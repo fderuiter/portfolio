@@ -6,6 +6,14 @@ A bleeding-edge interactive portfolio designed to unify disparate Python, Rust, 
 
 The core objective of this project is to create an interactive showcase that dynamically pulls real codebase statistics and updates from GitHub, while presenting rich editorial narratives and architectural breakdowns. It serves as a unified hub for all professional software engineering work.
 
+## Tech Stack & Features
+
+- **Framework:** Next.js 16 (App Router + Turbopack), React 19, TypeScript
+- **Styling:** Tailwind CSS v4 (CSS-first configuration)
+- **CMS:** Prisma ORM with SQLite
+- **Layout Engine:** `@chenglou/pretext` - A 15KB, zero-dependency pure JavaScript/TypeScript library used for high-performance text measurement.
+- **Performance:** Utilizes DOM-free layout calculations to maintain 60FPS during complex animations.
+
 ## Prerequisites
 
 To work on this repository, you will need:
