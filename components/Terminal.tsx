@@ -1,3 +1,4 @@
+// Source: https://magicui.design/docs/components/terminal
 "use client"
 
 import {

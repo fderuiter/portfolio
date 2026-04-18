@@ -1,3 +1,4 @@
+// Source: https://ui.aceternity.com/components/background-beams-with-collision
 "use client";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";

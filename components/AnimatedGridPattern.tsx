@@ -1,3 +1,4 @@
+// Source: https://magicui.design/docs/components/animated-grid-pattern
 "use client"
 
 import {

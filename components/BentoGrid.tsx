@@ -1,3 +1,5 @@
+// Source: https://ui.aceternity.com/components/bento-grid
+// Source: https://ui.aceternity.com/components/glare-card
 "use client";
 import { cn } from "@/lib/utils";
 import React, { useRef } from "react";
