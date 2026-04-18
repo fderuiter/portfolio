@@ -17,6 +17,17 @@ Tailwind CSS v4 introduces a radical, **CSS-first configuration model**. As such
 - All Tailwind utilities are loaded via the `@import "tailwindcss";` directive located at the top of `app/globals.css`.
 - Any custom design tokens, colors, and typography (such as the Inter font) are managed natively via the new `@theme` and `@theme inline` CSS rules directly in `app/globals.css`.
 
+## Visual & Component Strategy
+
+### "Copy-and-Paste" Component Model
+For our visual micro-interactions and macro-layouts, we utilize a "copy-and-paste" component model sourced from [Aceternity UI](https://ui.aceternity.com/) and [Magic UI](https://magicui.design/). Rather than relying on heavy, monolithic npm packages, this approach allows us to own the source code for complex Framer Motion physics and Tailwind styling directly within our repository.
+
+### Shared Utilities
+The visual ecosystem relies on a shared `cn()` utility function located in `lib/utils.ts`. This function merges `clsx` and `tailwind-merge` to safely construct dynamic class strings and properly resolve conflicts within our Tailwind CSS v4 setup.
+
+### Layout Engine Integration
+Crucially, our visual components must interface with our advanced layout physics. Components like the Aceternity Bento Grid are intentionally configured to accept explicit `style={{ height:... }}` props. This architectural decision allows the cards to seamlessly shrink-wrap to the mathematically calculated heights provided by the pretext engine, bypassing standard CSS flexbox stretching and DOM layout thrashing.
+
 ## Core Layout Engine: `@chenglou/pretext`
 
 To achieve fluid, 60FPS animations and circumvent performance bottlenecks inherent in modern web browsers, this project utilizes a custom React hook `usePretextLayout` powered by the `@chenglou/pretext` library.

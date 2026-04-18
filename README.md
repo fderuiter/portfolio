@@ -10,9 +10,14 @@ The core objective of this project is to create an interactive showcase that dyn
 
 - **Framework:** Next.js 16 (App Router + Turbopack), React 19, TypeScript
 - **Styling:** Tailwind CSS v4 (CSS-first configuration)
+- **Visual Ecosystem:** Aceternity UI, Magic UI, Framer Motion
 - **CMS:** Prisma ORM with SQLite
 - **Layout Engine:** `@chenglou/pretext` - A 15KB, zero-dependency pure JavaScript/TypeScript library used for high-performance text measurement.
 - **Performance:** Utilizes DOM-free layout calculations to maintain 60FPS during complex animations.
+
+## Visual Architecture
+
+The portfolio utilizes a "Design Engineering" approach, combining lightweight libraries like Aceternity UI and Magic UI with Framer Motion. This approach handles complex micro-interactions, hardware-accelerated physics, and typographic animations to provide a premium interactive experience without heavy, monolithic component libraries.
 
 ## Prerequisites
 
