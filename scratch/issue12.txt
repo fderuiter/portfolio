@@ -1,0 +1,239 @@
+title:	feat(api): Build Decoupled GitHub Integration Pipeline with Native Caching & Fallbacks
+state:	CLOSED
+author:	fderuiter (Frederick de Ruiter)
+labels:	enhancement
+comments:	1
+assignees:	
+projects:	
+milestone:	v0.3.0 - Data & API Integration
+number:	12
+--
+# feat(api): Build Decoupled GitHub Integration Pipeline with Native Caching & Fallbacks
+
+## 1. Summary / Objective
+Design and implement a highly performant, server-side data fetching pipeline that extracts real-time repository statistics, development history, and language profiles directly from the GitHub REST API. Integrate this data into Case Study pages, wrapping all fetch invocations in an optimized Next.js 16 caching tier to protect against API rate-limiting.
+
+---
+
+## 📋 Strict Architectural Requirements
+* **Data Augmentation:** The integration pipeline must fetch commit history, repository metadata, and language statistics directly from the GitHub API.
+* **Performance & Fallbacks:** The pipeline must utilize Next.js Server Components and native caching strategies to append dynamic statistics to the local CMS data without hitting rate limits or blocking page rendering.
+
+---
+
+## 2. Context & Motivation (Why We Are Doing This)
+To reinforce our engineering case studies (like **SchemaFlow** and **Clinical Data Mapper**), we want to present real-time repository metrics:
+* Active star counts and forks.
+* Open issue quantities (indicating active maintenance).
+* Precise programming language distribution (byte-based percentages).
+* A terminal-style feed displaying the five most recent commit hashes and messages.
+
+However, the GitHub API enforces strict rate limits:
+* **Unauthenticated Requests:** Limited to **60 requests per hour**.
+* **Authenticated Requests:** Up to **5,000 requests per hour** using a Personal Access Token (`GITHUB_TOKEN`).
+
+If our portfolio gets featured or experiences traffic spikes, unauthenticated API calls will immediately saturate and return `403 Rate Limit Exceeded` exceptions, breaking page loads. 
+
+We will build a bulletproof, decoupled data-fetching system that authenticates via `GITHUB_TOKEN`, uses a 1-hour memory cache, and implements **graceful degradation**—ensuring the application serves stale cached data or loads static content without throwing server-side errors if the API is offline.
+
+---
+
+## 3. Technical Blueprint & Architecture
+We will implement the fetching and parsing layer inside a dedicated backend library `lib/github.ts` using native fetch and the Next.js `unstable_cache` wrapper.
+
+```mermaid
+flowchart TD
+    Req["Request CaseStudy (RSC)"] -->|Read DB| Case["CaseStudy Record"]
+    Case -->|github_url| Parse{"Extract Owner/Repo"}
+    Parse -->|Invalid / None| RenderStatic["Render Editorial Content only"]
+    Parse -->|Valid| FetchCached["unstable_cache (getGitHubStats)"]
+    FetchCached -->|Cache Hit| Merge["Merge Stats with DB Model"]
+    FetchCached -->|Cache Miss / Expired| LiveFetch{"Fetch Live GitHub API"}
+    LiveFetch -->|Success| Save["Update Cache (1 hour TTL)"] --> Merge
+    LiveFetch -->|Failure / Rate Limit| Fallback["Return Null / Stale Cache"] --> Merge
+    Merge -->|Render| Page["Dynamic Case Study Page"]
+```
+
+### Senior Engineering Considerations:
+1. **Type Safety:** Define strict TypeScript interfaces for all returning JSON objects to ensure bundler compliance during RSC data passing.
+2. **Dynamic Language Calculation:** GitHub returns raw bytes per language. We will calculate the sum of all bytes and convert each language to a rounded percentage, sorting them descending.
+3. **Robust Error Boundary Handling:** All fetch operations will be bound inside try/catch wrappers. If an endpoint fails (e.g. invalid repo, network issue, rate-limit), the function writes to `console.error` and returns `null` instead of throwing an unhandled exception, keeping the main page active.
+
+---
+
+## 4. Target Files & Code Implementations
+
+### File A: [NEW] [`lib/github.ts`](file:///Volumes/SanDisk%20External%20SSD/Code/portfolio/lib/github.ts)
+Create the central GitHub API client and caching layer:
+
+```typescript
+import { unstable_cache } from "next/cache";
+
+export interface GitHubCommit {
+  sha: string;
+  message: string;
+  date: string;
+  author: string;
+}
+
+export interface GitHubLanguage {
+  name: string;
+  percentage: number;
+}
+
+export interface GitHubStats {
+  stars: number;
+  forks: number;
+  openIssues: number;
+  languages: GitHubLanguage[];
+  recentCommits: GitHubCommit[];
+}
+
+// Robust helper to parse owner and repository name from arbitrary GitHub URLs
+export function parseGitHubUrl(url: string): { owner: string; repo: string } | null {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname !== "github.com") return null;
+    const paths = parsed.pathname.split("/").filter(Boolean);
+    if (paths.length >= 2) {
+      return { owner: paths[0], repo: paths[1] };
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+// Primary fetch routine with rate-limit authentication guards
+async function fetchRawGitHubStats(owner: string, repo: string): Promise<GitHubStats> {
+  const headers: HeadersInit = {
+    Accept: "application/vnd.github.v3+json",
+  };
+  
+  if (process.env.GITHUB_TOKEN) {
+    headers.Authorization = `token ${process.env.GITHUB_TOKEN}`;
+  }
+
+  // 1. Fetch main repository statistics
+  const repoRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { 
+    headers,
+    next: { revalidate: 3600 } 
+  });
+  if (!repoRes.ok) {
+    throw new Error(`GitHub Repo API returned status ${repoRes.status} for ${owner}/${repo}`);
+  }
+  const repoData = await repoRes.json();
+
+  // 2. Fetch language definitions
+  const langRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/languages`, { 
+    headers,
+    next: { revalidate: 3600 }
+  });
+  const langData = langRes.ok ? await langRes.json() : {};
+  
+  // Convert raw language bytes into precise rounded percentages
+  const totalBytes = Object.values(langData).reduce((a: any, b: any) => a + b, 0) as number;
+  const languages: GitHubLanguage[] = Object.entries(langData).map(([name, bytes]) => ({
+    name,
+    percentage: totalBytes > 0 ? Math.round(((bytes as number) / totalBytes) * 100) : 0,
+  })).filter(l => l.percentage > 0).sort((a, b) => b.percentage - a.percentage);
+
+  // 3. Fetch recent development timeline commits (limit to 5)
+  const commitsRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits?per_page=5`, { 
+    headers,
+    next: { revalidate: 3600 }
+  });
+  const commitsData = commitsRes.ok ? await commitsRes.json() : [];
+  const recentCommits: GitHubCommit[] = Array.isArray(commitsData) 
+    ? commitsData.map((c: any) => ({
+        sha: c.sha.substring(0, 7),
+        message: c.commit.message.split("\n")[0],
+        date: c.commit.author.date,
+        author: c.commit.author.name,
+      }))
+    : [];
+
+  return {
+    stars: repoData.stargazers_count,
+    forks: repoData.forks_count,
+    openIssues: repoData.open_issues_count,
+    languages,
+    recentCommits,
+  };
+}
+
+// Next.js unstable_cache wrap to store outputs for 1 hour (3600 seconds)
+export const getGitHubStats = unstable_cache(
+  async (owner: string, repo: string) => fetchRawGitHubStats(owner, repo),
+  ["github-repo-metrics-cache"],
+  { revalidate: 3600, tags: ["github"] }
+);
+```
+
+### File B: [NEW] [`lib/db.ts`](file:///Volumes/SanDisk%20External%20SSD/Code/portfolio/lib/db.ts)
+Expose a single instantiated database instance to prevent client connection leaks:
+
+```typescript
+import { PrismaClient } from "../app/generated/prisma";
+
+const globalForPrisma = global as unknown as { prisma: PrismaClient };
+
+export const prisma = globalForPrisma.prisma || new PrismaClient();
+
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+```
+
+---
+
+## 5. Definition of Done (DoD) Checklist
+- [ ] Backend script `lib/github.ts` created containing URL parsing and fetching functions.
+- [ ] Safe `prisma` database wrapper instantiated inside `lib/db.ts`.
+- [ ] Zod or basic guards check that the personal access token (`GITHUB_TOKEN`) is active or fall back gracefully.
+- [ ] Dynamic language byte arrays are correctly transformed into sorted percentage values.
+- [ ] Entire API fetch suite is bound inside an `unstable_cache` helper with a 3600s TTL.
+- [ ] Error conditions are handled gracefully—failing endpoints return `null` instead of raising page-level build or rendering errors.
+
+---
+
+## 6. Verification & Testing Protocol
+
+### API Sandbox Compilation Check
+Create a scratch testing script `scratch/test_github_api.ts` to verify data outputs:
+```typescript
+import { getGitHubStats, parseGitHubUrl } from "../lib/github";
+import dotenv from "dotenv";
+dotenv.config();
+
+async function run() {
+  const repo = "https://github.com/fderuiter/portfolio";
+  const parsed = parseGitHubUrl(repo);
+  if (!parsed) return console.error("URL failed parsing");
+  console.log(`Querying stats for ${parsed.owner}/${parsed.repo}...`);
+  try {
+    const stats = await getGitHubStats(parsed.owner, parsed.repo);
+    console.log("Stats Loaded Successfully:");
+    console.log(`- Stars: ${stats.stars}, Forks: ${stats.forks}`);
+    console.log("- Primary Languages:", stats.languages);
+    console.log(`- Latest Commit: ${stats.recentCommits[0]?.sha} - ${stats.recentCommits[0]?.message}`);
+  } catch (e) {
+    console.error("Test failed:", e);
+  }
+}
+run();
+```
+Execute the test script:
+```bash
+bun run scratch/test_github_api.ts
+```
+Verify that the output accurately lists active metrics without raising network or formatting errors.
+
+---
+
+## 🔗 7. Relationships & Dependency Matrix
+* **Depends on:**
+  - #9 (`fix(prisma): Standardize Database Provider Block & Generate Type-Safe Prisma Client`) - *Prisma schema must compile to retrieve database records.*
+  - #10 (`feat(cms): Establish SQLite Dynamic Seed Pipeline & Populate Primary Case Study Narratives`) - *Target repositories must exist in the seeded database with valid github_url fields.*
+  - #11 (`feat(ui): Synchronize Pretext Layout Math with Tailwind v4 & Implement Bento Grid Height Shrink-Wrapping`) - *Card elements and layout hooks must be constructed to consume the fetched stats.*
+* **Blocks:**
+  - #13 (`ops(ci-cd): Transition to Production PostgreSQL, Vercel Serverless Hosting & Automated GitHub Actions CI/CD Pipeline`) - *Final build requires server routes and fetching pipelines fully correct and operational.*
+
