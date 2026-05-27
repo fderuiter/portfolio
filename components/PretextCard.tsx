@@ -41,11 +41,13 @@ export const PretextCard: React.FC<PretextCardProps> = ({
         <div className="mb-4">
           <CardTitle>{title}</CardTitle>
           {/* Attach Ref to the text container */}
-          <div ref={ref}>
+          <div ref={ref} aria-hidden="true" role="presentation">
             <CardDescription className={!isReady ? "invisible" : "transition-opacity duration-300"}>
               {description}
             </CardDescription>
           </div>
+          {/* Visually Hidden Semantic DOM Parallel Node */}
+          <p className="sr-only">{description}</p>
         </div>
         <div className="text-[10px] text-blue-500 font-mono self-end opacity-60">
           {!isReady ? "Measuring..." : `Pretext height: ${computedHeight}px`}

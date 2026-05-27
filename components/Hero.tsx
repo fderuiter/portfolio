@@ -315,39 +315,47 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
   };
 
   return (
-    <div
-      style={{
-        height: isReady ? `${height}px` : "auto",
-        transition: "height 200ms cubic-bezier(0.16, 1, 0.3, 1)",
-      }}
-      className="relative w-full max-w-2xl mx-auto overflow-hidden min-h-[56px] select-none"
-    >
-      <div ref={ref} className="w-full">
-        {!isReady ? (
-          // Prerendering skeleton/invisible text for SEO parsing on initial render
-          <p className="text-neutral-400 text-sm md:text-base leading-[28px] text-center opacity-0 pointer-events-none">
-            {text}
-          </p>
-        ) : (
-          <motion.p
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="text-neutral-400 text-sm md:text-base leading-[28px] text-center flex flex-wrap justify-center"
-          >
-            {words.map((word, i) => (
-              <motion.span
-                key={i}
-                variants={wordVariants}
-                className="inline-block mr-[0.35em] will-change-transform"
-              >
-                {word}
-              </motion.span>
-            ))}
-          </motion.p>
-        )}
+    <>
+      {/* 1. Visually Hidden Semantic DOM Parallel Node */}
+      <p className="sr-only">{text}</p>
+
+      {/* 2. Isolated Visual Layout Box hidden from Assistive Tech */}
+      <div
+        style={{
+          height: isReady ? `${height}px` : "auto",
+          transition: "height 200ms cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+        className="relative w-full max-w-2xl mx-auto overflow-hidden min-h-[56px] select-none"
+        aria-hidden="true"
+        role="presentation"
+      >
+        <div ref={ref} className="w-full">
+          {!isReady ? (
+            // Prerendering skeleton/invisible text for SEO parsing on initial render
+            <p className="text-neutral-400 text-sm md:text-base leading-[28px] text-center opacity-0 pointer-events-none">
+              {text}
+            </p>
+          ) : (
+            <motion.p
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="text-neutral-400 text-sm md:text-base leading-[28px] text-center flex flex-wrap justify-center"
+            >
+              {words.map((word, i) => (
+                <motion.span
+                  key={i}
+                  variants={wordVariants}
+                  className="inline-block mr-[0.35em] will-change-transform"
+                >
+                  {word}
+                </motion.span>
+              ))}
+            </motion.p>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useLayoutEffect, useRef, useCallback } from "react";
+import React, { useState, useLayoutEffect, useRef, useCallback } from "react";
 import { prepare, layout, clearCache, type PreparedText } from "@chenglou/pretext";
 import { prepareRichInline } from "@chenglou/pretext/rich-inline";
 
@@ -97,3 +97,54 @@ export function usePretextLayout({
 
 // Export global lifecycle helpers and rich-inline utilities
 export { clearCache, prepareRichInline };
+
+interface PretextTextProps {
+  text: string;
+  fontSize?: number;
+  lineHeight: number;
+  fontFamilyVariable?: string;
+  semanticTag?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p" | "span" | "div" | "article" | "section";
+  className?: string;
+  children?: React.ReactNode;
+}
+
+export const PretextText: React.FC<PretextTextProps> = ({
+  text,
+  fontSize = 16,
+  lineHeight,
+  fontFamilyVariable = "--font-inter",
+  semanticTag = "p",
+  className,
+  children,
+}) => {
+  const { ref, height, isReady } = usePretextLayout({
+    text,
+    fontSize,
+    lineHeight,
+    fontFamilyVariable,
+  });
+
+  const SemanticElement = semanticTag;
+
+  return (
+    <>
+      {/* 1. Visually Hidden Semantic DOM Parallel Node */}
+      <SemanticElement className="sr-only">
+        {text}
+      </SemanticElement>
+
+      {/* 2. Isolated Visual Layout Container hidden from Assistive Tech */}
+      <div
+        ref={ref}
+        aria-hidden="true"
+        role="presentation"
+        style={{
+          height: isReady ? `${height}px` : "auto",
+        }}
+        className={className}
+      >
+        {children || text}
+      </div>
+    </>
+  );
+};
