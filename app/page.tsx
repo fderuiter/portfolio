@@ -1,10 +1,15 @@
 import { prisma } from "@/lib/db";
-import { CaseStudyCard } from "@/components/ui/CaseStudyCard";
+import { CaseStudyShowcase } from "@/components/CaseStudyShowcase";
 import { BaseCaseStudy } from "@/types/domain";
 import { Hero } from "@/components/Hero";
+import { getGitHubStats, parseGitHubUrl, GitHubStats } from "@/lib/github";
+
+interface HydratedCaseStudy extends BaseCaseStudy {
+  githubStats: GitHubStats | null;
+}
 
 export default async function WalkingSkeletonPage() {
-  let caseStudies: BaseCaseStudy[] = [];
+  let caseStudies: HydratedCaseStudy[] = [];
   let errorMsg = "";
 
   try {
@@ -14,12 +19,25 @@ export default async function WalkingSkeletonPage() {
       orderBy: { created_at: "desc" },
       take: 3,
     });
-    // Map dates to JS Date objects matching our interface
-    caseStudies = data.map(d => ({
-      ...d,
-      created_at: new Date(d.created_at),
-      updated_at: new Date(d.updated_at),
-    }));
+    
+    // Aggregated server-side hydration for each case study
+    caseStudies = await Promise.all(
+      data.map(async (d) => {
+        let stats: GitHubStats | null = null;
+        if (d.github_url) {
+          const parsed = parseGitHubUrl(d.github_url);
+          if (parsed) {
+            stats = await getGitHubStats(parsed.owner, parsed.repo);
+          }
+        }
+        return {
+          ...d,
+          created_at: new Date(d.created_at),
+          updated_at: new Date(d.updated_at),
+          githubStats: stats,
+        };
+      })
+    );
   } catch (err) {
     console.error("Database query exception:", err);
     errorMsg = err instanceof Error ? err.message : "Failed to establish a connection to the serverless database.";
@@ -71,23 +89,19 @@ export default async function WalkingSkeletonPage() {
             </div>
           )}
 
-          {/* Feed Columns */}
-          <div className="w-full space-y-6">
-            {caseStudies.length === 0 ? (
-              <div className="text-center p-12 bg-zinc-900/10 border border-zinc-900/40 border-dashed rounded-2xl">
-                <p className="text-sm text-muted-strong italic mb-2">
-                  Connection established, but no published case studies were found in the database.
-                </p>
-                <p className="text-xs text-muted font-mono">
-                  Initialize seeding pipeline via Issue #10 to import clinical trial narratives.
-                </p>
-              </div>
-            ) : (
-              caseStudies.map((study) => (
-                <CaseStudyCard key={study.id} study={study} />
-              ))
-            )}
-          </div>
+          {/* Dynamic Bento Showcase */}
+          {caseStudies.length === 0 ? (
+            <div className="text-center p-12 bg-zinc-900/10 border border-zinc-900/40 border-dashed rounded-2xl w-full">
+              <p className="text-sm text-zinc-500 italic mb-2">
+                Connection established, but no published case studies were found in the database.
+              </p>
+              <p className="text-xs text-zinc-600 font-mono">
+                Initialize seeding pipeline via Issue #10 to import clinical trial narratives.
+              </p>
+            </div>
+          ) : (
+            <CaseStudyShowcase caseStudies={caseStudies} />
+          )}
         </div>
       </main>
 
