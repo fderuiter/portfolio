@@ -7,6 +7,7 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  console.error("Global uncaught crash boundary:", error);
   return (
     <html lang="en" className="h-full">
       <body className="min-h-full flex flex-col items-center justify-center bg-zinc-950 text-neutral-100 font-sans p-6">

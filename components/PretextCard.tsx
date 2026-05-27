@@ -1,0 +1,56 @@
+"use client";
+
+import React from "react";
+import { Card, CardTitle, CardDescription } from "@/components/BentoGrid";
+import { usePretextLayout } from "@/hooks/usePretextLayout";
+
+interface PretextCardProps {
+  title: string;
+  description: string;
+  className?: string;
+  paddingHeight?: number; // spacing, margins, titles, and borders
+}
+
+export const PretextCard: React.FC<PretextCardProps> = ({
+  title,
+  description,
+  className,
+  paddingHeight = 120,
+}) => {
+  // Bind Pretext Layout observer
+  const { ref, height, isReady } = usePretextLayout({
+    text: description,
+    fontSize: 12,      // maps to CardDescription text-xs (12px)
+    lineHeight: 16,    // maps to standard line-height (16px)
+    fontFamilyVariable: "--font-inter",
+  });
+
+  // Calculate strict heights
+  const computedHeight = isReady ? height + paddingHeight : undefined;
+
+  return (
+    <Card
+      className={className}
+      style={{
+        // Inline height prevents flexbox rows stretching elements
+        height: computedHeight ? `${computedHeight}px` : "auto",
+        transition: "height 180ms cubic-bezier(0.16, 1, 0.3, 1)",
+      }}
+    >
+      <div className="flex flex-col h-full justify-between">
+        <div className="mb-4">
+          <CardTitle>{title}</CardTitle>
+          {/* Attach Ref to the text container */}
+          <div ref={ref}>
+            <CardDescription className={!isReady ? "invisible" : "transition-opacity duration-300"}>
+              {description}
+            </CardDescription>
+          </div>
+        </div>
+        <div className="text-[10px] text-blue-500 font-mono self-end opacity-60">
+          {!isReady ? "Measuring..." : `Pretext height: ${computedHeight}px`}
+        </div>
+      </div>
+    </Card>
+  );
+};

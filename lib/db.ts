@@ -17,7 +17,7 @@ export const prisma =
   globalForPrisma.prisma ??
   (() => {
     const client = new Client(connectionString);
-    const adapter = new PrismaNeon(client as any);
+    const adapter = new PrismaNeon(client as unknown as ConstructorParameters<typeof PrismaNeon>[0]);
     return new PrismaClient({
       adapter,
       log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],

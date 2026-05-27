@@ -29,7 +29,7 @@ export function usePretextLayout({
     lineCount: 0,
   });
 
-  const containerRef = useRef<HTMLElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const preparedTextRef = useRef<PreparedText | null>(null);
 
   const measureText = useCallback((maxWidth: number) => {
@@ -50,19 +50,23 @@ export function usePretextLayout({
   }, [lineHeight]);
 
   useLayoutEffect(() => {
-    // Determine the exact font family string from CSS variables
-    const computedFontFamily = window.getComputedStyle(document.documentElement).getPropertyValue(fontFamilyVariable).trim() || 'Arial, sans-serif';
-    const fontString = `${fontSize}px ${computedFontFamily}`;
+    if (typeof window === "undefined") return;
 
-    // Preparation Phase: Cache text measurement
+    // 1. Senior Design: Extract active Tailwind v4 resolved font variable
+    const rootStyle = window.getComputedStyle(document.documentElement);
+    const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
+
+    // 2. Safe Fallback Matrix: Fallback gracefully to prevent Canvas errors
+    const resolvedFontFamily = rawFontFamily || "'Inter', system-ui, -apple-system, sans-serif";
+    const fontString = `${fontSize}px ${resolvedFontFamily}`;
+
+    // 3. Phase 1 Preparation: Parse text and cache measurements in Canvas
     preparedTextRef.current = prepare(text, fontString);
 
     if (containerRef.current) {
-      // If we have a container right away, do an initial measurement based on its current width
       const initialWidth = containerRef.current.getBoundingClientRect().width;
       measureText(initialWidth);
     } else {
-       // If no container is attached yet, just mark as ready
        setState((prev) => ({ ...prev, isReady: true }));
     }
   }, [text, fontSize, fontFamilyVariable, measureText]);

@@ -19,9 +19,9 @@ export default async function WalkingSkeletonPage() {
       created_at: new Date(d.created_at),
       updated_at: new Date(d.updated_at),
     }));
-  } catch (err: any) {
+  } catch (err) {
     console.error("Database query exception:", err);
-    errorMsg = err.message || "Failed to establish a connection to the serverless database.";
+    errorMsg = err instanceof Error ? err.message : "Failed to establish a connection to the serverless database.";
   }
 
   return (
