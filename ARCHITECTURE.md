@@ -47,7 +47,53 @@ To guarantee that the Canvas measurements perfectly align with the UI, we dynami
 This dynamically resolved string is passed directly into Pretext, ensuring mathematically perfect parity between the layout engine and Tailwind CSS v4 styling.
 
 ### SSR Safety Protocol
+
 Because the native Canvas `measureText` API is strictly a browser-only feature, our layout engine implements a rigid Server-Side Rendering (SSR) safety boundary:
 1. The Next.js `"use client"` directive is applied to `usePretextLayout.ts` to prevent server-side execution.
 2. During the initial Next.js SSR pass, the hook bypasses measurement and defaults to an `isReady: false` state with a fallback height.
 3. Only after the component has safely mounted on the client (via `useLayoutEffect`), the component invokes the Canvas logic and updates the state to `isReady: true`. This prevents hydration mismatches and server crashes.
+
+## Resilient GitHub Integration & Caching Layer (`lib/github.ts`)
+
+To ensure rapid initial page loading and prevent hitting GitHub's strict rate limits (60 requests/hour for unauthenticated clients), we decoupled data collection into a dedicated, hardened API abstraction layer.
+
+### Hybrid Caching Topology
+1. **Server Contexts (Next.js App Router):** Calls to `getGitHubStats` utilize Next.js `unstable_cache` with a `revalidate` window of 3600 seconds (1 hour) tagged under `"github"`.
+2. **Standalone / CLI Contexts (Seeding Pipeline & Builds):** When executed outside the active Next.js runtime environment (which lacks the full incremental cache layer), `unstable_cache` throws an `Invariant: incrementalCache missing` exception. The API client catches this error gracefully and automatically falls back to raw HTTP requests via `fetchRawGitHubStats`.
+
+### Telemetry Hardening & Dev Diagnostics
+- **Authenticated Fallback:** Inspects `process.env.GITHUB_TOKEN` to append authorized headers.
+- **Fail-Safe Warnings:** Produces non-blocking terminal warnings in `development` environments if no token is detected, preparing developers for potential unauthenticated rate limiting.
+- **Payload Sanitization:** Safely parses dynamic fields, maps commit strings (parsing only the first line of headers), handles index safety bounds, and formats language distribution bytes into precise, rounded percentages.
+
+## Interactive CLI Terminal Sandbox Engine (`components/SandboxTerminal.tsx`)
+
+For the Python SDK detail views, we built a fully functional interactive terminal CLI sandbox simulation. It is engineered with premium aesthetics and state-of-the-art interactive micro-interactions:
+
+### 1. Pure React State Purity Compliance
+Next.js 16/React 19 strict compiler pipelines enforce pure rendering rules. Traditional token generation (e.g. `Math.random()`) inside rendering functions results in hydration warnings. The Sandbox Terminal implements a pure static sequential ID counter (`idCounter` and `generateLogId()`) outside the component body, ensuring perfect render determinism.
+
+### 2. Full Console Ergonomics
+- **Curated Shortcuts:** Clickable quick-command badges instantly execute primary trials operations.
+- **Command History Buffer:** Keeps an active array of typed queries, fully navigable using `ArrowUp` and `ArrowDown` keys.
+- **Tab Auto-Completion:** Leverages custom key listeners (`e.preventDefault()`) to capture `Tab` triggers, matching inputs to registered SDK operations instantly.
+- **Regex JSON Syntactic Highlighting:** Splits JSON outputs by line and matches tokens using strict regular expressions to style keys (`purple-400`), string values (`emerald-400`), booleans (`amber-500`), nulls (`red-400`), and numeric variables (`blue-400`) uniquely.
+
+## Scroll-Driven Tracing Beam Physics (`components/ui/TracingBeam.tsx`)
+
+To guide readers down deep-dive technical narratives, we engineered a custom Tracing Beam margin rail:
+- **Scroll Hook Synchronization:** Hooks into Framer Motion `useScroll` tracking container viewport offsets (`scrollYProgress`).
+- **Spring Smoothing:** Applies Framer Motion `useSpring` physics (stiffness `80`, damping `22`) to smooth scroll jitters and deliver a high-premium, elegant trailing line.
+- **Pulsating Focus Head:** Positioned at the dynamic terminus of the visual line, utilizing localized CSS `@keyframes ping` animations to draw user focus.
+- **Desktop Margin Shift:** Seamlessly shifts content container margins (`md:pl-8 lg:pl-12`) on larger viewports to accommodate the vertical rail without layout shifts.
+
+## Serverless PostgreSQL & Connection Adapter Architecture (`lib/db.ts`)
+
+To support serverless operational profiles, we transitioned the database core from a local SQLite setup to Neon serverless PostgreSQL.
+
+### 1. WebSocket Pooling
+Because serverless functions terminate database connections rapidly, standard TCP socket wrappers cause overhead. We configured Neon to use the native `ws` (WebSockets) package inside Node.js environments (`neonConfig.webSocketConstructor = ws`), enabling extremely low-latency pooling.
+
+### 2. Dynamic Prisma Client Pooling
+To prevent connection leaks across Next.js Hot Module Replacement (HMR) refreshes during development, the client caches the active connection inside a global object (`globalThis.prisma`). It instantiates a fresh connection pool only when the global instance is undefined.
+
