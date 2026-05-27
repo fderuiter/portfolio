@@ -36,6 +36,7 @@ interface RawCommitResponse {
 
 /**
  * Robust helper to parse owner and repository name from arbitrary GitHub URLs.
+ * Sanitizes trailing .git extensions and correctly extracts segments.
  * Supports format: https://github.com/owner/repo (or with trailing slashes/subpaths)
  */
 export function parseGitHubUrl(url: string): { owner: string; repo: string } | null {
@@ -44,7 +45,10 @@ export function parseGitHubUrl(url: string): { owner: string; repo: string } | n
     if (parsed.hostname !== "github.com") return null;
     const paths = parsed.pathname.split("/").filter(Boolean);
     if (paths.length >= 2) {
-      return { owner: paths[0], repo: paths[1] };
+      return { 
+        owner: paths[0], 
+        repo: paths[1].replace(/\.git$/, "") 
+      };
     }
   } catch {
     return null;
@@ -64,6 +68,8 @@ async function fetchRawGitHubStats(owner: string, repo: string): Promise<GitHubS
   
   if (process.env.GITHUB_TOKEN) {
     headers.Authorization = `token ${process.env.GITHUB_TOKEN}`;
+  } else if (process.env.NODE_ENV === "development") {
+    console.warn("Warning: GITHUB_TOKEN environment variable is undefined. Unauthenticated GitHub API requests are capped at 60/hour.");
   }
 
   // 1. Fetch main repository statistics
@@ -114,12 +120,17 @@ async function fetchRawGitHubStats(owner: string, repo: string): Promise<GitHubS
     console.error(`Failed to fetch commits for ${owner}/${repo}:`, e);
   }
 
+  // Highly resilient commit mapper to safeguard against empty or broken payloads
   const recentCommits: GitHubCommit[] = Array.isArray(commitsData) 
     ? commitsData.map((c) => ({
-        sha: c.sha ? c.sha.substring(0, 7) : "",
-        message: c.commit?.message ? c.commit.message.split("\n")[0] : "",
-        date: c.commit?.author?.date || "",
-        author: c.commit?.author?.name || c.commit?.committer?.name || "",
+        sha: typeof c.sha === "string" ? c.sha.substring(0, 7) : "",
+        message: typeof c.commit?.message === "string" ? c.commit.message.split("\n")[0] : "No commit message provided",
+        date: typeof c.commit?.author?.date === "string" ? c.commit.author.date : "",
+        author: typeof c.commit?.author?.name === "string"
+          ? c.commit.author.name
+          : typeof c.commit?.committer?.name === "string"
+          ? c.commit.committer.name
+          : "Unknown Author",
       }))
     : [];
 
