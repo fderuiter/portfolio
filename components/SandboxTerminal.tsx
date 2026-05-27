@@ -196,10 +196,27 @@ export const SandboxTerminal: React.FC = () => {
     }, 450);
   };
 
-  // Handle key triggers (Enter, Up, Down)
+  // Handle key triggers (Enter, Up, Down, Tab)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       executeCommand(input);
+    } else if (e.key === "Tab") {
+      e.preventDefault();
+      const trimmed = input.trim().toLowerCase();
+      if (!trimmed) return;
+
+      const VALID_COMMANDS = [
+        "imednet studies list",
+        "imednet subjects get --id 123",
+        "imednet records search --study BRIGHT-01",
+        "clear",
+        "help"
+      ];
+
+      const matched = VALID_COMMANDS.find((c) => c.toLowerCase().startsWith(trimmed));
+      if (matched) {
+        setInput(matched);
+      }
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       if (commandHistory.length === 0) return;
