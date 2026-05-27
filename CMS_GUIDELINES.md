@@ -4,7 +4,7 @@ This document outlines our strategy for utilizing Prisma ORM as a local headless
 
 ## Schema Design
 
-We abstract editorial content and narratives away from the raw GitHub codebase using a local SQLite database, managed via Prisma. The primary schema mapping our portfolio projects is the `CaseStudy` model:
+We abstract editorial content and narratives away from the raw GitHub codebase using a serverless Neon PostgreSQL database, managed via Prisma. The primary schema mapping our portfolio projects is the `CaseStudy` model:
 
 ```prisma
 model CaseStudy {
@@ -26,11 +26,12 @@ This ensures we can dynamically inject rich text and architectural explanations 
 
 ## Prototyping Workflows
 
-During development, we utilize a local SQLite database (`dev.db`). This allows for zero-infrastructure, rapid iteration of editorial features.
+During development, we utilize a serverless Neon PostgreSQL datastore. This provides low-latency cloud data persistence.
 
-**To sync schema changes to the local database, developers should run:**
+**To sync schema changes to the Neon database, developers should run:**
 ```bash
-bunx prisma db push
+npx prisma db push
 ```
 
-This command pushes the state of the `schema.prisma` directly to the database. It is ideal for rapidly prototyping the schema without the overhead of creating formal migration files (`prisma migrate dev`), which are generally reserved for when we eventually deploy to a production PostgreSQL database.
+This command pushes the state of the `schema.prisma` directly to the active cloud datastore. It is ideal for rapidly prototyping the schema without the overhead of creating formal migration files, which are generally reserved for production promotion cycles.
+
