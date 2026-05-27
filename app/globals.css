@@ -1,8 +1,21 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 :root {
-  --background: #09090b; /* premium zinc-950 base */
-  --foreground: #fafafa; /* premium zinc-50 text */
+  /* Default Baseline: Premium Dark Mode zinc-950 base */
+  --background: #09090b;
+  --foreground: #fafafa;
+}
+
+:root[data-theme="light"] {
+  --background: #fafafa;
+  --foreground: #09090b;
+}
+
+:root[data-theme="dark"] {
+  --background: #09090b;
+  --foreground: #fafafa;
 }
 
 @theme inline {
@@ -16,16 +29,10 @@
   --color-brand-dark: #09090b;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --background: #fafafa;
-    --foreground: #09090b;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
   min-height: 100vh;
+  transition: background-color 300ms cubic-bezier(0.16, 1, 0.3, 1), color 300ms cubic-bezier(0.16, 1, 0.3, 1);
 }

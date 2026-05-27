@@ -28,6 +28,22 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('portfolio-theme') || 'system';
+                  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  var resolved = theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme;
+                  document.documentElement.setAttribute('data-theme', resolved);
+                } catch(e) {}
+              })();
+            `
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">
         <Navbar />
         {children}
