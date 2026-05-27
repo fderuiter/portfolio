@@ -9,45 +9,61 @@ The core objective of this project is to create an interactive showcase that dyn
 ## Tech Stack & Features
 
 - **Framework:** Next.js 16 (App Router + Turbopack), React 19, TypeScript
-- **Styling:** Tailwind CSS v4 (CSS-first configuration)
+- **Styling:** Tailwind CSS v4 (CSS-first configuration — no `tailwind.config.js`)
 - **Visual Ecosystem:** Aceternity UI, Magic UI, Framer Motion
 - **CMS:** Prisma ORM with Neon Serverless PostgreSQL
-- **Layout Engine:** `@chenglou/pretext` - A 15KB, zero-dependency pure JavaScript/TypeScript library used for high-performance text measurement.
-- **Performance:** Utilizes DOM-free layout calculations to maintain 60FPS during complex animations.
+- **Layout Engine:** `@chenglou/pretext` — 15KB zero-dependency pure JS/TS library for high-performance DOM-free text measurement
+- **Rich Text:** `@chenglou/pretext/rich-inline` — Inline Markdown tokenizer rendering **bold**, *italic*, and `code` chips with pixel-perfect canvas-measured heights
+- **Masonry Layout:** Parent-level zero-whitespace masonry Bento Grid using a greedy LPT column scheduler with ResizeObserver-driven sub-millisecond recalculations
+- **Performance:** DOM-free layout calculations maintaining 60FPS during complex animations
 
 ## Visual Architecture
 
 The portfolio utilizes a "Design Engineering" approach, combining lightweight libraries like Aceternity UI and Magic UI with Framer Motion. This approach handles complex micro-interactions, hardware-accelerated physics, and typographic animations to provide a premium interactive experience without heavy, monolithic component libraries.
 
+## Project Roadmap
+
+The full 5-phase development roadmap, milestone progress, and issue tracker are maintained in **[GitHub Issue #18 — Portfolio Hub V1 Architecture Master 5-Phase Development Plan](https://github.com/fderuiter/portfolio/issues/18)**.
+
+| Phase | Milestone | Status |
+|-------|-----------|--------|
+| 1 — Foundation & Data Integrity | `v0.1.0` | ✅ Complete |
+| 2 — Core Architecture & Layout Engine | `v0.2.0` | ✅ Complete |
+| 3 — Integration & Content Pipeline | `v0.3.0` | 🔄 In Progress |
+| 4 — Hardening & Performance | `v0.4.0` | ⏳ Upcoming |
+| 5 — Production CI/CD & Go-Live | `v1.0.0` | ⏳ Upcoming |
+
 ## Prerequisites
 
 To work on this repository, you will need:
 - **Node.js** (v20+)
-- **npm** as the standard package manager.
+- **npm** or **bun** as the package manager
 
 ## Setup Instructions
 
 1. **Install Dependencies**
-   Run the following command:
    ```bash
    npm install
    ```
 
-2. **Initialize Database & Prisma Client**
-   This project uses Prisma integrated with serverless Neon PostgreSQL. Set your `DATABASE_URL` in a `.env.local` file, then run:
+2. **Configure Environment**
+   Copy `.env.local.example` to `.env.local` and set your `DATABASE_URL` (Neon Postgres connection string) and optionally `GITHUB_TOKEN` to avoid API rate limits.
+
+3. **Initialize Database & Prisma Client**
    ```bash
    npx prisma generate
    ```
 
-3. **Seed Database**
-   To seed the database with dynamic clinical trials and schema engine case studies:
+4. **Seed Database**
+   Populate the database with clinical trials and schema engine case studies (with inline Markdown formatting):
    ```bash
    npx prisma db seed
    ```
 
-4. **Start the Development Server**
-   Launch the Next.js 16 development environment with Turbopack and concurrent TypeScript compiler checks:
+5. **Start the Development Server**
+   Launch Next.js 16 with Turbopack and concurrent TypeScript watcher:
    ```bash
    npm run dev
    ```
    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
