@@ -1,16 +1,20 @@
 "use client";
 
 import React from "react";
-import { Card, CardTitle, CardDescription } from "@/components/BentoGrid";
-import { usePretextLayout } from "@/hooks/usePretextLayout";
+import { Card, CardTitle } from "@/components/BentoGrid";
+import { PretextRichText, usePretextRichLayout, type ExtendedRichInlineItem } from "@/hooks/usePretextLayout";
 import { BaseCaseStudy } from "@/types/domain";
 import { GitHubStats } from "@/lib/github";
 import { IconStar, IconGitFork, IconAlertCircle, IconTerminal, IconChevronRight } from "@tabler/icons-react";
+import { type RichInlineLine } from "@chenglou/pretext/rich-inline";
 import Link from "next/link";
 
 interface CaseStudyBentoCardProps {
   study: BaseCaseStudy & { githubStats: GitHubStats | null };
   className?: string;
+  preCalculatedHeight?: number;
+  preCalculatedLines?: RichInlineLine[];
+  preCalculatedItems?: ExtendedRichInlineItem[];
 }
 
 // Map common languages to premium styling colors
@@ -24,29 +28,37 @@ const LANGUAGE_COLORS: Record<string, { bg: string; text: string; hex: string }>
 
 const DEFAULT_COLOR = { bg: "bg-zinc-500/10", text: "text-zinc-400", hex: "#8b949e" };
 
-export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({ study, className }) => {
+export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({ 
+  study, 
+  className,
+  preCalculatedHeight,
+  preCalculatedLines,
+  preCalculatedItems,
+}) => {
   const { githubStats } = study;
   const tagsList = study.tags ? study.tags.split(",").map((t) => t.trim()) : [];
+  const langColor = LANGUAGE_COLORS[study.primary_language] || DEFAULT_COLOR;
 
-  // Dynamic padding based on elements displayed
-  const paddingHeight = githubStats ? 390 : 170;
+  const hasPrecalculated = preCalculatedHeight !== undefined && preCalculatedLines !== undefined && preCalculatedItems !== undefined;
 
-  // Bind Pretext Layout Hook on variable editorial content
-  const { ref, height, isReady } = usePretextLayout({
+  // We always execute the hook to follow dynamic hooks rules, but ignore if precalculated is provided
+  const internalLayout = usePretextRichLayout({
     text: study.editorial_content,
-    fontSize: 13, // CardDescription text-sm font size
-    lineHeight: 18, // CardDescription leading-relaxed line height
+    fontSize: 13,
+    lineHeight: 18,
     fontFamilyVariable: "--font-inter",
   });
 
-  const computedHeight = isReady ? height + paddingHeight : undefined;
-  const langColor = LANGUAGE_COLORS[study.primary_language] || DEFAULT_COLOR;
+  const finalHeight = hasPrecalculated ? preCalculatedHeight : (internalLayout.isReady ? internalLayout.height + (githubStats ? 390 : 170) : undefined);
+  const finalLines = hasPrecalculated ? preCalculatedLines : internalLayout.lines;
+  const finalItems = hasPrecalculated ? preCalculatedItems : internalLayout.items;
+  const isLayoutReady = hasPrecalculated ? true : internalLayout.isReady;
 
   return (
     <Card
       className={className}
       style={{
-        height: computedHeight ? `${computedHeight}px` : "auto",
+        height: finalHeight ? `${finalHeight}px` : "auto",
         transition: "height 250ms cubic-bezier(0.16, 1, 0.3, 1)",
       }}
     >
@@ -66,14 +78,17 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({ study, c
             {study.title}
           </CardTitle>
 
-          {/* Description Block using Pretext hook ref */}
-          <div ref={ref} aria-hidden="true" role="presentation" className="mb-4">
-            <CardDescription className={!isReady ? "invisible" : "transition-opacity duration-300 text-zinc-400 text-sm leading-relaxed"}>
-              {study.editorial_content}
-            </CardDescription>
+          {/* Description Block using Pretext Rich Text */}
+          <div ref={hasPrecalculated ? undefined : internalLayout.ref} className="mb-4">
+            <PretextRichText
+              lines={finalLines}
+              items={finalItems}
+              lineHeight={18}
+              isReady={isLayoutReady}
+              fallbackText={study.editorial_content}
+              className="text-zinc-400 text-sm leading-relaxed font-sans"
+            />
           </div>
-          {/* Visually Hidden Semantic DOM Parallel Node for Accessibility */}
-          <p className="sr-only">{study.editorial_content}</p>
 
           {/* Dynamic GitHub Statistics Hydration */}
           {githubStats && (
@@ -189,7 +204,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({ study, c
             <IconChevronRight className="ml-1 w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" />
           </Link>
           <div className="text-[9px] font-mono text-zinc-600">
-            {!isReady ? "MEASURING..." : `H: ${computedHeight}px`}
+            {!isLayoutReady ? "MEASURING..." : `H: ${finalHeight}px`}
           </div>
         </div>
       </div>

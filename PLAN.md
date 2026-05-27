@@ -13,10 +13,10 @@ This document details the completed roadmap and design specifications for the Po
 - [x] Diagnostic warnings during development mode for missing `GITHUB_TOKEN` to ensure safe API rate-limit boundaries.
 
 ## Phase 3: Visual Layout, Typography & Rich Interactions (Complete)
-- [x] Audited and verified `@chenglou/pretext` high-performance layout rendering hook (`hooks/usePretextLayout.tsx`), ensuring absolute safety against browser Canvas measurement calls during Server-Side Rendering (SSR) to prevent hydration mismatches.
+- [x] Audited, verified, and expanded `@chenglou/pretext` with a high-performance Rich Text engine (`usePretextRichLayout` and `PretextRichText` in `hooks/usePretextLayout.tsx`), enabling inline Markdown configurations (`**bold**`, `*italic*`, and `` `code` `` chips) measured in userland canvas with zero DOM reflows.
 - [x] Implemented scroll-driven "Tracing Beam" (`components/ui/TracingBeam.tsx`) utilizing Framer Motion spring-smoothed scroll physics.
 - [x] Implemented premium mock CLI Developer Terminal Sandbox (`components/SandboxTerminal.tsx`) with keyword autocomplete (Tab key), arrow-key history recall, command button shortcuts, and automated regex JSON tokenizer highlighting.
-- [x] Modern bento-grid and animated background canvas integrations on the main page (`components/BentoGrid.tsx`, `components/AnimatedGridPattern.tsx`).
+- [x] Overhauled the main page Bento Grid into a mathematically perfect zero-whitespace masonry layout (`components/CaseStudyShowcase.tsx`), pre-calculating pretext card heights and greedily distributing items into columns on active container resize.
 
 ## Phase 4: Production Database & Seeding Pipeline (Complete)
 - [x] Migrated Prisma CMS provider to serverless Neon PostgreSQL.

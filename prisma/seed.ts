@@ -29,7 +29,7 @@ async function main() {
       github_url: "https://github.com/fderuiter/SchemaFlow",
       published: true,
       tags: "TypeScript, React, Flow, Schemas, AST, Node-RED",
-      editorial_content: "A reactive, visual graph editor built in TypeScript and React that allows system architects to visually compose, validate, and compile complex JSON Schema structures in real time. Features highly responsive node evaluation, cyclical dependency detection, and live code generation.",
+      editorial_content: "A **reactive**, `visual graph editor` built in **TypeScript** and **React** that allows system architects to visually compose, validate, and compile complex `JSON Schema` structures in real time. Features highly responsive `node evaluation`, cyclical dependency detection, and live `code generation`.",
       architectural_narrative: `
 <h3>The Challenge</h3>
 <p>Modern enterprise APIs often require complex, deeply nested JSON schemas. Hand-authoring these schemas in raw JSON or YAML leads to validation errors, duplicate definitions, and slow developer velocity. Visual graph editors exist, but they suffer from high rendering latency, lacks type-safety, and do not handle recursive schema references gracefully.</p>
@@ -68,7 +68,7 @@ interface SchemaNode {
       github_url: "https://github.com/fderuiter/clinical-data-mapper",
       published: true,
       tags: "TypeScript, CDISC, ODM, SDTM, XML Parser, Clinical Trials, HIPAA",
-      editorial_content: "An enterprise-grade TypeScript mapping pipeline that ingests clinical trial metadata in CDISC Operational Data Model (ODM) XML format, dynamically constructs data schemas, and transforms raw Electronic Data Capture (EDC) datasets into compliant CDISC Study Data Tabulation Model (SDTM) domains.",
+      editorial_content: "An enterprise-grade **TypeScript** mapping pipeline that ingests clinical trial metadata in `CDISC Operational Data Model (ODM)` XML format, dynamically constructs `data schemas`, and transforms raw `Electronic Data Capture (EDC)` datasets into compliant **CDISC SDTM** domains.",
       architectural_narrative: `
 <h3>The Challenge</h3>
 <p>Clinical trial databases are governed by rigid international regulatory standards set by CDISC. Review bodies like the FDA require trial findings to be submitted as SDTM datasets. The incoming trial data, however, arrives in XML-based CDISC ODM format or proprietary EDC database tables. Manual mapping is error-prone, highly slow, and compromises regulatory compliance.</p>
@@ -121,7 +121,7 @@ interface ODMClinicalData {
       github_url: "https://github.com/fderuiter/imednet-python-sdk",
       published: true,
       tags: "Python, SDK, iMednet, API Client, Clinical Trials, HIPAA, Clinical Data",
-      editorial_content: "A robust, fully-typed Python SDK client for programmatic extraction and integration of clinical trial metadata and patient records from the iMednet EDC platform. Built for biostatisticians and clinical data engineers.",
+      editorial_content: "A **robust**, fully-typed `Python SDK` client for programmatic extraction and integration of clinical trial metadata and patient records from the `iMednet EDC` platform. Built for **biostatisticians** and **clinical data engineers**.",
       architectural_narrative: `
 <h3>The Challenge</h3>
 <p>Clinical electronic data capture (EDC) systems, such as iMednet, hold highly sensitive patient records and complex clinical trial protocols. Programmatic extraction is required by biostatisticians, data scientists, and clinical engineers for automated reporting and analytical pipelines. However, traditional SOAP/REST endpoints in clinical platforms often lack modern developer ergonomics, proper type safety, and clear schema boundaries, exposing clinical workflows to integration bugs and HIPAA security risks.</p>

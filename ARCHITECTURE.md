@@ -26,31 +26,42 @@ For our visual micro-interactions and macro-layouts, we utilize a "copy-and-past
 The visual ecosystem relies on a shared `cn()` utility function located in `lib/utils.ts`. This function merges `clsx` and `tailwind-merge` to safely construct dynamic class strings and properly resolve conflicts within our Tailwind CSS v4 setup.
 
 ### Layout Engine Integration
-Crucially, our visual components must interface with our advanced layout physics. Components like the Aceternity Bento Grid are intentionally configured to accept explicit `style={{ height:... }}` props. This architectural decision allows the cards to seamlessly shrink-wrap to the mathematically calculated heights provided by the pretext engine, bypassing standard CSS flexbox stretching and DOM layout thrashing.
+
+Crucially, our visual components must interface with our advanced layout physics. Rather than relying on rigid row configurations in a standard CSS Grid, our **Zero-Whitespace Masonry Bento Grid (Issue #24)** completely decouples the grid's visual assembly from standard browser flow:
+1. **Parent-Level Sizing calculations:** The parent component `CaseStudyShowcase` intercepts layout container updates using a single `ResizeObserver`.
+2. **Dynamic Breakpoints:** Based on container bounds, it determines the active column count (3 columns on desktop, 2 on tablet, 1 on mobile) and computes the exact pixel column width.
+3. **Pretext Height Predictions:** It loops over all active case study descriptions, querying Pretext for their exact text heights given the active width (subtracting card padding), and aggregates them with dynamic sub-component paddings to determine precise card heights.
+4. **Greedy Column Scheduler:** Using an optimization schedule (greedy LPT-inspired scheduler), it routes each card into the vertical column that currently has the shortest accumulated height. 
+5. **Zero-Reflow Assembly:** Columns are rendered as separate, self-contained flexbox columns (`flex flex-col gap-4`), ensuring mathematically perfect vertical layouts with absolutely zero vertical gaps, and allowing Framer Motion's `layout` mechanics to handle column-swapping transitions smoothly at 60FPS.
 
 ## Core Layout Engine: `@chenglou/pretext`
 
-To achieve fluid, 60FPS animations and circumvent performance bottlenecks inherent in modern web browsers, this project utilizes a custom React hook `usePretextLayout` powered by the `@chenglou/pretext` library.
+To achieve fluid, 60FPS animations and circumvent performance bottlenecks inherent in modern web browsers, this project utilizes custom React hooks powered by the `@chenglou/pretext` library.
 
 ### The Layout Thrashing Problem
 Historically, using standard DOM measurements like `getBoundingClientRect` or `offsetHeight` forces the browser to synchronously recalculate the entire page geometry (a reflow). This layout thrashing can incur severe 30+ millisecond penalties. We utilize `pretext` to completely side-step this expensive operation for text-dense components by executing multiline text measurement entirely in userland JavaScript/TypeScript.
 
 ### The Two-Phase Architecture
-Our `usePretextLayout` hook strictly enforces a two-phase layout mechanism to eliminate DOM reflows:
+Our layout hooks strictly enforce a two-phase layout mechanism to eliminate DOM reflows:
+- **Phase 1 (Initialization):** The preparation function (`prepare` for raw text, `prepareRichInline` for styled segments) is invoked once to normalize whitespace, apply segmentation rules, and measure individual word widths using the native Canvas engine. These results are cached efficiently in memory.
+- **Phase 2 (Execution):** The layout calculations represent the hot path. We hook this execution to a `ResizeObserver`. Whenever the container resizes, the hooks run pure arithmetic over the cached widths, recalculating the layout in under a millisecond without ever touching the DOM or allocating new memory.
 
-- **Phase 1 (Initialization):** The `prepare(text, font)` function is invoked once to normalize whitespace, apply segmentation rules, and measure individual word widths using the native Canvas engine. These results are cached efficiently in memory.
-- **Phase 2 (Execution):** The `layout(prepared, maxWidth, lineHeight)` function represents the hot path. We hook this execution to a `ResizeObserver`. Whenever the container resizes, this function executes pure arithmetic over the cached widths, recalculating the layout in under a millisecond without ever touching the DOM or allocating new memory.
+### Rich Text & Monospace Code Chips (Issue #45)
+To support dynamic typography in case study descriptions, we pioneeringly integrated the `@chenglou/pretext/rich-inline` sub-package:
+1. **Markdown Tokenization:** The `parseMarkdownToRichItems` utility splits descriptions on formatting boundaries, capturing bold (`**`), italic (`*`), and code tags (`` ` ``).
+2. **Inline Code Padding Calculations:** Inline code chunks are designated as atomic nodes (`break: 'never'`) and mapped to a monospace font. We allocate a deterministic `extraWidth: 12` horizontal padding variable to guarantee that the canvas engine precisely measures the width of our visually styled cyan code badges.
+3. **Fragment Materialization:** Once lines are computed, the custom `PretextRichText` component maps each fragment back to its original source element by its `itemIndex` ref, rendering beautifully styled React elements (such as neon-tinted border chips and high-contrast bold texts) with mathematically perfect heights.
 
 ### Tailwind v4 Font Synchronization
-To guarantee that the Canvas measurements perfectly align with the UI, we dynamically synchronize the Canvas API with our CSS-first Tailwind configuration. During Phase 1, the hook extracts the exact resolved font family string from the DOM root via:
+To guarantee that the Canvas measurements perfectly align with the UI, we dynamically synchronize the Canvas API with our CSS-first Tailwind configuration. During Phase 1, the hooks extract the exact resolved font family string from the DOM root via:
 `window.getComputedStyle(document.documentElement).getPropertyValue('--font-inter')`
 This dynamically resolved string is passed directly into Pretext, ensuring mathematically perfect parity between the layout engine and Tailwind CSS v4 styling.
 
 ### SSR Safety Protocol
 
 Because the native Canvas `measureText` API is strictly a browser-only feature, our layout engine implements a rigid Server-Side Rendering (SSR) safety boundary:
-1. The Next.js `"use client"` directive is applied to `usePretextLayout.ts` to prevent server-side execution.
-2. During the initial Next.js SSR pass, the hook bypasses measurement and defaults to an `isReady: false` state with a fallback height.
+1. The Next.js `"use client"` directive is applied to `usePretextLayout.tsx` to prevent server-side execution.
+2. During the initial Next.js SSR pass, the hooks bypass measurement and default to an `isReady: false` state with standard fallback heights.
 3. Only after the component has safely mounted on the client (via `useLayoutEffect`), the component invokes the Canvas logic and updates the state to `isReady: true`. This prevents hydration mismatches and server crashes.
 
 ## Resilient GitHub Integration & Caching Layer (`lib/github.ts`)
