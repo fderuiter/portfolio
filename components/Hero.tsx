@@ -361,6 +361,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
 
   return (
     <section
+      id="hero"
       className={cn(
         "relative h-screen min-h-[600px] w-full flex flex-col justify-center items-center overflow-hidden bg-brand-dark px-4 md:px-8",
         className

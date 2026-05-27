@@ -90,6 +90,61 @@ export default async function WalkingSkeletonPage() {
           </div>
         </div>
       </main>
+
+      {/* 2. About Section */}
+      <section id="about" className="relative min-h-[50vh] py-24 px-6 md:px-16 flex flex-col items-center border-t border-neutral-900/50 bg-neutral-950/40">
+        <div className="absolute top-1/4 right-1/4 translate-x-1/2 w-72 h-72 rounded-full bg-brand-blue/5 blur-[120px] pointer-events-none" />
+        
+        <div className="relative z-10 w-full max-w-3xl flex flex-col items-center">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-neutral-100 via-neutral-300 to-neutral-500 tracking-tight text-center mb-4">
+            System Architect & Senior Developer
+          </h2>
+          <p className="text-xs font-mono text-neutral-500 tracking-widest uppercase mb-8">
+            Engineering High-Performance Technical Solutions
+          </p>
+          <div className="text-neutral-400 text-sm leading-relaxed text-center space-y-4 max-w-2xl">
+            <p>
+              I build advanced digital infrastructure connecting low-latency client environments with highly scalable cloud database clusters. By aligning elegant layout algorithms with robust network pipelines, my architectures guarantee performance, security, and exceptional interactivity.
+            </p>
+            <p>
+              Specializing in Next.js Server Components, PostgreSQL distributed systems, and real-time canvas-driven interfaces.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Contact Section */}
+      <section id="contact" className="relative py-24 px-6 md:px-16 flex flex-col items-center border-t border-neutral-900/50 bg-brand-dark">
+        <div className="relative z-10 w-full max-w-3xl flex flex-col items-center">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan to-brand-blue tracking-tight text-center mb-4">
+            Get In Touch
+          </h2>
+          <p className="text-xs font-mono text-neutral-500 tracking-widest uppercase mb-12">
+            Let&apos;s Collaborate on Premium Engineering Projects
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center w-full max-w-md">
+            <a
+              href="mailto:contact@fderuiter.com"
+              className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-semibold bg-neutral-900/50 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-white rounded-2xl transition-all duration-300 hover:scale-105"
+            >
+              Email Broadcast
+            </a>
+            <a
+              href="https://linkedin.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-semibold bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/20 hover:border-brand-cyan/30 text-brand-cyan rounded-2xl transition-all duration-300 hover:scale-105"
+            >
+              LinkedIn Secure Link
+            </a>
+          </div>
+          
+          <div className="mt-20 text-[10px] font-mono text-neutral-600 tracking-[0.2em]">
+            DESIGNED & DEVELOPED BY FREDERICK DE RUITER
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
