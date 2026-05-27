@@ -136,9 +136,9 @@ export const Card = ({
         }
       }}
     >
-      <div className="grid h-full origin-center [transform:rotateY(var(--r-x))_rotateX(var(--r-y))] overflow-hidden rounded-[var(--radius)] border border-slate-800 transition-transform delay-[var(--delay)] duration-[var(--duration)] ease-[var(--easing)] will-change-transform hover:filter-none hover:[--duration:200ms] hover:[--easing:linear] hover:[--opacity:0.6]">
+      <div className="grid h-full origin-center [transform:rotateY(var(--r-x))_rotateX(var(--r-y))] overflow-hidden rounded-[var(--radius)] border border-border hover:border-border-active transition-all duration-300 delay-[var(--delay)] ease-[var(--easing)] will-change-transform hover:filter-none hover:[--duration:200ms] hover:[--easing:linear] hover:[--opacity:0.6] hover:shadow-[0_0_30px_rgba(6,182,212,0.08)]">
         <div className="grid h-full w-full mix-blend-soft-light [clip-path:inset(0_0_0_0_round_var(--radius))] [grid-area:1/1]">
-          <div className={cn("h-full w-full bg-slate-950 p-4 flex flex-col justify-between", className)}>
+          <div className={cn("h-full w-full bg-surface-1 backdrop-blur-sm p-4 flex flex-col justify-between", className)}>
             {children}
           </div>
         </div>
@@ -160,7 +160,7 @@ export const CardTitle = ({
   children: React.ReactNode;
 }) => {
   return (
-    <div className={cn("mt-2 mb-2 font-sans font-bold text-neutral-600 dark:text-neutral-200", className)}>
+    <div className={cn("mt-2 mb-2 font-sans font-bold text-neutral-100 group-hover:text-brand-cyan transition-colors duration-300", className)}>
       {children}
     </div>
   );
@@ -174,7 +174,7 @@ export const CardDescription = ({
   children: React.ReactNode;
 }) => {
   return (
-    <div className={cn("font-sans text-xs font-normal text-neutral-600 dark:text-neutral-300", className)}>
+    <div className={cn("font-sans text-xs font-normal text-muted-strong leading-relaxed", className)}>
       {children}
     </div>
   );

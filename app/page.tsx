@@ -26,29 +26,29 @@ export default async function WalkingSkeletonPage() {
   }
 
   return (
-    <div className="bg-brand-dark min-h-screen text-foreground overflow-x-hidden flex flex-col">
+    <div className="bg-zinc-950 min-h-screen text-foreground overflow-x-hidden flex flex-col">
       {/* Premium Staggered Living Grid Hero */}
       <Hero />
 
       {/* Database walking skeleton / Case studies grid */}
-      <main id="case-studies" className="relative min-h-screen py-24 px-6 md:px-16 flex flex-col items-center border-t border-neutral-900/50 bg-neutral-950/20">
+      <main id="case-studies" className="relative min-h-screen py-24 md:py-32 px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950">
         {/* Decorative Blur Elements */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/10 blur-[120px] pointer-events-none" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none" />
         <div className="absolute top-1/3 left-1/3 -translate-y-1/2 w-96 h-96 rounded-full bg-brand-blue/5 blur-[150px] pointer-events-none" />
 
         {/* Main Container */}
-        <div className="relative z-10 w-full max-w-3xl flex flex-col items-center">
+        <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
           {/* Title Block */}
           <h2 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan via-brand-blue to-neutral-200 tracking-tight text-center mb-4">
             Unified Engineering Showcase
           </h2>
-          <p className="text-xs font-mono text-neutral-500 tracking-widest uppercase mb-12">
+          <p className="text-xs font-mono text-muted tracking-widest uppercase mb-12">
             Verifiable Serverless Postgres Architecture
           </p>
 
           {/* Database Status Alerts */}
           {errorMsg ? (
-            <div className="w-full p-6 bg-red-950/20 border border-red-900/60 rounded-2xl mb-8">
+            <div className="w-full p-6 bg-red-950/20 border border-red-900/40 rounded-2xl mb-8">
               <h3 className="text-lg font-bold text-red-400 mb-2 flex items-center">
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -60,7 +60,7 @@ export default async function WalkingSkeletonPage() {
               </p>
             </div>
           ) : (
-            <div className="w-full p-4 bg-emerald-950/20 border border-emerald-900/50 rounded-2xl flex items-center mb-12">
+            <div className="w-full p-4 bg-emerald-950/10 border border-emerald-900/30 rounded-2xl flex items-center mb-12">
               <span className="relative flex h-2 w-2 mr-3.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -74,11 +74,11 @@ export default async function WalkingSkeletonPage() {
           {/* Feed Columns */}
           <div className="w-full space-y-6">
             {caseStudies.length === 0 ? (
-              <div className="text-center p-12 bg-neutral-900/10 border border-neutral-900/60 border-dashed rounded-2xl">
-                <p className="text-sm text-neutral-500 italic mb-2">
+              <div className="text-center p-12 bg-zinc-900/10 border border-zinc-900/40 border-dashed rounded-2xl">
+                <p className="text-sm text-muted-strong italic mb-2">
                   Connection established, but no published case studies were found in the database.
                 </p>
-                <p className="text-xs text-neutral-600 font-mono">
+                <p className="text-xs text-muted font-mono">
                   Initialize seeding pipeline via Issue #10 to import clinical trial narratives.
                 </p>
               </div>
@@ -92,17 +92,17 @@ export default async function WalkingSkeletonPage() {
       </main>
 
       {/* 2. About Section */}
-      <section id="about" className="relative min-h-[50vh] py-24 px-6 md:px-16 flex flex-col items-center border-t border-neutral-900/50 bg-neutral-950/40">
+      <section id="about" className="relative min-h-[50vh] py-24 md:py-32 px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950/40">
         <div className="absolute top-1/4 right-1/4 translate-x-1/2 w-72 h-72 rounded-full bg-brand-blue/5 blur-[120px] pointer-events-none" />
         
-        <div className="relative z-10 w-full max-w-3xl flex flex-col items-center">
+        <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
           <h2 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-neutral-100 via-neutral-300 to-neutral-500 tracking-tight text-center mb-4">
             System Architect & Senior Developer
           </h2>
-          <p className="text-xs font-mono text-neutral-500 tracking-widest uppercase mb-8">
+          <p className="text-xs font-mono text-muted tracking-widest uppercase mb-8">
             Engineering High-Performance Technical Solutions
           </p>
-          <div className="text-neutral-400 text-sm leading-relaxed text-center space-y-4 max-w-2xl">
+          <div className="text-muted-strong text-sm md:text-base leading-relaxed text-center space-y-4 max-w-2xl">
             <p>
               I build advanced digital infrastructure connecting low-latency client environments with highly scalable cloud database clusters. By aligning elegant layout algorithms with robust network pipelines, my architectures guarantee performance, security, and exceptional interactivity.
             </p>
@@ -114,19 +114,19 @@ export default async function WalkingSkeletonPage() {
       </section>
 
       {/* 3. Contact Section */}
-      <section id="contact" className="relative py-24 px-6 md:px-16 flex flex-col items-center border-t border-neutral-900/50 bg-brand-dark">
-        <div className="relative z-10 w-full max-w-3xl flex flex-col items-center">
+      <section id="contact" className="relative py-24 md:py-32 px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950">
+        <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
           <h2 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan to-brand-blue tracking-tight text-center mb-4">
             Get In Touch
           </h2>
-          <p className="text-xs font-mono text-neutral-500 tracking-widest uppercase mb-12">
+          <p className="text-xs font-mono text-muted tracking-widest uppercase mb-12">
             Let&apos;s Collaborate on Premium Engineering Projects
           </p>
           
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center w-full max-w-md">
             <a
               href="mailto:contact@fderuiter.com"
-              className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-semibold bg-neutral-900/50 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-white rounded-2xl transition-all duration-300 hover:scale-105"
+              className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-semibold bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-white rounded-2xl transition-all duration-300 hover:scale-105"
             >
               Email Broadcast
             </a>
@@ -140,7 +140,7 @@ export default async function WalkingSkeletonPage() {
             </a>
           </div>
           
-          <div className="mt-20 text-[10px] font-mono text-neutral-600 tracking-[0.2em]">
+          <div className="mt-20 text-[10px] font-mono text-zinc-600 tracking-[0.2em]">
             DESIGNED & DEVELOPED BY FREDERICK DE RUITER
           </div>
         </div>

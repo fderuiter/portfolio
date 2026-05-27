@@ -1,6 +1,7 @@
 import React from "react";
 import { BaseCaseStudy } from "@/types/domain";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface CaseStudyCardProps {
   study: BaseCaseStudy;
@@ -49,7 +50,10 @@ export const CaseStudyCard: React.FC<CaseStudyCardProps> = ({ study, className }
       </div>
 
       {/* Bottom Footer Actions */}
-      <div className="flex items-center text-xs font-bold text-brand-cyan/80 group-hover:text-brand-cyan transition-colors duration-300 cursor-pointer">
+      <Link
+        href={`/case-studies/${study.slug}`}
+        className="inline-flex items-center text-xs font-bold text-brand-cyan/80 group-hover:text-brand-cyan transition-colors duration-300 cursor-pointer relative z-10"
+      >
         <span>Analyze Architecture</span>
         <svg
           className="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300"
@@ -60,7 +64,7 @@ export const CaseStudyCard: React.FC<CaseStudyCardProps> = ({ study, className }
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
         </svg>
-      </div>
+      </Link>
     </div>
   );
 };

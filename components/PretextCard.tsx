@@ -49,7 +49,7 @@ export const PretextCard: React.FC<PretextCardProps> = ({
           {/* Visually Hidden Semantic DOM Parallel Node */}
           <p className="sr-only">{description}</p>
         </div>
-        <div className="text-[10px] text-blue-500 font-mono self-end opacity-60">
+        <div className="text-[10px] text-brand-blue font-mono self-end opacity-60">
           {!isReady ? "Measuring..." : `Pretext height: ${computedHeight}px`}
         </div>
       </div>

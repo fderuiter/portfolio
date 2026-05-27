@@ -1,32 +1,49 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
-
 :root {
-  /* Default Baseline: Premium Dark Mode zinc-950 base */
+  /* Premium Dark-Only Theme Baseline: Zinc-950 base */
   --background: #09090b;
   --foreground: #fafafa;
-}
 
-:root[data-theme="light"] {
-  --background: #fafafa;
-  --foreground: #09090b;
-}
+  --surface-1: rgba(24, 24, 27, 0.6);
+  --surface-2: rgba(39, 39, 42, 0.4);
+  --border: rgba(63, 63, 70, 0.5);
+  --border-active: rgba(6, 182, 212, 0.4);
 
-:root[data-theme="dark"] {
-  --background: #09090b;
-  --foreground: #fafafa;
+  --muted: #71717a;
+  --muted-strong: #a1a1aa;
+
+  --brand-cyan-glow: rgba(6, 182, 212, 0.15);
+  --brand-blue-glow: rgba(59, 130, 246, 0.10);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
-  
-  /* Premium Palette */
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Surfaces & Borders */
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-active: var(--border-active);
+
+  /* Typography Scale */
+  --color-muted: var(--muted);
+  --color-muted-strong: var(--muted-strong);
+
+  /* Premium Palette & Accents */
   --color-brand-cyan: #06b6d4;
+  --color-brand-cyan-glow: var(--brand-cyan-glow);
   --color-brand-blue: #3b82f6;
+  --color-brand-blue-glow: var(--brand-blue-glow);
   --color-brand-dark: #09090b;
+
+  /* Semantic State Colors */
+  --color-success: #10b981;
+  --color-error: #f87171;
+  --color-warning: #fbbf24;
 }
 
 body {
@@ -34,5 +51,23 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   min-height: 100vh;
-  transition: background-color 300ms cubic-bezier(0.16, 1, 0.3, 1), color 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-x: hidden;
+  will-change: background-color, color;
 }
+
+/* Global focus ring styling (WCAG 2.1 compliance) */
+*:focus-visible {
+  outline: 2px solid var(--color-brand-cyan);
+  outline-offset: 3px;
+}
+
+/* Reduced motion compliance */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+

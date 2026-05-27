@@ -73,7 +73,7 @@ export const BackgroundBeamsWithCollision = ({
     <div
       ref={parentRef}
       className={cn(
-        "h-screen bg-gradient-to-b from-white to-neutral-100 dark:from-neutral-950 dark:to-neutral-800 relative flex items-center w-full justify-center overflow-hidden",
+        "h-screen bg-zinc-950 relative flex items-center w-full justify-center overflow-hidden",
         className
       )}
     >
@@ -89,11 +89,7 @@ export const BackgroundBeamsWithCollision = ({
       {children}
       <div
         ref={containerRef}
-        className="absolute bottom-0 bg-neutral-100 w-full inset-x-0 pointer-events-none"
-        style={{
-          boxShadow:
-            "0 0 24px rgba(34, 42, 53, 0.06), 0 1px 1px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(34, 42, 53, 0.04), 0 0 4px rgba(34, 42, 53, 0.08), 0 16px 68px rgba(47, 48, 55, 0.05), 0 1px 0 rgba(255, 255, 255, 0.1) inset",
-        }}
+        className="absolute bottom-0 w-full inset-x-0 pointer-events-none"
       ></div>
     </div>
   );
@@ -202,7 +198,7 @@ const CollisionMechanism = React.forwardRef<
           repeatDelay: beamOptions.repeatDelay || 0,
         }}
         className={cn(
-          "absolute left-0 top-20 m-auto h-14 w-px rounded-full bg-gradient-to-t from-indigo-500 via-purple-500 to-transparent",
+          "absolute left-0 top-20 m-auto h-14 w-px rounded-full bg-gradient-to-t from-brand-cyan via-brand-blue to-transparent opacity-20",
           beamOptions.className
         )}
       />
@@ -236,13 +232,13 @@ const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
       duration: number;
     }>
   >(() =>
-    Array.from({ length: 20 }, (_, index) => ({
+    Array.from({ length: 15 }, (_, index) => ({
       id: index,
       initialX: 0,
       initialY: 0,
       directionX: Math.floor(Math.random() * 80 - 40),
       directionY: Math.floor(Math.random() * -50 - 10),
-      duration: Math.random() * 1.5 + 0.5,
+      duration: Math.random() * 1.2 + 0.4,
     }))
   );
 
@@ -250,10 +246,10 @@ const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
     <div {...props} className={cn("absolute z-50 h-2 w-2", props.className)}>
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        animate={{ opacity: 0.5 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 1.5, ease: "easeOut" }}
-        className="absolute -inset-x-10 top-0 m-auto h-2 w-10 rounded-full bg-gradient-to-r from-transparent via-indigo-500 to-transparent blur-sm"
+        transition={{ duration: 1.2, ease: "easeOut" }}
+        className="absolute -inset-x-10 top-0 m-auto h-2 w-10 rounded-full bg-gradient-to-r from-transparent via-brand-cyan to-transparent blur-sm"
       ></motion.div>
       {spans.map((span) => (
         <motion.span
@@ -265,10 +261,105 @@ const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
             opacity: 0,
           }}
           transition={{ duration: span.duration, ease: "easeOut" }}
-          className="absolute h-1 w-1 rounded-full bg-gradient-to-b from-indigo-500 to-purple-500"
+          className="absolute h-1 w-1 rounded-full bg-gradient-to-b from-brand-cyan to-brand-blue"
         />
       ))}
     </div>
+  );
+};
+
+interface HeroHeadlineProps {
+  text: string;
+}
+
+export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
+  const { ref, height, isReady } = usePretextLayout({
+    text,
+    fontSize: 56, // Measures at the typical H1 size
+    lineHeight: 64,
+    fontFamilyVariable: "--font-inter",
+  });
+
+  const words = text.split(" ");
+
+  const containerVariants = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.07,
+      },
+    },
+  };
+
+  const wordVariants = {
+    hidden: {
+      opacity: 0,
+      y: 20,
+      scale: 0.95,
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        type: "spring" as const,
+        stiffness: 100,
+        damping: 18,
+        mass: 0.4,
+      },
+    },
+  };
+
+  return (
+    <>
+      <h1 className="sr-only">{text}</h1>
+
+      <div
+        style={{
+          height: isReady ? `${height}px` : "auto",
+          transition: "height 300ms cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+        className="relative w-full max-w-4xl mx-auto overflow-hidden min-h-[128px] select-none mb-6"
+        aria-hidden="true"
+        role="presentation"
+      >
+        <div ref={ref} className="w-full">
+          {!isReady ? (
+            <p className="text-4xl md:text-6xl font-black tracking-tight text-center opacity-0 pointer-events-none leading-tight md:leading-none">
+              {text}
+            </p>
+          ) : (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="text-4xl md:text-6xl font-black tracking-tight text-center flex flex-wrap justify-center leading-tight md:leading-none"
+            >
+              {words.map((word, i) => {
+                // Style specific words with brand gradient
+                const isGradient = ["Interface", "Data", "Meaning"].includes(
+                  word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
+                );
+                return (
+                  <motion.span
+                    key={i}
+                    variants={wordVariants}
+                    className={cn(
+                      "inline-block mr-[0.25em] will-change-transform",
+                      isGradient
+                        ? "text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan to-brand-blue"
+                        : "text-transparent bg-clip-text bg-gradient-to-r from-neutral-100 to-neutral-300"
+                    )}
+                  >
+                    {word}
+                  </motion.span>
+                );
+              })}
+            </motion.div>
+          )}
+        </div>
+      </div>
+    </>
   );
 };
 
@@ -290,7 +381,8 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
     hidden: {},
     visible: {
       transition: {
-        staggerChildren: 0.03,
+        staggerChildren: 0.02,
+        delayChildren: 0.7, // Staggers after the main headline animation finishes
       },
     },
   };
@@ -299,7 +391,7 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
     hidden: {
       opacity: 0,
       y: 12,
-      scale: 0.97,
+      scale: 0.98,
     },
     visible: {
       opacity: 1,
@@ -308,18 +400,16 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
       transition: {
         type: "spring" as const,
         stiffness: 110,
-        damping: 14,
-        mass: 0.4,
+        damping: 15,
+        mass: 0.3,
       },
     },
   };
 
   return (
     <>
-      {/* 1. Visually Hidden Semantic DOM Parallel Node */}
       <p className="sr-only">{text}</p>
 
-      {/* 2. Isolated Visual Layout Box hidden from Assistive Tech */}
       <div
         style={{
           height: isReady ? `${height}px` : "auto",
@@ -331,7 +421,6 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
       >
         <div ref={ref} className="w-full">
           {!isReady ? (
-            // Prerendering skeleton/invisible text for SEO parsing on initial render
             <p className="text-neutral-400 text-sm md:text-base leading-[28px] text-center opacity-0 pointer-events-none">
               {text}
             </p>
@@ -364,14 +453,15 @@ interface HeroProps {
 }
 
 export const Hero: React.FC<HeroProps> = ({ className }) => {
+  const headline = "Engineering the Interface Between Data and Meaning";
   const introText =
-    "Connecting high-performance canvas text layout pipelines, serverless Postgres data streams, and cutting-edge visual design systems into a unified engineering showcase.";
+    "Connecting high-performance canvas layout engines, serverless Postgres data streams, and clinical data integration clients into a unified engineering showcase.";
 
   return (
     <section
       id="hero"
       className={cn(
-        "relative h-screen min-h-[600px] w-full flex flex-col justify-center items-center overflow-hidden bg-brand-dark px-4 md:px-8",
+        "relative h-screen min-h-[600px] w-full flex flex-col justify-center items-center overflow-hidden bg-zinc-950 px-4 md:px-8",
         className
       )}
     >
@@ -379,7 +469,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
       <div className="absolute inset-0 z-0 opacity-40 [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_60%,transparent_100%)] pointer-events-none">
         <AnimatedGridPattern
           numSquares={45}
-          maxOpacity={0.12}
+          maxOpacity={0.1}
           duration={4}
           repeatDelay={1}
           className="fill-brand-cyan/20 stroke-neutral-800"
@@ -392,34 +482,27 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
 
       {/* 3. Hero Content Container */}
       <div className="relative z-10 w-full max-w-4xl flex flex-col items-center text-center">
-        {/* Sub-header mono tag */}
+        {/* Sub-header mono tag - Static Brand Identity */}
         <motion.span
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="px-3 py-1 mb-6 text-[10px] md:text-xs font-mono font-semibold tracking-[0.2em] uppercase text-brand-cyan bg-brand-cyan/5 border border-brand-cyan/20 rounded-full"
+          className="px-3.5 py-1 mb-6 text-[10px] md:text-xs font-mono font-semibold tracking-[0.2em] uppercase text-brand-cyan bg-brand-cyan/5 border border-brand-cyan/20 rounded-full"
         >
-          Active Portfolio Hub v1.0.0
+          FREDERICK DE RUITER · PRINCIPAL SYSTEMS ENGINEER
         </motion.span>
 
-        {/* Dynamic Staggered Title */}
-        <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-6 select-none leading-tight md:leading-none">
-          <span className="block text-transparent bg-clip-text bg-gradient-to-r from-neutral-100 to-neutral-400">
-            Engineering Premium
-          </span>
-          <span className="block text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan via-brand-blue to-neutral-200 mt-2">
-            Digital Experiences
-          </span>
-        </h1>
+        {/* Dynamic Staggered Pretext-powered Title */}
+        <HeroHeadline text={headline} />
 
-        {/* Text Reveal Component (using Pretext + Framer Motion) */}
+        {/* Text Reveal Description (using Pretext + Framer Motion) */}
         <HeroText text={introText} />
 
         {/* CTA Button Block */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.8, type: "spring", stiffness: 80 }}
+          transition={{ delay: 1.1, duration: 0.8, type: "spring", stiffness: 80 }}
           className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
           <a
