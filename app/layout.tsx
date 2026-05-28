@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
+import { getPersonSchema } from "@/lib/seo";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -54,6 +55,12 @@ export default function RootLayout({
       className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: getPersonSchema()
+          }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `

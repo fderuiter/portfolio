@@ -135,3 +135,14 @@ To deliver a premium, high-fidelity landing page showcase, we integrated dynamic
 - **Scroll-Triggered Career Timeline:** We developed `<Timeline />` as a client-side component using Framer Motion. Timeline cards fade in and slide up using custom spring physics (`stiffness: 60, duration: 0.8`), aligned on a vertical gradient rail.
 - **Accessible Contact Anchors:** Contact buttons are wrapped in semantic `<a>` tags featuring accessible descriptions (`aria-label`) and robust keyboard outline targets to guarantee a WCAG 2.1 AA compliant composition.
 
+## Dynamic Open Graph Image & JSON-LD Structured Data (Issue #28)
+
+To support rich social card visual motifs and compliant structural metadata representations for AI/search parsers, we implement dynamic image calculations and strict schema bindings:
+- **Dynamic ImageResponse Routes:** Rather than statically exporting templates, we place `opengraph-image.tsx` inside `/case-studies/[slug]/`. It leverages the Next.js `ImageResponse` canvas compilation API running on a standard NodeJS runtime to guarantee pooled, safe connection fetches from serverless Neon PostgreSQL instances.
+- **Visual Motif Design:** Programmatically compiles dynamic titles, primary languages, and category tag chips on a deep charcoal card featuring glowing radial ambient overlays in brand-cyan (`rgba(6, 182, 212, 0.08)`) and high-tech blue (`rgba(59, 130, 246, 0.05)`).
+- **JSON-LD Schema Utility Layer (`lib/seo.ts`):** Establishes type-safe constructors for Schema.org formats:
+  - **getPersonSchema:** Serializes professional developer profiles loaded site-wide in `app/layout.tsx`.
+  - **getSoftwareSourceCodeSchema:** Serializes dynamic case study items in `app/case-studies/[slug]/page.tsx`, directly incorporating cached stars and forks telemetry fetched from the GitHub client.
+- **XSS Sanitization Compliance:** Prevents stored script vectors from escaping structured data by programmatically replacing `<` bracket tags with unicode escapes (`\u003c`) inside the JSON-LD serialization pipeline.
+
+

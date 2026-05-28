@@ -5,6 +5,8 @@ import { SandboxTerminal } from "@/components/SandboxTerminal";
 import { IconTerminal } from "@tabler/icons-react";
 import { TracingBeam } from "@/components/ui/TracingBeam";
 import { RichNarrative } from "@/components/RichNarrative";
+import { getGitHubStats, parseGitHubUrl } from "@/lib/github";
+import { getSoftwareSourceCodeSchema } from "@/lib/seo";
 
 import type { Metadata } from "next";
 
@@ -79,11 +81,27 @@ export default async function CaseStudyPage({ params }: PageProps) {
     notFound();
   }
 
+  // Fetch dynamic GitHub cached statistics to hydrate the JSON-LD schemas
+  let stats = null;
+  if (study.github_url) {
+    const parsed = parseGitHubUrl(study.github_url);
+    if (parsed) {
+      stats = await getGitHubStats(parsed.owner, parsed.repo);
+    }
+  }
+
   // Split tags by comma for badge rendering
   const tagsList = study.tags ? study.tags.split(",").map(t => t.trim()) : [];
 
   return (
     <main className="min-h-screen py-24 md:py-32 px-6 md:px-12 lg:px-24 bg-zinc-950 text-foreground flex flex-col items-center relative overflow-hidden">
+      {/* Dynamic JSON-LD SoftwareSourceCode Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: getSoftwareSourceCodeSchema(study, stats),
+        }}
+      />
       {/* Background Blurs */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 w-80 h-80 rounded-full bg-brand-blue/5 blur-[120px] pointer-events-none" />
