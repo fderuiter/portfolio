@@ -5,7 +5,7 @@ import { IconTerminal, IconCornerDownLeft, IconCircle } from "@tabler/icons-reac
 
 interface LogItem {
   id: string;
-  type: "command" | "output" | "error" | "info";
+  type: "command" | "output" | "error" | "info" | "ai";
   text: string;
   jsonPayload?: unknown;
 }
@@ -107,12 +107,13 @@ export const SandboxTerminal: React.FC = () => {
     {
       id: "init",
       type: "info",
-      text: "iMednet Python SDK CLI Sandbox [Version 2.3.1]\nType 'help' to list available commands. Click the badges below for instant inputs.",
+      text: "iMednet Python SDK CLI Sandbox [Version 2.3.1]\nType 'help' to list available commands. Ask natural language questions for technical vetting.",
     },
   ]);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isExecuting, setIsExecuting] = useState(false);
+  const [isAiLoading, setIsAiLoading] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -128,7 +129,7 @@ export const SandboxTerminal: React.FC = () => {
   }, [logs]);
 
   // Execute terminal commands
-  const executeCommand = (cmdText: string) => {
+  const executeCommand = async (cmdText: string) => {
     const trimmed = cmdText.trim();
     if (!trimmed) return;
 
@@ -143,19 +144,18 @@ export const SandboxTerminal: React.FC = () => {
       return [...filtered, trimmed];
     });
     setHistoryIndex(-1);
-    setIsExecuting(true);
 
-    // Simulated short response lag for realism
-    setTimeout(() => {
-      setIsExecuting(false);
-      const outputId = generateLogId();
+    const outputId = generateLogId();
 
-      if (trimmed === "clear") {
-        setLogs([]);
-        return;
-      }
+    if (trimmed === "clear") {
+      setLogs([]);
+      return;
+    }
 
-      if (trimmed === "help") {
+    if (trimmed === "help") {
+      setIsExecuting(true);
+      setTimeout(() => {
+        setIsExecuting(false);
         setLogs((prev) => [
           ...prev,
           {
@@ -166,14 +166,19 @@ export const SandboxTerminal: React.FC = () => {
               `  imednet subjects get --id 123          -> Retrieve patient demographics\n` +
               `  imednet records search --study BRIGHT-01 -> Search electronic vital records\n` +
               `  clear                                  -> Clear the terminal console\n` +
-              `  help                                   -> View available command registry`,
+              `  help                                   -> View available command registry\n\n` +
+              `You can also ask natural language questions about the candidate's portfolio.`,
           },
         ]);
-        return;
-      }
+      }, 300);
+      return;
+    }
 
-      const match = COMMAND_REGISTRY[trimmed];
-      if (match) {
+    const match = COMMAND_REGISTRY[trimmed];
+    if (match) {
+      setIsExecuting(true);
+      setTimeout(() => {
+        setIsExecuting(false);
         setLogs((prev) => [
           ...prev,
           {
@@ -183,17 +188,57 @@ export const SandboxTerminal: React.FC = () => {
             jsonPayload: match.payload,
           },
         ]);
-      } else {
-        setLogs((prev) => [
-          ...prev,
-          {
-            id: outputId,
-            type: "error",
-            text: `Command not found: '${trimmed}'. Type 'help' to review supported registry entries.`,
-          },
-        ]);
+      }, 450);
+      return;
+    }
+
+    // Default: Forward to AI Assistant
+    setIsAiLoading(true);
+    const aiLogId = generateLogId();
+    setLogs((prev) => [...prev, { id: aiLogId, type: "ai", text: "" }]);
+    
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: [{ role: "user", content: trimmed }] }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server returned ${response.status}`);
       }
-    }, 450);
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("No response body");
+
+      const decoder = new TextDecoder();
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        setLogs((prev) => {
+          const newLogs = [...prev];
+          const index = newLogs.findIndex((l) => l.id === aiLogId);
+          if (index !== -1) {
+            newLogs[index] = { ...newLogs[index], text: newLogs[index].text + chunk };
+          }
+          return newLogs;
+        });
+      }
+    } catch (err) {
+      setLogs((prev) => {
+        const newLogs = [...prev];
+        const index = newLogs.findIndex((l) => l.id === aiLogId);
+        if (index !== -1) {
+          newLogs[index] = { ...newLogs[index], text: "Error connecting to AI service." };
+        }
+        return newLogs;
+      });
+    } finally {
+      setIsAiLoading(false);
+    }
   };
 
   // Handle key triggers (Enter, Up, Down, Tab)
@@ -291,7 +336,7 @@ export const SandboxTerminal: React.FC = () => {
           <button
             key={cmd}
             onClick={() => executeCommand(cmd)}
-            disabled={isExecuting}
+            disabled={isExecuting || isAiLoading}
             className="px-3 py-1.5 text-[10px] font-mono font-bold bg-zinc-900/40 border border-zinc-900 hover:border-brand-cyan/40 text-brand-cyan/90 hover:text-brand-cyan rounded-xl transition-all hover:scale-[1.02] cursor-pointer"
           >
             {cmd}
@@ -333,6 +378,11 @@ export const SandboxTerminal: React.FC = () => {
                   {log.text}
                 </div>
               )}
+              {log.type === "ai" && (
+                <div className="text-brand-cyan/90 whitespace-pre-wrap leading-relaxed select-text font-sans text-sm">
+                  {log.text}
+                </div>
+              )}
               {log.type === "error" && (
                 <div className="text-red-400/90 font-medium select-text">
                   ✖ {log.text}
@@ -351,10 +401,10 @@ export const SandboxTerminal: React.FC = () => {
           ))}
 
           {/* Loading execution state */}
-          {isExecuting && (
+          {(isExecuting || isAiLoading) && (
             <div className="flex items-center gap-2 text-brand-cyan/80 font-bold italic select-none">
               <span className="animate-pulse">◌</span>
-              <span>Executing clinical API query...</span>
+              <span>{isAiLoading ? "Consulting portfolio AI..." : "Executing clinical API query..."}</span>
             </div>
           )}
 
@@ -372,8 +422,8 @@ export const SandboxTerminal: React.FC = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            disabled={isExecuting}
-            placeholder="Type 'help' or execute dynamic clinical queries..."
+            disabled={isExecuting || isAiLoading}
+            placeholder="Type 'help' or ask a question..."
             className="flex-1 bg-transparent border-none outline-none font-mono text-[11px] text-zinc-100 placeholder-zinc-700 caret-brand-cyan select-text"
             autoCapitalize="off"
             autoComplete="off"
@@ -382,7 +432,7 @@ export const SandboxTerminal: React.FC = () => {
           />
           <button
             onClick={() => executeCommand(input)}
-            disabled={isExecuting || !input.trim()}
+            disabled={isExecuting || isAiLoading || !input.trim()}
             className="p-1 text-zinc-600 hover:text-brand-cyan disabled:text-zinc-800 disabled:hover:text-zinc-800 transition-colors cursor-pointer"
             title="Execute Command (Enter)"
           >

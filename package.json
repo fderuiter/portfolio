@@ -10,11 +10,14 @@
     "check": "tsc --noEmit && npm run lint"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.66",
+    "@ai-sdk/react": "^3.0.194",
     "@chenglou/pretext": "^0.0.5",
     "@neondatabase/serverless": "^1.1.0",
     "@prisma/adapter-neon": "^7.8.0",
     "@prisma/client": "^7.7.0",
     "@tabler/icons-react": "^3.41.1",
+    "ai": "^6.0.192",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "isomorphic-dompurify": "^3.14.0",
@@ -22,7 +25,8 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "tailwind-merge": "^3.5.0",
-    "ws": "^8.21.0"
+    "ws": "^8.21.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
