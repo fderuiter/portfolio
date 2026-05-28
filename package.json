@@ -9,7 +9,8 @@
     "build": "npx prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "check": "tsc --noEmit && npm run lint"
+    "check": "tsc --noEmit && npm run lint",
+    "prepare": "husky"
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.5",
@@ -36,8 +37,12 @@
     "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.5",
+    "prettier": "^3.8.3",
     "prisma": "^7.7.0",
     "tailwindcss": "^4",
+    "tsc-files": "^1.1.4",
     "typescript": "^5"
   },
   "ignoreScripts": [
@@ -50,5 +55,15 @@
   ],
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --fix",
+      "tsc-files --noEmit node_modules/next/types/global.d.ts"
+    ],
+    "*.{json,css,md}": [
+      "prettier --write"
+    ]
   }
 }

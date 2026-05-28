@@ -13,7 +13,7 @@ The core objective of this project is to create an interactive showcase that dyn
 - **Visual Ecosystem:** Aceternity UI, Magic UI, Framer Motion
 - **CMS:** Prisma ORM with Neon Serverless PostgreSQL
 - **Layout Engine:** `@chenglou/pretext` — 15KB zero-dependency pure JS/TS library for high-performance DOM-free text measurement
-- **Rich Text:** `@chenglou/pretext/rich-inline` — Inline Markdown tokenizer rendering **bold**, *italic*, and `code` chips with pixel-perfect canvas-measured heights
+- **Rich Text:** `@chenglou/pretext/rich-inline` — Inline Markdown tokenizer rendering **bold**, _italic_, and `code` chips with pixel-perfect canvas-measured heights
 - **Masonry Layout:** Parent-level zero-whitespace masonry Bento Grid using a greedy LPT column scheduler with ResizeObserver-driven sub-millisecond recalculations
 - **Performance:** DOM-free layout calculations maintaining 60FPS during complex animations
 
@@ -25,23 +25,43 @@ The portfolio utilizes a "Design Engineering" approach, combining lightweight li
 
 The full 5-phase development roadmap, milestone progress, and issue tracker are maintained in **[GitHub Issue #18 — Portfolio Hub V1 Architecture Master 5-Phase Development Plan](https://github.com/fderuiter/portfolio/issues/18)**.
 
-| Phase | Milestone | Status |
-|-------|-----------|--------|
-| 1 — Foundation & Data Integrity | `v0.1.0` | ✅ Complete |
-| 2 — Core Architecture & Layout Engine | `v0.2.0` | ✅ Complete |
-| 3 — Integration & Content Pipeline | `v0.3.0` | 🔄 In Progress |
-| 4 — Hardening & Performance | `v0.4.0` | ⏳ Upcoming |
-| 5 — Production CI/CD & Go-Live | `v1.0.0` | ⏳ Upcoming |
+| Phase                                 | Milestone | Status         |
+| ------------------------------------- | --------- | -------------- |
+| 1 — Foundation & Data Integrity       | `v0.1.0`  | ✅ Complete    |
+| 2 — Core Architecture & Layout Engine | `v0.2.0`  | ✅ Complete    |
+| 3 — Integration & Content Pipeline    | `v0.3.0`  | 🔄 In Progress |
+| 4 — Hardening & Performance           | `v0.4.0`  | ⏳ Upcoming    |
+| 5 — Production CI/CD & Go-Live        | `v1.0.0`  | ⏳ Upcoming    |
 
 ## Prerequisites
 
 To work on this repository, you will need:
+
 - **Node.js** (v20+)
 - **npm** or **bun** as the package manager
+
+## Development Guidelines
+
+### Pre-commit Enforcement
+
+To ensure codebase consistency, this project uses a local pre-commit hook (powered by Husky and lint-staged). Upon attempting to commit, the hook will automatically:
+
+- Format the staged files (indentation, quotes) using Prettier.
+- Run ESLint to fix and validate React/functional rules.
+- Type-check the staged files using TypeScript.
+
+If any functional errors are detected, the commit will be blocked. You must fix the errors to proceed.
+
+**Bypassing the Hook:** In exceptional circumstances (e.g., an emergency fix or work-in-progress commit), developers have a clear mechanism to bypass the hook by adding the `--no-verify` flag:
+
+```bash
+git commit --no-verify -m "wip: emergency fix"
+```
 
 ## Setup Instructions
 
 1. **Install Dependencies**
+
    ```bash
    npm install
    ```
@@ -50,12 +70,14 @@ To work on this repository, you will need:
    Copy `.env.local.example` to `.env.local` and set your `DATABASE_URL` (Neon Postgres connection string) and optionally `GITHUB_TOKEN` to avoid API rate limits.
 
 3. **Initialize Database & Prisma Client**
+
    ```bash
    npx prisma generate
    ```
 
 4. **Seed Database**
    Populate the database with clinical trials and schema engine case studies (with inline Markdown formatting):
+
    ```bash
    npx prisma db seed
    ```
@@ -66,4 +88,3 @@ To work on this repository, you will need:
    npm run dev
    ```
    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
