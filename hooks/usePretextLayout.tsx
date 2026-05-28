@@ -11,6 +11,38 @@ import {
   type RichInlineItem,
   type RichInlineLineRange
 } from "@chenglou/pretext/rich-inline";
+import { designManifest } from "@/lib/design-manifest";
+
+// --- Global Caches ---
+class LRUCache<K, V> {
+  private cache = new Map<K, V>();
+  constructor(private capacity: number) {}
+  get(key: K): V | undefined {
+    if (!this.cache.has(key)) return undefined;
+    const val = this.cache.get(key)!;
+    this.cache.delete(key);
+    this.cache.set(key, val);
+    return val;
+  }
+  set(key: K, value: V) {
+    if (this.cache.has(key)) {
+      this.cache.delete(key);
+    } else if (this.cache.size >= this.capacity) {
+      const firstKey = this.cache.keys().next().value;
+      if (firstKey !== undefined) {
+        this.cache.delete(firstKey);
+      }
+    }
+    this.cache.set(key, value);
+  }
+}
+
+const textPrepareCache = new LRUCache<string, PreparedText>(500);
+const textLayoutCache = new LRUCache<string, { height: number; lineCount: number }>(2000);
+
+const richItemsCache = new LRUCache<string, ExtendedRichInlineItem[]>(500);
+const richPrepareCache = new LRUCache<string, PreparedRichInline>(500);
+const richLayoutCache = new LRUCache<string, { height: number; lines: RichInlineLine[] }>(2000);
 
 interface UsePretextLayoutOptions {
   text: string;
@@ -39,11 +71,18 @@ export function usePretextLayout({
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const preparedTextRef = useRef<PreparedText | null>(null);
+  const fontStringRef = useRef<string>("");
 
   const measureText = useCallback((maxWidth: number) => {
-    if (!preparedTextRef.current) return;
+    if (!preparedTextRef.current || !fontStringRef.current) return;
 
-    const result = layout(preparedTextRef.current, maxWidth, lineHeight);
+    const cacheKey = `${text}|${fontStringRef.current}|${maxWidth}|${lineHeight}`;
+    let result = textLayoutCache.get(cacheKey);
+
+    if (!result) {
+      result = layout(preparedTextRef.current, maxWidth, lineHeight);
+      textLayoutCache.set(cacheKey, result);
+    }
 
     setState((prev) => {
       if (prev.height === result.height && prev.lineCount === result.lineCount) {
@@ -55,7 +94,7 @@ export function usePretextLayout({
         lineCount: result.lineCount,
       };
     });
-  }, [lineHeight]);
+  }, [text, lineHeight]);
 
   useLayoutEffect(() => {
     if (typeof window === "undefined") return;
@@ -67,9 +106,16 @@ export function usePretextLayout({
     // 2. Safe Fallback Matrix: Fallback gracefully to prevent Canvas errors
     const resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
     const fontString = `${fontSize}px ${resolvedFontFamily}`;
+    fontStringRef.current = fontString;
 
     // 3. Phase 1 Preparation: Parse text and cache measurements in Canvas
-    preparedTextRef.current = prepare(text, fontString);
+    const prepareKey = `${text}|${fontString}`;
+    let prepared = textPrepareCache.get(prepareKey);
+    if (!prepared) {
+      prepared = prepare(text, fontString);
+      textPrepareCache.set(prepareKey, prepared);
+    }
+    preparedTextRef.current = prepared;
 
     if (containerRef.current) {
       const initialWidth = containerRef.current.getBoundingClientRect().width;
@@ -226,8 +272,6 @@ interface UsePretextRichLayoutOptions {
   fontFamilyVariable?: string;
 }
 
-import { designManifest } from "@/lib/design-manifest";
-
 export function usePretextRichLayout({
   text,
   fontSize = designManifest.typography.sizes.sm.fontSize,
@@ -249,21 +293,33 @@ export function usePretextRichLayout({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const preparedRef = useRef<PreparedRichInline | null>(null);
   const itemsRef = useRef<ExtendedRichInlineItem[]>([]);
+  const itemsKeyRef = useRef<string>("");
 
   const measureRichText = useCallback((maxWidth: number) => {
-    if (!preparedRef.current) return;
+    if (!preparedRef.current || !itemsKeyRef.current) return;
 
-    const prepared = preparedRef.current;
-    const linesRanges: RichInlineLineRange[] = [];
-    walkRichInlineLineRanges(prepared, maxWidth, (range) => {
-      linesRanges.push(range);
-    });
+    const layoutKey = `${itemsKeyRef.current}|${maxWidth}|${lineHeight}`;
+    let cachedResult = richLayoutCache.get(layoutKey);
 
-    const materializedLines = linesRanges.map((range) =>
-      materializeRichInlineLineRange(prepared, range)
-    );
+    if (!cachedResult) {
+      const prepared = preparedRef.current;
+      const linesRanges: RichInlineLineRange[] = [];
+      walkRichInlineLineRanges(prepared, maxWidth, (range) => {
+        linesRanges.push(range);
+      });
 
-    const calculatedHeight = materializedLines.length * lineHeight;
+      const materializedLines = linesRanges.map((range) =>
+        materializeRichInlineLineRange(prepared, range)
+      );
+
+      cachedResult = {
+        height: materializedLines.length * lineHeight,
+        lines: materializedLines,
+      };
+      richLayoutCache.set(layoutKey, cachedResult);
+    }
+
+    const { height: calculatedHeight, lines: materializedLines } = cachedResult;
 
     setState((prev) => {
       if (prev.height === calculatedHeight && prev.lines.length === materializedLines.length) {
@@ -290,9 +346,23 @@ export function usePretextRichLayout({
     const italicFont = `italic 400 ${fontSize}px ${resolvedFontFamily}`;
     const codeFont = `500 ${fontSize - 1}px monospace`;
 
-    const parsedItems = parseMarkdownToRichItems(text, baseFont, boldFont, italicFont, codeFont);
+    const fontsKey = `${baseFont}|${boldFont}|${italicFont}|${codeFont}`;
+    const itemsKey = `${text}|${fontsKey}`;
+    itemsKeyRef.current = itemsKey;
+
+    let parsedItems = richItemsCache.get(itemsKey);
+    if (!parsedItems) {
+      parsedItems = parseMarkdownToRichItems(text, baseFont, boldFont, italicFont, codeFont);
+      richItemsCache.set(itemsKey, parsedItems);
+    }
     itemsRef.current = parsedItems;
-    preparedRef.current = prepareRichInline(parsedItems);
+
+    let prepared = richPrepareCache.get(itemsKey);
+    if (!prepared) {
+      prepared = prepareRichInline(parsedItems);
+      richPrepareCache.set(itemsKey, prepared);
+    }
+    preparedRef.current = prepared;
 
     if (containerRef.current) {
       const initialWidth = containerRef.current.getBoundingClientRect().width;
