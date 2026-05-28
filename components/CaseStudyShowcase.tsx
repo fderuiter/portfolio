@@ -3,6 +3,7 @@
 import React, { useState, useLayoutEffect, useRef, useCallback, useMemo } from "react";
 import { CaseStudyBentoCard } from "@/components/ui/CaseStudyBentoCard";
 import { BaseCaseStudy } from "@/types/domain";
+import { hexToRgba } from "@/lib/utils";
 import { GitHubStats } from "@/lib/github";
 import { motion, AnimatePresence } from "framer-motion";
 import { designManifest } from "@/lib/design-manifest";
@@ -108,13 +109,13 @@ export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = ({ caseStudie
     if (Object.keys(preparedDataRef.current).length === 0) return;
 
     let colCount = 1;
-    if (containerWidth >= 1024) {
+    if (containerWidth >= designManifest.breakpoints.lg) {
       colCount = 3;
-    } else if (containerWidth >= 768) {
+    } else if (containerWidth >= designManifest.breakpoints.md) {
       colCount = 2;
     }
 
-    const gap = 16; // gap-4 gap width
+    const gap = designManifest.layout.gap; // using generated gap token
     const columnWidth = (containerWidth - (gap * (colCount - 1))) / colCount;
 
     // 1. Calculate heights of each study
@@ -125,7 +126,7 @@ export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = ({ caseStudie
       }
 
       const linesRanges: RichInlineLineRange[] = [];
-      walkRichInlineLineRanges(cached.prepared, columnWidth - 32, (range) => {
+      walkRichInlineLineRanges(cached.prepared, columnWidth - (designManifest.layout.cardPadding * 2), (range) => {
         linesRanges.push(range);
       });
 
@@ -215,7 +216,8 @@ export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = ({ caseStudie
               {isActive && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute inset-0 bg-zinc-950 border border-zinc-800/80 rounded-xl -z-10 shadow-[0_0_15px_rgba(6,182,212,0.12)]"
+                  style={{ "--tab-glow": `0 0 15px ${hexToRgba(designManifest.colors["brand-cyan"], 0.12)}` } as React.CSSProperties}
+                  className="absolute inset-0 bg-zinc-950 border border-zinc-800/80 rounded-xl -z-10 shadow-[var(--tab-glow)]"
                   transition={designManifest.motion.springs.snappy}
                 />
               )}

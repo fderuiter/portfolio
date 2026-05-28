@@ -6,6 +6,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { usePretextLayout } from "@/hooks/usePretextLayout";
 import { AnimatedGridPattern } from "@/components/AnimatedGridPattern";
 import { designManifest } from "@/lib/design-manifest";
+import { hexToRgba } from "@/lib/utils";
 
 export const BackgroundBeamsWithCollision = ({
   children,
@@ -504,7 +505,8 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
         >
           <a
             href="#case-studies"
-            className="group relative inline-flex items-center justify-center px-8 py-3.5 text-sm font-semibold text-brand-dark bg-white rounded-full overflow-hidden transition-all duration-300 hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:shadow-[0_0_30px_rgba(6,182,212,0.4)]"
+            style={{ "--btn-glow": `0 0 30px ${hexToRgba(designManifest.colors["brand-cyan"], 0.4)}` } as React.CSSProperties}
+            className="group relative inline-flex items-center justify-center px-8 py-3.5 text-sm font-semibold text-brand-dark bg-white rounded-full overflow-hidden transition-all duration-300 hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:[box-shadow:var(--btn-glow)]"
           >
             {/* Hover reflection */}
             <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-brand-cyan/20 to-transparent transition-transform duration-1000 ease-out" />

@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useId, useMemo } from "react";
+import { hexToRgba } from "@/lib/utils";
+import { designManifest } from "@/lib/design-manifest";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -175,7 +177,8 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         exit={{ opacity: 0, scale: 0.97, y: -8 }}
         transition={{ duration: 0.18, ease: "easeOut" }}
         ref={containerRef}
-        className="w-full max-w-lg bg-zinc-900/80 border border-zinc-800/80 backdrop-blur-2xl shadow-[0_0_50px_rgba(6,182,212,0.06)] rounded-3xl overflow-hidden flex flex-col relative"
+        style={{ "--cmd-glow": `0 0 50px ${hexToRgba(designManifest.colors["brand-cyan"], 0.06)}` } as React.CSSProperties}
+        className="w-full max-w-lg bg-zinc-900/80 border border-zinc-800/80 backdrop-blur-2xl shadow-[var(--cmd-glow)] rounded-3xl overflow-hidden flex flex-col relative"
       >
         {/* Circular glow visual elements inside modal */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-cyan/5 rounded-full blur-3xl pointer-events-none" />
@@ -240,10 +243,11 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
                       router.push(item.url);
                     }
                   }}
+                  style={{ "--cmd-item-glow": hexToRgba(designManifest.colors["brand-cyan"], 0.04) } as React.CSSProperties}
                   onMouseEnter={() => setActiveIndex(index)}
                   className={`flex items-center gap-4 px-4 py-3.5 rounded-xl cursor-pointer select-none transition-all duration-200 border ${
                     isActive
-                      ? "bg-zinc-950 border-brand-cyan/25 shadow-[0_0_15px_rgba(6,182,212,0.04)]"
+                      ? "bg-zinc-950 border-brand-cyan/25 shadow-[0_0_15px_var(--cmd-item-glow)]"
                       : "bg-transparent border-transparent"
                   }`}
                 >

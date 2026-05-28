@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
+import { hexToRgba } from "@/lib/utils";
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
@@ -40,16 +41,18 @@ export const TracingBeam: React.FC<TracingBeamProps> = ({ children, className })
         <motion.div
           style={{
             height: heightTransform,
-          }}
-          className="absolute top-0 w-full bg-gradient-to-b from-brand-cyan via-brand-blue to-purple-500 rounded-full shadow-[0_0_8px_rgba(6,182,212,0.3)] origin-top"
+            "--beam-glow": `0 0 8px ${hexToRgba(designManifest.colors["brand-cyan"], 0.3)}`
+          } as any}
+          className="absolute top-0 w-full bg-gradient-to-b from-brand-cyan via-brand-blue to-purple-500 rounded-full shadow-[var(--beam-glow)] origin-top"
         />
         
         {/* Breathing Head floating focus bubble */}
         <motion.div
           style={{
             top: heightTransform,
-          }}
-          className="absolute -left-[5px] -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-brand-cyan border-2 border-zinc-950 shadow-[0_0_15px_rgba(6,182,212,0.8)] flex items-center justify-center"
+            "--dot-glow": `0 0 15px ${hexToRgba(designManifest.colors["brand-cyan"], 0.8)}`
+          } as any}
+          className="absolute -left-[5px] -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-brand-cyan border-2 border-zinc-950 shadow-[var(--dot-glow)] flex items-center justify-center"
         >
           {/* Neon pulsating ring */}
           <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping absolute opacity-75" />

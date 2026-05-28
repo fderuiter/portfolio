@@ -1,6 +1,77 @@
-
 @import "tailwindcss";
-@import "./theme.css";
+
+:root {
+  /* Colors */
+  --background: #09090b;
+  --foreground: #fafafa;
+  --surface-1: rgba(24, 24, 27, 0.6);
+  --surface-2: rgba(39, 39, 42, 0.4);
+  --border: rgba(63, 63, 70, 0.5);
+  --border-active: rgba(6, 182, 212, 0.4);
+  --muted: #71717a;
+  --muted-strong: #a1a1aa;
+  --brand-cyan: #06b6d4;
+  --brand-cyan-glow: rgba(6, 182, 212, 0.15);
+  --brand-blue: #3b82f6;
+  --brand-blue-glow: rgba(59, 130, 246, 0.10);
+  --brand-dark: #09090b;
+  --success: #10b981;
+  --error: #f87171;
+  --warning: #fbbf24;
+
+  /* Typography Sizes */
+  --font-size-sm: 13px;
+  --line-height-sm: 18px;
+
+  /* Masonry Layout */
+  --layout-masonry-padding-with-stats: 484px;
+  --layout-masonry-padding-without-stats: 194px;
+  --layout-gap: 16px;
+  --layout-card-padding: 16px;
+
+  /* Motion Springs (stiffness, damping) */
+  --motion-spring-snappy-stiffness: 380;
+  --motion-spring-snappy-damping: 30;
+  --motion-spring-smooth-stiffness: 80;
+  --motion-spring-smooth-damping: 20;
+  --motion-spring-gentle-stiffness: 60;
+  --motion-spring-gentle-damping: 20;
+  --motion-spring-hero-stiffness: 100;
+  --motion-spring-hero-damping: 18;
+  --motion-spring-hero-beam-stiffness: 110;
+  --motion-spring-hero-beam-damping: 30;
+  --motion-spring-timeline-stiffness: 60;
+  --motion-spring-timeline-damping: 20;
+
+  /* Breakpoints */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-border-active: var(--border-active);
+  --color-muted: var(--muted);
+  --color-muted-strong: var(--muted-strong);
+  --color-brand-cyan: var(--brand-cyan);
+  --color-brand-cyan-glow: var(--brand-cyan-glow);
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-blue-glow: var(--brand-blue-glow);
+  --color-brand-dark: var(--brand-dark);
+  --color-success: var(--success);
+  --color-error: var(--error);
+  --color-warning: var(--warning);
+
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
 
 body {
   background: var(--background);
@@ -26,4 +97,3 @@ body {
     scroll-behavior: auto !important;
   }
 }
-
