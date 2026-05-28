@@ -14,8 +14,33 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Frederick de Ruiter | Principal Systems Engineer & Designer",
+  metadataBase: new URL("https://fderuiter-portfolio.vercel.app"),
+  title: {
+    template: "%s | Frederick de Ruiter",
+    default: "Frederick de Ruiter | Principal Systems Engineer & Designer",
+  },
   description: "A high-performance design engineering showcase combining DOM-free canvas layout physics, serverless Neon Postgres data streams, and robust clinical CDISC data engines.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://fderuiter-portfolio.vercel.app",
+    siteName: "Frederick de Ruiter Portfolio",
+    title: "Frederick de Ruiter | Principal Systems Engineer & Designer",
+    description: "A high-performance design engineering showcase combining DOM-free canvas layout physics, serverless Neon Postgres data streams, and robust clinical CDISC data engines.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    creator: "@laser_loon",
+    title: "Frederick de Ruiter | Principal Systems Engineer & Designer",
+    description: "A high-performance design engineering showcase combining DOM-free canvas layout physics, serverless Neon Postgres data streams, and robust clinical CDISC data engines.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

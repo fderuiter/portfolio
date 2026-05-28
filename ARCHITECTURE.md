@@ -108,3 +108,20 @@ Because serverless functions terminate database connections rapidly, standard TC
 ### 2. Dynamic Prisma Client Pooling
 To prevent connection leaks across Next.js Hot Module Replacement (HMR) refreshes during development, the client caches the active connection inside a global object (`globalThis.prisma`). It instantiates a fresh connection pool only when the global instance is undefined.
 
+## Safe Rich-Text Rendering Pipeline (Issue #35)
+
+To prevent Stored Cross-Site Scripting (XSS) attacks when rendering complex HTML strings stored in the database's `architectural_narrative` field, we implement a secure HTML sanitization strategy (Option A):
+- **isomorphic-dompurify:** We selected `isomorphic-dompurify` because it seamlessly resolves to standard `dompurify` in browser environments and transparently handles JSDOM simulation in Server-Side Rendering (SSR) / React Server Components (RSC).
+- **Strict Security Allowlist:** Sanitization is handled by the dedicated `<RichNarrative className="..." html="..." />` component, which forces an audited allowlist:
+  - Allowed Tags: `h2`, `h3`, `h4`, `p`, `code`, `pre`, `strong`, `em`, `a`, `ul`, `ol`, `li`
+  - Allowed Attributes: `href`, `target`, `rel`, `class`
+- **Hydration & Parsing Safety:** Strips malicious nodes (such as `<script>`, `<iframe/>`, or event triggers like `<img onerror="...">`) server-side to guarantee that browser parser states hydrations are safe and match server outputs identically.
+
+## SEO, Open Graph & Crawling Optimization (Issue #36)
+
+To optimize discovering technical showcase materials for recruiters and crawler bots, we integrate Next.js 16 native metadata features:
+- **Canonical Alternates:** Automatically generates unique dynamic `<link rel="canonical">` elements on per-page view states using Next.js Metadata API.
+- **Dynamic Case Study Serialization:** Implements custom `generateMetadata()` on `/case-studies/[slug]` routes to dynamically extract and construct SEO/Open Graph descriptions, article tags, and published timelines directly from Prisma database schemas.
+- **Sitemap & Robots Automation:**
+  - `app/sitemap.ts` programmatically compiles `/`, `/ui-sandbox`, and Neon DB published case study slugs into a standards-compliant XML sitemap.
+  - `app/robots.ts` restricts crawlers from access logs and internal compilation maps while routing standard bots directly to our primary indexing endpoints.

@@ -35,3 +35,23 @@ npx prisma db push
 
 This command pushes the state of the `schema.prisma` directly to the active cloud datastore. It is ideal for rapidly prototyping the schema without the overhead of creating formal migration files, which are generally reserved for production promotion cycles.
 
+---
+
+## Content Markup Guidelines
+
+To ensure the portfolio displays narratives with high aesthetic quality and robust security, editors contributing to the Prisma dynamic `CaseStudy` fields must conform to strict content formatting guidelines.
+
+### 1. `editorial_content` Field
+- **Purpose:** Brief introductory summaries or thesis highlights shown on primary feed grids.
+- **Formatting:** Markdown strings are permitted (e.g., `**bold**`, `*italic*`, `` `inline code` ``). These tags are automatically stripped during SEO parsing but are parsed inside UI showcases via `@chenglou/pretext`.
+
+### 2. `architectural_narrative` Field
+- **Purpose:** Long-form technical explanation layout blocks.
+- **Formatting:** Safe, pre-formatted HTML elements are permitted. To prevent Stored XSS vectors and maintain styling uniformity, the rendering pipeline sanitizes inputs against a strict element allowlist:
+  - **Permitted Headers:** `<h2>`, `<h3>`, `<h4>` (e.g., `<h3>The Challenge</h3>`)
+  - **Permitted Layout Elements:** `<p>`, `<ul>`, `<ol>`, `<li>`
+  - **Permitted Code Layouts:** `<pre>`, `<code>` (e.g., `<pre><code class="language-typescript">// code</code></pre>`)
+  - **Permitted Inline Elements:** `<strong>`, `<em>`, `<a>` (with optional `class`, `href`, `target`, and `rel` attributes)
+- **Forbidden Elements:** Prohibits `<script>`, `<iframe>`, `<img onerror="...">`, or custom inline inline-styles to maintain strict data integrity boundaries.
+
+

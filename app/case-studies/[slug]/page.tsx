@@ -4,9 +4,62 @@ import Link from "next/link";
 import { SandboxTerminal } from "@/components/SandboxTerminal";
 import { IconTerminal } from "@tabler/icons-react";
 import { TracingBeam } from "@/components/ui/TracingBeam";
+import { RichNarrative } from "@/components/RichNarrative";
+
+import type { Metadata } from "next";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+
+  let study;
+  try {
+    study = await prisma.caseStudy.findUnique({
+      where: { slug },
+    });
+  } catch (err) {
+    console.error("Metadata generation DB query exception:", err);
+  }
+
+  if (!study) {
+    return {
+      title: "Not Found",
+      description: "The requested case study was not found.",
+    };
+  }
+
+  // Strip Markdown tokens from editorial content for plain text meta descriptions
+  const cleanDescription = study.editorial_content
+    .replace(/\*\*/g, "")
+    .replace(/`/g, "")
+    .replace(/\*/g, "")
+    .slice(0, 160);
+
+  return {
+    title: study.title,
+    description: cleanDescription,
+    alternates: {
+      canonical: `/case-studies/${slug}`,
+    },
+    openGraph: {
+      title: `${study.title} | Case Study`,
+      description: cleanDescription,
+      type: "article",
+      url: `https://fderuiter-portfolio.vercel.app/case-studies/${slug}`,
+      publishedTime: study.created_at.toISOString(),
+      modifiedTime: study.updated_at.toISOString(),
+      tags: study.tags.split(",").map((t) => t.trim()),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${study.title} | Case Study`,
+      description: cleanDescription,
+      creator: "@laser_loon",
+    },
+  };
 }
 
 export default async function CaseStudyPage({ params }: PageProps) {
@@ -103,9 +156,9 @@ export default async function CaseStudyPage({ params }: PageProps) {
             )}
 
             {/* Technical Deep Dive Narrative */}
-            <div
+            <RichNarrative
+              html={study.architectural_narrative}
               className="mt-12 space-y-6 text-sm md:text-base leading-relaxed text-muted-strong border-t border-zinc-900/50 pt-10"
-              dangerouslySetInnerHTML={{ __html: study.architectural_narrative }}
             />
           </article>
         </TracingBeam>
