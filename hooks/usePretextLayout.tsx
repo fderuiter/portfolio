@@ -65,7 +65,7 @@ export function usePretextLayout({
     const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
 
     // 2. Safe Fallback Matrix: Fallback gracefully to prevent Canvas errors
-    const resolvedFontFamily = rawFontFamily || "'Inter', system-ui, -apple-system, sans-serif";
+    const resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
     const fontString = `${fontSize}px ${resolvedFontFamily}`;
 
     // 3. Phase 1 Preparation: Parse text and cache measurements in Canvas
@@ -226,9 +226,11 @@ interface UsePretextRichLayoutOptions {
   fontFamilyVariable?: string;
 }
 
+import { designManifest } from "@/lib/design-manifest";
+
 export function usePretextRichLayout({
   text,
-  fontSize = 13,
+  fontSize = designManifest.typography.sizes.sm.fontSize,
   lineHeight,
   fontFamilyVariable = "--font-inter",
 }: UsePretextRichLayoutOptions) {
@@ -281,7 +283,7 @@ export function usePretextRichLayout({
 
     const rootStyle = window.getComputedStyle(document.documentElement);
     const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
-    const resolvedFontFamily = rawFontFamily || "'Inter', system-ui, -apple-system, sans-serif";
+    const resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
 
     const baseFont = `400 ${fontSize}px ${resolvedFontFamily}`;
     const boldFont = `700 ${fontSize}px ${resolvedFontFamily}`;

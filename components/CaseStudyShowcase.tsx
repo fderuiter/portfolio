@@ -5,6 +5,7 @@ import { CaseStudyBentoCard } from "@/components/ui/CaseStudyBentoCard";
 import { BaseCaseStudy } from "@/types/domain";
 import { GitHubStats } from "@/lib/github";
 import { motion, AnimatePresence } from "framer-motion";
+import { designManifest } from "@/lib/design-manifest";
 import { 
   parseMarkdownToRichItems, 
   type ExtendedRichInlineItem 
@@ -75,9 +76,9 @@ export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = ({ caseStudie
 
     const rootStyle = window.getComputedStyle(document.documentElement);
     const rawFontFamily = rootStyle.getPropertyValue("--font-inter").trim();
-    const resolvedFontFamily = rawFontFamily || "'Inter', system-ui, -apple-system, sans-serif";
+    const resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
 
-    const fontSize = 13; // text-sm size
+    const fontSize = designManifest.typography.sizes.sm.fontSize;
     const baseFont = `400 ${fontSize}px ${resolvedFontFamily}`;
     const boldFont = `700 ${fontSize}px ${resolvedFontFamily}`;
     const italicFont = `italic 400 ${fontSize}px ${resolvedFontFamily}`;
@@ -91,7 +92,7 @@ export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = ({ caseStudie
     for (const study of caseStudies) {
       const parsedItems = parseMarkdownToRichItems(study.editorial_content, baseFont, boldFont, italicFont, codeFont);
       const prepared = prepareRichInline(parsedItems);
-      const paddingHeight = study.githubStats ? 484 : 194;
+      const paddingHeight = study.githubStats ? designManifest.masonry.paddingWithStats : designManifest.masonry.paddingWithoutStats;
       
       data[study.id] = {
         prepared,
@@ -132,7 +133,7 @@ export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = ({ caseStudie
         materializeRichInlineLineRange(cached.prepared, range)
       );
 
-      const textHeight = materializedLines.length * 18; // leading-relaxed (18px)
+      const textHeight = materializedLines.length * designManifest.typography.sizes.sm.lineHeight;
       const totalHeight = textHeight + cached.paddingHeight;
 
       return {
@@ -215,7 +216,7 @@ export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = ({ caseStudie
                 <motion.div
                   layoutId="activeTab"
                   className="absolute inset-0 bg-zinc-950 border border-zinc-800/80 rounded-xl -z-10 shadow-[0_0_15px_rgba(6,182,212,0.12)]"
-                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  transition={designManifest.motion.springs.snappy}
                 />
               )}
               {tab === "All" ? "ALL PROJECTS" : tab.toUpperCase()}

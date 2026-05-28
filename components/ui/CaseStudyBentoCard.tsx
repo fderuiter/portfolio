@@ -10,6 +10,7 @@ import { type RichInlineLine } from "@chenglou/pretext/rich-inline";
 import Link from "next/link";
 import { CommitSparkline } from "@/components/CommitSparkline";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { designManifest } from "@/lib/design-manifest";
 
 interface CaseStudyBentoCardProps {
   study: BaseCaseStudy & { githubStats: GitHubStats | null };
@@ -50,12 +51,12 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
   // We always execute the hook to follow dynamic hooks rules, but ignore if precalculated is provided
   const internalLayout = usePretextRichLayout({
     text: study.editorial_content,
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: designManifest.typography.sizes.sm.fontSize,
+    lineHeight: designManifest.typography.sizes.sm.lineHeight,
     fontFamilyVariable: "--font-inter",
   });
 
-  const finalHeight = hasPrecalculated ? preCalculatedHeight : (internalLayout.isReady ? internalLayout.height + (githubStats ? 484 : 194) : undefined);
+  const finalHeight = hasPrecalculated ? preCalculatedHeight : (internalLayout.isReady ? internalLayout.height + (githubStats ? designManifest.masonry.paddingWithStats : designManifest.masonry.paddingWithoutStats) : undefined);
   const finalLines = hasPrecalculated ? preCalculatedLines : internalLayout.lines;
   const finalItems = hasPrecalculated ? preCalculatedItems : internalLayout.items;
   const isLayoutReady = hasPrecalculated ? true : internalLayout.isReady;
@@ -89,7 +90,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             <PretextRichText
               lines={finalLines}
               items={finalItems}
-              lineHeight={18}
+              lineHeight={designManifest.typography.sizes.sm.lineHeight}
               isReady={isLayoutReady}
               fallbackText={study.editorial_content}
               className="text-zinc-400 text-sm leading-relaxed font-sans"

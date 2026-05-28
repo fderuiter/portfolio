@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "npx tsx scripts/generate-theme.ts",
     "dev": "concurrently -n \"turbo,tsc\" -c \"cyan,magenta\" \"next dev --turbo\" \"tsc --noEmit --watch\"",
+    "prebuild": "npx tsx scripts/generate-theme.ts",
     "build": "npx prisma generate && next build",
     "start": "next start",
     "lint": "eslint",

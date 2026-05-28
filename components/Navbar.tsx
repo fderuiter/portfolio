@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { designManifest } from "@/lib/design-manifest";
 
 interface NavItem {
   label: string;
@@ -275,7 +276,7 @@ export const Navbar: React.FC = () => {
                     key={item.label}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.08, type: "spring", stiffness: 100 }}
+                    transition={{ delay: index * 0.08, ...designManifest.motion.springs.hero }}
                   >
                     <Link
                       href={item.href}
