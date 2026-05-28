@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { hexToRgba } from "@/lib/utils";
+import { designManifest } from "@/lib/design-manifest";
 import { IconTerminal, IconCornerDownLeft, IconCircle } from "@tabler/icons-react";
 
 interface LogItem {
@@ -302,7 +304,8 @@ export const SandboxTerminal: React.FC = () => {
       {/* Terminal Main Window Frame */}
       <div
         onClick={handleTerminalClick}
-        className="w-full border border-zinc-900 bg-zinc-950/80 rounded-2xl overflow-hidden shadow-[0_0_35px_rgba(6,182,212,0.02)] relative backdrop-blur-md cursor-text"
+        style={{ "--term-glow": `0 0 35px ${hexToRgba(designManifest.colors["brand-cyan"], 0.02)}` } as React.CSSProperties}
+        className="w-full border border-zinc-900 bg-zinc-950/80 rounded-2xl overflow-hidden shadow-[var(--term-glow)] relative backdrop-blur-md cursor-text"
       >
         {/* Terminal Header */}
         <div className="border-b border-zinc-900/60 bg-zinc-950/90 px-4 py-3.5 flex justify-between items-center select-none">

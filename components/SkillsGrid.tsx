@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import { hexToRgba } from "@/lib/utils";
+import { designManifest } from "@/lib/design-manifest";
 import { motion } from "framer-motion";
 
 export interface SkillLanguage {
@@ -28,7 +30,8 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
         <div>
           <div className="flex items-center gap-4 mb-6">
             {/* FDR Initials Badge */}
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-cyan/15 to-brand-blue/15 border border-brand-cyan/20 flex items-center justify-center font-mono font-black text-sm tracking-wider text-brand-cyan shadow-[0_0_15px_rgba(6,182,212,0.05)]">
+            <div style={{ "--skill-glow": `0 0 15px ${hexToRgba(designManifest.colors["brand-cyan"], 0.05)}` } as React.CSSProperties}
+              className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-cyan/15 to-brand-blue/15 border border-brand-cyan/20 flex items-center justify-center font-mono font-black text-sm tracking-wider text-brand-cyan shadow-[var(--skill-glow)]">
               FDR
             </div>
             <div>

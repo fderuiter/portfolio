@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { hexToRgba } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { designManifest } from "@/lib/design-manifest";
 
@@ -63,7 +64,8 @@ export const Timeline: React.FC = () => {
 
               {/* Card Container */}
               <div className={`w-full md:w-[45%] pl-10 md:pl-0 ${isLeft ? "md:pr-12 md:text-right" : "md:pl-12"}`}>
-                <div className="p-6 bg-zinc-900/20 border border-zinc-900/50 rounded-2xl backdrop-blur-sm hover:border-zinc-800 transition-all duration-300 group hover:shadow-[0_0_25px_rgba(6,182,212,0.03)]">
+                <div style={{ "--timeline-glow": `0 0 25px ${hexToRgba(designManifest.colors["brand-cyan"], 0.03)}` } as React.CSSProperties}
+                className="p-6 bg-zinc-900/20 border border-zinc-900/50 rounded-2xl backdrop-blur-sm hover:border-zinc-800 transition-all duration-300 group hover:[box-shadow:var(--timeline-glow)]">
                   <span className="text-[10px] font-mono font-bold tracking-wider text-brand-cyan uppercase bg-brand-cyan/5 px-2.5 py-1 border border-brand-cyan/10 rounded-md">
                     {item.period}
                   </span>

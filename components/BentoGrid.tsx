@@ -1,8 +1,9 @@
 // Source: https://ui.aceternity.com/components/bento-grid
 // Source: https://ui.aceternity.com/components/glare-card
 "use client";
-import { cn } from "@/lib/utils";
+import { cn, hexToRgba } from "@/lib/utils";
 import React, { useRef } from "react";
+import { designManifest } from "@/lib/design-manifest";
 
 export const BentoGrid = ({
   className,
@@ -136,7 +137,9 @@ export const Card = ({
         }
       }}
     >
-      <div className="grid h-full origin-center [transform:rotateY(var(--r-x))_rotateX(var(--r-y))] overflow-hidden rounded-[var(--radius)] border border-border hover:border-border-active transition-all duration-300 delay-[var(--delay)] ease-[var(--easing)] will-change-transform hover:filter-none hover:[--duration:200ms] hover:[--easing:linear] hover:[--opacity:0.6] hover:shadow-[0_0_30px_rgba(6,182,212,0.08)]">
+      <div 
+        style={{ "--hover-glow": `0 0 30px ${hexToRgba(designManifest.colors["brand-cyan"], 0.08)}` } as React.CSSProperties}
+        className="grid h-full origin-center [transform:rotateY(var(--r-x))_rotateX(var(--r-y))] overflow-hidden rounded-[var(--radius)] border border-border hover:border-border-active transition-all duration-300 delay-[var(--delay)] ease-[var(--easing)] will-change-transform hover:filter-none hover:[--duration:200ms] hover:[--easing:linear] hover:[--opacity:0.6] hover:[box-shadow:var(--hover-glow)]">
         <div className="grid h-full w-full mix-blend-soft-light [clip-path:inset(0_0_0_0_round_var(--radius))] [grid-area:1/1]">
           <div className={cn("h-full w-full bg-surface-1 backdrop-blur-sm p-4 flex flex-col justify-between", className)}>
             {children}
