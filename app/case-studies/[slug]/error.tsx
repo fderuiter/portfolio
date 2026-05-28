@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import * as Sentry from "@sentry/nextjs";
 
 export default function CaseStudyError({
   error,
@@ -11,6 +12,7 @@ export default function CaseStudyError({
   reset: () => void;
 }) {
   useEffect(() => {
+    Sentry.captureException(error);
     console.error("Case study route error:", error);
   }, [error]);
 
@@ -26,7 +28,7 @@ export default function CaseStudyError({
         </h1>
 
         <p className="text-sm text-neutral-400 leading-relaxed mb-8">
-          The server failed to parse the case study records from the Neon database stream due to an active runtime exception.
+          The server failed to parse the case study records from the Neon database stream due to an active runtime exception. The details have been reported to our automated observability system.
         </p>
 
         <div className="space-y-3">

@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
+
 export default function GlobalError({
   error,
   reset,
@@ -7,7 +10,11 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  console.error("Global uncaught crash boundary:", error);
+  useEffect(() => {
+    Sentry.captureException(error);
+    console.error("Global uncaught crash boundary:", error);
+  }, [error]);
+
   return (
     <html lang="en" className="h-full">
       <body className="min-h-full flex flex-col items-center justify-center bg-zinc-950 text-neutral-100 font-sans p-6">
@@ -21,7 +28,7 @@ export default function GlobalError({
           </h1>
 
           <p className="text-sm text-neutral-400 leading-relaxed mb-8">
-            The root layout rendering tree has failed to compile. A critical reset of all DOM and state variables is required.
+            The root layout rendering tree has failed to compile. The details of this crash have been reported to our automated observability system. A critical reset of all DOM and state variables is required.
           </p>
 
           <button
