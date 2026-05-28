@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
 
 export default function Error({
   error,
@@ -10,7 +11,8 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log the error to telemetry
+    // Capture the error in external observability system
+    Sentry.captureException(error);
     console.error("Layout compile error:", error);
   }, [error]);
 
@@ -26,7 +28,7 @@ export default function Error({
         </h1>
 
         <p className="text-sm text-neutral-400 leading-relaxed mb-8">
-          A runtime exception has interrupted the rendering pipeline. The details have been reported to the telemetry logger.
+          A runtime exception has interrupted the rendering pipeline. The details have been reported to the automated observability system.
         </p>
 
         <button
