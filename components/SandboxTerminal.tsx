@@ -48,7 +48,7 @@ const COMMAND_REGISTRY: Record<string, { description: string; payload: unknown }
       enrollmentDate: "2025-11-12",
       status: "COMPLETED",
       recordsCount: 18,
-      complianceScore: "98.4%",
+      complianceScore: "[VERIFY_SECURITY_LOGS]",
       demographics: {
         age: 11,
         gender: "F",
@@ -245,6 +245,13 @@ export const SandboxTerminal: React.FC = () => {
     
     const highlightValue = (valStr: string) => {
       const trimmed = valStr.trim();
+      if (trimmed === '"[VERIFY_SECURITY_LOGS]"') {
+        return (
+          <a href="/transparency" className="text-brand-cyan underline font-bold cursor-pointer hover:text-brand-cyan/80">
+            [LIVE_VERIFICATION_LINK]
+          </a>
+        );
+      }
       if (trimmed.startsWith('"')) {
         return <span className="text-emerald-400">{trimmed}</span>;
       }
