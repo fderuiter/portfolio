@@ -3,6 +3,9 @@ import { CaseStudyShowcase } from "@/components/CaseStudyShowcase";
 import { BaseCaseStudy } from "@/types/domain";
 import { Hero } from "@/components/Hero";
 import { getGitHubStats, parseGitHubUrl, GitHubStats } from "@/lib/github";
+import { TextReveal } from "@/components/TextReveal";
+import { SkillsGrid } from "@/components/SkillsGrid";
+import { Timeline } from "@/components/Timeline";
 
 interface HydratedCaseStudy extends BaseCaseStudy {
   githubStats: GitHubStats | null;
@@ -42,6 +45,34 @@ export default async function WalkingSkeletonPage() {
     console.error("Database query exception:", err);
     errorMsg = err instanceof Error ? err.message : "Failed to establish a connection to the serverless database.";
   }
+
+  // Aggregate language profiles from fetched case study stats
+  const languagesMap: Record<string, number> = {};
+  caseStudies.forEach((study) => {
+    if (study.githubStats?.languages) {
+      study.githubStats.languages.forEach((lang) => {
+        languagesMap[lang.name] = (languagesMap[lang.name] || 0) + lang.percentage;
+      });
+    }
+  });
+
+  const totalLangWeights = Object.values(languagesMap).reduce((a, b) => a + b, 0);
+  const aggregatedLanguages = Object.entries(languagesMap)
+    .map(([name, weight]) => ({
+      name,
+      percentage: totalLangWeights > 0 ? Math.round((weight / totalLangWeights) * 100) : 0,
+    }))
+    .filter((l) => l.percentage > 0)
+    .sort((a, b) => b.percentage - a.percentage);
+
+  const fallbackLanguages = [
+    { name: "TypeScript", percentage: 45 },
+    { name: "Python", percentage: 25 },
+    { name: "React", percentage: 15 },
+    { name: "Prisma", percentage: 10 },
+    { name: "PostgreSQL", percentage: 5 }
+  ];
+  const languagesList = aggregatedLanguages.length > 0 ? aggregatedLanguages.slice(0, 5) : fallbackLanguages;
 
   return (
     <div className="bg-zinc-950 min-h-screen text-foreground overflow-x-hidden flex flex-col">
@@ -105,56 +136,100 @@ export default async function WalkingSkeletonPage() {
         </div>
       </main>
 
-      {/* 2. About Section */}
-      <section id="about" className="relative min-h-[50vh] py-24 md:py-32 px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950/40">
-        <div className="absolute top-1/4 right-1/4 translate-x-1/2 w-72 h-72 rounded-full bg-brand-blue/5 blur-[120px] pointer-events-none" />
+      {/* 2. Philosophy TextReveal Highlight */}
+      <div className="bg-zinc-950 border-t border-zinc-900/50">
+        <TextReveal>I build resilient, type-safe infrastructure that connects low-latency client interfaces with scalable distributed systems, guaranteeing extreme security boundaries and exceptional performance.</TextReveal>
+      </div>
+
+      {/* 3. About Section */}
+      <section id="about" className="relative py-24 md:py-32 px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950/40 relative overflow-hidden">
+        {/* Decorative Blurs */}
+        <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-80 h-80 rounded-full bg-brand-blue/5 blur-[120px] pointer-events-none" />
         
         <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
           <h2 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-neutral-100 via-neutral-300 to-neutral-500 tracking-tight text-center mb-4">
-            System Architect & Senior Developer
+            System Architect & Design Engineer
           </h2>
-          <p className="text-xs font-mono text-muted tracking-widest uppercase mb-8">
+          <p className="text-xs font-mono text-muted tracking-widest uppercase mb-16 text-center">
             Engineering High-Performance Technical Solutions
           </p>
-          <div className="text-muted-strong text-sm md:text-base leading-relaxed text-center space-y-4 max-w-2xl">
-            <p>
-              I build advanced digital infrastructure connecting low-latency client environments with highly scalable cloud database clusters. By aligning elegant layout algorithms with robust network pipelines, my architectures guarantee performance, security, and exceptional interactivity.
-            </p>
-            <p>
-              Specializing in Next.js Server Components, PostgreSQL distributed systems, and real-time canvas-driven interfaces.
-            </p>
+          
+          {/* Dynamic Bento Skills Grid Card Layout */}
+          <div className="w-full mb-24">
+            <SkillsGrid languages={languagesList} />
+          </div>
+
+          <h3 className="text-2xl font-extrabold text-neutral-100 tracking-tight text-center mb-4">
+            Professional Experience Timeline
+          </h3>
+          <p className="text-xs font-mono text-muted tracking-widest uppercase mb-16 text-center">
+            A Chronological Evolution of Systems Engineering
+          </p>
+
+          {/* Interactive Staggered Timeline Component */}
+          <div className="w-full">
+            <Timeline />
           </div>
         </div>
       </section>
 
-      {/* 3. Contact Section */}
+      {/* 4. Contact Section */}
       <section id="contact" className="relative py-24 md:py-32 px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950">
         <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
           <h2 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan to-brand-blue tracking-tight text-center mb-4">
             Get In Touch
           </h2>
-          <p className="text-xs font-mono text-muted tracking-widest uppercase mb-12">
+          <p className="text-xs font-mono text-muted tracking-widest uppercase mb-16 text-center">
             Let&apos;s Collaborate on Premium Engineering Projects
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center w-full max-w-md">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full max-w-2xl justify-center items-center">
+            {/* Direct Email */}
             <a
               href="mailto:contact@fderuiter.com"
-              className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-semibold bg-zinc-900/50 hover:bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-white rounded-2xl transition-all duration-300 hover:scale-105"
+              aria-label="Send an email to Frederick de Ruiter at contact@fderuiter.com"
+              className="group flex flex-col items-center justify-center p-6 bg-zinc-900/10 border border-zinc-900/50 rounded-2xl transition-all duration-300 hover:border-brand-cyan/40 hover:shadow-[0_0_15px_rgba(6,182,212,0.05)] text-center cursor-pointer"
             >
-              Email Broadcast
+              <span className="w-8 h-8 rounded-xl bg-zinc-950 border border-zinc-900 flex items-center justify-center font-mono text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/25 transition-colors mb-3">
+                ✉
+              </span>
+              <span className="text-xs font-mono font-bold text-neutral-200 mb-1">Email Broadcast</span>
+              <span className="text-[10px] font-mono text-zinc-500">contact@fderuiter.com</span>
             </a>
+            
+            {/* GitHub Portal */}
+            <a
+              href="https://github.com/fderuiter"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="View Frederick de Ruiter's GitHub profile externally"
+              className="group flex flex-col items-center justify-center p-6 bg-zinc-900/10 border border-zinc-900/50 rounded-2xl transition-all duration-300 hover:border-brand-cyan/40 hover:shadow-[0_0_15px_rgba(6,182,212,0.05)] text-center cursor-pointer"
+            >
+              <span className="w-8 h-8 rounded-xl bg-zinc-950 border border-zinc-900 flex items-center justify-center font-mono text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/25 transition-colors mb-3">
+                🐙
+              </span>
+              <span className="text-xs font-mono font-bold text-neutral-200 mb-1">GitHub Repos</span>
+              <span className="text-[10px] font-mono text-zinc-500">github.com/fderuiter</span>
+            </a>
+
+            {/* LinkedIn Connection */}
             <a
               href="https://linkedin.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-semibold bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/20 hover:border-brand-cyan/30 text-brand-cyan rounded-2xl transition-all duration-300 hover:scale-105"
+              aria-label="View Frederick de Ruiter's LinkedIn profile externally"
+              className="group flex flex-col items-center justify-center p-6 bg-zinc-900/10 border border-zinc-900/50 rounded-2xl transition-all duration-300 hover:border-brand-blue/40 hover:shadow-[0_0_15px_rgba(59,130,246,0.05)] text-center cursor-pointer"
             >
-              LinkedIn Secure Link
+              <span className="w-8 h-8 rounded-xl bg-zinc-950 border border-zinc-900 flex items-center justify-center font-mono text-zinc-400 group-hover:text-brand-blue group-hover:border-brand-blue/25 transition-colors mb-3">
+                in
+              </span>
+              <span className="text-xs font-mono font-bold text-neutral-200 mb-1">LinkedIn Network</span>
+              <span className="text-[10px] font-mono text-zinc-500">Secure Profile Link</span>
             </a>
           </div>
           
-          <div className="mt-20 text-[10px] font-mono text-zinc-600 tracking-[0.2em]">
+          <div className="mt-24 text-[10px] font-mono text-zinc-700 tracking-[0.25em] text-center select-none">
             DESIGNED & DEVELOPED BY FREDERICK DE RUITER
           </div>
         </div>

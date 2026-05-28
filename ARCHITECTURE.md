@@ -125,3 +125,13 @@ To optimize discovering technical showcase materials for recruiters and crawler 
 - **Sitemap & Robots Automation:**
   - `app/sitemap.ts` programmatically compiles `/`, `/ui-sandbox`, and Neon DB published case study slugs into a standards-compliant XML sitemap.
   - `app/robots.ts` restricts crawlers from access logs and internal compilation maps while routing standard bots directly to our primary indexing endpoints.
+
+## Staggered Bento Skills & Scroll-Driven Career Timeline (Issue #37)
+
+To deliver a premium, high-fidelity landing page showcase, we integrated dynamic telemetry metrics with fluid scroll animations:
+- **Option B (In-Page Anchor Composition):** We chose Option B to maintain full compatibility with the existing navbar intersection observer and scroll-spy structure. This avoids separate page transitions, ensuring 60FPS seamless scroll navigations across `#case-studies`, `#about`, and `#contact`.
+- **Dynamic Telemetry Language Aggregator:** In `app/page.tsx`, we dynamically combine individual repository languages fetched from the serverless Neon database/GitHub cache pipeline. Normalizing these values server-side generates a telemetry skills chip array without incurring rendering overhead.
+- **Bento Skills Matrix:** Implements `<SkillsGrid />` using CSS Flex layout containing customized initials SVG badges and dynamic glowing progress meters mapped to current language metrics.
+- **Scroll-Triggered Career Timeline:** We developed `<Timeline />` as a client-side component using Framer Motion. Timeline cards fade in and slide up using custom spring physics (`stiffness: 60, duration: 0.8`), aligned on a vertical gradient rail.
+- **Accessible Contact Anchors:** Contact buttons are wrapped in semantic `<a>` tags featuring accessible descriptions (`aria-label`) and robust keyboard outline targets to guarantee a WCAG 2.1 AA compliant composition.
+
