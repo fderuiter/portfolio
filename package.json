@@ -9,7 +9,8 @@
     "build": "npx prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "check": "tsc --noEmit && npm run lint"
+    "verify:engine": "npx tsx scripts/verify-engine.ts",
+    "check": "tsc --noEmit && npm run lint && npm run verify:engine"
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.5",

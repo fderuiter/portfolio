@@ -45,3 +45,4 @@ next-env.d.ts
 *.db-journal
 *.log
 app/theme.css
+public/engine-health-report.json

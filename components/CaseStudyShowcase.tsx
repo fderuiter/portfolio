@@ -10,6 +10,7 @@ import {
   parseMarkdownToRichItems, 
   type ExtendedRichInlineItem 
 } from "@/hooks/usePretextLayout";
+import { distributeGreedyLPT } from "@/lib/layout-engine";
 import { 
   prepareRichInline, 
   walkRichInlineLineRanges, 
@@ -145,22 +146,7 @@ export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = ({ caseStudie
     });
 
     // 2. Greedy distribution (Zero-whitespace Masonry Scheduler)
-    const columns: LayoutStudy[][] = Array.from({ length: colCount }, () => []);
-    const columnHeights = Array(colCount).fill(0);
-
-    for (const study of studiesWithHeight) {
-      let minColIdx = 0;
-      let minHeight = columnHeights[0];
-      for (let i = 1; i < colCount; i++) {
-        if (columnHeights[i] < minHeight) {
-          minHeight = columnHeights[i];
-          minColIdx = i;
-        }
-      }
-
-      columns[minColIdx].push(study);
-      columnHeights[minColIdx] += study.height + gap;
-    }
+    const { columns } = distributeGreedyLPT(studiesWithHeight, colCount, gap);
 
     setLayoutState({
       colCount,
