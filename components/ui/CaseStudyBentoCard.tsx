@@ -2,11 +2,10 @@
 
 import React from "react";
 import { Card, CardTitle } from "@/components/BentoGrid";
-import { PretextRichText, usePretextRichLayout, type ExtendedRichInlineItem } from "@/hooks/usePretextLayout";
+import { PretextRichText, usePretextRichLayout } from "@/hooks/usePretextLayout";
 import { BaseCaseStudy } from "@/types/domain";
 import { GitHubStats } from "@/lib/github";
 import { IconStar, IconGitFork, IconAlertCircle, IconTerminal, IconChevronRight } from "@tabler/icons-react";
-import { type RichInlineLine } from "@chenglou/pretext/rich-inline";
 import Link from "next/link";
 import { CommitSparkline } from "@/components/CommitSparkline";
 import { useTelemetry } from "@/hooks/useTelemetry";
@@ -15,9 +14,6 @@ import { designManifest } from "@/lib/design-manifest";
 interface CaseStudyBentoCardProps {
   study: BaseCaseStudy & { githubStats: GitHubStats | null };
   className?: string;
-  preCalculatedHeight?: number;
-  preCalculatedLines?: RichInlineLine[];
-  preCalculatedItems?: ExtendedRichInlineItem[];
 }
 
 // Map common languages to premium styling colors
@@ -34,9 +30,6 @@ const DEFAULT_COLOR = { bg: "bg-zinc-500/10", text: "text-zinc-400", hex: "#8b94
 export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({ 
   study, 
   className,
-  preCalculatedHeight,
-  preCalculatedLines,
-  preCalculatedItems,
 }) => {
   const { githubStats } = study;
   const tagsList = study.tags ? study.tags.split(",").map((t) => t.trim()) : [];
@@ -46,28 +39,16 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
   const { telemetry, syncFailed, recordEvent } = useTelemetry();
   const stats = telemetry[study.slug] || { views: 0, clicks: 0 };
 
-  const hasPrecalculated = preCalculatedHeight !== undefined && preCalculatedLines !== undefined && preCalculatedItems !== undefined;
-
-  // We always execute the hook to follow dynamic hooks rules, but ignore if precalculated is provided
-  const internalLayout = usePretextRichLayout({
+  const { ref, lines, items, isReady } = usePretextRichLayout({
     text: study.editorial_content,
     fontSize: designManifest.typography.sizes.sm.fontSize,
     lineHeight: designManifest.typography.sizes.sm.lineHeight,
     fontFamilyVariable: "--font-inter",
   });
 
-  const finalHeight = hasPrecalculated ? preCalculatedHeight : (internalLayout.isReady ? internalLayout.height + (githubStats ? designManifest.masonry.paddingWithStats : designManifest.masonry.paddingWithoutStats) : undefined);
-  const finalLines = hasPrecalculated ? preCalculatedLines : internalLayout.lines;
-  const finalItems = hasPrecalculated ? preCalculatedItems : internalLayout.items;
-  const isLayoutReady = hasPrecalculated ? true : internalLayout.isReady;
-
   return (
     <Card
       className={className}
-      style={{
-        height: finalHeight ? `${finalHeight}px` : "auto",
-        transition: "height 250ms cubic-bezier(0.16, 1, 0.3, 1)",
-      }}
     >
       <div className="flex flex-col h-full justify-between">
         <div>
@@ -86,12 +67,11 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
           </CardTitle>
 
           {/* Description Block using Pretext Rich Text */}
-          <div ref={hasPrecalculated ? undefined : internalLayout.ref} className="mb-4">
+          <div ref={ref} className="mb-4">
             <PretextRichText
-              lines={finalLines}
-              items={finalItems}
+              lines={lines}
+              items={items}
               lineHeight={designManifest.typography.sizes.sm.lineHeight}
-              isReady={isLayoutReady}
               fallbackText={study.editorial_content}
               className="text-zinc-400 text-sm leading-relaxed font-sans"
             />
@@ -167,15 +147,18 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
               )}
 
               {/* Monospace terminal logs commits feed */}
-              <div className="bg-black/60 border border-zinc-900/60 rounded-xl p-3 font-mono text-[10px] leading-tight space-y-1 h-[130px] flex flex-col justify-start overflow-hidden">
-                <div className="flex items-center text-zinc-500 border-b border-zinc-900/60 pb-1.5 mb-1.5">
+              <div 
+                style={{ height: githubStats.recentCommits.length > 0 ? `${44 + (githubStats.recentCommits.length * 15)}px` : "auto" }}
+                className="bg-black/60 border border-zinc-900/60 rounded-xl p-3 font-mono text-[10px] leading-[15px] flex flex-col justify-start overflow-hidden"
+              >
+                <div className="flex items-center text-zinc-500 border-b border-zinc-900/60 pb-1.5 mb-1.5 h-[23px] box-border">
                   <IconTerminal className="w-3.5 h-3.5 mr-1 text-zinc-400" />
                   <span>git log --oneline -n 5</span>
                 </div>
                 <div className="flex-1 flex flex-col justify-start space-y-1 overflow-y-auto scrollbar-none text-zinc-400">
                   {githubStats.recentCommits.length > 0 ? (
                     githubStats.recentCommits.map((c, i) => (
-                      <div key={i} className="truncate flex items-start gap-1">
+                      <div key={i} className="truncate flex items-start gap-1 h-[15px]">
                         <span className="text-brand-cyan select-none">{c.sha}</span>
                         <span className="text-zinc-500 select-none">|</span>
                         <span className="text-zinc-300 truncate" title={c.message}>{c.message}</span>
@@ -233,7 +216,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             <IconChevronRight className="ml-1 w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" />
           </Link>
           <div className="text-[9px] font-mono text-zinc-600">
-            {!isLayoutReady ? "MEASURING..." : `H: ${finalHeight}px`}
+            DETERMINISTIC
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useId } from "react";
 import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
 import { IconTerminal, IconCornerDownLeft, IconCircle } from "@tabler/icons-react";
@@ -96,18 +96,13 @@ const COMMAND_REGISTRY: Record<string, { description: string; payload: unknown }
   },
 };
 
-// Pure ID Generator outside rendering pipeline to satisfy react-hooks/purity rules
-let idCounter = 0;
-function generateLogId(): string {
-  idCounter += 1;
-  return `log-entry-${idCounter}`;
-}
-
 export const SandboxTerminal: React.FC = () => {
+  const baseId = useId();
+  
   const [input, setInput] = useState("");
   const [logs, setLogs] = useState<LogItem[]>([
     {
-      id: "init",
+      id: `${baseId}-init`,
       type: "info",
       text: "iMednet Python SDK CLI Sandbox [Version 2.3.1]\nType 'help' to list available commands. Click the badges below for instant inputs.",
     },
@@ -135,7 +130,7 @@ export const SandboxTerminal: React.FC = () => {
     if (!trimmed) return;
 
     // Add command to output log
-    const cmdId = generateLogId();
+    const cmdId = crypto.randomUUID();
     setLogs((prev) => [...prev, { id: cmdId, type: "command", text: trimmed }]);
     setInput("");
 
@@ -150,7 +145,7 @@ export const SandboxTerminal: React.FC = () => {
     // Simulated short response lag for realism
     setTimeout(() => {
       setIsExecuting(false);
-      const outputId = generateLogId();
+      const outputId = crypto.randomUUID();
 
       if (trimmed === "clear") {
         setLogs([]);

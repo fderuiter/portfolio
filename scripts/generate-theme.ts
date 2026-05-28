@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import fs from 'fs';
 import path from 'path';
 
@@ -21,10 +22,9 @@ const parseCSSAndGenerateTS = () => {
     tokens[match[1]] = match[2].trim();
   }
 
-  const manifest: any = {
+  const manifest: Record<string, any> = {
     colors: {},
     typography: { fonts: {}, sizes: {} },
-    masonry: {},
     layout: {},
     motion: { springs: {} },
     breakpoints: {}
@@ -52,12 +52,9 @@ const parseCSSAndGenerateTS = () => {
     }
   }
 
-  // Layout & Masonry
+  // Layout
   for (const [key, value] of Object.entries(tokens)) {
-    if (key.startsWith('layout-masonry-')) {
-      const camelName = key.replace('layout-masonry-', '').replace(/-([a-z])/g, g => g[1].toUpperCase());
-      manifest.masonry[camelName] = parseNumber(value, key);
-    } else if (key.startsWith('layout-')) {
+    if (key.startsWith('layout-')) {
       const camelName = key.replace('layout-', '').replace(/-([a-z])/g, g => g[1].toUpperCase());
       manifest.layout[camelName] = parseNumber(value, key);
     }
@@ -114,15 +111,6 @@ const parseCSSAndGenerateTS = () => {
   ts += `        /** Original CSS Variable: --font-size-sm */\n        fontSize: ${manifest.typography.sizes.sm.fontSize},\n`;
   ts += `        /** Original CSS Variable: --line-height-sm */\n        lineHeight: ${manifest.typography.sizes.sm.lineHeight},\n`;
   ts += `      }\n    }\n  },\n`;
-
-  // Masonry
-  ts += `  masonry: {\n`;
-  for (const [k, v] of Object.entries(manifest.masonry)) {
-    const cssName = `layout-masonry-${k.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)}`;
-    ts += `    /** Original CSS Variable: --${cssName} */\n`;
-    ts += `    ${k}: ${v},\n`;
-  }
-  ts += `  },\n`;
 
   // Layout
   ts += `  layout: {\n`;

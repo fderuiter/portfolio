@@ -54,12 +54,6 @@ export const designManifest = {
       }
     }
   },
-  masonry: {
-    /** Original CSS Variable: --layout-masonry-padding-with-stats */
-    paddingWithStats: 484,
-    /** Original CSS Variable: --layout-masonry-padding-without-stats */
-    paddingWithoutStats: 194,
-  },
   layout: {
     /** Original CSS Variable: --layout-gap */
     gap: 16,

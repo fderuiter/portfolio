@@ -275,7 +275,7 @@ interface HeroHeadlineProps {
 }
 
 export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
-  const { ref, height, isReady } = usePretextLayout({
+  const { ref } = usePretextLayout({
     text,
     fontSize: 56, // Measures at the typical H1 size
     lineHeight: 64,
@@ -315,20 +315,11 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
       <h1 className="sr-only">{text}</h1>
 
       <div
-        style={{
-          height: isReady ? `${height}px` : "auto",
-          transition: "height 300ms cubic-bezier(0.16, 1, 0.3, 1)",
-        }}
         className="relative w-full max-w-4xl mx-auto overflow-hidden min-h-[128px] select-none mb-6"
         aria-hidden="true"
         role="presentation"
       >
         <div ref={ref} className="w-full">
-          {!isReady ? (
-            <p className="text-4xl md:text-6xl font-black tracking-tight text-center opacity-0 pointer-events-none leading-tight md:leading-none">
-              {text}
-            </p>
-          ) : (
             <motion.div
               variants={containerVariants}
               initial="hidden"
@@ -356,7 +347,6 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
                 );
               })}
             </motion.div>
-          )}
         </div>
       </div>
     </>
@@ -368,7 +358,7 @@ interface HeroTextProps {
 }
 
 export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
-  const { ref, height, isReady } = usePretextLayout({
+  const { ref } = usePretextLayout({
     text,
     fontSize: 16,
     lineHeight: 28,
@@ -409,20 +399,11 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
       <p className="sr-only">{text}</p>
 
       <div
-        style={{
-          height: isReady ? `${height}px` : "auto",
-          transition: "height 200ms cubic-bezier(0.16, 1, 0.3, 1)",
-        }}
         className="relative w-full max-w-2xl mx-auto overflow-hidden min-h-[56px] select-none"
         aria-hidden="true"
         role="presentation"
       >
         <div ref={ref} className="w-full">
-          {!isReady ? (
-            <p className="text-neutral-400 text-sm md:text-base leading-[28px] text-center opacity-0 pointer-events-none">
-              {text}
-            </p>
-          ) : (
             <motion.p
               variants={containerVariants}
               initial="hidden"
@@ -439,7 +420,6 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
                 </motion.span>
               ))}
             </motion.p>
-          )}
         </div>
       </div>
     </>

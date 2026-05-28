@@ -36,11 +36,31 @@ export default function TransparencyHub() {
 
   // Poll for updates every 15 seconds
   useEffect(() => {
-    fetchLogs();
-    const interval = setInterval(() => {
-      fetchLogs();
-    }, 15000);
-    return () => clearInterval(interval);
+    let mounted = true;
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch("/api/transparency/logs");
+        if (res.ok) {
+          const data = await res.json();
+          if (mounted) {
+            setLogs(data);
+            setLastRefreshed(new Date());
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch logs:", err);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    loadData();
+    const interval = setInterval(loadData, 15000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const filteredLogs = logs.filter(log => filter === "All" || log.category === filter);
