@@ -25,3 +25,13 @@ model CaseStudy {
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
 }
+
+model TelemetryEvent {
+  id          String   @id @default(cuid())
+  projectSlug String
+  eventType   String   // "page_view" | "project_click"
+  createdAt   DateTime @default(now())
+
+  @@index([projectSlug])
+  @@index([eventType])
+}

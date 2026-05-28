@@ -91,7 +91,7 @@ export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = ({ caseStudie
     for (const study of caseStudies) {
       const parsedItems = parseMarkdownToRichItems(study.editorial_content, baseFont, boldFont, italicFont, codeFont);
       const prepared = prepareRichInline(parsedItems);
-      const paddingHeight = study.githubStats ? 460 : 170;
+      const paddingHeight = study.githubStats ? 484 : 194;
       
       data[study.id] = {
         prepared,

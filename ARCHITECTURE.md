@@ -171,6 +171,23 @@ To deliver a premium, centralized navigation HUD accessible from any section of 
   - Returns browser focus perfectly back to the original triggering interactive element when closed via the backdrop click, selection confirm, or `Escape` key.
 - **Screen Reader ARIA Accessibility:** Implements strict WCAG-compliant attributes (`role="combobox"`, `aria-autocomplete="list"`, `aria-controls="palette-results-list"`, `aria-expanded`, and descriptive `aria-label` tags) ensuring command inputs are accessible to assistive technologies.
 
+## Serverless Telemetry Pipeline & Optimistic SWR Hook (Issue #46)
+
+To capture and display user engagement metrics in real-time without introducing main-thread latency or degrading SEO crawler indexing speeds, we implemented an optimized telemetry pipeline:
+- **Append-Only Schema Partitioning (`TelemetryEvent`):** Addressed transactional analytics overhead by storing events in a partitioned, append-only `TelemetryEvent` model indexed on `projectSlug` and `eventType`. This isolates metrics from case study core contents, allowing swift Neon Postgres DB writes.
+- **Serverless Edge-Cached API Route (`/api/telemetry`):**
+  - **GET**: Computes high-performance aggregate database counts (`groupBy` grouping views and clicks) on demand. The response payload is wrapped in edge-level cache headers (`Cache-Control: public, max-age=10, s-maxage=60, stale-while-revalidate=600`) to let CDNs cache aggregated counts and bypass database requests.
+  - **POST**: Commits dynamic transactional views (`page_view`) and clicks (`project_click`) into serverless pools.
+- **Anonymized IP Sliding-Window Rate Limiter:** To safeguard the Neon database from spam and DoS attempts without harvesting PII, the API route processes client IPs, hashes them instantly using a native SHA-256 digest wrapper (`crypto`), and checks request timestamps against a sliding 60-second limit (max 100 req/min).
+- **Instant Stale-While-Revalidate (SWR) Client Sync:**
+  - The client `useTelemetry()` hook extracts stats from `localStorage` immediately upon DOM initialization, ensuring the Bento grid mounts instantly with **zero Cumulative Layout Shift (CLS)**.
+  - Launches a non-blocking background SWR fetch to synchronize metrics with live datastores.
+  - Features an **Optimistic UI state mutator**: increments local counters instantly on clicks and views before waiting for the network API to resolve.
+- **Resilient Offline HUD Sync Warning:** If background updates are blocked by network drops, the SWR cache silently maintains local variables. To inform developers/users of cached-only states without interrupting layout integrity, the UI renders a small, pulsing orange warning indicator next to active view totals.
+- **Isolated Client-Side Tracker Boundary (`TelemetryTracker`):** Embedded `<TelemetryTracker slug={slug} />` inside Server dynamic pages. It manages client-side mount hooks (`useEffect` with React strict-mode double-run prevention refs) to trigger dynamic `page_view` records without making the parent route a Client Component.
+- **Zero-Reflow predicted height boundaries:** Adjusted masonry grid Pretext column precalculation paddings from `460` and `170` to `484` and `194` across both `CaseStudyShowcase.tsx` and `CaseStudyBentoCard.tsx`. This perfectly maps layout spacing constraints on both server pre-renders and dynamic client loads.
+
+
 
 
 

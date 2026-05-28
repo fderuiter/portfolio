@@ -9,6 +9,7 @@ import { IconStar, IconGitFork, IconAlertCircle, IconTerminal, IconChevronRight 
 import { type RichInlineLine } from "@chenglou/pretext/rich-inline";
 import Link from "next/link";
 import { CommitSparkline } from "@/components/CommitSparkline";
+import { useTelemetry } from "@/hooks/useTelemetry";
 
 interface CaseStudyBentoCardProps {
   study: BaseCaseStudy & { githubStats: GitHubStats | null };
@@ -40,6 +41,10 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
   const tagsList = study.tags ? study.tags.split(",").map((t) => t.trim()) : [];
   const langColor = LANGUAGE_COLORS[study.primary_language] || DEFAULT_COLOR;
 
+  // Track dynamic real-time telemetry metrics site-wide
+  const { telemetry, syncFailed, recordEvent } = useTelemetry();
+  const stats = telemetry[study.slug] || { views: 0, clicks: 0 };
+
   const hasPrecalculated = preCalculatedHeight !== undefined && preCalculatedLines !== undefined && preCalculatedItems !== undefined;
 
   // We always execute the hook to follow dynamic hooks rules, but ignore if precalculated is provided
@@ -50,7 +55,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
     fontFamilyVariable: "--font-inter",
   });
 
-  const finalHeight = hasPrecalculated ? preCalculatedHeight : (internalLayout.isReady ? internalLayout.height + (githubStats ? 460 : 170) : undefined);
+  const finalHeight = hasPrecalculated ? preCalculatedHeight : (internalLayout.isReady ? internalLayout.height + (githubStats ? 484 : 194) : undefined);
   const finalLines = hasPrecalculated ? preCalculatedLines : internalLayout.lines;
   const finalItems = hasPrecalculated ? preCalculatedItems : internalLayout.items;
   const isLayoutReady = hasPrecalculated ? true : internalLayout.isReady;
@@ -198,10 +203,29 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
           )}
         </div>
 
+        {/* Dynamic Telemetry Metrics HUD */}
+        <div className="flex items-center gap-4 text-[10px] font-mono text-zinc-500 mt-2 mb-1 relative z-10 select-none">
+          <span className="flex items-center gap-1.5" title="Aggregate Page Views">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
+            <span className="text-zinc-300 font-bold">{stats.views.toLocaleString()}</span> VIEWS
+          </span>
+          <span className="flex items-center gap-1.5" title="Bento Card Interactions">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+            <span className="text-zinc-300 font-bold">{stats.clicks.toLocaleString()}</span> CLICKS
+          </span>
+          {syncFailed && (
+            <span 
+              className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping cursor-help" 
+              title="Telemetry offline sync mode active (LocalStorage cached)"
+            />
+          )}
+        </div>
+
         {/* Footer analyze link */}
-        <div className="flex justify-between items-center border-t border-zinc-900/40 pt-3 mt-4">
+        <div className="flex justify-between items-center border-t border-zinc-900/40 pt-3 mt-2">
           <Link
             href={`/case-studies/${study.slug}`}
+            onClick={() => recordEvent(study.slug, "project_click")}
             className="inline-flex items-center text-xs font-bold text-brand-cyan/80 hover:text-brand-cyan transition-colors duration-300 cursor-pointer relative z-10"
           >
             <span>Analyze Architecture</span>

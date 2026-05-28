@@ -7,6 +7,7 @@ import { TracingBeam } from "@/components/ui/TracingBeam";
 import { RichNarrative } from "@/components/RichNarrative";
 import { getGitHubStats, parseGitHubUrl } from "@/lib/github";
 import { getSoftwareSourceCodeSchema } from "@/lib/seo";
+import { TelemetryTracker } from "@/components/TelemetryTracker";
 
 import type { Metadata } from "next";
 
@@ -95,6 +96,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
 
   return (
     <main className="min-h-screen py-24 md:py-32 px-6 md:px-12 lg:px-24 bg-zinc-950 text-foreground flex flex-col items-center relative overflow-hidden">
+      <TelemetryTracker slug={slug} />
       {/* Dynamic JSON-LD SoftwareSourceCode Schema */}
       <script
         type="application/ld+json"
