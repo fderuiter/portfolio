@@ -3,6 +3,7 @@ import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { getPersonSchema } from "@/lib/seo";
+import { CommandPalette } from "@/components/CommandPalette";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -76,7 +77,9 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-zinc-950 text-foreground antialiased">
         <Navbar />
         {children}
+        <CommandPalette />
       </body>
     </html>
   );
 }
+

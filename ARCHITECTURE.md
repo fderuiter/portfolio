@@ -154,5 +154,23 @@ To visually showcase developmental pace metrics on dynamic case study cards, we 
 - **High-Tech Aesthetic HUD Graping:** The SVG path is styled with glowing linear gradients sweeping from cyan (`#06b6d4`) to blue (`#3b82f6`), coupled with stdDeviation blur filters and a fading, semi-transparent backdrop area fill.
 - **Zero-Reflow Layout Constraints:** Swapping the bulky badges row for sparkline timelines increases bento grid paddings by `70px`. To ensure absolutely zero visual layout shifts (CLS) during client-side hydration, we synchronized the Pretext predicted layout limits from `390px` to `460px` across both `CaseStudyShowcase.tsx` and `CaseStudyBentoCard.tsx`.
 
+## Spotlight Cmd+K Command Palette Navigation Shell (Issue #43)
+
+To deliver a premium, centralized navigation HUD accessible from any section of the portfolio, we engineered a unified command palette interface:
+- **Dynamic Case Study Indexing API Route (`/api/case-studies`):** Queries Prisma database records serverless pools using a force-dynamic fetch handler. Selects and returns lightweight search tokens (`id`, `slug`, `title`, `primary_language`, `tags`) to keep initial connection payloads highly optimized.
+- **Lazy-Loaded Dynamic Import (`ssr: false`):** To preserve strict compile-time server component purity and bypass hydration failures, the `<CommandPalette />` container is loaded dynamically inside the `app/layout.tsx` layout shell using Next.js `dynamic()` with server-side rendering disabled.
+- **React Portals & Body Mounting:** Teleports the active React DOM nodes directly to the root layout's `document.body` layer using `createPortal`, isolating key events, animations, and stacking contexts from standard container bounds.
+- **Rigorous Keyboard Listeners & Fuzzy Search:** 
+  - Listens globally for trigger shortcuts (`Cmd+K` on macOS, `Ctrl+K` on Windows/Linux).
+  - Integrates arrow keys (`ArrowUp`/`ArrowDown`) with modulo index wrapping to navigate search outcomes seamlessly.
+  - Implements rapid, client-side fuzzy keyword matching against static navbar anchor channels, the UI developer sandbox, and dynamically loaded case studies.
+- **Focus Trap, Scroll Locking, & State Restore:**
+  - Automatically captures the pre-existing DOM active element upon opening the overlay (`originalFocusRef.current = document.activeElement`).
+  - Imposes absolute focus traps inside the palette query input field using dynamic client timeouts.
+  - Restricts parent viewport body scrollbars from reflowing by applying `document.body.style.overflow = "hidden"` while the dialog is active.
+  - Returns browser focus perfectly back to the original triggering interactive element when closed via the backdrop click, selection confirm, or `Escape` key.
+- **Screen Reader ARIA Accessibility:** Implements strict WCAG-compliant attributes (`role="combobox"`, `aria-autocomplete="list"`, `aria-controls="palette-results-list"`, `aria-expanded`, and descriptive `aria-label` tags) ensuring command inputs are accessible to assistive technologies.
+
+
 
 
