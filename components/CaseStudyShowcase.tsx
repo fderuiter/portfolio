@@ -7,6 +7,7 @@ import { hexToRgba } from "@/lib/utils";
 import { GitHubStats } from "@/lib/github";
 import { motion, AnimatePresence } from "framer-motion";
 import { designManifest } from "@/lib/design-manifest";
+import { LayoutConstants } from "@/lib/layout-constants";
 import { 
   parseMarkdownToRichItems, 
   type ExtendedRichInlineItem 
@@ -93,7 +94,7 @@ export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = ({ caseStudie
     for (const study of caseStudies) {
       const parsedItems = parseMarkdownToRichItems(study.editorial_content, baseFont, boldFont, italicFont, codeFont);
       const prepared = prepareRichInline(parsedItems);
-      const paddingHeight = study.githubStats ? designManifest.masonry.paddingWithStats : designManifest.masonry.paddingWithoutStats;
+      const paddingHeight = study.githubStats ? LayoutConstants.CardGeometry.paddingWithStats : LayoutConstants.CardGeometry.paddingWithoutStats;
       
       data[study.id] = {
         prepared,
@@ -115,7 +116,7 @@ export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = ({ caseStudie
       colCount = 2;
     }
 
-    const gap = designManifest.layout.gap; // using generated gap token
+    const gap = LayoutConstants.GridSpacing.gap; // using generated gap token
     const columnWidth = (containerWidth - (gap * (colCount - 1))) / colCount;
 
     // 1. Calculate heights of each study
@@ -126,7 +127,7 @@ export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = ({ caseStudie
       }
 
       const linesRanges: RichInlineLineRange[] = [];
-      walkRichInlineLineRanges(cached.prepared, columnWidth - (designManifest.layout.cardPadding * 2), (range) => {
+      walkRichInlineLineRanges(cached.prepared, columnWidth - (LayoutConstants.GridSpacing.cardPadding * 2), (range) => {
         linesRanges.push(range);
       });
 
@@ -134,7 +135,7 @@ export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = ({ caseStudie
         materializeRichInlineLineRange(cached.prepared, range)
       );
 
-      const textHeight = materializedLines.length * designManifest.typography.sizes.sm.lineHeight;
+      const textHeight = materializedLines.length * LayoutConstants.Typography.lineHeight;
       const totalHeight = textHeight + cached.paddingHeight;
 
       return {
@@ -230,14 +231,15 @@ export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = ({ caseStudie
       {/* Dynamic Masonry Bento Grid */}
       <div 
         ref={containerRef} 
-        className="w-full flex gap-4 items-start relative z-10"
+        className="w-full flex items-start relative z-10"
+        style={{ gap: `${LayoutConstants.GridSpacing.gap}px` }}
       >
         {layoutState.isReady ? (
           layoutState.columns.map((colCards, colIdx) => (
             <div 
               key={colIdx} 
-              className="flex flex-col gap-4 flex-1"
-              style={{ minWidth: 0 }}
+              className="flex flex-col flex-1"
+              style={{ minWidth: 0, gap: `${LayoutConstants.GridSpacing.gap}px` }}
             >
               <AnimatePresence mode="popLayout">
                 {colCards.map((study) => (
@@ -263,7 +265,10 @@ export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = ({ caseStudie
           ))
         ) : (
           /* SSR Safe Parallel Layout Fallback */
-          <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div 
+            className="w-full grid grid-cols-1 md:grid-cols-3"
+            style={{ gap: `${LayoutConstants.GridSpacing.gap}px` }}
+          >
             {caseStudies.map((study) => (
               <CaseStudyBentoCard key={study.id} study={study} />
             ))}

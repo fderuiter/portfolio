@@ -21,13 +21,8 @@
 
   /* Typography Sizes */
   --font-size-sm: 13px;
-  --line-height-sm: 18px;
 
   /* Masonry Layout */
-  --layout-masonry-padding-with-stats: 484px;
-  --layout-masonry-padding-without-stats: 194px;
-  --layout-gap: 16px;
-  --layout-card-padding: 16px;
 
   /* Motion Springs (stiffness, damping) */
   --motion-spring-snappy-stiffness: 380;

@@ -76,7 +76,6 @@ const parseCSSAndGenerateTS = () => {
   manifest.typography.fonts.mono = "var(--font-geist-mono), ui-monospace, monospace";
   manifest.typography.sizes.sm = {
     fontSize: parseNumber(tokens['font-size-sm'] || "13", 'font-size-sm'),
-    lineHeight: parseNumber(tokens['line-height-sm'] || "18", 'line-height-sm')
   };
 
   // Motion springs
@@ -112,26 +111,7 @@ const parseCSSAndGenerateTS = () => {
   ts += `      /** Font stack for monospace */\n      mono: "${manifest.typography.fonts.mono}",\n`;
   ts += `    },\n    sizes: {\n      sm: {\n`;
   ts += `        /** Original CSS Variable: --font-size-sm */\n        fontSize: ${manifest.typography.sizes.sm.fontSize},\n`;
-  ts += `        /** Original CSS Variable: --line-height-sm */\n        lineHeight: ${manifest.typography.sizes.sm.lineHeight},\n`;
   ts += `      }\n    }\n  },\n`;
-
-  // Masonry
-  ts += `  masonry: {\n`;
-  for (const [k, v] of Object.entries(manifest.masonry)) {
-    const cssName = `layout-masonry-${k.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)}`;
-    ts += `    /** Original CSS Variable: --${cssName} */\n`;
-    ts += `    ${k}: ${v},\n`;
-  }
-  ts += `  },\n`;
-
-  // Layout
-  ts += `  layout: {\n`;
-  for (const [k, v] of Object.entries(manifest.layout)) {
-    const cssName = `layout-${k.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)}`;
-    ts += `    /** Original CSS Variable: --${cssName} */\n`;
-    ts += `    ${k}: ${v},\n`;
-  }
-  ts += `  },\n`;
 
   // Breakpoints
   ts += `  breakpoints: {\n`;

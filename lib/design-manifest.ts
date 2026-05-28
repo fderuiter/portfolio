@@ -49,22 +49,8 @@ export const designManifest = {
       sm: {
         /** Original CSS Variable: --font-size-sm */
         fontSize: 13,
-        /** Original CSS Variable: --line-height-sm */
-        lineHeight: 18,
       }
     }
-  },
-  masonry: {
-    /** Original CSS Variable: --layout-masonry-padding-with-stats */
-    paddingWithStats: 484,
-    /** Original CSS Variable: --layout-masonry-padding-without-stats */
-    paddingWithoutStats: 194,
-  },
-  layout: {
-    /** Original CSS Variable: --layout-gap */
-    gap: 16,
-    /** Original CSS Variable: --layout-card-padding */
-    cardPadding: 16,
   },
   breakpoints: {
     /** Original CSS Variable: --breakpoint-sm */

@@ -5,6 +5,8 @@ import { cn, hexToRgba } from "@/lib/utils";
 import React, { useRef } from "react";
 import { designManifest } from "@/lib/design-manifest";
 
+import { LayoutConstants } from "@/lib/layout-constants";
+
 export const BentoGrid = ({
   className,
   children,
@@ -15,9 +17,10 @@ export const BentoGrid = ({
   return (
     <div
       className={cn(
-        "mx-auto grid max-w-7xl grid-cols-1 gap-4 md:grid-cols-3 items-start",
+        "mx-auto grid max-w-7xl grid-cols-1 md:grid-cols-3 items-start",
         className,
       )}
+      style={{ gap: `${LayoutConstants.GridSpacing.gap}px` }}
     >
       {children}
     </div>
@@ -141,7 +144,10 @@ export const Card = ({
         style={{ "--hover-glow": `0 0 30px ${hexToRgba(designManifest.colors["brand-cyan"], 0.08)}` } as React.CSSProperties}
         className="grid h-full origin-center [transform:rotateY(var(--r-x))_rotateX(var(--r-y))] overflow-hidden rounded-[var(--radius)] border border-border hover:border-border-active transition-all duration-300 delay-[var(--delay)] ease-[var(--easing)] will-change-transform hover:filter-none hover:[--duration:200ms] hover:[--easing:linear] hover:[--opacity:0.6] hover:[box-shadow:var(--hover-glow)]">
         <div className="grid h-full w-full mix-blend-soft-light [clip-path:inset(0_0_0_0_round_var(--radius))] [grid-area:1/1]">
-          <div className={cn("h-full w-full bg-surface-1 backdrop-blur-sm p-4 flex flex-col justify-between", className)}>
+          <div 
+            className={cn("h-full w-full bg-surface-1 backdrop-blur-sm flex flex-col justify-between", className)}
+            style={{ padding: `${LayoutConstants.GridSpacing.cardPadding}px` }}
+          >
             {children}
           </div>
         </div>
