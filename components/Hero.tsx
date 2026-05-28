@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import React, { useRef, useState, useEffect } from "react";
 import { usePretextLayout } from "@/hooks/usePretextLayout";
 import { AnimatedGridPattern } from "@/components/AnimatedGridPattern";
+import { designManifest } from "@/lib/design-manifest";
 
 export const BackgroundBeamsWithCollision = ({
   children,
@@ -302,9 +303,7 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
       y: 0,
       scale: 1,
       transition: {
-        type: "spring" as const,
-        stiffness: 100,
-        damping: 18,
+        ...designManifest.motion.springs.hero,
         mass: 0.4,
       },
     },
@@ -398,9 +397,7 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
       y: 0,
       scale: 1,
       transition: {
-        type: "spring" as const,
-        stiffness: 110,
-        damping: 15,
+        ...designManifest.motion.springs.heroBeam,
         mass: 0.3,
       },
     },
@@ -502,7 +499,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.1, duration: 0.8, type: "spring", stiffness: 80 }}
+          transition={{ delay: 1.1, duration: 0.8, ...designManifest.motion.springs.smooth }}
           className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
           <a

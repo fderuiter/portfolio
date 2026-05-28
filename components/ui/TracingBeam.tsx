@@ -3,6 +3,7 @@
 import React, { useRef } from "react";
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { designManifest } from "@/lib/design-manifest";
 
 interface TracingBeamProps {
   children: React.ReactNode;
@@ -20,7 +21,7 @@ export const TracingBeam: React.FC<TracingBeamProps> = ({ children, className })
 
   // 2. Smooth the scroll progress with spring physics
   const scrollYProgressSpring = useSpring(scrollYProgress, {
-    stiffness: 80,
+    stiffness: designManifest.motion.springs.smooth.stiffness,
     damping: 22,
     restDelta: 0.001,
   });

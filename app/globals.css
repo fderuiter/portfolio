@@ -1,50 +1,6 @@
+
 @import "tailwindcss";
-
-:root {
-  /* Premium Dark-Only Theme Baseline: Zinc-950 base */
-  --background: #09090b;
-  --foreground: #fafafa;
-
-  --surface-1: rgba(24, 24, 27, 0.6);
-  --surface-2: rgba(39, 39, 42, 0.4);
-  --border: rgba(63, 63, 70, 0.5);
-  --border-active: rgba(6, 182, 212, 0.4);
-
-  --muted: #71717a;
-  --muted-strong: #a1a1aa;
-
-  --brand-cyan-glow: rgba(6, 182, 212, 0.15);
-  --brand-blue-glow: rgba(59, 130, 246, 0.10);
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-
-  /* Surfaces & Borders */
-  --color-surface-1: var(--surface-1);
-  --color-surface-2: var(--surface-2);
-  --color-border: var(--border);
-  --color-border-active: var(--border-active);
-
-  /* Typography Scale */
-  --color-muted: var(--muted);
-  --color-muted-strong: var(--muted-strong);
-
-  /* Premium Palette & Accents */
-  --color-brand-cyan: #06b6d4;
-  --color-brand-cyan-glow: var(--brand-cyan-glow);
-  --color-brand-blue: #3b82f6;
-  --color-brand-blue-glow: var(--brand-blue-glow);
-  --color-brand-dark: #09090b;
-
-  /* Semantic State Colors */
-  --color-success: #10b981;
-  --color-error: #f87171;
-  --color-warning: #fbbf24;
-}
+@import "./theme.css";
 
 body {
   background: var(--background);

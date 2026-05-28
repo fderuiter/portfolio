@@ -2,6 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import { designManifest } from "@/lib/design-manifest";
 
 export interface TimelineItem {
   role: string;
@@ -50,7 +51,7 @@ export const Timeline: React.FC = () => {
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8, delay: idx * 0.1, type: "spring", stiffness: 60 }}
+              transition={{ duration: 0.8, delay: idx * 0.1, ...designManifest.motion.springs.timeline }}
               className={`relative flex flex-col md:flex-row items-start md:items-center ${
                 isLeft ? "md:flex-row-reverse" : ""
               }`}
