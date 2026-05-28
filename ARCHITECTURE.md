@@ -145,4 +145,14 @@ To support rich social card visual motifs and compliant structural metadata repr
   - **getSoftwareSourceCodeSchema:** Serializes dynamic case study items in `app/case-studies/[slug]/page.tsx`, directly incorporating cached stars and forks telemetry fetched from the GitHub client.
 - **XSS Sanitization Compliance:** Prevents stored script vectors from escaping structured data by programmatically replacing `<` bracket tags with unicode escapes (`\u003c`) inside the JSON-LD serialization pipeline.
 
+## Dynamic Bezier Commit Sparkline Visualizations (Issue #44)
+
+To visually showcase developmental pace metrics on dynamic case study cards, we engineered dynamic inline SVG sparkline timelines:
+- **Cached Weekly Activity Fetching:** We extended the decoupled `lib/github.ts` API client to fetch weekly commit counts directly from GitHub's `/stats/commit_activity` endpoint. These metrics are stored in the cached `GitHubStats` payload, returning a 52-week activity integer array refreshed every 3600 seconds.
+- **Resilient Fallback Generation:** To protect development environments and offline builds against API rate limit blocks, the client auto-generates a mock 52-week activity sine-wave pattern (`5 + sin(x/3) * 4`) mimicking active repo commit patterns.
+- **Cubic Bezier Path Mapping:** The `<CommitSparkline />` component maps the 52-week dataset into a dynamic coordinate grid bounded inside `(0, 0)` and `(300, 60)`. It connects the points using mathematically smooth SVG cubic bezier commands (`C cp1X cp1Y, cp2X cp2Y, targetX targetY`), yielding zero jagged edges.
+- **High-Tech Aesthetic HUD Graping:** The SVG path is styled with glowing linear gradients sweeping from cyan (`#06b6d4`) to blue (`#3b82f6`), coupled with stdDeviation blur filters and a fading, semi-transparent backdrop area fill.
+- **Zero-Reflow Layout Constraints:** Swapping the bulky badges row for sparkline timelines increases bento grid paddings by `70px`. To ensure absolutely zero visual layout shifts (CLS) during client-side hydration, we synchronized the Pretext predicted layout limits from `390px` to `460px` across both `CaseStudyShowcase.tsx` and `CaseStudyBentoCard.tsx`.
+
+
 

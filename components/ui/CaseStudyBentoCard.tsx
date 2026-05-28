@@ -8,6 +8,7 @@ import { GitHubStats } from "@/lib/github";
 import { IconStar, IconGitFork, IconAlertCircle, IconTerminal, IconChevronRight } from "@tabler/icons-react";
 import { type RichInlineLine } from "@chenglou/pretext/rich-inline";
 import Link from "next/link";
+import { CommitSparkline } from "@/components/CommitSparkline";
 
 interface CaseStudyBentoCardProps {
   study: BaseCaseStudy & { githubStats: GitHubStats | null };
@@ -49,7 +50,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
     fontFamilyVariable: "--font-inter",
   });
 
-  const finalHeight = hasPrecalculated ? preCalculatedHeight : (internalLayout.isReady ? internalLayout.height + (githubStats ? 390 : 170) : undefined);
+  const finalHeight = hasPrecalculated ? preCalculatedHeight : (internalLayout.isReady ? internalLayout.height + (githubStats ? 460 : 170) : undefined);
   const finalLines = hasPrecalculated ? preCalculatedLines : internalLayout.lines;
   const finalItems = hasPrecalculated ? preCalculatedItems : internalLayout.items;
   const isLayoutReady = hasPrecalculated ? true : internalLayout.isReady;
@@ -93,23 +94,26 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
           {/* Dynamic GitHub Statistics Hydration */}
           {githubStats && (
             <div className="space-y-4 mb-5 border-t border-zinc-900/60 pt-4">
-              {/* Badges Row */}
-              <div className="grid grid-cols-3 gap-2 text-center text-xs font-mono">
-                <div className="bg-zinc-950/60 border border-zinc-900 rounded-lg p-2 flex flex-col items-center">
-                  <IconStar className="w-4 h-4 text-amber-500 mb-1" />
-                  <span className="text-zinc-100 font-bold">{githubStats.stars.toLocaleString()}</span>
-                  <span className="text-[9px] text-zinc-500">STARS</span>
-                </div>
-                <div className="bg-zinc-950/60 border border-zinc-900 rounded-lg p-2 flex flex-col items-center">
-                  <IconGitFork className="w-4 h-4 text-blue-500 mb-1" />
-                  <span className="text-zinc-100 font-bold">{githubStats.forks.toLocaleString()}</span>
-                  <span className="text-[9px] text-zinc-500">FORKS</span>
-                </div>
-                <div className="bg-zinc-950/60 border border-zinc-900 rounded-lg p-2 flex flex-col items-center">
-                  <IconAlertCircle className="w-4 h-4 text-emerald-500 mb-1" />
-                  <span className="text-zinc-100 font-bold">{githubStats.openIssues.toLocaleString()}</span>
-                  <span className="text-[9px] text-zinc-500">ISSUES</span>
-                </div>
+              {/* Glowing SVG Commit Timeline Sparkline */}
+              <CommitSparkline 
+                activity={githubStats.commitActivity} 
+                className="mb-2"
+              />
+
+              {/* Refined Inline Badges Row */}
+              <div className="flex justify-between items-center text-[10px] font-mono text-zinc-500 border-b border-zinc-900/60 pb-3 mb-1">
+                <span className="flex items-center gap-1">
+                  <IconStar className="w-3.5 h-3.5 text-amber-500" />
+                  <span className="text-zinc-300 font-bold">{githubStats.stars.toLocaleString()}</span> STARS
+                </span>
+                <span className="flex items-center gap-1">
+                  <IconGitFork className="w-3.5 h-3.5 text-blue-500" />
+                  <span className="text-zinc-300 font-bold">{githubStats.forks.toLocaleString()}</span> FORKS
+                </span>
+                <span className="flex items-center gap-1">
+                  <IconAlertCircle className="w-3.5 h-3.5 text-emerald-500" />
+                  <span className="text-zinc-300 font-bold">{githubStats.openIssues.toLocaleString()}</span> ISSUES
+                </span>
               </div>
 
               {/* Language Percentage Bar */}
