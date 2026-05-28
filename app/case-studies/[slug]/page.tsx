@@ -11,8 +11,27 @@ import { TelemetryTracker } from "@/components/TelemetryTracker";
 
 import type { Metadata } from "next";
 
+export const revalidate = 3600;
+export const dynamicParams = true;
+
 interface PageProps {
   params: Promise<{ slug: string }>;
+}
+
+export async function generateStaticParams() {
+  try {
+    const studies = await prisma.caseStudy.findMany({
+      where: { published: true },
+      select: { slug: true },
+    });
+    
+    return studies.map((study) => ({
+      slug: study.slug,
+    }));
+  } catch (error) {
+    console.error("Failed to fetch case studies for static params:", error);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
