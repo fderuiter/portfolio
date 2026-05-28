@@ -2,17 +2,14 @@ import { prisma } from "@/lib/db";
 import { CaseStudyShowcase } from "@/components/CaseStudyShowcase";
 import { BaseCaseStudy } from "@/types/domain";
 import { Hero } from "@/components/Hero";
-import { getGitHubStats, parseGitHubUrl, GitHubStats } from "@/lib/github";
+import { getGitHubStats, parseGitHubUrl } from "@/lib/github";
 import { TextReveal } from "@/components/TextReveal";
 import { SkillsGrid } from "@/components/SkillsGrid";
 import { Timeline } from "@/components/Timeline";
-
-interface HydratedCaseStudy extends BaseCaseStudy {
-  githubStats: GitHubStats | null;
-}
+import { mapToCaseStudy } from "@/lib/mappers";
 
 export default async function WalkingSkeletonPage() {
-  let caseStudies: HydratedCaseStudy[] = [];
+  let caseStudies: BaseCaseStudy[] = [];
   let errorMsg = "";
 
   try {
@@ -26,19 +23,14 @@ export default async function WalkingSkeletonPage() {
     // Aggregated server-side hydration for each case study
     caseStudies = await Promise.all(
       data.map(async (d) => {
-        let stats: GitHubStats | null = null;
+        let stats = null;
         if (d.github_url) {
           const parsed = parseGitHubUrl(d.github_url);
           if (parsed) {
             stats = await getGitHubStats(parsed.owner, parsed.repo);
           }
         }
-        return {
-          ...d,
-          created_at: new Date(d.created_at),
-          updated_at: new Date(d.updated_at),
-          githubStats: stats,
-        };
+        return mapToCaseStudy(d, stats);
       })
     );
   } catch (err) {

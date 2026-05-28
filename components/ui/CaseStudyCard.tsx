@@ -9,8 +9,8 @@ interface CaseStudyCardProps {
 }
 
 export const CaseStudyCard: React.FC<CaseStudyCardProps> = ({ study, className }) => {
-  // Split tags by comma for individual rendering
-  const tagsList = study.tags ? study.tags.split(",").map(t => t.trim()) : [];
+  // Use pre-mapped tags
+  const tagsList = study.tags || [];
 
   return (
     <div

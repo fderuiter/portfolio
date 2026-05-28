@@ -8,6 +8,7 @@ import { RichNarrative } from "@/components/RichNarrative";
 import { getGitHubStats, parseGitHubUrl } from "@/lib/github";
 import { getSoftwareSourceCodeSchema } from "@/lib/seo";
 import { TelemetryTracker } from "@/components/TelemetryTracker";
+import { mapToCaseStudy } from "@/lib/mappers";
 
 import type { Metadata } from "next";
 
@@ -37,21 +38,23 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  let study;
+  let rawStudy;
   try {
-    study = await prisma.caseStudy.findUnique({
+    rawStudy = await prisma.caseStudy.findUnique({
       where: { slug },
     });
   } catch (err) {
     console.error("Metadata generation DB query exception:", err);
   }
 
-  if (!study) {
+  if (!rawStudy) {
     return {
       title: "Not Found",
       description: "The requested case study was not found.",
     };
   }
+  
+  const study = mapToCaseStudy(rawStudy);
 
   // Strip Markdown tokens from editorial content for plain text meta descriptions
   const cleanDescription = study.editorial_content
@@ -71,9 +74,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description: cleanDescription,
       type: "article",
       url: `https://fderuiter-portfolio.vercel.app/case-studies/${slug}`,
-      publishedTime: study.created_at.toISOString(),
-      modifiedTime: study.updated_at.toISOString(),
-      tags: study.tags.split(",").map((t) => t.trim()),
+      publishedTime: study.created_at,
+      modifiedTime: study.updated_at,
+      tags: study.tags,
     },
     twitter: {
       card: "summary_large_image",
@@ -87,9 +90,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function CaseStudyPage({ params }: PageProps) {
   const { slug } = await params;
 
-  let study;
+  let rawStudy;
   try {
-    study = await prisma.caseStudy.findUnique({
+    rawStudy = await prisma.caseStudy.findUnique({
       where: { slug },
     });
   } catch (err) {
@@ -97,21 +100,22 @@ export default async function CaseStudyPage({ params }: PageProps) {
     throw new Error("Unable to fetch case study records from serverless Neon database.");
   }
 
-  if (!study) {
+  if (!rawStudy) {
     notFound();
   }
 
   // Fetch dynamic GitHub cached statistics to hydrate the JSON-LD schemas
   let stats = null;
-  if (study.github_url) {
-    const parsed = parseGitHubUrl(study.github_url);
+  if (rawStudy.github_url) {
+    const parsed = parseGitHubUrl(rawStudy.github_url);
     if (parsed) {
       stats = await getGitHubStats(parsed.owner, parsed.repo);
     }
   }
+  
+  const study = mapToCaseStudy(rawStudy, stats);
 
-  // Split tags by comma for badge rendering
-  const tagsList = study.tags ? study.tags.split(",").map(t => t.trim()) : [];
+  const tagsList = study.tags || [];
 
   return (
     <main className="min-h-screen py-24 md:py-32 px-6 md:px-12 lg:px-24 bg-zinc-950 text-foreground flex flex-col items-center relative overflow-hidden">

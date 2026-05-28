@@ -4,7 +4,6 @@ import React, { useState, useLayoutEffect, useRef, useCallback, useMemo } from "
 import { CaseStudyBentoCard } from "@/components/ui/CaseStudyBentoCard";
 import { BaseCaseStudy } from "@/types/domain";
 import { hexToRgba } from "@/lib/utils";
-import { GitHubStats } from "@/lib/github";
 import { motion, AnimatePresence } from "framer-motion";
 import { designManifest } from "@/lib/design-manifest";
 import { 
@@ -20,18 +19,14 @@ import {
   type RichInlineLineRange
 } from "@chenglou/pretext/rich-inline";
 
-interface HydratedCaseStudy extends BaseCaseStudy {
-  githubStats: GitHubStats | null;
-}
-
-interface LayoutStudy extends HydratedCaseStudy {
+interface LayoutStudy extends BaseCaseStudy {
   height: number;
   lines: RichInlineLine[];
   items: ExtendedRichInlineItem[];
 }
 
 interface CaseStudyShowcaseProps {
-  caseStudies: HydratedCaseStudy[];
+  caseStudies: BaseCaseStudy[];
 }
 
 const FILTER_TABS = ["All", "TypeScript", "Python"];

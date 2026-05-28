@@ -7,9 +7,10 @@ export interface BaseCaseStudy {
   editorial_content: string;       // general summaries
   architectural_narrative: string; // deep-technical breakdowns
   published: boolean;
-  tags: string;                    // comma-separated list of tags
-  created_at: Date;
-  updated_at: Date;
+  tags: string[];                  // array of tags
+  created_at: string;
+  updated_at: string;
+  githubStats: import("@/lib/github").GitHubStats | null;
 }
 
 // CDISC ODM & SDTM Specialized Case Study Structure

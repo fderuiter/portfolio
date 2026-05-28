@@ -4,7 +4,6 @@ import React from "react";
 import { Card, CardTitle } from "@/components/BentoGrid";
 import { PretextRichText, usePretextRichLayout, type ExtendedRichInlineItem } from "@/hooks/usePretextLayout";
 import { BaseCaseStudy } from "@/types/domain";
-import { GitHubStats } from "@/lib/github";
 import { IconStar, IconGitFork, IconAlertCircle, IconTerminal, IconChevronRight } from "@tabler/icons-react";
 import { type RichInlineLine } from "@chenglou/pretext/rich-inline";
 import Link from "next/link";
@@ -13,7 +12,7 @@ import { useTelemetry } from "@/hooks/useTelemetry";
 import { designManifest } from "@/lib/design-manifest";
 
 interface CaseStudyBentoCardProps {
-  study: BaseCaseStudy & { githubStats: GitHubStats | null };
+  study: BaseCaseStudy;
   className?: string;
   preCalculatedHeight?: number;
   preCalculatedLines?: RichInlineLine[];
@@ -39,7 +38,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
   preCalculatedItems,
 }) => {
   const { githubStats } = study;
-  const tagsList = study.tags ? study.tags.split(",").map((t) => t.trim()) : [];
+  const tagsList = study.tags || [];
   const langColor = LANGUAGE_COLORS[study.primary_language] || DEFAULT_COLOR;
 
   // Track dynamic real-time telemetry metrics site-wide

@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { prisma } from "@/lib/db";
+import { mapToCaseStudy } from "@/lib/mappers";
 
 // Enforce standard NodeJS runtime to guarantee secure, pooled Neon database connections
 export const runtime = "nodejs";
@@ -19,9 +20,9 @@ interface ImageProps {
 export default async function Image({ params }: ImageProps) {
   const { slug } = await params;
 
-  let study;
+  let rawStudy;
   try {
-    study = await prisma.caseStudy.findUnique({
+    rawStudy = await prisma.caseStudy.findUnique({
       where: { slug }
     });
   } catch (err) {
@@ -29,7 +30,7 @@ export default async function Image({ params }: ImageProps) {
   }
 
   // Fallback state if the database query is unsuccessful or returning an empty record
-  if (!study) {
+  if (!rawStudy) {
     return new ImageResponse(
       (
         <div
@@ -69,13 +70,10 @@ export default async function Image({ params }: ImageProps) {
       size
     );
   }
+  
+  const study = mapToCaseStudy(rawStudy);
 
-  const tagsList = study.tags
-    ? study.tags
-        .split(",")
-        .map((t) => t.trim())
-        .slice(0, 4)
-    : [];
+  const tagsList = study.tags.slice(0, 4);
 
   return new ImageResponse(
     (
