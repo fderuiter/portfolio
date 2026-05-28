@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
 import { IconTerminal, IconCornerDownLeft, IconCircle } from "@tabler/icons-react";
+import { usePersistentState } from "@/hooks/usePersistentState";
 
 interface LogItem {
   id: string;
@@ -112,7 +113,7 @@ export const SandboxTerminal: React.FC = () => {
       text: "iMednet Python SDK CLI Sandbox [Version 2.3.1]\nType 'help' to list available commands. Click the badges below for instant inputs.",
     },
   ]);
-  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [commandHistory, setCommandHistory] = usePersistentState<string[]>("sandbox_terminal_history", []);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isExecuting, setIsExecuting] = useState(false);
 
