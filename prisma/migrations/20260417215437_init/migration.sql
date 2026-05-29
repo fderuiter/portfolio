@@ -1,6 +1,9 @@
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "public";
+
 -- CreateTable
 CREATE TABLE "CaseStudy" (
-    "id" TEXT NOT NULL PRIMARY KEY,
+    "id" TEXT NOT NULL,
     "slug" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "primary_language" TEXT NOT NULL,
@@ -9,8 +12,10 @@ CREATE TABLE "CaseStudy" (
     "architectural_narrative" TEXT NOT NULL,
     "published" BOOLEAN NOT NULL DEFAULT false,
     "tags" TEXT NOT NULL,
-    "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updated_at" DATETIME NOT NULL
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "CaseStudy_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
