@@ -2,7 +2,8 @@
 
 import React from "react";
 import { Card, CardTitle } from "@/components/BentoGrid";
-import { PretextRichText, usePretextRichLayout, type ExtendedRichInlineItem } from "@/hooks/usePretextLayout";
+import { PretextRichText } from "@/hooks/usePretextLayout";
+import { type EngineToken, EngineConfig } from "@/lib/engine";
 import { BaseCaseStudy } from "@/types/domain";
 import { GitHubStats } from "@/lib/github";
 import { IconStar, IconGitFork, IconAlertCircle, IconTerminal, IconChevronRight } from "@tabler/icons-react";
@@ -10,14 +11,13 @@ import { type RichInlineLine } from "@chenglou/pretext/rich-inline";
 import Link from "next/link";
 import { CommitSparkline } from "@/components/CommitSparkline";
 import { useTelemetry } from "@/hooks/useTelemetry";
-import { LAYOUT_CONFIG } from "@/lib/layout-config";
 
 interface CaseStudyBentoCardProps {
   study: BaseCaseStudy & { githubStats: GitHubStats | null };
   className?: string;
   preCalculatedHeight?: number;
   preCalculatedLines?: RichInlineLine[];
-  preCalculatedItems?: ExtendedRichInlineItem[];
+  preCalculatedItems?: EngineToken[];
 }
 
 // Map common languages to premium styling colors
@@ -48,24 +48,16 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
 
   const hasPrecalculated = preCalculatedHeight !== undefined && preCalculatedLines !== undefined && preCalculatedItems !== undefined;
 
-  // We always execute the hook to follow dynamic hooks rules, but ignore if precalculated is provided
-  const internalLayout = usePretextRichLayout({
-    text: study.editorial_content,
-    fontSize: LAYOUT_CONFIG.FONT_SIZE,
-    lineHeight: LAYOUT_CONFIG.LINE_HEIGHT,
-    fontFamilyVariable: "--font-inter",
-  });
-
-  const finalHeight = hasPrecalculated ? preCalculatedHeight : (internalLayout.isReady ? internalLayout.height + (githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS) : undefined);
-  const finalLines = hasPrecalculated ? preCalculatedLines : internalLayout.lines;
-  const finalItems = hasPrecalculated ? preCalculatedItems : internalLayout.items;
-  const isLayoutReady = hasPrecalculated ? true : internalLayout.isReady;
+  const finalHeight = preCalculatedHeight ?? EngineConfig.FALLBACK_ITEM_HEIGHT;
+  const finalLines = preCalculatedLines ?? [];
+  const finalItems = preCalculatedItems ?? [];
+  const isLayoutReady = hasPrecalculated && finalLines.length > 0;
 
   const innerRef = React.useRef<HTMLDivElement>(null);
 
   React.useLayoutEffect(() => {
     // Check global flag injected by Playwright
-    const isPlaywright = typeof window !== 'undefined' && (window as any).__PLAYWRIGHT_TEST__ === true;
+    const isPlaywright = typeof window !== 'undefined' && (window as unknown as { __PLAYWRIGHT_TEST__?: boolean }).__PLAYWRIGHT_TEST__ === true;
     
     // Only run in development or when explicitly requested by Playwright
     if ((process.env.NODE_ENV === "development" || isPlaywright) && hasPrecalculated && innerRef.current && finalHeight) {
@@ -117,11 +109,11 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
           </CardTitle>
 
           {/* Description Block using Pretext Rich Text */}
-          <div ref={hasPrecalculated ? undefined : internalLayout.ref} className="mb-4">
+          <div className="mb-4">
             <PretextRichText
               lines={finalLines}
               items={finalItems}
-              lineHeight={LAYOUT_CONFIG.LINE_HEIGHT}
+              lineHeight={EngineConfig.LINE_HEIGHT}
               isReady={isLayoutReady}
               fallbackText={study.editorial_content}
               className="text-zinc-400 text-sm leading-relaxed font-sans"

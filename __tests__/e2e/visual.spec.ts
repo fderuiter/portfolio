@@ -28,7 +28,7 @@ test.describe('Visual Regression & Drift Detection', () => {
   test('Layout constraints drift detection', async ({ page }) => {
     // Inject the global flag for the client so the component enables the checks
     await page.addInitScript(() => {
-      (window as any).__PLAYWRIGHT_TEST__ = true;
+      (window as unknown as { __PLAYWRIGHT_TEST__?: boolean }).__PLAYWRIGHT_TEST__ = true;
     });
 
     await page.goto('/');
@@ -46,7 +46,7 @@ test.describe('Visual Regression & Drift Detection', () => {
       const expected = await card.getAttribute('data-expected-height');
       const actual = await card.getAttribute('data-actual-height');
       // If there's a mismatched card, this will intentionally fail the test
-      expect(actual, \`Drift detected! Card mathematically expected \${expected}px but naturally measured \${actual}px. Update padding constants.\`).toBe(expected);
+      expect(actual, `Drift detected! Card mathematically expected ${expected}px but naturally measured ${actual}px. Update padding constants.`).toBe(expected);
     }
   });
 });

@@ -1,5 +1,6 @@
 import { BaseCaseStudy } from "@/types/domain";
 import { GitHubStats } from "@/lib/github";
+import { tokenizeText, getCleanTextFromTokens } from "@/lib/engine";
 
 /**
  * Returns the canonical Person schema representing Frederick de Ruiter.
@@ -30,11 +31,9 @@ export function getSoftwareSourceCodeSchema(
   study: BaseCaseStudy,
   stats: GitHubStats | null
 ): string {
-  // Strip formatting markdown markers for description fields
-  const cleanDescription = study.editorial_content
-    .replace(/\*\*/g, "")
-    .replace(/`/g, "")
-    .replace(/\*/g, "");
+  // Strip formatting markdown markers for description fields by consuming the engine's tokenization output
+  const tokens = tokenizeText(study.editorial_content, "", "", "", ""); // Fonts not needed for pure text stripping
+  const cleanDescription = getCleanTextFromTokens(tokens);
 
   const schema = {
     "@context": "https://schema.org",

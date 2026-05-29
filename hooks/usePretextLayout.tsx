@@ -2,16 +2,9 @@
 
 import React, { useState, useLayoutEffect, useRef, useCallback } from "react";
 import { prepare, layout, clearCache, type PreparedText } from "@chenglou/pretext";
-import { 
-  prepareRichInline, 
-  walkRichInlineLineRanges, 
-  materializeRichInlineLineRange,
-  type PreparedRichInline,
-  type RichInlineLine,
-  type RichInlineItem,
-  type RichInlineLineRange
-} from "@chenglou/pretext/rich-inline";
+import { type RichInlineLine, prepareRichInline } from "@chenglou/pretext/rich-inline";
 import { designManifest } from "@/lib/design-manifest";
+import { type EngineToken } from "@/lib/engine";
 
 // --- Global Caches ---
 class LRUCache<K, V> {
@@ -39,10 +32,6 @@ class LRUCache<K, V> {
 
 const textPrepareCache = new LRUCache<string, PreparedText>(500);
 const textLayoutCache = new LRUCache<string, { height: number; lineCount: number }>(2000);
-
-const richItemsCache = new LRUCache<string, ExtendedRichInlineItem[]>(500);
-const richPrepareCache = new LRUCache<string, PreparedRichInline>(500);
-const richLayoutCache = new LRUCache<string, { height: number; lines: RichInlineLine[] }>(2000);
 
 interface UsePretextLayoutOptions {
   text: string;
@@ -207,197 +196,9 @@ export const PretextText: React.FC<PretextTextProps> = ({
 // PRETEXT RICH INLINE TEXT ENGINE (ISSUE #45)
 // ==========================================
 
-export interface ExtendedRichInlineItem extends RichInlineItem {
-  type: "text" | "bold" | "italic" | "code";
-}
-
-/**
- * Tokenizes markdown-like inline text (**bold**, *italic*, `code`) into RichInlineItem arrays.
- */
-export function parseMarkdownToRichItems(
-  text: string,
-  baseFont: string,
-  boldFont: string,
-  italicFont: string,
-  codeFont: string
-): ExtendedRichInlineItem[] {
-  const items: ExtendedRichInlineItem[] = [];
-  const regex = /(\*\*.*?\*\*|`.*?`|\*.*?\*|[^*`\n]+|\n)/g;
-  
-  let match;
-  while ((match = regex.exec(text)) !== null) {
-    const raw = match[0];
-    if (raw === "\n") {
-      items.push({
-        text: " ",
-        font: baseFont,
-        type: "text",
-      });
-    } else if (raw.startsWith("**") && raw.endsWith("**") && raw.length > 4) {
-      items.push({
-        text: raw.slice(2, -2),
-        font: boldFont,
-        type: "bold",
-      });
-    } else if (raw.startsWith("`") && raw.endsWith("`") && raw.length > 2) {
-      items.push({
-        text: raw.slice(1, -1),
-        font: codeFont,
-        type: "code",
-        break: "never",
-        extraWidth: 12, // padding + borders on our styled code chips
-      });
-    } else if (raw.startsWith("*") && raw.endsWith("*") && raw.length > 2) {
-      items.push({
-        text: raw.slice(1, -1),
-        font: italicFont,
-        type: "italic",
-      });
-    } else {
-      items.push({
-        text: raw,
-        font: baseFont,
-        type: "text",
-      });
-    }
-  }
-  
-  return items;
-}
-
-interface UsePretextRichLayoutOptions {
-  text: string;
-  fontSize?: number;
-  lineHeight: number;
-  fontFamilyVariable?: string;
-}
-
-export function usePretextRichLayout({
-  text,
-  fontSize = designManifest.typography.sizes.sm.fontSize,
-  lineHeight,
-  fontFamilyVariable = "--font-inter",
-}: UsePretextRichLayoutOptions) {
-  const [state, setState] = useState<{
-    isReady: boolean;
-    height: number;
-    lines: RichInlineLine[];
-    items: ExtendedRichInlineItem[];
-  }>({
-    isReady: false,
-    height: 0,
-    lines: [],
-    items: [],
-  });
-
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const preparedRef = useRef<PreparedRichInline | null>(null);
-  const itemsRef = useRef<ExtendedRichInlineItem[]>([]);
-  const itemsKeyRef = useRef<string>("");
-
-  const measureRichText = useCallback((maxWidth: number) => {
-    if (!preparedRef.current || !itemsKeyRef.current) return;
-
-    const layoutKey = `${itemsKeyRef.current}|${maxWidth}|${lineHeight}`;
-    let cachedResult = richLayoutCache.get(layoutKey);
-
-    if (!cachedResult) {
-      const prepared = preparedRef.current;
-      const linesRanges: RichInlineLineRange[] = [];
-      walkRichInlineLineRanges(prepared, maxWidth, (range) => {
-        linesRanges.push(range);
-      });
-
-      const materializedLines = linesRanges.map((range) =>
-        materializeRichInlineLineRange(prepared, range)
-      );
-
-      cachedResult = {
-        height: materializedLines.length * lineHeight,
-        lines: materializedLines,
-      };
-      richLayoutCache.set(layoutKey, cachedResult);
-    }
-
-    const { height: calculatedHeight, lines: materializedLines } = cachedResult;
-
-    setState((prev) => {
-      if (prev.height === calculatedHeight && prev.lines.length === materializedLines.length) {
-        return prev;
-      }
-      return {
-        isReady: true,
-        height: calculatedHeight,
-        lines: materializedLines,
-        items: itemsRef.current,
-      };
-    });
-  }, [lineHeight]);
-
-  useLayoutEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const rootStyle = window.getComputedStyle(document.documentElement);
-    const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
-    const resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
-
-    const baseFont = `400 ${fontSize}px ${resolvedFontFamily}`;
-    const boldFont = `700 ${fontSize}px ${resolvedFontFamily}`;
-    const italicFont = `italic 400 ${fontSize}px ${resolvedFontFamily}`;
-    const codeFont = `500 ${fontSize - 1}px monospace`;
-
-    const fontsKey = `${baseFont}|${boldFont}|${italicFont}|${codeFont}`;
-    const itemsKey = `${text}|${fontsKey}`;
-    itemsKeyRef.current = itemsKey;
-
-    let parsedItems = richItemsCache.get(itemsKey);
-    if (!parsedItems) {
-      parsedItems = parseMarkdownToRichItems(text, baseFont, boldFont, italicFont, codeFont);
-      richItemsCache.set(itemsKey, parsedItems);
-    }
-    itemsRef.current = parsedItems;
-
-    let prepared = richPrepareCache.get(itemsKey);
-    if (!prepared) {
-      prepared = prepareRichInline(parsedItems);
-      richPrepareCache.set(itemsKey, prepared);
-    }
-    preparedRef.current = prepared;
-
-    if (containerRef.current) {
-      const initialWidth = containerRef.current.getBoundingClientRect().width;
-      measureRichText(initialWidth);
-    } else {
-      setState((prev) => ({ ...prev, isReady: true }));
-    }
-  }, [text, fontSize, fontFamilyVariable, measureRichText]);
-
-  useLayoutEffect(() => {
-    if (!containerRef.current) return;
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const maxWidth = entry.contentRect.width;
-        measureRichText(maxWidth);
-      }
-    });
-
-    resizeObserver.observe(containerRef.current);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [measureRichText]);
-
-  return {
-    ref: containerRef,
-    ...state,
-  };
-}
-
 interface PretextRichTextProps {
   lines: RichInlineLine[];
-  items: ExtendedRichInlineItem[];
+  items: EngineToken[];
   lineHeight: number;
   className?: string;
   isReady?: boolean;
@@ -480,4 +281,3 @@ export const PretextRichText: React.FC<PretextRichTextProps> = ({
     </>
   );
 };
-

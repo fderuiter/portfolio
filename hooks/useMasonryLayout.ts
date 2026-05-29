@@ -1,28 +1,16 @@
 import { useState, useLayoutEffect, useRef, useCallback } from "react";
-import { designManifest } from "@/lib/design-manifest";
-import { 
-  parseMarkdownToRichItems, 
-  type ExtendedRichInlineItem 
-} from "@/hooks/usePretextLayout";
-import { 
-  prepareRichInline, 
-  type RichInlineLine,
-} from "@chenglou/pretext/rich-inline";
-import { LAYOUT_CONFIG } from "@/lib/layout-config";
+import { type RichInlineLine } from "@chenglou/pretext/rich-inline";
 import { GitHubStats } from "@/lib/github";
-import { calculateMasonryLayout, type PreparedData } from "@/lib/masonry";
+import { 
+  generateManifest, 
+  EngineConfig, 
+  type EngineToken
+} from "@/lib/engine";
 
 export interface MasonryItem {
   id: string;
   editorial_content: string;
   githubStats?: GitHubStats | null;
-}
-
-export interface LayoutItem<T extends MasonryItem> {
-  item: T;
-  height: number;
-  lines: RichInlineLine[];
-  items: ExtendedRichInlineItem[];
 }
 
 export function useMasonryLayout<T extends MasonryItem>(
@@ -31,18 +19,17 @@ export function useMasonryLayout<T extends MasonryItem>(
 ) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const containerWidthRef = useRef<number>(0);
-  const preparedDataRef = useRef<Record<string, PreparedData>>({});
 
   const [layoutState, setLayoutState] = useState<{
     colCount: number;
-    columns: (T & { height: number; lines: RichInlineLine[]; items: ExtendedRichInlineItem[] })[][];
+    columns: (T & { height: number; lines: RichInlineLine[]; items: EngineToken[] })[][];
     isReady: boolean;
   }>({
-    colCount: LAYOUT_CONFIG.COLS.SM,
+    colCount: EngineConfig.COLS.SM,
     columns: [
       allItems.map((s) => ({
         ...s,
-        height: LAYOUT_CONFIG.FALLBACK_ITEM_HEIGHT,
+        height: EngineConfig.FALLBACK_ITEM_HEIGHT,
         lines: [],
         items: [],
       })),
@@ -50,47 +37,27 @@ export function useMasonryLayout<T extends MasonryItem>(
     isReady: false,
   });
 
-  useLayoutEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const rootStyle = window.getComputedStyle(document.documentElement);
-    const rawFontFamily = rootStyle.getPropertyValue("--font-inter").trim();
-    const resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
-
-    const baseFont = `400 ${LAYOUT_CONFIG.FONT_SIZE}px ${resolvedFontFamily}`;
-    const boldFont = `700 ${LAYOUT_CONFIG.FONT_SIZE}px ${resolvedFontFamily}`;
-    const italicFont = `italic 400 ${LAYOUT_CONFIG.FONT_SIZE}px ${resolvedFontFamily}`;
-    const codeFont = `500 ${LAYOUT_CONFIG.FONT_SIZE - 1}px monospace`;
-
-    const data: Record<string, PreparedData> = {};
-    for (const study of allItems) {
-      const parsedItems = parseMarkdownToRichItems(study.editorial_content, baseFont, boldFont, italicFont, codeFont);
-      const prepared = prepareRichInline(parsedItems);
-      const paddingHeight = study.githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS;
-      
-      data[study.id] = {
-        prepared,
-        items: parsedItems,
-        paddingHeight,
-      };
-    }
-    
-    preparedDataRef.current = data;
-  }, [allItems]);
-
   const recalculateLayout = useCallback((containerWidth: number) => {
-    if (Object.keys(preparedDataRef.current).length === 0) return;
-
-    const { colCount, columns } = calculateMasonryLayout(
+    const manifest = generateManifest<T>({
+      items: filteredItems,
       containerWidth,
-      filteredItems,
-      preparedDataRef.current,
-      LAYOUT_CONFIG
+      getText: (item) => item.editorial_content,
+      hasStats: (item) => !!item.githubStats,
+      fontFamilyVariable: "--font-inter",
+    });
+
+    const flattenedColumns = manifest.columns.map((col) =>
+      col.map((ci) => ({
+        ...ci.item,
+        height: ci.height,
+        lines: ci.lines,
+        items: ci.items,
+      }))
     );
 
     setLayoutState({
-      colCount,
-      columns,
+      colCount: manifest.colCount,
+      columns: flattenedColumns,
       isReady: true,
     });
   }, [filteredItems]);
