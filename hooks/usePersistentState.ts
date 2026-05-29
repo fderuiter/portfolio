@@ -35,7 +35,7 @@ export function usePersistentState<T>(
     (value: SetStateAction<T>) => {
       setState((prevState) => {
         // Resolve the new value, allowing for functional updates
-        const newValue = typeof value === "function" ? (value as Function)(prevState) : value;
+        const newValue = typeof value === "function" ? (value as /* eslint-disable-line @typescript-eslint/no-unsafe-function-type */ Function)(prevState) : value;
         
         try {
           if (typeof window !== "undefined") {

@@ -36,6 +36,7 @@ export default function TransparencyHub() {
 
   // Poll for updates every 15 seconds
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchLogs();
     const interval = setInterval(() => {
       fetchLogs();
