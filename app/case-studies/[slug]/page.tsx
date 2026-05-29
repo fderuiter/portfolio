@@ -8,6 +8,8 @@ import { RichNarrative } from "@/components/RichNarrative";
 import { getGitHubStats, parseGitHubUrl } from "@/lib/github";
 import { getSoftwareSourceCodeSchema } from "@/lib/seo";
 import { TelemetryTracker } from "@/components/TelemetryTracker";
+import { OfflineNarrativeTracker } from "@/components/OfflineNarrativeTracker";
+import { OfflineCaseStudy } from "@/components/OfflineCaseStudy";
 
 import type { Metadata } from "next";
 
@@ -93,8 +95,8 @@ export default async function CaseStudyPage({ params }: PageProps) {
       where: { slug },
     });
   } catch (err) {
-    console.error("Case study fetch exception:", err);
-    throw new Error("Unable to fetch case study records from serverless Neon database.");
+    console.error("Case study fetch exception intercepted, falling back to offline mode:", err);
+    return <OfflineCaseStudy slug={slug} />;
   }
 
   if (!study) {
@@ -116,6 +118,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
   return (
     <main className="min-h-screen py-24 md:py-32 px-6 md:px-12 lg:px-24 bg-zinc-950 text-foreground flex flex-col items-center relative overflow-hidden">
       <TelemetryTracker slug={slug} />
+      <OfflineNarrativeTracker study={study} />
       {/* Dynamic JSON-LD SoftwareSourceCode Schema */}
       <script
         type="application/ld+json"
