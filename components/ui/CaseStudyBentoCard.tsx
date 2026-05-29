@@ -61,6 +61,37 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
   const finalItems = hasPrecalculated ? preCalculatedItems : internalLayout.items;
   const isLayoutReady = hasPrecalculated ? true : internalLayout.isReady;
 
+  const innerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useLayoutEffect(() => {
+    // Check global flag injected by Playwright
+    const isPlaywright = typeof window !== 'undefined' && (window as any).__PLAYWRIGHT_TEST__ === true;
+    
+    // Only run in development or when explicitly requested by Playwright
+    if ((process.env.NODE_ENV === "development" || isPlaywright) && hasPrecalculated && innerRef.current && finalHeight) {
+      const cardEl = innerRef.current.closest('div.isolate') as HTMLElement;
+      if (cardEl) {
+        const originalHeight = cardEl.style.height;
+        cardEl.style.height = 'auto'; // Disable fixed height to measure natural footprint
+        
+        const actualHeight = cardEl.getBoundingClientRect().height;
+        
+        cardEl.style.height = originalHeight; // Restore immediately
+        
+        if (Math.abs(actualHeight - finalHeight) > 2) {
+          console.warn(`[Rigor] Hydration mismatch detected! Card '${study.slug}' mathematically predicted height ${finalHeight}px but DOM naturally measured ${actualHeight}px. This indicates a drift in layout constants (e.g. padding constants).`);
+          
+          // Provide an attribute for Playwright to catch
+          if (isPlaywright) {
+            cardEl.setAttribute('data-hydration-mismatch', 'true');
+            cardEl.setAttribute('data-expected-height', finalHeight.toString());
+            cardEl.setAttribute('data-actual-height', actualHeight.toString());
+          }
+        }
+      }
+    }
+  }, [hasPrecalculated, finalHeight, study.slug]);
+
   return (
     <Card
       className={className}
@@ -69,7 +100,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
         transition: "height 250ms cubic-bezier(0.16, 1, 0.3, 1)",
       }}
     >
-      <div className="flex flex-col h-full justify-between">
+      <div ref={innerRef} className="flex flex-col h-full justify-between">
         <div>
           {/* Card Top Pill & Header */}
           <div className="flex justify-between items-center mb-3">
