@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import crypto from "crypto";
+import { Redis } from "@upstash/redis";
 
 // Enforce standard dynamic route behavior in Next.js 16 to query live datastores safely
 export const dynamic = "force-dynamic";
@@ -122,18 +123,53 @@ export async function POST(req: NextRequest) {
     }
 
     // Save transaction event to the PostgreSQL Neon datastore
-    const newEvent = await prisma.telemetryEvent.create({
-      data: {
-        projectSlug,
-        eventType,
-      },
-      select: {
-        id: true,
-        projectSlug: true,
-        eventType: true,
-        createdAt: true,
-      },
-    });
+    // Implement HA buffering: Timeout or fail on primary DB, fallback to Redis
+    const eventId = crypto.randomUUID();
+    const eventData = {
+      id: eventId,
+      projectSlug,
+      eventType,
+      createdAt: new Date(),
+    };
+
+    let newEvent;
+    
+    try {
+      // Try writing to primary DB with 100ms timeout to ensure <150ms P95 latency
+      newEvent = await Promise.race([
+        prisma.telemetryEvent.create({
+          data: eventData,
+          select: {
+            id: true,
+            projectSlug: true,
+            eventType: true,
+            createdAt: true,
+          },
+        }),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error("Database Write Timeout")), 100)
+        )
+      ]);
+    } catch (dbErr) {
+      console.warn("Primary DB write failed or timed out. Buffering to secondary store.", dbErr);
+      
+      const redis = new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL || "http://localhost:8079",
+        token: process.env.UPSTASH_REDIS_REST_TOKEN || "example_token",
+      });
+      
+      // Push event into Redis list for background synchronization and ensure TTL
+      const p = redis.pipeline();
+      p.lpush("telemetry_buffer", eventData);
+      p.expire("telemetry_buffer", 48 * 60 * 60); // 48 hours
+      const [listLength] = await p.exec();
+      
+      if (Number(listLength) > 1000) {
+        console.error("ALERT: Secondary telemetry buffer occupancy exceeds threshold.");
+      }
+      
+      newEvent = eventData;
+    }
 
     return NextResponse.json({ success: true, event: newEvent }, { status: 201 });
   } catch (err) {
