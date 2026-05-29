@@ -42,7 +42,7 @@ export const TracingBeam: React.FC<TracingBeamProps> = ({ children, className })
           style={{
             height: heightTransform,
             "--beam-glow": `0 0 8px ${hexToRgba(designManifest.colors["brand-cyan"], 0.3)}`
-          } as any}
+          } as /* eslint-disable-line @typescript-eslint/no-explicit-any */ any}
           className="absolute top-0 w-full bg-gradient-to-b from-brand-cyan via-brand-blue to-purple-500 rounded-full shadow-[var(--beam-glow)] origin-top"
         />
         
@@ -51,7 +51,7 @@ export const TracingBeam: React.FC<TracingBeamProps> = ({ children, className })
           style={{
             top: heightTransform,
             "--dot-glow": `0 0 15px ${hexToRgba(designManifest.colors["brand-cyan"], 0.8)}`
-          } as any}
+          } as /* eslint-disable-line @typescript-eslint/no-explicit-any */ any}
           className="absolute -left-[5px] -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-brand-cyan border-2 border-zinc-950 shadow-[var(--dot-glow)] flex items-center justify-center"
         >
           {/* Neon pulsating ring */}

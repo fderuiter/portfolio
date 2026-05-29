@@ -6,14 +6,11 @@ import {
 } from "@/hooks/usePretextLayout";
 import { 
   prepareRichInline, 
-  walkRichInlineLineRanges, 
-  materializeRichInlineLineRange,
-  type PreparedRichInline,
   type RichInlineLine,
-  type RichInlineLineRange
 } from "@chenglou/pretext/rich-inline";
 import { LAYOUT_CONFIG } from "@/lib/layout-config";
 import { GitHubStats } from "@/lib/github";
+import { calculateMasonryLayout, type PreparedData } from "@/lib/masonry";
 
 export interface MasonryItem {
   id: string;
@@ -34,11 +31,7 @@ export function useMasonryLayout<T extends MasonryItem>(
 ) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const containerWidthRef = useRef<number>(0);
-  const preparedDataRef = useRef<Record<string, {
-    prepared: PreparedRichInline;
-    items: ExtendedRichInlineItem[];
-    paddingHeight: number;
-  }>>({});
+  const preparedDataRef = useRef<Record<string, PreparedData>>({});
 
   const [layoutState, setLayoutState] = useState<{
     colCount: number;
@@ -69,11 +62,7 @@ export function useMasonryLayout<T extends MasonryItem>(
     const italicFont = `italic 400 ${LAYOUT_CONFIG.FONT_SIZE}px ${resolvedFontFamily}`;
     const codeFont = `500 ${LAYOUT_CONFIG.FONT_SIZE - 1}px monospace`;
 
-    const data: Record<string, {
-      prepared: PreparedRichInline;
-      items: ExtendedRichInlineItem[];
-      paddingHeight: number;
-    }> = {};
+    const data: Record<string, PreparedData> = {};
     for (const study of allItems) {
       const parsedItems = parseMarkdownToRichItems(study.editorial_content, baseFont, boldFont, italicFont, codeFont);
       const prepared = prepareRichInline(parsedItems);
@@ -92,57 +81,12 @@ export function useMasonryLayout<T extends MasonryItem>(
   const recalculateLayout = useCallback((containerWidth: number) => {
     if (Object.keys(preparedDataRef.current).length === 0) return;
 
-    let colCount: number = LAYOUT_CONFIG.COLS.SM;
-    if (containerWidth >= LAYOUT_CONFIG.BREAKPOINTS.LG) {
-      colCount = LAYOUT_CONFIG.COLS.LG;
-    } else if (containerWidth >= LAYOUT_CONFIG.BREAKPOINTS.MD) {
-      colCount = LAYOUT_CONFIG.COLS.MD;
-    }
-
-    const columnWidth = (containerWidth - (LAYOUT_CONFIG.GAP * (colCount - 1))) / colCount;
-
-    const itemsWithHeight = filteredItems.map((study) => {
-      const cached = preparedDataRef.current[study.id];
-      if (!cached) {
-        return { ...study, height: LAYOUT_CONFIG.FALLBACK_ITEM_HEIGHT, lines: [], items: [] };
-      }
-
-      const linesRanges: RichInlineLineRange[] = [];
-      walkRichInlineLineRanges(cached.prepared, columnWidth - (LAYOUT_CONFIG.CARD_PADDING * 2), (range) => {
-        linesRanges.push(range);
-      });
-
-      const materializedLines = linesRanges.map((range) =>
-        materializeRichInlineLineRange(cached.prepared, range)
-      );
-
-      const textHeight = materializedLines.length * LAYOUT_CONFIG.LINE_HEIGHT;
-      const totalHeight = textHeight + cached.paddingHeight;
-
-      return {
-        ...study,
-        height: totalHeight,
-        lines: materializedLines,
-        items: cached.items,
-      };
-    });
-
-    const columns: (T & { height: number; lines: RichInlineLine[]; items: ExtendedRichInlineItem[] })[][] = Array.from({ length: colCount }, () => []);
-    const columnHeights = Array(colCount).fill(0);
-
-    for (const study of itemsWithHeight) {
-      let minColIdx = 0;
-      let minHeight = columnHeights[0];
-      for (let i = 1; i < colCount; i++) {
-        if (columnHeights[i] < minHeight) {
-          minHeight = columnHeights[i];
-          minColIdx = i;
-        }
-      }
-
-      columns[minColIdx].push(study);
-      columnHeights[minColIdx] += study.height + LAYOUT_CONFIG.GAP;
-    }
+    const { colCount, columns } = calculateMasonryLayout(
+      containerWidth,
+      filteredItems,
+      preparedDataRef.current,
+      LAYOUT_CONFIG
+    );
 
     setLayoutState({
       colCount,

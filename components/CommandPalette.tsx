@@ -7,6 +7,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { IconSearch, IconTerminal, IconFileCode, IconDirections, IconCornerDownLeft } from "@tabler/icons-react";
+import { filterFuzzySearch } from "@/lib/search-utils";
 
 interface SearchCaseStudy {
   id: string;
@@ -106,13 +107,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
 
   // 3. In-Memory Fuzzy filtering matching queries against titles or tags
   const filteredItems = useMemo(() => {
-    if (!query) return allItems;
-    const cleanQuery = query.toLowerCase().trim();
-    return allItems.filter(
-      (item) =>
-        item.title.toLowerCase().includes(cleanQuery) ||
-        item.subtitle.toLowerCase().includes(cleanQuery)
-    );
+    return filterFuzzySearch(query, allItems);
   }, [allItems, query]);
 
   // 4. Keyboard Control Handlers (↑↓, Enter, Escape)

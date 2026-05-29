@@ -1,0 +1,49 @@
+import { describe, it, expect } from 'vitest';
+import { filterFuzzySearch, type SearchItem } from '@/lib/search-utils';
+
+describe('filterFuzzySearch', () => {
+  const items: SearchItem[] = [
+    { id: '1', title: 'React Hooks', subtitle: 'Frontend development with React' },
+    { id: '2', title: 'TypeScript Deep Dive', subtitle: 'Advanced TS topics and patterns' },
+    { id: '3', title: 'Vitest Unit Testing', subtitle: 'Testing frontend code' },
+  ];
+
+  it('returns all items if query is empty', () => {
+    const result = filterFuzzySearch('', items);
+    expect(result).toHaveLength(3);
+  });
+
+  it('filters items matching title (case-insensitive)', () => {
+    const result = filterFuzzySearch('react', items);
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe('1');
+  });
+
+  it('filters items matching subtitle (case-insensitive)', () => {
+    const result = filterFuzzySearch('frontend', items);
+    expect(result).toHaveLength(2);
+    expect(result[0].id).toBe('1');
+    expect(result[1].id).toBe('3');
+  });
+
+  it('trims leading/trailing whitespace in query', () => {
+    const result = filterFuzzySearch('  typescript   ', items);
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe('2');
+  });
+
+  it('returns empty array if no match', () => {
+    const result = filterFuzzySearch('svelte', items);
+    expect(result).toHaveLength(0);
+  });
+
+  it('handles items with missing/null string fields safely', () => {
+    const brokenItems: SearchItem[] = [
+      { id: '1', title: null as never, subtitle: 'react' },
+      { id: '2', title: 'angular', subtitle: undefined as never },
+    ];
+    
+    expect(filterFuzzySearch('react', brokenItems)).toHaveLength(1);
+    expect(filterFuzzySearch('angular', brokenItems)).toHaveLength(1);
+  });
+});

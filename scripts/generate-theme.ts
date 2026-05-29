@@ -21,7 +21,7 @@ const parseCSSAndGenerateTS = () => {
     tokens[match[1]] = match[2].trim();
   }
 
-  const manifest: any = {
+  const manifest: /* eslint-disable-line @typescript-eslint/no-explicit-any */ any = {
     colors: {},
     typography: { fonts: {}, sizes: {} },
     masonry: {},
@@ -80,7 +80,7 @@ const parseCSSAndGenerateTS = () => {
   };
 
   // Motion springs
-  const springsData: Record<string, any> = {};
+  const springsData: Record<string, /* eslint-disable-line @typescript-eslint/no-explicit-any */ any> = {};
   for (const [key, value] of Object.entries(tokens)) {
     if (key.startsWith('motion-spring-')) {
       const match = key.match(/motion-spring-(.+)-(stiffness|damping)/);
@@ -144,7 +144,7 @@ const parseCSSAndGenerateTS = () => {
   // Motion
   ts += `  motion: {\n    springs: {\n`;
   for (const [k, obj] of Object.entries(manifest.motion.springs)) {
-    ts += `      ${k}: { type: "${(obj as any).type}", stiffness: ${(obj as any).stiffness}, damping: ${(obj as any).damping} },\n`;
+    ts += `      ${k}: { type: "${(obj as /* eslint-disable-line @typescript-eslint/no-explicit-any */ any).type}", stiffness: ${(obj as /* eslint-disable-line @typescript-eslint/no-explicit-any */ any).stiffness}, damping: ${(obj as /* eslint-disable-line @typescript-eslint/no-explicit-any */ any).damping} },\n`;
   }
   ts += `    }\n  }\n`;
 
