@@ -4,6 +4,7 @@ import React from "react";
 import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
 import { motion } from "framer-motion";
+import { Tooltip } from "@/components/ui/Tooltip";
 
 export interface SkillLanguage {
   name: string;
@@ -45,7 +46,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
           </div>
           
           <p className="text-sm text-neutral-300 leading-relaxed font-sans font-medium">
-            I am a full-stack design engineer specializing in CDISC operational data engines, robust backend API routing networks, and Next.js server frameworks. By aligning strict compile-time TypeScript validation layers with hardware-accelerated user interface physics, my architectures guarantee exceptional security boundaries, HIPAA compliance, and responsive digital products.
+            I am a full-stack design engineer who believes technology should ultimately serve and connect people. While my background is in building robust operational engines and responsive digital products, my core philosophy is rooted in creativity, playful problem-solving, and ensuring every system I build feels deeply human and accessible.
           </p>
         </div>
       </motion.div>
@@ -108,7 +109,11 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
             <div className="w-8 h-8 rounded-lg bg-emerald-950/20 border border-emerald-900/30 flex items-center justify-center font-mono font-bold text-xs text-emerald-400">
               01
             </div>
-            <h4 className="text-xs font-mono font-bold text-neutral-200">Clinical Integrations</h4>
+            <h4 className="text-xs font-mono font-bold text-neutral-200">
+              <Tooltip text="Making sure healthcare professionals get the right data to save lives safely.">
+                Clinical Integrations
+              </Tooltip>
+            </h4>
             <p className="text-[11px] text-zinc-500 leading-relaxed">
               Resilient XML streaming engines matching CDISC ODM schemas to FDA-compliant SDTM datasets.
             </p>
@@ -118,7 +123,11 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
             <div className="w-8 h-8 rounded-lg bg-cyan-950/20 border border-cyan-900/30 flex items-center justify-center font-mono font-bold text-xs text-brand-cyan">
               02
             </div>
-            <h4 className="text-xs font-mono font-bold text-neutral-200">Layout Physics</h4>
+            <h4 className="text-xs font-mono font-bold text-neutral-200">
+              <Tooltip text="Crafting buttery-smooth animations that feel completely natural to the user.">
+                Layout Physics
+              </Tooltip>
+            </h4>
             <p className="text-[11px] text-zinc-500 leading-relaxed">
               DOM-free userland canvas calculation loops synchronized to bypass layout reflow thrashes.
             </p>
@@ -128,7 +137,11 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
             <div className="w-8 h-8 rounded-lg bg-blue-950/20 border border-blue-900/30 flex items-center justify-center font-mono font-bold text-xs text-brand-blue">
               03
             </div>
-            <h4 className="text-xs font-mono font-bold text-neutral-200">Serverless Scaling</h4>
+            <h4 className="text-xs font-mono font-bold text-neutral-200">
+              <Tooltip text="Ensuring the app stays fast even when thousands of people use it at once.">
+                Serverless Scaling
+              </Tooltip>
+            </h4>
             <p className="text-[11px] text-zinc-500 leading-relaxed">
               Prisma WebSocket connectivity mappings linking pools into cloud Neon databases at 1ms latencies.
             </p>

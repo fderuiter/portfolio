@@ -5,6 +5,7 @@ import { SandboxTerminal } from "@/components/SandboxTerminal";
 import { IconTerminal } from "@tabler/icons-react";
 import { TracingBeam } from "@/components/ui/TracingBeam";
 import { RichNarrative } from "@/components/RichNarrative";
+import { Tooltip } from "@/components/ui/Tooltip";
 import { getGitHubStats, parseGitHubUrl } from "@/lib/github";
 import { getSoftwareSourceCodeSchema } from "@/lib/seo";
 import { TelemetryTracker } from "@/components/TelemetryTracker";
@@ -195,10 +196,17 @@ export default async function CaseStudyPage({ params }: PageProps) {
             )}
 
             {/* Technical Deep Dive Narrative */}
-            <RichNarrative
-              html={study.architectural_narrative}
-              className="mt-12 space-y-6 text-sm md:text-base leading-relaxed text-muted-strong border-t border-zinc-900/50 pt-10"
-            />
+            <div className="mt-12 border-t border-zinc-900/50 pt-10">
+              <h2 className="text-xl font-bold font-sans text-neutral-100 mb-3">
+                <Tooltip text="The human story behind the code—why this was built and who it helps.">
+                  Architectural Narratives
+                </Tooltip>
+              </h2>
+              <RichNarrative
+                html={study.architectural_narrative}
+                className="space-y-6 text-sm md:text-base leading-relaxed text-muted-strong"
+              />
+            </div>
           </article>
         </TracingBeam>
       </div>

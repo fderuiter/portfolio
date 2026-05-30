@@ -59,11 +59,13 @@ export default function UISandboxPage() {
             <CardTitle>Project Alpha</CardTitle>
             <CardDescription>A high-performance system for complex calculations.</CardDescription>
           </Card>
-          <Card>
-            <CardTitle>Laser Loon</CardTitle>
-            <CardDescription>Fast, precise, and visually appealing interactions.</CardDescription>
-          </Card>
           <Card className="md:col-span-2 md:row-span-2">
+            <CardTitle className="text-2xl text-brand-cyan">Laser Loon</CardTitle>
+            <CardDescription className="text-sm mt-4">
+              A viral, interactive physics experiment featuring a chaotic loon equipped with laser eyes. Designed to explore user engagement through unexpected, playful animations rather than standard UI forms. Proves that engineering doesn&apos;t always have to be so serious!
+            </CardDescription>
+          </Card>
+          <Card>
             <CardTitle>QRCraftly</CardTitle>
             <CardDescription>Advanced code generation and context modeling for modern AI.</CardDescription>
           </Card>

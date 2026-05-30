@@ -29,11 +29,25 @@ const timelineData: TimelineItem[] = [
     tags: ["React 19", "Next.js 16", "Framer Motion", "Canvas API", "DX Tooling"]
   },
   {
+    role: "Lead Volunteer & Technical Mentor",
+    company: "Civic Code for Humanity",
+    period: "2019 — 2021",
+    description: "Partnered with local nonprofits to modernize their digital presence and data systems. Taught coding bootcamps for underprivileged youth, emphasizing creativity and problem-solving.",
+    tags: ["Civic Impact", "Education", "Volunteering", "Accessibility"]
+  },
+  {
     role: "Full-Stack Developer",
     company: "CoreFlow Technologies",
     period: "2018 — 2020",
     description: "Pioneered DAG-based Visual Node Schema builders. Engineered immutable state trees, cycle validation compilers, and OpenAPI spec translators.",
     tags: ["React", "Zustand", "AST", "JSON Schema", "OpenAPI"]
+  },
+  {
+    role: "President, Computer Science Society",
+    company: "University Student Leadership",
+    period: "2016 — 2018",
+    description: "Led a community of 500+ students, organized weekly workshops, and fostered a culture of collaborative learning. Built mentorship programs that connected underclassmen with alumni.",
+    tags: ["Leadership", "Community Building", "Mentorship", "Public Speaking"]
   }
 ];
 
