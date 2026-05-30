@@ -6,6 +6,7 @@ import { getGitHubStats, parseGitHubUrl, GitHubStats } from "@/lib/github";
 import { TextReveal } from "@/components/TextReveal";
 import { SkillsGrid } from "@/components/SkillsGrid";
 import { Timeline } from "@/components/Timeline";
+import { Tooltip } from "@/components/ui/Tooltip";
 
 interface HydratedCaseStudy extends BaseCaseStudy {
   githubStats: GitHubStats | null;
@@ -155,6 +156,24 @@ export default async function WalkingSkeletonPage() {
             </div>
           )}
 
+          {/* Personal Highlights Section */}
+          <div className="w-full mb-12 p-8 bg-zinc-900/20 border border-brand-cyan/20 rounded-3xl relative overflow-hidden group hover:border-brand-cyan/40 transition-colors">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-cyan/5 rounded-full blur-[60px] pointer-events-none group-hover:bg-brand-cyan/10 transition-colors" />
+            <h3 className="text-xl font-bold text-neutral-100 mb-3 flex items-center gap-3">
+              <span className="w-2 h-2 rounded-full bg-brand-cyan animate-pulse"></span>
+              Personal Highlights: Creative Engineering
+            </h3>
+            <p className="text-sm text-neutral-300 leading-relaxed mb-6 font-sans">
+              Beyond standard engineering deep-dives, I build playful and interactive physics experiments to explore user engagement through unexpected UI forms.
+            </p>
+            <a href="/ui-sandbox" className="inline-flex items-center gap-2 px-4 py-2 bg-brand-cyan/10 text-brand-cyan border border-brand-cyan/20 rounded-xl text-xs font-mono font-bold hover:bg-brand-cyan/20 transition-all">
+              Explore the Laser Loon & UI Sandbox
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+          </div>
+
           {/* Dynamic Bento Showcase */}
           {caseStudies.length === 0 ? (
             <div className="text-center p-12 bg-zinc-900/10 border border-zinc-900/40 border-dashed rounded-2xl w-full">
@@ -199,7 +218,10 @@ export default async function WalkingSkeletonPage() {
             Professional Experience Timeline
           </h3>
           <p className="text-xs font-mono text-muted tracking-widest uppercase mb-16 text-center">
-            A Chronological Evolution of Systems Engineering
+            A Chronological Evolution of{" "}
+            <Tooltip text="Ensuring reliability for users so the platform never goes down when they need it most.">
+              Systems Rigor
+            </Tooltip>
           </p>
 
           {/* Interactive Staggered Timeline Component */}
