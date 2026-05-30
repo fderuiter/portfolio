@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import fs from "fs";
 import { defineConfig } from "prisma/config";
+import { env } from "./env";
 
 if (fs.existsSync(".env.local")) {
   dotenv.config({ path: ".env.local" });
@@ -15,6 +16,6 @@ export default defineConfig({
     seed: "npx tsx prisma/seed.ts",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url: env.DATABASE_URL,
   },
 });

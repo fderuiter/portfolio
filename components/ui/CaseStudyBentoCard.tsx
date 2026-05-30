@@ -1,4 +1,5 @@
 "use client";
+import { env } from "@/env";
 
 import React from "react";
 import { Card, CardTitle } from "@/components/BentoGrid";
@@ -65,10 +66,10 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
 
   React.useLayoutEffect(() => {
     // Check global flag injected by Playwright
-    const isPlaywright = typeof window !== 'undefined' && (window as any).__PLAYWRIGHT_TEST__ === true;
+    const isPlaywright = typeof window !== 'undefined' && (window as unknown as Record<string, unknown>).__PLAYWRIGHT_TEST__ === true;
     
     // Only run in development or when explicitly requested by Playwright
-    if ((process.env.NODE_ENV === "development" || isPlaywright) && hasPrecalculated && innerRef.current && finalHeight) {
+    if ((env.NODE_ENV === "development" || isPlaywright) && hasPrecalculated && innerRef.current && finalHeight) {
       const cardEl = innerRef.current.closest('div.isolate') as HTMLElement;
       if (cardEl) {
         const originalHeight = cardEl.style.height;

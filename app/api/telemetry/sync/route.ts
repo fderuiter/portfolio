@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { Redis } from "@upstash/redis";
+import { env } from "../../../../env";
 
 export const dynamic = "force-dynamic";
 
@@ -8,16 +9,16 @@ export async function GET(req: NextRequest) {
   // Use a secret to protect the endpoint if needed, for cron jobs standard is a header
   const authHeader = req.headers.get("authorization");
   if (
-    process.env.CRON_SECRET &&
-    authHeader !== `Bearer ${process.env.CRON_SECRET}`
+    env.CRON_SECRET &&
+    authHeader !== `Bearer ${env.CRON_SECRET}`
   ) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
     const redis = new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL || "http://localhost:8079",
-      token: process.env.UPSTASH_REDIS_REST_TOKEN || "example_token",
+      url: env.UPSTASH_REDIS_REST_URL || "http://localhost:8079",
+      token: env.UPSTASH_REDIS_REST_TOKEN || "example_token",
     });
 
     const BATCH_SIZE = 50;

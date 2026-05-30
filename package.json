@@ -6,10 +6,11 @@
     "predev": "npx tsx scripts/generate-theme.ts",
     "dev": "concurrently -n \"turbo,tsc\" -c \"cyan,magenta\" \"next dev --turbo\" \"tsc --noEmit --watch\"",
     "prebuild": "npx tsx scripts/generate-theme.ts",
-    "build": "node scripts/check-migrations.js && npx prisma generate && npx prisma migrate deploy && next build",
+    "build": "npx tsx scripts/check-migrations.ts && npx prisma generate && npx prisma migrate deploy && next build",
     "start": "next start",
     "lint": "eslint",
-    "check": "tsc --noEmit && npm run lint",
+    "check": "tsc --noEmit && npm run lint && npx tsx scripts/sync-env.ts",
+    "sync-env": "npx tsx scripts/sync-env.ts",
     "prepare": "husky",
     "pretest": "npx tsx scripts/generate-theme.ts && npx prisma generate",
     "test": "vitest run",
@@ -33,6 +34,7 @@
     "@prisma/adapter-neon": "^7.8.0",
     "@prisma/client": "^7.7.0",
     "@sentry/nextjs": "^10.55.0",
+    "@t3-oss/env-nextjs": "^0.13.11",
     "@tabler/icons-react": "^3.41.1",
     "@upstash/redis": "^1.38.0",
     "@vercel/kv": "^3.0.0",
@@ -43,7 +45,8 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "tailwind-merge": "^3.5.0",
-    "ws": "^8.21.0"
+    "ws": "^8.21.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@lhci/cli": "^0.15.1",

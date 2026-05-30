@@ -1,3 +1,4 @@
+import { env } from "../env";
 import dotenv from "dotenv";
 import path from "path";
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
@@ -9,7 +10,7 @@ import ws from "ws";
 
 neonConfig.webSocketConstructor = ws;
 
-const connectionString = process.env.DATABASE_URL;
+const connectionString = env.DATABASE_URL;
 const client = new Client(connectionString);
 const adapter = new PrismaNeon(client as unknown as ConstructorParameters<typeof PrismaNeon>[0]);
 const prisma = new PrismaClient({ adapter });

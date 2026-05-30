@@ -1,5 +1,6 @@
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
+import { env } from "./env";
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -7,8 +8,8 @@ const nextConfig: NextConfig = {
 
 export default withSentryConfig(nextConfig, {
   silent: true,
-  org: process.env.SENTRY_ORG || "dummy-org",
-  project: process.env.SENTRY_PROJECT || "dummy-project",
+  org: env.SENTRY_ORG || "dummy-org",
+  project: env.SENTRY_PROJECT || "dummy-project",
   widenClientFileUpload: true,
   sourcemaps: {
     disable: false,

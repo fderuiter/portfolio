@@ -1,4 +1,5 @@
 import { unstable_cache } from "next/cache";
+import { env } from "../env";
 
 export interface GitHubCommit {
   sha: string;
@@ -67,11 +68,12 @@ async function fetchRawGitHubStats(owner: string, repo: string): Promise<GitHubS
     "User-Agent": "portfolio-app",
   };
   
-  if (process.env.GITHUB_TOKEN) {
-    headers.Authorization = `token ${process.env.GITHUB_TOKEN}`;
-  } else if (process.env.NODE_ENV === "development") {
+  if (env.GITHUB_TOKEN) {
+    headers.Authorization = `token ${env.GITHUB_TOKEN}`;
+  } else if (env.NODE_ENV === "development") {
     console.warn("Warning: GITHUB_TOKEN environment variable is undefined. Unauthenticated GitHub API requests are capped at 60/hour.");
   }
+
 
   // 1. Fetch main repository statistics
   const repoRes = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { 
