@@ -1,3 +1,9 @@
+export interface CaseStudyBadge {
+  type: string;
+  label: string;
+  context: string;
+}
+
 export interface BaseCaseStudy {
   id: string;
   slug: string;
@@ -8,6 +14,7 @@ export interface BaseCaseStudy {
   architectural_narrative: string; // deep-technical breakdowns
   published: boolean;
   tags: string;                    // comma-separated list of tags
+  badges?: CaseStudyBadge[] | null; // Array of badge objects
   created_at: Date;
   updated_at: Date;
 }

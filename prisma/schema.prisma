@@ -22,6 +22,7 @@ model CaseStudy {
   architectural_narrative String   // Stores deep-dive technical explanations
   published               Boolean  @default(false)
   tags                    String   // Comma-separated string or a related Tag model
+  badges                  Json?    // Array of badge objects with type and context
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
 }

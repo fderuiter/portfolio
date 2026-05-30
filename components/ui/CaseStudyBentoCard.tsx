@@ -3,7 +3,7 @@
 import React from "react";
 import { Card, CardTitle } from "@/components/BentoGrid";
 import { PretextRichText, usePretextRichLayout, type ExtendedRichInlineItem } from "@/hooks/usePretextLayout";
-import { BaseCaseStudy } from "@/types/domain";
+import { BaseCaseStudy, CaseStudyBadge } from "@/types/domain";
 import { GitHubStats } from "@/lib/github";
 import { IconStar, IconGitFork, IconAlertCircle, IconTerminal, IconChevronRight } from "@tabler/icons-react";
 import { type RichInlineLine } from "@chenglou/pretext/rich-inline";
@@ -56,7 +56,10 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
     fontFamilyVariable: "--font-inter",
   });
 
-  const finalHeight = hasPrecalculated ? preCalculatedHeight : (internalLayout.isReady ? internalLayout.height + (githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS) : undefined);
+  const basePadding = githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS;
+  const badgesPadding = (study.badges && Array.isArray(study.badges) && study.badges.length > 0) ? LAYOUT_CONFIG.PADDING_BADGES : 0;
+  
+  const finalHeight = hasPrecalculated ? preCalculatedHeight : (internalLayout.isReady ? internalLayout.height + basePadding + badgesPadding : undefined);
   const finalLines = hasPrecalculated ? preCalculatedLines : internalLayout.lines;
   const finalItems = hasPrecalculated ? preCalculatedItems : internalLayout.items;
   const isLayoutReady = hasPrecalculated ? true : internalLayout.isReady;
@@ -65,7 +68,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
 
   React.useLayoutEffect(() => {
     // Check global flag injected by Playwright
-    const isPlaywright = typeof window !== 'undefined' && (window as any).__PLAYWRIGHT_TEST__ === true;
+    const isPlaywright = typeof window !== 'undefined' && (window as unknown as { __PLAYWRIGHT_TEST__?: boolean }).__PLAYWRIGHT_TEST__ === true;
     
     // Only run in development or when explicitly requested by Playwright
     if ((process.env.NODE_ENV === "development" || isPlaywright) && hasPrecalculated && innerRef.current && finalHeight) {
@@ -127,6 +130,32 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
               className="text-zinc-400 text-sm leading-relaxed font-sans"
             />
           </div>
+
+          {/* Social Proof Badges Block */}
+          {study.badges && Array.isArray(study.badges) && study.badges.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {study.badges.slice(0, 3).map((badge: CaseStudyBadge, idx: number) => {
+                let colorClass = "bg-zinc-800 text-zinc-300 border-zinc-700";
+                if (badge.type === "Viral Status") colorClass = "bg-rose-500/10 text-rose-400 border-rose-500/20";
+                else if (badge.type === "Public Adoption") colorClass = "bg-indigo-500/10 text-indigo-400 border-indigo-500/20";
+                else if (badge.type === "Commercial Product") colorClass = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+
+                return (
+                  <div 
+                    key={idx} 
+                    className={`group relative flex items-center px-2.5 py-1 text-xs font-bold font-sans border rounded-full cursor-help transition-colors ${colorClass}`}
+                  >
+                    <span>{badge.label}</span>
+                    {/* Tooltip */}
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-zinc-900 border border-zinc-800 text-zinc-300 text-[10px] leading-tight rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 text-center shadow-xl">
+                      {badge.context}
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-zinc-800" />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           {/* Dynamic GitHub Statistics Hydration */}
           {githubStats && (

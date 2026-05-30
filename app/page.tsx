@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import { CaseStudyShowcase } from "@/components/CaseStudyShowcase";
-import { BaseCaseStudy } from "@/types/domain";
+import { BaseCaseStudy, CaseStudyBadge } from "@/types/domain";
 import { Hero } from "@/components/Hero";
 import { getGitHubStats, parseGitHubUrl, GitHubStats } from "@/lib/github";
 import { TextReveal } from "@/components/TextReveal";
@@ -35,6 +35,7 @@ export default async function WalkingSkeletonPage() {
         }
         return {
           ...d,
+          badges: d.badges as unknown as CaseStudyBadge[] | null,
           created_at: new Date(d.created_at),
           updated_at: new Date(d.updated_at),
           githubStats: stats,
@@ -65,6 +66,25 @@ export default async function WalkingSkeletonPage() {
         },
         {
           id: "mock-2",
+          slug: "laser-loon",
+          title: "Laser Loon",
+          primary_language: "TypeScript",
+          github_url: "https://github.com/fderuiter/laser-loon",
+          published: true,
+          tags: "UI/UX, TypeScript, Animation",
+          editorial_content: "Fast, precise, and visually appealing interactions.",
+          architectural_narrative: "A highly optimized UI sandbox demo.",
+          badges: [
+            { type: "Viral Status", label: "Viral", context: "Achieved viral status with over 1M impressions." },
+            { type: "Public Adoption", label: "Library Card", context: "Adopted by St. Paul Public Library in 2024." },
+            { type: "Commercial Product", label: "Merch", context: "Official merchandise generated $50k+ in revenue." }
+          ],
+          created_at: new Date(),
+          updated_at: new Date(),
+          githubStats: null,
+        },
+        {
+          id: "mock-3",
           slug: "clinical-data-mapper",
           title: "Clinical Data Standards Engine",
           primary_language: "Python",

@@ -1,21 +1,17 @@
 import { useState, useLayoutEffect, useRef, useCallback } from "react";
 import { designManifest } from "@/lib/design-manifest";
-import { 
-  parseMarkdownToRichItems, 
-  type ExtendedRichInlineItem 
-} from "@/hooks/usePretextLayout";
-import { 
-  prepareRichInline, 
-  type RichInlineLine,
-} from "@chenglou/pretext/rich-inline";
+import { parseMarkdownToRichItems, type ExtendedRichInlineItem } from "@/hooks/usePretextLayout";
+import { prepareRichInline, type RichInlineLine } from "@chenglou/pretext/rich-inline";
 import { LAYOUT_CONFIG } from "@/lib/layout-config";
 import { GitHubStats } from "@/lib/github";
 import { calculateMasonryLayout, type PreparedData } from "@/lib/masonry";
+import { CaseStudyBadge } from "@/types/domain";
 
 export interface MasonryItem {
   id: string;
   editorial_content: string;
   githubStats?: GitHubStats | null;
+  badges?: CaseStudyBadge[] | null;
 }
 
 export interface LayoutItem<T extends MasonryItem> {
@@ -66,7 +62,11 @@ export function useMasonryLayout<T extends MasonryItem>(
     for (const study of allItems) {
       const parsedItems = parseMarkdownToRichItems(study.editorial_content, baseFont, boldFont, italicFont, codeFont);
       const prepared = prepareRichInline(parsedItems);
-      const paddingHeight = study.githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS;
+      let paddingHeight = study.githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS;
+      
+      if (study.badges && Array.isArray(study.badges) && study.badges.length > 0) {
+        paddingHeight += LAYOUT_CONFIG.PADDING_BADGES;
+      }
       
       data[study.id] = {
         prepared,

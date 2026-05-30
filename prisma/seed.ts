@@ -154,10 +154,30 @@ class SubjectRecord(BaseModel):
     },
   });
 
+  // 4. Laser Loon Seeding
+  const laserLoon = await prisma.caseStudy.create({
+    data: {
+      slug: "laser-loon",
+      title: "Laser Loon",
+      primary_language: "TypeScript",
+      github_url: "https://github.com/fderuiter/laser-loon",
+      published: true,
+      tags: "UI/UX, TypeScript, Animation",
+      editorial_content: "Fast, precise, and visually appealing interactions.",
+      architectural_narrative: "A highly optimized UI sandbox demo highlighting animation orchestration.",
+      badges: [
+        { type: "Viral Status", label: "Viral", context: "Achieved viral status with over 1M impressions." },
+        { type: "Public Adoption", label: "Library Card", context: "Adopted by St. Paul Public Library in 2024." },
+        { type: "Commercial Product", label: "Merch", context: "Official merchandise generated $50k+ in revenue." }
+      ]
+    },
+  });
+
   console.log(`Successfully seeded:`);
   console.log(`- ${schemaFlow.title}`);
   console.log(`- ${clinicalMapper.title}`);
   console.log(`- ${imednetSdk.title}`);
+  console.log(`- ${laserLoon.title}`);
 }
 
 main()

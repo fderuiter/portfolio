@@ -7,6 +7,7 @@ export const LAYOUT_CONFIG = {
   // We can pull these from designManifest for consistency but centralize their usage here
   PADDING_WITH_STATS: designManifest.masonry.paddingWithStats,
   PADDING_WITHOUT_STATS: designManifest.masonry.paddingWithoutStats,
+  PADDING_BADGES: 44, // Added constant for badges row height
 
   GAP: designManifest.layout.gap,
   CARD_PADDING: designManifest.layout.cardPadding,

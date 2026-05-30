@@ -59,10 +59,6 @@ export default function UISandboxPage() {
             <CardTitle>Project Alpha</CardTitle>
             <CardDescription>A high-performance system for complex calculations.</CardDescription>
           </Card>
-          <Card>
-            <CardTitle>Laser Loon</CardTitle>
-            <CardDescription>Fast, precise, and visually appealing interactions.</CardDescription>
-          </Card>
           <Card className="md:col-span-2 md:row-span-2">
             <CardTitle>QRCraftly</CardTitle>
             <CardDescription>Advanced code generation and context modeling for modern AI.</CardDescription>

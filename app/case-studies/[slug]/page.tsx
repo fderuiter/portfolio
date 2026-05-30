@@ -8,6 +8,7 @@ import { RichNarrative } from "@/components/RichNarrative";
 import { getGitHubStats, parseGitHubUrl } from "@/lib/github";
 import { getSoftwareSourceCodeSchema } from "@/lib/seo";
 import { TelemetryTracker } from "@/components/TelemetryTracker";
+import { BaseCaseStudy } from "@/types/domain";
 
 import type { Metadata } from "next";
 
@@ -120,7 +121,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: getSoftwareSourceCodeSchema(study, stats),
+          __html: getSoftwareSourceCodeSchema(study as unknown as BaseCaseStudy, stats),
         }}
       />
       {/* Background Blurs */}
