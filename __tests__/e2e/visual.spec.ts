@@ -28,6 +28,7 @@ test.describe('Visual Regression & Drift Detection', () => {
   test('Layout constraints drift detection', async ({ page }) => {
     // Inject the global flag for the client so the component enables the checks
     await page.addInitScript(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).__PLAYWRIGHT_TEST__ = true;
     });
 

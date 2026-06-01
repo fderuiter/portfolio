@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { env } from "@/lib/env";
 import { CaseStudyShowcase } from "@/components/CaseStudyShowcase";
 import { BaseCaseStudy } from "@/types/domain";
 import { Hero } from "@/components/Hero";
@@ -47,7 +48,7 @@ export default async function WalkingSkeletonPage() {
     errorMsg = err instanceof Error ? err.message : "Failed to establish a connection to the serverless database.";
     
     // Fallback for CI/Playwright environment to ensure components can be visually tested
-    if (process.env.CI === "true" || process.env.PLAYWRIGHT_TEST === "true") {
+    if (env.CI === "true" || env.PLAYWRIGHT_TEST === "true") {
       errorMsg = ""; // Clear error to render the showcase
       caseStudies = [
         {

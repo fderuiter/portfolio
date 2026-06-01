@@ -11,6 +11,7 @@ import Link from "next/link";
 import { CommitSparkline } from "@/components/CommitSparkline";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { LAYOUT_CONFIG } from "@/lib/layout-config";
+import { env } from "@/lib/env";
 
 interface CaseStudyBentoCardProps {
   study: BaseCaseStudy & { githubStats: GitHubStats | null };
@@ -65,10 +66,11 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
 
   React.useLayoutEffect(() => {
     // Check global flag injected by Playwright
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const isPlaywright = typeof window !== 'undefined' && (window as any).__PLAYWRIGHT_TEST__ === true;
     
     // Only run in development or when explicitly requested by Playwright
-    if ((process.env.NODE_ENV === "development" || isPlaywright) && hasPrecalculated && innerRef.current && finalHeight) {
+    if ((env.NODE_ENV === "development" || isPlaywright) && hasPrecalculated && innerRef.current && finalHeight) {
       const cardEl = innerRef.current.closest('div.isolate') as HTMLElement;
       if (cardEl) {
         const originalHeight = cardEl.style.height;

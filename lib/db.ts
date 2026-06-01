@@ -1,13 +1,14 @@
 import { Client, neonConfig } from "@neondatabase/serverless";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "@/app/generated/prisma/client";
+import { env } from "@/lib/env";
 import ws from "ws";
 
 // Configure Neon to use native 'ws' package inside Node.js environments (like Next.js build server)
 neonConfig.webSocketConstructor = ws;
 
 // Parse connection string
-const connectionString = process.env.DATABASE_URL;
+const connectionString = env.DATABASE_URL;
 
 let isHealthy = false;
 
@@ -16,13 +17,13 @@ const createPrismaClient = () => {
   const adapter = new PrismaNeon(client as unknown as ConstructorParameters<typeof PrismaNeon>[0]);
   const baseClient = new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+    log: env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
   });
 
   return baseClient.$extends({
     query: {
       async $allOperations({ args, query }) {
-        if (!isHealthy && process.env.SKIP_DB_HEALTH_CHECK !== "true") {
+        if (!isHealthy && env.SKIP_DB_HEALTH_CHECK !== "true") {
           try {
             // Runtime pre-flight validation
             await baseClient.$queryRawUnsafe(`SELECT 1 FROM "TelemetryEvent" LIMIT 1`);
@@ -46,4 +47,4 @@ const globalForPrisma = globalThis as unknown as {
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;

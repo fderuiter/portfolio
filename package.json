@@ -6,10 +6,12 @@
     "predev": "npx tsx scripts/generate-theme.ts",
     "dev": "concurrently -n \"turbo,tsc\" -c \"cyan,magenta\" \"next dev --turbo\" \"tsc --noEmit --watch\"",
     "prebuild": "npx tsx scripts/generate-theme.ts",
-    "build": "node scripts/check-migrations.js && npx prisma generate && npx prisma migrate deploy && next build",
+    "build": "npx tsx scripts/check-migrations.ts && npx prisma generate && npx prisma migrate deploy && next build",
     "start": "next start",
     "lint": "eslint",
-    "check": "tsc --noEmit && npm run lint",
+    "check-env": "npx tsx scripts/check-env.ts",
+    "sync": "npx tsx scripts/sync-env.ts",
+    "check": "npm run check-env && tsc --noEmit && npm run lint",
     "prepare": "husky",
     "pretest": "npx tsx scripts/generate-theme.ts && npx prisma generate",
     "test": "vitest run",
@@ -43,7 +45,8 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "tailwind-merge": "^3.5.0",
-    "ws": "^8.21.0"
+    "ws": "^8.21.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@lhci/cli": "^0.15.1",

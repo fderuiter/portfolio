@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { env } from "@/lib/env";
 import crypto from "crypto";
 import { Redis } from "@upstash/redis";
 
@@ -154,8 +155,8 @@ export async function POST(req: NextRequest) {
       console.warn("Primary DB write failed or timed out. Buffering to secondary store.", dbErr);
       
       const redis = new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL || "http://localhost:8079",
-        token: process.env.UPSTASH_REDIS_REST_TOKEN || "example_token",
+        url: env.UPSTASH_REDIS_REST_URL || "http://localhost:8079",
+        token: env.UPSTASH_REDIS_REST_TOKEN || "example_token",
       });
       
       // Push event into Redis list for background synchronization and ensure TTL

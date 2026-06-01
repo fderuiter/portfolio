@@ -1,9 +1,10 @@
 /* eslint-disable */
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { env } from '../lib/env';
 
 const migrationsDir = path.join(__dirname, '../prisma/migrations');
-const overrideFlag = process.env.ALLOW_DESTRUCTIVE_MIGRATIONS === 'true';
+const overrideFlag = env.ALLOW_DESTRUCTIVE_MIGRATIONS === 'true';
 
 if (!fs.existsSync(migrationsDir)) process.exit(0);
 
