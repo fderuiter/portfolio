@@ -154,10 +154,46 @@ class SubjectRecord(BaseModel):
     },
   });
 
+  // 4. Unified Account Transformation Seeding
+  const accountTransformation = await prisma.caseStudy.create({
+    data: {
+      slug: "unified-account-transformation",
+      title: "Unified Account Transformation",
+      primary_language: "TypeScript",
+      github_url: "https://github.com/fderuiter/unified-account-transformation",
+      published: true,
+      tags: "Identity, Verification, OTP, SNA, Stripe Connect, Clinical Data",
+      editorial_content: "An automated account conversion engine and unified identity resolution service to eliminate technical onboarding barriers. Features phone ownership verification via OTP and automated EEA verification fallback.",
+      architectural_narrative: `
+<h3>1. Context & Objectives</h3>
+<p><strong>Problem Statement:</strong> Existing users encounter onboarding dead ends when phone numbers are already linked to global Link profiles or when attempting to migrate between incompatible account types. Current systems lack the infrastructure to validate unique phone ownership or transition accounts from Standard to Express formats.</p>
+<p><strong>Business Goal:</strong> Eliminate technical barriers to entry for existing account holders, increasing successful onboarding throughput.</p>
+<p><strong>Hypothesis:</strong> Implementing an automated account conversion engine and unified identity resolution will remove the primary causes of abandonment for returning users.</p>
+
+<h3>2. User Scenarios</h3>
+<ul>
+  <li><strong>Resolving Identity Conflicts:</strong> Instead of a "number in use" error, the system validates ownership via OTP and merges the identity into the current session.</li>
+  <li><strong>Seamless Account Type Migration:</strong> The system detects an existing Standard account and automatically converts it to the Express format without forcing the user to start a new application.</li>
+  <li><strong>Automated EEA Verification:</strong> If the Secure Network Authentication (SNA) check fails (e.g., Twilio error 60510), the system immediately offers an OTP fallback to maintain momentum.</li>
+</ul>
+
+<h3>3. Functional Implementation</h3>
+<p>The system was engineered using a decoupled set of microservices built on Node.js and Prisma ORM:</p>
+<ul>
+  <li>Implemented a phone ownership verification bridge using OTP to resolve Link profile conflicts.</li>
+  <li>Created an automated backend engine to transition account types from Standard to Express/Custom roles.</li>
+  <li>Built a tiered verification handler that triggers OTP fallbacks upon SNA mismatch or failure.</li>
+  <li>Developed a session linking service to migrate user data and clinical context across merged identities safely.</li>
+</ul>
+      `.trim(),
+    },
+  });
+
   console.log(`Successfully seeded:`);
   console.log(`- ${schemaFlow.title}`);
   console.log(`- ${clinicalMapper.title}`);
   console.log(`- ${imednetSdk.title}`);
+  console.log(`- ${accountTransformation.title}`);
 }
 
 main()

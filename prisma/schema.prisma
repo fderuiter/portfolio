@@ -35,3 +35,35 @@ model TelemetryEvent {
   @@index([projectSlug])
   @@index([eventType])
 }
+
+model Account {
+  id            String   @id @default(cuid())
+  phoneNumber   String   @unique
+  accountType   String   @default("Standard") // Standard, Express, Custom
+  linkProfileId String?
+  linkProfile   LinkProfile? @relation(fields: [linkProfileId], references: [id])
+  sessions      Session[]
+  clinicalData  String?  // JSON string or related model for clinical context
+}
+
+model LinkProfile {
+  id          String   @id @default(cuid())
+  phoneNumber String   @unique
+  accounts    Account[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  accountId String
+  account   Account  @relation(fields: [accountId], references: [id])
+  active    Boolean  @default(true)
+}
+
+model Verification {
+  id          String   @id @default(cuid())
+  phoneNumber String
+  method      String   // SNA, OTP
+  status      String   // pending, success, failed
+  otpCode     String?
+  createdAt   DateTime @default(now())
+}
