@@ -144,7 +144,7 @@ const parseCSSAndGenerateTS = () => {
   // Motion
   ts += `  motion: {\n    springs: {\n`;
   for (const [k, obj] of Object.entries(manifest.motion.springs)) {
-    ts += `      ${k}: { type: "${(obj as /* eslint-disable-line @typescript-eslint/no-explicit-any */ any).type}", stiffness: ${(obj as /* eslint-disable-line @typescript-eslint/no-explicit-any */ any).stiffness}, damping: ${(obj as /* eslint-disable-line @typescript-eslint/no-explicit-any */ any).damping} },\n`;
+    ts += `      ${k}: { type: "${(obj as   any).type}", stiffness: ${(obj as   any).stiffness}, damping: ${(obj as /* eslint-disable-line @typescript-eslint/no-explicit-any */ any).damping} },\n`;
   }
   ts += `    }\n  }\n`;
 
