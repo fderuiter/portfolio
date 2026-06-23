@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { getPersonSchema } from "@/lib/seo";
 import { CommandPalette } from "@/components/CommandPalette";
+import { A11yProvider } from "@/components/providers/A11yProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -75,9 +76,11 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-zinc-950 text-foreground antialiased">
-        <Navbar />
-        {children}
-        <CommandPalette />
+        <A11yProvider>
+          <Navbar />
+          {children}
+          <CommandPalette />
+        </A11yProvider>
       </body>
     </html>
   );

@@ -10,6 +10,7 @@ import { type RichInlineLine } from "@chenglou/pretext/rich-inline";
 import Link from "next/link";
 import { CommitSparkline } from "@/components/CommitSparkline";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { useAnnouncer } from "@/components/providers/A11yProvider";
 import { LAYOUT_CONFIG } from "@/lib/layout-config";
 
 interface CaseStudyBentoCardProps {
@@ -45,6 +46,14 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
   // Track dynamic real-time telemetry metrics site-wide
   const { telemetry, syncFailed, recordEvent } = useTelemetry();
   const stats = telemetry[study.slug] || { views: 0, clicks: 0 };
+  
+  const { announce } = useAnnouncer();
+
+  React.useEffect(() => {
+    if (syncFailed) {
+      announce("Tax sync failed", "assertive");
+    }
+  }, [syncFailed, announce]);
 
   const hasPrecalculated = preCalculatedHeight !== undefined && preCalculatedLines !== undefined && preCalculatedItems !== undefined;
 
@@ -65,7 +74,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
 
   React.useLayoutEffect(() => {
     // Check global flag injected by Playwright
-    const isPlaywright = typeof window !== 'undefined' && (window as any).__PLAYWRIGHT_TEST__ === true;
+    const isPlaywright = typeof window !== 'undefined' && (window as unknown as { __PLAYWRIGHT_TEST__?: boolean }).__PLAYWRIGHT_TEST__ === true;
     
     // Only run in development or when explicitly requested by Playwright
     if ((process.env.NODE_ENV === "development" || isPlaywright) && hasPrecalculated && innerRef.current && finalHeight) {
@@ -238,12 +247,14 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
         {/* Dynamic Telemetry Metrics HUD */}
         <div className="flex items-center gap-4 text-[10px] font-mono text-zinc-500 mt-2 mb-1 relative z-10 select-none">
           <span className="flex items-center gap-1.5" title="Aggregate Page Views">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
-            <span className="text-zinc-300 font-bold">{stats.views.toLocaleString()}</span> VIEWS
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" aria-hidden="true" />
+            <span className="sr-only" aria-live="polite">Live page views: {stats.views}</span>
+            <span className="text-zinc-300 font-bold" aria-hidden="true">{stats.views.toLocaleString()}</span> <span aria-hidden="true">VIEWS</span>
           </span>
           <span className="flex items-center gap-1.5" title="Bento Card Interactions">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-            <span className="text-zinc-300 font-bold">{stats.clicks.toLocaleString()}</span> CLICKS
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" aria-hidden="true" />
+            <span className="sr-only" aria-live="polite">Live clicks: {stats.clicks}</span>
+            <span className="text-zinc-300 font-bold" aria-hidden="true">{stats.clicks.toLocaleString()}</span> <span aria-hidden="true">CLICKS</span>
           </span>
           {syncFailed && (
             <span 
