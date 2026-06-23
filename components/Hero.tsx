@@ -1,10 +1,10 @@
 // Source: https://ui.aceternity.com/components/background-beams-with-collision
 "use client";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import { m as motion, AnimatePresence } from "framer-motion";
 import React, { useRef, useState, useEffect } from "react";
 import { usePretextLayout } from "@/hooks/usePretextLayout";
-import { AnimatedGridPattern } from "@/components/AnimatedGridPattern";
+import { DynamicAnimatedGridPattern as AnimatedGridPattern } from "@/components/DynamicComponents";
 import { designManifest } from "@/lib/design-manifest";
 import { hexToRgba } from "@/lib/utils";
 

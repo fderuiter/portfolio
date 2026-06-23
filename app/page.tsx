@@ -5,8 +5,8 @@ import { Hero } from "@/components/Hero";
 import { getGitHubStats, parseGitHubUrl, GitHubStats } from "@/lib/github";
 import { TextReveal } from "@/components/TextReveal";
 import { SkillsGrid } from "@/components/SkillsGrid";
-import { Timeline } from "@/components/Timeline";
 import { Tooltip } from "@/components/ui/Tooltip";
+import { DynamicTimeline as Timeline } from "@/components/DynamicComponents";
 
 interface HydratedCaseStudy extends BaseCaseStudy {
   githubStats: GitHubStats | null;

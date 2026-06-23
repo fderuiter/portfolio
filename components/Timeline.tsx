@@ -2,7 +2,7 @@
 
 import React from "react";
 import { hexToRgba } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { m as motion } from "framer-motion";
 import { designManifest } from "@/lib/design-manifest";
 
 export interface TimelineItem {

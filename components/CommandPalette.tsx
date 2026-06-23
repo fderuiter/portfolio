@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useId, useMemo } from "react";
 import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { m as motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { IconSearch, IconTerminal, IconFileCode, IconDirections, IconCornerDownLeft } from "@tabler/icons-react";
 import { filterFuzzySearch } from "@/lib/search-utils";

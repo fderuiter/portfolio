@@ -3,7 +3,7 @@
 import React from "react";
 import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
-import { motion } from "framer-motion";
+import { m as motion } from "framer-motion";
 import { Tooltip } from "@/components/ui/Tooltip";
 
 export interface SkillLanguage {

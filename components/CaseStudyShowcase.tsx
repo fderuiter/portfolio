@@ -5,7 +5,7 @@ import { CaseStudyBentoCard } from "@/components/ui/CaseStudyBentoCard";
 import { BaseCaseStudy } from "@/types/domain";
 import { hexToRgba } from "@/lib/utils";
 import { GitHubStats } from "@/lib/github";
-import { motion, AnimatePresence } from "framer-motion";
+import { m as motion, AnimatePresence } from "framer-motion";
 import { designManifest } from "@/lib/design-manifest";
 import { useMasonryLayout } from "@/hooks/useMasonryLayout";
 
