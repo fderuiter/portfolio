@@ -58,8 +58,10 @@ export function A11yProvider({ children }: { children: React.ReactNode }) {
     }
   }, [politeQueue, assertiveQueue]);
 
+  const contextValue = React.useMemo(() => ({ announce }), [announce]);
+
   return (
-    <AnnouncerContext.Provider value={{ announce }}>
+    <AnnouncerContext.Provider value={contextValue}>
       {children}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {politeMessage}
