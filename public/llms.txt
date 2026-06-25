@@ -1,0 +1,54 @@
+# Portfolio Hub Utility Catalog
+
+This file contains a list of all reusable utilities, hooks, and components in the repository.
+
+## PDFEngine
+- **Path:** lib/accessibility-utils.ts
+- **Model:** centralized reuse
+- **Description:** Enterprise Accessibility Infrastructure
+
+## FocusBridge
+- **Path:** lib/accessibility-utils.ts
+- **Model:** centralized reuse
+- **Description:** Generates a 1099 PDF payload that successfully passes the PAC
+
+## designManifest
+- **Path:** lib/design-manifest.ts
+- **Model:** centralized reuse
+- **Description:** AUTO-GENERATED DESIGN TOKENS
+
+## parseGitHubUrl
+- **Path:** lib/github.ts
+- **Model:** centralized reuse
+- **Description:** Robust helper to parse owner and repository name from arbitrary GitHub URLs.
+
+## getPersonSchema
+- **Path:** lib/seo.ts
+- **Model:** centralized reuse
+- **Description:** Returns the canonical Person schema representing Frederick de Ruiter.
+
+## getSoftwareSourceCodeSchema
+- **Path:** lib/seo.ts
+- **Model:** centralized reuse
+- **Description:** Returns a specialized SoftwareSourceCode schema for dynamic Case Studies.
+
+## usePersistentState
+- **Path:** hooks/usePersistentState.ts
+- **Model:** centralized reuse
+- **Description:** A custom hook that works like useState but persists the state to localStorage.
+
+## parseMarkdownToRichItems
+- **Path:** hooks/usePretextLayout.tsx
+- **Model:** centralized reuse
+- **Description:** Tokenizes markdown-like inline text (**bold**, *italic*, `code`) into RichInlineItem arrays.
+
+## useTelemetry
+- **Path:** hooks/useTelemetry.ts
+- **Model:** centralized reuse
+- **Description:** Custom hook implementing a robust Stale-While-Revalidate (SWR) telemetry system.
+
+## TelemetryTracker
+- **Path:** components/TelemetryTracker.tsx
+- **Model:** copy-and-paste
+- **Description:** Lightweight Client Component tracker designed to silently capture page_view events on mount.
+

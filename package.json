@@ -11,6 +11,7 @@
     "lint": "eslint",
     "check": "tsc --noEmit && npm run lint",
     "prepare": "husky",
+    "mcp": "tsx scripts/catalog-mcp.ts",
     "pretest": "npx tsx scripts/generate-theme.ts && npx prisma generate",
     "test": "vitest run",
     "test:ci": "vitest run",
@@ -29,6 +30,7 @@
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.5",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@neondatabase/serverless": "^1.1.0",
     "@prisma/adapter-neon": "^7.8.0",
     "@prisma/client": "^7.7.0",
