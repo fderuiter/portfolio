@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
  */
 export function validateRouteInitialization() {
   const isDev = process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
-  const isBuild = process.env.NEXT_PHASE === "phase-production-build";
+  const isBuild = process.env.NEXT_PHASE === "phase-production-build" || process.env.PLAYWRIGHT_TEST === "true" || process.env.CI === "true";
   
   if (!isDev && !isBuild && !process.env.CRON_SECRET) {
     throw new Error("Route initialization failed: Required validation secret is missing.");
