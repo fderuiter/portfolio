@@ -41,13 +41,32 @@ export const PretextCard: React.FC<PretextCardProps> = ({
         <div className="mb-4">
           <CardTitle>{title}</CardTitle>
           {/* Attach Ref to the text container */}
-          <div ref={ref} aria-hidden="true" role="presentation">
-            <CardDescription className={!isReady ? "invisible" : "transition-opacity duration-300"}>
+          <div className="relative">
+            {/* Custom Visual Presentation (hidden from screen readers, not selectable) */}
+            <div
+              ref={ref}
+              aria-hidden="true"
+              role="presentation"
+              className="select-none pointer-events-none"
+            >
+              <CardDescription className={!isReady ? "invisible" : "transition-opacity duration-300"}>
+                {description}
+              </CardDescription>
+            </div>
+            {/* Transparent Standard Semantic Overlay (selectable, readable by screen readers) */}
+            <p
+              className={`font-sans text-xs font-normal leading-relaxed absolute inset-0 select-text bg-transparent ${!isReady ? "invisible" : "transition-opacity duration-300"}`}
+              style={{
+                color: "transparent",
+                WebkitTextFillColor: "transparent",
+                pointerEvents: "auto",
+                margin: 0,
+                padding: 0,
+              }}
+            >
               {description}
-            </CardDescription>
+            </p>
           </div>
-          {/* Visually Hidden Semantic DOM Parallel Node */}
-          <p className="sr-only">{description}</p>
         </div>
         <div className="text-[10px] text-brand-blue font-mono self-end opacity-60">
           {!isReady ? "Measuring..." : `Pretext height: ${computedHeight}px`}

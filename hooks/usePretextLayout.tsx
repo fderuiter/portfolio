@@ -171,25 +171,36 @@ export const PretextText: React.FC<PretextTextProps> = ({
   const SemanticElement = semanticTag;
 
   return (
-    <>
-      {/* 1. Visually Hidden Semantic DOM Parallel Node */}
-      <SemanticElement className="sr-only">
-        {text}
-      </SemanticElement>
-
-      {/* 2. Isolated Visual Layout Container hidden from Assistive Tech */}
+    <div
+      className="relative"
+      style={{
+        height: isReady ? `${height}px` : "auto",
+      }}
+    >
+      {/* 1. Custom Visual Presentation (hidden from screen readers, not selectable) */}
       <div
         ref={ref}
         aria-hidden="true"
         role="presentation"
-        style={{
-          height: isReady ? `${height}px` : "auto",
-        }}
-        className={className}
+        className={`${className || ""} select-none pointer-events-none`}
       >
         {children || text}
       </div>
-    </>
+
+      {/* 2. Transparent Standard Semantic Overlay (selectable, readable by screen readers) */}
+      <SemanticElement
+        className={`${className || ""} absolute inset-0 select-text bg-transparent`}
+        style={{
+          color: "transparent",
+          WebkitTextFillColor: "transparent",
+          pointerEvents: "auto",
+          margin: 0,
+          padding: 0,
+        }}
+      >
+        {text}
+      </SemanticElement>
+    </div>
   );
 };
 
@@ -418,17 +429,13 @@ export const PretextRichText: React.FC<PretextRichTextProps> = ({
     );
   }
 
-  const cleanFallbackText = fallbackText
-    ? fallbackText.replace(/\*\*|`|\*/g, "")
-    : items.map((it) => it.text).join("");
-
   return (
-    <>
-      <p className="sr-only">{cleanFallbackText}</p>
+    <div className="relative">
+      {/* 1. Custom Visual Presentation (hidden from screen readers, not selectable) */}
       <div 
         aria-hidden="true" 
         role="presentation" 
-        className={className}
+        className={`${className || ""} select-none pointer-events-none`}
         style={{ display: "flex", flexDirection: "column" }}
       >
         {lines.map((line, lineIdx) => (
@@ -444,7 +451,7 @@ export const PretextRichText: React.FC<PretextRichTextProps> = ({
                 return (
                   <span
                     key={fragIdx}
-                    className="px-1.5 py-0 mx-0.5 text-[11px] font-mono font-bold bg-brand-cyan/10 border border-brand-cyan/20 text-brand-cyan rounded-md inline-block shadow-[0_0_10px_rgba(6,182,212,0.05)] align-middle leading-[1.3] truncate select-text"
+                    className="px-1.5 py-0 mx-0.5 text-[11px] font-mono font-bold bg-brand-cyan/10 border border-brand-cyan/20 text-brand-cyan rounded-md inline-block shadow-[0_0_10px_rgba(6,182,212,0.05)] align-middle leading-[1.3] truncate"
                     style={{ 
                       marginLeft: frag.gapBefore > 0 ? `${frag.gapBefore}px` : undefined,
                     }}
@@ -475,7 +482,32 @@ export const PretextRichText: React.FC<PretextRichTextProps> = ({
           </div>
         ))}
       </div>
-    </>
+
+      {/* 2. Transparent Standard Semantic Overlay (selectable, readable by screen readers) */}
+      <p 
+        className={`${className || ""} absolute inset-0 select-text bg-transparent`}
+        style={{
+          color: "transparent",
+          WebkitTextFillColor: "transparent",
+          pointerEvents: "auto",
+          margin: 0,
+          padding: 0,
+        }}
+      >
+        {items.map((item, idx) => {
+          if (item.type === "bold") {
+            return <strong key={idx}>{item.text}</strong>;
+          }
+          if (item.type === "italic") {
+            return <em key={idx}>{item.text}</em>;
+          }
+          if (item.type === "code") {
+            return <code key={idx}>{item.text}</code>;
+          }
+          return <span key={idx}>{item.text}</span>;
+        })}
+      </p>
+    </div>
   );
 };
 
