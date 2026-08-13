@@ -2,7 +2,7 @@ import { prisma } from "@/lib/db";
 import { CaseStudyShowcase } from "@/components/CaseStudyShowcase";
 import { BaseCaseStudy } from "@/types/domain";
 import { Hero } from "@/components/Hero";
-import { getGitHubStats, parseGitHubUrl, GitHubStats } from "@/lib/github";
+import { getGitHubStats, parseGitHubUrl, GitHubStats, getSimulatedStats } from "@/lib/github";
 import { TextReveal } from "@/components/TextReveal";
 import { SkillsGrid } from "@/components/SkillsGrid";
 import { Timeline } from "@/components/Timeline";
@@ -28,7 +28,9 @@ export default async function WalkingSkeletonPage() {
     caseStudies = await Promise.all(
       data.map(async (d) => {
         let stats: GitHubStats | null = null;
-        if (d.github_url) {
+        if (d.simulated_telemetry) {
+          stats = getSimulatedStats(d.primary_language);
+        } else if (d.github_url) {
           const parsed = parseGitHubUrl(d.github_url);
           if (parsed) {
             stats = await getGitHubStats(parsed.owner, parsed.repo);
@@ -58,6 +60,7 @@ export default async function WalkingSkeletonPage() {
           primary_language: "TypeScript",
           github_url: "https://github.com/fderuiter/SchemaFlow",
           published: true,
+          simulated_telemetry: false,
           tags: "TypeScript, React, Flow",
           editorial_content: "A **reactive**, `visual graph editor` built in **TypeScript**.",
           architectural_narrative: "Mock narrative",
@@ -72,6 +75,7 @@ export default async function WalkingSkeletonPage() {
           primary_language: "Python",
           github_url: "https://github.com/fderuiter/clinical-data-mapper",
           published: true,
+          simulated_telemetry: false,
           tags: "Python, SDTM, Pipeline",
           editorial_content: "An enterprise-grade mapping pipeline.",
           architectural_narrative: "Mock narrative",

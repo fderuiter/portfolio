@@ -17,7 +17,7 @@ interface CaseStudyShowcaseProps {
   caseStudies: HydratedCaseStudy[];
 }
 
-const FILTER_TABS = ["All", "TypeScript", "Python"];
+const FILTER_TABS = ["All", "TypeScript", "Python", "Haskell"];
 
 export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = ({ caseStudies }) => {
   const [selectedFilter, setSelectedFilter] = useState("All");

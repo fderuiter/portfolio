@@ -21,6 +21,7 @@ model CaseStudy {
   editorial_content       String   // Stores general descriptions
   architectural_narrative String   // Stores deep-dive technical explanations
   published               Boolean  @default(false)
+  simulated_telemetry     Boolean  @default(false)
   tags                    String   // Comma-separated string or a related Tag model
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt

@@ -22,6 +22,7 @@ const SEED_PAYLOADS = [
     primary_language: "TypeScript",
     github_url: "https://github.com/fderuiter/SchemaFlow",
     published: true,
+    simulated_telemetry: false,
     tags: "TypeScript, React, Flow, Schemas, AST, Node-RED",
     editorial_content: "A **reactive**, `visual graph editor` built in **TypeScript** and **React** that allows system architects to visually compose, validate, and compile complex `JSON Schema` structures in real time. Features highly responsive `node evaluation`, cyclical dependency detection, and live `code generation`.",
     architectural_narrative: `
@@ -57,6 +58,7 @@ interface SchemaNode {
     primary_language: "TypeScript",
     github_url: "https://github.com/fderuiter/clinical-data-mapper",
     published: true,
+    simulated_telemetry: false,
     tags: "TypeScript, CDISC, ODM, SDTM, XML Parser, Clinical Trials, HIPAA",
     editorial_content: "An enterprise-grade **TypeScript** mapping pipeline that ingests clinical trial metadata in `CDISC Operational Data Model (ODM)` XML format, dynamically constructs `data schemas`, and transforms raw `Electronic Data Capture (EDC)` datasets into compliant **CDISC SDTM** domains.",
     architectural_narrative: `
@@ -106,6 +108,7 @@ interface ODMClinicalData {
     primary_language: "Python",
     github_url: "https://github.com/fderuiter/imednet-python-sdk",
     published: true,
+    simulated_telemetry: false,
     tags: "Python, SDK, iMednet, API Client, Clinical Trials, HIPAA, Clinical Data",
     editorial_content: "A **robust**, fully-typed `Python SDK` client for programmatic extraction and integration of clinical trial metadata and patient records from the `iMednet EDC` platform. Built for **biostatisticians** and **clinical data engineers**.",
     architectural_narrative: `
@@ -136,6 +139,23 @@ class SubjectRecord(BaseModel):
 
 <h4>3. Interactive Developer Sandbox</h4>
 <p>To accelerate developer onboarding, the repository introduces an interactive CLI sandbox built directly into the portfolio. Systems engineers can test commands, inspect raw JSON schemas, and simulate error/empty responses in real time, accelerating integration time-to-market from weeks to minutes.</p>
+    `.trim(),
+  },
+  {
+    slug: "aura-haskell",
+    title: "Aura: Language-Tailored Haskell Type Flow Analyzer",
+    primary_language: "Haskell",
+    github_url: "https://github.com/fderuiter/aura-haskell",
+    published: true,
+    simulated_telemetry: true,
+    tags: "Haskell, GHC, Compiler, AST, Static Analysis",
+    editorial_content: "An advanced **Haskell** static analyzer and type inference engine that parses GHC ASTs, traces type flow, and detects compile-time architectural anti-patterns with near-instantaneous feedback loops.",
+    architectural_narrative: `
+<h3>The Challenge</h3>
+<p>Haskell codebases are robust, but tracing complex monadic types or locating space leaks can be incredibly slow and taxing. Developers need visual, live compiler-level insight without introducing manual tracing overhead or restarting GHC sessions repeatedly.</p>
+
+<h3>The Architecture</h3>
+<p>Aura uses GHC plugins to stream compilation ASTs and type constraints directly. In the dashboard, these constraints are modeled as a unified type flow graph, allowing real-time inspection of active monads, lazy evaluation spaces, and compiler optimizations.</p>
     `.trim(),
   },
 ];

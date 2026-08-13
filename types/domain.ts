@@ -7,6 +7,7 @@ export interface BaseCaseStudy {
   editorial_content: string;       // general summaries
   architectural_narrative: string; // deep-technical breakdowns
   published: boolean;
+  simulated_telemetry: boolean;
   tags: string;                    // comma-separated list of tags
   created_at: Date;
   updated_at: Date;

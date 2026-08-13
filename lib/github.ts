@@ -198,3 +198,248 @@ export async function getGitHubStats(owner: string, repo: string): Promise<GitHu
     }
   }
 }
+
+export interface SimulatedTerminalLog {
+  text: string;
+  color?: string;
+}
+
+export function getSimulatedTerminalCommand(language: string): string {
+  const lang = language.toLowerCase();
+  if (lang === "haskell") return "stack build --fast";
+  if (lang === "typescript") return "tsc --build --watch";
+  if (lang === "python") return "pytest -v --color=yes";
+  return "make build";
+}
+
+export function getSimulatedTerminalLogs(language: string): SimulatedTerminalLog[] {
+  const lang = language.toLowerCase();
+  if (lang === "haskell") {
+    return [
+      { text: "[1 of 4] Compiling Core.AST          ( src/Core/AST.hs, AST.o )", color: "text-zinc-400" },
+      { text: "[2 of 4] Compiling Parser.Type      ( src/Parser/Type.hs, Type.o )", color: "text-zinc-400" },
+      { text: "[3 of 4] Compiling Solver.Unify     ( src/Solver/Unify.hs, Unify.o )", color: "text-zinc-400" },
+      { text: "[4 of 4] Compiling Main             ( app/Main.hs, Main.o )", color: "text-zinc-400" },
+      { text: "Linking .stack-work/dist/x86_64/aura-compiler ...", color: "text-zinc-500" },
+      { text: "Build successful! Loaded 4 modules.", color: "text-emerald-400" },
+    ];
+  }
+  if (lang === "typescript") {
+    return [
+      { text: "[1:24:02 PM] Starting compilation in watch mode...", color: "text-zinc-500" },
+      { text: "[1:24:04 PM] Found 0 errors. Watching for file changes.", color: "text-emerald-400" },
+      { text: "[1:24:10 PM] File change detected. Starting incremental compilation...", color: "text-brand-cyan" },
+      { text: "[1:24:11 PM] TS2304: Cannot find name 'unreachable' (Self-healed)", color: "text-amber-500" },
+      { text: "[1:24:12 PM] Re-compiled successfully. [0 errors]", color: "text-emerald-400" },
+    ];
+  }
+  if (lang === "python") {
+    return [
+      { text: "==================== test session starts ====================", color: "text-zinc-500" },
+      { text: "platform linux -- Python 3.11.4, pytest-7.4.0", color: "text-zinc-400" },
+      { text: "plugins: cov-4.1.0, pydantic-2.1.1", color: "text-zinc-500" },
+      { text: "collected 18 items", color: "text-zinc-300" },
+      { text: "tests/test_transport.py ... PASSED", color: "text-emerald-500" },
+      { text: "tests/test_hipaa_boundary.py ... PASSED", color: "text-emerald-500" },
+      { text: "==================== 18 passed in 0.42s =====================", color: "text-emerald-400" },
+    ];
+  }
+  return [
+    { text: "[info] Initializing compiler pipeline...", color: "text-zinc-500" },
+    { text: "[info] Parsing source file dependencies...", color: "text-zinc-500" },
+    { text: `[info] Compiling ${language} modules...`, color: "text-zinc-300" },
+    { text: "[success] Build target compiled successfully in 2.34s", color: "text-emerald-400" },
+  ];
+}
+
+export function getSimulatedStats(language: string): GitHubStats {
+  let stars = 42;
+  let forks = 8;
+  let openIssues = 1;
+  let languages: GitHubLanguage[] = [];
+  
+  const lang = language.toLowerCase();
+  if (lang === "typescript") {
+    stars = 148;
+    forks = 24;
+    openIssues = 3;
+    languages = [
+      { name: "TypeScript", percentage: 88 },
+      { name: "JavaScript", percentage: 12 },
+    ];
+  } else if (lang === "python") {
+    stars = 112;
+    forks = 18;
+    openIssues = 2;
+    languages = [
+      { name: "Python", percentage: 95 },
+      { name: "HTML", percentage: 5 },
+    ];
+  } else if (lang === "haskell") {
+    stars = 74;
+    forks = 11;
+    openIssues = 0;
+    languages = [
+      { name: "Haskell", percentage: 91 },
+      { name: "CSS", percentage: 9 },
+    ];
+  } else {
+    stars = 50;
+    forks = 10;
+    openIssues = 2;
+    languages = [
+      { name: language, percentage: 100 },
+    ];
+  }
+
+  const commitActivity = Array.from({ length: 52 }, (_, i) => {
+    const base = 4;
+    const wave = Math.round(Math.sin(i / 2.5) * 3);
+    const spike = i % 7 === 0 ? 4 : 0;
+    return Math.max(1, base + wave + spike);
+  });
+
+  let recentCommits: GitHubCommit[] = [];
+  if (lang === "haskell") {
+    recentCommits = [
+      {
+        sha: "a1b2c3d",
+        message: "Merge pull request #14 from ghc-9.2-upgrade",
+        date: new Date(Date.now() - 3600000 * 2).toISOString(),
+        author: "Frederick de Ruiter",
+      },
+      {
+        sha: "e5f6g7h",
+        message: "Optimize monadic parser combinators for large AST streams",
+        date: new Date(Date.now() - 3600000 * 12).toISOString(),
+        author: "Frederick de Ruiter",
+      },
+      {
+        sha: "i9j0k1l",
+        message: "Refactor type flow tracer to use ReaderT design pattern",
+        date: new Date(Date.now() - 3600000 * 24).toISOString(),
+        author: "Frederick de Ruiter",
+      },
+      {
+        sha: "m2n3o4p",
+        message: "Fix space leak in lazy evaluation check of compiler",
+        date: new Date(Date.now() - 3600000 * 48).toISOString(),
+        author: "Frederick de Ruiter",
+      },
+      {
+        sha: "q5r6s7t",
+        message: "Initial prototype of aura AST parser",
+        date: new Date(Date.now() - 3600000 * 120).toISOString(),
+        author: "Frederick de Ruiter",
+      },
+    ];
+  } else if (lang === "typescript") {
+    recentCommits = [
+      {
+        sha: "f1d2e3a",
+        message: "perf: optimize web worker message transfer serialization",
+        date: new Date(Date.now() - 3600000 * 3).toISOString(),
+        author: "Frederick de Ruiter",
+      },
+      {
+        sha: "c4b5a6f",
+        message: "feat: add cyclic dependency detection algorithm to DAG core",
+        date: new Date(Date.now() - 3600000 * 15).toISOString(),
+        author: "Frederick de Ruiter",
+      },
+      {
+        sha: "e7d8c9b",
+        message: "refactor: migrate state management store to Zustand",
+        date: new Date(Date.now() - 3600000 * 30).toISOString(),
+        author: "Frederick de Ruiter",
+      },
+      {
+        sha: "a1b2c3d",
+        message: "test: add integration test suite for AST compilation",
+        date: new Date(Date.now() - 3600000 * 60).toISOString(),
+        author: "Frederick de Ruiter",
+      },
+      {
+        sha: "4f5e6d7",
+        message: "initial commit: basic node workspace layout and setup",
+        date: new Date(Date.now() - 3600000 * 150).toISOString(),
+        author: "Frederick de Ruiter",
+      },
+    ];
+  } else if (lang === "python") {
+    recentCommits = [
+      {
+        sha: "p9o8i7u",
+        message: "release: v1.1.2 patch for clinical-data transport layer security",
+        date: new Date(Date.now() - 3600000 * 4).toISOString(),
+        author: "Frederick de Ruiter",
+      },
+      {
+        sha: "y6t5r4e",
+        message: "feat: enforce TLS 1.3 encryption and automatic token rotation",
+        date: new Date(Date.now() - 3600000 * 18).toISOString(),
+        author: "Frederick de Ruiter",
+      },
+      {
+        sha: "w3q2a1s",
+        message: "refactor: migrate clinical models to Pydantic v2 core schemas",
+        date: new Date(Date.now() - 3600000 * 36).toISOString(),
+        author: "Frederick de Ruiter",
+      },
+      {
+        sha: "z9x8c7v",
+        message: "test: implement HIPAA transport boundary mock endpoints",
+        date: new Date(Date.now() - 3600000 * 72).toISOString(),
+        author: "Frederick de Ruiter",
+      },
+      {
+        sha: "b6n5m4a",
+        message: "setup: initialize pyproject.toml and poetry structure",
+        date: new Date(Date.now() - 3600000 * 180).toISOString(),
+        author: "Frederick de Ruiter",
+      },
+    ];
+  } else {
+    recentCommits = [
+      {
+        sha: "d3c2b1a",
+        message: `update core modules and dependencies for ${language} codebase`,
+        date: new Date(Date.now() - 3600000 * 5).toISOString(),
+        author: "Frederick de Ruiter",
+      },
+      {
+        sha: "a4b5c6d",
+        message: "optimize internal algorithms and data structures",
+        date: new Date(Date.now() - 3600000 * 20).toISOString(),
+        author: "Frederick de Ruiter",
+      },
+      {
+        sha: "e7f8g9h",
+        message: "add integration and unit tests for core pipeline",
+        date: new Date(Date.now() - 3600000 * 40).toISOString(),
+        author: "Frederick de Ruiter",
+      },
+      {
+        sha: "i1j2k3l",
+        message: "improve error handling and exception logging structures",
+        date: new Date(Date.now() - 3600000 * 80).toISOString(),
+        author: "Frederick de Ruiter",
+      },
+      {
+        sha: "m4n5o6p",
+        message: `initial workspace layout for ${language} project`,
+        date: new Date(Date.now() - 3600000 * 200).toISOString(),
+        author: "Frederick de Ruiter",
+      },
+    ];
+  }
+
+  return {
+    stars,
+    forks,
+    openIssues,
+    languages,
+    recentCommits,
+    commitActivity,
+  };
+}
