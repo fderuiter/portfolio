@@ -8,7 +8,7 @@
 
 > **calculateCollisionPoint**(`beamRect`, `parentRect`): [`Point2D`](../type-aliases/Point2D.md)
 
-Defined in: [lib/graphics-engine.ts:343](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L343)
+Defined in: [lib/graphics-engine.ts:346](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L346)
 
 Calculates relative coordinates of the collision point with respect to a parent container.
 
