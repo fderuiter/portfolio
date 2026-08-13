@@ -257,7 +257,7 @@ export default async function WalkingSkeletonPage() {
                 ✉
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">Email Broadcast</span>
-              <span className="text-[10px] font-mono text-zinc-500">contact@fderuiter.com</span>
+              <span className="text-[10px] font-mono text-zinc-400">contact@fderuiter.com</span>
             </a>
             
             {/* GitHub Portal */}
@@ -272,7 +272,7 @@ export default async function WalkingSkeletonPage() {
                 🐙
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">GitHub Repos</span>
-              <span className="text-[10px] font-mono text-zinc-500">github.com/fderuiter</span>
+              <span className="text-[10px] font-mono text-zinc-400">github.com/fderuiter</span>
             </a>
 
             {/* LinkedIn Connection */}
@@ -287,11 +287,11 @@ export default async function WalkingSkeletonPage() {
                 in
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">LinkedIn Network</span>
-              <span className="text-[10px] font-mono text-zinc-500">Secure Profile Link</span>
+              <span className="text-[10px] font-mono text-zinc-400">Secure Profile Link</span>
             </a>
           </div>
           
-          <div className="mt-24 text-[10px] font-mono text-zinc-700 tracking-[0.25em] text-center select-none">
+          <div className="mt-24 text-[10px] font-mono text-zinc-400 tracking-[0.25em] text-center select-none">
             DESIGNED & DEVELOPED BY FREDERICK DE RUITER
           </div>
         </div>
