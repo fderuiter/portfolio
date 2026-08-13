@@ -34,6 +34,21 @@ vi.mock("@upstash/redis", () => {
   return { Redis: MockRedis };
 });
 
+vi.mock("@upstash/ratelimit", () => {
+  return {
+    Ratelimit: class {
+      static slidingWindow = vi.fn();
+      limit = vi.fn().mockResolvedValue({
+        success: true,
+        limit: 100,
+        remaining: 99,
+        reset: Date.now() + 60000,
+        pending: Promise.resolve(),
+      });
+    },
+  };
+});
+
 describe("Declarative Zod Validation Endpoints", () => {
   beforeEach(() => {
     vi.clearAllMocks();

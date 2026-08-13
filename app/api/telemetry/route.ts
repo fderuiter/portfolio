@@ -2,59 +2,114 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import crypto from "crypto";
 import { Redis } from "@upstash/redis";
-import { TelemetryEventSchema } from "@/lib/schemas";
+import { TelemetryEventSchema, RateLimitParamsSchema } from "@/lib/schemas";
+import { Ratelimit } from "@upstash/ratelimit";
 import * as Sentry from "@sentry/nextjs";
 
 // Enforce standard dynamic route behavior in Next.js 16 to query live datastores safely
 export const dynamic = "force-dynamic";
 
-// In-memory sliding window rate limiter cache: Maps hashed IP -> Array of timestamps (ms)
-const rateLimitCache = new Map<string, number[]>();
-const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 60 seconds
-const MAX_REQUESTS_PER_WINDOW = 100; // 100 requests per minute
+// Initialize the standard Redis client using process env
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL || "http://localhost:8079",
+  token: process.env.UPSTASH_REDIS_REST_TOKEN || "example_token",
+});
+
+// Ephemeral/local memory cache Map for the SDK
+const sdkEphemeralCache = new Map<string, number>();
+
+// Parse the rate limit defaults from schema
+const rateLimitConfig = RateLimitParamsSchema.parse({});
+const RATE_LIMIT_WINDOW_S = rateLimitConfig.windowMs / 1000;
+const MAX_REQUESTS_PER_WINDOW = rateLimitConfig.maxRequests;
+
+// Standard library SDK Rate Limiter using Upstash Redis as shared state backend
+const ratelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(MAX_REQUESTS_PER_WINDOW, `${RATE_LIMIT_WINDOW_S} s`),
+  ephemeralCache: sdkEphemeralCache,
+});
+
+// Local cache to bypass remote calls for active, valid clients
+interface LocalCacheEntry {
+  count: number;
+  expiresAt: number;
+}
+const activeClientsCache = new Map<string, LocalCacheEntry>();
+
+interface RateLimitResult {
+  limited: boolean;
+  headers?: Record<string, string>;
+}
 
 /**
  * Anonymously rate limits client requests using hashed IP identifiers.
  * Prevents PII collection while offering robust client-side DoS mitigation.
+ * Bypasses remote checks for active, valid clients using a local cache.
  */
-function isRateLimited(req: NextRequest): boolean {
+async function isRateLimited(req: NextRequest): Promise<RateLimitResult> {
   // Extract client IP address from standard proxies or request socket
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0] ||
     req.headers.get("x-real-ip") ||
     "127.0.0.1";
 
-  // Hash IP to establish anonymous tracking token
+  // Hash IP to establish anonymous tracking token (no plain text IP is logged or stored)
   const ipHash = crypto.createHash("sha256").update(ip).digest("hex");
 
   const now = Date.now();
-  const requestTimes = rateLimitCache.get(ipHash) || [];
 
-  // Filter timestamps to keep only those within the active sliding window
-  const activeTimestamps = requestTimes.filter((time) => now - time < RATE_LIMIT_WINDOW_MS);
-
-  if (activeTimestamps.length >= MAX_REQUESTS_PER_WINDOW) {
-    return true;
-  }
-
-  // Record active timestamp and sync cache map
-  activeTimestamps.push(now);
-  rateLimitCache.set(ipHash, activeTimestamps);
-
-  // Periodically sweep expired keys from cache map to prevent memory leaks
-  if (rateLimitCache.size > 5000) {
-    const sweepThreshold = now - RATE_LIMIT_WINDOW_MS;
-    for (const [key, times] of rateLimitCache.entries()) {
-      const filtered = times.filter((t) => t > sweepThreshold);
-      if (filtered.length === 0) {
-        rateLimitCache.delete(key);
-      } else {
-        rateLimitCache.set(key, filtered);
-      }
+  // 1. Check local memory bypass cache for active, valid clients
+  const cached = activeClientsCache.get(ipHash);
+  if (cached && now < cached.expiresAt) {
+    if (cached.count < MAX_REQUESTS_PER_WINDOW) {
+      cached.count += 1;
+      // Local cache hit: return no rate limiting immediately
+      return {
+        limited: false,
+        headers: {
+          "X-RateLimit-Limit": String(MAX_REQUESTS_PER_WINDOW),
+          "X-RateLimit-Remaining": String(MAX_REQUESTS_PER_WINDOW - cached.count),
+          "X-RateLimit-Reset": String(Math.ceil(cached.expiresAt / 1000)),
+        },
+      };
     }
   }
 
-  return false;
+  // 2. Perform SDK-based rate check
+  try {
+    const result = await ratelimit.limit(ipHash);
+    const headers = {
+      "X-RateLimit-Limit": String(result.limit),
+      "X-RateLimit-Remaining": String(result.remaining),
+      "X-RateLimit-Reset": String(Math.ceil(result.reset / 1000)),
+    };
+
+    if (result.success) {
+      // Valid client: update local bypass cache with a safe, short TTL (max 5 seconds or remaining window)
+      activeClientsCache.set(ipHash, {
+        count: MAX_REQUESTS_PER_WINDOW - result.remaining,
+        expiresAt: Math.min(result.reset, now + 5000),
+      });
+      return { limited: false, headers };
+    } else {
+      // Blocked client: invalidate local bypass cache
+      activeClientsCache.delete(ipHash);
+      return { limited: true, headers };
+    }
+  } catch (err) {
+    console.error("Rate limiting check failed, failing open:", err);
+    return { limited: false };
+  } finally {
+    // Periodically sweep expired keys from local cache map to prevent memory leaks
+    if (activeClientsCache.size > 5000) {
+      for (const [key, val] of activeClientsCache.entries()) {
+        if (Date.now() >= val.expiresAt) {
+          activeClientsCache.delete(key);
+        }
+      }
+    }
+  }
 }
 
 export async function GET() {
@@ -103,10 +158,14 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     // Enforce rate limiter checks
-    if (isRateLimited(req)) {
+    const rateLimitRes = await isRateLimited(req);
+    if (rateLimitRes.limited) {
       return NextResponse.json(
         { error: "Too many requests. Please slow down rate pacing." },
-        { status: 429 }
+        {
+          status: 429,
+          headers: rateLimitRes.headers,
+        }
       );
     }
 
@@ -183,7 +242,13 @@ export async function POST(req: NextRequest) {
       newEvent = eventData;
     }
 
-    return NextResponse.json({ success: true, event: newEvent }, { status: 201 });
+    const response = NextResponse.json({ success: true, event: newEvent }, { status: 201 });
+    if (rateLimitRes.headers) {
+      Object.entries(rateLimitRes.headers).forEach(([key, val]) => {
+        response.headers.set(key, val);
+      });
+    }
+    return response;
   } catch (err) {
     Sentry.captureException(err);
     console.error("Failed to commit telemetry event log:", err);
