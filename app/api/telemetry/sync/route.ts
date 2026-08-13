@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { Redis } from "@upstash/redis";
 import { validateRouteInitialization, validateSyncRequest } from "@/lib/security";
+import { SyncParamsSchema } from "@/lib/schemas";
+import * as Sentry from "@sentry/nextjs";
 
 export const dynamic = "force-dynamic";
 
@@ -16,12 +18,31 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const url = new URL(req.url);
+    const batchParam = url.searchParams.get("batch");
+    const parsedQuery = SyncParamsSchema.safeParse({
+      batch: batchParam !== null ? batchParam : undefined,
+    });
+
+    if (!parsedQuery.success) {
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          details: parsedQuery.error.issues.map((issue) => ({
+            path: issue.path.join("."),
+            message: issue.message,
+          })),
+        },
+        { status: 400 }
+      );
+    }
+
+    const BATCH_SIZE = parsedQuery.data.batch;
+
     const redis = new Redis({
       url: process.env.UPSTASH_REDIS_REST_URL || "http://localhost:8079",
       token: process.env.UPSTASH_REDIS_REST_TOKEN || "example_token",
     });
-
-    const BATCH_SIZE = 50;
     
     const p = redis.pipeline();
     for (let i = 0; i < BATCH_SIZE; i++) {
@@ -55,6 +76,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ success: true, processed: events.length, inserted: createResult.count });
   } catch (err) {
+    Sentry.captureException(err);
     console.error("Failed to sync buffered telemetry events:", err);
     return NextResponse.json(
       { error: "Failed to sync events to primary database" },
