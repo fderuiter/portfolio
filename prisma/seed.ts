@@ -25,6 +25,10 @@ const SEED_PAYLOADS = [
     simulated_telemetry: false,
     tags: "TypeScript, React, Flow, Schemas, AST, Node-RED",
     editorial_content: "A **reactive**, `visual graph editor` built in **TypeScript** and **React** that allows system architects to visually compose, validate, and compile complex `JSON Schema` structures in real time. Features highly responsive `node evaluation`, cyclical dependency detection, and live `code generation`.",
+    pitch: "Build a drag-and-drop reactive interface that generates complex, production-ready schemas dynamically with zero coding.",
+    implementation_reality: "While the visual nodes worked beautifully, deep schema nesting caused recursive render loops. We had to introduce strict memoization and delegate the heavy AST compilation to Web Workers to maintain a 60fps UI.",
+    lessons_learned: "Always isolate CPU-intensive operations (like schema validation/compilation) from the main thread. Web Workers are essential for high-performance visual graph editors.",
+    graveyard: false,
     architectural_narrative: `
 <h3>The Challenge</h3>
 <p>Modern enterprise APIs often require complex, deeply nested JSON schemas. Hand-authoring these schemas in raw JSON or YAML leads to validation errors, duplicate definitions, and slow developer velocity. Visual graph editors exist, but they suffer from high rendering latency, lacks type-safety, and do not handle recursive schema references gracefully.</p>
@@ -61,6 +65,10 @@ interface SchemaNode {
     simulated_telemetry: false,
     tags: "TypeScript, CDISC, ODM, SDTM, XML Parser, Clinical Trials, HIPAA",
     editorial_content: "An enterprise-grade **TypeScript** mapping pipeline that ingests clinical trial metadata in `CDISC Operational Data Model (ODM)` XML format, dynamically constructs `data schemas`, and transforms raw `Electronic Data Capture (EDC)` datasets into compliant **CDISC SDTM** domains.",
+    pitch: "A completely automated clinical trial data mapping pipeline that transforms raw EDC XML directly into regulatory-compliant CDISC SDTM datasets.",
+    implementation_reality: "Clinical files are massive (often >2GB) and highly nested. In-memory XML parsing was a blocker. We had to rewrite the parser using SAX stream events and process tables in sqlite temporary files to keep RAM under 50MB.",
+    lessons_learned: "DOM parsing is a non-starter for enterprise clinical payloads. Streaming, event-driven pipelines are the only reliable way to handle multi-gigabyte regulatory datasets under strict environment memory constraints.",
+    graveyard: false,
     architectural_narrative: `
 <h3>The Challenge</h3>
 <p>Clinical trial databases are governed by rigid international regulatory standards set by CDISC. Review bodies like the FDA require trial findings to be submitted as SDTM datasets. The incoming trial data, however, arrives in XML-based CDISC ODM format or proprietary EDC database tables. Manual mapping is error-prone, highly slow, and compromises regulatory compliance.</p>
@@ -111,6 +119,10 @@ interface ODMClinicalData {
     simulated_telemetry: false,
     tags: "Python, SDK, iMednet, API Client, Clinical Trials, HIPAA, Clinical Data",
     editorial_content: "A **robust**, fully-typed `Python SDK` client for programmatic extraction and integration of clinical trial metadata and patient records from the `iMednet EDC` platform. Built for **biostatisticians** and **clinical data engineers**.",
+    pitch: "A modern, Pythonic, fully-typed SDK that makes clinical data extraction as simple as calling a single function, completely hiding SOAP complexities.",
+    implementation_reality: "The platform's underlying APIs had inconsistent responses and lacked standard headers. We had to build a robust middleware caching layer and use Pydantic models to strictly enforce type boundaries at runtime.",
+    lessons_learned: "When integrating with legacy healthcare systems, trust nothing. Strict client-side schemas (using Pydantic or similar) are critical to prevent silent data corruption.",
+    graveyard: false,
     architectural_narrative: `
 <h3>The Challenge</h3>
 <p>Clinical electronic data capture (EDC) systems, such as iMednet, hold highly sensitive patient records and complex clinical trial protocols. Programmatic extraction is required by biostatisticians, data scientists, and clinical engineers for automated reporting and analytical pipelines. However, traditional SOAP/REST endpoints in clinical platforms often lack modern developer ergonomics, proper type safety, and clear schema boundaries, exposing clinical workflows to integration bugs and HIPAA security risks.</p>
@@ -150,6 +162,10 @@ class SubjectRecord(BaseModel):
     simulated_telemetry: true,
     tags: "Haskell, GHC, Compiler, AST, Static Analysis",
     editorial_content: "An advanced **Haskell** static analyzer and type inference engine that parses GHC ASTs, traces type flow, and detects compile-time architectural anti-patterns with near-instantaneous feedback loops.",
+    pitch: "Provide instant visual flow analysis of Haskell GHC ASTs and monadic type constraints inside a web dashboard to eliminate debugging latency.",
+    implementation_reality: "The GHC plugin API changed dramatically between compiler versions, requiring extensive rewrite efforts for each minor release. Furthermore, serialization of GHC type graphs to JSON was extremely slow and resource-heavy.",
+    lessons_learned: "Building web UI tooling coupled with GHC compiler internals introduces too much maintenance overhead for a small team. While technically successful, compiling static analyses to standard formats like LSP is a better path.",
+    graveyard: true,
     architectural_narrative: `
 <h3>The Challenge</h3>
 <p>Haskell codebases are robust, but tracing complex monadic types or locating space leaks can be incredibly slow and taxing. Developers need visual, live compiler-level insight without introducing manual tracing overhead or restarting GHC sessions repeatedly.</p>

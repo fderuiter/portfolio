@@ -25,6 +25,10 @@ model CaseStudy {
   tags                    String   // Comma-separated string or a related Tag model
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
+  pitch                   String?
+  implementation_reality  String?
+  lessons_learned         String?
+  graveyard               Boolean  @default(false)
 }
 
 model TelemetryEvent {

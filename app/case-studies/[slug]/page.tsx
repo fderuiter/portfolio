@@ -67,6 +67,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
           architectural_narrative: "<p>Mock architectural narrative for SchemaFlow.</p>",
           created_at: new Date(),
           updated_at: new Date(),
+          pitch: "Build a drag-and-drop reactive interface that generates complex, production-ready schemas dynamically with zero coding.",
+          implementation_reality: "While the visual nodes worked beautifully, deep schema nesting caused recursive render loops. We had to introduce strict memoization and delegate the heavy AST compilation to Web Workers to maintain a 60fps UI.",
+          lessons_learned: "Always isolate CPU-intensive operations (like schema validation/compilation) from the main thread. Web Workers are essential for high-performance visual graph editors.",
+          graveyard: false,
         },
         {
           id: "mock-2",
@@ -81,6 +85,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
           architectural_narrative: "<p>Mock architectural narrative for Clinical Data Standards Engine.</p>",
           created_at: new Date(),
           updated_at: new Date(),
+          pitch: "A completely automated clinical trial data mapping pipeline that transforms raw EDC XML directly into regulatory-compliant CDISC SDTM datasets.",
+          implementation_reality: "Clinical files are massive (often >2GB) and highly nested. In-memory XML parsing was a blocker. We had to rewrite the parser using SAX stream events and process tables in sqlite temporary files to keep RAM under 50MB.",
+          lessons_learned: "DOM parsing is a non-starter for enterprise clinical payloads. Streaming, event-driven pipelines are the only reliable way to handle multi-gigabyte regulatory datasets under strict environment memory constraints.",
+          graveyard: false,
         },
       ];
       study = mockStudies.find((s) => s.slug === slug);
@@ -152,6 +160,10 @@ export default async function CaseStudyPage({ params }: PageProps) {
           architectural_narrative: "<p>Mock architectural narrative for SchemaFlow.</p>",
           created_at: new Date(),
           updated_at: new Date(),
+          pitch: "Build a drag-and-drop reactive interface that generates complex, production-ready schemas dynamically with zero coding.",
+          implementation_reality: "While the visual nodes worked beautifully, deep schema nesting caused recursive render loops. We had to introduce strict memoization and delegate the heavy AST compilation to Web Workers to maintain a 60fps UI.",
+          lessons_learned: "Always isolate CPU-intensive operations (like schema validation/compilation) from the main thread. Web Workers are essential for high-performance visual graph editors.",
+          graveyard: false,
         },
         {
           id: "mock-2",
@@ -166,6 +178,10 @@ export default async function CaseStudyPage({ params }: PageProps) {
           architectural_narrative: "<p>Mock architectural narrative for Clinical Data Standards Engine.</p>",
           created_at: new Date(),
           updated_at: new Date(),
+          pitch: "A completely automated clinical trial data mapping pipeline that transforms raw EDC XML directly into regulatory-compliant CDISC SDTM datasets.",
+          implementation_reality: "Clinical files are massive (often >2GB) and highly nested. In-memory XML parsing was a blocker. We had to rewrite the parser using SAX stream events and process tables in sqlite temporary files to keep RAM under 50MB.",
+          lessons_learned: "DOM parsing is a non-starter for enterprise clinical payloads. Streaming, event-driven pipelines are the only reliable way to handle multi-gigabyte regulatory datasets under strict environment memory constraints.",
+          graveyard: false,
         },
       ];
       study = mockStudies.find((s) => s.slug === slug);
@@ -236,10 +252,26 @@ export default async function CaseStudyPage({ params }: PageProps) {
             <span className="px-3 py-1 text-xs font-mono font-bold bg-brand-cyan/5 border border-brand-cyan/20 text-brand-cyan rounded-md">
               {study.primary_language}
             </span>
+            {study.graveyard && (
+              <span className="px-3 py-1 text-xs font-mono font-bold bg-amber-500/10 border border-amber-500/30 text-amber-500 rounded-md animate-pulse">
+                Retired Experiment
+              </span>
+            )}
             <span className="text-xs font-mono text-muted">
               Node ID: {study.id}
             </span>
           </div>
+
+          {study.graveyard && (
+            <div className="mb-10 p-5 rounded-xl border border-amber-500/20 bg-amber-500/5 text-amber-200">
+              <div className="flex items-center gap-2 mb-2 font-mono font-black text-amber-500 text-sm tracking-wide">
+                <span>⚠️ PROJECT RETIRED (GRAVEYARD STATUS)</span>
+              </div>
+              <p className="text-sm text-amber-200/80 leading-relaxed font-sans">
+                This initiative is retired. Below is a post-mortem detailing the technical constraints, outcomes, and crucial lessons learned during its lifecycle.
+              </p>
+            </div>
+          )}
 
           {/* Long-form Article Narrative */}
           <article className="prose prose-invert max-w-none text-neutral-300 leading-relaxed space-y-8">
@@ -259,6 +291,56 @@ export default async function CaseStudyPage({ params }: PageProps) {
                 </span>
               ))}
             </div>
+
+            {/* Self-Reflection Section */}
+            {(study.pitch || study.implementation_reality || study.lessons_learned) && (
+              <div className="mt-8 p-6 rounded-2xl border border-zinc-900 bg-zinc-950/40 backdrop-blur-sm space-y-6">
+                <h3 className="text-lg font-bold font-sans text-neutral-100 flex items-center gap-2 border-b border-zinc-900 pb-3">
+                  <svg className="w-5 h-5 text-brand-cyan" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                  Project Self-Reflection
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {study.pitch && (
+                    <div className="space-y-2">
+                      <span className="text-xs font-mono font-bold tracking-wider text-brand-cyan/80 uppercase">
+                        The Original Pitch
+                      </span>
+                      <p className="text-sm text-neutral-300 leading-relaxed font-sans bg-brand-cyan/[0.02] border-l-2 border-brand-cyan/40 p-3 rounded-r-lg">
+                        {study.pitch}
+                      </p>
+                    </div>
+                  )}
+
+                  {study.implementation_reality && (
+                    <div className="space-y-2">
+                      <span className="text-xs font-mono font-bold tracking-wider text-brand-blue/80 uppercase">
+                        Implementation Reality
+                      </span>
+                      <p className="text-sm text-neutral-300 leading-relaxed font-sans bg-brand-blue/[0.02] border-l-2 border-brand-blue/40 p-3 rounded-r-lg">
+                        {study.implementation_reality}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {study.lessons_learned && (
+                  <div className="pt-4 border-t border-zinc-900/50 space-y-2">
+                    <span className="text-xs font-mono font-bold tracking-wider text-amber-500/80 uppercase flex items-center gap-1.5">
+                      <svg className="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                      {study.graveyard ? "Post-Mortem: Key Lessons Learned" : "Key Lessons Learned"}
+                    </span>
+                    <p className="text-sm text-neutral-300 leading-relaxed font-sans bg-amber-500/[0.01] border-l-2 border-amber-500/40 p-3 rounded-r-lg">
+                      {study.lessons_learned}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Interactive Sandbox Terminal Shell (Issue #42) */}
             {slug === "imednet-python-sdk" && (

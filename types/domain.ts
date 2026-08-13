@@ -11,6 +11,10 @@ export interface BaseCaseStudy {
   tags: string;                    // comma-separated list of tags
   created_at: Date;
   updated_at: Date;
+  pitch?: string | null;
+  implementation_reality?: string | null;
+  lessons_learned?: string | null;
+  graveyard?: boolean;
 }
 
 // CDISC ODM & SDTM Specialized Case Study Structure
