@@ -2,9 +2,25 @@
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { getClosestMatches, type CaseStudyItem } from "@/lib/search-utils";
 import { useSearch } from "@/components/providers/SearchProvider";
+
+const LabyrinthGame = dynamic(() => import("@/components/LabyrinthGame"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex flex-col items-center justify-center p-6 bg-neutral-950 border border-neutral-900 rounded-2xl shadow-xl w-full max-w-sm mx-auto text-center h-[438px] relative z-30 animate-pulse">
+      <div className="w-10 h-10 rounded-full border-2 border-brand-cyan/20 border-t-brand-cyan animate-spin mb-4" />
+      <span className="text-xs font-mono text-brand-cyan/80">
+        INITIALIZING CORE MATRIX...
+      </span>
+      <span className="text-[10px] font-mono text-neutral-600 mt-2">
+        Loading coordinate grid...
+      </span>
+    </div>
+  ),
+});
 
 export default function NotFound() {
   const [mousePos, setMousePos] = useState({ x: 200, y: 200 });
@@ -16,6 +32,7 @@ export default function NotFound() {
   const [invalidPath, setInvalidPath] = useState<string>("");
   const [caseStudies, setCaseStudies] = useState<CaseStudyItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadGame, setLoadGame] = useState(false);
 
   const { recordEvent } = useTelemetry();
   const { openSearch } = useSearch();
@@ -255,6 +272,19 @@ export default function NotFound() {
         ) : null}
 
         <div className="flex flex-col gap-3 mt-4 relative z-20">
+          {!loadGame ? (
+            <button
+              onClick={() => setLoadGame(true)}
+              className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-bold bg-brand-cyan hover:bg-cyan-500 text-black rounded-2xl transition-all duration-300 shadow-lg cursor-pointer font-mono tracking-wider"
+            >
+              Play 404 Labyrinth
+            </button>
+          ) : (
+            <div className="my-4">
+              <LabyrinthGame />
+            </div>
+          )}
+
           <button
             onClick={openSearch}
             className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-bold bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-brand-cyan/40 text-brand-cyan rounded-2xl transition-all duration-300 shadow-lg cursor-pointer"
