@@ -14,7 +14,7 @@
     "lint": "eslint",
     "check": "tsc --noEmit && npm run lint",
     "prepare": "husky",
-    "pretest": "npx tsx scripts/generate-theme.ts && npx prisma generate",
+    "pretest": "npx tsx scripts/generate-theme.ts && ./node_modules/.bin/prisma generate",
     "test": "vitest run",
     "test:ci": "vitest run",
     "test:watch": "vitest"
