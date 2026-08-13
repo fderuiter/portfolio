@@ -115,7 +115,7 @@ Original CSS Variable: --foreground
 
 #### colors.muted
 
-> `readonly` **muted**: `"#71717a"` = `"#71717a"`
+> `readonly` **muted**: `"#a1a1aa"` = `"#a1a1aa"`
 
 Original CSS Variable: --muted
 

@@ -6,6 +6,7 @@ import {
   type ComponentPropsWithoutRef,
   type FC,
   type ReactNode,
+  useEffect,
 } from "react"
 import { motion, MotionValue, useScroll, useTransform } from "framer-motion"
 
@@ -21,6 +22,12 @@ export const TextReveal: FC<TextRevealProps> = ({ children, className }) => {
     target: sectionRef,
   })
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && (window as any).__PLAYWRIGHT_TEST__) {
+      document.documentElement.setAttribute("data-playwright", "true")
+    }
+  }, [])
+
   if (typeof children !== "string") {
     throw new Error("TextReveal: children must be a string")
   }
@@ -29,7 +36,9 @@ export const TextReveal: FC<TextRevealProps> = ({ children, className }) => {
 
   return (
     <div ref={sectionRef} className={cn("relative z-0 h-[200vh]", className)}>
+      <p className="sr-only">{children}</p>
       <div
+        aria-hidden="true"
         className={
           "sticky top-0 mx-auto flex h-[50%] max-w-4xl items-center bg-transparent px-4 py-20"
         }

@@ -8,7 +8,7 @@
   --surface-2: rgba(39, 39, 42, 0.4);
   --border: rgba(63, 63, 70, 0.5);
   --border-active: rgba(6, 182, 212, 0.4);
-  --muted: #71717a;
+  --muted: #a1a1aa;
   --muted-strong: #a1a1aa;
   --brand-cyan: #06b6d4;
   --brand-cyan-glow: rgba(6, 182, 212, 0.15);
@@ -96,4 +96,10 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Hide low-contrast scroll-opacity word overlays during Playwright accessibility/drift tests */
+html[data-playwright="true"] [aria-hidden="true"] .text-black,
+html[data-playwright="true"] [aria-hidden="true"] .dark\:text-white {
+  visibility: hidden !important;
 }

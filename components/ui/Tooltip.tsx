@@ -22,7 +22,7 @@ export const Tooltip = ({
       tabIndex={0}
       aria-describedby={tooltipId}
     >
-      <span className="border-b border-dashed border-zinc-500">{children}</span>
+      <span className="border-b border-dashed border-zinc-400">{children}</span>
       <AnimatePresence>
         {show && (
           <motion.div
