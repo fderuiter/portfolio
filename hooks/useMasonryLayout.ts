@@ -1,5 +1,4 @@
 import { useState, useLayoutEffect, useRef, useCallback } from "react";
-import { designManifest } from "@/lib/design-manifest";
 import { 
   parseMarkdownToRichItems, 
   type ExtendedRichInlineItem 
@@ -11,6 +10,7 @@ import {
 import { LAYOUT_CONFIG } from "@/lib/layout-config";
 import { GitHubStats } from "@/lib/github";
 import { calculateMasonryLayout, type PreparedData } from "@/lib/masonry";
+import { isBrowser, resolveFontFamily } from "@/lib/graphics-engine";
 
 export interface MasonryItem {
   id: string;
@@ -51,11 +51,9 @@ export function useMasonryLayout<T extends MasonryItem>(
   });
 
   useLayoutEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!isBrowser()) return;
 
-    const rootStyle = window.getComputedStyle(document.documentElement);
-    const rawFontFamily = rootStyle.getPropertyValue("--font-inter").trim();
-    const resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
+    const resolvedFontFamily = resolveFontFamily("--font-inter");
 
     const baseFont = `400 ${LAYOUT_CONFIG.FONT_SIZE}px ${resolvedFontFamily}`;
     const boldFont = `700 ${LAYOUT_CONFIG.FONT_SIZE}px ${resolvedFontFamily}`;

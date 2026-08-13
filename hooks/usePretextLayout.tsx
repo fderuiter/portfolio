@@ -13,36 +13,16 @@ import {
 } from "@chenglou/pretext/rich-inline";
 import { designManifest } from "@/lib/design-manifest";
 
-// --- Global Caches ---
-class LRUCache<K, V> {
-  private cache = new Map<K, V>();
-  constructor(private capacity: number) {}
-  get(key: K): V | undefined {
-    if (!this.cache.has(key)) return undefined;
-    const val = this.cache.get(key)!;
-    this.cache.delete(key);
-    this.cache.set(key, val);
-    return val;
-  }
-  set(key: K, value: V) {
-    if (this.cache.has(key)) {
-      this.cache.delete(key);
-    } else if (this.cache.size >= this.capacity) {
-      const firstKey = this.cache.keys().next().value;
-      if (firstKey !== undefined) {
-        this.cache.delete(firstKey);
-      }
-    }
-    this.cache.set(key, value);
-  }
-}
-
-const textPrepareCache = new LRUCache<string, PreparedText>(500);
-const textLayoutCache = new LRUCache<string, { height: number; lineCount: number }>(2000);
-
-const richItemsCache = new LRUCache<string, ExtendedRichInlineItem[]>(500);
-const richPrepareCache = new LRUCache<string, PreparedRichInline>(500);
-const richLayoutCache = new LRUCache<string, { height: number; lines: RichInlineLine[] }>(2000);
+import { 
+  isBrowser, 
+  resolveFontFamily, 
+  validateLayoutHeight,
+  textPrepareCache,
+  textLayoutCache,
+  richItemsCache,
+  richPrepareCache,
+  richLayoutCache
+} from "@/lib/graphics-engine";
 
 interface UsePretextLayoutOptions {
   text: string;
@@ -97,18 +77,14 @@ export function usePretextLayout({
   }, [text, lineHeight]);
 
   useLayoutEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!isBrowser()) return;
 
-    // 1. Senior Design: Extract active Tailwind v4 resolved font variable
-    const rootStyle = window.getComputedStyle(document.documentElement);
-    const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
-
-    // 2. Safe Fallback Matrix: Fallback gracefully to prevent Canvas errors
-    const resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
+    // 1. Resolve active Tailwind/design manifest resolved font variable via central engine
+    const resolvedFontFamily = resolveFontFamily(fontFamilyVariable);
     const fontString = `${fontSize}px ${resolvedFontFamily}`;
     fontStringRef.current = fontString;
 
-    // 3. Phase 1 Preparation: Parse text and cache measurements in Canvas
+    // 2. Phase 1 Preparation: Parse text and cache measurements in Canvas
     const prepareKey = `${text}|${fontString}`;
     let prepared = textPrepareCache.get(prepareKey);
     if (!prepared) {
@@ -142,6 +118,18 @@ export function usePretextLayout({
       resizeObserver.disconnect();
     };
   }, [measureText]);
+
+  // Layout Height Validation Trigger
+  useLayoutEffect(() => {
+    if (state.isReady && containerRef.current) {
+      const actualHeight = containerRef.current.getBoundingClientRect().height;
+      validateLayoutHeight(
+        state.height,
+        actualHeight,
+        `usePretextLayout (text: "${text.slice(0, 30)}...")`
+      );
+    }
+  }, [state.isReady, state.height, text]);
 
   return {
     ref: containerRef,
@@ -335,11 +323,9 @@ export function usePretextRichLayout({
   }, [lineHeight]);
 
   useLayoutEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!isBrowser()) return;
 
-    const rootStyle = window.getComputedStyle(document.documentElement);
-    const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
-    const resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
+    const resolvedFontFamily = resolveFontFamily(fontFamilyVariable);
 
     const baseFont = `400 ${fontSize}px ${resolvedFontFamily}`;
     const boldFont = `700 ${fontSize}px ${resolvedFontFamily}`;
@@ -350,7 +336,7 @@ export function usePretextRichLayout({
     const itemsKey = `${text}|${fontsKey}`;
     itemsKeyRef.current = itemsKey;
 
-    let parsedItems = richItemsCache.get(itemsKey);
+    let parsedItems = richItemsCache.get(itemsKey) as ExtendedRichInlineItem[] | undefined;
     if (!parsedItems) {
       parsedItems = parseMarkdownToRichItems(text, baseFont, boldFont, italicFont, codeFont);
       richItemsCache.set(itemsKey, parsedItems);
@@ -358,8 +344,8 @@ export function usePretextRichLayout({
     itemsRef.current = parsedItems;
 
     let prepared = richPrepareCache.get(itemsKey);
-    if (!prepared) {
-      prepared = prepareRichInline(parsedItems);
+    if (!parsedItems || !prepared) {
+      prepared = prepareRichInline(parsedItems || []);
       richPrepareCache.set(itemsKey, prepared);
     }
     preparedRef.current = prepared;
@@ -388,6 +374,18 @@ export function usePretextRichLayout({
       resizeObserver.disconnect();
     };
   }, [measureRichText]);
+
+  // Layout Height Validation Trigger
+  useLayoutEffect(() => {
+    if (state.isReady && containerRef.current) {
+      const actualHeight = containerRef.current.getBoundingClientRect().height;
+      validateLayoutHeight(
+        state.height,
+        actualHeight,
+        `usePretextRichLayout (text: "${text.slice(0, 30)}...")`
+      );
+    }
+  }, [state.isReady, state.height, text]);
 
   return {
     ref: containerRef,
