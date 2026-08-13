@@ -16,6 +16,10 @@ jobs:
 
       - name: Append Authorized Commit
         run: |
+          if [ "$(git log -1 --format='%ae')" = "fpderuiter@gmail.com" ] || [ "$(git log -1 --format='%s')" = "Trigger Vercel deployment as project owner" ]; then
+            echo "Latest commit is already authored by Fred de Ruiter. Skipping empty commit to prevent infinite loop."
+            exit 0
+          fi
           git config user.name "Fred de Ruiter"
           git config user.email "fpderuiter@gmail.com"
           git commit --allow-empty -m "Trigger Vercel deployment as project owner"
