@@ -21,9 +21,10 @@ test.describe('Visual Regression & Drift Detection', () => {
     // Wait for network requests or images if any
     await page.waitForLoadState('networkidle');
 
-    // Wait for the Pretext measuring text to finish
+    // Wait for the Pretext measuring text to finish to ensure layout stability
     await page.waitForFunction(() => {
-      return document.querySelector('.text-\\[9px\\]') && !document.querySelector('.text-\\[9px\\]')?.textContent?.includes('MEASURING...');
+      const elements = Array.from(document.querySelectorAll('.text-\\[9px\\]'));
+      return elements.length > 0 && elements.every(el => !el.textContent?.includes('MEASURING...'));
     });
 
     // Take full page snapshot to cover case study components
@@ -45,9 +46,10 @@ test.describe('Visual Regression & Drift Detection', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    // Wait for the Pretext measuring text to finish
+    // Wait for the Pretext measuring text to finish to ensure layout stability
     await page.waitForFunction(() => {
-      return document.querySelector('.text-\\[9px\\]') && !document.querySelector('.text-\\[9px\\]')?.textContent?.includes('MEASURING...');
+      const elements = Array.from(document.querySelectorAll('.text-\\[9px\\]'));
+      return elements.length > 0 && elements.every(el => !el.textContent?.includes('MEASURING...'));
     });
 
     // Check if any card reported a hydration mismatch via the data attribute
