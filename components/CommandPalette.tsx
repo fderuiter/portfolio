@@ -226,8 +226,8 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         {/* Results List section */}
         <div
           id="palette-results-list"
-          role="listbox"
-          aria-label="Search outcomes list"
+          role={filteredItems.length > 0 ? "listbox" : undefined}
+          aria-label={filteredItems.length > 0 ? "Search outcomes list" : undefined}
           className="relative z-10 flex-1 max-h-[340px] overflow-y-auto p-2.5 space-y-1 scrollbar-none"
         >
           {filteredItems.length > 0 ? (
