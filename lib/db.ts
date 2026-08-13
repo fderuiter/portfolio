@@ -22,6 +22,10 @@ const createPrismaClient = () => {
   return baseClient.$extends({
     query: {
       async $allOperations({ args, query }) {
+        const conn = process.env.DATABASE_URL;
+        if (!conn || conn.includes("dummy")) {
+          throw new Error("Database offline: Dummy connection URL configured.");
+        }
         if (!isHealthy && process.env.SKIP_DB_HEALTH_CHECK !== "true") {
           try {
             // Runtime pre-flight validation
