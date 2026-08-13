@@ -517,11 +517,11 @@ export const SandboxTerminal: React.FC = () => {
             <IconCircle className="w-3 h-3 fill-red-500/80 stroke-none" />
             <IconCircle className="w-3 h-3 fill-yellow-500/80 stroke-none" />
             <IconCircle className="w-3 h-3 fill-green-500/80 stroke-none" />
-            <span className="text-[10px] font-mono font-bold text-zinc-500 tracking-wider ml-2 uppercase">
+            <span className="text-[10px] font-mono font-bold text-zinc-400 tracking-wider ml-2 uppercase">
               imednet-python-sdk // interactive CLI shell
             </span>
           </div>
-          <IconTerminal className="w-4 h-4 text-zinc-600" />
+          <IconTerminal className="w-4 h-4 text-zinc-400" />
         </div>
 
         {/* Console logs output viewport */}
@@ -534,13 +534,13 @@ export const SandboxTerminal: React.FC = () => {
             <div key={log.id} className="space-y-1">
               {log.type === "command" && (
                 <div className="flex items-center gap-2 text-zinc-400 font-bold select-none">
-                  <span className="text-zinc-600 font-bold">~</span>
+                  <span className="text-zinc-400 font-bold">~</span>
                   <span className="text-zinc-400 font-bold">imednet-sdk $</span>
                   <span className="text-zinc-100 font-bold select-text">{log.text}</span>
                 </div>
               )}
               {log.type === "info" && (
-                <div className="text-zinc-500 whitespace-pre-wrap leading-relaxed select-text">
+                <div className="text-zinc-400 whitespace-pre-wrap leading-relaxed select-text">
                   {log.text}
                 </div>
               )}
@@ -551,7 +551,7 @@ export const SandboxTerminal: React.FC = () => {
               )}
               {log.type === "output" && log.jsonPayload !== undefined && (
                 <div className="bg-zinc-950 border border-zinc-900/50 rounded-xl p-3.5 mt-1">
-                  <div className="flex items-center justify-between border-b border-zinc-900 pb-2 mb-2 text-[9px] text-zinc-500 select-none">
+                  <div className="flex items-center justify-between border-b border-zinc-900 pb-2 mb-2 text-[9px] text-zinc-400 select-none">
                     <span>200 OK // TRANSACTION RETRUSTED</span>
                     <span>JSON PAYLOAD</span>
                   </div>
@@ -581,7 +581,7 @@ export const SandboxTerminal: React.FC = () => {
 
         {/* Live Input Field Prompt */}
         <div className="border-t border-zinc-900/60 bg-zinc-950/60 px-5 py-3.5 flex items-center gap-2">
-          <span className="text-zinc-600 font-bold font-mono text-[11px] select-none">~</span>
+          <span className="text-zinc-400 font-bold font-mono text-[11px] select-none">~</span>
           <span className="text-zinc-400 font-bold font-mono text-[11px] select-none">imednet-sdk $</span>
           <input
             ref={inputRef}
@@ -599,8 +599,8 @@ export const SandboxTerminal: React.FC = () => {
           />
           <button
             onClick={() => executeCommand(input)}
-            disabled={isExecuting || !input.trim()}
-            className="p-1 text-zinc-600 hover:text-brand-cyan disabled:text-zinc-800 disabled:hover:text-zinc-800 transition-colors cursor-pointer focus:outline-none focus:text-brand-cyan focus:ring-2 focus:ring-brand-cyan/50 focus:ring-offset-1 focus:ring-offset-zinc-950 rounded"
+            disabled={isExecuting}
+            className="p-1 text-zinc-400 hover:text-brand-cyan disabled:text-zinc-800 disabled:hover:text-zinc-800 transition-colors cursor-pointer focus:outline-none focus:text-brand-cyan focus:ring-2 focus:ring-brand-cyan/50 focus:ring-offset-1 focus:ring-offset-zinc-950 rounded"
             title="Execute Command (Enter)"
           >
             <IconCornerDownLeft className="w-4 h-4" />

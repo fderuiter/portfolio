@@ -47,7 +47,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
         onMouseEnter={playSkillHover}
-        className="md:col-span-2 p-6 md:p-8 bg-zinc-900/10 border border-zinc-900/50 rounded-3xl relative overflow-hidden flex flex-col justify-between min-h-[250px] hover:border-zinc-800 transition-all duration-300"
+        className="md:col-span-2 p-6 md:p-8 bg-[#0a0a0c] border border-zinc-900 rounded-3xl relative overflow-hidden flex flex-col justify-between min-h-[250px] hover:border-zinc-800 transition-all duration-300"
       >
         <div className="absolute top-0 right-0 w-48 h-48 bg-brand-cyan/5 rounded-full blur-[60px] pointer-events-none" />
         
@@ -59,10 +59,10 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
               FDR
             </div>
             <div>
-              <h3 className="text-sm font-mono font-bold tracking-widest text-brand-cyan uppercase">
+              <h3 className="text-sm font-mono font-bold tracking-widest text-cyan-400 uppercase">
                 System Architect
               </h3>
-              <p className="text-[10px] font-mono text-zinc-500">
+              <p className="text-[10px] font-mono text-zinc-400">
                 Principal Design Engineer
               </p>
             </div>
@@ -81,7 +81,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: 0.1 }}
         onMouseEnter={playSkillHover}
-        className="p-6 bg-zinc-900/10 border border-zinc-900/50 rounded-3xl relative overflow-hidden flex flex-col justify-between min-h-[250px] hover:border-zinc-800 transition-all duration-300"
+        className="p-6 bg-[#0a0a0c] border border-zinc-900 rounded-3xl relative overflow-hidden flex flex-col justify-between min-h-[250px] hover:border-zinc-800 transition-all duration-300"
       >
         <div className="absolute bottom-0 left-0 w-32 h-32 bg-brand-blue/5 rounded-full blur-[50px] pointer-events-none" />
         
@@ -89,7 +89,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
           <h3 className="text-xs font-mono font-bold tracking-widest text-zinc-400 uppercase mb-4">
             Live Telemetry API
           </h3>
-          <p className="text-[10px] font-mono text-zinc-500 mb-6 leading-relaxed">
+          <p className="text-[10px] font-mono text-zinc-400 mb-6 leading-relaxed">
             Dynamic repository programming languages aggregated dynamically via GitHub cached metrics.
           </p>
           
@@ -123,7 +123,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: 0.2 }}
         onMouseEnter={playSkillHover}
-        className="md:col-span-3 p-6 md:p-8 bg-zinc-900/5 border border-zinc-900/40 rounded-3xl relative overflow-hidden hover:border-zinc-900 transition-all duration-300"
+        className="md:col-span-3 p-6 md:p-8 bg-[#0a0a0c] border border-zinc-900 rounded-3xl relative overflow-hidden hover:border-zinc-800 transition-all duration-300"
       >
         <h3 className="text-xs font-mono font-bold tracking-widest text-zinc-400 uppercase mb-6 text-center md:text-left">
           Core Technical Specializations
@@ -142,7 +142,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
                 Clinical Integrations
               </Tooltip>
             </h4>
-            <p className="text-[11px] text-zinc-500 leading-relaxed">
+            <p className="text-[11px] text-zinc-400 leading-relaxed">
               Resilient XML streaming engines matching CDISC ODM schemas to FDA-compliant SDTM datasets.
             </p>
           </div>
@@ -159,7 +159,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
                 Layout Physics
               </Tooltip>
             </h4>
-            <p className="text-[11px] text-zinc-500 leading-relaxed">
+            <p className="text-[11px] text-zinc-400 leading-relaxed">
               DOM-free userland canvas calculation loops synchronized to bypass layout reflow thrashes.
             </p>
           </div>
@@ -176,7 +176,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
                 Serverless Scaling
               </Tooltip>
             </h4>
-            <p className="text-[11px] text-zinc-500 leading-relaxed">
+            <p className="text-[11px] text-zinc-400 leading-relaxed">
               Prisma WebSocket connectivity mappings linking pools into cloud Neon databases at 1ms latencies.
             </p>
           </div>
@@ -193,7 +193,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
                 Full-Stack Security
               </Tooltip>
             </h4>
-            <p className="text-[11px] text-zinc-500 leading-relaxed">
+            <p className="text-[11px] text-zinc-400 leading-relaxed">
               Strict HTML sanitizers, encrypted HIPAA token rotation schemes, and dynamic sitemaps.
             </p>
           </div>

@@ -86,7 +86,7 @@ export const Timeline: React.FC = () => {
                   <h3 className="text-lg font-bold text-neutral-100 mt-3 group-hover:text-white transition-colors">
                     {item.role}
                   </h3>
-                  <h4 className="text-xs font-mono font-semibold text-zinc-500 mt-1">
+                  <h4 className="text-xs font-mono font-semibold text-zinc-400 mt-1">
                     {item.company}
                   </h4>
                   <p className="text-xs text-zinc-400 mt-3 leading-relaxed font-sans">
@@ -98,7 +98,7 @@ export const Timeline: React.FC = () => {
                     {item.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="px-2 py-0.5 text-[9px] font-mono bg-zinc-900/60 border border-zinc-800/80 text-zinc-500 rounded"
+                        className="px-2 py-0.5 text-[9px] font-mono bg-zinc-900/60 border border-zinc-800/80 text-zinc-400 rounded"
                       >
                         {tag}
                       </span>
