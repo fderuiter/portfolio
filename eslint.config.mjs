@@ -9,6 +9,7 @@ const eslintConfig = defineConfig([
     rules: {
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
+      "no-console": "warn",
     },
   },
   // Override default ignores of eslint-config-next.

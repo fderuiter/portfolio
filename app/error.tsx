@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
+import { sanitizeError } from "@/lib/error-sanitization";
 
 export default function Error({
   error,
@@ -13,7 +14,7 @@ export default function Error({
   useEffect(() => {
     // Capture the error in external observability system
     Sentry.captureException(error);
-    console.error("Layout compile error:", error);
+    console.error("Layout compile error:", sanitizeError(error));
   }, [error]);
 
   return (

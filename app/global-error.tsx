@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
+import { sanitizeError } from "@/lib/error-sanitization";
 
 export default function GlobalError({
   error,
@@ -12,7 +13,7 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     Sentry.captureException(error);
-    console.error("Global uncaught crash boundary:", error);
+    console.error("Global uncaught crash boundary:", sanitizeError(error));
   }, [error]);
 
   return (
