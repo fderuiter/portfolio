@@ -28,12 +28,12 @@ export const Navbar: React.FC = () => {
   const [activeSection, setActiveSection] = useState("hero");
 
   const pathname = usePathname();
-  const [prevPathname, setPrevPathname] = useState(pathname);
-  
-  if (pathname !== prevPathname) {
-    setPrevPathname(pathname);
+
+  // Close the mobile menu on page transition
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsOpen(false);
-  }
+  }, [pathname]);
 
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -151,6 +151,7 @@ export const Navbar: React.FC = () => {
 
   // Handle smooth scroll clicks on homepage
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    setIsOpen(false);
     if (pathname === "/" && href.startsWith("/#")) {
       e.preventDefault();
       const targetId = href.substring(2);
@@ -158,7 +159,6 @@ export const Navbar: React.FC = () => {
       if (targetElement) {
         targetElement.scrollIntoView({ behavior: "smooth" });
         setActiveSection(targetId);
-        setIsOpen(false);
       }
     }
   };
@@ -191,7 +191,9 @@ export const Navbar: React.FC = () => {
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-8">
             {navItems.map((item) => {
-              const isSectionActive = pathname === "/" && item.href.startsWith("/#") && activeSection === item.href.substring(2);
+              const isActive = item.href.startsWith("/#")
+                ? (pathname === "/" && activeSection === item.href.substring(2))
+                : (pathname === item.href);
               return (
                 <Link
                   key={item.label}
@@ -200,14 +202,18 @@ export const Navbar: React.FC = () => {
                   rel={item.isExternal ? "noopener noreferrer" : undefined}
                   onClick={(e) => handleNavClick(e, item.href)}
                   className={cn(
-                    "text-xs font-mono tracking-wider font-semibold transition-all duration-300 hover:text-foreground cursor-pointer flex items-center gap-1",
-                    isSectionActive
+                    "group text-xs font-mono tracking-wider font-semibold transition-all duration-300 hover:text-foreground cursor-pointer flex items-center gap-1",
+                    isActive
                       ? "text-brand-cyan font-bold"
                       : "text-muted"
                   )}
                 >
                   {item.label}
-                  {item.isExternal && <span className="text-[10px] text-zinc-600 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">↗</span>}
+                  {item.isExternal && (
+                    <span className="text-[10px] text-zinc-600 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                      ↗
+                    </span>
+                  )}
                 </Link>
               );
             })}
@@ -282,7 +288,9 @@ export const Navbar: React.FC = () => {
 
             <nav className="flex flex-col gap-8 relative z-10">
               {navItems.map((item, index) => {
-                const isSectionActive = pathname === "/" && item.href.startsWith("/#") && activeSection === item.href.substring(2);
+                const isActive = item.href.startsWith("/#")
+                  ? (pathname === "/" && activeSection === item.href.substring(2))
+                  : (pathname === item.href);
                 return (
                   <motion.div
                     key={item.label}
@@ -296,14 +304,18 @@ export const Navbar: React.FC = () => {
                       rel={item.isExternal ? "noopener noreferrer" : undefined}
                       onClick={(e) => handleNavClick(e, item.href)}
                       className={cn(
-                        "text-3xl font-extrabold tracking-tight font-sans transition-all cursor-pointer flex items-center gap-2",
-                        isSectionActive
+                        "group text-3xl font-extrabold tracking-tight font-sans transition-all cursor-pointer flex items-center gap-2",
+                        isActive
                           ? "text-brand-cyan"
                           : "text-zinc-300 hover:text-white"
                       )}
                     >
                       {item.label}
-                      {item.isExternal && <span className="text-lg text-zinc-600">↗</span>}
+                      {item.isExternal && (
+                        <span className="text-lg text-zinc-600 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                          ↗
+                        </span>
+                      )}
                     </Link>
                   </motion.div>
                 );
