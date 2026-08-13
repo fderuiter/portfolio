@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
       exclude: ["error", "warn"],
     },
   },
+  experimental: {
+    optimizePackageImports: ["@tabler/icons-react"],
+  },
 };
 
 export default withSentryConfig(nextConfig, {

@@ -481,7 +481,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
       {/* 1. Animated Grid Background */}
       <div className="absolute inset-0 z-0 opacity-40 [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_60%,transparent_100%)] pointer-events-none">
         <AnimatedGridPattern
-          numSquares={45}
+          numSquares={15}
           maxOpacity={0.1}
           duration={4}
           repeatDelay={1}

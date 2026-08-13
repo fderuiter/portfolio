@@ -79,7 +79,6 @@ body {
   font-family: var(--font-sans);
   min-height: 100vh;
   overflow-x: hidden;
-  will-change: background-color, color;
 }
 
 /* Global focus ring styling (WCAG 2.1 compliance) */
