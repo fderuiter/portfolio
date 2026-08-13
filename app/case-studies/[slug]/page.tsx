@@ -151,7 +151,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
           primary_language: "TypeScript",
           github_url: "https://github.com/fderuiter/SchemaFlow",
           published: true,
-          simulated_telemetry: false,
+          simulated_telemetry: true,
           tags: "TypeScript, React, Flow",
           editorial_content: "A reactive, visual graph editor built in TypeScript.",
           architectural_narrative: "<p>Mock architectural narrative for SchemaFlow.</p>",
