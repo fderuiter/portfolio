@@ -409,7 +409,7 @@ export const CommandPalette: React.FC = () => {
         elements.forEach(el => el.remove());
       };
     }
-  }, []);
+  }, [setIsOpen]);
 
   // 1. Keyboard Shortcut Listener (Cmd+K / Ctrl+K) site-wide & Custom Event Listener
   useEffect(() => {
@@ -423,20 +423,19 @@ export const CommandPalette: React.FC = () => {
     };
 
     const togglePalette = () => {
-      setIsOpen((prev) => {
-        if (!prev) {
-          // Capture focus state before mounting modal
-          originalFocusRef.current = document.activeElement as HTMLElement;
-        } else {
-          // Restore focus
-          try {
-            originalFocusRef.current?.focus();
-          } catch {
-            // Ignore
-          }
+      const nextOpen = !isOpen;
+      if (nextOpen) {
+        // Capture focus state before mounting modal
+        originalFocusRef.current = document.activeElement as HTMLElement;
+      } else {
+        // Restore focus
+        try {
+          originalFocusRef.current?.focus();
+        } catch {
+          // Ignore
         }
-        return !prev;
-      });
+      }
+      setIsOpen(nextOpen);
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -459,7 +458,7 @@ export const CommandPalette: React.FC = () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("open-command-palette", handleCustomEvent);
     };
-  }, [mounted, setIsOpen]);
+  }, [mounted, isOpen, setIsOpen]);
 
   // Capture original focus state when the palette opens
   useEffect(() => {
