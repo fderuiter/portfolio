@@ -6,28 +6,20 @@
 
 # Interface: PreparedData
 
-Defined in: [lib/masonry.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L23)
+Defined in: [lib/masonry.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L29)
 
 ## Properties
-
-### items
-
-> **items**: [`ExtendedRichInlineItem`](../../../hooks/usePretextLayout/interfaces/ExtendedRichInlineItem.md)[]
-
-Defined in: [lib/masonry.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L25)
-
-***
 
 ### paddingHeight
 
 > **paddingHeight**: `number`
 
-Defined in: [lib/masonry.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L26)
+Defined in: [lib/masonry.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L31)
 
 ***
 
-### prepared
+### paragraphs?
 
-> **prepared**: `PreparedRichInline`
+> `optional` **paragraphs?**: [`PreparedParagraph`](PreparedParagraph.md)[]
 
-Defined in: [lib/masonry.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L24)
+Defined in: [lib/masonry.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L30)
