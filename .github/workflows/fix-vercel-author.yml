@@ -22,5 +22,5 @@ jobs:
           fi
           git config user.name "Fred de Ruiter"
           git config user.email "fpderuiter@gmail.com"
-          git commit --allow-empty -m "Trigger Vercel deployment as project owner"
+          git commit --no-verify --allow-empty -m "Trigger Vercel deployment as project owner"
           git push
