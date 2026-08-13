@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { useConsoleArt } from "@/hooks/useConsoleArt";
 
 type Priority = "polite" | "assertive";
 
@@ -19,6 +20,7 @@ export function useAnnouncer() {
 }
 
 export function A11yProvider({ children }: { children: React.ReactNode }) {
+  useConsoleArt();
   const [politeQueue, setPoliteQueue] = useState<string[]>([]);
   const [assertiveQueue, setAssertiveQueue] = useState<string[]>([]);
   
