@@ -85,6 +85,17 @@ jobs:
       - name: Generate Centralized Health Dashboard
         if: always()
         run: |
+          # Generate accessibility summary and status files
+          node scripts/generate-accessibility-report.js || true
+
+          # Read accessibility status
+          ACC_STATUS="❌ Fail"
+          if [ -f playwright-report/accessibility-status.txt ]; then
+            ACC_STATUS=$(cat playwright-report/accessibility-status.txt)
+          elif [ "${{ steps.playwright.outcome }}" = "success" ]; then
+            ACC_STATUS="✅ Pass"
+          fi
+
           echo "# 🛡️ Rigor Ecosystem Health Report" >> $GITHUB_STEP_SUMMARY
           echo "### Commit: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -92,6 +103,12 @@ jobs:
           echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
           echo "| **Mathematical Logic** (Vitest) | ${{ steps.vitest.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Masonry scheduling algorithms & text metrics |" >> $GITHUB_STEP_SUMMARY
           echo "| **Visual & Drift Guard** (Playwright) | ${{ steps.playwright.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Sub-pixel pixel matching & layout constant sync |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Accessibility Audits** (Playwright-Axe) | $ACC_STATUS | Automated WCAG compliance scans on interactive states |" >> $GITHUB_STEP_SUMMARY
           echo "| **Performance Gates** (Lighthouse) | ${{ steps.lighthouse.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Web Vitals & >95 Lighthouse score |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "*(Generated via automated unified CI pipeline)*" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f playwright-report/accessibility-summary.md ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            cat playwright-report/accessibility-summary.md >> $GITHUB_STEP_SUMMARY
+          fi
