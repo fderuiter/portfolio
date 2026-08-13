@@ -37,6 +37,7 @@ const LANGUAGE_COLORS: Record<string, { bg: string; text: string; hex: string }>
   TypeScript: { bg: "bg-blue-500/10", text: "text-blue-400", hex: "#3178c6" },
   JavaScript: { bg: "bg-yellow-500/10", text: "text-yellow-400", hex: "#f1e05a" },
   Python: { bg: "bg-emerald-500/10", text: "text-emerald-400", hex: "#3572a5" },
+  Haskell: { bg: "bg-indigo-500/10", text: "text-indigo-400", hex: "#5e5086" },
   CSS: { bg: "bg-purple-500/10", text: "text-purple-400", hex: "#563d7c" },
   HTML: { bg: "bg-orange-500/10", text: "text-orange-400", hex: "#e34c26" },
 };

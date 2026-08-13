@@ -66,7 +66,7 @@ export default async function WalkingSkeletonPage() {
           architectural_narrative: "Mock narrative",
           created_at: new Date(),
           updated_at: new Date(),
-          githubStats: null,
+          githubStats: getSimulatedStats("TypeScript"),
         },
         {
           id: "mock-2",
@@ -81,7 +81,22 @@ export default async function WalkingSkeletonPage() {
           architectural_narrative: "Mock narrative",
           created_at: new Date(),
           updated_at: new Date(),
-          githubStats: null,
+          githubStats: getSimulatedStats("Python"),
+        },
+        {
+          id: "mock-3",
+          slug: "aura-haskell",
+          title: "Aura: Language-Tailored Haskell Type Flow Analyzer",
+          primary_language: "Haskell",
+          github_url: "https://github.com/fderuiter/aura-haskell",
+          published: true,
+          simulated_telemetry: true,
+          tags: "Haskell, GHC, Compiler, AST, Static Analysis",
+          editorial_content: "An advanced **Haskell** static analyzer and type inference engine.",
+          architectural_narrative: "<h3>The Challenge</h3><p>Haskell codebases are robust, but tracing complex monadic types or locating space leaks can be incredibly slow and taxing.</p>",
+          created_at: new Date(),
+          updated_at: new Date(),
+          githubStats: getSimulatedStats("Haskell"),
         }
       ];
     }
