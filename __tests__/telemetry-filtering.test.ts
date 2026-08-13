@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { GameEngineException } from "../lib/exceptions";
 
@@ -76,5 +77,10 @@ describe("Sentry Telemetry Filtering for Game Engine Exceptions", () => {
 
     const resultForStd = config.beforeSend(event, { originalException: stdError });
     expect(resultForStd).toEqual(event);
+  });
+
+  it("should initialize GameEngineException with default message", () => {
+    const error = new GameEngineException();
+    expect(error.message).toBe("Simulated gameplay failure");
   });
 });

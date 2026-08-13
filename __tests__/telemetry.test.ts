@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import crypto from "crypto";
 
 // Use vi.hoisted to declare the mock function before any imports or mocks are executed
 const { mockRatelimitLimit } = vi.hoisted(() => {
@@ -40,7 +42,7 @@ vi.mock("@upstash/ratelimit", () => {
 });
 
 // Import endpoints AFTER setting up the hoisted variables and mocks
-import { POST } from "@/app/api/telemetry/route";
+import { POST, GET } from "@/app/api/telemetry/route";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 
@@ -199,5 +201,128 @@ describe("Telemetry API Route - Route Error Telemetry", () => {
     expect(res2.status).toBe(201);
     // The rate limiter limit mock should NOT have been called a second time!
     expect(mockRatelimitLimit).toHaveBeenCalledTimes(1);
+  });
+
+  it("should return consolidated stats on GET request", async () => {
+    const mockGroupByRes = [
+      { projectSlug: "/dashboard", eventType: "page_view", _count: { id: 12 } },
+      { projectSlug: "/dashboard", eventType: "project_click", _count: { id: 7 } },
+      { projectSlug: "/about", eventType: "page_view", _count: { id: 4 } },
+    ];
+    vi.mocked(prisma.telemetryEvent.groupBy).mockResolvedValue(mockGroupByRes as any);
+
+    const res = await GET();
+    expect(res.status).toBe(200);
+
+    const data = await res.json();
+    expect(data["/dashboard"]).toEqual({ views: 12, clicks: 7 });
+    expect(data["/about"]).toEqual({ views: 4, clicks: 0 });
+  });
+
+  it("should fail gracefully on GET request if database query fails", async () => {
+    vi.mocked(prisma.telemetryEvent.groupBy).mockRejectedValue(new Error("Database connection timed out"));
+
+    const res = await GET();
+    expect(res.status).toBe(500);
+
+    const data = await res.json();
+    expect(data.error).toContain("Failed to compile aggregate");
+  });
+
+  it("should mask / hash IP addresses anonymously to prevent plain-text PII storage", async () => {
+    mockRatelimitLimit.mockResolvedValue({
+      success: true,
+      limit: 100,
+      remaining: 99,
+      reset: Date.now() + 60000,
+      pending: Promise.resolve(),
+    });
+
+    const payload = {
+      projectSlug: "/dashboard",
+      eventType: "page_view",
+    };
+
+    const rawIp = "198.51.100.42";
+    const hashedIp = crypto.createHash("sha256").update(rawIp).digest("hex");
+
+    const req = new NextRequest("http://localhost:3000/api/telemetry", {
+      method: "POST",
+      headers: {
+        "x-forwarded-for": rawIp,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    await POST(req);
+
+    // Verify the rate limiter was called with the hashed IP, not the raw IP
+    expect(mockRatelimitLimit).toHaveBeenCalledWith(hashedIp);
+    expect(mockRatelimitLimit).not.toHaveBeenCalledWith(rawIp);
+  });
+
+  it("should fallback gracefully to secondary Redis buffering on primary database connection failure", async () => {
+    mockRatelimitLimit.mockResolvedValue({
+      success: true,
+      limit: 100,
+      remaining: 99,
+      reset: Date.now() + 60000,
+      pending: Promise.resolve(),
+    });
+
+    const payload = {
+      projectSlug: "/dashboard",
+      eventType: "page_view",
+    };
+
+    // Simulate database write failure
+    vi.mocked(prisma.telemetryEvent.create).mockRejectedValue(new Error("Database connection lost"));
+
+    const req = new NextRequest("http://localhost:3000/api/telemetry", {
+      method: "POST",
+      headers: {
+        "x-forwarded-for": "10.0.0.5",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(201);
+
+    const data = await res.json();
+    expect(data.success).toBe(true);
+    expect(data.event.projectSlug).toBe("/dashboard");
+    expect(data.event.eventType).toBe("page_view");
+  });
+
+  it("should fall back to x-real-ip if x-forwarded-for is missing", async () => {
+    mockRatelimitLimit.mockResolvedValue({
+      success: true,
+      limit: 100,
+      remaining: 99,
+      reset: Date.now() + 60000,
+      pending: Promise.resolve(),
+    });
+
+    const payload = {
+      projectSlug: "/dashboard",
+      eventType: "page_view",
+    };
+
+    const rawIp = "198.51.100.99";
+    const hashedIp = crypto.createHash("sha256").update(rawIp).digest("hex");
+
+    const req = new NextRequest("http://localhost:3000/api/telemetry", {
+      method: "POST",
+      headers: {
+        "x-real-ip": rawIp,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    await POST(req);
+
+    // Verify rate limit check was called with hashed x-real-ip
+    expect(mockRatelimitLimit).toHaveBeenCalledWith(hashedIp);
   });
 });

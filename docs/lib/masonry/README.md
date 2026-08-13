@@ -10,6 +10,7 @@
 
 - [MasonryConfig](interfaces/MasonryConfig.md)
 - [PreparedData](interfaces/PreparedData.md)
+- [PreparedParagraph](interfaces/PreparedParagraph.md)
 
 ## Functions
 

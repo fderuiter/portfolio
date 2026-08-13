@@ -8,7 +8,7 @@
 
 > **generateExplosionTrajectories**(`count`, `minX?`, `maxX?`, `minY?`, `maxY?`, `minDuration?`, `maxDuration?`): [`Particle`](../interfaces/Particle.md)[]
 
-Defined in: [lib/graphics-engine.ts:355](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L355)
+Defined in: [lib/graphics-engine.ts:358](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L358)
 
 Generates randomized trajectory profiles for particle explosion vectors.
 
