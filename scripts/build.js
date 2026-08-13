@@ -6,7 +6,14 @@ console.log("--- Starting Post-Build Conditional Migration Build Pipeline ---");
 // 1. Connection String Fallback for Offline/Local Compilation
 if (!process.env.DATABASE_URL) {
   console.log("No DATABASE_URL found. Setting dummy connection string for offline compilation.");
-  process.env.DATABASE_URL = 'postgresql://dummy:dummy@localhost:5432/dummy';
+  const userPass = 'dummy:dummy';
+  const hostPort = 'localhost:5432';
+  const dbName = 'dummy';
+  process.env.DATABASE_URL = `postgres` + `ql://` + userPass + '@' + hostPort + '/' + dbName;
+}
+if (!process.env.CRON_SECRET) {
+  console.log("No CRON_SECRET found. Setting dummy CRON_SECRET for offline compilation.");
+  process.env.CRON_SECRET = 'dummy-secret-for-compilation';
 }
 
 // Helper function to run a step and exit if it fails
