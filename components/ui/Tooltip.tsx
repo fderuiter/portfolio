@@ -5,9 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 export const Tooltip = ({
   children,
   text,
+  onHover,
 }: {
   children: React.ReactNode;
   text: string;
+  onHover?: () => void;
 }) => {
   const [show, setShow] = useState(false);
   const tooltipId = useId();
@@ -15,9 +17,15 @@ export const Tooltip = ({
   return (
     <span
       className="relative inline-block cursor-help group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand-cyan"
-      onMouseEnter={() => setShow(true)}
+      onMouseEnter={() => {
+        setShow(true);
+        onHover?.();
+      }}
       onMouseLeave={() => setShow(false)}
-      onFocus={() => setShow(true)}
+      onFocus={() => {
+        setShow(true);
+        onHover?.();
+      }}
       onBlur={() => setShow(false)}
       tabIndex={0}
       aria-describedby={tooltipId}

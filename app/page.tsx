@@ -7,6 +7,9 @@ import { TextReveal } from "@/components/TextReveal";
 import { SkillsGrid } from "@/components/SkillsGrid";
 import { Timeline } from "@/components/Timeline";
 import { Tooltip } from "@/components/ui/Tooltip";
+import { homepageTooltips } from "@/components/skillsData";
+import { SandboxTerminal } from "@/components/SandboxTerminal";
+import { IconTerminal } from "@tabler/icons-react";
 
 interface HydratedCaseStudy extends BaseCaseStudy {
   githubStats: GitHubStats | null;
@@ -215,8 +218,19 @@ export default async function WalkingSkeletonPage() {
           </p>
           
           {/* Dynamic Bento Skills Grid Card Layout */}
-          <div className="w-full mb-24">
+          <div className="w-full mb-12">
             <SkillsGrid languages={languagesList} />
+          </div>
+
+          {/* Interactive Console Terminal */}
+          <div className="w-full max-w-4xl mb-24 flex flex-col items-center">
+            <h3 className="text-xs font-mono font-bold tracking-widest text-zinc-400 uppercase mb-4 flex items-center gap-2">
+              <IconTerminal className="w-4 h-4 text-brand-cyan" />
+              System Telemetry Console
+            </h3>
+            <div className="w-full max-w-2xl">
+              <SandboxTerminal />
+            </div>
           </div>
 
           <h3 className="text-2xl font-extrabold text-neutral-100 tracking-tight text-center mb-4">
@@ -224,7 +238,7 @@ export default async function WalkingSkeletonPage() {
           </h3>
           <p className="text-xs font-mono text-muted tracking-widest uppercase mb-16 text-center">
             A Chronological Evolution of{" "}
-            <Tooltip text="Ensuring reliability for users so the platform never goes down when they need it most.">
+            <Tooltip text={homepageTooltips["systems-rigor"]}>
               Systems Rigor
             </Tooltip>
           </p>

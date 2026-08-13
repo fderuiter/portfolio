@@ -6,6 +6,7 @@ import { IconTerminal } from "@tabler/icons-react";
 import { TracingBeam } from "@/components/ui/TracingBeam";
 import { RichNarrative } from "@/components/RichNarrative";
 import { Tooltip } from "@/components/ui/Tooltip";
+import { homepageTooltips } from "@/components/skillsData";
 import { getGitHubStats, parseGitHubUrl, getSimulatedStats } from "@/lib/github";
 import { getSoftwareSourceCodeSchema } from "@/lib/seo";
 import { TelemetryTracker } from "@/components/TelemetryTracker";
@@ -281,7 +282,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
             {/* Technical Deep Dive Narrative */}
             <div className="mt-12 border-t border-zinc-900/50 pt-10">
               <h2 className="text-xl font-bold font-sans text-neutral-100 mb-3">
-                <Tooltip text="The human story behind the code—why this was built and who it helps.">
+                <Tooltip text={homepageTooltips["architectural-narratives"]}>
                   Architectural Narratives
                 </Tooltip>
               </h2>

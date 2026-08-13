@@ -10,7 +10,7 @@ import { useAudio } from "@/components/providers/AudioProvider";
 
 interface LogItem {
   id: string;
-  type: "command" | "output" | "error" | "info";
+  type: "command" | "output" | "error" | "info" | "reactive";
   text: string;
   jsonPayload?: unknown;
 }
@@ -358,6 +358,30 @@ export const SandboxTerminal: React.FC = () => {
     };
   }, [isExecuting, executeCommand, playKeystroke]);
 
+  // Handle incoming terminal:add-log custom events for reactive easter-egg hovers
+  useEffect(() => {
+    const handleAddLogEvent = (e: Event) => {
+      const customEvent = e as CustomEvent<{ text: string }>;
+      if (!customEvent.detail || typeof customEvent.detail.text !== "string") return;
+
+      const logText = customEvent.detail.text;
+      const newLogId = `reactive-log-${Date.now()}-${Math.random()}`;
+
+      setLogs((prev) => {
+        const updated = [...prev, { id: newLogId, type: "reactive" as const, text: logText }];
+        if (updated.length > 100) {
+          return updated.slice(updated.length - 100);
+        }
+        return updated;
+      });
+    };
+
+    window.addEventListener("terminal:add-log", handleAddLogEvent);
+    return () => {
+      window.removeEventListener("terminal:add-log", handleAddLogEvent);
+    };
+  }, []);
+
   // Handle key triggers (Enter, Up, Down, Tab, Escape)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key.length === 1) {
@@ -532,6 +556,12 @@ export const SandboxTerminal: React.FC = () => {
                     <span>JSON PAYLOAD</span>
                   </div>
                   {renderJsonPayload(log.jsonPayload)}
+                </div>
+              )}
+              {log.type === "reactive" && (
+                <div className="text-brand-cyan font-mono font-medium leading-relaxed select-text flex items-start gap-2">
+                  <span className="text-brand-cyan/60 animate-pulse select-none">⚡</span>
+                  <span className="whitespace-pre-wrap">{log.text}</span>
                 </div>
               )}
             </div>

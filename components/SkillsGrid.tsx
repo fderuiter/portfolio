@@ -6,6 +6,7 @@ import { designManifest } from "@/lib/design-manifest";
 import { motion } from "framer-motion";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { useAudio } from "@/components/providers/AudioProvider";
+import { skillsData } from "@/components/skillsData";
 
 export interface SkillLanguage {
   name: string;
@@ -18,6 +19,24 @@ interface SkillsGridProps {
 
 export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
   const { playSkillHover } = useAudio();
+
+  const handleHover = (key: string) => {
+    const skill = skillsData[key];
+    if (!skill) return;
+
+    // Log to standard console
+    // eslint-disable-next-line no-console
+    console.log(`[SkillsGrid Hover] ${skill.name}: ${skill.tooltipText}`);
+
+    // Dispatch terminal logs via window CustomEvent
+    skill.terminalLogs.forEach((log) => {
+      window.dispatchEvent(
+        new CustomEvent("terminal:add-log", {
+          detail: { text: log },
+        })
+      );
+    });
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl mx-auto select-none">
@@ -116,7 +135,10 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
               01
             </div>
             <h4 className="text-xs font-mono font-bold text-neutral-200">
-              <Tooltip text="Making sure healthcare professionals get the right data to save lives safely.">
+              <Tooltip
+                text={skillsData["clinical-integrations"].tooltipText}
+                onHover={() => handleHover("clinical-integrations")}
+              >
                 Clinical Integrations
               </Tooltip>
             </h4>
@@ -130,7 +152,10 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
               02
             </div>
             <h4 className="text-xs font-mono font-bold text-neutral-200">
-              <Tooltip text="Crafting buttery-smooth animations that feel completely natural to the user.">
+              <Tooltip
+                text={skillsData["layout-physics"].tooltipText}
+                onHover={() => handleHover("layout-physics")}
+              >
                 Layout Physics
               </Tooltip>
             </h4>
@@ -144,7 +169,10 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
               03
             </div>
             <h4 className="text-xs font-mono font-bold text-neutral-200">
-              <Tooltip text="Ensuring the app stays fast even when thousands of people use it at once.">
+              <Tooltip
+                text={skillsData["serverless-scaling"].tooltipText}
+                onHover={() => handleHover("serverless-scaling")}
+              >
                 Serverless Scaling
               </Tooltip>
             </h4>
@@ -157,7 +185,14 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
             <div className="w-8 h-8 rounded-lg bg-purple-950/20 border border-purple-900/30 flex items-center justify-center font-mono font-bold text-xs text-purple-400">
               04
             </div>
-            <h4 className="text-xs font-mono font-bold text-neutral-200">Full-Stack Security</h4>
+            <h4 className="text-xs font-mono font-bold text-neutral-200">
+              <Tooltip
+                text={skillsData["full-stack-security"].tooltipText}
+                onHover={() => handleHover("full-stack-security")}
+              >
+                Full-Stack Security
+              </Tooltip>
+            </h4>
             <p className="text-[11px] text-zinc-500 leading-relaxed">
               Strict HTML sanitizers, encrypted HIPAA token rotation schemes, and dynamic sitemaps.
             </p>
