@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { CaseStudyBentoCard } from "@/components/ui/CaseStudyBentoCard";
+import { Card, CardTitle } from "@/components/BentoGrid";
 import { BaseCaseStudy } from "@/types/domain";
 import { hexToRgba } from "@/lib/utils";
 import { GitHubStats } from "@/lib/github";
@@ -19,6 +21,76 @@ interface CaseStudyShowcaseProps {
 }
 
 const FILTER_TABS = ["All", "TypeScript", "Python", "Haskell"];
+
+// Skeleton component matching exact layout bounds to eliminate layout shifts (CLS)
+const SimulatorCardSkeleton: React.FC = () => {
+  return (
+    <div className="w-full h-[520px] flex flex-col justify-between items-center py-8">
+      <div className="w-full px-4">
+        <div className="w-16 h-4 bg-zinc-900 border border-zinc-850 rounded-md mb-3 animate-pulse" />
+        <div className="w-48 h-6 bg-zinc-900 border border-zinc-850 rounded-md mb-2.5 animate-pulse" />
+        <div className="w-full h-12 bg-zinc-900/40 border border-zinc-900/60 rounded-xl mb-4 animate-pulse" />
+      </div>
+      <div className="w-64 h-64 rounded-full border-4 border-zinc-900 bg-zinc-950 flex items-center justify-center animate-pulse shadow-[inset_0_0_15px_rgba(0,0,0,0.95)]">
+        <span className="text-[10px] font-mono text-zinc-600">Simulating...</span>
+      </div>
+      <div className="w-[260px] h-8 bg-zinc-900/40 border border-zinc-850 rounded-xl animate-pulse" />
+    </div>
+  );
+};
+
+// Lazy loaded simulator with ssr: false
+const LazyGarminWatchSimulator = dynamic(
+  () => import("@/components/GarminWatchSimulator").then((mod) => mod.GarminWatchSimulator),
+  {
+    ssr: false,
+    loading: () => <SimulatorCardSkeleton />,
+  }
+);
+
+interface SimulatorBentoCardProps {
+  study: BaseCaseStudy & { height?: number };
+  className?: string;
+}
+
+const SimulatorBentoCard: React.FC<SimulatorBentoCardProps> = ({ study, className }) => {
+  return (
+    <Card
+      className={className}
+      style={{
+        height: study.height ? `${study.height}px` : "520px",
+        transition: "height 250ms cubic-bezier(0.16, 1, 0.3, 1)",
+      }}
+    >
+      <div className="flex flex-col h-full justify-between select-none">
+        <div>
+          {/* Card Top Pill & Header */}
+          <div className="flex justify-between items-center mb-2.5">
+            <span className="px-2.5 py-0.5 text-[10px] font-mono font-bold border border-cyan-500/20 bg-cyan-950/40 text-cyan-400 rounded-md">
+              Simulation
+            </span>
+            <span className="text-[10px] font-mono text-zinc-600">
+              {study.slug.toUpperCase()}
+            </span>
+          </div>
+
+          <CardTitle className="text-lg md:text-xl font-extrabold tracking-tight">
+            {study.title}
+          </CardTitle>
+
+          <p className="text-zinc-400 text-xs md:text-sm leading-relaxed font-sans mb-3">
+            {study.editorial_content}
+          </p>
+        </div>
+
+        {/* Watch Game Simulator with stable boundaries */}
+        <div className="flex-1 flex items-center justify-center relative overflow-hidden">
+          <LazyGarminWatchSimulator />
+        </div>
+      </div>
+    </Card>
+  );
+};
 
 const CaseStudyShowcaseInner: React.FC<CaseStudyShowcaseProps> = ({ caseStudies }) => {
   const [selectedFilter, setSelectedFilter] = useState("All");
@@ -83,12 +155,16 @@ const CaseStudyShowcaseInner: React.FC<CaseStudyShowcaseProps> = ({ caseStudies 
                     transition={{ duration: 0.22, ease: "easeInOut" }}
                     className="w-full"
                   >
-                    <CaseStudyBentoCard 
-                      study={study} 
-                      preCalculatedHeight={study.height}
-                      preCalculatedParagraphsLines={study.paragraphsLines}
-                      preCalculatedParagraphsItems={study.paragraphsItems}
-                    />
+                    {study.id === "simulator-card" ? (
+                      <SimulatorBentoCard study={study} />
+                    ) : (
+                      <CaseStudyBentoCard 
+                        study={study} 
+                        preCalculatedHeight={study.height}
+                        preCalculatedParagraphsLines={study.paragraphsLines}
+                        preCalculatedParagraphsItems={study.paragraphsItems}
+                      />
+                    )}
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -98,7 +174,11 @@ const CaseStudyShowcaseInner: React.FC<CaseStudyShowcaseProps> = ({ caseStudies 
           /* SSR Safe Parallel Layout Fallback */
           <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
             {caseStudies.map((study) => (
-              <CaseStudyBentoCard key={study.id} study={study} />
+              study.id === "simulator-card" ? (
+                <SimulatorBentoCard key={study.id} study={study} />
+              ) : (
+                <CaseStudyBentoCard key={study.id} study={study} />
+              )
             ))}
           </div>
         )}
@@ -127,4 +207,3 @@ export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = (props) => {
     </BentoLayoutProvider>
   );
 };
-

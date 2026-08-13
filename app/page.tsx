@@ -115,6 +115,24 @@ export default async function WalkingSkeletonPage() {
   ];
   const languagesList = aggregatedLanguages.length > 0 ? aggregatedLanguages.slice(0, 5) : fallbackLanguages;
 
+  const simulatorCard: HydratedCaseStudy = {
+    id: "simulator-card",
+    slug: "simulator",
+    title: "Smartwatch Game Simulator",
+    primary_language: "TypeScript",
+    github_url: null,
+    published: true,
+    simulated_telemetry: false,
+    tags: "Hardware, Canvas, Game",
+    editorial_content: "An interactive, retro-style side-scrolling game simulating a physical Garmin smartwatch interface directly within the web page. Fully playable on both mobile and desktop views.",
+    architectural_narrative: "Garmin smartwatch simulation with retro side-scroller game engine.",
+    created_at: new Date(),
+    updated_at: new Date(),
+    githubStats: null,
+  };
+
+  caseStudies = [...caseStudies, simulatorCard];
+
   return (
     <div className="bg-zinc-950 min-h-screen text-foreground overflow-x-hidden flex flex-col">
       {/* Premium Staggered Living Grid Hero */}

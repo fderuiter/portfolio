@@ -59,6 +59,14 @@ export function useMasonryLayout<T extends MasonryItem>(
 
     const data: Record<string, PreparedData> = {};
     for (const study of allItems) {
+      if (study.id === "simulator-card") {
+        data[study.id] = {
+          paragraphs: [],
+          paddingHeight: 520,
+        };
+        continue;
+      }
+
       const paragraphTexts = study.editorial_content.split(/\r?\n+/).map(p => p.trim()).filter(Boolean);
       const paragraphs = paragraphTexts.map((text) => {
         const parsedItems = parseMarkdownToRichItems(text, baseFont, boldFont, italicFont, codeFont);

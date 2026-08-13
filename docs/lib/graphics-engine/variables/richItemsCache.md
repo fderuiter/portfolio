@@ -8,4 +8,4 @@
 
 > `const` **richItemsCache**: [`LRUCache`](../classes/LRUCache.md)\<`string`, `unknown`[]\>
 
-Defined in: [lib/graphics-engine.ts:64](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L64)
+Defined in: [lib/graphics-engine.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L67)
