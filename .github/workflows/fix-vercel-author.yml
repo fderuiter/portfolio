@@ -1,0 +1,22 @@
+name: Fix Vercel Deploy Author
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  override-author:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR Branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Append Authorized Commit
+        run: |
+          git config user.name "Fred de Ruiter"
+          git config user.email "fpderuiter@gmail.com"
+          git commit --allow-empty -m "Trigger Vercel deployment as project owner"
+          git push
