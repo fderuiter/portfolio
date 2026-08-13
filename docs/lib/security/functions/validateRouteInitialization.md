@@ -8,7 +8,7 @@
 
 > **validateRouteInitialization**(): `void`
 
-Defined in: [lib/security.ts:9](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/security.ts#L9)
+Defined in: [lib/security.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/security.ts#L9)
 
 Validates that the required authorization secret is configured.
 Designed to run during route initialization (fail-closed behavior).

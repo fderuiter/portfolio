@@ -8,7 +8,7 @@
 
 > **Point2D** = `object`
 
-Defined in: [lib/graphics-engine.ts:9](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L9)
+Defined in: [lib/graphics-engine.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L9)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [lib/graphics-engine.ts:9](https://github.com/fderuiter/portfolio/bl
 
 > **x**: `number`
 
-Defined in: [lib/graphics-engine.ts:9](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L9)
+Defined in: [lib/graphics-engine.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L9)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [lib/graphics-engine.ts:9](https://github.com/fderuiter/portfolio/bl
 
 > **y**: `number`
 
-Defined in: [lib/graphics-engine.ts:9](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L9)
+Defined in: [lib/graphics-engine.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L9)

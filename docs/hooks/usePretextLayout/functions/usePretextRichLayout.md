@@ -8,7 +8,7 @@
 
 > **usePretextRichLayout**(`__namedParameters`): `object`
 
-Defined in: [hooks/usePretextLayout.tsx:252](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/hooks/usePretextLayout.tsx#L252)
+Defined in: [hooks/usePretextLayout.tsx:252](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L252)
 
 ## Parameters
 

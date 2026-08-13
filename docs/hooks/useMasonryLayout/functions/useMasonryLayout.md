@@ -8,7 +8,7 @@
 
 > **useMasonryLayout**\<`T`\>(`allItems`, `filteredItems`): `object`
 
-Defined in: [hooks/useMasonryLayout.ts:31](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/hooks/useMasonryLayout.ts#L31)
+Defined in: [hooks/useMasonryLayout.ts:31](https://github.com/fderuiter/portfolio/blob/main/hooks/useMasonryLayout.ts#L31)
 
 ## Type Parameters
 

@@ -6,7 +6,7 @@
 
 # Interface: CaseStudyItem
 
-Defined in: [lib/search-utils.ts:25](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/search-utils.ts#L25)
+Defined in: [lib/search-utils.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/search-utils.ts#L25)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/search-utils.ts:25](https://github.com/fderuiter/portfolio/blob
 
 > **id**: `string`
 
-Defined in: [lib/search-utils.ts:26](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/search-utils.ts#L26)
+Defined in: [lib/search-utils.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/search-utils.ts#L26)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/search-utils.ts:26](https://github.com/fderuiter/portfolio/blob
 
 > **primary\_language**: `string`
 
-Defined in: [lib/search-utils.ts:29](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/search-utils.ts#L29)
+Defined in: [lib/search-utils.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/search-utils.ts#L29)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/search-utils.ts:29](https://github.com/fderuiter/portfolio/blob
 
 > **slug**: `string`
 
-Defined in: [lib/search-utils.ts:27](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/search-utils.ts#L27)
+Defined in: [lib/search-utils.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/search-utils.ts#L27)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/search-utils.ts:27](https://github.com/fderuiter/portfolio/blob
 
 > **tags**: `string`
 
-Defined in: [lib/search-utils.ts:30](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/search-utils.ts#L30)
+Defined in: [lib/search-utils.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/search-utils.ts#L30)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [lib/search-utils.ts:30](https://github.com/fderuiter/portfolio/blob
 
 > **title**: `string`
 
-Defined in: [lib/search-utils.ts:28](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/search-utils.ts#L28)
+Defined in: [lib/search-utils.ts:28](https://github.com/fderuiter/portfolio/blob/main/lib/search-utils.ts#L28)

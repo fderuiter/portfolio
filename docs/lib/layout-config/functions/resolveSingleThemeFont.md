@@ -8,7 +8,7 @@
 
 > **resolveSingleThemeFont**(`fontSize`, `fontFamilyVariable?`): `string`
 
-Defined in: [lib/layout-config.ts:68](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/layout-config.ts#L68)
+Defined in: [lib/layout-config.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L68)
 
 ## Parameters
 

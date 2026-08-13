@@ -6,7 +6,7 @@
 
 # Interface: GitHubStats
 
-Defined in: [lib/github.ts:15](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/github.ts#L15)
+Defined in: [lib/github.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L15)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/github.ts:15](https://github.com/fderuiter/portfolio/blob/e9125
 
 > **commitActivity**: `number`[]
 
-Defined in: [lib/github.ts:21](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/github.ts#L21)
+Defined in: [lib/github.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L21)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/github.ts:21](https://github.com/fderuiter/portfolio/blob/e9125
 
 > **forks**: `number`
 
-Defined in: [lib/github.ts:17](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/github.ts#L17)
+Defined in: [lib/github.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L17)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/github.ts:17](https://github.com/fderuiter/portfolio/blob/e9125
 
 > **languages**: [`GitHubLanguage`](GitHubLanguage.md)[]
 
-Defined in: [lib/github.ts:19](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/github.ts#L19)
+Defined in: [lib/github.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L19)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/github.ts:19](https://github.com/fderuiter/portfolio/blob/e9125
 
 > **openIssues**: `number`
 
-Defined in: [lib/github.ts:18](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/github.ts#L18)
+Defined in: [lib/github.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L18)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/github.ts:18](https://github.com/fderuiter/portfolio/blob/e9125
 
 > **recentCommits**: [`GitHubCommit`](GitHubCommit.md)[]
 
-Defined in: [lib/github.ts:20](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/github.ts#L20)
+Defined in: [lib/github.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L20)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [lib/github.ts:20](https://github.com/fderuiter/portfolio/blob/e9125
 
 > **stars**: `number`
 
-Defined in: [lib/github.ts:16](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/github.ts#L16)
+Defined in: [lib/github.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L16)

@@ -8,7 +8,7 @@
 
 > **getGitHubStats**(`owner`, `repo`): `Promise`\<[`GitHubStats`](../interfaces/GitHubStats.md) \| `null`\>
 
-Defined in: [lib/github.ts:187](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/github.ts#L187)
+Defined in: [lib/github.ts:187](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L187)
 
 Public facing API client wrapper.
 Integrates Next.js unstable_cache and seamlessly falls back to direct API fetching

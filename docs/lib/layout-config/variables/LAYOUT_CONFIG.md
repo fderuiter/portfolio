@@ -8,7 +8,7 @@
 
 > `const` **LAYOUT\_CONFIG**: `object`
 
-Defined in: [lib/layout-config.ts:3](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/layout-config.ts#L3)
+Defined in: [lib/layout-config.ts:3](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L3)
 
 ## Type Declaration
 

@@ -6,7 +6,7 @@
 
 # Interface: TextMeasurementOptions
 
-Defined in: [lib/graphics-engine.ts:29](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L29)
+Defined in: [lib/graphics-engine.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L29)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/graphics-engine.ts:29](https://github.com/fderuiter/portfolio/b
 
 > `optional` **fontFamilyVariable?**: `string`
 
-Defined in: [lib/graphics-engine.ts:33](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L33)
+Defined in: [lib/graphics-engine.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L33)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/graphics-engine.ts:33](https://github.com/fderuiter/portfolio/b
 
 > **fontSize**: `number`
 
-Defined in: [lib/graphics-engine.ts:31](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L31)
+Defined in: [lib/graphics-engine.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L31)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/graphics-engine.ts:31](https://github.com/fderuiter/portfolio/b
 
 > **lineHeight**: `number`
 
-Defined in: [lib/graphics-engine.ts:32](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L32)
+Defined in: [lib/graphics-engine.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L32)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/graphics-engine.ts:32](https://github.com/fderuiter/portfolio/b
 
 > **maxWidth**: `number`
 
-Defined in: [lib/graphics-engine.ts:34](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L34)
+Defined in: [lib/graphics-engine.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L34)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [lib/graphics-engine.ts:34](https://github.com/fderuiter/portfolio/b
 
 > **text**: `string`
 
-Defined in: [lib/graphics-engine.ts:30](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L30)
+Defined in: [lib/graphics-engine.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L30)

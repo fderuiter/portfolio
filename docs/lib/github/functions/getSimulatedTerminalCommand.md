@@ -8,7 +8,7 @@
 
 > **getSimulatedTerminalCommand**(`language`): `string`
 
-Defined in: [lib/github.ts:207](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/github.ts#L207)
+Defined in: [lib/github.ts:207](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L207)
 
 ## Parameters
 

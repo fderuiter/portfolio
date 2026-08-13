@@ -8,7 +8,7 @@
 
 > **evaluateProofStatus**(`edges`): `object`
 
-Defined in: [lib/proof-utils.ts:76](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/proof-utils.ts#L76)
+Defined in: [lib/proof-utils.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L76)
 
 Evaluates the proof's logical progress based on current connections/edges.
 Modus Ponens: A (P) and B (P -> Q) yields C (Q)

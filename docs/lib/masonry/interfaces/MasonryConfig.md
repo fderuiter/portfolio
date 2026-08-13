@@ -6,7 +6,7 @@
 
 # Interface: MasonryConfig
 
-Defined in: [lib/masonry.ts:14](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/masonry.ts#L14)
+Defined in: [lib/masonry.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L14)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/masonry.ts:14](https://github.com/fderuiter/portfolio/blob/e912
 
 > **BREAKPOINTS**: `object`
 
-Defined in: [lib/masonry.ts:16](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/masonry.ts#L16)
+Defined in: [lib/masonry.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L16)
 
 #### LG
 
@@ -30,7 +30,7 @@ Defined in: [lib/masonry.ts:16](https://github.com/fderuiter/portfolio/blob/e912
 
 > **CARD\_PADDING**: `number`
 
-Defined in: [lib/masonry.ts:18](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/masonry.ts#L18)
+Defined in: [lib/masonry.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L18)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/masonry.ts:18](https://github.com/fderuiter/portfolio/blob/e912
 
 > **COLS**: `object`
 
-Defined in: [lib/masonry.ts:15](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/masonry.ts#L15)
+Defined in: [lib/masonry.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L15)
 
 #### LG
 
@@ -58,7 +58,7 @@ Defined in: [lib/masonry.ts:15](https://github.com/fderuiter/portfolio/blob/e912
 
 > **FALLBACK\_ITEM\_HEIGHT**: `number`
 
-Defined in: [lib/masonry.ts:20](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/masonry.ts#L20)
+Defined in: [lib/masonry.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L20)
 
 ***
 
@@ -66,7 +66,7 @@ Defined in: [lib/masonry.ts:20](https://github.com/fderuiter/portfolio/blob/e912
 
 > **GAP**: `number`
 
-Defined in: [lib/masonry.ts:17](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/masonry.ts#L17)
+Defined in: [lib/masonry.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L17)
 
 ***
 
@@ -74,4 +74,4 @@ Defined in: [lib/masonry.ts:17](https://github.com/fderuiter/portfolio/blob/e912
 
 > **LINE\_HEIGHT**: `number`
 
-Defined in: [lib/masonry.ts:19](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/masonry.ts#L19)
+Defined in: [lib/masonry.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L19)

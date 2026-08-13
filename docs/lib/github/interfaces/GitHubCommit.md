@@ -6,7 +6,7 @@
 
 # Interface: GitHubCommit
 
-Defined in: [lib/github.ts:3](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/github.ts#L3)
+Defined in: [lib/github.ts:3](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L3)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/github.ts:3](https://github.com/fderuiter/portfolio/blob/e9125b
 
 > **author**: `string`
 
-Defined in: [lib/github.ts:7](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/github.ts#L7)
+Defined in: [lib/github.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L7)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/github.ts:7](https://github.com/fderuiter/portfolio/blob/e9125b
 
 > **date**: `string`
 
-Defined in: [lib/github.ts:6](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/github.ts#L6)
+Defined in: [lib/github.ts:6](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L6)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/github.ts:6](https://github.com/fderuiter/portfolio/blob/e9125b
 
 > **message**: `string`
 
-Defined in: [lib/github.ts:5](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/github.ts#L5)
+Defined in: [lib/github.ts:5](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L5)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/github.ts:5](https://github.com/fderuiter/portfolio/blob/e9125b
 
 > **sha**: `string`
 
-Defined in: [lib/github.ts:4](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/github.ts#L4)
+Defined in: [lib/github.ts:4](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L4)

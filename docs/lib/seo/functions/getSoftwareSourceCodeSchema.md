@@ -8,7 +8,7 @@
 
 > **getSoftwareSourceCodeSchema**(`study`, `stats`): `string`
 
-Defined in: [lib/seo.ts:29](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/seo.ts#L29)
+Defined in: [lib/seo.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L29)
 
 Returns a specialized SoftwareSourceCode schema for dynamic Case Studies.
 Integrates database case study records with cached live GitHub telemetry statistics.
