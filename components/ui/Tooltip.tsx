@@ -2,15 +2,21 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNarrative } from "@/components/providers/NarrativeProvider";
+import { tooltipDictionary, TooltipKey } from "@/lib/tooltip-dictionary";
 
 export const Tooltip = ({
   children,
-  text,
+  textId,
 }: {
   children: React.ReactNode;
-  text: string;
+  textId: TooltipKey;
 }) => {
   const [show, setShow] = useState(false);
+  const { narrativeMode } = useNarrative();
+
+  const translation = tooltipDictionary[textId];
+  const text = translation ? translation[narrativeMode] : "Missing translation";
 
   return (
     <span

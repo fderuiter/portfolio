@@ -110,7 +110,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
               01
             </div>
             <h4 className="text-xs font-mono font-bold text-neutral-200">
-              <Tooltip text="Making sure healthcare professionals get the right data to save lives safely.">
+              <Tooltip textId="clinicalIntegrations">
                 Clinical Integrations
               </Tooltip>
             </h4>
@@ -124,7 +124,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
               02
             </div>
             <h4 className="text-xs font-mono font-bold text-neutral-200">
-              <Tooltip text="Crafting buttery-smooth animations that feel completely natural to the user.">
+              <Tooltip textId="layoutPhysics">
                 Layout Physics
               </Tooltip>
             </h4>
@@ -138,7 +138,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
               03
             </div>
             <h4 className="text-xs font-mono font-bold text-neutral-200">
-              <Tooltip text="Ensuring the app stays fast even when thousands of people use it at once.">
+              <Tooltip textId="serverlessScaling">
                 Serverless Scaling
               </Tooltip>
             </h4>

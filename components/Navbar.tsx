@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
+import { NarrativeToggle } from "@/components/NarrativeToggle";
 
 interface NavItem {
   label: string;
@@ -211,10 +212,12 @@ export const Navbar: React.FC = () => {
                 </Link>
               );
             })}
+            <NarrativeToggle />
           </nav>
 
           {/* Mobile Actions Container */}
           <div className="md:hidden flex items-center gap-4 relative z-50">
+            <NarrativeToggle />
             {/* Mobile Hamburger Trigger */}
             <button
               ref={triggerRef}

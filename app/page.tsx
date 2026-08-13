@@ -224,7 +224,7 @@ export default async function WalkingSkeletonPage() {
           </h3>
           <p className="text-xs font-mono text-muted tracking-widest uppercase mb-16 text-center">
             A Chronological Evolution of{" "}
-            <Tooltip text="Ensuring reliability for users so the platform never goes down when they need it most.">
+            <Tooltip textId="systemsRigor">
               Systems Rigor
             </Tooltip>
           </p>
