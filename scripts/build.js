@@ -30,6 +30,9 @@ function runStep(command, args) {
 console.log("\n--- Phase 1: Generating Prisma Client ---");
 runStep('npx', ['prisma', 'generate']);
 
+console.log("\n--- Phase 1.2: Compiling API Documentation ---");
+runStep('npm', ['run', 'compile-docs']);
+
 console.log("\n--- Phase 1.5: Verifying & Generating OpenAPI Specification ---");
 runStep('npx', ['tsx', 'scripts/generate-openapi.ts']);
 
