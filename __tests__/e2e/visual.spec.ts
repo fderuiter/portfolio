@@ -23,7 +23,8 @@ test.describe('Visual Regression & Drift Detection', () => {
 
     // Wait for the Pretext measuring text to finish
     await page.waitForFunction(() => {
-      return document.querySelector('.text-\\[9px\\]') && !document.querySelector('.text-\\[9px\\]')?.textContent?.includes('MEASURING...');
+      const el = document.querySelector('.text-\\[9px\\]');
+      return el && !el.textContent?.includes('MEASURING...');
     });
 
     // Take full page snapshot to cover case study components
