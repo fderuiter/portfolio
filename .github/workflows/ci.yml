@@ -36,11 +36,11 @@ jobs:
 
       - name: Install Playwright Browsers with Dependencies (Cache Miss)
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps
+        run: npx playwright install chromium webkit --with-deps
 
       - name: Install Playwright Dependencies Only (Cache Hit)
         if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps
+        run: npx playwright install-deps chromium webkit
 
       - name: Generate Theme and Prisma Schema (Pre-build steps)
         run: |

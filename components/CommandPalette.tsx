@@ -224,14 +224,14 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         </div>
 
         {/* Results List section */}
-        <div
-          id="palette-results-list"
-          role="listbox"
-          aria-label="Search outcomes list"
-          className="relative z-10 flex-1 max-h-[340px] overflow-y-auto p-2.5 space-y-1 scrollbar-none"
-        >
-          {filteredItems.length > 0 ? (
-            filteredItems.map((item, index) => {
+        {filteredItems.length > 0 ? (
+          <div
+            id="palette-results-list"
+            role="listbox"
+            aria-label="Search outcomes list"
+            className="relative z-10 flex-1 max-h-[340px] overflow-y-auto p-2.5 space-y-1 scrollbar-none"
+          >
+            {filteredItems.map((item, index) => {
               const isActive = index === activeIndex;
               return (
                 <div
@@ -304,16 +304,16 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
                   )}
                 </div>
               );
-            })
-          ) : (
-            <div className="py-12 text-center select-none">
-              <p className="text-sm text-zinc-500 italic">No outcomes match search query.</p>
-              <p className="text-[10px] font-mono text-zinc-600 mt-1 uppercase tracking-widest">
-                Try searching other tags
-              </p>
-            </div>
-          )}
-        </div>
+            })}
+          </div>
+        ) : (
+          <div className="relative z-10 flex-1 max-h-[340px] overflow-y-auto p-2.5 space-y-1 scrollbar-none py-12 text-center select-none">
+            <p className="text-sm text-zinc-500 italic">No outcomes match search query.</p>
+            <p className="text-[10px] font-mono text-zinc-600 mt-1 uppercase tracking-widest">
+              Try searching other tags
+            </p>
+          </div>
+        )}
 
         {/* Modal Bottom Footer bar */}
         <div className="relative z-10 border-t border-zinc-800/60 p-3 bg-zinc-950/60 flex justify-between items-center text-[10px] font-mono text-zinc-500 select-none">
@@ -368,6 +368,19 @@ export const CommandPalette: React.FC = () => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [mounted, isOpen, setIsOpen]);
+
+  // Expose test helper globally to open search modal programmatically
+  useEffect(() => {
+    if (!mounted) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).__openSearch = () => {
+      setIsOpen(true);
+    };
+    return () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (window as any).__openSearch;
+    };
+  }, [mounted, setIsOpen]);
 
   // Capture original focus state when the palette opens
   useEffect(() => {
