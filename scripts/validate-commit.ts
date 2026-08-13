@@ -22,7 +22,7 @@ function shouldScanFile(filePath: string): boolean {
     ".db", ".zip", ".tar", ".gz", ".pdf", ".mp4", ".mov"
   ];
   const ignoredFiles = ["package-lock.json", "bun.lock", "yarn.lock", "pnpm-lock.yaml"];
-  const ignoredDirectories = ["node_modules/", ".git/", ".next/", "dist/", "build/", "__tests__/"];
+  const ignoredDirectories = ["node_modules/", ".git/", ".next/", "dist/", "build/", "__tests__/", ".github/"];
 
   const baseName = path.basename(filePath);
   const ext = path.extname(filePath).toLowerCase();

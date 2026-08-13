@@ -64,7 +64,7 @@ jobs:
       - name: Build Production
         run: npx next build
         env:
-          DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
+          DATABASE_URL: "postgresql://localhost:5432/dummy"
 
       - name: Run Logic Tests (Vitest)
         id: vitest
@@ -74,13 +74,13 @@ jobs:
         id: playwright
         run: npx playwright test
         env:
-          DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
+          DATABASE_URL: "postgresql://localhost:5432/dummy"
 
       - name: Run Performance Benchmarks (Lighthouse)
         id: lighthouse
         run: npx lhci autorun
         env:
-          DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
+          DATABASE_URL: "postgresql://localhost:5432/dummy"
 
       - name: Generate Centralized Health Dashboard
         if: always()
@@ -94,4 +94,5 @@ jobs:
           echo "| **Visual & Drift Guard** (Playwright) | ${{ steps.playwright.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Sub-pixel pixel matching & layout constant sync |" >> $GITHUB_STEP_SUMMARY
           echo "| **Performance Gates** (Lighthouse) | ${{ steps.lighthouse.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Web Vitals & >95 Lighthouse score |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          node scripts/format-a11y-summary.js
           echo "*(Generated via automated unified CI pipeline)*" >> $GITHUB_STEP_SUMMARY

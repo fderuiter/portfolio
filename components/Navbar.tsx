@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
+import { useAnnouncer } from "@/components/providers/A11yProvider";
 
 interface NavItem {
   label: string;
@@ -26,6 +27,21 @@ export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("hero");
+
+  const { announce } = useAnnouncer();
+  const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (isOpen) {
+      announce("Mobile navigation menu opened. Tab to navigate.", "polite");
+    } else {
+      announce("Mobile navigation menu closed.", "polite");
+    }
+  }, [isOpen, announce]);
 
   const pathname = usePathname();
   const [prevPathname, setPrevPathname] = useState(pathname);
@@ -123,6 +139,17 @@ export const Navbar: React.FC = () => {
         const firstElement = elements[0];
         const lastElement = elements[elements.length - 1];
 
+        // If focus is outside the container, redirect it inside
+        if (!menuRef.current.contains(document.activeElement)) {
+          e.preventDefault();
+          if (e.shiftKey) {
+            lastElement.focus();
+          } else {
+            firstElement.focus();
+          }
+          return;
+        }
+
         if (e.shiftKey) {
           if (document.activeElement === firstElement) {
             lastElement.focus();
@@ -190,6 +217,15 @@ export const Navbar: React.FC = () => {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-8">
+            <button
+              id="search-trigger-btn"
+              onClick={() => window.dispatchEvent(new CustomEvent("open-command-palette"))}
+              aria-label="Open command palette"
+              className="text-xs font-mono tracking-wider font-semibold text-muted hover:text-foreground transition-all duration-300 cursor-pointer flex items-center gap-1.5"
+            >
+              <span>Search</span>
+              <kbd className="text-[9px] bg-zinc-900 border border-zinc-800 px-1 rounded text-zinc-500 font-sans">⌘K</kbd>
+            </button>
             {navItems.map((item) => {
               const isSectionActive = pathname === "/" && item.href.startsWith("/#") && activeSection === item.href.substring(2);
               return (
@@ -215,8 +251,24 @@ export const Navbar: React.FC = () => {
 
           {/* Mobile Actions Container */}
           <div className="md:hidden flex items-center gap-4 relative z-50">
+            <button
+              id="mobile-search-trigger-btn"
+              onClick={() => window.dispatchEvent(new CustomEvent("open-command-palette"))}
+              aria-label="Open command palette"
+              className="text-xs font-mono tracking-wider font-semibold text-muted hover:text-foreground transition-all duration-300 cursor-pointer flex items-center justify-center w-8 h-8"
+            >
+              <svg
+                className="w-4 h-4 fill-none stroke-current stroke-2"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+            </button>
             {/* Mobile Hamburger Trigger */}
             <button
+              id="mobile-menu-trigger-btn"
               ref={triggerRef}
               aria-expanded={isOpen}
               aria-controls="mobile-navigation"

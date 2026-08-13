@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { IconSearch, IconTerminal, IconFileCode, IconDirections, IconCornerDownLeft } from "@tabler/icons-react";
 import { filterFuzzySearch } from "@/lib/search-utils";
 import { useSearch } from "@/components/providers/SearchProvider";
+import { useAnnouncer } from "@/components/providers/A11yProvider";
 
 interface SearchCaseStudy {
   id: string;
@@ -41,10 +42,15 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
   const containerRef = useRef<HTMLDivElement | null>(null);
   const searchId = useId();
 
+  const { announce } = useAnnouncer();
+
   // 1. Body scroll locking and focus trap management
   useEffect(() => {
     // Lock parent layout scrollbars
     document.body.style.overflow = "hidden";
+
+    // Announce palette opened
+    announce("Command palette opened. Type to search site content.", "polite");
 
     // Auto-focus input after transition has completed
     const timer = setTimeout(() => {
@@ -54,8 +60,68 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
     return () => {
       document.body.style.overflow = "";
       clearTimeout(timer);
+      announce("Command palette closed.", "polite");
+    };
+  }, [announce]);
+
+  // Focus trap for Tab key
+  useEffect(() => {
+    const handleFocusTrap = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+
+      if (!containerRef.current) return;
+      const focusableElements = containerRef.current.querySelectorAll(
+        'input, select, textarea, button, a[href], [tabindex]:not([tabindex="-1"])'
+      );
+      const elements = Array.from(focusableElements) as HTMLElement[];
+      if (elements.length === 0) return;
+
+      const firstElement = elements[0];
+      const lastElement = elements[elements.length - 1];
+
+      // If focus is outside the container, redirect it inside
+      if (!containerRef.current.contains(document.activeElement)) {
+        e.preventDefault();
+        if (e.shiftKey) {
+          lastElement.focus();
+        } else {
+          firstElement.focus();
+        }
+        return;
+      }
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          lastElement.focus();
+          e.preventDefault();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          firstElement.focus();
+          e.preventDefault();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleFocusTrap);
+    return () => {
+      document.removeEventListener("keydown", handleFocusTrap);
     };
   }, []);
+
+  // Global keydown listener for Escape key to close modal
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    document.addEventListener("keydown", handleGlobalKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleGlobalKeyDown);
+    };
+  }, [onClose]);
 
   // 2. Compile indexable items from static navigations and Neon DB records
   const allItems = useMemo(() => {
@@ -335,16 +401,42 @@ export const CommandPalette: React.FC = () => {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
+    if (typeof window !== "undefined") {
+      (window as unknown as { __closeCommandPalette?: () => void }).__closeCommandPalette = () => {
+        setIsOpen(false);
+        // Force-delete leftover portal container elements to bypass headless Safari Framer Motion animation freeze
+        const elements = document.querySelectorAll('div[class*="z-[9999]"]');
+        elements.forEach(el => el.remove());
+      };
+    }
   }, []);
 
-  // 1. Keyboard Shortcut Listener (Cmd+K / Ctrl+K) site-wide
+  // 1. Keyboard Shortcut Listener (Cmd+K / Ctrl+K) site-wide & Custom Event Listener
   useEffect(() => {
     if (!mounted) return;
+
     const isWithinBoundary = (target: EventTarget | null) => {
       if (target instanceof Element) {
         return !!target.closest("[data-keyboard-boundary]");
       }
       return false;
+    };
+
+    const togglePalette = () => {
+      setIsOpen((prev) => {
+        if (!prev) {
+          // Capture focus state before mounting modal
+          originalFocusRef.current = document.activeElement as HTMLElement;
+        } else {
+          // Restore focus
+          try {
+            originalFocusRef.current?.focus();
+          } catch {
+            // Ignore
+          }
+        }
+        return !prev;
+      });
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -353,13 +445,21 @@ export const CommandPalette: React.FC = () => {
       }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        setIsOpen(!isOpen);
+        togglePalette();
       }
     };
 
+    const handleCustomEvent = () => {
+      togglePalette();
+    };
+
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [mounted, isOpen, setIsOpen]);
+    window.addEventListener("open-command-palette", handleCustomEvent);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("open-command-palette", handleCustomEvent);
+    };
+  }, [mounted, setIsOpen]);
 
   // Capture original focus state when the palette opens
   useEffect(() => {
@@ -389,7 +489,11 @@ export const CommandPalette: React.FC = () => {
 
   const handleClose = () => {
     closeSearch();
-    originalFocusRef.current?.focus();
+    try {
+      originalFocusRef.current?.focus();
+    } catch {
+      // Ignore
+    }
   };
 
   if (!mounted) return null;
