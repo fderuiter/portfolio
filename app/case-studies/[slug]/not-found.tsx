@@ -1,6 +1,23 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useRef } from "react";
+import { useTelemetry } from "@/hooks/useTelemetry";
 
 export default function CaseStudyNotFound() {
+  const { recordEvent } = useTelemetry();
+  const hasTracked = useRef(false);
+
+  useEffect(() => {
+    if (hasTracked.current) return;
+    hasTracked.current = true;
+
+    const path = typeof window !== "undefined" ? window.location.pathname : "/case-studies/not-found";
+    recordEvent(path, "route_error").catch((err) => {
+      console.error("Failed to record case-study route error telemetry:", err);
+    });
+  }, [recordEvent]);
+
   return (
     <main className="min-h-screen py-32 px-6 flex flex-col items-center justify-center bg-brand-dark text-foreground">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/10 blur-[120px] pointer-events-none" />

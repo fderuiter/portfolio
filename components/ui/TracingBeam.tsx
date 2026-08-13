@@ -2,7 +2,7 @@
 
 import React, { useRef } from "react";
 import { hexToRgba } from "@/lib/utils";
-import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import { motion, useScroll, useSpring, useTransform, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
 
@@ -13,6 +13,7 @@ interface TracingBeamProps {
 
 export const TracingBeam: React.FC<TracingBeamProps> = ({ children, className }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
 
   // 1. Track scroll progress of the container relative to the viewport
   const { scrollYProgress } = useScroll({
@@ -28,7 +29,11 @@ export const TracingBeam: React.FC<TracingBeamProps> = ({ children, className })
   });
 
   // 3. Map progress to height (0% to 100%)
-  const heightTransform = useTransform(scrollYProgressSpring, [0, 1], ["0%", "100%"]);
+  const heightTransform = useTransform(
+    shouldReduceMotion ? scrollYProgress : scrollYProgressSpring,
+    [0, 1],
+    ["0%", "100%"]
+  );
 
   return (
     <div
@@ -55,7 +60,9 @@ export const TracingBeam: React.FC<TracingBeamProps> = ({ children, className })
           className="absolute -left-[5px] -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-brand-cyan border-2 border-zinc-950 shadow-[var(--dot-glow)] flex items-center justify-center"
         >
           {/* Neon pulsating ring */}
-          <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping absolute opacity-75" />
+          {!shouldReduceMotion && (
+            <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping absolute opacity-75" />
+          )}
           <span className="w-1.5 h-1.5 rounded-full bg-white" />
         </motion.div>
       </div>

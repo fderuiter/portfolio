@@ -115,9 +115,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing or invalid projectSlug identifier" }, { status: 400 });
     }
 
-    if (eventType !== "page_view" && eventType !== "project_click") {
+    if (eventType !== "page_view" && eventType !== "project_click" && eventType !== "route_error") {
       return NextResponse.json(
-        { error: "Missing or invalid eventType. Allowed: 'page_view', 'project_click'" },
+        { error: "Missing or invalid eventType. Allowed: 'page_view', 'project_click', 'route_error'" },
         { status: 400 }
       );
     }
