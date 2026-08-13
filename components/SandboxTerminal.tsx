@@ -123,7 +123,14 @@ export const SandboxTerminal: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Focus terminal input on body clicks
-  const handleTerminalClick = () => {
+  const handleTerminalClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const selection = window.getSelection();
+    if (selection && selection.toString()) {
+      return;
+    }
+    if ((e.target as HTMLElement).closest("a, button, input")) {
+      return;
+    }
     inputRef.current?.focus();
   };
 
@@ -322,7 +329,7 @@ export const SandboxTerminal: React.FC = () => {
             key={cmd}
             onClick={() => executeCommand(cmd)}
             disabled={isExecuting}
-            className="px-3 py-1.5 text-[10px] font-mono font-bold bg-zinc-900/40 border border-zinc-900 hover:border-brand-cyan/40 text-brand-cyan/90 hover:text-brand-cyan rounded-xl transition-all hover:scale-[1.02] cursor-pointer"
+            className="px-3 py-1.5 text-[10px] font-mono font-bold bg-zinc-900/40 border border-zinc-900 hover:border-brand-cyan/40 text-brand-cyan/90 hover:text-brand-cyan rounded-xl transition-all hover:scale-[1.02] cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 focus:ring-offset-1 focus:ring-offset-zinc-950"
           >
             {cmd}
           </button>
@@ -333,6 +340,7 @@ export const SandboxTerminal: React.FC = () => {
       <div
         role="region"
         aria-label="Interactive Terminal Sandbox"
+        aria-busy={isExecuting}
         onClick={handleTerminalClick}
         style={{ "--term-glow": `0 0 35px ${hexToRgba(designManifest.colors["brand-cyan"], 0.02)}` } as React.CSSProperties}
         className="w-full border border-zinc-900 bg-zinc-950/80 rounded-2xl overflow-hidden shadow-[var(--term-glow)] relative backdrop-blur-md cursor-text"
@@ -420,7 +428,7 @@ export const SandboxTerminal: React.FC = () => {
           <button
             onClick={() => executeCommand(input)}
             disabled={isExecuting || !input.trim()}
-            className="p-1 text-zinc-600 hover:text-brand-cyan disabled:text-zinc-800 disabled:hover:text-zinc-800 transition-colors cursor-pointer"
+            className="p-1 text-zinc-600 hover:text-brand-cyan disabled:text-zinc-800 disabled:hover:text-zinc-800 transition-colors cursor-pointer focus:outline-none focus:text-brand-cyan focus:ring-2 focus:ring-brand-cyan/50 focus:ring-offset-1 focus:ring-offset-zinc-950 rounded"
             title="Execute Command (Enter)"
           >
             <IconCornerDownLeft className="w-4 h-4" />
