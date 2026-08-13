@@ -1,14 +1,43 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { TransparencyLogsParamsSchema } from "@/lib/schemas";
+import * as Sentry from "@sentry/nextjs";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const url = new URL(req.url);
+    const sortParam = url.searchParams.get("sort");
+    const pageParam = url.searchParams.get("page");
+    const limitParam = url.searchParams.get("limit");
+
+    const parsedQuery = TransparencyLogsParamsSchema.safeParse({
+      sort: sortParam !== null ? sortParam : undefined,
+      page: pageParam !== null ? pageParam : undefined,
+      limit: limitParam !== null ? limitParam : undefined,
+    });
+
+    if (!parsedQuery.success) {
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          details: parsedQuery.error.issues.map((issue) => ({
+            path: issue.path.join("."),
+            message: issue.message,
+          })),
+        },
+        { status: 400 }
+      );
+    }
+
+    const { sort, page, limit } = parsedQuery.data;
+
     // 1. Fetch raw platform telemetry (audit logs) from database
     const telemetryEvents = await prisma.telemetryEvent.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 20, // display the last 20 events
+      orderBy: { createdAt: sort },
+      take: limit,
+      skip: (page - 1) * limit,
     });
 
     const accessLogs = telemetryEvents.map(event => ({
@@ -67,6 +96,7 @@ export async function GET() {
       }
     });
   } catch (err) {
+    Sentry.captureException(err);
     console.error("Failed to fetch transparency logs:", err);
     return NextResponse.json(
       { error: "Failed to compile transparency logs" },

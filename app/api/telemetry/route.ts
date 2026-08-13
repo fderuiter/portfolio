@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import crypto from "crypto";
 import { Redis } from "@upstash/redis";
+import { TelemetryEventSchema } from "@/lib/schemas";
+import * as Sentry from "@sentry/nextjs";
 
 // Enforce standard dynamic route behavior in Next.js 16 to query live datastores safely
 export const dynamic = "force-dynamic";
@@ -89,6 +91,7 @@ export async function GET() {
       },
     });
   } catch (err) {
+    Sentry.captureException(err);
     console.error("Telemetry statistics aggregate query failed:", err);
     return NextResponse.json(
       { error: "Failed to compile aggregate portfolio telemetry" },
@@ -108,19 +111,28 @@ export async function POST(req: NextRequest) {
     }
 
     const payload = await req.json();
-    const { projectSlug, eventType } = payload;
-
-    // Validate payload values
-    if (!projectSlug || typeof projectSlug !== "string") {
-      return NextResponse.json({ error: "Missing or invalid projectSlug identifier" }, { status: 400 });
-    }
-
-    if (eventType !== "page_view" && eventType !== "project_click" && eventType !== "route_error") {
+    const result = TelemetryEventSchema.safeParse(payload);
+    if (!result.success) {
+      const firstIssue = result.error.issues[0];
+      let errorMessage = "Validation failed";
+      if (firstIssue.path[0] === "projectSlug") {
+        errorMessage = "Missing or invalid projectSlug identifier";
+      } else if (firstIssue.path[0] === "eventType") {
+        errorMessage = "Missing or invalid eventType. Allowed: 'page_view', 'project_click', 'route_error'";
+      }
       return NextResponse.json(
-        { error: "Missing or invalid eventType. Allowed: 'page_view', 'project_click', 'route_error'" },
+        {
+          error: errorMessage,
+          details: result.error.issues.map((err) => ({
+            path: err.path.join("."),
+            message: err.message,
+          })),
+        },
         { status: 400 }
       );
     }
+
+    const { projectSlug, eventType } = result.data;
 
     // Save transaction event to the PostgreSQL Neon datastore
     // Implement HA buffering: Timeout or fail on primary DB, fallback to Redis
@@ -173,6 +185,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, event: newEvent }, { status: 201 });
   } catch (err) {
+    Sentry.captureException(err);
     console.error("Failed to commit telemetry event log:", err);
     return NextResponse.json(
       { error: "Failed to record telemetry interaction event" },
