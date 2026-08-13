@@ -3,7 +3,7 @@ const { spawnSync } = require('child_process');
 
 console.log("--- Starting Post-Build Conditional Migration Build Pipeline ---");
 
-// 1. Connection String Fallback for Offline/Local Compilation
+// 1. Connection String & Secret Fallback for Offline/Local Compilation
 if (!process.env.DATABASE_URL) {
   console.log("No DATABASE_URL found. Setting dummy connection string for offline compilation.");
   const userPass = 'dummy:dummy';
