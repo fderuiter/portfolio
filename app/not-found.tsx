@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { getClosestMatches, type CaseStudyItem } from "@/lib/search-utils";
 import { useSearch } from "@/components/providers/SearchProvider";
+import { RetroLabyrinth } from "@/components/RetroLabyrinth";
 
 export default function NotFound() {
   const [mousePos, setMousePos] = useState({ x: 200, y: 200 });
@@ -16,6 +17,7 @@ export default function NotFound() {
   const [invalidPath, setInvalidPath] = useState<string>("");
   const [caseStudies, setCaseStudies] = useState<CaseStudyItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
 
   const { recordEvent } = useTelemetry();
   const { openSearch } = useSearch();
@@ -39,6 +41,7 @@ export default function NotFound() {
 
   // Automatically center the cursor on first mount / resize
   useEffect(() => {
+    setIsMounted(true);
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       setMousePos({ x: rect.width / 2, y: rect.height / 2 });
@@ -199,6 +202,9 @@ export default function NotFound() {
             </div>
           </div>
         )}
+
+        {/* Progressive Retro Labyrinth */}
+        <RetroLabyrinth isMounted={isMounted} />
 
         {/* Closest Matching Case Study Suggestions */}
         {loading ? (
