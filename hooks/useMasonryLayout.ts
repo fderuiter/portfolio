@@ -1,4 +1,6 @@
 import { useState, useLayoutEffect, useRef, useCallback } from "react";
+import { designManifest } from "@/lib/design-manifest";
+import { useResizeObserver } from "./useResizeObserver";
 import { 
   parseMarkdownToRichItems, 
   type ExtendedRichInlineItem 
@@ -29,7 +31,6 @@ export function useMasonryLayout<T extends MasonryItem>(
   allItems: T[],
   filteredItems: T[]
 ) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const containerWidthRef = useRef<number>(0);
   const preparedDataRef = useRef<Record<string, PreparedData>>({});
 
@@ -93,26 +94,19 @@ export function useMasonryLayout<T extends MasonryItem>(
     });
   }, [filteredItems]);
 
+  const containerRef = useResizeObserver<HTMLDivElement>((entry) => {
+    containerWidthRef.current = entry.contentRect.width;
+    recalculateLayout(entry.contentRect.width);
+  });
+
   useLayoutEffect(() => {
-    if (!containerRef.current) return;
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        containerWidthRef.current = entry.contentRect.width;
-        recalculateLayout(entry.contentRect.width);
-      }
-    });
-
-    resizeObserver.observe(containerRef.current);
-
-    const initialWidth = containerRef.current.getBoundingClientRect().width;
-    containerWidthRef.current = initialWidth;
-    recalculateLayout(initialWidth);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [recalculateLayout]);
+    if (containerRef.current) {
+      const initialWidth = containerRef.current.getBoundingClientRect().width;
+      containerWidthRef.current = initialWidth;
+      recalculateLayout(initialWidth);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useLayoutEffect(() => {
     if (containerWidthRef.current > 0) {

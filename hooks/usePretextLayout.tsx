@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useLayoutEffect, useRef, useCallback } from "react";
+import { useResizeObserver } from "./useResizeObserver";
 import { prepare, layout, clearCache, type PreparedText } from "@chenglou/pretext";
 import { 
   prepareRichInline, 
@@ -49,7 +50,6 @@ export function usePretextLayout({
     lineCount: 0,
   });
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const preparedTextRef = useRef<PreparedText | null>(null);
   const fontStringRef = useRef<string>("");
 
@@ -76,6 +76,11 @@ export function usePretextLayout({
     });
   }, [text, lineHeight]);
 
+  const containerRef = useResizeObserver<HTMLDivElement>((entry) => {
+    const maxWidth = entry.contentRect.width;
+    measureText(maxWidth);
+  });
+
   useLayoutEffect(() => {
     if (!isBrowser()) return;
 
@@ -99,25 +104,9 @@ export function usePretextLayout({
     } else {
        setState((prev) => ({ ...prev, isReady: true }));
     }
-  }, [text, fontSize, fontFamilyVariable, measureText]);
+  }, [text, fontSize, fontFamilyVariable, measureText, containerRef]);
 
-  useLayoutEffect(() => {
-    if (!containerRef.current) return;
-
-    // Execution Phase: ResizeObserver for fast layout path
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const maxWidth = entry.contentRect.width;
-        measureText(maxWidth);
-      }
-    });
-
-    resizeObserver.observe(containerRef.current);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [measureText]);
+  // Removed custom ResizeObserver in favor of unified useResizeObserver hook
 
   // Layout Height Validation Trigger
   useLayoutEffect(() => {
@@ -278,7 +267,6 @@ export function usePretextRichLayout({
     items: [],
   });
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const preparedRef = useRef<PreparedRichInline | null>(null);
   const itemsRef = useRef<ExtendedRichInlineItem[]>([]);
   const itemsKeyRef = useRef<string>("");
@@ -322,6 +310,11 @@ export function usePretextRichLayout({
     });
   }, [lineHeight]);
 
+  const containerRef = useResizeObserver<HTMLDivElement>((entry) => {
+    const maxWidth = entry.contentRect.width;
+    measureRichText(maxWidth);
+  });
+
   useLayoutEffect(() => {
     if (!isBrowser()) return;
 
@@ -356,24 +349,9 @@ export function usePretextRichLayout({
     } else {
       setState((prev) => ({ ...prev, isReady: true }));
     }
-  }, [text, fontSize, fontFamilyVariable, measureRichText]);
+  }, [text, fontSize, fontFamilyVariable, measureRichText, containerRef]);
 
-  useLayoutEffect(() => {
-    if (!containerRef.current) return;
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const maxWidth = entry.contentRect.width;
-        measureRichText(maxWidth);
-      }
-    });
-
-    resizeObserver.observe(containerRef.current);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [measureRichText]);
+  // Removed custom ResizeObserver in favor of unified useResizeObserver hook
 
   // Layout Height Validation Trigger
   useLayoutEffect(() => {
