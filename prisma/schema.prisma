@@ -36,3 +36,14 @@ model TelemetryEvent {
   @@index([projectSlug])
   @@index([eventType])
 }
+
+model ArchivedRepository {
+  id                String   @id @default(cuid())
+  url               String   @unique
+  name              String
+  languageBreakdown Json     // e.g. {"TypeScript": 65, "Rust": 35}
+  commitCount       Int
+  stars             Int
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
