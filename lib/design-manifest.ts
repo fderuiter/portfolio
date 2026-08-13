@@ -18,7 +18,7 @@ export const designManifest = {
     /** Original CSS Variable: --border-active */
     "border-active": "rgba(6, 182, 212, 0.4)",
     /** Original CSS Variable: --muted */
-    "muted": "#71717a",
+    "muted": "#8e8e99",
     /** Original CSS Variable: --muted-strong */
     "muted-strong": "#a1a1aa",
     /** Original CSS Variable: --brand-cyan */
