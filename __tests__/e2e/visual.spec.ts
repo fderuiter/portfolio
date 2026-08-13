@@ -18,6 +18,13 @@ test.describe('Visual Regression & Drift Detection', () => {
     // Wait for network requests or images if any
     await page.waitForLoadState('networkidle');
 
+    // Wait for the Pretext measuring text to finish across all elements to stabilize height
+    await page.waitForFunction(() => {
+      const hasCard = document.querySelector('.text-\\[9px\\]');
+      const bodyText = document.body?.innerText || '';
+      return hasCard && !bodyText.includes('MEASURING...');
+    });
+
     // Take full page snapshot to cover case study components
     await expect(page).toHaveScreenshot('home.png', {
       fullPage: true,
