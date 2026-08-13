@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { filterFuzzySearch, type SearchItem } from '@/lib/search-utils';
+import { filterFuzzySearch, getLevenshteinDistance, getClosestMatches, type SearchItem } from '@/lib/search-utils';
 
 describe('filterFuzzySearch', () => {
   const items: SearchItem[] = [
@@ -45,5 +45,41 @@ describe('filterFuzzySearch', () => {
     
     expect(filterFuzzySearch('react', brokenItems)).toHaveLength(1);
     expect(filterFuzzySearch('angular', brokenItems)).toHaveLength(1);
+  });
+});
+
+describe('getLevenshteinDistance', () => {
+  it('computes correct distance', () => {
+    expect(getLevenshteinDistance('kitten', 'sitting')).toBe(3);
+    expect(getLevenshteinDistance('schemaflow', 'schemafloww')).toBe(1);
+    expect(getLevenshteinDistance('same', 'same')).toBe(0);
+  });
+});
+
+describe('getClosestMatches', () => {
+  const items = [
+    { id: '1', slug: 'schemaflow', title: 'SchemaFlow', primary_language: 'TypeScript', tags: 'ORM, Database' },
+    { id: '2', slug: 'clinical-mapper', title: 'Clinical Mapper', primary_language: 'Python', tags: 'Clinical, Mapper, SDTM' },
+    { id: '3', slug: 'healthcare-portal', title: 'Healthcare Portal', primary_language: 'Go', tags: 'Go, Health, API' },
+  ];
+
+  it('returns first 3 items if path is empty', () => {
+    const result = getClosestMatches('', items);
+    expect(result).toHaveLength(3);
+  });
+
+  it('handles exact slug mismatch typo using Levenshtein distance', () => {
+    const result = getClosestMatches('/schemafloww', items);
+    expect(result[0].id).toBe('1');
+  });
+
+  it('matches keyword inside slug/title/tags', () => {
+    const result = getClosestMatches('/clinical-mapper-tool', items);
+    expect(result[0].id).toBe('2');
+  });
+
+  it('matches primary language', () => {
+    const result = getClosestMatches('/go-api', items);
+    expect(result[0].id).toBe('3');
   });
 });
