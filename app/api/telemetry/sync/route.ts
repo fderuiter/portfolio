@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { Redis } from "@upstash/redis";
+import { validateRouteInitialization, validateSyncRequest } from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 
+// Evaluate local environment configuration during route initialization
+validateRouteInitialization();
+
 export async function GET(req: NextRequest) {
-  // Use a secret to protect the endpoint if needed, for cron jobs standard is a header
-  const authHeader = req.headers.get("authorization");
-  if (
-    process.env.CRON_SECRET &&
-    authHeader !== `Bearer ${process.env.CRON_SECRET}`
-  ) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // Validate the request's credentials
+  const authResult = validateSyncRequest(req);
+  if (!authResult.isValid && authResult.errorResponse) {
+    return authResult.errorResponse;
   }
 
   try {
