@@ -99,6 +99,14 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         category: "navigation",
         url: "/proof",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
+      },
+      {
+        id: "nav-simulator",
+        title: "Recruiter Simulator",
+        subtitle: "Begin the compatibility wizard to calculate candidate alignment",
+        category: "navigation",
+        url: "/simulator",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />
       }
     ];
 

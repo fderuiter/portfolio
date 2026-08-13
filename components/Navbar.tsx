@@ -20,6 +20,7 @@ const navItems: NavItem[] = [
   { label: "About", href: "/#about" },
   { label: "Proof Workspace", href: "/proof" },
   { label: "Transparency", href: "/transparency" },
+  { label: "Simulator", href: "/simulator" },
   { label: "Contact", href: "/#contact" },
   { label: "GitHub", href: "https://github.com/fderuiter/portfolio", isExternal: true },
 ];
