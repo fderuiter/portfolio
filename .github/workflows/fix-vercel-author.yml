@@ -1,8 +1,7 @@
 name: Fix Vercel Deploy Author
 
 on:
-  pull_request:
-    types: [opened, synchronize]
+  workflow_dispatch:
 
 jobs:
   override-author:
