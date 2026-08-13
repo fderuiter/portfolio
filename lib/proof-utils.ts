@@ -8,7 +8,7 @@ export interface Edge {
 }
 
 export const VALID_NODE_IDS = ["A", "B", "C", "D", "E"];
-export const VALID_COMMANDS = ["connect", "disconnect", "list", "clear", "help"];
+export const VALID_COMMANDS = ["connect", "disconnect", "list", "clear", "help", "simulate"];
 
 /**
  * Checks if a given string is a valid Node ID.
@@ -62,6 +62,25 @@ export function getSuggestion(inputVal: string): string {
       if (matchNode && matchNode !== tokens[2]) {
         return `${tokens[0]} ${tokens[1]} ${matchNode}`;
       }
+    }
+  }
+
+  // 3. If first word is "simulate"
+  if (firstWord === "simulate") {
+    const secondWord = tokens[1]?.toLowerCase() || "";
+
+    if (tokens.length === 2 && !inputVal.endsWith(" ")) {
+      // Autocomplete second token ("normal" or "loop")
+      const subCommands = ["normal", "loop"];
+      const matchSub = subCommands.find((sub) => sub.startsWith(secondWord));
+      if (matchSub && matchSub !== secondWord) {
+        return `${tokens[0]} ${matchSub}`;
+      }
+    }
+
+    if (tokens.length === 2 && inputVal.endsWith(" ")) {
+      // If just typed "simulate " with a space, suggest "simulate normal" by default
+      return `${tokens[0]} normal`;
     }
   }
 

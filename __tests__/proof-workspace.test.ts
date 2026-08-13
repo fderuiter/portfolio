@@ -28,11 +28,19 @@ describe("Logic Proof Workspace Utilities", () => {
       expect(getSuggestion("di")).toBe("disconnect");
       expect(getSuggestion("l")).toBe("list");
       expect(getSuggestion("he")).toBe("help");
+      expect(getSuggestion("si")).toBe("simulate");
+      expect(getSuggestion("sim")).toBe("simulate");
     });
 
     it("does not suggest anything if command is already complete", () => {
       expect(getSuggestion("help")).toBe("");
       expect(getSuggestion("list")).toBe("");
+    });
+
+    it("suggests subcommands for simulate", () => {
+      expect(getSuggestion("simulate ")).toBe("simulate normal");
+      expect(getSuggestion("simulate n")).toBe("simulate normal");
+      expect(getSuggestion("simulate l")).toBe("simulate loop");
     });
 
     it("suggests node IDs inside connect parameters", () => {
