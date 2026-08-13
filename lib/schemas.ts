@@ -5,8 +5,8 @@ import { z } from "zod";
  */
 export const TelemetryEventSchema = z.object({
   projectSlug: z.string().min(1, "projectSlug must be a non-empty string"),
-  eventType: z.enum(["page_view", "project_click", "route_error"], {
-    message: "Allowed: 'page_view', 'project_click', 'route_error'",
+  eventType: z.enum(["page_view", "project_click", "route_error", "contact_click", "simulator_milestone"], {
+    message: "Allowed: 'page_view', 'project_click', 'route_error', 'contact_click', 'simulator_milestone'",
   }),
 });
 

@@ -177,7 +177,7 @@ export async function POST(req: NextRequest) {
       if (firstIssue.path[0] === "projectSlug") {
         errorMessage = "Missing or invalid projectSlug identifier";
       } else if (firstIssue.path[0] === "eventType") {
-        errorMessage = "Missing or invalid eventType. Allowed: 'page_view', 'project_click', 'route_error'";
+        errorMessage = "Missing or invalid eventType. Allowed: 'page_view', 'project_click', 'route_error', 'contact_click', 'simulator_milestone'";
       }
       return NextResponse.json(
         {

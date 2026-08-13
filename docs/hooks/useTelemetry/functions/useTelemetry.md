@@ -30,7 +30,7 @@ schedules silent background syncs, and supports optimistic layout updates.
 
 ##### eventType
 
-`"page_view"` \| `"project_click"` \| `"route_error"`
+`"page_view"` \| `"project_click"` \| `"route_error"` \| `"contact_click"` \| `"simulator_milestone"`
 
 #### Returns
 

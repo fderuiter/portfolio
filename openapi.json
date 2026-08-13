@@ -300,7 +300,9 @@
             "enum": [
               "page_view",
               "project_click",
-              "route_error"
+              "route_error",
+              "contact_click",
+              "simulator_milestone"
             ]
           }
         },

@@ -7,6 +7,7 @@ import { IconTerminal, IconCornerDownLeft, IconCircle } from "@tabler/icons-reac
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { useAnnouncer } from "@/components/providers/A11yProvider";
 import { useAudio } from "@/components/providers/AudioProvider";
+import { useTelemetry } from "@/hooks/useTelemetry";
 
 interface LogItem {
   id: string;
@@ -109,6 +110,7 @@ function generateLogId(): string {
 export const SandboxTerminal: React.FC = () => {
   const { announce } = useAnnouncer();
   const { playKeystroke, playAutocomplete, playSuccess } = useAudio();
+  const { recordEvent } = useTelemetry();
   const [input, setInput] = useState("");
   const [logs, setLogs] = useState<LogItem[]>([
     {
@@ -202,10 +204,13 @@ export const SandboxTerminal: React.FC = () => {
         ]);
         playSuccess();
         if (trimmed === "imednet studies list") {
+          recordEvent("imednet-python-sdk", "simulator_milestone").catch((err) => console.error(err));
           announce("Command execution completed. Returned active clinical trials: BRIGHT-01, ONCO-2026, and CARDIO-REF.", "polite");
         } else if (trimmed === "imednet subjects get --id 123") {
+          recordEvent("imednet-python-sdk", "simulator_milestone").catch((err) => console.error(err));
           announce("Command execution completed. Returned clinical records and HIPAA-anonymized demographics for subject 123.", "polite");
         } else if (trimmed === "imednet records search --study BRIGHT-01") {
+          recordEvent("imednet-python-sdk", "simulator_milestone").catch((err) => console.error(err));
           announce("Command execution completed. Returned 3 vital sign records matching study BRIGHT-01.", "polite");
         } else {
           announce("Command execution completed. Standard JSON payload results rendered.", "polite");
@@ -222,7 +227,7 @@ export const SandboxTerminal: React.FC = () => {
         announce(`Command execution failed. Unknown command: '${trimmed}'.`, "polite");
       }
     }, 450);
-  }, [setCommandHistory, setHistoryIndex, setIsExecuting, setInput, setLogs, announce, playSuccess]);
+  }, [setCommandHistory, setHistoryIndex, setIsExecuting, setInput, setLogs, announce, playSuccess, recordEvent]);
 
   // Typing animation state/ref
   const typingTimerRef = useRef<NodeJS.Timeout | null>(null);

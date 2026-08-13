@@ -87,7 +87,7 @@ export function useTelemetry() {
 
   // Optimistic UI updates recorder
   const recordEvent = useCallback(
-    async (projectSlug: string, eventType: "page_view" | "project_click" | "route_error") => {
+    async (projectSlug: string, eventType: "page_view" | "project_click" | "route_error" | "contact_click" | "simulator_milestone") => {
       // 1. Trigger optimistic local UI update immediately
       const currentStats = globalTelemetryData[projectSlug] || { views: 0, clicks: 0 };
       const updatedStats = {

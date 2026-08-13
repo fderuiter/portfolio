@@ -8,4 +8,4 @@
 
 > `const` **textPrepareCache**: [`LRUCache`](../classes/LRUCache.md)\<`string`, `PreparedText`\>
 
-Defined in: [lib/graphics-engine.ts:61](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L61)
+Defined in: [lib/graphics-engine.ts:64](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L64)

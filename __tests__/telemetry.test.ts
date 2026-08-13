@@ -200,4 +200,60 @@ describe("Telemetry API Route - Route Error Telemetry", () => {
     // The rate limiter limit mock should NOT have been called a second time!
     expect(mockRatelimitLimit).toHaveBeenCalledTimes(1);
   });
+
+  it("should accept 'contact_click' event type and save it in the database", async () => {
+    const payload = {
+      projectSlug: "contact-email",
+      eventType: "contact_click",
+    };
+
+    const mockDbResponse = {
+      id: "some-uuid-2",
+      projectSlug: "contact-email",
+      eventType: "contact_click",
+      createdAt: new Date(),
+    };
+    vi.mocked(prisma.telemetryEvent.create).mockResolvedValue(mockDbResponse);
+
+    const req = new NextRequest("http://localhost:3000/api/telemetry", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+
+    const response = await POST(req);
+    expect(response.status).toBe(201);
+
+    const data = await response.json();
+    expect(data.success).toBe(true);
+    expect(data.event.projectSlug).toBe("contact-email");
+    expect(data.event.eventType).toBe("contact_click");
+  });
+
+  it("should accept 'simulator_milestone' event type and save it in the database", async () => {
+    const payload = {
+      projectSlug: "imednet-python-sdk",
+      eventType: "simulator_milestone",
+    };
+
+    const mockDbResponse = {
+      id: "some-uuid-3",
+      projectSlug: "imednet-python-sdk",
+      eventType: "simulator_milestone",
+      createdAt: new Date(),
+    };
+    vi.mocked(prisma.telemetryEvent.create).mockResolvedValue(mockDbResponse);
+
+    const req = new NextRequest("http://localhost:3000/api/telemetry", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+
+    const response = await POST(req);
+    expect(response.status).toBe(201);
+
+    const data = await response.json();
+    expect(data.success).toBe(true);
+    expect(data.event.projectSlug).toBe("imednet-python-sdk");
+    expect(data.event.eventType).toBe("simulator_milestone");
+  });
 });

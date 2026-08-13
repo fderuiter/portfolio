@@ -6,7 +6,7 @@
 
 # Variable: TelemetryEventSchema
 
-> `const` **TelemetryEventSchema**: `ZodObject`\<\{ `eventType`: `ZodEnum`\<\{ `page_view`: `"page_view"`; `project_click`: `"project_click"`; `route_error`: `"route_error"`; \}\>; `projectSlug`: `ZodString`; \}, `$strip`\>
+> `const` **TelemetryEventSchema**: `ZodObject`\<\{ `eventType`: `ZodEnum`\<\{ `contact_click`: `"contact_click"`; `page_view`: `"page_view"`; `project_click`: `"project_click"`; `route_error`: `"route_error"`; `simulator_milestone`: `"simulator_milestone"`; \}\>; `projectSlug`: `ZodString`; \}, `$strip`\>
 
 Defined in: [lib/schemas.ts:6](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L6)
 
