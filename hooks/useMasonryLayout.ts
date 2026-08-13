@@ -1,5 +1,4 @@
 import { useState, useLayoutEffect, useRef, useCallback } from "react";
-import { designManifest } from "@/lib/design-manifest";
 import { useResizeObserver } from "./useResizeObserver";
 import { 
   parseMarkdownToRichItems, 
@@ -12,7 +11,7 @@ import {
 import { LAYOUT_CONFIG, resolveThemeFonts } from "@/lib/layout-config";
 import { GitHubStats } from "@/lib/github";
 import { calculateMasonryLayout, type PreparedData } from "@/lib/masonry";
-import { isBrowser, resolveFontFamily } from "@/lib/graphics-engine";
+import { isBrowser } from "@/lib/graphics-engine";
 import { useBentoLayout } from "@/components/providers/BentoLayoutContext";
 
 export interface MasonryItem {
@@ -24,8 +23,8 @@ export interface MasonryItem {
 export interface LayoutItem<T extends MasonryItem> {
   item: T;
   height: number;
-  lines: RichInlineLine[];
-  items: ExtendedRichInlineItem[];
+  paragraphsLines: RichInlineLine[][];
+  paragraphsItems: ExtendedRichInlineItem[][];
 }
 
 export function useMasonryLayout<T extends MasonryItem>(
@@ -38,7 +37,7 @@ export function useMasonryLayout<T extends MasonryItem>(
 
   const [layoutState, setLayoutState] = useState<{
     colCount: number;
-    columns: (T & { height: number; lines: RichInlineLine[]; items: ExtendedRichInlineItem[] })[][];
+    columns: (T & { height: number; paragraphsLines: RichInlineLine[][]; paragraphsItems: ExtendedRichInlineItem[][] })[][];
     isReady: boolean;
   }>({
     colCount: LAYOUT_CONFIG.COLS.SM,
@@ -46,8 +45,8 @@ export function useMasonryLayout<T extends MasonryItem>(
       allItems.map((s) => ({
         ...s,
         height: LAYOUT_CONFIG.FALLBACK_ITEM_HEIGHT,
-        lines: [],
-        items: [],
+        paragraphsLines: [],
+        paragraphsItems: [],
       })),
     ],
     isReady: false,
@@ -60,13 +59,20 @@ export function useMasonryLayout<T extends MasonryItem>(
 
     const data: Record<string, PreparedData> = {};
     for (const study of allItems) {
-      const parsedItems = parseMarkdownToRichItems(study.editorial_content, baseFont, boldFont, italicFont, codeFont);
-      const prepared = prepareRichInline(parsedItems);
+      const paragraphTexts = study.editorial_content.split(/\r?\n+/).map(p => p.trim()).filter(Boolean);
+      const paragraphs = paragraphTexts.map((text) => {
+        const parsedItems = parseMarkdownToRichItems(text, baseFont, boldFont, italicFont, codeFont);
+        const prepared = prepareRichInline(parsedItems);
+        return {
+          prepared,
+          items: parsedItems,
+        };
+      });
+
       const paddingHeight = study.githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS;
       
       data[study.id] = {
-        prepared,
-        items: parsedItems,
+        paragraphs,
         paddingHeight,
       };
     }

@@ -2,6 +2,7 @@ import {
   walkRichInlineLineRanges, 
   materializeRichInlineLineRange,
   type PreparedRichInline,
+  type RichInlineLine,
   type RichInlineLineRange
 } from "@chenglou/pretext/rich-inline";
 import { type ExtendedRichInlineItem } from "@/hooks/usePretextLayout";
@@ -20,9 +21,13 @@ export interface MasonryConfig {
   FALLBACK_ITEM_HEIGHT: number;
 }
 
-export interface PreparedData {
+export interface PreparedParagraph {
   prepared: PreparedRichInline;
   items: ExtendedRichInlineItem[];
+}
+
+export interface PreparedData {
+  paragraphs?: PreparedParagraph[];
   paddingHeight: number;
 }
 
@@ -41,27 +46,55 @@ export function calculateMasonryLayout<T extends { id: string }>(
     if (!cached) {
       const override = heightOverrides?.[study.id];
       const height = override !== undefined ? override : config.FALLBACK_ITEM_HEIGHT;
-      return { ...study, height, lines: [], items: [] };
+      return { ...study, height, paragraphsLines: [], paragraphsItems: [] };
     }
 
-    const linesRanges: RichInlineLineRange[] = [];
-    walkRichInlineLineRanges(cached.prepared, columnWidth - (config.CARD_PADDING * 2), (range) => {
-      linesRanges.push(range);
-    });
+    let totalTextHeight = 0;
+    const paragraphsLines: RichInlineLine[][] = [];
+    const paragraphsItems: ExtendedRichInlineItem[][] = [];
 
-    const materializedLines = linesRanges.map((range) =>
-      materializeRichInlineLineRange(cached.prepared, range)
-    );
+    const textWidth = columnWidth - (config.CARD_PADDING * 2);
 
-    const textHeight = materializedLines.length * config.LINE_HEIGHT;
+    let paragraphs = cached.paragraphs;
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    if (!paragraphs && (cached as any).prepared) {
+      paragraphs = [{
+        prepared: (cached as any).prepared,
+        items: (cached as any).items || [],
+      }];
+    }
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+
+    for (const paragraph of paragraphs || []) {
+      const linesRanges: RichInlineLineRange[] = [];
+      walkRichInlineLineRanges(paragraph.prepared, textWidth, (range) => {
+        linesRanges.push(range);
+      });
+
+      const materializedLines = linesRanges.map((range) =>
+        materializeRichInlineLineRange(paragraph.prepared, range)
+      );
+
+      paragraphsLines.push(materializedLines);
+      paragraphsItems.push(paragraph.items);
+
+      const paragraphHeight = materializedLines.length * config.LINE_HEIGHT;
+      totalTextHeight += paragraphHeight;
+    }
+
+    const PARAGRAPH_GAP = 12;
+    if (paragraphs && paragraphs.length > 1) {
+      totalTextHeight += (paragraphs.length - 1) * PARAGRAPH_GAP;
+    }
+
     const override = heightOverrides?.[study.id];
-    const totalHeight = override !== undefined ? override : textHeight + cached.paddingHeight;
+    const totalHeight = override !== undefined ? override : totalTextHeight + cached.paddingHeight;
 
     return {
       ...study,
       height: totalHeight,
-      lines: materializedLines,
-      items: cached.items,
+      paragraphsLines,
+      paragraphsItems,
     };
   });
 
