@@ -46,6 +46,7 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
   }, [html]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -100,7 +101,7 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
           );
 
           // Build safe attributes
-          const props: Record<string, any> = { key: `${tagName}-${index}` };
+          const props: Record<string, unknown> = { key: `${tagName}-${index}` };
           if (element.hasAttribute("class")) {
             props.className = element.getAttribute("class");
           }
