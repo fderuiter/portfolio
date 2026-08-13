@@ -9,6 +9,7 @@ import { Tooltip } from "@/components/ui/Tooltip";
 import { getGitHubStats, parseGitHubUrl, getSimulatedStats } from "@/lib/github";
 import { getSoftwareSourceCodeSchema } from "@/lib/seo";
 import { TelemetryTracker } from "@/components/TelemetryTracker";
+import { TerminologyToggle } from "@/components/TerminologyToggle";
 
 import type { Metadata } from "next";
 
@@ -232,13 +233,16 @@ export default async function CaseStudyPage({ params }: PageProps) {
           </h1>
 
           {/* Metadata badges row */}
-          <div className="flex flex-wrap items-center gap-3 mb-10 border-b border-zinc-900 pb-8">
-            <span className="px-3 py-1 text-xs font-mono font-bold bg-brand-cyan/5 border border-brand-cyan/20 text-brand-cyan rounded-md">
-              {study.primary_language}
-            </span>
-            <span className="text-xs font-mono text-muted">
-              Node ID: {study.id}
-            </span>
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-10 border-b border-zinc-900 pb-8">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="px-3 py-1 text-xs font-mono font-bold bg-brand-cyan/5 border border-brand-cyan/20 text-brand-cyan rounded-md">
+                {study.primary_language}
+              </span>
+              <span className="text-xs font-mono text-muted">
+                Node ID: {study.id}
+              </span>
+            </div>
+            <TerminologyToggle />
           </div>
 
           {/* Long-form Article Narrative */}

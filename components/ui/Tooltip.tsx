@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useState } from "react";
+import React, { useState, useId } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export const Tooltip = ({
@@ -11,20 +10,24 @@ export const Tooltip = ({
   text: string;
 }) => {
   const [show, setShow] = useState(false);
+  const tooltipId = useId();
 
   return (
     <span
-      className="relative inline-block cursor-help group"
+      className="relative inline-block cursor-help group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand-cyan"
       onMouseEnter={() => setShow(true)}
       onMouseLeave={() => setShow(false)}
       onFocus={() => setShow(true)}
       onBlur={() => setShow(false)}
       tabIndex={0}
+      aria-describedby={tooltipId}
     >
       <span className="border-b border-dashed border-zinc-500">{children}</span>
       <AnimatePresence>
         {show && (
           <motion.div
+            id={tooltipId}
+            role="tooltip"
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 5 }}
