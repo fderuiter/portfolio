@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useId } from "react";
+import { mapDataToCoordinates, generateHermiteSplinePath } from "@/lib/graphics-engine";
 
 interface CommitSparklineProps {
   activity: number[];
@@ -27,38 +28,14 @@ export const CommitSparkline: React.FC<CommitSparklineProps> = ({
   const maxVal = useMemo(() => Math.max(...dataPoints, 1), [dataPoints]);
   const minVal = useMemo(() => Math.min(...dataPoints, 0), [dataPoints]);
 
-  // Generate SVG path coordinates
+  // Generate SVG path coordinates utilizing the central graphics engine
   const { pathD, areaD } = useMemo(() => {
     const width = 300;
     const height = 60;
     const padding = 6;
-    const usableHeight = height - padding * 2;
 
-    const points = dataPoints.map((val, i) => {
-      const x = (i / (dataPoints.length - 1)) * width;
-      // Inverse coordinate space: y = 0 is top
-      const percentage = (val - minVal) / ((maxVal - minVal) || 1);
-      const y = height - padding - (percentage * usableHeight);
-      return { x, y };
-    });
-
-    if (points.length === 0) return { pathD: "", areaD: "" };
-
-    // Construct highly smooth cubic bezier path commands
-    let path = `M ${points[0].x} ${points[0].y}`;
-    for (let i = 1; i < points.length; i++) {
-      const prev = points[i - 1];
-      const curr = points[i];
-      const cp1x = prev.x + (curr.x - prev.x) / 2;
-      const cp1y = prev.y;
-      const cp2x = prev.x + (curr.x - prev.x) / 2;
-      const cp2y = curr.y;
-      path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${curr.x} ${curr.y}`;
-    }
-
-    const area = `${path} L ${points[points.length - 1].x} ${height} L ${points[0].x} ${height} Z`;
-
-    return { pathD: path, areaD: area };
+    const points = mapDataToCoordinates(dataPoints, width, height, padding, minVal, maxVal);
+    return generateHermiteSplinePath(points, height);
   }, [dataPoints, minVal, maxVal]);
 
   const id = useId();

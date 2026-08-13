@@ -7,6 +7,12 @@ import { usePretextLayout } from "@/hooks/usePretextLayout";
 import { AnimatedGridPattern } from "@/components/AnimatedGridPattern";
 import { designManifest } from "@/lib/design-manifest";
 import { hexToRgba } from "@/lib/utils";
+import { 
+  checkBeamContainerCollision, 
+  calculateCollisionPoint, 
+  generateExplosionTrajectories, 
+  type Particle 
+} from "@/lib/graphics-engine";
 
 export const BackgroundBeamsWithCollision = ({
   children,
@@ -141,17 +147,12 @@ export const BackgroundBeamsWithCollision = ({
         const containerRect = containerRef.current.getBoundingClientRect();
         const parentRect = parentRef.current.getBoundingClientRect();
 
-        if (beamRect.bottom >= containerRect.top) {
-          const relativeX =
-            beamRect.left - parentRect.left + beamRect.width / 2;
-          const relativeY = beamRect.bottom - parentRect.top;
+        if (checkBeamContainerCollision(beamRect, containerRect)) {
+          const point = calculateCollisionPoint(beamRect, parentRect);
 
           setCollision({
             detected: true,
-            coordinates: {
-              x: relativeX,
-              y: relativeY,
-            },
+            coordinates: point,
           });
           setCycleCollisionDetected(true);
         }
@@ -231,24 +232,8 @@ export const BackgroundBeamsWithCollision = ({
 CollisionMechanism.displayName = "CollisionMechanism";
 
 const Explosion = ({ ...props }: React.HTMLProps<HTMLDivElement>) => {
-  const [spans] = useState<
-    Array<{
-      id: number;
-      initialX: number;
-      initialY: number;
-      directionX: number;
-      directionY: number;
-      duration: number;
-    }>
-  >(() =>
-    Array.from({ length: 15 }, (_, index) => ({
-      id: index,
-      initialX: 0,
-      initialY: 0,
-      directionX: Math.floor(Math.random() * 80 - 40),
-      directionY: Math.floor(Math.random() * -50 - 10),
-      duration: Math.random() * 1.2 + 0.4,
-    }))
+  const [spans] = useState<Particle[]>(() =>
+    generateExplosionTrajectories(15, -40, 40, -60, -10, 0.4, 1.6)
   );
 
   return (

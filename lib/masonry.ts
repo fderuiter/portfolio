@@ -2,10 +2,14 @@ import {
   walkRichInlineLineRanges, 
   materializeRichInlineLineRange,
   type PreparedRichInline,
-  type RichInlineLine,
   type RichInlineLineRange
 } from "@chenglou/pretext/rich-inline";
 import { type ExtendedRichInlineItem } from "@/hooks/usePretextLayout";
+import { 
+  calculateColumnCount, 
+  calculateColumnWidth, 
+  distributeItemsGreedily 
+} from "@/lib/graphics-engine";
 
 export interface MasonryConfig {
   COLS: { SM: number; MD: number; LG: number };
@@ -28,14 +32,8 @@ export function calculateMasonryLayout<T extends { id: string }>(
   preparedData: Record<string, PreparedData>,
   config: MasonryConfig
 ) {
-  let colCount: number = config.COLS.SM;
-  if (containerWidth >= config.BREAKPOINTS.LG) {
-    colCount = config.COLS.LG;
-  } else if (containerWidth >= config.BREAKPOINTS.MD) {
-    colCount = config.COLS.MD;
-  }
-
-  const columnWidth = (containerWidth - (config.GAP * (colCount - 1))) / colCount;
+  const colCount = calculateColumnCount(containerWidth, config.BREAKPOINTS, config.COLS);
+  const columnWidth = calculateColumnWidth(containerWidth, colCount, config.GAP);
 
   const itemsWithHeight = filteredItems.map((study) => {
     const cached = preparedData[study.id];
@@ -63,22 +61,7 @@ export function calculateMasonryLayout<T extends { id: string }>(
     };
   });
 
-  const columns: (T & { height: number; lines: RichInlineLine[]; items: ExtendedRichInlineItem[] })[][] = Array.from({ length: colCount }, () => []);
-  const columnHeights = Array(colCount).fill(0);
-
-  for (const study of itemsWithHeight) {
-    let minColIdx = 0;
-    let minHeight = columnHeights[0];
-    for (let i = 1; i < colCount; i++) {
-      if (columnHeights[i] < minHeight) {
-        minHeight = columnHeights[i];
-        minColIdx = i;
-      }
-    }
-
-    columns[minColIdx].push(study);
-    columnHeights[minColIdx] += study.height + config.GAP;
-  }
+  const { columns } = distributeItemsGreedily(itemsWithHeight, colCount, config.GAP);
 
   return { colCount, columns };
 }
