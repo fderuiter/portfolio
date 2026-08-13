@@ -28,8 +28,8 @@ interface CaseStudyBentoCardProps {
   study: BaseCaseStudy & { githubStats: GitHubStats | null };
   className?: string;
   preCalculatedHeight?: number;
-  preCalculatedLines?: RichInlineLine[];
-  preCalculatedItems?: ExtendedRichInlineItem[];
+  preCalculatedParagraphsLines?: RichInlineLine[][];
+  preCalculatedParagraphsItems?: ExtendedRichInlineItem[][];
 }
 
 // Map common languages to premium styling colors
@@ -47,8 +47,8 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
   study, 
   className,
   preCalculatedHeight,
-  preCalculatedLines,
-  preCalculatedItems,
+  preCalculatedParagraphsLines,
+  preCalculatedParagraphsItems,
 }) => {
   const { githubStats } = study;
   const tagsList = study.tags ? study.tags.split(",").map((t) => t.trim()) : [];
@@ -87,7 +87,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
     }, 400);
   };
 
-  const hasPrecalculated = preCalculatedHeight !== undefined && preCalculatedLines !== undefined && preCalculatedItems !== undefined;
+  const hasPrecalculated = preCalculatedHeight !== undefined && preCalculatedParagraphsLines !== undefined && preCalculatedParagraphsItems !== undefined;
 
   // We always execute the hook to follow dynamic hooks rules, but ignore if precalculated is provided
   const internalLayout = usePretextRichLayout({
@@ -98,8 +98,6 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
   });
 
   const finalHeight = hasPrecalculated ? preCalculatedHeight : (internalLayout.isReady ? internalLayout.height + (githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS) : undefined);
-  const finalLines = hasPrecalculated ? preCalculatedLines : internalLayout.lines;
-  const finalItems = hasPrecalculated ? preCalculatedItems : internalLayout.items;
   const isLayoutReady = hasPrecalculated ? true : internalLayout.isReady;
 
   const innerRef = React.useRef<HTMLDivElement>(null);
@@ -214,18 +212,34 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             </button>
           </div>
 
-          {/* Description Block using Pretext Rich Text for Pitch, or Custom Reality Text */}
+           {/* Description Block using Pretext Rich Text for Pitch, or Custom Reality Text */}
           <div className="mb-4">
             {mode === "pitch" ? (
               <div ref={hasPrecalculated ? undefined : internalLayout.ref}>
-                <PretextRichText
-                  lines={finalLines}
-                  items={finalItems}
-                  lineHeight={LAYOUT_CONFIG.LINE_HEIGHT}
-                  isReady={isLayoutReady}
-                  fallbackText={study.editorial_content}
-                  className="text-zinc-400 text-sm leading-relaxed font-sans"
-                />
+                {hasPrecalculated && preCalculatedParagraphsLines && preCalculatedParagraphsItems ? (
+                  <div className="flex flex-col gap-[12px]">
+                    {preCalculatedParagraphsLines.map((pLines, pIdx) => (
+                      <PretextRichText
+                        key={pIdx}
+                        lines={pLines}
+                        items={preCalculatedParagraphsItems[pIdx]}
+                        lineHeight={LAYOUT_CONFIG.LINE_HEIGHT}
+                        isReady={isLayoutReady}
+                        fallbackText=""
+                        className="text-zinc-400 text-sm leading-relaxed font-sans"
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <PretextRichText
+                    lines={internalLayout.lines}
+                    items={internalLayout.items}
+                    lineHeight={LAYOUT_CONFIG.LINE_HEIGHT}
+                    isReady={isLayoutReady}
+                    fallbackText={study.editorial_content}
+                    className="text-zinc-400 text-sm leading-relaxed font-sans"
+                  />
+                )}
               </div>
             ) : (
               <p className="text-zinc-400 text-sm leading-relaxed font-sans">
