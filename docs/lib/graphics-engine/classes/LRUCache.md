@@ -38,6 +38,18 @@ Defined in: [lib/graphics-engine.ts:40](https://github.com/fderuiter/portfolio/b
 
 ## Methods
 
+### clear()
+
+> **clear**(): `void`
+
+Defined in: [lib/graphics-engine.ts:59](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L59)
+
+#### Returns
+
+`void`
+
+***
+
 ### get()
 
 > **get**(`key`): `V` \| `undefined`

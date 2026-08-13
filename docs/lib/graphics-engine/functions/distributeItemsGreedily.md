@@ -8,7 +8,7 @@
 
 > **distributeItemsGreedily**\<`T`\>(`items`, `colCount`, `gap`): `object`
 
-Defined in: [lib/graphics-engine.ts:179](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L179)
+Defined in: [lib/graphics-engine.ts:182](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L182)
 
 Distributes items with calculated heights into columns using the greedy shortest-column algorithm.
 
