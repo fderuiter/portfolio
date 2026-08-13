@@ -314,55 +314,69 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
   };
 
   return (
-    <>
-      <h1 className="sr-only">{text}</h1>
-
+    <div
+      style={{
+        height: isReady ? `${height}px` : "auto",
+        transition: "height 300ms cubic-bezier(0.16, 1, 0.3, 1)",
+      }}
+      className="relative w-full max-w-4xl mx-auto overflow-hidden min-h-[128px] mb-6"
+    >
+      {/* 1. Custom Visual Presentation (hidden from screen readers, not selectable) */}
       <div
-        style={{
-          height: isReady ? `${height}px` : "auto",
-          transition: "height 300ms cubic-bezier(0.16, 1, 0.3, 1)",
-        }}
-        className="relative w-full max-w-4xl mx-auto overflow-hidden min-h-[128px] select-none mb-6"
+        ref={ref}
         aria-hidden="true"
         role="presentation"
+        className="w-full select-none pointer-events-none"
       >
-        <div ref={ref} className="w-full">
-          {!isReady ? (
-            <p className="text-4xl md:text-6xl font-black tracking-tight text-center opacity-0 pointer-events-none leading-tight md:leading-none">
-              {text}
-            </p>
-          ) : (
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="text-4xl md:text-6xl font-black tracking-tight text-center flex flex-wrap justify-center leading-tight md:leading-none"
-            >
-              {words.map((word, i) => {
-                // Style specific words with brand gradient
-                const isGradient = ["Interface", "Data", "Meaning"].includes(
-                  word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
-                );
-                return (
-                  <motion.span
-                    key={i}
-                    variants={wordVariants}
-                    className={cn(
-                      "inline-block mr-[0.25em] will-change-transform",
-                      isGradient
-                        ? "text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan to-brand-blue"
-                        : "text-transparent bg-clip-text bg-gradient-to-r from-neutral-100 to-neutral-300"
-                    )}
-                  >
-                    {word}
-                  </motion.span>
-                );
-              })}
-            </motion.div>
-          )}
-        </div>
+        {!isReady ? (
+          <p className="text-4xl md:text-6xl font-black tracking-tight text-center opacity-0 leading-tight md:leading-none">
+            {text}
+          </p>
+        ) : (
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="text-4xl md:text-6xl font-black tracking-tight text-center flex flex-wrap justify-center leading-tight md:leading-none"
+          >
+            {words.map((word, i) => {
+              // Style specific words with brand gradient
+              const isGradient = ["Interface", "Data", "Meaning"].includes(
+                word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
+              );
+              return (
+                <motion.span
+                  key={i}
+                  variants={wordVariants}
+                  className={cn(
+                    "inline-block mr-[0.25em] will-change-transform",
+                    isGradient
+                      ? "text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan to-brand-blue"
+                      : "text-transparent bg-clip-text bg-gradient-to-r from-neutral-100 to-neutral-300"
+                  )}
+                >
+                  {word}
+                </motion.span>
+              );
+            })}
+          </motion.div>
+        )}
       </div>
-    </>
+
+      {/* 2. Transparent Standard Semantic Overlay (selectable, readable by screen readers) */}
+      <h1
+        className="text-4xl md:text-6xl font-black tracking-tight text-center leading-tight md:leading-none absolute inset-0 select-text bg-transparent"
+        style={{
+          color: "transparent",
+          WebkitTextFillColor: "transparent",
+          pointerEvents: "auto",
+          margin: 0,
+          padding: 0,
+        }}
+      >
+        {text}
+      </h1>
+    </div>
   );
 };
 
@@ -419,44 +433,58 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
   };
 
   return (
-    <>
-      <p className="sr-only">{text}</p>
-
+    <div
+      style={{
+        height: isReady ? `${height}px` : "auto",
+        transition: "height 200ms cubic-bezier(0.16, 1, 0.3, 1)",
+      }}
+      className="relative w-full max-w-2xl mx-auto overflow-hidden min-h-[56px]"
+    >
+      {/* 1. Custom Visual Presentation (hidden from screen readers, not selectable) */}
       <div
-        style={{
-          height: isReady ? `${height}px` : "auto",
-          transition: "height 200ms cubic-bezier(0.16, 1, 0.3, 1)",
-        }}
-        className="relative w-full max-w-2xl mx-auto overflow-hidden min-h-[56px] select-none"
+        ref={ref}
         aria-hidden="true"
         role="presentation"
+        className="w-full select-none pointer-events-none"
       >
-        <div ref={ref} className="w-full">
-          {!isReady ? (
-            <p className="text-neutral-400 text-sm md:text-base leading-[28px] text-center opacity-0 pointer-events-none">
-              {text}
-            </p>
-          ) : (
-            <motion.p
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-              className="text-neutral-400 text-sm md:text-base leading-[28px] text-center flex flex-wrap justify-center"
-            >
-              {words.map((word, i) => (
-                <motion.span
-                  key={i}
-                  variants={wordVariants}
-                  className="inline-block mr-[0.35em] will-change-transform"
-                >
-                  {word}
-                </motion.span>
-              ))}
-            </motion.p>
-          )}
-        </div>
+        {!isReady ? (
+          <p className="text-neutral-400 text-sm md:text-base leading-[28px] text-center opacity-0">
+            {text}
+          </p>
+        ) : (
+          <motion.p
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="text-neutral-400 text-sm md:text-base leading-[28px] text-center flex flex-wrap justify-center"
+          >
+            {words.map((word, i) => (
+              <motion.span
+                key={i}
+                variants={wordVariants}
+                className="inline-block mr-[0.35em] will-change-transform"
+              >
+                {word}
+              </motion.span>
+            ))}
+          </motion.p>
+        )}
       </div>
-    </>
+
+      {/* 2. Transparent Standard Semantic Overlay (selectable, readable by screen readers) */}
+      <p
+        className="text-neutral-400 text-sm md:text-base leading-[28px] text-center absolute inset-0 select-text bg-transparent"
+        style={{
+          color: "transparent",
+          WebkitTextFillColor: "transparent",
+          pointerEvents: "auto",
+          margin: 0,
+          padding: 0,
+        }}
+      >
+        {text}
+      </p>
+    </div>
   );
 };
 
