@@ -6,7 +6,7 @@ import { IconTerminal } from "@tabler/icons-react";
 import { TracingBeam } from "@/components/ui/TracingBeam";
 import { RichNarrative } from "@/components/RichNarrative";
 import { Tooltip } from "@/components/ui/Tooltip";
-import { getGitHubStats, parseGitHubUrl } from "@/lib/github";
+import { getGitHubStats, parseGitHubUrl, getSimulatedStats } from "@/lib/github";
 import { getSoftwareSourceCodeSchema } from "@/lib/seo";
 import { TelemetryTracker } from "@/components/TelemetryTracker";
 
@@ -104,7 +104,9 @@ export default async function CaseStudyPage({ params }: PageProps) {
 
   // Fetch dynamic GitHub cached statistics to hydrate the JSON-LD schemas
   let stats = null;
-  if (study.github_url) {
+  if (study.simulated_telemetry) {
+    stats = getSimulatedStats(study.primary_language);
+  } else if (study.github_url) {
     const parsed = parseGitHubUrl(study.github_url);
     if (parsed) {
       stats = await getGitHubStats(parsed.owner, parsed.repo);

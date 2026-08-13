@@ -4,7 +4,7 @@ import React from "react";
 import { Card, CardTitle } from "@/components/BentoGrid";
 import { PretextRichText, usePretextRichLayout, type ExtendedRichInlineItem } from "@/hooks/usePretextLayout";
 import { BaseCaseStudy } from "@/types/domain";
-import { GitHubStats } from "@/lib/github";
+import { GitHubStats, getSimulatedTerminalCommand, getSimulatedTerminalLogs } from "@/lib/github";
 import { IconStar, IconGitFork, IconAlertCircle, IconTerminal, IconChevronRight } from "@tabler/icons-react";
 import { type RichInlineLine } from "@chenglou/pretext/rich-inline";
 import Link from "next/link";
@@ -210,10 +210,16 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
               <div className="bg-black/60 border border-zinc-900/60 rounded-xl p-3 font-mono text-[10px] leading-tight space-y-1 h-[130px] flex flex-col justify-start overflow-hidden">
                 <div className="flex items-center text-zinc-500 border-b border-zinc-900/60 pb-1.5 mb-1.5">
                   <IconTerminal className="w-3.5 h-3.5 mr-1 text-zinc-400" />
-                  <span>git log --oneline -n 5</span>
+                  <span>{study.simulated_telemetry ? getSimulatedTerminalCommand(study.primary_language) : "git log --oneline -n 5"}</span>
                 </div>
                 <div className="flex-1 flex flex-col justify-start space-y-1 overflow-y-auto scrollbar-none text-zinc-400">
-                  {githubStats.recentCommits.length > 0 ? (
+                  {study.simulated_telemetry ? (
+                    getSimulatedTerminalLogs(study.primary_language).map((log, i) => (
+                      <div key={i} className="truncate flex items-start gap-1">
+                        <span className={log.color || "text-zinc-300"}>{log.text}</span>
+                      </div>
+                    ))
+                  ) : githubStats.recentCommits.length > 0 ? (
                     githubStats.recentCommits.map((c, i) => (
                       <div key={i} className="truncate flex items-start gap-1">
                         <span className="text-brand-cyan select-none">{c.sha}</span>
