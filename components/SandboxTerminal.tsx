@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
-import { IconTerminal, IconCornerDownLeft, IconCircle } from "@tabler/icons-react";
+import { IconTerminal, IconCornerDownLeft, IconCircle, IconRefresh } from "@tabler/icons-react";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { useAnnouncer } from "@/components/providers/A11yProvider";
 
@@ -119,11 +119,76 @@ export const SandboxTerminal: React.FC = () => {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isExecuting, setIsExecuting] = useState(false);
 
+  const [isBooted, setIsBooted] = useState(false);
+  const [isFading, setIsFading] = useState(false);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Play a beautiful synthesized diagnostic chime
+  const playChime = () => {
+    if (typeof window === "undefined") return;
+    try {
+      const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      if (ctx.state === "suspended") {
+        ctx.resume();
+      }
+      const now = ctx.currentTime;
+      const frequencies = [523.25, 659.25, 783.99, 1046.50];
+      frequencies.forEach((freq, index) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, now + index * 0.08);
+        gain.gain.setValueAtTime(0.001, now + index * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.12, now + index * 0.08 + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + index * 0.08 + 0.5);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + index * 0.08);
+        osc.stop(now + index * 0.08 + 0.5);
+      });
+    } catch (err) {
+      console.error("Web Audio API Chime Error:", err);
+    }
+  };
+
+  const handleBoot = () => {
+    playChime();
+    setIsFading(true);
+    setTimeout(() => {
+      setIsBooted(true);
+      setIsFading(false);
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 50);
+    }, 300);
+  };
+
+  const handleReset = () => {
+    if (typingTimerRef.current) {
+      clearInterval(typingTimerRef.current);
+      typingTimerRef.current = null;
+    }
+    setIsBooted(false);
+    setIsFading(false);
+    setInput("");
+    setHistoryIndex(-1);
+    setIsExecuting(false);
+    setLogs([
+      {
+        id: "init",
+        type: "info",
+        text: "iMednet Python SDK CLI Sandbox [Version 2.3.1]\nType 'help' to list available commands. Click the badges below for instant inputs.",
+      },
+    ]);
+  };
+
   // Focus terminal input on body clicks
   const handleTerminalClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isBooted) return;
     const selection = window.getSelection();
     if (selection && selection.toString()) {
       return;
@@ -141,6 +206,7 @@ export const SandboxTerminal: React.FC = () => {
 
   // Execute terminal commands
   const executeCommand = React.useCallback((cmdText: string) => {
+    if (!isBooted) return;
     const trimmed = cmdText.trim();
     if (!trimmed) return;
 
@@ -219,7 +285,7 @@ export const SandboxTerminal: React.FC = () => {
         announce(`Command execution failed. Unknown command: '${trimmed}'.`, "polite");
       }
     }, 450);
-  }, [setCommandHistory, setHistoryIndex, setIsExecuting, setInput, setLogs]);
+  }, [setCommandHistory, setHistoryIndex, setIsExecuting, setInput, setLogs, isBooted]);
 
   // Typing animation state/ref
   const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -288,6 +354,7 @@ export const SandboxTerminal: React.FC = () => {
   // Handle incoming terminal:run custom events
   useEffect(() => {
     const handleRunEvent = (e: Event) => {
+      if (!isBooted) return;
       const customEvent = e as CustomEvent<{ command: string }>;
       if (!customEvent.detail || typeof customEvent.detail.command !== "string") return;
 
@@ -352,7 +419,7 @@ export const SandboxTerminal: React.FC = () => {
         clearInterval(typingTimerRef.current);
       }
     };
-  }, [isExecuting, executeCommand]);
+  }, [isExecuting, executeCommand, isBooted]);
 
   // Handle key triggers (Enter, Up, Down, Tab, Escape)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -461,7 +528,8 @@ export const SandboxTerminal: React.FC = () => {
           <button
             key={cmd}
             onClick={() => executeCommand(cmd)}
-            disabled={isExecuting}
+            disabled={!isBooted || isExecuting}
+            tabIndex={isBooted ? 0 : -1}
             className="px-3 py-1.5 text-[10px] font-mono font-bold bg-zinc-900/40 border border-zinc-900 hover:border-brand-cyan/40 text-brand-cyan/90 hover:text-brand-cyan rounded-xl transition-all hover:scale-[1.02] cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 focus:ring-offset-1 focus:ring-offset-zinc-950"
           >
             {cmd}
@@ -478,6 +546,33 @@ export const SandboxTerminal: React.FC = () => {
         style={{ "--term-glow": `0 0 35px ${hexToRgba(designManifest.colors["brand-cyan"], 0.02)}` } as React.CSSProperties}
         className="w-full border border-zinc-900 bg-zinc-950/80 rounded-2xl overflow-hidden shadow-[var(--term-glow)] relative backdrop-blur-md cursor-text"
       >
+        {/* Diagnostics Boot Overlay Cover */}
+        {(!isBooted || isFading) && (
+          <div
+            className={`absolute inset-0 bg-zinc-950/95 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-6 text-center transition-opacity duration-300 ${
+              isFading ? "opacity-0 pointer-events-none" : "opacity-100"
+            }`}
+          >
+            <div className="max-w-xs p-6 bg-zinc-900/40 border border-zinc-900 rounded-2xl flex flex-col items-center shadow-2xl relative z-50">
+              <div className="w-12 h-12 rounded-full bg-brand-cyan/10 flex items-center justify-center mb-4 text-brand-cyan animate-pulse">
+                <IconTerminal className="w-6 h-6" />
+              </div>
+              <h3 className="text-zinc-100 font-mono font-bold text-sm mb-2 uppercase tracking-wider">
+                System Diagnostics Boot
+              </h3>
+              <p className="text-zinc-400 font-mono text-[10px] mb-5 leading-relaxed">
+                Unlock high-fidelity synthesized audio feedback and activate the terminal sandbox.
+              </p>
+              <button
+                onClick={handleBoot}
+                className="w-full px-4 py-2.5 text-xs font-mono font-bold bg-brand-cyan hover:bg-brand-cyan/90 text-zinc-950 rounded-xl transition-all hover:scale-[1.02] cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 focus:ring-offset-2 focus:ring-offset-zinc-950"
+              >
+                BOOT INTERFACE
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Terminal Header */}
         <div className="border-b border-zinc-900/60 bg-zinc-950/90 px-4 py-3.5 flex justify-between items-center select-none">
           <div className="flex items-center gap-2">
@@ -488,7 +583,20 @@ export const SandboxTerminal: React.FC = () => {
               imednet-python-sdk // interactive CLI shell
             </span>
           </div>
-          <IconTerminal className="w-4 h-4 text-zinc-600" />
+          <div className="flex items-center gap-2">
+            {isBooted && !isFading && (
+              <button
+                onClick={handleReset}
+                className="flex items-center gap-1 px-2.5 py-1 text-[9px] font-mono font-bold bg-zinc-900/60 border border-zinc-900 hover:border-brand-cyan/40 text-zinc-400 hover:text-brand-cyan rounded-lg transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 focus:ring-offset-1 focus:ring-offset-zinc-950"
+                title="Reset Simulation"
+                aria-label="Reset Terminal Simulation"
+              >
+                <IconRefresh className="w-3 h-3" />
+                <span>RESET</span>
+              </button>
+            )}
+            <IconTerminal className="w-4 h-4 text-zinc-600" />
+          </div>
         </div>
 
         {/* Console logs output viewport */}
@@ -550,8 +658,9 @@ export const SandboxTerminal: React.FC = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            disabled={isExecuting}
-            placeholder="Type 'help' or execute dynamic clinical queries..."
+            disabled={!isBooted || isExecuting}
+            tabIndex={isBooted ? 0 : -1}
+            placeholder={isBooted ? "Type 'help' or execute dynamic clinical queries..." : "Diagnostics system suspended..."}
             className="flex-1 bg-transparent border-none outline-none font-mono text-[11px] text-zinc-100 placeholder-zinc-700 caret-brand-cyan select-text"
             autoCapitalize="off"
             autoComplete="off"
@@ -560,7 +669,8 @@ export const SandboxTerminal: React.FC = () => {
           />
           <button
             onClick={() => executeCommand(input)}
-            disabled={isExecuting || !input.trim()}
+            disabled={!isBooted || isExecuting || !input.trim()}
+            tabIndex={isBooted ? 0 : -1}
             className="p-1 text-zinc-600 hover:text-brand-cyan disabled:text-zinc-800 disabled:hover:text-zinc-800 transition-colors cursor-pointer focus:outline-none focus:text-brand-cyan focus:ring-2 focus:ring-brand-cyan/50 focus:ring-offset-1 focus:ring-offset-zinc-950 rounded"
             title="Execute Command (Enter)"
           >
