@@ -12,7 +12,8 @@ import {
 import { LAYOUT_CONFIG, resolveThemeFonts } from "@/lib/layout-config";
 import { GitHubStats } from "@/lib/github";
 import { calculateMasonryLayout, type PreparedData } from "@/lib/masonry";
-import { isBrowser } from "@/lib/graphics-engine";
+import { isBrowser, resolveFontFamily } from "@/lib/graphics-engine";
+import { useBentoLayout } from "@/components/providers/BentoLayoutContext";
 
 export interface MasonryItem {
   id: string;
@@ -31,6 +32,7 @@ export function useMasonryLayout<T extends MasonryItem>(
   allItems: T[],
   filteredItems: T[]
 ) {
+  const { heightOverrides } = useBentoLayout();
   const containerWidthRef = useRef<number>(0);
   const preparedDataRef = useRef<Record<string, PreparedData>>({});
 
@@ -79,7 +81,8 @@ export function useMasonryLayout<T extends MasonryItem>(
       containerWidth,
       filteredItems,
       preparedDataRef.current,
-      LAYOUT_CONFIG
+      LAYOUT_CONFIG,
+      heightOverrides
     );
 
     setLayoutState({
@@ -87,7 +90,7 @@ export function useMasonryLayout<T extends MasonryItem>(
       columns,
       isReady: true,
     });
-  }, [filteredItems]);
+  }, [filteredItems, heightOverrides]);
 
   const containerRef = useResizeObserver<HTMLDivElement>((entry) => {
     containerWidthRef.current = entry.contentRect.width;

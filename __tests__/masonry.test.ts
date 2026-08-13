@@ -72,4 +72,19 @@ describe('calculateMasonryLayout', () => {
     const result = calculateMasonryLayout(500, items, {}, MOCK_CONFIG);
     expect(result.columns[0][0].height).toBe(MOCK_CONFIG.FALLBACK_ITEM_HEIGHT);
   });
+
+  it('respects heightOverrides when provided', () => {
+    const items = [{ id: '1' }, { id: '2' }];
+    const preparedData = {
+      '1': { prepared: {} as never, items: [], paddingHeight: 100 }, // normally height 140
+      '2': { prepared: {} as never, items: [], paddingHeight: 150 }, // normally height 190
+    };
+    const heightOverrides = {
+      '1': 300, // overridden to 300
+    };
+
+    const result = calculateMasonryLayout(500, items, preparedData, MOCK_CONFIG, heightOverrides);
+    expect(result.columns[0][0].height).toBe(300);
+    expect(result.columns[0][1].height).toBe(190);
+  });
 });

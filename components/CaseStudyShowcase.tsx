@@ -8,6 +8,7 @@ import { GitHubStats } from "@/lib/github";
 import { motion, AnimatePresence } from "framer-motion";
 import { designManifest } from "@/lib/design-manifest";
 import { useMasonryLayout } from "@/hooks/useMasonryLayout";
+import { BentoLayoutProvider } from "@/components/providers/BentoLayoutContext";
 
 interface HydratedCaseStudy extends BaseCaseStudy {
   githubStats: GitHubStats | null;
@@ -19,7 +20,7 @@ interface CaseStudyShowcaseProps {
 
 const FILTER_TABS = ["All", "TypeScript", "Python", "Haskell"];
 
-export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = ({ caseStudies }) => {
+const CaseStudyShowcaseInner: React.FC<CaseStudyShowcaseProps> = ({ caseStudies }) => {
   const [selectedFilter, setSelectedFilter] = useState("All");
 
   // Client-side interactive filter
@@ -118,3 +119,12 @@ export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = ({ caseStudie
     </div>
   );
 };
+
+export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = (props) => {
+  return (
+    <BentoLayoutProvider>
+      <CaseStudyShowcaseInner {...props} />
+    </BentoLayoutProvider>
+  );
+};
+
