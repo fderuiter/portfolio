@@ -171,12 +171,13 @@ async function fetchRawGitHubStats(owner: string, repo: string): Promise<GitHubS
 
 /**
  * Internal Next.js cached function mapping to stable caching stores.
+ * Dynamically includes owner and repo parameters in the cache key to prevent collision.
  */
-const cachedGetGitHubStats = unstable_cache(
-  async (owner: string, repo: string) => fetchRawGitHubStats(owner, repo),
-  ["github-repo-metrics-cache"],
+const cachedGetGitHubStats = (owner: string, repo: string) => unstable_cache(
+  async () => fetchRawGitHubStats(owner, repo),
+  ["github-repo-metrics-cache", owner, repo],
   { revalidate: 3600, tags: ["github"] }
-);
+)();
 
 /**
  * Public facing API client wrapper.
@@ -186,17 +187,14 @@ const cachedGetGitHubStats = unstable_cache(
 export async function getGitHubStats(owner: string, repo: string): Promise<GitHubStats | null> {
   try {
     return await cachedGetGitHubStats(owner, repo);
-  } catch (e) {
+  } catch {
     // Gracefully handle Next.js environment cache errors in standalone Node scripts/tests
-    if (e instanceof Error && e.message.includes("incrementalCache missing")) {
-      try {
-        return await fetchRawGitHubStats(owner, repo);
-      } catch (fallbackErr) {
-        console.error(`Failed to fetch raw GitHub stats for ${owner}/${repo}:`, fallbackErr);
-        return null;
-      }
+    // or when Next.js caching is unavailable, by falling back to direct API fetching.
+    try {
+      return await fetchRawGitHubStats(owner, repo);
+    } catch (fallbackErr) {
+      console.error(`Failed to fetch raw GitHub stats for ${owner}/${repo}:`, fallbackErr);
+      return null;
     }
-    console.error(`Failed to fetch cached GitHub stats for ${owner}/${repo}:`, e);
-    return null;
   }
 }
