@@ -95,7 +95,17 @@ export const Navbar: React.FC = () => {
       }
     }, 100);
 
+    const isWithinBoundary = (target: EventTarget | null) => {
+      if (target instanceof Element) {
+        return !!target.closest("[data-keyboard-boundary]");
+      }
+      return false;
+    };
+
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (isWithinBoundary(e.target)) {
+        return;
+      }
       if (e.key === "Escape") {
         setIsOpen(false);
         triggerRef.current?.focus();

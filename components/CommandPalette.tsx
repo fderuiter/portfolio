@@ -340,7 +340,17 @@ export const CommandPalette: React.FC = () => {
   // 1. Keyboard Shortcut Listener (Cmd+K / Ctrl+K) site-wide
   useEffect(() => {
     if (!mounted) return;
+    const isWithinBoundary = (target: EventTarget | null) => {
+      if (target instanceof Element) {
+        return !!target.closest("[data-keyboard-boundary]");
+      }
+      return false;
+    };
+
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (isWithinBoundary(e.target)) {
+        return;
+      }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         setIsOpen(!isOpen);
