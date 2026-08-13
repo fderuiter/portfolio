@@ -6,6 +6,7 @@ import { designManifest } from "@/lib/design-manifest";
 import { IconTerminal, IconCornerDownLeft, IconCircle } from "@tabler/icons-react";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { useAnnouncer } from "@/components/providers/A11yProvider";
+import { COMMAND_REGISTRY } from "@/lib/cliContracts";
 
 interface LogItem {
   id: string;
@@ -13,90 +14,6 @@ interface LogItem {
   text: string;
   jsonPayload?: unknown;
 }
-
-const COMMAND_REGISTRY: Record<string, { description: string; payload: unknown }> = {
-  "imednet studies list": {
-    description: "Retrieve a list of all active clinical trials from the iMednet EDC platform.",
-    payload: [
-      {
-        studyID: "BRIGHT-01",
-        name: "Phase III Pediatric Leukemia Study",
-        status: "ACTIVE",
-        subjectsCount: 142,
-        version: "v4.2.1",
-      },
-      {
-        studyID: "ONCO-2026",
-        name: "Advanced Melanoma Immunotherapy Trial",
-        status: "ENROLLING",
-        subjectsCount: 89,
-        version: "v1.0.8",
-      },
-      {
-        studyID: "CARDIO-REF",
-        name: "Congestive Heart Failure Observational Registry",
-        status: "COMPLETED",
-        subjectsCount: 310,
-        version: "v2.5.0",
-      }
-    ],
-  },
-  "imednet subjects get --id 123": {
-    description: "Query specific details and records for subject 123 (HIPAA-anonymized).",
-    payload: {
-      subjectID: "SUB-123",
-      studyID: "BRIGHT-01",
-      siteID: 401,
-      enrollmentDate: "2025-11-12",
-      status: "COMPLETED",
-      recordsCount: 18,
-      complianceScore: "[VERIFY_SECURITY_LOGS]",
-      demographics: {
-        age: 11,
-        gender: "F",
-        ethnicity: "ANONYMIZED_UNDER_HIPAA_SAFE_HARBOR",
-      },
-      lastVisit: "2026-05-10T14:30Z",
-    },
-  },
-  "imednet records search --study BRIGHT-01": {
-    description: "Search dynamic patient records and EDC form entries matching active trials.",
-    payload: {
-      studyID: "BRIGHT-01",
-      totalRecordsMatched: 3,
-      domain: "VS (Vital Signs)",
-      results: [
-        {
-          subjectID: "SUB-101",
-          visitName: "Week 4 Follow-up",
-          heartRate: 72,
-          tempCelsius: 36.8,
-          systolicBP: 110,
-          diastolicBP: 72,
-          timestamp: "2026-05-20T08:30Z",
-        },
-        {
-          subjectID: "SUB-102",
-          visitName: "Week 4 Follow-up",
-          heartRate: 84,
-          tempCelsius: 37.1,
-          systolicBP: 115,
-          diastolicBP: 76,
-          timestamp: "2026-05-20T09:15Z",
-        },
-        {
-          subjectID: "SUB-103",
-          visitName: "Week 4 Follow-up",
-          heartRate: 68,
-          tempCelsius: 36.6,
-          systolicBP: 108,
-          diastolicBP: 70,
-          timestamp: "2026-05-20T10:00Z",
-        }
-      ],
-    },
-  },
-};
 
 // Pure ID Generator outside rendering pipeline to satisfy react-hooks/purity rules
 let idCounter = 0;
@@ -187,7 +104,7 @@ export const SandboxTerminal: React.FC = () => {
         return;
       }
 
-      const match = COMMAND_REGISTRY[trimmed];
+      const match = trimmed in COMMAND_REGISTRY ? COMMAND_REGISTRY[trimmed as keyof typeof COMMAND_REGISTRY] : undefined;
       if (match) {
         setLogs((prev) => [
           ...prev,
