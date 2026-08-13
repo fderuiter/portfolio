@@ -16,6 +16,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: "Work", href: "/#case-studies" },
   { label: "About", href: "/#about" },
+  { label: "Proof Workspace", href: "/proof" },
   { label: "Transparency", href: "/transparency" },
   { label: "Contact", href: "/#contact" },
   { label: "GitHub", href: "https://github.com/fderuiter/portfolio", isExternal: true },
