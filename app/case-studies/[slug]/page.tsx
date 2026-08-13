@@ -9,8 +9,13 @@ import { Tooltip } from "@/components/ui/Tooltip";
 import { getGitHubStats, parseGitHubUrl, getSimulatedStats } from "@/lib/github";
 import { getSoftwareSourceCodeSchema } from "@/lib/seo";
 import { TelemetryTracker } from "@/components/TelemetryTracker";
+import dynamic from "next/dynamic";
 
 import type { Metadata } from "next";
+
+const ProofAssistant = dynamic(
+  () => import("@/components/ProofAssistant").then((mod) => mod.ProofAssistant)
+);
 
 export const revalidate = 3600;
 export const dynamicParams = true;
@@ -271,6 +276,20 @@ export default async function CaseStudyPage({ params }: PageProps) {
                   Test clinical trial EDC operations and view structured telemetry outputs directly inside the browser. Use the interactive badges or type &apos;help&apos; inside the prompt.
                 </p>
                 <SandboxTerminal />
+              </div>
+            )}
+
+            {/* Interactive Proof Tree & Telemetry (Requirement 1, 2, 3, 4) */}
+            {slug === "schemaflow" && (
+              <div className="mt-12 border-t border-zinc-900/50 pt-10">
+                <h2 className="text-xl font-bold font-sans text-neutral-100 mb-3 flex items-center gap-2">
+                  <IconTerminal className="w-5 h-5 text-brand-cyan" />
+                  Interactive Proof-Assistant & Telemetry Simulator
+                </h2>
+                <p className="text-xs font-mono text-zinc-500 mb-6 leading-relaxed">
+                  Apply tactical logical inferences dynamically to branch and solve mathematical proof trees. Monitor real-time memory fluctuations on the GPU compositor thread using CSS custom variables.
+                </p>
+                <ProofAssistant />
               </div>
             )}
 
