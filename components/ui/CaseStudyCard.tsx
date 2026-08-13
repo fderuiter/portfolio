@@ -1,7 +1,10 @@
+"use client";
+
 import React from "react";
 import { BaseCaseStudy } from "@/types/domain";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useTranslation } from "@/components/providers/TranslationProvider";
 
 interface CaseStudyCardProps {
   study: BaseCaseStudy;
@@ -9,8 +12,11 @@ interface CaseStudyCardProps {
 }
 
 export const CaseStudyCard: React.FC<CaseStudyCardProps> = ({ study, className }) => {
+  const { terminologyLevel } = useTranslation();
   // Split tags by comma for individual rendering
   const tagsList = study.tags ? study.tags.split(",").map(t => t.trim()) : [];
+
+  const textToUse = terminologyLevel === "simplified" ? study.editorial_content_simplified : study.editorial_content;
 
   return (
     <div
@@ -34,7 +40,7 @@ export const CaseStudyCard: React.FC<CaseStudyCardProps> = ({ study, className }
 
       {/* Editorial Content Summary */}
       <p className="text-sm text-neutral-400 leading-relaxed mb-6 group-hover:text-neutral-300 transition-colors duration-300">
-        {study.editorial_content}
+        {textToUse}
       </p>
 
       {/* Tags Array */}

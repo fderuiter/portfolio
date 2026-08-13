@@ -4,12 +4,14 @@ import React from "react";
 import { hexToRgba } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { designManifest } from "@/lib/design-manifest";
+import { useTranslation } from "@/components/providers/TranslationProvider";
 
 export interface TimelineItem {
   role: string;
   company: string;
   period: string;
   description: string;
+  description_simplified: string;
   tags: string[];
 }
 
@@ -19,6 +21,7 @@ const timelineData: TimelineItem[] = [
     company: "Systems Integration Group",
     period: "2023 — Present",
     description: "Architected distributed HIPAA-compliant streaming ODM XML parsers handling 2GB+ trials data within constant 50MB memory footprints. Transitioned local SQLite storage nodes to high-speed serverless Neon Postgres clusters utilizing native pooling.",
+    description_simplified: "Built secure systems to handle large amounts of clinical trial data efficiently. Moved database storage to modern cloud servers to keep the application fast and reliable.",
     tags: ["TypeScript", "Neon Postgres", "CDISC", "HIPAA", "SAX Parser"]
   },
   {
@@ -26,6 +29,7 @@ const timelineData: TimelineItem[] = [
     company: "Digital Physics Labs",
     period: "2020 — 2023",
     description: "Developed hardware-accelerated text measuring and Bento grid wrapping engines using browser canvas and custom hooks. Maintained 60FPS refresh metrics under active resizing and heavy grid item swaps.",
+    description_simplified: "Created high-performance visual dashboards that resize instantly and stay incredibly smooth, ensuring a fast and responsive user experience.",
     tags: ["React 19", "Next.js 16", "Framer Motion", "Canvas API", "DX Tooling"]
   },
   {
@@ -33,6 +37,7 @@ const timelineData: TimelineItem[] = [
     company: "Civic Code for Humanity",
     period: "2019 — 2021",
     description: "Partnered with local nonprofits to modernize their digital presence and data systems. Taught coding bootcamps for underprivileged youth, emphasizing creativity and problem-solving.",
+    description_simplified: "Worked with local charities to upgrade their websites and databases, and mentored young students learning to code.",
     tags: ["Civic Impact", "Education", "Volunteering", "Accessibility"]
   },
   {
@@ -40,6 +45,7 @@ const timelineData: TimelineItem[] = [
     company: "CoreFlow Technologies",
     period: "2018 — 2020",
     description: "Pioneered DAG-based Visual Node Schema builders. Engineered immutable state trees, cycle validation compilers, and OpenAPI spec translators.",
+    description_simplified: "Designed visual drag-and-drop tools to help other software developers create, validate, and document their data models easily.",
     tags: ["React", "Zustand", "AST", "JSON Schema", "OpenAPI"]
   },
   {
@@ -47,11 +53,14 @@ const timelineData: TimelineItem[] = [
     company: "University Student Leadership",
     period: "2016 — 2018",
     description: "Led a community of 500+ students, organized weekly workshops, and fostered a culture of collaborative learning. Built mentorship programs that connected underclassmen with alumni.",
+    description_simplified: "Managed a large student community, organized educational workshops, and created a mentorship program pairing younger students with successful alumni.",
     tags: ["Leadership", "Community Building", "Mentorship", "Public Speaking"]
   }
 ];
 
 export const Timeline: React.FC = () => {
+  const { terminologyLevel } = useTranslation();
+
   return (
     <div className="w-full max-w-3xl mx-auto py-12 relative select-none">
       {/* Vertical Rail Line */}
@@ -90,7 +99,7 @@ export const Timeline: React.FC = () => {
                     {item.company}
                   </h4>
                   <p className="text-xs text-zinc-400 mt-3 leading-relaxed font-sans">
-                    {item.description}
+                    {terminologyLevel === "simplified" ? item.description_simplified : item.description}
                   </p>
                   
                   {/* Tag Chips */}

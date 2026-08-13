@@ -5,6 +5,7 @@ export interface BaseCaseStudy {
   primary_language: string;
   github_url?: string | null;
   editorial_content: string;       // general summaries
+  editorial_content_simplified: string; // simplified general summaries
   architectural_narrative: string; // deep-technical breakdowns
   published: boolean;
   simulated_telemetry: boolean;

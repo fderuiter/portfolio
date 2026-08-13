@@ -6,6 +6,40 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
+import { useTranslation } from "@/components/providers/TranslationProvider";
+
+const TerminologyToggle: React.FC = () => {
+  const { terminologyLevel, setTerminologyLevel } = useTranslation();
+
+  return (
+    <div className="flex p-0.5 bg-zinc-900 border border-zinc-800 rounded-lg text-[9px] md:text-[10px] font-mono relative z-10 w-fit">
+      <button
+        onClick={() => setTerminologyLevel("standard")}
+        className={cn(
+          "px-2 py-0.5 rounded transition-all duration-200 cursor-pointer",
+          terminologyLevel === "standard"
+            ? "bg-zinc-800 text-brand-cyan shadow-sm font-bold"
+            : "text-zinc-500 hover:text-zinc-300 font-medium"
+        )}
+        aria-label="Set terminology level to standard"
+      >
+        STD
+      </button>
+      <button
+        onClick={() => setTerminologyLevel("simplified")}
+        className={cn(
+          "px-2 py-0.5 rounded transition-all duration-200 cursor-pointer",
+          terminologyLevel === "simplified"
+            ? "bg-zinc-800 text-brand-cyan shadow-sm font-bold"
+            : "text-zinc-500 hover:text-zinc-300 font-medium"
+        )}
+        aria-label="Set terminology level to simplified"
+      >
+        SIMP
+      </button>
+    </div>
+  );
+};
 
 interface NavItem {
   label: string;
@@ -211,10 +245,12 @@ export const Navbar: React.FC = () => {
                 </Link>
               );
             })}
+            <TerminologyToggle />
           </nav>
 
           {/* Mobile Actions Container */}
           <div className="md:hidden flex items-center gap-4 relative z-50">
+            <TerminologyToggle />
             {/* Mobile Hamburger Trigger */}
             <button
               ref={triggerRef}

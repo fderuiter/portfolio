@@ -13,6 +13,7 @@ import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAnnouncer } from "@/components/providers/A11yProvider";
 import { LAYOUT_CONFIG } from "@/lib/layout-config";
 import { useBentoLayout } from "@/components/providers/BentoLayoutContext";
+import { useTranslation } from "@/components/providers/TranslationProvider";
 
 const REALITY_CONTENT: Record<string, string> = {
   schemaflow: "While the drag-and-drop canvas is extremely smooth, we initially faced major rendering bottlenecks when rendering over 150 schema nodes. We had to implement node occlusion culling and state debouncing to maintain 60 FPS, and cyclical dependency detection still requires optimized Web Worker postMessage parsing.",
@@ -67,6 +68,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
   }, [syncFailed, announce]);
 
   const { heightOverrides, registerHeightOverride, clearHeightOverride, setTransitioning } = useBentoLayout();
+  const { terminologyLevel } = useTranslation();
   const [mode, setMode] = React.useState<"pitch" | "reality">("pitch");
   const [isLocalTransitioning, setIsLocalTransitioning] = React.useState(false);
 
@@ -89,9 +91,11 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
 
   const hasPrecalculated = preCalculatedHeight !== undefined && preCalculatedLines !== undefined && preCalculatedItems !== undefined;
 
+  const textToUse = terminologyLevel === "simplified" ? study.editorial_content_simplified : study.editorial_content;
+
   // We always execute the hook to follow dynamic hooks rules, but ignore if precalculated is provided
   const internalLayout = usePretextRichLayout({
-    text: study.editorial_content,
+    text: textToUse,
     fontSize: LAYOUT_CONFIG.FONT_SIZE,
     lineHeight: LAYOUT_CONFIG.LINE_HEIGHT,
     fontFamilyVariable: "--font-inter",
@@ -223,13 +227,13 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
                   items={finalItems}
                   lineHeight={LAYOUT_CONFIG.LINE_HEIGHT}
                   isReady={isLayoutReady}
-                  fallbackText={study.editorial_content}
+                  fallbackText={textToUse}
                   className="text-zinc-400 text-sm leading-relaxed font-sans"
                 />
               </div>
             ) : (
               <p className="text-zinc-400 text-sm leading-relaxed font-sans">
-                {getRealityContent(study.slug, study.editorial_content)}
+                {getRealityContent(study.slug, textToUse)}
               </p>
             )}
           </div>

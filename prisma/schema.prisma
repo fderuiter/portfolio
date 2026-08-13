@@ -19,6 +19,7 @@ model CaseStudy {
   primary_language        String
   github_url              String?
   editorial_content       String   // Stores general descriptions
+  editorial_content_simplified String // Stores simplified human-written general descriptions
   architectural_narrative String   // Stores deep-dive technical explanations
   published               Boolean  @default(false)
   simulated_telemetry     Boolean  @default(false)
