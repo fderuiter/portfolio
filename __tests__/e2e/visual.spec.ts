@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Visual Regression & Drift Detection', () => {
+  test.beforeEach(async ({ page }) => {
+    // Emulate reduced motion for stable animations and layout
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+  });
+
   test('Case Study components snapshot (desktop)', async ({ page }) => {
     // Emulate reduced motion to disable JS transitions/animations
     await page.emulateMedia({ reducedMotion: 'reduce' });

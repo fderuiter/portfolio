@@ -54,6 +54,9 @@ const saveMetric = (metric: { scan?: ScanMetric; focusTrap?: FocusTrapMetric }) 
 
 test.describe('Interactive Accessibility E2E tests', () => {
   test.beforeEach(async ({ page }) => {
+    // Emulate reduced motion for stable animations and layout
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+
     // Clean animations for stability
     await page.addStyleTag({
       content: `
