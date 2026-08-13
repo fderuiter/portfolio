@@ -82,7 +82,7 @@ export default function RootLayout({
           <A11yProvider>
             <Navbar />
             {children}
-            <Analytics />
+            {process.env.VERCEL_ENV === "production" && <Analytics />}
             <SearchWrapper />
           </A11yProvider>
         </SearchProvider>
