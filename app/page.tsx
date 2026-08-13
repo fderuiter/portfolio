@@ -46,8 +46,9 @@ export default async function WalkingSkeletonPage() {
     console.error("Database query exception:", err);
     errorMsg = err instanceof Error ? err.message : "Failed to establish a connection to the serverless database.";
     
-    // Fallback for CI/Playwright environment to ensure components can be visually tested
-    if (process.env.CI === "true" || process.env.PLAYWRIGHT_TEST === "true") {
+    // Fallback for CI/Playwright/Preview or other non-production environments to ensure components can be visually tested and load properly when database is offline
+    const isProduction = process.env.VERCEL_ENV === "production";
+    if (process.env.CI === "true" || process.env.PLAYWRIGHT_TEST === "true" || !isProduction) {
       errorMsg = ""; // Clear error to render the showcase
       caseStudies = [
         {
