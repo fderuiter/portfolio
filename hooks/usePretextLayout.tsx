@@ -56,11 +56,12 @@ export function usePretextLayout({
   const measureText = useCallback((maxWidth: number) => {
     if (!preparedTextRef.current || !fontStringRef.current) return;
 
-    const cacheKey = `${text}|${fontStringRef.current}|${maxWidth}|${lineHeight}`;
+    const flooredWidth = Math.floor(maxWidth);
+    const cacheKey = `${text}|${fontStringRef.current}|${flooredWidth}|${lineHeight}`;
     let result = textLayoutCache.get(cacheKey);
 
     if (!result) {
-      result = layout(preparedTextRef.current, maxWidth, lineHeight);
+      result = layout(preparedTextRef.current, flooredWidth, lineHeight);
       textLayoutCache.set(cacheKey, result);
     }
 
@@ -273,13 +274,14 @@ export function usePretextRichLayout({
   const measureRichText = useCallback((maxWidth: number) => {
     if (!preparedRef.current || !itemsKeyRef.current) return;
 
-    const layoutKey = `${itemsKeyRef.current}|${maxWidth}|${lineHeight}`;
+    const flooredWidth = Math.floor(maxWidth);
+    const layoutKey = `${itemsKeyRef.current}|${flooredWidth}|${lineHeight}`;
     let cachedResult = richLayoutCache.get(layoutKey);
 
     if (!cachedResult) {
       const prepared = preparedRef.current;
       const linesRanges: RichInlineLineRange[] = [];
-      walkRichInlineLineRanges(prepared, maxWidth, (range) => {
+      walkRichInlineLineRanges(prepared, flooredWidth, (range) => {
         linesRanges.push(range);
       });
 
