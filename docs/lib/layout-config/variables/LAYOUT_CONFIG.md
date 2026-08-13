@@ -62,7 +62,7 @@ Defined in: [lib/layout-config.ts:3](https://github.com/fderuiter/portfolio/blob
 
 ### PADDING\_WITH\_QUIZ
 
-> `readonly` **PADDING\_WITH\_QUIZ**: `260` = `designManifest.masonry.paddingWithQuiz`
+> `readonly` **PADDING\_WITH\_QUIZ**: `480` = `designManifest.masonry.paddingWithQuiz`
 
 ### PADDING\_WITH\_STATS
 

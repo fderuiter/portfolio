@@ -177,7 +177,7 @@ Original CSS Variable: --layout-masonry-padding-without-stats
 
 #### masonry.paddingWithQuiz
 
-> `readonly` **paddingWithQuiz**: `260` = `260`
+> `readonly` **paddingWithQuiz**: `480` = `480`
 
 Original CSS Variable: --layout-masonry-padding-with-quiz
 

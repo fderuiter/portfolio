@@ -88,7 +88,8 @@ export function calculateMasonryLayout<T extends { id: string }>(
     }
 
     const override = heightOverrides?.[study.id];
-    const totalHeight = override !== undefined ? override : totalTextHeight + cached.paddingHeight;
+    const isQuiz = (study as { isQuiz?: unknown }).isQuiz === true;
+    const totalHeight = override !== undefined ? override : (isQuiz ? cached.paddingHeight : totalTextHeight + cached.paddingHeight);
 
     return {
       ...study,

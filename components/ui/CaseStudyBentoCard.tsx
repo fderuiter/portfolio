@@ -123,7 +123,9 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
     ? LAYOUT_CONFIG.PADDING_WITH_QUIZ 
     : (githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS);
 
-  const finalHeight = hasPrecalculated ? preCalculatedHeight : (internalLayout.isReady ? internalLayout.height + finalPadding : undefined);
+  const finalHeight = study.isQuiz
+    ? LAYOUT_CONFIG.PADDING_WITH_QUIZ
+    : (hasPrecalculated ? preCalculatedHeight : (internalLayout.isReady ? internalLayout.height + finalPadding : undefined));
   const isLayoutReady = hasPrecalculated ? true : internalLayout.isReady;
 
   const innerRef = React.useRef<HTMLDivElement>(null);

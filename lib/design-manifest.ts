@@ -60,7 +60,7 @@ export const designManifest = {
     /** Original CSS Variable: --layout-masonry-padding-without-stats */
     paddingWithoutStats: 254,
     /** Original CSS Variable: --layout-masonry-padding-with-quiz */
-    paddingWithQuiz: 260,
+    paddingWithQuiz: 480,
   },
   layout: {
     /** Original CSS Variable: --layout-gap */
