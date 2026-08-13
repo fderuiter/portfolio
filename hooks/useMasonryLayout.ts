@@ -1,4 +1,6 @@
 import { useState, useLayoutEffect, useRef, useCallback } from "react";
+import { designManifest } from "@/lib/design-manifest";
+import { useResizeObserver } from "./useResizeObserver";
 import { 
   parseMarkdownToRichItems, 
   type ExtendedRichInlineItem 
@@ -7,10 +9,10 @@ import {
   prepareRichInline, 
   type RichInlineLine,
 } from "@chenglou/pretext/rich-inline";
-import { LAYOUT_CONFIG } from "@/lib/layout-config";
+import { LAYOUT_CONFIG, resolveThemeFonts } from "@/lib/layout-config";
 import { GitHubStats } from "@/lib/github";
 import { calculateMasonryLayout, type PreparedData } from "@/lib/masonry";
-import { isBrowser, resolveFontFamily } from "@/lib/graphics-engine";
+import { isBrowser } from "@/lib/graphics-engine";
 
 export interface MasonryItem {
   id: string;
@@ -29,7 +31,6 @@ export function useMasonryLayout<T extends MasonryItem>(
   allItems: T[],
   filteredItems: T[]
 ) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const containerWidthRef = useRef<number>(0);
   const preparedDataRef = useRef<Record<string, PreparedData>>({});
 
@@ -53,12 +54,7 @@ export function useMasonryLayout<T extends MasonryItem>(
   useLayoutEffect(() => {
     if (!isBrowser()) return;
 
-    const resolvedFontFamily = resolveFontFamily("--font-inter");
-
-    const baseFont = `400 ${LAYOUT_CONFIG.FONT_SIZE}px ${resolvedFontFamily}`;
-    const boldFont = `700 ${LAYOUT_CONFIG.FONT_SIZE}px ${resolvedFontFamily}`;
-    const italicFont = `italic 400 ${LAYOUT_CONFIG.FONT_SIZE}px ${resolvedFontFamily}`;
-    const codeFont = `500 ${LAYOUT_CONFIG.FONT_SIZE - 1}px monospace`;
+    const { baseFont, boldFont, italicFont, codeFont } = resolveThemeFonts(LAYOUT_CONFIG.FONT_SIZE, "--font-inter");
 
     const data: Record<string, PreparedData> = {};
     for (const study of allItems) {
@@ -93,26 +89,19 @@ export function useMasonryLayout<T extends MasonryItem>(
     });
   }, [filteredItems]);
 
+  const containerRef = useResizeObserver<HTMLDivElement>((entry) => {
+    containerWidthRef.current = entry.contentRect.width;
+    recalculateLayout(entry.contentRect.width);
+  });
+
   useLayoutEffect(() => {
-    if (!containerRef.current) return;
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        containerWidthRef.current = entry.contentRect.width;
-        recalculateLayout(entry.contentRect.width);
-      }
-    });
-
-    resizeObserver.observe(containerRef.current);
-
-    const initialWidth = containerRef.current.getBoundingClientRect().width;
-    containerWidthRef.current = initialWidth;
-    recalculateLayout(initialWidth);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [recalculateLayout]);
+    if (containerRef.current) {
+      const initialWidth = containerRef.current.getBoundingClientRect().width;
+      containerWidthRef.current = initialWidth;
+      recalculateLayout(initialWidth);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useLayoutEffect(() => {
     if (containerWidthRef.current > 0) {

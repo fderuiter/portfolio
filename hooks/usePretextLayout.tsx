@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useLayoutEffect, useRef, useCallback } from "react";
+import { useResizeObserver } from "./useResizeObserver";
 import { prepare, layout, clearCache, type PreparedText } from "@chenglou/pretext";
 import { 
   prepareRichInline, 
@@ -12,10 +13,10 @@ import {
   type RichInlineLineRange
 } from "@chenglou/pretext/rich-inline";
 import { designManifest } from "@/lib/design-manifest";
+import { resolveThemeFonts, resolveSingleThemeFont } from "@/lib/layout-config";
 
 import { 
   isBrowser, 
-  resolveFontFamily, 
   validateLayoutHeight,
   textPrepareCache,
   textLayoutCache,
@@ -49,7 +50,6 @@ export function usePretextLayout({
     lineCount: 0,
   });
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const preparedTextRef = useRef<PreparedText | null>(null);
   const fontStringRef = useRef<string>("");
 
@@ -76,12 +76,16 @@ export function usePretextLayout({
     });
   }, [text, lineHeight]);
 
+  const containerRef = useResizeObserver<HTMLDivElement>((entry) => {
+    const maxWidth = entry.contentRect.width;
+    measureText(maxWidth);
+  });
+
   useLayoutEffect(() => {
     if (!isBrowser()) return;
 
-    // 1. Resolve active Tailwind/design manifest resolved font variable via central engine
-    const resolvedFontFamily = resolveFontFamily(fontFamilyVariable);
-    const fontString = `${fontSize}px ${resolvedFontFamily}`;
+    // 1. Senior Design: Extract active Tailwind v4 resolved font variable & use central resolver
+    const fontString = resolveSingleThemeFont(fontSize, fontFamilyVariable);
     fontStringRef.current = fontString;
 
     // 2. Phase 1 Preparation: Parse text and cache measurements in Canvas
@@ -99,25 +103,9 @@ export function usePretextLayout({
     } else {
        setState((prev) => ({ ...prev, isReady: true }));
     }
-  }, [text, fontSize, fontFamilyVariable, measureText]);
+  }, [text, fontSize, fontFamilyVariable, measureText, containerRef]);
 
-  useLayoutEffect(() => {
-    if (!containerRef.current) return;
-
-    // Execution Phase: ResizeObserver for fast layout path
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const maxWidth = entry.contentRect.width;
-        measureText(maxWidth);
-      }
-    });
-
-    resizeObserver.observe(containerRef.current);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [measureText]);
+  // Removed custom ResizeObserver in favor of unified useResizeObserver hook
 
   // Layout Height Validation Trigger
   useLayoutEffect(() => {
@@ -278,7 +266,6 @@ export function usePretextRichLayout({
     items: [],
   });
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const preparedRef = useRef<PreparedRichInline | null>(null);
   const itemsRef = useRef<ExtendedRichInlineItem[]>([]);
   const itemsKeyRef = useRef<string>("");
@@ -322,15 +309,15 @@ export function usePretextRichLayout({
     });
   }, [lineHeight]);
 
+  const containerRef = useResizeObserver<HTMLDivElement>((entry) => {
+    const maxWidth = entry.contentRect.width;
+    measureRichText(maxWidth);
+  });
+
   useLayoutEffect(() => {
     if (!isBrowser()) return;
 
-    const resolvedFontFamily = resolveFontFamily(fontFamilyVariable);
-
-    const baseFont = `400 ${fontSize}px ${resolvedFontFamily}`;
-    const boldFont = `700 ${fontSize}px ${resolvedFontFamily}`;
-    const italicFont = `italic 400 ${fontSize}px ${resolvedFontFamily}`;
-    const codeFont = `500 ${fontSize - 1}px monospace`;
+    const { baseFont, boldFont, italicFont, codeFont } = resolveThemeFonts(fontSize, fontFamilyVariable);
 
     const fontsKey = `${baseFont}|${boldFont}|${italicFont}|${codeFont}`;
     const itemsKey = `${text}|${fontsKey}`;
@@ -356,24 +343,9 @@ export function usePretextRichLayout({
     } else {
       setState((prev) => ({ ...prev, isReady: true }));
     }
-  }, [text, fontSize, fontFamilyVariable, measureRichText]);
+  }, [text, fontSize, fontFamilyVariable, measureRichText, containerRef]);
 
-  useLayoutEffect(() => {
-    if (!containerRef.current) return;
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const maxWidth = entry.contentRect.width;
-        measureRichText(maxWidth);
-      }
-    });
-
-    resizeObserver.observe(containerRef.current);
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [measureRichText]);
+  // Removed custom ResizeObserver in favor of unified useResizeObserver hook
 
   // Layout Height Validation Trigger
   useLayoutEffect(() => {

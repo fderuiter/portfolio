@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { IconSearch, IconTerminal, IconFileCode, IconDirections, IconCornerDownLeft } from "@tabler/icons-react";
 import { filterFuzzySearch } from "@/lib/search-utils";
+import { useSearch } from "@/components/providers/SearchProvider";
 
 interface SearchCaseStudy {
   id: string;
@@ -327,7 +328,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
 
 export const CommandPalette: React.FC = () => {
   const [mounted, setMounted] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const { isOpen, setIsOpen, closeSearch } = useSearch();
   const [studies, setStudies] = useState<SearchCaseStudy[]>([]);
   const originalFocusRef = useRef<HTMLElement | null>(null);
 
@@ -339,25 +340,34 @@ export const CommandPalette: React.FC = () => {
   // 1. Keyboard Shortcut Listener (Cmd+K / Ctrl+K) site-wide
   useEffect(() => {
     if (!mounted) return;
+    const isWithinBoundary = (target: EventTarget | null) => {
+      if (target instanceof Element) {
+        return !!target.closest("[data-keyboard-boundary]");
+      }
+      return false;
+    };
+
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (isWithinBoundary(e.target)) {
+        return;
+      }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        setIsOpen((prev) => {
-          if (!prev) {
-            // Capture focus state before mounting modal
-            originalFocusRef.current = document.activeElement as HTMLElement;
-          } else {
-            // Restore focus
-            originalFocusRef.current?.focus();
-          }
-          return !prev;
-        });
+        setIsOpen(!isOpen);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [mounted]);
+  }, [mounted, isOpen, setIsOpen]);
+
+  // Capture original focus state when the palette opens
+  useEffect(() => {
+    if (!mounted) return;
+    if (isOpen) {
+      originalFocusRef.current = document.activeElement as HTMLElement;
+    }
+  }, [isOpen, mounted]);
 
   // 2. Fetch search case studies dynamically on mount
   useEffect(() => {
@@ -378,7 +388,7 @@ export const CommandPalette: React.FC = () => {
   }, [mounted]);
 
   const handleClose = () => {
-    setIsOpen(false);
+    closeSearch();
     originalFocusRef.current?.focus();
   };
 

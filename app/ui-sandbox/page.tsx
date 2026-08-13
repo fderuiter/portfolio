@@ -5,6 +5,7 @@ import { BentoGrid, Card, CardTitle, CardDescription } from "@/components/BentoG
 import { Terminal, AnimatedSpan, TypingAnimation } from "@/components/Terminal";
 import { TextReveal } from "@/components/TextReveal";
 import { AnimatedGridPattern } from "@/components/AnimatedGridPattern";
+import { GarminWatchSimulator } from "@/components/GarminWatchSimulator";
 
 export default function UISandboxPage() {
   return (
@@ -26,6 +27,19 @@ export default function UISandboxPage() {
           className="fill-white stroke-neutral-500"
         />
         <h2 className="text-2xl z-10 text-neutral-300">Animated Grid Pattern</h2>
+      </div>
+
+      {/* 2.5. Garmin Watch Simulator Section */}
+      <div className="py-16 flex flex-col justify-center items-center bg-zinc-950 border-b border-neutral-800">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-2 font-mono text-brand-cyan tracking-tight">
+          Garmin Watch Game Simulator
+        </h2>
+        <p className="text-xs text-zinc-400 max-w-md text-center mb-6 px-4">
+          Operate keys (UP, DOWN, LIGHT) locally. Keyboard boundaries ensure parent window does not scroll, and spotlight search modal (Cmd+K) ignores keystrokes inside the watch container.
+        </p>
+        <div className="max-w-md w-full px-4">
+          <GarminWatchSimulator />
+        </div>
       </div>
 
       {/* 3. Magic UI: Terminal */}
