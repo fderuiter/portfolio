@@ -3,9 +3,9 @@ import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { getPersonSchema } from "@/lib/seo";
-import { CommandPalette } from "@/components/CommandPalette";
 import { A11yProvider } from "@/components/providers/A11yProvider";
 import { Analytics } from "@vercel/analytics/next";
+import { SearchWrapper } from "@/components/SearchWrapper";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -81,7 +81,7 @@ export default function RootLayout({
           <Navbar />
           {children}
           <Analytics />
-          <CommandPalette />
+          <SearchWrapper />
         </A11yProvider>
       </body>
     </html>
