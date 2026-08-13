@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { getPersonSchema } from "@/lib/seo";
 import { A11yProvider } from "@/components/providers/A11yProvider";
+import { SearchProvider } from "@/components/providers/SearchProvider";
 import { Analytics } from "@vercel/analytics/next";
 import { SearchWrapper } from "@/components/SearchWrapper";
 
@@ -77,12 +78,14 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-zinc-950 text-foreground antialiased">
-        <A11yProvider>
-          <Navbar />
-          {children}
-          <Analytics />
-          <SearchWrapper />
-        </A11yProvider>
+        <SearchProvider>
+          <A11yProvider>
+            <Navbar />
+            {children}
+            <Analytics />
+            <SearchWrapper />
+          </A11yProvider>
+        </SearchProvider>
       </body>
     </html>
   );
