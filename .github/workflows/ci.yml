@@ -24,8 +24,23 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Install Playwright Browsers
+      - name: Cache Playwright Browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ github.head_ref || github.ref_name }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ github.head_ref || github.ref_name }}-${{ hashFiles('package-lock.json') }}
+            playwright-main-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright Browsers with Dependencies (Cache Miss)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps
+
+      - name: Install Playwright Dependencies Only (Cache Hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps
 
       - name: Generate Theme and Prisma Schema (Pre-build steps)
         run: |
@@ -36,6 +51,15 @@ jobs:
         run: |
           tsc --noEmit
           npm run lint
+
+      - name: Next.js Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.next/cache
+          key: nextjs-${{ github.head_ref || github.ref_name }}-${{ hashFiles('package-lock.json') }}-${{ github.sha }}
+          restore-keys: |
+            nextjs-${{ github.head_ref || github.ref_name }}-${{ hashFiles('package-lock.json') }}-
+            nextjs-main-${{ hashFiles('package-lock.json') }}-
 
       - name: Build Production
         run: npx next build
