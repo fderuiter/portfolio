@@ -5,6 +5,7 @@ import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
 import { IconTerminal, IconCornerDownLeft, IconCircle } from "@tabler/icons-react";
 import { usePersistentState } from "@/hooks/usePersistentState";
+import { useAnnouncer } from "@/components/providers/A11yProvider";
 
 interface LogItem {
   id: string;
@@ -105,6 +106,7 @@ function generateLogId(): string {
 }
 
 export const SandboxTerminal: React.FC = () => {
+  const { announce } = useAnnouncer();
   const [input, setInput] = useState("");
   const [logs, setLogs] = useState<LogItem[]>([
     {
@@ -147,6 +149,7 @@ export const SandboxTerminal: React.FC = () => {
     });
     setHistoryIndex(-1);
     setIsExecuting(true);
+    announce("Command execution started", "polite");
 
     // Simulated short response lag for realism
     setTimeout(() => {
@@ -155,6 +158,7 @@ export const SandboxTerminal: React.FC = () => {
 
       if (trimmed === "clear") {
         setLogs([]);
+        announce("Console cleared", "polite");
         return;
       }
 
@@ -172,6 +176,7 @@ export const SandboxTerminal: React.FC = () => {
               `  help                                   -> View available command registry`,
           },
         ]);
+        announce("Help menu loaded displaying available SDK commands.", "polite");
         return;
       }
 
@@ -186,6 +191,15 @@ export const SandboxTerminal: React.FC = () => {
             jsonPayload: match.payload,
           },
         ]);
+        if (trimmed === "imednet studies list") {
+          announce("Command execution completed. Returned active clinical trials: BRIGHT-01, ONCO-2026, and CARDIO-REF.", "polite");
+        } else if (trimmed === "imednet subjects get --id 123") {
+          announce("Command execution completed. Returned clinical records and HIPAA-anonymized demographics for subject 123.", "polite");
+        } else if (trimmed === "imednet records search --study BRIGHT-01") {
+          announce("Command execution completed. Returned 3 vital sign records matching study BRIGHT-01.", "polite");
+        } else {
+          announce("Command execution completed. Standard JSON payload results rendered.", "polite");
+        }
       } else {
         setLogs((prev) => [
           ...prev,
@@ -195,31 +209,34 @@ export const SandboxTerminal: React.FC = () => {
             text: `Command not found: '${trimmed}'. Type 'help' to review supported registry entries.`,
           },
         ]);
+        announce(`Command execution failed. Unknown command: '${trimmed}'.`, "polite");
       }
     }, 450);
   };
 
-  // Handle key triggers (Enter, Up, Down, Tab)
+  // Handle key triggers (Enter, Up, Down, Tab, Escape)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       executeCommand(input);
     } else if (e.key === "Tab") {
-      e.preventDefault();
       const trimmed = input.trim().toLowerCase();
-      if (!trimmed) return;
+      if (trimmed) {
+        const VALID_COMMANDS = [
+          "imednet studies list",
+          "imednet subjects get --id 123",
+          "imednet records search --study BRIGHT-01",
+          "clear",
+          "help"
+        ];
 
-      const VALID_COMMANDS = [
-        "imednet studies list",
-        "imednet subjects get --id 123",
-        "imednet records search --study BRIGHT-01",
-        "clear",
-        "help"
-      ];
-
-      const matched = VALID_COMMANDS.find((c) => c.toLowerCase().startsWith(trimmed));
-      if (matched) {
-        setInput(matched);
+        const matched = VALID_COMMANDS.find((c) => c.toLowerCase().startsWith(trimmed));
+        if (matched) {
+          e.preventDefault();
+          setInput(matched);
+        }
       }
+    } else if (e.key === "Escape") {
+      inputRef.current?.blur();
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       if (commandHistory.length === 0) return;
@@ -248,7 +265,10 @@ export const SandboxTerminal: React.FC = () => {
       const trimmed = valStr.trim();
       if (trimmed === '"[VERIFY_SECURITY_LOGS]"') {
         return (
-          <a href="/transparency" className="text-brand-cyan underline font-bold cursor-pointer hover:text-brand-cyan/80">
+          <a
+            href="/transparency"
+            className="text-brand-cyan underline font-bold cursor-pointer hover:text-brand-cyan/80 focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 focus:ring-offset-1 focus:ring-offset-zinc-950 rounded"
+          >
             [LIVE_VERIFICATION_LINK]
           </a>
         );
@@ -311,6 +331,8 @@ export const SandboxTerminal: React.FC = () => {
 
       {/* Terminal Main Window Frame */}
       <div
+        role="region"
+        aria-label="Interactive Terminal Sandbox"
         onClick={handleTerminalClick}
         style={{ "--term-glow": `0 0 35px ${hexToRgba(designManifest.colors["brand-cyan"], 0.02)}` } as React.CSSProperties}
         className="w-full border border-zinc-900 bg-zinc-950/80 rounded-2xl overflow-hidden shadow-[var(--term-glow)] relative backdrop-blur-md cursor-text"
@@ -329,7 +351,11 @@ export const SandboxTerminal: React.FC = () => {
         </div>
 
         {/* Console logs output viewport */}
-        <div className="p-5 font-mono text-[11px] leading-relaxed max-h-[380px] overflow-y-auto space-y-4 text-zinc-300">
+        <div
+          role="log"
+          aria-label="Terminal output log"
+          className="p-5 font-mono text-[11px] leading-relaxed max-h-[380px] overflow-y-auto space-y-4 text-zinc-300"
+        >
           {logs.map((log) => (
             <div key={log.id} className="space-y-1">
               {log.type === "command" && (
