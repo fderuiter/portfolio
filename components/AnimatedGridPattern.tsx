@@ -5,11 +5,11 @@ import {
   useCallback,
   useEffect,
   useId,
-  useRef,
   useState,
   type ComponentPropsWithoutRef,
 } from "react"
 import { motion, useReducedMotion } from "framer-motion"
+import { useResizeObserver } from "@/hooks/useResizeObserver"
 
 import { cn } from "@/lib/utils"
 
@@ -46,8 +46,20 @@ export function AnimatedGridPattern({
 }: AnimatedGridPatternProps) {
   const id = useId()
   const shouldReduceMotion = useReducedMotion()
-  const containerRef = useRef<SVGSVGElement | null>(null)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
+  const containerRef = useResizeObserver<SVGSVGElement>((entry) => {
+    setDimensions((currentDimensions) => {
+      const nextWidth = entry.contentRect.width
+      const nextHeight = entry.contentRect.height
+      if (
+        currentDimensions.width === nextWidth &&
+        currentDimensions.height === nextHeight
+      ) {
+        return currentDimensions
+      }
+      return { width: nextWidth, height: nextHeight }
+    })
+  })
   const [squares, setSquares] = useState<Array<Square>>([])
 
   const getPos = useCallback((): [number, number] => {
@@ -94,36 +106,7 @@ export function AnimatedGridPattern({
     }
   }, [dimensions.width, dimensions.height, generateSquares, numSquares])
 
-  useEffect(() => {
-    const element = containerRef.current
-    let resizeObserver: ResizeObserver | null = null
-
-    if (element) {
-      resizeObserver = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          setDimensions((currentDimensions) => {
-            const nextWidth = entry.contentRect.width
-            const nextHeight = entry.contentRect.height
-            if (
-              currentDimensions.width === nextWidth &&
-              currentDimensions.height === nextHeight
-            ) {
-              return currentDimensions
-            }
-            return { width: nextWidth, height: nextHeight }
-          })
-        }
-      })
-
-      resizeObserver.observe(element)
-    }
-
-    return () => {
-      if (resizeObserver) {
-        resizeObserver.disconnect()
-      }
-    }
-  }, [])
+  // Managed by unified useResizeObserver hook
 
   return (
     <svg
