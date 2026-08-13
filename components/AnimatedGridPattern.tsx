@@ -9,7 +9,7 @@ import {
   useState,
   type ComponentPropsWithoutRef,
 } from "react"
-import { motion } from "framer-motion"
+import { motion, useReducedMotion } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 
@@ -45,6 +45,7 @@ export function AnimatedGridPattern({
   ...props
 }: AnimatedGridPatternProps) {
   const id = useId()
+  const shouldReduceMotion = useReducedMotion()
   const containerRef = useRef<SVGSVGElement | null>(null)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
   const [squares, setSquares] = useState<Array<Square>>([])
@@ -154,17 +155,18 @@ export function AnimatedGridPattern({
       <svg x={x} y={y} className="overflow-visible">
         {squares.map(({ pos: [squareX, squareY], id, iteration }, index) => (
           <motion.rect
-            initial={{ opacity: 0 }}
-            animate={{ opacity: maxOpacity }}
-            transition={{
+            initial={shouldReduceMotion ? undefined : { opacity: 0 }}
+            animate={shouldReduceMotion ? undefined : { opacity: maxOpacity }}
+            transition={shouldReduceMotion ? undefined : {
               duration,
               repeat: 1,
               delay: index * 0.1,
               repeatType: "reverse",
               repeatDelay,
             }}
-            onAnimationComplete={() => updateSquarePosition(id)}
-            key={`${id}-${iteration}`}
+            onAnimationComplete={shouldReduceMotion ? undefined : () => updateSquarePosition(id)}
+            key={shouldReduceMotion ? `${id}` : `${id}-${iteration}`}
+            opacity={shouldReduceMotion ? maxOpacity : undefined}
             width={width - 1}
             height={height - 1}
             x={squareX * width + 1}
