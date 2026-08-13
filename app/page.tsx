@@ -132,7 +132,7 @@ export default async function WalkingSkeletonPage() {
           <h2 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan via-brand-blue to-neutral-200 tracking-tight text-center mb-4">
             Unified Engineering Showcase
           </h2>
-          <p className="text-xs font-mono text-muted tracking-widest uppercase mb-12">
+          <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-12">
             Verifiable Serverless Postgres Architecture
           </p>
 
@@ -210,7 +210,7 @@ export default async function WalkingSkeletonPage() {
           <h2 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-neutral-100 via-neutral-300 to-neutral-500 tracking-tight text-center mb-4">
             System Architect & Design Engineer
           </h2>
-          <p className="text-xs font-mono text-muted tracking-widest uppercase mb-16 text-center">
+          <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-16 text-center">
             Engineering High-Performance Technical Solutions
           </p>
           
@@ -222,7 +222,7 @@ export default async function WalkingSkeletonPage() {
           <h3 className="text-2xl font-extrabold text-neutral-100 tracking-tight text-center mb-4">
             Professional Experience Timeline
           </h3>
-          <p className="text-xs font-mono text-muted tracking-widest uppercase mb-16 text-center">
+          <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-16 text-center">
             A Chronological Evolution of{" "}
             <Tooltip text="Ensuring reliability for users so the platform never goes down when they need it most.">
               Systems Rigor
@@ -242,7 +242,7 @@ export default async function WalkingSkeletonPage() {
           <h2 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan to-brand-blue tracking-tight text-center mb-4">
             Get In Touch
           </h2>
-          <p className="text-xs font-mono text-muted tracking-widest uppercase mb-16 text-center">
+          <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-16 text-center">
             Let&apos;s Collaborate on Premium Engineering Projects
           </p>
           
@@ -257,7 +257,7 @@ export default async function WalkingSkeletonPage() {
                 ✉
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">Email Broadcast</span>
-              <span className="text-[10px] font-mono text-zinc-500">contact@fderuiter.com</span>
+              <span className="text-[10px] font-mono text-zinc-400">contact@fderuiter.com</span>
             </a>
             
             {/* GitHub Portal */}
@@ -272,7 +272,7 @@ export default async function WalkingSkeletonPage() {
                 🐙
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">GitHub Repos</span>
-              <span className="text-[10px] font-mono text-zinc-500">github.com/fderuiter</span>
+              <span className="text-[10px] font-mono text-zinc-400">github.com/fderuiter</span>
             </a>
 
             {/* LinkedIn Connection */}
@@ -287,11 +287,11 @@ export default async function WalkingSkeletonPage() {
                 in
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">LinkedIn Network</span>
-              <span className="text-[10px] font-mono text-zinc-500">Secure Profile Link</span>
+              <span className="text-[10px] font-mono text-zinc-400">Secure Profile Link</span>
             </a>
           </div>
           
-          <div className="mt-24 text-[10px] font-mono text-zinc-700 tracking-[0.25em] text-center select-none">
+          <div className="mt-24 text-[10px] font-mono text-zinc-400 tracking-[0.25em] text-center select-none">
             DESIGNED & DEVELOPED BY FREDERICK DE RUITER
           </div>
         </div>

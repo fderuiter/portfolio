@@ -218,7 +218,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
             aria-label="Spotlight command palette search"
             className="w-full bg-transparent text-sm text-neutral-100 placeholder-zinc-500 focus:outline-none font-sans"
           />
-          <span className="text-[9px] font-mono font-bold tracking-wider text-zinc-500 px-2.5 py-1 bg-zinc-950 border border-zinc-800 rounded-md select-none">
+          <span className="text-[9px] font-mono font-bold tracking-wider text-zinc-400 px-2.5 py-1 bg-zinc-950 border border-zinc-800 rounded-md select-none">
             ESC
           </span>
         </div>
@@ -226,7 +226,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         {/* Results List section */}
         <div
           id="palette-results-list"
-          role="listbox"
+          role={filteredItems.length > 0 ? "listbox" : undefined}
           aria-label="Search outcomes list"
           className="relative z-10 flex-1 max-h-[340px] overflow-y-auto p-2.5 space-y-1 scrollbar-none"
         >
@@ -278,7 +278,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
                   <div className="flex-1 min-w-0">
                     <div
                       className={`text-xs font-mono font-bold uppercase tracking-wider mb-0.5 transition-colors ${
-                        isActive ? "text-brand-cyan" : "text-zinc-500"
+                        isActive ? "text-brand-cyan" : "text-zinc-400"
                       }`}
                     >
                       {item.category === "case-study" ? "Case Study" : "Site Channel"}
@@ -290,14 +290,14 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
                     >
                       {item.title}
                     </div>
-                    <div className="text-[11px] text-zinc-500 truncate mt-0.5">
+                    <div className="text-[11px] text-zinc-400 truncate mt-0.5">
                       {item.subtitle}
                     </div>
                   </div>
 
                   {/* Right Enter Shortcut icon */}
                   {isActive && (
-                    <span className="text-[10px] font-mono text-zinc-500 flex items-center gap-1.5 animate-pulse flex-shrink-0 select-none">
+                    <span className="text-[10px] font-mono text-zinc-400 flex items-center gap-1.5 animate-pulse flex-shrink-0 select-none">
                       <span>Select</span>
                       <IconCornerDownLeft className="w-3.5 h-3.5" />
                     </span>
@@ -307,7 +307,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
             })
           ) : (
             <div className="py-12 text-center select-none">
-              <p className="text-sm text-zinc-500 italic">No outcomes match search query.</p>
+              <p className="text-sm text-zinc-400 italic">No outcomes match search query.</p>
               <p className="text-[10px] font-mono text-zinc-600 mt-1 uppercase tracking-widest">
                 Try searching other tags
               </p>
@@ -344,30 +344,6 @@ export const CommandPalette: React.FC = () => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
-
-  // 1. Keyboard Shortcut Listener (Cmd+K / Ctrl+K) site-wide
-  useEffect(() => {
-    if (!mounted) return;
-    const isWithinBoundary = (target: EventTarget | null) => {
-      if (target instanceof Element) {
-        return !!target.closest("[data-keyboard-boundary]");
-      }
-      return false;
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (isWithinBoundary(e.target)) {
-        return;
-      }
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        setIsOpen(!isOpen);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [mounted, isOpen, setIsOpen]);
 
   // Capture original focus state when the palette opens
   useEffect(() => {
