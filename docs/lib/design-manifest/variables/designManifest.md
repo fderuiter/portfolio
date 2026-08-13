@@ -171,7 +171,7 @@ Original CSS Variable: --layout-gap
 
 #### masonry.paddingWithoutStats
 
-> `readonly` **paddingWithoutStats**: `210` = `210`
+> `readonly` **paddingWithoutStats**: `254` = `254`
 
 Original CSS Variable: --layout-masonry-padding-without-stats
 

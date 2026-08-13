@@ -8,7 +8,7 @@
 
 > **calculateMasonryLayout**\<`T`\>(`containerWidth`, `filteredItems`, `preparedData`, `config`, `heightOverrides?`): `object`
 
-Defined in: [lib/masonry.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L29)
+Defined in: [lib/masonry.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L34)
 
 ## Type Parameters
 
