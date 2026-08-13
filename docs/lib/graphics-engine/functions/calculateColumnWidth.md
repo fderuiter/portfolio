@@ -8,7 +8,7 @@
 
 > **calculateColumnWidth**(`containerWidth`, `colCount`, `gap`): `number`
 
-Defined in: [lib/graphics-engine.ts:168](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L168)
+Defined in: [lib/graphics-engine.ts:171](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L171)
 
 Calculates individual column width in masonry layout.
 

@@ -8,7 +8,7 @@
 
 > **calculateColumnCount**(`containerWidth`, `breakpoints`, `cols`): `number`
 
-Defined in: [lib/graphics-engine.ts:152](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L152)
+Defined in: [lib/graphics-engine.ts:155](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L155)
 
 Calculates responsive column count based on container width and breakpoints.
 

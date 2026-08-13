@@ -7,7 +7,11 @@ import { A11yProvider } from "@/components/providers/A11yProvider";
 import { AudioProvider } from "@/components/providers/AudioProvider";
 import { SearchProvider } from "@/components/providers/SearchProvider";
 import { Analytics } from "@vercel/analytics/next";
-import { SearchWrapper } from "@/components/SearchWrapper";
+import dynamic from "next/dynamic";
+
+const SearchWrapper = dynamic(
+  () => import("@/components/SearchWrapper").then((mod) => mod.SearchWrapper)
+);
 
 const inter = Inter({
   variable: "--font-inter",
