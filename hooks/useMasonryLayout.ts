@@ -9,10 +9,10 @@ import {
   prepareRichInline, 
   type RichInlineLine,
 } from "@chenglou/pretext/rich-inline";
-import { LAYOUT_CONFIG } from "@/lib/layout-config";
+import { LAYOUT_CONFIG, resolveThemeFonts } from "@/lib/layout-config";
 import { GitHubStats } from "@/lib/github";
 import { calculateMasonryLayout, type PreparedData } from "@/lib/masonry";
-import { isBrowser, resolveFontFamily } from "@/lib/graphics-engine";
+import { isBrowser } from "@/lib/graphics-engine";
 
 export interface MasonryItem {
   id: string;
@@ -54,12 +54,7 @@ export function useMasonryLayout<T extends MasonryItem>(
   useLayoutEffect(() => {
     if (!isBrowser()) return;
 
-    const resolvedFontFamily = resolveFontFamily("--font-inter");
-
-    const baseFont = `400 ${LAYOUT_CONFIG.FONT_SIZE}px ${resolvedFontFamily}`;
-    const boldFont = `700 ${LAYOUT_CONFIG.FONT_SIZE}px ${resolvedFontFamily}`;
-    const italicFont = `italic 400 ${LAYOUT_CONFIG.FONT_SIZE}px ${resolvedFontFamily}`;
-    const codeFont = `500 ${LAYOUT_CONFIG.FONT_SIZE - 1}px monospace`;
+    const { baseFont, boldFont, italicFont, codeFont } = resolveThemeFonts(LAYOUT_CONFIG.FONT_SIZE, "--font-inter");
 
     const data: Record<string, PreparedData> = {};
     for (const study of allItems) {
