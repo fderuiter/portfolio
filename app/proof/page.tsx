@@ -68,6 +68,15 @@ export default function ProofWorkspacePage() {
   const [historyIdx, setHistoryIdx] = useState(-1);
   const [liveAnnouncement, setLiveAnnouncement] = useState("");
   
+  // Web Worker, Watchdog, Throttling States & Refs
+  const workerRef = useRef<Worker | null>(null);
+  const watchdogRef = useRef<NodeJS.Timeout | null>(null);
+  const pendingLogsRef = useRef<TerminalLog[]>([]);
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [simulationProgress, setSimulationProgress] = useState<{ step: number; total: number; log: string } | null>(null);
+  const nextIdRef = useRef(0);
+  const initWorkerRef = useRef<() => void>(() => {});
+  
   // Ref tracking for focus restoration
   const consoleInputRef = useRef<HTMLInputElement>(null);
   const toggleBtnRef = useRef<HTMLButtonElement>(null);
@@ -101,6 +110,147 @@ export default function ProofWorkspacePage() {
     });
   }, []);
   
+  // Helper to clear watchdog
+  const clearWatchdog = React.useCallback(() => {
+    if (watchdogRef.current) {
+      clearTimeout(watchdogRef.current);
+      watchdogRef.current = null;
+    }
+  }, []);
+
+  // Handle watchdog timeout termination and recovery
+  const handleWatchdogTimeout = React.useCallback(() => {
+    if (workerRef.current) {
+      workerRef.current.terminate();
+    }
+    initWorkerRef.current();
+    setIsSimulating(false);
+    setSimulationProgress(null);
+    clearWatchdog();
+
+    nextIdRef.current += 1;
+    const outputLogId = `out-timeout-${nextIdRef.current}`;
+    setConsoleLogs((prev) => [
+      ...prev,
+      {
+        id: outputLogId,
+        type: "error",
+        text: "Background calculation terminated by watchdog: execution exceeded 5-second limit (potential infinite loop detected)"
+      }
+    ]);
+    announceToScreenReader("Background calculation terminated by watchdog: execution exceeded 5-second limit.");
+  }, [clearWatchdog]);
+
+  // Helper to reset watchdog for another 5 seconds
+  const resetWatchdog = React.useCallback(() => {
+    clearWatchdog();
+    watchdogRef.current = setTimeout(() => {
+      handleWatchdogTimeout();
+    }, 5000);
+  }, [clearWatchdog, handleWatchdogTimeout]);
+
+  // Helper to lazily initialize/re-initialize the Web Worker
+  const initWorker = React.useCallback(() => {
+    if (typeof window !== "undefined") {
+      if (workerRef.current) {
+        workerRef.current.terminate();
+      }
+
+      // Next.js standard URL loader for Web Workers
+      const worker = new Worker(new URL("./proof-worker.ts", import.meta.url));
+
+      worker.onmessage = (event) => {
+        const message = event.data;
+        if (!message) return;
+
+        // Reset the watchdog timeout since the worker is active and responsive
+        resetWatchdog();
+
+        if (message.type === "progress") {
+          pendingLogsRef.current.push({
+            id: `sim-${Date.now()}-${Math.random()}`,
+            type: "output",
+            text: message.log
+          });
+          announceToScreenReader(`Simulation update: ${message.log}`);
+        } else if (message.type === "done") {
+          setIsSimulating(false);
+          setSimulationProgress(null);
+          clearWatchdog();
+
+          setConsoleLogs((prev) => [
+            ...prev,
+            {
+              id: `sim-done-${Date.now()}`,
+              type: "success",
+              text: `✔ Background Simulation completed successfully with ${message.stepsCompleted} steps.`
+            }
+          ]);
+          announceToScreenReader("Background proof simulation completed successfully.");
+        } else if (message.type === "error") {
+          setIsSimulating(false);
+          setSimulationProgress(null);
+          clearWatchdog();
+
+          setConsoleLogs((prev) => [
+            ...prev,
+            {
+              id: `sim-err-${Date.now()}`,
+              type: "error",
+              text: `Background Simulation error: ${message.message}`
+            }
+          ]);
+          announceToScreenReader(`Background proof simulation error: ${message.message}`);
+        }
+      };
+
+      workerRef.current = worker;
+    }
+  }, [clearWatchdog, resetWatchdog]);
+
+  // Synchronize initWorkerRef.current to point to the latest initWorker function
+  useEffect(() => {
+    initWorkerRef.current = initWorker;
+  }, [initWorker]);
+
+  // Setup/Teardown Web Worker and Batch Throttler
+  useEffect(() => {
+    initWorker();
+
+    // 100ms batch logs flush timer to maintain high-FPS UI performance
+    const flushInterval = setInterval(() => {
+      if (pendingLogsRef.current.length > 0) {
+        const logsToAppend = [...pendingLogsRef.current];
+        pendingLogsRef.current = [];
+
+        setConsoleLogs((prev) => [...prev, ...logsToAppend]);
+
+        // Extract latest step info for real-time progress metrics rendering
+        const stepLogs = logsToAppend.filter(
+          (log) => log.type === "output" && log.text.includes("[Step")
+        );
+        if (stepLogs.length > 0) {
+          const lastStepLog = stepLogs[stepLogs.length - 1];
+          const match = lastStepLog.text.match(/\[Step (\d+)\/(\d+)\] (.*)/);
+          if (match) {
+            const step = parseInt(match[1], 10);
+            const total = parseInt(match[2], 10);
+            const textLog = match[3];
+            setSimulationProgress({ step, total, log: textLog });
+          }
+        }
+      }
+    }, 100);
+
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.terminate();
+      }
+      clearInterval(flushInterval);
+      clearWatchdog();
+    };
+  }, [initWorker, clearWatchdog]);
+
   // Auto-scroll terminal logs
   useEffect(() => {
     terminalLogsEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -149,10 +299,11 @@ export default function ProofWorkspacePage() {
         "  connect <node1> <node2>    - Connect source node to target node\n" +
         "  disconnect <node1> <node2> - Remove connection between two nodes\n" +
         "  list                       - List all active logic nodes & their connections\n" +
+        "  simulate [normal|loop]     - Run background tactic simulation (normal/loop)\n" +
         "  clear                      - Clear the console logs\n" +
         "  help                       - Show this help dialogue";
       setConsoleLogs((prev) => [...prev, { id: outputLogId, type: "info", text: helpText }]);
-      announceToScreenReader("Help menu printed. Listing available commands: connect, disconnect, list, clear, and help.");
+      announceToScreenReader("Help menu printed. Listing available commands: connect, disconnect, list, simulate, clear, and help.");
       return;
     }
 
@@ -297,6 +448,83 @@ export default function ProofWorkspacePage() {
       return;
     }
 
+    if (op === "simulate") {
+      const subOp = tokens[1]?.toLowerCase() || "normal";
+      
+      if (subOp !== "normal" && subOp !== "loop") {
+        setConsoleLogs((prev) => [
+          ...prev,
+          {
+            id: outputLogId,
+            type: "error",
+            text: `Syntax Error: Unknown simulation type '${tokens[1]}'. Supported types: 'normal', 'loop'.`
+          }
+        ]);
+        announceToScreenReader(`Syntax error: Unknown simulation type '${tokens[1]}'.`);
+        return;
+      }
+
+      if (isSimulating) {
+        setConsoleLogs((prev) => [
+          ...prev,
+          {
+            id: outputLogId,
+            type: "error",
+            text: "Simulation Error: A tactic simulation is already active in the background."
+          }
+        ]);
+        announceToScreenReader("A tactic simulation is already active.");
+        return;
+      }
+
+      // Initialize state
+      setIsSimulating(true);
+      if (subOp === "normal") {
+        setSimulationProgress({ step: 0, total: 10, log: "Initializing background tactic simulation..." });
+        setConsoleLogs((prev) => [
+          ...prev,
+          {
+            id: outputLogId,
+            type: "info",
+            text: "Starting standard tactic simulation on background thread..."
+          }
+        ]);
+        announceToScreenReader("Starting standard tactic simulation on background thread.");
+      } else {
+        setSimulationProgress({ step: 0, total: 1, log: "Starting loop simulation (watchdog test)..." });
+        setConsoleLogs((prev) => [
+          ...prev,
+          {
+            id: outputLogId,
+            type: "info",
+            text: "Starting loop simulation on background thread. Watchdog timer armed (5s)..."
+          }
+        ]);
+        announceToScreenReader("Starting loop simulation. Watchdog timer armed.");
+      }
+
+      // Arm watchdog timer for 5 seconds
+      resetWatchdog();
+
+      // Trigger simulation in the worker
+      if (workerRef.current) {
+        workerRef.current.postMessage({
+          type: "START_SIMULATION",
+          mode: subOp as "normal" | "loop"
+        });
+      } else {
+        // Fallback in case worker is somehow uninitialized
+        initWorker();
+        setTimeout(() => {
+          workerRef.current?.postMessage({
+            type: "START_SIMULATION",
+            mode: subOp as "normal" | "loop"
+          });
+        }, 50);
+      }
+      return;
+    }
+
     // Command unrecognized
     setConsoleLogs((prev) => [
       ...prev,
@@ -387,6 +615,40 @@ export default function ProofWorkspacePage() {
             role="region"
             aria-label="Logic proof canvas editor. Keyboard users can use the command console on the right side to build edges."
           >
+            {/* Simulation Progress Widget */}
+            {isSimulating && simulationProgress && (
+              <div className="absolute top-4 left-4 right-4 bg-zinc-950/95 border border-brand-cyan/30 rounded-xl p-4 flex flex-col gap-3 shadow-lg shadow-brand-cyan/5 z-20 animate-in fade-in slide-in-from-top-4 duration-300">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-brand-cyan animate-ping"></span>
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                      Background Tactic Simulation Running...
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
+                    THREAD: WEB WORKER (60FPS UI SAFE)
+                  </span>
+                </div>
+                
+                {/* Progress bar */}
+                <div className="w-full bg-zinc-900 h-2 rounded-full overflow-hidden border border-zinc-800">
+                  <div 
+                    className="bg-brand-cyan h-full rounded-full transition-all duration-300" 
+                    style={{ width: `${(simulationProgress.step / simulationProgress.total) * 100}%` }}
+                  />
+                </div>
+
+                <div className="flex justify-between items-center text-[10px] font-mono">
+                  <span className="text-zinc-400 truncate max-w-[70%]">
+                    {simulationProgress.log}
+                  </span>
+                  <span className="text-brand-cyan font-bold">
+                    STEP {simulationProgress.step} / {simulationProgress.total}
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* SVG Connecting Edges Layer */}
             <svg className="absolute inset-0 w-full h-full pointer-events-none select-none z-0">
               <defs>
