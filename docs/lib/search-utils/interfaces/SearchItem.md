@@ -6,7 +6,7 @@
 
 # Interface: SearchItem
 
-Defined in: [lib/search-utils.ts:1](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/search-utils.ts#L1)
+Defined in: [lib/search-utils.ts:1](https://github.com/fderuiter/portfolio/blob/main/lib/search-utils.ts#L1)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/search-utils.ts:1](https://github.com/fderuiter/portfolio/blob/
 
 > **id**: `string`
 
-Defined in: [lib/search-utils.ts:2](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/search-utils.ts#L2)
+Defined in: [lib/search-utils.ts:2](https://github.com/fderuiter/portfolio/blob/main/lib/search-utils.ts#L2)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/search-utils.ts:2](https://github.com/fderuiter/portfolio/blob/
 
 > **subtitle**: `string`
 
-Defined in: [lib/search-utils.ts:4](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/search-utils.ts#L4)
+Defined in: [lib/search-utils.ts:4](https://github.com/fderuiter/portfolio/blob/main/lib/search-utils.ts#L4)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [lib/search-utils.ts:4](https://github.com/fderuiter/portfolio/blob/
 
 > **title**: `string`
 
-Defined in: [lib/search-utils.ts:3](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/search-utils.ts#L3)
+Defined in: [lib/search-utils.ts:3](https://github.com/fderuiter/portfolio/blob/main/lib/search-utils.ts#L3)

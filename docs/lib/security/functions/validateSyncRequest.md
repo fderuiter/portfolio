@@ -8,7 +8,7 @@
 
 > **validateSyncRequest**(`req`): `object`
 
-Defined in: [lib/security.ts:24](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/security.ts#L24)
+Defined in: [lib/security.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/security.ts#L24)
 
 Validates the request credentials using the configured environment secret.
 - In staging/production (non-development), if the secret is missing, it fails closed (rejects request).

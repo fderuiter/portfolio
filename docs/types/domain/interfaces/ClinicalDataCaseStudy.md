@@ -6,7 +6,7 @@
 
 # Interface: ClinicalDataCaseStudy
 
-Defined in: [types/domain.ts:17](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/types/domain.ts#L17)
+Defined in: [types/domain.ts:17](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L17)
 
 ## Extends
 
@@ -18,7 +18,7 @@ Defined in: [types/domain.ts:17](https://github.com/fderuiter/portfolio/blob/e91
 
 > **architectural\_narrative**: `string`
 
-Defined in: [types/domain.ts:8](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/types/domain.ts#L8)
+Defined in: [types/domain.ts:8](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L8)
 
 #### Inherited from
 
@@ -30,7 +30,7 @@ Defined in: [types/domain.ts:8](https://github.com/fderuiter/portfolio/blob/e912
 
 > **created\_at**: `Date`
 
-Defined in: [types/domain.ts:12](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/types/domain.ts#L12)
+Defined in: [types/domain.ts:12](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L12)
 
 #### Inherited from
 
@@ -42,7 +42,7 @@ Defined in: [types/domain.ts:12](https://github.com/fderuiter/portfolio/blob/e91
 
 > **editorial\_content**: `string`
 
-Defined in: [types/domain.ts:7](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/types/domain.ts#L7)
+Defined in: [types/domain.ts:7](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L7)
 
 #### Inherited from
 
@@ -54,7 +54,7 @@ Defined in: [types/domain.ts:7](https://github.com/fderuiter/portfolio/blob/e912
 
 > `optional` **github\_url?**: `string` \| `null`
 
-Defined in: [types/domain.ts:6](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/types/domain.ts#L6)
+Defined in: [types/domain.ts:6](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L6)
 
 #### Inherited from
 
@@ -66,7 +66,7 @@ Defined in: [types/domain.ts:6](https://github.com/fderuiter/portfolio/blob/e912
 
 > **id**: `string`
 
-Defined in: [types/domain.ts:2](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/types/domain.ts#L2)
+Defined in: [types/domain.ts:2](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L2)
 
 #### Inherited from
 
@@ -78,7 +78,7 @@ Defined in: [types/domain.ts:2](https://github.com/fderuiter/portfolio/blob/e912
 
 > **parsing\_mechanisms**: `"SAX_STREAMING"` \| `"DOM_PARSING"`
 
-Defined in: [types/domain.ts:19](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/types/domain.ts#L19)
+Defined in: [types/domain.ts:19](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L19)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [types/domain.ts:19](https://github.com/fderuiter/portfolio/blob/e91
 
 > **primary\_language**: `string`
 
-Defined in: [types/domain.ts:5](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/types/domain.ts#L5)
+Defined in: [types/domain.ts:5](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L5)
 
 #### Inherited from
 
@@ -98,7 +98,7 @@ Defined in: [types/domain.ts:5](https://github.com/fderuiter/portfolio/blob/e912
 
 > **published**: `boolean`
 
-Defined in: [types/domain.ts:9](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/types/domain.ts#L9)
+Defined in: [types/domain.ts:9](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L9)
 
 #### Inherited from
 
@@ -110,7 +110,7 @@ Defined in: [types/domain.ts:9](https://github.com/fderuiter/portfolio/blob/e912
 
 > **regulatory\_targets**: (`"FDA"` \| `"PMDA"` \| `"EMA"`)[]
 
-Defined in: [types/domain.ts:20](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/types/domain.ts#L20)
+Defined in: [types/domain.ts:20](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L20)
 
 ***
 
@@ -118,7 +118,7 @@ Defined in: [types/domain.ts:20](https://github.com/fderuiter/portfolio/blob/e91
 
 > **simulated\_telemetry**: `boolean`
 
-Defined in: [types/domain.ts:10](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/types/domain.ts#L10)
+Defined in: [types/domain.ts:10](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L10)
 
 #### Inherited from
 
@@ -130,7 +130,7 @@ Defined in: [types/domain.ts:10](https://github.com/fderuiter/portfolio/blob/e91
 
 > **slug**: `string`
 
-Defined in: [types/domain.ts:3](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/types/domain.ts#L3)
+Defined in: [types/domain.ts:3](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L3)
 
 #### Inherited from
 
@@ -142,7 +142,7 @@ Defined in: [types/domain.ts:3](https://github.com/fderuiter/portfolio/blob/e912
 
 > **standards\_validated**: (`"CDISC_ODM"` \| `"CDISC_SDTM"`)[]
 
-Defined in: [types/domain.ts:18](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/types/domain.ts#L18)
+Defined in: [types/domain.ts:18](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L18)
 
 ***
 
@@ -150,7 +150,7 @@ Defined in: [types/domain.ts:18](https://github.com/fderuiter/portfolio/blob/e91
 
 > **tags**: `string`
 
-Defined in: [types/domain.ts:11](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/types/domain.ts#L11)
+Defined in: [types/domain.ts:11](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L11)
 
 #### Inherited from
 
@@ -162,7 +162,7 @@ Defined in: [types/domain.ts:11](https://github.com/fderuiter/portfolio/blob/e91
 
 > **title**: `string`
 
-Defined in: [types/domain.ts:4](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/types/domain.ts#L4)
+Defined in: [types/domain.ts:4](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L4)
 
 #### Inherited from
 
@@ -174,7 +174,7 @@ Defined in: [types/domain.ts:4](https://github.com/fderuiter/portfolio/blob/e912
 
 > **updated\_at**: `Date`
 
-Defined in: [types/domain.ts:13](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/types/domain.ts#L13)
+Defined in: [types/domain.ts:13](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L13)
 
 #### Inherited from
 

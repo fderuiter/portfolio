@@ -6,7 +6,7 @@
 
 # Interface: Edge
 
-Defined in: [lib/proof-utils.ts:5](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/proof-utils.ts#L5)
+Defined in: [lib/proof-utils.ts:5](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L5)
 
 Logic Proof Workspace & Terminal Core Business Logic Utilities
 
@@ -16,7 +16,7 @@ Logic Proof Workspace & Terminal Core Business Logic Utilities
 
 > **source**: `string`
 
-Defined in: [lib/proof-utils.ts:6](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/proof-utils.ts#L6)
+Defined in: [lib/proof-utils.ts:6](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L6)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [lib/proof-utils.ts:6](https://github.com/fderuiter/portfolio/blob/e
 
 > **target**: `string`
 
-Defined in: [lib/proof-utils.ts:7](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/proof-utils.ts#L7)
+Defined in: [lib/proof-utils.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L7)

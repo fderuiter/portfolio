@@ -6,7 +6,7 @@
 
 # Interface: ScanMatch
 
-Defined in: [lib/validation-scanner.ts:3](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/validation-scanner.ts#L3)
+Defined in: [lib/validation-scanner.ts:3](https://github.com/fderuiter/portfolio/blob/main/lib/validation-scanner.ts#L3)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/validation-scanner.ts:3](https://github.com/fderuiter/portfolio
 
 > **category**: `string`
 
-Defined in: [lib/validation-scanner.ts:5](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/validation-scanner.ts#L5)
+Defined in: [lib/validation-scanner.ts:5](https://github.com/fderuiter/portfolio/blob/main/lib/validation-scanner.ts#L5)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/validation-scanner.ts:5](https://github.com/fderuiter/portfolio
 
 > **lineContent**: `string`
 
-Defined in: [lib/validation-scanner.ts:7](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/validation-scanner.ts#L7)
+Defined in: [lib/validation-scanner.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/validation-scanner.ts#L7)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/validation-scanner.ts:7](https://github.com/fderuiter/portfolio
 
 > **lineNumber**: `number`
 
-Defined in: [lib/validation-scanner.ts:4](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/validation-scanner.ts#L4)
+Defined in: [lib/validation-scanner.ts:4](https://github.com/fderuiter/portfolio/blob/main/lib/validation-scanner.ts#L4)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/validation-scanner.ts:4](https://github.com/fderuiter/portfolio
 
 > **matchedText**: `string`
 
-Defined in: [lib/validation-scanner.ts:6](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/validation-scanner.ts#L6)
+Defined in: [lib/validation-scanner.ts:6](https://github.com/fderuiter/portfolio/blob/main/lib/validation-scanner.ts#L6)

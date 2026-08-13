@@ -6,7 +6,7 @@
 
 # Interface: GitHubCommitHistory
 
-Defined in: [types/domain.ts:42](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/types/domain.ts#L42)
+Defined in: [types/domain.ts:42](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L42)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [types/domain.ts:42](https://github.com/fderuiter/portfolio/blob/e91
 
 > **commits**: [`GitHubCommit`](GitHubCommit.md)[]
 
-Defined in: [types/domain.ts:43](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/types/domain.ts#L43)
+Defined in: [types/domain.ts:43](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L43)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [types/domain.ts:43](https://github.com/fderuiter/portfolio/blob/e91
 
 > **lastUpdated**: `string`
 
-Defined in: [types/domain.ts:45](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/types/domain.ts#L45)
+Defined in: [types/domain.ts:45](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L45)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [types/domain.ts:45](https://github.com/fderuiter/portfolio/blob/e91
 
 > **totalCommits**: `number`
 
-Defined in: [types/domain.ts:44](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/types/domain.ts#L44)
+Defined in: [types/domain.ts:44](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L44)

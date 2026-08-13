@@ -8,7 +8,7 @@
 
 > **useConsoleArt**(): `void`
 
-Defined in: [hooks/useConsoleArt.ts:11](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/hooks/useConsoleArt.ts#L11)
+Defined in: [hooks/useConsoleArt.ts:11](https://github.com/fderuiter/portfolio/blob/main/hooks/useConsoleArt.ts#L11)
 
 Custom hook that asynchronously fetches a static ASCII art asset 
 and prints it in the browser console when the client is idle.

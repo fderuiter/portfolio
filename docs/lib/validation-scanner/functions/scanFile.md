@@ -8,7 +8,7 @@
 
 > **scanFile**(`filePath`): [`ScanMatch`](../interfaces/ScanMatch.md)[]
 
-Defined in: [lib/validation-scanner.ts:76](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/validation-scanner.ts#L76)
+Defined in: [lib/validation-scanner.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/validation-scanner.ts#L76)
 
 Scans a file by reading its contents and checking line-by-line.
 

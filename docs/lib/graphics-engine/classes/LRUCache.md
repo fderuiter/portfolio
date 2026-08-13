@@ -6,7 +6,7 @@
 
 # Class: LRUCache\<K, V\>
 
-Defined in: [lib/graphics-engine.ts:38](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L38)
+Defined in: [lib/graphics-engine.ts:38](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L38)
 
 ## Type Parameters
 
@@ -24,7 +24,7 @@ Defined in: [lib/graphics-engine.ts:38](https://github.com/fderuiter/portfolio/b
 
 > **new LRUCache**\<`K`, `V`\>(`capacity`): `LRUCache`\<`K`, `V`\>
 
-Defined in: [lib/graphics-engine.ts:40](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L40)
+Defined in: [lib/graphics-engine.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L40)
 
 #### Parameters
 
@@ -42,7 +42,7 @@ Defined in: [lib/graphics-engine.ts:40](https://github.com/fderuiter/portfolio/b
 
 > **get**(`key`): `V` \| `undefined`
 
-Defined in: [lib/graphics-engine.ts:41](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L41)
+Defined in: [lib/graphics-engine.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L41)
 
 #### Parameters
 
@@ -60,7 +60,7 @@ Defined in: [lib/graphics-engine.ts:41](https://github.com/fderuiter/portfolio/b
 
 > **set**(`key`, `value`): `void`
 
-Defined in: [lib/graphics-engine.ts:48](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L48)
+Defined in: [lib/graphics-engine.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L48)
 
 #### Parameters
 

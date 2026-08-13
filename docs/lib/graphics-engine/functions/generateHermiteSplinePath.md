@@ -8,7 +8,7 @@
 
 > **generateHermiteSplinePath**(`points`, `heightForArea?`): `object`
 
-Defined in: [lib/graphics-engine.ts:270](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L270)
+Defined in: [lib/graphics-engine.ts:270](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L270)
 
 Computes cubic Hermite spline paths (Catmull-Rom style tangents) connecting a series of points.
 This generates smooth organic curves by calculating tangents at each point.

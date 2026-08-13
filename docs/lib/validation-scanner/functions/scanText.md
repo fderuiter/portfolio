@@ -8,7 +8,7 @@
 
 > **scanText**(`text`): [`ScanMatch`](../interfaces/ScanMatch.md)[]
 
-Defined in: [lib/validation-scanner.ts:42](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/validation-scanner.ts#L42)
+Defined in: [lib/validation-scanner.ts:42](https://github.com/fderuiter/portfolio/blob/main/lib/validation-scanner.ts#L42)
 
 Scans a given string for sensitive credential patterns.
 

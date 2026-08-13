@@ -8,7 +8,7 @@
 
 > **getClosestMatches**\<`T`\>(`path`, `items`): `T`[]
 
-Defined in: [lib/search-utils.ts:53](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/search-utils.ts#L53)
+Defined in: [lib/search-utils.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/search-utils.ts#L53)
 
 ## Type Parameters
 

@@ -6,7 +6,7 @@
 
 # Interface: Particle
 
-Defined in: [lib/graphics-engine.ts:20](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L20)
+Defined in: [lib/graphics-engine.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L20)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/graphics-engine.ts:20](https://github.com/fderuiter/portfolio/b
 
 > **directionX**: `number`
 
-Defined in: [lib/graphics-engine.ts:24](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L24)
+Defined in: [lib/graphics-engine.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L24)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/graphics-engine.ts:24](https://github.com/fderuiter/portfolio/b
 
 > **directionY**: `number`
 
-Defined in: [lib/graphics-engine.ts:25](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L25)
+Defined in: [lib/graphics-engine.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L25)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/graphics-engine.ts:25](https://github.com/fderuiter/portfolio/b
 
 > **duration**: `number`
 
-Defined in: [lib/graphics-engine.ts:26](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L26)
+Defined in: [lib/graphics-engine.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L26)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/graphics-engine.ts:26](https://github.com/fderuiter/portfolio/b
 
 > **id**: `number`
 
-Defined in: [lib/graphics-engine.ts:21](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L21)
+Defined in: [lib/graphics-engine.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L21)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/graphics-engine.ts:21](https://github.com/fderuiter/portfolio/b
 
 > **initialX**: `number`
 
-Defined in: [lib/graphics-engine.ts:22](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L22)
+Defined in: [lib/graphics-engine.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L22)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [lib/graphics-engine.ts:22](https://github.com/fderuiter/portfolio/b
 
 > **initialY**: `number`
 
-Defined in: [lib/graphics-engine.ts:23](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L23)
+Defined in: [lib/graphics-engine.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L23)

@@ -6,7 +6,7 @@
 
 # Interface: Rect
 
-Defined in: [lib/graphics-engine.ts:11](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L11)
+Defined in: [lib/graphics-engine.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L11)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/graphics-engine.ts:11](https://github.com/fderuiter/portfolio/b
 
 > **bottom**: `number`
 
-Defined in: [lib/graphics-engine.ts:13](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L13)
+Defined in: [lib/graphics-engine.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L13)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/graphics-engine.ts:13](https://github.com/fderuiter/portfolio/b
 
 > **height**: `number`
 
-Defined in: [lib/graphics-engine.ts:17](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L17)
+Defined in: [lib/graphics-engine.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L17)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/graphics-engine.ts:17](https://github.com/fderuiter/portfolio/b
 
 > **left**: `number`
 
-Defined in: [lib/graphics-engine.ts:14](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L14)
+Defined in: [lib/graphics-engine.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L14)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/graphics-engine.ts:14](https://github.com/fderuiter/portfolio/b
 
 > **right**: `number`
 
-Defined in: [lib/graphics-engine.ts:15](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L15)
+Defined in: [lib/graphics-engine.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L15)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/graphics-engine.ts:15](https://github.com/fderuiter/portfolio/b
 
 > **top**: `number`
 
-Defined in: [lib/graphics-engine.ts:12](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L12)
+Defined in: [lib/graphics-engine.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L12)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [lib/graphics-engine.ts:12](https://github.com/fderuiter/portfolio/b
 
 > **width**: `number`
 
-Defined in: [lib/graphics-engine.ts:16](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L16)
+Defined in: [lib/graphics-engine.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L16)
