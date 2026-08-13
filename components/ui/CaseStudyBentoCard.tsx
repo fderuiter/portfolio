@@ -180,7 +180,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             <span className={`px-2.5 py-0.5 text-[10px] font-mono font-bold border border-current/10 rounded-md ${langColor.bg} ${langColor.text}`}>
               {study.primary_language}
             </span>
-            <span className="text-[10px] font-mono text-zinc-600">
+            <span className="text-[10px] font-mono text-zinc-400">
               {study.slug.toUpperCase()}
             </span>
           </div>
@@ -196,7 +196,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
               className={`px-3 py-1 rounded-md font-bold transition-all duration-200 cursor-pointer ${
                 mode === "pitch"
                   ? "bg-zinc-900 text-brand-cyan shadow-sm"
-                  : "text-zinc-500 hover:text-zinc-300"
+                  : "text-zinc-400 hover:text-zinc-300"
               }`}
             >
               THE PITCH
@@ -206,7 +206,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
               className={`px-3 py-1 rounded-md font-bold transition-all duration-200 cursor-pointer ${
                 mode === "reality"
                   ? "bg-zinc-900 text-brand-cyan shadow-sm"
-                  : "text-zinc-500 hover:text-zinc-300"
+                  : "text-zinc-400 hover:text-zinc-300"
               }`}
             >
               THE REALITY
@@ -363,7 +363,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
         </div>
 
         {/* Dynamic Telemetry Metrics HUD */}
-        <div className="flex items-center gap-4 text-[10px] font-mono text-zinc-500 mt-2 mb-1 relative z-10 select-none">
+        <div className="flex items-center gap-4 text-[10px] font-mono text-zinc-400 mt-2 mb-1 relative z-10 select-none">
           <span className="flex items-center gap-1.5" title="Aggregate Page Views">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" aria-hidden="true" />
             <span className="sr-only" aria-live="polite">Live page views: {stats.views}</span>
@@ -392,7 +392,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             <span>Analyze Architecture</span>
             <IconChevronRight className="ml-1 w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" />
           </Link>
-          <div className="text-[9px] font-mono text-zinc-600">
+          <div className="text-[9px] font-mono text-zinc-400">
             {!isLayoutReady ? "MEASURING..." : `H: ${finalHeight}px`}
           </div>
         </div>

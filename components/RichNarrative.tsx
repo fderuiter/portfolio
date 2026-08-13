@@ -46,7 +46,9 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
   }, [html]);
 
   useEffect(() => {
-    setMounted(true);
+    requestAnimationFrame(() => {
+      setMounted(true);
+    });
   }, []);
 
   // On the client, parse the HTML and rehydrate it to React components once mounted
@@ -100,7 +102,7 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
           );
 
           // Build safe attributes
-          const props: Record<string, any> = { key: `${tagName}-${index}` };
+          const props: Record<string, string | null> = { key: `${tagName}-${index}` };
           if (element.hasAttribute("class")) {
             props.className = element.getAttribute("class");
           }

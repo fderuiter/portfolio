@@ -7,7 +7,7 @@ vi.mock("@sentry/nextjs", async (importOriginal) => {
   const original = await importOriginal<typeof import("@sentry/nextjs")>();
   return {
     ...original,
-    init: (config: any) => {
+    init: (config: Record<string, unknown>) => {
       mockInit(config);
       return original.init(config);
     },

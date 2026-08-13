@@ -41,11 +41,13 @@ export default function NotFound() {
 
   // Automatically center the cursor on first mount / resize
   useEffect(() => {
-    setIsMounted(true);
-    if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      setMousePos({ x: rect.width / 2, y: rect.height / 2 });
-    }
+    requestAnimationFrame(() => {
+      setIsMounted(true);
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setMousePos({ x: rect.width / 2, y: rect.height / 2 });
+      }
+    });
   }, []);
 
   // Fetch the active case studies client-side from /api/case-studies
