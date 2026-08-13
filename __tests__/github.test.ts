@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getGitHubStats, parseGitHubUrl } from "@/lib/github";
+import { getGitHubStats, parseGitHubUrl, getGitHubWorkflowRuns } from "@/lib/github";
 import { unstable_cache } from "next/cache";
 
 // Mock next/cache
@@ -121,6 +121,57 @@ describe("GitHub Telemetry & Caching Suite", () => {
       expect(stats?.stars).toBe(42);
       expect(stats?.forks).toBe(10);
       expect(stats?.languages[0].name).toBe("TypeScript");
+    });
+  });
+
+  describe("getGitHubWorkflowRuns", () => {
+    it("should fetch workflow runs correctly and map fields", async () => {
+      vi.spyOn(global, "fetch").mockImplementation(async () => {
+        return {
+          ok: true,
+          json: async () => ({
+            workflow_runs: [
+              {
+                id: 111,
+                name: "CI Pipeline",
+                status: "completed",
+                conclusion: "success",
+                html_url: "https://github.com/test-url",
+                created_at: "2026-08-13T12:00:00Z",
+                updated_at: "2026-08-13T12:01:00Z",
+                head_branch: "main",
+              }
+            ]
+          }),
+        } as Response;
+      });
+
+      const runs = await getGitHubWorkflowRuns("test-owner", "test-repo");
+
+      expect(runs).not.toBeNull();
+      expect(runs).toHaveLength(1);
+      expect(runs?.[0]).toEqual({
+        id: 111,
+        name: "CI Pipeline",
+        status: "completed",
+        conclusion: "success",
+        html_url: "https://github.com/test-url",
+        created_at: "2026-08-13T12:00:00Z",
+        updated_at: "2026-08-13T12:01:00Z",
+        head_branch: "main",
+      });
+    });
+
+    it("should return null gracefully on non-ok status from actions API", async () => {
+      vi.spyOn(global, "fetch").mockImplementation(async () => {
+        return {
+          ok: false,
+          status: 404,
+        } as Response;
+      });
+
+      const runs = await getGitHubWorkflowRuns("test-owner", "test-repo");
+      expect(runs).toBeNull();
     });
   });
 });

@@ -443,3 +443,92 @@ export function getSimulatedStats(language: string): GitHubStats {
     commitActivity,
   };
 }
+
+export interface GitHubWorkflowRun {
+  id: number;
+  name: string;
+  status: string;
+  conclusion: string | null;
+  html_url: string;
+  created_at: string;
+  updated_at: string;
+  head_branch: string;
+}
+
+interface RawWorkflowRun {
+  id: number;
+  name?: string;
+  status: string;
+  conclusion: string | null;
+  html_url: string;
+  created_at: string;
+  updated_at: string;
+  head_branch?: string;
+}
+
+async function fetchRawGitHubWorkflowRuns(owner: string, repo: string): Promise<GitHubWorkflowRun[] | null> {
+  const headers: HeadersInit = {
+    Accept: "application/vnd.github.v3+json",
+    "User-Agent": "portfolio-app",
+  };
+  
+  if (process.env.GITHUB_TOKEN) {
+    headers.Authorization = `token ${process.env.GITHUB_TOKEN}`;
+  }
+
+  try {
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/actions/runs?per_page=20`, {
+      headers,
+      next: { revalidate: 60 }
+    });
+
+    if (!res.ok) {
+      console.error(`GitHub Actions API returned status ${res.status} for ${owner}/${repo}`);
+      return null;
+    }
+
+    const data = await res.json();
+    if (data && Array.isArray(data.workflow_runs)) {
+      return data.workflow_runs.map((run: RawWorkflowRun) => ({
+        id: run.id,
+        name: run.name || "CI Pipeline",
+        status: run.status,
+        conclusion: run.conclusion,
+        html_url: run.html_url,
+        created_at: run.created_at,
+        updated_at: run.updated_at,
+        head_branch: run.head_branch || "main",
+      }));
+    }
+    return [];
+  } catch (err) {
+    console.error(`Failed to fetch workflow runs for ${owner}/${repo}:`, err);
+    return null;
+  }
+}
+
+const cachedGetGitHubWorkflowRuns = (owner: string, repo: string) => unstable_cache(
+  async () => {
+    const runs = await fetchRawGitHubWorkflowRuns(owner, repo);
+    if (runs === null) {
+      throw new Error("Failed to fetch raw workflow runs");
+    }
+    return runs;
+  },
+  ["github-repo-runs-cache", owner, repo],
+  { revalidate: 60, tags: ["github-runs"] }
+)();
+
+export async function getGitHubWorkflowRuns(owner: string, repo: string): Promise<GitHubWorkflowRun[] | null> {
+  try {
+    return await cachedGetGitHubWorkflowRuns(owner, repo);
+  } catch {
+    try {
+      return await fetchRawGitHubWorkflowRuns(owner, repo);
+    } catch (fallbackErr) {
+      console.error(`Failed to fetch raw GitHub workflow runs for ${owner}/${repo}:`, fallbackErr);
+      return null;
+    }
+  }
+}
+

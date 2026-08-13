@@ -11,11 +11,13 @@
 - [GitHubCommit](interfaces/GitHubCommit.md)
 - [GitHubLanguage](interfaces/GitHubLanguage.md)
 - [GitHubStats](interfaces/GitHubStats.md)
+- [GitHubWorkflowRun](interfaces/GitHubWorkflowRun.md)
 - [SimulatedTerminalLog](interfaces/SimulatedTerminalLog.md)
 
 ## Functions
 
 - [getGitHubStats](functions/getGitHubStats.md)
+- [getGitHubWorkflowRuns](functions/getGitHubWorkflowRuns.md)
 - [getSimulatedStats](functions/getSimulatedStats.md)
 - [getSimulatedTerminalCommand](functions/getSimulatedTerminalCommand.md)
 - [getSimulatedTerminalLogs](functions/getSimulatedTerminalLogs.md)

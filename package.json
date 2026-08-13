@@ -82,6 +82,9 @@
     "sharp",
     "unrs-resolver"
   ],
+  "overrides": {
+    "shell-quote": "^1.8.5"
+  },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
   }

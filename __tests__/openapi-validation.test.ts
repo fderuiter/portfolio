@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST as telemetryPOST } from "@/app/api/telemetry/route";
 import { GET as syncGET } from "@/app/api/telemetry/sync/route";
 import { GET as transparencyGET } from "@/app/api/transparency/logs/route";
+import * as githubLib from "@/lib/github";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 
@@ -169,6 +170,74 @@ describe("Declarative Zod Validation Endpoints", () => {
       const data = await res.json();
       expect(data.error).toBe("Validation failed");
       expect(data.details).toHaveLength(3);
+    });
+
+    it("returns dynamic workflow runs when GitHub Actions API is fully available", async () => {
+      vi.mocked(prisma.telemetryEvent.findMany).mockResolvedValue([]);
+      const spy = vi.spyOn(githubLib, "getGitHubWorkflowRuns").mockResolvedValue([
+        {
+          id: 555,
+          name: "CI Pipeline",
+          status: "completed",
+          conclusion: "success",
+          html_url: "https://github.com/fderuiter/portfolio/actions/runs/555",
+          created_at: "2026-08-13T10:00:00Z",
+          updated_at: "2026-08-13T10:01:30Z",
+          head_branch: "main",
+        }
+      ]);
+
+      const req = new NextRequest("http://localhost:3000/api/transparency/logs", {
+        method: "GET",
+      });
+
+      const res = await transparencyGET(req);
+      expect(res.status).toBe(200);
+
+      const logs = await res.json();
+      // Should contain 2 items representing the CI Pipeline (Reliability and Security)
+      expect(logs).toHaveLength(2);
+      
+      const reliabilityLog = logs.find((l: any) => l.category === "Reliability");
+      expect(reliabilityLog).toBeDefined();
+      expect(reliabilityLog.message).toContain("CI/CD automated build and deploy for main branch (Duration: 90s)");
+      expect(reliabilityLog.status).toBe("SUCCESS");
+      expect(reliabilityLog.link).toBe("https://github.com/fderuiter/portfolio/actions/runs/555");
+
+      const securityLog = logs.find((l: any) => l.category === "Security");
+      expect(securityLog).toBeDefined();
+      expect(securityLog.message).toContain("Automated dependency security audit completed. Zero critical vulnerabilities found.");
+      expect(securityLog.status).toBe("SUCCESS");
+
+      spy.mockRestore();
+    });
+
+    it("gracefully falls back to degraded mode when GitHub Actions API fails", async () => {
+      vi.mocked(prisma.telemetryEvent.findMany).mockResolvedValue([]);
+      const spy = vi.spyOn(githubLib, "getGitHubWorkflowRuns").mockResolvedValue(null);
+
+      const req = new NextRequest("http://localhost:3000/api/transparency/logs", {
+        method: "GET",
+      });
+
+      const res = await transparencyGET(req);
+      expect(res.status).toBe(200);
+
+      const logs = await res.json();
+      // Should contain 2 items representing the degraded fallback warning logs
+      expect(logs).toHaveLength(2);
+      
+      const reliabilityLog = logs.find((l: any) => l.category === "Reliability");
+      expect(reliabilityLog).toBeDefined();
+      expect(reliabilityLog.message).toContain("Real-time build and deploy telemetry feed is temporarily offline. (Degraded Mode)");
+      expect(reliabilityLog.status).toBe("INFO");
+
+      const securityLog = logs.find((l: any) => l.category === "Security");
+      expect(securityLog).toBeDefined();
+      expect(securityLog.message).toContain("Live security scan validation status is temporarily offline. (Degraded Mode)");
+      expect(securityLog.status).toBe("INFO");
+
+      spy.mockRestore();
     });
   });
 });

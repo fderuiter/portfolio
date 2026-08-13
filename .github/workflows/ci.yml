@@ -58,6 +58,10 @@ jobs:
           tsc --noEmit
           npm run lint
 
+      - name: Security Audit (Dependency Vulnerabilities)
+        id: security_audit
+        run: npm audit --audit-level=critical
+
       - name: Next.js Cache
         uses: actions/cache@v4
         with:
@@ -111,6 +115,14 @@ jobs:
           echo "| **Visual & Drift Guard** (Playwright) | ${{ steps.playwright.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Sub-pixel pixel matching & layout constant sync |" >> $GITHUB_STEP_SUMMARY
           echo "| **Accessibility Audits** (Playwright-Axe) | $ACC_STATUS | Automated WCAG compliance scans on interactive states |" >> $GITHUB_STEP_SUMMARY
           echo "| **Performance Gates** (Lighthouse) | ${{ steps.lighthouse.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Web Vitals & >95 Lighthouse score |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Security Audit** (npm audit) | ${{ steps.security_audit.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Native dependency vulnerability scans |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🛡️ Security Audit Summary" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.security_audit.outcome }}" = "success" ]; then
+            echo "✅ **Vulnerability Scan Passed**: No critical package vulnerabilities were found in dependencies." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Vulnerability Scan Failed**: Critical package vulnerabilities detected. Please run \`npm audit\` locally to inspect and fix." >> $GITHUB_STEP_SUMMARY
+          fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "*(Generated via automated unified CI pipeline)*" >> $GITHUB_STEP_SUMMARY
 
