@@ -24,6 +24,7 @@ const SEED_PAYLOADS = [
     published: true,
     simulated_telemetry: false,
     tags: "TypeScript, React, Flow, Schemas, AST, Node-RED",
+    classification: "mainstream",
     editorial_content: "A **reactive**, `visual graph editor` built in **TypeScript** and **React** that allows system architects to visually compose, validate, and compile complex `JSON Schema` structures in real time. Features highly responsive `node evaluation`, cyclical dependency detection, and live `code generation`.",
     architectural_narrative: `
 <h3>The Challenge</h3>
@@ -60,6 +61,7 @@ interface SchemaNode {
     published: true,
     simulated_telemetry: false,
     tags: "TypeScript, CDISC, ODM, SDTM, XML Parser, Clinical Trials, HIPAA",
+    classification: "mainstream",
     editorial_content: "An enterprise-grade **TypeScript** mapping pipeline that ingests clinical trial metadata in `CDISC Operational Data Model (ODM)` XML format, dynamically constructs `data schemas`, and transforms raw `Electronic Data Capture (EDC)` datasets into compliant **CDISC SDTM** domains.",
     architectural_narrative: `
 <h3>The Challenge</h3>
@@ -110,6 +112,7 @@ interface ODMClinicalData {
     published: true,
     simulated_telemetry: false,
     tags: "Python, SDK, iMednet, API Client, Clinical Trials, HIPAA, Clinical Data",
+    classification: "mainstream",
     editorial_content: "A **robust**, fully-typed `Python SDK` client for programmatic extraction and integration of clinical trial metadata and patient records from the `iMednet EDC` platform. Built for **biostatisticians** and **clinical data engineers**.",
     architectural_narrative: `
 <h3>The Challenge</h3>
@@ -149,6 +152,7 @@ class SubjectRecord(BaseModel):
     published: true,
     simulated_telemetry: true,
     tags: "Haskell, GHC, Compiler, AST, Static Analysis",
+    classification: "mainstream",
     editorial_content: "An advanced **Haskell** static analyzer and type inference engine that parses GHC ASTs, traces type flow, and detects compile-time architectural anti-patterns with near-instantaneous feedback loops.",
     architectural_narrative: `
 <h3>The Challenge</h3>
@@ -158,6 +162,80 @@ class SubjectRecord(BaseModel):
 <p>Aura uses GHC plugins to stream compilation ASTs and type constraints directly. In the dashboard, these constraints are modeled as a unified type flow graph, allowing real-time inspection of active monads, lazy evaluation spaces, and compiler optimizations.</p>
     `.trim(),
   },
+  {
+    slug: "laser-loon",
+    title: "Laser Loon: WebAssembly-Powered Chaotic Physics Sandbox",
+    primary_language: "Rust",
+    github_url: "https://github.com/fderuiter/laser-loon",
+    published: true,
+    simulated_telemetry: true,
+    tags: "Rust, WebAssembly, Physics, Chaos, Canvas",
+    classification: "experimental",
+    editorial_content: "An experimental chaotic physics sandbox and multi-agent simulation where interactive laser beams bounce off dynamic mirrors and guide mechanical loons.",
+    architectural_narrative: `
+<h3>The Challenge</h3>
+<p>To implement an high-speed physics container with hundreds of active agents running on low-resource mobile platforms without frame-drops or browser layout locking.</p>
+
+<h3>The Architecture</h3>
+<p>We designed a customized continuous collision detection loop offloaded entirely to a high-efficiency Rust compiler compilation, communicating with standard HTML5 Canvas layouts via SharedArrayBuffers.</p>
+    `.trim(),
+    pitch: "A highly responsive, **WebAssembly-powered** physics sandbox demonstrating how multi-agent reinforcement learning can optimize mechanical loon trajectories.",
+    reality: "Fast-moving loons frequently clipped through thin mirror barriers on slow mobile browsers. We resolved this by implementing continuous collision detection and offloading calculations to a custom Rust WebAssembly worker.",
+    lessons_learned: "Floating-point determinism is extremely hard to enforce across standard browsers. Also, simulated laser beams are highly addictive and cause a **42%** drop in local productivity during QA testing.",
+    custom_html: `
+<div class="grid grid-cols-3 gap-2 border border-zinc-800/80 rounded-lg p-2.5 bg-black/40 text-[10px] font-mono leading-relaxed">
+  <div>
+    <div class="text-zinc-500 uppercase font-bold mb-0.5">Loon Count</div>
+    <div class="text-brand-cyan font-bold">500+ Active Agents</div>
+  </div>
+  <div>
+    <div class="text-zinc-500 uppercase font-bold mb-0.5">FPS Status</div>
+    <div class="text-emerald-400 font-bold">60 FPS (Wasm Mode)</div>
+  </div>
+  <div>
+    <div class="text-zinc-500 uppercase font-bold mb-0.5">Collision Engine</div>
+    <div class="text-amber-500 font-bold">Continuous CCD (Quadtree)</div>
+  </div>
+</div>
+`.trim()
+  },
+  {
+    slug: "monadic-graveyard",
+    title: "The Monadic Graveyard: Lean4 Formal Proof Verification Sandbox",
+    primary_language: "Lean4",
+    github_url: "https://github.com/fderuiter/monadic-graveyard",
+    published: true,
+    simulated_telemetry: true,
+    tags: "Lean4, Formal Proofs, Logic, WASI",
+    classification: "experimental",
+    editorial_content: "An interactive logic playground for validating formal mathematical proofs of API safety guarantees, using Lean4 compiler outputs compiled to WASI.",
+    architectural_narrative: `
+<h3>The Challenge</h3>
+<p>Validating API state transitions and proving memory safety requires complex inductive constraints that are difficult to check using standard testing systems.</p>
+
+<h3>The Architecture</h3>
+<p>This sandbox compiles Lean4 assertions into bytecode executed inside a sandboxed WASI container on the server, returning structural verification trees.</p>
+    `.trim(),
+    pitch: "A formal verification sandbox using Lean4 to statically prove that API contracts can never enter invalid states under high concurrency.",
+    reality: "Writing formal proofs for highly dynamic REST endpoints requires an extraordinary amount of boilerplate. Proving even a simple endpoint took 300+ lines of theorems, making it highly impractical for standard production cycles.",
+    lessons_learned: "While mathematical proof is the gold standard, automated end-to-end integration testing and strict schema compilation are 100x more cost-effective for general software applications.",
+    custom_html: `
+<div class="grid grid-cols-3 gap-2 border border-zinc-800/80 rounded-lg p-2.5 bg-black/40 text-[10px] font-mono leading-relaxed">
+  <div>
+    <div class="text-zinc-500 uppercase font-bold mb-0.5">Theorems Proved</div>
+    <div class="text-brand-cyan font-bold">42 Mathematical Proofs</div>
+  </div>
+  <div>
+    <div class="text-zinc-500 uppercase font-bold mb-0.5">Verification Time</div>
+    <div class="text-emerald-400 font-bold">&lt; 15ms (WASI Engine)</div>
+  </div>
+  <div>
+    <div class="text-zinc-500 uppercase font-bold mb-0.5">Logic Completeness</div>
+    <div class="text-amber-500 font-bold">100% Statically Verified</div>
+  </div>
+</div>
+`.trim()
+  }
 ];
 
 async function main() {
@@ -169,7 +247,18 @@ async function main() {
   for (const payload of SEED_PAYLOADS) {
     const editorialMatches = scanText(payload.editorial_content);
     const narrativeMatches = scanText(payload.architectural_narrative);
-    const combinedMatches = [...editorialMatches, ...narrativeMatches];
+    const pitchMatches = payload.pitch ? scanText(payload.pitch) : [];
+    const realityMatches = payload.reality ? scanText(payload.reality) : [];
+    const lessonsMatches = payload.lessons_learned ? scanText(payload.lessons_learned) : [];
+    const htmlMatches = payload.custom_html ? scanText(payload.custom_html) : [];
+    const combinedMatches = [
+      ...editorialMatches,
+      ...narrativeMatches,
+      ...pitchMatches,
+      ...realityMatches,
+      ...lessonsMatches,
+      ...htmlMatches
+    ];
 
     if (combinedMatches.length > 0) {
       console.error(`❌ Credentials detected programmatically in seeding payload for "${payload.title}":`);

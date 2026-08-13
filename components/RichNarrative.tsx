@@ -20,7 +20,9 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
       "a",
       "ul",
       "ol",
-      "li"
+      "li",
+      "div",
+      "span"
     ],
     ALLOWED_ATTR: ["href", "target", "rel", "class"]
   });

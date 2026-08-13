@@ -13,6 +13,7 @@ import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAnnouncer } from "@/components/providers/A11yProvider";
 import { LAYOUT_CONFIG } from "@/lib/layout-config";
 import { useBentoLayout } from "@/components/providers/BentoLayoutContext";
+import { RichNarrative } from "@/components/RichNarrative";
 
 const REALITY_CONTENT: Record<string, string> = {
   schemaflow: "While the drag-and-drop canvas is extremely smooth, we initially faced major rendering bottlenecks when rendering over 150 schema nodes. We had to implement node occlusion culling and state debouncing to maintain 60 FPS, and cyclical dependency detection still requires optimized Web Worker postMessage parsing.",
@@ -32,6 +33,33 @@ interface CaseStudyBentoCardProps {
   preCalculatedItems?: ExtendedRichInlineItem[];
 }
 
+interface MarkdownSectionProps {
+  text: string;
+  fallbackText?: string;
+}
+
+const MarkdownSection: React.FC<MarkdownSectionProps> = ({ text, fallbackText }) => {
+  const { ref: containerRef, lines, items, isReady } = usePretextRichLayout({
+    text: text || fallbackText || "",
+    fontSize: LAYOUT_CONFIG.FONT_SIZE,
+    lineHeight: LAYOUT_CONFIG.LINE_HEIGHT,
+    fontFamilyVariable: "--font-inter",
+  });
+
+  return (
+    <div ref={containerRef}>
+      <PretextRichText
+        lines={lines}
+        items={items}
+        lineHeight={LAYOUT_CONFIG.LINE_HEIGHT}
+        isReady={isReady}
+        fallbackText={text || fallbackText || ""}
+        className="text-zinc-400 text-sm leading-relaxed font-sans"
+      />
+    </div>
+  );
+};
+
 // Map common languages to premium styling colors
 const LANGUAGE_COLORS: Record<string, { bg: string; text: string; hex: string }> = {
   TypeScript: { bg: "bg-blue-500/10", text: "text-blue-400", hex: "#3178c6" },
@@ -39,6 +67,8 @@ const LANGUAGE_COLORS: Record<string, { bg: string; text: string; hex: string }>
   Python: { bg: "bg-emerald-500/10", text: "text-emerald-400", hex: "#3572a5" },
   CSS: { bg: "bg-purple-500/10", text: "text-purple-400", hex: "#563d7c" },
   HTML: { bg: "bg-orange-500/10", text: "text-orange-400", hex: "#e34c26" },
+  Rust: { bg: "bg-orange-600/10", text: "text-orange-400", hex: "#dea584" },
+  Lean4: { bg: "bg-indigo-500/10", text: "text-indigo-400", hex: "#4d41b5" },
 };
 
 const DEFAULT_COLOR = { bg: "bg-zinc-500/10", text: "text-zinc-400", hex: "#8b949e" };
@@ -104,9 +134,10 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
 
   const innerRef = React.useRef<HTMLDivElement>(null);
 
-  // ResizeObserver restricted strictly to the active transition/interactive state (Reality mode)
+  // ResizeObserver restricted strictly to the active transition/interactive state (Reality mode) or any experimental card
   React.useLayoutEffect(() => {
-    if (mode !== "reality" || !innerRef.current) return;
+    const shouldObserve = mode === "reality" || study.classification === "experimental";
+    if (!shouldObserve || !innerRef.current) return;
 
     const element = innerRef.current;
     
@@ -127,7 +158,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
     return () => {
       observer.disconnect();
     };
-  }, [mode, study.id, registerHeightOverride]);
+  }, [mode, study.id, study.classification, registerHeightOverride]);
 
   React.useLayoutEffect(() => {
     // Check global flag injected by Playwright
@@ -136,7 +167,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
     // Only run in development or when explicitly requested by Playwright
     if ((process.env.NODE_ENV === "development" || isPlaywright) && hasPrecalculated && innerRef.current && finalHeight) {
       // Temporarily bypass warnings during transitions or when card has active dynamic override
-      const isBypassed = isLocalTransitioning || mode !== "pitch" || (heightOverrides && heightOverrides[study.id] !== undefined);
+      const isBypassed = isLocalTransitioning || mode !== "pitch" || (heightOverrides && heightOverrides[study.id] !== undefined) || study.classification === "experimental";
       if (isBypassed) {
         return;
       }
@@ -162,7 +193,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
         }
       }
     }
-  }, [hasPrecalculated, finalHeight, study.slug, isLocalTransitioning, mode, heightOverrides, study.id]);
+  }, [hasPrecalculated, finalHeight, study.slug, isLocalTransitioning, mode, heightOverrides, study.id, study.classification]);
 
   const cardHeightValue = heightOverrides[study.id] !== undefined ? heightOverrides[study.id] : finalHeight;
 
@@ -174,7 +205,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
         transition: "height 250ms cubic-bezier(0.16, 1, 0.3, 1)",
       }}
     >
-      <div ref={innerRef} className="flex flex-col h-full justify-between">
+      <div ref={innerRef} className="flex flex-col h-full justify-between animate-fadeIn">
         <div>
           {/* Card Top Pill & Header */}
           <div className="flex justify-between items-center mb-3">
@@ -191,32 +222,49 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
           </CardTitle>
 
           {/* Premium Segmented Mode Switcher */}
-          <div className="flex p-0.5 bg-zinc-950/80 border border-zinc-900/60 rounded-lg mb-4 text-[10px] font-mono relative z-10 w-fit">
-            <button
-              onClick={() => handleToggleMode("pitch")}
-              className={`px-3 py-1 rounded-md font-bold transition-all duration-200 cursor-pointer ${
-                mode === "pitch"
-                  ? "bg-zinc-900 text-brand-cyan shadow-sm"
-                  : "text-zinc-500 hover:text-zinc-300"
-              }`}
-            >
-              THE PITCH
-            </button>
-            <button
-              onClick={() => handleToggleMode("reality")}
-              className={`px-3 py-1 rounded-md font-bold transition-all duration-200 cursor-pointer ${
-                mode === "reality"
-                  ? "bg-zinc-900 text-brand-cyan shadow-sm"
-                  : "text-zinc-500 hover:text-zinc-300"
-              }`}
-            >
-              THE REALITY
-            </button>
-          </div>
+          {study.classification !== "experimental" && (
+            <div className="flex p-0.5 bg-zinc-950/80 border border-zinc-900/60 rounded-lg mb-4 text-[10px] font-mono relative z-10 w-fit">
+              <button
+                onClick={() => handleToggleMode("pitch")}
+                className={`px-3 py-1 rounded-md font-bold transition-all duration-200 cursor-pointer ${
+                  mode === "pitch"
+                    ? "bg-zinc-900 text-brand-cyan shadow-sm"
+                    : "text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                THE PITCH
+              </button>
+              <button
+                onClick={() => handleToggleMode("reality")}
+                className={`px-3 py-1 rounded-md font-bold transition-all duration-200 cursor-pointer ${
+                  mode === "reality"
+                    ? "bg-zinc-900 text-brand-cyan shadow-sm"
+                    : "text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                THE REALITY
+              </button>
+            </div>
+          )}
 
           {/* Description Block using Pretext Rich Text for Pitch, or Custom Reality Text */}
           <div className="mb-4">
-            {mode === "pitch" ? (
+            {study.classification === "experimental" ? (
+              <div className="space-y-4 my-4">
+                <div>
+                  <div className="text-[10px] font-mono font-bold text-brand-cyan tracking-wider mb-1">THE PITCH</div>
+                  <MarkdownSection text={study.pitch || ""} fallbackText={study.editorial_content} />
+                </div>
+                <div className="border-t border-zinc-900/40 pt-3">
+                  <div className="text-[10px] font-mono font-bold text-brand-blue tracking-wider mb-1">THE REALITY</div>
+                  <MarkdownSection text={study.reality || ""} fallbackText="N/A" />
+                </div>
+                <div className="border-t border-zinc-900/40 pt-3">
+                  <div className="text-[10px] font-mono font-bold text-amber-500 tracking-wider mb-1">LESSONS LEARNED</div>
+                  <MarkdownSection text={study.lessons_learned || ""} fallbackText="N/A" />
+                </div>
+              </div>
+            ) : mode === "pitch" ? (
               <div ref={hasPrecalculated ? undefined : internalLayout.ref}>
                 <PretextRichText
                   lines={finalLines}
@@ -233,6 +281,13 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
               </p>
             )}
           </div>
+
+          {/* Custom HTML summaries for experimental projects */}
+          {study.classification === "experimental" && study.custom_html && (
+            <div className="my-4">
+              <RichNarrative html={study.custom_html} />
+            </div>
+          )}
 
           {/* Dynamic GitHub Statistics Hydration */}
           {githubStats && (

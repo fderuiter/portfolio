@@ -18,47 +18,102 @@ interface CaseStudyShowcaseProps {
   caseStudies: HydratedCaseStudy[];
 }
 
-const FILTER_TABS = ["All", "TypeScript", "Python", "Haskell"];
-
 const CaseStudyShowcaseInner: React.FC<CaseStudyShowcaseProps> = ({ caseStudies }) => {
-  const [selectedFilter, setSelectedFilter] = useState("All");
+  const [viewMode, setViewMode] = useState<"mainstream" | "experimental">("mainstream");
+  const [selectedFilterState, setSelectedFilterState] = useState("All");
+
+  // Client-side classification filtering
+  const activeClassifiedStudies = useMemo(() => {
+    return caseStudies.filter((study) => {
+      if (viewMode === "mainstream") {
+        return study.classification !== "experimental";
+      } else {
+        return study.classification === "experimental";
+      }
+    });
+  }, [caseStudies, viewMode]);
+
+  // Compute language tabs dynamically based on active view's projects
+  const filterTabs = useMemo(() => {
+    const languages = new Set<string>();
+    activeClassifiedStudies.forEach((study) => {
+      if (study.primary_language) {
+        languages.add(study.primary_language);
+      }
+    });
+    return ["All", ...Array.from(languages)];
+  }, [activeClassifiedStudies]);
+
+  // Derive the active filter value purely during the render pass to satisfy React architecture recommendations and avoid cascading effect renders
+  const selectedFilter = filterTabs.includes(selectedFilterState) ? selectedFilterState : "All";
 
   // Client-side interactive filter
   const filteredStudies = useMemo(() => {
     return selectedFilter === "All"
-      ? caseStudies
-      : caseStudies.filter((study) => study.primary_language === selectedFilter);
-  }, [caseStudies, selectedFilter]);
+      ? activeClassifiedStudies
+      : activeClassifiedStudies.filter((study) => study.primary_language === selectedFilter);
+  }, [activeClassifiedStudies, selectedFilter]);
 
   const { containerRef, layoutState } = useMasonryLayout(caseStudies, filteredStudies);
 
   return (
     <div className="w-full flex flex-col items-center">
-      {/* Premium Staggered Filtering Tabs */}
-      <div className="flex gap-1.5 mb-12 bg-zinc-900/40 p-1.5 rounded-2xl border border-zinc-900/60 backdrop-blur-md relative z-20">
-        {FILTER_TABS.map((tab) => {
-          const isActive = selectedFilter === tab;
+      {/* Top-Level Segmented View Switcher */}
+      <div className="flex gap-1.5 mb-10 bg-zinc-900/40 p-1.5 rounded-2xl border border-zinc-900/60 backdrop-blur-md relative z-20">
+        {[
+          { id: "mainstream", label: "Mainstream Engineering" },
+          { id: "experimental", label: "Hall of Fame & Graveyard" }
+        ].map((tab) => {
+          const isActive = viewMode === tab.id;
           return (
             <button
-              key={tab}
-              onClick={() => setSelectedFilter(tab)}
-              className={`relative px-4 py-2 text-xs font-mono font-bold transition-colors duration-300 rounded-xl cursor-pointer select-none ${
+              key={tab.id}
+              onClick={() => setViewMode(tab.id as "mainstream" | "experimental")}
+              className={`relative px-4 py-2 text-xs font-mono font-bold transition-all duration-300 rounded-xl cursor-pointer select-none ${
                 isActive ? "text-brand-cyan" : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
               {isActive && (
                 <motion.div
-                  layoutId="activeTab"
-                  style={{ "--tab-glow": `0 0 15px ${hexToRgba(designManifest.colors["brand-cyan"], 0.12)}` } as React.CSSProperties}
+                  layoutId="activeViewTab"
+                  style={{ "--tab-glow": `0 0 15px ${hexToRgba(designManifest.colors["brand-cyan"], 0.1)}` } as React.CSSProperties}
                   className="absolute inset-0 bg-zinc-950 border border-zinc-800/80 rounded-xl -z-10 shadow-[var(--tab-glow)]"
                   transition={designManifest.motion.springs.snappy}
                 />
               )}
-              {tab === "All" ? "ALL PROJECTS" : tab.toUpperCase()}
+              {tab.label.toUpperCase()}
             </button>
           );
         })}
       </div>
+
+      {/* Premium Staggered Filtering Tabs (Sub-filter) */}
+      {filterTabs.length > 2 && (
+        <div className="flex gap-1.5 mb-12 bg-zinc-900/40 p-1.5 rounded-2xl border border-zinc-900/60 backdrop-blur-md relative z-20">
+          {filterTabs.map((tab) => {
+            const isActive = selectedFilter === tab;
+            return (
+              <button
+                key={tab}
+                onClick={() => setSelectedFilterState(tab)}
+                className={`relative px-4 py-2 text-xs font-mono font-bold transition-colors duration-300 rounded-xl cursor-pointer select-none ${
+                  isActive ? "text-brand-cyan" : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="activeTab"
+                    style={{ "--tab-glow": `0 0 15px ${hexToRgba(designManifest.colors["brand-cyan"], 0.12)}` } as React.CSSProperties}
+                    className="absolute inset-0 bg-zinc-950 border border-zinc-800/80 rounded-xl -z-10 shadow-[var(--tab-glow)]"
+                    transition={designManifest.motion.springs.snappy}
+                  />
+                )}
+                {tab === "All" ? "ALL PROJECTS" : tab.toUpperCase()}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Dynamic Masonry Bento Grid */}
       <div 
@@ -97,7 +152,7 @@ const CaseStudyShowcaseInner: React.FC<CaseStudyShowcaseProps> = ({ caseStudies 
         ) : (
           /* SSR Safe Parallel Layout Fallback */
           <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
-            {caseStudies.map((study) => (
+            {activeClassifiedStudies.map((study) => (
               <CaseStudyBentoCard key={study.id} study={study} />
             ))}
           </div>

@@ -19,6 +19,7 @@ export interface MasonryItem {
   id: string;
   editorial_content: string;
   githubStats?: GitHubStats | null;
+  classification?: string;
 }
 
 export interface LayoutItem<T extends MasonryItem> {
@@ -62,7 +63,10 @@ export function useMasonryLayout<T extends MasonryItem>(
     for (const study of allItems) {
       const parsedItems = parseMarkdownToRichItems(study.editorial_content, baseFont, boldFont, italicFont, codeFont);
       const prepared = prepareRichInline(parsedItems);
-      const paddingHeight = study.githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS;
+      let paddingHeight = study.githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS;
+      if (study.classification === "experimental") {
+        paddingHeight += 380;
+      }
       
       data[study.id] = {
         prepared,
