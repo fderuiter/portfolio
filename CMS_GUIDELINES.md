@@ -52,7 +52,7 @@ To ensure the portfolio displays narratives with high aesthetic quality and robu
   - **Permitted Headers:** `<h2>`, `<h3>`, `<h4>` (e.g., `<h3>The Challenge</h3>`)
   - **Permitted Layout Elements:** `<p>`, `<ul>`, `<ol>`, `<li>`
   - **Permitted Code Layouts:** `<pre>`, `<code>` (e.g., `<pre><code class="language-typescript">// code</code></pre>`)
-  - **Permitted Inline Elements:** `<strong>`, `<em>`, `<a>` (with optional `class`, `href`, `target`, and `rel` attributes)
+  - **Permitted Inline Elements:** `<strong>`, `<em>`, `<a>`, `<span>`, `<abbr>` (with optional `class`, `href`, `target`, `rel`, `data-term`, `data-definition`, and `data-key` attributes)
 - **Forbidden Elements:** Prohibits `<script>`, `<iframe>`, `<img onerror="...">`, or custom inline inline-styles to maintain strict data integrity boundaries.
 
 
