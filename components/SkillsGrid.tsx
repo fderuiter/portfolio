@@ -5,6 +5,7 @@ import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
 import { motion } from "framer-motion";
 import { Tooltip } from "@/components/ui/Tooltip";
+import { useAudio } from "@/components/providers/AudioProvider";
 
 export interface SkillLanguage {
   name: string;
@@ -16,6 +17,8 @@ interface SkillsGridProps {
 }
 
 export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
+  const { playSkillHover } = useAudio();
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl mx-auto select-none">
       {/* 1. Professional Bio Card */}
@@ -24,6 +27,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
+        onMouseEnter={playSkillHover}
         className="md:col-span-2 p-6 md:p-8 bg-zinc-900/10 border border-zinc-900/50 rounded-3xl relative overflow-hidden flex flex-col justify-between min-h-[250px] hover:border-zinc-800 transition-all duration-300"
       >
         <div className="absolute top-0 right-0 w-48 h-48 bg-brand-cyan/5 rounded-full blur-[60px] pointer-events-none" />
@@ -57,6 +61,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: 0.1 }}
+        onMouseEnter={playSkillHover}
         className="p-6 bg-zinc-900/10 border border-zinc-900/50 rounded-3xl relative overflow-hidden flex flex-col justify-between min-h-[250px] hover:border-zinc-800 transition-all duration-300"
       >
         <div className="absolute bottom-0 left-0 w-32 h-32 bg-brand-blue/5 rounded-full blur-[50px] pointer-events-none" />
@@ -98,6 +103,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: 0.2 }}
+        onMouseEnter={playSkillHover}
         className="md:col-span-3 p-6 md:p-8 bg-zinc-900/5 border border-zinc-900/40 rounded-3xl relative overflow-hidden hover:border-zinc-900 transition-all duration-300"
       >
         <h3 className="text-xs font-mono font-bold tracking-widest text-zinc-400 uppercase mb-6 text-center md:text-left">
@@ -105,7 +111,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
         </h3>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="space-y-2">
+          <div className="space-y-2" onMouseEnter={playSkillHover}>
             <div className="w-8 h-8 rounded-lg bg-emerald-950/20 border border-emerald-900/30 flex items-center justify-center font-mono font-bold text-xs text-emerald-400">
               01
             </div>
@@ -119,7 +125,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
             </p>
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-2" onMouseEnter={playSkillHover}>
             <div className="w-8 h-8 rounded-lg bg-cyan-950/20 border border-cyan-900/30 flex items-center justify-center font-mono font-bold text-xs text-brand-cyan">
               02
             </div>
@@ -133,7 +139,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
             </p>
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-2" onMouseEnter={playSkillHover}>
             <div className="w-8 h-8 rounded-lg bg-blue-950/20 border border-blue-900/30 flex items-center justify-center font-mono font-bold text-xs text-brand-blue">
               03
             </div>
@@ -147,7 +153,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
             </p>
           </div>
           
-          <div className="space-y-2">
+          <div className="space-y-2" onMouseEnter={playSkillHover}>
             <div className="w-8 h-8 rounded-lg bg-purple-950/20 border border-purple-900/30 flex items-center justify-center font-mono font-bold text-xs text-purple-400">
               04
             </div>
