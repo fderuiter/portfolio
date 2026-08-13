@@ -118,10 +118,11 @@ export function measureTextOffscreen({
     textPrepareCache.set(prepareKey, prepared);
   }
 
-  const cacheKey = `${text}|${fontString}|${maxWidth}|${lineHeight}`;
+  const flooredWidth = Math.floor(maxWidth);
+  const cacheKey = `${text}|${fontString}|${flooredWidth}|${lineHeight}`;
   let result = textLayoutCache.get(cacheKey);
   if (!result) {
-    result = layout(prepared, maxWidth, lineHeight);
+    result = layout(prepared, flooredWidth, lineHeight);
     textLayoutCache.set(cacheKey, result);
   }
 

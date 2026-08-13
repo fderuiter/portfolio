@@ -2,6 +2,9 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Visual Regression & Drift Detection', () => {
   test('Case Study components snapshot (desktop)', async ({ page }) => {
+    // Emulate reduced motion to disable JS transitions/animations
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+
     // Wait for the hydration and masonry layout to be stable
     await page.goto('/');
     
@@ -18,6 +21,11 @@ test.describe('Visual Regression & Drift Detection', () => {
     // Wait for network requests or images if any
     await page.waitForLoadState('networkidle');
 
+    // Wait for the Pretext measuring text to finish
+    await page.waitForFunction(() => {
+      return document.querySelector('.text-\\[9px\\]') && !document.querySelector('.text-\\[9px\\]')?.textContent?.includes('MEASURING...');
+    });
+
     // Take full page snapshot to cover case study components
     await expect(page).toHaveScreenshot('home.png', {
       fullPage: true,
@@ -26,6 +34,9 @@ test.describe('Visual Regression & Drift Detection', () => {
   });
 
   test('Layout constraints drift detection', async ({ page }) => {
+    // Emulate reduced motion to disable JS transitions/animations
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+
     // Inject the global flag for the client so the component enables the checks
     await page.addInitScript(() => {
       (window as unknown as { __PLAYWRIGHT_TEST__?: boolean }).__PLAYWRIGHT_TEST__ = true;
