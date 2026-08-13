@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { calculateMasonryLayout, type MasonryConfig } from '@/lib/masonry';
+import { validateLayoutHeight } from '@/lib/graphics-engine';
 
 vi.mock("@chenglou/pretext/rich-inline", () => ({
   walkRichInlineLineRanges: vi.fn((_, _width, cb) => {
@@ -86,5 +87,34 @@ describe('calculateMasonryLayout', () => {
     const result = calculateMasonryLayout(500, items, preparedData, MOCK_CONFIG, heightOverrides);
     expect(result.columns[0][0].height).toBe(300);
     expect(result.columns[0][1].height).toBe(190);
+  });
+});
+
+describe('validateLayoutHeight', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let warnSpy: any;
+
+  beforeEach(() => {
+    warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
+  });
+
+  it('warns when deviation is greater than 2 and bypass is false', () => {
+    validateLayoutHeight(100, 105, 'Test Context', false);
+    expect(warnSpy).toHaveBeenCalled();
+    expect(warnSpy.mock.calls[0][0]).toContain('Layout Validation Warning');
+  });
+
+  it('does NOT warn when deviation is greater than 2 but bypass is true', () => {
+    validateLayoutHeight(100, 105, 'Test Context', true);
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  it('does NOT warn when deviation is less than or equal to 2 and bypass is false', () => {
+    validateLayoutHeight(100, 101.5, 'Test Context', false);
+    expect(warnSpy).not.toHaveBeenCalled();
   });
 });

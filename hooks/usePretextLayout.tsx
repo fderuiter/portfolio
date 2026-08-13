@@ -24,6 +24,7 @@ import {
   richPrepareCache,
   richLayoutCache
 } from "@/lib/graphics-engine";
+import { useBentoLayout } from "@/components/providers/BentoLayoutContext";
 
 interface UsePretextLayoutOptions {
   text: string;
@@ -31,6 +32,7 @@ interface UsePretextLayoutOptions {
   lineHeight: number;
   fontFamilyVariable?: string;
   translationMode?: string;
+  bypass?: boolean;
 }
 
 interface PretextLayoutState {
@@ -45,6 +47,7 @@ export function usePretextLayout({
   lineHeight,
   fontFamilyVariable = "--font-inter",
   translationMode,
+  bypass = false,
 }: UsePretextLayoutOptions) {
   const [state, setState] = useState<PretextLayoutState>({
     isReady: false,
@@ -121,17 +124,23 @@ export function usePretextLayout({
 
   // Removed custom ResizeObserver in favor of unified useResizeObserver hook
 
+  const { isTransitioning, heightOverrides } = useBentoLayout();
+
   // Layout Height Validation Trigger
   useLayoutEffect(() => {
     if (state.isReady && containerRef.current) {
       const actualHeight = containerRef.current.getBoundingClientRect().height;
+      const isBypassed = bypass || 
+        Object.values(isTransitioning).some(Boolean) || 
+        Object.keys(heightOverrides).length > 0;
       validateLayoutHeight(
         state.height,
         actualHeight,
-        `usePretextLayout (text: "${text.slice(0, 30)}...")`
+        `usePretextLayout (text: "${text.slice(0, 30)}...")`,
+        isBypassed
       );
     }
-  }, [state.isReady, state.height, text]);
+  }, [state.isReady, state.height, text, bypass, isTransitioning, heightOverrides]);
 
   return {
     ref: containerRef,
@@ -272,6 +281,7 @@ interface UsePretextRichLayoutOptions {
   lineHeight: number;
   fontFamilyVariable?: string;
   translationMode?: string;
+  bypass?: boolean;
 }
 
 export function usePretextRichLayout({
@@ -280,6 +290,7 @@ export function usePretextRichLayout({
   lineHeight,
   fontFamilyVariable = "--font-inter",
   translationMode,
+  bypass = false,
 }: UsePretextRichLayoutOptions) {
   const [state, setState] = useState<{
     isReady: boolean;
@@ -386,17 +397,23 @@ export function usePretextRichLayout({
 
   // Removed custom ResizeObserver in favor of unified useResizeObserver hook
 
+  const { isTransitioning, heightOverrides } = useBentoLayout();
+
   // Layout Height Validation Trigger
   useLayoutEffect(() => {
     if (state.isReady && containerRef.current) {
       const actualHeight = containerRef.current.getBoundingClientRect().height;
+      const isBypassed = bypass || 
+        Object.values(isTransitioning).some(Boolean) || 
+        Object.keys(heightOverrides).length > 0;
       validateLayoutHeight(
         state.height,
         actualHeight,
-        `usePretextRichLayout (text: "${text.slice(0, 30)}...")`
+        `usePretextRichLayout (text: "${text.slice(0, 30)}...")`,
+        isBypassed
       );
     }
-  }, [state.isReady, state.height, text]);
+  }, [state.isReady, state.height, text, bypass, isTransitioning, heightOverrides]);
 
   return {
     ref: containerRef,

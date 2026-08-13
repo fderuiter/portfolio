@@ -136,8 +136,11 @@ export function measureTextOffscreen({
  * Expose a layout validation utility that warns in non-production environments
  * when calculated layout height and actual physical DOM measurement differs by more than 2px.
  */
-export function validateLayoutHeight(calculated: number, actual: number, contextMessage?: string) {
+export function validateLayoutHeight(calculated: number, actual: number, contextMessage?: string, bypass?: boolean) {
   if (process.env.NODE_ENV !== "production") {
+    if (bypass) {
+      return;
+    }
     const deviation = Math.abs(calculated - actual);
     if (deviation > 2) {
       console.warn(

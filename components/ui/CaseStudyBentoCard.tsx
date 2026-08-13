@@ -96,6 +96,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
     lineHeight: LAYOUT_CONFIG.LINE_HEIGHT,
     fontFamilyVariable: "--font-inter",
     translationMode: mode, // Pass active translation state
+    bypass: isLocalTransitioning || mode !== "pitch" || (heightOverrides && heightOverrides[study.id] !== undefined),
   });
 
   const finalHeight = hasPrecalculated ? preCalculatedHeight : (internalLayout.isReady ? internalLayout.height + (githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS) : undefined);
