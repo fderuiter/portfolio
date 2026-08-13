@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { getPersonSchema } from "@/lib/seo";
 import { CommandPalette } from "@/components/CommandPalette";
 import { A11yProvider } from "@/components/providers/A11yProvider";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -79,6 +80,7 @@ export default function RootLayout({
         <A11yProvider>
           <Navbar />
           {children}
+          <Analytics />
           <CommandPalette />
         </A11yProvider>
       </body>
