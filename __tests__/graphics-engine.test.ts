@@ -10,7 +10,8 @@ import {
   generateHermiteSplinePath,
   checkBeamContainerCollision,
   calculateCollisionPoint,
-  generateExplosionTrajectories
+  generateExplosionTrajectories,
+  LRUCache
 } from "@/lib/graphics-engine";
 
 describe("Centralized Graphics and Layout Engine", () => {
@@ -152,6 +153,19 @@ describe("Centralized Graphics and Layout Engine", () => {
         expect(t.duration).toBeGreaterThanOrEqual(0.4);
         expect(t.duration).toBeLessThanOrEqual(1.6);
       });
+    });
+  });
+
+  describe("E. LRUCache Clear Support", () => {
+    it("clears cached values when clear() is called", () => {
+      const cache = new LRUCache<string, string>(10);
+      cache.set("key1", "value1");
+      cache.set("key2", "value2");
+      expect(cache.get("key1")).toBe("value1");
+      
+      cache.clear();
+      expect(cache.get("key1")).toBeUndefined();
+      expect(cache.get("key2")).toBeUndefined();
     });
   });
 });

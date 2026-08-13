@@ -30,6 +30,7 @@ interface UsePretextLayoutOptions {
   fontSize?: number;
   lineHeight: number;
   fontFamilyVariable?: string;
+  translationMode?: string;
 }
 
 interface PretextLayoutState {
@@ -43,6 +44,7 @@ export function usePretextLayout({
   fontSize = 16,
   lineHeight,
   fontFamilyVariable = "--font-inter",
+  translationMode,
 }: UsePretextLayoutOptions) {
   const [state, setState] = useState<PretextLayoutState>({
     isReady: false,
@@ -83,6 +85,17 @@ export function usePretextLayout({
   });
 
   useLayoutEffect(() => {
+    if (translationMode !== undefined) {
+      textPrepareCache.clear();
+      textLayoutCache.clear();
+      richItemsCache.clear();
+      richPrepareCache.clear();
+      richLayoutCache.clear();
+      clearCache();
+    }
+  }, [translationMode]);
+
+  useLayoutEffect(() => {
     if (!isBrowser()) return;
 
     // 1. Senior Design: Extract active Tailwind v4 resolved font variable & use central resolver
@@ -104,7 +117,7 @@ export function usePretextLayout({
     } else {
        setState((prev) => ({ ...prev, isReady: true }));
     }
-  }, [text, fontSize, fontFamilyVariable, measureText, containerRef]);
+  }, [text, fontSize, fontFamilyVariable, measureText, containerRef, translationMode]);
 
   // Removed custom ResizeObserver in favor of unified useResizeObserver hook
 
@@ -247,6 +260,7 @@ interface UsePretextRichLayoutOptions {
   fontSize?: number;
   lineHeight: number;
   fontFamilyVariable?: string;
+  translationMode?: string;
 }
 
 export function usePretextRichLayout({
@@ -254,6 +268,7 @@ export function usePretextRichLayout({
   fontSize = designManifest.typography.sizes.sm.fontSize,
   lineHeight,
   fontFamilyVariable = "--font-inter",
+  translationMode,
 }: UsePretextRichLayoutOptions) {
   const [state, setState] = useState<{
     isReady: boolean;
@@ -317,6 +332,17 @@ export function usePretextRichLayout({
   });
 
   useLayoutEffect(() => {
+    if (translationMode !== undefined) {
+      textPrepareCache.clear();
+      textLayoutCache.clear();
+      richItemsCache.clear();
+      richPrepareCache.clear();
+      richLayoutCache.clear();
+      clearCache();
+    }
+  }, [translationMode]);
+
+  useLayoutEffect(() => {
     if (!isBrowser()) return;
 
     const { baseFont, boldFont, italicFont, codeFont } = resolveThemeFonts(fontSize, fontFamilyVariable);
@@ -345,7 +371,7 @@ export function usePretextRichLayout({
     } else {
       setState((prev) => ({ ...prev, isReady: true }));
     }
-  }, [text, fontSize, fontFamilyVariable, measureRichText, containerRef]);
+  }, [text, fontSize, fontFamilyVariable, measureRichText, containerRef, translationMode]);
 
   // Removed custom ResizeObserver in favor of unified useResizeObserver hook
 

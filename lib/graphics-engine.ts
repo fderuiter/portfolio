@@ -56,6 +56,9 @@ export class LRUCache<K, V> {
     }
     this.cache.set(key, value);
   }
+  clear() {
+    this.cache.clear();
+  }
 }
 
 export const textPrepareCache = new LRUCache<string, PreparedText>(500);
