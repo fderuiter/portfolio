@@ -46,7 +46,15 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
   }, [html]);
 
   useEffect(() => {
-    setMounted(true);
+    let active = true;
+    setTimeout(() => {
+      if (active) {
+        setMounted(true);
+      }
+    }, 0);
+    return () => {
+      active = false;
+    };
   }, []);
 
   // On the client, parse the HTML and rehydrate it to React components once mounted
@@ -100,18 +108,18 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
           );
 
           // Build safe attributes
-          const props: Record<string, any> = { key: `${tagName}-${index}` };
+          const props: Record<string, string> = { key: `${tagName}-${index}` };
           if (element.hasAttribute("class")) {
-            props.className = element.getAttribute("class");
+            props.className = element.getAttribute("class") || "";
           }
           if (element.hasAttribute("href")) {
-            props.href = element.getAttribute("href");
+            props.href = element.getAttribute("href") || "";
           }
           if (element.hasAttribute("target")) {
-            props.target = element.getAttribute("target");
+            props.target = element.getAttribute("target") || "";
           }
           if (element.hasAttribute("rel")) {
-            props.rel = element.getAttribute("rel");
+            props.rel = element.getAttribute("rel") || "";
           }
 
           return React.createElement(tagName, props, children);
