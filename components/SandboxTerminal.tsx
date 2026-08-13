@@ -131,7 +131,7 @@ export const SandboxTerminal: React.FC = () => {
   }, [logs]);
 
   // Execute terminal commands
-  const executeCommand = (cmdText: string) => {
+  const executeCommand = React.useCallback((cmdText: string) => {
     const trimmed = cmdText.trim();
     if (!trimmed) return;
 
@@ -197,7 +197,140 @@ export const SandboxTerminal: React.FC = () => {
         ]);
       }
     }, 450);
-  };
+  }, [setCommandHistory, setHistoryIndex, setIsExecuting, setInput, setLogs]);
+
+  // Typing animation state/ref
+  const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Setup/Teardown interactive console API and custom greeting log
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Strict constraint check: Only enable this on the specific SDK case study page
+    if (!window.location.pathname.includes("/case-studies/imednet-python-sdk")) {
+      return;
+    }
+
+    const terminalApi = {
+      run: (cmdText: string) => {
+        if (typeof cmdText !== "string") {
+          console.error("terminal.run: command must be a string.");
+          return;
+        }
+        // Safely dispatch custom event to update the terminal UI asynchronously without triggering full-page react hydration cycles
+        window.dispatchEvent(new CustomEvent("terminal:run", { detail: { command: cmdText } }));
+      },
+      help: () => {
+        console.log(
+          "Supported API commands:\n" +
+          "  imednet.run('imednet studies list')\n" +
+          "  imednet.run('imednet subjects get --id 123')\n" +
+          "  imednet.run('imednet records search --study BRIGHT-01')\n" +
+          "  imednet.run('help')\n" +
+          "  imednet.run('clear')"
+        );
+      }
+    };
+
+    const anyWindow = window as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    anyWindow.terminal = terminalApi;
+    anyWindow.imednet = terminalApi;
+
+    // Interactive custom styled greeting in console
+    console.log(
+      `%c╔══════════════════════════════════════════════════════════════════════════╗\n` +
+      `║               iMednet SDK Developer Console Sandbox                      ║\n` +
+      `╚══════════════════════════════════════════════════════════════════════════╝\n` +
+      `Welcome, developer! You've unlocked the interactive CLI simulator console API.\n` +
+      `Try programmatically controlling the on-page terminal bento-card from here!\n\n` +
+      `Run this function to query the simulated SDK API directly:\n` +
+      `  %cimednet.run("imednet studies list")%c\n\n` +
+      `Supported Commands:\n` +
+      `  • imednet.run("imednet studies list")\n` +
+      `  • imednet.run("imednet subjects get --id 123")\n` +
+      `  • imednet.run("imednet records search --study BRIGHT-01")\n` +
+      `  • imednet.run("help")\n` +
+      `  • imednet.run("clear")`,
+      "color: #06b6d4; font-weight: bold;",
+      "color: #10b981; font-weight: bold; background: #18181b; padding: 2px 4px; border-radius: 4px;",
+      "color: inherit;"
+    );
+
+    return () => {
+      // Clean up global namespace completely on unmount (prevent leakage to other pages)
+      delete anyWindow.terminal;
+      delete anyWindow.imednet;
+    };
+  }, []);
+
+  // Handle incoming terminal:run custom events
+  useEffect(() => {
+    const handleRunEvent = (e: Event) => {
+      const customEvent = e as CustomEvent<{ command: string }>;
+      if (!customEvent.detail || typeof customEvent.detail.command !== "string") return;
+
+      const command = customEvent.detail.command;
+
+      // Cancel any ongoing typing animation
+      if (typingTimerRef.current) {
+        clearInterval(typingTimerRef.current);
+        typingTimerRef.current = null;
+      }
+
+      if (isExecuting) {
+        console.warn("Terminal is currently executing a command. Please wait.");
+        return;
+      }
+
+      // Clear input state and focus element
+      setInput("");
+      inputRef.current?.focus();
+
+      let currentIndex = 0;
+      let currentTyped = "";
+
+      // Performance Isolation: Simulate typing asynchronously using non-blocking setInterval
+      typingTimerRef.current = setInterval(() => {
+        if (currentIndex < command.length) {
+          const char = command[currentIndex];
+          currentTyped += char;
+          setInput(currentTyped);
+
+          // Translate into simulated keystroke events inside the terminal interface
+          const inputEl = inputRef.current;
+          if (inputEl) {
+            const keyEventInit = { key: char, bubbles: true, cancelable: true };
+            inputEl.dispatchEvent(new KeyboardEvent("keydown", keyEventInit));
+            inputEl.dispatchEvent(new KeyboardEvent("keypress", keyEventInit));
+            inputEl.dispatchEvent(new Event("input", { bubbles: true }));
+            inputEl.dispatchEvent(new KeyboardEvent("keyup", keyEventInit));
+          }
+
+          currentIndex++;
+        } else {
+          // Done typing! Clear interval and execute the command
+          if (typingTimerRef.current) {
+            clearInterval(typingTimerRef.current);
+            typingTimerRef.current = null;
+          }
+
+          // Delay execution slightly to feel natural (keystroke evaluation delay)
+          setTimeout(() => {
+            executeCommand(command);
+          }, 100);
+        }
+      }, 40); // 40ms typing speed
+    };
+
+    window.addEventListener("terminal:run", handleRunEvent);
+
+    return () => {
+      window.removeEventListener("terminal:run", handleRunEvent);
+      if (typingTimerRef.current) {
+        clearInterval(typingTimerRef.current);
+      }
+    };
+  }, [isExecuting, executeCommand]);
 
   // Handle key triggers (Enter, Up, Down, Tab)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
