@@ -1,6 +1,23 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useRef } from "react";
+import { useTelemetry } from "@/hooks/useTelemetry";
 
 export default function NotFound() {
+  const { recordEvent } = useTelemetry();
+  const hasTracked = useRef(false);
+
+  useEffect(() => {
+    if (hasTracked.current) return;
+    hasTracked.current = true;
+
+    const path = typeof window !== "undefined" ? window.location.pathname : "/not-found";
+    recordEvent(path, "route_error").catch((err) => {
+      console.error("Failed to record route error telemetry:", err);
+    });
+  }, [recordEvent]);
+
   return (
     <main className="min-h-screen py-32 px-6 flex flex-col items-center justify-center bg-brand-dark text-foreground">
       {/* Background Blurs */}
