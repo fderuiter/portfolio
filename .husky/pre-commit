@@ -1,3 +1,4 @@
 #!/bin/sh
+npx tsx scripts/validate-commit.ts
 npm run check
 npm test
