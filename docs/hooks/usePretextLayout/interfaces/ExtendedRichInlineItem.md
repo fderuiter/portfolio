@@ -1,0 +1,69 @@
+[**temp_dir**](../../../README.md)
+
+***
+
+[temp_dir](../../../modules.md) / [hooks/usePretextLayout](../README.md) / ExtendedRichInlineItem
+
+# Interface: ExtendedRichInlineItem
+
+Defined in: [hooks/usePretextLayout.tsx:187](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/hooks/usePretextLayout.tsx#L187)
+
+## Extends
+
+- `RichInlineItem`
+
+## Properties
+
+### break?
+
+> `optional` **break?**: `"normal"` \| `"never"`
+
+Defined in: node\_modules/@chenglou/pretext/dist/rich-inline.d.ts:6
+
+#### Inherited from
+
+`RichInlineItem.break`
+
+***
+
+### extraWidth?
+
+> `optional` **extraWidth?**: `number`
+
+Defined in: node\_modules/@chenglou/pretext/dist/rich-inline.d.ts:7
+
+#### Inherited from
+
+`RichInlineItem.extraWidth`
+
+***
+
+### font
+
+> **font**: `string`
+
+Defined in: node\_modules/@chenglou/pretext/dist/rich-inline.d.ts:5
+
+#### Inherited from
+
+`RichInlineItem.font`
+
+***
+
+### text
+
+> **text**: `string`
+
+Defined in: node\_modules/@chenglou/pretext/dist/rich-inline.d.ts:4
+
+#### Inherited from
+
+`RichInlineItem.text`
+
+***
+
+### type
+
+> **type**: `"text"` \| `"bold"` \| `"italic"` \| `"code"`
+
+Defined in: [hooks/usePretextLayout.tsx:188](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/hooks/usePretextLayout.tsx#L188)

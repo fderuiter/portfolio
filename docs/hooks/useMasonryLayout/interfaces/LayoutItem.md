@@ -1,0 +1,47 @@
+[**temp_dir**](../../../README.md)
+
+***
+
+[temp_dir](../../../modules.md) / [hooks/useMasonryLayout](../README.md) / LayoutItem
+
+# Interface: LayoutItem\<T\>
+
+Defined in: [hooks/useMasonryLayout.ts:24](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/hooks/useMasonryLayout.ts#L24)
+
+## Type Parameters
+
+### T
+
+`T` *extends* [`MasonryItem`](MasonryItem.md)
+
+## Properties
+
+### height
+
+> **height**: `number`
+
+Defined in: [hooks/useMasonryLayout.ts:26](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/hooks/useMasonryLayout.ts#L26)
+
+***
+
+### item
+
+> **item**: `T`
+
+Defined in: [hooks/useMasonryLayout.ts:25](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/hooks/useMasonryLayout.ts#L25)
+
+***
+
+### items
+
+> **items**: [`ExtendedRichInlineItem`](../../usePretextLayout/interfaces/ExtendedRichInlineItem.md)[]
+
+Defined in: [hooks/useMasonryLayout.ts:28](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/hooks/useMasonryLayout.ts#L28)
+
+***
+
+### lines
+
+> **lines**: `RichInlineLine`[]
+
+Defined in: [hooks/useMasonryLayout.ts:27](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/hooks/useMasonryLayout.ts#L27)

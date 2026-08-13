@@ -1,0 +1,57 @@
+[**temp_dir**](../../../README.md)
+
+***
+
+[temp_dir](../../../modules.md) / [lib/graphics-engine](../README.md) / Rect
+
+# Interface: Rect
+
+Defined in: [lib/graphics-engine.ts:11](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L11)
+
+## Properties
+
+### bottom
+
+> **bottom**: `number`
+
+Defined in: [lib/graphics-engine.ts:13](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L13)
+
+***
+
+### height
+
+> **height**: `number`
+
+Defined in: [lib/graphics-engine.ts:17](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L17)
+
+***
+
+### left
+
+> **left**: `number`
+
+Defined in: [lib/graphics-engine.ts:14](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L14)
+
+***
+
+### right
+
+> **right**: `number`
+
+Defined in: [lib/graphics-engine.ts:15](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L15)
+
+***
+
+### top
+
+> **top**: `number`
+
+Defined in: [lib/graphics-engine.ts:12](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L12)
+
+***
+
+### width
+
+> **width**: `number`
+
+Defined in: [lib/graphics-engine.ts:16](https://github.com/fderuiter/portfolio/blob/e9125b13b4fd502f929719e363744f8eb92647bc/lib/graphics-engine.ts#L16)

@@ -1,4 +1,6 @@
 #!/bin/sh
 npx tsx scripts/validate-commit.ts
+npm run check-docs-drift
+npm run lint:docs
 npm run check
 npm test
