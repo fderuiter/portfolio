@@ -1,7 +1,7 @@
 // Source: https://ui.aceternity.com/components/background-beams-with-collision
 "use client";
 import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import React, { useRef, useState, useEffect } from "react";
 import { usePretextLayout } from "@/hooks/usePretextLayout";
 import { AnimatedGridPattern } from "@/components/AnimatedGridPattern";
@@ -97,7 +97,7 @@ export const BackgroundBeamsWithCollision = ({
   );
 };
 
-const CollisionMechanism = React.forwardRef<
+ const CollisionMechanism = React.forwardRef<
   HTMLDivElement,
   {
     containerRef: React.RefObject<HTMLDivElement | null>;
@@ -114,7 +114,8 @@ const CollisionMechanism = React.forwardRef<
       repeatDelay?: number;
     };
   }
->(({ parentRef, containerRef, beamOptions = {} }) => {
+>(({ parentRef, containerRef, beamOptions = {} }, ref) => {
+  const shouldReduceMotion = useReducedMotion();
   const beamRef = useRef<HTMLDivElement>(null);
   const [collision, setCollision] = useState<{
     detected: boolean;
@@ -127,6 +128,8 @@ const CollisionMechanism = React.forwardRef<
   const [cycleCollisionDetected, setCycleCollisionDetected] = useState(false);
 
   useEffect(() => {
+    if (shouldReduceMotion) return;
+
     const checkCollision = () => {
       if (
         beamRef.current &&
@@ -158,9 +161,11 @@ const CollisionMechanism = React.forwardRef<
     const animationInterval = setInterval(checkCollision, 50);
 
     return () => clearInterval(animationInterval);
-  }, [cycleCollisionDetected, containerRef, parentRef]);
+  }, [cycleCollisionDetected, containerRef, parentRef, shouldReduceMotion]);
 
   useEffect(() => {
+    if (shouldReduceMotion) return;
+
     if (collision.detected && collision.coordinates) {
       setTimeout(() => {
         setCollision({ detected: false, coordinates: null });
@@ -171,7 +176,9 @@ const CollisionMechanism = React.forwardRef<
         setBeamKey((prevKey) => prevKey + 1);
       }, 2000);
     }
-  }, [collision]);
+  }, [collision, shouldReduceMotion]);
+
+  if (shouldReduceMotion) return null;
 
   return (
     <>
@@ -275,6 +282,7 @@ interface HeroHeadlineProps {
 }
 
 export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
+  const shouldReduceMotion = useReducedMotion();
   const { ref, height, isReady } = usePretextLayout({
     text,
     fontSize: 56, // Measures at the typical H1 size
@@ -288,12 +296,22 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
     hidden: {},
     visible: {
       transition: {
-        staggerChildren: 0.07,
+        staggerChildren: shouldReduceMotion ? 0.03 : 0.07,
       },
     },
   };
 
-  const wordVariants = {
+  const wordVariants = shouldReduceMotion ? {
+    hidden: {
+      opacity: 0,
+    },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.3,
+      },
+    },
+  } : {
     hidden: {
       opacity: 0,
       y: 20,
@@ -368,6 +386,7 @@ interface HeroTextProps {
 }
 
 export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
+  const shouldReduceMotion = useReducedMotion();
   const { ref, height, isReady } = usePretextLayout({
     text,
     fontSize: 16,
@@ -381,13 +400,23 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
     hidden: {},
     visible: {
       transition: {
-        staggerChildren: 0.02,
-        delayChildren: 0.7, // Staggers after the main headline animation finishes
+        staggerChildren: shouldReduceMotion ? 0.01 : 0.02,
+        delayChildren: shouldReduceMotion ? 0.1 : 0.7, // Staggers after the main headline animation finishes
       },
     },
   };
 
-  const wordVariants = {
+  const wordVariants = shouldReduceMotion ? {
+    hidden: {
+      opacity: 0,
+    },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.3,
+      },
+    },
+  } : {
     hidden: {
       opacity: 0,
       y: 12,
@@ -451,6 +480,7 @@ interface HeroProps {
 }
 
 export const Hero: React.FC<HeroProps> = ({ className }) => {
+  const shouldReduceMotion = useReducedMotion();
   const headline = "Engineering the Interface Between Data and Meaning";
   const introText =
     "Connecting high-performance canvas layout engines, serverless Postgres data streams, and clinical data integration clients into a unified engineering showcase.";
@@ -482,7 +512,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
       <div className="relative z-10 w-full max-w-4xl flex flex-col items-center text-center">
         {/* Sub-header mono tag - Static Brand Identity */}
         <motion.span
-          initial={{ opacity: 0, y: -10 }}
+          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="px-3.5 py-1 mb-6 text-[10px] md:text-xs font-mono font-semibold tracking-[0.2em] uppercase text-brand-cyan bg-brand-cyan/5 border border-brand-cyan/20 rounded-full"
@@ -498,9 +528,9 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
 
         {/* CTA Button Block */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.1, duration: 0.8, ...designManifest.motion.springs.smooth }}
+          transition={shouldReduceMotion ? { delay: 0.2, duration: 0.8 } : { delay: 1.1, duration: 0.8, ...designManifest.motion.springs.smooth }}
           className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
           <a
