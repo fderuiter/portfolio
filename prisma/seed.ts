@@ -6,6 +6,7 @@ import { Client, neonConfig } from "@neondatabase/serverless";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "../app/generated/prisma/client";
 import ws from "ws";
+import { scanFile, scanText } from "../lib/validation-scanner";
 
 neonConfig.webSocketConstructor = ws;
 
@@ -14,23 +15,16 @@ const client = new Client(connectionString);
 const adapter = new PrismaNeon(client as unknown as ConstructorParameters<typeof PrismaNeon>[0]);
 const prisma = new PrismaClient({ adapter });
 
-async function main() {
-  console.log("Seeding portfolio case studies...");
-
-  // WIPE: Enforce idempotence by cleaning database before seeding
-  await prisma.caseStudy.deleteMany({});
-
-  // 1. SchemaFlow Seeding
-  const schemaFlow = await prisma.caseStudy.create({
-    data: {
-      slug: "schemaflow",
-      title: "SchemaFlow: Reactive Node Engine for Schema Composition",
-      primary_language: "TypeScript",
-      github_url: "https://github.com/fderuiter/SchemaFlow",
-      published: true,
-      tags: "TypeScript, React, Flow, Schemas, AST, Node-RED",
-      editorial_content: "A **reactive**, `visual graph editor` built in **TypeScript** and **React** that allows system architects to visually compose, validate, and compile complex `JSON Schema` structures in real time. Features highly responsive `node evaluation`, cyclical dependency detection, and live `code generation`.",
-      architectural_narrative: `
+const SEED_PAYLOADS = [
+  {
+    slug: "schemaflow",
+    title: "SchemaFlow: Reactive Node Engine for Schema Composition",
+    primary_language: "TypeScript",
+    github_url: "https://github.com/fderuiter/SchemaFlow",
+    published: true,
+    tags: "TypeScript, React, Flow, Schemas, AST, Node-RED",
+    editorial_content: "A **reactive**, `visual graph editor` built in **TypeScript** and **React** that allows system architects to visually compose, validate, and compile complex `JSON Schema` structures in real time. Features highly responsive `node evaluation`, cyclical dependency detection, and live `code generation`.",
+    architectural_narrative: `
 <h3>The Challenge</h3>
 <p>Modern enterprise APIs often require complex, deeply nested JSON schemas. Hand-authoring these schemas in raw JSON or YAML leads to validation errors, duplicate definitions, and slow developer velocity. Visual graph editors exist, but they suffer from high rendering latency, lacks type-safety, and do not handle recursive schema references gracefully.</p>
 
@@ -55,21 +49,17 @@ interface SchemaNode {
 
 <h4>3. The AST Compiler</h4>
 <p>When state is pushed, the compiler resolves node connections into a unified AST. It then generates valid <strong>JSON Schema Draft-07</strong> or <strong>OpenAPI v3</strong> specs. The entire compilation runs in an isolated context, returning a structured output that can be directly copy-pasted or pushed to a schema registry.</p>
-      `.trim(),
-    },
-  });
-
-  // 2. Clinical Data Standards Mapper Seeding
-  const clinicalMapper = await prisma.caseStudy.create({
-    data: {
-      slug: "clinical-data-mapper",
-      title: "Clinical Data Standards Engine: CDISC ODM and SDTM Integration",
-      primary_language: "TypeScript",
-      github_url: "https://github.com/fderuiter/clinical-data-mapper",
-      published: true,
-      tags: "TypeScript, CDISC, ODM, SDTM, XML Parser, Clinical Trials, HIPAA",
-      editorial_content: "An enterprise-grade **TypeScript** mapping pipeline that ingests clinical trial metadata in `CDISC Operational Data Model (ODM)` XML format, dynamically constructs `data schemas`, and transforms raw `Electronic Data Capture (EDC)` datasets into compliant **CDISC SDTM** domains.",
-      architectural_narrative: `
+    `.trim(),
+  },
+  {
+    slug: "clinical-data-mapper",
+    title: "Clinical Data Standards Engine: CDISC ODM and SDTM Integration",
+    primary_language: "TypeScript",
+    github_url: "https://github.com/fderuiter/clinical-data-mapper",
+    published: true,
+    tags: "TypeScript, CDISC, ODM, SDTM, XML Parser, Clinical Trials, HIPAA",
+    editorial_content: "An enterprise-grade **TypeScript** mapping pipeline that ingests clinical trial metadata in `CDISC Operational Data Model (ODM)` XML format, dynamically constructs `data schemas`, and transforms raw `Electronic Data Capture (EDC)` datasets into compliant **CDISC SDTM** domains.",
+    architectural_narrative: `
 <h3>The Challenge</h3>
 <p>Clinical trial databases are governed by rigid international regulatory standards set by CDISC. Review bodies like the FDA require trial findings to be submitted as SDTM datasets. The incoming trial data, however, arrives in XML-based CDISC ODM format or proprietary EDC database tables. Manual mapping is error-prone, highly slow, and compromises regulatory compliance.</p>
 
@@ -108,21 +98,17 @@ interface ODMClinicalData {
 - Matches subject parameters across Study Events.
 - Computes standard SDTM columns like <code>AESEV</code> (Adverse Event Severity) and <code>AESTDY</code> (Adverse Event Study Day).
 - Validates constraints against CDISC Controlled Terminology vocabularies.</p>
-      `.trim(),
-    },
-  });
-
-  // 3. iMednet Python SDK Seeding
-  const imednetSdk = await prisma.caseStudy.create({
-    data: {
-      slug: "imednet-python-sdk",
-      title: "iMednet Python SDK: Clinical Trial Data Integration Client",
-      primary_language: "Python",
-      github_url: "https://github.com/fderuiter/imednet-python-sdk",
-      published: true,
-      tags: "Python, SDK, iMednet, API Client, Clinical Trials, HIPAA, Clinical Data",
-      editorial_content: "A **robust**, fully-typed `Python SDK` client for programmatic extraction and integration of clinical trial metadata and patient records from the `iMednet EDC` platform. Built for **biostatisticians** and **clinical data engineers**.",
-      architectural_narrative: `
+    `.trim(),
+  },
+  {
+    slug: "imednet-python-sdk",
+    title: "iMednet Python SDK: Clinical Trial Data Integration Client",
+    primary_language: "Python",
+    github_url: "https://github.com/fderuiter/imednet-python-sdk",
+    published: true,
+    tags: "Python, SDK, iMednet, API Client, Clinical Trials, HIPAA, Clinical Data",
+    editorial_content: "A **robust**, fully-typed `Python SDK` client for programmatic extraction and integration of clinical trial metadata and patient records from the `iMednet EDC` platform. Built for **biostatisticians** and **clinical data engineers**.",
+    architectural_narrative: `
 <h3>The Challenge</h3>
 <p>Clinical electronic data capture (EDC) systems, such as iMednet, hold highly sensitive patient records and complex clinical trial protocols. Programmatic extraction is required by biostatisticians, data scientists, and clinical engineers for automated reporting and analytical pipelines. However, traditional SOAP/REST endpoints in clinical platforms often lack modern developer ergonomics, proper type safety, and clear schema boundaries, exposing clinical workflows to integration bugs and HIPAA security risks.</p>
 
@@ -150,14 +136,75 @@ class SubjectRecord(BaseModel):
 
 <h4>3. Interactive Developer Sandbox</h4>
 <p>To accelerate developer onboarding, the repository introduces an interactive CLI sandbox built directly into the portfolio. Systems engineers can test commands, inspect raw JSON schemas, and simulate error/empty responses in real time, accelerating integration time-to-market from weeks to minutes.</p>
-      `.trim(),
-    },
-  });
+    `.trim(),
+  },
+];
+
+async function main() {
+  const startTime = Date.now();
+  console.log("Seeding portfolio case studies...");
+
+  // 1. Validate payload fields programmatically
+  console.log("Checking active database seeding payload for credentials...");
+  for (const payload of SEED_PAYLOADS) {
+    const editorialMatches = scanText(payload.editorial_content);
+    const narrativeMatches = scanText(payload.architectural_narrative);
+    const combinedMatches = [...editorialMatches, ...narrativeMatches];
+
+    if (combinedMatches.length > 0) {
+      console.error(`❌ Credentials detected programmatically in seeding payload for "${payload.title}":`);
+      for (const m of combinedMatches) {
+        console.error(`  - Matched Category: [${m.category}] on relative line ${m.lineNumber}: "${m.matchedText}"`);
+      }
+      console.error("Seeding halted. Zero records were inserted into the database.");
+      process.exit(1);
+    }
+  }
+
+  // 2. Validate fallback files statically to ensure absolute line tracing is perfect
+  const seedFile = path.resolve(process.cwd(), "prisma/seed.ts");
+  const fallbackFile = path.resolve(process.cwd(), "app/page.tsx");
+
+  console.log("Scanning seed file and fallback configurations...");
+  const seedMatches = scanFile(seedFile);
+  const fallbackMatches = scanFile(fallbackFile);
+
+  // Filter out any connection strings in seed.ts that match the actual DB connection string template / process.env lines,
+  // but we want to fail on actual hardcoded secrets/connection strings.
+  // Note: scanFile checks line-by-line. If there's any actual hardcoded connection string or secret, it will fail.
+  const allStaticMatches = [...seedMatches, ...fallbackMatches];
+
+  if (allStaticMatches.length > 0) {
+    console.error("\n❌ Regex Guard alert: Hardcoded secrets or DB connection strings detected in source code/configs!");
+    for (const match of seedMatches) {
+      console.error(`  - [In Seed File] Line ${match.lineNumber}: Category [${match.category}]`);
+      console.error(`    Matched: "${match.matchedText}"`);
+    }
+    for (const match of fallbackMatches) {
+      console.error(`  - [In Fallback Config] Line ${match.lineNumber}: Category [${match.category}]`);
+      console.error(`    Matched: "${match.matchedText}"`);
+    }
+    console.error("Seeding halted. Zero records were inserted into the database.");
+    process.exit(1);
+  }
+
+  const duration = Date.now() - startTime;
+  console.log(`Validation guards completed successfully in ${duration}ms.`);
+
+  // WIPE: Enforce idempotence by cleaning database before seeding
+  await prisma.caseStudy.deleteMany({});
+
+  // Insert the validated payloads
+  for (const payload of SEED_PAYLOADS) {
+    await prisma.caseStudy.create({
+      data: payload,
+    });
+  }
 
   console.log(`Successfully seeded:`);
-  console.log(`- ${schemaFlow.title}`);
-  console.log(`- ${clinicalMapper.title}`);
-  console.log(`- ${imednetSdk.title}`);
+  for (const payload of SEED_PAYLOADS) {
+    console.log(`- ${payload.title}`);
+  }
 }
 
 main()
