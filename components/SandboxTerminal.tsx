@@ -6,6 +6,7 @@ import { designManifest } from "@/lib/design-manifest";
 import { IconTerminal, IconCornerDownLeft, IconCircle } from "@tabler/icons-react";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { useAnnouncer } from "@/components/providers/A11yProvider";
+import { useAudio } from "@/components/providers/AudioProvider";
 
 interface LogItem {
   id: string;
@@ -107,6 +108,7 @@ function generateLogId(): string {
 
 export const SandboxTerminal: React.FC = () => {
   const { announce } = useAnnouncer();
+  const { playKeystroke, playAutocomplete, playSuccess } = useAudio();
   const [input, setInput] = useState("");
   const [logs, setLogs] = useState<LogItem[]>([
     {
@@ -198,6 +200,7 @@ export const SandboxTerminal: React.FC = () => {
             jsonPayload: match.payload,
           },
         ]);
+        playSuccess();
         if (trimmed === "imednet studies list") {
           announce("Command execution completed. Returned active clinical trials: BRIGHT-01, ONCO-2026, and CARDIO-REF.", "polite");
         } else if (trimmed === "imednet subjects get --id 123") {
@@ -219,7 +222,7 @@ export const SandboxTerminal: React.FC = () => {
         announce(`Command execution failed. Unknown command: '${trimmed}'.`, "polite");
       }
     }, 450);
-  }, [setCommandHistory, setHistoryIndex, setIsExecuting, setInput, setLogs]);
+  }, [setCommandHistory, setHistoryIndex, setIsExecuting, setInput, setLogs, announce, playSuccess]);
 
   // Typing animation state/ref
   const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -317,6 +320,7 @@ export const SandboxTerminal: React.FC = () => {
           const char = command[currentIndex];
           currentTyped += char;
           setInput(currentTyped);
+          playKeystroke(char.charCodeAt(0));
 
           // Translate into simulated keystroke events inside the terminal interface
           const inputEl = inputRef.current;
@@ -352,10 +356,14 @@ export const SandboxTerminal: React.FC = () => {
         clearInterval(typingTimerRef.current);
       }
     };
-  }, [isExecuting, executeCommand]);
+  }, [isExecuting, executeCommand, playKeystroke]);
 
   // Handle key triggers (Enter, Up, Down, Tab, Escape)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key.length === 1) {
+      playKeystroke(e.key.charCodeAt(0));
+    }
+
     if (e.key === "Enter") {
       executeCommand(input);
     } else if (e.key === "Tab") {
@@ -373,6 +381,7 @@ export const SandboxTerminal: React.FC = () => {
         if (matched) {
           e.preventDefault();
           setInput(matched);
+          playAutocomplete();
         }
       }
     } else if (e.key === "Escape") {

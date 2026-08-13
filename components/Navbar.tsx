@@ -6,6 +6,8 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
+import { useAudio } from "@/components/providers/AudioProvider";
+import { IconVolume, IconVolumeOff, IconChevronDown } from "@tabler/icons-react";
 
 interface NavItem {
   label: string;
@@ -26,6 +28,16 @@ export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("hero");
+
+  const { volume, muted, profile, setVolume, setMuted, setProfile, playHover } = useAudio();
+  const [showAudioPanel, setShowAudioPanel] = useState(false);
+
+  const handleLinkHover = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (typeof window === "undefined") return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pan = (rect.left + rect.width / 2) / window.innerWidth * 2 - 1;
+    playHover(pan);
+  };
 
   const pathname = usePathname();
   const [prevPathname, setPrevPathname] = useState(pathname);
@@ -189,29 +201,113 @@ export const Navbar: React.FC = () => {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-8">
-            {navItems.map((item) => {
-              const isSectionActive = pathname === "/" && item.href.startsWith("/#") && activeSection === item.href.substring(2);
-              return (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  target={item.isExternal ? "_blank" : undefined}
-                  rel={item.isExternal ? "noopener noreferrer" : undefined}
-                  onClick={(e) => handleNavClick(e, item.href)}
-                  className={cn(
-                    "text-xs font-mono tracking-wider font-semibold transition-all duration-300 hover:text-foreground cursor-pointer flex items-center gap-1",
-                    isSectionActive
-                      ? "text-brand-cyan font-bold"
-                      : "text-muted"
-                  )}
-                >
-                  {item.label}
-                  {item.isExternal && <span className="text-[10px] text-zinc-600 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">↗</span>}
-                </Link>
-              );
-            })}
-          </nav>
+          <div className="hidden md:flex items-center gap-8">
+            <nav className="flex items-center gap-8">
+              {navItems.map((item) => {
+                const isSectionActive = pathname === "/" && item.href.startsWith("/#") && activeSection === item.href.substring(2);
+                return (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    target={item.isExternal ? "_blank" : undefined}
+                    rel={item.isExternal ? "noopener noreferrer" : undefined}
+                    onClick={(e) => handleNavClick(e, item.href)}
+                    onMouseEnter={handleLinkHover}
+                    className={cn(
+                      "text-xs font-mono tracking-wider font-semibold transition-all duration-300 hover:text-foreground cursor-pointer flex items-center gap-1",
+                      isSectionActive
+                        ? "text-brand-cyan font-bold"
+                        : "text-muted"
+                    )}
+                  >
+                    {item.label}
+                    {item.isExternal && <span className="text-[10px] text-zinc-600 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">↗</span>}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* Audio Controller Desktop */}
+            <div className="relative">
+              <button
+                onClick={() => setShowAudioPanel(!showAudioPanel)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-zinc-900 bg-zinc-900/40 hover:border-brand-cyan/40 text-zinc-400 hover:text-foreground transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-cyan/40"
+                aria-label="Sound Settings"
+                aria-expanded={showAudioPanel}
+              >
+                {muted ? (
+                  <IconVolumeOff className="w-3.5 h-3.5 text-zinc-500" />
+                ) : (
+                  <IconVolume className="w-3.5 h-3.5 text-brand-cyan" />
+                )}
+                <span className="text-[10px] font-mono tracking-wider font-bold">
+                  SOUND: {muted ? "OFF" : profile.toUpperCase()}
+                </span>
+                <IconChevronDown className="w-3 h-3 text-zinc-500" />
+              </button>
+
+              <AnimatePresence>
+                {showAudioPanel && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowAudioPanel(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute right-0 mt-2 w-64 p-4 rounded-2xl border border-zinc-900 bg-zinc-950/95 backdrop-blur-xl shadow-xl z-50 flex flex-col gap-3.5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-mono font-bold tracking-wider text-zinc-400">SYNTH SETTINGS</span>
+                        <button
+                          onClick={() => setMuted(!muted)}
+                          className="px-2 py-0.5 rounded text-[10px] font-mono font-black border border-zinc-900 bg-zinc-900/50 hover:border-brand-cyan/40 text-brand-cyan transition-all cursor-pointer"
+                        >
+                          {muted ? "UNMUTE" : "MUTE"}
+                        </button>
+                      </div>
+
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex justify-between text-[10px] font-mono text-zinc-500">
+                          <span>Volume</span>
+                          <span>{Math.round(volume * 100)}%</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={Math.round(volume * 100)}
+                          onChange={(e) => setVolume(parseFloat(e.target.value) / 100)}
+                          disabled={muted}
+                          className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-brand-cyan disabled:opacity-40 disabled:cursor-not-allowed"
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-2">
+                        <span className="text-[10px] font-mono text-zinc-500">Sound Profile</span>
+                        <div className="flex flex-col gap-1.5">
+                          {(["8-bit", "90s-retro", "ambient"] as const).map((p) => (
+                            <button
+                              key={p}
+                              onClick={() => setProfile(p)}
+                              disabled={muted}
+                              className={cn(
+                                "w-full text-left px-3 py-1.5 rounded-lg border text-[10px] font-mono tracking-wider transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
+                                profile === p
+                                  ? "bg-brand-cyan/10 border-brand-cyan/40 text-brand-cyan font-bold"
+                                  : "bg-zinc-900/20 border-zinc-900 hover:border-zinc-800 text-zinc-400 hover:text-foreground"
+                              )}
+                            >
+                              {p === "8-bit" ? "8-Bit Retro" : p === "90s-retro" ? "90s Retro" : "Ambient Pad"}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
 
           {/* Mobile Actions Container */}
           <div className="md:hidden flex items-center gap-4 relative z-50">
@@ -295,6 +391,7 @@ export const Navbar: React.FC = () => {
                       target={item.isExternal ? "_blank" : undefined}
                       rel={item.isExternal ? "noopener noreferrer" : undefined}
                       onClick={(e) => handleNavClick(e, item.href)}
+                      onMouseEnter={handleLinkHover}
                       className={cn(
                         "text-3xl font-extrabold tracking-tight font-sans transition-all cursor-pointer flex items-center gap-2",
                         isSectionActive
@@ -309,6 +406,70 @@ export const Navbar: React.FC = () => {
                 );
               })}
             </nav>
+
+            {/* Mobile Audio Controls */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              className="mt-8 border-t border-zinc-900/80 pt-6 flex flex-col gap-4 relative z-10 max-w-sm"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {muted ? (
+                    <IconVolumeOff className="w-4 h-4 text-zinc-500" />
+                  ) : (
+                    <IconVolume className="w-4 h-4 text-brand-cyan" />
+                  )}
+                  <span className="text-xs font-mono font-bold tracking-wider text-zinc-400">SYNTH SETTINGS</span>
+                </div>
+                <button
+                  onClick={() => setMuted(!muted)}
+                  className="px-3 py-1 rounded-xl text-xs font-mono font-black border border-zinc-800 bg-zinc-900/50 hover:border-brand-cyan/40 text-brand-cyan transition-all cursor-pointer"
+                >
+                  {muted ? "UNMUTE" : "MUTE"}
+                </button>
+              </div>
+
+              {/* Volume Slider */}
+              <div className="flex flex-col gap-2">
+                <div className="flex justify-between text-xs font-mono text-zinc-500">
+                  <span>Volume</span>
+                  <span>{Math.round(volume * 100)}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={Math.round(volume * 100)}
+                  onChange={(e) => setVolume(parseFloat(e.target.value) / 100)}
+                  disabled={muted}
+                  className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-brand-cyan disabled:opacity-40"
+                />
+              </div>
+
+              {/* Profiles Selection Grid */}
+              <div className="flex flex-col gap-2">
+                <span className="text-xs font-mono text-zinc-500">Sound Profile</span>
+                <div className="grid grid-cols-3 gap-2">
+                  {(["8-bit", "90s-retro", "ambient"] as const).map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setProfile(p)}
+                      disabled={muted}
+                      className={cn(
+                        "text-center px-2 py-2 rounded-xl border text-[10px] font-mono tracking-wider transition-all cursor-pointer disabled:opacity-40",
+                        profile === p
+                          ? "bg-brand-cyan/10 border-brand-cyan/40 text-brand-cyan font-bold"
+                          : "bg-zinc-900/20 border-zinc-900 hover:border-zinc-800 text-zinc-400"
+                      )}
+                    >
+                      {p === "8-bit" ? "8-Bit" : p === "90s-retro" ? "90s" : "Ambient"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
 
             <motion.div
               initial={{ opacity: 0 }}
