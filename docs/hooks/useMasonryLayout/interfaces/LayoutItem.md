@@ -32,16 +32,16 @@ Defined in: [hooks/useMasonryLayout.ts:25](https://github.com/fderuiter/portfoli
 
 ***
 
-### items
+### paragraphsItems
 
-> **items**: [`ExtendedRichInlineItem`](../../usePretextLayout/interfaces/ExtendedRichInlineItem.md)[]
+> **paragraphsItems**: [`ExtendedRichInlineItem`](../../usePretextLayout/interfaces/ExtendedRichInlineItem.md)[][]
 
 Defined in: [hooks/useMasonryLayout.ts:28](https://github.com/fderuiter/portfolio/blob/main/hooks/useMasonryLayout.ts#L28)
 
 ***
 
-### lines
+### paragraphsLines
 
-> **lines**: `RichInlineLine`[]
+> **paragraphsLines**: `RichInlineLine`[][]
 
 Defined in: [hooks/useMasonryLayout.ts:27](https://github.com/fderuiter/portfolio/blob/main/hooks/useMasonryLayout.ts#L27)

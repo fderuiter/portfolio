@@ -18,6 +18,7 @@ export interface MasonryItem {
   id: string;
   editorial_content: string;
   githubStats?: GitHubStats | null;
+  isQuiz?: boolean;
 }
 
 export interface LayoutItem<T extends MasonryItem> {
@@ -69,7 +70,9 @@ export function useMasonryLayout<T extends MasonryItem>(
         };
       });
 
-      const paddingHeight = study.githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS;
+      const paddingHeight = study.isQuiz
+        ? LAYOUT_CONFIG.PADDING_WITH_QUIZ
+        : (study.githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS);
       
       data[study.id] = {
         paragraphs,

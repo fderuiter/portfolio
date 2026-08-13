@@ -12,6 +12,7 @@ import { BentoLayoutProvider } from "@/components/providers/BentoLayoutContext";
 
 interface HydratedCaseStudy extends BaseCaseStudy {
   githubStats: GitHubStats | null;
+  isQuiz?: boolean;
 }
 
 interface CaseStudyShowcaseProps {
@@ -23,14 +24,34 @@ const FILTER_TABS = ["All", "TypeScript", "Python", "Haskell"];
 const CaseStudyShowcaseInner: React.FC<CaseStudyShowcaseProps> = ({ caseStudies }) => {
   const [selectedFilter, setSelectedFilter] = useState("All");
 
+  // Inject the "Should You Hire Me?" hiring quiz card into the bento items
+  const combinedWithQuiz = useMemo(() => {
+    const quizCard = {
+      id: "hiring-quiz-card",
+      slug: "hiring-quiz",
+      title: "Should You Hire Me?",
+      primary_language: "TypeScript",
+      editorial_content: "Are you a recruiter looking to evaluate cultural, system, and design orientation instantly? Try our interactive hiring simulator directly within this card to see if we are a match.",
+      architectural_narrative: "",
+      simulated_telemetry: false,
+      tags: "Interactive, Quiz, Hydration",
+      githubStats: null,
+      isQuiz: true,
+      published: true,
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+    return [...caseStudies, quizCard] as HydratedCaseStudy[];
+  }, [caseStudies]);
+
   // Client-side interactive filter
   const filteredStudies = useMemo(() => {
     return selectedFilter === "All"
-      ? caseStudies
-      : caseStudies.filter((study) => study.primary_language === selectedFilter);
-  }, [caseStudies, selectedFilter]);
+      ? combinedWithQuiz
+      : combinedWithQuiz.filter((study) => study.primary_language === selectedFilter);
+  }, [combinedWithQuiz, selectedFilter]);
 
-  const { containerRef, layoutState } = useMasonryLayout(caseStudies, filteredStudies);
+  const { containerRef, layoutState } = useMasonryLayout(combinedWithQuiz, filteredStudies);
 
   return (
     <div className="w-full flex flex-col items-center">

@@ -13,6 +13,17 @@ import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAnnouncer } from "@/components/providers/A11yProvider";
 import { LAYOUT_CONFIG } from "@/lib/layout-config";
 import { useBentoLayout } from "@/components/providers/BentoLayoutContext";
+import dynamic from "next/dynamic";
+
+const HiringQuiz = dynamic(() => import("@/components/HiringQuiz"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex flex-col h-[280px] justify-center items-center font-mono text-xs text-zinc-500">
+      <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-ping mr-2 inline-block" />
+      LOADING SIMULATOR...
+    </div>
+  ),
+});
 
 const REALITY_CONTENT: Record<string, string> = {
   schemaflow: "While the drag-and-drop canvas is extremely smooth, we initially faced major rendering bottlenecks when rendering over 150 schema nodes. We had to implement node occlusion culling and state debouncing to maintain 60 FPS, and cyclical dependency detection still requires optimized Web Worker postMessage parsing.",
@@ -24,8 +35,13 @@ const getRealityContent = (slug: string, originalContent: string) => {
   return REALITY_CONTENT[slug] || `Reality Check: ${originalContent} (Dynamic verification and performance testing in live staging revealed minor scaling limits under concurrent loads).`;
 };
 
+interface ExtendedCaseStudy extends BaseCaseStudy {
+  githubStats: GitHubStats | null;
+  isQuiz?: boolean;
+}
+
 interface CaseStudyBentoCardProps {
-  study: BaseCaseStudy & { githubStats: GitHubStats | null };
+  study: ExtendedCaseStudy;
   className?: string;
   preCalculatedHeight?: number;
   preCalculatedParagraphsLines?: RichInlineLine[][];
@@ -70,6 +86,11 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
   const [mode, setMode] = React.useState<"pitch" | "reality">("pitch");
   const [isLocalTransitioning, setIsLocalTransitioning] = React.useState(false);
 
+  const [shouldLoad, setShouldLoad] = React.useState(false);
+  const triggerLoad = React.useCallback(() => {
+    setShouldLoad(true);
+  }, []);
+
   const handleToggleMode = (newMode: "pitch" | "reality") => {
     if (newMode === mode) return;
 
@@ -98,10 +119,36 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
     translationMode: mode, // Pass active translation state
   });
 
-  const finalHeight = hasPrecalculated ? preCalculatedHeight : (internalLayout.isReady ? internalLayout.height + (githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS) : undefined);
+  const finalPadding = study.isQuiz 
+    ? LAYOUT_CONFIG.PADDING_WITH_QUIZ 
+    : (githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS);
+
+  const finalHeight = hasPrecalculated ? preCalculatedHeight : (internalLayout.isReady ? internalLayout.height + finalPadding : undefined);
   const isLayoutReady = hasPrecalculated ? true : internalLayout.isReady;
 
   const innerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!study.isQuiz || shouldLoad) return;
+
+    const element = innerRef.current;
+    if (!element) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          triggerLoad();
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "100px" }
+    );
+
+    observer.observe(element);
+    return () => {
+      observer.disconnect();
+    };
+  }, [study.isQuiz, shouldLoad, triggerLoad]);
 
   // ResizeObserver restricted strictly to the active transition/interactive state (Reality mode)
   React.useLayoutEffect(() => {
@@ -165,6 +212,8 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
 
   const cardHeightValue = heightOverrides[study.id] !== undefined ? heightOverrides[study.id] : finalHeight;
 
+  const isQuizCard = study.isQuiz;
+
   return (
     <Card
       className={className}
@@ -173,11 +222,17 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
         transition: "height 250ms cubic-bezier(0.16, 1, 0.3, 1)",
       }}
     >
-      <div ref={innerRef} className="flex flex-col h-full justify-between">
+      <div 
+        ref={innerRef} 
+        className="flex flex-col h-full justify-between focus:outline-none"
+        tabIndex={isQuizCard ? 0 : undefined}
+        onPointerEnter={isQuizCard ? triggerLoad : undefined}
+        onFocus={isQuizCard ? triggerLoad : undefined}
+      >
         <div>
           {/* Card Top Pill & Header */}
           <div className="flex justify-between items-center mb-3">
-            <span className={`px-2.5 py-0.5 text-[10px] font-mono font-bold border border-current/10 rounded-md ${langColor.bg} ${langColor.text}`}>
+            <span className={`px-2.5 py-0.5 text-[10px] font-mono font-bold border border-current/10 rounded-md ${isQuizCard ? "bg-cyan-500/10 text-cyan-400" : langColor.bg} ${isQuizCard ? "text-cyan-400" : langColor.text}`}>
               {study.primary_language}
             </span>
             <span className="text-[10px] font-mono text-zinc-600">
@@ -189,65 +244,92 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             {study.title}
           </CardTitle>
 
-          {/* Premium Segmented Mode Switcher */}
-          <div className="flex p-0.5 bg-zinc-950/80 border border-zinc-900/60 rounded-lg mb-4 text-[10px] font-mono relative z-10 w-fit">
-            <button
-              onClick={() => handleToggleMode("pitch")}
-              className={`px-3 py-1 rounded-md font-bold transition-all duration-200 cursor-pointer ${
-                mode === "pitch"
-                  ? "bg-zinc-900 text-brand-cyan shadow-sm"
-                  : "text-zinc-500 hover:text-zinc-300"
-              }`}
-            >
-              THE PITCH
-            </button>
-            <button
-              onClick={() => handleToggleMode("reality")}
-              className={`px-3 py-1 rounded-md font-bold transition-all duration-200 cursor-pointer ${
-                mode === "reality"
-                  ? "bg-zinc-900 text-brand-cyan shadow-sm"
-                  : "text-zinc-500 hover:text-zinc-300"
-              }`}
-            >
-              THE REALITY
-            </button>
-          </div>
+          {isQuizCard ? (
+            <div className="mb-4">
+              {shouldLoad ? (
+                <HiringQuiz />
+              ) : (
+                <div className="flex flex-col justify-between h-[280px]">
+                  <p className="text-zinc-400 text-sm leading-relaxed font-sans">
+                    {study.editorial_content}
+                  </p>
+                  <div className="mt-4 p-3 bg-brand-cyan/5 border border-brand-cyan/20 rounded-xl text-center">
+                    <p className="text-[10px] font-mono text-brand-cyan font-bold uppercase tracking-wider mb-1">
+                      Simulator Standby
+                    </p>
+                    <button
+                      onClick={triggerLoad}
+                      className="text-xs font-bold text-zinc-300 hover:text-white transition-colors py-1 px-3 bg-zinc-950 border border-zinc-800 rounded-lg cursor-pointer"
+                    >
+                      Hover or Click to Initialize
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              {/* Premium Segmented Mode Switcher */}
+              <div className="flex p-0.5 bg-zinc-950/80 border border-zinc-900/60 rounded-lg mb-4 text-[10px] font-mono relative z-10 w-fit">
+                <button
+                  onClick={() => handleToggleMode("pitch")}
+                  className={`px-3 py-1 rounded-md font-bold transition-all duration-200 cursor-pointer ${
+                    mode === "pitch"
+                      ? "bg-zinc-900 text-brand-cyan shadow-sm"
+                      : "text-zinc-500 hover:text-zinc-300"
+                  }`}
+                >
+                  THE PITCH
+                </button>
+                <button
+                  onClick={() => handleToggleMode("reality")}
+                  className={`px-3 py-1 rounded-md font-bold transition-all duration-200 cursor-pointer ${
+                    mode === "reality"
+                      ? "bg-zinc-900 text-brand-cyan shadow-sm"
+                      : "text-zinc-500 hover:text-zinc-300"
+                  }`}
+                >
+                  THE REALITY
+                </button>
+              </div>
 
-           {/* Description Block using Pretext Rich Text for Pitch, or Custom Reality Text */}
-          <div className="mb-4">
-            {mode === "pitch" ? (
-              <div ref={hasPrecalculated ? undefined : internalLayout.ref}>
-                {hasPrecalculated && preCalculatedParagraphsLines && preCalculatedParagraphsItems ? (
-                  <div className="flex flex-col gap-[12px]">
-                    {preCalculatedParagraphsLines.map((pLines, pIdx) => (
+               {/* Description Block using Pretext Rich Text for Pitch, or Custom Reality Text */}
+              <div className="mb-4">
+                {mode === "pitch" ? (
+                  <div ref={hasPrecalculated ? undefined : internalLayout.ref}>
+                    {hasPrecalculated && preCalculatedParagraphsLines && preCalculatedParagraphsItems ? (
+                      <div className="flex flex-col gap-[12px]">
+                        {preCalculatedParagraphsLines.map((pLines, pIdx) => (
+                          <PretextRichText
+                            key={pIdx}
+                            lines={pLines}
+                            items={preCalculatedParagraphsItems[pIdx]}
+                            lineHeight={LAYOUT_CONFIG.LINE_HEIGHT}
+                            isReady={isLayoutReady}
+                            fallbackText=""
+                            className="text-zinc-400 text-sm leading-relaxed font-sans"
+                          />
+                        ))}
+                      </div>
+                    ) : (
                       <PretextRichText
-                        key={pIdx}
-                        lines={pLines}
-                        items={preCalculatedParagraphsItems[pIdx]}
+                        lines={internalLayout.lines}
+                        items={internalLayout.items}
                         lineHeight={LAYOUT_CONFIG.LINE_HEIGHT}
                         isReady={isLayoutReady}
-                        fallbackText=""
+                        fallbackText={study.editorial_content}
                         className="text-zinc-400 text-sm leading-relaxed font-sans"
                       />
-                    ))}
+                    )}
                   </div>
                 ) : (
-                  <PretextRichText
-                    lines={internalLayout.lines}
-                    items={internalLayout.items}
-                    lineHeight={LAYOUT_CONFIG.LINE_HEIGHT}
-                    isReady={isLayoutReady}
-                    fallbackText={study.editorial_content}
-                    className="text-zinc-400 text-sm leading-relaxed font-sans"
-                  />
+                  <p className="text-zinc-400 text-sm leading-relaxed font-sans">
+                    {getRealityContent(study.slug, study.editorial_content)}
+                  </p>
                 )}
               </div>
-            ) : (
-              <p className="text-zinc-400 text-sm leading-relaxed font-sans">
-                {getRealityContent(study.slug, study.editorial_content)}
-              </p>
-            )}
-          </div>
+            </>
+          )}
 
           {/* Dynamic GitHub Statistics Hydration */}
           {githubStats && (
@@ -385,11 +467,11 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
         {/* Footer analyze link */}
         <div className="flex justify-between items-center border-t border-zinc-900/40 pt-3 mt-2">
           <Link
-            href={`/case-studies/${study.slug}`}
+            href={isQuizCard ? "/simulator" : `/case-studies/${study.slug}`}
             onClick={() => recordEvent(study.slug, "project_click")}
             className="inline-flex items-center text-xs font-bold text-brand-cyan/80 hover:text-brand-cyan transition-colors duration-300 cursor-pointer relative z-10"
           >
-            <span>Analyze Architecture</span>
+            <span>{isQuizCard ? "Full Simulator" : "Analyze Architecture"}</span>
             <IconChevronRight className="ml-1 w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" />
           </Link>
           <div className="text-[9px] font-mono text-zinc-600">

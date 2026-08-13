@@ -16,6 +16,7 @@
 - [lib/db](lib/db/README.md)
 - [lib/design-manifest](lib/design-manifest/README.md)
 - [lib/error-sanitization](lib/error-sanitization/README.md)
+- [lib/exceptions](lib/exceptions/README.md)
 - [lib/github](lib/github/README.md)
 - [lib/graphics-engine](lib/graphics-engine/README.md)
 - [lib/layout-config](lib/layout-config/README.md)
