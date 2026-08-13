@@ -25,6 +25,17 @@ model CaseStudy {
   tags                    String   // Comma-separated string or a related Tag model
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
+  setbacks                Setback[]
+}
+
+model Setback {
+  id                String    @id @default(cuid())
+  title             String
+  editorial_content String
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+  caseStudyId       String
+  caseStudy         CaseStudy @relation(fields: [caseStudyId], references: [id], onDelete: Cascade)
 }
 
 model TelemetryEvent {

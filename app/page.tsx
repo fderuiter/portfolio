@@ -20,6 +20,7 @@ export default async function WalkingSkeletonPage() {
     // Query case studies from Neon database via Prisma
     const data = await prisma.caseStudy.findMany({
       where: { published: true },
+      include: { setbacks: true },
       orderBy: { created_at: "desc" },
       take: 3,
     });
@@ -41,6 +42,11 @@ export default async function WalkingSkeletonPage() {
           created_at: new Date(d.created_at),
           updated_at: new Date(d.updated_at),
           githubStats: stats,
+          setbacks: d.setbacks ? d.setbacks.map((sb) => ({
+            ...sb,
+            created_at: new Date(sb.created_at),
+            updated_at: new Date(sb.updated_at),
+          })) : [],
         };
       })
     );
@@ -67,6 +73,16 @@ export default async function WalkingSkeletonPage() {
           created_at: new Date(),
           updated_at: new Date(),
           githubStats: null,
+          setbacks: [
+            {
+              id: "mock-sb-1",
+              title: "Zustand State Drifting",
+              editorial_content: "We encountered complex rendering race conditions in Zustand where the canvas node positions drifted during rapid drag actions. Resolving this required debouncing the AST updates and memoizing selectors.",
+              created_at: new Date(),
+              updated_at: new Date(),
+              caseStudyId: "mock-1",
+            }
+          ]
         },
         {
           id: "mock-2",
@@ -82,6 +98,16 @@ export default async function WalkingSkeletonPage() {
           created_at: new Date(),
           updated_at: new Date(),
           githubStats: null,
+          setbacks: [
+            {
+              id: "mock-sb-2",
+              title: "SAX Stream Memory Bloat",
+              editorial_content: "Even with SAX parsing, standard V8 garbage collection overhead caused API timeouts on 2GB files. We solved this by using Node.js buffers directly and chunking database transaction commits.",
+              created_at: new Date(),
+              updated_at: new Date(),
+              caseStudyId: "mock-2",
+            }
+          ]
         }
       ];
     }

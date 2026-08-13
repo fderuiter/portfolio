@@ -1,3 +1,12 @@
+export interface BaseSetback {
+  id: string;
+  title: string;
+  editorial_content: string;
+  created_at: Date;
+  updated_at: Date;
+  caseStudyId: string;
+}
+
 export interface BaseCaseStudy {
   id: string;
   slug: string;
@@ -11,6 +20,7 @@ export interface BaseCaseStudy {
   tags: string;                    // comma-separated list of tags
   created_at: Date;
   updated_at: Date;
+  setbacks?: BaseSetback[];
 }
 
 // CDISC ODM & SDTM Specialized Case Study Structure

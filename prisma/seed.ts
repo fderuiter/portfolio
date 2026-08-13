@@ -7,6 +7,7 @@ import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "../app/generated/prisma/client";
 import ws from "ws";
 import { scanFile, scanText } from "../lib/validation-scanner";
+import { validateSetback } from "../lib/setback-validation";
 
 neonConfig.webSocketConstructor = ws;
 
@@ -25,6 +26,12 @@ const SEED_PAYLOADS = [
     simulated_telemetry: false,
     tags: "TypeScript, React, Flow, Schemas, AST, Node-RED",
     editorial_content: "A **reactive**, `visual graph editor` built in **TypeScript** and **React** that allows system architects to visually compose, validate, and compile complex `JSON Schema` structures in real time. Features highly responsive `node evaluation`, cyclical dependency detection, and live `code generation`.",
+    setbacks: [
+      {
+        title: "Zustand State Drifting",
+        editorial_content: "We encountered complex rendering race conditions in Zustand where the canvas node positions drifted during rapid drag actions. Resolving this required debouncing the AST updates and memoizing selectors.",
+      }
+    ],
     architectural_narrative: `
 <h3>The Challenge</h3>
 <p>Modern enterprise APIs often require complex, deeply nested JSON schemas. Hand-authoring these schemas in raw JSON or YAML leads to validation errors, duplicate definitions, and slow developer velocity. Visual graph editors exist, but they suffer from high rendering latency, lacks type-safety, and do not handle recursive schema references gracefully.</p>
@@ -61,6 +68,12 @@ interface SchemaNode {
     simulated_telemetry: false,
     tags: "TypeScript, CDISC, ODM, SDTM, XML Parser, Clinical Trials, HIPAA",
     editorial_content: "An enterprise-grade **TypeScript** mapping pipeline that ingests clinical trial metadata in `CDISC Operational Data Model (ODM)` XML format, dynamically constructs `data schemas`, and transforms raw `Electronic Data Capture (EDC)` datasets into compliant **CDISC SDTM** domains.",
+    setbacks: [
+      {
+        title: "SAX Stream Memory Bloat",
+        editorial_content: "Even with SAX parsing, standard V8 garbage collection overhead caused API timeouts on 2GB files. We solved this by using Node.js buffers directly and chunking database transaction commits.",
+      }
+    ],
     architectural_narrative: `
 <h3>The Challenge</h3>
 <p>Clinical trial databases are governed by rigid international regulatory standards set by CDISC. Review bodies like the FDA require trial findings to be submitted as SDTM datasets. The incoming trial data, however, arrives in XML-based CDISC ODM format or proprietary EDC database tables. Manual mapping is error-prone, highly slow, and compromises regulatory compliance.</p>
@@ -111,6 +124,12 @@ interface ODMClinicalData {
     simulated_telemetry: false,
     tags: "Python, SDK, iMednet, API Client, Clinical Trials, HIPAA, Clinical Data",
     editorial_content: "A **robust**, fully-typed `Python SDK` client for programmatic extraction and integration of clinical trial metadata and patient records from the `iMednet EDC` platform. Built for **biostatisticians** and **clinical data engineers**.",
+    setbacks: [
+      {
+        title: "Legacy SOAP API Timeouts",
+        editorial_content: "The platform's legacy SOAP API had persistent handshake timeouts and did not rotate session tokens safely. We built a custom TLS retry policy and active session connection pool.",
+      }
+    ],
     architectural_narrative: `
 <h3>The Challenge</h3>
 <p>Clinical electronic data capture (EDC) systems, such as iMednet, hold highly sensitive patient records and complex clinical trial protocols. Programmatic extraction is required by biostatisticians, data scientists, and clinical engineers for automated reporting and analytical pipelines. However, traditional SOAP/REST endpoints in clinical platforms often lack modern developer ergonomics, proper type safety, and clear schema boundaries, exposing clinical workflows to integration bugs and HIPAA security risks.</p>
@@ -150,6 +169,12 @@ class SubjectRecord(BaseModel):
     simulated_telemetry: true,
     tags: "Haskell, GHC, Compiler, AST, Static Analysis",
     editorial_content: "An advanced **Haskell** static analyzer and type inference engine that parses GHC ASTs, traces type flow, and detects compile-time architectural anti-patterns with near-instantaneous feedback loops.",
+    setbacks: [
+      {
+        title: "Lazy Evaluation Memory Leak",
+        editorial_content: "Strictness analyzer failed to optimize the monadic tree fold, causing massive memory accumulation. We fixed this by introducing bang patterns on accumulator structures.",
+      }
+    ],
     architectural_narrative: `
 <h3>The Challenge</h3>
 <p>Haskell codebases are robust, but tracing complex monadic types or locating space leaks can be incredibly slow and taxing. Developers need visual, live compiler-level insight without introducing manual tracing overhead or restarting GHC sessions repeatedly.</p>
@@ -178,6 +203,21 @@ async function main() {
       }
       console.error("Seeding halted. Zero records were inserted into the database.");
       process.exit(1);
+    }
+
+    // Validate setbacks programmatically
+    if (payload.setbacks) {
+      for (const sb of payload.setbacks) {
+        const sbErrors = validateSetback(sb);
+        if (sbErrors.length > 0) {
+          console.error(`❌ Validation failed in setback "${sb.title}" for payload "${payload.title}":`);
+          for (const err of sbErrors) {
+            console.error(`  - ${err}`);
+          }
+          console.error("Seeding halted. Zero records were inserted into the database.");
+          process.exit(1);
+        }
+      }
     }
   }
 
@@ -212,12 +252,19 @@ async function main() {
   console.log(`Validation guards completed successfully in ${duration}ms.`);
 
   // WIPE: Enforce idempotence by cleaning database before seeding
+  await prisma.setback.deleteMany({});
   await prisma.caseStudy.deleteMany({});
 
   // Insert the validated payloads
   for (const payload of SEED_PAYLOADS) {
+    const { setbacks, ...caseStudyData } = payload;
     await prisma.caseStudy.create({
-      data: payload,
+      data: {
+        ...caseStudyData,
+        setbacks: {
+          create: setbacks,
+        },
+      },
     });
   }
 
