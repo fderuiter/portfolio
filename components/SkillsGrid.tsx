@@ -5,6 +5,28 @@ import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
 import { motion } from "framer-motion";
 import { Tooltip } from "@/components/ui/Tooltip";
+import dynamic from "next/dynamic";
+
+// Lazy-loaded Smartwatch Simulator with pre-calculated aspect-ratio / heights for zero CLS
+const SmartwatchSimulator = dynamic(
+  () => import("@/components/SmartwatchSimulator").then((mod) => mod.SmartwatchSimulator),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[440px] bg-zinc-900/10 border border-zinc-900/50 rounded-[48px] animate-pulse flex flex-col justify-between p-6">
+        <div className="flex justify-between items-center">
+          <div className="w-24 h-4 bg-zinc-800/40 rounded-md" />
+          <div className="w-16 h-4 bg-zinc-800/40 rounded-md" />
+        </div>
+        <div className="w-[178px] h-[178px] rounded-full bg-zinc-900 border-4 border-zinc-950 flex items-center justify-center mx-auto" />
+        <div className="flex justify-between items-center">
+          <div className="w-20 h-3 bg-zinc-800/40 rounded-md" />
+          <div className="w-16 h-3 bg-zinc-800/40 rounded-md" />
+        </div>
+      </div>
+    ),
+  }
+);
 
 export interface SkillLanguage {
   name: string;
@@ -18,7 +40,7 @@ interface SkillsGridProps {
 export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl mx-auto select-none">
-      {/* 1. Professional Bio Card */}
+      {/* 1. Professional Bio Card (2 columns on desktop) */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -51,7 +73,18 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
         </div>
       </motion.div>
 
-      {/* 2. Dynamic Telemetry Languages Card */}
+      {/* 2. Embedded Smartwatch Simulator Card (1 column on desktop) */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6, delay: 0.05 }}
+        className="md:col-span-1"
+      >
+        <SmartwatchSimulator />
+      </motion.div>
+
+      {/* 3. Dynamic Telemetry Languages Card (1 column on desktop) */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -92,19 +125,19 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
         </div>
       </motion.div>
       
-      {/* 3. Core Architectural Pillars Card */}
+      {/* 4. Core Architectural Pillars Card (2 columns on desktop) */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: 0.2 }}
-        className="md:col-span-3 p-6 md:p-8 bg-zinc-900/5 border border-zinc-900/40 rounded-3xl relative overflow-hidden hover:border-zinc-900 transition-all duration-300"
+        className="md:col-span-2 p-6 md:p-8 bg-zinc-900/5 border border-zinc-900/40 rounded-3xl relative overflow-hidden hover:border-zinc-900 transition-all duration-300"
       >
         <h3 className="text-xs font-mono font-bold tracking-widest text-zinc-400 uppercase mb-6 text-center md:text-left">
           Core Technical Specializations
         </h3>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="space-y-2">
             <div className="w-8 h-8 rounded-lg bg-emerald-950/20 border border-emerald-900/30 flex items-center justify-center font-mono font-bold text-xs text-emerald-400">
               01
