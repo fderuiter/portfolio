@@ -106,6 +106,39 @@ function generateLogId(): string {
   return `log-entry-${idCounter}`;
 }
 
+export const highlightValue = (valStr: string): React.ReactNode => {
+  const trimmed = valStr.trim();
+  const hasTrailingComma = trimmed.endsWith(",");
+  const cleanValue = hasTrailingComma ? trimmed.slice(0, -1).trim() : trimmed;
+
+  if (cleanValue === '"[VERIFY_SECURITY_LOGS]"') {
+    return (
+      <>
+        <a
+          href="/transparency"
+          className="text-brand-cyan underline font-bold cursor-pointer hover:text-brand-cyan/80 focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 focus:ring-offset-1 focus:ring-offset-zinc-950 rounded"
+        >
+          [LIVE_VERIFICATION_LINK]
+        </a>
+        {hasTrailingComma && ","}
+      </>
+    );
+  }
+  if (trimmed.startsWith('"')) {
+    return <span className="text-emerald-400">{trimmed}</span>;
+  }
+  if (trimmed === "true" || trimmed === "false") {
+    return <span className="text-amber-500 font-bold">{trimmed}</span>;
+  }
+  if (trimmed === "null") {
+    return <span className="text-red-400 italic">{trimmed}</span>;
+  }
+  if (!isNaN(Number(trimmed.replace(/,$/, "")))) {
+    return <span className="text-blue-400 font-medium">{trimmed}</span>;
+  }
+  return <span className="text-zinc-300">{valStr}</span>;
+};
+
 export const SandboxTerminal: React.FC = () => {
   const { announce } = useAnnouncer();
   const { playKeystroke, playAutocomplete, playSuccess } = useAudio();
@@ -410,33 +443,6 @@ export const SandboxTerminal: React.FC = () => {
   const renderJsonPayload = (payload: unknown): React.ReactNode => {
     const str = JSON.stringify(payload, null, 2);
     
-    const highlightValue = (valStr: string) => {
-      const trimmed = valStr.trim();
-      if (trimmed === '"[VERIFY_SECURITY_LOGS]"') {
-        return (
-          <a
-            href="/transparency"
-            className="text-brand-cyan underline font-bold cursor-pointer hover:text-brand-cyan/80 focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 focus:ring-offset-1 focus:ring-offset-zinc-950 rounded"
-          >
-            [LIVE_VERIFICATION_LINK]
-          </a>
-        );
-      }
-      if (trimmed.startsWith('"')) {
-        return <span className="text-emerald-400">{trimmed}</span>;
-      }
-      if (trimmed === "true" || trimmed === "false") {
-        return <span className="text-amber-500 font-bold">{trimmed}</span>;
-      }
-      if (trimmed === "null") {
-        return <span className="text-red-400 italic">{trimmed}</span>;
-      }
-      if (!isNaN(Number(trimmed.replace(/,$/, "")))) {
-        return <span className="text-blue-400 font-medium">{trimmed}</span>;
-      }
-      return <span className="text-zinc-300">{valStr}</span>;
-    };
-
     return (
       <pre className="font-mono text-[11px] leading-relaxed text-zinc-300 overflow-x-auto select-text pt-2">
         <code>
