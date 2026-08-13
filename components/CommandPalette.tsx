@@ -90,6 +90,14 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         category: "navigation",
         url: "/ui-sandbox",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
+      },
+      {
+        id: "nav-proof",
+        title: "Logical Proof Workspace",
+        subtitle: "Construct and verify logic graphs using fully accessible CLI terminal",
+        category: "navigation",
+        url: "/proof",
+        icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
       }
     ];
 
