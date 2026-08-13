@@ -30,7 +30,8 @@ export function calculateMasonryLayout<T extends { id: string }>(
   containerWidth: number,
   filteredItems: T[],
   preparedData: Record<string, PreparedData>,
-  config: MasonryConfig
+  config: MasonryConfig,
+  heightOverrides?: Record<string, number>
 ) {
   const colCount = calculateColumnCount(containerWidth, config.BREAKPOINTS, config.COLS);
   const columnWidth = calculateColumnWidth(containerWidth, colCount, config.GAP);
@@ -38,7 +39,9 @@ export function calculateMasonryLayout<T extends { id: string }>(
   const itemsWithHeight = filteredItems.map((study) => {
     const cached = preparedData[study.id];
     if (!cached) {
-      return { ...study, height: config.FALLBACK_ITEM_HEIGHT, lines: [], items: [] };
+      const override = heightOverrides?.[study.id];
+      const height = override !== undefined ? override : config.FALLBACK_ITEM_HEIGHT;
+      return { ...study, height, lines: [], items: [] };
     }
 
     const linesRanges: RichInlineLineRange[] = [];
@@ -51,7 +54,8 @@ export function calculateMasonryLayout<T extends { id: string }>(
     );
 
     const textHeight = materializedLines.length * config.LINE_HEIGHT;
-    const totalHeight = textHeight + cached.paddingHeight;
+    const override = heightOverrides?.[study.id];
+    const totalHeight = override !== undefined ? override : textHeight + cached.paddingHeight;
 
     return {
       ...study,
