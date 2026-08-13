@@ -261,12 +261,22 @@ export default function ProofWorkspacePage() {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey && e.key === "\\") || (e.ctrlKey && e.key === "`")) {
         e.preventDefault();
-        toggleConsole();
+        if (!isConsoleOpen) {
+          toggleConsole();
+        } else {
+          // If already open, check focus location
+          if (document.activeElement !== consoleInputRef.current) {
+            consoleInputRef.current?.focus();
+            announceToScreenReader("Focused terminal command input.");
+          } else {
+            toggleConsole();
+          }
+        }
       }
     };
     window.addEventListener("keydown", handleGlobalKeyDown);
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-  }, [toggleConsole]);
+  }, [toggleConsole, isConsoleOpen]);
 
   // Command executor
   const runCommand = (cmdStr: string) => {
@@ -544,6 +554,11 @@ export default function ProofWorkspacePage() {
     if (e.key === "Enter") {
       e.preventDefault();
       runCommand(consoleInput);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      consoleInputRef.current?.blur();
+      toggleBtnRef.current?.focus();
+      announceToScreenReader("Console input blurred. Focus returned to toggle button.");
     } else if (e.key === "Tab") {
       e.preventDefault();
       if (suggestion) {
@@ -764,7 +779,10 @@ export default function ProofWorkspacePage() {
 
         {/* Right Split Panel: Accessible Command Terminal Console */}
         {isConsoleOpen && (
-          <div className="w-full md:w-[420px] border border-zinc-900 bg-zinc-950/80 rounded-3xl overflow-hidden flex flex-col relative backdrop-blur-md h-full">
+          <div 
+            data-keyboard-boundary="true"
+            className="w-full md:w-[420px] border border-zinc-900 bg-zinc-950/80 rounded-3xl overflow-hidden flex flex-col relative backdrop-blur-md h-full"
+          >
             
             {/* Terminal Window Header */}
             <div className="border-b border-zinc-900/60 bg-zinc-950/90 px-5 py-4 flex justify-between items-center select-none">
