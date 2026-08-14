@@ -6,13 +6,13 @@
 
 # Test info
 
-- Name: accessibility.spec.ts >> Accessibility Audit Suite >> Audit: Active Command Palette Search State
-- Location: __tests__/e2e/accessibility.spec.ts:136:7
+- Name: accessibility.spec.ts >> Accessibility Audit Suite >> Audit: Default Landing Page State
+- Location: __tests__/e2e/accessibility.spec.ts:97:7
 
 # Error details
 
 ```
-Error: Found 1 critical/serious accessibility violations in Active Command Palette State
+Error: Found 1 critical/serious accessibility violations in Default Page State
 
 expect(received).toBe(expected) // Object.is equality
 
@@ -23,7 +23,7 @@ Received: 1
 # Page snapshot
 
 ```yaml
-- generic [ref=e1]:
+- generic [active] [ref=e1]:
   - banner [ref=e2]:
     - generic [ref=e3]:
       - link "FDERUITER" [ref=e4] [cursor=pointer]:
@@ -580,28 +580,81 @@ Received: 1
           - generic [ref=e548]: Secure Profile Link
       - generic [ref=e549]: DESIGNED & DEVELOPED BY FREDERICK DE RUITER
   - alert [ref=e552]
-  - generic [ref=e554]:
-    - generic [ref=e555]:
-      - img [ref=e556]
-      - combobox "Spotlight command palette search" [expanded] [active] [ref=e559]: TypeScript
-      - generic [ref=e560]: ESC
-    - generic [ref=e561]:
-      - paragraph [ref=e562]: No outcomes match search query.
-      - paragraph [ref=e563]: Try searching other tags
-    - generic [ref=e564]:
-      - generic [ref=e565]:
-        - generic [ref=e566]:
-          - generic [ref=e567]: ↑↓
-          - text: Move
-        - generic [ref=e568]:
-          - generic [ref=e569]: ↵
-          - text: Enter
-      - generic [ref=e571]: "SEARCH RESULTS: 0"
 ```
 
 # Test source
 
 ```ts
+  10  |   if (!fs.existsSync(dir)) {
+  11  |     fs.mkdirSync(dir, { recursive: true });
+  12  |   }
+  13  |   const safeStateName = stateName.replace(/[^a-zA-Z0-9]/g, '_');
+  14  |   const filename = `${projectName}-${safeStateName}.json`;
+  15  |   const filePath = path.join(dir, filename);
+  16  |   
+  17  |   const resultData = {
+  18  |     project: projectName,
+  19  |     state: stateName,
+  20  |     url: checkedUrl,
+  21  |     violationsCount: violations.length,
+  22  |     violations: violations.map(v => ({
+  23  |       id: v.id,
+  24  |       impact: v.impact,
+  25  |       description: v.description,
+  26  |       help: v.help,
+  27  |       helpUrl: v.helpUrl,
+  28  |       nodes: v.nodes.map((n: any) => ({
+  29  |         target: n.target,
+  30  |         html: n.html
+  31  |       }))
+  32  |     })),
+  33  |     timestamp: new Date().toISOString()
+  34  |   };
+  35  |   
+  36  |   fs.writeFileSync(filePath, JSON.stringify(resultData, null, 2));
+  37  | }
+  38  | 
+  39  | // Helper to format failure messages clearly in terminal logs
+  40  | function formatViolationsForLog(projectName: string, stateName: string, violations: any[]): string {
+  41  |   if (violations.length === 0) return '';
+  42  |   let log = `\n==================================================\n`;
+  43  |   log += `🚨 ACCESSIBILITY VIOLATIONS DETECTED (${projectName} - ${stateName})\n`;
+  44  |   log += `Found ${violations.length} critical or serious violations.\n`;
+  45  |   log += `==================================================\n\n`;
+  46  | 
+  47  |   violations.forEach((violation, idx) => {
+  48  |     log += `Violation #${idx + 1}:\n`;
+  49  |     log += `  Rule ID:     ${violation.id}\n`;
+  50  |     log += `  Severity:    ${violation.impact}\n`;
+  51  |     log += `  Description: ${violation.description}\n`;
+  52  |     log += `  Help:        ${violation.help}\n`;
+  53  |     log += `  Help URL:    ${violation.helpUrl}\n`;
+  54  |     log += `  Affected Elements:\n`;
+  55  |     violation.nodes.forEach((node: any, nIdx: number) => {
+  56  |       log += `    Element ${nIdx + 1}:\n`;
+  57  |       log += `      CSS Selector: ${node.target.join(' > ')}\n`;
+  58  |       log += `      HTML snippet: ${node.html}\n`;
+  59  |     });
+  60  |     log += `--------------------------------------------------\n\n`;
+  61  |   });
+  62  |   return log;
+  63  | }
+  64  | 
+  65  | test.describe('Accessibility Audit Suite', () => {
+  66  |   test.beforeEach(async ({ page }) => {
+  67  |     // Emulate reduced motion to disable JS transitions/animations
+  68  |     await page.emulateMedia({ reducedMotion: 'reduce' });
+  69  | 
+  70  |     // Inject the global flag for the client so components enable specific testing behaviors if needed
+  71  |     await page.addInitScript(() => {
+  72  |       (window as unknown as { __PLAYWRIGHT_TEST__?: boolean }).__PLAYWRIGHT_TEST__ = true;
+  73  |     });
+  74  | 
+  75  |     // Go to landing page
+  76  |     await page.goto('/');
+  77  | 
+  78  |     // Disable animations for consistent layout scanning
+  79  |     await page.addStyleTag({
   80  |       content: `
   81  |         *, *::before, *::after {
   82  |           transition: none !important;
@@ -632,7 +685,8 @@ Received: 1
   107 |       console.error(errorLog);
   108 |     }
   109 | 
-  110 |     expect(criticalSerious.length, `Found ${criticalSerious.length} critical/serious accessibility violations in Default Page State`).toBe(0);
+> 110 |     expect(criticalSerious.length, `Found ${criticalSerious.length} critical/serious accessibility violations in Default Page State`).toBe(0);
+      |                                                                                                                                       ^ Error: Found 1 critical/serious accessibility violations in Default Page State
   111 |   });
   112 | 
   113 |   test('Audit: Interactive Project Filtering Tab State', async ({ page }, testInfo) => {
@@ -702,8 +756,7 @@ Received: 1
   177 |       console.error(errorLog);
   178 |     }
   179 | 
-> 180 |     expect(combinedCriticalSerious.length, `Found ${combinedCriticalSerious.length} critical/serious accessibility violations in Active Command Palette State`).toBe(0);
-      |                                                                                                                                                                 ^ Error: Found 1 critical/serious accessibility violations in Active Command Palette State
+  180 |     expect(combinedCriticalSerious.length, `Found ${combinedCriticalSerious.length} critical/serious accessibility violations in Active Command Palette State`).toBe(0);
   181 |   });
   182 | 
   183 |   test('Audit: Command Palette Focus Restoration', async ({ page }, testInfo) => {
@@ -734,74 +787,4 @@ Received: 1
   208 |     );
   209 | 
   210 |     // Close the command palette
-  211 |     await page.keyboard.press('Escape');
-  212 | 
-  213 |     // Wait for the modal to be removed
-  214 |     await expect(combobox).not.toBeVisible();
-  215 | 
-  216 |     // Verify keyboard focus returns to the calling button
-  217 |     const isFocused = await searchBtn.evaluate(el => document.activeElement === el);
-  218 |     expect(isFocused, "Keyboard focus did not return to the calling button when the modal closed").toBe(true);
-  219 | 
-  220 |     saveResult(testInfo.project.name, 'Command Palette Focus Restoration', criticalSerious, page.url());
-  221 |   });
-  222 | 
-  223 |   test('Audit: Mobile Navigation Focus Trap', async ({ page }, testInfo) => {
-  224 |     const isMobile = page.viewportSize()?.width && page.viewportSize()!.width < 768;
-  225 |     if (!isMobile) {
-  226 |       // Avoid failing desktop runs, but save empty violations so it's documented in metrics
-  227 |       saveResult(testInfo.project.name, 'Mobile Navigation Focus Trap', [], page.url());
-  228 |       return;
-  229 |     }
-  230 | 
-  231 |     // Go to landing page
-  232 |     await page.goto('/');
-  233 |     await page.waitForLoadState('networkidle');
-  234 | 
-  235 |     // Open mobile menu
-  236 |     const menuTrigger = page.locator('[aria-label="Open navigation menu"]');
-  237 |     await expect(menuTrigger).toBeVisible();
-  238 |     await menuTrigger.click();
-  239 | 
-  240 |     // Wait for menu overlay to be visible
-  241 |     const menuContainer = page.locator('#mobile-navigation');
-  242 |     await expect(menuContainer).toBeVisible();
-  243 | 
-  244 |     // Wait for the automatic focus shift (100ms in code)
-  245 |     await page.waitForTimeout(200);
-  246 | 
-  247 |     // Verify some element inside menu is currently focused
-  248 |     const isFocusedInitiallyInside = await page.evaluate(() => {
-  249 |       return !!document.activeElement?.closest('#mobile-navigation');
-  250 |     });
-  251 |     expect(isFocusedInitiallyInside).toBe(true);
-  252 | 
-  253 |     // Run Axe audit on the open mobile menu state
-  254 |     const results = await new AxeBuilder({ page }).disableRules(['color-contrast']).analyze();
-  255 |     const criticalSerious = results.violations.filter(
-  256 |       v => v.impact === 'critical' || v.impact === 'serious'
-  257 |     );
-  258 | 
-  259 |     // Press Tab multiple times to verify focus is trapped within the mobile menu container
-  260 |     let focusEscaped = false;
-  261 |     for (let i = 0; i < 20; i++) {
-  262 |       await page.keyboard.press('Tab');
-  263 |       const inside = await page.evaluate(() => {
-  264 |         return !!document.activeElement?.closest('#mobile-navigation');
-  265 |       });
-  266 |       if (!inside) {
-  267 |         focusEscaped = true;
-  268 |         break;
-  269 |       }
-  270 |     }
-  271 | 
-  272 |     expect(focusEscaped, "Focus escaped the open menu container on mobile-sized viewport during Tab navigation").toBe(false);
-  273 | 
-  274 |     // Press Shift+Tab multiple times to verify focus is trapped within the mobile menu container
-  275 |     for (let i = 0; i < 20; i++) {
-  276 |       await page.keyboard.press('Shift+Tab');
-  277 |       const inside = await page.evaluate(() => {
-  278 |         return !!document.activeElement?.closest('#mobile-navigation');
-  279 |       });
-  280 |       if (!inside) {
 ```

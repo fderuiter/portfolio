@@ -2,7 +2,35 @@
   "project": "chromium",
   "state": "Interactive State: Active Command Palette",
   "url": "http://localhost:3000/",
-  "violationsCount": 0,
-  "violations": [],
-  "timestamp": "2026-08-14T01:47:39.945Z"
+  "violationsCount": 1,
+  "violations": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+      "nodes": [
+        {
+          "target": [
+            "div[data-card-slug=\"schemaflow\"] > .\\[transform\\:rotateY\\(var\\(--r-x\\)\\)_rotateX\\(var\\(--r-y\\)\\)\\].rounded-\\[var\\(--radius\\)\\].border-border > .\\[clip-path\\:inset\\(0_0_0_0_round_var\\(--radius\\)\\)\\].mix-blend-soft-light.\\[grid-area\\:1\\/1\\] > .bg-surface-1.p-4.backdrop-blur-sm > .justify-between.h-full.flex-col > div:nth-child(1) > .mb-3.justify-between.items-center > .text-zinc-600.text-\\[10px\\].font-mono"
+          ],
+          "html": "<span class=\"text-[10px] font-mono text-zinc-600\">SCHEMAFLOW</span>"
+        },
+        {
+          "target": [
+            "div[data-card-slug=\"aura-haskell\"] > .\\[transform\\:rotateY\\(var\\(--r-x\\)\\)_rotateX\\(var\\(--r-y\\)\\)\\].rounded-\\[var\\(--radius\\)\\].border-border > .\\[clip-path\\:inset\\(0_0_0_0_round_var\\(--radius\\)\\)\\].mix-blend-soft-light.\\[grid-area\\:1\\/1\\] > .bg-surface-1.p-4.backdrop-blur-sm > .justify-between.h-full.flex-col > div:nth-child(1) > .mb-3.justify-between.items-center > .text-zinc-600.text-\\[10px\\].font-mono"
+          ],
+          "html": "<span class=\"text-[10px] font-mono text-zinc-600\">AURA-HASKELL</span>"
+        },
+        {
+          "target": [
+            "div[data-card-slug=\"clinical-data-mapper\"] > .\\[transform\\:rotateY\\(var\\(--r-x\\)\\)_rotateX\\(var\\(--r-y\\)\\)\\].rounded-\\[var\\(--radius\\)\\].border-border > .\\[clip-path\\:inset\\(0_0_0_0_round_var\\(--radius\\)\\)\\].mix-blend-soft-light.\\[grid-area\\:1\\/1\\] > .bg-surface-1.p-4.backdrop-blur-sm > .justify-between.h-full.flex-col > div:nth-child(1) > .mb-3.justify-between.items-center > .text-zinc-600.text-\\[10px\\].font-mono"
+          ],
+          "html": "<span class=\"text-[10px] font-mono text-zinc-600\">CLINICAL-DATA-MAPPER</span>"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-08-14T17:44:15.573Z"
 }
