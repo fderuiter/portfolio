@@ -25,7 +25,7 @@ import {
   richLayoutCache
 } from "@/lib/graphics-engine";
 
-interface UsePretextLayoutOptions {
+export interface UsePretextLayoutOptions {
   text: string;
   fontSize?: number;
   lineHeight: number;
@@ -33,7 +33,7 @@ interface UsePretextLayoutOptions {
   translationMode?: string;
 }
 
-interface PretextLayoutState {
+export interface PretextLayoutState {
   isReady: boolean;
   height: number;
   lineCount: number;
@@ -142,7 +142,7 @@ export function usePretextLayout({
 // Export global lifecycle helpers and rich-inline utilities
 export { clearCache, prepareRichInline };
 
-interface PretextTextProps {
+export interface PretextTextProps {
   text: string;
   fontSize?: number;
   lineHeight: number;
@@ -266,7 +266,7 @@ export function parseMarkdownToRichItems(
   return items;
 }
 
-interface UsePretextRichLayoutOptions {
+export interface UsePretextRichLayoutOptions {
   text: string;
   fontSize?: number;
   lineHeight: number;
@@ -404,7 +404,7 @@ export function usePretextRichLayout({
   };
 }
 
-interface PretextRichTextProps {
+export interface PretextRichTextProps {
   lines: RichInlineLine[];
   items: ExtendedRichInlineItem[];
   lineHeight: number;

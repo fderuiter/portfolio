@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import path from "path";
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
 
-import { Client, neonConfig } from "@neondatabase/serverless";
+import { neonConfig } from "@neondatabase/serverless";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "../app/generated/prisma/client";
 import ws from "ws";
@@ -11,8 +11,7 @@ import { scanFile, scanText } from "../lib/validation-scanner";
 neonConfig.webSocketConstructor = ws;
 
 const connectionString = process.env.DATABASE_URL;
-const client = new Client(connectionString);
-const adapter = new PrismaNeon(client as unknown as ConstructorParameters<typeof PrismaNeon>[0]);
+const adapter = new PrismaNeon({ connectionString });
 const prisma = new PrismaClient({ adapter });
 
 const SEED_PAYLOADS = [

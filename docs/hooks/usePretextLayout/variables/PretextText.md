@@ -6,6 +6,6 @@
 
 # Variable: PretextText
 
-> `const` **PretextText**: `React.FC`\<`PretextTextProps`\>
+> `const` **PretextText**: `React.FC`\<[`PretextTextProps`](../interfaces/PretextTextProps.md)\>
 
 Defined in: [hooks/usePretextLayout.tsx:155](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L155)

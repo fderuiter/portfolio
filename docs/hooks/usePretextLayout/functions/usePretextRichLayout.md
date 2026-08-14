@@ -14,7 +14,7 @@ Defined in: [hooks/usePretextLayout.tsx:277](https://github.com/fderuiter/portfo
 
 ### \_\_namedParameters
 
-`UsePretextRichLayoutOptions`
+[`UsePretextRichLayoutOptions`](../interfaces/UsePretextRichLayoutOptions.md)
 
 ## Returns
 

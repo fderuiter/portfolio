@@ -9,6 +9,11 @@
 ## Interfaces
 
 - [ExtendedRichInlineItem](interfaces/ExtendedRichInlineItem.md)
+- [PretextLayoutState](interfaces/PretextLayoutState.md)
+- [PretextRichTextProps](interfaces/PretextRichTextProps.md)
+- [PretextTextProps](interfaces/PretextTextProps.md)
+- [UsePretextLayoutOptions](interfaces/UsePretextLayoutOptions.md)
+- [UsePretextRichLayoutOptions](interfaces/UsePretextRichLayoutOptions.md)
 
 ## Variables
 

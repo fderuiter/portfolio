@@ -1,4 +1,4 @@
-import { Pool, neonConfig } from "@neondatabase/serverless";
+import { neonConfig } from "@neondatabase/serverless";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "@/app/generated/prisma/client";
 import ws from "ws";
@@ -12,8 +12,7 @@ const connectionString = process.env.DATABASE_URL;
 let isHealthy = false;
 
 const createPrismaClient = () => {
-  const pool = new Pool({ connectionString });
-  const adapter = new PrismaNeon(pool as unknown as ConstructorParameters<typeof PrismaNeon>[0]);
+  const adapter = new PrismaNeon({ connectionString });
   const baseClient = new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],

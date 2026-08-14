@@ -14,7 +14,7 @@ Defined in: [hooks/usePretextLayout.tsx:42](https://github.com/fderuiter/portfol
 
 ### \_\_namedParameters
 
-`UsePretextLayoutOptions`
+[`UsePretextLayoutOptions`](../interfaces/UsePretextLayoutOptions.md)
 
 ## Returns
 
