@@ -6,7 +6,7 @@
 
 # Interface: GitHubCommit
 
-Defined in: [types/domain.ts:33](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L33)
+Defined in: [types/domain.ts:38](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L38)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [types/domain.ts:33](https://github.com/fderuiter/portfolio/blob/mai
 
 > **author**: `string`
 
-Defined in: [types/domain.ts:37](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L37)
+Defined in: [types/domain.ts:42](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L42)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [types/domain.ts:37](https://github.com/fderuiter/portfolio/blob/mai
 
 > **date**: `string`
 
-Defined in: [types/domain.ts:36](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L36)
+Defined in: [types/domain.ts:41](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L41)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [types/domain.ts:36](https://github.com/fderuiter/portfolio/blob/mai
 
 > **message**: `string`
 
-Defined in: [types/domain.ts:35](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L35)
+Defined in: [types/domain.ts:40](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L40)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [types/domain.ts:35](https://github.com/fderuiter/portfolio/blob/mai
 
 > **sha**: `string`
 
-Defined in: [types/domain.ts:34](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L34)
+Defined in: [types/domain.ts:39](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L39)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [types/domain.ts:34](https://github.com/fderuiter/portfolio/blob/mai
 
 > **url**: `string`
 
-Defined in: [types/domain.ts:38](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L38)
+Defined in: [types/domain.ts:43](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L43)

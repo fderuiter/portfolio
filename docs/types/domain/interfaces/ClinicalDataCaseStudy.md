@@ -6,7 +6,7 @@
 
 # Interface: ClinicalDataCaseStudy
 
-Defined in: [types/domain.ts:17](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L17)
+Defined in: [types/domain.ts:22](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L22)
 
 ## Extends
 
@@ -26,11 +26,23 @@ Defined in: [types/domain.ts:8](https://github.com/fderuiter/portfolio/blob/main
 
 ***
 
+### classification
+
+> **classification**: `string`
+
+Defined in: [types/domain.ts:12](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L12)
+
+#### Inherited from
+
+[`BaseCaseStudy`](BaseCaseStudy.md).[`classification`](BaseCaseStudy.md#classification)
+
+***
+
 ### created\_at
 
 > **created\_at**: `Date`
 
-Defined in: [types/domain.ts:12](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L12)
+Defined in: [types/domain.ts:17](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L17)
 
 #### Inherited from
 
@@ -74,11 +86,23 @@ Defined in: [types/domain.ts:2](https://github.com/fderuiter/portfolio/blob/main
 
 ***
 
+### lessons\_learned?
+
+> `optional` **lessons\_learned?**: `string` \| `null`
+
+Defined in: [types/domain.ts:15](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L15)
+
+#### Inherited from
+
+[`BaseCaseStudy`](BaseCaseStudy.md).[`lessons_learned`](BaseCaseStudy.md#lessons_learned)
+
+***
+
 ### parsing\_mechanisms
 
 > **parsing\_mechanisms**: `"SAX_STREAMING"` \| `"DOM_PARSING"`
 
-Defined in: [types/domain.ts:19](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L19)
+Defined in: [types/domain.ts:24](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L24)
 
 ***
 
@@ -110,7 +134,7 @@ Defined in: [types/domain.ts:9](https://github.com/fderuiter/portfolio/blob/main
 
 > **regulatory\_targets**: (`"FDA"` \| `"PMDA"` \| `"EMA"`)[]
 
-Defined in: [types/domain.ts:20](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L20)
+Defined in: [types/domain.ts:25](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L25)
 
 ***
 
@@ -142,7 +166,19 @@ Defined in: [types/domain.ts:3](https://github.com/fderuiter/portfolio/blob/main
 
 > **standards\_validated**: (`"CDISC_ODM"` \| `"CDISC_SDTM"`)[]
 
-Defined in: [types/domain.ts:18](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L18)
+Defined in: [types/domain.ts:23](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L23)
+
+***
+
+### summary\_html?
+
+> `optional` **summary\_html?**: `string` \| `null`
+
+Defined in: [types/domain.ts:16](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L16)
+
+#### Inherited from
+
+[`BaseCaseStudy`](BaseCaseStudy.md).[`summary_html`](BaseCaseStudy.md#summary_html)
 
 ***
 
@@ -155,6 +191,30 @@ Defined in: [types/domain.ts:11](https://github.com/fderuiter/portfolio/blob/mai
 #### Inherited from
 
 [`BaseCaseStudy`](BaseCaseStudy.md).[`tags`](BaseCaseStudy.md#tags)
+
+***
+
+### the\_pitch?
+
+> `optional` **the\_pitch?**: `string` \| `null`
+
+Defined in: [types/domain.ts:13](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L13)
+
+#### Inherited from
+
+[`BaseCaseStudy`](BaseCaseStudy.md).[`the_pitch`](BaseCaseStudy.md#the_pitch)
+
+***
+
+### the\_reality?
+
+> `optional` **the\_reality?**: `string` \| `null`
+
+Defined in: [types/domain.ts:14](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L14)
+
+#### Inherited from
+
+[`BaseCaseStudy`](BaseCaseStudy.md).[`the_reality`](BaseCaseStudy.md#the_reality)
 
 ***
 
@@ -174,7 +234,7 @@ Defined in: [types/domain.ts:4](https://github.com/fderuiter/portfolio/blob/main
 
 > **updated\_at**: `Date`
 
-Defined in: [types/domain.ts:13](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L13)
+Defined in: [types/domain.ts:18](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L18)
 
 #### Inherited from
 

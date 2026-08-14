@@ -24,6 +24,7 @@ const SEED_PAYLOADS = [
     published: true,
     simulated_telemetry: false,
     tags: "TypeScript, React, Flow, Schemas, AST, Node-RED",
+    classification: "MAINSTREAM",
     editorial_content: "A **reactive**, `visual graph editor` built in **TypeScript** and **React** that allows system architects to visually compose, validate, and compile complex `JSON Schema` structures in real time. Features highly responsive `node evaluation`, cyclical dependency detection, and live `code generation`.",
     architectural_narrative: `
 <h3>The Challenge</h3>
@@ -60,6 +61,7 @@ interface SchemaNode {
     published: true,
     simulated_telemetry: false,
     tags: "TypeScript, CDISC, ODM, SDTM, XML Parser, Clinical Trials, HIPAA",
+    classification: "MAINSTREAM",
     editorial_content: "An enterprise-grade **TypeScript** mapping pipeline that ingests clinical trial metadata in `CDISC Operational Data Model (ODM)` XML format, dynamically constructs `data schemas`, and transforms raw `Electronic Data Capture (EDC)` datasets into compliant **CDISC SDTM** domains.",
     architectural_narrative: `
 <h3>The Challenge</h3>
@@ -110,6 +112,7 @@ interface ODMClinicalData {
     published: true,
     simulated_telemetry: false,
     tags: "Python, SDK, iMednet, API Client, Clinical Trials, HIPAA, Clinical Data",
+    classification: "MAINSTREAM",
     editorial_content: "A **robust**, fully-typed `Python SDK` client for programmatic extraction and integration of clinical trial metadata and patient records from the `iMednet EDC` platform. Built for **biostatisticians** and **clinical data engineers**.",
     architectural_narrative: `
 <h3>The Challenge</h3>
@@ -149,6 +152,7 @@ class SubjectRecord(BaseModel):
     published: true,
     simulated_telemetry: true,
     tags: "Haskell, GHC, Compiler, AST, Static Analysis",
+    classification: "MAINSTREAM",
     editorial_content: "An advanced **Haskell** static analyzer and type inference engine that parses GHC ASTs, traces type flow, and detects compile-time architectural anti-patterns with near-instantaneous feedback loops.",
     architectural_narrative: `
 <h3>The Challenge</h3>
@@ -156,6 +160,60 @@ class SubjectRecord(BaseModel):
 
 <h3>The Architecture</h3>
 <p>Aura uses GHC plugins to stream compilation ASTs and type constraints directly. In the dashboard, these constraints are modeled as a unified type flow graph, allowing real-time inspection of active monads, lazy evaluation spaces, and compiler optimizations.</p>
+    `.trim(),
+  },
+  {
+    slug: "proofchain-lean4",
+    title: "ProofChain: Lean4-Verified Micro-Consensus Protocol",
+    primary_language: "Lean4",
+    github_url: "https://github.com/fderuiter/proofchain-lean4",
+    published: true,
+    simulated_telemetry: true,
+    tags: "Lean4, Consensus, Cryptography, Formal Verification",
+    classification: "EXPERIMENTAL",
+    editorial_content: "A formally-verified micro-consensus protocol written in **Lean4** that mathematically proves safety and liveness properties of distributed node synchronization under Byzantine faults.",
+    architectural_narrative: "An exhaustive mathematical model of distributed consensus, specifying inductive invariants and utilizing Lean4 tactics to guarantee compile-time exclusion of double-spend states.",
+    the_pitch: "distributed systems often rely on probabilistic consensus. With **ProofChain**, we guarantee absolute deterministic correctness. By defining the consensus protocol as inductive relations in **Lean4**, we can mathematically prove that no two honest nodes can commit different blocks at the same height under arbitrary network delays.",
+    the_reality: "Lean4 has an extremely steep learning curve. Defining inductive invariants for network state took three weeks of formal proofs. While mathematically beautiful, the actual executable compiler generated from the proofs is slow and unoptimized, requiring heavy refinement of recursive functions.",
+    lessons_learned: "Formal verification is incredible for core state machine logic but overkill for I/O bounds. The optimal architecture is a Lean4-verified core coupled with a high-performance **Rust** network harness.",
+    summary_html: `
+<div class="grid grid-cols-2 gap-4 text-[10px] font-mono text-zinc-400">
+  <div class="border border-zinc-800 p-2 rounded bg-zinc-950/40">
+    <div class="text-brand-cyan font-bold mb-1">PROOF RATIO</div>
+    <div>12.4 lines of proof per line of executable code</div>
+  </div>
+  <div class="border border-zinc-800 p-2 rounded bg-zinc-950/40">
+    <div class="text-brand-cyan font-bold mb-1">SAFETY METRIC</div>
+    <div>0% state space violations in proof-checker</div>
+  </div>
+</div>
+    `.trim(),
+  },
+  {
+    slug: "laser-canvas-rust",
+    title: "Laser Loon: WebAssembly Vector Raytracer",
+    primary_language: "Rust",
+    github_url: "https://github.com/fderuiter/laser-canvas",
+    published: true,
+    simulated_telemetry: true,
+    tags: "Rust, WASM, Canvas, WebGL, Raytracing",
+    classification: "EXPERIMENTAL",
+    editorial_content: "A high-performance interactive 2D raytracer written in **Rust** and compiled to **WebAssembly** that performs real-time refractive vector calculations for over 10,000 laser vectors.",
+    architectural_narrative: "Leverages Rust's zero-cost abstractions and memory safety to execute ultra-fast linear algebra equations on a raw HTML5 Canvas via typed buffers.",
+    the_pitch: "A blazing-fast interactive playground. Standard vector raytracing in the browser is bottlenecked by JS garbage collection. By writing refractive physics equations in pure **Rust** and passing raw pixel buffers straight to the canvas, we achieve consistent 60fps.",
+    the_reality: "The WebAssembly bridge is a major overhead bottleneck. If you pass vectors one-by-one, the serializing cost wipes out the performance gains. We had to design an exclusive shared-memory buffer layout to transfer thousands of lines in a single memory frame copy.",
+    lessons_learned: "Minimize WASM-JS boundaries at all costs. Keep the state, calculations, and rendering loop completely within the WebAssembly memory workspace.",
+    summary_html: `
+<div class="grid grid-cols-2 gap-4 text-[10px] font-mono text-zinc-400">
+  <div class="border border-zinc-800 p-2 rounded bg-zinc-950/40">
+    <div class="text-brand-cyan font-bold mb-1">WASM OVERHEAD</div>
+    <div>Reduced JS boundary calls by 98.4%</div>
+  </div>
+  <div class="border border-zinc-800 p-2 rounded bg-zinc-950/40">
+    <div class="text-brand-cyan font-bold mb-1">FRAME BUDGET</div>
+    <div>Raytracer completes frame in under 1.4ms</div>
+  </div>
+</div>
     `.trim(),
   },
 ];
@@ -169,7 +227,18 @@ async function main() {
   for (const payload of SEED_PAYLOADS) {
     const editorialMatches = scanText(payload.editorial_content);
     const narrativeMatches = scanText(payload.architectural_narrative);
-    const combinedMatches = [...editorialMatches, ...narrativeMatches];
+    const pitchMatches = payload.the_pitch ? scanText(payload.the_pitch) : [];
+    const realityMatches = payload.the_reality ? scanText(payload.the_reality) : [];
+    const lessonsMatches = payload.lessons_learned ? scanText(payload.lessons_learned) : [];
+    const htmlMatches = payload.summary_html ? scanText(payload.summary_html) : [];
+    const combinedMatches = [
+      ...editorialMatches,
+      ...narrativeMatches,
+      ...pitchMatches,
+      ...realityMatches,
+      ...lessonsMatches,
+      ...htmlMatches
+    ];
 
     if (combinedMatches.length > 0) {
       console.error(`❌ Credentials detected programmatically in seeding payload for "${payload.title}":`);

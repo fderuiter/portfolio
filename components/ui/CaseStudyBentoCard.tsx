@@ -13,6 +13,7 @@ import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAnnouncer } from "@/components/providers/A11yProvider";
 import { LAYOUT_CONFIG } from "@/lib/layout-config";
 import { useBentoLayout } from "@/components/providers/BentoLayoutContext";
+import DOMPurify from "isomorphic-dompurify";
 
 const REALITY_CONTENT: Record<string, string> = {
   schemaflow: "While the drag-and-drop canvas is extremely smooth, we initially faced major rendering bottlenecks when rendering over 150 schema nodes. We had to implement node occlusion culling and state debouncing to maintain 60 FPS, and cyclical dependency detection still requires optimized Web Worker postMessage parsing.",
@@ -40,6 +41,8 @@ const LANGUAGE_COLORS: Record<string, { bg: string; text: string; hex: string }>
   Haskell: { bg: "bg-indigo-500/10", text: "text-indigo-400", hex: "#5e5086" },
   CSS: { bg: "bg-purple-500/10", text: "text-purple-400", hex: "#563d7c" },
   HTML: { bg: "bg-orange-500/10", text: "text-orange-400", hex: "#e34c26" },
+  Lean4: { bg: "bg-amber-500/10", text: "text-amber-400", hex: "#e5a100" },
+  Rust: { bg: "bg-orange-500/10", text: "text-orange-400", hex: "#dea584" },
 };
 
 const DEFAULT_COLOR = { bg: "bg-zinc-500/10", text: "text-zinc-400", hex: "#8b949e" };
@@ -68,17 +71,17 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
   }, [syncFailed, announce]);
 
   const { heightOverrides, registerHeightOverride, clearHeightOverride, setTransitioning } = useBentoLayout();
-  const [mode, setMode] = React.useState<"pitch" | "reality">("pitch");
+  const [mode, setMode] = React.useState<"pitch" | "reality" | "lessons">("pitch");
   const [isLocalTransitioning, setIsLocalTransitioning] = React.useState(false);
 
-  const handleToggleMode = (newMode: "pitch" | "reality") => {
+  const handleToggleMode = (newMode: "pitch" | "reality" | "lessons") => {
     if (newMode === mode) return;
 
     setIsLocalTransitioning(true);
     setTransitioning(study.id, true);
     setMode(newMode);
 
-    if (newMode === "pitch") {
+    if (newMode === "pitch" || newMode === "lessons" || study.classification === "EXPERIMENTAL") {
       clearHeightOverride(study.id);
     }
 
@@ -88,25 +91,50 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
     }, 400);
   };
 
+  const isExperimental = study.classification === "EXPERIMENTAL";
+
+  const activeText = React.useMemo(() => {
+    if (isExperimental) {
+      if (mode === "pitch") return study.the_pitch || study.editorial_content;
+      if (mode === "reality") return study.the_reality || study.editorial_content;
+      if (mode === "lessons") return study.lessons_learned || study.editorial_content;
+    }
+    return study.editorial_content;
+  }, [study, mode, isExperimental]);
+
+  const sanitizedSummaryHtml = React.useMemo(() => {
+    if (!study.summary_html) return null;
+    return DOMPurify.sanitize(study.summary_html, {
+      ALLOWED_TAGS: ["div", "span", "p", "strong", "em", "code", "pre", "h2", "h3", "h4", "h5", "h6"],
+      ALLOWED_ATTR: ["class", "style", "id"]
+    });
+  }, [study.summary_html]);
+
   const hasPrecalculated = preCalculatedHeight !== undefined && preCalculatedParagraphsLines !== undefined && preCalculatedParagraphsItems !== undefined;
 
   // We always execute the hook to follow dynamic hooks rules, but ignore if precalculated is provided
-  const internalLayout = usePretextRichLayout({
-    text: study.editorial_content,
+  const { 
+    ref: pretextRef, 
+    lines: pretextLines, 
+    items: pretextItems, 
+    isReady: pretextIsReady, 
+    height: pretextHeight 
+  } = usePretextRichLayout({
+    text: activeText,
     fontSize: LAYOUT_CONFIG.FONT_SIZE,
     lineHeight: LAYOUT_CONFIG.LINE_HEIGHT,
     fontFamilyVariable: "--font-inter",
     translationMode: mode, // Pass active translation state
   });
 
-  const finalHeight = hasPrecalculated ? preCalculatedHeight : (internalLayout.isReady ? internalLayout.height + (githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS) : undefined);
-  const isLayoutReady = hasPrecalculated ? true : internalLayout.isReady;
+  const finalHeight = hasPrecalculated ? preCalculatedHeight : (pretextIsReady ? pretextHeight + (githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS) : undefined);
+  const isLayoutReady = hasPrecalculated ? true : pretextIsReady;
 
   const innerRef = React.useRef<HTMLDivElement>(null);
 
-  // ResizeObserver restricted strictly to the active transition/interactive state (Reality mode)
+  // ResizeObserver restricted strictly to the active transition/interactive state
   React.useLayoutEffect(() => {
-    if (mode !== "reality" || !innerRef.current) return;
+    if ((mode === "pitch" && !isExperimental) || !innerRef.current) return;
 
     const element = innerRef.current;
     
@@ -127,7 +155,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
     return () => {
       observer.disconnect();
     };
-  }, [mode, study.id, registerHeightOverride]);
+  }, [mode, study.id, isExperimental, registerHeightOverride]);
 
   React.useLayoutEffect(() => {
     // Check global flag injected by Playwright
@@ -212,12 +240,35 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             >
               THE REALITY
             </button>
+            {isExperimental && (
+              <button
+                onClick={() => handleToggleMode("lessons")}
+                className={`px-3 py-1 rounded-md font-bold transition-all duration-200 cursor-pointer ${
+                  mode === "lessons"
+                    ? "bg-zinc-900 text-brand-cyan shadow-sm"
+                    : "text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                LESSONS LEARNED
+              </button>
+            )}
           </div>
 
            {/* Description Block using Pretext Rich Text for Pitch, or Custom Reality Text */}
           <div className="mb-4">
-            {mode === "pitch" ? (
-              <div ref={hasPrecalculated ? undefined : internalLayout.ref}>
+            {isExperimental ? (
+              <div ref={pretextRef}>
+                <PretextRichText
+                  lines={pretextLines}
+                  items={pretextItems}
+                  lineHeight={LAYOUT_CONFIG.LINE_HEIGHT}
+                  isReady={pretextIsReady}
+                  fallbackText={activeText}
+                  className="text-zinc-400 text-sm leading-relaxed font-sans"
+                />
+              </div>
+            ) : mode === "pitch" ? (
+              <div ref={hasPrecalculated ? undefined : pretextRef}>
                 {hasPrecalculated && preCalculatedParagraphsLines && preCalculatedParagraphsItems ? (
                   <div className="flex flex-col gap-[12px]">
                     {preCalculatedParagraphsLines.map((pLines, pIdx) => (
@@ -234,8 +285,8 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
                   </div>
                 ) : (
                   <PretextRichText
-                    lines={internalLayout.lines}
-                    items={internalLayout.items}
+                    lines={pretextLines}
+                    items={pretextItems}
                     lineHeight={LAYOUT_CONFIG.LINE_HEIGHT}
                     isReady={isLayoutReady}
                     fallbackText={study.editorial_content}
@@ -249,6 +300,14 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
               </p>
             )}
           </div>
+
+          {/* Complex Multi-column Summaries for Experimental Projects */}
+          {isExperimental && sanitizedSummaryHtml && (
+            <div 
+              className="mt-4 pt-4 border-t border-zinc-900/40 relative z-10"
+              dangerouslySetInnerHTML={{ __html: sanitizedSummaryHtml }}
+            />
+          )}
 
           {/* Dynamic GitHub Statistics Hydration */}
           {githubStats && (

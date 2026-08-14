@@ -9,6 +9,11 @@ export interface BaseCaseStudy {
   published: boolean;
   simulated_telemetry: boolean;
   tags: string;                    // comma-separated list of tags
+  classification: string;
+  the_pitch?: string | null;
+  the_reality?: string | null;
+  lessons_learned?: string | null;
+  summary_html?: string | null;
   created_at: Date;
   updated_at: Date;
 }

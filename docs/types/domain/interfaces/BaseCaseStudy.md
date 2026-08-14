@@ -22,11 +22,19 @@ Defined in: [types/domain.ts:8](https://github.com/fderuiter/portfolio/blob/main
 
 ***
 
+### classification
+
+> **classification**: `string`
+
+Defined in: [types/domain.ts:12](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L12)
+
+***
+
 ### created\_at
 
 > **created\_at**: `Date`
 
-Defined in: [types/domain.ts:12](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L12)
+Defined in: [types/domain.ts:17](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L17)
 
 ***
 
@@ -51,6 +59,14 @@ Defined in: [types/domain.ts:6](https://github.com/fderuiter/portfolio/blob/main
 > **id**: `string`
 
 Defined in: [types/domain.ts:2](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L2)
+
+***
+
+### lessons\_learned?
+
+> `optional` **lessons\_learned?**: `string` \| `null`
+
+Defined in: [types/domain.ts:15](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L15)
 
 ***
 
@@ -86,11 +102,35 @@ Defined in: [types/domain.ts:3](https://github.com/fderuiter/portfolio/blob/main
 
 ***
 
+### summary\_html?
+
+> `optional` **summary\_html?**: `string` \| `null`
+
+Defined in: [types/domain.ts:16](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L16)
+
+***
+
 ### tags
 
 > **tags**: `string`
 
 Defined in: [types/domain.ts:11](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L11)
+
+***
+
+### the\_pitch?
+
+> `optional` **the\_pitch?**: `string` \| `null`
+
+Defined in: [types/domain.ts:13](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L13)
+
+***
+
+### the\_reality?
+
+> `optional` **the\_reality?**: `string` \| `null`
+
+Defined in: [types/domain.ts:14](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L14)
 
 ***
 
@@ -106,4 +146,4 @@ Defined in: [types/domain.ts:4](https://github.com/fderuiter/portfolio/blob/main
 
 > **updated\_at**: `Date`
 
-Defined in: [types/domain.ts:13](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L13)
+Defined in: [types/domain.ts:18](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L18)
