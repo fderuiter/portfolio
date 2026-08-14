@@ -46,9 +46,9 @@ console.log(`\nChecking environment: VERCEL_ENV=${process.env.VERCEL_ENV || 'und
 if (isProduction) {
   console.log("\n--- Phase 3: Production Environment Detected - Running Migration Checks and Deploys ---");
   
-  // A. Migration Safety Check
-  console.log("Running migration safety check...");
-  runStep('node', ['scripts/check-migrations.js']);
+  // A. Migration Integrity and Safety Checks
+  console.log("Running migration integrity and safety checks...");
+  runStep('npm', ['run', 'check:migrations']);
   
   // B. Deploy Migrations
   console.log("Deploying database migrations...");
