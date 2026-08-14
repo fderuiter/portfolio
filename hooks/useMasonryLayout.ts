@@ -16,6 +16,7 @@ import { useBentoLayout } from "@/components/providers/BentoLayoutContext";
 
 export interface MasonryItem {
   id: string;
+  title?: string;
   editorial_content: string;
   githubStats?: GitHubStats | null;
 }
@@ -69,7 +70,10 @@ export function useMasonryLayout<T extends MasonryItem>(
         };
       });
 
-      const paddingHeight = study.githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS;
+      let paddingHeight = study.githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS;
+      if (study.title && study.title.length > 40) {
+        paddingHeight += 26; // Add height for one extra wrapped line of the title
+      }
       
       data[study.id] = {
         paragraphs,
