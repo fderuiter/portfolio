@@ -70,3 +70,9 @@ To work on this repository, you will need:
    npm run dev
    ```
    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Database changes
+
+Schema changes must include a checked-in Prisma migration. See
+[DATABASE_MIGRATIONS.md](_media/DATABASE_MIGRATIONS.md) for the development workflow,
+production rollout order, and the one-time production baseline procedure.
