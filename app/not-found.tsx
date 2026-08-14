@@ -41,6 +41,7 @@ export default function NotFound() {
 
   // Automatically center the cursor on first mount / resize
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
