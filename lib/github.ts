@@ -220,13 +220,13 @@ export function getSimulatedTerminalLogs(language: string): SimulatedTerminalLog
       { text: "[2 of 4] Compiling Parser.Type      ( src/Parser/Type.hs, Type.o )", color: "text-zinc-400" },
       { text: "[3 of 4] Compiling Solver.Unify     ( src/Solver/Unify.hs, Unify.o )", color: "text-zinc-400" },
       { text: "[4 of 4] Compiling Main             ( app/Main.hs, Main.o )", color: "text-zinc-400" },
-      { text: "Linking .stack-work/dist/x86_64/aura-compiler ...", color: "text-zinc-500" },
+      { text: "Linking .stack-work/dist/x86_64/aura-compiler ...", color: "text-zinc-400" },
       { text: "Build successful! Loaded 4 modules.", color: "text-emerald-400" },
     ];
   }
   if (lang === "typescript") {
     return [
-      { text: "[1:24:02 PM] Starting compilation in watch mode...", color: "text-zinc-500" },
+      { text: "[1:24:02 PM] Starting compilation in watch mode...", color: "text-zinc-400" },
       { text: "[1:24:04 PM] Found 0 errors. Watching for file changes.", color: "text-emerald-400" },
       { text: "[1:24:10 PM] File change detected. Starting incremental compilation...", color: "text-brand-cyan" },
       { text: "[1:24:11 PM] TS2304: Cannot find name 'unreachable' (Self-healed)", color: "text-amber-500" },
@@ -235,9 +235,9 @@ export function getSimulatedTerminalLogs(language: string): SimulatedTerminalLog
   }
   if (lang === "python") {
     return [
-      { text: "==================== test session starts ====================", color: "text-zinc-500" },
+      { text: "==================== test session starts ====================", color: "text-zinc-400" },
       { text: "platform linux -- Python 3.11.4, pytest-7.4.0", color: "text-zinc-400" },
-      { text: "plugins: cov-4.1.0, pydantic-2.1.1", color: "text-zinc-500" },
+      { text: "plugins: cov-4.1.0, pydantic-2.1.1", color: "text-zinc-400" },
       { text: "collected 18 items", color: "text-zinc-300" },
       { text: "tests/test_transport.py ... PASSED", color: "text-emerald-500" },
       { text: "tests/test_hipaa_boundary.py ... PASSED", color: "text-emerald-500" },
@@ -245,8 +245,8 @@ export function getSimulatedTerminalLogs(language: string): SimulatedTerminalLog
     ];
   }
   return [
-    { text: "[info] Initializing compiler pipeline...", color: "text-zinc-500" },
-    { text: "[info] Parsing source file dependencies...", color: "text-zinc-500" },
+    { text: "[info] Initializing compiler pipeline...", color: "text-zinc-400" },
+    { text: "[info] Parsing source file dependencies...", color: "text-zinc-400" },
     { text: `[info] Compiling ${language} modules...`, color: "text-zinc-300" },
     { text: "[success] Build target compiled successfully in 2.34s", color: "text-emerald-400" },
   ];

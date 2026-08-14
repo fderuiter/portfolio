@@ -190,10 +190,10 @@ export default async function PortfolioHomePage() {
           {/* Dynamic Bento Showcase */}
           {caseStudies.length === 0 ? (
             <div className="text-center p-12 bg-zinc-900/10 border border-zinc-900/40 border-dashed rounded-2xl w-full">
-              <p className="text-sm text-zinc-500 italic mb-2">
+              <p className="text-sm text-zinc-400 italic mb-2">
                 Connection established, but no published case studies were found in the database.
               </p>
-              <p className="text-xs text-zinc-600 font-mono">
+              <p className="text-xs text-zinc-400 font-mono">
                 Initialize seeding pipeline via Issue #10 to import clinical trial narratives.
               </p>
             </div>
@@ -265,7 +265,7 @@ export default async function PortfolioHomePage() {
                 ✉
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">Email Broadcast</span>
-              <span className="text-[10px] font-mono text-zinc-500">contact@fderuiter.com</span>
+              <span className="text-xs font-mono text-zinc-400">contact@fderuiter.com</span>
             </a>
             
             {/* GitHub Portal */}
@@ -280,7 +280,7 @@ export default async function PortfolioHomePage() {
                 🐙
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">GitHub Repos</span>
-              <span className="text-[10px] font-mono text-zinc-500">github.com/fderuiter</span>
+              <span className="text-xs font-mono text-zinc-400">github.com/fderuiter</span>
             </a>
 
             {/* LinkedIn Connection */}
@@ -295,11 +295,11 @@ export default async function PortfolioHomePage() {
                 in
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">LinkedIn Network</span>
-              <span className="text-[10px] font-mono text-zinc-500">Secure Profile Link</span>
+              <span className="text-xs font-mono text-zinc-400">Secure Profile Link</span>
             </a>
           </div>
           
-          <div className="mt-24 text-[10px] font-mono text-zinc-700 tracking-[0.25em] text-center select-none">
+          <div className="mt-24 text-xs font-mono text-zinc-400 tracking-[0.2em] text-center select-none">
             DESIGNED & DEVELOPED BY FREDERICK DE RUITER
           </div>
         </div>
