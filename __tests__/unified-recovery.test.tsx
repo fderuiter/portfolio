@@ -1,0 +1,124 @@
+// @vitest-environment jsdom
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
+// Configure React 19 act environment
+(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+
+import React, { act } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import { SearchProvider, useSearch } from "@/components/providers/SearchProvider";
+import { UnifiedErrorLayout } from "@/components/UnifiedErrorLayout";
+
+describe("SearchProvider & useSearch Context", () => {
+  it("should throw an error when useSearch is used outside of a SearchProvider", () => {
+    expect(() => {
+      useSearch();
+    }).toThrow();
+  });
+
+  it("should export UnifiedErrorLayout and make it available", () => {
+    expect(UnifiedErrorLayout).toBeDefined();
+    expect(typeof UnifiedErrorLayout).toBe("function");
+  });
+});
+
+describe("UnifiedErrorLayout JSDOM state and interactivity", () => {
+  let container: HTMLDivElement;
+  let root: Root;
+
+  beforeEach(() => {
+    container = document.createElement("div");
+    document.body.appendChild(container);
+
+    // Mock global fetch to return clean responses and prevent error logs
+    vi.stubGlobal("fetch", vi.fn().mockImplementation((url: string) => {
+      if (url.includes("/api/case-studies")) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve([
+            { id: "1", slug: "clinical-mapper", title: "Clinical Mapper", primary_language: "Python", tags: "Clinical" }
+          ])
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({})
+      });
+    }));
+  });
+
+  afterEach(() => {
+    act(() => {
+      root?.unmount();
+    });
+    document.body.removeChild(container);
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("renders with badge, title and description", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(
+        <SearchProvider>
+          <UnifiedErrorLayout
+            badge="TEST_BADGE"
+            title="Test Title"
+            description="Test description text"
+            showRetroLabyrinth={false}
+          />
+        </SearchProvider>
+      );
+    });
+
+    expect(container.textContent).toContain("TEST_BADGE");
+    expect(container.textContent).toContain("Test Title");
+    expect(container.textContent).toContain("Test description text");
+    expect(container.textContent).not.toContain("SYSTEM_LABYRINTH.EXE");
+  });
+
+  it("renders RetroLabyrinth when showRetroLabyrinth is true", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(
+        <SearchProvider>
+          <UnifiedErrorLayout
+            badge="TEST_BADGE"
+            title="Test Title"
+            description="Test description text"
+            showRetroLabyrinth={true}
+          />
+        </SearchProvider>
+      );
+    });
+
+    expect(container.textContent).toContain("SYSTEM_LABYRINTH.EXE");
+  });
+
+  it("focuses on the search button when clicked", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(
+        <SearchProvider>
+          <UnifiedErrorLayout
+            badge="TEST_BADGE"
+            title="Test Title"
+            description="Test description text"
+            showRetroLabyrinth={false}
+          />
+        </SearchProvider>
+      );
+    });
+
+    const searchButton = container.querySelector("button") as HTMLButtonElement;
+    expect(searchButton).toBeDefined();
+    expect(searchButton.textContent).toBe("Search Site");
+
+    await act(async () => {
+      searchButton.click();
+    });
+
+    // Check if the search button becomes the focused element
+    expect(document.activeElement).toBe(searchButton);
+  });
+});
