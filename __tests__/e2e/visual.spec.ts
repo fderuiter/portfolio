@@ -50,14 +50,20 @@ test.describe('Visual Regression & Drift Detection', () => {
       return document.querySelector('.text-\\[9px\\]') && !document.querySelector('.text-\\[9px\\]')?.textContent?.includes('MEASURING...');
     });
 
-    // Check if any card reported a hydration mismatch via the data attribute
-    const mismatchedCards = await page.locator('[data-hydration-mismatch="true"]').all();
-    
-    for (const card of mismatchedCards) {
+    // Wait for at least one card to be present and hydrated
+    await page.waitForSelector('[data-card-slug]');
+
+    // Select all cards inside the grid
+    const cards = await page.locator('[data-card-slug]').all();
+    for (const card of cards) {
+      const slug = await card.getAttribute('data-card-slug');
       const expected = await card.getAttribute('data-expected-height');
       const actual = await card.getAttribute('data-actual-height');
-      // If there's a mismatched card, this will intentionally fail the test
-      expect(actual, `Drift detected! Card mathematically expected ${expected}px but naturally measured ${actual}px. Update padding constants.`).toBe(expected);
+      
+      const mismatch = await card.getAttribute('data-hydration-mismatch');
+      if (mismatch === 'true') {
+        expect(actual, `Drift detected! Card '${slug}' mathematically expected ${expected}px but naturally measured ${actual}px. Update padding constants.`).toBe(expected);
+      }
     }
   });
 });
