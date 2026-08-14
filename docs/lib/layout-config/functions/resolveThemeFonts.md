@@ -8,7 +8,7 @@
 
 > **resolveThemeFonts**(`fontSize`, `fontFamilyVariable?`): [`ThemeFonts`](../interfaces/ThemeFonts.md)
 
-Defined in: [lib/layout-config.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L37)
+Defined in: [lib/layout-config.ts:38](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L38)
 
 ## Parameters
 

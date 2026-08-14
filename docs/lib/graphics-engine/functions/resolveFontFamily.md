@@ -6,7 +6,7 @@
 
 # Function: resolveFontFamily()
 
-> **resolveFontFamily**(`variableName?`): `string`
+> **resolveFontFamily**(`variableName?`, `fallback?`): `string`
 
 Defined in: [lib/graphics-engine.ts:84](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L84)
 
@@ -18,6 +18,10 @@ Returns designManifest sans-serif fallback if run in SSR or variables are missin
 ### variableName?
 
 `string` = `"--font-inter"`
+
+### fallback?
+
+`string` = `designManifest.typography.fonts.sans`
 
 ## Returns
 

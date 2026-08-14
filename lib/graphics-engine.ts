@@ -81,16 +81,19 @@ export function isBrowser(): boolean {
  * Resolves font family variable dynamically using Computed Style.
  * Returns designManifest sans-serif fallback if run in SSR or variables are missing.
  */
-export function resolveFontFamily(variableName: string = "--font-inter"): string {
+export function resolveFontFamily(
+  variableName: string = "--font-inter",
+  fallback: string = designManifest.typography.fonts.sans
+): string {
   if (!isBrowser()) {
-    return designManifest.typography.fonts.sans;
+    return fallback;
   }
   try {
     const rootStyle = window.getComputedStyle(document.documentElement);
     const rawFontFamily = rootStyle.getPropertyValue(variableName).trim();
-    return rawFontFamily || designManifest.typography.fonts.sans;
+    return rawFontFamily || fallback;
   } catch {
-    return designManifest.typography.fonts.sans;
+    return fallback;
   }
 }
 

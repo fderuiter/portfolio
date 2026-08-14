@@ -1,4 +1,5 @@
 import { designManifest } from "@/lib/design-manifest";
+import { resolveFontFamily } from "@/lib/graphics-engine";
 
 export const LAYOUT_CONFIG = {
   // Height offsets used for fallback and SSR
@@ -38,24 +39,13 @@ export function resolveThemeFonts(
   fontSize: number,
   fontFamilyVariable: string = "--font-inter"
 ): ThemeFonts {
-  if (typeof window === "undefined") {
-    const fallbackSans = designManifest.typography.fonts.sans;
-    const fallbackMono = designManifest.typography.fonts.mono;
-    return {
-      baseFont: `400 ${fontSize}px ${fallbackSans}`,
-      boldFont: `700 ${fontSize}px ${fallbackSans}`,
-      italicFont: `italic 400 ${fontSize}px ${fallbackSans}`,
-      codeFont: `500 ${fontSize - 1}px ${fallbackMono}`,
-    };
-  }
-
-  const rootStyle = window.getComputedStyle(document.documentElement);
+  const resolvedFontFamily = resolveFontFamily(fontFamilyVariable, designManifest.typography.fonts.sans);
   
-  const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
-  const resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
-
-  const rawMonoFamily = rootStyle.getPropertyValue("--font-mono").trim() || rootStyle.getPropertyValue("--font-geist-mono").trim();
-  const resolvedMonoFamily = rawMonoFamily || designManifest.typography.fonts.mono;
+  // Try custom font-mono variable, fallback to font-geist-mono, then standard design manifest fallback
+  let resolvedMonoFamily = resolveFontFamily("--font-mono", "");
+  if (!resolvedMonoFamily) {
+    resolvedMonoFamily = resolveFontFamily("--font-geist-mono", designManifest.typography.fonts.mono);
+  }
 
   return {
     baseFont: `400 ${fontSize}px ${resolvedFontFamily}`,
@@ -69,14 +59,6 @@ export function resolveSingleThemeFont(
   fontSize: number,
   fontFamilyVariable: string = "--font-inter"
 ): string {
-  if (typeof window === "undefined") {
-    const fallbackSans = designManifest.typography.fonts.sans;
-    return `${fontSize}px ${fallbackSans}`;
-  }
-
-  const rootStyle = window.getComputedStyle(document.documentElement);
-  const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
-  const resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
-
+  const resolvedFontFamily = resolveFontFamily(fontFamilyVariable, designManifest.typography.fonts.sans);
   return `${fontSize}px ${resolvedFontFamily}`;
 }
