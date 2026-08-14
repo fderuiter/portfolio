@@ -32,7 +32,7 @@ const SimulatorCardSkeleton: React.FC = () => {
         <div className="w-full h-12 bg-zinc-900/40 border border-zinc-900/60 rounded-xl mb-4 animate-pulse" />
       </div>
       <div className="w-64 h-64 rounded-full border-4 border-zinc-900 bg-zinc-950 flex items-center justify-center animate-pulse shadow-[inset_0_0_15px_rgba(0,0,0,0.95)]">
-        <span className="text-[10px] font-mono text-zinc-600">Simulating...</span>
+        <span className="text-[10px] font-mono text-zinc-400">Simulating...</span>
       </div>
       <div className="w-[260px] h-8 bg-zinc-900/40 border border-zinc-850 rounded-xl animate-pulse" />
     </div>
@@ -69,7 +69,7 @@ const SimulatorBentoCard: React.FC<SimulatorBentoCardProps> = ({ study, classNam
             <span className="px-2.5 py-0.5 text-[10px] font-mono font-bold border border-cyan-500/20 bg-cyan-950/40 text-cyan-400 rounded-md">
               Simulation
             </span>
-            <span className="text-[10px] font-mono text-zinc-600">
+            <span className="text-[10px] font-mono text-zinc-400">
               {study.slug.toUpperCase()}
             </span>
           </div>

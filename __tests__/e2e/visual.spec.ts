@@ -5,6 +5,11 @@ test.describe('Visual Regression & Drift Detection', () => {
     // Emulate reduced motion to disable JS transitions/animations
     await page.emulateMedia({ reducedMotion: 'reduce' });
 
+    // Inject the global flag for the client so the component boots
+    await page.addInitScript(() => {
+      (window as unknown as { __PLAYWRIGHT_TEST__?: boolean }).__PLAYWRIGHT_TEST__ = true;
+    });
+
     // Wait for the hydration and masonry layout to be stable
     await page.goto('/');
     

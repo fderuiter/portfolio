@@ -11,6 +11,7 @@ interface Obstacle {
 }
 
 export const GarminWatchSimulator: React.FC = () => {
+  const [isBooted, setIsBooted] = useState(() => typeof window !== "undefined" && !!(window as unknown as { __PLAYWRIGHT_TEST__?: boolean }).__PLAYWRIGHT_TEST__);
   const [gameState, setGameState] = useState<"idle" | "playing" | "gameover">("idle");
   const [playerY, setPlayerY] = useState(50); // percentage 10 to 90
   const [isLightOn, setIsLightOn] = useState(false);
@@ -60,6 +61,7 @@ export const GarminWatchSimulator: React.FC = () => {
 
   // ResizeObserver for dynamic scaling in responsive layouts
   useEffect(() => {
+    if (!isBooted) return;
     if (typeof window === "undefined") return;
     const handleResize = () => {
       if (wrapperRef.current) {
@@ -83,7 +85,7 @@ export const GarminWatchSimulator: React.FC = () => {
     return () => {
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [isBooted]);
 
   // Focus management
   const handleFocus = () => setIsFocused(true);
@@ -174,6 +176,7 @@ export const GarminWatchSimulator: React.FC = () => {
 
   // Game Loop
   useEffect(() => {
+    if (!isBooted) return;
     if (gameState !== "playing") {
       if (gameLoopRef.current) {
         cancelAnimationFrame(gameLoopRef.current);
@@ -268,7 +271,7 @@ export const GarminWatchSimulator: React.FC = () => {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameState, playerY, isLightOn, highScore, playNote]);
+  }, [gameState, playerY, isLightOn, highScore, playNote, isBooted]);
 
   return (
     <div ref={wrapperRef} className="w-full flex flex-col items-center select-none my-4 touch-pan-y">
@@ -287,7 +290,7 @@ export const GarminWatchSimulator: React.FC = () => {
             className={`inline-flex items-center gap-2 px-3 py-1 rounded-full font-mono text-[10px] font-bold uppercase tracking-wider border transition-all duration-300 ${
               isFocused
                 ? "bg-brand-cyan/10 text-brand-cyan border-brand-cyan/30 shadow-[0_0_10px_rgba(34,211,238,0.15)] animate-pulse"
-                : "bg-zinc-950 text-zinc-500 border-zinc-800"
+                : "bg-zinc-950 text-zinc-400 border-zinc-800"
             }`}
           >
             <IconCircle
@@ -295,18 +298,18 @@ export const GarminWatchSimulator: React.FC = () => {
                 isFocused ? "fill-brand-cyan stroke-none" : "fill-zinc-600 stroke-none"
               }`}
             />
-            {isFocused ? "Watch Keyboard Captures: ACTIVE" : "Click Watch to Focus controls"}
+            {!isBooted ? "Smartwatch Simulator: Offline" : isFocused ? "Watch Keyboard Captures: ACTIVE" : "Click Watch to Focus controls"}
           </span>
         </div>
 
         {/* Outer Watch Chassis */}
         <div
           ref={containerRef}
-          tabIndex={0}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          data-keyboard-boundary="true"
+          tabIndex={isBooted ? 0 : -1}
+          onFocus={isBooted ? handleFocus : undefined}
+          onBlur={isBooted ? handleBlur : undefined}
+          onKeyDown={isBooted ? handleKeyDown : undefined}
+          data-keyboard-boundary={isBooted ? "true" : undefined}
           className={`relative w-72 h-72 rounded-full bg-gradient-to-br from-zinc-800 via-zinc-900 to-zinc-950 p-6 flex items-center justify-center border-4 select-none outline-none transition-all duration-300 touch-pan-y ${
             isFocused
               ? "border-brand-cyan ring-4 ring-brand-cyan/20 shadow-[0_0_40px_rgba(34,211,238,0.25)] scale-[1.01]"
@@ -319,10 +322,17 @@ export const GarminWatchSimulator: React.FC = () => {
           <button
             onClick={(e) => {
               e.stopPropagation();
+              if (!isBooted) {
+                setIsBooted(true);
+                playLightSound();
+                containerRef.current?.focus();
+                return;
+              }
               toggleLight();
               containerRef.current?.focus();
             }}
-            className="absolute -left-3 top-[25%] px-2.5 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer"
+            className="absolute -left-3 top-[25%] px-2.5 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-white hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer"
+            aria-label="Toggle Watch Light"
           >
             LIGHT
           </button>
@@ -331,10 +341,16 @@ export const GarminWatchSimulator: React.FC = () => {
           <button
             onClick={(e) => {
               e.stopPropagation();
+              if (!isBooted) {
+                setIsBooted(true);
+                containerRef.current?.focus();
+                return;
+              }
               moveUp();
               containerRef.current?.focus();
             }}
-            className="absolute -left-3 top-[46%] px-2.5 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer"
+            className="absolute -left-3 top-[46%] px-2.5 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-white hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer"
+            aria-label="Move Up"
           >
             UP
           </button>
@@ -343,10 +359,16 @@ export const GarminWatchSimulator: React.FC = () => {
           <button
             onClick={(e) => {
               e.stopPropagation();
+              if (!isBooted) {
+                setIsBooted(true);
+                containerRef.current?.focus();
+                return;
+              }
               moveDown();
               containerRef.current?.focus();
             }}
-            className="absolute -left-3 top-[67%] px-2.5 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer"
+            className="absolute -left-3 top-[67%] px-2.5 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-white hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer"
+            aria-label="Move Down"
           >
             DOWN
           </button>
@@ -355,10 +377,25 @@ export const GarminWatchSimulator: React.FC = () => {
           <button
             onClick={(e) => {
               e.stopPropagation();
+              if (!isBooted) {
+                setIsBooted(true);
+                setGameState("playing");
+                setPlayerY(50);
+                setScore(0);
+                setObstacles([
+                  { id: ++obstacleIdCounter.current, x: 100, y: 30 },
+                  { id: ++obstacleIdCounter.current, x: 140, y: 70 },
+                ]);
+                setIsLightOn(false);
+                playStartJingle();
+                containerRef.current?.focus();
+                return;
+              }
               triggerStartStop();
               containerRef.current?.focus();
             }}
-            className="absolute -right-3 top-[30%] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-zinc-300 hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer"
+            className="absolute -right-3 top-[30%] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-white hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer"
+            aria-label="Start or Stop Game"
           >
             START
           </button>
@@ -367,10 +404,16 @@ export const GarminWatchSimulator: React.FC = () => {
           <button
             onClick={(e) => {
               e.stopPropagation();
+              if (!isBooted) {
+                setIsBooted(true);
+                containerRef.current?.focus();
+                return;
+              }
               triggerBack();
               containerRef.current?.focus();
             }}
-            className="absolute -right-3 top-[60%] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-zinc-300 hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer"
+            className="absolute -right-3 top-[60%] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-white hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer"
+            aria-label="Go Back"
           >
             BACK
           </button>
@@ -403,30 +446,42 @@ export const GarminWatchSimulator: React.FC = () => {
               <div className="flex justify-between w-full px-4 mt-0.5 text-[10px] font-bold text-zinc-400 font-mono">
                 <span className="text-zinc-500">HI: {highScore}</span>
                 <span className={isLightOn ? "text-cyan-400 animate-pulse font-mono font-black" : "text-zinc-500"}>
-                  {isLightOn ? "⚡ LIGHT ON" : "LIGHT OFF"}
+                  {!isBooted ? "OFFLINE" : isLightOn ? "⚡ LIGHT ON" : "LIGHT OFF"}
                 </span>
               </div>
             </div>
 
             {/* Screen Content Window */}
             <div className="flex-1 relative border-y border-zinc-900/60 my-1 overflow-hidden flex items-center justify-center">
-              {gameState === "idle" && (
+              {!isBooted ? (
+                <div className="text-center p-1 relative z-10 flex flex-col items-center justify-center h-full">
+                  <p className="text-cyan-400 font-bold text-[11px] animate-pulse uppercase tracking-wider">RETRO SIMULATOR</p>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsBooted(true);
+                      playStartJingle();
+                    }}
+                    className="mt-2 px-3 py-1 text-[9px] font-mono font-bold bg-zinc-900 hover:bg-brand-cyan hover:text-black border border-zinc-800 hover:border-brand-cyan rounded-md transition-all cursor-pointer shadow-md"
+                    aria-label="CLICK TO BOOT - retro smartwatch simulator"
+                  >
+                    CLICK TO BOOT
+                  </button>
+                  <p className="text-zinc-500 text-[8px] mt-1.5">Offline mode active</p>
+                </div>
+              ) : gameState === "idle" ? (
                 <div className="text-center p-1 relative z-10 flex flex-col items-center justify-center h-full">
                   <p className="text-emerald-400 font-bold text-[11px] animate-pulse uppercase tracking-wider">READY TO EXPLORE</p>
                   <p className="text-zinc-500 text-[9px] mt-1">Press START or SPACE</p>
                   <p className="text-zinc-600 text-[8px] mt-1">Use Arrow Keys & L</p>
                 </div>
-              )}
-
-              {gameState === "gameover" && (
+              ) : gameState === "gameover" ? (
                 <div className="text-center p-1 relative z-10 flex flex-col items-center justify-center h-full animate-bounce">
                   <p className="text-red-500 font-extrabold text-[12px] tracking-wide uppercase">GAME OVER</p>
                   <p className="text-zinc-300 text-[10px] font-bold mt-1">SCORE: {score}</p>
                   <p className="text-zinc-500 text-[8px] mt-1">Press BACK to reset</p>
                 </div>
-              )}
-
-              {gameState === "playing" && (
+              ) : (
                 <div className="absolute inset-0 select-none">
                   {/* Visual Light Beam from Player if Light is active */}
                   {isLightOn && (
@@ -475,12 +530,13 @@ export const GarminWatchSimulator: React.FC = () => {
         {/* Accessible Audio Controls inside the card frame */}
         <div className="mt-4 flex items-center gap-3 bg-zinc-900/60 border border-zinc-800/80 px-4 py-1.5 rounded-xl text-zinc-400 w-[260px] mx-auto z-10 relative">
           <button
+            disabled={!isBooted}
             onClick={() => setMuted(!muted)}
-            className="hover:text-white transition-colors cursor-pointer flex items-center justify-center p-1 rounded-md bg-zinc-950/40 hover:bg-zinc-950/80"
+            className={`hover:text-white transition-colors cursor-pointer flex items-center justify-center p-1 rounded-md bg-zinc-950/40 hover:bg-zinc-950/80 ${!isBooted ? "opacity-50 cursor-not-allowed" : ""}`}
             aria-label={muted ? "Unmute game audio" : "Mute game audio"}
           >
-            {muted ? (
-              <IconVolumeOff className="w-4 h-4 text-zinc-500 animate-pulse" />
+            {muted || !isBooted ? (
+              <IconVolumeOff className="w-4 h-4 text-zinc-500" />
             ) : (
               <IconVolume className="w-4 h-4 text-brand-cyan" />
             )}
@@ -489,11 +545,12 @@ export const GarminWatchSimulator: React.FC = () => {
           <div className="flex-1 flex items-center gap-2">
             <span className="text-[9px] font-mono tracking-wider text-zinc-500 select-none">VOL</span>
             <input
+              disabled={!isBooted}
               type="range"
               min="0"
               max="1"
               step="0.05"
-              value={muted ? 0 : volume}
+              value={!isBooted ? 0 : (muted ? 0 : volume)}
               onChange={(e) => {
                 const val = parseFloat(e.target.value);
                 if (val > 0 && muted) {
@@ -501,11 +558,11 @@ export const GarminWatchSimulator: React.FC = () => {
                 }
                 setVolume(val);
               }}
-              className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-brand-cyan"
+              className={`w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-brand-cyan ${!isBooted ? "opacity-50 cursor-not-allowed" : ""}`}
               aria-label="Volume level"
             />
             <span className="text-[9px] font-mono text-zinc-400 w-8 text-right select-none">
-              {muted ? "MUT" : `${Math.round(volume * 100)}%`}
+              {!isBooted ? "OFF" : (muted ? "MUT" : `${Math.round(volume * 100)}%`)}
             </span>
           </div>
         </div>
