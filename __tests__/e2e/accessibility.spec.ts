@@ -85,13 +85,13 @@ test.describe('Accessibility Audit Suite', () => {
       `
     });
 
-    // Wait for network idle
-    await page.waitForLoadState('networkidle');
-
-    // Wait for the Pretext measuring text to finish
+    // The app polls telemetry, so networkidle is not a valid readiness signal.
+    // Wait for every Pretext card to finish its deterministic measurement instead.
     await page.waitForFunction(() => {
-      return document.querySelector('.text-\\[9px\\]') && !document.querySelector('.text-\\[9px\\]')?.textContent?.includes('MEASURING...');
+      const elements = Array.from(document.querySelectorAll('.text-\\[9px\\]'));
+      return elements.length > 0 && elements.every((el) => !el.textContent?.includes('MEASURING...'));
     });
+    await page.waitForTimeout(500);
   });
 
   test('Audit: Default Landing Page State', async ({ page }, testInfo) => {

@@ -18,9 +18,6 @@ test.describe('Visual Regression & Drift Detection', () => {
       `
     });
 
-    // Wait for network requests or images if any
-    await page.waitForLoadState('networkidle');
-
     // Wait for the Pretext measuring text to finish
     await page.waitForFunction(() => {
       return document.querySelector('.text-\\[9px\\]') && !document.querySelector('.text-\\[9px\\]')?.textContent?.includes('MEASURING...');
@@ -43,8 +40,6 @@ test.describe('Visual Regression & Drift Detection', () => {
     });
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     // Wait for the Pretext measuring text to finish
     await page.waitForFunction(() => {
       return document.querySelector('.text-\\[9px\\]') && !document.querySelector('.text-\\[9px\\]')?.textContent?.includes('MEASURING...');

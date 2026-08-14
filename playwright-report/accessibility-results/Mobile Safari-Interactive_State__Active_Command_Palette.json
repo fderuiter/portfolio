@@ -1,0 +1,174 @@
+{
+  "project": "Mobile Safari",
+  "state": "Interactive State: Active Command Palette",
+  "url": "http://localhost:3000/",
+  "violationsCount": 1,
+  "violations": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.13/color-contrast?application=playwright",
+      "nodes": [
+        {
+          "target": [
+            ".mb-2"
+          ],
+          "html": "<p class=\"text-sm text-zinc-500 italic mb-2\">Connection established, but no published case studies were found in the database.</p>"
+        },
+        {
+          "target": [
+            ".p-12 > .text-zinc-600"
+          ],
+          "html": "<p class=\"text-xs text-zinc-600 font-mono\">Initialize seeding pipeline via Issue #10 to import clinical trial narratives.</p>"
+        },
+        {
+          "target": [
+            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(2) > .text-black.dark\\:text-white"
+          ],
+          "html": "<span class=\"text-black dark:text-white\" style=\"opacity:0\">build</span>"
+        },
+        {
+          "target": [
+            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(3) > .text-black.dark\\:text-white"
+          ],
+          "html": "<span class=\"text-black dark:text-white\" style=\"opacity:0\">resilient,</span>"
+        },
+        {
+          "target": [
+            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(4) > .text-black.dark\\:text-white"
+          ],
+          "html": "<span class=\"text-black dark:text-white\" style=\"opacity:0\">type-safe</span>"
+        },
+        {
+          "target": [
+            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(5) > .text-black.dark\\:text-white"
+          ],
+          "html": "<span class=\"text-black dark:text-white\" style=\"opacity:0\">infrastructure</span>"
+        },
+        {
+          "target": [
+            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(6) > .text-black.dark\\:text-white"
+          ],
+          "html": "<span class=\"text-black dark:text-white\" style=\"opacity:0\">that</span>"
+        },
+        {
+          "target": [
+            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(7) > .text-black.dark\\:text-white"
+          ],
+          "html": "<span class=\"text-black dark:text-white\" style=\"opacity:0\">connects</span>"
+        },
+        {
+          "target": [
+            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(8) > .text-black.dark\\:text-white"
+          ],
+          "html": "<span class=\"text-black dark:text-white\" style=\"opacity:0\">low-latency</span>"
+        },
+        {
+          "target": [
+            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(9) > .text-black.dark\\:text-white"
+          ],
+          "html": "<span class=\"text-black dark:text-white\" style=\"opacity:0\">client</span>"
+        },
+        {
+          "target": [
+            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(10) > .text-black.dark\\:text-white"
+          ],
+          "html": "<span class=\"text-black dark:text-white\" style=\"opacity:0\">interfaces</span>"
+        },
+        {
+          "target": [
+            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(11) > .text-black.dark\\:text-white"
+          ],
+          "html": "<span class=\"text-black dark:text-white\" style=\"opacity:0\">with</span>"
+        },
+        {
+          "target": [
+            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(12) > .text-black.dark\\:text-white"
+          ],
+          "html": "<span class=\"text-black dark:text-white\" style=\"opacity:0\">scalable</span>"
+        },
+        {
+          "target": [
+            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(13) > .text-black.dark\\:text-white"
+          ],
+          "html": "<span class=\"text-black dark:text-white\" style=\"opacity:0\">distributed</span>"
+        },
+        {
+          "target": [
+            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(14) > .text-black.dark\\:text-white"
+          ],
+          "html": "<span class=\"text-black dark:text-white\" style=\"opacity:0\">systems,</span>"
+        },
+        {
+          "target": [
+            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(15) > .text-black.dark\\:text-white"
+          ],
+          "html": "<span class=\"text-black dark:text-white\" style=\"opacity:0\">guaranteeing</span>"
+        },
+        {
+          "target": [
+            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(16) > .text-black.dark\\:text-white"
+          ],
+          "html": "<span class=\"text-black dark:text-white\" style=\"opacity:0\">extreme</span>"
+        },
+        {
+          "target": [
+            "#about > .max-w-4xl.z-10.flex-col > .mb-16.tracking-widest.text-muted:nth-child(2)"
+          ],
+          "html": "<p class=\"text-xs font-mono text-muted tracking-widest uppercase mb-16 text-center\">Engineering High-Performance Technical Solutions</p>"
+        },
+        {
+          "target": [
+            ".mb-16.tracking-widest.text-muted:nth-child(5)"
+          ],
+          "html": "<p class=\"text-xs font-mono text-muted tracking-widest uppercase mb-16 text-center\">"
+        },
+        {
+          "target": [
+            "span[aria-describedby=\"_R_tsind6lb_\"] > .border-zinc-500.border-b.border-dashed"
+          ],
+          "html": "<span class=\"border-b border-dashed border-zinc-500\">Systems Rigor</span>"
+        },
+        {
+          "target": [
+            "#contact > .max-w-4xl.z-10.flex-col > .mb-16.tracking-widest.text-muted"
+          ],
+          "html": "<p class=\"text-xs font-mono text-muted tracking-widest uppercase mb-16 text-center\">Let's Collaborate on Premium Engineering Projects</p>"
+        },
+        {
+          "target": [
+            "a[href=\"mailto:contact@fderuiter.com\"] > .text-\\[10px\\].text-zinc-500.font-mono"
+          ],
+          "html": "<span class=\"text-[10px] font-mono text-zinc-500\">contact@fderuiter.com</span>"
+        },
+        {
+          "target": [
+            "a[href$=\"fderuiter\"] > .text-\\[10px\\].text-zinc-500.font-mono"
+          ],
+          "html": "<span class=\"text-[10px] font-mono text-zinc-500\">github.com/fderuiter</span>"
+        },
+        {
+          "target": [
+            ".hover\\:border-brand-blue\\/40 > .text-\\[10px\\].text-zinc-500.font-mono"
+          ],
+          "html": "<span class=\"text-[10px] font-mono text-zinc-500\">Secure Profile Link</span>"
+        },
+        {
+          "target": [
+            ".mt-24"
+          ],
+          "html": "<div class=\"mt-24 text-[10px] font-mono text-zinc-700 tracking-[0.25em] text-center select-none\">DESIGNED &amp; DEVELOPED BY FREDERICK DE RUITER</div>"
+        },
+        {
+          "target": [
+            ".border-zinc-800"
+          ],
+          "html": "<span class=\"text-[9px] font-mono font-bold tracking-wider text-zinc-500 px-2.5 py-1 bg-zinc-950 border border-zinc-800 rounded-md select-none\">ESC</span>"
+        }
+      ]
+    }
+  ],
+  "timestamp": "2026-08-14T17:12:00.935Z"
+}
