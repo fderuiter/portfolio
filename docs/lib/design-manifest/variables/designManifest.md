@@ -115,13 +115,13 @@ Original CSS Variable: --foreground
 
 #### colors.muted
 
-> `readonly` **muted**: `"#71717a"` = `"#71717a"`
+> `readonly` **muted**: `"#a1a1aa"` = `"#a1a1aa"`
 
 Original CSS Variable: --muted
 
 #### colors.muted-strong
 
-> `readonly` **muted-strong**: `"#a1a1aa"` = `"#a1a1aa"`
+> `readonly` **muted-strong**: `"#d4d4d8"` = `"#d4d4d8"`
 
 Original CSS Variable: --muted-strong
 
@@ -177,7 +177,7 @@ Original CSS Variable: --layout-masonry-padding-without-stats
 
 #### masonry.paddingWithStats
 
-> `readonly` **paddingWithStats**: `484` = `484`
+> `readonly` **paddingWithStats**: `580` = `580`
 
 Original CSS Variable: --layout-masonry-padding-with-stats
 

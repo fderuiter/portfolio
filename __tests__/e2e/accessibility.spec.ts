@@ -134,6 +134,8 @@ test.describe('Accessibility Audit Suite', () => {
   });
 
   test('Audit: Active Command Palette Search State', async ({ page }, testInfo) => {
+    // Click the body to clear any trapped focus from keyboard boundary nodes
+    await page.locator('body').click();
     // Open Command Palette via Ctrl+K shortcut
     await page.keyboard.press('Control+k');
     

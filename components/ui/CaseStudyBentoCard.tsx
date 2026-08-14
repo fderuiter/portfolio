@@ -112,11 +112,18 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
     
     const observer = new ResizeObserver(() => {
       const cardEl = element.closest('div.isolate') as HTMLElement;
-      if (cardEl) {
+      const cardComponent = element.parentElement as HTMLElement;
+      if (cardEl && cardComponent) {
         const originalHeight = cardEl.style.height;
+        const originalCardHeight = cardComponent.style.height;
+        
         cardEl.style.height = 'auto'; // Disable fixed height to measure natural footprint
+        cardComponent.style.height = 'auto';
+        
         const actualHeight = cardEl.getBoundingClientRect().height;
+        
         cardEl.style.height = originalHeight; // Restore immediately
+        cardComponent.style.height = originalCardHeight;
         
         registerHeightOverride(study.id, actualHeight);
       }
@@ -142,13 +149,18 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
       }
 
       const cardEl = innerRef.current.closest('div.isolate') as HTMLElement;
-      if (cardEl) {
+      const cardComponent = innerRef.current.parentElement as HTMLElement;
+      if (cardEl && cardComponent) {
         const originalHeight = cardEl.style.height;
+        const originalCardHeight = cardComponent.style.height;
+        
         cardEl.style.height = 'auto'; // Disable fixed height to measure natural footprint
+        cardComponent.style.height = 'auto';
         
         const actualHeight = cardEl.getBoundingClientRect().height;
         
         cardEl.style.height = originalHeight; // Restore immediately
+        cardComponent.style.height = originalCardHeight;
         
         if (Math.abs(actualHeight - finalHeight) > 2) {
           console.warn(`[Rigor] Hydration mismatch detected! Card '${study.slug}' mathematically predicted height ${finalHeight}px but DOM naturally measured ${actualHeight}px. This indicates a drift in layout constants (e.g. padding constants).`);
@@ -181,7 +193,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             <span className={`px-2.5 py-0.5 text-[10px] font-mono font-bold border border-current/10 rounded-md ${langColor.bg} ${langColor.text}`}>
               {study.primary_language}
             </span>
-            <span className="text-[10px] font-mono text-zinc-600">
+            <span className="text-[10px] font-mono text-zinc-400">
               {study.slug.toUpperCase()}
             </span>
           </div>
@@ -197,7 +209,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
               className={`px-3 py-1 rounded-md font-bold transition-all duration-200 cursor-pointer ${
                 mode === "pitch"
                   ? "bg-zinc-900 text-brand-cyan shadow-sm"
-                  : "text-zinc-500 hover:text-zinc-300"
+                  : "text-zinc-400 hover:text-zinc-300"
               }`}
             >
               THE PITCH
@@ -207,7 +219,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
               className={`px-3 py-1 rounded-md font-bold transition-all duration-200 cursor-pointer ${
                 mode === "reality"
                   ? "bg-zinc-900 text-brand-cyan shadow-sm"
-                  : "text-zinc-500 hover:text-zinc-300"
+                  : "text-zinc-400 hover:text-zinc-300"
               }`}
             >
               THE REALITY
@@ -260,7 +272,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
               />
 
               {/* Refined Inline Badges Row */}
-              <div className="flex justify-between items-center text-[10px] font-mono text-zinc-500 border-b border-zinc-900/60 pb-3 mb-1">
+              <div className="flex justify-between items-center text-[10px] font-mono text-zinc-400 border-b border-zinc-900/60 pb-3 mb-1">
                 <span className="flex items-center gap-1">
                   <IconStar className="w-3.5 h-3.5 text-amber-500" />
                   <span className="text-zinc-300 font-bold">{githubStats.stars.toLocaleString()}</span> STARS
@@ -278,7 +290,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
               {/* Language Percentage Bar */}
               {githubStats.languages.length > 0 && (
                 <div className="space-y-1.5">
-                  <div className="flex justify-between items-center text-[10px] font-mono text-zinc-500">
+                  <div className="flex justify-between items-center text-[10px] font-mono text-zinc-400">
                     <span>LANGUAGE STACK</span>
                     <span className="text-zinc-400">
                       {githubStats.languages[0]?.name} {githubStats.languages[0]?.percentage}%
@@ -302,7 +314,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
                     })}
                   </div>
                   {/* Legend list */}
-                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-[9px] font-mono text-zinc-500">
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-[9px] font-mono text-zinc-400">
                     {githubStats.languages.slice(0, 3).map((lang, idx) => {
                       const color = LANGUAGE_COLORS[lang.name] || DEFAULT_COLOR;
                       return (
@@ -321,7 +333,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
 
               {/* Monospace terminal logs commits feed */}
               <div className="bg-black/60 border border-zinc-900/60 rounded-xl p-3 font-mono text-[10px] leading-tight space-y-1 h-[130px] flex flex-col justify-start overflow-hidden">
-                <div className="flex items-center text-zinc-500 border-b border-zinc-900/60 pb-1.5 mb-1.5">
+                <div className="flex items-center text-zinc-400 border-b border-zinc-900/60 pb-1.5 mb-1.5">
                   <IconTerminal className="w-3.5 h-3.5 mr-1 text-zinc-400" />
                   <span>{study.simulated_telemetry ? getSimulatedTerminalCommand(study.primary_language) : "git log --oneline -n 5"}</span>
                 </div>
@@ -336,12 +348,12 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
                     githubStats.recentCommits.map((c, i) => (
                       <div key={i} className="truncate flex items-start gap-1">
                         <span className="text-brand-cyan select-none">{c.sha}</span>
-                        <span className="text-zinc-500 select-none">|</span>
+                        <span className="text-zinc-400 select-none">|</span>
                         <span className="text-zinc-300 truncate" title={c.message}>{c.message}</span>
                       </div>
                     ))
                   ) : (
-                    <span className="text-zinc-600 italic">No recent commits located.</span>
+                    <span className="text-zinc-400 italic">No recent commits located.</span>
                   )}
                 </div>
               </div>
@@ -364,7 +376,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
         </div>
 
         {/* Dynamic Telemetry Metrics HUD */}
-        <div className="flex items-center gap-4 text-[10px] font-mono text-zinc-500 mt-2 mb-1 relative z-10 select-none">
+        <div className="flex items-center gap-4 text-[10px] font-mono text-zinc-400 mt-2 mb-1 relative z-10 select-none">
           <span className="flex items-center gap-1.5" title="Aggregate Page Views">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" aria-hidden="true" />
             <span className="sr-only" aria-live="polite">Live page views: {stats.views}</span>
@@ -393,7 +405,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             <span>Analyze Architecture</span>
             <IconChevronRight className="ml-1 w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" />
           </Link>
-          <div className="text-[9px] font-mono text-zinc-600">
+          <div className="text-[9px] font-mono text-zinc-400">
             {!isLayoutReady ? "MEASURING..." : `H: ${finalHeight}px`}
           </div>
         </div>

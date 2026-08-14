@@ -29,14 +29,16 @@ export const TextReveal: FC<TextRevealProps> = ({ children, className }) => {
 
   return (
     <div ref={sectionRef} className={cn("relative z-0 h-[200vh]", className)}>
+      <div className="sr-only">{children}</div>
       <div
+        aria-hidden="true"
         className={
           "sticky top-0 mx-auto flex h-[50%] max-w-4xl items-center bg-transparent px-4 py-20"
         }
       >
         <span
           className={
-            "flex flex-wrap p-5 text-2xl font-bold text-black/20 md:p-8 md:text-3xl lg:p-10 lg:text-4xl xl:text-5xl dark:text-white/20"
+            "flex flex-wrap p-5 text-2xl font-bold text-white/20 md:p-8 md:text-3xl lg:p-10 lg:text-4xl xl:text-5xl"
           }
         >
           {words.map((word, i) => {
@@ -62,15 +64,17 @@ interface WordProps {
 
 const Word: FC<WordProps> = ({ children, progress, range }) => {
   const opacity = useTransform(progress, range, [0, 1])
+  if (typeof children !== "string") {
+    return null
+  }
   return (
-    <span className="xl:lg-3 relative mx-1 lg:mx-1.5">
-      <span className="absolute opacity-30">{children}</span>
+    <span className="xl:lg-3 relative mx-1 lg:mx-1.5" aria-hidden="true">
+      <span className="absolute opacity-30 after:content-[attr(data-text)]" data-text={children} />
       <motion.span
         style={{ opacity: opacity }}
-        className={"text-black dark:text-white"}
-      >
-        {children}
-      </motion.span>
+        className="text-white after:content-[attr(data-text)]"
+        data-text={children}
+      />
     </span>
   )
 }

@@ -56,6 +56,7 @@ test.describe('Visual Regression & Drift Detection', () => {
     for (const card of mismatchedCards) {
       const expected = await card.getAttribute('data-expected-height');
       const actual = await card.getAttribute('data-actual-height');
+      console.log(`MISMATCH -> EXPECTED: ${expected} | ACTUAL: ${actual}`);
       // If there's a mismatched card, this will intentionally fail the test
       expect(actual, `Drift detected! Card mathematically expected ${expected}px but naturally measured ${actual}px. Update padding constants.`).toBe(expected);
     }
