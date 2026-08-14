@@ -633,9 +633,9 @@ export default function ProofWorkspacePage() {
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-brand-cyan animate-ping"></span>
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                    <h2 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
                       Background Tactic Simulation Running...
-                    </h3>
+                    </h2>
                   </div>
                   <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
                     THREAD: WEB WORKER (60FPS UI SAFE)
@@ -751,10 +751,10 @@ export default function ProofWorkspacePage() {
                   {isE_Proven ? <IconCheck className="w-5 h-5" /> : <IconPlay className="w-5 h-5" />}
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+                  <h2 className="text-xs font-bold text-white uppercase tracking-wider">
                     Proof Completion Status
-                  </h3>
-                  <p className="text-[11px] text-zinc-500 mt-0.5">
+                  </h2>
+                  <p className="text-xs text-zinc-400 mt-0.5 leading-relaxed">
                     {isE_Proven 
                       ? "Congratulations! The goal R has been successfully verified."
                       : isC_Proven 

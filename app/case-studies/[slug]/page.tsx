@@ -199,7 +199,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
       ];
       study = mockStudies.find((s) => s.slug === slug);
     }
-    if (!study) {
+    if (!study && !isMockEnv) {
       throw new Error("Unable to fetch case study records from serverless Neon database.");
     }
   }

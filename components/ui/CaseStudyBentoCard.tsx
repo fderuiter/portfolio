@@ -191,23 +191,23 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
           </CardTitle>
 
           {/* Premium Segmented Mode Switcher */}
-          <div className="flex p-0.5 bg-zinc-950/80 border border-zinc-900/80 rounded-lg mb-4 text-[10px] font-mono relative z-10 w-fit backdrop-blur-sm">
+          <div className="flex p-0.5 bg-zinc-950/80 border border-zinc-900/80 rounded-lg mb-4 text-xs font-mono relative z-10 w-fit backdrop-blur-sm">
             <button
               onClick={() => handleToggleMode("pitch")}
-              className={`px-3 py-1 rounded-md font-bold transition-all duration-200 cursor-pointer ${
+              className={`min-h-6 px-3 py-1 rounded-md border font-bold transition-all duration-200 cursor-pointer ${
                 mode === "pitch"
-                  ? "bg-zinc-900 text-brand-cyan border border-brand-cyan/30 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
-                  : "text-zinc-500 hover:text-zinc-300"
+                  ? "bg-zinc-900 text-brand-cyan border-brand-cyan/30 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200"
               }`}
             >
               THE PITCH
             </button>
             <button
               onClick={() => handleToggleMode("reality")}
-              className={`px-3 py-1 rounded-md font-bold transition-all duration-200 cursor-pointer ${
+              className={`min-h-6 px-3 py-1 rounded-md border font-bold transition-all duration-200 cursor-pointer ${
                 mode === "reality"
-                  ? "bg-zinc-900 text-brand-cyan border border-brand-cyan/30 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
-                  : "text-zinc-500 hover:text-zinc-300"
+                  ? "bg-zinc-900 text-brand-cyan border-brand-cyan/30 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                  : "border-transparent text-zinc-400 hover:text-zinc-200"
               }`}
             >
               THE REALITY

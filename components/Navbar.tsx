@@ -192,7 +192,7 @@ export const Navbar: React.FC = () => {
           <Link
             href="/"
             onClick={(e) => handleNavClick(e, "/#hero")}
-            className="group flex items-center gap-2.5 font-mono text-sm tracking-widest font-extrabold text-foreground cursor-pointer"
+            className="group flex min-h-6 items-center gap-2.5 font-mono text-sm tracking-widest font-extrabold text-foreground cursor-pointer"
           >
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-cyan/70 opacity-75"></span>
@@ -215,7 +215,7 @@ export const Navbar: React.FC = () => {
                     onClick={(e) => handleNavClick(e, item.href)}
                     onMouseEnter={handleLinkHover}
                     className={cn(
-                      "text-xs font-mono tracking-wider font-semibold transition-all duration-300 hover:text-foreground cursor-pointer flex items-center gap-1",
+                      "min-h-6 py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-300 hover:text-foreground cursor-pointer flex items-center gap-1",
                       isSectionActive
                         ? "text-brand-cyan font-bold"
                         : "text-muted"

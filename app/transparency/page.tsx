@@ -16,19 +16,23 @@ export default function TransparencyHub() {
   const [logs, setLogs] = useState<TransparencyLog[]>([]);
   const [filter, setFilter] = useState<"All" | "Security" | "Reliability" | "Access">("All");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
 
   const fetchLogs = async () => {
     try {
       setLoading(true);
+      setLoadError("");
       const res = await fetch("/api/transparency/logs");
-      if (res.ok) {
-        const data = await res.json();
-        setLogs(data);
-        setLastRefreshed(new Date());
+      if (!res.ok) {
+        throw new Error(`Telemetry request failed with status ${res.status}`);
       }
+      const data = await res.json();
+      setLogs(data);
+      setLastRefreshed(new Date());
     } catch (err) {
       console.error("Failed to fetch logs:", err);
+      setLoadError("Live telemetry is temporarily unavailable. Existing records may be stale.");
     } finally {
       setLoading(false);
     }
@@ -67,7 +71,9 @@ export default function TransparencyHub() {
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               System Status
             </div>
-            <span className="text-sm font-bold font-mono text-zinc-100">100% OPERATIONAL</span>
+            <span className={`text-sm font-bold font-mono ${loadError ? "text-amber-300" : "text-zinc-100"}`}>
+              {loadError ? "TELEMETRY DEGRADED" : "100% OPERATIONAL"}
+            </span>
           </div>
           <div className="p-3.5 bg-zinc-900/30 border border-zinc-800/80 rounded-2xl flex flex-col gap-1">
             <div className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-500 uppercase">
@@ -139,6 +145,10 @@ export default function TransparencyHub() {
           {loading && logs.length === 0 ? (
             <div className="py-24 flex justify-center items-center text-brand-cyan/50">
               <IconRefresh className="w-8 h-8 animate-spin" />
+            </div>
+          ) : loadError && logs.length === 0 ? (
+            <div className="py-12 px-6 text-center text-amber-200 font-mono text-sm leading-relaxed border border-amber-500/30 bg-amber-500/5 rounded-2xl" role="alert">
+              {loadError}
             </div>
           ) : filteredLogs.length === 0 ? (
             <div className="py-12 text-center text-zinc-500 font-mono text-sm border border-dashed border-zinc-800 rounded-2xl">
