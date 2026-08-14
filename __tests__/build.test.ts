@@ -39,7 +39,7 @@ describe('build.js script execution', () => {
     expect(spawnSpy).toHaveBeenCalledWith('npx', ['next', 'build'], expect.any(Object));
 
     // It should NOT have called check-migrations or prisma migrate deploy
-    expect(spawnSpy).not.toHaveBeenCalledWith('node', ['scripts/check-migrations.js'], expect.any(Object));
+    expect(spawnSpy).not.toHaveBeenCalledWith('npm', ['run', 'check:migrations'], expect.any(Object));
     expect(spawnSpy).not.toHaveBeenCalledWith('npx', ['prisma', 'migrate', 'deploy'], expect.any(Object));
 
     // It should exit with 0
@@ -61,7 +61,7 @@ describe('build.js script execution', () => {
     expect(spawnSpy).toHaveBeenCalledWith('npx', ['next', 'build'], expect.any(Object));
 
     // It SHOULD have called check-migrations and prisma migrate deploy
-    expect(spawnSpy).toHaveBeenCalledWith('node', ['scripts/check-migrations.js'], expect.any(Object));
+    expect(spawnSpy).toHaveBeenCalledWith('npm', ['run', 'check:migrations'], expect.any(Object));
     expect(spawnSpy).toHaveBeenCalledWith('npx', ['prisma', 'migrate', 'deploy'], expect.any(Object));
 
     // It should exit with 0

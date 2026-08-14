@@ -11,6 +11,21 @@ jobs:
     name: Rigor Ecosystem (Logic, Visual, Performance)
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: portfolio_ci
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d portfolio_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -46,6 +61,17 @@ jobs:
         run: |
           npx tsx scripts/generate-theme.ts
           npx prisma generate
+
+      - name: Check Migration Metadata
+        run: npm run check:migrations
+
+      - name: Replay Migrations and Check Schema Drift
+        run: |
+          npx prisma migrate deploy
+          npm run check:migrations:drift
+          npx prisma migrate status
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/portfolio_ci?schema=replay
 
       - name: Check Documentation Drift
         run: npm run check-docs-drift
