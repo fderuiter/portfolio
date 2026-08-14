@@ -13,90 +13,36 @@
       "nodes": [
         {
           "target": [
-            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(2) > .text-black.dark\\:text-white[aria-hidden=\"true\"]"
+            ".flex-1.gap-4.flex-col:nth-child(1) > .w-full:nth-child(1) > .isolate.\\[contain\\:layout_style\\][data-actual-height=\"600.47998046875\"] > .\\[transform\\:rotateY\\(var\\(--r-x\\)\\)_rotateX\\(var\\(--r-y\\)\\)\\].rounded-\\[var\\(--radius\\)\\].border-border > .\\[clip-path\\:inset\\(0_0_0_0_round_var\\(--radius\\)\\)\\].mix-blend-soft-light.\\[grid-area\\:1\\/1\\] > .bg-surface-1.p-4.backdrop-blur-sm > .justify-between.h-full.flex-col > div:nth-child(1) > .mb-3.justify-between.items-center > .text-zinc-600.text-\\[10px\\].font-mono"
           ],
-          "html": "<span class=\"text-black dark:text-white\" aria-hidden=\"true\" style=\"opacity:0\">build</span>"
+          "html": "<span class=\"text-[10px] font-mono text-zinc-600\">SCHEMAFLOW</span>"
         },
         {
           "target": [
-            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(3) > .text-black.dark\\:text-white[aria-hidden=\"true\"]"
+            ".flex-1.gap-4.flex-col:nth-child(1) > .w-full:nth-child(1) > .isolate.\\[contain\\:layout_style\\][data-actual-height=\"600.47998046875\"] > .\\[transform\\:rotateY\\(var\\(--r-x\\)\\)_rotateX\\(var\\(--r-y\\)\\)\\].rounded-\\[var\\(--radius\\)\\].border-border > .\\[clip-path\\:inset\\(0_0_0_0_round_var\\(--radius\\)\\)\\].mix-blend-soft-light.\\[grid-area\\:1\\/1\\] > .bg-surface-1.p-4.backdrop-blur-sm > .justify-between.h-full.flex-col > .pt-3.border-zinc-900\\/40.mt-2 > .text-zinc-600.text-\\[9px\\].font-mono"
           ],
-          "html": "<span class=\"text-black dark:text-white\" aria-hidden=\"true\" style=\"opacity:0\">resilient,</span>"
+          "html": "<div class=\"text-[9px] font-mono text-zinc-600\">H: 622px</div>"
         },
         {
           "target": [
-            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(4) > .text-black.dark\\:text-white[aria-hidden=\"true\"]"
+            "div[data-actual-height=\"627.35986328125\"] > .\\[transform\\:rotateY\\(var\\(--r-x\\)\\)_rotateX\\(var\\(--r-y\\)\\)\\].rounded-\\[var\\(--radius\\)\\].border-border > .\\[clip-path\\:inset\\(0_0_0_0_round_var\\(--radius\\)\\)\\].mix-blend-soft-light.\\[grid-area\\:1\\/1\\] > .bg-surface-1.p-4.backdrop-blur-sm > .justify-between.h-full.flex-col > div:nth-child(1) > .mb-3.justify-between.items-center > .text-zinc-600.text-\\[10px\\].font-mono"
           ],
-          "html": "<span class=\"text-black dark:text-white\" aria-hidden=\"true\" style=\"opacity:0\">type-safe</span>"
+          "html": "<span class=\"text-[10px] font-mono text-zinc-600\">AURA-HASKELL</span>"
         },
         {
           "target": [
-            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(5) > .text-black.dark\\:text-white[aria-hidden=\"true\"]"
+            ".flex-1.gap-4.flex-col:nth-child(2) > .w-full > .isolate.\\[contain\\:layout_style\\][data-actual-height=\"600.47998046875\"] > .\\[transform\\:rotateY\\(var\\(--r-x\\)\\)_rotateX\\(var\\(--r-y\\)\\)\\].rounded-\\[var\\(--radius\\)\\].border-border > .\\[clip-path\\:inset\\(0_0_0_0_round_var\\(--radius\\)\\)\\].mix-blend-soft-light.\\[grid-area\\:1\\/1\\] > .bg-surface-1.p-4.backdrop-blur-sm > .justify-between.h-full.flex-col > div:nth-child(1) > .mb-3.justify-between.items-center > .text-zinc-600.text-\\[10px\\].font-mono"
           ],
-          "html": "<span class=\"text-black dark:text-white\" aria-hidden=\"true\" style=\"opacity:0\">infrastructure</span>"
+          "html": "<span class=\"text-[10px] font-mono text-zinc-600\">CLINICAL-DATA-MAPPER</span>"
         },
         {
           "target": [
-            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(6) > .text-black.dark\\:text-white[aria-hidden=\"true\"]"
+            ".flex-1.gap-4.flex-col:nth-child(2) > .w-full > .isolate.\\[contain\\:layout_style\\][data-actual-height=\"600.47998046875\"] > .\\[transform\\:rotateY\\(var\\(--r-x\\)\\)_rotateX\\(var\\(--r-y\\)\\)\\].rounded-\\[var\\(--radius\\)\\].border-border > .\\[clip-path\\:inset\\(0_0_0_0_round_var\\(--radius\\)\\)\\].mix-blend-soft-light.\\[grid-area\\:1\\/1\\] > .bg-surface-1.p-4.backdrop-blur-sm > .justify-between.h-full.flex-col > .pt-3.border-zinc-900\\/40.mt-2 > .text-zinc-600.text-\\[9px\\].font-mono"
           ],
-          "html": "<span class=\"text-black dark:text-white\" aria-hidden=\"true\" style=\"opacity:0\">that</span>"
-        },
-        {
-          "target": [
-            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(7) > .text-black.dark\\:text-white[aria-hidden=\"true\"]"
-          ],
-          "html": "<span class=\"text-black dark:text-white\" aria-hidden=\"true\" style=\"opacity:0\">connects</span>"
-        },
-        {
-          "target": [
-            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(8) > .text-black.dark\\:text-white[aria-hidden=\"true\"]"
-          ],
-          "html": "<span class=\"text-black dark:text-white\" aria-hidden=\"true\" style=\"opacity:0\">low-latency</span>"
-        },
-        {
-          "target": [
-            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(9) > .text-black.dark\\:text-white[aria-hidden=\"true\"]"
-          ],
-          "html": "<span class=\"text-black dark:text-white\" aria-hidden=\"true\" style=\"opacity:0\">client</span>"
-        },
-        {
-          "target": [
-            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(10) > .text-black.dark\\:text-white[aria-hidden=\"true\"]"
-          ],
-          "html": "<span class=\"text-black dark:text-white\" aria-hidden=\"true\" style=\"opacity:0\">interfaces</span>"
-        },
-        {
-          "target": [
-            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(11) > .text-black.dark\\:text-white[aria-hidden=\"true\"]"
-          ],
-          "html": "<span class=\"text-black dark:text-white\" aria-hidden=\"true\" style=\"opacity:0\">with</span>"
-        },
-        {
-          "target": [
-            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(12) > .text-black.dark\\:text-white[aria-hidden=\"true\"]"
-          ],
-          "html": "<span class=\"text-black dark:text-white\" aria-hidden=\"true\" style=\"opacity:0\">scalable</span>"
-        },
-        {
-          "target": [
-            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(13) > .text-black.dark\\:text-white[aria-hidden=\"true\"]"
-          ],
-          "html": "<span class=\"text-black dark:text-white\" aria-hidden=\"true\" style=\"opacity:0\">distributed</span>"
-        },
-        {
-          "target": [
-            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(14) > .text-black.dark\\:text-white[aria-hidden=\"true\"]"
-          ],
-          "html": "<span class=\"text-black dark:text-white\" aria-hidden=\"true\" style=\"opacity:0\">systems,</span>"
-        },
-        {
-          "target": [
-            ".xl\\:lg-3.mx-1.lg\\:mx-1\\.5:nth-child(15) > .text-black.dark\\:text-white[aria-hidden=\"true\"]"
-          ],
-          "html": "<span class=\"text-black dark:text-white\" aria-hidden=\"true\" style=\"opacity:0\">guaranteeing</span>"
+          "html": "<div class=\"text-[9px] font-mono text-zinc-600\">H: 622px</div>"
         }
       ]
     }
   ],
-  "timestamp": "2026-08-14T17:22:20.977Z"
+  "timestamp": "2026-08-14T17:24:11.756Z"
 }

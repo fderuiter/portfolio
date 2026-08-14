@@ -13,12 +13,18 @@
       "nodes": [
         {
           "target": [
-            ".isolate.\\[contain\\:layout_style\\].\\[perspective\\:600px\\]:nth-child(3) > .\\[transform\\:rotateY\\(var\\(--r-x\\)\\)_rotateX\\(var\\(--r-y\\)\\)\\].rounded-\\[var\\(--radius\\)\\].border-border > .\\[clip-path\\:inset\\(0_0_0_0_round_var\\(--radius\\)\\)\\].mix-blend-soft-light.\\[grid-area\\:1\\/1\\] > .bg-surface-1.p-4.backdrop-blur-sm > .justify-between.flex-col.h-full > div:nth-child(1) > .mb-5.pt-4.space-y-4 > .bg-black\\/60.p-3.h-\\[130px\\] > .flex-1.overflow-y-auto.scrollbar-none > .items-start.truncate.gap-1:nth-child(5) > .text-zinc-500"
+            ".text-zinc-600.text-\\[10px\\].font-mono"
           ],
-          "html": "<span class=\"text-zinc-500\">Linking .stack-work/dist/x86_64/aura-compiler ...</span>"
+          "html": "<span class=\"text-[10px] font-mono text-zinc-600\">SCHEMAFLOW</span>"
+        },
+        {
+          "target": [
+            ".text-zinc-600.text-\\[9px\\].font-mono"
+          ],
+          "html": "<div class=\"text-[9px] font-mono text-zinc-600\">H: 622px</div>"
         }
       ]
     }
   ],
-  "timestamp": "2026-08-14T17:22:34.206Z"
+  "timestamp": "2026-08-14T17:24:28.041Z"
 }
