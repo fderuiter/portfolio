@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [lib/accessibility-utils](../README.md) / PDFEngine
+[fderuiter-portfolio](../../../modules.md) / [lib/accessibility-utils](../README.md) / PDFEngine
 
 # Class: PDFEngine
 
@@ -25,7 +25,7 @@ with automated tagging for structure and semantics.
 
 ### generate1099()
 
-> `static` **generate1099**(`taxData`): `Buffer`
+> `static` **generate1099**(`_taxData`): `Buffer`
 
 Defined in: [lib/accessibility-utils.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/accessibility-utils.ts#L19)
 
@@ -34,7 +34,7 @@ Generates a 1099 PDF payload that successfully passes the PAC
 
 #### Parameters
 
-##### taxData
+##### \_taxData
 
 `Record`\<`string`, `unknown`\>
 

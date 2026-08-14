@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [lib/layout-config](../README.md) / resolveSingleThemeFont
+[fderuiter-portfolio](../../../modules.md) / [lib/layout-config](../README.md) / resolveSingleThemeFont
 
 # Function: resolveSingleThemeFont()
 

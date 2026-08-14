@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [lib/graphics-engine](../README.md) / textLayoutCache
+[fderuiter-portfolio](../../../modules.md) / [lib/graphics-engine](../README.md) / textLayoutCache
 
 # Variable: textLayoutCache
 

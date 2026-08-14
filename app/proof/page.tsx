@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { Navbar } from "@/components/Navbar";
 import {
   IconTerminal,
   IconCornerDownLeft
@@ -589,8 +588,6 @@ export default function ProofWorkspacePage() {
 
   return (
     <div className="bg-zinc-950 min-h-screen text-foreground overflow-hidden flex flex-col font-sans">
-      <Navbar />
-
       {/* Screen reader ARIA live region for instant state broadcast */}
       <div aria-live="assertive" aria-atomic="true" className="sr-only">
         {liveAnnouncement}

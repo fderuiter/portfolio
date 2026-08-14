@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [types/domain](../README.md) / GitHubCommit
+[fderuiter-portfolio](../../../modules.md) / [types/domain](../README.md) / GitHubCommit
 
 # Interface: GitHubCommit
 

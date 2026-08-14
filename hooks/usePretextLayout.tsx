@@ -131,7 +131,7 @@ export function usePretextLayout({
         `usePretextLayout (text: "${text.slice(0, 30)}...")`
       );
     }
-  }, [state.isReady, state.height, text]);
+  }, [state.isReady, state.height, text, containerRef]);
 
   return {
     ref: containerRef,
@@ -396,7 +396,7 @@ export function usePretextRichLayout({
         `usePretextRichLayout (text: "${text.slice(0, 30)}...")`
       );
     }
-  }, [state.isReady, state.height, text]);
+  }, [state.isReady, state.height, text, containerRef]);
 
   return {
     ref: containerRef,

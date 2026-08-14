@@ -471,7 +471,7 @@ export const SandboxTerminal: React.FC = () => {
             key={cmd}
             onClick={() => executeCommand(cmd)}
             disabled={isExecuting}
-            className="px-3 py-1.5 text-[10px] font-mono font-bold bg-zinc-900/40 border border-zinc-900 hover:border-brand-cyan/40 text-brand-cyan/90 hover:text-brand-cyan rounded-xl transition-all hover:scale-[1.02] cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 focus:ring-offset-1 focus:ring-offset-zinc-950"
+            className="px-3 py-1.5 text-[10px] font-mono font-bold bg-zinc-900/40 border border-zinc-900 hover:border-brand-cyan/40 text-brand-cyan/90 hover:text-brand-cyan rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-95 hover:bg-brand-cyan/5 hover:shadow-[0_0_12px_rgba(6,182,212,0.15)] cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 focus:ring-offset-1 focus:ring-offset-zinc-950"
           >
             {cmd}
           </button>
@@ -485,7 +485,7 @@ export const SandboxTerminal: React.FC = () => {
         aria-busy={isExecuting}
         onClick={handleTerminalClick}
         style={{ "--term-glow": `0 0 35px ${hexToRgba(designManifest.colors["brand-cyan"], 0.02)}` } as React.CSSProperties}
-        className="w-full border border-zinc-900 bg-zinc-950/80 rounded-2xl overflow-hidden shadow-[var(--term-glow)] relative backdrop-blur-md cursor-text"
+        className="w-full border border-zinc-900 focus-within:border-brand-cyan/40 bg-zinc-950/80 rounded-2xl overflow-hidden shadow-[var(--term-glow)] focus-within:shadow-[0_0_40px_rgba(6,182,212,0.08),0_0_80px_rgba(6,182,212,0.02)] relative backdrop-blur-md cursor-text transition-all duration-300"
       >
         {/* Terminal Header */}
         <div className="border-b border-zinc-900/60 bg-zinc-950/90 px-4 py-3.5 flex justify-between items-center select-none">
@@ -570,7 +570,7 @@ export const SandboxTerminal: React.FC = () => {
           <button
             onClick={() => executeCommand(input)}
             disabled={isExecuting || !input.trim()}
-            className="p-1 text-zinc-600 hover:text-brand-cyan disabled:text-zinc-800 disabled:hover:text-zinc-800 transition-colors cursor-pointer focus:outline-none focus:text-brand-cyan focus:ring-2 focus:ring-brand-cyan/50 focus:ring-offset-1 focus:ring-offset-zinc-950 rounded"
+            className="p-1.5 text-zinc-600 hover:text-brand-cyan hover:bg-brand-cyan/10 active:scale-90 disabled:text-zinc-800 disabled:hover:text-zinc-800 disabled:hover:bg-transparent transition-all rounded-lg cursor-pointer focus:outline-none focus:text-brand-cyan focus:ring-2 focus:ring-brand-cyan/50 focus:ring-offset-1 focus:ring-offset-zinc-950"
             title="Execute Command (Enter)"
           >
             <IconCornerDownLeft className="w-4 h-4" />

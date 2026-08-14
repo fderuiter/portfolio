@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [lib/masonry](../README.md) / MasonryConfig
+[fderuiter-portfolio](../../../modules.md) / [lib/masonry](../README.md) / MasonryConfig
 
 # Interface: MasonryConfig
 

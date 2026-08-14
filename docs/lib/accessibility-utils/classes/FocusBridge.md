@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [lib/accessibility-utils](../README.md) / FocusBridge
+[fderuiter-portfolio](../../../modules.md) / [lib/accessibility-utils](../README.md) / FocusBridge
 
 # Class: FocusBridge
 

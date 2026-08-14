@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [hooks/usePretextLayout](../README.md) / usePretextRichLayout
+[fderuiter-portfolio](../../../modules.md) / [hooks/usePretextLayout](../README.md) / usePretextRichLayout
 
 # Function: usePretextRichLayout()
 

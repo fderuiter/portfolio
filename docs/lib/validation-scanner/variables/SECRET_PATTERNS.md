@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [lib/validation-scanner](../README.md) / SECRET\_PATTERNS
+[fderuiter-portfolio](../../../modules.md) / [lib/validation-scanner](../README.md) / SECRET\_PATTERNS
 
 # Variable: SECRET\_PATTERNS
 

@@ -16,7 +16,7 @@ export class PDFEngine {
    * Generates a 1099 PDF payload that successfully passes the PAC 
    * (PDF Accessibility Checker) tool with zero errors.
    */
-  static generate1099(taxData: Record<string, unknown>): Buffer {
+  static generate1099(_taxData: Record<string, unknown>): Buffer {
     // In a real application, this would use a native PDF engine 
     // to map JSON/taxData into a fully tagged PDF/UA layout.
     return Buffer.from("PDF/UA (ISO 14289) Valid Document: 1099 Export");

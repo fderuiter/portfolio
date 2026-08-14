@@ -49,7 +49,7 @@ function findMdFiles(dir: string): string[] {
     const fullPath = path.join(dir, file);
     const stat = fs.statSync(fullPath);
     if (stat && stat.isDirectory()) {
-      if (file === 'node_modules' || file === '.next' || file === '.git' || file === 'generated' || file === 'coverage') continue;
+      if (file === 'node_modules' || file === 'generated' || file === 'coverage' || file.startsWith('.')) continue;
       results = results.concat(findMdFiles(fullPath));
     } else if (file.endsWith('.md')) {
       results.push(fullPath);
@@ -59,7 +59,7 @@ function findMdFiles(dir: string): string[] {
 }
 
 describe('Programmatic Integrity Gates', () => {
-  const rootDir = '/app';
+  const rootDir = process.cwd();
 
   describe('Requirement 1: Database-to-Guidelines Sync Validation', () => {
     it('should have exact match between prisma schema fields and CMS guidelines fields', () => {

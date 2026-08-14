@@ -232,14 +232,23 @@ export const Navbar: React.FC = () => {
             <div className="relative">
               <button
                 onClick={() => setShowAudioPanel(!showAudioPanel)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-zinc-900 bg-zinc-900/40 hover:border-brand-cyan/40 text-zinc-400 hover:text-foreground transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-cyan/40"
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-cyan/40",
+                  !muted
+                    ? "border-brand-cyan/40 bg-brand-cyan/5 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.15)]"
+                    : "border-zinc-900 bg-zinc-900/40 hover:border-brand-cyan/40 text-zinc-400 hover:text-foreground"
+                )}
                 aria-label="Sound Settings"
                 aria-expanded={showAudioPanel}
               >
                 {muted ? (
                   <IconVolumeOff className="w-3.5 h-3.5 text-zinc-500" />
                 ) : (
-                  <IconVolume className="w-3.5 h-3.5 text-brand-cyan" />
+                  <div className="flex items-center gap-0.5" aria-hidden="true">
+                    <span className="w-0.5 h-2.5 bg-brand-cyan rounded-full animate-[pulse_1s_ease-in-out_infinite]" />
+                    <span className="w-0.5 h-3.5 bg-brand-cyan rounded-full animate-[pulse_1.4s_ease-in-out_infinite]" />
+                    <span className="w-0.5 h-2 bg-brand-cyan rounded-full animate-[pulse_0.8s_ease-in-out_infinite]" />
+                  </div>
                 )}
                 <span className="text-[10px] font-mono tracking-wider font-bold">
                   SOUND: {muted ? "OFF" : profile.toUpperCase()}
@@ -255,7 +264,7 @@ export const Navbar: React.FC = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 mt-2 w-64 p-4 rounded-2xl border border-zinc-900 bg-zinc-950/95 backdrop-blur-xl shadow-xl z-50 flex flex-col gap-3.5"
+                      className="absolute right-0 mt-2 w-64 p-4 rounded-2xl border border-zinc-800/80 bg-zinc-950/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_25px_rgba(6,182,212,0.08)] z-50 flex flex-col gap-3.5"
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] font-mono font-bold tracking-wider text-zinc-400">SYNTH SETTINGS</span>
@@ -292,9 +301,9 @@ export const Navbar: React.FC = () => {
                               onClick={() => setProfile(p)}
                               disabled={muted}
                               className={cn(
-                                "w-full text-left px-3 py-1.5 rounded-lg border text-[10px] font-mono tracking-wider transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed",
+                                "w-full text-left px-3 py-1.5 rounded-lg border text-[10px] font-mono tracking-wider transition-all duration-200 cursor-pointer active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed",
                                 profile === p
-                                  ? "bg-brand-cyan/10 border-brand-cyan/40 text-brand-cyan font-bold"
+                                  ? "bg-brand-cyan/10 border-brand-cyan/40 text-brand-cyan font-bold shadow-[0_0_12px_rgba(6,182,212,0.12)]"
                                   : "bg-zinc-900/20 border-zinc-900 hover:border-zinc-800 text-zinc-400 hover:text-foreground"
                               )}
                             >

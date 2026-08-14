@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [lib/github](../README.md) / getGitHubStats
+[fderuiter-portfolio](../../../modules.md) / [lib/github](../README.md) / getGitHubStats
 
 # Function: getGitHubStats()
 

@@ -1,8 +1,8 @@
-[**temp_dir**](../../README.md)
+[**fderuiter-portfolio**](../../README.md)
 
 ***
 
-[temp_dir](../../modules.md) / lib/seo
+[fderuiter-portfolio](../../modules.md) / lib/seo
 
 # lib/seo
 

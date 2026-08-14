@@ -120,7 +120,7 @@ export const BackgroundBeamsWithCollision = ({
       repeatDelay?: number;
     };
   }
->(({ parentRef, containerRef, beamOptions = {} }, ref) => {
+>(({ parentRef, containerRef, beamOptions = {} }, _ref) => {
   const shouldReduceMotion = useReducedMotion();
   const beamRef = useRef<HTMLDivElement>(null);
   const [collision, setCollision] = useState<{

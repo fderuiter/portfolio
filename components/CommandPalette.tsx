@@ -6,7 +6,7 @@ import { designManifest } from "@/lib/design-manifest";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { IconSearch, IconTerminal, IconFileCode, IconDirections, IconCornerDownLeft } from "@tabler/icons-react";
+import { IconSearch, IconTerminal, IconFileCode, IconDirections, IconCornerDownLeft, IconShieldCheck } from "@tabler/icons-react";
 import { filterFuzzySearch } from "@/lib/search-utils";
 import { useSearch } from "@/components/providers/SearchProvider";
 
@@ -85,12 +85,20 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />
       },
       {
-        id: "nav-sandbox",
-        title: "CLI Developer Sandbox",
-        subtitle: "Test dynamic CLI metrics and view sandbox environments",
+        id: "nav-ui-sandbox",
+        title: "UI Physics Sandbox",
+        subtitle: "Interactive canvas layout physics, Garmin watch simulator, and UI sandbox",
         category: "navigation",
         url: "/ui-sandbox",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
+      },
+      {
+        id: "nav-transparency",
+        title: "Platform Transparency Hub",
+        subtitle: "Live verifiable telemetry, CI/CD operational reliability, and security logs",
+        category: "navigation",
+        url: "/transparency",
+        icon: <IconShieldCheck className="w-4 h-4 text-brand-cyan" />
       },
       {
         id: "nav-proof",
