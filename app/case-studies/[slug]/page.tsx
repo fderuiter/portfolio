@@ -10,6 +10,12 @@ import { getGitHubStats, parseGitHubUrl, getSimulatedStats } from "@/lib/github"
 import { getSoftwareSourceCodeSchema } from "@/lib/seo";
 import { TelemetryTracker } from "@/components/TelemetryTracker";
 import { TerminologyToggle } from "@/components/TerminologyToggle";
+import dynamic from "next/dynamic";
+
+const SchemaFlowWorkspace = dynamic(
+  () => import("@/components/SchemaFlowWorkspace"),
+  { ssr: false }
+);
 
 import type { Metadata } from "next";
 
@@ -303,6 +309,22 @@ export default async function CaseStudyPage({ params }: PageProps) {
                   Test clinical trial EDC operations and view structured telemetry outputs directly inside the browser. Use the interactive badges or type &apos;help&apos; inside the prompt.
                 </p>
                 <SandboxTerminal />
+              </div>
+            )}
+
+            {/* Interactive Proof Tactic Canvas & Telemetry Gauge */}
+            {slug === "schemaflow" && (
+              <div className="mt-12 border-t border-zinc-900/50 pt-10">
+                <h2 className="text-xl font-bold font-sans text-neutral-100 mb-3 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-brand-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                  Interactive Mathematical Proof Tree & Telemetry
+                </h2>
+                <p className="text-xs font-mono text-zinc-500 mb-6 leading-relaxed">
+                  Apply logical tactics to branch and navigate the mathematical proof tree. Click nodes to connect/disconnect, track real-time telemetry, and run/rollback proof states.
+                </p>
+                <SchemaFlowWorkspace />
               </div>
             )}
 
