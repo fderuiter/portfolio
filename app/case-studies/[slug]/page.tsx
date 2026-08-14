@@ -10,12 +10,7 @@ import { getGitHubStats, parseGitHubUrl, getSimulatedStats } from "@/lib/github"
 import { getSoftwareSourceCodeSchema } from "@/lib/seo";
 import { TelemetryTracker } from "@/components/TelemetryTracker";
 import { TerminologyToggle } from "@/components/TerminologyToggle";
-import dynamic from "next/dynamic";
-
-const SchemaFlowWorkspace = dynamic(
-  () => import("@/components/SchemaFlowWorkspace"),
-  { ssr: false }
-);
+import SchemaFlowWorkspaceWrapper from "@/components/SchemaFlowWorkspaceWrapper";
 
 import type { Metadata } from "next";
 
@@ -324,7 +319,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
                 <p className="text-xs font-mono text-zinc-500 mb-6 leading-relaxed">
                   Apply logical tactics to branch and navigate the mathematical proof tree. Click nodes to connect/disconnect, track real-time telemetry, and run/rollback proof states.
                 </p>
-                <SchemaFlowWorkspace />
+                <SchemaFlowWorkspaceWrapper />
               </div>
             )}
 
