@@ -45,7 +45,28 @@ export function AnimatedGridPattern({
   ...props
 }: AnimatedGridPatternProps) {
   const id = useId()
-  const shouldReduceMotion = useReducedMotion()
+  const baseShouldReduceMotion = useReducedMotion()
+  const [isClientPlaywright, setIsClientPlaywright] = useState(() => {
+    if (typeof window !== "undefined") {
+      return (window as unknown as { __PLAYWRIGHT_TEST__?: boolean }).__PLAYWRIGHT_TEST__ === true ||
+        navigator.userAgent.includes("Playwright");
+    }
+    return false;
+  })
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const isPlaywright =
+        (window as unknown as { __PLAYWRIGHT_TEST__?: boolean }).__PLAYWRIGHT_TEST__ === true ||
+        navigator.userAgent.includes("Playwright");
+      if (isPlaywright) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setIsClientPlaywright(true);
+      }
+    }
+  }, [])
+
+  const shouldReduceMotion = baseShouldReduceMotion || isClientPlaywright
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
   const containerRef = useResizeObserver<SVGSVGElement>((entry) => {
     setDimensions((currentDimensions) => {

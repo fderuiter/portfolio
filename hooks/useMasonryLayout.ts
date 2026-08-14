@@ -122,8 +122,10 @@ export function useMasonryLayout<T extends MasonryItem>(
   }, [filteredItems, heightOverrides]);
 
   const containerRef = useResizeObserver<HTMLDivElement>((entry) => {
-    containerWidthRef.current = entry.contentRect.width;
-    recalculateLayout(entry.contentRect.width);
+    const nextWidth = Math.round(entry.contentRect.width);
+    if (containerWidthRef.current === nextWidth) return;
+    containerWidthRef.current = nextWidth;
+    recalculateLayout(nextWidth);
   });
 
   useLayoutEffect(() => {

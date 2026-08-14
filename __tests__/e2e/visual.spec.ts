@@ -1,6 +1,13 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Visual Regression & Drift Detection', () => {
+  test.beforeEach(async ({ page }) => {
+    // Inject the global flag for the client so components can detect Playwright
+    await page.addInitScript(() => {
+      (window as unknown as { __PLAYWRIGHT_TEST__?: boolean }).__PLAYWRIGHT_TEST__ = true;
+    });
+  });
+
   test('Case Study components snapshot (desktop)', async ({ page }) => {
     // Emulate reduced motion to disable JS transitions/animations
     await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -36,11 +43,6 @@ test.describe('Visual Regression & Drift Detection', () => {
   test('Layout constraints drift detection', async ({ page }) => {
     // Emulate reduced motion to disable JS transitions/animations
     await page.emulateMedia({ reducedMotion: 'reduce' });
-
-    // Inject the global flag for the client so the component enables the checks
-    await page.addInitScript(() => {
-      (window as unknown as { __PLAYWRIGHT_TEST__?: boolean }).__PLAYWRIGHT_TEST__ = true;
-    });
 
     await page.goto('/');
     await page.waitForLoadState('networkidle');
