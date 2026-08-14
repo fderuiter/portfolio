@@ -14,7 +14,7 @@ Defined in: [lib/masonry.ts:29](https://github.com/fderuiter/portfolio/blob/main
 
 > **paddingHeight**: `number`
 
-Defined in: [lib/masonry.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L31)
+Defined in: [lib/masonry.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L33)
 
 ***
 
@@ -23,3 +23,19 @@ Defined in: [lib/masonry.ts:31](https://github.com/fderuiter/portfolio/blob/main
 > `optional` **paragraphs?**: [`PreparedParagraph`](PreparedParagraph.md)[]
 
 Defined in: [lib/masonry.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L30)
+
+***
+
+### titleParagraphDesktop?
+
+> `optional` **titleParagraphDesktop?**: [`PreparedParagraph`](PreparedParagraph.md)
+
+Defined in: [lib/masonry.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L31)
+
+***
+
+### titleParagraphMobile?
+
+> `optional` **titleParagraphMobile?**: [`PreparedParagraph`](PreparedParagraph.md)
+
+Defined in: [lib/masonry.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L32)

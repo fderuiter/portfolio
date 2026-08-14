@@ -28,6 +28,8 @@ export interface PreparedParagraph {
 
 export interface PreparedData {
   paragraphs?: PreparedParagraph[];
+  titleParagraphDesktop?: PreparedParagraph;
+  titleParagraphMobile?: PreparedParagraph;
   paddingHeight: number;
 }
 
@@ -87,8 +89,19 @@ export function calculateMasonryLayout<T extends { id: string }>(
       totalTextHeight += (paragraphs.length - 1) * PARAGRAPH_GAP;
     }
 
+    let titleHeight = 0;
+    const titleParagraph = colCount === 1 ? cached.titleParagraphMobile : cached.titleParagraphDesktop;
+    if (titleParagraph) {
+      const titleLinesRanges: RichInlineLineRange[] = [];
+      walkRichInlineLineRanges(titleParagraph.prepared, textWidth, (range) => {
+        titleLinesRanges.push(range);
+      });
+      const numLines = Math.min(titleLinesRanges.length, 1);
+      titleHeight = numLines * 26.88;
+    }
+
     const override = heightOverrides?.[study.id];
-    const totalHeight = override !== undefined ? override : totalTextHeight + cached.paddingHeight;
+    const totalHeight = override !== undefined ? override : totalTextHeight + titleHeight + cached.paddingHeight;
 
     return {
       ...study,

@@ -62,8 +62,8 @@ Defined in: [lib/layout-config.ts:3](https://github.com/fderuiter/portfolio/blob
 
 ### PADDING\_WITH\_STATS
 
-> `readonly` **PADDING\_WITH\_STATS**: `484` = `designManifest.masonry.paddingWithStats`
+> `readonly` **PADDING\_WITH\_STATS**: `553` = `designManifest.masonry.paddingWithStats`
 
 ### PADDING\_WITHOUT\_STATS
 
-> `readonly` **PADDING\_WITHOUT\_STATS**: `254` = `designManifest.masonry.paddingWithoutStats`
+> `readonly` **PADDING\_WITHOUT\_STATS**: `227` = `designManifest.masonry.paddingWithoutStats`

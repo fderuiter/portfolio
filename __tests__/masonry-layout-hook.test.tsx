@@ -51,9 +51,9 @@ describe("useMasonryLayout Hook - Dynamic Resizing Observer", () => {
   let root: Root;
 
   const MOCK_ITEMS = [
-    { id: "1", editorial_content: "This is a short sample content for masonry study 1." },
-    { id: "2", editorial_content: "This is some editorial detail for dynamic layout 2." },
-    { id: "3", editorial_content: "And a third item for bento spacing calculations." },
+    { id: "1", title: "Mock Title 1", editorial_content: "This is a short sample content for masonry study 1." },
+    { id: "2", title: "Mock Title 2", editorial_content: "This is some editorial detail for dynamic layout 2." },
+    { id: "3", title: "Mock Title 3", editorial_content: "And a third item for bento spacing calculations." },
   ];
 
   beforeEach(() => {

@@ -177,7 +177,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             </span>
           </div>
 
-          <CardTitle className="text-lg md:text-xl font-extrabold tracking-tight">
+          <CardTitle className="text-lg md:text-xl font-extrabold tracking-tight truncate">
             {study.title}
           </CardTitle>
 

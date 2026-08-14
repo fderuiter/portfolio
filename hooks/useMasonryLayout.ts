@@ -16,6 +16,7 @@ import { useBentoLayout } from "@/components/providers/BentoLayoutContext";
 
 export interface MasonryItem {
   id: string;
+  title: string;
   editorial_content: string;
   githubStats?: GitHubStats | null;
 }
@@ -57,6 +58,12 @@ export function useMasonryLayout<T extends MasonryItem>(
 
     const { baseFont, boldFont, italicFont, codeFont } = resolveThemeFonts(LAYOUT_CONFIG.FONT_SIZE, "--font-inter");
 
+    const rootStyle = typeof window !== "undefined" ? window.getComputedStyle(document.documentElement) : null;
+    const rawFontFamily = rootStyle ? rootStyle.getPropertyValue("--font-inter").trim() : "";
+    const resolvedFontFamily = rawFontFamily || "Inter";
+    const titleFontDesktop = `800 20px ${resolvedFontFamily}`;
+    const titleFontMobile = `800 18px ${resolvedFontFamily}`;
+
     const data: Record<string, PreparedData> = {};
     for (const study of allItems) {
       const paragraphTexts = study.editorial_content.split(/\r?\n+/).map(p => p.trim()).filter(Boolean);
@@ -69,10 +76,26 @@ export function useMasonryLayout<T extends MasonryItem>(
         };
       });
 
+      const parsedTitleDesktop = parseMarkdownToRichItems(study.title, titleFontDesktop, titleFontDesktop, titleFontDesktop, titleFontDesktop);
+      const preparedTitleDesktop = prepareRichInline(parsedTitleDesktop);
+      const titleParagraphDesktop = {
+        prepared: preparedTitleDesktop,
+        items: parsedTitleDesktop,
+      };
+
+      const parsedTitleMobile = parseMarkdownToRichItems(study.title, titleFontMobile, titleFontMobile, titleFontMobile, titleFontMobile);
+      const preparedTitleMobile = prepareRichInline(parsedTitleMobile);
+      const titleParagraphMobile = {
+        prepared: preparedTitleMobile,
+        items: parsedTitleMobile,
+      };
+
       const paddingHeight = study.githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS;
       
       data[study.id] = {
         paragraphs,
+        titleParagraphDesktop,
+        titleParagraphMobile,
         paddingHeight,
       };
     }

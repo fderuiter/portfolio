@@ -6,7 +6,7 @@
 
 # Interface: LayoutItem\<T\>
 
-Defined in: [hooks/useMasonryLayout.ts:23](https://github.com/fderuiter/portfolio/blob/main/hooks/useMasonryLayout.ts#L23)
+Defined in: [hooks/useMasonryLayout.ts:24](https://github.com/fderuiter/portfolio/blob/main/hooks/useMasonryLayout.ts#L24)
 
 ## Type Parameters
 
@@ -20,7 +20,7 @@ Defined in: [hooks/useMasonryLayout.ts:23](https://github.com/fderuiter/portfoli
 
 > **height**: `number`
 
-Defined in: [hooks/useMasonryLayout.ts:25](https://github.com/fderuiter/portfolio/blob/main/hooks/useMasonryLayout.ts#L25)
+Defined in: [hooks/useMasonryLayout.ts:26](https://github.com/fderuiter/portfolio/blob/main/hooks/useMasonryLayout.ts#L26)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [hooks/useMasonryLayout.ts:25](https://github.com/fderuiter/portfoli
 
 > **item**: `T`
 
-Defined in: [hooks/useMasonryLayout.ts:24](https://github.com/fderuiter/portfolio/blob/main/hooks/useMasonryLayout.ts#L24)
+Defined in: [hooks/useMasonryLayout.ts:25](https://github.com/fderuiter/portfolio/blob/main/hooks/useMasonryLayout.ts#L25)
 
 ***
 
@@ -36,7 +36,7 @@ Defined in: [hooks/useMasonryLayout.ts:24](https://github.com/fderuiter/portfoli
 
 > **paragraphsItems**: [`ExtendedRichInlineItem`](../../usePretextLayout/interfaces/ExtendedRichInlineItem.md)[][]
 
-Defined in: [hooks/useMasonryLayout.ts:27](https://github.com/fderuiter/portfolio/blob/main/hooks/useMasonryLayout.ts#L27)
+Defined in: [hooks/useMasonryLayout.ts:28](https://github.com/fderuiter/portfolio/blob/main/hooks/useMasonryLayout.ts#L28)
 
 ***
 
@@ -44,4 +44,4 @@ Defined in: [hooks/useMasonryLayout.ts:27](https://github.com/fderuiter/portfoli
 
 > **paragraphsLines**: `RichInlineLine`[][]
 
-Defined in: [hooks/useMasonryLayout.ts:26](https://github.com/fderuiter/portfolio/blob/main/hooks/useMasonryLayout.ts#L26)
+Defined in: [hooks/useMasonryLayout.ts:27](https://github.com/fderuiter/portfolio/blob/main/hooks/useMasonryLayout.ts#L27)
