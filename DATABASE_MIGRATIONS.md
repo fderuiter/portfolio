@@ -15,8 +15,8 @@ changes the schema without adding an entry to Prisma's migration history.
 CI checks that the schema provider matches the migration lock, replays every
 migration on clean PostgreSQL, and compares the replayed database with
 `schema.prisma`. A schema edit without equivalent migration SQL fails that
-comparison. CI also rehearses the one-time production baseline from the first
-two migrations before applying the telemetry migration.
+comparison. The one-time ledger baseline stays manual because it requires a
+verified database target and restorable Neon branch or snapshot.
 
 ## One-time production baseline for 2026-08-14
 
