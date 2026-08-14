@@ -1,10 +1,12 @@
-/* eslint-disable react-hooks/set-state-in-effect, @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useMemo, useSyncExternalStore } from "react";
 import DOMPurify from "isomorphic-dompurify";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { usePersistentState } from "@/hooks/usePersistentState";
+
+const emptySubscribe = () => () => {};
 
 interface RichNarrativeProps {
   html: string;
@@ -12,7 +14,7 @@ interface RichNarrativeProps {
 }
 
 export function RichNarrative({ html, className }: RichNarrativeProps) {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const [simplified] = usePersistentState("simplified-terminology", false);
 
   // Enforce a strict security allowlist to prevent Stored XSS injections while maintaining beautiful layout aesthetics.
@@ -45,11 +47,6 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
       ]
     });
   }, [html]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-  }, []);
 
   // On the client, parse the HTML and rehydrate it to React components once mounted
   const rehydratedContent = useMemo(() => {
@@ -102,7 +99,6 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
           );
 
           // Build safe attributes
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const props: Record<string, any> = { key: `${tagName}-${index}` };
           if (element.hasAttribute("class")) {
             props.className = element.getAttribute("class");

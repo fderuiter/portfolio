@@ -8,15 +8,56 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
+class LocalStorageMock {
+  private store: Record<string, string> = {};
+
+  getItem(key: string): string | null {
+    return this.store[key] ?? null;
+  }
+
+  setItem(key: string, value: string): void {
+    this.store[key] = String(value);
+  }
+
+  removeItem(key: string): void {
+    delete this.store[key];
+  }
+
+  clear(): void {
+    this.store = {};
+  }
+
+  get length(): number {
+    return Object.keys(this.store).length;
+  }
+
+  key(index: number): string | null {
+    return Object.keys(this.store)[index] ?? null;
+  }
+}
+
 describe("useTelemetry Hook Integration & Isolation", () => {
   let container: HTMLDivElement;
   let root: Root;
   let useTelemetry: any;
   let fetchMock: any;
+  let mockStorage: LocalStorageMock;
 
   beforeEach(async () => {
     vi.useFakeTimers();
     vi.resetModules();
+
+    mockStorage = new LocalStorageMock();
+    Object.defineProperty(window, "localStorage", {
+      value: mockStorage,
+      writable: true,
+      configurable: true,
+    });
+    Object.defineProperty(globalThis, "localStorage", {
+      value: mockStorage,
+      writable: true,
+      configurable: true,
+    });
 
     // Dynamically import to ensure clean isolated module state
     const importedModule = await import("@/hooks/useTelemetry");
@@ -46,7 +87,7 @@ describe("useTelemetry Hook Integration & Isolation", () => {
     globalThis.fetch = fetchMock;
 
     // Clear localStorage
-    localStorage.clear();
+    mockStorage.clear();
   });
 
   afterEach(() => {
@@ -181,10 +222,10 @@ describe("useTelemetry Hook Integration & Isolation", () => {
 
   it("should fall back gracefully and not crash when localStorage throws errors", async () => {
     // Mock localStorage to throw error on setItem
-    vi.spyOn(window.Storage.prototype, "setItem").mockImplementation(() => {
+    vi.spyOn(window.localStorage, "setItem").mockImplementation(() => {
       throw new Error("QuotaExceededError");
     });
-    vi.spyOn(window.Storage.prototype, "getItem").mockImplementation(() => {
+    vi.spyOn(window.localStorage, "getItem").mockImplementation(() => {
       throw new Error("AccessDenied");
     });
 

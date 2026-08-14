@@ -8,7 +8,6 @@ vi.mock("@sentry/nextjs", async (importOriginal) => {
   const original = await importOriginal<typeof import("@sentry/nextjs")>();
   return {
     ...original,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     init: (config: any) => {
       mockInit(config);
       return original.init(config);

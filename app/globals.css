@@ -8,7 +8,7 @@
   --surface-2: rgba(39, 39, 42, 0.4);
   --border: rgba(63, 63, 70, 0.5);
   --border-active: rgba(6, 182, 212, 0.4);
-  --muted: #71717a;
+  --muted: #a1a1aa;
   --muted-strong: #a1a1aa;
   --brand-cyan: #06b6d4;
   --brand-cyan-glow: rgba(6, 182, 212, 0.15);
@@ -73,6 +73,38 @@
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
+/* Custom Scrollbars (Modern Web standard + WebKit fallback) */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(63, 63, 70, 0.5) transparent;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@supports not (scrollbar-color: auto) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(63, 63, 70, 0.5);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(6, 182, 212, 0.6);
+  }
+}
+
+/* Custom Text Selection Highlight */
+::selection {
+  background: rgba(6, 182, 212, 0.25);
+  color: #fafafa;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -86,6 +118,35 @@ body {
 *:focus-visible {
   outline: 2px solid var(--color-brand-cyan);
   outline-offset: 3px;
+}
+
+/* Glassmorphism & Neon Glow Utilities */
+.glass-panel {
+  background: var(--surface-1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+}
+
+.glass-panel-glow {
+  background: var(--surface-1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  box-shadow: 0 0 25px -5px var(--brand-cyan-glow);
+}
+
+.glow-cyan-sm {
+  box-shadow: 0 0 15px -3px rgba(6, 182, 212, 0.2);
+}
+
+.glow-cyan-md {
+  box-shadow: 0 0 30px -5px rgba(6, 182, 212, 0.25);
+}
+
+.glow-cyan-border {
+  border-color: rgba(6, 182, 212, 0.4);
+  box-shadow: 0 0 20px -3px rgba(6, 182, 212, 0.15), inset 0 0 15px -3px rgba(6, 182, 212, 0.05);
 }
 
 /* Reduced motion compliance */

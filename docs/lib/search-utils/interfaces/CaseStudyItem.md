@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [lib/search-utils](../README.md) / CaseStudyItem
+[fderuiter-portfolio](../../../modules.md) / [lib/search-utils](../README.md) / CaseStudyItem
 
 # Interface: CaseStudyItem
 

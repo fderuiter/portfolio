@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [hooks/useTelemetry](../README.md) / TelemetryData
+[fderuiter-portfolio](../../../modules.md) / [hooks/useTelemetry](../README.md) / TelemetryData
 
 # Type Alias: TelemetryData
 

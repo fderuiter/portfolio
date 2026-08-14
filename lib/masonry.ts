@@ -19,6 +19,7 @@ export interface MasonryConfig {
   CARD_PADDING: number;
   LINE_HEIGHT: number;
   FALLBACK_ITEM_HEIGHT: number;
+  MOBILE_PADDING_ADJUSTMENT?: number;
 }
 
 export interface PreparedParagraph {
@@ -88,7 +89,14 @@ export function calculateMasonryLayout<T extends { id: string }>(
     }
 
     const override = heightOverrides?.[study.id];
-    const totalHeight = override !== undefined ? override : totalTextHeight + cached.paddingHeight;
+    // The single-column card shell is 22px shorter because responsive typography
+    // and control wrapping remove one desktop spacing row.
+    const responsivePaddingAdjustment = colCount === 1
+      ? (config.MOBILE_PADDING_ADJUSTMENT ?? 0)
+      : 0;
+    const totalHeight = override !== undefined
+      ? override
+      : totalTextHeight + cached.paddingHeight - responsivePaddingAdjustment;
 
     return {
       ...study,

@@ -1,14 +1,14 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [lib/layout-config](../README.md) / resolveThemeFonts
+[fderuiter-portfolio](../../../modules.md) / [lib/layout-config](../README.md) / resolveThemeFonts
 
 # Function: resolveThemeFonts()
 
 > **resolveThemeFonts**(`fontSize`, `fontFamilyVariable?`): [`ThemeFonts`](../interfaces/ThemeFonts.md)
 
-Defined in: [lib/layout-config.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L37)
+Defined in: [lib/layout-config.ts:39](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L39)
 
 ## Parameters
 

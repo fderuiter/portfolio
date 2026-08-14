@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useSearch } from "@/components/providers/SearchProvider";
@@ -36,14 +36,14 @@ export function UnifiedErrorLayout({
   const [invalidPath, setInvalidPath] = useState<string>("");
   const [caseStudies, setCaseStudies] = useState<CaseStudyItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isMounted, setIsMounted] = useState<boolean>(false);
+  const isMounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   const { recordEvent } = useTelemetry();
   const { openSearch } = useSearch();
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   // Capture the path and track telemetry safely on-mount
   useEffect(() => {

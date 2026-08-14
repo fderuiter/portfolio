@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [hooks/useResizeObserver](../README.md) / useResizeObserver
+[fderuiter-portfolio](../../../modules.md) / [hooks/useResizeObserver](../README.md) / useResizeObserver
 
 # Function: useResizeObserver()
 

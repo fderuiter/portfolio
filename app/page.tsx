@@ -12,7 +12,7 @@ interface HydratedCaseStudy extends BaseCaseStudy {
   githubStats: GitHubStats | null;
 }
 
-export default async function WalkingSkeletonPage() {
+export default async function PortfolioHomePage() {
   let caseStudies: HydratedCaseStudy[] = [];
   let errorMsg = "";
 
@@ -135,7 +135,7 @@ export default async function WalkingSkeletonPage() {
       {/* Premium Staggered Living Grid Hero */}
       <Hero />
 
-      {/* Database walking skeleton / Case studies grid */}
+      {/* Case studies showcase section */}
       <main id="case-studies" className="relative min-h-screen py-24 md:py-32 px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950">
         {/* Decorative Blur Elements */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none" />
@@ -151,28 +151,21 @@ export default async function WalkingSkeletonPage() {
             Verifiable Serverless Postgres Architecture
           </p>
 
-          {/* Database Status Alerts */}
+          {/* Ambient Live System Status Chip */}
           {errorMsg ? (
-            <div className="w-full p-6 bg-red-950/20 border border-red-900/40 rounded-2xl mb-8">
-              <h3 className="text-lg font-bold text-red-400 mb-2 flex items-center">
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                Database Connection Failed
-              </h3>
-              <p className="text-xs font-mono text-red-500 leading-relaxed break-words">
-                {errorMsg}
-              </p>
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/25 text-rose-400 text-xs font-mono mb-10 backdrop-blur-md">
+              <span className="relative flex h-2 w-2">
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+              </span>
+              <span>Telemetry Degraded: Database Offline</span>
             </div>
           ) : (
-            <div className="w-full p-4 bg-emerald-950/10 border border-emerald-900/30 rounded-2xl flex items-center mb-12">
-              <span className="relative flex h-2 w-2 mr-3.5">
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono mb-10 backdrop-blur-md shadow-[0_0_15px_rgba(16,185,129,0.08)]">
+              <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              <p className="text-xs font-mono text-emerald-400">
-                Centralized serverless Neon Postgres instance successfully connected and active.
-              </p>
+              <span>Operational · Serverless Neon Postgres Active</span>
             </div>
           )}
 
@@ -197,10 +190,10 @@ export default async function WalkingSkeletonPage() {
           {/* Dynamic Bento Showcase */}
           {caseStudies.length === 0 ? (
             <div className="text-center p-12 bg-zinc-900/10 border border-zinc-900/40 border-dashed rounded-2xl w-full">
-              <p className="text-sm text-zinc-500 italic mb-2">
+              <p className="text-sm text-zinc-400 italic mb-2">
                 Connection established, but no published case studies were found in the database.
               </p>
-              <p className="text-xs text-zinc-600 font-mono">
+              <p className="text-xs text-zinc-400 font-mono">
                 Initialize seeding pipeline via Issue #10 to import clinical trial narratives.
               </p>
             </div>
@@ -272,7 +265,7 @@ export default async function WalkingSkeletonPage() {
                 ✉
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">Email Broadcast</span>
-              <span className="text-[10px] font-mono text-zinc-500">contact@fderuiter.com</span>
+              <span className="text-xs font-mono text-zinc-400">contact@fderuiter.com</span>
             </a>
             
             {/* GitHub Portal */}
@@ -287,7 +280,7 @@ export default async function WalkingSkeletonPage() {
                 🐙
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">GitHub Repos</span>
-              <span className="text-[10px] font-mono text-zinc-500">github.com/fderuiter</span>
+              <span className="text-xs font-mono text-zinc-400">github.com/fderuiter</span>
             </a>
 
             {/* LinkedIn Connection */}
@@ -302,11 +295,11 @@ export default async function WalkingSkeletonPage() {
                 in
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">LinkedIn Network</span>
-              <span className="text-[10px] font-mono text-zinc-500">Secure Profile Link</span>
+              <span className="text-xs font-mono text-zinc-400">Secure Profile Link</span>
             </a>
           </div>
           
-          <div className="mt-24 text-[10px] font-mono text-zinc-700 tracking-[0.25em] text-center select-none">
+          <div className="mt-24 text-xs font-mono text-zinc-400 tracking-[0.2em] text-center select-none">
             DESIGNED & DEVELOPED BY FREDERICK DE RUITER
           </div>
         </div>

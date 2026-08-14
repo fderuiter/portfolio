@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [lib/security](../README.md) / validateSyncRequest
+[fderuiter-portfolio](../../../modules.md) / [lib/security](../README.md) / validateSyncRequest
 
 # Function: validateSyncRequest()
 

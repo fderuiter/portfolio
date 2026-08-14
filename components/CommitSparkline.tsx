@@ -44,7 +44,7 @@ export const CommitSparkline: React.FC<CommitSparklineProps> = ({
   return (
     <div className={`w-full relative select-none ${className || ""}`}>
       {/* Sparkline Title Metadata */}
-      <div className="flex justify-between items-center text-[10px] font-mono text-zinc-500 mb-2">
+      <div className="flex justify-between items-center text-[10px] font-mono text-zinc-400 mb-2">
         <span className="tracking-widest uppercase">Commit Activity (12 Months)</span>
         <span className="text-brand-cyan font-bold">{totalCommits} Commits</span>
       </div>

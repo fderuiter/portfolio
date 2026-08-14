@@ -7,7 +7,7 @@ vi.mock("@chenglou/pretext/rich-inline", () => ({
     cb({ start: 0, end: 1 });
     cb({ start: 1, end: 2 });
   }),
-  materializeRichInlineLineRange: vi.fn((_, _range) => ({
+  materializeRichInlineLineRange: vi.fn(() => ({
     text: "line",
   })),
 }));

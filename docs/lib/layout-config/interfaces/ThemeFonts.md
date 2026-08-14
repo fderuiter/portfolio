@@ -1,12 +1,12 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [lib/layout-config](../README.md) / ThemeFonts
+[fderuiter-portfolio](../../../modules.md) / [lib/layout-config](../README.md) / ThemeFonts
 
 # Interface: ThemeFonts
 
-Defined in: [lib/layout-config.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L30)
+Defined in: [lib/layout-config.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L32)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/layout-config.ts:30](https://github.com/fderuiter/portfolio/blo
 
 > **baseFont**: `string`
 
-Defined in: [lib/layout-config.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L31)
+Defined in: [lib/layout-config.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L33)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/layout-config.ts:31](https://github.com/fderuiter/portfolio/blo
 
 > **boldFont**: `string`
 
-Defined in: [lib/layout-config.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L32)
+Defined in: [lib/layout-config.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L34)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/layout-config.ts:32](https://github.com/fderuiter/portfolio/blo
 
 > **codeFont**: `string`
 
-Defined in: [lib/layout-config.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L34)
+Defined in: [lib/layout-config.ts:36](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L36)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/layout-config.ts:34](https://github.com/fderuiter/portfolio/blo
 
 > **italicFont**: `string`
 
-Defined in: [lib/layout-config.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L33)
+Defined in: [lib/layout-config.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L35)

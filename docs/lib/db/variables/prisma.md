@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [lib/db](../README.md) / prisma
+[fderuiter-portfolio](../../../modules.md) / [lib/db](../README.md) / prisma
 
 # Variable: prisma
 

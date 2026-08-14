@@ -7,6 +7,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { SearchProvider, useSearch } from "@/components/providers/SearchProvider";
+import { AudioProvider } from "@/components/providers/AudioProvider";
 import { UnifiedErrorLayout } from "@/components/UnifiedErrorLayout";
 
 describe("SearchProvider & useSearch Context", () => {
@@ -29,6 +30,18 @@ describe("UnifiedErrorLayout JSDOM state and interactivity", () => {
   beforeEach(() => {
     container = document.createElement("div");
     document.body.appendChild(container);
+
+    const storage = new Map<string, string>();
+    vi.stubGlobal("localStorage", {
+      getItem: vi.fn((key: string) => storage.get(key) ?? null),
+      setItem: vi.fn((key: string, value: string) => storage.set(key, value)),
+      removeItem: vi.fn((key: string) => storage.delete(key)),
+      clear: vi.fn(() => storage.clear()),
+      key: vi.fn((index: number) => Array.from(storage.keys())[index] ?? null),
+      get length() {
+        return storage.size;
+      },
+    });
 
     // Mock global fetch to return clean responses and prevent error logs
     vi.stubGlobal("fetch", vi.fn().mockImplementation((url: string) => {
@@ -60,14 +73,16 @@ describe("UnifiedErrorLayout JSDOM state and interactivity", () => {
     await act(async () => {
       root = createRoot(container);
       root.render(
-        <SearchProvider>
-          <UnifiedErrorLayout
-            badge="TEST_BADGE"
-            title="Test Title"
-            description="Test description text"
-            showRetroLabyrinth={false}
-          />
-        </SearchProvider>
+        <AudioProvider>
+          <SearchProvider>
+            <UnifiedErrorLayout
+              badge="TEST_BADGE"
+              title="Test Title"
+              description="Test description text"
+              showRetroLabyrinth={false}
+            />
+          </SearchProvider>
+        </AudioProvider>
       );
     });
 
@@ -81,14 +96,16 @@ describe("UnifiedErrorLayout JSDOM state and interactivity", () => {
     await act(async () => {
       root = createRoot(container);
       root.render(
-        <SearchProvider>
-          <UnifiedErrorLayout
-            badge="TEST_BADGE"
-            title="Test Title"
-            description="Test description text"
-            showRetroLabyrinth={true}
-          />
-        </SearchProvider>
+        <AudioProvider>
+          <SearchProvider>
+            <UnifiedErrorLayout
+              badge="TEST_BADGE"
+              title="Test Title"
+              description="Test description text"
+              showRetroLabyrinth={true}
+            />
+          </SearchProvider>
+        </AudioProvider>
       );
     });
 
@@ -99,14 +116,16 @@ describe("UnifiedErrorLayout JSDOM state and interactivity", () => {
     await act(async () => {
       root = createRoot(container);
       root.render(
-        <SearchProvider>
-          <UnifiedErrorLayout
-            badge="TEST_BADGE"
-            title="Test Title"
-            description="Test description text"
-            showRetroLabyrinth={false}
-          />
-        </SearchProvider>
+        <AudioProvider>
+          <SearchProvider>
+            <UnifiedErrorLayout
+              badge="TEST_BADGE"
+              title="Test Title"
+              description="Test description text"
+              showRetroLabyrinth={false}
+            />
+          </SearchProvider>
+        </AudioProvider>
       );
     });
 

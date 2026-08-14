@@ -27,9 +27,7 @@ describe("Keyboard Boundary Exclusion Logic", () => {
   it("should detect when an element is NOT inside a keyboard boundary", () => {
     // Mock element not in boundary
     const mockElementOutside = {
-      closest: vi.fn((_selector: string) => {
-        return null;
-      }),
+      closest: vi.fn(() => null),
     };
 
     expect(isWithinBoundary(mockElementOutside)).toBe(false);
@@ -131,7 +129,7 @@ describe("Global Command Palette Listener", () => {
     };
 
     const mockTargetOutsideBoundary = {
-      closest: (_selector: string) => null,
+      closest: () => null,
     };
 
     simulateGlobalKeydown({

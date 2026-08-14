@@ -57,6 +57,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-theme="dark"
       className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
@@ -93,4 +94,3 @@ export default function RootLayout({
     </html>
   );
 }
-

@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [lib/masonry](../README.md) / MasonryConfig
+[fderuiter-portfolio](../../../modules.md) / [lib/masonry](../README.md) / MasonryConfig
 
 # Interface: MasonryConfig
 
@@ -75,3 +75,11 @@ Defined in: [lib/masonry.ts:18](https://github.com/fderuiter/portfolio/blob/main
 > **LINE\_HEIGHT**: `number`
 
 Defined in: [lib/masonry.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L20)
+
+***
+
+### MOBILE\_PADDING\_ADJUSTMENT?
+
+> `optional` **MOBILE\_PADDING\_ADJUSTMENT?**: `number`
+
+Defined in: [lib/masonry.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L22)

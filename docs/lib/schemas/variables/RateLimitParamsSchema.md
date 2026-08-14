@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [lib/schemas](../README.md) / RateLimitParamsSchema
+[fderuiter-portfolio](../../../modules.md) / [lib/schemas](../README.md) / RateLimitParamsSchema
 
 # Variable: RateLimitParamsSchema
 

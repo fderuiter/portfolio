@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [lib/layout-config](../README.md) / LAYOUT\_CONFIG
+[fderuiter-portfolio](../../../modules.md) / [lib/layout-config](../README.md) / LAYOUT\_CONFIG
 
 # Variable: LAYOUT\_CONFIG
 
@@ -59,6 +59,10 @@ Defined in: [lib/layout-config.ts:3](https://github.com/fderuiter/portfolio/blob
 ### LINE\_HEIGHT
 
 > `readonly` **LINE\_HEIGHT**: `18` = `designManifest.typography.sizes.sm.lineHeight`
+
+### MOBILE\_PADDING\_ADJUSTMENT
+
+> `readonly` **MOBILE\_PADDING\_ADJUSTMENT**: `22` = `22`
 
 ### PADDING\_WITH\_STATS
 

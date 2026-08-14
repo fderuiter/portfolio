@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [lib/design-manifest](../README.md) / designManifest
+[fderuiter-portfolio](../../../modules.md) / [lib/design-manifest](../README.md) / designManifest
 
 # Variable: designManifest
 
@@ -115,7 +115,7 @@ Original CSS Variable: --foreground
 
 #### colors.muted
 
-> `readonly` **muted**: `"#71717a"` = `"#71717a"`
+> `readonly` **muted**: `"#a1a1aa"` = `"#a1a1aa"`
 
 Original CSS Variable: --muted
 

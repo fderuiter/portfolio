@@ -1,8 +1,8 @@
-[**temp_dir**](../../README.md)
+[**fderuiter-portfolio**](../../README.md)
 
 ***
 
-[temp_dir](../../modules.md) / lib/layout-config
+[fderuiter-portfolio](../../modules.md) / lib/layout-config
 
 # lib/layout-config
 

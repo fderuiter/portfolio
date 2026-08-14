@@ -18,9 +18,6 @@ test.describe('Visual Regression & Drift Detection', () => {
       `
     });
 
-    // Wait for network requests or images if any
-    await page.waitForLoadState('networkidle');
-
     // Wait for the Pretext measuring text to finish on ALL cards
     await page.waitForFunction(() => {
       const elements = Array.from(document.querySelectorAll('.text-\\[9px\\]'));
@@ -48,8 +45,6 @@ test.describe('Visual Regression & Drift Detection', () => {
     });
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
-
     // Wait for the Pretext measuring text to finish on ALL cards
     await page.waitForFunction(() => {
       const elements = Array.from(document.querySelectorAll('.text-\\[9px\\]'));
@@ -69,7 +64,7 @@ test.describe('Visual Regression & Drift Detection', () => {
       const slug = await card.getAttribute('data-card-slug');
       const expected = await card.getAttribute('data-expected-height');
       const actual = await card.getAttribute('data-actual-height');
-      
+
       const mismatch = await card.getAttribute('data-hydration-mismatch');
       if (mismatch === 'true') {
         expect(actual, `Drift detected! Card '${slug}' mathematically expected ${expected}px but naturally measured ${actual}px. Update padding constants.`).toBe(expected);

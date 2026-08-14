@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [lib/validation-scanner](../README.md) / scanFile
+[fderuiter-portfolio](../../../modules.md) / [lib/validation-scanner](../README.md) / scanFile
 
 # Function: scanFile()
 

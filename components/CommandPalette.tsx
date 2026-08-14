@@ -6,7 +6,7 @@ import { designManifest } from "@/lib/design-manifest";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { IconSearch, IconTerminal, IconFileCode, IconDirections, IconCornerDownLeft } from "@tabler/icons-react";
+import { IconSearch, IconTerminal, IconFileCode, IconDirections, IconCornerDownLeft, IconShieldCheck } from "@tabler/icons-react";
 import { filterFuzzySearch } from "@/lib/search-utils";
 import { useSearch } from "@/components/providers/SearchProvider";
 
@@ -85,12 +85,60 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />
       },
       {
-        id: "nav-sandbox",
-        title: "CLI Developer Sandbox",
-        subtitle: "Test dynamic CLI metrics and view sandbox environments",
+        id: "nav-ui-sandbox",
+        title: "UI Physics Sandbox",
+        subtitle: "Interactive canvas layout physics, Garmin watch simulator, and UI sandbox",
         category: "navigation",
         url: "/ui-sandbox",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
+      },
+      {
+        id: "nav-laser-loon",
+        title: "Laser Loon: Cryo Bug Hunter",
+        subtitle: "Playable physics arcade game — shoot ice blocks and laser beams to blast bugs",
+        category: "navigation",
+        url: "/ui-sandbox#laser-loon",
+        icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
+      },
+      {
+        id: "nav-quasi-puzzler",
+        title: "Quasi-Perfect Puzzler",
+        subtitle: "Formal-methods arcade scaffold — tactics, proof goals, and simulated Lean RAM",
+        category: "navigation",
+        url: "/ui-sandbox#quasi-puzzler",
+        icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
+      },
+      {
+        id: "nav-clinical-chaos",
+        title: "Clinical Trial Chaos",
+        subtitle: "Clinical data-mapping arcade scaffold using synthetic, non-PHI scenarios",
+        category: "navigation",
+        url: "/ui-sandbox#clinical-chaos",
+        icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
+      },
+      {
+        id: "nav-garmin-watch",
+        title: "Garmin Multisport Simulator",
+        subtitle: "Retro multisport arcade simulator — deep ocean, mountain trail, and orbit modes",
+        category: "navigation",
+        url: "/ui-sandbox#garmin-watch",
+        icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
+      },
+      {
+        id: "nav-retro-labyrinth",
+        title: "Retro Labyrinth: Core Recovery",
+        subtitle: "Multi-stage cybernetic maze game with drone patrols and EMP shockwaves",
+        category: "navigation",
+        url: "/not-found",
+        icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
+      },
+      {
+        id: "nav-transparency",
+        title: "Platform Transparency Hub",
+        subtitle: "Live verifiable telemetry, CI/CD operational reliability, and security logs",
+        category: "navigation",
+        url: "/transparency",
+        icon: <IconShieldCheck className="w-4 h-4 text-brand-cyan" />
       },
       {
         id: "nav-proof",
@@ -102,8 +150,8 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
       },
       {
         id: "nav-simulator",
-        title: "Recruiter Simulator",
-        subtitle: "Begin the compatibility wizard to calculate candidate alignment",
+        title: "Engineering Alignment Simulator",
+        subtitle: "Incident triage, architecture dilemmas, and candidate compatibility arcade",
         category: "navigation",
         url: "/simulator",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />
@@ -218,7 +266,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
             aria-label="Spotlight command palette search"
             className="w-full bg-transparent text-sm text-neutral-100 placeholder-zinc-500 focus:outline-none font-sans"
           />
-          <span className="text-[9px] font-mono font-bold tracking-wider text-zinc-500 px-2.5 py-1 bg-zinc-950 border border-zinc-800 rounded-md select-none">
+          <span className="text-xs font-mono font-bold tracking-wider text-zinc-300 px-2.5 py-1 bg-zinc-950 border border-zinc-700 rounded-md select-none">
             ESC
           </span>
         </div>
@@ -278,7 +326,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
                   <div className="flex-1 min-w-0">
                     <div
                       className={`text-xs font-mono font-bold uppercase tracking-wider mb-0.5 transition-colors ${
-                        isActive ? "text-brand-cyan" : "text-zinc-500"
+                        isActive ? "text-brand-cyan" : "text-zinc-400"
                       }`}
                     >
                       {item.category === "case-study" ? "Case Study" : "Site Channel"}
@@ -290,14 +338,14 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
                     >
                       {item.title}
                     </div>
-                    <div className="text-[11px] text-zinc-500 truncate mt-0.5">
+                    <div className="text-xs text-zinc-400 truncate mt-0.5">
                       {item.subtitle}
                     </div>
                   </div>
 
                   {/* Right Enter Shortcut icon */}
                   {isActive && (
-                    <span className="text-[10px] font-mono text-zinc-500 flex items-center gap-1.5 animate-pulse flex-shrink-0 select-none">
+                    <span className="text-xs font-mono text-zinc-400 flex items-center gap-1.5 animate-pulse flex-shrink-0 select-none">
                       <span>Select</span>
                       <IconCornerDownLeft className="w-3.5 h-3.5" />
                     </span>
@@ -308,15 +356,15 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
           </div>
         ) : (
           <div className="relative z-10 flex-1 max-h-[340px] overflow-y-auto p-2.5 space-y-1 scrollbar-none py-12 text-center select-none">
-            <p className="text-sm text-zinc-500 italic">No outcomes match search query.</p>
-            <p className="text-[10px] font-mono text-zinc-600 mt-1 uppercase tracking-widest">
+            <p className="text-sm text-zinc-400 italic">No outcomes match search query.</p>
+            <p className="text-xs font-mono text-zinc-400 mt-1 uppercase tracking-widest">
               Try searching other tags
             </p>
           </div>
         )}
 
         {/* Modal Bottom Footer bar */}
-        <div className="relative z-10 border-t border-zinc-800/60 p-3 bg-zinc-950/60 flex justify-between items-center text-[10px] font-mono text-zinc-500 select-none">
+        <div className="relative z-10 border-t border-zinc-800/60 p-3 bg-zinc-950/60 flex justify-between items-center text-xs font-mono text-zinc-400 select-none">
           <div className="flex gap-4">
             <span className="flex items-center gap-1">
               <span className="bg-zinc-900 border border-zinc-850 px-1 rounded-md">↑↓</span> Move

@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [lib/proof-utils](../README.md) / getSuggestion
+[fderuiter-portfolio](../../../modules.md) / [lib/proof-utils](../README.md) / getSuggestion
 
 # Function: getSuggestion()
 

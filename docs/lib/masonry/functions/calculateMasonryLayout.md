@@ -1,14 +1,14 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [lib/masonry](../README.md) / calculateMasonryLayout
+[fderuiter-portfolio](../../../modules.md) / [lib/masonry](../README.md) / calculateMasonryLayout
 
 # Function: calculateMasonryLayout()
 
 > **calculateMasonryLayout**\<`T`\>(`containerWidth`, `filteredItems`, `preparedData`, `config`, `heightOverrides?`): `object`
 
-Defined in: [lib/masonry.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L34)
+Defined in: [lib/masonry.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L35)
 
 ## Type Parameters
 

@@ -1,8 +1,8 @@
-[**temp_dir**](../../../README.md)
+[**fderuiter-portfolio**](../../../README.md)
 
 ***
 
-[temp_dir](../../../modules.md) / [lib/security](../README.md) / validateRouteInitialization
+[fderuiter-portfolio](../../../modules.md) / [lib/security](../README.md) / validateRouteInitialization
 
 # Function: validateRouteInitialization()
 

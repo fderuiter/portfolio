@@ -85,17 +85,17 @@ test.describe('Accessibility Audit Suite', () => {
       `
     });
 
-    // Wait for network idle
-    await page.waitForLoadState('networkidle');
-
-    // Wait for the Pretext measuring text to finish
+    // The app polls telemetry, so networkidle is not a valid readiness signal.
+    // Wait for every Pretext card to finish its deterministic measurement instead.
     await page.waitForFunction(() => {
-      return document.querySelector('.text-\\[9px\\]') && !document.querySelector('.text-\\[9px\\]')?.textContent?.includes('MEASURING...');
+      const elements = Array.from(document.querySelectorAll('.text-\\[9px\\]'));
+      return elements.length > 0 && elements.every((el) => !el.textContent?.includes('MEASURING...'));
     });
+    await page.waitForTimeout(500);
   });
 
   test('Audit: Default Landing Page State', async ({ page }, testInfo) => {
-    const results = await new AxeBuilder({ page }).disableRules(['color-contrast']).analyze();
+    const results = await new AxeBuilder({ page }).analyze();
     const criticalSerious = results.violations.filter(
       v => v.impact === 'critical' || v.impact === 'serious'
     );
@@ -118,7 +118,7 @@ test.describe('Accessibility Audit Suite', () => {
     // Brief timeout to let masonry state transition complete
     await page.waitForTimeout(500);
 
-    const results = await new AxeBuilder({ page }).disableRules(['color-contrast']).analyze();
+    const results = await new AxeBuilder({ page }).analyze();
     const criticalSerious = results.violations.filter(
       v => v.impact === 'critical' || v.impact === 'serious'
     );
@@ -149,7 +149,7 @@ test.describe('Accessibility Audit Suite', () => {
     await expect(combobox).toBeVisible();
 
     // Take an initial scan of the opened command palette
-    const results = await new AxeBuilder({ page }).disableRules(['color-contrast']).analyze();
+    const results = await new AxeBuilder({ page }).analyze();
     const criticalSerious = results.violations.filter(
       v => v.impact === 'critical' || v.impact === 'serious'
     );
@@ -158,7 +158,7 @@ test.describe('Accessibility Audit Suite', () => {
     await combobox.fill('TypeScript');
     await page.waitForTimeout(300);
 
-    const resultsFiltered = await new AxeBuilder({ page }).disableRules(['color-contrast']).analyze();
+    const resultsFiltered = await new AxeBuilder({ page }).analyze();
     const criticalSeriousFiltered = resultsFiltered.violations.filter(
       v => v.impact === 'critical' || v.impact === 'serious'
     );
