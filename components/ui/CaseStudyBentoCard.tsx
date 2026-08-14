@@ -185,7 +185,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             <span className={`px-2.5 py-0.5 text-[10px] font-mono font-bold border border-current/10 rounded-md ${langColor.bg} ${langColor.text}`}>
               {study.primary_language}
             </span>
-            <span className="text-[10px] font-mono text-zinc-600">
+            <span className="text-[10px] font-mono text-zinc-400">
               {study.slug.toUpperCase()}
             </span>
           </div>
@@ -345,7 +345,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
                       </div>
                     ))
                   ) : (
-                    <span className="text-zinc-600 italic">No recent commits located.</span>
+                    <span className="text-zinc-400 italic">No recent commits located.</span>
                   )}
                 </div>
               </div>
@@ -397,7 +397,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             <span>Analyze Architecture</span>
             <IconChevronRight className="ml-1 w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-200" />
           </Link>
-          <div className="text-[9px] font-mono text-zinc-600">
+          <div className="text-[9px] font-mono text-zinc-400">
             {!isLayoutReady ? "MEASURING..." : `H: ${finalHeight}px`}
           </div>
         </div>
