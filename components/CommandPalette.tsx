@@ -101,6 +101,22 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
       },
       {
+        id: "nav-quasi-puzzler",
+        title: "Quasi-Perfect Puzzler",
+        subtitle: "Formal-methods arcade scaffold — tactics, proof goals, and simulated Lean RAM",
+        category: "navigation",
+        url: "/ui-sandbox#quasi-puzzler",
+        icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
+      },
+      {
+        id: "nav-clinical-chaos",
+        title: "Clinical Trial Chaos",
+        subtitle: "Clinical data-mapping arcade scaffold using synthetic, non-PHI scenarios",
+        category: "navigation",
+        url: "/ui-sandbox#clinical-chaos",
+        icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
+      },
+      {
         id: "nav-garmin-watch",
         title: "Garmin Multisport Simulator",
         subtitle: "Retro multisport arcade simulator — deep ocean, mountain trail, and orbit modes",

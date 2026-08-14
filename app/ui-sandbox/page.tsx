@@ -7,6 +7,8 @@ import { TextReveal } from "@/components/TextReveal";
 import { AnimatedGridPattern } from "@/components/AnimatedGridPattern";
 import { GarminWatchSimulator } from "@/components/GarminWatchSimulator";
 import { LaserLoon } from "@/components/LaserLoon";
+import { QuasiPerfectPuzzler } from "@/components/QuasiPerfectPuzzler";
+import { ClinicalTrialChaos } from "@/components/ClinicalTrialChaos";
 
 export default function UISandboxPage() {
   return (
@@ -23,7 +25,14 @@ export default function UISandboxPage() {
         </div>
       </BackgroundBeamsWithCollision>
 
-      {/* 2. Featured Game: Laser Loon Physics Arcade */}
+      {/* 2. Formal methods game scaffold */}
+      <section id="quasi-puzzler" className="py-16 px-4 flex flex-col justify-center items-center bg-zinc-950 border-t border-neutral-800">
+        <div className="max-w-3xl w-full">
+          <QuasiPerfectPuzzler />
+        </div>
+      </section>
+
+      {/* 3. Featured Game: Laser Loon Physics Arcade */}
       <section id="laser-loon" className="py-16 px-4 flex flex-col justify-center items-center bg-neutral-950 border-t border-b border-neutral-800">
         <div className="max-w-3xl w-full text-center mb-6">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono font-bold mb-3">
@@ -43,7 +52,7 @@ export default function UISandboxPage() {
         </div>
       </section>
 
-      {/* 3. Garmin Watch Simulator Section */}
+      {/* 4. Garmin Watch Simulator Section */}
       <section id="garmin-watch" className="py-16 flex flex-col justify-center items-center bg-zinc-950 border-b border-neutral-800">
         <div className="max-w-md w-full text-center mb-4 px-4">
           <h2 className="text-2xl md:text-3xl font-bold font-mono text-brand-cyan tracking-tight">
@@ -58,7 +67,14 @@ export default function UISandboxPage() {
         </div>
       </section>
 
-      {/* 4. Magic UI: Animated Grid Pattern */}
+      {/* 5. Clinical game scaffold */}
+      <section id="clinical-chaos" className="py-16 px-4 flex flex-col justify-center items-center bg-neutral-950 border-b border-neutral-800">
+        <div className="max-w-3xl w-full">
+          <ClinicalTrialChaos />
+        </div>
+      </section>
+
+      {/* 6. Magic UI: Animated Grid Pattern */}
       <div className="relative h-[25vh] flex items-center justify-center overflow-hidden border-b border-neutral-800">
         <AnimatedGridPattern
           numSquares={30}
@@ -70,7 +86,7 @@ export default function UISandboxPage() {
         <h2 className="text-2xl z-10 text-neutral-300 font-mono">Animated Grid Pattern</h2>
       </div>
 
-      {/* 5. Magic UI: Terminal */}
+      {/* 7. Magic UI: Terminal */}
       <div className="py-20 flex justify-center items-center bg-neutral-900 border-b border-neutral-800">
         <Terminal>
           <TypingAnimation>&gt; pnpm dlx shadcn@latest init</TypingAnimation>
@@ -86,14 +102,14 @@ export default function UISandboxPage() {
         </Terminal>
       </div>
 
-      {/* 6. Magic UI: Text Reveal */}
+      {/* 8. Magic UI: Text Reveal */}
       <div className="border-b border-neutral-800">
         <TextReveal>
           Gamifying the discovery of AI contexts and unlocking advanced systems architectures.
         </TextReveal>
       </div>
 
-      {/* 7. Aceternity: Bento Grid with Glare Cards */}
+      {/* 9. Aceternity: Bento Grid with Glare Cards */}
       <div className="py-20 bg-neutral-950">
         <h2 className="text-3xl font-bold text-center mb-10 font-mono">Bento Grid with Glare Cards</h2>
         <BentoGrid className="max-w-4xl mx-auto px-4">
