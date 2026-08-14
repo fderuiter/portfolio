@@ -21,10 +21,15 @@ test.describe('Visual Regression & Drift Detection', () => {
     // Wait for network requests or images if any
     await page.waitForLoadState('networkidle');
 
-    // Wait for the Pretext measuring text to finish
+    // Wait for the Pretext measuring text to finish on ALL cards
     await page.waitForFunction(() => {
-      return document.querySelector('.text-\\[9px\\]') && !document.querySelector('.text-\\[9px\\]')?.textContent?.includes('MEASURING...');
+      const elements = Array.from(document.querySelectorAll('.text-\\[9px\\]'));
+      if (elements.length === 0) return false;
+      return elements.every(el => el.textContent && !el.textContent.includes('MEASURING...'));
     });
+
+    // Give a brief moment for layout/scroll coordinates to settle completely
+    await page.waitForTimeout(500);
 
     // Take full page snapshot to cover case study components
     await expect(page).toHaveScreenshot('home.png', {
@@ -45,10 +50,15 @@ test.describe('Visual Regression & Drift Detection', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
 
-    // Wait for the Pretext measuring text to finish
+    // Wait for the Pretext measuring text to finish on ALL cards
     await page.waitForFunction(() => {
-      return document.querySelector('.text-\\[9px\\]') && !document.querySelector('.text-\\[9px\\]')?.textContent?.includes('MEASURING...');
+      const elements = Array.from(document.querySelectorAll('.text-\\[9px\\]'));
+      if (elements.length === 0) return false;
+      return elements.every(el => el.textContent && !el.textContent.includes('MEASURING...'));
     });
+
+    // Give a brief moment for layout/scroll coordinates to settle completely
+    await page.waitForTimeout(500);
 
     // Wait for at least one card to be present and hydrated
     await page.waitForSelector('[data-card-slug]');
