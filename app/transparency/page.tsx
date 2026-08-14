@@ -114,7 +114,7 @@ export default function TransparencyHub() {
           </div>
 
           <div className="flex items-center gap-4 text-xs font-mono text-zinc-500 self-end md:self-auto">
-            <span aria-live="polite">
+            <span aria-live="polite" suppressHydrationWarning>
               Last updated: {lastRefreshed.toLocaleTimeString()}
             </span>
             <button 
