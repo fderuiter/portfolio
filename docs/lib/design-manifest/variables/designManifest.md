@@ -177,7 +177,7 @@ Original CSS Variable: --layout-masonry-padding-without-stats
 
 #### masonry.paddingWithStats
 
-> `readonly` **paddingWithStats**: `484` = `484`
+> `readonly` **paddingWithStats**: `606` = `606`
 
 Original CSS Variable: --layout-masonry-padding-with-stats
 

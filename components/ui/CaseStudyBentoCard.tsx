@@ -214,7 +214,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             </span>
           </div>
 
-          <CardTitle className="text-lg md:text-xl font-extrabold tracking-tight">
+          <CardTitle className="text-lg md:text-xl font-extrabold tracking-tight line-clamp-2 h-[56px] leading-[28px] overflow-hidden">
             {study.title}
           </CardTitle>
 

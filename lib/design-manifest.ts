@@ -56,7 +56,7 @@ export const designManifest = {
   },
   masonry: {
     /** Original CSS Variable: --layout-masonry-padding-with-stats */
-    paddingWithStats: 484,
+    paddingWithStats: 606,
     /** Original CSS Variable: --layout-masonry-padding-without-stats */
     paddingWithoutStats: 254,
   },
