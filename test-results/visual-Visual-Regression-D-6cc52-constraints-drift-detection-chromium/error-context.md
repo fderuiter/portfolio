@@ -1,0 +1,328 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: visual.spec.ts >> Visual Regression & Drift Detection >> Layout constraints drift detection
+- Location: __tests__/e2e/visual.spec.ts:38:7
+
+# Error details
+
+```
+Test timeout of 30000ms exceeded.
+```
+
+```
+Error: page.waitForSelector: Test timeout of 30000ms exceeded.
+Call log:
+  - waiting for locator('[data-card-slug]') to be visible
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "FDERUITER" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e8]: FDERUITER
+      - generic [ref=e9]:
+        - navigation [ref=e10]:
+          - link "Work" [ref=e11] [cursor=pointer]:
+            - /url: /#case-studies
+          - link "About" [ref=e12] [cursor=pointer]:
+            - /url: /#about
+          - link "Proof Workspace" [ref=e13] [cursor=pointer]:
+            - /url: /proof
+          - link "Transparency" [ref=e14] [cursor=pointer]:
+            - /url: /transparency
+          - link "Simulator" [ref=e15] [cursor=pointer]:
+            - /url: /simulator
+          - link "Contact" [ref=e16] [cursor=pointer]:
+            - /url: /#contact
+          - link "GitHub ↗" [ref=e17] [cursor=pointer]:
+            - /url: https://github.com/fderuiter/portfolio
+            - text: GitHub
+            - generic [ref=e18]: ↗
+        - button "Sound Settings" [ref=e20] [cursor=pointer]:
+          - img [ref=e21]
+          - generic [ref=e26]: "SOUND: OFF"
+          - img [ref=e27]
+  - generic [ref=e29]:
+    - generic [ref=e30]:
+      - generic:
+        - img
+      - generic [ref=e31]:
+        - generic [ref=e32]: FREDERICK DE RUITER · PRINCIPAL SYSTEMS ENGINEER
+        - generic [ref=e33]:
+          - generic:
+            - paragraph: Engineering the Interface Between Data and Meaning
+          - heading "Engineering the Interface Between Data and Meaning" [level=1] [ref=e34]
+        - generic [ref=e35]:
+          - generic:
+            - paragraph: Connecting high-performance canvas layout engines, serverless Postgres data streams, and clinical data integration clients into a unified engineering showcase.
+          - paragraph [ref=e36]: Connecting high-performance canvas layout engines, serverless Postgres data streams, and clinical data integration clients into a unified engineering showcase.
+        - generic [ref=e37]:
+          - link "Explore Engineering" [ref=e38] [cursor=pointer]:
+            - /url: "#case-studies"
+            - text: Explore Engineering
+          - link "GitHub Repository" [ref=e40] [cursor=pointer]:
+            - /url: https://github.com/fderuiter/portfolio
+            - img [ref=e41]
+            - text: GitHub Repository
+    - main [ref=e43]:
+      - generic [ref=e44]:
+        - heading "Unified Engineering Showcase" [level=2] [ref=e45]
+        - paragraph [ref=e46]: Verifiable Serverless Postgres Architecture
+        - generic [ref=e51]: Operational · Serverless Neon Postgres Active
+        - generic [ref=e52]:
+          - 'heading "Personal Highlights: Creative Engineering" [level=3] [ref=e53]': "Personal Highlights: Creative Engineering"
+          - paragraph [ref=e55]: Beyond standard engineering deep-dives, I build playful and interactive physics experiments to explore user engagement through unexpected UI forms.
+          - link "Explore the Laser Loon & UI Sandbox" [ref=e56] [cursor=pointer]:
+            - /url: /ui-sandbox
+            - text: Explore the Laser Loon & UI Sandbox
+            - img [ref=e57]
+        - generic [ref=e59]:
+          - paragraph [ref=e60]: Connection established, but no published case studies were found in the database.
+          - paragraph [ref=e61]: "Initialize seeding pipeline via Issue #10 to import clinical trial narratives."
+    - generic [ref=e65]:
+      - generic [ref=e66]: I
+      - generic [ref=e67]: build
+      - generic [ref=e68]: resilient,
+      - generic [ref=e69]: type-safe
+      - generic [ref=e70]: infrastructure
+      - generic [ref=e71]: that
+      - generic [ref=e72]: connects
+      - generic [ref=e73]: low-latency
+      - generic [ref=e74]: client
+      - generic [ref=e75]: interfaces
+      - generic [ref=e76]: with
+      - generic [ref=e77]: scalable
+      - generic [ref=e78]: distributed
+      - generic [ref=e79]: systems,
+      - generic [ref=e80]: guaranteeing
+      - generic [ref=e81]: extreme
+      - generic [ref=e82]: security
+      - generic [ref=e83]: boundaries
+      - generic [ref=e84]: and
+      - generic [ref=e85]: exceptional
+      - generic [ref=e86]: performance.
+    - generic [ref=e88]:
+      - heading "System Architect & Design Engineer" [level=2] [ref=e89]
+      - paragraph [ref=e90]: Engineering High-Performance Technical Solutions
+      - generic [ref=e92]:
+        - generic [ref=e94]:
+          - generic [ref=e95]:
+            - generic [ref=e96]: FDR
+            - generic [ref=e97]:
+              - heading "System Architect" [level=3] [ref=e98]
+              - paragraph [ref=e99]: Principal Design Engineer
+          - paragraph [ref=e100]: I am a full-stack design engineer who believes technology should ultimately serve and connect people. While my background is in building robust operational engines and responsive digital products, my core philosophy is rooted in creativity, playful problem-solving, and ensuring every system I build feels deeply human and accessible.
+        - generic [ref=e102]:
+          - heading "Live Telemetry API" [level=3] [ref=e103]
+          - paragraph [ref=e104]: Dynamic repository programming languages aggregated dynamically via GitHub cached metrics.
+          - generic [ref=e105]:
+            - generic [ref=e107]:
+              - generic [ref=e108]: TypeScript
+              - generic [ref=e109]: 45%
+            - generic [ref=e112]:
+              - generic [ref=e113]: Python
+              - generic [ref=e114]: 25%
+            - generic [ref=e117]:
+              - generic [ref=e118]: React
+              - generic [ref=e119]: 15%
+            - generic [ref=e122]:
+              - generic [ref=e123]: Prisma
+              - generic [ref=e124]: 10%
+            - generic [ref=e127]:
+              - generic [ref=e128]: PostgreSQL
+              - generic [ref=e129]: 5%
+        - generic [ref=e131]:
+          - heading "Core Technical Specializations" [level=3] [ref=e132]
+          - generic [ref=e133]:
+            - generic [ref=e134]:
+              - generic [ref=e135]: "01"
+              - heading "Clinical Integrations" [level=4] [ref=e136]:
+                - generic [ref=e137]: Clinical Integrations
+              - paragraph [ref=e138]: Resilient XML streaming engines matching CDISC ODM schemas to FDA-compliant SDTM datasets.
+            - generic [ref=e139]:
+              - generic [ref=e140]: "02"
+              - heading "Layout Physics" [level=4] [ref=e141]:
+                - generic [ref=e142]: Layout Physics
+              - paragraph [ref=e143]: DOM-free userland canvas calculation loops synchronized to bypass layout reflow thrashes.
+            - generic [ref=e144]:
+              - generic [ref=e145]: "03"
+              - heading "Serverless Scaling" [level=4] [ref=e146]:
+                - generic [ref=e147]: Serverless Scaling
+              - paragraph [ref=e148]: Prisma WebSocket connectivity mappings linking pools into cloud Neon databases at 1ms latencies.
+            - generic [ref=e149]:
+              - generic [ref=e150]: "04"
+              - heading "Full-Stack Security" [level=4] [ref=e151]
+              - paragraph [ref=e152]: Strict HTML sanitizers, encrypted HIPAA token rotation schemes, and dynamic sitemaps.
+      - heading "Professional Experience Timeline" [level=3] [ref=e153]
+      - paragraph [ref=e154]:
+        - text: A Chronological Evolution of
+        - generic [ref=e155]: Systems Rigor
+      - generic [ref=e159]:
+        - generic [ref=e164]:
+          - text: 2023 — Present
+          - heading "Lead Clinical Software Architect" [level=3] [ref=e165]
+          - heading "Systems Integration Group" [level=4] [ref=e166]
+          - paragraph [ref=e167]: Architected distributed HIPAA-compliant streaming ODM XML parsers handling 2GB+ trials data within constant 50MB memory footprints. Transitioned local SQLite storage nodes to high-speed serverless Neon Postgres clusters utilizing native pooling.
+          - generic [ref=e168]:
+            - generic [ref=e169]: TypeScript
+            - generic [ref=e170]: Neon Postgres
+            - generic [ref=e171]: CDISC
+            - generic [ref=e172]: HIPAA
+            - generic [ref=e173]: SAX Parser
+        - generic [ref=e178]:
+          - text: 2020 — 2023
+          - heading "Senior Systems Engineer & UI Specialist" [level=3] [ref=e179]
+          - heading "Digital Physics Labs" [level=4] [ref=e180]
+          - paragraph [ref=e181]: Developed hardware-accelerated text measuring and Bento grid wrapping engines using browser canvas and custom hooks. Maintained 60FPS refresh metrics under active resizing and heavy grid item swaps.
+          - generic [ref=e182]:
+            - generic [ref=e183]: React 19
+            - generic [ref=e184]: Next.js 16
+            - generic [ref=e185]: Framer Motion
+            - generic [ref=e186]: Canvas API
+            - generic [ref=e187]: DX Tooling
+        - generic [ref=e192]:
+          - text: 2019 — 2021
+          - heading "Lead Volunteer & Technical Mentor" [level=3] [ref=e193]
+          - heading "Civic Code for Humanity" [level=4] [ref=e194]
+          - paragraph [ref=e195]: Partnered with local nonprofits to modernize their digital presence and data systems. Taught coding bootcamps for underprivileged youth, emphasizing creativity and problem-solving.
+          - generic [ref=e196]:
+            - generic [ref=e197]: Civic Impact
+            - generic [ref=e198]: Education
+            - generic [ref=e199]: Volunteering
+            - generic [ref=e200]: Accessibility
+        - generic [ref=e205]:
+          - text: 2018 — 2020
+          - heading "Full-Stack Developer" [level=3] [ref=e206]
+          - heading "CoreFlow Technologies" [level=4] [ref=e207]
+          - paragraph [ref=e208]: Pioneered DAG-based Visual Node Schema builders. Engineered immutable state trees, cycle validation compilers, and OpenAPI spec translators.
+          - generic [ref=e209]:
+            - generic [ref=e210]: React
+            - generic [ref=e211]: Zustand
+            - generic [ref=e212]: AST
+            - generic [ref=e213]: JSON Schema
+            - generic [ref=e214]: OpenAPI
+        - generic [ref=e219]:
+          - text: 2016 — 2018
+          - heading "President, Computer Science Society" [level=3] [ref=e220]
+          - heading "University Student Leadership" [level=4] [ref=e221]
+          - paragraph [ref=e222]: Led a community of 500+ students, organized weekly workshops, and fostered a culture of collaborative learning. Built mentorship programs that connected underclassmen with alumni.
+          - generic [ref=e223]:
+            - generic [ref=e224]: Leadership
+            - generic [ref=e225]: Community Building
+            - generic [ref=e226]: Mentorship
+            - generic [ref=e227]: Public Speaking
+    - generic [ref=e229]:
+      - heading "Get In Touch" [level=2] [ref=e230]
+      - paragraph [ref=e231]: Let's Collaborate on Premium Engineering Projects
+      - generic [ref=e232]:
+        - link "Send an email to Frederick de Ruiter at contact@fderuiter.com" [ref=e233] [cursor=pointer]:
+          - /url: mailto:contact@fderuiter.com
+          - generic [ref=e234]: ✉
+          - generic [ref=e235]: Email Broadcast
+          - generic [ref=e236]: contact@fderuiter.com
+        - link "View Frederick de Ruiter's GitHub profile externally" [ref=e237] [cursor=pointer]:
+          - /url: https://github.com/fderuiter
+          - generic [ref=e238]: 🐙
+          - generic [ref=e239]: GitHub Repos
+          - generic [ref=e240]: github.com/fderuiter
+        - link "View Frederick de Ruiter's LinkedIn profile externally" [ref=e241] [cursor=pointer]:
+          - /url: https://linkedin.com
+          - generic [ref=e242]: in
+          - generic [ref=e243]: LinkedIn Network
+          - generic [ref=e244]: Secure Profile Link
+      - generic [ref=e245]: DESIGNED & DEVELOPED BY FREDERICK DE RUITER
+  - button "Open Next.js Dev Tools" [ref=e253] [cursor=pointer]:
+    - img [ref=e254]
+```
+
+# Test source
+
+```ts
+  1  | import { test, expect } from '@playwright/test';
+  2  | 
+  3  | test.describe('Visual Regression & Drift Detection', () => {
+  4  |   test('Case Study components snapshot (desktop)', async ({ page }) => {
+  5  |     // Emulate reduced motion to disable JS transitions/animations
+  6  |     await page.emulateMedia({ reducedMotion: 'reduce' });
+  7  | 
+  8  |     // Wait for the hydration and masonry layout to be stable
+  9  |     await page.goto('/');
+  10 |     
+  11 |     // Disable animations for consistent snapshots
+  12 |     await page.addStyleTag({
+  13 |       content: `
+  14 |         *, *::before, *::after {
+  15 |           transition: none !important;
+  16 |           animation: none !important;
+  17 |         }
+  18 |       `
+  19 |     });
+  20 | 
+  21 |     // Wait for the Pretext measuring text to finish on ALL cards
+  22 |     await page.waitForFunction(() => {
+  23 |       const elements = Array.from(document.querySelectorAll('.text-\\[9px\\]'));
+  24 |       if (elements.length === 0) return false;
+  25 |       return elements.every(el => el.textContent && !el.textContent.includes('MEASURING...'));
+  26 |     });
+  27 | 
+  28 |     // Give a brief moment for layout/scroll coordinates to settle completely
+  29 |     await page.waitForTimeout(500);
+  30 | 
+  31 |     // Take full page snapshot to cover case study components
+  32 |     await expect(page).toHaveScreenshot('home.png', {
+  33 |       fullPage: true,
+  34 |       maxDiffPixelRatio: 0.01,
+  35 |     });
+  36 |   });
+  37 | 
+  38 |   test('Layout constraints drift detection', async ({ page }) => {
+  39 |     // Emulate reduced motion to disable JS transitions/animations
+  40 |     await page.emulateMedia({ reducedMotion: 'reduce' });
+  41 | 
+  42 |     // Inject the global flag for the client so the component enables the checks
+  43 |     await page.addInitScript(() => {
+  44 |       (window as unknown as { __PLAYWRIGHT_TEST__?: boolean }).__PLAYWRIGHT_TEST__ = true;
+  45 |     });
+  46 | 
+  47 |     await page.goto('/');
+  48 |     // Wait for the Pretext measuring text to finish on ALL cards
+  49 |     await page.waitForFunction(() => {
+  50 |       const elements = Array.from(document.querySelectorAll('.text-\\[9px\\]'));
+  51 |       if (elements.length === 0) return false;
+  52 |       return elements.every(el => el.textContent && !el.textContent.includes('MEASURING...'));
+  53 |     });
+  54 | 
+  55 |     // Give a brief moment for layout/scroll coordinates to settle completely
+  56 |     await page.waitForTimeout(500);
+  57 | 
+  58 |     // Wait for at least one card to be present and hydrated
+> 59 |     await page.waitForSelector('[data-card-slug]');
+     |                ^ Error: page.waitForSelector: Test timeout of 30000ms exceeded.
+  60 | 
+  61 |     // Select all cards inside the grid
+  62 |     const cards = await page.locator('[data-card-slug]').all();
+  63 |     for (const card of cards) {
+  64 |       const slug = await card.getAttribute('data-card-slug');
+  65 |       const expected = await card.getAttribute('data-expected-height');
+  66 |       const actual = await card.getAttribute('data-actual-height');
+  67 | 
+  68 |       const mismatch = await card.getAttribute('data-hydration-mismatch');
+  69 |       if (mismatch === 'true') {
+  70 |         expect(actual, `Drift detected! Card '${slug}' mathematically expected ${expected}px but naturally measured ${actual}px. Update padding constants.`).toBe(expected);
+  71 |       }
+  72 |     }
+  73 |   });
+  74 | });
+  75 | 
+```
