@@ -26,25 +26,19 @@ function runStep(command, args) {
   }
 }
 
-// 2. Build and Compilation Phase (First)
+// 2. Client Generation & Pre-Build Specifications (Phase 1)
 console.log("\n--- Phase 1: Generating Prisma Client ---");
 runStep('npx', ['prisma', 'generate']);
 
-console.log("\n--- Phase 1.2: Compiling API Documentation ---");
-runStep('npm', ['run', 'compile-docs']);
-
-console.log("\n--- Phase 1.5: Verifying & Generating OpenAPI Specification ---");
+console.log("\n--- Phase 1.2: Verifying & Generating OpenAPI Specification ---");
 runStep('npx', ['tsx', 'scripts/generate-openapi.ts']);
 
-console.log("\n--- Phase 2: Compiling Frontend Application ---");
-runStep('npx', ['next', 'build']);
-
-// 3. Conditional Migration Runner (Second)
+// 3. Pre-Build Database Migrations (Phase 1.5)
 const isProduction = process.env.VERCEL_ENV === 'production';
 console.log(`\nChecking environment: VERCEL_ENV=${process.env.VERCEL_ENV || 'undefined'}`);
 
 if (isProduction) {
-  console.log("\n--- Phase 3: Production Environment Detected - Running Migration Checks and Deploys ---");
+  console.log("\n--- Phase 1.5: Production Environment Detected - Running Migration Checks and Deploys ---");
   
   // A. Migration Integrity and Safety Checks
   console.log("Running migration integrity and safety checks...");
@@ -56,9 +50,13 @@ if (isProduction) {
   
   console.log("Database migrations applied successfully!");
 } else {
-  console.log("\n--- Phase 3: Non-Production Environment - Skipping Database Migrations ---");
-  console.log("Skipping check-migrations.js and prisma migrate deploy because this is not a production environment.");
+  console.log("\n--- Phase 1.5: Non-Production Environment - Skipping Database Migrations ---");
+  console.log("Skipping check:migrations and prisma migrate deploy because this is not a production environment.");
 }
+
+// 4. Application Compilation Phase (Phase 2)
+console.log("\n--- Phase 2: Compiling Frontend Application ---");
+runStep('npx', ['next', 'build']);
 
 console.log("\n--- Build Pipeline Completed Successfully! ---");
 process.exit(0);

@@ -88,20 +88,22 @@ preserved with `false`. Run `npx prisma migrate deploy` once more and confirm it
 is a no-op. Then smoke-test the home page, case studies, telemetry endpoints,
 and transparency routes.
 
-## Release ordering
+## Release ordering and pre-build execution
 
-The current Vercel command deliberately compiles first and runs `migrate
-deploy` afterward. Therefore every release must follow expand-and-contract:
+The Vercel build pipeline (`scripts/build.js`) executes migrations in Phase 1.5
+(pre-build), strictly before `next build` (Phase 2). This guarantees that
+Next.js static site generation (SSG) and dynamic prerendering always query
+the upgraded schema. Database connectivity in `lib/db.ts` uses a connection `Pool`
+via `@neondatabase/serverless` to support parallel queries during prerendering.
+
+Every release must follow expand-and-contract:
 
 1. Expand with backward-compatible, additive migration SQL.
-2. Deploy code that tolerates both the old and expanded schema during build
-   prerendering and rollout.
-3. Backfill separately when needed.
-4. Remove old fields only in a later release after all readers have moved.
+2. Deploy code alongside the pre-build migration runner.
+3. Automated destructive migration guards (`scripts/check-migrations.js`)
+   block `DROP TABLE` or `DROP COLUMN` in production unless explicitly approved.
+4. Remove old fields only in a later release after all readers have migrated.
 
 Prisma serializes concurrent migration attempts with its PostgreSQL advisory
-lock. If deployments move to a dedicated release job, keep a single migration
-runner and make application deployment depend on its success.
-
-Never automate `migrate resolve`; it is a one-time recovery operation that
+lock. Never automate `migrate resolve`; it is a one-time recovery operation that
 requires a verified schema comparison and a restorable snapshot.
