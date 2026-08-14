@@ -552,8 +552,11 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
             className="group relative inline-flex items-center justify-center px-8 py-3.5 text-sm font-semibold text-brand-dark bg-white rounded-full overflow-hidden transition-all duration-300 hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:[box-shadow:var(--btn-glow)]"
           >
             {/* Hover reflection */}
-            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-brand-cyan/20 to-transparent transition-transform duration-1000 ease-out" />
-            Explore Engineering
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-brand-cyan/20 to-transparent transition-transform duration-1000 ease-out"
+            />
+            <span className="relative z-10">Explore Engineering</span>
           </a>
           <a
             href="https://github.com/fderuiter/portfolio"
