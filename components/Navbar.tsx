@@ -274,6 +274,7 @@ export const Navbar: React.FC = () => {
                         </div>
                         <input
                           type="range"
+                          aria-label="Volume"
                           min="0"
                           max="100"
                           value={Math.round(volume * 100)}
@@ -440,6 +441,7 @@ export const Navbar: React.FC = () => {
                 </div>
                 <input
                   type="range"
+                  aria-label="Volume"
                   min="0"
                   max="100"
                   value={Math.round(volume * 100)}
