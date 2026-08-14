@@ -150,14 +150,18 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
         
         cardEl.style.height = originalHeight; // Restore immediately
         
+        if (isPlaywright) {
+          cardEl.setAttribute('data-card-slug', study.slug);
+          cardEl.setAttribute('data-expected-height', finalHeight.toString());
+          cardEl.setAttribute('data-actual-height', actualHeight.toString());
+        }
+        
         if (Math.abs(actualHeight - finalHeight) > 2) {
           console.warn(`[Rigor] Hydration mismatch detected! Card '${study.slug}' mathematically predicted height ${finalHeight}px but DOM naturally measured ${actualHeight}px. This indicates a drift in layout constants (e.g. padding constants).`);
           
           // Provide an attribute for Playwright to catch
           if (isPlaywright) {
             cardEl.setAttribute('data-hydration-mismatch', 'true');
-            cardEl.setAttribute('data-expected-height', finalHeight.toString());
-            cardEl.setAttribute('data-actual-height', actualHeight.toString());
           }
         }
       }
