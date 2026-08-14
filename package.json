@@ -7,7 +7,7 @@
     "dev": "concurrently -n \"turbo,tsc\" -c \"cyan,magenta\" \"next dev --turbo\" \"tsc --noEmit --watch\"",
     "compile-docs": "npx typedoc --entryPoints hooks --entryPoints types --entryPoints lib --exclude \"**/env.d.ts\" --entryPointStrategy expand --out docs --plugin typedoc-plugin-markdown --hideGenerator --cleanOutputDir --skipErrorChecking --gitRevision main",
     "check-docs-drift": "npx tsx scripts/check-drift.ts",
-    "lint:docs": "npx markdownlint \"**/*.md\" --ignore node_modules",
+    "lint:docs": "npx markdownlint \"**/*.md\" --ignore node_modules --ignore test-results --ignore playwright-report",
     "prebuild": "npx tsx scripts/generate-theme.ts && npm run compile-docs",
     "build": "node scripts/build.js",
     "start": "next start",

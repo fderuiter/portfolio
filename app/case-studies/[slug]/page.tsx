@@ -86,7 +86,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         {
           id: "mock-3",
           slug: "aura-haskell",
-          title: "Aura: Language-Tailored Haskell Type Flow Analyzer",
+          title: "Aura: Haskell Type Flow Analyzer",
           primary_language: "Haskell",
           github_url: "https://github.com/fderuiter/aura-haskell",
           published: true,
@@ -185,7 +185,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
         {
           id: "mock-3",
           slug: "aura-haskell",
-          title: "Aura: Language-Tailored Haskell Type Flow Analyzer",
+          title: "Aura: Haskell Type Flow Analyzer",
           primary_language: "Haskell",
           github_url: "https://github.com/fderuiter/aura-haskell",
           published: true,

@@ -11,7 +11,15 @@ import {
 import { LAYOUT_CONFIG, resolveThemeFonts } from "@/lib/layout-config";
 import { GitHubStats } from "@/lib/github";
 import { calculateMasonryLayout, type PreparedData } from "@/lib/masonry";
-import { isBrowser } from "@/lib/graphics-engine";
+import { 
+  isBrowser,
+  textPrepareCache,
+  textLayoutCache,
+  richItemsCache,
+  richPrepareCache,
+  richLayoutCache
+} from "@/lib/graphics-engine";
+import { clearCache } from "@chenglou/pretext";
 import { useBentoLayout } from "@/components/providers/BentoLayoutContext";
 
 export interface MasonryItem {
@@ -117,6 +125,58 @@ export function useMasonryLayout<T extends MasonryItem>(
       recalculateLayout(containerWidthRef.current);
     }
   }, [filteredItems, recalculateLayout]);
+
+  useLayoutEffect(() => {
+    if (!isBrowser()) return;
+    if (typeof document !== "undefined" && document.fonts) {
+      let active = true;
+      document.fonts.ready.then(() => {
+        if (!active) return;
+
+        // Clear all global layout caches
+        textPrepareCache.clear();
+        textLayoutCache.clear();
+        richItemsCache.clear();
+        richPrepareCache.clear();
+        richLayoutCache.clear();
+        clearCache();
+
+        // Re-resolve font styles with the loaded fonts
+        const { baseFont, boldFont, italicFont, codeFont } = resolveThemeFonts(LAYOUT_CONFIG.FONT_SIZE, "--font-inter");
+
+        // Re-prepare all paragraphs
+        const data: Record<string, PreparedData> = {};
+        for (const study of allItems) {
+          const paragraphTexts = study.editorial_content.split(/\r?\n+/).map(p => p.trim()).filter(Boolean);
+          const paragraphs = paragraphTexts.map((text) => {
+            const parsedItems = parseMarkdownToRichItems(text, baseFont, boldFont, italicFont, codeFont);
+            const prepared = prepareRichInline(parsedItems);
+            return {
+              prepared,
+              items: parsedItems,
+            };
+          });
+
+          const paddingHeight = study.githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS;
+          
+          data[study.id] = {
+            paragraphs,
+            paddingHeight,
+          };
+        }
+        
+        preparedDataRef.current = data;
+
+        // Recalculate layout heights with precise dimensions
+        if (containerWidthRef.current > 0) {
+          recalculateLayout(containerWidthRef.current);
+        }
+      });
+      return () => {
+        active = false;
+      };
+    }
+  }, [allItems, recalculateLayout]);
 
   return { containerRef, layoutState };
 }

@@ -62,7 +62,7 @@ Defined in: [lib/layout-config.ts:4](https://github.com/fderuiter/portfolio/blob
 
 ### PADDING\_WITH\_STATS
 
-> `readonly` **PADDING\_WITH\_STATS**: `484` = `designManifest.masonry.paddingWithStats`
+> `readonly` **PADDING\_WITH\_STATS**: `580` = `designManifest.masonry.paddingWithStats`
 
 ### PADDING\_WITHOUT\_STATS
 

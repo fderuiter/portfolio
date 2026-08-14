@@ -398,6 +398,30 @@ export function usePretextRichLayout({
     }
   }, [state.isReady, state.height, text]);
 
+  useLayoutEffect(() => {
+    if (!isBrowser()) return;
+    if (typeof document !== "undefined" && document.fonts) {
+      let active = true;
+      document.fonts.ready.then(() => {
+        if (!active) return;
+        textPrepareCache.clear();
+        textLayoutCache.clear();
+        richItemsCache.clear();
+        richPrepareCache.clear();
+        richLayoutCache.clear();
+        clearCache();
+
+        if (containerRef.current) {
+          const width = containerRef.current.getBoundingClientRect().width;
+          measureRichText(width);
+        }
+      });
+      return () => {
+        active = false;
+      };
+    }
+  }, [measureRichText, containerRef]);
+
   return {
     ref: containerRef,
     ...state,

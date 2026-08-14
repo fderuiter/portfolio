@@ -45,3 +45,6 @@ next-env.d.ts
 *.db-journal
 *.log
 app/theme.css
+/playwright-report
+/test-results
+
