@@ -22,4 +22,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ### 4. Hydration & React Best Practices
 - For client-only rendering or browser API reads, prefer `useSyncExternalStore` over `useEffect` + `useState` hydration flags.
 - Keep hook dependency arrays exhaustive in performance-critical hooks (like `usePretextLayout`) while leveraging ref callbacks and canvas measurement memoization.
+- Dynamic values that vary between server and client render (e.g. `toLocaleTimeString()`, timestamps, random IDs) must include `suppressHydrationWarning` on the host element or be rendered strictly after mounting.
+
+### 5. Multi-Agent Artifact Hygiene
+- Never commit intermediate agent tracking directories (`.agents/`), temporary planning logs, or ad-hoc adversarial scripts to project git history.
+
 
