@@ -198,6 +198,8 @@ function main() {
     const tempConfig = {
       extends: "./tsconfig.json",
       include: [
+        "next-env.d.ts",
+        ".next/types/**/*.ts",
         "types/env.d.ts",
         "types/domain.ts",
         ...tsFiles
