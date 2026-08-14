@@ -60,9 +60,13 @@ Defined in: [lib/layout-config.ts:3](https://github.com/fderuiter/portfolio/blob
 
 > `readonly` **LINE\_HEIGHT**: `18` = `designManifest.typography.sizes.sm.lineHeight`
 
+### MOBILE\_PADDING\_ADJUSTMENT
+
+> `readonly` **MOBILE\_PADDING\_ADJUSTMENT**: `22` = `22`
+
 ### PADDING\_WITH\_STATS
 
-> `readonly` **PADDING\_WITH\_STATS**: `484` = `designManifest.masonry.paddingWithStats`
+> `readonly` **PADDING\_WITH\_STATS**: `604` = `designManifest.masonry.paddingWithStats`
 
 ### PADDING\_WITHOUT\_STATS
 

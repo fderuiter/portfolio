@@ -18,7 +18,7 @@ export const SECRET_PATTERNS = [
   },
   {
     category: "Generic API Key/Secret/Password",
-    regex: /(?:api[_-]?key|secret[_-]?key|private[_-]?key|password|auth[_-]?token|access[_-]?token|session[_-]?token)\s*[:=]\s*['"][a-zA-Z0-9_.-]{16,}['"]/gi,
+    regex: /(?:api[_-]?key|secret[_-]?key|private[_-]?key|password|auth[_-]?token|access[_-]?token|session[_-]?token)\s*[:=]\s*['"`][a-zA-Z0-9_.-]{16,}['"`]/gi,
   },
   {
     category: "AWS Access Key",

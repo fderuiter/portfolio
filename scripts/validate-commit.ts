@@ -15,7 +15,7 @@ function getStagedFiles(): string[] {
   }
 }
 
-function shouldScanFile(filePath: string): boolean {
+export function shouldScanFile(filePath: string): boolean {
   // Exclude node_modules, package locks, binary files, configurations that are meant to hold env configs, etc.
   const ignoredExtensions = [
     ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".woff", ".woff2", ".ttf", ".eot",
@@ -80,4 +80,6 @@ function main() {
   }
 }
 
-main();
+if (typeof process.env.VITEST === "undefined") {
+  main();
+}

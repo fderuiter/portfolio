@@ -1,8 +1,8 @@
 {
   "project": "Mobile Safari",
-  "state": "Default Page State",
+  "state": "Mobile Navigation Focus Trap",
   "url": "http://localhost:3000/",
   "violationsCount": 0,
   "violations": [],
-  "timestamp": "2026-08-14T01:47:57.190Z"
+  "timestamp": "2026-08-14T01:48:25.271Z"
 }
