@@ -93,6 +93,30 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
       },
       {
+        id: "nav-laser-loon",
+        title: "Laser Loon: Cryo Bug Hunter",
+        subtitle: "Playable physics arcade game — shoot ice blocks and laser beams to blast bugs",
+        category: "navigation",
+        url: "/ui-sandbox#laser-loon",
+        icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
+      },
+      {
+        id: "nav-garmin-watch",
+        title: "Garmin Multisport Simulator",
+        subtitle: "Retro multisport arcade simulator — deep ocean, mountain trail, and orbit modes",
+        category: "navigation",
+        url: "/ui-sandbox#garmin-watch",
+        icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
+      },
+      {
+        id: "nav-retro-labyrinth",
+        title: "Retro Labyrinth: Core Recovery",
+        subtitle: "Multi-stage cybernetic maze game with drone patrols and EMP shockwaves",
+        category: "navigation",
+        url: "/not-found",
+        icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
+      },
+      {
         id: "nav-transparency",
         title: "Platform Transparency Hub",
         subtitle: "Live verifiable telemetry, CI/CD operational reliability, and security logs",
@@ -110,8 +134,8 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
       },
       {
         id: "nav-simulator",
-        title: "Recruiter Simulator",
-        subtitle: "Begin the compatibility wizard to calculate candidate alignment",
+        title: "Engineering Alignment Simulator",
+        subtitle: "Incident triage, architecture dilemmas, and candidate compatibility arcade",
         category: "navigation",
         url: "/simulator",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />

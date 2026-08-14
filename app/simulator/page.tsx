@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { useAudio } from "@/components/providers/AudioProvider";
 import {
   IconArrowLeft,
   IconAward,
@@ -11,13 +12,13 @@ import {
   IconCheck,
   IconRefresh,
   IconSend,
-  IconUser,
+  IconCopy,
 } from "@tabler/icons-react";
 
 interface Option {
   text: string;
   description?: string;
-  points: { tech: number; alignment: number };
+  points: { tech: number; alignment: number; ui: number; resilience: number };
   nextStep: string;
 }
 
@@ -25,6 +26,7 @@ interface Question {
   id: string;
   title: string;
   subtitle: string;
+  badge?: string;
   options: Option[];
 }
 
@@ -33,55 +35,58 @@ const branchingQuestions: Record<string, Question> = {
     id: "welcome",
     title: "1. Define Your Target Profile",
     subtitle: "What is your primary focus when hiring engineering leaders?",
+    badge: "Stage 1 · Profile Selection",
     options: [
       {
         text: "Raw Systems & Performance Maverick",
         description: "Low-overhead execution, memory optimization, robust backend databases, and blazing-fast microservices.",
-        points: { tech: 50, alignment: 40 },
-        nextStep: "depth_tech",
+        points: { tech: 50, alignment: 40, ui: 20, resilience: 45 },
+        nextStep: "incident_triage",
       },
       {
         text: "Pixel-Perfect Frontend & UX Artisan",
         description: "Immersive user interaction, 60 FPS visual motion, flawless accessibility, and zero layout shift transitions.",
-        points: { tech: 30, alignment: 50 },
-        nextStep: "depth_product",
+        points: { tech: 30, alignment: 50, ui: 50, resilience: 30 },
+        nextStep: "incident_triage",
       },
     ],
   },
-  depth_tech: {
-    id: "depth_tech",
-    title: "2. Technical Core Philosophy",
-    subtitle: "How does your team ensure production systems remain resilient under high traffic?",
+  incident_triage: {
+    id: "incident_triage",
+    title: "2. Live Incident Commander: Production Latency Spike",
+    subtitle: "A critical payment webhook experiences a 500ms p99 latency spike and 2% connection pool timeouts under high load. What is your immediate mitigation strategy?",
+    badge: "Stage 2 · Live Outage Triage",
     options: [
       {
-        text: "Absolute Typesafety & Strict Automated Isolation",
-        description: "Zero toleration for memory leaks. Explicit database connection timeouts, fallback caching layers, and high-performance queues.",
-        points: { tech: 50, alignment: 50 },
-        nextStep: "final_eval",
+        text: "Engage Distributed Circuit Breaker & Fallback Queue",
+        description: "Gracefully buffer non-critical requests to secondary Redis queue, shed downstream load, and alert database pool orchestrators.",
+        points: { tech: 45, alignment: 50, ui: 35, resilience: 50 },
+        nextStep: "code_review",
       },
       {
-        text: "Ultra-Rapid Execution & Incremental hot patching",
-        description: "Prioritize shipping live values over compiler warnings. Handle failures gracefully but prioritize product-to-market speed.",
-        points: { tech: 30, alignment: 30 },
-        nextStep: "final_eval",
+        text: "Scale Neon Read-Replicas & Increase Pool Timeouts",
+        description: "Increase serverless connection concurrency and dynamically redirect read queries away from the primary transactional instance.",
+        points: { tech: 40, alignment: 40, ui: 25, resilience: 40 },
+        nextStep: "code_review",
       },
     ],
   },
-  depth_product: {
-    id: "depth_product",
-    title: "2. Aesthetic & Interactive Standard",
-    subtitle: "What is the non-negotiable benchmark for your client-facing applications?",
+  code_review: {
+    id: "code_review",
+    title: "3. Code Review Speed Challenge",
+    subtitle: "Reviewing a high-throughput async processing pipeline: which architectural safeguard takes absolute priority?",
+    badge: "Stage 3 · Systems Review",
     options: [
       {
-        text: "Full Keyboard-Navigable Fluid Playgrounds",
-        description: "Every action is reactive. Seamless state synchronization, responsive grids, and delightful micro-interactions.",
-        points: { tech: 40, alignment: 50 },
+        text: "Enforce Exhaustive Idempotency Keys & Deduplication Window",
+        description: "Guarantee that webhook retransmissions and network blips never cause double-writes or race conditions in Postgres.",
+        points: { tech: 50, alignment: 50, ui: 30, resilience: 50 },
         nextStep: "final_eval",
       },
       {
-        text: "Functional Data Utility over Pure Visual Decoration",
-        description: "Deliver robust clinical/scientific reports in high-density tables. Avoid redundant visual fluff or complex animations.",
-        points: { tech: 25, alignment: 25 },
+        text: "Implement Client-Side Optimistic Updates with Rollback",
+        description: "Deliver instant sub-10ms UI feedback while verifying transaction settlement asynchronously via server-sent events.",
+        points: { tech: 35, alignment: 45, ui: 50, resilience: 35 },
         nextStep: "final_eval",
       },
     ],
@@ -96,11 +101,13 @@ const mockTimeSlots = [
 
 export default function RecruiterSimulator() {
   const { recordEvent } = useTelemetry();
+  const { playNote, playSuccess } = useAudio();
   const [mounted, setMounted] = useState(false);
   const [currentStep, setCurrentStep] = useState<string>("welcome");
   const [history, setHistory] = useState<string[]>([]);
   const [answers, setAnswers] = useState<Option[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Modal Interactive States
   const [selectedSlot, setSelectedSlot] = useState("");
@@ -109,7 +116,7 @@ export default function RecruiterSimulator() {
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
 
-  // 1. Establish mount tracking and log page entry EXACTLY once per session
+  // 1. Establish mount tracking
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
@@ -123,19 +130,24 @@ export default function RecruiterSimulator() {
     }
   }, [recordEvent]);
 
-  // 2. Handle selection & branching path routing
+  // 2. Handle selection
   const handleSelectOption = (option: Option) => {
-    // Record selection telemetry click
     recordEvent("/simulator", "project_click");
+    playNote(659.25, 0.05);
 
     setAnswers((prev) => [...prev, option]);
     setHistory((prev) => [...prev, currentStep]);
     setCurrentStep(option.nextStep);
+
+    if (option.nextStep === "final_eval") {
+      playSuccess();
+    }
   };
 
-  // 3. Handle backwards traversal
+  // 3. Handle back
   const handleBack = () => {
     if (history.length === 0) return;
+    playNote(440, 0.04);
     const prevStep = history[history.length - 1];
     setHistory((prev) => prev.slice(0, -1));
     setAnswers((prev) => prev.slice(0, -1));
@@ -144,6 +156,7 @@ export default function RecruiterSimulator() {
 
   // 4. Reset Simulator
   const handleReset = () => {
+    playNote(523.25, 0.04);
     setCurrentStep("welcome");
     setHistory([]);
     setAnswers([]);
@@ -155,48 +168,38 @@ export default function RecruiterSimulator() {
   };
 
   // 5. Calculate Final Alignment Outcomes
-  const getAlignmentProfile = () => {
+  const getAlignmentProfile = useCallback(() => {
     if (answers.length < 2) {
       return {
-        score: 80,
-        title: "Compatible Collaborator",
-        summary: "Excellent fit! Ready to build enterprise applications.",
+        score: 88,
+        title: "Principal Systems Architect",
+        summary: "High-integrity architecture leader with deep mastery across resilient serverless Postgres backends, strict typesafety, and microsecond frontend responsiveness.",
+        badge: "ARCHITECT ARCHETYPE: ZERO-DOWNTIME SAGE",
+        stats: { systems: 95, ui: 90, resilience: 98, velocity: 92 },
       };
     }
 
     const firstChoice = answers[0];
-    const secondChoice = answers[1];
+    const isTech = firstChoice.text.includes("Maverick");
 
-    if (firstChoice.nextStep === "depth_tech") {
-      if (secondChoice.text.includes("Typesafety")) {
-        return {
-          score: 98,
-          title: "Elite Systems Architect",
-          summary: "Perfect match! Frederick specializes in robust, typesafe TypeScript environments, high-performance database connection pooling, and resilient transactional backends with zero layout shifts.",
-        };
-      } else {
-        return {
-          score: 85,
-          title: "Pragmatic Systems Engineer",
-          summary: "Highly aligned! Frederick bridges the gap between lightning-fast feature launches and robust database architectures with automated fallbacks.",
-        };
-      }
+    if (isTech) {
+      return {
+        score: 98,
+        title: "Elite Systems & Distributed Architect",
+        summary: "Outstanding compatibility! Frederick brings enterprise expertise in serverless Postgres pooling, robust circuit breakers, strict automated testing, and sub-100ms API endpoints.",
+        badge: "ARCHITECT ARCHETYPE: HIGH-THROUGHPUT TITAN",
+        stats: { systems: 99, ui: 88, resilience: 98, velocity: 94 },
+      };
     } else {
-      if (secondChoice.text.includes("Fluid Playgrounds")) {
-        return {
-          score: 100,
-          title: "Pixel-Perfect Frontend Architect",
-          summary: "Absolute dream alignment! Frederick blends deep aesthetic craft with strict engineering: 60 FPS Framer Motion transitions, responsive Tailwind patterns, and zero cumulative layout shifts.",
-        };
-      } else {
-        return {
-          score: 75,
-          title: "Utilitarian Product Engineer",
-          summary: "Strong compatibility! Frederick has deep expertise building streamlined, accessible console terminal utilities and high-density logic engines where data speed dominates decoration.",
-        };
-      }
+      return {
+        score: 100,
+        title: "Pixel-Perfect Frontend & Design Engineer",
+        summary: "Dream alignment! Frederick seamlessly unites 60 FPS motion design, rigorous accessibility standards, and responsive micro-interactions with rock-solid full-stack infrastructure.",
+        badge: "ARCHITECT ARCHETYPE: INTERACTIVE CRAFTSMAN",
+        stats: { systems: 92, ui: 100, resilience: 94, velocity: 96 },
+      };
     }
-  };
+  }, [answers]);
 
   // 6. Handle Booking Submit
   const handleConfirmBooking = (e: React.FormEvent) => {
@@ -204,7 +207,7 @@ export default function RecruiterSimulator() {
     setEmailError("");
 
     if (!selectedSlot) {
-      setEmailError("Please select a simulated calendar slot.");
+      setEmailError("Please select a calendar slot.");
       return;
     }
 
@@ -216,34 +219,48 @@ export default function RecruiterSimulator() {
 
     setIsSubmittingBooking(true);
 
-    // Simulate high-performance queue logging API delay
     setTimeout(() => {
       recordEvent("/simulator/booking", "project_click");
       setIsSubmittingBooking(false);
       setBookingSuccess(true);
-    }, 600);
+      playSuccess();
+    }, 500);
   };
+
+  // Copy diagnostic card
+  const handleCopyCard = useCallback(() => {
+    const p = getAlignmentProfile();
+    const text = `Candidate Alignment Report: Frederick (System Architect & Engineer)\nMatch Score: ${p.score}%\nArchetype: ${p.title}\nSystems: ${p.stats.systems}% | UI/UX: ${p.stats.ui}% | Resilience: ${p.stats.resilience}%`;
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    playNote(880, 0.05);
+    setTimeout(() => setCopied(false), 2000);
+  }, [getAlignmentProfile, playNote]);
 
   const profile = getAlignmentProfile();
   const currentQuestion = branchingQuestions[currentStep];
 
   return (
     <main className="min-h-screen bg-zinc-950 text-foreground pt-32 pb-24 px-6 md:px-12 lg:px-24 flex items-center justify-center relative overflow-hidden">
-      {/* Background glowing effects - ensures beautiful visual depth */}
+      {/* Ambient background glows */}
       <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-96 h-96 rounded-full bg-brand-blue/5 blur-[120px] pointer-events-none" />
 
       <div className="w-full max-w-2xl mx-auto flex flex-col relative z-10">
-        <header className="text-center mb-10">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan to-brand-blue tracking-tight mb-3">
-            Recruiter Compatibility Wizard
+        <header className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-cyan/10 border border-brand-cyan/20 text-brand-cyan text-xs font-mono font-bold mb-3">
+            <span className="w-2 h-2 rounded-full bg-brand-cyan animate-pulse" />
+            Interactive Engineering Leadership Simulator
+          </div>
+          <h1 className="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan via-neutral-100 to-brand-blue tracking-tight mb-2">
+            Engineering Alignment Arcade
           </h1>
-          <p className="text-xs font-mono text-zinc-500 tracking-widest uppercase max-w-lg mx-auto leading-relaxed">
+          <p className="text-xs font-mono text-zinc-400 tracking-wider uppercase max-w-lg mx-auto leading-relaxed">
             Gamified candidate compatibility assessment engine. Evaluate cultural, system, and design orientation instantly.
           </p>
         </header>
 
-        {/* Wizard Card Container */}
+        {/* Card Container */}
         <div className="bg-zinc-900/40 border border-zinc-800/80 backdrop-blur-xl rounded-3xl p-6 md:p-8 shadow-2xl relative">
           <AnimatePresence mode="wait">
             {currentQuestion ? (
@@ -258,27 +275,27 @@ export default function RecruiterSimulator() {
                 {/* Step indicator */}
                 <div className="flex justify-between items-center mb-6">
                   <span className="text-[11px] font-mono uppercase tracking-wider text-brand-cyan font-bold bg-brand-cyan/15 px-3 py-1 rounded-full border border-brand-cyan/35">
-                    Compatibility Phase
+                    {currentQuestion.badge || "Compatibility Phase"}
                   </span>
                   <span className="text-xs font-mono text-zinc-500">
-                    Step {history.length + 1}
+                    Step {history.length + 1} of 3
                   </span>
                 </div>
 
                 <h2 className="text-xl md:text-2xl font-bold text-zinc-100 mb-2">
                   {currentQuestion.title}
                 </h2>
-                <p className="text-sm text-zinc-400 mb-8 font-sans">
+                <p className="text-xs md:text-sm text-zinc-400 mb-6 font-sans leading-relaxed">
                   {currentQuestion.subtitle}
                 </p>
 
                 {/* Option Buttons */}
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-3.5">
                   {currentQuestion.options.map((option, idx) => (
                     <button
                       key={idx}
                       onClick={() => handleSelectOption(option)}
-                      className="group flex flex-col items-start text-left p-5 bg-zinc-950/50 hover:bg-zinc-950 border border-zinc-800 hover:border-brand-cyan/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.06)] rounded-2xl transition-all duration-300 cursor-pointer w-full"
+                      className="group flex flex-col items-start text-left p-4 md:p-5 bg-zinc-950/60 hover:bg-zinc-950 border border-zinc-800 hover:border-brand-cyan/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.08)] rounded-2xl transition-all duration-200 cursor-pointer w-full"
                     >
                       <div className="flex items-center gap-3 mb-1.5 w-full">
                         <span className="w-5 h-5 rounded-full border border-zinc-700 group-hover:border-brand-cyan flex items-center justify-center shrink-0 transition-colors bg-zinc-900">
@@ -297,7 +314,7 @@ export default function RecruiterSimulator() {
                   ))}
                 </div>
 
-                {/* Footer Controls */}
+                {/* Footer Navigation */}
                 <div className="flex justify-between items-center mt-8 pt-6 border-t border-zinc-800/40">
                   <button
                     onClick={handleBack}
@@ -315,7 +332,7 @@ export default function RecruiterSimulator() {
                 </div>
               </motion.div>
             ) : (
-              /* RESULTS / FINAL STEP SCREEN */
+              /* RESULTS SCREEN */
               <motion.div
                 key="results"
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -324,31 +341,29 @@ export default function RecruiterSimulator() {
                 className="flex flex-col items-center text-center"
               >
                 {/* Compatibility Score Circle */}
-                <div className="relative w-40 h-40 flex items-center justify-center mb-6">
-                  {/* Outer animated gradient border */}
+                <div className="relative w-36 h-36 flex items-center justify-center mb-4">
                   <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-brand-cyan to-brand-blue opacity-25 animate-pulse" />
                   <div className="absolute inset-2 bg-zinc-950 rounded-full" />
-                  
-                  {/* Gauge Ring */}
+
                   <svg className="w-full h-full transform -rotate-90">
                     <circle
-                      cx="80"
-                      cy="80"
-                      r="70"
+                      cx="72"
+                      cy="72"
+                      r="60"
                       stroke="rgba(39, 39, 42, 0.4)"
                       strokeWidth="8"
                       fill="transparent"
                     />
                     <motion.circle
-                      cx="80"
-                      cy="80"
-                      r="70"
+                      cx="72"
+                      cy="72"
+                      r="60"
                       stroke="url(#gradient)"
                       strokeWidth="8"
                       fill="transparent"
-                      strokeDasharray="440"
-                      initial={{ strokeDashoffset: 440 }}
-                      animate={{ strokeDashoffset: 440 - (440 * profile.score) / 100 }}
+                      strokeDasharray="377"
+                      initial={{ strokeDashoffset: 377 }}
+                      animate={{ strokeDashoffset: 377 - (377 * profile.score) / 100 }}
                       transition={{ duration: 1, ease: "easeOut" }}
                     />
                     <defs>
@@ -359,40 +374,65 @@ export default function RecruiterSimulator() {
                     </defs>
                   </svg>
 
-                  {/* Inner Score text */}
                   <div className="absolute flex flex-col items-center">
-                    <span className="text-3xl md:text-4xl font-extrabold text-white tracking-tighter">
+                    <span className="text-3xl font-extrabold text-white tracking-tighter">
                       {profile.score}%
                     </span>
-                    <span className="text-[10px] font-mono uppercase text-brand-cyan font-bold tracking-widest mt-1">
+                    <span className="text-[9px] font-mono uppercase text-brand-cyan font-bold tracking-widest">
                       MATCH
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 px-3 py-1 bg-brand-cyan/10 rounded-full border border-brand-cyan/20 text-brand-cyan text-xs font-mono font-bold mb-4">
-                  <IconAward className="w-4 h-4 animate-bounce" /> Recommended Role Alignment
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-cyan/10 rounded-full border border-brand-cyan/20 text-brand-cyan text-xs font-mono font-bold mb-2">
+                  <IconAward className="w-4 h-4" /> {profile.badge}
                 </div>
 
-                <h2 className="text-2xl font-extrabold text-white tracking-tight mb-3">
+                <h2 className="text-2xl font-extrabold text-white tracking-tight mb-2">
                   {profile.title}
                 </h2>
-                
-                <p className="text-sm text-zinc-400 font-sans max-w-md leading-relaxed mb-8">
+
+                <p className="text-xs md:text-sm text-zinc-400 font-sans max-w-md leading-relaxed mb-6">
                   {profile.summary}
                 </p>
 
+                {/* Radar Metrics Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full mb-6 font-mono text-left">
+                  <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-850">
+                    <span className="text-[9px] text-zinc-500 block uppercase">Systems Rigor</span>
+                    <span className="text-sm font-bold text-brand-cyan">{profile.stats.systems}%</span>
+                  </div>
+                  <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-850">
+                    <span className="text-[9px] text-zinc-500 block uppercase">UI/UX Craft</span>
+                    <span className="text-sm font-bold text-emerald-400">{profile.stats.ui}%</span>
+                  </div>
+                  <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-850">
+                    <span className="text-[9px] text-zinc-500 block uppercase">Resilience</span>
+                    <span className="text-sm font-bold text-sky-400">{profile.stats.resilience}%</span>
+                  </div>
+                  <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-850">
+                    <span className="text-[9px] text-zinc-500 block uppercase">Ship Speed</span>
+                    <span className="text-sm font-bold text-amber-400">{profile.stats.velocity}%</span>
+                  </div>
+                </div>
+
                 {/* Action CTA Buttons */}
-                <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+                <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
                   <button
                     onClick={() => setIsModalOpen(true)}
-                    className="flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-brand-cyan to-brand-blue text-zinc-950 hover:text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl hover:shadow-[0_0_25px_rgba(6,182,212,0.25)] transition-all duration-300 cursor-pointer hover:scale-[1.02]"
+                    className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-brand-cyan to-brand-blue text-zinc-950 hover:text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.2)] transition-all cursor-pointer hover:scale-[1.02]"
                   >
                     <IconCalendar className="w-4 h-4" /> Schedule Interview
                   </button>
                   <button
+                    onClick={handleCopyCard}
+                    className="flex items-center justify-center gap-2 px-4 py-3 bg-zinc-950 border border-zinc-800 hover:border-zinc-700 text-zinc-300 font-mono font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                  >
+                    <IconCopy className="w-4 h-4" /> {copied ? "Copied!" : "Copy Report"}
+                  </button>
+                  <button
                     onClick={handleReset}
-                    className="flex items-center justify-center gap-2 px-6 py-3.5 bg-zinc-950 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900 text-zinc-400 hover:text-zinc-200 font-mono font-bold text-xs uppercase tracking-wider rounded-xl transition-all duration-300 cursor-pointer"
+                    className="flex items-center justify-center gap-2 px-4 py-3 bg-zinc-950 border border-zinc-800 hover:border-zinc-700 text-zinc-400 font-mono font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"
                   >
                     <IconRefresh className="w-4 h-4" /> Run Again
                   </button>
@@ -403,13 +443,12 @@ export default function RecruiterSimulator() {
         </div>
       </div>
 
-      {/* PORTAL RENDERED SCHEDULING MODAL OVERLAY */}
+      {/* PORTAL SCHEDULING MODAL */}
       {mounted &&
         createPortal(
           <AnimatePresence>
             {isModalOpen && (
               <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
-                {/* Backdrop overlay blur effect */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -418,7 +457,6 @@ export default function RecruiterSimulator() {
                   className="absolute inset-0 bg-zinc-950/80 backdrop-blur-lg"
                 />
 
-                {/* Modal main content wrapper */}
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95, y: 15 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -426,9 +464,6 @@ export default function RecruiterSimulator() {
                   transition={{ type: "spring", duration: 0.35 }}
                   className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-3xl p-6 md:p-8 relative z-10 overflow-hidden shadow-2xl"
                 >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-brand-cyan/10 rounded-full blur-2xl pointer-events-none" />
-                  
-                  {/* Close trigger button */}
                   <button
                     onClick={() => setIsModalOpen(false)}
                     className="absolute top-4 right-4 text-zinc-500 hover:text-zinc-300 text-xs font-mono bg-zinc-950 px-2 py-1 border border-zinc-850 rounded-md cursor-pointer"
@@ -449,133 +484,84 @@ export default function RecruiterSimulator() {
                             <IconCalendar className="w-5 h-5" />
                           </span>
                           <div>
-                            <h3 className="text-lg font-bold text-white tracking-tight">
-                              Instant Calendar Booking
-                            </h3>
-                            <p className="text-xs text-zinc-500 font-mono">
-                              PRE-APPROVED CALENDAR INVITATION
-                            </p>
+                            <h3 className="font-bold text-lg text-white">Direct Calendar Booking</h3>
+                            <p className="text-xs text-zinc-400">Lock in a 30-min systems architectural sync.</p>
                           </div>
                         </div>
 
-                        <p className="text-xs text-zinc-400 mb-6 leading-relaxed font-sans">
-                          You have matched as an <span className="text-brand-cyan font-bold">{profile.title}</span>! Unlock immediate access to Frederick&apos;s upcoming collaboration windows.
-                        </p>
-
-                        <form onSubmit={handleConfirmBooking} className="space-y-5">
-                          {/* Slot Selector */}
-                          <div className="space-y-2">
-                            <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block">
-                              Select Available Time Window
+                        <form onSubmit={handleConfirmBooking} className="flex flex-col gap-4">
+                          <div>
+                            <label className="text-[11px] font-mono text-zinc-400 block mb-2 font-bold uppercase tracking-wider">
+                              Select Available Slot
                             </label>
                             <div className="flex flex-col gap-2">
-                              {mockTimeSlots.map((slot) => (
+                              {mockTimeSlots.map((slot, idx) => (
                                 <button
-                                  key={slot}
+                                  key={idx}
                                   type="button"
                                   onClick={() => setSelectedSlot(slot)}
-                                  className={`w-full text-left p-3.5 rounded-xl border font-mono text-xs transition-all duration-200 flex items-center justify-between cursor-pointer ${
+                                  className={`p-3 text-left rounded-xl border text-xs font-mono transition-all cursor-pointer ${
                                     selectedSlot === slot
-                                      ? "bg-brand-cyan/10 border-brand-cyan text-brand-cyan shadow-[0_0_15px_rgba(6,182,212,0.08)]"
-                                      : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
+                                      ? "bg-brand-cyan/15 border-brand-cyan text-brand-cyan font-bold"
+                                      : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700"
                                   }`}
                                 >
-                                  <span>{slot}</span>
-                                  {selectedSlot === slot && (
-                                    <IconCheck className="w-4 h-4 shrink-0 text-brand-cyan" />
-                                  )}
+                                  {slot}
                                 </button>
                               ))}
                             </div>
                           </div>
 
-                          {/* Email Input */}
-                          <div className="space-y-2">
-                            <label className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block">
-                              Recruiter / Team Email
+                          <div>
+                            <label className="text-[11px] font-mono text-zinc-400 block mb-2 font-bold uppercase tracking-wider">
+                              Work Email
                             </label>
                             <div className="relative">
-                              <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-zinc-500">
-                                <IconUser className="w-4 h-4" />
-                              </span>
                               <input
                                 type="email"
                                 value={recruiterEmail}
                                 onChange={(e) => setRecruiterEmail(e.target.value)}
-                                placeholder="name@yourcompany.com"
-                                className="w-full bg-zinc-950 border border-zinc-800 focus:border-brand-cyan focus:ring-1 focus:ring-brand-cyan rounded-xl py-2.5 pl-9 pr-4 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none transition-all font-sans"
+                                placeholder="leader@company.com"
+                                className="w-full px-4 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm font-sans text-white focus:outline-none focus:border-brand-cyan transition-colors"
                               />
                             </div>
+                            {emailError && (
+                              <p className="text-xs text-rose-400 mt-1.5 font-mono">{emailError}</p>
+                            )}
                           </div>
 
-                          {/* Error feedback */}
-                          {emailError && (
-                            <div className="text-xs text-red-400 font-mono flex items-center gap-1.5">
-                              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-                              {emailError}
-                            </div>
-                          )}
-
-                          {/* Submit Trigger */}
                           <button
                             type="submit"
                             disabled={isSubmittingBooking}
-                            className="w-full flex items-center justify-center gap-2 py-3 bg-brand-cyan text-zinc-950 hover:text-white hover:bg-brand-cyan-glow hover:border-brand-cyan font-mono font-bold text-xs uppercase tracking-widest rounded-xl transition-all duration-300 disabled:opacity-50 cursor-pointer"
+                            className="mt-2 w-full py-3 bg-brand-cyan hover:bg-cyan-300 text-zinc-950 font-mono font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
                           >
                             {isSubmittingBooking ? (
-                              <>
-                                <IconRefresh className="w-4 h-4 animate-spin" /> Committing Queue Event...
-                              </>
+                              <span>Locking Slot...</span>
                             ) : (
                               <>
-                                <IconSend className="w-4 h-4" /> Schedule Calendar Invite
+                                <IconSend className="w-4 h-4" /> Confirm Schedule
                               </>
                             )}
                           </button>
                         </form>
                       </motion.div>
                     ) : (
-                      /* BOOKING SUCCESS STATE */
                       <motion.div
                         key="booking-success"
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="text-center py-6"
+                        className="text-center py-4"
                       >
-                        <div className="w-16 h-16 bg-green-500/10 text-green-400 border border-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-                          <IconCheck className="w-8 h-8" />
+                        <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto mb-3">
+                          <IconCheck className="w-6 h-6" />
                         </div>
-                        
-                        <h3 className="text-xl font-extrabold text-white tracking-tight mb-2">
-                          Meeting Successfully Booked!
-                        </h3>
-                        
-                        <p className="text-xs font-mono text-zinc-500 uppercase tracking-widest mb-6">
-                          Pre-approved telemetry commit confirmed
+                        <h3 className="font-bold text-xl text-white mb-1">Invitation Queued!</h3>
+                        <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
+                          Calendar invite dispatched to <span className="text-brand-cyan">{recruiterEmail}</span> for <span className="text-zinc-200">{selectedSlot}</span>.
                         </p>
-
-                        <div className="bg-zinc-950 border border-zinc-850 p-4 rounded-2xl text-left text-xs font-mono space-y-2 mb-6">
-                          <div className="text-zinc-500">
-                            &gt; ID: <span className="text-zinc-300">{crypto.randomUUID().slice(0, 8)}</span>
-                          </div>
-                          <div className="text-zinc-500">
-                            &gt; TARGET: <span className="text-brand-cyan">{recruiterEmail}</span>
-                          </div>
-                          <div className="text-zinc-500">
-                            &gt; SLOT: <span className="text-brand-blue">{selectedSlot}</span>
-                          </div>
-                          <div className="text-zinc-500">
-                            &gt; TELEMETRY: <span className="text-green-400">LOGGED (p95 &lt; 100ms)</span>
-                          </div>
-                        </div>
-
-                        <p className="text-xs text-zinc-400 leading-relaxed font-sans mb-6">
-                          Frederick&apos;s AI Agent has buffered this confirmation. A calendar invitation is being transmitted to your email.
-                        </p>
-
                         <button
                           onClick={() => setIsModalOpen(false)}
-                          className="px-6 py-2.5 bg-zinc-950 hover:bg-zinc-900 border border-zinc-800 text-zinc-300 font-mono text-xs uppercase tracking-wider rounded-xl transition-colors cursor-pointer"
+                          className="px-6 py-2.5 bg-zinc-950 border border-zinc-800 hover:border-zinc-700 text-zinc-300 font-mono text-xs uppercase font-bold rounded-xl cursor-pointer"
                         >
                           Close Window
                         </button>
