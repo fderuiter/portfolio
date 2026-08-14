@@ -23,7 +23,7 @@ export const TextReveal: FC<TextRevealProps> = ({ children, className }) => {
   })
 
   useEffect(() => {
-    if (typeof window !== "undefined" && (window as any).__PLAYWRIGHT_TEST__) {
+    if (typeof window !== "undefined" && (window as unknown as Record<string, unknown>).__PLAYWRIGHT_TEST__) {
       document.documentElement.setAttribute("data-playwright", "true")
     }
   }, [])
