@@ -29,12 +29,15 @@ This ensures we can dynamically inject rich text and architectural explanations 
 
 During development, we utilize a serverless Neon PostgreSQL datastore. This provides low-latency cloud data persistence.
 
-**To sync schema changes to the Neon database, developers should run:**
+**To create a tracked schema change on a disposable development database, run:**
 ```bash
-npx prisma db push
+npx prisma migrate dev --name <descriptive_name>
 ```
 
-This command pushes the state of the `schema.prisma` directly to the active cloud datastore. It is ideal for rapidly prototyping the schema without the overhead of creating formal migration files, which are generally reserved for production promotion cycles.
+Review and commit the generated migration with `schema.prisma`. Do not run
+`prisma db push` against production or a long-lived shared database because it
+bypasses Prisma's migration ledger. See [DATABASE_MIGRATIONS.md](DATABASE_MIGRATIONS.md)
+for the production runbook and CI guarantees.
 
 ---
 
@@ -54,5 +57,4 @@ To ensure the portfolio displays narratives with high aesthetic quality and robu
   - **Permitted Code Layouts:** `<pre>`, `<code>` (e.g., `<pre><code class="language-typescript">// code</code></pre>`)
   - **Permitted Inline Elements:** `<strong>`, `<em>`, `<a>`, `<span>`, `<abbr>` (with optional `class`, `href`, `target`, `rel`, `data-term`, `data-definition`, and `data-key` attributes)
 - **Forbidden Elements:** Prohibits `<script>`, `<iframe>`, `<img onerror="...">`, or custom inline inline-styles to maintain strict data integrity boundaries.
-
 

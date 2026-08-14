@@ -11,6 +11,21 @@ jobs:
     name: Rigor Ecosystem (Logic, Visual, Performance)
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: portfolio_ci
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d portfolio_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -46,6 +61,35 @@ jobs:
         run: |
           npx tsx scripts/generate-theme.ts
           npx prisma generate
+
+      - name: Check Migration Metadata
+        run: npm run check:migrations
+
+      - name: Replay Migrations and Check Schema Drift
+        run: |
+          npx prisma migrate deploy
+          npm run check:migrations:drift
+          npx prisma migrate status
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/portfolio_ci?schema=replay
+
+      - name: Rehearse Production Baseline
+        run: |
+          psql "$POSTGRES_ADMIN_URL" -v ON_ERROR_STOP=1 -c 'CREATE SCHEMA baseline'
+          PGOPTIONS='-c search_path=baseline' psql "$POSTGRES_ADMIN_URL" -v ON_ERROR_STOP=1 -f prisma/migrations/20260417215437_init/migration.sql
+          PGOPTIONS='-c search_path=baseline' psql "$POSTGRES_ADMIN_URL" -v ON_ERROR_STOP=1 -f prisma/migrations/20260528000000_add_telemetry_event/migration.sql
+          PGOPTIONS='-c search_path=baseline' psql "$POSTGRES_ADMIN_URL" -v ON_ERROR_STOP=1 -f scripts/fixtures/production-baseline.sql
+          npx prisma migrate resolve --applied 20260417215437_init
+          npx prisma migrate resolve --applied 20260528000000_add_telemetry_event
+          npx prisma migrate deploy
+          npx prisma migrate status
+          npm run check:migrations:drift
+          test "$(PGOPTIONS='-c search_path=baseline' psql "$POSTGRES_ADMIN_URL" -tAc 'SELECT count(*) FROM "CaseStudy"')" = "4"
+          test "$(PGOPTIONS='-c search_path=baseline' psql "$POSTGRES_ADMIN_URL" -tAc 'SELECT count(*) FROM "CaseStudy" WHERE simulated_telemetry = false')" = "4"
+          test "$(PGOPTIONS='-c search_path=baseline' psql "$POSTGRES_ADMIN_URL" -tAc 'SELECT count(*) FROM "_prisma_migrations" WHERE finished_at IS NOT NULL AND rolled_back_at IS NULL')" = "3"
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/portfolio_ci?schema=baseline
+          POSTGRES_ADMIN_URL: postgresql://postgres:postgres@localhost:5432/portfolio_ci
 
       - name: Check Documentation Drift
         run: npm run check-docs-drift

@@ -7,6 +7,8 @@
     "dev": "concurrently -n \"turbo,tsc\" -c \"cyan,magenta\" \"next dev --turbo\" \"tsc --noEmit --watch\"",
     "compile-docs": "npx typedoc --entryPoints hooks --entryPoints types --entryPoints lib --exclude \"**/env.d.ts\" --entryPointStrategy expand --out docs --plugin typedoc-plugin-markdown --hideGenerator --cleanOutputDir --skipErrorChecking --gitRevision main",
     "check-docs-drift": "npx tsx scripts/check-drift.ts",
+    "check:migrations": "node scripts/check-migration-integrity.js && node scripts/check-migrations.js",
+    "check:migrations:drift": "prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code",
     "lint:docs": "npx markdownlint \"**/*.md\" --ignore node_modules",
     "prebuild": "npx tsx scripts/generate-theme.ts && npm run compile-docs",
     "build": "node scripts/build.js",
