@@ -158,7 +158,7 @@ export default function HiringQuiz() {
                 <span className="text-[9px] font-mono uppercase tracking-widest text-brand-cyan bg-brand-cyan/10 px-2 py-0.5 rounded border border-brand-cyan/20">
                   Step {history.length + 1} of 2
                 </span>
-                <span className="text-[10px] font-mono text-zinc-500">
+                <span className="text-[10px] font-mono text-zinc-400">
                   SIMULATOR LIVE
                 </span>
               </div>
@@ -186,7 +186,7 @@ export default function HiringQuiz() {
                         {option.text}
                       </span>
                     </div>
-                    <p className="text-[10px] text-zinc-500 group-hover:text-zinc-400 pl-5 leading-tight transition-colors">
+                    <p className="text-[10px] text-zinc-400 group-hover:text-zinc-200 pl-5 leading-tight transition-colors">
                       {option.description}
                     </p>
                   </button>
@@ -199,13 +199,13 @@ export default function HiringQuiz() {
               <button
                 onClick={handleBack}
                 disabled={history.length === 0}
-                className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 disabled:opacity-0 transition-opacity cursor-pointer"
+                className="text-[10px] font-mono text-zinc-400 hover:text-zinc-200 disabled:opacity-0 transition-opacity cursor-pointer"
               >
                 &larr; Back
               </button>
               <button
                 onClick={handleReset}
-                className="text-[10px] font-mono text-zinc-600 hover:text-zinc-400 transition-colors cursor-pointer"
+                className="text-[10px] font-mono text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer"
               >
                 Restart
               </button>

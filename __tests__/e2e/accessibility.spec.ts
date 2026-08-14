@@ -134,11 +134,18 @@ test.describe('Accessibility Audit Suite', () => {
   });
 
   test('Audit: Active Command Palette Search State', async ({ page }, testInfo) => {
-    // Open Command Palette via Ctrl+K shortcut
+    // Open Command Palette via Ctrl+K / Cmd+K shortcut
     await page.keyboard.press('Control+k');
     
-    // Wait for the modal combobox to be visible
+    // For emulated WebKit / Mobile Safari platforms, try Meta+k if Control+k didn't open it immediately
     const combobox = page.locator('[role="combobox"]');
+    try {
+      await combobox.waitFor({ state: 'visible', timeout: 1500 });
+    } catch {
+      await page.keyboard.press('Meta+k');
+    }
+
+    // Wait for the modal combobox to be visible
     await expect(combobox).toBeVisible();
 
     // Take an initial scan of the opened command palette
