@@ -62,18 +62,39 @@ export function AnimatedGridPattern({
   })
   const [squares, setSquares] = useState<Array<Square>>([])
 
-  const getPos = useCallback((): [number, number] => {
-    return [
-      Math.floor((Math.random() * dimensions.width) / width),
-      Math.floor((Math.random() * dimensions.height) / height),
-    ]
+  const getPos = useCallback((seedOffset: number = 0): [number, number] => {
+    const isTest = typeof window !== "undefined" && (
+      (window as unknown as { __PLAYWRIGHT_TEST__?: boolean }).__PLAYWRIGHT_TEST__ ||
+      navigator.userAgent.includes("Playwright") ||
+      navigator.userAgent.includes("Headless")
+    );
+
+    let r = Math.random();
+    if (isTest) {
+      // Simple LCG with seed based on seedOffset
+      let seed = (seedOffset + 1) * 123456789;
+      seed = (seed * 1664525 + 1013904223) % 4294967296;
+      r = seed / 4294967296;
+    }
+
+    const xPos = Math.floor((r * dimensions.width) / width);
+
+    let r2 = Math.random();
+    if (isTest) {
+      let seed = (seedOffset + 2) * 987654321;
+      seed = (seed * 1664525 + 1013904223) % 4294967296;
+      r2 = seed / 4294967296;
+    }
+    const yPos = Math.floor((r2 * dimensions.height) / height);
+
+    return [xPos, yPos];
   }, [dimensions.height, dimensions.width, height, width])
 
   const generateSquares = useCallback(
     (count: number) => {
       return Array.from({ length: count }, (_, i) => ({
         id: i,
-        pos: getPos(),
+        pos: getPos(i),
         iteration: 0,
       }))
     },
@@ -89,7 +110,7 @@ export function AnimatedGridPattern({
         const nextSquares = currentSquares.slice()
         nextSquares[squareId] = {
           ...current,
-          pos: getPos(),
+          pos: getPos(squareId + (current.iteration + 1) * 1000),
           iteration: current.iteration + 1,
         }
 
