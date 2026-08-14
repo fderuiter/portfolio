@@ -13,6 +13,7 @@ import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAnnouncer } from "@/components/providers/A11yProvider";
 import { LAYOUT_CONFIG } from "@/lib/layout-config";
 import { useBentoLayout } from "@/components/providers/BentoLayoutContext";
+import { useResizeObserver } from "@/hooks/useResizeObserver";
 
 const REALITY_CONTENT: Record<string, string> = {
   schemaflow: "While the drag-and-drop canvas is extremely smooth, we initially faced major rendering bottlenecks when rendering over 150 schema nodes. We had to implement node occlusion culling and state debouncing to maintain 60 FPS, and cyclical dependency detection still requires optimized Web Worker postMessage parsing.",
@@ -102,32 +103,22 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
   const finalHeight = hasPrecalculated ? preCalculatedHeight : (internalLayout.isReady ? internalLayout.height + (githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS) : undefined);
   const isLayoutReady = hasPrecalculated ? true : internalLayout.isReady;
 
-  const innerRef = React.useRef<HTMLDivElement>(null);
+  const innerRef = useResizeObserver<HTMLDivElement>((entry) => {
+    if (mode !== "reality") return;
 
-  // ResizeObserver restricted strictly to the active transition/interactive state (Reality mode)
-  React.useLayoutEffect(() => {
-    if (mode !== "reality" || !innerRef.current) return;
-
-    const element = innerRef.current;
+    const element = entry.target as HTMLElement;
+    if (!element) return;
     
-    const observer = new ResizeObserver(() => {
-      const cardEl = element.closest('div.isolate') as HTMLElement;
-      if (cardEl) {
-        const originalHeight = cardEl.style.height;
-        cardEl.style.height = 'auto'; // Disable fixed height to measure natural footprint
-        const actualHeight = cardEl.getBoundingClientRect().height;
-        cardEl.style.height = originalHeight; // Restore immediately
-        
-        registerHeightOverride(study.id, actualHeight);
-      }
-    });
-
-    observer.observe(element);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [mode, study.id, registerHeightOverride]);
+    const cardEl = element.closest('div.isolate') as HTMLElement;
+    if (cardEl) {
+      const originalHeight = cardEl.style.height;
+      cardEl.style.height = 'auto'; // Disable fixed height to measure natural footprint
+      const actualHeight = cardEl.getBoundingClientRect().height;
+      cardEl.style.height = originalHeight; // Restore immediately
+      
+      registerHeightOverride(study.id, actualHeight);
+    }
+  });
 
   React.useLayoutEffect(() => {
     // Check global flag injected by Playwright

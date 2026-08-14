@@ -49,8 +49,8 @@ export function AnimatedGridPattern({
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
   const containerRef = useResizeObserver<SVGSVGElement>((entry) => {
     setDimensions((currentDimensions) => {
-      const nextWidth = entry.contentRect.width
-      const nextHeight = entry.contentRect.height
+      const nextWidth = Math.round(entry.contentRect.width)
+      const nextHeight = Math.round(entry.contentRect.height)
       if (
         currentDimensions.width === nextWidth &&
         currentDimensions.height === nextHeight
