@@ -179,4 +179,112 @@ test.describe('Accessibility Audit Suite', () => {
 
     expect(combinedCriticalSerious.length, `Found ${combinedCriticalSerious.length} critical/serious accessibility violations in Active Command Palette State`).toBe(0);
   });
+
+  test('Audit: Command Palette Focus Restoration', async ({ page }, testInfo) => {
+    // Navigate to a page with a calling button, like the 404 page
+    await page.goto('/this-is-not-found');
+    await page.waitForLoadState('networkidle');
+
+    // Get the Search Site button
+    const searchBtn = page.locator('button:has-text("Search Site")');
+    await expect(searchBtn).toBeVisible();
+
+    // Focus on the calling button
+    await searchBtn.focus();
+    await expect(searchBtn).toBeFocused();
+
+    // Click the calling button to open the modal
+    await searchBtn.click();
+
+    // Wait for the modal combobox to be visible and focused
+    const combobox = page.locator('[role="combobox"]');
+    await expect(combobox).toBeVisible();
+    await expect(combobox).toBeFocused();
+
+    // Now run an accessibility scan on this state
+    const results = await new AxeBuilder({ page }).disableRules(['color-contrast']).analyze();
+    const criticalSerious = results.violations.filter(
+      v => v.impact === 'critical' || v.impact === 'serious'
+    );
+
+    // Close the command palette
+    await page.keyboard.press('Escape');
+
+    // Wait for the modal to be removed
+    await expect(combobox).not.toBeVisible();
+
+    // Verify keyboard focus returns to the calling button
+    const isFocused = await searchBtn.evaluate(el => document.activeElement === el);
+    expect(isFocused, "Keyboard focus did not return to the calling button when the modal closed").toBe(true);
+
+    saveResult(testInfo.project.name, 'Command Palette Focus Restoration', criticalSerious, page.url());
+  });
+
+  test('Audit: Mobile Navigation Focus Trap', async ({ page }, testInfo) => {
+    const isMobile = page.viewportSize()?.width && page.viewportSize()!.width < 768;
+    if (!isMobile) {
+      // Avoid failing desktop runs, but save empty violations so it's documented in metrics
+      saveResult(testInfo.project.name, 'Mobile Navigation Focus Trap', [], page.url());
+      return;
+    }
+
+    // Go to landing page
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+
+    // Open mobile menu
+    const menuTrigger = page.locator('[aria-label="Open navigation menu"]');
+    await expect(menuTrigger).toBeVisible();
+    await menuTrigger.click();
+
+    // Wait for menu overlay to be visible
+    const menuContainer = page.locator('#mobile-navigation');
+    await expect(menuContainer).toBeVisible();
+
+    // Wait for the automatic focus shift (100ms in code)
+    await page.waitForTimeout(200);
+
+    // Verify some element inside menu is currently focused
+    const isFocusedInitiallyInside = await page.evaluate(() => {
+      return !!document.activeElement?.closest('#mobile-navigation');
+    });
+    expect(isFocusedInitiallyInside).toBe(true);
+
+    // Run Axe audit on the open mobile menu state
+    const results = await new AxeBuilder({ page }).disableRules(['color-contrast']).analyze();
+    const criticalSerious = results.violations.filter(
+      v => v.impact === 'critical' || v.impact === 'serious'
+    );
+
+    // Press Tab multiple times to verify focus is trapped within the mobile menu container
+    let focusEscaped = false;
+    for (let i = 0; i < 20; i++) {
+      await page.keyboard.press('Tab');
+      const inside = await page.evaluate(() => {
+        return !!document.activeElement?.closest('#mobile-navigation');
+      });
+      if (!inside) {
+        focusEscaped = true;
+        break;
+      }
+    }
+
+    expect(focusEscaped, "Focus escaped the open menu container on mobile-sized viewport during Tab navigation").toBe(false);
+
+    // Press Shift+Tab multiple times to verify focus is trapped within the mobile menu container
+    for (let i = 0; i < 20; i++) {
+      await page.keyboard.press('Shift+Tab');
+      const inside = await page.evaluate(() => {
+        return !!document.activeElement?.closest('#mobile-navigation');
+      });
+      if (!inside) {
+        focusEscaped = true;
+        break;
+      }
+    }
+
+    expect(focusEscaped, "Focus escaped the open menu container on mobile-sized viewport during Shift+Tab navigation").toBe(false);
+
+    saveResult(testInfo.project.name, 'Mobile Navigation Focus Trap', criticalSerious, page.url());
+  });
 });
