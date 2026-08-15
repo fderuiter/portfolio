@@ -6,7 +6,7 @@
 
 # Interface: LevelScore
 
-Defined in: [lib/quasi-perfect/types.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L75)
+Defined in: [lib/quasi-perfect/types.ts:118](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L118)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/quasi-perfect/types.ts:75](https://github.com/fderuiter/portfol
 
 > **completed**: `boolean`
 
-Defined in: [lib/quasi-perfect/types.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L77)
+Defined in: [lib/quasi-perfect/types.ts:120](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L120)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/quasi-perfect/types.ts:77](https://github.com/fderuiter/portfol
 
 > **levelId**: `string` \| `number`
 
-Defined in: [lib/quasi-perfect/types.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L76)
+Defined in: [lib/quasi-perfect/types.ts:119](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L119)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/quasi-perfect/types.ts:76](https://github.com/fderuiter/portfol
 
 > **morality**: `number`
 
-Defined in: [lib/quasi-perfect/types.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L81)
+Defined in: [lib/quasi-perfect/types.ts:124](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L124)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/quasi-perfect/types.ts:81](https://github.com/fderuiter/portfol
 
 > **remainingRam**: `number`
 
-Defined in: [lib/quasi-perfect/types.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L79)
+Defined in: [lib/quasi-perfect/types.ts:122](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L122)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/quasi-perfect/types.ts:79](https://github.com/fderuiter/portfol
 
 > **stars**: `number`
 
-Defined in: [lib/quasi-perfect/types.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L80)
+Defined in: [lib/quasi-perfect/types.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L123)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/quasi-perfect/types.ts:80](https://github.com/fderuiter/portfol
 
 > **timestamp**: `number`
 
-Defined in: [lib/quasi-perfect/types.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L82)
+Defined in: [lib/quasi-perfect/types.ts:125](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L125)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [lib/quasi-perfect/types.ts:82](https://github.com/fderuiter/portfol
 
 > **usedSorry**: `boolean`
 
-Defined in: [lib/quasi-perfect/types.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L78)
+Defined in: [lib/quasi-perfect/types.ts:121](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L121)

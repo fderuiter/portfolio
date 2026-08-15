@@ -8,7 +8,7 @@
 
 > **isValidNode**(`nodeId`): `boolean`
 
-Defined in: [lib/proof-utils.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L25)
+Defined in: [lib/proof-utils.ts:625](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L625)
 
 Checks if a given string is a valid Node ID.
 

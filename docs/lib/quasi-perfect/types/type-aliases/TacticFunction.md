@@ -8,7 +8,7 @@
 
 > **TacticFunction** = (`targetNode`, `globalAST`, `hypotheses`, `arg?`) => [`TacticResult`](../interfaces/TacticResult.md)
 
-Defined in: [lib/quasi-perfect/types.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L37)
+Defined in: [lib/quasi-perfect/types.ts:56](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L56)
 
 ## Parameters
 

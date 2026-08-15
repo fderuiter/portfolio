@@ -6,9 +6,9 @@
 
 # Function: canConnect()
 
-> **canConnect**(`sourceId`, `targetId`, `edges`): `object`
+> **canConnect**(`sourceId`, `targetId`, `edges`, `theoremId?`): `object`
 
-Defined in: [lib/proof-utils.ts:121](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L121)
+Defined in: [lib/proof-utils.ts:770](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L770)
 
 Checks if two nodes can be connected logically and returns validation status.
 
@@ -25,6 +25,10 @@ Checks if two nodes can be connected logically and returns validation status.
 ### edges
 
 [`Edge`](../interfaces/Edge.md)[]
+
+### theoremId?
+
+[`TheoremId`](../type-aliases/TheoremId.md) = `"modus-ponens"`
 
 ## Returns
 

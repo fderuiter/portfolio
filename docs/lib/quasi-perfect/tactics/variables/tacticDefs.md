@@ -6,6 +6,6 @@
 
 # Variable: tacticDefs
 
-> `const` **tacticDefs**: `Record`\<`string`, [`TacticDef`](../../types/interfaces/TacticDef.md)\>
+> `const` **tacticDefs**: `Record`\<[`TacticId`](../../types/type-aliases/TacticId.md), [`TacticDef`](../../types/interfaces/TacticDef.md)\>
 
-Defined in: [lib/quasi-perfect/tactics.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/tactics.ts#L12)
+Defined in: [lib/quasi-perfect/tactics.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/tactics.ts#L15)

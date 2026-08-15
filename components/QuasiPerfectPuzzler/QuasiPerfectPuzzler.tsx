@@ -1,24 +1,43 @@
 "use client";
 
-import React, { useState, useCallback, useSyncExternalStore } from "react";
+import React, { useState, useCallback, useSyncExternalStore, useMemo } from "react";
 import { PanInfo } from "framer-motion";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { puzzleLevels } from "@/lib/quasi-perfect/levels";
 import { tacticDefs } from "@/lib/quasi-perfect/tactics";
 import {
-  ASTNode,
   CompilerLogEntry,
   GameProgressState,
+  LeanProofStep,
   LevelScore,
   PuzzlerLevelDef,
+  SubGoal,
 } from "@/lib/quasi-perfect/types";
-import { cloneAST, findNodeById, isProofComplete } from "@/lib/quasi-perfect/engine";
+import {
+  cloneAST,
+  findNodeById,
+  isProofComplete,
+  areAllSubgoalsClosed,
+  generateLeanProofScript,
+} from "@/lib/quasi-perfect/engine";
 import { ExpressionTree } from "./ExpressionTree";
 import { TacticHand } from "./TacticHand";
 import { RAMGauge } from "./RAMGauge";
 import { TerminalLog } from "./TerminalLog";
 import { VictoryModal } from "./VictoryModal";
+import { MultiGoalTabs } from "./MultiGoalTabs";
+import { LeanIdeInspector } from "./LeanIdeInspector";
+import { HintSystem } from "./HintSystem";
+import { SandboxMode } from "./SandboxMode";
 import { FieldManualButton } from "@/components/FieldManualButton";
+import {
+  IconBulb,
+  IconCode,
+  IconFlask,
+  IconRotate,
+  IconArrowBackUp,
+  IconArrowForwardUp,
+} from "@tabler/icons-react";
 
 const STORAGE_KEY = "quasi_perfect_puzzler_progress_v1";
 
@@ -43,19 +62,42 @@ function getProgressServerSnapshot(): string {
 }
 
 interface StepHistory {
-  goalAST: ASTNode;
+  subgoals: SubGoal[];
+  activeGoalIndex: number;
   ram: number;
+  proofSteps: LeanProofStep[];
   logText: string;
 }
 
 export const QuasiPerfectPuzzler: React.FC = () => {
   const { playNote, playSuccess } = useAudio();
 
+  const [activeTab, setActiveTab] = useState<"campaign" | "sandbox">("campaign");
+  const [selectedChapter, setSelectedChapter] = useState<number | "all">("all");
+  const [showHints, setShowHints] = useState<boolean>(false);
+  const [showLeanInspector, setShowLeanInspector] = useState<boolean>(true);
+
   const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
   const currentLevel: PuzzlerLevelDef = puzzleLevels[currentLevelIndex] || puzzleLevels[0];
 
-  const [goalAST, setGoalAST] = useState<ASTNode>(() => cloneAST(currentLevel.goal));
+  // Multi-Goal State
+  const [subgoals, setSubgoals] = useState<SubGoal[]>(() => [
+    {
+      id: "root-goal",
+      label: "Main Goal",
+      goal: cloneAST(currentLevel.goal),
+      hypotheses: currentLevel.hypotheses.map(cloneAST),
+      isCompleted: false,
+    },
+  ]);
+  const [activeGoalIndex, setActiveGoalIndex] = useState<number>(0);
+
+  const activeSubgoal = subgoals[activeGoalIndex] || subgoals[0];
+  const goalAST = activeSubgoal.goal;
+  const activeHypotheses = activeSubgoal.hypotheses;
+
   const [currentRam, setCurrentRam] = useState<number>(currentLevel.initialRam);
+  const [proofSteps, setProofSteps] = useState<LeanProofStep[]>([]);
   const [history, setHistory] = useState<StepHistory[]>([]);
   const [redoHistory, setRedoHistory] = useState<StepHistory[]>([]);
 
@@ -71,7 +113,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
       id: "init-1",
       timestamp: "00:00:01",
       type: "info",
-      text: `Lean 4 server initialized. Loaded ${currentLevel.title}.`,
+      text: `Lean 4 server initialized. Loaded [Ch ${currentLevel.chapter} · ${currentLevel.chapterTitle}]: ${currentLevel.title}.`,
     },
   ]);
 
@@ -82,7 +124,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
     getProgressServerSnapshot
   );
 
-  const parsedProgress: GameProgressState = React.useMemo(() => {
+  const parsedProgress: GameProgressState = useMemo(() => {
     try {
       return JSON.parse(rawProgress) as GameProgressState;
     } catch {
@@ -106,7 +148,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       window.dispatchEvent(new Event("storage"));
     } catch {
-      // Storage unavailable or disabled
+      // Storage unavailable
     }
   }, []);
 
@@ -127,8 +169,18 @@ export const QuasiPerfectPuzzler: React.FC = () => {
     (index: number) => {
       const targetLvl = puzzleLevels[index] || puzzleLevels[0];
       setCurrentLevelIndex(index);
-      setGoalAST(cloneAST(targetLvl.goal));
+      setSubgoals([
+        {
+          id: `root-goal-${targetLvl.id}`,
+          label: "Main Goal",
+          goal: cloneAST(targetLvl.goal),
+          hypotheses: targetLvl.hypotheses.map(cloneAST),
+          isCompleted: false,
+        },
+      ]);
+      setActiveGoalIndex(0);
       setCurrentRam(targetLvl.initialRam);
+      setProofSteps([]);
       setHistory([]);
       setRedoHistory([]);
       setSelectedTacticIndex(null);
@@ -136,12 +188,13 @@ export const QuasiPerfectPuzzler: React.FC = () => {
       setHoveredTargetId(null);
       setLevelSolved(false);
       setCurrentScore(null);
+      setShowHints(false);
       setLogs([
         {
           id: `lvl-${targetLvl.id}-${Date.now()}`,
           timestamp: new Date().toLocaleTimeString("en-US", { hour12: false }),
           type: "info",
-          text: `Loaded [${targetLvl.subtitle}]: ${targetLvl.title}. RAM: ${targetLvl.initialRam} GB.`,
+          text: `Loaded Chapter ${targetLvl.chapter} [${targetLvl.subtitle}]: ${targetLvl.title}. RAM: ${targetLvl.initialRam} GB.`,
         },
       ]);
     },
@@ -172,7 +225,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
         return;
       }
 
-      // Resolve target node (or fallback to root goal)
+      // Target node in active sub-goal
       const targetNode = targetNodeId
         ? findNodeById(goalAST, targetNodeId) || goalAST
         : goalAST;
@@ -181,25 +234,71 @@ export const QuasiPerfectPuzzler: React.FC = () => {
       const result = tactic.execute(
         targetNode,
         goalAST,
-        currentLevel.hypotheses,
+        activeHypotheses,
         hypothesisArg
       );
 
-      if (result.success && result.newAST) {
-        // Successful step
+      if (result.success) {
         const nextRam = Math.max(0, currentRam - result.ramConsumed);
+
+        // Record history snapshot
         setHistory((prev) => [
           ...prev,
-          { goalAST: cloneAST(goalAST), ram: currentRam, logText: result.message },
+          {
+            subgoals: subgoals.map((sg) => ({
+              ...sg,
+              goal: cloneAST(sg.goal),
+              hypotheses: sg.hypotheses.map(cloneAST),
+            })),
+            activeGoalIndex,
+            ram: currentRam,
+            proofSteps: [...proofSteps],
+            logText: result.message,
+          },
         ]);
         setRedoHistory([]);
-        setGoalAST(result.newAST);
+
+        // Record Lean proof step
+        const newStep: LeanProofStep = {
+          id: `step-${Date.now()}`,
+          tacticId: tactic.id,
+          leanLine: result.leanProofStep || tactic.name,
+          explanation: tactic.description,
+          goalBefore: activeSubgoal.label,
+          goalAfter: result.newAST?.value ? String(result.newAST.value) : "Reduced",
+          subgoalLabel: activeSubgoal.label,
+        };
+        const updatedSteps = [...proofSteps, newStep];
+        setProofSteps(updatedSteps);
+
+        // Handle Subgoal splitting (e.g. cases)
+        let updatedSubgoals: SubGoal[] = [...subgoals];
+
+        if (result.newSubGoals && result.newSubGoals.length > 0) {
+          // Replace current subgoal with branched subgoals
+          const before = subgoals.slice(0, activeGoalIndex);
+          const after = subgoals.slice(activeGoalIndex + 1);
+          updatedSubgoals = [...before, ...result.newSubGoals, ...after];
+        } else if (result.newAST) {
+          // Update active subgoal AST and hypotheses
+          const isThisGoalDone =
+            result.isProofComplete || isProofComplete(result.newAST);
+
+          updatedSubgoals[activeGoalIndex] = {
+            ...activeSubgoal,
+            goal: result.newAST,
+            hypotheses: result.newHypotheses || activeSubgoal.hypotheses,
+            isCompleted: isThisGoalDone,
+          };
+        }
+
+        setSubgoals(updatedSubgoals);
         setCurrentRam(nextRam);
         setSelectedTacticIndex(null);
         setSelectedTargetId(null);
         addLog(result.message, tactic.id === "sorry" ? "warning" : "success");
 
-        // Play feedback sounds
+        // Sound feedback
         if (tactic.id === "sorry") {
           playNote(329.63, 0.15);
           setTimeout(() => playNote(220, 0.3), 120);
@@ -208,12 +307,14 @@ export const QuasiPerfectPuzzler: React.FC = () => {
           setTimeout(() => playNote(880, 0.1), 70);
         }
 
-        // Check level win condition
-        const isComplete = result.isProofComplete || isProofComplete(result.newAST);
-        if (isComplete) {
+        // Check if all subgoals are closed
+        const allClosed = areAllSubgoalsClosed(updatedSubgoals);
+
+        if (allClosed) {
           setLevelSolved(true);
           const usedSorry =
-            tactic.id === "sorry" || !!result.newAST.metadata?.provedViaSorry;
+            tactic.id === "sorry" ||
+            updatedSteps.some((s) => s.tacticId === "sorry");
 
           let stars = 1;
           if (!usedSorry) {
@@ -238,9 +339,24 @@ export const QuasiPerfectPuzzler: React.FC = () => {
 
           if (!usedSorry) {
             playSuccess();
-            addLog(`✔ Q.E.D. Goal closed! Theorem verified in ${nextRam.toFixed(1)} GB.`, "success");
+            addLog(
+              `✔ Q.E.D. All goals closed! Theorem verified in ${nextRam.toFixed(1)} GB.`,
+              "success"
+            );
           } else {
-            addLog("▲ Goal admitted via 'sorry'. Morality Penalty: -100 applied.", "warning");
+            addLog("▲ Theorem admitted via 'sorry'. Morality Penalty: -100.", "warning");
+          }
+        } else {
+          // If current active subgoal was completed, automatically advance to next open subgoal
+          if (updatedSubgoals[activeGoalIndex]?.isCompleted) {
+            const nextOpenIdx = updatedSubgoals.findIndex((sg) => !sg.isCompleted);
+            if (nextOpenIdx !== -1) {
+              setActiveGoalIndex(nextOpenIdx);
+              addLog(
+                `Subgoal closed! Advancing to ${updatedSubgoals[nextOpenIdx].label}.`,
+                "info"
+              );
+            }
           }
         }
       } else {
@@ -251,8 +367,11 @@ export const QuasiPerfectPuzzler: React.FC = () => {
         playNote(130.81, 0.2); // Low error buzz
 
         if (nextRam <= 0) {
-          addLog("FATAL ERROR: Lean Language Server crashed (OOM). Garbage collector forsaken.", "error");
-          playNote(98, 0.4); // Crash rumble
+          addLog(
+            "FATAL ERROR: Lean Language Server crashed (OOM). Garbage collector exhausted.",
+            "error"
+          );
+          playNote(98, 0.4);
         }
       }
     },
@@ -261,6 +380,11 @@ export const QuasiPerfectPuzzler: React.FC = () => {
       currentLevel,
       currentRam,
       goalAST,
+      activeHypotheses,
+      subgoals,
+      activeGoalIndex,
+      activeSubgoal,
+      proofSteps,
       addLog,
       playNote,
       playSuccess,
@@ -271,15 +395,23 @@ export const QuasiPerfectPuzzler: React.FC = () => {
   // Drag-and-drop collision detection
   const handleCardDragEnd = useCallback(
     (tacticIdx: number, event: MouseEvent | TouchEvent | PointerEvent, _info: PanInfo) => {
-      const clientX = "clientX" in event ? event.clientX : (event as TouchEvent).changedTouches?.[0]?.clientX;
-      const clientY = "clientY" in event ? event.clientY : (event as TouchEvent).changedTouches?.[0]?.clientY;
+      const clientX =
+        "clientX" in event
+          ? event.clientX
+          : (event as TouchEvent).changedTouches?.[0]?.clientX;
+      const clientY =
+        "clientY" in event
+          ? event.clientY
+          : (event as TouchEvent).changedTouches?.[0]?.clientY;
 
       if (typeof clientX === "number" && typeof clientY === "number") {
         const elementsUnderPoint = document.elementsFromPoint(clientX, clientY);
         let targetNodeId: string | null = null;
 
         for (const el of elementsUnderPoint) {
-          const nodeId = el.getAttribute("data-node-id") || el.closest("[data-node-id]")?.getAttribute("data-node-id");
+          const nodeId =
+            el.getAttribute("data-node-id") ||
+            el.closest("[data-node-id]")?.getAttribute("data-node-id");
           if (nodeId) {
             targetNodeId = nodeId;
             break;
@@ -293,52 +425,34 @@ export const QuasiPerfectPuzzler: React.FC = () => {
     [executeTacticOnNode]
   );
 
-  // Node selection / tap handler
-  const handleSelectTarget = useCallback(
-    (nodeId: string) => {
-      playNote(440, 0.05);
-      if (selectedTacticIndex !== null) {
-        // If card was already selected, execute immediately on this tapped node
-        executeTacticOnNode(selectedTacticIndex, nodeId);
-      } else {
-        // Otherwise toggle selection of this node
-        setSelectedTargetId((prev) => (prev === nodeId ? null : nodeId));
-      }
-    },
-    [selectedTacticIndex, executeTacticOnNode, playNote]
-  );
-
-  // Card selection / tap handler
-  const handleSelectTactic = useCallback(
-    (tacticIdx: number) => {
-      playNote(523.25, 0.05);
-      if (selectedTargetId !== null) {
-        // If node was already selected, execute immediately with this card
-        executeTacticOnNode(tacticIdx, selectedTargetId);
-      } else {
-        // Otherwise toggle selection of this card
-        setSelectedTacticIndex((prev) => (prev === tacticIdx ? null : tacticIdx));
-      }
-    },
-    [selectedTargetId, executeTacticOnNode, playNote]
-  );
-
   // Undo step
   const handleUndo = useCallback(() => {
     if (history.length === 0) return;
     const last = history[history.length - 1];
     setRedoHistory((prev) => [
       ...prev,
-      { goalAST: cloneAST(goalAST), ram: currentRam, logText: "Undo" },
+      {
+        subgoals: subgoals.map((sg) => ({
+          ...sg,
+          goal: cloneAST(sg.goal),
+          hypotheses: sg.hypotheses.map(cloneAST),
+        })),
+        activeGoalIndex,
+        ram: currentRam,
+        proofSteps: [...proofSteps],
+        logText: "Undo",
+      },
     ]);
-    setGoalAST(cloneAST(last.goalAST));
+    setSubgoals(last.subgoals);
+    setActiveGoalIndex(last.activeGoalIndex);
     setCurrentRam(last.ram);
+    setProofSteps(last.proofSteps);
     setHistory((prev) => prev.slice(0, -1));
     setLevelSolved(false);
     setCurrentScore(null);
     addLog("Reverted last tactic step via undo.", "info");
     playNote(392, 0.05);
-  }, [history, goalAST, currentRam, addLog, playNote]);
+  }, [history, subgoals, activeGoalIndex, currentRam, proofSteps, addLog, playNote]);
 
   // Redo step
   const handleRedo = useCallback(() => {
@@ -346,16 +460,27 @@ export const QuasiPerfectPuzzler: React.FC = () => {
     const next = redoHistory[redoHistory.length - 1];
     setHistory((prev) => [
       ...prev,
-      { goalAST: cloneAST(goalAST), ram: currentRam, logText: "Redo" },
+      {
+        subgoals: subgoals.map((sg) => ({
+          ...sg,
+          goal: cloneAST(sg.goal),
+          hypotheses: sg.hypotheses.map(cloneAST),
+        })),
+        activeGoalIndex,
+        ram: currentRam,
+        proofSteps: [...proofSteps],
+        logText: "Redo",
+      },
     ]);
-    setGoalAST(cloneAST(next.goalAST));
+    setSubgoals(next.subgoals);
+    setActiveGoalIndex(next.activeGoalIndex);
     setCurrentRam(next.ram);
+    setProofSteps(next.proofSteps);
     setRedoHistory((prev) => prev.slice(0, -1));
     addLog("Restored tactic step via redo.", "info");
     playNote(493.88, 0.05);
-  }, [redoHistory, goalAST, currentRam, addLog, playNote]);
+  }, [redoHistory, subgoals, activeGoalIndex, currentRam, proofSteps, addLog, playNote]);
 
-  // Reset current level
   const handleResetLevel = useCallback(() => {
     loadLevel(currentLevelIndex);
     playNote(261.63, 0.1);
@@ -371,16 +496,27 @@ export const QuasiPerfectPuzzler: React.FC = () => {
     } else if (e.key === "r" || e.key === "R") {
       e.preventDefault();
       handleResetLevel();
-    } else if (["1", "2", "3", "4", "5"].includes(e.key)) {
-      const idx = parseInt(e.key, 10) - 1;
-      if (puzzleLevels[idx]) {
-        e.preventDefault();
-        loadLevel(idx);
-      }
+    } else if (e.key === "h" || e.key === "H") {
+      e.preventDefault();
+      setShowHints((prev) => !prev);
+    } else if (e.key === "c" || e.key === "C") {
+      e.preventDefault();
+      setShowLeanInspector((prev) => !prev);
     }
   };
 
   const isOOM = currentRam <= 0 && !levelSolved;
+
+  // Filtered levels based on chapter tab
+  const filteredLevels = useMemo(() => {
+    if (selectedChapter === "all") return puzzleLevels;
+    return puzzleLevels.filter((lvl) => lvl.chapter === selectedChapter);
+  }, [selectedChapter]);
+
+  const generatedLeanScript = useMemo(
+    () => generateLeanProofScript(currentLevel, proofSteps, levelSolved),
+    [currentLevel, proofSteps, levelSolved]
+  );
 
   return (
     <section
@@ -390,15 +526,15 @@ export const QuasiPerfectPuzzler: React.FC = () => {
       onKeyDown={handleKeyDown}
       className="relative rounded-2xl border border-brand-cyan/30 bg-zinc-950/90 p-5 font-mono shadow-[0_0_35px_-10px_rgba(6,182,212,0.35)] outline-none focus:border-brand-cyan"
     >
-      {/* 1. Header & Level Picker */}
+      {/* 1. Header & Mode Switcher */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800/80 pb-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-brand-cyan">
               Formal Methods Arcade · Lean 4 Simulator
             </span>
-            <span className="rounded-full bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.2 text-[9px] font-semibold text-cyan-300">
-              Interactive AST
+            <span className="rounded-full bg-purple-500/10 border border-purple-500/30 px-2 py-0.2 text-[9px] font-semibold text-purple-300">
+              3-Chapter Curriculum
             </span>
           </div>
           <h2 id="quasi-puzzler-heading" className="mt-1 text-2xl font-bold text-zinc-100">
@@ -406,147 +542,305 @@ export const QuasiPerfectPuzzler: React.FC = () => {
           </h2>
         </div>
 
-        {/* Level Navigation Tabs & Manual */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          <FieldManualButton manualId="quasi-puzzler" label="Manual" />
-
-          {puzzleLevels.map((lvl, idx) => {
-            const isCurrent = idx === currentLevelIndex;
-            const lvlProgress = parsedProgress.completedLevels?.[lvl.id];
-            return (
-              <button
-                key={lvl.id}
-                type="button"
-                onClick={() => loadLevel(idx)}
-                className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-colors ${
-                  isCurrent
-                    ? "bg-brand-cyan text-black shadow-[0_0_10px_rgba(6,182,212,0.5)]"
-                    : lvlProgress?.completed
-                    ? "bg-zinc-800 text-emerald-300 hover:bg-zinc-700"
-                    : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
-                }`}
-              >
-                L{lvl.id}
-                {lvlProgress?.completed && !lvlProgress.usedSorry && (
-                  <span className="ml-1 text-[10px] text-amber-400">★</span>
-                )}
-                {lvlProgress?.usedSorry && (
-                  <span className="ml-1 text-[10px] text-rose-400">⚠</span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* 2. Level Header & Actions */}
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 bg-zinc-900/40 border border-zinc-850 rounded-xl p-3.5">
-        <div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-brand-cyan">
-            {currentLevel.subtitle}
-          </span>
-          <h3 className="text-base font-bold text-zinc-100">{currentLevel.title}</h3>
-          <p className="mt-0.5 text-xs text-zinc-400 max-w-xl">{currentLevel.description}</p>
-        </div>
-
+        {/* Campaign vs Sandbox Mode Switch */}
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handleUndo}
-            disabled={history.length === 0 || levelSolved}
-            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-bold text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            ↶ Undo
-          </button>
-          <button
-            type="button"
-            onClick={handleRedo}
-            disabled={redoHistory.length === 0 || levelSolved}
-            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-bold text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            ↷ Redo
-          </button>
-          <button
-            type="button"
-            onClick={handleResetLevel}
-            className="rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-bold text-zinc-300 hover:bg-zinc-800 transition-colors"
-          >
-            ↺ Reset
-          </button>
+          <div className="bg-zinc-900 p-1 rounded-xl border border-zinc-800 flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setActiveTab("campaign")}
+              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                activeTab === "campaign"
+                  ? "bg-brand-cyan text-black shadow-[0_0_10px_rgba(6,182,212,0.4)]"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              Campaign
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("sandbox")}
+              className={`flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                activeTab === "sandbox"
+                  ? "bg-emerald-500 text-black shadow-[0_0_10px_rgba(16,185,129,0.4)]"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              <IconFlask className="w-3.5 h-3.5" />
+              <span>Sandbox</span>
+            </button>
+          </div>
+
+          <FieldManualButton manualId="quasi-puzzler" label="Manual" />
         </div>
       </div>
 
-      {/* 3. Lean Server RAM Gauge */}
-      <div className="mt-4">
-        <RAMGauge currentRam={currentRam} initialRam={currentLevel.initialRam} />
-      </div>
-
-      {/* 4. OOM Server Crash Alert */}
-      {isOOM && (
-        <div className="mt-4 rounded-xl border border-rose-500/50 bg-rose-950/40 p-4 text-center">
-          <p className="text-sm font-bold text-rose-300">
-            💥 FATAL ERROR: Lean Language Server Crashed (OOM)
-          </p>
-          <p className="mt-1 text-xs text-zinc-400">
-            Available RAM was completely exhausted before closing the goal.
-          </p>
-          <button
-            type="button"
-            onClick={handleResetLevel}
-            className="mt-3 rounded-lg bg-rose-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-rose-500 transition-colors"
-          >
-            Reboot Server & Retry Level
-          </button>
+      {/* 2. Sandbox View (if selected) */}
+      {activeTab === "sandbox" ? (
+        <div className="mt-4">
+          <SandboxMode />
         </div>
-      )}
+      ) : (
+        /* 3. Campaign View */
+        <>
+          {/* Chapter & Level Navigation */}
+          <div className="mt-4 space-y-2.5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              {/* Chapter Tabs */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[10px] uppercase font-bold text-zinc-500 mr-1">
+                  Chapter:
+                </span>
+                {[
+                  { id: "all", label: "All Levels" },
+                  { id: 1, label: "Ch 1: Equational" },
+                  { id: 2, label: "Ch 2: Logic" },
+                  { id: 3, label: "Ch 3: Quasiperfect" },
+                ].map((chap) => (
+                  <button
+                    key={chap.id}
+                    type="button"
+                    onClick={() => setSelectedChapter(chap.id as number | "all")}
+                    className={`px-2 py-0.5 rounded text-[11px] font-bold transition-all ${
+                      selectedChapter === chap.id
+                        ? "bg-zinc-800 text-brand-cyan border border-brand-cyan/40"
+                        : "text-zinc-500 hover:text-zinc-300"
+                    }`}
+                  >
+                    {chap.label}
+                  </button>
+                ))}
+              </div>
 
-      {/* 5. Main Proof Expression Tree Canvas */}
-      <div className="mt-4">
-        <ExpressionTree
-          goalAST={goalAST}
-          hypotheses={currentLevel.hypotheses}
-          selectedTargetId={selectedTargetId}
-          hoveredTargetId={hoveredTargetId}
-          onSelectTarget={handleSelectTarget}
-          onHoverTarget={setHoveredTargetId}
-          isProofComplete={levelSolved}
-        />
-      </div>
+              {/* Tools Toggles */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setShowHints((prev) => !prev)}
+                  className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${
+                    showHints
+                      ? "bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-[0_0_10px_rgba(245,158,11,0.3)]"
+                      : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-zinc-200"
+                  }`}
+                >
+                  <IconBulb className="w-3.5 h-3.5" />
+                  <span>Hints {showHints ? "On" : "Off"}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowLeanInspector((prev) => !prev)}
+                  className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${
+                    showLeanInspector
+                      ? "bg-purple-500/20 text-purple-300 border-purple-500/50 shadow-[0_0_10px_rgba(168,85,247,0.3)]"
+                      : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-zinc-200"
+                  }`}
+                >
+                  <IconCode className="w-3.5 h-3.5" />
+                  <span>Lean IDE {showLeanInspector ? "Open" : "Closed"}</span>
+                </button>
+              </div>
+            </div>
 
-      {/* 6. Tactic Hand */}
-      <div className="mt-4">
-        <TacticHand
-          availableTactics={currentLevel.availableTactics}
-          currentRam={currentRam}
-          selectedTacticIndex={selectedTacticIndex}
-          onSelectTactic={handleSelectTactic}
-          onCardDragStart={(idx) => {
-            setSelectedTacticIndex(idx);
-            playNote(523.25, 0.03);
-          }}
-          onCardDragEnd={handleCardDragEnd}
-          isProofComplete={levelSolved}
-        />
-      </div>
+            {/* Level Selector Buttons */}
+            <div className="flex flex-wrap items-center gap-1.5 p-2 bg-zinc-900/50 rounded-xl border border-zinc-850">
+              {filteredLevels.map((lvl) => {
+                const actualIdx = puzzleLevels.findIndex((l) => l.id === lvl.id);
+                const isCurrent = actualIdx === currentLevelIndex;
+                const lvlProgress = parsedProgress.completedLevels?.[lvl.id];
 
-      {/* 7. Diagnostic Terminal Log */}
-      <div className="mt-4">
-        <TerminalLog logs={logs} />
-      </div>
+                return (
+                  <button
+                    key={lvl.id}
+                    type="button"
+                    onClick={() => loadLevel(actualIdx)}
+                    className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
+                      isCurrent
+                        ? "bg-brand-cyan text-black shadow-[0_0_10px_rgba(6,182,212,0.5)] font-extrabold"
+                        : lvlProgress?.completed
+                        ? "bg-zinc-800 text-emerald-300 hover:bg-zinc-700"
+                        : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                    }`}
+                  >
+                    L{lvl.id}
+                    {lvlProgress?.completed && !lvlProgress.usedSorry && (
+                      <span className="ml-1 text-[10px] text-amber-400">★</span>
+                    )}
+                    {lvlProgress?.usedSorry && (
+                      <span className="ml-1 text-[10px] text-rose-400">⚠</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-      {/* 8. Victory / Morality Modal */}
-      {levelSolved && currentScore && (
-        <VictoryModal
-          score={currentScore}
-          totalLevels={puzzleLevels.length}
-          currentLevelIndex={currentLevelIndex}
-          onNextLevel={() => {
-            if (currentLevelIndex < puzzleLevels.length - 1) {
-              loadLevel(currentLevelIndex + 1);
-            }
-          }}
-          onRestartLevel={handleResetLevel}
-        />
+          {/* Level Header & Controls */}
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 bg-zinc-900/40 border border-zinc-850 rounded-xl p-3.5">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-brand-cyan">
+                  Chapter {currentLevel.chapter} · {currentLevel.chapterTitle}
+                </span>
+                <span className="text-zinc-600">|</span>
+                <span className="text-[10px] font-bold text-purple-400">
+                  {currentLevel.subtitle}
+                </span>
+              </div>
+              <h3 className="text-base font-bold text-zinc-100 mt-0.5">
+                {currentLevel.title}
+              </h3>
+              <p className="mt-0.5 text-xs text-zinc-400 max-w-xl">
+                {currentLevel.description}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleUndo}
+                disabled={history.length === 0 || levelSolved}
+                className="flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-bold text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <IconArrowBackUp className="w-3.5 h-3.5" />
+                <span>Undo</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleRedo}
+                disabled={redoHistory.length === 0 || levelSolved}
+                className="flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-bold text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <IconArrowForwardUp className="w-3.5 h-3.5" />
+                <span>Redo</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleResetLevel}
+                className="flex items-center gap-1 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-bold text-zinc-300 hover:bg-zinc-800 transition-colors"
+              >
+                <IconRotate className="w-3.5 h-3.5" />
+                <span>Reset</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Progressive Hints Drawer (if toggled) */}
+          {showHints && (
+            <div className="mt-4">
+              <HintSystem hints={currentLevel.hints} onClose={() => setShowHints(false)} />
+            </div>
+          )}
+
+          {/* Lean Server RAM Gauge */}
+          <div className="mt-4">
+            <RAMGauge currentRam={currentRam} initialRam={currentLevel.initialRam} />
+          </div>
+
+          {/* OOM Server Crash Alert */}
+          {isOOM && (
+            <div className="mt-4 rounded-xl border border-rose-500/50 bg-rose-950/40 p-4 text-center">
+              <p className="text-sm font-bold text-rose-300">
+                💥 FATAL ERROR: Lean Language Server Crashed (OOM)
+              </p>
+              <p className="mt-1 text-xs text-zinc-400">
+                Available RAM was completely exhausted before discharging the goal.
+              </p>
+              <button
+                type="button"
+                onClick={handleResetLevel}
+                className="mt-3 rounded-lg bg-rose-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-rose-500 transition-colors"
+              >
+                Reboot Server &amp; Retry Level
+              </button>
+            </div>
+          )}
+
+          {/* Multi-Goal Branch Tabs */}
+          {subgoals.length > 1 && (
+            <div className="mt-4">
+              <MultiGoalTabs
+                subgoals={subgoals}
+                activeGoalIndex={activeGoalIndex}
+                onSelectGoal={setActiveGoalIndex}
+              />
+            </div>
+          )}
+
+          {/* Main Proof Expression Tree Canvas */}
+          <div className="mt-4">
+            <ExpressionTree
+              goalAST={goalAST}
+              hypotheses={activeHypotheses}
+              selectedTargetId={selectedTargetId}
+              hoveredTargetId={hoveredTargetId}
+              onSelectTarget={(nodeId) => {
+                playNote(440, 0.05);
+                if (selectedTacticIndex !== null) {
+                  executeTacticOnNode(selectedTacticIndex, nodeId);
+                } else {
+                  setSelectedTargetId((prev) => (prev === nodeId ? null : nodeId));
+                }
+              }}
+              onHoverTarget={setHoveredTargetId}
+              isProofComplete={levelSolved || activeSubgoal.isCompleted}
+            />
+          </div>
+
+          {/* Tactic Hand */}
+          <div className="mt-4">
+            <TacticHand
+              availableTactics={currentLevel.availableTactics}
+              currentRam={currentRam}
+              selectedTacticIndex={selectedTacticIndex}
+              onSelectTactic={(idx) => {
+                playNote(523.25, 0.05);
+                if (selectedTargetId !== null) {
+                  executeTacticOnNode(idx, selectedTargetId);
+                } else {
+                  setSelectedTacticIndex((prev) => (prev === idx ? null : idx));
+                }
+              }}
+              onCardDragStart={(idx) => {
+                setSelectedTacticIndex(idx);
+                playNote(523.25, 0.03);
+              }}
+              onCardDragEnd={handleCardDragEnd}
+              isProofComplete={levelSolved}
+            />
+          </div>
+
+          {/* Live Lean IDE Inspector & Tactic Encyclopedia */}
+          {showLeanInspector && (
+            <div className="mt-4">
+              <LeanIdeInspector
+                level={currentLevel}
+                steps={proofSteps}
+                isComplete={levelSolved}
+              />
+            </div>
+          )}
+
+          {/* Diagnostic Terminal Log */}
+          <div className="mt-4">
+            <TerminalLog logs={logs} />
+          </div>
+
+          {/* Victory Modal */}
+          {levelSolved && currentScore && (
+            <VictoryModal
+              score={currentScore}
+              level={currentLevel}
+              totalLevels={puzzleLevels.length}
+              currentLevelIndex={currentLevelIndex}
+              leanCode={generatedLeanScript}
+              onNextLevel={() => {
+                if (currentLevelIndex < puzzleLevels.length - 1) {
+                  loadLevel(currentLevelIndex + 1);
+                }
+              }}
+              onRestartLevel={handleResetLevel}
+            />
+          )}
+        </>
       )}
     </section>
   );

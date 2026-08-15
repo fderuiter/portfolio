@@ -6,7 +6,7 @@
 
 # Interface: CompilerLogEntry
 
-Defined in: [lib/quasi-perfect/types.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L68)
+Defined in: [lib/quasi-perfect/types.ts:101](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L101)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/quasi-perfect/types.ts:68](https://github.com/fderuiter/portfol
 
 > **id**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L69)
+Defined in: [lib/quasi-perfect/types.ts:102](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L102)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/quasi-perfect/types.ts:69](https://github.com/fderuiter/portfol
 
 > **text**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L72)
+Defined in: [lib/quasi-perfect/types.ts:105](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L105)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/quasi-perfect/types.ts:72](https://github.com/fderuiter/portfol
 
 > **timestamp**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L70)
+Defined in: [lib/quasi-perfect/types.ts:103](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L103)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/quasi-perfect/types.ts:70](https://github.com/fderuiter/portfol
 
 > **type**: `"info"` \| `"error"` \| `"warning"` \| `"success"`
 
-Defined in: [lib/quasi-perfect/types.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L71)
+Defined in: [lib/quasi-perfect/types.ts:104](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L104)

@@ -6,7 +6,7 @@
 
 # Interface: GameProgressState
 
-Defined in: [lib/quasi-perfect/types.ts:85](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L85)
+Defined in: [lib/quasi-perfect/types.ts:128](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L128)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/quasi-perfect/types.ts:85](https://github.com/fderuiter/portfol
 
 > **completedLevels**: `Record`\<`string` \| `number`, [`LevelScore`](LevelScore.md)\>
 
-Defined in: [lib/quasi-perfect/types.ts:86](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L86)
+Defined in: [lib/quasi-perfect/types.ts:129](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L129)
 
 ***
 
@@ -22,4 +22,12 @@ Defined in: [lib/quasi-perfect/types.ts:86](https://github.com/fderuiter/portfol
 
 > **currentLevelIndex**: `number`
 
-Defined in: [lib/quasi-perfect/types.ts:87](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L87)
+Defined in: [lib/quasi-perfect/types.ts:130](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L130)
+
+***
+
+### unlockedChapter?
+
+> `optional` **unlockedChapter?**: `number`
+
+Defined in: [lib/quasi-perfect/types.ts:131](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L131)

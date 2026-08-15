@@ -8,4 +8,4 @@
 
 > `const` **VALID\_COMMANDS**: `string`[]
 
-Defined in: [lib/proof-utils.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L20)
+Defined in: [lib/proof-utils.ts:84](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L84)

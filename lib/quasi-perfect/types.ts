@@ -2,6 +2,9 @@ export type NodeType =
   | "Equality"
   | "Inequality"
   | "Implication"
+  | "Conjunction"
+  | "Disjunction"
+  | "Negation"
   | "Operator"
   | "Variable"
   | "Constant"
@@ -24,14 +27,30 @@ export type TacticId =
   | "omega"
   | "linarith"
   | "intro"
+  | "apply"
+  | "exact"
+  | "cases"
+  | "ring"
+  | "norm_num"
   | "sorry";
+
+export interface SubGoal {
+  id: string;
+  label: string;
+  goal: ASTNode;
+  hypotheses: ASTNode[];
+  isCompleted: boolean;
+}
 
 export interface TacticResult {
   success: boolean;
   newAST?: ASTNode;
+  newHypotheses?: ASTNode[];
+  newSubGoals?: SubGoal[];
   ramConsumed: number;
   message: string;
   isProofComplete?: boolean;
+  leanProofStep?: string;
 }
 
 export type TacticFunction = (
@@ -52,8 +71,18 @@ export interface TacticDef {
   execute: TacticFunction;
 }
 
+export interface EducationalConcept {
+  title: string;
+  summary: string;
+  mathNotation?: string;
+  leanDocUrl?: string;
+  realWorldApplication: string;
+}
+
 export interface PuzzlerLevelDef {
   id: number | string;
+  chapter: number;
+  chapterTitle: string;
   title: string;
   subtitle: string;
   description: string;
@@ -63,6 +92,10 @@ export interface PuzzlerLevelDef {
   hypotheses: ASTNode[];
   goal: ASTNode;
   availableTactics: (TacticId | { id: TacticId; hypothesis?: string; labelOverride?: string })[];
+  hints: [string, string, string]; // [Tier 1 Concept, Tier 2 Target Node, Tier 3 Tactic Suggestion]
+  leanTheoremName: string;
+  leanTypeSignature: string;
+  educationalConcept: EducationalConcept;
 }
 
 export interface CompilerLogEntry {
@@ -70,6 +103,16 @@ export interface CompilerLogEntry {
   timestamp: string;
   type: "info" | "success" | "warning" | "error";
   text: string;
+}
+
+export interface LeanProofStep {
+  id: string;
+  tacticId: TacticId;
+  leanLine: string;
+  explanation: string;
+  goalBefore: string;
+  goalAfter: string;
+  subgoalLabel?: string;
 }
 
 export interface LevelScore {
@@ -85,4 +128,5 @@ export interface LevelScore {
 export interface GameProgressState {
   completedLevels: Record<string | number, LevelScore>;
   currentLevelIndex: number;
+  unlockedChapter?: number;
 }

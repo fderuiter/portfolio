@@ -1,26 +1,43 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { LevelScore } from "@/lib/quasi-perfect/types";
+import { LevelScore, PuzzlerLevelDef } from "@/lib/quasi-perfect/types";
+import { IconCheck, IconCopy, IconSparkles } from "@tabler/icons-react";
 
 interface VictoryModalProps {
   score: LevelScore;
+  level: PuzzlerLevelDef;
   totalLevels: number;
   currentLevelIndex: number;
+  leanCode?: string;
   onNextLevel: () => void;
   onRestartLevel: () => void;
 }
 
 export const VictoryModal: React.FC<VictoryModalProps> = ({
   score,
+  level,
   totalLevels,
   currentLevelIndex,
+  leanCode,
   onNextLevel,
   onRestartLevel,
 }) => {
   const isLastLevel = currentLevelIndex >= totalLevels - 1;
   const isSorry = score.usedSorry;
+  const [copied, setCopied] = useState<boolean>(false);
+
+  const handleCopyLean = async () => {
+    if (!leanCode) return;
+    try {
+      await navigator.clipboard.writeText(leanCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback
+    }
+  };
 
   return (
     <motion.div
@@ -37,22 +54,26 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
           </div>
         ) : (
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-bold mb-3">
-            ✔ FORMAL VERIFICATION VERIFIED
+            <IconSparkles className="w-3.5 h-3.5" />
+            <span>Q.E.D. · THEOREM VERIFIED</span>
           </div>
         )}
 
-        <h3 className="text-2xl font-extrabold text-white tracking-tight">
-          {isSorry ? "PROVED VIA SORRY" : "Q.E.D. · Theorem Verified"}
+        <h3 className="text-xl font-extrabold text-white tracking-tight">
+          {isSorry ? "PROVED VIA SORRY" : level.title}
         </h3>
+        <p className="text-[11px] text-zinc-400 font-semibold mt-0.5">
+          Chapter {level.chapter}: {level.chapterTitle}
+        </p>
 
         <p className="mt-2 text-xs text-zinc-400 leading-relaxed">
           {isSorry
-            ? "You bypassed the rigorous proof assistant using the forbidden 'sorry' escape hatch. The theorem is accepted, but your mathematical integrity has been penalized."
-            : "The AST was completely reduced to a closed truth state without exhausting simulated Lean Server RAM."}
+            ? "You bypassed the formal kernel using 'sorry'. The proof is admitted, but your verification morality has been penalized."
+            : "The AST goal was successfully discharged to True without exhausting simulated Lean Server RAM."}
         </p>
 
         {/* Stars Display */}
-        <div className="my-5 flex justify-center items-center gap-3">
+        <div className="my-4 flex justify-center items-center gap-3">
           {[1, 2, 3].map((starIdx) => (
             <span
               key={starIdx}
@@ -68,7 +89,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
         </div>
 
         {/* Score & Memory Breakdown */}
-        <div className="grid grid-cols-2 gap-3 rounded-xl border border-zinc-800 bg-zinc-900/60 p-3 text-xs mb-6">
+        <div className="grid grid-cols-2 gap-3 rounded-xl border border-zinc-800 bg-zinc-900/60 p-3 text-xs mb-4">
           <div className="flex flex-col">
             <span className="text-zinc-500">Remaining RAM</span>
             <span className="font-bold text-brand-cyan text-sm">
@@ -86,6 +107,26 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
             </span>
           </div>
         </div>
+
+        {/* Lean 4 Code Preview Snippet */}
+        {leanCode && !isSorry && (
+          <div className="mb-4 text-left rounded-xl border border-zinc-800 bg-zinc-900/80 p-2.5">
+            <div className="flex items-center justify-between text-[10px] text-zinc-400 mb-1 border-b border-zinc-800 pb-1">
+              <span>Verified Lean 4 Script</span>
+              <button
+                type="button"
+                onClick={handleCopyLean}
+                className="flex items-center gap-1 text-purple-400 hover:text-purple-300 font-bold"
+              >
+                {copied ? <IconCheck className="w-3 h-3 text-emerald-400" /> : <IconCopy className="w-3 h-3" />}
+                <span>{copied ? "Copied!" : "Copy"}</span>
+              </button>
+            </div>
+            <pre className="text-[10px] text-zinc-300 font-mono whitespace-pre overflow-x-auto max-h-24">
+              {leanCode}
+            </pre>
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="flex items-center justify-center gap-3">

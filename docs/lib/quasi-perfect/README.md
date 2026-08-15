@@ -8,15 +8,33 @@
 
 ## References
 
+### areAllSubgoalsClosed
+
+Re-exports [areAllSubgoalsClosed](engine/functions/areAllSubgoalsClosed.md)
+
+***
+
 ### areNodesEqual
 
 Re-exports [areNodesEqual](engine/functions/areNodesEqual.md)
 
 ***
 
+### areRingEquivalent
+
+Re-exports [areRingEquivalent](engine/functions/areRingEquivalent.md)
+
+***
+
 ### ASTNode
 
 Re-exports [ASTNode](types/interfaces/ASTNode.md)
+
+***
+
+### astToPolynomial
+
+Re-exports [astToPolynomial](engine/functions/astToPolynomial.md)
 
 ***
 
@@ -32,9 +50,21 @@ Re-exports [CompilerLogEntry](types/interfaces/CompilerLogEntry.md)
 
 ***
 
+### EducationalConcept
+
+Re-exports [EducationalConcept](types/interfaces/EducationalConcept.md)
+
+***
+
 ### evaluateArithmetic
 
 Re-exports [evaluateArithmetic](engine/functions/evaluateArithmetic.md)
+
+***
+
+### evaluateBooleanExpression
+
+Re-exports [evaluateBooleanExpression](engine/functions/evaluateBooleanExpression.md)
 
 ***
 
@@ -50,6 +80,12 @@ Re-exports [GameProgressState](types/interfaces/GameProgressState.md)
 
 ***
 
+### generateLeanProofScript
+
+Re-exports [generateLeanProofScript](engine/functions/generateLeanProofScript.md)
+
+***
+
 ### isConcreteExpression
 
 Re-exports [isConcreteExpression](engine/functions/isConcreteExpression.md)
@@ -62,9 +98,21 @@ Re-exports [isProofComplete](engine/functions/isProofComplete.md)
 
 ***
 
+### LeanProofStep
+
+Re-exports [LeanProofStep](types/interfaces/LeanProofStep.md)
+
+***
+
 ### LevelScore
 
 Re-exports [LevelScore](types/interfaces/LevelScore.md)
+
+***
+
+### MonomialMap
+
+Re-exports [MonomialMap](engine/type-aliases/MonomialMap.md)
 
 ***
 
@@ -101,6 +149,12 @@ Re-exports [replaceNode](engine/functions/replaceNode.md)
 ### simplifyNode
 
 Re-exports [simplifyNode](engine/functions/simplifyNode.md)
+
+***
+
+### SubGoal
+
+Re-exports [SubGoal](types/interfaces/SubGoal.md)
 
 ***
 

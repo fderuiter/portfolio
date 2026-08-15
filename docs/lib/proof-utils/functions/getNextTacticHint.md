@@ -6,9 +6,9 @@
 
 # Function: getNextTacticHint()
 
-> **getNextTacticHint**(`edges`): [`TacticHint`](../interfaces/TacticHint.md)
+> **getNextTacticHint**(`edges`, `theoremId?`): [`TacticHint`](../interfaces/TacticHint.md)
 
-Defined in: [lib/proof-utils.ts:170](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L170)
+Defined in: [lib/proof-utils.ts:875](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L875)
 
 Returns contextual step-by-step tactic hint for guided proof assistant.
 
@@ -17,6 +17,10 @@ Returns contextual step-by-step tactic hint for guided proof assistant.
 ### edges
 
 [`Edge`](../interfaces/Edge.md)[]
+
+### theoremId?
+
+[`TheoremId`](../type-aliases/TheoremId.md) = `"modus-ponens"`
 
 ## Returns
 

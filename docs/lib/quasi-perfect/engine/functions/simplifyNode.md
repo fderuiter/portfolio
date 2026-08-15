@@ -8,7 +8,7 @@
 
 > **simplifyNode**(`node`): `object`
 
-Defined in: [lib/quasi-perfect/engine.ts:150](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/engine.ts#L150)
+Defined in: [lib/quasi-perfect/engine.ts:228](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/engine.ts#L228)
 
 Recursively simplifies algebraic and arithmetic expressions.
 

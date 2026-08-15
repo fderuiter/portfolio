@@ -6,6 +6,6 @@
 
 # Type Alias: TacticId
 
-> **TacticId** = `"rfl"` \| `"rw"` \| `"simp"` \| `"decide"` \| `"omega"` \| `"linarith"` \| `"intro"` \| `"sorry"`
+> **TacticId** = `"rfl"` \| `"rw"` \| `"simp"` \| `"decide"` \| `"omega"` \| `"linarith"` \| `"intro"` \| `"apply"` \| `"exact"` \| `"cases"` \| `"ring"` \| `"norm_num"` \| `"sorry"`
 
-Defined in: [lib/quasi-perfect/types.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L19)
+Defined in: [lib/quasi-perfect/types.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L22)

@@ -10,9 +10,12 @@
 
 - [ASTNode](interfaces/ASTNode.md)
 - [CompilerLogEntry](interfaces/CompilerLogEntry.md)
+- [EducationalConcept](interfaces/EducationalConcept.md)
 - [GameProgressState](interfaces/GameProgressState.md)
+- [LeanProofStep](interfaces/LeanProofStep.md)
 - [LevelScore](interfaces/LevelScore.md)
 - [PuzzlerLevelDef](interfaces/PuzzlerLevelDef.md)
+- [SubGoal](interfaces/SubGoal.md)
 - [TacticDef](interfaces/TacticDef.md)
 - [TacticResult](interfaces/TacticResult.md)
 

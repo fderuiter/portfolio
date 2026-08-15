@@ -6,7 +6,7 @@
 
 # Interface: TacticDef
 
-Defined in: [lib/quasi-perfect/types.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L44)
+Defined in: [lib/quasi-perfect/types.ts:63](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L63)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/quasi-perfect/types.ts:44](https://github.com/fderuiter/portfol
 
 > **baseRamCost**: `number`
 
-Defined in: [lib/quasi-perfect/types.ts:49](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L49)
+Defined in: [lib/quasi-perfect/types.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L68)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/quasi-perfect/types.ts:49](https://github.com/fderuiter/portfol
 
 > **description**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L48)
+Defined in: [lib/quasi-perfect/types.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L67)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/quasi-perfect/types.ts:48](https://github.com/fderuiter/portfol
 
 > **execute**: [`TacticFunction`](../type-aliases/TacticFunction.md)
 
-Defined in: [lib/quasi-perfect/types.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L52)
+Defined in: [lib/quasi-perfect/types.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L71)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/quasi-perfect/types.ts:52](https://github.com/fderuiter/portfol
 
 > **failureCost**: `number`
 
-Defined in: [lib/quasi-perfect/types.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L50)
+Defined in: [lib/quasi-perfect/types.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L69)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/quasi-perfect/types.ts:50](https://github.com/fderuiter/portfol
 
 > `optional` **hypothesisTarget?**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L51)
+Defined in: [lib/quasi-perfect/types.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L70)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/quasi-perfect/types.ts:51](https://github.com/fderuiter/portfol
 
 > **id**: [`TacticId`](../type-aliases/TacticId.md)
 
-Defined in: [lib/quasi-perfect/types.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L45)
+Defined in: [lib/quasi-perfect/types.ts:64](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L64)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/quasi-perfect/types.ts:45](https://github.com/fderuiter/portfol
 
 > **label**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L47)
+Defined in: [lib/quasi-perfect/types.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L66)
 
 ***
 
@@ -70,4 +70,4 @@ Defined in: [lib/quasi-perfect/types.ts:47](https://github.com/fderuiter/portfol
 
 > **name**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:46](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L46)
+Defined in: [lib/quasi-perfect/types.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L65)

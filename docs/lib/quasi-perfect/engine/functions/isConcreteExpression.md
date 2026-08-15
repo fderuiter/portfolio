@@ -8,7 +8,7 @@
 
 > **isConcreteExpression**(`node`): `boolean`
 
-Defined in: [lib/quasi-perfect/engine.ts:138](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/engine.ts#L138)
+Defined in: [lib/quasi-perfect/engine.ts:170](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/engine.ts#L170)
 
 Checks whether an entire sub-tree contains only constants and operators (no free variables).
 

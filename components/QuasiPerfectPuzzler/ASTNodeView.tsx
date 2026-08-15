@@ -39,17 +39,53 @@ export const ASTNodeView: React.FC<ASTNodeViewProps> = React.memo(
         case "Inequality":
           return "border-cyan-500/40 bg-cyan-950/40 text-cyan-200 shadow-[0_0_15px_-5px_rgba(6,182,212,0.3)]";
 
+        case "Implication":
+        case "Conjunction":
+        case "Disjunction":
+        case "Negation":
+          return "border-purple-500/50 bg-purple-950/40 text-purple-200 shadow-[0_0_15px_-5px_rgba(168,85,247,0.3)]";
+
         case "Operator":
           return "border-amber-500/40 bg-amber-950/40 text-amber-200";
 
         case "Variable":
-          return "border-purple-500/40 bg-purple-950/40 text-purple-200 font-bold";
+          return "border-purple-400/40 bg-purple-950/30 text-purple-100 font-bold";
 
         case "Constant":
           return "border-blue-500/40 bg-blue-950/40 text-blue-200 font-mono";
 
+        case "Function":
+          return "border-emerald-500/40 bg-emerald-950/40 text-emerald-200 font-bold";
+
         default:
           return "border-zinc-700 bg-zinc-900 text-zinc-200";
+      }
+    };
+
+    const getTypePill = () => {
+      switch (node.type) {
+        case "Equality":
+          return "eq";
+        case "Inequality":
+          return "ineq";
+        case "Implication":
+          return "imp";
+        case "Conjunction":
+          return "and";
+        case "Disjunction":
+          return "or";
+        case "Negation":
+          return "not";
+        case "Operator":
+          return "op";
+        case "Variable":
+          return "var";
+        case "Constant":
+          return "const";
+        case "Function":
+          return "fn";
+        default:
+          return node.type.toLowerCase();
       }
     };
 
@@ -87,17 +123,7 @@ export const ASTNodeView: React.FC<ASTNodeViewProps> = React.memo(
         >
           {/* Node Type Pill Indicator */}
           <span className="text-[9px] uppercase tracking-wider opacity-60 font-sans font-semibold">
-            {node.type === "Equality"
-              ? "eq"
-              : node.type === "Inequality"
-              ? "ineq"
-              : node.type === "Operator"
-              ? "op"
-              : node.type === "Variable"
-              ? "var"
-              : node.type === "Constant"
-              ? "const"
-              : node.type.toLowerCase()}
+            {getTypePill()}
           </span>
 
           {/* Node Value */}

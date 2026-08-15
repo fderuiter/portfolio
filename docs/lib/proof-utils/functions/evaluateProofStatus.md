@@ -6,19 +6,21 @@
 
 # Function: evaluateProofStatus()
 
-> **evaluateProofStatus**(`edges`): `object`
+> **evaluateProofStatus**(`edges`, `theoremId?`): `object`
 
-Defined in: [lib/proof-utils.ts:104](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L104)
+Defined in: [lib/proof-utils.ts:732](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L732)
 
 Evaluates the proof logical progress based on current connections/edges.
-Modus Ponens: A (P) and B (P to Q) yields C (Q)
-Modus Ponens: C (Q) and D (Q to R) yields E (R)
 
 ## Parameters
 
 ### edges
 
 [`Edge`](../interfaces/Edge.md)[]
+
+### theoremId?
+
+[`TheoremId`](../type-aliases/TheoremId.md) = `"modus-ponens"`
 
 ## Returns
 

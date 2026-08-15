@@ -22,15 +22,33 @@
 
 ## References
 
+### areAllSubgoalsClosed
+
+Re-exports [areAllSubgoalsClosed](../quasi-perfect/engine/functions/areAllSubgoalsClosed.md)
+
+***
+
 ### areNodesEqual
 
 Re-exports [areNodesEqual](../quasi-perfect/engine/functions/areNodesEqual.md)
 
 ***
 
+### areRingEquivalent
+
+Re-exports [areRingEquivalent](../quasi-perfect/engine/functions/areRingEquivalent.md)
+
+***
+
 ### ASTNode
 
 Re-exports [ASTNode](../quasi-perfect/types/interfaces/ASTNode.md)
+
+***
+
+### astToPolynomial
+
+Re-exports [astToPolynomial](../quasi-perfect/engine/functions/astToPolynomial.md)
 
 ***
 
@@ -46,9 +64,21 @@ Re-exports [CompilerLogEntry](../quasi-perfect/types/interfaces/CompilerLogEntry
 
 ***
 
+### EducationalConcept
+
+Re-exports [EducationalConcept](../quasi-perfect/types/interfaces/EducationalConcept.md)
+
+***
+
 ### evaluateArithmetic
 
 Re-exports [evaluateArithmetic](../quasi-perfect/engine/functions/evaluateArithmetic.md)
+
+***
+
+### evaluateBooleanExpression
+
+Re-exports [evaluateBooleanExpression](../quasi-perfect/engine/functions/evaluateBooleanExpression.md)
 
 ***
 
@@ -64,6 +94,12 @@ Re-exports [GameProgressState](../quasi-perfect/types/interfaces/GameProgressSta
 
 ***
 
+### generateLeanProofScript
+
+Re-exports [generateLeanProofScript](../quasi-perfect/engine/functions/generateLeanProofScript.md)
+
+***
+
 ### isConcreteExpression
 
 Re-exports [isConcreteExpression](../quasi-perfect/engine/functions/isConcreteExpression.md)
@@ -76,9 +112,21 @@ Re-exports [isProofComplete](../quasi-perfect/engine/functions/isProofComplete.m
 
 ***
 
+### LeanProofStep
+
+Re-exports [LeanProofStep](../quasi-perfect/types/interfaces/LeanProofStep.md)
+
+***
+
 ### LevelScore
 
 Re-exports [LevelScore](../quasi-perfect/types/interfaces/LevelScore.md)
+
+***
+
+### MonomialMap
+
+Re-exports [MonomialMap](../quasi-perfect/engine/type-aliases/MonomialMap.md)
 
 ***
 
@@ -115,6 +163,12 @@ Re-exports [replaceNode](../quasi-perfect/engine/functions/replaceNode.md)
 ### simplifyNode
 
 Re-exports [simplifyNode](../quasi-perfect/engine/functions/simplifyNode.md)
+
+***
+
+### SubGoal
+
+Re-exports [SubGoal](../quasi-perfect/types/interfaces/SubGoal.md)
 
 ***
 

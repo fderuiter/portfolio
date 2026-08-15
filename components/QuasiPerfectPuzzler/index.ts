@@ -6,3 +6,7 @@ export * from "./TacticHand";
 export * from "./RAMGauge";
 export * from "./TerminalLog";
 export * from "./VictoryModal";
+export * from "./MultiGoalTabs";
+export * from "./LeanIdeInspector";
+export * from "./HintSystem";
+export * from "./SandboxMode";
