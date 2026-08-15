@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { hexToRgba } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { designManifest } from "@/lib/design-manifest";
