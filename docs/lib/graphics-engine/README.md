@@ -22,6 +22,8 @@
 
 ## Variables
 
+- [cssPropertyCache](variables/cssPropertyCache.md)
+- [fontConfigCache](variables/fontConfigCache.md)
 - [richItemsCache](variables/richItemsCache.md)
 - [richLayoutCache](variables/richLayoutCache.md)
 - [richPrepareCache](variables/richPrepareCache.md)

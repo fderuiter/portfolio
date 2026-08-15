@@ -1,4 +1,5 @@
 import { designManifest } from "@/lib/design-manifest";
+import { cssPropertyCache, fontConfigCache } from "@/lib/graphics-engine";
 
 export const LAYOUT_CONFIG = {
   // Height offsets used for fallback and SSR
@@ -51,20 +52,47 @@ export function resolveThemeFonts(
     };
   }
 
-  const rootStyle = window.getComputedStyle(document.documentElement);
-  
-  const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
-  const resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
+  const cacheKey = `themeFonts|${fontSize}|${fontFamilyVariable}`;
+  const cached = fontConfigCache.get(cacheKey);
+  if (cached) {
+    return cached as ThemeFonts;
+  }
 
-  const rawMonoFamily = rootStyle.getPropertyValue("--font-mono").trim() || rootStyle.getPropertyValue("--font-geist-mono").trim();
-  const resolvedMonoFamily = rawMonoFamily || designManifest.typography.fonts.mono;
+  try {
+    const rootStyle = window.getComputedStyle(document.documentElement);
+    
+    let resolvedFontFamily = cssPropertyCache.get(fontFamilyVariable);
+    if (!resolvedFontFamily) {
+      const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
+      resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
+      cssPropertyCache.set(fontFamilyVariable, resolvedFontFamily);
+    }
 
-  return {
-    baseFont: `400 ${fontSize}px ${resolvedFontFamily}`,
-    boldFont: `700 ${fontSize}px ${resolvedFontFamily}`,
-    italicFont: `italic 400 ${fontSize}px ${resolvedFontFamily}`,
-    codeFont: `500 ${fontSize - 1}px ${resolvedMonoFamily}`,
-  };
+    let resolvedMonoFamily = cssPropertyCache.get("--font-mono");
+    if (!resolvedMonoFamily) {
+      const rawMonoFamily = rootStyle.getPropertyValue("--font-mono").trim() || rootStyle.getPropertyValue("--font-geist-mono").trim();
+      resolvedMonoFamily = rawMonoFamily || designManifest.typography.fonts.mono;
+      cssPropertyCache.set("--font-mono", resolvedMonoFamily);
+    }
+
+    const result = {
+      baseFont: `400 ${fontSize}px ${resolvedFontFamily}`,
+      boldFont: `700 ${fontSize}px ${resolvedFontFamily}`,
+      italicFont: `italic 400 ${fontSize}px ${resolvedFontFamily}`,
+      codeFont: `500 ${fontSize - 1}px ${resolvedMonoFamily}`,
+    };
+    fontConfigCache.set(cacheKey, result);
+    return result;
+  } catch {
+    const fallbackSans = designManifest.typography.fonts.sans;
+    const fallbackMono = designManifest.typography.fonts.mono;
+    return {
+      baseFont: `400 ${fontSize}px ${fallbackSans}`,
+      boldFont: `700 ${fontSize}px ${fallbackSans}`,
+      italicFont: `italic 400 ${fontSize}px ${fallbackSans}`,
+      codeFont: `500 ${fontSize - 1}px ${fallbackMono}`,
+    };
+  }
 }
 
 export function resolveSingleThemeFont(
@@ -76,9 +104,27 @@ export function resolveSingleThemeFont(
     return `${fontSize}px ${fallbackSans}`;
   }
 
-  const rootStyle = window.getComputedStyle(document.documentElement);
-  const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
-  const resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
+  const cacheKey = `singleThemeFont|${fontSize}|${fontFamilyVariable}`;
+  const cached = fontConfigCache.get(cacheKey);
+  if (cached) {
+    return cached as string;
+  }
 
-  return `${fontSize}px ${resolvedFontFamily}`;
+  try {
+    const rootStyle = window.getComputedStyle(document.documentElement);
+    
+    let resolvedFontFamily = cssPropertyCache.get(fontFamilyVariable);
+    if (!resolvedFontFamily) {
+      const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
+      resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
+      cssPropertyCache.set(fontFamilyVariable, resolvedFontFamily);
+    }
+
+    const result = `${fontSize}px ${resolvedFontFamily}`;
+    fontConfigCache.set(cacheKey, result);
+    return result;
+  } catch {
+    const fallbackSans = designManifest.typography.fonts.sans;
+    return `${fontSize}px ${fallbackSans}`;
+  }
 }
