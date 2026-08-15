@@ -2,6 +2,7 @@
  * Audio helpers for retro chiptune SFX and procedural synth BGM in Clinical Trial Chaos.
  * Uses Web Audio oscillator synthesis with graceful degradation and zero external assets.
  */
+import { clamp } from "../game-utils";
 
 let globalAudioCtx: AudioContext | null = null;
 let bgmTimer: NodeJS.Timeout | number | null = null;
@@ -158,7 +159,7 @@ export function startProceduralBGM(initialTempoMs = 280) {
  */
 export function updateBGMTempo(suspicion: number) {
   // Scales from 280ms (relaxed) down to 160ms (intense frenzy)
-  const clampedSusp = Math.max(0, Math.min(100, suspicion));
+  const clampedSusp = clamp(suspicion, 0, 100);
   bgmTempoMs = Math.round(280 - (clampedSusp / 100) * 120);
 }
 

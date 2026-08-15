@@ -8,7 +8,7 @@
 
 > **getIndex**(`x`, `y`, `z`, `size?`): `number`
 
-Defined in: [lib/neuro/volume-generator.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L24)
+Defined in: [lib/neuro/volume-generator.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L25)
 
 Get 1D flat index from 3D coordinates (x, y, z)
 

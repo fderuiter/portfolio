@@ -6,7 +6,7 @@
 
 # Interface: IndoorPuddle
 
-Defined in: [lib/working-with-duck-engine.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L68)
+Defined in: [lib/working-with-duck-engine.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L69)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/working-with-duck-engine.ts:68](https://github.com/fderuiter/po
 
 > **id**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L69)
+Defined in: [lib/working-with-duck-engine.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L70)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/working-with-duck-engine.ts:69](https://github.com/fderuiter/po
 
 > **mopProgress**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L73)
+Defined in: [lib/working-with-duck-engine.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L74)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/working-with-duck-engine.ts:73](https://github.com/fderuiter/po
 
 > **radius**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L72)
+Defined in: [lib/working-with-duck-engine.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L73)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/working-with-duck-engine.ts:72](https://github.com/fderuiter/po
 
 > **x**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L70)
+Defined in: [lib/working-with-duck-engine.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L71)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [lib/working-with-duck-engine.ts:70](https://github.com/fderuiter/po
 
 > **y**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L71)
+Defined in: [lib/working-with-duck-engine.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L72)

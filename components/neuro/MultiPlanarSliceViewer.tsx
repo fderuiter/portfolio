@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
+import { clamp } from "@/lib/game-utils";
 import { ControlPoint, SlicePlane, ToolMode, VoxelCoord, VoxelEdit } from "@/lib/neuro/types";
 import { extractSlice, SyntheticVolume, VOLUME_SIZE } from "@/lib/neuro/volume-generator";
 import { IconLayersSubtract } from "@tabler/icons-react";
@@ -276,17 +277,17 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
     const clickX = Math.floor((e.clientX - rect.left) * scaleX);
     const clickY = Math.floor((e.clientY - rect.top) * scaleY);
 
-    const clampedX = Math.max(0, Math.min(VOLUME_SIZE - 1, clickX));
-    const clampedY = Math.max(0, Math.min(VOLUME_SIZE - 1, clickY));
+    const clampedX = clamp(clickX, 0, VOLUME_SIZE - 1);
+    const clampedY = clamp(clickY, 0, VOLUME_SIZE - 1);
 
     if (plane === "axial") {
       return { x: clampedX, y: clampedY, z: crosshair.z };
     } else if (plane === "coronal") {
       const z = VOLUME_SIZE - 1 - clampedY;
-      return { x: clampedX, y: crosshair.y, z: Math.max(0, Math.min(VOLUME_SIZE - 1, z)) };
+      return { x: clampedX, y: crosshair.y, z: clamp(z, 0, VOLUME_SIZE - 1) };
     } else {
       const z = VOLUME_SIZE - 1 - clampedY;
-      return { x: crosshair.x, y: clampedX, z: Math.max(0, Math.min(VOLUME_SIZE - 1, z)) };
+      return { x: crosshair.x, y: clampedX, z: clamp(z, 0, VOLUME_SIZE - 1) };
     }
   };
 
@@ -359,17 +360,17 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
     const touchX = Math.floor((touch.clientX - rect.left) * scaleX);
     const touchY = Math.floor((touch.clientY - rect.top) * scaleY);
 
-    const clampedX = Math.max(0, Math.min(VOLUME_SIZE - 1, touchX));
-    const clampedY = Math.max(0, Math.min(VOLUME_SIZE - 1, touchY));
+    const clampedX = clamp(touchX, 0, VOLUME_SIZE - 1);
+    const clampedY = clamp(touchY, 0, VOLUME_SIZE - 1);
 
     if (plane === "axial") {
       return { x: clampedX, y: clampedY, z: crosshair.z };
     } else if (plane === "coronal") {
       const z = VOLUME_SIZE - 1 - clampedY;
-      return { x: clampedX, y: crosshair.y, z: Math.max(0, Math.min(VOLUME_SIZE - 1, z)) };
+      return { x: clampedX, y: crosshair.y, z: clamp(z, 0, VOLUME_SIZE - 1) };
     } else {
       const z = VOLUME_SIZE - 1 - clampedY;
-      return { x: crosshair.x, y: clampedX, z: Math.max(0, Math.min(VOLUME_SIZE - 1, z)) };
+      return { x: crosshair.x, y: clampedX, z: clamp(z, 0, VOLUME_SIZE - 1) };
     }
   };
 
@@ -445,13 +446,13 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
     e.preventDefault();
     const delta = e.deltaY > 0 ? -1 : 1;
     if (plane === "axial") {
-      const nextZ = Math.max(0, Math.min(VOLUME_SIZE - 1, crosshair.z + delta));
+      const nextZ = clamp(crosshair.z + delta, 0, VOLUME_SIZE - 1);
       onCrosshairChange({ ...crosshair, z: nextZ });
     } else if (plane === "coronal") {
-      const nextY = Math.max(0, Math.min(VOLUME_SIZE - 1, crosshair.y + delta));
+      const nextY = clamp(crosshair.y + delta, 0, VOLUME_SIZE - 1);
       onCrosshairChange({ ...crosshair, y: nextY });
     } else {
-      const nextX = Math.max(0, Math.min(VOLUME_SIZE - 1, crosshair.x + delta));
+      const nextX = clamp(crosshair.x + delta, 0, VOLUME_SIZE - 1);
       onCrosshairChange({ ...crosshair, x: nextX });
     }
   };

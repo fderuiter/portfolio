@@ -6,7 +6,7 @@
 
 # Interface: SyntheticVolume
 
-Defined in: [lib/neuro/volume-generator.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L9)
+Defined in: [lib/neuro/volume-generator.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L10)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/neuro/volume-generator.ts:9](https://github.com/fderuiter/portf
 
 > **brainmask**: `Uint8Array`
 
-Defined in: [lib/neuro/volume-generator.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L12)
+Defined in: [lib/neuro/volume-generator.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L13)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/neuro/volume-generator.ts:12](https://github.com/fderuiter/port
 
 > **defectRegion**: `object`
 
-Defined in: [lib/neuro/volume-generator.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L16)
+Defined in: [lib/neuro/volume-generator.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L17)
 
 #### max
 
@@ -38,7 +38,7 @@ Defined in: [lib/neuro/volume-generator.ts:16](https://github.com/fderuiter/port
 
 > **dimensions**: `object`
 
-Defined in: [lib/neuro/volume-generator.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L10)
+Defined in: [lib/neuro/volume-generator.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L11)
 
 #### depth
 
@@ -58,7 +58,7 @@ Defined in: [lib/neuro/volume-generator.ts:10](https://github.com/fderuiter/port
 
 > **labels**: `Uint8Array`
 
-Defined in: [lib/neuro/volume-generator.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L14)
+Defined in: [lib/neuro/volume-generator.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L15)
 
 ***
 
@@ -66,7 +66,7 @@ Defined in: [lib/neuro/volume-generator.ts:14](https://github.com/fderuiter/port
 
 > **rawT1**: `Uint8Array`
 
-Defined in: [lib/neuro/volume-generator.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L11)
+Defined in: [lib/neuro/volume-generator.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L12)
 
 ***
 
@@ -74,7 +74,7 @@ Defined in: [lib/neuro/volume-generator.ts:11](https://github.com/fderuiter/port
 
 > **scenarioId**: [`ScenarioId`](../../types/type-aliases/ScenarioId.md)
 
-Defined in: [lib/neuro/volume-generator.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L15)
+Defined in: [lib/neuro/volume-generator.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L16)
 
 ***
 
@@ -82,4 +82,4 @@ Defined in: [lib/neuro/volume-generator.ts:15](https://github.com/fderuiter/port
 
 > **wmMask**: `Uint8Array`
 
-Defined in: [lib/neuro/volume-generator.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L13)
+Defined in: [lib/neuro/volume-generator.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L14)

@@ -8,7 +8,7 @@
 
 > **playAuditErrorBuzz**(): `void`
 
-Defined in: [lib/clinical-trial-chaos/sound-effects.ts:86](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L86)
+Defined in: [lib/clinical-trial-chaos/sound-effects.ts:87](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L87)
 
 Sound: Error / Query Rejection (buzzing low tone)
 

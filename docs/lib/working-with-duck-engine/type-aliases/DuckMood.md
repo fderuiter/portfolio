@@ -8,4 +8,4 @@
 
 > **DuckMood** = `"happy"` \| `"thirsty"` \| `"hungry"` \| `"potty"` \| `"playful"` \| `"sleepy"` \| `"muddy"` \| `"zoomies"`
 
-Defined in: [lib/working-with-duck-engine.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L40)
+Defined in: [lib/working-with-duck-engine.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L41)

@@ -8,7 +8,7 @@
 
 > **playChoiceIncorrectSound**(): `void`
 
-Defined in: [lib/clinical-trial-chaos/sound-effects.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L73)
+Defined in: [lib/clinical-trial-chaos/sound-effects.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L74)
 
 Sound: Incorrect multi-choice option chosen (low blunt double-tap)
 

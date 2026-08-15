@@ -8,4 +8,4 @@
 
 > `const` **CANVAS\_HEIGHT**: `500` = `500`
 
-Defined in: [lib/working-with-duck-engine.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L7)
+Defined in: [lib/working-with-duck-engine.ts:8](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L8)

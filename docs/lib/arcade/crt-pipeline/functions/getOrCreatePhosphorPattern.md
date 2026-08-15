@@ -8,7 +8,7 @@
 
 > **getOrCreatePhosphorPattern**(`type`, `themeColor?`): `HTMLCanvasElement` \| `null`
 
-Defined in: [lib/arcade/crt-pipeline.ts:235](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L235)
+Defined in: [lib/arcade/crt-pipeline.ts:236](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L236)
 
 Generates an offscreen pattern canvas representing a microscopic CRT phosphor triad or grille.
 

@@ -8,7 +8,7 @@
 
 > **enterBathtub**(`state`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:1641](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1641)
+Defined in: [lib/working-with-duck-engine.ts:1642](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1642)
 
 Bathtub Washroom Mini-Game Transitions & Logic
 

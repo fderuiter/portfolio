@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { clamp } from "@/lib/game-utils";
 import {
   IconTerminal,
   IconCornerDownLeft,
@@ -159,7 +160,7 @@ export default function SchemaFlowWorkspace() {
         tick += 1;
         // Fluctuating RAM simulating real solver calculation cycles
         const noise = Math.sin(tick * 0.4) * 8 + Math.cos(tick * 0.15) * 4;
-        const newPercent = Math.min(98.4, Math.max(30.2, baseVal + noise + (tick % 7 === 0 ? 10 : 0) - (tick % 11 === 0 ? 8 : 0)));
+        const newPercent = clamp(baseVal + noise + (tick % 7 === 0 ? 10 : 0) - (tick % 11 === 0 ? 8 : 0), 30.2, 98.4);
         setRamPercent(newPercent);
       }, 80); // ~12 updates per second
     } else {

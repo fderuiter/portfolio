@@ -8,7 +8,7 @@
 
 > **throwParkBall**(`state`, `powerX`, `powerY`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:2295](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2295)
+Defined in: [lib/working-with-duck-engine.ts:2296](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2296)
 
 ## Parameters
 

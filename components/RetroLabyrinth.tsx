@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, useSyncExternalStore } from "react";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { clamp } from "@/lib/game-utils";
 import { useAudio } from "@/components/providers/AudioProvider";
 import {
   IconTrophy,
@@ -228,7 +229,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
       } else {
         const campaign = generateRoguelikeCampaign();
         setCampaignRooms(campaign);
-        const idx = Math.max(0, Math.min(campaign.length - 1, targetStageOrIndex));
+        const idx = clamp(targetStageOrIndex, 0, campaign.length - 1);
         setRoomIndex(idx);
         const currentRoom = campaign[idx];
         setStage(idx + 1);

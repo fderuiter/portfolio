@@ -6,7 +6,7 @@
 
 # Interface: BathtubState
 
-Defined in: [lib/working-with-duck-engine.ts:365](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L365)
+Defined in: [lib/working-with-duck-engine.ts:366](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L366)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/working-with-duck-engine.ts:365](https://github.com/fderuiter/p
 
 > **bubbles**: `object`[]
 
-Defined in: [lib/working-with-duck-engine.ts:370](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L370)
+Defined in: [lib/working-with-duck-engine.ts:371](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L371)
 
 #### alpha
 
@@ -42,7 +42,7 @@ Defined in: [lib/working-with-duck-engine.ts:370](https://github.com/fderuiter/p
 
 > **rinseLevel**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:368](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L368)
+Defined in: [lib/working-with-duck-engine.ts:369](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L369)
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: [lib/working-with-duck-engine.ts:368](https://github.com/fderuiter/p
 
 > **scrubCount**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:369](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L369)
+Defined in: [lib/working-with-duck-engine.ts:370](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L370)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: [lib/working-with-duck-engine.ts:369](https://github.com/fderuiter/p
 
 > **soapLather**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:367](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L367)
+Defined in: [lib/working-with-duck-engine.ts:368](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L368)
 
 ***
 
@@ -66,4 +66,4 @@ Defined in: [lib/working-with-duck-engine.ts:367](https://github.com/fderuiter/p
 
 > **status**: `"idle"` \| `"soap"` \| `"scrub"` \| `"rinse"` \| `"clean"`
 
-Defined in: [lib/working-with-duck-engine.ts:366](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L366)
+Defined in: [lib/working-with-duck-engine.ts:367](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L367)

@@ -8,7 +8,7 @@
 
 > **createInitialAuditorState**(): [`AuditorState`](../../types/interfaces/AuditorState.md)
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L33)
+Defined in: [lib/clinical-trial-chaos/engine.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L34)
 
 ## Returns
 

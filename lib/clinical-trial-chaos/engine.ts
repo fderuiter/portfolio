@@ -1,3 +1,4 @@
+import { clamp } from "../game-utils";
 import {
   AuditLogEntry,
   AuditorState,
@@ -280,7 +281,7 @@ export function tickAuditor(
     nextSuspicion += (unresolvedBacklogCount - 4) * 0.8 * deltaSeconds;
   }
 
-  nextSuspicion = Math.max(0, Math.min(100, nextSuspicion));
+  nextSuspicion = clamp(nextSuspicion, 0, 100);
 
   if (nextSuspicion >= 100) {
     behavior = "issuing_483";

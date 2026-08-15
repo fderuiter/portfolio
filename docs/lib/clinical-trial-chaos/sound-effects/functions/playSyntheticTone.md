@@ -8,7 +8,7 @@
 
 > **playSyntheticTone**(`frequency`, `durationSeconds`, `type?`, `gainLevel?`): `void`
 
-Defined in: [lib/clinical-trial-chaos/sound-effects.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L35)
+Defined in: [lib/clinical-trial-chaos/sound-effects.ts:36](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L36)
 
 Play a short custom synthetic beep/tone.
 

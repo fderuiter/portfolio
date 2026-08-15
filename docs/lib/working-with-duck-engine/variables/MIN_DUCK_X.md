@@ -8,4 +8,4 @@
 
 > `const` **MIN\_DUCK\_X**: `40` = `40`
 
-Defined in: [lib/working-with-duck-engine.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L9)
+Defined in: [lib/working-with-duck-engine.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L10)

@@ -3,6 +3,7 @@
  * Handles physics, memory allocation lifecycle, GC mechanics,
  * thermal overheating, crash reports, and 16-color pixel canvas rendering.
  */
+import { clamp } from "./game-utils";
 
 export type DeviceTarget = "fenix" | "forerunner" | "edge";
 export type VariableType = "int" | "float" | "string" | "array";
@@ -321,7 +322,7 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
     return state;
   }
 
-  const safeDelta = Number.isFinite(deltaMs) ? Math.max(0, Math.min(5000, deltaMs)) : 0;
+  const safeDelta = Number.isFinite(deltaMs) ? clamp(deltaMs, 0, 5000) : 0;
 
   // Handle GC Freeze
   if (state.isGcActive) {
@@ -385,7 +386,7 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
   const nextDistance = state.distanceMeters + 0.25 * dtRatio;
   const nextScore = state.score + Math.round(1 * dtRatio);
   const nextHighScore = Math.max(state.highScore, nextScore);
-  const nextHeartRate = Math.min(188, Math.max(120, 130 + Math.floor(nextScore * 0.05)));
+  const nextHeartRate = clamp(130 + Math.floor(nextScore * 0.05), 120, 188);
 
   // 4. Memory Allocations (Automatic dynamic memory pressure)
   let updatedState: GameEngineState = {

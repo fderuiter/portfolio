@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { clamp } from "@/lib/game-utils";
 import * as THREE from "three";
 import { AnatomicalParcel, HemisphereFilter, SurfaceMode, VoxelCoord } from "@/lib/neuro/types";
 import { createCorticalSurfaceMesh, getAnatomicalParcelAtCoordinate } from "@/lib/neuro/mesh-generator";
@@ -292,9 +293,9 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
         const vy = Math.round(48 + (result.localPoint.y / 1.85) * 48);
         const vz = Math.round(48 + (result.localPoint.z / 1.45) * 48);
         onCrosshairChange({
-          x: Math.max(0, Math.min(95, vx)),
-          y: Math.max(0, Math.min(95, vy)),
-          z: Math.max(0, Math.min(95, vz)),
+          x: clamp(vx, 0, 95),
+          y: clamp(vy, 0, 95),
+          z: clamp(vz, 0, 95),
         });
       }
     }
@@ -331,9 +332,9 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
           const vy = Math.round(48 + (result.localPoint.y / 1.85) * 48);
           const vz = Math.round(48 + (result.localPoint.z / 1.45) * 48);
           onCrosshairChange({
-            x: Math.max(0, Math.min(95, vx)),
-            y: Math.max(0, Math.min(95, vy)),
-            z: Math.max(0, Math.min(95, vz)),
+            x: clamp(vx, 0, 95),
+            y: clamp(vy, 0, 95),
+            z: clamp(vz, 0, 95),
           });
         }
       }

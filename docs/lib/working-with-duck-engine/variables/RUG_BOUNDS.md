@@ -8,7 +8,7 @@
 
 > `const` **RUG\_BOUNDS**: `object`
 
-Defined in: [lib/working-with-duck-engine.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L15)
+Defined in: [lib/working-with-duck-engine.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L16)
 
 ## Type Declaration
 
