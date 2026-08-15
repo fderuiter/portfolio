@@ -1368,9 +1368,9 @@ export const WorkingWithDuck: React.FC = () => {
   const [isWardrobeOpen, setIsWardrobeOpen] = useState(false);
   const [activeScrapbookIndex, setActiveScrapbookIndex] = useState(0);
   const [scrapbookViewMode, setScrapbookViewMode] = useState<"photo" | "vector">("photo");
-  const [isDraggingDuckState, setIsDraggingDuckState] = useState(false);
-  const [isThrowingParkBall, setIsThrowingParkBall] = useState(false);
-  const [aimParkStart, setAimParkStart] = useState<{ x: number; y: number } | null>(null);
+  const isDraggingDuckStateRef = useRef(false);
+  const isThrowingParkBallRef = useRef(false);
+  const aimParkStartRef = useRef<{ x: number; y: number } | null>(null);
   const [isMusicMuted, setIsMusicMuted] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -1450,6 +1450,11 @@ export const WorkingWithDuck: React.FC = () => {
     [muted, playNote]
   );
 
+  const playSoundCueRef = useRef(playSoundCue);
+  useEffect(() => {
+    playSoundCueRef.current = playSoundCue;
+  }, [playSoundCue]);
+
   // Procedural Lo-Fi Background Music Loop
   useEffect(() => {
     if (muted || isMusicMuted || uiState.status !== "running") return;
@@ -1528,7 +1533,7 @@ export const WorkingWithDuck: React.FC = () => {
 
         // Process sound cue queue
         if (nextState.soundCueQueue.length > 0) {
-          nextState.soundCueQueue.forEach((cue) => playSoundCue(cue));
+          nextState.soundCueQueue.forEach((cue) => playSoundCueRef.current(cue));
           gameStateRef.current.soundCueQueue = [];
         }
 
@@ -1542,7 +1547,7 @@ export const WorkingWithDuck: React.FC = () => {
       if (canvas) {
         const ctx = canvas.getContext("2d");
         if (ctx) {
-          drawCanvas(ctx, gameStateRef.current, aimParkStart);
+          drawCanvas(ctx, gameStateRef.current, aimParkStartRef.current);
         }
       }
 
@@ -1561,7 +1566,7 @@ export const WorkingWithDuck: React.FC = () => {
         cancelAnimationFrame(animFrameIdRef.current);
       }
     };
-  }, [playSoundCue, aimParkStart]);
+  }, []);
 
   // Keyboard Shortcuts (1-4 for hotbar items, Q-W-E-R for tricks, Space for coding/jumping)
   useEffect(() => {
@@ -1635,18 +1640,18 @@ export const WorkingWithDuck: React.FC = () => {
   useEffect(() => {
     const handleGlobalPointerUp = () => {
       const state = gameStateRef.current;
-      if (state.inDogPark && isThrowingParkBall && aimParkStart) {
-        setIsThrowingParkBall(false);
-        const powerX = (aimParkStart.x - 90) * 0.08;
-        const powerY = (aimParkStart.y - 250) * 0.06;
+      if (state.inDogPark && isThrowingParkBallRef.current && aimParkStartRef.current) {
+        isThrowingParkBallRef.current = false;
+        const powerX = (aimParkStartRef.current.x - 90) * 0.08;
+        const powerY = (aimParkStartRef.current.y - 250) * 0.06;
         gameStateRef.current = throwParkBall(state, powerX, powerY);
-        setAimParkStart(null);
+        aimParkStartRef.current = null;
         setUiState({ ...gameStateRef.current });
         return;
       }
 
-      if (isDraggingDuckState) {
-        setIsDraggingDuckState(false);
+      if (isDraggingDuckStateRef.current) {
+        isDraggingDuckStateRef.current = false;
         gameStateRef.current = releaseDuck(state);
         setUiState({ ...gameStateRef.current });
       }
@@ -1658,7 +1663,7 @@ export const WorkingWithDuck: React.FC = () => {
       window.removeEventListener("mouseup", handleGlobalPointerUp);
       window.removeEventListener("touchend", handleGlobalPointerUp);
     };
-  }, [isThrowingParkBall, aimParkStart, isDraggingDuckState]);
+  }, []);
 
   // Canvas Mouse Interactions
   const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -1680,8 +1685,8 @@ export const WorkingWithDuck: React.FC = () => {
     // Dog Park Aiming & Throwing
     if (state.inDogPark) {
       if (state.parkState.status === "aim") {
-        setAimParkStart({ x, y });
-        setIsThrowingParkBall(true);
+        aimParkStartRef.current = { x, y };
+        isThrowingParkBallRef.current = true;
       }
       return;
     }
@@ -1810,7 +1815,7 @@ export const WorkingWithDuck: React.FC = () => {
         return;
       }
       gameStateRef.current = startDraggingDuck(state);
-      setIsDraggingDuckState(true);
+      isDraggingDuckStateRef.current = true;
       return;
     }
 
@@ -1845,8 +1850,8 @@ export const WorkingWithDuck: React.FC = () => {
 
     // Dog Park Mouse Steering during retrieval
     if (state.inDogPark) {
-      if (isThrowingParkBall) {
-        setAimParkStart({ x, y });
+      if (isThrowingParkBallRef.current) {
+        aimParkStartRef.current = { x, y };
       } else if (state.parkState.status === "retrieving") {
         gameStateRef.current = steerParkDuck(state, y);
       }
@@ -1854,7 +1859,7 @@ export const WorkingWithDuck: React.FC = () => {
     }
 
     // Dragging Duck
-    if (isDraggingDuckState) {
+    if (isDraggingDuckStateRef.current) {
       gameStateRef.current = dragDuckTo(state, x, y);
       return;
     }
@@ -1884,18 +1889,18 @@ export const WorkingWithDuck: React.FC = () => {
   const handleCanvasMouseUp = () => {
     const state = gameStateRef.current;
 
-    if (state.inDogPark && isThrowingParkBall && aimParkStart) {
-      setIsThrowingParkBall(false);
-      const powerX = (aimParkStart.x - 90) * 0.08;
-      const powerY = (aimParkStart.y - 250) * 0.06;
+    if (state.inDogPark && isThrowingParkBallRef.current && aimParkStartRef.current) {
+      isThrowingParkBallRef.current = false;
+      const powerX = (aimParkStartRef.current.x - 90) * 0.08;
+      const powerY = (aimParkStartRef.current.y - 250) * 0.06;
       gameStateRef.current = throwParkBall(state, powerX, powerY);
-      setAimParkStart(null);
+      aimParkStartRef.current = null;
       setUiState({ ...gameStateRef.current });
       return;
     }
 
-    if (isDraggingDuckState) {
-      setIsDraggingDuckState(false);
+    if (isDraggingDuckStateRef.current) {
+      isDraggingDuckStateRef.current = false;
       gameStateRef.current = releaseDuck(state);
       setUiState({ ...gameStateRef.current });
     }
