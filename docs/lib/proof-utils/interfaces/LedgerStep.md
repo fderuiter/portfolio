@@ -6,7 +6,7 @@
 
 # Interface: LedgerStep
 
-Defined in: [lib/proof-utils.ts:36](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L36)
+Defined in: [lib/proof-utils.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L52)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/proof-utils.ts:36](https://github.com/fderuiter/portfolio/blob/
 
 > **formula**: `string`
 
-Defined in: [lib/proof-utils.ts:38](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L38)
+Defined in: [lib/proof-utils.ts:54](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L54)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/proof-utils.ts:38](https://github.com/fderuiter/portfolio/blob/
 
 > **isProven**: `boolean`
 
-Defined in: [lib/proof-utils.ts:42](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L42)
+Defined in: [lib/proof-utils.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L58)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/proof-utils.ts:42](https://github.com/fderuiter/portfolio/blob/
 
 > **plainEnglish**: `string`
 
-Defined in: [lib/proof-utils.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L41)
+Defined in: [lib/proof-utils.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L57)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/proof-utils.ts:41](https://github.com/fderuiter/portfolio/blob/
 
 > **premises**: `string`
 
-Defined in: [lib/proof-utils.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L40)
+Defined in: [lib/proof-utils.ts:56](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L56)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/proof-utils.ts:40](https://github.com/fderuiter/portfolio/blob/
 
 > **rule**: `string`
 
-Defined in: [lib/proof-utils.ts:39](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L39)
+Defined in: [lib/proof-utils.ts:55](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L55)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [lib/proof-utils.ts:39](https://github.com/fderuiter/portfolio/blob/
 
 > **stepNumber**: `number`
 
-Defined in: [lib/proof-utils.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L37)
+Defined in: [lib/proof-utils.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L53)

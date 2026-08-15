@@ -5,11 +5,20 @@ import { IconBulb, IconChevronRight, IconLock, IconSparkles } from "@tabler/icon
 
 interface HintSystemProps {
   hints: [string, string, string];
+  onTierChange?: (tier: number) => void;
   onClose?: () => void;
 }
 
-export const HintSystem: React.FC<HintSystemProps> = ({ hints }) => {
+export const HintSystem: React.FC<HintSystemProps> = ({ hints, onTierChange }) => {
   const [unlockedTier, setUnlockedTier] = useState<number>(1);
+
+  const handleUnlockNext = () => {
+    setUnlockedTier((prev) => {
+      const nextTier = prev + 1;
+      onTierChange?.(nextTier);
+      return nextTier;
+    });
+  };
 
   const tierLabels = [
     { tier: 1, title: "Tier 1 · Strategy Clue", color: "text-brand-cyan" },
@@ -55,7 +64,7 @@ export const HintSystem: React.FC<HintSystemProps> = ({ hints }) => {
                 {!isUnlocked && idx === unlockedTier && (
                   <button
                     type="button"
-                    onClick={() => setUnlockedTier((prev) => prev + 1)}
+                    onClick={handleUnlockNext}
                     className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition-all"
                   >
                     <span>Reveal Next Hint</span>

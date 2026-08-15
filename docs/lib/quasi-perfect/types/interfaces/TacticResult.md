@@ -6,7 +6,7 @@
 
 # Interface: TacticResult
 
-Defined in: [lib/quasi-perfect/types.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L45)
+Defined in: [lib/quasi-perfect/types.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L51)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/quasi-perfect/types.ts:45](https://github.com/fderuiter/portfol
 
 > `optional` **isProofComplete?**: `boolean`
 
-Defined in: [lib/quasi-perfect/types.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L52)
+Defined in: [lib/quasi-perfect/types.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L58)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/quasi-perfect/types.ts:52](https://github.com/fderuiter/portfol
 
 > `optional` **leanProofStep?**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L53)
+Defined in: [lib/quasi-perfect/types.ts:59](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L59)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/quasi-perfect/types.ts:53](https://github.com/fderuiter/portfol
 
 > **message**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L51)
+Defined in: [lib/quasi-perfect/types.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L57)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/quasi-perfect/types.ts:51](https://github.com/fderuiter/portfol
 
 > `optional` **newAST?**: [`ASTNode`](ASTNode.md)
 
-Defined in: [lib/quasi-perfect/types.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L47)
+Defined in: [lib/quasi-perfect/types.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L53)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/quasi-perfect/types.ts:47](https://github.com/fderuiter/portfol
 
 > `optional` **newHypotheses?**: [`ASTNode`](ASTNode.md)[]
 
-Defined in: [lib/quasi-perfect/types.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L48)
+Defined in: [lib/quasi-perfect/types.ts:54](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L54)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/quasi-perfect/types.ts:48](https://github.com/fderuiter/portfol
 
 > `optional` **newSubGoals?**: [`SubGoal`](SubGoal.md)[]
 
-Defined in: [lib/quasi-perfect/types.ts:49](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L49)
+Defined in: [lib/quasi-perfect/types.ts:55](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L55)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/quasi-perfect/types.ts:49](https://github.com/fderuiter/portfol
 
 > **ramConsumed**: `number`
 
-Defined in: [lib/quasi-perfect/types.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L50)
+Defined in: [lib/quasi-perfect/types.ts:56](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L56)
 
 ***
 
@@ -70,4 +70,4 @@ Defined in: [lib/quasi-perfect/types.ts:50](https://github.com/fderuiter/portfol
 
 > **success**: `boolean`
 
-Defined in: [lib/quasi-perfect/types.ts:46](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L46)
+Defined in: [lib/quasi-perfect/types.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L52)

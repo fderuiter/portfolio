@@ -25,7 +25,7 @@ describe("Integrated Command Console Split-View Accessibility & Interactive Cont
   });
 
   it("should offer inline auto-completion suggestions for valid logic operations", () => {
-    expect(content).toContain("getSuggestion(consoleInput)");
+    expect(content).toContain("getSuggestion(consoleInput");
     expect(content).toContain("suggestion.substring(consoleInput.length)");
     expect(content).toContain('e.key === "Tab"');
   });

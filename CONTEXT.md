@@ -1,49 +1,54 @@
-# Portfolio Database & Migration Management
+# Portfolio Domain Context & Glossary
 
-The schema migration, database baseline, and runtime connection topology for the serverless portfolio application.
+## Logical Proof Workspace
 
-## Language
+### Deductive Inference Rules
+Formal inference rules used to derive logical steps from valid premises:
+- **Modus Ponens (MP)**: Given $P$ and $P \to Q$, derives $Q$.
+- **Modus Tollens (MT)**: Given $P \to Q$ and $\neg Q$, derives $\neg P$.
+- **Hypothetical Syllogism (HS)**: Given $P \to Q$ and $Q \to R$, derives $P \to R$.
+- **Disjunctive Syllogism (DS)**: Given $P \lor Q$ and $\neg P$, derives $Q$ (or given $P \lor Q$ and $\neg Q$, derives $P$).
+- **Clausal Resolution (Res)**: Given $(A \lor B)$ and $(\neg A \lor C)$, cancels complementary literals to derive the resolvent $(B \lor C)$.
+- **Conjunction Introduction / Elimination ($\land$-Intro / $\land$-Elim)**: From $P$ and $Q$ derive $P \land Q$; from $P \land Q$ derive $P$ or $Q$.
+- **De Morgan's Laws**: $\neg(P \land Q) \iff (\neg P \lor \neg Q)$ and $\neg(P \lor Q) \iff (\neg P \land \neg Q)$.
+- **Reductio Ad Absurdum / Contradiction (RAA)**: Assuming $P$ leading to $\bot$ (contradiction) derives $\neg P$.
 
-**Migration Ledger**:
-The `_prisma_migrations` table in PostgreSQL recording applied migration metadata, checksums, and completion timestamps.
-_Avoid_: Migration history, migration log, schema state
+### Proof Graph Elements
+- **Premise Node**: An axiomatic starting hypothesis or given system invariant.
+- **Rule Operator / Inference Application**: A deductive step linking premise inputs to a derived conclusion via a formal inference rule.
+- **Derived Lemma Node**: A valid proposition proven from preceding premises/lemmas.
+- **Target Invariant / Goal Node**: The target theorem or system invariant to be formally discharged (Q.E.D.).
 
-**Baseline**:
-The registration of pre-existing database objects into the Migration Ledger via `prisma migrate resolve --applied` without re-executing their DDL.
-_Avoid_: Db push, manual sync, seed override
+### Verification & Diagnosis
+- **Deduction Ledger**: A chronological, step-by-step mathematical proof table documenting step number, formula, applied rule, input premise lines, verification state, and software engineering meaning.
+- **Fallacy Engine**: AST-level diagnostic checker that detects invalid deductions (e.g., Affirming the Consequent, Denying the Antecedent, Incompatible Literals, Circular Dependencies) and generates counterexample truth tables.
+- **Soundness Checker**: Formal verification evaluator ensuring the proof DAG is acyclic, well-typed, and all inferences are mathematically sound.
 
-**Expand-and-Contract**:
-A phased release methodology where backward-compatible schema additions deploy prior to dependent application readers, and destructive removals occur in subsequent releases.
-_Avoid_: Monolithic migration, breaking deployment
+### Curriculum Tiers & Domains
+- **Foundations of Deductive Logic**: Direct & indirect inferences (Modus Ponens, Modus Tollens, De Morgan's, Disjunctive Syllogism) mapped to compiler & CI/CD invariants.
+- **Distributed Systems Consensus**: High-assurance invariants (Raft Leader Election, Two-Phase Commit Atomicity, Quorum Overlap, Split-Brain Prevention).
+- **Concurrency & Memory Safety**: Deadlock freedom via clausal resolution refutation, lock-free wait graph cycle elimination, bounded buffer memory safety.
+- **Custom Invariant Studio**: User-authored propositions and premises sandbox with live syntax parsing, proof builder, automated SAT/tableau solver verification, and multi-format exports.
 
-**Pre-Build Migration Runner**:
-The deployment pipeline phase (Phase 1.5) executing migrations prior to Next.js static site generation to guarantee schema availability during build-time page prerendering.
-_Avoid_: Post-build migration, runtime migration
+## CRF Studio (Clinical Form & Protocol Designer)
 
-**Destructive Migration Guard**:
-An automated static analyzer (`scripts/check-migrations.js`) that blocks migration files containing `DROP TABLE` or `DROP COLUMN` unless overridden by an explicit environment flag.
-_Avoid_: DDL lint, schema scanner
+### Clinical Data Architecture & CDISC Standards
+- **CDASH (Clinical Data Acquisition Standards Harmonization)**: CDISC standard establishing basic rules for clinical data acquisition and standard variable names (e.g. `DM`, `VS`, `AE`, `CM`, `LB`).
+- **NCI Thesaurus Controlled Terminology**: Standardized biomedical concepts and C-codes (e.g. C66742 for Sex, C49487 for Severity, C66768 for Causality) mapped directly to codelists.
+- **CDISC Conformance & Regulatory Validation Engine**: Automated regulatory rule engine validating dataset variable names (length <= 8 characters), core CDASH requirements (HR/O/R), NCI Thesaurus CT codelist codes, and ISO 8601 date formats adhering to FDA and PMDA Technical Conformance Guides with 1-click automated remediation.
+- **CDISC ODM-XML v1.3.2**: International vendor-neutral XML format representing clinical metadata (`MetaDataVersion`, `StudyEventDef`, `FormDef`, `ItemGroupDef`, `ItemDef`, `CodeList`).
+- **HL7 FHIR Structured Data Capture (SDC)**: FHIR R4/R5 Questionnaire resources for EHR-to-EDC clinical data interoperability.
 
-## Interactive Arcade & Formal Proof Verification
+### AST Logic & Calculation Engine
+- **Safe Recursive Descent AST**: Zero-eval mathematical formula evaluator supporting arithmetic operators, functions (`round`, `sqrt`, `abs`, `max`, `min`), and clinical derivations (BMI, Mosteller BSA, eGFR, RECIST 1.1 SLD % change, QTc).
+- **Dynamic Edit Checks**: Cross-field conditional triggers for showing/hiding questions, dynamic mandatory flags, boundary checking, and discrepancy query firing.
+- **Logic Dependency DAG (Rule Graph)**: Directed Acyclic Graph modeling cascading edit check trigger fields, rule operators, action targets, and circular dependency detection.
 
-The interactive games, simulation workspaces, and embedded domain modules powering the portfolio showcase.
+### 21 CFR Part 11 Electronic Data Capture (EDC) Simulation
+- **Multi-Role Simulation**: Role-based access control modeling Site Coordinator (data entry), Principal Investigator (e-signature & review), CRA Monitor (SDV & discrepancy management), and Data Manager.
+- **Subject Status Matrix**: Medidata Rave / Veeva Vault CDMS style 2D matrix visualizing multi-subject longitudinal visit progression and form completeness (Complete, Incomplete, Locked, Open Query, SDV Verified).
+- **Source Data Verification (SDV)**: CRA clinical monitoring activity verifying that electronic data captured in the EDC accurately reflects raw subject medical records / source charts.
+- **Reason for Change Prompt**: Mandatory justification audit prompts when modifying existing clinical data points.
+- **Immutable Chronological Audit Log**: Timestamped record tracking previous value, new value, user identity, role, and justification.
+- **Electronic Signatures**: Cryptographic simulated SHA-256 digital signatures attesting investigator review and data lock.
 
-### Language
-
-**Field Manual**:
-The standardized in-game modal providing structured gameplay objectives, keycap control bindings, scoring mechanics, and real-world engineering domain lore across all interactive modules.
-_Avoid_: Help modal, instructions popup, tutorial dialog
-
-**Proof Canvas**:
-The interactive visual workspace representing formal logic hypotheses, premises, and conclusions as connected graph nodes evaluated via deterministic inference rules.
-_Avoid_: Logic board, node chart, graph toy
-
-**Guided Proof Assistant**:
-The contextual step-by-step assistant guiding users through inference tactics (e.g. Modus Ponens) to discharge conclusions without requiring terminal commands.
-_Avoid_: Proof wizard, hint bar, helper box
-
-### Example Dialogue
-
-> **Dev**: "Can we run `prisma db push` to push the new `simulated_telemetry` column to production?"
->
-> **Tech Lead**: "No. All production schema modifications must be recorded in the **Migration Ledger** via checked-in migrations. For the existing tables, we perform a one-time **Baseline** using `prisma migrate resolve --applied` on Neon, and let the **Pre-Build Migration Runner** apply the new column before Next.js prerenders static pages. Every release follows **Expand-and-Contract**, backed by the **Destructive Migration Guard**."

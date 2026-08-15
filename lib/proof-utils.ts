@@ -1,5 +1,5 @@
 /**
- * Logic Proof Workspace, Formal Theorem Definitions, Fallacy Engine, and Export Utilities.
+ * Logic Proof Workspace, Formal Theorem Definitions, AST Logic Engine, Fallacy Diagnostics, and Multi-Format Exporters.
  */
 
 export type TheoremId =
@@ -7,11 +7,23 @@ export type TheoremId =
   | "modus-tollens"
   | "hypothetical-syllogism"
   | "disjunctive-syllogism"
-  | "resolution";
+  | "resolution"
+  | "two-phase-commit"
+  | "quorum-overlap"
+  | "cache-consistency"
+  | "custom";
+
+export type TheoremCategory =
+  | "Foundational"
+  | "Indirect Proofs"
+  | "Distributed Systems"
+  | "Fault Tolerance"
+  | "Custom Studio";
 
 export interface Edge {
   source: string;
   target: string;
+  ruleApplied?: string;
 }
 
 export interface ProofNode {
@@ -22,6 +34,9 @@ export interface ProofNode {
   meaning: string;
   x: number;
   y: number;
+  derivedFrom?: string[];
+  ruleUsed?: string;
+  ast?: PropAst;
 }
 
 export interface TacticHint {
@@ -30,6 +45,7 @@ export interface TacticHint {
   hint: string;
   suggestedSource?: string;
   suggestedTarget?: string;
+  suggestedRule?: string;
   isCompleted: boolean;
 }
 
@@ -46,6 +62,7 @@ export interface TruthTableRow {
   p: boolean;
   q: boolean;
   r?: boolean;
+  s?: boolean;
   premise1: boolean;
   premise2: boolean;
   conclusion: boolean;
@@ -64,7 +81,7 @@ export interface TheoremDefinition {
   id: TheoremId;
   title: string;
   subtitle: string;
-  category: "Foundational" | "Indirect Proofs" | "Distributed Systems" | "Fault Tolerance";
+  category: TheoremCategory;
   ruleName: string;
   scenario: string;
   goalDescription: string;
@@ -80,10 +97,114 @@ export interface TheoremDefinition {
   latexCode: string;
 }
 
-export const VALID_NODE_IDS = ["A", "B", "C", "D", "E"];
+export type PropAst =
+  | { type: "var"; name: string }
+  | { type: "not"; operand: PropAst }
+  | { type: "and"; left: PropAst; right: PropAst }
+  | { type: "or"; left: PropAst; right: PropAst }
+  | { type: "implies"; left: PropAst; right: PropAst }
+  | { type: "iff"; left: PropAst; right: PropAst }
+  | { type: "bottom" };
+
+export interface RuleDefinition {
+  id: string;
+  name: string;
+  symbol: string;
+  template: string;
+  arity: number;
+  description: string;
+  softwareMeaning: string;
+}
+
+export const INFERENCE_RULES: RuleDefinition[] = [
+  {
+    id: "mp",
+    name: "Modus Ponens",
+    symbol: "MP",
+    template: "P, P → Q ⊢ Q",
+    arity: 2,
+    description: "Affirms antecedent to derive consequent.",
+    softwareMeaning: "Triggering an action when precondition gate passes.",
+  },
+  {
+    id: "mt",
+    name: "Modus Tollens",
+    symbol: "MT",
+    template: "P → Q, ¬Q ⊢ ¬P",
+    arity: 2,
+    description: "Denies consequent to infer negation of antecedent.",
+    softwareMeaning: "Proving absence of root cause by confirming no downstream fault.",
+  },
+  {
+    id: "hs",
+    name: "Hypothetical Syllogism",
+    symbol: "HS",
+    template: "P → Q, Q → R ⊢ P → R",
+    arity: 2,
+    description: "Chains transitive implications.",
+    softwareMeaning: "Composing end-to-end latency SLA contracts across microservices.",
+  },
+  {
+    id: "ds",
+    name: "Disjunctive Syllogism",
+    symbol: "DS",
+    template: "P ∨ Q, ¬P ⊢ Q",
+    arity: 2,
+    description: "Eliminates false disjunct to isolate remaining true alternative.",
+    softwareMeaning: "Consensus leader failover when primary heartbeat lease expires.",
+  },
+  {
+    id: "res",
+    name: "Clausal Resolution",
+    symbol: "Res",
+    template: "A ∨ B, ¬A ∨ C ⊢ B ∨ C",
+    arity: 2,
+    description: "Cancels complementary literals across clauses.",
+    softwareMeaning: "Deadlock detection and wait-for graph cycle refutation.",
+  },
+  {
+    id: "demorgan",
+    name: "De Morgan's Laws",
+    symbol: "DM",
+    template: "¬(P ∧ Q) ⊢ ¬P ∨ ¬Q",
+    arity: 1,
+    description: "Distributes negation across conjunctions/disjunctions.",
+    softwareMeaning: "Compiler condition simplification and dead branch elimination.",
+  },
+  {
+    id: "and_intro",
+    name: "Conjunction Introduction",
+    symbol: "∧-Intro",
+    template: "P, Q ⊢ P ∧ Q",
+    arity: 2,
+    description: "Combines two verified facts into a joint conjunction.",
+    softwareMeaning: "Aggregating multi-phase commit quorum votes.",
+  },
+  {
+    id: "and_elim",
+    name: "Conjunction Elimination",
+    symbol: "∧-Elim",
+    template: "P ∧ Q ⊢ P",
+    arity: 1,
+    description: "Extracts an individual component from a conjunction.",
+    softwareMeaning: "Validating individual shard health invariants.",
+  },
+  {
+    id: "raa",
+    name: "Reductio Ad Absurdum",
+    symbol: "RAA",
+    template: "P → ⊥ ⊢ ¬P",
+    arity: 1,
+    description: "Derives negation when a proposition yields contradiction.",
+    softwareMeaning: "Proving exploit impossibility by showing attack leads to false state.",
+  },
+];
+
+export const VALID_NODE_IDS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
 export const VALID_COMMANDS = [
   "connect",
   "disconnect",
+  "apply",
   "list",
   "clear",
   "help",
@@ -94,7 +215,203 @@ export const VALID_COMMANDS = [
   "tactic",
   "ledger",
   "export",
+  "autostep",
+  "solve",
 ];
+
+/**
+ * Tokenizes propositional formulas into AST nodes.
+ */
+export function parseFormula(input: string): PropAst | null {
+  const cleaned = input.trim();
+  if (!cleaned) return null;
+
+  if (cleaned === "⊥" || cleaned.toLowerCase() === "false" || cleaned === "bot") {
+    return { type: "bottom" };
+  }
+
+  // Handle binary operators in order of standard precedence (iff, implies, or, and)
+  // Check for bi-conditional: <-> or ↔
+  const iffMatch = findTopLevelOp(cleaned, ["<->", "↔"]);
+  if (iffMatch) {
+    const left = parseFormula(cleaned.slice(0, iffMatch.index));
+    const right = parseFormula(cleaned.slice(iffMatch.index + iffMatch.op.length));
+    if (left && right) return { type: "iff", left, right };
+  }
+
+  // Check for implication: -> or →
+  const impMatch = findTopLevelOp(cleaned, ["->", "→"]);
+  if (impMatch) {
+    const left = parseFormula(cleaned.slice(0, impMatch.index));
+    const right = parseFormula(cleaned.slice(impMatch.index + impMatch.op.length));
+    if (left && right) return { type: "implies", left, right };
+  }
+
+  // Check for disjunction: | or || or ∨ or \lor
+  const orMatch = findTopLevelOp(cleaned, ["\\lor", "||", "|", "∨"]);
+  if (orMatch) {
+    const left = parseFormula(cleaned.slice(0, orMatch.index));
+    const right = parseFormula(cleaned.slice(orMatch.index + orMatch.op.length));
+    if (left && right) return { type: "or", left, right };
+  }
+
+  // Check for conjunction: & or && or ∧ or \land
+  const andMatch = findTopLevelOp(cleaned, ["\\land", "&&", "&", "∧"]);
+  if (andMatch) {
+    const left = parseFormula(cleaned.slice(0, andMatch.index));
+    const right = parseFormula(cleaned.slice(andMatch.index + andMatch.op.length));
+    if (left && right) return { type: "and", left, right };
+  }
+
+  // Check for negation: ~ or ! or ¬ or \neg
+  for (const prefix of ["\\neg", "¬", "~", "!"]) {
+    if (cleaned.startsWith(prefix)) {
+      const rest = cleaned.slice(prefix.length).trim();
+      const operand = parseFormula(rest);
+      if (operand) return { type: "not", operand };
+    }
+  }
+
+  // Handle parentheses wrapper: ( ... )
+  if (cleaned.startsWith("(") && cleaned.endsWith(")")) {
+    let depth = 0;
+    let wrapped = true;
+    for (let i = 0; i < cleaned.length - 1; i++) {
+      if (cleaned[i] === "(") depth++;
+      if (cleaned[i] === ")") depth--;
+      if (depth === 0) {
+        wrapped = false;
+        break;
+      }
+    }
+    if (wrapped) {
+      return parseFormula(cleaned.slice(1, -1));
+    }
+  }
+
+  // Single variable identifier
+  const varClean = cleaned.replace(/[^A-Za-z0-9_]/g, "");
+  if (varClean) {
+    return { type: "var", name: varClean };
+  }
+
+  return null;
+}
+
+function findTopLevelOp(
+  str: string,
+  operators: string[]
+): { index: number; op: string } | null {
+  let depth = 0;
+  for (let i = str.length - 1; i >= 0; i--) {
+    const char = str[i];
+    if (char === ")") depth++;
+    else if (char === "(") depth--;
+    else if (depth === 0) {
+      for (const op of operators) {
+        if (str.slice(i, i + op.length) === op) {
+          return { index: i, op };
+        }
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Formats a PropAst into mathematical unicode string.
+ */
+export function formatFormula(ast: PropAst): string {
+  switch (ast.type) {
+    case "bottom":
+      return "⊥";
+    case "var":
+      return ast.name;
+    case "not":
+      if (ast.operand.type === "var" || ast.operand.type === "bottom") {
+        return `¬${formatFormula(ast.operand)}`;
+      }
+      return `¬(${formatFormula(ast.operand)})`;
+    case "and":
+      return `${formatChildFormula(ast.left, "and")} ∧ ${formatChildFormula(ast.right, "and")}`;
+    case "or":
+      return `${formatChildFormula(ast.left, "or")} ∨ ${formatChildFormula(ast.right, "or")}`;
+    case "implies":
+      return `${formatChildFormula(ast.left, "implies")} → ${formatChildFormula(ast.right, "implies")}`;
+    case "iff":
+      return `${formatChildFormula(ast.left, "iff")} ↔ ${formatChildFormula(ast.right, "iff")}`;
+  }
+}
+
+function formatChildFormula(child: PropAst, parentType: string): string {
+  const needsParens =
+    (parentType === "implies" && (child.type === "implies" || child.type === "iff")) ||
+    (parentType === "or" && (child.type === "implies" || child.type === "iff")) ||
+    (parentType === "and" && (child.type === "or" || child.type === "implies" || child.type === "iff"));
+  return needsParens ? `(${formatFormula(child)})` : formatFormula(child);
+}
+
+/**
+ * Compares two PropAst trees for structural equivalence.
+ */
+export function areAstsEqual(a: PropAst | null | undefined, b: PropAst | null | undefined): boolean {
+  if (!a || !b) return false;
+  if (a.type !== b.type) return false;
+  switch (a.type) {
+    case "bottom":
+      return true;
+    case "var":
+      return a.name === (b as { type: "var"; name: string }).name;
+    case "not":
+      return areAstsEqual(a.operand, (b as { type: "not"; operand: PropAst }).operand);
+    case "and":
+    case "or":
+    case "implies":
+    case "iff": {
+      const bBin = b as { type: typeof a.type; left: PropAst; right: PropAst };
+      return areAstsEqual(a.left, bBin.left) && areAstsEqual(a.right, bBin.right);
+    }
+  }
+}
+
+/**
+ * Extracts unique proposition variable names from an AST.
+ */
+export function extractVariables(ast: PropAst): string[] {
+  const vars = new Set<string>();
+  function traverse(node: PropAst) {
+    if (node.type === "var") vars.add(node.name);
+    else if (node.type === "not") traverse(node.operand);
+    else if ("left" in node && "right" in node) {
+      traverse(node.left);
+      traverse(node.right);
+    }
+  }
+  traverse(ast);
+  return Array.from(vars).sort();
+}
+
+/**
+ * Evaluates the boolean truth value of an AST under a variable valuation.
+ */
+export function evaluateAst(ast: PropAst, env: Record<string, boolean>): boolean {
+  switch (ast.type) {
+    case "bottom":
+      return false;
+    case "var":
+      return env[ast.name] ?? false;
+    case "not":
+      return !evaluateAst(ast.operand, env);
+    case "and":
+      return evaluateAst(ast.left, env) && evaluateAst(ast.right, env);
+    case "or":
+      return evaluateAst(ast.left, env) || evaluateAst(ast.right, env);
+    case "implies":
+      return !evaluateAst(ast.left, env) || evaluateAst(ast.right, env);
+    case "iff":
+      return evaluateAst(ast.left, env) === evaluateAst(ast.right, env);
+  }
+}
 
 export const THEOREMS: Record<TheoremId, TheoremDefinition> = {
   "modus-ponens": {
@@ -118,6 +435,7 @@ export const THEOREMS: Record<TheoremId, TheoremDefinition> = {
         meaning: "All automated regression tests are actively running in the pipeline.",
         x: 120,
         y: 130,
+        ast: { type: "var", name: "P" },
       },
       {
         id: "B",
@@ -127,6 +445,7 @@ export const THEOREMS: Record<TheoremId, TheoremDefinition> = {
         meaning: "High coverage test suites reliably intercept regressions before production.",
         x: 120,
         y: 290,
+        ast: { type: "implies", left: { type: "var", name: "P" }, right: { type: "var", name: "Q" } },
       },
       {
         id: "C",
@@ -136,6 +455,7 @@ export const THEOREMS: Record<TheoremId, TheoremDefinition> = {
         meaning: "Derived fact: The pipeline successfully detects defects.",
         x: 360,
         y: 210,
+        ast: { type: "var", name: "Q" },
       },
       {
         id: "D",
@@ -145,6 +465,7 @@ export const THEOREMS: Record<TheoremId, TheoremDefinition> = {
         meaning: "Intercepting defects prevents outages and guarantees system uptime.",
         x: 360,
         y: 360,
+        ast: { type: "implies", left: { type: "var", name: "Q" }, right: { type: "var", name: "R" } },
       },
       {
         id: "E",
@@ -154,11 +475,12 @@ export const THEOREMS: Record<TheoremId, TheoremDefinition> = {
         meaning: "The target theorem: 100% formal confidence in deployment reliability.",
         x: 600,
         y: 285,
+        ast: { type: "var", name: "R" },
       },
     ],
     initialEdges: [
-      { source: "A", target: "C" },
-      { source: "B", target: "C" },
+      { source: "A", target: "C", ruleApplied: "MP" },
+      { source: "B", target: "C", ruleApplied: "MP" },
     ],
     validPairs: [
       ["A", "C"],
@@ -221,6 +543,7 @@ theorem modus_ponens_pipeline (P Q R : Prop)
         meaning: "Unchecked pointer arithmetic inevitably triggers heap corruptions.",
         x: 120,
         y: 130,
+        ast: { type: "implies", left: { type: "var", name: "P" }, right: { type: "var", name: "Q" } },
       },
       {
         id: "B",
@@ -230,6 +553,7 @@ theorem modus_ponens_pipeline (P Q R : Prop)
         meaning: "AddressSanitizer proves the absence of heap corruption across all executions.",
         x: 120,
         y: 290,
+        ast: { type: "not", operand: { type: "var", name: "Q" } },
       },
       {
         id: "C",
@@ -239,6 +563,7 @@ theorem modus_ponens_pipeline (P Q R : Prop)
         meaning: "Derived fact: Unbounded memory allocation is impossible in this runtime.",
         x: 360,
         y: 210,
+        ast: { type: "not", operand: { type: "var", name: "P" } },
       },
       {
         id: "D",
@@ -248,6 +573,7 @@ theorem modus_ponens_pipeline (P Q R : Prop)
         meaning: "Bounded buffers eliminate stack/heap smashing attack vectors.",
         x: 360,
         y: 360,
+        ast: { type: "implies", left: { type: "not", operand: { type: "var", name: "P" } }, right: { type: "var", name: "R" } },
       },
       {
         id: "E",
@@ -257,11 +583,12 @@ theorem modus_ponens_pipeline (P Q R : Prop)
         meaning: "The target theorem: 100% formal memory safety guarantee achieved.",
         x: 600,
         y: 285,
+        ast: { type: "var", name: "R" },
       },
     ],
     initialEdges: [
-      { source: "A", target: "C" },
-      { source: "B", target: "C" },
+      { source: "A", target: "C", ruleApplied: "MT" },
+      { source: "B", target: "C", ruleApplied: "MT" },
     ],
     validPairs: [
       ["A", "C"],
@@ -324,6 +651,7 @@ theorem modus_tollens_memory_safety (P Q R : Prop)
         meaning: "Fast token validation maintains warm Redis cache tiers.",
         x: 120,
         y: 130,
+        ast: { type: "implies", left: { type: "var", name: "P" }, right: { type: "var", name: "Q" } },
       },
       {
         id: "B",
@@ -333,6 +661,7 @@ theorem modus_tollens_memory_safety (P Q R : Prop)
         meaning: "High cache hit ratio prevents database connection pool exhaustion.",
         x: 120,
         y: 290,
+        ast: { type: "implies", left: { type: "var", name: "Q" }, right: { type: "var", name: "R" } },
       },
       {
         id: "C",
@@ -342,6 +671,7 @@ theorem modus_tollens_memory_safety (P Q R : Prop)
         meaning: "Derived transitive chain across the distributed service topology.",
         x: 360,
         y: 210,
+        ast: { type: "implies", left: { type: "var", name: "P" }, right: { type: "var", name: "R" } },
       },
       {
         id: "D",
@@ -351,6 +681,11 @@ theorem modus_tollens_memory_safety (P Q R : Prop)
         meaning: "System-wide architectural contract ensures 99.99% availability.",
         x: 360,
         y: 360,
+        ast: {
+          type: "implies",
+          left: { type: "implies", left: { type: "var", name: "P" }, right: { type: "var", name: "R" } },
+          right: { type: "var", name: "S" },
+        },
       },
       {
         id: "E",
@@ -360,11 +695,12 @@ theorem modus_tollens_memory_safety (P Q R : Prop)
         meaning: "The target theorem: End-to-end distributed SLA verified without bottlenecks.",
         x: 600,
         y: 285,
+        ast: { type: "var", name: "S" },
       },
     ],
     initialEdges: [
-      { source: "A", target: "C" },
-      { source: "B", target: "C" },
+      { source: "A", target: "C", ruleApplied: "HS" },
+      { source: "B", target: "C", ruleApplied: "HS" },
     ],
     validPairs: [
       ["A", "C"],
@@ -427,6 +763,7 @@ theorem hypothetical_syllogism_sla (P Q R S : Prop)
         meaning: "At least one consensus coordinator is active at any epoch.",
         x: 120,
         y: 130,
+        ast: { type: "or", left: { type: "var", name: "P" }, right: { type: "var", name: "Q" } },
       },
       {
         id: "B",
@@ -436,6 +773,7 @@ theorem hypothetical_syllogism_sla (P Q R S : Prop)
         meaning: "Split-brain detector confirms the primary node is unreachable.",
         x: 120,
         y: 290,
+        ast: { type: "not", operand: { type: "var", name: "P" } },
       },
       {
         id: "C",
@@ -445,15 +783,17 @@ theorem hypothetical_syllogism_sla (P Q R S : Prop)
         meaning: "Derived fact: Failover quorum is triggered immediately.",
         x: 360,
         y: 210,
+        ast: { type: "var", name: "Q" },
       },
       {
         id: "D",
         label: "Q → R",
         type: "premise",
         description: "Premise Q → R: If standby replica takes quorum, zero downtime (R) is maintained.",
-        meaning: "Fast failover replication guarantees un-interrupted client writes.",
+        meaning: "Fast failover replication guarantees uninterrupted client writes.",
         x: 360,
         y: 360,
+        ast: { type: "implies", left: { type: "var", name: "Q" }, right: { type: "var", name: "R" } },
       },
       {
         id: "E",
@@ -463,11 +803,12 @@ theorem hypothetical_syllogism_sla (P Q R S : Prop)
         meaning: "The target theorem: 100% formal resilience against primary node failure.",
         x: 600,
         y: 285,
+        ast: { type: "var", name: "R" },
       },
     ],
     initialEdges: [
-      { source: "A", target: "C" },
-      { source: "B", target: "C" },
+      { source: "A", target: "C", ruleApplied: "DS" },
+      { source: "B", target: "C", ruleApplied: "DS" },
     ],
     validPairs: [
       ["A", "C"],
@@ -530,6 +871,7 @@ theorem disjunctive_syllogism_raft (P Q R : Prop)
         meaning: "Concurrency control invariant: lock is held or request is queued.",
         x: 120,
         y: 130,
+        ast: { type: "or", left: { type: "var", name: "P" }, right: { type: "var", name: "Q" } },
       },
       {
         id: "B",
@@ -539,6 +881,11 @@ theorem disjunctive_syllogism_raft (P Q R : Prop)
         meaning: "If lock is not held, deadlock resolution policy is active.",
         x: 120,
         y: 290,
+        ast: {
+          type: "or",
+          left: { type: "not", operand: { type: "var", name: "P" } },
+          right: { type: "var", name: "R" },
+        },
       },
       {
         id: "C",
@@ -548,6 +895,7 @@ theorem disjunctive_syllogism_raft (P Q R : Prop)
         meaning: "Derived resolvent clause removing the complementary literal P and ¬P.",
         x: 360,
         y: 210,
+        ast: { type: "or", left: { type: "var", name: "Q" }, right: { type: "var", name: "R" } },
       },
       {
         id: "D",
@@ -557,6 +905,7 @@ theorem disjunctive_syllogism_raft (P Q R : Prop)
         meaning: "Queue boundary condition: Transaction cannot remain in wait state.",
         x: 360,
         y: 360,
+        ast: { type: "not", operand: { type: "var", name: "Q" } },
       },
       {
         id: "E",
@@ -566,11 +915,12 @@ theorem disjunctive_syllogism_raft (P Q R : Prop)
         meaning: "The target theorem: Deadlock resolved without data corruption or orphan locks.",
         x: 600,
         y: 285,
+        ast: { type: "var", name: "R" },
       },
     ],
     initialEdges: [
-      { source: "A", target: "C" },
-      { source: "B", target: "C" },
+      { source: "A", target: "C", ruleApplied: "Res" },
+      { source: "B", target: "C", ruleApplied: "Res" },
     ],
     validPairs: [
       ["A", "C"],
@@ -617,12 +967,451 @@ theorem resolution_deadlock_safety (P Q R : Prop)
   \\BinaryInfC{$R$}
 \\end{prooftree}`,
   },
+
+  "two-phase-commit": {
+    id: "two-phase-commit",
+    title: "Two-Phase Commit (2PC)",
+    subtitle: "Global Atomicity · Distributed Transaction Coordinator Safety",
+    category: "Distributed Systems",
+    ruleName: "2PC Consensus ((A ∧ B) ∧ ((A ∧ B) → Commit) ⊢ Commit)",
+    scenario: "Coordinating multi-shard database atomic commit across independent partitions.",
+    goalDescription: "Discharge Global Commit invariant (All shards commit atomically or all roll back).",
+    targetNodeId: "E",
+    intermediateNodeId: "C",
+    intermediateRequires: ["A", "B"],
+    conclusionRequires: ["C", "D"],
+    nodes: [
+      {
+        id: "A",
+        label: "PrepA",
+        type: "premise",
+        description: "Premise PrepA: Shard A voted PREPARED and wrote WAL log.",
+        meaning: "Partition A guarantees persistence of transaction changes.",
+        x: 120,
+        y: 130,
+        ast: { type: "var", name: "PrepA" },
+      },
+      {
+        id: "B",
+        label: "PrepB",
+        type: "premise",
+        description: "Premise PrepB: Shard B voted PREPARED and wrote WAL log.",
+        meaning: "Partition B guarantees persistence of transaction changes.",
+        x: 120,
+        y: 290,
+        ast: { type: "var", name: "PrepB" },
+      },
+      {
+        id: "C",
+        label: "PrepA ∧ PrepB",
+        type: "intermediate",
+        description: "Intermediate Conclusion: All participating shards confirmed readiness.",
+        meaning: "Unanimous preparation milestone reached across the cluster.",
+        x: 360,
+        y: 210,
+        ast: { type: "and", left: { type: "var", name: "PrepA" }, right: { type: "var", name: "PrepB" } },
+      },
+      {
+        id: "D",
+        label: "(PrepA ∧ PrepB) → Commit",
+        type: "premise",
+        description: "Premise Protocol: Unanimous prepare triggers Global Commit directive.",
+        meaning: "2PC protocol rule ensures zero dirty reads or partial writes.",
+        x: 360,
+        y: 360,
+        ast: {
+          type: "implies",
+          left: { type: "and", left: { type: "var", name: "PrepA" }, right: { type: "var", name: "PrepB" } },
+          right: { type: "var", name: "Commit" },
+        },
+      },
+      {
+        id: "E",
+        label: "Commit",
+        type: "conclusion",
+        description: "Conclusion Commit: Atomic multi-shard transaction formally committed.",
+        meaning: "ACID consistency guaranteed across distributed partitions.",
+        x: 600,
+        y: 285,
+        ast: { type: "var", name: "Commit" },
+      },
+    ],
+    initialEdges: [
+      { source: "A", target: "C", ruleApplied: "∧-Intro" },
+      { source: "B", target: "C", ruleApplied: "∧-Intro" },
+    ],
+    validPairs: [
+      ["A", "C"],
+      ["C", "A"],
+      ["B", "C"],
+      ["C", "B"],
+      ["C", "E"],
+      ["E", "C"],
+      ["D", "E"],
+      ["E", "D"],
+    ],
+    simulationSteps: [
+      "Initializing Two-Phase Commit Verification...",
+      "Gathering Phase-1 votes: Shard A (PrepA)...",
+      "Gathering Phase-1 votes: Shard B (PrepB)...",
+      "Applying Conjunction Introduction to establish (PrepA ∧ PrepB)...",
+      "Unanimous prepare quorum verified.",
+      "Linking with Coordinator Commit Rule Node D...",
+      "Applying Modus Ponens to derive Global Commit...",
+      "Verifying zero abort conditions across network partitions...",
+      "Distributed 2PC Atomicity theorem verified (Q.E.D.)",
+    ],
+    leanCode: `-- Formal Proof in Lean 4
+theorem two_phase_commit (PrepA PrepB Commit : Prop)
+  (hA : PrepA)
+  (hB : PrepB)
+  (hD : (PrepA ∧ PrepB) → Commit) : Commit := by
+  have hC : PrepA ∧ PrepB := And.intro hA hB
+  exact hD hC`,
+    latexCode: `\\begin{prooftree}
+  \\AxiomC{$PrepA$}
+  \\AxiomC{$PrepB$}
+  \\RightLabel{\\scriptsize $\\land$-Intro}
+  \\BinaryInfC{$PrepA \\land PrepB$}
+  \\AxiomC{$(PrepA \\land PrepB) \\to Commit$}
+  \\RightLabel{\\scriptsize MP}
+  \\BinaryInfC{$Commit$}
+\\end{prooftree}`,
+  },
+
+  "quorum-overlap": {
+    id: "quorum-overlap",
+    title: "Quorum Intersection Safety",
+    subtitle: "Pigeonhole Principle · Majority Overlap Invariant",
+    category: "Distributed Systems",
+    ruleName: "Quorum Safety ((Q1 ∧ Q2) ∧ ((Q1 ∧ Q2) → SingleLeader) ⊢ SingleLeader)",
+    scenario: "Proving impossibility of split-brain leader elections in Raft/Paxos clusters.",
+    goalDescription: "Discharge Single Leader invariant: At most one leader can be elected in any term.",
+    targetNodeId: "E",
+    intermediateNodeId: "C",
+    intermediateRequires: ["A", "B"],
+    conclusionRequires: ["C", "D"],
+    nodes: [
+      {
+        id: "A",
+        label: "MajA",
+        type: "premise",
+        description: "Premise MajA: Leader A collected a strict majority quorum of votes (N/2 + 1).",
+        meaning: "Majority partition verified for Candidate A in term T.",
+        x: 120,
+        y: 130,
+        ast: { type: "var", name: "MajA" },
+      },
+      {
+        id: "B",
+        label: "MajB",
+        type: "premise",
+        description: "Premise MajB: Candidate B claims a strict majority quorum in the same term T.",
+        meaning: "Hypothetical competing election attempt.",
+        x: 120,
+        y: 290,
+        ast: { type: "var", name: "MajB" },
+      },
+      {
+        id: "C",
+        label: "Overlap",
+        type: "intermediate",
+        description: "Intermediate Conclusion: Quorums MajA and MajB share at least one common voter node.",
+        meaning: "Pigeonhole principle: Any two majorities of size (N/2 + 1) must intersect.",
+        x: 360,
+        y: 210,
+        ast: { type: "var", name: "Overlap" },
+      },
+      {
+        id: "D",
+        label: "Overlap → SingleLeader",
+        type: "premise",
+        description: "Premise Invariant: Intersecting node cannot vote twice in term T, forcing single leader.",
+        meaning: "Vote idempotency prevents dual election split-brain.",
+        x: 360,
+        y: 360,
+        ast: {
+          type: "implies",
+          left: { type: "var", name: "Overlap" },
+          right: { type: "var", name: "SingleLeader" },
+        },
+      },
+      {
+        id: "E",
+        label: "SingleLeader",
+        type: "conclusion",
+        description: "Conclusion SingleLeader: Exactly one legitimate leader elected per term.",
+        meaning: "Split-brain impossibility formally proven.",
+        x: 600,
+        y: 285,
+        ast: { type: "var", name: "SingleLeader" },
+      },
+    ],
+    initialEdges: [
+      { source: "A", target: "C", ruleApplied: "Pigeonhole" },
+      { source: "B", target: "C", ruleApplied: "Pigeonhole" },
+    ],
+    validPairs: [
+      ["A", "C"],
+      ["C", "A"],
+      ["B", "C"],
+      ["C", "B"],
+      ["C", "E"],
+      ["E", "C"],
+      ["D", "E"],
+      ["E", "D"],
+    ],
+    simulationSteps: [
+      "Initializing Quorum Intersection Verification...",
+      "Evaluating Quorum A size: (N/2 + 1)...",
+      "Evaluating Quorum B size: (N/2 + 1)...",
+      "Applying Majority Intersection Theorem to derive Overlap node...",
+      "Inspecting overlapping voter term constraint Node D...",
+      "Applying Modus Ponens to establish SingleLeader invariant...",
+      "Verifying zero split-brain states across network splits...",
+      "Raft Quorum Safety formally proven (Q.E.D.)",
+    ],
+    leanCode: `-- Formal Proof in Lean 4
+theorem quorum_overlap_safety (MajA MajB Overlap SingleLeader : Prop)
+  (hA : MajA)
+  (hB : MajB)
+  (hOverlap : MajA → MajB → Overlap)
+  (hD : Overlap → SingleLeader) : SingleLeader := by
+  have hC : Overlap := hOverlap hA hB
+  exact hD hC`,
+    latexCode: `\\begin{prooftree}
+  \\AxiomC{$MajA$}
+  \\AxiomC{$MajB$}
+  \\RightLabel{\\scriptsize Quorum}
+  \\BinaryInfC{$Overlap$}
+  \\AxiomC{$Overlap \\to SingleLeader$}
+  \\RightLabel{\\scriptsize MP}
+  \\BinaryInfC{$SingleLeader$}
+\\end{prooftree}`,
+  },
+
+  "cache-consistency": {
+    id: "cache-consistency",
+    title: "Cache Invalidation & Coherence",
+    subtitle: "Write-Through Invariant · Stale Read Prevention",
+    category: "Distributed Systems",
+    ruleName: "Cache Safety (Write ∧ (Write → Invalidate) ∧ (Invalidate → FreshRead) ⊢ FreshRead)",
+    scenario: "Maintaining strong consistency between high-throughput cache and primary database.",
+    goalDescription: "Discharge FreshRead invariant: Clients never observe stale dirty cache reads.",
+    targetNodeId: "E",
+    intermediateNodeId: "C",
+    intermediateRequires: ["A", "B"],
+    conclusionRequires: ["C", "D"],
+    nodes: [
+      {
+        id: "A",
+        label: "Write",
+        type: "premise",
+        description: "Premise Write: Primary database successfully committed write update.",
+        meaning: "Source of truth has new record state.",
+        x: 120,
+        y: 130,
+        ast: { type: "var", name: "Write" },
+      },
+      {
+        id: "B",
+        label: "Write → Invalidate",
+        type: "premise",
+        description: "Premise: Database commit automatically dispatches cache eviction event.",
+        meaning: "Change Data Capture (CDC) stream evicts cached key.",
+        x: 120,
+        y: 290,
+        ast: {
+          type: "implies",
+          left: { type: "var", name: "Write" },
+          right: { type: "var", name: "Invalidate" },
+        },
+      },
+      {
+        id: "C",
+        label: "Invalidate",
+        type: "intermediate",
+        description: "Intermediate Conclusion: Cache key evicted across all edge clusters.",
+        meaning: "Stale data purged from L1/L2 cache tiers.",
+        x: 360,
+        y: 210,
+        ast: { type: "var", name: "Invalidate" },
+      },
+      {
+        id: "D",
+        label: "Invalidate → FreshRead",
+        type: "premise",
+        description: "Premise: Cache miss triggers synchronous fetch of canonical primary record.",
+        meaning: "Subsequent queries are routed to updated database record.",
+        x: 360,
+        y: 360,
+        ast: {
+          type: "implies",
+          left: { type: "var", name: "Invalidate" },
+          right: { type: "var", name: "FreshRead" },
+        },
+      },
+      {
+        id: "E",
+        label: "FreshRead",
+        type: "conclusion",
+        description: "Conclusion FreshRead: Guaranteed zero stale data read anomalies.",
+        meaning: "Sequential cache consistency verified.",
+        x: 600,
+        y: 285,
+        ast: { type: "var", name: "FreshRead" },
+      },
+    ],
+    initialEdges: [
+      { source: "A", target: "C", ruleApplied: "MP" },
+      { source: "B", target: "C", ruleApplied: "MP" },
+    ],
+    validPairs: [
+      ["A", "C"],
+      ["C", "A"],
+      ["B", "C"],
+      ["C", "B"],
+      ["C", "E"],
+      ["E", "C"],
+      ["D", "E"],
+      ["E", "D"],
+    ],
+    simulationSteps: [
+      "Initializing Cache Coherence Verification...",
+      "Evaluating Primary Database Commit Event (Write)...",
+      "Evaluating CDC Invalidation Trigger (Write → Invalidate)...",
+      "Applying Modus Ponens to establish Cache Invalidation...",
+      "Evaluating Edge Read Router Policy (Invalidate → FreshRead)...",
+      "Applying Modus Ponens to discharge FreshRead invariant...",
+      "Verifying absence of race conditions between CDC stream and read replica...",
+      "Cache consistency theorem verified (Q.E.D.)",
+    ],
+    leanCode: `-- Formal Proof in Lean 4
+theorem cache_consistency_safety (Write Invalidate FreshRead : Prop)
+  (hA : Write)
+  (hB : Write → Invalidate)
+  (hD : Invalidate → FreshRead) : FreshRead := by
+  have hC : Invalidate := hB hA
+  exact hD hC`,
+    latexCode: `\\begin{prooftree}
+  \\AxiomC{$Write$}
+  \\AxiomC{$Write \\to Invalidate$}
+  \\RightLabel{\\scriptsize MP}
+  \\BinaryInfC{$Invalidate$}
+  \\AxiomC{$Invalidate \\to FreshRead$}
+  \\RightLabel{\\scriptsize MP}
+  \\BinaryInfC{$FreshRead$}
+\\end{prooftree}`,
+  },
+
+  custom: {
+    id: "custom",
+    title: "Custom Invariant Studio",
+    subtitle: "Interactive Free-Form Propositional Prover",
+    category: "Custom Studio",
+    ruleName: "Custom User Proof",
+    scenario: "Author custom software propositions, assemble natural deduction proofs, and auto-solve.",
+    goalDescription: "Construct a formal natural deduction derivation for custom assertions.",
+    targetNodeId: "E",
+    intermediateNodeId: "C",
+    intermediateRequires: ["A", "B"],
+    conclusionRequires: ["C", "D"],
+    nodes: [
+      {
+        id: "A",
+        label: "P",
+        type: "premise",
+        description: "Custom Premise 1",
+        meaning: "User-defined starting hypothesis",
+        x: 120,
+        y: 130,
+        ast: { type: "var", name: "P" },
+      },
+      {
+        id: "B",
+        label: "P → Q",
+        type: "premise",
+        description: "Custom Premise 2",
+        meaning: "User-defined implication",
+        x: 120,
+        y: 290,
+        ast: { type: "implies", left: { type: "var", name: "P" }, right: { type: "var", name: "Q" } },
+      },
+      {
+        id: "C",
+        label: "Q",
+        type: "intermediate",
+        description: "Derived Lemma",
+        meaning: "Derived intermediate step",
+        x: 360,
+        y: 210,
+        ast: { type: "var", name: "Q" },
+      },
+      {
+        id: "D",
+        label: "Q → R",
+        type: "premise",
+        description: "Custom Premise 3",
+        meaning: "User-defined target bridge",
+        x: 360,
+        y: 360,
+        ast: { type: "implies", left: { type: "var", name: "Q" }, right: { type: "var", name: "R" } },
+      },
+      {
+        id: "E",
+        label: "R",
+        type: "conclusion",
+        description: "Custom Goal",
+        meaning: "Target assertion to be proven",
+        x: 600,
+        y: 285,
+        ast: { type: "var", name: "R" },
+      },
+    ],
+    initialEdges: [
+      { source: "A", target: "C", ruleApplied: "MP" },
+      { source: "B", target: "C", ruleApplied: "MP" },
+    ],
+    validPairs: [
+      ["A", "C"],
+      ["C", "A"],
+      ["B", "C"],
+      ["C", "B"],
+      ["C", "E"],
+      ["E", "C"],
+      ["D", "E"],
+      ["E", "D"],
+    ],
+    simulationSteps: [
+      "Parsing custom proposition AST...",
+      "Evaluating premise consistency via SAT table...",
+      "Applying natural deduction inference tactics...",
+      "Custom goal discharged successfully (Q.E.D.)",
+    ],
+    leanCode: `-- Formal Proof in Lean 4
+theorem custom_proof (P Q R : Prop)
+  (hA : P)
+  (hB : P → Q)
+  (hD : Q → R) : R := by
+  have hC : Q := hB hA
+  exact hD hC`,
+    latexCode: `\\begin{prooftree}
+  \\AxiomC{$P$}
+  \\AxiomC{$P \\to Q$}
+  \\RightLabel{\\scriptsize MP}
+  \\BinaryInfC{$Q$}
+  \\AxiomC{$Q \\to R$}
+  \\RightLabel{\\scriptsize MP}
+  \\BinaryInfC{$R$}
+\\end{prooftree}`,
+  },
 };
 
 /**
  * Checks if a given string is a valid Node ID.
  */
 export function isValidNode(nodeId: string): boolean {
+  if (!nodeId) return false;
   return VALID_NODE_IDS.includes(nodeId.toUpperCase());
 }
 
@@ -636,7 +1425,7 @@ export function getSuggestion(inputVal: string, _theoremId: TheoremId = "modus-p
   const tokens = inputVal.split(/\s+/);
   const firstWord = tokens[0].toLowerCase();
 
-  // If only typing the command name (first word)
+  // Typing command name
   if (tokens.length === 1 && !inputVal.endsWith(" ")) {
     const match = VALID_COMMANDS.find((cmd) => cmd.startsWith(trimmed.toLowerCase()));
     if (match && match !== trimmed.toLowerCase()) {
@@ -644,7 +1433,7 @@ export function getSuggestion(inputVal: string, _theoremId: TheoremId = "modus-p
     }
   }
 
-  // If first word is "connect" or "disconnect"
+  // Connect or Disconnect command
   if (tokens.length > 1 && (firstWord === "connect" || firstWord === "disconnect")) {
     const secondWord = tokens[1]?.toUpperCase() || "";
     const thirdWord = tokens[2]?.toUpperCase() || "";
@@ -671,10 +1460,40 @@ export function getSuggestion(inputVal: string, _theoremId: TheoremId = "modus-p
     }
   }
 
-  // If first word is "theorem" or "switch"
+  // Apply rule command
+  if (tokens.length > 1 && firstWord === "apply") {
+    const secondWord = tokens[1]?.toLowerCase() || "";
+    const rules = ["mp", "mt", "hs", "ds", "res", "demorgan", "and_intro", "and_elim", "raa"];
+    if (tokens.length === 2 && !inputVal.endsWith(" ")) {
+      const matchRule = rules.find((r) => r.startsWith(secondWord));
+      if (matchRule && matchRule !== secondWord) {
+        return `${tokens[0]} ${matchRule}`;
+      }
+    }
+  }
+
+  // Switch or theorem command
   if (tokens.length > 1 && (firstWord === "theorem" || firstWord === "switch")) {
     const secondWord = tokens[1]?.toLowerCase() || "";
-    const theoremKeys: string[] = ["mp", "mt", "hs", "ds", "res", "modus-ponens", "modus-tollens", "hypothetical-syllogism", "disjunctive-syllogism", "resolution"];
+    const theoremKeys: string[] = [
+      "mp",
+      "mt",
+      "hs",
+      "ds",
+      "res",
+      "2pc",
+      "quorum",
+      "cache",
+      "modus-ponens",
+      "modus-tollens",
+      "hypothetical-syllogism",
+      "disjunctive-syllogism",
+      "resolution",
+      "two-phase-commit",
+      "quorum-overlap",
+      "cache-consistency",
+      "custom",
+    ];
     if (tokens.length === 2 && !inputVal.endsWith(" ")) {
       const matchTh = theoremKeys.find((t) => t.startsWith(secondWord));
       if (matchTh && matchTh !== secondWord) {
@@ -683,7 +1502,7 @@ export function getSuggestion(inputVal: string, _theoremId: TheoremId = "modus-p
     }
   }
 
-  // If first word is "inspect"
+  // Inspect command
   if (tokens.length > 1 && firstWord === "inspect") {
     const secondWord = tokens[1]?.toUpperCase() || "";
     if (tokens.length === 2 && !inputVal.endsWith(" ")) {
@@ -694,7 +1513,7 @@ export function getSuggestion(inputVal: string, _theoremId: TheoremId = "modus-p
     }
   }
 
-  // If first word is "export"
+  // Export command
   if (tokens.length > 1 && firstWord === "export") {
     const secondWord = tokens[1]?.toLowerCase() || "";
     const formats = ["lean", "latex", "markdown", "mermaid"];
@@ -706,10 +1525,9 @@ export function getSuggestion(inputVal: string, _theoremId: TheoremId = "modus-p
     }
   }
 
-  // If first word is "simulate"
+  // Simulate command
   if (firstWord === "simulate") {
     const secondWord = tokens[1]?.toLowerCase() || "";
-
     if (tokens.length === 2 && !inputVal.endsWith(" ")) {
       const subCommands = ["normal", "loop"];
       const matchSub = subCommands.find((sub) => sub.startsWith(secondWord));
@@ -717,7 +1535,6 @@ export function getSuggestion(inputVal: string, _theoremId: TheoremId = "modus-p
         return `${tokens[0]} ${matchSub}`;
       }
     }
-
     if (tokens.length === 2 && inputVal.endsWith(" ")) {
       return `${tokens[0]} normal`;
     }
@@ -727,7 +1544,7 @@ export function getSuggestion(inputVal: string, _theoremId: TheoremId = "modus-p
 }
 
 /**
- * Evaluates the proof logical progress based on current connections/edges.
+ * Evaluates proof logical completion status based on graph edges and ASTs.
  */
 export function evaluateProofStatus(
   edges: Edge[],
@@ -800,7 +1617,7 @@ export function canConnect(
 }
 
 /**
- * Diagnoses the formal logical fallacy and generates truth table counterexamples for invalid connections.
+ * Diagnoses formal logical fallacies and synthesizes counterexample truth table rows.
  */
 export function getFallacyDiagnosis(
   sourceId: string,
@@ -811,7 +1628,7 @@ export function getFallacyDiagnosis(
   const s = sourceId.toUpperCase();
   const t = targetId.toUpperCase();
 
-  // 1. Self connection / circular loop
+  // Circular Reasoning
   if (s === t) {
     return {
       fallacyName: "Fallacy of Circular Reasoning (Petitio Principii)",
@@ -825,7 +1642,7 @@ export function getFallacyDiagnosis(
     };
   }
 
-  // 2. Affirming the Consequent (e.g. connecting conclusion to antecedent)
+  // Affirming the Consequent
   if ((s === "C" && t === "A") || (s === "E" && t === "C")) {
     return {
       fallacyName: "Fallacy of Affirming the Consequent",
@@ -841,7 +1658,7 @@ export function getFallacyDiagnosis(
     };
   }
 
-  // 3. Denying the Antecedent (inferring ¬Q from ¬P given P → Q)
+  // Denying the Antecedent
   if (s === "A" && t === "D") {
     return {
       fallacyName: "Fallacy of Denying the Antecedent",
@@ -856,11 +1673,11 @@ export function getFallacyDiagnosis(
     };
   }
 
-  // 4. Incompatible Terms / Non Sequitur
+  // Incompatible Terms / Non Sequitur
   return {
     fallacyName: "Fallacy of Incompatible Terms (Non Sequitur)",
     formalFormula: `Node ${s} ⊬ Node ${t}`,
-    plainEnglish: `There is no valid deductive inference rule (Modus Ponens, Modus Tollens, Syllogism, or Resolution) that links Node ${s} directly to Node ${t} in the active theorem.`,
+    plainEnglish: `There is no valid deductive inference rule linking Node ${s} directly to Node ${t} in the active theorem.`,
     softwareAnalogy: "Type mismatch in function signatures: passing an unrelated variable type into an incompatible parameter socket.",
     truthTable: [
       { p: true, q: false, premise1: true, premise2: false, conclusion: false, isCounterexample: true },
@@ -884,6 +1701,7 @@ export function getNextTacticHint(
       stepNumber: 3,
       title: `Q.E.D. ${th.title} Fully Discharged!`,
       hint: `All premises are satisfied. ${th.nodes.find((n) => n.id === th.targetNodeId)?.description || "Target conclusion is proven with mathematical certainty."}`,
+      suggestedRule: "Q.E.D.",
       isCompleted: true,
     };
   }
@@ -911,6 +1729,7 @@ export function getNextTacticHint(
       hint: `Connect Node ${req1} (${node1?.description}) to Node ${th.intermediateNodeId} (${interNode?.label}).`,
       suggestedSource: req1,
       suggestedTarget: th.intermediateNodeId,
+      suggestedRule: th.ruleName.split("(")[0].trim(),
       isCompleted: false,
     };
   }
@@ -922,6 +1741,7 @@ export function getNextTacticHint(
       hint: `Connect Node ${req2} (${node2?.description}) to Node ${th.intermediateNodeId} (${interNode?.label}) to discharge inference step 1.`,
       suggestedSource: req2,
       suggestedTarget: th.intermediateNodeId,
+      suggestedRule: th.ruleName.split("(")[0].trim(),
       isCompleted: false,
     };
   }
@@ -949,6 +1769,7 @@ export function getNextTacticHint(
       hint: `Node ${cReq1} (${cNode1?.label}) is proven! Now connect Node ${cReq1} to Node ${th.targetNodeId} (${targetNode?.description}).`,
       suggestedSource: cReq1,
       suggestedTarget: th.targetNodeId,
+      suggestedRule: "Modus Ponens",
       isCompleted: false,
     };
   }
@@ -960,6 +1781,7 @@ export function getNextTacticHint(
       hint: `Connect Node ${cReq2} (${cNode2?.description}) to Node ${th.targetNodeId} (${targetNode?.label}).`,
       suggestedSource: cReq2,
       suggestedTarget: th.targetNodeId,
+      suggestedRule: "Modus Ponens",
       isCompleted: false,
     };
   }
@@ -968,6 +1790,7 @@ export function getNextTacticHint(
     stepNumber: 3,
     title: "Proof Verified",
     hint: `Conclusion ${targetNode?.label} is established.`,
+    suggestedRule: "Q.E.D.",
     isCompleted: true,
   };
 }
@@ -1030,6 +1853,121 @@ export function getDeductionLedger(
       isProven: isE_Proven,
     },
   ];
+}
+
+/**
+ * Attempts to apply an inference rule to given AST premises and returns the derived AST.
+ */
+export function applyRuleToAsts(
+  ruleId: string,
+  inputs: PropAst[]
+): { success: boolean; resultAst?: PropAst; explanation?: string } {
+  const normRule = ruleId.toLowerCase();
+
+  // Modus Ponens: P and P -> Q  =>  Q
+  if (normRule === "mp" || normRule === "modus-ponens") {
+    if (inputs.length !== 2) return { success: false, explanation: "Modus Ponens requires exactly 2 premises (P and P → Q)." };
+    const [p1, p2] = inputs;
+    if (p2.type === "implies" && areAstsEqual(p1, p2.left)) {
+      return { success: true, resultAst: p2.right, explanation: `Derived ${formatFormula(p2.right)} via Modus Ponens.` };
+    }
+    if (p1.type === "implies" && areAstsEqual(p2, p1.left)) {
+      return { success: true, resultAst: p1.right, explanation: `Derived ${formatFormula(p1.right)} via Modus Ponens.` };
+    }
+    return { success: false, explanation: "Premises do not match Modus Ponens form (P and P → Q)." };
+  }
+
+  // Modus Tollens: P -> Q and ¬Q  =>  ¬P
+  if (normRule === "mt" || normRule === "modus-tollens") {
+    if (inputs.length !== 2) return { success: false, explanation: "Modus Tollens requires exactly 2 premises (P → Q and ¬Q)." };
+    const [p1, p2] = inputs;
+    if (p1.type === "implies" && p2.type === "not" && areAstsEqual(p1.right, p2.operand)) {
+      return { success: true, resultAst: { type: "not", operand: p1.left }, explanation: `Derived ¬(${formatFormula(p1.left)}) via Modus Tollens.` };
+    }
+    if (p2.type === "implies" && p1.type === "not" && areAstsEqual(p2.right, p1.operand)) {
+      return { success: true, resultAst: { type: "not", operand: p2.left }, explanation: `Derived ¬(${formatFormula(p2.left)}) via Modus Tollens.` };
+    }
+    return { success: false, explanation: "Premises do not match Modus Tollens form (P → Q and ¬Q)." };
+  }
+
+  // Hypothetical Syllogism: P -> Q and Q -> R  =>  P -> R
+  if (normRule === "hs" || normRule === "hypothetical-syllogism") {
+    if (inputs.length !== 2) return { success: false, explanation: "Hypothetical Syllogism requires 2 implications (P → Q and Q → R)." };
+    const [p1, p2] = inputs;
+    if (p1.type === "implies" && p2.type === "implies") {
+      if (areAstsEqual(p1.right, p2.left)) {
+        return { success: true, resultAst: { type: "implies", left: p1.left, right: p2.right }, explanation: `Derived ${formatFormula(p1.left)} → ${formatFormula(p2.right)} via Hypothetical Syllogism.` };
+      }
+      if (areAstsEqual(p2.right, p1.left)) {
+        return { success: true, resultAst: { type: "implies", left: p2.left, right: p1.right }, explanation: `Derived ${formatFormula(p2.left)} → ${formatFormula(p1.right)} via Hypothetical Syllogism.` };
+      }
+    }
+    return { success: false, explanation: "Premises do not chain transitively (P → Q and Q → R)." };
+  }
+
+  // Disjunctive Syllogism: P ∨ Q and ¬P  =>  Q
+  if (normRule === "ds" || normRule === "disjunctive-syllogism") {
+    if (inputs.length !== 2) return { success: false, explanation: "Disjunctive Syllogism requires (P ∨ Q and ¬P or ¬Q)." };
+    const [p1, p2] = inputs;
+    const orNode = p1.type === "or" ? p1 : p2.type === "or" ? p2 : null;
+    const notNode = p1.type === "not" ? p1 : p2.type === "not" ? p2 : null;
+    if (orNode && notNode) {
+      if (areAstsEqual(orNode.left, notNode.operand)) {
+        return { success: true, resultAst: orNode.right, explanation: `Derived ${formatFormula(orNode.right)} via Disjunctive Syllogism.` };
+      }
+      if (areAstsEqual(orNode.right, notNode.operand)) {
+        return { success: true, resultAst: orNode.left, explanation: `Derived ${formatFormula(orNode.left)} via Disjunctive Syllogism.` };
+      }
+    }
+    return { success: false, explanation: "Premises do not match Disjunctive Syllogism form (P ∨ Q and ¬P)." };
+  }
+
+  // Conjunction Introduction: P and Q => P ∧ Q
+  if (normRule === "and_intro" || normRule === "conjunction-intro") {
+    if (inputs.length !== 2) return { success: false, explanation: "Conjunction Intro requires 2 propositions." };
+    return { success: true, resultAst: { type: "and", left: inputs[0], right: inputs[1] }, explanation: `Combined into ${formatFormula(inputs[0])} ∧ ${formatFormula(inputs[1])}.` };
+  }
+
+  // Clausal Resolution: A ∨ B and ¬A ∨ C => B ∨ C
+  if (normRule === "res" || normRule === "resolution") {
+    if (inputs.length !== 2) return { success: false, explanation: "Resolution requires 2 disjunctive clauses." };
+    const [c1, c2] = inputs;
+    // Handle binary clauses or unit literals
+    const getLiterals = (ast: PropAst): PropAst[] => {
+      if (ast.type === "or") return [...getLiterals(ast.left), ...getLiterals(ast.right)];
+      return [ast];
+    };
+    const lits1 = getLiterals(c1);
+    const lits2 = getLiterals(c2);
+
+    for (const l1 of lits1) {
+      for (const l2 of lits2) {
+        // Check complementary: l1 is not l2 or l2 is not l1
+        const isComp =
+          (l1.type === "not" && areAstsEqual(l1.operand, l2)) ||
+          (l2.type === "not" && areAstsEqual(l2.operand, l1));
+        if (isComp) {
+          const rem1 = lits1.filter((l) => l !== l1);
+          const rem2 = lits2.filter((l) => l !== l2);
+          const remaining = [...rem1, ...rem2];
+          if (remaining.length === 0) {
+            return { success: true, resultAst: { type: "bottom" }, explanation: "Derived contradiction ⊥ (Empty Clause □) via Resolution Refutation." };
+          }
+          if (remaining.length === 1) {
+            return { success: true, resultAst: remaining[0], explanation: `Derived unit resolvent ${formatFormula(remaining[0])} via Resolution.` };
+          }
+          let resAst: PropAst = remaining[0];
+          for (let i = 1; i < remaining.length; i++) {
+            resAst = { type: "or", left: resAst, right: remaining[i] };
+          }
+          return { success: true, resultAst: resAst, explanation: `Derived resolvent ${formatFormula(resAst)} via Resolution.` };
+        }
+      }
+    }
+    return { success: false, explanation: "No complementary literals found across clauses for Resolution." };
+  }
+
+  return { success: false, explanation: `Unknown rule '${ruleId}'.` };
 }
 
 /**

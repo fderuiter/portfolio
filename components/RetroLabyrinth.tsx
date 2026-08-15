@@ -16,6 +16,9 @@ import {
 } from "@tabler/icons-react";
 import { VirtualDPad } from "@/components/ui/VirtualDPad";
 import { FieldManualButton } from "@/components/FieldManualButton";
+import { FullscreenButton } from "@/components/arcade/FullscreenButton";
+import { TabletOrientationHint } from "@/components/arcade/TabletOrientationHint";
+import { useFullscreen } from "@/hooks/useFullscreen";
 import {
   ActiveSideEffect,
   BossState,
@@ -70,7 +73,7 @@ interface Drone {
 }
 
 interface RetroLabyrinthProps {
-  isMounted: boolean;
+  isMounted?: boolean;
 }
 
 const subscribeHighScore = (callback: () => void) => {
@@ -86,8 +89,11 @@ const getHighScoreSnapshot = () => {
   }
 };
 const getHighScoreServerSnapshot = () => "0";
+const emptySubscribe = () => () => {};
 
-export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted }) => {
+export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propIsMounted }) => {
+  const clientMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const isMounted = propIsMounted ?? clientMounted;
   const rawHighScore = useSyncExternalStore(
     subscribeHighScore,
     getHighScoreSnapshot,
@@ -175,6 +181,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted }) => 
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { isFullscreen, toggleFullscreen } = useFullscreen(containerRef);
   const { recordEvent } = useTelemetry();
   const { playNote, playSuccess } = useAudio();
 
@@ -1348,6 +1355,9 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted }) => 
 
   return (
     <div className="w-full flex flex-col items-center select-none my-6 font-mono">
+      {/* Tablet Orientation Recommendation */}
+      <TabletOrientationHint className="w-full" />
+
       {/* Top HUD Banner: Mode, Class, CRT Theme & Expand Toggle */}
       <div className="mb-2 w-full flex flex-wrap items-center justify-between gap-2 px-1 text-[10px]">
         <div className="flex items-center gap-2">
@@ -1382,6 +1392,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted }) => 
         {/* Mode Selector, CRT Palette & Expand */}
         <div className="flex items-center gap-1.5">
           <FieldManualButton manualId="retro-labyrinth" label="Manual" />
+          <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} variant="header" />
 
           {/* CRT Theme Switcher */}
           <div className="flex items-center gap-0.5 bg-neutral-900 p-0.5 rounded-lg text-[9px]">
@@ -1478,13 +1489,22 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted }) => 
         onKeyDown={handleKeyDown}
         data-keyboard-boundary="true"
         className={`relative w-full ${
-          isExpanded ? "h-[420px]" : "h-[320px]"
+          isFullscreen
+            ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none bg-black flex flex-col items-center justify-between p-2 sm:p-4 overflow-y-auto"
+            : isExpanded
+            ? "h-[420px]"
+            : "h-[320px]"
         } bg-neutral-950/90 border rounded-2xl flex flex-col items-center justify-between p-2.5 overflow-hidden outline-none transition-all duration-300 ${
           isFocused
             ? "border-brand-cyan ring-2 ring-brand-cyan/10 shadow-[0_0_20px_rgba(34,211,238,0.1)] scale-[1.005]"
             : "border-neutral-900"
         }`}
       >
+        <FullscreenButton
+          isFullscreen={isFullscreen}
+          onToggle={toggleFullscreen}
+          variant="floating"
+        />
         {/* Header HUD: Subnet Badge, HP, RAM, Crypto, Score */}
         <div className="w-full flex justify-between items-center text-[10px] font-bold px-2 py-0.5 border-b border-neutral-900/60">
           <div className="flex items-center gap-2">
@@ -1553,7 +1573,11 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted }) => 
         {/* Game Canvas Container */}
         <div
           className={`relative ${
-            isExpanded ? "w-[360px] h-[216px]" : "w-[240px] h-[144px]"
+            isFullscreen
+              ? "w-full max-h-[calc(100vh-220px)] aspect-[240/144]"
+              : isExpanded
+              ? "w-[360px] h-[216px]"
+              : "w-[240px] h-[144px]"
           } flex items-center justify-center`}
         >
           <canvas
@@ -1562,7 +1586,11 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted }) => 
             height={144}
             onMouseMove={handleCanvasMouseMove}
             className={`block ${
-              isExpanded ? "w-[360px] h-[216px]" : "w-[240px] h-[144px]"
+              isFullscreen
+                ? "w-full h-full max-h-[calc(100vh-220px)] object-contain"
+                : isExpanded
+                ? "w-[360px] h-[216px]"
+                : "w-[240px] h-[144px]"
             } rounded-lg border border-neutral-900/60 bg-neutral-950 cursor-crosshair`}
           />
 
@@ -1918,7 +1946,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted }) => 
           </div>
 
           {/* Enhanced Touch D-Pad for Mobile & Tablet */}
-          <div className="w-full pt-1.5 md:hidden flex flex-col items-center">
+          <div className="w-full pt-1.5 flex flex-col items-center">
             <VirtualDPad
               onDirectionPress={handleDirectionalMove}
               onActionAPress={() => handleFireWeapon("emp_blast")}

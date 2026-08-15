@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   IconTerminal,
@@ -9,15 +9,16 @@ import {
   IconBulb,
   IconShieldCheck,
   IconX,
-  IconBolt,
   IconBook,
   IconTable,
   IconAlertTriangle,
   IconDownload,
   IconCopy,
   IconCheck,
-  IconArrowsMove,
-  IconCode,
+  IconPlayerPlay,
+  IconCpu,
+  IconWand,
+  IconPlus,
 } from "@tabler/icons-react";
 import {
   getSuggestion,
@@ -30,10 +31,15 @@ import {
   exportProofToLatex,
   exportProofToMarkdown,
   exportProofToMermaid,
+  applyRuleToAsts,
+  parseFormula,
+  formatFormula,
   THEOREMS,
+  INFERENCE_RULES,
   TheoremId,
   Edge,
   FallacyDiagnosis,
+  ProofNode,
 } from "@/lib/proof-utils";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { useAudio } from "@/components/providers/AudioProvider";
@@ -51,16 +57,23 @@ export default function ProofWorkspacePage() {
   const activeTheorem = THEOREMS[activeTheoremId];
 
   const [edges, setEdges] = useState<Edge[]>(activeTheorem.initialEdges);
-  const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
+  const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
   const [inspectedNodeId, setInspectedNodeId] = useState<string>("E");
-  const [activeTab, setActiveTab] = useState<"inspector" | "ledger" | "fallacy">("inspector");
+  const [activeTab, setActiveTab] = useState<"ledger" | "systems" | "fallacy">("ledger");
   const [feedbackToast, setFeedbackToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
   const [currentFallacy, setCurrentFallacy] = useState<FallacyDiagnosis | null>(null);
 
-  // Custom node drag positions (offset relative to default coordinates)
+  // Custom Node drag offsets
   const [nodeOffsets, setNodeOffsets] = useState<Record<string, { x: number; y: number }>>({});
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
   const dragStartRef = useRef<{ startX: number; startY: number; initOffsetX: number; initOffsetY: number } | null>(null);
+
+  // Custom Studio modal state
+  const [isCustomStudioOpen, setIsCustomStudioOpen] = useState(false);
+  const [customPremise1, setCustomPremise1] = useState("P");
+  const [customPremise2, setCustomPremise2] = useState("P -> Q");
+  const [customPremise3, setCustomPremise3] = useState("Q -> R");
+  const [customGoal, setCustomGoal] = useState("R");
 
   // Export Modal state
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -74,7 +87,7 @@ export default function ProofWorkspacePage() {
     {
       id: "welcome",
       type: "info",
-      text: "Interactive Logic Proof Canvas v3.0.0 · Multi-Theorem Formal Verification Suite\nClick nodes directly to connect, use the Guided Assistant, or run CLI commands. Type 'help' for command syntax.",
+      text: "Interactive Logic Proof Canvas v3.0.0 · Multi-Theorem Formal Verification Suite\nClick nodes to select premises, fire inference rules from the Rule Palette, or run CLI commands. Type 'help' for command syntax.",
     },
   ]);
   const [history, setHistory] = useState<string[]>([]);
@@ -99,7 +112,21 @@ export default function ProofWorkspacePage() {
   const terminalLogsContainerRef = useRef<HTMLDivElement>(null);
   const svgCanvasRef = useRef<SVGSVGElement>(null);
 
-  // Helper to trigger screen reader announcement within 100ms
+  const { isC_Proven, isE_Proven } = useMemo(
+    () => evaluateProofStatus(edges, activeTheoremId),
+    [edges, activeTheoremId]
+  );
+
+  const activeTacticHint = useMemo(
+    () => getNextTacticHint(edges, activeTheoremId),
+    [edges, activeTheoremId]
+  );
+
+  const deductionLedger = useMemo(
+    () => getDeductionLedger(edges, activeTheoremId),
+    [edges, activeTheoremId]
+  );
+
   const announceToScreenReader = (text: string) => {
     setLiveAnnouncement("");
     setTimeout(() => {
@@ -133,7 +160,6 @@ export default function ProofWorkspacePage() {
     });
   }, []);
 
-  // Helper to clear watchdog
   const clearWatchdog = React.useCallback(() => {
     if (watchdogRef.current) {
       clearTimeout(watchdogRef.current);
@@ -141,7 +167,6 @@ export default function ProofWorkspacePage() {
     }
   }, []);
 
-  // Handle watchdog timeout termination and recovery
   const handleWatchdogTimeout = React.useCallback(() => {
     if (workerRef.current) {
       workerRef.current.terminate();
@@ -164,7 +189,6 @@ export default function ProofWorkspacePage() {
     announceToScreenReader("Background calculation terminated by watchdog: execution exceeded 5-second limit.");
   }, [clearWatchdog]);
 
-  // Helper to reset watchdog for another 5 seconds (5000ms)
   const resetWatchdog = React.useCallback(() => {
     clearWatchdog();
     watchdogRef.current = setTimeout(() => {
@@ -172,7 +196,6 @@ export default function ProofWorkspacePage() {
     }, 5000);
   }, [clearWatchdog, handleWatchdogTimeout]);
 
-  // Helper to lazily initialize/re-initialize the Web Worker
   const initWorker = React.useCallback(() => {
     if (typeof window !== "undefined") {
       if (workerRef.current) {
@@ -237,6 +260,7 @@ export default function ProofWorkspacePage() {
     initWorker();
 
     // 100ms batch logs flush timer
+    // 100ms batch logs flush timer
     const flushInterval = setInterval(() => {
       if (pendingLogsRef.current.length > 0) {
         const logsToAppend = [...pendingLogsRef.current];
@@ -275,7 +299,6 @@ export default function ProofWorkspacePage() {
     }
   }, [consoleLogs]);
 
-  // Global Keyboard Shortcut handler for toggling split-view: Ctrl + \ or Ctrl + `
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey && e.key === "\\") || (e.ctrlKey && e.key === "`")) {
@@ -296,7 +319,6 @@ export default function ProofWorkspacePage() {
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
   }, [toggleConsole, isConsoleOpen]);
 
-  // Handle switching active theorem scenario
   const handleSwitchTheorem = (newTheoremId: TheoremId) => {
     if (newTheoremId === activeTheoremId) return;
     const nextTh = THEOREMS[newTheoremId];
@@ -304,7 +326,7 @@ export default function ProofWorkspacePage() {
 
     setActiveTheoremId(newTheoremId);
     setEdges(nextTh.initialEdges);
-    setSelectedSourceId(null);
+    setSelectedNodeIds([]);
     setInspectedNodeId(nextTh.targetNodeId);
     setNodeOffsets({});
     setCurrentFallacy(null);
@@ -313,7 +335,7 @@ export default function ProofWorkspacePage() {
       playAutocomplete();
     } catch {}
 
-    showToast(`Switched active theorem scenario to '${nextTh.title}' (${nextTh.subtitle})`, "info");
+    showToast(`Switched active theorem scenario to '${nextTh.title}'`, "info");
     announceToScreenReader(`Switched theorem to ${nextTh.title}.`);
 
     setConsoleLogs((prev) => [
@@ -326,7 +348,6 @@ export default function ProofWorkspacePage() {
     ]);
   };
 
-  // Node Drag Handlers in SVG Canvas
   const handleNodePointerDown = (e: React.PointerEvent, nodeId: string) => {
     e.stopPropagation();
     setDraggingNodeId(nodeId);
@@ -365,14 +386,16 @@ export default function ProofWorkspacePage() {
 
   const handleResetLayout = () => {
     setNodeOffsets({});
+    setEdges(activeTheorem.initialEdges);
+    setSelectedNodeIds([]);
+    setCurrentFallacy(null);
     try {
       playAutocomplete();
     } catch {}
-    showToast("Node coordinates reset to canonical layout.", "info");
-    announceToScreenReader("Node coordinates reset to default layout.");
+    showToast("Workspace state reset to default layout.", "info");
+    announceToScreenReader("Workspace state reset to default layout.");
   };
 
-  // Visual Node Connection / Selection Click Handler
   const handleNodeClick = (nodeId: string) => {
     try {
       playHover();
@@ -380,208 +403,372 @@ export default function ProofWorkspacePage() {
 
     setInspectedNodeId(nodeId);
 
-    if (!selectedSourceId) {
-      // Pick as source
-      setSelectedSourceId(nodeId);
-      showToast(`Selected Node ${nodeId} as premise source. Click a target node to connect.`, "info");
-      announceToScreenReader(`Selected source Node ${nodeId}. Click target node.`);
+    if (selectedNodeIds.length === 0) {
+      setSelectedNodeIds([nodeId]);
+      showToast(`Selected Node ${nodeId}. Pick another node or choose an Inference Rule.`, "info");
+      announceToScreenReader(`Selected Node ${nodeId}.`);
       return;
     }
 
-    if (selectedSourceId === nodeId) {
-      // Deselect
-      setSelectedSourceId(null);
+    if (selectedNodeIds.includes(nodeId)) {
+      setSelectedNodeIds((prev) => prev.filter((id) => id !== nodeId));
       showToast(`Deselected Node ${nodeId}.`, "info");
       announceToScreenReader(`Deselected Node ${nodeId}.`);
       return;
     }
 
-    // Attempt connection from selectedSourceId -> nodeId
-    const validation = canConnect(selectedSourceId, nodeId, edges, activeTheoremId);
-    if (!validation.allowed) {
-      const fallacy = getFallacyDiagnosis(selectedSourceId, nodeId, edges, activeTheoremId);
+    if (selectedNodeIds.length === 1) {
+      const sourceId = selectedNodeIds[0];
+      const validation = canConnect(sourceId, nodeId, edges, activeTheoremId);
+      if (!validation.allowed) {
+        const fallacy = getFallacyDiagnosis(sourceId, nodeId, edges, activeTheoremId);
+        setCurrentFallacy(fallacy);
+        setActiveTab("fallacy");
+
+        showToast(`Invalid Connection: ${fallacy.fallacyName}`, "error");
+        announceToScreenReader(`Connection rejected: ${fallacy.fallacyName}. ${validation.reason}`);
+        setConsoleLogs((prev) => [
+          ...prev,
+          {
+            id: `err-${Date.now()}`,
+            type: "error",
+            text: `[FALLACY DETECTED] ${fallacy.fallacyName}: ${validation.reason}\nFormula: ${fallacy.formalFormula}\nAnalogy: ${fallacy.softwareAnalogy}`,
+          },
+        ]);
+        setSelectedNodeIds([]);
+        return;
+      }
+
+      const newEdge: Edge = { source: sourceId, target: nodeId };
+      setEdges((prev) => [...prev, newEdge]);
+      setSelectedNodeIds([]);
+      setCurrentFallacy(null);
+
+      try {
+        playSuccess();
+      } catch {}
+
+      showToast(`✔ Connected Node ${newEdge.source} → Node ${newEdge.target}!`, "success");
+      announceToScreenReader(`Successfully connected Node ${newEdge.source} to Node ${newEdge.target}.`);
+
+      const sNode = activeTheorem.nodes.find((n) => n.id === newEdge.source);
+      const tNode = activeTheorem.nodes.find((n) => n.id === newEdge.target);
+
+      setConsoleLogs((prev) => [
+        ...prev,
+        {
+          id: `cmd-${Date.now()}`,
+          type: "command",
+          text: `connect ${newEdge.source} ${newEdge.target}`,
+        },
+        {
+          id: `out-${Date.now()}`,
+          type: "success",
+          text: `✔ Established edge: Node ${newEdge.source} (${sNode?.label}) → Node ${newEdge.target} (${tNode?.label})`,
+        },
+      ]);
+      return;
+    }
+
+    setSelectedNodeIds([nodeId]);
+  };
+
+  const handleApplyRule = (ruleId: string) => {
+    if (selectedNodeIds.length === 0) {
+      showToast("Select at least 1 premise/lemma node before applying a rule.", "info");
+      return;
+    }
+
+    const selectedNodes = selectedNodeIds
+      .map((id) => activeTheorem.nodes.find((n) => n.id === id))
+      .filter((n): n is ProofNode => Boolean(n));
+
+    const asts = selectedNodes
+      .map((n) => n.ast || parseFormula(n.label))
+      .filter((ast): ast is NonNullable<typeof ast> => Boolean(ast));
+
+    const ruleResult = applyRuleToAsts(ruleId, asts);
+
+    if (ruleResult.success && ruleResult.resultAst) {
+      try {
+        playSuccess();
+      } catch {}
+
+      const autoTarget = activeTheorem.nodes.find(
+        (n) => n.label === formatFormula(ruleResult.resultAst!) || n.id === activeTheorem.intermediateNodeId || n.id === activeTheorem.targetNodeId
+      );
+
+      if (autoTarget) {
+        const newEdges: Edge[] = selectedNodeIds.map((s) => ({
+          source: s,
+          target: autoTarget.id,
+          ruleApplied: ruleId.toUpperCase(),
+        }));
+        setEdges((prev) => [...prev, ...newEdges]);
+      }
+
+      setSelectedNodeIds([]);
+      setCurrentFallacy(null);
+      showToast(`✔ ${ruleResult.explanation}`, "success");
+      announceToScreenReader(`Applied rule ${ruleId.toUpperCase()}: ${ruleResult.explanation}`);
+
+      setConsoleLogs((prev) => [
+        ...prev,
+        {
+          id: `cmd-${Date.now()}`,
+          type: "command",
+          text: `apply ${ruleId} ${selectedNodeIds.join(" ")}`,
+        },
+        {
+          id: `out-${Date.now()}`,
+          type: "success",
+          text: `✔ ${ruleResult.explanation}`,
+        },
+      ]);
+    } else {
+      const sId = selectedNodeIds[0];
+      const tId = selectedNodeIds[1] || sId;
+      const fallacy = getFallacyDiagnosis(sId, tId, edges, activeTheoremId);
       setCurrentFallacy(fallacy);
       setActiveTab("fallacy");
 
-      showToast(`Invalid Connection: ${fallacy.fallacyName}`, "error");
-      announceToScreenReader(`Connection rejected: ${fallacy.fallacyName}. ${validation.reason}`);
+      showToast(`Rule Application Failed: ${ruleResult.explanation || fallacy.fallacyName}`, "error");
+      announceToScreenReader(`Rule failed: ${ruleResult.explanation || fallacy.fallacyName}`);
+
       setConsoleLogs((prev) => [
         ...prev,
         {
           id: `err-${Date.now()}`,
           type: "error",
-          text: `[FALLACY DETECTED] ${fallacy.fallacyName}: ${validation.reason}\nFormula: ${fallacy.formalFormula}\nAnalogy: ${fallacy.softwareAnalogy}`,
+          text: `[RULE ERROR] ${ruleResult.explanation || fallacy.fallacyName}\n${fallacy.plainEnglish}`,
         },
       ]);
-      setSelectedSourceId(null);
+    }
+  };
+
+  const handleAutoStep = () => {
+    if (isE_Proven) {
+      showToast("Goal already fully discharged (Q.E.D.)!", "success");
       return;
     }
 
-    // Valid connection!
-    const newEdge: Edge = { source: selectedSourceId, target: nodeId };
-    setEdges((prev) => [...prev, newEdge]);
-    setSelectedSourceId(null);
-    setCurrentFallacy(null);
+    if (!isC_Proven) {
+      const [r1, r2] = activeTheorem.intermediateRequires;
+      const newEdges: Edge[] = [
+        { source: r1, target: activeTheorem.intermediateNodeId },
+        { source: r2, target: activeTheorem.intermediateNodeId },
+      ];
+      setEdges((prev) => [...prev, ...newEdges]);
+      showToast(`Auto-Step: Connected premises to intermediate Node ${activeTheorem.intermediateNodeId}`, "success");
+    } else {
+      const [cr1, cr2] = activeTheorem.conclusionRequires;
+      const newEdges: Edge[] = [
+        { source: cr1, target: activeTheorem.targetNodeId },
+        { source: cr2, target: activeTheorem.targetNodeId },
+      ];
+      setEdges((prev) => [...prev, ...newEdges]);
+      showToast(`Auto-Step: Connected intermediate and premise to Target Node ${activeTheorem.targetNodeId}`, "success");
+    }
 
     try {
       playSuccess();
     } catch {}
-
-    showToast(`✔ Connected Node ${newEdge.source} → Node ${newEdge.target}!`, "success");
-    announceToScreenReader(`Successfully connected Node ${newEdge.source} to Node ${newEdge.target}.`);
-
-    const sNode = activeTheorem.nodes.find((n) => n.id === newEdge.source);
-    const tNode = activeTheorem.nodes.find((n) => n.id === newEdge.target);
-
-    setConsoleLogs((prev) => [
-      ...prev,
-      {
-        id: `cmd-${Date.now()}`,
-        type: "command",
-        text: `connect ${newEdge.source} ${newEdge.target}`,
-      },
-      {
-        id: `out-${Date.now()}`,
-        type: "success",
-        text: `✔ Established edge: Node ${newEdge.source} (${sNode?.label}) → Node ${newEdge.target} (${tNode?.label})`,
-      },
-    ]);
   };
 
-  const handleDisconnectEdge = (source: string, target: string) => {
-    setEdges((prev) =>
-      prev.filter(
-        (e) =>
-          !(
-            (e.source === source && e.target === target) ||
-            (e.source === target && e.target === source)
-          )
-      )
-    );
+  const handleStartSimulation = (mode: "normal" | "loop" = "normal") => {
+    if (isSimulating) return;
 
-    try {
-      playAutocomplete();
-    } catch {}
-
-    showToast(`Disconnected edge between Node ${source} and Node ${target}.`, "info");
-    announceToScreenReader(`Disconnected edge between Node ${source} and Node ${target}.`);
+    setIsSimulating(true);
+    setSimulationProgress({ step: 1, total: 10, log: "Booting Proof Simulation Engine..." });
+    resetWatchdog();
 
     setConsoleLogs((prev) => [
       ...prev,
       {
-        id: `cmd-${Date.now()}`,
-        type: "command",
-        text: `disconnect ${source} ${target}`,
-      },
-      {
-        id: `out-${Date.now()}`,
-        type: "output",
-        text: `Disconnected edge between Node ${source} and Node ${target}.`,
-      },
-    ]);
-  };
-
-  const handleApplyNextTactic = () => {
-    const hint = getNextTacticHint(edges, activeTheoremId);
-    if (hint.isCompleted || !hint.suggestedSource || !hint.suggestedTarget) {
-      showToast("Proof theorem is already fully discharged!", "success");
-      return;
-    }
-
-    const s = hint.suggestedSource;
-    const t = hint.suggestedTarget;
-    const newEdge: Edge = { source: s, target: t };
-
-    setEdges((prev) => [...prev, newEdge]);
-    setInspectedNodeId(t);
-    try {
-      playSuccess();
-    } catch {}
-
-    showToast(`Applied Tactic: Connected Node ${s} → Node ${t}`, "success");
-    announceToScreenReader(`Applied tactic: connected Node ${s} to Node ${t}`);
-
-    setConsoleLogs((prev) => [
-      ...prev,
-      {
-        id: `cmd-${Date.now()}`,
-        type: "command",
-        text: `connect ${s} ${t}`,
-      },
-      {
-        id: `out-${Date.now()}`,
-        type: "success",
-        text: `✔ Tactic Applied: ${hint.hint}`,
-      },
-    ]);
-  };
-
-  const handleResetProof = () => {
-    setEdges(activeTheorem.initialEdges);
-    setSelectedSourceId(null);
-    setInspectedNodeId(activeTheorem.targetNodeId);
-    setCurrentFallacy(null);
-    try {
-      playAutocomplete();
-    } catch {}
-
-    showToast(`Proof canvas reset to initial premises for ${activeTheorem.title}.`, "info");
-    announceToScreenReader(`Proof canvas reset to initial premises for ${activeTheorem.title}.`);
-
-    setConsoleLogs((prev) => [
-      ...prev,
-      {
-        id: `out-${Date.now()}`,
+        id: `sim-start-${Date.now()}`,
         type: "info",
-        text: `↺ Proof canvas reset to initial premises for [${activeTheorem.title}].`,
+        text: `Starting Proof Graph Simulation for [${activeTheorem.title}] in mode '${mode}'...`,
       },
     ]);
+
+    if (workerRef.current) {
+      workerRef.current.postMessage({
+        type: "START_SIMULATION",
+        mode,
+        theoremId: activeTheoremId,
+      });
+    }
   };
 
-  // Command executor
-  const runCommand = (cmdStr: string) => {
-    const trimmed = cmdStr.trim();
-    if (!trimmed) return;
+  const handleConsoleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const rawInput = consoleInput.trim();
+    if (!rawInput) return;
 
-    const commandLogId = `cmd-${Date.now()}`;
-    setConsoleLogs((prev) => [...prev, { id: commandLogId, type: "command", text: trimmed }]);
+    setHistory((prev) => [rawInput, ...prev]);
+    setHistoryIdx(-1);
     setConsoleInput("");
 
-    setHistory((prev) => {
-      const filtered = prev.filter((h) => h !== trimmed);
-      return [...filtered, trimmed];
-    });
-    setHistoryIdx(-1);
+    setConsoleLogs((prev) => [
+      ...prev,
+      {
+        id: `cmd-${Date.now()}`,
+        type: "command",
+        text: rawInput,
+      },
+    ]);
 
-    const tokens = trimmed.split(/\s+/);
+    const tokens = rawInput.split(/\s+/);
     const op = tokens[0].toLowerCase();
-    const arg1 = tokens[1]?.toUpperCase();
-    const arg2 = tokens[2]?.toUpperCase();
-
-    const outputLogId = `out-${Date.now()}`;
 
     if (op === "help") {
-      const helpText =
-        "Supported Formal Logic Commands:\n" +
-        "  theorem <id>               - Switch theorem: mp, mt, hs, ds, res\n" +
-        "  connect <node1> <node2>    - Connect source node to target node\n" +
-        "  disconnect <node1> <node2> - Remove connection between two nodes\n" +
-        "  inspect <node>             - Inspect proposition, rule, and status of a node\n" +
-        "  tactic                     - Automatically apply the next valid deduction step\n" +
-        "  ledger                     - Print formatted ASCII deduction proof ledger\n" +
-        "  export [lean|latex|md|mer] - Export formal proof code to console\n" +
-        "  list                       - List active theorem nodes & connections\n" +
-        "  simulate [normal|loop]     - Run background tactic simulation (normal/loop)\n" +
-        "  clear                      - Clear the console logs\n" +
-        "  help                       - Show this help menu";
-      setConsoleLogs((prev) => [...prev, { id: outputLogId, type: "info", text: helpText }]);
-      announceToScreenReader("Help menu printed.");
+      setConsoleLogs((prev) => [
+        ...prev,
+        {
+          id: `help-${Date.now()}`,
+          type: "info",
+          text: `Interactive Proof Workspace CLI v3.0 Commands:
+  connect <src> <tgt>    Connect two nodes with deductive edge
+  disconnect <src> <tgt> Remove an edge between nodes
+  apply <rule> <nodes..> Apply an inference rule (mp, mt, hs, ds, res, and_intro)
+  autostep               Automatically advance the next valid inference step
+  list                   List all nodes and active edges in graph
+  inspect <nodeId>       Inspect details of a specific node
+  theorem <id>           Switch theorem scenario (mp, mt, hs, ds, res, 2pc, quorum, cache)
+  ledger                 Print deduction ledger table
+  export <format>        Export proof (lean, latex, markdown, mermaid)
+  simulate normal|loop   Run verification engine in background Web Worker
+  clear                  Clear terminal buffer
+  help                   Print this command reference`,
+        },
+      ]);
+      announceToScreenReader("Printed help manual.");
       return;
     }
 
     if (op === "clear") {
       setConsoleLogs([]);
-      announceToScreenReader("Console logs cleared.");
+      announceToScreenReader("Cleared terminal logs.");
+      return;
+    }
+
+    if (op === "list") {
+      const nodeListStr = activeTheorem.nodes
+        .map((n) => `  [Node ${n.id}] ${n.label} (${n.type}) - ${n.description}`)
+        .join("\n");
+      const edgeListStr =
+        edges.length > 0
+          ? edges.map((e) => `  ${e.source} -> ${e.target}${e.ruleApplied ? ` [${e.ruleApplied}]` : ""}`).join("\n")
+          : "  (None)";
+
+      setConsoleLogs((prev) => [
+        ...prev,
+        {
+          id: `list-${Date.now()}`,
+          type: "info",
+          text: `Active Theorem: ${activeTheorem.title} (${activeTheorem.category})\nNodes:\n${nodeListStr}\nEdges:\n${edgeListStr}\nStatus: ${isE_Proven ? "✔ Q.E.D." : "⏳ INCOMPLETE"}`,
+        },
+      ]);
+      announceToScreenReader("Listed active nodes and connections.");
+      return;
+    }
+
+    if (op === "connect") {
+      const s = tokens[1]?.toUpperCase();
+      const t = tokens[2]?.toUpperCase();
+      if (!s || !t) {
+        setConsoleLogs((prev) => [
+          ...prev,
+          {
+            id: `err-${Date.now()}`,
+            type: "error",
+            text: "Usage: connect <sourceNode> <targetNode>",
+          },
+        ]);
+        return;
+      }
+      handleNodeClick(s);
+      handleNodeClick(t);
+      return;
+    }
+
+    if (op === "disconnect") {
+      const s = tokens[1]?.toUpperCase();
+      const t = tokens[2]?.toUpperCase();
+      if (!s || !t) {
+        setConsoleLogs((prev) => [
+          ...prev,
+          {
+            id: `err-${Date.now()}`,
+            type: "error",
+            text: "Usage: disconnect <sourceNode> <targetNode>",
+          },
+        ]);
+        return;
+      }
+      setEdges((prev) =>
+        prev.filter((e) => !(e.source === s && e.target === t) && !(e.source === t && e.target === s))
+      );
+      setConsoleLogs((prev) => [
+        ...prev,
+        {
+          id: `disc-${Date.now()}`,
+          type: "info",
+          text: `Removed edge between Node ${s} and Node ${t}.`,
+        },
+      ]);
+      announceToScreenReader(`Disconnected Node ${s} and Node ${t}.`);
+      return;
+    }
+
+    if (op === "apply") {
+      const rule = tokens[1]?.toLowerCase();
+      const nodes = tokens.slice(2).map((n) => n.toUpperCase());
+      if (!rule || nodes.length === 0) {
+        setConsoleLogs((prev) => [
+          ...prev,
+          {
+            id: `err-${Date.now()}`,
+            type: "error",
+            text: "Usage: apply <rule> <node1> [node2...]",
+          },
+        ]);
+        return;
+      }
+      setSelectedNodeIds(nodes);
+      handleApplyRule(rule);
+      return;
+    }
+
+    if (op === "autostep" || op === "solve") {
+      handleAutoStep();
+      return;
+    }
+
+    if (op === "inspect") {
+      const nId = tokens[1]?.toUpperCase();
+      const node = activeTheorem.nodes.find((n) => n.id === nId);
+      if (!node) {
+        setConsoleLogs((prev) => [
+          ...prev,
+          {
+            id: `err-${Date.now()}`,
+            type: "error",
+            text: `Node '${nId}' not found.`,
+          },
+        ]);
+        return;
+      }
+      setInspectedNodeId(node.id);
+      setConsoleLogs((prev) => [
+        ...prev,
+        {
+          id: `insp-${Date.now()}`,
+          type: "info",
+          text: `[Node ${node.id}] ${node.label}\nType: ${node.type.toUpperCase()}\nFormula: ${node.label}\nDescription: ${node.description}\nMeaning: ${node.meaning}`,
+        },
+      ]);
+      announceToScreenReader(`Inspecting Node ${node.id}.`);
       return;
     }
 
@@ -589,1238 +776,815 @@ export default function ProofWorkspacePage() {
       const targetTh = tokens[1]?.toLowerCase();
       const map: Record<string, TheoremId> = {
         mp: "modus-ponens",
-        "modus-ponens": "modus-ponens",
         mt: "modus-tollens",
-        "modus-tollens": "modus-tollens",
         hs: "hypothetical-syllogism",
-        "hypothetical-syllogism": "hypothetical-syllogism",
         ds: "disjunctive-syllogism",
-        "disjunctive-syllogism": "disjunctive-syllogism",
         res: "resolution",
-        resolution: "resolution",
+        "2pc": "two-phase-commit",
+        quorum: "quorum-overlap",
+        cache: "cache-consistency",
+        custom: "custom",
       };
-
-      if (!targetTh || !map[targetTh]) {
+      const thId = map[targetTh] || (targetTh as TheoremId);
+      if (THEOREMS[thId]) {
+        handleSwitchTheorem(thId);
+      } else {
         setConsoleLogs((prev) => [
           ...prev,
           {
-            id: outputLogId,
+            id: `err-${Date.now()}`,
             type: "error",
-            text: "Syntax Error: 'theorem' requires a valid theorem ID: mp, mt, hs, ds, or res. Example: 'theorem mt'",
+            text: `Unknown theorem ID '${targetTh}'. Available: mp, mt, hs, ds, res, 2pc, quorum, cache, custom.`,
           },
         ]);
-        announceToScreenReader("Syntax error in theorem switch command.");
-        return;
       }
-
-      handleSwitchTheorem(map[targetTh]);
-      return;
-    }
-
-    if (op === "tactic") {
-      handleApplyNextTactic();
-      return;
-    }
-
-    if (op === "inspect") {
-      if (!arg1 || !activeTheorem.nodes.some((n) => n.id === arg1)) {
-        setConsoleLogs((prev) => [
-          ...prev,
-          {
-            id: outputLogId,
-            type: "error",
-            text: `Invalid Node ID '${tokens[1]}'. Choose from: ${activeTheorem.nodes.map((n) => n.id).join(", ")}`,
-          },
-        ]);
-        announceToScreenReader("Invalid node specified for inspect.");
-        return;
-      }
-
-      const node = activeTheorem.nodes.find((n) => n.id === arg1)!;
-      const { isC_Proven, isE_Proven } = evaluateProofStatus(edges, activeTheoremId);
-      let isNodeProven = true;
-      if (node.id === "C") isNodeProven = isC_Proven;
-      if (node.id === "E") isNodeProven = isE_Proven;
-
-      setInspectedNodeId(arg1);
-      setActiveTab("inspector");
-
-      const nodeText =
-        `[INSPECT NODE ${node.id}]\n` +
-        `Proposition: ${node.label} (${node.type.toUpperCase()})\n` +
-        `Status: ${isNodeProven ? "✔ PROVEN / SATISFIED" : "⏳ PENDING DISCHARGE"}\n` +
-        `Description: ${node.description}\n` +
-        `Meaning: ${node.meaning}`;
-
-      setConsoleLogs((prev) => [...prev, { id: outputLogId, type: "info", text: nodeText }]);
-      announceToScreenReader(`Inspected Node ${node.id}`);
       return;
     }
 
     if (op === "ledger") {
       const ledger = getDeductionLedger(edges, activeTheoremId);
-      const rows = ledger
+      const textRows = ledger
         .map(
           (s) =>
-            `| ${s.stepNumber} | ${s.formula.padEnd(8)} | ${s.rule.padEnd(16)} | ${s.premises.padEnd(12)} | ${s.isProven ? "PROVEN" : "PENDING"} |`
+            `[Step ${s.stepNumber}] ${s.formula.padEnd(14)} | ${s.rule.padEnd(16)} | ${s.isProven ? "✔ PROVEN" : "⏳ PENDING"} | ${s.plainEnglish}`
         )
         .join("\n");
-      const ledgerText =
-        `Deduction Ledger: ${activeTheorem.title} (${activeTheorem.ruleName})\n` +
-        `+---+----------+------------------+--------------+---------+\n` +
-        `| # | Formula  | Rule             | Premises     | Status  |\n` +
-        `+---+----------+------------------+--------------+---------+\n` +
-        `${rows}\n` +
-        `+---+----------+------------------+--------------+---------+`;
-
-      setConsoleLogs((prev) => [...prev, { id: outputLogId, type: "output", text: ledgerText }]);
+      setConsoleLogs((prev) => [
+        ...prev,
+        {
+          id: `ledger-${Date.now()}`,
+          type: "info",
+          text: `--- Deduction Ledger: ${activeTheorem.title} ---\n${textRows}`,
+        },
+      ]);
       announceToScreenReader("Printed deduction ledger.");
       return;
     }
 
     if (op === "export") {
-      const fmt = tokens[1]?.toLowerCase() || "lean";
-      let code = "";
-      if (fmt === "lean" || fmt === "lean4") code = exportProofToLean4(activeTheoremId);
-      else if (fmt === "latex" || fmt === "tex") code = exportProofToLatex(activeTheoremId);
-      else if (fmt === "md" || fmt === "markdown") code = exportProofToMarkdown(edges, activeTheoremId);
-      else if (fmt === "mer" || fmt === "mermaid") code = exportProofToMermaid(edges, activeTheoremId);
-      else {
+      const fmt = tokens[1]?.toLowerCase();
+      if (fmt === "lean") {
         setConsoleLogs((prev) => [
           ...prev,
-          {
-            id: outputLogId,
-            type: "error",
-            text: "Supported export formats: lean, latex, markdown, mermaid. Example: 'export lean'",
-          },
+          { id: `exp-${Date.now()}`, type: "info", text: exportProofToLean4(activeTheoremId) },
         ]);
-        return;
-      }
-
-      setConsoleLogs((prev) => [
-        ...prev,
-        {
-          id: outputLogId,
-          type: "success",
-          text: `--- Formal Proof Export (${fmt.toUpperCase()}) ---\n${code}`,
-        },
-      ]);
-      announceToScreenReader(`Exported proof in ${fmt} format.`);
-      return;
-    }
-
-    if (op === "list") {
-      const activeNodesText = activeTheorem.nodes
-        .map((node) => {
-          const outConnections = edges.filter((e) => e.source === node.id).map((e) => e.target);
-          const connectionStr =
-            outConnections.length > 0 ? `connected to [${outConnections.join(", ")}]` : "no outgoing connections";
-          return `• Node ${node.id} (${node.label}): ${node.description} [${connectionStr}]`;
-        })
-        .join("\n");
-
-      setConsoleLogs((prev) => [
-        ...prev,
-        {
-          id: outputLogId,
-          type: "output",
-          text: `Active [${activeTheorem.title}] Logic Nodes & Connections:\n${activeNodesText}`,
-        },
-      ]);
-      announceToScreenReader("Listed active proof nodes and connections.");
-      return;
-    }
-
-    if (op === "connect") {
-      if (!arg1 || !arg2) {
+      } else if (fmt === "latex") {
         setConsoleLogs((prev) => [
           ...prev,
-          {
-            id: outputLogId,
-            type: "error",
-            text: "Syntax Error: 'connect' requires two node arguments. Example: 'connect C E'",
-          },
+          { id: `exp-${Date.now()}`, type: "info", text: exportProofToLatex(activeTheoremId) },
         ]);
-        announceToScreenReader("Syntax error in connect command.");
-        return;
-      }
-
-      const validation = canConnect(arg1, arg2, edges, activeTheoremId);
-      if (!validation.allowed) {
-        const fallacy = getFallacyDiagnosis(arg1, arg2, edges, activeTheoremId);
-        setCurrentFallacy(fallacy);
-        setActiveTab("fallacy");
-
+      } else if (fmt === "markdown") {
         setConsoleLogs((prev) => [
           ...prev,
-          {
-            id: outputLogId,
-            type: "error",
-            text: `[FALLACY DETECTED] ${fallacy.fallacyName}: ${validation.reason}\n${fallacy.softwareAnalogy}`,
-          },
+          { id: `exp-${Date.now()}`, type: "info", text: exportProofToMarkdown(edges, activeTheoremId) },
         ]);
-        announceToScreenReader(`Connection error: ${fallacy.fallacyName}`);
-        return;
-      }
-
-      setEdges((prev) => [...prev, { source: arg1, target: arg2 }]);
-      setCurrentFallacy(null);
-      setInspectedNodeId(arg2);
-
-      try {
-        playSuccess();
-      } catch {}
-      setConsoleLogs((prev) => [
-        ...prev,
-        {
-          id: outputLogId,
-          type: "success",
-          text: `✔ Established connection: Node ${arg1} → Node ${arg2}`,
-        },
-      ]);
-      announceToScreenReader(`Connected Node ${arg1} to Node ${arg2}`);
-      return;
-    }
-
-    if (op === "disconnect") {
-      if (!arg1 || !arg2) {
+      } else if (fmt === "mermaid") {
         setConsoleLogs((prev) => [
           ...prev,
-          {
-            id: outputLogId,
-            type: "error",
-            text: "Syntax Error: 'disconnect' requires two node arguments. Example: 'disconnect C E'",
-          },
+          { id: `exp-${Date.now()}`, type: "info", text: exportProofToMermaid(edges, activeTheoremId) },
         ]);
-        announceToScreenReader("Syntax error in disconnect command.");
-        return;
+      } else {
+        setIsExportModalOpen(true);
       }
-
-      const exists = edges.some(
-        (e) =>
-          (e.source === arg1 && e.target === arg2) ||
-          (e.source === arg2 && e.target === arg1)
-      );
-
-      if (!exists) {
-        setConsoleLogs((prev) => [
-          ...prev,
-          {
-            id: outputLogId,
-            type: "error",
-            text: `No active connection found between Node ${arg1} and Node ${arg2}.`,
-          },
-        ]);
-        announceToScreenReader("No connection found to disconnect.");
-        return;
-      }
-
-      setEdges((prev) =>
-        prev.filter(
-          (e) =>
-            !(
-              (e.source === arg1 && e.target === arg2) ||
-              (e.source === arg2 && e.target === arg1)
-            )
-        )
-      );
-      try {
-        playAutocomplete();
-      } catch {}
-      setConsoleLogs((prev) => [
-        ...prev,
-        {
-          id: outputLogId,
-          type: "output",
-          text: `✔ Severed connection: Node ${arg1} ↛ Node ${arg2}`,
-        },
-      ]);
-      announceToScreenReader(`Disconnected Node ${arg1} from Node ${arg2}`);
       return;
     }
 
     if (op === "simulate") {
-      const subOp = tokens[1]?.toLowerCase() || "normal";
-      if (subOp !== "normal" && subOp !== "loop") {
-        setConsoleLogs((prev) => [
-          ...prev,
-          {
-            id: outputLogId,
-            type: "error",
-            text: "Invalid simulate mode. Supported modes: 'normal' or 'loop'.",
-          },
-        ]);
-        announceToScreenReader("Invalid simulate mode.");
-        return;
-      }
-
-      setIsSimulating(true);
-      if (subOp === "normal") {
-        const stepCount = activeTheorem.simulationSteps.length;
-        setSimulationProgress({ step: 0, total: stepCount, log: `Initializing [${activeTheorem.title}] background tactic worker...` });
-        setConsoleLogs((prev) => [
-          ...prev,
-          {
-            id: outputLogId,
-            type: "info",
-            text: `Starting [${activeTheorem.title}] formal tactic simulation on background thread. Watchdog timer armed (5s)...`,
-          },
-        ]);
-        announceToScreenReader("Starting standard tactic simulation on background thread.");
-      } else {
-        setSimulationProgress({ step: 0, total: 1, log: "Starting loop simulation (watchdog test)..." });
-        setConsoleLogs((prev) => [
-          ...prev,
-          {
-            id: outputLogId,
-            type: "info",
-            text: "Starting loop simulation on background thread. Watchdog timer armed (5s)...",
-          },
-        ]);
-        announceToScreenReader("Starting loop simulation. Watchdog timer armed.");
-      }
-
-      resetWatchdog();
-
-      if (workerRef.current) {
-        workerRef.current.postMessage({
-          type: "START_SIMULATION",
-          mode: subOp as "normal" | "loop",
-          theoremId: activeTheoremId,
-        });
-      } else {
-        initWorker();
-        setTimeout(() => {
-          workerRef.current?.postMessage({
-            type: "START_SIMULATION",
-            mode: subOp as "normal" | "loop",
-            theoremId: activeTheoremId,
-          });
-        }, 50);
-      }
+      const mode = tokens[1]?.toLowerCase() === "loop" ? "loop" : "normal";
+      handleStartSimulation(mode);
       return;
     }
 
     setConsoleLogs((prev) => [
       ...prev,
       {
-        id: outputLogId,
+        id: `err-${Date.now()}`,
         type: "error",
-        text: `Unrecognized command: '${tokens[0]}'. Type 'help' to review supported registry entries.`,
+        text: `Unknown command '${op}'. Type 'help' for available commands.`,
       },
     ]);
-    announceToScreenReader(`Command unrecognized: '${tokens[0]}'. Please try again or type help.`);
+  };
+
+  const handleConsoleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (history.length > 0) {
+        const nextIdx = Math.min(historyIdx + 1, history.length - 1);
+        setHistoryIdx(nextIdx);
+        setConsoleInput(history[nextIdx]);
+      }
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (historyIdx > 0) {
+        const nextIdx = historyIdx - 1;
+        setHistoryIdx(nextIdx);
+        setConsoleInput(history[nextIdx]);
+      } else if (historyIdx === 0) {
+        setHistoryIdx(-1);
+        setConsoleInput("");
+      }
+    } else if (e.key === "Tab") {
+      e.preventDefault();
+      const suggestion = getSuggestion(consoleInput);
+      if (suggestion) {
+        setConsoleInput(suggestion);
+        try {
+          playAutocomplete();
+        } catch {}
+      }
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      consoleInputRef.current?.blur();
+      toggleBtnRef.current?.focus();
+    }
   };
 
   const suggestion = getSuggestion(consoleInput);
 
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      runCommand(consoleInput);
-    } else if (e.key === "Escape") {
-      e.preventDefault();
-      consoleInputRef.current?.blur();
-      toggleBtnRef.current?.focus({ preventScroll: true });
-      announceToScreenReader("Console input blurred. Focus returned to toggle button.");
-    } else if (e.key === "Tab") {
-      e.preventDefault();
-      if (suggestion) {
-        setConsoleInput(suggestion);
-      }
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      if (history.length === 0) return;
-      const nextIdx = historyIdx === -1 ? history.length - 1 : Math.max(0, historyIdx - 1);
-      setHistoryIdx(nextIdx);
-      setConsoleInput(history[nextIdx]);
-    } else if (e.key === "ArrowDown") {
-      e.preventDefault();
-      if (historyIdx === -1) return;
-      const nextIdx = historyIdx + 1;
-      if (nextIdx >= history.length) {
-        setHistoryIdx(-1);
-        setConsoleInput("");
-      } else {
-        setHistoryIdx(nextIdx);
-        setConsoleInput(history[nextIdx]);
-      }
-    }
-  };
-
-  const { isC_Proven, isE_Proven } = evaluateProofStatus(edges, activeTheoremId);
-  const tacticHint = getNextTacticHint(edges, activeTheoremId);
-  const deductionLedger = getDeductionLedger(edges, activeTheoremId);
-  const inspectedNode = activeTheorem.nodes.find((n) => n.id === inspectedNodeId) || activeTheorem.nodes[0];
-
-  const handleCopyExportCode = () => {
-    let code = "";
-    if (exportFormat === "lean") code = exportProofToLean4(activeTheoremId);
-    if (exportFormat === "latex") code = exportProofToLatex(activeTheoremId);
-    if (exportFormat === "markdown") code = exportProofToMarkdown(edges, activeTheoremId);
-    if (exportFormat === "mermaid") code = exportProofToMermaid(edges, activeTheoremId);
-
-    navigator.clipboard.writeText(code);
-    setHasCopiedExport(true);
-    try {
-      playSuccess();
-    } catch {}
-    showToast(`Copied ${exportFormat.toUpperCase()} proof code to clipboard!`, "success");
-    setTimeout(() => setHasCopiedExport(false), 3000);
-  };
-
   return (
-    <div className="bg-zinc-950 min-h-screen text-foreground overflow-x-hidden flex flex-col font-sans">
-      {/* Screen reader ARIA live region */}
-      <div aria-live="assertive" aria-atomic="true" className="sr-only">
+    <div className="min-h-screen bg-brand-dark text-slate-100 flex flex-col font-sans pt-20 pb-12">
+      {/* Live Accessibility Announcement Buffer */}
+      <div className="sr-only" aria-live="assertive" role="status">
         {liveAnnouncement}
       </div>
 
-      {/* Main Container */}
-      <div className="flex-1 pt-24 pb-8 px-4 sm:px-6 flex flex-col gap-6 max-w-7xl mx-auto w-full">
-        {/* Navigation Breadcrumbs */}
-        <Breadcrumbs
-          items={[
-            { label: "Systems", href: "/#case-studies" },
-            { label: "Proof Workspace" },
-          ]}
-        />
-
-        {/* Header Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-900 pb-5">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">
-                Formal Verification Workspace
-              </span>
-              <span className="text-xs font-mono text-zinc-600">· Propositional Logic Engine v3.0</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mt-1">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full flex-1 flex flex-col gap-6">
+        {/* Header and Breadcrumbs */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div className="space-y-1">
+            <Breadcrumbs items={[{ label: "Interactive Suite", href: "/" }, { label: "Logical Proof Workspace" }]} />
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2">
+              <IconCpu className="w-8 h-8 text-brand-cyan animate-pulse" />
               Logical Proof Canvas
             </h1>
-            <p className="text-xs sm:text-sm text-zinc-400 font-sans mt-0.5 max-w-2xl">
-              {activeTheorem.scenario} Select nodes to wire deductive inference rules and inspect real-time mathematical ledgers.
+            <p className="text-sm text-slate-400">
+              AST Natural Deduction & Distributed Systems Formal Invariant Workbench
             </p>
           </div>
-
-          <div className="flex items-center gap-2.5 flex-wrap self-start sm:self-center">
-            {/* Export Proof Button */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsCustomStudioOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-brand-purple/40 bg-brand-purple/10 text-brand-purple hover:bg-brand-purple/20 text-xs font-semibold transition"
+            >
+              <IconPlus className="w-4 h-4" />
+              Custom Studio
+            </button>
             <button
               onClick={() => setIsExportModalOpen(true)}
-              className="px-3.5 py-1.5 text-xs font-mono font-bold bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 hover:border-cyan-500/40 text-cyan-300 rounded-xl transition-all cursor-pointer flex items-center gap-2"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-200 hover:bg-slate-700 text-xs font-semibold transition"
             >
-              <IconDownload className="w-4 h-4 text-cyan-400" />
-              <span>Export Proof</span>
+              <IconDownload className="w-4 h-4" />
+              Export
             </button>
-
-            {/* Field Manual Trigger */}
-            <FieldManualButton manualId="proof" label="Field Manual" />
-
-            {/* Split Console Toggle */}
-            <button
-              ref={toggleBtnRef}
-              onClick={toggleConsole}
-              aria-expanded={isConsoleOpen}
-              aria-label={isConsoleOpen ? "Close interactive text console" : "Open interactive text console"}
-              className="px-3.5 py-1.5 text-xs font-mono font-bold bg-zinc-900/60 hover:bg-zinc-800 border border-zinc-800 hover:border-cyan-500/40 text-zinc-300 hover:text-cyan-400 rounded-xl transition-all cursor-pointer flex items-center gap-2"
-            >
-              <IconTerminal className="w-4 h-4 text-cyan-400" />
-              <span>{isConsoleOpen ? "Hide CLI" : "Show CLI"}</span>
-              <kbd className="hidden sm:inline-block text-[10px] text-zinc-500 bg-zinc-950 px-1.5 py-0.5 rounded border border-zinc-800">
-                Ctrl+\
-              </kbd>
-            </button>
+            <FieldManualButton manualId="proof" />
           </div>
         </div>
 
-        {/* Theorem Selector Toolbar */}
-        <div className="bg-zinc-900/60 border border-zinc-800/90 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <IconCode className="w-4 h-4 text-cyan-400" />
-            <span className="text-xs font-mono font-bold text-zinc-400 uppercase tracking-wider">
-              Theorem Catalog:
+        {/* Curriculum Domain Carousel */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-mono uppercase tracking-wider text-slate-400">Curriculum Invariant Catalog</span>
+            <span className="text-xs font-mono text-brand-cyan">
+              Status: {isE_Proven ? "✔ Q.E.D. DISCHARGED" : "⏳ IN PROGRESS"}
             </span>
           </div>
-
-          <div className="flex items-center gap-2 flex-wrap flex-1 justify-start sm:justify-end">
-            {(Object.keys(THEOREMS) as TheoremId[]).map((tId) => {
-              const th = THEOREMS[tId];
-              const isActive = tId === activeTheoremId;
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+            {(Object.keys(THEOREMS) as TheoremId[]).map((thKey) => {
+              const th = THEOREMS[thKey];
+              const isActive = thKey === activeTheoremId;
+              const { isE_Proven: isThProven } = evaluateProofStatus(
+                isActive ? edges : th.initialEdges,
+                thKey
+              );
               return (
                 <button
-                  key={tId}
-                  onClick={() => handleSwitchTheorem(tId)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
+                  key={thKey}
+                  onClick={() => handleSwitchTheorem(thKey)}
+                  className={`flex flex-col text-left p-2.5 rounded-xl border transition-all relative overflow-hidden ${
                     isActive
-                      ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-md shadow-cyan-500/10"
-                      : "bg-zinc-950/60 text-zinc-400 hover:text-zinc-200 border border-zinc-800 hover:border-zinc-700"
+                      ? "bg-slate-800 border-brand-cyan shadow-lg shadow-brand-cyan/10"
+                      : "bg-slate-900/60 border-slate-800 hover:border-slate-700 hover:bg-slate-800/50"
                   }`}
                 >
-                  <span>{th.title}</span>
-                  <span className="text-[10px] opacity-60 hidden md:inline">({th.category})</span>
+                  <div className="flex items-center justify-between gap-1 mb-1">
+                    <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-slate-950 text-slate-400">
+                      {th.category}
+                    </span>
+                    {isThProven ? (
+                      <IconShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                    ) : (
+                      <span className="w-2 h-2 rounded-full bg-amber-500/80" />
+                    )}
+                  </div>
+                  <span className="text-xs font-bold text-slate-200 line-clamp-1">{th.title}</span>
+                  <span className="text-[11px] text-slate-400 line-clamp-1">{th.subtitle}</span>
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Guided Proof Assistant & Theorem Inspector Tray */}
-        <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-4 sm:p-5 relative overflow-hidden backdrop-blur-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex items-start gap-3.5 flex-1">
-            <div
-              className={`p-2.5 rounded-xl shrink-0 ${
-                isE_Proven
-                  ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
-                  : "bg-cyan-500/10 border border-cyan-500/30 text-cyan-400"
-              }`}
-            >
-              {isE_Proven ? <IconShieldCheck className="w-5 h-5" /> : <IconBulb className="w-5 h-5" />}
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400">
-                  {activeTheorem.title} Assistant
-                </span>
-                <span
-                  className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${
-                    isE_Proven
-                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                      : isC_Proven
-                      ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/30"
-                      : "bg-zinc-800 text-zinc-400 border-zinc-700"
-                  }`}
-                >
-                  {isE_Proven ? "STEP 2/2 · Q.E.D. PROVEN" : isC_Proven ? "STEP 1/2 · IN PROGRESS" : "STEP 0/2 · INCOMPLETE"}
-                </span>
-              </div>
-              <h2 className="text-sm sm:text-base font-bold text-white font-sans">{tacticHint.title}</h2>
-              <p className="text-xs text-zinc-300 font-sans leading-relaxed">{tacticHint.hint}</p>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2.5 shrink-0 self-end md:self-center w-full md:w-auto justify-end">
-            <button
-              onClick={handleResetLayout}
-              title="Reset node positions to default layout"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-semibold text-zinc-400 hover:text-zinc-200 bg-zinc-950/60 hover:bg-zinc-900 border border-zinc-800 rounded-xl transition-all cursor-pointer"
-            >
-              <IconArrowsMove className="w-3.5 h-3.5" />
-              <span>Reset Layout</span>
-            </button>
-
-            <button
-              onClick={handleResetProof}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-semibold text-zinc-400 hover:text-zinc-200 bg-zinc-950/60 hover:bg-zinc-900 border border-zinc-800 rounded-xl transition-all cursor-pointer"
-            >
-              <IconRefresh className="w-3.5 h-3.5" />
-              <span>Reset Proof</span>
-            </button>
-
-            {!isE_Proven && (
-              <button
-                onClick={handleApplyNextTactic}
-                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider text-black bg-cyan-400 hover:bg-cyan-300 rounded-xl transition-all shadow-md shadow-cyan-500/10 cursor-pointer"
-              >
-                <IconBolt className="w-4 h-4 text-black fill-black" />
-                <span>Apply Next Tactic</span>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Workspace Canvas & Split View Console & Explanation Suite */}
-        <div className="flex flex-col lg:flex-row gap-6 relative min-h-[520px]">
-          {/* Left / Center: Interactive Graphical Canvas */}
-          <div className="flex-1 flex flex-col bg-zinc-950 border border-zinc-900 rounded-3xl relative overflow-hidden p-4 sm:p-6 min-h-[460px]">
-            {/* Toast Overlay */}
-            <AnimatePresence>
-              {feedbackToast && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className={`absolute top-4 left-4 right-4 z-30 px-4 py-2.5 rounded-xl border text-xs font-mono font-medium flex items-center justify-between shadow-lg backdrop-blur-md ${
-                    feedbackToast.type === "success"
-                      ? "bg-emerald-950/90 text-emerald-300 border-emerald-500/40"
-                      : feedbackToast.type === "error"
-                      ? "bg-rose-950/90 text-rose-300 border-rose-500/40"
-                      : "bg-zinc-900/90 text-cyan-300 border-cyan-500/40"
-                  }`}
-                >
-                  <span>{feedbackToast.message}</span>
+        {/* Workspace Layout: Canvas on Left/Center, Inspector on Right */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Canvas Section */}
+          <div className="lg:col-span-8 flex flex-col gap-4">
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/80 backdrop-blur overflow-hidden flex flex-col shadow-2xl relative">
+              {/* Canvas Header */}
+              <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-emerald-500/80 animate-ping" />
+                  <span className="text-xs font-semibold text-white">{activeTheorem.ruleName}</span>
+                </div>
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setFeedbackToast(null)}
-                    className="p-1 hover:text-white cursor-pointer"
+                    onClick={handleAutoStep}
+                    className="px-2.5 py-1 rounded bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan text-xs font-mono flex items-center gap-1 transition"
                   >
-                    <IconX className="w-3.5 h-3.5" />
+                    <IconWand className="w-3.5 h-3.5" />
+                    Auto-Step
                   </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Q.E.D Celebration Banner */}
-            <AnimatePresence>
-              {isE_Proven && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute top-4 left-4 right-4 z-20 bg-gradient-to-r from-emerald-950/95 via-zinc-950/95 to-emerald-950/95 border border-emerald-500/50 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl shadow-emerald-950/40"
-                >
-                  <div className="flex items-center gap-3.5">
-                    <div className="p-3 bg-emerald-500/20 border border-emerald-500/40 rounded-2xl text-emerald-400">
-                      <IconSparkles className="w-6 h-6 animate-spin" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono font-extrabold text-emerald-400 uppercase tracking-wider">
-                          Theorem Discharged (Q.E.D.)
-                        </span>
-                      </div>
-                      <h3 className="text-base sm:text-lg font-extrabold text-white">
-                        {activeTheorem.title}: {activeTheorem.nodes.find((n) => n.id === activeTheorem.targetNodeId)?.description}
-                      </h3>
-                      <p className="text-xs text-zinc-300 font-sans mt-0.5">
-                        Formal verification complete. Mathematical soundness achieved without sorry.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className="px-3 py-1.5 bg-emerald-900/50 border border-emerald-500/40 rounded-xl text-xs font-mono font-bold text-emerald-300">
-                      VERIFICATION: 100%
-                    </span>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Simulation Progress Widget */}
-            {isSimulating && simulationProgress && (
-              <div className="absolute top-4 left-4 right-4 bg-zinc-950/95 border border-cyan-500/30 rounded-xl p-4 flex flex-col gap-3 shadow-lg shadow-cyan-500/5 z-20">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
-                    <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
-                      Background Tactic Simulation Running...
-                    </h3>
-                  </div>
-                  <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
-                    THREAD: WEB WORKER (60FPS UI SAFE)
-                  </span>
-                </div>
-
-                <div className="w-full bg-zinc-900 h-2 rounded-full overflow-hidden border border-zinc-800">
-                  <div
-                    className="bg-cyan-400 h-full rounded-full transition-all duration-300"
-                    style={{ width: `${(simulationProgress.step / Math.max(1, simulationProgress.total)) * 100}%` }}
-                  />
-                </div>
-
-                <div className="flex justify-between items-center text-[10px] font-mono">
-                  <span className="text-zinc-400 truncate max-w-[70%]">{simulationProgress.log}</span>
-                  <span className="text-cyan-400 font-bold">
-                    STEP {simulationProgress.step} / {simulationProgress.total}
-                  </span>
+                  <button
+                    onClick={handleResetLayout}
+                    className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                    title="Reset node positions & connections"
+                  >
+                    <IconRefresh className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-            )}
 
-            {/* Canvas Viewport Area */}
-            <div
-              className="flex-1 relative bg-zinc-950/80 rounded-2xl border border-zinc-900 overflow-hidden flex items-center justify-center p-2 min-h-[380px]"
-              role="region"
-              aria-label="Formal logic proof graph canvas"
-            >
-              {/* Responsive SVG Layer */}
-              <svg
-                ref={svgCanvasRef}
-                viewBox="0 0 720 440"
-                className="w-full h-full max-h-[460px] select-none"
-                preserveAspectRatio="xMidYMid meet"
-              >
-                <defs>
-                  <marker
-                    id="cyan-arrow"
-                    viewBox="0 0 10 10"
-                    refX="6"
-                    refY="5"
-                    markerWidth="6"
-                    markerHeight="6"
-                    orient="auto-start-reverse"
-                  >
-                    <path d="M 0 2 L 8 5 L 0 8 z" fill="#22d3ee" />
-                  </marker>
-                  <marker
-                    id="emerald-arrow"
-                    viewBox="0 0 10 10"
-                    refX="6"
-                    refY="5"
-                    markerWidth="6"
-                    markerHeight="6"
-                    orient="auto-start-reverse"
-                  >
-                    <path d="M 0 2 L 8 5 L 0 8 z" fill="#10b981" />
-                  </marker>
-                </defs>
+              {/* Tactic Goal Ribbon */}
+              <div className="bg-slate-950/60 px-4 py-2 border-b border-slate-800/80 flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2 text-slate-300">
+                  <IconBulb className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span className="font-medium text-amber-300/90">{activeTacticHint.title}:</span>
+                  <span className="text-slate-400">{activeTacticHint.hint}</span>
+                </div>
+                <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 shrink-0">
+                  Goal: Node {activeTheorem.targetNodeId}
+                </span>
+              </div>
 
-                {/* Drawn Connecting Edges */}
-                {edges.map((edge, idx) => {
-                  const sNode = activeTheorem.nodes.find((n) => n.id === edge.source);
-                  const tNode = activeTheorem.nodes.find((n) => n.id === edge.target);
-                  if (!sNode || !tNode) return null;
+              {/* SVG Canvas Area */}
+              <div className="relative w-full h-[420px] bg-gradient-to-b from-slate-950/60 via-slate-900 to-slate-950 select-none overflow-hidden">
+                <svg ref={svgCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none">
+                  <defs>
+                    <marker
+                      id="arrow"
+                      viewBox="0 0 10 10"
+                      refX="8"
+                      refY="5"
+                      markerWidth="6"
+                      markerHeight="6"
+                      orient="auto-start-reverse"
+                    >
+                      <path d="M 0 1 L 10 5 L 0 9 z" fill="#06b6d4" />
+                    </marker>
+                    <linearGradient id="edgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#06b6d4" />
+                      <stop offset="100%" stopColor="#10b981" />
+                    </linearGradient>
+                  </defs>
 
-                  const sOffset = nodeOffsets[edge.source] || { x: 0, y: 0 };
-                  const tOffset = nodeOffsets[edge.target] || { x: 0, y: 0 };
+                  {/* Render Bezier Curves for Graph Edges */}
+                  {edges.map((edge, idx) => {
+                    const sNode = activeTheorem.nodes.find((n) => n.id === edge.source);
+                    const tNode = activeTheorem.nodes.find((n) => n.id === edge.target);
+                    if (!sNode || !tNode) return null;
 
-                  const sx = sNode.x + sOffset.x;
-                  const sy = sNode.y + sOffset.y;
-                  const tx = tNode.x + tOffset.x;
-                  const ty = tNode.y + tOffset.y;
+                    const sOffset = nodeOffsets[sNode.id] || { x: 0, y: 0 };
+                    const tOffset = nodeOffsets[tNode.id] || { x: 0, y: 0 };
 
-                  const isEdgeProven =
-                    (edge.target === "C" && isC_Proven) ||
-                    (edge.target === "E" && isE_Proven);
+                    const x1 = sNode.x + sOffset.x + 80;
+                    const y1 = sNode.y + sOffset.y + 35;
+                    const x2 = tNode.x + tOffset.x;
+                    const y2 = tNode.y + tOffset.y + 35;
 
-                  return (
-                    <g key={`edge-group-${idx}`} className="cursor-pointer group">
-                      {/* Thick transparent stroke for easier click target */}
-                      <path
-                        d={`M ${sx} ${sy} L ${tx} ${ty}`}
-                        stroke="transparent"
-                        strokeWidth="24"
-                        onClick={() => handleDisconnectEdge(edge.source, edge.target)}
-                      />
+                    const dx = Math.abs(x2 - x1) * 0.5;
+                    const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
 
-                      {/* Visible dashed line */}
-                      <path
-                        d={`M ${sx} ${sy} L ${tx} ${ty}`}
-                        stroke={isEdgeProven ? "#10b981" : "#22d3ee"}
-                        strokeWidth="2.5"
-                        strokeDasharray="5 5"
-                        className="animate-[dash_10s_linear_infinite]"
-                        markerEnd={isEdgeProven ? "url(#emerald-arrow)" : "url(#cyan-arrow)"}
-                        onClick={() => handleDisconnectEdge(edge.source, edge.target)}
-                      />
+                    return (
+                      <g key={`edge-${idx}`}>
+                        <path
+                          d={d}
+                          fill="none"
+                          stroke="url(#edgeGradient)"
+                          strokeWidth="2.5"
+                          strokeDasharray="4 2"
+                          className="animate-pulse"
+                          markerEnd="url(#arrow)"
+                        />
+                      </g>
+                    );
+                  })}
+                </svg>
 
-                      {/* Disconnect indicator on hover */}
-                      <circle
-                        cx={(sx + tx) / 2}
-                        cy={(sy + ty) / 2}
-                        r="12"
-                        className="fill-zinc-950 stroke-zinc-800 group-hover:stroke-rose-500 transition-colors"
-                        onClick={() => handleDisconnectEdge(edge.source, edge.target)}
-                      />
-                      <text
-                        x={(sx + tx) / 2}
-                        y={(sy + ty) / 2 + 3.5}
-                        textAnchor="middle"
-                        className="text-[9px] font-mono fill-zinc-500 group-hover:fill-rose-400 font-bold select-none pointer-events-none"
-                      >
-                        ✕
-                      </text>
-                    </g>
-                  );
-                })}
-
-                {/* Render Nodes inside SVG with Dragging and Inspection Support */}
+                {/* Node Cards on Canvas */}
                 {activeTheorem.nodes.map((node) => {
-                  let isNodeProven = true;
-                  if (node.id === "C") isNodeProven = isC_Proven;
-                  if (node.id === "E") isNodeProven = isE_Proven;
-
-                  const isSelected = selectedSourceId === node.id;
-                  const isInspected = inspectedNodeId === node.id;
-                  const isValidTarget =
-                    selectedSourceId !== null &&
-                    selectedSourceId !== node.id &&
-                    canConnect(selectedSourceId, node.id, edges, activeTheoremId).allowed;
-
                   const offset = nodeOffsets[node.id] || { x: 0, y: 0 };
-                  const nx = node.x + offset.x;
-                  const ny = node.y + offset.y;
+                  const isSelected = selectedNodeIds.includes(node.id);
+                  const isInspected = inspectedNodeId === node.id;
+                  const isTarget = node.id === activeTheorem.targetNodeId;
+                  const isIntermediate = node.id === activeTheorem.intermediateNodeId;
+
+                  let isNodeProven = true;
+                  if (isIntermediate) isNodeProven = isC_Proven;
+                  if (isTarget) isNodeProven = isE_Proven;
 
                   return (
-                    <g
+                    <motion.div
                       key={node.id}
-                      transform={`translate(${nx}, ${ny})`}
-                      onClick={() => handleNodeClick(node.id)}
+                      style={{
+                        position: "absolute",
+                        left: node.x + offset.x,
+                        top: node.y + offset.y,
+                      }}
                       onPointerDown={(e) => handleNodePointerDown(e, node.id)}
                       onPointerMove={(e) => handleNodePointerMove(e, node.id)}
                       onPointerUp={(e) => handleNodePointerUp(e, node.id)}
-                      className="cursor-pointer group"
-                    >
-                      {/* Selection Glow Halos */}
-                      {isSelected && (
-                        <circle
-                          r="58"
-                          className="fill-cyan-500/10 stroke-cyan-400 stroke-2 animate-ping opacity-60"
-                        />
-                      )}
-                      {isValidTarget && (
-                        <circle
-                          r="56"
-                          className="fill-emerald-500/10 stroke-emerald-400 stroke-2 stroke-dasharray-4 animate-pulse"
-                        />
-                      )}
-                      {isInspected && !isSelected && (
-                        <circle
-                          r="54"
-                          className="fill-indigo-500/10 stroke-indigo-400/80 stroke-1"
-                        />
-                      )}
-
-                      {/* Node Card Background */}
-                      <rect
-                        x="-70"
-                        y="-40"
-                        width="140"
-                        height="80"
-                        rx="16"
-                        className={`transition-all duration-300 ${
-                          isSelected
-                            ? "fill-zinc-950 stroke-cyan-400 stroke-2 filter drop-shadow-[0_0_12px_rgba(6,182,212,0.4)]"
-                            : isNodeProven
-                            ? "fill-zinc-950/95 stroke-emerald-500/60 group-hover:stroke-emerald-400 stroke-[1.5]"
-                            : isValidTarget
-                            ? "fill-zinc-950 stroke-emerald-400/80 stroke-2"
-                            : "fill-zinc-950/90 stroke-zinc-800 group-hover:stroke-zinc-700 stroke-1"
-                        }`}
-                      />
-
-                      {/* Node ID Badge */}
-                      <text
-                        x="-56"
-                        y="-22"
-                        className="text-[10px] font-mono font-extrabold fill-zinc-500 tracking-wider select-none"
-                      >
-                        NODE {node.id}
-                      </text>
-
-                      {/* Proven / Active Indicator Dot */}
-                      <circle
-                        cx="54"
-                        cy="-24"
-                        r="4"
-                        className={isNodeProven ? "fill-emerald-400" : "fill-zinc-700"}
-                      />
-
-                      {/* Logic Label */}
-                      <text
-                        x="0"
-                        y="6"
-                        textAnchor="middle"
-                        className="text-base font-extrabold fill-white font-mono select-none"
-                      >
-                        {node.label}
-                      </text>
-
-                      {/* Type subtitle */}
-                      <text
-                        x="0"
-                        y="24"
-                        textAnchor="middle"
-                        className="text-[10px] font-mono fill-zinc-500 uppercase tracking-wider select-none"
-                      >
-                        {node.type}
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
-            </div>
-
-            {/* Bottom Status / Legend bar */}
-            <div className="mt-4 pt-3 border-t border-zinc-900 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-zinc-500">
-              <div className="flex items-center gap-4 flex-wrap">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  <span>Proven Hypothesis</span>
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
-                  <span>Selected Source</span>
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-zinc-700"></span>
-                  <span>Unproven Goal</span>
-                </span>
-              </div>
-
-              <div className="text-[11px] text-zinc-500">
-                Click source → target to connect · Drag nodes to reposition · Click ✕ to disconnect
-              </div>
-            </div>
-          </div>
-
-          {/* Right Side: Tabbed Explanation Suite (Inspector / Ledger / Fallacy) & Split CLI */}
-          <div className="w-full lg:w-[440px] flex flex-col gap-4">
-            {/* Integrated Explanation Suite */}
-            <div className="bg-zinc-950 border border-zinc-900 rounded-3xl p-4 flex flex-col min-h-[300px] shadow-xl">
-              {/* Tab Navigation Header */}
-              <div className="flex items-center justify-between border-b border-zinc-900 pb-3 mb-3">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setActiveTab("inspector")}
-                    className={`px-3 py-1 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                      activeTab === "inspector"
-                        ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
-                        : "text-zinc-400 hover:text-zinc-200"
-                    }`}
-                  >
-                    <IconBook className="w-3.5 h-3.5" />
-                    <span>Logic Inspector</span>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveTab("ledger")}
-                    className={`px-3 py-1 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                      activeTab === "ledger"
-                        ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
-                        : "text-zinc-400 hover:text-zinc-200"
-                    }`}
-                  >
-                    <IconTable className="w-3.5 h-3.5" />
-                    <span>Deduction Ledger</span>
-                  </button>
-
-                  <button
-                    onClick={() => setActiveTab("fallacy")}
-                    className={`px-3 py-1 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                      activeTab === "fallacy"
-                        ? "bg-rose-500/20 text-rose-300 border border-rose-500/40"
-                        : "text-zinc-400 hover:text-zinc-200"
-                    }`}
-                  >
-                    <IconAlertTriangle className="w-3.5 h-3.5 text-rose-400" />
-                    <span>Fallacy Engine</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Tab 1: Logic Inspector */}
-              {activeTab === "inspector" && inspectedNode && (
-                <div className="space-y-3 font-sans text-xs flex-1 flex flex-col justify-between">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono font-bold text-white bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
-                          NODE {inspectedNode.id}
-                        </span>
-                        <span className="text-sm font-mono font-extrabold text-cyan-300">
-                          {inspectedNode.label}
-                        </span>
-                      </div>
-                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
-                        {inspectedNode.type}
-                      </span>
-                    </div>
-
-                    <div className="bg-zinc-900/60 rounded-xl p-3 border border-zinc-800/80 space-y-1">
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 font-bold">
-                        Formal Proposition
-                      </span>
-                      <p className="text-zinc-200 font-medium leading-relaxed">{inspectedNode.description}</p>
-                    </div>
-
-                    <div className="bg-zinc-900/40 rounded-xl p-3 border border-zinc-800/60 space-y-1">
-                      <span className="text-[10px] font-mono uppercase tracking-wider text-cyan-400 font-bold">
-                        Plain-English Interpretation
-                      </span>
-                      <p className="text-zinc-300 leading-relaxed">{inspectedNode.meaning}</p>
-                    </div>
-                  </div>
-
-                  <div className="pt-2 border-t border-zinc-900/80 text-[11px] font-mono text-zinc-500 flex justify-between items-center">
-                    <span>Inference Rule: {activeTheorem.ruleName}</span>
-                    <button
-                      onClick={() => setSelectedSourceId(inspectedNode.id)}
-                      className="text-cyan-400 hover:text-cyan-300 font-bold underline cursor-pointer"
-                    >
-                      Connect From Here
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Tab 2: Deduction Ledger */}
-              {activeTab === "ledger" && (
-                <div className="space-y-2 flex-1 overflow-y-auto max-h-[320px] font-mono text-[11px] pr-1">
-                  <div className="text-zinc-400 text-xs font-bold mb-2">
-                    Deduction Proof Derivation Ledger
-                  </div>
-                  {deductionLedger.map((step) => (
-                    <div
-                      key={step.stepNumber}
-                      className={`p-2.5 rounded-xl border flex flex-col gap-1 ${
-                        step.isProven
-                          ? "bg-emerald-950/20 border-emerald-500/30 text-zinc-300"
-                          : "bg-zinc-900/40 border-zinc-800 text-zinc-400"
+                      onClick={() => handleNodeClick(node.id)}
+                      className={`w-40 p-2.5 rounded-xl border cursor-pointer transition-shadow shadow-md ${
+                        isSelected
+                          ? "bg-brand-cyan/20 border-brand-cyan ring-2 ring-brand-cyan/50 shadow-cyan-500/20"
+                          : isInspected
+                          ? "bg-slate-800 border-slate-600 ring-1 ring-slate-400"
+                          : "bg-slate-900 border-slate-800 hover:border-slate-700"
                       }`}
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-white">#{step.stepNumber}</span>
-                          <code className="text-cyan-300 font-bold text-xs bg-zinc-950 px-1.5 py-0.5 rounded border border-zinc-800">
-                            {step.formula}
-                          </code>
-                          <span className="text-zinc-400 text-[10px]">{step.rule}</span>
-                        </div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-950 text-slate-300">
+                          Node {node.id}
+                        </span>
                         <span
-                          className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${
-                            step.isProven
-                              ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                              : "bg-zinc-800 text-zinc-500 border-zinc-700"
+                          className={`text-[9px] font-mono px-1 py-0.5 rounded ${
+                            isNodeProven
+                              ? "bg-emerald-950 text-emerald-400 border border-emerald-800/40"
+                              : "bg-amber-950 text-amber-400 border border-amber-800/40"
                           }`}
                         >
-                          {step.isProven ? "✔ PROVEN" : "⏳ PENDING"}
+                          {isNodeProven ? "PROVEN" : "PENDING"}
                         </span>
                       </div>
-                      <p className="font-sans text-[11px] text-zinc-400 leading-snug">{step.plainEnglish}</p>
-                    </div>
+                      <div className="font-mono text-sm font-bold text-white mb-0.5">{node.label}</div>
+                      <div className="text-[10px] text-slate-400 line-clamp-2 leading-tight">
+                        {node.meaning}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              {/* Floating Rule Palette Dock */}
+              <div className="p-3 bg-slate-950/90 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[10px] font-mono uppercase text-slate-500 mr-1">Rule Palette:</span>
+                  {INFERENCE_RULES.slice(0, 6).map((rule) => (
+                    <button
+                      key={rule.id}
+                      onClick={() => handleApplyRule(rule.id)}
+                      className="px-2.5 py-1 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 text-xs font-mono text-slate-300 hover:text-white transition flex items-center gap-1"
+                      title={`${rule.name}: ${rule.template}`}
+                    >
+                      <span className="text-brand-cyan font-bold">{rule.symbol}</span>
+                      <span className="text-[11px] text-slate-400 hidden sm:inline">{rule.name}</span>
+                    </button>
                   ))}
                 </div>
-              )}
-
-              {/* Tab 3: Fallacy Engine */}
-              {activeTab === "fallacy" && (
-                <div className="space-y-3 font-sans text-xs flex-1 flex flex-col">
-                  {currentFallacy ? (
-                    <div className="space-y-3">
-                      <div className="bg-rose-950/30 border border-rose-500/40 rounded-xl p-3 space-y-1">
-                        <div className="flex items-center gap-1.5 text-rose-400 font-mono font-bold text-xs">
-                          <IconAlertTriangle className="w-4 h-4" />
-                          <span>{currentFallacy.fallacyName}</span>
-                        </div>
-                        <div className="font-mono text-[11px] text-rose-300/90">{currentFallacy.formalFormula}</div>
-                        <p className="text-zinc-300 text-xs mt-1 leading-relaxed">{currentFallacy.plainEnglish}</p>
-                      </div>
-
-                      <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3 space-y-1">
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-amber-400 font-bold">
-                          Real-World Engineering Failure Case
-                        </span>
-                        <p className="text-zinc-300 text-xs leading-relaxed">{currentFallacy.softwareAnalogy}</p>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 font-bold">
-                          Truth Table Counterexample
-                        </span>
-                        <div className="overflow-x-auto border border-zinc-800 rounded-xl">
-                          <table className="w-full text-[10px] font-mono">
-                            <thead className="bg-zinc-900 text-zinc-400">
-                              <tr>
-                                <th className="p-1.5 text-center">P</th>
-                                <th className="p-1.5 text-center">Q</th>
-                                <th className="p-1.5 text-center">Premise 1</th>
-                                <th className="p-1.5 text-center">Premise 2</th>
-                                <th className="p-1.5 text-center">Conclusion</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {currentFallacy.truthTable.map((row, idx) => (
-                                <tr
-                                  key={idx}
-                                  className={`border-t border-zinc-800/60 ${
-                                    row.isCounterexample ? "bg-rose-950/40 text-rose-300 font-bold" : "text-zinc-400"
-                                  }`}
-                                >
-                                  <td className="p-1 text-center">{row.p ? "T" : "F"}</td>
-                                  <td className="p-1 text-center">{row.q ? "T" : "F"}</td>
-                                  <td className="p-1 text-center">{row.premise1 ? "T" : "F"}</td>
-                                  <td className="p-1 text-center">{row.premise2 ? "T" : "F"}</td>
-                                  <td className="p-1 text-center">{row.conclusion ? "T" : "F"}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center text-center p-4 space-y-2 text-zinc-500">
-                      <IconShieldCheck className="w-8 h-8 text-emerald-400" />
-                      <div className="font-bold text-zinc-300 text-sm">Fallacy Engine Armed</div>
-                      <p className="text-xs leading-relaxed max-w-xs">
-                        Attempting any invalid connection (such as Affirming the Consequent, Circular Reasoning, or Type Mismatch) will trigger an instant diagnosis with Truth Table counterexamples.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Split CLI Console */}
-            {isConsoleOpen && (
-              <div
-                id="proof-cli"
-                data-keyboard-boundary="true"
-                className="w-full bg-zinc-950 border border-zinc-900 rounded-3xl p-4 flex flex-col h-[380px] shadow-xl"
-              >
-                <div className="flex justify-between items-center pb-3 border-b border-zinc-900 mb-3">
-                  <div className="flex items-center gap-2">
-                    <IconTerminal className="w-4 h-4 text-cyan-400" />
-                    <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
-                      Deductive Proof Terminal
-                    </span>
-                  </div>
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setConsoleLogs([])}
-                    className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 cursor-pointer"
+                    onClick={() => handleStartSimulation("normal")}
+                    disabled={isSimulating}
+                    className="px-3 py-1 rounded-lg bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-600/30 text-xs font-mono flex items-center gap-1 transition"
                   >
-                    Clear
+                    <IconPlayerPlay className="w-3.5 h-3.5" />
+                    {isSimulating ? "Simulating..." : "Simulate"}
                   </button>
                 </div>
+              </div>
+            </div>
 
-                {/* Logs Area */}
-                <div ref={terminalLogsContainerRef} className="flex-1 overflow-y-auto space-y-2 font-mono text-xs pr-1 select-text">
-                  {consoleLogs.map((log) => (
-                    <div
-                      key={log.id}
-                      className={`leading-relaxed break-words whitespace-pre-wrap rounded-lg p-2 ${
-                        log.type === "command"
-                          ? "text-cyan-300 bg-zinc-900/50"
-                          : log.type === "success"
-                          ? "text-emerald-400 bg-emerald-950/20"
-                          : log.type === "error"
-                          ? "text-rose-400 bg-rose-950/20"
-                          : log.type === "info"
-                          ? "text-zinc-400 bg-zinc-900/30"
-                          : "text-zinc-300"
-                      }`}
-                    >
-                      {log.type === "command" && <span className="text-zinc-500 mr-1.5">&gt;</span>}
-                      {log.text}
-                    </div>
-                  ))}
+            {/* Simulation Progress Ribbon */}
+            {isSimulating && simulationProgress && (
+              <div className="p-3 rounded-xl border border-emerald-800/40 bg-emerald-950/20 text-emerald-300 text-xs flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <IconSparkles className="w-4 h-4 text-emerald-400 animate-spin" />
+                  <span>Background Tactic Simulation Running...</span>
+                  <span className="text-slate-400 font-mono">
+                    [{simulationProgress.step}/{simulationProgress.total}] {simulationProgress.log}
+                  </span>
                 </div>
-
-                {/* Autocomplete Suggestion Hint */}
-                {suggestion && (
-                  <div className="text-[10px] font-mono text-zinc-500 px-2 py-1 bg-zinc-900/50 rounded-lg border border-zinc-800/80 mb-2 flex items-center justify-between">
-                    <span>
-                      Tab: <code className="text-cyan-400">{consoleInput}{suggestion.substring(consoleInput.length)}</code>
-                    </span>
-                    <span>[TAB] to accept</span>
-                  </div>
-                )}
-
-                {/* Input Form */}
-                <div className="pt-2 border-t border-zinc-900 flex items-center gap-2">
-                  <span className="text-cyan-400 font-mono text-xs font-bold">&gt;</span>
-                  <input
-                    ref={consoleInputRef}
-                    type="text"
-                    value={consoleInput}
-                    onChange={(e) => setConsoleInput(e.target.value)}
-                    onKeyDown={handleInputKeyDown}
-                    placeholder="Type 'connect C E', 'theorem mt', or 'help'..."
-                    className="flex-1 bg-transparent border-0 text-xs font-mono text-white placeholder-zinc-600 focus:outline-none"
-                    aria-label="Interactive Proof CLI command input"
-                  />
-                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">
+                  THREAD: WEB WORKER (60FPS UI SAFE)
+                </span>
               </div>
             )}
           </div>
+
+          {/* Right Inspector Section */}
+          <div className="lg:col-span-4 flex flex-col gap-4">
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/80 backdrop-blur overflow-hidden flex flex-col shadow-xl">
+              {/* Tab Selector */}
+              <div className="grid grid-cols-3 border-b border-slate-800 bg-slate-950/40 text-xs font-medium">
+                <button
+                  onClick={() => setActiveTab("ledger")}
+                  className={`py-2.5 flex items-center justify-center gap-1.5 border-b-2 transition ${
+                    activeTab === "ledger"
+                      ? "border-brand-cyan text-brand-cyan bg-slate-900"
+                      : "border-transparent text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  <IconTable className="w-4 h-4" />
+                  Ledger
+                </button>
+                <button
+                  onClick={() => setActiveTab("systems")}
+                  className={`py-2.5 flex items-center justify-center gap-1.5 border-b-2 transition ${
+                    activeTab === "systems"
+                      ? "border-brand-cyan text-brand-cyan bg-slate-900"
+                      : "border-transparent text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  <IconBook className="w-4 h-4" />
+                  Systems
+                </button>
+                <button
+                  onClick={() => setActiveTab("fallacy")}
+                  className={`py-2.5 flex items-center justify-center gap-1.5 border-b-2 transition ${
+                    activeTab === "fallacy"
+                      ? "border-brand-cyan text-brand-cyan bg-slate-900"
+                      : "border-transparent text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  <IconAlertTriangle className="w-4 h-4" />
+                  Fallacy
+                </button>
+              </div>
+
+              {/* Tab Content */}
+              <div className="p-4 flex flex-col gap-4 min-h-[380px] max-h-[460px] overflow-y-auto">
+                {activeTab === "ledger" && (
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-mono font-bold text-slate-300">Formal Fitch Deduction Ledger</span>
+                      <span className="text-[10px] font-mono text-slate-500">Lines: {deductionLedger.length}</span>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      {deductionLedger.map((step) => (
+                        <div
+                          key={step.stepNumber}
+                          className={`p-2.5 rounded-lg border text-xs flex flex-col gap-1 transition ${
+                            step.isProven
+                              ? "bg-slate-900 border-slate-800"
+                              : "bg-slate-950/60 border-slate-900 text-slate-500"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono font-bold text-slate-400">Step {step.stepNumber}</span>
+                            <span
+                              className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${
+                                step.isProven ? "bg-emerald-950 text-emerald-400" : "bg-slate-800 text-slate-500"
+                              }`}
+                            >
+                              {step.isProven ? "✔ PROVEN" : "⏳ PENDING"}
+                            </span>
+                          </div>
+                          <div className="font-mono font-bold text-white text-sm">{step.formula}</div>
+                          <div className="text-slate-400 text-[11px]">
+                            <span className="text-brand-cyan font-mono">{step.rule}</span> ({step.premises})
+                          </div>
+                          <div className="text-slate-400 text-[11px] leading-tight">{step.plainEnglish}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === "systems" && (
+                  <div className="flex flex-col gap-3 text-xs">
+                    <div className="space-y-1">
+                      <span className="text-xs font-bold text-white">{activeTheorem.title}</span>
+                      <p className="text-slate-400 leading-relaxed">{activeTheorem.scenario}</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-2">
+                      <span className="font-mono text-brand-cyan font-semibold block">Lean 4 Invariant Model</span>
+                      <pre className="font-mono text-[11px] text-slate-300 whitespace-pre-wrap">
+                        {activeTheorem.leanCode}
+                      </pre>
+                    </div>
+                    <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1">
+                      <span className="font-mono text-slate-400 font-semibold block">Distributed Systems Invariant</span>
+                      <p className="text-slate-300 leading-relaxed">{activeTheorem.goalDescription}</p>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === "fallacy" && (
+                  <div className="flex flex-col gap-3 text-xs">
+                    {currentFallacy ? (
+                      <div className="space-y-3">
+                        <div className="p-2.5 rounded-lg bg-red-950/40 border border-red-800/60 text-red-300">
+                          <span className="font-bold block text-sm mb-0.5">{currentFallacy.fallacyName}</span>
+                          <span className="font-mono text-[11px] text-red-400">{currentFallacy.formalFormula}</span>
+                        </div>
+                        <p className="text-slate-300 leading-relaxed">{currentFallacy.plainEnglish}</p>
+                        <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800 space-y-1">
+                          <span className="font-mono text-amber-400 font-semibold block">Software Bug Analogy</span>
+                          <p className="text-slate-400 leading-relaxed">{currentFallacy.softwareAnalogy}</p>
+                        </div>
+                        <div className="space-y-1.5">
+                          <span className="font-mono text-slate-400 block font-semibold">
+                            Counterexample Truth Table
+                          </span>
+                          <div className="overflow-x-auto rounded border border-slate-800">
+                            <table className="w-full text-left font-mono text-[10px]">
+                              <thead className="bg-slate-950 text-slate-400">
+                                <tr>
+                                  <th className="p-1.5">P</th>
+                                  <th className="p-1.5">Q</th>
+                                  <th className="p-1.5">P1</th>
+                                  <th className="p-1.5">P2</th>
+                                  <th className="p-1.5">Concl</th>
+                                  <th className="p-1.5">Status</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {currentFallacy.truthTable.map((row, idx) => (
+                                  <tr
+                                    key={idx}
+                                    className={`border-t border-slate-800/60 ${
+                                      row.isCounterexample ? "bg-red-950/40 text-red-300" : "text-slate-400"
+                                    }`}
+                                  >
+                                    <td className="p-1.5">{row.p ? "T" : "F"}</td>
+                                    <td className="p-1.5">{row.q ? "T" : "F"}</td>
+                                    <td className="p-1.5">{row.premise1 ? "T" : "F"}</td>
+                                    <td className="p-1.5">{row.premise2 ? "T" : "F"}</td>
+                                    <td className="p-1.5">{row.conclusion ? "T" : "F"}</td>
+                                    <td className="p-1.5 font-bold">
+                                      {row.isCounterexample ? "INVALID ❌" : "VALID ✔"}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-center p-8 text-slate-500 gap-2">
+                        <IconShieldCheck className="w-10 h-10 text-emerald-400/80" />
+                        <span className="font-semibold text-slate-300">Zero Active Fallacies</span>
+                        <p className="text-[11px] max-w-xs">
+                          All current graph connections and premise selections follow valid deductive inference rules.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Proof Export Modal */}
+        {/* Command Console Split-View */}
+        <div
+          data-keyboard-boundary="true"
+          className="rounded-2xl border border-slate-800 bg-slate-950 overflow-hidden flex flex-col shadow-2xl"
+        >
+          <div className="px-4 py-2 border-b border-slate-800 bg-slate-900/60 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <IconTerminal className="w-4 h-4 text-brand-cyan" />
+              <span className="text-xs font-mono font-semibold text-slate-300">proof-cli @ formal-verification</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs font-mono text-slate-500">
+              <span>Toggle: Ctrl + `</span>
+              <button
+                ref={toggleBtnRef}
+                onClick={toggleConsole}
+                className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] transition"
+              >
+                {isConsoleOpen ? "Collapse" : "Expand"}
+              </button>
+            </div>
+          </div>
+
+          {isConsoleOpen && (
+            <div className="flex flex-col">
+              <div
+                ref={terminalLogsContainerRef}
+                className="p-4 font-mono text-xs text-slate-300 h-44 overflow-y-auto space-y-1.5 bg-slate-950/80"
+              >
+                {consoleLogs.map((log) => (
+                  <div
+                    key={log.id}
+                    className={`whitespace-pre-wrap ${
+                      log.type === "command"
+                        ? "text-brand-cyan font-bold"
+                        : log.type === "error"
+                        ? "text-red-400 font-semibold"
+                        : log.type === "success"
+                        ? "text-emerald-400"
+                        : "text-slate-300"
+                    }`}
+                  >
+                    {log.type === "command" ? `$ ${log.text}` : log.text}
+                  </div>
+                ))}
+              </div>
+
+              <form onSubmit={handleConsoleSubmit} className="relative border-t border-slate-800 flex items-center">
+                <span className="pl-4 text-brand-cyan font-mono text-xs font-bold">$</span>
+                <input
+                  ref={consoleInputRef}
+                  type="text"
+                  value={consoleInput}
+                  onChange={(e) => setConsoleInput(e.target.value)}
+                  onKeyDown={handleConsoleKeyDown}
+                  placeholder="Enter logic command (e.g. 'connect A C', 'apply mp A B', 'help')..."
+                  className="w-full bg-transparent px-3 py-2.5 font-mono text-xs text-white placeholder-slate-600 focus:outline-none"
+                />
+                {suggestion && (
+                  <span className="absolute left-6 pointer-events-none font-mono text-xs text-slate-600 pl-[1ch]">
+                    <span className="invisible">{consoleInput}</span>
+                    {suggestion.substring(consoleInput.length)}
+                  </span>
+                )}
+              </form>
+            </div>
+          )}
+        </div>
+
+        {/* Feedback Toast */}
+        <AnimatePresence>
+          {feedbackToast && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl border text-xs font-medium shadow-2xl flex items-center gap-2 ${
+                feedbackToast.type === "success"
+                  ? "bg-emerald-950 border-emerald-700 text-emerald-200"
+                  : feedbackToast.type === "error"
+                  ? "bg-red-950 border-red-700 text-red-200"
+                  : "bg-slate-900 border-slate-700 text-slate-200"
+              }`}
+            >
+              <span>{feedbackToast.message}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Export Proof Modal */}
         <AnimatePresence>
           {isExportModalOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-              onClick={() => setIsExportModalOpen(false)}
-            >
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
               <motion.div
-                initial={{ scale: 0.95, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.95, y: 20 }}
-                className="bg-zinc-950 border border-zinc-800 rounded-3xl p-6 max-w-2xl w-full shadow-2xl space-y-4"
-                onClick={(e) => e.stopPropagation()}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-6 flex flex-col gap-4 shadow-2xl"
               >
-                <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
-                  <div className="flex items-center gap-2">
-                    <IconDownload className="w-5 h-5 text-cyan-400" />
-                    <h3 className="text-lg font-bold text-white font-sans">
-                      Export Formal Proof: {activeTheorem.title}
-                    </h3>
-                  </div>
+                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <IconDownload className="w-5 h-5 text-brand-cyan" />
+                    Export Proof Certificate
+                  </h3>
                   <button
                     onClick={() => setIsExportModalOpen(false)}
-                    className="p-1 text-zinc-400 hover:text-white cursor-pointer"
+                    className="p-1 rounded text-slate-400 hover:text-white"
                   >
                     <IconX className="w-5 h-5" />
                   </button>
                 </div>
-
-                {/* Format Selector Tabs */}
-                <div className="flex items-center gap-2 border-b border-zinc-900 pb-3">
+                <div className="flex gap-2">
                   {(["lean", "latex", "markdown", "mermaid"] as const).map((fmt) => (
                     <button
                       key={fmt}
                       onClick={() => setExportFormat(fmt)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold uppercase transition-all cursor-pointer ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-mono uppercase font-bold border transition ${
                         exportFormat === fmt
-                          ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
-                          : "bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
+                          ? "border-brand-cyan bg-brand-cyan/20 text-brand-cyan"
+                          : "border-slate-800 bg-slate-950 text-slate-400 hover:text-white"
                       }`}
                     >
-                      {fmt === "lean" ? "Lean 4 Code" : fmt === "latex" ? "LaTeX Proof" : fmt === "markdown" ? "Markdown Table" : "Mermaid Diagram"}
+                      {fmt}
                     </button>
                   ))}
                 </div>
-
-                {/* Code Preview Box */}
-                <div className="relative bg-zinc-900/70 border border-zinc-800 rounded-2xl p-4 font-mono text-xs text-zinc-200 overflow-x-auto max-h-[280px]">
-                  <pre className="whitespace-pre">
+                <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 max-h-72 overflow-y-auto">
+                  <pre className="font-mono text-xs text-slate-300 whitespace-pre-wrap">
                     {exportFormat === "lean" && exportProofToLean4(activeTheoremId)}
                     {exportFormat === "latex" && exportProofToLatex(activeTheoremId)}
                     {exportFormat === "markdown" && exportProofToMarkdown(edges, activeTheoremId)}
                     {exportFormat === "mermaid" && exportProofToMermaid(edges, activeTheoremId)}
                   </pre>
                 </div>
-
-                <div className="flex items-center justify-between pt-2">
-                  <span className="text-xs font-mono text-zinc-500">
-                    Status: {isE_Proven ? "100% Formally Verified" : "Partial Derivation"}
-                  </span>
+                <div className="flex justify-end gap-3 pt-2">
                   <button
-                    onClick={handleCopyExportCode}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-cyan-400 hover:bg-cyan-300 text-black font-mono font-bold text-xs rounded-xl transition-all cursor-pointer shadow-md shadow-cyan-500/10"
+                    onClick={() => {
+                      const text =
+                        exportFormat === "lean"
+                          ? exportProofToLean4(activeTheoremId)
+                          : exportFormat === "latex"
+                          ? exportProofToLatex(activeTheoremId)
+                          : exportFormat === "markdown"
+                          ? exportProofToMarkdown(edges, activeTheoremId)
+                          : exportProofToMermaid(edges, activeTheoremId);
+                      navigator.clipboard.writeText(text);
+                      setHasCopiedExport(true);
+                      setTimeout(() => setHasCopiedExport(false), 2000);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-brand-cyan hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition"
                   >
                     {hasCopiedExport ? <IconCheck className="w-4 h-4" /> : <IconCopy className="w-4 h-4" />}
-                    <span>{hasCopiedExport ? "Copied to Clipboard!" : "Copy Code"}</span>
+                    {hasCopiedExport ? "Copied!" : "Copy to Clipboard"}
                   </button>
                 </div>
               </motion.div>
-            </motion.div>
+            </div>
           )}
         </AnimatePresence>
 
-        {/* Sequential Next / Prev Flow */}
+        {/* Custom Invariant Studio Modal */}
+        <AnimatePresence>
+          {isCustomStudioOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="w-full max-w-xl rounded-2xl border border-slate-800 bg-slate-900 p-6 flex flex-col gap-4 shadow-2xl"
+              >
+                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                    <IconPlus className="w-5 h-5 text-brand-purple" />
+                    Custom Invariant Studio
+                  </h3>
+                  <button
+                    onClick={() => setIsCustomStudioOpen(false)}
+                    className="p-1 rounded text-slate-400 hover:text-white"
+                  >
+                    <IconX className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="space-y-3 text-xs">
+                  <div>
+                    <label className="block text-slate-400 font-mono mb-1">Premise 1 Formula:</label>
+                    <input
+                      type="text"
+                      value={customPremise1}
+                      onChange={(e) => setCustomPremise1(e.target.value)}
+                      className="w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 font-mono text-white focus:outline-none focus:border-brand-cyan"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 font-mono mb-1">Premise 2 Formula:</label>
+                    <input
+                      type="text"
+                      value={customPremise2}
+                      onChange={(e) => setCustomPremise2(e.target.value)}
+                      className="w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 font-mono text-white focus:outline-none focus:border-brand-cyan"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 font-mono mb-1">Premise 3 Formula:</label>
+                    <input
+                      type="text"
+                      value={customPremise3}
+                      onChange={(e) => setCustomPremise3(e.target.value)}
+                      className="w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 font-mono text-white focus:outline-none focus:border-brand-cyan"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 font-mono mb-1">Target Invariant Goal:</label>
+                    <input
+                      type="text"
+                      value={customGoal}
+                      onChange={(e) => setCustomGoal(e.target.value)}
+                      className="w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 font-mono text-white focus:outline-none focus:border-brand-cyan"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3 pt-2">
+                  <button
+                    onClick={() => {
+                      handleSwitchTheorem("custom");
+                      setIsCustomStudioOpen(false);
+                    }}
+                    className="px-4 py-2 rounded-xl bg-brand-cyan hover:bg-cyan-400 text-slate-950 font-bold text-xs transition"
+                  >
+                    Load into Workspace
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
         <NextPrevNav
-          prev={{
-            title: "Platform Transparency Hub",
-            href: "/transparency",
-            label: "Verification Hub",
-            tag: "Audit Logs & Security",
-          }}
-          next={{
-            title: "Incident Alignment Simulator",
-            href: "/simulator",
-            label: "Architecture Simulator",
-            tag: "Incident Commander",
-          }}
-          backToHub={{
-            title: "View Work Showcase",
-            href: "/#case-studies",
-          }}
+          prev={{ title: "NeuroRecon CAD Simulator", href: "/neuro" }}
+          next={{ title: "Alignment Simulator", href: "/simulator" }}
+          backToHub={{ title: "Return to Experience Hub", href: "/" }}
         />
       </div>
     </div>

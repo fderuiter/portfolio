@@ -8,7 +8,7 @@
 
 > **getNextTacticHint**(`edges`, `theoremId?`): [`TacticHint`](../interfaces/TacticHint.md)
 
-Defined in: [lib/proof-utils.ts:875](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L875)
+Defined in: [lib/proof-utils.ts:1692](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L1692)
 
 Returns contextual step-by-step tactic hint for guided proof assistant.
 

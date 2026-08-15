@@ -6,7 +6,7 @@
 
 # Interface: PuzzlerLevelDef
 
-Defined in: [lib/quasi-perfect/types.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L82)
+Defined in: [lib/quasi-perfect/types.ts:91](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L91)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/quasi-perfect/types.ts:82](https://github.com/fderuiter/portfol
 
 > **availableTactics**: ([`TacticId`](../type-aliases/TacticId.md) \| \{ `hypothesis?`: `string`; `id`: [`TacticId`](../type-aliases/TacticId.md); `labelOverride?`: `string`; \})[]
 
-Defined in: [lib/quasi-perfect/types.ts:94](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L94)
+Defined in: [lib/quasi-perfect/types.ts:103](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L103)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/quasi-perfect/types.ts:94](https://github.com/fderuiter/portfol
 
 > **chapter**: `number`
 
-Defined in: [lib/quasi-perfect/types.ts:84](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L84)
+Defined in: [lib/quasi-perfect/types.ts:93](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L93)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/quasi-perfect/types.ts:84](https://github.com/fderuiter/portfol
 
 > **chapterTitle**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:85](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L85)
+Defined in: [lib/quasi-perfect/types.ts:94](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L94)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/quasi-perfect/types.ts:85](https://github.com/fderuiter/portfol
 
 > **description**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:88](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L88)
+Defined in: [lib/quasi-perfect/types.ts:97](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L97)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/quasi-perfect/types.ts:88](https://github.com/fderuiter/portfol
 
 > **educationalConcept**: [`EducationalConcept`](EducationalConcept.md)
 
-Defined in: [lib/quasi-perfect/types.ts:98](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L98)
+Defined in: [lib/quasi-perfect/types.ts:107](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L107)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/quasi-perfect/types.ts:98](https://github.com/fderuiter/portfol
 
 > **goal**: [`ASTNode`](ASTNode.md)
 
-Defined in: [lib/quasi-perfect/types.ts:93](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L93)
+Defined in: [lib/quasi-perfect/types.ts:102](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L102)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/quasi-perfect/types.ts:93](https://github.com/fderuiter/portfol
 
 > **goldRamTarget**: `number`
 
-Defined in: [lib/quasi-perfect/types.ts:90](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L90)
+Defined in: [lib/quasi-perfect/types.ts:99](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L99)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/quasi-perfect/types.ts:90](https://github.com/fderuiter/portfol
 
 > **hints**: \[`string`, `string`, `string`\]
 
-Defined in: [lib/quasi-perfect/types.ts:95](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L95)
+Defined in: [lib/quasi-perfect/types.ts:104](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L104)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/quasi-perfect/types.ts:95](https://github.com/fderuiter/portfol
 
 > **hypotheses**: [`ASTNode`](ASTNode.md)[]
 
-Defined in: [lib/quasi-perfect/types.ts:92](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L92)
+Defined in: [lib/quasi-perfect/types.ts:101](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L101)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [lib/quasi-perfect/types.ts:92](https://github.com/fderuiter/portfol
 
 > **id**: `string` \| `number`
 
-Defined in: [lib/quasi-perfect/types.ts:83](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L83)
+Defined in: [lib/quasi-perfect/types.ts:92](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L92)
 
 ***
 
@@ -94,7 +94,7 @@ Defined in: [lib/quasi-perfect/types.ts:83](https://github.com/fderuiter/portfol
 
 > **initialRam**: `number`
 
-Defined in: [lib/quasi-perfect/types.ts:89](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L89)
+Defined in: [lib/quasi-perfect/types.ts:98](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L98)
 
 ***
 
@@ -102,7 +102,7 @@ Defined in: [lib/quasi-perfect/types.ts:89](https://github.com/fderuiter/portfol
 
 > **leanTheoremName**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:96](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L96)
+Defined in: [lib/quasi-perfect/types.ts:105](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L105)
 
 ***
 
@@ -110,7 +110,7 @@ Defined in: [lib/quasi-perfect/types.ts:96](https://github.com/fderuiter/portfol
 
 > **leanTypeSignature**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:97](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L97)
+Defined in: [lib/quasi-perfect/types.ts:106](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L106)
 
 ***
 
@@ -118,7 +118,7 @@ Defined in: [lib/quasi-perfect/types.ts:97](https://github.com/fderuiter/portfol
 
 > **silverRamTarget**: `number`
 
-Defined in: [lib/quasi-perfect/types.ts:91](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L91)
+Defined in: [lib/quasi-perfect/types.ts:100](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L100)
 
 ***
 
@@ -126,7 +126,7 @@ Defined in: [lib/quasi-perfect/types.ts:91](https://github.com/fderuiter/portfol
 
 > **subtitle**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:87](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L87)
+Defined in: [lib/quasi-perfect/types.ts:96](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L96)
 
 ***
 
@@ -134,4 +134,4 @@ Defined in: [lib/quasi-perfect/types.ts:87](https://github.com/fderuiter/portfol
 
 > **title**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:86](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L86)
+Defined in: [lib/quasi-perfect/types.ts:95](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L95)

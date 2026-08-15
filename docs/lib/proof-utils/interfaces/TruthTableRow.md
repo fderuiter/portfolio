@@ -6,7 +6,7 @@
 
 # Interface: TruthTableRow
 
-Defined in: [lib/proof-utils.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L45)
+Defined in: [lib/proof-utils.ts:61](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L61)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/proof-utils.ts:45](https://github.com/fderuiter/portfolio/blob/
 
 > **conclusion**: `boolean`
 
-Defined in: [lib/proof-utils.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L51)
+Defined in: [lib/proof-utils.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L68)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/proof-utils.ts:51](https://github.com/fderuiter/portfolio/blob/
 
 > **isCounterexample**: `boolean`
 
-Defined in: [lib/proof-utils.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L52)
+Defined in: [lib/proof-utils.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L69)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/proof-utils.ts:52](https://github.com/fderuiter/portfolio/blob/
 
 > **p**: `boolean`
 
-Defined in: [lib/proof-utils.ts:46](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L46)
+Defined in: [lib/proof-utils.ts:62](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L62)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/proof-utils.ts:46](https://github.com/fderuiter/portfolio/blob/
 
 > **premise1**: `boolean`
 
-Defined in: [lib/proof-utils.ts:49](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L49)
+Defined in: [lib/proof-utils.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L66)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/proof-utils.ts:49](https://github.com/fderuiter/portfolio/blob/
 
 > **premise2**: `boolean`
 
-Defined in: [lib/proof-utils.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L50)
+Defined in: [lib/proof-utils.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L67)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/proof-utils.ts:50](https://github.com/fderuiter/portfolio/blob/
 
 > **q**: `boolean`
 
-Defined in: [lib/proof-utils.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L47)
+Defined in: [lib/proof-utils.ts:63](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L63)
 
 ***
 
@@ -62,4 +62,12 @@ Defined in: [lib/proof-utils.ts:47](https://github.com/fderuiter/portfolio/blob/
 
 > `optional` **r?**: `boolean`
 
-Defined in: [lib/proof-utils.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L48)
+Defined in: [lib/proof-utils.ts:64](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L64)
+
+***
+
+### s?
+
+> `optional` **s?**: `boolean`
+
+Defined in: [lib/proof-utils.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L65)

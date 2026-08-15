@@ -32,7 +32,13 @@ export type TacticId =
   | "cases"
   | "ring"
   | "norm_num"
+  | "symm"
+  | "split"
+  | "left"
+  | "right"
   | "sorry";
+
+export type GameMode = "story" | "hacker";
 
 export interface SubGoal {
   id: string;
@@ -75,6 +81,9 @@ export interface EducationalConcept {
   title: string;
   summary: string;
   mathNotation?: string;
+  mathIntuition?: string;
+  leanAnalogy?: string;
+  tacticalObjective?: string;
   leanDocUrl?: string;
   realWorldApplication: string;
 }

@@ -287,4 +287,21 @@ test.describe('Accessibility Audit Suite', () => {
 
     saveResult(testInfo.project.name, 'Mobile Navigation Focus Trap', criticalSerious, page.url());
   });
+
+  test('Audit: CRF Studio & Exporter Accessibility', async ({ page }, testInfo) => {
+    await page.goto('/crf');
+    await page.waitForLoadState('networkidle');
+
+    // Wait for CRF studio root container to load
+    await page.waitForSelector('text=CRF Studio', { timeout: 15000 });
+
+    // 1. Scan default CRF Studio state
+    const results = await new AxeBuilder({ page }).disableRules(['color-contrast']).analyze();
+    const criticalSerious = results.violations.filter(
+      v => v.impact === 'critical' || v.impact === 'serious'
+    );
+
+    saveResult(testInfo.project.name, 'CRF Studio Default State', criticalSerious, page.url());
+    expect(criticalSerious.length, `Found ${criticalSerious.length} violations in CRF Studio`).toBe(0);
+  });
 });

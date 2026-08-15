@@ -498,9 +498,9 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ className }) => {
   const shouldReduceMotion = useReducedMotion();
-  const headline = "Engineering high-compliance clinical data systems, responsive web architectures, and real-time canvas simulations.";
+  const headline = "Hey, I'm Fred. I build software, tame clinical trial data, and build fun things for the web.";
   const introText =
-    "Translating complex regulatory protocols and biomedical datasets into robust software, paired with bespoke interactive interfaces.";
+    "Clinical data specialist by day, creative coder by night. I like engineering, clinical research, and learning.";
 
   return (
     <section
@@ -534,7 +534,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="px-3.5 py-1 mb-6 text-[10px] md:text-xs font-mono font-semibold tracking-[0.2em] uppercase text-brand-cyan bg-brand-cyan/5 border border-brand-cyan/20 rounded-full"
         >
-          FREDERICK DE RUITER · SYSTEMS, CLINICAL DATA &amp; INTERACTIVE GRAPHICS
+          FRED DE RUITER · ENGINEERING, CLINICAL DATA &amp; FUN WEB STUFF
         </motion.span>
 
         {/* Dynamic Staggered Pretext-powered Title */}

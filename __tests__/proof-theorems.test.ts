@@ -5,11 +5,14 @@ import {
   canConnect,
   getNextTacticHint,
   getDeductionLedger,
+  applyRuleToAsts,
+  parseFormula,
+  formatFormula,
   type TheoremId,
 } from "../lib/proof-utils";
 
 describe("Formal Theorem Library & Multi-Theorem Validation", () => {
-  const theoremIds: TheoremId[] = [
+  const coreTheoremIds: TheoremId[] = [
     "modus-ponens",
     "modus-tollens",
     "hypothetical-syllogism",
@@ -17,9 +20,9 @@ describe("Formal Theorem Library & Multi-Theorem Validation", () => {
     "resolution",
   ];
 
-  it("registers all 5 distinct theorems with complete specifications", () => {
-    expect(Object.keys(THEOREMS)).toHaveLength(5);
-    theoremIds.forEach((id) => {
+  it("registers all distinct theorems with complete specifications", () => {
+    expect(Object.keys(THEOREMS).length).toBeGreaterThanOrEqual(5);
+    coreTheoremIds.forEach((id) => {
       const th = THEOREMS[id];
       expect(th).toBeDefined();
       expect(th.title).toBeTruthy();
@@ -130,6 +133,35 @@ describe("Formal Theorem Library & Multi-Theorem Validation", () => {
       expect(ledger[2].isProven).toBe(true);
       expect(ledger[4].isProven).toBe(true);
       expect(ledger[4].rule).toBe("Modus Ponens");
+    });
+  });
+
+  describe("Two-Phase Commit (2PC) & Quorum Overlap Scenarios", () => {
+    it("supports 2PC distributed transaction invariants", () => {
+      const th = THEOREMS["two-phase-commit"];
+      expect(th).toBeDefined();
+      expect(th.category).toBe("Distributed Systems");
+      expect(th.title).toContain("Two-Phase Commit");
+
+      const edges = [
+        { source: "A", target: "C" },
+        { source: "B", target: "C" },
+        { source: "C", target: "E" },
+        { source: "D", target: "E" },
+      ];
+      const status = evaluateProofStatus(edges, "two-phase-commit");
+      expect(status.isE_Proven).toBe(true);
+    });
+
+    it("evaluates AST rule applications accurately", () => {
+      const astP = parseFormula("P");
+      const astImp = parseFormula("P -> Q");
+      expect(astP).toBeDefined();
+      expect(astImp).toBeDefined();
+
+      const mpResult = applyRuleToAsts("mp", [astP!, astImp!]);
+      expect(mpResult.success).toBe(true);
+      expect(formatFormula(mpResult.resultAst!)).toBe("Q");
     });
   });
 });

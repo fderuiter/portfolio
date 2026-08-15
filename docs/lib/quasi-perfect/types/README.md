@@ -21,6 +21,7 @@
 
 ## Type Aliases
 
+- [GameMode](type-aliases/GameMode.md)
 - [NodeType](type-aliases/NodeType.md)
 - [TacticFunction](type-aliases/TacticFunction.md)
 - [TacticId](type-aliases/TacticId.md)

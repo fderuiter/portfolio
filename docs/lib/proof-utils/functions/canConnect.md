@@ -8,7 +8,7 @@
 
 > **canConnect**(`sourceId`, `targetId`, `edges`, `theoremId?`): `object`
 
-Defined in: [lib/proof-utils.ts:770](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L770)
+Defined in: [lib/proof-utils.ts:1587](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L1587)
 
 Checks if two nodes can be connected logically and returns validation status.
 

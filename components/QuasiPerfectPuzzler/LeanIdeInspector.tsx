@@ -127,9 +127,22 @@ export const LeanIdeInspector: React.FC<LeanIdeInspectorProps> = ({
                 let colorClass = "text-zinc-300";
                 if (line.startsWith("--")) colorClass = "text-zinc-500 italic";
                 else if (line.startsWith("theorem")) colorClass = "text-purple-400 font-bold";
-                else if (line.trim().startsWith("rfl") || line.trim().startsWith("ring") || line.trim().startsWith("exact"))
+                else if (
+                  line.trim().startsWith("rfl") ||
+                  line.trim().startsWith("ring") ||
+                  line.trim().startsWith("exact") ||
+                  line.trim().startsWith("symm")
+                )
                   colorClass = "text-emerald-400 font-semibold";
-                else if (line.trim().startsWith("intro") || line.trim().startsWith("apply") || line.trim().startsWith("cases"))
+                else if (
+                  line.trim().startsWith("intro") ||
+                  line.trim().startsWith("apply") ||
+                  line.trim().startsWith("cases") ||
+                  line.trim().startsWith("split") ||
+                  line.trim().startsWith("left") ||
+                  line.trim().startsWith("right") ||
+                  line.trim().startsWith("constructor")
+                )
                   colorClass = "text-brand-cyan font-semibold";
                 else if (line.trim().startsWith("rw") || line.trim().startsWith("simp"))
                   colorClass = "text-amber-400 font-semibold";
@@ -194,6 +207,26 @@ export const LeanIdeInspector: React.FC<LeanIdeInspectorProps> = ({
                       <span className="text-zinc-500 font-bold">Failure RAM Penalty:</span>{" "}
                       {tac.failureCost} GB
                     </div>
+                    {tac.id === "symm" && (
+                      <div>
+                        <span className="text-emerald-400 font-bold">Logic Rule:</span> Symmetry of Equality (`Eq.symm : a = b ⟹ b = a`)
+                      </div>
+                    )}
+                    {tac.id === "split" && (
+                      <div>
+                        <span className="text-brand-cyan font-bold">Logic Rule:</span> Conjunction Introduction (`And.intro : P → Q → P ∧ Q`)
+                      </div>
+                    )}
+                    {tac.id === "left" && (
+                      <div>
+                        <span className="text-brand-cyan font-bold">Logic Rule:</span> Disjunction Left Injection (`Or.inl : P → P ∨ Q`)
+                      </div>
+                    )}
+                    {tac.id === "right" && (
+                      <div>
+                        <span className="text-brand-cyan font-bold">Logic Rule:</span> Disjunction Right Injection (`Or.inr : Q → P ∨ Q`)
+                      </div>
+                    )}
                     {tac.id === "intro" && (
                       <div>
                         <span className="text-purple-400 font-bold">Logic Rule:</span>{" "}

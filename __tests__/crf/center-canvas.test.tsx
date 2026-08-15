@@ -1,0 +1,213 @@
+// @vitest-environment jsdom
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
+(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+
+import React, { act } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import { FormCanvas } from "@/components/crf/CenterCanvas/FormCanvas";
+import { CRFForm, CodelistDefinition } from "@/lib/crf/types";
+
+describe("FormCanvas & FieldRenderer Component Suite", () => {
+  let container: HTMLDivElement;
+  let root: Root;
+
+  const mockForm: CRFForm = {
+    id: "form_test_canvas",
+    name: "Vital Signs & Demographics",
+    domain: "VS",
+    description: "Vital signs panel",
+    version: "1.0",
+    rules: [],
+    sections: [
+      {
+        id: "sec_1",
+        title: "Subject Measurements",
+        fields: [
+          {
+            id: "f_height",
+            variableName: "HEIGHT",
+            label: "Height",
+            dataType: "number",
+            columnSpan: 6,
+            required: true,
+            unit: "cm",
+          },
+          {
+            id: "f_weight",
+            variableName: "WEIGHT",
+            label: "Weight",
+            dataType: "number",
+            columnSpan: 6,
+            required: true,
+            unit: "kg",
+          },
+        ],
+      },
+    ],
+  };
+
+  const mockCodelists: CodelistDefinition[] = [];
+
+  beforeEach(() => {
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+  });
+
+  afterEach(() => {
+    act(() => {
+      root?.unmount();
+    });
+    if (container.parentNode) {
+      document.body.removeChild(container);
+    }
+    vi.restoreAllMocks();
+  });
+
+  it("renders form title, sections, and fields in 12-column grid layout", async () => {
+    await act(async () => {
+      root.render(
+        <FormCanvas
+          form={mockForm}
+          selectedFieldId={null}
+          viewport="desktop"
+          codelists={mockCodelists}
+          onChangeViewport={vi.fn()}
+          onSelectField={vi.fn()}
+          onUpdateFormMeta={vi.fn()}
+          onAddSection={vi.fn()}
+          onDeleteSection={vi.fn()}
+          onUpdateSectionTitle={vi.fn()}
+          onDuplicateField={vi.fn()}
+          onDeleteField={vi.fn()}
+          onOpenPalette={vi.fn()}
+        />
+      );
+    });
+
+    expect(container.textContent).toContain("Vital Signs & Demographics");
+    expect(container.textContent).toContain("Subject Measurements");
+    expect(container.textContent).toContain("HEIGHT");
+    expect(container.textContent).toContain("WEIGHT");
+  });
+
+  it("handles field selection on click", async () => {
+    const onSelectField = vi.fn();
+
+    await act(async () => {
+      root.render(
+        <FormCanvas
+          form={mockForm}
+          selectedFieldId={null}
+          viewport="desktop"
+          codelists={mockCodelists}
+          onChangeViewport={vi.fn()}
+          onSelectField={onSelectField}
+          onUpdateFormMeta={vi.fn()}
+          onAddSection={vi.fn()}
+          onDeleteSection={vi.fn()}
+          onUpdateSectionTitle={vi.fn()}
+          onDuplicateField={vi.fn()}
+          onDeleteField={vi.fn()}
+          onOpenPalette={vi.fn()}
+        />
+      );
+    });
+
+    const heightField = container.querySelector('[data-field-id="f_height"]');
+    expect(heightField).not.toBeNull();
+
+    await act(async () => {
+      heightField?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(onSelectField).toHaveBeenCalledWith("f_height");
+  });
+
+  it("handles column span adjustment (+ and - buttons)", async () => {
+    const onUpdateField = vi.fn();
+
+    await act(async () => {
+      root.render(
+        <FormCanvas
+          form={mockForm}
+          selectedFieldId="f_height"
+          viewport="desktop"
+          codelists={mockCodelists}
+          onChangeViewport={vi.fn()}
+          onSelectField={vi.fn()}
+          onUpdateFormMeta={vi.fn()}
+          onAddSection={vi.fn()}
+          onDeleteSection={vi.fn()}
+          onUpdateSectionTitle={vi.fn()}
+          onDuplicateField={vi.fn()}
+          onDeleteField={vi.fn()}
+          onUpdateField={onUpdateField}
+          onOpenPalette={vi.fn()}
+        />
+      );
+    });
+
+    // Find column increment button
+    const plusBtn = container.querySelector('button[title="Expand column span"]');
+    expect(plusBtn).not.toBeNull();
+
+    await act(async () => {
+      plusBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(onUpdateField).toHaveBeenCalledWith("f_height", { columnSpan: 7 });
+
+    // Find column decrement button
+    const minusBtn = container.querySelector('button[title="Shrink column span"]');
+    expect(minusBtn).not.toBeNull();
+
+    await act(async () => {
+      minusBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+
+    expect(onUpdateField).toHaveBeenCalledWith("f_height", { columnSpan: 5 });
+  });
+
+  it("allows deleting and duplicating fields from field action controls", async () => {
+    const onDeleteField = vi.fn();
+    const onDuplicateField = vi.fn();
+
+    await act(async () => {
+      root.render(
+        <FormCanvas
+          form={mockForm}
+          selectedFieldId="f_height"
+          viewport="desktop"
+          codelists={mockCodelists}
+          onChangeViewport={vi.fn()}
+          onSelectField={vi.fn()}
+          onUpdateFormMeta={vi.fn()}
+          onAddSection={vi.fn()}
+          onDeleteSection={vi.fn()}
+          onUpdateSectionTitle={vi.fn()}
+          onDuplicateField={onDuplicateField}
+          onDeleteField={onDeleteField}
+          onOpenPalette={vi.fn()}
+        />
+      );
+    });
+
+    const duplicateBtn = container.querySelector('button[title="Duplicate Field"]');
+    expect(duplicateBtn).not.toBeNull();
+
+    await act(async () => {
+      duplicateBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    expect(onDuplicateField).toHaveBeenCalledWith("sec_1", "f_height");
+
+    const deleteBtn = container.querySelector('button[title="Delete Field"]');
+    expect(deleteBtn).not.toBeNull();
+
+    await act(async () => {
+      deleteBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
+    expect(onDeleteField).toHaveBeenCalledWith("sec_1", "f_height");
+  });
+});

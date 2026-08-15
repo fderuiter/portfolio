@@ -3,7 +3,11 @@ type TheoremId =
   | "modus-tollens"
   | "hypothetical-syllogism"
   | "disjunctive-syllogism"
-  | "resolution";
+  | "resolution"
+  | "two-phase-commit"
+  | "quorum-overlap"
+  | "cache-consistency"
+  | "custom";
 
 type WorkerAction = 
   | { type: "START_SIMULATION"; mode: "normal" | "loop"; theoremId?: TheoremId };
@@ -68,6 +72,43 @@ const THEOREM_SIMULATION_STEPS: Record<TheoremId, string[]> = {
     "Discharging unit resolvent Conclusion Node E (R: Deadlock Rollback)...",
     "Checking empty clause refutation and cycle-free wait graph...",
     "Database concurrency safety invariant verified (Q.E.D.)",
+  ],
+  "two-phase-commit": [
+    "Initializing Two-Phase Commit Verification...",
+    "Gathering Phase-1 votes: Shard A (PrepA)...",
+    "Gathering Phase-1 votes: Shard B (PrepB)...",
+    "Applying Conjunction Introduction to establish (PrepA ∧ PrepB)...",
+    "Unanimous prepare quorum verified.",
+    "Linking with Coordinator Commit Rule Node D...",
+    "Applying Modus Ponens to derive Global Commit...",
+    "Verifying zero abort conditions across network partitions...",
+    "Distributed 2PC Atomicity theorem verified (Q.E.D.)",
+  ],
+  "quorum-overlap": [
+    "Initializing Quorum Intersection Verification...",
+    "Evaluating Quorum A size: (N/2 + 1)...",
+    "Evaluating Quorum B size: (N/2 + 1)...",
+    "Applying Majority Intersection Theorem to derive Overlap node...",
+    "Inspecting overlapping voter term constraint Node D...",
+    "Applying Modus Ponens to establish SingleLeader invariant...",
+    "Verifying zero split-brain states across network splits...",
+    "Raft Quorum Safety formally proven (Q.E.D.)",
+  ],
+  "cache-consistency": [
+    "Initializing Cache Coherence Verification...",
+    "Evaluating Primary Database Commit Event (Write)...",
+    "Evaluating CDC Invalidation Trigger (Write → Invalidate)...",
+    "Applying Modus Ponens to establish Cache Invalidation...",
+    "Evaluating Edge Read Router Policy (Invalidate → FreshRead)...",
+    "Applying Modus Ponens to discharge FreshRead invariant...",
+    "Verifying absence of race conditions between CDC stream and read replica...",
+    "Cache consistency theorem verified (Q.E.D.)",
+  ],
+  "custom": [
+    "Parsing custom proposition AST...",
+    "Evaluating premise consistency via SAT table...",
+    "Applying natural deduction inference tactics...",
+    "Custom goal discharged successfully (Q.E.D.)",
   ],
 };
 

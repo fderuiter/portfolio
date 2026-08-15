@@ -6,7 +6,7 @@
 
 # Interface: SubGoal
 
-Defined in: [lib/quasi-perfect/types.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L37)
+Defined in: [lib/quasi-perfect/types.ts:43](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L43)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/quasi-perfect/types.ts:37](https://github.com/fderuiter/portfol
 
 > **goal**: [`ASTNode`](ASTNode.md)
 
-Defined in: [lib/quasi-perfect/types.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L40)
+Defined in: [lib/quasi-perfect/types.ts:46](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L46)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/quasi-perfect/types.ts:40](https://github.com/fderuiter/portfol
 
 > **hypotheses**: [`ASTNode`](ASTNode.md)[]
 
-Defined in: [lib/quasi-perfect/types.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L41)
+Defined in: [lib/quasi-perfect/types.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L47)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/quasi-perfect/types.ts:41](https://github.com/fderuiter/portfol
 
 > **id**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:38](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L38)
+Defined in: [lib/quasi-perfect/types.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L44)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/quasi-perfect/types.ts:38](https://github.com/fderuiter/portfol
 
 > **isCompleted**: `boolean`
 
-Defined in: [lib/quasi-perfect/types.ts:42](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L42)
+Defined in: [lib/quasi-perfect/types.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L48)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [lib/quasi-perfect/types.ts:42](https://github.com/fderuiter/portfol
 
 > **label**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:39](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L39)
+Defined in: [lib/quasi-perfect/types.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L45)

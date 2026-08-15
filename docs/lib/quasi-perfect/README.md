@@ -74,6 +74,12 @@ Re-exports [findNodeById](engine/functions/findNodeById.md)
 
 ***
 
+### GameMode
+
+Re-exports [GameMode](types/type-aliases/GameMode.md)
+
+***
+
 ### GameProgressState
 
 Re-exports [GameProgressState](types/interfaces/GameProgressState.md)

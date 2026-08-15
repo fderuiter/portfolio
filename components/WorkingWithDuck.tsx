@@ -6,6 +6,9 @@ import Image from "next/image";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { FieldManualButton } from "@/components/FieldManualButton";
+import { FullscreenButton } from "@/components/arcade/FullscreenButton";
+import { TabletOrientationHint } from "@/components/arcade/TabletOrientationHint";
+import { useFullscreen } from "@/hooks/useFullscreen";
 import {
   IconPlayerPlay,
   IconRotate,
@@ -1333,6 +1336,8 @@ export const WorkingWithDuck: React.FC = () => {
   const animFrameIdRef = useRef<number | null>(null);
   const lastBellyScrubPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
+  const { isFullscreen, toggleFullscreen } = useFullscreen(containerRef);
+
   // Web Audio Procedural Synthesizer for Duck Sound Effects & Lo-Fi Beats
   const playSoundCue = useCallback(
     (cue: SoundCue) => {
@@ -1779,6 +1784,30 @@ export const WorkingWithDuck: React.FC = () => {
     }
   };
 
+  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length > 0) {
+      const touch = e.touches[0];
+      handleCanvasMouseDown({
+        clientX: touch.clientX,
+        clientY: touch.clientY,
+      } as unknown as React.MouseEvent<HTMLCanvasElement>);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length > 0) {
+      const touch = e.touches[0];
+      handleCanvasMouseMove({
+        clientX: touch.clientX,
+        clientY: touch.clientY,
+      } as unknown as React.MouseEvent<HTMLCanvasElement>);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    handleCanvasMouseUp();
+  };
+
   const currentSprint = SPRINTS.find((s) => s.level === uiState.currentLevel) || SPRINTS[0];
 
   // Guided Onboarding Hint Text
@@ -1800,7 +1829,17 @@ export const WorkingWithDuck: React.FC = () => {
   }
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-5xl mx-auto select-none font-sans">
+    <div
+      ref={containerRef}
+      className={`relative w-full max-w-5xl mx-auto select-none font-sans ${
+        isFullscreen
+          ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none bg-black p-2 sm:p-4 overflow-y-auto overflow-x-hidden flex flex-col justify-between"
+          : ""
+      }`}
+    >
+      {/* Tablet Orientation Recommendation */}
+      <TabletOrientationHint />
+
       {/* Top Status & Meters HUD */}
       <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-3">
         {/* Work Progress Meter */}
@@ -1924,6 +1963,11 @@ export const WorkingWithDuck: React.FC = () => {
 
       {/* Main Canvas Screen Container */}
       <div className="relative rounded-3xl border border-zinc-800 bg-zinc-950 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)]">
+        <FullscreenButton
+          isFullscreen={isFullscreen}
+          onToggle={toggleFullscreen}
+          variant="floating"
+        />
         <canvas
           ref={canvasRef}
           width={CANVAS_WIDTH}
@@ -1931,7 +1975,14 @@ export const WorkingWithDuck: React.FC = () => {
           onMouseDown={handleCanvasMouseDown}
           onMouseMove={handleCanvasMouseMove}
           onMouseUp={handleCanvasMouseUp}
-          className="w-full h-auto cursor-crosshair block"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          className={
+            isFullscreen
+              ? "max-h-[calc(100vh-220px)] max-w-full aspect-[800/500] object-contain block cursor-crosshair touch-none my-auto mx-auto"
+              : "w-full h-auto cursor-crosshair block touch-none"
+          }
         />
 
         {/* Start Overlay Screen */}
@@ -2264,6 +2315,7 @@ export const WorkingWithDuck: React.FC = () => {
             </button>
 
             <FieldManualButton manualId="working-with-duck" label="Manual" />
+            <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} variant="header" />
           </div>
         </div>
       </div>
