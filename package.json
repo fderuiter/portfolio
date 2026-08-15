@@ -16,7 +16,7 @@
     "check-docs-drift": "npx tsx scripts/check-drift.ts",
     "check:migrations": "node scripts/check-migration-integrity.js && node scripts/check-migrations.js",
     "check:migrations:drift": "prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code",
-    "lint:docs": "npx markdownlint \"**/*.md\" --ignore node_modules --ignore .next --ignore coverage --ignore .agents --ignore scratch --ignore tmp",
+    "lint:docs": "npx markdownlint \"**/*.md\" --ignore node_modules --ignore .next --ignore coverage --ignore .agents --ignore scratch --ignore tmp --ignore test-results",
     "prebuild": "npx tsx scripts/generate-theme.ts && npm run compile-docs",
     "build": "node scripts/build.js",
     "start": "next start",

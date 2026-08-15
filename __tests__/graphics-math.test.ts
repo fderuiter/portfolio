@@ -5,10 +5,6 @@ import {
   distributeItemsGreedily,
   mapDataToCoordinates,
   generateCubicSplinePath,
-  generateHermiteSplinePath,
-  checkBeamContainerCollision,
-  calculateCollisionPoint,
-  generateExplosionTrajectories,
   LRUCache
 } from "@/lib/graphics-math";
 
