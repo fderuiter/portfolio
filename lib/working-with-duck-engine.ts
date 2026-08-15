@@ -15,6 +15,9 @@ export const DESK_BOUNDS = { x: 80, y: 150, width: 170, height: 160 };
 export const RUG_BOUNDS = { x: 320, y: 150, width: 230, height: 180 };
 export const DOG_BED_BOUNDS = { x: 640, y: 70, width: 120, height: 100 };
 export const BACK_DOOR_BOUNDS = { x: 690, y: 360, width: 90, height: 110 };
+export const WATER_BOWL_BOUNDS = { x: 60, y: 360, width: 55, height: 45 };
+export const FOOD_BOWL_BOUNDS = { x: 125, y: 360, width: 55, height: 45 };
+export const BATHTUB_BOUNDS = { x: 680, y: 220, width: 95, height: 95 };
 
 export type DuckBehaviorState =
   | "IDLE_ROAM"
@@ -25,9 +28,26 @@ export type DuckBehaviorState =
   | "ZOOMIES"
   | "FETCHING_BALL"
   | "DRAGGED"
-  | "NAP_TIME";
+  | "NAP_TIME"
+  | "PERFORMING_TRICK"
+  | "DRINKING_WATER"
+  | "EATING_KIBBLE";
 
-export type InventoryItem = "tennis-ball" | "kong" | "squeaky-toy" | "treat";
+export type DuckTrick = "SIT" | "HIGH_FIVE" | "DROP_IT" | "SPIN";
+
+export type DuckAccessory = "none" | "bucket-hat" | "bowtie" | "bandana" | "rain-boots";
+
+export type DuckMood =
+  | "happy"
+  | "thirsty"
+  | "hungry"
+  | "potty"
+  | "playful"
+  | "sleepy"
+  | "muddy"
+  | "zoomies";
+
+export type InventoryItem = "tennis-ball" | "kong" | "squeaky-toy" | "treat" | "frisbee";
 
 export type PortfolioHazardType = "resume" | "server-cable" | "clinical-db" | "garmin-watch";
 
@@ -55,6 +75,24 @@ export interface ParkBone {
   collected: boolean;
 }
 
+export interface ParkHurdle {
+  id: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  cleared: boolean;
+}
+
+export interface ParkFriend {
+  id: number;
+  name: string;
+  breed: "corgi" | "golden";
+  x: number;
+  y: number;
+  greeted: boolean;
+}
+
 export interface Squirrel {
   x: number;
   y: number;
@@ -72,7 +110,7 @@ export interface Particle {
   color: string;
   decay: number;
   size: number;
-  shape: "heart" | "circle" | "sweat" | "star" | "spark" | "bone";
+  shape: "heart" | "circle" | "sweat" | "star" | "spark" | "bone" | "bubble" | "mud" | "water";
 }
 
 export interface FloatingAlert {
@@ -200,27 +238,43 @@ export const DUCK_FACTS: DuckFact[] = [
 export const SPRINTS: GameSprint[] = [
   {
     level: 1,
-    title: "Sprint 1: Onboarding & Setup",
-    subtitle: "Gentle puppy impulses · Learn the tools",
+    title: "Sprint 1: Onboarding & Puppy Proofing",
+    subtitle: "Gentle puppy impulses · Learn clicker tricks & toys",
     targetWork: 100,
     impulseInterval: 280,
-    description: "Keep Duck entertained with toys and watch the back door clock while getting your developer environment configured.",
+    description: "Get your developer environment configured while teaching Duck basic obedience (Sit, High Five) and redirecting playful nibbles.",
   },
   {
     level: 2,
-    title: "Sprint 2: Production Hotfix",
-    subtitle: "Faster impulses · Sneaky cable chews & delivery knocks",
-    targetWork: 150,
+    title: "Sprint 2: Production Hotfix & Cable Alert",
+    subtitle: "Faster impulses · Amazon delivery knock & server wires",
+    targetWork: 160,
     impulseInterval: 220,
-    description: "Production bug in flight! Watch out for the Amazon delivery knock and protect the API server cluster wire.",
+    description: "Production bug in flight! Protect the API server cluster wire with Kong toys and trade treats during 'No Take, Only Throw!'.",
   },
   {
     level: 3,
-    title: "Sprint 3: Major Release Launch",
+    title: "Sprint 3: Startup Pitch & Window Squirrel",
     subtitle: "High excitement · Window squirrels & rapid potty runs",
-    targetWork: 220,
-    impulseInterval: 170,
-    description: "Launch day deadline! Zoomies are imminent. Take strategic dog park breaks to wear Duck out for the ultimate Nap Time.",
+    targetWork: 240,
+    impulseInterval: 175,
+    description: "Pitch day deadline! Excitement is rising. Run outside for fast potty breaks and practice clicker training for Good Boy multipliers.",
+  },
+  {
+    level: 4,
+    title: "Sprint 4: Crunch Week & Muddy Park Rescue",
+    subtitle: "Extreme multitasking · Agility hurdles & bathtub wash",
+    targetWork: 330,
+    impulseInterval: 145,
+    description: "Intense deployment crunch! Duck needs high-energy Dog Park agility runs. If he splashes into mud, scrub him clean in the Bathtub.",
+  },
+  {
+    level: 5,
+    title: "Sprint 5: Major 1.0 Launch & Golden Graduation",
+    subtitle: "Peak velocity · Master combos & zero downtime",
+    targetWork: 450,
+    impulseInterval: 120,
+    description: "The Version 1.0 General Availability launch! Master all training tricks, active desk coding bursts, and unlock the Golden Graduation hat.",
   },
 ];
 
@@ -279,7 +333,31 @@ export type SoundCue =
   | "door-knock"
   | "squirrel-chirp"
   | "hiccup"
-  | "combo-fanfare";
+  | "combo-fanfare"
+  | "trick-chime"
+  | "paw-clap"
+  | "spin-whoosh"
+  | "bath-soap"
+  | "bath-rinse"
+  | "water-lap"
+  | "crunch-kibble"
+  | "code-type"
+  | "frisbee-throw";
+
+export interface OfficeStations {
+  waterLevel: number; // 0 to 100%
+  foodLevel: number; // 0 to 100%
+  isWaterDrinking: boolean;
+  isFoodEating: boolean;
+}
+
+export interface BathtubState {
+  status: "idle" | "soap" | "scrub" | "rinse" | "clean";
+  soapLather: number; // 0 to 100%
+  rinseLevel: number; // 0 to 100%
+  scrubCount: number;
+  bubbles: Array<{ id: number; x: number; y: number; size: number; alpha: number }>;
+}
 
 export interface WorkingWithDuckState {
   status: "idle" | "running" | "paused" | "failed" | "won";
@@ -289,14 +367,32 @@ export interface WorkingWithDuckState {
   targetWorkProgress: number;
   excitement: number; // 0 to 100
   bladder: number; // 0 to 100
+  thirst: number; // 0 to 100
+  hunger: number; // 0 to 100
   naughtyVsGood: number; // -100 to +100
-  multiplier: number; // 1.0 to 2.5
+  multiplier: number; // 0.7 to 3.5
   ticks: number;
   totalScore: number;
   calmBuffTimer: number; // Ticks remaining for calm buff
   lastImpulseTick: number;
   bellyRubScrubCount: number;
   bellyRubProgress: number; // 0 to 100%
+  activeTrick: {
+    trick: DuckTrick;
+    timer: number;
+    maxTimer: number;
+  } | null;
+
+  activeAccessory: DuckAccessory;
+  unlockedAccessories: DuckAccessory[];
+
+  officeStations: OfficeStations;
+  isMuddy: boolean;
+  inBathtub: boolean;
+  bathtubState: BathtubState;
+
+  activeCodeBursts: number;
+  lastCodeTick: number;
 
   comboStreak: number;
   comboTimer: number;
@@ -321,6 +417,8 @@ export interface WorkingWithDuckState {
     isCarryingBall: boolean;
     circleAngle: number;
     sniffCountdown: number; // 0 to 210 (3.5 seconds at 60fps)
+    tailWagAngle: number;
+    tailWagSpeed: number;
   };
 
   selectedItem: InventoryItem;
@@ -343,6 +441,7 @@ export interface WorkingWithDuckState {
   inDogPark: boolean;
   parkState: {
     status: "aim" | "thrown" | "retrieving" | "success" | "muddy";
+    mode: "ball" | "frisbee";
     ballX: number;
     ballY: number;
     ballVx: number;
@@ -352,9 +451,14 @@ export interface WorkingWithDuckState {
     duckVx: number;
     duckVy: number;
     duckAngle: number;
+    duckIsJumping: boolean;
+    jumpHeight: number;
     puddles: MudPuddle[];
     bones: ParkBone[];
     bonesCollected: number;
+    hurdles: ParkHurdle[];
+    hurdlesCleared: number;
+    friends: ParkFriend[];
     whistleTaps: number;
     timer: number;
   };
@@ -374,8 +478,24 @@ export function clampBounds(x: number, y: number): { x: number; y: number } {
   };
 }
 
-export function createInitialDuckGameState(level = 1, mode: "campaign" | "endless" = "campaign"): WorkingWithDuckState {
+export function createInitialDuckGameState(
+  level = 1,
+  mode: "campaign" | "endless" = "campaign",
+  preservedAccessories: DuckAccessory[] = ["none", "bucket-hat"]
+): WorkingWithDuckState {
   const sprint = SPRINTS.find((s) => s.level === level) || SPRINTS[0];
+
+  const unlockedAcc: DuckAccessory[] = Array.from(
+    new Set<DuckAccessory>([
+      "none",
+      ...preservedAccessories,
+      level >= 1 ? "bucket-hat" : "none",
+      level >= 2 ? "bowtie" : "none",
+      level >= 3 ? "bandana" : "none",
+      level >= 4 ? "rain-boots" : "none",
+    ])
+  );
+
   return {
     status: "idle",
     mode,
@@ -384,6 +504,8 @@ export function createInitialDuckGameState(level = 1, mode: "campaign" | "endles
     targetWorkProgress: mode === "endless" ? 999999 : sprint.targetWork,
     excitement: 15,
     bladder: 10,
+    thirst: 20,
+    hunger: 15,
     naughtyVsGood: 15,
     multiplier: 1.2,
     ticks: 0,
@@ -392,6 +514,30 @@ export function createInitialDuckGameState(level = 1, mode: "campaign" | "endles
     lastImpulseTick: 0,
     bellyRubScrubCount: 0,
     bellyRubProgress: 0,
+    activeTrick: null,
+
+    activeAccessory: "none",
+    unlockedAccessories: unlockedAcc,
+
+    officeStations: {
+      waterLevel: 80,
+      foodLevel: 75,
+      isWaterDrinking: false,
+      isFoodEating: false,
+    },
+    isMuddy: false,
+    inBathtub: false,
+    bathtubState: {
+      status: "idle",
+      soapLather: 0,
+      rinseLevel: 0,
+      scrubCount: 0,
+      bubbles: [],
+    },
+
+    activeCodeBursts: 0,
+    lastCodeTick: 0,
+
     comboStreak: 0,
     comboTimer: 0,
     activeSurpriseEvent: null,
@@ -410,6 +556,8 @@ export function createInitialDuckGameState(level = 1, mode: "campaign" | "endles
       isCarryingBall: false,
       circleAngle: 0,
       sniffCountdown: 0,
+      tailWagAngle: 0,
+      tailWagSpeed: 0.15,
     },
 
     selectedItem: "tennis-ball",
@@ -426,6 +574,7 @@ export function createInitialDuckGameState(level = 1, mode: "campaign" | "endles
     inDogPark: false,
     parkState: {
       status: "aim",
+      mode: "ball",
       ballX: 100,
       ballY: 250,
       ballVx: 0,
@@ -435,6 +584,8 @@ export function createInitialDuckGameState(level = 1, mode: "campaign" | "endles
       duckVx: 0,
       duckVy: 0,
       duckAngle: 0,
+      duckIsJumping: false,
+      jumpHeight: 0,
       puddles: [
         { x: 360, y: 160, radius: 36 },
         { x: 480, y: 320, radius: 40 },
@@ -446,6 +597,15 @@ export function createInitialDuckGameState(level = 1, mode: "campaign" | "endles
         { id: 3, x: 580, y: 310, collected: false },
       ],
       bonesCollected: 0,
+      hurdles: [
+        { id: 1, x: 320, y: 220, width: 28, height: 44, cleared: false },
+        { id: 2, x: 520, y: 200, width: 28, height: 44, cleared: false },
+      ],
+      hurdlesCleared: 0,
+      friends: [
+        { id: 1, name: "Luna the Corgi", breed: "corgi", x: 240, y: 360, greeted: false },
+        { id: 2, name: "Barnaby", breed: "golden", x: 670, y: 120, greeted: false },
+      ],
       whistleTaps: 0,
       timer: 0,
     },
@@ -482,21 +642,28 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
   const nextTicks = state.ticks + 1;
   const soundCues: Array<SoundCue> = [];
 
-  // 1. If currently in the Dog Park mini-game, delegate to stepParkGame
+  // If in Dog Park mini-game, step park
   if (state.inDogPark) {
     return stepParkGame(state);
+  }
+
+  // If in Bathtub washroom, step bathtub
+  if (state.inBathtub) {
+    return stepBathtubGame(state);
   }
 
   const sprint = SPRINTS.find((s) => s.level === state.currentLevel) || SPRINTS[0];
   const impulseRate = sprint.impulseInterval;
 
-  // 2. Multipliers & Calm Buff
+  // Multipliers & Calm Buff
   const nextCalmBuff = Math.max(0, state.calmBuffTimer - 1);
   const baseMultiplier = calculateGoodBoyMultiplier(state.naughtyVsGood);
   const comboBonus = state.comboStreak >= 2 ? 0.3 * Math.min(3, state.comboStreak) : 0;
-  const effectiveMultiplier = nextCalmBuff > 0 ? baseMultiplier + 0.5 + comboBonus : baseMultiplier + comboBonus;
+  const accessoryBonus = state.activeAccessory === "bowtie" ? 0.2 : 0;
+  const effectiveMultiplier =
+    (nextCalmBuff > 0 ? baseMultiplier + 0.5 : baseMultiplier) + comboBonus + accessoryBonus;
 
-  // 3. Work Progress Advance (Only when Duck is NOT causing an active emergency)
+  // Work Progress Advance (When Duck is NOT in an active emergency)
   const isEmergency =
     state.duck.state === "SNIFFING_POTTY" ||
     state.duck.state === "SNEAKY_CHEW" ||
@@ -526,14 +693,20 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
     };
   }
 
-  // 4. Meters Natural Evolution (Paused or slowed during Calm Buff)
-  const excitementRate = nextCalmBuff > 0 ? 0.02 : 0.08 + state.currentLevel * 0.02;
+  // Meters Natural Evolution
+  const excitementRate = nextCalmBuff > 0 ? 0.02 : 0.07 + state.currentLevel * 0.018;
   const bladderRate = nextCalmBuff > 0 ? 0.02 : 0.05 + state.currentLevel * 0.015;
+  const thirstRate = 0.03 + state.currentLevel * 0.01;
+  const hungerRate = 0.02 + state.currentLevel * 0.01;
 
   let nextExcitement = Math.min(100, Math.max(0, state.excitement + excitementRate));
   let nextBladder = Math.min(100, Math.max(0, state.bladder + bladderRate));
+  let nextThirst = Math.min(100, Math.max(0, state.thirst + thirstRate));
+  let nextHunger = Math.min(100, Math.max(0, state.hunger + hungerRate));
   let nextNaughtyVsGood = state.naughtyVsGood;
-  let activeToast = state.activeSkillToast ? { ...state.activeSkillToast, timer: state.activeSkillToast.timer - 1 } : null;
+  let activeToast = state.activeSkillToast
+    ? { ...state.activeSkillToast, timer: state.activeSkillToast.timer - 1 }
+    : null;
   if (activeToast && activeToast.timer <= 0) {
     activeToast = null;
   }
@@ -543,20 +716,33 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
   const nextComboStreak = nextComboTimer > 0 ? state.comboStreak : 0;
 
   // Surprise event timer evolution
-  let activeSurprise = state.activeSurpriseEvent ? { ...state.activeSurpriseEvent, timer: state.activeSurpriseEvent.timer - 1 } : null;
+  let activeSurprise = state.activeSurpriseEvent
+    ? { ...state.activeSurpriseEvent, timer: state.activeSurpriseEvent.timer - 1 }
+    : null;
   if (activeSurprise && activeSurprise.timer <= 0) {
     activeSurprise = null;
   }
 
-  // 5. Duck Physics & Autonomous AI
+  // Active Trick timer evolution
+  let activeTrick = state.activeTrick ? { ...state.activeTrick, timer: state.activeTrick.timer - 1 } : null;
+  if (activeTrick && activeTrick.timer <= 0) {
+    activeTrick = null;
+  }
+
+  // Duck AI & Physics
   const duck = { ...state.duck };
   let particles = [...state.particles];
   let alerts = [...state.floatingAlerts];
   let activeHazardTarget = state.activeHazardTarget;
   const hazards = state.hazards.map((h) => ({ ...h }));
+  const stations = { ...state.officeStations };
 
-  // Randomly trigger surprise event during calm roam
-  if (!activeSurprise && nextTicks % 500 === 0 && duck.state === "IDLE_ROAM") {
+  // Tail wag physics
+  const tailSpeedMultiplier = Math.max(0.1, (nextNaughtyVsGood + 100) / 100);
+  duck.tailWagAngle = Math.sin(nextTicks * 0.35 * tailSpeedMultiplier) * 0.45;
+
+  // Random surprise event during calm roam
+  if (!activeSurprise && nextTicks % 520 === 0 && duck.state === "IDLE_ROAM") {
     const roll = Math.random();
     if (roll < 0.5) {
       activeSurprise = { type: "amazon-delivery", timer: 300, maxTimer: 300, resolved: false };
@@ -585,8 +771,29 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
     }
   }
 
+  // Thirst & Hunger Autonomous Station Visits
+  if (nextThirst >= 85 && duck.state === "IDLE_ROAM" && stations.waterLevel > 10) {
+    duck.state = "DRINKING_WATER";
+    duck.targetX = WATER_BOWL_BOUNDS.x + 25;
+    duck.targetY = WATER_BOWL_BOUNDS.y + 20;
+    duck.stateTimer = 180;
+    duck.maxStateTimer = 180;
+  } else if (nextHunger >= 85 && duck.state === "IDLE_ROAM" && stations.foodLevel > 10) {
+    duck.state = "EATING_KIBBLE";
+    duck.targetX = FOOD_BOWL_BOUNDS.x + 25;
+    duck.targetY = FOOD_BOWL_BOUNDS.y + 20;
+    duck.stateTimer = 180;
+    duck.maxStateTimer = 180;
+  }
+
   // Check 100% Excitement -> Trigger Zoomies
-  if (nextExcitement >= 99 && duck.state !== "ZOOMIES" && duck.state !== "DRAGGED" && duck.state !== "NAP_TIME") {
+  if (
+    nextExcitement >= 99 &&
+    duck.state !== "ZOOMIES" &&
+    duck.state !== "DRAGGED" &&
+    duck.state !== "NAP_TIME" &&
+    duck.state !== "PERFORMING_TRICK"
+  ) {
     duck.state = "ZOOMIES";
     duck.stateTimer = 240; // 4 seconds of wild zoomies
     duck.maxStateTimer = 240;
@@ -605,7 +812,13 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
   }
 
   // Check 100% Bladder -> Trigger Potty Sniff Countdown
-  if (nextBladder >= 99 && duck.state !== "SNIFFING_POTTY" && duck.state !== "DRAGGED" && duck.state !== "NAP_TIME") {
+  if (
+    nextBladder >= 99 &&
+    duck.state !== "SNIFFING_POTTY" &&
+    duck.state !== "DRAGGED" &&
+    duck.state !== "NAP_TIME" &&
+    duck.state !== "PERFORMING_TRICK"
+  ) {
     duck.state = "SNIFFING_POTTY";
     duck.sniffCountdown = 210; // 3.5 seconds at 60fps
     duck.circleAngle = 0;
@@ -639,7 +852,7 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
         duck.y += duck.vy;
         duck.angle = Math.atan2(dy, dx);
 
-        if (nextTicks % 22 === 0) {
+        if (nextTicks % 24 === 0) {
           soundCues.push("tippy-tap");
         }
       } else {
@@ -658,13 +871,15 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
       // Periodic random impulse generation
       if (nextTicks - state.lastImpulseTick > impulseRate) {
         const impulseChoice = Math.random();
-        if (impulseChoice < 0.4) {
+        if (impulseChoice < 0.45) {
           // Sneaky chew event
-          const randomHazard = hazards[Math.floor(Math.random() * hazards.length)];
+          const unchewedHazards = hazards.filter((h) => !h.isChewed);
+          const hazardPool = unchewedHazards.length > 0 ? unchewedHazards : hazards;
+          const randomHazard = hazardPool[Math.floor(Math.random() * hazardPool.length)];
           duck.state = "SNEAKY_CHEW";
           duck.targetX = randomHazard.x;
           duck.targetY = randomHazard.y;
-          duck.stateTimer = 240; // 4 seconds to save
+          duck.stateTimer = 240;
           duck.maxStateTimer = 240;
           activeHazardTarget = randomHazard.id;
           soundCues.push("bark");
@@ -677,10 +892,10 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
             alpha: 1,
             vy: -1.2,
           });
-        } else if (impulseChoice < 0.7) {
+        } else if (impulseChoice < 0.75) {
           // The Flop (Belly rubs invitation)
           duck.state = "THE_FLOP";
-          duck.stateTimer = 360; // 6 seconds flop window
+          duck.stateTimer = 360;
           duck.maxStateTimer = 360;
           duck.vx = 0;
           duck.vy = 0;
@@ -694,6 +909,100 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
             vy: -1.0,
           });
         }
+      }
+      break;
+    }
+
+    case "DRINKING_WATER": {
+      const dx = WATER_BOWL_BOUNDS.x + 25 - duck.x;
+      const dy = WATER_BOWL_BOUNDS.y + 20 - duck.y;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist > 8) {
+        duck.vx = (dx / dist) * 2.0;
+        duck.vy = (dy / dist) * 2.0;
+        duck.x += duck.vx;
+        duck.y += duck.vy;
+        duck.angle = Math.atan2(dy, dx);
+      } else {
+        duck.vx = 0;
+        duck.vy = 0;
+        duck.stateTimer -= 1;
+        stations.waterLevel = Math.max(0, stations.waterLevel - 0.15);
+        nextThirst = Math.max(0, nextThirst - 0.4);
+
+        if (nextTicks % 20 === 0) {
+          soundCues.push("water-lap");
+          particles.push({
+            id: state.nextParticleId + particles.length,
+            x: WATER_BOWL_BOUNDS.x + 25 + (Math.random() - 0.5) * 16,
+            y: WATER_BOWL_BOUNDS.y + 15,
+            vx: (Math.random() - 0.5) * 0.8,
+            vy: -0.6 - Math.random() * 0.6,
+            alpha: 1,
+            color: "#38bdf8",
+            decay: 0.03,
+            size: 4,
+            shape: "water",
+          });
+        }
+
+        if (duck.stateTimer <= 0 || nextThirst <= 5) {
+          duck.state = "IDLE_ROAM";
+          duck.stateTimer = 100;
+          duck.maxStateTimer = 100;
+          nextNaughtyVsGood = Math.min(100, nextNaughtyVsGood + 10);
+        }
+      }
+      break;
+    }
+
+    case "EATING_KIBBLE": {
+      const dx = FOOD_BOWL_BOUNDS.x + 25 - duck.x;
+      const dy = FOOD_BOWL_BOUNDS.y + 20 - duck.y;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist > 8) {
+        duck.vx = (dx / dist) * 2.0;
+        duck.vy = (dy / dist) * 2.0;
+        duck.x += duck.vx;
+        duck.y += duck.vy;
+        duck.angle = Math.atan2(dy, dx);
+      } else {
+        duck.vx = 0;
+        duck.vy = 0;
+        duck.stateTimer -= 1;
+        stations.foodLevel = Math.max(0, stations.foodLevel - 0.15);
+        nextHunger = Math.max(0, nextHunger - 0.4);
+
+        if (nextTicks % 22 === 0) {
+          soundCues.push("crunch-kibble");
+        }
+
+        if (duck.stateTimer <= 0 || nextHunger <= 5) {
+          duck.state = "IDLE_ROAM";
+          duck.stateTimer = 100;
+          duck.maxStateTimer = 100;
+          nextNaughtyVsGood = Math.min(100, nextNaughtyVsGood + 10);
+        }
+      }
+      break;
+    }
+
+    case "PERFORMING_TRICK": {
+      duck.stateTimer -= 1;
+      duck.vx = 0;
+      duck.vy = 0;
+
+      if (activeTrick?.trick === "SPIN") {
+        duck.angle += 0.25;
+      }
+
+      if (duck.stateTimer <= 0) {
+        duck.state = "IDLE_ROAM";
+        duck.stateTimer = 100;
+        duck.maxStateTimer = 100;
+        activeTrick = null;
       }
       break;
     }
@@ -743,7 +1052,6 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
           // Reached item, start chewing!
           duck.stateTimer -= 1;
           if (duck.stateTimer <= 0) {
-            // Chewed item
             targetHazard.isChewed = true;
             nextNaughtyVsGood = Math.max(-100, nextNaughtyVsGood - 25);
             duck.state = "IDLE_ROAM";
@@ -800,7 +1108,6 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
     }
 
     case "NO_TAKE_THROW": {
-      // Duck wiggles playfully with the ball
       duck.vx = Math.sin(nextTicks * 0.05) * 0.8;
       duck.vy = Math.cos(nextTicks * 0.05) * 0.8;
       duck.x += duck.vx;
@@ -808,7 +1115,6 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
       duck.angle = Math.atan2(duck.vy, duck.vx);
 
       duck.stateTimer -= 1;
-      // If not traded after timeout, Duck drops the ball near Fred's desk
       if (duck.stateTimer <= 0) {
         duck.isCarryingBall = false;
         duck.state = "IDLE_ROAM";
@@ -832,7 +1138,7 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
       duck.x += duck.vx;
       duck.y += duck.vy;
 
-      // Hard-clamp wall bounce resolution: strictly push inwards and set sign
+      // Bounce off walls
       if (duck.x <= 50) {
         duck.x = 50;
         duck.vx = Math.abs(duck.vx);
@@ -855,7 +1161,6 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
 
       duck.angle = Math.atan2(duck.vy, duck.vx);
 
-      // Zoomie smoke/spark particles
       particles.push({
         id: state.nextParticleId + particles.length,
         x: duck.x,
@@ -873,7 +1178,7 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
         duck.state = "IDLE_ROAM";
         duck.stateTimer = 100;
         duck.maxStateTimer = 100;
-        nextExcitement = 50; // Zoomies exhausted some energy
+        nextExcitement = 40;
       }
       break;
     }
@@ -892,10 +1197,9 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
           duck.y += duck.vy;
           duck.angle = Math.atan2(dy, dx);
         } else {
-          // Caught ball! Transition to "No Take, Only Throw"
           duck.isCarryingBall = true;
           duck.state = "NO_TAKE_THROW";
-          duck.stateTimer = 480; // 8 seconds to trade
+          duck.stateTimer = 480;
           duck.maxStateTimer = 480;
           nextExcitement = Math.max(0, nextExcitement - 25);
           nextNaughtyVsGood = Math.min(100, nextNaughtyVsGood + 15);
@@ -904,7 +1208,7 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
             id: state.nextAlertId + 5,
             x: duck.x,
             y: duck.y - 25,
-            text: "🎾 Caught ball! (Click Duck to trade treat)",
+            text: "🎾 Caught item! (Trade treat or call Drop It)",
             color: "#38bdf8",
             alpha: 1,
             vy: -1.2,
@@ -919,7 +1223,6 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
     }
 
     case "DRAGGED": {
-      // Position is clamped during dragDuckTo
       break;
     }
 
@@ -947,12 +1250,12 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
     }
   }
 
-  // Universal Hard Boundary Clamping for Duck in Office
+  // Universal Hard Boundary Clamping
   const clamped = clampBounds(duck.x, duck.y);
   duck.x = clamped.x;
   duck.y = clamped.y;
 
-  // 6. Update Particles & Alerts
+  // Update Particles & Alerts
   particles = particles
     .map((p) => ({
       ...p,
@@ -977,12 +1280,16 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
     totalScore: nextScore,
     excitement: nextExcitement,
     bladder: nextBladder,
+    thirst: nextThirst,
+    hunger: nextHunger,
     naughtyVsGood: nextNaughtyVsGood,
     multiplier: effectiveMultiplier,
     calmBuffTimer: nextCalmBuff,
     comboStreak: nextComboStreak,
     comboTimer: nextComboTimer,
     activeSurpriseEvent: activeSurprise,
+    activeTrick,
+    officeStations: stations,
     duck,
     hazards,
     activeHazardTarget,
@@ -1007,6 +1314,17 @@ function handleLevelVictory(
   soundCues.push("ding");
   soundCues.push("snore");
 
+  // Unlock next accessory
+  const unlockedAccessories: DuckAccessory[] = Array.from(
+    new Set<DuckAccessory>([
+      ...state.unlockedAccessories,
+      state.currentLevel === 1 ? "bucket-hat" : "none",
+      state.currentLevel === 2 ? "bowtie" : "none",
+      state.currentLevel === 3 ? "bandana" : "none",
+      state.currentLevel === 4 ? "rain-boots" : "none",
+    ])
+  );
+
   return {
     ...state,
     status: "won",
@@ -1017,6 +1335,7 @@ function handleLevelVictory(
     highScore: Math.max(state.highScore, state.totalScore + 250),
     unlockedFacts: unlocked,
     latestUnlockedFact: currentFact,
+    unlockedAccessories,
     duck: {
       ...state.duck,
       state: "NAP_TIME",
@@ -1030,10 +1349,389 @@ function handleLevelVictory(
 }
 
 /**
- * Player Action: Throw Tennis Ball (Drains Excitement)
+ * Player Action: Perform Puppy Training Trick (Sit, High Five, Drop It, Spin)
  */
-export function throwBall(state: WorkingWithDuckState, targetX: number, targetY: number): WorkingWithDuckState {
-  if (state.duck.state === "NAP_TIME" || state.inDogPark) return state;
+export function performTrick(
+  state: WorkingWithDuckState,
+  trick: DuckTrick
+): WorkingWithDuckState {
+  if (
+    state.duck.state === "NAP_TIME" ||
+    state.inDogPark ||
+    state.inBathtub ||
+    state.duck.state === "DRAGGED"
+  ) {
+    return state;
+  }
+
+  const soundCues: Array<SoundCue> = ["trick-chime"];
+  let nextScore = state.totalScore;
+  let nextNaughty = state.naughtyVsGood;
+  let nextExcitement = state.excitement;
+  const comboStreak = state.comboStreak + 1;
+  const alerts = [...state.floatingAlerts];
+  const particles = [...state.particles];
+
+  if (trick === "DROP_IT") {
+    // Drops any stolen item or ball immediately
+    if (state.duck.state === "NO_TAKE_THROW" || state.duck.isCarryingBall) {
+      soundCues.push("ding");
+      nextNaughty = Math.min(100, nextNaughty + 30);
+      nextScore += 60 * comboStreak;
+      alerts.push({
+        id: state.nextAlertId,
+        x: state.duck.x,
+        y: state.duck.y - 25,
+        text: "🎾 Perfect 'Drop It'! (+60 pts)",
+        color: "#22c55e",
+        alpha: 1,
+        vy: -1.2,
+      });
+    } else if (state.duck.state === "SNEAKY_CHEW") {
+      soundCues.push("ding");
+      nextNaughty = Math.min(100, nextNaughty + 35);
+      nextScore += 75 * comboStreak;
+      alerts.push({
+        id: state.nextAlertId,
+        x: state.duck.x,
+        y: state.duck.y - 25,
+        text: "⚡ Intercepted Chew with 'Drop It'! (+75 pts)",
+        color: "#22c55e",
+        alpha: 1,
+        vy: -1.2,
+      });
+    }
+  } else if (trick === "HIGH_FIVE") {
+    soundCues.push("paw-clap");
+    nextNaughty = Math.min(100, nextNaughty + 20);
+    nextScore += 45 * comboStreak;
+    nextExcitement = Math.max(0, nextExcitement - 15);
+    alerts.push({
+      id: state.nextAlertId,
+      x: state.duck.x,
+      y: state.duck.y - 25,
+      text: "🐾 High Five! (+45 pts)",
+      color: "#ec4899",
+      alpha: 1,
+      vy: -1.2,
+    });
+  } else if (trick === "SIT") {
+    soundCues.push("ding");
+    nextNaughty = Math.min(100, nextNaughty + 18);
+    nextScore += 35 * comboStreak;
+    nextExcitement = Math.max(0, nextExcitement - 20);
+    alerts.push({
+      id: state.nextAlertId,
+      x: state.duck.x,
+      y: state.duck.y - 25,
+      text: "🪑 Good Sit! (-20 Excitement)",
+      color: "#38bdf8",
+      alpha: 1,
+      vy: -1.2,
+    });
+  } else if (trick === "SPIN") {
+    soundCues.push("spin-whoosh");
+    nextNaughty = Math.min(100, nextNaughty + 22);
+    nextScore += 50 * comboStreak;
+    alerts.push({
+      id: state.nextAlertId,
+      x: state.duck.x,
+      y: state.duck.y - 25,
+      text: "🌀 Spin Trick! (+50 pts)",
+      color: "#a855f7",
+      alpha: 1,
+      vy: -1.2,
+    });
+  }
+
+  // Particle burst for successful trick
+  particles.push({
+    id: state.nextParticleId + 1,
+    x: state.duck.x,
+    y: state.duck.y,
+    vx: 0,
+    vy: -1.2,
+    alpha: 1,
+    color: "#fde047",
+    decay: 0.02,
+    size: 12,
+    shape: "star",
+  });
+
+  return {
+    ...state,
+    totalScore: nextScore,
+    naughtyVsGood: nextNaughty,
+    excitement: nextExcitement,
+    comboStreak,
+    comboTimer: 180,
+    activeTrick: {
+      trick,
+      timer: 60,
+      maxTimer: 60,
+    },
+    duck: {
+      ...state.duck,
+      state: "PERFORMING_TRICK",
+      stateTimer: 60,
+      maxStateTimer: 60,
+      isCarryingBall: false,
+    },
+    particles,
+    floatingAlerts: alerts,
+    soundCueQueue: [...state.soundCueQueue, ...soundCues],
+  };
+}
+
+/**
+ * Player Action: Active Coding / Commit Burst at Desk (Spacebar or Desk Click)
+ */
+export function activeCodeBurst(state: WorkingWithDuckState): WorkingWithDuckState {
+  if (state.status !== "running" || state.inDogPark || state.inBathtub) return state;
+
+  const effectiveMultiplier = state.multiplier;
+  const progressBoost = 0.6 * effectiveMultiplier;
+  const nextWork = Math.min(state.targetWorkProgress, state.workProgress + progressBoost);
+  const nextScore = state.totalScore + Math.round(5 * effectiveMultiplier);
+  const soundCues: Array<SoundCue> = ["code-type"];
+
+  const particles = [
+    ...state.particles,
+    {
+      id: state.nextParticleId + 1,
+      x: DESK_BOUNDS.x + 85 + (Math.random() - 0.5) * 40,
+      y: DESK_BOUNDS.y + 60,
+      vx: (Math.random() - 0.5) * 1.5,
+      vy: -1.5 - Math.random(),
+      alpha: 1,
+      color: "#22c55e",
+      decay: 0.03,
+      size: 5,
+      shape: "spark" as const,
+    },
+  ];
+
+  return {
+    ...state,
+    workProgress: nextWork,
+    totalScore: nextScore,
+    activeCodeBursts: state.activeCodeBursts + 1,
+    lastCodeTick: state.ticks,
+    particles,
+    soundCueQueue: [...state.soundCueQueue, ...soundCues],
+  };
+}
+
+/**
+ * Player Action: Interact with Office Station (Water Bowl, Food Bowl, Dog Bed)
+ */
+export function interactStation(
+  state: WorkingWithDuckState,
+  stationId: "water" | "food" | "bed" | "bath"
+): WorkingWithDuckState {
+  const stations = { ...state.officeStations };
+  const alerts = [...state.floatingAlerts];
+  const soundCues: Array<SoundCue> = [];
+
+  if (stationId === "water") {
+    stations.waterLevel = 100;
+    soundCues.push("water-lap");
+    alerts.push({
+      id: state.nextAlertId,
+      x: WATER_BOWL_BOUNDS.x + 25,
+      y: WATER_BOWL_BOUNDS.y - 15,
+      text: "💧 Fresh Water Refilled (100%)",
+      color: "#38bdf8",
+      alpha: 1,
+      vy: -1.2,
+    });
+  } else if (stationId === "food") {
+    stations.foodLevel = 100;
+    soundCues.push("crunch-kibble");
+    alerts.push({
+      id: state.nextAlertId,
+      x: FOOD_BOWL_BOUNDS.x + 25,
+      y: FOOD_BOWL_BOUNDS.y - 15,
+      text: "🍖 Premium Puppy Kibble Poured!",
+      color: "#fbbf24",
+      alpha: 1,
+      vy: -1.2,
+    });
+  } else if (stationId === "bed") {
+    if (state.excitement <= 30 || state.calmBuffTimer > 0) {
+      soundCues.push("snore");
+      return {
+        ...state,
+        duck: {
+          ...state.duck,
+          state: "NAP_TIME",
+          x: DOG_BED_BOUNDS.x + DOG_BED_BOUNDS.width / 2,
+          y: DOG_BED_BOUNDS.y + DOG_BED_BOUNDS.height / 2,
+          vx: 0,
+          vy: 0,
+        },
+        soundCueQueue: [...state.soundCueQueue, ...soundCues],
+      };
+    } else {
+      alerts.push({
+        id: state.nextAlertId,
+        x: DOG_BED_BOUNDS.x + 60,
+        y: DOG_BED_BOUNDS.y - 15,
+        text: "🐾 Duck is too excited to sleep! Wear him out first.",
+        color: "#f59e0b",
+        alpha: 1,
+        vy: -1.2,
+      });
+    }
+  } else if (stationId === "bath") {
+    return enterBathtub(state);
+  }
+
+  return {
+    ...state,
+    officeStations: stations,
+    floatingAlerts: alerts,
+    soundCueQueue: [...state.soundCueQueue, ...soundCues],
+  };
+}
+
+/**
+ * Bathtub Washroom Mini-Game Transitions & Logic
+ */
+export function enterBathtub(state: WorkingWithDuckState): WorkingWithDuckState {
+  return {
+    ...state,
+    inBathtub: true,
+    bathtubState: {
+      status: "soap",
+      soapLather: 0,
+      rinseLevel: 0,
+      scrubCount: 0,
+      bubbles: [
+        { id: 1, x: 380, y: 220, size: 14, alpha: 0.8 },
+        { id: 2, x: 420, y: 200, size: 18, alpha: 0.9 },
+        { id: 3, x: 400, y: 250, size: 12, alpha: 0.7 },
+      ],
+    },
+    soundCueQueue: [...state.soundCueQueue, "bath-soap"],
+  };
+}
+
+export function scrubBathtub(state: WorkingWithDuckState, x: number, y: number): WorkingWithDuckState {
+  if (!state.inBathtub) return state;
+
+  const bath = { ...state.bathtubState };
+  const nextScrubCount = bath.scrubCount + 1;
+  const nextLather = Math.min(100, bath.soapLather + 12);
+  const soundCues: Array<SoundCue> = [];
+
+  if (nextScrubCount % 4 === 0) {
+    soundCues.push("bath-soap");
+  }
+
+  const nextBubbles = [
+    ...bath.bubbles,
+    {
+      id: state.nextParticleId + nextScrubCount,
+      x: x + (Math.random() - 0.5) * 40,
+      y: y + (Math.random() - 0.5) * 30,
+      size: 8 + Math.random() * 12,
+      alpha: 1,
+    },
+  ];
+
+  return {
+    ...state,
+    bathtubState: {
+      ...bath,
+      soapLather: nextLather,
+      scrubCount: nextScrubCount,
+      status: nextLather >= 100 ? "rinse" : "scrub",
+      bubbles: nextBubbles,
+    },
+    soundCueQueue: [...state.soundCueQueue, ...soundCues],
+  };
+}
+
+export function rinseBathtub(state: WorkingWithDuckState): WorkingWithDuckState {
+  if (!state.inBathtub) return state;
+
+  const bath = { ...state.bathtubState };
+  const nextRinse = Math.min(100, bath.rinseLevel + 25);
+  const isClean = nextRinse >= 100;
+  const soundCues: Array<SoundCue> = ["bath-rinse"];
+
+  if (isClean) {
+    soundCues.push("combo-fanfare");
+  }
+
+  return {
+    ...state,
+    bathtubState: {
+      ...bath,
+      rinseLevel: nextRinse,
+      status: isClean ? "clean" : "rinse",
+    },
+    soundCueQueue: [...state.soundCueQueue, ...soundCues],
+  };
+}
+
+export function stepBathtubGame(state: WorkingWithDuckState): WorkingWithDuckState {
+  return state;
+}
+
+export function exitBathtub(state: WorkingWithDuckState): WorkingWithDuckState {
+  const isClean = state.bathtubState.status === "clean" || state.bathtubState.rinseLevel >= 100;
+  const scoreBonus = isClean ? 120 : 30;
+
+  return {
+    ...state,
+    inBathtub: false,
+    isMuddy: false,
+    totalScore: state.totalScore + scoreBonus,
+    naughtyVsGood: Math.min(100, state.naughtyVsGood + (isClean ? 35 : 10)),
+    calmBuffTimer: isClean ? 1200 : 300,
+    floatingAlerts: [
+      ...state.floatingAlerts,
+      {
+        id: state.nextAlertId,
+        x: BATHTUB_BOUNDS.x,
+        y: BATHTUB_BOUNDS.y - 15,
+        text: isClean ? "✨ Fresh & Clean Puppy! (+120 pts & Calm Buff)" : "🐾 Bathtime Finished",
+        color: "#38bdf8",
+        alpha: 1,
+        vy: -1.2,
+      },
+    ],
+    soundCueQueue: [...state.soundCueQueue, "ding"],
+  };
+}
+
+/**
+ * Player Action: Equip Wearable Accessory
+ */
+export function equipAccessory(
+  state: WorkingWithDuckState,
+  accessory: DuckAccessory
+): WorkingWithDuckState {
+  if (!state.unlockedAccessories.includes(accessory)) return state;
+
+  return {
+    ...state,
+    activeAccessory: accessory,
+    soundCueQueue: [...state.soundCueQueue, "ding"],
+  };
+}
+
+/**
+ * Player Action: Throw Tennis Ball / Frisbee (Drains Excitement)
+ */
+export function throwBall(
+  state: WorkingWithDuckState,
+  targetX: number,
+  targetY: number
+): WorkingWithDuckState {
+  if (state.duck.state === "NAP_TIME" || state.inDogPark || state.inBathtub) return state;
 
   const clampedTarget = clampBounds(targetX, targetY);
 
@@ -1057,9 +1755,13 @@ export function throwBall(state: WorkingWithDuckState, targetX: number, targetY:
 }
 
 /**
- * Player Action: Use Squeaky Toy to Recall and Redirect Duck (Instant Attention)
+ * Player Action: Use Squeaky Toy to Recall and Redirect Duck
  */
-export function applySqueakyToy(state: WorkingWithDuckState, x: number, y: number): WorkingWithDuckState {
+export function applySqueakyToy(
+  state: WorkingWithDuckState,
+  x: number,
+  y: number
+): WorkingWithDuckState {
   let nextNaughtyVsGood = state.naughtyVsGood;
   let activeToast = state.activeSkillToast;
   let activeHazard = state.activeHazardTarget;
@@ -1068,7 +1770,6 @@ export function applySqueakyToy(state: WorkingWithDuckState, x: number, y: numbe
   const soundCues: Array<SoundCue> = ["squeak"];
   const clamped = clampBounds(x, y);
 
-  // If Duck was targeting a portfolio hazard, redirect and save the item!
   if (state.duck.state === "SNEAKY_CHEW" && activeHazard) {
     const savedHazard = state.hazards.find((h) => h.id === activeHazard);
     if (savedHazard) {
@@ -1112,7 +1813,11 @@ export function applySqueakyToy(state: WorkingWithDuckState, x: number, y: numbe
 /**
  * Player Action: Use Kong Chew Toy (Distracts from Hazards & Calms)
  */
-export function applyKongToy(state: WorkingWithDuckState, x: number, y: number): WorkingWithDuckState {
+export function applyKongToy(
+  state: WorkingWithDuckState,
+  x: number,
+  y: number
+): WorkingWithDuckState {
   const clamped = clampBounds(x, y);
   let activeHazard = state.activeHazardTarget;
   let activeToast = state.activeSkillToast;
@@ -1147,7 +1852,7 @@ export function applyKongToy(state: WorkingWithDuckState, x: number, y: number):
       state: "IDLE_ROAM",
       targetX: clamped.x,
       targetY: clamped.y,
-      stateTimer: 200, // Settles down chewing Kong for longer
+      stateTimer: 200,
       maxStateTimer: 200,
     },
     soundCueQueue: [...state.soundCueQueue, "ding"],
@@ -1236,7 +1941,6 @@ export function scrubBelly(state: WorkingWithDuckState, x: number, y: number): W
     shape: "heart",
   });
 
-  // Check if Belly Rub complete (100%)
   if (nextProgress >= 100) {
     soundCues.push("combo-fanfare");
     return {
@@ -1246,7 +1950,7 @@ export function scrubBelly(state: WorkingWithDuckState, x: number, y: number): W
       excitement: 0,
       naughtyVsGood: Math.min(100, state.naughtyVsGood + 30),
       totalScore: state.totalScore + 100,
-      calmBuffTimer: 600, // 10 seconds of pure calm buff
+      calmBuffTimer: 600,
       duck: {
         ...state.duck,
         state: "IDLE_ROAM",
@@ -1288,7 +1992,7 @@ export function scrubBelly(state: WorkingWithDuckState, x: number, y: number): W
  * Player Action: Start dragging Duck
  */
 export function startDraggingDuck(state: WorkingWithDuckState): WorkingWithDuckState {
-  if (state.duck.state === "NAP_TIME") return state;
+  if (state.duck.state === "NAP_TIME" || state.inBathtub) return state;
   return {
     ...state,
     duck: {
@@ -1320,7 +2024,7 @@ export function dragDuckTo(state: WorkingWithDuckState, x: number, y: number): W
 export function releaseDuck(state: WorkingWithDuckState): WorkingWithDuckState {
   if (state.duck.state !== "DRAGGED") return state;
 
-  // If dropped at back door
+  // Dropped at back door
   if (
     state.duck.x >= BACK_DOOR_BOUNDS.x &&
     state.duck.x <= BACK_DOOR_BOUNDS.x + BACK_DOOR_BOUNDS.width &&
@@ -1358,6 +2062,16 @@ export function releaseDuck(state: WorkingWithDuckState): WorkingWithDuckState {
     };
   }
 
+  // Dropped at bathtub
+  if (
+    state.duck.x >= BATHTUB_BOUNDS.x &&
+    state.duck.x <= BATHTUB_BOUNDS.x + BATHTUB_BOUNDS.width &&
+    state.duck.y >= BATHTUB_BOUNDS.y &&
+    state.duck.y <= BATHTUB_BOUNDS.y + BATHTUB_BOUNDS.height
+  ) {
+    return enterBathtub(state);
+  }
+
   return {
     ...state,
     duck: {
@@ -1374,12 +2088,16 @@ export function releaseDuck(state: WorkingWithDuckState): WorkingWithDuckState {
 /**
  * Dog Park Mini-Game Transitions & Logic
  */
-export function enterDogPark(state: WorkingWithDuckState): WorkingWithDuckState {
+export function enterDogPark(
+  state: WorkingWithDuckState,
+  mode: "ball" | "frisbee" = "ball"
+): WorkingWithDuckState {
   return {
     ...state,
     inDogPark: true,
     parkState: {
       status: "aim",
+      mode,
       ballX: 120,
       ballY: 250,
       ballVx: 0,
@@ -1389,6 +2107,8 @@ export function enterDogPark(state: WorkingWithDuckState): WorkingWithDuckState 
       duckVx: 0,
       duckVy: 0,
       duckAngle: 0,
+      duckIsJumping: false,
+      jumpHeight: 0,
       puddles: [
         { x: 360, y: 160, radius: 36 },
         { x: 480, y: 320, radius: 40 },
@@ -1400,6 +2120,15 @@ export function enterDogPark(state: WorkingWithDuckState): WorkingWithDuckState 
         { id: 3, x: 580, y: 310, collected: false },
       ],
       bonesCollected: 0,
+      hurdles: [
+        { id: 1, x: 320, y: 220, width: 28, height: 44, cleared: false },
+        { id: 2, x: 520, y: 200, width: 28, height: 44, cleared: false },
+      ],
+      hurdlesCleared: 0,
+      friends: [
+        { id: 1, name: "Luna the Corgi", breed: "corgi", x: 240, y: 360, greeted: false },
+        { id: 2, name: "Barnaby", breed: "golden", x: 670, y: 120, greeted: false },
+      ],
       whistleTaps: 0,
       timer: 0,
     },
@@ -1407,9 +2136,14 @@ export function enterDogPark(state: WorkingWithDuckState): WorkingWithDuckState 
   };
 }
 
-export function throwParkBall(state: WorkingWithDuckState, powerX: number, powerY: number): WorkingWithDuckState {
+export function throwParkBall(
+  state: WorkingWithDuckState,
+  powerX: number,
+  powerY: number
+): WorkingWithDuckState {
   if (!state.inDogPark || state.parkState.status !== "aim") return state;
 
+  const isFrisbee = state.parkState.mode === "frisbee";
   return {
     ...state,
     parkState: {
@@ -1417,10 +2151,24 @@ export function throwParkBall(state: WorkingWithDuckState, powerX: number, power
       status: "thrown",
       ballX: 120,
       ballY: 250,
-      ballVx: Math.min(14, Math.max(7, powerX)),
+      ballVx: isFrisbee ? Math.min(16, Math.max(9, powerX * 1.2)) : Math.min(14, Math.max(7, powerX)),
       ballVy: Math.max(-6, Math.min(6, powerY)),
     },
-    soundCueQueue: [...state.soundCueQueue, "squeak"],
+    soundCueQueue: [...state.soundCueQueue, isFrisbee ? "frisbee-throw" : "squeak"],
+  };
+}
+
+export function jumpParkHurdle(state: WorkingWithDuckState): WorkingWithDuckState {
+  if (!state.inDogPark) return state;
+
+  return {
+    ...state,
+    parkState: {
+      ...state.parkState,
+      duckIsJumping: true,
+      jumpHeight: 28,
+    },
+    soundCueQueue: [...state.soundCueQueue, "spin-whoosh"],
   };
 }
 
@@ -1459,20 +2207,28 @@ export function stepParkGame(state: WorkingWithDuckState): WorkingWithDuckState 
   const soundCues: Array<SoundCue> = [];
   let nextScore = state.totalScore;
   let bonesCollected = park.bonesCollected;
+  let hurdlesCleared = park.hurdlesCleared;
   const bones = park.bones.map((b) => ({ ...b }));
+  const hurdles = park.hurdles.map((h) => ({ ...h }));
+  const friends = park.friends.map((f) => ({ ...f }));
+
+  // Jump decay
+  if (park.duckIsJumping) {
+    park.jumpHeight = Math.max(0, park.jumpHeight - 1.2);
+    if (park.jumpHeight <= 0) {
+      park.duckIsJumping = false;
+    }
+  }
 
   if (park.status === "thrown") {
-    // Ball flying through the air
     park.ballX += park.ballVx;
     park.ballY += park.ballVy;
     park.ballVx *= 0.98;
     park.ballVy *= 0.98;
 
-    // Ball bounds clamp in park
     park.ballX = Math.max(60, Math.min(CANVAS_WIDTH - 60, park.ballX));
     park.ballY = Math.max(60, Math.min(CANVAS_HEIGHT - 60, park.ballY));
 
-    // Duck sprinting after the ball
     const dx = park.ballX - park.duckX;
     const dy = park.ballY - park.duckY;
     const dist = Math.hypot(dx, dy);
@@ -1481,13 +2237,24 @@ export function stepParkGame(state: WorkingWithDuckState): WorkingWithDuckState 
       park.duckX += (dx / dist) * 7.5;
       park.duckY += (dy / dist) * 7.5;
       park.duckAngle = Math.atan2(dy, dx);
+
+      // Check hurdle clearing
+      for (const hurdle of hurdles) {
+        if (!hurdle.cleared) {
+          const hDist = Math.hypot(park.duckX - hurdle.x, park.duckY - hurdle.y);
+          if (hDist < 35 && park.duckIsJumping && park.jumpHeight > 10) {
+            hurdle.cleared = true;
+            hurdlesCleared += 1;
+            nextScore += 60;
+            soundCues.push("ding");
+          }
+        }
+      }
     } else {
-      // Reached ball! Now retrieve back
       park.status = "retrieving";
       soundCues.push("bark");
     }
   } else if (park.status === "retrieving") {
-    // Duck running back to player at (90, 250)
     const targetX = 90;
     const targetY = 250;
     const dx = targetX - park.duckX;
@@ -1496,10 +2263,10 @@ export function stepParkGame(state: WorkingWithDuckState): WorkingWithDuckState 
 
     if (dist > 15) {
       park.duckX += (dx / dist) * 4.8;
-      park.duckY += (dy / dist) * 2.4; // Soft pull toward center, allowing player steering
+      park.duckY += (dy / dist) * 2.4;
       park.duckAngle = Math.atan2(dy, dx);
 
-      // Check bone collections
+      // Bone collections
       for (const bone of bones) {
         if (!bone.collected) {
           const bDist = Math.hypot(park.duckX - bone.x, park.duckY - bone.y);
@@ -1512,23 +2279,35 @@ export function stepParkGame(state: WorkingWithDuckState): WorkingWithDuckState 
         }
       }
 
-      // Check mud puddle collisions
-      for (const puddle of park.puddles) {
-        const pDist = Math.hypot(park.duckX - puddle.x, park.duckY - puddle.y);
-        if (pDist < puddle.radius + 12) {
-          park.status = "muddy";
-          soundCues.push("fail");
-          break;
+      // Friendly dog greetings
+      for (const friend of friends) {
+        if (!friend.greeted) {
+          const fDist = Math.hypot(park.duckX - friend.x, park.duckY - friend.y);
+          if (fDist < 45) {
+            friend.greeted = true;
+            nextScore += 40;
+            soundCues.push("bark");
+          }
+        }
+      }
+
+      // Mud puddle collisions (Rain boots provide mud protection!)
+      if (state.activeAccessory !== "rain-boots" && !park.duckIsJumping) {
+        for (const puddle of park.puddles) {
+          const pDist = Math.hypot(park.duckX - puddle.x, park.duckY - puddle.y);
+          if (pDist < puddle.radius + 12) {
+            park.status = "muddy";
+            soundCues.push("fail");
+            break;
+          }
         }
       }
     } else {
-      // Successfully fetched back!
       park.status = "success";
       soundCues.push("combo-fanfare");
     }
   }
 
-  // Clamp duck coordinates in park
   park.duckX = Math.max(50, Math.min(CANVAS_WIDTH - 50, park.duckX));
   park.duckY = Math.max(50, Math.min(CANVAS_HEIGHT - 50, park.duckY));
 
@@ -1539,6 +2318,9 @@ export function stepParkGame(state: WorkingWithDuckState): WorkingWithDuckState 
       ...park,
       bones,
       bonesCollected,
+      hurdles,
+      hurdlesCleared,
+      friends,
     },
     soundCueQueue: [...state.soundCueQueue, ...soundCues],
   };
@@ -1548,12 +2330,17 @@ export function exitDogPark(state: WorkingWithDuckState, isSuccess: boolean): Wo
   const nextExcitement = 0;
   const nextBladder = 0;
   const bonusFromBones = state.parkState.bonesCollected * 10;
-  const nextNaughtyVsGood = isSuccess ? Math.min(100, state.naughtyVsGood + 30 + bonusFromBones) : state.naughtyVsGood;
-  const calmTimer = isSuccess ? 1800 : 600; // 30s calm buff for success, 10s for muddy
+  const bonusFromHurdles = state.parkState.hurdlesCleared * 15;
+  const nextNaughtyVsGood = isSuccess
+    ? Math.min(100, state.naughtyVsGood + 30 + bonusFromBones + bonusFromHurdles)
+    : state.naughtyVsGood;
+  const calmTimer = isSuccess ? 1800 : 600;
+  const isMuddy = state.parkState.status === "muddy";
 
   return {
     ...state,
     inDogPark: false,
+    isMuddy,
     excitement: nextExcitement,
     bladder: nextBladder,
     naughtyVsGood: nextNaughtyVsGood,
@@ -1572,10 +2359,12 @@ export function exitDogPark(state: WorkingWithDuckState, isSuccess: boolean): Wo
         id: state.nextAlertId,
         x: 400,
         y: 200,
-        text: isSuccess
+        text: isMuddy
+          ? "🧼 Duck got muddy! Take him to the Bathtub!"
+          : isSuccess
           ? `🌲 Park Trip Success! (Tired Puppy Buff 30s +${state.parkState.bonesCollected} Bones)`
-          : "🐾 Returned from park (Cleaned up)",
-        color: isSuccess ? "#22c55e" : "#f59e0b",
+          : "🐾 Returned from park",
+        color: isMuddy ? "#f59e0b" : isSuccess ? "#22c55e" : "#f59e0b",
         alpha: 1,
         vy: -1.2,
       },
@@ -1587,7 +2376,7 @@ export function advanceToNextLevel(state: WorkingWithDuckState): WorkingWithDuck
   const nextLevel = state.currentLevel + 1;
   const isComplete = nextLevel > SPRINTS.length;
   if (isComplete) {
-    return createInitialDuckGameState(3, "endless");
+    return createInitialDuckGameState(5, "endless", state.unlockedAccessories);
   }
-  return createInitialDuckGameState(nextLevel, "campaign");
+  return createInitialDuckGameState(nextLevel, "campaign", state.unlockedAccessories);
 }

@@ -6,7 +6,7 @@
 
 # Interface: StationConfig
 
-Defined in: [lib/clinical-trial-chaos/types.ts:36](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L36)
+Defined in: [lib/clinical-trial-chaos/types.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L44)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:36](https://github.com/fderuiter/
 
 > **accentColor**: `string`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:42](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L42)
+Defined in: [lib/clinical-trial-chaos/types.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L50)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:42](https://github.com/fderuiter/
 
 > **color**: `string`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L41)
+Defined in: [lib/clinical-trial-chaos/types.ts:49](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L49)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:41](https://github.com/fderuiter/
 
 > **description**: `string`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L40)
+Defined in: [lib/clinical-trial-chaos/types.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L48)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:40](https://github.com/fderuiter/
 
 > **id**: [`CDISCDomain`](../type-aliases/CDISCDomain.md)
 
-Defined in: [lib/clinical-trial-chaos/types.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L37)
+Defined in: [lib/clinical-trial-chaos/types.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L45)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:37](https://github.com/fderuiter/
 
 > **label**: `string`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:39](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L39)
+Defined in: [lib/clinical-trial-chaos/types.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L47)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:39](https://github.com/fderuiter/
 
 > **name**: `string`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:38](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L38)
+Defined in: [lib/clinical-trial-chaos/types.ts:46](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L46)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:38](https://github.com/fderuiter/
 
 > **pendingSubjects**: [`ClinicalSubject`](ClinicalSubject.md)[]
 
-Defined in: [lib/clinical-trial-chaos/types.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L45)
+Defined in: [lib/clinical-trial-chaos/types.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L53)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:45](https://github.com/fderuiter/
 
 > **positionIndex**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:43](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L43)
+Defined in: [lib/clinical-trial-chaos/types.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L51)
 
 ***
 
@@ -78,12 +78,12 @@ Defined in: [lib/clinical-trial-chaos/types.ts:43](https://github.com/fderuiter/
 
 > **processedCount**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:46](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L46)
+Defined in: [lib/clinical-trial-chaos/types.ts:54](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L54)
 
 ***
 
 ### vendor
 
-> **vendor**: `"iMednet"` \| `"Veeva Vault"` \| `"OpenClinica"`
+> **vendor**: [`VendorSystem`](../type-aliases/VendorSystem.md)
 
-Defined in: [lib/clinical-trial-chaos/types.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L44)
+Defined in: [lib/clinical-trial-chaos/types.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L52)

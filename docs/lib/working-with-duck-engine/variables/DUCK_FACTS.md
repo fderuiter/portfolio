@@ -8,4 +8,4 @@
 
 > `const` **DUCK\_FACTS**: [`DuckFact`](../interfaces/DuckFact.md)[]
 
-Defined in: [lib/working-with-duck-engine.ts:107](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L107)
+Defined in: [lib/working-with-duck-engine.ts:145](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L145)

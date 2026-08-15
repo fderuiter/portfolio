@@ -6,7 +6,7 @@
 
 # Interface: ThemedRoomMeta
 
-Defined in: [lib/dungeon/types.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L15)
+Defined in: [lib/dungeon/types.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L20)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/dungeon/types.ts:15](https://github.com/fderuiter/portfolio/blo
 
 > **badge**: `string`
 
-Defined in: [lib/dungeon/types.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L21)
+Defined in: [lib/dungeon/types.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L26)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/dungeon/types.ts:21](https://github.com/fderuiter/portfolio/blo
 
 > `optional` **boss?**: `boolean`
 
-Defined in: [lib/dungeon/types.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L22)
+Defined in: [lib/dungeon/types.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L27)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/dungeon/types.ts:22](https://github.com/fderuiter/portfolio/blo
 
 > **description**: `string`
 
-Defined in: [lib/dungeon/types.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L19)
+Defined in: [lib/dungeon/types.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L24)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/dungeon/types.ts:19](https://github.com/fderuiter/portfolio/blo
 
 > **id**: [`RoomThemeId`](../type-aliases/RoomThemeId.md)
 
-Defined in: [lib/dungeon/types.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L16)
+Defined in: [lib/dungeon/types.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L21)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/dungeon/types.ts:16](https://github.com/fderuiter/portfolio/blo
 
 > **mechanic**: `string`
 
-Defined in: [lib/dungeon/types.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L20)
+Defined in: [lib/dungeon/types.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L25)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/dungeon/types.ts:20](https://github.com/fderuiter/portfolio/blo
 
 > **name**: `string`
 
-Defined in: [lib/dungeon/types.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L17)
+Defined in: [lib/dungeon/types.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L22)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [lib/dungeon/types.ts:17](https://github.com/fderuiter/portfolio/blo
 
 > **repo**: `string`
 
-Defined in: [lib/dungeon/types.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L18)
+Defined in: [lib/dungeon/types.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L23)

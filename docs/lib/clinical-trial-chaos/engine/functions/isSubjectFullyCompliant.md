@@ -8,7 +8,7 @@
 
 > **isSubjectFullyCompliant**(`subject`): `boolean`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:93](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L93)
+Defined in: [lib/clinical-trial-chaos/engine.ts:180](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L180)
 
 Validates whether all observations on a subject are resolved and compliant.
 

@@ -6,7 +6,7 @@
 
 # Interface: GameScoreState
 
-Defined in: [lib/clinical-trial-chaos/types.ts:92](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L92)
+Defined in: [lib/clinical-trial-chaos/types.ts:103](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L103)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:92](https://github.com/fderuiter/
 
 > **auditViolations**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:101](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L101)
+Defined in: [lib/clinical-trial-chaos/types.ts:112](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L112)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:101](https://github.com/fderuiter
 
 > **cleanSubmissions**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:100](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L100)
+Defined in: [lib/clinical-trial-chaos/types.ts:111](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L111)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:100](https://github.com/fderuiter
 
 > **combo**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:95](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L95)
+Defined in: [lib/clinical-trial-chaos/types.ts:106](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L106)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:95](https://github.com/fderuiter/
 
 > **correctionsMade**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:99](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L99)
+Defined in: [lib/clinical-trial-chaos/types.ts:110](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L110)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:99](https://github.com/fderuiter/
 
 > **highScore**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:94](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L94)
+Defined in: [lib/clinical-trial-chaos/types.ts:105](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L105)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:94](https://github.com/fderuiter/
 
 > **maxCombo**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:96](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L96)
+Defined in: [lib/clinical-trial-chaos/types.ts:107](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L107)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:96](https://github.com/fderuiter/
 
 > **multiplier**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:97](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L97)
+Defined in: [lib/clinical-trial-chaos/types.ts:108](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L108)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:97](https://github.com/fderuiter/
 
 > **score**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:93](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L93)
+Defined in: [lib/clinical-trial-chaos/types.ts:104](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L104)
 
 ***
 
@@ -78,4 +78,4 @@ Defined in: [lib/clinical-trial-chaos/types.ts:93](https://github.com/fderuiter/
 
 > **subjectsSubmitted**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:98](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L98)
+Defined in: [lib/clinical-trial-chaos/types.ts:109](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L109)

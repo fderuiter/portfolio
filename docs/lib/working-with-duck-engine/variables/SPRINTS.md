@@ -8,4 +8,4 @@
 
 > `const` **SPRINTS**: [`GameSprint`](../interfaces/GameSprint.md)[]
 
-Defined in: [lib/working-with-duck-engine.ts:200](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L200)
+Defined in: [lib/working-with-duck-engine.ts:238](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L238)

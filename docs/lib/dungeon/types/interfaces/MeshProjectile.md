@@ -6,7 +6,7 @@
 
 # Interface: MeshProjectile
 
-Defined in: [lib/dungeon/types.ts:118](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L118)
+Defined in: [lib/dungeon/types.ts:162](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L162)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/dungeon/types.ts:118](https://github.com/fderuiter/portfolio/bl
 
 > **alive**: `boolean`
 
-Defined in: [lib/dungeon/types.ts:126](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L126)
+Defined in: [lib/dungeon/types.ts:170](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L170)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/dungeon/types.ts:126](https://github.com/fderuiter/portfolio/bl
 
 > **damage**: `number`
 
-Defined in: [lib/dungeon/types.ts:125](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L125)
+Defined in: [lib/dungeon/types.ts:169](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L169)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/dungeon/types.ts:125](https://github.com/fderuiter/portfolio/bl
 
 > **id**: `string`
 
-Defined in: [lib/dungeon/types.ts:119](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L119)
+Defined in: [lib/dungeon/types.ts:163](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L163)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/dungeon/types.ts:119](https://github.com/fderuiter/portfolio/bl
 
 > **mesh**: [`WireframeMesh`](WireframeMesh.md)
 
-Defined in: [lib/dungeon/types.ts:124](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L124)
+Defined in: [lib/dungeon/types.ts:168](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L168)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/dungeon/types.ts:124](https://github.com/fderuiter/portfolio/bl
 
 > **vx**: `number`
 
-Defined in: [lib/dungeon/types.ts:122](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L122)
+Defined in: [lib/dungeon/types.ts:166](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L166)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/dungeon/types.ts:122](https://github.com/fderuiter/portfolio/bl
 
 > **vy**: `number`
 
-Defined in: [lib/dungeon/types.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L123)
+Defined in: [lib/dungeon/types.ts:167](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L167)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/dungeon/types.ts:123](https://github.com/fderuiter/portfolio/bl
 
 > **x**: `number`
 
-Defined in: [lib/dungeon/types.ts:120](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L120)
+Defined in: [lib/dungeon/types.ts:164](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L164)
 
 ***
 
@@ -70,4 +70,4 @@ Defined in: [lib/dungeon/types.ts:120](https://github.com/fderuiter/portfolio/bl
 
 > **y**: `number`
 
-Defined in: [lib/dungeon/types.ts:121](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L121)
+Defined in: [lib/dungeon/types.ts:165](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L165)

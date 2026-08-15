@@ -6,7 +6,7 @@
 
 # Interface: Edge3D
 
-Defined in: [lib/dungeon/types.ts:90](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L90)
+Defined in: [lib/dungeon/types.ts:132](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L132)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/dungeon/types.ts:90](https://github.com/fderuiter/portfolio/blo
 
 > **p1**: `number`
 
-Defined in: [lib/dungeon/types.ts:91](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L91)
+Defined in: [lib/dungeon/types.ts:133](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L133)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [lib/dungeon/types.ts:91](https://github.com/fderuiter/portfolio/blo
 
 > **p2**: `number`
 
-Defined in: [lib/dungeon/types.ts:92](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L92)
+Defined in: [lib/dungeon/types.ts:134](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L134)

@@ -8,4 +8,4 @@
 
 > **GameMode** = `"campaign"` \| `"endless"`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:89](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L89)
+Defined in: [lib/clinical-trial-chaos/types.ts:100](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L100)

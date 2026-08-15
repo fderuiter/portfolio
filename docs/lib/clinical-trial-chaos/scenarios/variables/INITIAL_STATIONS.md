@@ -8,4 +8,4 @@
 
 > `const` **INITIAL\_STATIONS**: [`StationConfig`](../../types/interfaces/StationConfig.md)[]
 
-Defined in: [lib/clinical-trial-chaos/scenarios.ts:157](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L157)
+Defined in: [lib/clinical-trial-chaos/scenarios.ts:629](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L629)

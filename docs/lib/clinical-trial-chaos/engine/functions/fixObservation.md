@@ -8,9 +8,9 @@
 
 > **fixObservation**(`observation`, `suggestedCorrection?`): `object`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L65)
+Defined in: [lib/clinical-trial-chaos/engine.ts:160](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L160)
 
-Resolves or corrects a single clinical observation on a subject.
+Resolves or corrects a single clinical observation on a subject (auto or manual fallback).
 
 ## Parameters
 

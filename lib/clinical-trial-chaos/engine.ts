@@ -1,11 +1,16 @@
 import {
   AuditLogEntry,
   AuditorState,
+  BIMOInspectionReport,
+  BIMOFinding,
   CDISCDomain,
   ClinicalObservation,
   ClinicalSubject,
   GameScoreState,
+  PowerUpInventory,
+  PowerUpType,
   ProtocolAmendment,
+  SDTMRow,
   SignatureReason,
   StationConfig,
 } from "./types";
@@ -35,6 +40,52 @@ export function createInitialAuditorState(): AuditorState {
     suspicionDecayRate: 0.5, // 0.5% decay per second
     inspectTimer: 0,
     total483Citations: 0,
+    isPaused: false,
+  };
+}
+
+export function createInitialPowerUpInventory(): PowerUpInventory {
+  return {
+    "fda-coffee-break": {
+      id: "fda-coffee-break",
+      name: "FDA Coffee Break",
+      description: "Sends auditor to cafeteria. Freezes suspicion and auditor movement for 8 seconds.",
+      hotkey: "Q",
+      charge: 0,
+      maxCharge: 3,
+      activeSecondsRemaining: 0,
+      duration: 8,
+    },
+    "auto-clean": {
+      id: "auto-clean",
+      name: "CDISC Auto-Clean",
+      description: "Instantly validates and standardizes all observations on the active dossier.",
+      hotkey: "W",
+      charge: 0,
+      maxCharge: 4,
+      activeSecondsRemaining: 0,
+      duration: 0,
+    },
+    "query-extension": {
+      id: "query-extension",
+      name: "Site Query Extension",
+      description: "Grants +12 seconds to all active conveyor subjects to avoid overdue timeouts.",
+      hotkey: "E",
+      charge: 0,
+      maxCharge: 2,
+      activeSecondsRemaining: 0,
+      duration: 0,
+    },
+    "fast-sign": {
+      id: "fast-sign",
+      name: "Fast-Track 21 CFR Pass",
+      description: "Instant compliant sign & lock of active subject without opening the signature modal.",
+      hotkey: "R",
+      charge: 0,
+      maxCharge: 5,
+      activeSecondsRemaining: 0,
+      duration: 0,
+    },
   };
 }
 
@@ -60,23 +111,59 @@ export function createAuditLogEntry(
 }
 
 /**
- * Resolves or corrects a single clinical observation on a subject.
+ * Validates a user's multi-choice answer on a clinical observation.
+ */
+export function validateObservationChoice(
+  observation: ClinicalObservation,
+  selectedChoice: string
+): {
+  observation: ClinicalObservation;
+  isValid: boolean;
+  explanation: string;
+  suspicionDelta: number;
+  scoreDelta: number;
+} {
+  const expected = observation.correctedValue ?? observation.rawValue;
+  const isCorrect = selectedChoice.trim() === expected.trim();
+
+  if (isCorrect) {
+    return {
+      observation: {
+        ...observation,
+        currentValue: selectedChoice,
+        isResolved: true,
+      },
+      isValid: true,
+      explanation:
+        observation.explanation ||
+        `Correct CDISC standardization applied: '${selectedChoice}' complies with ${observation.destination} specification.`,
+      suspicionDelta: -3,
+      scoreDelta: 75,
+    };
+  } else {
+    return {
+      observation: {
+        ...observation,
+        isResolved: false,
+      },
+      isValid: false,
+      explanation: `Invalid regulatory code: '${selectedChoice}' does not resolve '${observation.field}' (${observation.hint || "Review standard terminology"}).`,
+      suspicionDelta: 8,
+      scoreDelta: -25,
+    };
+  }
+}
+
+/**
+ * Resolves or corrects a single clinical observation on a subject (auto or manual fallback).
  */
 export function fixObservation(
   observation: ClinicalObservation,
   suggestedCorrection?: string
 ): { observation: ClinicalObservation; isValid: boolean } {
-  const target = suggestedCorrection ?? observation.correctedValue;
-  if (!target) {
-    // If no correction needed, already resolved
-    return {
-      observation: { ...observation, isResolved: true },
-      isValid: true,
-    };
-  }
-
-  // Check if valid correction
+  const target = suggestedCorrection ?? observation.correctedValue ?? observation.rawValue;
   const isValid = target === observation.correctedValue || target.trim().length > 0;
+
   return {
     observation: {
       ...observation,
@@ -103,17 +190,16 @@ export function calculateSubmissionPoints(
   allClean: boolean
 ): number {
   const basePoints = 200;
-  const observationBonus = subject.observations.length * 50;
-  const speedBonus = Math.floor((subject.timeRemaining / subject.maxTime) * 100);
-  const saeBonus = subject.isSAE ? 250 : 0;
-  const cleanBonus = allClean ? 100 : 0;
+  const observationBonus = subject.observations.length * 60;
+  const speedBonus = Math.floor((subject.timeRemaining / subject.maxTime) * 120);
+  const saeBonus = subject.isSAE ? 300 : 0;
+  const cleanBonus = allClean ? 150 : 0;
 
   return Math.round((basePoints + observationBonus + speedBonus + saeBonus + cleanBonus) * multiplier);
 }
 
 /**
  * Advances conveyor subjects timer by deltaSeconds.
- * If time runs out, returns expired subjects and suspicion increase.
  */
 export function tickSubjectTimers(
   subjects: ClinicalSubject[],
@@ -149,6 +235,10 @@ export function tickAuditor(
   deltaSeconds: number,
   unresolvedBacklogCount: number
 ): AuditorState {
+  if (auditor.isPaused || auditor.behavior === "coffee_break") {
+    return auditor;
+  }
+
   const { suspicion } = auditor;
   let { x, direction, behavior, inspectTimer, total483Citations } = auditor;
 
@@ -209,11 +299,47 @@ export function tickAuditor(
 }
 
 /**
+ * Ticks active power-up cooldowns and durations.
+ */
+export function tickPowerUps(
+  inventory: PowerUpInventory,
+  deltaSeconds: number
+): PowerUpInventory {
+  const next = { ...inventory };
+  let key: PowerUpType;
+  for (key in next) {
+    const item = next[key];
+    if (item.activeSecondsRemaining > 0) {
+      const remaining = Math.max(0, item.activeSecondsRemaining - deltaSeconds);
+      next[key] = { ...item, activeSecondsRemaining: remaining };
+    }
+  }
+  return next;
+}
+
+/**
+ * Charges power-up meters upon clean actions or combos.
+ */
+export function chargePowerUps(
+  inventory: PowerUpInventory,
+  amount = 1
+): PowerUpInventory {
+  const next = { ...inventory };
+  let key: PowerUpType;
+  for (key in next) {
+    const item = next[key];
+    const newCharge = Math.min(item.maxCharge, item.charge + amount);
+    next[key] = { ...item, charge: newCharge };
+  }
+  return next;
+}
+
+/**
  * Scrambles station positions (for Protocol Amendment event).
  */
 export function scrambleStations(stations: StationConfig[]): StationConfig[] {
   const currentIndices = stations.map((s) => s.positionIndex);
-  // Shift indices by 1
+  // Circular shift
   const shiftedIndices = [...currentIndices.slice(1), currentIndices[0]];
 
   return stations.map((station, i) => ({
@@ -290,5 +416,227 @@ export function triggerRandomAmendment(): ProtocolAmendment {
     ...picked,
     timeRemaining: picked.durationSeconds,
     active: true,
+  };
+}
+
+/**
+ * Converts submitted subjects into compliant CDISC SDTM observation rows.
+ */
+export function generateSDTMDataset(subjects: ClinicalSubject[]): SDTMRow[] {
+  const rows: SDTMRow[] = [];
+  let seq = 1;
+
+  subjects.forEach((subj, subjIdx) => {
+    subj.observations.forEach((obs) => {
+      // Parse numeric result if present
+      const numMatch = obs.currentValue.match(/^[-+]?[0-9]*\.?[0-9]+/);
+      const stresn = numMatch ? parseFloat(numMatch[0]) : undefined;
+      const unitMatch = obs.currentValue.replace(/^[-+]?[0-9]*\.?[0-9]+/, "").trim();
+
+      rows.push({
+        STUDYID: "CT-CHAOS-2026",
+        DOMAIN: obs.destination,
+        USUBJID: `CTC-${subj.studySite.slice(5, 8)}-${subj.subjectLabel}`,
+        SEQ: seq++,
+        TESTCD: obs.ctCode || obs.field.toUpperCase().replace(/\s+/g, "").slice(0, 8),
+        TEST: obs.field,
+        ORRES: obs.rawValue,
+        STRESC: obs.currentValue,
+        STRESN: Number.isFinite(stresn) ? stresn : undefined,
+        STRESU: unitMatch || undefined,
+        VISIT: `VISIT ${subjIdx + 1} (DAY ${(subjIdx + 1) * 7})`,
+        DY: (subjIdx + 1) * 7,
+        SIGNDATE: new Date(subj.createdAt).toISOString().split("T")[0],
+        STATUS: obs.isResolved ? "COMPLIANT" : "QUERY",
+      });
+    });
+  });
+
+  return rows;
+}
+
+/**
+ * Serializes subjects and SDTM dataset into authentic CDISC ODM 1.3 XML.
+ */
+export function exportToCDISCODMXML(
+  subjects: ClinicalSubject[],
+  sdtmRows: SDTMRow[]
+): string {
+  const timestamp = new Date().toISOString();
+  const subjectNodes = subjects
+    .map((s) => {
+      const itemDataNodes = sdtmRows
+        .filter((r) => r.USUBJID.includes(s.subjectLabel))
+        .map(
+          (r) =>
+            `          <ItemData ItemOID="IT.${r.DOMAIN}.${r.TESTCD}" Value="${escapeXml(r.STRESC)}">
+            <AuditRecord>
+              <UserOID>USR.DATAMANAGER</UserOID>
+              <DateTimeStamp>${timestamp}</DateTimeStamp>
+              <ReasonForChange>21 CFR Part 11 Electronic Signature Verified</ReasonForChange>
+            </AuditRecord>
+          </ItemData>`
+        )
+        .join("\n");
+
+      return `      <SubjectData SubjectKey="${escapeXml(s.subjectLabel)}">
+        <StudyEventData StudyEventOID="SE.VISIT1">
+          <FormData FormOID="FRM.${s.observations[0]?.destination || "DM"}">
+            <ItemGroupData ItemGroupOID="IG.${s.observations[0]?.destination || "DM"}" ItemGroupRepeatKey="1">
+${itemDataNodes}
+            </ItemGroupData>
+          </FormData>
+        </StudyEventData>
+      </SubjectData>`;
+    })
+    .join("\n");
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<ODM xmlns="http://www.cdisc.org/ns/odm/v1.3"
+     xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+     ODMVersion="1.3.2"
+     FileType="Snapshot"
+     FileOID="ODM.CTC.SNAPSHOT.${Date.now()}"
+     CreationDateTime="${timestamp}">
+  <Study OID="STUDY.CT-CHAOS-2026">
+    <GlobalVariables>
+      <StudyName>Clinical Trial Chaos - Multi-Center CDISC SDTM Study</StudyName>
+      <StudyDescription>21 CFR Part 11 and CDISC Controlled Terminology Electronic Data Capture Run</StudyDescription>
+      <ProtocolName>CTC-PHASE-III-GLOBAL</ProtocolName>
+    </GlobalVariables>
+    <MetaDataVersion OID="MDV.001" Name="CDISC SDTM v3.3 Standard Metadata">
+      <Protocol>
+        <StudyEventRef StudyEventOID="SE.VISIT1" OrderNumber="1" Mandatory="Yes"/>
+      </Protocol>
+    </MetaDataVersion>
+  </Study>
+  <ClinicalData StudyOID="STUDY.CT-CHAOS-2026" MetaDataVersionOID="MDV.001">
+${subjectNodes}
+  </ClinicalData>
+</ODM>`;
+}
+
+function escapeXml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+/**
+ * Serializes SDTM rows into standard CSV text.
+ */
+export function exportToSDTMCSV(sdtmRows: SDTMRow[]): string {
+  const headers = [
+    "STUDYID",
+    "DOMAIN",
+    "USUBJID",
+    "SEQ",
+    "TESTCD",
+    "TEST",
+    "ORRES",
+    "STRESC",
+    "STRESN",
+    "STRESU",
+    "VISIT",
+    "DY",
+    "SIGNDATE",
+    "STATUS",
+  ];
+
+  const lines = sdtmRows.map((r) =>
+    [
+      r.STUDYID,
+      r.DOMAIN,
+      r.USUBJID,
+      r.SEQ,
+      r.TESTCD,
+      `"${r.TEST.replace(/"/g, '""')}"`,
+      `"${r.ORRES.replace(/"/g, '""')}"`,
+      `"${r.STRESC.replace(/"/g, '""')}"`,
+      r.STRESN !== undefined ? r.STRESN : "",
+      r.STRESU || "",
+      `"${r.VISIT}"`,
+      r.DY,
+      r.SIGNDATE,
+      r.STATUS,
+    ].join(",")
+  );
+
+  return [headers.join(","), ...lines].join("\n");
+}
+
+/**
+ * Generates an FDA Bioresearch Monitoring (BIMO) inspection compliance report.
+ */
+export function generateBIMOReport(
+  scoreState: GameScoreState,
+  auditorState: AuditorState,
+  _logs?: AuditLogEntry[]
+): BIMOInspectionReport {
+  const totalSubmissions = scoreState.subjectsSubmitted;
+  const violations = scoreState.auditViolations;
+  const cleanSubmissions = scoreState.cleanSubmissions;
+
+  const cleanRate = totalSubmissions > 0 ? (cleanSubmissions / totalSubmissions) * 100 : 100;
+  const violationPenalty = Math.min(60, violations * 15);
+  const suspicionPenalty = Math.min(30, auditorState.suspicion * 0.3);
+  const rawScore = Math.max(0, Math.round(100 - violationPenalty - suspicionPenalty));
+
+  const findings: BIMOFinding[] = [];
+
+  if (violations > 0) {
+    findings.push({
+      id: "FND-001",
+      category: "Data Integrity",
+      severity: violations >= 3 ? "Critical" : "Major",
+      description: `${violations} Case Report Forms submitted with unresolved raw data entries or domain mismatch.`,
+      regulation: "21 CFR § 11.10(a) - System validation & record authenticity",
+    });
+  }
+
+  if (auditorState.suspicion >= 50) {
+    findings.push({
+      id: "FND-002",
+      category: "21 CFR Part 11",
+      severity: auditorState.suspicion >= 100 ? "Critical" : "Major",
+      description: `Elevated auditor scrutiny index (${Math.round(auditorState.suspicion)}%). Backlog pressure and delayed source data verification.`,
+      regulation: "21 CFR § 11.50 - Signature manifestations and audit trail timeliness",
+    });
+  }
+
+  if (cleanRate < 80 && totalSubmissions > 0) {
+    findings.push({
+      id: "FND-003",
+      category: "Protocol Compliance",
+      severity: "Minor",
+      description: `Controlled Terminology non-conformances identified in ${Math.round(100 - cleanRate)}% of submissions prior to manual correction.`,
+      regulation: "ICH GCP E6(R2) § 5.5 - Data handling and record keeping",
+    });
+  }
+
+  let verdict: BIMOInspectionReport["verdict"] = "NAI (No Action Indicated - Approved)";
+  let summary = "The Bioresearch Monitoring inspection found no objectionable conditions. The sponsor and clinical site data systems operate in full compliance with 21 CFR Part 11 and CDISC standards.";
+
+  if (auditorState.suspicion >= 100 || violations >= 3) {
+    verdict = "OAI (Official Action Indicated - Form 483 Issued)";
+    summary = "FDA Form 483 issued. Significant objectionable conditions were observed during the inspection, including critical data integrity discrepancies. Trial operations suspended under 21 CFR § 312.44.";
+  } else if (findings.length > 0 || auditorState.suspicion > 30) {
+    verdict = "VAI (Voluntary Action Indicated)";
+    summary = "Objectionable conditions were noted, but they do not meet the threshold for regulatory action. The sponsor is advised to implement corrective and preventive action (CAPA) plans for Controlled Terminology validation.";
+  }
+
+  return {
+    runId: `BIMO-${Date.now().toString(36).toUpperCase()}`,
+    auditDate: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+    overallScore: rawScore,
+    verdict,
+    complianceRate: Math.round(cleanRate),
+    findings,
+    submittedCRFs: totalSubmissions,
+    cleanRate: Math.round(cleanRate),
+    summary,
   };
 }

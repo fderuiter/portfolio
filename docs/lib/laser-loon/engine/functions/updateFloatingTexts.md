@@ -8,7 +8,7 @@
 
 > **updateFloatingTexts**(`texts`, `dt`): [`FloatingText`](../../types/interfaces/FloatingText.md)[]
 
-Defined in: [lib/laser-loon/engine.ts:359](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L359)
+Defined in: [lib/laser-loon/engine.ts:610](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L610)
 
 ## Parameters
 

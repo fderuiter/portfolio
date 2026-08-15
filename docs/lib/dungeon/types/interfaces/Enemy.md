@@ -6,7 +6,7 @@
 
 # Interface: Enemy
 
-Defined in: [lib/dungeon/types.ts:63](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L63)
+Defined in: [lib/dungeon/types.ts:101](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L101)
 
 ## Properties
 
@@ -14,7 +14,39 @@ Defined in: [lib/dungeon/types.ts:63](https://github.com/fderuiter/portfolio/blo
 
 > **color**: `string`
 
-Defined in: [lib/dungeon/types.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L78)
+Defined in: [lib/dungeon/types.ts:116](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L116)
+
+***
+
+### confusedMs?
+
+> `optional` **confusedMs?**: `number`
+
+Defined in: [lib/dungeon/types.ts:122](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L122)
+
+***
+
+### cve?
+
+> `optional` **cve?**: [`CVEType`](../type-aliases/CVEType.md)
+
+Defined in: [lib/dungeon/types.ts:120](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L120)
+
+***
+
+### cveExposed?
+
+> `optional` **cveExposed?**: `boolean`
+
+Defined in: [lib/dungeon/types.ts:121](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L121)
+
+***
+
+### frozenMs?
+
+> `optional` **frozenMs?**: `number`
+
+Defined in: [lib/dungeon/types.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L123)
 
 ***
 
@@ -22,7 +54,7 @@ Defined in: [lib/dungeon/types.ts:78](https://github.com/fderuiter/portfolio/blo
 
 > **hp**: `number`
 
-Defined in: [lib/dungeon/types.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L68)
+Defined in: [lib/dungeon/types.ts:106](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L106)
 
 ***
 
@@ -30,7 +62,7 @@ Defined in: [lib/dungeon/types.ts:68](https://github.com/fderuiter/portfolio/blo
 
 > **id**: `string`
 
-Defined in: [lib/dungeon/types.ts:64](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L64)
+Defined in: [lib/dungeon/types.ts:102](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L102)
 
 ***
 
@@ -38,7 +70,7 @@ Defined in: [lib/dungeon/types.ts:64](https://github.com/fderuiter/portfolio/blo
 
 > `optional` **lastAttackMs?**: `number`
 
-Defined in: [lib/dungeon/types.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L80)
+Defined in: [lib/dungeon/types.ts:118](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L118)
 
 ***
 
@@ -46,7 +78,7 @@ Defined in: [lib/dungeon/types.ts:80](https://github.com/fderuiter/portfolio/blo
 
 > **maxHp**: `number`
 
-Defined in: [lib/dungeon/types.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L69)
+Defined in: [lib/dungeon/types.ts:107](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L107)
 
 ***
 
@@ -54,7 +86,7 @@ Defined in: [lib/dungeon/types.ts:69](https://github.com/fderuiter/portfolio/blo
 
 > `optional` **maxX?**: `number`
 
-Defined in: [lib/dungeon/types.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L73)
+Defined in: [lib/dungeon/types.ts:111](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L111)
 
 ***
 
@@ -62,7 +94,7 @@ Defined in: [lib/dungeon/types.ts:73](https://github.com/fderuiter/portfolio/blo
 
 > `optional` **maxY?**: `number`
 
-Defined in: [lib/dungeon/types.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L75)
+Defined in: [lib/dungeon/types.ts:113](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L113)
 
 ***
 
@@ -70,7 +102,7 @@ Defined in: [lib/dungeon/types.ts:75](https://github.com/fderuiter/portfolio/blo
 
 > `optional` **minX?**: `number`
 
-Defined in: [lib/dungeon/types.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L72)
+Defined in: [lib/dungeon/types.ts:110](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L110)
 
 ***
 
@@ -78,7 +110,7 @@ Defined in: [lib/dungeon/types.ts:72](https://github.com/fderuiter/portfolio/blo
 
 > `optional` **minY?**: `number`
 
-Defined in: [lib/dungeon/types.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L74)
+Defined in: [lib/dungeon/types.ts:112](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L112)
 
 ***
 
@@ -86,7 +118,7 @@ Defined in: [lib/dungeon/types.ts:74](https://github.com/fderuiter/portfolio/blo
 
 > **name**: `string`
 
-Defined in: [lib/dungeon/types.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L79)
+Defined in: [lib/dungeon/types.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L117)
 
 ***
 
@@ -94,7 +126,7 @@ Defined in: [lib/dungeon/types.ts:79](https://github.com/fderuiter/portfolio/blo
 
 > **patrolDir**: `"left"` \| `"right"` \| `"up"` \| `"down"`
 
-Defined in: [lib/dungeon/types.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L71)
+Defined in: [lib/dungeon/types.ts:109](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L109)
 
 ***
 
@@ -102,7 +134,7 @@ Defined in: [lib/dungeon/types.ts:71](https://github.com/fderuiter/portfolio/blo
 
 > `optional` **speedMs?**: `number`
 
-Defined in: [lib/dungeon/types.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L81)
+Defined in: [lib/dungeon/types.ts:119](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L119)
 
 ***
 
@@ -110,7 +142,7 @@ Defined in: [lib/dungeon/types.ts:81](https://github.com/fderuiter/portfolio/blo
 
 > **state**: [`EnemyState`](../type-aliases/EnemyState.md)
 
-Defined in: [lib/dungeon/types.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L70)
+Defined in: [lib/dungeon/types.ts:108](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L108)
 
 ***
 
@@ -118,7 +150,7 @@ Defined in: [lib/dungeon/types.ts:70](https://github.com/fderuiter/portfolio/blo
 
 > `optional` **stunTimerMs?**: `number`
 
-Defined in: [lib/dungeon/types.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L76)
+Defined in: [lib/dungeon/types.ts:114](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L114)
 
 ***
 
@@ -126,7 +158,7 @@ Defined in: [lib/dungeon/types.ts:76](https://github.com/fderuiter/portfolio/blo
 
 > **symbol**: `string`
 
-Defined in: [lib/dungeon/types.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L77)
+Defined in: [lib/dungeon/types.ts:115](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L115)
 
 ***
 
@@ -134,7 +166,7 @@ Defined in: [lib/dungeon/types.ts:77](https://github.com/fderuiter/portfolio/blo
 
 > **type**: [`EnemyType`](../type-aliases/EnemyType.md)
 
-Defined in: [lib/dungeon/types.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L65)
+Defined in: [lib/dungeon/types.ts:103](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L103)
 
 ***
 
@@ -142,7 +174,7 @@ Defined in: [lib/dungeon/types.ts:65](https://github.com/fderuiter/portfolio/blo
 
 > **x**: `number`
 
-Defined in: [lib/dungeon/types.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L66)
+Defined in: [lib/dungeon/types.ts:104](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L104)
 
 ***
 
@@ -150,4 +182,4 @@ Defined in: [lib/dungeon/types.ts:66](https://github.com/fderuiter/portfolio/blo
 
 > **y**: `number`
 
-Defined in: [lib/dungeon/types.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L67)
+Defined in: [lib/dungeon/types.ts:105](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L105)

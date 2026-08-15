@@ -1,4 +1,4 @@
-export type CDISCDomain = "DM" | "VS" | "AE" | "LB";
+export type CDISCDomain = "DM" | "VS" | "AE" | "LB" | "CM" | "EX" | "DS" | "MH";
 
 export type ValidationErrorType =
   | "unit-error"
@@ -6,7 +6,10 @@ export type ValidationErrorType =
   | "invalid-date"
   | "negative-value"
   | "range-outlier"
-  | "casing-mismatch";
+  | "casing-mismatch"
+  | "unapproved-conmed"
+  | "dose-calculation-error"
+  | "disposition-date-mismatch";
 
 export interface ClinicalObservation {
   id: string;
@@ -17,13 +20,16 @@ export interface ClinicalObservation {
   destination: CDISCDomain;
   errorType?: ValidationErrorType;
   hint?: string;
+  explanation?: string;
+  ctCode?: string; // e.g. CDISC CT Code C25473 or MedDRA PT
+  options?: string[]; // Multi-choice validation puzzle options
   isResolved: boolean;
 }
 
 export interface ClinicalSubject {
   id: string;
   subjectLabel: string; // e.g. "SUBJ-1042"
-  studySite: string; // e.g. "Site 014 (Boston)"
+  studySite: string; // e.g. "Site 014 (Boston General)"
   observations: ClinicalObservation[];
   status: "queued" | "validating" | "routing" | "signing" | "submitted" | "rejected" | "expired";
   isSAE?: boolean; // Serious Adverse Event - urgent priority rush!
@@ -33,6 +39,8 @@ export interface ClinicalSubject {
   createdAt: number;
 }
 
+export type VendorSystem = "iMednet" | "Veeva Vault" | "OpenClinica" | "Medidata Rave" | "Oracle InForm";
+
 export interface StationConfig {
   id: CDISCDomain;
   name: string;
@@ -40,16 +48,16 @@ export interface StationConfig {
   description: string;
   color: string;
   accentColor: string;
-  positionIndex: number; // 0, 1, 2, 3 (can be swapped during protocol amendments)
-  vendor: "iMednet" | "Veeva Vault" | "OpenClinica";
+  positionIndex: number; // Position index for layout and hotkeys
+  vendor: VendorSystem;
   pendingSubjects: ClinicalSubject[];
   processedCount: number;
 }
 
-export type AuditorBehavior = "patrolling" | "inspecting" | "suspicious" | "issuing_483";
+export type AuditorBehavior = "patrolling" | "inspecting" | "suspicious" | "issuing_483" | "coffee_break";
 
 export interface AuditorState {
-  x: number; // For canvas sprite rendering (0 to 1 percentage or pixels)
+  x: number; // 0 to 1 percentage
   y: number;
   direction: 1 | -1;
   behavior: AuditorBehavior;
@@ -58,13 +66,16 @@ export interface AuditorState {
   targetStationId?: CDISCDomain;
   inspectTimer: number;
   total483Citations: number;
+  isPaused?: boolean;
 }
 
 export type AmendmentType =
   | "station-scramble"
   | "sae-priority-rush"
   | "unit-shift-lbs-to-kg"
-  | "double-signature-audit";
+  | "double-signature-audit"
+  | "conmed-reconciliation-rush"
+  | "gcp-spot-inspection";
 
 export interface ProtocolAmendment {
   id: string;
@@ -114,3 +125,55 @@ export type SignatureReason =
   | "Author Verification"
   | "Protocol Compliance Review"
   | "Urgent Safety Expedited";
+
+export type PowerUpType = "fda-coffee-break" | "auto-clean" | "query-extension" | "fast-sign";
+
+export interface PowerUpState {
+  id: PowerUpType;
+  name: string;
+  description: string;
+  hotkey: string;
+  charge: number; // Current charge points (0 to maxCharge)
+  maxCharge: number;
+  activeSecondsRemaining: number;
+  duration: number;
+}
+
+export type PowerUpInventory = Record<PowerUpType, PowerUpState>;
+
+export interface SDTMRow {
+  STUDYID: string;
+  DOMAIN: CDISCDomain;
+  USUBJID: string;
+  SEQ: number;
+  TESTCD: string;
+  TEST: string;
+  ORRES: string;
+  STRESC: string;
+  STRESN?: number;
+  STRESU?: string;
+  VISIT: string;
+  DY: number;
+  SIGNDATE: string;
+  STATUS: "COMPLIANT" | "QUERY";
+}
+
+export interface BIMOFinding {
+  id: string;
+  category: "Data Integrity" | "Protocol Compliance" | "21 CFR Part 11" | "Adverse Event Reporting";
+  severity: "Critical" | "Major" | "Minor";
+  description: string;
+  regulation: string;
+}
+
+export interface BIMOInspectionReport {
+  runId: string;
+  auditDate: string;
+  overallScore: number;
+  verdict: "NAI (No Action Indicated - Approved)" | "VAI (Voluntary Action Indicated)" | "OAI (Official Action Indicated - Form 483 Issued)";
+  complianceRate: number;
+  findings: BIMOFinding[];
+  submittedCRFs: number;
+  cleanRate: number;
+  summary: string;
+}

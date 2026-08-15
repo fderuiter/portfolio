@@ -1,3 +1,8 @@
+/**
+ * Laser Loon: Quest for the State Flag
+ * Pure physics engine, raycast geometry, collision detection, and campaign lifecycle.
+ */
+
 import {
   LaserLoonState,
   LaserMode,
@@ -5,43 +10,72 @@ import {
   Target,
   IceBlock,
   Particle,
+  Shockwave,
   FloatingText,
-  TargetBugType,
+  CivicEnemyType,
+  PowerUp,
+  PowerUpType,
 } from "./types";
 import {
-  BUG_TYPES,
+  ENEMY_TYPES,
   WEAPONS,
+  CAMPAIGN_ACTS,
+  POWER_UP_CONFIGS,
   DEFAULT_CANVAS_WIDTH,
   DEFAULT_CANVAS_HEIGHT,
   ARCADE_GAME_DURATION_SECS,
   COMBO_TIMEOUT_MS,
   MAX_MULTIPLIER,
+  ULTIMATE_CHARGE_PER_KILL,
 } from "./constants";
 
-export function createInitialState(mode: LaserMode = "arcade"): LaserLoonState {
+export function createInitialState(mode: LaserMode = "campaign"): LaserLoonState {
   return {
     mode,
-    laserType: "ice-cannon",
+    laserType: "ruby-laser",
     gameState: "idle",
+    currentAct: 1,
+    actKills: 0,
     score: 0,
     highScore: 0,
     combo: 0,
     multiplier: 1,
-    timeLeft: mode === "arcade" ? ARCADE_GAME_DURATION_SECS : 60,
+    timeLeft: mode === "arcade" ? ARCADE_GAME_DURATION_SECS : 999,
     gravity: 0.15,
+    ultimateMeter: 0,
+    activePowerUp: null,
     targets: [],
     iceBlocks: [],
+    powerUps: [],
     particles: [],
+    shockwaves: [],
     floatingTexts: [],
     loonPos: { x: 120, y: 180, targetX: 120, targetY: 180 },
-    aimPos: { x: 380, y: 180 },
+    aimPos: { x: 420, y: 180 },
     lastFireTime: 0,
     lastComboTime: 0,
     nextTargetId: 1,
     nextIceId: 1,
+    nextPowerUpId: 1,
+    nextShockwaveId: 1,
     nextTextId: 1,
     shakeIntensity: 0,
   };
+}
+
+export function getActAvailableEnemies(actNumber: number): CivicEnemyType[] {
+  switch (actNumber) {
+    case 1:
+      return ["mosquito", "hailstorm", "jetski"];
+    case 2:
+      return ["butter-bomb", "pronto-pup-rogue", "livestock-decoy", "mosquito"];
+    case 3:
+      return ["red-tape", "veto-stamp", "tricolor-rival", "clipboard"];
+    case 4:
+      return ["legislative-amendment", "seal-guardian", "polar-vortex", "red-tape"];
+    default:
+      return ["mosquito", "hailstorm", "butter-bomb", "red-tape", "veto-stamp", "tricolor-rival"];
+  }
 }
 
 export function spawnTarget(
@@ -49,26 +83,38 @@ export function spawnTarget(
   nextId: number,
   canvasWidth = DEFAULT_CANVAS_WIDTH,
   canvasHeight = DEFAULT_CANVAS_HEIGHT,
-  forcedType?: TargetBugType
+  forcedType?: CivicEnemyType,
+  actNumber = 1
 ): { newTarget: Target; updatedTargets: Target[]; nextId: number } {
-  const template = forcedType
-    ? BUG_TYPES.find((b) => b.type === forcedType) || BUG_TYPES[0]
-    : BUG_TYPES[Math.floor(Math.random() * BUG_TYPES.length)];
+  let targetType = forcedType;
+  if (!targetType) {
+    const pool = getActAvailableEnemies(actNumber);
+    targetType = pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  const template = ENEMY_TYPES.find((b) => b.type === targetType) || ENEMY_TYPES[0];
 
   const edge = Math.floor(Math.random() * 3);
-  let x = canvasWidth + 25;
-  let y = Math.random() * (canvasHeight - 80) + 40;
-  const vx = -(Math.random() * 1.6 + 0.8);
+  let x = canvasWidth + 30;
+  let y = Math.random() * (canvasHeight - 100) + 50;
+  let vx = -(Math.random() * 1.5 + 1.0);
   let vy = (Math.random() - 0.5) * 1.2;
 
   if (edge === 0) {
-    x = Math.random() * (canvasWidth * 0.5) + canvasWidth * 0.5;
-    y = -25;
-    vy = Math.random() * 1.2 + 0.5;
+    x = Math.random() * (canvasWidth * 0.4) + canvasWidth * 0.6;
+    y = -30;
+    vy = Math.random() * 1.2 + 0.6;
   } else if (edge === 1) {
-    x = Math.random() * (canvasWidth * 0.5) + canvasWidth * 0.5;
-    y = canvasHeight + 25;
-    vy = -(Math.random() * 1.2 + 0.5);
+    x = Math.random() * (canvasWidth * 0.4) + canvasWidth * 0.6;
+    y = canvasHeight + 30;
+    vy = -(Math.random() * 1.2 + 0.6);
+  }
+
+  if (template.isBoss) {
+    x = canvasWidth - 100;
+    y = canvasHeight * 0.5;
+    vx = 0;
+    vy = 1.0;
   }
 
   const newTarget: Target = {
@@ -86,6 +132,10 @@ export function spawnTarget(
     points: template.points,
     pulsePhase: Math.random() * Math.PI * 2,
     frozenTimer: 0,
+    isBoss: template.isBoss || false,
+    bossPhase: 1,
+    shieldAngle: 0,
+    specialAttackTimer: 0,
   };
 
   return {
@@ -95,13 +145,104 @@ export function spawnTarget(
   };
 }
 
+export function spawnBossForAct(
+  actNumber: number,
+  nextId: number,
+  canvasWidth = DEFAULT_CANVAS_WIDTH,
+  canvasHeight = DEFAULT_CANVAS_HEIGHT
+): { boss: Target; nextId: number } {
+  const act = CAMPAIGN_ACTS.find((a) => a.actNumber === actNumber) || CAMPAIGN_ACTS[0];
+  const template = ENEMY_TYPES.find((e) => e.type === act.bossType) || ENEMY_TYPES[ENEMY_TYPES.length - 1];
+
+  const boss: Target = {
+    id: nextId,
+    x: canvasWidth - 120,
+    y: canvasHeight * 0.5,
+    vx: 0,
+    vy: 1.2,
+    radius: template.radius,
+    type: template.type,
+    label: template.label,
+    color: template.color,
+    hp: act.bossHp,
+    maxHp: act.bossHp,
+    points: template.points,
+    pulsePhase: 0,
+    frozenTimer: 0,
+    isBoss: true,
+    bossPhase: 1,
+    shieldAngle: 0,
+    specialAttackTimer: 0,
+  };
+
+  return { boss, nextId: nextId + 1 };
+}
+
+export function spawnPowerUp(
+  powerUps: PowerUp[],
+  nextId: number,
+  canvasWidth = DEFAULT_CANVAS_WIDTH,
+  canvasHeight = DEFAULT_CANVAS_HEIGHT,
+  forcedType?: PowerUpType
+): { newPowerUp: PowerUp; updatedPowerUps: PowerUp[]; nextId: number } {
+  const types: PowerUpType[] = ["hotdish", "pronto-pup", "north-star"];
+  const type = forcedType || types[Math.floor(Math.random() * types.length)];
+  const config = POWER_UP_CONFIGS[type];
+
+  const newPowerUp: PowerUp = {
+    id: nextId,
+    x: canvasWidth + 20,
+    y: Math.random() * (canvasHeight - 120) + 60,
+    vx: -(Math.random() * 1.2 + 0.8),
+    vy: Math.sin(Math.random() * Math.PI) * 0.5,
+    type,
+    label: config.label,
+    color: config.color,
+    pulsePhase: 0,
+    durationMs: config.durationMs,
+  };
+
+  return {
+    newPowerUp,
+    updatedPowerUps: [...powerUps, newPowerUp],
+    nextId: nextId + 1,
+  };
+}
+
+export function updatePowerUps(
+  powerUps: PowerUp[],
+  dt: number,
+  loonX: number,
+  loonY: number,
+  loonRadius = 32
+): { remainingPowerUps: PowerUp[]; collectedPowerUp: PowerUp | null } {
+  const remaining: PowerUp[] = [];
+  let collected: PowerUp | null = null;
+
+  for (const p of powerUps) {
+    const nextP = { ...p };
+    nextP.x += nextP.vx * dt;
+    nextP.y += nextP.vy * dt;
+    nextP.pulsePhase += 0.08 * dt;
+
+    const distToLoon = Math.hypot(nextP.x - loonX, nextP.y - loonY);
+    if (distToLoon < loonRadius + 20 && !collected) {
+      collected = nextP;
+    } else if (nextP.x > -40) {
+      remaining.push(nextP);
+    }
+  }
+
+  return { remainingPowerUps: remaining, collectedPowerUp: collected };
+}
+
 export function createIceBlock(
   fromX: number,
   fromY: number,
   targetX: number,
   targetY: number,
   nextId: number,
-  speed = 7.5
+  speed = 8.5
 ): { iceBlock: IceBlock; nextId: number } {
   const dx = targetX - fromX;
   const dy = targetY - fromY;
@@ -113,9 +254,9 @@ export function createIceBlock(
     y: fromY,
     vx: (dx / dist) * speed,
     vy: (dy / dist) * speed,
-    size: 26,
+    size: 28,
     rotation: Math.random() * Math.PI * 2,
-    vRot: (Math.random() - 0.5) * 0.15,
+    vRot: (Math.random() - 0.5) * 0.2,
     hp: 1,
   };
 
@@ -148,7 +289,6 @@ export function updateIceBlocksAndCollisions(
   const frozenTargets: Target[] = [];
   let pointsEarned = 0;
 
-  // Make a clone of targets to modify in place
   const updatedTargets = targets.map((t) => ({ ...t }));
   const remainingIceBlocks: IceBlock[] = [];
 
@@ -163,13 +303,13 @@ export function updateIceBlocksAndCollisions(
     }
 
     // Bounce off top and bottom walls
-    if (nextBlock.y < 15) {
-      nextBlock.y = 15;
-      nextBlock.vy = Math.abs(nextBlock.vy) * 0.8;
+    if (nextBlock.y < 20) {
+      nextBlock.y = 20;
+      nextBlock.vy = Math.abs(nextBlock.vy) * 0.85;
       shatteredBlocks.push({ x: nextBlock.x, y: nextBlock.y });
-    } else if (nextBlock.y > height - 15) {
-      nextBlock.y = height - 15;
-      nextBlock.vy = -Math.abs(nextBlock.vy) * 0.8;
+    } else if (nextBlock.y > height - 20) {
+      nextBlock.y = height - 20;
+      nextBlock.vy = -Math.abs(nextBlock.vy) * 0.85;
       shatteredBlocks.push({ x: nextBlock.x, y: nextBlock.y });
     }
 
@@ -180,20 +320,21 @@ export function updateIceBlocksAndCollisions(
       const dist = Math.hypot(target.x - nextBlock.x, target.y - nextBlock.y);
       if (dist < target.radius + nextBlock.size * 0.5) {
         blockShattered = true;
-        target.hp -= 2; // Ice block deals heavy crushing damage
-        target.frozenTimer = 90; // Freeze target in place
+        const dmg = target.isBoss ? 2 : 3;
+        target.hp -= dmg;
+        target.frozenTimer = target.isBoss ? 45 : 120; // Freeze in place
         frozenTargets.push(target);
         shatteredBlocks.push({ x: nextBlock.x, y: nextBlock.y });
 
         if (target.hp <= 0) {
           killedTargets.push(target);
-          pointsEarned += target.points * 2; // Frozen shatter bonus
+          pointsEarned += target.points * 2; // Shatter bonus
         }
         break;
       }
     }
 
-    if (!blockShattered && nextBlock.x < width + 50 && nextBlock.x > -50) {
+    if (!blockShattered && nextBlock.x < width + 60 && nextBlock.x > -60) {
       remainingIceBlocks.push(nextBlock);
     }
   }
@@ -213,31 +354,71 @@ export function updateTargetsPosition(
   dt: number,
   mode: LaserMode,
   gravity: number,
-  height = DEFAULT_CANVAS_HEIGHT
+  height = DEFAULT_CANVAS_HEIGHT,
+  width = DEFAULT_CANVAS_WIDTH
 ): Target[] {
   return targets
-    .filter((t) => t.hp > 0 && t.x > -50)
+    .filter((t) => t.hp > 0 && (t.isBoss || t.x > -60))
     .map((t) => {
       const nextT = { ...t };
+
       if (nextT.frozenTimer > 0) {
         nextT.frozenTimer = Math.max(0, nextT.frozenTimer - 1 * dt);
+        return nextT;
+      }
+
+      nextT.pulsePhase += 0.05 * dt;
+
+      if (nextT.isBoss) {
+        // Boss flight pattern
+        nextT.shieldAngle = ((nextT.shieldAngle || 0) + 0.04 * dt) % (Math.PI * 2);
+        nextT.y += nextT.vy * dt;
+        if (nextT.y < 80) {
+          nextT.y = 80;
+          nextT.vy = Math.abs(nextT.vy);
+        } else if (nextT.y > height - 80) {
+          nextT.y = height - 80;
+          nextT.vy = -Math.abs(nextT.vy);
+        }
+
+        // Slight horizontal bobbing
+        nextT.x = width - 130 + Math.sin(nextT.pulsePhase * 0.8) * 40;
+        return nextT;
+      }
+
+      const template = ENEMY_TYPES.find((e) => e.type === nextT.type);
+      const behavior = template?.behavior || "linear";
+
+      if (behavior === "sine") {
+        nextT.x += nextT.vx * dt;
+        nextT.y += Math.sin(nextT.pulsePhase) * 2.0 * dt;
+      } else if (behavior === "bouncing") {
+        nextT.x += nextT.vx * dt;
+        nextT.y += nextT.vy * dt;
+        if (nextT.y - nextT.radius < 15) {
+          nextT.y = 15 + nextT.radius;
+          nextT.vy = Math.abs(nextT.vy);
+        } else if (nextT.y + nextT.radius > height - 15) {
+          nextT.y = height - 15 - nextT.radius;
+          nextT.vy = -Math.abs(nextT.vy);
+        }
       } else {
         nextT.x += nextT.vx * dt;
         nextT.y += nextT.vy * dt;
-        nextT.pulsePhase += 0.05 * dt;
-
-        if (mode === "sandbox") {
-          nextT.vy += gravity * dt;
-        }
-
-        if (nextT.y - nextT.radius < 10) {
-          nextT.y = 10 + nextT.radius;
-          nextT.vy = Math.abs(nextT.vy) * 0.8;
-        } else if (nextT.y + nextT.radius > height - 10) {
-          nextT.y = height - 10 - nextT.radius;
-          nextT.vy = -Math.abs(nextT.vy) * 0.8;
-        }
       }
+
+      if (mode === "sandbox") {
+        nextT.vy += gravity * dt;
+      }
+
+      if (nextT.y - nextT.radius < 10) {
+        nextT.y = 10 + nextT.radius;
+        nextT.vy = Math.abs(nextT.vy) * 0.8;
+      } else if (nextT.y + nextT.radius > height - 10) {
+        nextT.y = height - 10 - nextT.radius;
+        nextT.vy = -Math.abs(nextT.vy) * 0.8;
+      }
+
       return nextT;
     });
 }
@@ -247,6 +428,7 @@ export interface LaserHitResult {
   hitAny: boolean;
   killedTargets: Target[];
   damagedPoints: Array<{ x: number; y: number; color: string }>;
+  ultimateGained: number;
 }
 
 export function checkLaserRayHit(
@@ -255,7 +437,8 @@ export function checkLaserRayHit(
   aimX: number,
   aimY: number,
   laserType: LaserType,
-  targets: Target[]
+  targets: Target[],
+  hasHotdishOvercharge = false
 ): LaserHitResult {
   const dx = aimX - eyeX;
   const dy = aimY - eyeY;
@@ -263,11 +446,12 @@ export function checkLaserRayHit(
   const dirX = dx / dist;
   const dirY = dy / dist;
 
-  const weapon = WEAPONS[laserType];
-  const hitExtra = weapon ? weapon.rayHitRadiusExtra : 8;
-  const damage = weapon ? weapon.damage : 1;
+  const weapon = WEAPONS[laserType] || WEAPONS["ruby-laser"];
+  const hitExtra = weapon.rayHitRadiusExtra + (hasHotdishOvercharge ? 10 : 0);
+  const damage = weapon.damage * (hasHotdishOvercharge ? 1.6 : 1.0);
 
   let hitAny = false;
+  let ultimateGained = 0;
   const killedTargets: Target[] = [];
   const damagedPoints: Array<{ x: number; y: number; color: string }> = [];
 
@@ -288,9 +472,14 @@ export function checkLaserRayHit(
         const nextHp = t.hp - damage;
         damagedPoints.push({ x: nearX, y: nearY, color: t.color });
 
+        if (t.isBoss) {
+          ultimateGained += 4;
+        }
+
         if (nextHp <= 0) {
           const killed = { ...t, hp: 0 };
           killedTargets.push(killed);
+          ultimateGained += ULTIMATE_CHARGE_PER_KILL;
           return killed;
         }
         return { ...t, hp: nextHp };
@@ -304,6 +493,57 @@ export function checkLaserRayHit(
     hitAny,
     killedTargets,
     damagedPoints,
+    ultimateGained,
+  };
+}
+
+export function triggerUltimateTremolo(
+  targets: Target[],
+  fromX: number,
+  fromY: number,
+  canvasWidth = DEFAULT_CANVAS_WIDTH,
+  canvasHeight = DEFAULT_CANVAS_HEIGHT,
+  nextShockwaveId = 1
+): {
+  updatedTargets: Target[];
+  killedTargets: Target[];
+  newShockwave: Shockwave;
+  pointsEarned: number;
+  nextShockwaveId: number;
+} {
+  const killedTargets: Target[] = [];
+  let pointsEarned = 0;
+
+  const updatedTargets = targets.map((t) => {
+    const nextT = { ...t };
+    const tremoloDamage = nextT.isBoss ? 15 : 999; // Instant kill regular targets, heavy boss damage
+    nextT.hp -= tremoloDamage;
+    nextT.frozenTimer = 180;
+
+    if (nextT.hp <= 0) {
+      killedTargets.push(nextT);
+      pointsEarned += nextT.points * 3; // Ultimate bonus
+    }
+    return nextT;
+  });
+
+  const newShockwave: Shockwave = {
+    id: nextShockwaveId,
+    x: fromX,
+    y: fromY,
+    radius: 10,
+    maxRadius: Math.max(canvasWidth, canvasHeight) * 1.2,
+    speed: 18,
+    color: "#22d3ee",
+    alpha: 1.0,
+  };
+
+  return {
+    updatedTargets: updatedTargets.filter((t) => t.hp > 0),
+    killedTargets,
+    newShockwave,
+    pointsEarned,
+    nextShockwaveId: nextShockwaveId + 1,
   };
 }
 
@@ -322,23 +562,24 @@ export function createExplosionParticles(
   x: number,
   y: number,
   color: string,
-  count = 18,
-  isIce = false
+  count = 20,
+  isIce = false,
+  isStar = false
 ): Particle[] {
   const particles: Particle[] = [];
   for (let i = 0; i < count; i++) {
     const angle = Math.random() * Math.PI * 2;
-    const speed = Math.random() * (isIce ? 5 : 4) + 1.5;
+    const speed = Math.random() * (isIce ? 5.5 : 4.5) + 1.5;
     particles.push({
       x,
       y,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
-      radius: isIce ? Math.random() * 5 + 2 : Math.random() * 3.5 + 1.5,
+      radius: isIce ? Math.random() * 5 + 2 : isStar ? Math.random() * 4 + 2 : Math.random() * 3.5 + 1.5,
       color: isIce ? (Math.random() > 0.4 ? "#38bdf8" : "#ffffff") : color,
       alpha: 1,
       decay: Math.random() * 0.03 + (isIce ? 0.015 : 0.02),
-      shape: isIce ? "crystal" : "circle",
+      shape: isIce ? "crystal" : isStar ? "star" : "circle",
       rotation: Math.random() * Math.PI * 2,
     });
   }
@@ -354,6 +595,16 @@ export function updateParticles(particles: Particle[], dt: number): Particle[] {
       alpha: p.alpha - p.decay * dt,
     }))
     .filter((p) => p.alpha > 0);
+}
+
+export function updateShockwaves(shockwaves: Shockwave[], dt: number): Shockwave[] {
+  return shockwaves
+    .map((s) => ({
+      ...s,
+      radius: s.radius + s.speed * dt,
+      alpha: Math.max(0, 1 - s.radius / s.maxRadius),
+    }))
+    .filter((s) => s.alpha > 0.02 && s.radius < s.maxRadius);
 }
 
 export function updateFloatingTexts(texts: FloatingText[], dt: number): FloatingText[] {

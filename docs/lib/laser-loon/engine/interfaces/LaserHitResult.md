@@ -6,7 +6,7 @@
 
 # Interface: LaserHitResult
 
-Defined in: [lib/laser-loon/engine.ts:245](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L245)
+Defined in: [lib/laser-loon/engine.ts:426](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L426)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/laser-loon/engine.ts:245](https://github.com/fderuiter/portfoli
 
 > **damagedPoints**: `object`[]
 
-Defined in: [lib/laser-loon/engine.ts:249](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L249)
+Defined in: [lib/laser-loon/engine.ts:430](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L430)
 
 #### color
 
@@ -34,7 +34,7 @@ Defined in: [lib/laser-loon/engine.ts:249](https://github.com/fderuiter/portfoli
 
 > **hitAny**: `boolean`
 
-Defined in: [lib/laser-loon/engine.ts:247](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L247)
+Defined in: [lib/laser-loon/engine.ts:428](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L428)
 
 ***
 
@@ -42,7 +42,15 @@ Defined in: [lib/laser-loon/engine.ts:247](https://github.com/fderuiter/portfoli
 
 > **killedTargets**: [`Target`](../../types/interfaces/Target.md)[]
 
-Defined in: [lib/laser-loon/engine.ts:248](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L248)
+Defined in: [lib/laser-loon/engine.ts:429](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L429)
+
+***
+
+### ultimateGained
+
+> **ultimateGained**: `number`
+
+Defined in: [lib/laser-loon/engine.ts:431](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L431)
 
 ***
 
@@ -50,4 +58,4 @@ Defined in: [lib/laser-loon/engine.ts:248](https://github.com/fderuiter/portfoli
 
 > **updatedTargets**: [`Target`](../../types/interfaces/Target.md)[]
 
-Defined in: [lib/laser-loon/engine.ts:246](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L246)
+Defined in: [lib/laser-loon/engine.ts:427](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L427)

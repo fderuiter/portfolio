@@ -6,9 +6,9 @@
 
 # Function: generateClinicalSubject()
 
-> **generateClinicalSubject**(`errorProbability?`, `forceSAE?`, `customSeq?`): [`ClinicalSubject`](../../types/interfaces/ClinicalSubject.md)
+> **generateClinicalSubject**(`errorProbability?`, `forceSAE?`, `customSeq?`, `activeDomains?`): [`ClinicalSubject`](../../types/interfaces/ClinicalSubject.md)
 
-Defined in: [lib/clinical-trial-chaos/scenarios.ts:257](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L257)
+Defined in: [lib/clinical-trial-chaos/scenarios.ts:701](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L701)
 
 Generates a random or seeded ClinicalSubject with 2-4 observations.
 
@@ -18,17 +18,17 @@ Generates a random or seeded ClinicalSubject with 2-4 observations.
 
 `number` = `0.5`
 
-Probability that any given observation has a typo/anomaly (0 to 1).
-
 ### forceSAE?
 
 `boolean` = `false`
 
-Whether this subject is an emergency SAE priority rush.
-
 ### customSeq?
 
 `number`
+
+### activeDomains?
+
+[`CDISCDomain`](../../types/type-aliases/CDISCDomain.md)[] = `...`
 
 ## Returns
 

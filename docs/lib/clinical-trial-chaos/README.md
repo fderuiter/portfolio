@@ -16,6 +16,12 @@
 
 ## References
 
+### ALL\_STATIONS
+
+Re-exports [ALL_STATIONS](scenarios/variables/ALL_STATIONS.md)
+
+***
+
 ### AMENDMENT\_PRESETS
 
 Re-exports [AMENDMENT_PRESETS](scenarios/variables/AMENDMENT_PRESETS.md)
@@ -46,6 +52,18 @@ Re-exports [AuditorState](types/interfaces/AuditorState.md)
 
 ***
 
+### BIMOFinding
+
+Re-exports [BIMOFinding](types/interfaces/BIMOFinding.md)
+
+***
+
+### BIMOInspectionReport
+
+Re-exports [BIMOInspectionReport](types/interfaces/BIMOInspectionReport.md)
+
+***
+
 ### calculateSubmissionPoints
 
 Re-exports [calculateSubmissionPoints](engine/functions/calculateSubmissionPoints.md)
@@ -55,6 +73,12 @@ Re-exports [calculateSubmissionPoints](engine/functions/calculateSubmissionPoint
 ### CDISCDomain
 
 Re-exports [CDISCDomain](types/type-aliases/CDISCDomain.md)
+
+***
+
+### chargePowerUps
+
+Re-exports [chargePowerUps](engine/functions/chargePowerUps.md)
 
 ***
 
@@ -82,9 +106,27 @@ Re-exports [createInitialAuditorState](engine/functions/createInitialAuditorStat
 
 ***
 
+### createInitialPowerUpInventory
+
+Re-exports [createInitialPowerUpInventory](engine/functions/createInitialPowerUpInventory.md)
+
+***
+
 ### createInitialScoreState
 
 Re-exports [createInitialScoreState](engine/functions/createInitialScoreState.md)
+
+***
+
+### exportToCDISCODMXML
+
+Re-exports [exportToCDISCODMXML](engine/functions/exportToCDISCODMXML.md)
+
+***
+
+### exportToSDTMCSV
+
+Re-exports [exportToSDTMCSV](engine/functions/exportToSDTMCSV.md)
 
 ***
 
@@ -118,9 +160,27 @@ Re-exports [GameScoreState](types/interfaces/GameScoreState.md)
 
 ***
 
+### generateBIMOReport
+
+Re-exports [generateBIMOReport](engine/functions/generateBIMOReport.md)
+
+***
+
 ### generateClinicalSubject
 
 Re-exports [generateClinicalSubject](scenarios/functions/generateClinicalSubject.md)
+
+***
+
+### generateSDTMDataset
+
+Re-exports [generateSDTMDataset](engine/functions/generateSDTMDataset.md)
+
+***
+
+### getStationsForPhase
+
+Re-exports [getStationsForPhase](scenarios/functions/getStationsForPhase.md)
 
 ***
 
@@ -160,9 +220,27 @@ Re-exports [playAuditErrorBuzz](sound-effects/functions/playAuditErrorBuzz.md)
 
 ***
 
+### playChoiceIncorrectSound
+
+Re-exports [playChoiceIncorrectSound](sound-effects/functions/playChoiceIncorrectSound.md)
+
+***
+
 ### playForm483AlarmSound
 
 Re-exports [playForm483AlarmSound](sound-effects/functions/playForm483AlarmSound.md)
+
+***
+
+### playPneumaticChuteSound
+
+Re-exports [playPneumaticChuteSound](sound-effects/functions/playPneumaticChuteSound.md)
+
+***
+
+### playPowerUpSound
+
+Re-exports [playPowerUpSound](sound-effects/functions/playPowerUpSound.md)
 
 ***
 
@@ -190,6 +268,24 @@ Re-exports [playValidationSound](sound-effects/functions/playValidationSound.md)
 
 ***
 
+### PowerUpInventory
+
+Re-exports [PowerUpInventory](types/type-aliases/PowerUpInventory.md)
+
+***
+
+### PowerUpState
+
+Re-exports [PowerUpState](types/interfaces/PowerUpState.md)
+
+***
+
+### PowerUpType
+
+Re-exports [PowerUpType](types/type-aliases/PowerUpType.md)
+
+***
+
 ### ProtocolAmendment
 
 Re-exports [ProtocolAmendment](types/interfaces/ProtocolAmendment.md)
@@ -199,6 +295,12 @@ Re-exports [ProtocolAmendment](types/interfaces/ProtocolAmendment.md)
 ### scrambleStations
 
 Re-exports [scrambleStations](engine/functions/scrambleStations.md)
+
+***
+
+### SDTMRow
+
+Re-exports [SDTMRow](types/interfaces/SDTMRow.md)
 
 ***
 
@@ -220,15 +322,33 @@ Re-exports [SignatureReason](types/type-aliases/SignatureReason.md)
 
 ***
 
+### startProceduralBGM
+
+Re-exports [startProceduralBGM](sound-effects/functions/startProceduralBGM.md)
+
+***
+
 ### StationConfig
 
 Re-exports [StationConfig](types/interfaces/StationConfig.md)
 
 ***
 
+### stopProceduralBGM
+
+Re-exports [stopProceduralBGM](sound-effects/functions/stopProceduralBGM.md)
+
+***
+
 ### tickAuditor
 
 Re-exports [tickAuditor](engine/functions/tickAuditor.md)
+
+***
+
+### tickPowerUps
+
+Re-exports [tickPowerUps](engine/functions/tickPowerUps.md)
 
 ***
 
@@ -244,9 +364,27 @@ Re-exports [triggerRandomAmendment](engine/functions/triggerRandomAmendment.md)
 
 ***
 
+### updateBGMTempo
+
+Re-exports [updateBGMTempo](sound-effects/functions/updateBGMTempo.md)
+
+***
+
+### validateObservationChoice
+
+Re-exports [validateObservationChoice](engine/functions/validateObservationChoice.md)
+
+***
+
 ### ValidationErrorType
 
 Re-exports [ValidationErrorType](types/type-aliases/ValidationErrorType.md)
+
+***
+
+### VendorSystem
+
+Re-exports [VendorSystem](types/type-aliases/VendorSystem.md)
 
 ***
 

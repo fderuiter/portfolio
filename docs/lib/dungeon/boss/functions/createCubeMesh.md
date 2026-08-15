@@ -8,9 +8,9 @@
 
 > **createCubeMesh**(`color?`, `scale?`): [`WireframeMesh`](../../types/interfaces/WireframeMesh.md)
 
-Defined in: [lib/dungeon/boss.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/boss.ts#L69)
+Defined in: [lib/dungeon/boss.ts:89](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/boss.ts#L89)
 
-Creates untextured 3D cube mesh for projectiles.
+Creates 3D cube mesh for projectiles.
 
 ## Parameters
 

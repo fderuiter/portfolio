@@ -6,9 +6,9 @@
 
 # Function: spawnTarget()
 
-> **spawnTarget**(`targets`, `nextId`, `canvasWidth?`, `canvasHeight?`, `forcedType?`): `object`
+> **spawnTarget**(`targets`, `nextId`, `canvasWidth?`, `canvasHeight?`, `forcedType?`, `actNumber?`): `object`
 
-Defined in: [lib/laser-loon/engine.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L47)
+Defined in: [lib/laser-loon/engine.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L81)
 
 ## Parameters
 
@@ -30,7 +30,11 @@ Defined in: [lib/laser-loon/engine.ts:47](https://github.com/fderuiter/portfolio
 
 ### forcedType?
 
-[`TargetBugType`](../../types/type-aliases/TargetBugType.md)
+[`CivicEnemyType`](../../types/type-aliases/CivicEnemyType.md)
+
+### actNumber?
+
+`number` = `1`
 
 ## Returns
 

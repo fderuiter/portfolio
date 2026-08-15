@@ -6,6 +6,6 @@
 
 # Type Alias: InventoryItem
 
-> **InventoryItem** = `"tennis-ball"` \| `"kong"` \| `"squeaky-toy"` \| `"treat"`
+> **InventoryItem** = `"tennis-ball"` \| `"kong"` \| `"squeaky-toy"` \| `"treat"` \| `"frisbee"`
 
-Defined in: [lib/working-with-duck-engine.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L30)
+Defined in: [lib/working-with-duck-engine.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L50)

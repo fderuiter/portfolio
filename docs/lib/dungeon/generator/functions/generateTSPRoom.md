@@ -8,9 +8,9 @@
 
 > **generateTSPRoom**(): [`DungeonRoom`](../../types/interfaces/DungeonRoom.md)
 
-Defined in: [lib/dungeon/generator.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/generator.ts#L35)
+Defined in: [lib/dungeon/generator.ts:227](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/generator.ts#L227)
 
-Creates Room 1: Traveling-Salesman-Problem
+Creates Room 1 / Tier 3: Traveling-Salesman-Problem / Zero-Trust Enclave
 
 ## Returns
 

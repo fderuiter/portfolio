@@ -6,7 +6,7 @@
 
 # Interface: DungeonRoom
 
-Defined in: [lib/dungeon/types.ts:151](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L151)
+Defined in: [lib/dungeon/types.ts:195](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L195)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/dungeon/types.ts:151](https://github.com/fderuiter/portfolio/bl
 
 > **badge**: `string`
 
-Defined in: [lib/dungeon/types.ts:157](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L157)
+Defined in: [lib/dungeon/types.ts:201](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L201)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/dungeon/types.ts:157](https://github.com/fderuiter/portfolio/bl
 
 > `optional` **boss?**: [`BossState`](BossState.md)
 
-Defined in: [lib/dungeon/types.ts:167](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L167)
+Defined in: [lib/dungeon/types.ts:211](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L211)
 
 ***
 
@@ -30,7 +30,15 @@ Defined in: [lib/dungeon/types.ts:167](https://github.com/fderuiter/portfolio/bl
 
 > `optional` **chestOpened?**: `boolean`
 
-Defined in: [lib/dungeon/types.ts:170](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L170)
+Defined in: [lib/dungeon/types.ts:214](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L214)
+
+***
+
+### darknetVendor?
+
+> `optional` **darknetVendor?**: `boolean`
+
+Defined in: [lib/dungeon/types.ts:218](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L218)
 
 ***
 
@@ -38,7 +46,7 @@ Defined in: [lib/dungeon/types.ts:170](https://github.com/fderuiter/portfolio/bl
 
 > **enemies**: [`Enemy`](Enemy.md)[]
 
-Defined in: [lib/dungeon/types.ts:165](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L165)
+Defined in: [lib/dungeon/types.ts:209](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L209)
 
 ***
 
@@ -46,7 +54,7 @@ Defined in: [lib/dungeon/types.ts:165](https://github.com/fderuiter/portfolio/bl
 
 > **exitX**: `number`
 
-Defined in: [lib/dungeon/types.ts:163](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L163)
+Defined in: [lib/dungeon/types.ts:207](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L207)
 
 ***
 
@@ -54,7 +62,7 @@ Defined in: [lib/dungeon/types.ts:163](https://github.com/fderuiter/portfolio/bl
 
 > **exitY**: `number`
 
-Defined in: [lib/dungeon/types.ts:164](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L164)
+Defined in: [lib/dungeon/types.ts:208](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L208)
 
 ***
 
@@ -62,7 +70,15 @@ Defined in: [lib/dungeon/types.ts:164](https://github.com/fderuiter/portfolio/bl
 
 > **grid**: `string`[][]
 
-Defined in: [lib/dungeon/types.ts:160](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L160)
+Defined in: [lib/dungeon/types.ts:204](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L204)
+
+***
+
+### hasTerminal?
+
+> `optional` **hasTerminal?**: `boolean`
+
+Defined in: [lib/dungeon/types.ts:216](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L216)
 
 ***
 
@@ -70,7 +86,7 @@ Defined in: [lib/dungeon/types.ts:160](https://github.com/fderuiter/portfolio/bl
 
 > **height**: `number`
 
-Defined in: [lib/dungeon/types.ts:159](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L159)
+Defined in: [lib/dungeon/types.ts:203](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L203)
 
 ***
 
@@ -78,7 +94,7 @@ Defined in: [lib/dungeon/types.ts:159](https://github.com/fderuiter/portfolio/bl
 
 > **id**: [`RoomThemeId`](../type-aliases/RoomThemeId.md)
 
-Defined in: [lib/dungeon/types.ts:152](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L152)
+Defined in: [lib/dungeon/types.ts:196](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L196)
 
 ***
 
@@ -86,7 +102,7 @@ Defined in: [lib/dungeon/types.ts:152](https://github.com/fderuiter/portfolio/bl
 
 > **index**: `number`
 
-Defined in: [lib/dungeon/types.ts:153](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L153)
+Defined in: [lib/dungeon/types.ts:197](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L197)
 
 ***
 
@@ -94,7 +110,7 @@ Defined in: [lib/dungeon/types.ts:153](https://github.com/fderuiter/portfolio/bl
 
 > **items**: [`ItemPickup`](ItemPickup.md)[]
 
-Defined in: [lib/dungeon/types.ts:166](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L166)
+Defined in: [lib/dungeon/types.ts:210](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L210)
 
 ***
 
@@ -102,7 +118,7 @@ Defined in: [lib/dungeon/types.ts:166](https://github.com/fderuiter/portfolio/bl
 
 > **mechanic**: `string`
 
-Defined in: [lib/dungeon/types.ts:156](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L156)
+Defined in: [lib/dungeon/types.ts:200](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L200)
 
 ***
 
@@ -110,7 +126,15 @@ Defined in: [lib/dungeon/types.ts:156](https://github.com/fderuiter/portfolio/bl
 
 > **repo**: `string`
 
-Defined in: [lib/dungeon/types.ts:155](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L155)
+Defined in: [lib/dungeon/types.ts:199](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L199)
+
+***
+
+### securityTier?
+
+> `optional` **securityTier?**: `number`
+
+Defined in: [lib/dungeon/types.ts:215](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L215)
 
 ***
 
@@ -118,7 +142,7 @@ Defined in: [lib/dungeon/types.ts:155](https://github.com/fderuiter/portfolio/bl
 
 > **startX**: `number`
 
-Defined in: [lib/dungeon/types.ts:161](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L161)
+Defined in: [lib/dungeon/types.ts:205](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L205)
 
 ***
 
@@ -126,7 +150,15 @@ Defined in: [lib/dungeon/types.ts:161](https://github.com/fderuiter/portfolio/bl
 
 > **startY**: `number`
 
-Defined in: [lib/dungeon/types.ts:162](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L162)
+Defined in: [lib/dungeon/types.ts:206](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L206)
+
+***
+
+### terminalHacked?
+
+> `optional` **terminalHacked?**: `boolean`
+
+Defined in: [lib/dungeon/types.ts:217](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L217)
 
 ***
 
@@ -134,7 +166,7 @@ Defined in: [lib/dungeon/types.ts:162](https://github.com/fderuiter/portfolio/bl
 
 > **title**: `string`
 
-Defined in: [lib/dungeon/types.ts:154](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L154)
+Defined in: [lib/dungeon/types.ts:198](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L198)
 
 ***
 
@@ -142,7 +174,7 @@ Defined in: [lib/dungeon/types.ts:154](https://github.com/fderuiter/portfolio/bl
 
 > `optional` **tspMovingWalls?**: [`TSPMovingWall`](TSPMovingWall.md)[]
 
-Defined in: [lib/dungeon/types.ts:169](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L169)
+Defined in: [lib/dungeon/types.ts:213](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L213)
 
 ***
 
@@ -150,7 +182,7 @@ Defined in: [lib/dungeon/types.ts:169](https://github.com/fderuiter/portfolio/bl
 
 > `optional` **tspNodes?**: [`TSPNode`](TSPNode.md)[]
 
-Defined in: [lib/dungeon/types.ts:168](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L168)
+Defined in: [lib/dungeon/types.ts:212](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L212)
 
 ***
 
@@ -158,4 +190,4 @@ Defined in: [lib/dungeon/types.ts:168](https://github.com/fderuiter/portfolio/bl
 
 > **width**: `number`
 
-Defined in: [lib/dungeon/types.ts:158](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L158)
+Defined in: [lib/dungeon/types.ts:202](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L202)

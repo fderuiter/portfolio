@@ -6,7 +6,7 @@
 
 # Interface: TSPMovingWall
 
-Defined in: [lib/dungeon/types.ts:143](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L143)
+Defined in: [lib/dungeon/types.ts:187](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L187)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/dungeon/types.ts:143](https://github.com/fderuiter/portfolio/bl
 
 > **active**: `boolean`
 
-Defined in: [lib/dungeon/types.ts:148](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L148)
+Defined in: [lib/dungeon/types.ts:192](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L192)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/dungeon/types.ts:148](https://github.com/fderuiter/portfolio/bl
 
 > **baseX**: `number`
 
-Defined in: [lib/dungeon/types.ts:146](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L146)
+Defined in: [lib/dungeon/types.ts:190](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L190)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/dungeon/types.ts:146](https://github.com/fderuiter/portfolio/bl
 
 > **baseY**: `number`
 
-Defined in: [lib/dungeon/types.ts:147](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L147)
+Defined in: [lib/dungeon/types.ts:191](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L191)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/dungeon/types.ts:147](https://github.com/fderuiter/portfolio/bl
 
 > **x**: `number`
 
-Defined in: [lib/dungeon/types.ts:144](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L144)
+Defined in: [lib/dungeon/types.ts:188](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L188)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [lib/dungeon/types.ts:144](https://github.com/fderuiter/portfolio/bl
 
 > **y**: `number`
 
-Defined in: [lib/dungeon/types.ts:145](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L145)
+Defined in: [lib/dungeon/types.ts:189](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L189)

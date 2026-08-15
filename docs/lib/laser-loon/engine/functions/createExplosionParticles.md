@@ -6,9 +6,9 @@
 
 # Function: createExplosionParticles()
 
-> **createExplosionParticles**(`x`, `y`, `color`, `count?`, `isIce?`): [`Particle`](../../types/interfaces/Particle.md)[]
+> **createExplosionParticles**(`x`, `y`, `color`, `count?`, `isIce?`, `isStar?`): [`Particle`](../../types/interfaces/Particle.md)[]
 
-Defined in: [lib/laser-loon/engine.ts:321](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L321)
+Defined in: [lib/laser-loon/engine.ts:561](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L561)
 
 ## Parameters
 
@@ -26,9 +26,13 @@ Defined in: [lib/laser-loon/engine.ts:321](https://github.com/fderuiter/portfoli
 
 ### count?
 
-`number` = `18`
+`number` = `20`
 
 ### isIce?
+
+`boolean` = `false`
+
+### isStar?
 
 `boolean` = `false`
 

@@ -6,9 +6,9 @@
 
 # Function: enterDogPark()
 
-> **enterDogPark**(`state`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
+> **enterDogPark**(`state`, `mode?`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:1377](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1377)
+Defined in: [lib/working-with-duck-engine.ts:2091](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2091)
 
 Dog Park Mini-Game Transitions & Logic
 
@@ -17,6 +17,10 @@ Dog Park Mini-Game Transitions & Logic
 ### state
 
 [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
+
+### mode?
+
+`"ball"` \| `"frisbee"`
 
 ## Returns
 

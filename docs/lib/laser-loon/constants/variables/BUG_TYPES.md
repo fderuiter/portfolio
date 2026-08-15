@@ -6,6 +6,6 @@
 
 # Variable: BUG\_TYPES
 
-> `const` **BUG\_TYPES**: readonly [`BugTemplate`](../../types/interfaces/BugTemplate.md)[]
+> `const` **BUG\_TYPES**: readonly [`EnemyTemplate`](../../types/interfaces/EnemyTemplate.md)[] = `ENEMY_TYPES`
 
-Defined in: [lib/laser-loon/constants.ts:3](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L3)
+Defined in: [lib/laser-loon/constants.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L33)

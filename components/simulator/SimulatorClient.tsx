@@ -178,7 +178,7 @@ export function SimulatorClient() {
   }, [profile]);
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-foreground pt-28 pb-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden flex flex-col items-center justify-center">
+    <main className="min-h-screen bg-zinc-950 text-foreground pt-28 pb-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden flex flex-col items-center justify-start">
       {/* Dynamic Background Atmospheric Lighting */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-brand-cyan/5 blur-[160px] pointer-events-none rounded-full" />
       <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-brand-blue/5 blur-[140px] pointer-events-none rounded-full" />
@@ -386,10 +386,10 @@ export function SimulatorClient() {
             tag: "Deductive Logic Engine",
           }}
           next={{
-            title: "Platform Transparency Hub",
-            href: "/transparency",
-            label: "Security & Observability",
-            tag: "Telemetry Logs",
+            title: "Schedule 1:1 Consultation",
+            href: "/schedule",
+            label: "Get In Touch",
+            tag: "Google Calendar Booking",
           }}
           backToHub={{
             title: "Return to Portfolio",

@@ -8,9 +8,9 @@
 
 > **generateFaceForgeRoom**(): [`DungeonRoom`](../../types/interfaces/DungeonRoom.md)
 
-Defined in: [lib/dungeon/generator.ts:141](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/generator.ts#L141)
+Defined in: [lib/dungeon/generator.ts:428](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/generator.ts#L428)
 
-Creates Room 2: faceforge_3d (Boss Fight)
+Creates Room 2 / Tier 5: FaceForge / Neural Warden 3D Boss Arena
 
 ## Returns
 

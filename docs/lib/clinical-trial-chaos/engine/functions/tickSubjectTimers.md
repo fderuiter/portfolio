@@ -8,10 +8,9 @@
 
 > **tickSubjectTimers**(`subjects`, `deltaSeconds`): `object`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:118](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L118)
+Defined in: [lib/clinical-trial-chaos/engine.ts:204](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L204)
 
 Advances conveyor subjects timer by deltaSeconds.
-If time runs out, returns expired subjects and suspicion increase.
 
 ## Parameters
 

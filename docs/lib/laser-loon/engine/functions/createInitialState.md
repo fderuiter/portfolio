@@ -8,13 +8,13 @@
 
 > **createInitialState**(`mode?`): [`LaserLoonState`](../../types/interfaces/LaserLoonState.md)
 
-Defined in: [lib/laser-loon/engine.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L21)
+Defined in: [lib/laser-loon/engine.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L32)
 
 ## Parameters
 
 ### mode?
 
-[`LaserMode`](../../types/type-aliases/LaserMode.md) = `"arcade"`
+[`LaserMode`](../../types/type-aliases/LaserMode.md) = `"campaign"`
 
 ## Returns
 

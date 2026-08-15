@@ -10,10 +10,14 @@
 
 - [AuditLogEntry](interfaces/AuditLogEntry.md)
 - [AuditorState](interfaces/AuditorState.md)
+- [BIMOFinding](interfaces/BIMOFinding.md)
+- [BIMOInspectionReport](interfaces/BIMOInspectionReport.md)
 - [ClinicalObservation](interfaces/ClinicalObservation.md)
 - [ClinicalSubject](interfaces/ClinicalSubject.md)
 - [GameScoreState](interfaces/GameScoreState.md)
+- [PowerUpState](interfaces/PowerUpState.md)
 - [ProtocolAmendment](interfaces/ProtocolAmendment.md)
+- [SDTMRow](interfaces/SDTMRow.md)
 - [SignatureModalState](interfaces/SignatureModalState.md)
 - [StationConfig](interfaces/StationConfig.md)
 
@@ -25,5 +29,8 @@
 - [GameMode](type-aliases/GameMode.md)
 - [GamePhase](type-aliases/GamePhase.md)
 - [PlayState](type-aliases/PlayState.md)
+- [PowerUpInventory](type-aliases/PowerUpInventory.md)
+- [PowerUpType](type-aliases/PowerUpType.md)
 - [SignatureReason](type-aliases/SignatureReason.md)
 - [ValidationErrorType](type-aliases/ValidationErrorType.md)
+- [VendorSystem](type-aliases/VendorSystem.md)

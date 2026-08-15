@@ -6,7 +6,7 @@
 
 # Interface: LoonPosition
 
-Defined in: [lib/laser-loon/types.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L75)
+Defined in: [lib/laser-loon/types.ts:133](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L133)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/laser-loon/types.ts:75](https://github.com/fderuiter/portfolio/
 
 > **targetX**: `number`
 
-Defined in: [lib/laser-loon/types.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L78)
+Defined in: [lib/laser-loon/types.ts:136](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L136)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/laser-loon/types.ts:78](https://github.com/fderuiter/portfolio/
 
 > **targetY**: `number`
 
-Defined in: [lib/laser-loon/types.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L79)
+Defined in: [lib/laser-loon/types.ts:137](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L137)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/laser-loon/types.ts:79](https://github.com/fderuiter/portfolio/
 
 > **x**: `number`
 
-Defined in: [lib/laser-loon/types.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L76)
+Defined in: [lib/laser-loon/types.ts:134](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L134)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/laser-loon/types.ts:76](https://github.com/fderuiter/portfolio/
 
 > **y**: `number`
 
-Defined in: [lib/laser-loon/types.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L77)
+Defined in: [lib/laser-loon/types.ts:135](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L135)

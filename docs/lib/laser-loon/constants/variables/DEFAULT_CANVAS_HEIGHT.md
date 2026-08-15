@@ -8,4 +8,4 @@
 
 > `const` **DEFAULT\_CANVAS\_HEIGHT**: `420` = `420`
 
-Defined in: [lib/laser-loon/constants.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L68)
+Defined in: [lib/laser-loon/constants.ts:243](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L243)

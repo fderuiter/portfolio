@@ -185,6 +185,8 @@ export const GarminWatchSimulator: React.FC = () => {
       "ArrowDown",
       "ArrowLeft",
       "ArrowRight",
+      "PageUp",
+      "PageDown",
       " ",
       "l",
       "L",
@@ -381,7 +383,7 @@ export const GarminWatchSimulator: React.FC = () => {
           onClick={(e) => {
             e.stopPropagation();
             handleToggleLight();
-            containerRef.current?.focus();
+            containerRef.current?.focus({ preventScroll: true });
           }}
           title="Backlight (L): +0.3%/s Battery"
           className="absolute -left-3.5 top-[24%] px-2 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-amber-500 hover:to-amber-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
@@ -395,7 +397,7 @@ export const GarminWatchSimulator: React.FC = () => {
           onClick={(e) => {
             e.stopPropagation();
             handleJump();
-            containerRef.current?.focus();
+            containerRef.current?.focus({ preventScroll: true });
           }}
           title="Jump (ArrowUp / UP)"
           className="absolute -left-3.5 top-[46%] px-2.5 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
@@ -409,7 +411,7 @@ export const GarminWatchSimulator: React.FC = () => {
           onClick={(e) => {
             e.stopPropagation();
             handleJettison();
-            containerRef.current?.focus();
+            containerRef.current?.focus({ preventScroll: true });
           }}
           title="Jettison Variable (ArrowDown / DOWN)"
           className="absolute -left-3.5 top-[68%] px-2 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-rose-500 hover:to-rose-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
@@ -423,7 +425,7 @@ export const GarminWatchSimulator: React.FC = () => {
           onClick={(e) => {
             e.stopPropagation();
             handleStartStop();
-            containerRef.current?.focus();
+            containerRef.current?.focus({ preventScroll: true });
           }}
           title="Start / Pause / Restart (Enter / Space)"
           className="absolute -right-3.5 top-[30%] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-emerald-500 hover:to-emerald-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
@@ -437,7 +439,7 @@ export const GarminWatchSimulator: React.FC = () => {
           onClick={(e) => {
             e.stopPropagation();
             handleForceGc();
-            containerRef.current?.focus();
+            containerRef.current?.focus({ preventScroll: true });
           }}
           title="Force Garbage Collection (Backspace / Escape): 500ms Freeze"
           className="absolute -right-3.5 top-[62%] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-purple-500 hover:to-purple-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
@@ -473,7 +475,7 @@ export const GarminWatchSimulator: React.FC = () => {
             onPointerDown={(e) => {
               setIsDraggingFog(true);
               handleCanvasPointerMove(e);
-              containerRef.current?.focus();
+              containerRef.current?.focus({ preventScroll: true });
             }}
             onPointerUp={() => setIsDraggingFog(false)}
             onPointerMove={handleCanvasPointerMove}

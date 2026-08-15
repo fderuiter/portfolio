@@ -1,8 +1,8 @@
 /**
- * Types & Domain Models for the Roguelike Repository Graveyard Crawler
+ * Types & Domain Models for the Roguelike Repository Graveyard & Cyberpunk Netrunner Crawler
  */
 
-export type TileType = "#" | " " | "E" | "D" | "T" | "B" | "S" | "W" | "@";
+export type TileType = "#" | " " | "E" | "D" | "T" | "B" | "S" | "W" | "@" | "H" | "V";
 
 export type RoomThemeId =
   | "classic_1"
@@ -10,7 +10,12 @@ export type RoomThemeId =
   | "tsp"
   | "faceforge"
   | "blinkbrowse"
-  | "billable_hours";
+  | "billable_hours"
+  | "dmz_gateway"
+  | "active_directory"
+  | "zero_trust_core"
+  | "darknet_vault"
+  | "neural_warden";
 
 export interface ThemedRoomMeta {
   id: RoomThemeId;
@@ -22,7 +27,24 @@ export interface ThemedRoomMeta {
   boss?: boolean;
 }
 
-export type WeaponId = "npm_install" | "git_force_push" | "stack_overflow" | "emp_blast";
+export type CVEType =
+  | "WEAK_SSH"
+  | "BUFFER_OVERFLOW"
+  | "DEFAULT_CREDS"
+  | "ZERO_DAY"
+  | "OUTDATED_TLS"
+  | "UNAUTHENTICATED_RCE";
+
+export type WeaponId =
+  | "npm_install"
+  | "git_force_push"
+  | "stack_overflow"
+  | "emp_blast"
+  | "port_scan"
+  | "buffer_overflow"
+  | "zero_day"
+  | "mitm_spoof"
+  | "ransomware_lock";
 
 export interface Weapon {
   id: WeaponId;
@@ -35,6 +57,8 @@ export interface Weapon {
   description: string;
   sideEffect: string;
   iconChar: string;
+  ramCost?: number;
+  cveSynergy?: CVEType;
 }
 
 export type ItemId =
@@ -43,7 +67,12 @@ export type ItemId =
   | "todo_shield"
   | "commit_token"
   | "hotfix_key"
-  | "git_stash";
+  | "git_stash"
+  | "ram_expansion"
+  | "zero_day_payload"
+  | "bypass_chip"
+  | "crypto_stash"
+  | "firmware_patch";
 
 export interface ItemPickup {
   id: string;
@@ -56,9 +85,18 @@ export interface ItemPickup {
   collected: boolean;
 }
 
-export type EnemyType = "zombie" | "drone" | "slime" | "boss_face" | "mesh_projectile";
+export type EnemyType =
+  | "zombie"
+  | "drone"
+  | "slime"
+  | "boss_face"
+  | "mesh_projectile"
+  | "sentinel_daemon"
+  | "kerberos_warden"
+  | "kernel_titan"
+  | "neural_warden";
 
-export type EnemyState = "patrol" | "chase" | "attack" | "stunned";
+export type EnemyState = "patrol" | "chase" | "attack" | "stunned" | "confused" | "frozen";
 
 export interface Enemy {
   id: string;
@@ -79,6 +117,10 @@ export interface Enemy {
   name: string;
   lastAttackMs?: number;
   speedMs?: number;
+  cve?: CVEType;
+  cveExposed?: boolean;
+  confusedMs?: number;
+  frozenMs?: number;
 }
 
 export interface Vec3 {
@@ -113,6 +155,8 @@ export interface BossState {
   attackIntervalMs: number;
   defeated: boolean;
   name: string;
+  shieldActive?: boolean;
+  phaseTitle?: string;
 }
 
 export interface MeshProjectile {
@@ -127,7 +171,7 @@ export interface MeshProjectile {
 }
 
 export interface ActiveSideEffect {
-  type: "lag_spike" | "scrambled_keys" | "history_rewritten" | "cursor_drift";
+  type: "lag_spike" | "scrambled_keys" | "history_rewritten" | "cursor_drift" | "memory_leak";
   title: string;
   description: string;
   expiresAt: number;
@@ -168,6 +212,10 @@ export interface DungeonRoom {
   tspNodes?: TSPNode[];
   tspMovingWalls?: TSPMovingWall[];
   chestOpened?: boolean;
+  securityTier?: number;
+  hasTerminal?: boolean;
+  terminalHacked?: boolean;
+  darknetVendor?: boolean;
 }
 
 export interface ParticleEffect {
@@ -190,4 +238,90 @@ export interface FloatingNotification {
   color: string;
   alpha: number;
   vy: number;
+}
+
+// ----------------------------------------------------
+// Cybersecurity Hacking Minigame Models
+// ----------------------------------------------------
+
+export interface HexCell {
+  row: number;
+  col: number;
+  byte: string;
+  selected: boolean;
+}
+
+export interface HexMatrixPuzzle {
+  grid: HexCell[][];
+  targetSequence: string[];
+  currentInput: string[];
+  maxBufferSize: number;
+  timeRemainingSeconds: number;
+  activeAxis: "row" | "col";
+  activeIndex: number;
+  solved: boolean;
+  failed: boolean;
+  rewardCrypto: number;
+  rewardBypassChips: number;
+}
+
+// ----------------------------------------------------
+// Cyberdeck Archetypes & Meta-Progression Models
+// ----------------------------------------------------
+
+export type CyberdeckClassId =
+  | "script_kiddie"
+  | "cryptanalyst"
+  | "apt_specialist"
+  | "hardware_hacker";
+
+export interface CyberdeckClass {
+  id: CyberdeckClassId;
+  name: string;
+  role: string;
+  description: string;
+  passiveBonus: string;
+  baseHp: number;
+  baseRam: number;
+  ramRegen: number;
+  startBypassChips: number;
+  starterWeapons: WeaponId[];
+  color: string;
+  icon: string;
+}
+
+export interface CyberdeckProfile {
+  totalCrypto: number;
+  highScore: number;
+  runsCompleted: number;
+  unlockedClasses: CyberdeckClassId[];
+  selectedClass: CyberdeckClassId;
+  firmwareUpgrades: {
+    maxRamTier: number;
+    scanSpeedTier: number;
+    exploitRadiusTier: number;
+    startChipsTier: number;
+  };
+}
+
+export interface DarknetItem {
+  id: string;
+  name: string;
+  cost: number;
+  description: string;
+  category: "ram" | "weapon" | "chip" | "heal" | "firmware";
+  icon: string;
+}
+
+export type CRTThemeId = "emerald" | "amber" | "synthwave" | "matrix";
+
+export interface CRTThemeConfig {
+  id: CRTThemeId;
+  name: string;
+  primaryColor: string;
+  accentColor: string;
+  bgDark: string;
+  glowColor: string;
+  textColor: string;
+  scanlineAlpha: number;
 }

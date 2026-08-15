@@ -105,10 +105,10 @@ export const WorkingWithDuckClient: React.FC = () => {
             tag: "Graveyard Roguelike",
           }}
           next={{
-            title: "Laser Loon: Cryo Bug Hunter",
+            title: "Laser Loon: Quest for the State Flag",
             href: "/arcade/laser-loon",
             label: "Next Game",
-            tag: "Physics Shooter",
+            tag: "Civic Arcade Campaign",
           }}
           backToHub={{
             title: "All Arcade Games",

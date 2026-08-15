@@ -6,15 +6,23 @@
 
 # Interface: Target
 
-Defined in: [lib/laser-loon/types.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L23)
+Defined in: [lib/laser-loon/types.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L51)
 
 ## Properties
+
+### bossPhase?
+
+> `optional` **bossPhase?**: `number`
+
+Defined in: [lib/laser-loon/types.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L67)
+
+***
 
 ### color
 
 > **color**: `string`
 
-Defined in: [lib/laser-loon/types.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L32)
+Defined in: [lib/laser-loon/types.ts:60](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L60)
 
 ***
 
@@ -22,7 +30,7 @@ Defined in: [lib/laser-loon/types.ts:32](https://github.com/fderuiter/portfolio/
 
 > **frozenTimer**: `number`
 
-Defined in: [lib/laser-loon/types.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L37)
+Defined in: [lib/laser-loon/types.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L65)
 
 ***
 
@@ -30,7 +38,7 @@ Defined in: [lib/laser-loon/types.ts:37](https://github.com/fderuiter/portfolio/
 
 > **hp**: `number`
 
-Defined in: [lib/laser-loon/types.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L33)
+Defined in: [lib/laser-loon/types.ts:61](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L61)
 
 ***
 
@@ -38,7 +46,15 @@ Defined in: [lib/laser-loon/types.ts:33](https://github.com/fderuiter/portfolio/
 
 > **id**: `number`
 
-Defined in: [lib/laser-loon/types.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L24)
+Defined in: [lib/laser-loon/types.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L52)
+
+***
+
+### isBoss?
+
+> `optional` **isBoss?**: `boolean`
+
+Defined in: [lib/laser-loon/types.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L66)
 
 ***
 
@@ -46,7 +62,7 @@ Defined in: [lib/laser-loon/types.ts:24](https://github.com/fderuiter/portfolio/
 
 > **label**: `string`
 
-Defined in: [lib/laser-loon/types.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L31)
+Defined in: [lib/laser-loon/types.ts:59](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L59)
 
 ***
 
@@ -54,7 +70,7 @@ Defined in: [lib/laser-loon/types.ts:31](https://github.com/fderuiter/portfolio/
 
 > **maxHp**: `number`
 
-Defined in: [lib/laser-loon/types.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L34)
+Defined in: [lib/laser-loon/types.ts:62](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L62)
 
 ***
 
@@ -62,7 +78,7 @@ Defined in: [lib/laser-loon/types.ts:34](https://github.com/fderuiter/portfolio/
 
 > **points**: `number`
 
-Defined in: [lib/laser-loon/types.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L35)
+Defined in: [lib/laser-loon/types.ts:63](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L63)
 
 ***
 
@@ -70,7 +86,7 @@ Defined in: [lib/laser-loon/types.ts:35](https://github.com/fderuiter/portfolio/
 
 > **pulsePhase**: `number`
 
-Defined in: [lib/laser-loon/types.ts:36](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L36)
+Defined in: [lib/laser-loon/types.ts:64](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L64)
 
 ***
 
@@ -78,15 +94,31 @@ Defined in: [lib/laser-loon/types.ts:36](https://github.com/fderuiter/portfolio/
 
 > **radius**: `number`
 
-Defined in: [lib/laser-loon/types.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L29)
+Defined in: [lib/laser-loon/types.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L57)
+
+***
+
+### shieldAngle?
+
+> `optional` **shieldAngle?**: `number`
+
+Defined in: [lib/laser-loon/types.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L68)
+
+***
+
+### specialAttackTimer?
+
+> `optional` **specialAttackTimer?**: `number`
+
+Defined in: [lib/laser-loon/types.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L69)
 
 ***
 
 ### type
 
-> **type**: [`TargetBugType`](../type-aliases/TargetBugType.md)
+> **type**: [`CivicEnemyType`](../type-aliases/CivicEnemyType.md)
 
-Defined in: [lib/laser-loon/types.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L30)
+Defined in: [lib/laser-loon/types.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L58)
 
 ***
 
@@ -94,7 +126,7 @@ Defined in: [lib/laser-loon/types.ts:30](https://github.com/fderuiter/portfolio/
 
 > **vx**: `number`
 
-Defined in: [lib/laser-loon/types.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L27)
+Defined in: [lib/laser-loon/types.ts:55](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L55)
 
 ***
 
@@ -102,7 +134,7 @@ Defined in: [lib/laser-loon/types.ts:27](https://github.com/fderuiter/portfolio/
 
 > **vy**: `number`
 
-Defined in: [lib/laser-loon/types.ts:28](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L28)
+Defined in: [lib/laser-loon/types.ts:56](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L56)
 
 ***
 
@@ -110,7 +142,7 @@ Defined in: [lib/laser-loon/types.ts:28](https://github.com/fderuiter/portfolio/
 
 > **x**: `number`
 
-Defined in: [lib/laser-loon/types.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L25)
+Defined in: [lib/laser-loon/types.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L53)
 
 ***
 
@@ -118,4 +150,4 @@ Defined in: [lib/laser-loon/types.ts:25](https://github.com/fderuiter/portfolio/
 
 > **y**: `number`
 
-Defined in: [lib/laser-loon/types.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L26)
+Defined in: [lib/laser-loon/types.ts:54](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L54)

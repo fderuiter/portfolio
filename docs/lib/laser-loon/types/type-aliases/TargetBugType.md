@@ -6,6 +6,6 @@
 
 # Type Alias: TargetBugType
 
-> **TargetBugType** = `"memory-leak"` \| `"hydration-error"` \| `"null-pointer"` \| `"segfault"` \| `"drop-db"` \| `"alien"` \| `"iceberg"`
+> **TargetBugType** = [`CivicEnemyType`](CivicEnemyType.md)
 
-Defined in: [lib/laser-loon/types.ts:5](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L5)
+Defined in: [lib/laser-loon/types.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L35)

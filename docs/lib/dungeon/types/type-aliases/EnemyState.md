@@ -6,6 +6,6 @@
 
 # Type Alias: EnemyState
 
-> **EnemyState** = `"patrol"` \| `"chase"` \| `"attack"` \| `"stunned"`
+> **EnemyState** = `"patrol"` \| `"chase"` \| `"attack"` \| `"stunned"` \| `"confused"` \| `"frozen"`
 
-Defined in: [lib/dungeon/types.ts:61](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L61)
+Defined in: [lib/dungeon/types.ts:99](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L99)

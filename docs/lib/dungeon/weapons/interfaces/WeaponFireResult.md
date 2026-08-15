@@ -6,7 +6,7 @@
 
 # Interface: WeaponFireResult
 
-Defined in: [lib/dungeon/weapons.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L65)
+Defined in: [lib/dungeon/weapons.ts:139](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L139)
 
 ## Properties
 
@@ -14,7 +14,23 @@ Defined in: [lib/dungeon/weapons.ts:65](https://github.com/fderuiter/portfolio/b
 
 > `optional` **activeSideEffect?**: [`ActiveSideEffect`](../../types/interfaces/ActiveSideEffect.md)
 
-Defined in: [lib/dungeon/weapons.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L72)
+Defined in: [lib/dungeon/weapons.ts:147](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L147)
+
+***
+
+### critTriggered?
+
+> `optional` **critTriggered?**: `boolean`
+
+Defined in: [lib/dungeon/weapons.ts:150](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L150)
+
+***
+
+### cryptoGained
+
+> **cryptoGained**: `number`
+
+Defined in: [lib/dungeon/weapons.ts:145](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L145)
 
 ***
 
@@ -22,7 +38,7 @@ Defined in: [lib/dungeon/weapons.ts:72](https://github.com/fderuiter/portfolio/b
 
 > **message**: `string`
 
-Defined in: [lib/dungeon/weapons.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L73)
+Defined in: [lib/dungeon/weapons.ts:148](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L148)
 
 ***
 
@@ -30,7 +46,7 @@ Defined in: [lib/dungeon/weapons.ts:73](https://github.com/fderuiter/portfolio/b
 
 > **particles**: [`ParticleEffect`](../../types/interfaces/ParticleEffect.md)[]
 
-Defined in: [lib/dungeon/weapons.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L71)
+Defined in: [lib/dungeon/weapons.ts:146](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L146)
 
 ***
 
@@ -38,7 +54,7 @@ Defined in: [lib/dungeon/weapons.ts:71](https://github.com/fderuiter/portfolio/b
 
 > **scoreGained**: `number`
 
-Defined in: [lib/dungeon/weapons.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L70)
+Defined in: [lib/dungeon/weapons.ts:144](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L144)
 
 ***
 
@@ -46,7 +62,7 @@ Defined in: [lib/dungeon/weapons.ts:70](https://github.com/fderuiter/portfolio/b
 
 > **success**: `boolean`
 
-Defined in: [lib/dungeon/weapons.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L74)
+Defined in: [lib/dungeon/weapons.ts:149](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L149)
 
 ***
 
@@ -54,7 +70,7 @@ Defined in: [lib/dungeon/weapons.ts:74](https://github.com/fderuiter/portfolio/b
 
 > `optional` **updatedBoss?**: [`BossState`](../../types/interfaces/BossState.md)
 
-Defined in: [lib/dungeon/weapons.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L68)
+Defined in: [lib/dungeon/weapons.ts:142](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L142)
 
 ***
 
@@ -62,7 +78,7 @@ Defined in: [lib/dungeon/weapons.ts:68](https://github.com/fderuiter/portfolio/b
 
 > **updatedEnemies**: [`Enemy`](../../types/interfaces/Enemy.md)[]
 
-Defined in: [lib/dungeon/weapons.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L67)
+Defined in: [lib/dungeon/weapons.ts:141](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L141)
 
 ***
 
@@ -70,7 +86,7 @@ Defined in: [lib/dungeon/weapons.ts:67](https://github.com/fderuiter/portfolio/b
 
 > **updatedPlayerHp**: `number`
 
-Defined in: [lib/dungeon/weapons.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L69)
+Defined in: [lib/dungeon/weapons.ts:143](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L143)
 
 ***
 
@@ -78,4 +94,4 @@ Defined in: [lib/dungeon/weapons.ts:69](https://github.com/fderuiter/portfolio/b
 
 > **updatedWeapons**: `Record`\<[`WeaponId`](../../types/type-aliases/WeaponId.md), [`Weapon`](../../types/interfaces/Weapon.md)\>
 
-Defined in: [lib/dungeon/weapons.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L66)
+Defined in: [lib/dungeon/weapons.ts:140](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L140)

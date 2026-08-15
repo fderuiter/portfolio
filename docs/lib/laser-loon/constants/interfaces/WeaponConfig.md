@@ -6,7 +6,7 @@
 
 # Interface: WeaponConfig
 
-Defined in: [lib/laser-loon/constants.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L13)
+Defined in: [lib/laser-loon/constants.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L35)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/laser-loon/constants.ts:13](https://github.com/fderuiter/portfo
 
 > **color**: `string`
 
-Defined in: [lib/laser-loon/constants.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L16)
+Defined in: [lib/laser-loon/constants.ts:38](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L38)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/laser-loon/constants.ts:16](https://github.com/fderuiter/portfo
 
 > **damage**: `number`
 
-Defined in: [lib/laser-loon/constants.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L19)
+Defined in: [lib/laser-loon/constants.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L41)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/laser-loon/constants.ts:19](https://github.com/fderuiter/portfo
 
 > **description**: `string`
 
-Defined in: [lib/laser-loon/constants.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L21)
+Defined in: [lib/laser-loon/constants.ts:43](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L43)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/laser-loon/constants.ts:21](https://github.com/fderuiter/portfo
 
 > **fireIntervalMs**: `number`
 
-Defined in: [lib/laser-loon/constants.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L18)
+Defined in: [lib/laser-loon/constants.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L40)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/laser-loon/constants.ts:18](https://github.com/fderuiter/portfo
 
 > **glowColor**: `string`
 
-Defined in: [lib/laser-loon/constants.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L17)
+Defined in: [lib/laser-loon/constants.ts:39](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L39)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/laser-loon/constants.ts:17](https://github.com/fderuiter/portfo
 
 > **keyNumber**: `string`
 
-Defined in: [lib/laser-loon/constants.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L15)
+Defined in: [lib/laser-loon/constants.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L37)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/laser-loon/constants.ts:15](https://github.com/fderuiter/portfo
 
 > **name**: `string`
 
-Defined in: [lib/laser-loon/constants.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L14)
+Defined in: [lib/laser-loon/constants.ts:36](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L36)
 
 ***
 
@@ -70,4 +70,4 @@ Defined in: [lib/laser-loon/constants.ts:14](https://github.com/fderuiter/portfo
 
 > **rayHitRadiusExtra**: `number`
 
-Defined in: [lib/laser-loon/constants.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L20)
+Defined in: [lib/laser-loon/constants.ts:42](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/constants.ts#L42)

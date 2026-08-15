@@ -12,11 +12,11 @@ export default function LaserLoonPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: getWebApplicationSchema({
-            name: "Laser Loon: Cryo Bug Hunter",
-            description: "Control a cybernetic Canadian Loon. Aim lasers and launch ice blocks to vaporize runtime errors and frozen bugs.",
+            name: "Laser Loon: Quest for the State Flag",
+            description: "Pilot submission F277 Laser Loon on the Road to the Capitol in this retro canvas shooter.",
             url: "/arcade/laser-loon",
             applicationCategory: "GameApplication",
-            genre: "Physics Arcade",
+            genre: "Civic Arcade Shooter",
           }),
         }}
       />

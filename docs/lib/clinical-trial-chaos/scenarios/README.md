@@ -12,6 +12,7 @@
 
 ## Variables
 
+- [ALL\_STATIONS](variables/ALL_STATIONS.md)
 - [AMENDMENT\_PRESETS](variables/AMENDMENT_PRESETS.md)
 - [INITIAL\_STATIONS](variables/INITIAL_STATIONS.md)
 - [MOCK\_OBSERVATION\_TEMPLATES](variables/MOCK_OBSERVATION_TEMPLATES.md)
@@ -20,3 +21,4 @@
 ## Functions
 
 - [generateClinicalSubject](functions/generateClinicalSubject.md)
+- [getStationsForPhase](functions/getStationsForPhase.md)

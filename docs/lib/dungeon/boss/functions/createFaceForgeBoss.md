@@ -8,9 +8,9 @@
 
 > **createFaceForgeBoss**(`gridX`, `gridY`): [`BossState`](../../types/interfaces/BossState.md)
 
-Defined in: [lib/dungeon/boss.ts:213](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/boss.ts#L213)
+Defined in: [lib/dungeon/boss.ts:229](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/boss.ts#L229)
 
-Initializes the FaceForge 3D Boss State.
+Initializes the FaceForge 3D / Legacy Boss State.
 
 ## Parameters
 

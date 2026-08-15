@@ -22,7 +22,7 @@ Re-exports [BUG_TYPES](constants/variables/BUG_TYPES.md)
 
 ### BugTemplate
 
-Re-exports [BugTemplate](types/interfaces/BugTemplate.md)
+Re-exports [BugTemplate](types/type-aliases/BugTemplate.md)
 
 ***
 
@@ -32,9 +32,27 @@ Re-exports [calculateNextComboAndMultiplier](engine/functions/calculateNextCombo
 
 ***
 
+### CAMPAIGN\_ACTS
+
+Re-exports [CAMPAIGN_ACTS](constants/variables/CAMPAIGN_ACTS.md)
+
+***
+
+### CampaignAct
+
+Re-exports [CampaignAct](types/interfaces/CampaignAct.md)
+
+***
+
 ### checkLaserRayHit
 
 Re-exports [checkLaserRayHit](engine/functions/checkLaserRayHit.md)
+
+***
+
+### CivicEnemyType
+
+Re-exports [CivicEnemyType](types/type-aliases/CivicEnemyType.md)
 
 ***
 
@@ -74,9 +92,39 @@ Re-exports [DEFAULT_CANVAS_WIDTH](constants/variables/DEFAULT_CANVAS_WIDTH.md)
 
 ***
 
+### ENEMY\_TYPES
+
+Re-exports [ENEMY_TYPES](constants/variables/ENEMY_TYPES.md)
+
+***
+
+### EnemyTemplate
+
+Re-exports [EnemyTemplate](types/interfaces/EnemyTemplate.md)
+
+***
+
+### FLAG\_MUSEUM
+
+Re-exports [FLAG_MUSEUM](constants/variables/FLAG_MUSEUM.md)
+
+***
+
+### FlagMuseumEntry
+
+Re-exports [FlagMuseumEntry](types/interfaces/FlagMuseumEntry.md)
+
+***
+
 ### FloatingText
 
 Re-exports [FloatingText](types/interfaces/FloatingText.md)
+
+***
+
+### getActAvailableEnemies
+
+Re-exports [getActAvailableEnemies](engine/functions/getActAvailableEnemies.md)
 
 ***
 
@@ -134,6 +182,42 @@ Re-exports [Particle](types/interfaces/Particle.md)
 
 ***
 
+### POWER\_UP\_CONFIGS
+
+Re-exports [POWER_UP_CONFIGS](constants/variables/POWER_UP_CONFIGS.md)
+
+***
+
+### PowerUp
+
+Re-exports [PowerUp](types/interfaces/PowerUp.md)
+
+***
+
+### PowerUpType
+
+Re-exports [PowerUpType](types/type-aliases/PowerUpType.md)
+
+***
+
+### Shockwave
+
+Re-exports [Shockwave](types/interfaces/Shockwave.md)
+
+***
+
+### spawnBossForAct
+
+Re-exports [spawnBossForAct](engine/functions/spawnBossForAct.md)
+
+***
+
+### spawnPowerUp
+
+Re-exports [spawnPowerUp](engine/functions/spawnPowerUp.md)
+
+***
+
 ### spawnTarget
 
 Re-exports [spawnTarget](engine/functions/spawnTarget.md)
@@ -152,6 +236,30 @@ Re-exports [TargetBugType](types/type-aliases/TargetBugType.md)
 
 ***
 
+### triggerUltimateTremolo
+
+Re-exports [triggerUltimateTremolo](engine/functions/triggerUltimateTremolo.md)
+
+***
+
+### ULTIMATE\_CHARGE\_PER\_BOSS\_HIT
+
+Re-exports [ULTIMATE_CHARGE_PER_BOSS_HIT](constants/variables/ULTIMATE_CHARGE_PER_BOSS_HIT.md)
+
+***
+
+### ULTIMATE\_CHARGE\_PER\_KILL
+
+Re-exports [ULTIMATE_CHARGE_PER_KILL](constants/variables/ULTIMATE_CHARGE_PER_KILL.md)
+
+***
+
+### ULTIMATE\_DURATION\_MS
+
+Re-exports [ULTIMATE_DURATION_MS](constants/variables/ULTIMATE_DURATION_MS.md)
+
+***
+
 ### updateFloatingTexts
 
 Re-exports [updateFloatingTexts](engine/functions/updateFloatingTexts.md)
@@ -167,6 +275,18 @@ Re-exports [updateIceBlocksAndCollisions](engine/functions/updateIceBlocksAndCol
 ### updateParticles
 
 Re-exports [updateParticles](engine/functions/updateParticles.md)
+
+***
+
+### updatePowerUps
+
+Re-exports [updatePowerUps](engine/functions/updatePowerUps.md)
+
+***
+
+### updateShockwaves
+
+Re-exports [updateShockwaves](engine/functions/updateShockwaves.md)
 
 ***
 

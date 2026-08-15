@@ -6,7 +6,7 @@
 
 # Interface: WireframeMesh
 
-Defined in: [lib/dungeon/types.ts:95](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L95)
+Defined in: [lib/dungeon/types.ts:137](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L137)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/dungeon/types.ts:95](https://github.com/fderuiter/portfolio/blo
 
 > **color**: `string`
 
-Defined in: [lib/dungeon/types.ts:100](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L100)
+Defined in: [lib/dungeon/types.ts:142](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L142)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/dungeon/types.ts:100](https://github.com/fderuiter/portfolio/bl
 
 > **edges**: [`Edge3D`](Edge3D.md)[]
 
-Defined in: [lib/dungeon/types.ts:97](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L97)
+Defined in: [lib/dungeon/types.ts:139](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L139)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/dungeon/types.ts:97](https://github.com/fderuiter/portfolio/blo
 
 > **rotation**: [`Vec3`](Vec3.md)
 
-Defined in: [lib/dungeon/types.ts:98](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L98)
+Defined in: [lib/dungeon/types.ts:140](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L140)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/dungeon/types.ts:98](https://github.com/fderuiter/portfolio/blo
 
 > **rotSpeed**: [`Vec3`](Vec3.md)
 
-Defined in: [lib/dungeon/types.ts:99](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L99)
+Defined in: [lib/dungeon/types.ts:141](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L141)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/dungeon/types.ts:99](https://github.com/fderuiter/portfolio/blo
 
 > **scale**: `number`
 
-Defined in: [lib/dungeon/types.ts:101](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L101)
+Defined in: [lib/dungeon/types.ts:143](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L143)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [lib/dungeon/types.ts:101](https://github.com/fderuiter/portfolio/bl
 
 > **vertices**: [`Vec3`](Vec3.md)[]
 
-Defined in: [lib/dungeon/types.ts:96](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L96)
+Defined in: [lib/dungeon/types.ts:138](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L138)

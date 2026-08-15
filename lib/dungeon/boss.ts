@@ -1,5 +1,5 @@
 /**
- * FaceForge 3D Boss Engine & 3D Wireframe Projection System
+ * Cybersecurity Multi-Phase Wireframe Boss Engine & 3D Vector Projection
  */
 
 import { BossState, MeshProjectile, Vec3, WireframeMesh } from "./types";
@@ -8,37 +8,28 @@ import { BossState, MeshProjectile, Vec3, WireframeMesh } from "./types";
  * Creates the low-polygon wireframe 3D face mesh.
  */
 export function createFaceMesh(): WireframeMesh {
-  // Low-poly 3D facial mask vertices (normalized -1 to 1)
   const vertices: Vec3[] = [
-    // Forehead / Crown
     { x: -0.6, y: -0.9, z: 0.2 },
     { x: 0.0, y: -1.0, z: 0.4 },
     { x: 0.6, y: -0.9, z: 0.2 },
-    // Eyebrows / Temples
     { x: -0.8, y: -0.4, z: 0.0 },
     { x: -0.3, y: -0.5, z: 0.5 },
     { x: 0.3, y: -0.5, z: 0.5 },
     { x: 0.8, y: -0.4, z: 0.0 },
-    // Eyes
     { x: -0.4, y: -0.2, z: 0.4 },
     { x: 0.4, y: -0.2, z: 0.4 },
-    // Nose bridge & tip
     { x: 0.0, y: -0.2, z: 0.7 },
     { x: 0.0, y: 0.2, z: 0.9 },
-    // Cheeks
     { x: -0.7, y: 0.1, z: 0.1 },
     { x: 0.7, y: 0.1, z: 0.1 },
-    // Mouth
     { x: -0.4, y: 0.5, z: 0.4 },
     { x: 0.0, y: 0.5, z: 0.5 },
     { x: 0.4, y: 0.5, z: 0.4 },
-    // Jaw & Chin
     { x: -0.5, y: 0.8, z: 0.1 },
     { x: 0.0, y: 0.9, z: 0.4 },
     { x: 0.5, y: 0.8, z: 0.1 },
   ];
 
-  // Wireframe edges linking facial landmarks
   const edges = [
     { p1: 0, p2: 1 }, { p1: 1, p2: 2 },
     { p1: 0, p2: 3 }, { p1: 1, p2: 4 }, { p1: 1, p2: 5 }, { p1: 2, p2: 6 },
@@ -64,7 +55,36 @@ export function createFaceMesh(): WireframeMesh {
 }
 
 /**
- * Creates untextured 3D cube mesh for projectiles.
+ * Creates an Octahedron 3D mesh for Security Daemons.
+ */
+export function createOctahedronMesh(color: string = "#38bdf8", scale: number = 22): WireframeMesh {
+  const vertices: Vec3[] = [
+    { x: 0, y: -1.2, z: 0 },
+    { x: 1, y: 0, z: 0 },
+    { x: 0, y: 0, z: 1 },
+    { x: -1, y: 0, z: 0 },
+    { x: 0, y: 0, z: -1 },
+    { x: 0, y: 1.2, z: 0 },
+  ];
+
+  const edges = [
+    { p1: 0, p2: 1 }, { p1: 0, p2: 2 }, { p1: 0, p2: 3 }, { p1: 0, p2: 4 },
+    { p1: 5, p2: 1 }, { p1: 5, p2: 2 }, { p1: 5, p2: 3 }, { p1: 5, p2: 4 },
+    { p1: 1, p2: 2 }, { p1: 2, p2: 3 }, { p1: 3, p2: 4 }, { p1: 4, p2: 1 },
+  ];
+
+  return {
+    vertices,
+    edges,
+    rotation: { x: 0, y: 0, z: 0 },
+    rotSpeed: { x: 0.02, y: 0.03, z: 0.01 },
+    color,
+    scale,
+  };
+}
+
+/**
+ * Creates 3D cube mesh for projectiles.
  */
 export function createCubeMesh(color: string = "#f43f5e", scale: number = 8): WireframeMesh {
   const vertices: Vec3[] = [
@@ -95,7 +115,7 @@ export function createCubeMesh(color: string = "#f43f5e", scale: number = 8): Wi
 }
 
 /**
- * Creates untextured 3D tetrahedron/pyramid mesh for phase 3 projectiles.
+ * Creates 3D tetrahedron/pyramid mesh for high-velocity projectiles.
  */
 export function createTetrahedronMesh(color: string = "#a855f7", scale: number = 7): WireframeMesh {
   const vertices: Vec3[] = [
@@ -124,17 +144,14 @@ export function createTetrahedronMesh(color: string = "#a855f7", scale: number =
  * Rotates a 3D vertex around X, Y, and Z axes.
  */
 export function rotate3D(v: Vec3, rot: Vec3): Vec3 {
-  // Rotate around X
   const radX = rot.x;
   const y1 = v.y * Math.cos(radX) - v.z * Math.sin(radX);
   const z1 = v.y * Math.sin(radX) + v.z * Math.cos(radX);
 
-  // Rotate around Y
   const radY = rot.y;
   const x2 = v.x * Math.cos(radY) + z1 * Math.sin(radY);
   const z2 = -v.x * Math.sin(radY) + z1 * Math.cos(radY);
 
-  // Rotate around Z
   const radZ = rot.z;
   const x3 = x2 * Math.cos(radZ) - y1 * Math.sin(radZ);
   const y3 = x2 * Math.sin(radZ) + y1 * Math.cos(radZ);
@@ -196,7 +213,6 @@ export function renderWireframeMesh(
     ctx.stroke();
   });
 
-  // Render glowing vertex nodes
   ctx.fillStyle = mesh.color;
   projected.forEach((p) => {
     ctx.beginPath();
@@ -208,7 +224,7 @@ export function renderWireframeMesh(
 }
 
 /**
- * Initializes the FaceForge 3D Boss State.
+ * Initializes the FaceForge 3D / Legacy Boss State.
  */
 export function createFaceForgeBoss(gridX: number, gridY: number): BossState {
   return {
@@ -223,6 +239,27 @@ export function createFaceForgeBoss(gridX: number, gridY: number): BossState {
     lastSalvoTime: 0,
     attackIntervalMs: 1600,
     defeated: false,
+    phaseTitle: "PHASE 1: WIREFRAME PROBE",
+  };
+}
+
+/**
+ * Initializes the NEURAL_WARDEN_v9 Sovereign Boss State.
+ */
+export function createNeuralWardenBoss(gridX: number, gridY: number): BossState {
+  return {
+    name: "NEURAL_WARDEN_v9 :: Sovereign Kernel Core",
+    hp: 450,
+    maxHp: 450,
+    phase: 1,
+    x: gridX,
+    y: gridY,
+    mesh: createOctahedronMesh("#a855f7", 26),
+    projectiles: [],
+    lastSalvoTime: 0,
+    attackIntervalMs: 1400,
+    defeated: false,
+    phaseTitle: "PHASE 1: ZERO-TRUST PROBE",
   };
 }
 
@@ -242,7 +279,6 @@ export function updateFaceForgeBoss(
 } {
   if (boss.defeated) return { updatedBoss: boss, spawnedDamage: 0 };
 
-  // 1. Advance mesh rotations
   const nextMesh: WireframeMesh = {
     ...boss.mesh,
     rotation: {
@@ -252,31 +288,32 @@ export function updateFaceForgeBoss(
     },
   };
 
-  // 2. Determine phase
   const hpRatio = boss.hp / boss.maxHp;
   let phase: 1 | 2 | 3 = 1;
   let attackIntervalMs = 1800;
+  let phaseTitle = "PHASE 1: SCANNING";
 
   if (hpRatio <= 0.34) {
     phase = 3;
     attackIntervalMs = 900;
-    nextMesh.color = "#ef4444"; // Aggressive red
+    nextMesh.color = "#ef4444";
+    phaseTitle = "PHASE 3: KERNEL MELTDOWN";
   } else if (hpRatio <= 0.67) {
     phase = 2;
     attackIntervalMs = 1300;
-    nextMesh.color = "#f59e0b"; // Warning amber
+    nextMesh.color = "#f59e0b";
+    phaseTitle = "PHASE 2: FIREWALL OVERCHARGE";
   } else {
     phase = 1;
     attackIntervalMs = 1700;
-    nextMesh.color = "#ec4899"; // Cyber pink
+    nextMesh.color = "#ec4899";
+    phaseTitle = "PHASE 1: PROBE VOLLEY";
   }
 
   const newProjectiles = [...boss.projectiles];
 
-  // 3. Boss firing logic
   if (nowMs - boss.lastSalvoTime >= attackIntervalMs) {
     if (phase === 1) {
-      // Salvo: 2-3 spinning cubes aimed at player
       const angle = Math.atan2(playerY - boss.y, playerX - boss.x);
       const speed = 0.08;
       newProjectiles.push({
@@ -290,7 +327,6 @@ export function updateFaceForgeBoss(
         alive: true,
       });
     } else if (phase === 2) {
-      // Phase 2: Spread of 3 untextured meshes
       const baseAngle = Math.atan2(playerY - boss.y, playerX - boss.x);
       const spreadAngles = [baseAngle - 0.25, baseAngle, baseAngle + 0.25];
       const speed = 0.11;
@@ -308,7 +344,6 @@ export function updateFaceForgeBoss(
         });
       });
     } else {
-      // Phase 3: Radial 6-way untextured tetrahedron blast
       const numRays = 6;
       const speed = 0.12;
       for (let i = 0; i < numRays; i++) {
@@ -327,7 +362,6 @@ export function updateFaceForgeBoss(
     }
   }
 
-  // 4. Advance projectiles & test player collision
   let damageDealtToPlayer = 0;
   const liveProjectiles: MeshProjectile[] = [];
 
@@ -337,19 +371,16 @@ export function updateFaceForgeBoss(
     const nextX = p.x + p.vx;
     const nextY = p.y + p.vy;
 
-    // Check bounds
     if (nextX < 0 || nextX >= gridWidth || nextY < 0 || nextY >= gridHeight) {
       return;
     }
 
-    // Check collision with player (hitbox radius approx 0.8 grid units)
     const distToPlayer = Math.hypot(nextX - playerX, nextY - playerY);
     if (distToPlayer < 0.75) {
       damageDealtToPlayer += p.damage;
-      return; // Projectile explodes on player
+      return;
     }
 
-    // Advance mesh rotation
     const pRotMesh: WireframeMesh = {
       ...p.mesh,
       rotation: {
@@ -374,6 +405,7 @@ export function updateFaceForgeBoss(
     attackIntervalMs,
     projectiles: liveProjectiles,
     lastSalvoTime: nowMs - boss.lastSalvoTime >= attackIntervalMs ? nowMs : boss.lastSalvoTime,
+    phaseTitle,
   };
 
   return { updatedBoss, spawnedDamage: damageDealtToPlayer };

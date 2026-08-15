@@ -8,7 +8,7 @@
 
 > **stepDuckGame**(`state`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:477](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L477)
+Defined in: [lib/working-with-duck-engine.ts:637](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L637)
 
 Deterministic Game Step Loop (60 FPS)
 

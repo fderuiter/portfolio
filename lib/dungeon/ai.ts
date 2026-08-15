@@ -1,5 +1,5 @@
 /**
- * Enemy AI State Machine & Collision Handling
+ * Enemy AI State Machine, CVE Recognition & Collision Handling
  */
 
 import { hasLineOfSight } from "./fov";
@@ -12,7 +12,7 @@ export interface AIUpdateResult {
 }
 
 /**
- * Updates AI states (patrol, chase, stunned) and positions for all active enemies.
+ * Updates AI states (patrol, chase, stunned, confused, frozen) and positions for all active enemies.
  */
 export function updateEnemyAI(
   enemies: Enemy[],
@@ -25,8 +25,24 @@ export function updateEnemyAI(
   let caughtPlayer = false;
 
   const updatedEnemies = enemies.map((enemy) => {
-    // 1. Handle Stun State
-    if (enemy.state === "stunned") {
+    // 1. Handle Frozen State (Ransomware Lock)
+    if (enemy.state === "frozen" || (enemy.frozenMs && enemy.frozenMs > 0)) {
+      const remFrozen = (enemy.frozenMs || 0) - deltaMs;
+      if (remFrozen <= 0) {
+        return {
+          ...enemy,
+          state: "patrol" as const,
+          frozenMs: 0,
+        };
+      }
+      return {
+        ...enemy,
+        frozenMs: remFrozen,
+      };
+    }
+
+    // 2. Handle Stun State
+    if (enemy.state === "stunned" || (enemy.stunTimerMs && enemy.stunTimerMs > 0)) {
       const remainingStun = (enemy.stunTimerMs || 0) - deltaMs;
       if (remainingStun <= 0) {
         return {
@@ -41,16 +57,30 @@ export function updateEnemyAI(
       };
     }
 
+    // 3. Handle Confused State (MitM Packet Spoof)
+    let isConfused = false;
+    let remainingConfused = enemy.confusedMs || 0;
+    if (enemy.state === "confused" || remainingConfused > 0) {
+      remainingConfused -= deltaMs;
+      if (remainingConfused <= 0) {
+        remainingConfused = 0;
+      } else {
+        isConfused = true;
+      }
+    }
+
     const distToPlayer = Math.hypot(enemy.x - playerX, enemy.y - playerY);
     const los = hasLineOfSight(grid, enemy.x, enemy.y, playerX, playerY);
 
-    // 2. State Transition: Zombies/slimes chase if within range & LOS. Drones maintain patrol track unless close-range alert.
-    let state = enemy.state;
-    if (enemy.type === "zombie" || enemy.type === "slime") {
-      if (distToPlayer <= 5 && los) {
-        state = "chase";
-      } else if (distToPlayer > 6) {
-        state = "patrol";
+    // 4. State Transitions
+    let state = isConfused ? "confused" : enemy.state;
+    if (!isConfused) {
+      if (enemy.type === "zombie" || enemy.type === "slime" || enemy.type === "sentinel_daemon") {
+        if (distToPlayer <= 5 && los) {
+          state = "chase";
+        } else if (distToPlayer > 6) {
+          state = "patrol";
+        }
       }
     }
 
@@ -58,7 +88,26 @@ export function updateEnemyAI(
     let nextY = enemy.y;
     let nextDir = enemy.patrolDir;
 
-    if (state === "chase") {
+    if (state === "confused") {
+      // Confused movement: erratic jitter
+      const dirs = ["left", "right", "up", "down"] as const;
+      nextDir = dirs[Math.floor(Math.random() * dirs.length)];
+      const stepX = nextDir === "right" ? 1 : nextDir === "left" ? -1 : 0;
+      const stepY = nextDir === "down" ? 1 : nextDir === "up" ? -1 : 0;
+      const candX = enemy.x + stepX;
+      const candY = enemy.y + stepY;
+      if (
+        candY >= 0 &&
+        candY < grid.length &&
+        candX >= 0 &&
+        candX < grid[0].length &&
+        grid[candY][candX] !== "#" &&
+        grid[candY][candX] !== "W"
+      ) {
+        nextX = candX;
+        nextY = candY;
+      }
+    } else if (state === "chase") {
       // Chase movement: step closer to player along primary axis
       const dx = playerX - enemy.x;
       const dy = playerY - enemy.y;
@@ -119,8 +168,8 @@ export function updateEnemyAI(
       }
     }
 
-    // Check collision with player
-    if (nextX === playerX && nextY === playerY) {
+    // Check collision with player (unless confused)
+    if (!isConfused && nextX === playerX && nextY === playerY) {
       caughtPlayer = true;
       damageToPlayer += 25;
     }
@@ -131,6 +180,7 @@ export function updateEnemyAI(
       y: nextY,
       state,
       patrolDir: nextDir,
+      confusedMs: remainingConfused,
     };
   });
 

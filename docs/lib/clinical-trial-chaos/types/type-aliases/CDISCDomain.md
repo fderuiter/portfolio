@@ -6,6 +6,6 @@
 
 # Type Alias: CDISCDomain
 
-> **CDISCDomain** = `"DM"` \| `"VS"` \| `"AE"` \| `"LB"`
+> **CDISCDomain** = `"DM"` \| `"VS"` \| `"AE"` \| `"LB"` \| `"CM"` \| `"EX"` \| `"DS"` \| `"MH"`
 
 Defined in: [lib/clinical-trial-chaos/types.ts:1](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L1)

@@ -6,6 +6,6 @@
 
 # Type Alias: LaserType
 
-> **LaserType** = `"cyan-pulse"` \| `"emerald-beam"` \| `"rainbow-chaos"` \| `"ice-cannon"`
+> **LaserType** = `"ruby-laser"` \| `"cyan-pulse"` \| `"aurora-wave"` \| `"ice-cannon"`
 
-Defined in: [lib/laser-loon/types.ts:3](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L3)
+Defined in: [lib/laser-loon/types.ts:8](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L8)

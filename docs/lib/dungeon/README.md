@@ -38,6 +38,12 @@ Re-exports [computeShortestTour](tsp/functions/computeShortestTour.md)
 
 ***
 
+### consumeBypassChip
+
+Re-exports [consumeBypassChip](hacking/functions/consumeBypassChip.md)
+
+***
+
 ### createCubeMesh
 
 Re-exports [createCubeMesh](boss/functions/createCubeMesh.md)
@@ -56,9 +62,87 @@ Re-exports [createFaceMesh](boss/functions/createFaceMesh.md)
 
 ***
 
+### createNeuralWardenBoss
+
+Re-exports [createNeuralWardenBoss](boss/functions/createNeuralWardenBoss.md)
+
+***
+
+### createOctahedronMesh
+
+Re-exports [createOctahedronMesh](boss/functions/createOctahedronMesh.md)
+
+***
+
 ### createTetrahedronMesh
 
 Re-exports [createTetrahedronMesh](boss/functions/createTetrahedronMesh.md)
+
+***
+
+### CRT\_THEMES
+
+Re-exports [CRT_THEMES](metaprogression/variables/CRT_THEMES.md)
+
+***
+
+### CRTThemeConfig
+
+Re-exports [CRTThemeConfig](types/interfaces/CRTThemeConfig.md)
+
+***
+
+### CRTThemeId
+
+Re-exports [CRTThemeId](types/type-aliases/CRTThemeId.md)
+
+***
+
+### CVEType
+
+Re-exports [CVEType](types/type-aliases/CVEType.md)
+
+***
+
+### CYBERDECK\_CLASSES
+
+Re-exports [CYBERDECK_CLASSES](metaprogression/variables/CYBERDECK_CLASSES.md)
+
+***
+
+### CyberdeckClass
+
+Re-exports [CyberdeckClass](types/interfaces/CyberdeckClass.md)
+
+***
+
+### CyberdeckClassId
+
+Re-exports [CyberdeckClassId](types/type-aliases/CyberdeckClassId.md)
+
+***
+
+### CyberdeckProfile
+
+Re-exports [CyberdeckProfile](types/interfaces/CyberdeckProfile.md)
+
+***
+
+### DARKNET\_VENDOR\_CATALOG
+
+Re-exports [DARKNET_VENDOR_CATALOG](metaprogression/variables/DARKNET_VENDOR_CATALOG.md)
+
+***
+
+### DarknetItem
+
+Re-exports [DarknetItem](types/interfaces/DarknetItem.md)
+
+***
+
+### DEFAULT\_CYBERDECK\_PROFILE
+
+Re-exports [DEFAULT_CYBERDECK_PROFILE](metaprogression/variables/DEFAULT_CYBERDECK_PROFILE.md)
 
 ***
 
@@ -122,6 +206,12 @@ Re-exports [FOVResult](fov/interfaces/FOVResult.md)
 
 ***
 
+### generateActiveDirectoryRoom
+
+Re-exports [generateActiveDirectoryRoom](generator/functions/generateActiveDirectoryRoom.md)
+
+***
+
 ### generateBillableHoursRoom
 
 Re-exports [generateBillableHoursRoom](generator/functions/generateBillableHoursRoom.md)
@@ -146,9 +236,39 @@ Re-exports [generateClassicStage2](generator/functions/generateClassicStage2.md)
 
 ***
 
+### generateCyberpunkCampaign
+
+Re-exports [generateCyberpunkCampaign](generator/functions/generateCyberpunkCampaign.md)
+
+***
+
+### generateDarknetVaultRoom
+
+Re-exports [generateDarknetVaultRoom](generator/functions/generateDarknetVaultRoom.md)
+
+***
+
+### generateDMZGatewayRoom
+
+Re-exports [generateDMZGatewayRoom](generator/functions/generateDMZGatewayRoom.md)
+
+***
+
 ### generateFaceForgeRoom
 
 Re-exports [generateFaceForgeRoom](generator/functions/generateFaceForgeRoom.md)
+
+***
+
+### generateHexMatrixPuzzle
+
+Re-exports [generateHexMatrixPuzzle](hacking/functions/generateHexMatrixPuzzle.md)
+
+***
+
+### generateNeuralWardenRoom
+
+Re-exports [generateNeuralWardenRoom](generator/functions/generateNeuralWardenRoom.md)
 
 ***
 
@@ -170,6 +290,24 @@ Re-exports [hasLineOfSight](fov/functions/hasLineOfSight.md)
 
 ***
 
+### HexCell
+
+Re-exports [HexCell](types/interfaces/HexCell.md)
+
+***
+
+### HexMatrixPuzzle
+
+Re-exports [HexMatrixPuzzle](types/interfaces/HexMatrixPuzzle.md)
+
+***
+
+### isSequenceMatched
+
+Re-exports [isSequenceMatched](hacking/functions/isSequenceMatched.md)
+
+***
+
 ### ItemId
 
 Re-exports [ItemId](types/type-aliases/ItemId.md)
@@ -179,6 +317,12 @@ Re-exports [ItemId](types/type-aliases/ItemId.md)
 ### ItemPickup
 
 Re-exports [ItemPickup](types/interfaces/ItemPickup.md)
+
+***
+
+### loadCyberdeckProfile
+
+Re-exports [loadCyberdeckProfile](metaprogression/functions/loadCyberdeckProfile.md)
 
 ***
 
@@ -206,6 +350,18 @@ Re-exports [renderWireframeMesh](boss/functions/renderWireframeMesh.md)
 
 ***
 
+### retroAudio
+
+Re-exports [retroAudio](audio/variables/retroAudio.md)
+
+***
+
+### RetroAudioEngine
+
+Re-exports [RetroAudioEngine](audio/classes/RetroAudioEngine.md)
+
+***
+
 ### RoomThemeId
 
 Re-exports [RoomThemeId](types/type-aliases/RoomThemeId.md)
@@ -218,6 +374,18 @@ Re-exports [rotate3D](boss/functions/rotate3D.md)
 
 ***
 
+### saveCyberdeckProfile
+
+Re-exports [saveCyberdeckProfile](metaprogression/functions/saveCyberdeckProfile.md)
+
+***
+
+### selectHexCell
+
+Re-exports [selectHexCell](hacking/functions/selectHexCell.md)
+
+***
+
 ### STAGE\_1\_MAZE
 
 Re-exports [STAGE_1_MAZE](generator/variables/STAGE_1_MAZE.md)
@@ -227,6 +395,12 @@ Re-exports [STAGE_1_MAZE](generator/variables/STAGE_1_MAZE.md)
 ### STAGE\_2\_MAZE
 
 Re-exports [STAGE_2_MAZE](generator/variables/STAGE_2_MAZE.md)
+
+***
+
+### STORAGE\_KEY\_PROFILE
+
+Re-exports [STORAGE_KEY_PROFILE](metaprogression/variables/STORAGE_KEY_PROFILE.md)
 
 ***
 

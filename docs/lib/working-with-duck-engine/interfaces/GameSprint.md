@@ -6,7 +6,7 @@
 
 # Interface: GameSprint
 
-Defined in: [lib/working-with-duck-engine.ts:98](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L98)
+Defined in: [lib/working-with-duck-engine.ts:136](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L136)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/working-with-duck-engine.ts:98](https://github.com/fderuiter/po
 
 > **description**: `string`
 
-Defined in: [lib/working-with-duck-engine.ts:104](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L104)
+Defined in: [lib/working-with-duck-engine.ts:142](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L142)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/working-with-duck-engine.ts:104](https://github.com/fderuiter/p
 
 > **impulseInterval**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:103](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L103)
+Defined in: [lib/working-with-duck-engine.ts:141](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L141)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/working-with-duck-engine.ts:103](https://github.com/fderuiter/p
 
 > **level**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:99](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L99)
+Defined in: [lib/working-with-duck-engine.ts:137](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L137)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/working-with-duck-engine.ts:99](https://github.com/fderuiter/po
 
 > **subtitle**: `string`
 
-Defined in: [lib/working-with-duck-engine.ts:101](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L101)
+Defined in: [lib/working-with-duck-engine.ts:139](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L139)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/working-with-duck-engine.ts:101](https://github.com/fderuiter/p
 
 > **targetWork**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:102](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L102)
+Defined in: [lib/working-with-duck-engine.ts:140](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L140)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [lib/working-with-duck-engine.ts:102](https://github.com/fderuiter/p
 
 > **title**: `string`
 
-Defined in: [lib/working-with-duck-engine.ts:100](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L100)
+Defined in: [lib/working-with-duck-engine.ts:138](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L138)

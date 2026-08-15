@@ -11,6 +11,8 @@
 - [createCubeMesh](functions/createCubeMesh.md)
 - [createFaceForgeBoss](functions/createFaceForgeBoss.md)
 - [createFaceMesh](functions/createFaceMesh.md)
+- [createNeuralWardenBoss](functions/createNeuralWardenBoss.md)
+- [createOctahedronMesh](functions/createOctahedronMesh.md)
 - [createTetrahedronMesh](functions/createTetrahedronMesh.md)
 - [project3DTo2D](functions/project3DTo2D.md)
 - [renderWireframeMesh](functions/renderWireframeMesh.md)

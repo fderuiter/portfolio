@@ -11,7 +11,6 @@ import {
   IconDeviceGamepad2,
   IconArrowRight,
   IconTrophy,
-  IconSparkles,
   IconPlayerPlay,
   IconBone,
 } from "@tabler/icons-react";
@@ -57,10 +56,10 @@ export const ARCADE_GAMES: ArcadeGameCard[] = [
     id: "working-with-duck",
     slug: "working-with-duck",
     title: "Working With Duck",
-    subtitle: "Pet Simulation & Multitasking Arcade",
-    genre: "Pet Simulation",
+    subtitle: "Autonomous State Machine & Multitasking Simulation",
+    genre: "Pet Simulation & AI",
     description:
-      "Balance writing code against managing your autonomous Golden Retriever puppy, Duck. Toss toys to save portfolio hazards, scrub belly rubs during the flop, sprint in the Dog Park, and tuck Duck in for nap time.",
+      "Balance code development against managing an autonomous Golden Retriever puppy, Duck. Features toy toss trajectories, real-time belly rub scrubbing, recall mechanics, and persistent scrapbook state.",
     mechanics: ["Autonomous Dog AI", "Tug-of-War Multipliers", "Dog Park Whistle Recall", "Polaroid Scrapbook"],
     techStack: ["HTML5 Canvas 2D", "Web Audio Synthesizer", "Deterministic State Machine"],
     icon: <IconBone className="w-6 h-6 text-amber-400" />,
@@ -73,17 +72,17 @@ export const ARCADE_GAMES: ArcadeGameCard[] = [
   {
     id: "laser-loon",
     slug: "laser-loon",
-    title: "Laser Loon: Cryo Bug Hunter",
-    subtitle: "Physics Arcade / Canvas Laser Shooter",
-    genre: "Physics Arcade",
+    title: "Laser Loon: Quest for the State Flag",
+    subtitle: "Physics Raycasting & Waveform Campaign",
+    genre: "Raycast Arcade Shooter",
     description:
-      "Control an iconic Canadian Loon equipped with cybernetic laser eyes. Blast runtime exceptions, frozen bugs, and memory leaks with real-time raycasting and ice cannon physics.",
-    mechanics: ["Raycast Collision", "Cryo Freezing", "Combo Multipliers", "Screen Shake FX"],
-    techStack: ["HTML5 Canvas", "Web Audio API", "Deterministic Vector Physics"],
-    icon: <IconCrosshair className="w-6 h-6 text-brand-cyan" />,
-    accentColor: "from-cyan-500/20 via-cyan-500/5 to-transparent",
-    borderHover: "hover:border-cyan-400/50",
-    badgeBg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
+      "Pilot submission F277 Laser Loon on the Road to the Capitol. Battle rival flag redesigns using raycast laser collision algorithms, cryo-shatter particle physics, and dual-synth Web Audio audio processing.",
+    mechanics: ["Raycast Collision", "Cryo Freezing", "Loon Tremolo Ultimate", "Campaign Boss Battles"],
+    techStack: ["HTML5 Canvas", "Web Audio Dual-Synth", "Multi-Phase AI Engine"],
+    icon: <IconCrosshair className="w-6 h-6 text-red-400" />,
+    accentColor: "from-red-500/20 via-red-500/5 to-transparent",
+    borderHover: "hover:border-red-400/50",
+    badgeBg: "bg-red-500/10 text-red-400 border-red-500/30",
     storageKey: "laser_loon_high_score",
     route: "/arcade/laser-loon",
   },
@@ -91,10 +90,10 @@ export const ARCADE_GAMES: ArcadeGameCard[] = [
     id: "quasi-puzzler",
     slug: "quasi-puzzler",
     title: "Quasi-Perfect Puzzler",
-    subtitle: "Formal Verification Logic Puzzle Arcade",
+    subtitle: "Formal Verification & Proof Tactics Engine",
     genre: "Formal Verification",
     description:
-      "Lean-style interactive proof tactics arcade. Construct inductive AST proofs, discharge hypotheses, and manage severe proof-engine RAM limits without conceding to sorry.",
+      "Lean-inspired interactive proof tactics workspace. Construct inductive AST proof trees, discharge hypotheses via Modus Ponens, and manage proof-engine RAM limits.",
     mechanics: ["AST Expression Tree", "Proof Tactics (intro, rw, simp)", "RAM Exhaustion OOM", "Morality Scoring"],
     techStack: ["TypeScript AST", "Interactive Drag & Drop", "Lean 4 Engine Sim"],
     icon: <IconBrain className="w-6 h-6 text-purple-400" />,
@@ -108,10 +107,10 @@ export const ARCADE_GAMES: ArcadeGameCard[] = [
     id: "garmin-watch",
     slug: "garmin-watch",
     title: "Garmin Connect IQ 32KB Memory Runner",
-    subtitle: "Embedded Systems Engineering Simulator",
+    subtitle: "Embedded Systems Memory & Display Simulator",
     genre: "Embedded Systems",
     description:
-      "Circular 280×280 smartwatch simulator where you navigate severe 32KB RAM constraints, manage garbage collection (GC) freezes, and wipe thermal condensation in real time.",
+      "Circular 280×280 smartwatch simulator operating under strict 32KB RAM constraints with real-time garbage collection lifecycle tracking and simulated thermal condensation.",
     mechanics: ["Circular LCD 280×280", "32KB Monkey C RAM Limit", "500ms GC Freeze", "Overheat Fog Wiping"],
     techStack: ["HTML5 Canvas", "Piezo Audio Synthesis", "Embedded State Engine"],
     icon: <IconCpu className="w-6 h-6 text-amber-400" />,
@@ -125,10 +124,10 @@ export const ARCADE_GAMES: ArcadeGameCard[] = [
     id: "clinical-chaos",
     slug: "clinical-chaos",
     title: "Clinical Trial Chaos: CDISC Compliance",
-    subtitle: "21 CFR Part 11 Compliance & Time Management Arcade",
-    genre: "Compliance Arcade",
+    subtitle: "21 CFR Part 11 Compliance & Domain Mapper",
+    genre: "Regulatory Simulation",
     description:
-      "Map CDISC SDTM/ADaM clinical observations, execute 21 CFR Part 11 electronic signatures with intent verification, and resolve queries before the FDA inspection clock expires.",
+      "Ingest CDISC SDTM/ADaM clinical observations, execute 21 CFR Part 11 electronic signatures with intent verification, and resolve site audit queries under inspection time pressure.",
     mechanics: ["CDISC SDTM Domains (DM, VS, AE, LB)", "21 CFR § 11 Signatures", "FDA Auditor Patrol AI", "Protocol Amendments"],
     techStack: ["FDA Compliance Sim", "Conveyor Belt Physics", "Web Audio Alarms"],
     icon: <IconShieldCheck className="w-6 h-6 text-emerald-400" />,
@@ -142,10 +141,10 @@ export const ARCADE_GAMES: ArcadeGameCard[] = [
     id: "retro-labyrinth",
     slug: "retro-labyrinth",
     title: "Retro Labyrinth: Graveyard Roguelike",
-    subtitle: "Dungeon Crawler & Developer Roguelike",
-    genre: "Dungeon Roguelike",
+    subtitle: "Procedural Dungeon Generation & CRT Filter Engine",
+    genre: "Procedural Roguelike",
     description:
-      "Explore abandoned repositories in a retro CRT dungeon crawler. Traverse Traveling Salesperson dynamic shifting walls, wield developer weapons (npm install, git push -f), and defeat the 3D FaceForge boss.",
+      "Explore procedural code graph dungeons rendered with custom CRT scanline shaders, Traveling Salesperson dynamic shifting geometry, and FOV raycast fog-of-war.",
     mechanics: ["TSP Dynamic Mazes", "FOV Fog-of-War", "Developer Weapons Inventory", "3D Wireframe Boss"],
     techStack: ["CRT Canvas Filter", "Procedural Dungeon Gen", "Matrix 3D Math"],
     icon: <IconDeviceGamepad2 className="w-6 h-6 text-rose-400" />,
@@ -263,7 +262,7 @@ function GameCard({ game, index }: { game: ArcadeGameCard; index: number }) {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-cyan text-black font-mono text-xs font-bold transition-all duration-200 hover:bg-white hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(6,182,212,0.3)] cursor-pointer"
         >
           <IconPlayerPlay className="w-3.5 h-3.5 fill-current" />
-          <span>Launch Game</span>
+          <span>Launch Module</span>
           <IconArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>
@@ -287,30 +286,29 @@ export const ArcadeHubClient: React.FC = () => {
         {/* Header Hero Section */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono font-bold mb-4">
-            <IconSparkles className="w-3.5 h-3.5 text-brand-cyan animate-pulse" />
-            Interactive Systems &amp; Physics Arcade
+            <span>Interactive Systems &amp; Graphics Labs</span>
           </div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold font-mono tracking-tight text-white">
-            Engineering <span className="text-brand-cyan">Arcade Hub</span>
+            Engineering <span className="text-brand-cyan">Arcade &amp; Labs</span>
           </h1>
           <p className="mt-4 text-sm md:text-base text-zinc-400 font-sans leading-relaxed">
-            A suite of high-performance physics engines, formal verification logic puzzles,
-            embedded memory simulators, and compliance arcades built with zero external gaming frameworks.
+            A suite of high-performance canvas physics engines, formal logic verification workspaces,
+            and embedded memory simulators built with zero external game frameworks.
           </p>
 
           {/* Quick Metrics Bar */}
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs font-mono">
             <span className="px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300">
-              🎮 <strong>6 Playable Games</strong>
+              <strong>6 Interactive Modules</strong>
             </span>
             <span className="px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300">
-              🔊 <strong>Web Audio Synthesizer</strong>
+              <strong>Web Audio Synthesis</strong>
             </span>
             <span className="px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300">
-              ⚡ <strong>Deterministic Canvas Loops</strong>
+              <strong>Deterministic 60FPS Loops</strong>
             </span>
             <span className="px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300">
-              🛡️ <strong>Zero External Game Engines</strong>
+              <strong>Zero Framework Overhead</strong>
             </span>
           </div>
         </div>

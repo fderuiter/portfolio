@@ -6,7 +6,7 @@
 
 # Interface: Particle
 
-Defined in: [lib/laser-loon/types.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L52)
+Defined in: [lib/laser-loon/types.ts:99](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L99)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/laser-loon/types.ts:52](https://github.com/fderuiter/portfolio/
 
 > **alpha**: `number`
 
-Defined in: [lib/laser-loon/types.ts:59](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L59)
+Defined in: [lib/laser-loon/types.ts:106](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L106)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/laser-loon/types.ts:59](https://github.com/fderuiter/portfolio/
 
 > **color**: `string`
 
-Defined in: [lib/laser-loon/types.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L58)
+Defined in: [lib/laser-loon/types.ts:105](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L105)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/laser-loon/types.ts:58](https://github.com/fderuiter/portfolio/
 
 > **decay**: `number`
 
-Defined in: [lib/laser-loon/types.ts:60](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L60)
+Defined in: [lib/laser-loon/types.ts:107](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L107)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/laser-loon/types.ts:60](https://github.com/fderuiter/portfolio/
 
 > **radius**: `number`
 
-Defined in: [lib/laser-loon/types.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L57)
+Defined in: [lib/laser-loon/types.ts:104](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L104)
 
 ***
 
@@ -46,15 +46,15 @@ Defined in: [lib/laser-loon/types.ts:57](https://github.com/fderuiter/portfolio/
 
 > `optional` **rotation?**: `number`
 
-Defined in: [lib/laser-loon/types.ts:62](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L62)
+Defined in: [lib/laser-loon/types.ts:109](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L109)
 
 ***
 
 ### shape?
 
-> `optional` **shape?**: `"circle"` \| `"crystal"`
+> `optional` **shape?**: `"circle"` \| `"crystal"` \| `"star"` \| `"smoke"`
 
-Defined in: [lib/laser-loon/types.ts:61](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L61)
+Defined in: [lib/laser-loon/types.ts:108](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L108)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/laser-loon/types.ts:61](https://github.com/fderuiter/portfolio/
 
 > **vx**: `number`
 
-Defined in: [lib/laser-loon/types.ts:55](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L55)
+Defined in: [lib/laser-loon/types.ts:102](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L102)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/laser-loon/types.ts:55](https://github.com/fderuiter/portfolio/
 
 > **vy**: `number`
 
-Defined in: [lib/laser-loon/types.ts:56](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L56)
+Defined in: [lib/laser-loon/types.ts:103](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L103)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/laser-loon/types.ts:56](https://github.com/fderuiter/portfolio/
 
 > **x**: `number`
 
-Defined in: [lib/laser-loon/types.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L53)
+Defined in: [lib/laser-loon/types.ts:100](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L100)
 
 ***
 
@@ -86,4 +86,4 @@ Defined in: [lib/laser-loon/types.ts:53](https://github.com/fderuiter/portfolio/
 
 > **y**: `number`
 
-Defined in: [lib/laser-loon/types.ts:54](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L54)
+Defined in: [lib/laser-loon/types.ts:101](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L101)

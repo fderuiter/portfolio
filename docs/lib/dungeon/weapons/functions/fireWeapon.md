@@ -6,11 +6,11 @@
 
 # Function: fireWeapon()
 
-> **fireWeapon**(`weaponId`, `weapons`, `playerX`, `playerY`, `playerHp`, `maxPlayerHp`, `enemies`, `boss`, `nowMs`): [`WeaponFireResult`](../interfaces/WeaponFireResult.md)
+> **fireWeapon**(`weaponId`, `weapons`, `playerX`, `playerY`, `playerHp`, `maxPlayerHp`, `enemies`, `boss`, `nowMs`, `currentRam?`): [`WeaponFireResult`](../interfaces/WeaponFireResult.md)
 
-Defined in: [lib/dungeon/weapons.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L80)
+Defined in: [lib/dungeon/weapons.ts:156](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/weapons.ts#L156)
 
-Fires a developer weapon with damage, particle generation, and humorous side effect.
+Fires a cybersecurity weapon or exploit with damage, CVE multipliers, particles, and side-effects.
 
 ## Parameters
 
@@ -49,6 +49,10 @@ Fires a developer weapon with damage, particle generation, and humorous side eff
 ### nowMs
 
 `number`
+
+### currentRam?
+
+`number` = `32`
 
 ## Returns
 

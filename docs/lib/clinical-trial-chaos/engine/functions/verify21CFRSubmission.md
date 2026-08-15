@@ -8,7 +8,7 @@
 
 > **verify21CFRSubmission**(`subject`, `reason`, `targetStation`): `object`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:228](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L228)
+Defined in: [lib/clinical-trial-chaos/engine.ts:354](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L354)
 
 Evaluates 21 CFR Part 11 Electronic Signature submission.
 

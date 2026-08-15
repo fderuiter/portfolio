@@ -6,9 +6,9 @@
 
 # Function: createInitialDuckGameState()
 
-> **createInitialDuckGameState**(`level?`, `mode?`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
+> **createInitialDuckGameState**(`level?`, `mode?`, `preservedAccessories?`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:377](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L377)
+Defined in: [lib/working-with-duck-engine.ts:481](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L481)
 
 ## Parameters
 
@@ -19,6 +19,10 @@ Defined in: [lib/working-with-duck-engine.ts:377](https://github.com/fderuiter/p
 ### mode?
 
 `"campaign"` \| `"endless"`
+
+### preservedAccessories?
+
+[`DuckAccessory`](../type-aliases/DuckAccessory.md)[] = `...`
 
 ## Returns
 

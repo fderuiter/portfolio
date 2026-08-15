@@ -8,7 +8,7 @@
 
 > **playForm483AlarmSound**(): `void`
 
-Defined in: [lib/clinical-trial-chaos/sound-effects.ts:86](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L86)
+Defined in: [lib/clinical-trial-chaos/sound-effects.ts:98](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L98)
 
 Sound: FDA Form 483 Issued Alarm (alarm horn)
 

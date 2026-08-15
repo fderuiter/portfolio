@@ -8,7 +8,7 @@
 
 > **project3DTo2D**(`v`, `screenCenterX`, `screenCenterY`, `scale`, `cameraDistance?`): `object`
 
-Defined in: [lib/dungeon/boss.ts:148](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/boss.ts#L148)
+Defined in: [lib/dungeon/boss.ts:165](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/boss.ts#L165)
 
 Projects a 3D rotated vertex onto a 2D screen coordinate.
 

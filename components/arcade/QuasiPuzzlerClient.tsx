@@ -100,10 +100,10 @@ export const QuasiPuzzlerClient: React.FC = () => {
         {/* Sequential Next / Previous Navigation */}
         <NextPrevNav
           prev={{
-            title: "Laser Loon: Cryo Bug Hunter",
+            title: "Laser Loon: Quest for the State Flag",
             href: "/arcade/laser-loon",
             label: "Previous Game",
-            tag: "Physics Shooter",
+            tag: "Civic Arcade Campaign",
           }}
           next={{
             title: "Garmin 32KB Memory Runner",

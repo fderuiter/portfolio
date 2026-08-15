@@ -6,7 +6,7 @@
 
 # Interface: Weapon
 
-Defined in: [lib/dungeon/types.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L27)
+Defined in: [lib/dungeon/types.ts:49](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L49)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/dungeon/types.ts:27](https://github.com/fderuiter/portfolio/blo
 
 > **ammo**: `number`
 
-Defined in: [lib/dungeon/types.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L31)
+Defined in: [lib/dungeon/types.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L53)
 
 ***
 
@@ -22,7 +22,15 @@ Defined in: [lib/dungeon/types.ts:31](https://github.com/fderuiter/portfolio/blo
 
 > **cooldownMs**: `number`
 
-Defined in: [lib/dungeon/types.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L34)
+Defined in: [lib/dungeon/types.ts:56](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L56)
+
+***
+
+### cveSynergy?
+
+> `optional` **cveSynergy?**: [`CVEType`](../type-aliases/CVEType.md)
+
+Defined in: [lib/dungeon/types.ts:61](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L61)
 
 ***
 
@@ -30,7 +38,7 @@ Defined in: [lib/dungeon/types.ts:34](https://github.com/fderuiter/portfolio/blo
 
 > **damage**: `number`
 
-Defined in: [lib/dungeon/types.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L33)
+Defined in: [lib/dungeon/types.ts:55](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L55)
 
 ***
 
@@ -38,7 +46,7 @@ Defined in: [lib/dungeon/types.ts:33](https://github.com/fderuiter/portfolio/blo
 
 > **description**: `string`
 
-Defined in: [lib/dungeon/types.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L35)
+Defined in: [lib/dungeon/types.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L57)
 
 ***
 
@@ -46,7 +54,7 @@ Defined in: [lib/dungeon/types.ts:35](https://github.com/fderuiter/portfolio/blo
 
 > **iconChar**: `string`
 
-Defined in: [lib/dungeon/types.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L37)
+Defined in: [lib/dungeon/types.ts:59](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L59)
 
 ***
 
@@ -54,7 +62,7 @@ Defined in: [lib/dungeon/types.ts:37](https://github.com/fderuiter/portfolio/blo
 
 > **id**: [`WeaponId`](../type-aliases/WeaponId.md)
 
-Defined in: [lib/dungeon/types.ts:28](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L28)
+Defined in: [lib/dungeon/types.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L50)
 
 ***
 
@@ -62,7 +70,7 @@ Defined in: [lib/dungeon/types.ts:28](https://github.com/fderuiter/portfolio/blo
 
 > **keyLabel**: `string`
 
-Defined in: [lib/dungeon/types.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L30)
+Defined in: [lib/dungeon/types.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L52)
 
 ***
 
@@ -70,7 +78,7 @@ Defined in: [lib/dungeon/types.ts:30](https://github.com/fderuiter/portfolio/blo
 
 > **maxAmmo**: `number`
 
-Defined in: [lib/dungeon/types.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L32)
+Defined in: [lib/dungeon/types.ts:54](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L54)
 
 ***
 
@@ -78,7 +86,15 @@ Defined in: [lib/dungeon/types.ts:32](https://github.com/fderuiter/portfolio/blo
 
 > **name**: `string`
 
-Defined in: [lib/dungeon/types.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L29)
+Defined in: [lib/dungeon/types.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L51)
+
+***
+
+### ramCost?
+
+> `optional` **ramCost?**: `number`
+
+Defined in: [lib/dungeon/types.ts:60](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L60)
 
 ***
 
@@ -86,4 +102,4 @@ Defined in: [lib/dungeon/types.ts:29](https://github.com/fderuiter/portfolio/blo
 
 > **sideEffect**: `string`
 
-Defined in: [lib/dungeon/types.ts:36](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L36)
+Defined in: [lib/dungeon/types.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L58)

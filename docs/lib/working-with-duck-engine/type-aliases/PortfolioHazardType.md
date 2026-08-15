@@ -8,4 +8,4 @@
 
 > **PortfolioHazardType** = `"resume"` \| `"server-cable"` \| `"clinical-db"` \| `"garmin-watch"`
 
-Defined in: [lib/working-with-duck-engine.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L32)
+Defined in: [lib/working-with-duck-engine.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L52)

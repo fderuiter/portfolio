@@ -8,4 +8,4 @@
 
 > **PlayState** = `"idle"` \| `"playing"` \| `"paused"` \| `"phase_cleared"` \| `"game_over"`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:90](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L90)
+Defined in: [lib/clinical-trial-chaos/types.ts:101](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L101)

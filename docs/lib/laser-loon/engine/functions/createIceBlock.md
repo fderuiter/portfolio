@@ -8,7 +8,7 @@
 
 > **createIceBlock**(`fromX`, `fromY`, `targetX`, `targetY`, `nextId`, `speed?`): `object`
 
-Defined in: [lib/laser-loon/engine.ts:98](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L98)
+Defined in: [lib/laser-loon/engine.ts:239](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L239)
 
 ## Parameters
 
@@ -34,7 +34,7 @@ Defined in: [lib/laser-loon/engine.ts:98](https://github.com/fderuiter/portfolio
 
 ### speed?
 
-`number` = `7.5`
+`number` = `8.5`
 
 ## Returns
 

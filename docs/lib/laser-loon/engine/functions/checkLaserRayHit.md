@@ -6,9 +6,9 @@
 
 # Function: checkLaserRayHit()
 
-> **checkLaserRayHit**(`eyeX`, `eyeY`, `aimX`, `aimY`, `laserType`, `targets`): [`LaserHitResult`](../interfaces/LaserHitResult.md)
+> **checkLaserRayHit**(`eyeX`, `eyeY`, `aimX`, `aimY`, `laserType`, `targets`, `hasHotdishOvercharge?`): [`LaserHitResult`](../interfaces/LaserHitResult.md)
 
-Defined in: [lib/laser-loon/engine.ts:252](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L252)
+Defined in: [lib/laser-loon/engine.ts:434](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L434)
 
 ## Parameters
 
@@ -35,6 +35,10 @@ Defined in: [lib/laser-loon/engine.ts:252](https://github.com/fderuiter/portfoli
 ### targets
 
 [`Target`](../../types/interfaces/Target.md)[]
+
+### hasHotdishOvercharge?
+
+`boolean` = `false`
 
 ## Returns
 
