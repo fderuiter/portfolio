@@ -36,22 +36,23 @@ describe("SchedulePage Component", () => {
       root?.render(<SchedulePage />);
     });
 
-    expect(container?.textContent).toContain("Schedule a Technical Consultation");
+    expect(container?.textContent).toContain("Say Hi & Book a Chat");
     expect(container?.textContent).toContain("Google Calendar & Meet Integration");
     expect(container?.textContent).toContain("30-60 Min Sessions");
-    expect(container?.textContent).toContain("Systems Architecture & Scale");
-    expect(container?.textContent).toContain("Clinical Data & GxP Compliance");
+    expect(container?.textContent).toContain("Code, Systems & Web Craft");
+    expect(container?.textContent).toContain("Healthcare & Clinical Data");
   });
 
-  it("renders Google Calendar iframe with correct src and title", async () => {
+  it("renders Google Calendar appointment booking button and spec badges", async () => {
     await act(async () => {
       root?.render(<SchedulePage />);
     });
 
-    const iframe = container?.querySelector("iframe");
-    expect(iframe).not.toBeNull();
-    expect(iframe?.getAttribute("src")).toBe("https://calendar.app.google/YnR5oxos7ZTLyvUp8");
-    expect(iframe?.getAttribute("title")).toBe("Google Calendar Appointment Scheduling");
+    const bookingBtn = container?.querySelector('a[href="https://calendar.app.google/YnR5oxos7ZTLyvUp8"]');
+    expect(bookingBtn).not.toBeNull();
+    expect(bookingBtn?.textContent).toContain("Open Google Calendar Appointments");
+    expect(container?.textContent).toContain("Ready to Connect?");
+    expect(container?.textContent).toContain("Google Meet Video Bridge");
   });
 
   it("renders correct contact links including email and linkedin", async () => {
@@ -65,24 +66,6 @@ describe("SchedulePage Component", () => {
 
     const linkedinLink = container?.querySelector('a[href="https://www.linkedin.com/in/frederick-de-ruiter-88012467/"]');
     expect(linkedinLink).not.toBeNull();
-
-    const calExternalLink = container?.querySelector('a[href="https://calendar.app.google/YnR5oxos7ZTLyvUp8"]');
-    expect(calExternalLink).not.toBeNull();
-  });
-
-  it("updates iframe visibility when onLoad event fires", async () => {
-    await act(async () => {
-      root?.render(<SchedulePage />);
-    });
-
-    const iframe = container?.querySelector("iframe");
-    expect(iframe).not.toBeNull();
-
-    // Trigger iframe onLoad
-    await act(async () => {
-      iframe?.dispatchEvent(new Event("load"));
-    });
-
-    expect(iframe?.className).toContain("opacity-100");
+    expect(linkedinLink?.textContent).toContain("LinkedIn Profile");
   });
 });

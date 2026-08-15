@@ -349,7 +349,7 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
           >
             {words.map((word, i) => {
               // Style specific words with brand gradient
-              const isGradient = ["Interface", "Data", "Meaning"].includes(
+              const isGradient = ["PDFs", "code", "games", "canvas", "Interface", "Data", "Meaning"].includes(
                 word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
               );
               return (
@@ -508,9 +508,9 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ className }) => {
   const shouldReduceMotion = useReducedMotion();
-  const headline = "Crafting the Interface Between Systems Rigor and Human Delight";
+  const headline = "Certified professional at turning 150-page PDFs into code and over-engineering canvas games instead of sleeping.";
   const introText =
-    "Bridging clinical data architectures, interactive canvas simulations, and open-source civic experiments into a unified engineering craft.";
+    "Building high-stakes healthcare data pipelines by day, ridiculous browser games and civic internet lore by night.";
 
   return (
     <section
@@ -544,7 +544,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="px-3.5 py-1 mb-6 text-[10px] md:text-xs font-mono font-semibold tracking-[0.2em] uppercase text-brand-cyan bg-brand-cyan/5 border border-brand-cyan/20 rounded-full"
         >
-          FREDERICK DE RUITER · CREATIVE DEVELOPER &amp; SYSTEMS ARCHITECT
+          FREDERICK DE RUITER · CODE, GAMES &amp; CLINICAL DATA EXPERIMENTS
         </motion.span>
 
         {/* Dynamic Staggered Pretext-powered Title */}
@@ -570,10 +570,17 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
               aria-hidden="true"
               className="absolute inset-0 -translate-x-full group-hover:translate-x-full bg-gradient-to-r from-transparent via-brand-cyan/20 to-transparent transition-transform duration-1000 ease-out"
             />
-            <span className="relative z-10">Explore Engineering</span>
+            <span className="relative z-10">Explore Projects</span>
           </a>
           <a
-            href="https://github.com/fderuiter/portfolio"
+            href="/arcade"
+            className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-semibold text-brand-cyan hover:text-white bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/30 hover:border-brand-cyan/50 rounded-full transition-all duration-300 hover:scale-105 backdrop-blur-md shadow-[0_0_15px_rgba(6,182,212,0.15)]"
+          >
+            <span className="text-base">🕹️</span>
+            <span>Play in Arcade</span>
+          </a>
+          <a
+            href="https://github.com/fderuiter"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-semibold text-neutral-300 hover:text-white bg-neutral-900/60 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-full transition-all duration-300 hover:scale-105 backdrop-blur-md"
@@ -589,7 +596,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
                 d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.579.688.481C19.137 20.162 22 16.418 22 12c0-5.523-4.477-10-10-10z"
               />
             </svg>
-            GitHub Repository
+            GitHub
           </a>
         </motion.div>
       </div>

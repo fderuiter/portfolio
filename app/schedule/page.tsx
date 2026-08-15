@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import {
   IconCalendar,
   IconClock,
@@ -20,23 +20,22 @@ const GOOGLE_CALENDAR_URL = "https://calendar.app.google/YnR5oxos7ZTLyvUp8";
 const CONSULTATION_TOPICS = [
   {
     icon: <IconCpu className="w-5 h-5 text-brand-cyan" />,
-    title: "Systems Architecture & Scale",
-    description: "Distributed systems design, Next.js / TypeScript architectures, event pipelines, and serverless reliability.",
+    title: "Code, Systems & Web Craft",
+    description: "Next.js, TypeScript, canvas physics, reactive UI experiments, and open-source side projects.",
   },
   {
     icon: <IconShieldCheck className="w-5 h-5 text-brand-cyan" />,
-    title: "Clinical Data & GxP Compliance",
-    description: "CDISC standards (ODM/SDTM), 21 CFR Part 11 electronic audit trails, EDC integrations, and HIPAA data pipelines.",
+    title: "Healthcare & Clinical Data",
+    description: "GxP eClinical systems, CDISC standards, neuroinformatics pipelines, or venting about medical software.",
   },
   {
     icon: <IconBrain className="w-5 h-5 text-brand-cyan" />,
-    title: "Full-Stack UI & Canvas Physics",
-    description: "High-performance interactive interfaces, custom animation engines, design systems, and rigorous automated testing.",
+    title: "Saying Hi & Bouncing Ideas",
+    description: "Casual chats, side project feedback, civic tech ideas, or talking about dogs and video games.",
   },
 ];
 
 export default function SchedulePage() {
-  const [iframeLoaded, setIframeLoaded] = useState(false);
 
   return (
     <div className="min-h-screen bg-zinc-950 text-foreground pt-32 pb-24 px-4 sm:px-6 md:px-12 lg:px-24 relative overflow-hidden">
@@ -50,7 +49,7 @@ export default function SchedulePage() {
           <Breadcrumbs
             items={[
               { label: "Connect", href: "/#contact" },
-              { label: "Schedule Consultation" },
+              { label: "Say Hi & Book a Chat" },
             ]}
           />
           <div className="flex items-center gap-2 text-xs font-mono text-brand-cyan bg-brand-cyan/10 border border-brand-cyan/20 px-3 py-1 rounded-full">
@@ -66,10 +65,10 @@ export default function SchedulePage() {
             <span>Google Calendar &amp; Meet Integration</span>
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold font-mono text-white tracking-tight mb-4">
-            Schedule a Technical Consultation
+            Say Hi &amp; Book a Chat
           </h1>
           <p className="text-sm sm:text-base text-zinc-400 font-sans leading-relaxed">
-            Book a 1:1 technical sync with Frederick de Ruiter. Choose an available slot below to automatically sync to Google Calendar, generate a Google Meet video bridge, and receive instant email confirmations.
+            Grab a friendly 30-minute sync to chat about projects, bounce ideas, talk tech, or swap stories. Choose an available slot below to automatically sync to Google Calendar and generate a Google Meet link.
           </p>
         </div>
 
@@ -93,72 +92,58 @@ export default function SchedulePage() {
           ))}
         </div>
 
-        {/* Booking Specs Bar */}
-        <div className="w-full bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-4 sm:p-5 mb-8 flex flex-wrap items-center justify-between gap-4 text-xs font-mono text-zinc-300">
-          <div className="flex items-center gap-6 flex-wrap">
+        {/* Interactive Booking Action Card */}
+        <div className="w-full p-8 md:p-12 rounded-3xl bg-zinc-900/30 border border-zinc-800/80 hover:border-brand-cyan/40 transition-all shadow-2xl relative overflow-hidden flex flex-col items-center text-center">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-brand-cyan/5 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-brand-blue/5 rounded-full blur-[100px] pointer-events-none" />
+
+          <div className="w-16 h-16 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/30 flex items-center justify-center mb-6 text-brand-cyan shadow-[0_0_25px_rgba(6,182,212,0.2)]">
+            <IconCalendar className="w-8 h-8" />
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl font-extrabold font-mono text-white mb-3 tracking-tight">
+            Ready to Connect?
+          </h2>
+          <p className="text-sm text-zinc-400 max-w-xl mb-8 leading-relaxed font-sans">
+            Pick a time that works best for you on Google Calendar. It will automatically generate a Google Meet video link and send an invite directly to your inbox.
+          </p>
+
+          <a
+            href={GOOGLE_CALENDAR_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-brand-cyan text-zinc-950 font-mono font-bold text-sm hover:bg-white transition-all duration-300 shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:scale-105 cursor-pointer"
+          >
+            <span>Open Google Calendar Appointments</span>
+            <IconExternalLink className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          </a>
+
+          {/* Booking Specs Pills */}
+          <div className="mt-10 pt-8 border-t border-zinc-800/60 w-full flex flex-wrap items-center justify-center gap-6 text-xs font-mono text-zinc-400">
             <span className="flex items-center gap-2">
               <IconClock className="w-4 h-4 text-brand-cyan" />
               <span>30-60 Min Sessions</span>
             </span>
             <span className="flex items-center gap-2">
               <IconVideo className="w-4 h-4 text-brand-cyan" />
-              <span>Google Meet HD Video</span>
+              <span>Google Meet Video Bridge</span>
             </span>
             <span className="flex items-center gap-2">
               <IconMail className="w-4 h-4 text-brand-cyan" />
               <span>Instant Gmail Confirmation</span>
             </span>
           </div>
-
-          <a
-            href={GOOGLE_CALENDAR_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-brand-cyan text-zinc-950 font-bold hover:bg-brand-cyan/90 transition-colors cursor-pointer"
-          >
-            <span>Open in Google Calendar</span>
-            <IconExternalLink className="w-3.5 h-3.5" />
-          </a>
-        </div>
-
-        {/* Google Calendar Interactive Embed Widget */}
-        <div className="w-full bg-zinc-900/20 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl relative">
-          <div className="bg-zinc-900/60 px-4 py-3 border-b border-zinc-800 flex items-center justify-between text-xs font-mono text-zinc-400">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
-              <span className="ml-2 text-zinc-300 font-semibold">calendar.google.com/appointments</span>
-            </div>
-            <span className="hidden sm:inline text-zinc-500">Encrypted HTTPS · TLS 1.3</span>
-          </div>
-
-          {!iframeLoaded && (
-            <div className="w-full h-[650px] flex flex-col items-center justify-center bg-zinc-950 text-zinc-400 gap-3 font-mono text-xs">
-              <div className="w-8 h-8 border-2 border-brand-cyan border-t-transparent rounded-full animate-spin" />
-              <span>Loading Google Appointment Scheduler...</span>
-            </div>
-          )}
-
-          <iframe
-            src={GOOGLE_CALENDAR_URL}
-            title="Google Calendar Appointment Scheduling"
-            className={`w-full h-[700px] border-0 bg-white transition-opacity duration-300 ${
-              iframeLoaded ? "opacity-100 block" : "opacity-0 absolute top-0 left-0"
-            }`}
-            onLoad={() => setIframeLoaded(true)}
-          />
         </div>
 
         {/* Direct Contact Alternative Endpoints */}
-        <div className="mt-16 pt-12 border-t border-zinc-900/80 w-full flex flex-col items-center text-center">
+        <div className="mt-12 pt-8 border-t border-zinc-900/80 w-full flex flex-col items-center text-center">
           <p className="text-xs font-mono text-zinc-400 uppercase tracking-widest mb-4">
-            Prefer direct messaging or custom inquiries?
+            Prefer direct email or messaging?
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <a
               href="mailto:fpderuiter@gmail.com"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900/60 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-brand-cyan hover:border-brand-cyan/40 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-brand-cyan hover:border-brand-cyan/40 transition-colors"
             >
               <IconMail className="w-4 h-4 text-brand-cyan" />
               <span>fpderuiter@gmail.com</span>
@@ -167,7 +152,7 @@ export default function SchedulePage() {
               href="https://www.linkedin.com/in/frederick-de-ruiter-88012467/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900/60 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-brand-cyan hover:border-brand-cyan/40 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-brand-cyan hover:border-brand-cyan/40 transition-colors"
             >
               <IconCheck className="w-4 h-4 text-brand-cyan" />
               <span>LinkedIn Profile</span>

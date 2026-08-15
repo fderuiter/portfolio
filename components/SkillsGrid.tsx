@@ -43,16 +43,16 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
             </div>
             <div>
               <h3 className="text-sm font-mono font-bold tracking-widest text-brand-cyan uppercase">
-                Creative Developer &amp; Systems Engineer
+                Full-Stack Tinkerer &amp; Data Wrangler
               </h3>
               <p className="text-[10px] font-mono text-zinc-500">
-                Design Engineering • Clinical Architecture • Civic Impact
+                Clinical Data • Creative Code • Civic Lore
               </p>
             </div>
           </div>
           
           <p className="text-sm text-neutral-300 leading-relaxed font-sans font-medium">
-            I build expressive digital experiences and resilient data infrastructure. My work bridges high-compliance healthcare architecture (GxP eCRF databases, CDISC data standards, neuroinformatics pipelines) with creative frontend engineering, canvas physics engines, and open-source civic initiatives. Whether designing viral public assets like the Laser Loon or architecting production clinical pipelines, I craft software with uncompromising craft, deep empathy, and human connection.
+            I write code that bridges high-compliance healthcare architecture (GxP eCRF databases, CDISC data standards, neuroinformatics pipelines) with creative frontend engineering, canvas physics engines, and open-source civic initiatives. Whether designing viral public assets like the Laser Loon or wrangling production clinical pipelines, I build software that works reliably and has real personality.
           </p>
         </div>
       </motion.div>
@@ -70,10 +70,10 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
         
         <div>
           <h3 className="text-xs font-mono font-bold tracking-widest text-zinc-400 uppercase mb-4">
-            Live Telemetry API
+            Live Code Diet
           </h3>
           <p className="text-[10px] font-mono text-zinc-500 mb-6 leading-relaxed">
-            Dynamic repository programming languages aggregated dynamically via GitHub cached metrics.
+            Dynamic repository programming languages aggregated live from my GitHub commits.
           </p>
           
           <div className="space-y-4">
@@ -109,7 +109,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
         className="md:col-span-3 p-6 md:p-8 bg-zinc-900/5 border border-zinc-900/40 rounded-3xl relative overflow-hidden hover:border-zinc-900 transition-all duration-300"
       >
         <h3 className="text-xs font-mono font-bold tracking-widest text-zinc-400 uppercase mb-6 text-center md:text-left">
-          Core Technical Specializations &amp; Leadership
+          What Keeps Me Busy
         </h3>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -118,12 +118,12 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
               01
             </div>
             <h4 className="text-xs font-mono font-bold text-neutral-200">
-              <Tooltip text="Translating complex scientific protocols into validated eCRFs, automated edit checks, and FDA-compliant SDTM datasets.">
-                Clinical Data Architecture
+              <Tooltip text="Translating complex 150-page protocols into validated eCRFs, automated edit checks, and FDA-compliant SDTM datasets.">
+                Clinical Data Wrangling
               </Tooltip>
             </h4>
             <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
-              GxP eClinical database design, CDISC ODM streaming parsers, and 21 CFR Part 11 electronic records compliance.
+              Turning FDA regulations and 150-page clinical trial protocols into schemas that humans and computers can actually understand.
             </p>
           </div>
           
@@ -132,12 +132,12 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
               02
             </div>
             <h4 className="text-xs font-mono font-bold text-neutral-200">
-              <Tooltip text="Crafting 60FPS canvas simulations, raycasting engines, and mathematical proof tactile interfaces.">
-                Creative UI &amp; Physics
+              <Tooltip text="Crafting 60FPS canvas simulations, raycasting engines, and interactive proof puzzles.">
+                Creative UI &amp; Canvas Physics
               </Tooltip>
             </h4>
             <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
-              Playable browser arcade games, hardware-accelerated canvas raycasting, and bespoke reactive web apps.
+              Building 60FPS browser physics, laser raycasting shooters, and retro roguelikes because boring web pages make me sad.
             </p>
           </div>
           
@@ -146,12 +146,12 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
               03
             </div>
             <h4 className="text-xs font-mono font-bold text-neutral-200">
-              <Tooltip text="Laser Loon CC0 viral campaign ($13.5k library fundraiser, NYT/WaPo coverage) and MNSCU statewide policy advocacy.">
-                Civic Impact &amp; Open Source
+              <Tooltip text="Laser Loon CC0 viral campaign ($13.5k library fundraiser, NYT/WaPo coverage) and grassroots tech advocacy.">
+                Civic Hacks &amp; Internet Lore
               </Tooltip>
             </h4>
             <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
-              Laser Loon (F277) CC0 asset repository generating $13.5k+ for St. Paul libraries, plus statewide student policy leadership.
+              Laser Loon (F277) CC0 asset repository raising $13.5k+ for St. Paul libraries, plus statewide open-source tech advocacy.
             </p>
           </div>
           
@@ -161,11 +161,11 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
             </div>
             <h4 className="text-xs font-mono font-bold text-neutral-200">
               <Tooltip text="Credentialed Alpine Ski Patroller (OEC/OET certified) performing rapid triage in high-stakes environments.">
-                Emergency Care &amp; Resilient Systems
+                Ski Patrol &amp; Mountain Triage
               </Tooltip>
             </h4>
             <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
-              Active Alpine Ski Patroller performing rapid triage in high-acuity mountain conditions; engineering fault-tolerant web systems.
+              Alpine Ski Patroller performing emergency mountain triage in sub-zero blizzards; engineering bulletproof fault-tolerant systems.
             </p>
           </div>
         </div>

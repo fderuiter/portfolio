@@ -104,10 +104,10 @@ export default async function PortfolioHomePage() {
           <div className="relative z-10 w-full max-w-7xl flex flex-col items-center">
             {/* Title Block */}
             <h2 className="text-3xl md:text-4xl font-extrabold font-mono tracking-tight text-white text-center mb-2">
-              Unified Systems &amp; Design Showcase
+              Projects, Side Quests &amp; Over-Engineered Ideas
             </h2>
             <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-8">
-              High-Compliance Clinical Architectures &amp; Interactive Web Craft
+              High-Compliance Clinical Data Infrastructure &amp; Interactive Web Craft
             </p>
 
             {/* Ambient Live System Status Chip */}
@@ -133,7 +133,7 @@ export default async function PortfolioHomePage() {
                     Interactive Physics &amp; UI Experiments
                   </h3>
                   <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-xl font-sans">
-                    Beyond standard systems engineering, explore playable canvas arcade games, real-time laser raycasting physics, 32KB embedded simulators, and formal logic tactic puzzles.
+                    Beyond serious data pipelines, explore playable canvas arcade games, real-time laser raycasting physics, 32KB embedded simulators, and puppy multitasking chaos.
                   </p>
                 </div>
                 <a
@@ -167,7 +167,7 @@ export default async function PortfolioHomePage() {
 
       {/* 2. Philosophy TextReveal Highlight */}
       <div className="bg-zinc-950 border-t border-zinc-900/50">
-        <TextReveal>I engineer high-craft digital experiences and resilient data systems, bridging clinical data rigor with creative UI physics, bespoke web applications, and meaningful civic impact.</TextReveal>
+        <TextReveal>Translating bureaucratic nightmares into clean code by day; building delightfully unhinged web experiments by night.</TextReveal>
       </div>
 
       {/* 3. About Section */}
@@ -178,10 +178,10 @@ export default async function PortfolioHomePage() {
         
         <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
           <h2 className="text-3xl md:text-4xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
-            Creative Developer &amp; Systems Architect
+            What I Actually Do
           </h2>
           <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-16 text-center">
-            Bridging Healthcare Data Rigor, UI Physics, and Civic Leadership
+            A Mix of Enterprise Data Rigor, Canvas Physics, and Civic Mischief
           </p>
           
           {/* Dynamic Bento Skills Grid Card Layout */}
@@ -190,12 +190,12 @@ export default async function PortfolioHomePage() {
           </div>
 
           <h3 className="text-2xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
-            Professional Experience &amp; Operational Journey
+            Lore, Battle Scars &amp; Side Quests
           </h3>
           <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-16 text-center">
-            A Chronological Evolution of{" "}
+            A Totally Accurate, Chronological Journey of{" "}
             <Tooltip text="Ensuring reliability for users so the platform never goes down when they need it most.">
-              Systems Rigor &amp; Real-World Impact
+              What Actually Happened
             </Tooltip>
           </p>
 
@@ -210,10 +210,10 @@ export default async function PortfolioHomePage() {
       <section id="contact" className="relative py-24 md:py-32 px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950">
         <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
           <h2 className="text-3xl md:text-4xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
-            Get In Touch
+            Say Hi &amp; Connect
           </h2>
           <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-16 text-center">
-            Let&apos;s Collaborate on Systems &amp; Design Engineering Projects
+            Drop a Line, Book a Quick Chat, or Check Out the Code
           </p>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-4xl justify-center items-stretch">
@@ -226,7 +226,7 @@ export default async function PortfolioHomePage() {
               <span className="w-9 h-9 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center font-mono text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/30 transition-colors mb-3">
                 ✉
               </span>
-              <span className="text-xs font-mono font-bold text-neutral-200 mb-1">Direct Email</span>
+              <span className="text-xs font-mono font-bold text-neutral-200 mb-1">Send an Email</span>
               <span className="text-xs font-mono text-zinc-400">fpderuiter@gmail.com</span>
             </a>
 
@@ -237,12 +237,12 @@ export default async function PortfolioHomePage() {
               className="group flex flex-col items-center justify-center p-6 bg-brand-cyan/[0.04] border border-brand-cyan/30 rounded-2xl transition-all duration-300 hover:border-brand-cyan hover:bg-brand-cyan/[0.09] hover:shadow-[0_0_25px_rgba(6,182,212,0.15)] text-center cursor-pointer relative overflow-hidden"
             >
               <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-brand-cyan/20 border border-brand-cyan/40 rounded text-[9px] font-mono text-brand-cyan uppercase tracking-wider">
-                Book
+                30 Min
               </div>
               <span className="w-9 h-9 rounded-xl bg-zinc-950 border border-brand-cyan/40 flex items-center justify-center font-mono text-brand-cyan group-hover:scale-110 transition-transform mb-3">
                 📅
               </span>
-              <span className="text-xs font-mono font-bold text-white mb-1">Schedule 1:1</span>
+              <span className="text-xs font-mono font-bold text-white mb-1">Say Hi / Book a Chat</span>
               <span className="text-xs font-mono text-brand-cyan">Google Calendar ↗</span>
             </Link>
             

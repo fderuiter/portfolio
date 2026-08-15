@@ -69,7 +69,7 @@ const timelineData: TimelineItem[] = [
 ];
 
 export const Timeline: React.FC = () => {
-  const [globalMode, setGlobalMode] = useState<"recruiter" | "reality">("recruiter");
+  const [globalMode, setGlobalMode] = useState<"recruiter" | "reality">("reality");
   const [cardOverrides, setCardOverrides] = useState<Record<number, "recruiter" | "reality">>({});
 
   const handleGlobalToggle = (mode: "recruiter" | "reality") => {
@@ -91,22 +91,11 @@ export const Timeline: React.FC = () => {
       {/* Global View Switcher */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-16 px-4 py-3 bg-zinc-900/40 border border-zinc-900/80 rounded-2xl backdrop-blur-md">
         <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
-          <span className="w-2 h-2 rounded-full bg-brand-cyan animate-pulse" />
+          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
           <span className="font-bold text-zinc-300">Timeline Perspective:</span>
         </div>
 
         <div className="flex p-0.5 bg-zinc-950/90 border border-zinc-800/80 rounded-xl text-xs font-mono">
-          <button
-            onClick={() => handleGlobalToggle("recruiter")}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer ${
-              globalMode === "recruiter"
-                ? "bg-zinc-900 text-brand-cyan border border-brand-cyan/30 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
-                : "text-zinc-400 hover:text-zinc-200 border border-transparent"
-            }`}
-          >
-            <IconBriefcase className="w-3.5 h-3.5" />
-            <span>RECRUITER VIEW</span>
-          </button>
           <button
             onClick={() => handleGlobalToggle("reality")}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer ${
@@ -117,6 +106,17 @@ export const Timeline: React.FC = () => {
           >
             <IconFlame className="w-3.5 h-3.5 text-amber-400" />
             <span>UNFILTERED REALITY</span>
+          </button>
+          <button
+            onClick={() => handleGlobalToggle("recruiter")}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer ${
+              globalMode === "recruiter"
+                ? "bg-zinc-900 text-brand-cyan border border-brand-cyan/30 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                : "text-zinc-400 hover:text-zinc-200 border border-transparent"
+            }`}
+          >
+            <IconBriefcase className="w-3.5 h-3.5" />
+            <span>CORPORATE RESUME MODE</span>
           </button>
         </div>
       </div>
@@ -192,7 +192,7 @@ export const Timeline: React.FC = () => {
                       }`}
                     >
                       <IconSwitchHorizontal className="w-3 h-3" />
-                      <span>{isReality ? "Reality" : "Recruiter"}</span>
+                      <span>{isReality ? "Reality" : "Resume Mode"}</span>
                     </button>
                   </div>
 

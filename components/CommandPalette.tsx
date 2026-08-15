@@ -78,8 +78,8 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
       },
       {
         id: "nav-contact",
-        title: "Contact Frederick",
-        subtitle: "Get in touch for premium systems engineering collaborations",
+        title: "Say Hi & Connect",
+        subtitle: "Drop a line, book a chat, or check out GitHub and LinkedIn",
         category: "navigation",
         url: "/#contact",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />
@@ -166,8 +166,8 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
       },
       {
         id: "nav-schedule",
-        title: "Schedule Consultation",
-        subtitle: "Book a 1:1 technical sync or systems architecture consultation on Google Calendar",
+        title: "Say Hi / Book a Chat",
+        subtitle: "Book a friendly 30-minute sync to chat about code, projects, or ideas",
         category: "navigation",
         url: "/schedule",
         icon: <IconCalendar className="w-4 h-4 text-brand-cyan" />
