@@ -107,3 +107,46 @@ Every release must follow expand-and-contract:
 Prisma serializes concurrent migration attempts with its PostgreSQL advisory
 lock. Never automate `migrate resolve`; it is a one-time recovery operation that
 requires a verified schema comparison and a restorable snapshot.
+
+## Connection URLs (`DATABASE_URL` vs `DIRECT_URL`)
+
+Neon databases provide two connection endpoints:
+- **Pooled Connection (`DATABASE_URL`)**: Uses Neon's transaction pooler (e.g. `ep-xxx-pooler.us-east-2.aws.neon.tech`). Used by `lib/db.ts` for runtime queries.
+- **Direct Connection (`DIRECT_URL`)**: Connects directly to Postgres compute without PgBouncer (e.g. `ep-xxx.us-east-2.aws.neon.tech`). Used by `prisma.config.ts` for Prisma migrations and CLI tooling.
+
+In Vercel and local development:
+- Set `DATABASE_URL` to the pooled connection string.
+- Set `DIRECT_URL` to the unpooled direct connection string.
+
+## Troubleshooting: Advisory Lock Timeout (`P1002`)
+
+If a build fails with:
+`Error: P1002 ... Timed out trying to acquire a postgres advisory lock (SELECT pg_advisory_lock(72707369))`
+
+This indicates a dangling lock held by a previous deployment, an interrupted baseline attempt, or a connection pooler holding session state.
+
+### Resolution Steps
+
+1. Connect to the database via Neon SQL Editor or `psql`.
+2. Inspect active advisory locks:
+   ```sql
+   SELECT pid, locktype, mode, granted, classid, objid
+   FROM pg_locks
+   WHERE locktype = 'advisory';
+   ```
+3. Terminate the specific backend process holding the advisory lock (advisory locks are session-scoped and can only be unlocked by the owning session or by terminating the backend PID):
+   ```sql
+   SELECT pg_terminate_backend(l.pid)
+   FROM pg_locks l
+   WHERE l.locktype = 'advisory'
+     AND l.objid = 72707369;
+   ```
+4. Alternatively, terminate all other active/idle client connections:
+   ```sql
+   SELECT pg_terminate_backend(pid)
+   FROM pg_stat_activity
+   WHERE pid <> pg_backend_pid()
+     AND datname = current_database();
+   ```
+5. Ensure `DIRECT_URL` is set in Vercel environment variables to avoid pooled lock contention.
+

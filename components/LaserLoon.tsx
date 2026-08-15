@@ -10,85 +10,62 @@ import {
   IconPlayerPlay,
   IconSnowflake,
 } from "@tabler/icons-react";
+import {
+  LaserMode,
+  LaserType,
+  Target,
+  IceBlock,
+  Particle,
+  FloatingText,
+  createInitialState,
+  spawnTarget as engineSpawnTarget,
+  createIceBlock as engineCreateIceBlock,
+  updateIceBlocksAndCollisions,
+  updateTargetsPosition,
+  checkLaserRayHit,
+  calculateNextComboAndMultiplier,
+  createExplosionParticles,
+  updateParticles,
+  updateFloatingTexts,
+  WEAPONS,
+  DEFAULT_CANVAS_WIDTH,
+  DEFAULT_CANVAS_HEIGHT,
+} from "@/lib/laser-loon";
 
 const emptySubscribe = () => () => {};
 
-export type LaserMode = "arcade" | "sandbox";
-export type LaserType = "cyan-pulse" | "emerald-beam" | "rainbow-chaos" | "ice-cannon";
-
-interface Target {
-  id: number;
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  radius: number;
-  type: "memory-leak" | "hydration-error" | "null-pointer" | "segfault" | "drop-db" | "alien" | "iceberg";
-  label: string;
-  color: string;
-  hp: number;
-  maxHp: number;
-  points: number;
-  pulsePhase: number;
-  frozenTimer: number; // >0 means frozen in ice!
-}
-
-interface IceBlock {
-  id: number;
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  size: number;
-  rotation: number;
-  vRot: number;
-  hp: number;
-}
-
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  radius: number;
-  color: string;
-  alpha: number;
-  decay: number;
-  shape?: "circle" | "crystal";
-  rotation?: number;
-}
-
-interface FloatingText {
-  id: number;
-  x: number;
-  y: number;
-  text: string;
-  color: string;
-  alpha: number;
-  vy: number;
-}
-
-const BUG_TYPES = [
-  { type: "memory-leak", label: "Memory Leak", color: "#f43f5e", points: 100, hp: 1, radius: 18 },
-  { type: "hydration-error", label: "Hydration Mismatch", color: "#f59e0b", points: 150, hp: 2, radius: 22 },
-  { type: "null-pointer", label: "Null Pointer", color: "#a855f7", points: 120, hp: 1, radius: 16 },
-  { type: "segfault", label: "SegFault 11", color: "#ef4444", points: 250, hp: 3, radius: 26 },
-  { type: "drop-db", label: "DROP TABLE", color: "#ec4899", points: 300, hp: 4, radius: 28 },
-  { type: "alien", label: "404 Alien", color: "#06b6d4", points: 80, hp: 1, radius: 15 },
-  { type: "iceberg", label: "Glacial Iceberg", color: "#38bdf8", points: 200, hp: 3, radius: 30 },
-] as const;
+const subscribeHighScore = (callback: () => void) => {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("storage", callback);
+  return () => window.removeEventListener("storage", callback);
+};
+const getHighScoreSnapshot = () => {
+  try {
+    return localStorage.getItem("laser_loon_high_score") || "0";
+  } catch {
+    return "0";
+  }
+};
+const getHighScoreServerSnapshot = () => "0";
 
 export const LaserLoon: React.FC = () => {
   const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const rawHighScore = useSyncExternalStore(
+    subscribeHighScore,
+    getHighScoreSnapshot,
+    getHighScoreServerSnapshot
+  );
+  const loadedHighScore = parseInt(rawHighScore, 10) || 0;
   const { playNote, playSuccess } = useAudio();
   const { recordEvent } = useTelemetry();
 
-  // Game configuration & state
+  // Game configuration & React state
   const [mode, setMode] = useState<LaserMode>("arcade");
   const [laserType, setLaserType] = useState<LaserType>("ice-cannon");
   const [gameState, setGameState] = useState<"idle" | "playing" | "gameover">("idle");
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
+  const effectiveHighScore = Math.max(highScore, loadedHighScore);
   const [combo, setCombo] = useState(0);
   const [multiplier, setMultiplier] = useState(1);
   const [timeLeft, setTimeLeft] = useState(45);
@@ -99,13 +76,13 @@ export const LaserLoon: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Mutable Game Physics Refs
+  // Mutable Game Physics & Animation Refs
   const targetsRef = useRef<Target[]>([]);
   const iceBlocksRef = useRef<IceBlock[]>([]);
   const particlesRef = useRef<Particle[]>([]);
   const floatingTextsRef = useRef<FloatingText[]>([]);
-  const loonPosRef = useRef({ x: 120, y: 200, targetX: 120, targetY: 200 });
-  const aimPosRef = useRef({ x: 380, y: 200 });
+  const loonPosRef = useRef({ x: 120, y: 180, targetX: 120, targetY: 180 });
+  const aimPosRef = useRef({ x: 380, y: 180 });
   const isFiringRef = useRef(false);
   const isDraggingLoonRef = useRef(false);
   const nextTargetIdRef = useRef(1);
@@ -116,18 +93,7 @@ export const LaserLoon: React.FC = () => {
   const animFrameIdRef = useRef<number | null>(null);
   const shakeIntensityRef = useRef(0);
 
-  // Load high score from local storage
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const saved = localStorage.getItem("laser_loon_high_score");
-    if (saved) {
-      setTimeout(() => {
-        setHighScore(parseInt(saved, 10) || 0);
-      }, 0);
-    }
-  }, []);
-
-  // Audio synthesis helpers
+  // Audio synthesis helpers with robust error handling
   const playLaserSound = useCallback((type: LaserType) => {
     try {
       if (type === "cyan-pulse") {
@@ -141,7 +107,6 @@ export const LaserLoon: React.FC = () => {
         playNote(659.25, 0.04);
         playNote(783.99, 0.04);
       } else if (type === "ice-cannon") {
-        // Ice block launch whoosh + icy glint
         playNote(330, 0.08);
         setTimeout(() => playNote(660, 0.06), 30);
       }
@@ -150,7 +115,6 @@ export const LaserLoon: React.FC = () => {
 
   const playIceShatterSound = useCallback(() => {
     try {
-      // Ice crunch / glass shattering arpeggio
       const freqs = [1046.5, 1318.5, 1567.98, 2093.0];
       freqs.forEach((f, idx) => {
         setTimeout(() => playNote(f, 0.05), idx * 25);
@@ -173,66 +137,7 @@ export const LaserLoon: React.FC = () => {
     } catch {}
   }, [playNote]);
 
-  // Target spawner
-  const spawnTarget = useCallback((canvasWidth: number, canvasHeight: number) => {
-    const template = BUG_TYPES[Math.floor(Math.random() * BUG_TYPES.length)];
-    const edge = Math.floor(Math.random() * 3);
-    let x = canvasWidth + 25;
-    let y = Math.random() * (canvasHeight - 80) + 40;
-    const vx = -(Math.random() * 1.6 + 0.8);
-    let vy = (Math.random() - 0.5) * 1.2;
-
-    if (edge === 0) {
-      x = Math.random() * (canvasWidth * 0.5) + canvasWidth * 0.5;
-      y = -25;
-      vy = Math.random() * 1.2 + 0.5;
-    } else if (edge === 1) {
-      x = Math.random() * (canvasWidth * 0.5) + canvasWidth * 0.5;
-      y = canvasHeight + 25;
-      vy = -(Math.random() * 1.2 + 0.5);
-    }
-
-    const newTarget: Target = {
-      id: nextTargetIdRef.current++,
-      x,
-      y,
-      vx,
-      vy,
-      radius: template.radius,
-      type: template.type,
-      label: template.label,
-      color: template.color,
-      hp: template.hp,
-      maxHp: template.hp,
-      points: template.points,
-      pulsePhase: Math.random() * Math.PI * 2,
-      frozenTimer: 0,
-    };
-
-    targetsRef.current.push(newTarget);
-  }, []);
-
-  // Spawn particle explosion (fire/spark or ice crystal)
-  const spawnExplosion = useCallback((x: number, y: number, color: string, count = 18, isIce = false) => {
-    for (let i = 0; i < count; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * (isIce ? 5 : 4) + 1.5;
-      particlesRef.current.push({
-        x,
-        y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        radius: isIce ? Math.random() * 5 + 2 : Math.random() * 3.5 + 1.5,
-        color: isIce ? (Math.random() > 0.4 ? "#38bdf8" : "#ffffff") : color,
-        alpha: 1,
-        decay: Math.random() * 0.03 + (isIce ? 0.015 : 0.02),
-        shape: isIce ? "crystal" : "circle",
-        rotation: Math.random() * Math.PI * 2,
-      });
-    }
-  }, []);
-
-  // Floating text
+  // Floating text helper
   const addFloatingText = useCallback((x: number, y: number, text: string, color: string) => {
     floatingTextsRef.current.push({
       id: nextTextIdRef.current++,
@@ -245,38 +150,59 @@ export const LaserLoon: React.FC = () => {
     });
   }, []);
 
-  // Launch Ice Block from Loon Beak / Eye
+  // Particle helper
+  const spawnExplosion = useCallback((x: number, y: number, color: string, count = 18, isIce = false) => {
+    const newParticles = createExplosionParticles(x, y, color, count, isIce);
+    particlesRef.current.push(...newParticles);
+  }, []);
+
+  // Launch Ice Block
   const launchIceBlock = useCallback((fromX: number, fromY: number, targetX: number, targetY: number) => {
-    const dx = targetX - fromX;
-    const dy = targetY - fromY;
-    const dist = Math.hypot(dx, dy) || 1;
-    const speed = 7.5;
-
-    const newBlock: IceBlock = {
-      id: nextIceIdRef.current++,
-      x: fromX,
-      y: fromY,
-      vx: (dx / dist) * speed,
-      vy: (dy / dist) * speed,
-      size: 26, // Cube width
-      rotation: Math.random() * Math.PI * 2,
-      vRot: (Math.random() - 0.5) * 0.15,
-      hp: 1,
-    };
-
-    iceBlocksRef.current.push(newBlock);
-
-    // Frost trail at launch
+    const { iceBlock, nextId } = engineCreateIceBlock(fromX, fromY, targetX, targetY, nextIceIdRef.current);
+    nextIceIdRef.current = nextId;
+    iceBlocksRef.current.push(iceBlock);
     spawnExplosion(fromX, fromY, "#38bdf8", 6, true);
   }, [spawnExplosion]);
 
+  // High score updater
+  const addScore = useCallback((pts: number) => {
+    setScore((s) => {
+      const next = s + pts;
+      setHighScore((h) => {
+        if (next > h) {
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.setItem("laser_loon_high_score", next.toString());
+            } catch {}
+          }
+          return next;
+        }
+        return h;
+      });
+      return next;
+    });
+  }, []);
+
+  // Spawner callback
+  const spawnTarget = useCallback((width: number, height: number) => {
+    const { updatedTargets, nextId } = engineSpawnTarget(
+      targetsRef.current,
+      nextTargetIdRef.current,
+      width,
+      height
+    );
+    targetsRef.current = updatedTargets;
+    nextTargetIdRef.current = nextId;
+  }, []);
+
   // Start game session
   const startGame = useCallback(() => {
+    const fresh = createInitialState(mode);
     setGameState("playing");
     setScore(0);
     setCombo(0);
     setMultiplier(1);
-    setTimeLeft(mode === "arcade" ? 45 : 60);
+    setTimeLeft(fresh.timeLeft);
     targetsRef.current = [];
     iceBlocksRef.current = [];
     particlesRef.current = [];
@@ -318,28 +244,11 @@ export const LaserLoon: React.FC = () => {
     return () => clearInterval(timer);
   }, [gameState, mode, playSuccess, recordEvent]);
 
-  // High score updater
-  const addScore = useCallback((pts: number) => {
-    setScore((s) => {
-      const next = s + pts;
-      setHighScore((h) => {
-        if (next > h) {
-          if (typeof window !== "undefined") {
-            localStorage.setItem("laser_loon_high_score", next.toString());
-          }
-          return next;
-        }
-        return h;
-      });
-      return next;
-    });
-  }, []);
-
-  // Handle Laser / Ice Firing
+  // Weapon fire trigger
   const fireWeapon = useCallback(() => {
     const now = performance.now();
-    const isIce = laserType === "ice-cannon";
-    const fireInterval = isIce ? 220 : laserType === "emerald-beam" ? 80 : 140;
+    const weapon = WEAPONS[laserType];
+    const fireInterval = weapon ? weapon.fireIntervalMs : 140;
 
     if (now - lastFireTimeRef.current < fireInterval) return;
     lastFireTimeRef.current = now;
@@ -353,67 +262,45 @@ export const LaserLoon: React.FC = () => {
     const beakY = loon.y - 8;
     const aim = aimPosRef.current;
 
-    if (isIce) {
-      // Launch spinning glacial Ice Block from beak!
+    if (laserType === "ice-cannon") {
       launchIceBlock(beakX, beakY, aim.x, aim.y);
       return;
     }
 
-    // Otherwise Raycast Laser Check
-    const dx = aim.x - eyeX;
-    const dy = aim.y - eyeY;
-    const dist = Math.hypot(dx, dy) || 1;
-    const dirX = dx / dist;
-    const dirY = dy / dist;
+    // Raycast hit check
+    const hitResult = checkLaserRayHit(eyeX, eyeY, aim.x, aim.y, laserType, targetsRef.current);
+    targetsRef.current = hitResult.updatedTargets;
 
-    let hitAny = false;
-
-    targetsRef.current.forEach((t) => {
-      const toTx = t.x - eyeX;
-      const toTy = t.y - eyeY;
-      const proj = toTx * dirX + toTy * dirY;
-
-      if (proj > 0) {
-        const nearX = eyeX + dirX * proj;
-        const nearY = eyeY + dirY * proj;
-        const distToRay = Math.hypot(t.x - nearX, t.y - nearY);
-
-        if (distToRay < t.radius + (laserType === "emerald-beam" ? 14 : 8)) {
-          hitAny = true;
-          t.hp -= laserType === "emerald-beam" ? 0.75 : 1;
-
-          spawnExplosion(nearX, nearY, t.color, 4);
-
-          if (t.hp <= 0) {
-            playExplodeSound();
-            spawnExplosion(t.x, t.y, t.color, 24);
-
-            if (screenShakeEnabled) shakeIntensityRef.current = 6;
-
-            const timeSinceLastCombo = now - lastComboTimeRef.current;
-            lastComboTimeRef.current = now;
-
-            let nextCombo = 1;
-            if (timeSinceLastCombo < 1800) nextCombo = combo + 1;
-            setCombo(nextCombo);
-
-            const nextMult = Math.min(5, Math.floor(nextCombo / 3) + 1);
-            setMultiplier(nextMult);
-
-            const pts = t.points * nextMult;
-            addScore(pts);
-            addFloatingText(t.x, t.y, `+${pts}`, t.color);
-
-            if (nextCombo > 1 && nextCombo % 3 === 0) {
-              playComboSound(nextCombo);
-              addFloatingText(t.x, t.y - 20, `${nextMult}x COMBO!`, "#38bdf8");
-            }
-          }
-        }
-      }
+    hitResult.damagedPoints.forEach((pt) => {
+      spawnExplosion(pt.x, pt.y, pt.color, 4);
     });
 
-    if (hitAny && screenShakeEnabled && shakeIntensityRef.current === 0) {
+    if (hitResult.killedTargets.length > 0) {
+      playExplodeSound();
+      if (screenShakeEnabled) shakeIntensityRef.current = 6;
+
+      hitResult.killedTargets.forEach((t) => {
+        spawnExplosion(t.x, t.y, t.color, 24);
+
+        const { nextCombo, nextMultiplier } = calculateNextComboAndMultiplier(
+          combo,
+          lastComboTimeRef.current,
+          now
+        );
+        lastComboTimeRef.current = now;
+        setCombo(nextCombo);
+        setMultiplier(nextMultiplier);
+
+        const pts = t.points * nextMultiplier;
+        addScore(pts);
+        addFloatingText(t.x, t.y, `+${pts}`, t.color);
+
+        if (nextCombo > 1 && nextCombo % 3 === 0) {
+          playComboSound(nextCombo);
+          addFloatingText(t.x, t.y - 20, `${nextMultiplier}x COMBO!`, "#38bdf8");
+        }
+      });
+    } else if (hitResult.hitAny && screenShakeEnabled && shakeIntensityRef.current === 0) {
       shakeIntensityRef.current = 2;
     }
   }, [
@@ -443,10 +330,10 @@ export const LaserLoon: React.FC = () => {
       const dt = Math.min(32, time - lastFrameTime) / 16.666;
       lastFrameTime = time;
 
-      const width = canvas.width;
-      const height = canvas.height;
+      const width = canvas.width || DEFAULT_CANVAS_WIDTH;
+      const height = canvas.height || DEFAULT_CANVAS_HEIGHT;
 
-      // Handle screen shake
+      // Screen shake calculation
       let shakeOffsetX = 0;
       let shakeOffsetY = 0;
       if (shakeIntensityRef.current > 0) {
@@ -512,65 +399,41 @@ export const LaserLoon: React.FC = () => {
         }
       }
 
-      // 4. Update & Render Ice Blocks
-      iceBlocksRef.current = iceBlocksRef.current.filter((block) => {
-        block.x += block.vx * dt;
-        block.y += block.vy * dt;
-        block.rotation += block.vRot * dt;
+      // 4. Update & Render Ice Blocks and Collisions
+      const iceResult = updateIceBlocksAndCollisions(
+        iceBlocksRef.current,
+        targetsRef.current,
+        dt,
+        mode,
+        gravity,
+        width,
+        height
+      );
+      iceBlocksRef.current = iceResult.updatedIceBlocks;
+      targetsRef.current = iceResult.updatedTargets;
 
-        if (mode === "sandbox") {
-          block.vy += gravity * dt;
-        }
+      // Handle ice shatter events
+      iceResult.shatteredBlocks.forEach((pt) => {
+        playIceShatterSound();
+        spawnExplosion(pt.x, pt.y, "#38bdf8", 18, true);
+        if (screenShakeEnabled) shakeIntensityRef.current = 4;
+      });
 
-        // Frost particle trail
-        if (Math.random() < 0.4 * dt) {
-          particlesRef.current.push({
-            x: block.x + (Math.random() - 0.5) * 10,
-            y: block.y + (Math.random() - 0.5) * 10,
-            vx: -block.vx * 0.2 + (Math.random() - 0.5),
-            vy: -block.vy * 0.2 + (Math.random() - 0.5),
-            radius: Math.random() * 2.5 + 1,
-            color: "#38bdf8",
-            alpha: 0.8,
-            decay: 0.03,
-            shape: "crystal",
-          });
-        }
+      iceResult.frozenTargets.forEach((t) => {
+        addFloatingText(t.x, t.y, "CRYO-FROZEN!", "#38bdf8");
+      });
 
-        // Collision Check: Ice Block vs Targets
-        let blockShattered = false;
+      if (iceResult.pointsEarned > 0) {
+        addScore(iceResult.pointsEarned);
+      }
 
-        targetsRef.current.forEach((t) => {
-          if (t.hp <= 0) return;
-          const dist = Math.hypot(t.x - block.x, t.y - block.y);
-          if (dist < t.radius + block.size * 0.5) {
-            blockShattered = true;
-            t.hp -= 2; // Ice block deals massive crushing damage!
-            t.frozenTimer = 90; // Freeze target solid!
+      iceResult.killedTargets.forEach((t) => {
+        spawnExplosion(t.x, t.y, "#38bdf8", 28, true);
+        addFloatingText(t.x, t.y, `SHATTERED! +${t.points * 2}`, "#38bdf8");
+      });
 
-            // Shatter effects
-            playIceShatterSound();
-            spawnExplosion(block.x, block.y, "#38bdf8", 22, true);
-
-            if (screenShakeEnabled) shakeIntensityRef.current = 5;
-
-            if (t.hp <= 0) {
-              spawnExplosion(t.x, t.y, "#38bdf8", 30, true);
-              addFloatingText(t.x, t.y, `SHATTERED! +${t.points * 2}`, "#38bdf8");
-              addScore(t.points * 2);
-            } else {
-              addFloatingText(t.x, t.y, "CRYO-FROZEN!", "#38bdf8");
-            }
-          }
-        });
-
-        // Bounce / Shatter on walls
-        if (block.y < 15 || block.y > height - 15) {
-          block.vy *= -0.8;
-          spawnExplosion(block.x, block.y, "#38bdf8", 6, true);
-        }
-
-        // Render Ice Block as Frosted Glowing 3D Voxel Cube
+      // Render Active Ice Blocks
+      iceBlocksRef.current.forEach((block) => {
         ctx.save();
         ctx.translate(block.x, block.y);
         ctx.rotate(block.rotation);
@@ -578,7 +441,6 @@ export const LaserLoon: React.FC = () => {
         const s = block.size;
         const half = s / 2;
 
-        // Ice Block Glow
         const iceGlow = ctx.createRadialGradient(0, 0, 2, 0, 0, s);
         iceGlow.addColorStop(0, "rgba(56, 189, 248, 0.7)");
         iceGlow.addColorStop(0.6, "rgba(56, 189, 248, 0.2)");
@@ -588,16 +450,14 @@ export const LaserLoon: React.FC = () => {
         ctx.arc(0, 0, s, 0, Math.PI * 2);
         ctx.fill();
 
-        // Main Ice Cube Body
-        ctx.fillStyle = "rgba(186, 230, 253, 0.85)"; // Light Ice Blue
-        ctx.strokeStyle = "#38bdf8"; // Glacial Cyan outline
+        ctx.fillStyle = "rgba(186, 230, 253, 0.85)";
+        ctx.strokeStyle = "#38bdf8";
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.roundRect(-half, -half, s, s, 4);
         ctx.fill();
         ctx.stroke();
 
-        // Internal Ice Refraction & Crystal Glints
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 1.5;
         ctx.beginPath();
@@ -607,7 +467,6 @@ export const LaserLoon: React.FC = () => {
         ctx.lineTo(-half + 3, half - 6);
         ctx.stroke();
 
-        // Snowflake icon in center of ice block
         ctx.fillStyle = "#0284c7";
         ctx.font = "bold 11px sans-serif";
         ctx.textAlign = "center";
@@ -615,44 +474,14 @@ export const LaserLoon: React.FC = () => {
         ctx.fillText("❄️", 0, 0);
 
         ctx.restore();
-
-        return !blockShattered && block.x < width + 50 && block.x > -50;
       });
 
       // 5. Update & Render Targets
-      targetsRef.current = targetsRef.current.filter((t) => {
-        // Freeze logic
-        if (t.frozenTimer > 0) {
-          t.frozenTimer -= 1 * dt;
-          // Target is immobilized while frozen
-        } else {
-          t.x += t.vx * dt;
-          t.y += t.vy * dt;
-          t.pulsePhase += 0.05 * dt;
+      targetsRef.current = updateTargetsPosition(targetsRef.current, dt, mode, gravity, height);
 
-          if (mode === "sandbox") {
-            t.vy += gravity * dt;
-          }
-
-          if (t.y - t.radius < 10) {
-            t.y = 10 + t.radius;
-            t.vy *= -0.8;
-          } else if (t.y + t.radius > height - 10) {
-            t.y = height - 10 - t.radius;
-            t.vy *= -0.8;
-          }
-        }
-
-        // Target Glow
+      targetsRef.current.forEach((t) => {
         const pulse = Math.sin(t.pulsePhase) * 3;
-        const glow = ctx.createRadialGradient(
-          t.x,
-          t.y,
-          2,
-          t.x,
-          t.y,
-          t.radius + 8 + pulse
-        );
+        const glow = ctx.createRadialGradient(t.x, t.y, 2, t.x, t.y, t.radius + 8 + pulse);
         glow.addColorStop(0, (t.frozenTimer > 0 ? "#38bdf8" : t.color) + "66");
         glow.addColorStop(1, t.color + "00");
         ctx.fillStyle = glow;
@@ -660,7 +489,6 @@ export const LaserLoon: React.FC = () => {
         ctx.arc(t.x, t.y, t.radius + 8 + pulse, 0, Math.PI * 2);
         ctx.fill();
 
-        // Target Core
         ctx.fillStyle = t.frozenTimer > 0 ? "rgba(186, 230, 253, 0.9)" : "#18181b";
         ctx.beginPath();
         ctx.arc(t.x, t.y, t.radius, 0, Math.PI * 2);
@@ -670,41 +498,30 @@ export const LaserLoon: React.FC = () => {
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // Frozen Ice Cage overlay if frozen
         if (t.frozenTimer > 0) {
           ctx.strokeStyle = "#ffffff";
           ctx.lineWidth = 1.5;
           ctx.strokeRect(t.x - t.radius - 2, t.y - t.radius - 2, (t.radius + 2) * 2, (t.radius + 2) * 2);
         }
 
-        // Health Arc
         if (t.maxHp > 1) {
           ctx.strokeStyle = "#10b981";
           ctx.lineWidth = 3;
           ctx.beginPath();
           const hpPct = Math.max(0, t.hp / t.maxHp);
-          ctx.arc(
-            t.x,
-            t.y,
-            t.radius + 3,
-            -Math.PI / 2,
-            -Math.PI / 2 + Math.PI * 2 * hpPct
-          );
+          ctx.arc(t.x, t.y, t.radius + 3, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * hpPct);
           ctx.stroke();
         }
 
-        // Label
         ctx.fillStyle = t.frozenTimer > 0 ? "#0369a1" : "#ffffff";
         ctx.font = "bold 9px monospace";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         const shortName = t.label.length > 10 ? t.label.slice(0, 8) + ".." : t.label;
         ctx.fillText(shortName, t.x, t.y);
-
-        return t.x > -50 && t.hp > 0;
       });
 
-      // 6. Laser Aim Sight & Reticle
+      // 6. Laser Aim Reticle & Active Laser Beams
       const eyeX = loon.x + 32;
       const eyeY = loon.y - 12;
       const aim = aimPosRef.current;
@@ -718,7 +535,6 @@ export const LaserLoon: React.FC = () => {
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Crosshair Reticle
       ctx.strokeStyle = laserType === "ice-cannon" ? "#38bdf8" : "#06b6d4";
       ctx.lineWidth = 1.5;
       ctx.beginPath();
@@ -729,10 +545,9 @@ export const LaserLoon: React.FC = () => {
       ctx.moveTo(aim.x - 12, aim.y);
       ctx.lineTo(aim.x + 12, aim.y);
       ctx.moveTo(aim.x, aim.y - 12);
-      ctx.lineTo(aim.x, aim.y + 12);
+      ctx.lineTo(aim.x + 12, aim.y);
       ctx.stroke();
 
-      // Active Firing Laser Beam (if not ice cannon)
       if (isFiringRef.current && laserType !== "ice-cannon") {
         ctx.save();
         if (laserType === "cyan-pulse") {
@@ -762,7 +577,6 @@ export const LaserLoon: React.FC = () => {
           ctx.lineWidth = 3;
           ctx.stroke();
         } else {
-          // Rainbow Chaos Beam
           const grad = ctx.createLinearGradient(eyeX, eyeY, aim.x, aim.y);
           grad.addColorStop(0, "#f43f5e");
           grad.addColorStop(0.33, "#eab308");
@@ -781,11 +595,10 @@ export const LaserLoon: React.FC = () => {
         ctx.restore();
       }
 
-      // 7. Canadian Laser Loon Avatar
+      // 7. Render Canadian Laser Loon
       ctx.save();
       ctx.translate(loon.x, loon.y);
 
-      // Frost aura around Loon if Ice Cannon is active
       if (laserType === "ice-cannon") {
         const loonGlow = ctx.createRadialGradient(10, 0, 5, 10, 0, 45);
         loonGlow.addColorStop(0, "rgba(56, 189, 248, 0.35)");
@@ -796,13 +609,11 @@ export const LaserLoon: React.FC = () => {
         ctx.fill();
       }
 
-      // Jetpack / Glacial Particle Trail
       ctx.fillStyle = laserType === "ice-cannon" ? "rgba(56, 189, 248, 0.3)" : "rgba(6, 182, 212, 0.15)";
       ctx.beginPath();
       ctx.ellipse(-20, 20, 30, 8, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Loon Body
       ctx.fillStyle = "#18181b";
       ctx.beginPath();
       ctx.ellipse(0, 10, 36, 20, -0.1, 0, Math.PI * 2);
@@ -811,7 +622,6 @@ export const LaserLoon: React.FC = () => {
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // Loon White Neck Collar Pattern
       ctx.fillStyle = "#e4e4e7";
       ctx.beginPath();
       ctx.rect(14, -8, 6, 16);
@@ -821,13 +631,11 @@ export const LaserLoon: React.FC = () => {
       ctx.rect(16, -6, 2, 12);
       ctx.fill();
 
-      // Loon Neck & Head
       ctx.fillStyle = "#09090b";
       ctx.beginPath();
       ctx.ellipse(22, -10, 14, 18, 0.4, 0, Math.PI * 2);
       ctx.fill();
 
-      // Cyber Beak (Frosted Cyan if Ice Cannon)
       ctx.fillStyle = laserType === "ice-cannon" ? "#38bdf8" : "#f59e0b";
       ctx.beginPath();
       ctx.moveTo(34, -14);
@@ -836,7 +644,6 @@ export const LaserLoon: React.FC = () => {
       ctx.closePath();
       ctx.fill();
 
-      // Laser Eye
       const eyeColor =
         laserType === "ice-cannon"
           ? "#38bdf8"
@@ -860,14 +667,9 @@ export const LaserLoon: React.FC = () => {
 
       ctx.restore();
 
-      // 8. Update & Draw Particles (Circles & Ice Crystals)
-      particlesRef.current = particlesRef.current.filter((p) => {
-        p.x += p.vx * dt;
-        p.y += p.vy * dt;
-        p.alpha -= p.decay * dt;
-
-        if (p.alpha <= 0) return false;
-
+      // 8. Update & Draw Particles
+      particlesRef.current = updateParticles(particlesRef.current, dt);
+      particlesRef.current.forEach((p) => {
         ctx.save();
         ctx.globalAlpha = Math.max(0, p.alpha);
         ctx.fillStyle = p.color;
@@ -884,17 +686,11 @@ export const LaserLoon: React.FC = () => {
           ctx.fill();
         }
         ctx.restore();
-
-        return true;
       });
 
-      // 9. Floating Text Popups
-      floatingTextsRef.current = floatingTextsRef.current.filter((f) => {
-        f.y += f.vy * dt;
-        f.alpha -= 0.02 * dt;
-
-        if (f.alpha <= 0) return false;
-
+      // 9. Update & Draw Floating Texts
+      floatingTextsRef.current = updateFloatingTexts(floatingTextsRef.current, dt);
+      floatingTextsRef.current.forEach((f) => {
         ctx.save();
         ctx.globalAlpha = Math.max(0, f.alpha);
         ctx.fillStyle = f.color;
@@ -904,8 +700,6 @@ export const LaserLoon: React.FC = () => {
         ctx.shadowBlur = 8;
         ctx.fillText(f.text, f.x, f.y);
         ctx.restore();
-
-        return true;
       });
 
       ctx.restore();
@@ -935,15 +729,15 @@ export const LaserLoon: React.FC = () => {
     addScore,
   ]);
 
-  // Mouse & Touch Controls
-  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  // Pointer / Mouse / Touch Controls
+  const updatePointerAim = (clientX: number, clientY: number) => {
     if (!canvasRef.current) return;
     const rect = canvasRef.current.getBoundingClientRect();
-    const scaleX = canvasRef.current.width / rect.width;
-    const scaleY = canvasRef.current.height / rect.height;
+    const scaleX = (canvasRef.current.width || DEFAULT_CANVAS_WIDTH) / (rect.width || 1);
+    const scaleY = (canvasRef.current.height || DEFAULT_CANVAS_HEIGHT) / (rect.height || 1);
 
-    const mouseX = (e.clientX - rect.left) * scaleX;
-    const mouseY = (e.clientY - rect.top) * scaleY;
+    const mouseX = (clientX - rect.left) * scaleX;
+    const mouseY = (clientY - rect.top) * scaleY;
 
     aimPosRef.current = { x: mouseX, y: mouseY };
 
@@ -953,8 +747,12 @@ export const LaserLoon: React.FC = () => {
       loonPosRef.current.targetX = mouseX;
       loonPosRef.current.targetY = mouseY;
     } else {
-      loonPosRef.current.targetY = Math.max(40, Math.min(canvasRef.current.height - 40, mouseY));
+      loonPosRef.current.targetY = Math.max(40, Math.min((canvasRef.current.height || DEFAULT_CANVAS_HEIGHT) - 40, mouseY));
     }
+  };
+
+  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    updatePointerAim(e.clientX, e.clientY);
   };
 
   const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -962,8 +760,8 @@ export const LaserLoon: React.FC = () => {
     containerRef.current?.focus();
 
     const rect = canvasRef.current.getBoundingClientRect();
-    const scaleX = canvasRef.current.width / rect.width;
-    const scaleY = canvasRef.current.height / rect.height;
+    const scaleX = (canvasRef.current.width || DEFAULT_CANVAS_WIDTH) / (rect.width || 1);
+    const scaleY = (canvasRef.current.height || DEFAULT_CANVAS_HEIGHT) / (rect.height || 1);
     const mouseX = (e.clientX - rect.left) * scaleX;
     const mouseY = (e.clientY - rect.top) * scaleY;
 
@@ -977,6 +775,25 @@ export const LaserLoon: React.FC = () => {
   };
 
   const handleCanvasMouseUp = () => {
+    isFiringRef.current = false;
+    isDraggingLoonRef.current = false;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length > 0) {
+      updatePointerAim(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length > 0) {
+      updatePointerAim(e.touches[0].clientX, e.touches[0].clientY);
+      isFiringRef.current = true;
+      fireWeapon();
+    }
+  };
+
+  const handleTouchEnd = () => {
     isFiringRef.current = false;
     isDraggingLoonRef.current = false;
   };
@@ -1136,7 +953,7 @@ export const LaserLoon: React.FC = () => {
           <div className="flex items-center gap-1.5 px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-300">
             <IconTrophy className="w-3.5 h-3.5 text-amber-400" />
             <span className="text-[10px] text-neutral-500">HI:</span>
-            <span className="font-bold text-amber-400">{highScore}</span>
+            <span className="font-bold text-amber-400">{effectiveHighScore}</span>
           </div>
 
           <div className="flex items-center gap-1.5 px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-300">
@@ -1205,7 +1022,10 @@ export const LaserLoon: React.FC = () => {
           onMouseMove={handleCanvasMouseMove}
           onMouseDown={handleCanvasMouseDown}
           onMouseUp={handleCanvasMouseUp}
-          className="w-full h-full block cursor-crosshair"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          className="w-full h-full block cursor-crosshair touch-none"
         />
 
         {/* Start Overlay Screen */}

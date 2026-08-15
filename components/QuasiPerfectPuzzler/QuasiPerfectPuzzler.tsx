@@ -360,12 +360,34 @@ export const QuasiPerfectPuzzler: React.FC = () => {
     playNote(261.63, 0.1);
   }, [loadLevel, currentLevelIndex, playNote]);
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (e.key === "z" && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      handleUndo();
+    } else if (e.key === "y" && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      handleRedo();
+    } else if (e.key === "r" || e.key === "R") {
+      e.preventDefault();
+      handleResetLevel();
+    } else if (["1", "2", "3", "4", "5"].includes(e.key)) {
+      const idx = parseInt(e.key, 10) - 1;
+      if (puzzleLevels[idx]) {
+        e.preventDefault();
+        loadLevel(idx);
+      }
+    }
+  };
+
   const isOOM = currentRam <= 0 && !levelSolved;
 
   return (
     <section
       aria-labelledby="quasi-puzzler-heading"
-      className="relative rounded-2xl border border-brand-cyan/30 bg-zinc-950/90 p-5 font-mono shadow-[0_0_35px_-10px_rgba(6,182,212,0.35)]"
+      tabIndex={0}
+      data-keyboard-boundary="true"
+      onKeyDown={handleKeyDown}
+      className="relative rounded-2xl border border-brand-cyan/30 bg-zinc-950/90 p-5 font-mono shadow-[0_0_35px_-10px_rgba(6,182,212,0.35)] outline-none focus:border-brand-cyan"
     >
       {/* 1. Header & Level Picker */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800/80 pb-4">

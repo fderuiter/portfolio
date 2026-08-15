@@ -11,6 +11,9 @@ if (!process.env.DATABASE_URL) {
   const dbName = 'dummy';
   process.env.DATABASE_URL = `postgres` + `ql://` + userPass + '@' + hostPort + '/' + dbName;
 }
+if (!process.env.DIRECT_URL) {
+  process.env.DIRECT_URL = process.env.DATABASE_URL;
+}
 if (!process.env.CRON_SECRET) {
   console.log("No CRON_SECRET found. Setting dummy CRON_SECRET for offline compilation.");
   process.env.CRON_SECRET = 'dummy-secret-for-compilation';

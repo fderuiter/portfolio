@@ -620,9 +620,11 @@ export const ClinicalTrialChaos: React.FC = () => {
     else if (key === "4") handleInitiateSubmission("LB");
   };
 
-  // Auto-scroll terminal log
+  // Auto-scroll terminal log safely
   useEffect(() => {
-    terminalBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (typeof terminalBottomRef.current?.scrollIntoView === "function") {
+      terminalBottomRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [auditLogs]);
 
   // SSR check

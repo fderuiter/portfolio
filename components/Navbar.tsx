@@ -18,6 +18,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: "Work", href: "/#case-studies" },
   { label: "About", href: "/#about" },
+  { label: "Arcade", href: "/arcade" },
   { label: "Proof Workspace", href: "/proof" },
   { label: "Transparency", href: "/transparency" },
   { label: "Simulator", href: "/simulator" },
@@ -206,6 +207,8 @@ export const Navbar: React.FC = () => {
             <nav className="flex items-center gap-8">
               {navItems.map((item) => {
                 const isSectionActive = pathname === "/" && item.href.startsWith("/#") && activeSection === item.href.substring(2);
+                const isRouteActive = !item.href.startsWith("/#") && !item.isExternal && (pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href)));
+                const isActive = isSectionActive || isRouteActive;
                 return (
                   <Link
                     key={item.label}
@@ -216,7 +219,7 @@ export const Navbar: React.FC = () => {
                     onMouseEnter={handleLinkHover}
                     className={cn(
                       "min-h-6 py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-300 hover:text-foreground cursor-pointer flex items-center gap-1",
-                      isSectionActive
+                      isActive
                         ? "text-brand-cyan font-bold"
                         : "text-muted"
                     )}
@@ -390,6 +393,8 @@ export const Navbar: React.FC = () => {
             <nav className="flex flex-col gap-8 relative z-10">
               {navItems.map((item, index) => {
                 const isSectionActive = pathname === "/" && item.href.startsWith("/#") && activeSection === item.href.substring(2);
+                const isRouteActive = !item.href.startsWith("/#") && !item.isExternal && (pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href)));
+                const isActive = isSectionActive || isRouteActive;
                 return (
                   <motion.div
                     key={item.label}
@@ -405,7 +410,7 @@ export const Navbar: React.FC = () => {
                       onMouseEnter={handleLinkHover}
                       className={cn(
                         "text-3xl font-extrabold tracking-tight font-sans transition-all cursor-pointer flex items-center gap-2",
-                        isSectionActive
+                        isActive
                           ? "text-brand-cyan"
                           : "text-zinc-300 hover:text-white"
                       )}

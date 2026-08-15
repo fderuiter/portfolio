@@ -1207,9 +1207,11 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted }) => 
               <span className="text-neutral-300 font-bold">{playerHp}</span>
             </div>
 
-            {/* Score */}
-            <div className="text-[9px] text-neutral-400">
-              SCORE: <span className="text-brand-cyan font-bold">{score}</span>
+            {/* Score & High Score */}
+            <div className="text-[9px] text-neutral-400 flex items-center gap-1.5">
+              <span>SCORE: <strong className="text-brand-cyan font-bold">{score}</strong></span>
+              <span className="text-neutral-600">|</span>
+              <span>HI: <strong className="text-amber-400 font-bold">{effectiveHighScore}</strong></span>
             </div>
 
             <span
@@ -1347,9 +1349,9 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted }) => 
 
         {/* Weapons Hotbar & Controls Footer */}
         <div className="w-full flex flex-col gap-1 px-2 pt-1 border-t border-neutral-900/60">
-          <div className="flex items-center justify-between gap-1 text-[8px] font-mono">
+          <div className="flex flex-wrap items-center justify-between gap-1 text-[8px] font-mono">
             {/* Weapon Hotkeys */}
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <button
                 onClick={() => handleFireWeapon("npm_install")}
                 className={`px-1.5 py-0.5 rounded border flex items-center gap-1 transition-all cursor-pointer ${
@@ -1388,7 +1390,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted }) => 
 
               <button
                 onClick={() => handleFireWeapon("emp_blast")}
-                className="px-1.5 py-0.5 rounded border bg-neutral-900 text-cyan-400 border-cyan-800/40 hover:bg-cyan-950 cursor-pointer hidden sm:inline-flex"
+                className="px-1.5 py-0.5 rounded border bg-neutral-900 text-cyan-400 border-cyan-800/40 hover:bg-cyan-950 cursor-pointer"
               >
                 <span className="font-bold">[SPACE] EMP</span>
               </button>
@@ -1398,6 +1400,56 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted }) => 
             <div className="text-neutral-500 uppercase tracking-wider hidden md:block">
               WASD / ARROWS · SPACE: EMP
             </div>
+          </div>
+
+          {/* On-screen Touch D-Pad for Mobile Navigation */}
+          <div className="flex items-center justify-center gap-1 pt-1 sm:hidden">
+            <button
+              type="button"
+              onClick={() => {
+                const isScrambled = activeSideEffect?.type === "scrambled_keys" && activeSideEffect.expiresAt > Date.now();
+                tryMove(isScrambled ? 1 : -1, 0);
+              }}
+              aria-label="Move Left"
+              className="w-7 h-7 rounded bg-zinc-900 border border-zinc-800 active:bg-brand-cyan/20 active:border-brand-cyan text-zinc-300 text-xs font-bold flex items-center justify-center cursor-pointer"
+            >
+              ◀
+            </button>
+            <div className="flex flex-col gap-1">
+              <button
+                type="button"
+                onClick={() => {
+                  const isScrambled = activeSideEffect?.type === "scrambled_keys" && activeSideEffect.expiresAt > Date.now();
+                  tryMove(0, isScrambled ? 1 : -1);
+                }}
+                aria-label="Move Up"
+                className="w-7 h-7 rounded bg-zinc-900 border border-zinc-800 active:bg-brand-cyan/20 active:border-brand-cyan text-zinc-300 text-xs font-bold flex items-center justify-center cursor-pointer"
+              >
+                ▲
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const isScrambled = activeSideEffect?.type === "scrambled_keys" && activeSideEffect.expiresAt > Date.now();
+                  tryMove(0, isScrambled ? -1 : 1);
+                }}
+                aria-label="Move Down"
+                className="w-7 h-7 rounded bg-zinc-900 border border-zinc-800 active:bg-brand-cyan/20 active:border-brand-cyan text-zinc-300 text-xs font-bold flex items-center justify-center cursor-pointer"
+              >
+                ▼
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const isScrambled = activeSideEffect?.type === "scrambled_keys" && activeSideEffect.expiresAt > Date.now();
+                tryMove(isScrambled ? -1 : 1, 0);
+              }}
+              aria-label="Move Right"
+              className="w-7 h-7 rounded bg-zinc-900 border border-zinc-800 active:bg-brand-cyan/20 active:border-brand-cyan text-zinc-300 text-xs font-bold flex items-center justify-center cursor-pointer"
+            >
+              ▶
+            </button>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, useSyncExternalStore } from "react";
 import {
   IconCircle,
   IconBolt,
@@ -28,14 +28,35 @@ import {
 export type GarminActivityMode = DeviceTarget | "ocean" | "trail" | "space";
 export type WatchBezelTheme = "slate" | "solar" | "cyan" | "neon";
 
+const subscribeHighScore = (callback: () => void) => {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("storage", callback);
+  return () => window.removeEventListener("storage", callback);
+};
+const getHighScoreSnapshot = () => {
+  try {
+    return localStorage.getItem("garmin_simulator_high_score") || "0";
+  } catch {
+    return "0";
+  }
+};
+const getHighScoreServerSnapshot = () => "0";
+
 export const GarminWatchSimulator: React.FC = () => {
+  const rawHighScore = useSyncExternalStore(
+    subscribeHighScore,
+    getHighScoreSnapshot,
+    getHighScoreServerSnapshot
+  );
+  const loadedHighScore = parseInt(rawHighScore, 10) || 0;
   const { playNote, playSuccess } = useAudio();
   const { recordEvent } = useTelemetry();
 
   // Hardware & Simulation State
   const [bezelTheme, setBezelTheme] = useState<WatchBezelTheme>("slate");
   const [deviceTarget, setDeviceTarget] = useState<DeviceTarget>("fenix");
-  const [gameState, setGameState] = useState<GameEngineState>(() => createInitialState("fenix"));
+  const [gameState, setGameState] = useState<GameEngineState>(() => createInitialState("fenix", loadedHighScore));
+  const effectiveHighScore = Math.max(gameState.highScore, loadedHighScore);
   const [isFocused, setIsFocused] = useState(false);
   const [isDraggingFog, setIsDraggingFog] = useState(false);
 
@@ -49,6 +70,17 @@ export const GarminWatchSimulator: React.FC = () => {
   useEffect(() => {
     stateRef.current = gameState;
   }, [gameState]);
+
+  // Save new high scores safely
+  useEffect(() => {
+    if (gameState.score > gameState.highScore) {
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("garmin_simulator_high_score", gameState.score.toString());
+        } catch {}
+      }
+    }
+  }, [gameState.score, gameState.highScore]);
 
   // Audio Beep Helpers (Authentic Garmin 1200-1600Hz Piezo)
   const playBeep = useCallback(
@@ -491,6 +523,10 @@ export const GarminWatchSimulator: React.FC = () => {
         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg">
           <IconFlame className={`w-3.5 h-3.5 ${gameState.fogLevel > 0.4 ? "text-rose-500 animate-pulse" : "text-zinc-500"}`} />
           <span>CONDENSATION: <strong className="text-white">{Math.round(gameState.fogLevel * 100)}%</strong></span>
+        </div>
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg">
+          <span className="text-amber-400 font-bold">🏆 HI-SCORE:</span>
+          <strong className="text-amber-300">{effectiveHighScore}</strong>
         </div>
       </div>
 

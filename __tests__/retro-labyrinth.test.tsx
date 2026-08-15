@@ -80,6 +80,6 @@ describe("CommandPalette Roguelike Registration", () => {
   it("registers Retro Labyrinth under staticNavs with roguelike description", () => {
     expect(content).toContain('id: "nav-retro-labyrinth"');
     expect(content).toContain("Retro Labyrinth: Graveyard Roguelike");
-    expect(content).toContain('url: "/not-found"');
+    expect(content).toContain('url: "/arcade/retro-labyrinth"');
   });
 });

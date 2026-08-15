@@ -187,4 +187,24 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
 
     expect(container.textContent).toContain("16.0 / 16 GB");
   });
+
+  it("enforces keyboard boundary and supports level switching keyboard shortcuts", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<QuasiPerfectPuzzler />);
+    });
+
+    const boundary = container.querySelector('[data-keyboard-boundary="true"]') as HTMLElement;
+    expect(boundary).not.toBeNull();
+    expect(boundary.getAttribute("tabIndex")).toBe("0");
+
+    // Press '2' key to switch to level 2
+    await act(async () => {
+      boundary.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "2", bubbles: true, cancelable: true })
+      );
+    });
+
+    expect(container.textContent).toContain("The Art of Substitution");
+  });
 });
