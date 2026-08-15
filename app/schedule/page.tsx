@@ -164,10 +164,10 @@ export default function SchedulePage() {
         {/* Sequential Next / Prev Flow */}
         <NextPrevNav
           prev={{
-            title: "Platform Transparency Hub",
-            href: "/transparency",
-            label: "Systems & Security",
-            tag: "Verifiable Telemetry",
+            title: "Incident Alignment Simulator",
+            href: "/simulator",
+            label: "Systems Tool",
+            tag: "Incident Commander",
           }}
           next={{
             title: "Arcade Games Hub",

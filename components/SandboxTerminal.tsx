@@ -122,9 +122,9 @@ export const SandboxTerminal: React.FC = () => {
   const [isExecuting, setIsExecuting] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const logsContainerRef = useRef<HTMLDivElement>(null);
 
-  // Focus terminal input on body clicks
+  // Focus terminal input on body clicks without shifting viewport
   const handleTerminalClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const selection = window.getSelection();
     if (selection && selection.toString()) {
@@ -133,12 +133,14 @@ export const SandboxTerminal: React.FC = () => {
     if ((e.target as HTMLElement).closest("a, button, input")) {
       return;
     }
-    inputRef.current?.focus();
+    inputRef.current?.focus({ preventScroll: true });
   };
 
-  // Scroll to bottom when logs update
+  // Scroll to bottom internally when logs update
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (logsContainerRef.current) {
+      logsContainerRef.current.scrollTop = logsContainerRef.current.scrollHeight;
+    }
   }, [logs]);
 
   // Execute terminal commands
@@ -307,9 +309,9 @@ export const SandboxTerminal: React.FC = () => {
         return;
       }
 
-      // Clear input state and focus element
+      // Clear input state and focus element without shifting viewport
       setInput("");
-      inputRef.current?.focus();
+      inputRef.current?.focus({ preventScroll: true });
 
       let currentIndex = 0;
       let currentTyped = "";
@@ -415,7 +417,7 @@ export const SandboxTerminal: React.FC = () => {
       if (trimmed === '"[VERIFY_SECURITY_LOGS]"') {
         return (
           <a
-            href="/transparency"
+            href="/proof"
             className="text-brand-cyan underline font-bold cursor-pointer hover:text-brand-cyan/80 focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 focus:ring-offset-1 focus:ring-offset-zinc-950 rounded"
           >
             [LIVE_VERIFICATION_LINK]
@@ -502,6 +504,7 @@ export const SandboxTerminal: React.FC = () => {
 
         {/* Console logs output viewport */}
         <div
+          ref={logsContainerRef}
           role="log"
           aria-label="Terminal output log"
           className="p-5 font-mono text-[11px] leading-relaxed max-h-[380px] overflow-y-auto space-y-4 text-zinc-300"
@@ -544,9 +547,6 @@ export const SandboxTerminal: React.FC = () => {
               <span>Executing clinical API query...</span>
             </div>
           )}
-
-          {/* Auto-scroll target ref */}
-          <div ref={scrollRef} />
         </div>
 
         {/* Live Input Field Prompt */}

@@ -8,7 +8,7 @@
 
 > **saveCyberdeckProfile**(`profile`): `void`
 
-Defined in: lib/dungeon/metaprogression.ts:200
+Defined in: [lib/dungeon/metaprogression.ts:200](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/metaprogression.ts#L200)
 
 Saves the persistent Cyberdeck profile to browser storage.
 

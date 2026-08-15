@@ -4,21 +4,31 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
   proof: {
     id: "proof",
     title: "Logical Proof Canvas",
-    subtitle: "Formal Verification & Modus Ponens Interactive Solver",
+    subtitle: "Formal Verification & Multi-Theorem Propositional Logic Suite",
     genre: "Formal Verification",
-    badge: "Formal Logic",
+    badge: "Formal Logic Suite",
     route: "/proof",
     accentColor: "from-cyan-500/20 via-cyan-500/5 to-transparent",
     badgeBg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
     objective:
-      "Establish Conclusion R (Node E: Reliability is guaranteed) by wiring valid antecedent and conditional premise nodes through the deductive inference rule Modus Ponens.",
+      "Construct deterministic deductive proofs across 5 classic propositional theorems (Modus Ponens, Modus Tollens, Hypothetical Syllogism, Disjunctive Syllogism, Resolution) to discharge target engineering conclusions with mathematical certainty.",
     quickSummary:
-      "Connect premises to intermediate conclusions. When both P and P → Q are linked to Q, Q becomes proven. Then link Q and Q → R to establish conclusion R.",
+      "Select a theorem scenario, wire valid premise nodes on the interactive canvas or CLI, inspect live step-by-step mathematical deduction ledgers, diagnose fallacies with truth-table counterexamples, and export verified proofs to Lean 4, LaTeX, Markdown, or Mermaid.",
     controls: [
       {
         action: "Select & Connect Node",
         description: "Click any source node (e.g. Node C), then click the target node (e.g. Node E) to establish a deductive dependency edge.",
-        key: "Click",
+        key: "Click Node",
+      },
+      {
+        action: "Drag Node Position",
+        description: "Click and drag any node across the canvas to customize visual layout; click 'Reset Layout' to return to canonical graph coordinates.",
+        key: "Drag Node",
+      },
+      {
+        action: "Switch Theorem Scenario",
+        description: "Select from 5 engineering proof scenarios (Modus Ponens, Modus Tollens, Hypothetical Syllogism, Disjunctive Syllogism, Resolution) using the top toolbar tabs or CLI.",
+        key: "Toolbar / CLI",
       },
       {
         action: "Guided Tactic Step",
@@ -27,33 +37,33 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       },
       {
         action: "CLI Split Console",
-        description: "Open the terminal and run commands such as `connect C E`, `disconnect C E`, `list`, or `simulate normal`.",
+        description: "Open the terminal and run commands such as `theorem mt`, `connect C E`, `inspect C`, `ledger`, `export lean`, `simulate normal`, or `clear`.",
         key: "Ctrl + \\",
       },
       {
-        action: "Disconnect Edge",
-        description: "Click on an existing drawn edge or click the Disconnect button in the inspector to sever a premise connection.",
-        key: "Click Edge",
+        action: "Export Verified Proof",
+        description: "Click 'Export Proof' to copy production-ready Lean 4 formal code, LaTeX deduction trees, Markdown audit tables, or Mermaid diagrams.",
+        key: "Export Button",
       },
     ],
     rules: [
       {
-        title: "Modus Ponens Inference Rule",
+        title: "Modus Ponens & Modus Tollens",
         detail:
-          "Formally stated: If P is true, and P → Q is true, then Q must be true (P ∧ (P → Q) ⊢ Q). Both antecedent (P) and conditional (P → Q) edges must reach the target node before it activates.",
-        badge: "Deductive Rule",
+          "Modus Ponens derives Q from (P ∧ (P → Q)). Modus Tollens derives ¬P from ((P → Q) ∧ ¬Q). Both antecedent/consequent pairs must reach the target node before it discharges.",
+        badge: "Deductive Rules",
       },
       {
-        title: "Deduction Chain Step 1",
+        title: "Syllogisms & Clausal Resolution",
         detail:
-          "Node A (Premise P) and Node B (Premise P → Q) are wired into Intermediate Node C (Conclusion Q). Because both premises are active, Node C is verified.",
-        badge: "Step 1: Proven",
+          "Hypothetical Syllogism chains (P → Q) ∧ (Q → R) into P → R. Disjunctive Syllogism eliminates (P ∨ Q) ∧ ¬P into Q. Resolution refutes complementary literals (P ∨ Q) ∧ (¬P ∨ R) into Q ∨ R.",
+        badge: "Advanced Rules",
       },
       {
-        title: "Deduction Chain Step 2 (Your Goal)",
+        title: "Fallacy Engine & Counterexamples",
         detail:
-          "Wire Intermediate Node C (Q) and Premise Node D (Q → R) into Conclusion Node E (R). Once both are connected, Theorem R discharges with mathematical certainty (Q.E.D.).",
-        badge: "Step 2: Target",
+          "Attempting invalid inferences (such as Affirming the Consequent or Denying the Antecedent) triggers real-time truth-table counterexamples demonstrating rows where premises are TRUE but conclusion is FALSE.",
+        badge: "Fallacy Detection",
       },
       {
         title: "Background Tactic Watchdog",
@@ -63,9 +73,10 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       },
     ],
     proTips: [
-      "Look at the node status rings: emerald green indicates a proven node, while zinc gray indicates unproven premises.",
+      "Use the 'Logic Inspector' tab to review the plain-English meaning and hypothesis requirements of any node.",
+      "Switch to the 'Deduction Ledger' tab to view the live mathematical proof derivation table.",
       "The Guided Proof Assistant on the left highlights the immediate next deduction step needed to complete the proof.",
-      "You can toggle between direct visual clicking and the keyboard CLI console at any time without losing proof state.",
+      "You can toggle between direct visual canvas interaction and the keyboard CLI console at any time without losing proof state.",
     ],
     lore: {
       title: "Why Formal Verification Matters in Modern Software",
@@ -88,59 +99,64 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     objective:
       "Balance writing production code against managing your autonomous Golden Retriever puppy, Duck. Keep Duck happy, healthy, and hazard-free while maximizing commit output.",
     quickSummary:
-      "Toss toys to divert Duck from power cables, scrub belly rubs during the flop, recall Duck in the Dog Park with the whistle, and tuck Duck in for nap time.",
+      "Toss toys to divert Duck from power cables, command training tricks (Q-W-E-R), push active coding commits (Space), scrub belly rubs during the flop, jump agility hurdles in the Dog Park, and wash in the Bathtub when muddy.",
     controls: [
       {
-        action: "Toss Squeaky Toy",
-        description: "Click anywhere on the office floor to throw a squeaky toy, diverting Duck away from dangerous cords and water bowls.",
-        key: "Click Canvas",
+        action: "Active Code Burst",
+        description: "Press Spacebar while at your desk to rapidly push code commits and squash bugs with Good Boy multiplier bonuses.",
+        key: "Spacebar / Desk Click",
       },
       {
-        action: "Belly Rub Scrub",
-        description: "When Duck flops onto his back with paws up, rapidly scrub over his belly with the mouse cursor to build happiness and score multipliers.",
-        key: "Drag Cursor",
+        action: "Training Tricks",
+        description: "Press Q (Sit), W (High Five/Paw), E (Drop It), or R (Spin) for immediate obedience, focus recovery, and Good Boy score multipliers.",
+        key: "Q, W, E, R",
       },
       {
-        action: "Whistle Recall (Dog Park)",
-        description: "In the Dog Park sprint mini-game, blow the ultrasonic whistle to recall Duck before his stamina runs out.",
+        action: "Toss Toys & Treats",
+        description: "Press 1 (Tennis Ball), 2 (Kong Chew), 3 (Squeaky Toy), or 4 (Treat) to divert Duck away from server cables and trade stolen items.",
+        key: "1, 2, 3, 4 Hotkeys",
+      },
+      {
+        action: "Bathtub Wash & Rinse",
+        description: "When Duck gets muddy at the Dog Park, drag him to the Bathtub station, scrub lather with your mouse, and shower rinse for a sparkling clean coat.",
+        key: "Bathtub Click / Drag",
+      },
+      {
+        action: "Agility Jump & Whistle",
+        description: "In the Dog Park, tap Spacebar to leap over agility hurdles and recall Duck with the ultrasonic whistle.",
         key: "Spacebar / Whistle",
-      },
-      {
-        action: "Nap Time Tuck-In",
-        description: "When Duck's energy drops into the red zone, guide him to the orthopedic dog bed and click to tuck him in for recovery.",
-        key: "Bed Click",
       },
     ],
     rules: [
       {
         title: "Autonomous Puppy State Machine",
         detail:
-          "Duck transitions autonomously between 6 behavioral states: Idle, Wander, Hazard-Chew, Belly-Flop, Park-Sprint, and Deep Sleep. Anticipate his transitions to prevent desk chaos.",
+          "Duck transitions autonomously between behavioral states: Idle, Hazard-Chew, Belly-Flop, Potty-Sniff, Trick-Performance, and Nap Time. Anticipate his transitions to prevent desk chaos.",
         badge: "Deterministic AI",
       },
       {
         title: "Hazard Interception",
         detail:
-          "If Duck chews the laptop charger or knocks over coffee, your active code build fails and score multiplier resets to 1x. Toss a toy immediately to redirect him.",
+          "If Duck chews the API cluster wire or Part 11 audit script, multiplier resets and penalty points apply. Call 'Drop It!' (E) or drop a Kong (2) immediately.",
         badge: "Hazard Penalty",
       },
       {
-        title: "Belly Rub Multiplier",
+        title: "5-Sprint Campaign & Accessories",
         detail:
-          "Scrubbing belly rubs during the flop window awards a 3x multiplier to all code commits pushed within the next 15 seconds.",
-        badge: "3x Multiplier",
+          "Progress across 5 story-driven sprints to unlock wearable cosmetics: Adidas Bucket Hat, Tech CEO Bowtie, Adventure Bandana, and Yellow Mud Boots.",
+        badge: "Wardrobe Unlocks",
       },
       {
         title: "Polaroid Scrapbook",
         detail:
-          "Capturing key milestone moments (first zoomies, 100% belly happiness, park recall) permanently unlocks high-resolution polaroids in your scrapbook.",
+          "Capturing key milestone moments unlocks 10 high-resolution real photos and vector artwork in your persistent scrapbook.",
         badge: "Collectibles",
       },
     ],
     proTips: [
-      "Keep a toy ready on the left side of the room to pull Duck away from the server rack.",
-      "Don't let Duck nap too close to the keyboard or he will type accidental git force pushes.",
-      "Dog Park sprints yield maximum score bonuses when recalled at the peak stamina window (between 70% and 85%).",
+      "Use 'Drop It!' (E) as soon as Duck targets a hazard to save items without switching toys.",
+      "Wear Yellow Mud Boots to provide complete mud puddle immunity at the Dog Park.",
+      "Equip the Tech CEO Bowtie for an extra 0.2x speed boost during active sprint crunch periods.",
     ],
     lore: {
       title: "Autonomous Behavior Trees in Canvas 2D",
@@ -152,65 +168,70 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
 
   "laser-loon": {
     id: "laser-loon",
-    title: "Laser Loon: Cryo Bug Hunter",
-    subtitle: "Physics Arcade / Canvas Laser Shooter",
-    genre: "Physics Arcade",
-    badge: "Vector Physics",
+    title: "Laser Loon: Quest for the State Flag",
+    subtitle: "Civic Arcade / Physics Raycast Shooter & Campaign",
+    genre: "Civic Arcade Shooter",
+    badge: "F277 Flag Lore",
     route: "/arcade/laser-loon",
     storageKey: "laser_loon_high_score",
-    accentColor: "from-cyan-500/20 via-cyan-500/5 to-transparent",
-    badgeBg: "bg-cyan-500/10 text-cyan-400 border-cyan-500/30",
+    accentColor: "from-cyan-500/20 via-red-500/10 to-transparent",
+    badgeBg: "bg-red-500/10 text-red-400 border-red-500/30",
     objective:
-      "Pilot the iconic cybernetic Canadian Loon to blast waves of runtime exceptions, memory leaks, and frozen syntax bugs using raycast laser eyes and cryo cannons.",
+      "Pilot the iconic F277 Laser Loon through four campaign acts from Lake Minnetonka to the State Capitol dome, battling rival flag finalists, bureaucratic red tape, and Minnesota folklore hazards.",
     quickSummary:
-      "Aim with the cursor, click to fire twin laser beams, and trigger the Cryo Shockwave to freeze swarm clusters before blasting them for shatter combos.",
+      "Aim with the cursor or touch controls, fire ruby eye-lasers and cryogenic ice mortars, collect Hotdish power-ups, and unleash the Haunting Loon Tremolo ultimate shockwave to claim victory!",
     controls: [
       {
-        action: "Aim & Fire Cyber Lasers",
-        description: "Move mouse cursor to aim laser crosshairs; left-click to fire high-energy cyan beam bursts.",
-        key: "Left Click",
+        action: "Aim & Fire Laser Arsenal",
+        description: "Aim crosshair with cursor or touch; left-click or drag to fire active laser beam (Ruby Laser, Cyan Pulse, Aurora Wave, or Cryo Mortar).",
+        key: "Left Click / Drag",
       },
       {
-        action: "Cryo Freeze Shockwave",
-        description: "Trigger an expansive freezing pulse that encases all on-screen bugs in ice, halting their descent for 4 seconds.",
-        key: "Right Click / Space",
+        action: "The Haunting Loon Tremolo (Ultimate)",
+        description: "When the energy meter hits 100%, trigger a screen-wide synthesized cryogenic loon screech that freezes and shatters all obstacles!",
+        key: "Spacebar / Ultimate Button",
       },
       {
-        action: "Loon Lateral Thrusters",
-        description: "Glide the Loon horizontally along the frozen lake surface to dodge falling exception debris.",
-        key: "A / D or ← / →",
+        action: "Cycle Laser Modes",
+        description: "Switch between Ruby Eye Laser (1), Cyan Pulse (2), Aurora Borealis Wave (3), and Glacial Cryo-Mortar (4).",
+        key: "Keys 1 - 4 / Weapon Bar",
+      },
+      {
+        action: "Loon Movement & Gliding",
+        description: "Glide Laser Loon smoothly along the lake surface or committee floor to collect power-ups and dodge boss projectiles.",
+        key: "W/A/S/D or Arrow Keys",
       },
     ],
     rules: [
       {
-        title: "Raycast Hit Detection",
+        title: "Iconic F277 Crimson Optics",
         detail:
-          "Laser beams project raycast vectors with continuous collision detection against polygon bug hitboxes, preventing tunneling at high velocities.",
+          "Laser beams project raycast vectors with continuous collision detection against rival flag submissions and bureaucratic red tape.",
         badge: "Raycast Physics",
       },
       {
-        title: "Cryo Shatter Multiplier",
+        title: "Glacial Cryo-Shatter Combos",
         detail:
-          "Blasting bugs while they are frozen in ice deals 4x damage and triggers shard shrapnel that cascades into neighboring bugs.",
-        badge: "4x Shatter Combo",
+          "Mortar ice blocks bounce off lake boundaries, encasing targets in ice. Shattering frozen targets awards 2x points and cascades shrapnel.",
+        badge: "2x Shatter Combo",
       },
       {
-        title: "Memory Leak Bosses",
+        title: "Historic Campaign Acts & Bosses",
         detail:
-          "Memory leak bugs grow larger over time as they consume heap space. Destroy them before they reach the lake surface and cause a Stack Overflow.",
-        badge: "Boss Threat",
+          "Advance through Lake Minnetonka (Mega Mosquito), State Fair (Butter Colossus), Redesign Commission (Starflake Finalist), and the Capitol Rotunda (Grand Veto Gavel).",
+        badge: "4-Act Campaign",
       },
     ],
     proTips: [
-      "Save your Cryo Shockwave for dense waves to maximize cascading shatter combo multipliers.",
-      "Lead your shots slightly ahead of fast NullPointerException bugs.",
-      "Look for flashing golden Garbage Collector power-ups to instantly clear 50% of the screen.",
+      "Save your Haunting Loon Tremolo ultimate for boss encounters to shatter their revolving defense shields.",
+      "Grab floating Tater Tot Hotdish pickups for instant zero-cooldown laser overcharge frenzy.",
+      "Bouncing Cryo Mortar ice blocks off the canvas floor and ceiling creates hazardous pinball walls for rival flags.",
     ],
     lore: {
-      title: "Real-Time Raycasting & Deterministic Vector Physics",
+      title: "The Grassroots Legend of Submission F277",
       story:
-        "The Common Loon (*Gavia immer*) is renowned across Canadian lakes for its haunting calls and sharp red eyes. Laser Loon supercharges this natural predator with cybernetic raycast optics and synthesized piezo audio, translating classic arcade space shooter mechanics into a tribute to runtime exception hunting.",
-      realWorldTech: ["Continuous Collision Detection", "Web Audio FM Synthesis", "Vector Kinematics", "Particle Emitters"],
+        "In late 2023, the Minnesota State Emblems Redesign Commission invited citizen submissions. Fred deRuiter submitted 'F277: Laser Loon'—a majestic common loon blasting twin crimson lasers across azure waters. The design became a worldwide viral sensation, featured in The New York Times, The Washington Post, and NPR. Fred released F277 into the public domain (CC0), launching a grassroots civic campaign that raised over $13,500 for the Saint Paul Public Library Foundation.",
+      realWorldTech: ["Raycast Collision Vectors", "Web Audio Dual-Oscillator Synthesis", "Multi-Phase Boss AI", "Deterministic State Progression"],
     },
   },
 
@@ -225,23 +246,33 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     accentColor: "from-purple-500/20 via-purple-500/5 to-transparent",
     badgeBg: "bg-purple-500/10 text-purple-300 border-purple-500/30",
     objective:
-      "Construct inductive AST proofs and discharge mathematical hypotheses within tight proof-engine RAM limits without conceding to the forbidden `sorry` axiom.",
+      "Construct formal AST proofs, discharge multi-goal branch cases, and synthesize valid Lean 4 code within language server RAM limits without conceding to the forbidden `sorry` axiom.",
     quickSummary:
-      "Select proof tactics (intro, rw, simp, exact, cases) to transform expression trees. Simplify goals before RAM fills up to achieve S-Tier verification rank.",
+      "Apply formal proof tactics (intro, apply, exact, cases, rw, ring, norm_num, simp, omega) across a 3-chapter curriculum to discharge mathematical theorems and preserve verification morality.",
     controls: [
       {
         action: "Apply Proof Tactic",
-        description: "Click or drag tactic buttons (`intro`, `rw`, `simp`, `exact`, `apply`, `cases`) to apply inference steps to the active goal.",
-        key: "Click Tactic",
+        description: "Click or drag tactic cards (`intro`, `apply`, `exact`, `cases`, `rw`, `ring`, `norm_num`, `simp`, `omega`, `linarith`) onto AST nodes to transform goals.",
+        key: "Click / Drag Tactic",
       },
       {
-        action: "Inspect AST Node",
-        description: "Click any node in the inductive expression tree to inspect its type signature, hypotheses, and sub-goals.",
-        key: "Click Node",
+        action: "Branch & Multi-Goal Navigation",
+        description: "Tactics like `cases` split goals into multiple subgoals. Use the branch tabs to switch between active goals until all are discharged.",
+        key: "Subgoal Tabs",
+      },
+      {
+        action: "Progressive Hint Coach",
+        description: "Toggle progressive 3-tier hints for conceptual strategy, target subtree highlights, and recommended tactics.",
+        key: "Hints Button (H)",
+      },
+      {
+        action: "Lean 4 IDE Inspector",
+        description: "Inspect live generated Lean 4 code in real time (`theorem ... := by ...`) and copy directly to Lean Web Editor.",
+        key: "Lean IDE (C)",
       },
       {
         action: "The 'Sorry' Escape Valve",
-        description: "Admit defeat on the current branch using `sorry`. This keeps the engine running but permanently ruins your Morality Score.",
+        description: "Admit defeat on the current branch using `sorry`. This keeps the engine running but permanently incurs a -100 Morality Penalty.",
         key: "Sorry Button",
       },
     ],
@@ -259,6 +290,12 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
         badge: "RAM Constraint",
       },
       {
+        title: "Multi-Goal Case Splits",
+        detail:
+          "Disjunctions (P ∨ Q) split into independent cases with their own hypotheses. Both branches must be discharged to achieve Q.E.D.",
+        badge: "Multi-Goal",
+      },
+      {
         title: "Zero-Sorry Morality Rating",
         detail:
           "Using `sorry` bypasses a difficult sub-goal without proving it, assigning a severe penalty to your final verification integrity score.",
@@ -266,9 +303,11 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
       },
     ],
     proTips: [
-      "Use `simp` early to prune trivial identity branches and drastically reduce engine RAM usage.",
+      "Use `ring` to automatically prove algebraic polynomial equivalences like (a+b)² = a² + 2ab + b².",
       "`intro h` unpacks implication antecedents into your local hypothesis pool.",
-      "Pair `cases` with structural induction when facing compound algebraic disjunctions.",
+      "`cases h_or` splits a disjunction into two sub-goals (h_left and h_right).",
+      "`norm_num` rapidly evaluates concrete numerical arithmetic and comparisons.",
+      "Targeted `rw [h]` uses far less RAM (2 GB) than full confluent search `simp` (6 GB).",
     ],
     lore: {
       title: "The Curry-Howard Isomorphism & Lean 4",
@@ -358,125 +397,142 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
     accentColor: "from-emerald-500/20 via-emerald-500/5 to-transparent",
     badgeBg: "bg-emerald-500/10 text-emerald-300 border-emerald-500/30",
     objective:
-      "Map patient observation records to standardized CDISC SDTM domains, verify investigator signatures under FDA 21 CFR Part 11, and resolve audits before the inspection timer expires.",
+      "Standardize clinical observations across 8 CDISC SDTM domains (DM, VS, AE, LB, CM, EX, DS, MH), solve multi-choice Controlled Terminology puzzles, deploy combo-charged regulatory lifelines, sign 21 CFR Part 11 electronic records, and achieve a clean FDA BIMO inspection rating.",
     quickSummary:
-      "Sort incoming patient records into DM, VS, AE, and LB bins. Sign locked records with intent verification, and resolve queries before the FDA inspector arrives.",
+      "Solve Controlled Terminology discrepancies via multi-choice puzzles, route validated dossier packets to tiered EDC stations with hotkeys [1-6], deploy power-ups [Q, W, E, R], and export authentic CDISC ODM XML / SDTM CSV datasets.",
     controls: [
       {
-        action: "Sort CDISC Domain Record",
-        description: "Drag or click clinical cards to assign them to Demographics (DM), Vital Signs (VS), Adverse Events (AE), or Lab (LB) domains.",
-        key: "Drag / Click Domain",
+        action: "Validate Clinical Observation",
+        description: "Click any unverified observation card to open the Multi-Choice Validation Drawer and select the compliant CDISC standard, MedDRA Preferred Term, or ISO-8601 date.",
+        key: "Click Observation / Multi-Choice",
       },
       {
-        action: "21 CFR § 11 Electronic Signature",
-        description: "Click 'Sign & Lock' to execute a legally binding electronic signature with cryptographic audit timestamp and intent verification.",
-        key: "Sign & Lock",
+        action: "Route to EDC Domain Desk",
+        description: "Submit validated dossiers to active EDC stations: [1] Demographics (DM), [2] Vital Signs (VS), [3] Adverse Events (AE), [4] Laboratory (LB), [5] Concomitant Meds (CM), [6] Drug Exposure (EX).",
+        key: "Keys [1-6] or Click Station",
       },
       {
-        action: "Resolve Auditor Query",
-        description: "When an FDA inspection finding flashes amber/red, click the query badge immediately to review source data and submit a corrective response.",
-        key: "Resolve Query",
+        action: "Deploy Regulatory Lifelines",
+        description: "Deploy combo-charged power-ups: [Q] FDA Coffee Break (freeze auditor), [W] CDISC Auto-Clean (clean active dossier), [E] Site Query Extension (+12s), [R] Fast-Track 21 CFR Pass (instant sign).",
+        key: "Keys [Q, W, E, R]",
+      },
+      {
+        action: "21 CFR Electronic Signature Lock",
+        description: "Verify legal signature intent and authenticate with password to permanently lock records and cooldown auditor suspicion.",
+        key: "Enter / Confirm Signature",
+      },
+      {
+        action: "Cycle Active Queue & Switch View",
+        description: "Press [Tab] to cycle between conveyor parcels. Toggle between Conveyor Floor, Live SDTM Studio, and Audit Trail Log tabs to export XML/CSV datasets.",
+        key: "Tab / Tab Switcher",
       },
     ],
     rules: [
       {
-        title: "CDISC SDTM Standardization",
+        title: "Tiered CDISC SDTM Domains",
         detail:
-          "Observations must be strictly partitioned: DM (Subject demographics & age), VS (Blood pressure & heart rate), AE (Adverse events & severity), LB (Lab blood panels).",
-        badge: "SDTM Domains",
+          "Phase I activates core safety & lab domains (DM, VS, AE, LB). Phase II unlocks Concomitant Medications (CM) and Drug Exposure (EX). Phase III unlocks Disposition (DS) and Medical History (MH).",
+        badge: "8 SDTM Domains",
       },
       {
-        title: "21 CFR Part 11 Electronic Signatures",
+        title: "Controlled Terminology & MedDRA Coding",
         detail:
-          "FDA regulations mandate non-repudiable signatures with authenticated signer identity, exact UTC timestamp, and explicit statement of intent (e.g. 'Approval of CRF').",
-        badge: "FDA § 11",
+          "Selecting incorrect CT codes or unstandardized units incurs auditor suspicion penalties. Correct answers award bonus points and recharge power-up lifelines.",
+        badge: "CDISC CT & MedDRA",
       },
       {
-        title: "Auditor Inspection Timer",
+        title: "21 CFR § 11.50 Manifestation of Signatures",
         detail:
-          "Regulatory auditors inspect the trial site at scheduled intervals. Unresolved protocol deviations result in Form 483 inspection observations and heavy score penalties.",
-        badge: "FDA Audit",
+          "Electronic records require unambiguous intent ('Intent to Submit', 'Urgent Safety Expedited', etc.). Submitting unverified raw data triggers immediate audit rejection.",
+        badge: "21 CFR Part 11",
+      },
+      {
+        title: "FDA Bioresearch Monitoring (BIMO) Scoring",
+        detail:
+          "At the end of each shift or upon trial termination, receive a formal BIMO inspection report with NAI (Approved), VAI (Voluntary Action), or OAI (Form 483 Issued) determination.",
+        badge: "BIMO Inspection",
       },
     ],
     proTips: [
-      "Prioritize Adverse Events (AE) immediately—unreported SAEs trigger automatic regulatory warning letters.",
-      "Double-check subject ID matching across DM and VS domains to avoid unlinked subject discrepancies.",
-      "Lock and sign clean batches in advance so you have bandwidth to handle surprise protocol amendments.",
+      "Keep an eye on Serious Adverse Events (⚡ SAE)—they have shorter timers and grant +300 bonus points upon compliant signature.",
+      "Charge your 'FDA Coffee Break' lifeline by maintaining clean submission streaks; deploy it when auditor suspicion climbs above 70%.",
+      "Switch to the Live SDTM Studio tab during shifts to inspect generated observation rows and export authentic CDISC ODM 1.3 XML.",
+      "Toggle the procedural 8-bit synth BGM to hear dynamic tempo scaling as auditor scrutiny intensifies.",
     ],
     lore: {
       title: "Biotech Data Governance & Regulatory Lifecycles",
       story:
-        "Bringing a novel therapeutic drug or medical device from Phase I trials through FDA/EMA approval requires processing millions of patient data points under strict federal regulations. CDISC standards (SDTM and ADaM) ensure universal interoperability, while FDA 21 CFR Part 11 guarantees that electronic records have the identical legal standing and auditability as traditional paper records.",
-      realWorldTech: ["CDISC SDTM / ADaM", "FDA 21 CFR Part 11", "Electronic Data Capture (EDC)", "GxP Validation"],
+        "Bringing a novel therapeutic drug or medical device from Phase I trials through FDA/EMA approval requires processing millions of patient data points under strict federal regulations. CDISC standards (SDTM, ADaM, and ODM) ensure universal semantic interoperability, while FDA 21 CFR Part 11 guarantees that electronic records have the identical legal standing and auditability as traditional paper records.",
+      realWorldTech: ["CDISC SDTM / ADaM / ODM", "FDA 21 CFR Part 11", "Electronic Data Capture (EDC)", "MedDRA / WHO-Drug", "GxP Validation"],
     },
   },
 
   "retro-labyrinth": {
     id: "retro-labyrinth",
     title: "Retro Labyrinth: Graveyard Roguelike",
-    subtitle: "Dungeon Crawler & Developer Roguelike",
+    subtitle: "Cyberpunk Red Team Breach & Mainframe Roguelike",
     genre: "Dungeon Roguelike",
-    badge: "CRT Roguelike",
+    badge: "Cyberpunk Roguelike",
     route: "/arcade/retro-labyrinth",
     storageKey: "retro_labyrinth_high_score",
-    accentColor: "from-rose-500/20 via-rose-500/5 to-transparent",
-    badgeBg: "bg-rose-500/10 text-rose-300 border-rose-500/30",
+    accentColor: "from-cyan-500/20 via-cyan-500/5 to-transparent",
+    badgeBg: "bg-cyan-500/10 text-cyan-300 border-cyan-500/30",
     objective:
-      "Explore forgotten legacy codebases in a retro CRT terminal dungeon crawler. Traverse Traveling Salesperson dynamic shifting mazes, wield developer weapons, and defeat the 3D FaceForge boss.",
+      "Infiltrate fortified corporate mainframe subnets as an autonomous Red Team Netrunner. Manage Cyberdeck RAM, weaponize zero-days and offensive exploits, bypass EDR sentinels, solve tactile Hex Matrix buffer puzzles, and defeat the 3D Wireframe Sovereign Boss.",
     quickSummary:
-      "Navigate procedural mazes with WASD/Arrows. Switch developer weapons (npm install, git push -f, kill -9, hotfix) to vanquish rogue processes and reach the boss elevator.",
+      "Navigate procedural subnets with WASD/Arrows. Deploy cyber tools ([1] Nmap / npm install, [2] Buffer Overflow / git push -f, [3] 0-Day / Stack Overflow, [4] MitM Spoof, [5] Ransomware, [SPACE] EMP) to exploit daemon CVEs and extract encrypted payloads.",
     controls: [
       {
-        action: "Move Developer Avatar",
-        description: "Navigate through the procedural maze corridors and step onto discovery nodes.",
+        action: "Move Netrunner Avatar",
+        description: "Navigate through procedural subnet corridors and step onto discovery nodes.",
         key: "WASD / Arrow Keys",
       },
       {
-        action: "Switch Developer Weapons",
-        description: "Equip weapons: [1] npm install (Area AoE), [2] git push -f (Burst), [3] kill -9 (High Single Target), [4] hotfix (Heal).",
-        key: "1, 2, 3, 4 Keys",
+        action: "Deploy Cyber Exploits",
+        description: "Execute exploits: [1] Nmap / npm i (Recon / AoE), [2] Buffer Overflow (Burst / Crit), [3] Zero-Day (Piercer / Snippet), [4] MitM Spoof (Confuse), [5] Ransomware (Freeze & Bounty).",
+        key: "1, 2, 3, 4, 5 Keys",
       },
       {
-        action: "Attack / Execute Command",
-        description: "Cast your currently selected developer command in the facing direction to destroy rogue bugs and zombie processes.",
-        key: "Spacebar / Click",
+        action: "EMP Kernel Surge",
+        description: "Discharge an electromagnetic surge to stun all security drones and camera sentinels in the sector.",
+        key: "Spacebar / Touch Action A",
       },
       {
-        action: "Toggle CRT Scanlines",
+        action: "Toggle CRT Phosphor Scanlines",
         description: "Toggle retro CRT phosphor curvature, bloom, and scanline shader post-processing filters.",
         key: "C Key",
       },
     ],
     rules: [
       {
-        title: "Dynamic Traveling Salesperson Mazes",
+        title: "Cyberdeck RAM & CVE Vulnerability Synergies",
         detail:
-          "Corridor layouts mutate procedurally based on graph traversal heuristics. Shifting walls block previously visited paths, requiring dynamic route recalculation.",
-        badge: "TSP Mazes",
+          "Exploits draw from your Cyberdeck RAM capacity. Port scanning exposes enemy CVE vulnerabilities (Buffer Overflow, Weak SSH, Default Creds) to trigger 2.5x critical damage and chain reactions.",
+        badge: "CVE Combos",
       },
       {
-        title: "Developer Weapon Cooldowns",
+        title: "Hex Matrix Buffer Bypass Terminals",
         detail:
-          "`kill -9` instantly obliterates major demons but incurs a 6-second cooldown. `npm install` cleanses swarms of minor dependencies across a wide radius.",
-        badge: "Combat Cooldowns",
+          "Locked data vaults and security airgaps feature tactile Hex Buffer minigames. Align alternating row/column byte sequences or deploy Hardware Jumper Bypass Chips to harvest Crypto bounties.",
+        badge: "Hex Hacking",
       },
       {
-        title: "3D FaceForge Wireframe Boss",
+        title: "3D Wireframe Sovereign Boss Fights",
         detail:
-          "The dungeon climax pits you against the 3D Matrix Boss. Dodge rotating vector lasers and strike the core when its wireframe shields destabilize.",
+          "The mainframe climax pits you against the 3D Vector Kernel Warden. Dodge rotating projectile volleys and strike the core as defense shields rotate across phases.",
         badge: "3D Boss Fight",
       },
     ],
     proTips: [
-      "Keep `hotfix` ready for floor transitions where lingering memory leak pools can drain health.",
-      "Collect Architecture Decision Record (ADR) scrolls to permanently reveal unexplored floor sections.",
-      "Circle-strafe around the 3D FaceForge boss during its vector laser charging sequence.",
+      "Use Nmap [1] on room entry to reveal hidden traps and tag hostile daemons with CVE vulnerability marks.",
+      "Save Hardware Bypass Chips for Tier 3 & 4 encrypted vaults where time limits are tight.",
+      "Visit the Darknet Market to purchase DDR5 RAM overclocks and Airgap 0-Day payloads using harvested Crypto.",
     ],
     lore: {
-      title: "Procedural Dungeons & Legacy Code Archaeology",
+      title: "Red Team Infiltration & Legacy Code Archaeology",
       story:
-        "Every engineer has explored legacy codebases that feel like ancient, crumbling dungeons filled with deprecated dependencies, undocumented endpoints, and zombie cron jobs. Retro Labyrinth turns code maintenance into a playable dungeon crawler using cellular automata dungeon generation, raycasted field-of-view, and custom WebGL CRT shaders.",
-      realWorldTech: ["Cellular Automata", "Bresenham FOV Raycasting", "CRT Shader Bloom", "Matrix Transformations"],
+        "Every engineer has explored legacy codebases that feel like ancient, crumbling dungeons filled with deprecated dependencies, undocumented endpoints, and zombie cron jobs. Retro Labyrinth turns code maintenance and cybersecurity into a playable roguelike using cellular automata dungeon generation, raycasted field-of-view, Web Audio 8-bit sound synthesis, and real-time 3D vector wireframe rendering.",
+      realWorldTech: ["Cellular Automata", "Bresenham FOV Raycasting", "CVE Vulnerability Models", "Hex Buffer Matrix", "Web Audio API", "3D Wireframe Projection"],
     },
   },
 

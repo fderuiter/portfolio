@@ -155,83 +155,6 @@ const openApiSpec = {
         },
       },
     },
-    "/api/transparency/logs": {
-      get: {
-        summary: "Retrieve transparency and audit logs",
-        description: "Fetches raw telemetry audit logs and blends them with CI/CD and Security operational event generation.",
-        parameters: [
-          {
-            name: "sort",
-            in: "query",
-            required: false,
-            description: "Sorting order for logs chronologically",
-            schema: {
-              type: "string",
-              enum: ["asc", "desc"],
-              default: "desc",
-            },
-          },
-          {
-            name: "page",
-            in: "query",
-            required: false,
-            description: "Pagination offset page",
-            schema: {
-              type: "integer",
-              default: 1,
-            },
-          },
-          {
-            name: "limit",
-            in: "query",
-            required: false,
-            description: "Event limit threshold per query page",
-            schema: {
-              type: "integer",
-              default: 20,
-              maximum: 100,
-            },
-          },
-        ],
-        responses: {
-          200: {
-            description: "Consolidated sorted log timeline",
-            content: {
-              "application/json": {
-                schema: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      id: { type: "string" },
-                      category: { type: "string" },
-                      timestamp: { type: "string", format: "date-time" },
-                      message: { type: "string" },
-                      status: { type: "string" },
-                      link: { type: "string" },
-                    },
-                    required: ["id", "category", "timestamp", "message", "status"],
-                  },
-                },
-              },
-            },
-          },
-          400: {
-            description: "Invalid query parameters",
-            content: {
-              "application/json": {
-                schema: {
-                  $ref: "#/components/schemas/ValidationError",
-                },
-              },
-            },
-          },
-          500: {
-            description: "Internal server error",
-          },
-        },
-      },
-    },
   },
   components: {
     schemas: {
@@ -292,25 +215,6 @@ const openApiSpec = {
             type: "integer",
             default: 50,
             description: "Batch parameter size for loading buffered items",
-          },
-        },
-      },
-      TransparencyLogsParams: {
-        type: "object",
-        properties: {
-          sort: {
-            type: "string",
-            enum: ["asc", "desc"],
-            default: "desc",
-          },
-          page: {
-            type: "integer",
-            default: 1,
-          },
-          limit: {
-            type: "integer",
-            default: 20,
-            maximum: 100,
           },
         },
       },

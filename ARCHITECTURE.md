@@ -123,7 +123,7 @@ To optimize discovering technical showcase materials for recruiters and crawler 
 - **Canonical Alternates:** Automatically generates unique dynamic `<link rel="canonical">` elements on per-page view states using Next.js Metadata API.
 - **Dynamic Case Study Serialization:** Implements custom `generateMetadata()` on `/case-studies/[slug]` routes to dynamically extract and construct SEO/Open Graph descriptions, article tags, and published timelines directly from Prisma database schemas.
 - **Sitemap & Robots Automation:**
-  - `app/sitemap.ts` programmatically compiles primary routes (`/arcade/*`, `/proof`, `/simulator`, `/transparency`, `/schedule`) and Neon DB published case study slugs into a standards-compliant XML sitemap.
+  - `app/sitemap.ts` programmatically compiles primary routes (`/arcade/*`, `/proof`, `/simulator`, `/schedule`) and Neon DB published case study slugs into a standards-compliant XML sitemap.
   - `app/robots.ts` restricts crawlers from access logs and internal compilation maps while routing standard bots directly to our primary indexing endpoints.
 
 ## Staggered Bento Skills & Scroll-Driven Career Timeline (Issue #37)

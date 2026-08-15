@@ -7,8 +7,15 @@ import { getGitHubStats, parseGitHubUrl, GitHubStats, getSimulatedStats } from "
 import { TextReveal } from "@/components/TextReveal";
 import { SkillsGrid } from "@/components/SkillsGrid";
 import { Timeline } from "@/components/Timeline";
-import { Tooltip } from "@/components/ui/Tooltip";
 import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
+import { 
+  IconMail, 
+  IconCalendar, 
+  IconBrandGithub, 
+  IconBrandLinkedin,
+  IconCpu,
+  IconArrowRight
+} from "@tabler/icons-react";
 
 interface HydratedCaseStudy extends BaseCaseStudy {
   githubStats: GitHubStats | null;
@@ -16,7 +23,6 @@ interface HydratedCaseStudy extends BaseCaseStudy {
 
 export default async function PortfolioHomePage() {
   let caseStudies: HydratedCaseStudy[] = [];
-  let errorMsg = "";
 
   try {
     // Query case studies from Neon database via Prisma
@@ -47,12 +53,10 @@ export default async function PortfolioHomePage() {
     );
   } catch (err) {
     console.error("Database query exception:", err);
-    errorMsg = err instanceof Error ? err.message : "Failed to establish a connection to the serverless database.";
     
-    // Fallback for CI/Playwright/Preview or other non-production environments to ensure components can be visually tested and load properly when database is offline
+    // Fallback for CI/Playwright/Preview or other non-production environments
     const isProduction = process.env.VERCEL_ENV === "production";
     if (process.env.CI === "true" || process.env.PLAYWRIGHT_TEST === "true" || !isProduction) {
-      errorMsg = ""; // Clear error to render the showcase
       caseStudies = FALLBACK_CASE_STUDIES.map((study) => ({
         ...study,
         githubStats: getSimulatedStats(study.primary_language),
@@ -90,7 +94,7 @@ export default async function PortfolioHomePage() {
 
   return (
     <div className="bg-zinc-950 min-h-screen text-foreground overflow-x-hidden flex flex-col">
-      {/* Premium Staggered Living Grid Hero */}
+      {/* Living Grid Hero */}
       <Hero />
 
       {/* Case studies showcase section */}
@@ -104,47 +108,32 @@ export default async function PortfolioHomePage() {
           <div className="relative z-10 w-full max-w-7xl flex flex-col items-center">
             {/* Title Block */}
             <h2 className="text-3xl md:text-4xl font-extrabold font-mono tracking-tight text-white text-center mb-2">
-              Projects, Side Quests &amp; Over-Engineered Ideas
+              Featured Systems &amp; Architecture
             </h2>
-            <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-8">
-              High-Compliance Clinical Data Infrastructure &amp; Interactive Web Craft
+            <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-12 text-center">
+              Clinical Data Pipelines, Regulatory Engines &amp; Interactive Systems
             </p>
 
-            {/* Ambient Live System Status Chip */}
-            {errorMsg ? (
-              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-mono mb-10 backdrop-blur-md">
-                <span className="w-2 h-2 rounded-full bg-rose-500" />
-                <span>Telemetry Degraded: Database Offline</span>
-              </div>
-            ) : (
-              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-zinc-900/80 border border-zinc-800 text-emerald-400 text-xs font-mono mb-10 backdrop-blur-md shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                <span>Operational · Serverless Neon Postgres Active</span>
-              </div>
-            )}
-
-            {/* Personal Highlights Section */}
+            {/* Interactive Systems Highlights Section */}
             <div className="w-full mb-12 p-6 sm:p-8 tool-shell relative overflow-hidden group hover:border-brand-cyan/40 transition-colors">
               <div className="absolute top-0 right-0 w-64 h-64 bg-brand-cyan/5 rounded-full blur-[60px] pointer-events-none group-hover:bg-brand-cyan/10 transition-colors" />
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h3 className="text-lg sm:text-xl font-bold font-mono text-white mb-2 flex items-center gap-2.5">
-                    <span className="w-2 h-2 rounded-full bg-brand-cyan"></span>
-                    Interactive Physics &amp; UI Experiments
+                    <IconCpu className="w-4 h-4 text-brand-cyan" />
+                    Interactive Canvas &amp; Systems Labs
                   </h3>
                   <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-xl font-sans">
-                    Beyond serious data pipelines, explore playable canvas arcade games, real-time laser raycasting physics, 32KB embedded simulators, and puppy multitasking chaos.
+                    Explore bespoke canvas physics engines, embedded memory simulators, and interactive formal verification tools built without external gaming frameworks.
                   </p>
                 </div>
-                <a
+                <Link
                   href="/arcade"
                   className="self-start sm:self-center shrink-0 inline-flex items-center gap-2 px-4 py-2.5 bg-brand-cyan text-black font-mono text-xs font-bold rounded-xl hover:bg-white transition-all shadow-sm"
                 >
-                  <span>Enter Arcade Hub</span>
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </a>
+                  <span>Explore Labs Hub</span>
+                  <IconArrowRight className="w-3.5 h-3.5" />
+                </Link>
               </div>
             </div>
 
@@ -152,10 +141,10 @@ export default async function PortfolioHomePage() {
             {caseStudies.length === 0 ? (
               <div className="text-center p-12 bg-zinc-900/10 border border-zinc-900/40 border-dashed rounded-2xl w-full">
                 <p className="text-sm text-zinc-400 italic mb-2">
-                  Connection established, but no published case studies were found in the database.
+                  No published case studies currently available in the active environment.
                 </p>
                 <p className="text-xs text-zinc-400 font-mono">
-                  Initialize seeding pipeline via Issue #10 to import clinical trial narratives.
+                  Refer to canonical project specifications in the repository documentation.
                 </p>
               </div>
             ) : (
@@ -167,7 +156,7 @@ export default async function PortfolioHomePage() {
 
       {/* 2. Philosophy TextReveal Highlight */}
       <div className="bg-zinc-950 border-t border-zinc-900/50">
-        <TextReveal>Translating bureaucratic nightmares into clean code by day; building delightfully unhinged web experiments by night.</TextReveal>
+        <TextReveal>Translating rigorous regulatory protocols into clean architectures; crafting high-performance, memorable web interfaces.</TextReveal>
       </div>
 
       {/* 3. About Section */}
@@ -178,10 +167,10 @@ export default async function PortfolioHomePage() {
         
         <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
           <h2 className="text-3xl md:text-4xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
-            What I Actually Do
+            Core Capabilities &amp; Focus
           </h2>
           <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-16 text-center">
-            A Mix of Enterprise Data Rigor, Canvas Physics, and Civic Mischief
+            High-Compliance Data Architecture, Native Canvas Engines, and Open-Source Systems
           </p>
           
           {/* Dynamic Bento Skills Grid Card Layout */}
@@ -190,13 +179,10 @@ export default async function PortfolioHomePage() {
           </div>
 
           <h3 className="text-2xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
-            Lore, Battle Scars &amp; Side Quests
+            Career Journey &amp; Experience
           </h3>
           <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-16 text-center">
-            A Totally Accurate, Chronological Journey of{" "}
-            <Tooltip text="Ensuring reliability for users so the platform never goes down when they need it most.">
-              What Actually Happened
-            </Tooltip>
+            Engineering Milestones, Regulatory Systems, and Technical Leadership
           </p>
 
           {/* Interactive Staggered Timeline Component */}
@@ -210,10 +196,10 @@ export default async function PortfolioHomePage() {
       <section id="contact" className="relative py-24 md:py-32 px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950">
         <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
           <h2 className="text-3xl md:text-4xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
-            Say Hi &amp; Connect
+            Get in Touch
           </h2>
           <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-16 text-center">
-            Drop a Line, Book a Quick Chat, or Check Out the Code
+            Open for technical collaborations, consulting, and systems engineering discussions.
           </p>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-4xl justify-center items-stretch">
@@ -223,8 +209,8 @@ export default async function PortfolioHomePage() {
               aria-label="Send an email to Frederick de Ruiter at fpderuiter@gmail.com"
               className="group flex flex-col items-center justify-center p-6 bg-zinc-900/20 border border-zinc-800/80 rounded-2xl transition-all duration-300 hover:border-brand-cyan/40 hover:bg-zinc-900/40 text-center cursor-pointer"
             >
-              <span className="w-9 h-9 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center font-mono text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/30 transition-colors mb-3">
-                ✉
+              <span className="w-9 h-9 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/30 transition-colors mb-3">
+                <IconMail className="w-4 h-4" />
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">Send an Email</span>
               <span className="text-xs font-mono text-zinc-400">fpderuiter@gmail.com</span>
@@ -239,10 +225,10 @@ export default async function PortfolioHomePage() {
               <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-brand-cyan/20 border border-brand-cyan/40 rounded text-[9px] font-mono text-brand-cyan uppercase tracking-wider">
                 30 Min
               </div>
-              <span className="w-9 h-9 rounded-xl bg-zinc-950 border border-brand-cyan/40 flex items-center justify-center font-mono text-brand-cyan group-hover:scale-110 transition-transform mb-3">
-                📅
+              <span className="w-9 h-9 rounded-xl bg-zinc-950 border border-brand-cyan/40 flex items-center justify-center text-brand-cyan group-hover:scale-110 transition-transform mb-3">
+                <IconCalendar className="w-4 h-4" />
               </span>
-              <span className="text-xs font-mono font-bold text-white mb-1">Say Hi / Book a Chat</span>
+              <span className="text-xs font-mono font-bold text-white mb-1">Schedule 1:1 Sync</span>
               <span className="text-xs font-mono text-brand-cyan">Google Calendar ↗</span>
             </Link>
             
@@ -254,10 +240,10 @@ export default async function PortfolioHomePage() {
               aria-label="View Frederick de Ruiter's GitHub profile externally"
               className="group flex flex-col items-center justify-center p-6 bg-zinc-900/20 border border-zinc-800/80 rounded-2xl transition-all duration-300 hover:border-brand-cyan/40 hover:bg-zinc-900/40 text-center cursor-pointer"
             >
-              <span className="w-9 h-9 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center font-mono text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/30 transition-colors mb-3">
-                🐙
+              <span className="w-9 h-9 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/30 transition-colors mb-3">
+                <IconBrandGithub className="w-4 h-4" />
               </span>
-              <span className="text-xs font-mono font-bold text-neutral-200 mb-1">GitHub Repos</span>
+              <span className="text-xs font-mono font-bold text-neutral-200 mb-1">GitHub Repositories</span>
               <span className="text-xs font-mono text-zinc-400">github.com/fderuiter</span>
             </a>
 
@@ -269,8 +255,8 @@ export default async function PortfolioHomePage() {
               aria-label="View Frederick de Ruiter's LinkedIn profile externally"
               className="group flex flex-col items-center justify-center p-6 bg-zinc-900/20 border border-zinc-800/80 rounded-2xl transition-all duration-300 hover:border-brand-cyan/40 hover:bg-zinc-900/40 text-center cursor-pointer"
             >
-              <span className="w-9 h-9 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center font-mono text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/30 transition-colors mb-3">
-                in
+              <span className="w-9 h-9 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/30 transition-colors mb-3">
+                <IconBrandLinkedin className="w-4 h-4" />
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">LinkedIn Network</span>
               <span className="text-xs font-mono text-zinc-400">Connect on LinkedIn ↗</span>

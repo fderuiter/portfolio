@@ -85,8 +85,7 @@ FROM "CaseStudy";
 Expected results are three finished and non-rolled-back migrations, a
 non-nullable Boolean column defaulting to `false`, and all four existing rows
 preserved with `false`. Run `npx prisma migrate deploy` once more and confirm it
-is a no-op. Then smoke-test the home page, case studies, telemetry endpoints,
-and transparency routes.
+is a no-op. Then smoke-test the home page, case studies, and telemetry endpoints.
 
 ## Release ordering and pre-build execution
 

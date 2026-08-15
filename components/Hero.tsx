@@ -13,6 +13,7 @@ import {
   generateExplosionTrajectories, 
   type Particle 
 } from "@/lib/graphics-engine";
+import { IconDeviceGamepad2 } from "@tabler/icons-react";
 
 export const BackgroundBeamsWithCollision = ({
   children,
@@ -347,26 +348,15 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
             animate="visible"
             className="text-4xl md:text-6xl font-black tracking-tight text-center flex flex-wrap justify-center leading-tight md:leading-none"
           >
-            {words.map((word, i) => {
-              // Style specific words with brand gradient
-              const isGradient = ["PDFs", "code", "games", "canvas", "Interface", "Data", "Meaning"].includes(
-                word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "")
-              );
-              return (
-                <motion.span
-                  key={i}
-                  variants={wordVariants}
-                  className={cn(
-                    "inline-block mr-[0.25em] will-change-transform",
-                    isGradient
-                      ? "text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan to-brand-blue"
-                      : "text-transparent bg-clip-text bg-gradient-to-r from-neutral-100 to-neutral-300"
-                  )}
-                >
-                  {word}
-                </motion.span>
-              );
-            })}
+            {words.map((word, i) => (
+              <motion.span
+                key={i}
+                variants={wordVariants}
+                className="inline-block mr-[0.25em] will-change-transform text-transparent bg-clip-text bg-gradient-to-r from-neutral-100 via-neutral-200 to-neutral-300"
+              >
+                {word}
+              </motion.span>
+            ))}
           </motion.div>
         )}
       </div>
@@ -508,9 +498,9 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ className }) => {
   const shouldReduceMotion = useReducedMotion();
-  const headline = "Certified professional at turning 150-page PDFs into code and over-engineering canvas games instead of sleeping.";
+  const headline = "Engineering high-compliance clinical data systems, responsive web architectures, and real-time canvas simulations.";
   const introText =
-    "Building high-stakes healthcare data pipelines by day, ridiculous browser games and civic internet lore by night.";
+    "Translating complex regulatory protocols and biomedical datasets into robust software, paired with bespoke interactive interfaces.";
 
   return (
     <section
@@ -544,7 +534,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="px-3.5 py-1 mb-6 text-[10px] md:text-xs font-mono font-semibold tracking-[0.2em] uppercase text-brand-cyan bg-brand-cyan/5 border border-brand-cyan/20 rounded-full"
         >
-          FREDERICK DE RUITER · CODE, GAMES &amp; CLINICAL DATA EXPERIMENTS
+          FREDERICK DE RUITER · SYSTEMS, CLINICAL DATA &amp; INTERACTIVE GRAPHICS
         </motion.span>
 
         {/* Dynamic Staggered Pretext-powered Title */}
@@ -576,8 +566,8 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
             href="/arcade"
             className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-semibold text-brand-cyan hover:text-white bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/30 hover:border-brand-cyan/50 rounded-full transition-all duration-300 hover:scale-105 backdrop-blur-md shadow-[0_0_15px_rgba(6,182,212,0.15)]"
           >
-            <span className="text-base">🕹️</span>
-            <span>Play in Arcade</span>
+            <IconDeviceGamepad2 className="w-4 h-4" />
+            <span>Interactive Labs</span>
           </a>
           <a
             href="https://github.com/fderuiter"

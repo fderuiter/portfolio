@@ -101,7 +101,7 @@ export default function SchemaFlowWorkspace() {
   ]);
   const [cliHistory, setCliHistory] = useState<string[]>([]);
   const [cliHistoryIdx, setCliHistoryIdx] = useState(-1);
-  const terminalLogsEndRef = useRef<HTMLDivElement>(null);
+  const terminalLogsContainerRef = useRef<HTMLDivElement>(null);
   const consoleInputRef = useRef<HTMLInputElement>(null);
 
   // Telemetry Gauge State
@@ -175,9 +175,11 @@ export default function SchemaFlowWorkspace() {
     };
   }, [isSolverLoopActive]);
 
-  // Scroll console to bottom
+  // Scroll console internally to bottom without shifting viewport
   useEffect(() => {
-    terminalLogsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (terminalLogsContainerRef.current) {
+      terminalLogsContainerRef.current.scrollTop = terminalLogsContainerRef.current.scrollHeight;
+    }
   }, [consoleLogs]);
 
   // Connect two nodes
@@ -734,6 +736,7 @@ export default function SchemaFlowWorkspace() {
 
           {/* Console logs output */}
           <div 
+            ref={terminalLogsContainerRef}
             className="flex-1 p-4 font-mono text-[10px] leading-normal overflow-y-auto max-h-[300px] lg:max-h-[350px] min-h-[220px] space-y-3 scrollbar-thin text-zinc-300 select-text"
             role="log"
             aria-label="Terminal feedback records"
@@ -769,7 +772,6 @@ export default function SchemaFlowWorkspace() {
                 )}
               </div>
             ))}
-            <div ref={terminalLogsEndRef} />
           </div>
 
           {/* Input Prompt panel */}

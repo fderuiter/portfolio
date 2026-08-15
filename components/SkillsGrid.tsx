@@ -43,16 +43,16 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
             </div>
             <div>
               <h3 className="text-sm font-mono font-bold tracking-widest text-brand-cyan uppercase">
-                Full-Stack Tinkerer &amp; Data Wrangler
+                Systems Engineer &amp; Clinical Data Architect
               </h3>
               <p className="text-[10px] font-mono text-zinc-500">
-                Clinical Data • Creative Code • Civic Lore
+                Clinical Data Architecture • Interactive Graphics • Open Source
               </p>
             </div>
           </div>
           
           <p className="text-sm text-neutral-300 leading-relaxed font-sans font-medium">
-            I write code that bridges high-compliance healthcare architecture (GxP eCRF databases, CDISC data standards, neuroinformatics pipelines) with creative frontend engineering, canvas physics engines, and open-source civic initiatives. Whether designing viral public assets like the Laser Loon or wrangling production clinical pipelines, I build software that works reliably and has real personality.
+            I engineer software that bridges high-compliance healthcare data architecture (GxP eCRF systems, CDISC data pipelines, neuroinformatics tooling) with high-performance frontend engineering, native canvas physics engines, and open-source civic initiatives. I focus on building resilient, maintainable software with high craft and thoughtful interface design.
           </p>
         </div>
       </motion.div>
@@ -70,10 +70,10 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
         
         <div>
           <h3 className="text-xs font-mono font-bold tracking-widest text-zinc-400 uppercase mb-4">
-            Live Code Diet
+            Codebase Distribution
           </h3>
           <p className="text-[10px] font-mono text-zinc-500 mb-6 leading-relaxed">
-            Dynamic repository programming languages aggregated live from my GitHub commits.
+            Primary languages and technologies aggregated across active repositories.
           </p>
           
           <div className="space-y-4">
@@ -109,7 +109,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
         className="md:col-span-3 p-6 md:p-8 bg-zinc-900/5 border border-zinc-900/40 rounded-3xl relative overflow-hidden hover:border-zinc-900 transition-all duration-300"
       >
         <h3 className="text-xs font-mono font-bold tracking-widest text-zinc-400 uppercase mb-6 text-center md:text-left">
-          What Keeps Me Busy
+          Technical Domains
         </h3>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -119,11 +119,11 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
             </div>
             <h4 className="text-xs font-mono font-bold text-neutral-200">
               <Tooltip text="Translating complex 150-page protocols into validated eCRFs, automated edit checks, and FDA-compliant SDTM datasets.">
-                Clinical Data Wrangling
+                Clinical Data Architecture
               </Tooltip>
             </h4>
             <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
-              Turning FDA regulations and 150-page clinical trial protocols into schemas that humans and computers can actually understand.
+              Translating FDA regulations and complex clinical trial protocols into resilient, type-safe data schemas.
             </p>
           </div>
           
@@ -132,12 +132,12 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
               02
             </div>
             <h4 className="text-xs font-mono font-bold text-neutral-200">
-              <Tooltip text="Crafting 60FPS canvas simulations, raycasting engines, and interactive proof puzzles.">
-                Creative UI &amp; Canvas Physics
+              <Tooltip text="Crafting 60FPS canvas simulations, raycasting engines, and interactive formal verification tools.">
+                Interactive Graphics &amp; Canvas Physics
               </Tooltip>
             </h4>
             <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
-              Building 60FPS browser physics, laser raycasting shooters, and retro roguelikes because boring web pages make me sad.
+              Building 60FPS browser physics, laser raycasting engines, and retro roguelikes with zero framework overhead.
             </p>
           </div>
           
@@ -147,11 +147,11 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
             </div>
             <h4 className="text-xs font-mono font-bold text-neutral-200">
               <Tooltip text="Laser Loon CC0 viral campaign ($13.5k library fundraiser, NYT/WaPo coverage) and grassroots tech advocacy.">
-                Civic Hacks &amp; Internet Lore
+                Civic Technology &amp; Public Projects
               </Tooltip>
             </h4>
             <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
-              Laser Loon (F277) CC0 asset repository raising $13.5k+ for St. Paul libraries, plus statewide open-source tech advocacy.
+              Authoring open-source CC0 design assets raising $13.5k+ for community libraries, alongside civic software advocacy.
             </p>
           </div>
           
@@ -161,11 +161,11 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
             </div>
             <h4 className="text-xs font-mono font-bold text-neutral-200">
               <Tooltip text="Credentialed Alpine Ski Patroller (OEC/OET certified) performing rapid triage in high-stakes environments.">
-                Ski Patrol &amp; Mountain Triage
+                Emergency Triage &amp; Reliability
               </Tooltip>
             </h4>
             <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
-              Alpine Ski Patroller performing emergency mountain triage in sub-zero blizzards; engineering bulletproof fault-tolerant systems.
+              Applying rapid triage decision models from alpine emergency medicine to build bulletproof, fault-tolerant architectures.
             </p>
           </div>
         </div>

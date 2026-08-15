@@ -13,7 +13,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ### 2. Layout & Component Hierarchy
 - `app/layout.tsx` renders the global `<Navbar />` and top-level providers (`AudioProvider`, `SearchProvider`).
-- Route pages (e.g. `app/proof/page.tsx`, `app/transparency/page.tsx`) must never render a secondary `<Navbar />` component.
+- Route pages (e.g. `app/proof/page.tsx`, `app/simulator/page.tsx`, `app/schedule/page.tsx`) must never render a secondary `<Navbar />` component.
 - Keep page top-padding (`pt-24` to `pt-32`) aligned with the fixed header height.
 
 ### 3. Route Indexing & Discovery

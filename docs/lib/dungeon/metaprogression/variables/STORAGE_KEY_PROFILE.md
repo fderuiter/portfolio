@@ -8,4 +8,4 @@
 
 > `const` **STORAGE\_KEY\_PROFILE**: `"retro_cyberdeck_profile"` = `"retro_cyberdeck_profile"`
 
-Defined in: lib/dungeon/metaprogression.ts:173
+Defined in: [lib/dungeon/metaprogression.ts:173](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/metaprogression.ts#L173)

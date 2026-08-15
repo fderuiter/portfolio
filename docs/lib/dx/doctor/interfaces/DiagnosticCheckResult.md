@@ -68,6 +68,6 @@ Defined in: [lib/dx/doctor.ts:9](https://github.com/fderuiter/portfolio/blob/mai
 
 ### status
 
-> **status**: `"warn"` \| `"pass"` \| `"fail"` \| `"fixed"`
+> **status**: `"warn"` \| `"fail"` \| `"pass"` \| `"fixed"`
 
 Defined in: [lib/dx/doctor.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L11)

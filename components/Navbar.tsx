@@ -18,7 +18,6 @@ import {
   IconCpu,
   IconCrosshair,
   IconBrain,
-  IconActivity,
   IconBone,
 } from "@tabler/icons-react";
 
@@ -33,19 +32,19 @@ interface SubNavItem {
 const ARCADE_ITEMS: SubNavItem[] = [
   {
     title: "Arcade Hub",
-    subtitle: "Playable canvas games & physics engines",
+    subtitle: "Playable canvas graphics & physics modules",
     href: "/arcade",
     icon: <IconDeviceGamepad2 className="w-4 h-4 text-brand-cyan" />,
   },
   {
     title: "Laser Loon",
-    subtitle: "Cryo Bug Hunter laser raycaster",
+    subtitle: "Physics raycasting & waveform campaign",
     href: "/arcade/laser-loon",
     icon: <IconCrosshair className="w-4 h-4 text-brand-cyan" />,
   },
   {
     title: "Quasi-Perfect Puzzler",
-    subtitle: "Formal proof tactics & AST puzzles",
+    subtitle: "Formal proof tactics & AST trees",
     href: "/arcade/quasi-puzzler",
     icon: <IconBrain className="w-4 h-4 text-brand-cyan" />,
   },
@@ -57,19 +56,19 @@ const ARCADE_ITEMS: SubNavItem[] = [
   },
   {
     title: "Clinical Trial Chaos",
-    subtitle: "21 CFR Part 11 CDISC compliance arcade",
+    subtitle: "21 CFR Part 11 CDISC regulatory simulator",
     href: "/arcade/clinical-chaos",
     icon: <IconShieldCheck className="w-4 h-4 text-brand-cyan" />,
   },
   {
     title: "Retro Labyrinth",
-    subtitle: "Procedural developer graveyard roguelike",
+    subtitle: "Procedural CRT shader & graph roguelike",
     href: "/arcade/retro-labyrinth",
     icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />,
   },
   {
     title: "Working With Duck",
-    subtitle: "Pet simulation & multitasking arcade",
+    subtitle: "Autonomous state machine & pet simulation",
     href: "/arcade/working-with-duck",
     icon: <IconBone className="w-4 h-4 text-brand-cyan" />,
   },
@@ -78,7 +77,7 @@ const ARCADE_ITEMS: SubNavItem[] = [
 const SYSTEMS_ITEMS: SubNavItem[] = [
   {
     title: "Proof Workspace",
-    subtitle: "Interactive deductive logic & proof tree",
+    subtitle: "Interactive deductive logic & proof ledger",
     href: "/proof",
     icon: <IconBrain className="w-4 h-4 text-brand-cyan" />,
   },
@@ -87,12 +86,6 @@ const SYSTEMS_ITEMS: SubNavItem[] = [
     subtitle: "Production outage triage decision tree",
     href: "/simulator",
     icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />,
-  },
-  {
-    title: "Transparency Hub",
-    subtitle: "Real-time security telemetry & audit logs",
-    href: "/transparency",
-    icon: <IconActivity className="w-4 h-4 text-brand-cyan" />,
   },
 ];
 
@@ -260,7 +253,7 @@ export const Navbar: React.FC = () => {
   };
 
   const isArcadeActive = pathname.startsWith("/arcade");
-  const isSystemsActive = pathname === "/proof" || pathname === "/simulator" || pathname === "/transparency";
+  const isSystemsActive = pathname === "/proof" || pathname === "/simulator";
 
   return (
     <>
@@ -763,16 +756,6 @@ export const Navbar: React.FC = () => {
                     <span className="flex items-center gap-2">
                       <IconTerminal className="w-4 h-4 text-zinc-400" />
                       Incident Simulator
-                    </span>
-                  </Link>
-                  <Link
-                    href="/transparency"
-                    onClick={(e) => handleNavClick(e, "/transparency")}
-                    className="min-h-11 px-3 py-2 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-300 hover:text-white flex items-center justify-between"
-                  >
-                    <span className="flex items-center gap-2">
-                      <IconShieldCheck className="w-4 h-4 text-zinc-400" />
-                      Transparency Hub
                     </span>
                   </Link>
                 </div>

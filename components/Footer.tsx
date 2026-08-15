@@ -71,16 +71,16 @@ export const Footer: React.FC = () => {
                 <span className="group-hover:text-brand-cyan transition-colors">FDERUITER</span>
               </Link>
               <p className="text-xs font-mono text-zinc-400 max-w-sm leading-relaxed">
-                Principal Systems Engineer &amp; Designer specializing in DOM-free canvas layout physics, serverless databases, formal verification, and clinical CDISC data pipelines.
+                Systems Engineer &amp; Designer specializing in clinical data architectures, formal verification tools, and real-time canvas graphics.
               </p>
             </div>
 
             {/* Live Operational Status Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900/80 border border-zinc-800 text-[11px] font-mono text-zinc-300 w-fit">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
               <span>All Systems Operational</span>
               <span className="text-zinc-600">|</span>
-              <span className="text-brand-cyan font-bold">60 FPS</span>
+              <span className="text-zinc-400">Next.js Edge</span>
             </div>
           </div>
 
@@ -177,7 +177,7 @@ export const Footer: React.FC = () => {
                   onMouseEnter={handleHover}
                   className="text-zinc-400 hover:text-brand-cyan transition-colors"
                 >
-                  Work Showcase Feed
+                  Featured Projects
                 </Link>
               </li>
               <li>
@@ -202,22 +202,12 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <Link
-                  href="/transparency"
-                  onMouseEnter={handleHover}
-                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
-                >
-                  <IconShieldCheck className="w-3 h-3 text-brand-cyan" />
-                  Transparency Hub
-                </Link>
-              </li>
-              <li>
-                <Link
                   href="/#about"
                   onClick={(e) => handleHashClick(e, "about")}
                   onMouseEnter={handleHover}
                   className="text-zinc-400 hover:text-brand-cyan transition-colors"
                 >
-                  About Architect
+                  About &amp; Experience
                 </Link>
               </li>
             </ul>
@@ -286,11 +276,11 @@ export const Footer: React.FC = () => {
 
           <div className="flex items-center gap-4">
             <Link
-              href="/transparency"
+              href="/proof"
               onMouseEnter={handleHover}
               className="hover:text-brand-cyan transition-colors"
             >
-              Telemetry &amp; Audit Logs
+              Systems Proof &amp; Verification
             </Link>
             <span className="text-zinc-700">&bull;</span>
             <button

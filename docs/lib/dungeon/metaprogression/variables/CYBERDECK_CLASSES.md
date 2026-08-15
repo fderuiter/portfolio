@@ -8,4 +8,4 @@
 
 > `const` **CYBERDECK\_CLASSES**: `Record`\<[`CyberdeckClassId`](../../types/type-aliases/CyberdeckClassId.md), [`CyberdeckClass`](../../types/interfaces/CyberdeckClass.md)\>
 
-Defined in: lib/dungeon/metaprogression.ts:14
+Defined in: [lib/dungeon/metaprogression.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/metaprogression.ts#L14)

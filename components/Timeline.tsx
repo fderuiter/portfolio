@@ -21,9 +21,9 @@ const timelineData: TimelineItem[] = [
     company: "BRIGHT Research Partners, Inc.",
     period: "March 2023 — Present",
     recruiterDescription:
-      "Lead technical architect for GxP-compliant eClinical databases, translating 100+ page scientific protocols into validated eCRF systems. Engineer hundreds of automated cross-form edit checks and dynamic logic rules to proactively enforce protocol compliance and point-of-entry data integrity. Manage end-to-end clinical data lifecycles (DMP authoring, SAE reconciliation, database locks) and administer 21 CFR 812 investigational device accountability with 100% traceability.",
+      "Lead technical architect for GxP-compliant eClinical databases, translating 100+ page scientific protocols into validated eCRF systems. Engineer automated cross-form edit checks and dynamic logic rules to enforce protocol compliance and point-of-entry data integrity. Manage clinical data lifecycles (DMP authoring, SAE reconciliation, database locks) and administer 21 CFR 812 investigational device accountability.",
     realityDescription:
-      "Currently translating 150-page PDFs into database schemas because someone decided capturing blood pressure in four incompatible units was a great idea. 90% of the day is spent writing automated edit checks to prevent clinicians from typing 'N/A' into numeric date fields and tracking investigational medical devices like an FDA private investigator.",
+      "Translating dense 150-page clinical trial protocols into relational schemas and dynamic eCRFs. Developing cross-form edit check suites to catch edge-case clinician input discrepancies at point-of-entry, and maintaining 100% device traceability under 21 CFR 812.",
     tags: ["GxP Systems", "21 CFR 812", "eCRF Architecture", "Edit Checks", "DMP Authoring", "SAE Reconciliation", "iMednet"]
   },
   {
@@ -33,7 +33,7 @@ const timelineData: TimelineItem[] = [
     recruiterDescription:
       "Pioneered an EHR-based recruitment pipeline using SlicerDicer and MyChart, resulting in a 5x increase in qualified participant enrollment (10 to 50+/month) and a 25% reduction in screen failures. Architected production REDCap databases, executed Linux-based FreeSurfer C pipelines processing 3T MRI scans for volumetric brain segmentation, innovated 3D-printable STL workflows for participant brain models, and prepared NIH DSMB data safety dossiers.",
     realityDescription:
-      "Automated clinical trial recruitment by turning Epic MyChart into a participant magnet, ran mysterious C binaries on Linux clusters overnight that converted 3T MRI brain scans into 3D-printed plastic brains to hand to study participants, and delivered multi-million dollar NIH data safety dossiers to board members without breaking a sweat.",
+      "Automated cohort identification using Epic SlicerDicer and MyChart queries, scaling monthly enrollment from 10 to 50+ participants. Executed FreeSurfer C processing pipelines across Linux clusters for 3T MRI volumetric segmentation and authored multi-million dollar NIH DSMB data safety dossiers.",
     tags: ["Mayo Clinic", "Epic SlicerDicer", "MyChart Recruitment", "REDCap", "FreeSurfer Linux", "3T MRI Neuroinformatics", "3D Printing (STL)", "NIH DSMB"]
   },
   {
@@ -43,7 +43,7 @@ const timelineData: TimelineItem[] = [
     recruiterDescription:
       "Orchestrated the operational lifecycle for multiple high-compliance, federally funded NIH studies from startup to closeout. Authored and managed complex IRB protocols, informed consent documents, and regulatory amendments. Served as departmental Epic Super User providing at-the-elbow clinical troubleshooting and leading staff training on Epic for Research modules, ensuring 100% data integrity through Source Document Verification (SDV).",
     realityDescription:
-      "Authored novel-length IRB amendments every time a principal investigator changed a survey question font, sprinted across clinical oncology wings doing 'at-the-elbow' Epic emergency triage for doctors who forgot their passwords, and hunted down missing clinical trial consent signatures across hospital floors.",
+      "Led operational execution for federally funded NIH trials from startup to closeout. Authored IRB protocols, navigated multi-phase regulatory amendments, and served as departmental Epic Super User providing frontline EHR workflow optimization.",
     tags: ["Mayo Clinic", "NIH Studies", "IRB Protocols", "Epic Super User", "Source Document Verification", "GxP Compliance", "Clinical Operations"]
   },
   {
@@ -53,7 +53,7 @@ const timelineData: TimelineItem[] = [
     recruiterDescription:
       "Spearheaded departmental EHR data migration for the high-volume Division of Oncology, personally transcribing record-high volumes of complex patient orders to ensure continuity of clinical care. Provided frontline technical troubleshooting and partnered with IT analysts to test and validate system updates in UAT environments.",
     realityDescription:
-      "Transcribed thousands of oncology patient orders at blinding typing speeds so the department wouldn't grind to a halt during an EHR migration. Became the unofficial hospital wizard when Epic inevitably threw a cryptic error message 5 minutes before clinic opened.",
+      "Executed high-volume EHR data migrations for the Division of Oncology, validating complex clinical orders during system transitions and resolving critical frontline Epic workflow issues.",
     tags: ["Mayo Clinic", "Division of Oncology", "EHR Data Migration", "Epic Super User", "UAT Testing", "Technical Troubleshooting"]
   },
   {
@@ -63,7 +63,7 @@ const timelineData: TimelineItem[] = [
     recruiterDescription:
       "Orchestrated logistical and media operations for the final year of the Minnesota Vikings Summer Training Camp, managing high-security accommodations and broadcast setups for NFL teams. Managed conference finances, inventory systems, and client billing reconciliations for university summer programs.",
     realityDescription:
-      "Herded 300lb NFL players, handled high-security keycards for the Vikings coaching staff, and balanced university conference budget spreadsheets while making sure ESPN's satellite broadcast trucks didn't knock out the campus power grid.",
+      "Coordinated logistical and broadcast infrastructure for the Minnesota Vikings Training Camp, managing venue operations, high-security access, and multi-departmental billing reconciliations.",
     tags: ["Minnesota Vikings NFL Camp", "Operations Logistics", "Financial Reconciliation", "Facilities Management", "Media Coordination"]
   }
 ];
@@ -91,8 +91,8 @@ export const Timeline: React.FC = () => {
       {/* Global View Switcher */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-16 px-4 py-3 bg-zinc-900/40 border border-zinc-900/80 rounded-2xl backdrop-blur-md">
         <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
-          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-          <span className="font-bold text-zinc-300">Timeline Perspective:</span>
+          <span className="w-2 h-2 rounded-full bg-amber-400" />
+          <span className="font-bold text-zinc-300">Perspective:</span>
         </div>
 
         <div className="flex p-0.5 bg-zinc-950/90 border border-zinc-800/80 rounded-xl text-xs font-mono">
@@ -105,7 +105,7 @@ export const Timeline: React.FC = () => {
             }`}
           >
             <IconFlame className="w-3.5 h-3.5 text-amber-400" />
-            <span>UNFILTERED REALITY</span>
+            <span>HANDS-ON REALITY</span>
           </button>
           <button
             onClick={() => handleGlobalToggle("recruiter")}
@@ -116,7 +116,7 @@ export const Timeline: React.FC = () => {
             }`}
           >
             <IconBriefcase className="w-3.5 h-3.5" />
-            <span>CORPORATE RESUME MODE</span>
+            <span>FORMAL SUMMARY</span>
           </button>
         </div>
       </div>
@@ -148,7 +148,7 @@ export const Timeline: React.FC = () => {
                 }`}
               >
                 <span
-                  className={`w-1.5 h-1.5 rounded-full animate-pulse transition-colors duration-300 ${
+                  className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${
                     isReality ? "bg-amber-400" : "bg-brand-cyan"
                   }`}
                 />
@@ -192,7 +192,7 @@ export const Timeline: React.FC = () => {
                       }`}
                     >
                       <IconSwitchHorizontal className="w-3 h-3" />
-                      <span>{isReality ? "Reality" : "Resume Mode"}</span>
+                      <span>{isReality ? "Hands-On" : "Formal"}</span>
                     </button>
                   </div>
 

@@ -17,10 +17,10 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     keywords: ["Arcade Games", "Canvas Physics", "Next.js Games", "Formal Verification", "Monkey C", "CDISC", "TypeScript"],
   },
   laserLoon: {
-    title: "Laser Loon: Cryo Bug Hunter | Physics Arcade",
-    description: "Control a cybernetic Canadian Loon. Aim laser beams and launch cryo ice blocks with 2D Newtonian physics to vaporize runtime exceptions and bugs.",
+    title: "Laser Loon: Quest for the State Flag | Physics Arcade & Campaign",
+    description: "Pilot submission F277 Laser Loon on the Road to the Capitol. Aim crimson eye-lasers and cryo ice blocks to battle rival flags and bureaucratic red tape in this retro canvas shooter.",
     path: "/arcade/laser-loon",
-    keywords: ["Laser Loon", "Canvas Shooter", "Physics Engine", "TypeScript Game", "Raycasting", "Particle System"],
+    keywords: ["Laser Loon", "Minnesota State Flag", "F277", "Canvas Shooter", "Physics Engine", "TypeScript Game", "Raycasting", "Particle System"],
   },
   quasiPuzzler: {
     title: "Quasi-Perfect Puzzler: Formal Verification Arcade",
@@ -63,12 +63,6 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     description: "Interactive incident commander decision tree — navigate high-stress production outages, architectural dilemmas, and verify technical candidate compatibility.",
     path: "/simulator",
     keywords: ["Incident Commander", "Production Outage", "System Architecture", "Decision Tree", "Engineering Leadership"],
-  },
-  transparency: {
-    title: "Platform Transparency Hub | Real-Time Telemetry",
-    description: "Verifiable operational metrics, live security telemetry, rate-limiting audit logs, and build reliability statistics.",
-    path: "/transparency",
-    keywords: ["Transparency", "Telemetry", "Audit Logs", "Security Telemetry", "System Health", "Observability"],
   },
   schedule: {
     title: "Schedule 1:1 Systems Consultation | Frederick de Ruiter",

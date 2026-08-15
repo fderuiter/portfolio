@@ -27,6 +27,13 @@ export const metadata: Metadata = {
     default: "Frederick de Ruiter | Principal Systems Engineer & Designer",
   },
   description: "A high-performance design engineering showcase combining DOM-free canvas layout physics, serverless Neon Postgres data streams, and robust clinical CDISC data engines.",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    shortcut: "/icon.svg",
+  },
   alternates: {
     canonical: "/",
   },

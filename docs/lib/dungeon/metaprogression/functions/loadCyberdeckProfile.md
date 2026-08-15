@@ -8,7 +8,7 @@
 
 > **loadCyberdeckProfile**(): [`CyberdeckProfile`](../../types/interfaces/CyberdeckProfile.md)
 
-Defined in: lib/dungeon/metaprogression.ts:178
+Defined in: [lib/dungeon/metaprogression.ts:178](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/metaprogression.ts#L178)
 
 Loads the persistent Cyberdeck profile from browser storage.
 
