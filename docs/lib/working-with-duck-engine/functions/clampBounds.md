@@ -8,7 +8,7 @@
 
 > **clampBounds**(`x`, `y`): `object`
 
-Defined in: [lib/working-with-duck-engine.ts:474](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L474)
+Defined in: [lib/working-with-duck-engine.ts:488](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L488)
 
 ## Parameters
 

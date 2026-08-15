@@ -8,7 +8,7 @@
 
 > **scaffoldCdashDomain**(`domainCode`): [`CRFForm`](../../types/interfaces/CRFForm.md)
 
-Defined in: [lib/crf/cdisc-cdash-library.ts:182](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cdisc-cdash-library.ts#L182)
+Defined in: [lib/crf/cdisc-cdash-library.ts:366](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cdisc-cdash-library.ts#L366)
 
 1-Click CDASH Domain Auto-Scaffolder Generator
 
@@ -16,7 +16,7 @@ Defined in: [lib/crf/cdisc-cdash-library.ts:182](https://github.com/fderuiter/po
 
 ### domainCode
 
-`"DM"` \| `"VS"` \| `"AE"` \| `"LB"` \| `"CM"` \| `"RECIST"`
+`"DM"` \| `"VS"` \| `"AE"` \| `"LB"` \| `"CM"` \| `"EX"` \| `"DS"` \| `"MH"` \| `"RECIST"` \| `"DI"` \| `"DU"` \| `"DE"` \| `"DA"`
 
 ## Returns
 

@@ -8,6 +8,6 @@
 
 > `const` **CDASH\_STANDARD\_VARIABLES**: `Record`\<`string`, [`CdashVariableMetadata`](../../types/interfaces/CdashVariableMetadata.md)[]\>
 
-Defined in: [lib/crf/cdisc-cdash-library.ts:127](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cdisc-cdash-library.ts#L127)
+Defined in: [lib/crf/cdisc-cdash-library.ts:249](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cdisc-cdash-library.ts#L249)
 
 Standard CDASH 2.2 Domain Variable Catalog

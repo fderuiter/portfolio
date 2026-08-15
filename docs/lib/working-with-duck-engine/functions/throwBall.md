@@ -8,7 +8,7 @@
 
 > **throwBall**(`state`, `targetX`, `targetY`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:1729](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1729)
+Defined in: [lib/working-with-duck-engine.ts:1803](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1803)
 
 Player Action: Throw Tennis Ball / Frisbee (Drains Excitement)
 

@@ -8,7 +8,7 @@
 
 > **applySqueakyToy**(`state`, `x`, `y`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:1760](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1760)
+Defined in: [lib/working-with-duck-engine.ts:1834](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1834)
 
 Player Action: Use Squeaky Toy to Recall and Redirect Duck
 

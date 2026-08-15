@@ -8,4 +8,4 @@
 
 > `const` **STUDY\_PRESETS**: [`PresetCatalogItem`](../interfaces/PresetCatalogItem.md)[]
 
-Defined in: [lib/crf/presets/index.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/crf/presets/index.ts#L17)
+Defined in: [lib/crf/presets/index.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/crf/presets/index.ts#L18)
