@@ -27,7 +27,7 @@
   --layout-masonry-padding-with-stats: 604px;
   --layout-masonry-padding-without-stats: 254px;
   --layout-gap: 16px;
-  --layout-card-padding: 16px;
+  --layout-card-padding: 20px;
 
   /* Motion Springs (stiffness, damping) */
   --motion-spring-snappy-stiffness: 380;

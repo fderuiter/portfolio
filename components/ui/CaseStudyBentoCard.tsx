@@ -188,7 +188,10 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             <span className={`px-2.5 py-0.5 text-[10px] font-mono font-bold border border-current/10 rounded-md ${langColor.bg} ${langColor.text}`}>
               {study.primary_language}
             </span>
-            <span className="text-[10px] font-mono text-zinc-400">
+            <span 
+              className="text-[10px] font-mono text-zinc-400 truncate max-w-[160px] text-right"
+              title={study.slug.toUpperCase()}
+            >
               {study.slug.toUpperCase()}
             </span>
           </div>

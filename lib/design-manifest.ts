@@ -64,7 +64,7 @@ export const designManifest = {
     /** Original CSS Variable: --layout-gap */
     gap: 16,
     /** Original CSS Variable: --layout-card-padding */
-    cardPadding: 16,
+    cardPadding: 20,
   },
   breakpoints: {
     /** Original CSS Variable: --breakpoint-sm */

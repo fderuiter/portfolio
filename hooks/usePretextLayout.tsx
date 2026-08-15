@@ -459,7 +459,7 @@ export const PretextRichText: React.FC<PretextRichTextProps> = ({
         {lines.map((line, lineIdx) => (
           <div 
             key={lineIdx} 
-            className="flex flex-wrap items-center overflow-hidden"
+            className="flex flex-nowrap items-center whitespace-nowrap overflow-hidden"
             style={{ height: `${lineHeight}px`, lineHeight: `${lineHeight}px` }}
           >
             {line.fragments.map((frag, fragIdx) => {

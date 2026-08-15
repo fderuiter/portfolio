@@ -173,7 +173,7 @@ export default async function PortfolioHomePage() {
           <div className="absolute top-1/3 left-1/3 -translate-y-1/2 w-96 h-96 rounded-full bg-brand-blue/5 blur-[150px] pointer-events-none" />
 
           {/* Main Container */}
-          <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
+          <div className="relative z-10 w-full max-w-7xl flex flex-col items-center">
             {/* Title Block */}
             <h2 className="text-3xl md:text-4xl font-extrabold font-mono tracking-tight text-white text-center mb-2">
               Unified Systems &amp; Design Showcase

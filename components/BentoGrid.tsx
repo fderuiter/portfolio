@@ -51,7 +51,7 @@ export const Card = ({
     "--duration": "300ms",
     "--foil-size": "100%",
     "--opacity": "0",
-    "--radius": "48px",
+    "--radius": "24px",
     "--easing": "ease",
     "--transition": "var(--duration) var(--easing)",
     ...style
@@ -141,7 +141,7 @@ export const Card = ({
         style={{ "--hover-glow": `0 0 30px ${hexToRgba(designManifest.colors["brand-cyan"], 0.15)}, 0 0 60px ${hexToRgba(designManifest.colors["brand-cyan"], 0.05)}, inset 0 0 20px ${hexToRgba(designManifest.colors["brand-cyan"], 0.03)}` } as React.CSSProperties}
         className="grid h-full origin-center [transform:rotateY(var(--r-x))_rotateX(var(--r-y))] overflow-hidden rounded-[var(--radius)] border border-border hover:border-border-active transition-all duration-300 delay-[var(--delay)] ease-[var(--easing)] will-change-transform hover:filter-none hover:[--duration:200ms] hover:[--easing:linear] hover:[--opacity:0.6] hover:[box-shadow:var(--hover-glow)]">
         <div className="grid h-full w-full mix-blend-soft-light [clip-path:inset(0_0_0_0_round_var(--radius))] [grid-area:1/1]">
-          <div className={cn("h-full w-full bg-surface-1 backdrop-blur-sm p-4 flex flex-col justify-between", className)}>
+          <div className={cn("h-full w-full bg-surface-1 backdrop-blur-sm p-5 flex flex-col justify-between", className)}>
             {children}
           </div>
         </div>
@@ -163,7 +163,7 @@ export const CardTitle = ({
   children: React.ReactNode;
 }) => {
   return (
-    <div className={cn("mt-2 mb-2 font-sans font-bold text-neutral-100 group-hover:text-brand-cyan transition-colors duration-300", className)}>
+    <div className={cn("mt-2 mb-2 font-sans font-bold text-neutral-100 group-hover:text-brand-cyan transition-colors duration-300 break-words text-balance", className)}>
       {children}
     </div>
   );

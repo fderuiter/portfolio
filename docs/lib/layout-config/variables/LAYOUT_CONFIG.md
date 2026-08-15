@@ -26,7 +26,7 @@ Defined in: [lib/layout-config.ts:3](https://github.com/fderuiter/portfolio/blob
 
 ### CARD\_PADDING
 
-> `readonly` **CARD\_PADDING**: `16` = `designManifest.layout.cardPadding`
+> `readonly` **CARD\_PADDING**: `20` = `designManifest.layout.cardPadding`
 
 ### COLS
 

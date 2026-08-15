@@ -155,7 +155,7 @@ Original CSS Variable: --warning
 
 #### layout.cardPadding
 
-> `readonly` **cardPadding**: `16` = `16`
+> `readonly` **cardPadding**: `20` = `20`
 
 Original CSS Variable: --layout-card-padding
 
