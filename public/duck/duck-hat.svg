@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="creamBody2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="60%" stop-color="#faf8f5" />
+      <stop offset="100%" stop-color="#f5efe6" />
+    </linearGradient>
+    <linearGradient id="earGradLeft2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#faf5ee" />
+      <stop offset="70%" stop-color="#fef08a" />
+      <stop offset="100%" stop-color="#fcd34d" />
+    </linearGradient>
+    <linearGradient id="earGradRight2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#faf5ee" />
+      <stop offset="70%" stop-color="#fef08a" />
+      <stop offset="100%" stop-color="#fcd34d" />
+    </linearGradient>
+    <radialGradient id="noseGrad2" cx="40%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#3f3f46" />
+      <stop offset="60%" stop-color="#18181b" />
+      <stop offset="100%" stop-color="#09090b" />
+    </radialGradient>
+    <linearGradient id="tongueGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fb7185" />
+      <stop offset="100%" stop-color="#f43f5e" />
+    </linearGradient>
+    <linearGradient id="harnessGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+    <filter id="hatShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#000000" flood-opacity="0.25" />
+    </filter>
+  </defs>
+
+  <!-- Background Sunburst -->
+  <circle cx="250" cy="250" r="230" fill="#f0fdf4" opacity="0.6" />
+  <circle cx="250" cy="250" r="190" fill="#bbf7d0" opacity="0.3" />
+
+  <!-- Shadow -->
+  <ellipse cx="250" cy="455" rx="130" ry="20" fill="#000000" opacity="0.15" />
+
+  <g filter="url(#hatShadow)">
+    <!-- Cyan Adventure Harness -->
+    <path d="M 160 330 C 145 370 170 430 250 430 C 330 430 355 370 340 330 Z" fill="url(#creamBody2)" />
+    <!-- Harness Straps -->
+    <path d="M 170 320 C 190 340 310 340 330 320 L 340 350 C 310 370 190 370 160 350 Z" fill="url(#harnessGrad)" stroke="#0891b2" stroke-width="2" />
+    <circle cx="250" cy="345" r="10" fill="#38bdf8" stroke="#ffffff" stroke-width="2" />
+
+    <!-- Front Paws -->
+    <ellipse cx="205" cy="445" rx="20" ry="12" fill="#ffffff" stroke="#fef08a" stroke-width="2" />
+    <ellipse cx="295" cy="445" rx="20" ry="12" fill="#ffffff" stroke="#fef08a" stroke-width="2" />
+
+    <!-- Floppy Ears (Poking out under hat) -->
+    <path d="M 165 180 C 120 190 90 260 115 320 C 130 345 155 350 170 325 C 185 295 180 240 175 195 Z" fill="url(#earGradLeft2)" stroke="#fde68a" stroke-width="2" />
+    <path d="M 335 180 C 380 190 410 260 385 320 C 370 345 345 350 330 325 C 315 295 320 240 325 195 Z" fill="url(#earGradRight2)" stroke="#fde68a" stroke-width="2" />
+
+    <!-- Puppy Head -->
+    <path d="M 160 180 C 140 240 160 300 200 315 C 220 322 280 322 300 315 C 340 300 360 240 340 180 C 320 120 180 120 160 180 Z" fill="url(#creamBody2)" stroke="#fef08a" stroke-width="1.5" />
+
+    <!-- Soft Muzzle -->
+    <ellipse cx="250" cy="270" rx="52" ry="38" fill="#ffffff" stroke="#fef08a" stroke-width="1" />
+
+    <!-- Big Happy Tongue Sticking Out (like in bucket hat photo) -->
+    <path d="M 226 288 C 230 320 270 320 274 288 Z" fill="#450a0a" />
+    <path d="M 230 292 C 228 340 272 340 270 292 Z" fill="url(#tongueGrad2)" />
+    <path d="M 250 292 L 250 330" stroke="#f43f5e" stroke-width="2" />
+
+    <!-- Upper Lip -->
+    <path d="M 218 278 C 235 290 250 285 250 276 C 250 285 265 290 282 278" fill="none" stroke="#1c1917" stroke-width="3" stroke-linecap="round" />
+
+    <!-- Big Button Nose -->
+    <path d="M 226 250 C 226 235 274 235 274 250 C 274 270 256 276 250 276 C 244 276 226 270 226 250 Z" fill="url(#noseGrad2)" />
+    <ellipse cx="242" cy="246" rx="6" ry="3" fill="#ffffff" opacity="0.5" />
+
+    <!-- Happy Squinting Sunny Walk Eyes -->
+    <path d="M 192 216 C 202 206 218 206 226 218" fill="none" stroke="#1c1917" stroke-width="4.5" stroke-linecap="round" />
+    <path d="M 308 216 C 298 206 282 206 274 218" fill="none" stroke="#1c1917" stroke-width="4.5" stroke-linecap="round" />
+
+    <!-- Eyebrows -->
+    <path d="M 194 200 C 204 195 218 198 224 204" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" opacity="0.7" />
+    <path d="M 306 200 C 296 195 282 198 276 204" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" opacity="0.7" />
+
+    <!-- Iconic Black Adidas Bucket Hat (Sitting jauntily over his ears) -->
+    <!-- Hat Brim -->
+    <path d="M 130 180 C 130 140 250 120 370 180 C 400 200 370 215 340 210 C 250 185 170 195 140 210 C 120 210 115 195 130 180 Z" fill="#18181b" stroke="#27272a" stroke-width="2" />
+
+    <!-- Hat Crown -->
+    <path d="M 175 145 C 185 85 315 85 325 145 C 290 135 210 135 175 145 Z" fill="#27272a" stroke="#3f3f46" stroke-width="2" />
+    <path d="M 190 92 C 220 84 280 84 310 92 Z" fill="#18181b" />
+
+    <!-- Hat Strap Chinstrap -->
+    <path d="M 160 190 C 170 260 210 320 230 330" fill="none" stroke="#18181b" stroke-width="3" stroke-linecap="round" />
+    <path d="M 340 190 C 330 260 290 320 270 330" fill="none" stroke="#18181b" stroke-width="3" stroke-linecap="round" />
+    <circle cx="250" cy="330" r="5" fill="#52525b" />
+
+    <!-- Adidas 3-Bar Logo on Hat -->
+    <g transform="translate(258, 105) rotate(12) scale(0.65)">
+      <rect x="0" y="24" width="8" height="12" rx="2" fill="#ffffff" transform="skewX(-25)" />
+      <rect x="14" y="14" width="8" height="22" rx="2" fill="#ffffff" transform="skewX(-25)" />
+      <rect x="28" y="4" width="8" height="32" rx="2" fill="#ffffff" transform="skewX(-25)" />
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="creamCoatCouch" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="60%" stop-color="#faf8f5" />
+      <stop offset="100%" stop-color="#f5efe6" />
+    </linearGradient>
+    <linearGradient id="goldenEarCouch" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#faf5ee" />
+      <stop offset="70%" stop-color="#fef08a" />
+      <stop offset="100%" stop-color="#fcd34d" />
+    </linearGradient>
+    <linearGradient id="couchStripe1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="50%" stop-color="#06b6d4" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+    <radialGradient id="darkNoseCouch" cx="40%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#3f3f46" />
+      <stop offset="60%" stop-color="#18181b" />
+      <stop offset="100%" stop-color="#09090b" />
+    </radialGradient>
+    <linearGradient id="tongueGradCouch" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fb7185" />
+      <stop offset="100%" stop-color="#f43f5e" />
+    </linearGradient>
+    <filter id="couchShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.18" />
+    </filter>
+  </defs>
+
+  <!-- Blue & Green Striped Couch Pattern (from photo) -->
+  <rect width="500" height="500" fill="#0284c7" />
+  <path d="M 0 50 Q 250 100 500 50 L 500 120 Q 250 170 0 120 Z" fill="#06b6d4" opacity="0.7" />
+  <path d="M 0 160 Q 250 210 500 160 L 500 230 Q 250 280 0 230 Z" fill="#10b981" opacity="0.6" />
+  <path d="M 0 270 Q 250 320 500 270 L 500 340 Q 250 390 0 340 Z" fill="#0ea5e9" opacity="0.7" />
+  <path d="M 0 380 Q 250 430 500 380 L 500 450 Q 250 500 0 450 Z" fill="#34d399" opacity="0.6" />
+
+  <g filter="url(#couchShadow)">
+    <!-- Fluffy Wagging Tail in Air -->
+    <path d="M 60 180 C 40 140 30 110 50 90 C 70 80 90 110 110 160 Z" fill="url(#creamCoatCouch)" stroke="#fef08a" stroke-width="1.5" />
+    <path d="M 55 95 C 45 80 50 65 65 70 C 80 75 85 95 100 120" stroke="#fde68a" stroke-width="2" stroke-linecap="round" fill="none" />
+
+    <!-- Puppy Body Walking Forward on Couch Cushions -->
+    <!-- Hind Leg -->
+    <path d="M 120 280 C 90 320 110 390 150 410 C 170 410 180 370 170 320 Z" fill="url(#creamCoatCouch)" stroke="#fef08a" stroke-width="1.5" />
+    
+    <!-- Torso -->
+    <path d="M 100 230 C 90 170 230 140 320 180 C 370 210 340 330 280 340 C 200 350 120 300 100 230 Z" fill="url(#creamCoatCouch)" stroke="#fef08a" stroke-width="1.5" />
+
+    <!-- Front Left Leg & Paw -->
+    <path d="M 230 270 C 225 330 215 390 220 420 C 225 435 255 435 265 415 C 275 385 275 320 270 270 Z" fill="url(#creamCoatCouch)" stroke="#fef08a" stroke-width="1.5" />
+    <ellipse cx="235" cy="425" rx="18" ry="11" fill="#ffffff" stroke="#fef08a" stroke-width="1.5" />
+
+    <!-- Front Right Leg (Stepping Forward enthusiastically) -->
+    <path d="M 330 270 C 340 330 360 400 380 440 C 395 455 425 445 425 425 C 415 385 385 320 360 270 Z" fill="url(#creamCoatCouch)" stroke="#fef08a" stroke-width="1.5" />
+    <ellipse cx="405" cy="440" rx="20" ry="13" fill="#ffffff" stroke="#fef08a" stroke-width="1.5" />
+
+    <!-- Head Stepping Forward with Open-Mouthed Joyful Grin -->
+    <!-- Floppy Left Ear (Behind Head) -->
+    <path d="M 260 110 C 220 120 200 190 225 260 C 235 285 260 285 270 260 C 280 230 280 160 270 120 Z" fill="url(#goldenEarCouch)" stroke="#fde68a" stroke-width="2" />
+
+    <!-- Floppy Right Ear (Flapping in joy) -->
+    <path d="M 380 120 C 430 130 460 190 445 260 C 435 285 410 285 400 260 C 390 230 385 160 380 120 Z" fill="url(#goldenEarCouch)" stroke="#fde68a" stroke-width="2" />
+
+    <!-- Head Shape -->
+    <path d="M 240 140 C 220 200 240 260 280 280 C 310 290 370 285 400 260 C 430 230 435 170 410 130 C 380 90 260 90 240 140 Z" fill="url(#creamCoatCouch)" stroke="#fef08a" stroke-width="1.5" />
+
+    <!-- Soft Muzzle Snout -->
+    <ellipse cx="360" cy="225" rx="50" ry="38" fill="#ffffff" stroke="#fef08a" stroke-width="1" />
+
+    <!-- Wide Open Joyful Smile & Lolling Pink Tongue -->
+    <path d="M 330 240 C 335 285 390 285 395 240 Z" fill="#450a0a" />
+    <path d="M 335 245 C 330 295 388 295 385 245 Z" fill="url(#tongueGradCouch)" />
+    <path d="M 360 245 L 360 288" stroke="#f43f5e" stroke-width="2" />
+
+    <!-- Big Button Nose -->
+    <path d="M 340 198 C 340 182 385 182 385 198 C 385 218 368 226 362 226 C 356 226 340 218 340 198 Z" fill="url(#darkNoseCouch)" />
+    <ellipse cx="354" cy="194" rx="6" ry="3" fill="#ffffff" opacity="0.6" />
+
+    <!-- Smiling Mouth Line -->
+    <path d="M 320 232 C 340 245 362 240 362 230 C 362 240 385 245 405 232" fill="none" stroke="#18181b" stroke-width="3" stroke-linecap="round" />
+
+    <!-- Happy Bright Dark Puppy Eyes -->
+    <!-- Left Eye -->
+    <ellipse cx="295" cy="165" rx="13" ry="14" fill="url(#darkNoseCouch)" />
+    <circle cx="291" cy="160" r="5" fill="#ffffff" />
+    <circle cx="300" cy="170" r="2" fill="#ffffff" />
+
+    <!-- Right Eye -->
+    <ellipse cx="385" cy="165" rx="13" ry="14" fill="url(#darkNoseCouch)" />
+    <circle cx="381" cy="160" r="5" fill="#ffffff" />
+    <circle cx="390" cy="170" r="2" fill="#ffffff" />
+  </g>
+</svg>

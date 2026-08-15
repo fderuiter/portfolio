@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="creamCoatHappy" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="60%" stop-color="#faf8f5" />
+      <stop offset="100%" stop-color="#f5efe6" />
+    </linearGradient>
+    <linearGradient id="goldenEarHappy" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#faf5ee" />
+      <stop offset="70%" stop-color="#fef08a" />
+      <stop offset="100%" stop-color="#fcd34d" />
+    </linearGradient>
+    <radialGradient id="darkNoseHappy" cx="40%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#3f3f46" />
+      <stop offset="60%" stop-color="#18181b" />
+      <stop offset="100%" stop-color="#09090b" />
+    </radialGradient>
+    <linearGradient id="tongueHappy" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fb7185" />
+      <stop offset="100%" stop-color="#f43f5e" />
+    </linearGradient>
+    <filter id="happyShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.18" />
+    </filter>
+  </defs>
+
+  <!-- Bright Sunny Backyard Background -->
+  <rect width="500" height="500" fill="#22c55e" />
+  <circle cx="250" cy="250" r="230" fill="#4ade80" opacity="0.4" />
+
+  <!-- Speed Lines -->
+  <path d="M 30 180 L 120 180 M 10 240 L 90 240 M 40 300 L 140 300" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity="0.5" />
+
+  <g filter="url(#happyShadow)">
+    <!-- Fluffy Flying Tail -->
+    <path d="M 80 270 C 40 250 20 200 40 180 C 60 170 80 200 110 240 Z" fill="url(#creamCoatHappy)" stroke="#fef08a" stroke-width="1.5" />
+
+    <!-- Full Speed Zooming Body -->
+    <ellipse cx="220" cy="270" rx="130" ry="75" fill="url(#creamCoatHappy)" stroke="#fef08a" stroke-width="2" />
+
+    <!-- Front & Hind Running Paws -->
+    <ellipse cx="120" cy="330" rx="18" ry="12" fill="#ffffff" stroke="#fef08a" stroke-width="1.5" />
+    <ellipse cx="320" cy="330" rx="20" ry="14" fill="#ffffff" stroke="#fef08a" stroke-width="1.5" />
+
+    <!-- Head Tilted Upwards at Full Speed -->
+    <!-- Floppy Ears Flying Straight Back in Wind -->
+    <path d="M 270 160 C 210 140 160 140 130 160 C 120 180 140 200 170 190 C 220 180 260 190 270 160 Z" fill="url(#goldenEarHappy)" stroke="#fde68a" stroke-width="2" />
+    <path d="M 320 140 C 260 110 200 100 170 120 C 160 140 180 160 210 150 C 260 140 300 160 320 140 Z" fill="url(#goldenEarHappy)" stroke="#fde68a" stroke-width="2" />
+
+    <!-- Head Shape -->
+    <ellipse cx="330" cy="210" rx="55" ry="46" fill="url(#creamCoatHappy)" stroke="#fef08a" stroke-width="2" />
+
+    <!-- Muzzle -->
+    <ellipse cx="380" cy="235" rx="42" ry="32" fill="#ffffff" stroke="#fef08a" stroke-width="1" />
+
+    <!-- Huge Joyful Smile & Big Flying Tongue -->
+    <path d="M 350 245 C 355 290 410 290 415 245 Z" fill="#450a0a" />
+    <path d="M 355 250 C 350 310 420 310 405 250 Z" fill="url(#tongueHappy)" />
+    <path d="M 380 250 L 380 300" stroke="#f43f5e" stroke-width="2" />
+
+    <!-- Black Button Nose -->
+    <path d="M 370 210 C 370 196 405 196 405 210 C 405 228 390 234 385 234 C 380 234 370 228 370 210 Z" fill="url(#darkNoseHappy)" />
+    <ellipse cx="380" cy="206" rx="5" ry="2.5" fill="#ffffff" opacity="0.6" />
+
+    <!-- Bright Happy Eyes -->
+    <ellipse cx="310" cy="180" rx="12" ry="14" fill="url(#darkNoseHappy)" />
+    <circle cx="306" cy="175" r="4.5" fill="#ffffff" />
+    <ellipse cx="375" cy="175" rx="12" ry="14" fill="url(#darkNoseHappy)" />
+    <circle cx="371" cy="170" r="4.5" fill="#ffffff" />
+  </g>
+</svg>

@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <!-- Coat Gradients -->
+    <linearGradient id="creamBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="60%" stop-color="#faf8f5" />
+      <stop offset="100%" stop-color="#f5efe6" />
+    </linearGradient>
+    <linearGradient id="goldenAccent" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fef3c7" />
+      <stop offset="100%" stop-color="#fde68a" />
+    </linearGradient>
+    <linearGradient id="earGradLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#faf5ee" />
+      <stop offset="70%" stop-color="#fef08a" />
+      <stop offset="100%" stop-color="#fcd34d" />
+    </linearGradient>
+    <linearGradient id="earGradRight" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#faf5ee" />
+      <stop offset="70%" stop-color="#fef08a" />
+      <stop offset="100%" stop-color="#fcd34d" />
+    </linearGradient>
+    <radialGradient id="eyeGrad" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#3f3f46" />
+      <stop offset="40%" stop-color="#1c1917" />
+      <stop offset="100%" stop-color="#09090b" />
+    </radialGradient>
+    <radialGradient id="noseGrad" cx="40%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#3f3f46" />
+      <stop offset="60%" stop-color="#18181b" />
+      <stop offset="100%" stop-color="#09090b" />
+    </radialGradient>
+    <linearGradient id="tongueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fb7185" />
+      <stop offset="100%" stop-color="#f43f5e" />
+    </linearGradient>
+    <filter id="fluffyShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.15" />
+    </filter>
+  </defs>
+
+  <!-- Background Glow -->
+  <circle cx="250" cy="250" r="230" fill="#fefce8" opacity="0.6" />
+  <circle cx="250" cy="250" r="190" fill="#fef08a" opacity="0.3" />
+
+  <!-- Ground Shadow -->
+  <ellipse cx="250" cy="450" rx="140" ry="24" fill="#000000" opacity="0.12" />
+
+  <!-- Main Puppy Body Group (Sitting Prince Pose) -->
+  <g filter="url(#fluffyShadow)">
+    <!-- Feathery Fluffy Tail -->
+    <path d="M 140 370 C 90 350 50 310 40 260 C 35 235 48 220 60 230 C 75 245 90 290 130 330 C 145 345 155 365 140 370 Z" fill="url(#creamBody)" stroke="#fef08a" stroke-width="2" stroke-linejoin="round" />
+    <path d="M 50 245 C 40 230 45 210 60 215 C 75 220 80 250 95 270" fill="none" stroke="#fef08a" stroke-width="3" stroke-linecap="round" />
+
+    <!-- Hind Legs / Fluffy Haunches -->
+    <path d="M 140 340 C 110 355 100 400 120 435 C 135 450 175 450 190 430 C 200 400 190 360 160 345 Z" fill="url(#creamBody)" stroke="#fef08a" stroke-width="1.5" />
+    <path d="M 360 340 C 390 355 400 400 380 435 C 365 450 325 450 310 430 C 300 400 310 360 340 345 Z" fill="url(#creamBody)" stroke="#fef08a" stroke-width="1.5" />
+
+    <!-- Torso / Chest Ruff -->
+    <path d="M 170 230 C 140 280 145 370 170 420 C 200 445 300 445 330 420 C 355 370 360 280 330 230 C 300 200 200 200 170 230 Z" fill="url(#creamBody)" />
+    
+    <!-- Chest Fluff Feathering -->
+    <path d="M 210 270 C 250 290 250 350 210 390 C 250 370 270 330 250 270" fill="#ffffff" opacity="0.8" />
+    <path d="M 290 270 C 250 290 250 350 290 390 C 250 370 230 330 250 270" fill="#ffffff" opacity="0.8" />
+
+    <!-- Front Left Leg & Paw -->
+    <path d="M 195 280 C 190 340 185 390 180 435 C 180 450 215 455 225 445 C 235 425 230 360 225 285 Z" fill="url(#creamBody)" stroke="#fef08a" stroke-width="1.5" />
+    <ellipse cx="202" cy="442" rx="16" ry="10" fill="#ffffff" stroke="#fef08a" stroke-width="1.5" />
+    <!-- Paw Toes -->
+    <path d="M 194 440 L 194 448 M 202 438 L 202 450 M 210 440 L 210 448" stroke="#fde68a" stroke-width="2" stroke-linecap="round" />
+
+    <!-- Front Right Leg & Paw -->
+    <path d="M 305 280 C 310 340 315 390 320 435 C 320 450 285 455 275 445 C 265 425 270 360 275 285 Z" fill="url(#creamBody)" stroke="#fef08a" stroke-width="1.5" />
+    <ellipse cx="298" cy="442" rx="16" ry="10" fill="#ffffff" stroke="#fef08a" stroke-width="1.5" />
+    <!-- Paw Toes -->
+    <path d="M 290 440 L 290 448 M 298 438 L 298 450 M 306 440 L 306 448" stroke="#fde68a" stroke-width="2" stroke-linecap="round" />
+
+    <!-- Floppy Left Ear (Behind Head Layer) -->
+    <path d="M 180 130 C 130 140 100 200 115 270 C 125 300 155 310 170 285 C 185 260 190 200 185 145 Z" fill="url(#earGradLeft)" stroke="#fde68a" stroke-width="2" />
+
+    <!-- Floppy Right Ear (Behind Head Layer) -->
+    <path d="M 320 130 C 370 140 400 200 385 270 C 375 300 345 310 330 285 C 315 260 310 200 315 145 Z" fill="url(#earGradRight)" stroke="#fde68a" stroke-width="2" />
+
+    <!-- Head (Rounded Marshmallow Teddy Bear Shape) -->
+    <path d="M 160 150 C 140 210 160 260 200 275 C 220 282 280 282 300 275 C 340 260 360 210 340 150 C 325 100 175 100 160 150 Z" fill="url(#creamBody)" stroke="#fef08a" stroke-width="1.5" />
+
+    <!-- Cheek Fluff Tufts -->
+    <path d="M 155 205 C 140 215 142 235 158 240 C 142 248 148 265 168 260" fill="url(#creamBody)" />
+    <path d="M 345 205 C 360 215 358 235 342 240 C 358 248 352 265 332 260" fill="url(#creamBody)" />
+
+    <!-- Crown Fur Tuft -->
+    <path d="M 235 108 C 245 92 255 92 265 108 C 255 102 245 102 235 108 Z" fill="#ffffff" />
+
+    <!-- Soft Muzzle Snout -->
+    <ellipse cx="250" cy="220" rx="46" ry="34" fill="#ffffff" stroke="#fef08a" stroke-width="1" />
+
+    <!-- Open Mouth & Happy Tongue -->
+    <path d="M 232 236 C 235 265 265 265 268 236 Z" fill="#450a0a" />
+    <path d="M 236 240 C 236 272 264 272 264 240 Z" fill="url(#tongueGrad)" />
+    <path d="M 250 240 L 250 262" stroke="#f43f5e" stroke-width="1.5" />
+
+    <!-- Upper Lip / Whiskers Muzzle Crease -->
+    <path d="M 225 228 C 238 238 250 234 250 226 C 250 234 262 238 275 228" fill="none" stroke="#1c1917" stroke-width="2.5" stroke-linecap="round" />
+
+    <!-- Big Soft Black Button Nose -->
+    <path d="M 230 202 C 230 190 270 190 270 202 C 270 218 255 224 250 224 C 245 224 230 218 230 202 Z" fill="url(#noseGrad)" />
+    <!-- Nose Highlight Specular -->
+    <ellipse cx="243" cy="199" rx="5" ry="2.5" fill="#ffffff" opacity="0.5" />
+    <circle cx="257" cy="201" r="1.5" fill="#ffffff" opacity="0.3" />
+
+    <!-- Whiskers Dots -->
+    <circle cx="218" cy="225" r="1.5" fill="#a1a1aa" />
+    <circle cx="224" cy="221" r="1.5" fill="#a1a1aa" />
+    <circle cx="222" cy="229" r="1.5" fill="#a1a1aa" />
+    <circle cx="282" cy="225" r="1.5" fill="#a1a1aa" />
+    <circle cx="276" cy="221" r="1.5" fill="#a1a1aa" />
+    <circle cx="278" cy="229" r="1.5" fill="#a1a1aa" />
+
+    <!-- Deep Soulful Retriever Eyes -->
+    <!-- Left Eye -->
+    <g>
+      <ellipse cx="205" cy="172" rx="14" ry="15" fill="url(#eyeGrad)" />
+      <!-- Specular Highlights -->
+      <circle cx="201" cy="167" r="5" fill="#ffffff" />
+      <circle cx="211" cy="177" r="2" fill="#ffffff" />
+      <!-- Eyelash / Eyebrow Accent -->
+      <path d="M 192 158 C 202 152 216 155 222 162" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    </g>
+
+    <!-- Right Eye -->
+    <g>
+      <ellipse cx="295" cy="172" rx="14" ry="15" fill="url(#eyeGrad)" />
+      <!-- Specular Highlights -->
+      <circle cx="291" cy="167" r="5" fill="#ffffff" />
+      <circle cx="301" cy="177" r="2" fill="#ffffff" />
+      <!-- Eyelash / Eyebrow Accent -->
+      <path d="M 308 158 C 298 152 284 155 278 162" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    </g>
+
+    <!-- Cute Golden Retriever Forehead Fur Contour -->
+    <path d="M 250 115 L 250 155" stroke="#fde68a" stroke-width="2" stroke-linecap="round" opacity="0.5" />
+    <path d="M 245 130 L 235 120 M 255 130 L 265 120" stroke="#fde68a" stroke-width="1.5" stroke-linecap="round" opacity="0.4" />
+  </g>
+</svg>

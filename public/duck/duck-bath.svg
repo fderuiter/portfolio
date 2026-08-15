@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="creamCoatWet" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="60%" stop-color="#faf5ee" />
+      <stop offset="100%" stop-color="#f0e6d6" />
+    </linearGradient>
+    <linearGradient id="goldenEarWet" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="100%" stop-color="#eab308" />
+    </linearGradient>
+    <linearGradient id="tubGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="50%" stop-color="#e2e8f0" />
+      <stop offset="100%" stop-color="#cbd5e1" />
+    </linearGradient>
+    <radialGradient id="darkNoseBath" cx="40%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#3f3f46" />
+      <stop offset="60%" stop-color="#18181b" />
+      <stop offset="100%" stop-color="#09090b" />
+    </radialGradient>
+    <filter id="bathShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.15" />
+    </filter>
+  </defs>
+
+  <!-- Bathroom Tile Background -->
+  <rect width="500" height="500" fill="#f8fafc" />
+  <!-- Tiles Grid -->
+  <path d="M 0 100 L 500 100 M 0 200 L 500 200 M 0 300 L 500 300 M 100 0 L 100 500 M 200 0 L 200 500 M 300 0 L 300 500 M 400 0 L 400 500" stroke="#e2e8f0" stroke-width="1.5" />
+
+  <g filter="url(#bathShadow)">
+    <!-- White Porcelain Bathtub Rim -->
+    <path d="M 40 320 C 40 280 460 280 460 320 L 440 480 C 440 500 60 500 60 480 Z" fill="url(#tubGrad)" stroke="#94a3b8" stroke-width="2" />
+    <!-- Tub Edge Highlight -->
+    <path d="M 40 320 C 40 290 460 290 460 320" fill="none" stroke="#ffffff" stroke-width="6" />
+
+    <!-- Water in Tub & Bubbles -->
+    <path d="M 70 330 C 120 340 380 340 430 330 L 415 450 C 350 460 150 460 85 450 Z" fill="#38bdf8" opacity="0.3" />
+    <!-- Soap Bubbles -->
+    <circle cx="120" cy="330" r="14" fill="#ffffff" opacity="0.7" stroke="#38bdf8" stroke-width="1" />
+    <circle cx="138" cy="324" r="8" fill="#ffffff" opacity="0.6" />
+    <circle cx="370" cy="335" r="16" fill="#ffffff" opacity="0.7" stroke="#38bdf8" stroke-width="1" />
+    <circle cx="390" cy="330" r="10" fill="#ffffff" opacity="0.6" />
+
+    <!-- Duck Sitting in Tub with Chin Resting on Tub Rim -->
+    <!-- Wet Slender Puppy Body -->
+    <ellipse cx="250" cy="270" rx="100" ry="80" fill="url(#creamCoatWet)" stroke="#fef08a" stroke-width="1.5" />
+
+    <!-- Sleek Floppy Wet Ears Hanging Straight Down -->
+    <path d="M 160 140 C 130 150 110 220 120 290 C 130 310 150 310 160 285 C 170 250 175 190 170 140 Z" fill="url(#goldenEarWet)" stroke="#eab308" stroke-width="2" />
+    <path d="M 340 140 C 370 150 390 220 380 290 C 370 310 350 310 340 285 C 330 250 325 190 330 140 Z" fill="url(#goldenEarWet)" stroke="#eab308" stroke-width="2" />
+
+    <!-- Head -->
+    <path d="M 155 160 C 140 220 160 280 200 295 C 225 302 275 302 300 295 C 340 280 360 220 345 160 C 325 100 175 100 155 160 Z" fill="url(#creamCoatWet)" stroke="#fde68a" stroke-width="1.5" />
+
+    <!-- Chin Resting on Bathtub Rim -->
+    <ellipse cx="250" cy="290" rx="42" ry="22" fill="#ffffff" stroke="#fef08a" stroke-width="1" />
+
+    <!-- Big Soft Button Nose Resting Right on Tub Wall -->
+    <path d="M 230 270 C 230 255 270 255 270 270 C 270 288 255 294 250 294 C 245 294 230 288 230 270 Z" fill="url(#darkNoseBath)" />
+    <ellipse cx="244" cy="266" rx="5" ry="2.5" fill="#ffffff" opacity="0.6" />
+
+    <!-- Resigned Contented Puppy Eyes -->
+    <!-- Left Eye -->
+    <ellipse cx="205" cy="205" rx="12" ry="14" fill="url(#darkNoseBath)" />
+    <circle cx="201" cy="200" r="4.5" fill="#ffffff" />
+    <circle cx="210" cy="210" r="1.8" fill="#ffffff" />
+
+    <!-- Right Eye -->
+    <ellipse cx="295" cy="205" rx="12" ry="14" fill="url(#darkNoseBath)" />
+    <circle cx="291" cy="200" r="4.5" fill="#ffffff" />
+    <circle cx="300" cy="210" r="1.8" fill="#ffffff" />
+
+    <!-- Water Droplet on Forehead -->
+    <path d="M 250 145 C 245 155 245 165 250 168 C 255 165 255 155 250 145 Z" fill="#38bdf8" />
+    <circle cx="251" cy="164" r="1" fill="#ffffff" />
+  </g>
+</svg>

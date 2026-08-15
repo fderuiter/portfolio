@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="creamCoatGaze" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="60%" stop-color="#faf8f5" />
+      <stop offset="100%" stop-color="#f5efe6" />
+    </linearGradient>
+    <linearGradient id="goldenEarGaze" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#faf5ee" />
+      <stop offset="70%" stop-color="#fef08a" />
+      <stop offset="100%" stop-color="#fcd34d" />
+    </linearGradient>
+    <radialGradient id="deepPuppyEye" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#52525b" />
+      <stop offset="40%" stop-color="#18181b" />
+      <stop offset="100%" stop-color="#09090b" />
+    </radialGradient>
+    <radialGradient id="largeNoseGaze" cx="40%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#3f3f46" />
+      <stop offset="60%" stop-color="#18181b" />
+      <stop offset="100%" stop-color="#09090b" />
+    </radialGradient>
+    <filter id="gazeShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.2" />
+    </filter>
+  </defs>
+
+  <!-- Background Floor -->
+  <rect width="500" height="500" fill="#475569" />
+  <circle cx="250" cy="250" r="230" fill="#64748b" opacity="0.4" />
+
+  <!-- Background Dog Friends in Daycare Blur -->
+  <circle cx="340" cy="80" r="25" fill="#d97706" opacity="0.3" />
+  <circle cx="380" cy="90" r="20" fill="#b45309" opacity="0.3" />
+
+  <g filter="url(#gazeShadow)">
+    <!-- Lying Down Puppy Torso & Haunches -->
+    <ellipse cx="250" cy="360" rx="140" ry="85" fill="url(#creamCoatGaze)" stroke="#fef08a" stroke-width="1.5" />
+    
+    <!-- Long Front Paws Stretched Forward -->
+    <!-- Left Paw -->
+    <path d="M 180 340 C 170 390 140 430 110 465 C 120 480 160 480 175 455 C 200 415 215 360 210 335 Z" fill="url(#creamCoatGaze)" stroke="#fef08a" stroke-width="1.5" />
+    <ellipse cx="140" cy="465" rx="26" ry="16" fill="#ffffff" stroke="#fef08a" stroke-width="1.5" />
+    <circle cx="128" cy="465" r="3.5" fill="#78350f" />
+    <circle cx="138" cy="470" r="4" fill="#78350f" />
+    <circle cx="148" cy="465" r="3.5" fill="#78350f" />
+
+    <!-- Right Paw -->
+    <path d="M 320 340 C 330 390 360 430 390 465 C 380 480 340 480 325 455 C 300 415 285 360 290 335 Z" fill="url(#creamCoatGaze)" stroke="#fef08a" stroke-width="1.5" />
+    <ellipse cx="360" cy="465" rx="26" ry="16" fill="#ffffff" stroke="#fef08a" stroke-width="1.5" />
+    <circle cx="348" cy="465" r="3.5" fill="#78350f" />
+    <circle cx="358" cy="470" r="4" fill="#78350f" />
+    <circle cx="368" cy="465" r="3.5" fill="#78350f" />
+
+    <!-- Floppy Golden Retriever Ears Hanging Down -->
+    <path d="M 150 150 C 90 170 60 240 75 320 C 90 350 120 355 135 330 C 155 290 160 220 155 165 Z" fill="url(#goldenEarGaze)" stroke="#fde68a" stroke-width="2" />
+    <path d="M 350 150 C 410 170 440 240 425 320 C 410 350 380 355 365 330 C 345 290 340 220 345 165 Z" fill="url(#goldenEarGaze)" stroke="#fde68a" stroke-width="2" />
+
+    <!-- Head Looking Upwards Directly at Camera -->
+    <path d="M 140 180 C 120 250 140 310 190 330 C 220 340 280 340 310 330 C 360 310 380 250 360 180 C 340 100 160 100 140 180 Z" fill="url(#creamCoatGaze)" stroke="#fef08a" stroke-width="1.5" />
+
+    <!-- Forehead Golden Shading & Contour -->
+    <path d="M 250 120 L 250 170" stroke="#fde68a" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    <path d="M 245 140 L 235 130 M 255 140 L 265 130" stroke="#fde68a" stroke-width="1.5" stroke-linecap="round" opacity="0.5" />
+
+    <!-- Soft White Muzzle Snout -->
+    <ellipse cx="250" cy="275" rx="55" ry="42" fill="#ffffff" stroke="#fef08a" stroke-width="1" />
+
+    <!-- Big Charcoal Button Nose -->
+    <path d="M 220 250 C 220 230 280 230 280 250 C 280 278 260 286 250 286 C 240 286 220 278 220 250 Z" fill="url(#largeNoseGaze)" />
+    <!-- Specular Highlight -->
+    <ellipse cx="238" cy="244" rx="7" ry="3.5" fill="#ffffff" opacity="0.5" />
+    <circle cx="260" cy="247" r="2" fill="#ffffff" opacity="0.3" />
+
+    <!-- Muzzle Whiskers & Dots -->
+    <path d="M 215 292 C 235 304 250 300 250 288 C 250 300 265 304 285 292" fill="none" stroke="#18181b" stroke-width="3" stroke-linecap="round" />
+    <circle cx="205" cy="285" r="1.5" fill="#a1a1aa" />
+    <circle cx="212" cy="280" r="1.5" fill="#a1a1aa" />
+    <circle cx="210" cy="290" r="1.5" fill="#a1a1aa" />
+    <circle cx="295" cy="285" r="1.5" fill="#a1a1aa" />
+    <circle cx="288" cy="280" r="1.5" fill="#a1a1aa" />
+    <circle cx="290" cy="290" r="1.5" fill="#a1a1aa" />
+
+    <!-- Irresistible Soulful Large Puppy Eyes -->
+    <!-- Left Eye -->
+    <g>
+      <ellipse cx="195" cy="190" rx="16" ry="18" fill="url(#deepPuppyEye)" />
+      <!-- Big Upper Specular Glint -->
+      <circle cx="190" cy="184" r="6" fill="#ffffff" />
+      <!-- Lower Reflection Glint -->
+      <circle cx="202" cy="196" r="2.5" fill="#ffffff" />
+      <!-- Eyebrow Expression -->
+      <path d="M 180 172 C 190 166 205 168 214 176" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" opacity="0.7" />
+    </g>
+
+    <!-- Right Eye -->
+    <g>
+      <ellipse cx="305" cy="190" rx="16" ry="18" fill="url(#deepPuppyEye)" />
+      <!-- Big Upper Specular Glint -->
+      <circle cx="300" cy="184" r="6" fill="#ffffff" />
+      <!-- Lower Reflection Glint -->
+      <circle cx="312" cy="196" r="2.5" fill="#ffffff" />
+      <!-- Eyebrow Expression -->
+      <path d="M 320 172 C 310 166 295 168 286 176" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" opacity="0.7" />
+    </g>
+  </g>
+</svg>

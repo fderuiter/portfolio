@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <!-- Coat Gradients -->
+    <linearGradient id="creamBodyPant" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="65%" stop-color="#faf6ef" />
+      <stop offset="100%" stop-color="#f5ede0" />
+    </linearGradient>
+    <linearGradient id="earGoldenPant" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#faf5ee" />
+      <stop offset="60%" stop-color="#fef08a" />
+      <stop offset="100%" stop-color="#fcd34d" />
+    </linearGradient>
+    <linearGradient id="trouserGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#64748b" />
+      <stop offset="40%" stop-color="#94a3b8" />
+      <stop offset="100%" stop-color="#475569" />
+    </linearGradient>
+    <linearGradient id="sockLavender" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#c084fc" />
+      <stop offset="100%" stop-color="#7e22ce" />
+    </linearGradient>
+    <linearGradient id="crocMarble" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="40%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+    <radialGradient id="puppyEyeGlint" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#3f3f46" />
+      <stop offset="45%" stop-color="#18181b" />
+      <stop offset="100%" stop-color="#020617" />
+    </radialGradient>
+    <radialGradient id="buttonNosePant" cx="40%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#3f3f46" />
+      <stop offset="60%" stop-color="#18181b" />
+      <stop offset="100%" stop-color="#09090b" />
+    </radialGradient>
+    <filter id="softShadowPant" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000000" flood-opacity="0.25" />
+    </filter>
+  </defs>
+
+  <!-- Dark Slate/Teal Daycare Floor (matching photo background) -->
+  <rect width="500" height="500" fill="#334155" />
+  <ellipse cx="250" cy="400" rx="220" ry="80" fill="#1e293b" opacity="0.4" />
+
+  <!-- Out-of-Focus Background Dog Paw / Floor Accents -->
+  <path d="M 0 0 L 500 0 L 500 120 C 350 140 150 140 0 120 Z" fill="#0f766e" opacity="0.3" />
+
+  <!-- Ground Shadows of Duck and Fred's Leg -->
+  <ellipse cx="140" cy="425" rx="75" ry="30" fill="#000000" opacity="0.35" />
+  <ellipse cx="320" cy="350" rx="140" ry="60" fill="#000000" opacity="0.25" />
+  <ellipse cx="360" cy="460" rx="60" ry="20" fill="#000000" opacity="0.25" />
+
+  <g filter="url(#softShadowPant)">
+    <!-- 1. SPRAWLED PUPPY BODY & HIND LEGS IN BACKGROUND -->
+    <!-- Extended Hind Left Leg & Paws lying flat on floor -->
+    <path d="M 310 260 C 380 270 440 290 470 310 C 480 320 460 340 435 330 C 380 310 330 290 280 280 Z" fill="url(#creamBodyPant)" stroke="#fef08a" stroke-width="1.5" />
+    <!-- Hind Paw Pads -->
+    <ellipse cx="455" cy="320" rx="14" ry="9" fill="#ffffff" stroke="#fef08a" stroke-width="1" />
+    <circle cx="448" cy="320" r="2.5" fill="#78350f" />
+    <circle cx="455" cy="323" r="3" fill="#78350f" />
+    <circle cx="462" cy="320" r="2.5" fill="#78350f" />
+
+    <!-- Fluffy Thin Puppy Tail curling back -->
+    <path d="M 420 285 C 450 270 475 250 480 230 C 470 225 450 245 425 265" fill="none" stroke="url(#creamBodyPant)" stroke-width="9" stroke-linecap="round" />
+    <path d="M 425 285 C 450 270 475 250 480 230" fill="none" stroke="#fde68a" stroke-width="1.5" stroke-linecap="round" />
+
+    <!-- Puppy Torso Sprawled Out -->
+    <path d="M 230 220 C 320 220 370 260 360 320 C 340 370 260 360 210 330 C 180 310 180 240 230 220 Z" fill="url(#creamBodyPant)" stroke="#fde68a" stroke-width="1.5" />
+
+    <!-- 2. FRONT LEGS -->
+    <!-- Front Right Paw (Tucked under Fred's Croc) -->
+    <path d="M 120 280 C 100 320 80 370 65 420 C 65 440 95 445 110 430 C 125 400 135 340 140 290 Z" fill="url(#creamBodyPant)" stroke="#fef08a" stroke-width="1.5" />
+    <ellipse cx="85" cy="435" rx="20" ry="14" fill="#ffffff" stroke="#fde68a" stroke-width="1.5" />
+    <!-- Paw Toes -->
+    <path d="M 76 432 L 76 442 M 85 430 L 85 444 M 94 432 L 94 442" stroke="#fde68a" stroke-width="2" stroke-linecap="round" />
+
+    <!-- Front Left Paw (Reaching Long & Low Towards Foreground) -->
+    <path d="M 220 290 C 240 340 275 400 310 450 C 325 470 365 470 375 445 C 360 415 315 350 270 290 Z" fill="url(#creamBodyPant)" stroke="#fde68a" stroke-width="1.5" />
+    <!-- Big Chubby White Foreground Paw -->
+    <ellipse cx="345" cy="455" rx="28" ry="18" fill="#ffffff" stroke="#fef08a" stroke-width="2" />
+    <!-- Rich Brown Paw Pads (matching photo) -->
+    <circle cx="330" cy="455" r="4.5" fill="#78350f" />
+    <circle cx="345" cy="462" r="5.5" fill="#78350f" />
+    <circle cx="360" cy="455" r="4.5" fill="#78350f" />
+    <circle cx="345" cy="442" r="6" fill="#78350f" />
+
+    <!-- 3. FRED'S LEG & FOOT (THE ANCHOR) -->
+    <!-- Grey Trouser Leg coming down from top left -->
+    <path d="M 0 0 L 125 0 L 135 250 C 120 270 40 275 0 250 Z" fill="url(#trouserGrad)" stroke="#334155" stroke-width="2" />
+    <!-- Trouser Fold Details -->
+    <path d="M 15 120 C 45 130 90 120 120 135" fill="none" stroke="#475569" stroke-width="3" stroke-linecap="round" />
+    <path d="M 10 180 C 40 195 80 185 125 195" fill="none" stroke="#475569" stroke-width="3" stroke-linecap="round" />
+    <path d="M 0 240 C 40 260 85 250 135 240" fill="none" stroke="#334155" stroke-width="3.5" stroke-linecap="round" />
+
+    <!-- Purple / Lavender Sock with Cat Graphic -->
+    <path d="M 5 245 L 130 245 L 140 330 C 120 345 30 345 5 330 Z" fill="url(#sockLavender)" stroke="#6b21a8" stroke-width="1.5" />
+    <!-- Sock Ribbed Texture Lines -->
+    <path d="M 10 260 L 130 260 M 10 275 L 132 275 M 10 290 L 135 290 M 10 305 L 138 305" stroke="#a855f7" stroke-width="1" opacity="0.6" />
+    <!-- White Knitted Cat Graphic on Sock (Lord Nermal / Cat from photo) -->
+    <g transform="translate(45, 260) scale(0.9)">
+      <rect x="0" y="10" width="28" height="22" rx="4" fill="#ffffff" />
+      <polygon points="0,10 6,0 12,10" fill="#ffffff" />
+      <polygon points="16,10 22,0 28,10" fill="#ffffff" />
+      <!-- Cat Face Details -->
+      <circle cx="8" cy="18" r="2" fill="#18181b" />
+      <circle cx="20" cy="18" r="2" fill="#18181b" />
+      <path d="M 12 22 L 14 24 L 16 22" fill="none" stroke="#f43f5e" stroke-width="1.5" />
+    </g>
+
+    <!-- Black Lightning / Marbled Croc Shoe -->
+    <!-- Croc Heel Strap -->
+    <path d="M 0 325 C 20 305 130 305 155 330 L 160 360 C 135 340 20 340 0 355 Z" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" />
+    <circle cx="145" cy="340" r="5" fill="#334155" stroke="#38bdf8" stroke-width="1" />
+
+    <!-- Croc Main Body -->
+    <path d="M 0 340 C 20 320 145 320 170 350 C 205 395 195 440 150 455 C 60 465 10 435 0 365 Z" fill="url(#crocMarble)" stroke="#0284c7" stroke-width="2" />
+    <!-- Lightning Marbled Streaks on Croc -->
+    <path d="M 60 355 L 75 380 L 70 395 L 90 420" stroke="#38bdf8" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.8" />
+    <path d="M 120 355 L 110 380 L 130 405 L 125 430" stroke="#60a5fa" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.8" />
+    <path d="M 30 380 L 45 400 L 40 420" stroke="#38bdf8" stroke-width="1.5" fill="none" opacity="0.7" />
+
+    <!-- 4. DUCK'S HEAD & GENTLE PANT-LEG CHEW (THE STAR OF THE SHOW) -->
+    <!-- Floppy Left Ear Draped Down Over Floor Behind Head -->
+    <path d="M 230 140 C 265 140 290 190 280 250 C 270 280 240 280 230 250 C 220 220 215 170 230 140 Z" fill="url(#earGoldenPant)" stroke="#fde68a" stroke-width="2" />
+
+    <!-- Floppy Right Ear Draped Along Left Side of Head -->
+    <path d="M 130 155 C 95 165 75 220 90 280 C 100 305 125 305 135 280 C 145 250 145 190 130 155 Z" fill="url(#earGoldenPant)" stroke="#fde68a" stroke-width="2" />
+
+    <!-- Main Puppy Head (Marshmallow Dome Shape Tilted at Fred's Leg) -->
+    <path d="M 125 150 C 105 210 120 265 160 280 C 190 290 245 285 270 260 C 295 230 300 170 275 130 C 245 90 150 90 125 150 Z" fill="url(#creamBodyPant)" stroke="#fef08a" stroke-width="2" />
+
+    <!-- Fluffy Forehead Fur Tufts & Shading -->
+    <path d="M 195 110 L 205 150" stroke="#fde68a" stroke-width="2" stroke-linecap="round" opacity="0.7" />
+    <path d="M 185 125 L 175 115 M 215 125 L 225 115" stroke="#fde68a" stroke-width="1.5" stroke-linecap="round" opacity="0.5" />
+
+    <!-- Muzzle / Cheeks Gently Mouthing Trouser Cuff -->
+    <ellipse cx="160" cy="225" rx="36" ry="28" fill="#ffffff" stroke="#fef08a" stroke-width="1.5" />
+
+    <!-- Duck's Mouth Gripping the Trouser Fold (Gentle Pant Leg Bandit hold) -->
+    <path d="M 125 220 C 115 228 110 240 125 248 C 140 252 155 248 160 240" fill="#450a0a" />
+    <!-- Pink Tongue / Lip detail -->
+    <path d="M 120 234 C 120 245 135 245 135 234 Z" fill="#fb7185" />
+    <!-- Mouthing Cuff Line -->
+    <path d="M 108 226 C 125 235 145 235 165 226" fill="none" stroke="#18181b" stroke-width="3" stroke-linecap="round" />
+
+    <!-- Big Velvety Charcoal Button Nose (Facing Camera at 3/4 Angle) -->
+    <path d="M 135 200 C 135 185 170 185 170 200 C 170 216 155 222 150 222 C 145 222 135 216 135 200 Z" fill="url(#buttonNosePant)" />
+    <!-- Specular Nose Highlight -->
+    <ellipse cx="145" cy="196" rx="5" ry="2.5" fill="#ffffff" opacity="0.6" />
+    <circle cx="158" cy="198" r="1.5" fill="#ffffff" opacity="0.4" />
+
+    <!-- Soulful Big Dark Puppy Eyes (Looking Up at Fred / Camera) -->
+    <!-- Left Eye (Directly gazing up with innocence) -->
+    <g>
+      <ellipse cx="155" cy="155" rx="12" ry="14" fill="url(#puppyEyeGlint)" />
+      <!-- Bright Double Specular Reflections -->
+      <circle cx="151" cy="150" r="4.5" fill="#ffffff" />
+      <circle cx="159" cy="160" r="2" fill="#ffffff" />
+      <!-- Gentle Eyebrow Ridge -->
+      <path d="M 142 142 C 150 136 162 138 170 146" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" opacity="0.7" />
+    </g>
+
+    <!-- Right Eye -->
+    <g>
+      <ellipse cx="235" cy="155" rx="12" ry="14" fill="url(#puppyEyeGlint)" />
+      <!-- Bright Double Specular Reflections -->
+      <circle cx="231" cy="150" r="4.5" fill="#ffffff" />
+      <circle cx="239" cy="160" r="2" fill="#ffffff" />
+      <!-- Gentle Eyebrow Ridge -->
+      <path d="M 224 142 C 232 136 244 138 252 146" fill="none" stroke="#eab308" stroke-width="2" stroke-linecap="round" opacity="0.7" />
+    </g>
+
+    <!-- Soft Cheerful Blushing Puppy Glow -->
+    <circle cx="125" cy="195" r="7" fill="#f472b6" opacity="0.4" />
+    <circle cx="215" cy="195" r="7" fill="#f472b6" opacity="0.4" />
+  </g>
+</svg>

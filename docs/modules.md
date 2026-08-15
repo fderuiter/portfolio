@@ -58,4 +58,5 @@
 - [lib/seo](lib/seo/README.md)
 - [lib/utils](lib/utils/README.md)
 - [lib/validation-scanner](lib/validation-scanner/README.md)
+- [lib/working-with-duck-engine](lib/working-with-duck-engine/README.md)
 - [types/domain](types/domain/README.md)
