@@ -232,6 +232,70 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
         skipDuplicates: true, // Absolutely key to ignore database duplicates!
       });
     });
+
+    it("returns error response when authorization is invalid", async () => {
+      const req = new NextRequest("http://localhost:3000/api/telemetry/sync", {
+        headers: {
+          authorization: "Bearer wrong-secret",
+        },
+      });
+
+      const response = await GETSync(req);
+      expect(response.status).toBe(401);
+    });
+
+    it("handles primary database write failure during sync and re-enqueues popped events to Redis buffer", async () => {
+      const mockEvents = [
+        { id: "uuid-1", projectSlug: "/project-a", eventType: "page_view", createdAt: new Date() },
+      ];
+      mockExec.mockResolvedValueOnce(mockEvents); // for GET pop
+
+      // Simulate prisma createMany failure
+      const dbError = new Error("Database Write Error");
+      vi.mocked(prisma.telemetryEvent.createMany).mockRejectedValueOnce(dbError);
+
+      const req = new NextRequest("http://localhost:3000/api/telemetry/sync", {
+        headers: {
+          authorization: "Bearer test-secret",
+        },
+      });
+
+      const response = await GETSync(req);
+      expect(response.status).toBe(500);
+
+      // Verify that popped events were re-enqueued (lpush)
+      expect(mockLpush).toHaveBeenCalledWith("telemetry_buffer", mockEvents[0]);
+      expect(mockExpire).toHaveBeenCalledWith("telemetry_buffer", 172800);
+    });
+
+    it("logs critical error when Redis re-enqueue fails during database sync rollback", async () => {
+      const mockEvents = [
+        { id: "uuid-1", projectSlug: "/project-a", eventType: "page_view", createdAt: new Date() },
+      ];
+      mockExec.mockResolvedValueOnce(mockEvents); // GET pop
+      
+      const dbError = new Error("Database Write Error");
+      vi.mocked(prisma.telemetryEvent.createMany).mockRejectedValueOnce(dbError);
+
+      // Simulate redis rollback exec failure
+      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      mockExec.mockRejectedValueOnce(new Error("Redis rollback failed"));
+
+      const req = new NextRequest("http://localhost:3000/api/telemetry/sync", {
+        headers: {
+          authorization: "Bearer test-secret",
+        },
+      });
+
+      const response = await GETSync(req);
+      expect(response.status).toBe(500);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Critical: Failed to re-enqueue buffered telemetry events to Redis:",
+        expect.any(Error)
+      );
+
+      consoleErrorSpy.mockRestore();
+    });
   });
 
   // --- REQUIREMENT 4 ---
