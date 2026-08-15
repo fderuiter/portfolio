@@ -2,16 +2,13 @@
 
 import React from "react";
 import { Card, CardTitle } from "@/components/BentoGrid";
-import { PretextRichText, usePretextRichLayout, type ExtendedRichInlineItem } from "@/hooks/usePretextLayout";
+import { type ExtendedRichInlineItem } from "@/hooks/usePretextLayout";
 import { BaseCaseStudy } from "@/types/domain";
 import { GitHubStats, getSimulatedTerminalCommand, getSimulatedTerminalLogs } from "@/lib/github";
 import { IconStar, IconGitFork, IconAlertCircle, IconTerminal, IconChevronRight } from "@tabler/icons-react";
 import { type RichInlineLine } from "@chenglou/pretext/rich-inline";
 import Link from "next/link";
 import { CommitSparkline } from "@/components/CommitSparkline";
-import { useTelemetry } from "@/hooks/useTelemetry";
-import { useAnnouncer } from "@/components/providers/A11yProvider";
-import { LAYOUT_CONFIG } from "@/lib/layout-config";
 import { useBentoLayout } from "@/components/providers/BentoLayoutContext";
 
 const REALITY_CONTENT: Record<string, string> = {
@@ -24,6 +21,66 @@ const REALITY_CONTENT: Record<string, string> = {
 
 const getRealityContent = (slug: string, originalContent: string) => {
   return REALITY_CONTENT[slug] || `Reality Check: ${originalContent} (Dynamic verification and performance testing in live staging revealed minor scaling limits under concurrent loads).`;
+};
+
+export const FormattedMarkdownText: React.FC<{ text: string; className?: string }> = ({ text, className }) => {
+  const paragraphs = React.useMemo(() => {
+    return text.split(/\r?\n+/).map((p) => p.trim()).filter(Boolean);
+  }, [text]);
+
+  return (
+    <div className="flex flex-col gap-3">
+      {paragraphs.map((para, pIdx) => {
+        const tokens: { type: "text" | "bold" | "italic" | "code"; content: string }[] = [];
+        const regex = /(\*\*.*?\*\*|`.*?`|\*.*?\*|[^*`\n]+|\n)/g;
+        let match;
+        while ((match = regex.exec(para)) !== null) {
+          const raw = match[0];
+          if (raw.startsWith("**") && raw.endsWith("**") && raw.length > 4) {
+            tokens.push({ type: "bold", content: raw.slice(2, -2) });
+          } else if (raw.startsWith("`") && raw.endsWith("`") && raw.length > 2) {
+            tokens.push({ type: "code", content: raw.slice(1, -1) });
+          } else if (raw.startsWith("*") && raw.endsWith("*") && raw.length > 2) {
+            tokens.push({ type: "italic", content: raw.slice(1, -1) });
+          } else {
+            tokens.push({ type: "text", content: raw });
+          }
+        }
+
+        return (
+          <p key={pIdx} className={className}>
+            {tokens.map((token, idx) => {
+              if (token.type === "bold") {
+                return (
+                  <strong key={idx} className="font-bold text-neutral-100">
+                    {token.content}
+                  </strong>
+                );
+              }
+              if (token.type === "code") {
+                return (
+                  <code
+                    key={idx}
+                    className="px-1.5 py-0.5 mx-0.5 text-[11px] font-mono font-bold bg-brand-cyan/10 border border-brand-cyan/20 text-brand-cyan rounded-md inline-block shadow-[0_0_10px_rgba(6,182,212,0.05)] align-baseline leading-none"
+                  >
+                    {token.content}
+                  </code>
+                );
+              }
+              if (token.type === "italic") {
+                return (
+                  <em key={idx} className="italic text-zinc-300">
+                    {token.content}
+                  </em>
+                );
+              }
+              return <span key={idx}>{token.content}</span>;
+            })}
+          </p>
+        );
+      })}
+    </div>
+  );
 };
 
 interface CaseStudyBentoCardProps {
@@ -51,33 +108,17 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
   study, 
   className,
   preCalculatedHeight,
-  preCalculatedParagraphsLines,
-  preCalculatedParagraphsItems,
 }) => {
   const { githubStats } = study;
   const tagsList = study.tags ? study.tags.split(",").map((t) => t.trim()) : [];
   const langColor = LANGUAGE_COLORS[study.primary_language] || DEFAULT_COLOR;
 
-  // Track dynamic real-time telemetry metrics site-wide
-  const { telemetry, syncFailed, recordEvent } = useTelemetry();
-  const stats = telemetry[study.slug] || { views: 0, clicks: 0 };
-  
-  const { announce } = useAnnouncer();
-
-  React.useEffect(() => {
-    if (syncFailed) {
-      announce("Tax sync failed", "assertive");
-    }
-  }, [syncFailed, announce]);
-
   const { heightOverrides, registerHeightOverride, clearHeightOverride, setTransitioning } = useBentoLayout();
   const [mode, setMode] = React.useState<"pitch" | "reality">("pitch");
-  const [isLocalTransitioning, setIsLocalTransitioning] = React.useState(false);
 
   const handleToggleMode = (newMode: "pitch" | "reality") => {
     if (newMode === mode) return;
 
-    setIsLocalTransitioning(true);
     setTransitioning(study.id, true);
     setMode(newMode);
 
@@ -86,24 +127,9 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
     }
 
     setTimeout(() => {
-      setIsLocalTransitioning(false);
       setTransitioning(study.id, false);
     }, 400);
   };
-
-  const hasPrecalculated = preCalculatedHeight !== undefined && preCalculatedParagraphsLines !== undefined && preCalculatedParagraphsItems !== undefined;
-
-  // We always execute the hook to follow dynamic hooks rules, but ignore if precalculated is provided
-  const internalLayout = usePretextRichLayout({
-    text: study.editorial_content,
-    fontSize: LAYOUT_CONFIG.FONT_SIZE,
-    lineHeight: LAYOUT_CONFIG.LINE_HEIGHT,
-    fontFamilyVariable: "--font-inter",
-    translationMode: mode, // Pass active translation state
-  });
-
-  const finalHeight = hasPrecalculated ? preCalculatedHeight : (internalLayout.isReady ? internalLayout.height + (githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS) : undefined);
-  const isLayoutReady = hasPrecalculated ? true : internalLayout.isReady;
 
   const innerRef = React.useRef<HTMLDivElement>(null);
 
@@ -132,46 +158,9 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
     };
   }, [mode, study.id, registerHeightOverride]);
 
-  React.useLayoutEffect(() => {
-    // Check global flag injected by Playwright
-    const isPlaywright = typeof window !== 'undefined' && (window as unknown as { __PLAYWRIGHT_TEST__?: boolean }).__PLAYWRIGHT_TEST__ === true;
-    
-    // Only run in development or when explicitly requested by Playwright
-    if ((process.env.NODE_ENV === "development" || isPlaywright) && hasPrecalculated && innerRef.current && finalHeight) {
-      // Temporarily bypass warnings during transitions or when card has active dynamic override
-      const isBypassed = isLocalTransitioning || mode !== "pitch" || (heightOverrides && heightOverrides[study.id] !== undefined);
-      if (isBypassed) {
-        return;
-      }
-
-      const cardEl = innerRef.current.closest('div.isolate') as HTMLElement;
-      if (cardEl) {
-        const originalHeight = cardEl.style.height;
-        cardEl.style.height = 'auto'; // Disable fixed height to measure natural footprint
-        
-        const actualHeight = cardEl.getBoundingClientRect().height;
-        
-        cardEl.style.height = originalHeight; // Restore immediately
-        
-        if (isPlaywright) {
-          cardEl.setAttribute('data-card-slug', study.slug);
-          cardEl.setAttribute('data-expected-height', finalHeight.toString());
-          cardEl.setAttribute('data-actual-height', actualHeight.toString());
-        }
-        
-        if (Math.abs(actualHeight - finalHeight) > 2) {
-          console.warn(`[Rigor] Hydration mismatch detected! Card '${study.slug}' mathematically predicted height ${finalHeight}px but DOM naturally measured ${actualHeight}px. This indicates a drift in layout constants (e.g. padding constants).`);
-          
-          // Provide an attribute for Playwright to catch
-          if (isPlaywright) {
-            cardEl.setAttribute('data-hydration-mismatch', 'true');
-          }
-        }
-      }
-    }
-  }, [hasPrecalculated, finalHeight, study.slug, isLocalTransitioning, mode, heightOverrides, study.id]);
-
-  const cardHeightValue = heightOverrides[study.id] !== undefined ? heightOverrides[study.id] : finalHeight;
+  const cardHeightValue = heightOverrides[study.id] !== undefined 
+    ? heightOverrides[study.id] 
+    : preCalculatedHeight;
 
   return (
     <Card
@@ -225,39 +214,18 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             </button>
           </div>
 
-          {/* Description Block using Pretext Rich Text for Pitch, or Custom Reality Text */}
+          {/* Description Block using Semantic Formatted Markdown */}
           <div className="mb-3">
             {mode === "pitch" ? (
-              <div ref={hasPrecalculated ? undefined : internalLayout.ref}>
-                {hasPrecalculated && preCalculatedParagraphsLines && preCalculatedParagraphsItems ? (
-                  <div className="flex flex-col gap-[12px]">
-                    {preCalculatedParagraphsLines.map((pLines, pIdx) => (
-                      <PretextRichText
-                        key={pIdx}
-                        lines={pLines}
-                        items={preCalculatedParagraphsItems[pIdx]}
-                        lineHeight={LAYOUT_CONFIG.LINE_HEIGHT}
-                        isReady={isLayoutReady}
-                        fallbackText=""
-                        className="text-zinc-400 text-xs md:text-sm leading-relaxed font-sans"
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <PretextRichText
-                    lines={internalLayout.lines}
-                    items={internalLayout.items}
-                    lineHeight={LAYOUT_CONFIG.LINE_HEIGHT}
-                    isReady={isLayoutReady}
-                    fallbackText={study.editorial_content}
-                    className="text-zinc-400 text-xs md:text-sm leading-relaxed font-sans"
-                  />
-                )}
-              </div>
+              <FormattedMarkdownText
+                text={study.editorial_content}
+                className="text-zinc-400 text-xs md:text-sm leading-relaxed font-sans"
+              />
             ) : (
-              <p className="text-zinc-400 text-xs md:text-sm leading-relaxed font-sans">
-                {getRealityContent(study.slug, study.editorial_content)}
-              </p>
+              <FormattedMarkdownText
+                text={getRealityContent(study.slug, study.editorial_content)}
+                className="text-zinc-400 text-xs md:text-sm leading-relaxed font-sans"
+              />
             )}
           </div>
 
@@ -374,41 +342,15 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
           )}
         </div>
 
-        {/* Dynamic Telemetry Metrics HUD */}
-        <div>
-          <div className="flex items-center gap-4 text-[10px] font-mono text-zinc-400 mt-1 mb-1 relative z-10 select-none">
-            <span className="flex items-center gap-1.5" title="Aggregate Page Views">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" aria-hidden="true" />
-              <span className="sr-only" aria-live="polite">Live page views: {stats.views}</span>
-              <span className="text-zinc-300 font-bold" aria-hidden="true">{stats.views.toLocaleString()}</span> <span aria-hidden="true">VIEWS</span>
-            </span>
-            <span className="flex items-center gap-1.5" title="Bento Card Interactions">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" aria-hidden="true" />
-              <span className="sr-only" aria-live="polite">Live clicks: {stats.clicks}</span>
-              <span className="text-zinc-300 font-bold" aria-hidden="true">{stats.clicks.toLocaleString()}</span> <span aria-hidden="true">CLICKS</span>
-            </span>
-            {syncFailed && (
-              <span 
-                className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping cursor-help" 
-                title="Telemetry offline sync mode active (LocalStorage cached)"
-              />
-            )}
-          </div>
-
-          {/* Footer analyze link */}
-          <div className="flex justify-between items-center border-t border-zinc-900/40 pt-2.5 mt-1.5">
-            <Link
-              href={`/case-studies/${study.slug}`}
-              onClick={() => recordEvent(study.slug, "project_click")}
-              className="group inline-flex items-center text-xs font-bold text-brand-cyan/80 hover:text-brand-cyan transition-colors duration-300 cursor-pointer relative z-10"
-            >
-              <span>Analyze Architecture</span>
-              <IconChevronRight className="ml-1 w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-200" />
-            </Link>
-            <div className="text-[9px] font-mono text-zinc-400">
-              {!isLayoutReady ? "MEASURING..." : `H: ${finalHeight}px`}
-            </div>
-          </div>
+        {/* Footer analyze link */}
+        <div className="flex justify-between items-center border-t border-zinc-900/40 pt-2.5 mt-1.5">
+          <Link
+            href={`/case-studies/${study.slug}`}
+            className="group inline-flex items-center text-xs font-bold text-brand-cyan/80 hover:text-brand-cyan transition-colors duration-300 cursor-pointer relative z-10"
+          >
+            <span>Analyze Architecture</span>
+            <IconChevronRight className="ml-1 w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-200" />
+          </Link>
         </div>
       </div>
     </Card>
