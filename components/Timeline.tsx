@@ -5,6 +5,7 @@ import { hexToRgba } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { designManifest } from "@/lib/design-manifest";
 import { IconBriefcase, IconFlame, IconSwitchHorizontal } from "@tabler/icons-react";
+import { RichNarrative } from "@/components/RichNarrative";
 
 export interface TimelineItem {
   role: string;
@@ -21,7 +22,7 @@ const timelineData: TimelineItem[] = [
     company: "BRIGHT Research Partners, Inc.",
     period: "March 2023 — Present",
     recruiterDescription:
-      "Lead technical architect for GxP-compliant eClinical databases, translating 100+ page scientific protocols into validated eCRF systems. Engineer automated cross-form edit checks and dynamic logic rules to enforce protocol compliance and point-of-entry data integrity. Manage clinical data lifecycles (DMP authoring, SAE reconciliation, database locks) and administer 21 CFR 812 investigational device accountability.",
+      "Lead technical architect for <span data-term=\"industry-standard\" data-definition=\"Good Practice standards (such as GCP or GLP) governing clinical trial design, conduct, and data integrity.\" data-key=\"gxp-term\">GxP</span>-compliant eClinical databases, translating 100+ page scientific protocols into validated <span data-term=\"digital case report form\" data-definition=\"electronic Case Report Form. A digital questionnaire used to collect clinical trial data from research sites.\" data-key=\"ecrf-term\">eCRF</span> systems. Engineer automated cross-form edit checks and dynamic logic rules to enforce protocol compliance and point-of-entry data integrity. Manage clinical data lifecycles (DMP authoring, SAE reconciliation, database locks) and administer 21 CFR 812 investigational device accountability.",
     realityDescription:
       "Translating dense 150-page clinical trial protocols into relational schemas and dynamic eCRFs. Developing cross-form edit check suites to catch edge-case clinician input discrepancies at point-of-entry, and maintaining 100% device traceability under 21 CFR 812.",
     tags: ["GxP Systems", "21 CFR 812", "eCRF Architecture", "Edit Checks", "DMP Authoring", "SAE Reconciliation", "iMednet"]
@@ -41,7 +42,7 @@ const timelineData: TimelineItem[] = [
     company: "Mayo Clinic",
     period: "October 2019 — July 2021",
     recruiterDescription:
-      "Orchestrated the operational lifecycle for multiple high-compliance, federally funded NIH studies from startup to closeout. Authored and managed complex IRB protocols, informed consent documents, and regulatory amendments. Served as departmental Epic Super User providing at-the-elbow clinical troubleshooting and leading staff training on Epic for Research modules, ensuring 100% data integrity through Source Document Verification (SDV).",
+      "Orchestrated the operational lifecycle for multiple high-compliance, federally funded NIH studies from startup to closeout. Authored and managed complex IRB protocols, informed consent documents, and regulatory amendments. Served as departmental Epic Super User providing at-the-elbow clinical troubleshooting and leading staff training on Epic for Research modules, ensuring 100% data integrity through <span data-term=\"record verification\" data-definition=\"Source Document Verification. The process of cross-referencing case report forms against original medical records to ensure accuracy.\" data-key=\"sdv-term\">Source Document Verification (SDV)</span>.",
     realityDescription:
       "Led operational execution for federally funded NIH trials from startup to closeout. Authored IRB protocols, navigated multi-phase regulatory amendments, and served as departmental Epic Super User providing frontline EHR workflow optimization.",
     tags: ["Mayo Clinic", "NIH Studies", "IRB Protocols", "Epic Super User", "Source Document Verification", "GxP Compliance", "Clinical Operations"]
@@ -206,7 +207,7 @@ export const Timeline: React.FC = () => {
                   {/* Animated Content Transition */}
                   <div className="mt-3 min-h-[70px]">
                     <AnimatePresence mode="wait">
-                      <motion.p
+                      <motion.div
                         key={isReality ? "reality" : "recruiter"}
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -216,8 +217,10 @@ export const Timeline: React.FC = () => {
                           isReality ? "text-amber-200/90 italic" : "text-zinc-300"
                         }`}
                       >
-                        {isReality ? item.realityDescription : item.recruiterDescription}
-                      </motion.p>
+                        <RichNarrative
+                          html={isReality ? item.realityDescription : item.recruiterDescription}
+                        />
+                      </motion.div>
                     </AnimatePresence>
                   </div>
 
