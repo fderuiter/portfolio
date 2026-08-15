@@ -8,6 +8,7 @@ import { TextReveal } from "@/components/TextReveal";
 import { SkillsGrid } from "@/components/SkillsGrid";
 import { Timeline } from "@/components/Timeline";
 import { Tooltip } from "@/components/ui/Tooltip";
+import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 
 interface HydratedCaseStudy extends BaseCaseStudy {
   githubStats: GitHubStats | null;
@@ -52,83 +53,10 @@ export default async function PortfolioHomePage() {
     const isProduction = process.env.VERCEL_ENV === "production";
     if (process.env.CI === "true" || process.env.PLAYWRIGHT_TEST === "true" || !isProduction) {
       errorMsg = ""; // Clear error to render the showcase
-      caseStudies = [
-        {
-          id: "mock-1",
-          slug: "clinical-data-mapper",
-          title: "Clinical Data Standards Engine: CDISC ODM and SDTM Integration",
-          primary_language: "TypeScript",
-          github_url: "https://github.com/fderuiter/clinical-data-mapper",
-          published: true,
-          simulated_telemetry: false,
-          tags: "TypeScript, CDISC, ODM, SDTM, XML Parser, Clinical Trials, HIPAA",
-          editorial_content: "An enterprise-grade **TypeScript** mapping pipeline that ingests clinical trial metadata in `CDISC Operational Data Model (ODM)` XML format, dynamically constructs `data schemas`, and transforms raw `Electronic Data Capture (EDC)` datasets into compliant **CDISC SDTM** domains.",
-          architectural_narrative: "Mock narrative",
-          created_at: new Date(),
-          updated_at: new Date(),
-          githubStats: getSimulatedStats("TypeScript"),
-        },
-        {
-          id: "mock-2",
-          slug: "cadence-clinical",
-          title: "Cadence Clinical: Protocol-Driven eCRF & Workflow Orchestrator",
-          primary_language: "TypeScript",
-          github_url: "https://github.com/fderuiter/cadence-clinical",
-          published: true,
-          simulated_telemetry: false,
-          tags: "TypeScript, Next.js, eCRF, GxP, Clinical Trials, React, Zod, HIPAA",
-          editorial_content: "A modern, **full-stack clinical trial orchestrator** built in **TypeScript** and **Next.js** that translates complex protocol schedules into dynamic, validated `eCRF workflows`. Implements cross-form edit checks, real-time query management, and immutable `audit trails` meeting **21 CFR Part 11** standards.",
-          architectural_narrative: "Mock narrative",
-          created_at: new Date(),
-          updated_at: new Date(),
-          githubStats: getSimulatedStats("TypeScript"),
-        },
-        {
-          id: "mock-3",
-          slug: "imednet-python-sdk",
-          title: "iMednet Python SDK: Clinical Trial Data Integration Client",
-          primary_language: "Python",
-          github_url: "https://github.com/fderuiter/imednet-python-sdk",
-          published: true,
-          simulated_telemetry: false,
-          tags: "Python, SDK, iMednet, API Client, Clinical Trials, HIPAA, Clinical Data",
-          editorial_content: "A **robust**, fully-typed `Python SDK` client for programmatic extraction and integration of clinical trial metadata and patient records from the `iMednet EDC` platform. Built for **biostatisticians** and **clinical data engineers**.",
-          architectural_narrative: "Mock narrative",
-          created_at: new Date(),
-          updated_at: new Date(),
-          githubStats: getSimulatedStats("Python"),
-        },
-        {
-          id: "mock-4",
-          slug: "wedding-website",
-          title: "The Nuptial Engine: Bespoke Event Portal & Guest Logistics",
-          primary_language: "TypeScript",
-          github_url: "https://github.com/fderuiter/wedding-website",
-          published: true,
-          simulated_telemetry: false,
-          tags: "TypeScript, Next.js, React, TailwindCSS, Framer Motion, Logistics, RSVP",
-          editorial_content: "A **bespoke event portal** and guest operations engine crafted in **Next.js** and **Framer Motion**. Features real-time multi-household `RSVP tracking`, interactive personalized travel timelines, accommodation logistics, and custom canvas physics animations built to survive zero-downtime family scrutiny.",
-          architectural_narrative: "Mock narrative",
-          created_at: new Date(),
-          updated_at: new Date(),
-          githubStats: getSimulatedStats("TypeScript"),
-        },
-        {
-          id: "mock-5",
-          slug: "schemaflow",
-          title: "SchemaFlow: Reactive Node Engine for Schema Composition",
-          primary_language: "TypeScript",
-          github_url: "https://github.com/fderuiter/SchemaFlow",
-          published: true,
-          simulated_telemetry: false,
-          tags: "TypeScript, React, Flow, Schemas, AST, Node-RED",
-          editorial_content: "A **reactive**, `visual graph editor` built in **TypeScript** and **React** that allows system architects to visually compose, validate, and compile complex `JSON Schema` structures in real time. Features highly responsive `node evaluation`, cyclical dependency detection, and live `code generation`.",
-          architectural_narrative: "Mock narrative",
-          created_at: new Date(),
-          updated_at: new Date(),
-          githubStats: getSimulatedStats("TypeScript"),
-        },
-      ];
+      caseStudies = FALLBACK_CASE_STUDIES.map((study) => ({
+        ...study,
+        githubStats: getSimulatedStats(study.primary_language),
+      }));
     }
   }
 

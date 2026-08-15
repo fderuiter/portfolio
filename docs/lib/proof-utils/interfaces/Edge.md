@@ -8,7 +8,7 @@
 
 Defined in: [lib/proof-utils.ts:5](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L5)
 
-Logic Proof Workspace & Terminal Core Business Logic Utilities
+Logic Proof Workspace and Terminal Core Business Logic Utilities.
 
 ## Properties
 

@@ -8,7 +8,7 @@
 
 > `const` **DOG\_BED\_BOUNDS**: `object`
 
-Defined in: [lib/working-with-duck-engine.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L11)
+Defined in: [lib/working-with-duck-engine.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L16)
 
 ## Type Declaration
 

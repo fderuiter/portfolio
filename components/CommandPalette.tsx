@@ -141,14 +141,6 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
       },
       {
-        id: "nav-ui-sandbox",
-        title: "UI Physics Sandbox",
-        subtitle: "Interactive canvas layout physics and UI sandbox",
-        category: "navigation",
-        url: "/ui-sandbox",
-        icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
-      },
-      {
         id: "nav-transparency",
         title: "Platform Transparency Hub",
         subtitle: "Live verifiable telemetry, CI/CD operational reliability, and security logs",

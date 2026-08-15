@@ -9,6 +9,7 @@
 ## Interfaces
 
 - [Edge](interfaces/Edge.md)
+- [TacticHint](interfaces/TacticHint.md)
 
 ## Variables
 
@@ -17,6 +18,8 @@
 
 ## Functions
 
+- [canConnect](functions/canConnect.md)
 - [evaluateProofStatus](functions/evaluateProofStatus.md)
+- [getNextTacticHint](functions/getNextTacticHint.md)
 - [getSuggestion](functions/getSuggestion.md)
 - [isValidNode](functions/isValidNode.md)

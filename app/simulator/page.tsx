@@ -1,7 +1,5 @@
-"use client";
-
 import React, { useState, useEffect, useCallback } from "react";
-import { createPortal } from "react-dom";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAudio } from "@/components/providers/AudioProvider";
@@ -9,11 +7,10 @@ import {
   IconArrowLeft,
   IconAward,
   IconCalendar,
-  IconCheck,
   IconRefresh,
-  IconSend,
   IconCopy,
 } from "@tabler/icons-react";
+import { FieldManualButton } from "@/components/FieldManualButton";
 
 interface Option {
   text: string;
@@ -93,34 +90,16 @@ const branchingQuestions: Record<string, Question> = {
   },
 };
 
-const mockTimeSlots = [
-  "Monday, Aug 17 at 10:00 AM PST",
-  "Tuesday, Aug 18 at 2:00 PM PST",
-  "Wednesday, Aug 19 at 4:30 PM PST",
-];
-
 export default function RecruiterSimulator() {
   const { recordEvent } = useTelemetry();
   const { playNote, playSuccess } = useAudio();
-  const [mounted, setMounted] = useState(false);
   const [currentStep, setCurrentStep] = useState<string>("welcome");
   const [history, setHistory] = useState<string[]>([]);
   const [answers, setAnswers] = useState<Option[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-
-  // Modal Interactive States
-  const [selectedSlot, setSelectedSlot] = useState("");
-  const [recruiterEmail, setRecruiterEmail] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [bookingSuccess, setBookingSuccess] = useState(false);
-  const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
 
   // 1. Establish mount tracking
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-
     if (typeof window !== "undefined") {
       const hasTrackedSession = sessionStorage.getItem("has_tracked_simulator_view_this_session");
       if (!hasTrackedSession) {
@@ -160,11 +139,6 @@ export default function RecruiterSimulator() {
     setCurrentStep("welcome");
     setHistory([]);
     setAnswers([]);
-    setSelectedSlot("");
-    setRecruiterEmail("");
-    setEmailError("");
-    setBookingSuccess(false);
-    setIsModalOpen(false);
   };
 
   // 5. Calculate Final Alignment Outcomes
@@ -201,32 +175,6 @@ export default function RecruiterSimulator() {
     }
   }, [answers]);
 
-  // 6. Handle Booking Submit
-  const handleConfirmBooking = (e: React.FormEvent) => {
-    e.preventDefault();
-    setEmailError("");
-
-    if (!selectedSlot) {
-      setEmailError("Please select a calendar slot.");
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(recruiterEmail)) {
-      setEmailError("Please enter a valid business email address.");
-      return;
-    }
-
-    setIsSubmittingBooking(true);
-
-    setTimeout(() => {
-      recordEvent("/simulator/booking", "project_click");
-      setIsSubmittingBooking(false);
-      setBookingSuccess(true);
-      playSuccess();
-    }, 500);
-  };
-
   // Copy diagnostic card
   const handleCopyCard = useCallback(() => {
     const p = getAlignmentProfile();
@@ -248,9 +196,12 @@ export default function RecruiterSimulator() {
 
       <div className="w-full max-w-2xl mx-auto flex flex-col relative z-10">
         <header className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-cyan/10 border border-brand-cyan/20 text-brand-cyan text-xs font-mono font-bold mb-3">
-            <span className="w-2 h-2 rounded-full bg-brand-cyan animate-pulse" />
-            Interactive Engineering Leadership Simulator
+          <div className="flex items-center justify-center gap-3 mb-3 flex-wrap">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-cyan/10 border border-brand-cyan/20 text-brand-cyan text-xs font-mono font-bold">
+              <span className="w-2 h-2 rounded-full bg-brand-cyan animate-pulse" />
+              Interactive Engineering Leadership Simulator
+            </div>
+            <FieldManualButton manualId="simulator" label="Field Manual" />
           </div>
           <h1 className="text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan via-neutral-100 to-brand-blue tracking-tight mb-2">
             Engineering Alignment Arcade
@@ -418,12 +369,12 @@ export default function RecruiterSimulator() {
 
                 {/* Action CTA Buttons */}
                 <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
-                  <button
-                    onClick={() => setIsModalOpen(true)}
+                  <Link
+                    href="/schedule"
                     className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-brand-cyan to-brand-blue text-zinc-950 hover:text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.2)] transition-all cursor-pointer hover:scale-[1.02]"
                   >
-                    <IconCalendar className="w-4 h-4" /> Schedule Interview
-                  </button>
+                    <IconCalendar className="w-4 h-4" /> Schedule on Google Calendar
+                  </Link>
                   <button
                     onClick={handleCopyCard}
                     className="flex items-center justify-center gap-2 px-4 py-3 bg-zinc-950 border border-zinc-800 hover:border-zinc-700 text-zinc-300 font-mono font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"
@@ -442,138 +393,6 @@ export default function RecruiterSimulator() {
           </AnimatePresence>
         </div>
       </div>
-
-      {/* PORTAL SCHEDULING MODAL */}
-      {mounted &&
-        createPortal(
-          <AnimatePresence>
-            {isModalOpen && (
-              <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  onClick={() => setIsModalOpen(false)}
-                  className="absolute inset-0 bg-zinc-950/80 backdrop-blur-lg"
-                />
-
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: 15 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                  transition={{ type: "spring", duration: 0.35 }}
-                  className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-3xl p-6 md:p-8 relative z-10 overflow-hidden shadow-2xl"
-                >
-                  <button
-                    onClick={() => setIsModalOpen(false)}
-                    className="absolute top-4 right-4 text-zinc-500 hover:text-zinc-300 text-xs font-mono bg-zinc-950 px-2 py-1 border border-zinc-850 rounded-md cursor-pointer"
-                  >
-                    ESC
-                  </button>
-
-                  <AnimatePresence mode="wait">
-                    {!bookingSuccess ? (
-                      <motion.div
-                        key="booking-form"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        <div className="flex items-center gap-3 mb-4">
-                          <span className="p-2.5 bg-brand-cyan/10 rounded-xl text-brand-cyan border border-brand-cyan/20">
-                            <IconCalendar className="w-5 h-5" />
-                          </span>
-                          <div>
-                            <h3 className="font-bold text-lg text-white">Direct Calendar Booking</h3>
-                            <p className="text-xs text-zinc-400">Lock in a 30-min systems architectural sync.</p>
-                          </div>
-                        </div>
-
-                        <form onSubmit={handleConfirmBooking} className="flex flex-col gap-4">
-                          <div>
-                            <label className="text-[11px] font-mono text-zinc-400 block mb-2 font-bold uppercase tracking-wider">
-                              Select Available Slot
-                            </label>
-                            <div className="flex flex-col gap-2">
-                              {mockTimeSlots.map((slot, idx) => (
-                                <button
-                                  key={idx}
-                                  type="button"
-                                  onClick={() => setSelectedSlot(slot)}
-                                  className={`p-3 text-left rounded-xl border text-xs font-mono transition-all cursor-pointer ${
-                                    selectedSlot === slot
-                                      ? "bg-brand-cyan/15 border-brand-cyan text-brand-cyan font-bold"
-                                      : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700"
-                                  }`}
-                                >
-                                  {slot}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div>
-                            <label className="text-[11px] font-mono text-zinc-400 block mb-2 font-bold uppercase tracking-wider">
-                              Work Email
-                            </label>
-                            <div className="relative">
-                              <input
-                                type="email"
-                                value={recruiterEmail}
-                                onChange={(e) => setRecruiterEmail(e.target.value)}
-                                placeholder="leader@company.com"
-                                className="w-full px-4 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-sm font-sans text-white focus:outline-none focus:border-brand-cyan transition-colors"
-                              />
-                            </div>
-                            {emailError && (
-                              <p className="text-xs text-rose-400 mt-1.5 font-mono">{emailError}</p>
-                            )}
-                          </div>
-
-                          <button
-                            type="submit"
-                            disabled={isSubmittingBooking}
-                            className="mt-2 w-full py-3 bg-brand-cyan hover:bg-cyan-300 text-zinc-950 font-mono font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
-                          >
-                            {isSubmittingBooking ? (
-                              <span>Locking Slot...</span>
-                            ) : (
-                              <>
-                                <IconSend className="w-4 h-4" /> Confirm Schedule
-                              </>
-                            )}
-                          </button>
-                        </form>
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="booking-success"
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="text-center py-4"
-                      >
-                        <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto mb-3">
-                          <IconCheck className="w-6 h-6" />
-                        </div>
-                        <h3 className="font-bold text-xl text-white mb-1">Invitation Queued!</h3>
-                        <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
-                          Calendar invite dispatched to <span className="text-brand-cyan">{recruiterEmail}</span> for <span className="text-zinc-200">{selectedSlot}</span>.
-                        </p>
-                        <button
-                          onClick={() => setIsModalOpen(false)}
-                          className="px-6 py-2.5 bg-zinc-950 border border-zinc-800 hover:border-zinc-700 text-zinc-300 font-mono text-xs uppercase font-bold rounded-xl cursor-pointer"
-                        >
-                          Close Window
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              </div>
-            )}
-          </AnimatePresence>,
-          document.body
-        )}
     </main>
   );
 }

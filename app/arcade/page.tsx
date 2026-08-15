@@ -15,6 +15,7 @@ import {
   IconPlayerPlay,
   IconBone,
 } from "@tabler/icons-react";
+import { FieldManualButton } from "@/components/FieldManualButton";
 
 interface ArcadeGameCard {
   id: string;
@@ -253,8 +254,9 @@ function GameCard({ game, index }: { game: ArcadeGameCard; index: number }) {
       </div>
 
       {/* Action CTA */}
-      <div className="relative z-10 mt-8 pt-4 border-t border-zinc-800/60 flex items-center justify-between">
-        <span className="text-xs font-mono text-zinc-500">Zero External Libs · 60 FPS</span>
+      <div className="relative z-10 mt-8 pt-4 border-t border-zinc-800/60 flex items-center justify-between gap-3 flex-wrap">
+        <FieldManualButton manualId={game.id} variant="card" />
+
         <Link
           href={game.route}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-cyan text-black font-mono text-xs font-bold transition-all duration-200 hover:bg-white hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(6,182,212,0.3)] cursor-pointer"

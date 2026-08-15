@@ -6,7 +6,7 @@
 
 # Interface: FloatingAlert
 
-Defined in: [lib/working-with-duck-engine.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L66)
+Defined in: [lib/working-with-duck-engine.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L78)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/working-with-duck-engine.ts:66](https://github.com/fderuiter/po
 
 > **alpha**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L72)
+Defined in: [lib/working-with-duck-engine.ts:84](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L84)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/working-with-duck-engine.ts:72](https://github.com/fderuiter/po
 
 > **color**: `string`
 
-Defined in: [lib/working-with-duck-engine.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L71)
+Defined in: [lib/working-with-duck-engine.ts:83](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L83)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/working-with-duck-engine.ts:71](https://github.com/fderuiter/po
 
 > **id**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L67)
+Defined in: [lib/working-with-duck-engine.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L79)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/working-with-duck-engine.ts:67](https://github.com/fderuiter/po
 
 > **text**: `string`
 
-Defined in: [lib/working-with-duck-engine.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L70)
+Defined in: [lib/working-with-duck-engine.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L82)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/working-with-duck-engine.ts:70](https://github.com/fderuiter/po
 
 > **vy**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L73)
+Defined in: [lib/working-with-duck-engine.ts:85](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L85)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/working-with-duck-engine.ts:73](https://github.com/fderuiter/po
 
 > **x**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L68)
+Defined in: [lib/working-with-duck-engine.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L80)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [lib/working-with-duck-engine.ts:68](https://github.com/fderuiter/po
 
 > **y**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L69)
+Defined in: [lib/working-with-duck-engine.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L81)

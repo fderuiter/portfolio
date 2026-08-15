@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { FieldManualButton } from "@/components/FieldManualButton";
 import {
   IconPlayerPlay,
   IconRotate,
@@ -25,6 +26,7 @@ import {
   IconPalette,
   IconMusic,
   IconMusicOff,
+  IconInfoCircle,
 } from "@tabler/icons-react";
 import {
   WorkingWithDuckState,
@@ -41,6 +43,7 @@ import {
   releaseDuck,
   enterDogPark,
   throwParkBall,
+  steerParkDuck,
   tapParkWhistle,
   exitDogPark,
   advanceToNextLevel,
@@ -74,27 +77,26 @@ const getHighScoreSnapshot = () => {
 
 const getServerSnapshot = () => "0";
 
-// --- Pure Drawing Helpers Outside Component (Zero Hook/Temporal Dead Zone Issues) ---
+// --- Pure Drawing Helpers Outside Component ---
 
 function drawDuckPuppy(
   ctx: CanvasRenderingContext2D,
   duck: { x: number; y: number; angle: number; state: DuckBehaviorState; isCarryingBall: boolean },
-  ticks: number
+  ticks: number,
+  bellyRubProgress: number = 0
 ) {
   ctx.save();
   ctx.translate(duck.x, duck.y);
 
   if (duck.state === "THE_FLOP") {
-    // Duck on his back with paws in the air (from real dog park / couch photos)
-    ctx.fillStyle = "#ffffff";
-    ctx.strokeStyle = "#fde68a";
-    ctx.lineWidth = 2;
-
     // Outer Fluffy Fur Aura
     ctx.fillStyle = "#faf5ee";
+    ctx.strokeStyle = "#fde68a";
+    ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.ellipse(0, 0, 32, 22, 0, 0, Math.PI * 2);
     ctx.fill();
+    ctx.stroke();
 
     // Soft Pink Belly Patch
     ctx.fillStyle = "#fdf2f8";
@@ -110,7 +112,7 @@ function drawDuckPuppy(
     ctx.arc(6, 2, 5, 0, Math.PI);
     ctx.stroke();
 
-    // Paws up in the air with cute brown pads
+    // Paws up in the air with brown pads
     const drawPawUp = (px: number, py: number, rot: number) => {
       ctx.save();
       ctx.translate(px, py);
@@ -123,7 +125,6 @@ function drawDuckPuppy(
       ctx.fill();
       ctx.stroke();
 
-      // Brown Paw Pads
       ctx.fillStyle = "#78350f";
       ctx.beginPath();
       ctx.ellipse(0, 2, 4, 5, 0, 0, Math.PI * 2);
@@ -181,24 +182,33 @@ function drawDuckPuppy(
 
     // Blushing puppy cheeks
     ctx.fillStyle = "#f472b6";
-    ctx.globalAlpha = 0.5;
+    ctx.globalAlpha = 0.6;
     ctx.beginPath();
     ctx.arc(-13, -19, 4.5, 0, Math.PI * 2);
     ctx.arc(13, -19, 4.5, 0, Math.PI * 2);
     ctx.fill();
     ctx.globalAlpha = 1.0;
 
-    // Floating belly rub label
+    // Belly Rub Progress Ring Overlay above Duck
     ctx.fillStyle = "#ec4899";
     ctx.font = "bold 11px monospace";
     ctx.textAlign = "center";
-    ctx.fillText("❤️ RUB BELLY!", 0, -44);
+    ctx.fillText(`❤️ SCRUB TUMMY (${Math.round(bellyRubProgress)}%)`, 0, -46);
+
+    // Progress Bar Track
+    ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+    ctx.fillRect(-35, -40, 70, 6);
+    ctx.fillStyle = "#ec4899";
+    ctx.fillRect(-35, -40, (70 * Math.min(100, bellyRubProgress)) / 100, 6);
+    ctx.strokeStyle = "#fbcfe8";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(-35, -40, 70, 6);
+
     ctx.restore();
     return;
   }
 
   if (duck.state === "NAP_TIME") {
-    // Curled up marshmallow ball on bed with breathing expansion
     const breath = Math.sin(ticks * 0.05) * 1.5;
     ctx.fillStyle = "#faf5ee";
     ctx.strokeStyle = "#fef08a";
@@ -265,16 +275,6 @@ function drawDuckPuppy(
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
-
-  // Feathery fur fringe on tail tip
-  ctx.strokeStyle = "#fde68a";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(-20, 2);
-  ctx.lineTo(-30, 8);
-  ctx.moveTo(-16, 4);
-  ctx.lineTo(-24, 10);
-  ctx.stroke();
   ctx.restore();
 
   // 2. Hind Paws & Haunches
@@ -296,15 +296,9 @@ function drawDuckPuppy(
   ctx.fill();
   ctx.stroke();
 
-  // Golden spine shading accent
-  ctx.fillStyle = "#fefce8";
-  ctx.beginPath();
-  ctx.ellipse(-4, 0, 18, 9, 0, 0, Math.PI * 2);
-  ctx.fill();
-
   // 4. Front Paws
   ctx.fillStyle = "#faf5ee";
-  ctx.strokeStyle = "#fef08a";
+  ctx.strokeStyle = "#fde68a";
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.ellipse(12, -14, 7, 5, 0.3, 0, Math.PI * 2);
@@ -312,12 +306,11 @@ function drawDuckPuppy(
   ctx.fill();
   ctx.stroke();
 
-  // 5. Floppy Ears (with slight flapping when running)
+  // 5. Floppy Ears
   const earFlap = duck.state === "ZOOMIES" ? Math.sin(ticks * 0.4) * 0.15 : 0;
   ctx.fillStyle = "#fef08a";
   ctx.strokeStyle = "#fcd34d";
   ctx.lineWidth = 1.5;
-
   ctx.beginPath();
   ctx.ellipse(16, -12, 7, 10, -0.35 + earFlap, 0, Math.PI * 2);
   ctx.ellipse(16, 12, 7, 10, 0.35 - earFlap, 0, Math.PI * 2);
@@ -333,25 +326,13 @@ function drawDuckPuppy(
   ctx.fill();
   ctx.stroke();
 
-  // Cheek Fluff Tufts
-  ctx.fillStyle = "#ffffff";
-  ctx.beginPath();
-  ctx.moveTo(18, -12);
-  ctx.lineTo(14, -16);
-  ctx.lineTo(22, -11);
-  ctx.moveTo(18, 12);
-  ctx.lineTo(14, 16);
-  ctx.lineTo(22, 11);
-  ctx.fill();
-
-  // 7. Soulful Large Puppy Eyes (Black with Double Specular Glints)
+  // 7. Soulful Puppy Eyes
   ctx.fillStyle = "#18181b";
   ctx.beginPath();
   ctx.arc(24, -5, 3.2, 0, Math.PI * 2);
   ctx.arc(24, 5, 3.2, 0, Math.PI * 2);
   ctx.fill();
 
-  // White Specular Highlights
   ctx.fillStyle = "#ffffff";
   ctx.beginPath();
   ctx.arc(23, -6, 1.2, 0, Math.PI * 2);
@@ -359,14 +340,6 @@ function drawDuckPuppy(
   ctx.arc(25, -4, 0.6, 0, Math.PI * 2);
   ctx.arc(25, 6, 0.6, 0, Math.PI * 2);
   ctx.fill();
-
-  // Eyebrow highlights
-  ctx.strokeStyle = "#fde68a";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.arc(24, -6, 3, Math.PI * 1.1, Math.PI * 1.9);
-  ctx.arc(24, 6, 3, Math.PI * 1.1, Math.PI * 1.9);
-  ctx.stroke();
 
   // 8. Soft Muzzle & Charcoal Button Nose
   ctx.fillStyle = "#ffffff";
@@ -379,21 +352,12 @@ function drawDuckPuppy(
   ctx.ellipse(32, 0, 3.5, 2.5, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Nose shine
-  ctx.fillStyle = "#ffffff";
-  ctx.beginPath();
-  ctx.arc(31, -0.8, 0.8, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Happy Pink Tongue when excited, happy, or carrying ball
+  // Happy Pink Tongue
   if (duck.state === "ZOOMIES" || duck.state === "FETCHING_BALL" || duck.state === "NO_TAKE_THROW") {
     ctx.fillStyle = "#fb7185";
     ctx.beginPath();
     ctx.ellipse(33, 2, 4, 3, 0.2, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = "#f43f5e";
-    ctx.lineWidth = 1;
-    ctx.stroke();
   }
 
   // Tennis ball in mouth
@@ -414,7 +378,7 @@ function drawDuckPuppy(
     ctx.fillStyle = "#38bdf8";
     ctx.font = "bold 11px monospace";
     ctx.textAlign = "center";
-    ctx.fillText("🎾 NO TAKE! ONLY THROW!", duck.x, duck.y - 34);
+    ctx.fillText("🎾 NO TAKE! (Click Duck to Trade)", duck.x, duck.y - 34);
   } else if (duck.state === "SNIFFING_POTTY") {
     ctx.fillStyle = "#ef4444";
     ctx.font = "bold 11px monospace";
@@ -481,14 +445,20 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
     ctx.beginPath();
     ctx.arc(425, 42, 7, 0, Math.PI * 2);
     ctx.fill();
-    // Bushy tail
     ctx.beginPath();
     ctx.arc(433, 36, 6, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = "#fde68a";
+
+    // High-visibility animated interactive card
+    ctx.fillStyle = "#f59e0b";
+    ctx.fillRect(340, 62, 125, 20);
+    ctx.strokeStyle = "#fef08a";
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(340, 62, 125, 20);
+    ctx.fillStyle = "#000000";
     ctx.font = "bold 9px monospace";
     ctx.textAlign = "center";
-    ctx.fillText("🐿️ SQUIRREL!", 402, 70);
+    ctx.fillText("🐿️ CLICK WINDOW (+200)", 402, 75);
   }
 
   // 2. Cozy Plush Rug
@@ -589,20 +559,49 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
   );
   ctx.fill();
 
-  // Bed Label
   ctx.fillStyle = "#e9d5ff";
   ctx.font = "10px monospace";
   ctx.textAlign = "center";
   ctx.fillText("DUCK'S BED", DOG_BED_BOUNDS.x + DOG_BED_BOUNDS.width / 2, DOG_BED_BOUNDS.y + DOG_BED_BOUNDS.height / 2 + 3);
 
   // 5. Back Door to Yard
-  ctx.fillStyle = "#064e3b";
-  ctx.strokeStyle = "#10b981";
-  ctx.lineWidth = 2;
+  const isPottyUrgent = state.bladder > 75 || state.duck.state === "SNIFFING_POTTY" || state.duck.state === "DRAGGED";
+
+  ctx.fillStyle = isPottyUrgent ? "#065f46" : "#064e3b";
+  ctx.strokeStyle = isPottyUrgent ? "#34d399" : "#10b981";
+  ctx.lineWidth = isPottyUrgent ? 3 : 2;
   ctx.beginPath();
   ctx.roundRect(BACK_DOOR_BOUNDS.x, BACK_DOOR_BOUNDS.y, BACK_DOOR_BOUNDS.width, BACK_DOOR_BOUNDS.height, 12);
   ctx.fill();
   ctx.stroke();
+
+  // Glowing Potty Drop Zone Pulsing Ring
+  if (isPottyUrgent) {
+    ctx.save();
+    ctx.strokeStyle = "#4ade80";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 6]);
+    ctx.strokeRect(
+      BACK_DOOR_BOUNDS.x - 4,
+      BACK_DOOR_BOUNDS.y - 4,
+      BACK_DOOR_BOUNDS.width + 8,
+      BACK_DOOR_BOUNDS.height + 8
+    );
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // Dotted Guide Path from Duck to Door
+    ctx.save();
+    ctx.strokeStyle = "#22c55e";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(state.duck.x, state.duck.y);
+    ctx.lineTo(BACK_DOOR_BOUNDS.x + BACK_DOOR_BOUNDS.width / 2, BACK_DOOR_BOUNDS.y + BACK_DOOR_BOUNDS.height / 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
 
   // Door Glass
   ctx.fillStyle = "#047857";
@@ -612,7 +611,7 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
   ctx.font = "bold 9px monospace";
   ctx.textAlign = "center";
   ctx.fillText("BACK DOOR", BACK_DOOR_BOUNDS.x + BACK_DOOR_BOUNDS.width / 2, BACK_DOOR_BOUNDS.y + BACK_DOOR_BOUNDS.height / 2 - 4);
-  ctx.fillText("(POTTY YARD)", BACK_DOOR_BOUNDS.x + BACK_DOOR_BOUNDS.width / 2, BACK_DOOR_BOUNDS.y + BACK_DOOR_BOUNDS.height / 2 + 8);
+  ctx.fillText(isPottyUrgent ? "👉 DROP HERE" : "(POTTY YARD)", BACK_DOOR_BOUNDS.x + BACK_DOOR_BOUNDS.width / 2, BACK_DOOR_BOUNDS.y + BACK_DOOR_BOUNDS.height / 2 + 8);
 
   // Amazon Delivery Parcel Knock if active
   if (state.activeSurpriseEvent?.type === "amazon-delivery") {
@@ -625,9 +624,15 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
     ctx.font = "bold 12px sans-serif";
     ctx.fillText("📦", BACK_DOOR_BOUNDS.x - 18, BACK_DOOR_BOUNDS.y + 57);
 
+    // Interactive Card
     ctx.fillStyle = "#f59e0b";
-    ctx.font = "bold 9px monospace";
-    ctx.fillText("KNOCK! KNOCK!", BACK_DOOR_BOUNDS.x - 18, BACK_DOOR_BOUNDS.y + 32);
+    ctx.fillRect(BACK_DOOR_BOUNDS.x - 70, BACK_DOOR_BOUNDS.y + 10, 80, 20);
+    ctx.strokeStyle = "#fde68a";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(BACK_DOOR_BOUNDS.x - 70, BACK_DOOR_BOUNDS.y + 10, 80, 20);
+    ctx.fillStyle = "#000000";
+    ctx.font = "bold 8px monospace";
+    ctx.fillText("📦 SIGN PACKAGE", BACK_DOOR_BOUNDS.x - 30, BACK_DOOR_BOUNDS.y + 23);
   }
 
   // 6. Portfolio Hazards
@@ -636,11 +641,27 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
     ctx.save();
 
     if (isTargeted) {
+      // Pulsing Orange/Red Danger Warning Ring
       ctx.strokeStyle = "#ef4444";
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.arc(hazard.x, hazard.y, hazard.radius + 8 + Math.sin(state.ticks * 0.2) * 4, 0, Math.PI * 2);
       ctx.stroke();
+
+      // Radial Countdown Timer Ring
+      const maxTimer = state.duck.maxStateTimer || 240;
+      const progress = Math.max(0, state.duck.stateTimer / maxTimer);
+      ctx.strokeStyle = "#f97316";
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(hazard.x, hazard.y, hazard.radius + 14, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress);
+      ctx.stroke();
+
+      // Help Prompt
+      ctx.fillStyle = "#f97316";
+      ctx.font = "bold 9px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText("🦴 DROP KONG / SQUEAK!", hazard.x, hazard.y - hazard.radius - 10);
     }
 
     ctx.fillStyle = hazard.isChewed ? "#7f1d1d" : "#27272a";
@@ -681,7 +702,7 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
   }
 
   // 8. Procedural Duck Puppy Rendering
-  drawDuckPuppy(ctx, state.duck, state.ticks);
+  drawDuckPuppy(ctx, state.duck, state.ticks, state.bellyRubProgress);
 
   // 9. Floating Particles
   state.particles.forEach((p) => {
@@ -761,7 +782,25 @@ function drawDogParkScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckS
     ctx.fillText("MUD PUDDLE!", puddle.x, puddle.y + 4);
   });
 
-  // 3. Player at left side
+  // 3. Golden Bonus Bones
+  park.bones.forEach((bone) => {
+    if (!bone.collected) {
+      ctx.save();
+      ctx.fillStyle = "#facc15";
+      ctx.strokeStyle = "#ca8a04";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(bone.x, bone.y, 14 + Math.sin(state.ticks * 0.1) * 2, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.font = "16px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("🦴", bone.x, bone.y + 6);
+      ctx.restore();
+    }
+  });
+
+  // 4. Player at left side
   ctx.fillStyle = "#27272a";
   ctx.beginPath();
   ctx.arc(80, 250, 24, 0, Math.PI * 2);
@@ -775,7 +814,7 @@ function drawDogParkScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckS
   ctx.textAlign = "center";
   ctx.fillText("FRED", 80, 254);
 
-  // 4. Thrown Ball Trajectory & Ball
+  // 5. Thrown Ball Trajectory & Ball
   if (park.status === "thrown" || park.status === "retrieving") {
     ctx.fillStyle = "#84cc16";
     ctx.beginPath();
@@ -798,7 +837,7 @@ function drawDogParkScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckS
     ctx.setLineDash([]);
   }
 
-  // 5. Duck in Park
+  // 6. Duck in Park
   drawDuckPuppy(
     ctx,
     {
@@ -812,30 +851,30 @@ function drawDogParkScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckS
   );
 
   // Park Instructions Overlay
-  ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-  ctx.fillRect(CANVAS_WIDTH / 2 - 180, 15, 360, 42);
+  ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+  ctx.fillRect(CANVAS_WIDTH / 2 - 200, 15, 400, 48);
   ctx.strokeStyle = "#22c55e";
-  ctx.lineWidth = 1;
-  ctx.strokeRect(CANVAS_WIDTH / 2 - 180, 15, 360, 42);
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(CANVAS_WIDTH / 2 - 200, 15, 400, 48);
 
   ctx.fillStyle = "#ffffff";
   ctx.font = "bold 11px monospace";
   ctx.textAlign = "center";
   if (park.status === "aim") {
-    ctx.fillText("🎾 Click & Drag on Field to Throw Ball!", CANVAS_WIDTH / 2, 34);
-    ctx.fillText("Duck will fetch it across the park", CANVAS_WIDTH / 2, 48);
+    ctx.fillText("🎾 Phase 1: Click & Drag on the field to Throw Ball!", CANVAS_WIDTH / 2, 34);
+    ctx.fillText("Duck will sprint across to retrieve it", CANVAS_WIDTH / 2, 50);
   } else if (park.status === "thrown" || park.status === "retrieving") {
     ctx.fillStyle = "#facc15";
-    ctx.fillText("📢 Press SPACEBAR or click 'Whistle' to steer Duck!", CANVAS_WIDTH / 2, 34);
-    ctx.fillText("Dodge mud puddles on the return sprint", CANVAS_WIDTH / 2, 48);
+    ctx.fillText(`🐾 Move Mouse or Up/Down to Steer Duck! (Bones: ${park.bonesCollected}/3)`, CANVAS_WIDTH / 2, 34);
+    ctx.fillText("Dodge mud puddles and grab golden bones on return sprint", CANVAS_WIDTH / 2, 50);
   } else if (park.status === "success") {
     ctx.fillStyle = "#4ade80";
-    ctx.fillText("🌟 Perfect Fetch! Duck is exhausted & happy!", CANVAS_WIDTH / 2, 34);
-    ctx.fillText("Click 'Return to Office' for Tired Puppy Buff", CANVAS_WIDTH / 2, 48);
+    ctx.fillText(`🌟 Perfect Fetch! Duck retrieved ball & ${park.bonesCollected} bones!`, CANVAS_WIDTH / 2, 34);
+    ctx.fillText("Click 'Return to Office' for 30s Tired Puppy Buff", CANVAS_WIDTH / 2, 50);
   } else if (park.status === "muddy") {
     ctx.fillStyle = "#f87171";
     ctx.fillText("💦 Duck splashed in mud! Needs a quick bath!", CANVAS_WIDTH / 2, 34);
-    ctx.fillText("Click 'Return to Office' to clean up", CANVAS_WIDTH / 2, 48);
+    ctx.fillText("Click 'Return to Office' to clean up", CANVAS_WIDTH / 2, 50);
   }
 }
 
@@ -924,7 +963,6 @@ export const WorkingWithDuck: React.FC = () => {
   useEffect(() => {
     if (muted || isMusicMuted || uiState.status !== "running") return;
 
-    // 4-Chord Lo-Fi Progression (Cmaj7 -> Am7 -> Dm7 -> G7)
     const chords = [
       [261.63, 329.63, 392.0, 493.88], // Cmaj7
       [220.0, 261.63, 329.63, 392.0],  // Am7
@@ -1011,25 +1049,33 @@ export const WorkingWithDuck: React.FC = () => {
     };
   }, [playSoundCue, aimParkStart]);
 
-  // Keyboard Shortcuts (1-4 for hotbar items, Space for whistle/park)
+  // Keyboard Shortcuts (1-3 for hotbar items, 4 for Treat, Space for whistle/park, Arrows for park steering)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const state = gameStateRef.current;
       if (e.key === "1") {
-        gameStateRef.current = { ...state, selectedItem: "squeaky-toy" };
-        setUiState((s) => ({ ...s, selectedItem: "squeaky-toy" }));
+        gameStateRef.current = { ...state, selectedItem: "tennis-ball" };
+        setUiState((s) => ({ ...s, selectedItem: "tennis-ball" }));
       } else if (e.key === "2") {
         gameStateRef.current = { ...state, selectedItem: "kong" };
         setUiState((s) => ({ ...s, selectedItem: "kong" }));
       } else if (e.key === "3") {
-        gameStateRef.current = { ...state, selectedItem: "tennis-ball" };
-        setUiState((s) => ({ ...s, selectedItem: "tennis-ball" }));
+        gameStateRef.current = { ...state, selectedItem: "squeaky-toy" };
+        setUiState((s) => ({ ...s, selectedItem: "squeaky-toy" }));
       } else if (e.key === "4") {
         gameStateRef.current = giveTreat(state);
         setUiState({ ...gameStateRef.current });
       } else if (e.code === "Space" && state.inDogPark) {
         e.preventDefault();
         gameStateRef.current = tapParkWhistle(state);
+        setUiState({ ...gameStateRef.current });
+      } else if ((e.key === "ArrowUp" || e.key === "w") && state.inDogPark) {
+        e.preventDefault();
+        gameStateRef.current = steerParkDuck(state, state.parkState.duckY - 25);
+        setUiState({ ...gameStateRef.current });
+      } else if ((e.key === "ArrowDown" || e.key === "s") && state.inDogPark) {
+        e.preventDefault();
+        gameStateRef.current = steerParkDuck(state, state.parkState.duckY + 25);
         setUiState({ ...gameStateRef.current });
       }
     };
@@ -1048,7 +1094,7 @@ export const WorkingWithDuck: React.FC = () => {
 
     const state = gameStateRef.current;
 
-    // Dog Park Aiming
+    // Dog Park Aiming & Throwing
     if (state.inDogPark) {
       if (state.parkState.status === "aim") {
         setAimParkStart({ x, y });
@@ -1059,7 +1105,7 @@ export const WorkingWithDuck: React.FC = () => {
 
     // Check click on surprise event target (e.g. Squirrel at window or Amazon package)
     if (state.activeSurpriseEvent) {
-      if (state.activeSurpriseEvent.type === "squirrel-window" && x >= 360 && x <= 445 && y <= 65) {
+      if (state.activeSurpriseEvent.type === "squirrel-window" && x >= 340 && x <= 465 && y <= 85) {
         gameStateRef.current = {
           ...state,
           activeSurpriseEvent: null,
@@ -1083,7 +1129,7 @@ export const WorkingWithDuck: React.FC = () => {
         return;
       }
 
-      if (state.activeSurpriseEvent.type === "amazon-delivery" && x >= BACK_DOOR_BOUNDS.x - 40 && x <= BACK_DOOR_BOUNDS.x + 30 && y >= BACK_DOOR_BOUNDS.y + 20) {
+      if (state.activeSurpriseEvent.type === "amazon-delivery" && x >= BACK_DOOR_BOUNDS.x - 70 && x <= BACK_DOOR_BOUNDS.x + 30 && y >= BACK_DOOR_BOUNDS.y + 10 && y <= BACK_DOOR_BOUNDS.y + 70) {
         gameStateRef.current = {
           ...state,
           activeSurpriseEvent: null,
@@ -1110,7 +1156,13 @@ export const WorkingWithDuck: React.FC = () => {
 
     // Check if clicked directly on Duck
     const duckDist = Math.hypot(x - state.duck.x, y - state.duck.y);
-    if (duckDist < 35) {
+    if (duckDist < 38) {
+      if (state.duck.state === "NO_TAKE_THROW") {
+        // Direct trade treat for ball
+        gameStateRef.current = giveTreat(state);
+        setUiState({ ...gameStateRef.current });
+        return;
+      }
       gameStateRef.current = startDraggingDuck(state);
       setIsDraggingDuckState(true);
       return;
@@ -1138,8 +1190,13 @@ export const WorkingWithDuck: React.FC = () => {
 
     const state = gameStateRef.current;
 
-    if (state.inDogPark && isThrowingParkBall) {
-      setAimParkStart({ x, y });
+    // Dog Park Mouse Steering during retrieval
+    if (state.inDogPark) {
+      if (isThrowingParkBall) {
+        setAimParkStart({ x, y });
+      } else if (state.parkState.status === "retrieving") {
+        gameStateRef.current = steerParkDuck(state, y);
+      }
       return;
     }
 
@@ -1155,6 +1212,7 @@ export const WorkingWithDuck: React.FC = () => {
       if (movedDist > 12) {
         lastBellyScrubPosRef.current = { x, y };
         gameStateRef.current = scrubBelly(state, x, y);
+        setUiState({ ...gameStateRef.current });
       }
     }
   };
@@ -1181,6 +1239,24 @@ export const WorkingWithDuck: React.FC = () => {
 
   const currentSprint = SPRINTS.find((s) => s.level === uiState.currentLevel) || SPRINTS[0];
 
+  // Guided Onboarding Hint Text
+  let tutorialHint: string | null = null;
+  if (uiState.currentLevel === 1 && uiState.status === "running") {
+    if (uiState.duck.state === "THE_FLOP") {
+      tutorialHint = "💖 Duck flopped on his back! Move your cursor back & forth over his belly!";
+    } else if (uiState.duck.state === "SNIFFING_POTTY" || uiState.bladder > 80) {
+      tutorialHint = "🚽 Duck needs to go! Click and drag Duck over to the Back Door!";
+    } else if (uiState.duck.state === "SNEAKY_CHEW") {
+      tutorialHint = "⚠️ Duck is eyeing your work! Drop a Kong (2) or Squeaky Toy (3) to save it!";
+    } else if (uiState.duck.state === "NO_TAKE_THROW") {
+      tutorialHint = "🎾 Duck caught the ball! Click on Duck or press (4) to trade a treat!";
+    } else if (uiState.excitement > 80) {
+      tutorialHint = "⚡ Excitement is high! Throw a Tennis Ball (1) or take a Dog Park trip!";
+    } else {
+      tutorialHint = "💡 Tip: Work advances automatically while Duck is calm. Toss toys to entertain him!";
+    }
+  }
+
   return (
     <div ref={containerRef} className="relative w-full max-w-5xl mx-auto select-none font-sans">
       {/* Top Status & Meters HUD */}
@@ -1205,7 +1281,7 @@ export const WorkingWithDuck: React.FC = () => {
             />
           </div>
           <div className="flex justify-between items-center mt-1.5 text-[10px] font-mono text-zinc-500">
-            <span>Sprint: {currentSprint.title.split(":")[0]}</span>
+            <span>{uiState.mode === "endless" ? "Endless Mode" : currentSprint.title.split(":")[0]}</span>
             <span className="text-teal-400 font-bold">{uiState.multiplier.toFixed(1)}× Speed</span>
           </div>
         </div>
@@ -1296,6 +1372,14 @@ export const WorkingWithDuck: React.FC = () => {
         </div>
       </div>
 
+      {/* Guided Tutorial Hint Banner */}
+      {tutorialHint && (
+        <div className="mb-3 px-4 py-2 rounded-xl border border-brand-cyan/30 bg-brand-cyan/10 backdrop-blur-md flex items-center gap-2 text-xs font-mono text-brand-cyan animate-fadeIn">
+          <IconInfoCircle className="w-4 h-4 shrink-0" />
+          <span>{tutorialHint}</span>
+        </div>
+      )}
+
       {/* Main Canvas Screen Container */}
       <div className="relative rounded-3xl border border-zinc-800 bg-zinc-950 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)]">
         <canvas
@@ -1308,7 +1392,7 @@ export const WorkingWithDuck: React.FC = () => {
           className="w-full h-auto cursor-crosshair block"
         />
 
-        {/* Start Overlay Screen */}
+        {/* Start Overlay Screen - Dynamic Sprint Title */}
         {uiState.status === "idle" && (
           <div className="absolute inset-0 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-20">
             <div className="w-16 h-16 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/30 flex items-center justify-center text-brand-cyan mb-4">
@@ -1317,9 +1401,13 @@ export const WorkingWithDuck: React.FC = () => {
             <h2 className="text-2xl sm:text-3xl font-extrabold font-mono text-white mb-2">
               Working With <span className="text-brand-cyan">Duck</span>
             </h2>
+            <p className="text-xs font-mono text-amber-300 font-bold mb-2">
+              {uiState.mode === "endless" ? "Endless Mode · High Score Challenge" : currentSprint.title}
+            </p>
             <p className="max-w-md text-xs sm:text-sm text-zinc-300 font-mono mb-6 leading-relaxed">
-              Balance writing code against managing your autonomous Golden Retriever puppy.
-              Toss toys, scrub belly rubs, drag Duck to the back door, and take dog park trips!
+              {uiState.mode === "endless"
+                ? "Infinite sprints with accelerating puppy impulses. Keep Duck entertained and protect the codebase!"
+                : currentSprint.description}
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <button
@@ -1331,7 +1419,7 @@ export const WorkingWithDuck: React.FC = () => {
                 className="px-6 py-3 rounded-xl bg-brand-cyan text-black font-mono font-bold text-sm hover:bg-white hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center gap-2 cursor-pointer"
               >
                 <IconPlayerPlay className="w-4 h-4 fill-current" />
-                <span>Start Sprint 1</span>
+                <span>{uiState.mode === "endless" ? "Start Endless Mode" : `Start Sprint ${uiState.currentLevel}`}</span>
               </button>
 
               <button
@@ -1341,6 +1429,8 @@ export const WorkingWithDuck: React.FC = () => {
                 <IconBook className="w-4 h-4" />
                 <span>Duck Scrapbook</span>
               </button>
+
+              <FieldManualButton manualId="working-with-duck" label="Field Manual" />
             </div>
           </div>
         )}
@@ -1363,41 +1453,11 @@ export const WorkingWithDuck: React.FC = () => {
         )}
       </div>
 
-      {/* Bottom Hotbar HUD & Action Dock */}
+      {/* Bottom Streamlined Hotbar HUD & Action Dock */}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 font-mono">
-        {/* Inventory Items (1-4) */}
+        {/* Streamlined 3 Distinct Tools + Direct Treat */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => {
-              gameStateRef.current = { ...gameStateRef.current, selectedItem: "squeaky-toy" };
-              setUiState((s) => ({ ...s, selectedItem: "squeaky-toy" }));
-            }}
-            className={`px-3.5 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-              uiState.selectedItem === "squeaky-toy"
-                ? "border-brand-cyan bg-brand-cyan/20 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.3)]"
-                : "border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:text-white"
-            }`}
-          >
-            <span className="px-1.5 py-0.5 rounded bg-zinc-950 text-[10px] text-zinc-500">1</span>
-            <IconBone className="w-4 h-4" />
-            <span>Squeaky Toy</span>
-          </button>
-
-          <button
-            onClick={() => {
-              gameStateRef.current = { ...gameStateRef.current, selectedItem: "kong" };
-              setUiState((s) => ({ ...s, selectedItem: "kong" }));
-            }}
-            className={`px-3.5 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-              uiState.selectedItem === "kong"
-                ? "border-brand-cyan bg-brand-cyan/20 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.3)]"
-                : "border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:text-white"
-            }`}
-          >
-            <span className="px-1.5 py-0.5 rounded bg-zinc-950 text-[10px] text-zinc-500">2</span>
-            <span>Kong Chew</span>
-          </button>
-
+          {/* Tool 1: Tennis Ball */}
           <button
             onClick={() => {
               gameStateRef.current = { ...gameStateRef.current, selectedItem: "tennis-ball" };
@@ -1408,18 +1468,56 @@ export const WorkingWithDuck: React.FC = () => {
                 ? "border-brand-cyan bg-brand-cyan/20 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.3)]"
                 : "border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:text-white"
             }`}
+            title="Throw ball to play fetch & drain Excitement"
           >
-            <span className="px-1.5 py-0.5 rounded bg-zinc-950 text-[10px] text-zinc-500">3</span>
+            <span className="px-1.5 py-0.5 rounded bg-zinc-950 text-[10px] text-zinc-500">1</span>
             <IconBallTennis className="w-4 h-4 text-lime-400" />
-            <span>Tennis Ball</span>
+            <span>Tennis Ball 🎾</span>
           </button>
 
+          {/* Tool 2: Kong Chew Toy */}
+          <button
+            onClick={() => {
+              gameStateRef.current = { ...gameStateRef.current, selectedItem: "kong" };
+              setUiState((s) => ({ ...s, selectedItem: "kong" }));
+            }}
+            className={`px-3.5 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+              uiState.selectedItem === "kong"
+                ? "border-brand-cyan bg-brand-cyan/20 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.3)]"
+                : "border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:text-white"
+            }`}
+            title="Drop chew toy to distract Duck away from desk hazards"
+          >
+            <span className="px-1.5 py-0.5 rounded bg-zinc-950 text-[10px] text-zinc-500">2</span>
+            <span>Kong Chew 🦴</span>
+          </button>
+
+          {/* Tool 3: Squeaky Toy */}
+          <button
+            onClick={() => {
+              gameStateRef.current = { ...gameStateRef.current, selectedItem: "squeaky-toy" };
+              setUiState((s) => ({ ...s, selectedItem: "squeaky-toy" }));
+            }}
+            className={`px-3.5 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+              uiState.selectedItem === "squeaky-toy"
+                ? "border-brand-cyan bg-brand-cyan/20 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.3)]"
+                : "border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:text-white"
+            }`}
+            title="Squeak to instantly get Duck's attention and recall"
+          >
+            <span className="px-1.5 py-0.5 rounded bg-zinc-950 text-[10px] text-zinc-500">3</span>
+            <IconBone className="w-4 h-4" />
+            <span>Squeaky Toy 🧸</span>
+          </button>
+
+          {/* Direct Treat */}
           <button
             onClick={() => {
               gameStateRef.current = giveTreat(gameStateRef.current);
               setUiState({ ...gameStateRef.current });
             }}
             className="px-3.5 py-2 rounded-xl border border-zinc-800 bg-zinc-900/70 text-amber-300 hover:border-amber-500/40 text-xs font-bold transition-all flex items-center gap-2 cursor-pointer"
+            title="Give treat (trades ball during No Take Only Throw)"
           >
             <span className="px-1.5 py-0.5 rounded bg-zinc-950 text-[10px] text-zinc-500">4</span>
             <span>Give Treat 🍖</span>
@@ -1464,6 +1562,8 @@ export const WorkingWithDuck: React.FC = () => {
             </div>
           )}
 
+          <FieldManualButton manualId="working-with-duck" label="Manual" />
+
           <button
             onClick={() => setIsScrapbookOpen(true)}
             className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer"
@@ -1499,7 +1599,7 @@ export const WorkingWithDuck: React.FC = () => {
             </div>
 
             <span className="px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-bold uppercase tracking-wider">
-              {currentSprint.title} Completed!
+              {uiState.mode === "endless" ? "Endless Milestone" : currentSprint.title} Completed!
             </span>
 
             <h3 className="text-2xl font-bold text-white mt-3 mb-2">

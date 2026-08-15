@@ -177,11 +177,12 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
     <Card
       className={className}
       style={{
+        minHeight: cardHeightValue ? `${cardHeightValue}px` : "auto",
         height: cardHeightValue ? `${cardHeightValue}px` : "auto",
-        transition: "height 250ms cubic-bezier(0.16, 1, 0.3, 1)",
+        transition: "height 250ms cubic-bezier(0.16, 1, 0.3, 1), min-height 250ms cubic-bezier(0.16, 1, 0.3, 1)",
       }}
     >
-      <div ref={innerRef} className="flex flex-col h-full justify-between gap-3">
+      <div ref={innerRef} className="flex flex-col h-full justify-between gap-3 flex-1 min-h-0">
         <div>
           {/* Card Top Pill & Header */}
           <div className="flex justify-between items-center mb-2.5">

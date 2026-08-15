@@ -282,4 +282,38 @@ describe("Working With Duck - UI & Component Suite", () => {
       });
     }
   });
+
+  it("renders guided onboarding tutorial hint when starting Sprint 1", async () => {
+    await act(async () => {
+      root.render(<WorkingWithDuck />);
+    });
+
+    const startBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Start Sprint 1")
+    );
+    if (startBtn) {
+      await act(async () => {
+        startBtn.click();
+      });
+      expect(container.textContent).toContain("Tip: Work advances automatically");
+    }
+  });
+
+  it("handles canvas mouse down, drag, and mouse up events gracefully", async () => {
+    await act(async () => {
+      root.render(<WorkingWithDuck />);
+    });
+
+    const canvas = container.querySelector("canvas");
+    expect(canvas).not.toBeNull();
+
+    if (canvas) {
+      await act(async () => {
+        canvas.dispatchEvent(new MouseEvent("mousedown", { clientX: 430, clientY: 240, bubbles: true }));
+        canvas.dispatchEvent(new MouseEvent("mousemove", { clientX: 450, clientY: 260, bubbles: true }));
+        canvas.dispatchEvent(new MouseEvent("mouseup", { clientX: 450, clientY: 260, bubbles: true }));
+      });
+    }
+  });
 });
+

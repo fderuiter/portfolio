@@ -6,7 +6,7 @@
 
 # Interface: WorkingWithDuckState
 
-Defined in: [lib/working-with-duck-engine.ts:272](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L272)
+Defined in: [lib/working-with-duck-engine.ts:284](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L284)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/working-with-duck-engine.ts:272](https://github.com/fderuiter/p
 
 > **activeHazardTarget**: [`PortfolioHazardType`](../type-aliases/PortfolioHazardType.md) \| `null`
 
-Defined in: [lib/working-with-duck-engine.ts:321](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L321)
+Defined in: [lib/working-with-duck-engine.ts:336](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L336)
 
 ***
 
@@ -22,15 +22,15 @@ Defined in: [lib/working-with-duck-engine.ts:321](https://github.com/fderuiter/p
 
 > **activeSkillToast**: \{ `badge`: `string`; `text`: `string`; `timer`: `number`; \} \| `null`
 
-Defined in: [lib/working-with-duck-engine.ts:346](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L346)
+Defined in: [lib/working-with-duck-engine.ts:365](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L365)
 
 ***
 
 ### activeSurpriseEvent
 
-> **activeSurpriseEvent**: \{ `resolved`: `boolean`; `timer`: `number`; `type`: `"amazon-delivery"` \| `"squirrel-window"` \| `"puppy-hiccups"`; \} \| `null`
+> **activeSurpriseEvent**: \{ `maxTimer`: `number`; `resolved`: `boolean`; `timer`: `number`; `type`: `"amazon-delivery"` \| `"squirrel-window"` \| `"puppy-hiccups"`; \} \| `null`
 
-Defined in: [lib/working-with-duck-engine.ts:290](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L290)
+Defined in: [lib/working-with-duck-engine.ts:303](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L303)
 
 ***
 
@@ -38,7 +38,15 @@ Defined in: [lib/working-with-duck-engine.ts:290](https://github.com/fderuiter/p
 
 > **ball**: \{ `active`: `boolean`; `vx`: `number`; `vy`: `number`; `x`: `number`; `y`: `number`; \} \| `null`
 
-Defined in: [lib/working-with-duck-engine.ts:312](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L312)
+Defined in: [lib/working-with-duck-engine.ts:327](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L327)
+
+***
+
+### bellyRubProgress
+
+> **bellyRubProgress**: `number`
+
+Defined in: [lib/working-with-duck-engine.ts:299](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L299)
 
 ***
 
@@ -46,7 +54,7 @@ Defined in: [lib/working-with-duck-engine.ts:312](https://github.com/fderuiter/p
 
 > **bellyRubScrubCount**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:286](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L286)
+Defined in: [lib/working-with-duck-engine.ts:298](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L298)
 
 ***
 
@@ -54,7 +62,7 @@ Defined in: [lib/working-with-duck-engine.ts:286](https://github.com/fderuiter/p
 
 > **bladder**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:279](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L279)
+Defined in: [lib/working-with-duck-engine.ts:291](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L291)
 
 ***
 
@@ -62,7 +70,7 @@ Defined in: [lib/working-with-duck-engine.ts:279](https://github.com/fderuiter/p
 
 > **calmBuffTimer**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:284](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L284)
+Defined in: [lib/working-with-duck-engine.ts:296](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L296)
 
 ***
 
@@ -70,7 +78,7 @@ Defined in: [lib/working-with-duck-engine.ts:284](https://github.com/fderuiter/p
 
 > **comboStreak**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:288](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L288)
+Defined in: [lib/working-with-duck-engine.ts:301](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L301)
 
 ***
 
@@ -78,7 +86,7 @@ Defined in: [lib/working-with-duck-engine.ts:288](https://github.com/fderuiter/p
 
 > **comboTimer**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:289](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L289)
+Defined in: [lib/working-with-duck-engine.ts:302](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L302)
 
 ***
 
@@ -86,7 +94,7 @@ Defined in: [lib/working-with-duck-engine.ts:289](https://github.com/fderuiter/p
 
 > **currentLevel**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:275](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L275)
+Defined in: [lib/working-with-duck-engine.ts:287](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L287)
 
 ***
 
@@ -94,7 +102,7 @@ Defined in: [lib/working-with-duck-engine.ts:275](https://github.com/fderuiter/p
 
 > **duck**: `object`
 
-Defined in: [lib/working-with-duck-engine.ts:296](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L296)
+Defined in: [lib/working-with-duck-engine.ts:310](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L310)
 
 #### angle
 
@@ -107,6 +115,10 @@ Defined in: [lib/working-with-duck-engine.ts:296](https://github.com/fderuiter/p
 #### isCarryingBall
 
 > **isCarryingBall**: `boolean`
+
+#### maxStateTimer
+
+> **maxStateTimer**: `number`
 
 #### sniffCountdown
 
@@ -150,7 +162,7 @@ Defined in: [lib/working-with-duck-engine.ts:296](https://github.com/fderuiter/p
 
 > **excitement**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:278](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L278)
+Defined in: [lib/working-with-duck-engine.ts:290](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L290)
 
 ***
 
@@ -158,7 +170,7 @@ Defined in: [lib/working-with-duck-engine.ts:278](https://github.com/fderuiter/p
 
 > **floatingAlerts**: [`FloatingAlert`](FloatingAlert.md)[]
 
-Defined in: [lib/working-with-duck-engine.ts:324](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L324)
+Defined in: [lib/working-with-duck-engine.ts:339](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L339)
 
 ***
 
@@ -166,7 +178,7 @@ Defined in: [lib/working-with-duck-engine.ts:324](https://github.com/fderuiter/p
 
 > **hazards**: [`PortfolioHazard`](PortfolioHazard.md)[]
 
-Defined in: [lib/working-with-duck-engine.ts:320](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L320)
+Defined in: [lib/working-with-duck-engine.ts:335](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L335)
 
 ***
 
@@ -174,7 +186,7 @@ Defined in: [lib/working-with-duck-engine.ts:320](https://github.com/fderuiter/p
 
 > **highScore**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:345](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L345)
+Defined in: [lib/working-with-duck-engine.ts:364](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L364)
 
 ***
 
@@ -182,7 +194,7 @@ Defined in: [lib/working-with-duck-engine.ts:345](https://github.com/fderuiter/p
 
 > **inDogPark**: `boolean`
 
-Defined in: [lib/working-with-duck-engine.ts:328](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L328)
+Defined in: [lib/working-with-duck-engine.ts:343](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L343)
 
 ***
 
@@ -190,7 +202,7 @@ Defined in: [lib/working-with-duck-engine.ts:328](https://github.com/fderuiter/p
 
 > **lastImpulseTick**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:285](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L285)
+Defined in: [lib/working-with-duck-engine.ts:297](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L297)
 
 ***
 
@@ -198,7 +210,7 @@ Defined in: [lib/working-with-duck-engine.ts:285](https://github.com/fderuiter/p
 
 > **latestUnlockedFact**: [`DuckFact`](DuckFact.md) \| `null`
 
-Defined in: [lib/working-with-duck-engine.ts:344](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L344)
+Defined in: [lib/working-with-duck-engine.ts:363](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L363)
 
 ***
 
@@ -206,7 +218,7 @@ Defined in: [lib/working-with-duck-engine.ts:344](https://github.com/fderuiter/p
 
 > **mode**: `"campaign"` \| `"endless"`
 
-Defined in: [lib/working-with-duck-engine.ts:274](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L274)
+Defined in: [lib/working-with-duck-engine.ts:286](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L286)
 
 ***
 
@@ -214,7 +226,7 @@ Defined in: [lib/working-with-duck-engine.ts:274](https://github.com/fderuiter/p
 
 > **multiplier**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:281](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L281)
+Defined in: [lib/working-with-duck-engine.ts:293](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L293)
 
 ***
 
@@ -222,7 +234,7 @@ Defined in: [lib/working-with-duck-engine.ts:281](https://github.com/fderuiter/p
 
 > **naughtyVsGood**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:280](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L280)
+Defined in: [lib/working-with-duck-engine.ts:292](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L292)
 
 ***
 
@@ -230,7 +242,7 @@ Defined in: [lib/working-with-duck-engine.ts:280](https://github.com/fderuiter/p
 
 > **nextAlertId**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:326](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L326)
+Defined in: [lib/working-with-duck-engine.ts:341](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L341)
 
 ***
 
@@ -238,7 +250,7 @@ Defined in: [lib/working-with-duck-engine.ts:326](https://github.com/fderuiter/p
 
 > **nextParticleId**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:325](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L325)
+Defined in: [lib/working-with-duck-engine.ts:340](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L340)
 
 ***
 
@@ -246,7 +258,7 @@ Defined in: [lib/working-with-duck-engine.ts:325](https://github.com/fderuiter/p
 
 > **parkState**: `object`
 
-Defined in: [lib/working-with-duck-engine.ts:329](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L329)
+Defined in: [lib/working-with-duck-engine.ts:344](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L344)
 
 #### ballVx
 
@@ -264,9 +276,25 @@ Defined in: [lib/working-with-duck-engine.ts:329](https://github.com/fderuiter/p
 
 > **ballY**: `number`
 
+#### bones
+
+> **bones**: [`ParkBone`](ParkBone.md)[]
+
+#### bonesCollected
+
+> **bonesCollected**: `number`
+
 #### duckAngle
 
 > **duckAngle**: `number`
+
+#### duckVx
+
+> **duckVx**: `number`
+
+#### duckVy
+
+> **duckVy**: `number`
 
 #### duckX
 
@@ -298,7 +326,7 @@ Defined in: [lib/working-with-duck-engine.ts:329](https://github.com/fderuiter/p
 
 > **particles**: [`Particle`](Particle.md)[]
 
-Defined in: [lib/working-with-duck-engine.ts:323](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L323)
+Defined in: [lib/working-with-duck-engine.ts:338](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L338)
 
 ***
 
@@ -306,7 +334,7 @@ Defined in: [lib/working-with-duck-engine.ts:323](https://github.com/fderuiter/p
 
 > **selectedItem**: [`InventoryItem`](../type-aliases/InventoryItem.md)
 
-Defined in: [lib/working-with-duck-engine.ts:311](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L311)
+Defined in: [lib/working-with-duck-engine.ts:326](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L326)
 
 ***
 
@@ -314,7 +342,7 @@ Defined in: [lib/working-with-duck-engine.ts:311](https://github.com/fderuiter/p
 
 > **soundCueQueue**: [`SoundCue`](../type-aliases/SoundCue.md)[]
 
-Defined in: [lib/working-with-duck-engine.ts:347](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L347)
+Defined in: [lib/working-with-duck-engine.ts:366](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L366)
 
 ***
 
@@ -322,7 +350,7 @@ Defined in: [lib/working-with-duck-engine.ts:347](https://github.com/fderuiter/p
 
 > **status**: `"idle"` \| `"paused"` \| `"running"` \| `"failed"` \| `"won"`
 
-Defined in: [lib/working-with-duck-engine.ts:273](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L273)
+Defined in: [lib/working-with-duck-engine.ts:285](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L285)
 
 ***
 
@@ -330,7 +358,7 @@ Defined in: [lib/working-with-duck-engine.ts:273](https://github.com/fderuiter/p
 
 > **targetWorkProgress**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:277](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L277)
+Defined in: [lib/working-with-duck-engine.ts:289](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L289)
 
 ***
 
@@ -338,7 +366,7 @@ Defined in: [lib/working-with-duck-engine.ts:277](https://github.com/fderuiter/p
 
 > **ticks**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:282](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L282)
+Defined in: [lib/working-with-duck-engine.ts:294](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L294)
 
 ***
 
@@ -346,7 +374,15 @@ Defined in: [lib/working-with-duck-engine.ts:282](https://github.com/fderuiter/p
 
 > **totalScore**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:283](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L283)
+Defined in: [lib/working-with-duck-engine.ts:295](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L295)
+
+***
+
+### tutorialStep
+
+> **tutorialStep**: `number`
+
+Defined in: [lib/working-with-duck-engine.ts:367](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L367)
 
 ***
 
@@ -354,7 +390,7 @@ Defined in: [lib/working-with-duck-engine.ts:283](https://github.com/fderuiter/p
 
 > **unlockedFacts**: `number`[]
 
-Defined in: [lib/working-with-duck-engine.ts:343](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L343)
+Defined in: [lib/working-with-duck-engine.ts:362](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L362)
 
 ***
 
@@ -362,4 +398,4 @@ Defined in: [lib/working-with-duck-engine.ts:343](https://github.com/fderuiter/p
 
 > **workProgress**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:276](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L276)
+Defined in: [lib/working-with-duck-engine.ts:288](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L288)

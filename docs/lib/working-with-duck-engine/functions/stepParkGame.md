@@ -8,7 +8,7 @@
 
 > **stepParkGame**(`state`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:1287](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1287)
+Defined in: [lib/working-with-duck-engine.ts:1457](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1457)
 
 ## Parameters
 

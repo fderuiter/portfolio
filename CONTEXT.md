@@ -24,7 +24,25 @@ _Avoid_: Post-build migration, runtime migration
 An automated static analyzer (`scripts/check-migrations.js`) that blocks migration files containing `DROP TABLE` or `DROP COLUMN` unless overridden by an explicit environment flag.
 _Avoid_: DDL lint, schema scanner
 
-## Example Dialogue
+## Interactive Arcade & Formal Proof Verification
+
+The interactive games, simulation workspaces, and embedded domain modules powering the portfolio showcase.
+
+### Language
+
+**Field Manual**:
+The standardized in-game modal providing structured gameplay objectives, keycap control bindings, scoring mechanics, and real-world engineering domain lore across all interactive modules.
+_Avoid_: Help modal, instructions popup, tutorial dialog
+
+**Proof Canvas**:
+The interactive visual workspace representing formal logic hypotheses, premises, and conclusions as connected graph nodes evaluated via deterministic inference rules.
+_Avoid_: Logic board, node chart, graph toy
+
+**Guided Proof Assistant**:
+The contextual step-by-step assistant guiding users through inference tactics (e.g. Modus Ponens) to discharge conclusions without requiring terminal commands.
+_Avoid_: Proof wizard, hint bar, helper box
+
+### Example Dialogue
 
 > **Dev**: "Can we run `prisma db push` to push the new `simulated_telemetry` column to production?"
 >

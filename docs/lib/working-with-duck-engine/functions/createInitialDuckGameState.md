@@ -8,7 +8,7 @@
 
 > **createInitialDuckGameState**(`level?`, `mode?`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:350](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L350)
+Defined in: [lib/working-with-duck-engine.ts:377](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L377)
 
 ## Parameters
 

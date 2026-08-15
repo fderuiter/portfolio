@@ -8,7 +8,7 @@
 
 > **advanceToNextLevel**(`state`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:1384](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1384)
+Defined in: [lib/working-with-duck-engine.ts:1586](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1586)
 
 ## Parameters
 

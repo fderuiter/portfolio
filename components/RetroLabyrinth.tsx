@@ -13,6 +13,7 @@ import {
   IconMinimize,
 } from "@tabler/icons-react";
 import { VirtualDPad } from "@/components/ui/VirtualDPad";
+import { FieldManualButton } from "@/components/FieldManualButton";
 import {
   ActiveSideEffect,
   BossState,
@@ -1144,48 +1145,52 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted }) => 
         </span>
 
         {/* Mode Selector & Room Navigation */}
-        <div className="flex items-center gap-1 bg-neutral-900 p-0.5 rounded-lg text-[9px] font-mono">
-          <button
-            onClick={startRoguelikeCampaign}
-            className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
-              gameMode === "roguelike"
-                ? "bg-brand-cyan text-black font-bold"
-                : "text-neutral-400 hover:text-white"
-            }`}
-          >
-            Graveyard Roguelike
-          </button>
-          <button
-            onClick={() => switchStage(1)}
-            className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
-              gameMode === "classic" && stage === 1
-                ? "bg-brand-cyan text-black font-bold"
-                : "text-neutral-400 hover:text-white"
-            }`}
-          >
-            Subnet 01
-          </button>
-          <button
-            onClick={() => switchStage(2)}
-            className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
-              gameMode === "classic" && stage === 2
-                ? "bg-brand-cyan text-black font-bold"
-                : "text-neutral-400 hover:text-white"
-            }`}
-          >
-            Subnet 02 (Firewall)
-          </button>
-          <button
-            onClick={() => setIsExpanded((prev) => !prev)}
-            title="Toggle Expanded View"
-            className="px-1.5 py-0.5 rounded text-neutral-400 hover:text-white hover:bg-neutral-800 cursor-pointer"
-          >
-            {isExpanded ? (
-              <IconMinimize className="w-3 h-3" />
-            ) : (
-              <IconMaximize className="w-3 h-3" />
-            )}
-          </button>
+        <div className="flex items-center gap-1.5">
+          <FieldManualButton manualId="retro-labyrinth" label="Manual" />
+
+          <div className="flex items-center gap-1 bg-neutral-900 p-0.5 rounded-lg text-[9px] font-mono">
+            <button
+              onClick={startRoguelikeCampaign}
+              className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
+                gameMode === "roguelike"
+                  ? "bg-brand-cyan text-black font-bold"
+                  : "text-neutral-400 hover:text-white"
+              }`}
+            >
+              Graveyard Roguelike
+            </button>
+            <button
+              onClick={() => switchStage(1)}
+              className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
+                gameMode === "classic" && stage === 1
+                  ? "bg-brand-cyan text-black font-bold"
+                  : "text-neutral-400 hover:text-white"
+              }`}
+            >
+              Subnet 01
+            </button>
+            <button
+              onClick={() => switchStage(2)}
+              className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
+                gameMode === "classic" && stage === 2
+                  ? "bg-brand-cyan text-black font-bold"
+                  : "text-neutral-400 hover:text-white"
+              }`}
+            >
+              Subnet 02 (Firewall)
+            </button>
+            <button
+              onClick={() => setIsExpanded((prev) => !prev)}
+              title="Toggle Expanded View"
+              className="px-1.5 py-0.5 rounded text-neutral-400 hover:text-white hover:bg-neutral-800 cursor-pointer"
+            >
+              {isExpanded ? (
+                <IconMinimize className="w-3 h-3" />
+              ) : (
+                <IconMaximize className="w-3 h-3" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 

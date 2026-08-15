@@ -128,7 +128,6 @@ import GarminWatchPage from "@/app/arcade/garmin-watch/page";
 import ClinicalChaosPage from "@/app/arcade/clinical-chaos/page";
 import RetroLabyrinthPage from "@/app/arcade/retro-labyrinth/page";
 import WorkingWithDuckPage from "@/app/arcade/working-with-duck/page";
-import UISandboxPage from "@/app/ui-sandbox/page";
 
 const storageStore: Record<string, string> = {};
 Object.defineProperty(globalThis, "localStorage", {
@@ -229,13 +228,5 @@ describe("Arcade Dedicated Routes Suite", () => {
     expect(container.textContent).toContain("Back to Arcade Hub");
     expect(container.textContent).toContain("Retro Labyrinth:");
     expect(container.textContent).toContain("Graveyard Roguelike");
-  });
-
-  it("renders UI Sandbox with links to arcade games", async () => {
-    await act(async () => {
-      root.render(<UISandboxPage />);
-    });
-    expect(container.textContent).toContain("Visit Full Arcade Hub");
-    expect(container.textContent).toContain("Dedicated Arcade Game Pages");
   });
 });

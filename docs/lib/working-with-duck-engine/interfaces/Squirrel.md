@@ -6,7 +6,7 @@
 
 # Interface: Squirrel
 
-Defined in: [lib/working-with-duck-engine.ts:46](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L46)
+Defined in: [lib/working-with-duck-engine.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L58)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/working-with-duck-engine.ts:46](https://github.com/fderuiter/po
 
 > **vx**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:49](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L49)
+Defined in: [lib/working-with-duck-engine.ts:61](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L61)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/working-with-duck-engine.ts:49](https://github.com/fderuiter/po
 
 > **vy**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L50)
+Defined in: [lib/working-with-duck-engine.ts:62](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L62)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/working-with-duck-engine.ts:50](https://github.com/fderuiter/po
 
 > **x**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L47)
+Defined in: [lib/working-with-duck-engine.ts:59](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L59)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/working-with-duck-engine.ts:47](https://github.com/fderuiter/po
 
 > **y**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L48)
+Defined in: [lib/working-with-duck-engine.ts:60](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L60)

@@ -8,6 +8,7 @@ import {
   IconFlame,
   IconPlayerPlay,
 } from "@tabler/icons-react";
+import { FieldManualButton } from "@/components/FieldManualButton";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import {
@@ -327,32 +328,36 @@ export const GarminWatchSimulator: React.FC = () => {
           </button>
         </div>
 
-        {/* Bezel Theme Switcher */}
-        <div className="flex items-center gap-1 p-0.5 bg-zinc-900 border border-zinc-800 rounded-full text-[9px] font-mono">
-          <button
-            onClick={() => setBezelTheme("slate")}
-            className={`px-2 py-0.5 rounded-full cursor-pointer ${
-              bezelTheme === "slate" ? "bg-zinc-700 text-white font-bold" : "text-zinc-400"
-            }`}
-          >
-            Tactix
-          </button>
-          <button
-            onClick={() => setBezelTheme("solar")}
-            className={`px-2 py-0.5 rounded-full cursor-pointer ${
-              bezelTheme === "solar" ? "bg-amber-600 text-black font-bold" : "text-zinc-400"
-            }`}
-          >
-            Solar
-          </button>
-          <button
-            onClick={() => setBezelTheme("cyan")}
-            className={`px-2 py-0.5 rounded-full cursor-pointer ${
-              bezelTheme === "cyan" ? "bg-cyan-500 text-black font-bold" : "text-zinc-400"
-            }`}
-          >
-            Cyan
-          </button>
+        {/* Bezel Theme Switcher & Field Manual */}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 p-0.5 bg-zinc-900 border border-zinc-800 rounded-full text-[9px] font-mono">
+            <button
+              onClick={() => setBezelTheme("slate")}
+              className={`px-2 py-0.5 rounded-full cursor-pointer ${
+                bezelTheme === "slate" ? "bg-zinc-700 text-white font-bold" : "text-zinc-400"
+              }`}
+            >
+              Tactix
+            </button>
+            <button
+              onClick={() => setBezelTheme("solar")}
+              className={`px-2 py-0.5 rounded-full cursor-pointer ${
+                bezelTheme === "solar" ? "bg-amber-600 text-black font-bold" : "text-zinc-400"
+              }`}
+            >
+              Solar
+            </button>
+            <button
+              onClick={() => setBezelTheme("cyan")}
+              className={`px-2 py-0.5 rounded-full cursor-pointer ${
+                bezelTheme === "cyan" ? "bg-cyan-500 text-black font-bold" : "text-zinc-400"
+              }`}
+            >
+              Cyan
+            </button>
+          </div>
+
+          <FieldManualButton manualId="garmin-watch" label="Manual" />
         </div>
       </div>
 

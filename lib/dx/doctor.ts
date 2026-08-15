@@ -68,7 +68,7 @@ export function checkRouteIndexing(root: string, fix = false): DiagnosticCheckRe
   for (const pageFile of pageFiles) {
     const relative = path.relative(appDir, pageFile);
     // Ignore internal routes, group routes, or api
-    if (relative.startsWith("api") || relative.includes("[") || relative.includes("ui-sandbox")) {
+    if (relative.startsWith("api") || relative.includes("[")) {
       continue;
     }
 

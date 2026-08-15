@@ -10,6 +10,7 @@ import {
   IconPlayerPlay,
   IconSnowflake,
 } from "@tabler/icons-react";
+import { FieldManualButton } from "@/components/FieldManualButton";
 import {
   LaserMode,
   LaserType,
@@ -948,8 +949,10 @@ export const LaserLoon: React.FC = () => {
           </button>
         </div>
 
-        {/* Score Indicators */}
-        <div className="flex items-center gap-3 text-xs font-mono">
+        {/* Score Indicators & Field Manual */}
+        <div className="flex items-center gap-2.5 text-xs font-mono">
+          <FieldManualButton manualId="laser-loon" label="Manual" />
+
           <div className="flex items-center gap-1.5 px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-300">
             <IconTrophy className="w-3.5 h-3.5 text-amber-400" />
             <span className="text-[10px] text-neutral-500">HI:</span>
@@ -1040,17 +1043,21 @@ export const LaserLoon: React.FC = () => {
             <p className="text-xs text-neutral-400 max-w-md mb-6 leading-relaxed">
               Vaporize bugs, memory leaks, and runtime exceptions by shooting <span className="text-sky-400 font-bold">blocks of ice 🧊</span> and laser beams. Ice blocks smash into shards and freeze enemies solid!
             </p>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                startGame();
-                containerRef.current?.focus();
-              }}
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-sky-400 hover:bg-sky-300 text-neutral-950 font-mono font-bold text-sm rounded-xl shadow-[0_0_20px_rgba(56,189,248,0.4)] transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
-            >
-              <IconPlayerPlay className="w-4 h-4 fill-current" />
-              LAUNCH CRYO HUNT [SPACE]
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  startGame();
+                  containerRef.current?.focus();
+                }}
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-sky-400 hover:bg-sky-300 text-neutral-950 font-mono font-bold text-sm rounded-xl shadow-[0_0_20px_rgba(56,189,248,0.4)] transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
+              >
+                <IconPlayerPlay className="w-4 h-4 fill-current" />
+                <span>LAUNCH CRYO HUNT [SPACE]</span>
+              </button>
+
+              <FieldManualButton manualId="laser-loon" label="Field Manual" />
+            </div>
             <div className="flex flex-wrap justify-center gap-4 mt-6 text-[10px] font-mono text-neutral-500">
               <span>MOUSE / WASD: AIM & FLY</span>
               <span>CLICK / SPACE: SHOOT ICE BLOCKS</span>

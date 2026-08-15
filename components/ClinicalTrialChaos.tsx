@@ -22,6 +22,7 @@ import {
   IconLock,
   IconInfoCircle,
 } from "@tabler/icons-react";
+import { FieldManualButton } from "@/components/FieldManualButton";
 
 import {
   CDISCDomain,
@@ -667,6 +668,8 @@ export const ClinicalTrialChaos: React.FC = () => {
 
         {/* Score & Controls */}
         <div className="flex items-center gap-3">
+          <FieldManualButton manualId="clinical-chaos" label="Manual" />
+
           <div className="flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/90 px-3 py-1.5 text-xs">
             <IconTrophy className="h-4 w-4 text-amber-400" />
             <div>

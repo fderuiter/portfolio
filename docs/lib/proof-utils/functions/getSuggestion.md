@@ -8,7 +8,7 @@
 
 > **getSuggestion**(`inputVal`): `string`
 
-Defined in: [lib/proof-utils.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L23)
+Defined in: [lib/proof-utils.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L32)
 
 Calculates inline autocomplete suggestion based on the current console input.
 

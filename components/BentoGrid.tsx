@@ -91,7 +91,9 @@ export const Card = ({
       )}
       ref={refElement}
       onPointerMove={(event) => {
-        const rotateFactor = 0.4;
+        if (event.pointerType === "touch") return;
+        if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        const rotateFactor = 0.35;
         const rect = event.currentTarget.getBoundingClientRect();
         const position = {
           x: event.clientX - rect.left,
@@ -139,17 +141,23 @@ export const Card = ({
     >
       <div 
         style={{ "--hover-glow": `0 0 30px ${hexToRgba(designManifest.colors["brand-cyan"], 0.15)}, 0 0 60px ${hexToRgba(designManifest.colors["brand-cyan"], 0.05)}, inset 0 0 20px ${hexToRgba(designManifest.colors["brand-cyan"], 0.03)}` } as React.CSSProperties}
-        className="grid h-full origin-center [transform:rotateY(var(--r-x))_rotateX(var(--r-y))] overflow-hidden rounded-[var(--radius)] border border-border hover:border-border-active transition-all duration-300 delay-[var(--delay)] ease-[var(--easing)] will-change-transform hover:filter-none hover:[--duration:200ms] hover:[--easing:linear] hover:[--opacity:0.6] hover:[box-shadow:var(--hover-glow)]">
-        <div className="grid h-full w-full mix-blend-soft-light [clip-path:inset(0_0_0_0_round_var(--radius))] [grid-area:1/1]">
-          <div className={cn("h-full w-full bg-surface-1 backdrop-blur-sm p-5 flex flex-col justify-between", className)}>
-            {children}
-          </div>
-        </div>
-        <div className="transition-background will-change-background grid h-full w-full opacity-[var(--opacity)] mix-blend-soft-light transition-opacity delay-[var(--delay)] duration-[var(--duration)] ease-[var(--easing)] [background:radial-gradient(farthest-corner_circle_at_var(--m-x)_var(--m-y),_rgba(255,255,255,0.8)_10%,_rgba(255,255,255,0.65)_20%,_rgba(255,255,255,0)_90%)] [clip-path:inset(0_0_1px_0_round_var(--radius))] [grid-area:1/1] pointer-events-none" />
+        className="grid h-full w-full origin-center [transform:rotateY(var(--r-x))_rotateX(var(--r-y))] overflow-hidden rounded-[var(--radius)] border border-border hover:border-border-active transition-all duration-300 delay-[var(--delay)] ease-[var(--easing)] will-change-transform hover:filter-none hover:[--duration:200ms] hover:[--easing:linear] hover:[--opacity:0.22] hover:[box-shadow:var(--hover-glow)]">
+        {/* Layer 1: Solid/Glass Base Surface */}
+        <div className="h-full w-full bg-surface-1 backdrop-blur-sm [grid-area:1/1] [clip-path:inset(0_0_0_0_round_var(--radius))]" />
+
+        {/* Layer 2: Subtle Ambient Glare & Iridescent Sheen behind content */}
+        <div className="transition-background will-change-background grid h-full w-full opacity-[var(--opacity)] mix-blend-soft-light transition-opacity delay-[var(--delay)] duration-[var(--duration)] ease-[var(--easing)] [background:radial-gradient(farthest-corner_circle_at_var(--m-x)_var(--m-y),_rgba(255,255,255,0.45)_10%,_rgba(255,255,255,0.2)_30%,_rgba(255,255,255,0)_80%)] [clip-path:inset(0_0_1px_0_round_var(--radius))] [grid-area:1/1] pointer-events-none" />
         <div
           className="will-change-background after:grid-area-[inherit] after:bg-repeat-[inherit] after:bg-attachment-[inherit] after:bg-origin-[inherit] after:bg-clip-[inherit] relative grid h-full w-full opacity-[var(--opacity)] [background-blend-mode:hue_hue_hue_overlay] mix-blend-color-dodge transition-opacity [background:var(--pattern),_var(--rainbow),_var(--diagonal),_var(--shade)] [clip-path:inset(0_0_1px_0_round_var(--radius))] [grid-area:1/1] after:bg-[inherit] after:[background-size:var(--foil-size),_200%_400%,_800%,_200%] after:[background-position:center,_0%_var(--bg-y),_calc(var(--bg-x)*_-1)_calc(var(--bg-y)*_-1),_var(--bg-x)_var(--bg-y)] after:[background-blend-mode:soft-light,_hue,_hard-light] after:mix-blend-exclusion after:content-[''] pointer-events-none"
           style={backgroundStyle}
         />
+
+        {/* Layer 3: High-Contrast Foreground Content (never degraded by blend modes or glare) */}
+        <div className="relative z-10 [grid-area:1/1] h-full w-full flex flex-col">
+          <div className={cn("h-full w-full p-5 flex flex-col justify-between flex-1", className)}>
+            {children}
+          </div>
+        </div>
       </div>
     </div>
   );

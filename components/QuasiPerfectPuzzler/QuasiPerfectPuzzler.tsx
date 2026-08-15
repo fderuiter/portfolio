@@ -18,6 +18,7 @@ import { TacticHand } from "./TacticHand";
 import { RAMGauge } from "./RAMGauge";
 import { TerminalLog } from "./TerminalLog";
 import { VictoryModal } from "./VictoryModal";
+import { FieldManualButton } from "@/components/FieldManualButton";
 
 const STORAGE_KEY = "quasi_perfect_puzzler_progress_v1";
 
@@ -405,8 +406,10 @@ export const QuasiPerfectPuzzler: React.FC = () => {
           </h2>
         </div>
 
-        {/* Level Navigation Tabs */}
+        {/* Level Navigation Tabs & Manual */}
         <div className="flex flex-wrap items-center gap-1.5">
+          <FieldManualButton manualId="quasi-puzzler" label="Manual" />
+
           {puzzleLevels.map((lvl, idx) => {
             const isCurrent = idx === currentLevelIndex;
             const lvlProgress = parsedProgress.completedLevels?.[lvl.id];

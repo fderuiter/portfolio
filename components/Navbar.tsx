@@ -19,6 +19,7 @@ import {
   IconCrosshair,
   IconBrain,
   IconActivity,
+  IconBone,
 } from "@tabler/icons-react";
 
 interface SubNavItem {
@@ -67,10 +68,10 @@ const ARCADE_ITEMS: SubNavItem[] = [
     icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />,
   },
   {
-    title: "Creative UI Sandbox",
-    subtitle: "Interactive canvas physics & UI widgets",
-    href: "/ui-sandbox",
-    icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />,
+    title: "Working With Duck",
+    subtitle: "Pet simulation & multitasking arcade",
+    href: "/arcade/working-with-duck",
+    icon: <IconBone className="w-4 h-4 text-brand-cyan" />,
   },
 ];
 
@@ -258,7 +259,7 @@ export const Navbar: React.FC = () => {
     }
   };
 
-  const isArcadeActive = pathname.startsWith("/arcade") || pathname === "/ui-sandbox";
+  const isArcadeActive = pathname.startsWith("/arcade");
   const isSystemsActive = pathname === "/proof" || pathname === "/simulator" || pathname === "/transparency";
 
   return (

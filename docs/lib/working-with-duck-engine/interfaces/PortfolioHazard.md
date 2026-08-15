@@ -6,7 +6,7 @@
 
 # Interface: PortfolioHazard
 
-Defined in: [lib/working-with-duck-engine.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L29)
+Defined in: [lib/working-with-duck-engine.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L34)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/working-with-duck-engine.ts:29](https://github.com/fderuiter/po
 
 > **id**: [`PortfolioHazardType`](../type-aliases/PortfolioHazardType.md)
 
-Defined in: [lib/working-with-duck-engine.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L30)
+Defined in: [lib/working-with-duck-engine.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L35)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/working-with-duck-engine.ts:30](https://github.com/fderuiter/po
 
 > **isChewed**: `boolean`
 
-Defined in: [lib/working-with-duck-engine.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L37)
+Defined in: [lib/working-with-duck-engine.ts:42](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L42)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/working-with-duck-engine.ts:37](https://github.com/fderuiter/po
 
 > **name**: `string`
 
-Defined in: [lib/working-with-duck-engine.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L31)
+Defined in: [lib/working-with-duck-engine.ts:36](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L36)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/working-with-duck-engine.ts:31](https://github.com/fderuiter/po
 
 > **radius**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L34)
+Defined in: [lib/working-with-duck-engine.ts:39](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L39)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/working-with-duck-engine.ts:34](https://github.com/fderuiter/po
 
 > **saveTooltip**: `string`
 
-Defined in: [lib/working-with-duck-engine.ts:36](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L36)
+Defined in: [lib/working-with-duck-engine.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L41)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/working-with-duck-engine.ts:36](https://github.com/fderuiter/po
 
 > **skillBadge**: `string`
 
-Defined in: [lib/working-with-duck-engine.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L35)
+Defined in: [lib/working-with-duck-engine.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L40)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/working-with-duck-engine.ts:35](https://github.com/fderuiter/po
 
 > **x**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L32)
+Defined in: [lib/working-with-duck-engine.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L37)
 
 ***
 
@@ -70,4 +70,4 @@ Defined in: [lib/working-with-duck-engine.ts:32](https://github.com/fderuiter/po
 
 > **y**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L33)
+Defined in: [lib/working-with-duck-engine.ts:38](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L38)

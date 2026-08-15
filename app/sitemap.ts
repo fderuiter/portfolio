@@ -17,8 +17,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const isMockEnv = process.env.CI === "true" || process.env.PLAYWRIGHT_TEST === "true" || !isProduction;
     if (isMockEnv) {
       studies = [
-        { slug: "schemaflow", updated_at: new Date() },
         { slug: "clinical-data-mapper", updated_at: new Date() },
+        { slug: "cadence-clinical", updated_at: new Date() },
+        { slug: "imednet-python-sdk", updated_at: new Date() },
+        { slug: "wedding-website", updated_at: new Date() },
+        { slug: "schemaflow", updated_at: new Date() },
       ];
     }
   }
@@ -27,7 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${baseUrl}/case-studies/${study.slug}`,
     lastModified: study.updated_at,
     changeFrequency: "weekly" as const,
-    priority: 0.8
+    priority: 0.8,
   }));
 
   return [
@@ -35,20 +38,74 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: baseUrl,
       lastModified: new Date(),
       changeFrequency: "daily",
-      priority: 1.0
+      priority: 1.0,
     },
     {
-      url: `${baseUrl}/ui-sandbox`,
+      url: `${baseUrl}/arcade`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.3
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/arcade/working-with-duck`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/arcade/laser-loon`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/arcade/quasi-puzzler`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/arcade/garmin-watch`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/arcade/clinical-chaos`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/arcade/retro-labyrinth`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/proof`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/simulator`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/transparency`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
     },
     {
       url: `${baseUrl}/schedule`,
       lastModified: new Date(),
       changeFrequency: "monthly",
-      priority: 0.7
+      priority: 0.7,
     },
-    ...caseStudyUrls
+    ...caseStudyUrls,
   ];
 }

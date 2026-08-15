@@ -12,10 +12,16 @@ import {
   releaseDuck,
   enterDogPark,
   throwParkBall,
+  steerParkDuck,
   tapParkWhistle,
   exitDogPark,
   advanceToNextLevel,
   calculateGoodBoyMultiplier,
+  clampBounds,
+  MIN_DUCK_X,
+  MAX_DUCK_X,
+  MIN_DUCK_Y,
+  MAX_DUCK_Y,
   SPRINTS,
   DUCK_FACTS,
   BACK_DOOR_BOUNDS,
@@ -35,6 +41,7 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     expect(state.duck.state).toBe("IDLE_ROAM");
     expect(state.hazards).toHaveLength(4);
     expect(state.unlockedFacts).toContain(1);
+    expect(state.tutorialStep).toBe(1);
   });
 
   it("should advance work progress when Duck is calm and game is running", () => {
@@ -74,6 +81,28 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     state = stepDuckGame(state);
     expect(state.duck.state).toBe("ZOOMIES");
     expect(state.soundCueQueue).toContain("bark");
+  });
+
+  it("should strictly clamp boundaries and bounce cleanly during Zoomies without sticking", () => {
+    let state = createInitialDuckGameState(1, "campaign");
+    state.status = "running";
+    state.duck.state = "ZOOMIES";
+    state.duck.x = 20; // past left boundary
+    state.duck.vx = -6.5;
+
+    state = stepDuckGame(state);
+    expect(state.duck.x).toBeGreaterThanOrEqual(MIN_DUCK_X);
+    expect(state.duck.vx).toBeGreaterThan(0); // bounced to the right
+  });
+
+  it("should strictly clamp Duck to canvas boundaries in clampBounds", () => {
+    const outLeft = clampBounds(-50, -50);
+    expect(outLeft.x).toBe(MIN_DUCK_X);
+    expect(outLeft.y).toBe(MIN_DUCK_Y);
+
+    const outRight = clampBounds(2000, 2000);
+    expect(outRight.x).toBe(MAX_DUCK_X);
+    expect(outRight.y).toBe(MAX_DUCK_Y);
   });
 
   it("should trigger urgent Potty Sniffing when Bladder reaches 100%", () => {
@@ -119,7 +148,7 @@ describe("Working With Duck - Deterministic Game Engine", () => {
 
     state = applyKongToy(state, 400, 250);
     expect(state.excitement).toBeLessThan(50);
-    expect(state.duck.stateTimer).toBe(180);
+    expect(state.duck.stateTimer).toBe(200);
   });
 
   it("should redirect Duck and save targeted hazard when using Squeaky Toy", () => {
@@ -147,19 +176,31 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     expect(state.totalScore).toBeGreaterThan(0);
   });
 
-  it("should reward belly rubs during The Flop with floating hearts and reduced excitement", () => {
+  it("should drop ball automatically if No Take Only Throw timeout expires", () => {
+    let state = createInitialDuckGameState(1, "campaign");
+    state.status = "running";
+    state.duck.state = "NO_TAKE_THROW";
+    state.duck.isCarryingBall = true;
+    state.duck.stateTimer = 1;
+
+    state = stepDuckGame(state);
+    expect(state.duck.isCarryingBall).toBe(false);
+    expect(state.duck.state).toBe("IDLE_ROAM");
+  });
+
+  it("should track belly rub progress and complete with calm buff", () => {
     let state = createInitialDuckGameState(1, "campaign");
     state.status = "running";
     state.duck.state = "THE_FLOP";
-    state.excitement = 50;
+    state.bellyRubProgress = 95;
 
     state = scrubBelly(state, state.duck.x, state.duck.y);
-    expect(state.bellyRubScrubCount).toBe(1);
-    expect(state.excitement).toBeLessThan(50);
-    expect(state.particles.some((p) => p.shape === "heart")).toBe(true);
+    expect(state.duck.state).toBe("IDLE_ROAM");
+    expect(state.calmBuffTimer).toBe(600);
+    expect(state.soundCueQueue).toContain("combo-fanfare");
   });
 
-  it("should transition to Dog Park, throw ball, whistle recall, and return with Tired Puppy buff", () => {
+  it("should transition to Dog Park, throw ball, steer duck, collect bones, and return with Tired Puppy buff", () => {
     let state = createInitialDuckGameState(1, "campaign");
     state.status = "running";
     state.excitement = 80;
@@ -167,9 +208,14 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     state = enterDogPark(state);
     expect(state.inDogPark).toBe(true);
     expect(state.parkState.status).toBe("aim");
+    expect(state.parkState.bones).toHaveLength(3);
 
     state = throwParkBall(state, 10, 0);
     expect(state.parkState.status).toBe("thrown");
+
+    state.parkState.status = "retrieving";
+    state = steerParkDuck(state, 180);
+    expect(state.parkState.duckY).toBe(180);
 
     state = tapParkWhistle(state);
     expect(state.parkState.whistleTaps).toBe(1);
@@ -178,7 +224,7 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     state = exitDogPark(state, true);
     expect(state.inDogPark).toBe(false);
     expect(state.excitement).toBe(0);
-    expect(state.calmBuffTimer).toBe(1200);
+    expect(state.calmBuffTimer).toBe(1800);
   });
 
   it("should trigger Level Victory and transition to Nap Time upon completing target work", () => {
@@ -221,12 +267,12 @@ describe("Working With Duck - Deterministic Game Engine", () => {
 
     state = giveTreat(state);
     expect(state.comboStreak).toBe(1);
-    expect(state.totalScore).toBe(30);
+    expect(state.totalScore).toBe(35);
 
     state.duck.state = "NO_TAKE_THROW";
     state = giveTreat(state);
     expect(state.comboStreak).toBe(2);
-    expect(state.totalScore).toBe(30 + 60);
+    expect(state.totalScore).toBe(35 + 70);
   });
 
   it("should decay combo streak when comboTimer expires", () => {
@@ -270,6 +316,21 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     expect(state.soundCueQueue).toContain("fail");
   });
 
+  it("should collect golden bonus bones during Dog Park retrieve sprint", () => {
+    let state = createInitialDuckGameState(1, "campaign");
+    state.status = "running";
+    state = enterDogPark(state);
+    state.parkState.status = "retrieving";
+    // Place duck near first bone
+    state.parkState.duckX = state.parkState.bones[0].x;
+    state.parkState.duckY = state.parkState.bones[0].y;
+
+    state = stepDuckGame(state);
+    expect(state.parkState.bones[0].collected).toBe(true);
+    expect(state.parkState.bonesCollected).toBe(1);
+    expect(state.totalScore).toBe(50);
+  });
+
   it("should properly save all four portfolio hazards with correct skill toasts", () => {
     const hazardIds = ["resume", "server-cable", "clinical-db", "garmin-watch"] as const;
     hazardIds.forEach((id) => {
@@ -290,7 +351,7 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     let state = createInitialDuckGameState(1, "campaign");
     state.status = "running";
     state.duck.state = "IDLE_ROAM";
-    state.ticks = 479; // next tick is 480
+    state.ticks = 499; // next tick is 500
 
     state = stepDuckGame(state);
     expect(state.activeSurpriseEvent).not.toBeNull();

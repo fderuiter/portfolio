@@ -8,9 +8,9 @@
 
 > **giveTreat**(`state`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:1070](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1070)
+Defined in: [lib/working-with-duck-engine.ts:1160](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1160)
 
-Player Action: Trade Treat for Ball ("No Take, Only Throw")
+Player Action: Trade Treat for Ball ("No Take, Only Throw") or Direct Treat Reward
 
 ## Parameters
 

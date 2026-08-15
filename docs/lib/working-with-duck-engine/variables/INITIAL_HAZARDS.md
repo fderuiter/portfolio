@@ -8,4 +8,4 @@
 
 > `const` **INITIAL\_HAZARDS**: [`PortfolioHazard`](../interfaces/PortfolioHazard.md)[]
 
-Defined in: [lib/working-with-duck-engine.ts:215](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L215)
+Defined in: [lib/working-with-duck-engine.ts:227](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L227)

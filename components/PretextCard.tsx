@@ -32,9 +32,10 @@ export const PretextCard: React.FC<PretextCardProps> = ({
     <Card
       className={className}
       style={{
-        // Inline height prevents flexbox rows stretching elements
+        // Inline min-height prevents flexbox rows stretching elements while allowing natural expansion
+        minHeight: computedHeight ? `${computedHeight}px` : "auto",
         height: computedHeight ? `${computedHeight}px` : "auto",
-        transition: "height 180ms cubic-bezier(0.16, 1, 0.3, 1)",
+        transition: "height 180ms cubic-bezier(0.16, 1, 0.3, 1), min-height 180ms cubic-bezier(0.16, 1, 0.3, 1)",
       }}
     >
       <div className="flex flex-col h-full justify-between">

@@ -1,36 +1,33 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   IconTerminal,
-  IconCornerDownLeft
+  IconSparkles,
+  IconRefresh,
+  IconBulb,
+  IconShieldCheck,
+  IconX,
+  IconBolt,
 } from "@tabler/icons-react";
-import { getSuggestion, evaluateProofStatus } from "@/lib/proof-utils";
-
-const IconCheck = ({ className = "w-5 h-5" }) => (
-  <svg className={className} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <polyline points="20 6 9 17 4 12" />
-  </svg>
-);
-
-const IconPlay = ({ className = "w-5 h-5" }) => (
-  <svg className={className} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <polygon points="5 3 19 12 5 21" />
-  </svg>
-);
+import {
+  getSuggestion,
+  evaluateProofStatus,
+  canConnect,
+  getNextTacticHint,
+  Edge,
+} from "@/lib/proof-utils";
+import { FieldManualButton } from "@/components/FieldManualButton";
+import { useAudio } from "@/components/providers/AudioProvider";
 
 interface Node {
   id: string;
   label: string;
   type: "premise" | "intermediate" | "conclusion";
   description: string;
-  x: number; // visual representation
+  x: number; // visual coordinate
   y: number;
-}
-
-interface Edge {
-  source: string;
-  target: string;
 }
 
 interface TerminalLog {
@@ -40,33 +37,39 @@ interface TerminalLog {
 }
 
 const DEFAULT_NODES: Node[] = [
-  { id: "A", label: "P", type: "premise", description: "Premise P: The system is under test.", x: 100, y: 150 },
-  { id: "B", label: "P → Q", type: "premise", description: "Premise P → Q: If the system is under test, then bugs will be caught.", x: 100, y: 300 },
-  { id: "C", label: "Q", type: "intermediate", description: "Intermediate Conclusion Q: Bugs will be caught.", x: 350, y: 225 },
-  { id: "D", label: "Q → R", type: "premise", description: "Premise Q → R: If bugs are caught, then reliability is guaranteed.", x: 350, y: 375 },
-  { id: "E", label: "R", type: "conclusion", description: "Conclusion R: Reliability is guaranteed.", x: 600, y: 300 }
+  { id: "A", label: "P", type: "premise", description: "Premise P: The system is under test.", x: 120, y: 130 },
+  { id: "B", label: "P → Q", type: "premise", description: "Premise P → Q: If the system is under test, then bugs will be caught.", x: 120, y: 290 },
+  { id: "C", label: "Q", type: "intermediate", description: "Intermediate Conclusion Q: Bugs will be caught.", x: 360, y: 210 },
+  { id: "D", label: "Q → R", type: "premise", description: "Premise Q → R: If bugs are caught, then reliability is guaranteed.", x: 360, y: 360 },
+  { id: "E", label: "R", type: "conclusion", description: "Conclusion R: Reliability is guaranteed.", x: 600, y: 285 },
+];
+
+const INITIAL_EDGES: Edge[] = [
+  { source: "A", target: "C" },
+  { source: "B", target: "C" },
 ];
 
 export default function ProofWorkspacePage() {
   const [nodes] = useState<Node[]>(DEFAULT_NODES);
-  const [edges, setEdges] = useState<Edge[]>([
-    { source: "A", target: "C" },
-    { source: "B", target: "C" }
-  ]);
-  
+  const [edges, setEdges] = useState<Edge[]>(INITIAL_EDGES);
+  const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null);
+  const [feedbackToast, setFeedbackToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+
   const [isConsoleOpen, setIsConsoleOpen] = useState(true);
   const [consoleInput, setConsoleInput] = useState("");
   const [consoleLogs, setConsoleLogs] = useState<TerminalLog[]>([
     {
       id: "welcome",
       type: "info",
-      text: "Interactive Logic Proof CLI v1.0.0\nType 'help' to review list of active commands. Press 'Tab' to autocomplete."
-    }
+      text: "Interactive Logic Proof Canvas v2.0.0\nClick nodes directly to connect, use the Guided Assistant, or run CLI commands. Type 'help' for command syntax.",
+    },
   ]);
   const [history, setHistory] = useState<string[]>([]);
   const [historyIdx, setHistoryIdx] = useState(-1);
   const [liveAnnouncement, setLiveAnnouncement] = useState("");
-  
+
+  const { playSuccess, playAutocomplete, playHover } = useAudio();
+
   // Web Worker, Watchdog, Throttling States & Refs
   const workerRef = useRef<Worker | null>(null);
   const watchdogRef = useRef<NodeJS.Timeout | null>(null);
@@ -75,19 +78,26 @@ export default function ProofWorkspacePage() {
   const [simulationProgress, setSimulationProgress] = useState<{ step: number; total: number; log: string } | null>(null);
   const nextIdRef = useRef(0);
   const initWorkerRef = useRef<() => void>(() => {});
-  
+
   // Ref tracking for focus restoration
   const consoleInputRef = useRef<HTMLInputElement>(null);
   const toggleBtnRef = useRef<HTMLButtonElement>(null);
   const lastActiveElementRef = useRef<HTMLElement | null>(null);
   const terminalLogsEndRef = useRef<HTMLDivElement>(null);
 
-  // Helper to trigger 100ms screen reader announcement
+  // Helper to trigger screen reader announcement
   const announceToScreenReader = (text: string) => {
     setLiveAnnouncement("");
     setTimeout(() => {
       setLiveAnnouncement(text);
     }, 10);
+  };
+
+  const showToast = (message: string, type: "success" | "error" | "info" = "info") => {
+    setFeedbackToast({ message, type });
+    setTimeout(() => {
+      setFeedbackToast((prev) => (prev?.message === message ? null : prev));
+    }, 4000);
   };
 
   const toggleConsole = React.useCallback(() => {
@@ -108,7 +118,7 @@ export default function ProofWorkspacePage() {
       return next;
     });
   }, []);
-  
+
   // Helper to clear watchdog
   const clearWatchdog = React.useCallback(() => {
     if (watchdogRef.current) {
@@ -134,8 +144,8 @@ export default function ProofWorkspacePage() {
       {
         id: outputLogId,
         type: "error",
-        text: "Background calculation terminated by watchdog: execution exceeded 5-second limit (potential infinite loop detected)"
-      }
+        text: "Background calculation terminated by watchdog: execution exceeded 5-second limit (potential infinite loop detected)",
+      },
     ]);
     announceToScreenReader("Background calculation terminated by watchdog: execution exceeded 5-second limit.");
   }, [clearWatchdog]);
@@ -155,21 +165,19 @@ export default function ProofWorkspacePage() {
         workerRef.current.terminate();
       }
 
-      // Next.js standard URL loader for Web Workers
       const worker = new Worker(new URL("./proof-worker.ts", import.meta.url));
 
       worker.onmessage = (event) => {
         const message = event.data;
         if (!message) return;
 
-        // Reset the watchdog timeout since the worker is active and responsive
         resetWatchdog();
 
         if (message.type === "progress") {
           pendingLogsRef.current.push({
             id: `sim-${Date.now()}-${Math.random()}`,
             type: "output",
-            text: message.log
+            text: message.log,
           });
           announceToScreenReader(`Simulation update: ${message.log}`);
         } else if (message.type === "done") {
@@ -182,8 +190,8 @@ export default function ProofWorkspacePage() {
             {
               id: `sim-done-${Date.now()}`,
               type: "success",
-              text: `✔ Background Simulation completed successfully with ${message.stepsCompleted} steps.`
-            }
+              text: `✔ Background Simulation completed successfully with ${message.stepsCompleted} steps.`,
+            },
           ]);
           announceToScreenReader("Background proof simulation completed successfully.");
         } else if (message.type === "error") {
@@ -196,8 +204,8 @@ export default function ProofWorkspacePage() {
             {
               id: `sim-err-${Date.now()}`,
               type: "error",
-              text: `Background Simulation error: ${message.message}`
-            }
+              text: `Background Simulation error: ${message.message}`,
+            },
           ]);
           announceToScreenReader(`Background proof simulation error: ${message.message}`);
         }
@@ -207,16 +215,14 @@ export default function ProofWorkspacePage() {
     }
   }, [clearWatchdog, resetWatchdog]);
 
-  // Synchronize initWorkerRef.current to point to the latest initWorker function
   useEffect(() => {
     initWorkerRef.current = initWorker;
   }, [initWorker]);
 
-  // Setup/Teardown Web Worker and Batch Throttler
   useEffect(() => {
     initWorker();
 
-    // 100ms batch logs flush timer to maintain high-FPS UI performance
+    // 100ms batch logs flush timer
     const flushInterval = setInterval(() => {
       if (pendingLogsRef.current.length > 0) {
         const logsToAppend = [...pendingLogsRef.current];
@@ -224,7 +230,6 @@ export default function ProofWorkspacePage() {
 
         setConsoleLogs((prev) => [...prev, ...logsToAppend]);
 
-        // Extract latest step info for real-time progress metrics rendering
         const stepLogs = logsToAppend.filter(
           (log) => log.type === "output" && log.text.includes("[Step")
         );
@@ -250,7 +255,6 @@ export default function ProofWorkspacePage() {
     };
   }, [initWorker, clearWatchdog]);
 
-  // Auto-scroll terminal logs
   useEffect(() => {
     terminalLogsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [consoleLogs]);
@@ -263,7 +267,6 @@ export default function ProofWorkspacePage() {
         if (!isConsoleOpen) {
           toggleConsole();
         } else {
-          // If already open, check focus location
           if (document.activeElement !== consoleInputRef.current) {
             consoleInputRef.current?.focus();
             announceToScreenReader("Focused terminal command input.");
@@ -277,24 +280,174 @@ export default function ProofWorkspacePage() {
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
   }, [toggleConsole, isConsoleOpen]);
 
+  // Visual Node Connection Click Handler
+  const handleNodeClick = (nodeId: string) => {
+    try {
+      playHover();
+    } catch {}
+
+    if (!selectedSourceId) {
+      // Pick as source
+      setSelectedSourceId(nodeId);
+      showToast(`Selected Node ${nodeId} as premise source. Now click a target node to connect.`, "info");
+      announceToScreenReader(`Selected source Node ${nodeId}. Click target node.`);
+      return;
+    }
+
+    if (selectedSourceId === nodeId) {
+      // Deselect
+      setSelectedSourceId(null);
+      showToast(`Deselected Node ${nodeId}.`, "info");
+      announceToScreenReader(`Deselected Node ${nodeId}.`);
+      return;
+    }
+
+    // Attempt connection from selectedSourceId -> nodeId
+    const validation = canConnect(selectedSourceId, nodeId, edges);
+    if (!validation.allowed) {
+      showToast(validation.reason || "Invalid connection.", "error");
+      announceToScreenReader(`Connection rejected: ${validation.reason}`);
+      setConsoleLogs((prev) => [
+        ...prev,
+        {
+          id: `err-${Date.now()}`,
+          type: "error",
+          text: `Invalid connection between Node ${selectedSourceId} and Node ${nodeId}: ${validation.reason}`,
+        },
+      ]);
+      setSelectedSourceId(null);
+      return;
+    }
+
+    // Valid connection!
+    const newEdge: Edge = { source: selectedSourceId, target: nodeId };
+    setEdges((prev) => [...prev, newEdge]);
+    setSelectedSourceId(null);
+
+    try {
+      playSuccess();
+    } catch {}
+
+    showToast(`✔ Connected Node ${newEdge.source} → Node ${newEdge.target}!`, "success");
+    announceToScreenReader(`Successfully connected Node ${newEdge.source} to Node ${newEdge.target}.`);
+
+    setConsoleLogs((prev) => [
+      ...prev,
+      {
+        id: `cmd-${Date.now()}`,
+        type: "command",
+        text: `connect ${newEdge.source} ${newEdge.target}`,
+      },
+      {
+        id: `out-${Date.now()}`,
+        type: "success",
+        text: `✔ Visual edge established: Node ${newEdge.source} (${DEFAULT_NODES.find((n) => n.id === newEdge.source)?.label}) → Node ${newEdge.target} (${DEFAULT_NODES.find((n) => n.id === newEdge.target)?.label})`,
+      },
+    ]);
+  };
+
+  const handleDisconnectEdge = (source: string, target: string) => {
+    setEdges((prev) =>
+      prev.filter(
+        (e) =>
+          !(
+            (e.source === source && e.target === target) ||
+            (e.source === target && e.target === source)
+          )
+      )
+    );
+
+    try {
+      playAutocomplete();
+    } catch {}
+
+    showToast(`Disconnected edge between Node ${source} and Node ${target}.`, "info");
+    announceToScreenReader(`Disconnected edge between Node ${source} and Node ${target}.`);
+
+    setConsoleLogs((prev) => [
+      ...prev,
+      {
+        id: `cmd-${Date.now()}`,
+        type: "command",
+        text: `disconnect ${source} ${target}`,
+      },
+      {
+        id: `out-${Date.now()}`,
+        type: "output",
+        text: `Disconnected edge between Node ${source} and Node ${target}.`,
+      },
+    ]);
+  };
+
+  const handleApplyNextTactic = () => {
+    const hint = getNextTacticHint(edges);
+    if (hint.isCompleted || !hint.suggestedSource || !hint.suggestedTarget) {
+      showToast("Proof is already fully discharged!", "success");
+      return;
+    }
+
+    const s = hint.suggestedSource;
+    const t = hint.suggestedTarget;
+    const newEdge: Edge = { source: s, target: t };
+
+    setEdges((prev) => [...prev, newEdge]);
+    try {
+      playSuccess();
+    } catch {}
+
+    showToast(`Applied Tactic: Connected Node ${s} → Node ${t}`, "success");
+    announceToScreenReader(`Applied tactic: connected Node ${s} to Node ${t}`);
+
+    setConsoleLogs((prev) => [
+      ...prev,
+      {
+        id: `cmd-${Date.now()}`,
+        type: "command",
+        text: `connect ${s} ${t}`,
+      },
+      {
+        id: `out-${Date.now()}`,
+        type: "success",
+        text: `✔ Tactic Applied: ${hint.hint}`,
+      },
+    ]);
+  };
+
+  const handleResetProof = () => {
+    setEdges(INITIAL_EDGES);
+    setSelectedSourceId(null);
+    try {
+      playAutocomplete();
+    } catch {}
+
+    showToast("Proof canvas reset to initial premises.", "info");
+    announceToScreenReader("Proof canvas reset to initial premises.");
+
+    setConsoleLogs((prev) => [
+      ...prev,
+      {
+        id: `out-${Date.now()}`,
+        type: "info",
+        text: "↺ Proof canvas reset to initial premises: Node A → C and Node B → C.",
+      },
+    ]);
+  };
+
   // Command executor
   const runCommand = (cmdStr: string) => {
     const trimmed = cmdStr.trim();
     if (!trimmed) return;
 
-    // Log the typed command
     const commandLogId = `cmd-${Date.now()}`;
     setConsoleLogs((prev) => [...prev, { id: commandLogId, type: "command", text: trimmed }]);
     setConsoleInput("");
 
-    // Update history queue
     setHistory((prev) => {
       const filtered = prev.filter((h) => h !== trimmed);
       return [...filtered, trimmed];
     });
     setHistoryIdx(-1);
 
-    // Parse command arguments
     const tokens = trimmed.split(/\s+/);
     const op = tokens[0].toLowerCase();
     const arg1 = tokens[1]?.toUpperCase();
@@ -303,7 +456,7 @@ export default function ProofWorkspacePage() {
     const outputLogId = `out-${Date.now()}`;
 
     if (op === "help") {
-      const helpText = 
+      const helpText =
         "Supported Commands:\n" +
         "  connect <node1> <node2>    - Connect source node to target node\n" +
         "  disconnect <node1> <node2> - Remove connection between two nodes\n" +
@@ -312,7 +465,7 @@ export default function ProofWorkspacePage() {
         "  clear                      - Clear the console logs\n" +
         "  help                       - Show this help dialogue";
       setConsoleLogs((prev) => [...prev, { id: outputLogId, type: "info", text: helpText }]);
-      announceToScreenReader("Help menu printed. Listing available commands: connect, disconnect, list, simulate, clear, and help.");
+      announceToScreenReader("Help menu printed.");
       return;
     }
 
@@ -334,8 +487,8 @@ export default function ProofWorkspacePage() {
         {
           id: outputLogId,
           type: "output",
-          text: `Active Proof Canvas Logic Nodes & Connections:\n${activeNodesText}`
-        }
+          text: `Active Proof Canvas Logic Nodes & Connections:\n${activeNodesText}`,
+        },
       ]);
       announceToScreenReader("Listed active proof nodes and connections.");
       return;
@@ -348,68 +501,40 @@ export default function ProofWorkspacePage() {
           {
             id: outputLogId,
             type: "error",
-            text: "Syntax Error: 'connect' command requires source and target node IDs. Example: connect A C"
-          }
+            text: "Syntax Error: 'connect' requires two node arguments. Example: 'connect C E'",
+          },
         ]);
-        announceToScreenReader("Syntax error: connect command requires two node parameters.");
+        announceToScreenReader("Syntax error in connect command.");
         return;
       }
 
-      const validIds = DEFAULT_NODES.map((n) => n.id);
-      if (!validIds.includes(arg1) || !validIds.includes(arg2)) {
+      const validation = canConnect(arg1, arg2, edges);
+      if (!validation.allowed) {
         setConsoleLogs((prev) => [
           ...prev,
           {
             id: outputLogId,
             type: "error",
-            text: `Validation Error: Invalid node IDs [${arg1}, ${arg2}]. Valid node IDs are: ${validIds.join(", ")}`
-          }
+            text: `Connection Error: ${validation.reason}`,
+          },
         ]);
-        announceToScreenReader(`Validation error: node IDs must be chosen from ${validIds.join(", ")}.`);
+        announceToScreenReader(`Connection error: ${validation.reason}`);
         return;
       }
 
-      if (arg1 === arg2) {
-        setConsoleLogs((prev) => [
-          ...prev,
-          {
-            id: outputLogId,
-            type: "error",
-            text: "Validation Error: Cannot connect a node to itself."
-          }
-        ]);
-        announceToScreenReader("Validation error: Self connections are not allowed.");
-        return;
-      }
-
-      // Check if connection already exists
-      const alreadyExists = edges.some(
-        (e) => (e.source === arg1 && e.target === arg2) || (e.source === arg2 && e.target === arg1)
-      );
-      if (alreadyExists) {
-        setConsoleLogs((prev) => [
-          ...prev,
-          {
-            id: outputLogId,
-            type: "error",
-            text: `Connection already exists between Node ${arg1} and Node ${arg2}.`
-          }
-        ]);
-        announceToScreenReader(`Connection between Node ${arg1} and Node ${arg2} already exists.`);
-        return;
-      }
-
-      // Add connection
       setEdges((prev) => [...prev, { source: arg1, target: arg2 }]);
+      try {
+        playSuccess();
+      } catch {}
       setConsoleLogs((prev) => [
         ...prev,
         {
           id: outputLogId,
           type: "success",
-          text: `Success: Connection successfully established from Node ${arg1} to Node ${arg2}.`
-        }
+          text: `✔ Established connection: Node ${arg1} → Node ${arg2}`,
+        },
       ]);
-      announceToScreenReader(`Connection established successfully: Node ${arg1} is now connected to Node ${arg2}.`);
+      announceToScreenReader(`Connected Node ${arg1} to Node ${arg2}`);
       return;
     }
 
@@ -420,83 +545,81 @@ export default function ProofWorkspacePage() {
           {
             id: outputLogId,
             type: "error",
-            text: "Syntax Error: 'disconnect' command requires source and target node IDs. Example: disconnect A C"
-          }
+            text: "Syntax Error: 'disconnect' requires two node arguments. Example: 'disconnect C E'",
+          },
         ]);
-        announceToScreenReader("Syntax error: disconnect command requires two node parameters.");
+        announceToScreenReader("Syntax error in disconnect command.");
         return;
       }
 
-      const connectionIndex = edges.findIndex(
-        (e) => (e.source === arg1 && e.target === arg2) || (e.source === arg2 && e.target === arg1)
+      const exists = edges.some(
+        (e) =>
+          (e.source === arg1 && e.target === arg2) ||
+          (e.source === arg2 && e.target === arg1)
       );
 
-      if (connectionIndex === -1) {
+      if (!exists) {
         setConsoleLogs((prev) => [
           ...prev,
           {
             id: outputLogId,
             type: "error",
-            text: `No connection found between Node ${arg1} and Node ${arg2}.`
-          }
+            text: `No active connection found between Node ${arg1} and Node ${arg2}.`,
+          },
         ]);
-        announceToScreenReader(`No connection exists between Node ${arg1} and Node ${arg2} to disconnect.`);
+        announceToScreenReader("No connection found to disconnect.");
         return;
       }
 
-      setEdges((prev) => prev.filter((_, idx) => idx !== connectionIndex));
+      setEdges((prev) =>
+        prev.filter(
+          (e) =>
+            !(
+              (e.source === arg1 && e.target === arg2) ||
+              (e.source === arg2 && e.target === arg1)
+            )
+        )
+      );
+      try {
+        playAutocomplete();
+      } catch {}
       setConsoleLogs((prev) => [
         ...prev,
         {
           id: outputLogId,
-          type: "success",
-          text: `Success: Connection between Node ${arg1} and Node ${arg2} has been severed.`
-        }
+          type: "output",
+          text: `✔ Severed connection: Node ${arg1} ↛ Node ${arg2}`,
+        },
       ]);
-      announceToScreenReader(`Connection removed: Node ${arg1} is no longer connected to Node ${arg2}.`);
+      announceToScreenReader(`Disconnected Node ${arg1} from Node ${arg2}`);
       return;
     }
 
     if (op === "simulate") {
       const subOp = tokens[1]?.toLowerCase() || "normal";
-      
       if (subOp !== "normal" && subOp !== "loop") {
         setConsoleLogs((prev) => [
           ...prev,
           {
             id: outputLogId,
             type: "error",
-            text: `Syntax Error: Unknown simulation type '${tokens[1]}'. Supported types: 'normal', 'loop'.`
-          }
+            text: "Invalid simulate mode. Supported modes: 'normal' or 'loop'.",
+          },
         ]);
-        announceToScreenReader(`Syntax error: Unknown simulation type '${tokens[1]}'.`);
+        announceToScreenReader("Invalid simulate mode.");
         return;
       }
 
-      if (isSimulating) {
-        setConsoleLogs((prev) => [
-          ...prev,
-          {
-            id: outputLogId,
-            type: "error",
-            text: "Simulation Error: A tactic simulation is already active in the background."
-          }
-        ]);
-        announceToScreenReader("A tactic simulation is already active.");
-        return;
-      }
-
-      // Initialize state
       setIsSimulating(true);
       if (subOp === "normal") {
-        setSimulationProgress({ step: 0, total: 10, log: "Initializing background tactic simulation..." });
+        setSimulationProgress({ step: 0, total: 20, log: "Initializing background tactic worker..." });
         setConsoleLogs((prev) => [
           ...prev,
           {
             id: outputLogId,
             type: "info",
-            text: "Starting standard tactic simulation on background thread..."
-          }
+            text: "Starting standard tactic simulation on background thread. Watchdog timer armed (5s)...",
+          },
         ]);
         announceToScreenReader("Starting standard tactic simulation on background thread.");
       } else {
@@ -506,49 +629,44 @@ export default function ProofWorkspacePage() {
           {
             id: outputLogId,
             type: "info",
-            text: "Starting loop simulation on background thread. Watchdog timer armed (5s)..."
-          }
+            text: "Starting loop simulation on background thread. Watchdog timer armed (5s)...",
+          },
         ]);
         announceToScreenReader("Starting loop simulation. Watchdog timer armed.");
       }
 
-      // Arm watchdog timer for 5 seconds
       resetWatchdog();
 
-      // Trigger simulation in the worker
       if (workerRef.current) {
         workerRef.current.postMessage({
           type: "START_SIMULATION",
-          mode: subOp as "normal" | "loop"
+          mode: subOp as "normal" | "loop",
         });
       } else {
-        // Fallback in case worker is somehow uninitialized
         initWorker();
         setTimeout(() => {
           workerRef.current?.postMessage({
             type: "START_SIMULATION",
-            mode: subOp as "normal" | "loop"
+            mode: subOp as "normal" | "loop",
           });
         }, 50);
       }
       return;
     }
 
-    // Command unrecognized
     setConsoleLogs((prev) => [
       ...prev,
       {
         id: outputLogId,
         type: "error",
-        text: `Unrecognized command: '${tokens[0]}'. Type 'help' to review supported registry entries.`
-      }
+        text: `Unrecognized command: '${tokens[0]}'. Type 'help' to review supported registry entries.`,
+      },
     ]);
     announceToScreenReader(`Command unrecognized: '${tokens[0]}'. Please try again or type help.`);
   };
 
   const suggestion = getSuggestion(consoleInput);
 
-  // Keyboard Handlers inside Console Input
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -583,309 +701,488 @@ export default function ProofWorkspacePage() {
     }
   };
 
-  // Proof verification status calculation
   const { isC_Proven, isE_Proven } = evaluateProofStatus(edges);
+  const tacticHint = getNextTacticHint(edges);
 
   return (
-    <div className="bg-zinc-950 min-h-screen text-foreground overflow-hidden flex flex-col font-sans">
-      {/* Screen reader ARIA live region for instant state broadcast */}
+    <div className="bg-zinc-950 min-h-screen text-foreground overflow-x-hidden flex flex-col font-sans">
+      {/* Screen reader ARIA live region */}
       <div aria-live="assertive" aria-atomic="true" className="sr-only">
         {liveAnnouncement}
       </div>
 
-      <div className="flex-1 pt-24 pb-6 px-4 md:px-6 flex flex-col md:flex-row gap-6 relative max-w-7xl mx-auto w-full min-h-[calc(100vh-6rem)] h-auto md:h-[calc(100vh-6rem)]">
-        
-        {/* Left Workspace Panel: Graphical Flow Canvas */}
-        <div className="flex-1 flex flex-col border border-zinc-900 bg-zinc-950/40 rounded-3xl relative overflow-hidden backdrop-blur-md p-4 md:p-6 h-[480px] md:h-full min-h-[420px]">
-          
-          {/* Workspace Title bar */}
-          <div className="flex justify-between items-center mb-6 border-b border-zinc-900 pb-4">
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-brand-cyan animate-pulse"></span>
-                Logical Proof Canvas
-              </h1>
-              <p className="text-xs text-zinc-500 font-mono mt-0.5">
-                Target: Prove Conclusion R (Node E) using interactive steps
-              </p>
+      {/* Main Container */}
+      <div className="flex-1 pt-24 pb-8 px-4 sm:px-6 flex flex-col gap-6 max-w-7xl mx-auto w-full">
+        {/* Header Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-900 pb-5">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400">
+                Formal Verification Workspace
+              </span>
+              <span className="text-xs font-mono text-zinc-600">· Modus Ponens AST</span>
             </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mt-1">
+              Logical Proof Canvas
+            </h1>
+            <p className="text-xs sm:text-sm text-zinc-400 font-sans mt-0.5 max-w-2xl">
+              Construct a deterministic deductive proof to discharge Conclusion R (<code className="text-cyan-300 font-mono">Reliability is guaranteed</code>). Click nodes directly to wire inference dependencies.
+            </p>
+          </div>
 
+          <div className="flex items-center gap-2.5 flex-wrap self-start sm:self-center">
+            {/* Field Manual Trigger */}
+            <FieldManualButton manualId="proof" label="Field Manual" />
+
+            {/* Split Console Toggle */}
             <button
               ref={toggleBtnRef}
               onClick={toggleConsole}
               aria-expanded={isConsoleOpen}
               aria-label={isConsoleOpen ? "Close interactive text console" : "Open interactive text console"}
-              className="px-3.5 py-1.5 text-xs font-mono font-bold bg-zinc-900/50 border border-zinc-800 hover:border-brand-cyan/40 text-zinc-300 hover:text-brand-cyan rounded-xl transition-all cursor-pointer"
+              className="px-3.5 py-1.5 text-xs font-mono font-bold bg-zinc-900/60 hover:bg-zinc-800 border border-zinc-800 hover:border-cyan-500/40 text-zinc-300 hover:text-cyan-400 rounded-xl transition-all cursor-pointer flex items-center gap-2"
             >
-              {isConsoleOpen ? "Hide Console (Ctrl+\\)" : "Show Console (Ctrl+\\)"}
+              <IconTerminal className="w-4 h-4 text-cyan-400" />
+              <span>{isConsoleOpen ? "Hide CLI" : "Show CLI"}</span>
+              <kbd className="hidden sm:inline-block text-[10px] text-zinc-500 bg-zinc-950 px-1.5 py-0.5 rounded border border-zinc-800">
+                Ctrl+\
+              </kbd>
             </button>
           </div>
+        </div>
 
-          {/* Interactive visual canvas workspace */}
-          <div 
-            className="flex-1 relative bg-zinc-950 rounded-2xl border border-zinc-900/60 overflow-hidden"
-            role="region"
-            aria-label="Logic proof canvas editor. Keyboard users can use the command console on the right side to build edges."
-          >
+        {/* Guided Proof Assistant & Theorem Inspector Tray */}
+        <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-4 sm:p-5 relative overflow-hidden backdrop-blur-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5 flex-1">
+            <div
+              className={`p-2.5 rounded-xl shrink-0 ${
+                isE_Proven
+                  ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
+                  : "bg-cyan-500/10 border border-cyan-500/30 text-cyan-400"
+              }`}
+            >
+              {isE_Proven ? <IconShieldCheck className="w-5 h-5" /> : <IconBulb className="w-5 h-5" />}
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400">
+                  Proof Assistant
+                </span>
+                <span
+                  className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${
+                    isE_Proven
+                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                      : isC_Proven
+                      ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/30"
+                      : "bg-zinc-800 text-zinc-400 border-zinc-700"
+                  }`}
+                >
+                  {isE_Proven ? "STEP 2/2 · Q.E.D. PROVEN" : isC_Proven ? "STEP 1/2 · IN PROGRESS" : "STEP 0/2 · INCOMPLETE"}
+                </span>
+              </div>
+              <h2 className="text-sm sm:text-base font-bold text-white font-sans">{tacticHint.title}</h2>
+              <p className="text-xs text-zinc-300 font-sans leading-relaxed">{tacticHint.hint}</p>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2.5 shrink-0 self-end md:self-center w-full md:w-auto justify-end">
+            <button
+              onClick={handleResetProof}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-semibold text-zinc-400 hover:text-zinc-200 bg-zinc-950/60 hover:bg-zinc-900 border border-zinc-800 rounded-xl transition-all cursor-pointer"
+            >
+              <IconRefresh className="w-3.5 h-3.5" />
+              <span>Reset</span>
+            </button>
+
+            {!isE_Proven && (
+              <button
+                onClick={handleApplyNextTactic}
+                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider text-black bg-cyan-400 hover:bg-cyan-300 rounded-xl transition-all shadow-md shadow-cyan-500/10 cursor-pointer"
+              >
+                <IconBolt className="w-4 h-4 text-black fill-black" />
+                <span>Apply Next Tactic</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Workspace Canvas & Split View Console */}
+        <div className="flex flex-col lg:flex-row gap-6 relative min-h-[520px]">
+          {/* Left / Center: Interactive Graphical Canvas */}
+          <div className="flex-1 flex flex-col bg-zinc-950 border border-zinc-900 rounded-3xl relative overflow-hidden p-4 sm:p-6 min-h-[460px]">
+            {/* Toast Overlay */}
+            <AnimatePresence>
+              {feedbackToast && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className={`absolute top-4 left-4 right-4 z-30 px-4 py-2.5 rounded-xl border text-xs font-mono font-medium flex items-center justify-between shadow-lg backdrop-blur-md ${
+                    feedbackToast.type === "success"
+                      ? "bg-emerald-950/90 text-emerald-300 border-emerald-500/40"
+                      : feedbackToast.type === "error"
+                      ? "bg-rose-950/90 text-rose-300 border-rose-500/40"
+                      : "bg-zinc-900/90 text-cyan-300 border-cyan-500/40"
+                  }`}
+                >
+                  <span>{feedbackToast.message}</span>
+                  <button
+                    onClick={() => setFeedbackToast(null)}
+                    className="p-1 hover:text-white cursor-pointer"
+                  >
+                    <IconX className="w-3.5 h-3.5" />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Q.E.D Celebration Banner */}
+            <AnimatePresence>
+              {isE_Proven && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute top-4 left-4 right-4 z-20 bg-gradient-to-r from-emerald-950/95 via-zinc-950/95 to-emerald-950/95 border border-emerald-500/50 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-2xl shadow-emerald-950/40"
+                >
+                  <div className="flex items-center gap-3.5">
+                    <div className="p-3 bg-emerald-500/20 border border-emerald-500/40 rounded-2xl text-emerald-400">
+                      <IconSparkles className="w-6 h-6 animate-spin" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono font-extrabold text-emerald-400 uppercase tracking-wider">
+                          Theorem Discharged (Q.E.D.)
+                        </span>
+                      </div>
+                      <h3 className="text-base sm:text-lg font-extrabold text-white">
+                        Conclusion R: Reliability is Guaranteed!
+                      </h3>
+                      <p className="text-xs text-zinc-300 font-sans mt-0.5">
+                        Both Modus Ponens hypotheses are verified without sorry. Formal soundness achieved.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1.5 bg-emerald-900/50 border border-emerald-500/40 rounded-xl text-xs font-mono font-bold text-emerald-300">
+                      VERIFICATION: 100%
+                    </span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Simulation Progress Widget */}
             {isSimulating && simulationProgress && (
-              <div className="absolute top-4 left-4 right-4 bg-zinc-950/95 border border-brand-cyan/30 rounded-xl p-4 flex flex-col gap-3 shadow-lg shadow-brand-cyan/5 z-20 animate-in fade-in slide-in-from-top-4 duration-300">
+              <div className="absolute top-4 left-4 right-4 bg-zinc-950/95 border border-cyan-500/30 rounded-xl p-4 flex flex-col gap-3 shadow-lg shadow-cyan-500/5 z-20">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-brand-cyan animate-ping"></span>
-                    <h2 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                    <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+                    <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
                       Background Tactic Simulation Running...
-                    </h2>
+                    </h3>
                   </div>
                   <span className="text-[10px] font-mono text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
                     THREAD: WEB WORKER (60FPS UI SAFE)
                   </span>
                 </div>
-                
-                {/* Progress bar */}
+
                 <div className="w-full bg-zinc-900 h-2 rounded-full overflow-hidden border border-zinc-800">
-                  <div 
-                    className="bg-brand-cyan h-full rounded-full transition-all duration-300" 
+                  <div
+                    className="bg-cyan-400 h-full rounded-full transition-all duration-300"
                     style={{ width: `${(simulationProgress.step / simulationProgress.total) * 100}%` }}
                   />
                 </div>
 
                 <div className="flex justify-between items-center text-[10px] font-mono">
-                  <span className="text-zinc-400 truncate max-w-[70%]">
-                    {simulationProgress.log}
-                  </span>
-                  <span className="text-brand-cyan font-bold">
+                  <span className="text-zinc-400 truncate max-w-[70%]">{simulationProgress.log}</span>
+                  <span className="text-cyan-400 font-bold">
                     STEP {simulationProgress.step} / {simulationProgress.total}
                   </span>
                 </div>
               </div>
             )}
 
-            {/* SVG Connecting Edges Layer */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none select-none z-0">
-              <defs>
-                <marker
-                  id="arrow"
-                  viewBox="0 0 10 10"
-                  refX="6"
-                  refY="5"
-                  markerWidth="6"
-                  markerHeight="6"
-                  orient="auto-start-reverse"
-                >
-                  <path d="M 0 2 L 8 5 L 0 8 z" fill="#06b6d4" />
-                </marker>
-              </defs>
+            {/* Canvas Viewport Area */}
+            <div
+              className="flex-1 relative bg-zinc-950/80 rounded-2xl border border-zinc-900 overflow-hidden flex items-center justify-center p-2 min-h-[380px]"
+              role="region"
+              aria-label="Formal logic proof graph canvas"
+            >
+              {/* Responsive SVG Layer */}
+              <svg
+                viewBox="0 0 720 440"
+                className="w-full h-full max-h-[460px] select-none"
+                preserveAspectRatio="xMidYMid meet"
+              >
+                <defs>
+                  <marker
+                    id="cyan-arrow"
+                    viewBox="0 0 10 10"
+                    refX="6"
+                    refY="5"
+                    markerWidth="6"
+                    markerHeight="6"
+                    orient="auto-start-reverse"
+                  >
+                    <path d="M 0 2 L 8 5 L 0 8 z" fill="#22d3ee" />
+                  </marker>
+                  <marker
+                    id="emerald-arrow"
+                    viewBox="0 0 10 10"
+                    refX="6"
+                    refY="5"
+                    markerWidth="6"
+                    markerHeight="6"
+                    orient="auto-start-reverse"
+                  >
+                    <path d="M 0 2 L 8 5 L 0 8 z" fill="#10b981" />
+                  </marker>
+                </defs>
 
-              {edges.map((edge, idx) => {
-                const sNode = DEFAULT_NODES.find((n) => n.id === edge.source);
-                const tNode = DEFAULT_NODES.find((n) => n.id === edge.target);
-                if (!sNode || !tNode) return null;
+                {/* Drawn Connecting Edges */}
+                {edges.map((edge, idx) => {
+                  const sNode = DEFAULT_NODES.find((n) => n.id === edge.source);
+                  const tNode = DEFAULT_NODES.find((n) => n.id === edge.target);
+                  if (!sNode || !tNode) return null;
 
-                // Simple path calculation from source coordinates to target
-                return (
-                  <path
-                    key={`edge-${idx}`}
-                    d={`M ${sNode.x} ${sNode.y} L ${tNode.x} ${tNode.y}`}
-                    stroke="#06b6d4"
-                    strokeWidth="2.5"
-                    strokeDasharray="4 4"
-                    className="animate-[dash_10s_linear_infinite]"
-                    markerEnd="url(#arrow)"
-                  />
-                );
-              })}
-            </svg>
+                  const isEdgeProven =
+                    (edge.target === "C" && isC_Proven) ||
+                    (edge.target === "E" && isE_Proven);
 
-            {/* Logical nodes visual layers */}
-            {nodes.map((node) => {
-              // Calculate connections for the accessible label
-              const targets = edges.filter((e) => e.source === node.id).map((e) => e.target);
-              const incoming = edges.filter((e) => e.target === node.id).map((e) => e.source);
-              const connectionInfo = 
-                (targets.length > 0 ? ` Connected to: ${targets.join(", ")}.` : "") +
-                (incoming.length > 0 ? ` Receives input from: ${incoming.join(", ")}.` : "");
+                  return (
+                    <g key={`edge-group-${idx}`} className="cursor-pointer group">
+                      {/* Thick transparent stroke for easier click target */}
+                      <path
+                        d={`M ${sNode.x} ${sNode.y} L ${tNode.x} ${tNode.y}`}
+                        stroke="transparent"
+                        strokeWidth="24"
+                        onClick={() => handleDisconnectEdge(edge.source, edge.target)}
+                      />
 
-              // Determine status style
-              let isNodeProven = true;
-              if (node.id === "C") isNodeProven = isC_Proven;
-              if (node.id === "E") isNodeProven = isE_Proven;
+                      {/* Visible dashed line */}
+                      <path
+                        d={`M ${sNode.x} ${sNode.y} L ${tNode.x} ${tNode.y}`}
+                        stroke={isEdgeProven ? "#10b981" : "#22d3ee"}
+                        strokeWidth="2.5"
+                        strokeDasharray="5 5"
+                        className="animate-[dash_10s_linear_infinite]"
+                        markerEnd={isEdgeProven ? "url(#emerald-arrow)" : "url(#cyan-arrow)"}
+                        onClick={() => handleDisconnectEdge(edge.source, edge.target)}
+                      />
 
-              return (
-                <div
-                  key={node.id}
-                  style={{ left: `${node.x - 70}px`, top: `${node.y - 40}px` }}
-                  className={`absolute w-[140px] px-3.5 py-3 rounded-2xl border bg-zinc-950/90 flex flex-col justify-center transition-all duration-350 z-10 select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:outline-none ${
-                    isNodeProven
-                      ? "border-emerald-500/50 hover:border-emerald-400"
-                      : "border-zinc-800 hover:border-brand-cyan/40"
-                  }`}
-                  tabIndex={0}
-                  role="article"
-                  aria-label={`Node ${node.id}: ${node.type}. Content is ${node.description}.${connectionInfo}`}
-                >
-                  <div className="flex justify-between items-center mb-1 select-none">
-                    <span className="text-[10px] font-mono font-extrabold text-zinc-500 tracking-wider">
-                      NODE {node.id}
-                    </span>
-                    <span className={`w-2 h-2 rounded-full ${
-                      isNodeProven ? "bg-emerald-500" : "bg-zinc-700"
-                    }`} />
-                  </div>
-                  <div className="text-sm font-extrabold text-white font-mono select-none">
-                    {node.label}
-                  </div>
-                  <div className="text-[10px] text-zinc-500 truncate select-none mt-0.5">
-                    {node.type}
-                  </div>
-                </div>
-              );
-            })}
+                      {/* Disconnect indicator on hover */}
+                      <circle
+                        cx={(sNode.x + tNode.x) / 2}
+                        cy={(sNode.y + tNode.y) / 2}
+                        r="12"
+                        className="fill-zinc-950 stroke-zinc-800 group-hover:stroke-rose-500 transition-colors"
+                        onClick={() => handleDisconnectEdge(edge.source, edge.target)}
+                      />
+                      <text
+                        x={(sNode.x + tNode.x) / 2}
+                        y={(sNode.y + tNode.y) / 2 + 3.5}
+                        textAnchor="middle"
+                        className="text-[9px] font-mono fill-zinc-500 group-hover:fill-rose-400 font-bold select-none pointer-events-none"
+                      >
+                        ✕
+                      </text>
+                    </g>
+                  );
+                })}
 
-            {/* Proof Status Widget */}
-            <div className="absolute bottom-4 left-4 right-4 bg-zinc-950/80 border border-zinc-900 rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 select-none">
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg flex items-center justify-center ${
-                  isE_Proven ? "bg-emerald-950 text-emerald-400 border border-emerald-900" : "bg-zinc-900 text-zinc-500 border border-zinc-850"
-                }`}>
-                  {isE_Proven ? <IconCheck className="w-5 h-5" /> : <IconPlay className="w-5 h-5" />}
-                </div>
-                <div>
-                  <h2 className="text-xs font-bold text-white uppercase tracking-wider">
-                    Proof Completion Status
-                  </h2>
-                  <p className="text-xs text-zinc-400 mt-0.5 leading-relaxed">
-                    {isE_Proven 
-                      ? "Congratulations! The goal R has been successfully verified."
-                      : isC_Proven 
-                      ? "Step 1 complete (Q is proven). Now connect C and D to E to finish." 
-                      : "Required: Connect premises A & B to C, then connect C & D to E."}
-                  </p>
-                </div>
+                {/* Render Nodes inside SVG */}
+                {nodes.map((node) => {
+                  let isNodeProven = true;
+                  if (node.id === "C") isNodeProven = isC_Proven;
+                  if (node.id === "E") isNodeProven = isE_Proven;
+
+                  const isSelected = selectedSourceId === node.id;
+                  const isValidTarget =
+                    selectedSourceId &&
+                    selectedSourceId !== node.id &&
+                    canConnect(selectedSourceId, node.id, edges).allowed;
+
+                  return (
+                    <g
+                      key={node.id}
+                      transform={`translate(${node.x}, ${node.y})`}
+                      onClick={() => handleNodeClick(node.id)}
+                      className="cursor-pointer group"
+                    >
+                      {/* Selection Glow Halos */}
+                      {isSelected && (
+                        <circle
+                          r="58"
+                          className="fill-cyan-500/10 stroke-cyan-400 stroke-2 animate-ping opacity-60"
+                        />
+                      )}
+                      {isValidTarget && (
+                        <circle
+                          r="56"
+                          className="fill-emerald-500/10 stroke-emerald-400 stroke-2 stroke-dasharray-4 animate-pulse"
+                        />
+                      )}
+
+                      {/* Node Card Background */}
+                      <rect
+                        x="-70"
+                        y="-40"
+                        width="140"
+                        height="80"
+                        rx="16"
+                        className={`transition-all duration-300 ${
+                          isSelected
+                            ? "fill-zinc-950 stroke-cyan-400 stroke-2 filter drop-shadow-[0_0_12px_rgba(6,182,212,0.4)]"
+                            : isNodeProven
+                            ? "fill-zinc-950/95 stroke-emerald-500/60 group-hover:stroke-emerald-400 stroke-[1.5]"
+                            : isValidTarget
+                            ? "fill-zinc-950 stroke-emerald-400/80 stroke-2"
+                            : "fill-zinc-950/90 stroke-zinc-800 group-hover:stroke-zinc-700 stroke-1"
+                        }`}
+                      />
+
+                      {/* Node ID Badge */}
+                      <text
+                        x="-56"
+                        y="-22"
+                        className="text-[10px] font-mono font-extrabold fill-zinc-500 tracking-wider select-none"
+                      >
+                        NODE {node.id}
+                      </text>
+
+                      {/* Proven / Active Indicator Dot */}
+                      <circle
+                        cx="54"
+                        cy="-24"
+                        r="4"
+                        className={isNodeProven ? "fill-emerald-400" : "fill-zinc-700"}
+                      />
+
+                      {/* Logic Label */}
+                      <text
+                        x="0"
+                        y="6"
+                        textAnchor="middle"
+                        className="text-base font-extrabold fill-white font-mono select-none"
+                      >
+                        {node.label}
+                      </text>
+
+                      {/* Type subtitle */}
+                      <text
+                        x="0"
+                        y="24"
+                        textAnchor="middle"
+                        className="text-[10px] font-mono fill-zinc-500 uppercase tracking-wider select-none"
+                      >
+                        {node.type}
+                      </text>
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+
+            {/* Bottom Status / Legend bar */}
+            <div className="mt-4 pt-3 border-t border-zinc-900 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-mono text-zinc-500">
+              <div className="flex items-center gap-4 flex-wrap">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  <span>Proven Hypothesis</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
+                  <span>Selected Source</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-zinc-700"></span>
+                  <span>Unproven Goal</span>
+                </span>
               </div>
 
-              <div className="flex items-center gap-2 text-[10px] font-mono">
-                <span className="text-zinc-600">ACTIVE EDGES:</span>
-                <span className="text-brand-cyan font-bold bg-brand-cyan/5 px-2.5 py-1 border border-brand-cyan/20 rounded-md">
-                  {edges.length}
-                </span>
+              <div className="text-[11px] text-zinc-500">
+                Click source node → click target node · Click ✕ to disconnect
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Right Split Panel: Accessible Command Terminal Console */}
-        {isConsoleOpen && (
-          <div 
-            data-keyboard-boundary="true"
-            className="w-full md:w-[420px] border border-zinc-900 bg-zinc-950/80 rounded-3xl overflow-hidden flex flex-col relative backdrop-blur-md h-[420px] md:h-full min-h-[360px]"
-          >
-            
-            {/* Terminal Window Header */}
-            <div className="border-b border-zinc-900/60 bg-zinc-950/90 px-5 py-4 flex justify-between items-center select-none">
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
-                <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
-                <span className="text-[10px] font-mono font-bold text-zinc-500 tracking-wider ml-2 uppercase">
-                  proof-engine // bash CLI
-                </span>
-              </div>
-              <IconTerminal className="w-4 h-4 text-zinc-600" />
-            </div>
-
-            {/* Console Log view area */}
-            <div 
-              className="flex-1 p-5 font-mono text-[11px] leading-relaxed overflow-y-auto space-y-3.5 scrollbar-thin text-zinc-300"
-              role="log"
-              aria-label="Command history and terminal outputs"
+          {/* Right: Split CLI Console */}
+          {isConsoleOpen && (
+            <div
+              id="proof-cli"
+              data-keyboard-boundary="true"
+              className="w-full lg:w-[420px] bg-zinc-950 border border-zinc-900 rounded-3xl p-4 flex flex-col h-[480px] lg:h-auto min-h-[440px] shadow-xl"
             >
-              {consoleLogs.map((log) => (
-                <div key={log.id} className="space-y-1">
-                  {log.type === "command" && (
-                    <div className="flex items-center gap-2 text-zinc-400 font-bold select-none">
-                      <span className="text-zinc-600 font-bold">~</span>
-                      <span className="text-zinc-400 font-bold">proof-cli $</span>
-                      <span className="text-zinc-100 font-bold select-text">{log.text}</span>
-                    </div>
-                  )}
-                  {log.type === "info" && (
-                    <div className="text-zinc-500 whitespace-pre-wrap leading-relaxed select-text">
-                      {log.text}
-                    </div>
-                  )}
-                  {log.type === "error" && (
-                    <div className="text-red-400/90 font-semibold select-text">
-                      ✖ {log.text}
-                    </div>
-                  )}
-                  {log.type === "success" && (
-                    <div className="text-emerald-400 font-semibold select-text">
-                      ✔ {log.text}
-                    </div>
-                  )}
-                  {log.type === "output" && (
-                    <div className="text-zinc-300 whitespace-pre-wrap select-text leading-relaxed">
-                      {log.text}
-                    </div>
-                  )}
+              <div className="flex justify-between items-center pb-3 border-b border-zinc-900 mb-3">
+                <div className="flex items-center gap-2">
+                  <IconTerminal className="w-4 h-4 text-cyan-400" />
+                  <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+                    Deductive Proof Terminal
+                  </span>
                 </div>
-              ))}
-              <div ref={terminalLogsEndRef} />
-            </div>
-
-            {/* Input prompt container with ghost text auto-complete */}
-            <div className="border-t border-zinc-900/60 bg-zinc-950/60 px-5 py-4 flex flex-col gap-2">
-              
-              <div className="flex items-center gap-2 relative">
-                <span className="text-zinc-600 font-bold font-mono text-[11px] select-none">~</span>
-                <span className="text-zinc-400 font-bold font-mono text-[11px] select-none">proof-cli $</span>
-                
-                <div className="flex-1 relative flex items-center min-h-[1.5rem]">
-                  {/* Ghost text for autocomplete preview */}
-                  {suggestion && (
-                    <div className="absolute inset-0 pointer-events-none font-mono text-[11px] text-zinc-700 flex items-center select-none z-0">
-                      <span>{consoleInput}</span>
-                      <span>{suggestion.substring(consoleInput.length)}</span>
-                    </div>
-                  )}
-                  
-                  <input
-                    ref={consoleInputRef}
-                    type="text"
-                    value={consoleInput}
-                    onChange={(e) => setConsoleInput(e.target.value)}
-                    onKeyDown={handleInputKeyDown}
-                    placeholder="Type commands to connect nodes..."
-                    className="w-full bg-transparent border-none outline-none font-mono text-[11px] text-zinc-100 placeholder-zinc-700 caret-brand-cyan z-10 select-text"
-                    autoCapitalize="off"
-                    autoComplete="off"
-                    autoCorrect="off"
-                    spellCheck="false"
-                    aria-label="Terminal command input"
-                  />
-                </div>
-
                 <button
-                  onClick={() => runCommand(consoleInput)}
-                  disabled={!consoleInput.trim()}
-                  className="p-1 text-zinc-600 hover:text-brand-cyan disabled:text-zinc-800 disabled:hover:text-zinc-800 transition-colors cursor-pointer"
-                  title="Execute Command (Enter)"
+                  onClick={() => setConsoleLogs([])}
+                  className="text-[10px] font-mono text-zinc-500 hover:text-zinc-300 cursor-pointer"
                 >
-                  <IconCornerDownLeft className="w-4 h-4" />
+                  Clear
                 </button>
               </div>
 
-              {/* Autocomplete helper suggestion notice */}
+              {/* Logs Area */}
+              <div className="flex-1 overflow-y-auto space-y-2 font-mono text-xs pr-1 select-text">
+                {consoleLogs.map((log) => (
+                  <div
+                    key={log.id}
+                    className={`leading-relaxed break-words whitespace-pre-wrap rounded-lg p-2 ${
+                      log.type === "command"
+                        ? "text-cyan-300 bg-zinc-900/50"
+                        : log.type === "success"
+                        ? "text-emerald-400 bg-emerald-950/20"
+                        : log.type === "error"
+                        ? "text-rose-400 bg-rose-950/20"
+                        : log.type === "info"
+                        ? "text-zinc-400 bg-zinc-900/30"
+                        : "text-zinc-300"
+                    }`}
+                  >
+                    {log.type === "command" && <span className="text-zinc-500 mr-1.5">&gt;</span>}
+                    {log.text}
+                  </div>
+                ))}
+                <div ref={terminalLogsEndRef} />
+              </div>
+
+              {/* Autocomplete Suggestion Hint */}
               {suggestion && (
-                <div className="text-[10px] font-mono text-zinc-500 flex justify-between select-none px-6">
-                  <span>Press <kbd className="bg-zinc-900 border border-zinc-800 px-1 rounded-md text-zinc-400 text-[9px]">TAB</kbd> to autocomplete</span>
-                  <span>Suggestion: {suggestion}</span>
+                <div className="text-[10px] font-mono text-zinc-500 px-2 py-1 bg-zinc-900/50 rounded-lg border border-zinc-800/80 mb-2 flex items-center justify-between">
+                  <span>
+                    Tab: <code className="text-cyan-400">{consoleInput}{suggestion.substring(consoleInput.length)}</code>
+                  </span>
+                  <span>[TAB] to accept</span>
                 </div>
               )}
+
+              {/* Input Form */}
+              <div className="pt-2 border-t border-zinc-900 flex items-center gap-2">
+                <span className="text-cyan-400 font-mono text-xs font-bold">&gt;</span>
+                <input
+                  ref={consoleInputRef}
+                  type="text"
+                  value={consoleInput}
+                  onChange={(e) => setConsoleInput(e.target.value)}
+                  onKeyDown={handleInputKeyDown}
+                  placeholder="Type 'connect C E' or 'help'..."
+                  className="flex-1 bg-transparent border-0 text-xs font-mono text-white placeholder-zinc-600 focus:outline-none"
+                  aria-label="Interactive Proof CLI command input"
+                />
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

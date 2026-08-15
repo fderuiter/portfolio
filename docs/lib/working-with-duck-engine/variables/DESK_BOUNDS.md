@@ -8,7 +8,7 @@
 
 > `const` **DESK\_BOUNDS**: `object`
 
-Defined in: [lib/working-with-duck-engine.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L9)
+Defined in: [lib/working-with-duck-engine.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L14)
 
 ## Type Declaration
 
