@@ -5,75 +5,16 @@ import { hexToRgba } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { designManifest } from "@/lib/design-manifest";
 import { IconBriefcase, IconFlame, IconSwitchHorizontal } from "@tabler/icons-react";
-
-export interface TimelineItem {
-  role: string;
-  company: string;
-  period: string;
-  recruiterDescription: string;
-  realityDescription: string;
-  tags: string[];
-}
-
-const timelineData: TimelineItem[] = [
-  {
-    role: "Clinical Data Specialist",
-    company: "BRIGHT Research Partners, Inc.",
-    period: "March 2023 — Present",
-    recruiterDescription:
-      "Lead technical architect for GxP-compliant eClinical databases, translating 100+ page scientific protocols into validated eCRF systems. Engineer automated cross-form edit checks and dynamic logic rules to enforce protocol compliance and point-of-entry data integrity. Manage clinical data lifecycles (DMP authoring, SAE reconciliation, database locks) and administer 21 CFR 812 investigational device accountability.",
-    realityDescription:
-      "Translating dense 150-page clinical trial protocols into relational schemas and dynamic eCRFs. Developing cross-form edit check suites to catch edge-case clinician input discrepancies at point-of-entry, and maintaining 100% device traceability under 21 CFR 812.",
-    tags: ["GxP Systems", "21 CFR 812", "eCRF Architecture", "Edit Checks", "DMP Authoring", "SAE Reconciliation", "iMednet"]
-  },
-  {
-    role: "Research Program Coordinator",
-    company: "Mayo Clinic",
-    period: "July 2021 — March 2023",
-    recruiterDescription:
-      "Pioneered an EHR-based recruitment pipeline using SlicerDicer and MyChart, resulting in a 5x increase in qualified participant enrollment (10 to 50+/month) and a 25% reduction in screen failures. Architected production REDCap databases, executed Linux-based FreeSurfer C pipelines processing 3T MRI scans for volumetric brain segmentation, innovated 3D-printable STL workflows for participant brain models, and prepared NIH DSMB data safety dossiers.",
-    realityDescription:
-      "Automated cohort identification using Epic SlicerDicer and MyChart queries, scaling monthly enrollment from 10 to 50+ participants. Executed FreeSurfer C processing pipelines across Linux clusters for 3T MRI volumetric segmentation and authored multi-million dollar NIH DSMB data safety dossiers.",
-    tags: ["Mayo Clinic", "Epic SlicerDicer", "MyChart Recruitment", "REDCap", "FreeSurfer Linux", "3T MRI Neuroinformatics", "3D Printing (STL)", "NIH DSMB"]
-  },
-  {
-    role: "Clinical Research Coordinator",
-    company: "Mayo Clinic",
-    period: "October 2019 — July 2021",
-    recruiterDescription:
-      "Orchestrated the operational lifecycle for multiple high-compliance, federally funded NIH studies from startup to closeout. Authored and managed complex IRB protocols, informed consent documents, and regulatory amendments. Served as departmental Epic Super User providing at-the-elbow clinical troubleshooting and leading staff training on Epic for Research modules, ensuring 100% data integrity through Source Document Verification (SDV).",
-    realityDescription:
-      "Led operational execution for federally funded NIH trials from startup to closeout. Authored IRB protocols, navigated multi-phase regulatory amendments, and served as departmental Epic Super User providing frontline EHR workflow optimization.",
-    tags: ["Mayo Clinic", "NIH Studies", "IRB Protocols", "Epic Super User", "Source Document Verification", "GxP Compliance", "Clinical Operations"]
-  },
-  {
-    role: "Desk Operations Specialist & Epic Super User",
-    company: "Mayo Clinic",
-    period: "February 2018 — October 2019",
-    recruiterDescription:
-      "Spearheaded departmental EHR data migration for the high-volume Division of Oncology, personally transcribing record-high volumes of complex patient orders to ensure continuity of clinical care. Provided frontline technical troubleshooting and partnered with IT analysts to test and validate system updates in UAT environments.",
-    realityDescription:
-      "Executed high-volume EHR data migrations for the Division of Oncology, validating complex clinical orders during system transitions and resolving critical frontline Epic workflow issues.",
-    tags: ["Mayo Clinic", "Division of Oncology", "EHR Data Migration", "Epic Super User", "UAT Testing", "Technical Troubleshooting"]
-  },
-  {
-    role: "Summer Operations Coordinator",
-    company: "Minnesota State University, Mankato",
-    period: "July 2017 — February 2018",
-    recruiterDescription:
-      "Orchestrated logistical and media operations for the final year of the Minnesota Vikings Summer Training Camp, managing high-security accommodations and broadcast setups for NFL teams. Managed conference finances, inventory systems, and client billing reconciliations for university summer programs.",
-    realityDescription:
-      "Coordinated logistical and broadcast infrastructure for the Minnesota Vikings Training Camp, managing venue operations, high-security access, and multi-departmental billing reconciliations.",
-    tags: ["Minnesota Vikings NFL Camp", "Operations Logistics", "Financial Reconciliation", "Facilities Management", "Media Coordination"]
-  }
-];
+import { useTerminology } from "@/components/providers/TerminologyProvider";
+import { dictionary } from "@/lib/i18n-dictionary";
 
 export const Timeline: React.FC = () => {
-  const [globalMode, setGlobalMode] = useState<"recruiter" | "reality">("reality");
+  const { simplified, setSimplified } = useTerminology();
+  const globalMode = simplified ? "recruiter" : "reality";
   const [cardOverrides, setCardOverrides] = useState<Record<number, "recruiter" | "reality">>({});
 
   const handleGlobalToggle = (mode: "recruiter" | "reality") => {
-    setGlobalMode(mode);
+    setSimplified(mode === "recruiter");
     setCardOverrides({});
   };
 
@@ -85,6 +26,9 @@ export const Timeline: React.FC = () => {
       [idx]: nextMode,
     }));
   };
+
+  // Centralize state career narratives: fetch either detailed or simplified based on global terminology context preference
+  const activeTimeline = simplified ? dictionary.simplified.timeline : dictionary.detailed.timeline;
 
   return (
     <div className="w-full max-w-3xl mx-auto py-6 sm:py-8 relative select-none">
@@ -125,7 +69,7 @@ export const Timeline: React.FC = () => {
       <div className="absolute left-3 sm:left-4 md:left-1/2 top-28 bottom-0 w-0.5 bg-gradient-to-b from-brand-cyan/30 via-brand-blue/20 to-zinc-900/10 -translate-x-1/2" />
 
       <div className="space-y-10 sm:space-y-14">
-        {timelineData.map((item, idx) => {
+        {activeTimeline.map((item, idx) => {
           const isLeft = idx % 2 === 0;
           const currentMode = cardOverrides[idx] ?? globalMode;
           const isReality = currentMode === "reality";

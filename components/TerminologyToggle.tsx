@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
-import { usePersistentState } from "@/hooks/usePersistentState";
+import { useTerminology } from "@/components/providers/TerminologyProvider";
 
 export function TerminologyToggle() {
-  const [simplified, setSimplified] = usePersistentState("simplified-terminology", false);
+  // Underlying state is managed via: usePersistentState("simplified-terminology", false)
+  const { simplified, setSimplified } = useTerminology();
 
   return (
     <div className="flex items-center gap-3 bg-zinc-900/40 border border-zinc-800/80 px-3 py-1.5 rounded-lg select-none">
