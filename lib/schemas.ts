@@ -34,11 +34,3 @@ export const SyncParamsSchema = z.object({
   batch: z.coerce.number().int().positive("Batch must be a positive integer").max(500, "Batch cannot exceed 500").default(50),
 });
 
-/**
- * Schema for transparency logs list query parameters
- */
-export const TransparencyLogsParamsSchema = z.object({
-  sort: z.enum(["asc", "desc"]).default("desc"),
-  page: z.coerce.number().int().positive("Page must be a positive integer").default(1),
-  limit: z.coerce.number().int().positive("Limit must be a positive integer").max(100, "Limit cannot exceed 100").default(20),
-});

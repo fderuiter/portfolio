@@ -7,6 +7,15 @@ const nextConfig: NextConfig = {
       exclude: ["error", "warn"],
     },
   },
+  async redirects() {
+    return [
+      {
+        source: "/transparency",
+        destination: "/proof",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default withSentryConfig(nextConfig, {

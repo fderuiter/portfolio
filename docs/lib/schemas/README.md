@@ -12,4 +12,3 @@
 - [RateLimitParamsSchema](variables/RateLimitParamsSchema.md)
 - [SyncParamsSchema](variables/SyncParamsSchema.md)
 - [TelemetryEventSchema](variables/TelemetryEventSchema.md)
-- [TransparencyLogsParamsSchema](variables/TransparencyLogsParamsSchema.md)
