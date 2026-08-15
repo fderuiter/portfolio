@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { IconShieldCheck, IconActivity, IconLock, IconRefresh, IconExternalLink } from "@tabler/icons-react";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { NextPrevNav } from "@/components/ui/NextPrevNav";
 
 interface TransparencyLog {
   id: string;
@@ -19,9 +21,11 @@ export default function TransparencyHub() {
   const [loadError, setLoadError] = useState("");
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
 
-  const fetchLogs = async () => {
+  const fetchLogs = useCallback(async (showLoading = false) => {
     try {
-      setLoading(true);
+      if (showLoading) {
+        setLoading(true);
+      }
       setLoadError("");
       const res = await fetch("/api/transparency/logs");
       if (!res.ok) {
@@ -36,17 +40,40 @@ export default function TransparencyHub() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Poll for updates every 15 seconds
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    fetchLogs();
+    let ignore = false;
+    fetch("/api/transparency/logs")
+      .then((res) => {
+        if (!res.ok) throw new Error(`Telemetry request failed with status ${res.status}`);
+        return res.json();
+      })
+      .then((data) => {
+        if (!ignore) {
+          setLogs(data);
+          setLastRefreshed(new Date());
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (!ignore) {
+          console.error("Failed to fetch logs:", err);
+          setLoadError("Live telemetry is temporarily unavailable. Existing records may be stale.");
+          setLoading(false);
+        }
+      });
+
     const interval = setInterval(() => {
       fetchLogs();
     }, 15000);
-    return () => clearInterval(interval);
-  }, []);
+
+    return () => {
+      ignore = true;
+      clearInterval(interval);
+    };
+  }, [fetchLogs]);
 
   const filteredLogs = logs.filter(log => filter === "All" || log.category === filter);
 
@@ -57,6 +84,21 @@ export default function TransparencyHub() {
       <div className="absolute top-64 right-1/4 w-[400px] h-[250px] bg-brand-blue/5 blur-[120px] pointer-events-none -z-10 rounded-full" />
 
       <div className="max-w-5xl mx-auto flex flex-col items-center relative z-10">
+        {/* Navigation Breadcrumb */}
+        <div className="w-full flex items-center justify-between gap-4 mb-6 border-b border-zinc-900 pb-4 flex-wrap">
+          <Breadcrumbs
+            items={[
+              { label: "Systems", href: "/#case-studies" },
+              { label: "Transparency Hub" },
+            ]}
+          />
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+              Live Telemetry &amp; Security Audits
+            </span>
+          </div>
+        </div>
+
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold font-mono text-white tracking-tight text-center mb-3">
           Platform <span className="text-brand-cyan">Transparency Hub</span>
         </h1>
@@ -124,7 +166,7 @@ export default function TransparencyHub() {
               Last updated: {lastRefreshed.toLocaleTimeString()}
             </span>
             <button 
-              onClick={fetchLogs} 
+              onClick={() => fetchLogs(true)} 
               disabled={loading}
               aria-label="Refresh logs"
               className="p-2 bg-zinc-950 border border-zinc-800 rounded-lg hover:text-brand-cyan hover:border-brand-cyan/50 transition-colors cursor-pointer disabled:opacity-50"
@@ -148,75 +190,84 @@ export default function TransparencyHub() {
             </div>
           ) : loadError && logs.length === 0 ? (
             <div className="py-12 px-6 text-center text-amber-200 font-mono text-sm leading-relaxed border border-amber-500/30 bg-amber-500/5 rounded-2xl" role="alert">
-              {loadError}
+              <p className="mb-2 font-bold">{loadError}</p>
+              <p className="text-xs text-zinc-400">Please check your network connection or verify API service metrics.</p>
             </div>
           ) : filteredLogs.length === 0 ? (
-            <div className="py-12 text-center text-zinc-500 font-mono text-sm border border-dashed border-zinc-800 rounded-2xl">
-              No transparency logs found for this category.
+            <div className="py-24 text-center text-zinc-500 font-mono text-sm border border-zinc-900 border-dashed rounded-2xl">
+              No transparency logs recorded in this category.
             </div>
           ) : (
             filteredLogs.map((log) => (
               <div 
-                key={log.id} 
-                className="group flex flex-col md:flex-row md:items-center p-4 bg-zinc-900/25 hover:bg-zinc-900/50 border border-zinc-800/80 hover:border-zinc-700/90 hover:shadow-[0_0_25px_rgba(6,182,212,0.05)] rounded-2xl transition-all duration-300 gap-4"
+                key={log.id}
+                className="p-5 bg-zinc-900/20 border border-zinc-800/60 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:border-zinc-700 transition-colors"
               >
-                {/* Category Icon & Time */}
-                <div className="flex items-center md:w-48 shrink-0 gap-3">
-                  <div className={`p-2 rounded-lg border flex items-center justify-center
-                    ${log.category === 'Security' ? 'bg-indigo-950/30 border-indigo-900/50 text-indigo-400' : ''}
-                    ${log.category === 'Reliability' ? 'bg-blue-950/30 border-blue-900/50 text-blue-400' : ''}
-                    ${log.category === 'Access' ? 'bg-emerald-950/30 border-emerald-900/50 text-emerald-400' : ''}
-                  `} aria-hidden="true">
-                    {log.category === 'Security' && <IconShieldCheck className="w-5 h-5" />}
-                    {log.category === 'Reliability' && <IconActivity className="w-5 h-5" />}
-                    {log.category === 'Access' && <IconLock className="w-5 h-5" />}
+                <div className="flex items-start gap-4">
+                  <div className="mt-1 p-2 bg-zinc-950 border border-zinc-800 rounded-xl text-brand-cyan">
+                    {log.category === "Security" && <IconShieldCheck className="w-4 h-4" />}
+                    {log.category === "Reliability" && <IconActivity className="w-4 h-4" />}
+                    {log.category === "Access" && <IconLock className="w-4 h-4" />}
                   </div>
-                  <div className="flex flex-col">
-                    <span className="text-xs font-bold text-zinc-300">{log.category}</span>
-                    <span className="text-[10px] font-mono text-zinc-500">
-                      {new Date(log.timestamp).toLocaleDateString()} {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
+                  <div>
+                    <div className="flex items-center gap-3 mb-1">
+                      <span className="text-xs font-mono font-bold text-neutral-200">
+                        {log.category.toUpperCase()}
+                      </span>
+                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
+                        log.status === "SUCCESS" ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" :
+                        log.status === "FAILURE" ? "bg-rose-500/10 border-rose-500/30 text-rose-400" :
+                        "bg-zinc-800 border-zinc-700 text-zinc-400"
+                      }`}>
+                        {log.status}
+                      </span>
+                    </div>
+                    <p className="text-xs font-mono text-zinc-400 leading-relaxed">
+                      {log.message}
+                    </p>
                   </div>
                 </div>
 
-                {/* Message */}
-                <div className="flex-1 text-sm text-zinc-400 leading-relaxed font-mono">
-                  {log.message}
-                </div>
-
-                {/* Status & External Link */}
-                <div className="flex items-center gap-4 shrink-0 mt-2 md:mt-0">
-                  <span className={`text-[10px] font-mono font-bold px-2.5 py-1 rounded-md border flex items-center gap-1.5
-                    ${log.status === 'SUCCESS' ? 'bg-emerald-950/20 text-emerald-400 border-emerald-900/40' : ''}
-                    ${log.status === 'FAILURE' ? 'bg-red-950/20 text-red-400 border-red-900/40' : ''}
-                    ${log.status === 'INFO' ? 'bg-zinc-800/50 text-zinc-300 border-zinc-700' : ''}
-                  `}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${
-                      log.status === 'SUCCESS' ? 'bg-emerald-400 animate-pulse' :
-                      log.status === 'FAILURE' ? 'bg-red-400 animate-pulse' :
-                      'bg-zinc-400'
-                    }`} />
-                    {log.status}
+                <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 border-zinc-900 pt-3 md:pt-0">
+                  <span className="text-[11px] font-mono text-zinc-600" suppressHydrationWarning>
+                    {new Date(log.timestamp).toLocaleString()}
                   </span>
-                  {log.link ? (
+                  {log.link && (
                     <a 
-                      href={log.link} 
-                      target="_blank" 
+                      href={log.link}
+                      target="_blank"
                       rel="noopener noreferrer"
-                      className="p-1.5 text-zinc-500 hover:text-brand-cyan hover:bg-brand-cyan/10 active:scale-95 bg-zinc-950 border border-zinc-800 hover:border-brand-cyan/40 rounded-lg transition-all cursor-pointer"
-                      aria-label={`View external source for ${log.category} event`}
-                      title="View External Proof"
+                      className="p-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-400 hover:text-brand-cyan hover:border-brand-cyan/50 transition-colors"
+                      aria-label="View external log source"
                     >
-                      <IconExternalLink className="w-4 h-4" />
+                      <IconExternalLink className="w-3.5 h-3.5" />
                     </a>
-                  ) : (
-                    <div className="w-[30px]" aria-hidden="true" /> // Spacer for alignment if no link
                   )}
                 </div>
               </div>
             ))
           )}
         </div>
+
+        {/* Sequential Next / Prev Flow */}
+        <NextPrevNav
+          prev={{
+            title: "Incident Alignment Simulator",
+            href: "/simulator",
+            label: "Systems Tool",
+            tag: "Incident Commander",
+          }}
+          next={{
+            title: "Schedule 1:1 Consultation",
+            href: "/schedule",
+            label: "Get In Touch",
+            tag: "Google Calendar Booking",
+          }}
+          backToHub={{
+            title: "Return to Portfolio",
+            href: "/",
+          }}
+        />
       </div>
     </div>
   );

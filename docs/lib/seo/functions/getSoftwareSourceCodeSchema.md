@@ -8,7 +8,7 @@
 
 > **getSoftwareSourceCodeSchema**(`study`, `stats`): `string`
 
-Defined in: [lib/seo.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L30)
+Defined in: [lib/seo.ts:147](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L147)
 
 Returns a specialized SoftwareSourceCode schema for dynamic Case Studies.
 Integrates database case study records with cached live GitHub telemetry statistics.
@@ -21,7 +21,7 @@ Integrates database case study records with cached live GitHub telemetry statist
 
 ### stats
 
-[`GitHubStats`](../../github/interfaces/GitHubStats.md) \| `null`
+`Partial`\<[`GitHubStats`](../../github/interfaces/GitHubStats.md)\> \| `null`
 
 ## Returns
 

@@ -15,19 +15,36 @@ interface AudioContextType {
   playKeystroke: (charCode: number) => void;
   playAutocomplete: () => void;
   playSuccess: () => void;
+  playSubmit: () => void;
+  playError: () => void;
   playHover: (pan?: number) => void;
   playSkillHover: () => void;
   bypassActive: boolean;
 }
 
+const defaultAudioContext: AudioContextType = {
+  volume: 0.3,
+  muted: true,
+  profile: "8-bit",
+  setVolume: () => {},
+  setMuted: () => {},
+  setProfile: () => {},
+  playNote: () => {},
+  playKeystroke: () => {},
+  playAutocomplete: () => {},
+  playSuccess: () => {},
+  playSubmit: () => {},
+  playError: () => {},
+  playHover: () => {},
+  playSkillHover: () => {},
+  bypassActive: false,
+};
+
 const AudioProviderContext = createContext<AudioContextType | null>(null);
 
 export function useAudio() {
   const context = useContext(AudioProviderContext);
-  if (!context) {
-    throw new Error("useAudio must be used within an AudioProvider");
-  }
-  return context;
+  return context || defaultAudioContext;
 }
 
 export function AudioProvider({ children }: { children: React.ReactNode }) {
@@ -227,6 +244,22 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const playSubmit = () => {
+    if (muted || bypassActive) return;
+    playNote(523.25, 0.06);
+    setTimeout(() => {
+      playNote(659.25, 0.08);
+    }, 50);
+  };
+
+  const playError = () => {
+    if (muted || bypassActive) return;
+    playNote(311.13, 0.08);
+    setTimeout(() => {
+      playNote(233.08, 0.12);
+    }, 60);
+  };
+
   const playHover = (pan?: number) => {
     if (muted || bypassActive) return;
     const freq = profile === "ambient" ? 440.00 : 880.00;
@@ -290,6 +323,8 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     playKeystroke,
     playAutocomplete,
     playSuccess,
+    playSubmit,
+    playError,
     playHover,
     playSkillHover,
     bypassActive

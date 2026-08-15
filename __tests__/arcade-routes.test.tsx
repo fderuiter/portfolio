@@ -179,7 +179,7 @@ describe("Arcade Dedicated Routes Suite", () => {
     await act(async () => {
       root.render(<WorkingWithDuckPage />);
     });
-    expect(container.textContent).toContain("Back to Arcade Hub");
+    expect(container.textContent).toContain("Arcade Hub");
     expect(container.textContent).toContain("Working With");
     expect(container.textContent).toContain("Duck");
     expect(container.textContent).toContain("Pet Simulation / Multitasking Arcade");
@@ -189,7 +189,7 @@ describe("Arcade Dedicated Routes Suite", () => {
     await act(async () => {
       root.render(<LaserLoonPage />);
     });
-    expect(container.textContent).toContain("Back to Arcade Hub");
+    expect(container.textContent).toContain("Arcade Hub");
     expect(container.textContent).toContain("Laser Loon:");
     expect(container.textContent).toContain("Cryo Bug Hunter");
   });
@@ -198,7 +198,7 @@ describe("Arcade Dedicated Routes Suite", () => {
     await act(async () => {
       root.render(<QuasiPuzzlerPage />);
     });
-    expect(container.textContent).toContain("Back to Arcade Hub");
+    expect(container.textContent).toContain("Arcade Hub");
     expect(container.textContent).toContain("Quasi-Perfect");
     expect(container.textContent).toContain("Puzzler");
   });
@@ -207,7 +207,7 @@ describe("Arcade Dedicated Routes Suite", () => {
     await act(async () => {
       root.render(<GarminWatchPage />);
     });
-    expect(container.textContent).toContain("Back to Arcade Hub");
+    expect(container.textContent).toContain("Arcade Hub");
     expect(container.textContent).toContain("Garmin Connect IQ");
     expect(container.textContent).toContain("32KB Memory Runner");
   });
@@ -216,7 +216,7 @@ describe("Arcade Dedicated Routes Suite", () => {
     await act(async () => {
       root.render(<ClinicalChaosPage />);
     });
-    expect(container.textContent).toContain("Back to Arcade Hub");
+    expect(container.textContent).toContain("Arcade Hub");
     expect(container.textContent).toContain("Clinical Trial Chaos:");
     expect(container.textContent).toContain("CDISC Compliance");
   });
@@ -225,7 +225,7 @@ describe("Arcade Dedicated Routes Suite", () => {
     await act(async () => {
       root.render(<RetroLabyrinthPage />);
     });
-    expect(container.textContent).toContain("Back to Arcade Hub");
+    expect(container.textContent).toContain("Arcade Hub");
     expect(container.textContent).toContain("Retro Labyrinth:");
     expect(container.textContent).toContain("Graveyard Roguelike");
   });

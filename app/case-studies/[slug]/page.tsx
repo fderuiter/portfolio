@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { SandboxTerminal } from "@/components/SandboxTerminal";
 import { IconTerminal } from "@tabler/icons-react";
 import { TracingBeam } from "@/components/ui/TracingBeam";
@@ -12,6 +11,8 @@ import { TelemetryTracker } from "@/components/TelemetryTracker";
 import { TerminologyToggle } from "@/components/TerminologyToggle";
 import SchemaFlowWorkspaceWrapper from "@/components/SchemaFlowWorkspaceWrapper";
 import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { NextPrevNav } from "@/components/ui/NextPrevNav";
 
 import type { Metadata } from "next";
 
@@ -62,12 +63,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!study) {
     return {
-      title: "Not Found",
+      title: "Case Study Not Found",
       description: "The requested case study was not found.",
     };
   }
 
-  // Strip Markdown tokens from editorial content for plain text meta descriptions
   const cleanDescription = study.editorial_content
     .replace(/\*\*/g, "")
     .replace(/`/g, "")
@@ -75,7 +75,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .slice(0, 160);
 
   return {
-    title: study.title,
+    title: `${study.title} | Case Study`,
     description: cleanDescription,
     alternates: {
       canonical: `/case-studies/${slug}`,
@@ -101,13 +101,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function CaseStudyPage({ params }: PageProps) {
   const { slug } = await params;
 
-  let study;
+  let allStudies = [];
   try {
-    study = await prisma.caseStudy.findUnique({
-      where: { slug },
+    allStudies = await prisma.caseStudy.findMany({
+      where: { published: true },
+      orderBy: { created_at: "asc" },
     });
-  } catch (err) {
-    console.error("Case study fetch exception:", err);
+  } catch {
+    allStudies = FALLBACK_CASE_STUDIES;
+  }
+
+  let study = allStudies.find((s) => s.slug === slug);
+  if (!study) {
     const isProduction = process.env.VERCEL_ENV === "production";
     const isMockEnv = process.env.CI === "true" || process.env.PLAYWRIGHT_TEST === "true" || !isProduction;
     if (isMockEnv) {
@@ -122,7 +127,10 @@ export default async function CaseStudyPage({ params }: PageProps) {
     notFound();
   }
 
-  // Fetch dynamic GitHub cached statistics to hydrate the JSON-LD schemas
+  const currentIndex = allStudies.findIndex((s) => s.slug === slug);
+  const prevStudy = currentIndex > 0 ? allStudies[currentIndex - 1] : allStudies[allStudies.length - 1];
+  const nextStudy = currentIndex < allStudies.length - 1 ? allStudies[currentIndex + 1] : allStudies[0];
+
   let stats = null;
   if (study.simulated_telemetry) {
     stats = getSimulatedStats(study.primary_language);
@@ -133,7 +141,6 @@ export default async function CaseStudyPage({ params }: PageProps) {
     }
   }
 
-  // Split tags by comma for badge rendering
   const tagsList = study.tags ? study.tags.split(",").map(t => t.trim()) : [];
 
   return (
@@ -152,22 +159,15 @@ export default async function CaseStudyPage({ params }: PageProps) {
 
       <div className="relative z-10 w-full max-w-3xl">
         <TracingBeam>
-          {/* Back Link */}
-          <Link
-            href="/"
-            className="text-xs font-mono font-bold text-brand-cyan hover:text-brand-cyan/80 transition-colors mb-10 inline-flex items-center gap-2 cursor-pointer group"
-          >
-            <svg
-              className="w-4 h-4 transform group-hover:-translate-x-1 transition-transform duration-300"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Core Feed
-          </Link>
+          {/* Breadcrumbs Navigation */}
+          <div className="mb-8">
+            <Breadcrumbs
+              items={[
+                { label: "Work Showcase", href: "/#case-studies" },
+                { label: study.title },
+              ]}
+            />
+          </div>
 
           {/* Title */}
           <h1 className="text-4xl md:text-5xl font-black tracking-tight text-neutral-100 mb-4 leading-tight">
@@ -249,6 +249,36 @@ export default async function CaseStudyPage({ params }: PageProps) {
               />
             </div>
           </article>
+
+          {/* Sequential Next / Previous Case Study Navigation */}
+          {prevStudy && nextStudy && (
+            <NextPrevNav
+              prev={
+                prevStudy.slug !== slug
+                  ? {
+                      title: prevStudy.title,
+                      href: `/case-studies/${prevStudy.slug}`,
+                      label: "Previous Case Study",
+                      tag: prevStudy.primary_language,
+                    }
+                  : null
+              }
+              next={
+                nextStudy.slug !== slug
+                  ? {
+                      title: nextStudy.title,
+                      href: `/case-studies/${nextStudy.slug}`,
+                      label: "Next Case Study",
+                      tag: nextStudy.primary_language,
+                    }
+                  : null
+              }
+              backToHub={{
+                title: "View All Case Studies",
+                href: "/#case-studies",
+              }}
+            />
+          )}
         </TracingBeam>
       </div>
     </main>

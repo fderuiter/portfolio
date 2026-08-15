@@ -1,19 +1,19 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import {
   IconCalendar,
   IconClock,
   IconVideo,
   IconMail,
   IconExternalLink,
-  IconArrowLeft,
   IconShieldCheck,
   IconCpu,
   IconBrain,
   IconCheck,
 } from "@tabler/icons-react";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { NextPrevNav } from "@/components/ui/NextPrevNav";
 
 const GOOGLE_CALENDAR_URL = "https://calendar.app.google/YnR5oxos7ZTLyvUp8";
 
@@ -46,14 +46,13 @@ export default function SchedulePage() {
 
       <div className="max-w-5xl mx-auto flex flex-col items-center relative z-10">
         {/* Navigation Breadcrumb */}
-        <div className="w-full flex items-center justify-between mb-8">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-xs font-mono text-zinc-400 hover:text-brand-cyan transition-colors px-3 py-1.5 rounded-lg bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700"
-          >
-            <IconArrowLeft className="w-3.5 h-3.5" />
-            <span>Return to Portfolio</span>
-          </Link>
+        <div className="w-full flex items-center justify-between mb-8 gap-4 flex-wrap">
+          <Breadcrumbs
+            items={[
+              { label: "Connect", href: "/#contact" },
+              { label: "Schedule Consultation" },
+            ]}
+          />
           <div className="flex items-center gap-2 text-xs font-mono text-brand-cyan bg-brand-cyan/10 border border-brand-cyan/20 px-3 py-1 rounded-full">
             <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
             <span>Calendar Live Sync</span>
@@ -172,10 +171,30 @@ export default function SchedulePage() {
             >
               <IconCheck className="w-4 h-4 text-brand-cyan" />
               <span>LinkedIn Profile</span>
-              <IconExternalLink className="w-3 h-3 text-zinc-500" />
+              <IconExternalLink className="w-3.5 h-3.5 text-zinc-500" />
             </a>
           </div>
         </div>
+
+        {/* Sequential Next / Prev Flow */}
+        <NextPrevNav
+          prev={{
+            title: "Platform Transparency Hub",
+            href: "/transparency",
+            label: "Systems & Security",
+            tag: "Verifiable Telemetry",
+          }}
+          next={{
+            title: "Arcade Games Hub",
+            href: "/arcade",
+            label: "Interactive Labs",
+            tag: "6 Playable Games",
+          }}
+          backToHub={{
+            title: "Return to Portfolio",
+            href: "/",
+          }}
+        />
       </div>
     </div>
   );

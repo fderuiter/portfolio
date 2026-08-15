@@ -20,6 +20,8 @@ import {
 } from "@/lib/proof-utils";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { useAudio } from "@/components/providers/AudioProvider";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { NextPrevNav } from "@/components/ui/NextPrevNav";
 
 interface Node {
   id: string;
@@ -713,6 +715,14 @@ export default function ProofWorkspacePage() {
 
       {/* Main Container */}
       <div className="flex-1 pt-24 pb-8 px-4 sm:px-6 flex flex-col gap-6 max-w-7xl mx-auto w-full">
+        {/* Navigation Breadcrumbs */}
+        <Breadcrumbs
+          items={[
+            { label: "Systems", href: "/#case-studies" },
+            { label: "Proof Workspace" },
+          ]}
+        />
+
         {/* Header Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-900 pb-5">
           <div>
@@ -1183,6 +1193,26 @@ export default function ProofWorkspacePage() {
             </div>
           )}
         </div>
+
+        {/* Sequential Next / Prev Flow */}
+        <NextPrevNav
+          prev={{
+            title: "Platform Transparency Hub",
+            href: "/transparency",
+            label: "Verification Hub",
+            tag: "Audit Logs & Security",
+          }}
+          next={{
+            title: "Incident Alignment Simulator",
+            href: "/simulator",
+            label: "Architecture Simulator",
+            tag: "Incident Commander",
+          }}
+          backToHub={{
+            title: "View Work Showcase",
+            href: "/#case-studies",
+          }}
+        />
       </div>
     </div>
   );

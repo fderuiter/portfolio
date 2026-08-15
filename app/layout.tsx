@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
-import { getPersonSchema } from "@/lib/seo";
+import { Footer } from "@/components/Footer";
+import { getPersonSchema, getWebsiteSchema } from "@/lib/seo";
 import { A11yProvider } from "@/components/providers/A11yProvider";
 import { AudioProvider } from "@/components/providers/AudioProvider";
 import { SearchProvider } from "@/components/providers/SearchProvider";
@@ -68,6 +69,12 @@ export default function RootLayout({
           }}
         />
         <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: getWebsiteSchema()
+          }}
+        />
+        <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
@@ -90,7 +97,10 @@ export default function RootLayout({
           <A11yProvider>
             <AudioProvider>
               <Navbar />
-              {children}
+              <div className="flex-grow flex flex-col">
+                {children}
+              </div>
+              <Footer />
               <Analytics />
               <SearchWrapper />
             </AudioProvider>

@@ -94,7 +94,7 @@ const branchingQuestions: Record<string, Question> = {
   },
 };
 
-export default function RecruiterSimulator() {
+export function SimulatorClient() {
   const { recordEvent } = useTelemetry();
   const { playNote, playSuccess } = useAudio();
   const [currentStep, setCurrentStep] = useState<string>("welcome");
