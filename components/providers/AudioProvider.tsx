@@ -112,6 +112,15 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (audioCtxRef.current) {
+        audioCtxRef.current.close().catch(() => {});
+        audioCtxRef.current = null;
+      }
+    };
+  }, []);
+
   const getAudioContext = (): AudioContext | null => {
     if (typeof window === "undefined") return null;
     if (!audioCtxRef.current) {
