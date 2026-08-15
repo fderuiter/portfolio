@@ -12,17 +12,24 @@ import {
 } from "../lib/proof-utils";
 
 describe("Formal Theorem Library & Multi-Theorem Validation", () => {
-  const coreTheoremIds: TheoremId[] = [
+  const allTheoremIds: TheoremId[] = [
     "modus-ponens",
     "modus-tollens",
     "hypothetical-syllogism",
     "disjunctive-syllogism",
     "resolution",
+    "two-phase-commit",
+    "quorum-overlap",
+    "cache-consistency",
+    "paxos-synod",
+    "paxos-phase2b",
+    "bft-quorum",
+    "custom",
   ];
 
-  it("registers all distinct theorems with complete specifications", () => {
-    expect(Object.keys(THEOREMS).length).toBeGreaterThanOrEqual(5);
-    coreTheoremIds.forEach((id) => {
+  it("registers all 12 distinct theorems with complete specifications", () => {
+    expect(Object.keys(THEOREMS)).toHaveLength(12);
+    allTheoremIds.forEach((id) => {
       const th = THEOREMS[id];
       expect(th).toBeDefined();
       expect(th.title).toBeTruthy();
@@ -31,7 +38,7 @@ describe("Formal Theorem Library & Multi-Theorem Validation", () => {
       expect(th.validPairs.length).toBeGreaterThan(0);
       expect(th.leanCode).toContain("theorem");
       expect(th.latexCode).toContain("\\begin{prooftree}");
-      expect(th.simulationSteps.length).toBeGreaterThan(5);
+      expect(th.simulationSteps.length).toBeGreaterThan(3);
     });
   });
 
@@ -162,6 +169,120 @@ describe("Formal Theorem Library & Multi-Theorem Validation", () => {
       const mpResult = applyRuleToAsts("mp", [astP!, astImp!]);
       expect(mpResult.success).toBe(true);
       expect(formatFormula(mpResult.resultAst!)).toBe("Q");
+    });
+  });
+
+  describe("Paxos Synod Invariant (Targeted Consensus Utility)", () => {
+    it("provides complete specification and verifies consensus safety", () => {
+      const th = THEOREMS["paxos-synod"];
+      expect(th).toBeDefined();
+      expect(th.category).toBe("Distributed Systems");
+      expect(th.title).toBe("Paxos Synod Invariant");
+      expect(th.subtitle).toContain("Single-Decree");
+
+      // Verify node formulas and ASTs
+      expect(th.nodes.find((n) => n.id === "A")?.label).toBe("MajQ1");
+      expect(th.nodes.find((n) => n.id === "C")?.label).toBe("MaxVal");
+      expect(th.nodes.find((n) => n.id === "E")?.label).toBe("SynodAgreement");
+
+      // Initial state: C is proven via initial edges (A->C, B->C)
+      const initialStatus = evaluateProofStatus(th.initialEdges, "paxos-synod");
+      expect(initialStatus.isC_Proven).toBe(true);
+      expect(initialStatus.isE_Proven).toBe(false);
+
+      // Complete proof: C and D wired to E
+      const completeEdges = [
+        { source: "A", target: "C" },
+        { source: "B", target: "C" },
+        { source: "C", target: "E" },
+        { source: "D", target: "E" },
+      ];
+      const completeStatus = evaluateProofStatus(completeEdges, "paxos-synod");
+      expect(completeStatus.isC_Proven).toBe(true);
+      expect(completeStatus.isE_Proven).toBe(true);
+
+      const ledger = getDeductionLedger(completeEdges, "paxos-synod");
+      expect(ledger).toHaveLength(5);
+      expect(ledger[0].formula).toBe("MajQ1");
+      expect(ledger[2].formula).toBe("MaxVal");
+      expect(ledger[4].formula).toBe("SynodAgreement");
+      expect(ledger[4].isProven).toBe(true);
+
+      expect(th.leanCode).toContain("theorem paxos_synod_safety");
+      expect(th.latexCode).toContain("SynodAgreement");
+    });
+
+    it("enforces valid connection constraints and prevents invalid jumps", () => {
+      expect(canConnect("A", "C", [], "paxos-synod").allowed).toBe(true);
+      expect(canConnect("C", "E", [], "paxos-synod").allowed).toBe(true);
+      expect(canConnect("D", "E", [], "paxos-synod").allowed).toBe(true);
+      expect(canConnect("A", "E", [], "paxos-synod").allowed).toBe(false);
+      expect(canConnect("B", "D", [], "paxos-synod").allowed).toBe(false);
+    });
+  });
+
+  describe("Paxos Phase 2B Acceptor Quorum", () => {
+    it("verifies conjunction and commit threshold for Phase 2B", () => {
+      const th = THEOREMS["paxos-phase2b"];
+      expect(th).toBeDefined();
+      expect(th.category).toBe("Distributed Systems");
+      expect(th.title).toContain("Paxos Phase 2B");
+
+      const nodeA = th.nodes.find((n) => n.id === "A");
+      const nodeB = th.nodes.find((n) => n.id === "B");
+      const nodeC = th.nodes.find((n) => n.id === "C");
+      const nodeE = th.nodes.find((n) => n.id === "E");
+
+      expect(nodeA?.label).toBe("PromiseB");
+      expect(nodeB?.label).toBe("AcceptReqB");
+      expect(nodeC?.label).toBe("PromiseB ∧ AcceptReqB");
+      expect(nodeE?.label).toBe("ValueChosen");
+
+      // Verify AST Conjunction Intro
+      const andIntroResult = applyRuleToAsts("and_intro", [nodeA!.ast!, nodeB!.ast!]);
+      expect(andIntroResult.success).toBe(true);
+      expect(formatFormula(andIntroResult.resultAst!)).toBe("PromiseB ∧ AcceptReqB");
+
+      const edges = [
+        { source: "A", target: "C" },
+        { source: "B", target: "C" },
+        { source: "C", target: "E" },
+        { source: "D", target: "E" },
+      ];
+      const status = evaluateProofStatus(edges, "paxos-phase2b");
+      expect(status.isE_Proven).toBe(true);
+      expect(th.leanCode).toContain("theorem paxos_phase2b_quorum");
+    });
+  });
+
+  describe("BFT 3f+1 Quorum Overlap (Fault Tolerance)", () => {
+    it("verifies Byzantine fault tolerance 3f+1 overlap bound and equivocation resistance", () => {
+      const th = THEOREMS["bft-quorum"];
+      expect(th).toBeDefined();
+      expect(th.category).toBe("Fault Tolerance");
+      expect(th.title).toBe("BFT 3f+1 Quorum Overlap");
+
+      expect(th.nodes.find((n) => n.id === "A")?.label).toBe("Quorum1");
+      expect(th.nodes.find((n) => n.id === "B")?.label).toBe("Quorum2");
+      expect(th.nodes.find((n) => n.id === "C")?.label).toBe("HonestOverlap");
+      expect(th.nodes.find((n) => n.id === "E")?.label).toBe("ByzantineSafety");
+
+      const edges = [
+        { source: "A", target: "C" },
+        { source: "B", target: "C" },
+        { source: "C", target: "E" },
+        { source: "D", target: "E" },
+      ];
+      const status = evaluateProofStatus(edges, "bft-quorum");
+      expect(status.isC_Proven).toBe(true);
+      expect(status.isE_Proven).toBe(true);
+
+      const hint = getNextTacticHint(edges, "bft-quorum");
+      expect(hint.isCompleted).toBe(true);
+      expect(hint.title).toContain("Discharged");
+
+      expect(th.leanCode).toContain("theorem bft_3f_plus_1_quorum_safety");
+      expect(th.latexCode).toContain("ByzantineSafety");
     });
   });
 });

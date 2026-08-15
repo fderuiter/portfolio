@@ -8,7 +8,7 @@
 
 > **calculateCockcroftGaultCrCl**(`age`, `weightKg`, `serumCrMgDl`, `isFemale`): `number`
 
-Defined in: [lib/crf/ast-evaluator.ts:336](https://github.com/fderuiter/portfolio/blob/main/lib/crf/ast-evaluator.ts#L336)
+Defined in: [lib/crf/ast-evaluator.ts:937](https://github.com/fderuiter/portfolio/blob/main/lib/crf/ast-evaluator.ts#L937)
 
 Calculates Cockcroft-Gault Creatinine Clearance (CrCl) in mL/min.
 

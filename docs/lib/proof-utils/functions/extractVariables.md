@@ -8,7 +8,7 @@
 
 > **extractVariables**(`ast`): `string`[]
 
-Defined in: [lib/proof-utils.ts:380](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L380)
+Defined in: [lib/proof-utils.ts:415](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L415)
 
 Extracts unique proposition variable names from an AST.
 
@@ -16,7 +16,7 @@ Extracts unique proposition variable names from an AST.
 
 ### ast
 
-[`PropAst`](../type-aliases/PropAst.md)
+[`PropAst`](../type-aliases/PropAst.md) \| `null` \| `undefined`
 
 ## Returns
 

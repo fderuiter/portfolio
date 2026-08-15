@@ -8,4 +8,4 @@
 
 > **ComplianceSeverity** = `"error"` \| `"warning"` \| `"notice"`
 
-Defined in: [lib/crf/types.ts:226](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L226)
+Defined in: [lib/crf/types.ts:242](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L242)

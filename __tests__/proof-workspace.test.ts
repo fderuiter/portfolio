@@ -5,6 +5,8 @@ import {
   evaluateProofStatus,
   canConnect,
   getNextTacticHint,
+  getDeductionLedger,
+  pruneStepOrNode,
   type Edge,
 } from "../lib/proof-utils";
 
@@ -148,6 +150,124 @@ describe("Logic Proof Workspace Utilities", () => {
       expect(hint.stepNumber).toBe(3);
       expect(hint.isCompleted).toBe(true);
       expect(hint.title).toContain("Q.E.D.");
+    });
+  });
+
+  describe("pruneStepOrNode (Essential Focus Step Deletion)", () => {
+    it("prunes intermediate lemma step 3 and cascades to remove both incoming and downstream edges", () => {
+      const fullEdges: Edge[] = [
+        { source: "A", target: "C" },
+        { source: "B", target: "C" },
+        { source: "C", target: "E" },
+        { source: "D", target: "E" },
+      ];
+
+      // Prune Step 3 (Node C)
+      const res = pruneStepOrNode(3, fullEdges, "modus-ponens");
+      expect(res.success).toBe(true);
+      expect(res.prunedCount).toBe(3); // A->C, B->C, C->E
+      expect(res.prunedNodeId).toBe("C");
+      expect(res.newEdges).toEqual([{ source: "D", target: "E" }]);
+
+      // Verify that after pruning C, intermediate status is false and proof status is incomplete
+      const newStatus = evaluateProofStatus(res.newEdges, "modus-ponens");
+      expect(newStatus.isC_Proven).toBe(false);
+      expect(newStatus.isE_Proven).toBe(false);
+    });
+
+    it("prunes conclusion step 5 while preserving intermediate lemma edges", () => {
+      const fullEdges: Edge[] = [
+        { source: "A", target: "C" },
+        { source: "B", target: "C" },
+        { source: "C", target: "E" },
+        { source: "D", target: "E" },
+      ];
+
+      // Prune Step 5 (Node E)
+      const res = pruneStepOrNode(5, fullEdges, "modus-ponens");
+      expect(res.success).toBe(true);
+      expect(res.prunedCount).toBe(2); // C->E, D->E
+      expect(res.prunedNodeId).toBe("E");
+      expect(res.newEdges).toEqual([
+        { source: "A", target: "C" },
+        { source: "B", target: "C" },
+      ]);
+
+      // Intermediate is still proven, but goal conclusion is no longer proven
+      const newStatus = evaluateProofStatus(res.newEdges, "modus-ponens");
+      expect(newStatus.isC_Proven).toBe(true);
+      expect(newStatus.isE_Proven).toBe(false);
+    });
+
+    it("accepts node IDs as strings (case-insensitive) for pruning", () => {
+      const fullEdges: Edge[] = [
+        { source: "A", target: "C" },
+        { source: "B", target: "C" },
+      ];
+
+      const res = pruneStepOrNode("c", fullEdges, "modus-ponens");
+      expect(res.success).toBe(true);
+      expect(res.prunedCount).toBe(2);
+      expect(res.newEdges).toEqual([]);
+    });
+
+    it("protects foundational premises from deletion as immutable axioms", () => {
+      const edges: Edge[] = [
+        { source: "A", target: "C" },
+        { source: "B", target: "C" },
+      ];
+
+      // Premise 1 (Step 1 / Node A)
+      const res1 = pruneStepOrNode(1, edges, "modus-ponens");
+      expect(res1.success).toBe(false);
+      expect(res1.reason).toContain("immutable axiom");
+
+      // Premise 2 (Step 2 / Node B)
+      const res2 = pruneStepOrNode("B", edges, "modus-ponens");
+      expect(res2.success).toBe(false);
+      expect(res2.reason).toContain("immutable axiom");
+
+      // Premise 3 (Step 4 / Node D)
+      const res4 = pruneStepOrNode(4, edges, "modus-ponens");
+      expect(res4.success).toBe(false);
+      expect(res4.reason).toContain("immutable axiom");
+    });
+
+    it("handles out of bounds step numbers and invalid node IDs", () => {
+      const edges: Edge[] = [];
+      const resOOB = pruneStepOrNode(99, edges, "modus-ponens");
+      expect(resOOB.success).toBe(false);
+      expect(resOOB.reason).toContain("out of bounds");
+
+      const resInvalid = pruneStepOrNode("Z", edges, "modus-ponens");
+      expect(resInvalid.success).toBe(false);
+      expect(resInvalid.reason).toContain("not found");
+    });
+  });
+
+  describe("getDeductionLedger Deletability Flags", () => {
+    it("marks only proven derived steps as deletable and foundational premises as undeletable", () => {
+      // Incomplete proof (no edges)
+      const ledgerEmpty = getDeductionLedger([], "modus-ponens");
+      expect(ledgerEmpty[0].isDeletable).toBe(false); // Premise 1
+      expect(ledgerEmpty[1].isDeletable).toBe(false); // Premise 2
+      expect(ledgerEmpty[2].isDeletable).toBe(false); // Pending Lemma (Step 3)
+      expect(ledgerEmpty[3].isDeletable).toBe(false); // Premise 3
+      expect(ledgerEmpty[4].isDeletable).toBe(false); // Pending Conclusion (Step 5)
+
+      // Completed proof
+      const fullEdges: Edge[] = [
+        { source: "A", target: "C" },
+        { source: "B", target: "C" },
+        { source: "C", target: "E" },
+        { source: "D", target: "E" },
+      ];
+      const ledgerFull = getDeductionLedger(fullEdges, "modus-ponens");
+      expect(ledgerFull[0].isDeletable).toBe(false); // Premise 1
+      expect(ledgerFull[1].isDeletable).toBe(false); // Premise 2
+      expect(ledgerFull[2].isDeletable).toBe(true);  // Proven Lemma (Step 3)
+      expect(ledgerFull[3].isDeletable).toBe(false); // Premise 3
+      expect(ledgerFull[4].isDeletable).toBe(true);  // Proven Conclusion (Step 5)
     });
   });
 });

@@ -10,6 +10,10 @@ import {
   checkSecretLeaks,
   checkMigrationGuard,
   checkHydrationSafety,
+  checkAccessibilityStandards,
+  checkDocumentationParity,
+  checkOpenApiParity,
+  checkDefectRemediationInvariants,
   runDiagnostics,
   printDoctorReport,
 } from "@/lib/dx/doctor";
@@ -167,14 +171,172 @@ describe("DX Invariant Doctor Engine", () => {
     });
   });
 
+  describe("checkDocumentationParity", () => {
+    it("warns if docs directory is missing", () => {
+      const result = checkDocumentationParity(tempDir, false);
+      expect(result.status).toBe("warn");
+      expect(result.message).toContain("docs/ directory does not exist");
+    });
+
+    it("passes when docs directory exists without drift", () => {
+      const docsDir = path.join(tempDir, "docs");
+      fs.mkdirSync(docsDir, { recursive: true });
+      fs.writeFileSync(path.join(docsDir, "README.md"), "# Docs");
+
+      const result = checkDocumentationParity(tempDir, false);
+      expect(result.status).toBe("pass");
+    });
+  });
+
+  describe("checkOpenApiParity", () => {
+    it("warns if openapi.json or generator script is missing", () => {
+      const result = checkOpenApiParity(tempDir, false);
+      expect(result.status).toBe("warn");
+      expect(result.message).toContain("not found");
+    });
+
+    it("fails when an app/api route is missing from openapi.json", () => {
+      const apiDir = path.join(tempDir, "app", "api", "metrics");
+      fs.mkdirSync(apiDir, { recursive: true });
+      fs.writeFileSync(path.join(apiDir, "route.ts"), "export async function GET() { return null; }");
+
+      const scriptsDir = path.join(tempDir, "scripts");
+      fs.mkdirSync(scriptsDir, { recursive: true });
+      fs.writeFileSync(path.join(scriptsDir, "generate-openapi.ts"), "// generator");
+
+      fs.writeFileSync(
+        path.join(tempDir, "openapi.json"),
+        JSON.stringify({ openapi: "3.0.0", paths: { "/api/other": {} } })
+      );
+
+      const result = checkOpenApiParity(tempDir, false);
+      expect(result.status).toBe("fail");
+      expect(result.message).toContain("1 route(s) missing from openapi.json");
+      expect(result.details?.[0]).toContain("/api/metrics");
+    });
+
+    it("passes when all app/api routes are documented in openapi.json", () => {
+      const apiDir = path.join(tempDir, "app", "api", "telemetry");
+      fs.mkdirSync(apiDir, { recursive: true });
+      fs.writeFileSync(path.join(apiDir, "route.ts"), "export async function GET() { return null; }");
+
+      const scriptsDir = path.join(tempDir, "scripts");
+      fs.mkdirSync(scriptsDir, { recursive: true });
+      fs.writeFileSync(path.join(scriptsDir, "generate-openapi.ts"), "// generator");
+
+      fs.writeFileSync(
+        path.join(tempDir, "openapi.json"),
+        JSON.stringify({ openapi: "3.0.0", paths: { "/api/telemetry": {} } })
+      );
+
+      const result = checkOpenApiParity(tempDir, false);
+      expect(result.status).toBe("pass");
+      expect(result.message).toContain("All app/api routes are documented");
+    });
+  });
+
+  describe("checkAccessibilityStandards", () => {
+    it("fails when app/layout.tsx is missing skip link, main landmark, or announcer provider", () => {
+      const appDir = path.join(tempDir, "app");
+      fs.mkdirSync(appDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(appDir, "layout.tsx"),
+        "export default function Layout({ children }: { children: React.ReactNode }) { return <div>{children}</div>; }"
+      );
+
+      const result = checkAccessibilityStandards(tempDir, false);
+      expect(result.status).toBe("fail");
+      expect(result.details?.length).toBeGreaterThan(0);
+    });
+
+    it("passes when app/layout.tsx satisfies all accessibility landmark requirements", () => {
+      const appDir = path.join(tempDir, "app");
+      fs.mkdirSync(appDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(appDir, "layout.tsx"),
+        `import { SkipToContent } from "@/components/SkipToContent";
+import { A11yProvider } from "@/components/providers/A11yProvider";
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <body>
+      <SkipToContent />
+      <A11yProvider>
+        <main id="main-content">{children}</main>
+      </A11yProvider>
+    </body>
+  );
+}`
+      );
+
+      const result = checkAccessibilityStandards(tempDir, false);
+      expect(result.status).toBe("pass");
+    });
+
+    it("auto-fixes missing skip link and main landmarks when fix=true", () => {
+      const appDir = path.join(tempDir, "app");
+      fs.mkdirSync(appDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(appDir, "layout.tsx"),
+        `import { A11yProvider } from "@/components/providers/A11yProvider";
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <body>
+      <A11yProvider>
+        <div className="flex-grow flex flex-col">{children}</div>
+      </A11yProvider>
+    </body>
+  );
+}`
+      );
+
+      const fixResult = checkAccessibilityStandards(tempDir, true);
+      expect(fixResult.status).toBe("fixed");
+
+      const updated = fs.readFileSync(path.join(appDir, "layout.tsx"), "utf-8");
+      expect(updated).toContain("SkipToContent");
+      expect(updated).toContain('id="main-content"');
+    });
+  });
+
   describe("checkHydrationSafety", () => {
-    it("passes on deterministic components without hydration antipatterns", () => {
+    it("passes when no hydration anti-patterns are found", () => {
       const compDir = path.join(tempDir, "components");
       fs.mkdirSync(compDir, { recursive: true });
-      fs.writeFileSync(path.join(compDir, "Pure.tsx"), "export const Pure = () => <div>Hello</div>;");
+      fs.writeFileSync(
+        path.join(compDir, "TestComp.tsx"),
+        "export function TestComp() { return <div>Static text</div>; }"
+      );
 
       const result = checkHydrationSafety(tempDir);
       expect(result.status).toBe("pass");
+    });
+
+    it("warns when unsuppressed Math.random is found in JSX", () => {
+      const compDir = path.join(tempDir, "components");
+      fs.mkdirSync(compDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(compDir, "TestComp.tsx"),
+        "export function TestComp() { return <div>{Math.random()}</div>; }"
+      );
+
+      const result = checkHydrationSafety(tempDir);
+      expect(result.status).toBe("warn");
+      expect(result.details?.[0]).toContain("Math.random()");
+    });
+  });
+
+  describe("checkDefectRemediationInvariants", () => {
+    it("fails when regression test suite or ADR 0007 are missing", () => {
+      const result = checkDefectRemediationInvariants(tempDir);
+      expect(result.status).toBe("fail");
+      expect(result.message).toContain("defect remediation invariant violation");
+    });
+
+    it("passes when all computational engines and regression suites are verified", () => {
+      const workspaceRoot = path.resolve(__dirname, "..");
+      const result = checkDefectRemediationInvariants(workspaceRoot);
+      expect(result.status).toBe("pass");
+      expect(result.category).toBe("quality");
     });
   });
 

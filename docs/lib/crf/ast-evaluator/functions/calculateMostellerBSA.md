@@ -8,7 +8,7 @@
 
 > **calculateMostellerBSA**(`heightCm`, `weightKg`): `number`
 
-Defined in: [lib/crf/ast-evaluator.ts:309](https://github.com/fderuiter/portfolio/blob/main/lib/crf/ast-evaluator.ts#L309)
+Defined in: [lib/crf/ast-evaluator.ts:910](https://github.com/fderuiter/portfolio/blob/main/lib/crf/ast-evaluator.ts#L910)
 
 Calculates Mosteller Body Surface Area (BSA) in m^2.
 

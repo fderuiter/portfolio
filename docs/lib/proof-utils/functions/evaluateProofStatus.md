@@ -8,7 +8,7 @@
 
 > **evaluateProofStatus**(`edges`, `theoremId?`): `object`
 
-Defined in: [lib/proof-utils.ts:1549](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L1549)
+Defined in: [lib/proof-utils.ts:2130](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L2130)
 
 Evaluates proof logical completion status based on graph edges and ASTs.
 

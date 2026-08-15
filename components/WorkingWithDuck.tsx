@@ -1495,9 +1495,29 @@ export const WorkingWithDuck: React.FC = () => {
   // Main 60 FPS Canvas Game Loop
   useEffect(() => {
     let isRunning = true;
+    let isContextLost = false;
+    const canvas = canvasRef.current;
+
+    const handleContextLost = (e: Event) => {
+      e.preventDefault();
+      isContextLost = true;
+      if (animFrameIdRef.current) {
+        cancelAnimationFrame(animFrameIdRef.current);
+      }
+    };
+
+    const handleContextRestored = () => {
+      isContextLost = false;
+      animFrameIdRef.current = requestAnimationFrame(render);
+    };
+
+    if (canvas) {
+      canvas.addEventListener("contextlost", handleContextLost);
+      canvas.addEventListener("contextrestored", handleContextRestored);
+    }
 
     const render = () => {
-      if (!isRunning) return;
+      if (!isRunning || isContextLost) return;
 
       const state = gameStateRef.current;
 
@@ -1519,7 +1539,6 @@ export const WorkingWithDuck: React.FC = () => {
       }
 
       // Draw canvas frame
-      const canvas = canvasRef.current;
       if (canvas) {
         const ctx = canvas.getContext("2d");
         if (ctx) {
@@ -1534,6 +1553,10 @@ export const WorkingWithDuck: React.FC = () => {
 
     return () => {
       isRunning = false;
+      if (canvas) {
+        canvas.removeEventListener("contextlost", handleContextLost);
+        canvas.removeEventListener("contextrestored", handleContextRestored);
+      }
       if (animFrameIdRef.current) {
         cancelAnimationFrame(animFrameIdRef.current);
       }

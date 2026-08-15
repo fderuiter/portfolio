@@ -610,9 +610,28 @@ export const LaserLoon: React.FC = () => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    let isContextLost = false;
     let lastFrameTime = performance.now();
 
+    const handleContextLost = (e: Event) => {
+      e.preventDefault();
+      isContextLost = true;
+      if (animFrameIdRef.current) {
+        cancelAnimationFrame(animFrameIdRef.current);
+      }
+    };
+
+    const handleContextRestored = () => {
+      isContextLost = false;
+      lastFrameTime = performance.now();
+      animFrameIdRef.current = requestAnimationFrame(renderLoop);
+    };
+
+    canvas.addEventListener("contextlost", handleContextLost);
+    canvas.addEventListener("contextrestored", handleContextRestored);
+
     const renderLoop = (time: number) => {
+      if (isContextLost) return;
       const dt = Math.min(32, time - lastFrameTime) / 16.666;
       lastFrameTime = time;
 
@@ -1131,6 +1150,8 @@ export const LaserLoon: React.FC = () => {
     animFrameIdRef.current = requestAnimationFrame(renderLoop);
 
     return () => {
+      canvas.removeEventListener("contextlost", handleContextLost);
+      canvas.removeEventListener("contextrestored", handleContextRestored);
       if (animFrameIdRef.current) {
         cancelAnimationFrame(animFrameIdRef.current);
       }

@@ -8,15 +8,13 @@
 
 > **useTelemetry**(): `object`
 
-Defined in: [hooks/useTelemetry.ts:25](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L25)
+Defined in: [hooks/useTelemetry.ts:185](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L185)
 
-Custom hook implementing a robust Stale-While-Revalidate (SWR) telemetry system.
+Custom hook implementing a robust Stale-While-Revalidate (SWR) telemetry system with useSyncExternalStore.
 Hydrates state instantly from LocalStorage cache to prevent Cumulative Layout Shifts (CLS),
-schedules silent background syncs, and supports optimistic layout updates.
+schedules background syncs, and supports optimistic updates with automated rollback and retry queuing.
 
 ## Returns
-
-`object`
 
 ### recordEvent
 
@@ -38,7 +36,9 @@ schedules silent background syncs, and supports optimistic layout updates.
 
 ### refetch
 
-> **refetch**: () => `Promise`\<`void`\> = `fetchTelemetry`
+> **refetch**: () => `Promise`\<`void`\> = `fetchTelemetryAggregates`
+
+Fetch latest telemetry aggregates from the server.
 
 #### Returns
 
@@ -46,8 +46,8 @@ schedules silent background syncs, and supports optimistic layout updates.
 
 ### syncFailed
 
-> **syncFailed**: `boolean`
+> **syncFailed**: `boolean` = `store.syncFailed`
 
 ### telemetry
 
-> **telemetry**: [`TelemetryData`](../type-aliases/TelemetryData.md)
+> **telemetry**: [`TelemetryData`](../type-aliases/TelemetryData.md) = `store.telemetry`

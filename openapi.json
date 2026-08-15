@@ -6,6 +6,37 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/case-studies": {
+      "get": {
+        "summary": "Retrieve published case studies",
+        "description": "Fetches a list of published case studies including title, slug, primary language, and tags.",
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of case studies",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CaseStudySummary"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/telemetry": {
       "get": {
         "summary": "Retrieve compiled telemetry metrics",
@@ -189,6 +220,47 @@
   },
   "components": {
     "schemas": {
+      "CaseStudySummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "primary_language": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "title",
+          "primary_language",
+          "tags"
+        ]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
       "TelemetryEvent": {
         "type": "object",
         "properties": {

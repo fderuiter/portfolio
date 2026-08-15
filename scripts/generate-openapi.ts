@@ -1,8 +1,33 @@
 import * as fs from "fs";
 import * as path from "path";
 
+// Helper to recursively find API route files
+function findRouteFiles(dir: string): string[] {
+  if (!fs.existsSync(dir)) return [];
+  const results: string[] = [];
+  const list = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of list) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...findRouteFiles(fullPath));
+    } else if (/^route\.(ts|js)$/.test(entry.name)) {
+      results.push(fullPath);
+    }
+  }
+  return results;
+}
+
+export function getExpectedApiRoutes(workspaceRoot: string): string[] {
+  const apiDir = path.join(workspaceRoot, "app", "api");
+  const routeFiles = findRouteFiles(apiDir);
+  return routeFiles.map((file) => {
+    const rel = path.relative(apiDir, path.dirname(file)).replace(/\\/g, "/");
+    return rel === "" ? "/api" : `/api/${rel}`;
+  });
+}
+
 // Construct OpenAPI 3.0.0 specification using the declarative Zod schemas
-const openApiSpec = {
+export const openApiSpec = {
   openapi: "3.0.0",
   info: {
     title: "Portfolio Service API",
@@ -10,6 +35,37 @@ const openApiSpec = {
     version: "1.0.0",
   },
   paths: {
+    "/api/case-studies": {
+      get: {
+        summary: "Retrieve published case studies",
+        description: "Fetches a list of published case studies including title, slug, primary language, and tags.",
+        responses: {
+          200: {
+            description: "Successful retrieval of case studies",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: {
+                    $ref: "#/components/schemas/CaseStudySummary",
+                  },
+                },
+              },
+            },
+          },
+          500: {
+            description: "Internal server error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     "/api/telemetry": {
       get: {
         summary: "Retrieve compiled telemetry metrics",
@@ -158,6 +214,27 @@ const openApiSpec = {
   },
   components: {
     schemas: {
+      CaseStudySummary: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+          slug: { type: "string" },
+          title: { type: "string" },
+          primary_language: { type: "string" },
+          tags: {
+            type: "array",
+            items: { type: "string" },
+          },
+        },
+        required: ["id", "slug", "title", "primary_language", "tags"],
+      },
+      ErrorResponse: {
+        type: "object",
+        properties: {
+          error: { type: "string" },
+        },
+        required: ["error"],
+      },
       TelemetryEvent: {
         type: "object",
         properties: {
@@ -240,28 +317,61 @@ const openApiSpec = {
   },
 };
 
-// Target location to save the spec file
-const specFilePath = path.join(__dirname, "../openapi.json");
-const generatedJson = JSON.stringify(openApiSpec, null, 2);
+export function generateOpenApi(workspaceRoot: string = path.resolve(__dirname, "..")): {
+  generatedJson: string;
+  missingRoutes: string[];
+  hasDrift: boolean;
+} {
+  const specFilePath = path.join(workspaceRoot, "openapi.json");
+  const expectedRoutes = getExpectedApiRoutes(workspaceRoot);
+  const documentedRoutes = Object.keys(openApiSpec.paths);
 
-let existingJson = "";
-if (fs.existsSync(specFilePath)) {
-  existingJson = fs.readFileSync(specFilePath, "utf8");
-}
+  const missingRoutes = expectedRoutes.filter((r) => !documentedRoutes.includes(r));
+  const generatedJson = JSON.stringify(openApiSpec, null, 2);
 
-const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
-
-if (existingJson !== generatedJson) {
-  if (isCI) {
-    console.error("❌ ERROR: The API schemas have been modified, but openapi.json is not updated!");
-    console.error("Please run the generation script locally ('npx tsx scripts/generate-openapi.ts') and commit the updated 'openapi.json' file.");
-    process.exit(1);
-  } else {
-    fs.writeFileSync(specFilePath, generatedJson, "utf8");
-    console.log("✅ Successfully updated openapi.json in the repository.");
+  let existingJson = "";
+  if (fs.existsSync(specFilePath)) {
+    existingJson = fs.readFileSync(specFilePath, "utf8");
   }
-} else {
-  console.log("✅ openapi.json is fully up-to-date with current schemas.");
+
+  const hasDrift = existingJson !== generatedJson;
+
+  return {
+    generatedJson,
+    missingRoutes,
+    hasDrift,
+  };
 }
 
-process.exit(0);
+function main() {
+  const root = path.resolve(__dirname, "..");
+  const { generatedJson, missingRoutes, hasDrift } = generateOpenApi(root);
+  const specFilePath = path.join(root, "openapi.json");
+
+  if (missingRoutes.length > 0) {
+    console.error(`❌ [OPENAPI ERROR] The following app/api routes are not documented in OpenAPI spec:`);
+    for (const r of missingRoutes) {
+      console.error(`  • ${r}`);
+    }
+    process.exit(1);
+  }
+
+  const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
+
+  if (hasDrift) {
+    if (isCI) {
+      console.error("❌ ERROR: The API schemas have been modified, but openapi.json is not updated!");
+      console.error("Please run the generation script locally ('npx tsx scripts/generate-openapi.ts') and commit the updated 'openapi.json' file.");
+      process.exit(1);
+    } else {
+      fs.writeFileSync(specFilePath, generatedJson, "utf8");
+      console.log("✅ Successfully updated openapi.json in the repository.");
+    }
+  } else {
+    console.log("✅ openapi.json is fully up-to-date with current schemas and all API routes are covered.");
+  }
+}
+
+if (typeof process.env.VITEST === "undefined" && require.main === module) {
+  main();
+}

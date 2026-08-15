@@ -1,0 +1,72 @@
+name: Synthetic User Probes & Journey Monitoring
+
+on:
+  schedule:
+    # Run every 30 minutes continuously to detect silent production regressions
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "Target URL to run synthetic probes against (default: production)"
+        required: false
+        default: ""
+
+jobs:
+  synthetic-probe-run:
+    name: Headless Synthetic Probe Matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Cache Playwright Browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-synthetic-${{ hashFiles('package-lock.json', 'bun.lock') }}
+          restore-keys: |
+            playwright-synthetic-
+            playwright-
+
+      - name: Install Playwright Browsers (Cache Miss)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install chromium --with-deps
+
+      - name: Run Synthetic Journey Probes
+        id: probes
+        run: |
+          if [ -n "${{ github.event.inputs.target_url }}" ]; then
+            export PLAYWRIGHT_TEST_BASE_URL="${{ github.event.inputs.target_url }}"
+          fi
+          npx playwright test __tests__/e2e/synthetic-probes.spec.ts --project=chromium
+        env:
+          DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
+          NODE_ENV: "production"
+
+      - name: Publish Synthetic Health Summary
+        if: always()
+        run: |
+          echo "# 🛰️ Synthetic Journey Monitoring Report" >> $GITHUB_STEP_SUMMARY
+          echo "### Timestamp: $(date -u)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Synthetic Journey | Status | Description |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Landing & Pretext Layout** | ${{ steps.probes.outcome == 'success' && '✅ Healthy' || '❌ Regression Detected' }} | Card heights, text layout & filtering |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Command Palette** | ${{ steps.probes.outcome == 'success' && '✅ Healthy' || '❌ Regression Detected' }} | Keyboard shortcuts & instant route discovery |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Proof Studio Engine** | ${{ steps.probes.outcome == 'success' && '✅ Healthy' || '❌ Regression Detected' }} | AST graph deductions & multi-format export |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Arcade Canvas 2D** | ${{ steps.probes.outcome == 'success' && '✅ Healthy' || '❌ Regression Detected' }} | Game canvas lifecycle & controls |" >> $GITHUB_STEP_SUMMARY
+          echo "| **API Telemetry & Schemas** | ${{ steps.probes.outcome == 'success' && '✅ Healthy' || '❌ Regression Detected' }} | Ingest endpoint, rate-limiting & response schema |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "*(Automated Canary & Proactive Interception Guard)*" >> $GITHUB_STEP_SUMMARY

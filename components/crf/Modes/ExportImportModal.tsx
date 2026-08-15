@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { StudyProtocol } from "@/lib/crf/types";
 import { exportStudyToCdiscOdmXml } from "@/lib/crf/odm-xml-serializer";
 import { exportFormToFhirQuestionnaire } from "@/lib/crf/fhir-questionnaire";
+import { exportStudyToSas } from "@/lib/crf/export-sas";
+import { exportStudyToR } from "@/lib/crf/export-r";
 import {
   IconDownload,
   IconCopy,
@@ -14,6 +16,9 @@ import {
   IconFlame,
   IconPalette,
   IconFileText,
+  IconTerminal,
+  IconFileCode,
+  IconAdjustments,
 } from "@tabler/icons-react";
 
 interface ExportImportModalProps {
@@ -23,7 +28,7 @@ interface ExportImportModalProps {
   onOpenBranding?: () => void;
 }
 
-type ExportTab = "odm" | "json" | "fhir" | "sdtm_spec";
+export type ExportTab = "odm" | "sas" | "r" | "json" | "fhir" | "sdtm_spec";
 
 export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   study,
@@ -32,6 +37,7 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   onOpenBranding,
 }) => {
   const [activeTab, setActiveTab] = useState<ExportTab>("odm");
+  const [selectedFormId, setSelectedFormId] = useState<string>("all");
   const [copied, setCopied] = useState(false);
   const [importJsonText, setImportJsonText] = useState("");
   const [importError, setImportError] = useState<string | null>(null);
@@ -39,16 +45,44 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   // Serialized formats
   const odmXmlContent = exportStudyToCdiscOdmXml(study);
   const jsonBundleContent = JSON.stringify(study, null, 2);
+  const selectedForm = selectedFormId === "all" ? undefined : study.forms.find((f) => f.id === selectedFormId);
+  const targetFormForFhir = selectedForm || study.forms[0] || {
+    id: "crf-1",
+    name: "General Form",
+    domain: "DM",
+    description: "",
+    version: "1.0",
+    sections: [],
+    rules: [],
+  };
   const fhirContent = JSON.stringify(
-    exportFormToFhirQuestionnaire(study.forms[0] || study.forms[0], study),
+    exportFormToFhirQuestionnaire(targetFormForFhir, study),
     null,
     2
   );
+
+  const sasContent = exportStudyToSas(study, {
+    selectedFormId: selectedFormId === "all" ? undefined : selectedFormId,
+    includeSampleData: true,
+    includeProcContents: true,
+    includeProcFreq: true,
+  });
+
+  const rContent = exportStudyToR(study, {
+    selectedFormId: selectedFormId === "all" ? undefined : selectedFormId,
+    includeSampleData: true,
+    includeGlimpse: true,
+    useLabelledPackage: true,
+  });
 
   const getActiveContent = () => {
     switch (activeTab) {
       case "odm":
         return odmXmlContent;
+      case "sas":
+        return sasContent;
+      case "r":
+        return rContent;
       case "json":
         return jsonBundleContent;
       case "fhir":
@@ -68,12 +102,20 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
     let filename = `study-${study.protocolNumber}.json`;
     let mimeType = "application/json";
     const content = getActiveContent();
+    const domainSuffix = selectedForm ? `-${selectedForm.domain || selectedForm.id}` : "";
 
     if (activeTab === "odm") {
       filename = `study-${study.protocolNumber}-odm.xml`;
       mimeType = "application/xml";
+    } else if (activeTab === "sas") {
+      filename = `study-${study.protocolNumber}${domainSuffix}.sas`;
+      mimeType = "text/x-sas";
+    } else if (activeTab === "r") {
+      filename = `study-${study.protocolNumber}${domainSuffix}.R`;
+      mimeType = "text/x-r";
     } else if (activeTab === "fhir") {
-      filename = `fhir-questionnaire-${study.protocolNumber}.json`;
+      filename = `fhir-questionnaire-${study.protocolNumber}${domainSuffix}.json`;
+      mimeType = "application/json";
     }
 
     const blob = new Blob([content], { type: mimeType });
@@ -101,8 +143,12 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
     }
   };
 
-  // Compile all SDTM variables for specification table
-  const allFields = study.forms.flatMap((f) =>
+  // Compile SDTM variables for specification table, filtered by selectedFormId if applicable
+  const formsForSpec = selectedFormId === "all"
+    ? study.forms
+    : study.forms.filter((f) => f.id === selectedFormId);
+
+  const specFields = formsForSpec.flatMap((f) =>
     f.sections.flatMap((s) => s.fields.map((field) => ({ field, form: f })))
   );
 
@@ -120,7 +166,7 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
             </h1>
           </div>
           <p className="text-xs text-zinc-400 font-sans mt-1">
-            Export study protocols and CRFs to international clinical data standards (CDISC ODM-XML v1.3.2, HL7 FHIR Questionnaire R4, JSON Study Bundles).
+            Export study protocols and CRFs to CDISC ODM-XML, SAS programs (PROC FORMAT &amp; ATTRIB), R tidyverse tibbles, HL7 FHIR Questionnaires, and JSON Study Bundles.
           </p>
         </div>
 
@@ -162,47 +208,90 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         </div>
       </div>
 
+      {/* Domain / Form Filter Control */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-zinc-900/60 border border-zinc-800">
+        <div className="flex items-center gap-2 text-xs font-mono text-zinc-300">
+          <IconAdjustments className="w-4 h-4 text-brand-cyan" />
+          <span className="font-bold">Domain &amp; Form Scope:</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <select
+            value={selectedFormId}
+            onChange={(e) => setSelectedFormId(e.target.value)}
+            className="px-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs font-mono text-zinc-200 focus:border-brand-cyan focus:outline-none"
+            aria-label="Filter export domain scope"
+          >
+            <option value="all">All Study Domains (Full Protocol Suite)</option>
+            {study.forms.map((form) => (
+              <option key={form.id} value={form.id}>
+                {form.domain ? `[${form.domain}] ` : ""}{form.name}
+              </option>
+            ))}
+          </select>
+          {selectedFormId !== "all" && (
+            <button
+              onClick={() => setSelectedFormId("all")}
+              className="text-[11px] font-mono text-zinc-400 hover:text-brand-cyan underline"
+            >
+              Reset to Full Study
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Tabs */}
-      <div className="flex border-b border-zinc-800 gap-2">
+      <div className="flex border-b border-zinc-800 gap-2 overflow-x-auto">
         <button
           onClick={() => setActiveTab("odm")}
-          className={`px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 ${
+          className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
             activeTab === "odm"
               ? "border-brand-cyan text-brand-cyan font-bold"
               : "border-transparent text-zinc-400 hover:text-zinc-200"
           }`}
         >
           <IconCode className="w-4 h-4" />
-          <span>CDISC ODM-XML v1.3.2</span>
+          <span>CDISC ODM-XML</span>
         </button>
 
         <button
-          onClick={() => setActiveTab("json")}
-          className={`px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 ${
-            activeTab === "json"
+          onClick={() => setActiveTab("sas")}
+          className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
+            activeTab === "sas"
               ? "border-brand-cyan text-brand-cyan font-bold"
               : "border-transparent text-zinc-400 hover:text-zinc-200"
           }`}
         >
-          <IconCode className="w-4 h-4" />
-          <span>JSON Study Protocol Bundle</span>
+          <IconTerminal className="w-4 h-4 text-emerald-400" />
+          <span>SAS Script (.sas)</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("r")}
+          className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
+            activeTab === "r"
+              ? "border-brand-cyan text-brand-cyan font-bold"
+              : "border-transparent text-zinc-400 hover:text-zinc-200"
+          }`}
+        >
+          <IconFileCode className="w-4 h-4 text-sky-400" />
+          <span>R Scaffolding (.R)</span>
         </button>
 
         <button
           onClick={() => setActiveTab("fhir")}
-          className={`px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 ${
+          className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
             activeTab === "fhir"
               ? "border-brand-cyan text-brand-cyan font-bold"
               : "border-transparent text-zinc-400 hover:text-zinc-200"
           }`}
         >
           <IconFlame className="w-4 h-4 text-orange-400" />
-          <span>HL7 FHIR R4 Questionnaire</span>
+          <span>HL7 FHIR R4</span>
         </button>
 
         <button
           onClick={() => setActiveTab("sdtm_spec")}
-          className={`px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 ${
+          className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
             activeTab === "sdtm_spec"
               ? "border-brand-cyan text-brand-cyan font-bold"
               : "border-transparent text-zinc-400 hover:text-zinc-200"
@@ -210,6 +299,18 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         >
           <IconFileSpreadsheet className="w-4 h-4" />
           <span>SDTM Mapping Specs</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("json")}
+          className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
+            activeTab === "json"
+              ? "border-brand-cyan text-brand-cyan font-bold"
+              : "border-transparent text-zinc-400 hover:text-zinc-200"
+          }`}
+        >
+          <IconCode className="w-4 h-4" />
+          <span>JSON Study Bundle</span>
         </button>
       </div>
 
@@ -229,7 +330,7 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-850">
-              {allFields.map(({ field, form }) => (
+              {specFields.map(({ field, form }) => (
                 <tr key={`${form.id}_${field.id}`} className="hover:bg-zinc-850/40">
                   <td className="p-3 font-bold text-brand-cyan">{form.domain}</td>
                   <td className="p-3 text-zinc-300 font-sans">{form.name}</td>
@@ -242,6 +343,13 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
                   </td>
                 </tr>
               ))}
+              {specFields.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="p-4 text-center text-zinc-500">
+                    No fields found for selected form/domain scope.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

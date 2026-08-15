@@ -3,9 +3,9 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { useConsoleArt } from "@/hooks/useConsoleArt";
 
-type Priority = "polite" | "assertive";
+export type Priority = "polite" | "assertive";
 
-interface AnnouncerContextType {
+export interface AnnouncerContextType {
   announce: (message: string, priority?: Priority) => void;
 }
 

@@ -8,10 +8,10 @@
 
 > **usePersistentState**\<`T`\>(`key`, `initialValue`): \[`T`, `Dispatch`\<`SetStateAction`\<`T`\>\>\]
 
-Defined in: [hooks/usePersistentState.ts:12](https://github.com/fderuiter/portfolio/blob/main/hooks/usePersistentState.ts#L12)
+Defined in: [hooks/usePersistentState.ts:80](https://github.com/fderuiter/portfolio/blob/main/hooks/usePersistentState.ts#L80)
 
-A custom hook that works like useState but persists the state to localStorage.
-Automatically hydrates on mount to prevent SSR hydration mismatches.
+Custom hook that works like useState but persists state to localStorage using useSyncExternalStore.
+Synchronizes seamlessly across multiple hook instances and browser tabs with zero tearing.
 
 ## Type Parameters
 

@@ -45,10 +45,10 @@ export default defineConfig({
         'lib/working-with-duck-types.ts',
       ],
       thresholds: {
-        lines: 80,
-        functions: 80,
-        branches: 65,
-        statements: 80,
+        lines: 86,
+        functions: 90,
+        branches: 74,
+        statements: 86,
       }
     }
   },

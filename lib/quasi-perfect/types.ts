@@ -118,6 +118,7 @@ export interface LeanProofStep {
   id: string;
   tacticId: TacticId;
   leanLine: string;
+  cost?: number;
   explanation: string;
   goalBefore: string;
   goalAfter: string;

@@ -1,48 +1,63 @@
 /* eslint-disable no-console */
 import { execSync } from "child_process";
+import path from "path";
+import { generateOpenApi } from "./generate-openapi";
 
 function checkDrift() {
-  console.log("Checking for documentation drift...");
+  console.log("Checking for documentation and specification drift...");
+  const workspaceRoot = path.resolve(__dirname, "..");
   
-  // 1. Run compilation
+  // 1. Check TypeDoc documentation compilation & drift
+  let docsDrift = false;
+  let driftSummary = "";
+
   try {
-    console.log("Compiling documentation...");
-    execSync("npm run compile-docs", { stdio: "inherit" });
+    console.log("Compiling documentation via TypeDoc...");
+    execSync("npm run compile-docs", { cwd: workspaceRoot, stdio: "inherit" });
   } catch {
     console.error("❌ Documentation compilation failed.");
     process.exit(1);
   }
 
-  // 2. Check for unstaged changes in docs/
-  let hasDrift = false;
-  let driftSummary = "";
-
   try {
-    execSync("git diff --exit-code docs", { stdio: "ignore" });
+    execSync("git diff --exit-code docs", { cwd: workspaceRoot, stdio: "ignore" });
   } catch {
-    hasDrift = true;
+    docsDrift = true;
     driftSummary += "• Modified/drifted files exist in docs/\n";
   }
 
-  // 3. Check for untracked files in docs/
   try {
-    const untrackedFiles = execSync("git ls-files --others --exclude-standard docs", { encoding: "utf-8" }).trim();
+    const untrackedFiles = execSync("git ls-files --others --exclude-standard docs", { cwd: workspaceRoot, encoding: "utf-8" }).trim();
     if (untrackedFiles.length > 0) {
-      hasDrift = true;
+      docsDrift = true;
       driftSummary += "• Untracked files exist in docs/:\n" + untrackedFiles + "\n";
     }
   } catch {
-    console.error("❌ Failed to check for untracked files.");
+    console.error("❌ Failed to check for untracked files in docs/.");
     process.exit(1);
   }
 
-  if (hasDrift) {
-    console.error("\n❌ [DRIFT DETECTED] The compiled documentation is out of sync with the codebase!");
+  // 2. Check OpenAPI Specification parity and route coverage
+  console.log("Checking OpenAPI contract synchronization and route coverage...");
+  const { missingRoutes, hasDrift: openApiDrift } = generateOpenApi(workspaceRoot);
+
+  if (missingRoutes.length > 0) {
+    docsDrift = true;
+    driftSummary += `• Undocumented API routes detected (${missingRoutes.length}):\n` + missingRoutes.map((r) => `  - ${r}`).join("\n") + "\n";
+  }
+
+  if (openApiDrift) {
+    docsDrift = true;
+    driftSummary += "• openapi.json is out of sync with scripts/generate-openapi.ts\n";
+  }
+
+  if (docsDrift) {
+    console.error("\n❌ [DRIFT DETECTED] Technical specifications or documentation are out of sync with the codebase!");
     console.error(driftSummary);
-    console.error("\n👉 Please run 'npm run compile-docs' locally to update the documentation, review and stage/commit the changes.\n");
+    console.error("👉 Please run 'npm run compile-docs' or 'npm run doctor:fix' locally to update specs, then commit the changes.\n");
     process.exit(1);
   } else {
-    console.log("✅ No documentation drift detected. All API contracts are perfectly synchronized.");
+    console.log("✅ No documentation or specification drift detected. All API contracts and docs are synchronized.");
     process.exit(0);
   }
 }

@@ -9,8 +9,9 @@ type TheoremId =
   | "cache-consistency"
   | "custom";
 
-type WorkerAction = 
-  | { type: "START_SIMULATION"; mode: "normal" | "loop"; theoremId?: TheoremId };
+export type WorkerAction = 
+  | { type: "START_SIMULATION"; requestId?: number; mode: "normal" | "loop"; theoremId?: TheoremId }
+  | { type: "ABORT"; requestId?: number };
 
 const THEOREM_SIMULATION_STEPS: Record<TheoremId, string[]> = {
   "modus-ponens": [
@@ -112,25 +113,42 @@ const THEOREM_SIMULATION_STEPS: Record<TheoremId, string[]> = {
   ],
 };
 
-function runNormalSimulation(theoremId: TheoremId = "modus-ponens") {
+let currentSimulationTimer: ReturnType<typeof setTimeout> | null = null;
+let activeRequestId = 0;
+
+function cancelCurrentSimulation() {
+  if (currentSimulationTimer !== null) {
+    clearTimeout(currentSimulationTimer);
+    currentSimulationTimer = null;
+  }
+}
+
+function runNormalSimulation(requestId: number, theoremId: TheoremId = "modus-ponens") {
+  cancelCurrentSimulation();
+  activeRequestId = requestId;
   const steps = THEOREM_SIMULATION_STEPS[theoremId] || THEOREM_SIMULATION_STEPS["modus-ponens"];
   let currentStep = 0;
 
   function next() {
+    if (activeRequestId !== requestId) return;
+
     if (currentStep < steps.length) {
       self.postMessage({
         type: "progress",
+        requestId,
         step: currentStep + 1,
         log: `[Step ${currentStep + 1}/${steps.length}] ${steps[currentStep]}`
       });
       currentStep++;
-      setTimeout(next, 200); // 200ms delay between steps to simulate complex processing
+      currentSimulationTimer = setTimeout(next, 200); // 200ms delay between steps
     } else {
       self.postMessage({
         type: "done",
+        requestId,
         stepsCompleted: steps.length,
         finalStatus: "success"
       });
+      currentSimulationTimer = null;
     }
   }
 
@@ -139,10 +157,23 @@ function runNormalSimulation(theoremId: TheoremId = "modus-ponens") {
 
 self.addEventListener("message", (event: MessageEvent<WorkerAction>) => {
   const { data } = event;
-  if (data && data.type === "START_SIMULATION") {
+  if (!data) return;
+
+  if (data.type === "ABORT") {
+    cancelCurrentSimulation();
+    activeRequestId = 0;
+    return;
+  }
+
+  if (data.type === "START_SIMULATION") {
+    cancelCurrentSimulation();
+    const reqId = data.requestId ?? Date.now();
+    activeRequestId = reqId;
+
     if (data.mode === "loop") {
       self.postMessage({
         type: "progress",
+        requestId: reqId,
         step: 0,
         log: "Starting loop simulation: this will enter an infinite loop to test the 5s watchdog..."
       });
@@ -152,7 +183,7 @@ self.addEventListener("message", (event: MessageEvent<WorkerAction>) => {
         // block
       }
     } else {
-      runNormalSimulation(data.theoremId || "modus-ponens");
+      runNormalSimulation(reqId, data.theoremId || "modus-ponens");
     }
   }
 });

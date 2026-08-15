@@ -165,6 +165,22 @@ export interface ExportPdfOptions {
   branding?: StudyBranding;
 }
 
+export interface ExportSasOptions {
+  selectedFormId?: string;
+  includeSampleData?: boolean;
+  includeProcContents?: boolean;
+  includeProcFreq?: boolean;
+  datasetPrefix?: string;
+}
+
+export interface ExportROptions {
+  selectedFormId?: string;
+  includeSampleData?: boolean;
+  includeGlimpse?: boolean;
+  useLabelledPackage?: boolean;
+  tibblePrefix?: string;
+}
+
 export interface StudyProtocol {
   id: string;
   protocolNumber: string;    // e.g. "ONC-2026-003"

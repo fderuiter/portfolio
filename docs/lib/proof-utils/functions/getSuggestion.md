@@ -8,7 +8,7 @@
 
 > **getSuggestion**(`inputVal`, `_theoremId?`): `string`
 
-Defined in: [lib/proof-utils.ts:1421](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L1421)
+Defined in: [lib/proof-utils.ts:1979](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L1979)
 
 Calculates inline autocomplete suggestion based on current console input and active theorem.
 

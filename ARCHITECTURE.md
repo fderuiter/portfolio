@@ -187,7 +187,38 @@ To capture and display user engagement metrics in real-time without introducing 
 - **Isolated Client-Side Tracker Boundary (`TelemetryTracker`):** Embedded `<TelemetryTracker slug={slug} />` inside Server dynamic pages. It manages client-side mount hooks (`useEffect` with React strict-mode double-run prevention refs) to trigger dynamic `page_view` records without making the parent route a Client Component.
 - **Zero-Reflow predicted height boundaries:** Adjusted masonry grid Pretext column precalculation paddings from `460` and `170` to `484` and `194` across both `CaseStudyShowcase.tsx` and `CaseStudyBentoCard.tsx`. This perfectly maps layout spacing constraints on both server pre-renders and dynamic client loads.
 
+## Automated Specification & API Synchronization Engine
 
+To guarantee that technical specifications, API documentation, and internal architectural guidelines evolve in lockstep with codebase mutations without developer friction, we implemented a zero-drift synchronization architecture:
 
+- **Schema-Driven API Contracts (`lib/schemas.ts` & `openapi.json`):**
+  - All API routes (`/api/telemetry`, `/api/telemetry/sync`, `/api/case-studies`) define declarative Zod contracts.
+  - The OpenAPI generator (`scripts/generate-openapi.ts`) compiles these schemas into OpenAPI 3.0 specifications.
+  - Automated route discovery enforces 100% route coverage, failing verification if any handler in `app/api/**/route.ts` lacks specification coverage.
+- **TypeDoc Markdown Parity (`docs/`):**
+  - Public hooks, types, and library symbols automatically compile to Markdown documentation via `npm run compile-docs`.
+  - `scripts/check-drift.ts` verifies zero uncommitted modifications and zero untracked documentation files.
+- **DX Doctor Invariant Verification & One-Command Auto-Remediation:**
+  - `npm run dx doctor` and `npm run verify` check documentation and API parity alongside 9 core architectural invariants.
+  - Running `npm run doctor:fix` automatically synchronizes `openapi.json` and recompiles TypeDoc markdown files.
+- **Strict Hygiene Boundaries:**
+  - Brainstorming notes, intermediate agent traces, and temporary scratchpad directories (`.agents/`, `scratch/`, `tmp/`) are excluded from markdown linting and repository tracking to preserve documentation integrity.
 
+## Defect Remediation & Root-Cause Quality Architecture
+
+To maintain high stability across complex domain simulation and calculation engines, the repository implements a proactive defect eradication framework:
+
+- **Multi-Layer Defect Detection Pipeline:**
+  - **Static AST & Computational Guards:** Scans AST parsers and mathematical engines for unguarded division-by-zero, cyclic graph traversals, and unchecked recursion limits.
+  - **Runtime Observability & Path Sanitization:** Sentry error hooks and `lib/error-sanitization.ts` intercept production exceptions while scrubbing absolute filesystem paths and stack traces.
+  - **Targeted Property & Boundary Fuzzing:** Automated regression harnesses assert state machine determinism and numerical stability across edge-case parameter combinations.
+- **Legacy Computational Engine Hardening:**
+  - **Proof AST Solver (`lib/proof-utils.ts`):** Enforces cycle-safe evaluation and max-depth guards on propositional ASTs to prevent stack overflow on deeply nested formulas.
+  - **CRF Clinical Evaluator (`lib/crf/ast-evaluator.ts`):** Guarantees zero-divisor protection and safe token evaluation for anthropometric and oncology clinical formulas.
+  - **Garmin Telemetry Engine (`lib/garmin-engine.ts`):** Defends against zero-duration pace divisions, negative heap allocation readings, and thermal boundary overruns.
+  - **Deterministic Duck State Machine (`lib/working-with-duck-engine.ts`):** Guards out-of-bounds drag coordinates, eliminates illegal concurrent states, and isolates item hazard interactions.
+- **Strict Red-Green Remediation Protocol:**
+  - Every reported defect requires an isolated reproduction test in `__tests__/` written before patching.
+  - Fixes must eradicate the root architectural flaw rather than masking symptoms.
+  - Continuous CI verification via `__tests__/defect-remediation-regression.test.ts` guarantees zero regression drift.
 

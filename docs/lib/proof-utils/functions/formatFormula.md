@@ -8,7 +8,7 @@
 
 > **formatFormula**(`ast`): `string`
 
-Defined in: [lib/proof-utils.ts:324](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L324)
+Defined in: [lib/proof-utils.ts:352](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L352)
 
 Formats a PropAst into mathematical unicode string.
 
@@ -16,7 +16,7 @@ Formats a PropAst into mathematical unicode string.
 
 ### ast
 
-[`PropAst`](../type-aliases/PropAst.md)
+[`PropAst`](../type-aliases/PropAst.md) \| `null` \| `undefined`
 
 ## Returns
 

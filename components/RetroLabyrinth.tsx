@@ -13,11 +13,19 @@ import {
   IconMinimize,
   IconTerminal2,
   IconShoppingCart,
+  IconDeviceTv,
 } from "@tabler/icons-react";
 import { VirtualDPad } from "@/components/ui/VirtualDPad";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { FullscreenButton } from "@/components/arcade/FullscreenButton";
 import { TabletOrientationHint } from "@/components/arcade/TabletOrientationHint";
+import { CRTCalibrationModal } from "@/components/arcade/CRTCalibrationModal";
+import {
+  CRTCalibrationConfig,
+  loadCRTCalibration,
+  saveCRTCalibration,
+  renderCRTEffects,
+} from "@/lib/arcade/crt-pipeline";
 import { useFullscreen } from "@/hooks/useFullscreen";
 import {
   ActiveSideEffect,
@@ -106,9 +114,12 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
   const [selectedClassId, setSelectedClassId] = useState<CyberdeckClassId>("script_kiddie");
   const selectedClass = CYBERDECK_CLASSES[selectedClassId] || CYBERDECK_CLASSES.script_kiddie;
 
-  // CRT Phosphor Theme & Shaders
+  // CRT Phosphor Theme & Calibration
   const [crtThemeId, setCrtThemeId] = useState<CRTThemeId>("emerald");
-  const [scanlinesEnabled, setScanlinesEnabled] = useState(true);
+  const [crtCalibration, setCrtCalibration] = useState<CRTCalibrationConfig>(() =>
+    loadCRTCalibration()
+  );
+  const [isCRTModalOpen, setIsCRTModalOpen] = useState(false);
   const currentTheme = CRT_THEMES[crtThemeId] || CRT_THEMES.emerald;
 
   // Game mode & stage
@@ -787,7 +798,11 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
       } else if (key === " ") {
         handleFireWeapon("emp_blast");
       } else if (key.toLowerCase() === "c") {
-        setScanlinesEnabled((prev) => !prev);
+        setCrtCalibration((prev) => {
+          const next = { ...prev, scanlinesEnabled: !prev.scanlinesEnabled };
+          saveCRTCalibration(next);
+          return next;
+        });
       } else if (key === "ArrowUp" || key.toLowerCase() === "w") {
         tryMove(0, isScrambled ? 1 : -1);
       } else if (key === "ArrowDown" || key.toLowerCase() === "s") {
@@ -876,9 +891,28 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
     if (!isMounted) return;
 
     let isRunning = true;
+    let isContextLost = false;
+    const canvas = canvasRef.current;
+
+    const handleContextLost = (e: Event) => {
+      e.preventDefault();
+      isContextLost = true;
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+    };
+
+    const handleContextRestored = () => {
+      isContextLost = false;
+      lastTimeRef.current = performance.now();
+      animFrameRef.current = requestAnimationFrame(loop);
+    };
+
+    if (canvas) {
+      canvas.addEventListener("contextlost", handleContextLost);
+      canvas.addEventListener("contextrestored", handleContextRestored);
+    }
 
     const loop = (timestamp: number) => {
-      if (!isRunning) return;
+      if (!isRunning || isContextLost) return;
 
       if (!lastTimeRef.current) lastTimeRef.current = timestamp;
       const deltaMs = timestamp - lastTimeRef.current;
@@ -1257,29 +1291,15 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
             return true;
           });
 
-          // CRT Scanline Overlay
-          if (scanlinesEnabled) {
-            ctx.save();
-            ctx.fillStyle = `rgba(0, 0, 0, ${currentTheme.scanlineAlpha})`;
-            for (let y = 0; y < height; y += 3) {
-              ctx.fillRect(0, y, width, 1);
-            }
-            ctx.restore();
-          }
-
-          // Dark Vignette Overlay
-          const vignette = ctx.createRadialGradient(
-            width / 2,
-            height / 2,
-            width * 0.3,
-            width / 2,
-            height / 2,
-            width * 0.7
+          // Calibrated CRT Post-Processing Pipeline (Phosphor mask, Scanlines, Bloom, Vignette)
+          renderCRTEffects(
+            ctx,
+            width,
+            height,
+            crtCalibration,
+            currentTheme,
+            animFrameRef.current || 0
           );
-          vignette.addColorStop(0, "rgba(0, 0, 0, 0)");
-          vignette.addColorStop(1, "rgba(0, 0, 0, 0.65)");
-          ctx.fillStyle = vignette;
-          ctx.fillRect(0, 0, width, height);
         }
       }
 
@@ -1290,6 +1310,10 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
 
     return () => {
       isRunning = false;
+      if (canvas) {
+        canvas.removeEventListener("contextlost", handleContextLost);
+        canvas.removeEventListener("contextrestored", handleContextRestored);
+      }
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
   }, [
@@ -1309,7 +1333,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
     gameStatus,
     activeSideEffect,
     currentTheme,
-    scanlinesEnabled,
+    crtCalibration,
     playNote,
   ]);
 
@@ -1431,6 +1455,18 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
               }`}
             >
               🟩
+            </button>
+
+            {/* CRT Calibration Trigger */}
+            <span className="w-px h-3 bg-neutral-800 mx-0.5" />
+            <button
+              onClick={() => setIsCRTModalOpen(true)}
+              title="Calibrate CRT Display & Phosphor Shaders"
+              aria-label="Calibrate CRT Display & Phosphor Shaders"
+              className="px-1.5 py-0.5 rounded hover:bg-neutral-800 text-neutral-400 hover:text-emerald-400 cursor-pointer flex items-center gap-1 transition-colors"
+            >
+              <IconDeviceTv className="w-3 h-3" />
+              <span className="hidden sm:inline">CRT</span>
             </button>
           </div>
 
@@ -1578,7 +1614,15 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
               : isExpanded
               ? "w-[360px] h-[216px]"
               : "w-[240px] h-[144px]"
-          } flex items-center justify-center`}
+          } flex items-center justify-center transition-all duration-300`}
+          style={
+            crtCalibration.curvature > 0.05
+              ? {
+                  borderRadius: `${Math.round(8 + crtCalibration.curvature * 20)}px`,
+                  boxShadow: `inset 0 0 ${Math.round(crtCalibration.curvature * 30)}px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)`,
+                }
+              : undefined
+          }
         >
           <canvas
             ref={canvasRef}
@@ -1960,6 +2004,15 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
           </div>
         </div>
       </div>
+
+      {/* CRT Calibration Modal */}
+      <CRTCalibrationModal
+        isOpen={isCRTModalOpen}
+        onClose={() => setIsCRTModalOpen(false)}
+        config={crtCalibration}
+        onChange={setCrtCalibration}
+        themePrimaryColor={currentTheme.primaryColor}
+      />
     </div>
   );
 };

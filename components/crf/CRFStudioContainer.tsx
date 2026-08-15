@@ -30,12 +30,15 @@ import { DiagnosticsDrawer } from "./DiagnosticsDrawer";
 import { WorkflowWizardModal } from "./Wizard/WorkflowWizardModal";
 import { SpotlightTourOverlay } from "./Wizard/SpotlightTourOverlay";
 import { getStudyBranding } from "@/lib/crf/branding-defaults";
+import { useStudioHashParams } from "@/hooks/useStudioHashParams";
+import { useAudio } from "@/components/providers/AudioProvider";
 import {
   IconFileSpreadsheet,
   IconLayoutGrid,
   IconAdjustments,
   IconSparkles,
   IconX,
+  IconCheck,
 } from "@tabler/icons-react";
 
 export const CRFStudioContainer: React.FC = () => {
@@ -61,10 +64,38 @@ export const CRFStudioContainer: React.FC = () => {
   const [history, setHistory] = useState<StudyProtocol[]>([]);
   const [future, setFuture] = useState<StudyProtocol[]>([]);
 
+  const { params, setParam, setParams } = useStudioHashParams();
+  const { playSuccess } = useAudio();
+  const [copyToast, setCopyToast] = useState<string | null>(null);
+
   // Studio Navigation & Selection State
-  const [activeMode, setActiveMode] = useState<StudioMode>("designer");
-  const [activeFormId, setActiveFormId] = useState<string>(study.forms[0]?.id || "");
-  const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
+  const [activeMode, setActiveModeState] = useState<StudioMode>(() => {
+    if (typeof window !== "undefined") {
+      const rawMode = new URLSearchParams(window.location.hash.slice(1)).get("mode") as StudioMode;
+      if (rawMode && ["designer", "matrix", "rules", "edc", "acrf", "export"].includes(rawMode)) {
+        return rawMode;
+      }
+    }
+    return "designer";
+  });
+
+  const [activeFormId, setActiveFormIdState] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const rawForm = new URLSearchParams(window.location.hash.slice(1)).get("form");
+      if (rawForm && study.forms.some((f) => f.id === rawForm)) {
+        return rawForm;
+      }
+    }
+    return study.forms[0]?.id || "";
+  });
+
+  const [selectedFieldId, setSelectedFieldIdState] = useState<string | null>(() => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.hash.slice(1)).get("field") || null;
+    }
+    return null;
+  });
+
   const [viewport, setViewport] = useState<DeviceViewport>("desktop");
 
   // Sidebar Visibility / Collapse States for Desktop & Laptop
@@ -82,7 +113,96 @@ export const CRFStudioContainer: React.FC = () => {
   const [isExportDocModalOpen, setIsExportDocModalOpen] = useState(false);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isSpotlightTourOpen, setIsSpotlightTourOpen] = useState(false);
-  const [leftTab, setLeftTab] = useState<"forms" | "palette">("forms");
+  const [leftTab, setLeftTabState] = useState<"forms" | "palette">(() => {
+    if (typeof window !== "undefined") {
+      const rawTab = new URLSearchParams(window.location.hash.slice(1)).get("tab");
+      if (rawTab === "forms" || rawTab === "palette") return rawTab;
+    }
+    return "forms";
+  });
+
+  // Synchronize incoming hash state on mount or browser Back/Forward navigation
+  useEffect(() => {
+    const rawMode = params.mode as StudioMode | undefined;
+    if (rawMode && ["designer", "matrix", "rules", "edc", "acrf", "export"].includes(rawMode)) {
+      if (rawMode !== activeMode) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setActiveModeState(rawMode);
+      }
+    }
+
+    const rawForm = params.form;
+    if (rawForm && study.forms.some((f) => f.id === rawForm)) {
+      if (rawForm !== activeFormId) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setActiveFormIdState(rawForm);
+      }
+    }
+
+    const rawField = params.field || null;
+    if (rawField !== selectedFieldId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedFieldIdState(rawField);
+    }
+
+    const rawTab = params.tab;
+    if ((rawTab === "forms" || rawTab === "palette") && rawTab !== leftTab) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLeftTabState(rawTab);
+    }
+  }, [params, study.forms, activeMode, activeFormId, selectedFieldId, leftTab]);
+
+  // Synchronized Setters with Hybrid Navigation
+  const setActiveMode = useCallback(
+    (mode: StudioMode) => {
+      setActiveModeState(mode);
+      setParam("mode", mode === "designer" ? null : mode, { replace: false });
+    },
+    [setParam]
+  );
+
+  const setActiveFormId = useCallback(
+    (formId: string) => {
+      setActiveFormIdState(formId);
+      const isDefault = formId === study.forms[0]?.id;
+      setParams(
+        {
+          form: isDefault ? null : formId,
+          field: null,
+        },
+        { replace: true }
+      );
+    },
+    [setParams, study.forms]
+  );
+
+  const setSelectedFieldId = useCallback(
+    (fieldId: string | null) => {
+      setSelectedFieldIdState(fieldId);
+      setParam("field", fieldId, { replace: true });
+    },
+    [setParam]
+  );
+
+  const setLeftTab = useCallback(
+    (tab: "forms" | "palette") => {
+      setLeftTabState(tab);
+      setParam("tab", tab === "forms" ? null : tab, { replace: true });
+    },
+    [setParam]
+  );
+
+  const handleCopyShareLink = useCallback(() => {
+    if (typeof window !== "undefined") {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        try {
+          playSuccess();
+        } catch {}
+        setCopyToast("Link copied to clipboard with current studio view!");
+        setTimeout(() => setCopyToast(null), 3500);
+      });
+    }
+  }, [playSuccess]);
 
   // Push new state onto undo history stack
   const updateStudyWithHistory = useCallback(
@@ -186,7 +306,7 @@ export const CRFStudioContainer: React.FC = () => {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleUndo, handleRedo, selectedFieldId]);
+  }, [handleUndo, handleRedo, selectedFieldId, setActiveMode, setSelectedFieldId]);
 
   const activeForm = study.forms.find((f) => f.id === activeFormId) || study.forms[0];
   const allFields = activeForm ? activeForm.sections.flatMap((s) => s.fields) : [];
@@ -427,7 +547,20 @@ export const CRFStudioContainer: React.FC = () => {
         onOpenExportDocument={() => setIsExportDocModalOpen(true)}
         onOpenWizard={() => setIsWizardOpen(true)}
         onStartSpotlightTour={() => setIsSpotlightTourOpen(true)}
+        onCopyShareLink={handleCopyShareLink}
       />
+
+      {/* Copy Toast Alert */}
+      {copyToast && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="absolute top-16 right-6 z-50 flex items-center gap-2 bg-emerald-950 border border-emerald-500/50 text-emerald-200 text-xs font-mono px-3.5 py-2 rounded-xl shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-2 duration-150"
+        >
+          <IconCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{copyToast}</span>
+        </div>
+      )}
 
       {/* Main Workspace Body based on Mode */}
       <div className="flex-1 flex overflow-hidden relative">

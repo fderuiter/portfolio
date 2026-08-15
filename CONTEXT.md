@@ -63,3 +63,60 @@ Formal inference rules used to derive logical steps from valid premises:
 - **Virtual D-Pad**: An on-screen, high-contrast touch controller component with minimum 48x48px directional buttons supporting rapid touch/mouse down-up events, haptic/audio feedback, and pointer capture for responsive action in arcade games.
 - **Canvas Touch Action Isolation**: The explicit setting of `touch-action: none` or `touch-action: pan-y` on interactive HTML5 / WebGL canvas elements during active gameplay to prevent touch gestures from triggering browser pull-to-refresh or unwanted page scrolling.
 - **Safe Area Inset Adaptation**: Dynamic spacing integration using CSS `env(safe-area-inset-top)`, `env(safe-area-inset-bottom)`, `env(safe-area-inset-left)`, and `env(safe-area-inset-right)` to protect fixed navigation bars, floating buttons, and game controllers from iPhone notches, Dynamic Islands, and mobile home indicator bars.
+
+## Accessibility Architecture & WCAG 2.1 Compliance
+
+### Continuous Auditing & Enforcement
+- **Multi-Tiered Accessibility Guard**: An automated testing hierarchy comprising static invariant analysis (`lib/dx/doctor.ts`), unit component testing (Vitest), comprehensive end-to-end axe-core browser evaluation (`@axe-core/playwright`), and Lighthouse CI score assertion (100% threshold).
+- **WCAG 2.1 Level AA Conformance Invariant**: The structural requirement that all public routes, interactive modals, drawers, and form controls pass axe-core scans with zero critical, serious, or moderate violations.
+- **Internal Developer Tool Boundary**: Clear demarcation excluding CLI developer tasks (`scripts/dx.ts`), database seed scripts, and headless build pipelines from end-user accessibility audits while maintaining strict audit coverage across 100% of user-facing production interfaces.
+
+### Navigation & Focus Management
+- **Skip Navigation Link**: An accessible, high-contrast bypass mechanism at the root DOM level (`<SkipToContent />`) enabling keyboard and screen reader users to skip global navigation and jump directly to `<main id="main-content">`.
+- **Modal Focus Trap**: An event-controlled keyboard boundary (`useFocusTrap`) that restricts `Tab` / `Shift+Tab` cycling strictly within active dialogs, bottom sheets, or command palettes until dismissed via `Escape` or interactive trigger, automatically restoring focus to the originating element.
+- **Dynamic Live Region (Live Announcer)**: An off-screen `aria-live="polite"` / `role="status"` notification hub (`useAnnouncer`) providing timely audio cues for asynchronous state mutations, mathematical proof discharges, telemetry streams, and form validation alerts.
+- **Canvas Accessible Alternative**: Contextual screen-reader accessible DOM descriptors, tabular mirrors, and high-contrast status overlays providing equivalent functional information for 2D/3D WebGL and HTML5 canvas experiences.
+
+## Graphics & Context Loss Resilience
+
+### GPU Context Management
+- **WebGL Context Loss Handler**: An isolated browser event management protocol intercepting `webglcontextlost` (calling `preventDefault()` to enable automatic recovery) and pausing active animation frame loops to guard GPU state.
+- **WebGL Context Restoration Lifecycle**: An automated re-instantiation pipeline triggered upon `webglcontextrestored` that re-binds GPU vertex buffers, shader programs, and materials while preserving exact user session state (camera rotation, surface modes, crosshairs, active tools).
+- **Canvas 2D Context Resilience**: Event-driven restoration managing HTML5 2D canvas `contextlost` / `contextrestored` events to preserve simulation states and rendering pipelines across mobile tab suspension and GPU power state switches.
+
+## Command Palette Discovery & Intuitive Navigation
+
+### Master-Detail Search Architecture
+- **Command Palette Preview Pane**: A high-density master-detail split-pane preview surface in `CommandPalette.tsx` presenting real-time technical context (tech stack badges, live route status, architectural highlights, capability bullet points) for focused search outcomes.
+- **Contextual Preview Metadata**: Structured metadata attached to indexable static navigation routes and case studies—including route category, status badges, tech stack pills, capability highlights, and destination URLs—enabling zero-latency contextual discovery prior to page routing.
+- **Progressive ARIA Preview Association**: Accessible WAI-ARIA Combobox 1.2 integration linking active search options to preview descriptors via `aria-describedby`, ensuring screen reader users receive rich contextual metadata without disrupting keyboard traversal speed.
+## Documentation Synchronization & Architectural Invariants
+
+### Governance & Drift Management
+- **Full-Spectrum Documentation Governance**: The unified taxonomy and policy governing formal OpenAPI contracts (`openapi.json`), compiled TypeDoc markdown references (`docs/`), Architectural Decision Records (`adr/`), and System Architecture blueprints (`ARCHITECTURE.md`), while strictly isolating transient agent traces and scratch notes.
+- **Specification Drift**: A desynchronization state where codebase mutations (such as modified route signatures, altered Zod validation schemas, or renamed exported hooks) diverge from committed documentation files or OpenAPI schemas.
+- **Transient Scratchpad Boundary**: Strict repository isolation demarcating temporary planning logs, intermediate agent scratchpads, and adversarial testing directories (`.agents/`, `scratch/`, `tmp/`) from tracked repository documentation and markdown linting pipelines.
+- **Lockstep Synchronization Gate**: An automated enforcement mechanism across pre-commit hooks, DX invariant suites, and CI pipelines that asserts zero drift across all public endpoints and exported TypeScript interfaces.
+- **Zero-Drift Invariant Gate**: A strict verification rule where CI and pre-commit hooks abort with exit code 1 if any uncommitted documentation mutations, untracked generated markdown files, or undocumented API routes exist.
+- **One-Command Auto-Remediation (`npm run doctor:fix`)**: A single idempotent task runner command that synchronizes OpenAPI specifications, compiles TypeDoc markdown, and resolves fixable architectural discrepancies across the codebase.
+- **Declarative Schema Registry (`lib/schemas.ts`)**: The central repository of runtime Zod validation schemas establishing typed request payloads, query parameters, and response structures for all system endpoints.
+- **Dynamic Route Discovery**: Automated filesystem scanning traversing `app/api/**/route.ts` to discover all active HTTP route handlers and assert 100% coverage in the centralized OpenAPI specification.
+- **Vertical Slice Scaffolding (`scripts/dx.ts scaffold`)**: Automated code generation that simultaneously creates route handlers, companion Zod contracts, Vitest unit test suites, and registers entries in `CommandPalette.tsx` and `scripts/generate-openapi.ts` to prevent initial drift.
+- **Architectural Decision Record (ADR) Registry**: Sequentially indexed markdown documents in `adr/` capturing immutable, high-context architectural rationale, trade-offs, and invariants.
+- **Dual Spec Consumption Model**: Co-location of standard machine-readable schema artifacts (`openapi.json` for CI/linting/tooling) alongside human-readable GitHub-native markdown docs (`docs/`, `adr/`, `ARCHITECTURE.md`) to support both automated validation tooling and frictionless human onboarding.
+
+## Defect Remediation & Quality Engineering
+
+### Multi-Layer Defect Detection
+- **Multi-Layer Defect Scanner**: A unified verification pipeline combining compile-time static AST analysis, runtime telemetry error monitors, and edge-case property/fuzz test harnesses.
+- **Automated Invariant Gate**: A strict pre-commit and CI verification gate that halts builds upon detecting structural anti-patterns, memory leak vectors, unhandled Promise rejections, or API contract violations.
+- **Proactive Defect Eradication**: The continuous process of eliminating latent root-cause defects in codebase modules before release, supported by automated regression validation.
+
+### Legacy Triage & Defect Classification
+- **Risk & Impact Matrix**: A four-tier defect classification hierarchy (P0: System Crash/Data Loss, P1: Calculation/AST Logic Invariant Failure, P2: Visual/A11y Regression, P3: Cosmetic/Minor) used to prioritize remediation effort.
+- **Legacy Module Audit**: Systematic inspection and verification of foundational state and calculation engines to identify and isolate unhandled edge cases, floating-point drift, circular reference traps, or unhandled null states.
+
+### Root-Cause Remediation & Regression Verification
+- **Red-Green Remediation Protocol**: The mandatory practice of authoring a failing reproduction test isolating a bug's precise root cause prior to applying architectural fixes, proving the patch's efficacy when the test turns green.
+- **Verified Regression Patch**: A comprehensive code modification that eliminates the root structural defect rather than masking symptoms, paired with automated regression tests committed in lockstep.
+- **Defect Invariant Gate**: An automated rule in the DX doctor suite ensuring all core modules satisfy mathematical invariants, boundary conditions, error sanitization, and state determinism.

@@ -19,6 +19,7 @@ import {
   IconCpu,
   IconWand,
   IconPlus,
+  IconLink,
 } from "@tabler/icons-react";
 import {
   getSuggestion,
@@ -27,6 +28,7 @@ import {
   getNextTacticHint,
   getFallacyDiagnosis,
   getDeductionLedger,
+  pruneStepOrNode,
   exportProofToLean4,
   exportProofToLatex,
   exportProofToMarkdown,
@@ -34,6 +36,9 @@ import {
   applyRuleToAsts,
   parseFormula,
   formatFormula,
+  getCompatibleTargets,
+  computeMagneticSnap,
+  AlignmentGuide,
   THEOREMS,
   INFERENCE_RULES,
   TheoremId,
@@ -42,7 +47,9 @@ import {
   ProofNode,
 } from "@/lib/proof-utils";
 import { FieldManualButton } from "@/components/FieldManualButton";
+import { InteractiveTruthTable } from "@/components/proof/InteractiveTruthTable";
 import { useAudio } from "@/components/providers/AudioProvider";
+import { useStudioHashParams } from "@/hooks/useStudioHashParams";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
 
@@ -53,13 +60,37 @@ interface TerminalLog {
 }
 
 export default function ProofWorkspacePage() {
-  const [activeTheoremId, setActiveTheoremId] = useState<TheoremId>("modus-ponens");
+  const { params, setParam, setParams } = useStudioHashParams();
+
+  const [activeTheoremId, setActiveTheoremId] = useState<TheoremId>(() => {
+    if (typeof window !== "undefined") {
+      const rawTh = new URLSearchParams(window.location.hash.slice(1)).get("theorem") as TheoremId;
+      if (rawTh && THEOREMS[rawTh]) {
+        return rawTh;
+      }
+    }
+    return "modus-ponens";
+  });
   const activeTheorem = THEOREMS[activeTheoremId];
 
   const [edges, setEdges] = useState<Edge[]>(activeTheorem.initialEdges);
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
-  const [inspectedNodeId, setInspectedNodeId] = useState<string>("E");
-  const [activeTab, setActiveTab] = useState<"ledger" | "systems" | "fallacy">("ledger");
+  const [inspectedNodeId, setInspectedNodeIdState] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const rawNode = new URLSearchParams(window.location.hash.slice(1)).get("inspect");
+      if (rawNode) return rawNode;
+    }
+    return activeTheorem.targetNodeId || "E";
+  });
+  const [activeTab, setActiveTabState] = useState<"ledger" | "systems" | "fallacy">(() => {
+    if (typeof window !== "undefined") {
+      const rawTab = new URLSearchParams(window.location.hash.slice(1)).get("tab") as "ledger" | "systems" | "fallacy";
+      if (rawTab && ["ledger", "systems", "fallacy"].includes(rawTab)) {
+        return rawTab;
+      }
+    }
+    return "ledger";
+  });
   const [mobileActiveView, setMobileActiveView] = useState<"canvas" | "ledger" | "systems" | "fallacy" | "terminal">("canvas");
   const [feedbackToast, setFeedbackToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
   const [currentFallacy, setCurrentFallacy] = useState<FallacyDiagnosis | null>(null);
@@ -67,7 +98,20 @@ export default function ProofWorkspacePage() {
   // Custom Node drag offsets
   const [nodeOffsets, setNodeOffsets] = useState<Record<string, { x: number; y: number }>>({});
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
-  const dragStartRef = useRef<{ startX: number; startY: number; initOffsetX: number; initOffsetY: number } | null>(null);
+
+  // Magnetic Snapping & Drag Guides state
+  const [isSnappingEnabled, setIsSnappingEnabled] = useState(true);
+  const [activeGuides, setActiveGuides] = useState<AlignmentGuide[]>([]);
+  const [dragConnection, setDragConnection] = useState<{
+    sourceId: string;
+    sourceX: number;
+    sourceY: number;
+    currentX: number;
+    currentY: number;
+    hoveredTargetId: string | null;
+    isValid: boolean;
+    ruleBadge?: string;
+  } | null>(null);
 
   // Custom Studio modal state
   const [isCustomStudioOpen, setIsCustomStudioOpen] = useState(false);
@@ -94,24 +138,87 @@ export default function ProofWorkspacePage() {
   const [history, setHistory] = useState<string[]>([]);
   const [historyIdx, setHistoryIdx] = useState(-1);
   const [liveAnnouncement, setLiveAnnouncement] = useState("");
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [simulationProgress, setSimulationProgress] = useState<{ step: number; total: number; log: string } | null>(null);
 
-  const { playSuccess, playAutocomplete, playHover } = useAudio();
-
-  // Web Worker, Watchdog, Throttling States & Refs
+  // Refs
+  const dragStartRef = useRef<{ startX: number; startY: number; initOffsetX: number; initOffsetY: number } | null>(null);
+  const canvasWrapperRef = useRef<HTMLDivElement>(null);
+  const lastSnapAudioTimeRef = useRef(0);
   const workerRef = useRef<Worker | null>(null);
   const watchdogRef = useRef<NodeJS.Timeout | null>(null);
   const pendingLogsRef = useRef<TerminalLog[]>([]);
-  const [isSimulating, setIsSimulating] = useState(false);
-  const [simulationProgress, setSimulationProgress] = useState<{ step: number; total: number; log: string } | null>(null);
   const nextIdRef = useRef(0);
   const initWorkerRef = useRef<() => void>(() => {});
-
-  // Ref tracking for focus restoration
   const consoleInputRef = useRef<HTMLInputElement>(null);
   const toggleBtnRef = useRef<HTMLButtonElement>(null);
   const lastActiveElementRef = useRef<HTMLElement | null>(null);
   const terminalLogsContainerRef = useRef<HTMLDivElement>(null);
   const svgCanvasRef = useRef<SVGSVGElement>(null);
+
+  const { playSuccess, playAutocomplete, playHover } = useAudio();
+
+  const announceToScreenReader = React.useCallback((text: string) => {
+    setLiveAnnouncement("");
+    setTimeout(() => {
+      setLiveAnnouncement(text);
+    }, 10);
+  }, []);
+
+  const showToast = React.useCallback((message: string, type: "success" | "error" | "info" = "info") => {
+    setFeedbackToast({ message, type });
+    setTimeout(() => {
+      setFeedbackToast((prev) => (prev?.message === message ? null : prev));
+    }, 4000);
+  }, []);
+
+  // Synchronize incoming hash state on mount or browser Back/Forward navigation
+  useEffect(() => {
+    const rawTh = params.theorem as TheoremId | undefined;
+    if (rawTh && THEOREMS[rawTh] && rawTh !== activeTheoremId) {
+      const nextTh = THEOREMS[rawTh];
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setActiveTheoremId(rawTh);
+      setEdges(nextTh.initialEdges);
+      setSelectedNodeIds([]);
+      setInspectedNodeIdState(nextTh.targetNodeId);
+      setNodeOffsets({});
+      setCurrentFallacy(null);
+    }
+
+    const rawTab = params.tab as "ledger" | "systems" | "fallacy" | undefined;
+    if (rawTab && ["ledger", "systems", "fallacy"].includes(rawTab) && rawTab !== activeTab) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setActiveTabState(rawTab);
+    }
+
+    const rawInspect = params.inspect;
+    if (rawInspect && rawInspect !== inspectedNodeId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setInspectedNodeIdState(rawInspect);
+    }
+  }, [params, activeTheoremId, activeTab, inspectedNodeId]);
+
+  const setActiveTab = (tab: "ledger" | "systems" | "fallacy") => {
+    setActiveTabState(tab);
+    setParam("tab", tab === "ledger" ? null : tab, { replace: true });
+  };
+
+  const setInspectedNodeId = (nodeId: string) => {
+    setInspectedNodeIdState(nodeId);
+    setParam("inspect", nodeId === activeTheorem.targetNodeId ? null : nodeId, { replace: true });
+  };
+
+  const handleCopyShareLink = () => {
+    if (typeof window !== "undefined") {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        try {
+          playSuccess();
+        } catch {}
+        showToast("Proof Studio link copied to clipboard with current theorem & tab!", "success");
+      });
+    }
+  };
 
   const { isC_Proven, isE_Proven } = useMemo(
     () => evaluateProofStatus(edges, activeTheoremId),
@@ -128,19 +235,52 @@ export default function ProofWorkspacePage() {
     [edges, activeTheoremId]
   );
 
-  const announceToScreenReader = (text: string) => {
-    setLiveAnnouncement("");
-    setTimeout(() => {
-      setLiveAnnouncement(text);
-    }, 10);
-  };
+  const activeSourceId =
+    dragConnection?.sourceId || (selectedNodeIds.length === 1 ? selectedNodeIds[0] : null);
 
-  const showToast = (message: string, type: "success" | "error" | "info" = "info") => {
-    setFeedbackToast({ message, type });
-    setTimeout(() => {
-      setFeedbackToast((prev) => (prev?.message === message ? null : prev));
-    }, 4000);
-  };
+  const compatibleTargets = useMemo(
+    () => (activeSourceId ? getCompatibleTargets(activeSourceId, activeTheoremId, edges) : []),
+    [activeSourceId, activeTheoremId, edges]
+  );
+
+  const toggleSnapping = React.useCallback(() => {
+    setIsSnappingEnabled((prev) => {
+      const next = !prev;
+      try {
+        playAutocomplete();
+      } catch {}
+      showToast(
+        next
+          ? "Magnetic Snapping enabled (20px grid & alignment crosshairs)"
+          : "Magnetic Snapping disabled (freeform drag)",
+        "info"
+      );
+      announceToScreenReader(
+        next ? "Magnetic snapping and alignment guides enabled." : "Magnetic snapping disabled."
+      );
+      return next;
+    });
+  }, [playAutocomplete, showToast, announceToScreenReader]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const targetTag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+      if (
+        targetTag === "input" ||
+        targetTag === "textarea" ||
+        (e.target as HTMLElement)?.isContentEditable
+      ) {
+        return;
+      }
+      if (e.key === "g" || e.key === "G") {
+        e.preventDefault();
+        toggleSnapping();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [toggleSnapping]);
 
   const toggleConsole = React.useCallback(() => {
     setIsConsoleOpen((prev) => {
@@ -159,7 +299,7 @@ export default function ProofWorkspacePage() {
       }
       return next;
     });
-  }, []);
+  }, [announceToScreenReader]);
 
   const clearWatchdog = React.useCallback(() => {
     if (watchdogRef.current) {
@@ -167,6 +307,8 @@ export default function ProofWorkspacePage() {
       watchdogRef.current = null;
     }
   }, []);
+
+  const currentRequestIdRef = useRef(0);
 
   const handleWatchdogTimeout = React.useCallback(() => {
     if (workerRef.current) {
@@ -188,7 +330,7 @@ export default function ProofWorkspacePage() {
       },
     ]);
     announceToScreenReader("Background calculation terminated by watchdog: execution exceeded 5-second limit.");
-  }, [clearWatchdog]);
+  }, [clearWatchdog, announceToScreenReader]);
 
   const resetWatchdog = React.useCallback(() => {
     clearWatchdog();
@@ -198,7 +340,7 @@ export default function ProofWorkspacePage() {
   }, [clearWatchdog, handleWatchdogTimeout]);
 
   const initWorker = React.useCallback(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && typeof Worker !== "undefined") {
       if (workerRef.current) {
         workerRef.current.terminate();
       }
@@ -208,6 +350,11 @@ export default function ProofWorkspacePage() {
       worker.onmessage = (event) => {
         const message = event.data;
         if (!message) return;
+
+        // Discard stale in-flight messages from previous request IDs
+        if (message.requestId && message.requestId !== currentRequestIdRef.current) {
+          return;
+        }
 
         resetWatchdog();
 
@@ -251,7 +398,7 @@ export default function ProofWorkspacePage() {
 
       workerRef.current = worker;
     }
-  }, [clearWatchdog, resetWatchdog]);
+  }, [clearWatchdog, resetWatchdog, announceToScreenReader]);
 
   useEffect(() => {
     initWorkerRef.current = initWorker;
@@ -260,7 +407,6 @@ export default function ProofWorkspacePage() {
   useEffect(() => {
     initWorker();
 
-    // 100ms batch logs flush timer
     // 100ms batch logs flush timer
     const flushInterval = setInterval(() => {
       if (pendingLogsRef.current.length > 0) {
@@ -318,19 +464,35 @@ export default function ProofWorkspacePage() {
     };
     window.addEventListener("keydown", handleGlobalKeyDown);
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-  }, [toggleConsole, isConsoleOpen]);
+  }, [toggleConsole, isConsoleOpen, announceToScreenReader]);
 
   const handleSwitchTheorem = (newTheoremId: TheoremId) => {
     if (newTheoremId === activeTheoremId) return;
     const nextTh = THEOREMS[newTheoremId];
     if (!nextTh) return;
 
+    if (workerRef.current) {
+      currentRequestIdRef.current += 1;
+      workerRef.current.postMessage({ type: "ABORT" });
+      setIsSimulating(false);
+      setSimulationProgress(null);
+      clearWatchdog();
+    }
+
     setActiveTheoremId(newTheoremId);
     setEdges(nextTh.initialEdges);
     setSelectedNodeIds([]);
-    setInspectedNodeId(nextTh.targetNodeId);
+    setInspectedNodeIdState(nextTh.targetNodeId);
     setNodeOffsets({});
     setCurrentFallacy(null);
+
+    setParams(
+      {
+        theorem: newTheoremId === "modus-ponens" ? null : newTheoremId,
+        inspect: null,
+      },
+      { replace: false }
+    );
 
     try {
       playAutocomplete();
@@ -349,7 +511,7 @@ export default function ProofWorkspacePage() {
     ]);
   };
 
-  const handleNodePointerDown = (e: React.PointerEvent, nodeId: string) => {
+  const handleNodePointerDown = React.useCallback((e: React.PointerEvent, nodeId: string) => {
     e.stopPropagation();
     setDraggingNodeId(nodeId);
     const currentOffset = nodeOffsets[nodeId] || { x: 0, y: 0 };
@@ -360,33 +522,195 @@ export default function ProofWorkspacePage() {
       initOffsetY: currentOffset.y,
     };
     (e.target as Element).setPointerCapture(e.pointerId);
-  };
+  }, [nodeOffsets]);
 
-  const handleNodePointerMove = (e: React.PointerEvent, nodeId: string) => {
+  const handleNodePointerMove = React.useCallback((e: React.PointerEvent, nodeId: string) => {
     if (draggingNodeId !== nodeId || !dragStartRef.current) return;
+    const sNode = activeTheorem.nodes.find((n) => n.id === nodeId);
+    if (!sNode) return;
+
     const dx = e.clientX - dragStartRef.current.startX;
     const dy = e.clientY - dragStartRef.current.startY;
-    setNodeOffsets((prev) => ({
-      ...prev,
-      [nodeId]: {
-        x: dragStartRef.current!.initOffsetX + dx,
-        y: dragStartRef.current!.initOffsetY + dy,
-      },
-    }));
-  };
+    const rawX = sNode.x + dragStartRef.current.initOffsetX + dx;
+    const rawY = sNode.y + dragStartRef.current.initOffsetY + dy;
 
-  const handleNodePointerUp = (e: React.PointerEvent, nodeId: string) => {
+    if (isSnappingEnabled) {
+      const peerNodes = activeTheorem.nodes
+        .filter((n) => n.id !== nodeId)
+        .map((n) => {
+          const off = nodeOffsets[n.id] || { x: 0, y: 0 };
+          return {
+            id: n.id,
+            x: n.x + off.x,
+            y: n.y + off.y,
+            width: 160,
+            height: 70,
+          };
+        });
+
+      const snap = computeMagneticSnap(rawX, rawY, 160, 70, peerNodes, {
+        gridSize: 20,
+        threshold: 12,
+        enableGrid: true,
+        enableAlignment: true,
+      });
+
+      setActiveGuides(snap.guides);
+
+      if (snap.snappedX || snap.snappedY) {
+        const now = typeof performance !== "undefined" ? performance.now() : 0;
+        if (now - lastSnapAudioTimeRef.current > 350) {
+          lastSnapAudioTimeRef.current = now;
+          try {
+            playHover();
+          } catch {}
+        }
+      }
+
+      setNodeOffsets((prev) => ({
+        ...prev,
+        [nodeId]: {
+          x: snap.x - sNode.x,
+          y: snap.y - sNode.y,
+        },
+      }));
+    } else {
+      setActiveGuides([]);
+      setNodeOffsets((prev) => ({
+        ...prev,
+        [nodeId]: {
+          x: dragStartRef.current!.initOffsetX + dx,
+          y: dragStartRef.current!.initOffsetY + dy,
+        },
+      }));
+    }
+  }, [draggingNodeId, activeTheorem.nodes, isSnappingEnabled, nodeOffsets, playHover]);
+
+  const handleNodePointerUp = React.useCallback((e: React.PointerEvent, nodeId: string) => {
     if (draggingNodeId === nodeId) {
       setDraggingNodeId(null);
       dragStartRef.current = null;
+      setActiveGuides([]);
       try {
         (e.target as Element).releasePointerCapture(e.pointerId);
       } catch {}
     }
+  }, [draggingNodeId]);
+
+  const handleHandlePointerDown = (e: React.PointerEvent, nodeId: string) => {
+    e.stopPropagation();
+    const sNode = activeTheorem.nodes.find((n) => n.id === nodeId);
+    if (!sNode) return;
+    const offset = nodeOffsets[nodeId] || { x: 0, y: 0 };
+    const sourceX = sNode.x + offset.x + 160;
+    const sourceY = sNode.y + offset.y + 35;
+
+    setDragConnection({
+      sourceId: nodeId,
+      sourceX,
+      sourceY,
+      currentX: sourceX,
+      currentY: sourceY,
+      hoveredTargetId: null,
+      isValid: false,
+    });
+
+    try {
+      (e.target as Element).setPointerCapture(e.pointerId);
+      playHover();
+    } catch {}
+
+    announceToScreenReader(`Started connection drag from Node ${nodeId}. Drag to a compatible target node.`);
+  };
+
+  const handleCanvasPointerMove = (e: React.PointerEvent) => {
+    if (!dragConnection) return;
+    const rect = canvasWrapperRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const currentX = e.clientX - rect.left;
+    const currentY = e.clientY - rect.top;
+
+    let hoveredTarget: ProofNode | null = null;
+    for (const node of activeTheorem.nodes) {
+      if (node.id === dragConnection.sourceId) continue;
+      const off = nodeOffsets[node.id] || { x: 0, y: 0 };
+      const nX = node.x + off.x;
+      const nY = node.y + off.y;
+      if (currentX >= nX - 10 && currentX <= nX + 170 && currentY >= nY - 10 && currentY <= nY + 85) {
+        hoveredTarget = node;
+        break;
+      }
+    }
+
+    const hoveredTargetId = hoveredTarget ? hoveredTarget.id : null;
+    let isValid = false;
+    let ruleBadge = "";
+
+    if (hoveredTargetId) {
+      const validation = canConnect(dragConnection.sourceId, hoveredTargetId, edges, activeTheoremId);
+      isValid = validation.allowed;
+      if (isValid) {
+        const targets = getCompatibleTargets(dragConnection.sourceId, activeTheoremId, edges);
+        const found = targets.find((c) => c.targetId === hoveredTargetId);
+        ruleBadge = found?.badgeLabel || "Valid Inferred Target";
+      }
+    }
+
+    setDragConnection((prev) =>
+      prev
+        ? {
+            ...prev,
+            currentX,
+            currentY,
+            hoveredTargetId,
+            isValid,
+            ruleBadge,
+          }
+        : null
+    );
+  };
+
+  const handleCanvasPointerUp = (e: React.PointerEvent) => {
+    if (!dragConnection) return;
+    try {
+      (e.target as Element).releasePointerCapture(e.pointerId);
+    } catch {}
+
+    if (dragConnection.hoveredTargetId && dragConnection.isValid) {
+      const sId = dragConnection.sourceId;
+      const tId = dragConnection.hoveredTargetId;
+      setEdges((prev) => [...prev, { source: sId, target: tId }]);
+      try {
+        playSuccess();
+      } catch {}
+      showToast(`Connected Node ${sId} to Node ${tId} (${dragConnection.ruleBadge || "Inference"})`, "success");
+      announceToScreenReader(`Connected Node ${sId} to Node ${tId} via ${dragConnection.ruleBadge || "deductive rule"}.`);
+      setConsoleLogs((prev) => [
+        ...prev,
+        {
+          id: `drag-conn-${Date.now()}`,
+          type: "success",
+          text: `Connected Node ${sId} → Node ${tId} via interactive drag cord. Rule: ${dragConnection.ruleBadge || "Inference"}`,
+        },
+      ]);
+    } else if (dragConnection.hoveredTargetId && !dragConnection.isValid) {
+      const sId = dragConnection.sourceId;
+      const tId = dragConnection.hoveredTargetId;
+      const fallacy = getFallacyDiagnosis(sId, tId, edges, activeTheoremId);
+      setCurrentFallacy(fallacy);
+      setActiveTab("fallacy");
+      showToast(`Invalid Connection: ${fallacy.fallacyName}`, "error");
+      announceToScreenReader(`Connection rejected: ${fallacy.fallacyName}`);
+    }
+
+    setDragConnection(null);
   };
 
   const handleResetLayout = () => {
     setNodeOffsets({});
+    setActiveGuides([]);
+    setDragConnection(null);
     setEdges(activeTheorem.initialEdges);
     setSelectedNodeIds([]);
     setCurrentFallacy(null);
@@ -576,8 +900,46 @@ export default function ProofWorkspacePage() {
     } catch {}
   };
 
+  const handleDeleteStep = (stepOrNode: number | string) => {
+    const result = pruneStepOrNode(stepOrNode, edges, activeTheoremId);
+    if (!result.success) {
+      showToast(result.reason, "error");
+      announceToScreenReader(result.reason);
+      setConsoleLogs((prev) => [
+        ...prev,
+        {
+          id: `err-${Date.now()}`,
+          type: "error",
+          text: `[PRUNE ERROR] ${result.reason}`,
+        },
+      ]);
+      return;
+    }
+
+    setEdges(result.newEdges);
+    setCurrentFallacy(null);
+    showToast(`✔ ${result.reason}`, "info");
+    announceToScreenReader(result.reason);
+
+    try {
+      playAutocomplete();
+    } catch {}
+
+    setConsoleLogs((prev) => [
+      ...prev,
+      {
+        id: `prune-${Date.now()}`,
+        type: "info",
+        text: `✔ ${result.reason}`,
+      },
+    ]);
+  };
+
   const handleStartSimulation = (mode: "normal" | "loop" = "normal") => {
     if (isSimulating) return;
+
+    currentRequestIdRef.current += 1;
+    const reqId = currentRequestIdRef.current;
 
     setIsSimulating(true);
     setSimulationProgress({ step: 1, total: 10, log: "Booting Proof Simulation Engine..." });
@@ -595,6 +957,7 @@ export default function ProofWorkspacePage() {
     if (workerRef.current) {
       workerRef.current.postMessage({
         type: "START_SIMULATION",
+        requestId: reqId,
         mode,
         theoremId: activeTheoremId,
       });
@@ -631,6 +994,8 @@ export default function ProofWorkspacePage() {
           text: `Interactive Proof Workspace CLI v3.0 Commands:
   connect <src> <tgt>    Connect two nodes with deductive edge
   disconnect <src> <tgt> Remove an edge between nodes
+  prune <step|node>      Prune a derived step (Step 3/5 or C/E) and dependent edges
+  delete-step <n>        Delete a derived deduction step by line number
   apply <rule> <nodes..> Apply an inference rule (mp, mt, hs, ds, res, and_intro)
   autostep               Automatically advance the next valid inference step
   list                   List all nodes and active edges in graph
@@ -722,6 +1087,23 @@ export default function ProofWorkspacePage() {
       return;
     }
 
+    if (op === "prune" || op === "delete-step") {
+      const target = tokens[1];
+      if (!target) {
+        setConsoleLogs((prev) => [
+          ...prev,
+          {
+            id: `err-${Date.now()}`,
+            type: "error",
+            text: "Usage: prune <stepNumber|nodeId> or delete-step <stepNumber>",
+          },
+        ]);
+        return;
+      }
+      handleDeleteStep(target);
+      return;
+    }
+
     if (op === "apply") {
       const rule = tokens[1]?.toLowerCase();
       const nodes = tokens.slice(2).map((n) => n.toUpperCase());
@@ -784,6 +1166,17 @@ export default function ProofWorkspacePage() {
         "2pc": "two-phase-commit",
         quorum: "quorum-overlap",
         cache: "cache-consistency",
+        synod: "paxos-synod",
+        paxos: "paxos-synod",
+        "paxos-synod": "paxos-synod",
+        "paxos-phase2b": "paxos-phase2b",
+        paxos2b: "paxos-phase2b",
+        phase2b: "paxos-phase2b",
+        "2b": "paxos-phase2b",
+        bft: "bft-quorum",
+        "bft-quorum": "bft-quorum",
+        pbft: "bft-quorum",
+        "pbft-quorum": "bft-quorum",
         custom: "custom",
       };
       const thId = map[targetTh] || (targetTh as TheoremId);
@@ -795,7 +1188,7 @@ export default function ProofWorkspacePage() {
           {
             id: `err-${Date.now()}`,
             type: "error",
-            text: `Unknown theorem ID '${targetTh}'. Available: mp, mt, hs, ds, res, 2pc, quorum, cache, custom.`,
+            text: `Unknown theorem ID '${targetTh}'. Available: mp, mt, hs, ds, res, 2pc, quorum, cache, synod, paxos2b, bft, custom.`,
           },
         ]);
       }
@@ -924,6 +1317,14 @@ export default function ProofWorkspacePage() {
           </div>
           <div className="flex items-center gap-3">
             <button
+              onClick={handleCopyShareLink}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-200 hover:bg-slate-700 text-xs font-semibold transition"
+              title="Copy Shareable Proof Link with Active Theorem & Tab"
+            >
+              <IconLink className="w-4 h-4 text-brand-cyan" />
+              Share
+            </button>
+            <button
               onClick={() => setIsCustomStudioOpen(true)}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-brand-purple/40 bg-brand-purple/10 text-brand-purple hover:bg-brand-purple/20 text-xs font-semibold transition"
             >
@@ -949,7 +1350,7 @@ export default function ProofWorkspacePage() {
               Status: {isE_Proven ? "✔ Q.E.D. DISCHARGED" : "⏳ IN PROGRESS"}
             </span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
             {(Object.keys(THEOREMS) as TheoremId[]).map((thKey) => {
               const th = THEOREMS[thKey];
               const isActive = thKey === activeTheoremId;
@@ -1052,6 +1453,27 @@ export default function ProofWorkspacePage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button
+                    onClick={toggleSnapping}
+                    className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono flex items-center gap-1.5 transition ${
+                      isSnappingEnabled
+                        ? "bg-brand-cyan/15 border-brand-cyan/50 text-brand-cyan shadow-sm shadow-cyan-500/20"
+                        : "bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200"
+                    }`}
+                    title="Toggle magnetic snapping & alignment guides [Shortcut: G]"
+                    aria-pressed={isSnappingEnabled}
+                    aria-label={`Magnetic Snapping: ${isSnappingEnabled ? "Enabled" : "Disabled"}. Press G to toggle.`}
+                  >
+                    <span className="text-[11px] font-bold">SNAP</span>
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        isSnappingEnabled ? "bg-emerald-400 animate-pulse" : "bg-slate-600"
+                      }`}
+                    />
+                    <kbd className="hidden md:inline text-[9px] px-1 py-0.2 rounded bg-slate-950/70 border border-slate-800 text-slate-400 font-mono">
+                      G
+                    </kbd>
+                  </button>
+                  <button
                     onClick={handleAutoStep}
                     className="px-2.5 py-1.5 rounded-lg bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan text-xs font-mono flex items-center gap-1 transition"
                   >
@@ -1081,10 +1503,18 @@ export default function ProofWorkspacePage() {
               </div>
 
               {/* SVG Canvas Area (Responsive scroll wrapper) */}
-              <div className="relative w-full h-[420px] bg-gradient-to-b from-slate-950/60 via-slate-900 to-slate-950 select-none overflow-x-auto overflow-y-hidden">
+              <div
+                ref={canvasWrapperRef}
+                onPointerMove={handleCanvasPointerMove}
+                onPointerUp={handleCanvasPointerUp}
+                className="relative w-full h-[420px] bg-gradient-to-b from-slate-950/60 via-slate-900 to-slate-950 select-none overflow-x-auto overflow-y-hidden"
+              >
                 <div className="relative min-w-[760px] h-full">
                   <svg ref={svgCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none">
                     <defs>
+                      <pattern id="canvas-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <circle cx="2" cy="2" r="1" fill="#334155" opacity={isSnappingEnabled ? 0.45 : 0.15} />
+                      </pattern>
                       <marker
                         id="arrow"
                         viewBox="0 0 10 10"
@@ -1096,11 +1526,57 @@ export default function ProofWorkspacePage() {
                       >
                         <path d="M 0 1 L 10 5 L 0 9 z" fill="#06b6d4" />
                       </marker>
+                      <marker
+                        id="arrow-emerald"
+                        viewBox="0 0 10 10"
+                        refX="8"
+                        refY="5"
+                        markerWidth="6"
+                        markerHeight="6"
+                        orient="auto-start-reverse"
+                      >
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981" />
+                      </marker>
                       <linearGradient id="edgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                         <stop offset="0%" stopColor="#06b6d4" />
                         <stop offset="100%" stopColor="#10b981" />
                       </linearGradient>
                     </defs>
+
+                    {/* Canvas Background Grid */}
+                    <rect width="100%" height="100%" fill="url(#canvas-grid)" />
+
+                    {/* Snapping Alignment Guides */}
+                    {activeGuides.map((guide, idx) => {
+                      if (guide.type === "vertical") {
+                        return (
+                          <line
+                            key={`guide-v-${idx}`}
+                            x1={guide.pos}
+                            y1={Math.max(0, guide.start)}
+                            x2={guide.pos}
+                            y2={Math.min(420, guide.end)}
+                            stroke="#06b6d4"
+                            strokeWidth="1.5"
+                            strokeDasharray="4 3"
+                            className="animate-pulse"
+                          />
+                        );
+                      }
+                      return (
+                        <line
+                          key={`guide-h-${idx}`}
+                          x1={Math.max(0, guide.start)}
+                          y1={guide.pos}
+                          x2={Math.min(760, guide.end)}
+                          y2={guide.pos}
+                          stroke="#10b981"
+                          strokeWidth="1.5"
+                          strokeDasharray="4 3"
+                          className="animate-pulse"
+                        />
+                      );
+                    })}
 
                     {/* Render Bezier Curves for Graph Edges */}
                     {edges.map((edge, idx) => {
@@ -1133,6 +1609,48 @@ export default function ProofWorkspacePage() {
                         </g>
                       );
                     })}
+
+                    {/* Interactive Drag-to-Connect Cord */}
+                    {dragConnection && (() => {
+                      const x1 = dragConnection.sourceX;
+                      const y1 = dragConnection.sourceY;
+                      const x2 = dragConnection.currentX;
+                      const y2 = dragConnection.currentY;
+                      const dx = Math.abs(x2 - x1) * 0.5;
+                      const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+                      const strokeColor = dragConnection.hoveredTargetId
+                        ? dragConnection.isValid
+                          ? "#10b981"
+                          : "#f43f5e"
+                        : "#06b6d4";
+
+                      return (
+                        <g key="drag-connection-cord">
+                          <path
+                            d={d}
+                            fill="none"
+                            stroke={strokeColor}
+                            strokeWidth="6"
+                            opacity="0.25"
+                          />
+                          <path
+                            d={d}
+                            fill="none"
+                            stroke={strokeColor}
+                            strokeWidth="3"
+                            strokeDasharray="6 3"
+                            className="animate-pulse"
+                            markerEnd={
+                              dragConnection.hoveredTargetId && dragConnection.isValid
+                                ? "url(#arrow-emerald)"
+                                : "url(#arrow)"
+                            }
+                          />
+                          <circle cx={x2} cy={y2} r="5" fill={strokeColor} className="animate-ping" opacity="0.75" />
+                          <circle cx={x2} cy={y2} r="4" fill={strokeColor} />
+                        </g>
+                      );
+                    })()}
                   </svg>
 
                   {/* Node Cards on Canvas */}
@@ -1147,6 +1665,12 @@ export default function ProofWorkspacePage() {
                     if (isIntermediate) isNodeProven = isC_Proven;
                     if (isTarget) isNodeProven = isE_Proven;
 
+                    const compTarget = compatibleTargets.find((c) => c.targetId === node.id);
+                    const isCompatible = !!compTarget;
+                    const isHoveredInDrag = dragConnection?.hoveredTargetId === node.id;
+                    const isDragSource = dragConnection?.sourceId === node.id;
+                    const isDimmed = !!dragConnection && !isDragSource && !isCompatible && !isHoveredInDrag;
+
                     return (
                       <motion.div
                         key={node.id}
@@ -1159,14 +1683,39 @@ export default function ProofWorkspacePage() {
                         onPointerMove={(e) => handleNodePointerMove(e, node.id)}
                         onPointerUp={(e) => handleNodePointerUp(e, node.id)}
                         onClick={() => handleNodeClick(node.id)}
-                        className={`w-40 p-2.5 rounded-xl border cursor-pointer transition-shadow shadow-md select-none ${
-                          isSelected
+                        className={`group w-40 p-2.5 rounded-xl border cursor-pointer transition-all shadow-md select-none ${
+                          isDimmed ? "opacity-40" : "opacity-100"
+                        } ${
+                          isHoveredInDrag
+                            ? dragConnection?.isValid
+                              ? "bg-emerald-950/60 border-emerald-400 ring-2 ring-emerald-400/80 shadow-emerald-500/30 scale-105"
+                              : "bg-rose-950/60 border-rose-500 ring-2 ring-rose-500/80 shadow-rose-500/30 scale-105"
+                            : isCompatible
+                            ? "bg-emerald-950/30 border-emerald-500/70 ring-2 ring-emerald-500/50 shadow-emerald-500/20"
+                            : isSelected
                             ? "bg-brand-cyan/20 border-brand-cyan ring-2 ring-brand-cyan/50 shadow-cyan-500/20"
                             : isInspected
                             ? "bg-slate-800 border-slate-600 ring-1 ring-slate-400"
                             : "bg-slate-900 border-slate-800 hover:border-slate-700"
                         }`}
                       >
+                        {/* Compatible Rule Floating Badge */}
+                        {isCompatible && compTarget && (
+                          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-mono text-[9px] font-bold shadow-md shadow-emerald-950/50 flex items-center gap-1 z-30 whitespace-nowrap animate-bounce">
+                            <IconSparkles className="w-2.5 h-2.5 shrink-0" />
+                            <span>{compTarget.badgeLabel}</span>
+                          </div>
+                        )}
+
+                        {/* Invalid Hover Floating Badge */}
+                        {isHoveredInDrag && !dragConnection?.isValid && (
+                          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-rose-500 text-white font-mono text-[9px] font-bold shadow-md flex items-center gap-1 z-30 whitespace-nowrap">
+                            <IconAlertTriangle className="w-2.5 h-2.5 shrink-0" />
+                            <span>Invalid Inference</span>
+                          </div>
+                        )}
+
+                        {/* Node Header & Status */}
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-950 text-slate-300">
                             Node {node.id}
@@ -1185,6 +1734,17 @@ export default function ProofWorkspacePage() {
                         <div className="text-[10px] text-slate-400 line-clamp-2 leading-tight">
                           {node.meaning}
                         </div>
+
+                        {/* Connection Anchor Handle Port (Right Edge) */}
+                        <button
+                          type="button"
+                          onPointerDown={(e) => handleHandlePointerDown(e, node.id)}
+                          className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-slate-950 border-2 border-brand-cyan/80 hover:border-brand-cyan hover:scale-125 hover:bg-brand-cyan transition-all shadow-md shadow-cyan-500/40 flex items-center justify-center cursor-crosshair z-20 group-hover:opacity-100 opacity-80"
+                          title={`Drag connection from Node ${node.id}`}
+                          aria-label={`Drag connection handle from Node ${node.id}`}
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan group-hover:bg-slate-950" />
+                        </button>
                       </motion.div>
                     );
                   })}
@@ -1305,14 +1865,34 @@ export default function ProofWorkspacePage() {
                           }`}
                         >
                           <div className="flex items-center justify-between">
-                            <span className="font-mono font-bold text-slate-400">Step {step.stepNumber}</span>
-                            <span
-                              className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${
-                                step.isProven ? "bg-emerald-950 text-emerald-400" : "bg-slate-800 text-slate-500"
-                              }`}
-                            >
-                              {step.isProven ? "✔ PROVEN" : "⏳ PENDING"}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono font-bold text-slate-400">Step {step.stepNumber}</span>
+                              {step.nodeId && (
+                                <span className="text-[10px] font-mono px-1.5 py-0.5 text-slate-400 bg-slate-800/60 rounded">
+                                  Node {step.nodeId}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span
+                                className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${
+                                  step.isProven ? "bg-emerald-950 text-emerald-400" : "bg-slate-800 text-slate-500"
+                                }`}
+                              >
+                                {step.isProven ? "✔ PROVEN" : "⏳ PENDING"}
+                              </span>
+                              {step.isDeletable && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteStep(step.stepNumber)}
+                                  aria-label={`Delete Step ${step.stepNumber} and prune downstream dependencies`}
+                                  title={`Delete Step ${step.stepNumber} (prune dependencies)`}
+                                  className="p-1 rounded text-slate-400 hover:text-red-400 hover:bg-red-950/50 transition-colors focus:outline-none focus:ring-1 focus:ring-red-500/50"
+                                >
+                                  <IconX className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
                           </div>
                           <div className="font-mono font-bold text-white text-sm">{step.formula}</div>
                           <div className="text-slate-400 text-[11px]">
@@ -1347,55 +1927,10 @@ export default function ProofWorkspacePage() {
                 {activeTab === "fallacy" && (
                   <div className="flex flex-col gap-3 text-xs">
                     {currentFallacy ? (
-                      <div className="space-y-3">
-                        <div className="p-2.5 rounded-lg bg-red-950/40 border border-red-800/60 text-red-300">
-                          <span className="font-bold block text-sm mb-0.5">{currentFallacy.fallacyName}</span>
-                          <span className="font-mono text-[11px] text-red-400">{currentFallacy.formalFormula}</span>
-                        </div>
-                        <p className="text-slate-300 leading-relaxed">{currentFallacy.plainEnglish}</p>
-                        <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800 space-y-1">
-                          <span className="font-mono text-amber-400 font-semibold block">Software Bug Analogy</span>
-                          <p className="text-slate-400 leading-relaxed">{currentFallacy.softwareAnalogy}</p>
-                        </div>
-                        <div className="space-y-1.5">
-                          <span className="font-mono text-slate-400 block font-semibold">
-                            Counterexample Truth Table
-                          </span>
-                          <div className="overflow-x-auto rounded border border-slate-800">
-                            <table className="w-full text-left font-mono text-[10px]">
-                              <thead className="bg-slate-950 text-slate-400">
-                                <tr>
-                                  <th className="p-1.5">P</th>
-                                  <th className="p-1.5">Q</th>
-                                  <th className="p-1.5">P1</th>
-                                  <th className="p-1.5">P2</th>
-                                  <th className="p-1.5">Concl</th>
-                                  <th className="p-1.5">Status</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {currentFallacy.truthTable.map((row, idx) => (
-                                  <tr
-                                    key={idx}
-                                    className={`border-t border-slate-800/60 ${
-                                      row.isCounterexample ? "bg-red-950/40 text-red-300" : "text-slate-400"
-                                    }`}
-                                  >
-                                    <td className="p-1.5">{row.p ? "T" : "F"}</td>
-                                    <td className="p-1.5">{row.q ? "T" : "F"}</td>
-                                    <td className="p-1.5">{row.premise1 ? "T" : "F"}</td>
-                                    <td className="p-1.5">{row.premise2 ? "T" : "F"}</td>
-                                    <td className="p-1.5">{row.conclusion ? "T" : "F"}</td>
-                                    <td className="p-1.5 font-bold">
-                                      {row.isCounterexample ? "INVALID ❌" : "VALID ✔"}
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      </div>
+                      <InteractiveTruthTable
+                        diagnosis={currentFallacy}
+                        onClear={() => setCurrentFallacy(null)}
+                      />
                     ) : (
                       <div className="flex flex-col items-center justify-center text-center p-8 text-slate-500 gap-2">
                         <IconShieldCheck className="w-10 h-10 text-emerald-400/80" />

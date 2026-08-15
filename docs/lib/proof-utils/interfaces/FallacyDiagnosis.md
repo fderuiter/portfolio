@@ -6,15 +6,31 @@
 
 # Interface: FallacyDiagnosis
 
-Defined in: [lib/proof-utils.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L72)
+Defined in: [lib/proof-utils.ts:94](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L94)
 
 ## Properties
+
+### conclusion?
+
+> `optional` **conclusion?**: [`FallacyFormulaAst`](FallacyFormulaAst.md)
+
+Defined in: [lib/proof-utils.ts:101](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L101)
+
+***
+
+### counterexampleValuation?
+
+> `optional` **counterexampleValuation?**: `Record`\<`string`, `boolean`\>
+
+Defined in: [lib/proof-utils.ts:103](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L103)
+
+***
 
 ### fallacyName
 
 > **fallacyName**: `string`
 
-Defined in: [lib/proof-utils.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L73)
+Defined in: [lib/proof-utils.ts:95](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L95)
 
 ***
 
@@ -22,7 +38,7 @@ Defined in: [lib/proof-utils.ts:73](https://github.com/fderuiter/portfolio/blob/
 
 > **formalFormula**: `string`
 
-Defined in: [lib/proof-utils.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L74)
+Defined in: [lib/proof-utils.ts:96](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L96)
 
 ***
 
@@ -30,7 +46,15 @@ Defined in: [lib/proof-utils.ts:74](https://github.com/fderuiter/portfolio/blob/
 
 > **plainEnglish**: `string`
 
-Defined in: [lib/proof-utils.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L75)
+Defined in: [lib/proof-utils.ts:97](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L97)
+
+***
+
+### premises?
+
+> `optional` **premises?**: [`FallacyFormulaAst`](FallacyFormulaAst.md)[]
+
+Defined in: [lib/proof-utils.ts:100](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L100)
 
 ***
 
@@ -38,7 +62,7 @@ Defined in: [lib/proof-utils.ts:75](https://github.com/fderuiter/portfolio/blob/
 
 > **softwareAnalogy**: `string`
 
-Defined in: [lib/proof-utils.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L76)
+Defined in: [lib/proof-utils.ts:98](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L98)
 
 ***
 
@@ -46,4 +70,12 @@ Defined in: [lib/proof-utils.ts:76](https://github.com/fderuiter/portfolio/blob/
 
 > **truthTable**: [`TruthTableRow`](TruthTableRow.md)[]
 
-Defined in: [lib/proof-utils.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L77)
+Defined in: [lib/proof-utils.ts:99](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L99)
+
+***
+
+### variables?
+
+> `optional` **variables?**: `string`[]
+
+Defined in: [lib/proof-utils.ts:102](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L102)

@@ -63,16 +63,32 @@ export async function GET(req: NextRequest) {
       createdAt: string | Date;
     }
 
-    // Insert events into PostgreSQL, skipping duplicates
-    const createResult = await prisma.telemetryEvent.createMany({
-      data: (events as BufferedEvent[]).map((e) => ({
-        id: e.id,
-        projectSlug: e.projectSlug,
-        eventType: e.eventType,
-        createdAt: new Date(e.createdAt),
-      })),
-      skipDuplicates: true,
-    });
+    // Insert events into PostgreSQL, skipping duplicates with transactional re-enqueue safeguard
+    let createResult;
+    try {
+      createResult = await prisma.telemetryEvent.createMany({
+        data: (events as BufferedEvent[]).map((e) => ({
+          id: e.id,
+          projectSlug: e.projectSlug,
+          eventType: e.eventType,
+          createdAt: new Date(e.createdAt),
+        })),
+        skipDuplicates: true,
+      });
+    } catch (dbErr) {
+      console.warn("Primary database write failed during sync. Re-enqueueing popped events to Redis buffer.", dbErr);
+      try {
+        const rollbackPipeline = redis.pipeline();
+        for (const evt of events) {
+          rollbackPipeline.lpush("telemetry_buffer", evt);
+        }
+        rollbackPipeline.expire("telemetry_buffer", 48 * 60 * 60);
+        await rollbackPipeline.exec();
+      } catch (redisErr) {
+        console.error("Critical: Failed to re-enqueue buffered telemetry events to Redis:", redisErr);
+      }
+      throw dbErr;
+    }
 
     return NextResponse.json({ success: true, processed: events.length, inserted: createResult.count });
   } catch (err) {

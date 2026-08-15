@@ -39,4 +39,29 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ### 8. JSDoc & TypeDoc Markdown Formatting
 - In JSDoc comments on exported symbols, avoid numbered prefixes (e.g. `1. ...`) or raw unescaped JSX/HTML tags (e.g. `<Navbar />`), as TypeDoc converts these into markdown files subject to `markdownlint` rules `MD029` (ordered list style) and `MD033` (inline HTML).
 
+### 9. Specification & API Documentation Synchronization
+- All API routes in `app/api/**/route.ts` must have declarative Zod schemas in `lib/schemas.ts` and 100% endpoint coverage in `openapi.json`.
+- `scripts/generate-openapi.ts` and `npm run compile-docs` must be synchronized; any schema changes or missing route documentation will trigger a drift failure in CI (`npm run check-docs-drift`) and DX verification (`npm run verify`).
+- Run `npm run doctor:fix` to automatically regenerate and synchronize all API specifications and TypeDoc markdown files.
+
+### 10. Continuous Accessibility (a11y) & WCAG 2.1 Conformance
+- All public pages, interactive modals, drawers, and forms must maintain strict WCAG 2.1 Level AA compliance with zero Critical, Serious, or Moderate axe-core violations.
+- Root layout (`app/layout.tsx`) must provide a visible-on-focus `<SkipToContent />` link targeting `<main id="main-content" tabIndex={-1}>`, alongside the global screen reader live announcer provider (`A11yProvider`).
+- Interactive modal containers and mobile navigation drawers must enforce focus trapping (`useFocusTrap`) with Escape dismissal and focus restoration to the originating trigger.
+- Canvas-driven experiences (games, 3D brain simulator, proof DAGs) must supply accessible fallback descriptions and keyboard-navigable controls.
+
+### 11. Defect Remediation & Root-Cause Regression Invariant
+- All bug fixes and defect remediations across core computational engines (`lib/proof-utils.ts`, `lib/garmin-engine.ts`, `lib/working-with-duck-engine.ts`, `lib/crf/ast-evaluator.ts`) must follow the strict Red-Green Remediation Protocol.
+- Every patch must include an isolated reproduction test in `__tests__/` verifying pre-fix failure and post-fix success, backed by regression test coverage in `__tests__/defect-remediation-regression.test.ts`.
+- Core calculation and state engines must enforce boundary defenses against division-by-zero, cyclic AST references, and out-of-bounds inputs with zero unhandled crash vectors.
+
+### 12. Proactive Defect Interception & Synthetic Reliability
+- Core deterministic logic and security sanitization modules must maintain property-based fuzz tests (`__tests__/property-fuzz.test.ts`) and pass Stryker mutation threshold gates (>=80% mutation score).
+- Critical user journeys (Landing Pretext layout, Command Palette discovery, Proof DAG studio, Arcade canvas lifecycles, and API telemetry ingestion) must be verified via Playwright synthetic user probes (`__tests__/e2e/synthetic-probes.spec.ts`) and monitored continuously via scheduled crons (`.github/workflows/synthetic-probes.yml`).
+- Automated Canary Analysis (`scripts/canary-analyzer.ts`) must guard deployments with hard SLA limits (5xx error rate <= 0.5%, p95 latency <= 800ms, Sentry exception spike ratio <= 2.0x) and automated rollback dispatch capabilities.
+
+
+
+
+
 

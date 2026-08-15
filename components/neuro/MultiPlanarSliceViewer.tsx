@@ -224,11 +224,41 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
     [volume, crosshair, showPialContour, showWmContour, controlPoints]
   );
 
-  // Render all active slice views on state update
+  // Render all active slice views on state update and context restoration
   useEffect(() => {
-    renderSliceToCanvas(axialCanvasRef.current, "axial", crosshair.z);
-    renderSliceToCanvas(coronalCanvasRef.current, "coronal", crosshair.y);
-    renderSliceToCanvas(sagittalCanvasRef.current, "sagittal", crosshair.x);
+    const redrawAll = () => {
+      renderSliceToCanvas(axialCanvasRef.current, "axial", crosshair.z);
+      renderSliceToCanvas(coronalCanvasRef.current, "coronal", crosshair.y);
+      renderSliceToCanvas(sagittalCanvasRef.current, "sagittal", crosshair.x);
+    };
+
+    redrawAll();
+
+    const handleRestore = () => {
+      redrawAll();
+    };
+
+    const handleLoss = (e: Event) => {
+      e.preventDefault();
+    };
+
+    const canvases = [
+      axialCanvasRef.current,
+      coronalCanvasRef.current,
+      sagittalCanvasRef.current,
+    ].filter(Boolean) as HTMLCanvasElement[];
+
+    canvases.forEach((c) => {
+      c.addEventListener("contextlost", handleLoss);
+      c.addEventListener("contextrestored", handleRestore);
+    });
+
+    return () => {
+      canvases.forEach((c) => {
+        c.removeEventListener("contextlost", handleLoss);
+        c.removeEventListener("contextrestored", handleRestore);
+      });
+    };
   }, [renderSliceToCanvas, crosshair]);
 
   /**

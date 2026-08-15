@@ -11,10 +11,18 @@ describe("Integrated Command Console Split-View Accessibility & Interactive Cont
     expect(content).toContain("proof-cli");
   });
 
-  it("should support connect, disconnect, and list active logic nodes on the canvas", () => {
+  it("should support connect, disconnect, prune, delete-step, and list active logic nodes on the canvas", () => {
     expect(content).toContain("op === \"connect\"");
     expect(content).toContain("op === \"disconnect\"");
+    expect(content).toContain("op === \"prune\" || op === \"delete-step\"");
     expect(content).toContain("op === \"list\"");
+    expect(content).toContain("handleDeleteStep");
+  });
+
+  it("should render accessible step deletion (×) button on proven derived ledger rows", () => {
+    expect(content).toContain("step.isDeletable");
+    expect(content).toContain("handleDeleteStep(step.stepNumber)");
+    expect(content).toContain("aria-label={`Delete Step ${step.stepNumber} and prune downstream dependencies`}");
   });
 
   it("should support sequential command history navigation using Up and Down arrow keys", () => {
