@@ -1,0 +1,11 @@
+[**fderuiter-portfolio**](../../../README.md)
+
+***
+
+[fderuiter-portfolio](../../../modules.md) / [lib/garmin-engine](../README.md) / GROUND\_Y
+
+# Variable: GROUND\_Y
+
+> `const` **GROUND\_Y**: `205` = `205`
+
+Defined in: [lib/garmin-engine.ts:132](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L132)

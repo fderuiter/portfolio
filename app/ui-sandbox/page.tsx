@@ -56,10 +56,10 @@ export default function UISandboxPage() {
       <section id="garmin-watch" className="py-16 flex flex-col justify-center items-center bg-zinc-950 border-b border-neutral-800">
         <div className="max-w-md w-full text-center mb-4 px-4">
           <h2 className="text-2xl md:text-3xl font-bold font-mono text-brand-cyan tracking-tight">
-            Garmin Multisport Simulator
+            Garmin Connect IQ 32KB Memory Runner
           </h2>
           <p className="text-xs text-zinc-400 mt-2">
-            Operate keys (UP, DOWN, LIGHT, START) locally. Keyboard boundary isolation ensures parent window does not scroll.
+            Survive severe 32KB RAM constraints, manage garbage collection freezes, and wipe thermal condensation on a 280×280 circular display.
           </p>
         </div>
         <div className="max-w-md w-full px-4">

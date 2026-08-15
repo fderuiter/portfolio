@@ -6,7 +6,7 @@
 
 # Interface: PuzzlerTactic
 
-Defined in: [lib/quasi-perfect-puzzler.ts:3](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L3)
+Defined in: [lib/quasi-perfect-puzzler.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L9)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/quasi-perfect-puzzler.ts:3](https://github.com/fderuiter/portfo
 
 > **description**: `string`
 
-Defined in: [lib/quasi-perfect-puzzler.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L7)
+Defined in: [lib/quasi-perfect-puzzler.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L13)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/quasi-perfect-puzzler.ts:7](https://github.com/fderuiter/portfo
 
 > **id**: [`PuzzlerTacticId`](../type-aliases/PuzzlerTacticId.md)
 
-Defined in: [lib/quasi-perfect-puzzler.ts:4](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L4)
+Defined in: [lib/quasi-perfect-puzzler.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L10)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/quasi-perfect-puzzler.ts:4](https://github.com/fderuiter/portfo
 
 > **label**: `string`
 
-Defined in: [lib/quasi-perfect-puzzler.ts:5](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L5)
+Defined in: [lib/quasi-perfect-puzzler.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L11)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/quasi-perfect-puzzler.ts:5](https://github.com/fderuiter/portfo
 
 > **memoryCostGb**: `number`
 
-Defined in: [lib/quasi-perfect-puzzler.ts:6](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L6)
+Defined in: [lib/quasi-perfect-puzzler.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L12)

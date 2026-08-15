@@ -8,4 +8,4 @@
 
 > **PuzzlerTacticId** = `"simp"` \| `"rw"` \| `"linarith"` \| `"omega"` \| `"decide"` \| `"sorry"`
 
-Defined in: [lib/quasi-perfect-puzzler.ts:1](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L1)
+Defined in: [lib/quasi-perfect-puzzler.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L7)

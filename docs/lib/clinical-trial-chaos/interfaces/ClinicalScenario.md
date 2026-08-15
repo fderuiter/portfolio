@@ -6,7 +6,7 @@
 
 # Interface: ClinicalScenario
 
-Defined in: [lib/clinical-trial-chaos.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos.ts#L10)
+Defined in: [lib/clinical-trial-chaos.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos.ts#L9)
 
 ## Properties
 
@@ -14,15 +14,15 @@ Defined in: [lib/clinical-trial-chaos.ts:10](https://github.com/fderuiter/portfo
 
 > **id**: `string`
 
-Defined in: [lib/clinical-trial-chaos.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos.ts#L11)
+Defined in: [lib/clinical-trial-chaos.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos.ts#L10)
 
 ***
 
 ### observations
 
-> **observations**: readonly [`ClinicalObservation`](ClinicalObservation.md)[]
+> **observations**: readonly `object`[]
 
-Defined in: [lib/clinical-trial-chaos.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos.ts#L13)
+Defined in: [lib/clinical-trial-chaos.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos.ts#L12)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [lib/clinical-trial-chaos.ts:13](https://github.com/fderuiter/portfo
 
 > **subjectLabel**: `string`
 
-Defined in: [lib/clinical-trial-chaos.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos.ts#L12)
+Defined in: [lib/clinical-trial-chaos.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos.ts#L11)

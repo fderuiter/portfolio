@@ -110,24 +110,24 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
       },
       {
         id: "nav-clinical-chaos",
-        title: "Clinical Trial Chaos",
-        subtitle: "Clinical data-mapping arcade scaffold using synthetic, non-PHI scenarios",
+        title: "Clinical Trial Chaos: CDISC Compliance Arcade",
+        subtitle: "Fast-paced CDISC mapping & 21 CFR Part 11 electronic signature compliance arcade under FDA auditor pressure",
         category: "navigation",
         url: "/ui-sandbox#clinical-chaos",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
       },
       {
         id: "nav-garmin-watch",
-        title: "Garmin Multisport Simulator",
-        subtitle: "Retro multisport arcade simulator — deep ocean, mountain trail, and orbit modes",
+        title: "Garmin Connect IQ 32KB Memory Runner",
+        subtitle: "Retro smartwatch engineering game — survive strict 32KB RAM, GC freezes, and thermal overheating",
         category: "navigation",
         url: "/ui-sandbox#garmin-watch",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
       },
       {
         id: "nav-retro-labyrinth",
-        title: "Retro Labyrinth: Core Recovery",
-        subtitle: "Multi-stage cybernetic maze game with drone patrols and EMP shockwaves",
+        title: "Retro Labyrinth: Graveyard Roguelike",
+        subtitle: "Roguelike dungeon crawler exploring abandoned repos — TSP dynamic walls, 3D wireframe boss, and developer weapons",
         category: "navigation",
         url: "/not-found",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />

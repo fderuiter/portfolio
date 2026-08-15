@@ -8,4 +8,4 @@
 
 > `const` **puzzlerTactics**: `Record`\<[`PuzzlerTacticId`](../type-aliases/PuzzlerTacticId.md), [`PuzzlerTactic`](../interfaces/PuzzlerTactic.md)\>
 
-Defined in: [lib/quasi-perfect-puzzler.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L18)
+Defined in: [lib/quasi-perfect-puzzler.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L24)

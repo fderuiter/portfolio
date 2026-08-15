@@ -1,3 +1,9 @@
+import { puzzleLevels } from "./quasi-perfect/levels";
+import { tacticDefs } from "./quasi-perfect/tactics";
+import { PuzzlerLevelDef } from "./quasi-perfect/types";
+
+export * from "./quasi-perfect";
+
 export type PuzzlerTacticId = "simp" | "rw" | "linarith" | "omega" | "decide" | "sorry";
 
 export interface PuzzlerTactic {
@@ -16,20 +22,18 @@ export interface PuzzlerLevel {
 }
 
 export const puzzlerTactics: Record<PuzzlerTacticId, PuzzlerTactic> = {
-  simp: { id: "simp", label: "simp", memoryCostGb: 2, description: "Simplify a bounded expression." },
-  rw: { id: "rw", label: "rw [h1]", memoryCostGb: 1, description: "Rewrite using a known equality." },
-  linarith: { id: "linarith", label: "linarith", memoryCostGb: 3, description: "Close a linear arithmetic goal." },
-  omega: { id: "omega", label: "omega", memoryCostGb: 4, description: "Reason over Presburger arithmetic." },
-  decide: { id: "decide", label: "decide", memoryCostGb: 1, description: "Resolve a decidable finite proposition." },
-  sorry: { id: "sorry", label: "Use sorry", memoryCostGb: 0, description: "End the level with a morality penalty." },
+  simp: { id: "simp", label: "simp", memoryCostGb: tacticDefs.simp.baseRamCost, description: tacticDefs.simp.description },
+  rw: { id: "rw", label: "rw [h1]", memoryCostGb: tacticDefs.rw.baseRamCost, description: tacticDefs.rw.description },
+  linarith: { id: "linarith", label: "linarith", memoryCostGb: tacticDefs.linarith.baseRamCost, description: tacticDefs.linarith.description },
+  omega: { id: "omega", label: "omega", memoryCostGb: tacticDefs.omega.baseRamCost, description: tacticDefs.omega.description },
+  decide: { id: "decide", label: "decide", memoryCostGb: tacticDefs.decide.baseRamCost, description: tacticDefs.decide.description },
+  sorry: { id: "sorry", label: "Use sorry", memoryCostGb: tacticDefs.sorry.baseRamCost, description: tacticDefs.sorry.description },
 };
 
-export const puzzlerLevels: readonly PuzzlerLevel[] = [
-  {
-    id: "odd-quasiperfect",
-    title: "Odd Quasiperfect Candidate",
-    goal: "⊢ n = σ(n) - 1 → False",
-    prompt: "Reduce the contradiction without exhausting the simulated Lean server.",
-    tactics: ["simp", "rw", "omega", "sorry"],
-  },
-];
+export const puzzlerLevels: readonly PuzzlerLevel[] = puzzleLevels.map((lvl: PuzzlerLevelDef) => ({
+  id: String(lvl.id),
+  title: lvl.title,
+  goal: `⊢ ${lvl.description}`,
+  prompt: lvl.description,
+  tactics: lvl.availableTactics.map((t) => (typeof t === "string" ? t : t.id)) as PuzzlerTacticId[],
+}));

@@ -1,0 +1,904 @@
+/**
+ * Garmin Connect IQ (Monkey C) Game Simulation Engine
+ * Handles physics, memory allocation lifecycle, GC mechanics,
+ * thermal overheating, crash reports, and 16-color pixel canvas rendering.
+ */
+
+export type DeviceTarget = "fenix" | "forerunner" | "edge";
+export type VariableType = "int" | "float" | "string" | "array";
+export type ObstacleType = "null_pointer" | "watchdog" | "stack_overflow" | "mem_token";
+
+export interface DeviceProfile {
+  id: DeviceTarget;
+  name: string;
+  ramLimitKb: number;
+  description: string;
+  color: string;
+}
+
+export const DEVICE_PROFILES: Record<DeviceTarget, DeviceProfile> = {
+  fenix: {
+    id: "fenix",
+    name: "Fēnix 5 (32KB)",
+    ramLimitKb: 32.0,
+    description: "Hard: Brutal 32KB RAM ceiling with rapid allocations",
+    color: "#ef4444",
+  },
+  forerunner: {
+    id: "forerunner",
+    name: "Forerunner 245 (64KB)",
+    ramLimitKb: 64.0,
+    description: "Medium: 64KB memory limit with standard heap pressure",
+    color: "#eab308",
+  },
+  edge: {
+    id: "edge",
+    name: "Edge 1030 (128KB)",
+    ramLimitKb: 128.0,
+    description: "Casual: 128KB generous heap for experimental apps",
+    color: "#22c55e",
+  },
+};
+
+export const VARIABLE_RAM_COSTS: Record<VariableType, number> = {
+  int: 0.2,
+  float: 0.4,
+  string: 0.8,
+  array: 1.6,
+};
+
+// Authentic 16-color Garmin Chroma Palette
+export const CIQ_PALETTE = {
+  black: "#000000",
+  white: "#FFFFFF",
+  lightGray: "#AAAAAA",
+  darkGray: "#555555",
+  red: "#FF0000",
+  darkRed: "#AA0000",
+  orange: "#FF5500",
+  yellow: "#FFAA00",
+  green: "#00AA00",
+  brightGreen: "#00FF00",
+  blue: "#0000FF",
+  darkBlue: "#0000AA",
+  cyan: "#00AAAA",
+  brightCyan: "#00FFFF",
+  purple: "#AA00AA",
+  magenta: "#FF00FF",
+} as const;
+
+export interface MemoryVariable {
+  id: number;
+  name: string;
+  type: VariableType;
+  sizeKb: number;
+  allocatedAt: number;
+}
+
+export interface Obstacle {
+  id: number;
+  x: number; // 0 - 280
+  y: number; // 0 - 280
+  width: number;
+  height: number;
+  type: ObstacleType;
+  label: string;
+  speed: number;
+  variablePayload?: VariableType;
+}
+
+export interface CrashReport {
+  errorType: "Out Of Memory" | "Symbol Not Found" | "Watchdog Tripped" | "Null Pointer";
+  file: string;
+  line: number;
+  stackTrace: string[];
+  heapUsedKb: number;
+  heapLimitKb: number;
+}
+
+export interface FogPoint {
+  x: number;
+  y: number;
+  radius: number;
+}
+
+export interface GameEngineState {
+  gameState: "idle" | "playing" | "paused" | "crashed" | "summary";
+  device: DeviceTarget;
+  playerY: number; // Y position in 280x280 canvas
+  playerVy: number; // Vertical velocity
+  isGrounded: boolean;
+  score: number;
+  highScore: number;
+  distanceMeters: number;
+  variables: MemoryVariable[];
+  allocatedRamKb: number;
+  obstacles: Obstacle[];
+  isLightOn: boolean;
+  battery: number; // 0 - 100%
+  lightActiveDurationMs: number;
+  fogLevel: number; // 0 (clear) to 1.0 (fully frosted)
+  fogWipes: FogPoint[];
+  isGcActive: boolean;
+  gcTimerMs: number; // 500ms freeze
+  heartRate: number;
+  crashReport: CrashReport | null;
+  lastAllocTime: number;
+  lastObstacleTime: number;
+  consecutiveDodges: number;
+}
+
+export const CANVAS_SIZE = 280;
+export const GROUND_Y = 205;
+export const PLAYER_X = 52;
+export const PLAYER_WIDTH = 20;
+export const PLAYER_HEIGHT = 24;
+export const GRAVITY = 0.65;
+export const JUMP_FORCE = -10.5;
+
+/**
+ * Initializes a new fresh game state
+ */
+export function createInitialState(device: DeviceTarget = "fenix", highScore = 0): GameEngineState {
+  return {
+    gameState: "idle",
+    device,
+    playerY: GROUND_Y - PLAYER_HEIGHT,
+    playerVy: 0,
+    isGrounded: true,
+    score: 0,
+    highScore,
+    distanceMeters: 0,
+    variables: [
+      { id: 1, name: "appCtx", type: "int", sizeKb: 0.2, allocatedAt: 0 },
+      { id: 2, name: "displayGfx", type: "array", sizeKb: 1.6, allocatedAt: 0 },
+    ],
+    allocatedRamKb: 1.8,
+    obstacles: [],
+    isLightOn: false,
+    battery: 100,
+    lightActiveDurationMs: 0,
+    fogLevel: 0,
+    fogWipes: [],
+    isGcActive: false,
+    gcTimerMs: 0,
+    heartRate: 135,
+    crashReport: null,
+    lastAllocTime: 0,
+    lastObstacleTime: 0,
+    consecutiveDodges: 0,
+  };
+}
+
+/**
+ * Start a new game session
+ */
+export function startGame(state: GameEngineState, device?: DeviceTarget): GameEngineState {
+  const targetDevice = device || state.device;
+  const initial = createInitialState(targetDevice, state.highScore);
+  return {
+    ...initial,
+    gameState: "playing",
+  };
+}
+
+/**
+ * Jettison (pop) the oldest variable in the heap
+ */
+export function jettisonOldestVariable(state: GameEngineState): { state: GameEngineState; popped?: MemoryVariable } {
+  if (state.gameState !== "playing" || state.variables.length === 0) {
+    return { state };
+  }
+
+  const [popped, ...rest] = state.variables;
+  const newRam = Math.max(0.2, state.allocatedRamKb - popped.sizeKb);
+
+  return {
+    state: {
+      ...state,
+      variables: rest,
+      allocatedRamKb: Number(newRam.toFixed(2)),
+      score: state.score + 5,
+    },
+    popped,
+  };
+}
+
+/**
+ * Force Garbage Collection (GC)
+ * Freezes game for 500ms and frees 2.0 to 4.0 KB of garbage
+ */
+export function triggerGarbageCollection(state: GameEngineState): { state: GameEngineState; freedKb: number } {
+  if (state.gameState !== "playing" || state.isGcActive) {
+    return { state, freedKb: 0 };
+  }
+
+  // Calculate garbage memory to free (2.0 to 4.0 KB, capped by current non-essential variables)
+  const targetFreedKb = Number((2.0 + Math.random() * 2.0).toFixed(2));
+  let accumulatedFreed = 0;
+  const remainingVars: MemoryVariable[] = [];
+
+  // Remove variables from oldest to newest until target freed is met
+  for (let i = 0; i < state.variables.length; i++) {
+    const v = state.variables[i];
+    if (accumulatedFreed < targetFreedKb && state.variables.length - remainingVars.length > 2) {
+      accumulatedFreed += v.sizeKb;
+    } else {
+      remainingVars.push(v);
+    }
+  }
+
+  const newRam = Math.max(0.4, Number((state.allocatedRamKb - accumulatedFreed).toFixed(2)));
+
+  return {
+    state: {
+      ...state,
+      isGcActive: true,
+      gcTimerMs: 500, // 500ms freeze
+      variables: remainingVars,
+      allocatedRamKb: newRam,
+      score: state.score + 10,
+    },
+    freedKb: accumulatedFreed,
+  };
+}
+
+/**
+ * Allocate a new variable into the heap
+ */
+export function allocateVariable(
+  state: GameEngineState,
+  type: VariableType,
+  name?: string
+): { state: GameEngineState; crashed: boolean } {
+  const sizeKb = VARIABLE_RAM_COSTS[type];
+  const newRam = Number((state.allocatedRamKb + sizeKb).toFixed(2));
+  const ramLimit = DEVICE_PROFILES[state.device].ramLimitKb;
+
+  const newVar: MemoryVariable = {
+    id: Date.now() + Math.random(),
+    name: name || `${type}_${Math.floor(Math.random() * 900 + 100)}`,
+    type,
+    sizeKb,
+    allocatedAt: Date.now(),
+  };
+
+  if (newRam > ramLimit) {
+    // Trigger Out Of Memory Crash
+    const crashReport: CrashReport = {
+      errorType: "Out Of Memory",
+      file: "MonkeyC_Alloc.mc",
+      line: 12,
+      stackTrace: [
+        `Failed to allocate ${sizeKb}KB (${type})`,
+        `Heap: ${newRam}KB / ${ramLimit}KB`,
+        "at Rez.Fonts.drawGlyph() [Rez.mc:88]",
+        "at Garmin_Schvitz_App.onUpdate() [App.mc:42]",
+      ],
+      heapUsedKb: newRam,
+      heapLimitKb: ramLimit,
+    };
+
+    return {
+      state: {
+        ...state,
+        allocatedRamKb: newRam,
+        gameState: "crashed",
+        crashReport,
+      },
+      crashed: true,
+    };
+  }
+
+  return {
+    state: {
+      ...state,
+      variables: [...state.variables, newVar],
+      allocatedRamKb: newRam,
+    },
+    crashed: false,
+  };
+}
+
+/**
+ * Adds a wipe trail to defog the screen
+ */
+export function wipeScreenFog(state: GameEngineState, x: number, y: number, radius = 28): GameEngineState {
+  const newWipes = [...state.fogWipes.slice(-15), { x, y, radius }];
+  const newFogLevel = Math.max(0, state.fogLevel - 0.22);
+  return {
+    ...state,
+    fogWipes: newWipes,
+    fogLevel: newFogLevel,
+  };
+}
+
+/**
+ * Primary Game Physics & Simulation Update Loop (Called by requestAnimationFrame)
+ */
+export function updateGameSimulation(state: GameEngineState, deltaMs: number): GameEngineState {
+  if (state.gameState !== "playing") {
+    return state;
+  }
+
+  // Handle GC Freeze
+  if (state.isGcActive) {
+    const remainingGc = state.gcTimerMs - deltaMs;
+    if (remainingGc <= 0) {
+      return {
+        ...state,
+        isGcActive: false,
+        gcTimerMs: 0,
+      };
+    }
+    return {
+      ...state,
+      gcTimerMs: remainingGc,
+    };
+  }
+
+  const dtRatio = deltaMs / 16.666;
+
+  // 1. Battery Drain & Overheating Mechanics
+  let nextBattery = state.battery;
+  let lightDuration = state.lightActiveDurationMs;
+  let fogLevel = state.fogLevel;
+
+  // Base battery drain: 0.1%/sec; With light: +0.3%/sec (0.4%/sec total)
+  const baseDrainPerMs = 0.0001;
+  const lightDrainPerMs = 0.0003;
+  const totalDrain = (baseDrainPerMs + (state.isLightOn ? lightDrainPerMs : 0)) * deltaMs;
+  nextBattery = Math.max(0, nextBattery - totalDrain);
+
+  let nextLight = state.isLightOn;
+  if (nextBattery <= 0) {
+    nextLight = false;
+    nextBattery = 0;
+  }
+
+  if (state.isLightOn) {
+    lightDuration += deltaMs;
+    // Overheat after sustained light drain (> 6 seconds buildup)
+    if (lightDuration > 6000) {
+      fogLevel = Math.min(0.95, fogLevel + 0.0004 * deltaMs);
+    }
+  } else {
+    lightDuration = Math.max(0, lightDuration - deltaMs * 0.5);
+    fogLevel = Math.max(0, fogLevel - 0.0001 * deltaMs);
+  }
+
+  // 2. Player Jump & Gravity Physics
+  let nextPlayerY = state.playerY + state.playerVy * dtRatio;
+  let nextPlayerVy = state.playerVy + GRAVITY * dtRatio;
+  let isGrounded = false;
+
+  const groundLevel = GROUND_Y - PLAYER_HEIGHT;
+  if (nextPlayerY >= groundLevel) {
+    nextPlayerY = groundLevel;
+    nextPlayerVy = 0;
+    isGrounded = true;
+  }
+
+  // 3. Distance & Score Tracking
+  const nextDistance = state.distanceMeters + 0.25 * dtRatio;
+  const nextScore = state.score + Math.round(1 * dtRatio);
+  const nextHighScore = Math.max(state.highScore, nextScore);
+  const nextHeartRate = Math.min(188, Math.max(120, 130 + Math.floor(nextScore * 0.05)));
+
+  // 4. Memory Allocations (Automatic dynamic memory pressure)
+  let updatedState: GameEngineState = {
+    ...state,
+    playerY: nextPlayerY,
+    playerVy: nextPlayerVy,
+    isGrounded,
+    battery: Number(nextBattery.toFixed(2)),
+    isLightOn: nextLight,
+    lightActiveDurationMs: lightDuration,
+    fogLevel: Number(fogLevel.toFixed(3)),
+    distanceMeters: Number(nextDistance.toFixed(1)),
+    score: nextScore,
+    highScore: nextHighScore,
+    heartRate: nextHeartRate,
+  };
+
+  const now = Date.now();
+  const allocInterval = state.device === "fenix" ? 3200 : state.device === "forerunner" ? 4000 : 5000;
+  if (now - state.lastAllocTime > allocInterval) {
+    const types: VariableType[] = ["int", "float", "string", "array"];
+    const chosenType = types[Math.floor(Math.random() * types.length)];
+    const allocResult = allocateVariable(updatedState, chosenType);
+    if (allocResult.crashed) {
+      return allocResult.state;
+    }
+    updatedState = {
+      ...allocResult.state,
+      lastAllocTime: now,
+    };
+  }
+
+  // 5. Procedural Obstacles & Memory Tokens Update
+  const currentObstacles = [...updatedState.obstacles];
+  const nextObstacles: Obstacle[] = [];
+  let crashTriggered: CrashReport | null = null;
+
+  for (const obs of currentObstacles) {
+    const nextX = obs.x - obs.speed * dtRatio;
+
+    // Check collision with Player
+    const playerBox = {
+      left: PLAYER_X + 2,
+      right: PLAYER_X + PLAYER_WIDTH - 2,
+      top: updatedState.playerY + 2,
+      bottom: updatedState.playerY + PLAYER_HEIGHT - 2,
+    };
+
+    const obsBox = {
+      left: nextX + 2,
+      right: nextX + obs.width - 2,
+      top: obs.y + 2,
+      bottom: obs.y + obs.height - 2,
+    };
+
+    const isColliding =
+      playerBox.right > obsBox.left &&
+      playerBox.left < obsBox.right &&
+      playerBox.bottom > obsBox.top &&
+      playerBox.top < obsBox.bottom;
+
+    if (isColliding) {
+      if (obs.type === "mem_token" && obs.variablePayload) {
+        // Collected memory token -> forced allocation
+        const allocRes = allocateVariable(updatedState, obs.variablePayload);
+        if (allocRes.crashed) {
+          return allocRes.state;
+        }
+        updatedState = allocRes.state;
+        // Don't keep obstacle after collection
+        continue;
+      } else if (obs.type === "watchdog") {
+        crashTriggered = {
+          errorType: "Watchdog Tripped",
+          file: "Garmin_Schvitz_App.mc",
+          line: 42,
+          stackTrace: [
+            "Watchdog Tripped: App Execution > 5000ms",
+            "at System.println() [Core.mc:12]",
+            "at Garmin_Schvitz_App.onTimer() [App.mc:42]",
+          ],
+          heapUsedKb: updatedState.allocatedRamKb,
+          heapLimitKb: DEVICE_PROFILES[updatedState.device].ramLimitKb,
+        };
+        break;
+      } else if (obs.type === "null_pointer" || obs.type === "stack_overflow") {
+        crashTriggered = {
+          errorType: obs.type === "null_pointer" ? "Null Pointer" : "Symbol Not Found",
+          file: "Garmin_Schvitz_App.mc",
+          line: 77,
+          stackTrace: [
+            `Symbol Not Found Error in Garmin_Schvitz_App.mc:77`,
+            `Failed symbol: :${obs.label.toLowerCase()}`,
+            "at Ui.View.findDrawableById() [Ui.mc:104]",
+          ],
+          heapUsedKb: updatedState.allocatedRamKb,
+          heapLimitKb: DEVICE_PROFILES[updatedState.device].ramLimitKb,
+        };
+        break;
+      }
+    }
+
+    // Keep active if on screen
+    if (nextX + obs.width > 0) {
+      nextObstacles.push({ ...obs, x: nextX });
+    }
+  }
+
+  if (crashTriggered) {
+    return {
+      ...updatedState,
+      gameState: "crashed",
+      crashReport: crashTriggered,
+      obstacles: nextObstacles,
+    };
+  }
+
+  // 6. Spawn new Obstacles
+  const obstacleInterval = 1800 + Math.random() * 1200;
+  if (now - updatedState.lastObstacleTime > obstacleInterval && nextObstacles.length < 3) {
+    const maxX = nextObstacles.reduce((max, o) => Math.max(max, o.x), 0);
+    if (maxX < 190) {
+      const obstacleTypes: ObstacleType[] = ["null_pointer", "watchdog", "stack_overflow", "mem_token"];
+      const chosen = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
+
+      let width = 16;
+      let height = 20;
+      let y = GROUND_Y - height;
+      let label = "NULL";
+      let variablePayload: VariableType | undefined;
+
+      if (chosen === "null_pointer") {
+        label = "NULL";
+        width = 16;
+        height = 20;
+        y = GROUND_Y - height;
+      } else if (chosen === "watchdog") {
+        label = "DOG";
+        width = 20;
+        height = 28;
+        y = GROUND_Y - height;
+      } else if (chosen === "stack_overflow") {
+        label = "STK";
+        width = 18;
+        height = 24;
+        y = GROUND_Y - height;
+      } else if (chosen === "mem_token") {
+        const types: VariableType[] = ["int", "float", "string", "array"];
+        variablePayload = types[Math.floor(Math.random() * types.length)];
+        label = variablePayload.slice(0, 3).toUpperCase();
+        width = 14;
+        height = 14;
+        y = GROUND_Y - 36 - Math.floor(Math.random() * 20); // Floating in air
+      }
+
+      nextObstacles.push({
+        id: Date.now() + Math.random(),
+        x: CANVAS_SIZE + 10,
+        y,
+        width,
+        height,
+        type: chosen,
+        label,
+        speed: 2.2 + Math.min(2.0, updatedState.score * 0.005),
+        variablePayload,
+      });
+
+      updatedState.lastObstacleTime = now;
+    }
+  }
+
+  return {
+    ...updatedState,
+    obstacles: nextObstacles,
+  };
+}
+
+/**
+ * 16-Color CIQ Retro Canvas 2D Renderer
+ */
+export function renderCanvasFrame(ctx: CanvasRenderingContext2D, state: GameEngineState) {
+  // Clear full 280x280 frame
+  ctx.save();
+  ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+  // Circular Clip Path for 280x280 Round Smartwatch Display
+  ctx.beginPath();
+  ctx.arc(CANVAS_SIZE / 2, CANVAS_SIZE / 2, CANVAS_SIZE / 2 - 2, 0, Math.PI * 2);
+  ctx.clip();
+
+  // Background Display (Black / Dark Navy)
+  ctx.fillStyle = state.isLightOn ? "#0c1f2d" : CIQ_PALETTE.black;
+  ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+  // LCD Pixel Grid Texture
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.03)";
+  ctx.lineWidth = 1;
+  for (let x = 0; x < CANVAS_SIZE; x += 6) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, CANVAS_SIZE);
+    ctx.stroke();
+  }
+  for (let y = 0; y < CANVAS_SIZE; y += 6) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(CANVAS_SIZE, y);
+    ctx.stroke();
+  }
+
+  // Draw Ground & Track Baseline
+  ctx.fillStyle = CIQ_PALETTE.darkGray;
+  ctx.fillRect(0, GROUND_Y, CANVAS_SIZE, CANVAS_SIZE - GROUND_Y);
+
+  ctx.fillStyle = CIQ_PALETTE.cyan;
+  ctx.fillRect(0, GROUND_Y, CANVAS_SIZE, 2);
+
+  // Perspective Track Markers
+  ctx.fillStyle = CIQ_PALETTE.lightGray;
+  const markerOffset = (state.distanceMeters * 10) % 24;
+  for (let x = -markerOffset; x < CANVAS_SIZE; x += 24) {
+    ctx.fillRect(x, GROUND_Y + 4, 12, 2);
+  }
+
+  // If Crashed: Render CIQ Blue Error Screen
+  if (state.gameState === "crashed" && state.crashReport) {
+    renderCrashScreen(ctx, state);
+    ctx.restore();
+    return;
+  }
+
+  // 1. Draw Player Character (Retro Monkey C Pixel Sprite)
+  drawMonkeyRunner(ctx, PLAYER_X, state.playerY, state.isGcActive);
+
+  // 2. Draw Obstacles & Memory Tokens
+  for (const obs of state.obstacles) {
+    drawObstacle(ctx, obs);
+  }
+
+  // 3. Draw GC Freeze Indicator Overlay
+  if (state.isGcActive) {
+    ctx.fillStyle = "rgba(0, 0, 170, 0.4)";
+    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+    ctx.fillStyle = CIQ_PALETTE.brightCyan;
+    ctx.font = "bold 10px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("GC FREEZE (500ms)", CANVAS_SIZE / 2, 95);
+    ctx.fillStyle = CIQ_PALETTE.white;
+    ctx.font = "8px monospace";
+    ctx.fillText(`RECLAIMING HEAP...`, CANVAS_SIZE / 2, 108);
+  }
+
+  // 4. Draw HUD Overlays (Top Arc & Bottom RAM Bar)
+  drawHud(ctx, state);
+
+  // 5. Draw Overheat Fog & Condensation Layer
+  if (state.fogLevel > 0.05) {
+    drawOverheatFog(ctx, state);
+  }
+
+  ctx.restore();
+}
+
+/**
+ * Draws HUD elements inside the circular screen
+ */
+function drawHud(ctx: CanvasRenderingContext2D, state: GameEngineState) {
+  const ramLimit = DEVICE_PROFILES[state.device].ramLimitKb;
+  const ramPct = Math.min(1.0, state.allocatedRamKb / ramLimit);
+
+  // Top Status Bar: Battery & Profile
+  ctx.font = "bold 9px monospace";
+  ctx.textAlign = "left";
+  ctx.fillStyle = state.battery < 20 ? CIQ_PALETTE.red : CIQ_PALETTE.green;
+  ctx.fillText(`BAT: ${Math.round(state.battery)}%`, 50, 42);
+
+  ctx.textAlign = "right";
+  ctx.fillStyle = CIQ_PALETTE.lightGray;
+  ctx.fillText(state.device.toUpperCase(), CANVAS_SIZE - 50, 42);
+
+  // Top Center: Score & Heart Rate
+  ctx.textAlign = "center";
+  ctx.fillStyle = CIQ_PALETTE.white;
+  ctx.font = "bold 11px monospace";
+  ctx.fillText(`${state.score} PTS`, CANVAS_SIZE / 2, 54);
+
+  // Bottom RAM Meter HUD (Crucial Game Mechanic)
+  const ramY = 222;
+  const ramBarW = 160;
+  const ramBarH = 10;
+  const ramBarX = (CANVAS_SIZE - ramBarW) / 2;
+
+  // Background Box
+  ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+  ctx.fillRect(ramBarX - 4, ramY - 14, ramBarW + 8, 38);
+  ctx.strokeStyle = CIQ_PALETTE.darkGray;
+  ctx.strokeRect(ramBarX - 4, ramY - 14, ramBarW + 8, 38);
+
+  // RAM Text
+  ctx.font = "bold 8px monospace";
+  ctx.textAlign = "left";
+  ctx.fillStyle = ramPct > 0.85 ? CIQ_PALETTE.red : ramPct > 0.65 ? CIQ_PALETTE.yellow : CIQ_PALETTE.brightCyan;
+  ctx.fillText(`RAM: ${state.allocatedRamKb.toFixed(1)} / ${ramLimit.toFixed(1)} KB`, ramBarX, ramY - 4);
+
+  // RAM Progress Bar
+  ctx.fillStyle = CIQ_PALETTE.darkGray;
+  ctx.fillRect(ramBarX, ramY, ramBarW, ramBarH);
+
+  const fillW = Math.max(0, ramBarW * ramPct);
+  ctx.fillStyle = ramPct > 0.9 ? CIQ_PALETTE.red : ramPct > 0.7 ? CIQ_PALETTE.yellow : CIQ_PALETTE.brightGreen;
+  ctx.fillRect(ramBarX, ramY, fillW, ramBarH);
+  ctx.strokeStyle = CIQ_PALETTE.white;
+  ctx.strokeRect(ramBarX, ramY, ramBarW, ramBarH);
+
+  // Variable Allocation Queue Preview
+  ctx.font = "7px monospace";
+  ctx.fillStyle = CIQ_PALETTE.lightGray;
+  const queueSummary = state.variables
+    .slice(-4)
+    .map((v) => `${v.type[0].toUpperCase()}:${v.sizeKb}k`)
+    .join(" ");
+  ctx.fillText(`QUEUE: ${queueSummary || "EMPTY"}`, ramBarX, ramY + 18);
+}
+
+/**
+ * Draws the Pixel Art Monkey Runner
+ */
+function drawMonkeyRunner(ctx: CanvasRenderingContext2D, x: number, y: number, isFrozen: boolean) {
+  ctx.save();
+  ctx.translate(x, y);
+
+  // Body Color (Brown or Cyan if Frozen)
+  ctx.fillStyle = isFrozen ? CIQ_PALETTE.cyan : "#8B4513";
+  ctx.fillRect(4, 6, 12, 14); // Torso
+
+  // Head
+  ctx.fillStyle = isFrozen ? CIQ_PALETTE.brightCyan : "#A0522D";
+  ctx.fillRect(2, 0, 16, 8); // Head
+
+  // Ears
+  ctx.fillStyle = "#D2B48C";
+  ctx.fillRect(0, 2, 3, 4);
+  ctx.fillRect(17, 2, 3, 4);
+
+  // Snout
+  ctx.fillStyle = "#F5DEB3";
+  ctx.fillRect(5, 3, 10, 5);
+
+  // Eyes
+  ctx.fillStyle = CIQ_PALETTE.black;
+  ctx.fillRect(7, 3, 2, 2);
+  ctx.fillRect(11, 3, 2, 2);
+
+  // Developer Headband (Red)
+  ctx.fillStyle = CIQ_PALETTE.red;
+  ctx.fillRect(2, 0, 16, 2);
+
+  // Tail
+  ctx.strokeStyle = "#8B4513";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(4, 16);
+  ctx.quadraticCurveTo(-4, 12, -2, 6);
+  ctx.stroke();
+
+  // Running Legs
+  ctx.fillStyle = CIQ_PALETTE.black;
+  ctx.fillRect(6, 20, 3, 4);
+  ctx.fillRect(11, 20, 3, 4);
+
+  ctx.restore();
+}
+
+/**
+ * Draws an obstacle or memory token
+ */
+function drawObstacle(ctx: CanvasRenderingContext2D, obs: Obstacle) {
+  ctx.save();
+  ctx.translate(obs.x, obs.y);
+
+  if (obs.type === "mem_token") {
+    // Floating Memory Token
+    ctx.fillStyle = CIQ_PALETTE.yellow;
+    ctx.fillRect(0, 0, obs.width, obs.height);
+    ctx.strokeStyle = CIQ_PALETTE.orange;
+    ctx.strokeRect(0, 0, obs.width, obs.height);
+
+    ctx.fillStyle = CIQ_PALETTE.black;
+    ctx.font = "bold 6px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(obs.label, obs.width / 2, obs.height / 2 + 2);
+  } else if (obs.type === "null_pointer") {
+    // Red Spiky Bug Obstacle
+    ctx.fillStyle = CIQ_PALETTE.red;
+    ctx.beginPath();
+    ctx.moveTo(obs.width / 2, 0);
+    ctx.lineTo(obs.width, obs.height);
+    ctx.lineTo(0, obs.height);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = CIQ_PALETTE.white;
+    ctx.font = "bold 5px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("NULL", obs.width / 2, obs.height - 2);
+  } else if (obs.type === "watchdog") {
+    // Watchdog Hurdle (Purple Box with Timer)
+    ctx.fillStyle = CIQ_PALETTE.purple;
+    ctx.fillRect(0, 0, obs.width, obs.height);
+    ctx.strokeStyle = CIQ_PALETTE.magenta;
+    ctx.strokeRect(0, 0, obs.width, obs.height);
+
+    ctx.fillStyle = CIQ_PALETTE.white;
+    ctx.font = "bold 6px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("DOG", obs.width / 2, 10);
+    ctx.fillText("5s", obs.width / 2, 20);
+  } else {
+    // Stack Overflow Block
+    ctx.fillStyle = CIQ_PALETTE.darkRed;
+    ctx.fillRect(0, 0, obs.width, obs.height);
+    ctx.strokeStyle = CIQ_PALETTE.red;
+    ctx.strokeRect(0, 0, obs.width, obs.height);
+
+    ctx.fillStyle = CIQ_PALETTE.white;
+    ctx.font = "bold 5px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("STK", obs.width / 2, obs.height / 2 + 2);
+  }
+
+  ctx.restore();
+}
+
+/**
+ * Draws the Overheat Screen Fog and Condensation Layer
+ */
+function drawOverheatFog(ctx: CanvasRenderingContext2D, state: GameEngineState) {
+  ctx.save();
+
+  // Create temporary offscreen fog layer
+  const fogAlpha = Math.min(0.85, state.fogLevel);
+  ctx.fillStyle = `rgba(220, 240, 255, ${fogAlpha})`;
+  ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+  // Cut out swiped / wiped areas using destination-out
+  ctx.globalCompositeOperation = "destination-out";
+  for (const wipe of state.fogWipes) {
+    const grad = ctx.createRadialGradient(wipe.x, wipe.y, 0, wipe.x, wipe.y, wipe.radius);
+    grad.addColorStop(0, "rgba(0, 0, 0, 1.0)");
+    grad.addColorStop(0.7, "rgba(0, 0, 0, 0.8)");
+    grad.addColorStop(1, "rgba(0, 0, 0, 0)");
+
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(wipe.x, wipe.y, wipe.radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.restore();
+
+  // Render "OVERHEAT / SWIPE TO WIPE" Warning
+  if (state.fogLevel > 0.4) {
+    ctx.save();
+    ctx.fillStyle = CIQ_PALETTE.yellow;
+    ctx.font = "bold 8px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("⚠️ OVERHEAT: SWIPE TO WIPE", CANVAS_SIZE / 2, 75);
+    ctx.restore();
+  }
+}
+
+/**
+ * Draws the CIQ Blue Error Console when crashed
+ */
+function renderCrashScreen(ctx: CanvasRenderingContext2D, state: GameEngineState) {
+  const report = state.crashReport;
+  if (!report) return;
+
+  // Garmin Blue Screen of Death
+  ctx.fillStyle = "#000088";
+  ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+  ctx.fillStyle = CIQ_PALETTE.brightCyan;
+  ctx.font = "bold 10px monospace";
+  ctx.textAlign = "center";
+  ctx.fillText("CONNECT IQ ERROR", CANVAS_SIZE / 2, 45);
+
+  ctx.fillStyle = CIQ_PALETTE.white;
+  ctx.font = "bold 8px monospace";
+  ctx.fillText(report.errorType.toUpperCase(), CANVAS_SIZE / 2, 60);
+
+  ctx.fillStyle = CIQ_PALETTE.yellow;
+  ctx.font = "7px monospace";
+  ctx.fillText(`File: ${report.file}:${report.line}`, CANVAS_SIZE / 2, 74);
+
+  // Stack trace lines
+  ctx.font = "6.5px monospace";
+  ctx.textAlign = "left";
+  ctx.fillStyle = CIQ_PALETTE.lightGray;
+  let textY = 92;
+  for (const line of report.stackTrace) {
+    ctx.fillText(line.slice(0, 42), 24, textY);
+    textY += 11;
+  }
+
+  // Summary Metrics
+  ctx.fillStyle = CIQ_PALETTE.white;
+  ctx.font = "bold 7.5px monospace";
+  ctx.textAlign = "center";
+  ctx.fillText(`PEAK RAM: ${report.heapUsedKb.toFixed(1)} / ${report.heapLimitKb.toFixed(1)} KB`, CANVAS_SIZE / 2, 175);
+  ctx.fillText(`SCORE: ${state.score}  |  HI: ${state.highScore}`, CANVAS_SIZE / 2, 190);
+
+  // Restart instructions
+  ctx.fillStyle = CIQ_PALETTE.brightGreen;
+  ctx.font = "bold 9px monospace";
+  ctx.fillText("PRESS START TO REBUILD", CANVAS_SIZE / 2, 218);
+}
