@@ -35,14 +35,14 @@ const CaseStudyShowcaseInner: React.FC<CaseStudyShowcaseProps> = ({ caseStudies 
   return (
     <div className="w-full flex flex-col items-center">
       {/* Premium Staggered Filtering Tabs */}
-      <div className="flex gap-1.5 mb-12 bg-zinc-900/40 p-1.5 rounded-2xl border border-zinc-900/60 backdrop-blur-md relative z-20">
+      <div className="flex max-w-full overflow-x-auto gap-1.5 mb-8 sm:mb-12 bg-zinc-900/40 p-1.5 rounded-2xl border border-zinc-900/60 backdrop-blur-md relative z-20 scrollbar-none">
         {FILTER_TABS.map((tab) => {
           const isActive = selectedFilter === tab;
           return (
             <button
               key={tab}
               onClick={() => setSelectedFilter(tab)}
-              className={`relative px-4 py-2 text-xs font-mono font-bold transition-colors duration-300 rounded-xl cursor-pointer select-none ${
+              className={`relative px-3.5 sm:px-4 py-2.5 sm:py-2 min-h-[40px] sm:min-h-0 flex items-center justify-center text-xs font-mono font-bold transition-colors duration-300 rounded-xl cursor-pointer select-none shrink-0 ${
                 isActive ? "text-brand-cyan" : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
