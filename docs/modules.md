@@ -33,6 +33,7 @@
 - [lib/crf/presets](lib/crf/presets/README.md)
 - [lib/crf/presets/clinical-instruments](lib/crf/presets/clinical-instruments/README.md)
 - [lib/crf/presets/cns-neuro](lib/crf/presets/cns-neuro/README.md)
+- [lib/crf/presets/device-cardiovascular-implant](lib/crf/presets/device-cardiovascular-implant/README.md)
 - [lib/crf/presets/empty-study](lib/crf/presets/empty-study/README.md)
 - [lib/crf/presets/oncology-recist](lib/crf/presets/oncology-recist/README.md)
 - [lib/crf/presets/pk-dose-escalation](lib/crf/presets/pk-dose-escalation/README.md)

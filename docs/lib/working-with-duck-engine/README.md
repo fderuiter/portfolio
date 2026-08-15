@@ -12,6 +12,7 @@
 - [DuckFact](interfaces/DuckFact.md)
 - [FloatingAlert](interfaces/FloatingAlert.md)
 - [GameSprint](interfaces/GameSprint.md)
+- [IndoorPuddle](interfaces/IndoorPuddle.md)
 - [MudPuddle](interfaces/MudPuddle.md)
 - [OfficeStations](interfaces/OfficeStations.md)
 - [ParkBone](interfaces/ParkBone.md)
@@ -24,6 +25,8 @@
 
 ## Type Aliases
 
+- [CorporateHazard](type-aliases/CorporateHazard.md)
+- [CorporateHazardType](type-aliases/CorporateHazardType.md)
 - [DuckAccessory](type-aliases/DuckAccessory.md)
 - [DuckBehaviorState](type-aliases/DuckBehaviorState.md)
 - [DuckMood](type-aliases/DuckMood.md)
@@ -69,6 +72,7 @@
 - [giveTreat](functions/giveTreat.md)
 - [interactStation](functions/interactStation.md)
 - [jumpParkHurdle](functions/jumpParkHurdle.md)
+- [mopIndoorPuddle](functions/mopIndoorPuddle.md)
 - [performTrick](functions/performTrick.md)
 - [releaseDuck](functions/releaseDuck.md)
 - [rinseBathtub](functions/rinseBathtub.md)

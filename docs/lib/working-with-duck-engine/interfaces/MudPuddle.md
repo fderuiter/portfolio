@@ -6,7 +6,7 @@
 
 # Interface: MudPuddle
 
-Defined in: [lib/working-with-duck-engine.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L65)
+Defined in: [lib/working-with-duck-engine.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L76)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/working-with-duck-engine.ts:65](https://github.com/fderuiter/po
 
 > **radius**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L68)
+Defined in: [lib/working-with-duck-engine.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L79)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/working-with-duck-engine.ts:68](https://github.com/fderuiter/po
 
 > **x**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L66)
+Defined in: [lib/working-with-duck-engine.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L77)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [lib/working-with-duck-engine.ts:66](https://github.com/fderuiter/po
 
 > **y**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L67)
+Defined in: [lib/working-with-duck-engine.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L78)

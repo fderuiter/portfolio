@@ -6,7 +6,7 @@
 
 # Interface: DuckFact
 
-Defined in: [lib/working-with-duck-engine.ts:126](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L126)
+Defined in: [lib/working-with-duck-engine.ts:137](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L137)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/working-with-duck-engine.ts:126](https://github.com/fderuiter/p
 
 > **caption**: `string`
 
-Defined in: [lib/working-with-duck-engine.ts:133](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L133)
+Defined in: [lib/working-with-duck-engine.ts:144](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L144)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/working-with-duck-engine.ts:133](https://github.com/fderuiter/p
 
 > **fact**: `string`
 
-Defined in: [lib/working-with-duck-engine.ts:130](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L130)
+Defined in: [lib/working-with-duck-engine.ts:141](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L141)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/working-with-duck-engine.ts:130](https://github.com/fderuiter/p
 
 > **id**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:127](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L127)
+Defined in: [lib/working-with-duck-engine.ts:138](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L138)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/working-with-duck-engine.ts:127](https://github.com/fderuiter/p
 
 > **level**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:128](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L128)
+Defined in: [lib/working-with-duck-engine.ts:139](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L139)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/working-with-duck-engine.ts:128](https://github.com/fderuiter/p
 
 > **photoUrl**: `string`
 
-Defined in: [lib/working-with-duck-engine.ts:131](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L131)
+Defined in: [lib/working-with-duck-engine.ts:142](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L142)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/working-with-duck-engine.ts:131](https://github.com/fderuiter/p
 
 > **svgUrl**: `string`
 
-Defined in: [lib/working-with-duck-engine.ts:132](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L132)
+Defined in: [lib/working-with-duck-engine.ts:143](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L143)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [lib/working-with-duck-engine.ts:132](https://github.com/fderuiter/p
 
 > **title**: `string`
 
-Defined in: [lib/working-with-duck-engine.ts:129](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L129)
+Defined in: [lib/working-with-duck-engine.ts:140](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L140)

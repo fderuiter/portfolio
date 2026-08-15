@@ -8,7 +8,7 @@
 
 > **releaseDuck**(`state`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:2024](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2024)
+Defined in: [lib/working-with-duck-engine.ts:2178](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2178)
 
 Player Action: Release Duck
 
