@@ -194,7 +194,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
           <div className="flex p-0.5 bg-zinc-950/80 border border-zinc-900/80 rounded-lg mb-3 text-xs font-mono relative z-10 w-fit backdrop-blur-sm">
             <button
               onClick={() => handleToggleMode("pitch")}
-              className={`min-h-6 px-3 py-0.5 rounded-md border text-[11px] font-bold transition-all duration-200 cursor-pointer ${
+              className={`min-h-9 px-3.5 py-1.5 rounded-md border text-[11px] font-bold transition-all duration-200 cursor-pointer flex items-center justify-center ${
                 mode === "pitch"
                   ? "bg-zinc-900 text-brand-cyan border-brand-cyan/30 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
                   : "border-transparent text-zinc-400 hover:text-zinc-200"
@@ -204,7 +204,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             </button>
             <button
               onClick={() => handleToggleMode("reality")}
-              className={`min-h-6 px-3 py-0.5 rounded-md border text-[11px] font-bold transition-all duration-200 cursor-pointer ${
+              className={`min-h-9 px-3.5 py-1.5 rounded-md border text-[11px] font-bold transition-all duration-200 cursor-pointer flex items-center justify-center ${
                 mode === "reality"
                   ? "bg-zinc-900 text-brand-cyan border-brand-cyan/30 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
                   : "border-transparent text-zinc-400 hover:text-zinc-200"
@@ -301,10 +301,10 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
               {/* Monospace terminal logs commits feed */}
               <div className="bg-black/60 border border-zinc-900/60 rounded-xl p-2.5 font-mono text-[9.5px] leading-tight space-y-1 h-[115px] flex flex-col justify-start overflow-hidden">
                 <div className="flex items-center text-zinc-400 border-b border-zinc-900/60 pb-1 mb-1">
-                  <IconTerminal className="w-3.5 h-3.5 mr-1 text-zinc-400" />
+                  <IconTerminal className="w-3.5 h-3.5 mr-1 text-zinc-400 shrink-0" />
                   <span className="truncate">{study.simulated_telemetry ? getSimulatedTerminalCommand(study.primary_language) : "git log --oneline -n 5"}</span>
                 </div>
-                <div className="flex-1 flex flex-col justify-start space-y-1 overflow-y-auto scrollbar-none text-zinc-400">
+                <div className="flex-1 flex flex-col justify-start space-y-1 overflow-y-auto overscroll-contain scrollbar-none text-zinc-400">
                   {study.simulated_telemetry ? (
                     getSimulatedTerminalLogs(study.primary_language).map((log, i) => (
                       <div key={i} className="truncate flex items-start gap-1">
@@ -314,8 +314,8 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
                   ) : githubStats.recentCommits.length > 0 ? (
                     githubStats.recentCommits.map((c, i) => (
                       <div key={i} className="truncate flex items-start gap-1">
-                        <span className="text-brand-cyan select-none">{c.sha}</span>
-                        <span className="text-zinc-500 select-none">|</span>
+                        <span className="text-brand-cyan select-none shrink-0">{c.sha}</span>
+                        <span className="text-zinc-500 select-none shrink-0">|</span>
                         <span className="text-zinc-300 truncate" title={c.message}>{c.message}</span>
                       </div>
                     ))
@@ -342,11 +342,11 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
           )}
         </div>
 
-        {/* Footer analyze link */}
-        <div className="flex justify-between items-center border-t border-zinc-900/40 pt-2.5 mt-1.5">
+        {/* Footer analyze link with 44px+ tap target */}
+        <div className="flex justify-between items-center border-t border-zinc-900/40 pt-1.5 mt-1">
           <Link
             href={`/case-studies/${study.slug}`}
-            className="group inline-flex items-center text-xs font-bold text-brand-cyan/80 hover:text-brand-cyan transition-colors duration-300 cursor-pointer relative z-10"
+            className="group inline-flex items-center min-h-[44px] py-2 text-xs font-bold text-brand-cyan/80 hover:text-brand-cyan transition-colors duration-300 cursor-pointer relative z-10"
           >
             <span>Analyze Architecture</span>
             <IconChevronRight className="ml-1 w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-200" />
