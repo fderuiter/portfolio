@@ -1,0 +1,27 @@
+[**fderuiter-portfolio**](../../../../README.md)
+
+***
+
+[fderuiter-portfolio](../../../../modules.md) / [lib/crf/export-acrf](../README.md) / generateSdtmMappingMatrix
+
+# Function: generateSdtmMappingMatrix()
+
+> **generateSdtmMappingMatrix**(`study`): [`SdtmMappingRow`](../interfaces/SdtmMappingRow.md)[]
+
+Defined in: [lib/crf/export-acrf.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-acrf.ts#L30)
+
+Generates an SDTM mapping matrix across all forms in a study protocol.
+
+## Parameters
+
+### study
+
+[`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
+
+The study protocol
+
+## Returns
+
+[`SdtmMappingRow`](../interfaces/SdtmMappingRow.md)[]
+
+Array of SDTM mapping rows

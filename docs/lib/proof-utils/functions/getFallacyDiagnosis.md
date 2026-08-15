@@ -8,9 +8,9 @@
 
 > **getFallacyDiagnosis**(`sourceId`, `targetId`, `_edges`, `_theoremId?`): [`FallacyDiagnosis`](../interfaces/FallacyDiagnosis.md)
 
-Defined in: [lib/proof-utils.ts:805](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L805)
+Defined in: [lib/proof-utils.ts:1622](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L1622)
 
-Diagnoses the formal logical fallacy and generates truth table counterexamples for invalid connections.
+Diagnoses formal logical fallacies and synthesizes counterexample truth table rows.
 
 ## Parameters
 

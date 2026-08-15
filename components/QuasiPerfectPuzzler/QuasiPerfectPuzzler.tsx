@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useCallback, useSyncExternalStore, useMemo } from "react";
+import React, { useState, useCallback, useSyncExternalStore, useMemo, useRef } from "react";
 import { PanInfo } from "framer-motion";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { puzzleLevels } from "@/lib/quasi-perfect/levels";
 import { tacticDefs } from "@/lib/quasi-perfect/tactics";
 import {
   CompilerLogEntry,
+  GameMode,
   GameProgressState,
   LeanProofStep,
   LevelScore,
@@ -29,7 +30,11 @@ import { MultiGoalTabs } from "./MultiGoalTabs";
 import { LeanIdeInspector } from "./LeanIdeInspector";
 import { HintSystem } from "./HintSystem";
 import { SandboxMode } from "./SandboxMode";
+import { TheoryBriefingModal } from "./TheoryBriefingModal";
 import { FieldManualButton } from "@/components/FieldManualButton";
+import { FullscreenButton } from "@/components/arcade/FullscreenButton";
+import { TabletOrientationHint } from "@/components/arcade/TabletOrientationHint";
+import { useFullscreen } from "@/hooks/useFullscreen";
 import {
   IconBulb,
   IconCode,
@@ -37,9 +42,11 @@ import {
   IconRotate,
   IconArrowBackUp,
   IconArrowForwardUp,
+  IconSparkles,
 } from "@tabler/icons-react";
 
 const STORAGE_KEY = "quasi_perfect_puzzler_progress_v1";
+const MODE_STORAGE_KEY = "quasi_perfect_puzzler_mode_v1";
 
 // SSR-Safe localStorage sync subscriber
 function subscribeProgress(callback: () => void) {
@@ -76,6 +83,17 @@ export const QuasiPerfectPuzzler: React.FC = () => {
   const [selectedChapter, setSelectedChapter] = useState<number | "all">("all");
   const [showHints, setShowHints] = useState<boolean>(false);
   const [showLeanInspector, setShowLeanInspector] = useState<boolean>(true);
+  const [showBriefingModal, setShowBriefingModal] = useState<boolean>(false);
+
+  // Dual Game Mode State (Story/Casual vs Hacker/Speedrun)
+  const [gameMode, setGameMode] = useState<GameMode>(() => {
+    if (typeof window === "undefined") return "story";
+    try {
+      return (localStorage.getItem(MODE_STORAGE_KEY) as GameMode) || "story";
+    } catch {
+      return "story";
+    }
+  });
 
   const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
   const currentLevel: PuzzlerLevelDef = puzzleLevels[currentLevelIndex] || puzzleLevels[0];
@@ -96,7 +114,9 @@ export const QuasiPerfectPuzzler: React.FC = () => {
   const goalAST = activeSubgoal.goal;
   const activeHypotheses = activeSubgoal.hypotheses;
 
-  const [currentRam, setCurrentRam] = useState<number>(currentLevel.initialRam);
+  const [currentRam, setCurrentRam] = useState<number>(
+    gameMode === "story" ? 99 : currentLevel.initialRam
+  );
   const [proofSteps, setProofSteps] = useState<LeanProofStep[]>([]);
   const [history, setHistory] = useState<StepHistory[]>([]);
   const [redoHistory, setRedoHistory] = useState<StepHistory[]>([]);
@@ -113,9 +133,28 @@ export const QuasiPerfectPuzzler: React.FC = () => {
       id: "init-1",
       timestamp: "00:00:01",
       type: "info",
-      text: `Lean 4 server initialized. Loaded [Ch ${currentLevel.chapter} · ${currentLevel.chapterTitle}]: ${currentLevel.title}.`,
+      text: `Lean 4 server initialized. Loaded [Ch ${currentLevel.chapter} · ${currentLevel.chapterTitle}]: ${currentLevel.title}. Mode: ${gameMode.toUpperCase()}.`,
     },
   ]);
+
+  const handleToggleMode = useCallback(
+    (mode: GameMode) => {
+      setGameMode(mode);
+      if (mode === "hacker") {
+        setCurrentRam(currentLevel.initialRam);
+      } else {
+        setCurrentRam(99);
+      }
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(MODE_STORAGE_KEY, mode);
+        } catch {
+          // Storage fallback
+        }
+      }
+    },
+    [currentLevel.initialRam]
+  );
 
   // SSR-Safe progress state
   const rawProgress = useSyncExternalStore(
@@ -179,7 +218,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
         },
       ]);
       setActiveGoalIndex(0);
-      setCurrentRam(targetLvl.initialRam);
+      setCurrentRam(gameMode === "story" ? 99 : targetLvl.initialRam);
       setProofSteps([]);
       setHistory([]);
       setRedoHistory([]);
@@ -194,11 +233,11 @@ export const QuasiPerfectPuzzler: React.FC = () => {
           id: `lvl-${targetLvl.id}-${Date.now()}`,
           timestamp: new Date().toLocaleTimeString("en-US", { hour12: false }),
           type: "info",
-          text: `Loaded Chapter ${targetLvl.chapter} [${targetLvl.subtitle}]: ${targetLvl.title}. RAM: ${targetLvl.initialRam} GB.`,
+          text: `Loaded Chapter ${targetLvl.chapter} [${targetLvl.subtitle}]: ${targetLvl.title}. Mode: ${gameMode.toUpperCase()}.`,
         },
       ]);
     },
-    []
+    [gameMode]
   );
 
   // Execute a tactic on a given target AST node
@@ -215,8 +254,8 @@ export const QuasiPerfectPuzzler: React.FC = () => {
 
       if (!tactic) return;
 
-      // Check RAM availability
-      if (currentRam < tactic.baseRamCost && tactic.id !== "sorry") {
+      // Check RAM availability (enforced strictly in Hacker mode)
+      if (gameMode === "hacker" && currentRam < tactic.baseRamCost && tactic.id !== "sorry") {
         addLog(
           `FATAL ERROR: Insufficient RAM for tactic '${tactic.name}'. Required: ${tactic.baseRamCost} GB, Available: ${currentRam.toFixed(1)} GB.`,
           "error"
@@ -226,9 +265,21 @@ export const QuasiPerfectPuzzler: React.FC = () => {
       }
 
       // Target node in active sub-goal
-      const targetNode = targetNodeId
-        ? findNodeById(goalAST, targetNodeId) || goalAST
-        : goalAST;
+      let targetNode = goalAST;
+      if (targetNodeId) {
+        const foundInGoal = findNodeById(goalAST, targetNodeId);
+        if (foundInGoal) {
+          targetNode = foundInGoal;
+        } else {
+          for (const hyp of activeHypotheses) {
+            const foundInHyp = findNodeById(hyp, targetNodeId);
+            if (foundInHyp) {
+              targetNode = foundInHyp;
+              break;
+            }
+          }
+        }
+      }
 
       // Execute tactic reducer
       const result = tactic.execute(
@@ -239,7 +290,8 @@ export const QuasiPerfectPuzzler: React.FC = () => {
       );
 
       if (result.success) {
-        const nextRam = Math.max(0, currentRam - result.ramConsumed);
+        const nextRam =
+          gameMode === "story" ? 99 : Math.max(0, currentRam - result.ramConsumed);
 
         // Record history snapshot
         setHistory((prev) => [
@@ -271,7 +323,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
         const updatedSteps = [...proofSteps, newStep];
         setProofSteps(updatedSteps);
 
-        // Handle Subgoal splitting (e.g. cases)
+        // Handle Subgoal splitting (e.g. cases or split)
         let updatedSubgoals: SubGoal[] = [...subgoals];
 
         if (result.newSubGoals && result.newSubGoals.length > 0) {
@@ -318,8 +370,12 @@ export const QuasiPerfectPuzzler: React.FC = () => {
 
           let stars = 1;
           if (!usedSorry) {
-            if (nextRam >= currentLevel.goldRamTarget) stars = 3;
-            else if (nextRam >= currentLevel.silverRamTarget) stars = 2;
+            if (gameMode === "story") {
+              stars = 3;
+            } else {
+              if (nextRam >= currentLevel.goldRamTarget) stars = 3;
+              else if (nextRam >= currentLevel.silverRamTarget) stars = 2;
+            }
           } else {
             stars = 0;
           }
@@ -340,7 +396,9 @@ export const QuasiPerfectPuzzler: React.FC = () => {
           if (!usedSorry) {
             playSuccess();
             addLog(
-              `✔ Q.E.D. All goals closed! Theorem verified in ${nextRam.toFixed(1)} GB.`,
+              `✔ Q.E.D. All goals closed! Theorem verified${
+                gameMode === "hacker" ? ` in ${nextRam.toFixed(1)} GB.` : "!"
+              }`,
               "success"
             );
           } else {
@@ -360,13 +418,14 @@ export const QuasiPerfectPuzzler: React.FC = () => {
           }
         }
       } else {
-        // Failed step: deduct failure penalty
-        const nextRam = Math.max(0, currentRam - result.ramConsumed);
+        // Failed step: deduct failure penalty in hacker mode
+        const nextRam =
+          gameMode === "story" ? 99 : Math.max(0, currentRam - result.ramConsumed);
         setCurrentRam(nextRam);
         addLog(result.message, "error");
         playNote(130.81, 0.2); // Low error buzz
 
-        if (nextRam <= 0) {
+        if (gameMode === "hacker" && nextRam <= 0) {
           addLog(
             "FATAL ERROR: Lean Language Server crashed (OOM). Garbage collector exhausted.",
             "error"
@@ -379,6 +438,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
       levelSolved,
       currentLevel,
       currentRam,
+      gameMode,
       goalAST,
       activeHypotheses,
       subgoals,
@@ -502,10 +562,16 @@ export const QuasiPerfectPuzzler: React.FC = () => {
     } else if (e.key === "c" || e.key === "C") {
       e.preventDefault();
       setShowLeanInspector((prev) => !prev);
+    } else if (e.key === "b" || e.key === "B") {
+      e.preventDefault();
+      setShowBriefingModal((prev) => !prev);
+    } else if (e.key === "m" || e.key === "M") {
+      e.preventDefault();
+      handleToggleMode(gameMode === "story" ? "hacker" : "story");
     }
   };
 
-  const isOOM = currentRam <= 0 && !levelSolved;
+  const isOOM = gameMode === "hacker" && currentRam <= 0 && !levelSolved;
 
   // Filtered levels based on chapter tab
   const filteredLevels = useMemo(() => {
@@ -518,14 +584,31 @@ export const QuasiPerfectPuzzler: React.FC = () => {
     [currentLevel, proofSteps, levelSolved]
   );
 
+  const containerRef = useRef<HTMLElement | null>(null);
+  const { isFullscreen, toggleFullscreen } = useFullscreen(containerRef);
+
   return (
     <section
+      ref={containerRef}
       aria-labelledby="quasi-puzzler-heading"
       tabIndex={0}
       data-keyboard-boundary="true"
       onKeyDown={handleKeyDown}
-      className="relative rounded-2xl border border-brand-cyan/30 bg-zinc-950/90 p-5 font-mono shadow-[0_0_35px_-10px_rgba(6,182,212,0.35)] outline-none focus:border-brand-cyan"
+      className={`relative font-mono outline-none transition-all ${
+        isFullscreen
+          ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none bg-black p-4 sm:p-6 overflow-y-auto"
+          : "rounded-2xl border border-brand-cyan/30 bg-zinc-950/90 p-5 shadow-[0_0_35px_-10px_rgba(6,182,212,0.35)] focus:border-brand-cyan"
+      }`}
     >
+      <FullscreenButton
+        isFullscreen={isFullscreen}
+        onToggle={toggleFullscreen}
+        variant="floating"
+      />
+
+      {/* Tablet Orientation Recommendation */}
+      <TabletOrientationHint className="w-full mb-3" />
+
       {/* 1. Header & Mode Switcher */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800/80 pb-4">
         <div>
@@ -534,7 +617,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
               Formal Methods Arcade · Lean 4 Simulator
             </span>
             <span className="rounded-full bg-purple-500/10 border border-purple-500/30 px-2 py-0.2 text-[9px] font-semibold text-purple-300">
-              3-Chapter Curriculum
+              18-Level 3-Chapter Curriculum
             </span>
           </div>
           <h2 id="quasi-puzzler-heading" className="mt-1 text-2xl font-bold text-zinc-100">
@@ -542,15 +625,41 @@ export const QuasiPerfectPuzzler: React.FC = () => {
           </h2>
         </div>
 
-        {/* Campaign vs Sandbox Mode Switch */}
+        {/* Campaign vs Sandbox Mode Switch & Field Manual */}
         <div className="flex items-center gap-2">
+          {/* Game Mode (Story / Casual vs Hacker / Speedrun) */}
+          <div className="bg-zinc-900/90 p-1 rounded-xl border border-zinc-800 flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => handleToggleMode("story")}
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
+                gameMode === "story"
+                  ? "bg-brand-cyan text-black shadow-[0_0_10px_rgba(6,182,212,0.4)]"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              Story Mode
+            </button>
+            <button
+              type="button"
+              onClick={() => handleToggleMode("hacker")}
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
+                gameMode === "hacker"
+                  ? "bg-amber-400 text-black shadow-[0_0_10px_rgba(251,191,36,0.4)] font-extrabold"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              Hacker Mode
+            </button>
+          </div>
+
           <div className="bg-zinc-900 p-1 rounded-xl border border-zinc-800 flex items-center gap-1">
             <button
               type="button"
               onClick={() => setActiveTab("campaign")}
               className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
                 activeTab === "campaign"
-                  ? "bg-brand-cyan text-black shadow-[0_0_10px_rgba(6,182,212,0.4)]"
+                  ? "bg-purple-600 text-white shadow-[0_0_10px_rgba(168,85,247,0.4)]"
                   : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
@@ -571,6 +680,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
           </div>
 
           <FieldManualButton manualId="quasi-puzzler" label="Manual" />
+          <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} variant="header" />
         </div>
       </div>
 
@@ -591,16 +701,16 @@ export const QuasiPerfectPuzzler: React.FC = () => {
                   Chapter:
                 </span>
                 {[
-                  { id: "all", label: "All Levels" },
-                  { id: 1, label: "Ch 1: Equational" },
-                  { id: 2, label: "Ch 2: Logic" },
-                  { id: 3, label: "Ch 3: Quasiperfect" },
+                  { id: "all", label: "All Levels (18)" },
+                  { id: 1, label: "Ch 1: Equational (1-6)" },
+                  { id: 2, label: "Ch 2: Logic (7-12)" },
+                  { id: 3, label: "Ch 3: Quasiperfect (13-18)" },
                 ].map((chap) => (
                   <button
                     key={chap.id}
                     type="button"
                     onClick={() => setSelectedChapter(chap.id as number | "all")}
-                    className={`px-2 py-0.5 rounded text-[11px] font-bold transition-all ${
+                    className={`px-2.5 py-0.5 rounded text-[11px] font-bold transition-all ${
                       selectedChapter === chap.id
                         ? "bg-zinc-800 text-brand-cyan border border-brand-cyan/40"
                         : "text-zinc-500 hover:text-zinc-300"
@@ -613,6 +723,14 @@ export const QuasiPerfectPuzzler: React.FC = () => {
 
               {/* Tools Toggles */}
               <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setShowBriefingModal(true)}
+                  className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg border border-brand-cyan/40 bg-brand-cyan/10 text-brand-cyan hover:bg-brand-cyan/20 transition-all"
+                >
+                  <IconSparkles className="w-3.5 h-3.5" />
+                  <span>Theory Briefing</span>
+                </button>
                 <button
                   type="button"
                   onClick={() => setShowHints((prev) => !prev)}
@@ -684,6 +802,11 @@ export const QuasiPerfectPuzzler: React.FC = () => {
                 <span className="text-[10px] font-bold text-purple-400">
                   {currentLevel.subtitle}
                 </span>
+                {gameMode === "story" && (
+                  <span className="text-[9px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-1.5 py-0.2 rounded">
+                    STORY MODE
+                  </span>
+                )}
               </div>
               <h3 className="text-base font-bold text-zinc-100 mt-0.5">
                 {currentLevel.title}
@@ -730,10 +853,12 @@ export const QuasiPerfectPuzzler: React.FC = () => {
             </div>
           )}
 
-          {/* Lean Server RAM Gauge */}
-          <div className="mt-4">
-            <RAMGauge currentRam={currentRam} initialRam={currentLevel.initialRam} />
-          </div>
+          {/* Lean Server RAM Gauge (Hacker Mode Only) */}
+          {gameMode === "hacker" && (
+            <div className="mt-4">
+              <RAMGauge currentRam={currentRam} initialRam={currentLevel.initialRam} />
+            </div>
+          )}
 
           {/* OOM Server Crash Alert */}
           {isOOM && (
@@ -823,6 +948,15 @@ export const QuasiPerfectPuzzler: React.FC = () => {
           <div className="mt-4">
             <TerminalLog logs={logs} />
           </div>
+
+          {/* Theory Briefing Modal */}
+          <TheoryBriefingModal
+            level={currentLevel}
+            gameMode={gameMode}
+            isOpen={showBriefingModal}
+            onClose={() => setShowBriefingModal(false)}
+            onToggleMode={handleToggleMode}
+          />
 
           {/* Victory Modal */}
           {levelSolved && currentScore && (

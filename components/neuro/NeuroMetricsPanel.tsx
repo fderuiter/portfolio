@@ -1,0 +1,175 @@
+"use client";
+
+import React from "react";
+import { QAMetrics, ScenarioConfig, ScoreState } from "@/lib/neuro/types";
+import {
+  IconFlame,
+  IconTrophy,
+  IconShieldCheck,
+  IconCircleDot,
+  IconAlertTriangle,
+} from "@tabler/icons-react";
+
+interface NeuroMetricsPanelProps {
+  scenario: ScenarioConfig;
+  metrics: QAMetrics;
+  scoreState: ScoreState;
+}
+
+export const NeuroMetricsPanel: React.FC<NeuroMetricsPanelProps> = ({
+  scenario,
+  metrics,
+  scoreState,
+}) => {
+  const isEulerOk = metrics.eulerCharacteristic === scenario.targetEuler;
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+      {/* 1. Euler Characteristic χ */}
+      <div className="bg-zinc-900/80 border border-zinc-800/80 p-3 rounded-2xl flex flex-col justify-between">
+        <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
+          <span>EULER (χ)</span>
+          <span className="text-[10px] text-zinc-400">TARGET: {scenario.targetEuler}</span>
+        </div>
+        <div className="flex items-center gap-2 mt-1">
+          <span
+            className={`text-xl font-mono font-bold ${
+              isEulerOk ? "text-emerald-400" : "text-amber-400"
+            }`}
+          >
+            χ = {metrics.eulerCharacteristic}
+          </span>
+          {isEulerOk ? (
+            <IconShieldCheck className="w-4 h-4 text-emerald-400" />
+          ) : (
+            <IconAlertTriangle className="w-4 h-4 text-amber-400 animate-pulse" />
+          )}
+        </div>
+        <div className="text-[10px] font-mono text-zinc-400 mt-1">
+          {isEulerOk ? "Topological 2-Sphere ($S^2$)" : "Genus $g \\ge 1$ Handle"}
+        </div>
+      </div>
+
+      {/* 2. Defect Count */}
+      <div className="bg-zinc-900/80 border border-zinc-800/80 p-3 rounded-2xl flex flex-col justify-between">
+        <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
+          <span>DEFECT VOXELS</span>
+          <span className="text-[10px] text-zinc-400">INITIAL: {scenario.initialDefects}</span>
+        </div>
+        <div className="flex items-center gap-2 mt-1">
+          <span
+            className={`text-xl font-mono font-bold ${
+              metrics.defectCount === 0 ? "text-emerald-400" : "text-rose-400"
+            }`}
+          >
+            {metrics.defectCount}
+          </span>
+          <span className="text-xs font-mono text-zinc-400">remaining</span>
+        </div>
+        <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden mt-1">
+          <div
+            className="bg-brand-cyan h-full transition-all duration-300"
+            style={{
+              width: `${Math.max(
+                0,
+                Math.min(
+                  100,
+                  scenario.initialDefects > 0
+                    ? ((scenario.initialDefects - metrics.defectCount) / scenario.initialDefects) * 100
+                    : 100
+                )
+              )}%`,
+            }}
+          />
+        </div>
+      </div>
+
+      {/* 3. Dice Similarity Coefficient */}
+      <div className="bg-zinc-900/80 border border-zinc-800/80 p-3 rounded-2xl flex flex-col justify-between">
+        <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
+          <span>DICE SCORE</span>
+          <span className="text-[10px] text-zinc-400">GOAL: ≥{(scenario.targetDice * 100).toFixed(0)}%</span>
+        </div>
+        <div className="flex items-center gap-1.5 mt-1">
+          <span
+            className={`text-xl font-mono font-bold ${
+              metrics.diceScore >= scenario.targetDice ? "text-emerald-400" : "text-brand-cyan"
+            }`}
+          >
+            {(metrics.diceScore * 100).toFixed(1)}%
+          </span>
+        </div>
+        <div className="text-[10px] font-mono text-zinc-400 mt-1">
+          Ground Truth Concordance
+        </div>
+      </div>
+
+      {/* 4. Cortical Thickness Estimate */}
+      <div className="bg-zinc-900/80 border border-zinc-800/80 p-3 rounded-2xl flex flex-col justify-between">
+        <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
+          <span>CORTICAL THICKNESS</span>
+          <span className="text-[10px] text-zinc-400">MEAN</span>
+        </div>
+        <div className="flex items-center gap-1.5 mt-1">
+          <span className="text-xl font-mono font-bold text-white">
+            {metrics.meanCorticalThicknessMm.toFixed(2)}
+          </span>
+          <span className="text-xs font-mono text-zinc-400">mm</span>
+        </div>
+        <div className="text-[10px] font-mono text-zinc-400 mt-1">
+          Pial $\leftrightarrow$ WM distance
+        </div>
+      </div>
+
+      {/* 5. Score & Streak */}
+      <div className="bg-zinc-900/80 border border-zinc-800/80 p-3 rounded-2xl flex flex-col justify-between">
+        <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
+          <span>QA SCORE</span>
+          <div className="flex items-center gap-1 text-amber-400 font-bold">
+            <IconFlame className="w-3.5 h-3.5" />
+            <span>{scoreState.multiplier}x</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-1.5 mt-1">
+          <IconTrophy className="w-5 h-5 text-amber-400" />
+          <span className="text-xl font-mono font-bold text-amber-400">
+            {scoreState.score.toLocaleString()}
+          </span>
+        </div>
+        <div className="text-[10px] font-mono text-zinc-400 mt-1">
+          Streak: {scoreState.streak} clean cases
+        </div>
+      </div>
+
+      {/* 6. Pipeline Resolution Status */}
+      <div
+        className={`p-3 rounded-2xl border flex flex-col justify-between transition-colors ${
+          metrics.isResolved
+            ? "bg-emerald-950/40 border-emerald-500/40 text-emerald-400"
+            : "bg-zinc-900/80 border-zinc-800/80 text-zinc-400"
+        }`}
+      >
+        <div className="flex items-center justify-between text-xs font-mono">
+          <span>STATUS</span>
+          <IconCircleDot
+            className={`w-3.5 h-3.5 ${
+              metrics.isResolved ? "text-emerald-400 animate-ping" : "text-zinc-400"
+            }`}
+          />
+        </div>
+        <div className="mt-1">
+          <span
+            className={`text-sm font-mono font-bold uppercase tracking-wider ${
+              metrics.isResolved ? "text-emerald-400" : "text-zinc-300"
+            }`}
+          >
+            {metrics.isResolved ? "PASS · VERIFIED" : "INSPECTION ACTIVE"}
+          </span>
+        </div>
+        <div className="text-[10px] font-mono mt-1">
+          {metrics.isResolved ? "Ready for recon-all stage 3" : "Apply manual edits & re-run"}
+        </div>
+      </div>
+    </div>
+  );
+};

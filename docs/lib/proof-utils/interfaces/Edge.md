@@ -6,15 +6,23 @@
 
 # Interface: Edge
 
-Defined in: [lib/proof-utils.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L12)
+Defined in: [lib/proof-utils.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L23)
 
 ## Properties
+
+### ruleApplied?
+
+> `optional` **ruleApplied?**: `string`
+
+Defined in: [lib/proof-utils.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L26)
+
+***
 
 ### source
 
 > **source**: `string`
 
-Defined in: [lib/proof-utils.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L13)
+Defined in: [lib/proof-utils.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L24)
 
 ***
 
@@ -22,4 +30,4 @@ Defined in: [lib/proof-utils.ts:13](https://github.com/fderuiter/portfolio/blob/
 
 > **target**: `string`
 
-Defined in: [lib/proof-utils.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L14)
+Defined in: [lib/proof-utils.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L25)

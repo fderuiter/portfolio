@@ -70,6 +70,12 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     path: "/schedule",
     keywords: ["Schedule Consultation", "1:1 Technical Sync", "Systems Engineering", "Google Calendar", "Frederick de Ruiter"],
   },
+  neuro: {
+    title: "NeuroRecon: FreeSurfer Pipeline Simulator & QA Studio",
+    description: "Interactive neuroimaging CAD workspace — repair 3D cortical surfaces, place intensity control points, resolve topological Euler defects, and slice 2D MRI orthoviews.",
+    path: "/neuro",
+    keywords: ["FreeSurfer", "Neuroimaging", "3D Brain Mesh", "MRI Slices", "Euler Characteristic", "Cortical Surface", "Post Processing", "Neuroinformatics"],
+  },
 };
 
 /**

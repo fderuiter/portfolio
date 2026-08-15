@@ -6,15 +6,31 @@
 
 # Interface: EducationalConcept
 
-Defined in: [lib/quasi-perfect/types.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L74)
+Defined in: [lib/quasi-perfect/types.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L80)
 
 ## Properties
+
+### leanAnalogy?
+
+> `optional` **leanAnalogy?**: `string`
+
+Defined in: [lib/quasi-perfect/types.ts:85](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L85)
+
+***
 
 ### leanDocUrl?
 
 > `optional` **leanDocUrl?**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L78)
+Defined in: [lib/quasi-perfect/types.ts:87](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L87)
+
+***
+
+### mathIntuition?
+
+> `optional` **mathIntuition?**: `string`
+
+Defined in: [lib/quasi-perfect/types.ts:84](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L84)
 
 ***
 
@@ -22,7 +38,7 @@ Defined in: [lib/quasi-perfect/types.ts:78](https://github.com/fderuiter/portfol
 
 > `optional` **mathNotation?**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L77)
+Defined in: [lib/quasi-perfect/types.ts:83](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L83)
 
 ***
 
@@ -30,7 +46,7 @@ Defined in: [lib/quasi-perfect/types.ts:77](https://github.com/fderuiter/portfol
 
 > **realWorldApplication**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L79)
+Defined in: [lib/quasi-perfect/types.ts:88](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L88)
 
 ***
 
@@ -38,7 +54,15 @@ Defined in: [lib/quasi-perfect/types.ts:79](https://github.com/fderuiter/portfol
 
 > **summary**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L76)
+Defined in: [lib/quasi-perfect/types.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L82)
+
+***
+
+### tacticalObjective?
+
+> `optional` **tacticalObjective?**: `string`
+
+Defined in: [lib/quasi-perfect/types.ts:86](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L86)
 
 ***
 
@@ -46,4 +70,4 @@ Defined in: [lib/quasi-perfect/types.ts:76](https://github.com/fderuiter/portfol
 
 > **title**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L75)
+Defined in: [lib/quasi-perfect/types.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L81)

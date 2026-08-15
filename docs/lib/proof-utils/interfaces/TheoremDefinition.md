@@ -6,15 +6,15 @@
 
 # Interface: TheoremDefinition
 
-Defined in: [lib/proof-utils.ts:63](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L63)
+Defined in: [lib/proof-utils.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L80)
 
 ## Properties
 
 ### category
 
-> **category**: `"Foundational"` \| `"Indirect Proofs"` \| `"Distributed Systems"` \| `"Fault Tolerance"`
+> **category**: [`TheoremCategory`](../type-aliases/TheoremCategory.md)
 
-Defined in: [lib/proof-utils.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L67)
+Defined in: [lib/proof-utils.ts:84](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L84)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/proof-utils.ts:67](https://github.com/fderuiter/portfolio/blob/
 
 > **conclusionRequires**: \[`string`, `string`\]
 
-Defined in: [lib/proof-utils.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L77)
+Defined in: [lib/proof-utils.ts:94](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L94)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/proof-utils.ts:77](https://github.com/fderuiter/portfolio/blob/
 
 > **goalDescription**: `string`
 
-Defined in: [lib/proof-utils.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L70)
+Defined in: [lib/proof-utils.ts:87](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L87)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/proof-utils.ts:70](https://github.com/fderuiter/portfolio/blob/
 
 > **id**: [`TheoremId`](../type-aliases/TheoremId.md)
 
-Defined in: [lib/proof-utils.ts:64](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L64)
+Defined in: [lib/proof-utils.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L81)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/proof-utils.ts:64](https://github.com/fderuiter/portfolio/blob/
 
 > **initialEdges**: [`Edge`](Edge.md)[]
 
-Defined in: [lib/proof-utils.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L73)
+Defined in: [lib/proof-utils.ts:90](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L90)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/proof-utils.ts:73](https://github.com/fderuiter/portfolio/blob/
 
 > **intermediateNodeId**: `string`
 
-Defined in: [lib/proof-utils.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L75)
+Defined in: [lib/proof-utils.ts:92](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L92)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/proof-utils.ts:75](https://github.com/fderuiter/portfolio/blob/
 
 > **intermediateRequires**: \[`string`, `string`\]
 
-Defined in: [lib/proof-utils.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L76)
+Defined in: [lib/proof-utils.ts:93](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L93)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/proof-utils.ts:76](https://github.com/fderuiter/portfolio/blob/
 
 > **latexCode**: `string`
 
-Defined in: [lib/proof-utils.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L80)
+Defined in: [lib/proof-utils.ts:97](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L97)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/proof-utils.ts:80](https://github.com/fderuiter/portfolio/blob/
 
 > **leanCode**: `string`
 
-Defined in: [lib/proof-utils.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L79)
+Defined in: [lib/proof-utils.ts:96](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L96)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [lib/proof-utils.ts:79](https://github.com/fderuiter/portfolio/blob/
 
 > **nodes**: [`ProofNode`](ProofNode.md)[]
 
-Defined in: [lib/proof-utils.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L72)
+Defined in: [lib/proof-utils.ts:89](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L89)
 
 ***
 
@@ -94,7 +94,7 @@ Defined in: [lib/proof-utils.ts:72](https://github.com/fderuiter/portfolio/blob/
 
 > **ruleName**: `string`
 
-Defined in: [lib/proof-utils.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L68)
+Defined in: [lib/proof-utils.ts:85](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L85)
 
 ***
 
@@ -102,7 +102,7 @@ Defined in: [lib/proof-utils.ts:68](https://github.com/fderuiter/portfolio/blob/
 
 > **scenario**: `string`
 
-Defined in: [lib/proof-utils.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L69)
+Defined in: [lib/proof-utils.ts:86](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L86)
 
 ***
 
@@ -110,7 +110,7 @@ Defined in: [lib/proof-utils.ts:69](https://github.com/fderuiter/portfolio/blob/
 
 > **simulationSteps**: `string`[]
 
-Defined in: [lib/proof-utils.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L78)
+Defined in: [lib/proof-utils.ts:95](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L95)
 
 ***
 
@@ -118,7 +118,7 @@ Defined in: [lib/proof-utils.ts:78](https://github.com/fderuiter/portfolio/blob/
 
 > **subtitle**: `string`
 
-Defined in: [lib/proof-utils.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L66)
+Defined in: [lib/proof-utils.ts:83](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L83)
 
 ***
 
@@ -126,7 +126,7 @@ Defined in: [lib/proof-utils.ts:66](https://github.com/fderuiter/portfolio/blob/
 
 > **targetNodeId**: `string`
 
-Defined in: [lib/proof-utils.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L71)
+Defined in: [lib/proof-utils.ts:88](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L88)
 
 ***
 
@@ -134,7 +134,7 @@ Defined in: [lib/proof-utils.ts:71](https://github.com/fderuiter/portfolio/blob/
 
 > **title**: `string`
 
-Defined in: [lib/proof-utils.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L65)
+Defined in: [lib/proof-utils.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L82)
 
 ***
 
@@ -142,4 +142,4 @@ Defined in: [lib/proof-utils.ts:65](https://github.com/fderuiter/portfolio/blob/
 
 > **validPairs**: `string`[][]
 
-Defined in: [lib/proof-utils.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L74)
+Defined in: [lib/proof-utils.ts:91](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L91)

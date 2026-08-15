@@ -8,7 +8,7 @@
 
 > **exportProofToLatex**(`theoremId?`): `string`
 
-Defined in: [lib/proof-utils.ts:1048](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L1048)
+Defined in: [lib/proof-utils.ts:1986](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L1986)
 
 Exports the active theorem proof into LaTeX natural deduction syntax.
 

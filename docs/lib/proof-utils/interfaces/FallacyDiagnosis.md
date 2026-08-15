@@ -6,7 +6,7 @@
 
 # Interface: FallacyDiagnosis
 
-Defined in: [lib/proof-utils.ts:55](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L55)
+Defined in: [lib/proof-utils.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L72)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/proof-utils.ts:55](https://github.com/fderuiter/portfolio/blob/
 
 > **fallacyName**: `string`
 
-Defined in: [lib/proof-utils.ts:56](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L56)
+Defined in: [lib/proof-utils.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L73)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/proof-utils.ts:56](https://github.com/fderuiter/portfolio/blob/
 
 > **formalFormula**: `string`
 
-Defined in: [lib/proof-utils.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L57)
+Defined in: [lib/proof-utils.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L74)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/proof-utils.ts:57](https://github.com/fderuiter/portfolio/blob/
 
 > **plainEnglish**: `string`
 
-Defined in: [lib/proof-utils.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L58)
+Defined in: [lib/proof-utils.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L75)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/proof-utils.ts:58](https://github.com/fderuiter/portfolio/blob/
 
 > **softwareAnalogy**: `string`
 
-Defined in: [lib/proof-utils.ts:59](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L59)
+Defined in: [lib/proof-utils.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L76)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [lib/proof-utils.ts:59](https://github.com/fderuiter/portfolio/blob/
 
 > **truthTable**: [`TruthTableRow`](TruthTableRow.md)[]
 
-Defined in: [lib/proof-utils.ts:60](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L60)
+Defined in: [lib/proof-utils.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L77)

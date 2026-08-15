@@ -36,6 +36,9 @@ import {
   IconMusic,
 } from "@tabler/icons-react";
 import { FieldManualButton } from "@/components/FieldManualButton";
+import { FullscreenButton } from "@/components/arcade/FullscreenButton";
+import { TabletOrientationHint } from "@/components/arcade/TabletOrientationHint";
+import { useFullscreen } from "@/hooks/useFullscreen";
 
 import {
   CDISCDomain,
@@ -179,6 +182,7 @@ export const ClinicalTrialChaos: React.FC = () => {
   // 4. DOM & Canvas references
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { isFullscreen, toggleFullscreen } = useFullscreen(containerRef);
   const animFrameIdRef = useRef<number | null>(null);
   const lastTickTimeRef = useRef<number>(0);
   const spawnTimerRef = useRef<number>(0);
@@ -1057,8 +1061,21 @@ export const ClinicalTrialChaos: React.FC = () => {
       data-keyboard-boundary="true"
       tabIndex={0}
       onKeyDown={handleKeyDown}
-      className="relative w-full rounded-2xl border border-blue-500/30 bg-zinc-950 p-4 md:p-6 shadow-2xl font-mono focus:outline-none focus:ring-1 focus:ring-brand-cyan transition-all"
+      className={`relative w-full font-mono focus:outline-none transition-all ${
+        isFullscreen
+          ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none bg-black p-4 sm:p-6 overflow-y-auto overflow-x-hidden"
+          : "rounded-2xl border border-blue-500/30 bg-zinc-950 p-4 md:p-6 shadow-2xl focus:ring-1 focus:ring-brand-cyan"
+      }`}
     >
+      <FullscreenButton
+        isFullscreen={isFullscreen}
+        onToggle={toggleFullscreen}
+        variant="floating"
+      />
+
+      {/* Tablet Orientation Recommendation */}
+      <TabletOrientationHint className="w-full mb-4" />
+
       {/* Header Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-800 pb-4">
         <div>
@@ -1079,6 +1096,7 @@ export const ClinicalTrialChaos: React.FC = () => {
         {/* Score, Sound, & Manual Controls */}
         <div className="flex flex-wrap items-center gap-3">
           <FieldManualButton manualId="clinical-chaos" label="Manual" />
+          <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} variant="header" />
 
           {/* Score Counter */}
           <div className="flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900/90 px-3 py-1.5 text-xs">
@@ -1296,7 +1314,12 @@ export const ClinicalTrialChaos: React.FC = () => {
         <>
           {/* HTML5 Canvas Simulation */}
           <div className="mt-4 relative rounded-xl border border-zinc-800 bg-black overflow-hidden">
-            <canvas ref={canvasRef} width={760} height={200} className="w-full h-[180px] block" />
+            <canvas
+              ref={canvasRef}
+              width={760}
+              height={200}
+              className={`w-full ${isFullscreen ? "h-auto max-h-[300px] aspect-[760/200] object-contain" : "h-[180px]"} block`}
+            />
 
             {/* Overlays for Idle / Paused / Game Over / Cleared */}
             {playState !== "playing" && (

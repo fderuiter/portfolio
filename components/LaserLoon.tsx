@@ -19,6 +19,9 @@ import {
   IconTarget,
 } from "@tabler/icons-react";
 import { FieldManualButton } from "@/components/FieldManualButton";
+import { FullscreenButton } from "@/components/arcade/FullscreenButton";
+import { TabletOrientationHint } from "@/components/arcade/TabletOrientationHint";
+import { useFullscreen } from "@/hooks/useFullscreen";
 import {
   LaserMode,
   LaserType,
@@ -108,6 +111,8 @@ export const LaserLoon: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
+
+  const { isFullscreen, toggleFullscreen } = useFullscreen(containerRef);
 
   // Mutable Game Physics & Animation Refs
   const targetsRef = useRef<Target[]>([]);
@@ -1307,6 +1312,9 @@ export const LaserLoon: React.FC = () => {
 
   return (
     <div className="w-full flex flex-col items-center select-none my-6">
+      {/* Tablet Orientation Recommendation */}
+      <TabletOrientationHint className="w-full max-w-3xl" />
+
       {/* HUD Header Bar & Mode Selector */}
       <div className="w-full max-w-3xl flex flex-wrap items-center justify-between gap-3 mb-3 px-2">
         {/* Mode Tabs */}
@@ -1408,6 +1416,7 @@ export const LaserLoon: React.FC = () => {
           </button>
 
           <FieldManualButton manualId="laser-loon" label="Manual" />
+          <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} variant="header" />
 
           <div className="flex items-center gap-1.5 px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-300">
             <IconTrophy className="w-3.5 h-3.5 text-amber-400" />
@@ -1431,12 +1440,21 @@ export const LaserLoon: React.FC = () => {
         onKeyDown={handleKeyDown}
         onKeyUp={handleKeyUp}
         data-keyboard-boundary="true"
-        className={`relative w-full max-w-3xl h-[420px] bg-neutral-950 border rounded-3xl overflow-hidden outline-none transition-all duration-300 shadow-2xl flex flex-col justify-between ${
-          isFocused
-            ? "border-red-500 ring-4 ring-red-500/20 shadow-[0_0_40px_rgba(239,68,68,0.25)]"
-            : "border-neutral-800 hover:border-neutral-700"
+        className={`relative outline-none transition-all duration-300 shadow-2xl flex flex-col justify-between ${
+          isFullscreen
+            ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none bg-black p-2 sm:p-4 overflow-hidden"
+            : `w-full max-w-3xl h-[420px] bg-neutral-950 border rounded-3xl overflow-hidden ${
+                isFocused
+                  ? "border-red-500 ring-4 ring-red-500/20 shadow-[0_0_40px_rgba(239,68,68,0.25)]"
+                  : "border-neutral-800 hover:border-neutral-700"
+              }`
         }`}
       >
+        <FullscreenButton
+          isFullscreen={isFullscreen}
+          onToggle={toggleFullscreen}
+          variant="floating"
+        />
         {/* Top Floating HUD */}
         <div className="absolute top-4 left-4 right-4 z-20 flex justify-between items-center pointer-events-none">
           <div className="flex items-center gap-2">
@@ -1538,7 +1556,11 @@ export const LaserLoon: React.FC = () => {
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
-          className="w-full h-full block cursor-crosshair touch-none"
+          className={
+            isFullscreen
+              ? "max-h-[calc(100vh-140px)] max-w-full aspect-[768/420] object-contain block cursor-crosshair touch-none my-auto"
+              : "w-full h-full block cursor-crosshair touch-none"
+          }
         />
 
         {/* Start Overlay Screen */}

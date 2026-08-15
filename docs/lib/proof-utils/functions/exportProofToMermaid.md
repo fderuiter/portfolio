@@ -8,7 +8,7 @@
 
 > **exportProofToMermaid**(`edges`, `theoremId?`): `string`
 
-Defined in: [lib/proof-utils.ts:1090](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L1090)
+Defined in: [lib/proof-utils.ts:2028](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L2028)
 
 Exports the active theorem proof into Mermaid flowchart syntax.
 

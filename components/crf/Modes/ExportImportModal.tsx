@@ -1,0 +1,291 @@
+"use client";
+
+import React, { useState } from "react";
+import { StudyProtocol } from "@/lib/crf/types";
+import { exportStudyToCdiscOdmXml } from "@/lib/crf/odm-xml-serializer";
+import { exportFormToFhirQuestionnaire } from "@/lib/crf/fhir-questionnaire";
+import {
+  IconDownload,
+  IconCopy,
+  IconCheck,
+  IconUpload,
+  IconCode,
+  IconFileSpreadsheet,
+  IconFlame,
+  IconPalette,
+  IconFileText,
+} from "@tabler/icons-react";
+
+interface ExportImportModalProps {
+  study: StudyProtocol;
+  onImportStudy: (importedStudy: StudyProtocol) => void;
+  onOpenExportDocument?: () => void;
+  onOpenBranding?: () => void;
+}
+
+type ExportTab = "odm" | "json" | "fhir" | "sdtm_spec";
+
+export const ExportImportModal: React.FC<ExportImportModalProps> = ({
+  study,
+  onImportStudy,
+  onOpenExportDocument,
+  onOpenBranding,
+}) => {
+  const [activeTab, setActiveTab] = useState<ExportTab>("odm");
+  const [copied, setCopied] = useState(false);
+  const [importJsonText, setImportJsonText] = useState("");
+  const [importError, setImportError] = useState<string | null>(null);
+
+  // Serialized formats
+  const odmXmlContent = exportStudyToCdiscOdmXml(study);
+  const jsonBundleContent = JSON.stringify(study, null, 2);
+  const fhirContent = JSON.stringify(
+    exportFormToFhirQuestionnaire(study.forms[0] || study.forms[0], study),
+    null,
+    2
+  );
+
+  const getActiveContent = () => {
+    switch (activeTab) {
+      case "odm":
+        return odmXmlContent;
+      case "json":
+        return jsonBundleContent;
+      case "fhir":
+        return fhirContent;
+      default:
+        return jsonBundleContent;
+    }
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(getActiveContent());
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownload = () => {
+    let filename = `study-${study.protocolNumber}.json`;
+    let mimeType = "application/json";
+    const content = getActiveContent();
+
+    if (activeTab === "odm") {
+      filename = `study-${study.protocolNumber}-odm.xml`;
+      mimeType = "application/xml";
+    } else if (activeTab === "fhir") {
+      filename = `fhir-questionnaire-${study.protocolNumber}.json`;
+    }
+
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handlePerformImport = () => {
+    setImportError(null);
+    try {
+      const parsed = JSON.parse(importJsonText);
+      if (!parsed.protocolNumber || !Array.isArray(parsed.forms)) {
+        throw new Error("Invalid Study Protocol JSON: Missing 'protocolNumber' or 'forms' array.");
+      }
+      onImportStudy(parsed);
+      setImportJsonText("");
+    } catch (err: unknown) {
+      setImportError((err as Error).message || "Invalid JSON syntax");
+    }
+  };
+
+  // Compile all SDTM variables for specification table
+  const allFields = study.forms.flatMap((f) =>
+    f.sections.flatMap((s) => s.fields.map((field) => ({ field, form: f })))
+  );
+
+  return (
+    <div className="flex-1 flex flex-col h-full bg-zinc-950 p-4 sm:p-6 overflow-y-auto space-y-6">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-zinc-800">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="p-1.5 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-400">
+              <IconCode className="w-5 h-5" />
+            </span>
+            <h1 className="text-lg font-bold text-white font-mono">
+              CDISC Standards &amp; Interoperability Exporter
+            </h1>
+          </div>
+          <p className="text-xs text-zinc-400 font-sans mt-1">
+            Export study protocols and CRFs to international clinical data standards (CDISC ODM-XML v1.3.2, HL7 FHIR Questionnaire R4, JSON Study Bundles).
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {onOpenBranding && (
+            <button
+              onClick={onOpenBranding}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-mono transition-all"
+            >
+              <IconPalette className="w-4 h-4 text-brand-cyan" />
+              <span>Branding</span>
+            </button>
+          )}
+
+          {onOpenExportDocument && (
+            <button
+              onClick={onOpenExportDocument}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition-all shadow-sm"
+            >
+              <IconFileText className="w-4 h-4" />
+              <span>Export Word / PDF</span>
+            </button>
+          )}
+
+          <button
+            onClick={handleCopy}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-850 hover:bg-zinc-800 border border-zinc-750 text-zinc-200 text-xs font-mono transition-all"
+          >
+            {copied ? <IconCheck className="w-4 h-4 text-emerald-400" /> : <IconCopy className="w-4 h-4" />}
+            <span>{copied ? "Copied!" : "Copy Code"}</span>
+          </button>
+          <button
+            onClick={handleDownload}
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-brand-cyan text-black hover:bg-white font-mono text-xs font-bold transition-all shadow-sm"
+          >
+            <IconDownload className="w-4 h-4" />
+            <span>Download File</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-b border-zinc-800 gap-2">
+        <button
+          onClick={() => setActiveTab("odm")}
+          className={`px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 ${
+            activeTab === "odm"
+              ? "border-brand-cyan text-brand-cyan font-bold"
+              : "border-transparent text-zinc-400 hover:text-zinc-200"
+          }`}
+        >
+          <IconCode className="w-4 h-4" />
+          <span>CDISC ODM-XML v1.3.2</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("json")}
+          className={`px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 ${
+            activeTab === "json"
+              ? "border-brand-cyan text-brand-cyan font-bold"
+              : "border-transparent text-zinc-400 hover:text-zinc-200"
+          }`}
+        >
+          <IconCode className="w-4 h-4" />
+          <span>JSON Study Protocol Bundle</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("fhir")}
+          className={`px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 ${
+            activeTab === "fhir"
+              ? "border-brand-cyan text-brand-cyan font-bold"
+              : "border-transparent text-zinc-400 hover:text-zinc-200"
+          }`}
+        >
+          <IconFlame className="w-4 h-4 text-orange-400" />
+          <span>HL7 FHIR R4 Questionnaire</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("sdtm_spec")}
+          className={`px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 ${
+            activeTab === "sdtm_spec"
+              ? "border-brand-cyan text-brand-cyan font-bold"
+              : "border-transparent text-zinc-400 hover:text-zinc-200"
+          }`}
+        >
+          <IconFileSpreadsheet className="w-4 h-4" />
+          <span>SDTM Mapping Specs</span>
+        </button>
+      </div>
+
+      {/* Main Tab Content */}
+      {activeTab === "sdtm_spec" ? (
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 overflow-x-auto shadow-xl">
+          <table className="w-full text-left border-collapse text-xs font-mono">
+            <thead>
+              <tr className="border-b border-zinc-800 bg-zinc-950/80 text-zinc-400">
+                <th className="p-3">Domain</th>
+                <th className="p-3">Form</th>
+                <th className="p-3">Variable (CDASH)</th>
+                <th className="p-3">Label</th>
+                <th className="p-3">Data Type</th>
+                <th className="p-3">Core</th>
+                <th className="p-3">aCRF Overlay Tag</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-850">
+              {allFields.map(({ field, form }) => (
+                <tr key={`${form.id}_${field.id}`} className="hover:bg-zinc-850/40">
+                  <td className="p-3 font-bold text-brand-cyan">{form.domain}</td>
+                  <td className="p-3 text-zinc-300 font-sans">{form.name}</td>
+                  <td className="p-3 font-bold text-white">{field.variableName}</td>
+                  <td className="p-3 text-zinc-300 font-sans">{field.label}</td>
+                  <td className="p-3 text-zinc-500">{field.dataType}</td>
+                  <td className="p-3 text-zinc-400">{field.cdashMetadata?.core || (field.required ? "R" : "O")}</td>
+                  <td className="p-3 text-sky-400">
+                    {field.cdashMetadata?.acrfAnnotation || `${form.domain}.${field.variableName}`}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4 font-mono text-xs overflow-x-auto max-h-[450px]">
+          <pre className="text-zinc-300 whitespace-pre-wrap leading-relaxed">
+            {getActiveContent()}
+          </pre>
+        </div>
+      )}
+
+      {/* Import Section */}
+      <div className="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800 space-y-3">
+        <div className="flex items-center gap-2">
+          <IconUpload className="w-4 h-4 text-brand-cyan" />
+          <h2 className="text-xs font-bold text-white font-mono uppercase">
+            Lossless Protocol Import (JSON Study Bundle)
+          </h2>
+        </div>
+
+        <textarea
+          rows={3}
+          value={importJsonText}
+          onChange={(e) => setImportJsonText(e.target.value)}
+          placeholder="Paste exported StudyProtocol JSON here to load..."
+          className="w-full p-3 bg-zinc-950 border border-zinc-800 rounded-xl text-xs font-mono text-zinc-300 focus:border-brand-cyan focus:outline-none"
+        />
+
+        {importError && (
+          <div className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-xs text-red-400 font-mono">
+            {importError}
+          </div>
+        )}
+
+        <div className="flex justify-end">
+          <button
+            onClick={handlePerformImport}
+            disabled={!importJsonText.trim()}
+            className="px-4 py-2 bg-zinc-800 hover:bg-brand-cyan text-white hover:text-black font-mono text-xs font-bold rounded-xl transition-all disabled:opacity-40 disabled:pointer-events-none"
+          >
+            Import Protocol into Studio
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};

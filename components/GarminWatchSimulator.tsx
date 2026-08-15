@@ -9,6 +9,9 @@ import {
   IconPlayerPlay,
 } from "@tabler/icons-react";
 import { FieldManualButton } from "@/components/FieldManualButton";
+import { FullscreenButton } from "@/components/arcade/FullscreenButton";
+import { TabletOrientationHint } from "@/components/arcade/TabletOrientationHint";
+import { useFullscreen } from "@/hooks/useFullscreen";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import {
@@ -64,6 +67,8 @@ export const GarminWatchSimulator: React.FC = () => {
   // References for Canvas and Animation Loop
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const outerContainerRef = useRef<HTMLDivElement | null>(null);
+  const { isFullscreen, toggleFullscreen } = useFullscreen(outerContainerRef);
   const gameLoopRef = useRef<number | null>(null);
   const lastFrameTimeRef = useRef<number>(0);
   const stateRef = useRef<GameEngineState>(gameState);
@@ -284,7 +289,23 @@ export const GarminWatchSimulator: React.FC = () => {
   const currentProfile = DEVICE_PROFILES[deviceTarget];
 
   return (
-    <div className="w-full flex flex-col items-center select-none my-8">
+    <div
+      ref={outerContainerRef}
+      className={`w-full select-none ${
+        isFullscreen
+          ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none bg-black p-4 sm:p-6 overflow-y-auto flex flex-col items-center justify-between"
+          : "flex flex-col items-center my-8"
+      }`}
+    >
+      <FullscreenButton
+        isFullscreen={isFullscreen}
+        onToggle={toggleFullscreen}
+        variant="floating"
+      />
+
+      {/* Tablet Orientation Recommendation */}
+      <TabletOrientationHint className="w-full max-w-md mb-3" />
+
       {/* Keyboard Capture Status Banner & Controls Bar */}
       <div className="mb-4 text-center flex flex-wrap items-center justify-center gap-3">
         <span
@@ -360,6 +381,7 @@ export const GarminWatchSimulator: React.FC = () => {
           </div>
 
           <FieldManualButton manualId="garmin-watch" label="Manual" />
+          <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} variant="header" />
         </div>
       </div>
 

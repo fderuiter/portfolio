@@ -8,7 +8,7 @@
 
 > **exportProofToMarkdown**(`edges`, `theoremId?`): `string`
 
-Defined in: [lib/proof-utils.ts:1058](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L1058)
+Defined in: [lib/proof-utils.ts:1996](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L1996)
 
 Exports the active theorem proof ledger into Markdown table format.
 

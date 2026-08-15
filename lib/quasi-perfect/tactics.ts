@@ -592,6 +592,151 @@ export const tacticDefs: Record<TacticId, TacticDef> = {
     },
   },
 
+  symm: {
+    id: "symm",
+    name: "symm",
+    label: "symm",
+    description: "Symmetry of equality: transpose goal from (A = B) to (B = A).",
+    baseRamCost: 1,
+    failureCost: 1,
+    execute: (targetNode, globalAST) => {
+      const nodeToTest = targetNode.type === "Equality" ? targetNode : globalAST;
+
+      if (nodeToTest.type !== "Equality" || !nodeToTest.children || nodeToTest.children.length !== 2) {
+        return {
+          success: false,
+          ramConsumed: 1,
+          message: "error: 'symm' failed: target must be an equality (LHS = RHS).",
+        };
+      }
+
+      const [left, right] = nodeToTest.children;
+      const swappedNode: ASTNode = {
+        ...cloneAST(nodeToTest),
+        children: [cloneAST(right), cloneAST(left)],
+      };
+      const newAST = replaceNode(globalAST, nodeToTest.id, swappedNode);
+
+      return {
+        success: true,
+        newAST,
+        ramConsumed: 1,
+        leanProofStep: "symm",
+        message: `tactic 'symm' transposed equality: '${renderASTString(left)} = ${renderASTString(right)}' ⟹ '${renderASTString(right)} = ${renderASTString(left)}'.`,
+        isProofComplete: false,
+      };
+    },
+  },
+
+  split: {
+    id: "split",
+    name: "split",
+    label: "split",
+    description: "Decompose a conjunction goal (A ∧ B) into 2 subgoals (constructor / split).",
+    baseRamCost: 2,
+    failureCost: 1,
+    execute: (targetNode, globalAST, hypotheses) => {
+      const nodeToTest = targetNode.type === "Conjunction" ? targetNode : globalAST;
+
+      if (nodeToTest.type !== "Conjunction" || !nodeToTest.children || nodeToTest.children.length !== 2) {
+        return {
+          success: false,
+          ramConsumed: 1,
+          message: "error: 'split' failed: goal is not a conjunction (A ∧ B).",
+        };
+      }
+
+      const [leftConj, rightConj] = nodeToTest.children;
+      const subGoal1: SubGoal = {
+        id: `subgoal-left-${Date.now()}`,
+        label: `Left Branch: ${renderASTString(leftConj)}`,
+        goal: cloneAST(leftConj),
+        hypotheses: hypotheses.map(cloneAST),
+        isCompleted: false,
+      };
+      const subGoal2: SubGoal = {
+        id: `subgoal-right-${Date.now()}`,
+        label: `Right Branch: ${renderASTString(rightConj)}`,
+        goal: cloneAST(rightConj),
+        hypotheses: hypotheses.map(cloneAST),
+        isCompleted: false,
+      };
+
+      return {
+        success: true,
+        newSubGoals: [subGoal1, subGoal2],
+        ramConsumed: 2,
+        leanProofStep: "constructor",
+        message: `tactic 'split' decomposed conjunction goal into 2 subgoals: '${renderASTString(leftConj)}' and '${renderASTString(rightConj)}'.`,
+        isProofComplete: false,
+      };
+    },
+  },
+
+  left: {
+    id: "left",
+    name: "left",
+    label: "left",
+    description: "Disjunction introduction: select Left branch (A ∨ B ⟹ A).",
+    baseRamCost: 1,
+    failureCost: 1,
+    execute: (targetNode, globalAST) => {
+      const nodeToTest = targetNode.type === "Disjunction" ? targetNode : globalAST;
+
+      if (nodeToTest.type !== "Disjunction" || !nodeToTest.children || nodeToTest.children.length !== 2) {
+        return {
+          success: false,
+          ramConsumed: 1,
+          message: "error: tactic 'left' failed: goal is not a disjunction (A ∨ B).",
+        };
+      }
+
+      const [leftDisj] = nodeToTest.children;
+      const newAST = replaceNode(globalAST, nodeToTest.id, cloneAST(leftDisj));
+
+      return {
+        success: true,
+        newAST,
+        ramConsumed: 1,
+        leanProofStep: "left",
+        message: `tactic 'left' selected left disjunct: '${renderASTString(leftDisj)}'.`,
+        isProofComplete: false,
+      };
+    },
+  },
+
+  right: {
+    id: "right",
+    name: "right",
+    label: "right",
+    description: "Disjunction introduction: select Right branch (A ∨ B ⟹ B).",
+    baseRamCost: 1,
+    failureCost: 1,
+    execute: (targetNode, globalAST) => {
+      const nodeToTest = targetNode.type === "Disjunction" ? targetNode : globalAST;
+
+      if (nodeToTest.type !== "Disjunction" || !nodeToTest.children || nodeToTest.children.length !== 2) {
+        return {
+          success: false,
+          ramConsumed: 1,
+          message: "error: tactic 'right' failed: goal is not a disjunction (A ∨ B).",
+        };
+      }
+
+      const [, rightDisj] = nodeToTest.children;
+      const newAST = replaceNode(globalAST, nodeToTest.id, cloneAST(rightDisj));
+
+      return {
+        success: true,
+        newAST,
+        ramConsumed: 1,
+        leanProofStep: "right",
+        message: `tactic 'right' selected right disjunct: '${renderASTString(rightDisj)}'.`,
+        isProofComplete: false,
+      };
+    },
+  },
+
   sorry: {
     id: "sorry",
     name: "sorry",

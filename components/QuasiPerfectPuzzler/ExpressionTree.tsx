@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { ASTNode } from "@/lib/quasi-perfect/types";
-import { renderASTString } from "@/lib/quasi-perfect/engine";
+import { findNodeById, renderASTString } from "@/lib/quasi-perfect/engine";
 import { ASTNodeView } from "./ASTNodeView";
+import { IconFocus2, IconSparkles } from "@tabler/icons-react";
 
 interface ExpressionTreeProps {
   goalAST: ASTNode;
@@ -26,6 +27,12 @@ export const ExpressionTree: React.FC<ExpressionTreeProps> = ({
 }) => {
   const mathematicalNotation = renderASTString(goalAST);
 
+  const activeTargetId = selectedTargetId || hoveredTargetId;
+  const inspectedNode = useMemo(() => {
+    if (!activeTargetId) return null;
+    return findNodeById(goalAST, activeTargetId);
+  }, [goalAST, activeTargetId]);
+
   return (
     <div className="w-full flex flex-col gap-4">
       {/* 1. Hypotheses Panel (Lean Proof Context) */}
@@ -44,14 +51,27 @@ export const ExpressionTree: React.FC<ExpressionTreeProps> = ({
             {hypotheses.map((hyp) => {
               const hypName = (hyp.metadata?.name as string) || "h";
               const hypFormula = renderASTString(hyp);
+              const isSelected = selectedTargetId === hyp.id;
+              const isHovered = hoveredTargetId === hyp.id;
               return (
-                <div
+                <button
+                  type="button"
                   key={hyp.id}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-purple-500/30 bg-purple-950/20 px-2.5 py-1 text-xs font-mono text-purple-200"
+                  data-node-id={hyp.id}
+                  onClick={() => onSelectTarget(hyp.id)}
+                  onMouseEnter={() => onHoverTarget(hyp.id)}
+                  onMouseLeave={() => onHoverTarget(null)}
+                  className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-mono transition-all cursor-pointer ${
+                    isSelected
+                      ? "border-purple-400 bg-purple-600/30 text-white shadow-[0_0_12px_rgba(168,85,247,0.5)] ring-2 ring-purple-400"
+                      : isHovered
+                      ? "border-purple-500/60 bg-purple-950/40 text-purple-100"
+                      : "border-purple-500/30 bg-purple-950/20 text-purple-200 hover:border-purple-400"
+                  }`}
                 >
                   <span className="font-bold text-purple-400">{hypName}:</span>
                   <span>{hypFormula}</span>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -61,7 +81,7 @@ export const ExpressionTree: React.FC<ExpressionTreeProps> = ({
       {/* 2. Main Goal Tree Container */}
       <div className="relative flex flex-col items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-950/90 p-6 min-h-[220px] overflow-x-auto">
         {/* Goal Formula Banner */}
-        <div className="w-full flex items-center justify-between border-b border-zinc-800/70 pb-3 mb-6">
+        <div className="w-full flex flex-wrap items-center justify-between border-b border-zinc-800/70 pb-3 mb-6 gap-2">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-brand-cyan tracking-wider font-mono">
               GOAL ⊢
@@ -71,11 +91,18 @@ export const ExpressionTree: React.FC<ExpressionTreeProps> = ({
             </span>
           </div>
 
-          <div className="text-[10px] text-zinc-500 font-mono">
+          <div className="text-[10px] text-zinc-500 font-mono flex items-center gap-2">
             {isProofComplete ? (
               <span className="text-emerald-400 font-bold">✔ Closed</span>
+            ) : inspectedNode ? (
+              <span className="rounded bg-brand-cyan/10 border border-brand-cyan/30 px-2 py-0.5 text-brand-cyan font-bold flex items-center gap-1">
+                <IconFocus2 className="w-3 h-3" />
+                <span>
+                  {inspectedNode.type}: <code className="text-white font-mono">{renderASTString(inspectedNode)}</code>
+                </span>
+              </span>
             ) : (
-              <span>Target: {selectedTargetId ? `node #${selectedTargetId}` : "Root Goal"}</span>
+              <span>Target: Root Goal</span>
             )}
           </div>
         </div>
@@ -98,12 +125,13 @@ export const ExpressionTree: React.FC<ExpressionTreeProps> = ({
           <div className="mt-4 text-center">
             <p className="text-[11px] text-zinc-500 font-mono">
               {selectedTargetId ? (
-                <span className="text-brand-cyan">
-                  Node selected! Tap or drop a tactic card to execute.
+                <span className="text-brand-cyan font-semibold flex items-center justify-center gap-1">
+                  <IconSparkles className="w-3.5 h-3.5 text-brand-cyan" />
+                  <span>Subterm locked: &apos;{inspectedNode ? renderASTString(inspectedNode) : selectedTargetId}&apos;. Click or drop a tactic card!</span>
                 </span>
               ) : (
                 <span>
-                  Drag a tactic card onto any target node, or tap a node then tap a card.
+                  Drag a tactic card onto any target node, or click a node then click a card.
                 </span>
               )}
             </p>
@@ -113,3 +141,4 @@ export const ExpressionTree: React.FC<ExpressionTreeProps> = ({
     </div>
   );
 };
+

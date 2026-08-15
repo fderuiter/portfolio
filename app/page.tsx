@@ -108,10 +108,10 @@ export default async function PortfolioHomePage() {
           <div className="relative z-10 w-full max-w-7xl flex flex-col items-center">
             {/* Title Block */}
             <h2 className="text-3xl md:text-4xl font-extrabold font-mono tracking-tight text-white text-center mb-2">
-              Featured Systems &amp; Architecture
+              Things I&apos;ve Built
             </h2>
             <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-12 text-center">
-              Clinical Data Pipelines, Regulatory Engines &amp; Interactive Systems
+              Clinical data systems, quirky canvas games, and weekend experiments
             </p>
 
             {/* Interactive Systems Highlights Section */}
@@ -121,10 +121,10 @@ export default async function PortfolioHomePage() {
                 <div>
                   <h3 className="text-lg sm:text-xl font-bold font-mono text-white mb-2 flex items-center gap-2.5">
                     <IconCpu className="w-4 h-4 text-brand-cyan" />
-                    Interactive Canvas &amp; Systems Labs
+                    Interactive Canvas &amp; Game Labs
                   </h3>
                   <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-xl font-sans">
-                    Explore bespoke canvas physics engines, embedded memory simulators, and interactive formal verification tools built without external gaming frameworks.
+                    Bespoke canvas physics, weird retro simulations, and logic puzzles built without bloated game engines.
                   </p>
                 </div>
                 <Link
@@ -156,7 +156,7 @@ export default async function PortfolioHomePage() {
 
       {/* 2. Philosophy TextReveal Highlight */}
       <div className="bg-zinc-950 border-t border-zinc-900/50">
-        <TextReveal>Translating rigorous regulatory protocols into clean architectures; crafting high-performance, memorable web interfaces.</TextReveal>
+        <TextReveal>I like taking messy, scary-sounding regulatory rules and turning them into clean code and fast web apps.</TextReveal>
       </div>
 
       {/* 3. About Section */}
@@ -167,10 +167,10 @@ export default async function PortfolioHomePage() {
         
         <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
           <h2 className="text-3xl md:text-4xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
-            Core Capabilities &amp; Focus
+            What I Do
           </h2>
           <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-16 text-center">
-            High-Compliance Data Architecture, Native Canvas Engines, and Open-Source Systems
+            A mix of clinical trial tech, canvas experiments, and outdoor emergency response
           </p>
           
           {/* Dynamic Bento Skills Grid Card Layout */}
@@ -179,10 +179,10 @@ export default async function PortfolioHomePage() {
           </div>
 
           <h3 className="text-2xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
-            Career Journey &amp; Experience
+            Work History
           </h3>
           <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-16 text-center">
-            Engineering Milestones, Regulatory Systems, and Technical Leadership
+            From clinical operations at Mayo Clinic to high-compliance data architecture
           </p>
 
           {/* Interactive Staggered Timeline Component */}
@@ -196,10 +196,10 @@ export default async function PortfolioHomePage() {
       <section id="contact" className="relative py-24 md:py-32 px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950">
         <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
           <h2 className="text-3xl md:text-4xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
-            Get in Touch
+            Say Hello
           </h2>
           <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-16 text-center">
-            Open for technical collaborations, consulting, and systems engineering discussions.
+            Always up for talking tech, clinical data, or wild project ideas.
           </p>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-4xl justify-center items-stretch">

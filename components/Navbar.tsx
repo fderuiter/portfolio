@@ -19,6 +19,7 @@ import {
   IconCrosshair,
   IconBrain,
   IconBone,
+  IconFileSpreadsheet,
 } from "@tabler/icons-react";
 
 interface SubNavItem {
@@ -76,9 +77,21 @@ const ARCADE_ITEMS: SubNavItem[] = [
 
 const SYSTEMS_ITEMS: SubNavItem[] = [
   {
+    title: "CRF Studio",
+    subtitle: "Clinical form designer & live EDC simulator",
+    href: "/crf",
+    icon: <IconFileSpreadsheet className="w-4 h-4 text-brand-cyan" />,
+  },
+  {
     title: "Proof Workspace",
     subtitle: "Interactive deductive logic & proof ledger",
     href: "/proof",
+    icon: <IconBrain className="w-4 h-4 text-brand-cyan" />,
+  },
+  {
+    title: "NeuroRecon Studio",
+    subtitle: "FreeSurfer 3D cortical CAD simulator",
+    href: "/neuro",
     icon: <IconBrain className="w-4 h-4 text-brand-cyan" />,
   },
   {

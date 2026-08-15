@@ -6,7 +6,7 @@ import { designManifest } from "@/lib/design-manifest";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { IconSearch, IconTerminal, IconFileCode, IconDirections, IconCornerDownLeft, IconCalendar } from "@tabler/icons-react";
+import { IconSearch, IconTerminal, IconFileCode, IconDirections, IconCornerDownLeft, IconCalendar, IconBrain, IconFileSpreadsheet } from "@tabler/icons-react";
 import { filterFuzzySearch } from "@/lib/search-utils";
 import { useSearch } from "@/components/providers/SearchProvider";
 
@@ -147,6 +147,22 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         category: "navigation",
         url: "/proof",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
+      },
+      {
+        id: "nav-neuro",
+        title: "NeuroRecon: FreeSurfer Pipeline Simulator",
+        subtitle: "Interactive neuroimaging CAD workspace — repair 3D cortical surfaces, control points & 2D MRI slices",
+        category: "navigation",
+        url: "/neuro",
+        icon: <IconBrain className="w-4 h-4 text-brand-cyan" />
+      },
+      {
+        id: "nav-crf",
+        title: "CRF Studio: Clinical Form & Protocol Designer",
+        subtitle: "Zero-latency 12-column visual CRF builder, AST edit check logic, CDISC CDASH/ODM-XML, and live Part 11 EDC simulator",
+        category: "navigation",
+        url: "/crf",
+        icon: <IconFileSpreadsheet className="w-4 h-4 text-brand-cyan" />
       },
       {
         id: "nav-simulator",

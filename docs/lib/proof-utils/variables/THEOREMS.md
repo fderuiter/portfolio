@@ -8,4 +8,4 @@
 
 > `const` **THEOREMS**: `Record`\<[`TheoremId`](../type-aliases/TheoremId.md), [`TheoremDefinition`](../interfaces/TheoremDefinition.md)\>
 
-Defined in: [lib/proof-utils.ts:99](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L99)
+Defined in: [lib/proof-utils.ts:416](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L416)

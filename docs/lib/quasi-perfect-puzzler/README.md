@@ -88,6 +88,12 @@ Re-exports [findNodeById](../quasi-perfect/engine/functions/findNodeById.md)
 
 ***
 
+### GameMode
+
+Re-exports [GameMode](../quasi-perfect/types/type-aliases/GameMode.md)
+
+***
+
 ### GameProgressState
 
 Re-exports [GameProgressState](../quasi-perfect/types/interfaces/GameProgressState.md)

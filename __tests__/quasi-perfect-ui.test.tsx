@@ -87,9 +87,11 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     expect(container.textContent).toContain("Quasi-Perfect Puzzler");
     expect(container.textContent).toContain("The Identity Crisis");
     expect(container.textContent).toContain("Chapter 1 · Equational Reasoning");
-    expect(container.textContent).toContain("16.0 / 16 GB");
+    expect(container.textContent).toContain("18-Level 3-Chapter Curriculum");
     expect(container.textContent).toContain("rfl");
     expect(container.textContent).toContain("Lean 4 Proof Script");
+    expect(container.textContent).toContain("Story Mode");
+    expect(container.textContent).toContain("Hacker Mode");
   });
 
   it("solves Level 1 by applying the rfl tactic and displaying the victory modal", async () => {
@@ -117,7 +119,66 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     // Check Victory Modal is displayed
     expect(container.textContent).toContain("Q.E.D. · THEOREM VERIFIED");
     expect(container.textContent).toContain("The Identity Crisis");
-    expect(container.textContent).toContain("15.0 GB");
+  });
+
+  it("toggles and interacts with the Theory Briefing modal", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<QuasiPerfectPuzzler />);
+    });
+
+    // Open Theory Briefing modal
+    const briefingBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Theory Briefing")
+    );
+    expect(briefingBtn).toBeDefined();
+
+    await act(async () => {
+      briefingBtn?.click();
+    });
+
+    expect(container.textContent).toContain("1. Mathematical Intuition");
+    expect(container.textContent).toContain("2. Formal Proof Assistant Analogy (Lean 4)");
+    expect(container.textContent).toContain("3. Your Mission & Tactical Objective");
+    expect(container.textContent).toContain("The Reflexivity Axiom (rfl)");
+
+    // Close modal via Start Proving button
+    const startBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Start Proving")
+    );
+    expect(startBtn).toBeDefined();
+
+    await act(async () => {
+      startBtn?.click();
+    });
+
+    expect(container.textContent).not.toContain("1. Mathematical Intuition");
+  });
+
+  it("switches between Story Mode and Hacker Mode with RAM gauge visibility", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<QuasiPerfectPuzzler />);
+    });
+
+    // Initially in Story Mode, RAM gauge is hidden
+    expect(container.textContent).toContain("STORY MODE");
+    expect(container.textContent).not.toContain("16.0 / 16 GB");
+
+    // Switch to Hacker Mode
+    const hackerBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.trim() === "Hacker Mode"
+    );
+    expect(hackerBtn).toBeDefined();
+
+    await act(async () => {
+      hackerBtn?.click();
+    });
+
+    // Hacker mode displays RAM Gauge
+    expect(container.textContent).toContain("16.0 / 16 GB");
+    expect(container.textContent).toContain("Server Memory:");
+    expect(container.textContent).toContain("LEAN RAM NOMINAL");
   });
 
   it("toggles and interacts with the Progressive Hints system", async () => {
@@ -196,7 +257,7 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     expect(container.textContent).toContain("RAM Cost:");
   });
 
-  it("filters levels by chapter", async () => {
+  it("filters levels by chapter across all 18 levels", async () => {
     await act(async () => {
       root = createRoot(container);
       root.render(<QuasiPerfectPuzzler />);
@@ -211,10 +272,140 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
       ch2Button?.click();
     });
 
-    // Level 5 should be visible in chapter 2
-    expect(container.textContent).toContain("L5");
-    expect(container.textContent).toContain("L6");
+    // Chapter 2 contains Levels 7-12
     expect(container.textContent).toContain("L7");
     expect(container.textContent).toContain("L8");
+    expect(container.textContent).toContain("L9");
+    expect(container.textContent).toContain("L10");
+    expect(container.textContent).toContain("L11");
+    expect(container.textContent).toContain("L12");
+
+    // Switch to Chapter 3
+    const ch3Button = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Ch 3: Quasiperfect")
+    );
+    expect(ch3Button).toBeDefined();
+
+    await act(async () => {
+      ch3Button?.click();
+    });
+
+    // Chapter 3 contains Levels 13-18
+    expect(container.textContent).toContain("L13");
+    expect(container.textContent).toContain("L14");
+    expect(container.textContent).toContain("L15");
+    expect(container.textContent).toContain("L16");
+    expect(container.textContent).toContain("L17");
+    expect(container.textContent).toContain("L18");
+  });
+
+  it("solves Level 11 with cases, right/left disjunction branching and exact in UI", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<QuasiPerfectPuzzler />);
+    });
+
+    // 1. Switch to Level 11
+    const l11Button = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.trim() === "L11"
+    );
+    expect(l11Button).toBeDefined();
+
+    await act(async () => {
+      l11Button?.click();
+    });
+
+    expect(container.textContent).toContain("Disjunction Splitting");
+
+    // 2. Play 'cases' on h_or
+    const casesCard = container.querySelector('[data-tactic-id="cases"]') as HTMLElement;
+    expect(casesCard).not.toBeNull();
+
+    await act(async () => {
+      casesCard.click();
+    });
+
+    // Click hypothesis h_or node
+    const hypOrNode = container.querySelector('[data-node-id="hyp-disj-lvl11"]') as HTMLElement;
+    expect(hypOrNode).not.toBeNull();
+
+    await act(async () => {
+      hypOrNode.click();
+    });
+
+    // Multi-goal tabs are now visible!
+    expect(container.textContent).toContain("Case 1: P");
+    expect(container.textContent).toContain("Case 2: Q");
+
+    // 3. Subgoal 1: select 'right' tactic, then click root goal
+    const rightCard = container.querySelector('[data-tactic-id="right"]') as HTMLElement;
+    expect(rightCard).not.toBeNull();
+
+    await act(async () => {
+      rightCard.click();
+    });
+
+    const goalDisjNode = container.querySelector('[data-node-id="goal-disj-target-lvl11"]') as HTMLElement;
+    expect(goalDisjNode).not.toBeNull();
+
+    await act(async () => {
+      goalDisjNode.click();
+    });
+
+    // Subgoal 1 now has goal P. Play 'exact h_left'
+    const exactHLeft = Array.from(container.querySelectorAll('[data-tactic-id="exact"]')).find(
+      (el) => el.textContent?.includes("exact h_left")
+    ) as HTMLElement;
+    expect(exactHLeft).toBeDefined();
+
+    await act(async () => {
+      exactHLeft.click();
+    });
+
+    const goalPNode = container.querySelector('[data-node-id="var-P-out-lvl11"]') as HTMLElement;
+    expect(goalPNode).not.toBeNull();
+
+    await act(async () => {
+      goalPNode.click();
+    });
+
+    // Automatically advances to Subgoal 2 (Case 2: Q)
+    expect(container.textContent).toContain("Case 2: Q");
+
+    // 4. Subgoal 2: select 'left' tactic, then click root goal
+    const leftCard = container.querySelector('[data-tactic-id="left"]') as HTMLElement;
+    expect(leftCard).not.toBeNull();
+
+    await act(async () => {
+      leftCard.click();
+    });
+
+    const goalDisjNode2 = container.querySelector('[data-node-id="goal-disj-target-lvl11"]') as HTMLElement;
+    expect(goalDisjNode2).not.toBeNull();
+
+    await act(async () => {
+      goalDisjNode2.click();
+    });
+
+    // Subgoal 2 now has goal Q. Play 'exact h_right'
+    const exactHRight = Array.from(container.querySelectorAll('[data-tactic-id="exact"]')).find(
+      (el) => el.textContent?.includes("exact h_right")
+    ) as HTMLElement;
+    expect(exactHRight).toBeDefined();
+
+    await act(async () => {
+      exactHRight.click();
+    });
+
+    const goalQNode = container.querySelector('[data-node-id="var-Q-out-lvl11"]') as HTMLElement;
+    expect(goalQNode).not.toBeNull();
+
+    await act(async () => {
+      goalQNode.click();
+    });
+
+    // 5. Check Victory Modal
+    expect(container.textContent).toContain("Q.E.D. · THEOREM VERIFIED");
+    expect(container.textContent).toContain("Disjunction Splitting");
   });
 });
