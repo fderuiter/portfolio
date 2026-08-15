@@ -6,9 +6,9 @@
 
 # Function: createCorticalSurfaceMesh()
 
-> **createCorticalSurfaceMesh**(`mode?`, `wireframe?`): `Group`
+> **createCorticalSurfaceMesh**(`mode?`, `wireframe?`, `hemiFilter?`): `Group`
 
-Defined in: [lib/neuro/mesh-generator.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/mesh-generator.ts#L19)
+Defined in: [lib/neuro/mesh-generator.ts:124](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/mesh-generator.ts#L124)
 
 Procedurally generates a FreeSurfer-style cortical surface mesh.
 
@@ -21,6 +21,10 @@ Procedurally generates a FreeSurfer-style cortical surface mesh.
 ### wireframe?
 
 `boolean` = `false`
+
+### hemiFilter?
+
+[`HemisphereFilter`](../../types/type-aliases/HemisphereFilter.md) = `"both"`
 
 ## Returns
 

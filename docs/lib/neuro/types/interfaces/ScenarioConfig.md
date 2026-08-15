@@ -6,7 +6,7 @@
 
 # Interface: ScenarioConfig
 
-Defined in: [lib/neuro/types.ts:62](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L62)
+Defined in: [lib/neuro/types.ts:388](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L388)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/neuro/types.ts:62](https://github.com/fderuiter/portfolio/blob/
 
 > **badge**: `string`
 
-Defined in: [lib/neuro/types.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L66)
+Defined in: [lib/neuro/types.ts:392](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L392)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/neuro/types.ts:66](https://github.com/fderuiter/portfolio/blob/
 
 > **defectDescription**: `string`
 
-Defined in: [lib/neuro/types.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L70)
+Defined in: [lib/neuro/types.ts:396](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L396)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/neuro/types.ts:70](https://github.com/fderuiter/portfolio/blob/
 
 > **difficulty**: `"Beginner"` \| `"Intermediate"` \| `"Advanced"` \| `"Expert"` \| `"Sandbox"`
 
-Defined in: [lib/neuro/types.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L67)
+Defined in: [lib/neuro/types.ts:393](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L393)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/neuro/types.ts:67](https://github.com/fderuiter/portfolio/blob/
 
 > **id**: [`ScenarioId`](../type-aliases/ScenarioId.md)
 
-Defined in: [lib/neuro/types.ts:63](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L63)
+Defined in: [lib/neuro/types.ts:389](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L389)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/neuro/types.ts:63](https://github.com/fderuiter/portfolio/blob/
 
 > **initialDefects**: `number`
 
-Defined in: [lib/neuro/types.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L74)
+Defined in: [lib/neuro/types.ts:400](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L400)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/neuro/types.ts:74](https://github.com/fderuiter/portfolio/blob/
 
 > **initialEuler**: `number`
 
-Defined in: [lib/neuro/types.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L72)
+Defined in: [lib/neuro/types.ts:398](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L398)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/neuro/types.ts:72](https://github.com/fderuiter/portfolio/blob/
 
 > **lore**: [`ScenarioLore`](ScenarioLore.md)
 
-Defined in: [lib/neuro/types.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L71)
+Defined in: [lib/neuro/types.ts:397](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L397)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/neuro/types.ts:71](https://github.com/fderuiter/portfolio/blob/
 
 > **recommendedTool**: [`ToolMode`](../type-aliases/ToolMode.md)
 
-Defined in: [lib/neuro/types.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L76)
+Defined in: [lib/neuro/types.ts:402](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L402)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/neuro/types.ts:76](https://github.com/fderuiter/portfolio/blob/
 
 > **subtitle**: `string`
 
-Defined in: [lib/neuro/types.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L65)
+Defined in: [lib/neuro/types.ts:391](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L391)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [lib/neuro/types.ts:65](https://github.com/fderuiter/portfolio/blob/
 
 > **successMessage**: `string`
 
-Defined in: [lib/neuro/types.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L77)
+Defined in: [lib/neuro/types.ts:403](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L403)
 
 ***
 
@@ -94,7 +94,7 @@ Defined in: [lib/neuro/types.ts:77](https://github.com/fderuiter/portfolio/blob/
 
 > **targetCoords**: [`VoxelCoord`](VoxelCoord.md)
 
-Defined in: [lib/neuro/types.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L69)
+Defined in: [lib/neuro/types.ts:395](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L395)
 
 ***
 
@@ -102,7 +102,7 @@ Defined in: [lib/neuro/types.ts:69](https://github.com/fderuiter/portfolio/blob/
 
 > **targetDice**: `number`
 
-Defined in: [lib/neuro/types.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L75)
+Defined in: [lib/neuro/types.ts:401](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L401)
 
 ***
 
@@ -110,7 +110,7 @@ Defined in: [lib/neuro/types.ts:75](https://github.com/fderuiter/portfolio/blob/
 
 > **targetEuler**: `number`
 
-Defined in: [lib/neuro/types.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L73)
+Defined in: [lib/neuro/types.ts:399](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L399)
 
 ***
 
@@ -118,7 +118,7 @@ Defined in: [lib/neuro/types.ts:73](https://github.com/fderuiter/portfolio/blob/
 
 > **targetPlane**: [`SlicePlane`](../type-aliases/SlicePlane.md)
 
-Defined in: [lib/neuro/types.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L68)
+Defined in: [lib/neuro/types.ts:394](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L394)
 
 ***
 
@@ -126,4 +126,4 @@ Defined in: [lib/neuro/types.ts:68](https://github.com/fderuiter/portfolio/blob/
 
 > **title**: `string`
 
-Defined in: [lib/neuro/types.ts:64](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L64)
+Defined in: [lib/neuro/types.ts:390](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L390)

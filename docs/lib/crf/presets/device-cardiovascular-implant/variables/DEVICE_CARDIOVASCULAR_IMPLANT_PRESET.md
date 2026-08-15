@@ -8,4 +8,4 @@
 
 > `const` **DEVICE\_CARDIOVASCULAR\_IMPLANT\_PRESET**: [`StudyProtocol`](../../../types/interfaces/StudyProtocol.md)
 
-Defined in: lib/crf/presets/device-cardiovascular-implant.ts:4
+Defined in: [lib/crf/presets/device-cardiovascular-implant.ts:4](https://github.com/fderuiter/portfolio/blob/main/lib/crf/presets/device-cardiovascular-implant.ts#L4)

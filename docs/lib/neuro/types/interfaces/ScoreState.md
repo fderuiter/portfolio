@@ -6,7 +6,7 @@
 
 # Interface: ScoreState
 
-Defined in: [lib/neuro/types.ts:91](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L91)
+Defined in: [lib/neuro/types.ts:417](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L417)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/neuro/types.ts:91](https://github.com/fderuiter/portfolio/blob/
 
 > **multiplier**: `number`
 
-Defined in: [lib/neuro/types.ts:93](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L93)
+Defined in: [lib/neuro/types.ts:419](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L419)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/neuro/types.ts:93](https://github.com/fderuiter/portfolio/blob/
 
 > **resolvedScenarios**: [`ScenarioId`](../type-aliases/ScenarioId.md)[]
 
-Defined in: [lib/neuro/types.ts:95](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L95)
+Defined in: [lib/neuro/types.ts:421](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L421)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/neuro/types.ts:95](https://github.com/fderuiter/portfolio/blob/
 
 > **score**: `number`
 
-Defined in: [lib/neuro/types.ts:92](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L92)
+Defined in: [lib/neuro/types.ts:418](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L418)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/neuro/types.ts:92](https://github.com/fderuiter/portfolio/blob/
 
 > **streak**: `number`
 
-Defined in: [lib/neuro/types.ts:94](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L94)
+Defined in: [lib/neuro/types.ts:420](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L420)

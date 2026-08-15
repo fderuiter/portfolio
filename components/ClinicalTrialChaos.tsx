@@ -1053,6 +1053,26 @@ export const ClinicalTrialChaos: React.FC = () => {
     );
   }
 
+  const handleCanvasClickOrTouch = (clientX: number, clientY: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = (clientX - rect.left) * (canvas.width / rect.width);
+    const y = (clientY - rect.top) * (canvas.height / rect.height);
+    const beltY = canvas.height * 0.44;
+    const slotWidth = (canvas.width - 70) / 5;
+
+    if (y >= beltY - 35 && y <= beltY + 60) {
+      conveyorSubjects.forEach((subj, idx) => {
+        const px = 28 + idx * slotWidth;
+        if (x >= px && x <= px + slotWidth - 10) {
+          setSelectedSubjectId(subj.id);
+          triggerSound("validate");
+        }
+      });
+    }
+  };
+
   const sortedStations = [...stations].sort((a, b) => a.positionIndex - b.positionIndex);
 
   return (
@@ -1318,7 +1338,13 @@ export const ClinicalTrialChaos: React.FC = () => {
               ref={canvasRef}
               width={760}
               height={200}
-              className={`w-full ${isFullscreen ? "h-auto max-h-[300px] aspect-[760/200] object-contain" : "h-[180px]"} block`}
+              onClick={(e) => handleCanvasClickOrTouch(e.clientX, e.clientY)}
+              onTouchStart={(e) => {
+                const touch = e.touches[0];
+                if (touch) handleCanvasClickOrTouch(touch.clientX, touch.clientY);
+              }}
+              style={{ touchAction: "none" }}
+              className={`w-full ${isFullscreen ? "h-auto max-h-[300px] aspect-[760/200] object-contain" : "h-[180px]"} block cursor-pointer`}
             />
 
             {/* Overlays for Idle / Paused / Game Over / Cleared */}

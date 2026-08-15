@@ -27,7 +27,16 @@ import { ExportImportModal } from "./Modes/ExportImportModal";
 import { ExportDocumentModal } from "./Modes/ExportDocumentModal";
 import { BrandingConfigModal } from "./Branding/BrandingConfigModal";
 import { DiagnosticsDrawer } from "./DiagnosticsDrawer";
+import { WorkflowWizardModal } from "./Wizard/WorkflowWizardModal";
+import { SpotlightTourOverlay } from "./Wizard/SpotlightTourOverlay";
 import { getStudyBranding } from "@/lib/crf/branding-defaults";
+import {
+  IconFileSpreadsheet,
+  IconLayoutGrid,
+  IconAdjustments,
+  IconSparkles,
+  IconX,
+} from "@tabler/icons-react";
 
 export const CRFStudioContainer: React.FC = () => {
   // Study State & History
@@ -58,11 +67,21 @@ export const CRFStudioContainer: React.FC = () => {
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
   const [viewport, setViewport] = useState<DeviceViewport>("desktop");
 
+  // Sidebar Visibility / Collapse States for Desktop & Laptop
+  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
+  const [isRightInspectorOpen, setIsRightInspectorOpen] = useState(true);
+
+  // Mobile Stack Navigation View: "forms" | "canvas" | "inspector"
+  const [mobileActiveView, setMobileActiveView] = useState<"forms" | "canvas" | "inspector">("canvas");
+  const [isMobileWidgetDrawerOpen, setIsMobileWidgetDrawerOpen] = useState(false);
+
   // Modals & Panels State
   const [isScaffolderOpen, setIsScaffolderOpen] = useState(false);
   const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState(false);
   const [isBrandingOpen, setIsBrandingOpen] = useState(false);
   const [isExportDocModalOpen, setIsExportDocModalOpen] = useState(false);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [isSpotlightTourOpen, setIsSpotlightTourOpen] = useState(false);
   const [leftTab, setLeftTab] = useState<"forms" | "palette">("forms");
 
   // Push new state onto undo history stack
@@ -95,9 +114,17 @@ export const CRFStudioContainer: React.FC = () => {
     setStudy(next);
   }, [future, study]);
 
-  // Keyboard Shortcuts (Undo, Redo)
+  // Global Keyboard Shortcuts (Undo, Redo, Sidebar Toggles, Mode Switching, Hotkeys)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const isInput =
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.tagName === "SELECT" ||
+        target?.isContentEditable;
+
+      // Undo / Redo
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") {
         if (e.shiftKey) {
           e.preventDefault();
@@ -106,15 +133,72 @@ export const CRFStudioContainer: React.FC = () => {
           e.preventDefault();
           handleUndo();
         }
+        return;
+      }
+
+      // Quick Scaffolder (⌘K / Ctrl+K)
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsScaffolderOpen(true);
+        return;
+      }
+
+      // Toggle Left Sidebar (⌘B / Ctrl+B)
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "b") {
+        e.preventDefault();
+        setIsLeftSidebarOpen((prev) => !prev);
+        return;
+      }
+
+      // Toggle Right Inspector (⌘I / Ctrl+I)
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "i") {
+        e.preventDefault();
+        setIsRightInspectorOpen((prev) => !prev);
+        return;
+      }
+
+      // Escape key to close mobile drawers or clear selection
+      if (e.key === "Escape") {
+        setIsMobileWidgetDrawerOpen(false);
+        if (selectedFieldId) {
+          setSelectedFieldId(null);
+        }
+      }
+
+      if (!isInput) {
+        if (e.key === "?" || e.key === "F1") {
+          e.preventDefault();
+          setIsWizardOpen((prev) => !prev);
+        } else if (e.key === "1") {
+          setActiveMode("designer");
+        } else if (e.key === "2") {
+          setActiveMode("matrix");
+        } else if (e.key === "3") {
+          setActiveMode("rules");
+        } else if (e.key === "4") {
+          setActiveMode("edc");
+        } else if (e.key === "5") {
+          setActiveMode("acrf");
+        } else if (e.key === "6") {
+          setActiveMode("export");
+        }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleUndo, handleRedo]);
+  }, [handleUndo, handleRedo, selectedFieldId]);
 
   const activeForm = study.forms.find((f) => f.id === activeFormId) || study.forms[0];
   const allFields = activeForm ? activeForm.sections.flatMap((s) => s.fields) : [];
   const selectedField = allFields.find((f) => f.id === selectedFieldId) || null;
+
+  // Select Field on Mobile automatically slides in Inspector or updates tab
+  const handleSelectField = (fieldId: string | null) => {
+    setSelectedFieldId(fieldId);
+    if (fieldId && typeof window !== "undefined" && window.innerWidth < 768) {
+      setMobileActiveView("inspector");
+    }
+  };
 
   // Preset Selector Handler
   const handleSelectPreset = (presetId: string) => {
@@ -150,6 +234,7 @@ export const CRFStudioContainer: React.FC = () => {
     });
     setActiveFormId(newForm.id);
     setSelectedFieldId(null);
+    setMobileActiveView("canvas");
   };
 
   const handleDuplicateForm = (formId: string) => {
@@ -167,6 +252,7 @@ export const CRFStudioContainer: React.FC = () => {
       forms: [...study.forms, dupForm],
     });
     setActiveFormId(dupForm.id);
+    setMobileActiveView("canvas");
   };
 
   const handleDeleteForm = (formId: string) => {
@@ -187,6 +273,7 @@ export const CRFStudioContainer: React.FC = () => {
     });
     setActiveFormId(newForm.id);
     setSelectedFieldId(null);
+    setMobileActiveView("canvas");
   };
 
   const handleUpdateFormMeta = (updates: Partial<CRFForm>) => {
@@ -236,6 +323,7 @@ export const CRFStudioContainer: React.FC = () => {
 
     handleUpdateFormMeta({ sections: updatedSections });
     setSelectedFieldId(field.id);
+    setIsMobileWidgetDrawerOpen(false);
   };
 
   const handleUpdateField = (fieldId: string, updates: Partial<CRFField>) => {
@@ -297,6 +385,16 @@ export const CRFStudioContainer: React.FC = () => {
     });
   };
 
+  const handleSaveCodelist = useCallback(
+    (newCodelist: import("@/lib/crf/types").CodelistDefinition) => {
+      updateStudyWithHistory({
+        ...study,
+        codelists: [...study.codelists.filter((cl) => cl.id !== newCodelist.id), newCodelist],
+      });
+    },
+    [study, updateStudyWithHistory]
+  );
+
   const activeBranding = getStudyBranding(study);
 
   return (
@@ -307,7 +405,7 @@ export const CRFStudioContainer: React.FC = () => {
           "--brand-accent": activeBranding.accentColor || "#0ea5e9",
         } as React.CSSProperties
       }
-      className="flex flex-col h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] bg-zinc-950 text-foreground overflow-hidden"
+      className="flex flex-col h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] bg-zinc-950 text-foreground overflow-hidden relative"
     >
       {/* Studio Header Bar */}
       <StudioHeader
@@ -315,6 +413,10 @@ export const CRFStudioContainer: React.FC = () => {
         activeMode={activeMode}
         canUndo={history.length > 0}
         canRedo={future.length > 0}
+        isLeftSidebarOpen={isLeftSidebarOpen}
+        isRightInspectorOpen={isRightInspectorOpen}
+        onToggleLeftSidebar={() => setIsLeftSidebarOpen((prev) => !prev)}
+        onToggleRightInspector={() => setIsRightInspectorOpen((prev) => !prev)}
         onUndo={handleUndo}
         onRedo={handleRedo}
         onChangeMode={setActiveMode}
@@ -323,67 +425,131 @@ export const CRFStudioContainer: React.FC = () => {
         onOpenCdashScaffolder={() => setIsScaffolderOpen(true)}
         onOpenBranding={() => setIsBrandingOpen(true)}
         onOpenExportDocument={() => setIsExportDocModalOpen(true)}
+        onOpenWizard={() => setIsWizardOpen(true)}
+        onStartSpotlightTour={() => setIsSpotlightTourOpen(true)}
       />
 
       {/* Main Workspace Body based on Mode */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         {activeMode === "designer" && activeForm && (
           <>
-            {/* Left Sidebar: Forms Navigator & Widget Palette */}
-            <aside className="w-64 sm:w-72 bg-zinc-950 border-r border-zinc-850 flex flex-col shrink-0">
-              {/* Left Sub-Tabs */}
-              <div className="flex border-b border-zinc-850 bg-zinc-900/40">
-                <button
-                  onClick={() => setLeftTab("forms")}
-                  className={`flex-1 py-2 text-xs font-mono transition-colors border-b-2 ${
-                    leftTab === "forms"
-                      ? "border-brand-cyan text-brand-cyan font-bold bg-zinc-900/60"
-                      : "border-transparent text-zinc-400 hover:text-zinc-200"
-                  }`}
-                >
-                  Forms ({study.forms.length})
-                </button>
-                <button
-                  onClick={() => setLeftTab("palette")}
-                  className={`flex-1 py-2 text-xs font-mono transition-colors border-b-2 ${
-                    leftTab === "palette"
-                      ? "border-brand-cyan text-brand-cyan font-bold bg-zinc-900/60"
-                      : "border-transparent text-zinc-400 hover:text-zinc-200"
-                  }`}
-                >
-                  Widget Palette
-                </button>
-              </div>
+            {/* Desktop / Tablet Left Sidebar: Forms Navigator & Widget Palette */}
+            {isLeftSidebarOpen && (
+              <aside className="hidden md:flex w-64 lg:w-72 bg-zinc-950 border-r border-zinc-850 flex-col shrink-0 transition-all">
+                {/* Left Sub-Tabs */}
+                <div className="flex border-b border-zinc-850 bg-zinc-900/40">
+                  <button
+                    onClick={() => setLeftTab("forms")}
+                    className={`flex-1 py-2 text-xs font-mono transition-colors border-b-2 ${
+                      leftTab === "forms"
+                        ? "border-brand-cyan text-brand-cyan font-bold bg-zinc-900/60"
+                        : "border-transparent text-zinc-400 hover:text-zinc-200"
+                    }`}
+                  >
+                    Forms ({study.forms.length})
+                  </button>
+                  <button
+                    onClick={() => setLeftTab("palette")}
+                    className={`flex-1 py-2 text-xs font-mono transition-colors border-b-2 ${
+                      leftTab === "palette"
+                        ? "border-brand-cyan text-brand-cyan font-bold bg-zinc-900/60"
+                        : "border-transparent text-zinc-400 hover:text-zinc-200"
+                    }`}
+                  >
+                    Palette
+                  </button>
+                </div>
 
-              <div className="flex-1 overflow-y-auto p-3">
-                {leftTab === "forms" ? (
+                <div className="flex-1 overflow-y-auto p-3">
+                  {leftTab === "forms" ? (
+                    <FormsNavigator
+                      forms={study.forms}
+                      activeFormId={activeForm.id}
+                      onSelectForm={(id) => {
+                        setActiveFormId(id);
+                        setSelectedFieldId(null);
+                      }}
+                      onAddForm={handleAddForm}
+                      onDuplicateForm={handleDuplicateForm}
+                      onDeleteForm={handleDeleteForm}
+                      onOpenCdashScaffolder={() => setIsScaffolderOpen(true)}
+                    />
+                  ) : (
+                    <WidgetPalette onAddField={handleAddField} />
+                  )}
+                </div>
+              </aside>
+            )}
+
+            {/* Mobile Stack Views (Visible only on < md screens) */}
+            <div className="md:hidden flex-1 flex flex-col overflow-hidden">
+              {mobileActiveView === "forms" && (
+                <div className="flex-1 overflow-y-auto p-4 bg-zinc-950">
                   <FormsNavigator
                     forms={study.forms}
                     activeFormId={activeForm.id}
                     onSelectForm={(id) => {
                       setActiveFormId(id);
                       setSelectedFieldId(null);
+                      setMobileActiveView("canvas");
                     }}
                     onAddForm={handleAddForm}
                     onDuplicateForm={handleDuplicateForm}
                     onDeleteForm={handleDeleteForm}
                     onOpenCdashScaffolder={() => setIsScaffolderOpen(true)}
                   />
-                ) : (
-                  <WidgetPalette onAddField={handleAddField} />
-                )}
-              </div>
-            </aside>
+                </div>
+              )}
 
-            {/* Center Canvas: Responsive 12-Column Layout */}
-            <main className="flex-1 flex flex-col overflow-hidden">
+              {mobileActiveView === "canvas" && (
+                <main className="flex-1 flex flex-col overflow-hidden">
+                  <FormCanvas
+                    form={activeForm}
+                    selectedFieldId={selectedFieldId}
+                    viewport={viewport}
+                    codelists={study.codelists}
+                    onChangeViewport={setViewport}
+                    onSelectField={handleSelectField}
+                    onUpdateFormMeta={handleUpdateFormMeta}
+                    onAddSection={handleAddSection}
+                    onDeleteSection={handleDeleteSection}
+                    onUpdateSectionTitle={handleUpdateSectionTitle}
+                    onDuplicateField={handleDuplicateField}
+                    onDeleteField={handleDeleteField}
+                    onUpdateField={handleUpdateField}
+                    onOpenPalette={() => setIsMobileWidgetDrawerOpen(true)}
+                  />
+                </main>
+              )}
+
+              {mobileActiveView === "inspector" && (
+                <div className="flex-1 overflow-y-auto bg-zinc-950">
+                  <InspectorPanel
+                    form={activeForm}
+                    selectedField={selectedField}
+                    codelists={study.codelists}
+                    onClose={() => {
+                      setSelectedFieldId(null);
+                      setMobileActiveView("canvas");
+                    }}
+                    onUpdateField={handleUpdateField}
+                    onUpdateFormMeta={handleUpdateFormMeta}
+                    onUpdateRules={handleUpdateRules}
+                    onSaveCodelist={handleSaveCodelist}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Center Canvas for Desktop/Tablet (Visible on md+ screens) */}
+            <main className="hidden md:flex flex-1 flex-col overflow-hidden">
               <FormCanvas
                 form={activeForm}
                 selectedFieldId={selectedFieldId}
                 viewport={viewport}
                 codelists={study.codelists}
                 onChangeViewport={setViewport}
-                onSelectField={setSelectedFieldId}
+                onSelectField={handleSelectField}
                 onUpdateFormMeta={handleUpdateFormMeta}
                 onAddSection={handleAddSection}
                 onDeleteSection={handleDeleteSection}
@@ -391,22 +557,28 @@ export const CRFStudioContainer: React.FC = () => {
                 onDuplicateField={handleDuplicateField}
                 onDeleteField={handleDeleteField}
                 onUpdateField={handleUpdateField}
-                onOpenPalette={() => setLeftTab("palette")}
+                onOpenPalette={() => {
+                  setIsLeftSidebarOpen(true);
+                  setLeftTab("palette");
+                }}
               />
             </main>
 
-            {/* Right Inspector Panel */}
-            <aside className="w-80 sm:w-96 bg-zinc-950 shrink-0 flex flex-col">
-              <InspectorPanel
-                form={activeForm}
-                selectedField={selectedField}
-                codelists={study.codelists}
-                onClose={() => setSelectedFieldId(null)}
-                onUpdateField={handleUpdateField}
-                onUpdateFormMeta={handleUpdateFormMeta}
-                onUpdateRules={handleUpdateRules}
-              />
-            </aside>
+            {/* Desktop / Tablet Right Inspector Panel */}
+            {isRightInspectorOpen && (
+              <aside className="hidden md:flex w-72 lg:w-96 bg-zinc-950 shrink-0 flex-col transition-all">
+                <InspectorPanel
+                  form={activeForm}
+                  selectedField={selectedField}
+                  codelists={study.codelists}
+                  onClose={() => setSelectedFieldId(null)}
+                  onUpdateField={handleUpdateField}
+                  onUpdateFormMeta={handleUpdateFormMeta}
+                  onUpdateRules={handleUpdateRules}
+                  onSaveCodelist={handleSaveCodelist}
+                />
+              </aside>
+            )}
           </>
         )}
 
@@ -441,6 +613,80 @@ export const CRFStudioContainer: React.FC = () => {
         )}
       </div>
 
+      {/* Mobile Stack Bottom Navigation Bar (Visible only in Designer mode on mobile < md) */}
+      {activeMode === "designer" && (
+        <nav
+          aria-label="Mobile View Navigation"
+          className="md:hidden flex items-center justify-around border-t border-zinc-800 bg-zinc-950/95 backdrop-blur-lg px-2 py-1.5 z-20"
+        >
+          <button
+            onClick={() => setMobileActiveView("forms")}
+            className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-all ${
+              mobileActiveView === "forms"
+                ? "text-brand-cyan font-bold bg-brand-cyan/10"
+                : "text-zinc-400 hover:text-zinc-200"
+            }`}
+          >
+            <IconFileSpreadsheet className="w-4 h-4" />
+            <span className="text-[10px] font-mono">Forms ({study.forms.length})</span>
+          </button>
+
+          <button
+            onClick={() => setMobileActiveView("canvas")}
+            className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-all ${
+              mobileActiveView === "canvas"
+                ? "text-brand-cyan font-bold bg-brand-cyan/10"
+                : "text-zinc-400 hover:text-zinc-200"
+            }`}
+          >
+            <IconLayoutGrid className="w-4 h-4" />
+            <span className="text-[10px] font-mono">Canvas</span>
+          </button>
+
+          <button
+            onClick={() => setMobileActiveView("inspector")}
+            className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-all ${
+              mobileActiveView === "inspector"
+                ? "text-brand-cyan font-bold bg-brand-cyan/10"
+                : "text-zinc-400 hover:text-zinc-200"
+            }`}
+          >
+            <IconAdjustments className="w-4 h-4" />
+            <span className="text-[10px] font-mono truncate max-w-[80px]">
+              {selectedField ? selectedField.variableName : "Inspector"}
+            </span>
+          </button>
+        </nav>
+      )}
+
+      {/* Mobile Widget Palette Slide-Up Bottom Sheet */}
+      {isMobileWidgetDrawerOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs md:hidden"
+            onClick={() => setIsMobileWidgetDrawerOpen(false)}
+          />
+          <div className="fixed bottom-0 inset-x-0 z-50 max-h-[75vh] bg-zinc-950 border-t border-zinc-800 rounded-t-3xl p-4 overflow-y-auto md:hidden shadow-2xl space-y-3 animate-in slide-in-from-bottom duration-200">
+            <div className="flex items-center justify-between pb-2 border-b border-zinc-850">
+              <div className="flex items-center gap-2">
+                <IconSparkles className="w-4 h-4 text-brand-cyan" />
+                <span className="text-xs font-mono font-bold text-white uppercase">
+                  Add Clinical Widget
+                </span>
+              </div>
+              <button
+                onClick={() => setIsMobileWidgetDrawerOpen(false)}
+                className="p-1 rounded-full bg-zinc-900 text-zinc-400 hover:text-white"
+                aria-label="Close Widget Palette"
+              >
+                <IconX className="w-4 h-4" />
+              </button>
+            </div>
+            <WidgetPalette onAddField={handleAddField} />
+          </div>
+        </>
+      )}
+
       {/* Modals & Drawers */}
       <CdashScaffolderModal
         isOpen={isScaffolderOpen}
@@ -455,6 +701,7 @@ export const CRFStudioContainer: React.FC = () => {
         onSelectForm={(fId) => {
           setActiveFormId(fId);
           setActiveMode("designer");
+          setMobileActiveView("canvas");
         }}
         onUpdateStudy={updateStudyWithHistory}
       />
@@ -478,6 +725,21 @@ export const CRFStudioContainer: React.FC = () => {
           }}
         />
       )}
+
+      {/* 5-Stage Interactive Clinical Walkthrough Wizard */}
+      <WorkflowWizardModal
+        isOpen={isWizardOpen}
+        onClose={() => setIsWizardOpen(false)}
+        onSwitchMode={setActiveMode}
+        onLoadPreset={handleSelectPreset}
+        onStartSpotlightTour={() => setIsSpotlightTourOpen(true)}
+      />
+
+      {/* Interactive UI Spotlight Tour */}
+      <SpotlightTourOverlay
+        isOpen={isSpotlightTourOpen}
+        onClose={() => setIsSpotlightTourOpen(false)}
+      />
     </div>
   );
 };

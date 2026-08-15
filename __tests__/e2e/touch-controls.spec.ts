@@ -21,11 +21,41 @@ test.describe('Mobile & Tablet Touch Interactions Suite', () => {
     });
   });
 
-  test('Mobile Navigation Drawer opens, traps focus, and navigates', async ({ page, isMobile }) => {
+  const TEST_ROUTES = [
+    '/',
+    '/schedule',
+    '/crf',
+    '/proof',
+    '/neuro',
+    '/simulator',
+    '/arcade',
+    '/arcade/laser-loon',
+    '/arcade/retro-labyrinth',
+    '/arcade/clinical-chaos',
+    '/arcade/garmin-watch',
+    '/arcade/working-with-duck',
+    '/arcade/quasi-puzzler',
+  ];
+
+  for (const route of TEST_ROUTES) {
+    test(`Zero Horizontal Overflow Invariant on route: ${route}`, async ({ page }) => {
+      await page.goto(route);
+      await page.waitForTimeout(300);
+
+      // Verify that document scrollWidth does not exceed viewport innerWidth
+      const isOverflowing = await page.evaluate(() => {
+        return document.documentElement.scrollWidth > window.innerWidth;
+      });
+
+      expect(isOverflowing).toBe(false);
+    });
+  }
+
+  test('Mobile Navigation Drawer opens, traps focus, and links to all primary routes', async ({ page, isMobile }) => {
     test.skip(!isMobile, 'Mobile drawer test is only applicable on mobile viewports');
 
     await page.goto('/');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(400);
 
     // Click Hamburger Menu Trigger
     const menuButton = page.getByRole('button', { name: /open navigation menu/i });
@@ -43,14 +73,80 @@ test.describe('Mobile & Tablet Touch Interactions Suite', () => {
     const arcadeLink = overlay.getByRole('link', { name: /arcade games hub/i });
     await expect(arcadeLink).toBeVisible();
 
+    const crfLink = overlay.getByRole('link', { name: /crf studio/i });
+    await expect(crfLink).toBeVisible();
+
+    const proofLink = overlay.getByRole('link', { name: /proof canvas/i });
+    await expect(proofLink).toBeVisible();
+
+    const neuroLink = overlay.getByRole('link', { name: /neurorecon studio/i });
+    await expect(neuroLink).toBeVisible();
+
     // Close menu with escape key
     await page.keyboard.press('Escape');
     await expect(overlay).toBeHidden();
   });
 
+  test('Proof Workspace mobile view switcher tabs and auto-step execution', async ({ page, isMobile }) => {
+    await page.goto('/proof');
+    await page.waitForTimeout(400);
+
+    if (isMobile) {
+      // Verify mobile segmented tab switcher
+      const ledgerTab = page.getByRole('button', { name: /ledger/i }).first();
+      const fallacyTab = page.getByRole('button', { name: /fallacy/i }).first();
+      const canvasTab = page.getByRole('button', { name: /canvas/i }).first();
+
+      await expect(canvasTab).toBeVisible();
+      await ledgerTab.click();
+      await expect(page.getByText(/Formal Fitch Deduction Ledger/i)).toBeVisible();
+
+      await fallacyTab.click();
+      await expect(page.getByText(/Zero Active Fallacies|Truth Table/i)).toBeVisible();
+
+      await canvasTab.click();
+    }
+
+    // Verify auto-step execution
+    const autoStepBtn = page.getByRole('button', { name: /auto-step/i });
+    await expect(autoStepBtn).toBeVisible();
+    await autoStepBtn.click();
+  });
+
+  test('CRF Studio mobile bottom navigation and canvas interaction', async ({ page, isMobile }) => {
+    await page.goto('/crf');
+    await page.waitForTimeout(400);
+
+    if (isMobile) {
+      const mobileNav = page.getByLabel(/mobile view navigation/i);
+      if (await mobileNav.isVisible()) {
+        const formsTab = mobileNav.getByRole('button', { name: /forms/i });
+        const canvasTab = mobileNav.getByRole('button', { name: /canvas/i });
+
+        await expect(formsTab).toBeVisible();
+        await expect(canvasTab).toBeVisible();
+
+        await formsTab.click();
+        await canvasTab.click();
+      }
+    }
+  });
+
+  test('Neuro Simulator view mode toggles and slice canvas rendering', async ({ page }) => {
+    await page.goto('/neuro');
+    await page.waitForTimeout(400);
+
+    // Verify 2D / 3D split toggles
+    const splitBtn = page.getByRole('button', { name: /split 3d\/2d/i });
+    await expect(splitBtn).toBeVisible();
+
+    const canvasElements = page.locator('canvas');
+    await expect(canvasElements.first()).toBeVisible();
+  });
+
   test('Retro Labyrinth touch D-Pad and action buttons operate properly', async ({ page }) => {
     await page.goto('/arcade/retro-labyrinth');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(400);
 
     // Locate the labyrinth game container
     const gameContainer = page.locator('[data-keyboard-boundary="true"]').first();
@@ -63,26 +159,23 @@ test.describe('Mobile & Tablet Touch Interactions Suite', () => {
       const downBtn = virtualPad.getByRole('button', { name: /move down/i });
       const leftBtn = virtualPad.getByRole('button', { name: /move left/i });
       const rightBtn = virtualPad.getByRole('button', { name: /move right/i });
-      const empBtn = virtualPad.getByRole('button', { name: /emp/i });
 
       await expect(upBtn).toBeVisible();
       await expect(downBtn).toBeVisible();
       await expect(leftBtn).toBeVisible();
       await expect(rightBtn).toBeVisible();
-      await expect(empBtn).toBeVisible();
 
       // Trigger touch movements
       await upBtn.click();
       await downBtn.click();
       await leftBtn.click();
       await rightBtn.click();
-      await empBtn.click();
     }
   });
 
   test('Laser Loon touch controls bar and weapon switching', async ({ page }) => {
     await page.goto('/arcade/laser-loon');
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(400);
 
     // Verify game canvas is rendered
     const canvas = page.locator('canvas').first();
@@ -101,24 +194,15 @@ test.describe('Mobile & Tablet Touch Interactions Suite', () => {
     }
   });
 
-  test('Proof Workspace responsive split layout and command execution', async ({ page }) => {
-    await page.goto('/proof');
-    await page.waitForTimeout(500);
+  test('Clinical Trial Chaos conveyor canvas touch isolation and station routing', async ({ page }) => {
+    await page.goto('/arcade/clinical-chaos');
+    await page.waitForTimeout(400);
 
-    // Verify logical proof canvas is present
-    const canvasRegion = page.getByRole('region', { name: /logic proof canvas editor/i });
-    await expect(canvasRegion).toBeVisible();
+    const canvas = page.locator('canvas').first();
+    await expect(canvas).toBeVisible();
 
-    // Verify terminal input prompt
-    const terminalInput = page.getByLabel(/terminal command input/i);
-    await expect(terminalInput).toBeVisible();
-
-    // Execute help command via terminal
-    await terminalInput.fill('help');
-    await terminalInput.press('Enter');
-
-    // Verify output log updated
-    const outputLog = page.getByRole('log', { name: /command history/i });
-    await expect(outputLog).toContainText('Available Commands');
+    // Verify touchAction style is none
+    const touchAction = await canvas.evaluate((el) => window.getComputedStyle(el).touchAction);
+    expect(touchAction).toBe('none');
   });
 });

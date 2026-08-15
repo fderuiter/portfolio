@@ -35,9 +35,9 @@ describe("CRFStudioContainer Component", () => {
 
     expect(container.textContent).toContain("CRF Studio");
     expect(container.textContent).toContain("Form Designer");
-    expect(container.textContent).toContain("Visit Matrix");
-    expect(container.textContent).toContain("Logic & Rules");
-    expect(container.textContent).toContain("Live EDC Test");
+    expect(container.textContent).toContain("Visit Matrix (SoA)");
+    expect(container.textContent).toContain("Logic & AST Rules");
+    expect(container.textContent).toContain("Live 21 CFR EDC");
   });
 
   it("switches studio modes when clicking header tabs", async () => {
@@ -58,7 +58,7 @@ describe("CRFStudioContainer Component", () => {
 
     // Click Logic & Rules
     const rulesBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Logic & Rules")
+      b.textContent?.includes("Logic & AST Rules")
     );
     await act(async () => {
       rulesBtn?.click();
@@ -67,7 +67,7 @@ describe("CRFStudioContainer Component", () => {
 
     // Click Live EDC Test
     const edcBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Live EDC Test")
+      b.textContent?.includes("Live 21 CFR EDC")
     );
     await act(async () => {
       edcBtn?.click();
@@ -76,7 +76,7 @@ describe("CRFStudioContainer Component", () => {
 
     // Click Submission aCRF
     const acrfBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Submission aCRF")
+      b.textContent?.includes("Annotated aCRF")
     );
     await act(async () => {
       acrfBtn?.click();
@@ -85,7 +85,7 @@ describe("CRFStudioContainer Component", () => {
 
     // Click Export / CDISC
     const exportBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Export / CDISC")
+      b.textContent?.includes("CDISC / Exports")
     );
     await act(async () => {
       exportBtn?.click();

@@ -52,3 +52,14 @@ Formal inference rules used to derive logical steps from valid premises:
 - **Immutable Chronological Audit Log**: Timestamped record tracking previous value, new value, user identity, role, and justification.
 - **Electronic Signatures**: Cryptographic simulated SHA-256 digital signatures attesting investigator review and data lock.
 
+## Mobile Touch & Responsive Architecture
+
+### Multi-Modal Mobile Stack
+- **Mobile Stack View**: A segmented view navigation paradigm for complex desktop studio tools (CRF Studio, Proof Canvas, Neuro Simulator) that decomposes multi-column desktop layouts into discrete, focused views (e.g. Canvas, Inspector, Ledger, Terminal) accessible via bottom tab bars on screens < 768px.
+- **Slide-Up Action Sheet (Bottom Sheet)**: A mobile modal drawer pattern used for widget palettes, command inputs, and tool selectors that slides up from the bottom of the viewport with backdrop blur and swipe-to-dismiss capabilities.
+- **Horizontal Overflow Invariant**: The structural requirement that all rendered pages, canvas elements, tables, and overlays must satisfy `element.scrollWidth <= element.clientWidth` to prevent unintended horizontal scrolling or layout tearing on mobile viewports (320px to 480px).
+
+### Virtual Gamepad & Canvas Ergonomics
+- **Virtual D-Pad**: An on-screen, high-contrast touch controller component with minimum 48x48px directional buttons supporting rapid touch/mouse down-up events, haptic/audio feedback, and pointer capture for responsive action in arcade games.
+- **Canvas Touch Action Isolation**: The explicit setting of `touch-action: none` or `touch-action: pan-y` on interactive HTML5 / WebGL canvas elements during active gameplay to prevent touch gestures from triggering browser pull-to-refresh or unwanted page scrolling.
+- **Safe Area Inset Adaptation**: Dynamic spacing integration using CSS `env(safe-area-inset-top)`, `env(safe-area-inset-bottom)`, `env(safe-area-inset-left)`, and `env(safe-area-inset-right)` to protect fixed navigation bars, floating buttons, and game controllers from iPhone notches, Dynamic Islands, and mobile home indicator bars.

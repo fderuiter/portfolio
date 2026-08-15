@@ -6,7 +6,7 @@
 
 # Interface: VolumeDimensions
 
-Defined in: [lib/neuro/types.ts:105](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L105)
+Defined in: [lib/neuro/types.ts:431](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L431)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/neuro/types.ts:105](https://github.com/fderuiter/portfolio/blob
 
 > **depth**: `number`
 
-Defined in: [lib/neuro/types.ts:108](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L108)
+Defined in: [lib/neuro/types.ts:434](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L434)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/neuro/types.ts:108](https://github.com/fderuiter/portfolio/blob
 
 > **height**: `number`
 
-Defined in: [lib/neuro/types.ts:107](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L107)
+Defined in: [lib/neuro/types.ts:433](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L433)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [lib/neuro/types.ts:107](https://github.com/fderuiter/portfolio/blob
 
 > **width**: `number`
 
-Defined in: [lib/neuro/types.ts:106](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L106)
+Defined in: [lib/neuro/types.ts:432](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L432)

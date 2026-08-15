@@ -6,7 +6,7 @@
 
 # Interface: QAMetrics
 
-Defined in: [lib/neuro/types.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L80)
+Defined in: [lib/neuro/types.ts:406](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L406)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/neuro/types.ts:80](https://github.com/fderuiter/portfolio/blob/
 
 > **accuracyScore**: `number`
 
-Defined in: [lib/neuro/types.ts:88](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L88)
+Defined in: [lib/neuro/types.ts:414](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L414)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/neuro/types.ts:88](https://github.com/fderuiter/portfolio/blob/
 
 > **controlPointCount**: `number`
 
-Defined in: [lib/neuro/types.ts:85](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L85)
+Defined in: [lib/neuro/types.ts:411](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L411)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/neuro/types.ts:85](https://github.com/fderuiter/portfolio/blob/
 
 > **defectCount**: `number`
 
-Defined in: [lib/neuro/types.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L82)
+Defined in: [lib/neuro/types.ts:408](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L408)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/neuro/types.ts:82](https://github.com/fderuiter/portfolio/blob/
 
 > **diceScore**: `number`
 
-Defined in: [lib/neuro/types.ts:83](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L83)
+Defined in: [lib/neuro/types.ts:409](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L409)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/neuro/types.ts:83](https://github.com/fderuiter/portfolio/blob/
 
 > **eulerCharacteristic**: `number`
 
-Defined in: [lib/neuro/types.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L81)
+Defined in: [lib/neuro/types.ts:407](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L407)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/neuro/types.ts:81](https://github.com/fderuiter/portfolio/blob/
 
 > **isResolved**: `boolean`
 
-Defined in: [lib/neuro/types.ts:87](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L87)
+Defined in: [lib/neuro/types.ts:413](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L413)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/neuro/types.ts:87](https://github.com/fderuiter/portfolio/blob/
 
 > **meanCorticalThicknessMm**: `number`
 
-Defined in: [lib/neuro/types.ts:84](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L84)
+Defined in: [lib/neuro/types.ts:410](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L410)
 
 ***
 
@@ -70,4 +70,4 @@ Defined in: [lib/neuro/types.ts:84](https://github.com/fderuiter/portfolio/blob/
 
 > **voxelEditsCount**: `number`
 
-Defined in: [lib/neuro/types.ts:86](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L86)
+Defined in: [lib/neuro/types.ts:412](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L412)

@@ -8,4 +8,4 @@
 
 > **DatasetSource** = `"case_study"` \| `"mni152"` \| `"oasis"`
 
-Defined in: [lib/neuro/types.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L44)
+Defined in: [lib/neuro/types.ts:370](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L370)

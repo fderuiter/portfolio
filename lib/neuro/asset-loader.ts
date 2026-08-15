@@ -7,7 +7,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import { createCorticalSurfaceMesh } from "./mesh-generator";
-import { SurfaceMode } from "./types";
+import { HemisphereFilter, SurfaceMode } from "./types";
 
 const meshCache = new Map<string, THREE.Group>();
 
@@ -16,9 +16,10 @@ const meshCache = new Map<string, THREE.Group>();
  */
 export async function loadExternalBrainMesh(
   modelUrl: string,
-  mode: SurfaceMode = "pial"
+  mode: SurfaceMode = "pial",
+  hemiFilter: HemisphereFilter = "both"
 ): Promise<THREE.Group> {
-  const cacheKey = `${modelUrl}_${mode}`;
+  const cacheKey = `${modelUrl}_${mode}_${hemiFilter}`;
   if (meshCache.has(cacheKey)) {
     const cached = meshCache.get(cacheKey)!;
     return cached.clone();
@@ -91,6 +92,8 @@ export async function loadExternalBrainMesh(
   } catch (err) {
     // Graceful fallback to procedural cortical surface mesh
     console.warn(`Failed to load external model from ${modelUrl}, falling back to procedural mesh:`, err);
-    return createCorticalSurfaceMesh(mode);
+    const fallback = createCorticalSurfaceMesh(mode, false, hemiFilter);
+    meshCache.set(cacheKey, fallback);
+    return fallback.clone();
   }
 }

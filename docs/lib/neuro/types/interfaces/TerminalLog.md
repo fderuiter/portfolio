@@ -6,7 +6,7 @@
 
 # Interface: TerminalLog
 
-Defined in: [lib/neuro/types.ts:98](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L98)
+Defined in: [lib/neuro/types.ts:424](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L424)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/neuro/types.ts:98](https://github.com/fderuiter/portfolio/blob/
 
 > **id**: `string`
 
-Defined in: [lib/neuro/types.ts:99](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L99)
+Defined in: [lib/neuro/types.ts:425](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L425)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/neuro/types.ts:99](https://github.com/fderuiter/portfolio/blob/
 
 > **text**: `string`
 
-Defined in: [lib/neuro/types.ts:101](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L101)
+Defined in: [lib/neuro/types.ts:427](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L427)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/neuro/types.ts:101](https://github.com/fderuiter/portfolio/blob
 
 > **timestamp**: `string`
 
-Defined in: [lib/neuro/types.ts:102](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L102)
+Defined in: [lib/neuro/types.ts:428](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L428)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/neuro/types.ts:102](https://github.com/fderuiter/portfolio/blob
 
 > **type**: `"error"` \| `"info"` \| `"success"` \| `"command"` \| `"output"`
 
-Defined in: [lib/neuro/types.ts:100](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L100)
+Defined in: [lib/neuro/types.ts:426](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L426)

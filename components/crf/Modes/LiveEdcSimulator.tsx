@@ -363,13 +363,13 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
   return (
     <div className="flex-1 flex flex-col h-full bg-zinc-950 p-4 sm:p-6 overflow-y-auto space-y-6">
       {/* Top Banner & Multi-Role Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-zinc-800">
-        <div>
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 sm:pb-6 border-b border-zinc-800">
+        <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+            <span className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 shrink-0">
               <IconShieldCheck className="w-5 h-5" />
             </span>
-            <h1 className="text-lg font-bold text-white font-mono">
+            <h1 className="text-base sm:text-lg font-bold text-white font-mono truncate">
               Live 21 CFR Part 11 EDC Simulation Mode
             </h1>
           </div>
@@ -379,13 +379,13 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
         </div>
 
         {/* User Role Switcher */}
-        <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 p-1 rounded-xl shadow-inner">
-          <span className="text-[10px] font-mono text-zinc-500 uppercase px-2">Active Role:</span>
+        <div className="flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 p-1 rounded-xl shadow-inner max-w-full overflow-x-auto scrollbar-none">
+          <span className="text-[10px] font-mono text-zinc-500 uppercase px-1.5 hidden sm:inline">Active Role:</span>
           {(["Site Coordinator", "Principal Investigator", "CRA Monitor", "Data Manager"] as UserRole[]).map((role) => (
             <button
               key={role}
               onClick={() => setCurrentRole(role)}
-              className={`px-3 py-1 rounded-lg text-xs font-mono transition-all ${
+              className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-mono whitespace-nowrap transition-all ${
                 currentRole === role
                   ? "bg-brand-cyan text-black font-bold shadow-sm"
                   : "text-zinc-400 hover:text-white"
@@ -398,10 +398,10 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
       </div>
 
       {/* Sub-View Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-zinc-800 pb-2">
+      <div className="flex items-center gap-2 border-b border-zinc-800 pb-2 overflow-x-auto scrollbar-none">
         <button
           onClick={() => setSubView("form_entry")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-all ${
             subView === "form_entry"
               ? "bg-brand-cyan text-black font-bold"
               : "bg-zinc-900 text-zinc-400 hover:text-white"
@@ -412,7 +412,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
         </button>
         <button
           onClick={() => setSubView("subject_matrix")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-all ${
             subView === "subject_matrix"
               ? "bg-brand-cyan text-black font-bold"
               : "bg-zinc-900 text-zinc-400 hover:text-white"
@@ -423,7 +423,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
         </button>
         <button
           onClick={() => setSubView("queries")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-all ${
             subView === "queries"
               ? "bg-brand-cyan text-black font-bold"
               : "bg-zinc-900 text-zinc-400 hover:text-white"
@@ -434,7 +434,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
         </button>
         <button
           onClick={() => setSubView("audit_trail")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-all ${
             subView === "audit_trail"
               ? "bg-brand-cyan text-black font-bold"
               : "bg-zinc-900 text-zinc-400 hover:text-white"
@@ -723,6 +723,62 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                                 <span>{opt.label}</span>
                               </label>
                             ))}
+                          </div>
+                        )}
+
+                        {field.dataType === "single_select" && (
+                          <select
+                            value={String(currentVal || "")}
+                            onChange={(e) => handleFieldChange(field, e.target.value)}
+                            disabled={isCurrentFormLocked && currentRole !== "Principal Investigator"}
+                            className="w-full px-2.5 py-1.5 text-xs bg-zinc-900 border border-zinc-700 rounded-lg text-white font-sans focus:border-brand-cyan focus:outline-none disabled:opacity-50"
+                          >
+                            <option value="">-- Select Option --</option>
+                            {(
+                              field.customOptions ||
+                              study.codelists.find((cl) => cl.id === field.codelistId)?.options || []
+                            ).map((opt) => (
+                              <option key={opt.code} value={opt.code}>
+                                {opt.label} ({opt.code})
+                              </option>
+                            ))}
+                          </select>
+                        )}
+
+                        {field.dataType === "multi_select" && (
+                          <div className="space-y-1.5 pt-0.5">
+                            {(
+                              field.customOptions ||
+                              study.codelists.find((cl) => cl.id === field.codelistId)?.options || []
+                            ).map((opt) => {
+                              const selectedArray: string[] = Array.isArray(currentVal)
+                                ? currentVal
+                                : typeof currentVal === "string" && currentVal
+                                ? currentVal.split(",")
+                                : [];
+                              const isChecked = selectedArray.includes(opt.code);
+
+                              return (
+                                <label
+                                  key={opt.code}
+                                  className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={(e) => {
+                                      const updated = e.target.checked
+                                        ? [...selectedArray, opt.code]
+                                        : selectedArray.filter((c) => c !== opt.code);
+                                      handleFieldChange(field, updated.join(","));
+                                    }}
+                                    disabled={isCurrentFormLocked && currentRole !== "Principal Investigator"}
+                                    className="text-brand-cyan rounded border-zinc-700 bg-zinc-900 focus:ring-0"
+                                  />
+                                  <span>{opt.label}</span>
+                                </label>
+                              );
+                            })}
                           </div>
                         )}
 

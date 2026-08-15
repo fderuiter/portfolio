@@ -6,7 +6,7 @@
 
 # Interface: TissueSegmentLabels
 
-Defined in: [lib/neuro/types.ts:111](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L111)
+Defined in: [lib/neuro/types.ts:437](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L437)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/neuro/types.ts:111](https://github.com/fderuiter/portfolio/blob
 
 > **BACKGROUND**: `0`
 
-Defined in: [lib/neuro/types.ts:112](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L112)
+Defined in: [lib/neuro/types.ts:438](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L438)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/neuro/types.ts:112](https://github.com/fderuiter/portfolio/blob
 
 > **CSF**: `1`
 
-Defined in: [lib/neuro/types.ts:113](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L113)
+Defined in: [lib/neuro/types.ts:439](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L439)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/neuro/types.ts:113](https://github.com/fderuiter/portfolio/blob
 
 > **DURA**: `5`
 
-Defined in: [lib/neuro/types.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L117)
+Defined in: [lib/neuro/types.ts:443](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L443)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/neuro/types.ts:117](https://github.com/fderuiter/portfolio/blob
 
 > **GRAY\_MATTER**: `2`
 
-Defined in: [lib/neuro/types.ts:114](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L114)
+Defined in: [lib/neuro/types.ts:440](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L440)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/neuro/types.ts:114](https://github.com/fderuiter/portfolio/blob
 
 > **SKULL**: `6`
 
-Defined in: [lib/neuro/types.ts:118](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L118)
+Defined in: [lib/neuro/types.ts:444](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L444)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/neuro/types.ts:118](https://github.com/fderuiter/portfolio/blob
 
 > **SUBCORTICAL**: `4`
 
-Defined in: [lib/neuro/types.ts:116](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L116)
+Defined in: [lib/neuro/types.ts:442](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L442)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [lib/neuro/types.ts:116](https://github.com/fderuiter/portfolio/blob
 
 > **WHITE\_MATTER**: `3`
 
-Defined in: [lib/neuro/types.ts:115](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L115)
+Defined in: [lib/neuro/types.ts:441](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L441)

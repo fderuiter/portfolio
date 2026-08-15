@@ -6,7 +6,7 @@
 
 # Function: loadExternalBrainMesh()
 
-> **loadExternalBrainMesh**(`modelUrl`, `mode?`): `Promise`\<`Group`\<`Object3DEventMap`\>\>
+> **loadExternalBrainMesh**(`modelUrl`, `mode?`, `hemiFilter?`): `Promise`\<`Group`\<`Object3DEventMap`\>\>
 
 Defined in: [lib/neuro/asset-loader.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/asset-loader.ts#L17)
 
@@ -21,6 +21,10 @@ Load external 3D brain mesh model (.glb, .gltf, or .obj) with automatic centerin
 ### mode?
 
 [`SurfaceMode`](../../types/type-aliases/SurfaceMode.md) = `"pial"`
+
+### hemiFilter?
+
+[`HemisphereFilter`](../../types/type-aliases/HemisphereFilter.md) = `"both"`
 
 ## Returns
 

@@ -9,6 +9,7 @@ import {
   IconCheck,
   IconArrowUp,
   IconArrowDown,
+  IconSparkles,
 } from "@tabler/icons-react";
 import { CRFForm, CRFField, CodelistDefinition, DeviceViewport } from "@/lib/crf/types";
 import { FieldRenderer } from "./FieldRenderer";
@@ -85,6 +86,23 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
     onUpdateFormMeta({ sections: newSections });
   };
 
+  // Field move up / down (touch & accessible navigation)
+  const handleMoveField = (sectionId: string, fieldIndex: number, direction: "up" | "down") => {
+    const targetIndex = direction === "up" ? fieldIndex - 1 : fieldIndex + 1;
+    const targetSec = form.sections.find((s) => s.id === sectionId);
+    if (!targetSec || targetIndex < 0 || targetIndex >= targetSec.fields.length) return;
+
+    const updatedSections = form.sections.map((sec) => {
+      if (sec.id !== sectionId) return sec;
+      const fields = [...sec.fields];
+      const [moved] = fields.splice(fieldIndex, 1);
+      fields.splice(targetIndex, 0, moved);
+      return { ...sec, fields };
+    });
+
+    onUpdateFormMeta({ sections: updatedSections });
+  };
+
   // Drag & drop field reordering
   const handleFieldDragStart = (e: React.DragEvent, sectionId: string, fieldId: string) => {
     e.stopPropagation();
@@ -157,20 +175,20 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
   return (
     <div
       onClick={() => onSelectField(null)}
-      className="flex-1 flex flex-col h-full bg-zinc-950/80 overflow-y-auto p-4 sm:p-6 transition-all"
+      className="flex-1 flex flex-col h-full bg-zinc-950/80 overflow-y-auto p-3 sm:p-6 transition-all relative"
     >
       {/* Top Canvas Controls Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6 pb-4 border-b border-zinc-800/80">
-        <div className="flex items-center gap-3">
-          <span className="font-mono text-xs font-bold text-zinc-400">
-            Form Layout Canvas
+      <div className="flex flex-wrap items-center justify-between gap-2.5 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-zinc-800/80">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <span className="font-mono text-xs font-bold text-zinc-300">
+            Layout Canvas
           </span>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 text-brand-cyan border border-zinc-800">
-            12-Column Drag &amp; Drop Grid
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 text-brand-cyan border border-zinc-800 hidden sm:inline-block">
+            12-Column Responsive Grid
           </span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <ViewportSwitcher
             viewport={viewport}
             onChangeViewport={onChangeViewport}
@@ -181,19 +199,20 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
               e.stopPropagation();
               onAddSection();
             }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-850 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 text-xs font-mono transition-all shadow-sm"
+            className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-zinc-850 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 text-xs font-mono transition-all shadow-sm"
           >
-            <IconFolderPlus className="w-4 h-4 text-brand-cyan" />
-            <span>Add Section</span>
+            <IconFolderPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-cyan" />
+            <span className="hidden sm:inline">Add Section</span>
+            <span className="sm:hidden">+ Section</span>
           </button>
         </div>
       </div>
 
       {/* Main Canvas Scroll Area with Centered Viewport */}
-      <div className="flex-1 flex justify-center pb-24">
-        <div className={`${viewportWidthClass} transition-all duration-300 space-y-6`}>
+      <div className="flex-1 flex justify-center pb-28">
+        <div className={`${viewportWidthClass} transition-all duration-300 space-y-4 sm:space-y-6`}>
           {/* Form Header Card */}
-          <div className="p-5 rounded-2xl bg-zinc-900/70 border border-zinc-800/80 shadow-lg relative group">
+          <div className="p-4 sm:p-5 rounded-2xl bg-zinc-900/70 border border-zinc-800/80 shadow-lg relative group">
             {isEditingTitle ? (
               <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
@@ -205,7 +224,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                       type="text"
                       value={titleInput}
                       onChange={(e) => setTitleInput(e.target.value)}
-                      className="w-full px-3 py-1.5 bg-zinc-950 border border-zinc-700 rounded-lg text-sm text-white font-sans"
+                      className="w-full px-3 py-1.5 bg-zinc-950 border border-zinc-700 rounded-lg text-sm text-white font-sans focus:border-brand-cyan focus:outline-none"
                     />
                   </div>
                   <div>
@@ -216,7 +235,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                       type="text"
                       value={domainInput}
                       onChange={(e) => setDomainInput(e.target.value)}
-                      className="w-full px-3 py-1.5 bg-zinc-950 border border-zinc-700 rounded-lg text-sm text-white font-mono uppercase"
+                      className="w-full px-3 py-1.5 bg-zinc-950 border border-zinc-700 rounded-lg text-sm text-white font-mono uppercase focus:border-brand-cyan focus:outline-none"
                     />
                   </div>
                 </div>
@@ -229,7 +248,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                     rows={2}
                     value={descInput}
                     onChange={(e) => setDescInput(e.target.value)}
-                    className="w-full px-3 py-1.5 bg-zinc-950 border border-zinc-700 rounded-lg text-xs text-zinc-300 font-sans resize-none"
+                    className="w-full px-3 py-1.5 bg-zinc-950 border border-zinc-700 rounded-lg text-xs text-zinc-300 font-sans resize-none focus:border-brand-cyan focus:outline-none"
                   />
                 </div>
 
@@ -250,13 +269,13 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                 </div>
               </div>
             ) : (
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2.5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-brand-cyan/15 text-brand-cyan border border-brand-cyan/30">
                       {form.domain || "CRF"}
                     </span>
-                    <h1 className="text-lg sm:text-xl font-extrabold text-white font-mono">
+                    <h1 className="text-base sm:text-xl font-extrabold text-white font-mono truncate">
                       {form.name}
                     </h1>
                     {form.isLogForm && (
@@ -278,8 +297,9 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                     setDomainInput(form.domain);
                     setIsEditingTitle(true);
                   }}
-                  className="p-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-white border border-zinc-700/60 transition-all opacity-0 group-hover:opacity-100"
+                  className="p-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-white border border-zinc-700/60 transition-all opacity-80 sm:opacity-0 sm:group-hover:opacity-100 shrink-0"
                   title="Edit Form Properties"
+                  aria-label="Edit Form Properties"
                 >
                   <IconEdit className="w-4 h-4" />
                 </button>
@@ -296,7 +316,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                 key={section.id}
                 onDragOver={(e) => handleFieldDragOver(e, section.id, section.fields.length)}
                 onDrop={(e) => handleFieldDrop(e, section.id, section.fields.length)}
-                className="p-4 sm:p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 space-y-4"
+                className="p-3.5 sm:p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 space-y-3 sm:space-y-4"
               >
                 {/* Section Header */}
                 <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">
@@ -306,7 +326,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                         type="text"
                         value={sectionTitleInput}
                         onChange={(e) => setSectionTitleInput(e.target.value)}
-                        className="w-full px-2.5 py-1 bg-zinc-950 border border-zinc-700 rounded-md text-xs text-white"
+                        className="w-full px-2.5 py-1 bg-zinc-950 border border-zinc-700 rounded-md text-xs text-white focus:border-brand-cyan focus:outline-none"
                         autoFocus
                       />
                       <button
@@ -320,11 +340,11 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                       </button>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <span className="text-xs font-mono font-bold text-zinc-400">
                         §{sIdx + 1}.
                       </span>
-                      <h2 className="text-sm font-bold text-zinc-100 font-mono">
+                      <h2 className="text-xs sm:text-sm font-bold text-zinc-100 font-mono truncate">
                         {section.title}
                       </h2>
                       <button
@@ -335,13 +355,14 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                         }}
                         className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
                         title="Rename Section"
+                        aria-label="Rename Section"
                       >
                         <IconEdit className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   )}
 
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
                     {/* Section Move Up / Down Buttons */}
                     <button
                       onClick={(e) => {
@@ -351,6 +372,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                       disabled={sIdx === 0}
                       className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-white disabled:opacity-25"
                       title="Move Section Up"
+                      aria-label="Move Section Up"
                     >
                       <IconArrowUp className="w-3.5 h-3.5" />
                     </button>
@@ -362,11 +384,12 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                       disabled={sIdx === form.sections.length - 1}
                       className="p-1 rounded hover:bg-zinc-800 text-zinc-500 hover:text-white disabled:opacity-25"
                       title="Move Section Down"
+                      aria-label="Move Section Down"
                     >
                       <IconArrowDown className="w-3.5 h-3.5" />
                     </button>
 
-                    <span className="text-[10px] font-mono text-zinc-500 ml-2">
+                    <span className="text-[10px] font-mono text-zinc-500 ml-1 hidden xs:inline">
                       {section.fields.length} {section.fields.length === 1 ? "field" : "fields"}
                     </span>
                     {form.sections.length > 1 && (
@@ -377,6 +400,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                         }}
                         className="p-1 text-zinc-500 hover:text-red-400 transition-colors ml-1"
                         title="Delete Section"
+                        aria-label="Delete Section"
                       >
                         <IconTrash className="w-3.5 h-3.5" />
                       </button>
@@ -391,18 +415,18 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                       e.stopPropagation();
                       onOpenPalette();
                     }}
-                    className="p-8 border-2 border-dashed border-zinc-800 hover:border-brand-cyan/40 rounded-xl text-center cursor-pointer transition-all bg-zinc-950/30 group"
+                    className="p-6 sm:p-8 border-2 border-dashed border-zinc-800 hover:border-brand-cyan/40 rounded-xl text-center cursor-pointer transition-all bg-zinc-950/30 group"
                   >
-                    <IconPlus className="w-6 h-6 text-zinc-600 group-hover:text-brand-cyan mx-auto mb-2 transition-colors" />
+                    <IconPlus className="w-5 h-5 sm:w-6 sm:h-6 text-zinc-600 group-hover:text-brand-cyan mx-auto mb-2 transition-colors" />
                     <p className="text-xs text-zinc-400 font-mono">
                       No fields in this section yet.
                     </p>
                     <p className="text-[11px] text-zinc-500 mt-1">
-                      Click to choose a widget from the palette or drag and drop items here.
+                      Tap or click to pick a widget from the palette.
                     </p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-12 gap-3 sm:gap-4">
+                  <div className="grid grid-cols-12 gap-2.5 sm:gap-4">
                     {section.fields.map((field, fIdx) => (
                       <React.Fragment key={field.id}>
                         {/* Drop indicator line if dragging over this position */}
@@ -419,6 +443,10 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                           onSelect={() => onSelectField(field.id)}
                           onDuplicate={() => onDuplicateField(section.id, field.id)}
                           onDelete={() => onDeleteField(section.id, field.id)}
+                          canMoveUp={fIdx > 0}
+                          canMoveDown={fIdx < section.fields.length - 1}
+                          onMoveUp={() => handleMoveField(section.id, fIdx, "up")}
+                          onMoveDown={() => handleMoveField(section.id, fIdx, "down")}
                           onUpdateField={(updates) => {
                             if (onUpdateField) {
                               onUpdateField(field.id, updates);
@@ -451,6 +479,20 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Floating Action Button (FAB) for Mobile Quick Widget Addition */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onOpenPalette();
+        }}
+        className="fixed sm:hidden bottom-20 right-4 z-30 flex items-center gap-1.5 px-3.5 py-2.5 rounded-full bg-brand-cyan text-black font-mono text-xs font-extrabold shadow-2xl hover:bg-white transition-all active:scale-95"
+        title="Add Field / Open Widget Palette"
+        aria-label="Add Field Widget"
+      >
+        <IconSparkles className="w-4 h-4" />
+        <span>+ Widget</span>
+      </button>
     </div>
   );
 };
