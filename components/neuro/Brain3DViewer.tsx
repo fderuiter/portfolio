@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { AnatomicalParcel, HemisphereFilter, SurfaceMode, VoxelCoord } from "@/lib/neuro/types";
 import { createCorticalSurfaceMesh, getAnatomicalParcelAtCoordinate } from "@/lib/neuro/mesh-generator";
 import { loadExternalBrainMesh } from "@/lib/neuro/asset-loader";
+import { useWebGLContextLoss } from "@/hooks/useWebGLContextLoss";
 import { Icon3dCubeSphere, IconCheck, IconLayersSubtract, IconRefresh } from "@tabler/icons-react";
 
 interface Brain3DViewerProps {
@@ -30,6 +31,20 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const meshGroupRef = useRef<THREE.Group | null>(null);
   const crosshairMarkerRef = useRef<THREE.Mesh | null>(null);
+
+  const [contextKey, setContextKey] = useState(0);
+  const isContextLostRef = useRef(false);
+
+  const { status: contextStatus, triggerSimulation, bindCanvas } = useWebGLContextLoss({
+    label: "NeuroRecon 3D",
+    onContextLost: () => {
+      isContextLostRef.current = true;
+    },
+    onContextRestored: () => {
+      isContextLostRef.current = false;
+      setContextKey((k) => k + 1);
+    },
+  });
 
   const [isRotating, setIsRotating] = useState(true);
   const isRotatingRef = useRef(isRotating);
@@ -98,6 +113,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
       container.innerHTML = "";
       container.appendChild(renderer.domElement);
       rendererRef.current = renderer;
+      bindCanvas(renderer.domElement);
     } catch {
       // Fallback for headless / test environments
       return;
@@ -106,6 +122,8 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
     let animId: number;
     const animate = () => {
       animId = requestAnimationFrame(animate);
+
+      if (isContextLostRef.current) return;
 
       if (meshGroupRef.current) {
         if (isRotatingRef.current && !isDraggingRef.current) {
@@ -135,6 +153,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", handleResize);
+      bindCanvas(null);
       if (renderer) {
         renderer.dispose();
       }
@@ -142,9 +161,9 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
         container.removeChild(renderer.domElement);
       }
     };
-  }, []);
+  }, [contextKey, bindCanvas]);
 
-  // Update Cortical Mesh on surfaceMode, modelUrl, wireframeActive, or hemiFilter change
+  // Update Cortical Mesh on surfaceMode, modelUrl, wireframeActive, hemiFilter, or contextKey change
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene) return;
@@ -180,7 +199,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [surfaceMode, modelUrl, wireframeActive, hemiFilter]);
+  }, [surfaceMode, modelUrl, wireframeActive, hemiFilter, contextKey]);
 
   // Update Crosshair Marker Position in 3D Space
   useEffect(() => {
@@ -395,7 +414,42 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
           <span>Wireframe</span>
           {wireframeActive && <IconCheck className="w-2.5 h-2.5" />}
         </button>
+        <span className="text-zinc-700 mx-0.5">|</span>
+        <button
+          onClick={() => triggerSimulation(800)}
+          title="Simulate WebGL Context Loss & Recovery (GPU Resilience Test)"
+          aria-label="Simulate WebGL Context Loss and Recovery"
+          className="flex items-center gap-1 px-2 py-0.5 rounded text-zinc-400 hover:text-amber-300 hover:bg-zinc-800 transition"
+        >
+          <IconRefresh className="w-2.5 h-2.5 text-amber-400" />
+          <span>GPU Test</span>
+        </button>
       </div>
+
+      {/* WebGL Context Loss & Recovery HUD Banner */}
+      {contextStatus !== "idle" && (
+        <div
+          role="status"
+          aria-live="polite"
+          className={`absolute top-12 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono shadow-xl transition-all duration-300 pointer-events-none ${
+            contextStatus === "lost" || contextStatus === "restoring"
+              ? "bg-amber-950/90 border border-amber-500/60 text-amber-300 animate-pulse"
+              : "bg-emerald-950/90 border border-emerald-500/60 text-emerald-300"
+          }`}
+        >
+          {contextStatus === "lost" || contextStatus === "restoring" ? (
+            <>
+              <IconRefresh className="w-3.5 h-3.5 animate-spin text-amber-400" />
+              <span>GPU Context Interrupted — Re-instantiating buffers...</span>
+            </>
+          ) : (
+            <>
+              <IconCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span>GPU Context Restored</span>
+            </>
+          )}
+        </div>
+      )}
 
       {/* 3D Canvas Container */}
       <div

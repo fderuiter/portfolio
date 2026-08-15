@@ -10,11 +10,19 @@ Defined in: [lib/quasi-perfect/types.ts:117](https://github.com/fderuiter/portfo
 
 ## Properties
 
+### cost?
+
+> `optional` **cost?**: `number`
+
+Defined in: [lib/quasi-perfect/types.ts:121](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L121)
+
+***
+
 ### explanation
 
 > **explanation**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:121](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L121)
+Defined in: [lib/quasi-perfect/types.ts:122](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L122)
 
 ***
 
@@ -22,7 +30,7 @@ Defined in: [lib/quasi-perfect/types.ts:121](https://github.com/fderuiter/portfo
 
 > **goalAfter**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L123)
+Defined in: [lib/quasi-perfect/types.ts:124](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L124)
 
 ***
 
@@ -30,7 +38,7 @@ Defined in: [lib/quasi-perfect/types.ts:123](https://github.com/fderuiter/portfo
 
 > **goalBefore**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:122](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L122)
+Defined in: [lib/quasi-perfect/types.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L123)
 
 ***
 
@@ -54,7 +62,7 @@ Defined in: [lib/quasi-perfect/types.ts:120](https://github.com/fderuiter/portfo
 
 > `optional` **subgoalLabel?**: `string`
 
-Defined in: [lib/quasi-perfect/types.ts:124](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L124)
+Defined in: [lib/quasi-perfect/types.ts:125](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L125)
 
 ***
 

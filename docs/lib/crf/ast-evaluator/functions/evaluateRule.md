@@ -8,7 +8,7 @@
 
 > **evaluateRule**(`rule`, `fieldValues`, `fieldsList`, `visitContext?`): `boolean`
 
-Defined in: [lib/crf/ast-evaluator.ts:469](https://github.com/fderuiter/portfolio/blob/main/lib/crf/ast-evaluator.ts#L469)
+Defined in: [lib/crf/ast-evaluator.ts:1070](https://github.com/fderuiter/portfolio/blob/main/lib/crf/ast-evaluator.ts#L1070)
 
 Evaluate full edit check rule conditions
 

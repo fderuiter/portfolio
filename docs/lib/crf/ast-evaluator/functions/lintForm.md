@@ -8,7 +8,7 @@
 
 > **lintForm**(`form`): [`DiagnosticItem`](../interfaces/DiagnosticItem.md)[]
 
-Defined in: [lib/crf/ast-evaluator.ts:494](https://github.com/fderuiter/portfolio/blob/main/lib/crf/ast-evaluator.ts#L494)
+Defined in: [lib/crf/ast-evaluator.ts:1095](https://github.com/fderuiter/portfolio/blob/main/lib/crf/ast-evaluator.ts#L1095)
 
 ## Parameters
 

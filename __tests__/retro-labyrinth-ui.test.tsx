@@ -94,6 +94,7 @@ describe("RetroLabyrinth React Component UI Suite", () => {
       createLinearGradient: vi.fn(() => ({
         addColorStop: vi.fn(),
       })),
+      createPattern: vi.fn(() => ({}) as any),
       setLineDash: vi.fn(),
     };
 
@@ -238,5 +239,49 @@ describe("RetroLabyrinth React Component UI Suite", () => {
     expect(container.textContent).toContain("Overclocked 16GB DDR5 RAM");
     expect(container.textContent).toContain("Hardware Jumper Bypass Chip");
   });
+
+  it("should open CRT calibration modal and permit switching display presets", async () => {
+    await act(async () => {
+      root.render(<RetroLabyrinth isMounted={true} />);
+    });
+
+    const crtBtn = container.querySelector("button[aria-label='Calibrate CRT Display & Phosphor Shaders']");
+    expect(crtBtn).toBeTruthy();
+
+    await act(async () => {
+      (crtBtn as HTMLButtonElement)?.click();
+    });
+
+    expect(container.textContent).toContain("CRT Display Calibration");
+    expect(container.textContent).toContain("Display Archetype Presets");
+    expect(container.textContent).toContain("Trinitron PVM Pro");
+    expect(container.textContent).toContain("Amber Mainframe Terminal");
+
+    // Click Trinitron preset
+    const trinitronBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Trinitron PVM Pro")
+    );
+    expect(trinitronBtn).toBeTruthy();
+    await act(async () => {
+      trinitronBtn?.click();
+    });
+
+    const savedRaw = mockStorage.getItem("retro_labyrinth_crt_calibration");
+    expect(savedRaw).toBeTruthy();
+    const savedConfig = JSON.parse(savedRaw!);
+    expect(savedConfig.phosphorMask).toBe("aperture-grille");
+    expect(savedConfig.scanlinesEnabled).toBe(true);
+
+    // Close modal
+    const closeBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Apply & Close")
+    );
+    await act(async () => {
+      closeBtn?.click();
+    });
+
+    expect(container.textContent).not.toContain("Display Archetype Presets");
+  });
 });
+
 

@@ -34,3 +34,19 @@ export const SyncParamsSchema = z.object({
   batch: z.coerce.number().int().positive("Batch must be a positive integer").max(500, "Batch cannot exceed 500").default(50),
 });
 
+/**
+ * Schema for Case Study Summary item
+ */
+export const CaseStudySummarySchema = z.object({
+  id: z.string().min(1),
+  slug: z.string().min(1),
+  title: z.string().min(1),
+  primary_language: z.string().min(1),
+  tags: z.array(z.string()),
+});
+
+/**
+ * Schema for Case Study list response
+ */
+export const CaseStudyListResponseSchema = z.array(CaseStudySummarySchema);
+

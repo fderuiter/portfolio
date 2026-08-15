@@ -13,12 +13,15 @@
 
 ## Functions
 
+- [checkAccessibilityStandards](functions/checkAccessibilityStandards.md)
+- [checkDefectRemediationInvariants](functions/checkDefectRemediationInvariants.md)
 - [checkDocumentationParity](functions/checkDocumentationParity.md)
 - [checkHydrationSafety](functions/checkHydrationSafety.md)
 - [checkMigrationGuard](functions/checkMigrationGuard.md)
 - [checkNavbarHierarchy](functions/checkNavbarHierarchy.md)
 - [checkOpenApiParity](functions/checkOpenApiParity.md)
 - [checkPageTopPadding](functions/checkPageTopPadding.md)
+- [checkProactiveDefectInterception](functions/checkProactiveDefectInterception.md)
 - [checkRouteIndexing](functions/checkRouteIndexing.md)
 - [checkSecretLeaks](functions/checkSecretLeaks.md)
 - [checkTestPathResolution](functions/checkTestPathResolution.md)

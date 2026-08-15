@@ -8,7 +8,7 @@
 
 > **calculateRecistSldChange**(`baselineSldMm`, `currentSldMm`): `number`
 
-Defined in: [lib/crf/ast-evaluator.ts:379](https://github.com/fderuiter/portfolio/blob/main/lib/crf/ast-evaluator.ts#L379)
+Defined in: [lib/crf/ast-evaluator.ts:980](https://github.com/fderuiter/portfolio/blob/main/lib/crf/ast-evaluator.ts#L980)
 
 Calculates RECIST 1.1 Sum of Longest Diameters percentage change from baseline.
 

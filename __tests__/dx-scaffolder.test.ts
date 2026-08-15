@@ -71,7 +71,11 @@ describe("DX Universal Scaffolder", () => {
 
     const routeContent = fs.readFileSync(routeFile, "utf-8");
     expect(routeContent).toContain("TelemetryStreamQuerySchema");
+    expect(routeContent).toContain("TelemetryStreamResponseSchema");
     expect(routeContent).toContain("sanitizeError");
+
+    const testContent = fs.readFileSync(testFile, "utf-8");
+    expect(testContent).toContain("TelemetryStreamResponseSchema.safeParse");
   });
 
   it("scaffolds sequential ADR correctly", () => {
@@ -89,6 +93,7 @@ describe("DX Universal Scaffolder", () => {
     const content = fs.readFileSync(expectedFile, "utf-8");
     expect(content).toContain("# 0003. Event Sourcing Pattern");
     expect(content).toContain("## Status");
+    expect(content).toContain("## Invariant Compliance");
   });
 
   it("scaffolds case study showcase page", () => {

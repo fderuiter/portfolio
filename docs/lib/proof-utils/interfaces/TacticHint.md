@@ -6,7 +6,7 @@
 
 # Interface: TacticHint
 
-Defined in: [lib/proof-utils.ts:42](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L42)
+Defined in: [lib/proof-utils.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L45)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/proof-utils.ts:42](https://github.com/fderuiter/portfolio/blob/
 
 > **hint**: `string`
 
-Defined in: [lib/proof-utils.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L45)
+Defined in: [lib/proof-utils.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L48)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/proof-utils.ts:45](https://github.com/fderuiter/portfolio/blob/
 
 > **isCompleted**: `boolean`
 
-Defined in: [lib/proof-utils.ts:49](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L49)
+Defined in: [lib/proof-utils.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L52)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/proof-utils.ts:49](https://github.com/fderuiter/portfolio/blob/
 
 > **stepNumber**: `number`
 
-Defined in: [lib/proof-utils.ts:43](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L43)
+Defined in: [lib/proof-utils.ts:46](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L46)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/proof-utils.ts:43](https://github.com/fderuiter/portfolio/blob/
 
 > `optional` **suggestedRule?**: `string`
 
-Defined in: [lib/proof-utils.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L48)
+Defined in: [lib/proof-utils.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L51)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/proof-utils.ts:48](https://github.com/fderuiter/portfolio/blob/
 
 > `optional` **suggestedSource?**: `string`
 
-Defined in: [lib/proof-utils.ts:46](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L46)
+Defined in: [lib/proof-utils.ts:49](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L49)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/proof-utils.ts:46](https://github.com/fderuiter/portfolio/blob/
 
 > `optional` **suggestedTarget?**: `string`
 
-Defined in: [lib/proof-utils.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L47)
+Defined in: [lib/proof-utils.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L50)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [lib/proof-utils.ts:47](https://github.com/fderuiter/portfolio/blob/
 
 > **title**: `string`
 
-Defined in: [lib/proof-utils.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L44)
+Defined in: [lib/proof-utils.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L47)

@@ -486,9 +486,11 @@ export interface WorkingWithDuckState {
 }
 
 export function clampBounds(x: number, y: number): { x: number; y: number } {
+  const safeX = Number.isFinite(x) ? x : CANVAS_WIDTH / 2;
+  const safeY = Number.isFinite(y) ? y : CANVAS_HEIGHT / 2;
   return {
-    x: Math.max(MIN_DUCK_X, Math.min(MAX_DUCK_X, x)),
-    y: Math.max(MIN_DUCK_Y, Math.min(MAX_DUCK_Y, y)),
+    x: Math.max(MIN_DUCK_X, Math.min(MAX_DUCK_X, safeX)),
+    y: Math.max(MIN_DUCK_Y, Math.min(MAX_DUCK_Y, safeY)),
   };
 }
 

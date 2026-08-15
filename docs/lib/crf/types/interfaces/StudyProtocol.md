@@ -6,7 +6,7 @@
 
 # Interface: StudyProtocol
 
-Defined in: [lib/crf/types.ts:168](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L168)
+Defined in: [lib/crf/types.ts:184](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L184)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/types.ts:168](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **branding?**: [`StudyBranding`](StudyBranding.md)
 
-Defined in: [lib/crf/types.ts:180](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L180)
+Defined in: [lib/crf/types.ts:196](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L196)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/types.ts:180](https://github.com/fderuiter/portfolio/blob/m
 
 > **codelists**: [`CodelistDefinition`](CodelistDefinition.md)[]
 
-Defined in: [lib/crf/types.ts:179](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L179)
+Defined in: [lib/crf/types.ts:195](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L195)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/types.ts:179](https://github.com/fderuiter/portfolio/blob/m
 
 > **forms**: [`CRFForm`](CRFForm.md)[]
 
-Defined in: [lib/crf/types.ts:177](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L177)
+Defined in: [lib/crf/types.ts:193](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L193)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/types.ts:177](https://github.com/fderuiter/portfolio/blob/m
 
 > **id**: `string`
 
-Defined in: [lib/crf/types.ts:169](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L169)
+Defined in: [lib/crf/types.ts:185](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L185)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/crf/types.ts:169](https://github.com/fderuiter/portfolio/blob/m
 
 > **lastModified**: `string`
 
-Defined in: [lib/crf/types.ts:176](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L176)
+Defined in: [lib/crf/types.ts:192](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L192)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/crf/types.ts:176](https://github.com/fderuiter/portfolio/blob/m
 
 > **phase**: `"Phase I"` \| `"Phase I/II"` \| `"Phase II"` \| `"Phase III"` \| `"Phase IV"` \| `"Registry"`
 
-Defined in: [lib/crf/types.ts:172](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L172)
+Defined in: [lib/crf/types.ts:188](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L188)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/crf/types.ts:172](https://github.com/fderuiter/portfolio/blob/m
 
 > **protocolNumber**: `string`
 
-Defined in: [lib/crf/types.ts:170](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L170)
+Defined in: [lib/crf/types.ts:186](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L186)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/crf/types.ts:170](https://github.com/fderuiter/portfolio/blob/m
 
 > **sponsor**: `string`
 
-Defined in: [lib/crf/types.ts:173](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L173)
+Defined in: [lib/crf/types.ts:189](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L189)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/crf/types.ts:173](https://github.com/fderuiter/portfolio/blob/m
 
 > **studyName**: `string`
 
-Defined in: [lib/crf/types.ts:171](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L171)
+Defined in: [lib/crf/types.ts:187](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L187)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [lib/crf/types.ts:171](https://github.com/fderuiter/portfolio/blob/m
 
 > **therapeuticArea**: `string`
 
-Defined in: [lib/crf/types.ts:174](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L174)
+Defined in: [lib/crf/types.ts:190](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L190)
 
 ***
 
@@ -94,7 +94,7 @@ Defined in: [lib/crf/types.ts:174](https://github.com/fderuiter/portfolio/blob/m
 
 > **version**: `string`
 
-Defined in: [lib/crf/types.ts:175](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L175)
+Defined in: [lib/crf/types.ts:191](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L191)
 
 ***
 
@@ -102,4 +102,4 @@ Defined in: [lib/crf/types.ts:175](https://github.com/fderuiter/portfolio/blob/m
 
 > **visits**: [`StudyVisit`](StudyVisit.md)[]
 
-Defined in: [lib/crf/types.ts:178](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L178)
+Defined in: [lib/crf/types.ts:194](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L194)

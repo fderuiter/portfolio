@@ -29,6 +29,7 @@ import {
   IconX,
   IconHelp,
   IconPlayerPlay,
+  IconLink,
 } from "@tabler/icons-react";
 import { getStudyBranding } from "@/lib/crf/branding-defaults";
 
@@ -51,6 +52,7 @@ interface StudioHeaderProps {
   onOpenExportDocument: () => void;
   onOpenWizard: () => void;
   onStartSpotlightTour?: () => void;
+  onCopyShareLink?: () => void;
 }
 
 export const StudioHeader: React.FC<StudioHeaderProps> = ({
@@ -72,6 +74,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
   onOpenExportDocument,
   onOpenWizard,
   onStartSpotlightTour,
+  onCopyShareLink,
 }) => {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const branding = getStudyBranding(study);
@@ -262,6 +265,18 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
               <span>+ CDASH Form</span>
             </button>
 
+            {/* Copy Shareable Link */}
+            {onCopyShareLink && (
+              <button
+                onClick={onCopyShareLink}
+                className="inline-flex items-center gap-1 px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white font-mono text-xs rounded-lg transition-all"
+                title="Copy Shareable Studio Link with Active Mode & Form State"
+              >
+                <IconLink className="w-3.5 h-3.5 text-brand-cyan" />
+                <span>Share</span>
+              </button>
+            )}
+
             {/* "How It Works" / Walkthrough Tour Trigger */}
             <div className="flex items-center bg-zinc-900 border border-brand-cyan/40 rounded-lg overflow-hidden shadow-xs">
               <button
@@ -395,6 +410,22 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
                       <div className="text-[10px] text-zinc-500">Logos, colors &amp; header profiles</div>
                     </div>
                   </button>
+
+                  {onCopyShareLink && (
+                    <button
+                      onClick={() => {
+                        setIsMoreMenuOpen(false);
+                        onCopyShareLink();
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs font-mono rounded-xl bg-zinc-950 hover:bg-zinc-800 text-zinc-200 transition-colors"
+                    >
+                      <IconLink className="w-4 h-4 text-brand-cyan" />
+                      <div className="flex-1">
+                        <div className="font-bold">Share Studio View</div>
+                        <div className="text-[10px] text-zinc-500">Copy link with active mode &amp; form</div>
+                      </div>
+                    </button>
+                  )}
 
                   <div className="pt-2 border-t border-zinc-800 flex gap-2">
                     <button

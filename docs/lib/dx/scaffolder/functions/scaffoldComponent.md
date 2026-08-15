@@ -8,7 +8,7 @@
 
 > **scaffoldComponent**(`root`, `rawName`, `dryRun?`): [`GeneratedFile`](../interfaces/GeneratedFile.md)[]
 
-Defined in: [lib/dx/scaffolder.ts:506](https://github.com/fderuiter/portfolio/blob/main/lib/dx/scaffolder.ts#L506)
+Defined in: [lib/dx/scaffolder.ts:524](https://github.com/fderuiter/portfolio/blob/main/lib/dx/scaffolder.ts#L524)
 
 Scaffold UI Component & Hook
 

@@ -275,7 +275,7 @@ describe("${pascal} UI Component", () => {
 }
 
 /**
- * Scaffold API Route with Zod Validation & Tests
+ * Scaffold API Route with Zod Validation, OpenAPI Specification & Tests
  */
 export function scaffoldApiRoute(root: string, rawName: string, dryRun = false): GeneratedFile[] {
   const kebab = toKebabCase(rawName);
@@ -289,9 +289,19 @@ export function scaffoldApiRoute(root: string, rawName: string, dryRun = false):
 import { z } from "zod";
 import { sanitizeError } from "@/lib/error-sanitization";
 
-const ${pascal}QuerySchema = z.object({
+export const ${pascal}QuerySchema = z.object({
   limit: z.coerce.number().min(1).max(100).default(10),
   query: z.string().optional(),
+});
+
+export const ${pascal}ResponseSchema = z.object({
+  status: z.literal("success"),
+  title: z.string(),
+  data: z.object({
+    limit: z.number(),
+    query: z.string().nullable(),
+    timestamp: z.string(),
+  }),
 });
 
 export async function GET(request: NextRequest) {
@@ -319,11 +329,11 @@ export async function GET(request: NextRequest) {
 `;
 
   const testContent = `import { describe, it, expect } from "vitest";
-import { GET } from "@/app/api/${kebab}/route";
+import { GET, ${pascal}ResponseSchema } from "@/app/api/${kebab}/route";
 import { NextRequest } from "next/server";
 
 describe("GET /api/${kebab}", () => {
-  it("returns default payload successfully", async () => {
+  it("returns default payload matching schema successfully", async () => {
     const req = new NextRequest("http://localhost:3000/api/${kebab}?limit=5");
     const res = await GET(req);
     const json = await res.json();
@@ -331,6 +341,9 @@ describe("GET /api/${kebab}", () => {
     expect(res.status).toBe(200);
     expect(json.status).toBe("success");
     expect(json.data.limit).toBe(5);
+
+    const validated = ${pascal}ResponseSchema.safeParse(json);
+    expect(validated.success).toBe(true);
   });
 });
 `;
@@ -391,6 +404,11 @@ Describe the architectural context, constraints, and problem statement motivatin
 ## Decision
 
 We will implement...
+
+## Invariant Compliance
+
+- **AGENTS.md Invariants**: State how this decision complies with system invariants.
+- **Verification**: Document automated verification commands (\`npm run quality\`, \`npm run verify\`).
 
 ## Consequences
 

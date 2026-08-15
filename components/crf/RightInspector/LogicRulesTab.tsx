@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { CRFForm, CRFField, EditCheckRule, AstCondition } from "@/lib/crf/types";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
+import { AstRuleEditor } from "./AstRuleEditor";
 
 interface LogicRulesTabProps {
   form: CRFForm;
@@ -270,6 +271,19 @@ export const LogicRulesTab: React.FC<LogicRulesTabProps> = ({
                         </div>
                       ))}
                     </div>
+
+                    {/* Derived Calculation Formula if Action is set_value */}
+                    {rule.actionType === "set_value" && (
+                      <div className="pt-2 border-t border-zinc-850">
+                        <AstRuleEditor
+                          formula={rule.formulaExpression || ""}
+                          onChange={(newFormula) => handleUpdateRule(rule.id, { formulaExpression: newFormula })}
+                          fields={allFields}
+                          label="Derived Rule Formula"
+                          placeholder="e.g. weight / ((height/100) * (height/100))"
+                        />
+                      </div>
+                    )}
 
                     {/* Query Message if Action is raise_query */}
                     {rule.actionType === "raise_query" && (

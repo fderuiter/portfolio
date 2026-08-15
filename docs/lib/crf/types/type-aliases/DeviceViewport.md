@@ -8,4 +8,4 @@
 
 > **DeviceViewport** = `"desktop"` \| `"tablet"` \| `"mobile"`
 
-Defined in: [lib/crf/types.ts:262](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L262)
+Defined in: [lib/crf/types.ts:278](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L278)

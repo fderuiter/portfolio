@@ -6,7 +6,7 @@
 
 # Interface: GameProgressState
 
-Defined in: [lib/quasi-perfect/types.ts:137](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L137)
+Defined in: [lib/quasi-perfect/types.ts:138](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L138)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/quasi-perfect/types.ts:137](https://github.com/fderuiter/portfo
 
 > **completedLevels**: `Record`\<`string` \| `number`, [`LevelScore`](LevelScore.md)\>
 
-Defined in: [lib/quasi-perfect/types.ts:138](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L138)
+Defined in: [lib/quasi-perfect/types.ts:139](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L139)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/quasi-perfect/types.ts:138](https://github.com/fderuiter/portfo
 
 > **currentLevelIndex**: `number`
 
-Defined in: [lib/quasi-perfect/types.ts:139](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L139)
+Defined in: [lib/quasi-perfect/types.ts:140](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L140)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [lib/quasi-perfect/types.ts:139](https://github.com/fderuiter/portfo
 
 > `optional` **unlockedChapter?**: `number`
 
-Defined in: [lib/quasi-perfect/types.ts:140](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L140)
+Defined in: [lib/quasi-perfect/types.ts:141](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L141)

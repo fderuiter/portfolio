@@ -6,7 +6,7 @@
 
 # Class: ExpressionEvaluator
 
-Defined in: [lib/crf/ast-evaluator.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/crf/ast-evaluator.ts#L80)
+Defined in: [lib/crf/ast-evaluator.ts:681](https://github.com/fderuiter/portfolio/blob/main/lib/crf/ast-evaluator.ts#L681)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/ast-evaluator.ts:80](https://github.com/fderuiter/portfolio
 
 > **new ExpressionEvaluator**(`tokens`, `context`): `ExpressionEvaluator`
 
-Defined in: [lib/crf/ast-evaluator.ts:85](https://github.com/fderuiter/portfolio/blob/main/lib/crf/ast-evaluator.ts#L85)
+Defined in: [lib/crf/ast-evaluator.ts:686](https://github.com/fderuiter/portfolio/blob/main/lib/crf/ast-evaluator.ts#L686)
 
 #### Parameters
 
@@ -36,7 +36,7 @@ Defined in: [lib/crf/ast-evaluator.ts:85](https://github.com/fderuiter/portfolio
 
 > **parse**(): `number`
 
-Defined in: [lib/crf/ast-evaluator.ts:113](https://github.com/fderuiter/portfolio/blob/main/lib/crf/ast-evaluator.ts#L113)
+Defined in: [lib/crf/ast-evaluator.ts:714](https://github.com/fderuiter/portfolio/blob/main/lib/crf/ast-evaluator.ts#L714)
 
 #### Returns
 

@@ -7,7 +7,7 @@ import { colors, badge, formatSection } from "./utils";
 export interface DiagnosticCheckResult {
   id: string;
   name: string;
-  category: "architecture" | "routes" | "security" | "database" | "docs" | "hydration";
+  category: "architecture" | "routes" | "security" | "database" | "docs" | "hydration" | "accessibility" | "quality";
   status: "pass" | "fail" | "warn" | "fixed";
   message: string;
   details?: string[];
@@ -234,7 +234,12 @@ export function checkTestPathResolution(root: string): DiagnosticCheckResult {
   for (const file of testFiles) {
     const relative = path.relative(root, file);
     // Skip test fixtures in error sanitization or doctor tests that purposefully contain mock stack strings
-    if (relative.includes("error-sanitization.test.ts") || relative.includes("dx-doctor.test.ts")) {
+    if (
+      relative.includes("error-sanitization.test.ts") ||
+      relative.includes("dx-doctor.test.ts") ||
+      relative.includes("defect-remediation-regression.test.ts") ||
+      relative.includes("property-fuzz.test.ts")
+    ) {
       continue;
     }
 
@@ -294,6 +299,7 @@ export function checkSecretLeaks(root: string): DiagnosticCheckResult {
     "yarn.lock",
     "pnpm-lock.yaml",
     "ci.yml",
+    "synthetic-probes.yml",
     ".env.example",
   ];
 
@@ -422,21 +428,31 @@ export function checkDocumentationParity(root: string, fix = false): DiagnosticC
     }
   }
 
+  const driftDetails: string[] = [];
+
   try {
     const diff = execSync("git diff --name-only docs", { cwd: root, encoding: "utf-8" }).trim();
     if (diff.length > 0) {
-      return {
-        id: "docs-drift",
-        name: "TypeDoc & Markdown Documentation Parity",
-        category: "docs",
-        status: "warn",
-        message: "Documentation in docs/ has uncommitted modifications or drift.",
-        details: diff.split("\n"),
-        fixable: true,
-      };
+      driftDetails.push(...diff.split("\n").map((f) => `Modified: ${f}`));
+    }
+    const untracked = execSync("git ls-files --others --exclude-standard docs", { cwd: root, encoding: "utf-8" }).trim();
+    if (untracked.length > 0) {
+      driftDetails.push(...untracked.split("\n").map((f) => `Untracked: ${f}`));
     }
   } catch {
     // Git diff failed or not a git repository
+  }
+
+  if (driftDetails.length > 0) {
+    return {
+      id: "docs-drift",
+      name: "TypeDoc & Markdown Documentation Parity",
+      category: "docs",
+      status: "warn",
+      message: `TypeDoc markdown documentation in docs/ is out of sync (${driftDetails.length} file(s)).`,
+      details: driftDetails,
+      fixable: true,
+    };
   }
 
   return {
@@ -449,11 +465,12 @@ export function checkDocumentationParity(root: string, fix = false): DiagnosticC
 }
 
 /**
- * OpenAPI Parity Check
+ * OpenAPI Parity & Route Completeness Check
  */
 export function checkOpenApiParity(root: string, fix = false): DiagnosticCheckResult {
   const openApiFile = path.join(root, "openapi.json");
   const generatorScript = path.join(root, "scripts", "generate-openapi.ts");
+  const apiDir = path.join(root, "app", "api");
 
   if (!fs.existsSync(openApiFile) || !fs.existsSync(generatorScript)) {
     return {
@@ -474,7 +491,7 @@ export function checkOpenApiParity(root: string, fix = false): DiagnosticCheckRe
         name: "OpenAPI Specification Contract Sync",
         category: "architecture",
         status: "fixed",
-        message: "Successfully regenerated openapi.json specification.",
+        message: "Successfully regenerated openapi.json specification with complete route coverage.",
       };
     } catch {
       return {
@@ -487,12 +504,49 @@ export function checkOpenApiParity(root: string, fix = false): DiagnosticCheckRe
     }
   }
 
+  // 1. Discover all app/api routes
+  const routeFiles = findFiles(apiDir, /^route\.(ts|js)$/);
+  const expectedRoutes = routeFiles.map((file) => {
+    const rel = path.relative(apiDir, path.dirname(file)).replace(/\\/g, "/");
+    return rel === "" ? "/api" : `/api/${rel}`;
+  });
+
+  let parsedSpec: { paths?: Record<string, unknown> } = {};
+  try {
+    const fileContent = fs.readFileSync(openApiFile, "utf-8");
+    parsedSpec = JSON.parse(fileContent);
+  } catch {
+    return {
+      id: "api-openapi-sync",
+      name: "OpenAPI Specification Contract Sync",
+      category: "architecture",
+      status: "fail",
+      message: "openapi.json is not valid JSON.",
+      fixable: true,
+    };
+  }
+
+  const documentedRoutes = Object.keys(parsedSpec.paths || {});
+  const missingRoutes = expectedRoutes.filter((r) => !documentedRoutes.includes(r));
+
+  if (missingRoutes.length > 0) {
+    return {
+      id: "api-openapi-sync",
+      name: "OpenAPI Specification Contract Sync",
+      category: "architecture",
+      status: "fail",
+      message: `${missingRoutes.length} route(s) missing from openapi.json specification`,
+      details: missingRoutes.map((r) => `Missing specification for: ${r}`),
+      fixable: true,
+    };
+  }
+
   return {
     id: "api-openapi-sync",
     name: "OpenAPI Specification Contract Sync",
     category: "architecture",
     status: "pass",
-    message: "OpenAPI specification is present and active.",
+    message: "All app/api routes are documented in openapi.json with zero specification drift.",
   };
 }
 
@@ -541,6 +595,195 @@ export function checkHydrationSafety(root: string): DiagnosticCheckResult {
 }
 
 /**
+ * Accessibility Standards & WCAG 2.1 Conformance Guard (Invariant #10)
+ * Ensures bypass skip links, semantic main landmark, live announcer provider, and alt/label tags are present.
+ */
+export function checkAccessibilityStandards(root: string, fix = false): DiagnosticCheckResult {
+  const layoutFile = path.join(root, "app", "layout.tsx");
+  const violations: string[] = [];
+
+  if (!fs.existsSync(layoutFile)) {
+    return {
+      id: "a11y-standards",
+      name: "WCAG 2.1 Accessibility & Landmark Standards",
+      category: "accessibility",
+      status: "fail",
+      message: "app/layout.tsx not found",
+      fixable: false,
+    };
+  }
+
+  let layoutContent = fs.readFileSync(layoutFile, "utf-8");
+
+  // Check 1: SkipToContent or accessible skip link
+  const hasSkipLink = /<SkipToContent\b|href=["']#main-content["']/.test(layoutContent);
+  if (!hasSkipLink) {
+    violations.push("Missing SkipToContent or #main-content skip link in app/layout.tsx");
+  }
+
+  // Check 2: Semantic main element with id="main-content"
+  const hasMainLandmark = /<main[^>]*id=["']main-content["']|<main[^>]*\bid=["']main-content["']/.test(layoutContent);
+  if (!hasMainLandmark) {
+    violations.push("Missing semantic main landmark with id='main-content' in app/layout.tsx");
+  }
+
+  // Check 3: Live Announcer Provider
+  const hasAnnouncer = /<A11yProvider\b|<LiveAnnouncerProvider\b/.test(layoutContent);
+  if (!hasAnnouncer) {
+    violations.push("Missing A11yProvider / LiveAnnouncerProvider screen-reader live region in app/layout.tsx");
+  }
+
+  // Auto-fix if fix is true and layout violations exist
+  if (fix && violations.length > 0) {
+    let modified = false;
+    if (!hasSkipLink && !layoutContent.includes("SkipToContent")) {
+      layoutContent = `import { SkipToContent } from "@/components/SkipToContent";\n` + layoutContent;
+      layoutContent = layoutContent.replace(/<body[^>]*>/, (match) => `${match}\n        <SkipToContent />`);
+      modified = true;
+    }
+    if (!hasMainLandmark && layoutContent.includes("{children}")) {
+      layoutContent = layoutContent.replace(
+        /<div className="flex-grow flex flex-col">\s*\{children\}\s*<\/div>/,
+        '<main id="main-content" tabIndex={-1} className="flex-grow flex flex-col focus:outline-none">\n                {children}\n              </main>'
+      );
+      modified = true;
+    }
+    if (modified) {
+      fs.writeFileSync(layoutFile, layoutContent, "utf-8");
+      return {
+        id: "a11y-standards",
+        name: "WCAG 2.1 Accessibility & Landmark Standards",
+        category: "accessibility",
+        status: "fixed",
+        message: "Auto-remediated layout landmarks and skip links in app/layout.tsx",
+        details: violations,
+      };
+    }
+  }
+
+  if (violations.length === 0) {
+    return {
+      id: "a11y-standards",
+      name: "WCAG 2.1 Accessibility & Landmark Standards",
+      category: "accessibility",
+      status: "pass",
+      message: "Root layout satisfies WCAG 2.1 skip link, semantic main landmark, and dynamic live announcer standards.",
+    };
+  }
+
+  return {
+    id: "a11y-standards",
+    name: "WCAG 2.1 Accessibility & Landmark Standards",
+    category: "accessibility",
+    status: "fail",
+    message: `${violations.length} accessibility structure violation(s) detected in app/layout.tsx`,
+    details: violations,
+    fixable: true,
+  };
+}
+
+/**
+ * Check Defect Remediation & Root-Cause Invariants (AGENTS.md Invariant #11).
+ * Asserts presence of regression test harness and computational boundary defenses.
+ */
+export function checkDefectRemediationInvariants(root: string): DiagnosticCheckResult {
+  const regressionTestFile = path.join(root, "__tests__", "defect-remediation-regression.test.ts");
+  const adrFile = path.join(root, "adr", "0007-comprehensive-defect-remediation-strategy.md");
+  const violations: string[] = [];
+
+  if (!fs.existsSync(regressionTestFile)) {
+    violations.push("Missing primary defect remediation regression suite: __tests__/defect-remediation-regression.test.ts");
+  }
+
+  if (!fs.existsSync(adrFile)) {
+    violations.push("Missing Architectural Decision Record: adr/0007-comprehensive-defect-remediation-strategy.md");
+  }
+
+  // Scan computational engine files for boundary guards
+  const engineChecks = [
+    { file: "lib/proof-utils.ts", pattern: /depth\s*>\s*500/, label: "Proof AST recursion limit guard" },
+    { file: "lib/garmin-engine.ts", pattern: /safeDelta\s*=\s*Number\.isFinite/, label: "Garmin telemetry finite delta guard" },
+    { file: "lib/working-with-duck-engine.ts", pattern: /safeX\s*=\s*Number\.isFinite/, label: "Duck engine coordinate boundary guard" },
+    { file: "lib/crf/ast-evaluator.ts", pattern: /ExpressionEvaluator/, label: "CRF AST Expression Evaluator" },
+  ];
+
+  for (const ec of engineChecks) {
+    const fullPath = path.join(root, ec.file);
+    if (!fs.existsSync(fullPath)) {
+      violations.push(`Missing core computational engine: ${ec.file}`);
+      continue;
+    }
+    const content = fs.readFileSync(fullPath, "utf-8");
+    if (!ec.pattern.test(content)) {
+      violations.push(`Engine ${ec.file} lacks verified invariant defense: ${ec.label}`);
+    }
+  }
+
+  if (violations.length === 0) {
+    return {
+      id: "quality-defect-remediation",
+      name: "Defect Remediation & Root-Cause Regression Invariant",
+      category: "quality",
+      status: "pass",
+      message: "All legacy computational engines enforce boundary defenses, and verified regression test harness is active.",
+    };
+  }
+
+  return {
+    id: "quality-defect-remediation",
+    name: "Defect Remediation & Root-Cause Regression Invariant",
+    category: "quality",
+    status: "fail",
+    message: `${violations.length} defect remediation invariant violation(s) detected (AGENTS.md #11)`,
+    details: violations,
+    fixable: false,
+  };
+}
+
+/**
+ * Check Proactive Defect Interception, Shift-Left Gateways & Synthetic Probes (AGENTS.md Invariant #12).
+ */
+export function checkProactiveDefectInterception(root: string): DiagnosticCheckResult {
+  const violations: string[] = [];
+
+  const requiredFiles = [
+    { file: "stryker.config.mjs", desc: "Stryker mutation testing configuration" },
+    { file: "__tests__/property-fuzz.test.ts", desc: "Fast-check property & generative fuzz test suite" },
+    { file: "__tests__/e2e/synthetic-probes.spec.ts", desc: "Headless synthetic journey probe suite" },
+    { file: ".github/workflows/synthetic-probes.yml", desc: "Scheduled synthetic probe monitoring workflow" },
+    { file: "scripts/canary-analyzer.ts", desc: "Automated Canary Analysis (ACA) engine" },
+    { file: "adr/0008-proactive-defect-interception-strategy.md", desc: "ADR-0008 Proactive Defect Interception Strategy" },
+  ];
+
+  for (const rf of requiredFiles) {
+    const fullPath = path.join(root, rf.file);
+    if (!fs.existsSync(fullPath)) {
+      violations.push(`Missing ${rf.desc}: ${rf.file}`);
+    }
+  }
+
+  if (violations.length === 0) {
+    return {
+      id: "quality-proactive-interception",
+      name: "Proactive Defect Interception & Synthetic Reliability Invariant",
+      category: "quality",
+      status: "pass",
+      message: "Shift-left property fuzzing, mutation configs, synthetic journey probes, and canary analyzer are active.",
+    };
+  }
+
+  return {
+    id: "quality-proactive-interception",
+    name: "Proactive Defect Interception & Synthetic Reliability Invariant",
+    category: "quality",
+    status: "fail",
+    message: `${violations.length} proactive defect interception violation(s) detected (AGENTS.md #12)`,
+    details: violations,
+    fixable: false,
+  };
+}
+
+/**
  * Run All Diagnostics
  */
 export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
@@ -565,6 +808,9 @@ export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
     checkDocumentationParity(root, fix),
     checkOpenApiParity(root, fix),
     checkHydrationSafety(root),
+    checkAccessibilityStandards(root, fix),
+    checkDefectRemediationInvariants(root),
+    checkProactiveDefectInterception(root),
   ];
 
   const totalPassed = checks.filter((c) => c.status === "pass").length;

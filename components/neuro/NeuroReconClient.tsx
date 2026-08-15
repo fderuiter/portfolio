@@ -25,6 +25,7 @@ import { FreeSurferTerminal } from "./FreeSurferTerminal";
 import { NeuroFieldManual } from "./NeuroFieldManual";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { useStudioHashParams } from "@/hooks/useStudioHashParams";
 import {
   IconBrain,
   IconCheck,
@@ -33,33 +34,69 @@ import {
   Icon3dCubeSphere,
   IconLayersSubtract,
   IconShieldCheck,
+  IconLink,
 } from "@tabler/icons-react";
 
 export const NeuroReconClient: React.FC = () => {
   const { playNote, playSuccess } = useAudio();
   const { recordEvent } = useTelemetry();
+  const { params, setParam, setParams } = useStudioHashParams();
+  const [copyToast, setCopyToast] = useState<string | null>(null);
 
-  const [activeScenarioId, setActiveScenarioId] = useState<ScenarioId>("dura_inclusion");
+  const [activeScenarioId, setActiveScenarioId] = useState<ScenarioId>(() => {
+    if (typeof window !== "undefined") {
+      const rawSc = new URLSearchParams(window.location.hash.slice(1)).get("scenario") as ScenarioId;
+      if (rawSc && SCENARIOS[rawSc]) {
+        return rawSc;
+      }
+    }
+    return "dura_inclusion";
+  });
   const currentScenario = SCENARIOS[activeScenarioId];
 
   const [volume, setVolume] = useState<SyntheticVolume>(() =>
-    generateSyntheticVolume("dura_inclusion")
+    generateSyntheticVolume(activeScenarioId)
   );
 
   const [crosshair, setCrosshair] = useState<VoxelCoord>(currentScenario.targetCoords);
-  const [toolMode, setToolMode] = useState<ToolMode>(currentScenario.recommendedTool);
+  const [toolMode, setToolModeState] = useState<ToolMode>(() => {
+    if (typeof window !== "undefined") {
+      const rawTool = new URLSearchParams(window.location.hash.slice(1)).get("tool") as ToolMode;
+      if (rawTool && ["inspect", "control_point", "paint", "erase"].includes(rawTool)) {
+        return rawTool;
+      }
+    }
+    return currentScenario.recommendedTool;
+  });
   const [brushRadius, setBrushRadius] = useState<number>(2);
   const [surfaceMode, setSurfaceMode] = useState<SurfaceMode>("pial");
   const [showPialContour, setShowPialContour] = useState(true);
   const [showWmContour, setShowWmContour] = useState(true);
-  const [viewMode, setViewMode] = useState<"split" | "3d" | "2d">("split");
-  const [activeDataset, setActiveDataset] = useState<DatasetSource>("case_study");
+  const [viewMode, setViewModeState] = useState<"split" | "3d" | "2d">(() => {
+    if (typeof window !== "undefined") {
+      const rawView = new URLSearchParams(window.location.hash.slice(1)).get("view") as "split" | "3d" | "2d";
+      if (rawView && ["split", "3d", "2d"].includes(rawView)) {
+        return rawView;
+      }
+    }
+    return "split";
+  });
+  const [activeDataset, setActiveDatasetState] = useState<DatasetSource>(() => {
+    if (typeof window !== "undefined") {
+      const rawDs = new URLSearchParams(window.location.hash.slice(1)).get("dataset") as DatasetSource;
+      if (rawDs && ["case_study", "mni152", "oasis"].includes(rawDs)) {
+        return rawDs;
+      }
+    }
+    return "case_study";
+  });
 
   const [controlPoints, setControlPoints] = useState<ControlPoint[]>([]);
   const [voxelEdits, setVoxelEdits] = useState<VoxelEdit[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isFieldManualOpen, setIsFieldManualOpen] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const reconTimerRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const [scoreState, setScoreState] = useState<ScoreState>({
     score: 1200,
@@ -89,25 +126,31 @@ export const NeuroReconClient: React.FC = () => {
     },
   ]);
 
-  // Evaluate QA metrics
-  const qaMetrics: QAMetrics = evaluateQAMetrics(
-    currentScenario,
-    volume,
-    controlPoints,
-    voxelEdits
-  );
-
   // Switch Scenario Handler
-  const handleSelectScenario = (scenarioId: ScenarioId) => {
+  const handleSelectScenario = useCallback((scenarioId: ScenarioId) => {
+    if (reconTimerRef.current !== null) {
+      clearTimeout(reconTimerRef.current);
+      reconTimerRef.current = null;
+      setIsProcessing(false);
+    }
+
     setActiveScenarioId(scenarioId);
     const newConfig = SCENARIOS[scenarioId];
     const newVol = generateSyntheticVolume(scenarioId);
     setVolume(newVol);
     setCrosshair(newConfig.targetCoords);
-    setToolMode(newConfig.recommendedTool);
+    setToolModeState(newConfig.recommendedTool);
     setControlPoints([]);
     setVoxelEdits([]);
     setShowSuccessModal(false);
+
+    setParams(
+      {
+        scenario: scenarioId === "dura_inclusion" ? null : scenarioId,
+        tool: null,
+      },
+      { replace: false }
+    );
 
     setLogs((prev) => [
       ...prev,
@@ -126,7 +169,75 @@ export const NeuroReconClient: React.FC = () => {
     ]);
 
     recordEvent("neuro", "project_click");
+  }, [setParams, recordEvent]);
+
+  // Synchronize incoming hash state on mount or browser Back/Forward navigation
+  useEffect(() => {
+    const rawSc = params.scenario as ScenarioId | undefined;
+    if (rawSc && SCENARIOS[rawSc] && rawSc !== activeScenarioId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      handleSelectScenario(rawSc);
+    }
+    const rawView = params.view as "split" | "3d" | "2d" | undefined;
+    if (rawView && ["split", "3d", "2d"].includes(rawView) && rawView !== viewMode) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setViewModeState(rawView);
+    }
+    const rawDs = params.dataset as DatasetSource | undefined;
+    if (rawDs && ["case_study", "mni152", "oasis"].includes(rawDs) && rawDs !== activeDataset) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setActiveDatasetState(rawDs);
+    }
+    const rawTool = params.tool as ToolMode | undefined;
+    if (rawTool && ["inspect", "control_point", "paint", "erase"].includes(rawTool) && rawTool !== toolMode) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setToolModeState(rawTool);
+    }
+  }, [params, activeScenarioId, viewMode, activeDataset, toolMode, handleSelectScenario]);
+
+  const setViewMode = (mode: "split" | "3d" | "2d") => {
+    setViewModeState(mode);
+    setParam("view", mode === "split" ? null : mode, { replace: true });
   };
+
+  const setActiveDataset = (dataset: DatasetSource) => {
+    setActiveDatasetState(dataset);
+    setParam("dataset", dataset === "case_study" ? null : dataset, { replace: true });
+  };
+
+  const setToolMode = useCallback((tool: ToolMode) => {
+    setToolModeState(tool);
+    setParam("tool", tool === currentScenario.recommendedTool ? null : tool, { replace: true });
+  }, [currentScenario.recommendedTool, setParam]);
+
+  const handleCopyShareLink = () => {
+    if (typeof window !== "undefined") {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        try {
+          playSuccess();
+        } catch {}
+        setCopyToast("NeuroRecon Studio link copied to clipboard!");
+        setTimeout(() => setCopyToast(null), 3500);
+      });
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (reconTimerRef.current !== null) {
+        clearTimeout(reconTimerRef.current);
+        reconTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  // Evaluate QA metrics
+  const qaMetrics: QAMetrics = evaluateQAMetrics(
+    currentScenario,
+    volume,
+    controlPoints,
+    voxelEdits
+  );
 
   // Add Control Point Handler
   const handleAddControlPoint = (point: Omit<ControlPoint, "id" | "timestamp">) => {
@@ -170,6 +281,12 @@ export const NeuroReconClient: React.FC = () => {
 
   // Reset Scenario Edits
   const handleReset = () => {
+    if (reconTimerRef.current !== null) {
+      clearTimeout(reconTimerRef.current);
+      reconTimerRef.current = null;
+      setIsProcessing(false);
+    }
+
     const freshVol = generateSyntheticVolume(activeScenarioId);
     setVolume(freshVol);
     setControlPoints([]);
@@ -196,6 +313,10 @@ export const NeuroReconClient: React.FC = () => {
 
   // Run recon-all Pipeline Execution
   const handleRunRecon = useCallback(() => {
+    if (reconTimerRef.current !== null) {
+      clearTimeout(reconTimerRef.current);
+    }
+
     setIsProcessing(true);
     playNote(520, 0.15);
 
@@ -216,7 +337,8 @@ export const NeuroReconClient: React.FC = () => {
       },
     ]);
 
-    setTimeout(() => {
+    reconTimerRef.current = setTimeout(() => {
+      reconTimerRef.current = null;
       setIsProcessing(false);
       const metrics = evaluateQAMetrics(currentScenario, volume, controlPoints, voxelEdits);
 
@@ -254,7 +376,7 @@ export const NeuroReconClient: React.FC = () => {
         ]);
       }
     }, 850);
-  }, [toolMode, activeScenarioId, currentScenario, volume, controlPoints, voxelEdits, playNote, playSuccess, recordEvent]);
+  }, [toolMode, activeScenarioId, currentScenario, volume, controlPoints, voxelEdits, playNote, playSuccess, recordEvent, setLogs]);
 
   // CLI Command Execution Router
   const handleExecuteCliCommand = (cmd: string) => {
@@ -387,7 +509,7 @@ export const NeuroReconClient: React.FC = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isProcessing, handleRunRecon]);
+  }, [isProcessing, handleRunRecon, setToolMode]);
 
   // Next Scenario Advancer
   const handleAdvanceNextScenario = () => {
@@ -425,6 +547,16 @@ export const NeuroReconClient: React.FC = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 self-stretch md:self-auto">
+          {/* Share Link Button */}
+          <button
+            onClick={handleCopyShareLink}
+            className="flex items-center gap-1.5 px-3 py-2 bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 rounded-xl text-xs font-mono text-zinc-300 hover:text-white transition-all shadow-sm"
+            title="Copy Shareable Link for Current Scenario & View"
+          >
+            <IconLink className="w-3.5 h-3.5 text-brand-cyan" />
+            <span>Share</span>
+          </button>
+
           {/* Dataset Source Selector */}
           <div className="flex items-center gap-1 bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs font-mono">
             {(["case_study", "mni152", "oasis"] as DatasetSource[]).map((dId) => {
@@ -676,6 +808,21 @@ export const NeuroReconClient: React.FC = () => {
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Share Toast Notification */}
+      <AnimatePresence>
+        {copyToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 15 }}
+            className="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-xl border border-brand-cyan/40 bg-zinc-900/95 text-xs font-mono text-brand-cyan shadow-2xl flex items-center gap-2 backdrop-blur-md"
+          >
+            <IconLink className="w-4 h-4 text-brand-cyan" />
+            <span>{copyToast}</span>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

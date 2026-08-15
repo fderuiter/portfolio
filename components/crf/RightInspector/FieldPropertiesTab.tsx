@@ -2,9 +2,8 @@
 
 import React, { useState } from "react";
 import { CRFField, CodelistDefinition, CodelistOption, ClinicalDataType } from "@/lib/crf/types";
+import { AstRuleEditor } from "./AstRuleEditor";
 import {
-  IconMathFunction,
-  IconInfoCircle,
   IconPlus,
   IconTrash,
   IconArrowUp,
@@ -690,47 +689,13 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
 
       {/* Dynamic AST Formula Builder for Calculated Fields */}
       {field.dataType === "calculated" && (
-        <div className="space-y-2.5 pt-2 border-t border-zinc-850">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-brand-cyan font-semibold uppercase flex items-center gap-1">
-              <IconMathFunction className="w-3.5 h-3.5" />
-              AST Dynamic Formula
-            </span>
-          </div>
-
-          <textarea
-            rows={2}
-            value={field.calculationFormula || ""}
-            onChange={(e) => onUpdateField({ calculationFormula: e.target.value })}
-            className="w-full px-2.5 py-1.5 bg-zinc-950 border border-brand-cyan/40 rounded-lg text-brand-cyan font-mono text-xs focus:border-brand-cyan focus:outline-none resize-none"
-            placeholder="e.g. weight / ((height/100) * (height/100))"
+        <div className="pt-2 border-t border-zinc-850">
+          <AstRuleEditor
+            formula={field.calculationFormula || ""}
+            onChange={(newFormula) => onUpdateField({ calculationFormula: newFormula })}
+            fields={allFieldsInForm}
+            currentFieldId={field.id}
           />
-
-          <div className="p-2.5 rounded-lg bg-zinc-950 border border-zinc-850 space-y-1.5">
-            <div className="text-[10px] font-mono text-zinc-400 flex items-center gap-1">
-              <IconInfoCircle className="w-3 h-3 text-brand-cyan" />
-              <span>Available Form Variables to reference:</span>
-            </div>
-            <div className="flex flex-wrap gap-1">
-              {allFieldsInForm
-                .filter((f) => f.id !== field.id)
-                .map((f) => (
-                  <button
-                    key={f.id}
-                    onClick={() => {
-                      const cur = field.calculationFormula || "";
-                      onUpdateField({ calculationFormula: `${cur} ${f.variableName}`.trim() });
-                    }}
-                    className="px-1.5 py-0.5 rounded bg-zinc-900 hover:bg-brand-cyan/20 border border-zinc-800 text-[10px] font-mono text-zinc-300 hover:text-brand-cyan transition-colors"
-                  >
-                    {f.variableName}
-                  </button>
-                ))}
-            </div>
-            <div className="text-[10px] text-zinc-500 font-mono pt-1">
-              Functions: <code>round(x, n)</code>, <code>sqrt(x)</code>, <code>abs(x)</code>, <code>max(a, b)</code>
-            </div>
-          </div>
         </div>
       )}
 

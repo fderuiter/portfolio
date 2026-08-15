@@ -22,6 +22,8 @@
 - [ElectronicSignature](interfaces/ElectronicSignature.md)
 - [ExportDocxOptions](interfaces/ExportDocxOptions.md)
 - [ExportPdfOptions](interfaces/ExportPdfOptions.md)
+- [ExportROptions](interfaces/ExportROptions.md)
+- [ExportSasOptions](interfaces/ExportSasOptions.md)
 - [StudyBranding](interfaces/StudyBranding.md)
 - [StudyProtocol](interfaces/StudyProtocol.md)
 - [StudyVisit](interfaces/StudyVisit.md)

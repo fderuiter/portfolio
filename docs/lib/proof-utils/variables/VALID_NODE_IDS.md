@@ -8,4 +8,4 @@
 
 > `const` **VALID\_NODE\_IDS**: `string`[]
 
-Defined in: [lib/proof-utils.ts:203](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L203)
+Defined in: [lib/proof-utils.ts:229](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L229)

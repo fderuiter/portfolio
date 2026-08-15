@@ -102,6 +102,10 @@ jobs:
         id: vitest
         run: npm run test:ci
 
+      - name: Run Shift-Left Mutation & Fuzz Testing Gate
+        id: mutation
+        run: npm run test:mutation
+
       - name: Run Visual & Drift Detection (Playwright)
         id: playwright
         run: npx playwright test
@@ -134,6 +138,7 @@ jobs:
           echo "| Verification Layer | Status | Description |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
           echo "| **Mathematical Logic** (Vitest) | ${{ steps.vitest.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Masonry scheduling algorithms & text metrics |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Shift-Left Mutation & Fuzz Gate** | ${{ steps.mutation.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Stryker mutation & fast-check generative invariants |" >> $GITHUB_STEP_SUMMARY
           echo "| **Visual & Drift Guard** (Playwright) | ${{ steps.playwright.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Sub-pixel pixel matching & layout constant sync |" >> $GITHUB_STEP_SUMMARY
           echo "| **Accessibility Audits** (Playwright-Axe) | $ACC_STATUS | Automated WCAG compliance scans on interactive states |" >> $GITHUB_STEP_SUMMARY
           echo "| **Performance Gates** (Lighthouse) | ${{ steps.lighthouse.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Web Vitals & >95 Lighthouse score |" >> $GITHUB_STEP_SUMMARY

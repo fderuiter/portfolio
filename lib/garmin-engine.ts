@@ -321,9 +321,11 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
     return state;
   }
 
+  const safeDelta = Number.isFinite(deltaMs) ? Math.max(0, Math.min(5000, deltaMs)) : 0;
+
   // Handle GC Freeze
   if (state.isGcActive) {
-    const remainingGc = state.gcTimerMs - deltaMs;
+    const remainingGc = state.gcTimerMs - safeDelta;
     if (remainingGc <= 0) {
       return {
         ...state,
@@ -337,7 +339,7 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
     };
   }
 
-  const dtRatio = deltaMs / 16.666;
+  const dtRatio = safeDelta / 16.666;
 
   // 1. Battery Drain & Overheating Mechanics
   let nextBattery = state.battery;
@@ -347,7 +349,7 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
   // Base battery drain: 0.1%/sec; With light: +0.3%/sec (0.4%/sec total)
   const baseDrainPerMs = 0.0001;
   const lightDrainPerMs = 0.0003;
-  const totalDrain = (baseDrainPerMs + (state.isLightOn ? lightDrainPerMs : 0)) * deltaMs;
+  const totalDrain = (baseDrainPerMs + (state.isLightOn ? lightDrainPerMs : 0)) * safeDelta;
   nextBattery = Math.max(0, nextBattery - totalDrain);
 
   let nextLight = state.isLightOn;
@@ -357,14 +359,14 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
   }
 
   if (state.isLightOn) {
-    lightDuration += deltaMs;
+    lightDuration += safeDelta;
     // Overheat after sustained light drain (> 6 seconds buildup)
     if (lightDuration > 6000) {
-      fogLevel = Math.min(0.95, fogLevel + 0.0004 * deltaMs);
+      fogLevel = Math.min(0.95, fogLevel + 0.0004 * safeDelta);
     }
   } else {
-    lightDuration = Math.max(0, lightDuration - deltaMs * 0.5);
-    fogLevel = Math.max(0, fogLevel - 0.0001 * deltaMs);
+    lightDuration = Math.max(0, lightDuration - safeDelta * 0.5);
+    fogLevel = Math.max(0, fogLevel - 0.0001 * safeDelta);
   }
 
   // 2. Player Jump & Gravity Physics

@@ -803,9 +803,28 @@ export const ClinicalTrialChaos: React.FC = () => {
     if (playState !== "playing") return;
 
     let isRunning = true;
+    let isContextLost = false;
+    const canvas = canvasRef.current;
+
+    const handleContextLost = (e: Event) => {
+      e.preventDefault();
+      isContextLost = true;
+      if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
+    };
+
+    const handleContextRestored = () => {
+      isContextLost = false;
+      lastTickTimeRef.current = Date.now();
+      animFrameIdRef.current = requestAnimationFrame(gameLoop);
+    };
+
+    if (canvas) {
+      canvas.addEventListener("contextlost", handleContextLost);
+      canvas.addEventListener("contextrestored", handleContextRestored);
+    }
 
     const gameLoop = () => {
-      if (!isRunning) return;
+      if (!isRunning || isContextLost) return;
 
       const now = Date.now();
       const deltaSeconds = Math.min(0.1, (now - lastTickTimeRef.current) / 1000);
@@ -937,6 +956,10 @@ export const ClinicalTrialChaos: React.FC = () => {
 
     return () => {
       isRunning = false;
+      if (canvas) {
+        canvas.removeEventListener("contextlost", handleContextLost);
+        canvas.removeEventListener("contextrestored", handleContextRestored);
+      }
       if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
     };
   }, [

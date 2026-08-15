@@ -6,7 +6,7 @@
 
 # Interface: LedgerStep
 
-Defined in: [lib/proof-utils.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L52)
+Defined in: [lib/proof-utils.ts:55](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L55)
 
 ## Properties
 
@@ -14,7 +14,15 @@ Defined in: [lib/proof-utils.ts:52](https://github.com/fderuiter/portfolio/blob/
 
 > **formula**: `string`
 
-Defined in: [lib/proof-utils.ts:54](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L54)
+Defined in: [lib/proof-utils.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L57)
+
+***
+
+### isDeletable?
+
+> `optional` **isDeletable?**: `boolean`
+
+Defined in: [lib/proof-utils.ts:63](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L63)
 
 ***
 
@@ -22,7 +30,15 @@ Defined in: [lib/proof-utils.ts:54](https://github.com/fderuiter/portfolio/blob/
 
 > **isProven**: `boolean`
 
-Defined in: [lib/proof-utils.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L58)
+Defined in: [lib/proof-utils.ts:61](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L61)
+
+***
+
+### nodeId?
+
+> `optional` **nodeId?**: `string`
+
+Defined in: [lib/proof-utils.ts:62](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L62)
 
 ***
 
@@ -30,7 +46,7 @@ Defined in: [lib/proof-utils.ts:58](https://github.com/fderuiter/portfolio/blob/
 
 > **plainEnglish**: `string`
 
-Defined in: [lib/proof-utils.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L57)
+Defined in: [lib/proof-utils.ts:60](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L60)
 
 ***
 
@@ -38,7 +54,7 @@ Defined in: [lib/proof-utils.ts:57](https://github.com/fderuiter/portfolio/blob/
 
 > **premises**: `string`
 
-Defined in: [lib/proof-utils.ts:56](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L56)
+Defined in: [lib/proof-utils.ts:59](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L59)
 
 ***
 
@@ -46,7 +62,7 @@ Defined in: [lib/proof-utils.ts:56](https://github.com/fderuiter/portfolio/blob/
 
 > **rule**: `string`
 
-Defined in: [lib/proof-utils.ts:55](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L55)
+Defined in: [lib/proof-utils.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L58)
 
 ***
 
@@ -54,4 +70,4 @@ Defined in: [lib/proof-utils.ts:55](https://github.com/fderuiter/portfolio/blob/
 
 > **stepNumber**: `number`
 
-Defined in: [lib/proof-utils.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L53)
+Defined in: [lib/proof-utils.ts:56](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L56)

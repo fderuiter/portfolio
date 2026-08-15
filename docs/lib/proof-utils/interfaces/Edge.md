@@ -6,7 +6,7 @@
 
 # Interface: Edge
 
-Defined in: [lib/proof-utils.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L23)
+Defined in: [lib/proof-utils.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L26)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/proof-utils.ts:23](https://github.com/fderuiter/portfolio/blob/
 
 > `optional` **ruleApplied?**: `string`
 
-Defined in: [lib/proof-utils.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L26)
+Defined in: [lib/proof-utils.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L29)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/proof-utils.ts:26](https://github.com/fderuiter/portfolio/blob/
 
 > **source**: `string`
 
-Defined in: [lib/proof-utils.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L24)
+Defined in: [lib/proof-utils.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L27)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [lib/proof-utils.ts:24](https://github.com/fderuiter/portfolio/blob/
 
 > **target**: `string`
 
-Defined in: [lib/proof-utils.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L25)
+Defined in: [lib/proof-utils.ts:28](https://github.com/fderuiter/portfolio/blob/main/lib/proof-utils.ts#L28)

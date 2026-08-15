@@ -237,8 +237,32 @@ export const GarminWatchSimulator: React.FC = () => {
   // Main 60FPS Game Physics and Rendering Loop
   useEffect(() => {
     let animationFrameId: number;
+    let isContextLost = false;
+    const canvas = canvasRef.current;
+
+    const handleContextLost = (e: Event) => {
+      e.preventDefault();
+      isContextLost = true;
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+
+    const handleContextRestored = () => {
+      isContextLost = false;
+      lastFrameTimeRef.current = performance.now();
+      animationFrameId = requestAnimationFrame(gameTick);
+      gameLoopRef.current = animationFrameId;
+    };
+
+    if (canvas) {
+      canvas.addEventListener("contextlost", handleContextLost);
+      canvas.addEventListener("contextrestored", handleContextRestored);
+    }
 
     const gameTick = (timestamp: number) => {
+      if (isContextLost) return;
+
       if (!lastFrameTimeRef.current) {
         lastFrameTimeRef.current = timestamp;
       }
@@ -251,7 +275,6 @@ export const GarminWatchSimulator: React.FC = () => {
       }
 
       // Render Canvas Frame
-      const canvas = canvasRef.current;
       if (canvas) {
         const ctx = canvas.getContext("2d");
         if (ctx) {
@@ -266,6 +289,10 @@ export const GarminWatchSimulator: React.FC = () => {
     gameLoopRef.current = animationFrameId;
 
     return () => {
+      if (canvas) {
+        canvas.removeEventListener("contextlost", handleContextLost);
+        canvas.removeEventListener("contextrestored", handleContextRestored);
+      }
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }

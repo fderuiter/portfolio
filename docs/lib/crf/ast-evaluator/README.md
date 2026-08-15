@@ -12,12 +12,23 @@
 
 ## Interfaces
 
+- [ClinicalFormulaPreset](interfaces/ClinicalFormulaPreset.md)
 - [DiagnosticItem](interfaces/DiagnosticItem.md)
+- [FormulaDiagnostic](interfaces/FormulaDiagnostic.md)
+- [FormulaLintResult](interfaces/FormulaLintResult.md)
+- [HighlightToken](interfaces/HighlightToken.md)
 - [Token](interfaces/Token.md)
 
 ## Type Aliases
 
+- [FormulaTokenType](type-aliases/FormulaTokenType.md)
 - [TokenType](type-aliases/TokenType.md)
+
+## Variables
+
+- [CLINICAL\_FORMULA\_PRESETS](variables/CLINICAL_FORMULA_PRESETS.md)
+- [KNOWN\_MATH\_FUNCTIONS](variables/KNOWN_MATH_FUNCTIONS.md)
+- [NUMERIC\_DATA\_TYPES](variables/NUMERIC_DATA_TYPES.md)
 
 ## Functions
 
@@ -32,3 +43,6 @@
 - [evaluateFormula](functions/evaluateFormula.md)
 - [evaluateRule](functions/evaluateRule.md)
 - [lintForm](functions/lintForm.md)
+- [lintFormula](functions/lintFormula.md)
+- [mapPresetToFormVariables](functions/mapPresetToFormVariables.md)
+- [tokenizeWithSpans](functions/tokenizeWithSpans.md)

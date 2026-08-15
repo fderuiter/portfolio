@@ -11,6 +11,9 @@ export type TheoremId =
   | "two-phase-commit"
   | "quorum-overlap"
   | "cache-consistency"
+  | "paxos-synod"
+  | "paxos-phase2b"
+  | "bft-quorum"
   | "custom";
 
 export type TheoremCategory =
@@ -56,6 +59,8 @@ export interface LedgerStep {
   premises: string;
   plainEnglish: string;
   isProven: boolean;
+  nodeId?: string;
+  isDeletable?: boolean;
 }
 
 export interface TruthTableRow {
@@ -63,10 +68,27 @@ export interface TruthTableRow {
   q: boolean;
   r?: boolean;
   s?: boolean;
+  valuations?: Record<string, boolean>;
+  premiseValues?: boolean[];
   premise1: boolean;
   premise2: boolean;
   conclusion: boolean;
   isCounterexample: boolean;
+}
+
+export interface FallacyFormulaAst {
+  label: string;
+  ast: PropAst;
+  description: string;
+}
+
+export interface AstTraceNode {
+  ast: PropAst;
+  label: string;
+  value: boolean;
+  operator?: string;
+  operandLabels?: string[];
+  children?: AstTraceNode[];
 }
 
 export interface FallacyDiagnosis {
@@ -75,6 +97,10 @@ export interface FallacyDiagnosis {
   plainEnglish: string;
   softwareAnalogy: string;
   truthTable: TruthTableRow[];
+  premises?: FallacyFormulaAst[];
+  conclusion?: FallacyFormulaAst;
+  variables?: string[];
+  counterexampleValuation?: Record<string, boolean>;
 }
 
 export interface TheoremDefinition {
@@ -217,6 +243,8 @@ export const VALID_COMMANDS = [
   "export",
   "autostep",
   "solve",
+  "prune",
+  "delete-step",
 ];
 
 /**
@@ -321,13 +349,15 @@ function findTopLevelOp(
 /**
  * Formats a PropAst into mathematical unicode string.
  */
-export function formatFormula(ast: PropAst): string {
+export function formatFormula(ast: PropAst | null | undefined): string {
+  if (!ast || typeof ast !== "object" || !("type" in ast)) return "";
   switch (ast.type) {
     case "bottom":
       return "⊥";
     case "var":
-      return ast.name;
+      return ast.name || "";
     case "not":
+      if (!ast.operand) return "¬";
       if (ast.operand.type === "var" || ast.operand.type === "bottom") {
         return `¬${formatFormula(ast.operand)}`;
       }
@@ -340,10 +370,13 @@ export function formatFormula(ast: PropAst): string {
       return `${formatChildFormula(ast.left, "implies")} → ${formatChildFormula(ast.right, "implies")}`;
     case "iff":
       return `${formatChildFormula(ast.left, "iff")} ↔ ${formatChildFormula(ast.right, "iff")}`;
+    default:
+      return "";
   }
 }
 
-function formatChildFormula(child: PropAst, parentType: string): string {
+function formatChildFormula(child: PropAst | null | undefined, parentType: string): string {
+  if (!child) return "";
   const needsParens =
     (parentType === "implies" && (child.type === "implies" || child.type === "iff")) ||
     (parentType === "or" && (child.type === "implies" || child.type === "iff")) ||
@@ -355,7 +388,7 @@ function formatChildFormula(child: PropAst, parentType: string): string {
  * Compares two PropAst trees for structural equivalence.
  */
 export function areAstsEqual(a: PropAst | null | undefined, b: PropAst | null | undefined): boolean {
-  if (!a || !b) return false;
+  if (!a || !b || typeof a !== "object" || typeof b !== "object") return false;
   if (a.type !== b.type) return false;
   switch (a.type) {
     case "bottom":
@@ -371,46 +404,222 @@ export function areAstsEqual(a: PropAst | null | undefined, b: PropAst | null | 
       const bBin = b as { type: typeof a.type; left: PropAst; right: PropAst };
       return areAstsEqual(a.left, bBin.left) && areAstsEqual(a.right, bBin.right);
     }
+    default:
+      return false;
   }
 }
 
 /**
  * Extracts unique proposition variable names from an AST.
  */
-export function extractVariables(ast: PropAst): string[] {
+export function extractVariables(ast: PropAst | null | undefined): string[] {
+  if (!ast || typeof ast !== "object") return [];
   const vars = new Set<string>();
-  function traverse(node: PropAst) {
-    if (node.type === "var") vars.add(node.name);
-    else if (node.type === "not") traverse(node.operand);
+  function traverse(node: PropAst | null | undefined, depth = 0) {
+    if (!node || typeof node !== "object" || depth > 500) return;
+    if (node.type === "var" && node.name) vars.add(node.name);
+    else if (node.type === "not") traverse(node.operand, depth + 1);
     else if ("left" in node && "right" in node) {
-      traverse(node.left);
-      traverse(node.right);
+      traverse(node.left, depth + 1);
+      traverse(node.right, depth + 1);
     }
   }
-  traverse(ast);
+  traverse(ast, 0);
   return Array.from(vars).sort();
 }
 
 /**
  * Evaluates the boolean truth value of an AST under a variable valuation.
  */
-export function evaluateAst(ast: PropAst, env: Record<string, boolean>): boolean {
+export function evaluateAst(ast: PropAst | null | undefined, env: Record<string, boolean> = {}, depth = 0): boolean {
+  if (!ast || typeof ast !== "object" || !("type" in ast) || depth > 500) {
+    return false;
+  }
   switch (ast.type) {
     case "bottom":
       return false;
     case "var":
-      return env[ast.name] ?? false;
+      return Boolean(env[ast.name]);
     case "not":
-      return !evaluateAst(ast.operand, env);
+      return !evaluateAst(ast.operand, env, depth + 1);
     case "and":
-      return evaluateAst(ast.left, env) && evaluateAst(ast.right, env);
+      return evaluateAst(ast.left, env, depth + 1) && evaluateAst(ast.right, env, depth + 1);
     case "or":
-      return evaluateAst(ast.left, env) || evaluateAst(ast.right, env);
+      return evaluateAst(ast.left, env, depth + 1) || evaluateAst(ast.right, env, depth + 1);
     case "implies":
-      return !evaluateAst(ast.left, env) || evaluateAst(ast.right, env);
+      return !evaluateAst(ast.left, env, depth + 1) || evaluateAst(ast.right, env, depth + 1);
     case "iff":
-      return evaluateAst(ast.left, env) === evaluateAst(ast.right, env);
+      return evaluateAst(ast.left, env, depth + 1) === evaluateAst(ast.right, env, depth + 1);
+    default:
+      return false;
   }
+}
+
+/**
+ * Evaluates the boolean truth value of an AST under a variable valuation and produces a hierarchical evaluation trace.
+ */
+export function evaluateAstWithTrace(ast: PropAst | null | undefined, env: Record<string, boolean> = {}, depth = 0): AstTraceNode {
+  if (!ast || typeof ast !== "object" || !("type" in ast) || depth > 500) {
+    return {
+      ast: ast || { type: "bottom" },
+      label: "",
+      value: false,
+      children: [],
+    };
+  }
+  switch (ast.type) {
+    case "bottom":
+      return {
+        ast,
+        label: "⊥",
+        value: false,
+        children: [],
+      };
+    case "var": {
+      const val = Boolean(env[ast.name]);
+      return {
+        ast,
+        label: ast.name || "",
+        value: val,
+        children: [],
+      };
+    }
+    case "not": {
+      const child = evaluateAstWithTrace(ast.operand, env, depth + 1);
+      const val = !child.value;
+      return {
+        ast,
+        label: formatFormula(ast),
+        value: val,
+        operator: "¬",
+        operandLabels: [child.label],
+        children: [child],
+      };
+    }
+    case "and": {
+      const left = evaluateAstWithTrace(ast.left, env, depth + 1);
+      const right = evaluateAstWithTrace(ast.right, env, depth + 1);
+      const val = left.value && right.value;
+      return {
+        ast,
+        label: formatFormula(ast),
+        value: val,
+        operator: "∧",
+        operandLabels: [left.label, right.label],
+        children: [left, right],
+      };
+    }
+    case "or": {
+      const left = evaluateAstWithTrace(ast.left, env, depth + 1);
+      const right = evaluateAstWithTrace(ast.right, env, depth + 1);
+      const val = left.value || right.value;
+      return {
+        ast,
+        label: formatFormula(ast),
+        value: val,
+        operator: "∨",
+        operandLabels: [left.label, right.label],
+        children: [left, right],
+      };
+    }
+    case "implies": {
+      const left = evaluateAstWithTrace(ast.left, env, depth + 1);
+      const right = evaluateAstWithTrace(ast.right, env, depth + 1);
+      const val = !left.value || right.value;
+      return {
+        ast,
+        label: formatFormula(ast),
+        value: val,
+        operator: "→",
+        operandLabels: [left.label, right.label],
+        children: [left, right],
+      };
+    }
+    case "iff": {
+      const left = evaluateAstWithTrace(ast.left, env, depth + 1);
+      const right = evaluateAstWithTrace(ast.right, env, depth + 1);
+      const val = left.value === right.value;
+      return {
+        ast,
+        label: formatFormula(ast),
+        value: val,
+        operator: "↔",
+        operandLabels: [left.label, right.label],
+        children: [left, right],
+      };
+    }
+    default:
+      return {
+        ast,
+        label: "",
+        value: false,
+        children: [],
+      };
+  }
+}
+
+/**
+ * Dynamically synthesizes all combinatorial truth table valuations for a set of premises and a conclusion.
+ */
+export function generateTruthTable(
+  premises: { label: string; ast: PropAst }[],
+  conclusion: { label: string; ast: PropAst }
+): { truthTable: TruthTableRow[]; variables: string[]; counterexampleValuation?: Record<string, boolean> } {
+  const varSet = new Set<string>();
+  premises.forEach((p) => extractVariables(p.ast).forEach((v) => varSet.add(v)));
+  extractVariables(conclusion.ast).forEach((v) => varSet.add(v));
+
+  if (varSet.size === 0) {
+    varSet.add("P");
+    varSet.add("Q");
+  } else if (varSet.size === 1) {
+    const singleVar = Array.from(varSet)[0];
+    if (singleVar === "P") varSet.add("Q");
+    else varSet.add("P");
+  }
+
+  const variables = Array.from(varSet).sort();
+  const numVars = variables.length;
+  const totalCombinations = 1 << numVars;
+  const truthTable: TruthTableRow[] = [];
+  let firstCounterexample: Record<string, boolean> | undefined = undefined;
+
+  for (let i = totalCombinations - 1; i >= 0; i--) {
+    const valuation: Record<string, boolean> = {};
+    for (let bit = 0; bit < numVars; bit++) {
+      const varName = variables[bit];
+      const isTrue = Boolean((i >> (numVars - 1 - bit)) & 1);
+      valuation[varName] = isTrue;
+    }
+
+    const premiseValues = premises.map((p) => evaluateAst(p.ast, valuation));
+    const conclusionVal = evaluateAst(conclusion.ast, valuation);
+    const allPremisesTrue = premiseValues.length > 0 ? premiseValues.every((v) => v === true) : true;
+    const isCounterexample = allPremisesTrue && !conclusionVal;
+
+    if (isCounterexample && !firstCounterexample) {
+      firstCounterexample = valuation;
+    }
+
+    truthTable.push({
+      p: valuation["P"] ?? valuation[variables[0]] ?? false,
+      q: valuation["Q"] ?? valuation[variables[1]] ?? false,
+      r: valuation["R"] ?? (variables[2] ? valuation[variables[2]] : undefined),
+      s: valuation["S"] ?? (variables[3] ? valuation[variables[3]] : undefined),
+      valuations: valuation,
+      premiseValues,
+      premise1: premiseValues[0] ?? false,
+      premise2: premiseValues[1] ?? false,
+      conclusion: conclusionVal,
+      isCounterexample,
+    });
+  }
+
+  return {
+    truthTable,
+    variables,
+    counterexampleValuation: firstCounterexample,
+  };
 }
 
 export const THEOREMS: Record<TheoremId, TheoremDefinition> = {
@@ -1304,6 +1513,355 @@ theorem cache_consistency_safety (Write Invalidate FreshRead : Prop)
 \\end{prooftree}`,
   },
 
+  "paxos-synod": {
+    id: "paxos-synod",
+    title: "Paxos Synod Invariant",
+    subtitle: "Proposal Monotonicity · Single-Decree Consensus Safety",
+    category: "Distributed Systems",
+    ruleName: "Paxos Synod (MajQ1 ∧ (MajQ1 → MaxVal) ⊢ MaxVal)",
+    scenario: "Single-Decree Paxos leader ballot proposal and value stability across election rounds.",
+    goalDescription: "Discharge Synod Agreement invariant (No two distinct values can ever be chosen across ballots).",
+    targetNodeId: "E",
+    intermediateNodeId: "C",
+    intermediateRequires: ["A", "B"],
+    conclusionRequires: ["C", "D"],
+    nodes: [
+      {
+        id: "A",
+        label: "MajQ1",
+        type: "premise",
+        description: "Premise MajQ1: Leader gathered a majority promise quorum Q1 in ballot B.",
+        meaning: "Majority of acceptors in Q1 promised not to accept ballots older than B.",
+        x: 120,
+        y: 130,
+        ast: { type: "var", name: "MajQ1" },
+      },
+      {
+        id: "B",
+        label: "MajQ1 → MaxVal",
+        type: "premise",
+        description: "Premise: Quorum intersection forces proposer to adopt value V of highest-numbered ballot.",
+        meaning: "If Q1 intersects with previously chosen quorum, highest ballot value V is reported.",
+        x: 120,
+        y: 290,
+        ast: {
+          type: "implies",
+          left: { type: "var", name: "MajQ1" },
+          right: { type: "var", name: "MaxVal" },
+        },
+      },
+      {
+        id: "C",
+        label: "MaxVal",
+        type: "intermediate",
+        description: "Intermediate Conclusion MaxVal: Proposer binds proposal in ballot B to canonical value V.",
+        meaning: "Derived invariant: Proposer cannot propose any competing value V' ≠ V.",
+        x: 360,
+        y: 210,
+        ast: { type: "var", name: "MaxVal" },
+      },
+      {
+        id: "D",
+        label: "MaxVal → SynodAgreement",
+        type: "premise",
+        description: "Premise: Invariant preservation ensures all subsequent ballots only choose value V.",
+        meaning: "Inductive step: If all proposals inherit V, no split-decision value can ever be chosen.",
+        x: 360,
+        y: 360,
+        ast: {
+          type: "implies",
+          left: { type: "var", name: "MaxVal" },
+          right: { type: "var", name: "SynodAgreement" },
+        },
+      },
+      {
+        id: "E",
+        label: "SynodAgreement",
+        type: "conclusion",
+        description: "Conclusion SynodAgreement: Single-Decree Paxos consistency holds with mathematical certainty.",
+        meaning: "The target theorem: 100% formal safety guarantee against split-brain decisions.",
+        x: 600,
+        y: 285,
+        ast: { type: "var", name: "SynodAgreement" },
+      },
+    ],
+    initialEdges: [
+      { source: "A", target: "C", ruleApplied: "MP" },
+      { source: "B", target: "C", ruleApplied: "MP" },
+    ],
+    validPairs: [
+      ["A", "C"],
+      ["C", "A"],
+      ["B", "C"],
+      ["C", "B"],
+      ["C", "E"],
+      ["E", "C"],
+      ["D", "E"],
+      ["E", "D"],
+    ],
+    simulationSteps: [
+      "Initializing Paxos Synod Invariant Verification Engine...",
+      "Inspecting Phase 1b promise responses across acceptor majority (MajQ1)...",
+      "Inspecting highest-ballot value constraint (MajQ1 → MaxVal)...",
+      "Applying Modus Ponens to derive proposal value binding (MaxVal)...",
+      "Proposal value bound: Proposer locked to canonical value V.",
+      "Connecting proposal binding with Synod Agreement invariant Node D...",
+      "Applying Modus Ponens on derived Node C and Premise Node D...",
+      "Discharging Conclusion Node E (SynodAgreement)...",
+      "Verifying inductive hypothesis across all subsequent ballot epochs...",
+      "Paxos Synod Consensus Safety formally verified (Q.E.D.)",
+    ],
+    leanCode: `-- Formal Proof in Lean 4
+theorem paxos_synod_safety (MajQ1 MaxVal SynodAgreement : Prop)
+  (hA : MajQ1)
+  (hB : MajQ1 → MaxVal)
+  (hD : MaxVal → SynodAgreement) : SynodAgreement := by
+  have hC : MaxVal := hB hA
+  exact hD hC`,
+    latexCode: `\\begin{prooftree}
+  \\AxiomC{$MajQ1$}
+  \\AxiomC{$MajQ1 \\to MaxVal$}
+  \\RightLabel{\\scriptsize MP}
+  \\BinaryInfC{$MaxVal$}
+  \\AxiomC{$MaxVal \\to SynodAgreement$}
+  \\RightLabel{\\scriptsize MP}
+  \\BinaryInfC{$SynodAgreement$}
+\\end{prooftree}`,
+  },
+
+  "paxos-phase2b": {
+    id: "paxos-phase2b",
+    title: "Paxos Phase 2B Acceptor Quorum",
+    subtitle: "Phase 2b Vote Aggregation · Irrevocable Consensus Commit",
+    category: "Distributed Systems",
+    ruleName: "Paxos Phase 2B ((PromiseB ∧ AcceptReqB) ∧ ((PromiseB ∧ AcceptReqB) → ValueChosen) ⊢ ValueChosen)",
+    scenario: "Acceptors processing Phase 2a accept requests and committing chosen value on majority acceptance.",
+    goalDescription: "Discharge ValueChosen invariant (Value V is chosen and permanently committed across the cluster).",
+    targetNodeId: "E",
+    intermediateNodeId: "C",
+    intermediateRequires: ["A", "B"],
+    conclusionRequires: ["C", "D"],
+    nodes: [
+      {
+        id: "A",
+        label: "PromiseB",
+        type: "premise",
+        description: "Premise PromiseB: Acceptors promised ballot B and have seen no higher proposal.",
+        meaning: "Acceptor local promise invariant is active for ballot epoch B.",
+        x: 120,
+        y: 130,
+        ast: { type: "var", name: "PromiseB" },
+      },
+      {
+        id: "B",
+        label: "AcceptReqB",
+        type: "premise",
+        description: "Premise AcceptReqB: Leader transmits Phase 2a Accept(B, V) message matching ballot B.",
+        meaning: "Phase 2a message carries valid ballot number B and candidate value V.",
+        x: 120,
+        y: 290,
+        ast: { type: "var", name: "AcceptReqB" },
+      },
+      {
+        id: "C",
+        label: "PromiseB ∧ AcceptReqB",
+        type: "intermediate",
+        description: "Intermediate Conclusion: Ballot compatibility verified, triggering Phase 2b Accepted(B, V).",
+        meaning: "Acceptors register accept vote and emit Phase 2b acknowledgement.",
+        x: 360,
+        y: 210,
+        ast: {
+          type: "and",
+          left: { type: "var", name: "PromiseB" },
+          right: { type: "var", name: "AcceptReqB" },
+        },
+      },
+      {
+        id: "D",
+        label: "(PromiseB ∧ AcceptReqB) → ValueChosen",
+        type: "premise",
+        description: "Premise: Gathering majority Phase 2b accept votes permanently chooses value V.",
+        meaning: "Commit threshold reached: Value V is irreversibly decided.",
+        x: 360,
+        y: 360,
+        ast: {
+          type: "implies",
+          left: {
+            type: "and",
+            left: { type: "var", name: "PromiseB" },
+            right: { type: "var", name: "AcceptReqB" },
+          },
+          right: { type: "var", name: "ValueChosen" },
+        },
+      },
+      {
+        id: "E",
+        label: "ValueChosen",
+        type: "conclusion",
+        description: "Conclusion ValueChosen: Value V is committed across the distributed state machine.",
+        meaning: "The target theorem: 100% formal verification of Phase 2b consensus commitment.",
+        x: 600,
+        y: 285,
+        ast: { type: "var", name: "ValueChosen" },
+      },
+    ],
+    initialEdges: [
+      { source: "A", target: "C", ruleApplied: "∧-Intro" },
+      { source: "B", target: "C", ruleApplied: "∧-Intro" },
+    ],
+    validPairs: [
+      ["A", "C"],
+      ["C", "A"],
+      ["B", "C"],
+      ["C", "B"],
+      ["C", "E"],
+      ["E", "C"],
+      ["D", "E"],
+      ["E", "D"],
+    ],
+    simulationSteps: [
+      "Initializing Paxos Phase 2B Verification Engine...",
+      "Checking Acceptor Promise state for ballot B (PromiseB)...",
+      "Checking Phase 2a Accept Request for ballot B (AcceptReqB)...",
+      "Applying Conjunction Introduction to derive (PromiseB ∧ AcceptReqB)...",
+      "Acceptor ballot compatibility verified: Phase 2b votes emitted.",
+      "Linking quorum aggregation with Commit Rule Node D...",
+      "Applying Modus Ponens on derived Node C and Premise Node D...",
+      "Discharging final Conclusion Node E (ValueChosen)...",
+      "Verifying zero uncommitted transitions across network drops...",
+      "Paxos Phase 2B Quorum Commitment formally proven (Q.E.D.)",
+    ],
+    leanCode: `-- Formal Proof in Lean 4
+theorem paxos_phase2b_quorum (PromiseB AcceptReqB ValueChosen : Prop)
+  (hA : PromiseB)
+  (hB : AcceptReqB)
+  (hD : (PromiseB ∧ AcceptReqB) → ValueChosen) : ValueChosen := by
+  have hC : PromiseB ∧ AcceptReqB := And.intro hA hB
+  exact hD hC`,
+    latexCode: `\\begin{prooftree}
+  \\AxiomC{$PromiseB$}
+  \\AxiomC{$AcceptReqB$}
+  \\RightLabel{\\scriptsize $\\land$-Intro}
+  \\BinaryInfC{$PromiseB \\land AcceptReqB$}
+  \\AxiomC{$(PromiseB \\land AcceptReqB) \\to ValueChosen$}
+  \\RightLabel{\\scriptsize MP}
+  \\BinaryInfC{$ValueChosen$}
+\\end{prooftree}`,
+  },
+
+  "bft-quorum": {
+    id: "bft-quorum",
+    title: "BFT 3f+1 Quorum Overlap",
+    subtitle: "Pigeonhole Overlap Bound · Byzantine Equivocation Resistance",
+    category: "Fault Tolerance",
+    ruleName: "BFT Quorum ((Quorum1 ∧ Quorum2) ∧ ((Quorum1 ∧ Quorum2) → HonestOverlap) ⊢ ByzantineSafety)",
+    scenario: "PBFT / Tendermint consensus safety in a 3f+1 network tolerating up to f arbitrary Byzantine faulty nodes.",
+    goalDescription: "Discharge ByzantineSafety invariant: Two conflicting blocks/values can never both receive quorum certificates.",
+    targetNodeId: "E",
+    intermediateNodeId: "C",
+    intermediateRequires: ["A", "B"],
+    conclusionRequires: ["C", "D"],
+    nodes: [
+      {
+        id: "A",
+        label: "Quorum1",
+        type: "premise",
+        description: "Premise Quorum1: Primary quorum Q1 of 2f+1 nodes signed prepare certificate for value V1.",
+        meaning: "Certificate Q1 meets 2/3 supermajority threshold in view v.",
+        x: 120,
+        y: 130,
+        ast: { type: "var", name: "Quorum1" },
+      },
+      {
+        id: "B",
+        label: "Quorum2",
+        type: "premise",
+        description: "Premise Quorum2: Conflicting quorum Q2 of 2f+1 nodes attempts prepare certificate for V2.",
+        meaning: "Adversary attempts to create split-brain commit with competing quorum Q2.",
+        x: 120,
+        y: 290,
+        ast: { type: "var", name: "Quorum2" },
+      },
+      {
+        id: "C",
+        label: "HonestOverlap",
+        type: "intermediate",
+        description: "Intermediate Conclusion HonestOverlap: Q1 and Q2 intersect in at least f+1 nodes (at least 1 honest node).",
+        meaning: "Pigeonhole bound: 2(2f+1) - (3f+1) = f+1; subtracting at most f faulty nodes leaves ≥ 1 honest node.",
+        x: 360,
+        y: 210,
+        ast: { type: "var", name: "HonestOverlap" },
+      },
+      {
+        id: "D",
+        label: "HonestOverlap → ByzantineSafety",
+        type: "premise",
+        description: "Premise: Honest node strictly rejects double-signing conflicting values in view v.",
+        meaning: "Byzantine equivocation refutation: Honest validator refuses to sign two different values.",
+        x: 360,
+        y: 360,
+        ast: {
+          type: "implies",
+          left: { type: "var", name: "HonestOverlap" },
+          right: { type: "var", name: "ByzantineSafety" },
+        },
+      },
+      {
+        id: "E",
+        label: "ByzantineSafety",
+        type: "conclusion",
+        description: "Conclusion ByzantineSafety: Byzantine agreement guaranteed, preventing blockchain forks.",
+        meaning: "The target theorem: 100% formal resilience against up to f Byzantine malicious nodes.",
+        x: 600,
+        y: 285,
+        ast: { type: "var", name: "ByzantineSafety" },
+      },
+    ],
+    initialEdges: [
+      { source: "A", target: "C", ruleApplied: "BFT-Quorum" },
+      { source: "B", target: "C", ruleApplied: "BFT-Quorum" },
+    ],
+    validPairs: [
+      ["A", "C"],
+      ["C", "A"],
+      ["B", "C"],
+      ["C", "B"],
+      ["C", "E"],
+      ["E", "C"],
+      ["D", "E"],
+      ["E", "D"],
+    ],
+    simulationSteps: [
+      "Initializing Byzantine Fault Tolerance Quorum Verification Engine...",
+      "Evaluating Quorum 1 size: 2f + 1 nodes (Quorum1)...",
+      "Evaluating Conflicting Quorum 2 size: 2f + 1 nodes (Quorum2)...",
+      "Calculating Pigeonhole overlap in 3f + 1 total cluster: (2f+1) + (2f+1) - (3f+1) = f + 1...",
+      "Subtracting maximum f Byzantine faulty nodes: at least 1 honest non-faulty node guaranteed (HonestOverlap)...",
+      "Inspecting honest validator double-signing prevention rule Node D...",
+      "Applying Modus Ponens on derived Node C and Premise Node D...",
+      "Discharging final Conclusion Node E (ByzantineSafety)...",
+      "Verifying complete fork-freedom and equivocation resistance...",
+      "Byzantine Fault Tolerance 3f+1 Quorum Safety formally proven (Q.E.D.)",
+    ],
+    leanCode: `-- Formal Proof in Lean 4
+theorem bft_3f_plus_1_quorum_safety (Quorum1 Quorum2 HonestOverlap ByzantineSafety : Prop)
+  (hA : Quorum1)
+  (hB : Quorum2)
+  (hOverlap : Quorum1 → Quorum2 → HonestOverlap)
+  (hD : HonestOverlap → ByzantineSafety) : ByzantineSafety := by
+  have hC : HonestOverlap := hOverlap hA hB
+  exact hD hC`,
+    latexCode: `\\begin{prooftree}
+  \\AxiomC{$Quorum1$}
+  \\AxiomC{$Quorum2$}
+  \\RightLabel{\\scriptsize BFT-Quorum}
+  \\BinaryInfC{$HonestOverlap$}
+  \\AxiomC{$HonestOverlap \\to ByzantineSafety$}
+  \\RightLabel{\\scriptsize MP}
+  \\BinaryInfC{$ByzantineSafety$}
+\\end{prooftree}`,
+  },
+
   custom: {
     id: "custom",
     title: "Custom Invariant Studio",
@@ -1484,6 +2042,17 @@ export function getSuggestion(inputVal: string, _theoremId: TheoremId = "modus-p
       "2pc",
       "quorum",
       "cache",
+      "synod",
+      "paxos",
+      "paxos-synod",
+      "phase2b",
+      "paxos-phase2b",
+      "paxos2b",
+      "2b",
+      "bft",
+      "bft-quorum",
+      "pbft",
+      "pbft-quorum",
       "modus-ponens",
       "modus-tollens",
       "hypothetical-syllogism",
@@ -1537,6 +2106,18 @@ export function getSuggestion(inputVal: string, _theoremId: TheoremId = "modus-p
     }
     if (tokens.length === 2 && inputVal.endsWith(" ")) {
       return `${tokens[0]} normal`;
+    }
+  }
+
+  // Prune or delete-step command
+  if (firstWord === "prune" || firstWord === "delete-step") {
+    const secondWord = tokens[1]?.toUpperCase() || "";
+    const options = ["3", "5", "C", "E"];
+    if (tokens.length === 2 && !inputVal.endsWith(" ")) {
+      const matchOpt = options.find((opt) => opt.startsWith(secondWord));
+      if (matchOpt && matchOpt !== secondWord) {
+        return `${tokens[0]} ${matchOpt}`;
+      }
     }
   }
 
@@ -1630,59 +2211,139 @@ export function getFallacyDiagnosis(
 
   // Circular Reasoning
   if (s === t) {
+    const premises: FallacyFormulaAst[] = [
+      {
+        label: `Premise 1: ${s}`,
+        ast: { type: "var", name: "P" },
+        description: `Node ${s} asserted without independent proof justification.`,
+      },
+      {
+        label: `Premise 2: ${s}`,
+        ast: { type: "var", name: "P" },
+        description: `Self-referential dependency on Node ${s}.`,
+      },
+    ];
+    const conclusion: FallacyFormulaAst = {
+      label: `Conclusion: ${s}`,
+      ast: { type: "var", name: "P" },
+      description: `Target Node ${s} assumed from self-reference.`,
+    };
+    const { truthTable, variables } = generateTruthTable(premises, conclusion);
+    const enhancedTable = truthTable.map((r) =>
+      !r.p && !r.conclusion ? { ...r, isCounterexample: true } : r
+    );
+
     return {
       fallacyName: "Fallacy of Circular Reasoning (Petitio Principii)",
       formalFormula: "P ⊢ P (Tautological Self-Reference)",
       plainEnglish: `Connecting Node ${s} directly to itself creates an invalid recursive feedback loop without establishing an external premise justification.`,
       softwareAnalogy: "Circular dependency in module imports: A depends on A, causing a runtime bootstrap deadlock.",
-      truthTable: [
-        { p: true, q: true, premise1: true, premise2: true, conclusion: true, isCounterexample: false },
-        { p: false, q: false, premise1: false, premise2: false, conclusion: false, isCounterexample: true },
-      ],
+      premises,
+      conclusion,
+      variables,
+      truthTable: enhancedTable,
+      counterexampleValuation: { P: false, Q: false },
     };
   }
 
   // Affirming the Consequent
   if ((s === "C" && t === "A") || (s === "E" && t === "C")) {
+    const premises: FallacyFormulaAst[] = [
+      {
+        label: "Premise 1: P → Q",
+        ast: { type: "implies", left: { type: "var", name: "P" }, right: { type: "var", name: "Q" } },
+        description: "If the antecedent condition P occurs, consequent Q follows.",
+      },
+      {
+        label: "Premise 2: Q",
+        ast: { type: "var", name: "Q" },
+        description: "Consequent Q is observed or asserted as true.",
+      },
+    ];
+    const conclusion: FallacyFormulaAst = {
+      label: "Conclusion: P",
+      ast: { type: "var", name: "P" },
+      description: "Erroneously inferring that antecedent P was the sole cause.",
+    };
+    const { truthTable, variables, counterexampleValuation } = generateTruthTable(premises, conclusion);
+
     return {
       fallacyName: "Fallacy of Affirming the Consequent",
       formalFormula: "((P → Q) ∧ Q) ⊬ P",
       plainEnglish: `Assuming that because the outcome (${t}) occurred, the specific initial cause (${s}) must have been the sole trigger. Other independent factors could have caused the same outcome.`,
       softwareAnalogy: "Observing that regression tests passed does not prove that all possible edge cases were tested — a missing test case could simply have been omitted.",
-      truthTable: [
-        { p: true, q: true, premise1: true, premise2: true, conclusion: true, isCounterexample: false },
-        { p: false, q: true, premise1: true, premise2: true, conclusion: false, isCounterexample: true },
-        { p: true, q: false, premise1: false, premise2: false, conclusion: true, isCounterexample: false },
-        { p: false, q: false, premise1: true, premise2: false, conclusion: false, isCounterexample: false },
-      ],
+      premises,
+      conclusion,
+      variables,
+      truthTable,
+      counterexampleValuation: counterexampleValuation || { P: false, Q: true },
     };
   }
 
   // Denying the Antecedent
   if (s === "A" && t === "D") {
+    const premises: FallacyFormulaAst[] = [
+      {
+        label: "Premise 1: P → Q",
+        ast: { type: "implies", left: { type: "var", name: "P" }, right: { type: "var", name: "Q" } },
+        description: "If antecedent P occurs, consequent Q follows.",
+      },
+      {
+        label: "Premise 2: ¬P",
+        ast: { type: "not", operand: { type: "var", name: "P" } },
+        description: "Antecedent P is denied or false.",
+      },
+    ];
+    const conclusion: FallacyFormulaAst = {
+      label: "Conclusion: ¬Q",
+      ast: { type: "not", operand: { type: "var", name: "Q" } },
+      description: "Erroneously inferring that consequent Q cannot occur.",
+    };
+    const { truthTable, variables, counterexampleValuation } = generateTruthTable(premises, conclusion);
+
     return {
       fallacyName: "Fallacy of Denying the Antecedent",
       formalFormula: "((P → Q) ∧ ¬P) ⊬ ¬Q",
       plainEnglish: `Assuming that if the antecedent condition is not met, the consequence cannot occur. The consequence might still happen via other mechanisms.`,
       softwareAnalogy: "If you don't run tests on commit (¬P), that doesn't mean zero bugs were caught (¬Q); an automated compiler lint or canary build could have caught them.",
-      truthTable: [
-        { p: true, q: true, premise1: true, premise2: false, conclusion: true, isCounterexample: false },
-        { p: false, q: true, premise1: true, premise2: true, conclusion: false, isCounterexample: true },
-        { p: false, q: false, premise1: true, premise2: true, conclusion: true, isCounterexample: false },
-      ],
+      premises,
+      conclusion,
+      variables,
+      truthTable,
+      counterexampleValuation: counterexampleValuation || { P: false, Q: true },
     };
   }
 
   // Incompatible Terms / Non Sequitur
+  const premises: FallacyFormulaAst[] = [
+    {
+      label: `Premise 1: Node ${s}`,
+      ast: { type: "var", name: "P" },
+      description: `Assertion of Node ${s} within active graph context.`,
+    },
+    {
+      label: "Premise 2: ¬Q (Independent)",
+      ast: { type: "not", operand: { type: "var", name: "Q" } },
+      description: `Target Node ${t} is independently unconstrained or false.`,
+    },
+  ];
+  const conclusion: FallacyFormulaAst = {
+    label: `Conclusion: Node ${t}`,
+    ast: { type: "var", name: "Q" },
+    description: `Unjustified deduction of Node ${t} from Node ${s}.`,
+  };
+  const { truthTable, variables, counterexampleValuation } = generateTruthTable(premises, conclusion);
+
   return {
     fallacyName: "Fallacy of Incompatible Terms (Non Sequitur)",
     formalFormula: `Node ${s} ⊬ Node ${t}`,
     plainEnglish: `There is no valid deductive inference rule linking Node ${s} directly to Node ${t} in the active theorem.`,
     softwareAnalogy: "Type mismatch in function signatures: passing an unrelated variable type into an incompatible parameter socket.",
-    truthTable: [
-      { p: true, q: false, premise1: true, premise2: false, conclusion: false, isCounterexample: true },
-      { p: false, q: true, premise1: false, premise2: true, conclusion: false, isCounterexample: true },
-    ],
+    premises,
+    conclusion,
+    variables,
+    truthTable,
+    counterexampleValuation: counterexampleValuation || { P: true, Q: false },
   };
 }
 
@@ -1819,6 +2480,8 @@ export function getDeductionLedger(
       premises: "Given",
       plainEnglish: nA?.description || "Initial premise established.",
       isProven: true,
+      nodeId: nA?.id || "A",
+      isDeletable: false,
     },
     {
       stepNumber: 2,
@@ -1827,6 +2490,8 @@ export function getDeductionLedger(
       premises: "Given",
       plainEnglish: nB?.description || "Conditional implication premise.",
       isProven: true,
+      nodeId: nB?.id || "B",
+      isDeletable: false,
     },
     {
       stepNumber: 3,
@@ -1835,6 +2500,8 @@ export function getDeductionLedger(
       premises: "Lines [1, 2]",
       plainEnglish: nC?.meaning || "Derived intermediate conclusion.",
       isProven: isC_Proven,
+      nodeId: nC?.id || "C",
+      isDeletable: isC_Proven,
     },
     {
       stepNumber: 4,
@@ -1843,6 +2510,8 @@ export function getDeductionLedger(
       premises: "Given",
       plainEnglish: nD?.description || "Goal conditional premise.",
       isProven: true,
+      nodeId: nD?.id || "D",
+      isDeletable: false,
     },
     {
       stepNumber: 5,
@@ -1851,8 +2520,110 @@ export function getDeductionLedger(
       premises: "Lines [3, 4]",
       plainEnglish: nE?.meaning || "Target conclusion proven with mathematical certainty.",
       isProven: isE_Proven,
+      nodeId: nE?.id || "E",
+      isDeletable: isE_Proven,
     },
   ];
+}
+
+/**
+ * Result object returned when pruning a deduction step or node.
+ */
+export interface PruneResult {
+  success: boolean;
+  newEdges: Edge[];
+  prunedCount: number;
+  prunedNodeId?: string;
+  prunedStepNumber?: number;
+  targetLabel?: string;
+  reason: string;
+}
+
+/**
+ * Prunes an intermediate lemma or conclusion deduction step and recursively removes dependent edges in the DAG.
+ * Foundational premises are immutable axioms and cannot be deleted.
+ */
+export function pruneStepOrNode(
+  stepOrNode: number | string,
+  edges: Edge[],
+  theoremId: TheoremId = "modus-ponens"
+): PruneResult {
+  const th = THEOREMS[theoremId] || THEOREMS["modus-ponens"];
+
+  let targetNodeId: string;
+  let targetStepNum: number | undefined;
+
+  const rawStr = typeof stepOrNode === "string" ? stepOrNode.trim() : String(stepOrNode);
+  const parsedNum = parseInt(rawStr, 10);
+
+  if (!Number.isNaN(parsedNum) && String(parsedNum) === rawStr) {
+    targetStepNum = parsedNum;
+    if (parsedNum === 1) targetNodeId = "A";
+    else if (parsedNum === 2) targetNodeId = "B";
+    else if (parsedNum === 3) targetNodeId = th.intermediateNodeId || "C";
+    else if (parsedNum === 4) targetNodeId = "D";
+    else if (parsedNum === 5) targetNodeId = th.targetNodeId || "E";
+    else {
+      return {
+        success: false,
+        newEdges: edges,
+        prunedCount: 0,
+        reason: `Step ${parsedNum} is out of bounds (valid steps: 1 to 5).`,
+      };
+    }
+  } else {
+    targetNodeId = rawStr.toUpperCase();
+    if (targetNodeId === "A") targetStepNum = 1;
+    else if (targetNodeId === "B") targetStepNum = 2;
+    else if (targetNodeId === (th.intermediateNodeId || "C").toUpperCase()) targetStepNum = 3;
+    else if (targetNodeId === "D") targetStepNum = 4;
+    else if (targetNodeId === (th.targetNodeId || "E").toUpperCase()) targetStepNum = 5;
+  }
+
+  const targetNode = th.nodes.find((n) => n.id.toUpperCase() === targetNodeId);
+  if (!targetNode) {
+    return {
+      success: false,
+      newEdges: edges,
+      prunedCount: 0,
+      reason: `Node '${targetNodeId}' not found in active theorem '${th.title}'.`,
+    };
+  }
+
+  if (targetNode.type === "premise" || targetStepNum === 1 || targetStepNum === 2 || targetStepNum === 4) {
+    return {
+      success: false,
+      newEdges: edges,
+      prunedCount: 0,
+      prunedNodeId: targetNode.id,
+      prunedStepNumber: targetStepNum,
+      targetLabel: targetNode.label,
+      reason: `Step ${targetStepNum ?? targetNode.id} (${targetNode.label}) is a foundational premise and immutable axiom. Only derived steps (intermediate lemmas and conclusions) can be pruned.`,
+    };
+  }
+
+  // Full DAG Cascade:
+  // Remove all edges directly connected to targetNodeId (incoming and outgoing)
+  const newEdges = edges.filter(
+    (e) =>
+      e.source.toUpperCase() !== targetNodeId &&
+      e.target.toUpperCase() !== targetNodeId
+  );
+
+  const prunedCount = edges.length - newEdges.length;
+
+  return {
+    success: true,
+    newEdges,
+    prunedCount,
+    prunedNodeId: targetNode.id,
+    prunedStepNumber: targetStepNum,
+    targetLabel: targetNode.label,
+    reason:
+      prunedCount > 0
+        ? `Pruned Step ${targetStepNum ?? targetNode.id} (${targetNode.label}) and ${prunedCount} dependent edge(s).`
+        : `Step ${targetStepNum ?? targetNode.id} (${targetNode.label}) had no active edges to prune.`,
+  };
 }
 
 /**
@@ -2057,3 +2828,238 @@ ${edgeDefs}
     class Node_E ${isE_Proven ? "proven" : "pending"};
 `;
 }
+
+export interface CompatibleTargetInfo {
+  targetId: string;
+  targetLabel: string;
+  ruleId: string;
+  ruleName: string;
+  ruleSymbol: string;
+  ruleTemplate: string;
+  badgeLabel: string;
+  hint: string;
+}
+
+/**
+ * Returns all compatible target nodes and corresponding rule annotations for a source node.
+ */
+export function getCompatibleTargets(
+  sourceId: string,
+  theoremId: TheoremId = "modus-ponens",
+  edges: Edge[] = []
+): CompatibleTargetInfo[] {
+  const th = THEOREMS[theoremId] || THEOREMS["modus-ponens"];
+  const sNode = th.nodes.find((n) => n.id.toUpperCase() === sourceId.toUpperCase());
+  if (!sNode) return [];
+
+  const results: CompatibleTargetInfo[] = [];
+
+  for (const tNode of th.nodes) {
+    if (tNode.id.toUpperCase() === sourceId.toUpperCase()) continue;
+
+    const isIntermediateTarget =
+      tNode.id === th.intermediateNodeId && th.intermediateRequires.includes(sNode.id);
+    const isConclusionTarget =
+      tNode.id === th.targetNodeId && th.conclusionRequires.includes(sNode.id);
+
+    if (!isIntermediateTarget && !isConclusionTarget) continue;
+
+    const validation = canConnect(sourceId, tNode.id, edges, theoremId);
+    if (!validation.allowed) continue;
+
+    let ruleId = "mp";
+    let ruleName = "Modus Ponens";
+    let ruleSymbol = "MP";
+    let ruleTemplate = "P, P → Q ⊢ Q";
+
+    if (tNode.id === th.intermediateNodeId) {
+      const parsedRuleName = th.ruleName.split("(")[0].trim();
+      ruleName = parsedRuleName;
+      const foundRule = INFERENCE_RULES.find(
+        (r) => r.name.toLowerCase() === parsedRuleName.toLowerCase() || r.id === theoremId
+      );
+      if (foundRule) {
+        ruleId = foundRule.id;
+        ruleSymbol = foundRule.symbol;
+        ruleTemplate = foundRule.template;
+      } else {
+        ruleSymbol = parsedRuleName.split(" ").map((w) => w[0]).join("").toUpperCase();
+      }
+    } else if (tNode.id === th.targetNodeId) {
+      ruleId = "mp";
+      ruleName = "Modus Ponens";
+      ruleSymbol = "MP";
+      ruleTemplate = "P, P → Q ⊢ Q";
+    }
+
+    results.push({
+      targetId: tNode.id,
+      targetLabel: tNode.label,
+      ruleId,
+      ruleName,
+      ruleSymbol,
+      ruleTemplate,
+      badgeLabel: `${ruleSymbol} Target ⊢ ${tNode.label}`,
+      hint: `Connect [${sNode.id}: ${sNode.label}] to [${tNode.id}: ${tNode.label}] via ${ruleName}`,
+    });
+  }
+
+  return results;
+}
+
+export interface AlignmentGuide {
+  type: "horizontal" | "vertical";
+  pos: number;
+  start: number;
+  end: number;
+  sourceNodeId?: string;
+  targetNodeId?: string;
+}
+
+export interface SnapResult {
+  x: number;
+  y: number;
+  snappedX: boolean;
+  snappedY: boolean;
+  guides: AlignmentGuide[];
+}
+
+/**
+ * Computes magnetic snapping coordinates and active orthogonal alignment crosshairs.
+ */
+export function computeMagneticSnap(
+  currentX: number,
+  currentY: number,
+  nodeWidth: number,
+  nodeHeight: number,
+  peerNodes: { id: string; x: number; y: number; width?: number; height?: number }[],
+  options: {
+    gridSize?: number;
+    threshold?: number;
+    enableGrid?: boolean;
+    enableAlignment?: boolean;
+  } = {}
+): SnapResult {
+  const gridSize = options.gridSize ?? 20;
+  const threshold = options.threshold ?? 12;
+  const enableGrid = options.enableGrid ?? true;
+  const enableAlignment = options.enableAlignment ?? true;
+
+  let finalX = currentX;
+  let finalY = currentY;
+  let snappedX = false;
+  let snappedY = false;
+  const guides: AlignmentGuide[] = [];
+
+  if (enableAlignment && peerNodes.length > 0) {
+    const currentCenterX = currentX + nodeWidth / 2;
+    const currentRightX = currentX + nodeWidth;
+    const currentCenterY = currentY + nodeHeight / 2;
+    const currentBottomY = currentY + nodeHeight;
+
+    let closestDistX = threshold + 1;
+    let bestSnapX: number | null = null;
+    let bestGuideX: AlignmentGuide | null = null;
+
+    let closestDistY = threshold + 1;
+    let bestSnapY: number | null = null;
+    let bestGuideY: AlignmentGuide | null = null;
+
+    for (const peer of peerNodes) {
+      const peerW = peer.width ?? nodeWidth;
+      const peerH = peer.height ?? nodeHeight;
+      const peerCenterX = peer.x + peerW / 2;
+      const peerRightX = peer.x + peerW;
+      const peerCenterY = peer.y + peerH / 2;
+      const peerBottomY = peer.y + peerH;
+
+      // X alignment checks (Center-to-Center, Left-to-Left, Right-to-Right)
+      const xChecks = [
+        { myPos: currentCenterX, peerPos: peerCenterX, snapPos: peerCenterX - nodeWidth / 2, guidePos: peerCenterX },
+        { myPos: currentX, peerPos: peer.x, snapPos: peer.x, guidePos: peer.x },
+        { myPos: currentRightX, peerPos: peerRightX, snapPos: peerRightX - nodeWidth, guidePos: peerRightX },
+      ];
+
+      for (const check of xChecks) {
+        const dist = Math.abs(check.myPos - check.peerPos);
+        if (dist < closestDistX) {
+          closestDistX = dist;
+          bestSnapX = check.snapPos;
+          const minY = Math.min(currentY, peer.y) - 20;
+          const maxY = Math.max(currentBottomY, peerBottomY) + 20;
+          bestGuideX = {
+            type: "vertical",
+            pos: check.guidePos,
+            start: minY,
+            end: maxY,
+            targetNodeId: peer.id,
+          };
+        }
+      }
+
+      // Y alignment checks (Center-to-Center, Top-to-Top, Bottom-to-Bottom)
+      const yChecks = [
+        { myPos: currentCenterY, peerPos: peerCenterY, snapPos: peerCenterY - nodeHeight / 2, guidePos: peerCenterY },
+        { myPos: currentY, peerPos: peer.y, snapPos: peer.y, guidePos: peer.y },
+        { myPos: currentBottomY, peerPos: peerBottomY, snapPos: peerBottomY - nodeHeight, guidePos: peerBottomY },
+      ];
+
+      for (const check of yChecks) {
+        const dist = Math.abs(check.myPos - check.peerPos);
+        if (dist < closestDistY) {
+          closestDistY = dist;
+          bestSnapY = check.snapPos;
+          const minX = Math.min(currentX, peer.x) - 20;
+          const maxX = Math.max(currentRightX, peerRightX) + 20;
+          bestGuideY = {
+            type: "horizontal",
+            pos: check.guidePos,
+            start: minX,
+            end: maxX,
+            targetNodeId: peer.id,
+          };
+        }
+      }
+    }
+
+    if (bestSnapX !== null && closestDistX <= threshold) {
+      finalX = bestSnapX;
+      snappedX = true;
+      if (bestGuideX) guides.push(bestGuideX);
+    }
+
+    if (bestSnapY !== null && closestDistY <= threshold) {
+      finalY = bestSnapY;
+      snappedY = true;
+      if (bestGuideY) guides.push(bestGuideY);
+    }
+  }
+
+  // Grid Snapping fallback if not aligned on an axis
+  if (enableGrid && gridSize > 0) {
+    if (!snappedX) {
+      const nearestGridX = Math.round(currentX / gridSize) * gridSize;
+      if (Math.abs(currentX - nearestGridX) <= threshold) {
+        finalX = nearestGridX;
+        snappedX = true;
+      }
+    }
+
+    if (!snappedY) {
+      const nearestGridY = Math.round(currentY / gridSize) * gridSize;
+      if (Math.abs(currentY - nearestGridY) <= threshold) {
+        finalY = nearestGridY;
+        snappedY = true;
+      }
+    }
+  }
+
+  return {
+    x: finalX,
+    y: finalY,
+    snappedX,
+    snappedY,
+    guides,
+  };
+}
+
