@@ -8,7 +8,7 @@
 
 > **getSimulatedTerminalLogs**(`language`): [`SimulatedTerminalLog`](../interfaces/SimulatedTerminalLog.md)[]
 
-Defined in: [lib/github.ts:215](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L215)
+Defined in: [lib/github.ts:227](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L227)
 
 ## Parameters
 

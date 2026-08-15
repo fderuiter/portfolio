@@ -21,6 +21,20 @@ export interface GitHubStats {
   commitActivity: number[];
 }
 
+/**
+ * Centralized, mathematically uniform mock telemetry commit activity generator.
+ * Produces exactly 52 values with static, non-parameterized curves to ensure visual parity
+ * across simulation and rate-limiting API fallbacks.
+ */
+export function generateMockCommitActivity(): number[] {
+  return Array.from({ length: 52 }, (_, i) => {
+    const base = 4;
+    const wave = Math.round(Math.sin(i / 2.5) * 3);
+    const spike = i % 7 === 0 ? 4 : 0;
+    return Math.max(1, base + wave + spike);
+  });
+}
+
 interface RawCommitResponse {
   sha?: string;
   commit?: {
@@ -154,9 +168,7 @@ async function fetchRawGitHubStats(owner: string, repo: string): Promise<GitHubS
 
   // Resilient sine-wave-based mockup generator if empty or rate-limited
   if (commitActivity.length === 0) {
-    commitActivity = Array.from({ length: 52 }, (_, i) => {
-      return Math.max(0, Math.round(5 + Math.sin(i / 3) * 4 + (i % 5 === 0 ? 3 : 0)));
-    });
+    commitActivity = generateMockCommitActivity();
   }
 
   return {
@@ -292,12 +304,7 @@ export function getSimulatedStats(language: string): GitHubStats {
     ];
   }
 
-  const commitActivity = Array.from({ length: 52 }, (_, i) => {
-    const base = 4;
-    const wave = Math.round(Math.sin(i / 2.5) * 3);
-    const spike = i % 7 === 0 ? 4 : 0;
-    return Math.max(1, base + wave + spike);
-  });
+  const commitActivity = generateMockCommitActivity();
 
   let recentCommits: GitHubCommit[] = [];
   if (lang === "haskell") {
