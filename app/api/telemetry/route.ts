@@ -203,44 +203,17 @@ export async function POST(req: NextRequest) {
       createdAt: new Date(),
     };
 
-    let newEvent;
+    // Push event into Redis list for background synchronization and ensure TTL
+    const p = redis.pipeline();
+    p.lpush("telemetry_buffer", eventData);
+    p.expire("telemetry_buffer", 48 * 60 * 60); // 48 hours
+    const [listLength] = await p.exec();
     
-    try {
-      // Try writing to primary DB with 100ms timeout to ensure <150ms P95 latency
-      newEvent = await Promise.race([
-        prisma.telemetryEvent.create({
-          data: eventData,
-          select: {
-            id: true,
-            projectSlug: true,
-            eventType: true,
-            createdAt: true,
-          },
-        }),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error("Database Write Timeout")), 100)
-        )
-      ]);
-    } catch (dbErr) {
-      console.warn("Primary DB write failed or timed out. Buffering to secondary store.", dbErr);
-      
-      const redis = new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL || "http://localhost:8079",
-        token: process.env.UPSTASH_REDIS_REST_TOKEN || "example_token",
-      });
-      
-      // Push event into Redis list for background synchronization and ensure TTL
-      const p = redis.pipeline();
-      p.lpush("telemetry_buffer", eventData);
-      p.expire("telemetry_buffer", 48 * 60 * 60); // 48 hours
-      const [listLength] = await p.exec();
-      
-      if (Number(listLength) > 1000) {
-        console.error("ALERT: Secondary telemetry buffer occupancy exceeds threshold.");
-      }
-      
-      newEvent = eventData;
+    if (Number(listLength) > 1000) {
+      console.error("ALERT: Secondary telemetry buffer occupancy exceeds threshold.");
     }
+    
+    const newEvent = eventData;
 
     const response = NextResponse.json({ success: true, event: newEvent }, { status: 201 });
     if (rateLimitRes.headers) {
