@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { hexToRgba } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { designManifest } from "@/lib/design-manifest";
 import { IconBriefcase, IconFlame, IconSwitchHorizontal } from "@tabler/icons-react";
+import { useTimelineState } from "@/hooks/useTimelineState";
 
 export interface TimelineItem {
   role: string;
@@ -69,22 +70,12 @@ const timelineData: TimelineItem[] = [
 ];
 
 export const Timeline: React.FC = () => {
-  const [globalMode, setGlobalMode] = useState<"recruiter" | "reality">("reality");
-  const [cardOverrides, setCardOverrides] = useState<Record<number, "recruiter" | "reality">>({});
-
-  const handleGlobalToggle = (mode: "recruiter" | "reality") => {
-    setGlobalMode(mode);
-    setCardOverrides({});
-  };
-
-  const handleCardToggle = (idx: number) => {
-    const currentCardMode = cardOverrides[idx] ?? globalMode;
-    const nextMode = currentCardMode === "recruiter" ? "reality" : "recruiter";
-    setCardOverrides((prev) => ({
-      ...prev,
-      [idx]: nextMode,
-    }));
-  };
+  const {
+    globalMode,
+    handleGlobalToggle,
+    handleCardToggle,
+    getCardMode,
+  } = useTimelineState();
 
   return (
     <div className="w-full max-w-3xl mx-auto py-6 sm:py-8 relative select-none">
@@ -127,7 +118,7 @@ export const Timeline: React.FC = () => {
       <div className="space-y-10 sm:space-y-14">
         {timelineData.map((item, idx) => {
           const isLeft = idx % 2 === 0;
-          const currentMode = cardOverrides[idx] ?? globalMode;
+          const currentMode = getCardMode(idx);
           const isReality = currentMode === "reality";
 
           return (
