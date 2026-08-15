@@ -125,6 +125,14 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
       },
       {
+        id: "nav-working-with-duck",
+        title: "Working With Duck: Pet Simulation Arcade",
+        subtitle: "Multitasking & puppy management game — balance coding deadlines against Duck's zoomies, potty breaks, and belly rubs",
+        category: "navigation",
+        url: "/arcade/working-with-duck",
+        icon: <IconTerminal className="w-4 h-4 text-amber-400" />
+      },
+      {
         id: "nav-retro-labyrinth",
         title: "Retro Labyrinth: Graveyard Roguelike",
         subtitle: "Roguelike dungeon crawler exploring abandoned repos — TSP dynamic walls, 3D wireframe boss, and developer weapons",
@@ -171,7 +179,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         category: "navigation",
         url: "/schedule",
         icon: <IconCalendar className="w-4 h-4 text-brand-cyan" />
-      }
+      },
     ];
 
     const studyItems: PaletteItem[] = studies.map((study) => ({

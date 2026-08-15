@@ -6,7 +6,7 @@
 
 # Interface: ExtendedRichInlineItem
 
-Defined in: [hooks/usePretextLayout.tsx:211](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L211)
+Defined in: [hooks/usePretextLayout.tsx:229](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L229)
 
 ## Extends
 
@@ -66,4 +66,4 @@ Defined in: node\_modules/@chenglou/pretext/dist/rich-inline.d.ts:4
 
 > **type**: `"text"` \| `"bold"` \| `"italic"` \| `"code"`
 
-Defined in: [hooks/usePretextLayout.tsx:212](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L212)
+Defined in: [hooks/usePretextLayout.tsx:230](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L230)

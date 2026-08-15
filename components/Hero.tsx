@@ -270,9 +270,17 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
   const shouldReduceMotion = useReducedMotion();
   const { ref, height, isReady } = usePretextLayout({
     text,
-    fontSize: 56, // Measures at the typical H1 size
-    lineHeight: 64,
+    fontSize: 60,
+    lineHeight: 60,
     fontFamilyVariable: "--font-inter",
+    getResponsiveMetrics: (width) => {
+      if (width < 640) {
+        return { fontSize: 36, lineHeight: 40 };
+      } else if (width < 768) {
+        return { fontSize: 48, lineHeight: 52 };
+      }
+      return { fontSize: 60, lineHeight: 60 };
+    },
   });
 
   const words = text.split(" ");
@@ -391,6 +399,12 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
     fontSize: 16,
     lineHeight: 28,
     fontFamilyVariable: "--font-inter",
+    getResponsiveMetrics: (width) => {
+      if (width < 640) {
+        return { fontSize: 14, lineHeight: 24 };
+      }
+      return { fontSize: 16, lineHeight: 28 };
+    },
   });
 
   const words = text.split(" ");

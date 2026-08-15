@@ -26,6 +26,32 @@ Defined in: [hooks/usePretextLayout.tsx:30](https://github.com/fderuiter/portfol
 
 ***
 
+### getResponsiveMetrics?
+
+> `optional` **getResponsiveMetrics?**: (`width`) => `object`
+
+Defined in: [hooks/usePretextLayout.tsx:34](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L34)
+
+#### Parameters
+
+##### width
+
+`number`
+
+#### Returns
+
+`object`
+
+##### fontSize
+
+> **fontSize**: `number`
+
+##### lineHeight
+
+> **lineHeight**: `number`
+
+***
+
 ### lineHeight
 
 > **lineHeight**: `number`

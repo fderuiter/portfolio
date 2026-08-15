@@ -31,6 +31,7 @@ export interface UsePretextLayoutOptions {
   lineHeight: number;
   fontFamilyVariable?: string;
   translationMode?: string;
+  getResponsiveMetrics?: (width: number) => { fontSize: number; lineHeight: number };
 }
 
 export interface PretextLayoutState {
@@ -45,6 +46,7 @@ export function usePretextLayout({
   lineHeight,
   fontFamilyVariable = "--font-inter",
   translationMode,
+  getResponsiveMetrics,
 }: UsePretextLayoutOptions) {
   const [state, setState] = useState<PretextLayoutState>({
     isReady: false,
@@ -56,14 +58,34 @@ export function usePretextLayout({
   const fontStringRef = useRef<string>("");
 
   const measureText = useCallback((maxWidth: number) => {
-    if (!preparedTextRef.current || !fontStringRef.current) return;
+    if (!isBrowser() || maxWidth <= 0) return;
+
+    let activeFontSize = fontSize;
+    let activeLineHeight = lineHeight;
+
+    if (getResponsiveMetrics) {
+      const metrics = getResponsiveMetrics(maxWidth);
+      activeFontSize = metrics.fontSize;
+      activeLineHeight = metrics.lineHeight;
+    }
+
+    const fontString = resolveSingleThemeFont(activeFontSize, fontFamilyVariable);
+    fontStringRef.current = fontString;
+
+    const prepareKey = `${text}|${fontString}`;
+    let prepared = textPrepareCache.get(prepareKey);
+    if (!prepared) {
+      prepared = prepare(text, fontString);
+      textPrepareCache.set(prepareKey, prepared);
+    }
+    preparedTextRef.current = prepared;
 
     const flooredWidth = Math.floor(maxWidth);
-    const cacheKey = `${text}|${fontStringRef.current}|${flooredWidth}|${lineHeight}`;
+    const cacheKey = `${text}|${fontString}|${flooredWidth}|${activeLineHeight}`;
     let result = textLayoutCache.get(cacheKey);
 
     if (!result) {
-      result = layout(preparedTextRef.current, flooredWidth, lineHeight);
+      result = layout(prepared, flooredWidth, activeLineHeight);
       textLayoutCache.set(cacheKey, result);
     }
 
@@ -77,7 +99,7 @@ export function usePretextLayout({
         lineCount: result.lineCount,
       };
     });
-  }, [text, lineHeight]);
+  }, [text, fontSize, lineHeight, fontFamilyVariable, getResponsiveMetrics]);
 
   const containerRef = useResizeObserver<HTMLDivElement>((entry) => {
     const maxWidth = entry.contentRect.width;
@@ -98,24 +120,20 @@ export function usePretextLayout({
   useLayoutEffect(() => {
     if (!isBrowser()) return;
 
-    // 1. Senior Design: Extract active Tailwind v4 resolved font variable & use central resolver
-    const fontString = resolveSingleThemeFont(fontSize, fontFamilyVariable);
-    fontStringRef.current = fontString;
-
-    // 2. Phase 1 Preparation: Parse text and cache measurements in Canvas
-    const prepareKey = `${text}|${fontString}`;
-    let prepared = textPrepareCache.get(prepareKey);
-    if (!prepared) {
-      prepared = prepare(text, fontString);
-      textPrepareCache.set(prepareKey, prepared);
-    }
-    preparedTextRef.current = prepared;
-
     if (containerRef.current) {
       const initialWidth = containerRef.current.getBoundingClientRect().width;
       measureText(initialWidth);
     } else {
-       setState((prev) => ({ ...prev, isReady: true }));
+      const fontString = resolveSingleThemeFont(fontSize, fontFamilyVariable);
+      fontStringRef.current = fontString;
+      const prepareKey = `${text}|${fontString}`;
+      let prepared = textPrepareCache.get(prepareKey);
+      if (!prepared) {
+        prepared = prepare(text, fontString);
+        textPrepareCache.set(prepareKey, prepared);
+      }
+      preparedTextRef.current = prepared;
+      setState((prev) => ({ ...prev, isReady: true }));
     }
   }, [text, fontSize, fontFamilyVariable, measureText, containerRef, translationMode]);
 

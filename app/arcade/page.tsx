@@ -13,6 +13,7 @@ import {
   IconTrophy,
   IconSparkles,
   IconPlayerPlay,
+  IconBone,
 } from "@tabler/icons-react";
 
 interface ArcadeGameCard {
@@ -50,6 +51,23 @@ const getScore = (key?: string) => () => {
 const getServerScore = () => "0";
 
 const GAMES: ArcadeGameCard[] = [
+  {
+    id: "working-with-duck",
+    slug: "working-with-duck",
+    title: "Working With Duck",
+    subtitle: "Pet Simulation & Multitasking Arcade",
+    genre: "Pet Simulation",
+    description:
+      "Balance writing code against managing your autonomous Golden Retriever puppy, Duck. Toss toys to save portfolio hazards, scrub belly rubs during the flop, sprint in the Dog Park, and tuck Duck in for nap time.",
+    mechanics: ["Autonomous Dog AI", "Tug-of-War Multipliers", "Dog Park Whistle Recall", "Polaroid Scrapbook"],
+    techStack: ["HTML5 Canvas 2D", "Web Audio Synthesizer", "Deterministic State Machine"],
+    icon: <IconBone className="w-6 h-6 text-amber-400" />,
+    accentColor: "from-amber-500/20 via-amber-500/5 to-transparent",
+    borderHover: "hover:border-amber-400/50",
+    badgeBg: "bg-amber-500/10 text-amber-300 border-amber-500/30",
+    storageKey: "working_with_duck_high_score",
+    route: "/arcade/working-with-duck",
+  },
   {
     id: "laser-loon",
     slug: "laser-loon",
@@ -275,7 +293,7 @@ export default function ArcadePage() {
           {/* Quick Metrics Bar */}
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs font-mono">
             <span className="px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300">
-              🎮 <strong>5 Playable Games</strong>
+              🎮 <strong>6 Playable Games</strong>
             </span>
             <span className="px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300">
               🔊 <strong>Web Audio Synthesizer</strong>

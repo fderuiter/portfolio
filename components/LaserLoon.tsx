@@ -1151,9 +1151,96 @@ export const LaserLoon: React.FC = () => {
         )}
       </div>
 
+      {/* Mobile / Tablet Touch Controls Bar */}
+      <div className="w-full max-w-3xl flex flex-wrap items-center justify-between gap-2 p-3 mt-3 rounded-2xl bg-neutral-950/80 border border-neutral-800 lg:hidden">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <button
+            type="button"
+            onClick={() => setLaserType("ice-cannon")}
+            className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+              laserType === "ice-cannon"
+                ? "bg-sky-500/20 text-sky-300 border border-sky-500/50 shadow-[0_0_10px_rgba(56,189,248,0.2)]"
+                : "bg-neutral-900 text-neutral-400 border border-neutral-800"
+            }`}
+          >
+            🧊 Ice Cannon
+          </button>
+          <button
+            type="button"
+            onClick={() => setLaserType("cyan-pulse")}
+            className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+              laserType === "cyan-pulse"
+                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.2)]"
+                : "bg-neutral-900 text-neutral-400 border border-neutral-800"
+            }`}
+          >
+            ⚡ Pulse
+          </button>
+          <button
+            type="button"
+            onClick={() => setLaserType("emerald-beam")}
+            className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+              laserType === "emerald-beam"
+                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
+                : "bg-neutral-900 text-neutral-400 border border-neutral-800"
+            }`}
+          >
+            🟢 Plasma
+          </button>
+          <button
+            type="button"
+            onClick={() => setLaserType("rainbow-chaos")}
+            className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+              laserType === "rainbow-chaos"
+                ? "bg-pink-500/20 text-pink-300 border border-pink-500/50 shadow-[0_0_10px_rgba(244,114,182,0.2)]"
+                : "bg-neutral-900 text-neutral-400 border border-neutral-800"
+            }`}
+          >
+            🌈 Chaos
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {gameState !== "playing" ? (
+            <button
+              type="button"
+              onClick={() => {
+                startGame();
+                containerRef.current?.focus();
+              }}
+              className="px-4 py-2 rounded-xl bg-sky-400 text-black font-mono font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-md active:scale-95"
+            >
+              <IconPlayerPlay className="w-3.5 h-3.5 fill-current" />
+              START GAME
+            </button>
+          ) : (
+            <button
+              type="button"
+              onTouchStart={() => {
+                isFiringRef.current = true;
+                fireWeapon();
+              }}
+              onTouchEnd={() => {
+                isFiringRef.current = false;
+              }}
+              onMouseDown={() => {
+                isFiringRef.current = true;
+                fireWeapon();
+              }}
+              onMouseUp={() => {
+                isFiringRef.current = false;
+              }}
+              className="px-6 py-2.5 rounded-xl bg-sky-400 text-black font-mono font-extrabold text-sm active:bg-sky-300 active:scale-95 cursor-pointer shadow-[0_0_15px_rgba(56,189,248,0.4)]"
+            >
+              🔥 FIRE
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Footer Instructions */}
       <div className="w-full max-w-3xl flex justify-between items-center px-4 mt-2 text-[10px] font-mono text-neutral-500">
-        <span>Controls: Click / Space to Shoot Ice Blocks · Keys 1-4 Switch Weapon · WASD Aim</span>
+        <span>Controls: Click / Tap / Space to Shoot Ice Blocks · Touch buttons to switch weapon</span>
         <button
           onClick={() => setScreenShakeEnabled((prev) => !prev)}
           className="hover:text-neutral-300 transition-colors cursor-pointer"

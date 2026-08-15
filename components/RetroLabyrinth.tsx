@@ -12,6 +12,7 @@ import {
   IconMaximize,
   IconMinimize,
 } from "@tabler/icons-react";
+import { VirtualDPad } from "@/components/ui/VirtualDPad";
 import {
   ActiveSideEffect,
   BossState,
@@ -584,6 +585,31 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted }) => 
     handleSubmitTimesheet,
     tryMove,
   ]);
+
+  const handleDirectionalMove = useCallback((dir: "up" | "down" | "left" | "right") => {
+    if (gameStatus !== "playing") return;
+    const isScrambled =
+      activeSideEffect?.type === "scrambled_keys" &&
+      activeSideEffect.expiresAt > Date.now();
+
+    if (dir === "up") {
+      tryMove(0, isScrambled ? 1 : -1);
+    } else if (dir === "down") {
+      tryMove(0, isScrambled ? -1 : 1);
+    } else if (dir === "left") {
+      tryMove(isScrambled ? 1 : -1, 0);
+    } else if (dir === "right") {
+      tryMove(isScrambled ? -1 : 1, 0);
+    }
+  }, [activeSideEffect, gameStatus, tryMove]);
+
+  const cycleWeapon = useCallback(() => {
+    const order: WeaponId[] = ["npm_install", "git_force_push", "stack_overflow"];
+    const nextIdx = (order.indexOf(activeWeaponId) + 1) % order.length;
+    const nextWeapon = order[nextIdx];
+    setActiveWeaponId(nextWeapon);
+    handleFireWeapon(nextWeapon);
+  }, [activeWeaponId, handleFireWeapon]);
 
   // BlinkBrowse cursor movement handler
   const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -1402,54 +1428,18 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted }) => 
             </div>
           </div>
 
-          {/* On-screen Touch D-Pad for Mobile Navigation */}
-          <div className="flex items-center justify-center gap-1 pt-1 sm:hidden">
-            <button
-              type="button"
-              onClick={() => {
-                const isScrambled = activeSideEffect?.type === "scrambled_keys" && activeSideEffect.expiresAt > Date.now();
-                tryMove(isScrambled ? 1 : -1, 0);
-              }}
-              aria-label="Move Left"
-              className="w-7 h-7 rounded bg-zinc-900 border border-zinc-800 active:bg-brand-cyan/20 active:border-brand-cyan text-zinc-300 text-xs font-bold flex items-center justify-center cursor-pointer"
-            >
-              ◀
-            </button>
-            <div className="flex flex-col gap-1">
-              <button
-                type="button"
-                onClick={() => {
-                  const isScrambled = activeSideEffect?.type === "scrambled_keys" && activeSideEffect.expiresAt > Date.now();
-                  tryMove(0, isScrambled ? 1 : -1);
-                }}
-                aria-label="Move Up"
-                className="w-7 h-7 rounded bg-zinc-900 border border-zinc-800 active:bg-brand-cyan/20 active:border-brand-cyan text-zinc-300 text-xs font-bold flex items-center justify-center cursor-pointer"
-              >
-                ▲
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const isScrambled = activeSideEffect?.type === "scrambled_keys" && activeSideEffect.expiresAt > Date.now();
-                  tryMove(0, isScrambled ? -1 : 1);
-                }}
-                aria-label="Move Down"
-                className="w-7 h-7 rounded bg-zinc-900 border border-zinc-800 active:bg-brand-cyan/20 active:border-brand-cyan text-zinc-300 text-xs font-bold flex items-center justify-center cursor-pointer"
-              >
-                ▼
-              </button>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                const isScrambled = activeSideEffect?.type === "scrambled_keys" && activeSideEffect.expiresAt > Date.now();
-                tryMove(isScrambled ? -1 : 1, 0);
-              }}
-              aria-label="Move Right"
-              className="w-7 h-7 rounded bg-zinc-900 border border-zinc-800 active:bg-brand-cyan/20 active:border-brand-cyan text-zinc-300 text-xs font-bold flex items-center justify-center cursor-pointer"
-            >
-              ▶
-            </button>
+          {/* Enhanced Touch D-Pad for Mobile & Tablet */}
+          <div className="w-full pt-1.5 md:hidden flex flex-col items-center">
+            <VirtualDPad
+              onDirectionPress={handleDirectionalMove}
+              onActionAPress={() => handleFireWeapon("emp_blast")}
+              onActionBPress={cycleWeapon}
+              actionALabel="EMP"
+              actionASubtitle="BLAST"
+              actionBLabel="WEAPON"
+              actionBSubtitle={activeWeaponId === "npm_install" ? "NPM" : activeWeaponId === "git_force_push" ? "GIT" : "SO"}
+              className="w-full max-w-sm py-2 px-3"
+            />
           </div>
         </div>
       </div>

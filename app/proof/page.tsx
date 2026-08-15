@@ -593,10 +593,10 @@ export default function ProofWorkspacePage() {
         {liveAnnouncement}
       </div>
 
-      <div className="flex-1 pt-24 pb-6 px-6 flex flex-col md:flex-row gap-6 relative max-w-7xl mx-auto w-full h-[calc(100vh-6rem)]">
+      <div className="flex-1 pt-24 pb-6 px-4 md:px-6 flex flex-col md:flex-row gap-6 relative max-w-7xl mx-auto w-full min-h-[calc(100vh-6rem)] h-auto md:h-[calc(100vh-6rem)]">
         
         {/* Left Workspace Panel: Graphical Flow Canvas */}
-        <div className="flex-1 flex flex-col border border-zinc-900 bg-zinc-950/40 rounded-3xl relative overflow-hidden backdrop-blur-md p-6 h-full min-h-[400px]">
+        <div className="flex-1 flex flex-col border border-zinc-900 bg-zinc-950/40 rounded-3xl relative overflow-hidden backdrop-blur-md p-4 md:p-6 h-[480px] md:h-full min-h-[420px]">
           
           {/* Workspace Title bar */}
           <div className="flex justify-between items-center mb-6 border-b border-zinc-900 pb-4">
@@ -778,7 +778,7 @@ export default function ProofWorkspacePage() {
         {isConsoleOpen && (
           <div 
             data-keyboard-boundary="true"
-            className="w-full md:w-[420px] border border-zinc-900 bg-zinc-950/80 rounded-3xl overflow-hidden flex flex-col relative backdrop-blur-md h-full"
+            className="w-full md:w-[420px] border border-zinc-900 bg-zinc-950/80 rounded-3xl overflow-hidden flex flex-col relative backdrop-blur-md h-[420px] md:h-full min-h-[360px]"
           >
             
             {/* Terminal Window Header */}
