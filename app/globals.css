@@ -128,6 +128,19 @@ body {
   border: 1px solid var(--border);
 }
 
+/* Standardized SVG Visual Filters */
+.svg-glow-cyan {
+  filter: drop-shadow(0 0 1.5px rgba(6, 182, 212, 0.8)) drop-shadow(0 0 4px rgba(6, 182, 212, 0.45));
+}
+
+.svg-glow-blue {
+  filter: drop-shadow(0 0 1.5px rgba(59, 130, 246, 0.8)) drop-shadow(0 0 4px rgba(59, 130, 246, 0.45));
+}
+
+.svg-shadow {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
 .glass-panel-glow {
   background: var(--surface-1);
   backdrop-filter: blur(16px);

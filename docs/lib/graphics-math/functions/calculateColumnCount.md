@@ -2,13 +2,13 @@
 
 ***
 
-[fderuiter-portfolio](../../../modules.md) / [lib/graphics-engine](../README.md) / calculateColumnCount
+[fderuiter-portfolio](../../../modules.md) / [lib/graphics-math](../README.md) / calculateColumnCount
 
 # Function: calculateColumnCount()
 
 > **calculateColumnCount**(`containerWidth`, `breakpoints`, `cols`): `number`
 
-Defined in: [lib/graphics-engine.ts:155](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L155)
+Defined in: [lib/graphics-math.ts:54](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L54)
 
 Calculates responsive column count based on container width and breakpoints.
 

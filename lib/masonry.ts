@@ -10,7 +10,7 @@ import {
   calculateColumnCount, 
   calculateColumnWidth, 
   distributeItemsGreedily 
-} from "@/lib/graphics-engine";
+} from "@/lib/graphics-math";
 
 export interface MasonryConfig {
   COLS: { SM: number; MD: number; LG: number };

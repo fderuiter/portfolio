@@ -2,13 +2,13 @@
 
 ***
 
-[fderuiter-portfolio](../../../modules.md) / [lib/graphics-engine](../README.md) / checkBeamContainerCollision
+[fderuiter-portfolio](../../../modules.md) / [lib/graphics-math](../README.md) / checkBeamContainerCollision
 
 # Function: checkBeamContainerCollision()
 
 > **checkBeamContainerCollision**(`beamRect`, `containerRect`): `boolean`
 
-Defined in: [lib/graphics-engine.ts:336](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L336)
+Defined in: [lib/graphics-math.ts:235](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L235)
 
 Checks if the bottom of a beam/bounding box has intersected or crossed the top of a container.
 

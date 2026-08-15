@@ -72,6 +72,7 @@
 - [lib/garmin-engine](lib/garmin-engine/README.md)
 - [lib/github](lib/github/README.md)
 - [lib/graphics-engine](lib/graphics-engine/README.md)
+- [lib/graphics-math](lib/graphics-math/README.md)
 - [lib/laser-loon](lib/laser-loon/README.md)
 - [lib/laser-loon/constants](lib/laser-loon/constants/README.md)
 - [lib/laser-loon/engine](lib/laser-loon/engine/README.md)

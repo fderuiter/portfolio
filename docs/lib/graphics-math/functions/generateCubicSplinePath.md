@@ -2,13 +2,13 @@
 
 ***
 
-[fderuiter-portfolio](../../../modules.md) / [lib/graphics-engine](../README.md) / generateCubicSplinePath
+[fderuiter-portfolio](../../../modules.md) / [lib/graphics-math](../README.md) / generateCubicSplinePath
 
 # Function: generateCubicSplinePath()
 
 > **generateCubicSplinePath**(`points`, `heightForArea?`): `object`
 
-Defined in: [lib/graphics-engine.ts:239](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L239)
+Defined in: [lib/graphics-math.ts:138](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L138)
 
 Computes cubic Bezier curves connecting a series of points using midpoint control points.
 Generates an SVG path string ('d' attribute) for the line and an optional closed area path.

@@ -6,6 +6,6 @@
 
 # Variable: richLayoutCache
 
-> `const` **richLayoutCache**: [`LRUCache`](../classes/LRUCache.md)\<`string`, \{ `height`: `number`; `lines`: `RichInlineLine`[]; \}\>
+> `const` **richLayoutCache**: [`LRUCache`](../../graphics-math/classes/LRUCache.md)\<`string`, \{ `height`: `number`; `lines`: `RichInlineLine`[]; \}\>
 
-Defined in: [lib/graphics-engine.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L69)
+Defined in: [lib/graphics-engine.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L17)

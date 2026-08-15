@@ -6,6 +6,6 @@
 
 # Variable: richItemsCache
 
-> `const` **richItemsCache**: [`LRUCache`](../classes/LRUCache.md)\<`string`, `unknown`[]\>
+> `const` **richItemsCache**: [`LRUCache`](../../graphics-math/classes/LRUCache.md)\<`string`, `unknown`[]\>
 
-Defined in: [lib/graphics-engine.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L67)
+Defined in: [lib/graphics-engine.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L15)

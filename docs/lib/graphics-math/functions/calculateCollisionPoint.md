@@ -2,13 +2,13 @@
 
 ***
 
-[fderuiter-portfolio](../../../modules.md) / [lib/graphics-engine](../README.md) / calculateCollisionPoint
+[fderuiter-portfolio](../../../modules.md) / [lib/graphics-math](../README.md) / calculateCollisionPoint
 
 # Function: calculateCollisionPoint()
 
 > **calculateCollisionPoint**(`beamRect`, `parentRect`): [`Point2D`](../type-aliases/Point2D.md)
 
-Defined in: [lib/graphics-engine.ts:346](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L346)
+Defined in: [lib/graphics-math.ts:245](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L245)
 
 Calculates relative coordinates of the collision point with respect to a parent container.
 

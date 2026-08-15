@@ -1,5 +1,10 @@
 import { performance } from "perf_hooks";
-import { distributeItemsGreedily } from "../graphics-engine";
+import { 
+  distributeItemsGreedily, 
+  mapDataToCoordinates, 
+  generateHermiteSplinePath, 
+  generateCubicSplinePath 
+} from "../graphics-math";
 import { 
   prepareRichInline, 
   walkRichInlineLineRanges, 
@@ -197,11 +202,43 @@ export function benchmarkScanner(iterations = 100): BenchmarkResult[] {
 }
 
 /**
+ * Benchmark Browser-Free SVG Spline & Coordinate Math
+ */
+export function benchmarkSVGCoordinateMath(iterations = 5000): BenchmarkResult[] {
+  const dataSize = 100;
+  const mockData = Array.from({ length: dataSize }, (_, i) => Math.sin(i / 10) * 50 + 50);
+
+  const start = performance.now();
+  for (let it = 0; it < iterations; it++) {
+    const coords = mapDataToCoordinates(mockData, 500, 200, 10);
+    generateHermiteSplinePath(coords, 200);
+    generateCubicSplinePath(coords, 200);
+  }
+  const duration = performance.now() - start;
+  const opsPerSec = Math.round((iterations * 1000) / duration);
+
+  return [
+    {
+      suite: "SVG Coordinate Math",
+      name: `Spline generation (${dataSize} points, Hermite & Cubic)`,
+      iterations,
+      durationMs: Number(duration.toFixed(2)),
+      opsPerSec,
+      metrics: {
+        "Points/Run": dataSize,
+        "Total Ops/sec": opsPerSec.toLocaleString(),
+      },
+    },
+  ];
+}
+
+/**
  * Run All Benchmarks
  */
 export function runAllBenchmarks(): BenchmarkResult[] {
   const allResults: BenchmarkResult[] = [
     ...benchmarkMasonryScheduler(),
+    ...benchmarkSVGCoordinateMath(),
     ...benchmarkPretextLayout(),
     ...benchmarkScanner(),
   ];
