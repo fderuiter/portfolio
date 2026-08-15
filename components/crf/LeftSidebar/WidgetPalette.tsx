@@ -119,24 +119,48 @@ const WIDGETS: WidgetItem[] = [
     category: "codelists",
     icon: <IconListDetails className="w-4 h-4 text-purple-400" />,
     defaultField: {
-      label: "Yes / No Condition",
-      variableName: "COND_YN",
+      label: "Custom Multiple Choice (Radio)",
+      variableName: "RADIO_Q",
       columnSpan: 6,
       required: true,
-      codelistId: "CL_NY",
+      customOptions: [
+        { code: "OPT_1", label: "Option 1", order: 1 },
+        { code: "OPT_2", label: "Option 2", order: 2 },
+      ],
     },
   },
   {
     type: "single_select",
-    label: "Dropdown Select (Codelist)",
+    label: "Dropdown Select",
     category: "codelists",
     icon: <IconListDetails className="w-4 h-4 text-purple-400" />,
     defaultField: {
-      label: "Standard Codelist Question",
-      variableName: "CL_SELECT",
+      label: "Custom Dropdown Question",
+      variableName: "SELECT_Q",
       columnSpan: 6,
       required: true,
-      codelistId: "CL_SEX",
+      customOptions: [
+        { code: "CHOICE_A", label: "Choice A", order: 1 },
+        { code: "CHOICE_B", label: "Choice B", order: 2 },
+        { code: "CHOICE_C", label: "Choice C", order: 3 },
+      ],
+    },
+  },
+  {
+    type: "multi_select",
+    label: "Multi-Select Choices",
+    category: "codelists",
+    icon: <IconCheckbox className="w-4 h-4 text-purple-400" />,
+    defaultField: {
+      label: "Multi-Select Options",
+      variableName: "MULTI_Q",
+      columnSpan: 6,
+      required: false,
+      customOptions: [
+        { code: "ITEM_1", label: "Item 1", order: 1 },
+        { code: "ITEM_2", label: "Item 2", order: 2 },
+        { code: "ITEM_3", label: "Item 3", order: 3 },
+      ],
     },
   },
   {
@@ -226,6 +250,9 @@ export const WidgetPalette: React.FC<WidgetPaletteProps> = ({ onAddField }) => {
       minValue: widget.defaultField.minValue,
       maxValue: widget.defaultField.maxValue,
       codelistId: widget.defaultField.codelistId,
+      customOptions: widget.defaultField.customOptions
+        ? widget.defaultField.customOptions.map((o) => ({ ...o }))
+        : undefined,
       calculationFormula: widget.defaultField.calculationFormula,
       scaleMinLabel: widget.defaultField.scaleMinLabel,
       scaleMaxLabel: widget.defaultField.scaleMaxLabel,

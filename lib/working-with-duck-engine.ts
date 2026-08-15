@@ -49,7 +49,8 @@ export type DuckMood =
 
 export type InventoryItem = "tennis-ball" | "kong" | "squeaky-toy" | "treat" | "frisbee";
 
-export type PortfolioHazardType = "resume" | "server-cable" | "clinical-db" | "garmin-watch";
+export type CorporateHazardType = "pitch-deck" | "power-cable" | "audit-file" | "laptop";
+export type PortfolioHazardType = CorporateHazardType | "resume" | "server-cable" | "clinical-db" | "garmin-watch";
 
 export interface PortfolioHazard {
   id: PortfolioHazardType;
@@ -60,6 +61,16 @@ export interface PortfolioHazard {
   skillBadge: string;
   saveTooltip: string;
   isChewed: boolean;
+}
+
+export type CorporateHazard = PortfolioHazard;
+
+export interface IndoorPuddle {
+  id: number;
+  x: number;
+  y: number;
+  radius: number;
+  mopProgress: number; // 0 to 100%
 }
 
 export interface MudPuddle {
@@ -242,81 +253,81 @@ export const SPRINTS: GameSprint[] = [
     subtitle: "Gentle puppy impulses · Learn clicker tricks & toys",
     targetWork: 100,
     impulseInterval: 280,
-    description: "Get your developer environment configured while teaching Duck basic obedience (Sit, High Five) and redirecting playful nibbles.",
+    description: "Configure your remote workspace while teaching Duck basic obedience (Sit, High Five) and redirecting playful nibbles.",
   },
   {
     level: 2,
-    title: "Sprint 2: Production Hotfix & Cable Alert",
-    subtitle: "Faster impulses · Amazon delivery knock & server wires",
+    title: "Sprint 2: Q1 Deliverables & Cable Alert",
+    subtitle: "Faster impulses · Package delivery knock & office wires",
     targetWork: 160,
     impulseInterval: 220,
-    description: "Production bug in flight! Protect the API server cluster wire with Kong toys and trade treats during 'No Take, Only Throw!'.",
+    description: "High-priority deliverable in flight! Protect the office power strip with Kong toys and trade treats during 'No Take, Only Throw!'.",
   },
   {
     level: 3,
-    title: "Sprint 3: Startup Pitch & Window Squirrel",
+    title: "Sprint 3: Executive Pitch & Window Distraction",
     subtitle: "High excitement · Window squirrels & rapid potty runs",
     targetWork: 240,
     impulseInterval: 175,
-    description: "Pitch day deadline! Excitement is rising. Run outside for fast potty breaks and practice clicker training for Good Boy multipliers.",
+    description: "Board meeting deadline! Excitement is rising. Run outside for fast potty breaks and practice clicker training for Good Boy multipliers.",
   },
   {
     level: 4,
-    title: "Sprint 4: Crunch Week & Muddy Park Rescue",
+    title: "Sprint 4: Deadline Crunch & Park Break",
     subtitle: "Extreme multitasking · Agility hurdles & bathtub wash",
     targetWork: 330,
     impulseInterval: 145,
-    description: "Intense deployment crunch! Duck needs high-energy Dog Park agility runs. If he splashes into mud, scrub him clean in the Bathtub.",
+    description: "Intense project crunch! Duck needs high-energy Dog Park agility runs. If he splashes into mud, scrub him clean in the Bathtub.",
   },
   {
     level: 5,
-    title: "Sprint 5: Major 1.0 Launch & Golden Graduation",
+    title: "Sprint 5: Annual Launch & Golden Promotion",
     subtitle: "Peak velocity · Master combos & zero downtime",
     targetWork: 450,
     impulseInterval: 120,
-    description: "The Version 1.0 General Availability launch! Master all training tricks, active desk coding bursts, and unlock the Golden Graduation hat.",
+    description: "The major milestone release! Master all training tricks, focus work sprints, and unlock the Golden Graduation hat.",
   },
 ];
 
 export const INITIAL_HAZARDS: PortfolioHazard[] = [
   {
-    id: "resume",
-    name: "Fred's Resume Folder",
+    id: "pitch-deck",
+    name: "Quarterly Pitch Deck",
     x: 270,
     y: 85,
     radius: 24,
-    skillBadge: "Resume Intact!",
-    saveTooltip: "Fred has 8+ years building resilient distributed systems.",
+    skillBadge: "Deck Saved!",
+    saveTooltip: "Key executive presentation intact.",
     isChewed: false,
   },
   {
-    id: "server-cable",
-    name: "API Server Cluster Wire",
+    id: "power-cable",
+    name: "Main Power & Network Strip",
     x: 130,
     y: 380,
     radius: 26,
-    skillBadge: "Zero Downtime!",
-    saveTooltip: "Real-time Redis telemetry and fault-tolerant serverless APIs.",
+    skillBadge: "Online!",
+    saveTooltip: "Office connectivity and power protected from disconnection.",
     isChewed: false,
   },
   {
-    id: "clinical-db",
-    name: "21 CFR Part 11 Audit Script",
+    id: "audit-file",
+    name: "Corporate Audit & Budget Sheet",
     x: 480,
     y: 85,
     radius: 24,
-    skillBadge: "Audit Compliant!",
-    saveTooltip: "Strict CDISC SDTM/ADaM compliance and tamper-proof electronic signatures.",
+    skillBadge: "Audit Ready!",
+    saveTooltip: "Crucial quarterly budget and compliance spreadsheet safe.",
     isChewed: false,
   },
   {
-    id: "garmin-watch",
-    name: "32KB Garmin Watch Prototype",
+    id: "laptop",
+    name: "Company Laptop & Dock",
     x: 530,
     y: 390,
     radius: 24,
-    skillBadge: "Memory Protected!",
-    saveTooltip: "High-performance Monkey C embedded systems with tight 32KB RAM budgets.",
+    skillBadge: "Hardware Intact!",
+    saveTooltip: "Workstation protected from spills and puppy nibbles.",
     isChewed: false,
   },
 ];
@@ -432,6 +443,9 @@ export interface WorkingWithDuckState {
 
   hazards: PortfolioHazard[];
   activeHazardTarget: PortfolioHazardType | null;
+
+  indoorPuddles: IndoorPuddle[];
+  nextPuddleId: number;
 
   particles: Particle[];
   floatingAlerts: FloatingAlert[];
@@ -566,6 +580,9 @@ export function createInitialDuckGameState(
     hazards: INITIAL_HAZARDS.map((h) => ({ ...h })),
     activeHazardTarget: null,
 
+    indoorPuddles: [],
+    nextPuddleId: 1,
+
     particles: [],
     floatingAlerts: [],
     nextParticleId: 1,
@@ -669,13 +686,16 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
     state.duck.state === "SNEAKY_CHEW" ||
     state.duck.state === "ZOOMIES";
 
+  // Debuff from unmopped indoor puddles (-30% speed)
+  const puddlePenalty = state.indoorPuddles && state.indoorPuddles.length > 0 ? 0.7 : 1.0;
+
   let nextWorkProgress = state.workProgress;
   let nextScore = state.totalScore;
 
   if (!isEmergency && state.duck.state !== "NAP_TIME") {
-    const workIncrement = 0.08 * effectiveMultiplier;
+    const workIncrement = 0.08 * effectiveMultiplier * puddlePenalty;
     nextWorkProgress = Math.min(state.targetWorkProgress, state.workProgress + workIncrement);
-    nextScore += Math.round(1 * effectiveMultiplier);
+    nextScore += Math.round(1 * effectiveMultiplier * puddlePenalty);
   }
 
   // Win condition check
@@ -704,6 +724,10 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
   let nextThirst = Math.min(100, Math.max(0, state.thirst + thirstRate));
   let nextHunger = Math.min(100, Math.max(0, state.hunger + hungerRate));
   let nextNaughtyVsGood = state.naughtyVsGood;
+  let nextLastImpulseTick = state.lastImpulseTick;
+  const nextIndoorPuddles = state.indoorPuddles ? [...state.indoorPuddles] : [];
+  let nextPuddleId = state.nextPuddleId || (nextIndoorPuddles.length + 1);
+
   let activeToast = state.activeSkillToast
     ? { ...state.activeSkillToast, timer: state.activeSkillToast.timer - 1 }
     : null;
@@ -868,8 +892,9 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
         duck.maxStateTimer = duck.stateTimer;
       }
 
-      // Periodic random impulse generation
+      // Periodic random impulse generation (persisting lastImpulseTick)
       if (nextTicks - state.lastImpulseTick > impulseRate) {
+        nextLastImpulseTick = nextTicks;
         const impulseChoice = Math.random();
         if (impulseChoice < 0.45) {
           // Sneaky chew event
@@ -1022,11 +1047,21 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
         duck.stateTimer = 90;
         duck.maxStateTimer = 90;
         soundCues.push("fail");
+
+        const newPuddle: IndoorPuddle = {
+          id: nextPuddleId++,
+          x: Math.round(duck.x),
+          y: Math.round(duck.y),
+          radius: 28,
+          mopProgress: 0,
+        };
+        nextIndoorPuddles.push(newPuddle);
+
         alerts.push({
           id: state.nextAlertId + 3,
           x: duck.x,
           y: duck.y - 25,
-          text: "💦 Pee on the rug! (-30 pts)",
+          text: "💦 Pee on the rug! Mop it up! (-30 pts)",
           color: "#ef4444",
           alpha: 1,
           vy: -1.5,
@@ -1285,6 +1320,7 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
     naughtyVsGood: nextNaughtyVsGood,
     multiplier: effectiveMultiplier,
     calmBuffTimer: nextCalmBuff,
+    lastImpulseTick: nextLastImpulseTick,
     comboStreak: nextComboStreak,
     comboTimer: nextComboTimer,
     activeSurpriseEvent: activeSurprise,
@@ -1293,6 +1329,8 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
     duck,
     hazards,
     activeHazardTarget,
+    indoorPuddles: nextIndoorPuddles,
+    nextPuddleId,
     particles,
     floatingAlerts: alerts,
     activeSkillToast: activeToast,
@@ -1618,7 +1656,7 @@ export function enterBathtub(state: WorkingWithDuckState): WorkingWithDuckState 
 }
 
 export function scrubBathtub(state: WorkingWithDuckState, x: number, y: number): WorkingWithDuckState {
-  if (!state.inBathtub) return state;
+  if (!state.inBathtub || state.bathtubState.soapLather >= 100) return state;
 
   const bath = { ...state.bathtubState };
   const nextScrubCount = bath.scrubCount + 1;
@@ -1677,7 +1715,43 @@ export function rinseBathtub(state: WorkingWithDuckState): WorkingWithDuckState 
 }
 
 export function stepBathtubGame(state: WorkingWithDuckState): WorkingWithDuckState {
-  return state;
+  const nextTicks = state.ticks + 1;
+  const bath = { ...state.bathtubState };
+  const bubbles = bath.bubbles
+    .map((b) => ({
+      ...b,
+      y: b.y - 0.2,
+      alpha: b.alpha - 0.003,
+    }))
+    .filter((b) => b.alpha > 0.05);
+
+  const particles = state.particles
+    .map((p) => ({
+      ...p,
+      x: p.x + p.vx,
+      y: p.y + p.vy,
+      alpha: p.alpha - p.decay,
+    }))
+    .filter((p) => p.alpha > 0.02);
+
+  const alerts = state.floatingAlerts
+    .map((a) => ({
+      ...a,
+      y: a.y + a.vy,
+      alpha: a.alpha - 0.018,
+    }))
+    .filter((a) => a.alpha > 0.05);
+
+  return {
+    ...state,
+    ticks: nextTicks,
+    bathtubState: {
+      ...bath,
+      bubbles,
+    },
+    particles,
+    floatingAlerts: alerts,
+  };
 }
 
 export function exitBathtub(state: WorkingWithDuckState): WorkingWithDuckState {
@@ -1769,11 +1843,12 @@ export function applySqueakyToy(
   let nextScore = state.totalScore;
   const soundCues: Array<SoundCue> = ["squeak"];
   const clamped = clampBounds(x, y);
+  let nextHazards = state.hazards;
 
   if (state.duck.state === "SNEAKY_CHEW" && activeHazard) {
     const savedHazard = state.hazards.find((h) => h.id === activeHazard);
     if (savedHazard) {
-      savedHazard.isChewed = false;
+      nextHazards = state.hazards.map((h) => (h.id === activeHazard ? { ...h, isChewed: false } : h));
       nextNaughtyVsGood = Math.min(100, nextNaughtyVsGood + 30);
       comboStreak += 1;
       nextScore += 50 * comboStreak;
@@ -1796,6 +1871,7 @@ export function applySqueakyToy(
     comboTimer: 180,
     excitement: Math.max(0, state.excitement - 15),
     naughtyVsGood: nextNaughtyVsGood,
+    hazards: nextHazards,
     activeHazardTarget: activeHazard,
     activeSkillToast: activeToast,
     duck: {
@@ -1823,11 +1899,12 @@ export function applyKongToy(
   let activeToast = state.activeSkillToast;
   let nextScore = state.totalScore;
   let nextNaughty = Math.min(100, state.naughtyVsGood + 20);
+  let nextHazards = state.hazards;
 
   if (state.duck.state === "SNEAKY_CHEW" && activeHazard) {
     const savedHazard = state.hazards.find((h) => h.id === activeHazard);
     if (savedHazard) {
-      savedHazard.isChewed = false;
+      nextHazards = state.hazards.map((h) => (h.id === activeHazard ? { ...h, isChewed: false } : h));
       nextNaughty = Math.min(100, nextNaughty + 25);
       nextScore += 60;
       activeToast = {
@@ -1845,6 +1922,7 @@ export function applyKongToy(
     excitement: Math.max(0, state.excitement - 25),
     naughtyVsGood: nextNaughty,
     comboTimer: 180,
+    hazards: nextHazards,
     activeHazardTarget: activeHazard,
     activeSkillToast: activeToast,
     duck: {
@@ -1984,6 +2062,82 @@ export function scrubBelly(state: WorkingWithDuckState, x: number, y: number): W
     excitement: nextExcitement,
     naughtyVsGood: nextNaughtyVsGood,
     particles: newParticles,
+    soundCueQueue: [...state.soundCueQueue, ...soundCues],
+  };
+}
+
+/**
+ * Player Action: Mop up an indoor bladder puddle by clicking / scrubbing over it
+ */
+export function mopIndoorPuddle(
+  state: WorkingWithDuckState,
+  x: number,
+  y: number
+): WorkingWithDuckState {
+  if (!state.indoorPuddles || state.indoorPuddles.length === 0) return state;
+
+  const soundCues: Array<SoundCue> = [];
+  const particles: Particle[] = [...state.particles];
+  const alerts: FloatingAlert[] = [...state.floatingAlerts];
+  let scoreGained = 0;
+  let nextNaughty = state.naughtyVsGood;
+  let didClean = false;
+
+  const nextPuddles = state.indoorPuddles
+    .map((puddle) => {
+      const dist = Math.hypot(x - puddle.x, y - puddle.y);
+      if (dist <= puddle.radius + 15) {
+        didClean = true;
+        const nextProgress = puddle.mopProgress + 35;
+        soundCues.push("bath-soap");
+
+        particles.push({
+          id: state.nextParticleId + particles.length,
+          x: puddle.x + (Math.random() - 0.5) * puddle.radius,
+          y: puddle.y + (Math.random() - 0.5) * puddle.radius,
+          vx: (Math.random() - 0.5) * 1.0,
+          vy: -1.0 - Math.random() * 0.8,
+          alpha: 1,
+          color: "#38bdf8",
+          decay: 0.03,
+          size: 6,
+          shape: "water",
+        });
+
+        if (nextProgress >= 100) {
+          scoreGained += 50;
+          nextNaughty = Math.min(100, nextNaughty + 15);
+          soundCues.push("ding");
+          alerts.push({
+            id: state.nextAlertId + alerts.length,
+            x: puddle.x,
+            y: puddle.y - 15,
+            text: "✨ Floor Mopped Clean! (+50 pts)",
+            color: "#22c55e",
+            alpha: 1,
+            vy: -1.2,
+          });
+          return null;
+        }
+
+        return {
+          ...puddle,
+          mopProgress: nextProgress,
+        };
+      }
+      return puddle;
+    })
+    .filter((p): p is IndoorPuddle => p !== null);
+
+  if (!didClean) return state;
+
+  return {
+    ...state,
+    indoorPuddles: nextPuddles,
+    totalScore: state.totalScore + scoreGained,
+    naughtyVsGood: nextNaughty,
+    particles,
+    floatingAlerts: alerts,
     soundCueQueue: [...state.soundCueQueue, ...soundCues],
   };
 }
@@ -2203,6 +2357,7 @@ export function tapParkWhistle(state: WorkingWithDuckState): WorkingWithDuckStat
 }
 
 export function stepParkGame(state: WorkingWithDuckState): WorkingWithDuckState {
+  const nextTicks = state.ticks + 1;
   const park = { ...state.parkState };
   const soundCues: Array<SoundCue> = [];
   let nextScore = state.totalScore;
@@ -2311,8 +2466,26 @@ export function stepParkGame(state: WorkingWithDuckState): WorkingWithDuckState 
   park.duckX = Math.max(50, Math.min(CANVAS_WIDTH - 50, park.duckX));
   park.duckY = Math.max(50, Math.min(CANVAS_HEIGHT - 50, park.duckY));
 
+  const particles = state.particles
+    .map((p) => ({
+      ...p,
+      x: p.x + p.vx,
+      y: p.y + p.vy,
+      alpha: p.alpha - p.decay,
+    }))
+    .filter((p) => p.alpha > 0.02);
+
+  const alerts = state.floatingAlerts
+    .map((a) => ({
+      ...a,
+      y: a.y + a.vy,
+      alpha: a.alpha - 0.018,
+    }))
+    .filter((a) => a.alpha > 0.05);
+
   return {
     ...state,
+    ticks: nextTicks,
     totalScore: nextScore,
     parkState: {
       ...park,
@@ -2322,6 +2495,8 @@ export function stepParkGame(state: WorkingWithDuckState): WorkingWithDuckState 
       hurdlesCleared,
       friends,
     },
+    particles,
+    floatingAlerts: alerts,
     soundCueQueue: [...state.soundCueQueue, ...soundCues],
   };
 }

@@ -8,4 +8,4 @@
 
 > **ToolMode** = `"inspect"` \| `"control_point"` \| `"paint"` \| `"erase"`
 
-Defined in: [lib/neuro/types.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L35)
+Defined in: [lib/neuro/types.ts:361](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L361)

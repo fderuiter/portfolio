@@ -6,7 +6,7 @@
 
 # Interface: ScenarioLore
 
-Defined in: [lib/neuro/types.ts:55](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L55)
+Defined in: [lib/neuro/types.ts:381](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L381)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/neuro/types.ts:55](https://github.com/fderuiter/portfolio/blob/
 
 > **algorithmicImpact**: `string`
 
-Defined in: [lib/neuro/types.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L57)
+Defined in: [lib/neuro/types.ts:383](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L383)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/neuro/types.ts:57](https://github.com/fderuiter/portfolio/blob/
 
 > **biologicalCause**: `string`
 
-Defined in: [lib/neuro/types.ts:56](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L56)
+Defined in: [lib/neuro/types.ts:382](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L382)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/neuro/types.ts:56](https://github.com/fderuiter/portfolio/blob/
 
 > **freeSurferCommand**: `string`
 
-Defined in: [lib/neuro/types.ts:59](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L59)
+Defined in: [lib/neuro/types.ts:385](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L385)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/neuro/types.ts:59](https://github.com/fderuiter/portfolio/blob/
 
 > **remediationProtocol**: `string`
 
-Defined in: [lib/neuro/types.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L58)
+Defined in: [lib/neuro/types.ts:384](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L384)

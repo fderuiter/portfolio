@@ -117,6 +117,8 @@ export function exportStudyToCdiscOdmXml(study: StudyProtocol): string {
 
   // ItemDefs (Fields)
   const processedItems = new Set<string>();
+  const customFieldCodelists: Map<string, import("./types").CodelistDefinition> = new Map();
+
   study.forms.forEach((form) => {
     form.sections.forEach((sec) => {
       sec.fields.forEach((field) => {
@@ -124,8 +126,21 @@ export function exportStudyToCdiscOdmXml(study: StudyProtocol): string {
         if (processedItems.has(itemOid)) return;
         processedItems.add(itemOid);
 
+        let effectiveCodelistId = field.codelistId;
+        if (!effectiveCodelistId && field.customOptions && field.customOptions.length > 0) {
+          effectiveCodelistId = `CL_${field.variableName || field.id}`;
+          if (!customFieldCodelists.has(effectiveCodelistId)) {
+            customFieldCodelists.set(effectiveCodelistId, {
+              id: effectiveCodelistId,
+              name: `${field.label || field.variableName} (Field Codelist)`,
+              options: field.customOptions,
+              isStandard: false,
+            });
+          }
+        }
+
         const odmType = mapDataTypeToOdm(field.dataType);
-        const codelistAttr = field.codelistId ? ` CodeListOID="${escapeXml(field.codelistId)}"` : "";
+        const codelistAttr = effectiveCodelistId ? ` CodeListOID="${escapeXml(effectiveCodelistId)}"` : "";
 
         xml += `      <ItemDef OID="${itemOid}" Name="${escapeXml(field.variableName)}" DataType="${odmType}"${codelistAttr}>\n`;
         xml += `        <Description><TranslatedText xml:lang="en">${escapeXml(field.label)}</TranslatedText></Description>\n`;
@@ -142,8 +157,15 @@ export function exportStudyToCdiscOdmXml(study: StudyProtocol): string {
 
   xml += `\n`;
 
-  // CodeLists
-  study.codelists.forEach((cl) => {
+  // CodeLists (Study Codelists + Inline Custom Codelists)
+  const allCodelists: import("./types").CodelistDefinition[] = [
+    ...study.codelists,
+    ...Array.from(customFieldCodelists.values()).filter(
+      (ccl) => !study.codelists.some((cl) => cl.id === ccl.id)
+    ),
+  ];
+
+  allCodelists.forEach((cl) => {
     const nciAttr = cl.nciCodelistCode ? ` def:NCICode="${escapeXml(cl.nciCodelistCode)}"` : "";
     xml += `      <CodeList OID="${escapeXml(cl.id)}" Name="${escapeXml(cl.name)}" DataType="text"${nciAttr}>\n`;
     cl.options.forEach((opt) => {

@@ -8,4 +8,4 @@
 
 > **ScenarioId** = `"dura_inclusion"` \| `"wm_hypointensity"` \| `"skull_strip_erosion"` \| `"topological_handle"` \| `"sandbox"`
 
-Defined in: [lib/neuro/types.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L37)
+Defined in: [lib/neuro/types.ts:363](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L363)

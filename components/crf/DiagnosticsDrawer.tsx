@@ -82,36 +82,36 @@ export const DiagnosticsDrawer: React.FC<DiagnosticsDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-zinc-900 border border-zinc-700/80 rounded-2xl w-full max-w-3xl max-h-[88vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm">
+      <div className="bg-zinc-900 border border-zinc-700/80 rounded-2xl w-full max-w-3xl max-h-[92vh] sm:max-h-[88vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-950/70">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-brand-cyan">
-              <IconShieldCheck className="w-5 h-5" />
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-zinc-800 bg-zinc-950/70">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="p-1.5 sm:p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-brand-cyan shrink-0">
+              <IconShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
-            <div>
-              <h3 className="text-base font-bold text-white font-mono flex items-center gap-2">
-                <span>CDISC Conformance &amp; Regulatory Validation Studio</span>
-                <span className="text-[10px] bg-brand-cyan/15 text-brand-cyan px-2 py-0.5 rounded border border-brand-cyan/30">
+            <div className="min-w-0">
+              <h3 className="text-xs sm:text-base font-bold text-white font-mono flex items-center gap-2 flex-wrap">
+                <span className="truncate">CDISC Conformance &amp; Regulatory Validation Studio</span>
+                <span className="text-[9px] sm:text-[10px] bg-brand-cyan/15 text-brand-cyan px-1.5 sm:px-2 py-0.5 rounded border border-brand-cyan/30">
                   CDASH 2.2 / SDTMIG v3.4
                 </span>
               </h3>
-              <p className="text-xs text-zinc-400 font-sans">
-                Real-time validation for missing core variables, 8-char SDTM limits, and NCI CT codelists with 1-Click Auto-Fix.
+              <p className="text-[11px] sm:text-xs text-zinc-400 font-sans truncate sm:whitespace-normal">
+                Real-time validation for missing core variables and SDTM limits with 1-Click Auto-Fix.
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors shrink-0"
           >
             <IconX className="w-5 h-5" />
           </button>
         </div>
 
         {/* Severity Filter Tabs & Auto-Fix All Action */}
-        <div className="px-6 py-3 border-b border-zinc-800 bg-zinc-950/40 flex flex-wrap items-center justify-between gap-3">
+        <div className="px-4 sm:px-6 py-2.5 sm:py-3 border-b border-zinc-800 bg-zinc-950/40 flex flex-wrap items-center justify-between gap-2.5">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setFilterSeverity("all")}

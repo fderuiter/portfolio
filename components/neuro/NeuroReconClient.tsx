@@ -571,6 +571,7 @@ export const NeuroReconClient: React.FC = () => {
               crosshair={crosshair}
               modelUrl={DATASET_CONFIGS[activeDataset].modelUrl}
               onSurfaceChange={setSurfaceMode}
+              onCrosshairChange={setCrosshair}
             />
           </div>
         )}

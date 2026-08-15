@@ -60,6 +60,7 @@ export default function ProofWorkspacePage() {
   const [selectedNodeIds, setSelectedNodeIds] = useState<string[]>([]);
   const [inspectedNodeId, setInspectedNodeId] = useState<string>("E");
   const [activeTab, setActiveTab] = useState<"ledger" | "systems" | "fallacy">("ledger");
+  const [mobileActiveView, setMobileActiveView] = useState<"canvas" | "ledger" | "systems" | "fallacy" | "terminal">("canvas");
   const [feedbackToast, setFeedbackToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
   const [currentFallacy, setCurrentFallacy] = useState<FallacyDiagnosis | null>(null);
 
@@ -984,10 +985,64 @@ export default function ProofWorkspacePage() {
           </div>
         </div>
 
+        {/* Mobile View Switcher Tabs (Visible on < lg screens) */}
+        <div className="lg:hidden flex items-center bg-slate-900 border border-slate-800 rounded-2xl p-1 gap-1 text-xs font-mono select-none">
+          <button
+            onClick={() => setMobileActiveView("canvas")}
+            className={`flex-1 py-2.5 px-2 rounded-xl text-center font-bold flex items-center justify-center gap-1.5 transition ${
+              mobileActiveView === "canvas"
+                ? "bg-brand-cyan text-slate-950 shadow-md"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            <IconCpu className="w-4 h-4" />
+            <span>Canvas</span>
+          </button>
+          <button
+            onClick={() => {
+              setMobileActiveView("ledger");
+              setActiveTab("ledger");
+            }}
+            className={`flex-1 py-2.5 px-2 rounded-xl text-center font-bold flex items-center justify-center gap-1.5 transition ${
+              mobileActiveView === "ledger"
+                ? "bg-brand-cyan text-slate-950 shadow-md"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            <IconTable className="w-4 h-4" />
+            <span>Ledger</span>
+          </button>
+          <button
+            onClick={() => {
+              setMobileActiveView("fallacy");
+              setActiveTab("fallacy");
+            }}
+            className={`flex-1 py-2.5 px-2 rounded-xl text-center font-bold flex items-center justify-center gap-1.5 transition ${
+              mobileActiveView === "fallacy"
+                ? "bg-brand-cyan text-slate-950 shadow-md"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            <IconAlertTriangle className="w-4 h-4" />
+            <span>Fallacy</span>
+          </button>
+          <button
+            onClick={() => setMobileActiveView("terminal")}
+            className={`flex-1 py-2.5 px-2 rounded-xl text-center font-bold flex items-center justify-center gap-1.5 transition ${
+              mobileActiveView === "terminal"
+                ? "bg-brand-cyan text-slate-950 shadow-md"
+                : "text-slate-400 hover:text-white"
+            }`}
+          >
+            <IconTerminal className="w-4 h-4" />
+            <span>Terminal</span>
+          </button>
+        </div>
+
         {/* Workspace Layout: Canvas on Left/Center, Inspector on Right */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Canvas Section */}
-          <div className="lg:col-span-8 flex flex-col gap-4">
+          <div className={`lg:col-span-8 flex flex-col gap-4 ${mobileActiveView === "canvas" ? "flex" : "hidden lg:flex"}`}>
             <div className="rounded-2xl border border-slate-800 bg-slate-900/80 backdrop-blur overflow-hidden flex flex-col shadow-2xl relative">
               {/* Canvas Header */}
               <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
@@ -998,14 +1053,14 @@ export default function ProofWorkspacePage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handleAutoStep}
-                    className="px-2.5 py-1 rounded bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan text-xs font-mono flex items-center gap-1 transition"
+                    className="px-2.5 py-1.5 rounded-lg bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan text-xs font-mono flex items-center gap-1 transition"
                   >
                     <IconWand className="w-3.5 h-3.5" />
                     Auto-Step
                   </button>
                   <button
                     onClick={handleResetLayout}
-                    className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
                     title="Reset node positions & connections"
                   >
                     <IconRefresh className="w-4 h-4" />
@@ -1025,113 +1080,115 @@ export default function ProofWorkspacePage() {
                 </span>
               </div>
 
-              {/* SVG Canvas Area */}
-              <div className="relative w-full h-[420px] bg-gradient-to-b from-slate-950/60 via-slate-900 to-slate-950 select-none overflow-hidden">
-                <svg ref={svgCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none">
-                  <defs>
-                    <marker
-                      id="arrow"
-                      viewBox="0 0 10 10"
-                      refX="8"
-                      refY="5"
-                      markerWidth="6"
-                      markerHeight="6"
-                      orient="auto-start-reverse"
-                    >
-                      <path d="M 0 1 L 10 5 L 0 9 z" fill="#06b6d4" />
-                    </marker>
-                    <linearGradient id="edgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#06b6d4" />
-                      <stop offset="100%" stopColor="#10b981" />
-                    </linearGradient>
-                  </defs>
+              {/* SVG Canvas Area (Responsive scroll wrapper) */}
+              <div className="relative w-full h-[420px] bg-gradient-to-b from-slate-950/60 via-slate-900 to-slate-950 select-none overflow-x-auto overflow-y-hidden">
+                <div className="relative min-w-[760px] h-full">
+                  <svg ref={svgCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none">
+                    <defs>
+                      <marker
+                        id="arrow"
+                        viewBox="0 0 10 10"
+                        refX="8"
+                        refY="5"
+                        markerWidth="6"
+                        markerHeight="6"
+                        orient="auto-start-reverse"
+                      >
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="#06b6d4" />
+                      </marker>
+                      <linearGradient id="edgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#06b6d4" />
+                        <stop offset="100%" stopColor="#10b981" />
+                      </linearGradient>
+                    </defs>
 
-                  {/* Render Bezier Curves for Graph Edges */}
-                  {edges.map((edge, idx) => {
-                    const sNode = activeTheorem.nodes.find((n) => n.id === edge.source);
-                    const tNode = activeTheorem.nodes.find((n) => n.id === edge.target);
-                    if (!sNode || !tNode) return null;
+                    {/* Render Bezier Curves for Graph Edges */}
+                    {edges.map((edge, idx) => {
+                      const sNode = activeTheorem.nodes.find((n) => n.id === edge.source);
+                      const tNode = activeTheorem.nodes.find((n) => n.id === edge.target);
+                      if (!sNode || !tNode) return null;
 
-                    const sOffset = nodeOffsets[sNode.id] || { x: 0, y: 0 };
-                    const tOffset = nodeOffsets[tNode.id] || { x: 0, y: 0 };
+                      const sOffset = nodeOffsets[sNode.id] || { x: 0, y: 0 };
+                      const tOffset = nodeOffsets[tNode.id] || { x: 0, y: 0 };
 
-                    const x1 = sNode.x + sOffset.x + 80;
-                    const y1 = sNode.y + sOffset.y + 35;
-                    const x2 = tNode.x + tOffset.x;
-                    const y2 = tNode.y + tOffset.y + 35;
+                      const x1 = sNode.x + sOffset.x + 80;
+                      const y1 = sNode.y + sOffset.y + 35;
+                      const x2 = tNode.x + tOffset.x;
+                      const y2 = tNode.y + tOffset.y + 35;
 
-                    const dx = Math.abs(x2 - x1) * 0.5;
-                    const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+                      const dx = Math.abs(x2 - x1) * 0.5;
+                      const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+
+                      return (
+                        <g key={`edge-${idx}`}>
+                          <path
+                            d={d}
+                            fill="none"
+                            stroke="url(#edgeGradient)"
+                            strokeWidth="2.5"
+                            strokeDasharray="4 2"
+                            className="animate-pulse"
+                            markerEnd="url(#arrow)"
+                          />
+                        </g>
+                      );
+                    })}
+                  </svg>
+
+                  {/* Node Cards on Canvas */}
+                  {activeTheorem.nodes.map((node) => {
+                    const offset = nodeOffsets[node.id] || { x: 0, y: 0 };
+                    const isSelected = selectedNodeIds.includes(node.id);
+                    const isInspected = inspectedNodeId === node.id;
+                    const isTarget = node.id === activeTheorem.targetNodeId;
+                    const isIntermediate = node.id === activeTheorem.intermediateNodeId;
+
+                    let isNodeProven = true;
+                    if (isIntermediate) isNodeProven = isC_Proven;
+                    if (isTarget) isNodeProven = isE_Proven;
 
                     return (
-                      <g key={`edge-${idx}`}>
-                        <path
-                          d={d}
-                          fill="none"
-                          stroke="url(#edgeGradient)"
-                          strokeWidth="2.5"
-                          strokeDasharray="4 2"
-                          className="animate-pulse"
-                          markerEnd="url(#arrow)"
-                        />
-                      </g>
+                      <motion.div
+                        key={node.id}
+                        style={{
+                          position: "absolute",
+                          left: node.x + offset.x,
+                          top: node.y + offset.y,
+                        }}
+                        onPointerDown={(e) => handleNodePointerDown(e, node.id)}
+                        onPointerMove={(e) => handleNodePointerMove(e, node.id)}
+                        onPointerUp={(e) => handleNodePointerUp(e, node.id)}
+                        onClick={() => handleNodeClick(node.id)}
+                        className={`w-40 p-2.5 rounded-xl border cursor-pointer transition-shadow shadow-md select-none ${
+                          isSelected
+                            ? "bg-brand-cyan/20 border-brand-cyan ring-2 ring-brand-cyan/50 shadow-cyan-500/20"
+                            : isInspected
+                            ? "bg-slate-800 border-slate-600 ring-1 ring-slate-400"
+                            : "bg-slate-900 border-slate-800 hover:border-slate-700"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-950 text-slate-300">
+                            Node {node.id}
+                          </span>
+                          <span
+                            className={`text-[9px] font-mono px-1 py-0.5 rounded ${
+                              isNodeProven
+                                ? "bg-emerald-950 text-emerald-400 border border-emerald-800/40"
+                                : "bg-amber-950 text-amber-400 border border-amber-800/40"
+                            }`}
+                          >
+                            {isNodeProven ? "PROVEN" : "PENDING"}
+                          </span>
+                        </div>
+                        <div className="font-mono text-sm font-bold text-white mb-0.5">{node.label}</div>
+                        <div className="text-[10px] text-slate-400 line-clamp-2 leading-tight">
+                          {node.meaning}
+                        </div>
+                      </motion.div>
                     );
                   })}
-                </svg>
-
-                {/* Node Cards on Canvas */}
-                {activeTheorem.nodes.map((node) => {
-                  const offset = nodeOffsets[node.id] || { x: 0, y: 0 };
-                  const isSelected = selectedNodeIds.includes(node.id);
-                  const isInspected = inspectedNodeId === node.id;
-                  const isTarget = node.id === activeTheorem.targetNodeId;
-                  const isIntermediate = node.id === activeTheorem.intermediateNodeId;
-
-                  let isNodeProven = true;
-                  if (isIntermediate) isNodeProven = isC_Proven;
-                  if (isTarget) isNodeProven = isE_Proven;
-
-                  return (
-                    <motion.div
-                      key={node.id}
-                      style={{
-                        position: "absolute",
-                        left: node.x + offset.x,
-                        top: node.y + offset.y,
-                      }}
-                      onPointerDown={(e) => handleNodePointerDown(e, node.id)}
-                      onPointerMove={(e) => handleNodePointerMove(e, node.id)}
-                      onPointerUp={(e) => handleNodePointerUp(e, node.id)}
-                      onClick={() => handleNodeClick(node.id)}
-                      className={`w-40 p-2.5 rounded-xl border cursor-pointer transition-shadow shadow-md ${
-                        isSelected
-                          ? "bg-brand-cyan/20 border-brand-cyan ring-2 ring-brand-cyan/50 shadow-cyan-500/20"
-                          : isInspected
-                          ? "bg-slate-800 border-slate-600 ring-1 ring-slate-400"
-                          : "bg-slate-900 border-slate-800 hover:border-slate-700"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-950 text-slate-300">
-                          Node {node.id}
-                        </span>
-                        <span
-                          className={`text-[9px] font-mono px-1 py-0.5 rounded ${
-                            isNodeProven
-                              ? "bg-emerald-950 text-emerald-400 border border-emerald-800/40"
-                              : "bg-amber-950 text-amber-400 border border-amber-800/40"
-                          }`}
-                        >
-                          {isNodeProven ? "PROVEN" : "PENDING"}
-                        </span>
-                      </div>
-                      <div className="font-mono text-sm font-bold text-white mb-0.5">{node.label}</div>
-                      <div className="text-[10px] text-slate-400 line-clamp-2 leading-tight">
-                        {node.meaning}
-                      </div>
-                    </motion.div>
-                  );
-                })}
+                </div>
               </div>
 
               {/* Floating Rule Palette Dock */}
@@ -1142,7 +1199,7 @@ export default function ProofWorkspacePage() {
                     <button
                       key={rule.id}
                       onClick={() => handleApplyRule(rule.id)}
-                      className="px-2.5 py-1 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 text-xs font-mono text-slate-300 hover:text-white transition flex items-center gap-1"
+                      className="min-h-8 px-2.5 py-1 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 text-xs font-mono text-slate-300 hover:text-white transition flex items-center gap-1"
                       title={`${rule.name}: ${rule.template}`}
                     >
                       <span className="text-brand-cyan font-bold">{rule.symbol}</span>
@@ -1154,7 +1211,7 @@ export default function ProofWorkspacePage() {
                   <button
                     onClick={() => handleStartSimulation("normal")}
                     disabled={isSimulating}
-                    className="px-3 py-1 rounded-lg bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-600/30 text-xs font-mono flex items-center gap-1 transition"
+                    className="min-h-8 px-3 py-1.5 rounded-lg bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-600/30 text-xs font-mono flex items-center gap-1 transition"
                   >
                     <IconPlayerPlay className="w-3.5 h-3.5" />
                     {isSimulating ? "Simulating..." : "Simulate"}
@@ -1181,12 +1238,15 @@ export default function ProofWorkspacePage() {
           </div>
 
           {/* Right Inspector Section */}
-          <div className="lg:col-span-4 flex flex-col gap-4">
+          <div className={`lg:col-span-4 flex flex-col gap-4 ${mobileActiveView === "ledger" || mobileActiveView === "systems" || mobileActiveView === "fallacy" ? "flex" : "hidden lg:flex"}`}>
             <div className="rounded-2xl border border-slate-800 bg-slate-900/80 backdrop-blur overflow-hidden flex flex-col shadow-xl">
               {/* Tab Selector */}
               <div className="grid grid-cols-3 border-b border-slate-800 bg-slate-950/40 text-xs font-medium">
                 <button
-                  onClick={() => setActiveTab("ledger")}
+                  onClick={() => {
+                    setActiveTab("ledger");
+                    setMobileActiveView("ledger");
+                  }}
                   className={`py-2.5 flex items-center justify-center gap-1.5 border-b-2 transition ${
                     activeTab === "ledger"
                       ? "border-brand-cyan text-brand-cyan bg-slate-900"
@@ -1197,7 +1257,10 @@ export default function ProofWorkspacePage() {
                   Ledger
                 </button>
                 <button
-                  onClick={() => setActiveTab("systems")}
+                  onClick={() => {
+                    setActiveTab("systems");
+                    setMobileActiveView("systems");
+                  }}
                   className={`py-2.5 flex items-center justify-center gap-1.5 border-b-2 transition ${
                     activeTab === "systems"
                       ? "border-brand-cyan text-brand-cyan bg-slate-900"
@@ -1208,7 +1271,10 @@ export default function ProofWorkspacePage() {
                   Systems
                 </button>
                 <button
-                  onClick={() => setActiveTab("fallacy")}
+                  onClick={() => {
+                    setActiveTab("fallacy");
+                    setMobileActiveView("fallacy");
+                  }}
                   className={`py-2.5 flex items-center justify-center gap-1.5 border-b-2 transition ${
                     activeTab === "fallacy"
                       ? "border-brand-cyan text-brand-cyan bg-slate-900"
@@ -1349,7 +1415,9 @@ export default function ProofWorkspacePage() {
         {/* Command Console Split-View */}
         <div
           data-keyboard-boundary="true"
-          className="rounded-2xl border border-slate-800 bg-slate-950 overflow-hidden flex flex-col shadow-2xl"
+          className={`rounded-2xl border border-slate-800 bg-slate-950 overflow-hidden flex flex-col shadow-2xl ${
+            mobileActiveView === "terminal" ? "flex" : "hidden lg:flex"
+          }`}
         >
           <div className="px-4 py-2 border-b border-slate-800 bg-slate-900/60 flex items-center justify-between">
             <div className="flex items-center gap-2">

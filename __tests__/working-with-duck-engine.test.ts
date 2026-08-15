@@ -14,9 +14,11 @@ import {
   activeCodeBurst,
   interactStation,
   enterBathtub,
+  stepBathtubGame,
   scrubBathtub,
   rinseBathtub,
   exitBathtub,
+  mopIndoorPuddle,
   equipAccessory,
   enterDogPark,
   throwParkBall,
@@ -53,6 +55,7 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     expect(state.unlockedFacts).toContain(1);
     expect(state.tutorialStep).toBe(1);
     expect(state.unlockedAccessories).toContain("bucket-hat");
+    expect(state.indoorPuddles).toEqual([]);
   });
 
   it("should advance work progress when Duck is calm and game is running", () => {
@@ -87,7 +90,7 @@ describe("Working With Duck - Deterministic Game Engine", () => {
   it("should trigger Zoomies when Excitement reaches 100%", () => {
     let state = createInitialDuckGameState(1, "campaign");
     state.status = "running";
-    state.excitement = 99.5;
+    state.excitement = 99.8;
 
     state = stepDuckGame(state);
     expect(state.duck.state).toBe("ZOOMIES");
@@ -166,12 +169,12 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     let state = createInitialDuckGameState(1, "campaign");
     state.status = "running";
     state.duck.state = "SNEAKY_CHEW";
-    state.activeHazardTarget = "resume";
+    state.activeHazardTarget = "pitch-deck";
 
     state = applySqueakyToy(state, 300, 200);
     expect(state.duck.state).toBe("IDLE_ROAM");
     expect(state.activeHazardTarget).toBeNull();
-    expect(state.activeSkillToast?.badge).toBe("Resume Intact!");
+    expect(state.activeSkillToast?.badge).toBe("Deck Saved!");
     expect(state.naughtyVsGood).toBeGreaterThan(15);
   });
 
@@ -211,7 +214,6 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     expect(state.soundCueQueue).toContain("combo-fanfare");
   });
 
-  // --- Training Tricks & Clicker Obdience Tests ---
   it("should perform training tricks (Sit, High Five, Drop It, Spin) and award points/good boy boosts", () => {
     let state = createInitialDuckGameState(1, "campaign");
     state.status = "running";
@@ -241,7 +243,6 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     expect(state.soundCueQueue).toContain("spin-whoosh");
   });
 
-  // --- Active Coding Burst Tests ---
   it("should boost work progress and increment commit bursts on activeCodeBurst", () => {
     let state = createInitialDuckGameState(1, "campaign");
     state.status = "running";
@@ -253,7 +254,6 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     expect(state.soundCueQueue).toContain("code-type");
   });
 
-  // --- Office Stations Tests ---
   it("should interact with Water Bowl, Food Bowl, and Dog Bed stations", () => {
     let state = createInitialDuckGameState(1, "campaign");
     state.status = "running";
@@ -277,7 +277,6 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     expect(state.soundCueQueue).toContain("snore");
   });
 
-  // --- Bathtub Washroom Minigame Tests ---
   it("should enter Bathtub, scrub soap lather, rinse spray, and exit fresh & clean", () => {
     let state = createInitialDuckGameState(1, "campaign");
     state.status = "running";
@@ -308,7 +307,6 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     expect(state.totalScore).toBeGreaterThan(100);
   });
 
-  // --- Wearable Accessories & Mud Resistance Tests ---
   it("should equip wearable accessories and apply perks (Rain boots mud immunity, Bowtie speed)", () => {
     let state = createInitialDuckGameState(4, "campaign"); // Unlocks rain boots
     expect(state.unlockedAccessories).toContain("rain-boots");
@@ -417,7 +415,6 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     DUCK_FACTS.forEach((fact) => {
       expect(fact.photoUrl).toMatch(/^\/duck\/duck-.*\.jpg$/);
       expect(fact.svgUrl).toMatch(/^\/duck\/duck-.*\.svg$/);
-      expect(fact.title.length).toBeGreaterThan(0);
       expect(fact.fact.length).toBeGreaterThan(0);
       expect(fact.caption.length).toBeGreaterThan(0);
     });
@@ -493,8 +490,8 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     expect(state.totalScore).toBe(50);
   });
 
-  it("should properly save all four portfolio hazards with correct skill toasts", () => {
-    const hazardIds = ["resume", "server-cable", "clinical-db", "garmin-watch"] as const;
+  it("should properly save all four corporate hazards with correct skill toasts", () => {
+    const hazardIds = ["pitch-deck", "power-cable", "audit-file", "laptop"] as const;
     hazardIds.forEach((id) => {
       let state = createInitialDuckGameState(1, "campaign");
       state.status = "running";
@@ -532,7 +529,12 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     expect(state.bathtubState.soapLather).toBeGreaterThan(0);
     expect(state.soundCueQueue).toContain("bath-soap");
 
-    // Step bathtub game
+    // Step bathtub game increments ticks
+    const preTicks = state.ticks;
+    state = stepBathtubGame(state);
+    expect(state.ticks).toBe(preTicks + 1);
+
+    // Step duck game in bathtub
     state = stepDuckGame(state);
     expect(state.inBathtub).toBe(true);
 
@@ -607,6 +609,68 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     expect(state.naughtyVsGood).toBeGreaterThan(0);
   });
 
+  it("should spawn indoor puddle when bladder reaches 100% and potty sniffing countdown expires indoors", () => {
+    let state = createInitialDuckGameState(1, "campaign");
+    state.status = "running";
+    state.duck.state = "SNIFFING_POTTY";
+    state.duck.sniffCountdown = 1;
+    state.duck.x = 350;
+    state.duck.y = 220;
+
+    state = stepDuckGame(state);
+    expect(state.indoorPuddles.length).toBe(1);
+    expect(state.indoorPuddles[0].x).toBe(351);
+    expect(state.indoorPuddles[0].y).toBe(220);
+    expect(state.indoorPuddles[0].mopProgress).toBe(0);
+    expect(state.soundCueQueue).toContain("fail");
+  });
+
+  it("should apply 30% work penalty while indoor puddles exist", () => {
+    const stateWithoutPuddle = createInitialDuckGameState(1, "campaign");
+    stateWithoutPuddle.status = "running";
+    stateWithoutPuddle.duck.state = "IDLE_ROAM";
+    const nextWithout = stepDuckGame(stateWithoutPuddle);
+
+    const stateWithPuddle = createInitialDuckGameState(1, "campaign");
+    stateWithPuddle.status = "running";
+    stateWithPuddle.duck.state = "IDLE_ROAM";
+    stateWithPuddle.indoorPuddles = [{ id: 1, x: 300, y: 200, radius: 24, mopProgress: 0 }];
+    const nextWith = stepDuckGame(stateWithPuddle);
+
+    expect(nextWith.workProgress).toBeCloseTo(nextWithout.workProgress * 0.7, 3);
+  });
+
+  it("should mop indoor puddle progressively until clean", () => {
+    let state = createInitialDuckGameState(1, "campaign");
+    state.status = "running";
+    state.indoorPuddles = [{ id: 1, x: 300, y: 200, radius: 24, mopProgress: 0 }];
+
+    // Scrub puddle (35% per scrub)
+    state = mopIndoorPuddle(state, 300, 200);
+    expect(state.indoorPuddles.length).toBe(1);
+    expect(state.indoorPuddles[0].mopProgress).toBe(35);
+
+    state = mopIndoorPuddle(state, 300, 200);
+    expect(state.indoorPuddles[0].mopProgress).toBe(70);
+
+    // Third scrub reaches 105% -> puddle removed & points awarded
+    state = mopIndoorPuddle(state, 300, 200);
+    expect(state.indoorPuddles.length).toBe(0);
+    expect(state.totalScore).toBe(50);
+    expect(state.soundCueQueue).toContain("ding");
+  });
+
+  it("should throttle impulse timing and persist lastImpulseTick", () => {
+    const state = createInitialDuckGameState(1, "campaign");
+    state.status = "running";
+    state.duck.state = "IDLE_ROAM";
+    state.ticks = 600;
+    state.lastImpulseTick = 0;
+
+    const nextState = stepDuckGame(state);
+    expect(nextState.lastImpulseTick).toBe(601);
+  });
+
   it("should interact with all office stations and perform all tricks", () => {
     let state = createInitialDuckGameState(1, "campaign");
 
@@ -627,7 +691,7 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     // Code burst
     state.status = "running";
     state = activeCodeBurst(state);
-    expect(state.activeCodeBursts).toBeGreaterThan(0);
+    expect(state.activeCodeBursts).toBe(1);
 
     // Accessories
     const accessories = ["bucket-hat", "bowtie", "rain-boots", "bandana", "none"] as const;

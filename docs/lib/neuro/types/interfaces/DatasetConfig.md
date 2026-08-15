@@ -6,7 +6,7 @@
 
 # Interface: DatasetConfig
 
-Defined in: [lib/neuro/types.ts:46](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L46)
+Defined in: [lib/neuro/types.ts:372](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L372)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/neuro/types.ts:46](https://github.com/fderuiter/portfolio/blob/
 
 > **id**: [`DatasetSource`](../type-aliases/DatasetSource.md)
 
-Defined in: [lib/neuro/types.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L47)
+Defined in: [lib/neuro/types.ts:373](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L373)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/neuro/types.ts:47](https://github.com/fderuiter/portfolio/blob/
 
 > **isRealHumanScan**: `boolean`
 
-Defined in: [lib/neuro/types.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L52)
+Defined in: [lib/neuro/types.ts:378](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L378)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/neuro/types.ts:52](https://github.com/fderuiter/portfolio/blob/
 
 > `optional` **modelUrl?**: `string`
 
-Defined in: [lib/neuro/types.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L51)
+Defined in: [lib/neuro/types.ts:377](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L377)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/neuro/types.ts:51](https://github.com/fderuiter/portfolio/blob/
 
 > **name**: `string`
 
-Defined in: [lib/neuro/types.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L48)
+Defined in: [lib/neuro/types.ts:374](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L374)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/neuro/types.ts:48](https://github.com/fderuiter/portfolio/blob/
 
 > **sourceRepo**: `string`
 
-Defined in: [lib/neuro/types.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L50)
+Defined in: [lib/neuro/types.ts:376](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L376)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [lib/neuro/types.ts:50](https://github.com/fderuiter/portfolio/blob/
 
 > **subtitle**: `string`
 
-Defined in: [lib/neuro/types.ts:49](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L49)
+Defined in: [lib/neuro/types.ts:375](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L375)

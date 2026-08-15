@@ -253,7 +253,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
   return (
     <div
       onClick={handleBackdropClick}
-      className="fixed inset-0 z-[9999] flex items-start justify-center pt-[15vh] px-4 bg-zinc-950/80 backdrop-blur-md transition-all duration-300"
+      className="fixed inset-0 z-[9999] flex items-start justify-center pt-[max(1.5rem,env(safe-area-inset-top)+1rem)] sm:pt-[15vh] px-3 sm:px-4 pb-[max(1.5rem,env(safe-area-inset-bottom)+1rem)] bg-zinc-950/85 backdrop-blur-md transition-all duration-300 overflow-y-auto"
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.97, y: -8 }}
@@ -262,20 +262,20 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         transition={{ duration: 0.18, ease: "easeOut" }}
         ref={containerRef}
         style={{ "--cmd-glow": `0 0 50px ${hexToRgba(designManifest.colors["brand-cyan"], 0.06)}` } as React.CSSProperties}
-        className="w-full max-w-lg bg-zinc-900/80 border border-zinc-800/80 backdrop-blur-2xl shadow-[var(--cmd-glow)] rounded-3xl overflow-hidden flex flex-col relative"
+        className="w-full max-w-lg bg-zinc-900/90 border border-zinc-800/80 backdrop-blur-2xl shadow-[var(--cmd-glow)] rounded-3xl overflow-hidden flex flex-col relative my-auto sm:my-0 max-h-[85vh]"
       >
         {/* Circular glow visual elements inside modal */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-brand-cyan/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-brand-blue/5 rounded-full blur-3xl pointer-events-none" />
 
         {/* Input Header container */}
-        <div className="relative z-10 flex items-center border-b border-zinc-800/60 p-4 gap-3">
+        <div className="relative z-10 flex items-center border-b border-zinc-800/60 p-3 sm:p-4 gap-2 sm:gap-3">
           <IconSearch className="w-5 h-5 text-zinc-500 flex-shrink-0" />
           <input
             ref={inputRef}
             id={searchId}
             type="text"
-            placeholder="Type dynamic case study title, keyword, or section..."
+            placeholder="Search cases, tools, games, sections..."
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -288,11 +288,16 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
             aria-controls="palette-results-list"
             aria-haspopup="listbox"
             aria-label="Spotlight command palette search"
-            className="w-full bg-transparent text-sm text-neutral-100 placeholder-zinc-500 focus:outline-none font-sans"
+            className="w-full bg-transparent text-sm sm:text-base text-neutral-100 placeholder-zinc-500 focus:outline-none font-sans"
           />
-          <span className="text-xs font-mono font-bold tracking-wider text-zinc-300 px-2.5 py-1 bg-zinc-950 border border-zinc-700 rounded-md select-none">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close command search"
+            className="min-h-10 min-w-10 flex items-center justify-center text-xs font-mono font-bold tracking-wider text-zinc-300 px-2.5 py-1 bg-zinc-950 border border-zinc-700 hover:border-brand-cyan/40 hover:text-brand-cyan rounded-xl cursor-pointer select-none transition"
+          >
             ESC
-          </span>
+          </button>
         </div>
 
         {/* Results List section */}

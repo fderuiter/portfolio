@@ -21,6 +21,7 @@ interface InspectorPanelProps {
   onUpdateField: (fieldId: string, updates: Partial<CRFField>) => void;
   onUpdateFormMeta: (updates: Partial<CRFForm>) => void;
   onUpdateRules: (rules: EditCheckRule[]) => void;
+  onSaveCodelist?: (codelist: CodelistDefinition) => void;
 }
 
 type InspectorTab = "properties" | "logic" | "cdash";
@@ -33,6 +34,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
   onUpdateField,
   onUpdateFormMeta,
   onUpdateRules,
+  onSaveCodelist,
 }) => {
   const [activeTab, setActiveTab] = useState<InspectorTab>("properties");
   const allFields = form.sections.flatMap((s) => s.fields);
@@ -113,6 +115,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                 allFieldsInForm={allFields}
                 codelists={codelists}
                 onUpdateField={(updates) => onUpdateField(selectedField.id, updates)}
+                onSaveToStudyCodelist={onSaveCodelist}
               />
             )}
 

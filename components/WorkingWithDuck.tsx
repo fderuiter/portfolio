@@ -52,6 +52,7 @@ import {
   performTrick,
   activeCodeBurst,
   interactStation,
+  mopIndoorPuddle,
   enterBathtub,
   scrubBathtub,
   rinseBathtub,
@@ -688,7 +689,7 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
   ctx.fillStyle = "#e4e4e7";
   ctx.font = "bold 10px monospace";
   ctx.textAlign = "center";
-  ctx.fillText("FRED", DESK_BOUNDS.x + 85, DESK_BOUNDS.y + 104);
+  ctx.fillText("YOU", DESK_BOUNDS.x + 85, DESK_BOUNDS.y + 104);
 
   // Interactive Code Prompt overlay on Desk
   ctx.fillStyle = "rgba(6, 182, 212, 0.15)";
@@ -698,7 +699,7 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
   ctx.strokeRect(DESK_BOUNDS.x + 20, DESK_BOUNDS.y + 125, 130, 22);
   ctx.fillStyle = "#38bdf8";
   ctx.font = "bold 9px monospace";
-  ctx.fillText("💻 CODE BURST (SPACE)", DESK_BOUNDS.x + 85, DESK_BOUNDS.y + 140);
+  ctx.fillText("💻 FOCUS SPRINT (SPACE)", DESK_BOUNDS.x + 85, DESK_BOUNDS.y + 140);
 
   // 4. Dog Bed
   ctx.fillStyle = "#581c87";
@@ -905,10 +906,11 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
     ctx.fillStyle = isTargeted ? "#fca5a5" : "#e4e4e7";
     ctx.font = "14px sans-serif";
     ctx.textAlign = "center";
-    let icon = "📄";
-    if (hazard.id === "server-cable") icon = "⚡";
-    if (hazard.id === "clinical-db") icon = "💊";
-    if (hazard.id === "garmin-watch") icon = "⌚";
+    let icon = "📊";
+    if (hazard.id === "power-cable" || hazard.id === "server-cable") icon = "⚡";
+    if (hazard.id === "audit-file" || hazard.id === "clinical-db") icon = "📑";
+    if (hazard.id === "laptop" || hazard.id === "garmin-watch") icon = "💻";
+    if (hazard.id === "pitch-deck" || hazard.id === "resume") icon = "📊";
     ctx.fillText(icon, hazard.x, hazard.y + 5);
 
     ctx.fillStyle = isTargeted ? "#f87171" : "#a1a1aa";
@@ -918,7 +920,47 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
     ctx.restore();
   });
 
-  // 9. Thrown Ball in room
+  // 9. Indoor Bladder Puddles
+  if (state.indoorPuddles && state.indoorPuddles.length > 0) {
+    state.indoorPuddles.forEach((puddle) => {
+      ctx.save();
+      // Outer puddle spill
+      ctx.fillStyle = "rgba(56, 189, 248, 0.35)";
+      ctx.strokeStyle = "#38bdf8";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.ellipse(puddle.x, puddle.y, puddle.radius * 1.25, puddle.radius * 0.85, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Inner puddle ripple
+      ctx.fillStyle = "rgba(14, 165, 233, 0.55)";
+      ctx.beginPath();
+      ctx.ellipse(puddle.x, puddle.y, puddle.radius * 0.7, puddle.radius * 0.45, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Mop Progress Bar if scrubbing
+      if (puddle.mopProgress > 0) {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+        ctx.fillRect(puddle.x - 25, puddle.y - 28, 50, 6);
+        ctx.fillStyle = "#22c55e";
+        ctx.fillRect(puddle.x - 25, puddle.y - 28, (50 * Math.min(100, puddle.mopProgress)) / 100, 6);
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(puddle.x - 25, puddle.y - 28, 50, 6);
+      }
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 9px monospace";
+      ctx.textAlign = "center";
+      ctx.shadowColor = "#000000";
+      ctx.shadowBlur = 4;
+      ctx.fillText("🧹 CLICK / SCRUB TO MOP", puddle.x, puddle.y + 4);
+      ctx.restore();
+    });
+  }
+
+  // 10. Thrown Ball in room
   if (state.ball && state.ball.active) {
     ctx.fillStyle = "#84cc16";
     ctx.beginPath();
@@ -1077,7 +1119,7 @@ function drawDogParkScene(
   ctx.fillStyle = "#ffffff";
   ctx.font = "bold 10px monospace";
   ctx.textAlign = "center";
-  ctx.fillText("FRED", 80, 254);
+  ctx.fillText("YOU", 80, 254);
 
   // 7. Thrown Ball / Frisbee Trajectory
   if (park.status === "thrown" || park.status === "retrieving") {
@@ -1566,6 +1608,35 @@ export const WorkingWithDuck: React.FC = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // Global Window Pointer Up Handler (Prevents Drag Locking Off-Canvas)
+  useEffect(() => {
+    const handleGlobalPointerUp = () => {
+      const state = gameStateRef.current;
+      if (state.inDogPark && isThrowingParkBall && aimParkStart) {
+        setIsThrowingParkBall(false);
+        const powerX = (aimParkStart.x - 90) * 0.08;
+        const powerY = (aimParkStart.y - 250) * 0.06;
+        gameStateRef.current = throwParkBall(state, powerX, powerY);
+        setAimParkStart(null);
+        setUiState({ ...gameStateRef.current });
+        return;
+      }
+
+      if (isDraggingDuckState) {
+        setIsDraggingDuckState(false);
+        gameStateRef.current = releaseDuck(state);
+        setUiState({ ...gameStateRef.current });
+      }
+    };
+
+    window.addEventListener("mouseup", handleGlobalPointerUp);
+    window.addEventListener("touchend", handleGlobalPointerUp);
+    return () => {
+      window.removeEventListener("mouseup", handleGlobalPointerUp);
+      window.removeEventListener("touchend", handleGlobalPointerUp);
+    };
+  }, [isThrowingParkBall, aimParkStart, isDraggingDuckState]);
+
   // Canvas Mouse Interactions
   const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -1695,6 +1766,18 @@ export const WorkingWithDuck: React.FC = () => {
       return;
     }
 
+    // Check if clicked directly on indoor puddle for mopping
+    if (state.indoorPuddles && state.indoorPuddles.length > 0) {
+      const clickedPuddle = state.indoorPuddles.some(
+        (p) => Math.hypot(x - p.x, y - p.y) <= p.radius + 15
+      );
+      if (clickedPuddle) {
+        gameStateRef.current = mopIndoorPuddle(state, x, y);
+        setUiState({ ...gameStateRef.current });
+        return;
+      }
+    }
+
     // Check if clicked directly on Duck
     const duckDist = Math.hypot(x - state.duck.x, y - state.duck.y);
     if (duckDist < 38) {
@@ -1751,6 +1834,17 @@ export const WorkingWithDuck: React.FC = () => {
     if (isDraggingDuckState) {
       gameStateRef.current = dragDuckTo(state, x, y);
       return;
+    }
+
+    // Scrub / Mop Indoor Puddle on Hover & Scrub
+    if (state.indoorPuddles && state.indoorPuddles.length > 0) {
+      const hoveringPuddle = state.indoorPuddles.some(
+        (p) => Math.hypot(x - p.x, y - p.y) <= p.radius + 15
+      );
+      if (hoveringPuddle) {
+        gameStateRef.current = mopIndoorPuddle(state, x, y);
+        setUiState({ ...gameStateRef.current });
+      }
     }
 
     // Belly Rubbing during The Flop
@@ -2186,10 +2280,10 @@ export const WorkingWithDuck: React.FC = () => {
                   setUiState({ ...gameStateRef.current });
                 }}
                 className="px-4 py-2 rounded-xl bg-cyan-500 text-black font-bold text-xs hover:bg-cyan-400 active:scale-95 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center gap-2 cursor-pointer"
-                title="Active Coding burst at desk (Spacebar)"
+                title="Focus work sprint at desk (Spacebar)"
               >
                 <IconCode className="w-4 h-4" />
-                <span>Active Commit Burst (Space)</span>
+                <span>Focus Work Sprint (Space)</span>
               </button>
             ) : uiState.inBathtub ? (
               <div className="flex items-center gap-2">
@@ -2333,7 +2427,7 @@ export const WorkingWithDuck: React.FC = () => {
             </span>
 
             <h3 className="text-2xl font-bold text-white mt-3 mb-2">
-              Duck is Asleep &amp; Code is Shipped! 💤
+              Duck is Asleep &amp; Work is Done! 💤
             </h3>
 
             <p className="text-xs text-zinc-400 leading-relaxed mb-6">

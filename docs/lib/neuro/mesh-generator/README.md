@@ -13,3 +13,4 @@
 ## Functions
 
 - [createCorticalSurfaceMesh](functions/createCorticalSurfaceMesh.md)
+- [getAnatomicalParcelAtCoordinate](functions/getAnatomicalParcelAtCoordinate.md)

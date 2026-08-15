@@ -2,10 +2,10 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import { SurfaceMode, VoxelCoord } from "@/lib/neuro/types";
-import { createCorticalSurfaceMesh } from "@/lib/neuro/mesh-generator";
+import { AnatomicalParcel, HemisphereFilter, SurfaceMode, VoxelCoord } from "@/lib/neuro/types";
+import { createCorticalSurfaceMesh, getAnatomicalParcelAtCoordinate } from "@/lib/neuro/mesh-generator";
 import { loadExternalBrainMesh } from "@/lib/neuro/asset-loader";
-import { Icon3dCubeSphere, IconRefresh } from "@tabler/icons-react";
+import { Icon3dCubeSphere, IconCheck, IconLayersSubtract, IconRefresh } from "@tabler/icons-react";
 
 interface Brain3DViewerProps {
   surfaceMode: SurfaceMode;
@@ -13,6 +13,7 @@ interface Brain3DViewerProps {
   modelUrl?: string;
   wireframe?: boolean;
   onSurfaceChange?: (mode: SurfaceMode) => void;
+  onCrosshairChange?: (coord: VoxelCoord) => void;
 }
 
 export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
@@ -21,6 +22,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
   modelUrl,
   wireframe = false,
   onSurfaceChange,
+  onCrosshairChange,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -34,7 +36,15 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
   useEffect(() => {
     isRotatingRef.current = isRotating;
   }, [isRotating]);
+
+  const [hemiFilter, setHemiFilter] = useState<HemisphereFilter>("both");
+  const [wireframeActive, setWireframeActive] = useState<boolean>(wireframe);
+  const [hoveredParcel, setHoveredParcel] = useState<AnatomicalParcel | null>(null);
+  const [hoveredPos, setHoveredPos] = useState<{ x: number; y: number; z: number } | null>(null);
+  const [tooltipPos, setTooltipPos] = useState<{ x: number; y: number } | null>(null);
+
   const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
   const prevMouseRef = useRef({ x: 0, y: 0 });
   const rotationRef = useRef({ x: 0.2, y: -0.4 });
 
@@ -57,16 +67,20 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
     cameraRef.current = camera;
 
     // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
     scene.add(ambientLight);
 
-    const dirLight1 = new THREE.DirectionalLight(0x38bdf8, 1.2); // Sky blue
+    const dirLight1 = new THREE.DirectionalLight(0x38bdf8, 1.25); // Sky blue key light
     dirLight1.position.set(5, 8, 6);
     scene.add(dirLight1);
 
-    const dirLight2 = new THREE.DirectionalLight(0x818cf8, 0.8); // Indigo
+    const dirLight2 = new THREE.DirectionalLight(0x818cf8, 0.85); // Indigo fill light
     dirLight2.position.set(-5, -4, -4);
     scene.add(dirLight2);
+
+    const rimLight = new THREE.DirectionalLight(0x06b6d4, 0.5); // Cyan rim light
+    rimLight.position.set(0, 6, -5);
+    scene.add(rimLight);
 
     // 3D Crosshair Indicator
     const crossGeo = new THREE.SphereGeometry(0.06, 16, 16);
@@ -95,7 +109,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
 
       if (meshGroupRef.current) {
         if (isRotatingRef.current && !isDraggingRef.current) {
-          rotationRef.current.y += 0.005;
+          rotationRef.current.y += 0.004;
         }
         meshGroupRef.current.rotation.x = rotationRef.current.x;
         meshGroupRef.current.rotation.y = rotationRef.current.y;
@@ -130,7 +144,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
     };
   }, []);
 
-  // Update Cortical Mesh on surfaceMode, modelUrl, or wireframe change
+  // Update Cortical Mesh on surfaceMode, modelUrl, wireframeActive, or hemiFilter change
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene) return;
@@ -151,14 +165,14 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
       });
     }
 
-    if (modelUrl && surfaceMode === "pial") {
-      loadExternalBrainMesh(modelUrl, surfaceMode).then((externalGroup) => {
+    if (modelUrl && surfaceMode === "pial" && hemiFilter === "both") {
+      loadExternalBrainMesh(modelUrl, surfaceMode, hemiFilter).then((externalGroup) => {
         if (!isMounted || !sceneRef.current) return;
         sceneRef.current.add(externalGroup);
         meshGroupRef.current = externalGroup;
       });
     } else {
-      const newGroup = createCorticalSurfaceMesh(surfaceMode, wireframe);
+      const newGroup = createCorticalSurfaceMesh(surfaceMode, wireframeActive, hemiFilter);
       scene.add(newGroup);
       meshGroupRef.current = newGroup;
     }
@@ -166,7 +180,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [surfaceMode, modelUrl, wireframe]);
+  }, [surfaceMode, modelUrl, wireframeActive, hemiFilter]);
 
   // Update Crosshair Marker Position in 3D Space
   useEffect(() => {
@@ -178,22 +192,133 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
     crosshairMarkerRef.current.position.set(normX, normY, normZ);
   }, [crosshair]);
 
-  // Mouse Orbit Handlers
+  // Raycaster for 3D clicks and hover parcel detection
+  const performRaycast = (clientX: number, clientY: number) => {
+    const container = containerRef.current;
+    const camera = cameraRef.current;
+    const meshGroup = meshGroupRef.current;
+    if (!container || !camera || !meshGroup) return null;
+
+    const rect = container.getBoundingClientRect();
+    const mouseX = ((clientX - rect.left) / rect.width) * 2 - 1;
+    const mouseY = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(new THREE.Vector2(mouseX, mouseY), camera);
+
+    const intersects = raycaster.intersectObjects(meshGroup.children, true);
+    if (intersects.length === 0) return null;
+
+    const hit = intersects[0];
+    // Convert world hit point to meshGroup local coordinate space
+    const localPoint = hit.point.clone();
+    meshGroup.worldToLocal(localPoint);
+
+    return {
+      hit,
+      localPoint,
+      clientPos: { x: clientX - rect.left, y: clientY - rect.top },
+    };
+  };
+
+  // Mouse & Touch Orbit Handlers
   const handleMouseDown = (e: React.MouseEvent) => {
     isDraggingRef.current = true;
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
     prevMouseRef.current = { x: e.clientX, y: e.clientY };
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDraggingRef.current) return;
-    const deltaX = e.clientX - prevMouseRef.current.x;
-    const deltaY = e.clientY - prevMouseRef.current.y;
-    rotationRef.current.y += deltaX * 0.008;
-    rotationRef.current.x += deltaY * 0.008;
-    prevMouseRef.current = { x: e.clientX, y: e.clientY };
+    if (isDraggingRef.current) {
+      const deltaX = e.clientX - prevMouseRef.current.x;
+      const deltaY = e.clientY - prevMouseRef.current.y;
+      rotationRef.current.y += deltaX * 0.008;
+      rotationRef.current.x += deltaY * 0.008;
+      prevMouseRef.current = { x: e.clientX, y: e.clientY };
+      setHoveredParcel(null);
+      setTooltipPos(null);
+      return;
+    }
+
+    // Hover parcel detection
+    const result = performRaycast(e.clientX, e.clientY);
+    if (result) {
+      const isLeft = result.localPoint.x < 0;
+      const parcel = getAnatomicalParcelAtCoordinate(result.localPoint, isLeft);
+      setHoveredParcel(parcel);
+      setHoveredPos({
+        x: Math.round(48 + (result.localPoint.x / 1.35) * 48),
+        y: Math.round(48 + (result.localPoint.y / 1.85) * 48),
+        z: Math.round(48 + (result.localPoint.z / 1.45) * 48),
+      });
+      setTooltipPos(result.clientPos);
+    } else {
+      setHoveredParcel(null);
+      setTooltipPos(null);
+    }
   };
 
-  const handleMouseUp = () => {
+  const handleMouseUp = (e: React.MouseEvent) => {
+    const dragDist = Math.hypot(
+      e.clientX - dragStartRef.current.x,
+      e.clientY - dragStartRef.current.y
+    );
+    isDraggingRef.current = false;
+
+    // If mouse was clicked without significant dragging, trigger 3D raycast voxel navigation
+    if (dragDist < 6 && onCrosshairChange) {
+      const result = performRaycast(e.clientX, e.clientY);
+      if (result) {
+        const vx = Math.round(48 + (result.localPoint.x / 1.35) * 48);
+        const vy = Math.round(48 + (result.localPoint.y / 1.85) * 48);
+        const vz = Math.round(48 + (result.localPoint.z / 1.45) * 48);
+        onCrosshairChange({
+          x: Math.max(0, Math.min(95, vx)),
+          y: Math.max(0, Math.min(95, vy)),
+          z: Math.max(0, Math.min(95, vz)),
+        });
+      }
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0] || e.changedTouches[0];
+    isDraggingRef.current = true;
+    dragStartRef.current = { x: touch.clientX, y: touch.clientY };
+    prevMouseRef.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDraggingRef.current) return;
+    const touch = e.touches[0] || e.changedTouches[0];
+    const deltaX = touch.clientX - prevMouseRef.current.x;
+    const deltaY = touch.clientY - prevMouseRef.current.y;
+    rotationRef.current.y += deltaX * 0.008;
+    rotationRef.current.x += deltaY * 0.008;
+    prevMouseRef.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const touch = e.changedTouches[0];
+    if (touch && onCrosshairChange) {
+      const dragDist = Math.hypot(
+        touch.clientX - dragStartRef.current.x,
+        touch.clientY - dragStartRef.current.y
+      );
+      if (dragDist < 8) {
+        const result = performRaycast(touch.clientX, touch.clientY);
+        if (result) {
+          const vx = Math.round(48 + (result.localPoint.x / 1.35) * 48);
+          const vy = Math.round(48 + (result.localPoint.y / 1.85) * 48);
+          const vz = Math.round(48 + (result.localPoint.z / 1.45) * 48);
+          onCrosshairChange({
+            x: Math.max(0, Math.min(95, vx)),
+            y: Math.max(0, Math.min(95, vy)),
+            z: Math.max(0, Math.min(95, vz)),
+          });
+        }
+      }
+    }
     isDraggingRef.current = false;
   };
 
@@ -204,30 +329,72 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
         <Icon3dCubeSphere className="w-4 h-4 text-brand-cyan" />
         <span className="font-semibold text-white uppercase tracking-wider">
           {surfaceMode === "pial"
-            ? "Pial Surface (lh.pial)"
+            ? "Pial Surface (lh.pial / rh.pial)"
             : surfaceMode === "white"
-            ? "White Matter (lh.white)"
+            ? "White Matter (lh.white / rh.white)"
             : surfaceMode === "inflated"
             ? "Inflated Cortex (lh.inflated)"
+            : surfaceMode === "aparc"
+            ? "Desikan-Killiany Atlas (aparc.a2009s)"
             : "Subcortical ASEG"}
         </span>
       </div>
 
       {/* Surface Mode Toggle Bar */}
-      <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-zinc-900/85 backdrop-blur-md p-1 rounded-xl border border-zinc-750 text-xs font-mono">
-        {(["pial", "white", "inflated", "aseg"] as SurfaceMode[]).map((mode) => (
+      <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-zinc-900/85 backdrop-blur-md p-1 rounded-xl border border-zinc-750 text-xs font-mono overflow-x-auto max-w-[55%]">
+        {(["pial", "white", "inflated", "aparc", "aseg"] as SurfaceMode[]).map((mode) => (
           <button
             key={mode}
             onClick={() => onSurfaceChange?.(mode)}
-            className={`px-2.5 py-1 rounded-lg transition-all capitalize ${
+            className={`px-2.5 py-1 rounded-lg transition-all capitalize whitespace-nowrap ${
               surfaceMode === mode
                 ? "bg-brand-cyan text-zinc-950 font-bold shadow-sm"
                 : "text-zinc-400 hover:text-white hover:bg-zinc-800"
             }`}
           >
-            {mode}
+            {mode === "aparc" ? "Atlas (aparc)" : mode}
           </button>
         ))}
+      </div>
+
+      {/* Hemisphere and Wireframe Secondary Controls */}
+      <div className="absolute top-12 left-3 z-10 flex items-center gap-1.5 bg-zinc-900/80 backdrop-blur-md p-1 rounded-lg border border-zinc-800 text-[11px] font-mono text-zinc-400">
+        <span className="px-1.5 text-zinc-400 font-semibold">HEMI:</span>
+        <button
+          onClick={() => setHemiFilter("both")}
+          className={`px-2 py-0.5 rounded transition ${
+            hemiFilter === "both" ? "bg-zinc-700 text-white font-bold" : "hover:text-zinc-200"
+          }`}
+        >
+          Both
+        </button>
+        <button
+          onClick={() => setHemiFilter("lh")}
+          className={`px-2 py-0.5 rounded transition ${
+            hemiFilter === "lh" ? "bg-zinc-700 text-white font-bold" : "hover:text-zinc-200"
+          }`}
+        >
+          Left (lh)
+        </button>
+        <button
+          onClick={() => setHemiFilter("rh")}
+          className={`px-2 py-0.5 rounded transition ${
+            hemiFilter === "rh" ? "bg-zinc-700 text-white font-bold" : "hover:text-zinc-200"
+          }`}
+        >
+          Right (rh)
+        </button>
+        <span className="text-zinc-700 mx-0.5">|</span>
+        <button
+          onClick={() => setWireframeActive((prev) => !prev)}
+          className={`flex items-center gap-1 px-2 py-0.5 rounded transition ${
+            wireframeActive ? "bg-brand-cyan/20 text-brand-cyan font-bold" : "hover:text-zinc-200"
+          }`}
+        >
+          <IconLayersSubtract className="w-3 h-3" />
+          <span>Wireframe</span>
+          {wireframeActive && <IconCheck className="w-2.5 h-2.5" />}
+        </button>
       </div>
 
       {/* 3D Canvas Container */}
@@ -237,8 +404,39 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ touchAction: "none" }}
         className="w-full flex-1 cursor-grab active:cursor-grabbing"
       />
+
+      {/* Interactive Anatomical Parcel Tooltip HUD */}
+      {hoveredParcel && tooltipPos && (
+        <div
+          style={{
+            transform: `translate3d(min(${tooltipPos.x + 16}px, calc(100% - 240px)), max(16px, ${tooltipPos.y - 65}px), 0)`,
+            left: 0,
+            top: 0,
+          }}
+          className="pointer-events-none absolute z-20 bg-zinc-950/90 backdrop-blur-md border border-zinc-700 p-2.5 rounded-xl shadow-2xl text-xs font-mono max-w-[230px]"
+        >
+          <div className="flex items-center gap-2">
+            <span
+              className="w-2.5 h-2.5 rounded-full shrink-0"
+              style={{ backgroundColor: `rgb(${hoveredParcel.rgb.join(",")})` }}
+            />
+            <span className="font-bold text-white leading-tight">{hoveredParcel.name}</span>
+          </div>
+          <div className="mt-1 flex items-center justify-between text-[10px] text-zinc-400">
+            <span className="text-brand-cyan font-semibold">Lobe: {hoveredParcel.lobe}</span>
+            {hoveredPos && <span>({hoveredPos.x}, {hoveredPos.y}, {hoveredPos.z})</span>}
+          </div>
+          <p className="mt-1 text-[10px] text-zinc-400 leading-snug line-clamp-2">
+            {hoveredParcel.description}
+          </p>
+        </div>
+      )}
 
       {/* Bottom Controls Bar */}
       <div className="absolute bottom-3 left-3 right-3 z-10 flex items-center justify-between text-xs font-mono text-zinc-400 bg-zinc-900/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-zinc-800">
@@ -246,8 +444,8 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
           <span>
             VOXEL: ({crosshair.x}, {crosshair.y}, {crosshair.z})
           </span>
-          <span className="hidden sm:inline text-zinc-400">|</span>
-          <span className="hidden sm:inline">DRAG TO ROTATE</span>
+          <span className="hidden sm:inline text-zinc-600">|</span>
+          <span className="hidden sm:inline text-zinc-400">CLICK 3D TO SYNC 2D SLICES</span>
         </div>
         <button
           onClick={() => setIsRotating((prev) => !prev)}

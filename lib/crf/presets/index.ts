@@ -1,5 +1,6 @@
 import { StudyProtocol } from "../types";
 import { ONCOLOGY_RECIST_PRESET } from "./oncology-recist";
+import { DEVICE_CARDIOVASCULAR_IMPLANT_PRESET } from "./device-cardiovascular-implant";
 import { CNS_NEURO_PRESET } from "./cns-neuro";
 import { PK_ESCALATION_PRESET } from "./pk-dose-escalation";
 import { CLINICAL_INSTRUMENTS_PRESET } from "./clinical-instruments";
@@ -22,6 +23,14 @@ export const STUDY_PRESETS: PresetCatalogItem[] = [
     therapeuticArea: "Oncology",
     description: "Dual immunotherapy trial with continuous AE/CM logs, CTCAE grading, and automated RECIST 1.1 tumor burden SLD derivations.",
     study: ONCOLOGY_RECIST_PRESET,
+  },
+  {
+    id: "device_cardiovascular_implant",
+    name: "Pivotal Medical Device IDE Trial (ISO 14155 / TAVR)",
+    phase: "Pivotal / IDE",
+    therapeuticArea: "Medical Device / Cardiology",
+    description: "Class III cardiovascular implant trial with UDI tracking (DI), procedural deployment (DU), and device malfunction / deficiency logging (DE).",
+    study: DEVICE_CARDIOVASCULAR_IMPLANT_PRESET,
   },
   {
     id: "clinical_instruments",

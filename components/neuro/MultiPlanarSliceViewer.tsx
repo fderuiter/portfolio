@@ -313,6 +313,62 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
     }
   };
 
+  /**
+   * Convert canvas touch event to 3D Voxel Coordinate
+   */
+  const getVoxelFromTouchEvent = (
+    e: React.TouchEvent<HTMLCanvasElement>,
+    plane: SlicePlane
+  ): VoxelCoord => {
+    const touch = e.touches[0] || e.changedTouches[0];
+    const canvas = e.currentTarget;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    const touchX = Math.floor((touch.clientX - rect.left) * scaleX);
+    const touchY = Math.floor((touch.clientY - rect.top) * scaleY);
+
+    const clampedX = Math.max(0, Math.min(VOLUME_SIZE - 1, touchX));
+    const clampedY = Math.max(0, Math.min(VOLUME_SIZE - 1, touchY));
+
+    if (plane === "axial") {
+      return { x: clampedX, y: clampedY, z: crosshair.z };
+    } else if (plane === "coronal") {
+      const z = VOLUME_SIZE - 1 - clampedY;
+      return { x: clampedX, y: crosshair.y, z: Math.max(0, Math.min(VOLUME_SIZE - 1, z)) };
+    } else {
+      const z = VOLUME_SIZE - 1 - clampedY;
+      return { x: crosshair.x, y: clampedX, z: Math.max(0, Math.min(VOLUME_SIZE - 1, z)) };
+    }
+  };
+
+  const handleCanvasTouchStart = (
+    e: React.TouchEvent<HTMLCanvasElement>,
+    plane: SlicePlane
+  ) => {
+    isMouseDownRef.current = true;
+    activePlaneRef.current = plane;
+    const coord = getVoxelFromTouchEvent(e, plane);
+    onCrosshairChange(coord);
+    handleToolAction(coord);
+  };
+
+  const handleCanvasTouchMove = (
+    e: React.TouchEvent<HTMLCanvasElement>,
+    plane: SlicePlane
+  ) => {
+    const coord = getVoxelFromTouchEvent(e, plane);
+    if (isMouseDownRef.current && (toolMode === "paint" || toolMode === "erase")) {
+      onCrosshairChange(coord);
+      handleToolAction(coord);
+    }
+  };
+
+  const handleCanvasTouchEnd = () => {
+    isMouseDownRef.current = false;
+  };
+
   const handleCanvasMouseDown = (
     e: React.MouseEvent<HTMLCanvasElement>,
     plane: SlicePlane
@@ -440,7 +496,11 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
                 ref={coronalCanvasRef}
                 onMouseDown={(e) => handleCanvasMouseDown(e, "coronal")}
                 onMouseMove={(e) => handleCanvasMouseMove(e, "coronal")}
+                onTouchStart={(e) => handleCanvasTouchStart(e, "coronal")}
+                onTouchMove={(e) => handleCanvasTouchMove(e, "coronal")}
+                onTouchEnd={handleCanvasTouchEnd}
                 onWheel={(e) => handleWheel(e, "coronal")}
+                style={{ touchAction: "none" }}
                 className="w-full h-full object-contain cursor-crosshair"
               />
             </div>
@@ -472,7 +532,11 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
                 ref={axialCanvasRef}
                 onMouseDown={(e) => handleCanvasMouseDown(e, "axial")}
                 onMouseMove={(e) => handleCanvasMouseMove(e, "axial")}
+                onTouchStart={(e) => handleCanvasTouchStart(e, "axial")}
+                onTouchMove={(e) => handleCanvasTouchMove(e, "axial")}
+                onTouchEnd={handleCanvasTouchEnd}
                 onWheel={(e) => handleWheel(e, "axial")}
+                style={{ touchAction: "none" }}
                 className="w-full h-full object-contain cursor-crosshair"
               />
             </div>
@@ -504,7 +568,11 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
                 ref={sagittalCanvasRef}
                 onMouseDown={(e) => handleCanvasMouseDown(e, "sagittal")}
                 onMouseMove={(e) => handleCanvasMouseMove(e, "sagittal")}
+                onTouchStart={(e) => handleCanvasTouchStart(e, "sagittal")}
+                onTouchMove={(e) => handleCanvasTouchMove(e, "sagittal")}
+                onTouchEnd={handleCanvasTouchEnd}
                 onWheel={(e) => handleWheel(e, "sagittal")}
+                style={{ touchAction: "none" }}
                 className="w-full h-full object-contain cursor-crosshair"
               />
             </div>
@@ -556,7 +624,11 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
                 ref={axialCanvasRef}
                 onMouseDown={(e) => handleCanvasMouseDown(e, "axial")}
                 onMouseMove={(e) => handleCanvasMouseMove(e, "axial")}
+                onTouchStart={(e) => handleCanvasTouchStart(e, "axial")}
+                onTouchMove={(e) => handleCanvasTouchMove(e, "axial")}
+                onTouchEnd={handleCanvasTouchEnd}
                 onWheel={(e) => handleWheel(e, "axial")}
+                style={{ touchAction: "none" }}
                 className="w-full h-full object-contain cursor-crosshair"
               />
             )}
@@ -565,7 +637,11 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
                 ref={coronalCanvasRef}
                 onMouseDown={(e) => handleCanvasMouseDown(e, "coronal")}
                 onMouseMove={(e) => handleCanvasMouseMove(e, "coronal")}
+                onTouchStart={(e) => handleCanvasTouchStart(e, "coronal")}
+                onTouchMove={(e) => handleCanvasTouchMove(e, "coronal")}
+                onTouchEnd={handleCanvasTouchEnd}
                 onWheel={(e) => handleWheel(e, "coronal")}
+                style={{ touchAction: "none" }}
                 className="w-full h-full object-contain cursor-crosshair"
               />
             )}
@@ -574,7 +650,11 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
                 ref={sagittalCanvasRef}
                 onMouseDown={(e) => handleCanvasMouseDown(e, "sagittal")}
                 onMouseMove={(e) => handleCanvasMouseMove(e, "sagittal")}
+                onTouchStart={(e) => handleCanvasTouchStart(e, "sagittal")}
+                onTouchMove={(e) => handleCanvasTouchMove(e, "sagittal")}
+                onTouchEnd={handleCanvasTouchEnd}
                 onWheel={(e) => handleWheel(e, "sagittal")}
+                style={{ touchAction: "none" }}
                 className="w-full h-full object-contain cursor-crosshair"
               />
             )}

@@ -8,6 +8,7 @@
 
 ## Interfaces
 
+- [AnatomicalParcel](interfaces/AnatomicalParcel.md)
 - [ControlPoint](interfaces/ControlPoint.md)
 - [DatasetConfig](interfaces/DatasetConfig.md)
 - [QAMetrics](interfaces/QAMetrics.md)
@@ -23,6 +24,7 @@
 ## Type Aliases
 
 - [DatasetSource](type-aliases/DatasetSource.md)
+- [HemisphereFilter](type-aliases/HemisphereFilter.md)
 - [ScenarioId](type-aliases/ScenarioId.md)
 - [SlicePlane](type-aliases/SlicePlane.md)
 - [SurfaceMode](type-aliases/SurfaceMode.md)
@@ -30,4 +32,5 @@
 
 ## Variables
 
+- [DESIKAN\_KILLIANY\_PARCELS](variables/DESIKAN_KILLIANY_PARCELS.md)
 - [TISSUE\_LABELS](variables/TISSUE_LABELS.md)

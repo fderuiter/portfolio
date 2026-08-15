@@ -1,14 +1,27 @@
 "use client";
 
-import React from "react";
-import { CRFField, CodelistDefinition, ClinicalDataType } from "@/lib/crf/types";
-import { IconMathFunction, IconInfoCircle } from "@tabler/icons-react";
+import React, { useState } from "react";
+import { CRFField, CodelistDefinition, CodelistOption, ClinicalDataType } from "@/lib/crf/types";
+import {
+  IconMathFunction,
+  IconInfoCircle,
+  IconPlus,
+  IconTrash,
+  IconArrowUp,
+  IconArrowDown,
+  IconDeviceFloppy,
+  IconClipboardText,
+  IconSparkles,
+  IconCheck,
+  IconListDetails,
+} from "@tabler/icons-react";
 
 interface FieldPropertiesTabProps {
   field: CRFField;
   allFieldsInForm: CRFField[];
   codelists: CodelistDefinition[];
   onUpdateField: (updates: Partial<CRFField>) => void;
+  onSaveToStudyCodelist?: (codelist: CodelistDefinition) => void;
 }
 
 const DATA_TYPES: { type: ClinicalDataType; label: string }[] = [
@@ -21,11 +34,86 @@ const DATA_TYPES: { type: ClinicalDataType; label: string }[] = [
   { type: "datetime", label: "Date & Time Stamp" },
   { type: "time", label: "Time" },
   { type: "radio", label: "Radio Button Group" },
-  { type: "single_select", label: "Dropdown Select (Codelist)" },
+  { type: "single_select", label: "Dropdown Select (Single)" },
+  { type: "multi_select", label: "Multi-Select Choices" },
   { type: "checkbox", label: "Single Checkbox" },
   { type: "calculated", label: "Calculated Field (AST Formula)" },
   { type: "vas_scale", label: "Visual Analog Scale (VAS 0-100mm)" },
   { type: "signature", label: "21 CFR Part 11 Electronic Signature" },
+];
+
+interface QuickTemplate {
+  name: string;
+  badge: string;
+  options: CodelistOption[];
+}
+
+const QUICK_TEMPLATES: QuickTemplate[] = [
+  {
+    name: "Yes / No",
+    badge: "Binary",
+    options: [
+      { code: "Y", label: "Yes", nciCode: "C49488", order: 1 },
+      { code: "N", label: "No", nciCode: "C49487", order: 2 },
+    ],
+  },
+  {
+    name: "Normal / Abnormal (CS/NCS)",
+    badge: "Safety",
+    options: [
+      { code: "NORMAL", label: "Normal", nciCode: "C14165", order: 1 },
+      { code: "ABNORMAL_NCS", label: "Abnormal (Not Clinically Significant)", nciCode: "C112042", order: 2 },
+      { code: "ABNORMAL_CS", label: "Abnormal (Clinically Significant)", nciCode: "C112043", order: 3 },
+    ],
+  },
+  {
+    name: "Likert 5-Point",
+    badge: "PRO/eCOA",
+    options: [
+      { code: "1", label: "Strongly Disagree", order: 1 },
+      { code: "2", label: "Disagree", order: 2 },
+      { code: "3", label: "Neutral / Neither", order: 3 },
+      { code: "4", label: "Agree", order: 4 },
+      { code: "5", label: "Strongly Agree", order: 5 },
+    ],
+  },
+  {
+    name: "Severity (Mild/Mod/Sev)",
+    badge: "Safety",
+    options: [
+      { code: "MILD", label: "Mild", nciCode: "C48275", order: 1 },
+      { code: "MODERATE", label: "Moderate", nciCode: "C48276", order: 2 },
+      { code: "SEVERE", label: "Severe", nciCode: "C48277", order: 3 },
+    ],
+  },
+  {
+    name: "Pass / Fail",
+    badge: "Screening",
+    options: [
+      { code: "PASS", label: "Pass / Criteria Met", nciCode: "C48288", order: 1 },
+      { code: "FAIL", label: "Fail / Criteria Not Met", nciCode: "C48289", order: 2 },
+    ],
+  },
+  {
+    name: "Device Status",
+    badge: "ISO 14155",
+    options: [
+      { code: "ACTIVE", label: "Implanted & Active In-Situ", nciCode: "C112034", order: 1 },
+      { code: "EXPLANTED", label: "Explanted / Removed", nciCode: "C112029", order: 2 },
+      { code: "DEPLOY_FAILED", label: "Deployment Failed / Discarded", nciCode: "C112035", order: 3 },
+    ],
+  },
+  {
+    name: "CTCAE Grade 1-5",
+    badge: "Oncology",
+    options: [
+      { code: "GRADE 1", label: "Grade 1 - Mild", nciCode: "C48275", order: 1 },
+      { code: "GRADE 2", label: "Grade 2 - Moderate", nciCode: "C48276", order: 2 },
+      { code: "GRADE 3", label: "Grade 3 - Severe", nciCode: "C48277", order: 3 },
+      { code: "GRADE 4", label: "Grade 4 - Life-Threatening", nciCode: "C48278", order: 4 },
+      { code: "GRADE 5", label: "Grade 5 - Death", nciCode: "C48279", order: 5 },
+    ],
+  },
 ];
 
 export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
@@ -33,7 +121,163 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
   allFieldsInForm,
   codelists,
   onUpdateField,
+  onSaveToStudyCodelist,
 }) => {
+  const isCodelistField =
+    field.dataType === "single_select" ||
+    field.dataType === "radio" ||
+    field.dataType === "multi_select";
+
+  const hasCustomOptions = !!(field.customOptions && field.customOptions.length > 0);
+  const [optionMode, setOptionMode] = useState<"standard" | "custom">(
+    hasCustomOptions ? "custom" : "standard"
+  );
+  const [isBulkOpen, setIsBulkOpen] = useState(false);
+  const [bulkInput, setBulkInput] = useState("");
+  const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
+
+  // Active options list (custom or resolved from codelist)
+  const currentCodelist = codelists.find((cl) => cl.id === field.codelistId);
+  const currentOptions: CodelistOption[] =
+    field.customOptions || currentCodelist?.options || [];
+
+  const handleSetOptionMode = (mode: "standard" | "custom") => {
+    setOptionMode(mode);
+    if (mode === "custom") {
+      // If switching to custom and no custom options exist yet, clone existing codelist options or create defaults
+      if (!field.customOptions || field.customOptions.length === 0) {
+        if (currentCodelist && currentCodelist.options.length > 0) {
+          onUpdateField({
+            customOptions: currentCodelist.options.map((opt) => ({ ...opt })),
+            codelistId: undefined,
+          });
+        } else {
+          onUpdateField({
+            customOptions: [
+              { code: "OPT_1", label: "Option 1", order: 1 },
+              { code: "OPT_2", label: "Option 2", order: 2 },
+            ],
+            codelistId: undefined,
+          });
+        }
+      }
+    } else {
+      // Switching to standard
+      if (!field.codelistId && codelists.length > 0) {
+        onUpdateField({
+          codelistId: codelists[0].id,
+          customOptions: undefined,
+        });
+      }
+    }
+  };
+
+  const handleAddOption = () => {
+    const nextOrder = (field.customOptions?.length || 0) + 1;
+    const newOption: CodelistOption = {
+      code: `OPT_${nextOrder}`,
+      label: `Option ${nextOrder}`,
+      order: nextOrder,
+    };
+    const updated = [...(field.customOptions || []), newOption];
+    onUpdateField({ customOptions: updated });
+  };
+
+  const handleUpdateOptionItem = (index: number, updates: Partial<CodelistOption>) => {
+    if (!field.customOptions) return;
+    const updated = field.customOptions.map((opt, i) =>
+      i === index ? { ...opt, ...updates } : opt
+    );
+    onUpdateField({ customOptions: updated });
+  };
+
+  const handleDeleteOptionItem = (index: number) => {
+    if (!field.customOptions) return;
+    const updated = field.customOptions
+      .filter((_, i) => i !== index)
+      .map((opt, i) => ({ ...opt, order: i + 1 }));
+    onUpdateField({ customOptions: updated });
+  };
+
+  const handleMoveOption = (index: number, direction: -1 | 1) => {
+    if (!field.customOptions) return;
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= field.customOptions.length) return;
+
+    const list = [...field.customOptions];
+    const temp = list[index];
+    list[index] = list[targetIndex];
+    list[targetIndex] = temp;
+
+    const reordered = list.map((opt, i) => ({ ...opt, order: i + 1 }));
+    onUpdateField({ customOptions: reordered });
+  };
+
+  const handleApplyTemplate = (tpl: QuickTemplate) => {
+    onUpdateField({
+      customOptions: tpl.options.map((opt) => ({ ...opt })),
+      codelistId: undefined,
+    });
+    setOptionMode("custom");
+  };
+
+  const handleApplyBulkText = () => {
+    if (!bulkInput.trim()) return;
+
+    // Split by newlines or commas
+    const lines = bulkInput
+      .split(/[\n,]/)
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+
+    if (lines.length === 0) return;
+
+    const generated: CodelistOption[] = lines.map((line, idx) => {
+      // Create a clean submission code (alphanumeric uppercase with underscores)
+      const sanitizedCode = line
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "_")
+        .replace(/_+/g, "_")
+        .replace(/^_|_$/g, "")
+        .slice(0, 16) || `OPT_${idx + 1}`;
+
+      return {
+        code: sanitizedCode,
+        label: line,
+        order: idx + 1,
+      };
+    });
+
+    onUpdateField({
+      customOptions: generated,
+      codelistId: undefined,
+    });
+    setOptionMode("custom");
+    setBulkInput("");
+    setIsBulkOpen(false);
+  };
+
+  const handleSaveAsStudyCodelist = () => {
+    if (!field.customOptions || field.customOptions.length === 0 || !onSaveToStudyCodelist) return;
+
+    const codelistId = `CL_${field.variableName || "CUSTOM"}_${Date.now().toString(36).toUpperCase()}`;
+    const newCodelist: CodelistDefinition = {
+      id: codelistId,
+      name: `${field.label || field.variableName} (${field.customOptions.length} Options)`,
+      options: field.customOptions.map((opt) => ({ ...opt })),
+      isStandard: false,
+    };
+
+    onSaveToStudyCodelist(newCodelist);
+    onUpdateField({
+      codelistId: newCodelist.id,
+      customOptions: undefined,
+    });
+    setOptionMode("standard");
+    setSaveSuccessMessage(`Saved as study codelist "${newCodelist.name}"!`);
+    setTimeout(() => setSaveSuccessMessage(null), 4000);
+  };
+
   return (
     <div className="space-y-4 p-4 text-xs font-sans">
       {/* Variable Name & Display Label */}
@@ -46,7 +290,7 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
           value={field.variableName}
           onChange={(e) => onUpdateField({ variableName: e.target.value.toUpperCase() })}
           className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-white font-mono uppercase focus:border-brand-cyan focus:outline-none"
-          placeholder="e.g. BRTHYR, SYSBP, AETERM"
+          placeholder="e.g. BRTHYR, SYSBP, AETERM, DITERM"
         />
       </div>
 
@@ -59,7 +303,7 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
           value={field.label}
           onChange={(e) => onUpdateField({ label: e.target.value })}
           className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-white font-sans focus:border-brand-cyan focus:outline-none"
-          placeholder="e.g. Systolic Blood Pressure"
+          placeholder="e.g. Primary Device Deficiency Classification"
         />
       </div>
 
@@ -72,7 +316,7 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
           value={field.description || ""}
           onChange={(e) => onUpdateField({ description: e.target.value })}
           className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-300 font-sans focus:border-brand-cyan focus:outline-none resize-none"
-          placeholder="e.g. Measure after patient has been sitting for 5 minutes."
+          placeholder="e.g. Select the primary reason observed during procedure."
         />
       </div>
 
@@ -181,24 +425,266 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
         </div>
       )}
 
-      {/* Codelist Selector for Select / Radio */}
-      {(field.dataType === "single_select" || field.dataType === "radio" || field.dataType === "multi_select") && (
-        <div className="space-y-2 pt-2 border-t border-zinc-850">
-          <div className="text-[11px] font-mono text-zinc-400 font-semibold uppercase">
-            Controlled Terminology Codelist
+      {/* RICH QUESTION OPTIONS BUILDER (Radio, Single Select, Multi Select) */}
+      {isCodelistField && (
+        <div className="space-y-3 pt-3 border-t border-zinc-850">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-mono text-white font-bold uppercase flex items-center gap-1.5">
+              <IconListDetails className="w-3.5 h-3.5 text-brand-cyan" />
+              <span>Options &amp; Terminology</span>
+            </span>
+            <span className="text-[10px] font-mono text-zinc-400">
+              {currentOptions.length} choice{currentOptions.length === 1 ? "" : "s"}
+            </span>
           </div>
-          <select
-            value={field.codelistId || ""}
-            onChange={(e) => onUpdateField({ codelistId: e.target.value || undefined })}
-            className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-white font-sans focus:border-brand-cyan focus:outline-none"
-          >
-            <option value="">-- Select Standard Codelist --</option>
-            {codelists.map((cl) => (
-              <option key={cl.id} value={cl.id}>
-                {cl.name} ({cl.options.length} items)
-              </option>
-            ))}
-          </select>
+
+          {/* Success Toast */}
+          {saveSuccessMessage && (
+            <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] flex items-center gap-1.5 animate-in fade-in">
+              <IconCheck className="w-3.5 h-3.5 shrink-0" />
+              <span>{saveSuccessMessage}</span>
+            </div>
+          )}
+
+          {/* Source Switcher: Standard vs Custom */}
+          <div className="flex rounded-lg p-0.5 bg-zinc-900 border border-zinc-800">
+            <button
+              onClick={() => handleSetOptionMode("standard")}
+              className={`flex-1 py-1.5 px-2 rounded-md text-[11px] font-mono font-medium transition-all ${
+                optionMode === "standard"
+                  ? "bg-zinc-800 text-brand-cyan shadow-sm font-bold"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              Standard Codelist
+            </button>
+            <button
+              onClick={() => handleSetOptionMode("custom")}
+              className={`flex-1 py-1.5 px-2 rounded-md text-[11px] font-mono font-medium transition-all ${
+                optionMode === "custom"
+                  ? "bg-zinc-800 text-brand-cyan shadow-sm font-bold"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+            >
+              Custom Options ({field.customOptions?.length || 0})
+            </button>
+          </div>
+
+          {/* STANDARD CODELIST SELECTOR */}
+          {optionMode === "standard" && (
+            <div className="space-y-2 p-2.5 rounded-xl bg-zinc-950/60 border border-zinc-850">
+              <label className="block text-[10px] font-mono text-zinc-400">
+                Select Controlled Codelist Library
+              </label>
+              <select
+                value={field.codelistId || ""}
+                onChange={(e) => {
+                  onUpdateField({
+                    codelistId: e.target.value || undefined,
+                    customOptions: undefined,
+                  });
+                }}
+                className="w-full px-2.5 py-1.5 bg-zinc-900 border border-zinc-750 rounded-lg text-white font-sans text-xs focus:border-brand-cyan focus:outline-none"
+              >
+                <option value="">-- Choose Standard / Study Codelist --</option>
+                {codelists.map((cl) => (
+                  <option key={cl.id} value={cl.id}>
+                    {cl.name} ({cl.options.length} options) {cl.isStandard ? "[CDISC]" : "[Custom]"}
+                  </option>
+                ))}
+              </select>
+
+              {currentCodelist && (
+                <div className="pt-2 border-t border-zinc-800/80 space-y-1.5">
+                  <div className="flex items-center justify-between text-[10px] font-mono text-zinc-400">
+                    <span>Preview Choices:</span>
+                    <button
+                      onClick={() => handleSetOptionMode("custom")}
+                      className="text-brand-cyan hover:underline"
+                    >
+                      Clone &amp; Customize
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto">
+                    {currentCodelist.options.map((opt) => (
+                      <span
+                        key={opt.code}
+                        className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-300 font-sans"
+                      >
+                        {opt.label} <code className="text-zinc-500">({opt.code})</code>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* CUSTOM OPTIONS BUILDER */}
+          {optionMode === "custom" && (
+            <div className="space-y-3">
+              {/* Quick Template Buttons */}
+              <div className="space-y-1.5">
+                <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider flex items-center gap-1">
+                  <IconSparkles className="w-3 h-3 text-brand-cyan" />
+                  <span>Quick-Insert Templates</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {QUICK_TEMPLATES.map((tpl) => (
+                    <button
+                      key={tpl.name}
+                      onClick={() => handleApplyTemplate(tpl)}
+                      className="px-2 py-1 rounded-md bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 hover:border-brand-cyan/40 text-[10px] font-sans text-zinc-300 hover:text-white transition-all flex items-center gap-1"
+                      title={`Load ${tpl.options.length} options for ${tpl.name}`}
+                    >
+                      <span>{tpl.name}</span>
+                      <span className="text-[9px] font-mono text-brand-cyan/80 bg-brand-cyan/10 px-1 rounded">
+                        {tpl.options.length}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Bulk Text Import Drawer */}
+              <div className="p-2 rounded-lg bg-zinc-950/80 border border-zinc-850 space-y-2">
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={() => setIsBulkOpen(!isBulkOpen)}
+                    className="text-[10px] font-mono text-zinc-400 hover:text-brand-cyan flex items-center gap-1 transition-colors"
+                  >
+                    <IconClipboardText className="w-3 h-3 text-brand-cyan" />
+                    <span>{isBulkOpen ? "Hide Bulk Paste Tool" : "Bulk Paste Options (Line/Comma List)"}</span>
+                  </button>
+                </div>
+
+                {isBulkOpen && (
+                  <div className="space-y-1.5 pt-1 animate-in fade-in">
+                    <textarea
+                      rows={3}
+                      value={bulkInput}
+                      onChange={(e) => setBulkInput(e.target.value)}
+                      placeholder="Paste options here, e.g.:&#10;Mild&#10;Moderate&#10;Severe&#10;or: Option A, Option B, Option C"
+                      className="w-full px-2 py-1.5 text-xs bg-zinc-900 border border-zinc-750 rounded text-white font-sans focus:border-brand-cyan focus:outline-none resize-none"
+                    />
+                    <div className="flex justify-end gap-2">
+                      <button
+                        onClick={() => setIsBulkOpen(false)}
+                        className="px-2 py-1 text-[10px] font-mono text-zinc-400 hover:text-white"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleApplyBulkText}
+                        disabled={!bulkInput.trim()}
+                        className="px-2.5 py-1 rounded bg-brand-cyan/20 hover:bg-brand-cyan text-brand-cyan hover:text-black font-mono text-[10px] font-bold border border-brand-cyan/40 transition-all disabled:opacity-40"
+                      >
+                        Apply Bulk Options
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Interactive Rows Editor */}
+              <div className="space-y-1.5">
+                <div className="grid grid-cols-12 gap-1 text-[9px] font-mono text-zinc-400 uppercase px-1">
+                  <span className="col-span-1 text-center">#</span>
+                  <span className="col-span-5">Display Label</span>
+                  <span className="col-span-3">SDTM Code</span>
+                  <span className="col-span-2">NCI Code</span>
+                  <span className="col-span-1 text-right">Act</span>
+                </div>
+
+                <div className="space-y-1.5 max-h-60 overflow-y-auto pr-0.5">
+                  {(field.customOptions || []).map((opt, idx) => (
+                    <div
+                      key={idx}
+                      className="grid grid-cols-12 gap-1 items-center p-1 rounded-md bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700 transition-colors"
+                    >
+                      <span className="col-span-1 text-center font-mono text-[10px] text-zinc-500 font-bold">
+                        {opt.order || idx + 1}
+                      </span>
+                      <input
+                        type="text"
+                        value={opt.label}
+                        onChange={(e) => handleUpdateOptionItem(idx, { label: e.target.value })}
+                        className="col-span-5 px-1.5 py-1 text-[11px] bg-zinc-950 border border-zinc-800 rounded text-white font-sans focus:border-brand-cyan focus:outline-none"
+                        placeholder="Choice Label"
+                      />
+                      <input
+                        type="text"
+                        value={opt.code}
+                        onChange={(e) => handleUpdateOptionItem(idx, { code: e.target.value.toUpperCase() })}
+                        className="col-span-3 px-1.5 py-1 text-[10px] bg-zinc-950 border border-zinc-800 rounded text-brand-cyan font-mono uppercase focus:border-brand-cyan focus:outline-none"
+                        placeholder="CODE"
+                      />
+                      <input
+                        type="text"
+                        value={opt.nciCode || ""}
+                        onChange={(e) => handleUpdateOptionItem(idx, { nciCode: e.target.value.toUpperCase() })}
+                        className="col-span-2 px-1 py-1 text-[9px] bg-zinc-950 border border-zinc-800 rounded text-zinc-400 font-mono uppercase focus:border-brand-cyan focus:outline-none"
+                        placeholder="C-Code"
+                      />
+                      <div className="col-span-1 flex items-center justify-end gap-0.5">
+                        <button
+                          onClick={() => handleMoveOption(idx, -1)}
+                          disabled={idx === 0}
+                          className="p-0.5 text-zinc-500 hover:text-white disabled:opacity-20"
+                          title="Move Up"
+                        >
+                          <IconArrowUp className="w-2.5 h-2.5" />
+                        </button>
+                        <button
+                          onClick={() => handleMoveOption(idx, 1)}
+                          disabled={idx === (field.customOptions?.length || 0) - 1}
+                          className="p-0.5 text-zinc-500 hover:text-white disabled:opacity-20"
+                          title="Move Down"
+                        >
+                          <IconArrowDown className="w-2.5 h-2.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteOptionItem(idx)}
+                          className="p-0.5 text-zinc-500 hover:text-red-400 transition-colors"
+                          title="Delete Choice"
+                        >
+                          <IconTrash className="w-2.5 h-2.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {(!field.customOptions || field.customOptions.length === 0) && (
+                    <div className="text-center p-3 rounded-lg border border-dashed border-zinc-800 text-zinc-500 text-[11px]">
+                      No custom choices defined yet. Click &quot;Add Option&quot; or select a template above.
+                    </div>
+                  )}
+                </div>
+
+                {/* Option Builder Controls */}
+                <div className="flex items-center justify-between pt-1 gap-2">
+                  <button
+                    onClick={handleAddOption}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-zinc-900 hover:bg-zinc-800 text-brand-cyan border border-zinc-750 text-[11px] font-mono font-medium transition-colors"
+                  >
+                    <IconPlus className="w-3 h-3" />
+                    <span>Add Option</span>
+                  </button>
+
+                  {onSaveToStudyCodelist && (field.customOptions?.length || 0) > 0 && (
+                    <button
+                      onClick={handleSaveAsStudyCodelist}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-brand-cyan/15 hover:bg-brand-cyan/25 text-brand-cyan border border-brand-cyan/40 text-[10px] font-mono font-bold transition-all"
+                      title="Promote these choices into a reusable study-level controlled codelist"
+                    >
+                      <IconDeviceFloppy className="w-3 h-3" />
+                      <span>Save to Study Codelists</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
