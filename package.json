@@ -3,6 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "dx": "npx tsx scripts/dx.ts",
+    "doctor": "npx tsx scripts/dx.ts doctor",
+    "doctor:fix": "npx tsx scripts/dx.ts doctor --fix",
+    "verify": "npx tsx scripts/dx.ts verify",
+    "bench": "npx tsx scripts/dx.ts bench",
+    "scaffold": "npx tsx scripts/dx.ts scaffold",
+    "quality": "npm run check && npm run lint:docs && npm run check-docs-drift && npm run verify",
     "predev": "npx tsx scripts/generate-theme.ts",
     "dev": "concurrently -n \"turbo,tsc\" -c \"cyan,magenta\" \"next dev --turbo\" \"tsc --noEmit --watch\"",
     "compile-docs": "npx typedoc --entryPoints hooks --entryPoints types --entryPoints lib --exclude \"**/env.d.ts\" --entryPointStrategy expand --out docs --plugin typedoc-plugin-markdown --hideGenerator --cleanOutputDir --skipErrorChecking --gitRevision main --intentionallyNotExported TypeMap --intentionallyNotExported GlobalOmitConfig --intentionallyNotExported TypeMapCb",

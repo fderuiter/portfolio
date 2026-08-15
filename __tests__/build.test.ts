@@ -77,9 +77,10 @@ describe('build.js script execution', () => {
     expect(exitMock).toHaveBeenCalledWith(0);
   });
 
-  it('sets dummy DATABASE_URL if none is provided', () => {
+  it('sets dummy DATABASE_URL and DIRECT_URL if none are provided', () => {
     process.env.VERCEL_ENV = 'preview';
     delete (process.env as any).DATABASE_URL;
+    delete (process.env as any).DIRECT_URL;
 
     try {
       require('../scripts/build.js');
@@ -88,6 +89,7 @@ describe('build.js script execution', () => {
     }
 
     expect(process.env.DATABASE_URL).toBe('postgresql://dummy:dummy@localhost:5432/dummy');
+    expect(process.env.DIRECT_URL).toBe('postgresql://dummy:dummy@localhost:5432/dummy');
   });
 
   it('fails immediately if a build step fails', () => {

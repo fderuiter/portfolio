@@ -49,4 +49,37 @@ describe("RetroLabyrinth Component Architecture & Functional Rules", () => {
     expect(content).toContain('if (cell === "#") return "█"');
     expect(content).toContain('if (x === START_X && y === START_Y) return "@"');
   });
+
+  it("should support developer weapon hotkeys 1, 2, 3 and EMP spacebar", () => {
+    expect(content).toContain('key === "1"');
+    expect(content).toContain('key === "2"');
+    expect(content).toContain('key === "3"');
+    expect(content).toContain('key === " "');
+    expect(content).toContain("npm_install");
+    expect(content).toContain("git_force_push");
+    expect(content).toContain("stack_overflow");
+  });
+
+  it("should support Roguelike Graveyard campaign mode and room transitions", () => {
+    expect(content).toContain("generateRoguelikeCampaign");
+    expect(content).toContain("startRoguelikeCampaign");
+    expect(content).toContain("Graveyard Roguelike");
+  });
+
+  it("should contain Billable Hours timesheet modal trigger and submission", () => {
+    expect(content).toContain("handleSubmitTimesheet");
+    expect(content).toContain("BILLABLE HOURS INTERRUPT");
+    expect(content).toContain("Submit Timesheet");
+  });
+});
+
+describe("CommandPalette Roguelike Registration", () => {
+  const cmdPath = path.resolve(__dirname, "../components/CommandPalette.tsx");
+  const content = fs.readFileSync(cmdPath, "utf-8");
+
+  it("registers Retro Labyrinth under staticNavs with roguelike description", () => {
+    expect(content).toContain('id: "nav-retro-labyrinth"');
+    expect(content).toContain("Retro Labyrinth: Graveyard Roguelike");
+    expect(content).toContain('url: "/arcade/retro-labyrinth"');
+  });
 });

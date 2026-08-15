@@ -1,121 +1,183 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { IconCircle, IconTrophy, IconHeartFilled, IconBolt } from "@tabler/icons-react";
+import React, { useState, useEffect, useRef, useCallback, useSyncExternalStore } from "react";
+import {
+  IconCircle,
+  IconBolt,
+  IconCpu,
+  IconFlame,
+  IconPlayerPlay,
+} from "@tabler/icons-react";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import {
+  DeviceTarget,
+  DEVICE_PROFILES,
+  createInitialState,
+  startGame,
+  jettisonOldestVariable,
+  triggerGarbageCollection,
+  wipeScreenFog,
+  updateGameSimulation,
+  renderCanvasFrame,
+  JUMP_FORCE,
+  CANVAS_SIZE,
+  GameEngineState,
+} from "@/lib/garmin-engine";
 
-export type GarminActivityMode = "ocean" | "trail" | "space";
+export type GarminActivityMode = DeviceTarget | "ocean" | "trail" | "space";
 export type WatchBezelTheme = "slate" | "solar" | "cyan" | "neon";
 
-interface Hazard {
-  id: number;
-  x: number; // percentage 0-100
-  y: number; // percentage 10-90
-  type: "hazard" | "powerup" | "solar";
-  icon: string;
-  speed: number;
-}
+const subscribeHighScore = (callback: () => void) => {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("storage", callback);
+  return () => window.removeEventListener("storage", callback);
+};
+const getHighScoreSnapshot = () => {
+  try {
+    return localStorage.getItem("garmin_simulator_high_score") || "0";
+  } catch {
+    return "0";
+  }
+};
+const getHighScoreServerSnapshot = () => "0";
 
 export const GarminWatchSimulator: React.FC = () => {
+  const rawHighScore = useSyncExternalStore(
+    subscribeHighScore,
+    getHighScoreSnapshot,
+    getHighScoreServerSnapshot
+  );
+  const loadedHighScore = parseInt(rawHighScore, 10) || 0;
   const { playNote, playSuccess } = useAudio();
   const { recordEvent } = useTelemetry();
 
-  // Mode and hardware states
-  const [activityMode, setActivityMode] = useState<GarminActivityMode>("ocean");
+  // Hardware & Simulation State
   const [bezelTheme, setBezelTheme] = useState<WatchBezelTheme>("slate");
-  const [gameState, setGameState] = useState<"idle" | "playing" | "gameover" | "summary">("idle");
-  const [playerY, setPlayerY] = useState(50); // percentage 10 to 90
-  const [isLightOn, setIsLightOn] = useState(false);
-  const [battery, setBattery] = useState(100); // 0-100%
-  const [heartRate, setHeartRate] = useState(142); // bpm
-  const [distanceKm, setDistanceKm] = useState(0); // km
-  const [score, setScore] = useState(0);
-  const [highScore, setHighScore] = useState(0);
-  const [hazards, setHazards] = useState<Hazard[]>([]);
+  const [deviceTarget, setDeviceTarget] = useState<DeviceTarget>("fenix");
+  const [gameState, setGameState] = useState<GameEngineState>(() => createInitialState("fenix", loadedHighScore));
+  const effectiveHighScore = Math.max(gameState.highScore, loadedHighScore);
   const [isFocused, setIsFocused] = useState(false);
-  const [trainingEffect, setTrainingEffect] = useState(3.5);
+  const [isDraggingFog, setIsDraggingFog] = useState(false);
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const hazardIdCounter = useRef(0);
+  // References for Canvas and Animation Loop
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const gameLoopRef = useRef<number | null>(null);
+  const lastFrameTimeRef = useRef<number>(0);
+  const stateRef = useRef<GameEngineState>(gameState);
 
-  // Focus management
-  const handleFocus = () => setIsFocused(true);
-  const handleBlur = () => setIsFocused(false);
+  useEffect(() => {
+    stateRef.current = gameState;
+  }, [gameState]);
 
-  // Audio helper functions
-  const playBeep = useCallback((freq = 1200, dur = 0.04) => {
-    try {
-      playNote(freq, dur);
-    } catch {}
-  }, [playNote]);
+  // Save new high scores safely
+  useEffect(() => {
+    if (gameState.score > gameState.highScore) {
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("garmin_simulator_high_score", gameState.score.toString());
+        } catch {}
+      }
+    }
+  }, [gameState.score, gameState.highScore]);
+
+  // Audio Beep Helpers (Authentic Garmin 1200-1600Hz Piezo)
+  const playBeep = useCallback(
+    (freq = 1200, dur = 0.04) => {
+      try {
+        playNote(freq, dur);
+      } catch {}
+    },
+    [playNote]
+  );
 
   const playButtonTone = useCallback(() => {
     playBeep(1400, 0.025);
   }, [playBeep]);
 
-  // Controls
-  const moveUp = useCallback(() => {
-    if (gameState !== "playing") return;
-    playBeep(900, 0.02);
-    setPlayerY((prev) => Math.max(12, prev - 12));
-    setHeartRate((hr) => Math.min(185, hr + 1));
-  }, [gameState, playBeep]);
+  // Jump (UP)
+  const handleJump = useCallback(() => {
+    const current = stateRef.current;
+    if (current.gameState !== "playing" || !current.isGrounded) return;
+    playBeep(900, 0.03);
+    setGameState((prev) => ({
+      ...prev,
+      playerVy: JUMP_FORCE,
+      isGrounded: false,
+    }));
+  }, [playBeep]);
 
-  const moveDown = useCallback(() => {
-    if (gameState !== "playing") return;
-    playBeep(700, 0.02);
-    setPlayerY((prev) => Math.min(88, prev + 12));
-    setHeartRate((hr) => Math.min(185, hr + 1));
-  }, [gameState, playBeep]);
+  // Jettison Oldest Variable (DOWN)
+  const handleJettison = useCallback(() => {
+    const current = stateRef.current;
+    if (current.gameState !== "playing") return;
+    playBeep(650, 0.035);
+    setGameState((prev) => {
+      const { state: nextState } = jettisonOldestVariable(prev);
+      return nextState;
+    });
+  }, [playBeep]);
 
-  const toggleLight = useCallback(() => {
+  // Trigger Backlight / Flashlight (LIGHT)
+  const handleToggleLight = useCallback(() => {
     playButtonTone();
-    setIsLightOn((prev) => !prev);
-  }, [playButtonTone]);
+    setGameState((prev) => {
+      const nextLight = !prev.isLightOn;
+      if (nextLight && prev.battery > 0) {
+        playBeep(1600, 0.04);
+      }
+      return {
+        ...prev,
+        isLightOn: prev.battery > 0 ? nextLight : false,
+      };
+    });
+  }, [playButtonTone, playBeep]);
 
-  const triggerStartStop = useCallback(() => {
+  // Force Garbage Collection (BACK)
+  const handleForceGc = useCallback(() => {
+    const current = stateRef.current;
+    if (current.gameState !== "playing" || current.isGcActive) return;
+    playBeep(450, 0.08);
+    setGameState((prev) => {
+      const { state: nextState } = triggerGarbageCollection(prev);
+      return nextState;
+    });
+  }, [playBeep]);
+
+  // Start / Pause / Restart (START)
+  const handleStartStop = useCallback(() => {
     playButtonTone();
-    if (gameState === "idle" || gameState === "gameover" || gameState === "summary") {
-      setGameState("playing");
-      setPlayerY(50);
-      setScore(0);
-      setDistanceKm(0);
-      setBattery(100);
-      setHeartRate(activityMode === "trail" ? 155 : 138);
-      setHazards([
-        { id: ++hazardIdCounter.current, x: 100, y: 30, type: "hazard", icon: activityMode === "ocean" ? "🦈" : activityMode === "trail" ? "🪨" : "🛰️", speed: 0.2 },
-        { id: ++hazardIdCounter.current, x: 140, y: 70, type: "hazard", icon: activityMode === "ocean" ? "🐙" : activityMode === "trail" ? "🪵" : "☄️", speed: 0.22 },
-        { id: ++hazardIdCounter.current, x: 170, y: 50, type: "powerup", icon: "⚡", speed: 0.18 },
-      ]);
-      setIsLightOn(false);
+    const current = stateRef.current;
+    if (current.gameState === "idle" || current.gameState === "crashed" || current.gameState === "summary") {
+      const next = startGame(current, deviceTarget);
+      setGameState(next);
       recordEvent("garmin_simulator_start", "project_click").catch(() => {});
-    } else if (gameState === "playing") {
-      setGameState("summary");
-      setTrainingEffect(+(Math.min(5.0, 2.0 + score * 0.005)).toFixed(1));
       playSuccess();
+    } else if (current.gameState === "playing") {
+      setGameState((prev) => ({ ...prev, gameState: "paused" }));
+    } else if (current.gameState === "paused") {
+      setGameState((prev) => ({ ...prev, gameState: "playing" }));
     }
-  }, [gameState, activityMode, score, playButtonTone, playSuccess, recordEvent]);
+  }, [deviceTarget, playButtonTone, playSuccess, recordEvent]);
 
-  const triggerBack = useCallback(() => {
+  // Quick Fog Wipe (W / Touch / Mouse)
+  const handleWipeFog = useCallback(
+    (canvasX = CANVAS_SIZE / 2, canvasY = CANVAS_SIZE / 2) => {
+      playBeep(1100, 0.015);
+      setGameState((prev) => wipeScreenFog(prev, canvasX, canvasY, 35));
+    },
+    [playBeep]
+  );
+
+  // Switch Device Profile
+  const handleSelectDevice = (target: DeviceTarget) => {
     playButtonTone();
-    if (gameState === "gameover" || gameState === "summary") {
-      setGameState("idle");
-      setScore(0);
-      setHazards([]);
-    } else if (gameState === "playing") {
-      setGameState("summary");
-      setTrainingEffect(+(Math.min(5.0, 2.0 + score * 0.005)).toFixed(1));
-    } else {
-      setGameState("idle");
-      setScore(0);
-      setHazards([]);
-      setIsLightOn(false);
-    }
-  }, [gameState, score, playButtonTone]);
+    setDeviceTarget(target);
+    setGameState((prev) => createInitialState(target, prev.highScore));
+  };
 
-  // Keyboard listener
+  // Keyboard Event Handlers
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const interceptKeys = [
       "ArrowUp",
@@ -125,11 +187,11 @@ export const GarminWatchSimulator: React.FC = () => {
       " ",
       "l",
       "L",
+      "w",
+      "W",
       "Enter",
       "Escape",
       "Backspace",
-      "m",
-      "M",
     ];
 
     if (interceptKeys.includes(e.key)) {
@@ -137,163 +199,72 @@ export const GarminWatchSimulator: React.FC = () => {
     }
 
     if (e.key === "ArrowUp") {
-      moveUp();
+      handleJump();
     } else if (e.key === "ArrowDown") {
-      moveDown();
+      handleJettison();
     } else if (e.key.toLowerCase() === "l") {
-      toggleLight();
-    } else if (e.key === "Enter" || e.key === " ") {
-      triggerStartStop();
+      handleToggleLight();
+    } else if (e.key.toLowerCase() === "w") {
+      handleWipeFog();
     } else if (e.key === "Backspace" || e.key === "Escape") {
-      triggerBack();
-    } else if (e.key.toLowerCase() === "m") {
-      // Cycle activity mode
-      setActivityMode((curr) => (curr === "ocean" ? "trail" : curr === "trail" ? "space" : "ocean"));
+      handleForceGc();
+    } else if (e.key === "Enter" || e.key === " ") {
+      handleStartStop();
     }
   };
 
-  // Game Physics Loop
+  // Canvas Mouse & Touch Drag Wiping for Overheat Fog
+  const handleCanvasPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!isDraggingFog && e.buttons === 0) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = CANVAS_SIZE / rect.width;
+    const scaleY = CANVAS_SIZE / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+    handleWipeFog(x, y);
+  };
+
+  // Main 60FPS Game Physics and Rendering Loop
   useEffect(() => {
-    if (gameState !== "playing") {
-      if (gameLoopRef.current) {
-        cancelAnimationFrame(gameLoopRef.current);
-        gameLoopRef.current = null;
+    let animationFrameId: number;
+
+    const gameTick = (timestamp: number) => {
+      if (!lastFrameTimeRef.current) {
+        lastFrameTimeRef.current = timestamp;
       }
-      return;
-    }
+      const deltaMs = Math.min(40, timestamp - lastFrameTimeRef.current);
+      lastFrameTimeRef.current = timestamp;
 
-    let lastTime = performance.now();
-
-    const update = (now: number) => {
-      const delta = Math.min(40, now - lastTime);
-      lastTime = now;
-
-      // Battery drain when flashlight/sonar is active
-      if (isLightOn) {
-        setBattery((b) => {
-          const next = b - 0.08 * (delta / 16);
-          if (next <= 0) {
-            setIsLightOn(false);
-            playBeep(300, 0.1);
-            return 0;
-          }
-          return next;
-        });
+      // Update simulation if active
+      if (stateRef.current.gameState === "playing") {
+        setGameState((current) => updateGameSimulation(current, deltaMs));
       }
 
-      // Distance and calories increment
-      setDistanceKm((d) => +(d + 0.001 * (delta / 16)).toFixed(2));
-
-      // Update Hazards & Powerups
-      setHazards((prev) => {
-        let hitHazard = false;
-
-        const nextHazards = prev
-          .map((item) => {
-            const baseSpeed = item.speed;
-            const effectiveSpeed = isLightOn ? baseSpeed * 0.7 : baseSpeed;
-            const nextX = item.x - effectiveSpeed * delta;
-
-            const playerWidth = 10;
-            const itemWidth = 8;
-            const xDist = Math.abs(nextX - 20);
-            const yDist = Math.abs(item.y - playerY);
-
-            // Light beam destroys hazards ahead if light is ON and within range
-            if (
-              isLightOn &&
-              item.type === "hazard" &&
-              nextX > 20 &&
-              nextX < 65 &&
-              Math.abs(item.y - playerY) < 22
-            ) {
-              playBeep(1600, 0.03);
-              return { ...item, x: -50 };
-            }
-
-            // Powerup pickup
-            if (item.type === "powerup" && xDist < 12 && yDist < 14) {
-              setBattery((b) => Math.min(100, b + 25));
-              playSuccess();
-              return { ...item, x: -50 };
-            }
-
-            if (item.type === "solar" && xDist < 12 && yDist < 14) {
-              setScore((s) => s + 50);
-              playBeep(1200, 0.05);
-              return { ...item, x: -50 };
-            }
-
-            // Collision with hazard
-            if (item.type === "hazard" && xDist < (playerWidth + itemWidth) / 2 && yDist < 11) {
-              hitHazard = true;
-            }
-
-            return { ...item, x: nextX };
-          })
-          .filter((item) => item.x > -10);
-
-        if (hitHazard) {
-          setGameState("gameover");
-          playBeep(200, 0.2);
-          return prev;
+      // Render Canvas Frame
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          renderCanvasFrame(ctx, stateRef.current);
         }
+      }
 
-        // Spawn new hazards / powerups
-        if (nextHazards.length < 4) {
-          const maxX = nextHazards.reduce((max, h) => Math.max(max, h.x), 0);
-          if (maxX < 75) {
-            const randomY = 15 + Math.floor(Math.random() * 70);
-            const isPower = Math.random() < 0.25;
-            const isSolar = !isPower && Math.random() < 0.2;
-
-            let icon = activityMode === "ocean" ? "🦈" : activityMode === "trail" ? "🪨" : "☄️";
-            let type: "hazard" | "powerup" | "solar" = "hazard";
-
-            if (isPower) {
-              icon = "⚡";
-              type = "powerup";
-            } else if (isSolar) {
-              icon = "☀️";
-              type = "solar";
-            }
-
-            nextHazards.push({
-              id: ++hazardIdCounter.current,
-              x: 110,
-              y: randomY,
-              type,
-              icon,
-              speed: 0.18 + Math.random() * 0.08,
-            });
-          }
-        }
-
-        return nextHazards;
-      });
-
-      // Score counter
-      setScore((prev) => {
-        const nextScore = prev + 1;
-        if (nextScore > highScore) {
-          setHighScore(nextScore);
-        }
-        return nextScore;
-      });
-
-      gameLoopRef.current = requestAnimationFrame(update);
+      animationFrameId = requestAnimationFrame(gameTick);
     };
 
-    gameLoopRef.current = requestAnimationFrame(update);
+    animationFrameId = requestAnimationFrame(gameTick);
+    gameLoopRef.current = animationFrameId;
 
     return () => {
-      if (gameLoopRef.current) {
-        cancelAnimationFrame(gameLoopRef.current);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [gameState, playerY, isLightOn, highScore, activityMode, playBeep, playSuccess]);
+  }, []);
 
-  // Visual Theme Styling
+  // Theme styling helpers
   const getThemeChassis = () => {
     switch (bezelTheme) {
       case "solar":
@@ -307,10 +278,12 @@ export const GarminWatchSimulator: React.FC = () => {
     }
   };
 
+  const currentProfile = DEVICE_PROFILES[deviceTarget];
+
   return (
     <div className="w-full flex flex-col items-center select-none my-8">
-      {/* Keyboard Capture Status Banner */}
-      <div className="mb-3 text-center flex flex-wrap items-center justify-center gap-2">
+      {/* Keyboard Capture Status Banner & Controls Bar */}
+      <div className="mb-4 text-center flex flex-wrap items-center justify-center gap-3">
         <span
           className={`inline-flex items-center gap-2 px-3 py-1 rounded-full font-mono text-[10px] font-bold uppercase tracking-wider border transition-all duration-300 ${
             isFocused
@@ -323,10 +296,38 @@ export const GarminWatchSimulator: React.FC = () => {
               isFocused ? "fill-brand-cyan stroke-none" : "fill-zinc-600 stroke-none"
             }`}
           />
-          {isFocused ? "Watch Keyboard Captures: ACTIVE" : "Click Watch to Focus controls"}
+          {isFocused ? "Watch Keyboard Captures: ACTIVE" : "Click Watch to Focus Controls"}
         </span>
 
-        {/* Theme Switcher */}
+        {/* Device Profile Target (Memory Limit) Selector */}
+        <div className="flex items-center gap-1 p-0.5 bg-zinc-900 border border-zinc-800 rounded-full text-[9px] font-mono">
+          <button
+            onClick={() => handleSelectDevice("fenix")}
+            className={`px-2.5 py-0.5 rounded-full cursor-pointer transition-all ${
+              deviceTarget === "fenix" ? "bg-rose-600 text-white font-bold" : "text-zinc-400 hover:text-zinc-200"
+            }`}
+          >
+            Fēnix (32KB)
+          </button>
+          <button
+            onClick={() => handleSelectDevice("forerunner")}
+            className={`px-2.5 py-0.5 rounded-full cursor-pointer transition-all ${
+              deviceTarget === "forerunner" ? "bg-amber-600 text-black font-bold" : "text-zinc-400 hover:text-zinc-200"
+            }`}
+          >
+            Forerunner (64KB)
+          </button>
+          <button
+            onClick={() => handleSelectDevice("edge")}
+            className={`px-2.5 py-0.5 rounded-full cursor-pointer transition-all ${
+              deviceTarget === "edge" ? "bg-emerald-600 text-white font-bold" : "text-zinc-400 hover:text-zinc-200"
+            }`}
+          >
+            Edge (128KB)
+          </button>
+        </div>
+
+        {/* Bezel Theme Switcher */}
         <div className="flex items-center gap-1 p-0.5 bg-zinc-900 border border-zinc-800 rounded-full text-[9px] font-mono">
           <button
             onClick={() => setBezelTheme("slate")}
@@ -359,11 +360,11 @@ export const GarminWatchSimulator: React.FC = () => {
       <div
         ref={containerRef}
         tabIndex={0}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         onKeyDown={handleKeyDown}
         data-keyboard-boundary="true"
-        className={`relative w-80 h-80 rounded-full bg-gradient-to-br p-6 flex items-center justify-center border-4 select-none outline-none transition-all duration-300 ${getThemeChassis()} ${
+        className={`relative w-84 h-84 rounded-full bg-gradient-to-br p-6 flex items-center justify-center border-4 select-none outline-none transition-all duration-300 ${getThemeChassis()} ${
           isFocused
             ? "ring-4 ring-brand-cyan/20 shadow-[0_0_40px_rgba(34,211,238,0.25)] scale-[1.01]"
             : "shadow-2xl"
@@ -374,207 +375,168 @@ export const GarminWatchSimulator: React.FC = () => {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            toggleLight();
+            handleToggleLight();
             containerRef.current?.focus();
           }}
-          className="absolute -left-3.5 top-[25%] px-2.5 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer"
+          title="Backlight (L): +0.3%/s Battery"
+          className="absolute -left-3.5 top-[24%] px-2 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-amber-500 hover:to-amber-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
         >
-          LIGHT
+          <span>LIGHT</span>
+          <span className="text-[6px] text-amber-300/80">[L]</span>
         </button>
 
         {/* 2. UP BUTTON (Middle Left) */}
         <button
           onClick={(e) => {
             e.stopPropagation();
-            moveUp();
+            handleJump();
             containerRef.current?.focus();
           }}
-          className="absolute -left-3.5 top-[46%] px-2.5 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer"
+          title="Jump (ArrowUp / UP)"
+          className="absolute -left-3.5 top-[46%] px-2.5 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
         >
-          UP
+          <span>UP</span>
+          <span className="text-[6px] text-cyan-300/80">[▲]</span>
         </button>
 
         {/* 3. DOWN BUTTON (Bottom Left) */}
         <button
           onClick={(e) => {
             e.stopPropagation();
-            moveDown();
+            handleJettison();
             containerRef.current?.focus();
           }}
-          className="absolute -left-3.5 top-[67%] px-2.5 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer"
+          title="Jettison Variable (ArrowDown / DOWN)"
+          className="absolute -left-3.5 top-[68%] px-2 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-rose-500 hover:to-rose-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
         >
-          DOWN
+          <span>DOWN</span>
+          <span className="text-[6px] text-rose-300/80">[▼] POP</span>
         </button>
 
         {/* 4. START/STOP BUTTON (Top Right) */}
         <button
           onClick={(e) => {
             e.stopPropagation();
-            triggerStartStop();
+            handleStartStop();
             containerRef.current?.focus();
           }}
-          className="absolute -right-3.5 top-[30%] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-zinc-300 hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer"
+          title="Start / Pause / Restart (Enter / Space)"
+          className="absolute -right-3.5 top-[30%] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-emerald-500 hover:to-emerald-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
         >
-          START
+          <span>START</span>
+          <span className="text-[6px] text-emerald-300/80">[ENTER]</span>
         </button>
 
-        {/* 5. BACK/LAP BUTTON (Bottom Right) */}
+        {/* 5. BACK/GC BUTTON (Bottom Right) */}
         <button
           onClick={(e) => {
             e.stopPropagation();
-            triggerBack();
+            handleForceGc();
             containerRef.current?.focus();
           }}
-          className="absolute -right-3.5 top-[60%] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-zinc-300 hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer"
+          title="Force Garbage Collection (Backspace / Escape): 500ms Freeze"
+          className="absolute -right-3.5 top-[62%] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-purple-500 hover:to-purple-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
         >
-          BACK
+          <span>BACK</span>
+          <span className="text-[6px] text-purple-300/80">[GC]</span>
         </button>
 
-        {/* Outer Circular Bezel Dial with Compass Markers */}
+        {/* Outer Circular Bezel Dial with Compass / Memory Markers */}
         <div className="absolute inset-2 rounded-full border border-zinc-750/50 pointer-events-none flex items-center justify-center">
           <div className="w-full h-full rounded-full relative">
-            <div className="absolute top-1 left-[50%] -translate-x-[50%] text-[8px] font-bold tracking-widest text-zinc-500">N · 0°</div>
-            <div className="absolute bottom-1 left-[50%] -translate-x-[50%] text-[8px] font-bold tracking-widest text-zinc-500">S · 180°</div>
-            <div className="absolute left-2 top-[50%] -translate-y-[50%] text-[8px] font-bold tracking-widest text-zinc-500">W</div>
-            <div className="absolute right-2 top-[50%] -translate-y-[50%] text-[8px] font-bold tracking-widest text-zinc-500">E</div>
-          </div>
-        </div>
-
-        {/* Watch Inner Circular Screen Display */}
-        <div
-          className={`w-full h-full rounded-full flex flex-col justify-between p-4 relative select-none overflow-hidden border-2 transition-all duration-300 ${
-            isLightOn
-              ? "bg-cyan-950/90 border-cyan-500/40 shadow-[inset_0_0_20px_rgba(6,182,212,0.6)]"
-              : "bg-zinc-950 border-zinc-850 shadow-[inset_0_0_15px_rgba(0,0,0,0.95)]"
-          }`}
-        >
-          {/* Subtle LCD Grid Lines */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(18,18,18,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(18,18,18,0.05)_1px,transparent_1px)] bg-[size:4px_4px] pointer-events-none opacity-40" />
-
-          {/* Screen Header: Metrics & Garmin Status */}
-          <div className="relative z-10 flex flex-col items-center pt-2 select-none">
-            <div className="flex justify-between w-full px-3 text-[9px] font-bold font-mono text-zinc-400">
-              <span className="flex items-center gap-1 text-rose-400">
-                <IconHeartFilled className="w-2.5 h-2.5 animate-pulse" />
-                {heartRate}
-              </span>
-              <span className="text-[8px] uppercase tracking-widest text-zinc-500 font-bold">
-                {activityMode.toUpperCase()}
-              </span>
-              <span className="flex items-center gap-0.5 text-amber-400">
-                <IconBolt className="w-2.5 h-2.5" />
-                {Math.round(battery)}%
-              </span>
+            <div className="absolute top-1 left-[50%] -translate-x-[50%] text-[8px] font-bold tracking-widest text-zinc-500">
+              CIQ · {currentProfile.ramLimitKb}KB
+            </div>
+            <div className="absolute bottom-1 left-[50%] -translate-x-[50%] text-[8px] font-bold tracking-widest text-zinc-500">
+              HEAP · 0x00
+            </div>
+            <div className="absolute left-2 top-[50%] -translate-y-[50%] text-[8px] font-bold tracking-widest text-zinc-500">
+              GC
+            </div>
+            <div className="absolute right-2 top-[50%] -translate-y-[50%] text-[8px] font-bold tracking-widest text-zinc-500">
+              RUN
             </div>
           </div>
-
-          {/* Screen Content Window */}
-          <div className="flex-1 relative border-y border-zinc-900/60 my-1 overflow-hidden flex items-center justify-center">
-            {gameState === "idle" && (
-              <div className="text-center p-1 relative z-10 flex flex-col items-center justify-center h-full">
-                <p className="text-emerald-400 font-bold text-[11px] animate-pulse uppercase tracking-wider">
-                  {activityMode === "ocean" ? "🌊 DEEP OCEAN" : activityMode === "trail" ? "🏔️ TRAIL ULTRA" : "🚀 ORBIT RADAR"}
-                </p>
-                <p className="text-zinc-400 text-[9px] mt-0.5 font-mono">Press START / SPACE</p>
-                <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={() => setActivityMode("ocean")}
-                    className={`px-1.5 py-0.5 rounded text-[8px] font-mono ${activityMode === "ocean" ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/40" : "text-zinc-600"}`}
-                  >
-                    Ocean
-                  </button>
-                  <button
-                    onClick={() => setActivityMode("trail")}
-                    className={`px-1.5 py-0.5 rounded text-[8px] font-mono ${activityMode === "trail" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40" : "text-zinc-600"}`}
-                  >
-                    Trail
-                  </button>
-                  <button
-                    onClick={() => setActivityMode("space")}
-                    className={`px-1.5 py-0.5 rounded text-[8px] font-mono ${activityMode === "space" ? "bg-amber-500/20 text-amber-400 border border-amber-500/40" : "text-zinc-600"}`}
-                  >
-                    Space
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {gameState === "gameover" && (
-              <div className="text-center p-1 relative z-10 flex flex-col items-center justify-center h-full">
-                <p className="text-rose-500 font-extrabold text-[12px] tracking-wide uppercase animate-bounce">INCIDENT LOGGED</p>
-                <p className="text-zinc-300 text-[10px] font-bold mt-0.5 font-mono">SCORE: {score}</p>
-                <button
-                  onClick={triggerStartStop}
-                  className="mt-1 px-2.5 py-1 bg-zinc-800 text-brand-cyan text-[8px] font-bold rounded cursor-pointer border border-zinc-700"
-                >
-                  RESTART [ENTER]
-                </button>
-              </div>
-            )}
-
-            {gameState === "summary" && (
-              <div className="text-center p-2 relative z-10 flex flex-col items-center justify-center h-full font-mono">
-                <div className="flex items-center gap-1 text-emerald-400 text-[10px] font-bold mb-1">
-                  <IconTrophy className="w-3 h-3 text-amber-400" />
-                  WORKOUT SAVED
-                </div>
-                <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[8px] text-zinc-400 text-left w-full px-2">
-                  <div>DIST: <span className="text-white font-bold">{distanceKm} km</span></div>
-                  <div>SCORE: <span className="text-brand-cyan font-bold">{score}</span></div>
-                  <div>TE: <span className="text-emerald-400 font-bold">{trainingEffect}</span></div>
-                  <div>AVG HR: <span className="text-rose-400 font-bold">{heartRate}</span></div>
-                </div>
-                <button
-                  onClick={triggerBack}
-                  className="mt-2 px-2 py-0.5 bg-zinc-800 text-zinc-300 text-[8px] font-bold rounded cursor-pointer"
-                >
-                  DONE
-                </button>
-              </div>
-            )}
-
-            {gameState === "playing" && (
-              <div className="absolute inset-0 select-none">
-                {/* Visual Light Beam from Player */}
-                {isLightOn && (
-                  <div
-                    style={{ top: `${playerY - 12}%` }}
-                    className="absolute left-[20%] w-[55%] h-[24%] bg-gradient-to-r from-cyan-400/35 to-transparent rounded-r-full blur-[2px] pointer-events-none transition-all duration-75"
-                  />
-                )}
-
-                {/* Player Avatar */}
-                <div
-                  style={{ top: `${playerY}%` }}
-                  className="absolute left-[15%] -translate-y-[50%] transition-all duration-75 ease-out z-20"
-                >
-                  <span className="text-[13px] filter drop-shadow-[0_0_4px_rgba(255,255,255,0.4)]">
-                    {activityMode === "ocean" ? "🤿" : activityMode === "trail" ? "🏃" : "🛰️"}
-                  </span>
-                </div>
-
-                {/* Hazards & Collectibles */}
-                {hazards.map((item) => (
-                  <div
-                    key={item.id}
-                    style={{ left: `${item.x}%`, top: `${item.y}%` }}
-                    className={`absolute -translate-y-[50%] -translate-x-[50%] transition-all duration-75 ease-linear z-10 text-[11px] ${
-                      item.type === "powerup" ? "animate-pulse filter drop-shadow-[0_0_4px_#38bdf8]" : ""
-                    }`}
-                  >
-                    {item.icon}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Screen Footer: Score & High Score */}
-          <div className="relative z-10 flex justify-between items-center px-4 pb-2 text-zinc-400 font-bold select-none text-[9px] font-mono">
-            <span>HI: {highScore}</span>
-            <span className="text-[11px] font-extrabold text-zinc-200">{score}</span>
-          </div>
         </div>
+
+        {/* Watch Inner Circular 280x280 Screen Display */}
+        <div className="relative w-[280px] h-[280px] rounded-full overflow-hidden border-2 border-zinc-800 bg-black shadow-[inset_0_0_20px_rgba(0,0,0,0.9)] flex items-center justify-center">
+          <canvas
+            ref={canvasRef}
+            width={CANVAS_SIZE}
+            height={CANVAS_SIZE}
+            onPointerDown={(e) => {
+              setIsDraggingFog(true);
+              handleCanvasPointerMove(e);
+              containerRef.current?.focus();
+            }}
+            onPointerUp={() => setIsDraggingFog(false)}
+            onPointerMove={handleCanvasPointerMove}
+            className="w-full h-full rounded-full cursor-crosshair touch-none"
+          />
+
+          {/* Idle Menu Overlay */}
+          {gameState.gameState === "idle" && (
+            <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center p-4 text-center z-30 font-mono">
+              <span className="text-[12px] font-extrabold text-brand-cyan tracking-wider uppercase flex items-center gap-1">
+                <IconCpu className="w-3.5 h-3.5 text-brand-cyan animate-pulse" />
+                MONKEY C RUNNER
+              </span>
+              <span className="text-[9px] text-rose-400 font-bold mt-1">
+                LIMIT: {currentProfile.ramLimitKb} KB RAM
+              </span>
+              <p className="text-[8px] text-zinc-400 mt-2 max-w-[190px] leading-tight">
+                Survive memory allocations, jump over bugs, pop variables &amp; trigger GC!
+              </p>
+              <button
+                onClick={handleStartStop}
+                className="mt-3 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[9px] rounded-full flex items-center gap-1 shadow-lg cursor-pointer transition-all active:scale-95"
+              >
+                <IconPlayerPlay className="w-3 h-3" />
+                START SIMULATION
+              </button>
+            </div>
+          )}
+
+          {/* Overheat Fog Quick Wipe Floating Badge */}
+          {gameState.fogLevel > 0.35 && gameState.gameState === "playing" && (
+            <button
+              onClick={() => handleWipeFog()}
+              className="absolute top-16 right-12 z-30 px-2 py-0.5 bg-amber-500/90 text-black font-bold text-[8px] font-mono rounded-full border border-amber-300 shadow-md animate-bounce cursor-pointer"
+            >
+              WIPE [W]
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Real-time Engineering Telemetry & Controls Dashboard Below Watch */}
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs font-mono text-zinc-400 max-w-xl text-center">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg">
+          <IconCpu className="w-3.5 h-3.5 text-brand-cyan" />
+          <span>RAM: <strong className="text-white">{gameState.allocatedRamKb.toFixed(1)} / {currentProfile.ramLimitKb} KB</strong></span>
+        </div>
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg">
+          <IconBolt className="w-3.5 h-3.5 text-amber-400" />
+          <span>BATTERY: <strong className="text-white">{Math.round(gameState.battery)}%</strong></span>
+        </div>
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg">
+          <IconFlame className={`w-3.5 h-3.5 ${gameState.fogLevel > 0.4 ? "text-rose-500 animate-pulse" : "text-zinc-500"}`} />
+          <span>CONDENSATION: <strong className="text-white">{Math.round(gameState.fogLevel * 100)}%</strong></span>
+        </div>
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg">
+          <span className="text-amber-400 font-bold">🏆 HI-SCORE:</span>
+          <strong className="text-amber-300">{effectiveHighScore}</strong>
+        </div>
+      </div>
+
+      {/* Control Quick Reference Guide */}
+      <div className="mt-3 flex flex-wrap justify-center gap-2 text-[10px] font-mono text-zinc-500">
+        <span className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded"><strong className="text-zinc-300">UP / ▲:</strong> Jump</span>
+        <span className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded"><strong className="text-zinc-300">DOWN / ▼:</strong> Pop Heap Variable</span>
+        <span className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded"><strong className="text-zinc-300">BACK / [GC]:</strong> Trigger Garbage Collector</span>
+        <span className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded"><strong className="text-zinc-300">LIGHT / [L]:</strong> Backlight (Burns Bat)</span>
+        <span className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded"><strong className="text-zinc-300">SWIPE / [W]:</strong> Wipe Screen Fog</span>
       </div>
     </div>
   );

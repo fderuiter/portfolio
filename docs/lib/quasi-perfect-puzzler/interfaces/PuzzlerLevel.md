@@ -6,7 +6,7 @@
 
 # Interface: PuzzlerLevel
 
-Defined in: [lib/quasi-perfect-puzzler.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L10)
+Defined in: [lib/quasi-perfect-puzzler.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L16)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/quasi-perfect-puzzler.ts:10](https://github.com/fderuiter/portf
 
 > **goal**: `string`
 
-Defined in: [lib/quasi-perfect-puzzler.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L13)
+Defined in: [lib/quasi-perfect-puzzler.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L19)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/quasi-perfect-puzzler.ts:13](https://github.com/fderuiter/portf
 
 > **id**: `string`
 
-Defined in: [lib/quasi-perfect-puzzler.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L11)
+Defined in: [lib/quasi-perfect-puzzler.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L17)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/quasi-perfect-puzzler.ts:11](https://github.com/fderuiter/portf
 
 > **prompt**: `string`
 
-Defined in: [lib/quasi-perfect-puzzler.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L14)
+Defined in: [lib/quasi-perfect-puzzler.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L20)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/quasi-perfect-puzzler.ts:14](https://github.com/fderuiter/portf
 
 > **tactics**: [`PuzzlerTacticId`](../type-aliases/PuzzlerTacticId.md)[]
 
-Defined in: [lib/quasi-perfect-puzzler.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L15)
+Defined in: [lib/quasi-perfect-puzzler.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L21)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [lib/quasi-perfect-puzzler.ts:15](https://github.com/fderuiter/portf
 
 > **title**: `string`
 
-Defined in: [lib/quasi-perfect-puzzler.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L12)
+Defined in: [lib/quasi-perfect-puzzler.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect-puzzler.ts#L18)

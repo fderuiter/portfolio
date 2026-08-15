@@ -27,4 +27,16 @@ This version has breaking changes — APIs, conventions, and file structure may 
 ### 5. Multi-Agent Artifact Hygiene
 - Never commit intermediate agent tracking directories (`.agents/`), temporary planning logs, or ad-hoc adversarial scripts to project git history.
 
+### 6. Developer Suite (DX) & Quality Invariants
+- Run `npm run quality` (or `npm run verify`) to ensure type safety, zero ESLint warnings, docs synchronization, and all 9 architectural invariants pass.
+- When adding new games, APIs, ADRs, case studies, or components, utilize `npm run scaffold <type> <name>` to guarantee standard vertical slices and automatic `CommandPalette.tsx` registration.
+- Whenever public library or hook signatures change, regenerate TypeDoc markdown with `npm run compile-docs` and verify with `npm run check-docs-drift`.
+
+### 7. Headless Canvas 2D Testing & Animation Lifecycle
+- In JSDOM and unit tests for canvas-driven components (games, simulators, Pretext layouts), ensure Canvas 2D mock contexts provide all curve methods (`quadraticCurveTo`, `bezierCurveTo`, `arcTo`, `roundRect`, `measureText`) to prevent unhandled frame exceptions during async `requestAnimationFrame` ticks.
+- Ensure active component timers and animation frames are unmounted/cancelled cleanly in `afterEach`.
+
+### 8. JSDoc & TypeDoc Markdown Formatting
+- In JSDoc comments on exported symbols, avoid numbered prefixes (e.g. `1. ...`) or raw unescaped JSX/HTML tags (e.g. `<Navbar />`), as TypeDoc converts these into markdown files subject to `markdownlint` rules `MD029` (ordered list style) and `MD033` (inline HTML).
+
 

@@ -85,11 +85,11 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />
       },
       {
-        id: "nav-ui-sandbox",
-        title: "UI Physics Sandbox",
-        subtitle: "Interactive canvas layout physics, Garmin watch simulator, and UI sandbox",
+        id: "nav-arcade",
+        title: "Arcade Games Hub",
+        subtitle: "Launch interactive games, physics engines, and systems simulators",
         category: "navigation",
-        url: "/ui-sandbox",
+        url: "/arcade",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
       },
       {
@@ -97,7 +97,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         title: "Laser Loon: Cryo Bug Hunter",
         subtitle: "Playable physics arcade game — shoot ice blocks and laser beams to blast bugs",
         category: "navigation",
-        url: "/ui-sandbox#laser-loon",
+        url: "/arcade/laser-loon",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
       },
       {
@@ -105,31 +105,39 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         title: "Quasi-Perfect Puzzler",
         subtitle: "Formal-methods arcade scaffold — tactics, proof goals, and simulated Lean RAM",
         category: "navigation",
-        url: "/ui-sandbox#quasi-puzzler",
+        url: "/arcade/quasi-puzzler",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
       },
       {
         id: "nav-clinical-chaos",
-        title: "Clinical Trial Chaos",
-        subtitle: "Clinical data-mapping arcade scaffold using synthetic, non-PHI scenarios",
+        title: "Clinical Trial Chaos: CDISC Compliance Arcade",
+        subtitle: "Fast-paced CDISC mapping & 21 CFR Part 11 electronic signature compliance arcade under FDA auditor pressure",
         category: "navigation",
-        url: "/ui-sandbox#clinical-chaos",
+        url: "/arcade/clinical-chaos",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
       },
       {
         id: "nav-garmin-watch",
-        title: "Garmin Multisport Simulator",
-        subtitle: "Retro multisport arcade simulator — deep ocean, mountain trail, and orbit modes",
+        title: "Garmin Connect IQ 32KB Memory Runner",
+        subtitle: "Retro smartwatch engineering game — survive strict 32KB RAM, GC freezes, and thermal overheating",
         category: "navigation",
-        url: "/ui-sandbox#garmin-watch",
+        url: "/arcade/garmin-watch",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
       },
       {
         id: "nav-retro-labyrinth",
-        title: "Retro Labyrinth: Core Recovery",
-        subtitle: "Multi-stage cybernetic maze game with drone patrols and EMP shockwaves",
+        title: "Retro Labyrinth: Graveyard Roguelike",
+        subtitle: "Roguelike dungeon crawler exploring abandoned repos — TSP dynamic walls, 3D wireframe boss, and developer weapons",
         category: "navigation",
-        url: "/not-found",
+        url: "/arcade/retro-labyrinth",
+        icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
+      },
+      {
+        id: "nav-ui-sandbox",
+        title: "UI Physics Sandbox",
+        subtitle: "Interactive canvas layout physics and UI sandbox",
+        category: "navigation",
+        url: "/ui-sandbox",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />
       },
       {
