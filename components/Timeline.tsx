@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { hexToRgba } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { designManifest } from "@/lib/design-manifest";
 import { IconBriefcase, IconFlame, IconSwitchHorizontal } from "@tabler/icons-react";
+import { usePersona } from "@/components/providers/PersonaProvider";
 
 export interface TimelineItem {
   role: string;
@@ -69,12 +70,19 @@ const timelineData: TimelineItem[] = [
 ];
 
 export const Timeline: React.FC = () => {
-  const [globalMode, setGlobalMode] = useState<"recruiter" | "reality">("reality");
+  const { persona, setPersona } = usePersona();
   const [cardOverrides, setCardOverrides] = useState<Record<number, "recruiter" | "reality">>({});
 
-  const handleGlobalToggle = (mode: "recruiter" | "reality") => {
-    setGlobalMode(mode);
+  const globalMode = persona === "technical" ? "reality" : "recruiter";
+
+  const [prevPersona, setPrevPersona] = useState(persona);
+  if (persona !== prevPersona) {
+    setPrevPersona(persona);
     setCardOverrides({});
+  }
+
+  const handleGlobalToggle = (mode: "recruiter" | "reality") => {
+    setPersona(mode === "reality" ? "technical" : "recruiter");
   };
 
   const handleCardToggle = (idx: number) => {

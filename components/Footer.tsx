@@ -19,10 +19,12 @@ import {
   IconSparkles,
 } from "@tabler/icons-react";
 import { useAudio } from "@/components/providers/AudioProvider";
+import { usePersona } from "@/components/providers/PersonaProvider";
 
 export const Footer: React.FC = () => {
   const pathname = usePathname();
   const { playHover, playSuccess } = useAudio();
+  const { persona } = usePersona();
 
   const handleHover = (e: React.MouseEvent<HTMLElement>) => {
     if (typeof window === "undefined") return;
@@ -55,7 +57,7 @@ export const Footer: React.FC = () => {
 
       <div className="max-w-6xl mx-auto px-6 md:px-12 pt-16 pb-[max(4rem,env(safe-area-inset-bottom)+2rem)]">
         {/* Main Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8 mb-16">
+        <div className={`grid grid-cols-1 sm:grid-cols-2 ${persona === "technical" ? "lg:grid-cols-4" : "lg:grid-cols-5"} gap-10 lg:gap-8 mb-16`}>
           {/* Col 1: Brand & Bio */}
           <div className="lg:col-span-2 flex flex-col justify-between space-y-6">
             <div className="space-y-3">
@@ -85,83 +87,85 @@ export const Footer: React.FC = () => {
           </div>
 
           {/* Col 2: Interactive Arcade */}
-          <div className="space-y-4">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-              <IconSparkles className="w-3.5 h-3.5 text-brand-cyan" />
-              Arcade &amp; Labs
-            </span>
-            <ul className="space-y-2 text-xs font-mono">
-              <li>
-                <Link
-                  href="/arcade"
-                  onMouseEnter={handleHover}
-                  className="text-zinc-400 hover:text-brand-cyan transition-colors"
-                >
-                  Arcade Hub Index ↗
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/arcade/laser-loon"
-                  onMouseEnter={handleHover}
-                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
-                >
-                  <IconCrosshair className="w-3 h-3 text-cyan-400" />
-                  Laser Loon
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/arcade/quasi-puzzler"
-                  onMouseEnter={handleHover}
-                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
-                >
-                  <IconBrain className="w-3 h-3 text-cyan-400" />
-                  Quasi-Puzzler
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/arcade/garmin-watch"
-                  onMouseEnter={handleHover}
-                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
-                >
-                  <IconCpu className="w-3 h-3 text-cyan-400" />
-                  Garmin 32KB Runner
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/arcade/clinical-chaos"
-                  onMouseEnter={handleHover}
-                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
-                >
-                  <IconShieldCheck className="w-3 h-3 text-cyan-400" />
-                  Clinical Trial Chaos
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/arcade/retro-labyrinth"
-                  onMouseEnter={handleHover}
-                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
-                >
-                  <IconTerminal className="w-3 h-3 text-cyan-400" />
-                  Retro Labyrinth
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/arcade/working-with-duck"
-                  onMouseEnter={handleHover}
-                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
-                >
-                  <IconBone className="w-3 h-3 text-amber-400" />
-                  Working With Duck
-                </Link>
-              </li>
-            </ul>
-          </div>
+          {persona !== "technical" && (
+            <div className="space-y-4">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                <IconSparkles className="w-3.5 h-3.5 text-brand-cyan" />
+                Arcade &amp; Labs
+              </span>
+              <ul className="space-y-2 text-xs font-mono">
+                <li>
+                  <Link
+                    href="/arcade"
+                    onMouseEnter={handleHover}
+                    className="text-zinc-400 hover:text-brand-cyan transition-colors"
+                  >
+                    Arcade Hub Index ↗
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/arcade/laser-loon"
+                    onMouseEnter={handleHover}
+                    className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                  >
+                    <IconCrosshair className="w-3 h-3 text-cyan-400" />
+                    Laser Loon
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/arcade/quasi-puzzler"
+                    onMouseEnter={handleHover}
+                    className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                  >
+                    <IconBrain className="w-3 h-3 text-cyan-400" />
+                    Quasi-Puzzler
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/arcade/garmin-watch"
+                    onMouseEnter={handleHover}
+                    className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                  >
+                    <IconCpu className="w-3 h-3 text-cyan-400" />
+                    Garmin 32KB Runner
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/arcade/clinical-chaos"
+                    onMouseEnter={handleHover}
+                    className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                  >
+                    <IconShieldCheck className="w-3 h-3 text-cyan-400" />
+                    Clinical Trial Chaos
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/arcade/retro-labyrinth"
+                    onMouseEnter={handleHover}
+                    className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                  >
+                    <IconTerminal className="w-3 h-3 text-cyan-400" />
+                    Retro Labyrinth
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/arcade/working-with-duck"
+                    onMouseEnter={handleHover}
+                    className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                  >
+                    <IconBone className="w-3 h-3 text-amber-400" />
+                    Working With Duck
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          )}
 
           {/* Col 3: Systems & Verification */}
           <div className="space-y-4">
@@ -190,16 +194,18 @@ export const Footer: React.FC = () => {
                   Proof Workspace
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/simulator"
-                  onMouseEnter={handleHover}
-                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
-                >
-                  <IconActivity className="w-3 h-3 text-brand-cyan" />
-                  Incident Simulator
-                </Link>
-              </li>
+              {persona !== "technical" && (
+                <li>
+                  <Link
+                    href="/simulator"
+                    onMouseEnter={handleHover}
+                    className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                  >
+                    <IconActivity className="w-3 h-3 text-brand-cyan" />
+                    Incident Simulator
+                  </Link>
+                </li>
+              )}
               <li>
                 <Link
                   href="/#about"
