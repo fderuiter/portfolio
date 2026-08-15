@@ -92,6 +92,9 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       createLinearGradient: vi.fn(() => ({
         addColorStop: vi.fn(),
       })),
+      createRadialGradient: vi.fn(() => ({
+        addColorStop: vi.fn(),
+      })),
       setLineDash: vi.fn(),
     };
 
@@ -121,7 +124,7 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     container.remove();
   });
 
-  it("should mount with initial HUD and CDISC domain station layout", async () => {
+  it("should mount with initial HUD, stations, and regulatory lifelines", async () => {
     await act(async () => {
       root.render(<ClinicalTrialChaos />);
     });
@@ -132,6 +135,8 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     expect(container.textContent).toContain("COMBO:");
     expect(container.textContent).toContain("DM Station");
     expect(container.textContent).toContain("VS Station");
+    expect(container.textContent).toContain("FDA Coffee Break");
+    expect(container.textContent).toContain("CDISC Auto-Clean");
   });
 
   it("should enforce keyboard boundary with data-keyboard-boundary='true'", async () => {
@@ -162,7 +167,9 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     expect(container.textContent).toContain("SUBJ-1001");
   });
 
-  it("should fix an observation discrepancy via validation drawer", async () => {
+  it("should open Multi-Choice Validation Drawer and resolve an observation", async () => {
+    vi.useFakeTimers();
+
     await act(async () => {
       root.render(<ClinicalTrialChaos />);
     });
@@ -175,34 +182,76 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       startBtn?.click();
     });
 
-    // Find and click the observation card containing "Fix Typo"
-    const fixTypoEl = Array.from(container.querySelectorAll("span")).find((s) =>
-      s.textContent?.includes("Fix Typo")
+    // Find and click the observation card with unvalidated prompt
+    const validateChoiceEl = Array.from(container.querySelectorAll("span")).find((s) =>
+      s.textContent?.includes("Validate Choice")
     );
-    expect(fixTypoEl).toBeDefined();
-    const obsCard = fixTypoEl?.closest(".cursor-pointer") as HTMLElement;
+    expect(validateChoiceEl).toBeDefined();
+    const obsCard = validateChoiceEl?.closest(".cursor-pointer") as HTMLElement;
     expect(obsCard).not.toBeNull();
 
     await act(async () => {
       obsCard.click();
     });
 
-    expect(container.textContent).toContain("Standardize & Clean Data");
+    expect(container.textContent).toContain("CDISC Controlled Terminology Validation");
+    expect(container.textContent).toContain("Select Compliant CDISC Standard Value / CT Code");
 
-    // Click Clean Data button
-    const cleanBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Standardize & Clean Data")
+    // Click the correct choice "180 cm"
+    const choiceBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.trim() === "180 cm"
     );
-    expect(cleanBtn).toBeDefined();
+    expect(choiceBtn).toBeDefined();
 
     await act(async () => {
-      cleanBtn?.click();
+      choiceBtn?.click();
+    });
+
+    // Advance timer for modal auto-close
+    await act(async () => {
+      vi.advanceTimersByTime(600);
     });
 
     expect(container.textContent).toContain("180 cm");
+
+    vi.useRealTimers();
   });
 
-  it("should open 21 CFR Part 11 Electronic Signature modal when routing clean subject", async () => {
+  it("should switch between Conveyor Floor, Live SDTM Studio, and Audit Trail tabs", async () => {
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+
+    // Switch to Live SDTM Studio tab
+    const sdtmTabBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Live SDTM Studio")
+    );
+    expect(sdtmTabBtn).toBeDefined();
+
+    await act(async () => {
+      sdtmTabBtn?.click();
+    });
+
+    expect(container.textContent).toContain("Live CDISC SDTM Dataset Studio");
+    expect(container.textContent).toContain("Export CDISC ODM XML");
+    expect(container.textContent).toContain("Export SDTM CSV");
+
+    // Switch to Audit Trail tab
+    const auditTabBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Audit Trail Log")
+    );
+    expect(auditTabBtn).toBeDefined();
+
+    await act(async () => {
+      auditTabBtn?.click();
+    });
+
+    expect(container.textContent).toContain("21 CFR PART 11 IMMUTABLE AUDIT TRAIL");
+  });
+
+  it("should open 21 CFR Part 11 signature modal and complete clean submission", async () => {
+    vi.useFakeTimers();
+
     await act(async () => {
       root.render(<ClinicalTrialChaos />);
     });
@@ -215,75 +264,38 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       startBtn?.click();
     });
 
-    // Fix observation (Height: 180 m -> 180 cm)
-    const fixTypoEl = Array.from(container.querySelectorAll("span")).find((s) =>
-      s.textContent?.includes("Fix Typo")
+    // Resolve observation (Height: 180 m -> 180 cm)
+    const validateChoiceEl = Array.from(container.querySelectorAll("span")).find((s) =>
+      s.textContent?.includes("Validate Choice")
     );
-    const obsCard = fixTypoEl?.closest(".cursor-pointer") as HTMLElement;
+    const obsCard = validateChoiceEl?.closest(".cursor-pointer") as HTMLElement;
     await act(async () => {
       obsCard.click();
     });
 
-    const cleanBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Standardize & Clean Data")
+    const choiceBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.trim() === "180 cm"
     );
     await act(async () => {
-      cleanBtn?.click();
+      choiceBtn?.click();
     });
 
-    // Route to DM Station
-    const dmHeading = Array.from(container.querySelectorAll("h4")).find((h) =>
-      h.textContent?.includes("DM Station")
-    );
-    expect(dmHeading).toBeDefined();
-    const dmStationCard = dmHeading?.closest(".group") as HTMLElement;
-    expect(dmStationCard).not.toBeNull();
-
     await act(async () => {
-      dmStationCard.click();
-    });
-
-    expect(container.textContent).toContain("21 CFR Part 11 Electronic Signature");
-    expect(container.textContent).toContain("Intent to Submit");
-  });
-
-  it("should complete electronic signature and submit dataset successfully", async () => {
-    await act(async () => {
-      root.render(<ClinicalTrialChaos />);
-    });
-
-    // Start campaign
-    const startBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Start 3-Phase Campaign")
-    );
-    await act(async () => {
-      startBtn?.click();
-    });
-
-    // Fix observation (Height: 180 m -> 180 cm)
-    const fixTypoEl = Array.from(container.querySelectorAll("span")).find((s) =>
-      s.textContent?.includes("Fix Typo")
-    );
-    const obsCard = fixTypoEl?.closest(".cursor-pointer") as HTMLElement;
-    await act(async () => {
-      obsCard.click();
-    });
-
-    const cleanBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Standardize & Clean Data")
-    );
-    await act(async () => {
-      cleanBtn?.click();
+      vi.advanceTimersByTime(600);
     });
 
     // Open signature modal via DM Station
     const dmHeading = Array.from(container.querySelectorAll("h4")).find((h) =>
       h.textContent?.includes("DM Station")
     );
+    expect(dmHeading).toBeDefined();
     const dmStationCard = dmHeading?.closest(".group") as HTMLElement;
+
     await act(async () => {
       dmStationCard.click();
     });
+
+    expect(container.textContent).toContain("21 CFR Part 11 Electronic Signature");
 
     // Confirm signature
     const confirmBtn = Array.from(container.querySelectorAll("button")).find((b) =>
@@ -295,7 +307,9 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
       confirmBtn?.click();
     });
 
-    expect(container.textContent).toContain("Clean Submits:1");
+    expect(container.textContent).toContain("Submits:1");
+
+    vi.useRealTimers();
   });
 
   it("should load existing high score from localStorage", async () => {

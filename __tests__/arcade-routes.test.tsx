@@ -168,7 +168,7 @@ describe("Arcade Dedicated Routes Suite", () => {
     expect(container.textContent).toContain("Engineering");
     expect(container.textContent).toContain("Arcade Hub");
     expect(container.textContent).toContain("Working With Duck");
-    expect(container.textContent).toContain("Laser Loon: Cryo Bug Hunter");
+    expect(container.textContent).toContain("Laser Loon: Quest for the State Flag");
     expect(container.textContent).toContain("Quasi-Perfect Puzzler");
     expect(container.textContent).toContain("Garmin Connect IQ 32KB Memory Runner");
     expect(container.textContent).toContain("Clinical Trial Chaos: CDISC Compliance");
@@ -191,7 +191,7 @@ describe("Arcade Dedicated Routes Suite", () => {
     });
     expect(container.textContent).toContain("Arcade Hub");
     expect(container.textContent).toContain("Laser Loon:");
-    expect(container.textContent).toContain("Cryo Bug Hunter");
+    expect(container.textContent).toContain("Quest for the State Flag");
   });
 
   it("renders Quasi-Perfect Puzzler dedicated game page", async () => {

@@ -5,6 +5,9 @@ import {
   generateFaceForgeRoom,
   generateBlinkBrowseRoom,
   generateBillableHoursRoom,
+  generateClassicStage1,
+  generateClassicStage2,
+  generateCyberpunkCampaign,
   calculateFOV,
   hasLineOfSight,
   computeShortestTour,
@@ -16,7 +19,18 @@ import {
   fireWeapon,
   DEFAULT_WEAPONS,
   updateEnemyAI,
+  generateHexMatrixPuzzle,
+  selectHexCell,
+  consumeBypassChip,
+  CYBERDECK_CLASSES,
+  CRT_THEMES,
 } from "@/lib/dungeon";
+import { retroAudio } from "@/lib/dungeon/audio";
+import {
+  loadCyberdeckProfile,
+  saveCyberdeckProfile,
+  DEFAULT_CYBERDECK_PROFILE,
+} from "@/lib/dungeon/metaprogression";
 
 describe("Roguelike Dungeon Generator & Rooms", () => {
   it("should generate the full campaign with 4 distinct themed rooms", () => {
@@ -64,6 +78,18 @@ describe("Roguelike Dungeon Generator & Rooms", () => {
     const billableRoom = generateBillableHoursRoom();
     expect(billableRoom.id).toBe("billable_hours");
     expect(billableRoom.items.some((i) => i.itemId === "commit_token")).toBe(true);
+  });
+
+  it("should generate classic stages and Cyberpunk campaign", () => {
+    const s1 = generateClassicStage1();
+    expect(s1.id).toBe("classic_1");
+
+    const s2 = generateClassicStage2();
+    expect(s2.id).toBe("classic_2");
+    expect(s2.enemies.length).toBeGreaterThan(0);
+
+    const cp = generateCyberpunkCampaign();
+    expect(cp.length).toBeGreaterThanOrEqual(2);
   });
 });
 
@@ -295,3 +321,341 @@ describe("Enemy AI State Machine", () => {
     expect(updatedEnemies[0].state).toBe("chase");
   });
 });
+
+describe("Cybersecurity Hex Matrix Buffer Hacking Minigame", () => {
+  it("generates a solvable procedural hex matrix puzzle", () => {
+    const puzzle = generateHexMatrixPuzzle(2);
+    expect(puzzle.grid.length).toBeGreaterThanOrEqual(4);
+    expect(puzzle.targetSequence.length).toBeGreaterThanOrEqual(2);
+    expect(puzzle.activeAxis).toBe("row");
+    expect(puzzle.solved).toBe(false);
+  });
+
+  it("evaluates byte selection with row/col alternation", () => {
+    const puzzle = generateHexMatrixPuzzle(1);
+    const targetByte = puzzle.grid[0][0].byte;
+    const res = selectHexCell(puzzle, 0, 0);
+
+    expect(res.puzzle.currentInput).toContain(targetByte);
+    expect(res.puzzle.activeAxis).toBe("col");
+    expect(res.puzzle.activeIndex).toBe(0);
+  });
+
+  it("instantly solves puzzle when using a hardware bypass chip", () => {
+    const puzzle = generateHexMatrixPuzzle(3);
+    const solved = consumeBypassChip(puzzle);
+    expect(solved.solved).toBe(true);
+    expect(solved.failed).toBe(false);
+  });
+});
+
+describe("Cyberdeck Archetypes, Meta-Progression & Themes", () => {
+  it("defines 4 distinct cyberdeck classes with unique perks and starting stats", () => {
+    expect(Object.keys(CYBERDECK_CLASSES)).toEqual([
+      "script_kiddie",
+      "cryptanalyst",
+      "apt_specialist",
+      "hardware_hacker",
+    ]);
+
+    const scriptKiddie = CYBERDECK_CLASSES.script_kiddie;
+    expect(scriptKiddie.startBypassChips).toBe(2);
+    expect(scriptKiddie.starterWeapons).toContain("port_scan");
+
+    const apt = CYBERDECK_CLASSES.apt_specialist;
+    expect(apt.baseRam).toBe(48);
+  });
+
+  it("provides 4 distinct retro CRT phosphor theme configurations", () => {
+    expect(Object.keys(CRT_THEMES)).toEqual(["emerald", "amber", "synthwave", "matrix"]);
+    expect(CRT_THEMES.emerald.primaryColor).toBe("#10b981");
+    expect(CRT_THEMES.amber.primaryColor).toBe("#f59e0b");
+  });
+});
+
+describe("Cybersecurity Weapons & CVE Synergies", () => {
+  it("fires port_scan and exposes CVE vulnerabilities in sector", () => {
+    const enemies = [
+      {
+        id: "d1",
+        type: "drone" as const,
+        name: "Sentinel",
+        x: 2,
+        y: 1,
+        hp: 40,
+        maxHp: 40,
+        state: "patrol" as const,
+        patrolDir: "right" as const,
+        symbol: "D",
+        color: "#ef4444",
+        cve: "DEFAULT_CREDS" as const,
+      },
+    ];
+
+    const res = fireWeapon(
+      "port_scan",
+      DEFAULT_WEAPONS,
+      1,
+      1,
+      100,
+      100,
+      enemies,
+      undefined,
+      1000,
+      32
+    );
+
+    expect(res.success).toBe(true);
+    expect(res.updatedEnemies[0].cveExposed).toBe(true);
+  });
+
+  it("fires buffer_overflow with critical damage on BUFFER_OVERFLOW targets", () => {
+    const enemies = [
+      {
+        id: "vuln-1",
+        type: "zombie" as const,
+        name: "Vulnerable Daemon",
+        x: 2,
+        y: 1,
+        hp: 150,
+        maxHp: 150,
+        state: "patrol" as const,
+        patrolDir: "right" as const,
+        symbol: "Z",
+        color: "#ef4444",
+        cve: "BUFFER_OVERFLOW" as const,
+      },
+    ];
+
+    const res = fireWeapon(
+      "buffer_overflow",
+      DEFAULT_WEAPONS,
+      1,
+      1,
+      100,
+      100,
+      enemies,
+      undefined,
+      1000,
+      32
+    );
+
+    expect(res.success).toBe(true);
+    expect(res.critTriggered).toBe(true);
+  });
+
+  it("fires npm_install, git_force_push, stack_overflow, zero_day, and ransomware_lock", () => {
+    const enemies = [
+      {
+        id: "e1",
+        type: "drone" as const,
+        name: "Sentinel",
+        x: 2,
+        y: 1,
+        hp: 100,
+        maxHp: 100,
+        state: "patrol" as const,
+        patrolDir: "right" as const,
+        symbol: "D",
+        color: "#ef4444",
+        cve: "UNAUTHENTICATED_RCE" as const,
+      },
+    ];
+
+    // npm_install
+    const npmRes = fireWeapon("npm_install", DEFAULT_WEAPONS, 1, 1, 100, 100, enemies, undefined, 1000, 32);
+    expect(npmRes.success).toBe(true);
+
+    // git_force_push
+    const gitRes = fireWeapon("git_force_push", DEFAULT_WEAPONS, 1, 1, 100, 100, enemies, undefined, 2000, 32);
+    expect(gitRes.success).toBe(true);
+
+    // stack_overflow
+    const stackRes = fireWeapon("stack_overflow", DEFAULT_WEAPONS, 1, 1, 50, 100, enemies, undefined, 3000, 32);
+    expect(stackRes.success).toBe(true);
+    expect(stackRes.updatedPlayerHp).toBe(90);
+
+    // zero_day
+    const zdRes = fireWeapon("zero_day", DEFAULT_WEAPONS, 1, 1, 100, 100, enemies, undefined, 4000, 32);
+    expect(zdRes.success).toBe(true);
+
+    // ransomware_lock
+    const rwRes = fireWeapon("ransomware_lock", DEFAULT_WEAPONS, 1, 1, 100, 100, enemies, undefined, 5000, 32);
+    expect(rwRes.success).toBe(true);
+    expect(rwRes.cryptoGained).toBeGreaterThan(0);
+
+    // emp_blast
+    const empRes = fireWeapon("emp_blast", DEFAULT_WEAPONS, 1, 1, 100, 100, enemies, undefined, 6000, 32);
+    expect(empRes.success).toBe(true);
+    expect(empRes.updatedEnemies[0].state).toBe("stunned");
+
+    // git_force_push against low-HP boss
+    const lowHpBoss = { ...createFaceForgeBoss(10, 10), hp: 10 };
+    const forceBossRes = fireWeapon("git_force_push", DEFAULT_WEAPONS, 1, 1, 100, 100, [], lowHpBoss, 7000, 32);
+    expect(forceBossRes.updatedBoss?.defeated).toBe(true);
+  });
+
+  it("handles weapons against FaceForge 3D boss and tests boss updates", () => {
+    const boss = createFaceForgeBoss(10, 10);
+    const res = fireWeapon("zero_day", DEFAULT_WEAPONS, 1, 1, 100, 100, [], boss, 1000, 32);
+    expect(res.success).toBe(true);
+    expect(res.updatedBoss).toBeDefined();
+
+    // Update boss through phases
+    let b = createFaceForgeBoss(10, 10);
+    let updateRes = updateFaceForgeBoss(b, 1, 1, 100, 32, 32);
+    b = updateRes.updatedBoss;
+    expect(b.mesh.rotation.y).toBeGreaterThan(0);
+
+    // Phase 2 transition
+    b.hp = 150;
+    updateRes = updateFaceForgeBoss(b, 1, 1, 200, 32, 32);
+    b = updateRes.updatedBoss;
+    expect(b.phase).toBe(2);
+
+    // Phase 3 transition
+    b.hp = 50;
+    updateRes = updateFaceForgeBoss(b, 1, 1, 300, 32, 32);
+    b = updateRes.updatedBoss;
+    expect(b.phase).toBe(3);
+  });
+
+  it("updates enemy AI states (patrol, chase, stunned, confused, attacking)", () => {
+    const sampleGrid = [
+      ["#", "#", "#", "#", "#"],
+      ["#", " ", " ", " ", "#"],
+      ["#", " ", "#", " ", "#"],
+      ["#", " ", " ", " ", "#"],
+      ["#", "#", "#", "#", "#"],
+    ];
+
+    const enemies = [
+      {
+        id: "patrol-drone",
+        type: "drone" as const,
+        name: "Drone",
+        x: 1,
+        y: 1,
+        hp: 30,
+        maxHp: 30,
+        state: "patrol" as const,
+        patrolDir: "right" as const,
+        symbol: "D",
+        color: "#38bdf8",
+      },
+      {
+        id: "stunned-drone",
+        type: "drone" as const,
+        name: "Stunned",
+        x: 3,
+        y: 1,
+        hp: 30,
+        maxHp: 30,
+        state: "stunned" as const,
+        stunTimerMs: 2000,
+        patrolDir: "left" as const,
+        symbol: "D",
+        color: "#38bdf8",
+      },
+      {
+        id: "confused-drone",
+        type: "drone" as const,
+        name: "Confused",
+        x: 3,
+        y: 3,
+        hp: 30,
+        maxHp: 30,
+        state: "confused" as const,
+        confusedTimerMs: 2000,
+        patrolDir: "up" as const,
+        symbol: "D",
+        color: "#38bdf8",
+      },
+    ];
+
+    const aiRes = updateEnemyAI(enemies, sampleGrid, 1, 3, 16.6);
+    expect(aiRes.updatedEnemies.length).toBe(3);
+    expect(aiRes.updatedEnemies.find((e) => e.id === "stunned-drone")?.state).toBe("stunned");
+  });
+
+  it("exercises retro audio synthesizer methods without error", () => {
+    const mockCtx = {
+      state: "running",
+      currentTime: 0,
+      destination: {},
+      resume: async () => {},
+      createOscillator: () => ({
+        type: "sawtooth",
+        frequency: {
+          setValueAtTime: () => {},
+          exponentialRampToValueAtTime: () => {},
+        },
+        connect: () => {},
+        start: () => {},
+        stop: () => {},
+      }),
+      createGain: () => ({
+        gain: {
+          setValueAtTime: () => {},
+          exponentialRampToValueAtTime: () => {},
+          linearRampToValueAtTime: () => {},
+        },
+        connect: () => {},
+      }),
+    };
+    (globalThis as unknown as { AudioContext: unknown }).AudioContext = function () {
+      return mockCtx;
+    };
+
+    retroAudio.setMuted(false);
+    expect(retroAudio.getMuted()).toBe(false);
+
+    expect(() => retroAudio.playStep()).not.toThrow();
+    expect(() => retroAudio.playPortScan()).not.toThrow();
+    expect(() => retroAudio.playExploitBlast()).not.toThrow();
+    expect(() => retroAudio.playCriticalHit()).not.toThrow();
+    expect(() => retroAudio.playHackSuccess()).not.toThrow();
+    expect(() => retroAudio.playAlertPulse()).not.toThrow();
+    expect(() => retroAudio.playPickup()).not.toThrow();
+    expect(() => retroAudio.playTone(440, 50, "square", 0.05)).not.toThrow();
+
+    retroAudio.setMuted(true);
+    expect(retroAudio.getMuted()).toBe(true);
+    expect(() => retroAudio.playStep()).not.toThrow();
+  });
+
+  it("handles cyberdeck profile persistence in localStorage", () => {
+    const store: Record<string, string> = {};
+    const mockStorage = {
+      getItem: (key: string) => store[key] ?? null,
+      setItem: (key: string, val: string) => {
+        store[key] = String(val);
+      },
+      removeItem: (key: string) => {
+        delete store[key];
+      },
+      clear: () => {
+        for (const k in store) delete store[k];
+      },
+      length: 0,
+      key: () => null,
+    };
+    Object.defineProperty(globalThis, "localStorage", {
+      value: mockStorage,
+      writable: true,
+      configurable: true,
+    });
+
+    const profile = loadCyberdeckProfile();
+    expect(profile.unlockedClasses).toContain("script_kiddie");
+
+    saveCyberdeckProfile({
+      ...DEFAULT_CYBERDECK_PROFILE,
+      totalCrypto: 500,
+    });
+
+    const loaded = loadCyberdeckProfile();
+    expect(loaded.totalCrypto).toBe(500);
+  });
+});
+

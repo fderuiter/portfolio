@@ -199,4 +199,44 @@ describe("RetroLabyrinth React Component UI Suite", () => {
 
     expect(container.textContent).toContain("15400");
   });
+
+  it("should render Cyberdeck RAM, Crypto counter, and Class selector", async () => {
+    await act(async () => {
+      root.render(<RetroLabyrinth isMounted={true} />);
+    });
+
+    expect(container.textContent).toContain("RAM");
+    expect(container.textContent).toContain("Script Kiddie");
+    expect(container.textContent).toContain("Chips");
+
+    // Click class badge to open class selector modal
+    const classBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Script Kiddie")
+    );
+    await act(async () => {
+      classBtn?.click();
+    });
+
+    expect(container.textContent).toContain("SELECT CYBERDECK FIRMWARE ARCHETYPE");
+    expect(container.textContent).toContain("Cryptanalyst");
+    expect(container.textContent).toContain("APT Specialist");
+  });
+
+  it("should open Darknet Market modal and show vendor items", async () => {
+    await act(async () => {
+      root.render(<RetroLabyrinth isMounted={true} />);
+    });
+
+    const marketBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Market")
+    );
+    await act(async () => {
+      marketBtn?.click();
+    });
+
+    expect(container.textContent).toContain("DARKNET EXPLOIT BLACK-MARKET");
+    expect(container.textContent).toContain("Overclocked 16GB DDR5 RAM");
+    expect(container.textContent).toContain("Hardware Jumper Bypass Chip");
+  });
 });
+

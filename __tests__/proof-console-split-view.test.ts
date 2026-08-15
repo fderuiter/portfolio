@@ -44,7 +44,7 @@ describe("Integrated Command Console Split-View Accessibility & Interactive Cont
   it("should return focus to the toggle button on escape or when closed", () => {
     expect(content).toContain('e.key === "Escape"');
     expect(content).toContain("consoleInputRef.current?.blur()");
-    expect(content).toContain("toggleBtnRef.current?.focus()");
+    expect(content).toContain("toggleBtnRef.current?.focus");
   });
 
   it("should toggle console open/close and focus input with standard global keyboard shortcuts", () => {

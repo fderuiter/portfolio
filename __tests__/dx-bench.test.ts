@@ -4,6 +4,7 @@ import {
   benchmarkPretextLayout,
   benchmarkScanner,
   runAllBenchmarks,
+  printBenchmarkReport,
 } from "@/lib/dx/bench";
 
 describe("DX Micro-Benchmark Suite", () => {
@@ -31,8 +32,10 @@ describe("DX Micro-Benchmark Suite", () => {
     expect(results[0].opsPerSec).toBeGreaterThan(0);
   });
 
-  it("runs all benchmarks cleanly and returns aggregate summary", () => {
+  it("runs all benchmarks cleanly and prints formatted report", () => {
     const results = runAllBenchmarks();
     expect(results.length).toBeGreaterThanOrEqual(5);
+
+    expect(() => printBenchmarkReport(results)).not.toThrow();
   });
 });

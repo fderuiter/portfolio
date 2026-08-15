@@ -78,7 +78,7 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     vi.restoreAllMocks();
   });
 
-  it("renders the main puzzler scaffold and Level 1 initial state", async () => {
+  it("renders the main puzzler scaffold and Chapter 1 Level 1 initial state", async () => {
     await act(async () => {
       root = createRoot(container);
       root.render(<QuasiPerfectPuzzler />);
@@ -86,9 +86,10 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
 
     expect(container.textContent).toContain("Quasi-Perfect Puzzler");
     expect(container.textContent).toContain("The Identity Crisis");
+    expect(container.textContent).toContain("Chapter 1 · Equational Reasoning");
     expect(container.textContent).toContain("16.0 / 16 GB");
-    expect(container.textContent).toContain("LEAN RAM NOMINAL");
     expect(container.textContent).toContain("rfl");
+    expect(container.textContent).toContain("Lean 4 Proof Script");
   });
 
   it("solves Level 1 by applying the rfl tactic and displaying the victory modal", async () => {
@@ -105,7 +106,7 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
       rflCard.click();
     });
 
-    // Click the root goal node or target
+    // Click the root goal node
     const goalNode = container.querySelector('[data-node-id="eq-lvl1"]') as HTMLElement;
     expect(goalNode).not.toBeNull();
 
@@ -114,97 +115,106 @@ describe("QuasiPerfectPuzzler UI Component Suite", () => {
     });
 
     // Check Victory Modal is displayed
-    expect(container.textContent).toContain("Q.E.D. · Theorem Verified");
-    expect(container.textContent).toContain("FORMAL VERIFICATION VERIFIED");
-    expect(container.textContent).toContain("15.0 GB"); // 16 - 1 GB = 15 GB
+    expect(container.textContent).toContain("Q.E.D. · THEOREM VERIFIED");
+    expect(container.textContent).toContain("The Identity Crisis");
+    expect(container.textContent).toContain("15.0 GB");
   });
 
-  it("handles Level navigation and loads Level 2 hypotheses", async () => {
+  it("toggles and interacts with the Progressive Hints system", async () => {
     await act(async () => {
       root = createRoot(container);
       root.render(<QuasiPerfectPuzzler />);
     });
 
-    // Find and click Level 2 button
-    const buttons = Array.from(container.querySelectorAll("button"));
-    const l2Button = buttons.find((b) => b.textContent?.includes("L2"));
-    expect(l2Button).toBeDefined();
-
-    await act(async () => {
-      l2Button?.click();
-    });
-
-    expect(container.textContent).toContain("The Art of Substitution");
-    expect(container.textContent).toContain("Active Hypotheses Context (Γ)");
-    expect(container.textContent).toContain("h1:");
-    expect(container.textContent).toContain("h2:");
-    expect(container.textContent).toContain("rw [h1]");
-    expect(container.textContent).toContain("rw [h2]");
-  });
-
-  it("triggers the morality penalty when using the sorry escape hatch", async () => {
-    await act(async () => {
-      root = createRoot(container);
-      root.render(<QuasiPerfectPuzzler />);
-    });
-
-    // Find and click 'sorry' tactic card
-    const sorryCard = container.querySelector('[data-tactic-id="sorry"]') as HTMLElement;
-    expect(sorryCard).not.toBeNull();
-
-    await act(async () => {
-      sorryCard.click();
-    });
-
-    // Click target node
-    const goalNode = container.querySelector('[data-node-id="eq-lvl1"]') as HTMLElement;
-    expect(goalNode).not.toBeNull();
-
-    await act(async () => {
-      goalNode.click();
-    });
-
-    // Check Morality Warning
-    expect(container.textContent).toContain("MATHEMATICAL MORALITY VIOLATION");
-    expect(container.textContent).toContain("PROVED VIA SORRY");
-    expect(container.textContent).toContain("-100");
-  });
-
-  it("supports Reset and Undo actions", async () => {
-    await act(async () => {
-      root = createRoot(container);
-      root.render(<QuasiPerfectPuzzler />);
-    });
-
-    const resetButton = Array.from(container.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("Reset")
+    // Toggle Hints On
+    const hintsButton = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Hints")
     );
-    expect(resetButton).toBeDefined();
+    expect(hintsButton).toBeDefined();
 
     await act(async () => {
-      resetButton?.click();
+      hintsButton?.click();
     });
 
-    expect(container.textContent).toContain("16.0 / 16 GB");
+    expect(container.textContent).toContain("Interactive Proof Coach · Progressive Hints");
+    expect(container.textContent).toContain("Tier 1 · Strategy Clue");
+    expect(container.textContent).toContain("Every mathematical object is equal to itself");
+
+    // Reveal Tier 2 Hint
+    const revealButton = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Reveal Next Hint")
+    );
+    expect(revealButton).toBeDefined();
+
+    await act(async () => {
+      revealButton?.click();
+    });
+
+    expect(container.textContent).toContain("Tier 2 · Subtree Target Focus");
   });
 
-  it("enforces keyboard boundary and supports level switching keyboard shortcuts", async () => {
+  it("toggles Sandbox Mode with unlimited RAM", async () => {
     await act(async () => {
       root = createRoot(container);
       root.render(<QuasiPerfectPuzzler />);
     });
 
-    const boundary = container.querySelector('[data-keyboard-boundary="true"]') as HTMLElement;
-    expect(boundary).not.toBeNull();
-    expect(boundary.getAttribute("tabIndex")).toBe("0");
+    // Click Sandbox button
+    const sandboxButton = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Sandbox")
+    );
+    expect(sandboxButton).toBeDefined();
 
-    // Press '2' key to switch to level 2
     await act(async () => {
-      boundary.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "2", bubbles: true, cancelable: true })
-      );
+      sandboxButton?.click();
     });
 
-    expect(container.textContent).toContain("The Art of Substitution");
+    expect(container.textContent).toContain("Theorem Playground & AST Sandbox");
+    expect(container.textContent).toContain("Unlimited RAM");
+    expect(container.textContent).toContain("Preset 1");
+  });
+
+  it("switches tabs in the Lean IDE Inspector and browses Tactic Encyclopedia", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<QuasiPerfectPuzzler />);
+    });
+
+    expect(container.textContent).toContain("theorem identity_crisis");
+
+    // Switch to Encyclopedia tab
+    const encButton = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Tactic Encyclopedia")
+    );
+    expect(encButton).toBeDefined();
+
+    await act(async () => {
+      encButton?.click();
+    });
+
+    expect(container.textContent).toContain("tactic");
+    expect(container.textContent).toContain("RAM Cost:");
+  });
+
+  it("filters levels by chapter", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<QuasiPerfectPuzzler />);
+    });
+
+    const ch2Button = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Ch 2: Logic")
+    );
+    expect(ch2Button).toBeDefined();
+
+    await act(async () => {
+      ch2Button?.click();
+    });
+
+    // Level 5 should be visible in chapter 2
+    expect(container.textContent).toContain("L5");
+    expect(container.textContent).toContain("L6");
+    expect(container.textContent).toContain("L7");
+    expect(container.textContent).toContain("L8");
   });
 });

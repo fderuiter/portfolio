@@ -11,6 +11,7 @@ import {
   checkMigrationGuard,
   checkHydrationSafety,
   runDiagnostics,
+  printDoctorReport,
 } from "@/lib/dx/doctor";
 
 describe("DX Invariant Doctor Engine", () => {
@@ -178,11 +179,33 @@ describe("DX Invariant Doctor Engine", () => {
   });
 
   describe("Full Workspace Health Diagnostic", () => {
-    it("runs diagnostic across active workspace cleanly", async () => {
+    it("runs diagnostic across active workspace cleanly and prints reports", async () => {
       const workspaceRoot = path.resolve(__dirname, "..");
       const summary = await runDiagnostics({ workspaceRoot, fix: false, ci: true });
       expect(summary.results.length).toBeGreaterThan(0);
       expect(summary.totalPassed).toBeGreaterThan(0);
+
+      expect(() => printDoctorReport(summary, true)).not.toThrow();
+
+      // Test report with fake failures and fixes
+      const mockSummary = {
+        ...summary,
+        totalFixed: 1,
+        totalWarned: 1,
+        totalFailed: 1,
+        hasFailures: true,
+        results: [
+          {
+            id: "fake-check",
+            name: "Fake Invariant",
+            category: "routes" as const,
+            status: "fail" as const,
+            message: "Missing mock route",
+            details: ["/mock/path"],
+          },
+        ],
+      };
+      expect(() => printDoctorReport(mockSummary, false)).not.toThrow();
     });
   });
 });

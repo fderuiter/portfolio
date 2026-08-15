@@ -129,9 +129,11 @@ describe("LaserLoon React Component UI Suite", () => {
       root.render(<LaserLoon />);
     });
 
+    expect(container.textContent).toContain("Campaign");
     expect(container.textContent).toContain("Arcade Survival");
     expect(container.textContent).toContain("Zero-G Sandbox");
-    expect(container.textContent).toContain("Ice Cannon (4)");
+    expect(container.textContent).toContain("Ruby (1)");
+    expect(container.textContent).toContain("Pulse (2)");
     expect(container.textContent).toContain("SCORE:");
     expect(container.textContent).toContain("HI:");
   });
@@ -152,7 +154,7 @@ describe("LaserLoon React Component UI Suite", () => {
     });
 
     const pulseBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Pulse (1)")
+      b.textContent?.includes("Pulse (2)")
     );
     expect(pulseBtn).toBeDefined();
 
@@ -179,7 +181,7 @@ describe("LaserLoon React Component UI Suite", () => {
 
     expect(container.textContent).toContain("GRAVITY:");
     expect(container.textContent).toContain("Zero-G");
-    expect(container.textContent).toContain("Launch Ice Block");
+    expect(container.textContent).toContain("Ice Mortar");
   });
 
   it("should toggle screen shake option", async () => {
@@ -199,13 +201,13 @@ describe("LaserLoon React Component UI Suite", () => {
     expect(shakeBtn?.textContent).toContain("Screen Shake: OFF");
   });
 
-  it("should start game when Launch Cryo Hunt button is clicked", async () => {
+  it("should start game when Start Campaign button is clicked", async () => {
     await act(async () => {
       root.render(<LaserLoon />);
     });
 
     const startBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("LAUNCH CRYO HUNT")
+      b.textContent?.includes("START CAMPAIGN")
     );
     expect(startBtn).toBeDefined();
 
@@ -214,7 +216,6 @@ describe("LaserLoon React Component UI Suite", () => {
     });
 
     expect(mockRecordEvent).toHaveBeenCalledWith("laser_loon_start", "project_click");
-    expect(container.textContent).toContain("TIME:");
   });
 
   it("should handle keyboard shortcuts for weapon switching and spacebar start", async () => {
@@ -234,14 +235,14 @@ describe("LaserLoon React Component UI Suite", () => {
 
     await act(async () => {
       boundary.dispatchEvent(
-        new KeyboardEvent("keydown", { key: "2", bubbles: true, cancelable: true })
+        new KeyboardEvent("keydown", { key: "3", bubbles: true, cancelable: true })
       );
     });
 
-    const plasmaBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Plasma (2)")
+    const auroraBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Aurora (3)")
     );
-    expect(plasmaBtn?.className).toContain("bg-emerald-500/20");
+    expect(auroraBtn?.className).toContain("bg-emerald-500/20");
   });
 
   it("should load existing high score from localStorage", async () => {

@@ -132,16 +132,22 @@ describe("Working With Duck - UI & Component Suite", () => {
     expect(container.textContent).toContain("Duck Scrapbook");
   });
 
-  it("renders bottom Hotbar items (Squeaky Toy, Kong, Ball, Treat)", async () => {
+  it("renders bottom Hotbar items and training tricks (Tennis Ball, Kong, Squeaky, Treat, Sit, Paw, Drop It, Spin)", async () => {
     await act(async () => {
       root.render(<WorkingWithDuck />);
     });
 
-    expect(container.textContent).toContain("Squeaky Toy");
-    expect(container.textContent).toContain("Kong Chew");
     expect(container.textContent).toContain("Tennis Ball");
-    expect(container.textContent).toContain("Give Treat 🍖");
-    expect(container.textContent).toContain("Go to Dog Park");
+    expect(container.textContent).toContain("Kong Chew");
+    expect(container.textContent).toContain("Squeaky");
+    expect(container.textContent).toContain("Treat 🍖");
+    expect(container.textContent).toContain("Sit 🪑");
+    expect(container.textContent).toContain("Paw 🐾");
+    expect(container.textContent).toContain("Drop It ✋");
+    expect(container.textContent).toContain("Spin 🌀");
+    expect(container.textContent).toContain("Active Commit Burst (Space)");
+    expect(container.textContent).toContain("Dog Park 🌲");
+    expect(container.textContent).toContain("Bathtub 🛁");
   });
 
   it("opens and toggles the Polaroid Scrapbook modal", async () => {
@@ -162,6 +168,25 @@ describe("Working With Duck - UI & Component Suite", () => {
     }
   });
 
+  it("opens and toggles the Accessory Wardrobe modal", async () => {
+    await act(async () => {
+      root.render(<WorkingWithDuck />);
+    });
+
+    const buttons = container.querySelectorAll("button");
+    const wardrobeBtn = Array.from(buttons).find((b) => b.textContent?.includes("Wardrobe") || b.title?.includes("Wardrobe"));
+    expect(wardrobeBtn).toBeDefined();
+
+    if (wardrobeBtn) {
+      await act(async () => {
+        wardrobeBtn.click();
+      });
+      expect(container.textContent).toContain("Duck's Wardrobe");
+      expect(container.textContent).toContain("Adidas Bucket Hat");
+      expect(container.textContent).toContain("Natural Fluffy Coat");
+    }
+  });
+
   it("transitions to running state when clicking Start Sprint 1", async () => {
     await act(async () => {
       root.render(<WorkingWithDuck />);
@@ -174,7 +199,6 @@ describe("Working With Duck - UI & Component Suite", () => {
       });
     }
 
-    // Overlay removed, game is active
     expect(container.querySelector("canvas")).toBeDefined();
   });
 
@@ -233,7 +257,7 @@ describe("Working With Duck - UI & Component Suite", () => {
     }
   });
 
-  it("handles hotbar keyboard shortcuts 1, 2, 3, 4 without crashing", async () => {
+  it("handles hotbar keyboard shortcuts 1, 2, 3, 4, Q, W, E, R, Space without crashing", async () => {
     await act(async () => {
       root.render(<WorkingWithDuck />);
     });
@@ -243,26 +267,50 @@ describe("Working With Duck - UI & Component Suite", () => {
       window.dispatchEvent(new KeyboardEvent("keydown", { key: "2" }));
       window.dispatchEvent(new KeyboardEvent("keydown", { key: "3" }));
       window.dispatchEvent(new KeyboardEvent("keydown", { key: "4" }));
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "q" }));
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "w" }));
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "e" }));
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "r" }));
+      window.dispatchEvent(new KeyboardEvent("keydown", { code: "Space" }));
     });
 
-    expect(container.textContent).toContain("Squeaky Toy");
+    expect(container.textContent).toContain("Tennis Ball");
   });
 
-  it("toggles dog park and renders whistle controls", async () => {
+  it("toggles dog park and renders agility jump and whistle controls", async () => {
     await act(async () => {
       root.render(<WorkingWithDuck />);
     });
 
     const parkBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Go to Dog Park")
+      b.textContent?.includes("Dog Park")
     );
     if (parkBtn) {
       await act(async () => {
         parkBtn.click();
       });
 
-      expect(container.textContent).toContain("Whistle Recall");
+      expect(container.textContent).toContain("Agility Jump (Space)");
+      expect(container.textContent).toContain("Whistle");
       expect(container.textContent).toContain("Return to Office");
+    }
+  });
+
+  it("enters Bathtub and renders bathtub wash and shower rinse controls", async () => {
+    await act(async () => {
+      root.render(<WorkingWithDuck />);
+    });
+
+    const bathBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Bathtub")
+    );
+    if (bathBtn) {
+      await act(async () => {
+        bathBtn.click();
+      });
+
+      expect(container.textContent).toContain("Shower Rinse Spray");
+      expect(container.textContent).toContain("Finish Bath & Return");
     }
   });
 
@@ -316,4 +364,3 @@ describe("Working With Duck - UI & Component Suite", () => {
     }
   });
 });
-

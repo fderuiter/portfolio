@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST as telemetryPOST } from "@/app/api/telemetry/route";
 import { GET as syncGET } from "@/app/api/telemetry/sync/route";
-import { GET as transparencyGET } from "@/app/api/transparency/logs/route";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 
@@ -137,38 +136,6 @@ describe("Declarative Zod Validation Endpoints", () => {
       const data = await res.json();
       expect(data.error).toBe("Validation failed");
       expect(data.details[0].path).toBe("batch");
-    });
-  });
-
-  describe("Transparency Logs GET Validation", () => {
-    it("successfully validates standard query parameters and queries database", async () => {
-      vi.mocked(prisma.telemetryEvent.findMany).mockResolvedValue([]);
-
-      const req = new NextRequest("http://localhost:3000/api/transparency/logs?sort=asc&page=2&limit=5", {
-        method: "GET",
-      });
-
-      const res = await transparencyGET(req);
-      expect(res.status).toBe(200);
-      expect(prisma.telemetryEvent.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          orderBy: { createdAt: "asc" },
-          take: 5,
-          skip: 5,
-        })
-      );
-    });
-
-    it("fails validation on invalid query parameters", async () => {
-      const req = new NextRequest("http://localhost:3000/api/transparency/logs?sort=invalid_sort&page=-1&limit=200", {
-        method: "GET",
-      });
-
-      const res = await transparencyGET(req);
-      expect(res.status).toBe(400);
-      const data = await res.json();
-      expect(data.error).toBe("Validation failed");
-      expect(data.details).toHaveLength(3);
     });
   });
 });

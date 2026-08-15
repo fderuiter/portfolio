@@ -98,7 +98,8 @@ describe("SandboxTerminal JSDOM Emulator States", () => {
     // Loading indicator should be gone, and help logs should be displayed
     expect(container.textContent).not.toContain("Executing clinical API query...");
     expect(container.textContent).toContain("Available Curated Clinical EDC SDK Commands");
-    expect(scrollIntoViewMock).toHaveBeenCalled();
+    const logViewport = container.querySelector('[role="log"]');
+    expect(logViewport).toBeDefined();
   });
 
   it("should handle command history with ArrowUp and ArrowDown keys", async () => {

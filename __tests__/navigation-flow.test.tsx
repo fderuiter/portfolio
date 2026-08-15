@@ -125,7 +125,6 @@ describe("Navigation Flow Components Suite", () => {
       // Systems links
       expect(container.textContent).toContain("Proof Workspace");
       expect(container.textContent).toContain("Incident Simulator");
-      expect(container.textContent).toContain("Transparency Hub");
 
       // Connect links
       expect(container.textContent).toContain("Schedule 1:1 Sync ↗");

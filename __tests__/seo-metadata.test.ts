@@ -1,4 +1,6 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+import fs from "fs";
+import path from "path";
 import {
   getPersonSchema,
   getWebsiteSchema,
@@ -11,6 +13,11 @@ import {
 import { ROUTE_METADATA_CONFIGS, buildRouteMetadata } from "@/lib/seo-metadata";
 import robots from "@/app/robots";
 import sitemap from "@/app/sitemap";
+
+vi.mock("next/font/google", () => ({
+  Inter: () => ({ variable: "--font-inter" }),
+  Geist_Mono: () => ({ variable: "--font-geist-mono" }),
+}));
 
 describe("SEO Architecture & JSON-LD Schemas", () => {
   it("getPersonSchema generates valid, parseable Schema.org Person with XSS sanitization", () => {
@@ -35,19 +42,19 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
 
   it("getWebApplicationSchema generates valid WebApplication schema for games", () => {
     const raw = getWebApplicationSchema({
-      name: "Laser Loon: Cryo Bug Hunter",
+      name: "Laser Loon: Quest for the State Flag",
       description: "Raycaster laser arcade game",
       url: "/arcade/laser-loon",
       applicationCategory: "GameApplication",
-      genre: "Physics Arcade",
+      genre: "Civic Arcade Shooter",
     });
     const parsed = JSON.parse(raw);
     expect(parsed["@context"]).toBe("https://schema.org");
     expect(parsed["@type"]).toBe("WebApplication");
-    expect(parsed.name).toBe("Laser Loon: Cryo Bug Hunter");
+    expect(parsed.name).toBe("Laser Loon: Quest for the State Flag");
     expect(parsed.url).toBe(`${SITE_BASE_URL}/arcade/laser-loon`);
     expect(parsed.applicationCategory).toBe("GameApplication");
-    expect(parsed.genre).toBe("Physics Arcade");
+    expect(parsed.genre).toBe("Civic Arcade Shooter");
   });
 
   it("getBreadcrumbSchema generates structured BreadcrumbList", () => {
@@ -109,7 +116,7 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
 
   it("buildRouteMetadata generates complete Next.js metadata objects for all registered routes", () => {
     const routeKeys = Object.keys(ROUTE_METADATA_CONFIGS);
-    expect(routeKeys.length).toBeGreaterThanOrEqual(11);
+    expect(routeKeys.length).toBeGreaterThanOrEqual(10);
 
     for (const key of routeKeys) {
       const config = ROUTE_METADATA_CONFIGS[key];
@@ -145,7 +152,39 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     expect(urls).toContain(`${SITE_BASE_URL}/arcade/working-with-duck`);
     expect(urls).toContain(`${SITE_BASE_URL}/proof`);
     expect(urls).toContain(`${SITE_BASE_URL}/simulator`);
-    expect(urls).toContain(`${SITE_BASE_URL}/transparency`);
     expect(urls).toContain(`${SITE_BASE_URL}/schedule`);
   });
+
+  it("root layout metadata configures SVG and ICO icon fallbacks", async () => {
+    const { metadata } = await import("@/app/layout");
+    expect(metadata.icons).toBeDefined();
+    expect(metadata.icons).toEqual({
+      icon: [
+        { url: "/icon.svg", type: "image/svg+xml" },
+        { url: "/favicon.ico", sizes: "any" },
+      ],
+      shortcut: "/icon.svg",
+    });
+  });
+
+  it("app/icon.svg and public/favicon.svg exist and contain valid SVG monogram architecture", () => {
+    const appIconPath = path.resolve(process.cwd(), "app/icon.svg");
+    const publicFaviconPath = path.resolve(process.cwd(), "public/favicon.svg");
+
+    expect(fs.existsSync(appIconPath)).toBe(true);
+    expect(fs.existsSync(publicFaviconPath)).toBe(true);
+
+    const appIconContent = fs.readFileSync(appIconPath, "utf-8");
+    const publicFaviconContent = fs.readFileSync(publicFaviconPath, "utf-8");
+
+    for (const content of [appIconContent, publicFaviconContent]) {
+      expect(content).toContain("<svg");
+      expect(content).toContain("id=\"fd-grad\"");
+      expect(content).toContain("glyph-stem");
+      expect(content).toContain("telemetry-dot");
+      expect(content).toContain("</svg>");
+    }
+  });
 });
+
+

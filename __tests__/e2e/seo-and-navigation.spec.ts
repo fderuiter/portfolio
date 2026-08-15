@@ -12,7 +12,6 @@ const ALL_FIRST_CLASS_ROUTES = [
   "/arcade/working-with-duck",
   "/proof",
   "/simulator",
-  "/transparency",
   "/schedule",
   "/case-studies/clinical-data-mapper",
 ];
@@ -97,5 +96,11 @@ test.describe("SEO & Navigation Full-Spectrum Suite", () => {
 
       expect(criticalViolations).toEqual([]);
     }
+  });
+
+  test("Redirect: Legacy /transparency permanently redirects to /proof", async ({ page }) => {
+    await page.goto("/transparency");
+    await page.waitForURL("**/proof");
+    expect(page.url()).toContain("/proof");
   });
 });
