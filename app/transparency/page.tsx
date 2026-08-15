@@ -57,11 +57,11 @@ export default function TransparencyHub() {
       <div className="absolute top-64 right-1/4 w-[400px] h-[250px] bg-brand-blue/5 blur-[120px] pointer-events-none -z-10 rounded-full" />
 
       <div className="max-w-5xl mx-auto flex flex-col items-center relative z-10">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan to-brand-blue tracking-tight text-center mb-4">
-          Platform Transparency Hub
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold font-mono text-white tracking-tight text-center mb-3">
+          Platform <span className="text-brand-cyan">Transparency Hub</span>
         </h1>
-        <p className="text-sm font-mono text-muted tracking-widest uppercase mb-8 text-center max-w-2xl leading-relaxed">
-          Live verifiable telemetry, CI/CD operational reliability metrics, and active vulnerability scan history.
+        <p className="text-xs sm:text-sm font-mono text-zinc-400 tracking-widest uppercase mb-8 text-center max-w-2xl leading-relaxed">
+          Live verifiable telemetry, CI/CD operational reliability metrics, and active vulnerability audit log.
         </p>
 
         {/* Telemetry Summary KPI Grid */}
