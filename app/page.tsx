@@ -136,71 +136,75 @@ export default async function PortfolioHomePage() {
       <Hero />
 
       {/* Case studies showcase section */}
-      <main id="case-studies" className="relative min-h-screen py-24 md:py-32 px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950">
-        {/* Decorative Blur Elements */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none" />
-        <div className="absolute top-1/3 left-1/3 -translate-y-1/2 w-96 h-96 rounded-full bg-brand-blue/5 blur-[150px] pointer-events-none" />
+      <main id="main-content" tabIndex={-1} className="relative min-h-screen py-24 md:py-32 px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/60 bg-zinc-950 outline-none">
+        <section id="case-studies" className="w-full flex flex-col items-center">
+          {/* Decorative Blur Elements */}
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none" />
+          <div className="absolute top-1/3 left-1/3 -translate-y-1/2 w-96 h-96 rounded-full bg-brand-blue/5 blur-[150px] pointer-events-none" />
 
-        {/* Main Container */}
-        <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
-          {/* Title Block */}
-          <h2 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan via-brand-blue to-neutral-200 tracking-tight text-center mb-4">
-            Unified Engineering Showcase
-          </h2>
-          <p className="text-xs font-mono text-muted tracking-widest uppercase mb-12">
-            Verifiable Serverless Postgres Architecture
-          </p>
-
-          {/* Ambient Live System Status Chip */}
-          {errorMsg ? (
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-rose-500/10 border border-rose-500/25 text-rose-400 text-xs font-mono mb-10 backdrop-blur-md">
-              <span className="relative flex h-2 w-2">
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
-              </span>
-              <span>Telemetry Degraded: Database Offline</span>
-            </div>
-          ) : (
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono mb-10 backdrop-blur-md shadow-[0_0_15px_rgba(16,185,129,0.08)]">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              <span>Operational · Serverless Neon Postgres Active</span>
-            </div>
-          )}
-
-          {/* Personal Highlights Section */}
-          <div className="w-full mb-12 p-8 bg-zinc-900/20 border border-brand-cyan/20 rounded-3xl relative overflow-hidden group hover:border-brand-cyan/40 transition-colors">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-cyan/5 rounded-full blur-[60px] pointer-events-none group-hover:bg-brand-cyan/10 transition-colors" />
-            <h3 className="text-xl font-bold text-neutral-100 mb-3 flex items-center gap-3">
-              <span className="w-2 h-2 rounded-full bg-brand-cyan animate-pulse"></span>
-              Personal Highlights: Creative Engineering
-            </h3>
-            <p className="text-sm text-neutral-300 leading-relaxed mb-6 font-sans">
-              Beyond standard engineering deep-dives, I build playful and interactive physics experiments to explore user engagement through unexpected UI forms.
+          {/* Main Container */}
+          <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
+            {/* Title Block */}
+            <h2 className="text-3xl md:text-4xl font-extrabold font-mono tracking-tight text-white text-center mb-2">
+              Unified Engineering Showcase
+            </h2>
+            <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-8">
+              Verifiable Serverless Postgres Architecture
             </p>
-            <a href="/ui-sandbox" className="inline-flex items-center gap-2 px-4 py-2 bg-brand-cyan/10 text-brand-cyan border border-brand-cyan/20 rounded-xl text-xs font-mono font-bold hover:bg-brand-cyan/20 transition-all">
-              Explore the Laser Loon & UI Sandbox
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </a>
-          </div>
 
-          {/* Dynamic Bento Showcase */}
-          {caseStudies.length === 0 ? (
-            <div className="text-center p-12 bg-zinc-900/10 border border-zinc-900/40 border-dashed rounded-2xl w-full">
-              <p className="text-sm text-zinc-400 italic mb-2">
-                Connection established, but no published case studies were found in the database.
-              </p>
-              <p className="text-xs text-zinc-400 font-mono">
-                Initialize seeding pipeline via Issue #10 to import clinical trial narratives.
-              </p>
+            {/* Ambient Live System Status Chip */}
+            {errorMsg ? (
+              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-mono mb-10 backdrop-blur-md">
+                <span className="w-2 h-2 rounded-full bg-rose-500" />
+                <span>Telemetry Degraded: Database Offline</span>
+              </div>
+            ) : (
+              <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-xl bg-zinc-900/80 border border-zinc-800 text-emerald-400 text-xs font-mono mb-10 backdrop-blur-md shadow-sm">
+                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                <span>Operational · Serverless Neon Postgres Active</span>
+              </div>
+            )}
+
+            {/* Personal Highlights Section */}
+            <div className="w-full mb-12 p-6 sm:p-8 tool-shell relative overflow-hidden group hover:border-brand-cyan/40 transition-colors">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-brand-cyan/5 rounded-full blur-[60px] pointer-events-none group-hover:bg-brand-cyan/10 transition-colors" />
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-lg sm:text-xl font-bold font-mono text-white mb-2 flex items-center gap-2.5">
+                    <span className="w-2 h-2 rounded-full bg-brand-cyan"></span>
+                    Interactive Physics &amp; UI Experiments
+                  </h3>
+                  <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-xl font-sans">
+                    Beyond standard systems engineering, explore playable canvas games, real-time raycasting physics, and low-latency interaction models.
+                  </p>
+                </div>
+                <a
+                  href="/arcade"
+                  className="self-start sm:self-center shrink-0 inline-flex items-center gap-2 px-4 py-2.5 bg-brand-cyan text-black font-mono text-xs font-bold rounded-xl hover:bg-white transition-all shadow-sm"
+                >
+                  <span>Enter Arcade Hub</span>
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </a>
+              </div>
             </div>
-          ) : (
-            <CaseStudyShowcase caseStudies={caseStudies} />
-          )}
-        </div>
+
+            {/* Dynamic Bento Showcase */}
+            {caseStudies.length === 0 ? (
+              <div className="text-center p-12 bg-zinc-900/10 border border-zinc-900/40 border-dashed rounded-2xl w-full">
+                <p className="text-sm text-zinc-400 italic mb-2">
+                  Connection established, but no published case studies were found in the database.
+                </p>
+                <p className="text-xs text-zinc-400 font-mono">
+                  Initialize seeding pipeline via Issue #10 to import clinical trial narratives.
+                </p>
+              </div>
+            ) : (
+              <CaseStudyShowcase caseStudies={caseStudies} />
+            )}
+          </div>
+        </section>
       </main>
 
       {/* 2. Philosophy TextReveal Highlight */}
@@ -209,16 +213,16 @@ export default async function PortfolioHomePage() {
       </div>
 
       {/* 3. About Section */}
-      <section id="about" className="relative py-24 md:py-32 px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950/40 relative overflow-hidden">
+      <section id="about" className="relative py-24 md:py-32 px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950/40 overflow-hidden">
         {/* Decorative Blurs */}
         <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none" />
         <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-80 h-80 rounded-full bg-brand-blue/5 blur-[120px] pointer-events-none" />
         
         <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-neutral-100 via-neutral-300 to-neutral-500 tracking-tight text-center mb-4">
-            System Architect & Design Engineer
+          <h2 className="text-3xl md:text-4xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
+            System Architect &amp; Design Engineer
           </h2>
-          <p className="text-xs font-mono text-muted tracking-widest uppercase mb-16 text-center">
+          <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-16 text-center">
             Engineering High-Performance Technical Solutions
           </p>
           
@@ -227,10 +231,10 @@ export default async function PortfolioHomePage() {
             <SkillsGrid languages={languagesList} />
           </div>
 
-          <h3 className="text-2xl font-extrabold text-neutral-100 tracking-tight text-center mb-4">
+          <h3 className="text-2xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
             Professional Experience Timeline
           </h3>
-          <p className="text-xs font-mono text-muted tracking-widest uppercase mb-16 text-center">
+          <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-16 text-center">
             A Chronological Evolution of{" "}
             <Tooltip text="Ensuring reliability for users so the platform never goes down when they need it most.">
               Systems Rigor
@@ -247,11 +251,11 @@ export default async function PortfolioHomePage() {
       {/* 4. Contact Section */}
       <section id="contact" className="relative py-24 md:py-32 px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950">
         <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-cyan to-brand-blue tracking-tight text-center mb-4">
+          <h2 className="text-3xl md:text-4xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
             Get In Touch
           </h2>
-          <p className="text-xs font-mono text-muted tracking-widest uppercase mb-16 text-center">
-            Let&apos;s Collaborate on Premium Engineering Projects
+          <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-16 text-center">
+            Let&apos;s Collaborate on Systems &amp; Design Engineering Projects
           </p>
           
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full max-w-2xl justify-center items-center">
@@ -259,9 +263,9 @@ export default async function PortfolioHomePage() {
             <a
               href="mailto:contact@fderuiter.com"
               aria-label="Send an email to Frederick de Ruiter at contact@fderuiter.com"
-              className="group flex flex-col items-center justify-center p-6 bg-zinc-900/10 border border-zinc-900/50 rounded-2xl transition-all duration-300 hover:border-brand-cyan/40 hover:shadow-[0_0_15px_rgba(6,182,212,0.05)] text-center cursor-pointer"
+              className="group flex flex-col items-center justify-center p-6 bg-zinc-900/20 border border-zinc-800/80 rounded-2xl transition-all duration-300 hover:border-brand-cyan/40 hover:bg-zinc-900/40 text-center cursor-pointer"
             >
-              <span className="w-8 h-8 rounded-xl bg-zinc-950 border border-zinc-900 flex items-center justify-center font-mono text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/25 transition-colors mb-3">
+              <span className="w-9 h-9 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center font-mono text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/30 transition-colors mb-3">
                 ✉
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">Email Broadcast</span>
@@ -274,9 +278,9 @@ export default async function PortfolioHomePage() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="View Frederick de Ruiter's GitHub profile externally"
-              className="group flex flex-col items-center justify-center p-6 bg-zinc-900/10 border border-zinc-900/50 rounded-2xl transition-all duration-300 hover:border-brand-cyan/40 hover:shadow-[0_0_15px_rgba(6,182,212,0.05)] text-center cursor-pointer"
+              className="group flex flex-col items-center justify-center p-6 bg-zinc-900/20 border border-zinc-800/80 rounded-2xl transition-all duration-300 hover:border-brand-cyan/40 hover:bg-zinc-900/40 text-center cursor-pointer"
             >
-              <span className="w-8 h-8 rounded-xl bg-zinc-950 border border-zinc-900 flex items-center justify-center font-mono text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/25 transition-colors mb-3">
+              <span className="w-9 h-9 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center font-mono text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/30 transition-colors mb-3">
                 🐙
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">GitHub Repos</span>
@@ -289,18 +293,18 @@ export default async function PortfolioHomePage() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="View Frederick de Ruiter's LinkedIn profile externally"
-              className="group flex flex-col items-center justify-center p-6 bg-zinc-900/10 border border-zinc-900/50 rounded-2xl transition-all duration-300 hover:border-brand-blue/40 hover:shadow-[0_0_15px_rgba(59,130,246,0.05)] text-center cursor-pointer"
+              className="group flex flex-col items-center justify-center p-6 bg-zinc-900/20 border border-zinc-800/80 rounded-2xl transition-all duration-300 hover:border-brand-cyan/40 hover:bg-zinc-900/40 text-center cursor-pointer"
             >
-              <span className="w-8 h-8 rounded-xl bg-zinc-950 border border-zinc-900 flex items-center justify-center font-mono text-zinc-400 group-hover:text-brand-blue group-hover:border-brand-blue/25 transition-colors mb-3">
+              <span className="w-9 h-9 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center font-mono text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/30 transition-colors mb-3">
                 in
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">LinkedIn Network</span>
-              <span className="text-xs font-mono text-zinc-400">Secure Profile Link</span>
+              <span className="text-xs font-mono text-zinc-400">Profile Link ↗</span>
             </a>
           </div>
           
-          <div className="mt-24 text-xs font-mono text-zinc-400 tracking-[0.2em] text-center select-none">
-            DESIGNED & DEVELOPED BY FREDERICK DE RUITER
+          <div className="mt-24 text-xs font-mono text-zinc-500 tracking-[0.2em] text-center select-none">
+            DESIGNED &amp; DEVELOPED BY FREDERICK DE RUITER
           </div>
         </div>
       </section>

@@ -5,57 +5,130 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { designManifest } from "@/lib/design-manifest";
 import { useAudio } from "@/components/providers/AudioProvider";
-import { IconVolume, IconVolumeOff, IconChevronDown } from "@tabler/icons-react";
+import { useSearch } from "@/components/providers/SearchProvider";
+import {
+  IconVolume,
+  IconVolumeOff,
+  IconChevronDown,
+  IconSearch,
+  IconDeviceGamepad2,
+  IconShieldCheck,
+  IconTerminal,
+  IconCpu,
+  IconCrosshair,
+  IconBrain,
+  IconActivity,
+} from "@tabler/icons-react";
 
-interface NavItem {
-  label: string;
+interface SubNavItem {
+  title: string;
+  subtitle: string;
   href: string;
+  icon: React.ReactNode;
   isExternal?: boolean;
 }
 
-const navItems: NavItem[] = [
-  { label: "Work", href: "/#case-studies" },
-  { label: "About", href: "/#about" },
-  { label: "Arcade", href: "/arcade" },
-  { label: "Proof Workspace", href: "/proof" },
-  { label: "Transparency", href: "/transparency" },
-  { label: "Simulator", href: "/simulator" },
-  { label: "Contact", href: "/#contact" },
-  { label: "GitHub", href: "https://github.com/fderuiter/portfolio", isExternal: true },
+const ARCADE_ITEMS: SubNavItem[] = [
+  {
+    title: "Arcade Hub",
+    subtitle: "Playable canvas games & physics engines",
+    href: "/arcade",
+    icon: <IconDeviceGamepad2 className="w-4 h-4 text-brand-cyan" />,
+  },
+  {
+    title: "Laser Loon",
+    subtitle: "Cryo Bug Hunter laser raycaster",
+    href: "/arcade/laser-loon",
+    icon: <IconCrosshair className="w-4 h-4 text-brand-cyan" />,
+  },
+  {
+    title: "Quasi-Perfect Puzzler",
+    subtitle: "Formal proof tactics & AST puzzles",
+    href: "/arcade/quasi-puzzler",
+    icon: <IconBrain className="w-4 h-4 text-brand-cyan" />,
+  },
+  {
+    title: "Garmin 32KB Runner",
+    subtitle: "Embedded Monkey C memory simulator",
+    href: "/arcade/garmin-watch",
+    icon: <IconCpu className="w-4 h-4 text-brand-cyan" />,
+  },
+  {
+    title: "Clinical Trial Chaos",
+    subtitle: "21 CFR Part 11 CDISC compliance arcade",
+    href: "/arcade/clinical-chaos",
+    icon: <IconShieldCheck className="w-4 h-4 text-brand-cyan" />,
+  },
+  {
+    title: "Retro Labyrinth",
+    subtitle: "Procedural developer graveyard roguelike",
+    href: "/arcade/retro-labyrinth",
+    icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />,
+  },
+  {
+    title: "Creative UI Sandbox",
+    subtitle: "Interactive canvas physics & UI widgets",
+    href: "/ui-sandbox",
+    icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />,
+  },
+];
+
+const SYSTEMS_ITEMS: SubNavItem[] = [
+  {
+    title: "Proof Workspace",
+    subtitle: "Interactive deductive logic & proof tree",
+    href: "/proof",
+    icon: <IconBrain className="w-4 h-4 text-brand-cyan" />,
+  },
+  {
+    title: "Incident Simulator",
+    subtitle: "Production outage triage decision tree",
+    href: "/simulator",
+    icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />,
+  },
+  {
+    title: "Transparency Hub",
+    subtitle: "Real-time security telemetry & audit logs",
+    href: "/transparency",
+    icon: <IconActivity className="w-4 h-4 text-brand-cyan" />,
+  },
 ];
 
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("hero");
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   const { volume, muted, profile, setVolume, setMuted, setProfile, playHover } = useAudio();
+  const { openSearch } = useSearch();
   const [showAudioPanel, setShowAudioPanel] = useState(false);
 
-  const handleLinkHover = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const pathname = usePathname();
+  const [prevPathname, setPrevPathname] = useState(pathname);
+
+  if (pathname !== prevPathname) {
+    setPrevPathname(pathname);
+    setIsOpen(false);
+    setActiveDropdown(null);
+  }
+
+  const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const navContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleLinkHover = (e: React.MouseEvent<HTMLElement>) => {
     if (typeof window === "undefined") return;
     const rect = e.currentTarget.getBoundingClientRect();
     const pan = (rect.left + rect.width / 2) / window.innerWidth * 2 - 1;
     playHover(pan);
   };
 
-  const pathname = usePathname();
-  const [prevPathname, setPrevPathname] = useState(pathname);
-  
-  if (pathname !== prevPathname) {
-    setPrevPathname(pathname);
-    setIsOpen(false);
-  }
-
-  const menuRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-
   // 1. Scroll-driven backdrop color transition
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 30) {
+      if (window.scrollY > 20) {
         setIsScrolled(true);
       } else {
         setIsScrolled(false);
@@ -81,7 +154,7 @@ export const Navbar: React.FC = () => {
     };
 
     const observer = new IntersectionObserver(callback, {
-      rootMargin: "-25% 0px -55% 0px", // triggers when section dominates screen middle
+      rootMargin: "-25% 0px -55% 0px",
       threshold: 0.1,
     });
 
@@ -97,39 +170,46 @@ export const Navbar: React.FC = () => {
     };
   }, [pathname]);
 
-  // 3. Accessibility: Keyboard focus trapping and Esc key listener
+  // 3. Click outside dropdown handler
   useEffect(() => {
-    if (!isOpen) return;
-
-    // Focus the first link when menu opens
-    const timer = setTimeout(() => {
-      if (menuRef.current) {
-        const firstLink = menuRef.current.querySelector("a");
-        firstLink?.focus();
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        navContainerRef.current &&
+        !navContainerRef.current.contains(e.target as Node)
+      ) {
+        setActiveDropdown(null);
       }
-    }, 100);
-
-    const isWithinBoundary = (target: EventTarget | null) => {
-      if (target instanceof Element) {
-        return !!target.closest("[data-keyboard-boundary]");
-      }
-      return false;
     };
 
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // 4. Accessibility: Keyboard focus trapping and Esc key listener
+  useEffect(() => {
+    if (!isOpen && !activeDropdown && !showAudioPanel) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isWithinBoundary(e.target)) {
-        return;
-      }
       if (e.key === "Escape") {
-        setIsOpen(false);
-        triggerRef.current?.focus();
-        return;
+        if (showAudioPanel) {
+          setShowAudioPanel(false);
+          return;
+        }
+        if (activeDropdown) {
+          setActiveDropdown(null);
+          return;
+        }
+        if (isOpen) {
+          setIsOpen(false);
+          triggerRef.current?.focus();
+          return;
+        }
       }
 
-      if (e.key === "Tab") {
+      if (isOpen && e.key === "Tab") {
         if (!menuRef.current) return;
         const focusableElements = menuRef.current.querySelectorAll(
-          'a[href], button:not([disabled])'
+          'a[href], button:not([disabled]), input:not([disabled])'
         );
         const elements = Array.from(focusableElements) as HTMLElement[];
         if (elements.length === 0) return;
@@ -152,19 +232,20 @@ export const Navbar: React.FC = () => {
     };
 
     document.addEventListener("keydown", handleKeyDown);
-    
-    // Prevent body scrolling when mobile menu is active
-    document.body.style.overflow = "hidden";
+
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    }
 
     return () => {
-      clearTimeout(timer);
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
     };
-  }, [isOpen]);
+  }, [isOpen, activeDropdown, showAudioPanel]);
 
   // Handle smooth scroll clicks on homepage
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    setActiveDropdown(null);
     if (pathname === "/" && href.startsWith("/#")) {
       e.preventDefault();
       const targetId = href.substring(2);
@@ -177,6 +258,9 @@ export const Navbar: React.FC = () => {
     }
   };
 
+  const isArcadeActive = pathname.startsWith("/arcade") || pathname === "/ui-sandbox";
+  const isSystemsActive = pathname === "/proof" || pathname === "/simulator" || pathname === "/transparency";
+
   return (
     <>
       {/* Navbar Container */}
@@ -184,56 +268,259 @@ export const Navbar: React.FC = () => {
         className={cn(
           "fixed top-0 inset-x-0 z-50 transition-all duration-300 w-full select-none",
           isScrolled
-            ? "bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/50 py-4"
-            : "bg-transparent py-6"
+            ? "bg-zinc-950/85 backdrop-blur-xl border-b border-zinc-800/60 py-3 shadow-[0_4px_30px_rgba(0,0,0,0.5)]"
+            : "bg-transparent py-5"
         )}
       >
-        <div className="max-w-6xl mx-auto px-6 md:px-12 flex justify-between items-center w-full">
+        <div
+          ref={navContainerRef}
+          className="max-w-6xl mx-auto px-4 sm:px-6 md:px-12 flex justify-between items-center w-full"
+        >
           {/* Logo / Wordmark */}
           <Link
             href="/"
             onClick={(e) => handleNavClick(e, "/#hero")}
-            className="group flex min-h-6 items-center gap-2.5 font-mono text-sm tracking-widest font-extrabold text-foreground cursor-pointer"
+            onMouseEnter={handleLinkHover}
+            className="group flex min-h-6 items-center gap-2.5 font-mono text-sm tracking-widest font-extrabold text-foreground cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-cyan rounded-md"
+            aria-label="Frederick de Ruiter Homepage"
           >
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-cyan/70 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-cyan"></span>
             </span>
-            <span>FDERUITER</span>
+            <span className="tracking-wider">FDERUITER</span>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center gap-8">
-            <nav className="flex items-center gap-8">
-              {navItems.map((item) => {
-                const isSectionActive = pathname === "/" && item.href.startsWith("/#") && activeSection === item.href.substring(2);
-                const isRouteActive = !item.href.startsWith("/#") && !item.isExternal && (pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href)));
-                const isActive = isSectionActive || isRouteActive;
-                return (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    target={item.isExternal ? "_blank" : undefined}
-                    rel={item.isExternal ? "noopener noreferrer" : undefined}
-                    onClick={(e) => handleNavClick(e, item.href)}
-                    onMouseEnter={handleLinkHover}
+          <div className="hidden md:flex items-center gap-6 lg:gap-8">
+            <nav className="flex items-center gap-6 lg:gap-7" aria-label="Main Navigation">
+              {/* Work Pillar */}
+              <Link
+                href="/#case-studies"
+                onClick={(e) => handleNavClick(e, "/#case-studies")}
+                onMouseEnter={handleLinkHover}
+                className={cn(
+                  "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1",
+                  pathname === "/" && activeSection === "case-studies"
+                    ? "text-brand-cyan font-bold"
+                    : "text-muted"
+                )}
+              >
+                Work
+              </Link>
+
+              {/* Arcade & Labs Dropdown */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setActiveDropdown(activeDropdown === "arcade" ? null : "arcade")}
+                  onMouseEnter={handleLinkHover}
+                  className={cn(
+                    "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-brand-cyan rounded",
+                    isArcadeActive || activeDropdown === "arcade"
+                      ? "text-brand-cyan font-bold"
+                      : "text-muted"
+                  )}
+                  aria-expanded={activeDropdown === "arcade"}
+                  aria-haspopup="true"
+                >
+                  <span>Arcade &amp; Labs</span>
+                  <IconChevronDown
                     className={cn(
-                      "min-h-6 py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-300 hover:text-foreground cursor-pointer flex items-center gap-1",
-                      isActive
-                        ? "text-brand-cyan font-bold"
-                        : "text-muted"
+                      "w-3 h-3 transition-transform duration-200",
+                      activeDropdown === "arcade" ? "rotate-180 text-brand-cyan" : "text-zinc-500"
                     )}
-                  >
-                    {item.label}
-                    {item.isExternal && <span className="text-[10px] text-zinc-600 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">↗</span>}
-                  </Link>
-                );
-              })}
+                  />
+                </button>
+
+                <AnimatePresence>
+                  {activeDropdown === "arcade" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute left-0 mt-3 w-80 p-2.5 rounded-2xl border border-zinc-800 bg-zinc-950/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_20px_rgba(6,182,212,0.08)] z-50 flex flex-col gap-1"
+                      role="menu"
+                    >
+                      <div className="px-3 py-1.5 border-b border-zinc-800/80 mb-1 flex items-center justify-between">
+                        <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-zinc-400">
+                          Interactive Arcade &amp; Labs
+                        </span>
+                        <span className="text-[9px] font-mono text-brand-cyan">60 FPS</span>
+                      </div>
+                      {ARCADE_ITEMS.map((item) => {
+                        const isActive = pathname === item.href;
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setActiveDropdown(null)}
+                            onMouseEnter={handleLinkHover}
+                            className={cn(
+                              "flex items-start gap-3 p-2.5 rounded-xl transition-all duration-150 group",
+                              isActive
+                                ? "bg-brand-cyan/10 border border-brand-cyan/30 text-white"
+                                : "hover:bg-zinc-900/80 text-zinc-300 hover:text-white"
+                            )}
+                            role="menuitem"
+                          >
+                            <div className="mt-0.5 p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 group-hover:border-brand-cyan/30 transition-colors">
+                              {item.icon}
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-xs font-mono font-bold tracking-tight text-neutral-200 group-hover:text-brand-cyan transition-colors">
+                                {item.title}
+                              </span>
+                              <span className="text-[11px] font-sans text-zinc-400 truncate">
+                                {item.subtitle}
+                              </span>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Systems & Proof Dropdown */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setActiveDropdown(activeDropdown === "systems" ? null : "systems")}
+                  onMouseEnter={handleLinkHover}
+                  className={cn(
+                    "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-brand-cyan rounded",
+                    isSystemsActive || activeDropdown === "systems"
+                      ? "text-brand-cyan font-bold"
+                      : "text-muted"
+                  )}
+                  aria-expanded={activeDropdown === "systems"}
+                  aria-haspopup="true"
+                >
+                  <span>Systems</span>
+                  <IconChevronDown
+                    className={cn(
+                      "w-3 h-3 transition-transform duration-200",
+                      activeDropdown === "systems" ? "rotate-180 text-brand-cyan" : "text-zinc-500"
+                    )}
+                  />
+                </button>
+
+                <AnimatePresence>
+                  {activeDropdown === "systems" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute left-0 mt-3 w-72 p-2.5 rounded-2xl border border-zinc-800 bg-zinc-950/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_20px_rgba(6,182,212,0.08)] z-50 flex flex-col gap-1"
+                      role="menu"
+                    >
+                      <div className="px-3 py-1.5 border-b border-zinc-800/80 mb-1">
+                        <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-zinc-400">
+                          Workspaces &amp; Verification
+                        </span>
+                      </div>
+                      {SYSTEMS_ITEMS.map((item) => {
+                        const isActive = pathname === item.href;
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setActiveDropdown(null)}
+                            onMouseEnter={handleLinkHover}
+                            className={cn(
+                              "flex items-start gap-3 p-2.5 rounded-xl transition-all duration-150 group",
+                              isActive
+                                ? "bg-brand-cyan/10 border border-brand-cyan/30 text-white"
+                                : "hover:bg-zinc-900/80 text-zinc-300 hover:text-white"
+                            )}
+                            role="menuitem"
+                          >
+                            <div className="mt-0.5 p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 group-hover:border-brand-cyan/30 transition-colors">
+                              {item.icon}
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-xs font-mono font-bold tracking-tight text-neutral-200 group-hover:text-brand-cyan transition-colors">
+                                {item.title}
+                              </span>
+                              <span className="text-[11px] font-sans text-zinc-400 truncate">
+                                {item.subtitle}
+                              </span>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* About Pillar */}
+              <Link
+                href="/#about"
+                onClick={(e) => handleNavClick(e, "/#about")}
+                onMouseEnter={handleLinkHover}
+                className={cn(
+                  "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1",
+                  pathname === "/" && activeSection === "about"
+                    ? "text-brand-cyan font-bold"
+                    : "text-muted"
+                )}
+              >
+                About
+              </Link>
+
+              {/* Contact Pillar */}
+              <Link
+                href="/#contact"
+                onClick={(e) => handleNavClick(e, "/#contact")}
+                onMouseEnter={handleLinkHover}
+                className={cn(
+                  "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1",
+                  pathname === "/" && activeSection === "contact"
+                    ? "text-brand-cyan font-bold"
+                    : "text-muted"
+                )}
+              >
+                Contact
+              </Link>
+
+              {/* GitHub External */}
+              <a
+                href="https://github.com/fderuiter/portfolio"
+                target="_blank"
+                rel="noopener noreferrer"
+                onMouseEnter={handleLinkHover}
+                className="py-1 text-xs font-mono tracking-wider font-semibold text-muted hover:text-foreground transition-all duration-200 cursor-pointer flex items-center gap-1 group"
+                aria-label="View source repository on GitHub"
+              >
+                <span>GitHub</span>
+                <span className="text-[10px] text-zinc-600 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                  ↗
+                </span>
+              </a>
             </nav>
+
+            {/* Quick-Access ⌘K Command Palette Trigger Button */}
+            <button
+              type="button"
+              onClick={openSearch}
+              onMouseEnter={handleLinkHover}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-brand-cyan/40 hover:bg-zinc-900 text-zinc-400 hover:text-white transition-all cursor-pointer shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-cyan/40"
+              aria-label="Search portfolio and commands (Press Command+K)"
+            >
+              <IconSearch className="w-3.5 h-3.5 text-zinc-400" />
+              <span className="text-xs font-mono hidden lg:inline">Search</span>
+              <kbd className="kbd-badge text-[10px] text-zinc-400 font-mono">⌘K</kbd>
+            </button>
 
             {/* Audio Controller Desktop */}
             <div className="relative">
               <button
+                type="button"
                 onClick={() => setShowAudioPanel(!showAudioPanel)}
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-cyan/40",
@@ -262,7 +549,10 @@ export const Navbar: React.FC = () => {
               <AnimatePresence>
                 {showAudioPanel && (
                   <>
-                    <div className="fixed inset-0 z-40" onClick={() => setShowAudioPanel(false)} />
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setShowAudioPanel(false)}
+                    />
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -270,8 +560,11 @@ export const Navbar: React.FC = () => {
                       className="absolute right-0 mt-2 w-64 p-4 rounded-2xl border border-zinc-800/80 bg-zinc-950/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_25px_rgba(6,182,212,0.08)] z-50 flex flex-col gap-3.5"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-mono font-bold tracking-wider text-zinc-400">SYNTH SETTINGS</span>
+                        <span className="text-[11px] font-mono font-bold tracking-wider text-zinc-400">
+                          SYNTH SETTINGS
+                        </span>
                         <button
+                          type="button"
                           onClick={() => setMuted(!muted)}
                           className="px-2 py-0.5 rounded text-[10px] font-mono font-black border border-zinc-900 bg-zinc-900/50 hover:border-brand-cyan/40 text-brand-cyan transition-all cursor-pointer"
                         >
@@ -302,6 +595,7 @@ export const Navbar: React.FC = () => {
                           {(["8-bit", "90s-retro", "ambient"] as const).map((p) => (
                             <button
                               key={p}
+                              type="button"
                               onClick={() => setProfile(p)}
                               disabled={muted}
                               className={cn(
@@ -323,16 +617,26 @@ export const Navbar: React.FC = () => {
             </div>
           </div>
 
-          {/* Mobile Actions Container */}
-          <div className="md:hidden flex items-center gap-4 relative z-50">
+          {/* Mobile Header Actions (Search Button + Hamburger) */}
+          <div className="md:hidden flex items-center gap-2 relative z-50">
+            <button
+              type="button"
+              onClick={openSearch}
+              className="flex items-center justify-center w-9 h-9 rounded-xl border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-brand-cyan transition-colors cursor-pointer"
+              aria-label="Open Command Search"
+            >
+              <IconSearch className="w-4 h-4" />
+            </button>
+
             {/* Mobile Hamburger Trigger */}
             <button
               ref={triggerRef}
+              type="button"
               aria-expanded={isOpen}
               aria-controls="mobile-navigation"
               aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
               onClick={() => setIsOpen(!isOpen)}
-              className="flex items-center justify-center w-8 h-8 text-muted hover:text-foreground transition-colors cursor-pointer"
+              className="flex items-center justify-center w-9 h-9 rounded-xl border border-zinc-800 bg-zinc-900/60 text-muted hover:text-foreground transition-colors cursor-pointer"
             >
               <svg
                 className="w-5 h-5 fill-current"
@@ -384,98 +688,145 @@ export const Navbar: React.FC = () => {
             role="dialog"
             aria-modal="true"
             aria-label="Mobile navigation overlay"
-            className="fixed inset-0 z-40 bg-zinc-950/95 backdrop-blur-2xl flex flex-col justify-center px-8"
+            className="fixed inset-0 z-40 bg-zinc-950/98 backdrop-blur-2xl flex flex-col justify-between pt-24 pb-8 px-6 overflow-y-auto"
           >
             {/* Ambient gradients */}
             <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/10 blur-[130px] pointer-events-none" />
             <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-80 h-80 rounded-full bg-brand-blue/5 blur-[130px] pointer-events-none" />
 
-            <nav className="flex flex-col gap-8 relative z-10">
-              {navItems.map((item, index) => {
-                const isSectionActive = pathname === "/" && item.href.startsWith("/#") && activeSection === item.href.substring(2);
-                const isRouteActive = !item.href.startsWith("/#") && !item.isExternal && (pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href)));
-                const isActive = isSectionActive || isRouteActive;
-                return (
-                  <motion.div
-                    key={item.label}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.08, ...designManifest.motion.springs.hero }}
+            <div className="relative z-10 flex flex-col gap-6">
+              {/* Primary Navigation Sections */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Core Section */}
+                <div className="flex flex-col gap-2">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 font-bold px-1">
+                    Core
+                  </span>
+                  <Link
+                    href="/#case-studies"
+                    onClick={(e) => handleNavClick(e, "/#case-studies")}
+                    className="min-h-11 px-3 py-2 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between"
                   >
-                    <Link
-                      href={item.href}
-                      target={item.isExternal ? "_blank" : undefined}
-                      rel={item.isExternal ? "noopener noreferrer" : undefined}
-                      onClick={(e) => handleNavClick(e, item.href)}
-                      onMouseEnter={handleLinkHover}
-                      className={cn(
-                        "text-3xl font-extrabold tracking-tight font-sans transition-all cursor-pointer flex items-center gap-2",
-                        isActive
-                          ? "text-brand-cyan"
-                          : "text-zinc-300 hover:text-white"
-                      )}
-                    >
-                      {item.label}
-                      {item.isExternal && <span className="text-lg text-zinc-600">↗</span>}
-                    </Link>
-                  </motion.div>
-                );
-              })}
-            </nav>
-
-            {/* Mobile Audio Controls */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35 }}
-              className="mt-8 border-t border-zinc-900/80 pt-6 flex flex-col gap-4 relative z-10 max-w-sm"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {muted ? (
-                    <IconVolumeOff className="w-4 h-4 text-zinc-500" />
-                  ) : (
-                    <IconVolume className="w-4 h-4 text-brand-cyan" />
-                  )}
-                  <span className="text-xs font-mono font-bold tracking-wider text-zinc-400">SYNTH SETTINGS</span>
+                    <span>Work Showcase</span>
+                    <span className="text-xs font-mono text-zinc-500">→</span>
+                  </Link>
+                  <Link
+                    href="/#about"
+                    onClick={(e) => handleNavClick(e, "/#about")}
+                    className="min-h-11 px-3 py-2 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between"
+                  >
+                    <span>About &amp; Experience</span>
+                    <span className="text-xs font-mono text-zinc-500">→</span>
+                  </Link>
+                  <Link
+                    href="/#contact"
+                    onClick={(e) => handleNavClick(e, "/#contact")}
+                    className="min-h-11 px-3 py-2 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between"
+                  >
+                    <span>Contact</span>
+                    <span className="text-xs font-mono text-zinc-500">→</span>
+                  </Link>
                 </div>
-                <button
-                  onClick={() => setMuted(!muted)}
-                  className="px-3 py-1 rounded-xl text-xs font-mono font-black border border-zinc-800 bg-zinc-900/50 hover:border-brand-cyan/40 text-brand-cyan transition-all cursor-pointer"
-                >
-                  {muted ? "UNMUTE" : "MUTE"}
-                </button>
+
+                {/* Interactive Tools & Arcade */}
+                <div className="flex flex-col gap-2">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 font-bold px-1">
+                    Arcade &amp; Workspaces
+                  </span>
+                  <Link
+                    href="/arcade"
+                    onClick={(e) => handleNavClick(e, "/arcade")}
+                    className="min-h-11 px-3 py-2 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-brand-cyan hover:bg-brand-cyan/10 flex items-center justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <IconDeviceGamepad2 className="w-4 h-4" />
+                      Arcade Games Hub
+                    </span>
+                    <span className="text-xs font-mono text-brand-cyan">5 Games</span>
+                  </Link>
+                  <Link
+                    href="/proof"
+                    onClick={(e) => handleNavClick(e, "/proof")}
+                    className="min-h-11 px-3 py-2 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-300 hover:text-white flex items-center justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <IconBrain className="w-4 h-4 text-zinc-400" />
+                      Proof Workspace
+                    </span>
+                  </Link>
+                  <Link
+                    href="/simulator"
+                    onClick={(e) => handleNavClick(e, "/simulator")}
+                    className="min-h-11 px-3 py-2 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-300 hover:text-white flex items-center justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <IconTerminal className="w-4 h-4 text-zinc-400" />
+                      Incident Simulator
+                    </span>
+                  </Link>
+                  <Link
+                    href="/transparency"
+                    onClick={(e) => handleNavClick(e, "/transparency")}
+                    className="min-h-11 px-3 py-2 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-300 hover:text-white flex items-center justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <IconShieldCheck className="w-4 h-4 text-zinc-400" />
+                      Transparency Hub
+                    </span>
+                  </Link>
+                </div>
               </div>
 
-              {/* Volume Slider */}
-              <div className="flex flex-col gap-2">
-                <div className="flex justify-between text-xs font-mono text-zinc-500">
-                  <span>Volume</span>
-                  <span>{Math.round(volume * 100)}%</span>
+              {/* Mobile Audio Controls */}
+              <div className="border-t border-zinc-900/80 pt-4 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {muted ? (
+                      <IconVolumeOff className="w-4 h-4 text-zinc-500" />
+                    ) : (
+                      <IconVolume className="w-4 h-4 text-brand-cyan" />
+                    )}
+                    <span className="text-xs font-mono font-bold tracking-wider text-zinc-400">
+                      SOUND: {muted ? "OFF" : profile.toUpperCase()}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setMuted(!muted)}
+                    className="min-h-8 px-3 py-1 rounded-xl text-xs font-mono font-black border border-zinc-800 bg-zinc-900/50 hover:border-brand-cyan/40 text-brand-cyan transition-all cursor-pointer"
+                  >
+                    {muted ? "UNMUTE" : "MUTE"}
+                  </button>
                 </div>
-                <input
-                  type="range"
-                  aria-label="Volume"
-                  min="0"
-                  max="100"
-                  value={Math.round(volume * 100)}
-                  onChange={(e) => setVolume(parseFloat(e.target.value) / 100)}
-                  disabled={muted}
-                  className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-brand-cyan disabled:opacity-40"
-                />
-              </div>
 
-              {/* Profiles Selection Grid */}
-              <div className="flex flex-col gap-2">
-                <span className="text-xs font-mono text-zinc-500">Sound Profile</span>
-                <div className="grid grid-cols-3 gap-2">
+                {/* Volume Slider */}
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex justify-between text-xs font-mono text-zinc-500">
+                    <span>Volume</span>
+                    <span>{Math.round(volume * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    aria-label="Volume"
+                    min="0"
+                    max="100"
+                    value={Math.round(volume * 100)}
+                    onChange={(e) => setVolume(parseFloat(e.target.value) / 100)}
+                    disabled={muted}
+                    className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-brand-cyan disabled:opacity-40"
+                  />
+                </div>
+
+                {/* Profiles Selection Grid */}
+                <div className="grid grid-cols-3 gap-2 mt-1">
                   {(["8-bit", "90s-retro", "ambient"] as const).map((p) => (
                     <button
                       key={p}
+                      type="button"
                       onClick={() => setProfile(p)}
                       disabled={muted}
                       className={cn(
-                        "text-center px-2 py-2 rounded-xl border text-[10px] font-mono tracking-wider transition-all cursor-pointer disabled:opacity-40",
+                        "min-h-9 text-center px-2 py-1.5 rounded-xl border text-[11px] font-mono tracking-wider transition-all cursor-pointer disabled:opacity-40",
                         profile === p
                           ? "bg-brand-cyan/10 border-brand-cyan/40 text-brand-cyan font-bold"
                           : "bg-zinc-900/20 border-zinc-900 hover:border-zinc-800 text-zinc-400"
@@ -486,16 +837,19 @@ export const Navbar: React.FC = () => {
                   ))}
                 </div>
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.4 }}
-              transition={{ delay: 0.4 }}
-              className="absolute bottom-8 left-8 font-mono text-[10px] text-zinc-500 tracking-[0.2em]"
-            >
-              © 2026 FREDERICK DE RUITER
-            </motion.div>
+            <div className="relative z-10 pt-4 border-t border-zinc-900 flex items-center justify-between text-xs font-mono text-zinc-500">
+              <span>© 2026 FREDERICK DE RUITER</span>
+              <a
+                href="https://github.com/fderuiter/portfolio"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-zinc-400 hover:text-brand-cyan flex items-center gap-1"
+              >
+                GitHub ↗
+              </a>
+            </div>
           </div>
         )}
       </AnimatePresence>
