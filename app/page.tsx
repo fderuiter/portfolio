@@ -98,7 +98,7 @@ export default async function PortfolioHomePage() {
       <Hero />
 
       {/* Case studies showcase section */}
-      <main id="main-content" tabIndex={-1} className="relative min-h-screen py-24 md:py-32 px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/60 bg-zinc-950 outline-none">
+      <main id="main-content" tabIndex={-1} className="relative min-h-screen py-16 sm:py-24 md:py-32 px-4 sm:px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/60 bg-zinc-950 outline-none">
         <section id="case-studies" className="w-full flex flex-col items-center">
           {/* Decorative Blur Elements */}
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none" />
@@ -107,20 +107,20 @@ export default async function PortfolioHomePage() {
           {/* Main Container */}
           <div className="relative z-10 w-full max-w-7xl flex flex-col items-center">
             {/* Title Block */}
-            <h2 className="text-3xl md:text-4xl font-extrabold font-mono tracking-tight text-white text-center mb-2">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-mono tracking-tight text-white text-center mb-2">
               Things I&apos;ve Built
             </h2>
-            <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-12 text-center">
+            <p className="text-[11px] sm:text-xs font-mono text-zinc-400 tracking-widest uppercase mb-8 sm:mb-12 text-center max-w-lg">
               Clinical data systems, quirky canvas games, and weekend experiments
             </p>
 
             {/* Interactive Systems Highlights Section */}
-            <div className="w-full mb-12 p-6 sm:p-8 tool-shell relative overflow-hidden group hover:border-brand-cyan/40 transition-colors">
+            <div className="w-full mb-8 sm:mb-12 p-5 sm:p-8 tool-shell relative overflow-hidden group hover:border-brand-cyan/40 transition-colors">
               <div className="absolute top-0 right-0 w-64 h-64 bg-brand-cyan/5 rounded-full blur-[60px] pointer-events-none group-hover:bg-brand-cyan/10 transition-colors" />
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-lg sm:text-xl font-bold font-mono text-white mb-2 flex items-center gap-2.5">
-                    <IconCpu className="w-4 h-4 text-brand-cyan" />
+                  <h3 className="text-base sm:text-xl font-bold font-mono text-white mb-2 flex items-center gap-2.5">
+                    <IconCpu className="w-4 h-4 text-brand-cyan shrink-0" />
                     Interactive Canvas &amp; Game Labs
                   </h3>
                   <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-xl font-sans">
@@ -129,17 +129,17 @@ export default async function PortfolioHomePage() {
                 </div>
                 <Link
                   href="/arcade"
-                  className="self-start sm:self-center shrink-0 inline-flex items-center gap-2 px-4 py-2.5 bg-brand-cyan text-black font-mono text-xs font-bold rounded-xl hover:bg-white transition-all shadow-sm"
+                  className="w-full sm:w-auto self-start sm:self-center shrink-0 inline-flex items-center justify-center gap-2 px-5 py-3 sm:py-2.5 bg-brand-cyan text-black font-mono text-xs font-bold rounded-xl hover:bg-white transition-all shadow-sm cursor-pointer active:scale-[0.98]"
                 >
                   <span>Explore Labs Hub</span>
-                  <IconArrowRight className="w-3.5 h-3.5" />
+                  <IconArrowRight className="w-3.5 h-3.5 shrink-0" />
                 </Link>
               </div>
             </div>
 
             {/* Dynamic Bento Showcase */}
             {caseStudies.length === 0 ? (
-              <div className="text-center p-12 bg-zinc-900/10 border border-zinc-900/40 border-dashed rounded-2xl w-full">
+              <div className="text-center p-8 sm:p-12 bg-zinc-900/10 border border-zinc-900/40 border-dashed rounded-2xl w-full">
                 <p className="text-sm text-zinc-400 italic mb-2">
                   No published case studies currently available in the active environment.
                 </p>
@@ -160,28 +160,28 @@ export default async function PortfolioHomePage() {
       </div>
 
       {/* 3. About Section */}
-      <section id="about" className="relative py-24 md:py-32 px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950/40 overflow-hidden">
+      <section id="about" className="relative py-16 sm:py-24 md:py-32 px-4 sm:px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950/40 overflow-hidden">
         {/* Decorative Blurs */}
         <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none" />
         <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-80 h-80 rounded-full bg-brand-blue/5 blur-[120px] pointer-events-none" />
         
         <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
-          <h2 className="text-3xl md:text-4xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
             What I Do
           </h2>
-          <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-16 text-center">
+          <p className="text-[11px] sm:text-xs font-mono text-zinc-400 tracking-widest uppercase mb-10 sm:mb-16 text-center max-w-md">
             A mix of clinical trial tech, canvas experiments, and outdoor emergency response
           </p>
           
           {/* Dynamic Bento Skills Grid Card Layout */}
-          <div className="w-full mb-24">
+          <div className="w-full mb-16 sm:mb-24">
             <SkillsGrid languages={languagesList} />
           </div>
 
-          <h3 className="text-2xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
+          <h3 className="text-xl sm:text-2xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
             Work History
           </h3>
-          <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-16 text-center">
+          <p className="text-[11px] sm:text-xs font-mono text-zinc-400 tracking-widest uppercase mb-10 sm:mb-16 text-center max-w-md">
             From clinical operations at Mayo Clinic to high-compliance data architecture
           </p>
 
@@ -193,23 +193,23 @@ export default async function PortfolioHomePage() {
       </section>
 
       {/* 4. Contact Section */}
-      <section id="contact" className="relative py-24 md:py-32 px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950">
+      <section id="contact" className="relative py-16 sm:py-24 md:py-32 px-4 sm:px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950">
         <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
-          <h2 className="text-3xl md:text-4xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
             Say Hello
           </h2>
-          <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-16 text-center">
+          <p className="text-[11px] sm:text-xs font-mono text-zinc-400 tracking-widest uppercase mb-10 sm:mb-16 text-center max-w-md">
             Always up for talking tech, clinical data, or wild project ideas.
           </p>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-4xl justify-center items-stretch">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full max-w-4xl justify-center items-stretch">
             {/* Direct Email */}
             <a
               href="mailto:fpderuiter@gmail.com"
               aria-label="Send an email to Frederick de Ruiter at fpderuiter@gmail.com"
-              className="group flex flex-col items-center justify-center p-6 bg-zinc-900/20 border border-zinc-800/80 rounded-2xl transition-all duration-300 hover:border-brand-cyan/40 hover:bg-zinc-900/40 text-center cursor-pointer"
+              className="group flex flex-col items-center justify-center p-5 sm:p-6 bg-zinc-900/20 border border-zinc-800/80 rounded-2xl transition-all duration-300 hover:border-brand-cyan/40 hover:bg-zinc-900/40 active:scale-[0.98] text-center cursor-pointer min-h-[110px]"
             >
-              <span className="w-9 h-9 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/30 transition-colors mb-3">
+              <span className="w-10 h-10 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/30 transition-colors mb-3 shrink-0">
                 <IconMail className="w-4 h-4" />
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">Send an Email</span>
@@ -220,12 +220,12 @@ export default async function PortfolioHomePage() {
             <Link
               href="/schedule"
               aria-label="Schedule a 1:1 meeting with Frederick de Ruiter on Google Calendar"
-              className="group flex flex-col items-center justify-center p-6 bg-brand-cyan/[0.04] border border-brand-cyan/30 rounded-2xl transition-all duration-300 hover:border-brand-cyan hover:bg-brand-cyan/[0.09] hover:shadow-[0_0_25px_rgba(6,182,212,0.15)] text-center cursor-pointer relative overflow-hidden"
+              className="group flex flex-col items-center justify-center p-5 sm:p-6 bg-brand-cyan/[0.04] border border-brand-cyan/30 rounded-2xl transition-all duration-300 hover:border-brand-cyan hover:bg-brand-cyan/[0.09] hover:shadow-[0_0_25px_rgba(6,182,212,0.15)] active:scale-[0.98] text-center cursor-pointer relative overflow-hidden min-h-[110px]"
             >
-              <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-brand-cyan/20 border border-brand-cyan/40 rounded text-[9px] font-mono text-brand-cyan uppercase tracking-wider">
+              <div className="absolute top-2.5 right-2.5 px-1.5 py-0.5 bg-brand-cyan/20 border border-brand-cyan/40 rounded text-[9px] font-mono text-brand-cyan uppercase tracking-wider">
                 30 Min
               </div>
-              <span className="w-9 h-9 rounded-xl bg-zinc-950 border border-brand-cyan/40 flex items-center justify-center text-brand-cyan group-hover:scale-110 transition-transform mb-3">
+              <span className="w-10 h-10 rounded-xl bg-zinc-950 border border-brand-cyan/40 flex items-center justify-center text-brand-cyan group-hover:scale-110 transition-transform mb-3 shrink-0">
                 <IconCalendar className="w-4 h-4" />
               </span>
               <span className="text-xs font-mono font-bold text-white mb-1">Schedule 1:1 Sync</span>
@@ -238,9 +238,9 @@ export default async function PortfolioHomePage() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="View Frederick de Ruiter's GitHub profile externally"
-              className="group flex flex-col items-center justify-center p-6 bg-zinc-900/20 border border-zinc-800/80 rounded-2xl transition-all duration-300 hover:border-brand-cyan/40 hover:bg-zinc-900/40 text-center cursor-pointer"
+              className="group flex flex-col items-center justify-center p-5 sm:p-6 bg-zinc-900/20 border border-zinc-800/80 rounded-2xl transition-all duration-300 hover:border-brand-cyan/40 hover:bg-zinc-900/40 active:scale-[0.98] text-center cursor-pointer min-h-[110px]"
             >
-              <span className="w-9 h-9 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/30 transition-colors mb-3">
+              <span className="w-10 h-10 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/30 transition-colors mb-3 shrink-0">
                 <IconBrandGithub className="w-4 h-4" />
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">GitHub Repositories</span>
@@ -253,9 +253,9 @@ export default async function PortfolioHomePage() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="View Frederick de Ruiter's LinkedIn profile externally"
-              className="group flex flex-col items-center justify-center p-6 bg-zinc-900/20 border border-zinc-800/80 rounded-2xl transition-all duration-300 hover:border-brand-cyan/40 hover:bg-zinc-900/40 text-center cursor-pointer"
+              className="group flex flex-col items-center justify-center p-5 sm:p-6 bg-zinc-900/20 border border-zinc-800/80 rounded-2xl transition-all duration-300 hover:border-brand-cyan/40 hover:bg-zinc-900/40 active:scale-[0.98] text-center cursor-pointer min-h-[110px]"
             >
-              <span className="w-9 h-9 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/30 transition-colors mb-3">
+              <span className="w-10 h-10 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/30 transition-colors mb-3 shrink-0">
                 <IconBrandLinkedin className="w-4 h-4" />
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">LinkedIn Network</span>
@@ -263,7 +263,7 @@ export default async function PortfolioHomePage() {
             </a>
           </div>
           
-          <div className="mt-24 text-xs font-mono text-zinc-500 tracking-[0.2em] text-center select-none">
+          <div className="mt-16 sm:mt-24 text-xs font-mono text-zinc-500 tracking-[0.2em] text-center select-none">
             DESIGNED &amp; DEVELOPED BY FREDERICK DE RUITER
           </div>
         </div>
