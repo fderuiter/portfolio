@@ -17,7 +17,9 @@ import { useBentoLayout } from "@/components/providers/BentoLayoutContext";
 const REALITY_CONTENT: Record<string, string> = {
   schemaflow: "While the drag-and-drop canvas is extremely smooth, we initially faced major rendering bottlenecks when rendering over 150 schema nodes. We had to implement node occlusion culling and state debouncing to maintain 60 FPS, and cyclical dependency detection still requires optimized Web Worker postMessage parsing.",
   "clinical-data-mapper": "Handling 2GB+ XML structures in Node.js was a memory nightmare. Even with SAX streaming, V8 garbage collection spikes caused transient API container restarts in production. We had to tune Kubernetes memory limits and implement chunked database transaction commits to stabilize the service under heavy load.",
-  "imednet-python-sdk": "The platform SOAP endpoints are notoriously flaky and poorly documented. We spent over 80 hours reverse-engineering session token validation schemas. Retries are frequent, and TLS handshake timeouts on Legacy endpoints require an aggressive connection pooling and cache synchronization strategy."
+  "imednet-python-sdk": "The platform SOAP endpoints are notoriously flaky and poorly documented. We spent over 80 hours reverse-engineering session token validation schemas. Retries are frequent, and TLS handshake timeouts on legacy endpoints require an aggressive connection pooling and cache synchronization strategy.",
+  "cadence-clinical": "Building a unified eCRF orchestrator sounds elegant until clinical trial coordinators attempt to create dynamic conditional logic trees with 40 circular dependencies. We had to write a custom DAG resolution engine and aggressive client-side form debouncing to keep the UI from lagging during 50-field visits.",
+  "wedding-website": "Building a bespoke event portal for your own wedding is the ultimate high-stakes deployment. Zero downtime tolerance when 150 relatives try to RSVP at once, and debugging custom Framer Motion spring physics on aunties' 7-year-old iPads at midnight before the rehearsal dinner was a character-building experience."
 };
 
 const getRealityContent = (slug: string, originalContent: string) => {
@@ -40,6 +42,7 @@ const LANGUAGE_COLORS: Record<string, { bg: string; text: string; hex: string }>
   Haskell: { bg: "bg-indigo-500/10", text: "text-indigo-400", hex: "#5e5086" },
   CSS: { bg: "bg-purple-500/10", text: "text-purple-400", hex: "#563d7c" },
   HTML: { bg: "bg-orange-500/10", text: "text-orange-400", hex: "#e34c26" },
+  React: { bg: "bg-cyan-500/10", text: "text-cyan-400", hex: "#06b6d4" },
 };
 
 const DEFAULT_COLOR = { bg: "bg-zinc-500/10", text: "text-zinc-400", hex: "#8b949e" };
@@ -178,10 +181,10 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
         transition: "height 250ms cubic-bezier(0.16, 1, 0.3, 1)",
       }}
     >
-      <div ref={innerRef} className="flex flex-col h-full justify-between">
+      <div ref={innerRef} className="flex flex-col h-full justify-between gap-3">
         <div>
           {/* Card Top Pill & Header */}
-          <div className="flex justify-between items-center mb-3">
+          <div className="flex justify-between items-center mb-2.5">
             <span className={`px-2.5 py-0.5 text-[10px] font-mono font-bold border border-current/10 rounded-md ${langColor.bg} ${langColor.text}`}>
               {study.primary_language}
             </span>
@@ -190,15 +193,15 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             </span>
           </div>
 
-          <CardTitle className="text-lg md:text-xl font-extrabold tracking-tight">
+          <CardTitle className="text-base md:text-lg font-extrabold tracking-tight leading-snug mb-2.5">
             {study.title}
           </CardTitle>
 
           {/* Premium Segmented Mode Switcher */}
-          <div className="flex p-0.5 bg-zinc-950/80 border border-zinc-900/80 rounded-lg mb-4 text-xs font-mono relative z-10 w-fit backdrop-blur-sm">
+          <div className="flex p-0.5 bg-zinc-950/80 border border-zinc-900/80 rounded-lg mb-3 text-xs font-mono relative z-10 w-fit backdrop-blur-sm">
             <button
               onClick={() => handleToggleMode("pitch")}
-              className={`min-h-6 px-3 py-1 rounded-md border font-bold transition-all duration-200 cursor-pointer ${
+              className={`min-h-6 px-3 py-0.5 rounded-md border text-[11px] font-bold transition-all duration-200 cursor-pointer ${
                 mode === "pitch"
                   ? "bg-zinc-900 text-brand-cyan border-brand-cyan/30 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
                   : "border-transparent text-zinc-400 hover:text-zinc-200"
@@ -208,7 +211,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             </button>
             <button
               onClick={() => handleToggleMode("reality")}
-              className={`min-h-6 px-3 py-1 rounded-md border font-bold transition-all duration-200 cursor-pointer ${
+              className={`min-h-6 px-3 py-0.5 rounded-md border text-[11px] font-bold transition-all duration-200 cursor-pointer ${
                 mode === "reality"
                   ? "bg-zinc-900 text-brand-cyan border-brand-cyan/30 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
                   : "border-transparent text-zinc-400 hover:text-zinc-200"
@@ -218,8 +221,8 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             </button>
           </div>
 
-           {/* Description Block using Pretext Rich Text for Pitch, or Custom Reality Text */}
-          <div className="mb-4">
+          {/* Description Block using Pretext Rich Text for Pitch, or Custom Reality Text */}
+          <div className="mb-3">
             {mode === "pitch" ? (
               <div ref={hasPrecalculated ? undefined : internalLayout.ref}>
                 {hasPrecalculated && preCalculatedParagraphsLines && preCalculatedParagraphsItems ? (
@@ -232,7 +235,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
                         lineHeight={LAYOUT_CONFIG.LINE_HEIGHT}
                         isReady={isLayoutReady}
                         fallbackText=""
-                        className="text-zinc-400 text-sm leading-relaxed font-sans"
+                        className="text-zinc-400 text-xs md:text-sm leading-relaxed font-sans"
                       />
                     ))}
                   </div>
@@ -243,12 +246,12 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
                     lineHeight={LAYOUT_CONFIG.LINE_HEIGHT}
                     isReady={isLayoutReady}
                     fallbackText={study.editorial_content}
-                    className="text-zinc-400 text-sm leading-relaxed font-sans"
+                    className="text-zinc-400 text-xs md:text-sm leading-relaxed font-sans"
                   />
                 )}
               </div>
             ) : (
-              <p className="text-zinc-400 text-sm leading-relaxed font-sans">
+              <p className="text-zinc-400 text-xs md:text-sm leading-relaxed font-sans">
                 {getRealityContent(study.slug, study.editorial_content)}
               </p>
             )}
@@ -256,15 +259,15 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
 
           {/* Dynamic GitHub Statistics Hydration */}
           {githubStats && (
-            <div className="space-y-4 mb-5 border-t border-zinc-900/60 pt-4">
+            <div className="space-y-3 mb-3 border-t border-zinc-900/60 pt-3">
               {/* Glowing SVG Commit Timeline Sparkline */}
               <CommitSparkline 
                 activity={githubStats.commitActivity} 
-                className="mb-2"
+                className="mb-1"
               />
 
               {/* Refined Inline Badges Row */}
-              <div className="flex justify-between items-center text-[10px] font-mono text-zinc-400 border-b border-zinc-900/60 pb-3 mb-1">
+              <div className="flex justify-between items-center text-[10px] font-mono text-zinc-400 border-b border-zinc-900/60 pb-2.5 mb-1">
                 <span className="flex items-center gap-1">
                   <IconStar className="w-3.5 h-3.5 text-amber-500" />
                   <span className="text-zinc-300 font-bold">{githubStats.stars.toLocaleString()}</span> STARS
@@ -281,7 +284,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
 
               {/* Language Percentage Bar */}
               {githubStats.languages.length > 0 && (
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   <div className="flex justify-between items-center text-[10px] font-mono text-zinc-400">
                     <span>LANGUAGE STACK</span>
                     <span className="text-zinc-400">
@@ -289,7 +292,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
                     </span>
                   </div>
                   {/* Aggregated distribution bar */}
-                  <div className="h-2 w-full bg-zinc-900 rounded-full overflow-hidden flex">
+                  <div className="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden flex">
                     {githubStats.languages.map((lang, idx) => {
                       const color = LANGUAGE_COLORS[lang.name] || DEFAULT_COLOR;
                       return (
@@ -306,7 +309,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
                     })}
                   </div>
                   {/* Legend list */}
-                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-[9px] font-mono text-zinc-400">
+                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[9px] font-mono text-zinc-400">
                     {githubStats.languages.slice(0, 3).map((lang, idx) => {
                       const color = LANGUAGE_COLORS[lang.name] || DEFAULT_COLOR;
                       return (
@@ -324,10 +327,10 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
               )}
 
               {/* Monospace terminal logs commits feed */}
-              <div className="bg-black/60 border border-zinc-900/60 rounded-xl p-3 font-mono text-[10px] leading-tight space-y-1 h-[130px] flex flex-col justify-start overflow-hidden">
-                <div className="flex items-center text-zinc-400 border-b border-zinc-900/60 pb-1.5 mb-1.5">
+              <div className="bg-black/60 border border-zinc-900/60 rounded-xl p-2.5 font-mono text-[9.5px] leading-tight space-y-1 h-[115px] flex flex-col justify-start overflow-hidden">
+                <div className="flex items-center text-zinc-400 border-b border-zinc-900/60 pb-1 mb-1">
                   <IconTerminal className="w-3.5 h-3.5 mr-1 text-zinc-400" />
-                  <span>{study.simulated_telemetry ? getSimulatedTerminalCommand(study.primary_language) : "git log --oneline -n 5"}</span>
+                  <span className="truncate">{study.simulated_telemetry ? getSimulatedTerminalCommand(study.primary_language) : "git log --oneline -n 5"}</span>
                 </div>
                 <div className="flex-1 flex flex-col justify-start space-y-1 overflow-y-auto scrollbar-none text-zinc-400">
                   {study.simulated_telemetry ? (
@@ -354,7 +357,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
 
           {/* Tags list (only when no stats are rendered to save visual space, or inline) */}
           {!githubStats && (
-            <div className="flex flex-wrap gap-1.5 mt-3 mb-4">
+            <div className="flex flex-wrap gap-1.5 mt-2 mb-3">
               {tagsList.slice(0, 4).map((tag, idx) => (
                 <span
                   key={idx}
@@ -368,37 +371,39 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
         </div>
 
         {/* Dynamic Telemetry Metrics HUD */}
-        <div className="flex items-center gap-4 text-[10px] font-mono text-zinc-400 mt-2 mb-1 relative z-10 select-none">
-          <span className="flex items-center gap-1.5" title="Aggregate Page Views">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" aria-hidden="true" />
-            <span className="sr-only" aria-live="polite">Live page views: {stats.views}</span>
-            <span className="text-zinc-300 font-bold" aria-hidden="true">{stats.views.toLocaleString()}</span> <span aria-hidden="true">VIEWS</span>
-          </span>
-          <span className="flex items-center gap-1.5" title="Bento Card Interactions">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" aria-hidden="true" />
-            <span className="sr-only" aria-live="polite">Live clicks: {stats.clicks}</span>
-            <span className="text-zinc-300 font-bold" aria-hidden="true">{stats.clicks.toLocaleString()}</span> <span aria-hidden="true">CLICKS</span>
-          </span>
-          {syncFailed && (
-            <span 
-              className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping cursor-help" 
-              title="Telemetry offline sync mode active (LocalStorage cached)"
-            />
-          )}
-        </div>
+        <div>
+          <div className="flex items-center gap-4 text-[10px] font-mono text-zinc-400 mt-1 mb-1 relative z-10 select-none">
+            <span className="flex items-center gap-1.5" title="Aggregate Page Views">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" aria-hidden="true" />
+              <span className="sr-only" aria-live="polite">Live page views: {stats.views}</span>
+              <span className="text-zinc-300 font-bold" aria-hidden="true">{stats.views.toLocaleString()}</span> <span aria-hidden="true">VIEWS</span>
+            </span>
+            <span className="flex items-center gap-1.5" title="Bento Card Interactions">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" aria-hidden="true" />
+              <span className="sr-only" aria-live="polite">Live clicks: {stats.clicks}</span>
+              <span className="text-zinc-300 font-bold" aria-hidden="true">{stats.clicks.toLocaleString()}</span> <span aria-hidden="true">CLICKS</span>
+            </span>
+            {syncFailed && (
+              <span 
+                className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping cursor-help" 
+                title="Telemetry offline sync mode active (LocalStorage cached)"
+              />
+            )}
+          </div>
 
-        {/* Footer analyze link */}
-        <div className="flex justify-between items-center border-t border-zinc-900/40 pt-3 mt-2">
-          <Link
-            href={`/case-studies/${study.slug}`}
-            onClick={() => recordEvent(study.slug, "project_click")}
-            className="group inline-flex items-center text-xs font-bold text-brand-cyan/80 hover:text-brand-cyan transition-colors duration-300 cursor-pointer relative z-10"
-          >
-            <span>Analyze Architecture</span>
-            <IconChevronRight className="ml-1 w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-200" />
-          </Link>
-          <div className="text-[9px] font-mono text-zinc-400">
-            {!isLayoutReady ? "MEASURING..." : `H: ${finalHeight}px`}
+          {/* Footer analyze link */}
+          <div className="flex justify-between items-center border-t border-zinc-900/40 pt-2.5 mt-1.5">
+            <Link
+              href={`/case-studies/${study.slug}`}
+              onClick={() => recordEvent(study.slug, "project_click")}
+              className="group inline-flex items-center text-xs font-bold text-brand-cyan/80 hover:text-brand-cyan transition-colors duration-300 cursor-pointer relative z-10"
+            >
+              <span>Analyze Architecture</span>
+              <IconChevronRight className="ml-1 w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-200" />
+            </Link>
+            <div className="text-[9px] font-mono text-zinc-400">
+              {!isLayoutReady ? "MEASURING..." : `H: ${finalHeight}px`}
+            </div>
           </div>
         </div>
       </div>

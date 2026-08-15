@@ -494,9 +494,9 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ className }) => {
   const shouldReduceMotion = useReducedMotion();
-  const headline = "Engineering the Interface Between Data and Meaning";
+  const headline = "Crafting the Interface Between Systems Rigor and Human Delight";
   const introText =
-    "Connecting high-performance canvas layout engines, serverless Postgres data streams, and clinical data integration clients into a unified engineering showcase.";
+    "Bridging clinical data architectures, interactive canvas simulations, and open-source civic experiments into a unified engineering craft.";
 
   return (
     <section
@@ -530,7 +530,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="px-3.5 py-1 mb-6 text-[10px] md:text-xs font-mono font-semibold tracking-[0.2em] uppercase text-brand-cyan bg-brand-cyan/5 border border-brand-cyan/20 rounded-full"
         >
-          FREDERICK DE RUITER · PRINCIPAL SYSTEMS ENGINEER
+          FREDERICK DE RUITER · CREATIVE DEVELOPER &amp; SYSTEMS ARCHITECT
         </motion.span>
 
         {/* Dynamic Staggered Pretext-powered Title */}

@@ -141,20 +141,86 @@ class SubjectRecord(BaseModel):
     `.trim(),
   },
   {
-    slug: "aura-haskell",
-    title: "Aura: Language-Tailored Haskell Type Flow Analyzer",
-    primary_language: "Haskell",
-    github_url: "https://github.com/fderuiter/aura-haskell",
+    slug: "cadence-clinical",
+    title: "Cadence Clinical: Protocol-Driven eCRF & Workflow Orchestrator",
+    primary_language: "TypeScript",
+    github_url: "https://github.com/fderuiter/cadence-clinical",
     published: true,
-    simulated_telemetry: true,
-    tags: "Haskell, GHC, Compiler, AST, Static Analysis",
-    editorial_content: "An advanced **Haskell** static analyzer and type inference engine that parses GHC ASTs, traces type flow, and detects compile-time architectural anti-patterns with near-instantaneous feedback loops.",
+    simulated_telemetry: false,
+    tags: "TypeScript, Next.js, eCRF, GxP, Clinical Trials, React, Zod, HIPAA",
+    editorial_content: "A modern, **full-stack clinical trial orchestrator** built in **TypeScript** and **Next.js** that translates complex protocol schedules into dynamic, validated `eCRF workflows`. Implements cross-form edit checks, real-time query management, and immutable `audit trails` meeting **21 CFR Part 11** standards.",
     architectural_narrative: `
 <h3>The Challenge</h3>
-<p>Haskell codebases are robust, but tracing complex monadic types or locating space leaks can be incredibly slow and taxing. Developers need visual, live compiler-level insight without introducing manual tracing overhead or restarting GHC sessions repeatedly.</p>
+<p>Clinical trial protocols frequently change through mid-study amendments. Traditional Electronic Data Capture (EDC) systems lock study sites into rigid database schemas that require weeks of vendor engineering to update, creating operational friction, data lock delays, and regulatory audit vulnerabilities.</p>
 
-<h3>The Architecture</h3>
-<p>Aura uses GHC plugins to stream compilation ASTs and type constraints directly. In the dashboard, these constraints are modeled as a unified type flow graph, allowing real-time inspection of active monads, lazy evaluation spaces, and compiler optimizations.</p>
+<h3>Technical Architecture</h3>
+<p>Cadence Clinical is engineered as a decoupled, reactive clinical trial orchestration platform: the <strong>Protocol Schedule Compiler</strong>, the <strong>Dynamic eCRF Synthesis Engine</strong>, and the <strong>21 CFR Part 11 Audit Log Pipeline</strong>.</p>
+
+<pre><code class="language-typescript">
+// Protocol-driven form validation and dynamic dependency resolution
+interface StudyVisitSchema {
+  visitId: string;
+  protocolScheduleDay: number;
+  forms: {
+    formId: string;
+    fields: Array<{
+      fieldId: string;
+      type: "text" | "numeric" | "codelist" | "date";
+      validationRules: Array<{ expression: string; errorMessage: string }>;
+    }>;
+  }[];
+}
+</code></pre>
+
+<h4>1. Dynamic eCRF Synthesis Engine</h4>
+<p>Rather than hardcoding visit forms, Cadence dynamically constructs validated UI interfaces at runtime using <code>zod</code> and schema metadata. As coordinators navigate participant visits, dependent fields are resolved reactively (e.g. automatically prompting for SAE forms when high-grade adverse events are recorded).</p>
+
+<h4>2. Cross-Form Real-Time Edit Checks</h4>
+<p>To prevent data entry discrepancies before submission, the engine evaluates cross-form validation rules client-side with debounced worker threads. If a medication start date precedes informed consent, an instantaneous non-blocking query is raised for site coordinators.</p>
+
+<h4>3. Immutable Audit Trails &amp; 21 CFR Part 11 Compliance</h4>
+<p>Every field mutation, query resolution, and investigator electronic signature is cryptographically hashed and logged to an append-only audit trail, ensuring 100% compliance with FDA regulatory standards.</p>
+    `.trim(),
+  },
+  {
+    slug: "wedding-website",
+    title: "The Nuptial Engine: Bespoke Event Portal & Guest Logistics",
+    primary_language: "TypeScript",
+    github_url: "https://github.com/fderuiter/wedding-website",
+    published: true,
+    simulated_telemetry: false,
+    tags: "TypeScript, Next.js, React, TailwindCSS, Framer Motion, Logistics, RSVP",
+    editorial_content: "A **bespoke event portal** and guest operations engine crafted in **Next.js** and **Framer Motion**. Features real-time multi-household `RSVP tracking`, interactive personalized travel timelines, accommodation logistics, and custom canvas physics animations built to survive zero-downtime family scrutiny.",
+    architectural_narrative: `
+<h3>The Challenge</h3>
+<p>Off-the-shelf wedding websites are notoriously cookie-cutter, rigid, and cluttered with third-party tracking scripts. Coordinating multi-event logistics across multiple time zones—including rehearsal dinners, hotel blocks, dietary accommodations, and real-time RSVPs—demanded a high-craft, bespoke digital experience engineered with zero-downtime reliability.</p>
+
+<h3>Technical Architecture</h3>
+<p>The platform is designed around three architectural pillars: the <strong>Multi-Party RSVP State Machine</strong>, the <strong>Personalized Guest Timeline Engine</strong>, and the <strong>Hardware-Accelerated Canvas Presentation Layer</strong>.</p>
+
+<pre><code class="language-typescript">
+// Guest RSVP State Model
+interface HouseholdRSVP {
+  householdId: string;
+  passcode: string;
+  guests: Array<{
+    guestId: string;
+    fullName: string;
+    attendingCeremony: boolean;
+    attendingReception: boolean;
+    dietaryRestrictions: string[];
+  }>;
+}
+</code></pre>
+
+<h4>1. Multi-Party RSVP State Machine</h4>
+<p>Handles household groupings where one recipient can respond for their entire party without data conflicts. Backed by optimistic UI updates and localized transactional caching, the interface delivers instantaneous visual feedback even on congested mobile cellular networks.</p>
+
+<h4>2. Interactive Guest Itinerary &amp; Logistics</h4>
+<p>Guests receive contextual schedules customized to their specific invite group (e.g. bridal party vs general guests). Travel directions, hotel accommodations, and local recommendations are presented via interactive micro-animations and offline-accessible guides.</p>
+
+<h4>3. Design Craft &amp; Canvas Physics</h4>
+<p>Bespoke typography, smooth Framer Motion layout transitions, and subtle particle physics create a warm, unforgettable digital invitation that marries aesthetic beauty with rock-solid full-stack engineering.</p>
     `.trim(),
   },
 ];

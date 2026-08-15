@@ -6,7 +6,7 @@ import { designManifest } from "@/lib/design-manifest";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { IconSearch, IconTerminal, IconFileCode, IconDirections, IconCornerDownLeft, IconShieldCheck } from "@tabler/icons-react";
+import { IconSearch, IconTerminal, IconFileCode, IconDirections, IconCornerDownLeft, IconShieldCheck, IconCalendar } from "@tabler/icons-react";
 import { filterFuzzySearch } from "@/lib/search-utils";
 import { useSearch } from "@/components/providers/SearchProvider";
 
@@ -163,6 +163,14 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         category: "navigation",
         url: "/simulator",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />
+      },
+      {
+        id: "nav-schedule",
+        title: "Schedule Consultation",
+        subtitle: "Book a 1:1 technical sync or systems architecture consultation on Google Calendar",
+        category: "navigation",
+        url: "/schedule",
+        icon: <IconCalendar className="w-4 h-4 text-brand-cyan" />
       }
     ];
 

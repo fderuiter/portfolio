@@ -1,104 +1,232 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { hexToRgba } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { designManifest } from "@/lib/design-manifest";
+import { IconBriefcase, IconFlame, IconSwitchHorizontal } from "@tabler/icons-react";
 
 export interface TimelineItem {
   role: string;
   company: string;
   period: string;
-  description: string;
+  recruiterDescription: string;
+  realityDescription: string;
   tags: string[];
 }
 
 const timelineData: TimelineItem[] = [
   {
-    role: "Lead Clinical Software Architect",
-    company: "Systems Integration Group",
-    period: "2023 — Present",
-    description: "Architected distributed HIPAA-compliant streaming ODM XML parsers handling 2GB+ trials data within constant 50MB memory footprints. Transitioned local SQLite storage nodes to high-speed serverless Neon Postgres clusters utilizing native pooling.",
-    tags: ["TypeScript", "Neon Postgres", "CDISC", "HIPAA", "SAX Parser"]
+    role: "Clinical Data Specialist",
+    company: "BRIGHT Research Partners, Inc.",
+    period: "March 2023 — Present",
+    recruiterDescription:
+      "Lead technical architect for GxP-compliant eClinical databases, translating 100+ page scientific protocols into validated eCRF systems. Engineer hundreds of automated cross-form edit checks and dynamic logic rules to proactively enforce protocol compliance and point-of-entry data integrity. Manage end-to-end clinical data lifecycles (DMP authoring, SAE reconciliation, database locks) and administer 21 CFR 812 investigational device accountability with 100% traceability.",
+    realityDescription:
+      "Currently translating 150-page PDFs into database schemas because someone decided capturing blood pressure in four incompatible units was a great idea. 90% of the day is spent writing automated edit checks to prevent clinicians from typing 'N/A' into numeric date fields and tracking investigational medical devices like an FDA private investigator.",
+    tags: ["GxP Systems", "21 CFR 812", "eCRF Architecture", "Edit Checks", "DMP Authoring", "SAE Reconciliation", "iMednet"]
   },
   {
-    role: "Senior Systems Engineer & UI Specialist",
-    company: "Digital Physics Labs",
-    period: "2020 — 2023",
-    description: "Developed hardware-accelerated text measuring and Bento grid wrapping engines using browser canvas and custom hooks. Maintained 60FPS refresh metrics under active resizing and heavy grid item swaps.",
-    tags: ["React 19", "Next.js 16", "Framer Motion", "Canvas API", "DX Tooling"]
+    role: "Research Program Coordinator",
+    company: "Mayo Clinic",
+    period: "July 2021 — March 2023",
+    recruiterDescription:
+      "Pioneered an EHR-based recruitment pipeline using SlicerDicer and MyChart, resulting in a 5x increase in qualified participant enrollment (10 to 50+/month) and a 25% reduction in screen failures. Architected production REDCap databases, executed Linux-based FreeSurfer C pipelines processing 3T MRI scans for volumetric brain segmentation, innovated 3D-printable STL workflows for participant brain models, and prepared NIH DSMB data safety dossiers.",
+    realityDescription:
+      "Automated clinical trial recruitment by turning Epic MyChart into a participant magnet, ran mysterious C binaries on Linux clusters overnight that converted 3T MRI brain scans into 3D-printed plastic brains to hand to study participants, and delivered multi-million dollar NIH data safety dossiers to board members without breaking a sweat.",
+    tags: ["Mayo Clinic", "Epic SlicerDicer", "MyChart Recruitment", "REDCap", "FreeSurfer Linux", "3T MRI Neuroinformatics", "3D Printing (STL)", "NIH DSMB"]
   },
   {
-    role: "Lead Volunteer & Technical Mentor",
-    company: "Civic Code for Humanity",
-    period: "2019 — 2021",
-    description: "Partnered with local nonprofits to modernize their digital presence and data systems. Taught coding bootcamps for underprivileged youth, emphasizing creativity and problem-solving.",
-    tags: ["Civic Impact", "Education", "Volunteering", "Accessibility"]
+    role: "Clinical Research Coordinator",
+    company: "Mayo Clinic",
+    period: "October 2019 — July 2021",
+    recruiterDescription:
+      "Orchestrated the operational lifecycle for multiple high-compliance, federally funded NIH studies from startup to closeout. Authored and managed complex IRB protocols, informed consent documents, and regulatory amendments. Served as departmental Epic Super User providing at-the-elbow clinical troubleshooting and leading staff training on Epic for Research modules, ensuring 100% data integrity through Source Document Verification (SDV).",
+    realityDescription:
+      "Authored novel-length IRB amendments every time a principal investigator changed a survey question font, sprinted across clinical oncology wings doing 'at-the-elbow' Epic emergency triage for doctors who forgot their passwords, and hunted down missing clinical trial consent signatures across hospital floors.",
+    tags: ["Mayo Clinic", "NIH Studies", "IRB Protocols", "Epic Super User", "Source Document Verification", "GxP Compliance", "Clinical Operations"]
   },
   {
-    role: "Full-Stack Developer",
-    company: "CoreFlow Technologies",
-    period: "2018 — 2020",
-    description: "Pioneered DAG-based Visual Node Schema builders. Engineered immutable state trees, cycle validation compilers, and OpenAPI spec translators.",
-    tags: ["React", "Zustand", "AST", "JSON Schema", "OpenAPI"]
+    role: "Desk Operations Specialist & Epic Super User",
+    company: "Mayo Clinic",
+    period: "February 2018 — October 2019",
+    recruiterDescription:
+      "Spearheaded departmental EHR data migration for the high-volume Division of Oncology, personally transcribing record-high volumes of complex patient orders to ensure continuity of clinical care. Provided frontline technical troubleshooting and partnered with IT analysts to test and validate system updates in UAT environments.",
+    realityDescription:
+      "Transcribed thousands of oncology patient orders at blinding typing speeds so the department wouldn't grind to a halt during an EHR migration. Became the unofficial hospital wizard when Epic inevitably threw a cryptic error message 5 minutes before clinic opened.",
+    tags: ["Mayo Clinic", "Division of Oncology", "EHR Data Migration", "Epic Super User", "UAT Testing", "Technical Troubleshooting"]
   },
   {
-    role: "President, Computer Science Society",
-    company: "University Student Leadership",
-    period: "2016 — 2018",
-    description: "Led a community of 500+ students, organized weekly workshops, and fostered a culture of collaborative learning. Built mentorship programs that connected underclassmen with alumni.",
-    tags: ["Leadership", "Community Building", "Mentorship", "Public Speaking"]
+    role: "Summer Operations Coordinator",
+    company: "Minnesota State University, Mankato",
+    period: "July 2017 — February 2018",
+    recruiterDescription:
+      "Orchestrated logistical and media operations for the final year of the Minnesota Vikings Summer Training Camp, managing high-security accommodations and broadcast setups for NFL teams. Managed conference finances, inventory systems, and client billing reconciliations for university summer programs.",
+    realityDescription:
+      "Herded 300lb NFL players, handled high-security keycards for the Vikings coaching staff, and balanced university conference budget spreadsheets while making sure ESPN's satellite broadcast trucks didn't knock out the campus power grid.",
+    tags: ["Minnesota Vikings NFL Camp", "Operations Logistics", "Financial Reconciliation", "Facilities Management", "Media Coordination"]
   }
 ];
 
 export const Timeline: React.FC = () => {
-  return (
-    <div className="w-full max-w-3xl mx-auto py-12 relative select-none">
-      {/* Vertical Rail Line */}
-      <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-brand-cyan/30 via-brand-blue/20 to-zinc-900/10 -translate-x-1/2" />
+  const [globalMode, setGlobalMode] = useState<"recruiter" | "reality">("recruiter");
+  const [cardOverrides, setCardOverrides] = useState<Record<number, "recruiter" | "reality">>({});
 
-      <div className="space-y-16">
+  const handleGlobalToggle = (mode: "recruiter" | "reality") => {
+    setGlobalMode(mode);
+    setCardOverrides({});
+  };
+
+  const handleCardToggle = (idx: number) => {
+    const currentCardMode = cardOverrides[idx] ?? globalMode;
+    const nextMode = currentCardMode === "recruiter" ? "reality" : "recruiter";
+    setCardOverrides((prev) => ({
+      ...prev,
+      [idx]: nextMode,
+    }));
+  };
+
+  return (
+    <div className="w-full max-w-3xl mx-auto py-8 relative select-none">
+      {/* Global View Switcher */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-16 px-4 py-3 bg-zinc-900/40 border border-zinc-900/80 rounded-2xl backdrop-blur-md">
+        <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
+          <span className="w-2 h-2 rounded-full bg-brand-cyan animate-pulse" />
+          <span className="font-bold text-zinc-300">Timeline Perspective:</span>
+        </div>
+
+        <div className="flex p-0.5 bg-zinc-950/90 border border-zinc-800/80 rounded-xl text-xs font-mono">
+          <button
+            onClick={() => handleGlobalToggle("recruiter")}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer ${
+              globalMode === "recruiter"
+                ? "bg-zinc-900 text-brand-cyan border border-brand-cyan/30 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                : "text-zinc-400 hover:text-zinc-200 border border-transparent"
+            }`}
+          >
+            <IconBriefcase className="w-3.5 h-3.5" />
+            <span>RECRUITER VIEW</span>
+          </button>
+          <button
+            onClick={() => handleGlobalToggle("reality")}
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer ${
+              globalMode === "reality"
+                ? "bg-zinc-900 text-amber-400 border border-amber-400/30 shadow-[0_0_12px_rgba(251,191,36,0.2)]"
+                : "text-zinc-400 hover:text-zinc-200 border border-transparent"
+            }`}
+          >
+            <IconFlame className="w-3.5 h-3.5 text-amber-400" />
+            <span>UNFILTERED REALITY</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Vertical Rail Line */}
+      <div className="absolute left-4 md:left-1/2 top-28 bottom-0 w-0.5 bg-gradient-to-b from-brand-cyan/30 via-brand-blue/20 to-zinc-900/10 -translate-x-1/2" />
+
+      <div className="space-y-14">
         {timelineData.map((item, idx) => {
           const isLeft = idx % 2 === 0;
+          const currentMode = cardOverrides[idx] ?? globalMode;
+          const isReality = currentMode === "reality";
+
           return (
             <motion.div
               key={idx}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8, delay: idx * 0.1, ...designManifest.motion.springs.timeline }}
+              transition={{ duration: 0.8, delay: idx * 0.08, ...designManifest.motion.springs.timeline }}
               className={`relative flex flex-col md:flex-row items-start md:items-center ${
                 isLeft ? "md:flex-row-reverse" : ""
               }`}
             >
               {/* Timeline Bullet Node */}
-              <div className="absolute left-4 md:left-1/2 w-4 h-4 rounded-full bg-zinc-950 border-2 border-brand-cyan -translate-x-1/2 z-10 flex items-center justify-center">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
+              <div
+                className={`absolute left-4 md:left-1/2 w-4 h-4 rounded-full bg-zinc-950 border-2 -translate-x-1/2 z-10 flex items-center justify-center transition-colors duration-300 ${
+                  isReality ? "border-amber-400" : "border-brand-cyan"
+                }`}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full animate-pulse transition-colors duration-300 ${
+                    isReality ? "bg-amber-400" : "bg-brand-cyan"
+                  }`}
+                />
               </div>
 
               {/* Card Container */}
-              <div className={`w-full md:w-[45%] pl-10 md:pl-0 ${isLeft ? "md:pr-12 md:text-right" : "md:pl-12"}`}>
-                <div style={{ "--timeline-glow": `0 0 25px ${hexToRgba(designManifest.colors["brand-cyan"], 0.03)}` } as React.CSSProperties}
-                className="p-6 bg-zinc-900/20 border border-zinc-900/50 rounded-2xl backdrop-blur-sm hover:border-zinc-800 transition-all duration-300 group hover:[box-shadow:var(--timeline-glow)]">
-                  <span className="text-[10px] font-mono font-bold tracking-wider text-brand-cyan uppercase bg-brand-cyan/5 px-2.5 py-1 border border-brand-cyan/10 rounded-md">
-                    {item.period}
-                  </span>
-                  <h3 className="text-lg font-bold text-neutral-100 mt-3 group-hover:text-white transition-colors">
+              <div className={`w-full md:w-[46%] pl-10 md:pl-0 ${isLeft ? "md:pr-10 md:text-right" : "md:pl-10"}`}>
+                <div
+                  style={
+                    {
+                      "--timeline-glow": `0 0 25px ${
+                        isReality
+                          ? hexToRgba(designManifest.colors.warning, 0.05)
+                          : hexToRgba(designManifest.colors["brand-cyan"], 0.05)
+                      }`,
+                    } as React.CSSProperties
+                  }
+                  className={`p-6 bg-zinc-900/25 border rounded-2xl backdrop-blur-sm transition-all duration-300 group hover:[box-shadow:var(--timeline-glow)] ${
+                    isReality ? "border-amber-500/20 hover:border-amber-500/40" : "border-zinc-900/60 hover:border-zinc-800"
+                  }`}
+                >
+                  <div className={`flex items-center justify-between gap-2 mb-3 ${isLeft ? "md:flex-row-reverse" : ""}`}>
+                    <span
+                      className={`text-[10px] font-mono font-bold tracking-wider uppercase px-2.5 py-0.5 border rounded-md transition-colors duration-300 ${
+                        isReality
+                          ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                          : "bg-brand-cyan/5 text-brand-cyan border-brand-cyan/10"
+                      }`}
+                    >
+                      {item.period}
+                    </span>
+
+                    {/* Quick Flip Toggle Button */}
+                    <button
+                      onClick={() => handleCardToggle(idx)}
+                      title="Toggle perspective for this role"
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-mono rounded border transition-colors cursor-pointer ${
+                        isReality
+                          ? "bg-amber-500/10 text-amber-300 border-amber-500/30 hover:bg-amber-500/20"
+                          : "bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-zinc-200 hover:border-zinc-700"
+                      }`}
+                    >
+                      <IconSwitchHorizontal className="w-3 h-3" />
+                      <span>{isReality ? "Reality" : "Recruiter"}</span>
+                    </button>
+                  </div>
+
+                  <h3 className="text-base md:text-lg font-bold text-neutral-100 group-hover:text-white transition-colors">
                     {item.role}
                   </h3>
-                  <h4 className="text-xs font-mono font-semibold text-zinc-500 mt-1">
+                  <h4 className="text-xs font-mono font-semibold text-zinc-400 mt-1">
                     {item.company}
                   </h4>
-                  <p className="text-xs text-zinc-400 mt-3 leading-relaxed font-sans">
-                    {item.description}
-                  </p>
-                  
+
+                  {/* Animated Content Transition */}
+                  <div className="mt-3 min-h-[70px]">
+                    <AnimatePresence mode="wait">
+                      <motion.p
+                        key={isReality ? "reality" : "recruiter"}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.2 }}
+                        className={`text-xs leading-relaxed font-sans ${
+                          isReality ? "text-amber-200/90 italic" : "text-zinc-300"
+                        }`}
+                      >
+                        {isReality ? item.realityDescription : item.recruiterDescription}
+                      </motion.p>
+                    </AnimatePresence>
+                  </div>
+
                   {/* Tag Chips */}
                   <div className={`flex flex-wrap gap-1.5 mt-4 ${isLeft ? "md:justify-end" : ""}`}>
                     {item.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="px-2 py-0.5 text-[9px] font-mono bg-zinc-900/60 border border-zinc-800/80 text-zinc-500 rounded"
+                        className="px-2 py-0.5 text-[9px] font-mono bg-zinc-900/60 border border-zinc-800/80 text-zinc-400 rounded"
                       >
                         {tag}
                       </span>

@@ -13,9 +13,10 @@ export function getPersonSchema(): string {
     "url": "https://fderuiter-portfolio.vercel.app",
     "image": "https://fderuiter-portfolio.vercel.app/favicon.ico",
     "jobTitle": "Principal Systems Engineer & Designer",
+    "email": "fpderuiter@gmail.com",
     "sameAs": [
       "https://github.com/fderuiter",
-      "https://linkedin.com"
+      "https://www.linkedin.com/in/frederick-de-ruiter-88012467/"
     ]
   };
 

@@ -33,24 +33,26 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
         <div className="absolute top-0 right-0 w-48 h-48 bg-brand-cyan/5 rounded-full blur-[60px] pointer-events-none" />
         
         <div>
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center gap-4 mb-5">
             {/* FDR Initials Badge */}
-            <div style={{ "--skill-glow": `0 0 15px ${hexToRgba(designManifest.colors["brand-cyan"], 0.05)}` } as React.CSSProperties}
-              className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-cyan/15 to-brand-blue/15 border border-brand-cyan/20 flex items-center justify-center font-mono font-black text-sm tracking-wider text-brand-cyan shadow-[var(--skill-glow)]">
+            <div
+              style={{ "--skill-glow": `0 0 15px ${hexToRgba(designManifest.colors["brand-cyan"], 0.05)}` } as React.CSSProperties}
+              className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-cyan/15 to-brand-blue/15 border border-brand-cyan/20 flex items-center justify-center font-mono font-black text-sm tracking-wider text-brand-cyan shadow-[var(--skill-glow)]"
+            >
               FDR
             </div>
             <div>
               <h3 className="text-sm font-mono font-bold tracking-widest text-brand-cyan uppercase">
-                System Architect
+                Creative Developer &amp; Systems Engineer
               </h3>
               <p className="text-[10px] font-mono text-zinc-500">
-                Principal Design Engineer
+                Design Engineering • Clinical Architecture • Civic Impact
               </p>
             </div>
           </div>
           
           <p className="text-sm text-neutral-300 leading-relaxed font-sans font-medium">
-            I am a full-stack design engineer who believes technology should ultimately serve and connect people. While my background is in building robust operational engines and responsive digital products, my core philosophy is rooted in creativity, playful problem-solving, and ensuring every system I build feels deeply human and accessible.
+            I build expressive digital experiences and resilient data infrastructure. My work bridges high-compliance healthcare architecture (GxP eCRF databases, CDISC data standards, neuroinformatics pipelines) with creative frontend engineering, canvas physics engines, and open-source civic initiatives. Whether designing viral public assets like the Laser Loon or architecting production clinical pipelines, I craft software with uncompromising craft, deep empathy, and human connection.
           </p>
         </div>
       </motion.div>
@@ -107,7 +109,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
         className="md:col-span-3 p-6 md:p-8 bg-zinc-900/5 border border-zinc-900/40 rounded-3xl relative overflow-hidden hover:border-zinc-900 transition-all duration-300"
       >
         <h3 className="text-xs font-mono font-bold tracking-widest text-zinc-400 uppercase mb-6 text-center md:text-left">
-          Core Technical Specializations
+          Core Technical Specializations &amp; Leadership
         </h3>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -116,12 +118,12 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
               01
             </div>
             <h4 className="text-xs font-mono font-bold text-neutral-200">
-              <Tooltip text="Making sure healthcare professionals get the right data to save lives safely.">
-                Clinical Integrations
+              <Tooltip text="Translating complex scientific protocols into validated eCRFs, automated edit checks, and FDA-compliant SDTM datasets.">
+                Clinical Data Architecture
               </Tooltip>
             </h4>
-            <p className="text-[11px] text-zinc-500 leading-relaxed">
-              Resilient XML streaming engines matching CDISC ODM schemas to FDA-compliant SDTM datasets.
+            <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
+              GxP eClinical database design, CDISC ODM streaming parsers, and 21 CFR Part 11 electronic records compliance.
             </p>
           </div>
           
@@ -130,12 +132,12 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
               02
             </div>
             <h4 className="text-xs font-mono font-bold text-neutral-200">
-              <Tooltip text="Crafting buttery-smooth animations that feel completely natural to the user.">
-                Layout Physics
+              <Tooltip text="Crafting 60FPS canvas simulations, raycasting engines, and mathematical proof tactile interfaces.">
+                Creative UI &amp; Physics
               </Tooltip>
             </h4>
-            <p className="text-[11px] text-zinc-500 leading-relaxed">
-              DOM-free userland canvas calculation loops synchronized to bypass layout reflow thrashes.
+            <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
+              Playable browser arcade games, hardware-accelerated canvas raycasting, and bespoke reactive web apps.
             </p>
           </div>
           
@@ -144,12 +146,12 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
               03
             </div>
             <h4 className="text-xs font-mono font-bold text-neutral-200">
-              <Tooltip text="Ensuring the app stays fast even when thousands of people use it at once.">
-                Serverless Scaling
+              <Tooltip text="Laser Loon CC0 viral campaign ($13.5k library fundraiser, NYT/WaPo coverage) and MNSCU statewide policy advocacy.">
+                Civic Impact &amp; Open Source
               </Tooltip>
             </h4>
-            <p className="text-[11px] text-zinc-500 leading-relaxed">
-              Prisma WebSocket connectivity mappings linking pools into cloud Neon databases at 1ms latencies.
+            <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
+              Laser Loon (F277) CC0 asset repository generating $13.5k+ for St. Paul libraries, plus statewide student policy leadership.
             </p>
           </div>
           
@@ -157,9 +159,13 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
             <div className="w-8 h-8 rounded-lg bg-purple-950/20 border border-purple-900/30 flex items-center justify-center font-mono font-bold text-xs text-purple-400">
               04
             </div>
-            <h4 className="text-xs font-mono font-bold text-neutral-200">Full-Stack Security</h4>
-            <p className="text-[11px] text-zinc-500 leading-relaxed">
-              Strict HTML sanitizers, encrypted HIPAA token rotation schemes, and dynamic sitemaps.
+            <h4 className="text-xs font-mono font-bold text-neutral-200">
+              <Tooltip text="Credentialed Alpine Ski Patroller (OEC/OET certified) performing rapid triage in high-stakes environments.">
+                Emergency Care &amp; Resilient Systems
+              </Tooltip>
+            </h4>
+            <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
+              Active Alpine Ski Patroller performing rapid triage in high-acuity mountain conditions; engineering fault-tolerant web systems.
             </p>
           </div>
         </div>

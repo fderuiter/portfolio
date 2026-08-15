@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { CaseStudyShowcase } from "@/components/CaseStudyShowcase";
 import { BaseCaseStudy } from "@/types/domain";
@@ -21,7 +22,6 @@ export default async function PortfolioHomePage() {
     const data = await prisma.caseStudy.findMany({
       where: { published: true },
       orderBy: { created_at: "desc" },
-      take: 3,
     });
     
     // Aggregated server-side hydration for each case study
@@ -55,21 +55,6 @@ export default async function PortfolioHomePage() {
       caseStudies = [
         {
           id: "mock-1",
-          slug: "schemaflow",
-          title: "SchemaFlow: Reactive Node Engine for Schema Composition",
-          primary_language: "TypeScript",
-          github_url: "https://github.com/fderuiter/SchemaFlow",
-          published: true,
-          simulated_telemetry: false,
-          tags: "TypeScript, React, Flow, Schemas, AST, Node-RED",
-          editorial_content: "A **reactive**, `visual graph editor` built in **TypeScript** and **React** that allows system architects to visually compose, validate, and compile complex `JSON Schema` structures in real time. Features highly responsive `node evaluation`, cyclical dependency detection, and live `code generation`.",
-          architectural_narrative: "Mock narrative",
-          created_at: new Date(),
-          updated_at: new Date(),
-          githubStats: getSimulatedStats("TypeScript"),
-        },
-        {
-          id: "mock-2",
           slug: "clinical-data-mapper",
           title: "Clinical Data Standards Engine: CDISC ODM and SDTM Integration",
           primary_language: "TypeScript",
@@ -84,20 +69,65 @@ export default async function PortfolioHomePage() {
           githubStats: getSimulatedStats("TypeScript"),
         },
         {
-          id: "mock-3",
-          slug: "aura-haskell",
-          title: "Aura: Language-Tailored Haskell Type Flow Analyzer",
-          primary_language: "Haskell",
-          github_url: "https://github.com/fderuiter/aura-haskell",
+          id: "mock-2",
+          slug: "cadence-clinical",
+          title: "Cadence Clinical: Protocol-Driven eCRF & Workflow Orchestrator",
+          primary_language: "TypeScript",
+          github_url: "https://github.com/fderuiter/cadence-clinical",
           published: true,
-          simulated_telemetry: true,
-          tags: "Haskell, GHC, Compiler, AST, Static Analysis",
-          editorial_content: "An advanced **Haskell** static analyzer and type inference engine that parses GHC ASTs, traces type flow, and detects compile-time architectural anti-patterns with near-instantaneous feedback loops.",
-          architectural_narrative: "<h3>The Challenge</h3><p>Haskell codebases are robust, but tracing complex monadic types or locating space leaks can be incredibly slow and taxing.</p>",
+          simulated_telemetry: false,
+          tags: "TypeScript, Next.js, eCRF, GxP, Clinical Trials, React, Zod, HIPAA",
+          editorial_content: "A modern, **full-stack clinical trial orchestrator** built in **TypeScript** and **Next.js** that translates complex protocol schedules into dynamic, validated `eCRF workflows`. Implements cross-form edit checks, real-time query management, and immutable `audit trails` meeting **21 CFR Part 11** standards.",
+          architectural_narrative: "Mock narrative",
           created_at: new Date(),
           updated_at: new Date(),
-          githubStats: getSimulatedStats("Haskell"),
-        }
+          githubStats: getSimulatedStats("TypeScript"),
+        },
+        {
+          id: "mock-3",
+          slug: "imednet-python-sdk",
+          title: "iMednet Python SDK: Clinical Trial Data Integration Client",
+          primary_language: "Python",
+          github_url: "https://github.com/fderuiter/imednet-python-sdk",
+          published: true,
+          simulated_telemetry: false,
+          tags: "Python, SDK, iMednet, API Client, Clinical Trials, HIPAA, Clinical Data",
+          editorial_content: "A **robust**, fully-typed `Python SDK` client for programmatic extraction and integration of clinical trial metadata and patient records from the `iMednet EDC` platform. Built for **biostatisticians** and **clinical data engineers**.",
+          architectural_narrative: "Mock narrative",
+          created_at: new Date(),
+          updated_at: new Date(),
+          githubStats: getSimulatedStats("Python"),
+        },
+        {
+          id: "mock-4",
+          slug: "wedding-website",
+          title: "The Nuptial Engine: Bespoke Event Portal & Guest Logistics",
+          primary_language: "TypeScript",
+          github_url: "https://github.com/fderuiter/wedding-website",
+          published: true,
+          simulated_telemetry: false,
+          tags: "TypeScript, Next.js, React, TailwindCSS, Framer Motion, Logistics, RSVP",
+          editorial_content: "A **bespoke event portal** and guest operations engine crafted in **Next.js** and **Framer Motion**. Features real-time multi-household `RSVP tracking`, interactive personalized travel timelines, accommodation logistics, and custom canvas physics animations built to survive zero-downtime family scrutiny.",
+          architectural_narrative: "Mock narrative",
+          created_at: new Date(),
+          updated_at: new Date(),
+          githubStats: getSimulatedStats("TypeScript"),
+        },
+        {
+          id: "mock-5",
+          slug: "schemaflow",
+          title: "SchemaFlow: Reactive Node Engine for Schema Composition",
+          primary_language: "TypeScript",
+          github_url: "https://github.com/fderuiter/SchemaFlow",
+          published: true,
+          simulated_telemetry: false,
+          tags: "TypeScript, React, Flow, Schemas, AST, Node-RED",
+          editorial_content: "A **reactive**, `visual graph editor` built in **TypeScript** and **React** that allows system architects to visually compose, validate, and compile complex `JSON Schema` structures in real time. Features highly responsive `node evaluation`, cyclical dependency detection, and live `code generation`.",
+          architectural_narrative: "Mock narrative",
+          created_at: new Date(),
+          updated_at: new Date(),
+          githubStats: getSimulatedStats("TypeScript"),
+        },
       ];
     }
   }
@@ -146,10 +176,10 @@ export default async function PortfolioHomePage() {
           <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
             {/* Title Block */}
             <h2 className="text-3xl md:text-4xl font-extrabold font-mono tracking-tight text-white text-center mb-2">
-              Unified Engineering Showcase
+              Unified Systems &amp; Design Showcase
             </h2>
             <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-8">
-              Verifiable Serverless Postgres Architecture
+              High-Compliance Clinical Architectures &amp; Interactive Web Craft
             </p>
 
             {/* Ambient Live System Status Chip */}
@@ -175,7 +205,7 @@ export default async function PortfolioHomePage() {
                     Interactive Physics &amp; UI Experiments
                   </h3>
                   <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-xl font-sans">
-                    Beyond standard systems engineering, explore playable canvas games, real-time raycasting physics, and low-latency interaction models.
+                    Beyond standard systems engineering, explore playable canvas arcade games, real-time laser raycasting physics, 32KB embedded simulators, and formal logic tactic puzzles.
                   </p>
                 </div>
                 <a
@@ -209,7 +239,7 @@ export default async function PortfolioHomePage() {
 
       {/* 2. Philosophy TextReveal Highlight */}
       <div className="bg-zinc-950 border-t border-zinc-900/50">
-        <TextReveal>I build resilient, type-safe infrastructure that connects low-latency client interfaces with scalable distributed systems, guaranteeing extreme security boundaries and exceptional performance.</TextReveal>
+        <TextReveal>I engineer high-craft digital experiences and resilient data systems, bridging clinical data rigor with creative UI physics, bespoke web applications, and meaningful civic impact.</TextReveal>
       </div>
 
       {/* 3. About Section */}
@@ -220,10 +250,10 @@ export default async function PortfolioHomePage() {
         
         <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
           <h2 className="text-3xl md:text-4xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
-            System Architect &amp; Design Engineer
+            Creative Developer &amp; Systems Architect
           </h2>
           <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-16 text-center">
-            Engineering High-Performance Technical Solutions
+            Bridging Healthcare Data Rigor, UI Physics, and Civic Leadership
           </p>
           
           {/* Dynamic Bento Skills Grid Card Layout */}
@@ -232,12 +262,12 @@ export default async function PortfolioHomePage() {
           </div>
 
           <h3 className="text-2xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
-            Professional Experience Timeline
+            Professional Experience &amp; Operational Journey
           </h3>
           <p className="text-xs font-mono text-zinc-400 tracking-widest uppercase mb-16 text-center">
             A Chronological Evolution of{" "}
             <Tooltip text="Ensuring reliability for users so the platform never goes down when they need it most.">
-              Systems Rigor
+              Systems Rigor &amp; Real-World Impact
             </Tooltip>
           </p>
 
@@ -258,19 +288,35 @@ export default async function PortfolioHomePage() {
             Let&apos;s Collaborate on Systems &amp; Design Engineering Projects
           </p>
           
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full max-w-2xl justify-center items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-4xl justify-center items-stretch">
             {/* Direct Email */}
             <a
-              href="mailto:contact@fderuiter.com"
-              aria-label="Send an email to Frederick de Ruiter at contact@fderuiter.com"
+              href="mailto:fpderuiter@gmail.com"
+              aria-label="Send an email to Frederick de Ruiter at fpderuiter@gmail.com"
               className="group flex flex-col items-center justify-center p-6 bg-zinc-900/20 border border-zinc-800/80 rounded-2xl transition-all duration-300 hover:border-brand-cyan/40 hover:bg-zinc-900/40 text-center cursor-pointer"
             >
               <span className="w-9 h-9 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-center font-mono text-zinc-400 group-hover:text-brand-cyan group-hover:border-brand-cyan/30 transition-colors mb-3">
                 ✉
               </span>
-              <span className="text-xs font-mono font-bold text-neutral-200 mb-1">Email Broadcast</span>
-              <span className="text-xs font-mono text-zinc-400">contact@fderuiter.com</span>
+              <span className="text-xs font-mono font-bold text-neutral-200 mb-1">Direct Email</span>
+              <span className="text-xs font-mono text-zinc-400">fpderuiter@gmail.com</span>
             </a>
+
+            {/* Schedule 1:1 */}
+            <Link
+              href="/schedule"
+              aria-label="Schedule a 1:1 meeting with Frederick de Ruiter on Google Calendar"
+              className="group flex flex-col items-center justify-center p-6 bg-brand-cyan/[0.04] border border-brand-cyan/30 rounded-2xl transition-all duration-300 hover:border-brand-cyan hover:bg-brand-cyan/[0.09] hover:shadow-[0_0_25px_rgba(6,182,212,0.15)] text-center cursor-pointer relative overflow-hidden"
+            >
+              <div className="absolute top-2 right-2 px-1.5 py-0.5 bg-brand-cyan/20 border border-brand-cyan/40 rounded text-[9px] font-mono text-brand-cyan uppercase tracking-wider">
+                Book
+              </div>
+              <span className="w-9 h-9 rounded-xl bg-zinc-950 border border-brand-cyan/40 flex items-center justify-center font-mono text-brand-cyan group-hover:scale-110 transition-transform mb-3">
+                📅
+              </span>
+              <span className="text-xs font-mono font-bold text-white mb-1">Schedule 1:1</span>
+              <span className="text-xs font-mono text-brand-cyan">Google Calendar ↗</span>
+            </Link>
             
             {/* GitHub Portal */}
             <a
@@ -289,7 +335,7 @@ export default async function PortfolioHomePage() {
 
             {/* LinkedIn Connection */}
             <a
-              href="https://linkedin.com"
+              href="https://www.linkedin.com/in/frederick-de-ruiter-88012467/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="View Frederick de Ruiter's LinkedIn profile externally"
@@ -299,7 +345,7 @@ export default async function PortfolioHomePage() {
                 in
               </span>
               <span className="text-xs font-mono font-bold text-neutral-200 mb-1">LinkedIn Network</span>
-              <span className="text-xs font-mono text-zinc-400">Profile Link ↗</span>
+              <span className="text-xs font-mono text-zinc-400">Connect on LinkedIn ↗</span>
             </a>
           </div>
           
