@@ -4,10 +4,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
-import React from "react";
 import { renderHook } from "@testing-library/react";
 import { cssPropertyCache, fontConfigCache } from "@/lib/graphics-engine";
-import { resolveThemeFonts, resolveSingleThemeFont } from "@/lib/layout-config";
+import { resolveSingleThemeFont } from "@/lib/layout-config";
 import { usePretextLayout } from "@/hooks/usePretextLayout";
 
 describe("Pretext LRU Font and Style Cache Suite", () => {
