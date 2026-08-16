@@ -18,8 +18,8 @@ import {
 import { VirtualDPad } from "@/components/ui/VirtualDPad";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { FullscreenButton } from "@/components/arcade/FullscreenButton";
-import { TabletOrientationHint } from "@/components/arcade/TabletOrientationHint";
-import { CRTCalibrationModal } from "@/components/arcade/CRTCalibrationModal";
+import { DynamicTabletOrientationHint as TabletOrientationHint } from "@/components/arcade/DynamicTabletOrientationHint";
+import { DynamicCRTCalibrationModal as CRTCalibrationModal } from "@/components/arcade/DynamicCRTCalibrationModal";
 import {
   CRTCalibrationConfig,
   loadCRTCalibration,
