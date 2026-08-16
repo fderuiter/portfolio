@@ -6,7 +6,12 @@ import Link from "next/link";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { clamp } from "@/lib/game-utils";
 import { useSearch } from "@/components/providers/SearchProvider";
-import { RetroLabyrinth } from "@/components/RetroLabyrinth";
+import dynamic from "next/dynamic";
+
+const RetroLabyrinth = dynamic(
+  () => import("@/components/RetroLabyrinth").then((mod) => mod.RetroLabyrinth),
+  { ssr: false }
+);
 import { getClosestMatches, type CaseStudyItem } from "@/lib/search-utils";
 
 interface UnifiedErrorLayoutProps {
