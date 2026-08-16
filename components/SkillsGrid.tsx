@@ -3,7 +3,7 @@
 import React from "react";
 import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTerminology } from "@/components/providers/TerminologyProvider";
@@ -21,6 +21,7 @@ interface SkillsGridProps {
 export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
   const { playSkillHover } = useAudio();
   const { simplified } = useTerminology();
+  const shouldReduceMotion = useReducedMotion();
 
   const dict = simplified ? dictionary.simplified : dictionary.detailed;
 
@@ -91,11 +92,15 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
                 {/* Progress bar */}
                 <div className="h-1 w-full bg-zinc-950 rounded-full overflow-hidden">
                   <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: `${lang.percentage}%` }}
+                    initial={{ scaleX: shouldReduceMotion ? 1 : 0 }}
+                    whileInView={{ scaleX: 1 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 1, delay: idx * 0.1 }}
-                    className="h-full bg-gradient-to-r from-brand-cyan to-brand-blue rounded-full"
+                    transition={shouldReduceMotion ? { duration: 0 } : { duration: 1, delay: idx * 0.1 }}
+                    style={{
+                      width: `${lang.percentage}%`,
+                      originX: 0,
+                    }}
+                    className="h-full bg-gradient-to-r from-brand-cyan to-brand-blue rounded-full transform-gpu will-change-transform"
                   />
                 </div>
               </div>
