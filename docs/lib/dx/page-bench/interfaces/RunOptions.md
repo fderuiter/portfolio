@@ -18,11 +18,51 @@ Defined in: [lib/dx/page-bench.ts:232](https://github.com/fderuiter/portfolio/bl
 
 ***
 
+### device?
+
+> `optional` **device?**: `object`
+
+Defined in: [lib/dx/page-bench.ts:237](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L237)
+
+#### hasTouch?
+
+> `optional` **hasTouch?**: `boolean`
+
+#### isMobile?
+
+> `optional` **isMobile?**: `boolean`
+
+#### userAgent?
+
+> `optional` **userAgent?**: `string`
+
+#### viewport
+
+> **viewport**: `object`
+
+##### viewport.height
+
+> **height**: `number`
+
+##### viewport.width
+
+> **width**: `number`
+
+***
+
+### isMobile?
+
+> `optional` **isMobile?**: `boolean`
+
+Defined in: [lib/dx/page-bench.ts:236](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L236)
+
+***
+
 ### onProgress?
 
 > `optional` **onProgress?**: (`progress`) => `void`
 
-Defined in: [lib/dx/page-bench.ts:236](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L236)
+Defined in: [lib/dx/page-bench.ts:243](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L243)
 
 #### Parameters
 

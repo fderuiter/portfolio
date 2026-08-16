@@ -6,7 +6,7 @@
 
 # Interface: PretextTextProps
 
-Defined in: [hooks/usePretextLayout.tsx:201](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L201)
+Defined in: [hooks/usePretextLayout.tsx:205](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L205)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [hooks/usePretextLayout.tsx:201](https://github.com/fderuiter/portfo
 
 > `optional` **activeTheme?**: `string`
 
-Defined in: [hooks/usePretextLayout.tsx:207](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L207)
+Defined in: [hooks/usePretextLayout.tsx:211](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L211)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [hooks/usePretextLayout.tsx:207](https://github.com/fderuiter/portfo
 
 > `optional` **children?**: `ReactNode`
 
-Defined in: [hooks/usePretextLayout.tsx:210](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L210)
+Defined in: [hooks/usePretextLayout.tsx:214](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L214)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [hooks/usePretextLayout.tsx:210](https://github.com/fderuiter/portfo
 
 > `optional` **className?**: `string`
 
-Defined in: [hooks/usePretextLayout.tsx:209](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L209)
+Defined in: [hooks/usePretextLayout.tsx:213](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L213)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [hooks/usePretextLayout.tsx:209](https://github.com/fderuiter/portfo
 
 > `optional` **fontFamilyVariable?**: `string`
 
-Defined in: [hooks/usePretextLayout.tsx:205](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L205)
+Defined in: [hooks/usePretextLayout.tsx:209](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L209)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [hooks/usePretextLayout.tsx:205](https://github.com/fderuiter/portfo
 
 > `optional` **fontSize?**: `number`
 
-Defined in: [hooks/usePretextLayout.tsx:203](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L203)
+Defined in: [hooks/usePretextLayout.tsx:207](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L207)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [hooks/usePretextLayout.tsx:203](https://github.com/fderuiter/portfo
 
 > **lineHeight**: `number`
 
-Defined in: [hooks/usePretextLayout.tsx:204](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L204)
+Defined in: [hooks/usePretextLayout.tsx:208](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L208)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [hooks/usePretextLayout.tsx:204](https://github.com/fderuiter/portfo
 
 > `optional` **semanticTag?**: `"h1"` \| `"h2"` \| `"h3"` \| `"h4"` \| `"h5"` \| `"h6"` \| `"p"` \| `"span"` \| `"div"` \| `"article"` \| `"section"`
 
-Defined in: [hooks/usePretextLayout.tsx:208](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L208)
+Defined in: [hooks/usePretextLayout.tsx:212](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L212)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [hooks/usePretextLayout.tsx:208](https://github.com/fderuiter/portfo
 
 > **text**: `string`
 
-Defined in: [hooks/usePretextLayout.tsx:202](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L202)
+Defined in: [hooks/usePretextLayout.tsx:206](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L206)
 
 ***
 
@@ -78,4 +78,4 @@ Defined in: [hooks/usePretextLayout.tsx:202](https://github.com/fderuiter/portfo
 
 > `optional` **translationMode?**: `string`
 
-Defined in: [hooks/usePretextLayout.tsx:206](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L206)
+Defined in: [hooks/usePretextLayout.tsx:210](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L210)

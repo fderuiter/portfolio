@@ -8,7 +8,7 @@
 
 > **runPageBenchmarks**(`options?`): `Promise`\<[`PageBenchmarkSummary`](../interfaces/PageBenchmarkSummary.md)[]\>
 
-Defined in: [lib/dx/page-bench.ts:242](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L242)
+Defined in: [lib/dx/page-bench.ts:249](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L249)
 
 Execute Page Benchmark Suite across specified routes
 
