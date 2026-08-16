@@ -8,7 +8,7 @@
 
 > **benchmarkGarminMemory**(`iterations?`): [`BenchmarkResult`](../interfaces/BenchmarkResult.md)[]
 
-Defined in: [lib/dx/bench.ts:350](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L350)
+Defined in: [lib/dx/bench.ts:349](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L349)
 
 Benchmark Garmin 32KB Embedded Memory Allocator & GC Loop
 

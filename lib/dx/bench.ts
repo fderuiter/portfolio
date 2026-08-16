@@ -16,6 +16,7 @@ import { evaluateFormula, lintFormula } from "../crf/ast-evaluator";
 import { parseFormula, extractVariables, generateTruthTable } from "../proof-utils";
 import { createInitialDuckGameState, stepDuckGame, enterDogPark, stepParkGame } from "../working-with-duck-engine";
 import { createInitialState, startGame, allocateVariable, updateGameSimulation, triggerGarbageCollection } from "../garmin-engine";
+import type { CRFField } from "../crf/types";
 import { colors, formatSection, renderTable } from "./utils";
 import path from "path";
 import fs from "fs";
@@ -235,8 +236,6 @@ export function benchmarkSVGCoordinateMath(iterations = 5000): BenchmarkResult[]
     },
   ];
 }
-
-import type { CRFField } from "../crf/types";
 
 /**
  * Benchmark Clinical AST Rule Evaluation & Formula Linting

@@ -91,7 +91,6 @@ export default async function PortfolioHomePage() {
       {/* Living Grid Hero */}
       <Hero />
 
-      {/* Case studies showcase section */}
       <div className="relative py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/60 bg-zinc-950 outline-none">
         <section id="case-studies" className="w-full flex flex-col items-center">
           {/* Decorative Blur Elements (desktop only to prevent mobile GPU rasterization drops) */}

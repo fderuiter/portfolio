@@ -139,7 +139,6 @@ describe("Page Benchmark Suite Utilities & Statistical Aggregator", () => {
       expect(md).toContain("Fleet Average LCP");
     });
   });
-
   describe("Mobile Emulation Configuration", () => {
     it("supports mobile device emulation options", () => {
       const mobileOptions = {
