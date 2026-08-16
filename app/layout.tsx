@@ -9,6 +9,7 @@ import { A11yProvider } from "@/components/providers/A11yProvider";
 import { AudioProvider } from "@/components/providers/AudioProvider";
 import { SearchProvider } from "@/components/providers/SearchProvider";
 import { TerminologyProvider } from "@/components/providers/TerminologyProvider";
+import { PersonaProvider } from "@/components/providers/PersonaProvider";
 import { Analytics } from "@vercel/analytics/next";
 import { SearchWrapper } from "@/components/SearchWrapper";
 
@@ -97,21 +98,23 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-zinc-950 text-foreground antialiased">
         <SkipToContent />
-        <TerminologyProvider>
-          <SearchProvider>
-            <A11yProvider>
-              <AudioProvider>
-                <Navbar />
-                <main id="main-content" tabIndex={-1} className="flex-grow flex flex-col focus:outline-none">
-                  {children}
-                </main>
-                <Footer />
-                <Analytics />
-                <SearchWrapper />
-              </AudioProvider>
-            </A11yProvider>
-          </SearchProvider>
-        </TerminologyProvider>
+        <PersonaProvider>
+          <TerminologyProvider>
+            <SearchProvider>
+              <A11yProvider>
+                <AudioProvider>
+                  <Navbar />
+                  <main id="main-content" tabIndex={-1} className="flex-grow flex flex-col focus:outline-none">
+                    {children}
+                  </main>
+                  <Footer />
+                  <Analytics />
+                  <SearchWrapper />
+                </AudioProvider>
+              </A11yProvider>
+            </SearchProvider>
+          </TerminologyProvider>
+        </PersonaProvider>
       </body>
     </html>
   );

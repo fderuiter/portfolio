@@ -106,9 +106,17 @@ describe("Timeline Inline-Marked RichNarrative Integration", () => {
     mockStorage.clear();
   });
 
-  it("should render timeline in reality mode initially", async () => {
+  it("should render timeline in reality mode when selected", async () => {
     await act(async () => {
       root.render(<Timeline />);
+    });
+
+    const buttons = Array.from(container.querySelectorAll("button"));
+    const realityBtn = buttons.find((btn) => btn.textContent?.includes("HANDS-ON REALITY"));
+    expect(realityBtn).toBeDefined();
+
+    await act(async () => {
+      realityBtn?.click();
     });
 
     // Should contain some reality descriptions

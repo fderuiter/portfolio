@@ -1,28 +1,47 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { hexToRgba } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { IconBriefcase, IconFlame, IconSwitchHorizontal } from "@tabler/icons-react";
 import { designManifest } from "@/lib/design-manifest";
-import { useTimelineState } from "@/hooks/useTimelineState";
 import { RichNarrative } from "@/components/RichNarrative";
-import { useTerminology } from "@/components/providers/TerminologyProvider";
+import { usePersona } from "@/components/providers/PersonaProvider";
 import { dictionary, TimelineItem } from "@/lib/i18n-dictionary";
 
 export type { TimelineItem };
 
 export const Timeline: React.FC = () => {
-  const { simplified, setSimplified } = useTerminology();
-  const {
-    globalMode,
-    handleGlobalToggle: handleTimelineGlobalToggle,
-    handleCardToggle,
-    getCardMode,
-  } = useTimelineState();
+  const { persona, setPersona } = usePersona();
+  const [localMode, setLocalMode] = useState<"recruiter" | "reality" | null>(null);
+  const [cardOverrides, setCardOverrides] = useState<Record<number, "recruiter" | "reality">>({});
+
+  const globalMode = localMode ?? (persona === "technical" ? "reality" : "recruiter");
+
+  const [prevPersona, setPrevPersona] = useState(persona);
+  if (persona !== prevPersona) {
+    setPrevPersona(persona);
+    setLocalMode(null);
+    setCardOverrides({});
+  }
 
   const handleGlobalToggle = (mode: "recruiter" | "reality") => {
-    handleTimelineGlobalToggle(mode);
+    setLocalMode(mode);
+    setPersona(mode === "reality" ? "technical" : "recruiter");
+    setCardOverrides({});
+  };
+
+  const handleCardToggle = (idx: number) => {
+    const currentCardMode = cardOverrides[idx] ?? globalMode;
+    const nextMode = currentCardMode === "recruiter" ? "reality" : "recruiter";
+    setCardOverrides((prev) => ({
+      ...prev,
+      [idx]: nextMode,
+    }));
+  };
+
+  const getCardMode = (idx: number) => {
+    return cardOverrides[idx] ?? globalMode;
   };
 
   // Centralize state career narratives: RichNarrative handles translation according to global terminology preference
