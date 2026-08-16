@@ -6,7 +6,7 @@
 
 # Interface: ClinicalDataCaseStudy
 
-Defined in: [types/domain.ts:17](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L17)
+Defined in: [types/domain.ts:19](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L19)
 
 ## Extends
 
@@ -26,11 +26,23 @@ Defined in: [types/domain.ts:8](https://github.com/fderuiter/portfolio/blob/main
 
 ***
 
+### commands\_json?
+
+> `optional` **commands\_json?**: `string` \| `null`
+
+Defined in: [types/domain.ts:12](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L12)
+
+#### Inherited from
+
+[`BaseCaseStudy`](BaseCaseStudy.md).[`commands_json`](BaseCaseStudy.md#commands_json)
+
+***
+
 ### created\_at
 
 > **created\_at**: `Date`
 
-Defined in: [types/domain.ts:12](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L12)
+Defined in: [types/domain.ts:14](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L14)
 
 #### Inherited from
 
@@ -78,7 +90,19 @@ Defined in: [types/domain.ts:2](https://github.com/fderuiter/portfolio/blob/main
 
 > **parsing\_mechanisms**: `"SAX_STREAMING"` \| `"DOM_PARSING"`
 
-Defined in: [types/domain.ts:19](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L19)
+Defined in: [types/domain.ts:21](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L21)
+
+***
+
+### playback\_json?
+
+> `optional` **playback\_json?**: `string` \| `null`
+
+Defined in: [types/domain.ts:13](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L13)
+
+#### Inherited from
+
+[`BaseCaseStudy`](BaseCaseStudy.md).[`playback_json`](BaseCaseStudy.md#playback_json)
 
 ***
 
@@ -110,7 +134,7 @@ Defined in: [types/domain.ts:9](https://github.com/fderuiter/portfolio/blob/main
 
 > **regulatory\_targets**: (`"FDA"` \| `"PMDA"` \| `"EMA"`)[]
 
-Defined in: [types/domain.ts:20](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L20)
+Defined in: [types/domain.ts:22](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L22)
 
 ***
 
@@ -142,7 +166,7 @@ Defined in: [types/domain.ts:3](https://github.com/fderuiter/portfolio/blob/main
 
 > **standards\_validated**: (`"CDISC_ODM"` \| `"CDISC_SDTM"`)[]
 
-Defined in: [types/domain.ts:18](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L18)
+Defined in: [types/domain.ts:20](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L20)
 
 ***
 
@@ -174,7 +198,7 @@ Defined in: [types/domain.ts:4](https://github.com/fderuiter/portfolio/blob/main
 
 > **updated\_at**: `Date`
 
-Defined in: [types/domain.ts:13](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L13)
+Defined in: [types/domain.ts:15](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L15)
 
 #### Inherited from
 

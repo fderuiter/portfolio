@@ -7,6 +7,7 @@ import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "../app/generated/prisma/client";
 import ws from "ws";
 import { scanFile, scanText } from "../lib/validation-scanner";
+import { IMEDNET_COMMANDS_OBJ, IMEDNET_PLAYBACK_OBJ } from "../lib/case-studies-data";
 
 neonConfig.webSocketConstructor = ws;
 
@@ -109,6 +110,8 @@ interface ODMClinicalData {
     published: true,
     simulated_telemetry: false,
     tags: "Python, SDK, iMednet, API Client, Clinical Trials, HIPAA, Clinical Data",
+    commands_json: JSON.stringify(IMEDNET_COMMANDS_OBJ),
+    playback_json: JSON.stringify(IMEDNET_PLAYBACK_OBJ),
     editorial_content: "A **robust**, fully-typed `Python SDK` client for programmatic extraction and integration of clinical trial metadata and patient records from the `iMednet EDC` platform. Built for **biostatisticians** and **clinical data engineers**.",
     architectural_narrative: `
 <h3>The Challenge</h3>

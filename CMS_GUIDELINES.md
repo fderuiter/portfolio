@@ -18,6 +18,8 @@ model CaseStudy {
   published               Boolean  @default(false)
   simulated_telemetry     Boolean  @default(false)
   tags                    String   // Comma-separated string or a related Tag model
+  commands_json           String?
+  playback_json           String?
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
 }
