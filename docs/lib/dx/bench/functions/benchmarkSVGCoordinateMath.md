@@ -8,7 +8,7 @@
 
 > **benchmarkSVGCoordinateMath**(`iterations?`): [`BenchmarkResult`](../interfaces/BenchmarkResult.md)[]
 
-Defined in: [lib/dx/bench.ts:207](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L207)
+Defined in: [lib/dx/bench.ts:212](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L212)
 
 Benchmark Browser-Free SVG Spline & Coordinate Math
 

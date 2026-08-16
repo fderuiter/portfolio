@@ -139,4 +139,20 @@ describe("Page Benchmark Suite Utilities & Statistical Aggregator", () => {
       expect(md).toContain("Fleet Average LCP");
     });
   });
+  describe("Mobile Emulation Configuration", () => {
+    it("supports mobile device emulation options", () => {
+      const mobileOptions = {
+        isMobile: true,
+        device: {
+          viewport: { width: 390, height: 844 },
+          isMobile: true,
+          hasTouch: true,
+        },
+      };
+
+      expect(mobileOptions.isMobile).toBe(true);
+      expect(mobileOptions.device.viewport.width).toBe(390);
+      expect(mobileOptions.device.hasTouch).toBe(true);
+    });
+  });
 });

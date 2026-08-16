@@ -24,25 +24,25 @@
         --accent: url(#fd-grad);
       }
     }
-    .bg-box { fill: var(--bg); stroke: var(--border); stroke-width: 1.5; rx: 7; }
-    .glyph-stem { fill: var(--stem); }
-    .glyph-bar { fill: var(--accent); }
+    .bg-box { fill: #090D16; stroke: #1E293B; stroke-width: 1.5; rx: 7; }
+    .glyph-stem { fill: #F8FAFC; }
+    .glyph-bar { fill: url(#fd-grad); }
     .telemetry-dot { fill: #10B981; filter: url(#glow); }
   </style>
 
   <!-- Container Tile -->
-  <rect class="bg-box" x="1" y="1" width="30" height="30" />
+  <rect class="bg-box" fill="#090D16" stroke="#1E293B" stroke-width="1.5" rx="7" x="1" y="1" width="30" height="30" />
 
   <!-- Monogram Architecture 'F' -->
   <!-- Vertical backbone -->
-  <rect class="glyph-stem" x="7" y="7" width="4" height="18" rx="1.5" />
+  <rect class="glyph-stem" fill="#F8FAFC" x="7" y="7" width="4" height="18" rx="1.5" />
   
   <!-- Top Primary Bar -->
-  <rect class="glyph-bar" x="13" y="7" width="9" height="4" rx="1.5" />
+  <rect class="glyph-bar" fill="url(#fd-grad)" x="13" y="7" width="9" height="4" rx="1.5" />
   
   <!-- Middle Secondary Bar -->
-  <rect class="glyph-bar" x="13" y="14" width="6" height="3.5" rx="1.5" />
+  <rect class="glyph-bar" fill="url(#fd-grad)" x="13" y="14" width="6" height="3.5" rx="1.5" />
 
   <!-- Real-time Systems Telemetry Dot -->
-  <circle class="telemetry-dot" cx="24.5" cy="7.5" r="2" />
+  <circle class="telemetry-dot" fill="#10B981" filter="url(#glow)" cx="24.5" cy="7.5" r="2" />
 </svg>

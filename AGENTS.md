@@ -19,11 +19,13 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Route entrypoint files (`app/**/page.tsx`) must directly declare root header clearance padding (`pt-24` to `pt-32` or `min-h-screen`/`min-h-dvh` or `<PageLayout />`) to satisfy static DX Doctor invariant audits.
 
 ### 3. Route Indexing & Discovery
-- Any new first-class route or interactive tool must be synchronized across the 4-Point Discovery Matrix:
+- Any new first-class route or interactive tool must be synchronized across the 5-Point Discovery Matrix:
   - `components/CommandPalette.tsx` under `staticNavs` with Tabler/Lucide icon, status badge, tech stack tags, and preview highlights.
   - `components/Navbar.tsx` under the appropriate desktop dropdown (`SYSTEMS_ITEMS` / `ARCADE_ITEMS`) and mobile slide-out drawer.
   - `components/Footer.tsx` under the corresponding navigation category and status link.
   - `app/sitemap.ts` and `lib/seo-metadata.ts` under `ROUTE_METADATA_CONFIGS` with canonical path and change frequency.
+  - `app/<route>/opengraph-image.tsx` providing a 1200x630 dynamic social preview card matching the systems architecture design system (`lib/og-image.tsx`).
+
 
 ### 4. Hydration & React Best Practices
 - For client-only rendering or browser API reads, prefer `useSyncExternalStore` over `useEffect` + `useState` hydration flags.
@@ -104,5 +106,16 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Dead code and orphaned exports must be inspected via `npm run dx dead-code` and monitored in `lib/dx/doctor.ts`.
 - Production bundle chunks and initial shared footprints must comply with performance budgets via `npm run dx analyze` and `lib/dx/bundle-guard.ts`.
 - VS Code workspace configurations (`.vscode/`) and `.editorconfig` must remain valid and intact.
+### 16. Mobile Runtime Performance & Animation Invariants
+- **Background Animation Throttling**: Background SVG and particle canvas animations (e.g. `AnimatedGridPattern`, collision beams) must use hardware-accelerated CSS keyframes on mobile viewports (`< 768px`) or be clamped to static composited loops. They must never trigger continuous React `setState` updates or loop `onAnimationComplete` callbacks in mobile render trees.
+- **GPU Blur & Compositing Bounds**: Heavy gaussian blur layers (`blur-[100px]` or greater) and overlapping multi-layer `backdrop-blur` filters must be suppressed or substituted with lightweight CSS radial gradients (`hidden sm:block` or responsive classes) on mobile devices to prevent GPU rasterization stalls during scrolling.
+- **ResizeObserver Dimension Isolation**: Dynamic text layout engines and Pretext observers must isolate width measurements (`Math.floor(contentRect.width)`) from height fluctuations to prevent mobile browser URL bar / address-bar collapse during scrolling from triggering unnecessary canvas text layout recalculations.
+- **Touch & Synthesizer Isolation**: Synthesized Web Audio effects tied to mouse cursor movement (such as hover frequencies) must defensively check `window.matchMedia('(hover: none)').matches` to avoid unwanted audio thread contention during mobile touch-scrolling. Interactive touch buttons and cards must supply instant tactile scaling (`active:scale-[0.98]`).
+
+### 17. Brand Assets, Headless SVG Rasterization & Satori OpenGraph Invariants
+- **Headless SVG Rasterization Fallbacks**: SVGs consumed by Node.js build pipelines, `sharp`, or `librsvg` must define explicit inline presentation attributes (`fill="..."`, `stroke="..."`) on geometry elements in addition to CSS class styles, preventing unparsed CSS custom properties from rasterizing as solid black silhouettes.
+- **Satori (`next/og`) Layout Flow**: Dynamic `ImageResponse` social card generators (`lib/og-image.tsx`, `app/**/opengraph-image.tsx`) must avoid `zIndex` properties, relying strictly on flexbox and natural DOM document order for ambient glow and card stacking.
+- **Asset Hygiene & PWA Manifest Parity**: Default boilerplate assets (`vercel.svg`, `next.svg`, `file.svg`, `globe.svg`, `window.svg`, default 25KB placeholder `favicon.ico`) must be removed, maintaining dedicated multi-size binary ICOs (16/32/48px), Apple Touch icons (180x180), PWA icons (192/512px), and dynamic `app/manifest.ts` metadata synchronization.
+
 
 

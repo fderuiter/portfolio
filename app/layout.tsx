@@ -16,11 +16,15 @@ import { SearchWrapper } from "@/components/SearchWrapper";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+  preload: true,
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -36,7 +40,11 @@ export const metadata: Metadata = {
       { url: "/favicon.ico", sizes: "any" },
     ],
     shortcut: "/icon.svg",
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
+  manifest: "/manifest.webmanifest",
   alternates: {
     canonical: "/",
   },

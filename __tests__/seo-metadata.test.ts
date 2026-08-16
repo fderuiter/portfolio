@@ -13,6 +13,7 @@ import {
 import { ROUTE_METADATA_CONFIGS, buildRouteMetadata } from "@/lib/seo-metadata";
 import robots from "@/app/robots";
 import sitemap from "@/app/sitemap";
+import manifest from "@/app/manifest";
 
 vi.mock("next/font/google", () => ({
   Inter: () => ({ variable: "--font-inter" }),
@@ -155,7 +156,7 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     expect(urls).toContain(`${SITE_BASE_URL}/schedule`);
   });
 
-  it("root layout metadata configures SVG and ICO icon fallbacks", async () => {
+  it("root layout metadata configures SVG, ICO, Apple Touch, and web manifest", async () => {
     const { metadata } = await import("@/app/layout");
     expect(metadata.icons).toBeDefined();
     expect(metadata.icons).toEqual({
@@ -164,7 +165,23 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
         { url: "/favicon.ico", sizes: "any" },
       ],
       shortcut: "/icon.svg",
+      apple: [
+        { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      ],
     });
+    expect(metadata.manifest).toBe("/manifest.webmanifest");
+  });
+
+  it("app/manifest.ts generates valid PWA Web App Manifest", () => {
+    const data = manifest();
+    expect(data.name).toContain("Frederick de Ruiter");
+    expect(data.short_name).toBe("F. de Ruiter");
+    expect(data.start_url).toBe("/");
+    expect(data.display).toBe("standalone");
+    expect(data.background_color).toBe("#090D16");
+    expect(data.theme_color).toBe("#06B6D4");
+    expect(data.icons).toBeDefined();
+    expect(data.icons?.length).toBeGreaterThanOrEqual(4);
   });
 
   it("app/icon.svg and public/favicon.svg exist and contain valid SVG monogram architecture", () => {
@@ -185,6 +202,73 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
       expect(content).toContain("</svg>");
     }
   });
+
+  it("custom branded favicon.ico, apple-touch-icon, and PWA icons exist as binary assets", () => {
+    const appFaviconPath = path.resolve(process.cwd(), "app/favicon.ico");
+    const publicFaviconPath = path.resolve(process.cwd(), "public/favicon.ico");
+    const appleTouchPath = path.resolve(process.cwd(), "public/apple-touch-icon.png");
+    const icon192Path = path.resolve(process.cwd(), "public/icon-192.png");
+    const icon512Path = path.resolve(process.cwd(), "public/icon-512.png");
+
+    for (const filePath of [appFaviconPath, publicFaviconPath, appleTouchPath, icon192Path, icon512Path]) {
+      expect(fs.existsSync(filePath)).toBe(true);
+      const stat = fs.statSync(filePath);
+      expect(stat.size).toBeGreaterThan(500);
+    }
+
+    // Ensure favicon.ico is not the 25KB+ default Next.js/Vercel placeholder
+    const faviconStat = fs.statSync(appFaviconPath);
+    expect(faviconStat.size).toBeLessThan(10000);
+  });
+
+  it("createSocialImageResponse generates valid ImageResponse with 1200x630 dimensions", async () => {
+    const { createSocialImageResponse, OG_IMAGE_SIZE, OG_IMAGE_CONTENT_TYPE } = await import("@/lib/og-image");
+    expect(OG_IMAGE_SIZE).toEqual({ width: 1200, height: 630 });
+    expect(OG_IMAGE_CONTENT_TYPE).toBe("image/png");
+
+    const res = createSocialImageResponse({
+      title: "Test Social Preview",
+      description: "Test description",
+      badge: "TEST // MODE",
+      tags: ["TypeScript", "Vitest"],
+    });
+
+    expect(res).toBeDefined();
+    expect(res.headers.get("content-type")).toContain("image/png");
+  });
+
+  it("root opengraph-image and twitter-image generators return valid responses", async () => {
+    const { default: rootOgImage, size: ogSize } = await import("@/app/opengraph-image");
+    const { default: rootTwitterImage, size: twitterSize } = await import("@/app/twitter-image");
+
+    expect(ogSize).toEqual({ width: 1200, height: 630 });
+    expect(twitterSize).toEqual({ width: 1200, height: 630 });
+
+    const ogRes = rootOgImage();
+    const twRes = rootTwitterImage();
+
+    expect(ogRes).toBeDefined();
+    expect(twRes).toBeDefined();
+    expect(ogRes.headers.get("content-type")).toContain("image/png");
+    expect(twRes.headers.get("content-type")).toContain("image/png");
+  });
+
+  it("interactive hub opengraph-image generators return valid responses", async () => {
+    const { default: arcadeOg } = await import("@/app/arcade/opengraph-image");
+    const { default: proofOg } = await import("@/app/proof/opengraph-image");
+    const { default: simulatorOg } = await import("@/app/simulator/opengraph-image");
+    const { default: stackOg } = await import("@/app/stack/opengraph-image");
+    const { default: scheduleOg } = await import("@/app/schedule/opengraph-image");
+    const { default: caseStudiesOg } = await import("@/app/case-studies/opengraph-image");
+
+    for (const generator of [arcadeOg, proofOg, simulatorOg, stackOg, scheduleOg, caseStudiesOg]) {
+      const res = generator();
+      expect(res).toBeDefined();
+      expect(res.headers.get("content-type")).toContain("image/png");
+    }
+  });
 });
+
+
 
 

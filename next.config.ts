@@ -7,6 +7,43 @@ const nextConfig: NextConfig = {
       exclude: ["error", "warn"],
     },
   },
+  images: {
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [360, 414, 640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 31536000,
+  },
+  async headers() {
+    return [
+      {
+        source: "/:all*(svg|jpg|png|webp|avif|glb|obj|ico|txt)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/models/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/duck/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return [
       {

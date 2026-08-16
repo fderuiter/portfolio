@@ -93,6 +93,7 @@
 - [lib/neuro/scenarios](lib/neuro/scenarios/README.md)
 - [lib/neuro/types](lib/neuro/types/README.md)
 - [lib/neuro/volume-generator](lib/neuro/volume-generator/README.md)
+- [lib/og-image](lib/og-image/README.md)
 - [lib/proof-utils](lib/proof-utils/README.md)
 - [lib/quasi-perfect](lib/quasi-perfect/README.md)
 - [lib/quasi-perfect-puzzler](lib/quasi-perfect-puzzler/README.md)

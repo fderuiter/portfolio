@@ -1,7 +1,7 @@
 // Source: https://magicui.design/docs/components/animated-grid-pattern
 "use client"
 
-import {
+import React, {
   useCallback,
   useEffect,
   useId,
@@ -31,6 +31,22 @@ type Square = {
   iteration: number
 }
 
+function subscribeMobile(callback: () => void) {
+  if (typeof window === "undefined" || !window.matchMedia) return () => {};
+  const mql = window.matchMedia("(max-width: 767px)");
+  mql.addEventListener("change", callback);
+  return () => mql.removeEventListener("change", callback);
+}
+
+function getMobileSnapshot(): boolean {
+  if (typeof window === "undefined" || !window.matchMedia) return false;
+  return window.matchMedia("(max-width: 767px)").matches;
+}
+
+function getMobileServerSnapshot(): boolean {
+  return false;
+}
+
 export function AnimatedGridPattern({
   width = 40,
   height = 40,
@@ -46,11 +62,12 @@ export function AnimatedGridPattern({
 }: AnimatedGridPatternProps) {
   const id = useId()
   const shouldReduceMotion = useReducedMotion()
+  const isMobile = React.useSyncExternalStore(subscribeMobile, getMobileSnapshot, getMobileServerSnapshot)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
   const containerRef = useResizeObserver<SVGSVGElement>((entry) => {
     setDimensions((currentDimensions) => {
-      const nextWidth = entry.contentRect.width
-      const nextHeight = entry.contentRect.height
+      const nextWidth = Math.floor(entry.contentRect.width)
+      const nextHeight = Math.floor(entry.contentRect.height)
       if (
         currentDimensions.width === nextWidth &&
         currentDimensions.height === nextHeight
@@ -64,10 +81,12 @@ export function AnimatedGridPattern({
 
   const getPos = useCallback((): [number, number] => {
     return [
-      Math.floor((Math.random() * dimensions.width) / width),
-      Math.floor((Math.random() * dimensions.height) / height),
+      Math.floor((Math.random() * (dimensions.width || 800)) / width),
+      Math.floor((Math.random() * (dimensions.height || 600)) / height),
     ]
   }, [dimensions.height, dimensions.width, height, width])
+
+  const effectiveCount = isMobile ? Math.min(10, numSquares) : numSquares
 
   const generateSquares = useCallback(
     (count: number) => {
@@ -82,6 +101,8 @@ export function AnimatedGridPattern({
 
   const updateSquarePosition = useCallback(
     (squareId: number) => {
+      if (isMobile || shouldReduceMotion) return;
+
       setSquares((currentSquares) => {
         const current = currentSquares[squareId]
         if (!current || current.id !== squareId) return currentSquares
@@ -96,17 +117,15 @@ export function AnimatedGridPattern({
         return nextSquares
       })
     },
-    [getPos]
+    [getPos, isMobile, shouldReduceMotion]
   )
 
   useEffect(() => {
     if (dimensions.width && dimensions.height) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSquares(generateSquares(numSquares))
+      setSquares(generateSquares(effectiveCount))
     }
-  }, [dimensions.width, dimensions.height, generateSquares, numSquares])
-
-  // Managed by unified useResizeObserver hook
+  }, [dimensions.width, dimensions.height, generateSquares, effectiveCount])
 
   return (
     <svg
@@ -136,29 +155,60 @@ export function AnimatedGridPattern({
       </defs>
       <rect width="100%" height="100%" fill={`url(#${id})`} />
       <svg x={x} y={y} className="overflow-visible">
-        {squares.map(({ pos: [squareX, squareY], id, iteration }, index) => (
-          <motion.rect
-            initial={shouldReduceMotion ? undefined : { opacity: 0 }}
-            animate={shouldReduceMotion ? undefined : { opacity: maxOpacity }}
-            transition={shouldReduceMotion ? undefined : {
-              duration,
-              repeat: 1,
-              delay: index * 0.1,
-              repeatType: "reverse",
-              repeatDelay,
-            }}
-            onAnimationComplete={shouldReduceMotion ? undefined : () => updateSquarePosition(id)}
-            key={shouldReduceMotion ? `${id}` : `${id}-${iteration}`}
-            opacity={shouldReduceMotion ? maxOpacity : undefined}
-            width={width - 1}
-            height={height - 1}
-            x={squareX * width + 1}
-            y={squareY * height + 1}
-            fill="currentColor"
-            strokeWidth="0"
-          />
-        ))}
+        {isMobile ? (
+          squares.map(({ pos: [squareX, squareY], id: sqId }, index) => (
+            <rect
+              key={sqId}
+              width={width - 1}
+              height={height - 1}
+              x={squareX * width + 1}
+              y={squareY * height + 1}
+              fill="currentColor"
+              strokeWidth="0"
+              className={shouldReduceMotion ? undefined : "animate-grid-square"}
+              style={
+                shouldReduceMotion
+                  ? { opacity: maxOpacity }
+                  : ({
+                      "--grid-square-opacity": maxOpacity,
+                      "--grid-square-duration": `${duration}s`,
+                      "--grid-square-delay": `${(index % 8) * 0.4}s`,
+                    } as React.CSSProperties)
+              }
+            />
+          ))
+        ) : (
+          squares.map(({ pos: [squareX, squareY], id: sqId, iteration }, index) => (
+            <motion.rect
+              initial={shouldReduceMotion ? undefined : { opacity: 0 }}
+              animate={shouldReduceMotion ? undefined : { opacity: maxOpacity }}
+              transition={
+                shouldReduceMotion
+                  ? undefined
+                  : {
+                      duration,
+                      repeat: 1,
+                      delay: index * 0.1,
+                      repeatType: "reverse",
+                      repeatDelay,
+                    }
+              }
+              onAnimationComplete={
+                shouldReduceMotion ? undefined : () => updateSquarePosition(sqId)
+              }
+              key={shouldReduceMotion ? `${sqId}` : `${sqId}-${iteration}`}
+              opacity={shouldReduceMotion ? maxOpacity : undefined}
+              width={width - 1}
+              height={height - 1}
+              x={squareX * width + 1}
+              y={squareY * height + 1}
+              fill="currentColor"
+              strokeWidth="0"
+            />
+          ))
+        )}
       </svg>
     </svg>
   )
 }
+

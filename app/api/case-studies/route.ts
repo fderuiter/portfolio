@@ -17,7 +17,11 @@ export async function GET() {
       }
     });
 
-    return NextResponse.json(studies);
+    return NextResponse.json(studies, {
+      headers: {
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600",
+      },
+    });
   } catch (err) {
     console.error("API Case Studies search data fetch failed:", err);
     return NextResponse.json(

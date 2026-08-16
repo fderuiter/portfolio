@@ -358,7 +358,8 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
       },
     ];
 
-    const studyItems: PaletteItem[] = studies.map((study) => {
+    const safeStudies = Array.isArray(studies) ? studies : [];
+    const studyItems: PaletteItem[] = safeStudies.map((study) => {
       const parsedTags = study.tags
         ? study.tags.split(",").map((t) => t.trim()).filter(Boolean)
         : [];
@@ -791,23 +792,54 @@ export const CommandPalette: React.FC = () => {
     }
   }, [isOpen, mounted]);
 
-  // 2. Fetch search case studies dynamically on mount
+  // 2. Fetch search case studies on-demand when palette opens or during idle time
   useEffect(() => {
     if (!mounted) return;
+    if (studies.length > 0) return;
+
+    let isSubscribed = true;
+
     const loadStudies = async () => {
       try {
         const res = await fetch("/api/case-studies");
-        if (res.ok) {
+        if (res.ok && isSubscribed) {
           const data = await res.json();
-          setStudies(data);
+          if (Array.isArray(data)) {
+            setStudies(data);
+          }
         }
       } catch (err) {
         console.error("Failed to load search dynamic case studies:", err);
       }
     };
 
-    loadStudies();
-  }, [mounted]);
+    if (isOpen) {
+      loadStudies();
+    } else if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      const idleWindow = window as Window & {
+        requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+        cancelIdleCallback?: (id: number) => void;
+      };
+      if (typeof idleWindow.requestIdleCallback === "function") {
+        const idleId = idleWindow.requestIdleCallback(
+          () => {
+            loadStudies();
+          },
+          { timeout: 4000 }
+        );
+        return () => {
+          isSubscribed = false;
+          if (typeof idleWindow.cancelIdleCallback === "function") {
+            idleWindow.cancelIdleCallback(idleId);
+          }
+        };
+      }
+    }
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [mounted, isOpen, studies.length]);
 
   const handleClose = () => {
     closeSearch();
