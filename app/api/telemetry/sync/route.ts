@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { Redis } from "@upstash/redis";
+import { redis } from "@/lib/redis";
 import { validateRouteInitialization, validateSyncRequest } from "@/lib/security";
 import { SyncParamsSchema } from "@/lib/schemas";
 import * as Sentry from "@sentry/nextjs";
@@ -39,11 +39,6 @@ export async function GET(req: NextRequest) {
 
     const BATCH_SIZE = parsedQuery.data.batch;
 
-    const redis = new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL || "http://localhost:8079",
-      token: process.env.UPSTASH_REDIS_REST_TOKEN || "example_token",
-    });
-    
     const p = redis.pipeline();
     for (let i = 0; i < BATCH_SIZE; i++) {
       p.rpop("telemetry_buffer");

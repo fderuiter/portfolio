@@ -1,19 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import crypto from "crypto";
-import { Redis } from "@upstash/redis";
+import { redis } from "@/lib/redis";
 import { TelemetryEventSchema, RateLimitParamsSchema } from "@/lib/schemas";
 import { Ratelimit } from "@upstash/ratelimit";
 import * as Sentry from "@sentry/nextjs";
 
 // Enforce standard dynamic route behavior in Next.js 16 to query live datastores safely
 export const dynamic = "force-dynamic";
-
-// Initialize the standard Redis client using process env
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL || "http://localhost:8079",
-  token: process.env.UPSTASH_REDIS_REST_TOKEN || "example_token",
-});
 
 // Ephemeral/local memory cache Map for the SDK
 const sdkEphemeralCache = new Map<string, number>();
@@ -223,11 +217,6 @@ export async function POST(req: NextRequest) {
       ]);
     } catch (dbErr) {
       console.warn("Primary DB write failed or timed out. Buffering to secondary store.", dbErr);
-      
-      const redis = new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL || "http://localhost:8079",
-        token: process.env.UPSTASH_REDIS_REST_TOKEN || "example_token",
-      });
       
       // Push event into Redis list for background synchronization and ensure TTL
       const p = redis.pipeline();
