@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useSyncExternalStore } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   IconTerminal,
@@ -52,8 +52,6 @@ import { useAudio } from "@/components/providers/AudioProvider";
 import { useStudioHashParams } from "@/hooks/useStudioHashParams";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
-
-import dynamic from "next/dynamic";
 
 interface TerminalLog {
   id: string;
@@ -223,19 +221,19 @@ export function ProofWorkspaceSkeleton() {
   );
 }
 
-const ProofWorkspace = dynamic(
-  () => import("./page").then((mod) => mod.ProofWorkspaceClient),
-  {
-    ssr: false,
-    loading: () => <ProofWorkspaceSkeleton />,
-  }
-);
+const emptySubscribe = () => () => {};
 
 export default function ProofWorkspacePage() {
+  const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
+
   if (typeof process !== "undefined" && process.env.NODE_ENV === "test") {
     return <ProofWorkspaceClient />;
   }
-  return <ProofWorkspace />;
+
+  if (!isMounted) {
+    return <ProofWorkspaceSkeleton />;
+  }
+  return <ProofWorkspaceClient />;
 }
 
 export function ProofWorkspaceClient() {
