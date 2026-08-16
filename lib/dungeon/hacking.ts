@@ -2,6 +2,7 @@
  * Cybersecurity Hex Matrix Buffer & Sequence Bypass Minigame Engine
  */
 
+import { clamp } from "../game-utils";
 import { HexCell, HexMatrixPuzzle } from "./types";
 
 const HEX_BYTE_POOL = ["1C", "E9", "7A", "BD", "55", "FF", "A3", "4D", "3B", "C2"];
@@ -29,7 +30,7 @@ export function generateHexMatrixPuzzle(difficulty: number = 1): HexMatrixPuzzle
   }
 
   // Construct a guaranteed solvable target sequence
-  const sequenceLength = Math.min(4, Math.max(2, difficulty + 1));
+  const sequenceLength = clamp(difficulty + 1, 2, 4);
   const targetSequence: string[] = [];
 
   let curRow = 0;

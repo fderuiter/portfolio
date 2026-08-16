@@ -5,6 +5,7 @@
  */
 
 import { ScenarioId, VoxelCoord } from "./types";
+import { clamp } from "../game-utils";
 
 export interface SyntheticVolume {
   dimensions: { width: number; height: number; depth: number };
@@ -234,7 +235,7 @@ export function extractSlice(
     // Slice along Z axis -> X (width) vs Y (height)
     sliceW = width;
     sliceH = height;
-    const clampedZ = Math.max(0, Math.min(depth - 1, sliceIndex));
+    const clampedZ = clamp(sliceIndex, 0, depth - 1);
     const pixels = new Uint8Array(sliceW * sliceH);
     const mask = new Uint8Array(sliceW * sliceH);
     const wm = new Uint8Array(sliceW * sliceH);
@@ -253,7 +254,7 @@ export function extractSlice(
     // Slice along Y axis -> X (width) vs Z (height)
     sliceW = width;
     sliceH = depth;
-    const clampedY = Math.max(0, Math.min(height - 1, sliceIndex));
+    const clampedY = clamp(sliceIndex, 0, height - 1);
     const pixels = new Uint8Array(sliceW * sliceH);
     const mask = new Uint8Array(sliceW * sliceH);
     const wm = new Uint8Array(sliceW * sliceH);
@@ -273,7 +274,7 @@ export function extractSlice(
     // Sagittal: Slice along X axis -> Y (width) vs Z (height)
     sliceW = height;
     sliceH = depth;
-    const clampedX = Math.max(0, Math.min(width - 1, sliceIndex));
+    const clampedX = clamp(sliceIndex, 0, width - 1);
     const pixels = new Uint8Array(sliceW * sliceH);
     const mask = new Uint8Array(sliceW * sliceH);
     const wm = new Uint8Array(sliceW * sliceH);

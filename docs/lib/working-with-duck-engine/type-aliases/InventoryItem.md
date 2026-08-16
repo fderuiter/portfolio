@@ -8,4 +8,4 @@
 
 > **InventoryItem** = `"tennis-ball"` \| `"kong"` \| `"squeaky-toy"` \| `"treat"` \| `"frisbee"`
 
-Defined in: [lib/working-with-duck-engine.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L50)
+Defined in: [lib/working-with-duck-engine.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L51)

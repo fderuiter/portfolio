@@ -8,7 +8,7 @@
 
 > **computeShortestTour**(`startX`, `startY`, `nodes`, `exitX`, `exitY`): `object`
 
-Defined in: [lib/dungeon/tsp.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/tsp.ts#L18)
+Defined in: [lib/dungeon/tsp.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/tsp.ts#L19)
 
 Recalculates the shortest TSP route through remaining unvisited landmark nodes
 using nearest-neighbor heuristic starting from player position.

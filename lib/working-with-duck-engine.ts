@@ -2,6 +2,7 @@
  * Working With Duck - Deterministic Game Engine & State Machine
  * Zero external framework dependencies. 60 FPS deterministic loop.
  */
+import { clamp } from "./game-utils";
 
 export const CANVAS_WIDTH = 800;
 export const CANVAS_HEIGHT = 500;
@@ -489,8 +490,8 @@ export function clampBounds(x: number, y: number): { x: number; y: number } {
   const safeX = Number.isFinite(x) ? x : CANVAS_WIDTH / 2;
   const safeY = Number.isFinite(y) ? y : CANVAS_HEIGHT / 2;
   return {
-    x: Math.max(MIN_DUCK_X, Math.min(MAX_DUCK_X, safeX)),
-    y: Math.max(MIN_DUCK_Y, Math.min(MAX_DUCK_Y, safeY)),
+    x: clamp(safeX, MIN_DUCK_X, MAX_DUCK_X),
+    y: clamp(safeY, MIN_DUCK_Y, MAX_DUCK_Y),
   };
 }
 
@@ -721,10 +722,10 @@ export function stepDuckGame(state: WorkingWithDuckState): WorkingWithDuckState 
   const thirstRate = 0.03 + state.currentLevel * 0.01;
   const hungerRate = 0.02 + state.currentLevel * 0.01;
 
-  let nextExcitement = Math.min(100, Math.max(0, state.excitement + excitementRate));
-  let nextBladder = Math.min(100, Math.max(0, state.bladder + bladderRate));
-  let nextThirst = Math.min(100, Math.max(0, state.thirst + thirstRate));
-  let nextHunger = Math.min(100, Math.max(0, state.hunger + hungerRate));
+  let nextExcitement = clamp(state.excitement + excitementRate, 0, 100);
+  let nextBladder = clamp(state.bladder + bladderRate, 0, 100);
+  let nextThirst = clamp(state.thirst + thirstRate, 0, 100);
+  let nextHunger = clamp(state.hunger + hungerRate, 0, 100);
   let nextNaughtyVsGood = state.naughtyVsGood;
   let nextLastImpulseTick = state.lastImpulseTick;
   const nextIndoorPuddles = state.indoorPuddles ? [...state.indoorPuddles] : [];
@@ -2307,8 +2308,8 @@ export function throwParkBall(
       status: "thrown",
       ballX: 120,
       ballY: 250,
-      ballVx: isFrisbee ? Math.min(16, Math.max(9, powerX * 1.2)) : Math.min(14, Math.max(7, powerX)),
-      ballVy: Math.max(-6, Math.min(6, powerY)),
+      ballVx: isFrisbee ? clamp(powerX * 1.2, 9, 16) : clamp(powerX, 7, 14),
+      ballVy: clamp(powerY, -6, 6),
     },
     soundCueQueue: [...state.soundCueQueue, isFrisbee ? "frisbee-throw" : "squeak"],
   };
@@ -2331,7 +2332,7 @@ export function jumpParkHurdle(state: WorkingWithDuckState): WorkingWithDuckStat
 export function steerParkDuck(state: WorkingWithDuckState, targetY: number): WorkingWithDuckState {
   if (!state.inDogPark || state.parkState.status !== "retrieving") return state;
 
-  const clampedY = Math.max(50, Math.min(CANVAS_HEIGHT - 50, targetY));
+  const clampedY = clamp(targetY, 50, CANVAS_HEIGHT - 50);
   return {
     ...state,
     parkState: {
@@ -2383,8 +2384,8 @@ export function stepParkGame(state: WorkingWithDuckState): WorkingWithDuckState 
     park.ballVx *= 0.98;
     park.ballVy *= 0.98;
 
-    park.ballX = Math.max(60, Math.min(CANVAS_WIDTH - 60, park.ballX));
-    park.ballY = Math.max(60, Math.min(CANVAS_HEIGHT - 60, park.ballY));
+    park.ballX = clamp(park.ballX, 60, CANVAS_WIDTH - 60);
+    park.ballY = clamp(park.ballY, 60, CANVAS_HEIGHT - 60);
 
     const dx = park.ballX - park.duckX;
     const dy = park.ballY - park.duckY;
@@ -2465,8 +2466,8 @@ export function stepParkGame(state: WorkingWithDuckState): WorkingWithDuckState 
     }
   }
 
-  park.duckX = Math.max(50, Math.min(CANVAS_WIDTH - 50, park.duckX));
-  park.duckY = Math.max(50, Math.min(CANVAS_HEIGHT - 50, park.duckY));
+  park.duckX = clamp(park.duckX, 50, CANVAS_WIDTH - 50);
+  park.duckY = clamp(park.duckY, 50, CANVAS_HEIGHT - 50);
 
   const particles = state.particles
     .map((p) => ({

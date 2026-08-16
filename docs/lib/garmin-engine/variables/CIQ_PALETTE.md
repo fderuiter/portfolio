@@ -8,7 +8,7 @@
 
 > `const` **CIQ\_PALETTE**: `object`
 
-Defined in: [lib/garmin-engine.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L51)
+Defined in: [lib/garmin-engine.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L52)
 
 ## Type Declaration
 

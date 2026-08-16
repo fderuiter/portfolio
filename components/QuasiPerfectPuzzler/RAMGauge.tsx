@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { clamp } from "@/lib/game-utils";
 import { motion } from "framer-motion";
 
 interface RAMGaugeProps {
@@ -9,7 +10,7 @@ interface RAMGaugeProps {
 }
 
 export const RAMGauge: React.FC<RAMGaugeProps> = ({ currentRam, initialRam }) => {
-  const percentage = Math.max(0, Math.min(100, (currentRam / initialRam) * 100));
+  const percentage = clamp((currentRam / initialRam) * 100, 0, 100);
   const isOOM = currentRam <= 0;
   const isLowMemory = currentRam > 0 && percentage <= 30;
 

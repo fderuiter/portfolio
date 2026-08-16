@@ -8,7 +8,7 @@
 
 > **updateBGMTempo**(`suspicion`): `void`
 
-Defined in: [lib/clinical-trial-chaos/sound-effects.ts:159](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L159)
+Defined in: [lib/clinical-trial-chaos/sound-effects.ts:160](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L160)
 
 Updates procedural BGM tempo based on auditor suspicion & excitement.
 

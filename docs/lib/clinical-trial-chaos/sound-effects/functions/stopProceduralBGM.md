@@ -8,7 +8,7 @@
 
 > **stopProceduralBGM**(): `void`
 
-Defined in: [lib/clinical-trial-chaos/sound-effects.ts:168](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L168)
+Defined in: [lib/clinical-trial-chaos/sound-effects.ts:169](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L169)
 
 Stops procedural background music.
 

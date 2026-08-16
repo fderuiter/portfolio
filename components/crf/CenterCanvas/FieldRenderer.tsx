@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { clamp } from "@/lib/game-utils";
 import {
   IconTrash,
   IconCopy,
@@ -87,7 +88,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 
   const handleAdjustSpan = (delta: number) => {
     if (!onUpdateField) return;
-    const newSpan = Math.max(1, Math.min(12, field.columnSpan + delta));
+    const newSpan = clamp(field.columnSpan + delta, 1, 12);
     onUpdateField({ columnSpan: newSpan });
   };
 

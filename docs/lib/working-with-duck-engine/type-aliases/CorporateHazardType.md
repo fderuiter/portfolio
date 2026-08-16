@@ -8,4 +8,4 @@
 
 > **CorporateHazardType** = `"pitch-deck"` \| `"power-cable"` \| `"audit-file"` \| `"laptop"`
 
-Defined in: [lib/working-with-duck-engine.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L52)
+Defined in: [lib/working-with-duck-engine.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L53)

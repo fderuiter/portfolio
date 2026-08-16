@@ -8,4 +8,4 @@
 
 > **VariableType** = `"int"` \| `"float"` \| `"string"` \| `"array"`
 
-Defined in: [lib/garmin-engine.ts:8](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L8)
+Defined in: [lib/garmin-engine.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L9)
