@@ -17,6 +17,7 @@ import {
   IconCpu,
   IconBone,
   IconSparkles,
+  IconFileSpreadsheet,
 } from "@tabler/icons-react";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { usePersona } from "@/components/providers/PersonaProvider";
@@ -78,12 +79,16 @@ export const Footer: React.FC = () => {
             </div>
 
             {/* Live Operational Status Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900/80 border border-zinc-800 text-[11px] font-mono text-zinc-300 w-fit">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <Link
+              href="/stack"
+              onMouseEnter={handleHover}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900/80 hover:bg-zinc-900 border border-zinc-800 hover:border-brand-cyan/40 text-[11px] font-mono text-zinc-300 hover:text-white transition-all w-fit group"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-500 group-hover:animate-pulse" />
               <span>All Systems Operational</span>
               <span className="text-zinc-600">|</span>
-              <span className="text-zinc-400">Next.js Edge</span>
-            </div>
+              <span className="text-zinc-400 group-hover:text-brand-cyan transition-colors">Inspect Stack ↗</span>
+            </Link>
           </div>
 
           {/* Col 2: Interactive Arcade */}
@@ -182,6 +187,26 @@ export const Footer: React.FC = () => {
                   className="text-zinc-400 hover:text-brand-cyan transition-colors"
                 >
                   Featured Projects
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/stack"
+                  onMouseEnter={handleHover}
+                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                >
+                  <IconCpu className="w-3 h-3 text-brand-cyan" />
+                  Under the Hood (Stack)
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/crf"
+                  onMouseEnter={handleHover}
+                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                >
+                  <IconFileSpreadsheet className="w-3 h-3 text-brand-cyan" />
+                  CRF Studio &amp; EDC
                 </Link>
               </li>
               <li>

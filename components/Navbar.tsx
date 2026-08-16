@@ -80,6 +80,12 @@ const ARCADE_ITEMS: SubNavItem[] = [
 
 const SYSTEMS_ITEMS: SubNavItem[] = [
   {
+    title: "Under the Hood (Stack)",
+    subtitle: "Interactive architecture & live telemetry",
+    href: "/stack",
+    icon: <IconCpu className="w-4 h-4 text-brand-cyan" />,
+  },
+  {
     title: "CRF Studio",
     subtitle: "Clinical form designer & live EDC simulator",
     href: "/crf",
@@ -270,7 +276,7 @@ export const Navbar: React.FC = () => {
   };
 
   const isArcadeActive = pathname.startsWith("/arcade");
-  const isSystemsActive = pathname === "/proof" || pathname === "/simulator";
+  const isSystemsActive = pathname === "/proof" || pathname === "/simulator" || pathname === "/crf" || pathname === "/neuro" || pathname === "/stack";
 
   return (
     <>
@@ -830,6 +836,17 @@ export const Navbar: React.FC = () => {
                       NeuroRecon Studio
                     </span>
                     <span className="text-[10px] font-mono text-emerald-400 px-1.5 py-0.5 rounded bg-emerald-500/10">3D MRI</span>
+                  </Link>
+                  <Link
+                    href="/stack"
+                    onClick={(e) => handleNavClick(e, "/stack")}
+                    className="min-h-11 px-3 py-2.5 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between"
+                  >
+                    <span className="flex items-center gap-2">
+                      <IconCpu className="w-4 h-4 text-brand-cyan" />
+                      Under the Hood (Stack)
+                    </span>
+                    <span className="text-[10px] font-mono text-brand-cyan px-1.5 py-0.5 rounded bg-brand-cyan/10">Architecture</span>
                   </Link>
                   {persona !== "technical" && (
                     <Link

@@ -6,7 +6,7 @@
 
 # Interface: DoctorOptions
 
-Defined in: [lib/dx/doctor.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L18)
+Defined in: [lib/dx/doctor.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L22)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/dx/doctor.ts:18](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **ci?**: `boolean`
 
-Defined in: [lib/dx/doctor.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L20)
+Defined in: [lib/dx/doctor.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L24)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/dx/doctor.ts:20](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **fix?**: `boolean`
 
-Defined in: [lib/dx/doctor.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L19)
+Defined in: [lib/dx/doctor.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L23)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/dx/doctor.ts:19](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **quiet?**: `boolean`
 
-Defined in: [lib/dx/doctor.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L21)
+Defined in: [lib/dx/doctor.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L25)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/dx/doctor.ts:21](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **workspaceRoot?**: `string`
 
-Defined in: [lib/dx/doctor.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L22)
+Defined in: [lib/dx/doctor.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L26)

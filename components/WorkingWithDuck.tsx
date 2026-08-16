@@ -239,7 +239,13 @@ function drawDuckPuppy(
     ctx.fill();
     ctx.stroke();
 
-    // Soft Pink Belly Patch
+    // Soft Pink Belly Patch with Pulsing Glow on touch
+    const tummyPulse = Math.sin(ticks * 0.15) * 3;
+    ctx.fillStyle = "rgba(236, 72, 153, 0.2)";
+    ctx.beginPath();
+    ctx.ellipse(0, 2, 22 + tummyPulse, 16 + tummyPulse, 0, 0, Math.PI * 2);
+    ctx.fill();
+
     ctx.fillStyle = "#fdf2f8";
     ctx.beginPath();
     ctx.ellipse(0, 2, 20, 14, 0, 0, Math.PI * 2);
@@ -816,15 +822,16 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
   ctx.stroke();
 
   if (isPottyUrgent) {
+    const pulse = Math.sin(state.ticks * 0.15) * 3;
     ctx.save();
     ctx.strokeStyle = "#4ade80";
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.5;
     ctx.setLineDash([6, 6]);
     ctx.strokeRect(
-      BACK_DOOR_BOUNDS.x - 4,
-      BACK_DOOR_BOUNDS.y - 4,
-      BACK_DOOR_BOUNDS.width + 8,
-      BACK_DOOR_BOUNDS.height + 8
+      BACK_DOOR_BOUNDS.x - 4 - pulse,
+      BACK_DOOR_BOUNDS.y - 4 - pulse,
+      BACK_DOOR_BOUNDS.width + 8 + pulse * 2,
+      BACK_DOOR_BOUNDS.height + 8 + pulse * 2
     );
     ctx.setLineDash([]);
 
@@ -1368,6 +1375,7 @@ export const WorkingWithDuck: React.FC = () => {
   const [isWardrobeOpen, setIsWardrobeOpen] = useState(false);
   const [activeScrapbookIndex, setActiveScrapbookIndex] = useState(0);
   const [scrapbookViewMode, setScrapbookViewMode] = useState<"photo" | "vector">("photo");
+  const [mobileTab, setMobileTab] = useState<"toys" | "tricks" | "actions">("toys");
   const isDraggingDuckStateRef = useRef(false);
   const isThrowingParkBallRef = useRef(false);
   const aimParkStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -1963,19 +1971,19 @@ export const WorkingWithDuck: React.FC = () => {
       <TabletOrientationHint />
 
       {/* Top Status & Meters HUD */}
-      <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-3">
+      <div className="mb-3 sm:mb-4 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
         {/* Work Progress Meter */}
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-3.5 backdrop-blur-md">
-          <div className="flex items-center justify-between text-xs font-mono mb-1.5">
-            <span className="text-zinc-400 font-bold flex items-center gap-1.5">
-              <IconBriefcase className="w-4 h-4 text-cyan-400" />
-              Work Progress
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-2.5 sm:p-3.5 backdrop-blur-md">
+          <div className="flex items-center justify-between text-[11px] sm:text-xs font-mono mb-1">
+            <span className="text-zinc-400 font-bold flex items-center gap-1 sm:gap-1.5 truncate">
+              <IconBriefcase className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 shrink-0" />
+              <span>Work Progress</span>
             </span>
-            <span className="text-brand-cyan font-bold">
+            <span className="text-brand-cyan font-bold shrink-0 ml-1">
               {Math.min(100, Math.round((uiState.workProgress / uiState.targetWorkProgress) * 100))}%
             </span>
           </div>
-          <div className="w-full bg-zinc-950 rounded-full h-2.5 overflow-hidden border border-zinc-800">
+          <div className="w-full bg-zinc-950 rounded-full h-2 sm:h-2.5 overflow-hidden border border-zinc-800">
             <div
               className="h-full bg-gradient-to-r from-cyan-500 to-teal-400 transition-all duration-150"
               style={{
@@ -1983,28 +1991,28 @@ export const WorkingWithDuck: React.FC = () => {
               }}
             />
           </div>
-          <div className="flex justify-between items-center mt-1.5 text-[10px] font-mono text-zinc-500">
-            <span>{uiState.mode === "endless" ? "Endless Mode" : currentSprint.title.split(":")[0]}</span>
-            <span className="text-teal-400 font-bold">{uiState.multiplier.toFixed(1)}× Speed</span>
+          <div className="flex justify-between items-center mt-1 text-[9px] sm:text-[10px] font-mono text-zinc-500">
+            <span className="truncate">{uiState.mode === "endless" ? "Endless Mode" : currentSprint.title.split(":")[0]}</span>
+            <span className="text-teal-400 font-bold shrink-0 ml-1">{uiState.multiplier.toFixed(1)}× Speed</span>
           </div>
         </div>
 
         {/* Excitement / Zoomies Meter */}
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-3.5 backdrop-blur-md">
-          <div className="flex items-center justify-between text-xs font-mono mb-1.5">
-            <span className="text-zinc-400 font-bold flex items-center gap-1.5">
-              <IconSparkles className="w-4 h-4 text-amber-400" />
-              Excitement
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-2.5 sm:p-3.5 backdrop-blur-md">
+          <div className="flex items-center justify-between text-[11px] sm:text-xs font-mono mb-1">
+            <span className="text-zinc-400 font-bold flex items-center gap-1 sm:gap-1.5 truncate">
+              <IconSparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 shrink-0" />
+              <span>Excitement</span>
             </span>
             <span
-              className={`font-bold ${
+              className={`font-bold shrink-0 ml-1 ${
                 uiState.excitement > 80 ? "text-amber-400 animate-pulse" : "text-zinc-300"
               }`}
             >
               {Math.round(uiState.excitement)}%
             </span>
           </div>
-          <div className="w-full bg-zinc-950 rounded-full h-2.5 overflow-hidden border border-zinc-800">
+          <div className="w-full bg-zinc-950 rounded-full h-2 sm:h-2.5 overflow-hidden border border-zinc-800">
             <div
               className={`h-full transition-all duration-150 ${
                 uiState.excitement > 80
@@ -2014,26 +2022,26 @@ export const WorkingWithDuck: React.FC = () => {
               style={{ width: `${uiState.excitement}%` }}
             />
           </div>
-          <div className="flex justify-between items-center mt-1.5 text-[10px] font-mono text-zinc-500">
-            <span>{uiState.excitement > 85 ? "⚠️ ZOOMIES IMMINENT" : "Play fetch / call Sit"}</span>
-            {uiState.calmBuffTimer > 0 && <span className="text-emerald-400">Tired Buff Active</span>}
+          <div className="flex justify-between items-center mt-1 text-[9px] sm:text-[10px] font-mono text-zinc-500">
+            <span className="truncate">{uiState.excitement > 85 ? "⚠️ ZOOMIES" : "Fetch / Sit"}</span>
+            {uiState.calmBuffTimer > 0 && <span className="text-emerald-400 shrink-0 ml-1">Calm Active</span>}
           </div>
         </div>
 
         {/* Bladder / Potty Meter */}
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-3.5 backdrop-blur-md">
-          <div className="flex items-center justify-between text-xs font-mono mb-1.5">
-            <span className="text-zinc-400 font-bold flex items-center gap-1.5">
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-2.5 sm:p-3.5 backdrop-blur-md">
+          <div className="flex items-center justify-between text-[11px] sm:text-xs font-mono mb-1">
+            <span className="text-zinc-400 font-bold flex items-center gap-1 sm:gap-1.5 truncate">
               <IconAlertTriangle
-                className={`w-4 h-4 ${uiState.bladder > 80 ? "text-rose-400 animate-bounce" : "text-sky-400"}`}
+                className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${uiState.bladder > 80 ? "text-rose-400 animate-bounce" : "text-sky-400"}`}
               />
-              Bladder Clock
+              <span>Bladder Clock</span>
             </span>
-            <span className={`font-bold ${uiState.bladder > 80 ? "text-rose-400" : "text-zinc-300"}`}>
+            <span className={`font-bold shrink-0 ml-1 ${uiState.bladder > 80 ? "text-rose-400" : "text-zinc-300"}`}>
               {Math.round(uiState.bladder)}%
             </span>
           </div>
-          <div className="w-full bg-zinc-950 rounded-full h-2.5 overflow-hidden border border-zinc-800">
+          <div className="w-full bg-zinc-950 rounded-full h-2 sm:h-2.5 overflow-hidden border border-zinc-800">
             <div
               className={`h-full transition-all duration-150 ${
                 uiState.bladder > 85
@@ -2043,21 +2051,21 @@ export const WorkingWithDuck: React.FC = () => {
               style={{ width: `${uiState.bladder}%` }}
             />
           </div>
-          <div className="flex justify-between items-center mt-1.5 text-[10px] font-mono text-zinc-500">
-            <span>{uiState.duck.state === "SNIFFING_POTTY" ? "🚨 DRAG TO DOOR!" : "Drag to Back Door"}</span>
+          <div className="flex justify-between items-center mt-1 text-[9px] sm:text-[10px] font-mono text-zinc-500">
+            <span className="truncate">{uiState.duck.state === "SNIFFING_POTTY" ? "🚨 TO DOOR!" : "Drag to Door"}</span>
           </div>
         </div>
 
         {/* Naughty vs Good Boy Scale */}
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-3.5 backdrop-blur-md">
-          <div className="flex items-center justify-between text-xs font-mono mb-1.5">
-            <span className="text-zinc-400 font-bold flex items-center gap-1.5">
-              <IconHeart className="w-4 h-4 text-rose-400" />
-              Good Boy Scale
+        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-2.5 sm:p-3.5 backdrop-blur-md">
+          <div className="flex items-center justify-between text-[11px] sm:text-xs font-mono mb-1">
+            <span className="text-zinc-400 font-bold flex items-center gap-1 sm:gap-1.5 truncate">
+              <IconHeart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-400 shrink-0" />
+              <span>Good Boy Scale</span>
             </span>
-            <span className="text-amber-300 font-bold">{Math.round(uiState.naughtyVsGood)}</span>
+            <span className="text-amber-300 font-bold shrink-0 ml-1">{Math.round(uiState.naughtyVsGood)}</span>
           </div>
-          <div className="w-full bg-zinc-950 rounded-full h-2.5 overflow-hidden border border-zinc-800 relative">
+          <div className="w-full bg-zinc-950 rounded-full h-2 sm:h-2.5 overflow-hidden border border-zinc-800 relative">
             <div
               className="h-full bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-400 transition-all duration-200"
               style={{
@@ -2068,7 +2076,7 @@ export const WorkingWithDuck: React.FC = () => {
             {/* Center line */}
             <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-white/40" />
           </div>
-          <div className="flex justify-between items-center mt-1.5 text-[10px] font-mono">
+          <div className="flex justify-between items-center mt-1 text-[9px] sm:text-[10px] font-mono">
             <span className="text-rose-400 font-semibold">Naughty</span>
             <span className="text-emerald-400 font-semibold">Good Boy (2.5×)</span>
           </div>
@@ -2109,29 +2117,29 @@ export const WorkingWithDuck: React.FC = () => {
 
         {/* Start Overlay Screen */}
         {uiState.status === "idle" && (
-          <div className="absolute inset-0 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-20">
-            <div className="w-16 h-16 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/30 flex items-center justify-center text-brand-cyan mb-4">
-              <IconBone className="w-8 h-8" />
+          <div className="absolute inset-0 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-6 text-center z-20 overflow-y-auto">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-brand-cyan/10 border border-brand-cyan/30 flex items-center justify-center text-brand-cyan mb-2 sm:mb-4 shrink-0">
+              <IconBone className="w-6 h-6 sm:w-8 sm:h-8" />
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold font-mono text-white mb-2">
+            <h2 className="text-xl sm:text-3xl font-extrabold font-mono text-white mb-1 sm:mb-2">
               Working With <span className="text-brand-cyan">Duck</span>
             </h2>
-            <p className="text-xs font-mono text-amber-300 font-bold mb-2">
+            <p className="text-[11px] sm:text-xs font-mono text-amber-300 font-bold mb-1 sm:mb-2">
               {uiState.mode === "endless" ? "Endless Mode · High Score Challenge" : currentSprint.title}
             </p>
-            <p className="max-w-md text-xs sm:text-sm text-zinc-300 font-mono mb-6 leading-relaxed">
+            <p className="max-w-md text-[11px] sm:text-sm text-zinc-300 font-mono mb-4 sm:mb-6 leading-relaxed line-clamp-3 sm:line-clamp-none">
               {uiState.mode === "endless"
                 ? "Infinite sprints with accelerating puppy impulses. Keep Duck entertained and protect the codebase!"
                 : currentSprint.description}
             </p>
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
               <button
                 onClick={() => {
                   gameStateRef.current = { ...gameStateRef.current, status: "running" };
                   setUiState((s) => ({ ...s, status: "running" }));
                   recordEvent("working-with-duck", "project_click").catch(() => {});
                 }}
-                className="px-6 py-3 rounded-xl bg-brand-cyan text-black font-mono font-bold text-sm hover:bg-white hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center gap-2 cursor-pointer"
+                className="px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl bg-brand-cyan text-black font-mono font-bold text-xs sm:text-sm hover:bg-white hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center gap-2 cursor-pointer min-h-[44px]"
               >
                 <IconPlayerPlay className="w-4 h-4 fill-current" />
                 <span>{uiState.mode === "endless" ? "Start Endless Mode" : `Start Sprint ${uiState.currentLevel}`}</span>
@@ -2139,7 +2147,7 @@ export const WorkingWithDuck: React.FC = () => {
 
               <button
                 onClick={() => setIsScrapbookOpen(true)}
-                className="px-4 py-3 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-300 font-mono text-xs hover:text-white hover:border-zinc-500 transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-300 font-mono text-xs hover:text-white hover:border-zinc-500 transition-colors flex items-center gap-1.5 cursor-pointer min-h-[44px]"
               >
                 <IconBook className="w-4 h-4" />
                 <span>Duck Scrapbook</span>
@@ -2147,13 +2155,13 @@ export const WorkingWithDuck: React.FC = () => {
 
               <button
                 onClick={() => setIsWardrobeOpen(true)}
-                className="px-4 py-3 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-300 font-mono text-xs hover:text-white hover:border-zinc-500 transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-300 font-mono text-xs hover:text-white hover:border-zinc-500 transition-colors flex items-center gap-1.5 cursor-pointer min-h-[44px]"
               >
                 <IconShirt className="w-4 h-4 text-amber-400" />
                 <span>Wardrobe</span>
               </button>
 
-              <FieldManualButton manualId="working-with-duck" label="Field Manual" />
+              <FieldManualButton manualId="working-with-duck" label="Manual" />
             </div>
           </div>
         )}
@@ -2177,260 +2185,293 @@ export const WorkingWithDuck: React.FC = () => {
       </div>
 
       {/* Unified Tactile Action Dock */}
-      <div className="mt-4 flex flex-col gap-3 font-mono">
-        {/* Hotbar Row 1: Toys & Treats [1-4] + Tricks [Q-W-E-R] */}
-        <div className="flex flex-wrap items-center justify-between gap-2.5">
-          {/* Toys & Treats */}
-          <div className="flex items-center gap-1.5 flex-wrap">
+      <div className="mt-3 sm:mt-4 flex flex-col gap-2.5 font-mono">
+        {/* --- MOBILE VIEWPORT CONTROL DECK (<md) --- */}
+        <div className="flex md:hidden flex-col gap-2">
+          {/* Segmented Switcher Tabs */}
+          <div className="grid grid-cols-3 p-1 rounded-2xl bg-zinc-900/90 border border-zinc-800 gap-1 text-xs font-bold">
             <button
-              onClick={() => {
-                gameStateRef.current = { ...gameStateRef.current, selectedItem: "tennis-ball" };
-                setUiState((s) => ({ ...s, selectedItem: "tennis-ball" }));
-              }}
-              className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                uiState.selectedItem === "tennis-ball"
-                  ? "border-brand-cyan bg-brand-cyan/20 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.3)]"
-                  : "border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:text-white"
+              onClick={() => setMobileTab("toys")}
+              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[40px] cursor-pointer ${
+                mobileTab === "toys"
+                  ? "bg-brand-cyan text-black shadow-md font-bold"
+                  : "text-zinc-400 hover:text-white"
               }`}
-              title="Throw ball to play fetch & drain Excitement"
             >
-              <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-zinc-500">1</span>
-              <IconBallTennis className="w-3.5 h-3.5 text-lime-400" />
-              <span>Tennis Ball</span>
+              <span>🧸 Toys</span>
+              {uiState.duck.state === "NO_TAKE_THROW" && (
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              )}
             </button>
 
             <button
-              onClick={() => {
-                gameStateRef.current = { ...gameStateRef.current, selectedItem: "kong" };
-                setUiState((s) => ({ ...s, selectedItem: "kong" }));
-              }}
-              className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                uiState.selectedItem === "kong"
-                  ? "border-brand-cyan bg-brand-cyan/20 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.3)]"
-                  : "border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:text-white"
+              onClick={() => setMobileTab("tricks")}
+              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[40px] cursor-pointer ${
+                mobileTab === "tricks"
+                  ? "bg-brand-cyan text-black shadow-md font-bold"
+                  : "text-zinc-400 hover:text-white"
               }`}
-              title="Drop chew toy to distract Duck away from desk hazards"
             >
-              <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-zinc-500">2</span>
-              <span>Kong Chew</span>
+              <span>✨ Tricks</span>
+              {uiState.excitement > 80 && (
+                <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
+              )}
             </button>
 
             <button
-              onClick={() => {
-                gameStateRef.current = { ...gameStateRef.current, selectedItem: "squeaky-toy" };
-                setUiState((s) => ({ ...s, selectedItem: "squeaky-toy" }));
-              }}
-              className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                uiState.selectedItem === "squeaky-toy"
-                  ? "border-brand-cyan bg-brand-cyan/20 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.3)]"
-                  : "border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:text-white"
+              onClick={() => setMobileTab("actions")}
+              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[40px] cursor-pointer ${
+                mobileTab === "actions"
+                  ? "bg-brand-cyan text-black shadow-md font-bold"
+                  : "text-zinc-400 hover:text-white"
               }`}
-              title="Squeak to instantly get Duck's attention and recall"
             >
-              <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-zinc-500">3</span>
-              <IconBone className="w-3.5 h-3.5" />
-              <span>Squeaky</span>
-            </button>
-
-            <button
-              onClick={() => {
-                gameStateRef.current = giveTreat(gameStateRef.current);
-                setUiState({ ...gameStateRef.current });
-              }}
-              className="px-3 py-1.5 rounded-xl border border-zinc-800 bg-zinc-900/70 text-amber-300 hover:border-amber-500/40 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-              title="Give treat (trades ball during No Take Only Throw)"
-            >
-              <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-zinc-500">4</span>
-              <span>Treat 🍖</span>
+              <span>⚡ Actions</span>
+              {(uiState.inDogPark || uiState.inBathtub || uiState.isMuddy) && (
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              )}
             </button>
           </div>
 
-          {/* Training Tricks [Q-W-E-R] */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <button
-              onClick={() => {
-                gameStateRef.current = performTrick(gameStateRef.current, "SIT");
-                setUiState({ ...gameStateRef.current });
-              }}
-              className="px-3 py-1.5 rounded-xl border border-sky-500/40 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-              title="Command Sit: Calms Excitement (-20) & boosts Good Boy scale"
-            >
-              <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-sky-400">Q</span>
-              <span>Sit 🪑</span>
-            </button>
-
-            <button
-              onClick={() => {
-                gameStateRef.current = performTrick(gameStateRef.current, "HIGH_FIVE");
-                setUiState({ ...gameStateRef.current });
-              }}
-              className="px-3 py-1.5 rounded-xl border border-pink-500/40 bg-pink-500/10 text-pink-300 hover:bg-pink-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-              title="Command High Five: Morale boost (+45 pts) & tail wag"
-            >
-              <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-pink-400">W</span>
-              <span>Paw 🐾</span>
-            </button>
-
-            <button
-              onClick={() => {
-                gameStateRef.current = performTrick(gameStateRef.current, "DROP_IT");
-                setUiState({ ...gameStateRef.current });
-              }}
-              className="px-3 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-              title="Command Drop It: Immediately drops stolen hazards or ball (+60-75 pts)"
-            >
-              <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-emerald-400">E</span>
-              <span>Drop It ✋</span>
-            </button>
-
-            <button
-              onClick={() => {
-                gameStateRef.current = performTrick(gameStateRef.current, "SPIN");
-                setUiState({ ...gameStateRef.current });
-              }}
-              className="px-3 py-1.5 rounded-xl border border-purple-500/40 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-              title="Command Spin: Playful trick (+50 pts) with 360 rotation"
-            >
-              <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-purple-400">R</span>
-              <span>Spin 🌀</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Hotbar Row 2: Active Desk Coding + Office Stations + Dog Park */}
-        <div className="flex flex-wrap items-center justify-between gap-2.5">
-          {/* Active Action Button */}
-          <div className="flex items-center gap-2">
-            {!uiState.inDogPark && !uiState.inBathtub ? (
+          {/* Mobile Tab 1: Toys & Treats */}
+          {mobileTab === "toys" && (
+            <div className="grid grid-cols-2 gap-2 animate-fadeIn">
               <button
                 onClick={() => {
-                  gameStateRef.current = activeCodeBurst(gameStateRef.current);
+                  gameStateRef.current = { ...gameStateRef.current, selectedItem: "tennis-ball" };
+                  setUiState((s) => ({ ...s, selectedItem: "tennis-ball" }));
+                }}
+                className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer ${
+                  uiState.selectedItem === "tennis-ball"
+                    ? "border-brand-cyan bg-brand-cyan/25 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.3)]"
+                    : "border-zinc-800 bg-zinc-900/80 text-zinc-300 active:bg-zinc-800"
+                }`}
+              >
+                <IconBallTennis className="w-4 h-4 text-lime-400 shrink-0" />
+                <span>Tennis Ball</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  gameStateRef.current = { ...gameStateRef.current, selectedItem: "kong" };
+                  setUiState((s) => ({ ...s, selectedItem: "kong" }));
+                }}
+                className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer ${
+                  uiState.selectedItem === "kong"
+                    ? "border-brand-cyan bg-brand-cyan/25 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.3)]"
+                    : "border-zinc-800 bg-zinc-900/80 text-zinc-300 active:bg-zinc-800"
+                }`}
+              >
+                <span>🦴 Kong Chew</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  gameStateRef.current = { ...gameStateRef.current, selectedItem: "squeaky-toy" };
+                  setUiState((s) => ({ ...s, selectedItem: "squeaky-toy" }));
+                }}
+                className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer ${
+                  uiState.selectedItem === "squeaky-toy"
+                    ? "border-brand-cyan bg-brand-cyan/25 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.3)]"
+                    : "border-zinc-800 bg-zinc-900/80 text-zinc-300 active:bg-zinc-800"
+                }`}
+              >
+                <IconBone className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Squeaky</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  gameStateRef.current = giveTreat(gameStateRef.current);
                   setUiState({ ...gameStateRef.current });
                 }}
-                className="px-4 py-2 rounded-xl bg-cyan-500 text-black font-bold text-xs hover:bg-cyan-400 active:scale-95 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center gap-2 cursor-pointer"
-                title="Focus work sprint at desk (Spacebar)"
+                className="p-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-amber-300 active:bg-amber-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
               >
-                <IconCode className="w-4 h-4" />
-                <span>Focus Work Sprint (Space)</span>
+                <span>🍖 Give Treat</span>
               </button>
-            ) : uiState.inBathtub ? (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    gameStateRef.current = rinseBathtub(gameStateRef.current);
-                    setUiState({ ...gameStateRef.current });
-                  }}
-                  className="px-4 py-2 rounded-xl bg-sky-500 text-black font-bold text-xs hover:bg-sky-400 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_0_15px_rgba(56,189,248,0.3)]"
-                >
-                  <IconDroplet className="w-4 h-4" />
-                  <span>Shower Rinse Spray 🚿</span>
-                </button>
+            </div>
+          )}
 
-                <button
-                  onClick={() => {
-                    gameStateRef.current = exitBathtub(gameStateRef.current);
-                    setUiState({ ...gameStateRef.current });
-                  }}
-                  className="px-4 py-2 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs hover:bg-zinc-800 transition-colors cursor-pointer"
-                >
-                  <span>Finish Bath &amp; Return →</span>
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    gameStateRef.current = jumpParkHurdle(gameStateRef.current);
-                    setUiState({ ...gameStateRef.current });
-                  }}
-                  className="px-4 py-2 rounded-xl bg-amber-400 text-black font-bold text-xs hover:bg-amber-300 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_0_12px_rgba(250,204,21,0.3)]"
-                >
-                  <span>🦘 Agility Jump (Space)</span>
-                </button>
+          {/* Mobile Tab 2: Training Tricks */}
+          {mobileTab === "tricks" && (
+            <div className="grid grid-cols-2 gap-2 animate-fadeIn">
+              <button
+                onClick={() => {
+                  gameStateRef.current = performTrick(gameStateRef.current, "SIT");
+                  setUiState({ ...gameStateRef.current });
+                }}
+                className="p-3 rounded-2xl border border-sky-500/40 bg-sky-500/10 text-sky-300 active:bg-sky-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
+              >
+                <span>🪑 Sit (Calm)</span>
+              </button>
 
-                <button
-                  onClick={() => {
-                    gameStateRef.current = tapParkWhistle(gameStateRef.current);
-                    setUiState({ ...gameStateRef.current });
-                  }}
-                  className="px-3.5 py-2 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs font-bold transition-all cursor-pointer"
-                >
-                  <span>Whistle 📢</span>
-                </button>
+              <button
+                onClick={() => {
+                  gameStateRef.current = performTrick(gameStateRef.current, "HIGH_FIVE");
+                  setUiState({ ...gameStateRef.current });
+                }}
+                className="p-3 rounded-2xl border border-pink-500/40 bg-pink-500/10 text-pink-300 active:bg-pink-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
+              >
+                <span>🐾 High Five</span>
+              </button>
 
-                <button
-                  onClick={() => {
-                    const isSuccess = uiState.parkState.status === "success";
-                    gameStateRef.current = exitDogPark(gameStateRef.current, isSuccess);
-                    setUiState({ ...gameStateRef.current });
-                  }}
-                  className="px-3.5 py-2 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs hover:bg-zinc-800 transition-colors cursor-pointer"
-                >
-                  <span>Return to Office →</span>
-                </button>
-              </div>
-            )}
+              <button
+                onClick={() => {
+                  gameStateRef.current = performTrick(gameStateRef.current, "DROP_IT");
+                  setUiState({ ...gameStateRef.current });
+                }}
+                className="p-3 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 active:bg-emerald-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
+              >
+                <span>✋ Drop It!</span>
+              </button>
 
-            {!uiState.inDogPark && !uiState.inBathtub && (
-              <>
-                <button
-                  onClick={() => {
-                    gameStateRef.current = enterDogPark(gameStateRef.current);
-                    setUiState({ ...gameStateRef.current });
-                  }}
-                  className="px-3.5 py-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-                >
-                  <IconTrees className="w-4 h-4" />
-                  <span>Dog Park 🌲</span>
-                </button>
+              <button
+                onClick={() => {
+                  gameStateRef.current = performTrick(gameStateRef.current, "SPIN");
+                  setUiState({ ...gameStateRef.current });
+                }}
+                className="p-3 rounded-2xl border border-purple-500/40 bg-purple-500/10 text-purple-300 active:bg-purple-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
+              >
+                <span>🌀 Spin Trick</span>
+              </button>
+            </div>
+          )}
 
-                <button
-                  onClick={() => {
-                    gameStateRef.current = enterBathtub(gameStateRef.current);
-                    setUiState({ ...gameStateRef.current });
-                  }}
-                  className={`px-3.5 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                    uiState.isMuddy
-                      ? "border-sky-400 bg-sky-500/20 text-sky-300 animate-pulse"
-                      : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white"
-                  }`}
-                >
-                  <IconDroplet className="w-4 h-4 text-sky-400" />
-                  <span>Bathtub 🛁</span>
-                </button>
-              </>
-            )}
-          </div>
+          {/* Mobile Tab 3: Actions & Mini-games */}
+          {mobileTab === "actions" && (
+            <div className="flex flex-col gap-2 animate-fadeIn">
+              {!uiState.inDogPark && !uiState.inBathtub ? (
+                <>
+                  <button
+                    onClick={() => {
+                      gameStateRef.current = activeCodeBurst(gameStateRef.current);
+                      setUiState({ ...gameStateRef.current });
+                    }}
+                    className="w-full py-3 px-4 rounded-2xl bg-cyan-500 text-black font-bold text-xs hover:bg-cyan-400 active:scale-98 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
+                  >
+                    <IconCode className="w-4 h-4" />
+                    <span>Focus Work Sprint</span>
+                  </button>
 
-          {/* Quick Meta Controls */}
-          <div className="flex items-center gap-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => {
+                        gameStateRef.current = enterDogPark(gameStateRef.current);
+                        setUiState({ ...gameStateRef.current });
+                      }}
+                      className="p-3 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 active:bg-emerald-500/20 text-xs font-bold transition-all flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer"
+                    >
+                      <IconTrees className="w-4 h-4" />
+                      <span>Dog Park 🌲</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        gameStateRef.current = enterBathtub(gameStateRef.current);
+                        setUiState({ ...gameStateRef.current });
+                      }}
+                      className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer ${
+                        uiState.isMuddy
+                          ? "border-sky-400 bg-sky-500/20 text-sky-300 animate-pulse"
+                          : "border-zinc-800 bg-zinc-900 text-zinc-400 active:text-white"
+                      }`}
+                    >
+                      <IconDroplet className="w-4 h-4 text-sky-400" />
+                      <span>Bathtub 🛁</span>
+                    </button>
+                  </div>
+                </>
+              ) : uiState.inBathtub ? (
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => {
+                      gameStateRef.current = rinseBathtub(gameStateRef.current);
+                      setUiState({ ...gameStateRef.current });
+                    }}
+                    className="p-3 rounded-2xl bg-sky-500 text-black font-bold text-xs active:bg-sky-400 transition-all flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer shadow-[0_0_15px_rgba(56,189,248,0.3)]"
+                  >
+                    <IconDroplet className="w-4 h-4" />
+                    <span>Rinse Spray 🚿</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      gameStateRef.current = exitBathtub(gameStateRef.current);
+                      setUiState({ ...gameStateRef.current });
+                    }}
+                    className="p-3 rounded-2xl border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs active:bg-zinc-800 transition-colors flex items-center justify-center min-h-[48px] cursor-pointer"
+                  >
+                    <span>Finish Bath →</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => {
+                        gameStateRef.current = jumpParkHurdle(gameStateRef.current);
+                        setUiState({ ...gameStateRef.current });
+                      }}
+                      className="p-3 rounded-2xl bg-amber-400 text-black font-bold text-xs active:bg-amber-300 transition-all flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer shadow-[0_0_12px_rgba(250,204,21,0.3)]"
+                    >
+                      <span>🦘 Jump Hurdle</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        gameStateRef.current = tapParkWhistle(gameStateRef.current);
+                        setUiState({ ...gameStateRef.current });
+                      }}
+                      className="p-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs font-bold transition-all flex items-center justify-center min-h-[48px] cursor-pointer"
+                    >
+                      <span>Whistle 📢</span>
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      const isSuccess = uiState.parkState.status === "success";
+                      gameStateRef.current = exitDogPark(gameStateRef.current, isSuccess);
+                      setUiState({ ...gameStateRef.current });
+                    }}
+                    className="w-full py-2.5 rounded-2xl border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs active:bg-zinc-800 transition-colors flex items-center justify-center min-h-[44px] cursor-pointer"
+                  >
+                    <span>Return to Office →</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Mobile Meta Controls Strip */}
+          <div className="flex items-center justify-between gap-1 pt-2 border-t border-zinc-800/80">
             <button
               onClick={() => setIsWardrobeOpen(true)}
-              className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 text-amber-400 hover:text-white transition-colors cursor-pointer"
-              title="Duck Wardrobe & Accessories"
+              className="p-2.5 rounded-xl border border-zinc-800 bg-zinc-900/80 text-amber-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+              title="Wardrobe"
             >
               <IconShirt className="w-4 h-4" />
             </button>
 
             <button
               onClick={() => setIsScrapbookOpen(true)}
-              className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-              title="Duck Scrapbook & Facts"
+              className="p-2.5 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+              title="Scrapbook"
             >
               <IconBook className="w-4 h-4" />
             </button>
 
             <button
               onClick={() => setIsMusicMuted(!isMusicMuted)}
-              className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer"
-              title={isMusicMuted ? "Unmute Lo-Fi Music" : "Mute Lo-Fi Music"}
+              className="p-2.5 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
+              title={isMusicMuted ? "Unmute Music" : "Mute Music"}
             >
               {isMusicMuted ? <IconMusicOff className="w-4 h-4 text-zinc-500" /> : <IconMusic className="w-4 h-4 text-emerald-400" />}
             </button>
 
             <button
               onClick={() => setMuted(!muted)}
-              className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              className="p-2.5 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
               title={muted ? "Unmute Audio" : "Mute Audio"}
             >
               {muted ? <IconVolumeOff className="w-4 h-4" /> : <IconVolume className="w-4 h-4 text-brand-cyan" />}
@@ -2440,68 +2481,348 @@ export const WorkingWithDuck: React.FC = () => {
             <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} variant="header" />
           </div>
         </div>
+
+        {/* --- DESKTOP VIEWPORT HOTBAR (>=md) --- */}
+        <div className="hidden md:flex flex-col gap-3">
+          {/* Desktop Row 1: Toys [1-4] + Tricks [Q-W-E-R] */}
+          <div className="flex flex-wrap items-center justify-between gap-2.5">
+            {/* Toys & Treats */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <button
+                onClick={() => {
+                  gameStateRef.current = { ...gameStateRef.current, selectedItem: "tennis-ball" };
+                  setUiState((s) => ({ ...s, selectedItem: "tennis-ball" }));
+                }}
+                className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  uiState.selectedItem === "tennis-ball"
+                    ? "border-brand-cyan bg-brand-cyan/20 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.3)]"
+                    : "border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:text-white"
+                }`}
+                title="Throw ball to play fetch & drain Excitement"
+              >
+                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-zinc-500">1</span>
+                <IconBallTennis className="w-3.5 h-3.5 text-lime-400" />
+                <span>Tennis Ball</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  gameStateRef.current = { ...gameStateRef.current, selectedItem: "kong" };
+                  setUiState((s) => ({ ...s, selectedItem: "kong" }));
+                }}
+                className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  uiState.selectedItem === "kong"
+                    ? "border-brand-cyan bg-brand-cyan/20 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.3)]"
+                    : "border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:text-white"
+                }`}
+                title="Drop chew toy to distract Duck away from desk hazards"
+              >
+                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-zinc-500">2</span>
+                <span>Kong Chew</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  gameStateRef.current = { ...gameStateRef.current, selectedItem: "squeaky-toy" };
+                  setUiState((s) => ({ ...s, selectedItem: "squeaky-toy" }));
+                }}
+                className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  uiState.selectedItem === "squeaky-toy"
+                    ? "border-brand-cyan bg-brand-cyan/20 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.3)]"
+                    : "border-zinc-800 bg-zinc-900/70 text-zinc-400 hover:text-white"
+                }`}
+                title="Squeak to instantly get Duck's attention and recall"
+              >
+                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-zinc-500">3</span>
+                <IconBone className="w-3.5 h-3.5" />
+                <span>Squeaky</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  gameStateRef.current = giveTreat(gameStateRef.current);
+                  setUiState({ ...gameStateRef.current });
+                }}
+                className="px-3 py-1.5 rounded-xl border border-zinc-800 bg-zinc-900/70 text-amber-300 hover:border-amber-500/40 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                title="Give treat (trades ball during No Take Only Throw)"
+              >
+                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-zinc-500">4</span>
+                <span>Treat 🍖</span>
+              </button>
+            </div>
+
+            {/* Training Tricks [Q-W-E-R] */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <button
+                onClick={() => {
+                  gameStateRef.current = performTrick(gameStateRef.current, "SIT");
+                  setUiState({ ...gameStateRef.current });
+                }}
+                className="px-3 py-1.5 rounded-xl border border-sky-500/40 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                title="Command Sit: Calms Excitement (-20) & boosts Good Boy scale"
+              >
+                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-sky-400">Q</span>
+                <span>Sit 🪑</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  gameStateRef.current = performTrick(gameStateRef.current, "HIGH_FIVE");
+                  setUiState({ ...gameStateRef.current });
+                }}
+                className="px-3 py-1.5 rounded-xl border border-pink-500/40 bg-pink-500/10 text-pink-300 hover:bg-pink-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                title="Command High Five: Morale boost (+45 pts) & tail wag"
+              >
+                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-pink-400">W</span>
+                <span>Paw 🐾</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  gameStateRef.current = performTrick(gameStateRef.current, "DROP_IT");
+                  setUiState({ ...gameStateRef.current });
+                }}
+                className="px-3 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                title="Command Drop It: Immediately drops stolen hazards or ball (+60-75 pts)"
+              >
+                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-emerald-400">E</span>
+                <span>Drop It ✋</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  gameStateRef.current = performTrick(gameStateRef.current, "SPIN");
+                  setUiState({ ...gameStateRef.current });
+                }}
+                className="px-3 py-1.5 rounded-xl border border-purple-500/40 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                title="Command Spin: Playful trick (+50 pts) with 360 rotation"
+              >
+                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-purple-400">R</span>
+                <span>Spin 🌀</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Desktop Row 2: Active Desk Coding + Office Stations + Dog Park + Meta */}
+          <div className="flex flex-wrap items-center justify-between gap-2.5">
+            {/* Active Action Button */}
+            <div className="flex items-center gap-2">
+              {!uiState.inDogPark && !uiState.inBathtub ? (
+                <button
+                  onClick={() => {
+                    gameStateRef.current = activeCodeBurst(gameStateRef.current);
+                    setUiState({ ...gameStateRef.current });
+                  }}
+                  className="px-4 py-2 rounded-xl bg-cyan-500 text-black font-bold text-xs hover:bg-cyan-400 active:scale-95 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center gap-2 cursor-pointer"
+                  title="Focus work sprint at desk (Spacebar)"
+                >
+                  <IconCode className="w-4 h-4" />
+                  <span>Focus Work Sprint (Space)</span>
+                </button>
+              ) : uiState.inBathtub ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      gameStateRef.current = rinseBathtub(gameStateRef.current);
+                      setUiState({ ...gameStateRef.current });
+                    }}
+                    className="px-4 py-2 rounded-xl bg-sky-500 text-black font-bold text-xs hover:bg-sky-400 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_0_15px_rgba(56,189,248,0.3)]"
+                  >
+                    <IconDroplet className="w-4 h-4" />
+                    <span>Shower Rinse Spray 🚿</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      gameStateRef.current = exitBathtub(gameStateRef.current);
+                      setUiState({ ...gameStateRef.current });
+                    }}
+                    className="px-4 py-2 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs hover:bg-zinc-800 transition-colors cursor-pointer"
+                  >
+                    <span>Finish Bath &amp; Return →</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      gameStateRef.current = jumpParkHurdle(gameStateRef.current);
+                      setUiState({ ...gameStateRef.current });
+                    }}
+                    className="px-4 py-2 rounded-xl bg-amber-400 text-black font-bold text-xs hover:bg-amber-300 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_0_12px_rgba(250,204,21,0.3)]"
+                  >
+                    <span>🦘 Agility Jump (Space)</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      gameStateRef.current = tapParkWhistle(gameStateRef.current);
+                      setUiState({ ...gameStateRef.current });
+                    }}
+                    className="px-3.5 py-2 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs font-bold transition-all cursor-pointer"
+                  >
+                    <span>Whistle 📢</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      const isSuccess = uiState.parkState.status === "success";
+                      gameStateRef.current = exitDogPark(gameStateRef.current, isSuccess);
+                      setUiState({ ...gameStateRef.current });
+                    }}
+                    className="px-3.5 py-2 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs hover:bg-zinc-800 transition-colors cursor-pointer"
+                  >
+                    <span>Return to Office →</span>
+                  </button>
+                </div>
+              )}
+
+              {!uiState.inDogPark && !uiState.inBathtub && (
+                <>
+                  <button
+                    onClick={() => {
+                      gameStateRef.current = enterDogPark(gameStateRef.current);
+                      setUiState({ ...gameStateRef.current });
+                    }}
+                    className="px-3.5 py-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <IconTrees className="w-4 h-4" />
+                    <span>Dog Park 🌲</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      gameStateRef.current = enterBathtub(gameStateRef.current);
+                      setUiState({ ...gameStateRef.current });
+                    }}
+                    className={`px-3.5 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                      uiState.isMuddy
+                        ? "border-sky-400 bg-sky-500/20 text-sky-300 animate-pulse"
+                        : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white"
+                    }`}
+                  >
+                    <IconDroplet className="w-4 h-4 text-sky-400" />
+                    <span>Bathtub 🛁</span>
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Quick Meta Controls */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsWardrobeOpen(true)}
+                className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 text-amber-400 hover:text-white transition-colors cursor-pointer"
+                title="Duck Wardrobe & Accessories"
+              >
+                <IconShirt className="w-4 h-4" />
+              </button>
+
+              <button
+                onClick={() => setIsScrapbookOpen(true)}
+                className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                title="Duck Scrapbook & Facts"
+              >
+                <IconBook className="w-4 h-4" />
+              </button>
+
+              <button
+                onClick={() => setIsMusicMuted(!isMusicMuted)}
+                className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                title={isMusicMuted ? "Unmute Lo-Fi Music" : "Mute Lo-Fi Music"}
+              >
+                {isMusicMuted ? <IconMusicOff className="w-4 h-4 text-zinc-500" /> : <IconMusic className="w-4 h-4 text-emerald-400" />}
+              </button>
+
+              <button
+                onClick={() => setMuted(!muted)}
+                className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                title={muted ? "Unmute Audio" : "Mute Audio"}
+              >
+                {muted ? <IconVolumeOff className="w-4 h-4" /> : <IconVolume className="w-4 h-4 text-brand-cyan" />}
+              </button>
+
+              <FieldManualButton manualId="working-with-duck" label="Manual" />
+              <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} variant="header" />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Win / Nap Time Modal */}
       {uiState.status === "won" && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="max-w-lg w-full rounded-3xl border border-brand-cyan/40 bg-zinc-950 p-6 sm:p-8 shadow-[0_0_50px_rgba(6,182,212,0.2)] text-center font-mono">
-            <div className="w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 mx-auto flex items-center justify-center mb-4">
-              <IconSparkles className="w-8 h-8 animate-pulse" />
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 z-50 animate-fadeIn">
+          <div className="max-w-lg w-full max-h-[90dvh] overflow-y-auto rounded-3xl border border-brand-cyan/40 bg-zinc-950 p-4 sm:p-8 shadow-[0_0_50px_rgba(6,182,212,0.2)] text-center font-mono">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 mx-auto flex items-center justify-center mb-3">
+              <IconSparkles className="w-6 h-6 sm:w-8 sm:h-8 animate-pulse" />
             </div>
 
-            <span className="px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-bold uppercase tracking-wider">
+            <span className="px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[11px] sm:text-xs font-bold uppercase tracking-wider">
               {uiState.mode === "endless" ? "Endless Milestone" : currentSprint.title} Completed!
             </span>
 
-            <h3 className="text-2xl font-bold text-white mt-3 mb-2">
+            <h3 className="text-xl sm:text-2xl font-bold text-white mt-2 sm:mt-3 mb-1 sm:mb-2">
               Duck is Asleep &amp; Work is Done! 💤
             </h3>
 
-            <p className="text-xs text-zinc-400 leading-relaxed mb-6">
+            <p className="text-xs text-zinc-400 leading-relaxed mb-4">
               Total Score: <strong className="text-amber-300 font-bold">{uiState.totalScore}</strong> · High Score:{" "}
               <strong className="text-brand-cyan">{Math.max(uiState.highScore, loadedHighScore)}</strong>
             </p>
 
             {/* Unlocked Polaroid Card */}
             {uiState.latestUnlockedFact && (
-              <div className="mb-6 rounded-2xl bg-white p-3 shadow-2xl text-black rotate-1 max-w-xs mx-auto">
-                <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-amber-50 mb-2 border border-zinc-200">
+              <div className="mb-4 sm:mb-6 rounded-2xl bg-white p-2.5 sm:p-3 shadow-2xl text-black rotate-1 max-w-[220px] sm:max-w-xs mx-auto">
+                <div className="relative w-full aspect-[4/3] sm:aspect-square rounded-lg overflow-hidden bg-amber-50 mb-2 border border-zinc-200">
                   <Image
                     src={uiState.latestUnlockedFact.photoUrl}
                     alt={uiState.latestUnlockedFact.title}
                     fill
                     className="object-cover"
+                    sizes="(max-width: 640px) 220px, 320px"
                   />
                 </div>
                 <h4 className="font-bold text-xs text-zinc-900">{uiState.latestUnlockedFact.title}</h4>
-                <p className="text-[11px] text-zinc-600 font-sans mt-1 leading-snug">
+                <p className="text-[10px] sm:text-[11px] text-zinc-600 font-sans mt-1 leading-snug line-clamp-3 sm:line-clamp-none">
                   {uiState.latestUnlockedFact.fact}
                 </p>
               </div>
             )}
 
+            {/* Progression CTA - Immediate & Prominent on Mobile */}
+            <div className="mb-4">
+              <button
+                onClick={() => {
+                  gameStateRef.current = advanceToNextLevel(gameStateRef.current);
+                  setUiState({ ...gameStateRef.current, status: "running" });
+                }}
+                className="w-full py-3 px-4 rounded-xl bg-brand-cyan text-black font-bold text-xs sm:text-sm hover:bg-white active:scale-95 transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
+              >
+                <span>{uiState.currentLevel < 5 ? `Proceed to Sprint ${uiState.currentLevel + 1} →` : "Play Endless Mode →"}</span>
+              </button>
+            </div>
+
             {/* Recruiter CTA Suite */}
-            <div className="mt-6 pt-6 border-t border-zinc-800/80">
-              <p className="text-xs text-zinc-300 mb-4 font-sans leading-relaxed">
+            <div className="pt-4 border-t border-zinc-800/80">
+              <p className="text-[11px] sm:text-xs text-zinc-300 mb-3 font-sans leading-relaxed">
                 Raising Duck takes multitasking, empathy, and quick problem solving — the exact skills Fred brings to
                 engineering teams. Now that Duck is napping, let&apos;s talk!
               </p>
 
-              <div className="flex flex-wrap items-center justify-center gap-2.5">
+              <div className="flex flex-wrap items-center justify-center gap-2">
                 <Link
                   href="/schedule"
-                  className="px-4 py-2.5 rounded-xl bg-brand-cyan text-black font-bold text-xs hover:bg-white transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center gap-1.5"
+                  className="px-3.5 py-2 rounded-xl bg-brand-cyan/20 border border-brand-cyan/50 text-cyan-300 hover:bg-brand-cyan hover:text-black font-bold text-xs transition-all flex items-center gap-1.5 min-h-[40px]"
                 >
-                  <IconCalendar className="w-4 h-4" />
+                  <IconCalendar className="w-3.5 h-3.5" />
                   <span>Schedule a Chat</span>
                 </Link>
 
                 <Link
                   href="/case-studies"
-                  className="px-4 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-200 text-xs hover:border-zinc-600 transition-colors flex items-center gap-1.5"
+                  className="px-3.5 py-2 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-200 text-xs hover:border-zinc-600 transition-colors flex items-center gap-1.5 min-h-[40px]"
                 >
-                  <IconBriefcase className="w-4 h-4" />
+                  <IconBriefcase className="w-3.5 h-3.5" />
                   <span>Case Studies</span>
                 </Link>
 
@@ -2509,23 +2830,11 @@ export const WorkingWithDuck: React.FC = () => {
                   href="https://github.com/fderuiter"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-200 text-xs hover:border-zinc-600 transition-colors flex items-center gap-1.5"
+                  className="px-3.5 py-2 rounded-xl border border-zinc-800 bg-zinc-900 text-zinc-200 text-xs hover:border-zinc-600 transition-colors flex items-center gap-1.5 min-h-[40px]"
                 >
-                  <IconBrandGithub className="w-4 h-4" />
+                  <IconBrandGithub className="w-3.5 h-3.5" />
                   <span>GitHub</span>
                 </a>
-              </div>
-
-              <div className="mt-4">
-                <button
-                  onClick={() => {
-                    gameStateRef.current = advanceToNextLevel(gameStateRef.current);
-                    setUiState({ ...gameStateRef.current, status: "running" });
-                  }}
-                  className="text-xs text-zinc-400 hover:text-brand-cyan transition-colors underline cursor-pointer"
-                >
-                  {uiState.currentLevel < 5 ? "Proceed to Next Sprint →" : "Play Endless Mode →"}
-                </button>
               </div>
             </div>
           </div>
@@ -2534,13 +2843,13 @@ export const WorkingWithDuck: React.FC = () => {
 
       {/* Fail / Time Out Modal */}
       {uiState.status === "failed" && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="max-w-md w-full rounded-3xl border border-rose-500/40 bg-zinc-950 p-6 sm:p-8 shadow-[0_0_50px_rgba(244,63,94,0.2)] text-center font-mono">
-            <div className="w-16 h-16 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 mx-auto flex items-center justify-center mb-4">
-              <IconAlertTriangle className="w-8 h-8" />
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 z-50 animate-fadeIn">
+          <div className="max-w-md w-full max-h-[90dvh] overflow-y-auto rounded-3xl border border-rose-500/40 bg-zinc-950 p-6 sm:p-8 shadow-[0_0_50px_rgba(244,63,94,0.2)] text-center font-mono">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 mx-auto flex items-center justify-center mb-4">
+              <IconAlertTriangle className="w-7 h-7 sm:w-8 sm:h-8" />
             </div>
 
-            <h3 className="text-2xl font-bold text-white mb-2">Duck Got a Time-Out! 🐾</h3>
+            <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Duck Got a Time-Out! 🐾</h3>
             <p className="text-xs text-zinc-400 leading-relaxed mb-6 font-sans">
               Too many sneaky chews and missed potty breaks tilted the scale fully red.
               Take a breath and try again!
@@ -2552,7 +2861,7 @@ export const WorkingWithDuck: React.FC = () => {
                 gameStateRef.current.status = "running";
                 setUiState({ ...gameStateRef.current });
               }}
-              className="w-full py-3 rounded-xl bg-rose-500 text-white font-mono font-bold text-xs hover:bg-rose-400 transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl bg-rose-500 text-white font-mono font-bold text-xs sm:text-sm hover:bg-rose-400 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2 min-h-[44px]"
             >
               <IconRotate className="w-4 h-4" />
               <span>Retry Sprint {uiState.currentLevel}</span>
@@ -2563,26 +2872,26 @@ export const WorkingWithDuck: React.FC = () => {
 
       {/* Accessory Wardrobe Modal */}
       {isWardrobeOpen && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="max-w-md w-full rounded-3xl border border-zinc-800 bg-zinc-950 p-6 font-mono relative">
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 z-50 animate-fadeIn">
+          <div className="max-w-md w-full max-h-[90dvh] overflow-y-auto rounded-3xl border border-zinc-800 bg-zinc-950 p-4 sm:p-6 font-mono relative">
             <button
               onClick={() => setIsWardrobeOpen(false)}
-              className="absolute top-6 right-6 p-2 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
             >
               <IconX className="w-4 h-4" />
             </button>
 
-            <div className="flex items-center gap-2.5 mb-6">
-              <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
+            <div className="flex items-center gap-2.5 mb-4 sm:mb-6">
+              <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 shrink-0">
                 <IconShirt className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-white">Duck&apos;s Wardrobe</h3>
-                <p className="text-xs text-zinc-400">Equip unlocked accessories</p>
+                <h3 className="text-base sm:text-lg font-bold text-white">Duck&apos;s Wardrobe</h3>
+                <p className="text-[11px] sm:text-xs text-zinc-400">Equip unlocked accessories</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-2.5">
+            <div className="grid grid-cols-1 gap-2 sm:gap-2.5">
               {[
                 { id: "none", name: "Natural Fluffy Coat", desc: "Pure English Cream marshmallow vibes", icon: "🐾" },
                 { id: "bucket-hat", name: "Adidas Bucket Hat", desc: "Fact #5 · +10 Charisma & street style", icon: "🧢" },
@@ -2601,7 +2910,7 @@ export const WorkingWithDuck: React.FC = () => {
                       gameStateRef.current = equipAccessory(gameStateRef.current, acc.id as DuckAccessory);
                       setUiState({ ...gameStateRef.current });
                     }}
-                    className={`w-full p-3 rounded-2xl border text-left flex items-center justify-between transition-all cursor-pointer ${
+                    className={`w-full p-2.5 sm:p-3 rounded-2xl border text-left flex items-center justify-between transition-all min-h-[48px] cursor-pointer ${
                       isSelected
                         ? "border-brand-cyan bg-brand-cyan/15 text-white shadow-md"
                         : isUnlocked
@@ -2609,8 +2918,8 @@ export const WorkingWithDuck: React.FC = () => {
                         : "border-zinc-800/50 bg-zinc-900/30 text-zinc-600 cursor-not-allowed opacity-50"
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{acc.icon}</span>
+                    <div className="flex items-center gap-2.5 sm:gap-3">
+                      <span className="text-xl sm:text-2xl shrink-0">{acc.icon}</span>
                       <div>
                         <div className="text-xs font-bold flex items-center gap-2">
                           <span>{acc.name}</span>
@@ -2632,23 +2941,23 @@ export const WorkingWithDuck: React.FC = () => {
 
       {/* Polaroid Scrapbook Modal */}
       {isScrapbookOpen && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="max-w-xl w-full rounded-3xl border border-zinc-800 bg-zinc-950 p-6 sm:p-8 font-mono relative">
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 z-50 animate-fadeIn">
+          <div className="max-w-xl w-full max-h-[90dvh] overflow-y-auto rounded-3xl border border-zinc-800 bg-zinc-950 p-4 sm:p-8 font-mono relative">
             <button
               onClick={() => setIsScrapbookOpen(false)}
-              className="absolute top-6 right-6 p-2 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
             >
               <IconX className="w-4 h-4" />
             </button>
 
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4 sm:mb-6 pr-8 sm:pr-0">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
+                <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 shrink-0">
                   <IconBook className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white">Duck&apos;s Polaroid Scrapbook</h3>
-                  <p className="text-xs text-zinc-400">Real puppy milestones &amp; vector art</p>
+                  <h3 className="text-base sm:text-lg font-bold text-white">Duck&apos;s Polaroid Scrapbook</h3>
+                  <p className="text-[11px] sm:text-xs text-zinc-400">Real puppy milestones &amp; vector art</p>
                 </div>
               </div>
 
@@ -2656,7 +2965,7 @@ export const WorkingWithDuck: React.FC = () => {
               <div className="flex items-center rounded-xl bg-zinc-900 border border-zinc-800 p-1">
                 <button
                   onClick={() => setScrapbookViewMode("photo")}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
                     scrapbookViewMode === "photo"
                       ? "bg-brand-cyan text-black shadow-sm"
                       : "text-zinc-400 hover:text-white"
@@ -2668,7 +2977,7 @@ export const WorkingWithDuck: React.FC = () => {
 
                 <button
                   onClick={() => setScrapbookViewMode("vector")}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
                     scrapbookViewMode === "vector"
                       ? "bg-brand-cyan text-black shadow-sm"
                       : "text-zinc-400 hover:text-white"
@@ -2687,14 +2996,15 @@ export const WorkingWithDuck: React.FC = () => {
               const activeImageSource = scrapbookViewMode === "photo" ? currentFact.photoUrl : currentFact.svgUrl;
 
               return (
-                <div className="rounded-2xl bg-white p-4 text-black shadow-2xl">
-                  <div className="relative w-full aspect-4/3 rounded-xl overflow-hidden bg-zinc-100 mb-3 border border-zinc-200">
+                <div className="rounded-2xl bg-white p-3 sm:p-4 text-black shadow-2xl">
+                  <div className="relative w-full aspect-4/3 rounded-xl overflow-hidden bg-zinc-100 mb-2.5 sm:mb-3 border border-zinc-200">
                     {isUnlocked ? (
                       <Image
                         src={activeImageSource}
                         alt={currentFact.title}
                         fill
                         className="object-cover"
+                        sizes="(max-width: 640px) 280px, 480px"
                       />
                     ) : (
                       <div className="absolute inset-0 bg-zinc-900 flex flex-col items-center justify-center text-zinc-500 p-4 text-center">
@@ -2708,7 +3018,7 @@ export const WorkingWithDuck: React.FC = () => {
                   </div>
 
                   <div className="flex items-center justify-between mb-1">
-                    <h4 className="font-bold text-sm text-zinc-900">
+                    <h4 className="font-bold text-xs sm:text-sm text-zinc-900">
                       {isUnlocked ? currentFact.title : `Sprint ${currentFact.level} Secret`}
                     </h4>
                     <span className="text-[10px] font-mono font-bold text-zinc-500">
@@ -2716,12 +3026,12 @@ export const WorkingWithDuck: React.FC = () => {
                     </span>
                   </div>
 
-                  <p className="text-xs text-zinc-700 font-sans leading-relaxed">
+                  <p className="text-[11px] sm:text-xs text-zinc-700 font-sans leading-relaxed">
                     {isUnlocked ? currentFact.fact : "Play through the campaign levels to reveal real photos, artwork, and stories about Duck."}
                   </p>
 
                   {isUnlocked && (
-                    <p className="text-[11px] text-zinc-500 italic font-sans mt-2">
+                    <p className="text-[10px] sm:text-[11px] text-zinc-500 italic font-sans mt-1.5 sm:mt-2">
                       &ldquo;{currentFact.caption}&rdquo;
                     </p>
                   )}
@@ -2730,13 +3040,13 @@ export const WorkingWithDuck: React.FC = () => {
             })()}
 
             {/* Carousel Navigation */}
-            <div className="mt-4 flex items-center justify-between">
+            <div className="mt-3 sm:mt-4 flex items-center justify-between gap-2">
               <button
                 disabled={activeScrapbookIndex === 0}
                 onClick={() => setActiveScrapbookIndex((i) => Math.max(0, i - 1))}
-                className="px-3.5 py-1.5 rounded-lg border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                className="px-3 py-1.5 rounded-lg border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer min-h-[38px]"
               >
-                ← Previous
+                ← Prev
               </button>
 
               <div className="flex gap-1.5">
@@ -2756,7 +3066,7 @@ export const WorkingWithDuck: React.FC = () => {
               <button
                 disabled={activeScrapbookIndex === DUCK_FACTS.length - 1}
                 onClick={() => setActiveScrapbookIndex((i) => Math.min(DUCK_FACTS.length - 1, i + 1))}
-                className="px-3.5 py-1.5 rounded-lg border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                className="px-3 py-1.5 rounded-lg border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer min-h-[38px]"
               >
                 Next →
               </button>

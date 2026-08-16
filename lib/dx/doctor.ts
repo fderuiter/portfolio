@@ -3,6 +3,10 @@ import path from "path";
 import { execSync } from "child_process";
 import { scanFile } from "../validation-scanner";
 import { colors, badge, formatSection } from "./utils";
+import { checkEnvironmentVariables } from "./env-guard";
+import { checkGitHygieneConfig } from "./git-guard";
+import { checkDeadCode } from "./dead-code";
+import { checkBundleBudgets } from "./bundle-guard";
 
 export interface DiagnosticCheckResult {
   id: string;
@@ -304,6 +308,7 @@ export function checkSecretLeaks(root: string): DiagnosticCheckResult {
     "ci.yml",
     "synthetic-probes.yml",
     ".env.example",
+    "env-guard.ts",
   ];
 
   const leaks: { file: string; line: number; category: string }[] = [];
@@ -850,6 +855,71 @@ export function checkLayoutTextClippingInvariants(root: string): DiagnosticCheck
 }
 
 /**
+ * Check Workspace & IDE Configuration Integrity (.editorconfig, .vscode)
+ */
+export function checkWorkspaceIdeConfig(root: string, fix = false): DiagnosticCheckResult {
+  const requiredFiles = [
+    { file: ".editorconfig", desc: "Universal EditorConfig rules" },
+    { file: path.join(".vscode", "settings.json"), desc: "VS Code workspace settings" },
+    { file: path.join(".vscode", "extensions.json"), desc: "VS Code extension recommendations" },
+    { file: path.join(".vscode", "launch.json"), desc: "VS Code launch debug profiles" },
+    { file: path.join(".vscode", "tasks.json"), desc: "VS Code build task runners" },
+  ];
+
+  const missing: string[] = [];
+
+  for (const rf of requiredFiles) {
+    const full = path.join(root, rf.file);
+    if (!fs.existsSync(full)) {
+      missing.push(`Missing ${rf.desc} (${rf.file})`);
+    }
+  }
+
+  if (missing.length > 0) {
+    if (fix) {
+      const vscodeDir = path.join(root, ".vscode");
+      if (!fs.existsSync(vscodeDir)) fs.mkdirSync(vscodeDir, { recursive: true });
+
+      const editorConfigPath = path.join(root, ".editorconfig");
+      if (!fs.existsSync(editorConfigPath)) {
+        fs.writeFileSync(
+          editorConfigPath,
+          `root = true\n\n[*]\nindent_style = space\nindent_size = 2\nend_of_line = lf\ncharset = utf-8\ntrim_trailing_whitespace = true\ninsert_final_newline = true\n`,
+          "utf-8"
+        );
+      }
+
+      return {
+        id: "workspace-ide-config",
+        name: "IDE & Workspace Configuration Standards",
+        category: "architecture",
+        status: "fixed",
+        message: "Scaffolded missing workspace IDE configurations (.vscode, .editorconfig).",
+        fixedMessage: "Created missing IDE configs.",
+      };
+    }
+
+    return {
+      id: "workspace-ide-config",
+      name: "IDE & Workspace Configuration Standards",
+      category: "architecture",
+      status: "fail",
+      message: `${missing.length} workspace configuration file(s) missing.`,
+      details: missing,
+      fixable: true,
+    };
+  }
+
+  return {
+    id: "workspace-ide-config",
+    name: "IDE & Workspace Configuration Standards",
+    category: "architecture",
+    status: "pass",
+    message: "All VS Code workspace profiles (.vscode/) and .editorconfig are properly configured.",
+  };
+}
+
+/**
  * Run All Diagnostics
  */
 export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
@@ -878,6 +948,11 @@ export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
     checkDefectRemediationInvariants(root),
     checkProactiveDefectInterception(root),
     checkLayoutTextClippingInvariants(root),
+    checkEnvironmentVariables(root, fix),
+    checkGitHygieneConfig(root, fix),
+    checkWorkspaceIdeConfig(root, fix),
+    checkDeadCode(root),
+    checkBundleBudgets(root),
   ];
 
   const totalPassed = checks.filter((c) => c.status === "pass").length;

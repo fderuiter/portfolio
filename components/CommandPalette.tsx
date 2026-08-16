@@ -6,7 +6,7 @@ import { designManifest } from "@/lib/design-manifest";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { IconSearch, IconTerminal, IconFileCode, IconDirections, IconCornerDownLeft, IconCalendar, IconBrain, IconFileSpreadsheet } from "@tabler/icons-react";
+import { IconSearch, IconTerminal, IconFileCode, IconDirections, IconCornerDownLeft, IconCalendar, IconBrain, IconFileSpreadsheet, IconCpu } from "@tabler/icons-react";
 import { filterFuzzySearch } from "@/lib/search-utils";
 import { useSearch } from "@/components/providers/SearchProvider";
 import { useAudio } from "@/components/providers/AudioProvider";
@@ -303,6 +303,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
           "12-column clinical grid & visit schedule",
           "Automated CDASH regulatory remediation",
           "Multi-role simulated investigator sign-off"
+        ]
+      },
+      {
+        id: "nav-stack",
+        title: "Under the Hood: Architecture & Stack Overview",
+        subtitle: "Interactive architecture colophon, layout physics benchmark, Web Audio synthesizer & 12 quality invariants",
+        category: "navigation",
+        url: "/stack",
+        icon: <IconCpu className="w-4 h-4 text-brand-cyan" />,
+        badge: "Architecture",
+        status: "Live Blueprint",
+        description: "Interactive architecture colophon & live telemetry breakdown showcasing Next.js 16, @chenglou/pretext layout physics, procedural Web Audio, and 12 engineering invariants.",
+        techStack: ["Next.js 16", "Pretext Canvas", "Web Audio API", "Prisma 7", "Vitest"],
+        highlights: [
+          "Real-time Pretext vs DOM reflow benchmark",
+          "Zero-asset procedural audio soundboard",
+          "12 verified architectural quality invariants"
         ]
       },
       {

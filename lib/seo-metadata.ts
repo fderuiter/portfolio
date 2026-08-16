@@ -76,6 +76,12 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     path: "/neuro",
     keywords: ["FreeSurfer", "Neuroimaging", "3D Brain Mesh", "MRI Slices", "Euler Characteristic", "Cortical Surface", "Post Processing", "Neuroinformatics"],
   },
+  stack: {
+    title: "Under the Hood: Architecture & Stack Overview | Frederick de Ruiter",
+    description: "Interactive architecture colophon, layout physics benchmark (@chenglou/pretext), procedural Web Audio synthesizer, and 12 engineering quality invariants.",
+    path: "/stack",
+    keywords: ["Architecture", "Tech Stack", "Next.js 16", "React 19", "Turbopack", "Pretext", "Web Audio API", "Prisma 7", "Neon Database", "Invariants"],
+  },
 };
 
 /**

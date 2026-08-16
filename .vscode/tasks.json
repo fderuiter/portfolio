@@ -1,0 +1,36 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "dev",
+      "isBackground": true,
+      "problemMatcher": ["$tsc-watch"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "label": "npm: dev"
+    },
+    {
+      "type": "npm",
+      "script": "quality",
+      "group": "test",
+      "problemMatcher": [],
+      "label": "npm: quality"
+    },
+    {
+      "type": "npm",
+      "script": "verify",
+      "group": "test",
+      "problemMatcher": [],
+      "label": "npm: verify"
+    },
+    {
+      "type": "npm",
+      "script": "doctor:fix",
+      "problemMatcher": [],
+      "label": "npm: doctor:fix"
+    }
+  ]
+}

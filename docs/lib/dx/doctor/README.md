@@ -26,5 +26,6 @@
 - [checkRouteIndexing](functions/checkRouteIndexing.md)
 - [checkSecretLeaks](functions/checkSecretLeaks.md)
 - [checkTestPathResolution](functions/checkTestPathResolution.md)
+- [checkWorkspaceIdeConfig](functions/checkWorkspaceIdeConfig.md)
 - [printDoctorReport](functions/printDoctorReport.md)
 - [runDiagnostics](functions/runDiagnostics.md)

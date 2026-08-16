@@ -11,7 +11,11 @@ import { execSync } from "child_process";
 import { runDiagnostics, printDoctorReport } from "../lib/dx/doctor";
 import { scaffold, type ScaffoldType } from "../lib/dx/scaffolder";
 import { runAllBenchmarks, printBenchmarkReport } from "../lib/dx/bench";
-import { colors, formatHeader, badge } from "../lib/dx/utils";
+import { colors, formatHeader, badge, formatSection } from "../lib/dx/utils";
+import { ALLOWED_COMMIT_TYPES, validateCommitMessage, validateBranchName } from "../lib/dx/git-guard";
+import { checkEnvironmentVariables } from "../lib/dx/env-guard";
+import { scanDeadCode } from "../lib/dx/dead-code";
+import { inspectBundleChunks, DEFAULT_BUDGETS } from "../lib/dx/bundle-guard";
 
 const workspaceRoot = path.resolve(__dirname, "..");
 
@@ -22,7 +26,12 @@ function printUsage(): void {
   console.log(`  ${colors.cyan}doctor${colors.reset}                 Run architectural & invariant health diagnostics`);
   console.log(`  ${colors.cyan}doctor --fix${colors.reset}           Run diagnostics and automatically fix remediable issues`);
   console.log(`  ${colors.cyan}verify${colors.reset}                 Strict invariant check for CI / pre-commit (exits with code 1 on failure)`);
-  console.log(`  ${colors.cyan}scaffold <type> <name>${colors.reset} Scaffold code templates (types: arcade, api, adr, case-study, component)`);
+  console.log(`  ${colors.cyan}commit${colors.reset}                 Interactive Conventional Commit wizard`);
+  console.log(`  ${colors.cyan}branch${colors.reset}                 Interactive branch generator with convention validation`);
+  console.log(`  ${colors.cyan}env${colors.reset}                    Validate runtime environment schema & sync .env.example`);
+  console.log(`  ${colors.cyan}dead-code${colors.reset}              Scan for unused exports and orphaned modules`);
+  console.log(`  ${colors.cyan}analyze${colors.reset}                Inspect production bundle chunk sizes and performance budgets`);
+  console.log(`  ${colors.cyan}scaffold <type> <name>${colors.reset} Scaffold code templates (types: arcade, api, adr, case-study, component, hook)`);
   console.log(`  ${colors.cyan}bench${colors.reset}                  Run Pretext, Masonry Scheduler, and Security benchmarks`);
   console.log(`  ${colors.cyan}bench --pages${colors.reset}          Run real-browser Core Web Vitals & page speed benchmarks`);
   console.log(`  ${colors.cyan}clean${colors.reset}                  Clean build artifacts and reset developer cache`);
@@ -30,11 +39,12 @@ function printUsage(): void {
   console.log(`${colors.bold}Examples:${colors.reset}`);
   console.log(`  $ npm run dx doctor`);
   console.log(`  $ npm run dx doctor -- --fix`);
+  console.log(`  $ npm run dx commit`);
+  console.log(`  $ npm run dx env`);
+  console.log(`  $ npm run dx dead-code`);
+  console.log(`  $ npm run dx analyze`);
   console.log(`  $ npm run dx scaffold arcade matrix-defender`);
-  console.log(`  $ npm run dx scaffold api webhook-handler`);
-  console.log(`  $ npm run dx scaffold adr state-machine-transitions`);
-  console.log(`  $ npm run dx bench`);
-  console.log(`  $ npm run dx bench --pages\n`);
+  console.log(`  $ npm run dx bench\n`);
 }
 
 async function handleDoctorCommand(args: string[]): Promise<void> {
@@ -68,6 +78,162 @@ async function handleVerifyCommand(): Promise<void> {
   } else {
     console.log(`\n${colors.brightGreen}✅ All AGENTS.md architectural invariants and security checks verified.${colors.reset}\n`);
     process.exit(0);
+  }
+}
+
+async function handleEnvCommand(args: string[] = []): Promise<void> {
+  const fix = args.includes("--fix");
+  console.log(formatHeader("DX Environment & Schema Sentinel", "lib/env.ts • .env.example"));
+
+  const result = checkEnvironmentVariables(workspaceRoot, fix);
+  console.log(badge(`[${result.category.toUpperCase()}] ${result.name}`, result.status));
+  console.log(`  ${result.message}`);
+
+  if (result.details && result.details.length > 0) {
+    console.log("\nDetails:");
+    for (const d of result.details) {
+      console.log(`  ${colors.yellow}• ${d}${colors.reset}`);
+    }
+  }
+
+  if (result.status === "fail" && !fix) {
+    console.log(`\n${colors.cyan}Tip: Run 'npm run dx env -- --fix' to auto-sync .env.example.${colors.reset}\n`);
+    process.exit(1);
+  }
+}
+
+function handleDeadCodeCommand(): void {
+  console.log(formatHeader("DX Dead Code & Unused Export Scanner", "Static AST & Cross-Workspace Reference Analyzer"));
+
+  const report = scanDeadCode(workspaceRoot);
+  console.log(`Scanned ${colors.cyan}${report.totalScannedFiles}${colors.reset} files | Found ${colors.cyan}${report.totalExports}${colors.reset} exports.\n`);
+
+  if (report.unusedExports.length === 0) {
+    console.log(`${colors.brightGreen}✔ No unused exports or orphaned files detected. Codebase is clean!${colors.reset}\n`);
+    return;
+  }
+
+  console.log(`${colors.yellow}Found ${report.unusedExports.length} potentially unused export(s):${colors.reset}\n`);
+  for (const u of report.unusedExports) {
+    const relPath = path.relative(workspaceRoot, u.filePath);
+    console.log(`  ${colors.dim}${relPath}:${u.line}${colors.reset}  ${colors.cyan}[${u.kind}]${colors.reset} ${colors.bold}${u.name}${colors.reset}`);
+  }
+  console.log("");
+}
+
+function handleAnalyzeCommand(): void {
+  console.log(formatHeader("DX Bundle Analyzer & Chunk Budget Guard", ".next/static/chunks • Gzip Size Assertions"));
+
+  const report = inspectBundleChunks(workspaceRoot);
+
+  if (!report.isBuilt) {
+    console.log(`${colors.yellow}No build artifacts detected in .next/static/chunks/. Run 'npm run build' first.${colors.reset}\n`);
+    return;
+  }
+
+  console.log(formatSection("Production Chunk Inventory"));
+  console.log(
+    `Total Chunks: ${colors.cyan}${report.totalChunks}${colors.reset} | ` +
+    `Total Raw: ${colors.cyan}${(report.totalRawBytes / 1024).toFixed(1)} kB${colors.reset} | ` +
+    `Total Gzip: ${colors.cyan}${(report.totalGzipBytes / 1024).toFixed(1)} kB${colors.reset} | ` +
+    `Initial Shared Gzip: ${colors.cyan}${(report.initialSharedGzipBytes / 1024).toFixed(1)} kB${colors.reset} (Budget: ${(DEFAULT_BUDGETS.maxInitialSharedGzip / 1024).toFixed(0)} kB)\n`
+  );
+
+  console.log(`${colors.bold}${"CHUNK NAME".padEnd(45)} ${"RAW (kB)".padStart(12)} ${"GZIP (kB)".padStart(12)} ${"INITIAL".padStart(10)}${colors.reset}`);
+  console.log("─".repeat(82));
+
+  for (const chunk of report.chunks.slice(0, 15)) {
+    const name = chunk.name.length > 43 ? chunk.name.slice(0, 40) + "..." : chunk.name;
+    const rawKb = (chunk.rawBytes / 1024).toFixed(1);
+    const gzipKb = (chunk.gzipBytes / 1024).toFixed(1);
+    const initBadge = chunk.isInitial ? `${colors.magenta}YES${colors.reset}` : `${colors.gray}NO${colors.reset}`;
+
+    console.log(`${name.padEnd(45)} ${rawKb.padStart(12)} ${gzipKb.padStart(12)} ${initBadge.padStart(19)}`);
+  }
+
+  if (report.chunks.length > 15) {
+    console.log(`... and ${report.chunks.length - 15} more chunks.`);
+  }
+
+  if (report.violations.length > 0) {
+    console.log(`\n${colors.brightRed}❌ Performance Budget Violations:${colors.reset}`);
+    for (const v of report.violations) {
+      console.log(`  ${colors.red}• ${v}${colors.reset}`);
+    }
+    console.log("");
+  } else {
+    console.log(`\n${colors.brightGreen}✔ All chunks comply with production performance budgets.${colors.reset}\n`);
+  }
+}
+
+async function handleCommitCommand(): Promise<void> {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+
+  console.log(formatHeader("DX Conventional Commit Wizard"));
+  console.log(`Select commit type from allowed list:`);
+  console.log(`  ${colors.cyan}${ALLOWED_COMMIT_TYPES.join(", ")}${colors.reset}\n`);
+
+  const question = (q: string): Promise<string> =>
+    new Promise((resolve) => rl.question(q, (ans) => resolve(ans.trim())));
+
+  const type = await question(`${colors.bold}Type${colors.reset} (e.g. feat, fix, dx, docs): `);
+  const scope = await question(`${colors.bold}Scope${colors.reset} [optional, e.g. proof, crf, a11y]: `);
+  const subject = await question(`${colors.bold}Subject (lowercase, imperative)${colors.reset}: `);
+  const isBreakingStr = await question(`${colors.bold}Is breaking change? (y/N)${colors.reset}: `);
+
+  rl.close();
+
+  const isBreaking = isBreakingStr.toLowerCase() === "y";
+  const exclamation = isBreaking ? "!" : "";
+  const header = scope ? `${type}(${scope})${exclamation}: ${subject}` : `${type}${exclamation}: ${subject}`;
+
+  const validation = validateCommitMessage(header);
+  if (!validation.valid) {
+    console.error(`\n${colors.brightRed}❌ Generated commit message failed validation:${colors.reset}`);
+    for (const err of validation.errors) {
+      console.error(`  ${colors.red}• ${err}${colors.reset}`);
+    }
+    console.log("");
+    process.exit(1);
+  }
+
+  console.log(`\n${colors.brightGreen}Commit Message:${colors.reset} ${colors.bold}${header}${colors.reset}`);
+  try {
+    execSync(`git commit -m "${header.replace(/"/g, '\\"')}"`, { stdio: "inherit" });
+    console.log(`\n${colors.brightGreen}✔ Commit created successfully.${colors.reset}\n`);
+  } catch {
+    console.error(`\n${colors.red}Git commit command failed.${colors.reset}\n`);
+  }
+}
+
+async function handleBranchCommand(): Promise<void> {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+
+  console.log(formatHeader("DX Git Branch Generator"));
+  console.log(`Allowed prefixes: ${colors.cyan}feat/, fix/, chore/, refactor/, docs/, perf/, dx/, test/${colors.reset}\n`);
+
+  const question = (q: string): Promise<string> =>
+    new Promise((resolve) => rl.question(q, (ans) => resolve(ans.trim())));
+
+  const prefix = await question(`${colors.bold}Prefix${colors.reset} (e.g. feat, fix, dx): `);
+  const slug = await question(`${colors.bold}Branch slug${colors.reset} (e.g. add-telemetry-guard): `);
+  rl.close();
+
+  const cleanPrefix = prefix.endsWith("/") ? prefix : `${prefix}/`;
+  const branchName = `${cleanPrefix}${slug}`.toLowerCase().replace(/\s+/g, "-");
+
+  const validation = validateBranchName(branchName);
+  if (!validation.valid) {
+    console.error(`\n${colors.brightRed}❌ Invalid branch name:${colors.reset} ${validation.error}\n`);
+    process.exit(1);
+  }
+
+  console.log(`\nCreating branch: ${colors.cyan}${branchName}${colors.reset}`);
+  try {
+    execSync(`git checkout -b ${branchName}`, { stdio: "inherit" });
+    console.log(`${colors.brightGreen}✔ Checked out to new branch '${branchName}'.${colors.reset}\n`);
+  } catch {
+    console.error(`\n${colors.red}Failed to create branch.${colors.reset}\n`);
   }
 }
 
@@ -149,15 +315,17 @@ async function runInteractiveMenu(): Promise<void> {
   console.log(`${colors.bold}Choose an action:${colors.reset}`);
   console.log(`  ${colors.cyan}1)${colors.reset} Invariant Doctor (Health Check)`);
   console.log(`  ${colors.cyan}2)${colors.reset} Invariant Doctor with Auto-Fix`);
-  console.log(`  ${colors.cyan}3)${colors.reset} Scaffold New Arcade Mini-Game`);
-  console.log(`  ${colors.cyan}4)${colors.reset} Scaffold New API Route`);
-  console.log(`  ${colors.cyan}5)${colors.reset} Scaffold Architecture Decision Record (ADR)`);
-  console.log(`  ${colors.cyan}6)${colors.reset} Run Micro-Benchmarks (Pretext & Math)`);
-  console.log(`  ${colors.cyan}7)${colors.reset} Run Page Speed & Web Vitals Benchmarks`);
-  console.log(`  ${colors.cyan}8)${colors.reset} Clean Caches & Rebuild Tokens`);
-  console.log(`  ${colors.cyan}9)${colors.reset} Exit\n`);
+  console.log(`  ${colors.cyan}3)${colors.reset} Interactive Conventional Commit Wizard`);
+  console.log(`  ${colors.cyan}4)${colors.reset} Interactive Git Branch Generator`);
+  console.log(`  ${colors.cyan}5)${colors.reset} Validate Environment & Schema (.env.example)`);
+  console.log(`  ${colors.cyan}6)${colors.reset} Scan for Dead Code & Unused Exports`);
+  console.log(`  ${colors.cyan}7)${colors.reset} Inspect Production Bundle Chunks & Budgets`);
+  console.log(`  ${colors.cyan}8)${colors.reset} Scaffold New Code Template (Arcade, API, ADR, Component)`);
+  console.log(`  ${colors.cyan}9)${colors.reset} Run Micro-Benchmarks (Pretext & Math)`);
+  console.log(`  ${colors.cyan}10)${colors.reset} Clean Caches & Rebuild Tokens`);
+  console.log(`  ${colors.cyan}11)${colors.reset} Exit\n`);
 
-  rl.question(`${colors.bold}${colors.brightWhite}Select an option [1-9]: ${colors.reset}`, async (answer) => {
+  rl.question(`${colors.bold}${colors.brightWhite}Select an option [1-11]: ${colors.reset}`, async (answer) => {
     rl.close();
     const choice = answer.trim();
 
@@ -168,46 +336,39 @@ async function runInteractiveMenu(): Promise<void> {
       case "2":
         await handleDoctorCommand(["--fix"]);
         break;
-      case "3": {
-        const rl2 = readline.createInterface({ input: process.stdin, output: process.stdout });
-        rl2.question(`Enter arcade game name (e.g. quantum-flux): `, async (gameName) => {
-          rl2.close();
-          if (gameName.trim()) {
-            await handleScaffoldCommand(["arcade", gameName.trim()]);
-          }
-        });
+      case "3":
+        await handleCommitCommand();
         break;
-      }
-      case "4": {
-        const rl2 = readline.createInterface({ input: process.stdin, output: process.stdout });
-        rl2.question(`Enter API route name (e.g. system-metrics): `, async (apiName) => {
-          rl2.close();
-          if (apiName.trim()) {
-            await handleScaffoldCommand(["api", apiName.trim()]);
-          }
-        });
+      case "4":
+        await handleBranchCommand();
         break;
-      }
-      case "5": {
-        const rl2 = readline.createInterface({ input: process.stdin, output: process.stdout });
-        rl2.question(`Enter ADR title slug (e.g. streaming-telemetry-protocol): `, async (adrName) => {
-          rl2.close();
-          if (adrName.trim()) {
-            await handleScaffoldCommand(["adr", adrName.trim()]);
-          }
-        });
+      case "5":
+        await handleEnvCommand([]);
         break;
-      }
       case "6":
-        handleBenchCommand([]);
+        handleDeadCodeCommand();
         break;
       case "7":
-        handleBenchCommand(["--pages"]);
+        handleAnalyzeCommand();
         break;
-      case "8":
+      case "8": {
+        const rl2 = readline.createInterface({ input: process.stdin, output: process.stdout });
+        rl2.question(`Enter type (arcade, api, adr, component, hook) and name: `, async (input) => {
+          rl2.close();
+          const [t, n] = input.trim().split(/\s+/);
+          if (t && n) {
+            await handleScaffoldCommand([t, n]);
+          }
+        });
+        break;
+      }
+      case "9":
+        handleBenchCommand([]);
+        break;
+      case "10":
         handleCleanCommand();
         break;
-      case "9":
+      case "11":
       default:
         console.log(`\n${colors.gray}Exiting DX Suite.${colors.reset}\n`);
         process.exit(0);
@@ -231,6 +392,24 @@ async function main(): Promise<void> {
     case "verify":
     case "check":
       await handleVerifyCommand();
+      break;
+    case "commit":
+    case "cz":
+      await handleCommitCommand();
+      break;
+    case "branch":
+      await handleBranchCommand();
+      break;
+    case "env":
+      await handleEnvCommand(args.slice(1));
+      break;
+    case "dead-code":
+    case "unused":
+      handleDeadCodeCommand();
+      break;
+    case "analyze":
+    case "bundle":
+      handleAnalyzeCommand();
       break;
     case "scaffold":
     case "g":
