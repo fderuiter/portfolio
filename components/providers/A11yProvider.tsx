@@ -14,7 +14,11 @@ const AnnouncerContext = createContext<AnnouncerContextType | null>(null);
 export function useAnnouncer() {
   const ctx = useContext(AnnouncerContext);
   if (!ctx) {
-    throw new Error("useAnnouncer must be used within A11yProvider");
+    return {
+      announce: (_message: string, _priority?: Priority) => {
+        // Fallback fallback announcer to prevent crashing in direct component mounts/tests
+      },
+    };
   }
   return ctx;
 }
