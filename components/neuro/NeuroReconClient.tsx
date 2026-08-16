@@ -17,8 +17,58 @@ import {
 import { SCENARIOS, SCENARIO_LIST, DATASET_CONFIGS } from "@/lib/neuro/scenarios";
 import { generateSyntheticVolume, SyntheticVolume, VOLUME_SIZE } from "@/lib/neuro/volume-generator";
 import { evaluateQAMetrics } from "@/lib/neuro/qa-engine";
-import { Brain3DViewer } from "./Brain3DViewer";
 import { MultiPlanarSliceViewer } from "./MultiPlanarSliceViewer";
+import dynamic from "next/dynamic";
+
+const Brain3DViewerSkeleton: React.FC = () => {
+  return (
+    <div 
+      className="relative w-full h-[460px] bg-zinc-950 rounded-2xl border border-zinc-800/80 overflow-hidden flex flex-col justify-between p-4 select-none animate-pulse"
+      data-testid="brain-3d-skeleton"
+    >
+      {/* Skeleton Header */}
+      <div className="flex items-center gap-2 bg-zinc-900/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-zinc-800 text-xs font-mono w-max">
+        <div className="w-1.5 h-1.5 rounded-full bg-brand-cyan/60 animate-ping" />
+        <span className="font-semibold text-zinc-400 uppercase tracking-wider">
+          Initializing 3D Engine...
+        </span>
+      </div>
+
+      {/* Skeleton Center pulsing graphic */}
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+        <div className="relative">
+          <div className="absolute -inset-4 rounded-full bg-brand-cyan/5 blur-xl animate-pulse" />
+          <Icon3dCubeSphere className="w-16 h-16 text-brand-cyan/40 animate-pulse relative z-10" />
+        </div>
+        <div className="text-center space-y-1 relative z-10">
+          <p className="text-sm font-bold font-mono text-zinc-300">
+            NeuroRecon 3D Viewer
+          </p>
+          <p className="text-[11px] font-mono text-brand-cyan/60">
+            Loading heavy WebGL visualizer and 3D brain mesh...
+          </p>
+        </div>
+      </div>
+
+      {/* Skeleton Footer */}
+      <div className="flex items-center justify-between text-xs font-mono text-zinc-500 bg-zinc-900/40 backdrop-blur-md px-3 py-1.5 rounded-xl border border-zinc-800/60 w-full mt-auto">
+        <span>PREPARING T1 MESH BUFFER</span>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-brand-cyan/30 animate-pulse" />
+          <span className="text-[10px]">STANDBY</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const Brain3DViewer = dynamic(
+  () => import("./Brain3DViewer").then((mod) => mod.Brain3DViewer),
+  {
+    ssr: false,
+    loading: () => <Brain3DViewerSkeleton />,
+  }
+);
 import { NeuroToolbar } from "./NeuroToolbar";
 import { NeuroMetricsPanel } from "./NeuroMetricsPanel";
 import { FreeSurferTerminal } from "./FreeSurferTerminal";
