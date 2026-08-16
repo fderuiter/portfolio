@@ -8,7 +8,7 @@
 
 > **createSocialImageResponse**(`options`): `ImageResponse`
 
-Defined in: lib/og-image.tsx:23
+Defined in: [lib/og-image.tsx:23](https://github.com/fderuiter/portfolio/blob/main/lib/og-image.tsx#L23)
 
 Generates an OpenGraph / Twitter Social Preview Card ImageResponse
 featuring the Frederick de Ruiter systems architecture visual identity.
