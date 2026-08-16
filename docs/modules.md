@@ -7,6 +7,7 @@
 ## Modules
 
 - [hooks/useAnnouncer](hooks/useAnnouncer/README.md)
+- [hooks/useClipboard](hooks/useClipboard/README.md)
 - [hooks/useConsoleArt](hooks/useConsoleArt/README.md)
 - [hooks/useFocusTrap](hooks/useFocusTrap/README.md)
 - [hooks/useFullscreen](hooks/useFullscreen/README.md)
@@ -28,6 +29,7 @@
 - [lib/clinical-trial-chaos/scenarios](lib/clinical-trial-chaos/scenarios/README.md)
 - [lib/clinical-trial-chaos/sound-effects](lib/clinical-trial-chaos/sound-effects/README.md)
 - [lib/clinical-trial-chaos/types](lib/clinical-trial-chaos/types/README.md)
+- [lib/clipboard](lib/clipboard/README.md)
 - [lib/crf/ast-evaluator](lib/crf/ast-evaluator/README.md)
 - [lib/crf/branding-defaults](lib/crf/branding-defaults/README.md)
 - [lib/crf/cdisc-cdash-library](lib/crf/cdisc-cdash-library/README.md)
