@@ -115,7 +115,6 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: 0.2 }}
-        onMouseEnter={playSkillHover}
         className="md:col-span-3 p-5 sm:p-6 md:p-8 bg-zinc-900/5 border border-zinc-900/40 rounded-3xl relative overflow-hidden hover:border-zinc-900 transition-all duration-300"
       >
         <h3 className="text-xs font-mono font-bold tracking-widest text-zinc-400 uppercase mb-5 sm:mb-6 text-center md:text-left">
