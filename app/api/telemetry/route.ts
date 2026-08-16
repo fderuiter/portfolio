@@ -164,52 +164,95 @@ export async function POST(req: NextRequest) {
     }
 
     const payload = await req.json();
-    const result = TelemetryEventSchema.safeParse(payload);
-    if (!result.success) {
-      const firstIssue = result.error.issues[0];
+    const isArray = Array.isArray(payload);
+    const eventsToProcess = isArray ? payload : [payload];
+
+    if (eventsToProcess.length === 0) {
+      return NextResponse.json(
+        { error: "Empty batch payload" },
+        { status: 400 }
+      );
+    }
+
+    // Payload Limits: Maximum single batch payload size must be restricted to 50 events
+    if (eventsToProcess.length > 50) {
+      return NextResponse.json(
+        { error: "Payload exceeds maximum batch limit of 50 events" },
+        { status: 400 }
+      );
+    }
+
+    const validEvents: { projectSlug: string; eventType: "page_view" | "project_click" | "route_error" }[] = [];
+    const validationErrors: { item: unknown; errors: { path: string; message: string }[] }[] = [];
+
+    for (const item of eventsToProcess) {
+      const result = TelemetryEventSchema.safeParse(item);
+      if (result.success) {
+        validEvents.push(result.data);
+      } else {
+        validationErrors.push({
+          item,
+          errors: result.error.issues.map((err) => ({
+            path: err.path.join("."),
+            message: err.message,
+          })),
+        });
+        console.error("Validation failed for event item in batch:", JSON.stringify(item), result.error.issues);
+      }
+    }
+
+    // If there are zero valid events in the batch, return 400 validation error
+    if (validEvents.length === 0) {
       let errorMessage = "Validation failed";
-      if (firstIssue.path[0] === "projectSlug") {
-        errorMessage = "Missing or invalid projectSlug identifier";
-      } else if (firstIssue.path[0] === "eventType") {
-        errorMessage = "Missing or invalid eventType. Allowed: 'page_view', 'project_click', 'route_error'";
+      if (validationErrors.length > 0) {
+        const firstErr = validationErrors[0].errors[0];
+        if (firstErr) {
+          if (firstErr.path === "projectSlug") {
+            errorMessage = "Missing or invalid projectSlug identifier";
+          } else if (firstErr.path === "eventType") {
+            errorMessage = "Missing or invalid eventType. Allowed: 'page_view', 'project_click', 'route_error'";
+          }
+        }
       }
       return NextResponse.json(
         {
           error: errorMessage,
-          details: result.error.issues.map((err) => ({
-            path: err.path.join("."),
-            message: err.message,
-          })),
+          details: validationErrors,
         },
         { status: 400 }
       );
     }
 
-    const { projectSlug, eventType } = result.data;
-
     // Save transaction event to the PostgreSQL Neon datastore
     // Implement HA buffering: Timeout or fail on primary DB, fallback to Redis
-    const eventId = crypto.randomUUID();
-    const eventData = {
-      id: eventId,
-      projectSlug,
-      eventType,
-      createdAt: new Date(),
-    };
-
-    // Push event into Redis list for background synchronization and ensure TTL
+    const processedEvents = [];
     const p = redis.pipeline();
-    p.lpush("telemetry_buffer", eventData);
+
+    for (const event of validEvents) {
+      const eventId = crypto.randomUUID();
+      const eventData = {
+        id: eventId,
+        projectSlug: event.projectSlug,
+        eventType: event.eventType,
+        createdAt: new Date(),
+      };
+      processedEvents.push(eventData);
+      p.lpush("telemetry_buffer", eventData);
+    }
+
     p.expire("telemetry_buffer", 48 * 60 * 60); // 48 hours
-    const [listLength] = await p.exec();
-    
-    if (Number(listLength) > 1000) {
+    const listLengths = await p.exec();
+    const lastListLength = listLengths[listLengths.length - 2];
+
+    if (Number(lastListLength) > 1000) {
       console.error("ALERT: Secondary telemetry buffer occupancy exceeds threshold.");
     }
-    
-    const newEvent = eventData;
 
-    const response = NextResponse.json({ success: true, event: newEvent }, { status: 201 });
+    const responseBody = isArray
+      ? { success: true, events: processedEvents, validationErrors }
+      : { success: true, event: processedEvents[0] };
+
+    const response = NextResponse.json(responseBody, { status: 201 });
     if (rateLimitRes.headers) {
       Object.entries(rateLimitRes.headers).forEach(([key, val]) => {
         response.headers.set(key, val);

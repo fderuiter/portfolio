@@ -21,7 +21,6 @@ interface TelemetryStoreState {
 interface QueuedEvent {
   projectSlug: string;
   eventType: "page_view" | "project_click" | "route_error";
-  retries: number;
 }
 
 // Global in-memory state
@@ -30,8 +29,8 @@ let currentStoreState: TelemetryStoreState = {
   syncFailed: false,
 };
 
-let retryQueue: QueuedEvent[] = [];
-let retryTimer: NodeJS.Timeout | null = null;
+let clientEventQueue: QueuedEvent[] = [];
+let flushTimer: NodeJS.Timeout | null = null;
 let lastRawCache: string | null = null;
 const listeners = new Set<() => void>();
 
@@ -143,39 +142,71 @@ async function fetchTelemetryAggregates() {
 }
 
 /**
- * Process queued retry events with exponential backoff.
+ * Process client-side telemetry queue and send to POST endpoint
  */
-async function processRetryQueue() {
-  if (retryQueue.length === 0) return;
-  const currentBatch = [...retryQueue];
-  retryQueue = [];
+export async function flushQueue() {
+  if (flushTimer) {
+    clearTimeout(flushTimer);
+    flushTimer = null;
+  }
 
-  for (const item of currentBatch) {
-    try {
-      const response = await fetch("/api/telemetry", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectSlug: item.projectSlug, eventType: item.eventType }),
-      });
+  if (clientEventQueue.length === 0) return;
 
-      if (!response.ok) {
-        if (response.status === 429 && item.retries < 3) {
-          retryQueue.push({ ...item, retries: item.retries + 1 });
-        }
+  // Slicing up to 50 events for single batch payload restriction
+  const batchToSend = clientEventQueue.slice(0, 50);
+  clientEventQueue = clientEventQueue.slice(50);
+
+  // If items remain in queue, reschedule next chunk flush immediately
+  if (clientEventQueue.length > 0) {
+    scheduleFlush(0);
+  }
+
+  try {
+    const response = await fetch("/api/telemetry", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(batchToSend),
+    });
+
+    if (!response.ok) {
+      if (response.status === 429) {
+        console.warn("Telemetry record rate limited by API.");
+      } else {
+        console.error("Telemetry batch dispatch failed with status:", response.status);
       }
-    } catch {
-      if (item.retries < 3) {
-        retryQueue.push({ ...item, retries: item.retries + 1 });
-      }
+      // Re-enqueue failed batch elements to retry later
+      clientEventQueue = [...batchToSend, ...clientEventQueue];
+      scheduleFlush(3000); // retry in 3 seconds
+      
+      updateStore((prev) => ({
+        ...prev,
+        syncFailed: true,
+      }));
+    } else {
+      updateStore((prev) => ({
+        ...prev,
+        syncFailed: false,
+      }));
     }
-  }
+  } catch (err) {
+    console.error("Optimistic telemetry sync persistence failed:", sanitizeError(err));
+    // Return failed batch back to queue for retry
+    clientEventQueue = [...batchToSend, ...clientEventQueue];
+    scheduleFlush(3000); // retry in 3 seconds
 
-  if (retryQueue.length > 0 && !retryTimer) {
-    retryTimer = setTimeout(() => {
-      retryTimer = null;
-      processRetryQueue();
-    }, 5000);
+    updateStore((prev) => ({
+      ...prev,
+      syncFailed: true,
+    }));
   }
+}
+
+export function scheduleFlush(delayMs: number = 2000) {
+  if (flushTimer) return;
+  flushTimer = setTimeout(() => {
+    flushTimer = null;
+    flushQueue();
+  }, delayMs);
 }
 
 /**
@@ -208,42 +239,14 @@ export function useTelemetry() {
         },
       }));
 
-      // 2. Dispatch network POST event
-      try {
-        const response = await fetch("/api/telemetry", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ projectSlug, eventType }),
-        });
+      // Queue the event
+      clientEventQueue.push({ projectSlug, eventType });
 
-        if (!response.ok) {
-          if (response.status === 429) {
-            console.warn("Telemetry record rate limited by API.");
-            // Enqueue for background retry
-            retryQueue.push({ projectSlug, eventType, retries: 0 });
-            if (!retryTimer) {
-              retryTimer = setTimeout(() => {
-                retryTimer = null;
-                processRetryQueue();
-              }, 3000);
-            }
-          } else {
-            throw new Error("Failed to persist telemetry event");
-          }
-        }
-      } catch (err) {
-        console.error("Optimistic telemetry sync persistence failed:", sanitizeError(err));
-        // Rollback optimistic increment on hard error
-        updateStore((prev) => ({
-          ...prev,
-          telemetry: {
-            ...prev.telemetry,
-            [projectSlug]: currentStats,
-          },
-          syncFailed: true,
-        }));
+      // Flush if threshold reached
+      if (clientEventQueue.length >= 30) {
+        await flushQueue();
+      } else {
+        scheduleFlush(2000);
       }
     },
     [store.telemetry]

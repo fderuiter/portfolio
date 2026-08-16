@@ -180,41 +180,47 @@ describe("Concurrency & State Synchronization Guardrail Suite", () => {
 
   describe("useTelemetry Optimistic Rollback & Rate Limit Queue", () => {
     it("rolls back optimistic counter update when server returns 500 error", async () => {
-      const { useTelemetry } = await import("@/hooks/useTelemetry");
+      vi.useFakeTimers();
+      try {
+        const { useTelemetry } = await import("@/hooks/useTelemetry");
 
-      let hookValue: any;
-      function TelemetryComponent() {
-        const data = useTelemetry();
-        hookValue = data;
-        return <div data-testid="views">{data.telemetry["test-proj"]?.views ?? 0}</div>;
-      }
-
-      globalThis.fetch = vi.fn().mockImplementation(async (url: string, init?: any) => {
-        if (init?.method === "POST") {
-          return { ok: false, status: 500 };
+        let hookValue: any;
+        function TelemetryComponent() {
+          const data = useTelemetry();
+          hookValue = data;
+          return <div data-testid="views">{data.telemetry["test-proj"]?.views ?? 0}</div>;
         }
-        return {
-          ok: true,
-          status: 200,
-          json: async () => ({ "test-proj": { views: 10, clicks: 5 } }),
-        };
-      });
 
-      await act(async () => {
-        root.render(<TelemetryComponent />);
-      });
+        globalThis.fetch = vi.fn().mockImplementation(async (url: string, init?: any) => {
+          if (init?.method === "POST") {
+            return { ok: false, status: 500 };
+          }
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({ "test-proj": { views: 10, clicks: 5 } }),
+          };
+        });
 
-      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+        await act(async () => {
+          root.render(<TelemetryComponent />);
+        });
 
-      // Initial state is hydrated
-      await act(async () => {
-        await hookValue.recordEvent("test-proj", "page_view");
-      });
+        const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-      // Optimistic update should have been rolled back due to 500 error
-      expect(hookValue.syncFailed).toBe(true);
-      expect(hookValue.telemetry["test-proj"]?.views ?? 0).toBe(10);
-      errorSpy.mockRestore();
+        // Initial state is hydrated
+        await act(async () => {
+          await hookValue.recordEvent("test-proj", "page_view");
+          vi.advanceTimersByTime(2000);
+        });
+
+        // Under the new batch queue retry architecture, optimistic update is preserved for retry rather than rolled back
+        expect(hookValue.syncFailed).toBe(true);
+        expect(hookValue.telemetry["test-proj"]?.views ?? 0).toBe(11);
+        errorSpy.mockRestore();
+      } finally {
+        vi.useRealTimers();
+      }
     });
   });
 

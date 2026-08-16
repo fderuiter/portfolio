@@ -16,4 +16,6 @@
 
 ## Functions
 
+- [flushQueue](functions/flushQueue.md)
+- [scheduleFlush](functions/scheduleFlush.md)
 - [useTelemetry](functions/useTelemetry.md)

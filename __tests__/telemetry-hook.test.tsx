@@ -278,6 +278,7 @@ describe("useTelemetry Hook Integration & Isolation", () => {
     // 1. Test project_click
     await act(async () => {
       await hookResult.recordEvent("project-abc", "project_click");
+      vi.advanceTimersByTime(2000);
     });
     expect(hookResult.telemetry["project-abc"].clicks).toBe(11);
 
@@ -288,6 +289,7 @@ describe("useTelemetry Hook Integration & Isolation", () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     await act(async () => {
       await hookResult.recordEvent("project-abc", "page_view");
+      vi.advanceTimersByTime(2000);
     });
     expect(warnSpy).toHaveBeenCalledWith("Telemetry record rate limited by API.");
     warnSpy.mockRestore();
@@ -299,6 +301,7 @@ describe("useTelemetry Hook Integration & Isolation", () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     await act(async () => {
       await hookResult.recordEvent("project-abc", "page_view");
+      vi.advanceTimersByTime(2000);
     });
     expect(hookResult.syncFailed).toBe(true);
     errorSpy.mockRestore();
@@ -339,6 +342,7 @@ describe("useTelemetry Hook Integration & Isolation", () => {
       // Trigger record event to cause an optimistic sync persistence failure
       await act(async () => {
         await hookResult.recordEvent("project-abc", "page_view");
+        vi.advanceTimersByTime(2000);
       });
 
       // Verify console.error was called with a sanitized error object (no "/app/api/telemetry" path)
@@ -360,6 +364,7 @@ describe("useTelemetry Hook Integration & Isolation", () => {
 
       await act(async () => {
         await hookResult.recordEvent("project-abc", "page_view");
+        vi.advanceTimersByTime(2000);
       });
 
       // Verify console.error was called with raw, unmodified error
