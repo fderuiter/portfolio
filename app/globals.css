@@ -227,3 +227,20 @@ body {
   }
 }
 
+/* Hardware-Accelerated Mobile Grid Animation */
+@keyframes grid-square-pulse {
+  0%, 100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: var(--grid-square-opacity, 0.4);
+  }
+}
+
+.animate-grid-square {
+  animation: grid-square-pulse var(--grid-square-duration, 4s) ease-in-out infinite;
+  animation-delay: var(--grid-square-delay, 0s);
+  will-change: opacity;
+}
+
+

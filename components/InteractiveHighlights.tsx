@@ -13,7 +13,7 @@ export const InteractiveHighlights: React.FC = () => {
   }
 
   return (
-    <div className="w-full mb-8 sm:mb-12 p-5 sm:p-8 tool-shell relative overflow-hidden group hover:border-brand-cyan/40 transition-colors">
+    <div className="w-full mb-6 sm:mb-8 p-5 sm:p-8 tool-shell relative overflow-hidden group hover:border-brand-cyan/40 transition-colors">
       <div className="absolute top-0 right-0 w-64 h-64 bg-brand-cyan/5 rounded-full blur-[60px] pointer-events-none group-hover:bg-brand-cyan/10 transition-colors" />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

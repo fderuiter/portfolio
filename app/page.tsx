@@ -92,11 +92,11 @@ export default async function PortfolioHomePage() {
       <Hero />
 
       {/* Case studies showcase section */}
-      <div className="relative min-h-dvh py-16 sm:py-24 md:py-32 px-4 sm:px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/60 bg-zinc-950 outline-none">
+      <div className="relative py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/60 bg-zinc-950 outline-none">
         <section id="case-studies" className="w-full flex flex-col items-center">
-          {/* Decorative Blur Elements */}
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none" />
-          <div className="absolute top-1/3 left-1/3 -translate-y-1/2 w-96 h-96 rounded-full bg-brand-blue/5 blur-[150px] pointer-events-none" />
+          {/* Decorative Blur Elements (desktop only to prevent mobile GPU rasterization drops) */}
+          <div className="hidden sm:block absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none" />
+          <div className="hidden sm:block absolute top-1/3 left-1/3 -translate-y-1/2 w-96 h-96 rounded-full bg-brand-blue/5 blur-[150px] pointer-events-none" />
 
           {/* Main Container */}
           <div className="relative z-10 w-full max-w-7xl flex flex-col items-center">
@@ -104,7 +104,7 @@ export default async function PortfolioHomePage() {
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-mono tracking-tight text-white text-center mb-2">
               Things I&apos;ve Built
             </h2>
-            <p className="text-[11px] sm:text-xs font-mono text-zinc-400 tracking-widest uppercase mb-8 sm:mb-12 text-center max-w-lg">
+            <p className="text-[11px] sm:text-xs font-mono text-zinc-400 tracking-widest uppercase mb-6 sm:mb-8 text-center max-w-lg">
               Clinical data systems, quirky canvas games, and weekend experiments
             </p>
 
@@ -134,28 +134,28 @@ export default async function PortfolioHomePage() {
       </div>
 
       {/* 3. About Section */}
-      <section id="about" className="relative py-16 sm:py-24 md:py-32 px-4 sm:px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950/40 overflow-hidden">
-        {/* Decorative Blurs */}
-        <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-80 h-80 rounded-full bg-brand-blue/5 blur-[120px] pointer-events-none" />
+      <section id="about" className="relative py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950/40 overflow-hidden">
+        {/* Decorative Blurs (desktop only to prevent mobile GPU rasterization drops) */}
+        <div className="hidden sm:block absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none" />
+        <div className="hidden sm:block absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-80 h-80 rounded-full bg-brand-blue/5 blur-[120px] pointer-events-none" />
         
         <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
             What I Do
           </h2>
-          <p className="text-[11px] sm:text-xs font-mono text-zinc-400 tracking-widest uppercase mb-10 sm:mb-16 text-center max-w-md">
+          <p className="text-[11px] sm:text-xs font-mono text-zinc-400 tracking-widest uppercase mb-6 sm:mb-8 text-center max-w-md">
             A mix of clinical trial tech, canvas experiments, and outdoor emergency response
           </p>
           
           {/* Dynamic Bento Skills Grid Card Layout */}
-          <div className="w-full mb-16 sm:mb-24">
+          <div className="w-full mb-10 sm:mb-14">
             <SkillsGrid languages={languagesList} />
           </div>
 
           <h3 className="text-xl sm:text-2xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
             Work History
           </h3>
-          <p className="text-[11px] sm:text-xs font-mono text-zinc-400 tracking-widest uppercase mb-10 sm:mb-16 text-center max-w-md">
+          <p className="text-[11px] sm:text-xs font-mono text-zinc-400 tracking-widest uppercase mb-6 sm:mb-8 text-center max-w-md">
             From clinical operations at Mayo Clinic to high-compliance data architecture
           </p>
 
@@ -167,12 +167,12 @@ export default async function PortfolioHomePage() {
       </section>
 
       {/* 4. Contact Section */}
-      <section id="contact" className="relative py-16 sm:py-24 md:py-32 px-4 sm:px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950">
+      <section id="contact" className="relative py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/50 bg-zinc-950">
         <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
             Say Hello
           </h2>
-          <p className="text-[11px] sm:text-xs font-mono text-zinc-400 tracking-widest uppercase mb-10 sm:mb-16 text-center max-w-md">
+          <p className="text-[11px] sm:text-xs font-mono text-zinc-400 tracking-widest uppercase mb-6 sm:mb-8 text-center max-w-md">
             Always up for talking tech, clinical data, or wild project ideas.
           </p>
           
@@ -237,7 +237,7 @@ export default async function PortfolioHomePage() {
             </a>
           </div>
           
-          <div className="mt-16 sm:mt-24 text-xs font-mono text-zinc-500 tracking-[0.2em] text-center select-none">
+          <div className="mt-10 sm:mt-14 text-xs font-mono text-zinc-500 tracking-[0.2em] text-center select-none">
             DESIGNED &amp; DEVELOPED BY FREDERICK DE RUITER
           </div>
         </div>

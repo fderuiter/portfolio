@@ -64,6 +64,7 @@ export function usePretextLayout({
   const preparedTextRef = useRef<PreparedText | null>(null);
   const fontStringRef = useRef<string>("");
   const resolvedFontRef = useRef<{ fontSize: number; fontFamilyVariable: string; fontString: string } | null>(null);
+  const lastWidthRef = useRef<number>(-1);
 
   const measureText = useCallback((maxWidth: number) => {
     if (!isBrowser() || maxWidth <= 0) return;
@@ -125,8 +126,11 @@ export function usePretextLayout({
   }, [text, fontSize, lineHeight, fontFamilyVariable, getResponsiveMetrics]);
 
   const containerRef = useResizeObserver<HTMLDivElement>((entry) => {
-    const maxWidth = entry.contentRect.width;
-    measureText(maxWidth);
+    const maxWidth = Math.floor(entry.contentRect.width);
+    if (maxWidth > 0 && maxWidth !== lastWidthRef.current) {
+      lastWidthRef.current = maxWidth;
+      measureText(maxWidth);
+    }
   });
 
   useLayoutEffect(() => {
@@ -363,6 +367,7 @@ export function usePretextRichLayout({
   const itemsRef = useRef<ExtendedRichInlineItem[]>([]);
   const itemsKeyRef = useRef<string>("");
   const resolvedFontsRef = useRef<{ fontSize: number; fontFamilyVariable: string; fonts: ThemeFonts } | null>(null);
+  const lastWidthRef = useRef<number>(-1);
 
   const measureRichText = useCallback((maxWidth: number) => {
     if (!preparedRef.current || !itemsKeyRef.current) return;
@@ -405,8 +410,11 @@ export function usePretextRichLayout({
   }, [lineHeight]);
 
   const containerRef = useResizeObserver<HTMLDivElement>((entry) => {
-    const maxWidth = entry.contentRect.width;
-    measureRichText(maxWidth);
+    const maxWidth = Math.floor(entry.contentRect.width);
+    if (maxWidth > 0 && maxWidth !== lastWidthRef.current) {
+      lastWidthRef.current = maxWidth;
+      measureRichText(maxWidth);
+    }
   });
 
   useLayoutEffect(() => {

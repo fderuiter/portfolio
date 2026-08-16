@@ -15,6 +15,22 @@ import {
 } from "@/lib/graphics-math";
 import { IconDeviceGamepad2 } from "@tabler/icons-react";
 
+function subscribeMobile(callback: () => void) {
+  if (typeof window === "undefined" || !window.matchMedia) return () => {};
+  const mql = window.matchMedia("(max-width: 767px)");
+  mql.addEventListener("change", callback);
+  return () => mql.removeEventListener("change", callback);
+}
+
+function getMobileSnapshot(): boolean {
+  if (typeof window === "undefined" || !window.matchMedia) return false;
+  return window.matchMedia("(max-width: 767px)").matches;
+}
+
+function getMobileServerSnapshot(): boolean {
+  return false;
+}
+
 export const BackgroundBeamsWithCollision = ({
   children,
   className,
@@ -22,6 +38,7 @@ export const BackgroundBeamsWithCollision = ({
   children: React.ReactNode;
   className?: string;
 }) => {
+  const isMobile = React.useSyncExternalStore(subscribeMobile, getMobileSnapshot, getMobileServerSnapshot);
   const containerRef = useRef<HTMLDivElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -78,6 +95,8 @@ export const BackgroundBeamsWithCollision = ({
     },
   ];
 
+  const activeBeams = isMobile ? beams.slice(0, 3) : beams;
+
   return (
     <div
       ref={parentRef}
@@ -86,7 +105,7 @@ export const BackgroundBeamsWithCollision = ({
         className
       )}
     >
-      {beams.map((beam) => (
+      {activeBeams.map((beam) => (
         <CollisionMechanism
           key={beam.initialX + "beam-idx"}
           beamOptions={beam}
@@ -123,6 +142,7 @@ export const BackgroundBeamsWithCollision = ({
   }
 >(({ parentRef, containerRef, beamOptions = {} }, _ref) => {
   const shouldReduceMotion = useReducedMotion();
+  const isMobile = React.useSyncExternalStore(subscribeMobile, getMobileSnapshot, getMobileServerSnapshot);
   const beamRef = useRef<HTMLDivElement>(null);
   const [collision, setCollision] = useState<{
     detected: boolean;
@@ -135,7 +155,7 @@ export const BackgroundBeamsWithCollision = ({
   const [cycleCollisionDetected, setCycleCollisionDetected] = useState(false);
 
   useEffect(() => {
-    if (shouldReduceMotion) return;
+    if (shouldReduceMotion || isMobile) return;
 
     const checkCollision = () => {
       if (
@@ -163,7 +183,7 @@ export const BackgroundBeamsWithCollision = ({
     const animationInterval = setInterval(checkCollision, 50);
 
     return () => clearInterval(animationInterval);
-  }, [cycleCollisionDetected, containerRef, parentRef, shouldReduceMotion]);
+  }, [cycleCollisionDetected, containerRef, parentRef, shouldReduceMotion, isMobile]);
 
   useEffect(() => {
     if (shouldReduceMotion) return;
@@ -269,6 +289,7 @@ interface HeroHeadlineProps {
 
 export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
   const shouldReduceMotion = useReducedMotion();
+  const isMobile = React.useSyncExternalStore(subscribeMobile, getMobileSnapshot, getMobileServerSnapshot);
   const { ref, height, isReady } = usePretextLayout({
     text,
     fontSize: 60,
@@ -341,6 +362,15 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
           <p className="text-4xl md:text-6xl font-black tracking-tight text-center opacity-0 leading-tight md:leading-none">
             {text}
           </p>
+        ) : isMobile ? (
+          <motion.p
+            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="text-4xl md:text-6xl font-black tracking-tight text-center leading-tight md:leading-none text-transparent bg-clip-text bg-gradient-to-r from-neutral-100 via-neutral-200 to-neutral-300"
+          >
+            {text}
+          </motion.p>
         ) : (
           <motion.div
             variants={containerVariants}
@@ -384,6 +414,7 @@ interface HeroTextProps {
 
 export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
   const shouldReduceMotion = useReducedMotion();
+  const isMobile = React.useSyncExternalStore(subscribeMobile, getMobileSnapshot, getMobileServerSnapshot);
   const { ref, height, isReady } = usePretextLayout({
     text,
     fontSize: 16,
@@ -455,6 +486,15 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
           <p className="text-neutral-400 text-sm md:text-base leading-[28px] text-center opacity-0">
             {text}
           </p>
+        ) : isMobile ? (
+          <motion.p
+            initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.4, ease: "easeOut" }}
+            className="text-neutral-400 text-sm md:text-base leading-[28px] text-center"
+          >
+            {text}
+          </motion.p>
         ) : (
           <motion.p
             variants={containerVariants}
@@ -498,9 +538,8 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ className }) => {
   const shouldReduceMotion = useReducedMotion();
-  const headline = "Hey, I'm Fred. I build software, tame clinical trial data, and build fun things.";
-  const introText =
-    "Clinical data specialist by day, creative coder by night. I like engineering, clinical research, and learning.";
+  const headline = "Hey, I'm Fred. I like to build fun things.";
+  const introText = "Clinical data specialist by day, creative coder by night.";
 
   return (
     <section
@@ -521,9 +560,10 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
         />
       </div>
 
-      {/* 2. Radial Blurred Ambient Gradient Blobs */}
-      <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[35vw] h-[35vw] rounded-full bg-brand-cyan/10 blur-[130px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[35vw] h-[35vw] rounded-full bg-brand-blue/10 blur-[130px] pointer-events-none" />
+      {/* 2. Radial Ambient Gradient Blobs (optimized for mobile GPU compositing) */}
+      <div className="hidden sm:block absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[35vw] h-[35vw] rounded-full bg-brand-cyan/10 blur-[130px] pointer-events-none" />
+      <div className="hidden sm:block absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[35vw] h-[35vw] rounded-full bg-brand-blue/10 blur-[130px] pointer-events-none" />
+      <div className="sm:hidden absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-cyan/10 via-transparent to-transparent pointer-events-none" />
 
       {/* 3. Hero Content Container */}
       <div className="relative z-10 w-full max-w-4xl flex flex-col items-center text-center">
@@ -534,7 +574,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="px-3.5 py-1 mb-6 text-[10px] md:text-xs font-mono font-semibold tracking-[0.2em] uppercase text-brand-cyan bg-brand-cyan/5 border border-brand-cyan/20 rounded-full"
         >
-          FRED DE RUITER · ENGINEERING, CLINICAL DATA &amp; FUN WEB STUFF
+          FRED DE RUITER · BUILDER &amp; EXPERIMENTER
         </motion.span>
 
         {/* Dynamic Staggered Pretext-powered Title */}
@@ -554,7 +594,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
           <a
             href="#case-studies"
             style={{ "--btn-glow": `0 0 30px ${hexToRgba(designManifest.colors["brand-cyan"], 0.4)}` } as React.CSSProperties}
-            className="w-full sm:w-auto group relative inline-flex items-center justify-center px-8 py-3.5 text-sm font-semibold text-brand-dark bg-white rounded-full overflow-hidden transition-all duration-300 hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:[box-shadow:var(--btn-glow)] cursor-pointer"
+            className="w-full sm:w-auto group relative inline-flex items-center justify-center px-8 py-3.5 text-sm font-semibold text-brand-dark bg-white rounded-full overflow-hidden transition-all duration-300 hover:scale-105 active:scale-[0.98] shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:[box-shadow:var(--btn-glow)] cursor-pointer"
           >
             {/* Hover reflection */}
             <div
@@ -568,7 +608,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
           <div className="grid grid-cols-2 gap-3 w-full sm:w-auto sm:flex sm:flex-row sm:gap-4 min-w-0">
             <a
               href="/arcade"
-              className="inline-flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 text-xs sm:text-sm font-semibold text-brand-cyan hover:text-white bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/30 hover:border-brand-cyan/50 rounded-full transition-all duration-300 hover:scale-105 backdrop-blur-md shadow-[0_0_15px_rgba(6,182,212,0.15)] cursor-pointer min-w-0"
+              className="inline-flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 text-xs sm:text-sm font-semibold text-brand-cyan hover:text-white bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/30 hover:border-brand-cyan/50 rounded-full transition-all duration-300 hover:scale-105 active:scale-[0.98] backdrop-blur-md shadow-[0_0_15px_rgba(6,182,212,0.15)] cursor-pointer min-w-0"
             >
               <IconDeviceGamepad2 className="w-4 h-4 shrink-0" />
               <span className="truncate">Interactive Labs</span>
@@ -577,7 +617,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
               href="https://github.com/fderuiter"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 text-xs sm:text-sm font-semibold text-neutral-300 hover:text-white bg-neutral-900/60 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-full transition-all duration-300 hover:scale-105 backdrop-blur-md cursor-pointer min-w-0"
+              className="inline-flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 text-xs sm:text-sm font-semibold text-neutral-300 hover:text-white bg-neutral-900/60 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-full transition-all duration-300 hover:scale-105 active:scale-[0.98] backdrop-blur-md cursor-pointer min-w-0"
             >
               <svg
                 className="w-4 h-4 fill-current shrink-0"

@@ -129,7 +129,14 @@ export const Navbar: React.FC = () => {
     setPrevPathname(pathname);
     setIsOpen(false);
     setActiveDropdown(null);
+    setShowAudioPanel(false);
   }
+
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.body.style.overflow = "";
+    }
+  }, [pathname]);
 
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -158,7 +165,7 @@ export const Navbar: React.FC = () => {
 
   // 2. Scroll Spy: active section observer
   useEffect(() => {
-    if (pathname !== "/") return;
+    if (pathname !== "/" || typeof IntersectionObserver === "undefined") return;
 
     const sections = ["hero", "case-studies", "about", "contact"];
 
@@ -260,9 +267,13 @@ export const Navbar: React.FC = () => {
     };
   }, [isOpen, activeDropdown, showAudioPanel]);
 
-  // Handle smooth scroll clicks on homepage
+  // Handle smooth scroll clicks on homepage and universal mobile drawer dismissal
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     setActiveDropdown(null);
+    setIsOpen(false);
+    if (typeof document !== "undefined") {
+      document.body.style.overflow = "";
+    }
     if (pathname === "/" && href.startsWith("/#")) {
       e.preventDefault();
       const targetId = href.substring(2);
@@ -270,7 +281,6 @@ export const Navbar: React.FC = () => {
       if (targetElement) {
         targetElement.scrollIntoView({ behavior: "smooth" });
         setActiveSection(targetId);
-        setIsOpen(false);
       }
     }
   };
@@ -745,6 +755,14 @@ export const Navbar: React.FC = () => {
             role="dialog"
             aria-modal="true"
             aria-label="Mobile navigation overlay"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setIsOpen(false);
+                if (typeof document !== "undefined") {
+                  document.body.style.overflow = "";
+                }
+              }
+            }}
             className="fixed inset-0 z-40 bg-zinc-950/98 backdrop-blur-2xl flex flex-col justify-between pt-[max(6rem,env(safe-area-inset-top)+4.5rem)] pb-[max(2rem,env(safe-area-inset-bottom)+1.5rem)] px-[max(1.5rem,env(safe-area-inset-left)+1rem)] overflow-y-auto"
           >
             {/* Ambient gradients */}
@@ -761,14 +779,8 @@ export const Navbar: React.FC = () => {
                   </span>
                   <Link
                     href={pathname === "/" ? "/#case-studies" : "/case-studies"}
-                    onClick={(e) => {
-                      if (pathname === "/") {
-                        handleNavClick(e, "/#case-studies");
-                      } else {
-                        setIsOpen(false);
-                      }
-                    }}
-                    className="min-h-11 px-3 py-2.5 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between"
+                    onClick={(e) => handleNavClick(e, pathname === "/" ? "/#case-studies" : "/case-studies")}
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between active:scale-[0.99] transition-all"
                   >
                     <span>Engineering Case Studies</span>
                     <span className="text-xs font-mono text-zinc-500">→</span>
@@ -776,7 +788,7 @@ export const Navbar: React.FC = () => {
                   <Link
                     href="/#about"
                     onClick={(e) => handleNavClick(e, "/#about")}
-                    className="min-h-11 px-3 py-2.5 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between"
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between active:scale-[0.99] transition-all"
                   >
                     <span>About &amp; Experience</span>
                     <span className="text-xs font-mono text-zinc-500">→</span>
@@ -784,7 +796,7 @@ export const Navbar: React.FC = () => {
                   <Link
                     href="/#contact"
                     onClick={(e) => handleNavClick(e, "/#contact")}
-                    className="min-h-11 px-3 py-2.5 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between"
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between active:scale-[0.99] transition-all"
                   >
                     <span>Contact</span>
                     <span className="text-xs font-mono text-zinc-500">→</span>
@@ -792,7 +804,7 @@ export const Navbar: React.FC = () => {
                   <Link
                     href="/schedule"
                     onClick={(e) => handleNavClick(e, "/schedule")}
-                    className="min-h-11 px-3 py-2.5 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-300 hover:text-white flex items-center justify-between"
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-300 hover:text-white flex items-center justify-between active:scale-[0.99] transition-all"
                   >
                     <span>Office Hours &amp; Schedule</span>
                     <span className="text-xs font-mono text-zinc-500">→</span>
@@ -807,7 +819,7 @@ export const Navbar: React.FC = () => {
                   <Link
                     href="/crf"
                     onClick={(e) => handleNavClick(e, "/crf")}
-                    className="min-h-11 px-3 py-2.5 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between"
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between active:scale-[0.99] transition-all"
                   >
                     <span className="flex items-center gap-2">
                       <IconFileSpreadsheet className="w-4 h-4 text-brand-cyan" />
@@ -818,7 +830,7 @@ export const Navbar: React.FC = () => {
                   <Link
                     href="/proof"
                     onClick={(e) => handleNavClick(e, "/proof")}
-                    className="min-h-11 px-3 py-2.5 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between"
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between active:scale-[0.99] transition-all"
                   >
                     <span className="flex items-center gap-2">
                       <IconBrain className="w-4 h-4 text-brand-purple" />
@@ -829,7 +841,7 @@ export const Navbar: React.FC = () => {
                   <Link
                     href="/neuro"
                     onClick={(e) => handleNavClick(e, "/neuro")}
-                    className="min-h-11 px-3 py-2.5 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between"
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between active:scale-[0.99] transition-all"
                   >
                     <span className="flex items-center gap-2">
                       <IconBrain className="w-4 h-4 text-emerald-400" />
@@ -840,7 +852,7 @@ export const Navbar: React.FC = () => {
                   <Link
                     href="/stack"
                     onClick={(e) => handleNavClick(e, "/stack")}
-                    className="min-h-11 px-3 py-2.5 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between"
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between active:scale-[0.99] transition-all"
                   >
                     <span className="flex items-center gap-2">
                       <IconCpu className="w-4 h-4 text-brand-cyan" />
@@ -852,7 +864,7 @@ export const Navbar: React.FC = () => {
                     <Link
                       href="/arcade"
                       onClick={(e) => handleNavClick(e, "/arcade")}
-                      className="min-h-11 px-3 py-2.5 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-brand-cyan hover:bg-brand-cyan/10 flex items-center justify-between"
+                      className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-brand-cyan hover:bg-brand-cyan/10 flex items-center justify-between active:scale-[0.99] transition-all"
                     >
                       <span className="flex items-center gap-2">
                         <IconDeviceGamepad2 className="w-4 h-4" />

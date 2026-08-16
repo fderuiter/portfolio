@@ -271,12 +271,14 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
   const playHover = (pan?: number) => {
     if (muted || bypassActive) return;
+    if (typeof window !== "undefined" && window.matchMedia?.("(hover: none)").matches) return;
     const freq = profile === "ambient" ? 440.00 : 880.00;
     playNote(freq, 0.02, pan);
   };
 
   const playSkillHover = () => {
     if (muted || bypassActive) return;
+    if (typeof window !== "undefined" && window.matchMedia?.("(hover: none)").matches) return;
     const notes = [261.63, 293.66, 329.63, 392.00, 440.00];
     const randomFreq = notes[Math.floor(Math.random() * notes.length)];
     playNote(randomFreq, 0.1);
