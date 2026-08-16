@@ -68,6 +68,10 @@ export const richItemsCache = new LRUCache<string, unknown[]>(500);
 export const richPrepareCache = new LRUCache<string, PreparedRichInline>(500);
 export const richLayoutCache = new LRUCache<string, { height: number; lines: RichInlineLine[] }>(2000);
 
+// Bounded style and font caches with strict capacity limits to avoid memory growth
+export const cssPropertyCache = new LRUCache<string, string>(100);
+export const fontConfigCache = new LRUCache<string, unknown>(100);
+
 // --- Environment and CSS resolution helpers ---
 
 /**
@@ -85,10 +89,19 @@ export function resolveFontFamily(variableName: string = "--font-inter"): string
   if (!isBrowser()) {
     return designManifest.typography.fonts.sans;
   }
+
+  // Intercept repeated queries with the bounded cache
+  const cached = cssPropertyCache.get(variableName);
+  if (cached !== undefined) {
+    return cached;
+  }
+
   try {
     const rootStyle = window.getComputedStyle(document.documentElement);
     const rawFontFamily = rootStyle.getPropertyValue(variableName).trim();
-    return rawFontFamily || designManifest.typography.fonts.sans;
+    const resolved = rawFontFamily || designManifest.typography.fonts.sans;
+    cssPropertyCache.set(variableName, resolved);
+    return resolved;
   } catch {
     return designManifest.typography.fonts.sans;
   }

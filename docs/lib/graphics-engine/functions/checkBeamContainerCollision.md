@@ -8,7 +8,7 @@
 
 > **checkBeamContainerCollision**(`beamRect`, `containerRect`): `boolean`
 
-Defined in: [lib/graphics-engine.ts:336](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L336)
+Defined in: [lib/graphics-engine.ts:349](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L349)
 
 Checks if the bottom of a beam/bounding box has intersected or crossed the top of a container.
 
