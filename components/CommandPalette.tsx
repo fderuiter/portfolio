@@ -136,6 +136,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         ]
       },
       {
+        id: "nav-case-studies",
+        title: "Engineering Case Studies Hub",
+        subtitle: "Full Bento showcase of clinical data & architectural systems",
+        category: "navigation",
+        url: "/case-studies",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Case Studies",
+        status: "Interactive Showcase",
+        description: "Comprehensive portfolio showcase featuring interactive clinical systems, formal logic tools, live telemetry feeds, and full-stack architectural case studies.",
+        techStack: ["Next.js 16", "React 19", "Tailwind CSS", "TypeScript"],
+        highlights: [
+          "Interactive bento-box case study grid",
+          "Live telemetry and commit logs",
+          "Deep architectural retrospectives"
+        ]
+      },
+      {
         id: "nav-laser-loon",
         title: "Laser Loon: Quest for the State Flag",
         subtitle: "Playable civic physics shooter — pilot F277 Laser Loon on the Road to the Capitol",

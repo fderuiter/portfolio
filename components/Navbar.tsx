@@ -307,12 +307,18 @@ export const Navbar: React.FC = () => {
             <nav className="flex items-center gap-6 lg:gap-7" aria-label="Main Navigation">
               {/* Work Pillar */}
               <Link
-                href="/#case-studies"
-                onClick={(e) => handleNavClick(e, "/#case-studies")}
+                href={pathname === "/" ? "/#case-studies" : "/case-studies"}
+                onClick={(e) => {
+                  if (pathname === "/") {
+                    handleNavClick(e, "/#case-studies");
+                  } else {
+                    setActiveDropdown(null);
+                  }
+                }}
                 onMouseEnter={handleLinkHover}
                 className={cn(
                   "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1",
-                  pathname === "/" && activeSection === "case-studies"
+                  (pathname === "/" && activeSection === "case-studies") || pathname === "/case-studies" || pathname.startsWith("/case-studies/")
                     ? "text-brand-cyan font-bold"
                     : "text-muted"
                 )}
@@ -748,11 +754,17 @@ export const Navbar: React.FC = () => {
                     Core Navigation
                   </span>
                   <Link
-                    href="/#case-studies"
-                    onClick={(e) => handleNavClick(e, "/#case-studies")}
+                    href={pathname === "/" ? "/#case-studies" : "/case-studies"}
+                    onClick={(e) => {
+                      if (pathname === "/") {
+                        handleNavClick(e, "/#case-studies");
+                      } else {
+                        setIsOpen(false);
+                      }
+                    }}
                     className="min-h-11 px-3 py-2.5 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between"
                   >
-                    <span>Work Showcase</span>
+                    <span>Engineering Case Studies</span>
                     <span className="text-xs font-mono text-zinc-500">→</span>
                   </Link>
                   <Link

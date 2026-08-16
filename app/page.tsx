@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import { CaseStudyShowcase } from "@/components/CaseStudyShowcase";
+import { ProjectTeaserGrid } from "@/components/ProjectTeaserGrid";
 import { BaseCaseStudy } from "@/types/domain";
 import { Hero } from "@/components/Hero";
 import { getGitHubStats, parseGitHubUrl, GitHubStats, getSimulatedStats } from "@/lib/github";
@@ -116,7 +116,7 @@ export default async function PortfolioHomePage() {
             {/* Interactive Systems Highlights Section */}
             <InteractiveHighlights />
 
-            {/* Dynamic Bento Showcase */}
+            {/* Streamlined Lightweight Project Teaser */}
             {caseStudies.length === 0 ? (
               <div className="text-center p-8 sm:p-12 bg-zinc-900/10 border border-zinc-900/40 border-dashed rounded-2xl w-full">
                 <p className="text-sm text-zinc-400 italic mb-2">
@@ -127,7 +127,7 @@ export default async function PortfolioHomePage() {
                 </p>
               </div>
             ) : (
-              <CaseStudyShowcase caseStudies={caseStudies} />
+              <ProjectTeaserGrid caseStudies={caseStudies} />
             )}
           </div>
         </section>
