@@ -11,10 +11,14 @@ import {
   IconCalendar,
   IconRefresh,
   IconCopy,
+  IconCheck,
+  IconAlertCircle,
 } from "@tabler/icons-react";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
+import { useClipboard } from "@/hooks/useClipboard";
+import { getActiveHostUrl } from "@/lib/clipboard";
 
 interface Option {
   text: string;
@@ -100,7 +104,10 @@ export function SimulatorClient() {
   const [currentStep, setCurrentStep] = useState<string>("welcome");
   const [history, setHistory] = useState<string[]>([]);
   const [answers, setAnswers] = useState<Option[]>([]);
-  const [copied, setCopied] = useState(false);
+  const { copy, copied, error } = useClipboard({
+    successMessage: "Engineering alignment assessment report successfully copied to clipboard!",
+    errorMessage: "Unable to copy engineering assessment to clipboard",
+  });
 
   const hasTracked = useRef(false);
 
@@ -175,14 +182,41 @@ export function SimulatorClient() {
 
   const handleCopyCard = useCallback(() => {
     if (!profile) return;
-    const reportText = `🏆 Engineering Alignment Assessment\nResult: ${profile.title} (${profile.score}% Match)\nSummary: ${profile.summary}\nSchedule a sync: https://fderuiter-portfolio.vercel.app/schedule`;
-    navigator.clipboard.writeText(reportText);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }, [profile]);
+    const reportText = `🏆 Engineering Alignment Assessment\nResult: ${profile.title} (${profile.score}% Match)\nSummary: ${profile.summary}\nSchedule a sync: ${getActiveHostUrl()}/schedule`;
+    copy(reportText);
+  }, [profile, copy]);
 
   return (
     <main className="min-h-screen bg-zinc-950 text-foreground pt-28 pb-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden flex flex-col items-center justify-start">
+      {/* Visual Copy Alerts */}
+      <AnimatePresence>
+        {copied && (
+          <motion.div
+            role="status"
+            aria-live="polite"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="fixed top-24 right-6 z-50 flex items-center gap-2 bg-emerald-950/90 border border-emerald-500/50 text-emerald-200 text-xs font-mono px-3.5 py-2.5 rounded-xl shadow-2xl backdrop-blur-md"
+          >
+            <IconCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>Assessment report copied to clipboard!</span>
+          </motion.div>
+        )}
+        {error && (
+          <motion.div
+            role="alert"
+            aria-live="assertive"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="fixed top-24 right-6 z-50 flex items-center gap-2 bg-rose-950/90 border border-rose-500/50 text-rose-200 text-xs font-mono px-3.5 py-2.5 rounded-xl shadow-2xl backdrop-blur-md"
+          >
+            <IconAlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+            <span>{error}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Dynamic Background Atmospheric Lighting */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-brand-cyan/5 blur-[160px] pointer-events-none rounded-full" />
       <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-brand-blue/5 blur-[140px] pointer-events-none rounded-full" />
