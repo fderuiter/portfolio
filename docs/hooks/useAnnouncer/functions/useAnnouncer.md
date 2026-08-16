@@ -6,10 +6,28 @@
 
 # Function: useAnnouncer()
 
-> **useAnnouncer**(): [`AnnouncerContextType`](../interfaces/AnnouncerContextType.md)
+> **useAnnouncer**(): `object`
 
 Defined in: [components/providers/A11yProvider.tsx:14](https://github.com/fderuiter/portfolio/blob/main/components/providers/A11yProvider.tsx#L14)
 
 ## Returns
 
-[`AnnouncerContextType`](../interfaces/AnnouncerContextType.md)
+`object`
+
+### announce
+
+> **announce**: (`_message`, `_priority?`) => `void`
+
+#### Parameters
+
+##### \_message
+
+`string`
+
+##### \_priority?
+
+[`AnnouncementMode`](../type-aliases/AnnouncementMode.md)
+
+#### Returns
+
+`void`

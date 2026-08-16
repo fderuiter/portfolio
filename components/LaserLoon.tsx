@@ -23,6 +23,8 @@ import { FieldManualButton } from "@/components/FieldManualButton";
 import { FullscreenButton } from "@/components/arcade/FullscreenButton";
 import { DynamicTabletOrientationHint as TabletOrientationHint } from "@/components/arcade/DynamicTabletOrientationHint";
 import { useFullscreen } from "@/hooks/useFullscreen";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useAnnouncer } from "@/hooks/useAnnouncer";
 import {
   LaserMode,
   LaserType,
@@ -109,11 +111,22 @@ export const LaserLoon: React.FC = () => {
   const [showMuseum, setShowMuseum] = useState(false);
   const [selectedFlagIndex, setSelectedFlagIndex] = useState(0);
 
+  const { announce } = useAnnouncer();
+  const museumTrapRef = useFocusTrap<HTMLDivElement>(showMuseum, {
+    onEscape: () => setShowMuseum(false),
+  });
+
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
 
   const { isFullscreen, toggleFullscreen } = useFullscreen(containerRef);
+
+  const selectLaserType = (type: LaserType) => {
+    setLaserType(type);
+    const weaponName = WEAPONS[type]?.name || type;
+    announce(`Weapon selected: ${weaponName}`, "polite");
+  };
 
   // Mutable Game Physics & Animation Refs
   const targetsRef = useRef<Target[]>([]);
@@ -455,6 +468,34 @@ export const LaserLoon: React.FC = () => {
     shockwavesRef.current = [];
     floatingTextsRef.current = [];
   }, []);
+
+  // Screen reader announcements for major game transitions
+  const lastGameStateRef = useRef<string | null>(null);
+  const lastBossActiveRef = useRef(false);
+
+  useEffect(() => {
+    if (gameState !== lastGameStateRef.current) {
+      if (gameState === "playing") {
+        announce(`Game started. Active weapon is ${WEAPONS[laserType]?.name || laserType}.`, "assertive");
+      } else if (gameState === "gameover") {
+        announce(`Game over. Final score is ${score}.`, "assertive");
+      } else if (gameState === "act-victory") {
+        announce(`Act ${currentActNum} completed successfully!`, "assertive");
+      } else if (gameState === "campaign-victory") {
+        announce("Campaign victory! You successfully completed all acts.", "assertive");
+      }
+      lastGameStateRef.current = gameState;
+    }
+  }, [gameState, laserType, score, currentActNum, announce]);
+
+  useEffect(() => {
+    if (bossActive && !lastBossActiveRef.current) {
+      announce(`Warning: Boss ${bossName} has spawned!`, "assertive");
+      lastBossActiveRef.current = true;
+    } else if (!bossActive) {
+      lastBossActiveRef.current = false;
+    }
+  }, [bossActive, bossName, announce]);
 
   // Countdown timer for arcade mode
   useEffect(() => {
@@ -1297,17 +1338,29 @@ export const LaserLoon: React.FC = () => {
     } else if (e.key.toLowerCase() === "m") {
       setShowMuseum((prev) => !prev);
     } else if (e.key === "ArrowUp" || e.key.toLowerCase() === "w") {
-      loonPosRef.current.targetY = Math.max(40, loonPosRef.current.targetY - 25);
+      const nextY = Math.max(40, loonPosRef.current.targetY - 25);
+      loonPosRef.current.targetY = nextY;
+      announce(`Loon moved up. Horizontal position: ${Math.round(loonPosRef.current.targetX)}, vertical position: ${Math.round(nextY)}`, "polite");
     } else if (e.key === "ArrowDown" || e.key.toLowerCase() === "s") {
-      loonPosRef.current.targetY = Math.min(340, loonPosRef.current.targetY + 25);
+      const nextY = Math.min(340, loonPosRef.current.targetY + 25);
+      loonPosRef.current.targetY = nextY;
+      announce(`Loon moved down. Horizontal position: ${Math.round(loonPosRef.current.targetX)}, vertical position: ${Math.round(nextY)}`, "polite");
+    } else if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") {
+      const nextX = Math.max(40, loonPosRef.current.targetX - 25);
+      loonPosRef.current.targetX = nextX;
+      announce(`Loon moved left. Horizontal position: ${Math.round(nextX)}, vertical position: ${Math.round(loonPosRef.current.targetY)}`, "polite");
+    } else if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") {
+      const nextX = Math.min(728, loonPosRef.current.targetX + 25);
+      loonPosRef.current.targetX = nextX;
+      announce(`Loon moved right. Horizontal position: ${Math.round(nextX)}, vertical position: ${Math.round(loonPosRef.current.targetY)}`, "polite");
     } else if (e.key === "1") {
-      setLaserType("ruby-laser");
+      selectLaserType("ruby-laser");
     } else if (e.key === "2") {
-      setLaserType("cyan-pulse");
+      selectLaserType("cyan-pulse");
     } else if (e.key === "3") {
-      setLaserType("aurora-wave");
+      selectLaserType("aurora-wave");
     } else if (e.key === "4") {
-      setLaserType("ice-cannon");
+      selectLaserType("ice-cannon");
     } else if (e.key === "Escape") {
       resetGame();
     }
@@ -1385,7 +1438,8 @@ export const LaserLoon: React.FC = () => {
         {/* Laser Weapon Selector */}
         <div className="flex items-center gap-1.5 p-1 bg-neutral-900/80 border border-neutral-800 rounded-xl backdrop-blur-md">
           <button
-            onClick={() => setLaserType("ruby-laser")}
+            onClick={() => selectLaserType("ruby-laser")}
+            aria-pressed={laserType === "ruby-laser"}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 ${
               laserType === "ruby-laser"
                 ? "bg-red-500/20 text-red-400 border border-red-500/40 shadow-[0_0_10px_rgba(239,68,68,0.3)]"
@@ -1395,7 +1449,8 @@ export const LaserLoon: React.FC = () => {
             Ruby (1)
           </button>
           <button
-            onClick={() => setLaserType("cyan-pulse")}
+            onClick={() => selectLaserType("cyan-pulse")}
+            aria-pressed={laserType === "cyan-pulse"}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer ${
               laserType === "cyan-pulse"
                 ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/40"
@@ -1405,7 +1460,8 @@ export const LaserLoon: React.FC = () => {
             Pulse (2)
           </button>
           <button
-            onClick={() => setLaserType("aurora-wave")}
+            onClick={() => selectLaserType("aurora-wave")}
+            aria-pressed={laserType === "aurora-wave"}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer ${
               laserType === "aurora-wave"
                 ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
@@ -1415,7 +1471,8 @@ export const LaserLoon: React.FC = () => {
             Aurora (3)
           </button>
           <button
-            onClick={() => setLaserType("ice-cannon")}
+            onClick={() => selectLaserType("ice-cannon")}
+            aria-pressed={laserType === "ice-cannon"}
             className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 ${
               laserType === "ice-cannon"
                 ? "bg-sky-500/20 text-sky-400 border border-sky-500/40 shadow-[0_0_10px_rgba(56,189,248,0.3)]"
@@ -1540,7 +1597,14 @@ export const LaserLoon: React.FC = () => {
               <span className="text-red-400">{bossName.toUpperCase()}</span>
               <span>{Math.max(0, bossHp)} / {bossMaxHp} HP</span>
             </div>
-            <div className="w-full h-2.5 bg-neutral-950 rounded-full overflow-hidden border border-neutral-800">
+            <div
+              role="progressbar"
+              aria-valuenow={Math.max(0, Math.round((bossHp / bossMaxHp) * 100))}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={`${bossName} Health`}
+              className="w-full h-2.5 bg-neutral-950 rounded-full overflow-hidden border border-neutral-800"
+            >
               <div
                 className="h-full bg-gradient-to-r from-red-500 to-amber-500 transition-all duration-150"
                 style={{ width: `${clamp((bossHp / bossMaxHp) * 100, 0, 100)}%` }}
@@ -1555,6 +1619,11 @@ export const LaserLoon: React.FC = () => {
             <button
               onClick={fireUltimateTremolo}
               disabled={ultimateMeter < 100 && mode !== "sandbox"}
+              role="progressbar"
+              aria-valuenow={ultimateMeter}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Ultimate Tremolo Meter"
               className={`px-3 py-1.5 rounded-xl font-mono text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-lg ${
                 ultimateMeter >= 100 || mode === "sandbox"
                   ? "bg-gradient-to-r from-cyan-400 to-sky-500 text-black shadow-[0_0_20px_rgba(34,211,238,0.6)] animate-bounce"
@@ -1578,6 +1647,9 @@ export const LaserLoon: React.FC = () => {
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          role="application"
+          aria-label="Laser Loon Arcade Game. Use arrow keys to reposition the loon, spacebar or enter to fire weapons, and number keys 1 to 4 to select weapons."
+          tabIndex={0}
           className={
             isFullscreen
               ? "max-h-[calc(100vh-140px)] max-w-full aspect-[768/420] object-contain block cursor-crosshair touch-none my-auto"
@@ -1841,7 +1913,8 @@ export const LaserLoon: React.FC = () => {
         <div className="flex items-center gap-1.5 flex-wrap">
           <button
             type="button"
-            onClick={() => setLaserType("ruby-laser")}
+            onClick={() => selectLaserType("ruby-laser")}
+            aria-pressed={laserType === "ruby-laser"}
             className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
               laserType === "ruby-laser"
                 ? "bg-red-500/20 text-red-300 border border-red-500/50 shadow-[0_0_10px_rgba(239,68,68,0.2)]"
@@ -1852,7 +1925,8 @@ export const LaserLoon: React.FC = () => {
           </button>
           <button
             type="button"
-            onClick={() => setLaserType("cyan-pulse")}
+            onClick={() => selectLaserType("cyan-pulse")}
+            aria-pressed={laserType === "cyan-pulse"}
             className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
               laserType === "cyan-pulse"
                 ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.2)]"
@@ -1863,7 +1937,8 @@ export const LaserLoon: React.FC = () => {
           </button>
           <button
             type="button"
-            onClick={() => setLaserType("aurora-wave")}
+            onClick={() => selectLaserType("aurora-wave")}
+            aria-pressed={laserType === "aurora-wave"}
             className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
               laserType === "aurora-wave"
                 ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
@@ -1874,7 +1949,8 @@ export const LaserLoon: React.FC = () => {
           </button>
           <button
             type="button"
-            onClick={() => setLaserType("ice-cannon")}
+            onClick={() => selectLaserType("ice-cannon")}
+            aria-pressed={laserType === "ice-cannon"}
             className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
               laserType === "ice-cannon"
                 ? "bg-sky-500/20 text-sky-300 border border-sky-500/50 shadow-[0_0_10px_rgba(56,189,248,0.2)]"
@@ -1959,7 +2035,10 @@ export const LaserLoon: React.FC = () => {
       {/* Flag Museum & Lore Modal */}
       {showMuseum && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-neutral-950 border border-neutral-800 rounded-3xl max-w-2xl w-full p-6 relative shadow-2xl overflow-y-auto max-h-[90vh]">
+          <div
+            ref={museumTrapRef}
+            className="bg-neutral-950 border border-neutral-800 rounded-3xl max-w-2xl w-full p-6 relative shadow-2xl overflow-y-auto max-h-[90vh]"
+          >
             <button
               onClick={() => setShowMuseum(false)}
               className="absolute top-5 right-5 p-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white cursor-pointer"
@@ -1987,6 +2066,7 @@ export const LaserLoon: React.FC = () => {
                 <button
                   key={entry.id}
                   onClick={() => setSelectedFlagIndex(idx)}
+                  aria-pressed={selectedFlagIndex === idx}
                   className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold whitespace-nowrap cursor-pointer transition-all ${
                     selectedFlagIndex === idx
                       ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]"
