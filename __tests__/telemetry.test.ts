@@ -3,8 +3,13 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import crypto from "crypto";
 
 // Use vi.hoisted to declare the mock function before any imports or mocks are executed
-const { mockRatelimitLimit } = vi.hoisted(() => {
-  return { mockRatelimitLimit: vi.fn() };
+const { mockRatelimitLimit, mockLpush, mockExpire, mockExec } = vi.hoisted(() => {
+  return {
+    mockRatelimitLimit: vi.fn(),
+    mockLpush: vi.fn(),
+    mockExpire: vi.fn(),
+    mockExec: vi.fn().mockResolvedValue([1]),
+  };
 });
 
 // Mock the dependencies
@@ -23,9 +28,9 @@ vi.mock("@upstash/redis", () => {
   class MockRedis {
     pipeline() {
       return {
-        lpush: vi.fn(),
-        expire: vi.fn(),
-        exec: vi.fn().mockResolvedValue([1]),
+        lpush: mockLpush,
+        expire: mockExpire,
+        exec: mockExec,
       };
     }
   }
@@ -59,20 +64,11 @@ describe("Telemetry API Route - Route Error Telemetry", () => {
     });
   });
 
-  it("should accept 'route_error' event type and save it in the database", async () => {
+  it("should accept 'route_error' event type and save it in the memory queue", async () => {
     const payload = {
       projectSlug: "/non-existent-page-link",
       eventType: "route_error",
     };
-
-    // Mock successful database write
-    const mockDbResponse = {
-      id: "some-uuid",
-      projectSlug: "/non-existent-page-link",
-      eventType: "route_error",
-      createdAt: new Date(),
-    };
-    vi.mocked(prisma.telemetryEvent.create).mockResolvedValue(mockDbResponse);
 
     // Construct the NextRequest
     const req = new NextRequest("http://localhost:3000/api/telemetry", {
@@ -88,14 +84,15 @@ describe("Telemetry API Route - Route Error Telemetry", () => {
     expect(data.event.projectSlug).toBe("/non-existent-page-link");
     expect(data.event.eventType).toBe("route_error");
 
-    expect(prisma.telemetryEvent.create).toHaveBeenCalledWith(
+    expect(prisma.telemetryEvent.create).not.toHaveBeenCalled();
+    expect(mockLpush).toHaveBeenCalledWith(
+      "telemetry_buffer",
       expect.objectContaining({
-        data: expect.objectContaining({
-          projectSlug: "/non-existent-page-link",
-          eventType: "route_error",
-        }),
+        projectSlug: "/non-existent-page-link",
+        eventType: "route_error",
       })
     );
+    expect(mockExpire).toHaveBeenCalledWith("telemetry_buffer", 172800);
   });
 
   it("should reject invalid event types with 400 status", async () => {
