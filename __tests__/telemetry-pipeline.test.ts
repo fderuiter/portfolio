@@ -23,7 +23,11 @@ vi.mock("react", async (importOriginal) => {
   };
 });
 
-vi.mock("@/lib/db", () => {
+vi.mock("@/lib/db", async (importOriginal) => {
+  const isLiveDb = !!(process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("dummy"));
+  if (isLiveDb) {
+    return await importOriginal<typeof import("@/lib/db")>();
+  }
   return {
     prisma: {
       telemetryEvent: {
@@ -70,8 +74,10 @@ import { prisma } from "@/lib/db";
 import { TelemetryTracker } from "@/components/TelemetryTracker";
 import { useTelemetry } from "@/hooks/useTelemetry";
 
+const isLiveDb = !!(process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("dummy"));
+
 describe("Telemetry Robustness & Pipeline Test Suite", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
     vi.useRealTimers();
     process.env.CRON_SECRET = "test-secret";
@@ -88,21 +94,30 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
     // Default Redis exec response
     mockExec.mockResolvedValue([1]);
 
-    // Default Prisma database create behavior (instant resolution)
-    vi.mocked(prisma.telemetryEvent.create).mockResolvedValue({
-      id: "some-uuid",
-      projectSlug: "/dashboard",
-      eventType: "page_view",
-      createdAt: new Date(),
-    });
+    if (isLiveDb) {
+      // State isolation: clear the live database state before each test run
+      await prisma.telemetryEvent.deleteMany();
+    } else {
+      // Default Prisma database create behavior (instant resolution)
+      vi.mocked(prisma.telemetryEvent.create).mockResolvedValue({
+        id: "some-uuid",
+        projectSlug: "/dashboard",
+        eventType: "page_view",
+        createdAt: new Date(),
+      });
+    }
 
     // Setup React hook mocks to have basic default behaviors
     mockUseRef.mockImplementation((initialValue) => ({ current: initialValue }));
     mockUseEffect.mockImplementation((cb) => cb());
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     vi.restoreAllMocks();
+    if (isLiveDb) {
+      // Reset the database state after each test run for absolute isolation
+      await prisma.telemetryEvent.deleteMany();
+    }
   });
 
   // --- REQUIREMENT 1 ---
@@ -111,10 +126,17 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
       vi.useFakeTimers();
 
       // Mock DB create to never resolve, simulating extreme latency/timeout
-      vi.mocked(prisma.telemetryEvent.create).mockImplementation(() => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return new Promise(() => {}) as any; // Never resolves
-      });
+      if (isLiveDb) {
+        vi.spyOn(prisma.telemetryEvent, "create").mockImplementation(() => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return new Promise(() => {}) as any; // Never resolves
+        });
+      } else {
+        vi.mocked(prisma.telemetryEvent.create).mockImplementation(() => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          return new Promise(() => {}) as any; // Never resolves
+        });
+      }
 
       const payload = {
         projectSlug: "/latency-test",
@@ -214,23 +236,35 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
       expect(mockRpop).toHaveBeenCalledTimes(50);
 
       // Verify skipping of duplicate payloads logged in database
-      expect(prisma.telemetryEvent.createMany).toHaveBeenCalledWith({
-        data: [
-          {
-            id: "uuid-1",
-            projectSlug: "/project-a",
-            eventType: "page_view",
-            createdAt: expect.any(Date),
+      if (isLiveDb) {
+        const eventsInDb = await prisma.telemetryEvent.findMany({
+          where: {
+            id: { in: ["uuid-1", "uuid-2"] },
           },
-          {
-            id: "uuid-2",
-            projectSlug: "/project-b",
-            eventType: "project_click",
-            createdAt: expect.any(Date),
-          },
-        ],
-        skipDuplicates: true, // Absolutely key to ignore database duplicates!
-      });
+          orderBy: { id: "asc" },
+        });
+        expect(eventsInDb).toHaveLength(2);
+        expect(eventsInDb[0].projectSlug).toBe("/project-a");
+        expect(eventsInDb[1].projectSlug).toBe("/project-b");
+      } else {
+        expect(prisma.telemetryEvent.createMany).toHaveBeenCalledWith({
+          data: [
+            {
+              id: "uuid-1",
+              projectSlug: "/project-a",
+              eventType: "page_view",
+              createdAt: expect.any(Date),
+            },
+            {
+              id: "uuid-2",
+              projectSlug: "/project-b",
+              eventType: "project_click",
+              createdAt: expect.any(Date),
+            },
+          ],
+          skipDuplicates: true, // Absolutely key to ignore database duplicates!
+        });
+      }
     });
 
     it("returns error response when authorization is invalid", async () => {
@@ -252,7 +286,11 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
 
       // Simulate prisma createMany failure
       const dbError = new Error("Database Write Error");
-      vi.mocked(prisma.telemetryEvent.createMany).mockRejectedValueOnce(dbError);
+      if (isLiveDb) {
+        vi.spyOn(prisma.telemetryEvent, "createMany").mockRejectedValueOnce(dbError);
+      } else {
+        vi.mocked(prisma.telemetryEvent.createMany).mockRejectedValueOnce(dbError);
+      }
 
       const req = new NextRequest("http://localhost:3000/api/telemetry/sync", {
         headers: {
@@ -275,7 +313,11 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
       mockExec.mockResolvedValueOnce(mockEvents); // GET pop
       
       const dbError = new Error("Database Write Error");
-      vi.mocked(prisma.telemetryEvent.createMany).mockRejectedValueOnce(dbError);
+      if (isLiveDb) {
+        vi.spyOn(prisma.telemetryEvent, "createMany").mockRejectedValueOnce(dbError);
+      } else {
+        vi.mocked(prisma.telemetryEvent.createMany).mockRejectedValueOnce(dbError);
+      }
 
       // Simulate redis rollback exec failure
       const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -376,4 +418,42 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
       dateSpy.mockRestore();
     });
   });
+
+  if (isLiveDb) {
+    describe("Live Database Direct Interaction Invariants (Requirement 4)", () => {
+      it("surfaces relational constraint and unique validation errors directly from PostgreSQL rather than simulated mocks", async () => {
+        // Assert that we are in a clean state (pre-test database cleanup)
+        await prisma.telemetryEvent.deleteMany();
+
+        const uniqueId = "test-live-duplicate-constraint-uuid";
+        const payload = {
+          id: uniqueId,
+          projectSlug: "/constraint-test",
+          eventType: "page_view",
+          createdAt: new Date(),
+        };
+
+        // 1. First insert should succeed perfectly
+        await prisma.telemetryEvent.create({ data: payload });
+
+        // 2. Second insert with identical ID must throw Unique Constraint Violation (P2002) directly from PostgreSQL
+        await expect(
+          prisma.telemetryEvent.create({ data: payload })
+        ).rejects.toThrow();
+
+        // 3. Ensure the error is indeed a database level client error (from Prisma/Postgres)
+        try {
+          await prisma.telemetryEvent.create({ data: payload });
+          expect.fail("Should have thrown a relational constraint error");
+        } catch (err: unknown) {
+          const error = err as { code?: string; message?: string };
+          expect(error.code || error.message).toBeDefined();
+          // P2002 is Prisma's known request error code for unique constraint violations
+          if (error.code) {
+            expect(error.code).toBe("P2002");
+          }
+        }
+      });
+    });
+  }
 });
