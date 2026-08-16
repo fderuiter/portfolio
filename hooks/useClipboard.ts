@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
 import { copyToClipboard } from "@/lib/clipboard";
 
@@ -13,9 +13,27 @@ export function useClipboard(options: UseClipboardOptions = {}) {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { announce } = useAnnouncer();
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const clearActiveTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
 
   const copy = useCallback(async (text: string) => {
     try {
+      clearActiveTimer();
       setError(null);
       setCopied(false);
       
@@ -25,12 +43,12 @@ export function useClipboard(options: UseClipboardOptions = {}) {
       const successMsg = options.successMessage || "Copied to clipboard successfully";
       announce(successMsg, "polite");
       
-      const timer = setTimeout(() => {
+      timerRef.current = setTimeout(() => {
         setCopied(false);
+        timerRef.current = null;
       }, 2000);
-      
-      return () => clearTimeout(timer);
     } catch (err) {
+      clearActiveTimer();
       const message = err instanceof Error ? err.message : String(err);
       setError(message);
       
@@ -40,13 +58,12 @@ export function useClipboard(options: UseClipboardOptions = {}) {
         
       announce(errorMsg, "assertive");
       
-      const timer = setTimeout(() => {
+      timerRef.current = setTimeout(() => {
         setError(null);
+        timerRef.current = null;
       }, 4000);
-      
-      return () => clearTimeout(timer);
     }
-  }, [announce, options.successMessage, options.errorMessage]);
+  }, [announce, options.successMessage, options.errorMessage, clearActiveTimer]);
 
   return { copy, copied, error };
 }

@@ -26,7 +26,7 @@ Defined in: [hooks/useClipboard.ts:12](https://github.com/fderuiter/portfolio/bl
 
 ### copy
 
-> **copy**: (`text`) => `Promise`\<() => `void`\>
+> **copy**: (`text`) => `Promise`\<`void`\>
 
 #### Parameters
 
@@ -36,7 +36,7 @@ Defined in: [hooks/useClipboard.ts:12](https://github.com/fderuiter/portfolio/bl
 
 #### Returns
 
-`Promise`\<() => `void`\>
+`Promise`\<`void`\>
 
 ### error
 
