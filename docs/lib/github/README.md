@@ -15,6 +15,7 @@
 
 ## Functions
 
+- [generateMockCommitActivity](functions/generateMockCommitActivity.md)
 - [getGitHubStats](functions/getGitHubStats.md)
 - [getSimulatedStats](functions/getSimulatedStats.md)
 - [getSimulatedTerminalCommand](functions/getSimulatedTerminalCommand.md)
