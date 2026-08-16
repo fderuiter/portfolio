@@ -3,7 +3,16 @@
 import React, { useState, useRef, useEffect } from "react";
 import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
-import { IconTerminal, IconCornerDownLeft, IconCircle } from "@tabler/icons-react";
+import {
+  IconTerminal,
+  IconCornerDownLeft,
+  IconCircle,
+  IconPlayerPlay,
+  IconPlayerPause,
+  IconPlayerSkipForward,
+  IconPlayerSkipBack,
+  IconRotate
+} from "@tabler/icons-react";
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { useAnnouncer } from "@/components/providers/A11yProvider";
 import { useAudio } from "@/components/providers/AudioProvider";
@@ -99,6 +108,21 @@ const COMMAND_REGISTRY: Record<string, { description: string; payload: unknown }
   },
 };
 
+const DEFAULT_PLAYBACK = [
+  {
+    command: "imednet studies list",
+    description: "Retrieve active clinical trials from the iMednet EDC platform"
+  },
+  {
+    command: "imednet subjects get --id 123",
+    description: "Query details and demographics for subject 123"
+  },
+  {
+    command: "imednet records search --study BRIGHT-01",
+    description: "Search patient records matching active trial BRIGHT-01"
+  }
+];
+
 // Pure ID Generator outside rendering pipeline to satisfy react-hooks/purity rules
 let idCounter = 0;
 function generateLogId(): string {
@@ -106,7 +130,17 @@ function generateLogId(): string {
   return `log-entry-${idCounter}`;
 }
 
-export const SandboxTerminal: React.FC = () => {
+interface SandboxTerminalProps {
+  slug?: string;
+  commands?: Record<string, { description: string; payload: unknown }>;
+  playback?: Array<{ command: string; description: string }>;
+}
+
+export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
+  slug,
+  commands,
+  playback,
+}) => {
   const { announce } = useAnnouncer();
   const { playKeystroke, playAutocomplete, playSuccess } = useAudio();
   const [input, setInput] = useState("");
@@ -121,8 +155,24 @@ export const SandboxTerminal: React.FC = () => {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isExecuting, setIsExecuting] = useState(false);
 
+  // Playback Step Player states
+  const [currentStepIndex, setCurrentStepIndex] = useState(-1);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+
+  const isPlayingRef = useRef(false);
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const logsContainerRef = useRef<HTMLDivElement>(null);
+  const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const playbackTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const startPlaybackLoopRef = useRef<((targetIdx?: number) => void) | null>(null);
+
+  const activeRegistry = commands || COMMAND_REGISTRY;
+  const activePlayback = playback || DEFAULT_PLAYBACK;
 
   // Focus terminal input on body clicks without shifting viewport
   const handleTerminalClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -174,24 +224,26 @@ export const SandboxTerminal: React.FC = () => {
       }
 
       if (trimmed === "help") {
+        const cmdLines = Object.entries(activeRegistry)
+          .map(([cmd, data]) => `  ${cmd.padEnd(40)} -> ${data.description}`)
+          .join("\n");
+
         setLogs((prev) => [
           ...prev,
           {
             id: outputId,
             type: "info",
             text: `Available Curated Clinical EDC SDK Commands:\n\n` +
-              `  imednet studies list                   -> List active clinical trials\n` +
-              `  imednet subjects get --id 123          -> Retrieve patient demographics\n` +
-              `  imednet records search --study BRIGHT-01 -> Search electronic vital records\n` +
-              `  clear                                  -> Clear the terminal console\n` +
-              `  help                                   -> View available command registry`,
+              cmdLines + `\n` +
+              `  clear                                    -> Clear the terminal console\n` +
+              `  help                                     -> View available command registry`,
           },
         ]);
         announce("Help menu loaded displaying available SDK commands.", "polite");
         return;
       }
 
-      const match = COMMAND_REGISTRY[trimmed];
+      const match = activeRegistry[trimmed];
       if (match) {
         setLogs((prev) => [
           ...prev,
@@ -224,17 +276,226 @@ export const SandboxTerminal: React.FC = () => {
         announce(`Command execution failed. Unknown command: '${trimmed}'.`, "polite");
       }
     }, 450);
-  }, [setCommandHistory, setHistoryIndex, setIsExecuting, setInput, setLogs, announce, playSuccess]);
+  }, [setCommandHistory, setHistoryIndex, setIsExecuting, setInput, setLogs, announce, playSuccess, activeRegistry]);
 
-  // Typing animation state/ref
-  const typingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  // Unified typing simulation engine
+  const typeAndExecute = React.useCallback((command: string, onComplete?: () => void) => {
+    if (typingTimerRef.current) {
+      clearInterval(typingTimerRef.current);
+      typingTimerRef.current = null;
+    }
+
+    setIsTyping(true);
+    setInput("");
+    inputRef.current?.focus({ preventScroll: true });
+
+    let currentIndex = 0;
+    let currentTyped = "";
+
+    typingTimerRef.current = setInterval(() => {
+      if (currentIndex < command.length) {
+        const char = command[currentIndex];
+        currentTyped += char;
+        setInput(currentTyped);
+        playKeystroke(char.charCodeAt(0));
+
+        // Emulate key events in the DOM
+        const inputEl = inputRef.current;
+        if (inputEl) {
+          const keyEventInit = { key: char, bubbles: true, cancelable: true };
+          inputEl.dispatchEvent(new KeyboardEvent("keydown", keyEventInit));
+          inputEl.dispatchEvent(new KeyboardEvent("keypress", keyEventInit));
+          inputEl.dispatchEvent(new Event("input", { bubbles: true }));
+          inputEl.dispatchEvent(new KeyboardEvent("keyup", keyEventInit));
+        }
+
+        currentIndex++;
+      } else {
+        if (typingTimerRef.current) {
+          clearInterval(typingTimerRef.current);
+          typingTimerRef.current = null;
+        }
+
+        setTimeout(() => {
+          setIsTyping(false);
+          executeCommand(command);
+          onComplete?.();
+        }, 150);
+      }
+    }, 40); // 40ms realistic physical typing pace
+  }, [executeCommand, playKeystroke]);
+
+  // Automated step playback runner loop
+  const startPlaybackLoop = React.useCallback((targetIdx?: number) => {
+    if (!isPlayingRef.current) return;
+
+    const nextIdx = targetIdx !== undefined ? targetIdx : currentStepIndex + 1;
+    if (nextIdx >= activePlayback.length) {
+      setIsPlaying(false);
+      return;
+    }
+
+    setCurrentStepIndex(nextIdx);
+    const step = activePlayback[nextIdx];
+
+    typeAndExecute(step.command, () => {
+      if (isPlayingRef.current) {
+        playbackTimeoutRef.current = setTimeout(() => {
+          startPlaybackLoopRef.current?.(nextIdx + 1);
+        }, 1500); // 1.5 seconds natural delay before typing next command
+      }
+    });
+  }, [currentStepIndex, activePlayback, typeAndExecute]);
+
+  // Sync ref to avoid ESLint immutability recursion rule
+  useEffect(() => {
+    startPlaybackLoopRef.current = startPlaybackLoop;
+  }, [startPlaybackLoop]);
+
+  // Play / Pause Toggle handler
+  const handlePlay = () => {
+    if (isTyping || isExecuting) return;
+
+    if (isPlaying) {
+      setIsPlaying(false);
+      if (playbackTimeoutRef.current) {
+        clearTimeout(playbackTimeoutRef.current);
+        playbackTimeoutRef.current = null;
+      }
+    } else {
+      setIsPlaying(true);
+      isPlayingRef.current = true;
+      
+      // If we are already at the end, restart from the first command
+      if (currentStepIndex >= activePlayback.length - 1) {
+        setLogs([
+          {
+            id: "init",
+            type: "info",
+            text: "iMednet Python SDK CLI Sandbox [Version 2.3.1]\nType 'help' to list available commands. Click the badges below for instant inputs.",
+          },
+        ]);
+        setCurrentStepIndex(0);
+        const step = activePlayback[0];
+        typeAndExecute(step.command, () => {
+          if (isPlayingRef.current) {
+            playbackTimeoutRef.current = setTimeout(() => {
+              startPlaybackLoopRef.current?.(1);
+            }, 1500);
+          }
+        });
+      } else {
+        // Just resume or play the next command
+        startPlaybackLoopRef.current?.(currentStepIndex + 1);
+      }
+    }
+  };
+
+  // Step Forward handler
+  const stepForward = () => {
+    if (isTyping || isExecuting) return;
+
+    if (isPlaying) {
+      setIsPlaying(false);
+      if (playbackTimeoutRef.current) {
+        clearTimeout(playbackTimeoutRef.current);
+        playbackTimeoutRef.current = null;
+      }
+    }
+
+    const nextIdx = currentStepIndex + 1;
+    if (nextIdx >= activePlayback.length) return;
+
+    setCurrentStepIndex(nextIdx);
+    const step = activePlayback[nextIdx];
+    typeAndExecute(step.command);
+  };
+
+  // Step Backward handler with instant rollback and re-execution log append
+  const stepBackward = () => {
+    if (isTyping || isExecuting) return;
+
+    if (isPlaying) {
+      setIsPlaying(false);
+      if (playbackTimeoutRef.current) {
+        clearTimeout(playbackTimeoutRef.current);
+        playbackTimeoutRef.current = null;
+      }
+    }
+
+    const prevIdx = currentStepIndex - 1;
+    if (prevIdx < -1) return;
+
+    setCurrentStepIndex(prevIdx);
+
+    const initialLogs: LogItem[] = [
+      {
+        id: "init",
+        type: "info",
+        text: "iMednet Python SDK CLI Sandbox [Version 2.3.1]\nType 'help' to list available commands. Click the badges below for instant inputs.",
+      },
+    ];
+
+    if (prevIdx === -1) {
+      setLogs(initialLogs);
+      return;
+    }
+
+    // Instantly reconstruct logs without delays (zero-blocking rollback)
+    const updatedLogs = [...initialLogs];
+    for (let i = 0; i <= prevIdx; i++) {
+      const cmdText = activePlayback[i].command;
+      updatedLogs.push({ id: `rollback-cmd-${i}`, type: "command", text: cmdText });
+
+      const match = activeRegistry[cmdText];
+      if (match) {
+        updatedLogs.push({
+          id: `rollback-out-${i}`,
+          type: "output",
+          text: "",
+          jsonPayload: match.payload,
+        });
+      } else {
+        updatedLogs.push({
+          id: `rollback-out-${i}`,
+          type: "error",
+          text: `Command not found: '${cmdText}'. Type 'help' to review supported registry entries.`,
+        });
+      }
+    }
+    setLogs(updatedLogs);
+  };
+
+  // Reset handler
+  const handleReset = () => {
+    setIsPlaying(false);
+    if (playbackTimeoutRef.current) {
+      clearTimeout(playbackTimeoutRef.current);
+      playbackTimeoutRef.current = null;
+    }
+    if (typingTimerRef.current) {
+      clearInterval(typingTimerRef.current);
+      typingTimerRef.current = null;
+    }
+    setIsTyping(false);
+    setCurrentStepIndex(-1);
+    setInput("");
+    setLogs([
+      {
+        id: "init",
+        type: "info",
+        text: "iMednet Python SDK CLI Sandbox [Version 2.3.1]\nType 'help' to list available commands. Click the badges below for instant inputs.",
+      },
+    ]);
+  };
 
   // Setup/Teardown interactive console API and custom greeting log
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Strict constraint check: Only enable this on the specific SDK case study page
-    if (!window.location.pathname.includes("/case-studies/imednet-python-sdk")) {
+    // Strict constraint check: Only enable this on the active case study bento page
+    const targetSlug = slug || "imednet-python-sdk";
+    if (!window.location.pathname.includes(`/case-studies/${targetSlug}`)) {
       return;
     }
 
@@ -244,7 +505,6 @@ export const SandboxTerminal: React.FC = () => {
           console.error("terminal.run: command must be a string.");
           return;
         }
-        // Safely dispatch custom event to update the terminal UI asynchronously without triggering full-page react hydration cycles
         window.dispatchEvent(new CustomEvent("terminal:run", { detail: { command: cmdText } }));
       },
       help: () => {
@@ -288,7 +548,7 @@ export const SandboxTerminal: React.FC = () => {
       delete anyWindow.terminal;
       delete anyWindow.imednet;
     };
-  }, []);
+  }, [slug]);
 
   // Handle incoming terminal:run custom events
   useEffect(() => {
@@ -298,67 +558,32 @@ export const SandboxTerminal: React.FC = () => {
 
       const command = customEvent.detail.command;
 
-      // Cancel any ongoing typing animation
-      if (typingTimerRef.current) {
-        clearInterval(typingTimerRef.current);
-        typingTimerRef.current = null;
-      }
-
-      if (isExecuting) {
-        console.warn("Terminal is currently executing a command. Please wait.");
+      if (isExecuting || isTyping) {
+        console.warn("Terminal is currently executing a command or typing. Please wait.");
         return;
       }
 
-      // Clear input state and focus element without shifting viewport
-      setInput("");
-      inputRef.current?.focus({ preventScroll: true });
-
-      let currentIndex = 0;
-      let currentTyped = "";
-
-      // Performance Isolation: Simulate typing asynchronously using non-blocking setInterval
-      typingTimerRef.current = setInterval(() => {
-        if (currentIndex < command.length) {
-          const char = command[currentIndex];
-          currentTyped += char;
-          setInput(currentTyped);
-          playKeystroke(char.charCodeAt(0));
-
-          // Translate into simulated keystroke events inside the terminal interface
-          const inputEl = inputRef.current;
-          if (inputEl) {
-            const keyEventInit = { key: char, bubbles: true, cancelable: true };
-            inputEl.dispatchEvent(new KeyboardEvent("keydown", keyEventInit));
-            inputEl.dispatchEvent(new KeyboardEvent("keypress", keyEventInit));
-            inputEl.dispatchEvent(new Event("input", { bubbles: true }));
-            inputEl.dispatchEvent(new KeyboardEvent("keyup", keyEventInit));
-          }
-
-          currentIndex++;
-        } else {
-          // Done typing! Clear interval and execute the command
-          if (typingTimerRef.current) {
-            clearInterval(typingTimerRef.current);
-            typingTimerRef.current = null;
-          }
-
-          // Delay execution slightly to feel natural (keystroke evaluation delay)
-          setTimeout(() => {
-            executeCommand(command);
-          }, 100);
-        }
-      }, 40); // 40ms typing speed
+      typeAndExecute(command);
     };
 
     window.addEventListener("terminal:run", handleRunEvent);
 
     return () => {
       window.removeEventListener("terminal:run", handleRunEvent);
+    };
+  }, [isExecuting, isTyping, typeAndExecute]);
+
+  // Clean up all timeouts and intervals on unmount
+  useEffect(() => {
+    return () => {
+      if (playbackTimeoutRef.current) {
+        clearTimeout(playbackTimeoutRef.current);
+      }
       if (typingTimerRef.current) {
         clearInterval(typingTimerRef.current);
       }
     };
-  }, [isExecuting, executeCommand, playKeystroke]);
+  }, []);
 
   // Handle key triggers (Enter, Up, Down, Tab, Escape)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -372,9 +597,7 @@ export const SandboxTerminal: React.FC = () => {
       const trimmed = input.trim().toLowerCase();
       if (trimmed) {
         const VALID_COMMANDS = [
-          "imednet studies list",
-          "imednet subjects get --id 123",
-          "imednet records search --study BRIGHT-01",
+          ...Object.keys(activeRegistry),
           "clear",
           "help"
         ];
@@ -466,13 +689,85 @@ export const SandboxTerminal: React.FC = () => {
 
   return (
     <div className="w-full flex flex-col items-center">
+      {/* Incident Playback Controller Panel */}
+      <div className="w-full bg-zinc-900/20 border border-zinc-900 rounded-2xl p-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 select-none">
+        <div className="flex flex-col gap-1">
+          <span className="text-[11px] font-mono font-bold text-brand-cyan uppercase tracking-wider">
+            Incident Playback Controller
+          </span>
+          <span className="text-[10px] font-mono text-zinc-500">
+            {currentStepIndex === -1 ? (
+              "Ready to start step-by-step diagnostic sequence."
+            ) : (
+              `Step ${currentStepIndex + 1} of ${activePlayback.length}: "${activePlayback[currentStepIndex].command}"`
+            )}
+          </span>
+        </div>
+
+        {/* Control Buttons */}
+        <div className="flex items-center gap-2">
+          {/* Step Back Button */}
+          <button
+            onClick={stepBackward}
+            disabled={isTyping || isExecuting || currentStepIndex <= -1}
+            className="p-2 bg-zinc-950 border border-zinc-900 hover:border-brand-cyan/40 text-zinc-400 hover:text-brand-cyan rounded-lg transition-all disabled:opacity-30 disabled:hover:border-zinc-900 disabled:hover:text-zinc-400 cursor-pointer focus:outline-none"
+            title="Step Back"
+          >
+            <IconPlayerSkipBack className="w-4 h-4" />
+          </button>
+
+          {/* Play / Pause Button */}
+          <button
+            onClick={handlePlay}
+            disabled={isTyping || isExecuting}
+            className={`px-4 py-2 flex items-center gap-2 font-mono text-xs font-bold border rounded-lg transition-all cursor-pointer focus:outline-none ${
+              isPlaying
+                ? "bg-amber-500/10 border-amber-500/30 text-amber-500 hover:bg-amber-500/20"
+                : "bg-brand-cyan/10 border-brand-cyan/30 text-brand-cyan hover:bg-brand-cyan/20"
+            }`}
+            title={isPlaying ? "Pause Playback" : "Play Sequence"}
+          >
+            {isPlaying ? (
+              <>
+                <IconPlayerPause className="w-4 h-4" />
+                <span>PAUSE</span>
+              </>
+            ) : (
+              <>
+                <IconPlayerPlay className="w-4 h-4" />
+                <span>PLAY</span>
+              </>
+            )}
+          </button>
+
+          {/* Step Forward Button */}
+          <button
+            onClick={stepForward}
+            disabled={isTyping || isExecuting || currentStepIndex >= activePlayback.length - 1}
+            className="p-2 bg-zinc-950 border border-zinc-900 hover:border-brand-cyan/40 text-zinc-400 hover:text-brand-cyan rounded-lg transition-all disabled:opacity-30 disabled:hover:border-zinc-900 disabled:hover:text-zinc-400 cursor-pointer focus:outline-none"
+            title="Step Forward"
+          >
+            <IconPlayerSkipForward className="w-4 h-4" />
+          </button>
+
+          {/* Reset Button */}
+          <button
+            onClick={handleReset}
+            className="p-2 bg-zinc-950 border border-zinc-900 hover:border-brand-cyan/40 text-zinc-400 hover:text-brand-cyan rounded-lg transition-all cursor-pointer focus:outline-none"
+            title="Reset"
+          >
+            <IconRotate className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
       {/* Curved Command Badges Row */}
       <div className="flex flex-wrap gap-2 mb-4 w-full select-none">
-        {Object.keys(COMMAND_REGISTRY).map((cmd) => (
+        {Object.keys(activeRegistry).map((cmd) => (
           <button
             key={cmd}
             onClick={() => executeCommand(cmd)}
-            disabled={isExecuting}
+            disabled={isExecuting || isTyping}
             className="px-3 py-1.5 text-[10px] font-mono font-bold bg-zinc-900/40 border border-zinc-900 hover:border-brand-cyan/40 text-brand-cyan/90 hover:text-brand-cyan rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-95 hover:bg-brand-cyan/5 hover:shadow-[0_0_12px_rgba(6,182,212,0.15)] cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 focus:ring-offset-1 focus:ring-offset-zinc-950"
           >
             {cmd}
@@ -484,7 +779,7 @@ export const SandboxTerminal: React.FC = () => {
       <div
         role="region"
         aria-label="Interactive Terminal Sandbox"
-        aria-busy={isExecuting}
+        aria-busy={isExecuting || isTyping}
         onClick={handleTerminalClick}
         style={{ "--term-glow": `0 0 35px ${hexToRgba(designManifest.colors["brand-cyan"], 0.02)}` } as React.CSSProperties}
         className="w-full border border-zinc-900 focus-within:border-brand-cyan/40 bg-zinc-950/80 rounded-2xl overflow-hidden shadow-[var(--term-glow)] focus-within:shadow-[0_0_40px_rgba(6,182,212,0.08),0_0_80px_rgba(6,182,212,0.02)] relative backdrop-blur-md cursor-text transition-all duration-300"
@@ -559,7 +854,7 @@ export const SandboxTerminal: React.FC = () => {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            disabled={isExecuting}
+            disabled={isExecuting || isTyping}
             placeholder="Type 'help' or execute dynamic clinical queries..."
             className="flex-1 bg-transparent border-none outline-none font-mono text-[11px] text-zinc-100 placeholder-zinc-700 caret-brand-cyan select-text"
             autoCapitalize="off"
@@ -569,7 +864,7 @@ export const SandboxTerminal: React.FC = () => {
           />
           <button
             onClick={() => executeCommand(input)}
-            disabled={isExecuting || !input.trim()}
+            disabled={isExecuting || isTyping || !input.trim()}
             className="p-1.5 text-zinc-600 hover:text-brand-cyan hover:bg-brand-cyan/10 active:scale-90 disabled:text-zinc-800 disabled:hover:text-zinc-800 disabled:hover:bg-transparent transition-all rounded-lg cursor-pointer focus:outline-none focus:text-brand-cyan focus:ring-2 focus:ring-brand-cyan/50 focus:ring-offset-1 focus:ring-offset-zinc-950"
             title="Execute Command (Enter)"
           >

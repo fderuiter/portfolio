@@ -6,7 +6,7 @@
 
 # Interface: GitHubRepoStats
 
-Defined in: [types/domain.ts:24](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L24)
+Defined in: [types/domain.ts:26](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L26)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [types/domain.ts:24](https://github.com/fderuiter/portfolio/blob/mai
 
 > **forks**: `number`
 
-Defined in: [types/domain.ts:26](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L26)
+Defined in: [types/domain.ts:28](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L28)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [types/domain.ts:26](https://github.com/fderuiter/portfolio/blob/mai
 
 > **languages**: `Record`\<`string`, `number`\>
 
-Defined in: [types/domain.ts:29](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L29)
+Defined in: [types/domain.ts:31](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L31)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [types/domain.ts:29](https://github.com/fderuiter/portfolio/blob/mai
 
 > **openIssues**: `number`
 
-Defined in: [types/domain.ts:27](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L27)
+Defined in: [types/domain.ts:29](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L29)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [types/domain.ts:27](https://github.com/fderuiter/portfolio/blob/mai
 
 > **stars**: `number`
 
-Defined in: [types/domain.ts:25](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L25)
+Defined in: [types/domain.ts:27](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L27)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [types/domain.ts:25](https://github.com/fderuiter/portfolio/blob/mai
 
 > **watchers**: `number`
 
-Defined in: [types/domain.ts:28](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L28)
+Defined in: [types/domain.ts:30](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L30)

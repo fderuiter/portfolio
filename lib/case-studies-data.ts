@@ -9,9 +9,110 @@ export interface CaseStudyData {
   tags: string;
   editorial_content: string;
   architectural_narrative: string;
+  commands_json?: string;
+  playback_json?: string;
   created_at: Date;
   updated_at: Date;
 }
+
+export const IMEDNET_COMMANDS_OBJ = {
+  "imednet studies list": {
+    description: "Retrieve a list of all active clinical trials from the iMednet EDC platform.",
+    payload: [
+      {
+        studyID: "BRIGHT-01",
+        name: "Phase III Pediatric Leukemia Study",
+        status: "ACTIVE",
+        subjectsCount: 142,
+        version: "v4.2.1"
+      },
+      {
+        studyID: "ONCO-2026",
+        name: "Advanced Melanoma Immunotherapy Trial",
+        status: "ENROLLING",
+        subjectsCount: 89,
+        version: "v1.0.8"
+      },
+      {
+        studyID: "CARDIO-REF",
+        name: "Congestive Heart Failure Observational Registry",
+        status: "COMPLETED",
+        subjectsCount: 310,
+        version: "v2.5.0"
+      }
+    ]
+  },
+  "imednet subjects get --id 123": {
+    description: "Query specific details and records for subject 123 (HIPAA-anonymized).",
+    payload: {
+      subjectID: "SUB-123",
+      studyID: "BRIGHT-01",
+      siteID: 401,
+      enrollmentDate: "2025-11-12",
+      status: "COMPLETED",
+      recordsCount: 18,
+      complianceScore: "[VERIFY_SECURITY_LOGS]",
+      demographics: {
+        age: 11,
+        gender: "F",
+        ethnicity: "ANONYMIZED_UNDER_HIPAA_SAFE_HARBOR"
+      },
+      lastVisit: "2026-05-10T14:30Z"
+    }
+  },
+  "imednet records search --study BRIGHT-01": {
+    description: "Search dynamic patient records and EDC form entries matching active trials.",
+    payload: {
+      studyID: "BRIGHT-01",
+      totalRecordsMatched: 3,
+      domain: "VS (Vital Signs)",
+      results: [
+        {
+          subjectID: "SUB-101",
+          visitName: "Week 4 Follow-up",
+          heartRate: 72,
+          tempCelsius: 36.8,
+          systolicBP: 110,
+          diastolicBP: 72,
+          timestamp: "2026-05-20T08:30Z"
+        },
+        {
+          subjectID: "SUB-102",
+          visitName: "Week 4 Follow-up",
+          heartRate: 84,
+          tempCelsius: 37.1,
+          systolicBP: 115,
+          diastolicBP: 76,
+          timestamp: "2026-05-20T09:15Z"
+        },
+        {
+          subjectID: "SUB-103",
+          visitName: "Week 4 Follow-up",
+          heartRate: 68,
+          tempCelsius: 36.6,
+          systolicBP: 108,
+          diastolicBP: 70,
+          timestamp: "2026-05-20T10:00Z"
+        }
+      ]
+    }
+  }
+};
+
+export const IMEDNET_PLAYBACK_OBJ = [
+  {
+    command: "imednet studies list",
+    description: "Retrieve a list of all active clinical trials from the iMednet EDC platform."
+  },
+  {
+    command: "imednet subjects get --id 123",
+    description: "Query details and demographics for subject 123"
+  },
+  {
+    command: "imednet records search --study BRIGHT-01",
+    description: "Search dynamic patient records for active trial BRIGHT-01"
+  }
+];
 
 export const FALLBACK_CASE_STUDIES: CaseStudyData[] = [
   {
@@ -145,6 +246,8 @@ class SubjectRecord(BaseModel):
 
 <h4>3. Interactive Developer Sandbox</h4>
 <p>To accelerate developer onboarding, the repository introduces an interactive CLI sandbox built directly into the portfolio. Systems engineers can test commands, inspect raw JSON schemas, and simulate error/empty responses in real time, accelerating integration time-to-market from weeks to minutes.</p>`,
+    commands_json: JSON.stringify(IMEDNET_COMMANDS_OBJ),
+    playback_json: JSON.stringify(IMEDNET_PLAYBACK_OBJ),
     created_at: new Date("2026-02-01T00:00:00Z"),
     updated_at: new Date("2026-08-14T00:00:00Z"),
   },

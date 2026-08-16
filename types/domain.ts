@@ -9,6 +9,8 @@ export interface BaseCaseStudy {
   published: boolean;
   simulated_telemetry: boolean;
   tags: string;                    // comma-separated list of tags
+  commands_json?: string | null;
+  playback_json?: string | null;
   created_at: Date;
   updated_at: Date;
 }
