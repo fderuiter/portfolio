@@ -14,6 +14,7 @@ import {
 } from "@chenglou/pretext/rich-inline";
 import { designManifest } from "@/lib/design-manifest";
 import { resolveThemeFonts, resolveSingleThemeFont, type ThemeFonts } from "@/lib/layout-config";
+import { useTerminology } from "@/components/providers/TerminologyProvider";
 
 import { 
   isBrowser, 
@@ -57,6 +58,8 @@ export function usePretextLayout({
     height: 0,
     lineCount: 0,
   });
+
+  const { simplified } = useTerminology();
 
   const preparedTextRef = useRef<PreparedText | null>(null);
   const fontStringRef = useRef<string>("");
@@ -127,18 +130,16 @@ export function usePretextLayout({
   });
 
   useLayoutEffect(() => {
-    if (translationMode !== undefined || activeTheme !== undefined) {
-      resolvedFontRef.current = null;
-      cssPropertyCache.clear();
-      fontConfigCache.clear();
-      textPrepareCache.clear();
-      textLayoutCache.clear();
-      richItemsCache.clear();
-      richPrepareCache.clear();
-      richLayoutCache.clear();
-      clearCache();
-    }
-  }, [translationMode, activeTheme]);
+    resolvedFontRef.current = null;
+    cssPropertyCache.clear();
+    fontConfigCache.clear();
+    textPrepareCache.clear();
+    textLayoutCache.clear();
+    richItemsCache.clear();
+    richPrepareCache.clear();
+    richLayoutCache.clear();
+    clearCache();
+  }, [simplified, translationMode, activeTheme]);
 
   useLayoutEffect(() => {
     if (!isBrowser()) return;
@@ -172,7 +173,7 @@ export function usePretextLayout({
       preparedTextRef.current = prepared;
       setState((prev) => ({ ...prev, isReady: true }));
     }
-  }, [text, fontSize, fontFamilyVariable, measureText, containerRef, translationMode, activeTheme]);
+  }, [text, fontSize, fontFamilyVariable, measureText, containerRef, translationMode, activeTheme, simplified]);
 
   // Removed custom ResizeObserver in favor of unified useResizeObserver hook
 
@@ -356,6 +357,8 @@ export function usePretextRichLayout({
     items: [],
   });
 
+  const { simplified } = useTerminology();
+
   const preparedRef = useRef<PreparedRichInline | null>(null);
   const itemsRef = useRef<ExtendedRichInlineItem[]>([]);
   const itemsKeyRef = useRef<string>("");
@@ -407,18 +410,16 @@ export function usePretextRichLayout({
   });
 
   useLayoutEffect(() => {
-    if (translationMode !== undefined || activeTheme !== undefined) {
-      resolvedFontsRef.current = null;
-      cssPropertyCache.clear();
-      fontConfigCache.clear();
-      textPrepareCache.clear();
-      textLayoutCache.clear();
-      richItemsCache.clear();
-      richPrepareCache.clear();
-      richLayoutCache.clear();
-      clearCache();
-    }
-  }, [translationMode, activeTheme]);
+    resolvedFontsRef.current = null;
+    cssPropertyCache.clear();
+    fontConfigCache.clear();
+    textPrepareCache.clear();
+    textLayoutCache.clear();
+    richItemsCache.clear();
+    richPrepareCache.clear();
+    richLayoutCache.clear();
+    clearCache();
+  }, [simplified, translationMode, activeTheme]);
 
   useLayoutEffect(() => {
     if (!isBrowser()) return;
@@ -464,7 +465,7 @@ export function usePretextRichLayout({
     } else {
       setState((prev) => ({ ...prev, isReady: true }));
     }
-  }, [text, fontSize, fontFamilyVariable, measureRichText, containerRef, translationMode, activeTheme]);
+  }, [text, fontSize, fontFamilyVariable, measureRichText, containerRef, translationMode, activeTheme, simplified]);
 
   // Removed custom ResizeObserver in favor of unified useResizeObserver hook
 
