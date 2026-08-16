@@ -303,4 +303,137 @@ describe("useTelemetry Hook Integration & Isolation", () => {
     expect(hookResult.syncFailed).toBe(true);
     errorSpy.mockRestore();
   });
+
+  it("should sanitize telemetry console errors and warnings when simulated in production, and keep them full in development", async () => {
+    const originalEnv = process.env.NODE_ENV;
+
+    try {
+      // 1. Simulate Production Environment
+      (process.env as any).NODE_ENV = "production";
+
+      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+      // Simulate rate limiting or sync failure in recordEvent
+      fetchMock.mockImplementationOnce(async () => {
+        throw new Error("POST request failed on server at /app/api/telemetry/route.ts");
+      });
+
+      let hookResult: any;
+      await act(async () => {
+        root = createRoot(container);
+        root.render(
+          <TelemetryTestComponent
+            onHookValue={(val) => {
+              hookResult = val;
+            }}
+          />
+        );
+      });
+
+      // Advance timers to trigger background fetch (SWR)
+      await act(async () => {
+        vi.advanceTimersByTime(0);
+      });
+
+      // Trigger record event to cause an optimistic sync persistence failure
+      await act(async () => {
+        await hookResult.recordEvent("project-abc", "page_view");
+      });
+
+      // Verify console.error was called with a sanitized error object (no "/app/api/telemetry" path)
+      expect(errorSpy).toHaveBeenCalled();
+      const lastErrorCallArgs = errorSpy.mock.calls[errorSpy.mock.calls.length - 1];
+      const errorObj = lastErrorCallArgs[1];
+      expect(errorObj).toBeInstanceOf(Error);
+      expect(errorObj.message).toContain("[scrubbed]");
+      expect(errorObj.message).not.toContain("/app");
+
+      errorSpy.mockClear();
+
+      // 2. Simulate Local Development Environment
+      (process.env as any).NODE_ENV = "development";
+
+      fetchMock.mockImplementationOnce(async () => {
+        throw new Error("POST request failed on server at /app/api/telemetry/route.ts");
+      });
+
+      await act(async () => {
+        await hookResult.recordEvent("project-abc", "page_view");
+      });
+
+      // Verify console.error was called with raw, unmodified error
+      expect(errorSpy).toHaveBeenCalled();
+      const devErrorCallArgs = errorSpy.mock.calls[errorSpy.mock.calls.length - 1];
+      const devErrorObj = devErrorCallArgs[1];
+      expect(devErrorObj).toBeInstanceOf(Error);
+      expect(devErrorObj.message).toContain("/app");
+      expect(devErrorObj.message).not.toContain("[scrubbed]");
+
+      errorSpy.mockRestore();
+      warnSpy.mockRestore();
+    } finally {
+      (process.env as any).NODE_ENV = originalEnv;
+    }
+  });
+
+  it("should sanitize local storage caught warnings in production and keep them raw in development", async () => {
+    const originalEnv = process.env.NODE_ENV;
+
+    try {
+      // Mock localStorage to throw error on setItem with an absolute path
+      vi.spyOn(window.localStorage, "setItem").mockImplementation(() => {
+        throw new Error("QuotaExceeded at /Users/runner/workspace/cache.ts");
+      });
+
+      // 1. Simulate Production Environment
+      (process.env as any).NODE_ENV = "production";
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+      let hookResult: any;
+      await act(async () => {
+        root = createRoot(container);
+        root.render(
+          <TelemetryTestComponent
+            onHookValue={(val) => {
+              hookResult = val;
+            }}
+          />
+        );
+      });
+
+      // Click record event to trigger local storage write
+      const recordBtn = container.querySelector('[data-testid="record-btn"]') as HTMLButtonElement;
+      await act(async () => {
+        recordBtn.click();
+      });
+
+      expect(warnSpy).toHaveBeenCalled();
+      const lastWarnCallArgs = warnSpy.mock.calls[warnSpy.mock.calls.length - 1];
+      const warnObj = lastWarnCallArgs[1];
+      expect(warnObj).toBeInstanceOf(Error);
+      expect(warnObj.message).toContain("[scrubbed]");
+      expect(warnObj.message).not.toContain("/Users/runner");
+
+      warnSpy.mockClear();
+
+      // 2. Simulate Local Development Environment
+      (process.env as any).NODE_ENV = "development";
+
+      await act(async () => {
+        recordBtn.click();
+      });
+
+      expect(warnSpy).toHaveBeenCalled();
+      const devWarnCallArgs = warnSpy.mock.calls[warnSpy.mock.calls.length - 1];
+      const devWarnObj = devWarnCallArgs[1];
+      expect(devWarnObj).toBeInstanceOf(Error);
+      expect(devWarnObj.message).toContain("/Users/runner");
+      expect(devWarnObj.message).not.toContain("[scrubbed]");
+
+      warnSpy.mockRestore();
+    } finally {
+      (process.env as any).NODE_ENV = originalEnv;
+    }
+  });
 });

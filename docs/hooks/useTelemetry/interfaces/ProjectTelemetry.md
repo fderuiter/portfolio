@@ -6,7 +6,7 @@
 
 # Interface: ProjectTelemetry
 
-Defined in: [hooks/useTelemetry.ts:5](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L5)
+Defined in: [hooks/useTelemetry.ts:6](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L6)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [hooks/useTelemetry.ts:5](https://github.com/fderuiter/portfolio/blo
 
 > **clicks**: `number`
 
-Defined in: [hooks/useTelemetry.ts:7](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L7)
+Defined in: [hooks/useTelemetry.ts:8](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L8)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [hooks/useTelemetry.ts:7](https://github.com/fderuiter/portfolio/blo
 
 > **views**: `number`
 
-Defined in: [hooks/useTelemetry.ts:6](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L6)
+Defined in: [hooks/useTelemetry.ts:7](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L7)
