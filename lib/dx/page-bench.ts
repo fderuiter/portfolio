@@ -233,6 +233,13 @@ export interface RunOptions {
   runs?: number;
   routes?: PageBenchmarkRoute[];
   thresholds?: BenchmarkThresholds;
+  isMobile?: boolean;
+  device?: {
+    viewport: { width: number; height: number };
+    isMobile?: boolean;
+    hasTouch?: boolean;
+    userAgent?: string;
+  };
   onProgress?: (progress: { route: PageBenchmarkRoute; currentRun: number; totalRuns: number; metrics?: SingleRunMetrics }) => void;
 }
 
@@ -244,6 +251,7 @@ export async function runPageBenchmarks(options: RunOptions = {}): Promise<PageB
   const runs = options.runs || 3;
   const routes = options.routes || CANONICAL_ROUTES;
   const thresholds = options.thresholds || DEFAULT_THRESHOLDS;
+  const isMobile = options.isMobile || false;
 
   let browser: Browser | null = null;
   const summaries: PageBenchmarkSummary[] = [];
@@ -254,9 +262,21 @@ export async function runPageBenchmarks(options: RunOptions = {}): Promise<PageB
       args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
     });
 
-    const context = await browser.newContext({
-      viewport: { width: 1280, height: 800 },
-    });
+    const contextOptions = options.device || (isMobile
+      ? {
+          viewport: { width: 390, height: 844 },
+          isMobile: true,
+          hasTouch: true,
+          userAgent:
+            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+        }
+      : {
+          viewport: { width: 1280, height: 800 },
+          isMobile: false,
+          hasTouch: false,
+        });
+
+    const context = await browser.newContext(contextOptions);
 
     for (const route of routes) {
       const pageUrl = `${baseUrl.replace(/\/$/, "")}${route.path}`;

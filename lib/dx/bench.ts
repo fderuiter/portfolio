@@ -12,6 +12,10 @@ import {
   type RichInlineLineRange 
 } from "@chenglou/pretext/rich-inline";
 import { scanFile } from "../validation-scanner";
+import { evaluateFormula, lintFormula } from "../crf/ast-evaluator";
+import { parseFormula, extractVariables, generateTruthTable } from "../proof-utils";
+import { createInitialDuckGameState, stepDuckGame, enterDogPark, stepParkGame } from "../working-with-duck-engine";
+import { createInitialState, startGame, allocateVariable, updateGameSimulation, triggerGarbageCollection } from "../garmin-engine";
 import { colors, formatSection, renderTable } from "./utils";
 import path from "path";
 import fs from "fs";
@@ -232,6 +236,151 @@ export function benchmarkSVGCoordinateMath(iterations = 5000): BenchmarkResult[]
   ];
 }
 
+import type { CRFField } from "../crf/types";
+
+/**
+ * Benchmark Clinical AST Rule Evaluation & Formula Linting
+ */
+export function benchmarkASTEvaluator(iterations = 3000): BenchmarkResult[] {
+  const formula = "WEIGHT / ((HEIGHT / 100) ^ 2)";
+  const context = { WEIGHT: 72, HEIGHT: 178 };
+  const mockFields: CRFField[] = [
+    { id: "WEIGHT", variableName: "WEIGHT", label: "Weight (kg)", dataType: "number", required: true, columnSpan: 6 },
+    { id: "HEIGHT", variableName: "HEIGHT", label: "Height (cm)", dataType: "number", required: true, columnSpan: 6 },
+  ];
+
+  const start = performance.now();
+  for (let i = 0; i < iterations; i++) {
+    evaluateFormula(formula, context, mockFields);
+    lintFormula(formula, mockFields);
+  }
+  const duration = performance.now() - start;
+  const opsPerSec = Math.round((iterations * 1000) / duration);
+
+  return [
+    {
+      suite: "Clinical AST Engine",
+      name: "Expression Evaluation & Lint (BMI / BSA)",
+      iterations,
+      durationMs: Number(duration.toFixed(2)),
+      opsPerSec,
+      metrics: {
+        "Expression": formula,
+        "Throughput": `${opsPerSec.toLocaleString()} evals/sec`,
+        "Latency / Eval": `${(duration / iterations).toFixed(4)}ms`,
+      },
+    },
+  ];
+}
+
+/**
+ * Benchmark Deductive Logic Proof Engine & Truth Table Solver
+ */
+export function benchmarkProofDAGValidation(iterations = 1500): BenchmarkResult[] {
+  const p1 = parseFormula("P -> Q");
+  const p2 = parseFormula("Q -> R");
+  const conc = parseFormula("P -> R");
+
+  const start = performance.now();
+  for (let i = 0; i < iterations; i++) {
+    if (p1 && p2 && conc) {
+      extractVariables(conc);
+      generateTruthTable(
+        [
+          { label: "P1", ast: p1 },
+          { label: "P2", ast: p2 },
+        ],
+        { label: "C", ast: conc }
+      );
+    }
+  }
+  const duration = performance.now() - start;
+  const opsPerSec = Math.round((iterations * 1000) / duration);
+
+  return [
+    {
+      suite: "Proof Engine",
+      name: "Propositional AST Parse & Truth Table Solver",
+      iterations,
+      durationMs: Number(duration.toFixed(2)),
+      opsPerSec,
+      metrics: {
+        "Theorem": "Hypothetical Syllogism",
+        "Throughput": `${opsPerSec.toLocaleString()} solves/sec`,
+        "Latency / Solve": `${(duration / iterations).toFixed(4)}ms`,
+      },
+    },
+  ];
+}
+
+/**
+ * Benchmark Autonomous Duck Physics & Park Simulation Step
+ */
+export function benchmarkDuckPhysics(iterations = 2500): BenchmarkResult[] {
+  let state = createInitialDuckGameState(1);
+  let parkState = enterDogPark(state, "ball");
+
+  const start = performance.now();
+  for (let i = 0; i < iterations; i++) {
+    state = stepDuckGame(state);
+    parkState = stepParkGame(parkState);
+  }
+  const duration = performance.now() - start;
+  const opsPerSec = Math.round((iterations * 1000) / duration);
+
+  return [
+    {
+      suite: "Duck Physics Engine",
+      name: "Autonomous State Step & Park Simulation",
+      iterations,
+      durationMs: Number(duration.toFixed(2)),
+      opsPerSec,
+      metrics: {
+        "Ticks Simulated": (iterations * 2).toLocaleString(),
+        "Throughput": `${opsPerSec.toLocaleString()} ticks/sec`,
+        "Latency / Tick": `${(duration / (iterations * 2)).toFixed(4)}ms`,
+      },
+    },
+  ];
+}
+
+/**
+ * Benchmark Garmin 32KB Embedded Memory Allocator & GC Loop
+ */
+export function benchmarkGarminMemory(iterations = 4000): BenchmarkResult[] {
+  let state = startGame(createInitialState("fenix"));
+  const varTypes: ("int" | "float" | "string" | "array")[] = ["int", "float", "string", "array"];
+
+  const start = performance.now();
+  for (let i = 0; i < iterations; i++) {
+    const type = varTypes[i % varTypes.length];
+    const allocRes = allocateVariable(state, type, `var_${i}`);
+    state = allocRes.state;
+    state = updateGameSimulation(state, 16);
+    if (state.allocatedRamKb > 24) {
+      const gcRes = triggerGarbageCollection(state);
+      state = gcRes.state;
+    }
+  }
+  const duration = performance.now() - start;
+  const opsPerSec = Math.round((iterations * 1000) / duration);
+
+  return [
+    {
+      suite: "Garmin Memory Simulator",
+      name: "32KB Embedded Allocator & GC Cycle",
+      iterations,
+      durationMs: Number(duration.toFixed(2)),
+      opsPerSec,
+      metrics: {
+        "Memory Budget": "32 KB",
+        "Throughput": `${opsPerSec.toLocaleString()} ops/sec`,
+        "Latency / Step": `${(duration / iterations).toFixed(4)}ms`,
+      },
+    },
+  ];
+}
+
 /**
  * Run All Benchmarks
  */
@@ -241,6 +390,10 @@ export function runAllBenchmarks(): BenchmarkResult[] {
     ...benchmarkSVGCoordinateMath(),
     ...benchmarkPretextLayout(),
     ...benchmarkScanner(),
+    ...benchmarkASTEvaluator(),
+    ...benchmarkProofDAGValidation(),
+    ...benchmarkDuckPhysics(),
+    ...benchmarkGarminMemory(),
   ];
 
   return allResults;

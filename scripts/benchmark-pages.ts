@@ -63,6 +63,7 @@ export async function main(): Promise<void> {
   let baseUrl = "http://localhost:3000";
   let runs = 3;
   let assertBudget = false;
+  let isMobile = false;
   let routeFilter: string | null = null;
   let outputDir = process.cwd();
 
@@ -74,6 +75,8 @@ export async function main(): Promise<void> {
       runs = parseInt(args[++i], 10) || 3;
     } else if (arg === "--assert" || arg === "--budget") {
       assertBudget = true;
+    } else if (arg === "--mobile" || arg === "-m") {
+      isMobile = true;
     } else if (arg === "--routes" && args[i + 1]) {
       routeFilter = args[++i];
     } else if (arg === "--output" && args[i + 1]) {
@@ -84,6 +87,7 @@ export async function main(): Promise<void> {
       console.log(`${colors.bold}Options:${colors.reset}`);
       console.log(`  --url <url>        Target server URL (default: http://localhost:3000)`);
       console.log(`  --runs <n>         Number of measured runs per page (default: 3)`);
+      console.log(`  --mobile, -m       Emulate mobile device viewport (iPhone/Pixel 390x844 with touch)`);
       console.log(`  --routes <pattern> Filter routes by pattern (e.g. 'arcade', 'proof', 'case-studies')`);
       console.log(`  --assert, --budget Exit with code 1 if any page fails Web Vitals budget`);
       console.log(`  --output <dir>     Export directory for benchmark-results.md/.json`);
@@ -143,6 +147,7 @@ export async function main(): Promise<void> {
       baseUrl,
       runs,
       routes: selectedRoutes,
+      isMobile,
       onProgress: ({ route, currentRun, totalRuns, metrics }) => {
         if (currentRun === 0) {
           currentRouteIdx++;
