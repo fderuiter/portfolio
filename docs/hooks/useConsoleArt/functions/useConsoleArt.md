@@ -8,10 +8,10 @@
 
 > **useConsoleArt**(): `void`
 
-Defined in: [hooks/useConsoleArt.ts:11](https://github.com/fderuiter/portfolio/blob/main/hooks/useConsoleArt.ts#L11)
+Defined in: [hooks/useConsoleArt.ts:13](https://github.com/fderuiter/portfolio/blob/main/hooks/useConsoleArt.ts#L13)
 
-Custom hook that asynchronously fetches a static ASCII art asset 
-and prints it in the browser console when the client is idle.
+Custom hook that prints a static ASCII art asset 
+in the browser console when the client is idle.
 This prevents main thread blockage, avoids bundle size increase, 
 and completely eliminates hydration mismatches.
 

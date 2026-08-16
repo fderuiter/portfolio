@@ -32,13 +32,8 @@ describe("useConsoleArt Hook", () => {
     return <div>Console Art Test</div>;
   }
 
-  it("fetches ASCII art and logs to console when requestIdleCallback is supported", async () => {
+  it("logs ASCII art to console directly when requestIdleCallback is supported", async () => {
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-    const mockFetch = vi.fn().mockResolvedValue({
-      ok: true,
-      text: async () => "ASCII ART CONTENT",
-    });
-    globalThis.fetch = mockFetch;
 
     (window as any).requestIdleCallback = (cb: () => void) => {
       cb();
@@ -50,25 +45,27 @@ describe("useConsoleArt Hook", () => {
       root.render(<TestComponent />);
     });
 
-    expect(mockFetch).toHaveBeenCalledWith("/ascii-art.txt");
     await vi.runAllTimersAsync();
-    expect(logSpy).toHaveBeenCalledWith("ASCII ART CONTENT");
+    expect(logSpy).toHaveBeenCalled();
+    const printedArt = logSpy.mock.calls[0][0];
+    expect(printedArt).toContain("_______");
+    expect(printedArt).toContain("Welcome, Developer!");
   });
 
-  it("falls back to setTimeout when requestIdleCallback is unavailable and cleans up timer", async () => {
+  it("falls back to setTimeout when requestIdleCallback is unavailable and prints console art", async () => {
     delete (window as any).requestIdleCallback;
     delete (window as any).cancelIdleCallback;
 
-    const mockFetch = vi.fn().mockResolvedValue({
-      ok: false,
-    });
-    globalThis.fetch = mockFetch;
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
     await act(async () => {
       root.render(<TestComponent />);
     });
 
     await vi.runAllTimersAsync();
-    expect(mockFetch).toHaveBeenCalledWith("/ascii-art.txt");
+    expect(logSpy).toHaveBeenCalled();
+    const printedArt = logSpy.mock.calls[0][0];
+    expect(printedArt).toContain("_______");
+    expect(printedArt).toContain("Welcome, Developer!");
   });
 });
