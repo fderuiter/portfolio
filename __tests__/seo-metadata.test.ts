@@ -220,7 +220,55 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     const faviconStat = fs.statSync(appFaviconPath);
     expect(faviconStat.size).toBeLessThan(10000);
   });
+
+  it("createSocialImageResponse generates valid ImageResponse with 1200x630 dimensions", async () => {
+    const { createSocialImageResponse, OG_IMAGE_SIZE, OG_IMAGE_CONTENT_TYPE } = await import("@/lib/og-image");
+    expect(OG_IMAGE_SIZE).toEqual({ width: 1200, height: 630 });
+    expect(OG_IMAGE_CONTENT_TYPE).toBe("image/png");
+
+    const res = createSocialImageResponse({
+      title: "Test Social Preview",
+      description: "Test description",
+      badge: "TEST // MODE",
+      tags: ["TypeScript", "Vitest"],
+    });
+
+    expect(res).toBeDefined();
+    expect(res.headers.get("content-type")).toContain("image/png");
+  });
+
+  it("root opengraph-image and twitter-image generators return valid responses", async () => {
+    const { default: rootOgImage, size: ogSize } = await import("@/app/opengraph-image");
+    const { default: rootTwitterImage, size: twitterSize } = await import("@/app/twitter-image");
+
+    expect(ogSize).toEqual({ width: 1200, height: 630 });
+    expect(twitterSize).toEqual({ width: 1200, height: 630 });
+
+    const ogRes = rootOgImage();
+    const twRes = rootTwitterImage();
+
+    expect(ogRes).toBeDefined();
+    expect(twRes).toBeDefined();
+    expect(ogRes.headers.get("content-type")).toContain("image/png");
+    expect(twRes.headers.get("content-type")).toContain("image/png");
+  });
+
+  it("interactive hub opengraph-image generators return valid responses", async () => {
+    const { default: arcadeOg } = await import("@/app/arcade/opengraph-image");
+    const { default: proofOg } = await import("@/app/proof/opengraph-image");
+    const { default: simulatorOg } = await import("@/app/simulator/opengraph-image");
+    const { default: stackOg } = await import("@/app/stack/opengraph-image");
+    const { default: scheduleOg } = await import("@/app/schedule/opengraph-image");
+    const { default: caseStudiesOg } = await import("@/app/case-studies/opengraph-image");
+
+    for (const generator of [arcadeOg, proofOg, simulatorOg, stackOg, scheduleOg, caseStudiesOg]) {
+      const res = generator();
+      expect(res).toBeDefined();
+      expect(res.headers.get("content-type")).toContain("image/png");
+    }
+  });
 });
+
 
 
 
