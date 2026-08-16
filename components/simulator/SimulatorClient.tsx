@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAudio } from "@/components/providers/AudioProvider";
+import { useAnnouncer } from "@/hooks/useAnnouncer";
 import {
   IconArrowLeft,
   IconAward,
@@ -101,6 +102,8 @@ const branchingQuestions: Record<string, Question> = {
 export function SimulatorClient() {
   const { recordEvent } = useTelemetry();
   const { playNote, playSuccess } = useAudio();
+  const { announce } = useAnnouncer();
+  const cardRef = useRef<HTMLDivElement>(null);
   const [currentStep, setCurrentStep] = useState<string>("welcome");
   const [history, setHistory] = useState<string[]>([]);
   const [answers, setAnswers] = useState<Option[]>([]);
@@ -117,6 +120,14 @@ export function SimulatorClient() {
     recordEvent("simulator", "page_view");
   }, [recordEvent]);
 
+  // Delayed focus redirection to the active question card after step transition animation completes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      cardRef.current?.focus();
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [currentStep]);
+
   const handleSelectOption = useCallback(
     (option: Option) => {
       playNote(440 + answers.length * 110, 0.1);
@@ -127,9 +138,11 @@ export function SimulatorClient() {
       recordEvent("simulator", "project_click");
       if (option.nextStep === "final_eval") {
         playSuccess();
+      } else {
+        announce("Step completed", "polite");
       }
     },
-    [answers.length, currentStep, playNote, playSuccess, recordEvent]
+    [answers.length, currentStep, playNote, playSuccess, recordEvent, announce]
   );
 
   const handleBack = useCallback(() => {
@@ -179,6 +192,13 @@ export function SimulatorClient() {
   }, [answers]);
 
   const profile = currentStep === "final_eval" ? calculateProfile() : null;
+
+  // Assertive announcement of alignment match and result title on completion
+  useEffect(() => {
+    if (currentStep === "final_eval" && profile) {
+      announce(`Alignment complete. Result: ${profile.title}, ${profile.score}% Match`, "assertive");
+    }
+  }, [currentStep, profile, announce]);
 
   const handleCopyCard = useCallback(() => {
     if (!profile) return;
@@ -244,7 +264,7 @@ export function SimulatorClient() {
               onClick={handleBack}
               className="inline-flex items-center gap-1.5 text-xs font-mono text-zinc-400 hover:text-white transition-colors cursor-pointer"
             >
-              <IconArrowLeft className="w-4 h-4" />
+              <IconArrowLeft className="w-4 h-4" aria-hidden="true" />
               <span>Back</span>
             </button>
           ) : (
@@ -259,12 +279,14 @@ export function SimulatorClient() {
           <AnimatePresence mode="wait">
             {currentStep !== "final_eval" && branchingQuestions[currentStep] && (
               <motion.div
+                ref={cardRef}
+                tabIndex={-1}
                 key={currentStep}
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
                 transition={{ duration: 0.25 }}
-                className="bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-6 sm:p-10 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col"
+                className="bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-6 sm:p-10 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col focus:outline-none"
               >
                 {/* Stage Badge */}
                 <div className="inline-flex items-center gap-2 text-xs font-mono text-brand-cyan tracking-widest uppercase font-bold mb-3">
@@ -292,7 +314,7 @@ export function SimulatorClient() {
                         <span className="text-sm sm:text-base font-bold text-neutral-200 group-hover:text-brand-cyan transition-colors">
                           {opt.text}
                         </span>
-                        <span className="text-xs font-mono text-zinc-600 group-hover:text-brand-cyan transition-colors ml-2">
+                        <span className="text-xs font-mono text-zinc-600 group-hover:text-brand-cyan transition-colors ml-2" aria-hidden="true">
                           &rarr;
                         </span>
                       </div>
@@ -309,16 +331,19 @@ export function SimulatorClient() {
 
             {currentStep === "final_eval" && profile && (
               <motion.div
+                ref={cardRef}
+                tabIndex={-1}
                 key="final"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.35 }}
-                className="bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-6 sm:p-10 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.7)] flex flex-col items-center text-center"
+                className="bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-6 sm:p-10 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.7)] flex flex-col items-center text-center focus:outline-none"
               >
                 {/* Circular Match Gauge */}
-                <div className="relative flex items-center justify-center mb-6">
-                  <svg className="w-36 h-36 transform -rotate-90">
+                <div className="relative flex items-center justify-center mb-6" aria-label={`Candidate alignment score: ${profile.score}%`} role="img">
+                  <span className="sr-only">Candidate alignment score: {profile.score}%</span>
+                  <svg className="w-36 h-36 transform -rotate-90" aria-hidden="true">
                     <circle
                       cx="72"
                       cy="72"
@@ -347,7 +372,7 @@ export function SimulatorClient() {
                     </defs>
                   </svg>
 
-                  <div className="absolute flex flex-col items-center">
+                  <div className="absolute flex flex-col items-center" aria-hidden="true">
                     <span className="text-3xl font-extrabold text-white tracking-tighter">
                       {profile.score}%
                     </span>
@@ -358,7 +383,7 @@ export function SimulatorClient() {
                 </div>
 
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-cyan/10 rounded-full border border-brand-cyan/20 text-brand-cyan text-xs font-mono font-bold mb-2">
-                  <IconAward className="w-4 h-4" /> {profile.badge}
+                  <IconAward className="w-4 h-4" aria-hidden="true" /> {profile.badge}
                 </div>
 
                 <h2 className="text-2xl font-extrabold text-white tracking-tight mb-2">
@@ -395,19 +420,19 @@ export function SimulatorClient() {
                     href="/schedule"
                     className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-brand-cyan to-brand-blue text-zinc-950 hover:text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.2)] transition-all cursor-pointer hover:scale-[1.02]"
                   >
-                    <IconCalendar className="w-4 h-4" /> Schedule on Google Calendar
+                    <IconCalendar className="w-4 h-4" aria-hidden="true" /> Schedule on Google Calendar
                   </Link>
                   <button
                     onClick={handleCopyCard}
                     className="flex items-center justify-center gap-2 px-4 py-3 bg-zinc-950 border border-zinc-800 hover:border-zinc-700 text-zinc-300 font-mono font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"
                   >
-                    <IconCopy className="w-4 h-4" /> {copied ? "Copied!" : "Copy Report"}
+                    <IconCopy className="w-4 h-4" aria-hidden="true" /> {copied ? "Copied!" : "Copy Report"}
                   </button>
                   <button
                     onClick={handleReset}
                     className="flex items-center justify-center gap-2 px-4 py-3 bg-zinc-950 border border-zinc-800 hover:border-zinc-700 text-zinc-400 font-mono font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"
                   >
-                    <IconRefresh className="w-4 h-4" /> Run Again
+                    <IconRefresh className="w-4 h-4" aria-hidden="true" /> Run Again
                   </button>
                 </div>
               </motion.div>
