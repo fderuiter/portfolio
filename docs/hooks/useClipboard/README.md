@@ -6,6 +6,10 @@
 
 # hooks/useClipboard
 
+## Interfaces
+
+- [UseClipboardOptions](interfaces/UseClipboardOptions.md)
+
 ## Functions
 
 - [useClipboard](functions/useClipboard.md)
