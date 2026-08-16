@@ -8,7 +8,7 @@
 
 > **exportToSDTMCSV**(`sdtmRows`): `string`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:531](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L531)
+Defined in: [lib/clinical-trial-chaos/engine.ts:532](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L532)
 
 Serializes SDTM rows into standard CSV text.
 

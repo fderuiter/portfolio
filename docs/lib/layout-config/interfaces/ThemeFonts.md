@@ -6,7 +6,7 @@
 
 # Interface: ThemeFonts
 
-Defined in: [lib/layout-config.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L32)
+Defined in: [lib/layout-config.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L33)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/layout-config.ts:32](https://github.com/fderuiter/portfolio/blo
 
 > **baseFont**: `string`
 
-Defined in: [lib/layout-config.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L33)
+Defined in: [lib/layout-config.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L34)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/layout-config.ts:33](https://github.com/fderuiter/portfolio/blo
 
 > **boldFont**: `string`
 
-Defined in: [lib/layout-config.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L34)
+Defined in: [lib/layout-config.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L35)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/layout-config.ts:34](https://github.com/fderuiter/portfolio/blo
 
 > **codeFont**: `string`
 
-Defined in: [lib/layout-config.ts:36](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L36)
+Defined in: [lib/layout-config.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L37)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/layout-config.ts:36](https://github.com/fderuiter/portfolio/blo
 
 > **italicFont**: `string`
 
-Defined in: [lib/layout-config.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L35)
+Defined in: [lib/layout-config.ts:36](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L36)

@@ -3,6 +3,7 @@ import { ArcadeHubClient } from "@/components/arcade/ArcadeHubClient";
 import { buildRouteMetadata, ROUTE_METADATA_CONFIGS } from "@/lib/seo-metadata";
 import { getCollectionPageSchema } from "@/lib/seo";
 import { ARCADE_GAMES_METADATA } from "@/lib/arcade-data";
+import { PageLayout } from "@/components/PageLayout";
 
 export const metadata: Metadata = buildRouteMetadata(ROUTE_METADATA_CONFIGS.arcade);
 
@@ -14,7 +15,7 @@ export default function ArcadePage() {
   }));
 
   return (
-    <main className="min-h-screen pt-28">
+    <PageLayout variant="studio" className="pt-28">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -27,6 +28,6 @@ export default function ArcadePage() {
         }}
       />
       <ArcadeHubClient />
-    </main>
+    </PageLayout>
   );
 }

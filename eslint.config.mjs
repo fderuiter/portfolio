@@ -22,6 +22,19 @@ const eslintConfig = defineConfig([
       ],
     },
   },
+  {
+    files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
+    ignores: ["lib/game-utils.ts", "components/providers/AudioProvider.tsx"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "CallExpression[callee.object.name='Math'][callee.property.name=/^(min|max)$/] CallExpression[callee.object.name='Math'][callee.property.name=/^(min|max)$/]",
+          message: "Do not use inline nested Math.min or Math.max. Use clamp() or lerp() from lib/game-utils.ts instead."
+        }
+      ]
+    }
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

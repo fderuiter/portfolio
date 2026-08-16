@@ -2,6 +2,9 @@ import { describe, it, expect } from "vitest";
 import DOMPurify from "isomorphic-dompurify";
 import fs from "fs";
 import path from "path";
+import { renderHook } from "@testing-library/react";
+import { dictionary } from "@/lib/i18n-dictionary";
+import { useTerminology } from "@/components/providers/TerminologyProvider";
 
 describe("Interactive Terminology Tooltips - Sanitization Layers", () => {
   const allowedTags = [
@@ -77,3 +80,35 @@ describe("Interactive Terminology Tooltips - Component Structures", () => {
     expect(content).toContain('role="tooltip"');
   });
 });
+
+describe("Centralized i18n Static Context & Dictionary Keys", () => {
+  it("should contain detailed and simplified key structures in the centralized static dictionary", () => {
+    expect(dictionary).toHaveProperty("detailed");
+    expect(dictionary).toHaveProperty("simplified");
+
+    // Check Bio Card structure
+    expect(dictionary.detailed.bio).toHaveProperty("title");
+    expect(dictionary.detailed.bio).toHaveProperty("subtitle");
+    expect(dictionary.detailed.bio).toHaveProperty("description");
+    expect(dictionary.simplified.bio).toHaveProperty("description");
+
+    // Check Timeline structure
+    expect(dictionary.detailed.timeline.length).toBeGreaterThan(0);
+    expect(dictionary.simplified.timeline.length).toBeGreaterThan(0);
+    expect(dictionary.detailed.timeline[0]).toHaveProperty("recruiterDescription");
+    expect(dictionary.detailed.timeline[0]).toHaveProperty("realityDescription");
+
+    // Check Domains/Skills structure
+    expect(dictionary.detailed.domains.items.length).toBe(4);
+    expect(dictionary.simplified.domains.items.length).toBe(4);
+  });
+
+  it("should fallback gracefully if useTerminology is invoked outside the Provider", () => {
+    const { result } = renderHook(() => useTerminology());
+
+    expect(result.current.simplified).toBe(false);
+    expect(result.current.isFallback).toBe(true);
+    expect(typeof result.current.setSimplified).toBe("function");
+  });
+});
+

@@ -1,19 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import crypto from "crypto";
-import { Redis } from "@upstash/redis";
+import { redis } from "@/lib/redis";
 import { TelemetryEventSchema, RateLimitParamsSchema } from "@/lib/schemas";
 import { Ratelimit } from "@upstash/ratelimit";
 import * as Sentry from "@sentry/nextjs";
 
 // Enforce standard dynamic route behavior in Next.js 16 to query live datastores safely
 export const dynamic = "force-dynamic";
-
-// Initialize the standard Redis client using process env
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL || "http://localhost:8079",
-  token: process.env.UPSTASH_REDIS_REST_TOKEN || "example_token",
-});
 
 // Ephemeral/local memory cache Map for the SDK
 const sdkEphemeralCache = new Map<string, number>();
@@ -203,44 +197,17 @@ export async function POST(req: NextRequest) {
       createdAt: new Date(),
     };
 
-    let newEvent;
+    // Push event into Redis list for background synchronization and ensure TTL
+    const p = redis.pipeline();
+    p.lpush("telemetry_buffer", eventData);
+    p.expire("telemetry_buffer", 48 * 60 * 60); // 48 hours
+    const [listLength] = await p.exec();
     
-    try {
-      // Try writing to primary DB with 100ms timeout to ensure <150ms P95 latency
-      newEvent = await Promise.race([
-        prisma.telemetryEvent.create({
-          data: eventData,
-          select: {
-            id: true,
-            projectSlug: true,
-            eventType: true,
-            createdAt: true,
-          },
-        }),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error("Database Write Timeout")), 100)
-        )
-      ]);
-    } catch (dbErr) {
-      console.warn("Primary DB write failed or timed out. Buffering to secondary store.", dbErr);
-      
-      const redis = new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL || "http://localhost:8079",
-        token: process.env.UPSTASH_REDIS_REST_TOKEN || "example_token",
-      });
-      
-      // Push event into Redis list for background synchronization and ensure TTL
-      const p = redis.pipeline();
-      p.lpush("telemetry_buffer", eventData);
-      p.expire("telemetry_buffer", 48 * 60 * 60); // 48 hours
-      const [listLength] = await p.exec();
-      
-      if (Number(listLength) > 1000) {
-        console.error("ALERT: Secondary telemetry buffer occupancy exceeds threshold.");
-      }
-      
-      newEvent = eventData;
+    if (Number(listLength) > 1000) {
+      console.error("ALERT: Secondary telemetry buffer occupancy exceeds threshold.");
     }
+    
+    const newEvent = eventData;
 
     const response = NextResponse.json({ success: true, event: newEvent }, { status: 201 });
     if (rateLimitRes.headers) {

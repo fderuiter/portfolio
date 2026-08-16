@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useSyncExternalStore, useCallback } from "react";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { clamp } from "@/lib/game-utils";
 import {
   IconFlame,
   IconRefresh,
@@ -20,7 +21,7 @@ import {
 } from "@tabler/icons-react";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { FullscreenButton } from "@/components/arcade/FullscreenButton";
-import { TabletOrientationHint } from "@/components/arcade/TabletOrientationHint";
+import { DynamicTabletOrientationHint as TabletOrientationHint } from "@/components/arcade/DynamicTabletOrientationHint";
 import { useFullscreen } from "@/hooks/useFullscreen";
 import {
   LaserMode,
@@ -1194,7 +1195,7 @@ export const LaserLoon: React.FC = () => {
       loonPosRef.current.targetX = mouseX;
       loonPosRef.current.targetY = mouseY;
     } else {
-      loonPosRef.current.targetY = Math.max(40, Math.min((canvasRef.current.height || DEFAULT_CANVAS_HEIGHT) - 40, mouseY));
+      loonPosRef.current.targetY = clamp(mouseY, 40, (canvasRef.current?.height || DEFAULT_CANVAS_HEIGHT) - 40);
     }
   };
 
@@ -1542,7 +1543,7 @@ export const LaserLoon: React.FC = () => {
             <div className="w-full h-2.5 bg-neutral-950 rounded-full overflow-hidden border border-neutral-800">
               <div
                 className="h-full bg-gradient-to-r from-red-500 to-amber-500 transition-all duration-150"
-                style={{ width: `${Math.max(0, Math.min(100, (bossHp / bossMaxHp) * 100))}%` }}
+                style={{ width: `${clamp((bossHp / bossMaxHp) * 100, 0, 100)}%` }}
               />
             </div>
           </div>

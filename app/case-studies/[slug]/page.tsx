@@ -13,6 +13,7 @@ import SchemaFlowWorkspaceWrapper from "@/components/SchemaFlowWorkspaceWrapper"
 import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
+import { PageLayout } from "@/components/PageLayout";
 
 import type { Metadata } from "next";
 
@@ -144,7 +145,10 @@ export default async function CaseStudyPage({ params }: PageProps) {
   const tagsList = study.tags ? study.tags.split(",").map(t => t.trim()) : [];
 
   return (
-    <main className="min-h-screen py-24 md:py-32 px-6 md:px-12 lg:px-24 bg-zinc-950 text-foreground flex flex-col items-center relative overflow-hidden">
+    <PageLayout
+      variant="standard"
+      className="py-24 md:py-32 px-6 md:px-12 lg:px-24 bg-zinc-950 text-foreground flex flex-col items-center relative overflow-hidden outline-none"
+    >
       <TelemetryTracker slug={slug} />
       {/* Dynamic JSON-LD SoftwareSourceCode Schema */}
       <script
@@ -163,7 +167,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
           <div className="mb-8">
             <Breadcrumbs
               items={[
-                { label: "Work Showcase", href: "/#case-studies" },
+                { label: "Case Studies", href: "/case-studies" },
                 { label: study.title },
               ]}
             />
@@ -281,6 +285,6 @@ export default async function CaseStudyPage({ params }: PageProps) {
           )}
         </TracingBeam>
       </div>
-    </main>
+    </PageLayout>
   );
 }

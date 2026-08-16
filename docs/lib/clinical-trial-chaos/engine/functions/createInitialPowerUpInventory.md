@@ -8,7 +8,7 @@
 
 > **createInitialPowerUpInventory**(): [`PowerUpInventory`](../../types/type-aliases/PowerUpInventory.md)
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L47)
+Defined in: [lib/clinical-trial-chaos/engine.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L48)
 
 ## Returns
 

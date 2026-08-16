@@ -8,7 +8,7 @@
 
 > **exportToCDISCODMXML**(`subjects`, `sdtmRows`): `string`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:461](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L461)
+Defined in: [lib/clinical-trial-chaos/engine.ts:462](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L462)
 
 Serializes subjects and SDTM dataset into authentic CDISC ODM 1.3 XML.
 

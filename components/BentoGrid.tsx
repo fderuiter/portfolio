@@ -1,9 +1,9 @@
 // Source: https://ui.aceternity.com/components/bento-grid
 // Source: https://ui.aceternity.com/components/glare-card
 "use client";
-import { cn, hexToRgba } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import React, { useRef } from "react";
-import { designManifest } from "@/lib/design-manifest";
+import { clamp } from "@/lib/game-utils";
 
 export const BentoGrid = ({
   className,
@@ -86,7 +86,7 @@ export const Card = ({
     <div
       style={containerStyle}
       className={cn(
-        "relative isolate w-full h-full transition-transform delay-[var(--delay)] duration-[var(--duration)] ease-[var(--easing)] will-change-transform [contain:layout_style] [perspective:600px]",
+        "@container relative isolate w-full h-full transition-transform delay-[var(--delay)] duration-[var(--duration)] ease-[var(--easing)] will-change-transform [contain:layout_style] [perspective:600px]",
         className
       )}
       ref={refElement}
@@ -112,9 +112,9 @@ export const Card = ({
         background.x = 50 + percentage.x / 4 - 12.5;
         background.y = 50 + percentage.y / 3 - 16.67;
         rotate.x = -(delta.x / 3.5);
+        rotate.x = clamp(rotate.x, -rotateFactor * 35, rotateFactor * 35);
         rotate.y = delta.y / 2;
-        rotate.x *= rotateFactor;
-        rotate.y *= rotateFactor;
+        rotate.y = clamp(rotate.y, -rotateFactor * 35, rotateFactor * 35);
         glare.x = percentage.x;
         glare.y = percentage.y;
 
@@ -134,27 +134,24 @@ export const Card = ({
         isPointerInside.current = false;
         if (refElement.current) {
           refElement.current.style.removeProperty("--duration");
-          refElement.current?.style.setProperty("--r-x", `0deg`);
-          refElement.current?.style.setProperty("--r-y", `0deg`);
+          refElement.current.style.setProperty("--r-x", `0deg`);
+          refElement.current.style.setProperty("--r-y", `0deg`);
         }
       }}
     >
-      <div 
-        style={{ "--hover-glow": `0 0 30px ${hexToRgba(designManifest.colors["brand-cyan"], 0.15)}, 0 0 60px ${hexToRgba(designManifest.colors["brand-cyan"], 0.05)}, inset 0 0 20px ${hexToRgba(designManifest.colors["brand-cyan"], 0.03)}` } as React.CSSProperties}
-        className="grid h-full w-full origin-center [transform:rotateY(var(--r-x))_rotateX(var(--r-y))] overflow-hidden rounded-[var(--radius)] border border-border hover:border-border-active transition-all duration-300 delay-[var(--delay)] ease-[var(--easing)] will-change-transform hover:filter-none hover:[--duration:200ms] hover:[--easing:linear] hover:[--opacity:0.22] hover:[box-shadow:var(--hover-glow)]">
-        {/* Layer 1: Solid/Glass Base Surface */}
-        <div className="h-full w-full bg-surface-1 backdrop-blur-sm [grid-area:1/1] [clip-path:inset(0_0_0_0_round_var(--radius))]" />
+      <div className="h-full grid [grid-template-areas:'stack'] transform-gpu [transform-style:preserve-3d] rounded-[var(--radius)]">
+        {/* Layer 1: Solid Dark Background & Subtle Border */}
+        <div className="border border-zinc-800/80 [grid-area:1/1] rounded-[var(--radius)] bg-zinc-950/70 backdrop-blur-md" />
 
-        {/* Layer 2: Subtle Ambient Glare & Iridescent Sheen behind content */}
-        <div className="transition-background will-change-background grid h-full w-full opacity-[var(--opacity)] mix-blend-soft-light transition-opacity delay-[var(--delay)] duration-[var(--duration)] ease-[var(--easing)] [background:radial-gradient(farthest-corner_circle_at_var(--m-x)_var(--m-y),_rgba(255,255,255,0.45)_10%,_rgba(255,255,255,0.2)_30%,_rgba(255,255,255,0)_80%)] [clip-path:inset(0_0_1px_0_round_var(--radius))] [grid-area:1/1] pointer-events-none" />
+        {/* Layer 2: Dynamic Holographic Glare Pattern */}
         <div
           className="will-change-background after:grid-area-[inherit] after:bg-repeat-[inherit] after:bg-attachment-[inherit] after:bg-origin-[inherit] after:bg-clip-[inherit] relative grid h-full w-full opacity-[var(--opacity)] [background-blend-mode:hue_hue_hue_overlay] mix-blend-color-dodge transition-opacity [background:var(--pattern),_var(--rainbow),_var(--diagonal),_var(--shade)] [clip-path:inset(0_0_1px_0_round_var(--radius))] [grid-area:1/1] after:bg-[inherit] after:[background-size:var(--foil-size),_200%_400%,_800%,_200%] after:[background-position:center,_0%_var(--bg-y),_calc(var(--bg-x)*_-1)_calc(var(--bg-y)*_-1),_var(--bg-x)_var(--bg-y)] after:[background-blend-mode:soft-light,_hue,_hard-light] after:mix-blend-exclusion after:content-[''] pointer-events-none"
           style={backgroundStyle}
         />
 
         {/* Layer 3: High-Contrast Foreground Content (never degraded by blend modes or glare) */}
-        <div className="relative z-10 [grid-area:1/1] h-full w-full flex flex-col">
-          <div className={cn("h-full w-full p-5 flex flex-col justify-between flex-1", className)}>
+        <div className="relative z-10 [grid-area:1/1] h-full w-full flex flex-col min-w-0">
+          <div className={cn("h-full w-full p-5 flex flex-col justify-between flex-1 min-w-0", className)}>
             {children}
           </div>
         </div>
@@ -171,7 +168,7 @@ export const CardTitle = ({
   children: React.ReactNode;
 }) => {
   return (
-    <div className={cn("mt-2 mb-2 font-sans font-bold text-neutral-100 group-hover:text-brand-cyan transition-colors duration-300 break-words text-balance", className)}>
+    <div className={cn("mt-2 mb-2 font-sans font-bold text-neutral-100 group-hover:text-brand-cyan transition-colors duration-300 break-words text-balance min-w-0", className)}>
       {children}
     </div>
   );
@@ -185,7 +182,7 @@ export const CardDescription = ({
   children: React.ReactNode;
 }) => {
   return (
-    <div className={cn("font-sans text-xs font-normal text-muted-strong leading-relaxed", className)}>
+    <div className={cn("font-sans text-xs font-normal text-muted-strong leading-relaxed break-words min-w-0", className)}>
       {children}
     </div>
   );

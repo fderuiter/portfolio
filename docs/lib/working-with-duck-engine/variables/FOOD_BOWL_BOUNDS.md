@@ -8,7 +8,7 @@
 
 > `const` **FOOD\_BOWL\_BOUNDS**: `object`
 
-Defined in: [lib/working-with-duck-engine.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L19)
+Defined in: [lib/working-with-duck-engine.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L20)
 
 ## Type Declaration
 

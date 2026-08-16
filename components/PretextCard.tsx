@@ -38,8 +38,8 @@ export const PretextCard: React.FC<PretextCardProps> = ({
         transition: "height 180ms cubic-bezier(0.16, 1, 0.3, 1), min-height 180ms cubic-bezier(0.16, 1, 0.3, 1)",
       }}
     >
-      <div className="flex flex-col h-full justify-between">
-        <div className="mb-4">
+      <div className="flex flex-col h-full justify-between min-w-0">
+        <div className="mb-4 min-w-0">
           <CardTitle>{title}</CardTitle>
           {/* Attach Ref to the text container */}
           <div className="relative">

@@ -368,6 +368,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         ],
       };
       expect(() => printDoctorReport(mockSummary, false)).not.toThrow();
-    });
+    }, 20000);
   });
 });

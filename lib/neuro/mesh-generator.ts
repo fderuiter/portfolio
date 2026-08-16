@@ -5,6 +5,7 @@
  */
 
 import * as THREE from "three";
+import { clamp } from "../game-utils";
 import { AnatomicalParcel, DESIKAN_KILLIANY_PARCELS, HemisphereFilter, SurfaceMode } from "./types";
 
 export interface MeshBundle {
@@ -251,7 +252,7 @@ function createHemisphereGeometry(
       if (mode === "aparc") {
         const parcel = getAnatomicalParcelAtCoordinate({ x, y, z }, isLeft);
         // Slightly shade according to sulcal curvature for realistic 3D parcel depth
-        const depthShade = 0.85 + Math.max(-0.25, Math.min(0.25, curvature * 0.2));
+        const depthShade = 0.85 + clamp(curvature * 0.2, -0.25, 0.25);
         colors.push(
           parcel.normRgb[0] * depthShade,
           parcel.normRgb[1] * depthShade,
@@ -259,7 +260,7 @@ function createHemisphereGeometry(
         );
       } else {
         // Sulcal fundi (dark slate/gray) vs Gyral crests (bright cyan/blue)
-        const normCurv = Math.max(0, Math.min(1, (curvature + 1.2) / 2.4));
+        const normCurv = clamp((curvature + 1.2) / 2.4, 0, 1);
         let r = 0.16 + normCurv * 0.16;
         let g = 0.26 + normCurv * 0.48;
         let b = 0.42 + normCurv * 0.58;

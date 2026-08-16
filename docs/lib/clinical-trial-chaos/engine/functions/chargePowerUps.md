@@ -8,7 +8,7 @@
 
 > **chargePowerUps**(`inventory`, `amount?`): [`PowerUpInventory`](../../types/type-aliases/PowerUpInventory.md)
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:323](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L323)
+Defined in: [lib/clinical-trial-chaos/engine.ts:324](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L324)
 
 Charges power-up meters upon clean actions or combos.
 

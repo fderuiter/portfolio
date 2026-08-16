@@ -8,7 +8,7 @@
 
 > **startDraggingDuck**(`state`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:2150](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2150)
+Defined in: [lib/working-with-duck-engine.ts:2151](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2151)
 
 Player Action: Start dragging Duck
 

@@ -4,8 +4,14 @@
 import React, { useState, useEffect, useRef, useMemo, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { clamp } from "@/lib/game-utils";
 import { useSearch } from "@/components/providers/SearchProvider";
-import { RetroLabyrinth } from "@/components/RetroLabyrinth";
+import dynamic from "next/dynamic";
+
+const RetroLabyrinth = dynamic(
+  () => import("@/components/RetroLabyrinth").then((mod) => mod.RetroLabyrinth),
+  { ssr: false }
+);
 import { getClosestMatches, type CaseStudyItem } from "@/lib/search-utils";
 
 interface UnifiedErrorLayoutProps {
@@ -106,8 +112,8 @@ export function UnifiedErrorLayout({
     const y = e.clientY - rect.top;
 
     // Constrain within bounds
-    const boundedX = Math.max(0, Math.min(x, rect.width));
-    const boundedY = Math.max(0, Math.min(y, rect.height));
+    const boundedX = clamp(x, 0, rect.width);
+    const boundedY = clamp(y, 0, rect.height);
 
     const normX = boundedX / rect.width;
     const normY = boundedY / rect.height;

@@ -6,6 +6,52 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+
+// Statically import components to put in global mock registry
+import { VisitMatrixEditor } from "@/components/crf/Modes/VisitMatrixEditor";
+import { RuleGraphStudio } from "@/components/crf/Modes/RuleGraphStudio";
+import { LiveEdcSimulator } from "@/components/crf/Modes/LiveEdcSimulator";
+import { WorkflowWizardModal } from "@/components/crf/Wizard/WorkflowWizardModal";
+
+(globalThis as any).mockComponents = {
+  VisitMatrixEditor,
+  RuleGraphStudio,
+  LiveEdcSimulator,
+  WorkflowWizardModal,
+};
+
+// Synchronous dynamic import mock for tests using global registry
+vi.mock("next/dynamic", () => {
+  return {
+    default: (loader: any, options: any) => {
+      const loaderStr = loader.toString();
+
+      return function DynamicComponent(props: any) {
+        const registry = (globalThis as any).mockComponents || {};
+        let Component: any = null;
+
+        if (loaderStr.includes("VisitMatrixEditor")) {
+          Component = registry.VisitMatrixEditor;
+        } else if (loaderStr.includes("RuleGraphStudio")) {
+          Component = registry.RuleGraphStudio;
+        } else if (loaderStr.includes("LiveEdcSimulator")) {
+          Component = registry.LiveEdcSimulator;
+        } else if (loaderStr.includes("WorkflowWizardModal")) {
+          Component = registry.WorkflowWizardModal;
+        }
+
+        if (Component) {
+          return React.createElement(Component, props);
+        }
+        if (options && options.loading) {
+          return options.loading();
+        }
+        return null;
+      };
+    },
+  };
+});
+
 import { CRFStudioContainer } from "@/components/crf/CRFStudioContainer";
 
 describe("CRFStudioContainer Component", () => {

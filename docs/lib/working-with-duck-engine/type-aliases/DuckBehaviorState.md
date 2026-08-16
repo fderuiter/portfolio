@@ -8,4 +8,4 @@
 
 > **DuckBehaviorState** = `"IDLE_ROAM"` \| `"SNIFFING_POTTY"` \| `"SNEAKY_CHEW"` \| `"NO_TAKE_THROW"` \| `"THE_FLOP"` \| `"ZOOMIES"` \| `"FETCHING_BALL"` \| `"DRAGGED"` \| `"NAP_TIME"` \| `"PERFORMING_TRICK"` \| `"DRINKING_WATER"` \| `"EATING_KIBBLE"`
 
-Defined in: [lib/working-with-duck-engine.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L22)
+Defined in: [lib/working-with-duck-engine.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L23)

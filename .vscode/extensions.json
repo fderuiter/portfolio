@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+    "vitest.explorer",
+    "davidlday.vscode-markdownlint",
+    "ms-playwright.playwright",
+    "Prisma.prisma"
+  ]
+}

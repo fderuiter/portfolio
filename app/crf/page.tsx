@@ -2,11 +2,12 @@ import React from "react";
 import { CRFStudioContainer } from "@/components/crf/CRFStudioContainer";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
+import { PageLayout } from "@/components/PageLayout";
 
 export default function CRFStudioPage() {
   return (
-    <main className="min-h-screen pt-28 pb-16 bg-zinc-950 text-white selection:bg-brand-cyan/30 selection:text-brand-cyan">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4">
+    <PageLayout variant="studio" className="bg-zinc-950 text-white selection:bg-brand-cyan/30 selection:text-brand-cyan">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4 w-full">
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
@@ -16,13 +17,13 @@ export default function CRFStudioPage() {
         />
       </div>
 
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 w-full">
         <div className="rounded-3xl border border-zinc-800 bg-zinc-950 overflow-hidden shadow-2xl">
           <CRFStudioContainer />
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 w-full">
         <NextPrevNav
           prev={{
             title: "NeuroRecon: FreeSurfer Simulator",
@@ -42,6 +43,6 @@ export default function CRFStudioPage() {
           }}
         />
       </div>
-    </main>
+    </PageLayout>
   );
 }

@@ -8,7 +8,7 @@
 
 > **validateObservationChoice**(`observation`, `selectedChoice`): `object`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:116](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L116)
+Defined in: [lib/clinical-trial-chaos/engine.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L117)
 
 Validates a user's multi-choice answer on a clinical observation.
 

@@ -8,7 +8,7 @@
 
 > **extractSlice**(`volume`, `plane`, `sliceIndex`): `object`
 
-Defined in: [lib/neuro/volume-generator.ts:224](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L224)
+Defined in: [lib/neuro/volume-generator.ts:225](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L225)
 
 Extract a 2D slice from the 3D volume along an anatomical plane.
 

@@ -3,24 +3,26 @@ import { WorkingWithDuckClient } from "@/components/arcade/WorkingWithDuckClient
 import { buildRouteMetadata, ROUTE_METADATA_CONFIGS } from "@/lib/seo-metadata";
 import { getWebApplicationSchema } from "@/lib/seo";
 
+import { PageLayout } from "@/components/PageLayout";
+
 export const metadata: Metadata = buildRouteMetadata(ROUTE_METADATA_CONFIGS.workingWithDuck);
 
 export default function WorkingWithDuckPage() {
   return (
-    <div className="min-h-screen pt-28">
+    <PageLayout variant="studio" className="pt-28">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: getWebApplicationSchema({
-            name: "Working With Duck",
-            description: "Balance shipping code deadlines against managing Duck — an autonomous, fluffy white golden retriever puppy.",
+            name: "Working With Duck: Rubber Duck Debugging",
+            description: "Interactive conversational debugging simulator. Formulate hypotheses, diagnose tricky concurrency bugs, and preserve developer sanity.",
             url: "/arcade/working-with-duck",
             applicationCategory: "GameApplication",
-            genre: "Pet Simulation Arcade",
+            genre: "Developer Simulation",
           }),
         }}
       />
       <WorkingWithDuckClient />
-    </div>
+    </PageLayout>
   );
 }

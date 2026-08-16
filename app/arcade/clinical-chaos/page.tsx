@@ -3,11 +3,13 @@ import { ClinicalChaosClient } from "@/components/arcade/ClinicalChaosClient";
 import { buildRouteMetadata, ROUTE_METADATA_CONFIGS } from "@/lib/seo-metadata";
 import { getWebApplicationSchema } from "@/lib/seo";
 
+import { PageLayout } from "@/components/PageLayout";
+
 export const metadata: Metadata = buildRouteMetadata(ROUTE_METADATA_CONFIGS.clinicalChaos);
 
 export default function ClinicalChaosPage() {
   return (
-    <div className="min-h-screen pt-28">
+    <PageLayout variant="studio" className="pt-28">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -21,6 +23,6 @@ export default function ClinicalChaosPage() {
         }}
       />
       <ClinicalChaosClient />
-    </div>
+    </PageLayout>
   );
 }

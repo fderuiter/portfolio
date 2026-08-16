@@ -8,6 +8,16 @@ import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { SearchProvider, useSearch } from "@/components/providers/SearchProvider";
 import { AudioProvider } from "@/components/providers/AudioProvider";
+const MockRetroLabyrinth = () => <div>SYSTEM_LABYRINTH.EXE</div>;
+
+vi.mock("next/dynamic", () => ({
+  default: () => {
+    return function MockDynamic(props: Record<string, unknown>) {
+      return React.createElement(MockRetroLabyrinth, props);
+    };
+  },
+}));
+
 import { UnifiedErrorLayout } from "@/components/UnifiedErrorLayout";
 
 describe("SearchProvider & useSearch Context", () => {

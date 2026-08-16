@@ -6,7 +6,7 @@
 
 # Interface: CRTCalibrationConfig
 
-Defined in: [lib/arcade/crt-pipeline.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L21)
+Defined in: [lib/arcade/crt-pipeline.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L22)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/arcade/crt-pipeline.ts:21](https://github.com/fderuiter/portfol
 
 > **bloomIntensity**: `number`
 
-Defined in: [lib/arcade/crt-pipeline.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L45)
+Defined in: [lib/arcade/crt-pipeline.ts:46](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L46)
 
 Diffusion intensity of the screen bloom and phosphor glow (0.0 to 1.0).
 
@@ -24,7 +24,7 @@ Diffusion intensity of the screen bloom and phosphor glow (0.0 to 1.0).
 
 > **curvature**: `number`
 
-Defined in: [lib/arcade/crt-pipeline.ts:49](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L49)
+Defined in: [lib/arcade/crt-pipeline.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L50)
 
 Physical CRT tube barrel curvature factor (0.0 to 1.0).
 
@@ -34,7 +34,7 @@ Physical CRT tube barrel curvature factor (0.0 to 1.0).
 
 > **flickerShimmer**: `boolean`
 
-Defined in: [lib/arcade/crt-pipeline.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L57)
+Defined in: [lib/arcade/crt-pipeline.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L58)
 
 Subtle refresh-rate phosphor micro-flicker shimmer.
 
@@ -44,7 +44,7 @@ Subtle refresh-rate phosphor micro-flicker shimmer.
 
 > **phosphorIntensity**: `number`
 
-Defined in: [lib/arcade/crt-pipeline.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L41)
+Defined in: [lib/arcade/crt-pipeline.ts:42](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L42)
 
 Opacity of the RGB phosphor mask overlay (0.0 to 1.0).
 
@@ -54,7 +54,7 @@ Opacity of the RGB phosphor mask overlay (0.0 to 1.0).
 
 > **phosphorMask**: [`PhosphorMaskType`](../type-aliases/PhosphorMaskType.md)
 
-Defined in: [lib/arcade/crt-pipeline.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L37)
+Defined in: [lib/arcade/crt-pipeline.ts:38](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L38)
 
 Type of physical phosphor mask to emulate.
 
@@ -64,7 +64,7 @@ Type of physical phosphor mask to emulate.
 
 > **scanlineDensity**: `number`
 
-Defined in: [lib/arcade/crt-pipeline.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L33)
+Defined in: [lib/arcade/crt-pipeline.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L34)
 
 Pixel pitch/interval between scanlines (2, 3, or 4 px).
 
@@ -74,7 +74,7 @@ Pixel pitch/interval between scanlines (2, 3, or 4 px).
 
 > **scanlineIntensity**: `number`
 
-Defined in: [lib/arcade/crt-pipeline.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L29)
+Defined in: [lib/arcade/crt-pipeline.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L30)
 
 Scanline darkness and prominence (0.0 to 1.0).
 
@@ -84,7 +84,7 @@ Scanline darkness and prominence (0.0 to 1.0).
 
 > **scanlinesEnabled**: `boolean`
 
-Defined in: [lib/arcade/crt-pipeline.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L25)
+Defined in: [lib/arcade/crt-pipeline.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L26)
 
 Whether horizontal CRT scanlines are rendered.
 
@@ -94,6 +94,6 @@ Whether horizontal CRT scanlines are rendered.
 
 > **vignetteIntensity**: `number`
 
-Defined in: [lib/arcade/crt-pipeline.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L53)
+Defined in: [lib/arcade/crt-pipeline.ts:54](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L54)
 
 Corner shadow and radial falloff intensity (0.0 to 1.0).

@@ -2,6 +2,7 @@
  * TSP (Traveling Salesman Problem) Moving Wall & Path Recalculation Engine
  */
 
+import { clamp } from "../game-utils";
 import { TSPNode, TSPMovingWall } from "./types";
 
 /**
@@ -83,7 +84,7 @@ export function updateTSPMovingWalls(
 
     // Toggle wall position based on move count and index
     const shift = (moveCount + index) % 4 < 2;
-    const nextY = shift ? w.baseY : Math.max(1, Math.min(newGrid.length - 2, w.baseY + 1));
+    const nextY = shift ? w.baseY : clamp(w.baseY + 1, 1, newGrid.length - 2);
     const nextX = w.baseX;
 
     return {

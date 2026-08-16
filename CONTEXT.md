@@ -90,6 +90,7 @@ Formal inference rules used to derive logical steps from valid premises:
 - **Command Palette Preview Pane**: A high-density master-detail split-pane preview surface in `CommandPalette.tsx` presenting real-time technical context (tech stack badges, live route status, architectural highlights, capability bullet points) for focused search outcomes.
 - **Contextual Preview Metadata**: Structured metadata attached to indexable static navigation routes and case studies—including route category, status badges, tech stack pills, capability highlights, and destination URLs—enabling zero-latency contextual discovery prior to page routing.
 - **Progressive ARIA Preview Association**: Accessible WAI-ARIA Combobox 1.2 integration linking active search options to preview descriptors via `aria-describedby`, ensuring screen reader users receive rich contextual metadata without disrupting keyboard traversal speed.
+- **Studio Hash State Persistence**: A bidirectional URL hash synchronization mechanism (`window.location.hash`) that preserves and restores active studio sub-modes, inspected entities, and viewport configurations across browser navigation, page reloads, and shared hyperlinks without server roundtrips.
 ## Documentation Synchronization & Architectural Invariants
 
 ### Governance & Drift Management
@@ -120,3 +121,48 @@ Formal inference rules used to derive logical steps from valid premises:
 - **Red-Green Remediation Protocol**: The mandatory practice of authoring a failing reproduction test isolating a bug's precise root cause prior to applying architectural fixes, proving the patch's efficacy when the test turns green.
 - **Verified Regression Patch**: A comprehensive code modification that eliminates the root structural defect rather than masking symptoms, paired with automated regression tests committed in lockstep.
 - **Defect Invariant Gate**: An automated rule in the DX doctor suite ensuring all core modules satisfy mathematical invariants, boundary conditions, error sanitization, and state determinism.
+
+## Layout Integrity & Text-Clipping Invariants
+
+### Container Sizing & Flexbox Boundary Defenses
+- **Flexible Container Bounds (`min-h-*` over fixed `h-*`)**: The architectural requirement to utilize minimum height constraints (`min-h-*`, `h-auto`) rather than rigid fixed heights (`h-48`, `h-64`) on content containers, ensuring containers dynamically expand as localized text wraps on narrow viewports.
+- **Flexbox/Grid Intrinsic Width Neutralization (`min-w-0` / `min-h-0`)**: The mandatory application of `min-w-0` (or `min-h-0` in vertical flex layouts) on flex and grid children containing text elements, overriding CSS `min-width: auto` to permit proper word wrapping and truncation without layout expansion.
+- **Differentiated Word Wrapping**: The structural pattern applying `break-words` (`overflow-wrap: break-word`) to editorial prose and headings, `break-all` / `overflow-wrap: anywhere` to unbroken identifiers/URLs, and horizontal scroll boundaries to complex mathematical AST ledgers.
+
+### Stacking Contexts & Semantic Layer Scale
+- **Section Stacking Isolation (`isolate`)**: The explicit application of CSS `isolation: isolate` on composite and layered multi-element sections, scoping internal `z-index` hierarchies and preventing z-index escalation bugs across sibling page components.
+- **Standardized Layer Scale**: A bounded system-wide elevation hierarchy (background: `-z-10`, content: `relative z-10`, sticky navigation: `z-40`, modals and search palettes: `z-50`) replacing unmanaged arbitrary z-index values (`z-[9999]`).
+- **Dynamic Viewport Height Adaptation (`dvh`)**: The responsive viewport scaling standard utilizing `min-h-dvh` across page wrappers and modal layouts to account for mobile browser dynamic UI expansion (address bars, bottom sheets).
+
+### Defensive CSS & Component Independence
+- **Container Query Encapsulation (`@container`)**: The practice of wrapping modular cards and widgets in CSS container contexts (`@container`) so internal layout shifts, font sizing, and flex directions react directly to parent container width rather than global viewport dimensions (`@media`).
+- **Dynamic Content Stress Invariant**: The requirement that all text containers and card wrappers maintain visual integrity when populated with edge-case data: localized translations (+40% character expansion), long unbroken URLs/identifiers (100+ characters without spaces), and 200% simulated browser zoom.
+- **Design Token Governance**: The architectural enforcement preventing arbitrary inline magic numbers (e.g. ad-hoc `h-[...px]`, `text-[...px]`, `z-[9999]`) in favor of centralized design manifest tokens and responsive clamp scales.
+
+### Production Layout Validation Protocol
+- **The 320px Squeeze Invariant**: The mobile boundary stress test validating that all rendered components, interactive studios, and cards operate without text truncation, layout distortion, or horizontal page scrolling on 320px-wide viewports (iPhone SE class).
+- **Horizontal Overflow Detector (`right > clientWidth`)**: The automated DOM inspection probe evaluating `element.getBoundingClientRect().right > document.documentElement.clientWidth` across all rendered DOM nodes to catch invisible horizontal layout leaks.
+- **WCAG 1.4.4 200% Zoom Restacking**: The accessibility requirement asserting that when browser zoom increases to 200% at desktop viewport widths, all elements dynamically re-stack and expand vertically with zero horizontal clipping or content collision.
+- **Real-Device Dynamic Viewport Adaptation**: Verification on real iOS Safari and Android devices confirming proper `min-h-dvh` expansion beneath floating browser bars and accommodation of system-level "Largest" font accessibility preferences.
+
+## Developer Experience (DX) & Tooling Integrity
+
+### Environment & Secret Governance
+- **Typed Environment Schema (`lib/env.ts`)**: Declarative Zod validation rules establishing runtime safety and contract isolation between server-side secrets and client-safe public variables (`NEXT_PUBLIC_`).
+- **Environment Drift Sentinel**: Automated synchronization mechanism asserting 100% parity between active runtime schema keys and `.env.example` templates without exposing sensitive credentials.
+- **One-Command Environment Auto-Sync (`npm run dx env -- --fix` / `npm run doctor:fix`)**: Idempotent task that reconciles environment configuration templates with declared TypeScript schemas.
+
+### Git Hygiene & Conventional Commits
+- **Conventional Commits Invariant**: Strict format enforcement (`<type>(<scope>): <subject>`) validating commit message semantics, length limits (<=100 chars), and imperative phrasing across standard types (`feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`, `dx`).
+- **Husky Commit Guard (`.husky/commit-msg`)**: Pre-commit hook interceptor preventing malformed or unclassified git commits from entering repository history.
+- **Interactive Commit Wizard (`npm run dx commit`)**: Guided command-line interface generating compliant Conventional Commits with scope validation and breaking change indicators.
+- **Branch Naming Standard**: Team-wide git branch naming convention requiring categorical prefixes (`feat/*`, `fix/*`, `chore/*`, `refactor/*`, `docs/*`, `perf/*`, `dx/*`, `test/*`, `main`).
+
+### Static Analysis & Performance Budgets
+- **Dead Code & Unused Export Scanner (`lib/dx/dead-code.ts`)**: Fast static AST analysis engine traversing project source files to discover orphaned symbols, unreferenced types, and dead modules.
+- **Bundle Chunk Budget Guard (`lib/dx/bundle-guard.ts`)**: Post-build asset analyzer evaluating production gzip and raw byte footprints against hard performance budgets (initial shared <= 350 kB, single chunk <= 200 kB).
+- **Workspace IDE Standard (`.vscode/`, `.editorconfig`)**: Centralized editor profiles establishing consistent formatting, TypeScript SDK resolution, Tailwind IntelliSense rules, and one-click debugger profiles across all developer environments.
+
+
+
+

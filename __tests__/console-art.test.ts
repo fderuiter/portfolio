@@ -55,12 +55,8 @@ describe("useConsoleArt Hook", () => {
     vi.clearAllMocks();
   });
 
-  it("should schedule fetching and log on idle success", async () => {
-    const mockAscii = "  _______  ";
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      text: () => Promise.resolve(mockAscii),
-    } as Response);
+  it("should schedule and log console art on idle success directly", async () => {
+    global.fetch = vi.fn();
 
     // Call the hook to register the effect callback
     useConsoleArt();
@@ -73,16 +69,19 @@ describe("useConsoleArt Hook", () => {
 
     expect(window.requestIdleCallback).toHaveBeenCalled();
     
-    // Wait for the final log assertion to be true as subsequent promises resolve
+    // Wait for the final log assertion to be true
     await vi.waitFor(() => {
-      expect(consoleLogMock).toHaveBeenCalledWith(mockAscii);
+      expect(consoleLogMock).toHaveBeenCalled();
+      const printed = consoleLogMock.mock.calls[0][0];
+      expect(printed).toContain("_______");
     });
 
+    expect(global.fetch).not.toHaveBeenCalled();
     expect(consoleErrorMock).not.toHaveBeenCalled();
   });
 
-  it("should fail silently on network fetch failure", async () => {
-    global.fetch = vi.fn().mockRejectedValue(new Error("Network Error"));
+  it("should not make any network fetch requests to get console art", async () => {
+    global.fetch = vi.fn();
 
     useConsoleArt();
     expect(mockEffectCallback).toBeTypeOf("function");
@@ -90,33 +89,7 @@ describe("useConsoleArt Hook", () => {
 
     expect(window.requestIdleCallback).toHaveBeenCalled();
 
-    // Wait until fetch is called to ensure the async chain has completed
-    await vi.waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith("/ascii-art.txt");
-    });
-
-    expect(consoleLogMock).not.toHaveBeenCalled();
-    expect(consoleErrorMock).not.toHaveBeenCalled();
-  });
-
-  it("should fail silently on non-2xx response status", async () => {
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: false,
-      status: 404,
-    } as Response);
-
-    useConsoleArt();
-    expect(mockEffectCallback).toBeTypeOf("function");
-    mockEffectCallback!();
-
-    expect(window.requestIdleCallback).toHaveBeenCalled();
-
-    // Wait until fetch is called to ensure the async chain has completed
-    await vi.waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith("/ascii-art.txt");
-    });
-
-    expect(consoleLogMock).not.toHaveBeenCalled();
+    expect(global.fetch).not.toHaveBeenCalled();
     expect(consoleErrorMock).not.toHaveBeenCalled();
   });
 
@@ -125,12 +98,7 @@ describe("useConsoleArt Hook", () => {
     delete (window as any).requestIdleCallback;
     
     vi.useFakeTimers();
-
-    const mockAscii = "  _______  ";
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      text: () => Promise.resolve(mockAscii),
-    } as Response);
+    global.fetch = vi.fn();
 
     useConsoleArt();
     expect(mockEffectCallback).toBeTypeOf("function");
@@ -140,11 +108,14 @@ describe("useConsoleArt Hook", () => {
     vi.advanceTimersByTime(1);
     vi.useRealTimers();
 
-    // Wait for the final log assertion to be true as subsequent promises resolve
+    // Wait for the final log assertion to be true
     await vi.waitFor(() => {
-      expect(consoleLogMock).toHaveBeenCalledWith(mockAscii);
+      expect(consoleLogMock).toHaveBeenCalled();
+      const printed = consoleLogMock.mock.calls[0][0];
+      expect(printed).toContain("_______");
     });
 
+    expect(global.fetch).not.toHaveBeenCalled();
     expect(consoleErrorMock).not.toHaveBeenCalled();
   });
 });

@@ -13,7 +13,8 @@ import {
   type RichInlineLineRange
 } from "@chenglou/pretext/rich-inline";
 import { designManifest } from "@/lib/design-manifest";
-import { resolveThemeFonts, resolveSingleThemeFont } from "@/lib/layout-config";
+import { resolveThemeFonts, resolveSingleThemeFont, type ThemeFonts } from "@/lib/layout-config";
+import { useTerminology } from "@/components/providers/TerminologyProvider";
 
 import { 
   isBrowser, 
@@ -22,7 +23,9 @@ import {
   textLayoutCache,
   richItemsCache,
   richPrepareCache,
-  richLayoutCache
+  richLayoutCache,
+  cssPropertyCache,
+  fontConfigCache
 } from "@/lib/graphics-engine";
 
 export interface UsePretextLayoutOptions {
@@ -31,6 +34,7 @@ export interface UsePretextLayoutOptions {
   lineHeight: number;
   fontFamilyVariable?: string;
   translationMode?: string;
+  activeTheme?: string;
   getResponsiveMetrics?: (width: number) => { fontSize: number; lineHeight: number };
 }
 
@@ -46,6 +50,7 @@ export function usePretextLayout({
   lineHeight,
   fontFamilyVariable = "--font-inter",
   translationMode,
+  activeTheme,
   getResponsiveMetrics,
 }: UsePretextLayoutOptions) {
   const [state, setState] = useState<PretextLayoutState>({
@@ -54,8 +59,11 @@ export function usePretextLayout({
     lineCount: 0,
   });
 
+  const { simplified } = useTerminology();
+
   const preparedTextRef = useRef<PreparedText | null>(null);
   const fontStringRef = useRef<string>("");
+  const resolvedFontRef = useRef<{ fontSize: number; fontFamilyVariable: string; fontString: string } | null>(null);
 
   const measureText = useCallback((maxWidth: number) => {
     if (!isBrowser() || maxWidth <= 0) return;
@@ -69,7 +77,22 @@ export function usePretextLayout({
       activeLineHeight = metrics.lineHeight;
     }
 
-    const fontString = resolveSingleThemeFont(activeFontSize, fontFamilyVariable);
+    // Skip DOM query on resizing if previously resolved
+    let fontString = "";
+    if (
+      resolvedFontRef.current &&
+      resolvedFontRef.current.fontSize === activeFontSize &&
+      resolvedFontRef.current.fontFamilyVariable === fontFamilyVariable
+    ) {
+      fontString = resolvedFontRef.current.fontString;
+    } else {
+      fontString = resolveSingleThemeFont(activeFontSize, fontFamilyVariable);
+      resolvedFontRef.current = {
+        fontSize: activeFontSize,
+        fontFamilyVariable,
+        fontString,
+      };
+    }
     fontStringRef.current = fontString;
 
     const prepareKey = `${text}|${fontString}`;
@@ -107,15 +130,16 @@ export function usePretextLayout({
   });
 
   useLayoutEffect(() => {
-    if (translationMode !== undefined) {
-      textPrepareCache.clear();
-      textLayoutCache.clear();
-      richItemsCache.clear();
-      richPrepareCache.clear();
-      richLayoutCache.clear();
-      clearCache();
-    }
-  }, [translationMode]);
+    resolvedFontRef.current = null;
+    cssPropertyCache.clear();
+    fontConfigCache.clear();
+    textPrepareCache.clear();
+    textLayoutCache.clear();
+    richItemsCache.clear();
+    richPrepareCache.clear();
+    richLayoutCache.clear();
+    clearCache();
+  }, [simplified, translationMode, activeTheme]);
 
   useLayoutEffect(() => {
     if (!isBrowser()) return;
@@ -124,7 +148,21 @@ export function usePretextLayout({
       const initialWidth = containerRef.current.getBoundingClientRect().width;
       measureText(initialWidth);
     } else {
-      const fontString = resolveSingleThemeFont(fontSize, fontFamilyVariable);
+      let fontString = "";
+      if (
+        resolvedFontRef.current &&
+        resolvedFontRef.current.fontSize === fontSize &&
+        resolvedFontRef.current.fontFamilyVariable === fontFamilyVariable
+      ) {
+        fontString = resolvedFontRef.current.fontString;
+      } else {
+        fontString = resolveSingleThemeFont(fontSize, fontFamilyVariable);
+        resolvedFontRef.current = {
+          fontSize,
+          fontFamilyVariable,
+          fontString,
+        };
+      }
       fontStringRef.current = fontString;
       const prepareKey = `${text}|${fontString}`;
       let prepared = textPrepareCache.get(prepareKey);
@@ -135,7 +173,7 @@ export function usePretextLayout({
       preparedTextRef.current = prepared;
       setState((prev) => ({ ...prev, isReady: true }));
     }
-  }, [text, fontSize, fontFamilyVariable, measureText, containerRef, translationMode]);
+  }, [text, fontSize, fontFamilyVariable, measureText, containerRef, translationMode, activeTheme, simplified]);
 
   // Removed custom ResizeObserver in favor of unified useResizeObserver hook
 
@@ -165,6 +203,8 @@ export interface PretextTextProps {
   fontSize?: number;
   lineHeight: number;
   fontFamilyVariable?: string;
+  translationMode?: string;
+  activeTheme?: string;
   semanticTag?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p" | "span" | "div" | "article" | "section";
   className?: string;
   children?: React.ReactNode;
@@ -175,6 +215,8 @@ export const PretextText: React.FC<PretextTextProps> = ({
   fontSize = 16,
   lineHeight,
   fontFamilyVariable = "--font-inter",
+  translationMode,
+  activeTheme,
   semanticTag = "p",
   className,
   children,
@@ -184,6 +226,8 @@ export const PretextText: React.FC<PretextTextProps> = ({
     fontSize,
     lineHeight,
     fontFamilyVariable,
+    translationMode,
+    activeTheme,
   });
 
   const SemanticElement = semanticTag;
@@ -290,6 +334,7 @@ export interface UsePretextRichLayoutOptions {
   lineHeight: number;
   fontFamilyVariable?: string;
   translationMode?: string;
+  activeTheme?: string;
 }
 
 export function usePretextRichLayout({
@@ -298,6 +343,7 @@ export function usePretextRichLayout({
   lineHeight,
   fontFamilyVariable = "--font-inter",
   translationMode,
+  activeTheme,
 }: UsePretextRichLayoutOptions) {
   const [state, setState] = useState<{
     isReady: boolean;
@@ -311,9 +357,12 @@ export function usePretextRichLayout({
     items: [],
   });
 
+  const { simplified } = useTerminology();
+
   const preparedRef = useRef<PreparedRichInline | null>(null);
   const itemsRef = useRef<ExtendedRichInlineItem[]>([]);
   const itemsKeyRef = useRef<string>("");
+  const resolvedFontsRef = useRef<{ fontSize: number; fontFamilyVariable: string; fonts: ThemeFonts } | null>(null);
 
   const measureRichText = useCallback((maxWidth: number) => {
     if (!preparedRef.current || !itemsKeyRef.current) return;
@@ -361,20 +410,36 @@ export function usePretextRichLayout({
   });
 
   useLayoutEffect(() => {
-    if (translationMode !== undefined) {
-      textPrepareCache.clear();
-      textLayoutCache.clear();
-      richItemsCache.clear();
-      richPrepareCache.clear();
-      richLayoutCache.clear();
-      clearCache();
-    }
-  }, [translationMode]);
+    resolvedFontsRef.current = null;
+    cssPropertyCache.clear();
+    fontConfigCache.clear();
+    textPrepareCache.clear();
+    textLayoutCache.clear();
+    richItemsCache.clear();
+    richPrepareCache.clear();
+    richLayoutCache.clear();
+    clearCache();
+  }, [simplified, translationMode, activeTheme]);
 
   useLayoutEffect(() => {
     if (!isBrowser()) return;
 
-    const { baseFont, boldFont, italicFont, codeFont } = resolveThemeFonts(fontSize, fontFamilyVariable);
+    let fonts: ThemeFonts;
+    if (
+      resolvedFontsRef.current &&
+      resolvedFontsRef.current.fontSize === fontSize &&
+      resolvedFontsRef.current.fontFamilyVariable === fontFamilyVariable
+    ) {
+      fonts = resolvedFontsRef.current.fonts;
+    } else {
+      fonts = resolveThemeFonts(fontSize, fontFamilyVariable);
+      resolvedFontsRef.current = {
+        fontSize,
+        fontFamilyVariable,
+        fonts,
+      };
+    }
+    const { baseFont, boldFont, italicFont, codeFont } = fonts;
 
     const fontsKey = `${baseFont}|${boldFont}|${italicFont}|${codeFont}`;
     const itemsKey = `${text}|${fontsKey}`;
@@ -400,7 +465,7 @@ export function usePretextRichLayout({
     } else {
       setState((prev) => ({ ...prev, isReady: true }));
     }
-  }, [text, fontSize, fontFamilyVariable, measureRichText, containerRef, translationMode]);
+  }, [text, fontSize, fontFamilyVariable, measureRichText, containerRef, translationMode, activeTheme, simplified]);
 
   // Removed custom ResizeObserver in favor of unified useResizeObserver hook
 

@@ -19,15 +19,50 @@ import { WidgetPalette } from "./LeftSidebar/WidgetPalette";
 import { CdashScaffolderModal } from "./LeftSidebar/CdashScaffolderModal";
 import { FormCanvas } from "./CenterCanvas/FormCanvas";
 import { InspectorPanel } from "./RightInspector/InspectorPanel";
-import { VisitMatrixEditor } from "./Modes/VisitMatrixEditor";
-import { RuleGraphStudio } from "./Modes/RuleGraphStudio";
-import { LiveEdcSimulator } from "./Modes/LiveEdcSimulator";
+import dynamic from "next/dynamic";
 import { AcrfOverlayViewer } from "./Modes/AcrfOverlayViewer";
 import { ExportImportModal } from "./Modes/ExportImportModal";
 import { ExportDocumentModal } from "./Modes/ExportDocumentModal";
 import { BrandingConfigModal } from "./Branding/BrandingConfigModal";
 import { DiagnosticsDrawer } from "./DiagnosticsDrawer";
-import { WorkflowWizardModal } from "./Wizard/WorkflowWizardModal";
+import {
+  VisitMatrixEditorSkeleton,
+  RuleGraphStudioSkeleton,
+  LiveEdcSimulatorSkeleton,
+  WorkflowWizardModalSkeleton,
+} from "./Skeletons";
+
+const VisitMatrixEditor = dynamic(
+  () => import("./Modes/VisitMatrixEditor").then((mod) => mod.VisitMatrixEditor),
+  {
+    ssr: false,
+    loading: () => <VisitMatrixEditorSkeleton />,
+  }
+);
+
+const RuleGraphStudio = dynamic(
+  () => import("./Modes/RuleGraphStudio").then((mod) => mod.RuleGraphStudio),
+  {
+    ssr: false,
+    loading: () => <RuleGraphStudioSkeleton />,
+  }
+);
+
+const LiveEdcSimulator = dynamic(
+  () => import("./Modes/LiveEdcSimulator").then((mod) => mod.LiveEdcSimulator),
+  {
+    ssr: false,
+    loading: () => <LiveEdcSimulatorSkeleton />,
+  }
+);
+
+const WorkflowWizardModal = dynamic(
+  () => import("./Wizard/WorkflowWizardModal").then((mod) => mod.WorkflowWizardModal),
+  {
+    ssr: false,
+    loading: () => <WorkflowWizardModalSkeleton />,
+  }
+);
 import { SpotlightTourOverlay } from "./Wizard/SpotlightTourOverlay";
 import { getStudyBranding } from "@/lib/crf/branding-defaults";
 import { useStudioHashParams } from "@/hooks/useStudioHashParams";

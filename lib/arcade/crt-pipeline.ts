@@ -8,6 +8,7 @@
  */
 
 import { CRTThemeConfig } from "@/lib/dungeon/types";
+import { clamp } from "../game-utils";
 
 export type PhosphorMaskType = "none" | "aperture-grille" | "shadow-mask" | "monochrome-dot";
 
@@ -176,11 +177,11 @@ export function loadCRTCalibration(): CRTCalibrationConfig {
           : DEFAULT_CRT_CALIBRATION.scanlinesEnabled,
       scanlineIntensity:
         typeof parsed.scanlineIntensity === "number"
-          ? Math.max(0, Math.min(1, parsed.scanlineIntensity))
+          ? clamp(parsed.scanlineIntensity, 0, 1)
           : DEFAULT_CRT_CALIBRATION.scanlineIntensity,
       scanlineDensity:
         typeof parsed.scanlineDensity === "number"
-          ? Math.max(1, Math.min(4, Math.round(parsed.scanlineDensity)))
+          ? clamp(Math.round(parsed.scanlineDensity), 1, 4)
           : DEFAULT_CRT_CALIBRATION.scanlineDensity,
       phosphorMask: ["none", "aperture-grille", "shadow-mask", "monochrome-dot"].includes(
         parsed.phosphorMask
@@ -189,19 +190,19 @@ export function loadCRTCalibration(): CRTCalibrationConfig {
         : DEFAULT_CRT_CALIBRATION.phosphorMask,
       phosphorIntensity:
         typeof parsed.phosphorIntensity === "number"
-          ? Math.max(0, Math.min(1, parsed.phosphorIntensity))
+          ? clamp(parsed.phosphorIntensity, 0, 1)
           : DEFAULT_CRT_CALIBRATION.phosphorIntensity,
       bloomIntensity:
         typeof parsed.bloomIntensity === "number"
-          ? Math.max(0, Math.min(1, parsed.bloomIntensity))
+          ? clamp(parsed.bloomIntensity, 0, 1)
           : DEFAULT_CRT_CALIBRATION.bloomIntensity,
       curvature:
         typeof parsed.curvature === "number"
-          ? Math.max(0, Math.min(1, parsed.curvature))
+          ? clamp(parsed.curvature, 0, 1)
           : DEFAULT_CRT_CALIBRATION.curvature,
       vignetteIntensity:
         typeof parsed.vignetteIntensity === "number"
-          ? Math.max(0, Math.min(1, parsed.vignetteIntensity))
+          ? clamp(parsed.vignetteIntensity, 0, 1)
           : DEFAULT_CRT_CALIBRATION.vignetteIntensity,
       flickerShimmer:
         typeof parsed.flickerShimmer === "boolean"
@@ -352,7 +353,7 @@ export function renderCRTEffects(
     if (patternCanvas) {
       try {
         ctx.save();
-        ctx.globalAlpha = Math.max(0, Math.min(1, config.phosphorIntensity + shimmer));
+        ctx.globalAlpha = clamp(config.phosphorIntensity + shimmer, 0, 1);
         const pattern = ctx.createPattern(patternCanvas, "repeat");
         if (pattern) {
           ctx.fillStyle = pattern;
@@ -368,7 +369,7 @@ export function renderCRTEffects(
   // 2. Horizontal CRT Scanline Raster Pass
   if (config.scanlinesEnabled && config.scanlineIntensity > 0) {
     ctx.save();
-    const alpha = Math.max(0, Math.min(1, config.scanlineIntensity + shimmer));
+    const alpha = clamp(config.scanlineIntensity + shimmer, 0, 1);
     ctx.fillStyle = `rgba(0, 0, 0, ${alpha.toFixed(3)})`;
     const step = Math.max(1, Math.round(config.scanlineDensity || 3));
 
@@ -381,7 +382,7 @@ export function renderCRTEffects(
   // 3. Multi-Pass Phosphor Bloom Glow
   if (config.bloomIntensity > 0.05) {
     ctx.save();
-    const bloomAlpha = Math.max(0, Math.min(0.3, config.bloomIntensity * 0.25));
+    const bloomAlpha = clamp(config.bloomIntensity * 0.25, 0, 0.3);
     const glowColor = theme.glowColor || "rgba(16, 185, 129, 0.4)";
 
     const bloomGrad = ctx.createRadialGradient(
@@ -403,7 +404,7 @@ export function renderCRTEffects(
   // 4. Dark Radial Vignette Falloff Pass
   if (config.vignetteIntensity > 0.05) {
     ctx.save();
-    const maxVignetteAlpha = Math.max(0, Math.min(0.95, config.vignetteIntensity * 0.85));
+    const maxVignetteAlpha = clamp(config.vignetteIntensity * 0.85, 0, 0.95);
     const vignette = ctx.createRadialGradient(
       width / 2,
       height / 2,

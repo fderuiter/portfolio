@@ -3,9 +3,11 @@
 import React from "react";
 import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { useAudio } from "@/components/providers/AudioProvider";
+import { useTerminology } from "@/components/providers/TerminologyProvider";
+import { dictionary } from "@/lib/i18n-dictionary";
 
 export interface SkillLanguage {
   name: string;
@@ -18,6 +20,10 @@ interface SkillsGridProps {
 
 export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
   const { playSkillHover } = useAudio();
+  const { simplified } = useTerminology();
+  const shouldReduceMotion = useReducedMotion();
+
+  const dict = simplified ? dictionary.simplified : dictionary.detailed;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 w-full max-w-4xl mx-auto select-none">
@@ -43,16 +49,16 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
             </div>
             <div className="min-w-0">
               <h3 className="text-xs sm:text-sm font-mono font-bold tracking-widest text-brand-cyan uppercase truncate">
-                Systems Engineer &amp; Clinical Data Specialist
+                {dict.bio.title}
               </h3>
               <p className="text-[10px] font-mono text-zinc-500 truncate">
-                Clinical Data • Interactive Graphics • Ski Patrol
+                {dict.bio.subtitle}
               </p>
             </div>
           </div>
           
           <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed font-sans font-medium">
-            I spend my days turning 150-page FDA clinical trial protocols into clean, type-safe data pipelines. By night, I build zero-dependency canvas games, retro simulations, and civic open-source tools (like a laser loon design that accidentally raised $13.5k for libraries). When I&apos;m not writing TypeScript or Python, I&apos;m out on the mountain doing alpine ski patrol.
+            {dict.bio.description}
           </p>
         </div>
       </motion.div>
@@ -86,11 +92,15 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
                 {/* Progress bar */}
                 <div className="h-1 w-full bg-zinc-950 rounded-full overflow-hidden">
                   <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: `${lang.percentage}%` }}
+                    initial={{ scaleX: shouldReduceMotion ? 1 : 0 }}
+                    whileInView={{ scaleX: 1 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 1, delay: idx * 0.1 }}
-                    className="h-full bg-gradient-to-r from-brand-cyan to-brand-blue rounded-full"
+                    transition={shouldReduceMotion ? { duration: 0 } : { duration: 1, delay: idx * 0.1 }}
+                    style={{
+                      width: `${lang.percentage}%`,
+                      originX: 0,
+                    }}
+                    className="h-full bg-gradient-to-r from-brand-cyan to-brand-blue rounded-full transform-gpu will-change-transform"
                   />
                 </div>
               </div>
@@ -105,77 +115,39 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6, delay: 0.2 }}
-        onMouseEnter={playSkillHover}
         className="md:col-span-3 p-5 sm:p-6 md:p-8 bg-zinc-900/5 border border-zinc-900/40 rounded-3xl relative overflow-hidden hover:border-zinc-900 transition-all duration-300"
       >
         <h3 className="text-xs font-mono font-bold tracking-widest text-zinc-400 uppercase mb-5 sm:mb-6 text-center md:text-left">
-          Technical Domains
+          {dict.domains.title}
         </h3>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <div className="space-y-2 p-3.5 sm:p-0 rounded-2xl bg-zinc-900/30 sm:bg-transparent border border-zinc-800/40 sm:border-transparent transition-colors" onMouseEnter={playSkillHover}>
-            <div className="flex items-center gap-2.5 sm:block sm:space-y-2">
-              <div className="w-8 h-8 rounded-lg bg-emerald-950/20 border border-emerald-900/30 flex items-center justify-center font-mono font-bold text-xs text-emerald-400 shrink-0">
-                01
+          {dict.domains.items.map((item, idx) => {
+            const colors = [
+              { bg: "bg-emerald-950/20", border: "border-emerald-900/30", text: "text-emerald-400" },
+              { bg: "bg-cyan-950/20", border: "border-cyan-900/30", text: "text-brand-cyan" },
+              { bg: "bg-blue-950/20", border: "border-blue-900/30", text: "text-brand-blue" },
+              { bg: "bg-purple-950/20", border: "border-purple-900/30", text: "text-purple-400" }
+            ];
+            const color = colors[idx] || colors[0];
+            return (
+              <div key={item.id} className="space-y-2 p-3.5 sm:p-0 rounded-2xl bg-zinc-900/30 sm:bg-transparent border border-zinc-800/40 sm:border-transparent transition-colors" onMouseEnter={playSkillHover}>
+                <div className="flex items-center gap-2.5 sm:block sm:space-y-2">
+                  <div className={`w-8 h-8 rounded-lg ${color.bg} ${color.border} flex items-center justify-center font-mono font-bold text-xs ${color.text} shrink-0`}>
+                    {item.id}
+                  </div>
+                  <h4 className="text-xs font-mono font-bold text-neutral-200">
+                    <Tooltip text={item.tooltip}>
+                      {item.title}
+                    </Tooltip>
+                  </h4>
+                </div>
+                <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
+                  {item.description}
+                </p>
               </div>
-              <h4 className="text-xs font-mono font-bold text-neutral-200">
-                <Tooltip text="Translating complex 150-page protocols into validated eCRFs, automated edit checks, and FDA-compliant SDTM datasets.">
-                  Clinical Data Pipelines
-                </Tooltip>
-              </h4>
-            </div>
-            <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
-              Translating dense 150-page clinical trial protocols into validated eCRFs, automated edit checks, and rock-solid typed schemas.
-            </p>
-          </div>
-          
-          <div className="space-y-2 p-3.5 sm:p-0 rounded-2xl bg-zinc-900/30 sm:bg-transparent border border-zinc-800/40 sm:border-transparent transition-colors" onMouseEnter={playSkillHover}>
-            <div className="flex items-center gap-2.5 sm:block sm:space-y-2">
-              <div className="w-8 h-8 rounded-lg bg-cyan-950/20 border border-cyan-900/30 flex items-center justify-center font-mono font-bold text-xs text-brand-cyan shrink-0">
-                02
-              </div>
-              <h4 className="text-xs font-mono font-bold text-neutral-200">
-                <Tooltip text="Crafting 60FPS canvas simulations, raycasting engines, and interactive formal verification tools.">
-                  Interactive Canvas Physics
-                </Tooltip>
-              </h4>
-            </div>
-            <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
-              Crafting 60FPS browser simulations, raycasters, and retro roguelikes from scratch with zero framework bloat.
-            </p>
-          </div>
-          
-          <div className="space-y-2 p-3.5 sm:p-0 rounded-2xl bg-zinc-900/30 sm:bg-transparent border border-zinc-800/40 sm:border-transparent transition-colors" onMouseEnter={playSkillHover}>
-            <div className="flex items-center gap-2.5 sm:block sm:space-y-2">
-              <div className="w-8 h-8 rounded-lg bg-blue-950/20 border border-blue-900/30 flex items-center justify-center font-mono font-bold text-xs text-brand-blue shrink-0">
-                03
-              </div>
-              <h4 className="text-xs font-mono font-bold text-neutral-200">
-                <Tooltip text="Laser Loon CC0 viral campaign ($13.5k library fundraiser, NYT/WaPo coverage) and grassroots tech advocacy.">
-                  Civic Tech &amp; Open Source
-                </Tooltip>
-              </h4>
-            </div>
-            <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
-              Creating open-source CC0 tools and viral designs that raised $13.5k+ for community public libraries (NYT &amp; WaPo covered).
-            </p>
-          </div>
-          
-          <div className="space-y-2 p-3.5 sm:p-0 rounded-2xl bg-zinc-900/30 sm:bg-transparent border border-zinc-800/40 sm:border-transparent transition-colors" onMouseEnter={playSkillHover}>
-            <div className="flex items-center gap-2.5 sm:block sm:space-y-2">
-              <div className="w-8 h-8 rounded-lg bg-purple-950/20 border border-purple-900/30 flex items-center justify-center font-mono font-bold text-xs text-purple-400 shrink-0">
-                04
-              </div>
-              <h4 className="text-xs font-mono font-bold text-neutral-200">
-                <Tooltip text="Credentialed Alpine Ski Patroller (OEC/OET certified) performing rapid triage in high-stakes environments.">
-                  Ski Patrol &amp; High-Stakes Triage
-                </Tooltip>
-              </h4>
-            </div>
-            <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
-              Certified Alpine Ski Patroller (OEC/OET) applying rapid triage and situational clarity to build fault-tolerant, resilient software.
-            </p>
-          </div>
+            );
+          })}
         </div>
       </motion.div>
     </div>

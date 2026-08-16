@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { clamp } from "@/lib/game-utils";
 import { QAMetrics, ScenarioConfig, ScoreState } from "@/lib/neuro/types";
 import {
   IconFlame,
@@ -70,14 +71,12 @@ export const NeuroMetricsPanel: React.FC<NeuroMetricsPanelProps> = ({
           <div
             className="bg-brand-cyan h-full transition-all duration-300"
             style={{
-              width: `${Math.max(
+              width: `${clamp(
+                scenario.initialDefects > 0
+                  ? ((scenario.initialDefects - metrics.defectCount) / scenario.initialDefects) * 100
+                  : 100,
                 0,
-                Math.min(
-                  100,
-                  scenario.initialDefects > 0
-                    ? ((scenario.initialDefects - metrics.defectCount) / scenario.initialDefects) * 100
-                    : 100
-                )
+                100
               )}%`,
             }}
           />

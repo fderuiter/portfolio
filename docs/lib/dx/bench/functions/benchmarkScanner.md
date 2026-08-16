@@ -8,7 +8,7 @@
 
 > **benchmarkScanner**(`iterations?`): [`BenchmarkResult`](../interfaces/BenchmarkResult.md)[]
 
-Defined in: [lib/dx/bench.ts:166](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L166)
+Defined in: [lib/dx/bench.ts:171](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L171)
 
 Benchmark Security Validation Scanner
 

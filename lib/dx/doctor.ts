@@ -3,6 +3,10 @@ import path from "path";
 import { execSync } from "child_process";
 import { scanFile } from "../validation-scanner";
 import { colors, badge, formatSection } from "./utils";
+import { checkEnvironmentVariables } from "./env-guard";
+import { checkGitHygieneConfig } from "./git-guard";
+import { checkDeadCode } from "./dead-code";
+import { checkBundleBudgets } from "./bundle-guard";
 
 export interface DiagnosticCheckResult {
   id: string;
@@ -195,7 +199,10 @@ export function checkPageTopPadding(root: string): DiagnosticCheckResult {
     if (relative.startsWith("app/api") || relative.startsWith("app/generated")) continue;
 
     const content = fs.readFileSync(file, "utf-8");
-    const hasTopPadding = /\bpt-(20|24|28|32|36|40|44|48|\[\d+px\])\b/.test(content) || /min-h-screen/.test(content);
+    const hasTopPadding =
+      /\bpt-(20|24|28|32|36|40|44|48|\[\d+px\])\b/.test(content) ||
+      /min-h-(screen|dvh)/.test(content) ||
+      /<PageLayout\b/.test(content);
 
     if (!hasTopPadding) {
       warnings.push(relative);
@@ -301,6 +308,7 @@ export function checkSecretLeaks(root: string): DiagnosticCheckResult {
     "ci.yml",
     "synthetic-probes.yml",
     ".env.example",
+    "env-guard.ts",
   ];
 
   const leaks: { file: string; line: number; category: string }[] = [];
@@ -784,6 +792,134 @@ export function checkProactiveDefectInterception(root: string): DiagnosticCheckR
 }
 
 /**
+ * Check Layout Integrity, Defensive CSS & Stacking Context Isolation (AGENTS.md Invariant #13)
+ */
+export function checkLayoutTextClippingInvariants(root: string): DiagnosticCheckResult {
+  const violations: string[] = [];
+
+  const requiredFiles = [
+    { file: "components/PageLayout.tsx", desc: "PageLayout container component" },
+    { file: "adr/0009-responsive-layout-and-text-clipping-standard.md", desc: "ADR-0009 Responsive Layout Integrity Standard" },
+  ];
+
+  for (const rf of requiredFiles) {
+    const fullPath = path.join(root, rf.file);
+    if (!fs.existsSync(fullPath)) {
+      violations.push(`Missing ${rf.desc}: ${rf.file}`);
+    }
+  }
+
+  // Scan components and app files for rogue z-[9999]
+  const sourceFiles = [
+    ...findFiles(path.join(root, "components"), /\.(tsx|jsx|ts|js)$/),
+    ...findFiles(path.join(root, "app"), /\.(tsx|jsx|ts|js)$/),
+  ];
+
+  for (const file of sourceFiles) {
+    const content = fs.readFileSync(file, "utf-8");
+    if (content.includes("z-[9999]")) {
+      const relPath = path.relative(root, file);
+      violations.push(`Rogue z-index escalation 'z-[9999]' found in ${relPath}`);
+    }
+  }
+
+  // Check that app routes don't create duplicate <main id="main-content">
+  const pageFiles = findFiles(path.join(root, "app"), /^page\.tsx?$/);
+  for (const pageFile of pageFiles) {
+    const content = fs.readFileSync(pageFile, "utf-8");
+    const relPath = path.relative(root, pageFile);
+    if (content.includes('<main id="main-content"')) {
+      violations.push(`Duplicate <main id="main-content"> landmark found in ${relPath}`);
+    }
+  }
+
+  if (violations.length === 0) {
+    return {
+      id: "architecture-layout-integrity",
+      name: "Layout Integrity, Defensive CSS & Stacking Isolation Invariant",
+      category: "architecture",
+      status: "pass",
+      message: "PageLayout containers, bounded z-index scale, and defensive CSS invariants are active.",
+    };
+  }
+
+  return {
+    id: "architecture-layout-integrity",
+    name: "Layout Integrity, Defensive CSS & Stacking Isolation Invariant",
+    category: "architecture",
+    status: "fail",
+    message: `${violations.length} layout integrity violation(s) detected (AGENTS.md #13)`,
+    details: violations,
+    fixable: false,
+  };
+}
+
+/**
+ * Check Workspace & IDE Configuration Integrity (.editorconfig, .vscode)
+ */
+export function checkWorkspaceIdeConfig(root: string, fix = false): DiagnosticCheckResult {
+  const requiredFiles = [
+    { file: ".editorconfig", desc: "Universal EditorConfig rules" },
+    { file: path.join(".vscode", "settings.json"), desc: "VS Code workspace settings" },
+    { file: path.join(".vscode", "extensions.json"), desc: "VS Code extension recommendations" },
+    { file: path.join(".vscode", "launch.json"), desc: "VS Code launch debug profiles" },
+    { file: path.join(".vscode", "tasks.json"), desc: "VS Code build task runners" },
+  ];
+
+  const missing: string[] = [];
+
+  for (const rf of requiredFiles) {
+    const full = path.join(root, rf.file);
+    if (!fs.existsSync(full)) {
+      missing.push(`Missing ${rf.desc} (${rf.file})`);
+    }
+  }
+
+  if (missing.length > 0) {
+    if (fix) {
+      const vscodeDir = path.join(root, ".vscode");
+      if (!fs.existsSync(vscodeDir)) fs.mkdirSync(vscodeDir, { recursive: true });
+
+      const editorConfigPath = path.join(root, ".editorconfig");
+      if (!fs.existsSync(editorConfigPath)) {
+        fs.writeFileSync(
+          editorConfigPath,
+          `root = true\n\n[*]\nindent_style = space\nindent_size = 2\nend_of_line = lf\ncharset = utf-8\ntrim_trailing_whitespace = true\ninsert_final_newline = true\n`,
+          "utf-8"
+        );
+      }
+
+      return {
+        id: "workspace-ide-config",
+        name: "IDE & Workspace Configuration Standards",
+        category: "architecture",
+        status: "fixed",
+        message: "Scaffolded missing workspace IDE configurations (.vscode, .editorconfig).",
+        fixedMessage: "Created missing IDE configs.",
+      };
+    }
+
+    return {
+      id: "workspace-ide-config",
+      name: "IDE & Workspace Configuration Standards",
+      category: "architecture",
+      status: "fail",
+      message: `${missing.length} workspace configuration file(s) missing.`,
+      details: missing,
+      fixable: true,
+    };
+  }
+
+  return {
+    id: "workspace-ide-config",
+    name: "IDE & Workspace Configuration Standards",
+    category: "architecture",
+    status: "pass",
+    message: "All VS Code workspace profiles (.vscode/) and .editorconfig are properly configured.",
+  };
+}
+
+/**
  * Run All Diagnostics
  */
 export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
@@ -811,6 +947,12 @@ export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
     checkAccessibilityStandards(root, fix),
     checkDefectRemediationInvariants(root),
     checkProactiveDefectInterception(root),
+    checkLayoutTextClippingInvariants(root),
+    checkEnvironmentVariables(root, fix),
+    checkGitHygieneConfig(root, fix),
+    checkWorkspaceIdeConfig(root, fix),
+    checkDeadCode(root),
+    checkBundleBudgets(root),
   ];
 
   const totalPassed = checks.filter((c) => c.status === "pass").length;

@@ -8,7 +8,7 @@
 
 > **checkHydrationSafety**(`root`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:556](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L556)
+Defined in: [lib/dx/doctor.ts:564](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L564)
 
 Hydration & React SSR Best Practices Check (AGENTS.md Invariant #4)
 

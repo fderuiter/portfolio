@@ -8,7 +8,7 @@
 
 > **createInitialState**(`device?`, `highScore?`): [`GameEngineState`](../interfaces/GameEngineState.md)
 
-Defined in: [lib/garmin-engine.ts:142](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L142)
+Defined in: [lib/garmin-engine.ts:143](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L143)
 
 Initializes a new fresh game state
 

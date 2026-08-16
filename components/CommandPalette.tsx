@@ -6,7 +6,7 @@ import { designManifest } from "@/lib/design-manifest";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { IconSearch, IconTerminal, IconFileCode, IconDirections, IconCornerDownLeft, IconCalendar, IconBrain, IconFileSpreadsheet } from "@tabler/icons-react";
+import { IconSearch, IconTerminal, IconFileCode, IconDirections, IconCornerDownLeft, IconCalendar, IconBrain, IconFileSpreadsheet, IconCpu } from "@tabler/icons-react";
 import { filterFuzzySearch } from "@/lib/search-utils";
 import { useSearch } from "@/components/providers/SearchProvider";
 import { useAudio } from "@/components/providers/AudioProvider";
@@ -133,6 +133,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
           "Zero-dependency custom physics engines",
           "Synthesized 8-bit & retro audio chips",
           "Virtual D-Pad touch controls on mobile"
+        ]
+      },
+      {
+        id: "nav-case-studies",
+        title: "Engineering Case Studies Hub",
+        subtitle: "Full Bento showcase of clinical data & architectural systems",
+        category: "navigation",
+        url: "/case-studies",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Case Studies",
+        status: "Interactive Showcase",
+        description: "Comprehensive portfolio showcase featuring interactive clinical systems, formal logic tools, live telemetry feeds, and full-stack architectural case studies.",
+        techStack: ["Next.js 16", "React 19", "Tailwind CSS", "TypeScript"],
+        highlights: [
+          "Interactive bento-box case study grid",
+          "Live telemetry and commit logs",
+          "Deep architectural retrospectives"
         ]
       },
       {
@@ -289,6 +306,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         ]
       },
       {
+        id: "nav-stack",
+        title: "Under the Hood: Architecture & Stack Overview",
+        subtitle: "Interactive architecture colophon, layout physics benchmark, Web Audio synthesizer & 12 quality invariants",
+        category: "navigation",
+        url: "/stack",
+        icon: <IconCpu className="w-4 h-4 text-brand-cyan" />,
+        badge: "Architecture",
+        status: "Live Blueprint",
+        description: "Interactive architecture colophon & live telemetry breakdown showcasing Next.js 16, @chenglou/pretext layout physics, procedural Web Audio, and 12 engineering invariants.",
+        techStack: ["Next.js 16", "Pretext Canvas", "Web Audio API", "Prisma 7", "Vitest"],
+        highlights: [
+          "Real-time Pretext vs DOM reflow benchmark",
+          "Zero-asset procedural audio soundboard",
+          "12 verified architectural quality invariants"
+        ]
+      },
+      {
         id: "nav-simulator",
         title: "Engineering Alignment Simulator",
         subtitle: "Incident triage, architecture dilemmas, and candidate compatibility arcade",
@@ -420,7 +454,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
   return (
     <div
       onClick={handleBackdropClick}
-      className="fixed inset-0 z-[9999] flex items-start justify-center pt-[max(1.5rem,env(safe-area-inset-top)+1rem)] sm:pt-[12vh] px-3 sm:px-4 pb-[max(1.5rem,env(safe-area-inset-bottom)+1rem)] bg-zinc-950/85 backdrop-blur-md transition-all duration-300 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-[max(1.5rem,env(safe-area-inset-top)+1rem)] sm:pt-[12vh] px-3 sm:px-4 pb-[max(1.5rem,env(safe-area-inset-bottom)+1rem)] bg-zinc-950/85 backdrop-blur-md transition-all duration-300 overflow-y-auto"
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.97, y: -8 }}

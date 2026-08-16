@@ -14,6 +14,7 @@ import {
 } from "@tabler/icons-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
+import { PageLayout } from "@/components/PageLayout";
 
 const GOOGLE_CALENDAR_URL = "https://calendar.app.google/YnR5oxos7ZTLyvUp8";
 
@@ -38,12 +39,12 @@ const CONSULTATION_TOPICS = [
 export default function SchedulePage() {
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-foreground pt-32 pb-24 px-4 sm:px-6 md:px-12 lg:px-24 relative overflow-hidden">
+    <PageLayout variant="standard" className="bg-zinc-950 text-foreground relative overflow-hidden">
       {/* Ambient Atmospheric Glows */}
       <div className="absolute top-24 left-1/2 -translate-x-1/2 w-[650px] h-[320px] bg-brand-cyan/5 blur-[140px] pointer-events-none -z-10 rounded-full" />
       <div className="absolute top-96 right-1/4 w-[450px] h-[280px] bg-brand-blue/5 blur-[120px] pointer-events-none -z-10 rounded-full" />
 
-      <div className="max-w-5xl mx-auto flex flex-col items-center relative z-10">
+      <div className="max-w-5xl mx-auto flex flex-col items-center relative z-10 w-full">
         {/* Navigation Breadcrumb */}
         <div className="w-full flex items-center justify-between mb-8 gap-4 flex-wrap">
           <Breadcrumbs
@@ -181,6 +182,6 @@ export default function SchedulePage() {
           }}
         />
       </div>
-    </div>
+    </PageLayout>
   );
 }

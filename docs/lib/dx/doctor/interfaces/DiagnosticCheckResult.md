@@ -6,7 +6,7 @@
 
 # Interface: DiagnosticCheckResult
 
-Defined in: [lib/dx/doctor.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L7)
+Defined in: [lib/dx/doctor.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L11)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/dx/doctor.ts:7](https://github.com/fderuiter/portfolio/blob/mai
 
 > **category**: `"architecture"` \| `"routes"` \| `"security"` \| `"database"` \| `"docs"` \| `"hydration"` \| `"accessibility"` \| `"quality"`
 
-Defined in: [lib/dx/doctor.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L10)
+Defined in: [lib/dx/doctor.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L14)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/dx/doctor.ts:10](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **details?**: `string`[]
 
-Defined in: [lib/dx/doctor.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L13)
+Defined in: [lib/dx/doctor.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L17)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/dx/doctor.ts:13](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **fixable?**: `boolean`
 
-Defined in: [lib/dx/doctor.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L14)
+Defined in: [lib/dx/doctor.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L18)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/dx/doctor.ts:14](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **fixedMessage?**: `string`
 
-Defined in: [lib/dx/doctor.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L15)
+Defined in: [lib/dx/doctor.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L19)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/dx/doctor.ts:15](https://github.com/fderuiter/portfolio/blob/ma
 
 > **id**: `string`
 
-Defined in: [lib/dx/doctor.ts:8](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L8)
+Defined in: [lib/dx/doctor.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L12)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/dx/doctor.ts:8](https://github.com/fderuiter/portfolio/blob/mai
 
 > **message**: `string`
 
-Defined in: [lib/dx/doctor.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L12)
+Defined in: [lib/dx/doctor.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L16)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/dx/doctor.ts:12](https://github.com/fderuiter/portfolio/blob/ma
 
 > **name**: `string`
 
-Defined in: [lib/dx/doctor.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L9)
+Defined in: [lib/dx/doctor.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L13)
 
 ***
 
@@ -70,4 +70,4 @@ Defined in: [lib/dx/doctor.ts:9](https://github.com/fderuiter/portfolio/blob/mai
 
 > **status**: `"warn"` \| `"fail"` \| `"pass"` \| `"fixed"`
 
-Defined in: [lib/dx/doctor.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L11)
+Defined in: [lib/dx/doctor.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L15)

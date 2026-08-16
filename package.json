@@ -7,7 +7,12 @@
     "doctor": "npx tsx scripts/dx.ts doctor",
     "doctor:fix": "npx tsx scripts/dx.ts doctor --fix",
     "verify": "npx tsx scripts/dx.ts verify",
+    "commit": "npx tsx scripts/dx.ts commit",
+    "env:check": "npx tsx scripts/dx.ts env",
+    "dead-code": "npx tsx scripts/dx.ts dead-code",
+    "analyze:bundle": "npx tsx scripts/dx.ts analyze",
     "bench": "npx tsx scripts/dx.ts bench",
+    "bench:pages": "npx tsx scripts/benchmark-pages.ts",
     "scaffold": "npx tsx scripts/dx.ts scaffold",
     "quality": "npm run check && npm run lint:docs && npm run check-docs-drift && npm run verify",
     "predev": "npx tsx scripts/generate-theme.ts",
@@ -16,7 +21,7 @@
     "check-docs-drift": "npx tsx scripts/check-drift.ts",
     "check:migrations": "node scripts/check-migration-integrity.js && node scripts/check-migrations.js",
     "check:migrations:drift": "prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code",
-    "lint:docs": "npx markdownlint \"**/*.md\" --ignore node_modules --ignore .next --ignore coverage --ignore .agents --ignore scratch --ignore tmp",
+    "lint:docs": "npx markdownlint \"**/*.md\" --ignore node_modules --ignore .next --ignore coverage --ignore .agents --ignore scratch --ignore tmp --ignore test-results",
     "prebuild": "npx tsx scripts/generate-theme.ts && npm run compile-docs",
     "build": "node scripts/build.js",
     "start": "next start",
@@ -38,7 +43,7 @@
       "eslint --fix"
     ],
     "*.{ts,tsx}": [
-      "vitest run --passWithNoTests"
+      "vitest related --run --passWithNoTests"
     ],
     "**/*": [
       "npm run check"

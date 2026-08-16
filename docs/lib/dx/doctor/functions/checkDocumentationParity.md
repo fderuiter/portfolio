@@ -8,7 +8,7 @@
 
 > **checkDocumentationParity**(`root`, `fix?`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:397](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L397)
+Defined in: [lib/dx/doctor.ts:405](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L405)
 
 Documentation & TypeDoc Parity Check
 

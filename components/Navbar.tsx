@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useSearch } from "@/components/providers/SearchProvider";
+import { usePersona } from "@/components/providers/PersonaProvider";
 import {
   IconVolume,
   IconVolumeOff,
@@ -20,6 +21,8 @@ import {
   IconBrain,
   IconBone,
   IconFileSpreadsheet,
+  IconBriefcase,
+  IconFlame,
 } from "@tabler/icons-react";
 
 interface SubNavItem {
@@ -77,6 +80,12 @@ const ARCADE_ITEMS: SubNavItem[] = [
 
 const SYSTEMS_ITEMS: SubNavItem[] = [
   {
+    title: "Under the Hood (Stack)",
+    subtitle: "Interactive architecture & live telemetry",
+    href: "/stack",
+    icon: <IconCpu className="w-4 h-4 text-brand-cyan" />,
+  },
+  {
     title: "CRF Studio",
     subtitle: "Clinical form designer & live EDC simulator",
     href: "/crf",
@@ -110,6 +119,7 @@ export const Navbar: React.FC = () => {
 
   const { volume, muted, profile, setVolume, setMuted, setProfile, playHover } = useAudio();
   const { openSearch } = useSearch();
+  const { persona, setPersona } = usePersona();
   const [showAudioPanel, setShowAudioPanel] = useState(false);
 
   const pathname = usePathname();
@@ -266,7 +276,7 @@ export const Navbar: React.FC = () => {
   };
 
   const isArcadeActive = pathname.startsWith("/arcade");
-  const isSystemsActive = pathname === "/proof" || pathname === "/simulator";
+  const isSystemsActive = pathname === "/proof" || pathname === "/simulator" || pathname === "/crf" || pathname === "/neuro" || pathname === "/stack";
 
   return (
     <>
@@ -303,12 +313,18 @@ export const Navbar: React.FC = () => {
             <nav className="flex items-center gap-6 lg:gap-7" aria-label="Main Navigation">
               {/* Work Pillar */}
               <Link
-                href="/#case-studies"
-                onClick={(e) => handleNavClick(e, "/#case-studies")}
+                href={pathname === "/" ? "/#case-studies" : "/case-studies"}
+                onClick={(e) => {
+                  if (pathname === "/") {
+                    handleNavClick(e, "/#case-studies");
+                  } else {
+                    setActiveDropdown(null);
+                  }
+                }}
                 onMouseEnter={handleLinkHover}
                 className={cn(
                   "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1",
-                  pathname === "/" && activeSection === "case-studies"
+                  (pathname === "/" && activeSection === "case-studies") || pathname === "/case-studies" || pathname.startsWith("/case-studies/")
                     ? "text-brand-cyan font-bold"
                     : "text-muted"
                 )}
@@ -317,79 +333,81 @@ export const Navbar: React.FC = () => {
               </Link>
 
               {/* Arcade & Labs Dropdown */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setActiveDropdown(activeDropdown === "arcade" ? null : "arcade")}
-                  onMouseEnter={handleLinkHover}
-                  className={cn(
-                    "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-brand-cyan rounded",
-                    isArcadeActive || activeDropdown === "arcade"
-                      ? "text-brand-cyan font-bold"
-                      : "text-muted"
-                  )}
-                  aria-expanded={activeDropdown === "arcade"}
-                  aria-haspopup="true"
-                >
-                  <span>Arcade &amp; Labs</span>
-                  <IconChevronDown
+              {persona !== "technical" && (
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setActiveDropdown(activeDropdown === "arcade" ? null : "arcade")}
+                    onMouseEnter={handleLinkHover}
                     className={cn(
-                      "w-3 h-3 transition-transform duration-200",
-                      activeDropdown === "arcade" ? "rotate-180 text-brand-cyan" : "text-zinc-500"
+                      "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-brand-cyan rounded",
+                      isArcadeActive || activeDropdown === "arcade"
+                        ? "text-brand-cyan font-bold"
+                        : "text-muted"
                     )}
-                  />
-                </button>
+                    aria-expanded={activeDropdown === "arcade"}
+                    aria-haspopup="true"
+                  >
+                    <span>Arcade &amp; Labs</span>
+                    <IconChevronDown
+                      className={cn(
+                        "w-3 h-3 transition-transform duration-200",
+                        activeDropdown === "arcade" ? "rotate-180 text-brand-cyan" : "text-zinc-500"
+                      )}
+                    />
+                  </button>
 
-                <AnimatePresence>
-                  {activeDropdown === "arcade" && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute left-0 mt-3 w-80 p-2.5 rounded-2xl border border-zinc-800 bg-zinc-950/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_20px_rgba(6,182,212,0.08)] z-50 flex flex-col gap-1"
-                      role="menu"
-                    >
-                      <div className="px-3 py-1.5 border-b border-zinc-800/80 mb-1 flex items-center justify-between">
-                        <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-zinc-400">
-                          Interactive Arcade &amp; Labs
-                        </span>
-                        <span className="text-[9px] font-mono text-brand-cyan">60 FPS</span>
-                      </div>
-                      {ARCADE_ITEMS.map((item) => {
-                        const isActive = pathname === item.href;
-                        return (
-                          <Link
-                            key={item.href}
-                            href={item.href}
-                            onClick={() => setActiveDropdown(null)}
-                            onMouseEnter={handleLinkHover}
-                            className={cn(
-                              "flex items-start gap-3 p-2.5 rounded-xl transition-all duration-150 group",
-                              isActive
-                                ? "bg-brand-cyan/10 border border-brand-cyan/30 text-white"
-                                : "hover:bg-zinc-900/80 text-zinc-300 hover:text-white"
-                            )}
-                            role="menuitem"
-                          >
-                            <div className="mt-0.5 p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 group-hover:border-brand-cyan/30 transition-colors">
-                              {item.icon}
-                            </div>
-                            <div className="flex flex-col min-w-0">
-                              <span className="text-xs font-mono font-bold tracking-tight text-neutral-200 group-hover:text-brand-cyan transition-colors">
-                                {item.title}
-                              </span>
-                              <span className="text-[11px] font-sans text-zinc-400 truncate">
-                                {item.subtitle}
-                              </span>
-                            </div>
-                          </Link>
-                        );
-                      })}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                  <AnimatePresence>
+                    {activeDropdown === "arcade" && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute left-0 mt-3 w-80 p-2.5 rounded-2xl border border-zinc-800 bg-zinc-950/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_20px_rgba(6,182,212,0.08)] z-50 flex flex-col gap-1"
+                        role="menu"
+                      >
+                        <div className="px-3 py-1.5 border-b border-zinc-800/80 mb-1 flex items-center justify-between">
+                          <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-zinc-400">
+                            Interactive Arcade &amp; Labs
+                          </span>
+                          <span className="text-[9px] font-mono text-brand-cyan">60 FPS</span>
+                        </div>
+                        {ARCADE_ITEMS.map((item) => {
+                          const isActive = pathname === item.href;
+                          return (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              onClick={() => setActiveDropdown(null)}
+                              onMouseEnter={handleLinkHover}
+                              className={cn(
+                                "flex items-start gap-3 p-2.5 rounded-xl transition-all duration-150 group",
+                                isActive
+                                  ? "bg-brand-cyan/10 border border-brand-cyan/30 text-white"
+                                  : "hover:bg-zinc-900/80 text-zinc-300 hover:text-white"
+                              )}
+                              role="menuitem"
+                            >
+                              <div className="mt-0.5 p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 group-hover:border-brand-cyan/30 transition-colors">
+                                {item.icon}
+                              </div>
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-xs font-mono font-bold tracking-tight text-neutral-200 group-hover:text-brand-cyan transition-colors">
+                                  {item.title}
+                                </span>
+                                <span className="text-[11px] font-sans text-zinc-400 truncate">
+                                  {item.subtitle}
+                                </span>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
 
               {/* Systems & Proof Dropdown */}
               <div className="relative">
@@ -430,7 +448,7 @@ export const Navbar: React.FC = () => {
                           Workspaces &amp; Verification
                         </span>
                       </div>
-                      {SYSTEMS_ITEMS.map((item) => {
+                      {SYSTEMS_ITEMS.filter((item) => !(persona === "technical" && item.href === "/simulator")).map((item) => {
                         const isActive = pathname === item.href;
                         return (
                           <Link
@@ -523,6 +541,38 @@ export const Navbar: React.FC = () => {
               <span className="text-xs font-mono hidden lg:inline">Search</span>
               <kbd className="kbd-badge text-[10px] text-zinc-400 font-mono">⌘K</kbd>
             </button>
+
+            {/* Global Persona Toggle (Desktop) */}
+            <div className="flex p-0.5 bg-zinc-900/85 border border-zinc-800/80 rounded-xl text-[10px] font-mono shrink-0 select-none">
+              <button
+                type="button"
+                onClick={() => setPersona("technical")}
+                className={cn(
+                  "flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer min-h-8",
+                  persona === "technical"
+                    ? "bg-zinc-950 text-amber-400 border border-amber-400/20 shadow-[0_0_8px_rgba(251,191,36,0.15)]"
+                    : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                )}
+                aria-label="Switch to Technical Persona"
+              >
+                <IconFlame className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden lg:inline">TECHNICAL</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPersona("recruiter")}
+                className={cn(
+                  "flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer min-h-8",
+                  persona === "recruiter"
+                    ? "bg-zinc-950 text-brand-cyan border border-brand-cyan/20 shadow-[0_0_8px_rgba(6,182,212,0.15)]"
+                    : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                )}
+                aria-label="Switch to Recruiter Persona"
+              >
+                <IconBriefcase className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden lg:inline">RECRUITER</span>
+              </button>
+            </div>
 
             {/* Audio Controller Desktop */}
             <div className="relative">
@@ -710,11 +760,17 @@ export const Navbar: React.FC = () => {
                     Core Navigation
                   </span>
                   <Link
-                    href="/#case-studies"
-                    onClick={(e) => handleNavClick(e, "/#case-studies")}
+                    href={pathname === "/" ? "/#case-studies" : "/case-studies"}
+                    onClick={(e) => {
+                      if (pathname === "/") {
+                        handleNavClick(e, "/#case-studies");
+                      } else {
+                        setIsOpen(false);
+                      }
+                    }}
                     className="min-h-11 px-3 py-2.5 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between"
                   >
-                    <span>Work Showcase</span>
+                    <span>Engineering Case Studies</span>
                     <span className="text-xs font-mono text-zinc-500">→</span>
                   </Link>
                   <Link
@@ -782,16 +838,64 @@ export const Navbar: React.FC = () => {
                     <span className="text-[10px] font-mono text-emerald-400 px-1.5 py-0.5 rounded bg-emerald-500/10">3D MRI</span>
                   </Link>
                   <Link
-                    href="/arcade"
-                    onClick={(e) => handleNavClick(e, "/arcade")}
-                    className="min-h-11 px-3 py-2.5 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-brand-cyan hover:bg-brand-cyan/10 flex items-center justify-between"
+                    href="/stack"
+                    onClick={(e) => handleNavClick(e, "/stack")}
+                    className="min-h-11 px-3 py-2.5 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between"
                   >
                     <span className="flex items-center gap-2">
-                      <IconDeviceGamepad2 className="w-4 h-4" />
-                      Arcade Games Hub
+                      <IconCpu className="w-4 h-4 text-brand-cyan" />
+                      Under the Hood (Stack)
                     </span>
-                    <span className="text-xs font-mono text-brand-cyan">6 Games</span>
+                    <span className="text-[10px] font-mono text-brand-cyan px-1.5 py-0.5 rounded bg-brand-cyan/10">Architecture</span>
                   </Link>
+                  {persona !== "technical" && (
+                    <Link
+                      href="/arcade"
+                      onClick={(e) => handleNavClick(e, "/arcade")}
+                      className="min-h-11 px-3 py-2.5 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-brand-cyan hover:bg-brand-cyan/10 flex items-center justify-between"
+                    >
+                      <span className="flex items-center gap-2">
+                        <IconDeviceGamepad2 className="w-4 h-4" />
+                        Arcade Games Hub
+                      </span>
+                      <span className="text-xs font-mono text-brand-cyan">6 Games</span>
+                    </Link>
+                  )}
+                </div>
+              </div>
+
+              {/* Mobile Persona Toggle */}
+              <div className="border-t border-zinc-900/80 pt-4 flex flex-col gap-2.5">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 font-bold px-1">
+                  Perspective State
+                </span>
+                <div className="flex p-1 bg-zinc-900 border border-zinc-800 rounded-2xl text-xs font-mono w-full select-none">
+                  <button
+                    type="button"
+                    onClick={() => setPersona("technical")}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-1.5 min-h-11 py-2.5 rounded-xl font-bold transition-all cursor-pointer",
+                      persona === "technical"
+                        ? "bg-zinc-950 text-amber-400 border border-amber-400/20 shadow-[0_0_12px_rgba(251,191,36,0.15)]"
+                        : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                    )}
+                  >
+                    <IconFlame className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span>TECHNICAL</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPersona("recruiter")}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-1.5 min-h-11 py-2.5 rounded-xl font-bold transition-all cursor-pointer",
+                      persona === "recruiter"
+                        ? "bg-zinc-950 text-brand-cyan border border-brand-cyan/20 shadow-[0_0_12px_rgba(6,182,212,0.15)]"
+                        : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                    )}
+                  >
+                    <IconBriefcase className="w-3.5 h-3.5 text-brand-cyan shrink-0" />
+                    <span>RECRUITER</span>
+                  </button>
                 </div>
               </div>
 

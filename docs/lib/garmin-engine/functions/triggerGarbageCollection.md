@@ -8,7 +8,7 @@
 
 > **triggerGarbageCollection**(`state`): `object`
 
-Defined in: [lib/garmin-engine.ts:211](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L211)
+Defined in: [lib/garmin-engine.ts:212](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L212)
 
 Force Garbage Collection (GC)
 Freezes game for 500ms and frees 2.0 to 4.0 KB of garbage

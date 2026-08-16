@@ -8,7 +8,7 @@
 
 > **generateSyntheticVolume**(`scenario?`): [`SyntheticVolume`](../interfaces/SyntheticVolume.md)
 
-Defined in: [lib/neuro/volume-generator.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L31)
+Defined in: [lib/neuro/volume-generator.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/volume-generator.ts#L32)
 
 Procedural generation of a 3D MRI brain volume for a given scenario.
 

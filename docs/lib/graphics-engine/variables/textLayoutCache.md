@@ -6,6 +6,6 @@
 
 # Variable: textLayoutCache
 
-> `const` **textLayoutCache**: [`LRUCache`](../classes/LRUCache.md)\<`string`, \{ `height`: `number`; `lineCount`: `number`; \}\>
+> `const` **textLayoutCache**: [`LRUCache`](../../graphics-math/classes/LRUCache.md)\<`string`, \{ `height`: `number`; `lineCount`: `number`; \}\>
 
-Defined in: [lib/graphics-engine.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L65)
+Defined in: [lib/graphics-engine.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L13)

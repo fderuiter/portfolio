@@ -128,6 +128,19 @@ body {
   border: 1px solid var(--border);
 }
 
+/* Standardized SVG Visual Filters */
+.svg-glow-cyan {
+  filter: drop-shadow(0 0 1.5px rgba(6, 182, 212, 0.8)) drop-shadow(0 0 4px rgba(6, 182, 212, 0.45));
+}
+
+.svg-glow-blue {
+  filter: drop-shadow(0 0 1.5px rgba(59, 130, 246, 0.8)) drop-shadow(0 0 4px rgba(59, 130, 246, 0.45));
+}
+
+.svg-shadow {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
 .glass-panel-glow {
   background: var(--surface-1);
   backdrop-filter: blur(16px);
@@ -179,6 +192,31 @@ body {
   border: 1px solid rgba(39, 39, 42, 0.7);
 }
 
+/* Layout Integrity & Stacking Context Isolation Utilities */
+.section-isolate {
+  isolation: isolate;
+}
+
+.text-token-break {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.fluid-heading-hero {
+  font-size: clamp(2rem, 5vw, 3.75rem);
+  line-height: 1.1;
+}
+
+.fluid-heading-section {
+  font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+  line-height: 1.2;
+}
+
+.fluid-body {
+  font-size: clamp(0.875rem, 1.5vw, 1.125rem);
+  line-height: 1.6;
+}
+
 /* Reduced motion compliance */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -188,3 +226,4 @@ body {
     scroll-behavior: auto !important;
   }
 }
+

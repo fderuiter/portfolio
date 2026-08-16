@@ -71,4 +71,43 @@ test.describe('Visual Regression & Drift Detection', () => {
       }
     }
   });
+
+  const viewports = [
+    { name: 'Mobile 320px Squeeze', width: 320, height: 568 },
+    { name: 'Mobile 375px', width: 375, height: 667 },
+    { name: 'Tablet 768px', width: 768, height: 1024 },
+    { name: 'Desktop 1440px', width: 1440, height: 900 },
+  ];
+
+  for (const vp of viewports) {
+    test(`Horizontal Overflow Detector across DOM on ${vp.name}`, async ({ page }) => {
+      await page.setViewportSize({ width: vp.width, height: vp.height });
+      await page.goto('/');
+      await page.waitForLoadState('domcontentloaded');
+
+      // Detect any element overflowing the horizontal viewport boundary
+      const overflowingElements = await page.evaluate(() => {
+        const clientWidth = document.documentElement.clientWidth;
+        const badElements: { tag: string; className: string; right: number; clientWidth: number }[] = [];
+
+        document.querySelectorAll('*').forEach((el) => {
+          const rect = el.getBoundingClientRect();
+          // Allow small 1px subpixel tolerance
+          if (rect.right > clientWidth + 1) {
+            badElements.push({
+              tag: el.tagName.toLowerCase(),
+              className: typeof el.className === 'string' ? el.className.slice(0, 50) : '',
+              right: Math.round(rect.right),
+              clientWidth,
+            });
+          }
+        });
+
+        return badElements;
+      });
+
+      expect(overflowingElements, `Horizontal overflow detected on viewport ${vp.name} (${vp.width}x${vp.height})`).toEqual([]);
+    });
+  }
 });
+

@@ -2,7 +2,8 @@ import { describe, it, expect } from "vitest";
 import { 
   getSimulatedStats, 
   getSimulatedTerminalCommand, 
-  getSimulatedTerminalLogs 
+  getSimulatedTerminalLogs,
+  generateMockCommitActivity
 } from "@/lib/github";
 
 describe("Language-Tailored Simulated Telemetry Engine", () => {
@@ -86,6 +87,33 @@ describe("Language-Tailored Simulated Telemetry Engine", () => {
     it("should return generic build logs as fallback", () => {
       const logs = getSimulatedTerminalLogs("Ruby");
       expect(logs.some(log => log.text.includes("Initializing compiler pipeline"))).toBe(true);
+    });
+  });
+
+  describe("Centralized Single-Curve Refactoring Invariants (Requirements 1, 2, 3)", () => {
+    it("should produce exactly 52 data points", () => {
+      const activity = generateMockCommitActivity();
+      expect(activity).toHaveLength(52);
+    });
+
+    it("should produce identical value distributions for both simulation and central mock triggers", () => {
+      const centralActivity = generateMockCommitActivity();
+      
+      const haskellStats = getSimulatedStats("Haskell");
+      const typescriptStats = getSimulatedStats("TypeScript");
+      const pythonStats = getSimulatedStats("Python");
+      const fallbackStats = getSimulatedStats("Rust");
+
+      expect(haskellStats.commitActivity).toEqual(centralActivity);
+      expect(typescriptStats.commitActivity).toEqual(centralActivity);
+      expect(pythonStats.commitActivity).toEqual(centralActivity);
+      expect(fallbackStats.commitActivity).toEqual(centralActivity);
+    });
+
+    it("should output static, non-parameterized curves with constant peaks and baselines", () => {
+      const activity1 = generateMockCommitActivity();
+      const activity2 = generateMockCommitActivity();
+      expect(activity1).toEqual(activity2);
     });
   });
 });

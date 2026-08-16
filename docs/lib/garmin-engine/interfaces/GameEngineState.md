@@ -6,7 +6,7 @@
 
 # Interface: GameEngineState
 
-Defined in: [lib/garmin-engine.ts:105](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L105)
+Defined in: [lib/garmin-engine.ts:106](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L106)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/garmin-engine.ts:105](https://github.com/fderuiter/portfolio/bl
 
 > **allocatedRamKb**: `number`
 
-Defined in: [lib/garmin-engine.ts:115](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L115)
+Defined in: [lib/garmin-engine.ts:116](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L116)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/garmin-engine.ts:115](https://github.com/fderuiter/portfolio/bl
 
 > **battery**: `number`
 
-Defined in: [lib/garmin-engine.ts:118](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L118)
+Defined in: [lib/garmin-engine.ts:119](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L119)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/garmin-engine.ts:118](https://github.com/fderuiter/portfolio/bl
 
 > **consecutiveDodges**: `number`
 
-Defined in: [lib/garmin-engine.ts:128](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L128)
+Defined in: [lib/garmin-engine.ts:129](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L129)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/garmin-engine.ts:128](https://github.com/fderuiter/portfolio/bl
 
 > **crashReport**: [`CrashReport`](CrashReport.md) \| `null`
 
-Defined in: [lib/garmin-engine.ts:125](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L125)
+Defined in: [lib/garmin-engine.ts:126](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L126)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/garmin-engine.ts:125](https://github.com/fderuiter/portfolio/bl
 
 > **device**: [`DeviceTarget`](../type-aliases/DeviceTarget.md)
 
-Defined in: [lib/garmin-engine.ts:107](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L107)
+Defined in: [lib/garmin-engine.ts:108](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L108)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/garmin-engine.ts:107](https://github.com/fderuiter/portfolio/bl
 
 > **distanceMeters**: `number`
 
-Defined in: [lib/garmin-engine.ts:113](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L113)
+Defined in: [lib/garmin-engine.ts:114](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L114)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/garmin-engine.ts:113](https://github.com/fderuiter/portfolio/bl
 
 > **fogLevel**: `number`
 
-Defined in: [lib/garmin-engine.ts:120](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L120)
+Defined in: [lib/garmin-engine.ts:121](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L121)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/garmin-engine.ts:120](https://github.com/fderuiter/portfolio/bl
 
 > **fogWipes**: [`FogPoint`](FogPoint.md)[]
 
-Defined in: [lib/garmin-engine.ts:121](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L121)
+Defined in: [lib/garmin-engine.ts:122](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L122)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/garmin-engine.ts:121](https://github.com/fderuiter/portfolio/bl
 
 > **gameState**: `"idle"` \| `"playing"` \| `"paused"` \| `"crashed"` \| `"summary"`
 
-Defined in: [lib/garmin-engine.ts:106](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L106)
+Defined in: [lib/garmin-engine.ts:107](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L107)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [lib/garmin-engine.ts:106](https://github.com/fderuiter/portfolio/bl
 
 > **gcTimerMs**: `number`
 
-Defined in: [lib/garmin-engine.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L123)
+Defined in: [lib/garmin-engine.ts:124](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L124)
 
 ***
 
@@ -94,7 +94,7 @@ Defined in: [lib/garmin-engine.ts:123](https://github.com/fderuiter/portfolio/bl
 
 > **heartRate**: `number`
 
-Defined in: [lib/garmin-engine.ts:124](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L124)
+Defined in: [lib/garmin-engine.ts:125](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L125)
 
 ***
 
@@ -102,7 +102,7 @@ Defined in: [lib/garmin-engine.ts:124](https://github.com/fderuiter/portfolio/bl
 
 > **highScore**: `number`
 
-Defined in: [lib/garmin-engine.ts:112](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L112)
+Defined in: [lib/garmin-engine.ts:113](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L113)
 
 ***
 
@@ -110,7 +110,7 @@ Defined in: [lib/garmin-engine.ts:112](https://github.com/fderuiter/portfolio/bl
 
 > **isGcActive**: `boolean`
 
-Defined in: [lib/garmin-engine.ts:122](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L122)
+Defined in: [lib/garmin-engine.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L123)
 
 ***
 
@@ -118,7 +118,7 @@ Defined in: [lib/garmin-engine.ts:122](https://github.com/fderuiter/portfolio/bl
 
 > **isGrounded**: `boolean`
 
-Defined in: [lib/garmin-engine.ts:110](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L110)
+Defined in: [lib/garmin-engine.ts:111](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L111)
 
 ***
 
@@ -126,7 +126,7 @@ Defined in: [lib/garmin-engine.ts:110](https://github.com/fderuiter/portfolio/bl
 
 > **isLightOn**: `boolean`
 
-Defined in: [lib/garmin-engine.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L117)
+Defined in: [lib/garmin-engine.ts:118](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L118)
 
 ***
 
@@ -134,7 +134,7 @@ Defined in: [lib/garmin-engine.ts:117](https://github.com/fderuiter/portfolio/bl
 
 > **lastAllocTime**: `number`
 
-Defined in: [lib/garmin-engine.ts:126](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L126)
+Defined in: [lib/garmin-engine.ts:127](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L127)
 
 ***
 
@@ -142,7 +142,7 @@ Defined in: [lib/garmin-engine.ts:126](https://github.com/fderuiter/portfolio/bl
 
 > **lastObstacleTime**: `number`
 
-Defined in: [lib/garmin-engine.ts:127](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L127)
+Defined in: [lib/garmin-engine.ts:128](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L128)
 
 ***
 
@@ -150,7 +150,7 @@ Defined in: [lib/garmin-engine.ts:127](https://github.com/fderuiter/portfolio/bl
 
 > **lightActiveDurationMs**: `number`
 
-Defined in: [lib/garmin-engine.ts:119](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L119)
+Defined in: [lib/garmin-engine.ts:120](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L120)
 
 ***
 
@@ -158,7 +158,7 @@ Defined in: [lib/garmin-engine.ts:119](https://github.com/fderuiter/portfolio/bl
 
 > **obstacles**: [`Obstacle`](Obstacle.md)[]
 
-Defined in: [lib/garmin-engine.ts:116](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L116)
+Defined in: [lib/garmin-engine.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L117)
 
 ***
 
@@ -166,7 +166,7 @@ Defined in: [lib/garmin-engine.ts:116](https://github.com/fderuiter/portfolio/bl
 
 > **playerVy**: `number`
 
-Defined in: [lib/garmin-engine.ts:109](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L109)
+Defined in: [lib/garmin-engine.ts:110](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L110)
 
 ***
 
@@ -174,7 +174,7 @@ Defined in: [lib/garmin-engine.ts:109](https://github.com/fderuiter/portfolio/bl
 
 > **playerY**: `number`
 
-Defined in: [lib/garmin-engine.ts:108](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L108)
+Defined in: [lib/garmin-engine.ts:109](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L109)
 
 ***
 
@@ -182,7 +182,7 @@ Defined in: [lib/garmin-engine.ts:108](https://github.com/fderuiter/portfolio/bl
 
 > **score**: `number`
 
-Defined in: [lib/garmin-engine.ts:111](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L111)
+Defined in: [lib/garmin-engine.ts:112](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L112)
 
 ***
 
@@ -190,4 +190,4 @@ Defined in: [lib/garmin-engine.ts:111](https://github.com/fderuiter/portfolio/bl
 
 > **variables**: [`MemoryVariable`](MemoryVariable.md)[]
 
-Defined in: [lib/garmin-engine.ts:114](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L114)
+Defined in: [lib/garmin-engine.ts:115](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L115)

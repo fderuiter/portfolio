@@ -12,7 +12,7 @@ import {
   calculateCollisionPoint, 
   generateExplosionTrajectories, 
   type Particle 
-} from "@/lib/graphics-engine";
+} from "@/lib/graphics-math";
 import { IconDeviceGamepad2 } from "@tabler/icons-react";
 
 export const BackgroundBeamsWithCollision = ({
@@ -82,7 +82,7 @@ export const BackgroundBeamsWithCollision = ({
     <div
       ref={parentRef}
       className={cn(
-        "h-screen bg-zinc-950 relative flex items-center w-full justify-center overflow-hidden",
+        "min-h-[100dvh] bg-zinc-950 relative flex items-center w-full justify-center overflow-hidden",
         className
       )}
     >
@@ -565,10 +565,10 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
           </a>
 
           {/* Secondary Actions: 2-Column grid on mobile, inline row on desktop */}
-          <div className="grid grid-cols-2 gap-3 w-full sm:w-auto sm:flex sm:flex-row sm:gap-4">
+          <div className="grid grid-cols-2 gap-3 w-full sm:w-auto sm:flex sm:flex-row sm:gap-4 min-w-0">
             <a
               href="/arcade"
-              className="inline-flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 text-xs sm:text-sm font-semibold text-brand-cyan hover:text-white bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/30 hover:border-brand-cyan/50 rounded-full transition-all duration-300 hover:scale-105 backdrop-blur-md shadow-[0_0_15px_rgba(6,182,212,0.15)] cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 text-xs sm:text-sm font-semibold text-brand-cyan hover:text-white bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/30 hover:border-brand-cyan/50 rounded-full transition-all duration-300 hover:scale-105 backdrop-blur-md shadow-[0_0_15px_rgba(6,182,212,0.15)] cursor-pointer min-w-0"
             >
               <IconDeviceGamepad2 className="w-4 h-4 shrink-0" />
               <span className="truncate">Interactive Labs</span>
@@ -577,7 +577,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
               href="https://github.com/fderuiter"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 text-xs sm:text-sm font-semibold text-neutral-300 hover:text-white bg-neutral-900/60 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-full transition-all duration-300 hover:scale-105 backdrop-blur-md cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 px-4 sm:px-8 py-3.5 text-xs sm:text-sm font-semibold text-neutral-300 hover:text-white bg-neutral-900/60 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-700 rounded-full transition-all duration-300 hover:scale-105 backdrop-blur-md cursor-pointer min-w-0"
             >
               <svg
                 className="w-4 h-4 fill-current shrink-0"
