@@ -197,6 +197,11 @@ body {
   isolation: isolate;
 }
 
+.card-isolate-contain {
+  contain: layout paint;
+  isolation: isolate;
+}
+
 .text-token-break {
   overflow-wrap: anywhere;
   word-break: break-word;

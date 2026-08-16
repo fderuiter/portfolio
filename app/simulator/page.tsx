@@ -184,8 +184,8 @@ export default function RecruiterSimulator() {
       className="bg-zinc-950 text-foreground relative overflow-hidden flex flex-col items-center justify-start"
     >
       {/* Dynamic Background Atmospheric Lighting */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-brand-cyan/5 blur-[160px] pointer-events-none rounded-full" />
-      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-brand-blue/5 blur-[140px] pointer-events-none rounded-full" />
+      <div className="hidden lg:block absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-brand-cyan/5 blur-[160px] pointer-events-none rounded-full" />
+      <div className="hidden lg:block absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-brand-blue/5 blur-[140px] pointer-events-none rounded-full" />
 
       <div className="w-full max-w-2xl mx-auto relative z-10 flex flex-col items-center">
         {/* Navigation Breadcrumb */}
@@ -230,7 +230,7 @@ export default function RecruiterSimulator() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
                 transition={{ duration: 0.25 }}
-                className="bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-6 sm:p-10 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col"
+                className="bg-zinc-900 backdrop-blur-none md:bg-zinc-900/40 md:backdrop-blur-2xl border border-zinc-800/80 rounded-3xl p-6 sm:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col card-isolate-contain"
               >
                 {/* Stage Badge */}
                 <div className="inline-flex items-center gap-2 text-xs font-mono text-brand-cyan tracking-widest uppercase font-bold mb-3">
@@ -280,7 +280,7 @@ export default function RecruiterSimulator() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.35 }}
-                className="bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-6 sm:p-10 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.7)] flex flex-col items-center text-center"
+                className="bg-zinc-900 backdrop-blur-none md:bg-zinc-900/40 md:backdrop-blur-2xl border border-zinc-800/80 rounded-3xl p-6 sm:p-10 shadow-[0_20px_60px_rgba(0,0,0,0.7)] flex flex-col items-center text-center card-isolate-contain"
               >
                 {/* Circular Match Gauge */}
                 <div className="relative flex items-center justify-center mb-6">
