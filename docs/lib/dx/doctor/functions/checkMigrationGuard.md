@@ -8,7 +8,7 @@
 
 > **checkMigrationGuard**(`root`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:347](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L347)
+Defined in: [lib/dx/doctor.ts:350](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L350)
 
 Migration Integrity & Destructive Migration Guard
 

@@ -17,6 +17,7 @@
 - [checkDefectRemediationInvariants](functions/checkDefectRemediationInvariants.md)
 - [checkDocumentationParity](functions/checkDocumentationParity.md)
 - [checkHydrationSafety](functions/checkHydrationSafety.md)
+- [checkLayoutTextClippingInvariants](functions/checkLayoutTextClippingInvariants.md)
 - [checkMigrationGuard](functions/checkMigrationGuard.md)
 - [checkNavbarHierarchy](functions/checkNavbarHierarchy.md)
 - [checkOpenApiParity](functions/checkOpenApiParity.md)

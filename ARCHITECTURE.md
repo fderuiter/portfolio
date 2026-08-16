@@ -222,3 +222,48 @@ To maintain high stability across complex domain simulation and calculation engi
   - Fixes must eradicate the root architectural flaw rather than masking symptoms.
   - Continuous CI verification via `__tests__/defect-remediation-regression.test.ts` guarantees zero regression drift.
 
+## Responsive Layout Integrity, Stacking Isolation & Defensive CSS Architecture
+
+To eliminate visual clipping, text overlapping, and unmanaged z-index escalation across variable screen sizes (320px mobile to 4K desktop) and dynamic localized content (+40% text expansion), the codebase adheres to a strict defensive CSS architecture:
+
+- **Semantic `<PageLayout />` Sizing Standard:**
+  - Standardizes all routes on `min-h-dvh` (Dynamic Viewport Height) and `overflow-x-hidden`.
+  - Preserves single global `<main id="main-content">` landmark in `app/layout.tsx` for full WCAG AA accessibility compliance without duplicate nested landmarks.
+  - Enforces intrinsic flexible container bounds (`min-h-*`, `h-auto`) rather than rigid fixed heights (`h-48`, `h-64`) to accommodate dynamic text wrapping.
+- **Flexbox/Grid Defensive Neutralization (`min-w-0` / `min-h-0`):**
+  - Overrides CSS `min-width: auto` on flex and grid children hosting text or truncation badges to prevent layout blowouts and neighbor squishing.
+  - Enforces `break-words` on prose/headings and `text-token-break` (`overflow-wrap: anywhere; word-break: break-word;`) on long URLs/hashes.
+- **Stacking Context Isolation & Standardized Elevation Scale:**
+  - Applies CSS `isolation: isolate` (`.section-isolate`) to multi-layered composite sections, preventing internal z-indexes from bleeding into sibling components.
+  - Replaces arbitrary `z-[9999]` inflations with a bounded 4-tier elevation scale (`-z-10` background, `z-10` content, `z-40` fixed nav, `z-50` dialogs/modals).
+- **Component Independence via Container Queries (`@container`):**
+  - Card modules (`BentoGrid`, `PretextCard`, `ProjectTeaserGrid`, `CaseStudyShowcase`) declare `@container` contexts, allowing internal typography, padding, and flex flows to adapt relative to parent column width.
+- **Dynamic Content & Zoom Stress Invariant:**
+  - Verified via `__tests__/defensive-css-stress.test.tsx` simulating +40% elongated strings, 100-character unbroken tokens, and 200% font scaling.
+
+### Four-Layer Production Layout Validation Protocol
+
+To guarantee that layouts remain resilient across all devices, viewports, and edge-case copy, the portfolio enforces a 4-layer validation strategy:
+
+1. **The DevTools "Stress-Test" Routine:**
+   - **The 320px Squeeze:** Viewport dragged down to 320px (iPhone SE standard minimum). Asserts zero text clipping and zero horizontal page scrolling.
+   - **The 200% Zoom Check (WCAG 1.4.4):** Desktop browser zoomed to 200%. Elements must naturally re-stack and expand vertically without overlap.
+   - **Content Fuzzing:** Live DOM edit tests with 100-character unbroken URLs, 3x tripled localized text length, and empty card states.
+2. **The Horizontal Overflow Detector (`right > clientWidth`):**
+   - Automated evaluation across all DOM nodes:
+     ```javascript
+     document.querySelectorAll('*').forEach(el => {
+       if (el.getBoundingClientRect().right > document.documentElement.clientWidth) {
+         console.log('Overflowing element:', el);
+         el.style.outline = '2px solid red';
+       }
+     });
+     ```
+3. **Automated Visual & Multi-Viewport Regression (Playwright):**
+   - Matrix testing across Mobile 320px, Mobile 375px, Tablet 768px, and Desktop 1440px in `__tests__/e2e/visual.spec.ts`.
+4. **Real-Device Verification Checklist:**
+   - **iOS Safari Dynamic Viewport:** Validates `min-h-dvh` bottom clearance beneath floating browser bars.
+   - **Android System Font Scaling:** Verifies vertical container expansion under system-level "Largest" font size.
+
+
+

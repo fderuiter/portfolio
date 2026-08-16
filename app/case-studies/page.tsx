@@ -5,6 +5,7 @@ import { BaseCaseStudy } from "@/types/domain";
 import { getGitHubStats, parseGitHubUrl, GitHubStats, getSimulatedStats } from "@/lib/github";
 import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
+import { PageLayout } from "@/components/PageLayout";
 
 export const revalidate = 3600;
 
@@ -31,7 +32,7 @@ interface HydratedCaseStudy extends BaseCaseStudy {
   githubStats: GitHubStats | null;
 }
 
-export default async function CaseStudiesIndexPage() {
+export default async function CaseStudiesPage() {
   let caseStudies: HydratedCaseStudy[] = [];
 
   try {
@@ -59,29 +60,24 @@ export default async function CaseStudiesIndexPage() {
         };
       })
     );
-  } catch (err) {
-    console.error("Database query exception in /case-studies:", err);
-
-    const isProduction = process.env.VERCEL_ENV === "production";
-    if (process.env.CI === "true" || process.env.PLAYWRIGHT_TEST === "true" || !isProduction) {
-      caseStudies = FALLBACK_CASE_STUDIES.map((study) => ({
-        ...study,
-        githubStats: getSimulatedStats(study.primary_language),
-      }));
-    }
+  } catch (error) {
+    console.warn("Failed to load case studies from database. Falling back to local data:", error);
+    caseStudies = FALLBACK_CASE_STUDIES.map((cs) => ({
+      ...cs,
+      githubStats: getSimulatedStats(cs.primary_language),
+    }));
   }
 
   return (
-    <main
-      id="main-content"
-      tabIndex={-1}
-      className="relative min-h-screen pt-28 sm:pt-32 pb-16 sm:pb-24 px-4 sm:px-6 md:px-12 lg:px-24 flex flex-col items-center bg-zinc-950 text-foreground outline-none overflow-x-hidden"
+    <PageLayout
+      variant="standard"
+      className="relative bg-zinc-950 text-foreground outline-none"
     >
       {/* Ambient background glows */}
       <div className="absolute top-20 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full bg-brand-cyan/5 blur-[140px] pointer-events-none" />
       <div className="absolute top-60 left-1/3 w-80 h-80 rounded-full bg-brand-blue/5 blur-[160px] pointer-events-none" />
 
-      <div className="relative z-10 w-full max-w-7xl flex flex-col items-center">
+      <div className="relative z-10 w-full flex flex-col items-center">
         {/* Navigation Breadcrumb */}
         <div className="w-full mb-6 sm:mb-8 flex justify-start">
           <Breadcrumbs items={[{ label: "Case Studies" }]} />
@@ -111,6 +107,6 @@ export default async function CaseStudiesIndexPage() {
           <CaseStudyShowcase caseStudies={caseStudies} />
         )}
       </div>
-    </main>
+    </PageLayout>
   );
 }

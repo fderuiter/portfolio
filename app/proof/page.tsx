@@ -61,7 +61,7 @@ interface TerminalLog {
 
 export function ProofWorkspaceSkeleton() {
   return (
-    <div className="min-h-screen bg-brand-dark text-slate-100 flex flex-col font-sans pt-20 pb-12">
+    <div className="min-h-dvh bg-brand-dark text-slate-100 flex flex-col font-sans pt-20 pb-12 overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full flex-1 flex flex-col gap-6">
         {/* Header and Breadcrumbs */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
@@ -1473,7 +1473,7 @@ export function ProofWorkspaceClient() {
   const suggestion = getSuggestion(consoleInput);
 
   return (
-    <div className="min-h-screen bg-brand-dark text-slate-100 flex flex-col font-sans pt-20 pb-12">
+    <div className="min-h-dvh bg-brand-dark text-slate-100 flex flex-col font-sans pt-20 pb-12 overflow-x-hidden">
       {/* Live Accessibility Announcement Buffer */}
       <div className="sr-only" aria-live="assertive" role="status">
         {liveAnnouncement}

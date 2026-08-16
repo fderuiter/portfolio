@@ -9,6 +9,7 @@ import { SkillsGrid } from "@/components/SkillsGrid";
 import { Timeline } from "@/components/Timeline";
 import { InteractiveHighlights } from "@/components/InteractiveHighlights";
 import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
+import { PageLayout } from "@/components/PageLayout";
 import { 
   IconMail, 
   IconCalendar, 
@@ -50,17 +51,12 @@ export default async function PortfolioHomePage() {
         };
       })
     );
-  } catch (err) {
-    console.error("Database query exception:", err);
-    
-    // Fallback for CI/Playwright/Preview or other non-production environments
-    const isProduction = process.env.VERCEL_ENV === "production";
-    if (process.env.CI === "true" || process.env.PLAYWRIGHT_TEST === "true" || !isProduction) {
-      caseStudies = FALLBACK_CASE_STUDIES.map((study) => ({
-        ...study,
-        githubStats: getSimulatedStats(study.primary_language),
-      }));
-    }
+  } catch (error) {
+    console.warn("Failed to load case studies from database. Falling back to local data:", error);
+    caseStudies = FALLBACK_CASE_STUDIES.map(cs => ({
+      ...cs,
+      githubStats: getSimulatedStats(cs.primary_language)
+    }));
   }
 
   // Aggregate language profiles from fetched case study stats
@@ -83,21 +79,20 @@ export default async function PortfolioHomePage() {
     .sort((a, b) => b.percentage - a.percentage);
 
   const fallbackLanguages = [
-    { name: "TypeScript", percentage: 45 },
+    { name: "TypeScript", percentage: 55 },
     { name: "Python", percentage: 25 },
-    { name: "React", percentage: 15 },
-    { name: "Prisma", percentage: 10 },
+    { name: "Rust", percentage: 15 },
     { name: "PostgreSQL", percentage: 5 }
   ];
   const languagesList = aggregatedLanguages.length > 0 ? aggregatedLanguages.slice(0, 5) : fallbackLanguages;
 
   return (
-    <div className="bg-zinc-950 min-h-screen text-foreground overflow-x-hidden flex flex-col">
+    <PageLayout variant="full" className="bg-zinc-950">
       {/* Living Grid Hero */}
       <Hero />
 
       {/* Case studies showcase section */}
-      <main id="main-content" tabIndex={-1} className="relative min-h-screen py-16 sm:py-24 md:py-32 px-4 sm:px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/60 bg-zinc-950 outline-none">
+      <div className="relative min-h-dvh py-16 sm:py-24 md:py-32 px-4 sm:px-6 md:px-12 lg:px-24 flex flex-col items-center border-t border-zinc-900/60 bg-zinc-950 outline-none">
         <section id="case-studies" className="w-full flex flex-col items-center">
           {/* Decorative Blur Elements */}
           <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none" />
@@ -131,7 +126,7 @@ export default async function PortfolioHomePage() {
             )}
           </div>
         </section>
-      </main>
+      </div>
 
       {/* 2. Philosophy TextReveal Highlight */}
       <div className="bg-zinc-950 border-t border-zinc-900/50">
@@ -247,6 +242,6 @@ export default async function PortfolioHomePage() {
           </div>
         </div>
       </section>
-    </div>
+    </PageLayout>
   );
 }

@@ -2,11 +2,12 @@ import React from "react";
 import { NeuroReconClient } from "@/components/neuro/NeuroReconClient";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
+import { PageLayout } from "@/components/PageLayout";
 
 export default function NeuroReconPage() {
   return (
-    <main className="min-h-screen pt-28 pb-16 bg-zinc-950 text-white selection:bg-brand-cyan/30 selection:text-brand-cyan">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+    <PageLayout variant="studio" className="bg-zinc-950 text-white selection:bg-brand-cyan/30 selection:text-brand-cyan">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 w-full">
         <Breadcrumbs
           items={[
             { label: "Home", href: "/" },
@@ -18,7 +19,7 @@ export default function NeuroReconPage() {
 
       <NeuroReconClient />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 w-full">
         <NextPrevNav
           prev={{
             title: "Logical Proof Workspace",
@@ -38,6 +39,6 @@ export default function NeuroReconPage() {
           }}
         />
       </div>
-    </main>
+    </PageLayout>
   );
 }

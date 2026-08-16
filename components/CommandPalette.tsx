@@ -437,7 +437,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
   return (
     <div
       onClick={handleBackdropClick}
-      className="fixed inset-0 z-[9999] flex items-start justify-center pt-[max(1.5rem,env(safe-area-inset-top)+1rem)] sm:pt-[12vh] px-3 sm:px-4 pb-[max(1.5rem,env(safe-area-inset-bottom)+1rem)] bg-zinc-950/85 backdrop-blur-md transition-all duration-300 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-[max(1.5rem,env(safe-area-inset-top)+1rem)] sm:pt-[12vh] px-3 sm:px-4 pb-[max(1.5rem,env(safe-area-inset-bottom)+1rem)] bg-zinc-950/85 backdrop-blur-md transition-all duration-300 overflow-y-auto"
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.97, y: -8 }}
