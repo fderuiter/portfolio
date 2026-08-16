@@ -8,6 +8,7 @@
     "doctor:fix": "npx tsx scripts/dx.ts doctor --fix",
     "verify": "npx tsx scripts/dx.ts verify",
     "bench": "npx tsx scripts/dx.ts bench",
+    "bench:pages": "npx tsx scripts/benchmark-pages.ts",
     "scaffold": "npx tsx scripts/dx.ts scaffold",
     "quality": "npm run check && npm run lint:docs && npm run check-docs-drift && npm run verify",
     "predev": "npx tsx scripts/generate-theme.ts",

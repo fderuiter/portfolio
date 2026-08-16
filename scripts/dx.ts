@@ -24,6 +24,7 @@ function printUsage(): void {
   console.log(`  ${colors.cyan}verify${colors.reset}                 Strict invariant check for CI / pre-commit (exits with code 1 on failure)`);
   console.log(`  ${colors.cyan}scaffold <type> <name>${colors.reset} Scaffold code templates (types: arcade, api, adr, case-study, component)`);
   console.log(`  ${colors.cyan}bench${colors.reset}                  Run Pretext, Masonry Scheduler, and Security benchmarks`);
+  console.log(`  ${colors.cyan}bench --pages${colors.reset}          Run real-browser Core Web Vitals & page speed benchmarks`);
   console.log(`  ${colors.cyan}clean${colors.reset}                  Clean build artifacts and reset developer cache`);
   console.log(`  ${colors.cyan}help${colors.reset}                   Show this help menu\n`);
   console.log(`${colors.bold}Examples:${colors.reset}`);
@@ -32,7 +33,8 @@ function printUsage(): void {
   console.log(`  $ npm run dx scaffold arcade matrix-defender`);
   console.log(`  $ npm run dx scaffold api webhook-handler`);
   console.log(`  $ npm run dx scaffold adr state-machine-transitions`);
-  console.log(`  $ npm run dx bench\n`);
+  console.log(`  $ npm run dx bench`);
+  console.log(`  $ npm run dx bench --pages\n`);
 }
 
 async function handleDoctorCommand(args: string[]): Promise<void> {
@@ -103,7 +105,12 @@ async function handleScaffoldCommand(args: string[]): Promise<void> {
   }
 }
 
-function handleBenchCommand(): void {
+function handleBenchCommand(args: string[] = []): void {
+  if (args.includes("--pages") || args.includes("pages")) {
+    console.log(formatHeader("DX Bench: Page Speed & Core Web Vitals", "Real-Browser Chromium • Navigation Timing L2 • Web Vitals"));
+    execSync("npx tsx scripts/benchmark-pages.ts", { cwd: workspaceRoot, stdio: "inherit" });
+    return;
+  }
   console.log(formatHeader("DX Bench: Micro-Benchmark Suite", "Pretext Layout • Greedy Masonry • Security Scanner"));
   const results = runAllBenchmarks();
   printBenchmarkReport(results);
@@ -145,11 +152,12 @@ async function runInteractiveMenu(): Promise<void> {
   console.log(`  ${colors.cyan}3)${colors.reset} Scaffold New Arcade Mini-Game`);
   console.log(`  ${colors.cyan}4)${colors.reset} Scaffold New API Route`);
   console.log(`  ${colors.cyan}5)${colors.reset} Scaffold Architecture Decision Record (ADR)`);
-  console.log(`  ${colors.cyan}6)${colors.reset} Run Micro-Benchmarks`);
-  console.log(`  ${colors.cyan}7)${colors.reset} Clean Caches & Rebuild Tokens`);
-  console.log(`  ${colors.cyan}8)${colors.reset} Exit\n`);
+  console.log(`  ${colors.cyan}6)${colors.reset} Run Micro-Benchmarks (Pretext & Math)`);
+  console.log(`  ${colors.cyan}7)${colors.reset} Run Page Speed & Web Vitals Benchmarks`);
+  console.log(`  ${colors.cyan}8)${colors.reset} Clean Caches & Rebuild Tokens`);
+  console.log(`  ${colors.cyan}9)${colors.reset} Exit\n`);
 
-  rl.question(`${colors.bold}${colors.brightWhite}Select an option [1-8]: ${colors.reset}`, async (answer) => {
+  rl.question(`${colors.bold}${colors.brightWhite}Select an option [1-9]: ${colors.reset}`, async (answer) => {
     rl.close();
     const choice = answer.trim();
 
@@ -191,12 +199,15 @@ async function runInteractiveMenu(): Promise<void> {
         break;
       }
       case "6":
-        handleBenchCommand();
+        handleBenchCommand([]);
         break;
       case "7":
-        handleCleanCommand();
+        handleBenchCommand(["--pages"]);
         break;
       case "8":
+        handleCleanCommand();
+        break;
+      case "9":
       default:
         console.log(`\n${colors.gray}Exiting DX Suite.${colors.reset}\n`);
         process.exit(0);
@@ -228,7 +239,8 @@ async function main(): Promise<void> {
       break;
     case "bench":
     case "benchmark":
-      handleBenchCommand();
+    case "bench:pages":
+      handleBenchCommand(command === "bench:pages" ? ["--pages", ...args.slice(1)] : args.slice(1));
       break;
     case "clean":
     case "reset":

@@ -63,6 +63,7 @@
 - [lib/dungeon/weapons](lib/dungeon/weapons/README.md)
 - [lib/dx/bench](lib/dx/bench/README.md)
 - [lib/dx/doctor](lib/dx/doctor/README.md)
+- [lib/dx/page-bench](lib/dx/page-bench/README.md)
 - [lib/dx/scaffolder](lib/dx/scaffolder/README.md)
 - [lib/dx/utils](lib/dx/utils/README.md)
 - [lib/error-sanitization](lib/error-sanitization/README.md)
