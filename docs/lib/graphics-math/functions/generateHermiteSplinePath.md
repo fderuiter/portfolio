@@ -2,13 +2,13 @@
 
 ***
 
-[fderuiter-portfolio](../../../modules.md) / [lib/graphics-engine](../README.md) / generateHermiteSplinePath
+[fderuiter-portfolio](../../../modules.md) / [lib/graphics-math](../README.md) / generateHermiteSplinePath
 
 # Function: generateHermiteSplinePath()
 
 > **generateHermiteSplinePath**(`points`, `heightForArea?`): `object`
 
-Defined in: [lib/graphics-engine.ts:286](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L286)
+Defined in: [lib/graphics-math.ts:172](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L172)
 
 Computes cubic Hermite spline paths (Catmull-Rom style tangents) connecting a series of points.
 This generates smooth organic curves by calculating tangents at each point.

@@ -6,20 +6,6 @@
 
 # lib/graphics-engine
 
-## Classes
-
-- [LRUCache](classes/LRUCache.md)
-
-## Interfaces
-
-- [Particle](interfaces/Particle.md)
-- [Rect](interfaces/Rect.md)
-- [TextMeasurementOptions](interfaces/TextMeasurementOptions.md)
-
-## Type Aliases
-
-- [Point2D](type-aliases/Point2D.md)
-
 ## Variables
 
 - [cssPropertyCache](variables/cssPropertyCache.md)
@@ -32,17 +18,91 @@
 
 ## Functions
 
-- [calculateCollisionPoint](functions/calculateCollisionPoint.md)
-- [calculateColumnCount](functions/calculateColumnCount.md)
-- [calculateColumnWidth](functions/calculateColumnWidth.md)
-- [calculateParticleTrajectory](functions/calculateParticleTrajectory.md)
-- [checkBeamContainerCollision](functions/checkBeamContainerCollision.md)
-- [distributeItemsGreedily](functions/distributeItemsGreedily.md)
-- [generateCubicSplinePath](functions/generateCubicSplinePath.md)
-- [generateExplosionTrajectories](functions/generateExplosionTrajectories.md)
-- [generateHermiteSplinePath](functions/generateHermiteSplinePath.md)
 - [isBrowser](functions/isBrowser.md)
-- [mapDataToCoordinates](functions/mapDataToCoordinates.md)
 - [measureTextOffscreen](functions/measureTextOffscreen.md)
 - [resolveFontFamily](functions/resolveFontFamily.md)
 - [validateLayoutHeight](functions/validateLayoutHeight.md)
+
+## References
+
+### calculateCollisionPoint
+
+Re-exports [calculateCollisionPoint](../graphics-math/functions/calculateCollisionPoint.md)
+
+***
+
+### calculateColumnCount
+
+Re-exports [calculateColumnCount](../graphics-math/functions/calculateColumnCount.md)
+
+***
+
+### calculateColumnWidth
+
+Re-exports [calculateColumnWidth](../graphics-math/functions/calculateColumnWidth.md)
+
+***
+
+### calculateParticleTrajectory
+
+Re-exports [calculateParticleTrajectory](../graphics-math/functions/calculateParticleTrajectory.md)
+
+***
+
+### checkBeamContainerCollision
+
+Re-exports [checkBeamContainerCollision](../graphics-math/functions/checkBeamContainerCollision.md)
+
+***
+
+### distributeItemsGreedily
+
+Re-exports [distributeItemsGreedily](../graphics-math/functions/distributeItemsGreedily.md)
+
+***
+
+### generateCubicSplinePath
+
+Re-exports [generateCubicSplinePath](../graphics-math/functions/generateCubicSplinePath.md)
+
+***
+
+### generateExplosionTrajectories
+
+Re-exports [generateExplosionTrajectories](../graphics-math/functions/generateExplosionTrajectories.md)
+
+***
+
+### generateHermiteSplinePath
+
+Re-exports [generateHermiteSplinePath](../graphics-math/functions/generateHermiteSplinePath.md)
+
+***
+
+### LRUCache
+
+Re-exports [LRUCache](../graphics-math/classes/LRUCache.md)
+
+***
+
+### mapDataToCoordinates
+
+Re-exports [mapDataToCoordinates](../graphics-math/functions/mapDataToCoordinates.md)
+
+***
+
+### Particle
+
+Re-exports [Particle](../graphics-math/interfaces/Particle.md)
+
+***
+
+### Point2D
+
+Re-exports [Point2D](../graphics-math/type-aliases/Point2D.md)
+
+***
+
+### Rect
+
+Re-exports [Rect](../graphics-math/interfaces/Rect.md)

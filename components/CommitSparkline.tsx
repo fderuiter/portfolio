@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useId } from "react";
-import { mapDataToCoordinates, generateHermiteSplinePath } from "@/lib/graphics-engine";
+import { mapDataToCoordinates, generateHermiteSplinePath } from "@/lib/graphics-math";
 
 interface CommitSparklineProps {
   activity: number[];
@@ -73,15 +73,6 @@ export const CommitSparkline: React.FC<CommitSparklineProps> = ({
               <stop offset="50%" stopColor="#3b82f6" />
               <stop offset="100%" stopColor="#06b6d4" />
             </linearGradient>
-
-            {/* Glowing line filter */}
-            <filter id={`${uniqueId}-glow`} x="-10%" y="-10%" width="120%" height="120%">
-              <feGaussianBlur stdDeviation="1.5" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
           </defs>
 
           {/* Shaded Area */}
@@ -99,8 +90,7 @@ export const CommitSparkline: React.FC<CommitSparklineProps> = ({
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            filter={`url(#${uniqueId}-glow)`}
-            className="transition-all duration-300"
+            className="svg-glow-cyan transition-all duration-300"
           />
         </svg>
       </div>

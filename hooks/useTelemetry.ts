@@ -44,7 +44,7 @@ function updateStore(updater: (prev: TelemetryStoreState) => TelemetryStoreState
   if (next.telemetry !== currentStoreState.telemetry || next.syncFailed !== currentStoreState.syncFailed) {
     currentStoreState = next;
     try {
-      if (typeof window !== "undefined") {
+      if (typeof window !== "undefined" && typeof window.localStorage?.setItem === "function") {
         const stringified = JSON.stringify(currentStoreState.telemetry);
         lastRawCache = stringified;
         localStorage.setItem(CACHE_KEY, stringified);
@@ -89,7 +89,7 @@ function subscribe(listener: () => void) {
 }
 
 function getSnapshot(): TelemetryStoreState {
-  if (typeof window !== "undefined") {
+  if (typeof window !== "undefined" && typeof window.localStorage?.getItem === "function") {
     try {
       const raw = localStorage.getItem(CACHE_KEY);
       if (raw !== lastRawCache) {

@@ -2,13 +2,13 @@
 
 ***
 
-[fderuiter-portfolio](../../../modules.md) / [lib/graphics-engine](../README.md) / distributeItemsGreedily
+[fderuiter-portfolio](../../../modules.md) / [lib/graphics-math](../README.md) / distributeItemsGreedily
 
 # Function: distributeItemsGreedily()
 
 > **distributeItemsGreedily**\<`T`\>(`items`, `colCount`, `gap`): `object`
 
-Defined in: [lib/graphics-engine.ts:195](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L195)
+Defined in: [lib/graphics-math.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L81)
 
 Distributes items with calculated heights into columns using the greedy shortest-column algorithm.
 

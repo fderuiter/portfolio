@@ -6,6 +6,6 @@
 
 # Variable: cssPropertyCache
 
-> `const` **cssPropertyCache**: [`LRUCache`](../classes/LRUCache.md)\<`string`, `string`\>
+> `const` **cssPropertyCache**: [`LRUCache`](../../graphics-math/classes/LRUCache.md)\<`string`, `string`\>
 
-Defined in: [lib/graphics-engine.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L72)
+Defined in: [lib/graphics-engine.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L20)

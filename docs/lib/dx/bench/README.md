@@ -15,5 +15,6 @@
 - [benchmarkMasonryScheduler](functions/benchmarkMasonryScheduler.md)
 - [benchmarkPretextLayout](functions/benchmarkPretextLayout.md)
 - [benchmarkScanner](functions/benchmarkScanner.md)
+- [benchmarkSVGCoordinateMath](functions/benchmarkSVGCoordinateMath.md)
 - [printBenchmarkReport](functions/printBenchmarkReport.md)
 - [runAllBenchmarks](functions/runAllBenchmarks.md)

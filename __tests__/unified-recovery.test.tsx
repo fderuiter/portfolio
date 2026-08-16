@@ -8,15 +8,12 @@ import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { SearchProvider, useSearch } from "@/components/providers/SearchProvider";
 import { AudioProvider } from "@/components/providers/AudioProvider";
-import { RetroLabyrinth } from "@/components/RetroLabyrinth";
-
-const mockReact = React;
-const mockRetroLabyrinth = RetroLabyrinth;
+const MockRetroLabyrinth = () => <div>SYSTEM_LABYRINTH.EXE</div>;
 
 vi.mock("next/dynamic", () => ({
   default: () => {
     return function MockDynamic(props: Record<string, unknown>) {
-      return mockReact.createElement(mockRetroLabyrinth, props);
+      return React.createElement(MockRetroLabyrinth, props);
     };
   },
 }));

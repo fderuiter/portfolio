@@ -2,13 +2,13 @@
 
 ***
 
-[fderuiter-portfolio](../../../modules.md) / [lib/graphics-engine](../README.md) / generateExplosionTrajectories
+[fderuiter-portfolio](../../../modules.md) / [lib/graphics-math](../README.md) / generateExplosionTrajectories
 
 # Function: generateExplosionTrajectories()
 
 > **generateExplosionTrajectories**(`count`, `minX?`, `maxX?`, `minY?`, `maxY?`, `minDuration?`, `maxDuration?`): [`Particle`](../interfaces/Particle.md)[]
 
-Defined in: [lib/graphics-engine.ts:371](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L371)
+Defined in: [lib/graphics-math.ts:257](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L257)
 
 Generates randomized trajectory profiles for particle explosion vectors.
 

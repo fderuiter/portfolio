@@ -12,7 +12,7 @@ import {
   calculateCollisionPoint, 
   generateExplosionTrajectories, 
   type Particle 
-} from "@/lib/graphics-engine";
+} from "@/lib/graphics-math";
 import { IconDeviceGamepad2 } from "@tabler/icons-react";
 
 export const BackgroundBeamsWithCollision = ({
