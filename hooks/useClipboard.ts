@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
 import { copyToClipboard } from "@/lib/clipboard";
 
-interface UseClipboardOptions {
+export interface UseClipboardOptions {
   successMessage?: string;
   errorMessage?: string;
 }

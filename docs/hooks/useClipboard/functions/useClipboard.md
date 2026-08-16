@@ -14,7 +14,7 @@ Defined in: [hooks/useClipboard.ts:12](https://github.com/fderuiter/portfolio/bl
 
 ### options?
 
-`UseClipboardOptions` = `{}`
+[`UseClipboardOptions`](../interfaces/UseClipboardOptions.md) = `{}`
 
 ## Returns
 
