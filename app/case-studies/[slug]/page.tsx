@@ -144,6 +144,23 @@ export default async function CaseStudyPage({ params }: PageProps) {
 
   const tagsList = study.tags ? study.tags.split(",").map(t => t.trim()) : [];
 
+  let commands = undefined;
+  let playback = undefined;
+  try {
+    if (study.commands_json) {
+      commands = JSON.parse(study.commands_json);
+    }
+  } catch (err) {
+    console.error("Failed to parse commands_json:", err);
+  }
+  try {
+    if (study.playback_json) {
+      playback = JSON.parse(study.playback_json);
+    }
+  } catch (err) {
+    console.error("Failed to parse playback_json:", err);
+  }
+
   return (
     <PageLayout
       variant="standard"
@@ -220,7 +237,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
                 <p className="text-xs font-mono text-zinc-500 mb-6 leading-relaxed">
                   Test clinical trial EDC operations and view structured telemetry outputs directly inside the browser. Use the interactive badges or type &apos;help&apos; inside the prompt.
                 </p>
-                <SandboxTerminal />
+                <SandboxTerminal commands={commands} playback={playback} slug={slug} />
               </div>
             )}
 

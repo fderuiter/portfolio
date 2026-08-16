@@ -29,6 +29,7 @@ describe("Prisma migration integrity", () => {
       "20260417215437_init",
       "20260528000000_add_telemetry_event",
       "20260814000000_add_simulated_telemetry",
+      "20261014000000_add_commands_and_playback",
     ]);
   });
 

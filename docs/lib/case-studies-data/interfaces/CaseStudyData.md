@@ -18,11 +18,19 @@ Defined in: [lib/case-studies-data.ts:11](https://github.com/fderuiter/portfolio
 
 ***
 
+### commands\_json?
+
+> `optional` **commands\_json?**: `string`
+
+Defined in: [lib/case-studies-data.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L12)
+
+***
+
 ### created\_at
 
 > **created\_at**: `Date`
 
-Defined in: [lib/case-studies-data.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L12)
+Defined in: [lib/case-studies-data.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L14)
 
 ***
 
@@ -47,6 +55,14 @@ Defined in: [lib/case-studies-data.ts:6](https://github.com/fderuiter/portfolio/
 > **id**: `string`
 
 Defined in: [lib/case-studies-data.ts:2](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L2)
+
+***
+
+### playback\_json?
+
+> `optional` **playback\_json?**: `string`
+
+Defined in: [lib/case-studies-data.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L13)
 
 ***
 
@@ -102,4 +118,4 @@ Defined in: [lib/case-studies-data.ts:4](https://github.com/fderuiter/portfolio/
 
 > **updated\_at**: `Date`
 
-Defined in: [lib/case-studies-data.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L13)
+Defined in: [lib/case-studies-data.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L15)
