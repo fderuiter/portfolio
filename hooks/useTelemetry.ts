@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore, useCallback, useEffect } from "react";
+import { sanitizeError } from "@/lib/error-sanitization";
 
 export interface ProjectTelemetry {
   views: number;
@@ -50,7 +51,7 @@ function updateStore(updater: (prev: TelemetryStoreState) => TelemetryStoreState
         window.dispatchEvent(new CustomEvent(TELEMETRY_CHANGE_EVENT));
       }
     } catch (e) {
-      console.warn("Failed to write to local storage telemetry cache:", e);
+      console.warn("Failed to write to local storage telemetry cache:", sanitizeError(e));
     }
     notifyListeners();
   }
@@ -69,7 +70,7 @@ if (typeof window !== "undefined") {
           };
           notifyListeners();
         } catch (err) {
-          console.warn("Failed to parse cross-tab telemetry storage event:", err);
+          console.warn("Failed to parse cross-tab telemetry storage event:", sanitizeError(err));
         }
       }
     }
@@ -104,7 +105,7 @@ function getSnapshot(): TelemetryStoreState {
         }
       }
     } catch (e) {
-      console.warn("Failed to retrieve local storage telemetry cache:", e);
+      console.warn("Failed to retrieve local storage telemetry cache:", sanitizeError(e));
     }
   }
   return currentStoreState;
@@ -133,7 +134,7 @@ async function fetchTelemetryAggregates() {
       syncFailed: false,
     }));
   } catch (err) {
-    console.error("Background telemetry synchronization failed:", err);
+    console.error("Background telemetry synchronization failed:", sanitizeError(err));
     updateStore((prev) => ({
       ...prev,
       syncFailed: true,
@@ -233,7 +234,7 @@ export function useTelemetry() {
           }
         }
       } catch (err) {
-        console.error("Optimistic telemetry sync persistence failed:", err);
+        console.error("Optimistic telemetry sync persistence failed:", sanitizeError(err));
         // Rollback optimistic increment on hard error
         updateStore((prev) => ({
           ...prev,
