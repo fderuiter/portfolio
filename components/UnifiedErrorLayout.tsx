@@ -7,6 +7,7 @@ import { useTelemetry } from "@/hooks/useTelemetry";
 import { clamp } from "@/lib/game-utils";
 import { useSearch } from "@/components/providers/SearchProvider";
 import dynamic from "next/dynamic";
+import { env } from "@/lib/env";
 
 const RetroLabyrinth = dynamic(
   () => import("@/components/RetroLabyrinth").then((mod) => mod.RetroLabyrinth),
@@ -42,7 +43,10 @@ export function UnifiedErrorLayout({
   const [invalidPath, setInvalidPath] = useState<string>("");
   const [caseStudies, setCaseStudies] = useState<CaseStudyItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [canonicalUrl, setCanonicalUrl] = useState<string>("https://fderuiter-portfolio.vercel.app/");
+  const [canonicalUrl, setCanonicalUrl] = useState<string>(() => {
+    const base = env.NEXT_PUBLIC_APP_URL || "https://fderuiter-portfolio.vercel.app";
+    return base.endsWith("/") ? base : `${base}/`;
+  });
   const isMounted = useSyncExternalStore(
     () => () => {},
     () => true,

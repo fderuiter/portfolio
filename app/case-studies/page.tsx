@@ -6,6 +6,7 @@ import { getGitHubStats, parseGitHubUrl, GitHubStats, getSimulatedStats } from "
 import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageLayout } from "@/components/PageLayout";
+import { env } from "@/lib/env";
 
 export const revalidate = 3600;
 
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
     title: "Engineering Case Studies | Frederick de Ruiter",
     description: "Deep-dive architectural breakdowns, clinical data systems, CDISC standards pipelines, and full-stack systems engineering.",
     type: "website",
-    url: "https://fderuiter-portfolio.vercel.app/case-studies",
+    url: `${env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "")}/case-studies`,
   },
   twitter: {
     card: "summary_large_image",

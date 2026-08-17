@@ -12,6 +12,7 @@ import { TerminologyProvider } from "@/components/providers/TerminologyProvider"
 import { PersonaProvider } from "@/components/providers/PersonaProvider";
 import { Analytics } from "@vercel/analytics/next";
 import { SearchWrapper } from "@/components/SearchWrapper";
+import { env } from "@/lib/env";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -28,7 +29,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://fderuiter-portfolio.vercel.app"),
+  metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
   title: {
     template: "%s | Frederick de Ruiter",
     default: "Frederick de Ruiter | Principal Systems Engineer & Designer",
@@ -51,7 +52,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://fderuiter-portfolio.vercel.app",
+    url: env.NEXT_PUBLIC_APP_URL,
     siteName: "Frederick de Ruiter Portfolio",
     title: "Frederick de Ruiter | Principal Systems Engineer & Designer",
     description: "A high-performance design engineering showcase combining DOM-free canvas layout physics, serverless Neon Postgres data streams, and robust clinical CDISC data engines.",

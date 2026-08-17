@@ -1,7 +1,8 @@
 import { BaseCaseStudy } from "@/types/domain";
 import { GitHubStats } from "@/lib/github";
+import { env } from "@/lib/env";
 
-export const SITE_BASE_URL = "https://fderuiter-portfolio.vercel.app";
+export const SITE_BASE_URL = env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
 
 /**
  * Returns the canonical Person schema representing Frederick de Ruiter.
