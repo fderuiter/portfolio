@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { WorkingWithDuck } from "@/components/WorkingWithDuck";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
@@ -11,8 +11,12 @@ import {
   IconAlertTriangle,
   IconArrowLeft,
 } from "@tabler/icons-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { GameSetupWizard } from "@/components/arcade/GameSetupWizard";
 
 export const WorkingWithDuckClient: React.FC = () => {
+  const [isSetupActive, setIsSetupActive] = useState(true);
+
   return (
     <div className="w-full min-h-dvh bg-black text-white pt-4 pb-20 px-3 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
@@ -59,8 +63,34 @@ export const WorkingWithDuckClient: React.FC = () => {
         </div>
 
         {/* Game Container */}
-        <div className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-6 shadow-[0_0_50px_rgba(251,191,36,0.08)]">
-          <WorkingWithDuck />
+        <div className="relative overflow-hidden min-h-[480px] flex items-center justify-center rounded-3xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-6 shadow-[0_0_50px_rgba(251,191,36,0.08)]">
+          <AnimatePresence mode="wait">
+            {isSetupActive ? (
+              <motion.div
+                key="setup"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.25 }}
+                className="w-full flex justify-center"
+              >
+                <GameSetupWizard
+                  onSkip={() => setIsSetupActive(false)}
+                  onComplete={() => setIsSetupActive(false)}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="game"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="w-full h-full"
+              >
+                <WorkingWithDuck />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Instructions & Controls Reference */}
