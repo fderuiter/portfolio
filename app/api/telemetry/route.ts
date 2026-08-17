@@ -29,7 +29,57 @@ interface LocalCacheEntry {
   count: number;
   expiresAt: number;
 }
-const activeClientsCache = new Map<string, LocalCacheEntry>();
+let activeGeneration = new Map<string, LocalCacheEntry>();
+let inactiveGeneration = new Map<string, LocalCacheEntry>();
+let lastSwapTime = Date.now();
+
+const SWAP_INTERVAL_MS = 5000;
+
+function swapGenerations() {
+  const temp = inactiveGeneration;
+  inactiveGeneration = activeGeneration;
+  activeGeneration = temp;
+  // Clear the active map immediately after the swap (O(1) clear)
+  activeGeneration.clear();
+  lastSwapTime = Date.now();
+}
+
+// Set up the interval to swap active and inactive generations
+const intervalId = setInterval(() => {
+  swapGenerations();
+}, SWAP_INTERVAL_MS);
+
+// If running in Node.js, unref the interval to allow the process to exit cleanly
+if (typeof intervalId !== "undefined" && typeof intervalId.unref === "function") {
+  intervalId.unref();
+}
+
+function checkAndSwapPassive() {
+  const now = Date.now();
+  if (now - lastSwapTime >= SWAP_INTERVAL_MS) {
+    if (now - lastSwapTime >= SWAP_INTERVAL_MS * 2) {
+      activeGeneration.clear();
+      inactiveGeneration.clear();
+      lastSwapTime = now;
+    } else {
+      swapGenerations();
+    }
+  }
+}
+
+// Export cache for testing purposes
+export const _testCache = {
+  get active() { return activeGeneration; },
+  get inactive() { return inactiveGeneration; },
+  swap() {
+    swapGenerations();
+  },
+  reset() {
+    activeGeneration.clear();
+    inactiveGeneration.clear();
+    lastSwapTime = Date.now();
+  }
+};
 
 interface RateLimitResult {
   limited: boolean;
@@ -42,6 +92,9 @@ interface RateLimitResult {
  * Bypasses remote checks for active, valid clients using a local cache.
  */
 async function isRateLimited(req: NextRequest): Promise<RateLimitResult> {
+  // Passively check and perform generational swap if needed
+  checkAndSwapPassive();
+
   // Extract client IP address from standard proxies or request socket
   const ip =
     req.headers.get("x-forwarded-for")?.split(",")[0] ||
@@ -53,8 +106,12 @@ async function isRateLimited(req: NextRequest): Promise<RateLimitResult> {
 
   const now = Date.now();
 
-  // 1. Check local memory bypass cache for active, valid clients
-  const cached = activeClientsCache.get(ipHash);
+  // 1. Check local memory bypass cache for active, valid clients across both generations
+  let cached = activeGeneration.get(ipHash);
+  if (!cached) {
+    cached = inactiveGeneration.get(ipHash);
+  }
+
   if (cached && now < cached.expiresAt) {
     if (cached.count < MAX_REQUESTS_PER_WINDOW) {
       cached.count += 1;
@@ -81,28 +138,21 @@ async function isRateLimited(req: NextRequest): Promise<RateLimitResult> {
 
     if (result.success) {
       // Valid client: update local bypass cache with a safe, short TTL (max 5 seconds or remaining window)
-      activeClientsCache.set(ipHash, {
+      // Write incoming client rate-limit statuses exclusively to the active map
+      activeGeneration.set(ipHash, {
         count: MAX_REQUESTS_PER_WINDOW - result.remaining,
         expiresAt: Math.min(result.reset, now + 5000),
       });
       return { limited: false, headers };
     } else {
-      // Blocked client: invalidate local bypass cache
-      activeClientsCache.delete(ipHash);
+      // Blocked client: invalidate local bypass cache in both maps
+      activeGeneration.delete(ipHash);
+      inactiveGeneration.delete(ipHash);
       return { limited: true, headers };
     }
   } catch (err) {
     console.error("Rate limiting check failed, failing open:", err);
     return { limited: false };
-  } finally {
-    // Periodically sweep expired keys from local cache map to prevent memory leaks
-    if (activeClientsCache.size > 5000) {
-      for (const [key, val] of activeClientsCache.entries()) {
-        if (Date.now() >= val.expiresAt) {
-          activeClientsCache.delete(key);
-        }
-      }
-    }
   }
 }
 
