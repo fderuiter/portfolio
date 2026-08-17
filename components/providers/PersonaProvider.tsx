@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useMemo, useEffect } from "react";
 
-export type PersonaType = "recruiter" | "technical";
+type PersonaType = "recruiter" | "technical";
 
 interface PersonaContextType {
   persona: PersonaType;

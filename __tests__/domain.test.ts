@@ -34,11 +34,11 @@ describe("Dynamic Domain Helper (resolveBaseUrl)", () => {
   it("falls back to the production canonical URL in production environment if NEXT_PUBLIC_APP_URL is omitted", () => {
     vi.stubEnv("NEXT_PUBLIC_APP_URL", "");
     vi.stubEnv("VERCEL_ENV", "production");
-    expect(resolveBaseUrl()).toBe("https://fderuiter.dev");
+    expect(resolveBaseUrl()).toBe("https://www.deruiter.dev");
 
     vi.stubEnv("VERCEL_ENV", "development");
     vi.stubEnv("NODE_ENV", "production");
-    expect(resolveBaseUrl()).toBe("https://fderuiter.dev");
+    expect(resolveBaseUrl()).toBe("https://www.deruiter.dev");
   });
 
   it("falls back to localhost in non-production environments if NEXT_PUBLIC_APP_URL is omitted", () => {

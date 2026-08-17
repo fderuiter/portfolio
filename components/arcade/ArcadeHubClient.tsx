@@ -13,11 +13,12 @@ import {
   IconTrophy,
   IconPlayerPlay,
   IconBone,
+  IconSparkles,
 } from "@tabler/icons-react";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
-export interface ArcadeGameCard {
+interface ArcadeGameCard {
   id: string;
   slug: string;
   title: string;
@@ -51,7 +52,7 @@ const getScore = (key?: string) => () => {
 
 const getServerScore = () => "0";
 
-export const ARCADE_GAMES: ArcadeGameCard[] = [
+const ARCADE_GAMES: ArcadeGameCard[] = [
   {
     id: "working-with-duck",
     slug: "working-with-duck",
@@ -314,11 +315,47 @@ export const ArcadeHubClient: React.FC = () => {
         </div>
 
         {/* Games Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
           {ARCADE_GAMES.map((game, index) => (
             <GameCard key={game.id} game={game} index={index} />
           ))}
         </div>
+
+        {/* Easter Egg Meme Vault Discovery Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.4 }}
+          className="relative rounded-3xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/40 via-slate-900/60 to-slate-950/80 p-6 sm:p-8 backdrop-blur-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 overflow-hidden shadow-[0_0_30px_rgba(16,185,129,0.1)] hover:border-emerald-500/50 transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-400">
+              <IconSparkles className="w-7 h-7 animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border bg-emerald-500/10 text-emerald-300 border-emerald-500/30">
+                  Secret Vault
+                </span>
+                <span className="text-xs font-mono text-zinc-400">Audio DSP &amp; Memes</span>
+              </div>
+              <h2 className="text-lg sm:text-xl font-bold font-mono text-white">
+                Developer Soundboard &amp; Meme Vault
+              </h2>
+              <p className="text-xs sm:text-sm text-zinc-300 font-sans mt-1">
+                Synthesized 8-channel Web Audio soundboard, collectible Easter egg trophies, and ASCII art generators.
+              </p>
+            </div>
+          </div>
+
+          <Link
+            href="/arcade/meme-vault"
+            className="inline-flex shrink-0 items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono text-xs font-bold transition-all duration-200 hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.3)] cursor-pointer"
+          >
+            <span>Enter Vault</span>
+            <IconArrowRight className="w-4 h-4" />
+          </Link>
+        </motion.div>
       </div>
     </main>
   );

@@ -5,14 +5,14 @@ import Link from "next/link";
 import { IconArrowLeft, IconArrowRight, IconGridDots } from "@tabler/icons-react";
 import { useAudio } from "@/components/providers/AudioProvider";
 
-export interface NavItemTarget {
+interface NavItemTarget {
   title: string;
   href: string;
   label?: string;
   tag?: string;
 }
 
-export interface NextPrevNavProps {
+interface NextPrevNavProps {
   prev?: NavItemTarget | null;
   next?: NavItemTarget | null;
   backToHub?: { title: string; href: string };

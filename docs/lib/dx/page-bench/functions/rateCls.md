@@ -8,7 +8,7 @@
 
 > **rateCls**(`cls`): [`WebVitalRating`](../type-aliases/WebVitalRating.md)
 
-Defined in: [lib/dx/page-bench.ts:135](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L135)
+Defined in: [lib/dx/page-bench.ts:136](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L136)
 
 ## Parameters
 

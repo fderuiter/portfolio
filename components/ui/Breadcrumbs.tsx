@@ -6,12 +6,12 @@ import { IconChevronRight, IconHome } from "@tabler/icons-react";
 import { getBreadcrumbSchema } from "@/lib/seo";
 import { useAudio } from "@/components/providers/AudioProvider";
 
-export interface BreadcrumbCrumb {
+interface BreadcrumbCrumb {
   label: string;
   href?: string;
 }
 
-export interface BreadcrumbsProps {
+interface BreadcrumbsProps {
   items: BreadcrumbCrumb[];
   className?: string;
 }

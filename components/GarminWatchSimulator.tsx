@@ -29,8 +29,7 @@ import {
   GameEngineState,
 } from "@/lib/garmin-engine";
 
-export type GarminActivityMode = DeviceTarget | "ocean" | "trail" | "space";
-export type WatchBezelTheme = "slate" | "solar" | "cyan" | "neon";
+type WatchBezelTheme = "slate" | "solar" | "cyan" | "neon";
 
 const subscribeHighScore = (callback: () => void) => {
   if (typeof window === "undefined") return () => {};

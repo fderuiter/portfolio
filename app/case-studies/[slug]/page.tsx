@@ -36,7 +36,9 @@ export async function generateStaticParams() {
       slug: study.slug,
     }));
   } catch (error) {
-    console.error("Failed to fetch case studies for static params:", error);
+    if (process.env.VERCEL_ENV === "production") {
+      console.error("Failed to fetch case studies for static params:", error);
+    }
     const isProduction = process.env.VERCEL_ENV === "production";
     const isMockEnv = process.env.CI === "true" || process.env.PLAYWRIGHT_TEST === "true" || !isProduction;
     if (isMockEnv) {
@@ -55,7 +57,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       where: { slug },
     });
   } catch (err) {
-    console.error("Metadata generation DB query exception:", err);
+    if (process.env.VERCEL_ENV === "production") {
+      console.error("Metadata generation DB query exception:", err);
+    }
     const isProduction = process.env.VERCEL_ENV === "production";
     const isMockEnv = process.env.CI === "true" || process.env.PLAYWRIGHT_TEST === "true" || !isProduction;
     if (isMockEnv) {

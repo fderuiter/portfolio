@@ -8,7 +8,7 @@
 
 > **rateLcp**(`ms`): [`WebVitalRating`](../type-aliases/WebVitalRating.md)
 
-Defined in: [lib/dx/page-bench.ts:129](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L129)
+Defined in: [lib/dx/page-bench.ts:130](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L130)
 
 ## Parameters
 

@@ -205,7 +205,9 @@ export async function getGitHubStats(owner: string, repo: string): Promise<GitHu
     try {
       return await fetchRawGitHubStats(owner, repo);
     } catch (fallbackErr) {
-      console.error(`Failed to fetch raw GitHub stats for ${owner}/${repo}:`, fallbackErr);
+      if (process.env.VERCEL_ENV === "production") {
+        console.error(`Failed to fetch raw GitHub stats for ${owner}/${repo}:`, fallbackErr);
+      }
       return null;
     }
   }

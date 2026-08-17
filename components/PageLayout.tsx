@@ -1,7 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
-export interface PageLayoutProps extends React.HTMLAttributes<HTMLDivElement> {
+interface PageLayoutProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   /**
    * Layout presentation variant:

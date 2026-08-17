@@ -13,7 +13,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: { slug: true, updated_at: true }
     });
   } catch (err) {
-    console.error("Sitemap generation database query failure:", err);
+    if (process.env.VERCEL_ENV === "production") {
+      console.error("Sitemap generation database query failure:", err);
+    }
     const isProduction = process.env.VERCEL_ENV === "production";
     const isMockEnv = process.env.CI === "true" || process.env.PLAYWRIGHT_TEST === "true" || !isProduction;
     if (isMockEnv) {
@@ -85,6 +87,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${baseUrl}/arcade/retro-labyrinth`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/arcade/meme-vault`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,

@@ -3,7 +3,7 @@
 import React from "react";
 import { IconMaximize, IconMinimize } from "@tabler/icons-react";
 
-export interface FullscreenButtonProps {
+interface FullscreenButtonProps {
   isFullscreen: boolean;
   onToggle: () => void;
   variant?: "header" | "floating";

@@ -2,7 +2,7 @@
 
 import React from "react";
 
-export interface SkipToContentProps {
+interface SkipToContentProps {
   /**
    * Target DOM element ID to jump to when activated.
    * Defaults to 'main-content'.

@@ -23,7 +23,7 @@ const getRealityContent = (slug: string, originalContent: string) => {
   return REALITY_CONTENT[slug] || `Reality Check: ${originalContent} (Dynamic verification and performance testing in live staging revealed minor scaling limits under concurrent loads).`;
 };
 
-export const FormattedMarkdownText: React.FC<{ text: string; className?: string }> = ({ text, className }) => {
+const FormattedMarkdownText: React.FC<{ text: string; className?: string }> = ({ text, className }) => {
   const paragraphs = React.useMemo(() => {
     return text.split(/\r?\n+/).map((p) => p.trim()).filter(Boolean);
   }, [text]);

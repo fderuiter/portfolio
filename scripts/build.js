@@ -18,6 +18,9 @@ if (!process.env.CRON_SECRET) {
   console.log("No CRON_SECRET found. Setting dummy CRON_SECRET for offline compilation.");
   process.env.CRON_SECRET = 'dummy-secret-for-compilation';
 }
+if (!process.env.NODE_OPTIONS || !process.env.NODE_OPTIONS.includes('--no-warnings')) {
+  process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS || ''} --no-warnings`.trim();
+}
 
 // Helper function to run a step and exit if it fails
 function runStep(command, args) {

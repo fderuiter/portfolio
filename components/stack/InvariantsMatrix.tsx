@@ -11,7 +11,7 @@ import {
 } from "@tabler/icons-react";
 import { useAudio } from "@/components/providers/AudioProvider";
 
-export interface InvariantItem {
+interface InvariantItem {
   id: number;
   code: string;
   name: string;

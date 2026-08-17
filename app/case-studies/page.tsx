@@ -62,7 +62,9 @@ export default async function CaseStudiesPage() {
       })
     );
   } catch (error) {
-    console.warn("Failed to load case studies from database. Falling back to local data:", error);
+    if (process.env.VERCEL_ENV === "production") {
+      console.warn("Failed to load case studies from database. Falling back to local data:", error);
+    }
     caseStudies = FALLBACK_CASE_STUDIES.map((cs) => ({
       ...cs,
       githubStats: getSimulatedStats(cs.primary_language),

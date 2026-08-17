@@ -53,6 +53,11 @@ function isConventionEntrypoint(filePath: string): boolean {
       "not-found.tsx",
       "sitemap.ts",
       "robots.ts",
+      "manifest.ts",
+      "opengraph-image.tsx",
+      "twitter-image.tsx",
+      "icon.tsx",
+      "apple-icon.tsx",
       "instrumentation.ts",
       "middleware.ts",
       "global-error.tsx",
@@ -63,18 +68,31 @@ function isConventionEntrypoint(filePath: string): boolean {
     return true;
   }
 
-  // Scripts, configs, tests, seeds
+  // Scripts, configs, tests, seeds, setup files
   if (
     normalized.includes("/scripts/") ||
     normalized.includes("/__tests__/") ||
     normalized.includes("/prisma/") ||
     base.includes(".config.") ||
-    base.startsWith("sentry.")
+    base.startsWith("sentry.") ||
+    base === "vitest.setup.ts"
   ) {
     return true;
   }
 
   return false;
+}
+
+/**
+ * Checks if a file belongs to the public library and TypeDoc contract surface.
+ */
+function isPublicLibrarySurface(filePath: string): boolean {
+  const normalized = filePath.replace(/\\/g, "/");
+  return (
+    normalized.includes("/lib/") ||
+    normalized.includes("/types/") ||
+    normalized.includes("/hooks/")
+  );
 }
 
 /**
@@ -171,8 +189,35 @@ export function scanDeadCode(workspaceRoot: string): DeadCodeReport {
   }
 
   const unusedExports: ExportItem[] = [];
+  const orphanedFiles: string[] = [];
 
+  // 1. Check for orphaned non-entrypoint files (never imported or referenced)
+  for (const f of targetFilesToAnalyze) {
+    const baseName = path.basename(f).replace(/\.[^/.]+$/, "");
+    let fileReferenced = false;
+
+    for (const [otherFile, content] of fileContents.entries()) {
+      if (otherFile === f) continue;
+      if (content.includes(baseName) || content.includes(path.basename(f))) {
+        fileReferenced = true;
+        break;
+      }
+    }
+
+    // Library and types files might be imported via index or folder paths
+    if (!fileReferenced && !isPublicLibrarySurface(f)) {
+      orphanedFiles.push(f);
+    }
+  }
+
+  // 2. Check for unused exports in private UI and internal modules (components/ and app/)
   for (const exp of allExports) {
+    // Only flag unreferenced exports in non-library surfaces (components, app internal helpers)
+    // Library contracts in lib/, types/, and hooks/ are public API entrypoints documented by TypeDoc
+    if (isPublicLibrarySurface(exp.filePath)) {
+      continue;
+    }
+
     // If default export on a non-entrypoint file, check if filename or import references it
     if (exp.name === "default") {
       const baseName = path.basename(exp.filePath).replace(/\.[^/.]+$/, "");
@@ -213,7 +258,7 @@ export function scanDeadCode(workspaceRoot: string): DeadCodeReport {
     totalScannedFiles: allSourceFiles.length,
     totalExports: allExports.length,
     unusedExports,
-    orphanedFiles: [],
+    orphanedFiles,
   };
 }
 
@@ -222,16 +267,23 @@ export function scanDeadCode(workspaceRoot: string): DeadCodeReport {
  */
 export function checkDeadCode(root: string): DiagnosticCheckResult {
   const report = scanDeadCode(root);
+  const issues = [...report.unusedExports, ...report.orphanedFiles];
 
-  if (report.unusedExports.length > 0) {
-    // Only warn if there are unused exports so it doesn't break CI unexpectedly
-    const details = report.unusedExports.slice(0, 10).map((u) => {
+  if (issues.length > 0) {
+    const details: string[] = [];
+
+    for (const u of report.unusedExports.slice(0, 10)) {
       const relPath = path.relative(root, u.filePath);
-      return `${relPath}:${u.line} - [${u.kind}] ${u.name}`;
-    });
+      details.push(`${relPath}:${u.line} - [${u.kind}] ${u.name}`);
+    }
 
-    if (report.unusedExports.length > 10) {
-      details.push(`... and ${report.unusedExports.length - 10} more`);
+    for (const orphan of report.orphanedFiles.slice(0, 5)) {
+      const relPath = path.relative(root, orphan);
+      details.push(`[orphaned file] ${relPath}`);
+    }
+
+    if (issues.length > 10) {
+      details.push(`... and ${issues.length - 10} more`);
     }
 
     return {
@@ -239,7 +291,7 @@ export function checkDeadCode(root: string): DiagnosticCheckResult {
       name: "Dead Code & Unused Export Scanner",
       category: "quality",
       status: "warn",
-      message: `Found ${report.unusedExports.length} potentially unused export(s) across ${report.totalScannedFiles} source files.`,
+      message: `Found ${report.unusedExports.length} unreferenced export(s) and ${report.orphanedFiles.length} orphaned file(s) across ${report.totalScannedFiles} source files.`,
       details,
     };
   }

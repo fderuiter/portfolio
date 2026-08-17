@@ -20,7 +20,7 @@ import {
 import { StudioMode } from "@/lib/crf/types";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 
-export interface WorkflowWizardModalProps {
+interface WorkflowWizardModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSwitchMode: (mode: StudioMode) => void;

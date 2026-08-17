@@ -5,10 +5,26 @@ import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { IconSearch, IconTerminal, IconFileCode, IconDirections, IconCornerDownLeft, IconCalendar, IconBrain, IconFileSpreadsheet, IconCpu } from "@tabler/icons-react";
+import {
+  IconSearch,
+  IconTerminal,
+  IconFileCode,
+  IconDirections,
+  IconCornerDownLeft,
+  IconCalendar,
+  IconBrain,
+  IconFileSpreadsheet,
+  IconCpu,
+  IconDeviceGamepad2,
+  IconSparkles,
+  IconCoffee,
+  IconFlame,
+} from "@tabler/icons-react";
 import { filterFuzzySearch } from "@/lib/search-utils";
 import { useSearch } from "@/components/providers/SearchProvider";
 import { useAudio } from "@/components/providers/AudioProvider";
+import { unlockAchievement, setVaultUnlocked } from "@/lib/meme-data";
+import { playMemeSound } from "@/lib/meme-audio";
 
 interface SearchCaseStudy {
   id: string;
@@ -355,6 +371,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
           "Zero-friction confirmation workflow"
         ]
       },
+      {
+        id: "nav-meme-vault",
+        title: "Secret Meme Vault & Soundboard",
+        subtitle: "Synthesized retro sounds, Easter egg achievements, and engineering jokes",
+        category: "navigation",
+        url: "/arcade/meme-vault",
+        icon: <IconDeviceGamepad2 className="w-4 h-4 text-emerald-400" />,
+        badge: "Secret Vault",
+        status: "Unlocked",
+        description: "Interactive developer & MedTech soundboard, achievement tracker, and meme generator cards.",
+        techStack: ["Web Audio API", "CRT Shader", "React 19", "LocalStorage"],
+        highlights: [
+          "8-channel synthesized retro soundboard",
+          "6 collectible site achievements",
+          "Interactive meme quotes & sound triggers"
+        ]
+      },
     ];
 
     const safeStudies = Array.isArray(studies) ? studies : [];
@@ -384,9 +417,111 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
     return [...staticNavs, ...studyItems];
   }, [studies]);
 
-  // 3. In-Memory Fuzzy filtering matching queries against titles or tags
+  // 3. In-Memory Fuzzy filtering matching queries against titles, tags, and secret easter egg triggers
   const filteredItems = useMemo(() => {
-    return filterFuzzySearch(query, allItems);
+    const baseMatches = filterFuzzySearch(query, allItems);
+    const q = query.trim().toLowerCase();
+    if (!q) return baseMatches;
+
+    const secretItems: PaletteItem[] = [];
+
+    if (q === "418" || q.includes("coffee") || q.includes("tea")) {
+      secretItems.push({
+        id: "secret-418",
+        title: "HTTP 418: I'm a Teapot (RFC 2324)",
+        subtitle: "Hyper Text Coffee Pot Control Protocol / RFC 7168",
+        category: "navigation",
+        url: "action:418",
+        icon: <IconCoffee className="w-4 h-4 text-teal-400" />,
+        badge: "RFC 2324",
+        status: "Brewing Error",
+        description: "HTCPCP 1.0 error: The requested entity body is short and stout. Cannot brew espresso on a web server.",
+        techStack: ["RFC 2324", "RFC 7168", "HTCPCP/1.0"],
+        highlights: ["Brew coffee action", "Teapot whistle sound effect", "Instant achievement unlock"]
+      });
+    }
+
+    if (q.includes("duck") || q.includes("puppy") || q.includes("woof")) {
+      secretItems.push({
+        id: "secret-duck",
+        title: "🐾 Summon Duck the Golden Retriever",
+        subtitle: "Click to toss a treat and hear Duck bark happily!",
+        category: "navigation",
+        url: "action:duck",
+        icon: <IconSparkles className="w-4 h-4 text-amber-400" />,
+        badge: "Chief Bark Officer",
+        status: "Good Boy",
+        description: "Duck has achieved 100% test coverage by enthusiastically chewing through the staging network cables.",
+        techStack: ["Golden Retriever AI", "Treat Physics", "Bark Synthesizer"],
+        highlights: ["Playful synthesized puppy woof", "Achievement unlocked: Duck Whisperer", "100% Good Boy rating"]
+      });
+    }
+
+    if (q.includes("sudo") || q.includes("root")) {
+      secretItems.push({
+        id: "secret-sudo",
+        title: "sudo su - (Permission Denied)",
+        subtitle: "Incident reported to security team (and Duck 🐾)",
+        category: "navigation",
+        url: "action:sudo",
+        icon: <IconTerminal className="w-4 h-4 text-rose-400" />,
+        badge: "Security Log",
+        status: "Denied",
+        description: "User is not in the sudoers file. This incident has been logged in triplicate under 21 CFR Part 11 audit trails.",
+        techStack: ["UNIX PAM", "21 CFR Part 11", "Audit Sentry"],
+        highlights: ["Audit alert siren", "Immutable security log", "Terminal achievement progress"]
+      });
+    }
+
+    if (q.includes("chaos") || q.includes("konami") || q.includes("retro") || q.includes("matrix")) {
+      secretItems.push({
+        id: "secret-chaos",
+        title: "🎮 Launch Retro Chaos Mode",
+        subtitle: "Activate full-screen CRT scanline overlay and unlock secrets",
+        category: "navigation",
+        url: "action:chaos",
+        icon: <IconSparkles className="w-4 h-4 text-emerald-400" />,
+        badge: "Easter Egg",
+        status: "CRT Ready",
+        description: "Trigger the full-screen cyberpunk phosphor CRT scanline overlay, unlocking all easter eggs and achievement badges.",
+        techStack: ["CRT Post-Processing", "Konami Engine", "Web Audio API"],
+        highlights: ["Full-screen phosphor CRT scanlines", "8-bit fanfare chime", "Unlocks Secret Meme Vault"]
+      });
+    }
+
+    if (q.includes("friday") || q.includes("push") || q.includes("deploy")) {
+      secretItems.push({
+        id: "secret-friday",
+        title: "🚨 Git Push --Force to Main (Friday 4:59 PM)",
+        subtitle: "Simulate a high-stakes emergency production deployment",
+        category: "navigation",
+        url: "action:friday",
+        icon: <IconFlame className="w-4 h-4 text-red-400" />,
+        badge: "High Risk",
+        status: "Alarm Armed",
+        description: "Push directly to production without testing. Will the server survive the weekend?",
+        techStack: ["Git Engine", "Friday Deploy Protocol", "Panic Siren"],
+        highlights: ["Dramatic alarm siren sound", "Achievement unlocked: Friday Deploy Survivor", "Zero staging fear"]
+      });
+    }
+
+    if (q === "ping") {
+      secretItems.push({
+        id: "secret-ping",
+        title: "ping 127.0.0.1 -> 64 bytes from localhost: icmp_seq=1 ttl=64 time=0.012 ms",
+        subtitle: "Lake Minnetonka cluster is 100% online",
+        category: "navigation",
+        url: "action:ping",
+        icon: <IconTerminal className="w-4 h-4 text-cyan-400" />,
+        badge: "ICMP Pong",
+        status: "0.012ms",
+        description: "Direct zero-latency heartbeat from the local Next.js 15 kernel runtime.",
+        techStack: ["ICMP Ping", "Localhost", "Zero Latency"],
+        highlights: ["Instant response", "Sub-millisecond latency", "100% uptime"]
+      });
+    }
+
+    return [...secretItems, ...baseMatches];
   }, [allItems, query]);
 
   // 4. Keyboard Control Handlers (↑↓, Enter, Escape)
@@ -424,6 +559,35 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
       playSubmit();
     }
     onClose();
+
+    // Handle special easter egg action commands
+    if (item.url.startsWith("action:")) {
+      const actionType = item.url.replace("action:", "");
+      if (actionType === "418") {
+        unlockAchievement("rfc-barista");
+        playMemeSound("teapot-whistle");
+      } else if (actionType === "duck") {
+        unlockAchievement("duck-whisperer");
+        playMemeSound("bark");
+      } else if (actionType === "sudo") {
+        unlockAchievement("terminal-cowboy");
+        playMemeSound("fda-siren");
+      } else if (actionType === "chaos") {
+        unlockAchievement("konami-hero");
+        setVaultUnlocked(true);
+        playMemeSound("fanfare");
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("trigger_retro_chaos"));
+        }
+      } else if (actionType === "friday") {
+        unlockAchievement("friday-survivor");
+        playMemeSound("friday-alarm");
+      } else if (actionType === "ping") {
+        playMemeSound("matrix-glitch");
+      }
+      return;
+    }
+
     // Handle in-page dynamic smooth scrolls
     if (item.url.startsWith("/#")) {
       const targetId = item.url.substring(2);
