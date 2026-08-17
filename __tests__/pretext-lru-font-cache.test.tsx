@@ -6,7 +6,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import { renderHook } from "@testing-library/react";
 import { cssPropertyCache, fontConfigCache } from "@/lib/graphics-engine";
-import { resolveSingleThemeFont } from "@/lib/layout-config";
+import { resolveSingleThemeFont, resolveThemeFonts } from "@/lib/layout-config";
 import { usePretextLayout } from "@/hooks/usePretextLayout";
 
 describe("Pretext LRU Font and Style Cache Suite", () => {
@@ -126,5 +126,81 @@ describe("Pretext LRU Font and Style Cache Suite", () => {
 
     const font = resolveSingleThemeFont(16, "--font-inter");
     expect(font).toContain("system-ui"); // fallback sans-serif default font on error
+  });
+
+  it("Requirement 5: window.getComputedStyle is only queried if both the outer configuration cache and inner individual font family cache miss (single font)", () => {
+    // 1. Fully cached in both: should not query style
+    cssPropertyCache.set("--font-inter", "MyInterFont");
+    fontConfigCache.set("singleThemeFont|18|--font-inter", "18px MyInterFont");
+    
+    const getComputedStyleSpy = vi.spyOn(window, "getComputedStyle");
+    const fontValCached = resolveSingleThemeFont(18, "--font-inter");
+    expect(fontValCached).toBe("18px MyInterFont");
+    expect(getComputedStyleSpy).not.toHaveBeenCalled();
+
+    // 2. Outer configuration cache miss, but inner individual font family cache hit:
+    // Should NOT query getComputedStyle
+    fontConfigCache.clear();
+    getComputedStyleSpy.mockClear();
+    
+    const fontValInnerHit = resolveSingleThemeFont(18, "--font-inter");
+    expect(fontValInnerHit).toBe("18px MyInterFont");
+    expect(getComputedStyleSpy).not.toHaveBeenCalled();
+
+    // 3. Both outer and inner caches miss:
+    // Must query getComputedStyle
+    cssPropertyCache.clear();
+    fontConfigCache.clear();
+    getComputedStyleSpy.mockClear();
+
+    const getPropertyValueSpy = vi.spyOn(window.CSSStyleDeclaration.prototype, "getPropertyValue");
+    getPropertyValueSpy.mockReturnValue("NewInterFont");
+
+    const fontValBothMiss = resolveSingleThemeFont(18, "--font-inter");
+    expect(fontValBothMiss).toBe("18px NewInterFont");
+    expect(getComputedStyleSpy).toHaveBeenCalledTimes(1);
+    expect(cssPropertyCache.get("--font-inter")).toBe("NewInterFont");
+  });
+
+  it("Requirement 5: window.getComputedStyle is only queried if both the outer configuration cache and inner individual font family cache miss (theme fonts)", () => {
+    // 1. Fully cached in both: should not query style
+    cssPropertyCache.set("--font-inter", "MyInterFont");
+    cssPropertyCache.set("--font-mono", "MyMonoFont");
+    
+    const mockTheme = {
+      baseFont: "400 18px MyInterFont",
+      boldFont: "700 18px MyInterFont",
+      italicFont: "italic 400 18px MyInterFont",
+      codeFont: "500 17px MyMonoFont",
+    };
+    fontConfigCache.set("themeFonts|18|--font-inter", mockTheme);
+
+    const getComputedStyleSpy = vi.spyOn(window, "getComputedStyle");
+    const resultCached = resolveThemeFonts(18, "--font-inter");
+    expect(resultCached).toEqual(mockTheme);
+    expect(getComputedStyleSpy).not.toHaveBeenCalled();
+
+    // 2. Outer configuration cache miss, but inner individual font family cache hit:
+    // Should NOT query getComputedStyle
+    fontConfigCache.clear();
+    getComputedStyleSpy.mockClear();
+
+    const resultInnerHit = resolveThemeFonts(18, "--font-inter");
+    expect(resultInnerHit).toEqual(mockTheme);
+    expect(getComputedStyleSpy).not.toHaveBeenCalled();
+
+    // 3. Inner cache partial miss (one matches, one misses):
+    // Must query getComputedStyle
+    cssPropertyCache.clear();
+    cssPropertyCache.set("--font-inter", "MyInterFont"); // only inter is present, mono is missing
+    fontConfigCache.clear();
+    getComputedStyleSpy.mockClear();
+
+    const getPropertyValueSpy = vi.spyOn(window.CSSStyleDeclaration.prototype, "getPropertyValue");
+    getPropertyValueSpy.mockReturnValue("NewMonoFont");
+
+    const resultPartialMiss = resolveThemeFonts(18, "--font-inter");
+    expect(getComputedStyleSpy).toHaveBeenCalledTimes(1);
+    expect(resultPartialMiss.codeFont).toContain("NewMonoFont");
   });
 });

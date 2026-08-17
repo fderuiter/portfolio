@@ -59,16 +59,28 @@ export function resolveThemeFonts(
   }
 
   try {
+    let resolvedFontFamily = cssPropertyCache.get(fontFamilyVariable);
+    let resolvedMonoFamily = cssPropertyCache.get("--font-mono");
+
+    if (resolvedFontFamily && resolvedMonoFamily) {
+      const result = {
+        baseFont: `400 ${fontSize}px ${resolvedFontFamily}`,
+        boldFont: `700 ${fontSize}px ${resolvedFontFamily}`,
+        italicFont: `italic 400 ${fontSize}px ${resolvedFontFamily}`,
+        codeFont: `500 ${fontSize - 1}px ${resolvedMonoFamily}`,
+      };
+      fontConfigCache.set(cacheKey, result);
+      return result;
+    }
+
     const rootStyle = window.getComputedStyle(document.documentElement);
     
-    let resolvedFontFamily = cssPropertyCache.get(fontFamilyVariable);
     if (!resolvedFontFamily) {
       const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
       resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
       cssPropertyCache.set(fontFamilyVariable, resolvedFontFamily);
     }
 
-    let resolvedMonoFamily = cssPropertyCache.get("--font-mono");
     if (!resolvedMonoFamily) {
       const rawMonoFamily = rootStyle.getPropertyValue("--font-mono").trim() || rootStyle.getPropertyValue("--font-geist-mono").trim();
       resolvedMonoFamily = rawMonoFamily || designManifest.typography.fonts.mono;
@@ -111,14 +123,18 @@ export function resolveSingleThemeFont(
   }
 
   try {
+    let resolvedFontFamily = cssPropertyCache.get(fontFamilyVariable);
+    if (resolvedFontFamily) {
+      const result = `${fontSize}px ${resolvedFontFamily}`;
+      fontConfigCache.set(cacheKey, result);
+      return result;
+    }
+
     const rootStyle = window.getComputedStyle(document.documentElement);
     
-    let resolvedFontFamily = cssPropertyCache.get(fontFamilyVariable);
-    if (!resolvedFontFamily) {
-      const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
-      resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
-      cssPropertyCache.set(fontFamilyVariable, resolvedFontFamily);
-    }
+    const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
+    resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
+    cssPropertyCache.set(fontFamilyVariable, resolvedFontFamily);
 
     const result = `${fontSize}px ${resolvedFontFamily}`;
     fontConfigCache.set(cacheKey, result);
