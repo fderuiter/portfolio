@@ -321,4 +321,103 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
 
     expect(container.textContent).toContain("9800");
   });
+
+  it("should freeze conveyor subject timers when Controlled Terminology Drawer or Signature Modal is open, and resume immediately on close", async () => {
+    vi.useFakeTimers();
+
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+
+    // Start campaign
+    const startBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Start 3-Phase Campaign")
+    );
+    await act(async () => {
+      startBtn?.click();
+    });
+
+    // Helper to tick fake timers in small steps asynchronously to allow recursive animation frames to execute
+    const tickGame = async (totalMs: number, stepMs = 100) => {
+      for (let elapsed = 0; elapsed < totalMs; elapsed += stepMs) {
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(stepMs);
+        });
+      }
+    };
+
+    // Verify initial time is 40s
+    expect(container.textContent).toContain("40s");
+
+    // Let 2.5 seconds pass
+    await tickGame(2500, 100);
+
+    // Timer should have ticked down to 38s (40 - 2.5 = 37.5 -> Math.ceil = 38)
+    expect(container.textContent).toContain("38s");
+
+    // Find and click the observation card to open multi-choice validation drawer
+    const validateChoiceEl = Array.from(container.querySelectorAll("span")).find((s) =>
+      s.textContent?.includes("Validate Choice")
+    );
+    const obsCard = validateChoiceEl?.closest(".cursor-pointer") as HTMLElement;
+    await act(async () => {
+      obsCard.click();
+    });
+
+    expect(container.textContent).toContain("CDISC Controlled Terminology Validation");
+
+    // Let another 3 seconds pass while drawer is open
+    await tickGame(3000, 100);
+
+    // The timer should still show 38s (since game loop frame delta is 0 seconds when drawer is open)
+    expect(container.textContent).toContain("38s");
+
+    // Close the drawer using the close button
+    const closeBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Close")
+    );
+    await act(async () => {
+      closeBtn?.click();
+    });
+
+    // Let another 2.0 seconds pass after closing drawer
+    await tickGame(2000, 100);
+
+    // Timer should now have ticked down to 36s (37.5 - 2.0 = 35.5 -> Math.ceil = 36)
+    expect(container.textContent).toContain("36s");
+
+
+    // Open signature modal via DM Station
+    const dmHeading = Array.from(container.querySelectorAll("h4")).find((h) =>
+      h.textContent?.includes("DM Station")
+    );
+    const dmStationCard = dmHeading?.closest(".group") as HTMLElement;
+    await act(async () => {
+      dmStationCard.click();
+    });
+
+    expect(container.textContent).toContain("21 CFR Part 11 Electronic Signature");
+
+    // Let another 4 seconds pass while signature modal is open
+    await tickGame(4000, 100);
+
+    // The timer should still show 36s (frozen frame delta)
+    expect(container.textContent).toContain("36s");
+
+    // Cancel signature modal (Close/Cancel)
+    const cancelBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Cancel")
+    );
+    await act(async () => {
+      cancelBtn?.click();
+    });
+
+    // Let another 1 second pass after closing signature modal
+    await tickGame(1000, 100);
+
+    // Timer should now tick down to 35s
+    expect(container.textContent).toContain("35s");
+
+    vi.useRealTimers();
+  });
 });
