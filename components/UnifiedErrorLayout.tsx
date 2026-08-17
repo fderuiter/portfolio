@@ -42,6 +42,7 @@ export function UnifiedErrorLayout({
   const [invalidPath, setInvalidPath] = useState<string>("");
   const [caseStudies, setCaseStudies] = useState<CaseStudyItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [canonicalUrl, setCanonicalUrl] = useState<string>("https://fderuiter-portfolio.vercel.app/");
   const isMounted = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -55,6 +56,7 @@ export function UnifiedErrorLayout({
   useEffect(() => {
     if (typeof window !== "undefined") {
       const currentPath = window.location.pathname || fallbackPath;
+      setCanonicalUrl(window.location.href);
       setTimeout(() => {
         setInvalidPath(currentPath);
       }, 0);
@@ -141,7 +143,11 @@ export function UnifiedErrorLayout({
   };
 
   return (
-    <main className="min-h-screen py-32 px-6 flex flex-col items-center justify-center bg-brand-dark text-foreground relative overflow-hidden select-none">
+    <>
+      <title>{`${badge} - ${title}`}</title>
+      <meta name="robots" content="noindex, nofollow" />
+      <link rel="canonical" href={canonicalUrl} />
+      <main className="min-h-screen py-32 px-6 flex flex-col items-center justify-center bg-brand-dark text-foreground relative overflow-hidden select-none">
       {/* Background Blurs */}
       <div 
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none transition-all duration-700" 
@@ -318,5 +324,6 @@ export function UnifiedErrorLayout({
         </div>
       </div>
     </main>
+    </>
   );
 }
