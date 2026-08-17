@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   IconX,
   IconChevronRight,
@@ -18,6 +18,7 @@ import {
   IconPlayerPlay,
 } from "@tabler/icons-react";
 import { StudioMode } from "@/lib/crf/types";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 export interface WorkflowWizardModalProps {
   isOpen: boolean;
@@ -206,21 +207,49 @@ export const WorkflowWizardModal: React.FC<WorkflowWizardModalProps> = ({
 }) => {
   const [currentStageIdx, setCurrentStageIdx] = useState<number>(0);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen) return;
-      if (e.key === "Escape") {
-        onClose();
-      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-        setCurrentStageIdx((prev) => Math.min(prev + 1, WIZARD_STAGES.length - 1));
-      } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-        setCurrentStageIdx((prev) => Math.max(prev - 1, 0));
-      }
-    };
+  const containerRef = useFocusTrap<HTMLDivElement>(isOpen, {
+    onEscape: onClose,
+    returnFocus: true,
+  });
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      e.stopPropagation();
+      onClose();
+      return;
+    }
+
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      const activeEl = document.activeElement;
+      if (
+        activeEl &&
+        (activeEl.tagName === "INPUT" ||
+          activeEl.tagName === "TEXTAREA" ||
+          activeEl.tagName === "SELECT" ||
+          (activeEl.hasAttribute("contenteditable") &&
+            activeEl.getAttribute("contenteditable") !== "false"))
+      ) {
+        return;
+      }
+      e.preventDefault();
+      setCurrentStageIdx((prev) => Math.min(prev + 1, WIZARD_STAGES.length - 1));
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      const activeEl = document.activeElement;
+      if (
+        activeEl &&
+        (activeEl.tagName === "INPUT" ||
+          activeEl.tagName === "TEXTAREA" ||
+          activeEl.tagName === "SELECT" ||
+          (activeEl.hasAttribute("contenteditable") &&
+            activeEl.getAttribute("contenteditable") !== "false"))
+      ) {
+        return;
+      }
+      e.preventDefault();
+      setCurrentStageIdx((prev) => Math.max(prev - 1, 0));
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -248,10 +277,13 @@ export const WorkflowWizardModal: React.FC<WorkflowWizardModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
       <div
+        ref={containerRef}
+        onKeyDown={handleKeyDown}
         className="w-full max-w-4xl max-h-[92vh] flex flex-col bg-zinc-950 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden"
         role="dialog"
         aria-modal="true"
         aria-labelledby="wizard-title"
+        tabIndex={-1}
       >
         {/* Top Header Bar */}
         <div className="px-6 py-4 border-b border-zinc-800/80 bg-zinc-900/60 flex items-center justify-between">
