@@ -17,6 +17,8 @@ import {
   IconBrandLinkedin
 } from "@tabler/icons-react";
 
+export const revalidate = 3600;
+
 interface HydratedCaseStudy extends BaseCaseStudy {
   githubStats: GitHubStats | null;
 }
