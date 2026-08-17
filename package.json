@@ -37,7 +37,8 @@
     "test:fuzz": "vitest run __tests__/property-fuzz.test.ts",
     "test:mutation": "npx tsx scripts/run-mutation-tests.ts",
     "probe:synthetic": "playwright test __tests__/e2e/synthetic-probes.spec.ts",
-    "canary:eval": "npx tsx scripts/canary-analyzer.ts"
+    "canary:eval": "npx tsx scripts/canary-analyzer.ts",
+    "audit:security": "npx tsx scripts/security-audit.ts"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
