@@ -163,6 +163,20 @@ Formal inference rules used to derive logical steps from valid premises:
 - **Bundle Chunk Budget Guard (`lib/dx/bundle-guard.ts`)**: Post-build asset analyzer evaluating production gzip and raw byte footprints against hard performance budgets (initial shared <= 350 kB, single chunk <= 200 kB).
 - **Workspace IDE Standard (`.vscode/`, `.editorconfig`)**: Centralized editor profiles establishing consistent formatting, TypeScript SDK resolution, Tailwind IntelliSense rules, and one-click debugger profiles across all developer environments.
 
+## Synthetic Reliability, Telemetry & Watch Emulation
+
+### Headless Synthetic Journey Probing
+- **Headless Synthetic User Probes**: Continuous real-browser Playwright test probes (`__tests__/e2e/synthetic-probes.spec.ts`) validating 5 critical end-to-end user journeys across a 4-browser matrix (Desktop Chrome, Tablet Safari, Mobile Safari, Mobile Chrome): Pretext text layout rendering, Spotlight Command Palette traversal and fuzzy search routing, Proof Assistant DAG theorem verification and export, Arcade Canvas 2D engine lifecycle, and Telemetry API ingestion with schema rejection guards.
+- **Multi-Device Discovery Matrix**: Cross-platform testing matrix verifying touch interaction, keyboard boundaries, modal focus trapping, and responsive viewport sizing across mobile (375x667, 393x851), tablet (810x1080), and desktop (1280x720) viewports.
+
+### Production Canary Analysis & Health Governance
+- **Automated Canary Analysis (ACA)**: Production deployment verification engine (`scripts/canary-analyzer.ts`) evaluating live request telemetry and error budgets against statistical baseline thresholds (5xx error rate <= 0.5%, p95 latency <= 800ms, Sentry exception spike ratio <= 2.0x) to automate canary promotion or trigger rollback workflows.
+- **Telemetry Event Ingestion Guard**: Validated REST API endpoint (`/api/telemetry`) enforcing strict Zod schema parsing, origin sanitization, rate-limiting, and error-boundary isolation on client performance and user interaction metrics.
+
+### Garmin Watch Hardware & Thermal Emulation
+- **Garmin Thermal & CPU Telemetry Engine**: Deterministic physical simulation engine (`lib/garmin-engine.ts`, `components/arcade/GarminWatch.tsx`) modeling Connect IQ runtime CPU workloads, heat generation curves, passive wrist thermal dissipation, battery discharge profiles, and ANT+ heart rate sensor telemetry under active workload stress.
+- **Monkey C Bytecode Emulation Scaffold**: Canvas-driven graphical rendering pipeline emulating high-contrast MIP (Memory-in-Pixel) transflective smartwatch displays, hardware bezel buttons, and Connect IQ OS lifecycle states with zero native C dependencies.
+
 
 
 

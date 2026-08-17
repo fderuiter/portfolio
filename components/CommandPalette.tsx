@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef, useId, useMemo } from "react";
 import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
-import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { IconSearch, IconTerminal, IconFileCode, IconDirections, IconCornerDownLeft, IconCalendar, IconBrain, IconFileSpreadsheet, IconCpu } from "@tabler/icons-react";
@@ -453,11 +452,19 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
   const activeItem = filteredItems[activeIndex] || filteredItems[0];
 
   return (
-    <div
+    <motion.div
+      key="command-palette-backdrop"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.15 }}
       onClick={handleBackdropClick}
       className="fixed inset-0 z-50 flex items-start justify-center pt-[max(1.5rem,env(safe-area-inset-top)+1rem)] sm:pt-[12vh] px-3 sm:px-4 pb-[max(1.5rem,env(safe-area-inset-bottom)+1rem)] bg-zinc-950/85 backdrop-blur-md transition-all duration-300 overflow-y-auto"
     >
       <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Command Palette"
         initial={{ opacity: 0, scale: 0.97, y: -8 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.97, y: -8 }}
@@ -732,24 +739,24 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
           </div>
         </div>
       </motion.div>
-    </div>
+    </motion.div>
   );
 };
 
 export const CommandPalette: React.FC = () => {
-  const [mounted, setMounted] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const { isOpen, setIsOpen, closeSearch } = useSearch();
   const [studies, setStudies] = useState<SearchCaseStudy[]>([]);
   const originalFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
+    setIsMounted(true);
   }, []);
 
   // 1. Keyboard Shortcut Listener (Cmd+K / Ctrl+K) site-wide
   useEffect(() => {
-    if (!mounted) return;
+    if (!isMounted) return;
     const isWithinBoundary = (target: EventTarget | null) => {
       if (target instanceof Element) {
         return !!target.closest("[data-keyboard-boundary]");
@@ -769,11 +776,11 @@ export const CommandPalette: React.FC = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [mounted, isOpen, setIsOpen]);
+  }, [isMounted, isOpen, setIsOpen]);
 
   // Expose test helper globally to open search modal programmatically
   useEffect(() => {
-    if (!mounted) return;
+    if (!isMounted) return;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__openSearch = () => {
       setIsOpen(true);
@@ -782,19 +789,19 @@ export const CommandPalette: React.FC = () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (window as any).__openSearch;
     };
-  }, [mounted, setIsOpen]);
+  }, [isMounted, setIsOpen]);
 
   // Capture original focus state when the palette opens
   useEffect(() => {
-    if (!mounted) return;
+    if (!isMounted) return;
     if (isOpen) {
       originalFocusRef.current = document.activeElement as HTMLElement;
     }
-  }, [isOpen, mounted]);
+  }, [isOpen, isMounted]);
 
   // 2. Fetch search case studies on-demand when palette opens or during idle time
   useEffect(() => {
-    if (!mounted) return;
+    if (!isMounted) return;
     if (studies.length > 0) return;
 
     let isSubscribed = true;
@@ -839,25 +846,24 @@ export const CommandPalette: React.FC = () => {
     return () => {
       isSubscribed = false;
     };
-  }, [mounted, isOpen, studies.length]);
+  }, [isMounted, isOpen, studies.length]);
 
   const handleClose = () => {
     closeSearch();
     originalFocusRef.current?.focus();
   };
 
-  if (!mounted) return null;
-  if (typeof window === "undefined") return null;
+  if (!isMounted) return null;
 
-  return createPortal(
+  return (
     <AnimatePresence>
       {isOpen && (
         <CommandPaletteModal
+          key="command-palette-modal"
           onClose={handleClose}
           studies={studies}
         />
       )}
-    </AnimatePresence>,
-    document.body
+    </AnimatePresence>
   );
 };
