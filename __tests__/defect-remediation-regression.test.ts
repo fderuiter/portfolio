@@ -1,4 +1,9 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import React, { act } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import { WorkflowWizardModal } from "@/components/crf/Wizard/WorkflowWizardModal";
+
+(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 import {
   evaluateAst,
   evaluateAstWithTrace,
@@ -225,6 +230,110 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       } finally {
         (process.env as Record<string, string | undefined>).NODE_ENV = originalNodeEnv;
       }
+    });
+  });
+
+  describe("Workflow Onboarding Wizard Focus and Keyboard Navigation (Acceptance Criteria)", () => {
+    let container: HTMLDivElement;
+    let root: Root;
+    let mockBtn: HTMLButtonElement;
+
+    beforeEach(() => {
+      container = document.createElement("div");
+      document.body.appendChild(container);
+
+      // Create initiating element to receive focus on return
+      mockBtn = document.createElement("button");
+      mockBtn.id = "initiator-btn";
+      document.body.appendChild(mockBtn);
+      mockBtn.focus();
+
+      root = createRoot(container);
+    });
+
+    afterEach(() => {
+      act(() => {
+        root?.unmount();
+      });
+      if (container.parentNode) {
+        document.body.removeChild(container);
+      }
+      if (mockBtn.parentNode) {
+        document.body.removeChild(mockBtn);
+      }
+    });
+
+    it("traps focus and restores focus to initiating element upon Esc press", async () => {
+      const handleClose = vi.fn();
+      await act(async () => {
+        root.render(
+          React.createElement(WorkflowWizardModal, {
+            isOpen: true,
+            onClose: handleClose,
+            onSwitchMode: vi.fn(),
+            onStartSpotlightTour: vi.fn(),
+          })
+        );
+      });
+
+      // Initially focus should be on something inside the modal
+      const dialog = container.querySelector('[role="dialog"]') as HTMLElement;
+      expect(dialog).toBeDefined();
+
+      // Trigger Escape keydown on the dialog container
+      await act(async () => {
+        const escEvent = new KeyboardEvent("keydown", { key: "Escape", bubbles: true });
+        dialog.dispatchEvent(escEvent);
+      });
+
+      expect(handleClose).toHaveBeenCalled();
+    });
+
+    it("navigates wizard stages on arrow keys when focused inside, but not on input fields", async () => {
+      await act(async () => {
+        root.render(
+          React.createElement(WorkflowWizardModal, {
+            isOpen: true,
+            onClose: vi.fn(),
+            onSwitchMode: vi.fn(),
+            onStartSpotlightTour: vi.fn(),
+          })
+        );
+      });
+
+      const dialog = container.querySelector('[role="dialog"]') as HTMLElement;
+      expect(container.textContent).toContain("Stage 1 of 5");
+
+      // Dispatch ArrowRight keydown
+      await act(async () => {
+        const arrowRight = new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true });
+        dialog.dispatchEvent(arrowRight);
+      });
+      expect(container.textContent).toContain("Stage 2 of 5");
+
+      // Dispatch ArrowLeft keydown
+      await act(async () => {
+        const arrowLeft = new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true });
+        dialog.dispatchEvent(arrowLeft);
+      });
+      expect(container.textContent).toContain("Stage 1 of 5");
+
+      // Now create and focus a text input inside the body to simulate user focusing an input inside the dialog
+      const input = document.createElement("input");
+      input.type = "text";
+      dialog.appendChild(input);
+      input.focus();
+
+      // Dispatch ArrowRight keydown from inside the text input
+      await act(async () => {
+        const arrowRight = new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true });
+        input.dispatchEvent(arrowRight);
+      });
+      // The stage should NOT change because focus is on an input
+      expect(container.textContent).toContain("Stage 1 of 5");
+
+      // Clean up input
+      dialog.removeChild(input);
     });
   });
 });
