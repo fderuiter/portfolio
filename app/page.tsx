@@ -5,8 +5,18 @@ import { BaseCaseStudy } from "@/types/domain";
 import { Hero } from "@/components/Hero";
 import { getGitHubStats, parseGitHubUrl, GitHubStats, getSimulatedStats } from "@/lib/github";
 import { TextReveal } from "@/components/TextReveal";
-import { SkillsGrid } from "@/components/SkillsGrid";
-import { Timeline } from "@/components/Timeline";
+import dynamic from "next/dynamic";
+import { DeferredHydration, SkillsGridSkeleton, TimelineSkeleton } from "@/components/DeferredHydration";
+
+const DynamicSkillsGrid = dynamic(
+  () => import("@/components/SkillsGrid").then((mod) => mod.SkillsGrid),
+  { ssr: true }
+);
+
+const DynamicTimeline = dynamic(
+  () => import("@/components/Timeline").then((mod) => mod.Timeline),
+  { ssr: true }
+);
 import { InteractiveHighlights } from "@/components/InteractiveHighlights";
 import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 import { PageLayout } from "@/components/PageLayout";
@@ -148,7 +158,9 @@ export default async function PortfolioHomePage() {
           
           {/* Dynamic Bento Skills Grid Card Layout */}
           <div className="w-full mb-10 sm:mb-14">
-            <SkillsGrid languages={languagesList} />
+            <DeferredHydration fallback={<SkillsGridSkeleton />}>
+              <DynamicSkillsGrid languages={languagesList} />
+            </DeferredHydration>
           </div>
 
           <h3 className="text-xl sm:text-2xl font-extrabold font-mono text-white tracking-tight text-center mb-2">
@@ -160,7 +172,9 @@ export default async function PortfolioHomePage() {
 
           {/* Interactive Staggered Timeline Component */}
           <div className="w-full">
-            <Timeline />
+            <DeferredHydration fallback={<TimelineSkeleton />}>
+              <DynamicTimeline />
+            </DeferredHydration>
           </div>
         </div>
       </section>
