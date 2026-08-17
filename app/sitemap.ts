@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
+import { resolveBaseUrl } from "@/lib/domain";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://fderuiter-portfolio.vercel.app";
+  const baseUrl = resolveBaseUrl();
 
   // Fetch all published case studies to dynamically generate sitemap URLs
   let studies: { slug: string; updated_at: Date }[] = [];

@@ -10,6 +10,7 @@ import {
   getSoftwareSourceCodeSchema,
   SITE_BASE_URL,
 } from "@/lib/seo";
+import { resolveBaseUrl } from "@/lib/domain";
 import { ROUTE_METADATA_CONFIGS, buildRouteMetadata } from "@/lib/seo-metadata";
 import robots from "@/app/robots";
 import sitemap from "@/app/sitemap";
@@ -143,7 +144,7 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
         allow: "/",
         disallow: ["/api/", "/_next/"]
       });
-      expect(result.sitemap).toBe(`${SITE_BASE_URL}/sitemap.xml`);
+      expect(result.sitemap).toBe(`${resolveBaseUrl()}/sitemap.xml`);
     } finally {
       process.env.VERCEL_ENV = originalVercelEnv;
     }
@@ -170,17 +171,18 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     expect(Array.isArray(map)).toBe(true);
 
     const urls = map.map((entry) => entry.url);
-    expect(urls).toContain(SITE_BASE_URL);
-    expect(urls).toContain(`${SITE_BASE_URL}/arcade`);
-    expect(urls).toContain(`${SITE_BASE_URL}/arcade/laser-loon`);
-    expect(urls).toContain(`${SITE_BASE_URL}/arcade/quasi-puzzler`);
-    expect(urls).toContain(`${SITE_BASE_URL}/arcade/garmin-watch`);
-    expect(urls).toContain(`${SITE_BASE_URL}/arcade/clinical-chaos`);
-    expect(urls).toContain(`${SITE_BASE_URL}/arcade/retro-labyrinth`);
-    expect(urls).toContain(`${SITE_BASE_URL}/arcade/working-with-duck`);
-    expect(urls).toContain(`${SITE_BASE_URL}/proof`);
-    expect(urls).toContain(`${SITE_BASE_URL}/simulator`);
-    expect(urls).toContain(`${SITE_BASE_URL}/schedule`);
+    const expectedBase = resolveBaseUrl();
+    expect(urls).toContain(expectedBase);
+    expect(urls).toContain(`${expectedBase}/arcade`);
+    expect(urls).toContain(`${expectedBase}/arcade/laser-loon`);
+    expect(urls).toContain(`${expectedBase}/arcade/quasi-puzzler`);
+    expect(urls).toContain(`${expectedBase}/arcade/garmin-watch`);
+    expect(urls).toContain(`${expectedBase}/arcade/clinical-chaos`);
+    expect(urls).toContain(`${expectedBase}/arcade/retro-labyrinth`);
+    expect(urls).toContain(`${expectedBase}/arcade/working-with-duck`);
+    expect(urls).toContain(`${expectedBase}/proof`);
+    expect(urls).toContain(`${expectedBase}/simulator`);
+    expect(urls).toContain(`${expectedBase}/schedule`);
   });
 
   it("root layout metadata configures SVG, ICO, Apple Touch, and web manifest", async () => {

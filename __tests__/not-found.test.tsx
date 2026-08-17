@@ -47,13 +47,16 @@ describe("NotFound component & dynamic metadata hoisting", () => {
       });
     }));
 
-    // Mock window.location
+    // Mock window.location and NEXT_PUBLIC_APP_URL dynamically
+    const testAppUrl = "https://my-custom-test-domain.com";
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", testAppUrl);
+
     const originalLocation = window.location;
     vi.stubGlobal("location", {
       ...originalLocation,
-      href: "https://fderuiter-portfolio.vercel.app/some-broken-path",
+      href: `${testAppUrl}/some-broken-path`,
       pathname: "/some-broken-path",
-      origin: "https://fderuiter-portfolio.vercel.app"
+      origin: testAppUrl
     });
   });
 
@@ -96,6 +99,6 @@ describe("NotFound component & dynamic metadata hoisting", () => {
     // Check canonical link tag is hoisted to head and matches window.location.href
     const canonicalLink = document.head.querySelector('link[rel="canonical"]');
     expect(canonicalLink).toBeDefined();
-    expect(canonicalLink?.getAttribute("href")).toBe("https://fderuiter-portfolio.vercel.app/some-broken-path");
+    expect(canonicalLink?.getAttribute("href")).toBe("https://my-custom-test-domain.com/some-broken-path");
   });
 });
