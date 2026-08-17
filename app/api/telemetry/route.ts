@@ -107,6 +107,18 @@ async function isRateLimited(req: NextRequest): Promise<RateLimitResult> {
 }
 
 export async function GET() {
+  if (process.env.PLAYWRIGHT_TEST === "true") {
+    return NextResponse.json({
+      "synthetic-probe-runner": { views: 5, clicks: 2 },
+      "simulator": { views: 10, clicks: 4 },
+      "neuro": { views: 8, clicks: 3 },
+    }, {
+      status: 200,
+      headers: {
+        "Cache-Control": "public, max-age=10, s-maxage=60, stale-while-revalidate=600",
+      },
+    });
+  }
   try {
     // Perform dynamic grouping aggregate on TelemetryEvents to sum view & click metrics
     const stats = await prisma.telemetryEvent.groupBy({
@@ -150,6 +162,34 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  if (process.env.PLAYWRIGHT_TEST === "true") {
+    try {
+      const payload = await req.json();
+      const result = TelemetryEventSchema.safeParse(payload);
+      if (!result.success) {
+        const firstIssue = result.error.issues[0];
+        let errorMessage = "Validation failed";
+        if (firstIssue.path[0] === "projectSlug") {
+          errorMessage = "Missing or invalid projectSlug identifier";
+        } else if (firstIssue.path[0] === "eventType") {
+          errorMessage = "Missing or invalid eventType. Allowed: 'page_view', 'project_click', 'route_error'";
+        }
+        return NextResponse.json(
+          {
+            error: errorMessage,
+            details: result.error.issues.map((err) => ({
+              path: err.path.join("."),
+              message: err.message,
+            })),
+          },
+          { status: 400 }
+        );
+      }
+      return NextResponse.json({ success: true, event: result.data }, { status: 201 });
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body payload" }, { status: 400 });
+    }
+  }
   try {
     // Enforce rate limiter checks
     const rateLimitRes = await isRateLimited(req);

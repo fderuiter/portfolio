@@ -8,4 +8,4 @@
 
 > `const` **prisma**: `DynamicClientExtensionThis`\<`TypeMap`\<`InternalArgs` & `object`, `GlobalOmitConfig` \| `undefined`\>, `TypeMapCb`\<`GlobalOmitConfig` \| `undefined`\>, \{ `client`: \{ \}; `model`: \{ \}; `query`: \{ \}; `result`: \{ \}; \}\>
 
-Defined in: [lib/db.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/db.ts#L50)
+Defined in: [lib/db.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib/db.ts#L82)
