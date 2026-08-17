@@ -798,6 +798,34 @@ export const ClinicalTrialChaos: React.FC = () => {
     [selectedSubjectId]
   );
 
+  // 16b. Mirroring Refs for Stable Game Loop
+  const playStateRef = useRef(playState);
+  const phaseRef = useRef(phase);
+  const conveyorSubjectsRef = useRef(conveyorSubjects);
+  const selectedSubjectIdRef = useRef(selectedSubjectId);
+  const auditorRef = useRef(auditor);
+  const stationsRef = useRef(stations);
+  const scoreStateRef = useRef(scoreState);
+  const auditLogsRef = useRef(auditLogs);
+  const addAuditLogRef = useRef(addAuditLog);
+  const triggerSoundRef = useRef(triggerSound);
+  const renderConveyorCanvasRef = useRef(renderConveyorCanvas);
+
+  // Sync refs on every render
+  useEffect(() => {
+    playStateRef.current = playState;
+    phaseRef.current = phase;
+    conveyorSubjectsRef.current = conveyorSubjects;
+    selectedSubjectIdRef.current = selectedSubjectId;
+    auditorRef.current = auditor;
+    stationsRef.current = stations;
+    scoreStateRef.current = scoreState;
+    auditLogsRef.current = auditLogs;
+    addAuditLogRef.current = addAuditLog;
+    triggerSoundRef.current = triggerSound;
+    renderConveyorCanvasRef.current = renderConveyorCanvas;
+  });
+
   // 17. Main Game Loop Tick (requestAnimationFrame)
   useEffect(() => {
     if (playState !== "playing") return;
@@ -836,8 +864,8 @@ export const ClinicalTrialChaos: React.FC = () => {
 
         if (expiredSubjects.length > 0) {
           expiredSubjects.forEach((exp) => {
-            triggerSound("error");
-            addAuditLog(
+            triggerSoundRef.current("error");
+            addAuditLogRef.current(
               `[AUDIT TIMEOUT] Subject ${exp.subjectLabel} expired unverified on conveyor! Auditor suspicion +20%`,
               "CRITICAL",
               20
@@ -867,15 +895,15 @@ export const ClinicalTrialChaos: React.FC = () => {
 
       // 2. Tick Auditor AI
       setAuditor((prev) => {
-        const updatedAuditor = tickAuditor(prev, deltaSeconds, conveyorSubjects.length);
-        if (updatedAuditor.suspicion >= 100 && playState === "playing") {
-          triggerSound("alarm");
+        const updatedAuditor = tickAuditor(prev, deltaSeconds, conveyorSubjectsRef.current.length);
+        if (updatedAuditor.suspicion >= 100 && playStateRef.current === "playing") {
+          triggerSoundRef.current("alarm");
           setPlayState("game_over");
-          addAuditLog(
+          addAuditLogRef.current(
             `[FDA NOTICE OF STUDY TERMINATION] 21 CFR Part 11 Audit Suspicion reached 100%. Form 483 Issued.`,
             "CRITICAL"
           );
-          const report = generateBIMOReport(scoreState, updatedAuditor, auditLogs);
+          const report = generateBIMOReport(scoreStateRef.current, updatedAuditor, auditLogsRef.current);
           setBimoReport(report);
         }
         return updatedAuditor;
@@ -889,7 +917,7 @@ export const ClinicalTrialChaos: React.FC = () => {
         if (!prev || !prev.active) return null;
         const remaining = prev.timeRemaining - deltaSeconds;
         if (remaining <= 0) {
-          addAuditLog(`Protocol Amendment ${prev.version} concluded. Standard site procedures resumed.`, "INFO");
+          addAuditLogRef.current(`Protocol Amendment ${prev.version} concluded. Standard site procedures resumed.`, "INFO");
           return null;
         }
         return { ...prev, timeRemaining: remaining };
@@ -897,37 +925,37 @@ export const ClinicalTrialChaos: React.FC = () => {
 
       // 5. Random Protocol Amendments
       amendmentTimerRef.current += deltaSeconds;
-      const amendmentInterval = phase === 1 ? 40 : phase === 2 ? 28 : 20;
+      const amendmentInterval = phaseRef.current === 1 ? 40 : phaseRef.current === 2 ? 28 : 20;
       if (amendmentTimerRef.current > amendmentInterval) {
         amendmentTimerRef.current = 0;
         const newAmendment = triggerRandomAmendment();
         setActiveAmendment(newAmendment);
-        triggerSound("amendment");
-        addAuditLog(`[PROTOCOL AMENDMENT ALERT] ${newAmendment.version}: ${newAmendment.title}!`, "WARN");
+        triggerSoundRef.current("amendment");
+        addAuditLogRef.current(`[PROTOCOL AMENDMENT ALERT] ${newAmendment.version}: ${newAmendment.title}!`, "WARN");
 
         if (newAmendment.type === "station-scramble") {
           setStations((st) => scrambleStations(st));
         } else if (newAmendment.type === "sae-priority-rush") {
-          const saeSubj = generateClinicalSubject(0.7, true, undefined, stations.map((s) => s.id));
+          const saeSubj = generateClinicalSubject(0.7, true, undefined, stationsRef.current.map((s) => s.id));
           setConveyorSubjects((cs) => [saeSubj, ...cs]);
         }
       }
 
       // 6. Spawning new subjects
       spawnTimerRef.current += deltaSeconds;
-      const spawnInterval = phase === 1 ? 6.5 : phase === 2 ? 4.8 : 3.5;
-      if (spawnTimerRef.current > spawnInterval && conveyorSubjects.length < 5) {
+      const spawnInterval = phaseRef.current === 1 ? 6.5 : phaseRef.current === 2 ? 4.8 : 3.5;
+      if (spawnTimerRef.current > spawnInterval && conveyorSubjectsRef.current.length < 5) {
         spawnTimerRef.current = 0;
-        const errorChance = phase === 1 ? 0.45 : phase === 2 ? 0.65 : 0.8;
-        const isSAE = Math.random() < (phase === 1 ? 0.1 : 0.3);
+        const errorChance = phaseRef.current === 1 ? 0.45 : phaseRef.current === 2 ? 0.65 : 0.8;
+        const isSAE = Math.random() < (phaseRef.current === 1 ? 0.1 : 0.3);
         const newSub = generateClinicalSubject(
           errorChance,
           isSAE,
           undefined,
-          stations.map((s) => s.id)
+          stationsRef.current.map((s) => s.id)
         );
         setConveyorSubjects((prev) => [...prev, newSub]);
-        if (!selectedSubjectId) {
+        if (!selectedSubjectIdRef.current) {
           setSelectedSubjectId(newSub.id);
         }
       }
@@ -937,12 +965,12 @@ export const ClinicalTrialChaos: React.FC = () => {
       if (canvas) {
         const ctx = canvas.getContext("2d");
         if (ctx) {
-          renderConveyorCanvas(
+          renderConveyorCanvasRef.current(
             ctx,
             canvas.width,
             canvas.height,
-            auditor,
-            conveyorSubjects,
+            auditorRef.current,
+            conveyorSubjectsRef.current,
             particlesRef.current
           );
         }
@@ -962,19 +990,7 @@ export const ClinicalTrialChaos: React.FC = () => {
       }
       if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
     };
-  }, [
-    playState,
-    phase,
-    conveyorSubjects,
-    selectedSubjectId,
-    auditor,
-    stations,
-    scoreState,
-    auditLogs,
-    addAuditLog,
-    triggerSound,
-    renderConveyorCanvas,
-  ]);
+  }, [playState]);
 
   // 18. Hotkeys and Keyboard Boundary
   const handleKeyDown = (e: React.KeyboardEvent) => {
