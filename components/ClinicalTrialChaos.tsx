@@ -189,6 +189,17 @@ export const ClinicalTrialChaos: React.FC = () => {
   const amendmentTimerRef = useRef<number>(0);
   const terminalContainerRef = useRef<HTMLDivElement>(null);
   const particlesRef = useRef<Particle[]>([]);
+  const coffeeBreakTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Unmount effect for coffee break timer
+  useEffect(() => {
+    return () => {
+      if (coffeeBreakTimerRef.current) {
+        clearTimeout(coffeeBreakTimerRef.current);
+        coffeeBreakTimerRef.current = null;
+      }
+    };
+  }, []);
 
   // 5. Audit Logger
   const addAuditLog = useCallback(
@@ -245,6 +256,10 @@ export const ClinicalTrialChaos: React.FC = () => {
   // 8. Start / Restart shift
   const startGame = useCallback(
     (mode: GameMode = "campaign", targetPhase: GamePhase = 1) => {
+      if (coffeeBreakTimerRef.current) {
+        clearTimeout(coffeeBreakTimerRef.current);
+        coffeeBreakTimerRef.current = null;
+      }
       setGameMode(mode);
       setPhase(targetPhase);
       setPlayState("playing");
@@ -406,6 +421,11 @@ export const ClinicalTrialChaos: React.FC = () => {
       triggerSound("powerup");
 
       if (type === "fda-coffee-break") {
+        if (coffeeBreakTimerRef.current) {
+          clearTimeout(coffeeBreakTimerRef.current);
+          coffeeBreakTimerRef.current = null;
+        }
+
         setAuditor((aud) => ({
           ...aud,
           behavior: "coffee_break",
@@ -414,13 +434,14 @@ export const ClinicalTrialChaos: React.FC = () => {
         }));
         addAuditLog("☕ [POWER-UP ACTIVATED] FDA Coffee Break! Auditor halted for 8 seconds.", "COMPLIANT");
 
-        setTimeout(() => {
+        coffeeBreakTimerRef.current = setTimeout(() => {
           setAuditor((aud) => ({
             ...aud,
             behavior: "patrolling",
             isPaused: false,
           }));
           addAuditLog("☕ FDA Coffee Break ended. Auditor resumed inspection floor patrol.", "INFO");
+          coffeeBreakTimerRef.current = null;
         }, 8000);
       } else if (type === "auto-clean") {
         if (activeSubject) {

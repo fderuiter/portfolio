@@ -6,7 +6,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { ClinicalTrialChaos } from "@/components/ClinicalTrialChaos";
 
 class LocalStorageMock {
   private store: Record<string, string> = {};
@@ -56,12 +55,35 @@ vi.mock("@/hooks/useTelemetry", () => ({
   }),
 }));
 
+vi.mock("@/lib/clinical-trial-chaos/engine", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/clinical-trial-chaos/engine")>();
+  return {
+    ...actual,
+    createInitialPowerUpInventory: () => {
+      const inventory = actual.createInitialPowerUpInventory();
+      inventory["fda-coffee-break"].charge = inventory["fda-coffee-break"].maxCharge;
+      return inventory;
+    },
+    tickPowerUps: (pu: any, deltaSeconds: number) => {
+      const updated = actual.tickPowerUps(pu, deltaSeconds);
+      if (updated["fda-coffee-break"]) {
+        updated["fda-coffee-break"].charge = updated["fda-coffee-break"].maxCharge;
+      }
+      return updated;
+    },
+  };
+});
+
+let ClinicalTrialChaos: any;
+
 describe("ClinicalTrialChaos React Component UI Suite", () => {
   let container: HTMLDivElement;
   let root: Root;
   let mockStorage: LocalStorageMock;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    const mod = await import("@/components/ClinicalTrialChaos");
+    ClinicalTrialChaos = mod.ClinicalTrialChaos;
     mockStorage = new LocalStorageMock();
     Object.defineProperty(window, "localStorage", {
       value: mockStorage,
@@ -320,5 +342,182 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     });
 
     expect(container.textContent).toContain("9800");
+  });
+
+  it("should activate fda-coffee-break and resume patrolling after 8 seconds", async () => {
+    vi.useFakeTimers();
+
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+
+    // Start campaign
+    const startBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Start 3-Phase Campaign")
+    );
+    await act(async () => {
+      startBtn?.click();
+    });
+
+    // Trigger coffee break
+    const coffeeBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("FDA Coffee Break")
+    );
+    expect(coffeeBtn).toBeDefined();
+
+    await act(async () => {
+      coffeeBtn?.click();
+    });
+
+    expect(container.textContent).toContain("COFFEE BREAK");
+
+    // Advance 8 seconds
+    await act(async () => {
+      vi.advanceTimersByTime(8000);
+    });
+
+    expect(container.textContent).toContain("patrolling");
+
+    vi.useRealTimers();
+  });
+
+  it("should cancel active coffee break timer immediately upon game restart", async () => {
+    vi.useFakeTimers();
+    const clearTimeoutSpy = vi.spyOn(globalThis, "clearTimeout");
+
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+
+    // Start campaign
+    const startBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Start 3-Phase Campaign")
+    );
+    await act(async () => {
+      startBtn?.click();
+    });
+
+    // Trigger coffee break
+    const coffeeBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("FDA Coffee Break")
+    );
+    await act(async () => {
+      coffeeBtn?.click();
+    });
+
+    expect(container.textContent).toContain("COFFEE BREAK");
+
+    // Submit invalid electronic signatures 4 times to reach 100% suspicion
+    for (let i = 0; i < 4; i++) {
+      const dmHeading = Array.from(container.querySelectorAll("h4")).find((h) =>
+        h.textContent?.includes("DM Station")
+      );
+      const dmStationCard = dmHeading?.closest(".group") as HTMLElement;
+      await act(async () => {
+        dmStationCard.click();
+      });
+
+      const confirmBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+        b.textContent?.includes("Sign & Lock CRF")
+      );
+      await act(async () => {
+        confirmBtn?.click();
+      });
+    }
+
+    // Advance timers so that the game loop tick transitions playState to game_over
+    await act(async () => {
+      vi.advanceTimersByTime(500);
+    });
+
+    // Now game over screen should be shown
+    expect(container.textContent).toContain("FDA FORM 483 ISSUED");
+
+    // Restart the game by clicking Restart
+    const restartBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Restart Phase I")
+    );
+    expect(restartBtn).toBeDefined();
+    await act(async () => {
+      restartBtn?.click();
+    });
+
+    // clearTimeout should be called immediately on restart
+    expect(clearTimeoutSpy).toHaveBeenCalled();
+
+    clearTimeoutSpy.mockRestore();
+    vi.useRealTimers();
+  });
+
+  it("should cancel active coffee break timer automatically when component unmounts", async () => {
+    vi.useFakeTimers();
+    const clearTimeoutSpy = vi.spyOn(globalThis, "clearTimeout");
+
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+
+    // Start campaign
+    const startBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Start 3-Phase Campaign")
+    );
+    await act(async () => {
+      startBtn?.click();
+    });
+
+    // Trigger coffee break
+    const coffeeBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("FDA Coffee Break")
+    );
+    await act(async () => {
+      coffeeBtn?.click();
+    });
+
+    // Unmount component
+    await act(async () => {
+      root.unmount();
+    });
+
+    // clearTimeout should have been called
+    expect(clearTimeoutSpy).toHaveBeenCalled();
+
+    clearTimeoutSpy.mockRestore();
+    vi.useRealTimers();
+  });
+
+  it("should cancel existing timer before starting a new one when coffee break is activated in rapid succession", async () => {
+    vi.useFakeTimers();
+    const clearTimeoutSpy = vi.spyOn(globalThis, "clearTimeout");
+
+    await act(async () => {
+      root.render(<ClinicalTrialChaos />);
+    });
+
+    // Start campaign
+    const startBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Start 3-Phase Campaign")
+    );
+    await act(async () => {
+      startBtn?.click();
+    });
+
+    // Trigger coffee break 1
+    const coffeeBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("FDA Coffee Break")
+    );
+    await act(async () => {
+      coffeeBtn?.click();
+    });
+
+    // Trigger coffee break 2
+    await act(async () => {
+      coffeeBtn?.click();
+    });
+
+    // clearTimeout should have been called on the previous timer
+    expect(clearTimeoutSpy).toHaveBeenCalled();
+
+    clearTimeoutSpy.mockRestore();
+    vi.useRealTimers();
   });
 });
