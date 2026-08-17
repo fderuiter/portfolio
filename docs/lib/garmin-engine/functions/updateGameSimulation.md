@@ -8,7 +8,7 @@
 
 > **updateGameSimulation**(`state`, `deltaMs`): [`GameEngineState`](../interfaces/GameEngineState.md)
 
-Defined in: [lib/garmin-engine.ts:320](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L320)
+Defined in: [lib/garmin-engine.ts:322](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L322)
 
 Primary Game Physics & Simulation Update Loop (Called by requestAnimationFrame)
 

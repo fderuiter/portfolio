@@ -342,4 +342,78 @@ describe("Garmin Connect IQ Simulation Engine (lib/garmin-engine.ts)", () => {
     };
     expect(() => renderCanvasFrame(mockCtx, crashedState)).not.toThrow();
   });
+
+  it("should track stateful thermalStress combining backlight, RAM utilization (>80%), and GC freezes", () => {
+    let state = startGame(createInitialState("fenix"));
+    expect(state.thermalStress).toBe(0);
+
+    // 1. Backlight stress
+    state.isLightOn = true;
+    state.lightActiveDurationMs = 6000;
+    state = updateGameSimulation(state, 1000);
+    expect(state.thermalStress).toBeGreaterThan(0);
+
+    // 2. RAM stress
+    state.isLightOn = false;
+    state.lightActiveDurationMs = 0;
+    state.allocatedRamKb = 30; // 30 / 32 = 93.75% > 80%
+    state = updateGameSimulation(state, 1000);
+    expect(state.thermalStress).toBeGreaterThan(0);
+
+    // 3. GC freeze stress
+    state.allocatedRamKb = 1.8;
+    state.isGcActive = true;
+    state.gcTimerMs = 500;
+    state = updateGameSimulation(state, 50);
+    expect(state.thermalStress).toBeGreaterThan(0);
+  });
+
+  it("should increase fogLevel proportionally to thermalStress", () => {
+    let state = startGame(createInitialState("fenix"));
+    state.thermalStress = 0.8;
+    state.fogLevel = 0.1;
+    state = updateGameSimulation(state, 500);
+    expect(state.fogLevel).toBeGreaterThan(0.1);
+    expect(state.fogLevel).toBeLessThanOrEqual(0.8);
+  });
+
+  it("should render a semi-transparent fog overlay when RAM utilization exceeds 80% or during a garbage collection freeze", () => {
+    let state = startGame(createInitialState("fenix"));
+    state.allocatedRamKb = 30; // > 80%
+    state = updateGameSimulation(state, 1000);
+    expect(state.fogLevel).toBeGreaterThan(0);
+
+    // During GC Freeze
+    let gcState = startGame(createInitialState("fenix"));
+    gcState.isGcActive = true;
+    gcState.gcTimerMs = 500;
+    gcState = updateGameSimulation(gcState, 50);
+    expect(gcState.fogLevel).toBeGreaterThan(0);
+  });
+
+  it("should dissipate fogLevel back to zero within 15 seconds (15000ms) after resource stress resolves and backlight is off", () => {
+    let state = startGame(createInitialState("fenix"));
+    state.thermalStress = 1.0;
+    state.fogLevel = 1.0;
+    
+    // Resolve stress
+    state.allocatedRamKb = 1.8;
+    state.isLightOn = false;
+    state.lightActiveDurationMs = 0;
+    state.isGcActive = false;
+
+    // Simulate 15 seconds (clamped to max 5s per frame)
+    state = updateGameSimulation(state, 5000);
+    state = updateGameSimulation(state, 5000);
+    state = updateGameSimulation(state, 5000);
+    expect(state.thermalStress).toBe(0);
+    expect(state.fogLevel).toBe(0);
+  });
+
+  it("should successfully reduce fogLevel by swiping", () => {
+    const state = startGame(createInitialState("fenix"));
+    state.fogLevel = 0.8;
+    const wiped = wipeScreenFog(state, 140, 140, 30);
+    expect(wiped.fogLevel).toBeCloseTo(0.58, 2);
+  });
 });

@@ -123,6 +123,7 @@ export interface GameEngineState {
   isGcActive: boolean;
   gcTimerMs: number; // 500ms freeze
   heartRate: number;
+  thermalStress: number; // Stateful thermal stress level (0.0 to 1.0)
   crashReport: CrashReport | null;
   lastAllocTime: number;
   lastObstacleTime: number;
@@ -160,6 +161,7 @@ export function createInitialState(device: DeviceTarget = "fenix", highScore = 0
     battery: 100,
     lightActiveDurationMs: 0,
     fogLevel: 0,
+    thermalStress: 0,
     fogWipes: [],
     isGcActive: false,
     gcTimerMs: 0,
@@ -327,15 +329,66 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
   // Handle GC Freeze
   if (state.isGcActive) {
     const remainingGc = state.gcTimerMs - safeDelta;
+    
+    // Calculate battery, backlight, thermal stress, fog level updates during GC
+    const ramLimit = DEVICE_PROFILES[state.device].ramLimitKb;
+    const ramPct = state.allocatedRamKb / ramLimit;
+
+    const baseDrainPerMs = 0.0001;
+    const lightDrainPerMs = 0.0003;
+    const totalDrain = (baseDrainPerMs + (state.isLightOn ? lightDrainPerMs : 0)) * safeDelta;
+    const nextBattery = Math.max(0, state.battery - totalDrain);
+
+    let nextLight = state.isLightOn;
+    if (nextBattery <= 0) {
+      nextLight = false;
+    }
+
+    let lightDuration = state.lightActiveDurationMs;
+    if (state.isLightOn) {
+      lightDuration += safeDelta;
+    } else {
+      lightDuration = Math.max(0, lightDuration - safeDelta * 0.5);
+    }
+
+    const backlightStress = state.isLightOn ? Math.min(1.0, lightDuration / 6000) : 0;
+    const ramStress = ramPct > 0.8 ? Math.min(1.0, 0.4 + (ramPct - 0.8) * 3.0) : 0;
+    const gcStress = 1.0; // GC is active!
+
+    const targetStress = Math.max(backlightStress, ramStress, gcStress);
+    let nextThermalStress = state.thermalStress ?? 0;
+    if (targetStress > nextThermalStress) {
+      nextThermalStress = Math.min(targetStress, nextThermalStress + 0.0005 * safeDelta);
+    } else {
+      nextThermalStress = Math.max(targetStress, nextThermalStress - (1.0 / 14900) * safeDelta);
+    }
+
+    let nextFogLevel = state.fogLevel;
+    if (nextThermalStress > nextFogLevel) {
+      nextFogLevel = Math.min(nextThermalStress, nextFogLevel + 0.0004 * safeDelta);
+    } else {
+      nextFogLevel = Math.max(nextThermalStress, nextFogLevel - (1.0 / 14900) * safeDelta);
+    }
+
     if (remainingGc <= 0) {
       return {
         ...state,
+        battery: Number(nextBattery.toFixed(2)),
+        isLightOn: nextLight,
+        lightActiveDurationMs: lightDuration,
+        thermalStress: Number(nextThermalStress.toFixed(3)),
+        fogLevel: Number(nextFogLevel.toFixed(3)),
         isGcActive: false,
         gcTimerMs: 0,
       };
     }
     return {
       ...state,
+      battery: Number(nextBattery.toFixed(2)),
+      isLightOn: nextLight,
+      lightActiveDurationMs: lightDuration,
+      thermalStress: Number(nextThermalStress.toFixed(3)),
+      fogLevel: Number(nextFogLevel.toFixed(3)),
       gcTimerMs: remainingGc,
     };
   }
@@ -345,7 +398,6 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
   // 1. Battery Drain & Overheating Mechanics
   let nextBattery = state.battery;
   let lightDuration = state.lightActiveDurationMs;
-  let fogLevel = state.fogLevel;
 
   // Base battery drain: 0.1%/sec; With light: +0.3%/sec (0.4%/sec total)
   const baseDrainPerMs = 0.0001;
@@ -361,13 +413,31 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
 
   if (state.isLightOn) {
     lightDuration += safeDelta;
-    // Overheat after sustained light drain (> 6 seconds buildup)
-    if (lightDuration > 6000) {
-      fogLevel = Math.min(0.95, fogLevel + 0.0004 * safeDelta);
-    }
   } else {
     lightDuration = Math.max(0, lightDuration - safeDelta * 0.5);
-    fogLevel = Math.max(0, fogLevel - 0.0001 * safeDelta);
+  }
+
+  const ramLimit = DEVICE_PROFILES[state.device].ramLimitKb;
+  const ramPct = state.allocatedRamKb / ramLimit;
+
+  // Calculate combined target stress
+  const backlightStress = state.isLightOn ? Math.min(1.0, lightDuration / 6000) : 0;
+  const ramStress = ramPct > 0.8 ? Math.min(1.0, 0.4 + (ramPct - 0.8) * 3.0) : 0;
+  const gcStress = state.isGcActive ? 0.8 : 0;
+
+  const targetStress = Math.max(backlightStress, ramStress, gcStress);
+  let nextThermalStress = state.thermalStress ?? 0;
+  if (targetStress > nextThermalStress) {
+    nextThermalStress = Math.min(targetStress, nextThermalStress + 0.0005 * safeDelta);
+  } else {
+    nextThermalStress = Math.max(targetStress, nextThermalStress - (1.0 / 14900) * safeDelta);
+  }
+
+  let nextFogLevel = state.fogLevel;
+  if (nextThermalStress > nextFogLevel) {
+    nextFogLevel = Math.min(nextThermalStress, nextFogLevel + 0.0004 * safeDelta);
+  } else {
+    nextFogLevel = Math.max(nextThermalStress, nextFogLevel - (1.0 / 14900) * safeDelta);
   }
 
   // 2. Player Jump & Gravity Physics
@@ -397,7 +467,8 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
     battery: Number(nextBattery.toFixed(2)),
     isLightOn: nextLight,
     lightActiveDurationMs: lightDuration,
-    fogLevel: Number(fogLevel.toFixed(3)),
+    thermalStress: Number(nextThermalStress.toFixed(3)),
+    fogLevel: Number(nextFogLevel.toFixed(3)),
     distanceMeters: Number(nextDistance.toFixed(1)),
     score: nextScore,
     highScore: nextHighScore,
