@@ -413,15 +413,6 @@ export const ClinicalTrialChaos: React.FC = () => {
           suspicion: Math.max(0, aud.suspicion - 15),
         }));
         addAuditLog("☕ [POWER-UP ACTIVATED] FDA Coffee Break! Auditor halted for 8 seconds.", "COMPLIANT");
-
-        setTimeout(() => {
-          setAuditor((aud) => ({
-            ...aud,
-            behavior: "patrolling",
-            isPaused: false,
-          }));
-          addAuditLog("☕ FDA Coffee Break ended. Auditor resumed inspection floor patrol.", "INFO");
-        }, 8000);
       } else if (type === "auto-clean") {
         if (activeSubject) {
           setConveyorSubjects((prev) =>
@@ -810,6 +801,8 @@ export const ClinicalTrialChaos: React.FC = () => {
   const addAuditLogRef = useRef(addAuditLog);
   const triggerSoundRef = useRef(triggerSound);
   const renderConveyorCanvasRef = useRef(renderConveyorCanvas);
+  const validatingObsRef = useRef(validatingObs);
+  const signatureModalRef = useRef(signatureModal);
 
   // Sync refs on every render
   useEffect(() => {
@@ -824,6 +817,8 @@ export const ClinicalTrialChaos: React.FC = () => {
     addAuditLogRef.current = addAuditLog;
     triggerSoundRef.current = triggerSound;
     renderConveyorCanvasRef.current = renderConveyorCanvas;
+    validatingObsRef.current = validatingObs;
+    signatureModalRef.current = signatureModal;
   });
 
   // 17. Main Game Loop Tick (requestAnimationFrame)
@@ -855,7 +850,8 @@ export const ClinicalTrialChaos: React.FC = () => {
       if (!isRunning || isContextLost) return;
 
       const now = Date.now();
-      const deltaSeconds = Math.min(0.1, (now - lastTickTimeRef.current) / 1000);
+      const isPausedByModal = !!validatingObsRef.current || !!signatureModalRef.current?.isOpen;
+      const deltaSeconds = isPausedByModal ? 0 : Math.min(0.1, (now - lastTickTimeRef.current) / 1000);
       lastTickTimeRef.current = now;
 
       // 1. Tick subjects on conveyor
@@ -910,7 +906,23 @@ export const ClinicalTrialChaos: React.FC = () => {
       });
 
       // 3. Tick Power-ups
-      setPowerUps((pu) => tickPowerUps(pu, deltaSeconds));
+      setPowerUps((prevPu) => {
+        const nextPu = tickPowerUps(prevPu, deltaSeconds);
+        if (prevPu["fda-coffee-break"].activeSecondsRemaining > 0 && nextPu["fda-coffee-break"].activeSecondsRemaining === 0) {
+          setAuditor((aud) => {
+            if (aud.behavior === "coffee_break") {
+              return {
+                ...aud,
+                behavior: "patrolling",
+                isPaused: false,
+              };
+            }
+            return aud;
+          });
+          addAuditLogRef.current("☕ FDA Coffee Break ended. Auditor resumed inspection floor patrol.", "INFO");
+        }
+        return nextPu;
+      });
 
       // 4. Tick Protocol Amendment countdown
       setActiveAmendment((prev) => {

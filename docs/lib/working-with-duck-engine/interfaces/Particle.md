@@ -44,7 +44,7 @@ Defined in: [lib/working-with-duck-engine.ts:116](https://github.com/fderuiter/p
 
 ### shape
 
-> **shape**: `"heart"` \| `"circle"` \| `"sweat"` \| `"star"` \| `"spark"` \| `"bone"` \| `"bubble"` \| `"mud"` \| `"water"`
+> **shape**: `"circle"` \| `"heart"` \| `"sweat"` \| `"star"` \| `"spark"` \| `"bone"` \| `"bubble"` \| `"mud"` \| `"water"`
 
 Defined in: [lib/working-with-duck-engine.ts:125](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L125)
 
