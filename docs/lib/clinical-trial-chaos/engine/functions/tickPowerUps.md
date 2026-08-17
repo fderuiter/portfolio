@@ -8,7 +8,7 @@
 
 > **tickPowerUps**(`inventory`, `deltaSeconds`): [`PowerUpInventory`](../../types/type-aliases/PowerUpInventory.md)
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:305](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L305)
+Defined in: [lib/clinical-trial-chaos/engine.ts:306](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L306)
 
 Ticks active power-up cooldowns and durations.
 

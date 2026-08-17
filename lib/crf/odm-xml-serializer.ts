@@ -1,17 +1,5 @@
 import { StudyProtocol } from "./types";
-
-/**
- * Escapes XML special characters
- */
-function escapeXml(unsafe: string): string {
-  if (!unsafe) return "";
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
-}
+import { escapeXml } from "../utils";
 
 /**
  * Maps ClinicalDataType to CDISC ODM DataType

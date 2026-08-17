@@ -8,7 +8,7 @@
 
 > **createInitialScoreState**(): [`GameScoreState`](../../types/interfaces/GameScoreState.md)
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L20)
+Defined in: [lib/clinical-trial-chaos/engine.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L21)
 
 ## Returns
 

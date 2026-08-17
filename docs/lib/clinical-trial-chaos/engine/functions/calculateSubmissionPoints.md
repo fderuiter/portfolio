@@ -8,7 +8,7 @@
 
 > **calculateSubmissionPoints**(`subject`, `multiplier`, `allClean`): `number`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:188](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L188)
+Defined in: [lib/clinical-trial-chaos/engine.ts:189](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L189)
 
 Computes score delta for a successful subject submission.
 
