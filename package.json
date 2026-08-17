@@ -29,6 +29,7 @@
     "lint": "eslint",
     "check": "tsc --noEmit && npm run lint",
     "prepare": "husky",
+    "preinstall": "node scripts/enforce-npm.js",
     "pretest": "npx tsx scripts/generate-theme.ts && npx prisma generate",
     "test": "vitest run",
     "test:ci": "vitest run --coverage",
@@ -113,6 +114,10 @@
     "sharp",
     "unrs-resolver"
   ],
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
   }

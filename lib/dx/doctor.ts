@@ -919,6 +919,31 @@ export function checkWorkspaceIdeConfig(root: string, fix = false): DiagnosticCh
   };
 }
 
+export function checkPackageLockfile(root: string): DiagnosticCheckResult {
+  const alternativeLocks = ["bun.lock", "bun.lockb", "yarn.lock", "pnpm-lock.yaml"];
+  const foundLocks = alternativeLocks.filter(lock => fs.existsSync(path.join(root, lock)));
+
+  if (foundLocks.length > 0) {
+    return {
+      id: "alternative-lockfiles",
+      name: "Single Package Manager Lockfile Invariant",
+      category: "architecture",
+      status: "fail",
+      message: `Alternative lockfile(s) detected: ${foundLocks.join(", ")}. This workspace is standardized on npm and must only contain package-lock.json.`,
+      details: foundLocks.map(lock => `Found alternative lockfile: ${lock}`),
+      fixable: false,
+    };
+  }
+
+  return {
+    id: "alternative-lockfiles",
+    name: "Single Package Manager Lockfile Invariant",
+    category: "architecture",
+    status: "pass",
+    message: "Zero duplicate/alternative lockfiles detected. Workspace is correctly standardized on npm and uses package-lock.json.",
+  };
+}
+
 /**
  * Run All Diagnostics
  */
@@ -951,6 +976,7 @@ export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
     checkEnvironmentVariables(root, fix),
     checkGitHygieneConfig(root, fix),
     checkWorkspaceIdeConfig(root, fix),
+    checkPackageLockfile(root),
     checkDeadCode(root),
     checkBundleBudgets(root),
   ];

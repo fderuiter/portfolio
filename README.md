@@ -37,7 +37,7 @@ The full 5-phase development roadmap, milestone progress, and issue tracker are 
 
 To work on this repository, you will need:
 - **Node.js** (v20+)
-- **npm** or **bun** as the package manager
+- **npm** (the exclusive package manager)
 
 ## Setup Instructions
 

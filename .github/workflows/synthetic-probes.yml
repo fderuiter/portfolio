@@ -35,7 +35,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-synthetic-${{ hashFiles('package-lock.json', 'bun.lock') }}
+          key: playwright-synthetic-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             playwright-synthetic-
             playwright-

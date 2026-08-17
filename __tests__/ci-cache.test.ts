@@ -22,7 +22,7 @@ describe("CI Workflow Dual Caching and Isolation Suite", () => {
         expect(playwrightSection).toContain("path: ~/.cache/ms-playwright");
 
         // Key should be branch-isolated and lockfile hash dependent
-        expect(playwrightSection).toMatch(/key:\s*playwright-\$\{\{\s*github\.head_ref\s*\|\|\s*github\.ref_name\s*\}\}-\$\{\{\s*hashFiles\(['"]package-lock\.json['"],\s*['"]bun\.lock['"]\)\s*\}\}/);
+        expect(playwrightSection).toMatch(/key:\s*playwright-\$\{\{\s*github\.head_ref\s*\|\|\s*github\.ref_name\s*\}\}-\$\{\{\s*hashFiles\(['"]package-lock\.json['"]\)\s*\}\}/);
 
         // Restore keys should fallback to main and must be branch-isolated with lockfile hash dependent to ensure complete invalidation on lockfile changes
         const restoreKeysMatch = playwrightSection.match(/restore-keys:\s*\|((?:\n\s{12,}\S.*)+)/);
@@ -36,11 +36,11 @@ describe("CI Workflow Dual Caching and Isolation Suite", () => {
 
           // Branch specific restore key with hash
           const branchSpecificRestoreKey = restoreKeys[0];
-          expect(branchSpecificRestoreKey).toMatch(/playwright-\$\{\{\s*github\.head_ref\s*\|\|\s*github\.ref_name\s*\}\}-\$\{\{\s*hashFiles\(['"]package-lock\.json['"],\s*['"]bun\.lock['"]\)\s*\}\}/);
+          expect(branchSpecificRestoreKey).toMatch(/playwright-\$\{\{\s*github\.head_ref\s*\|\|\s*github\.ref_name\s*\}\}-\$\{\{\s*hashFiles\(['"]package-lock\.json['"]\)\s*\}\}/);
 
           // Main specific fallback restore key with hash
           const mainSpecificRestoreKey = restoreKeys[1];
-          expect(mainSpecificRestoreKey).toMatch(/playwright-main-\$\{\{\s*hashFiles\(['"]package-lock\.json['"],\s*['"]bun\.lock['"]\)\s*\}\}/);
+          expect(mainSpecificRestoreKey).toMatch(/playwright-main-\$\{\{\s*hashFiles\(['"]package-lock\.json['"]\)\s*\}\}/);
         }
       }
     });
@@ -57,7 +57,7 @@ describe("CI Workflow Dual Caching and Isolation Suite", () => {
         expect(nextjsSection).toContain("path: ${{ github.workspace }}/.next/cache");
 
         // Key should be branch-isolated, lockfile hash dependent, and end with github.sha for incremental writes
-        expect(nextjsSection).toMatch(/key:\s*nextjs-\$\{\{\s*github\.head_ref\s*\|\|\s*github\.ref_name\s*\}\}-\$\{\{\s*hashFiles\(['"]package-lock\.json['"],\s*['"]bun\.lock['"]\)\s*\}\}-\$\{\{\s*github\.sha\s*\}\}/);
+        expect(nextjsSection).toMatch(/key:\s*nextjs-\$\{\{\s*github\.head_ref\s*\|\|\s*github\.ref_name\s*\}\}-\$\{\{\s*hashFiles\(['"]package-lock\.json['"]\)\s*\}\}-\$\{\{\s*github\.sha\s*\}\}/);
 
         // Restore keys should fallback to same branch or main branch, with lockfile hash prefix for complete invalidation on lockfile changes
         const restoreKeysMatch = nextjsSection.match(/restore-keys:\s*\|((?:\n\s{12,}\S.*)+)/);
@@ -71,11 +71,11 @@ describe("CI Workflow Dual Caching and Isolation Suite", () => {
 
           // Branch specific restore key prefix with hash
           const branchSpecificRestoreKey = restoreKeys[0];
-          expect(branchSpecificRestoreKey).toMatch(/nextjs-\$\{\{\s*github\.head_ref\s*\|\|\s*github\.ref_name\s*\}\}-\$\{\{\s*hashFiles\(['"]package-lock\.json['"],\s*['"]bun\.lock['"]\)\s*\}\}-/);
+          expect(branchSpecificRestoreKey).toMatch(/nextjs-\$\{\{\s*github\.head_ref\s*\|\|\s*github\.ref_name\s*\}\}-\$\{\{\s*hashFiles\(['"]package-lock\.json['"]\)\s*\}\}-/);
 
           // Main specific fallback restore key prefix with hash
           const mainSpecificRestoreKey = restoreKeys[1];
-          expect(mainSpecificRestoreKey).toMatch(/nextjs-main-\$\{\{\s*hashFiles\(['"]package-lock\.json['"],\s*['"]bun\.lock['"]\)\s*\}\}-/);
+          expect(mainSpecificRestoreKey).toMatch(/nextjs-main-\$\{\{\s*hashFiles\(['"]package-lock\.json['"]\)\s*\}\}-/);
         }
       }
     });
