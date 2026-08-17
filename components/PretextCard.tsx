@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Card, CardTitle, CardDescription } from "@/components/BentoGrid";
+import { Card, CardTitle, CardDescription, type HeadingTag } from "@/components/BentoGrid";
 import { usePretextLayout } from "@/hooks/usePretextLayout";
 
 interface PretextCardProps {
@@ -9,6 +9,7 @@ interface PretextCardProps {
   description: string;
   className?: string;
   paddingHeight?: number; // spacing, margins, titles, and borders
+  headingTag?: HeadingTag | string;
 }
 
 export const PretextCard: React.FC<PretextCardProps> = ({
@@ -16,6 +17,7 @@ export const PretextCard: React.FC<PretextCardProps> = ({
   description,
   className,
   paddingHeight = 120,
+  headingTag,
 }) => {
   // Bind Pretext Layout observer
   const { ref, height, isReady } = usePretextLayout({
@@ -40,7 +42,7 @@ export const PretextCard: React.FC<PretextCardProps> = ({
     >
       <div className="flex flex-col h-full justify-between min-w-0">
         <div className="mb-4 min-w-0">
-          <CardTitle>{title}</CardTitle>
+          <CardTitle as={headingTag}>{title}</CardTitle>
           {/* Attach Ref to the text container */}
           <div className="relative">
             {/* Custom Visual Presentation (hidden from screen readers, not selectable) */}
