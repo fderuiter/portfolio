@@ -69,7 +69,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const cleanDescription = study.editorial_content
+  const cleanDescription = (study.editorial_content || "")
     .replace(/\*\*/g, "")
     .replace(/`/g, "")
     .replace(/\*/g, "")

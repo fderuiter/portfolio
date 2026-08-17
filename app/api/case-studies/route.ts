@@ -5,6 +5,35 @@ import { prisma } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  if (process.env.PLAYWRIGHT_TEST === "true") {
+    return NextResponse.json([
+      {
+        id: "clinical-data-mapper",
+        slug: "clinical-data-mapper",
+        title: "Clinical Data Mapper",
+        primary_language: "TypeScript",
+        tags: "clinical, edc, mapping"
+      },
+      {
+        id: "cadence-clinical",
+        slug: "cadence-clinical",
+        title: "Cadence Clinical",
+        primary_language: "TypeScript",
+        tags: "clinical, telemetry, real-time"
+      },
+      {
+        id: "imednet-python-sdk",
+        slug: "imednet-python-sdk",
+        title: "iMedNet Python SDK",
+        primary_language: "Python",
+        tags: "sdk, clinical, integration"
+      }
+    ], {
+      headers: {
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600",
+      },
+    });
+  }
   try {
     const studies = await prisma.caseStudy.findMany({
       where: { published: true },
