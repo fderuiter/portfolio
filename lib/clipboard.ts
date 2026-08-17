@@ -1,3 +1,5 @@
+import { resolveBaseUrl } from "./domain";
+
 /**
  * Centralized Clipboard Helper with Environment-Aware Base Origin
  */
@@ -11,7 +13,7 @@ export function getActiveHostUrl(): string {
     return window.location.origin;
   }
   // Fallback for SSR or non-browser execution
-  return "https://fderuiter-portfolio.vercel.app";
+  return resolveBaseUrl();
 }
 
 /**

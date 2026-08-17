@@ -81,15 +81,29 @@ describe("Unified Clipboard Utility & Hook", () => {
       expect(getActiveHostUrl()).toBe("https://staging-preview.vercel.app");
     });
 
-    it("falls back to default production domain when window is simulated as undefined", () => {
+    it("falls back dynamically to configured NEXT_PUBLIC_APP_URL, production fallback, or dev fallback when window is simulated as undefined", () => {
       // Temporarily mock window location by deleting or modifying it to trigger the fallback
       const originalWin = global.window;
       try {
         // @ts-expect-error - simulating environment where window is deleted
         delete global.window;
+
+        // 1. Omitted / dev fallback
+        vi.stubEnv("NEXT_PUBLIC_APP_URL", "");
+        vi.stubEnv("VERCEL_ENV", "development");
+        vi.stubEnv("NODE_ENV", "development");
+        expect(getActiveHostUrl()).toBe("http://localhost:3000");
+
+        // 2. Production fallback
+        vi.stubEnv("VERCEL_ENV", "production");
         expect(getActiveHostUrl()).toBe("https://fderuiter-portfolio.vercel.app");
+
+        // 3. Configured NEXT_PUBLIC_APP_URL
+        vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://custom-domain.dev");
+        expect(getActiveHostUrl()).toBe("https://custom-domain.dev");
       } finally {
         global.window = originalWin;
+        vi.unstubAllEnvs();
       }
     });
   });

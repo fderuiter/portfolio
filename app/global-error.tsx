@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import * as Sentry from "@sentry/nextjs";
 import { sanitizeError } from "@/lib/error-sanitization";
+import { resolveBaseUrl } from "@/lib/domain";
 
 export default function GlobalError({
   error,
@@ -11,7 +12,7 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const [canonicalUrl, setCanonicalUrl] = useState<string>("https://fderuiter-portfolio.vercel.app/");
+  const [canonicalUrl, setCanonicalUrl] = useState<string>(`${resolveBaseUrl()}/`);
 
   useEffect(() => {
     Sentry.captureException(error);

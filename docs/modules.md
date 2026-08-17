@@ -52,6 +52,7 @@
 - [lib/crf/types](lib/crf/types/README.md)
 - [lib/db](lib/db/README.md)
 - [lib/design-manifest](lib/design-manifest/README.md)
+- [lib/domain](lib/domain/README.md)
 - [lib/dungeon](lib/dungeon/README.md)
 - [lib/dungeon/ai](lib/dungeon/ai/README.md)
 - [lib/dungeon/audio](lib/dungeon/audio/README.md)

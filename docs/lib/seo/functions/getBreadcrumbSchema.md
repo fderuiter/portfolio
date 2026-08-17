@@ -8,7 +8,7 @@
 
 > **getBreadcrumbSchema**(`items`): `string`
 
-Defined in: [lib/seo.ts:88](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L88)
+Defined in: [lib/seo.ts:89](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L89)
 
 Returns a Schema.org BreadcrumbList for hierarchical page navigation.
 

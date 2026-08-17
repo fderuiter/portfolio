@@ -14,6 +14,7 @@ import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
 import { PageLayout } from "@/components/PageLayout";
+import { resolveBaseUrl } from "@/lib/domain";
 
 import type { Metadata } from "next";
 
@@ -85,7 +86,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `${study.title} | Case Study`,
       description: cleanDescription,
       type: "article",
-      url: `https://fderuiter-portfolio.vercel.app/case-studies/${slug}`,
+      url: `${resolveBaseUrl()}/case-studies/${slug}`,
       publishedTime: study.created_at.toISOString(),
       modifiedTime: study.updated_at.toISOString(),
       tags: study.tags.split(",").map((t) => t.trim()),
