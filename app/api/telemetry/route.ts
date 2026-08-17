@@ -30,6 +30,62 @@ interface LocalCacheEntry {
   expiresAt: number;
 }
 const activeClientsCache = new Map<string, LocalCacheEntry>();
+const MAX_CACHE_SIZE = 5000;
+
+/**
+ * Retrieves a valid entry from the local cache and moves it to the end of the Map
+ * to update its recency (Least Recently Used strategy).
+ */
+function getCacheEntry(key: string): LocalCacheEntry | undefined {
+  const cached = activeClientsCache.get(key);
+  if (!cached) return undefined;
+
+  const now = Date.now();
+  if (now >= cached.expiresAt) {
+    activeClientsCache.delete(key);
+    return undefined;
+  }
+
+  // Update recency (LRU): delete and re-insert at the end
+  activeClientsCache.delete(key);
+  activeClientsCache.set(key, cached);
+  return cached;
+}
+
+/**
+ * Sets an entry in the local cache, enforcing the hard capacity limit by
+ * evicting the oldest or least recently used entries when capacity is exceeded.
+ */
+function setCacheEntry(key: string, val: LocalCacheEntry) {
+  // Update recency: delete first to insert at the end
+  activeClientsCache.delete(key);
+  activeClientsCache.set(key, val);
+
+  // Hard ceiling enforcement: evict the oldest inserted/accessed elements
+  while (activeClientsCache.size > MAX_CACHE_SIZE) {
+    const oldestKey = activeClientsCache.keys().next().value;
+    if (oldestKey !== undefined) {
+      activeClientsCache.delete(oldestKey);
+    } else {
+      break;
+    }
+  }
+}
+
+// Background sweep to periodically purge stale/expired entries to prevent memory leaks
+if (typeof setInterval !== "undefined") {
+  const intervalId = setInterval(() => {
+    const now = Date.now();
+    for (const [key, val] of activeClientsCache.entries()) {
+      if (now >= val.expiresAt) {
+        activeClientsCache.delete(key);
+      }
+    }
+  }, 10000);
+  if (intervalId && typeof intervalId.unref === "function") {
+    intervalId.unref();
+  }
+}
 
 interface RateLimitResult {
   limited: boolean;
@@ -54,10 +110,12 @@ async function isRateLimited(req: NextRequest): Promise<RateLimitResult> {
   const now = Date.now();
 
   // 1. Check local memory bypass cache for active, valid clients
-  const cached = activeClientsCache.get(ipHash);
-  if (cached && now < cached.expiresAt) {
+  const cached = getCacheEntry(ipHash);
+  if (cached) {
     if (cached.count < MAX_REQUESTS_PER_WINDOW) {
       cached.count += 1;
+      // Re-set to keep order and update count in Map
+      setCacheEntry(ipHash, cached);
       // Local cache hit: return no rate limiting immediately
       return {
         limited: false,
@@ -81,7 +139,7 @@ async function isRateLimited(req: NextRequest): Promise<RateLimitResult> {
 
     if (result.success) {
       // Valid client: update local bypass cache with a safe, short TTL (max 5 seconds or remaining window)
-      activeClientsCache.set(ipHash, {
+      setCacheEntry(ipHash, {
         count: MAX_REQUESTS_PER_WINDOW - result.remaining,
         expiresAt: Math.min(result.reset, now + 5000),
       });
@@ -96,9 +154,10 @@ async function isRateLimited(req: NextRequest): Promise<RateLimitResult> {
     return { limited: false };
   } finally {
     // Periodically sweep expired keys from local cache map to prevent memory leaks
-    if (activeClientsCache.size > 5000) {
+    if (activeClientsCache.size > MAX_CACHE_SIZE) {
+      const currentTime = Date.now();
       for (const [key, val] of activeClientsCache.entries()) {
-        if (Date.now() >= val.expiresAt) {
+        if (currentTime >= val.expiresAt) {
           activeClientsCache.delete(key);
         }
       }

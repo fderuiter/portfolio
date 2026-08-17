@@ -322,4 +322,55 @@ describe("Telemetry API Route - Route Error Telemetry", () => {
     // Verify rate limit check was called with hashed x-real-ip
     expect(mockRatelimitLimit).toHaveBeenCalledWith(hashedIp);
   });
+
+  it("verifies that 10,000 unique client IP queries trigger standard cache evictions without exceeding the memory ceiling", async () => {
+    // 1. Initial success rate-limit state
+    mockRatelimitLimit.mockResolvedValue({
+      success: true,
+      limit: 100,
+      remaining: 99,
+      reset: Date.now() + 60000,
+      pending: Promise.resolve(),
+    });
+
+    const payload = {
+      projectSlug: "/dashboard",
+      eventType: "page_view",
+    };
+
+    const createReq = (ip: string) => new NextRequest("http://localhost:3000/api/telemetry", {
+      method: "POST",
+      headers: { "x-forwarded-for": ip },
+      body: JSON.stringify(payload),
+    });
+
+    // First request with IP 0 (Least Recently Used)
+    await POST(createReq("198.51.100.0"));
+    expect(mockRatelimitLimit).toHaveBeenCalledTimes(1);
+
+    // Second request with IP 0 should hit local cache and bypass remote check
+    await POST(createReq("198.51.100.0"));
+    expect(mockRatelimitLimit).toHaveBeenCalledTimes(1); // Call count still 1
+
+    // Now query 10,000 unique client IPs to trigger evictions and enforce the memory ceiling
+    // We do this in batches of 1000 to keep memory clean and execution ultra-fast
+    const batchSize = 1000;
+    for (let b = 0; b < 10; b++) {
+      const promises = [];
+      for (let i = 1; i <= batchSize; i++) {
+        const ipIdx = b * batchSize + i; // 1 to 10,000
+        promises.push(POST(createReq(`198.51.100.${ipIdx}`)));
+      }
+      await Promise.all(promises);
+    }
+
+    // Since more than 5000 unique elements were added, IP 0 must have been evicted.
+    // Clear mock call stats before the final call to isolate IP 0's post-eviction behavior.
+    mockRatelimitLimit.mockClear();
+
+    // Querying IP 0 again should bypass the cache (cache miss) and call mockRatelimitLimit again.
+    await POST(createReq("198.51.100.0"));
+    expect(mockRatelimitLimit).toHaveBeenCalledTimes(1); // Since it was evicted, it must query the remote rate limiter!
+  });
 });
+
