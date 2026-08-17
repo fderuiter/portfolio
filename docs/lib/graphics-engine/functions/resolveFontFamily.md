@@ -8,7 +8,7 @@
 
 > **resolveFontFamily**(`variableName?`): `string`
 
-Defined in: [lib/graphics-engine.ts:36](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L36)
+Defined in: [lib/graphics-engine.ts:86](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L86)
 
 Resolves font family variable dynamically using Computed Style.
 Returns designManifest sans-serif fallback if run in SSR or variables are missing.

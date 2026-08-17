@@ -20,6 +20,7 @@
 
 - [isBrowser](functions/isBrowser.md)
 - [measureTextOffscreen](functions/measureTextOffscreen.md)
+- [resolveCodeChipExtraWidth](functions/resolveCodeChipExtraWidth.md)
 - [resolveFontFamily](functions/resolveFontFamily.md)
 - [validateLayoutHeight](functions/validateLayoutHeight.md)
 
