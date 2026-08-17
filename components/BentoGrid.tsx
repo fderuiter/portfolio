@@ -160,17 +160,30 @@ export const Card = ({
   );
 };
 
+export type HeadingTag = "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+
 export const CardTitle = ({
   className,
   children,
+  as = "h3",
+  style,
 }: {
   className?: string;
   children: React.ReactNode;
+  as?: HeadingTag | string;
+  style?: React.CSSProperties;
 }) => {
+  const validTags = ["h1", "h2", "h3", "h4", "h5", "h6"];
+  const resolvedTag = as && typeof as === "string" && validTags.includes(as.toLowerCase()) ? as.toLowerCase() : "h3";
+  const Component = resolvedTag as React.ElementType;
+
   return (
-    <div className={cn("mt-2 mb-2 font-sans font-bold text-neutral-100 group-hover:text-brand-cyan transition-colors duration-300 break-words text-balance min-w-0", className)}>
+    <Component
+      className={cn("mt-2 mb-2 font-sans font-bold text-neutral-100 group-hover:text-brand-cyan transition-colors duration-300 break-words text-balance min-w-0", className)}
+      style={{ margin: 0, marginTop: "0.5rem", marginBottom: "0.5rem", ...style }}
+    >
       {children}
-    </div>
+    </Component>
   );
 };
 

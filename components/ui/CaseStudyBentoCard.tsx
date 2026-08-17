@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Card, CardTitle } from "@/components/BentoGrid";
+import { Card, CardTitle, type HeadingTag } from "@/components/BentoGrid";
 import { type ExtendedRichInlineItem } from "@/hooks/usePretextLayout";
 import { BaseCaseStudy } from "@/types/domain";
 import { GitHubStats, getSimulatedTerminalCommand, getSimulatedTerminalLogs } from "@/lib/github";
@@ -89,6 +89,7 @@ interface CaseStudyBentoCardProps {
   preCalculatedHeight?: number;
   preCalculatedParagraphsLines?: RichInlineLine[][];
   preCalculatedParagraphsItems?: ExtendedRichInlineItem[][];
+  headingTag?: HeadingTag | string;
 }
 
 // Map common languages to premium styling colors
@@ -108,6 +109,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
   study, 
   className,
   preCalculatedHeight,
+  headingTag,
 }) => {
   const { githubStats } = study;
   const tagsList = study.tags ? study.tags.split(",").map((t) => t.trim()) : [];
@@ -186,7 +188,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             </span>
           </div>
 
-          <CardTitle className="text-base md:text-lg font-extrabold tracking-tight leading-snug mb-2.5">
+          <CardTitle as={headingTag} className="text-base md:text-lg font-extrabold tracking-tight leading-snug mb-2.5">
             {study.title}
           </CardTitle>
 
