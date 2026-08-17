@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
-import { LaserLoon } from "@/components/LaserLoon";
+import dynamic from "next/dynamic";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
+import { PlayCabinet } from "@/components/arcade/PlayCabinet";
 import Link from "next/link";
 import {
   IconCrosshair,
@@ -11,6 +12,19 @@ import {
   IconFlame,
   IconArrowLeft,
 } from "@tabler/icons-react";
+
+const LaserLoonLoader = () =>
+  import("@/components/LaserLoon").then((mod) => mod.LaserLoon);
+
+const DynamicLaserLoon = dynamic(LaserLoonLoader, {
+  ssr: false,
+  loading: () => (
+    <div className="flex flex-col items-center justify-center p-8 min-h-[380px] font-mono text-xs text-zinc-500 animate-pulse">
+      <div className="w-8 h-8 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin mb-4" />
+      <span>ALIGNING OPTIC ARSENAL CHUNKS...</span>
+    </div>
+  ),
+});
 
 export const LaserLoonClient: React.FC = () => {
   return (
@@ -60,7 +74,21 @@ export const LaserLoonClient: React.FC = () => {
 
         {/* Game Container */}
         <div className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-6 shadow-[0_0_50px_rgba(239,68,68,0.1)]">
-          <LaserLoon />
+          <PlayCabinet
+            title="Laser Loon: Quest for the State Flag"
+            subtitle="Physics Raycasting & Waveform Campaign"
+            accentColor="red"
+            icon={<IconCrosshair className="w-8 h-8 text-red-400" />}
+            instructions="Pilot submission F277 Laser Loon on the Road to the Capitol. Battle rival flag redesigns using raycast laser collision algorithms, cryo-shatter particle physics, and dual-synth Web Audio audio processing."
+            controls={[
+              { key: "1-4", action: "Optic Arsenal" },
+              { key: "Space", action: "Loon Tremolo" },
+              { key: "Mouse", action: "Aim Crosshair" },
+            ]}
+            importComponent={LaserLoonLoader}
+          >
+            <DynamicLaserLoon />
+          </PlayCabinet>
         </div>
 
         {/* Instructions & Controls Reference */}

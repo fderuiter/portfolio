@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
-import { ClinicalTrialChaos } from "@/components/ClinicalTrialChaos";
+import dynamic from "next/dynamic";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
+import { PlayCabinet } from "@/components/arcade/PlayCabinet";
 import Link from "next/link";
 import {
   IconShieldCheck,
@@ -11,6 +12,19 @@ import {
   IconAlertTriangle,
   IconArrowLeft,
 } from "@tabler/icons-react";
+
+const ClinicalTrialChaosLoader = () =>
+  import("@/components/ClinicalTrialChaos").then((mod) => mod.ClinicalTrialChaos);
+
+const DynamicClinicalTrialChaos = dynamic(ClinicalTrialChaosLoader, {
+  ssr: false,
+  loading: () => (
+    <div className="flex flex-col items-center justify-center p-8 min-h-[380px] font-mono text-xs text-zinc-500 animate-pulse">
+      <div className="w-8 h-8 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin mb-4" />
+      <span>ALIGNING CDISC SDTM COMPLIANCE ENGINE...</span>
+    </div>
+  ),
+});
 
 export const ClinicalChaosClient: React.FC = () => {
   return (
@@ -60,7 +74,21 @@ export const ClinicalChaosClient: React.FC = () => {
 
         {/* Game Container */}
         <div className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-6 shadow-[0_0_50px_rgba(16,185,129,0.1)]">
-          <ClinicalTrialChaos />
+          <PlayCabinet
+            title="Clinical Trial Chaos: CDISC Compliance"
+            subtitle="21 CFR Part 11 Compliance & Domain Mapper"
+            accentColor="emerald"
+            icon={<IconShieldCheck className="w-8 h-8 text-emerald-400" />}
+            instructions="Ingest CDISC SDTM/ADaM clinical observations, execute 21 CFR Part 11 electronic signatures with intent verification, and resolve site audit queries under inspection time pressure."
+            controls={[
+              { key: "Click", action: "Fix Obs / Map SDTM" },
+              { key: "Space", action: "Power-up" },
+              { key: "Sign", action: "FDA Submission" },
+            ]}
+            importComponent={ClinicalTrialChaosLoader}
+          >
+            <DynamicClinicalTrialChaos />
+          </PlayCabinet>
         </div>
 
         {/* Instructions & Controls Reference */}
