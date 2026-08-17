@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { GarminWatchSimulator } from "@/components/GarminWatchSimulator";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
@@ -12,8 +12,13 @@ import {
   IconDeviceWatch,
   IconArrowLeft,
 } from "@tabler/icons-react";
+import { GameOnboardingWizard } from "@/components/arcade/GameOnboardingWizard";
+import { GarminWatchConfig } from "@/lib/game-config-schemas";
 
 export const GarminWatchClient: React.FC = () => {
+  const [config, setConfig] = useState<GarminWatchConfig | null>(null);
+  const [wizardOpen, setWizardOpen] = useState(true);
+
   return (
     <main className="min-h-screen bg-black text-white pt-28 pb-24 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
@@ -60,9 +65,35 @@ export const GarminWatchClient: React.FC = () => {
         </div>
 
         {/* Game Container */}
-        <div className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-6 shadow-[0_0_50px_rgba(245,158,11,0.1)] flex flex-col items-center">
-          <GarminWatchSimulator />
+        <div className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-6 shadow-[0_0_50px_rgba(245,158,11,0.1)] flex flex-col items-center justify-center min-h-[400px]">
+          {config ? (
+            <GarminWatchSimulator config={config} />
+          ) : (
+            <div className="text-center space-y-4 max-w-md mx-auto py-8 font-mono">
+              <IconDeviceWatch className="w-16 h-16 text-amber-400 mx-auto animate-pulse" />
+              <h2 className="text-xl font-bold text-white">Pre-Game Onboarding Required</h2>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                This simulator conforms to the Unified Game Configuration standard. Please initialize your session using the onboarding setup wizard.
+              </p>
+              <button
+                onClick={() => setWizardOpen(true)}
+                className="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs shadow-[0_0_15px_rgba(245,158,11,0.3)] transition-all uppercase"
+              >
+                Configure &amp; Launch Setup
+              </button>
+            </div>
+          )}
         </div>
+
+        <GameOnboardingWizard
+          gameId="garmin-watch"
+          isOpen={wizardOpen}
+          onClose={() => setWizardOpen(false)}
+          onComplete={(newConfig) => {
+            setConfig(newConfig as GarminWatchConfig);
+            setWizardOpen(false);
+          }}
+        />
 
         {/* Instructions & Controls Reference */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs text-zinc-400">

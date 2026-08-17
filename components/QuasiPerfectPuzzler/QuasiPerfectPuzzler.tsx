@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useCallback, useSyncExternalStore, useMemo, useRef } from "react";
+import React, { useState, useCallback, useSyncExternalStore, useMemo, useRef, useEffect } from "react";
+import { QuasiPuzzlerConfig } from "@/lib/game-config-schemas";
 import { PanInfo } from "framer-motion";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { puzzleLevels } from "@/lib/quasi-perfect/levels";
@@ -76,7 +77,11 @@ interface StepHistory {
   logText: string;
 }
 
-export const QuasiPerfectPuzzler: React.FC = () => {
+export interface QuasiPerfectPuzzlerProps {
+  config?: QuasiPuzzlerConfig;
+}
+
+export const QuasiPerfectPuzzler: React.FC<QuasiPerfectPuzzlerProps> = ({ config }) => {
   const { playNote, playSuccess } = useAudio();
 
   const [activeTab, setActiveTab] = useState<"campaign" | "sandbox">("campaign");
@@ -95,7 +100,18 @@ export const QuasiPerfectPuzzler: React.FC = () => {
     }
   });
 
-  const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
+  const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(() => {
+    if (config?.proofGoal) {
+      const levelMap: Record<string, number> = {
+        identity: 0,
+        double_negation: 1,
+        modus_ponens: 2,
+        syllogism: 3,
+      };
+      return levelMap[config.proofGoal] ?? 0;
+    }
+    return 0;
+  });
   const currentLevel: PuzzlerLevelDef = puzzleLevels[currentLevelIndex] || puzzleLevels[0];
 
   // Multi-Goal State
@@ -136,6 +152,38 @@ export const QuasiPerfectPuzzler: React.FC = () => {
       text: `Lean 4 server initialized. Loaded [Ch ${currentLevel.chapter} · ${currentLevel.chapterTitle}]: ${currentLevel.title}. Mode: ${gameMode.toUpperCase()}.`,
     },
   ]);
+
+  useEffect(() => {
+    if (config) {
+      setTimeout(() => {
+        const levelMap: Record<string, number> = {
+          identity: 0,
+          double_negation: 1,
+          modus_ponens: 2,
+          syllogism: 3,
+        };
+        const idx = levelMap[config.proofGoal] ?? 0;
+        setCurrentLevelIndex(idx);
+        
+        const targetLevel = puzzleLevels[idx] || puzzleLevels[0];
+        setSubgoals([
+          {
+            id: "root-goal",
+            label: "Main Goal",
+            goal: cloneAST(targetLevel.goal),
+            hypotheses: targetLevel.hypotheses.map(cloneAST),
+            isCompleted: false,
+          }
+        ]);
+        setActiveGoalIndex(0);
+        setProofSteps([]);
+        setHistory([]);
+        setRedoHistory([]);
+        setLevelSolved(false);
+        setCurrentScore(null);
+      }, 0);
+    }
+  }, [config]);
 
   const handleToggleMode = useCallback(
     (mode: GameMode) => {

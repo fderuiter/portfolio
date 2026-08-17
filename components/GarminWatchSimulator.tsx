@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback, useSyncExternalStore } from "react";
+import { GarminWatchConfig } from "@/lib/game-config-schemas";
 import {
   IconCircle,
   IconBolt,
@@ -46,7 +47,11 @@ const getHighScoreSnapshot = () => {
 };
 const getHighScoreServerSnapshot = () => "0";
 
-export const GarminWatchSimulator: React.FC = () => {
+export interface GarminWatchSimulatorProps {
+  config?: GarminWatchConfig;
+}
+
+export const GarminWatchSimulator: React.FC<GarminWatchSimulatorProps> = ({ config }) => {
   const rawHighScore = useSyncExternalStore(
     subscribeHighScore,
     getHighScoreSnapshot,
@@ -57,9 +62,65 @@ export const GarminWatchSimulator: React.FC = () => {
   const { recordEvent } = useTelemetry();
 
   // Hardware & Simulation State
-  const [bezelTheme, setBezelTheme] = useState<WatchBezelTheme>("slate");
-  const [deviceTarget, setDeviceTarget] = useState<DeviceTarget>("fenix");
-  const [gameState, setGameState] = useState<GameEngineState>(() => createInitialState("fenix", loadedHighScore));
+  const [bezelTheme, setBezelTheme] = useState<WatchBezelTheme>(() => config?.bezelTheme || "slate");
+  const [deviceTarget, setDeviceTarget] = useState<DeviceTarget>(() => config?.deviceTarget || "fenix");
+  const [gameState, setGameState] = useState<GameEngineState>(() => {
+    const target = config?.deviceTarget || "fenix";
+    const baseState = createInitialState(target, loadedHighScore);
+    if (config?.initialAllocationsKb) {
+      const vars = [...baseState.variables];
+      let currentAlloc = baseState.allocatedRamKb;
+      let idCounter = vars.length + 1;
+      while (currentAlloc < config.initialAllocationsKb) {
+        const remaining = config.initialAllocationsKb - currentAlloc;
+        const size = Math.min(1.6, remaining);
+        vars.push({
+          id: idCounter++,
+          name: `preAlloc_${idCounter}`,
+          type: "array",
+          sizeKb: Number(size.toFixed(2)),
+          allocatedAt: 0,
+        });
+        currentAlloc += size;
+      }
+      baseState.variables = vars;
+      baseState.allocatedRamKb = Number(currentAlloc.toFixed(2));
+    }
+    return baseState;
+  });
+
+  useEffect(() => {
+    if (config) {
+      setTimeout(() => {
+        setBezelTheme(config.bezelTheme);
+        setDeviceTarget(config.deviceTarget);
+        setGameState(() => {
+          const target = config.deviceTarget;
+          const baseState = createInitialState(target, loadedHighScore);
+          const vars = [...baseState.variables];
+          let currentAlloc = baseState.allocatedRamKb;
+          let idCounter = vars.length + 1;
+          while (currentAlloc < config.initialAllocationsKb) {
+            const remaining = config.initialAllocationsKb - currentAlloc;
+            const size = Math.min(1.6, remaining);
+            vars.push({
+              id: idCounter++,
+              name: `preAlloc_${idCounter}`,
+              type: "array",
+              sizeKb: Number(size.toFixed(2)),
+              allocatedAt: 0,
+            });
+            currentAlloc += size;
+          }
+          baseState.variables = vars;
+          baseState.allocatedRamKb = Number(currentAlloc.toFixed(2));
+          baseState.gameState = "playing";
+          return baseState;
+        });
+      }, 0);
+    }
+  }, [config, loadedHighScore]);
+
   const effectiveHighScore = Math.max(gameState.highScore, loadedHighScore);
   const [isFocused, setIsFocused] = useState(false);
   const [isDraggingFog, setIsDraggingFog] = useState(false);

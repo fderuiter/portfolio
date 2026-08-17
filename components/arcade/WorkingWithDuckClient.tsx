@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { WorkingWithDuck } from "@/components/WorkingWithDuck";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
@@ -11,8 +11,13 @@ import {
   IconAlertTriangle,
   IconArrowLeft,
 } from "@tabler/icons-react";
+import { GameOnboardingWizard } from "@/components/arcade/GameOnboardingWizard";
+import { WorkingWithDuckConfig } from "@/lib/game-config-schemas";
 
 export const WorkingWithDuckClient: React.FC = () => {
+  const [config, setConfig] = useState<WorkingWithDuckConfig | null>(null);
+  const [wizardOpen, setWizardOpen] = useState(true);
+
   return (
     <div className="w-full min-h-dvh bg-black text-white pt-4 pb-20 px-3 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
@@ -59,9 +64,35 @@ export const WorkingWithDuckClient: React.FC = () => {
         </div>
 
         {/* Game Container */}
-        <div className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-6 shadow-[0_0_50px_rgba(251,191,36,0.08)]">
-          <WorkingWithDuck />
+        <div className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-6 shadow-[0_0_50px_rgba(251,191,36,0.08)] flex flex-col justify-center min-h-[400px]">
+          {config ? (
+            <WorkingWithDuck config={config} />
+          ) : (
+            <div className="text-center space-y-4 max-w-md mx-auto py-8 font-mono">
+              <IconBone className="w-16 h-16 text-pink-400 mx-auto animate-pulse" />
+              <h2 className="text-xl font-bold text-white">Pre-Game Onboarding Required</h2>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                This simulator conforms to the Unified Game Configuration standard. Please initialize your session using the onboarding setup wizard.
+              </p>
+              <button
+                onClick={() => setWizardOpen(true)}
+                className="px-6 py-3 rounded-xl bg-pink-500 hover:bg-pink-400 text-black font-bold text-xs shadow-[0_0_15px_rgba(236,72,153,0.3)] transition-all uppercase"
+              >
+                Configure &amp; Launch Setup
+              </button>
+            </div>
+          )}
         </div>
+
+        <GameOnboardingWizard
+          gameId="working-with-duck"
+          isOpen={wizardOpen}
+          onClose={() => setWizardOpen(false)}
+          onComplete={(newConfig) => {
+            setConfig(newConfig as WorkingWithDuckConfig);
+            setWizardOpen(false);
+          }}
+        />
 
         {/* Instructions & Controls Reference */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs text-zinc-400">

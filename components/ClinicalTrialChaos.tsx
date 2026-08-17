@@ -8,6 +8,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
+import { ClinicalChaosConfig } from "@/lib/game-config-schemas";
 import Link from "next/link";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
@@ -129,7 +130,11 @@ interface Particle {
   life: number;
 }
 
-export const ClinicalTrialChaos: React.FC = () => {
+export interface ClinicalTrialChaosProps {
+  config?: ClinicalChaosConfig;
+}
+
+export const ClinicalTrialChaos: React.FC<ClinicalTrialChaosProps> = ({ config }) => {
   const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const rawHighScore = useSyncExternalStore(
     subscribeHighScore,
@@ -152,16 +157,45 @@ export const ClinicalTrialChaos: React.FC = () => {
   // 2. Entities & Engine State
   const [scoreState, setScoreState] = useState<GameScoreState>(createInitialScoreState);
   const effectiveHighScore = Math.max(scoreState.highScore, loadedHighScore);
-  const [auditor, setAuditor] = useState<AuditorState>(createInitialAuditorState);
-  const [stations, setStations] = useState<StationConfig[]>(() => getStationsForPhase(1, "campaign"));
+  const [auditor, setAuditor] = useState<AuditorState>(() => {
+    const initial = createInitialAuditorState();
+    if (config?.validationErrorThreshold !== undefined) {
+      initial.suspicion = config.validationErrorThreshold;
+      initial.behavior = initial.suspicion >= 50 ? "suspicious" : "patrolling";
+    }
+    return initial;
+  });
+  const [stations, setStations] = useState<StationConfig[]>(() => {
+    const base = getStationsForPhase(1, "campaign");
+    if (config?.sdtmDomains) {
+      return base.filter((s) => (config.sdtmDomains as CDISCDomain[]).includes(s.id));
+    }
+    return base;
+  });
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const [conveyorSubjects, setConveyorSubjects] = useState<ClinicalSubject[]>([]);
   const [submittedHistory, setSubmittedHistory] = useState<ClinicalSubject[]>([]);
   const [powerUps, setPowerUps] = useState<PowerUpInventory>(createInitialPowerUpInventory);
   const [activeAmendment, setActiveAmendment] = useState<ProtocolAmendment | null>(null);
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
 
+  useEffect(() => {
+    if (config) {
+      setTimeout(() => {
+        setPlayState("playing");
+        const activeDomains = config.sdtmDomains;
+        const initialSubs = [
+          generateClinicalSubject(0.4, false, 100, activeDomains),
+          generateClinicalSubject(0.6, false, 101, activeDomains),
+          generateClinicalSubject(0.7, false, 102, activeDomains),
+        ];
+        setConveyorSubjects(initialSubs);
+        setSelectedSubjectId(initialSubs[0]?.id ?? null);
+      }, 0);
+    }
+  }, [config]);
+
   // 3. Modals & Interactive States
-  const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
   const [validatingObs, setValidatingObs] = useState<{
     subjectId: string;
     obs: ClinicalObservation;

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useSyncExternalStore, useCallback } from "react";
+import { LaserLoonConfig } from "@/lib/game-config-schemas";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { clamp } from "@/lib/game-utils";
@@ -72,7 +73,11 @@ const getHighScoreSnapshot = () => {
 };
 const getHighScoreServerSnapshot = () => "0";
 
-export const LaserLoon: React.FC = () => {
+export interface LaserLoonProps {
+  config?: LaserLoonConfig;
+}
+
+export const LaserLoon: React.FC<LaserLoonProps> = ({ config }) => {
   const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const rawHighScore = useSyncExternalStore(
     subscribeHighScore,
@@ -85,10 +90,22 @@ export const LaserLoon: React.FC = () => {
 
   // Game configuration & React state
   const [mode, setMode] = useState<LaserMode>("campaign");
-  const [laserType, setLaserType] = useState<LaserType>("ruby-laser");
-  const [gameState, setGameState] = useState<"idle" | "playing" | "act-intro" | "act-victory" | "gameover" | "campaign-victory">("idle");
-  const [currentActNum, setCurrentActNum] = useState(1);
+  const [laserType, setLaserType] = useState<LaserType>(() => config?.laserType || "ruby-laser");
+  const [gameState, setGameState] = useState<"idle" | "playing" | "act-intro" | "act-victory" | "gameover" | "campaign-victory">(
+    () => config ? "playing" : "idle"
+  );
+  const [currentActNum, setCurrentActNum] = useState(() => config?.initialAct || 1);
   const [actKills, setActKills] = useState(0);
+
+  useEffect(() => {
+    if (config) {
+      setTimeout(() => {
+        setLaserType(config.laserType);
+        setCurrentActNum(config.initialAct);
+        setGameState("playing");
+      }, 0);
+    }
+  }, [config]);
   const [bossActive, setBossActive] = useState(false);
   const [bossHp, setBossHp] = useState(100);
   const [bossMaxHp, setBossMaxHp] = useState(100);

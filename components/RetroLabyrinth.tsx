@@ -81,8 +81,11 @@ interface Drone {
   maxX: number;
 }
 
-interface RetroLabyrinthProps {
+import { RetroLabyrinthConfig } from "@/lib/game-config-schemas";
+
+export interface RetroLabyrinthProps {
   isMounted?: boolean;
+  config?: RetroLabyrinthConfig;
 }
 
 const subscribeHighScore = (callback: () => void) => {
@@ -100,7 +103,7 @@ const getHighScoreSnapshot = () => {
 const getHighScoreServerSnapshot = () => "0";
 const emptySubscribe = () => () => {};
 
-export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propIsMounted }) => {
+export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propIsMounted, config }) => {
   const clientMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const isMounted = propIsMounted ?? clientMounted;
   const rawHighScore = useSyncExternalStore(
@@ -112,7 +115,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
 
   // Persistent Cyberdeck Profile & Meta-Progression
   const [profile, setProfile] = useState<CyberdeckProfile>(() => loadCyberdeckProfile());
-  const [selectedClassId, setSelectedClassId] = useState<CyberdeckClassId>("script_kiddie");
+  const [selectedClassId, setSelectedClassId] = useState<CyberdeckClassId>(() => config?.cyberdeckClass || "script_kiddie");
   const selectedClass = CYBERDECK_CLASSES[selectedClassId] || CYBERDECK_CLASSES.script_kiddie;
 
   // CRT Phosphor Theme & Calibration
@@ -190,6 +193,41 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
   const animFrameRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
   const cursorGridPosRef = useRef<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    if (config) {
+      setTimeout(() => {
+        setSelectedClassId(config.cyberdeckClass);
+        const starter = CYBERDECK_CLASSES[config.cyberdeckClass] || CYBERDECK_CLASSES.script_kiddie;
+        setPlayerHp(starter.baseHp);
+        setMaxPlayerHp(starter.baseHp);
+        setCurrentRam(starter.baseRam);
+        setMaxRam(starter.baseRam);
+        setBypassChips(starter.startBypassChips);
+        setStage(config.securityTier);
+
+        if (config.startingExploit && config.startingExploit !== "none") {
+          setWeapons((prev) => {
+            const updated = { ...prev };
+            if (config.startingExploit === "buffer_overflow") {
+              updated.buffer_overflow = {
+                ...updated.buffer_overflow,
+                damage: updated.buffer_overflow.damage + 15,
+              };
+            } else if (config.startingExploit === "sql_injection") {
+              updated.git_force_push = {
+                ...updated.git_force_push,
+                damage: updated.git_force_push.damage + 20,
+              };
+            } else if (config.startingExploit === "auth_bypass") {
+              setBypassChips((prevChips) => prevChips + 2);
+            }
+            return updated;
+          });
+        }
+      }, 0);
+    }
+  }, [config]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);

@@ -74,6 +74,7 @@
 - [lib/error-sanitization](lib/error-sanitization/README.md)
 - [lib/exceptions](lib/exceptions/README.md)
 - [lib/game-audio](lib/game-audio/README.md)
+- [lib/game-config-schemas](lib/game-config-schemas/README.md)
 - [lib/game-manuals](lib/game-manuals/README.md)
 - [lib/game-utils](lib/game-utils/README.md)
 - [lib/garmin-engine](lib/garmin-engine/README.md)

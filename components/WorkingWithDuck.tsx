@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useSyncExternalStore, useCallback } from "react";
+import { WorkingWithDuckConfig } from "@/lib/game-config-schemas";
 import Link from "next/link";
 import Image from "next/image";
 import { useAudio } from "@/components/providers/AudioProvider";
@@ -1360,7 +1361,11 @@ function drawCanvas(
 
 // --- Main React Component ---
 
-export const WorkingWithDuck: React.FC = () => {
+export interface WorkingWithDuckProps {
+  config?: WorkingWithDuckConfig;
+}
+
+export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({ config }) => {
   const rawHighScore = useSyncExternalStore(subscribeStorage, getHighScoreSnapshot, getServerSnapshot);
   const loadedHighScore = parseInt(rawHighScore, 10) || 0;
 
@@ -1368,9 +1373,74 @@ export const WorkingWithDuck: React.FC = () => {
   const { recordEvent } = useTelemetry();
 
   // Core Game State Ref for 60 FPS deterministic engine
-  const gameStateRef = useRef<WorkingWithDuckState>(createInitialDuckGameState(1, "campaign"));
+  const initialDuckState = (() => {
+    const level = config?.levelSprint || 1;
+    const s = createInitialDuckGameState(level, "campaign");
+    if (config) {
+      s.status = "running";
+      if (config.puppyState === "playful") {
+        s.duck.state = "ZOOMIES";
+        s.excitement = 80;
+      } else if (config.puppyState === "sleepy") {
+        s.duck.state = "NAP_TIME";
+        s.excitement = 5;
+      } else {
+        s.duck.state = "IDLE_ROAM";
+        s.excitement = 50;
+      }
+      (s as unknown as Record<string, unknown>).customBoundX = config.officeBoundariesX;
+      (s as unknown as Record<string, unknown>).customBoundY = config.officeBoundariesY;
+    }
+    return s;
+  })();
+
+  const gameStateRef = useRef<WorkingWithDuckState>(initialDuckState);
+
   // UI React State for rendering HUD, modals, and overlays
-  const [uiState, setUiState] = useState<WorkingWithDuckState>(() => createInitialDuckGameState(1, "campaign"));
+  const [uiState, setUiState] = useState<WorkingWithDuckState>(() => {
+    const level = config?.levelSprint || 1;
+    const s = createInitialDuckGameState(level, "campaign");
+    if (config) {
+      s.status = "running";
+      if (config.puppyState === "playful") {
+        s.duck.state = "ZOOMIES";
+        s.excitement = 80;
+      } else if (config.puppyState === "sleepy") {
+        s.duck.state = "NAP_TIME";
+        s.excitement = 5;
+      } else {
+        s.duck.state = "IDLE_ROAM";
+        s.excitement = 50;
+      }
+      (s as unknown as Record<string, unknown>).customBoundX = config.officeBoundariesX;
+      (s as unknown as Record<string, unknown>).customBoundY = config.officeBoundariesY;
+    }
+    return s;
+  });
+
+  useEffect(() => {
+    if (config) {
+      setTimeout(() => {
+        const level = config.levelSprint || 1;
+        const s = createInitialDuckGameState(level, "campaign");
+        s.status = "running";
+        if (config.puppyState === "playful") {
+          s.duck.state = "ZOOMIES";
+          s.excitement = 80;
+        } else if (config.puppyState === "sleepy") {
+          s.duck.state = "NAP_TIME";
+          s.excitement = 5;
+        } else {
+          s.duck.state = "IDLE_ROAM";
+          s.excitement = 50;
+        }
+        (s as unknown as Record<string, unknown>).customBoundX = config.officeBoundariesX;
+        (s as unknown as Record<string, unknown>).customBoundY = config.officeBoundariesY;
+        gameStateRef.current = s;
+        setUiState(s);
+      }, 0);
+    }
+  }, [config]);
   const [isScrapbookOpen, setIsScrapbookOpen] = useState(false);
   const [isWardrobeOpen, setIsWardrobeOpen] = useState(false);
   const [activeScrapbookIndex, setActiveScrapbookIndex] = useState(0);
