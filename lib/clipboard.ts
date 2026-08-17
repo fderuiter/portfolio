@@ -2,6 +2,8 @@
  * Centralized Clipboard Helper with Environment-Aware Base Origin
  */
 
+import { env } from "@/lib/env";
+
 /**
  * Dynamically resolves the active Vercel preview, production, or local host URL.
  * Safely executes in both browser and server-side (SSR) environments.
@@ -11,7 +13,7 @@ export function getActiveHostUrl(): string {
     return window.location.origin;
   }
   // Fallback for SSR or non-browser execution
-  return "https://fderuiter-portfolio.vercel.app";
+  return env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
 }
 
 /**

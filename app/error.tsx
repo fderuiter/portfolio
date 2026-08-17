@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import * as Sentry from "@sentry/nextjs";
 import { sanitizeError } from "@/lib/error-sanitization";
+import { env } from "@/lib/env";
 
 export default function Error({
   error,
@@ -11,7 +12,10 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const [canonicalUrl, setCanonicalUrl] = useState<string>("https://fderuiter-portfolio.vercel.app/");
+  const [canonicalUrl, setCanonicalUrl] = useState<string>(() => {
+    const base = env.NEXT_PUBLIC_APP_URL || "https://www.deruiter.dev";
+    return base.endsWith("/") ? base : `${base}/`;
+  });
 
   useEffect(() => {
     // Capture the error in external observability system

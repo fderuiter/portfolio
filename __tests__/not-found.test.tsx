@@ -51,9 +51,9 @@ describe("NotFound component & dynamic metadata hoisting", () => {
     const originalLocation = window.location;
     vi.stubGlobal("location", {
       ...originalLocation,
-      href: "https://fderuiter-portfolio.vercel.app/some-broken-path",
+      href: "https://www.deruiter.dev/some-broken-path",
       pathname: "/some-broken-path",
-      origin: "https://fderuiter-portfolio.vercel.app"
+      origin: "https://www.deruiter.dev"
     });
   });
 
@@ -96,6 +96,6 @@ describe("NotFound component & dynamic metadata hoisting", () => {
     // Check canonical link tag is hoisted to head and matches window.location.href
     const canonicalLink = document.head.querySelector('link[rel="canonical"]');
     expect(canonicalLink).toBeDefined();
-    expect(canonicalLink?.getAttribute("href")).toBe("https://fderuiter-portfolio.vercel.app/some-broken-path");
+    expect(canonicalLink?.getAttribute("href")).toBe("https://www.deruiter.dev/some-broken-path");
   });
 });

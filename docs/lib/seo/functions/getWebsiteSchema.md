@@ -8,7 +8,7 @@
 
 > **getWebsiteSchema**(): `string`
 
-Defined in: [lib/seo.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L31)
+Defined in: [lib/seo.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L32)
 
 Returns the root WebSite schema.
 

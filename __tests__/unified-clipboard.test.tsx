@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React from "react";
 import { render, screen, act, cleanup } from "@testing-library/react";
 import { getActiveHostUrl, copyToClipboard } from "@/lib/clipboard";
+import { env } from "@/lib/env";
 import { useClipboard } from "@/hooks/useClipboard";
 import { A11yProvider } from "@/components/providers/A11yProvider";
 
@@ -87,7 +88,7 @@ describe("Unified Clipboard Utility & Hook", () => {
       try {
         // @ts-expect-error - simulating environment where window is deleted
         delete global.window;
-        expect(getActiveHostUrl()).toBe("https://fderuiter-portfolio.vercel.app");
+        expect(getActiveHostUrl()).toBe(env.NEXT_PUBLIC_APP_URL.replace(/\/$/, ""));
       } finally {
         global.window = originalWin;
       }
