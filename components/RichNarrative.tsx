@@ -45,7 +45,14 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
         "class",
         "data-term",
         "data-definition",
-        "data-key"
+        "data-key",
+        "role",
+        "tabindex",
+        "aria-label",
+        "aria-describedby",
+        "aria-hidden",
+        "aria-expanded",
+        "aria-checked"
       ]
     });
   }, [html]);
@@ -114,6 +121,19 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
           if (element.hasAttribute("rel")) {
             props.rel = element.getAttribute("rel");
           }
+
+          // Parse and preserve standard accessibility attributes starting with aria-, role, and tabindex
+          Array.from(element.attributes).forEach((attr) => {
+            const name = attr.name.toLowerCase();
+            if (name.startsWith("aria-")) {
+              props[attr.name] = attr.value;
+            } else if (name === "role") {
+              props.role = attr.value;
+            } else if (name === "tabindex") {
+              const parsed = parseInt(attr.value, 10);
+              props.tabIndex = isNaN(parsed) ? 0 : parsed;
+            }
+          });
 
           return React.createElement(tagName, props, children);
         }
