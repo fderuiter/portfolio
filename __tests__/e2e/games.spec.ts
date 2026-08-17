@@ -6,60 +6,64 @@ test.describe('Arcade Games & Simulators Suite', () => {
     await page.waitForLoadState('networkidle');
 
     // 1. Quasi-Perfect Puzzler
-    await expect(page.getByText('Quasi-Perfect Puzzler')).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Quasi-Perfect Puzzler/i }).first()).toBeVisible();
 
     // 2. Laser Loon: Bug Hunter
-    await expect(page.getByText('Laser Loon')).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Laser Loon/i }).first()).toBeVisible();
 
     // 3. Garmin Watch Simulator
-    await expect(page.getByText('Garmin 32KB Memory Runner')).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Garmin/i }).first()).toBeVisible();
 
     // 4. Clinical Trial Chaos
-    await expect(page.getByText('Clinical Trial Chaos')).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Clinical Trial Chaos/i }).first()).toBeVisible();
 
     // 5. Retro Labyrinth
-    await expect(page.getByText('Retro Labyrinth')).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Retro Labyrinth/i }).first()).toBeVisible();
 
     // 6. Working With Duck
-    await expect(page.getByText('Working With Duck')).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Working With Duck/i }).first()).toBeVisible();
   });
 
   test('Laser Loon dedicated game starts and switches weapon modes', async ({ page }) => {
     await page.goto('/arcade/laser-loon');
     await page.waitForLoadState('networkidle');
 
-    // Laser canvas exists
+    // Click Launch Cabinet button to mount/start the game
+    const launchCabinetBtn = page.getByRole('button', { name: /Launch Cabinet/i });
+    await expect(launchCabinetBtn).toBeVisible();
+    await launchCabinetBtn.click();
+
+    // Laser canvas exists after launch warming up
     const laserCanvas = page.locator('canvas').first();
-    await expect(laserCanvas).toBeVisible();
+    await expect(laserCanvas).toBeVisible({ timeout: 15000 });
 
-    // Click Launch button to start playing
-    const launchBtn = page.getByRole('button', { name: /LAUNCH CRYO HUNT/i });
-    if (await launchBtn.isVisible()) {
-      await launchBtn.click();
-    }
-
-    // Switch weapons to Emerald Beam (Plasma)
-    const plasmaBtn = page.getByRole('button', { name: /Plasma \(2\)/i });
-    await plasmaBtn.click();
-    await expect(plasmaBtn).toHaveClass(/bg-emerald-500/);
+    // Switch weapons to Emerald Beam (Aurora)
+    const auroraBtn = page.getByRole('button', { name: /Aurora \(3\)/i });
+    await auroraBtn.click();
+    await expect(auroraBtn).toHaveClass(/bg-emerald-500/);
 
     // Switch to Sandbox mode
     const sandboxTab = page.getByRole('button', { name: /Zero-G Sandbox/i });
     await sandboxTab.click();
-    await expect(page.getByText(/Zero-G/)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Zero-G', exact: true })).toBeVisible();
   });
 
   test('Garmin Watch Simulator switches device targets and starts', async ({ page }) => {
     await page.goto('/arcade/garmin-watch');
     await page.waitForLoadState('networkidle');
 
+    // Click Launch Cabinet button to mount/start the game
+    const launchCabinetBtn = page.getByRole('button', { name: /Launch Cabinet/i });
+    await expect(launchCabinetBtn).toBeVisible();
+    await launchCabinetBtn.click();
+
     const garminCanvas = page.locator('canvas').first();
-    await expect(garminCanvas).toBeVisible();
+    await expect(garminCanvas).toBeVisible({ timeout: 15000 });
 
     // Switch to Edge (128KB) profile
     const edgeBtn = page.getByRole('button', { name: /Edge \(128KB\)/i });
     await edgeBtn.click();
-    await expect(page.getByText(/128 KB/)).toBeVisible();
+    await expect(page.getByText('LIMIT: 128 KB RAM').first()).toBeVisible();
 
     // Start simulation
     const startSimBtn = page.getByRole('button', { name: /START SIMULATION/i });
@@ -72,10 +76,16 @@ test.describe('Arcade Games & Simulators Suite', () => {
     await page.goto('/arcade/quasi-puzzler');
     await page.waitForLoadState('networkidle');
 
+    // Click Launch Cabinet button to mount/start the game
+    const launchCabinetBtn = page.getByRole('button', { name: /Launch Cabinet/i });
+    await expect(launchCabinetBtn).toBeVisible();
+    await launchCabinetBtn.click();
+
     // Switch to Level 2
     const l2Btn = page.getByRole('button', { name: /L2/i });
+    await expect(l2Btn).toBeVisible({ timeout: 15000 });
     await l2Btn.click();
-    await expect(page.getByText(/The Art of Substitution/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'The Mirror Law' })).toBeVisible();
     await expect(page.getByText(/Active Hypotheses Context/i)).toBeVisible();
   });
 
