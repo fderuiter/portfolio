@@ -60,7 +60,7 @@ Defined in: [hooks/usePretextLayout.tsx:208](https://github.com/fderuiter/portfo
 
 ### semanticTag?
 
-> `optional` **semanticTag?**: `"h1"` \| `"h2"` \| `"h3"` \| `"h4"` \| `"h5"` \| `"h6"` \| `"p"` \| `"span"` \| `"div"` \| `"article"` \| `"section"`
+> `optional` **semanticTag?**: `"article"` \| `"div"` \| `"h1"` \| `"h2"` \| `"h3"` \| `"h4"` \| `"h5"` \| `"h6"` \| `"p"` \| `"section"` \| `"span"`
 
 Defined in: [hooks/usePretextLayout.tsx:212](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L212)
 

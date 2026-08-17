@@ -422,7 +422,7 @@ Defined in: [lib/working-with-duck-engine.ts:457](https://github.com/fderuiter/p
 
 #### mode
 
-> **mode**: `"ball"` \| `"frisbee"`
+> **mode**: `"frisbee"` \| `"ball"`
 
 #### puddles
 
@@ -430,7 +430,7 @@ Defined in: [lib/working-with-duck-engine.ts:457](https://github.com/fderuiter/p
 
 #### status
 
-> **status**: `"success"` \| `"aim"` \| `"thrown"` \| `"retrieving"` \| `"muddy"`
+> **status**: `"success"` \| `"muddy"` \| `"aim"` \| `"thrown"` \| `"retrieving"`
 
 #### timer
 

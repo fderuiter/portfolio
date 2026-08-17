@@ -20,7 +20,7 @@ Dog Park Mini-Game Transitions & Logic
 
 ### mode?
 
-`"ball"` \| `"frisbee"`
+`"frisbee"` \| `"ball"`
 
 ## Returns
 

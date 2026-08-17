@@ -64,6 +64,6 @@ Defined in: node\_modules/@chenglou/pretext/dist/rich-inline.d.ts:4
 
 ### type
 
-> **type**: `"text"` \| `"bold"` \| `"italic"` \| `"code"`
+> **type**: `"text"` \| `"code"` \| `"bold"` \| `"italic"`
 
 Defined in: [hooks/usePretextLayout.tsx:278](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L278)
