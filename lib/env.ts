@@ -91,7 +91,7 @@ let cachedEnv: AppEnv | null = null;
  * In development / production, logs formatted warnings if schema validation fails.
  */
 export function getEnv(): AppEnv {
-  if (cachedEnv) return cachedEnv;
+  if (cachedEnv && process.env.NODE_ENV !== "test") return cachedEnv;
 
   const result = validateEnv(process.env);
   if (!result.success && process.env.NODE_ENV !== "test") {
@@ -100,6 +100,15 @@ export function getEnv(): AppEnv {
 
   cachedEnv = result.data;
   return cachedEnv;
+}
+
+/**
+ * Centered dynamic helper to check if current deployment is production.
+ * Uses the existing environment validation schema to prevent unvalidated configurations.
+ */
+export function isProductionEnvironment(): boolean {
+  const currentEnv = getEnv();
+  return currentEnv.VERCEL_ENV === "production";
 }
 
 export const env = getEnv();

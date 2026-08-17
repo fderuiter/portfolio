@@ -132,10 +132,37 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     }
   });
 
-  it("robots configuration allows indexing and references sitemap", () => {
-    const result = robots();
-    expect(result.rules).toBeDefined();
-    expect(result.sitemap).toBe(`${SITE_BASE_URL}/sitemap.xml`);
+  it("robots configuration allows indexing and references sitemap in production", () => {
+    const originalVercelEnv = process.env.VERCEL_ENV;
+    try {
+      process.env.VERCEL_ENV = "production";
+      const result = robots();
+      expect(result.rules).toBeDefined();
+      expect(Array.isArray(result.rules) ? result.rules[0] : result.rules).toEqual({
+        userAgent: "*",
+        allow: "/",
+        disallow: ["/api/", "/_next/"]
+      });
+      expect(result.sitemap).toBe(`${SITE_BASE_URL}/sitemap.xml`);
+    } finally {
+      process.env.VERCEL_ENV = originalVercelEnv;
+    }
+  });
+
+  it("robots configuration disallows indexing and hides sitemap in non-production", () => {
+    const originalVercelEnv = process.env.VERCEL_ENV;
+    try {
+      process.env.VERCEL_ENV = "preview";
+      const result = robots();
+      expect(result.rules).toBeDefined();
+      expect(Array.isArray(result.rules) ? result.rules[0] : result.rules).toEqual({
+        userAgent: "*",
+        disallow: "/"
+      });
+      expect(result.sitemap).toBeUndefined();
+    } finally {
+      process.env.VERCEL_ENV = originalVercelEnv;
+    }
   });
 
   it("sitemap generator returns all first-class routes and dynamic case studies", async () => {
