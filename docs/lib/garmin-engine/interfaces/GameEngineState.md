@@ -30,7 +30,7 @@ Defined in: [lib/garmin-engine.ts:119](https://github.com/fderuiter/portfolio/bl
 
 > **consecutiveDodges**: `number`
 
-Defined in: [lib/garmin-engine.ts:129](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L129)
+Defined in: [lib/garmin-engine.ts:130](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L130)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/garmin-engine.ts:129](https://github.com/fderuiter/portfolio/bl
 
 > **crashReport**: [`CrashReport`](CrashReport.md) \| `null`
 
-Defined in: [lib/garmin-engine.ts:126](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L126)
+Defined in: [lib/garmin-engine.ts:127](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L127)
 
 ***
 
@@ -134,7 +134,7 @@ Defined in: [lib/garmin-engine.ts:118](https://github.com/fderuiter/portfolio/bl
 
 > **lastAllocTime**: `number`
 
-Defined in: [lib/garmin-engine.ts:127](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L127)
+Defined in: [lib/garmin-engine.ts:128](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L128)
 
 ***
 
@@ -142,7 +142,7 @@ Defined in: [lib/garmin-engine.ts:127](https://github.com/fderuiter/portfolio/bl
 
 > **lastObstacleTime**: `number`
 
-Defined in: [lib/garmin-engine.ts:128](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L128)
+Defined in: [lib/garmin-engine.ts:129](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L129)
 
 ***
 
@@ -183,6 +183,14 @@ Defined in: [lib/garmin-engine.ts:109](https://github.com/fderuiter/portfolio/bl
 > **score**: `number`
 
 Defined in: [lib/garmin-engine.ts:112](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L112)
+
+***
+
+### thermalStress
+
+> **thermalStress**: `number`
+
+Defined in: [lib/garmin-engine.ts:126](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L126)
 
 ***
 

@@ -577,6 +577,10 @@ export const GarminWatchSimulator: React.FC = () => {
           <span>BATTERY: <strong className="text-white">{Math.round(gameState.battery)}%</strong></span>
         </div>
         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg">
+          <IconFlame className={`w-3.5 h-3.5 ${gameState.thermalStress > 0.4 ? "text-orange-500 animate-pulse" : "text-zinc-500"}`} />
+          <span>THERMAL STRESS: <strong className="text-white">{Math.round((gameState.thermalStress ?? 0) * 100)}%</strong></span>
+        </div>
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg">
           <IconFlame className={`w-3.5 h-3.5 ${gameState.fogLevel > 0.4 ? "text-rose-500 animate-pulse" : "text-zinc-500"}`} />
           <span>CONDENSATION: <strong className="text-white">{Math.round(gameState.fogLevel * 100)}%</strong></span>
         </div>
