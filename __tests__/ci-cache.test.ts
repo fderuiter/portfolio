@@ -11,6 +11,19 @@ describe("CI Workflow Dual Caching and Isolation Suite", () => {
 
   const content = fs.readFileSync(workflowPath, "utf8");
 
+  describe("Lockfile Validation Execution Order", () => {
+    it("should ensure lockfile validation runs before expensive installation steps", () => {
+      // Find the index or step name of Lockfile validation and npm ci
+      const steps = content.split("- name:").map(s => s.trim());
+      const lockfileStepIndex = steps.findIndex(step => step.toLowerCase().includes("verify lockfile"));
+      const npmCiStepIndex = steps.findIndex(step => step.includes("Install Dependencies") || step.includes("npm ci"));
+      
+      expect(lockfileStepIndex).toBeGreaterThan(-1);
+      expect(npmCiStepIndex).toBeGreaterThan(-1);
+      expect(lockfileStepIndex).toBeLessThan(npmCiStepIndex);
+    });
+  });
+
   describe("Playwright Browser Caching Config", () => {
     it("should configure branch-isolated caching with lockfile-based invalidation for Playwright", () => {
       // Find the Playwright cache block

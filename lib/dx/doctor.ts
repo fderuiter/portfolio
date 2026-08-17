@@ -919,6 +919,208 @@ export function checkWorkspaceIdeConfig(root: string, fix = false): DiagnosticCh
   };
 }
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export function getPackageLockVersion(packageLock: any, pkgName: string): string | null {
+  if (packageLock.packages) {
+    const pkgObj = packageLock.packages[`node_modules/${pkgName}`];
+    if (pkgObj && pkgObj.version) {
+      return pkgObj.version;
+    }
+  }
+  if (packageLock.dependencies && packageLock.dependencies[pkgName]) {
+    return packageLock.dependencies[pkgName].version || null;
+  }
+  return null;
+}
+
+export function getBunLockVersion(bunLock: any, pkgName: string): string | null {
+  if (bunLock.packages) {
+    // 1. Direct key match
+    const pkgArr = bunLock.packages[pkgName];
+    if (pkgArr && Array.isArray(pkgArr) && typeof pkgArr[0] === "string") {
+      const val = pkgArr[0];
+      const lastAtIndex = val.lastIndexOf('@');
+      if (lastAtIndex !== -1) {
+        return val.substring(lastAtIndex + 1);
+      }
+    }
+    // 2. Fallback search (e.g. nested packages or aliased paths)
+    for (const key of Object.keys(bunLock.packages)) {
+      const parts = key.split('/');
+      if (parts[parts.length - 1] === pkgName || key === pkgName) {
+        const arr = bunLock.packages[key];
+        if (arr && Array.isArray(arr) && typeof arr[0] === "string") {
+          const val = arr[0];
+          const lastAtIndex = val.lastIndexOf('@');
+          if (lastAtIndex !== -1) {
+            const parsedName = val.substring(0, lastAtIndex);
+            if (parsedName === pkgName) {
+              return val.substring(lastAtIndex + 1);
+            }
+          }
+        }
+      }
+    }
+  }
+  return null;
+}
+
+export function checkLockfileSync(root: string, fix = false): DiagnosticCheckResult {
+  const packageJsonPath = path.join(root, "package.json");
+  const packageLockPath = path.join(root, "package-lock.json");
+  const bunLockPath = path.join(root, "bun.lock");
+
+  if (!fs.existsSync(packageJsonPath)) {
+    return {
+      id: "lockfile-sync",
+      name: "Lockfile Synchronization Guard",
+      category: "quality",
+      status: "fail",
+      message: "package.json not found.",
+      fixable: false,
+    };
+  }
+
+  if (!fs.existsSync(packageLockPath) || !fs.existsSync(bunLockPath)) {
+    if (fix) {
+      try {
+        if (!fs.existsSync(packageLockPath)) {
+          execSync("npm install --package-lock-only", { cwd: root, stdio: "ignore" });
+        }
+        if (!fs.existsSync(bunLockPath)) {
+          execSync("bun install", { cwd: root, stdio: "ignore" });
+        }
+        return {
+          id: "lockfile-sync",
+          name: "Lockfile Synchronization Guard",
+          category: "quality",
+          status: "fixed",
+          message: "Regenerated missing lockfiles.",
+        };
+      } catch (err: any) {
+        return {
+          id: "lockfile-sync",
+          name: "Lockfile Synchronization Guard",
+          category: "quality",
+          status: "fail",
+          message: `Failed to regenerate lockfiles: ${err.message}`,
+          fixable: true,
+        };
+      }
+    }
+    return {
+      id: "lockfile-sync",
+      name: "Lockfile Synchronization Guard",
+      category: "quality",
+      status: "fail",
+      message: "Missing lockfile(s). Both package-lock.json and bun.lock must exist.",
+      fixable: true,
+    };
+  }
+
+  let packageJson: any;
+  let packageLock: any;
+  let bunLock: any;
+
+  try {
+    packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
+    packageLock = JSON.parse(fs.readFileSync(packageLockPath, "utf-8"));
+    
+    let bunLockContent = fs.readFileSync(bunLockPath, "utf-8");
+    bunLockContent = bunLockContent.replace(/,(\s*[\]}])/g, "$1");
+    bunLock = JSON.parse(bunLockContent);
+  } catch (err: any) {
+    return {
+      id: "lockfile-sync",
+      name: "Lockfile Synchronization Guard",
+      category: "quality",
+      status: "fail",
+      message: `Failed to parse package or lock files: ${err.message}`,
+      fixable: false,
+    };
+  }
+
+  const dependencies = {
+    ...(packageJson.dependencies || {}),
+    ...(packageJson.devDependencies || {}),
+  };
+
+  const mismatches: string[] = [];
+  let needsNpm = false;
+  let needsBun = false;
+
+  for (const pkgName of Object.keys(dependencies)) {
+    const npmVer = getPackageLockVersion(packageLock, pkgName);
+    const bunVer = getBunLockVersion(bunLock, pkgName);
+
+    if (!npmVer && !bunVer) {
+      mismatches.push(`${pkgName} (missing from both package-lock.json and bun.lock)`);
+      needsNpm = true;
+      needsBun = true;
+    } else if (!npmVer) {
+      mismatches.push(`${pkgName} (missing from package-lock.json, bun resolved: ${bunVer})`);
+      needsNpm = true;
+    } else if (!bunVer) {
+      mismatches.push(`${pkgName} (missing from bun.lock, npm resolved: ${npmVer})`);
+      needsBun = true;
+    } else if (npmVer !== bunVer) {
+      mismatches.push(`${pkgName} (npm resolved: ${npmVer}, bun resolved: ${bunVer})`);
+      needsNpm = true;
+      needsBun = true;
+    }
+  }
+
+  if (mismatches.length === 0) {
+    return {
+      id: "lockfile-sync",
+      name: "Lockfile Synchronization Guard",
+      category: "quality",
+      status: "pass",
+      message: "Both package-lock.json and bun.lock are fully synchronized with identical package versions.",
+    };
+  }
+
+  if (fix) {
+    try {
+      if (needsNpm) {
+        execSync("npm install --package-lock-only", { cwd: root, stdio: "ignore" });
+      }
+      if (needsBun) {
+        execSync("bun install", { cwd: root, stdio: "ignore" });
+      }
+      return {
+        id: "lockfile-sync",
+        name: "Lockfile Synchronization Guard",
+        category: "quality",
+        status: "fixed",
+        message: `Auto-synchronized ${mismatches.length} desynchronized dependency lockfile entry(ies).`,
+        details: mismatches,
+      };
+    } catch (err: any) {
+      return {
+        id: "lockfile-sync",
+        name: "Lockfile Synchronization Guard",
+        category: "quality",
+        status: "fail",
+        message: `Failed to auto-synchronize lockfiles: ${err.message}`,
+        details: mismatches,
+        fixable: true,
+      };
+    }
+  }
+
+  return {
+    id: "lockfile-sync",
+    name: "Lockfile Synchronization Guard",
+    category: "quality",
+    status: "fail",
+    message: `Lockfiles are desynchronized! ${mismatches.length} package mismatch(es) found between package-lock.json and bun.lock. Run 'npm run dx sync' or 'npm run doctor:fix' to align them.`,
+    details: mismatches,
+    fixable: true,
+  };
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
 /**
  * Run All Diagnostics
  */
@@ -953,6 +1155,7 @@ export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
     checkWorkspaceIdeConfig(root, fix),
     checkDeadCode(root),
     checkBundleBudgets(root),
+    checkLockfileSync(root, fix),
   ];
 
   const totalPassed = checks.filter((c) => c.status === "pass").length;

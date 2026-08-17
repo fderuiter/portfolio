@@ -36,6 +36,9 @@ jobs:
           node-version: 20
           cache: 'npm'
 
+      - name: Verify Lockfile Synchronization
+        run: node scripts/check-lockfile-sync.js
+
       - name: Install Dependencies
         run: npm ci
 

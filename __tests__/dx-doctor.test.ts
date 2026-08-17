@@ -14,6 +14,7 @@ import {
   checkDocumentationParity,
   checkOpenApiParity,
   checkDefectRemediationInvariants,
+  checkLockfileSync,
   runDiagnostics,
   printDoctorReport,
 } from "@/lib/dx/doctor";
@@ -337,6 +338,75 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       const result = checkDefectRemediationInvariants(workspaceRoot);
       expect(result.status).toBe("pass");
       expect(result.category).toBe("quality");
+    });
+  });
+
+  describe("checkLockfileSync", () => {
+    it("fails when lockfiles are desynchronized", () => {
+      // Setup mock package.json, package-lock.json, bun.lock
+      fs.writeFileSync(
+        path.join(tempDir, "package.json"),
+        JSON.stringify({
+          dependencies: {
+            "isomorphic-dompurify": "^3.19.0",
+          },
+        })
+      );
+      fs.writeFileSync(
+        path.join(tempDir, "package-lock.json"),
+        JSON.stringify({
+          packages: {
+            "node_modules/isomorphic-dompurify": {
+              version: "3.22.0",
+            },
+          },
+        })
+      );
+      fs.writeFileSync(
+        path.join(tempDir, "bun.lock"),
+        JSON.stringify({
+          packages: {
+            "isomorphic-dompurify": ["isomorphic-dompurify@3.14.0", "", {}],
+          },
+        })
+      );
+
+      const result = checkLockfileSync(tempDir, false);
+      expect(result.status).toBe("fail");
+      expect(result.message).toContain("Lockfiles are desynchronized!");
+      expect(result.details?.[0]).toContain("isomorphic-dompurify");
+    });
+
+    it("passes when lockfiles have identical resolved versions", () => {
+      fs.writeFileSync(
+        path.join(tempDir, "package.json"),
+        JSON.stringify({
+          dependencies: {
+            "isomorphic-dompurify": "^3.19.0",
+          },
+        })
+      );
+      fs.writeFileSync(
+        path.join(tempDir, "package-lock.json"),
+        JSON.stringify({
+          packages: {
+            "node_modules/isomorphic-dompurify": {
+              version: "3.22.0",
+            },
+          },
+        })
+      );
+      fs.writeFileSync(
+        path.join(tempDir, "bun.lock"),
+        JSON.stringify({
+          packages: {
+            "isomorphic-dompurify": ["isomorphic-dompurify@3.22.0", "", {}],
+          },
+        })
+      );
+
+      const result = checkLockfileSync(tempDir, false);
+      expect(result.status).toBe("pass");
     });
   });
 

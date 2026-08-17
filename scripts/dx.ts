@@ -8,7 +8,7 @@ import readline from "readline";
 import path from "path";
 import fs from "fs";
 import { execSync } from "child_process";
-import { runDiagnostics, printDoctorReport } from "../lib/dx/doctor";
+import { runDiagnostics, printDoctorReport, getPackageLockVersion, getBunLockVersion } from "../lib/dx/doctor";
 import { scaffold, type ScaffoldType } from "../lib/dx/scaffolder";
 import { runAllBenchmarks, printBenchmarkReport } from "../lib/dx/bench";
 import { colors, formatHeader, badge, formatSection } from "../lib/dx/utils";
@@ -305,6 +305,83 @@ function handleCleanCommand(): void {
   console.log(`\n${colors.brightGreen}✅ Clean completed. Workspace is in a pristine, fresh state.${colors.reset}\n`);
 }
 
+async function handleSyncCommand(): Promise<void> {
+  console.log(formatHeader("DX Lockfile Sync: Aligning Bun & NPM"));
+  const startTime = Date.now();
+  
+  try {
+    const root = workspaceRoot;
+    const packageJsonPath = path.join(root, "package.json");
+    const packageLockPath = path.join(root, "package-lock.json");
+    const bunLockPath = path.join(root, "bun.lock");
+
+    if (!fs.existsSync(packageJsonPath)) {
+      console.error(`${colors.red}❌ package.json not found.${colors.reset}`);
+      process.exit(1);
+    }
+
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
+    const dependencies = {
+      ...(packageJson.dependencies || {}),
+      ...(packageJson.devDependencies || {}),
+    };
+
+    const packageLockExists = fs.existsSync(packageLockPath);
+    const bunLockExists = fs.existsSync(bunLockPath);
+    
+    let needsNpmInstall = !packageLockExists;
+    let needsBunInstall = !bunLockExists;
+
+    if (packageLockExists && bunLockExists) {
+      const packageLock = JSON.parse(fs.readFileSync(packageLockPath, "utf-8"));
+      let bunLockContent = fs.readFileSync(bunLockPath, "utf-8");
+      bunLockContent = bunLockContent.replace(/,(\s*[\]}])/g, "$1");
+      const bunLock = JSON.parse(bunLockContent);
+      
+      for (const pkgName of Object.keys(dependencies)) {
+        const npmVer = getPackageLockVersion(packageLock, pkgName);
+        const bunVer = getBunLockVersion(bunLock, pkgName);
+        
+        if (!npmVer) {
+          needsNpmInstall = true;
+        }
+        if (!bunVer) {
+          needsBunInstall = true;
+        }
+        if (npmVer && bunVer && npmVer !== bunVer) {
+          needsNpmInstall = true;
+          needsBunInstall = true;
+        }
+      }
+    } else {
+      needsNpmInstall = true;
+      needsBunInstall = true;
+    }
+
+    if (!needsNpmInstall && !needsBunInstall) {
+      console.log(`${colors.brightGreen}✅ Lockfiles are already perfectly synchronized with identical package versions.${colors.reset}`);
+      process.exit(0);
+    }
+
+    if (needsNpmInstall) {
+      console.log(`${colors.yellow}Regenerating package-lock.json based on package manifest...${colors.reset}`);
+      execSync("npm install --package-lock-only", { cwd: root, stdio: "inherit" });
+    }
+
+    if (needsBunInstall) {
+      console.log(`${colors.yellow}Regenerating bun.lock based on package manifest...${colors.reset}`);
+      execSync("bun install", { cwd: root, stdio: "inherit" });
+    }
+
+    const elapsed = Date.now() - startTime;
+    console.log(`\n${colors.brightGreen}✔ Successfully synchronized lockfiles in ${elapsed}ms.${colors.reset}\n`);
+    process.exit(0);
+  } catch (err: unknown) {
+    console.error(`\n${colors.brightRed}✖ Lockfile synchronization failed: ${(err as Error).message}${colors.reset}\n`);
+    process.exit(1);
+  }
+}
+
 async function runInteractiveMenu(): Promise<void> {
   const rl = readline.createInterface({
     input: process.stdin,
@@ -323,9 +400,10 @@ async function runInteractiveMenu(): Promise<void> {
   console.log(`  ${colors.cyan}8)${colors.reset} Scaffold New Code Template (Arcade, API, ADR, Component)`);
   console.log(`  ${colors.cyan}9)${colors.reset} Run Micro-Benchmarks (Pretext & Math)`);
   console.log(`  ${colors.cyan}10)${colors.reset} Clean Caches & Rebuild Tokens`);
-  console.log(`  ${colors.cyan}11)${colors.reset} Exit\n`);
+  console.log(`  ${colors.cyan}11)${colors.reset} Lockfile Synchronization (Align Bun & NPM)`);
+  console.log(`  ${colors.cyan}12)${colors.reset} Exit\n`);
 
-  rl.question(`${colors.bold}${colors.brightWhite}Select an option [1-11]: ${colors.reset}`, async (answer) => {
+  rl.question(`${colors.bold}${colors.brightWhite}Select an option [1-12]: ${colors.reset}`, async (answer) => {
     rl.close();
     const choice = answer.trim();
 
@@ -369,6 +447,9 @@ async function runInteractiveMenu(): Promise<void> {
         handleCleanCommand();
         break;
       case "11":
+        await handleSyncCommand();
+        break;
+      case "12":
       default:
         console.log(`\n${colors.gray}Exiting DX Suite.${colors.reset}\n`);
         process.exit(0);
@@ -392,6 +473,9 @@ async function main(): Promise<void> {
     case "verify":
     case "check":
       await handleVerifyCommand();
+      break;
+    case "sync":
+      await handleSyncCommand();
       break;
     case "commit":
     case "cz":
