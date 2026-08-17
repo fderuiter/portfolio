@@ -409,7 +409,7 @@ export function checkDocumentationParity(root: string, fix = false): DiagnosticC
       id: "docs-drift",
       name: "TypeDoc & Markdown Documentation Parity",
       category: "docs",
-      status: "warn",
+      status: "fail",
       message: "docs/ directory does not exist. Run 'npm run compile-docs' to generate.",
       fixable: true,
     };
@@ -456,7 +456,7 @@ export function checkDocumentationParity(root: string, fix = false): DiagnosticC
       id: "docs-drift",
       name: "TypeDoc & Markdown Documentation Parity",
       category: "docs",
-      status: "warn",
+      status: "fail",
       message: `TypeDoc markdown documentation in docs/ is out of sync (${driftDetails.length} file(s)).`,
       details: driftDetails,
       fixable: true,

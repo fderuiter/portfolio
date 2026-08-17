@@ -12,7 +12,7 @@ Defined in: [lib/dungeon/types.ts:254](https://github.com/fderuiter/portfolio/bl
 
 ### activeAxis
 
-> **activeAxis**: `"row"` \| `"col"`
+> **activeAxis**: `"col"` \| `"row"`
 
 Defined in: [lib/dungeon/types.ts:260](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L260)
 

@@ -172,9 +172,9 @@ describe("DX Invariant Doctor Engine", () => {
   });
 
   describe("checkDocumentationParity", () => {
-    it("warns if docs directory is missing", () => {
+    it("fails if docs directory is missing", () => {
       const result = checkDocumentationParity(tempDir, false);
-      expect(result.status).toBe("warn");
+      expect(result.status).toBe("fail");
       expect(result.message).toContain("docs/ directory does not exist");
     });
 

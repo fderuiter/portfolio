@@ -57,6 +57,10 @@ if (isProduction) {
   console.log("Skipping check:migrations and prisma migrate deploy because this is not a production environment.");
 }
 
+// 3.5. Documentation Compilation Phase (Phase 1.8)
+console.log("\n--- Phase 1.8: Strictly Compiling and Verifying Documentation ---");
+runStep('npm', ['run', 'compile-docs']);
+
 // 4. Application Compilation Phase (Phase 2)
 console.log("\n--- Phase 2: Compiling Frontend Application ---");
 runStep('npx', ['next', 'build']);
