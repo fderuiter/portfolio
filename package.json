@@ -53,8 +53,8 @@
   "dependencies": {
     "@chenglou/pretext": "^0.0.5",
     "@neondatabase/serverless": "^1.1.0",
-    "@prisma/adapter-neon": "^7.8.0",
-    "@prisma/client": "^7.7.0",
+    "@prisma/adapter-neon": "^7.9.1",
+    "@prisma/client": "^7.9.1",
     "@sentry/nextjs": "^10.55.0",
     "@tabler/icons-react": "^3.41.1",
     "@types/three": "^0.185.4",
@@ -65,10 +65,10 @@
     "clsx": "^2.1.1",
     "docx": "^9.7.1",
     "framer-motion": "^12.38.0",
-    "isomorphic-dompurify": "^3.19.0",
+    "isomorphic-dompurify": "^3.22.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
-    "next": "16.2.6",
+    "next": "16.3.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "tailwind-merge": "^3.5.0",
@@ -97,7 +97,7 @@
     "jsdom": "^30.0.1",
     "lint-staged": "^17.0.5",
     "markdownlint-cli": "^0.49.1",
-    "prisma": "^7.7.0",
+    "prisma": "^7.9.1",
     "tailwindcss": "^4",
     "tsx": "^4.23.12",
     "typedoc": "^0.28.20",
@@ -113,6 +113,9 @@
     "sharp",
     "unrs-resolver"
   ],
+  "overrides": {
+    "deepmerge-ts": "^8.0.1"
+  },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
   }
