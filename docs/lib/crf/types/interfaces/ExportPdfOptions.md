@@ -44,7 +44,7 @@ Defined in: [lib/crf/types.ts:160](https://github.com/fderuiter/portfolio/blob/m
 
 ### scope
 
-> **scope**: `"single"` \| `"all"` \| `"selected"`
+> **scope**: `"all"` \| `"single"` \| `"selected"`
 
 Defined in: [lib/crf/types.ts:161](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L161)
 

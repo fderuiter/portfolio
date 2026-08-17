@@ -76,7 +76,7 @@ Defined in: [lib/crf/types.ts:67](https://github.com/fderuiter/portfolio/blob/ma
 
 ### querySeverity?
 
-> `optional` **querySeverity?**: `"error"` \| `"warning"` \| `"info"`
+> `optional` **querySeverity?**: `"error"` \| `"info"` \| `"warning"`
 
 Defined in: [lib/crf/types.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L66)
 

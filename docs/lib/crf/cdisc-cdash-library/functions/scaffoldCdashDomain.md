@@ -16,7 +16,7 @@ Defined in: [lib/crf/cdisc-cdash-library.ts:366](https://github.com/fderuiter/po
 
 ### domainCode
 
-`"DM"` \| `"VS"` \| `"AE"` \| `"LB"` \| `"CM"` \| `"EX"` \| `"DS"` \| `"MH"` \| `"RECIST"` \| `"DI"` \| `"DU"` \| `"DE"` \| `"DA"`
+`"DM"` \| `"VS"` \| `"AE"` \| `"LB"` \| `"CM"` \| `"EX"` \| `"DS"` \| `"MH"` \| `"DE"` \| `"DI"` \| `"DU"` \| `"DA"` \| `"RECIST"`
 
 ## Returns
 

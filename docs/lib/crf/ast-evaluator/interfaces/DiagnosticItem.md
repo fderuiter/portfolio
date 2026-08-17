@@ -38,6 +38,6 @@ Defined in: [lib/crf/ast-evaluator.ts:1091](https://github.com/fderuiter/portfol
 
 ### severity
 
-> **severity**: `"error"` \| `"warning"` \| `"info"`
+> **severity**: `"error"` \| `"info"` \| `"warning"`
 
 Defined in: [lib/crf/ast-evaluator.ts:1090](https://github.com/fderuiter/portfolio/blob/main/lib/crf/ast-evaluator.ts#L1090)
