@@ -8,7 +8,7 @@
 
 > **isBrowser**(): `boolean`
 
-Defined in: [lib/graphics-engine.ts:28](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L28)
+Defined in: [lib/graphics-engine.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L78)
 
 Safe browser environment check to prevent SSR failures.
 

@@ -19,6 +19,7 @@ import { useTerminology } from "@/components/providers/TerminologyProvider";
 import { 
   isBrowser, 
   validateLayoutHeight,
+  resolveCodeChipExtraWidth,
   textPrepareCache,
   textLayoutCache,
   richItemsCache,
@@ -312,7 +313,7 @@ export function parseMarkdownToRichItems(
         font: codeFont,
         type: "code",
         break: "never",
-        extraWidth: 12, // padding + borders on our styled code chips
+        extraWidth: resolveCodeChipExtraWidth(), // padding + borders on our styled code chips
       });
     } else if (raw.startsWith("*") && raw.endsWith("*") && raw.length > 2) {
       items.push({
@@ -330,6 +331,13 @@ export function parseMarkdownToRichItems(
   }
   
   return items;
+}
+
+interface ParagraphData {
+  items: ExtendedRichInlineItem[];
+  prepared: PreparedRichInline | null;
+  isEmpty: boolean;
+  itemOffset: number;
 }
 
 export interface UsePretextRichLayoutOptions {
@@ -363,29 +371,49 @@ export function usePretextRichLayout({
 
   const { simplified } = useTerminology();
 
-  const preparedRef = useRef<PreparedRichInline | null>(null);
+  const paragraphsRef = useRef<ParagraphData[]>([]);
   const itemsRef = useRef<ExtendedRichInlineItem[]>([]);
   const itemsKeyRef = useRef<string>("");
   const resolvedFontsRef = useRef<{ fontSize: number; fontFamilyVariable: string; fonts: ThemeFonts } | null>(null);
   const lastWidthRef = useRef<number>(-1);
 
   const measureRichText = useCallback((maxWidth: number) => {
-    if (!preparedRef.current || !itemsKeyRef.current) return;
+    if (paragraphsRef.current.length === 0 || !itemsKeyRef.current) return;
 
     const flooredWidth = Math.floor(maxWidth);
     const layoutKey = `${itemsKeyRef.current}|${flooredWidth}|${lineHeight}`;
     let cachedResult = richLayoutCache.get(layoutKey);
 
     if (!cachedResult) {
-      const prepared = preparedRef.current;
-      const linesRanges: RichInlineLineRange[] = [];
-      walkRichInlineLineRanges(prepared, flooredWidth, (range) => {
-        linesRanges.push(range);
-      });
+      const materializedLines: RichInlineLine[] = [];
+      paragraphsRef.current.forEach((paragraph) => {
+        if (paragraph.isEmpty) {
+          materializedLines.push({
+            fragments: [],
+            width: 0,
+            end: 0 as unknown as RichInlineLine['end'],
+          });
+        } else if (paragraph.prepared) {
+          const linesRanges: RichInlineLineRange[] = [];
+          walkRichInlineLineRanges(paragraph.prepared, flooredWidth, (range) => {
+            linesRanges.push(range);
+          });
 
-      const materializedLines = linesRanges.map((range) =>
-        materializeRichInlineLineRange(prepared, range)
-      );
+          const paragraphLines = linesRanges.map((range) => {
+            const line = materializeRichInlineLineRange(paragraph.prepared!, range);
+            const adjustedFragments = line.fragments.map((frag) => ({
+              ...frag,
+              itemIndex: frag.itemIndex + paragraph.itemOffset,
+            }));
+            return {
+              ...line,
+              fragments: adjustedFragments,
+            };
+          });
+
+          materializedLines.push(...paragraphLines);
+        }
+      });
 
       cachedResult = {
         height: materializedLines.length * lineHeight,
@@ -453,19 +481,39 @@ export function usePretextRichLayout({
     const itemsKey = `${text}|${fontsKey}`;
     itemsKeyRef.current = itemsKey;
 
-    let parsedItems = richItemsCache.get(itemsKey) as ExtendedRichInlineItem[] | undefined;
-    if (!parsedItems) {
-      parsedItems = parseMarkdownToRichItems(text, baseFont, boldFont, italicFont, codeFont);
-      richItemsCache.set(itemsKey, parsedItems);
+    let parsedParagraphs = richItemsCache.get(itemsKey) as ParagraphData[] | undefined;
+    if (!parsedParagraphs) {
+      let accumulatedItemOffset = 0;
+      const paragraphs = text.split("\n");
+      parsedParagraphs = paragraphs.map((paragraphStr) => {
+        if (paragraphStr === "") {
+          return {
+            items: [],
+            prepared: null,
+            isEmpty: true,
+            itemOffset: accumulatedItemOffset,
+          };
+        }
+        const items = parseMarkdownToRichItems(paragraphStr, baseFont, boldFont, italicFont, codeFont);
+        const prepared = prepareRichInline(items);
+        const res = {
+          items,
+          prepared,
+          isEmpty: false,
+          itemOffset: accumulatedItemOffset,
+        };
+        accumulatedItemOffset += items.length;
+        return res;
+      });
+      richItemsCache.set(itemsKey, parsedParagraphs);
     }
-    itemsRef.current = parsedItems;
+    paragraphsRef.current = parsedParagraphs;
 
-    let prepared = richPrepareCache.get(itemsKey);
-    if (!parsedItems || !prepared) {
-      prepared = prepareRichInline(parsedItems || []);
-      richPrepareCache.set(itemsKey, prepared);
-    }
-    preparedRef.current = prepared;
+    const allItems: ExtendedRichInlineItem[] = [];
+    parsedParagraphs.forEach((p) => {
+      allItems.push(...p.items);
+    });
+    itemsRef.current = allItems;
 
     if (containerRef.current) {
       const initialWidth = containerRef.current.getBoundingClientRect().width;
@@ -535,7 +583,7 @@ export const PretextRichText: React.FC<PretextRichTextProps> = ({
             className="flex flex-nowrap items-center whitespace-nowrap overflow-visible"
             style={{ height: `${lineHeight}px`, lineHeight: `${lineHeight}px` }}
           >
-            {line.fragments.map((frag, fragIdx) => {
+            {line.fragments.length === 0 ? "\u00A0" : line.fragments.map((frag, fragIdx) => {
               const item = items[frag.itemIndex];
               
               if (item?.type === "code") {
@@ -583,20 +631,78 @@ export const PretextRichText: React.FC<PretextRichTextProps> = ({
           pointerEvents: "auto",
           margin: 0,
           padding: 0,
+          display: "flex",
+          flexDirection: "column",
         }}
       >
-        {items.map((item, idx) => {
-          if (item.type === "bold") {
-            return <strong key={idx}>{item.text}</strong>;
-          }
-          if (item.type === "italic") {
-            return <em key={idx}>{item.text}</em>;
-          }
-          if (item.type === "code") {
-            return <code key={idx}>{item.text}</code>;
-          }
-          return <span key={idx}>{item.text}</span>;
-        })}
+        {lines.map((line, lineIdx) => (
+          <span 
+            key={lineIdx} 
+            className="flex flex-nowrap items-center whitespace-nowrap overflow-visible"
+            style={{ height: `${lineHeight}px`, lineHeight: `${lineHeight}px` }}
+          >
+            {line.fragments.length === 0 ? (
+              <span>{"\u00A0"}</span>
+            ) : (
+              line.fragments.map((frag, fragIdx) => {
+                const item = items[frag.itemIndex];
+                
+                if (item?.type === "code") {
+                  return (
+                    <code
+                      key={fragIdx}
+                      className="px-1.5 py-0 mx-0.5 text-[11px] font-mono font-bold border inline-block align-middle leading-[1.3]"
+                      style={{ 
+                        marginLeft: frag.gapBefore > 0 ? `${frag.gapBefore}px` : undefined,
+                      }}
+                    >
+                      {frag.text}
+                    </code>
+                  );
+                }
+
+                if (item?.type === "bold") {
+                  return (
+                    <strong
+                      key={fragIdx}
+                      className="font-bold"
+                      style={{ 
+                        marginLeft: frag.gapBefore > 0 ? `${frag.gapBefore}px` : undefined,
+                      }}
+                    >
+                      {frag.text}
+                    </strong>
+                  );
+                }
+
+                if (item?.type === "italic") {
+                  return (
+                    <em
+                      key={fragIdx}
+                      className="italic"
+                      style={{ 
+                        marginLeft: frag.gapBefore > 0 ? `${frag.gapBefore}px` : undefined,
+                      }}
+                    >
+                      {frag.text}
+                    </em>
+                  );
+                }
+
+                return (
+                  <span
+                    key={fragIdx}
+                    style={{ 
+                      marginLeft: frag.gapBefore > 0 ? `${frag.gapBefore}px` : undefined,
+                    }}
+                  >
+                    {frag.text}
+                  </span>
+                );
+              })
+            )}
+          </span>
+        ))}
       </p>
     </div>
   );
