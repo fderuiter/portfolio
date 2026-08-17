@@ -9,4 +9,5 @@
 ## Functions
 
 - [cn](functions/cn.md)
+- [escapeXml](functions/escapeXml.md)
 - [hexToRgba](functions/hexToRgba.md)

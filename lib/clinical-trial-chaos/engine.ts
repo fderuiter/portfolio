@@ -1,4 +1,5 @@
 import { clamp } from "../game-utils";
+import { escapeXml } from "../utils";
 import {
   AuditLogEntry,
   AuditorState,
@@ -515,15 +516,6 @@ ${itemDataNodes}
 ${subjectNodes}
   </ClinicalData>
 </ODM>`;
-}
-
-function escapeXml(unsafe: string): string {
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
 }
 
 /**
