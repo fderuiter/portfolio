@@ -20,6 +20,56 @@ export const richLayoutCache = new LRUCache<string, { height: number; lines: Ric
 export const cssPropertyCache = new LRUCache<string, string>(100);
 export const fontConfigCache = new LRUCache<string, unknown>(100);
 
+let lastResizeTime = 0;
+if (typeof window !== "undefined") {
+  window.addEventListener("resize", () => {
+    lastResizeTime = Date.now();
+  });
+}
+
+/**
+ * Resolves styled inline code chip extra width dynamically using Computed Style.
+ * Returns fallback if run in SSR.
+ */
+export function resolveCodeChipExtraWidth(): number {
+  if (!isBrowser()) {
+    return 12; // Fallback for SSR
+  }
+
+  const cacheKey = "code-chip-extra-width";
+  const cached = cssPropertyCache.get(cacheKey);
+  if (cached !== undefined) {
+    return Number(cached);
+  }
+
+  try {
+    const dummy = document.createElement("span");
+    dummy.className = "px-1.5 py-0 mx-0.5 border inline-block font-mono";
+    dummy.style.position = "absolute";
+    dummy.style.visibility = "hidden";
+    document.body.appendChild(dummy);
+
+    const style = window.getComputedStyle(dummy);
+    const paddingLeft = parseFloat(style.paddingLeft || "0");
+    const paddingRight = parseFloat(style.paddingRight || "0");
+    const borderLeftWidth = parseFloat(style.borderLeftWidth || "0");
+    const borderRightWidth = parseFloat(style.borderRightWidth || "0");
+    const marginLeft = parseFloat(style.marginLeft || "0");
+    const marginRight = parseFloat(style.marginRight || "0");
+
+    const totalExtraWidth = paddingLeft + paddingRight + borderLeftWidth + borderRightWidth + marginLeft + marginRight;
+
+    document.body.removeChild(dummy);
+
+    const result = totalExtraWidth > 0 ? totalExtraWidth : 12;
+    cssPropertyCache.set(cacheKey, String(result));
+    return result;
+  } catch (err) {
+    console.error("Failed resolving code chip extra width:", err);
+    return 12; // Fallback
+  }
+}
+
 // --- Environment and CSS resolution helpers ---
 
 /**
@@ -105,6 +155,12 @@ export function measureTextOffscreen({
  */
 export function validateLayoutHeight(calculated: number, actual: number, contextMessage?: string) {
   if (process.env.NODE_ENV !== "production") {
+    if (actual === 0) {
+      return;
+    }
+    if (Date.now() - lastResizeTime < 150) {
+      return;
+    }
     const deviation = Math.abs(calculated - actual);
     if (deviation > 2) {
       console.warn(
