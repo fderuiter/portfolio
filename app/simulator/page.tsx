@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTelemetry } from "@/hooks/useTelemetry";
@@ -103,7 +103,11 @@ export default function RecruiterSimulator() {
   const [answers, setAnswers] = useState<Option[]>([]);
   const [copied, setCopied] = useState(false);
 
+  const hasTracked = useRef(false);
+
   useEffect(() => {
+    if (hasTracked.current) return;
+    hasTracked.current = true;
     recordEvent("simulator", "page_view");
   }, [recordEvent]);
 

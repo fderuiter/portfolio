@@ -20,7 +20,39 @@ const createPrismaClient = () => {
 
   return baseClient.$extends({
     query: {
-      async $allOperations({ args, query }) {
+      async $allOperations({ args, query, ...rest }) {
+        if (process.env.PLAYWRIGHT_TEST === "true") {
+          const operation = (rest as Record<string, unknown>).operation;
+          const model = (rest as Record<string, unknown>).model;
+          if (operation === "findMany" || operation === "findFirst" || operation === "findUnique") {
+            if (model === "CaseStudy") {
+              return [
+                {
+                  id: "clinical-data-mapper",
+                  slug: "clinical-data-mapper",
+                  title: "Clinical Data Mapper",
+                  primary_language: "TypeScript",
+                  tags: "clinical, edc, mapping",
+                  published: true,
+                  created_at: new Date(),
+                  updated_at: new Date(),
+                  description: "Clinical Data Mapper Description",
+                  editorial_content: "Clinical Data Mapper Editorial Content",
+                  github_url: "https://github.com/fderuiter/clinical-data-mapper",
+                  simulated_telemetry: false,
+                }
+              ];
+            }
+            return [];
+          }
+          if (operation === "groupBy") {
+            return [];
+          }
+          if (operation === "count") {
+            return 0;
+          }
+          return null;
+        }
         const conn = process.env.DATABASE_URL;
         if (!conn || conn.includes("dummy")) {
           throw new Error("Database offline: Dummy connection URL configured.");
