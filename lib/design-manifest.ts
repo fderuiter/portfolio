@@ -6,21 +6,21 @@
 export const designManifest = {
   colors: {
     /** Original CSS Variable: --background */
-    "background": "#09090b",
+    "background": "#0d0e11",
     /** Original CSS Variable: --foreground */
-    "foreground": "#fafafa",
+    "foreground": "#f4f4f6",
     /** Original CSS Variable: --surface-1 */
-    "surface-1": "rgba(24, 24, 27, 0.6)",
+    "surface-1": "rgba(20, 22, 28, 0.75)",
     /** Original CSS Variable: --surface-2 */
-    "surface-2": "rgba(39, 39, 42, 0.4)",
+    "surface-2": "rgba(28, 31, 39, 0.55)",
     /** Original CSS Variable: --border */
-    "border": "rgba(63, 63, 70, 0.5)",
+    "border": "rgba(255, 255, 255, 0.08)",
     /** Original CSS Variable: --border-active */
-    "border-active": "rgba(6, 182, 212, 0.4)",
+    "border-active": "rgba(245, 158, 11, 0.4)",
     /** Original CSS Variable: --muted */
-    "muted": "#a1a1aa",
+    "muted": "#94a3b8",
     /** Original CSS Variable: --muted-strong */
-    "muted-strong": "#a1a1aa",
+    "muted-strong": "#cbd5e1",
     /** Original CSS Variable: --brand-cyan */
     "brand-cyan": "#06b6d4",
     /** Original CSS Variable: --brand-cyan-glow */
@@ -30,13 +30,13 @@ export const designManifest = {
     /** Original CSS Variable: --brand-blue-glow */
     "brand-blue-glow": "rgba(59, 130, 246, 0.10)",
     /** Original CSS Variable: --brand-dark */
-    "brand-dark": "#09090b",
+    "brand-dark": "#0d0e11",
     /** Original CSS Variable: --success */
     "success": "#10b981",
     /** Original CSS Variable: --error */
     "error": "#f87171",
     /** Original CSS Variable: --warning */
-    "warning": "#fbbf24",
+    "warning": "#f59e0b",
   },
   typography: {
     fonts: {

@@ -276,3 +276,5 @@ export type StudioMode =
   | "export";                // ODM-XML, JSON, FHIR & Define-XML Export
 
 export type DeviceViewport = "desktop" | "tablet" | "mobile";
+
+export type StudioTheme = "dark" | "light";

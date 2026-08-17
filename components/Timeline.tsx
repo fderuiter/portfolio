@@ -44,24 +44,23 @@ export const Timeline: React.FC = () => {
     return cardOverrides[idx] ?? globalMode;
   };
 
-  // Centralize state career narratives: RichNarrative handles translation according to global terminology preference
   const activeTimeline = dictionary.detailed.timeline;
 
   return (
     <div className="w-full max-w-3xl mx-auto py-6 sm:py-8 relative select-none">
       {/* Global View Switcher */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 mb-12 sm:mb-16 px-4 py-3 bg-zinc-900/40 border border-zinc-900/80 rounded-2xl backdrop-blur-md w-full">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 mb-12 sm:mb-16 px-4 py-3 bg-[#13151a]/90 border border-white/10 rounded-2xl backdrop-blur-md w-full shadow-lg">
         <div className="flex items-center gap-2 text-xs font-mono text-zinc-400 self-start sm:self-center">
           <span className="w-2 h-2 rounded-full bg-amber-400" />
-          <span className="font-bold text-zinc-300">Perspective:</span>
+          <span className="font-bold text-zinc-200">Perspective:</span>
         </div>
 
-        <div className="flex p-0.5 bg-zinc-950/90 border border-zinc-800/80 rounded-xl text-xs font-mono w-full sm:w-auto">
+        <div className="flex p-0.5 bg-black/60 border border-white/10 rounded-xl text-xs font-mono w-full sm:w-auto">
           <button
             onClick={() => handleGlobalToggle("reality")}
             className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 min-h-10 px-3.5 py-2 rounded-lg font-bold transition-all duration-200 cursor-pointer ${
               globalMode === "reality"
-                ? "bg-zinc-900 text-amber-400 border border-amber-400/30 shadow-[0_0_12px_rgba(251,191,36,0.2)]"
+                ? "bg-[#1f232d] text-amber-300 border border-amber-500/40 shadow-sm"
                 : "text-zinc-400 hover:text-zinc-200 border border-transparent"
             }`}
           >
@@ -72,7 +71,7 @@ export const Timeline: React.FC = () => {
             onClick={() => handleGlobalToggle("recruiter")}
             className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 min-h-10 px-3.5 py-2 rounded-lg font-bold transition-all duration-200 cursor-pointer ${
               globalMode === "recruiter"
-                ? "bg-zinc-900 text-brand-cyan border border-brand-cyan/30 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                ? "bg-[#1f232d] text-cyan-300 border border-cyan-500/40 shadow-sm"
                 : "text-zinc-400 hover:text-zinc-200 border border-transparent"
             }`}
           >
@@ -83,7 +82,7 @@ export const Timeline: React.FC = () => {
       </div>
 
       {/* Vertical Rail Line */}
-      <div className="absolute left-3 sm:left-4 md:left-1/2 top-28 bottom-0 w-0.5 bg-gradient-to-b from-brand-cyan/30 via-brand-blue/20 to-zinc-900/10 -translate-x-1/2" />
+      <div className="absolute left-3 sm:left-4 md:left-1/2 top-28 bottom-0 w-0.5 bg-gradient-to-b from-amber-500/40 via-amber-500/15 to-transparent -translate-x-1/2" />
 
       <div className="space-y-10 sm:space-y-14">
         {activeTimeline.map((item, idx) => {
@@ -104,13 +103,13 @@ export const Timeline: React.FC = () => {
             >
               {/* Timeline Bullet Node */}
               <div
-                className={`absolute left-3 sm:left-4 md:left-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-zinc-950 border-2 -translate-x-1/2 z-10 flex items-center justify-center transition-colors duration-300 ${
-                  isReality ? "border-amber-400" : "border-brand-cyan"
+                className={`absolute left-3 sm:left-4 md:left-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-[#0d0e11] border-2 -translate-x-1/2 z-10 flex items-center justify-center transition-colors duration-300 ${
+                  isReality ? "border-amber-400" : "border-cyan-400"
                 }`}
               >
                 <span
                   className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${
-                    isReality ? "bg-amber-400" : "bg-brand-cyan"
+                    isReality ? "bg-amber-400" : "bg-cyan-400"
                   }`}
                 />
               </div>
@@ -127,16 +126,16 @@ export const Timeline: React.FC = () => {
                       }`,
                     } as React.CSSProperties
                   }
-                  className={`p-4 sm:p-6 bg-zinc-900/25 border rounded-2xl backdrop-blur-sm transition-all duration-300 group hover:[box-shadow:var(--timeline-glow)] ${
-                    isReality ? "border-amber-500/20 hover:border-amber-500/40" : "border-zinc-900/60 hover:border-zinc-800"
+                  className={`p-4 sm:p-6 bg-[#13151a]/85 border rounded-2xl backdrop-blur-md transition-all duration-300 group shadow-lg ${
+                    isReality ? "border-amber-500/25 hover:border-amber-500/45" : "border-white/10 hover:border-white/20"
                   }`}
                 >
                   <div className={`flex items-center justify-between gap-2 mb-3 ${isLeft ? "md:flex-row-reverse" : ""}`}>
                     <span
                       className={`text-[10px] font-mono font-bold tracking-wider uppercase px-2.5 py-0.5 border rounded-md transition-colors duration-300 ${
                         isReality
-                          ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                          : "bg-brand-cyan/5 text-brand-cyan border-brand-cyan/10"
+                          ? "bg-amber-500/10 text-amber-300 border-amber-500/25"
+                          : "bg-cyan-500/10 text-cyan-300 border-cyan-500/25"
                       }`}
                     >
                       {item.period}
@@ -149,7 +148,7 @@ export const Timeline: React.FC = () => {
                       className={`inline-flex items-center gap-1 min-h-8 px-2.5 py-1 text-[10px] font-mono rounded-lg border transition-colors cursor-pointer ${
                         isReality
                           ? "bg-amber-500/10 text-amber-300 border-amber-500/30 hover:bg-amber-500/20"
-                          : "bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-zinc-200 hover:border-zinc-700"
+                          : "bg-white/5 text-zinc-300 border-white/10 hover:text-white hover:border-white/20"
                       }`}
                     >
                       <IconSwitchHorizontal className="w-3 h-3 shrink-0" />
@@ -157,7 +156,7 @@ export const Timeline: React.FC = () => {
                     </button>
                   </div>
 
-                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-neutral-100 group-hover:text-white transition-colors">
+                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-zinc-100 group-hover:text-white transition-colors">
                     {item.role}
                   </h3>
                   <h4 className="text-xs font-mono font-semibold text-zinc-400 mt-1">
@@ -189,7 +188,7 @@ export const Timeline: React.FC = () => {
                     {item.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="px-2 py-0.5 text-[9px] font-mono bg-zinc-900/60 border border-zinc-800/80 text-zinc-400 rounded"
+                        className="px-2 py-0.5 text-[9px] font-mono bg-black/40 border border-white/10 text-zinc-400 rounded"
                       >
                         {tag}
                       </span>

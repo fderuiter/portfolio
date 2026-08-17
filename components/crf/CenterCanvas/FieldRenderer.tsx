@@ -117,7 +117,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         e.stopPropagation();
         onSelect();
       }}
-      className={`${spanClass} group relative p-3 sm:p-4 rounded-2xl border transition-all cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:border-brand-cyan ${
+      className={`${spanClass} crf-field-card group relative p-3 sm:p-4 rounded-2xl border transition-all cursor-pointer select-none outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan focus-visible:border-brand-cyan ${
         isSelected
           ? "bg-zinc-900/95 border-brand-cyan shadow-[0_0_24px_rgba(6,182,212,0.18)] ring-1 ring-brand-cyan/60"
           : "bg-zinc-950/80 border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/50"

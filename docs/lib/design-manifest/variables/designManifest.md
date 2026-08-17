@@ -55,19 +55,19 @@ Original CSS Variable: --breakpoint-xl
 
 #### colors.background
 
-> `readonly` **background**: `"#09090b"` = `"#09090b"`
+> `readonly` **background**: `"#0d0e11"` = `"#0d0e11"`
 
 Original CSS Variable: --background
 
 #### colors.border
 
-> `readonly` **border**: `"rgba(63, 63, 70, 0.5)"` = `"rgba(63, 63, 70, 0.5)"`
+> `readonly` **border**: `"rgba(255, 255, 255, 0.08)"` = `"rgba(255, 255, 255, 0.08)"`
 
 Original CSS Variable: --border
 
 #### colors.border-active
 
-> `readonly` **border-active**: `"rgba(6, 182, 212, 0.4)"` = `"rgba(6, 182, 212, 0.4)"`
+> `readonly` **border-active**: `"rgba(245, 158, 11, 0.4)"` = `"rgba(245, 158, 11, 0.4)"`
 
 Original CSS Variable: --border-active
 
@@ -97,7 +97,7 @@ Original CSS Variable: --brand-cyan-glow
 
 #### colors.brand-dark
 
-> `readonly` **brand-dark**: `"#09090b"` = `"#09090b"`
+> `readonly` **brand-dark**: `"#0d0e11"` = `"#0d0e11"`
 
 Original CSS Variable: --brand-dark
 
@@ -109,19 +109,19 @@ Original CSS Variable: --error
 
 #### colors.foreground
 
-> `readonly` **foreground**: `"#fafafa"` = `"#fafafa"`
+> `readonly` **foreground**: `"#f4f4f6"` = `"#f4f4f6"`
 
 Original CSS Variable: --foreground
 
 #### colors.muted
 
-> `readonly` **muted**: `"#a1a1aa"` = `"#a1a1aa"`
+> `readonly` **muted**: `"#94a3b8"` = `"#94a3b8"`
 
 Original CSS Variable: --muted
 
 #### colors.muted-strong
 
-> `readonly` **muted-strong**: `"#a1a1aa"` = `"#a1a1aa"`
+> `readonly` **muted-strong**: `"#cbd5e1"` = `"#cbd5e1"`
 
 Original CSS Variable: --muted-strong
 
@@ -133,19 +133,19 @@ Original CSS Variable: --success
 
 #### colors.surface-1
 
-> `readonly` **surface-1**: `"rgba(24, 24, 27, 0.6)"` = `"rgba(24, 24, 27, 0.6)"`
+> `readonly` **surface-1**: `"rgba(20, 22, 28, 0.75)"` = `"rgba(20, 22, 28, 0.75)"`
 
 Original CSS Variable: --surface-1
 
 #### colors.surface-2
 
-> `readonly` **surface-2**: `"rgba(39, 39, 42, 0.4)"` = `"rgba(39, 39, 42, 0.4)"`
+> `readonly` **surface-2**: `"rgba(28, 31, 39, 0.55)"` = `"rgba(28, 31, 39, 0.55)"`
 
 Original CSS Variable: --surface-2
 
 #### colors.warning
 
-> `readonly` **warning**: `"#fbbf24"` = `"#fbbf24"`
+> `readonly` **warning**: `"#f59e0b"` = `"#f59e0b"`
 
 Original CSS Variable: --warning
 

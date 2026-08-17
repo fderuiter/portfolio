@@ -35,3 +35,4 @@
 - [ComplianceSeverity](type-aliases/ComplianceSeverity.md)
 - [DeviceViewport](type-aliases/DeviceViewport.md)
 - [StudioMode](type-aliases/StudioMode.md)
+- [StudioTheme](type-aliases/StudioTheme.md)
