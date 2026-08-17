@@ -79,6 +79,20 @@ describe("Interactive Terminology Tooltips - Component Structures", () => {
     expect(content).toContain("aria-describedby={tooltipId}");
     expect(content).toContain('role="tooltip"');
   });
+
+  it("should allow and preserve standard accessibility attributes in RichNarrative sanitize and rehydration", () => {
+    const content = fs.readFileSync(richNarrativePath, "utf-8");
+    expect(content).toContain('"role"');
+    expect(content).toContain('"tabindex"');
+    expect(content).toContain('"aria-label"');
+    expect(content).toContain('"aria-describedby"');
+    expect(content).toContain('"aria-hidden"');
+    expect(content).toContain('"aria-expanded"');
+    expect(content).toContain('"aria-checked"');
+    expect(content).toContain('name.startsWith("aria-")');
+    expect(content).toContain('props.role = attr.value');
+    expect(content).toContain('props.tabIndex =');
+  });
 });
 
 describe("Centralized i18n Static Context & Dictionary Keys", () => {
