@@ -1521,6 +1521,9 @@ export function ProofWorkspaceClient() {
                 onPointerMove={handleCanvasPointerMove}
                 onPointerUp={handleCanvasPointerUp}
                 className="relative w-full h-[420px] bg-gradient-to-b from-slate-950/60 via-slate-900 to-slate-950 select-none overflow-x-auto overflow-y-hidden"
+                tabIndex={0}
+                aria-label="Proof workspace canvas"
+                role="region"
               >
                 <div className="relative min-w-[760px] h-full">
                   <svg ref={svgCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none">

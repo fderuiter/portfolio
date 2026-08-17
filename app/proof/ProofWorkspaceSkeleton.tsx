@@ -108,7 +108,12 @@ export function ProofWorkspaceSkeleton() {
               </div>
 
               {/* SVG Canvas Area placeholder */}
-              <div className="relative w-full h-[420px] bg-gradient-to-b from-slate-950/60 via-slate-900 to-slate-950 select-none overflow-x-auto overflow-y-hidden">
+              <div
+                className="relative w-full h-[420px] bg-gradient-to-b from-slate-950/60 via-slate-900 to-slate-950 select-none overflow-x-auto overflow-y-hidden"
+                tabIndex={0}
+                aria-label="Proof workspace canvas skeleton"
+                role="region"
+              >
                 <div className="relative min-w-[760px] h-full flex items-center justify-center">
                   <svg className="absolute inset-0 w-full h-full pointer-events-none">
                     <defs>
