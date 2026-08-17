@@ -201,16 +201,3 @@ export const CardDescription = ({
   );
 };
 
-export const CardSkeletonContainer = ({
-  className,
-  children,
-}: {
-  className?: string;
-  children?: React.ReactNode;
-}) => {
-  return (
-    <div className={cn("flex flex-1 w-full h-full min-h-[6rem] rounded-xl bg-gradient-to-br from-neutral-200 dark:from-neutral-900 dark:to-neutral-800 to-neutral-100 overflow-hidden", className)}>
-      {children}
-    </div>
-  );
-};

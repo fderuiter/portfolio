@@ -16,6 +16,16 @@ import {
 import { usePersistentState } from "@/hooks/usePersistentState";
 import { useAnnouncer } from "@/components/providers/A11yProvider";
 import { useAudio } from "@/components/providers/AudioProvider";
+import {
+  ASCII_COWSAY,
+  ASCII_DUCK,
+  ASCII_NEOFETCH,
+  ASCII_TRAIN,
+  FORTUNES,
+  unlockAchievement,
+  setVaultUnlocked,
+} from "@/lib/meme-data";
+import { playMemeSound } from "@/lib/meme-audio";
 
 interface LogItem {
   id: string;
@@ -243,6 +253,179 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
         return;
       }
 
+      // --- Easter Egg & UNIX Meme Command Handlers ---
+      const lower = trimmed.toLowerCase();
+
+      if (lower.startsWith("cowsay")) {
+        const customText = trimmed.replace(/^cowsay\s*/i, "").trim() || "Moo! Ships with 100% test coverage.";
+        unlockAchievement("terminal-cowboy");
+        playMemeSound("laser");
+        setLogs((prev) => [
+          ...prev,
+          {
+            id: outputId,
+            type: "info",
+            text: ASCII_COWSAY(customText),
+          },
+        ]);
+        announce(`Cowsay output: ${customText}`, "polite");
+        return;
+      }
+
+      if (lower === "neofetch" || lower === "fastfetch") {
+        unlockAchievement("terminal-cowboy");
+        playMemeSound("matrix-glitch");
+        setLogs((prev) => [
+          ...prev,
+          {
+            id: outputId,
+            type: "info",
+            text: ASCII_NEOFETCH(),
+          },
+        ]);
+        announce("Neofetch system profile rendered.", "polite");
+        return;
+      }
+
+      if (lower === "sl") {
+        unlockAchievement("terminal-cowboy");
+        playMemeSound("level-up");
+        setLogs((prev) => [
+          ...prev,
+          {
+            id: outputId,
+            type: "info",
+            text: ASCII_TRAIN() + "\nCHOO-CHOO! Developer Express on track 1.",
+          },
+        ]);
+        announce("Steam locomotive animation executed.", "polite");
+        return;
+      }
+
+      if (lower === "ls" || lower === "dir") {
+        unlockAchievement("terminal-cowboy");
+        setLogs((prev) => [
+          ...prev,
+          {
+            id: outputId,
+            type: "info",
+            text: "src/   components/   app/   lib/   duck_treats.db   secrets/   package.json",
+          },
+        ]);
+        announce("Directory contents listed.", "polite");
+        return;
+      }
+
+      if (lower === "fortune") {
+        unlockAchievement("terminal-cowboy");
+        playMemeSound("level-up");
+        const fortune = FORTUNES[Math.floor(Math.random() * FORTUNES.length)];
+        setLogs((prev) => [
+          ...prev,
+          {
+            id: outputId,
+            type: "info",
+            text: `🥠 Fortune: "${fortune}"`,
+          },
+        ]);
+        announce(`Fortune received: ${fortune}`, "polite");
+        return;
+      }
+
+      if (lower === "duck" || lower === "pet duck" || lower === "woof") {
+        unlockAchievement("duck-whisperer");
+        playMemeSound("bark");
+        setLogs((prev) => [
+          ...prev,
+          {
+            id: outputId,
+            type: "info",
+            text: ASCII_DUCK() + "\nDuck wags his tail enthusiastically! *Woof!*",
+          },
+        ]);
+        announce("Duck the golden retriever puppy was summoned!", "polite");
+        return;
+      }
+
+      if (lower === "matrix") {
+        unlockAchievement("terminal-cowboy");
+        playMemeSound("matrix-glitch");
+        setLogs((prev) => [
+          ...prev,
+          {
+            id: outputId,
+            type: "info",
+            text: "01000011 01101000 01100001 01101111 01110011\nWake up, developer...\nThe Matrix has you.\nFollow the white puppy 🐾",
+          },
+        ]);
+        announce("Matrix terminal stream initialized.", "polite");
+        return;
+      }
+
+      if (lower.startsWith("sudo")) {
+        unlockAchievement("terminal-cowboy");
+        playMemeSound("fda-siren");
+        setLogs((prev) => [
+          ...prev,
+          {
+            id: outputId,
+            type: "error",
+            text: "Permission denied: Duck 🐾 is guarding the root filesystem. Nice try, sudoer!",
+          },
+        ]);
+        announce("Sudo command denied by Duck the puppy.", "polite");
+        return;
+      }
+
+      if (lower.includes("git push") && (lower.includes("-f") || lower.includes("force"))) {
+        unlockAchievement("friday-survivor");
+        playMemeSound("friday-alarm");
+        setLogs((prev) => [
+          ...prev,
+          {
+            id: outputId,
+            type: "error",
+            text: "🚨 CRITICAL ALERT: Force-pushing to main on a Friday at 4:59 PM!\nremote: Resolving deltas: 100% (42/42), done.\nremote: Error: You bypassed 18 CI invariant checks and broke staging!\nremote: Duck is currently debugging your merge conflict in production.",
+          },
+        ]);
+        announce("Friday force push disaster simulation triggered!", "polite");
+        return;
+      }
+
+      if (lower === "secret" || lower === "meme" || lower === "vault" || lower === "chaos") {
+        unlockAchievement("terminal-cowboy");
+        setVaultUnlocked(true);
+        playMemeSound("fanfare");
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("trigger_retro_chaos"));
+        }
+        setLogs((prev) => [
+          ...prev,
+          {
+            id: outputId,
+            type: "info",
+            text: "🔓 SECRET MEME VAULT UNLOCKED!\nOpening Retro Chaos Mode... Visit /arcade/meme-vault to explore the full soundboard and meme cards!",
+          },
+        ]);
+        announce("Secret Meme Vault unlocked and opened.", "polite");
+        return;
+      }
+
+      if (lower === "418" || lower === "coffee" || lower === "tea") {
+        unlockAchievement("rfc-barista");
+        playMemeSound("teapot-whistle");
+        setLogs((prev) => [
+          ...prev,
+          {
+            id: outputId,
+            type: "error",
+            text: "HTTP 418: I'm a teapot (RFC 2324 / RFC 7168 HTCPCP/1.0).\nCannot brew coffee: Connected device is a clinical database engine, not a kettle.",
+          },
+        ]);
+        announce("HTTP 418 I'm a teapot response received.", "polite");
+        return;
+      }
+
       const match = activeRegistry[trimmed];
       if (match) {
         setLogs((prev) => [
@@ -270,7 +453,7 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
           {
             id: outputId,
             type: "error",
-            text: `Command not found: '${trimmed}'. Type 'help' to review supported registry entries.`,
+            text: `Command not found: '${trimmed}'. Type 'help' to review supported registry entries or try 'neofetch', 'cowsay', or 'duck'.`,
           },
         ]);
         announce(`Command execution failed. Unknown command: '${trimmed}'.`, "polite");

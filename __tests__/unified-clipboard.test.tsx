@@ -96,7 +96,7 @@ describe("Unified Clipboard Utility & Hook", () => {
 
         // 2. Production fallback
         vi.stubEnv("VERCEL_ENV", "production");
-        expect(getActiveHostUrl()).toBe("https://fderuiter.dev");
+        expect(getActiveHostUrl()).toBe("https://www.deruiter.dev");
 
         // 3. Configured NEXT_PUBLIC_APP_URL
         vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://custom-domain.dev");

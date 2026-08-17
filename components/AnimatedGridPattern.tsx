@@ -13,7 +13,7 @@ import { useResizeObserver } from "@/hooks/useResizeObserver"
 
 import { cn } from "@/lib/utils"
 
-export interface AnimatedGridPatternProps extends ComponentPropsWithoutRef<"svg"> {
+interface AnimatedGridPatternProps extends ComponentPropsWithoutRef<"svg"> {
   width?: number
   height?: number
   x?: number

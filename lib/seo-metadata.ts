@@ -82,6 +82,12 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     path: "/stack",
     keywords: ["Architecture", "Tech Stack", "Next.js 16", "React 19", "Turbopack", "Pretext", "Web Audio API", "Prisma 7", "Neon Database", "Invariants"],
   },
+  memeVault: {
+    title: "Secret Meme Vault & Developer Soundboard | Frederick de Ruiter",
+    description: "Unlockable developer & MedTech secret room featuring synthesized Web Audio sound effects, Easter egg achievement trophies, and interactive engineering meme cards.",
+    path: "/arcade/meme-vault",
+    keywords: ["Developer Memes", "Easter Eggs", "Soundboard", "Web Audio API", "CDISC Humor", "Duck Mascot", "Retro Arcade"],
+  },
 };
 
 /**

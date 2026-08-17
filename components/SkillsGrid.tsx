@@ -7,7 +7,7 @@ import { useAudio } from "@/components/providers/AudioProvider";
 import { useTerminology } from "@/components/providers/TerminologyProvider";
 import { dictionary } from "@/lib/i18n-dictionary";
 
-export interface SkillLanguage {
+interface SkillLanguage {
   name: string;
   percentage: number;
 }

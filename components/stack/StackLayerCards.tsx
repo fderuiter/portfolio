@@ -13,7 +13,7 @@ import {
 } from "@tabler/icons-react";
 import { useAudio } from "@/components/providers/AudioProvider";
 
-export interface StackLayer {
+interface StackLayer {
   id: string;
   category: string;
   icon: React.ReactNode;

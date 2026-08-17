@@ -122,7 +122,7 @@ export const VirtualDPad: React.FC<VirtualDPadProps> = ({
   );
 };
 
-export interface VirtualGamepadProps {
+interface VirtualGamepadProps {
   onDirectionPress?: (direction: "up" | "down" | "left" | "right") => void;
   onDirectionRelease?: (direction: "up" | "down" | "left" | "right") => void;
   onActionAPress?: () => void;

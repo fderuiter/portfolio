@@ -76,6 +76,12 @@ const ARCADE_ITEMS: SubNavItem[] = [
     href: "/arcade/working-with-duck",
     icon: <IconBone className="w-4 h-4 text-brand-cyan" />,
   },
+  {
+    title: "Secret Meme Vault",
+    subtitle: "Synthesized soundboard & Easter egg trophies",
+    href: "/arcade/meme-vault",
+    icon: <IconDeviceGamepad2 className="w-4 h-4 text-emerald-400" />,
+  },
 ];
 
 const SYSTEMS_ITEMS: SubNavItem[] = [

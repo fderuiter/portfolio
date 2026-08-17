@@ -10,7 +10,7 @@ import {
   IconFocus2,
 } from "@tabler/icons-react";
 
-export interface SpotlightTourOverlayProps {
+interface SpotlightTourOverlayProps {
   isOpen: boolean;
   onClose: () => void;
 }

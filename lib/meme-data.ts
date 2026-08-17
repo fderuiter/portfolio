@@ -1,0 +1,356 @@
+/**
+ * Central repository for portfolio memes, easter egg achievements,
+ * soundboard triggers, fortunes, and ASCII art assets.
+ */
+
+export interface MemeQuote {
+  id: string;
+  category: "dev" | "medtech" | "lore" | "classic";
+  quote: string;
+  author: string;
+  tagline?: string;
+}
+
+export interface SoundboardButton {
+  id: string;
+  label: string;
+  emoji: string;
+  category: "dev" | "medtech" | "lore" | "retro" | "classic";
+  description: string;
+  accent: string;
+  synthType: "bark" | "laser" | "friday-alarm" | "matrix-glitch" | "teapot-whistle" | "modem" | "fda-siren" | "level-up";
+}
+
+export interface EasterEggAchievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  unlockedByDefault?: boolean;
+  hint: string;
+}
+
+export const MEME_QUOTES: MemeQuote[] = [
+  {
+    id: "git-force",
+    category: "dev",
+    quote: "git push --force origin main: Because confidence is when you break production with full commit.",
+    author: "Senior Staff Architect at 4:59 PM on a Friday",
+    tagline: "DevOps Roulette",
+  },
+  {
+    id: "node-modules",
+    category: "dev",
+    quote: "There are only three things of infinite mass in the universe: supermassive black holes, human curiosity, and node_modules.",
+    author: "Theoretical Package Physicist",
+    tagline: "Bundle Gravity",
+  },
+  {
+    id: "works-on-machine",
+    category: "dev",
+    quote: "It works on my machine! ...Then we will ship your machine to the cloud datacenter.",
+    author: "Every Developer Since 1995",
+    tagline: "Docker Origin Story",
+  },
+  {
+    id: "fda-part-11",
+    category: "medtech",
+    quote: "21 CFR Part 11: If it wasn't electronically timestamped, audit-trailed, and digitally signed in triplicate, did the clinical trial even occur?",
+    author: "Lead Regulatory Auditor",
+    tagline: "CDISC Compliance",
+  },
+  {
+    id: "sdtm-validation",
+    category: "medtech",
+    quote: "All subjects are healthy until you run the SDTM domain validator across the AE dataset.",
+    author: "Principal Biostatistician",
+    tagline: "Protocol Anomaly",
+  },
+  {
+    id: "duck-puppy",
+    category: "lore",
+    quote: "Duck the puppy has achieved 100% test coverage by chewing through the Ethernet cable.",
+    author: "Chief Bark Officer",
+    tagline: "Lake Minnetonka QA",
+  },
+  {
+    id: "laser-loon",
+    category: "lore",
+    quote: "Blasting through red tape and rival flags with pure Lake Minnetonka cryo-ray optics.",
+    author: "Submission F277 State Flag Committee",
+    tagline: "Civic Arcade",
+  },
+  {
+    id: "http-418",
+    category: "classic",
+    quote: "Error 418: I'm a teapot. RFC 2324 Hyper Text Coffee Pot Control Protocol is alive and brewing.",
+    author: "IETF Network Working Group",
+    tagline: "RFC 2324",
+  },
+  {
+    id: "rust-borrow",
+    category: "dev",
+    quote: "The Rust borrow checker doesn't just reject your code; it questions your life choices in lifetimes.",
+    author: "Zero-Cost Abstinence Fanatic",
+    tagline: "Memory Safety",
+  },
+  {
+    id: "ai-hallucination",
+    category: "dev",
+    quote: "The LLM was 99.9% confident that 2 + 2 = 5 with full citations from non-existent papers.",
+    author: "Autonomous Agent Orchestrator",
+    tagline: "P-Value Drift",
+  },
+];
+
+export const SOUNDBOARD_BUTTONS: SoundboardButton[] = [
+  {
+    id: "snd-bark",
+    label: "Puppy Woof",
+    emoji: "🐾",
+    category: "lore",
+    description: "Synthesized golden retriever puppy bark from Duck.",
+    accent: "from-amber-500/20 to-amber-600/20 text-amber-300 border-amber-500/40",
+    synthType: "bark",
+  },
+  {
+    id: "snd-laser",
+    label: "Loon Cryo-Laser",
+    emoji: "🦆",
+    category: "lore",
+    description: "High-frequency Minnesota Laser Loon raycast blast.",
+    accent: "from-cyan-500/20 to-blue-600/20 text-cyan-300 border-cyan-500/40",
+    synthType: "laser",
+  },
+  {
+    id: "snd-friday",
+    label: "Friday Deploy Alarm",
+    emoji: "🚨",
+    category: "dev",
+    description: "Siren warning triggered when pushing to main at 5 PM.",
+    accent: "from-red-500/20 to-rose-600/20 text-rose-300 border-red-500/40",
+    synthType: "friday-alarm",
+  },
+  {
+    id: "snd-matrix",
+    label: "Matrix Glitch",
+    emoji: "💾",
+    category: "retro",
+    description: "Cyberpunk CRT digital cascade burst.",
+    accent: "from-emerald-500/20 to-green-600/20 text-emerald-300 border-emerald-500/40",
+    synthType: "matrix-glitch",
+  },
+  {
+    id: "snd-teapot",
+    label: "RFC 418 Teapot",
+    emoji: "🫖",
+    category: "classic",
+    description: "HTCPCP 1.0 whistle and pressure release steam.",
+    accent: "from-teal-500/20 to-emerald-600/20 text-teal-300 border-teal-500/40",
+    synthType: "teapot-whistle",
+  },
+  {
+    id: "snd-modem",
+    label: "56k Dialup Handshake",
+    emoji: "📞",
+    category: "retro",
+    description: "Nostalgic 1996 V.90 modem negotiation frequencies.",
+    accent: "from-indigo-500/20 to-purple-600/20 text-indigo-300 border-indigo-500/40",
+    synthType: "modem",
+  },
+  {
+    id: "snd-fda",
+    label: "FDA Audit Siren",
+    emoji: "📋",
+    category: "medtech",
+    description: "High-voltage buzzer when CDISC validation fails.",
+    accent: "from-yellow-500/20 to-amber-600/20 text-yellow-300 border-yellow-500/40",
+    synthType: "fda-siren",
+  },
+  {
+    id: "snd-levelup",
+    label: "Retro Fanfare",
+    emoji: "⭐",
+    category: "retro",
+    description: "Arpeggiated 8-bit arcade triumph chime.",
+    accent: "from-purple-500/20 to-pink-600/20 text-purple-300 border-purple-500/40",
+    synthType: "level-up",
+  },
+];
+
+export const EASTER_EGG_ACHIEVEMENTS: EasterEggAchievement[] = [
+  {
+    id: "konami-hero",
+    title: "Konami Code Pioneer",
+    description: "Entered the legendary sequence (↑ ↑ ↓ ↓ ← → ← → B A) on the keyboard.",
+    icon: "🕹️",
+    hint: "Enter the classic retro code on any page.",
+  },
+  {
+    id: "terminal-cowboy",
+    title: "Terminal Cowboy",
+    description: "Executed UNIX easter eggs (cowsay, neofetch, sl, or matrix) in the Sandbox Terminal.",
+    icon: "💻",
+    hint: "Explore UNIX and dev commands in the interactive terminal.",
+  },
+  {
+    id: "duck-whisperer",
+    title: "Duck Whisperer",
+    description: "Clicked Duck the Golden Retriever in the footer and tossed a treat.",
+    icon: "🐾",
+    hint: "Find and click Duck resting at the bottom of the page.",
+  },
+  {
+    id: "rfc-barista",
+    title: "RFC 2324 Barista",
+    description: "Queried 418 or coffee in the Command Palette (Cmd+K).",
+    icon: "🫖",
+    hint: "Order coffee from the Command Palette.",
+  },
+  {
+    id: "soundboard-maestro",
+    title: "Soundboard Maestro",
+    description: "Sampled synthesized retro audio effects in the Secret Meme Vault.",
+    icon: "🎧",
+    hint: "Play sounds in the Meme Vault room.",
+  },
+  {
+    id: "friday-survivor",
+    title: "Friday Deploy Survivor",
+    description: "Attempted a simulated 'git push --force origin main' in the terminal.",
+    icon: "🚨",
+    hint: "Try force-pushing in the terminal.",
+  },
+];
+
+export const STATUS_TICKER_ITEMS: string[] = [
+  "Build: Passing (0 errors, 418 warnings)",
+  "Duck Status: Sleeping on keyboard 🐾",
+  "CDISC 21 CFR Part 11: 100% Audit-Trailed",
+  "Laser Loon: Optics charged to 100% 🦆",
+  "Staging: Deployed on Friday with 0 fear",
+  "RAM Footprint: Exactly 31.9 KB of 32 KB",
+  "Lake Minnetonka Water Cooling: 4.2°C",
+  "LLM Temperature: 0.0 (Zero Hallucination Mode)",
+];
+
+export const ASCII_COWSAY = (text: string = "Moo! Ships with 100% test coverage."): string => {
+  const line = "-".repeat(text.length + 2);
+  return `  ${line}
+< ${text} >
+  ${line}
+        \\   ^__^
+         \\  (oo)\\_______
+            (__)\\       )\\/\\
+                ||----w |
+                ||     ||`;
+};
+
+export const ASCII_DUCK = (): string => {
+  return `
+    __
+  <(o )___  *woof!*
+   ( ._> /  Duck is guarding the codebase
+    \`---'   Status: 100% Good Boy
+  `;
+};
+
+export const ASCII_NEOFETCH = (): string => {
+  return `
+    .---.      fred@portfolio-minnetonka
+   /     \\     -------------------------
+  | () () |    OS: FredOS 2026.2 (Next.js 15.2 / React 19)
+   \\  _  /     Host: Lake Minnetonka Supercluster
+    \`---\`      Kernel: 6.14.0-antigravity-arm64
+   /     \\     Uptime: 99.999% (Zero Friday downtime)
+  |       |    Packages: 42 (bun), 1 (duck-engine)
+  |  |_|  |    Shell: zsh 5.9 (duck-theme)
+  \`---\`---\`    Terminal: SandboxTerminal v2.3.1
+               CPU: Apple M-Series Silicon (Neural Engine)
+               Memory: 31.8KB / 32.0KB (Garmin Mode)
+               Mascot: Duck 🐾 (Fluffy Golden Retriever)
+  `;
+};
+
+export const ASCII_TRAIN = (): string => {
+  return `
+   ====        ________                ___________
+ _D|_|  )_____/        \\______________/           |
+(  DEV  EXPRESS  ===     ===     ===   [CHOO-CHOO] |
+ \`------------------------------------------------'
+     (O)(O)            (O)(O)            (O)(O)
+  `;
+};
+
+export const FORTUNES: string[] = [
+  "Today is a great day to write unit tests before debugging in production.",
+  "A bug found before merge is worth ten hotfixes in staging.",
+  "The best documentation is the code that is so simple it explains itself.",
+  "Duck recommends taking a 15-minute walk outside when the compiler complains.",
+  "21 CFR Part 11 says: Electronic signatures are forever.",
+  "There is no place like 127.0.0.1.",
+  "Remember: sudo will not save you from a typo in production.",
+  "Laser Loon sees all runtime exceptions and incinerates them on sight.",
+];
+
+/**
+ * Storage helpers for achievements and meme vault unlock state
+ */
+export const MEME_STORAGE_KEYS = {
+  VAULT_UNLOCKED: "unlocked_meme_vault",
+  ACHIEVEMENTS: "meme_achievements_unlocked",
+  RETRO_CHAOS_MODE: "retro_chaos_mode_active",
+} as const;
+
+export function getUnlockedAchievements(): string[] {
+  if (typeof window === "undefined" || typeof window.localStorage?.getItem !== "function") {
+    return [];
+  }
+  try {
+    const raw = window.localStorage.getItem(MEME_STORAGE_KEYS.ACHIEVEMENTS);
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function unlockAchievement(achievementId: string): boolean {
+  if (typeof window === "undefined" || typeof window.localStorage?.setItem !== "function") {
+    return false;
+  }
+  try {
+    const current = getUnlockedAchievements();
+    if (!current.includes(achievementId)) {
+      const next = [...current, achievementId];
+      window.localStorage.setItem(MEME_STORAGE_KEYS.ACHIEVEMENTS, JSON.stringify(next));
+      window.dispatchEvent(new CustomEvent("meme_achievement_unlocked", { detail: { id: achievementId } }));
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+export function isVaultUnlocked(): boolean {
+  if (typeof window === "undefined" || typeof window.localStorage?.getItem !== "function") {
+    return false;
+  }
+  try {
+    return window.localStorage.getItem(MEME_STORAGE_KEYS.VAULT_UNLOCKED) === "true";
+  } catch {
+    return false;
+  }
+}
+
+export function setVaultUnlocked(unlocked: boolean = true): void {
+  if (typeof window === "undefined" || typeof window.localStorage?.setItem !== "function") {
+    return;
+  }
+  try {
+    window.localStorage.setItem(MEME_STORAGE_KEYS.VAULT_UNLOCKED, unlocked ? "true" : "false");
+    window.dispatchEvent(new CustomEvent("meme_vault_unlocked_change", { detail: { unlocked } }));
+  } catch {
+    // Ignore storage errors in restricted contexts
+  }
+}

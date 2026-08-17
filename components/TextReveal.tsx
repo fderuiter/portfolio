@@ -11,7 +11,7 @@ import { motion, MotionValue, useScroll, useTransform } from "framer-motion"
 
 import { cn } from "@/lib/utils"
 
-export interface TextRevealProps extends ComponentPropsWithoutRef<"div"> {
+interface TextRevealProps extends ComponentPropsWithoutRef<"div"> {
   children: string
 }
 

@@ -9,7 +9,7 @@ type TheoremId =
   | "cache-consistency"
   | "custom";
 
-export type WorkerAction = 
+type WorkerAction = 
   | { type: "START_SIMULATION"; requestId?: number; mode: "normal" | "loop"; theoremId?: TheoremId }
   | { type: "ABORT"; requestId?: number };
 

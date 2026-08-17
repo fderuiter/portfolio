@@ -28,7 +28,7 @@ interface ExportImportModalProps {
   onOpenBranding?: () => void;
 }
 
-export type ExportTab = "odm" | "sas" | "r" | "json" | "fhir" | "sdtm_spec";
+type ExportTab = "odm" | "sas" | "r" | "json" | "fhir" | "sdtm_spec";
 
 export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   study,

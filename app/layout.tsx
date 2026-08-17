@@ -10,6 +10,7 @@ import { AudioProvider } from "@/components/providers/AudioProvider";
 import { SearchProvider } from "@/components/providers/SearchProvider";
 import { TerminologyProvider } from "@/components/providers/TerminologyProvider";
 import { PersonaProvider } from "@/components/providers/PersonaProvider";
+import { RetroChaosOverlay } from "@/components/RetroChaosOverlay";
 import { Analytics } from "@vercel/analytics/next";
 import { SearchWrapper } from "@/components/SearchWrapper";
 import { resolveBaseUrl } from "@/lib/domain";
@@ -117,6 +118,7 @@ export default function RootLayout({
                     {children}
                   </main>
                   <Footer />
+                  <RetroChaosOverlay />
                   <Analytics />
                   <SearchWrapper />
                 </AudioProvider>

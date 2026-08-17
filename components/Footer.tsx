@@ -18,9 +18,11 @@ import {
   IconBone,
   IconSparkles,
   IconFileSpreadsheet,
+  IconDeviceGamepad2,
 } from "@tabler/icons-react";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { usePersona } from "@/components/providers/PersonaProvider";
+import { FooterStatusTicker } from "@/components/FooterStatusTicker";
 
 export const Footer: React.FC = () => {
   const pathname = usePathname();
@@ -56,7 +58,10 @@ export const Footer: React.FC = () => {
       {/* Top Ambient Highlight */}
       <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-cyan/20 to-transparent" />
 
-      <div className="max-w-6xl mx-auto px-6 md:px-12 pt-16 pb-[max(4rem,env(safe-area-inset-bottom)+2rem)]">
+      {/* Live Status Ticker & Interactive Mascot */}
+      <FooterStatusTicker />
+
+      <div className="max-w-6xl mx-auto px-6 md:px-12 pt-12 pb-[max(4rem,env(safe-area-inset-bottom)+2rem)]">
         {/* Main Grid */}
         <div className={`grid grid-cols-1 sm:grid-cols-2 ${persona === "technical" ? "lg:grid-cols-4" : "lg:grid-cols-5"} gap-10 lg:gap-8 mb-16`}>
           {/* Col 1: Brand & Bio */}
@@ -166,6 +171,16 @@ export const Footer: React.FC = () => {
                   >
                     <IconBone className="w-3 h-3 text-amber-400" />
                     Working With Duck
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/arcade/meme-vault"
+                    onMouseEnter={handleHover}
+                    className="text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1.5"
+                  >
+                    <IconDeviceGamepad2 className="w-3 h-3 text-emerald-400" />
+                    Secret Meme Vault 🔓
                   </Link>
                 </li>
               </ul>

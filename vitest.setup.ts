@@ -1,0 +1,162 @@
+import { vi } from "vitest";
+
+// Mock localStorage if missing or defective in JSDOM / Node 25+
+class MockStorage implements Storage {
+  private store = new Map<string, string>();
+
+  get length(): number {
+    return this.store.size;
+  }
+
+  clear(): void {
+    this.store.clear();
+  }
+
+  getItem(key: string): string | null {
+    return this.store.has(key) ? this.store.get(key)! : null;
+  }
+
+  key(index: number): string | null {
+    const keys = Array.from(this.store.keys());
+    return keys[index] ?? null;
+  }
+
+  removeItem(key: string): void {
+    this.store.delete(key);
+  }
+
+  setItem(key: string, value: string): void {
+    this.store.set(key, String(value));
+  }
+}
+
+if (typeof globalThis.localStorage === "undefined" || typeof globalThis.localStorage.getItem !== "function") {
+  const storageInstance = new MockStorage();
+  Object.defineProperty(globalThis, "localStorage", {
+    value: storageInstance,
+    writable: true,
+    configurable: true,
+  });
+}
+
+// Mock ResizeObserver
+if (typeof globalThis.ResizeObserver === "undefined") {
+  class MockResizeObserver {
+    observe = vi.fn();
+    unobserve = vi.fn();
+    disconnect = vi.fn();
+  }
+  globalThis.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver;
+}
+
+// Mock IntersectionObserver
+if (typeof globalThis.IntersectionObserver === "undefined") {
+  class MockIntersectionObserver {
+    observe = vi.fn();
+    unobserve = vi.fn();
+    disconnect = vi.fn();
+    takeRecords = vi.fn(() => []);
+  }
+  globalThis.IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver;
+}
+
+// Mock Canvas 2D and WebGL contexts
+const originalGetContext = HTMLCanvasElement.prototype.getContext;
+
+HTMLCanvasElement.prototype.getContext = function (
+  this: HTMLCanvasElement,
+  contextId: string,
+  ...args: unknown[]
+): RenderingContext | null {
+  if (contextId === "2d") {
+    return {
+      canvas: this,
+      font: "16px sans-serif",
+      fillStyle: "#ffffff",
+      strokeStyle: "#000000",
+      lineWidth: 1,
+      globalAlpha: 1,
+      fillRect: vi.fn(),
+      strokeRect: vi.fn(),
+      clearRect: vi.fn(),
+      setLineDash: vi.fn(),
+      getLineDash: vi.fn(() => []),
+      clip: vi.fn(),
+      ellipse: vi.fn(),
+      createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+      createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+      createPattern: vi.fn(),
+      getImageData: vi.fn((_sx?: number, _sy?: number, sw?: number, sh?: number) => {
+        const width = typeof sw === "number" && sw > 0 ? sw : 256;
+        const height = typeof sh === "number" && sh > 0 ? sh : 256;
+        return {
+          width,
+          height,
+          data: new Uint8ClampedArray(width * height * 4),
+        };
+      }),
+      putImageData: vi.fn(),
+      createImageData: vi.fn((w?: number | ImageData, h?: number) => {
+        const width = typeof w === "number" && w > 0 ? w : 256;
+        const height = typeof h === "number" && h > 0 ? h : 256;
+        return {
+          width,
+          height,
+          data: new Uint8ClampedArray(width * height * 4),
+        };
+      }),
+      drawImage: vi.fn(),
+      save: vi.fn(),
+      fillText: vi.fn(),
+      strokeText: vi.fn(),
+      restore: vi.fn(),
+      beginPath: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      closePath: vi.fn(),
+      stroke: vi.fn(),
+      translate: vi.fn(),
+      scale: vi.fn(),
+      rotate: vi.fn(),
+      arc: vi.fn(),
+      arcTo: vi.fn(),
+      fill: vi.fn(),
+      rect: vi.fn(),
+      quadraticCurveTo: vi.fn(),
+      bezierCurveTo: vi.fn(),
+      roundRect: vi.fn(),
+      measureText: vi.fn((text: string) => ({ width: (text || "").length * 8, height: 16 })),
+      transform: vi.fn(),
+      resetTransform: vi.fn(),
+    } as unknown as RenderingContext;
+  }
+
+  if (contextId === "webgl" || contextId === "webgl2" || contextId === "experimental-webgl") {
+    return {
+      canvas: this,
+      getExtension: vi.fn(),
+      getParameter: vi.fn(() => "Mock WebGL"),
+      createBuffer: vi.fn(),
+      bindBuffer: vi.fn(),
+      bufferData: vi.fn(),
+      createShader: vi.fn(),
+      shaderSource: vi.fn(),
+      compileShader: vi.fn(),
+      createProgram: vi.fn(),
+      attachShader: vi.fn(),
+      linkProgram: vi.fn(),
+      useProgram: vi.fn(),
+      viewport: vi.fn(),
+      clear: vi.fn(),
+      clearColor: vi.fn(),
+      enable: vi.fn(),
+      disable: vi.fn(),
+      isContextLost: vi.fn(() => false),
+    } as unknown as RenderingContext;
+  }
+
+  if (typeof originalGetContext === "function") {
+    return (originalGetContext as (...a: unknown[]) => RenderingContext | null).apply(this, [contextId, ...args]);
+  }
+  return null;
+} as typeof HTMLCanvasElement.prototype.getContext;

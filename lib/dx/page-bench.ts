@@ -39,6 +39,7 @@ export const CANONICAL_ROUTES: PageBenchmarkRoute[] = [
   { path: "/arcade/garmin-watch", name: "Game: Garmin Watch", category: "arcade" },
   { path: "/arcade/clinical-chaos", name: "Game: Clinical Chaos", category: "arcade" },
   { path: "/arcade/retro-labyrinth", name: "Game: Retro Labyrinth", category: "arcade" },
+  { path: "/arcade/meme-vault", name: "Game: Secret Meme Vault", category: "arcade" },
 ];
 
 export interface SingleRunMetrics {

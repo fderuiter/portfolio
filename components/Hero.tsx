@@ -36,20 +36,6 @@ function getMobileServerSnapshot(): boolean {
   return false;
 }
 
-/**
- * Lightweight Background Beams fallback preserved for backwards compatibility.
- */
-export const BackgroundBeamsWithCollision: React.FC<{
-  children: React.ReactNode;
-  className?: string;
-}> = ({ children, className }) => {
-  return (
-    <div className={cn("min-h-[100dvh] bg-[#0d0e11] relative flex items-center w-full justify-center overflow-hidden", className)}>
-      {children}
-    </div>
-  );
-};
-
 interface HeroHeadlineProps {
   text: string;
 }
@@ -276,7 +262,7 @@ type ConsoleMode = "logic" | "cdisc" | "garmin";
 /**
  * Interactive Live Engineering Console / Telemetry Spec Card
  */
-export const InteractiveEngineeringConsole: React.FC = () => {
+const InteractiveEngineeringConsole: React.FC = () => {
   const [mode, setMode] = useState<ConsoleMode>("logic");
   const { playSkillHover, playSuccess } = useAudio();
   const [logicDischarged, setLogicDischarged] = useState(false);
