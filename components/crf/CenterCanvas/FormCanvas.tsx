@@ -175,7 +175,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
   return (
     <div
       onClick={() => onSelectField(null)}
-      className="flex-1 flex flex-col h-full bg-zinc-950/80 overflow-y-auto p-3 sm:p-6 transition-all relative"
+      className="flex-1 flex flex-col h-full bg-zinc-950/80 crf-canvas-area overflow-y-auto p-3 sm:p-6 transition-all relative"
     >
       {/* Top Canvas Controls Bar */}
       <div className="flex flex-wrap items-center justify-between gap-2.5 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-zinc-800/80">
@@ -212,7 +212,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
       <div className="flex-1 flex justify-center pb-28">
         <div className={`${viewportWidthClass} transition-all duration-300 space-y-4 sm:space-y-6`}>
           {/* Form Header Card */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-zinc-900/70 border border-zinc-800/80 shadow-lg relative group">
+          <div className="p-4 sm:p-5 rounded-2xl bg-zinc-900/70 crf-paper-sheet border border-zinc-800/80 shadow-lg relative group">
             {isEditingTitle ? (
               <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
@@ -316,7 +316,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                 key={section.id}
                 onDragOver={(e) => handleFieldDragOver(e, section.id, section.fields.length)}
                 onDrop={(e) => handleFieldDrop(e, section.id, section.fields.length)}
-                className="p-3.5 sm:p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 space-y-3 sm:space-y-4"
+                className="p-3.5 sm:p-5 rounded-2xl bg-zinc-900/40 crf-paper-sheet border border-zinc-800/80 space-y-3 sm:space-y-4"
               >
                 {/* Section Header */}
                 <div className="flex items-center justify-between border-b border-zinc-800/60 pb-3">

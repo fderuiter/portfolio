@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import {
   StudyProtocol,
   StudioMode,
+  StudioTheme,
 } from "@/lib/crf/types";
 import { STUDY_PRESETS } from "@/lib/crf/presets";
 import { lintForm } from "@/lib/crf/ast-evaluator";
@@ -30,6 +31,8 @@ import {
   IconHelp,
   IconPlayerPlay,
   IconLink,
+  IconSun,
+  IconMoon,
 } from "@tabler/icons-react";
 import { getStudyBranding } from "@/lib/crf/branding-defaults";
 
@@ -38,6 +41,8 @@ interface StudioHeaderProps {
   activeMode: StudioMode;
   canUndo: boolean;
   canRedo: boolean;
+  theme?: StudioTheme;
+  onToggleTheme?: () => void;
   isLeftSidebarOpen?: boolean;
   isRightInspectorOpen?: boolean;
   onToggleLeftSidebar?: () => void;
@@ -60,6 +65,8 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
   activeMode,
   canUndo,
   canRedo,
+  theme = "dark",
+  onToggleTheme,
   isLeftSidebarOpen = true,
   isRightInspectorOpen = true,
   onToggleLeftSidebar,
@@ -210,6 +217,22 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
               <IconArrowForwardUp className="w-3.5 h-3.5" />
             </button>
           </div>
+
+          {/* Theme Toggle (Dark / Light) */}
+          {onToggleTheme && (
+            <button
+              onClick={onToggleTheme}
+              className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 transition-colors inline-flex items-center gap-1 text-[11px] font-mono"
+              title={theme === "light" ? "Switch to Dark Studio Mode" : "Switch to Clinical Light Mode"}
+              aria-label={theme === "light" ? "Switch to Dark Studio Mode" : "Switch to Clinical Light Mode"}
+            >
+              {theme === "light" ? (
+                <IconMoon className="w-3.5 h-3.5 text-amber-500" />
+              ) : (
+                <IconSun className="w-3.5 h-3.5 text-amber-400" />
+              )}
+            </button>
+          )}
 
           {/* Desktop Actions (Hidden on small screens / laptops, moved to More Menu) */}
           <div className="hidden lg:flex items-center gap-1.5">
@@ -424,6 +447,31 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
                         <div className="font-bold">Share Studio View</div>
                         <div className="text-[10px] text-zinc-500">Copy link with active mode &amp; form</div>
                       </div>
+                    </button>
+                  )}
+
+                  {onToggleTheme && (
+                    <button
+                      onClick={() => {
+                        setIsMoreMenuOpen(false);
+                        onToggleTheme();
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-2 text-left text-xs font-mono rounded-xl bg-zinc-950 hover:bg-zinc-800 text-zinc-200 transition-colors"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        {theme === "light" ? (
+                          <IconMoon className="w-4 h-4 text-amber-500" />
+                        ) : (
+                          <IconSun className="w-4 h-4 text-amber-400" />
+                        )}
+                        <div className="flex-1">
+                          <div className="font-bold">Studio Theme</div>
+                          <div className="text-[10px] text-zinc-500">{theme === "light" ? "Clinical Light" : "Studio Dark"}</div>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-bold text-zinc-400 uppercase px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800">
+                        {theme}
+                      </span>
                     </button>
                   )}
 

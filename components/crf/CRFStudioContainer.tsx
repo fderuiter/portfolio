@@ -4,6 +4,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import {
   StudyProtocol,
   StudioMode,
+  StudioTheme,
   DeviceViewport,
   CRFForm,
   CRFField,
@@ -131,6 +132,26 @@ export const CRFStudioContainer: React.FC = () => {
     return null;
   });
 
+  const [theme, setTheme] = useState<StudioTheme>(() => {
+    if (typeof window !== "undefined") {
+      const rawTheme = new URLSearchParams(window.location.hash.slice(1)).get("theme") as StudioTheme;
+      if (rawTheme === "light" || rawTheme === "dark") {
+        return rawTheme;
+      }
+      try {
+        if (typeof window.localStorage?.getItem === "function") {
+          const cached = localStorage.getItem("crf_studio_theme") as StudioTheme;
+          if (cached === "light" || cached === "dark") {
+            return cached;
+          }
+        }
+      } catch {
+        // Fallback to dark
+      }
+    }
+    return "dark";
+  });
+
   const [viewport, setViewport] = useState<DeviceViewport>("desktop");
 
   // Sidebar Visibility / Collapse States for Desktop & Laptop
@@ -185,7 +206,18 @@ export const CRFStudioContainer: React.FC = () => {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLeftTabState(rawTab);
     }
-  }, [params, study.forms, activeMode, activeFormId, selectedFieldId, leftTab]);
+
+    const rawTheme = params.theme as StudioTheme | undefined;
+    if (rawTheme && (rawTheme === "light" || rawTheme === "dark")) {
+      if (rawTheme !== theme) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setTheme(rawTheme);
+      }
+    } else if (rawTheme === undefined && params.theme === "" && theme !== "dark") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setTheme("dark");
+    }
+  }, [params, study.forms, activeMode, activeFormId, selectedFieldId, leftTab, theme]);
 
   // Synchronized Setters with Hybrid Navigation
   const setActiveMode = useCallback(
@@ -226,6 +258,21 @@ export const CRFStudioContainer: React.FC = () => {
     },
     [setParam]
   );
+
+  const handleToggleTheme = useCallback(() => {
+    const nextTheme: StudioTheme = theme === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    if (typeof window !== "undefined") {
+      try {
+        if (typeof window.localStorage?.setItem === "function") {
+          localStorage.setItem("crf_studio_theme", nextTheme);
+        }
+      } catch {
+        // Ignore localstorage errors in restricted contexts
+      }
+    }
+    setParam("theme", nextTheme === "dark" ? null : nextTheme, { replace: true });
+  }, [theme, setParam]);
 
   const handleCopyShareLink = useCallback(() => {
     if (typeof window !== "undefined") {
@@ -554,13 +601,16 @@ export const CRFStudioContainer: React.FC = () => {
 
   return (
     <div
+      data-studio-theme={theme}
       style={
         {
           "--brand-primary": activeBranding.primaryColor || "#0284c7",
           "--brand-accent": activeBranding.accentColor || "#0ea5e9",
         } as React.CSSProperties
       }
-      className="flex flex-col h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] bg-zinc-950 text-foreground overflow-hidden relative"
+      className={`flex flex-col h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] ${
+        theme === "light" ? "bg-slate-50 text-slate-900" : "bg-zinc-950 text-foreground"
+      } overflow-hidden relative`}
     >
       {/* Studio Header Bar */}
       <StudioHeader
@@ -568,6 +618,8 @@ export const CRFStudioContainer: React.FC = () => {
         activeMode={activeMode}
         canUndo={history.length > 0}
         canRedo={future.length > 0}
+        theme={theme}
+        onToggleTheme={handleToggleTheme}
         isLeftSidebarOpen={isLeftSidebarOpen}
         isRightInspectorOpen={isRightInspectorOpen}
         onToggleLeftSidebar={() => setIsLeftSidebarOpen((prev) => !prev)}
