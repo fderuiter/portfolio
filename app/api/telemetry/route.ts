@@ -198,13 +198,30 @@ export async function POST(req: NextRequest) {
     };
 
     // Push event into Redis list for background synchronization and ensure TTL
-    const p = redis.pipeline();
-    p.lpush("telemetry_buffer", eventData);
-    p.expire("telemetry_buffer", 48 * 60 * 60); // 48 hours
-    const [listLength] = await p.exec();
-    
-    if (Number(listLength) > 1000) {
-      console.error("ALERT: Secondary telemetry buffer occupancy exceeds threshold.");
+    try {
+      const p = redis.pipeline();
+      p.lpush("telemetry_buffer", eventData);
+      p.expire("telemetry_buffer", 48 * 60 * 60); // 48 hours
+      const execResult = await p.exec();
+      const listLength = Number(execResult[0]);
+      
+      if (listLength > 1000) {
+        console.error("ALERT: Secondary telemetry buffer occupancy exceeds threshold.");
+      }
+    } catch (redisErr) {
+      console.warn("Failed to push telemetry event to Redis buffer, trying database fallback:", redisErr);
+      try {
+        await prisma.telemetryEvent.create({
+          data: {
+            id: eventId,
+            projectSlug,
+            eventType,
+            createdAt: eventData.createdAt,
+          },
+        });
+      } catch (dbErr) {
+        console.error("Critical: Fallback direct database write also failed, failing open:", dbErr);
+      }
     }
     
     const newEvent = eventData;

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useSyncExternalStore } from "react";
 
 interface DeferredHydrationProps {
   children: React.ReactNode;
@@ -8,10 +8,18 @@ interface DeferredHydrationProps {
 }
 
 export const DeferredHydration: React.FC<DeferredHydrationProps> = ({ children, fallback }) => {
-  const [isMounted, setIsMounted] = useState(false);
+  const isMounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+
   const [shouldRenderInteractive, setShouldRenderInteractive] = useState(false);
+  const [isFullyVisible, setIsFullyVisible] = useState(false);
 
   useEffect(() => {
+    if (!isMounted) return;
+
     // Delay mounting the interactive tree slightly to ensure the page has completed mounting first.
     // This allows the initial paint of the skeleton to load instantly with zero blocking work.
     const idleCallback = window.requestIdleCallback 
@@ -22,23 +30,19 @@ export const DeferredHydration: React.FC<DeferredHydrationProps> = ({ children, 
       setShouldRenderInteractive(true);
       // Let the interactive component mount in the DOM, then fade it in.
       setTimeout(() => {
-        setIsMounted(true);
+        setIsFullyVisible(true);
       }, 50);
     });
-  }, []);
+  }, [isMounted]);
 
-  const isServer = typeof window === "undefined";
-
-  // Server-side rendering always renders the children directly (hidden via CSS if desired, 
-  // or fully rendered so search engines can index it).
-  // On the client, before hydration is ready (before requestIdleCallback triggers), we render the high-fidelity skeleton.
-  if (isServer) {
+  // SSR or initial client paint pass before hydration completes
+  if (!isMounted || !shouldRenderInteractive) {
     return (
       <div className="w-full relative">
-        <div className="w-full opacity-0 pointer-events-none">
+        <div className="w-full opacity-0 pointer-events-none absolute inset-0">
           {children}
         </div>
-        <div className="absolute inset-0 z-10 w-full h-full pointer-events-none">
+        <div className="w-full">
           {fallback}
         </div>
       </div>
@@ -46,22 +50,18 @@ export const DeferredHydration: React.FC<DeferredHydrationProps> = ({ children, 
   }
 
   return (
-    <div className="w-full relative" suppressHydrationWarning>
-      {shouldRenderInteractive ? (
-        <div
-          className={`w-full transition-opacity duration-500 ease-in-out ${
-            isMounted ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
-        >
-          {children}
-        </div>
-      ) : null}
+    <div className="w-full relative">
+      <div
+        className={`w-full transition-opacity duration-500 ease-in-out ${
+          isFullyVisible ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        {children}
+      </div>
 
-      {!isMounted && (
+      {!isFullyVisible && (
         <div
-          className={`w-full transition-opacity duration-500 ease-in-out ${
-            shouldRenderInteractive ? "opacity-0 pointer-events-none absolute inset-0 z-10" : "opacity-100"
-          }`}
+          className="absolute inset-0 z-10 w-full h-full pointer-events-none transition-opacity duration-500 ease-in-out opacity-100"
         >
           {fallback}
         </div>

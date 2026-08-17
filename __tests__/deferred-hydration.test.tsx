@@ -67,9 +67,10 @@ describe("DeferredHydration & Structure-Matched Skeletons Suite", () => {
       root.render(<TestComponent />);
     });
 
-    // Initially, before mounting is complete, we should only see the fallback skeleton
+    // Initially, before mounting is complete, we should see the fallback skeleton,
+    // and the children are rendered inside the hidden SEO-friendly container
     expect(container.querySelector('[data-testid="my-skeleton"]')).not.toBeNull();
-    expect(container.querySelector('[data-testid="my-content"]')).toBeNull();
+    expect(container.querySelector('[data-testid="my-content"]')).not.toBeNull();
 
     // Advance timers so idle callback and mounting effects execute
     await act(async () => {
