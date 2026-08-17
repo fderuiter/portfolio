@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, useSyncExternalStore } from "react";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { useViewportIdle } from "@/hooks/useViewportIdle";
 import { clamp } from "@/lib/game-utils";
 import { useAudio } from "@/components/providers/AudioProvider";
 import {
@@ -191,8 +192,14 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
   const lastTimeRef = useRef<number>(0);
   const cursorGridPosRef = useRef<{ x: number; y: number } | null>(null);
 
-  const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isLoopIdledRef = useRef(false);
+  const resumeLoopRef = useRef<(() => void) | null>(null);
+  const isVisibleRef = useViewportIdle(canvasRef, () => {
+    resumeLoopRef.current?.();
+  });
+
+  const containerRef = useRef<HTMLDivElement>(null);
   const { isFullscreen, toggleFullscreen } = useFullscreen(containerRef);
   const { recordEvent } = useTelemetry();
   const { playNote, playSuccess } = useAudio();
@@ -914,6 +921,10 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
 
     const loop = (timestamp: number) => {
       if (!isRunning || isContextLost) return;
+      if (!isVisibleRef.current) {
+        isLoopIdledRef.current = true;
+        return;
+      }
 
       if (!lastTimeRef.current) lastTimeRef.current = timestamp;
       const deltaMs = timestamp - lastTimeRef.current;
@@ -1307,6 +1318,14 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
       animFrameRef.current = requestAnimationFrame(loop);
     };
 
+    resumeLoopRef.current = () => {
+      if (isLoopIdledRef.current) {
+        isLoopIdledRef.current = false;
+        lastTimeRef.current = performance.now();
+        animFrameRef.current = requestAnimationFrame(loop);
+      }
+    };
+
     animFrameRef.current = requestAnimationFrame(loop);
 
     return () => {
@@ -1316,6 +1335,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
         canvas.removeEventListener("contextrestored", handleContextRestored);
       }
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+      resumeLoopRef.current = null;
     };
   }, [
     isMounted,
@@ -1336,6 +1356,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
     currentTheme,
     crtCalibration,
     playNote,
+    isVisibleRef,
   ]);
 
   // ASCII Fallback for SSR & Initial Hydration

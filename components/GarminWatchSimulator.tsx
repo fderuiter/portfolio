@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback, useSyncExternalStore } from "react";
+import { useViewportIdle } from "@/hooks/useViewportIdle";
 import {
   IconCircle,
   IconBolt,
@@ -66,6 +67,12 @@ export const GarminWatchSimulator: React.FC = () => {
 
   // References for Canvas and Animation Loop
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const isLoopIdledRef = useRef(false);
+  const resumeLoopRef = useRef<(() => void) | null>(null);
+  const isVisibleRef = useViewportIdle(canvasRef, () => {
+    resumeLoopRef.current?.();
+  });
+
   const containerRef = useRef<HTMLDivElement | null>(null);
   const outerContainerRef = useRef<HTMLDivElement | null>(null);
   const { isFullscreen, toggleFullscreen } = useFullscreen(outerContainerRef);
@@ -262,6 +269,10 @@ export const GarminWatchSimulator: React.FC = () => {
 
     const gameTick = (timestamp: number) => {
       if (isContextLost) return;
+      if (!isVisibleRef.current) {
+        isLoopIdledRef.current = true;
+        return;
+      }
 
       if (!lastFrameTimeRef.current) {
         lastFrameTimeRef.current = timestamp;
@@ -285,6 +296,15 @@ export const GarminWatchSimulator: React.FC = () => {
       animationFrameId = requestAnimationFrame(gameTick);
     };
 
+    resumeLoopRef.current = () => {
+      if (isLoopIdledRef.current) {
+        isLoopIdledRef.current = false;
+        lastFrameTimeRef.current = performance.now();
+        animationFrameId = requestAnimationFrame(gameTick);
+        gameLoopRef.current = animationFrameId;
+      }
+    };
+
     animationFrameId = requestAnimationFrame(gameTick);
     gameLoopRef.current = animationFrameId;
 
@@ -296,8 +316,9 @@ export const GarminWatchSimulator: React.FC = () => {
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }
+      resumeLoopRef.current = null;
     };
-  }, []);
+  }, [isVisibleRef]);
 
   // Theme styling helpers
   const getThemeChassis = () => {

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useSyncExternalStore, useCallback } from "react";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { useViewportIdle } from "@/hooks/useViewportIdle";
 import { clamp } from "@/lib/game-utils";
 import {
   IconFlame,
@@ -139,6 +140,12 @@ export const LaserLoon: React.FC = () => {
   const bossSpawnedRef = useRef(false);
   const activePowerUpRef = useRef<{ type: PowerUpType; expiresAt: number } | null>(null);
   const ultimateMeterRef = useRef(0);
+
+  const isLoopIdledRef = useRef(false);
+  const resumeLoopRef = useRef<(() => void) | null>(null);
+  const isVisibleRef = useViewportIdle(canvasRef, () => {
+    resumeLoopRef.current?.();
+  });
 
   const currentAct = CAMPAIGN_ACTS.find((a) => a.actNumber === currentActNum) || CAMPAIGN_ACTS[0];
 
@@ -633,6 +640,10 @@ export const LaserLoon: React.FC = () => {
 
     const renderLoop = (time: number) => {
       if (isContextLost) return;
+      if (!isVisibleRef.current) {
+        isLoopIdledRef.current = true;
+        return;
+      }
       const dt = Math.min(32, time - lastFrameTime) / 16.666;
       lastFrameTime = time;
 
@@ -1148,6 +1159,14 @@ export const LaserLoon: React.FC = () => {
       animFrameIdRef.current = requestAnimationFrame(renderLoop);
     };
 
+    resumeLoopRef.current = () => {
+      if (isLoopIdledRef.current) {
+        isLoopIdledRef.current = false;
+        lastFrameTime = performance.now();
+        animFrameIdRef.current = requestAnimationFrame(renderLoop);
+      }
+    };
+
     animFrameIdRef.current = requestAnimationFrame(renderLoop);
 
     return () => {
@@ -1156,6 +1175,7 @@ export const LaserLoon: React.FC = () => {
       if (animFrameIdRef.current) {
         cancelAnimationFrame(animFrameIdRef.current);
       }
+      resumeLoopRef.current = null;
     };
   }, [
     isMounted,
@@ -1175,6 +1195,7 @@ export const LaserLoon: React.FC = () => {
     addFloatingText,
     addScore,
     addUltimateMeter,
+    isVisibleRef,
   ]);
 
   // Pointer / Mouse / Touch Controls

@@ -17,6 +17,7 @@
 - [hooks/useStudioHashParams](hooks/useStudioHashParams/README.md)
 - [hooks/useTelemetry](hooks/useTelemetry/README.md)
 - [hooks/useTimelineState](hooks/useTimelineState/README.md)
+- [hooks/useViewportIdle](hooks/useViewportIdle/README.md)
 - [hooks/useWebGLContextLoss](hooks/useWebGLContextLoss/README.md)
 - [lib/accessibility-utils](lib/accessibility-utils/README.md)
 - [lib/arcade](lib/arcade/README.md)

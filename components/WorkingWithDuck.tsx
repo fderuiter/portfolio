@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { useViewportIdle } from "@/hooks/useViewportIdle";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { FullscreenButton } from "@/components/arcade/FullscreenButton";
 import { DynamicTabletOrientationHint as TabletOrientationHint } from "@/components/arcade/DynamicTabletOrientationHint";
@@ -1382,6 +1383,11 @@ export const WorkingWithDuck: React.FC = () => {
   const [isMusicMuted, setIsMusicMuted] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isLoopIdledRef = useRef(false);
+  const resumeLoopRef = useRef<(() => void) | null>(null);
+  const isVisibleRef = useViewportIdle(canvasRef, () => {
+    resumeLoopRef.current?.();
+  });
   const containerRef = useRef<HTMLDivElement>(null);
   const animFrameIdRef = useRef<number | null>(null);
   const lastBellyScrubPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -1530,9 +1536,13 @@ export const WorkingWithDuck: React.FC = () => {
     }
 
     const render = () => {
-      if (!isRunning || isContextLost) return;
+       if (!isRunning || isContextLost) return;
+       if (!isVisibleRef.current) {
+         isLoopIdledRef.current = true;
+         return;
+       }
 
-      const state = gameStateRef.current;
+       const state = gameStateRef.current;
 
       // Advance deterministic engine
       if (state.status === "running") {
@@ -1562,6 +1572,13 @@ export const WorkingWithDuck: React.FC = () => {
       animFrameIdRef.current = requestAnimationFrame(render);
     };
 
+    resumeLoopRef.current = () => {
+      if (isLoopIdledRef.current) {
+        isLoopIdledRef.current = false;
+        animFrameIdRef.current = requestAnimationFrame(render);
+      }
+    };
+
     animFrameIdRef.current = requestAnimationFrame(render);
 
     return () => {
@@ -1573,8 +1590,9 @@ export const WorkingWithDuck: React.FC = () => {
       if (animFrameIdRef.current) {
         cancelAnimationFrame(animFrameIdRef.current);
       }
+      resumeLoopRef.current = null;
     };
-  }, []);
+  }, [isVisibleRef]);
 
   // Keyboard Shortcuts (1-4 for hotbar items, Q-W-E-R for tricks, Space for coding/jumping)
   useEffect(() => {

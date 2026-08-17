@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { useViewportIdle } from "@/hooks/useViewportIdle";
 import { clamp } from "@/lib/game-utils";
 import * as THREE from "three";
 import { AnatomicalParcel, HemisphereFilter, SurfaceMode, VoxelCoord } from "@/lib/neuro/types";
@@ -27,6 +28,12 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
   onCrosshairChange,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const isLoopIdledRef = useRef(false);
+  const resumeLoopRef = useRef<(() => void) | null>(null);
+  const isVisibleRef = useViewportIdle(containerRef, () => {
+    resumeLoopRef.current?.();
+  });
+
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
@@ -125,6 +132,10 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
       animId = requestAnimationFrame(animate);
 
       if (isContextLostRef.current) return;
+      if (!isVisibleRef.current) {
+        isLoopIdledRef.current = true;
+        return;
+      }
 
       if (meshGroupRef.current) {
         if (isRotatingRef.current && !isDraggingRef.current) {
@@ -136,6 +147,12 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
 
       if (renderer && scene && camera) {
         renderer.render(scene, camera);
+      }
+    };
+    resumeLoopRef.current = () => {
+      if (isLoopIdledRef.current) {
+        isLoopIdledRef.current = false;
+        animId = requestAnimationFrame(animate);
       }
     };
     animate();
@@ -161,8 +178,9 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
       if (container && renderer && renderer.domElement.parentNode === container) {
         container.removeChild(renderer.domElement);
       }
+      resumeLoopRef.current = null;
     };
-  }, [contextKey, bindCanvas]);
+  }, [contextKey, bindCanvas, isVisibleRef]);
 
   // Update Cortical Mesh on surfaceMode, modelUrl, wireframeActive, hemiFilter, or contextKey change
   useEffect(() => {

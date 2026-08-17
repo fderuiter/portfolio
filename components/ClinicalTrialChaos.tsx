@@ -11,6 +11,7 @@ import React, {
 import Link from "next/link";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { useViewportIdle } from "@/hooks/useViewportIdle";
 import {
   IconAlertTriangle,
   IconCheck,
@@ -182,6 +183,13 @@ export const ClinicalTrialChaos: React.FC = () => {
   // 4. DOM & Canvas references
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const isLoopIdledRef = useRef(false);
+  const resumeLoopRef = useRef<(() => void) | null>(null);
+  const isVisibleRef = useViewportIdle(canvasRef, () => {
+    resumeLoopRef.current?.();
+  });
+
   const { isFullscreen, toggleFullscreen } = useFullscreen(containerRef);
   const animFrameIdRef = useRef<number | null>(null);
   const lastTickTimeRef = useRef<number>(0);
@@ -825,6 +833,10 @@ export const ClinicalTrialChaos: React.FC = () => {
 
     const gameLoop = () => {
       if (!isRunning || isContextLost) return;
+      if (!isVisibleRef.current) {
+        isLoopIdledRef.current = true;
+        return;
+      }
 
       const now = Date.now();
       const deltaSeconds = Math.min(0.1, (now - lastTickTimeRef.current) / 1000);
@@ -951,6 +963,14 @@ export const ClinicalTrialChaos: React.FC = () => {
       animFrameIdRef.current = requestAnimationFrame(gameLoop);
     };
 
+    resumeLoopRef.current = () => {
+      if (isLoopIdledRef.current) {
+        isLoopIdledRef.current = false;
+        lastTickTimeRef.current = Date.now();
+        animFrameIdRef.current = requestAnimationFrame(gameLoop);
+      }
+    };
+
     lastTickTimeRef.current = Date.now();
     animFrameIdRef.current = requestAnimationFrame(gameLoop);
 
@@ -961,6 +981,7 @@ export const ClinicalTrialChaos: React.FC = () => {
         canvas.removeEventListener("contextrestored", handleContextRestored);
       }
       if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
+      resumeLoopRef.current = null;
     };
   }, [
     playState,
@@ -974,6 +995,7 @@ export const ClinicalTrialChaos: React.FC = () => {
     addAuditLog,
     triggerSound,
     renderConveyorCanvas,
+    isVisibleRef,
   ]);
 
   // 18. Hotkeys and Keyboard Boundary
