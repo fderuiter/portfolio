@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
-import { GarminWatchSimulator } from "@/components/GarminWatchSimulator";
+import dynamic from "next/dynamic";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
+import { PlayCabinet } from "@/components/arcade/PlayCabinet";
 import Link from "next/link";
 import {
   IconCpu,
@@ -12,6 +13,19 @@ import {
   IconDeviceWatch,
   IconArrowLeft,
 } from "@tabler/icons-react";
+
+const GarminWatchSimulatorLoader = () =>
+  import("@/components/GarminWatchSimulator").then((mod) => mod.GarminWatchSimulator);
+
+const DynamicGarminWatchSimulator = dynamic(GarminWatchSimulatorLoader, {
+  ssr: false,
+  loading: () => (
+    <div className="flex flex-col items-center justify-center p-8 min-h-[380px] font-mono text-xs text-zinc-500 animate-pulse">
+      <div className="w-8 h-8 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin mb-4" />
+      <span>ALLOCATING HEAP STACK BUFFER (32KB)...</span>
+    </div>
+  ),
+});
 
 export const GarminWatchClient: React.FC = () => {
   return (
@@ -61,7 +75,23 @@ export const GarminWatchClient: React.FC = () => {
 
         {/* Game Container */}
         <div className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-6 shadow-[0_0_50px_rgba(245,158,11,0.1)] flex flex-col items-center">
-          <GarminWatchSimulator />
+          <PlayCabinet
+            title="Garmin Connect IQ 32KB Memory Runner"
+            subtitle="Embedded Systems Memory & Display Simulator"
+            accentColor="amber"
+            icon={<IconDeviceWatch className="w-8 h-8 text-amber-400" />}
+            instructions="Circular 280×280 smartwatch simulator operating under strict 32KB RAM constraints with real-time garbage collection lifecycle tracking and simulated thermal condensation."
+            controls={[
+              { key: "UP", action: "Jump" },
+              { key: "DOWN", action: "Jettison RAM" },
+              { key: "Drag", action: "Wipe Thermal" },
+            ]}
+            importComponent={GarminWatchSimulatorLoader}
+          >
+            <div className="flex flex-col items-center w-full">
+              <DynamicGarminWatchSimulator />
+            </div>
+          </PlayCabinet>
         </div>
 
         {/* Instructions & Controls Reference */}

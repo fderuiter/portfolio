@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
-import { QuasiPerfectPuzzler } from "@/components/QuasiPerfectPuzzler";
+import dynamic from "next/dynamic";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
+import { PlayCabinet } from "@/components/arcade/PlayCabinet";
 import Link from "next/link";
 import {
   IconBrain,
@@ -12,6 +13,19 @@ import {
   IconShieldLock,
   IconArrowLeft,
 } from "@tabler/icons-react";
+
+const QuasiPerfectPuzzlerLoader = () =>
+  import("@/components/QuasiPerfectPuzzler").then((mod) => mod.QuasiPerfectPuzzler);
+
+const DynamicQuasiPerfectPuzzler = dynamic(QuasiPerfectPuzzlerLoader, {
+  ssr: false,
+  loading: () => (
+    <div className="flex flex-col items-center justify-center p-8 min-h-[380px] font-mono text-xs text-zinc-500 animate-pulse">
+      <div className="w-8 h-8 border-2 border-purple-500/30 border-t-purple-500 rounded-full animate-spin mb-4" />
+      <span>DISCHARGING MATHEMATICAL AST HYPOTHESES...</span>
+    </div>
+  ),
+});
 
 export const QuasiPuzzlerClient: React.FC = () => {
   return (
@@ -61,7 +75,21 @@ export const QuasiPuzzlerClient: React.FC = () => {
 
         {/* Game Container */}
         <div className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-6 shadow-[0_0_50px_rgba(168,85,247,0.1)]">
-          <QuasiPerfectPuzzler />
+          <PlayCabinet
+            title="Quasi-Perfect Puzzler"
+            subtitle="Formal Verification & Proof Tactics Engine"
+            accentColor="purple"
+            icon={<IconBrain className="w-8 h-8 text-purple-400" />}
+            instructions="Lean-style formal verification arcade. Drag and apply tactics to simplify mathematical AST goals and preserve theorem morality."
+            controls={[
+              { key: "Drag", action: "Apply Tactic" },
+              { key: "Click", action: "Select Node" },
+              { key: "sorry", action: "Moral Penalty" },
+            ]}
+            importComponent={QuasiPerfectPuzzlerLoader}
+          >
+            <DynamicQuasiPerfectPuzzler />
+          </PlayCabinet>
         </div>
 
         {/* Instructions & Controls Reference */}

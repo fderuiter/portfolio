@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
-import { WorkingWithDuck } from "@/components/WorkingWithDuck";
+import dynamic from "next/dynamic";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
+import { PlayCabinet } from "@/components/arcade/PlayCabinet";
 import Link from "next/link";
 import {
   IconBone,
@@ -11,6 +12,19 @@ import {
   IconAlertTriangle,
   IconArrowLeft,
 } from "@tabler/icons-react";
+
+const WorkingWithDuckLoader = () =>
+  import("@/components/WorkingWithDuck").then((mod) => mod.WorkingWithDuck);
+
+const DynamicWorkingWithDuck = dynamic(WorkingWithDuckLoader, {
+  ssr: false,
+  loading: () => (
+    <div className="flex flex-col items-center justify-center p-8 min-h-[380px] font-mono text-xs text-zinc-500 animate-pulse">
+      <div className="w-8 h-8 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin mb-4" />
+      <span>RETRIEVING DUCK STATE MACHINE...</span>
+    </div>
+  ),
+});
 
 export const WorkingWithDuckClient: React.FC = () => {
   return (
@@ -60,7 +74,21 @@ export const WorkingWithDuckClient: React.FC = () => {
 
         {/* Game Container */}
         <div className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-6 shadow-[0_0_50px_rgba(251,191,36,0.08)]">
-          <WorkingWithDuck />
+          <PlayCabinet
+            title="Working With Duck"
+            subtitle="Autonomous State Machine & Multitasking Simulation"
+            accentColor="amber"
+            icon={<IconBone className="w-8 h-8 text-amber-400" />}
+            instructions="Balance code development against managing an autonomous Golden Retriever puppy, Duck. Features toy toss trajectories, real-time belly rub scrubbing, recall mechanics, and persistent scrapbook state."
+            controls={[
+              { key: "1-3", action: "Toss Toys" },
+              { key: "4", action: "Trade Treats" },
+              { key: "Space", action: "Steer Duck" },
+            ]}
+            importComponent={WorkingWithDuckLoader}
+          >
+            <DynamicWorkingWithDuck />
+          </PlayCabinet>
         </div>
 
         {/* Instructions & Controls Reference */}

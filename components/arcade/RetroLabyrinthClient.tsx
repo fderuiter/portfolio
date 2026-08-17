@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
-import { RetroLabyrinth } from "@/components/RetroLabyrinth";
+import dynamic from "next/dynamic";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
+import { PlayCabinet } from "@/components/arcade/PlayCabinet";
 import Link from "next/link";
 import {
   IconDeviceGamepad2,
@@ -12,6 +13,19 @@ import {
   IconShieldLock,
   IconArrowLeft,
 } from "@tabler/icons-react";
+
+const RetroLabyrinthLoader = () =>
+  import("@/components/RetroLabyrinth").then((mod) => mod.RetroLabyrinth);
+
+const DynamicRetroLabyrinth = dynamic(RetroLabyrinthLoader, {
+  ssr: false,
+  loading: () => (
+    <div className="flex flex-col items-center justify-center p-8 min-h-[380px] font-mono text-xs text-zinc-500 animate-pulse">
+      <div className="w-8 h-8 border-2 border-rose-500/30 border-t-rose-500 rounded-full animate-spin mb-4" />
+      <span>COMPILING PROCEDURAL SHADERS & MAZE GEOMETRY...</span>
+    </div>
+  ),
+});
 
 export const RetroLabyrinthClient: React.FC = () => {
   return (
@@ -61,7 +75,23 @@ export const RetroLabyrinthClient: React.FC = () => {
 
         {/* Game Container */}
         <div className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-6 shadow-[0_0_50px_rgba(244,63,94,0.1)] flex flex-col items-center">
-          <RetroLabyrinth isMounted={true} />
+          <PlayCabinet
+            title="Retro Labyrinth: Graveyard Roguelike"
+            subtitle="Procedural Dungeon Generation & CRT Filter Engine"
+            accentColor="rose"
+            icon={<IconDeviceGamepad2 className="w-8 h-8 text-rose-400" />}
+            instructions="Explore procedural code graph dungeons rendered with custom CRT scanline shaders, Traveling Salesperson dynamic shifting geometry, and FOV raycast fog-of-war."
+            controls={[
+              { key: "WASD", action: "Move Developer" },
+              { key: "Space", action: "Wield Weapon" },
+              { key: "1-4", action: "Switch Tool" },
+            ]}
+            importComponent={RetroLabyrinthLoader}
+          >
+            <div className="flex flex-col items-center w-full">
+              <DynamicRetroLabyrinth isMounted={true} />
+            </div>
+          </PlayCabinet>
         </div>
 
         {/* Instructions & Controls Reference */}
