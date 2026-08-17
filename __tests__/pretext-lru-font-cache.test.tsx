@@ -5,7 +5,16 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
 import { renderHook } from "@testing-library/react";
-import { cssPropertyCache, fontConfigCache } from "@/lib/graphics-engine";
+import { 
+  cssPropertyCache, 
+  fontConfigCache, 
+  resetStylesheetLoadedCache,
+  resolveCodeChipExtraWidth,
+  isStylesheetLoaded,
+  measureTextOffscreen,
+  textPrepareCache,
+  textLayoutCache
+} from "@/lib/graphics-engine";
 import { resolveSingleThemeFont, resolveThemeFonts } from "@/lib/layout-config";
 import { usePretextLayout } from "@/hooks/usePretextLayout";
 
@@ -13,6 +22,8 @@ describe("Pretext LRU Font and Style Cache Suite", () => {
   beforeEach(() => {
     cssPropertyCache.clear();
     fontConfigCache.clear();
+    resetStylesheetLoadedCache();
+    delete (globalThis as any).__mockStylesheetLoaded;
     vi.restoreAllMocks();
 
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation((contextId) => {
@@ -202,5 +213,88 @@ describe("Pretext LRU Font and Style Cache Suite", () => {
     const resultPartialMiss = resolveThemeFonts(18, "--font-inter");
     expect(getComputedStyleSpy).toHaveBeenCalledTimes(1);
     expect(resultPartialMiss.codeFont).toContain("NewMonoFont");
+  });
+
+  describe("Non-Destructive Stylesheet Load-Guard requirements", () => {
+    it("Requirement 1 & 2: Checks presence of root variables to verify stylesheet loaded, and returns default fallbacks during unready state without writing to caches", () => {
+      // Mock unready stylesheet state (all root style queries return empty string)
+      const getPropertyValueSpy = vi.spyOn(window.CSSStyleDeclaration.prototype, "getPropertyValue");
+      getPropertyValueSpy.mockReturnValue("");
+
+      // Caches are empty
+      cssPropertyCache.clear();
+      fontConfigCache.clear();
+
+      // resolveSingleThemeFont
+      const fontSingle = resolveSingleThemeFont(16, "--font-inter");
+      expect(fontSingle).toContain("system-ui"); // fallback font stack
+      expect(cssPropertyCache.get("--font-inter")).toBeUndefined();
+      expect(fontConfigCache.get("singleThemeFont|16|--font-inter")).toBeUndefined();
+
+      // resolveThemeFonts
+      const fontsTheme = resolveThemeFonts(16, "--font-inter");
+      expect(fontsTheme.baseFont).toContain("system-ui");
+      expect(cssPropertyCache.get("--font-inter")).toBeUndefined();
+      expect(fontConfigCache.get("themeFonts|16|--font-inter")).toBeUndefined();
+
+      // resolveCodeChipExtraWidth
+      const extraWidth = resolveCodeChipExtraWidth();
+      expect(extraWidth).toBe(12);
+      expect(cssPropertyCache.get("code-chip-extra-width")).toBeUndefined();
+    });
+
+    it("Requirement 3: Skips caching dynamic measurements for temporary DOM elements until stylesheet loads", () => {
+      // Mock unready stylesheet
+      const getPropertyValueSpy = vi.spyOn(window.CSSStyleDeclaration.prototype, "getPropertyValue");
+      getPropertyValueSpy.mockReturnValue("");
+
+      // Caches are empty
+      textPrepareCache.clear();
+      textLayoutCache.clear();
+
+      expect(isStylesheetLoaded()).toBe(false);
+
+      // Call measureTextOffscreen
+      const result = measureTextOffscreen({
+        text: "Temporary layout state text",
+        fontSize: 14,
+        lineHeight: 20,
+        maxWidth: 300,
+      });
+
+      expect(result.height).toBeGreaterThan(0);
+      // Caches must remain empty (should NOT have been written to)
+      expect(textPrepareCache.size).toBe(0);
+      expect(textLayoutCache.size).toBe(0);
+    });
+
+    it("Requirement 4: Cache is fully writable once stylesheet loaded check succeeds", () => {
+      // Mock ready stylesheet
+      const getPropertyValueSpy = vi.spyOn(window.CSSStyleDeclaration.prototype, "getPropertyValue");
+      getPropertyValueSpy.mockImplementation((prop) => {
+        if (prop === "--layout-gap") return "16px";
+        if (prop === "--brand-cyan") return "#06b6d4";
+        if (prop === "--font-size-sm") return "13px";
+        if (prop === "--font-inter") return "MyCustomBrandFont";
+        return "";
+      });
+
+      textPrepareCache.clear();
+      textLayoutCache.clear();
+
+      expect(isStylesheetLoaded()).toBe(true);
+
+      const result = measureTextOffscreen({
+        text: "Custom brand font text",
+        fontSize: 14,
+        lineHeight: 20,
+        maxWidth: 300,
+      });
+
+      expect(result.height).toBeGreaterThan(0);
+      // Caches must contain the resolved/measured keys
+      expect(textPrepareCache.size).toBeGreaterThan(0);
+      expect(textLayoutCache.size).toBeGreaterThan(0);
+    });
   });
 });
