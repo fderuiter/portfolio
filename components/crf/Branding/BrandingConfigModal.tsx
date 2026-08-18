@@ -3,7 +3,7 @@
 import React, { useState, useRef } from "react";
 import { StudyBranding } from "@/lib/crf/types";
 import { BRANDING_PRESETS, DEFAULT_STUDY_BRANDING } from "@/lib/crf/branding-defaults";
-import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { ModalContainer } from "@/components/ui/ModalContainer";
 import {
   IconPalette,
   IconX,
@@ -27,11 +27,6 @@ export const BrandingConfigModal: React.FC<BrandingConfigModalProps> = ({
   onSave,
   onClose,
 }) => {
-  const containerRef = useFocusTrap<HTMLDivElement>(true, {
-    onEscape: onClose,
-    returnFocus: true,
-  });
-
   const [branding, setBranding] = useState<StudyBranding>(
     initialBranding || DEFAULT_STUDY_BRANDING
   );
@@ -102,14 +97,13 @@ export const BrandingConfigModal: React.FC<BrandingConfigModalProps> = ({
   };
 
   return (
-    <div
-      ref={containerRef}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="branding-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+    <ModalContainer
+      isOpen={true}
+      onClose={onClose}
+      titleId="branding-modal-title"
+      maxWidth="max-w-4xl"
+      className="bg-zinc-900 border-zinc-750"
     >
-      <div className="bg-zinc-900 border border-zinc-750 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-950">
           <div className="flex items-center gap-3">
@@ -472,7 +466,6 @@ export const BrandingConfigModal: React.FC<BrandingConfigModalProps> = ({
             </button>
           </div>
         </div>
-      </div>
-    </div>
+    </ModalContainer>
   );
 };
