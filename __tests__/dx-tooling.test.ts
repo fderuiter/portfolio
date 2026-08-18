@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import path from "path";
 import fs from "fs";
 import { validateEnv } from "../lib/env";
@@ -14,7 +14,8 @@ import {
   checkEnvironmentVariables,
 } from "../lib/dx/env-guard";
 import { extractExports, scanDeadCode, checkDeadCode } from "../lib/dx/dead-code";
-import { inspectBundleChunks, checkBundleBudgets } from "../lib/dx/bundle-guard";
+import * as bundleGuard from "../lib/dx/bundle-guard";
+import { handleAnalyzeCommand } from "../scripts/dx";
 import { checkWorkspaceIdeConfig } from "../lib/dx/doctor";
 
 describe("Developer Experience (DX) Tooling Suite", () => {
@@ -215,16 +216,103 @@ describe("Developer Experience (DX) Tooling Suite", () => {
 
   describe("4. Bundle Performance Budget Guard", () => {
     it("inspects bundle chunks without throwing", () => {
-      const report = inspectBundleChunks(root);
+      const report = bundleGuard.inspectBundleChunks(root);
       expect(typeof report.isBuilt).toBe("boolean");
       expect(Array.isArray(report.chunks)).toBe(true);
       expect(Array.isArray(report.violations)).toBe(true);
     });
 
     it("passes checkBundleBudgets diagnostic check", () => {
-      const result = checkBundleBudgets(root);
+      const result = bundleGuard.checkBundleBudgets(root);
       expect(["pass", "warn"]).toContain(result.status);
       expect(result.id).toBe("bundle-performance-budgets");
+    });
+
+    it("runs handleAnalyzeCommand without strict flag and does not exit on violations", () => {
+      const spyInspect = vi.spyOn(bundleGuard, "inspectBundleChunks").mockReturnValue({
+        isBuilt: true,
+        totalChunks: 1,
+        totalRawBytes: 500000,
+        totalGzipBytes: 400000,
+        initialSharedGzipBytes: 400000,
+        chunks: [
+          {
+            name: "oversized-chunk.js",
+            relativePath: "static/chunks/oversized-chunk.js",
+            rawBytes: 500000,
+            gzipBytes: 400000,
+            isInitial: true,
+          },
+        ],
+        violations: ["Chunk 'oversized-chunk.js' (400.0 kB gzip) exceeds maximum chunk budget of 350 kB."],
+      });
+
+      const spyExit = vi.spyOn(process, "exit").mockImplementation((code?: string | number | null | undefined) => {
+        throw new Error(`process.exit(${code})`);
+      });
+
+      expect(() => handleAnalyzeCommand([])).not.toThrow();
+
+      spyInspect.mockRestore();
+      spyExit.mockRestore();
+    });
+
+    it("runs handleAnalyzeCommand with strict flag and exits with code 1 on violations", () => {
+      const spyInspect = vi.spyOn(bundleGuard, "inspectBundleChunks").mockReturnValue({
+        isBuilt: true,
+        totalChunks: 1,
+        totalRawBytes: 500000,
+        totalGzipBytes: 400000,
+        initialSharedGzipBytes: 400000,
+        chunks: [
+          {
+            name: "oversized-chunk.js",
+            relativePath: "static/chunks/oversized-chunk.js",
+            rawBytes: 500000,
+            gzipBytes: 400000,
+            isInitial: true,
+          },
+        ],
+        violations: ["Chunk 'oversized-chunk.js' (400.0 kB gzip) exceeds maximum chunk budget of 350 kB."],
+      });
+
+      const spyExit = vi.spyOn(process, "exit").mockImplementation((code?: string | number | null | undefined) => {
+        throw new Error(`process.exit(${code})`);
+      });
+
+      expect(() => handleAnalyzeCommand(["--strict"])).toThrow("process.exit(1)");
+
+      spyInspect.mockRestore();
+      spyExit.mockRestore();
+    });
+
+    it("runs handleAnalyzeCommand with strict flag and passes cleanly when no violations exist", () => {
+      const spyInspect = vi.spyOn(bundleGuard, "inspectBundleChunks").mockReturnValue({
+        isBuilt: true,
+        totalChunks: 1,
+        totalRawBytes: 10000,
+        totalGzipBytes: 5000,
+        initialSharedGzipBytes: 5000,
+        chunks: [
+          {
+            name: "small-chunk.js",
+            relativePath: "static/chunks/small-chunk.js",
+            rawBytes: 10000,
+            gzipBytes: 5000,
+            isInitial: true,
+          },
+        ],
+        violations: [],
+      });
+
+      const spyExit = vi.spyOn(process, "exit").mockImplementation((code?: string | number | null | undefined) => {
+        throw new Error(`process.exit(${code})`);
+      });
+
+      expect(() => handleAnalyzeCommand(["--strict"])).not.toThrow();
+
+      spyInspect.mockRestore();
+      spyExit.mockRestore();
     });
   });
 

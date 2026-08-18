@@ -174,6 +174,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         ]
       },
       {
+        id: "nav-oxidizemath",
+        title: "OxidizeMath: Verified Numerical Framework in Rust",
+        subtitle: "Deep-dive technical case study — proc-macro verification, double-buffer PDEs & egui WASM",
+        category: "navigation",
+        url: "/case-studies/oxidizemath",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Case Study",
+        status: "Rust / WASM",
+        description: "Unified, memory-safe computation framework in Rust spanning pure math, medical physics, biology, and ML domains.",
+        techStack: ["Rust", "WebAssembly", "egui", "Formal Verification", "PDE Solver"],
+        highlights: [
+          "10+ crate domain monorepo architecture",
+          "Compile-time LaTeX proc-macro verification",
+          "Zero-copy double-buffered state execution"
+        ]
+      },
+      {
         id: "nav-laser-loon",
         title: "Laser Loon: Quest for the State Flag",
         subtitle: "Playable civic physics shooter — pilot F277 Laser Loon on the Road to the Capitol",
@@ -968,13 +985,11 @@ export const CommandPalette: React.FC = () => {
   // Expose test helper globally to open search modal programmatically
   useEffect(() => {
     if (!isMounted) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).__openSearch = () => {
+    window.__openSearch = () => {
       setIsOpen(true);
     };
     return () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      delete (window as any).__openSearch;
+      delete window.__openSearch;
     };
   }, [isMounted, setIsOpen]);
 

@@ -50,6 +50,7 @@ export const PretextCard: React.FC<PretextCardProps> = ({
               ref={ref}
               aria-hidden="true"
               role="presentation"
+              data-pretext-layer="visual"
               className="select-none pointer-events-none"
             >
               <CardDescription className={!isReady ? "invisible" : "transition-opacity duration-300"}>
@@ -58,6 +59,7 @@ export const PretextCard: React.FC<PretextCardProps> = ({
             </div>
             {/* Transparent Standard Semantic Overlay (selectable, readable by screen readers) */}
             <p
+              data-pretext-layer="semantic"
               className={`font-sans text-xs font-normal leading-relaxed absolute inset-0 select-text bg-transparent ${!isReady ? "invisible" : "transition-opacity duration-300"}`}
               style={{
                 color: "transparent",

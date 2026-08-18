@@ -168,6 +168,47 @@ export function ProofWorkspaceClient() {
   const terminalLogsContainerRef = useRef<HTMLDivElement>(null);
   const svgCanvasRef = useRef<SVGSVGElement>(null);
 
+  // Frame Throttling Refs for Node & Connection Dragging
+  const nodeDragRafIdRef = useRef<number | null>(null);
+  const pendingNodeDragRef = useRef<{ clientX: number; clientY: number; nodeId: string } | null>(null);
+  const connDragRafIdRef = useRef<number | null>(null);
+  const pendingConnDragRef = useRef<{ clientX: number; clientY: number } | null>(null);
+
+  const activeTheoremRef = useRef(activeTheorem);
+  const nodeOffsetsRef = useRef(nodeOffsets);
+  const isSnappingEnabledRef = useRef(isSnappingEnabled);
+  const dragConnectionRef = useRef(dragConnection);
+
+  useEffect(() => {
+    activeTheoremRef.current = activeTheorem;
+  }, [activeTheorem]);
+
+  useEffect(() => {
+    nodeOffsetsRef.current = nodeOffsets;
+  }, [nodeOffsets]);
+
+  useEffect(() => {
+    isSnappingEnabledRef.current = isSnappingEnabled;
+  }, [isSnappingEnabled]);
+
+  useEffect(() => {
+    dragConnectionRef.current = dragConnection;
+  }, [dragConnection]);
+
+  // Clean cancellation of frame callbacks on component unmount
+  useEffect(() => {
+    return () => {
+      if (nodeDragRafIdRef.current !== null) {
+        cancelAnimationFrame(nodeDragRafIdRef.current);
+        nodeDragRafIdRef.current = null;
+      }
+      if (connDragRafIdRef.current !== null) {
+        cancelAnimationFrame(connDragRafIdRef.current);
+        connDragRafIdRef.current = null;
+      }
+    };
+  }, []);
+
   const { playSuccess, playAutocomplete, playHover } = useAudio();
 
   const announceToScreenReader = React.useCallback((text: string) => {
@@ -541,24 +582,30 @@ export function ProofWorkspaceClient() {
       initOffsetX: currentOffset.x,
       initOffsetY: currentOffset.y,
     };
-    (e.target as Element).setPointerCapture(e.pointerId);
+    try {
+      (e.target as Element).setPointerCapture(e.pointerId);
+    } catch {}
   }, [nodeOffsets]);
 
-  const handleNodePointerMove = React.useCallback((e: React.PointerEvent, nodeId: string) => {
-    if (draggingNodeId !== nodeId || !dragStartRef.current) return;
-    const sNode = activeTheorem.nodes.find((n) => n.id === nodeId);
+  const processNodePointerMove = React.useCallback((clientX: number, clientY: number, nodeId: string) => {
+    if (!dragStartRef.current) return;
+    const currentActiveTheorem = activeTheoremRef.current;
+    const currentOffsets = nodeOffsetsRef.current;
+    const currentSnapping = isSnappingEnabledRef.current;
+
+    const sNode = currentActiveTheorem.nodes.find((n) => n.id === nodeId);
     if (!sNode) return;
 
-    const dx = e.clientX - dragStartRef.current.startX;
-    const dy = e.clientY - dragStartRef.current.startY;
+    const dx = clientX - dragStartRef.current.startX;
+    const dy = clientY - dragStartRef.current.startY;
     const rawX = sNode.x + dragStartRef.current.initOffsetX + dx;
     const rawY = sNode.y + dragStartRef.current.initOffsetY + dy;
 
-    if (isSnappingEnabled) {
-      const peerNodes = activeTheorem.nodes
+    if (currentSnapping) {
+      const peerNodes = currentActiveTheorem.nodes
         .filter((n) => n.id !== nodeId)
         .map((n) => {
-          const off = nodeOffsets[n.id] || { x: 0, y: 0 };
+          const off = currentOffsets[n.id] || { x: 0, y: 0 };
           return {
             id: n.id,
             x: n.x + off.x,
@@ -604,10 +651,35 @@ export function ProofWorkspaceClient() {
         },
       }));
     }
-  }, [draggingNodeId, activeTheorem.nodes, isSnappingEnabled, nodeOffsets, playHover]);
+  }, [playHover]);
+
+  const handleNodePointerMove = React.useCallback((e: React.PointerEvent, nodeId: string) => {
+    if (draggingNodeId !== nodeId || !dragStartRef.current) return;
+    pendingNodeDragRef.current = { clientX: e.clientX, clientY: e.clientY, nodeId };
+
+    if (nodeDragRafIdRef.current === null) {
+      nodeDragRafIdRef.current = requestAnimationFrame(() => {
+        nodeDragRafIdRef.current = null;
+        if (pendingNodeDragRef.current) {
+          const { clientX, clientY, nodeId: pNodeId } = pendingNodeDragRef.current;
+          pendingNodeDragRef.current = null;
+          processNodePointerMove(clientX, clientY, pNodeId);
+        }
+      });
+    }
+  }, [draggingNodeId, processNodePointerMove]);
 
   const handleNodePointerUp = React.useCallback((e: React.PointerEvent, nodeId: string) => {
     if (draggingNodeId === nodeId) {
+      if (nodeDragRafIdRef.current !== null) {
+        cancelAnimationFrame(nodeDragRafIdRef.current);
+        nodeDragRafIdRef.current = null;
+      }
+      if (pendingNodeDragRef.current) {
+        const { clientX, clientY, nodeId: pNodeId } = pendingNodeDragRef.current;
+        pendingNodeDragRef.current = null;
+        processNodePointerMove(clientX, clientY, pNodeId);
+      }
       setDraggingNodeId(null);
       dragStartRef.current = null;
       setActiveGuides([]);
@@ -615,7 +687,7 @@ export function ProofWorkspaceClient() {
         (e.target as Element).releasePointerCapture(e.pointerId);
       } catch {}
     }
-  }, [draggingNodeId]);
+  }, [draggingNodeId, processNodePointerMove]);
 
   const handleHandlePointerDown = (e: React.PointerEvent, nodeId: string) => {
     e.stopPropagation();
@@ -643,18 +715,22 @@ export function ProofWorkspaceClient() {
     announceToScreenReader(`Started connection drag from Node ${nodeId}. Drag to a compatible target node.`);
   };
 
-  const handleCanvasPointerMove = (e: React.PointerEvent) => {
-    if (!dragConnection) return;
+  const processCanvasPointerMove = React.useCallback((clientX: number, clientY: number) => {
+    const currentDragConnection = dragConnectionRef.current;
+    if (!currentDragConnection) return;
     const rect = canvasWrapperRef.current?.getBoundingClientRect();
     if (!rect) return;
 
-    const currentX = e.clientX - rect.left;
-    const currentY = e.clientY - rect.top;
+    const currentX = clientX - rect.left;
+    const currentY = clientY - rect.top;
 
     let hoveredTarget: ProofNode | null = null;
-    for (const node of activeTheorem.nodes) {
-      if (node.id === dragConnection.sourceId) continue;
-      const off = nodeOffsets[node.id] || { x: 0, y: 0 };
+    const currentTheorem = activeTheoremRef.current;
+    const currentOffsets = nodeOffsetsRef.current;
+
+    for (const node of currentTheorem.nodes) {
+      if (node.id === currentDragConnection.sourceId) continue;
+      const off = currentOffsets[node.id] || { x: 0, y: 0 };
       const nX = node.x + off.x;
       const nY = node.y + off.y;
       if (currentX >= nX - 10 && currentX <= nX + 170 && currentY >= nY - 10 && currentY <= nY + 85) {
@@ -668,10 +744,10 @@ export function ProofWorkspaceClient() {
     let ruleBadge = "";
 
     if (hoveredTargetId) {
-      const validation = canConnect(dragConnection.sourceId, hoveredTargetId, edges, activeTheoremId);
+      const validation = canConnect(currentDragConnection.sourceId, hoveredTargetId, edges, activeTheoremId);
       isValid = validation.allowed;
       if (isValid) {
-        const targets = getCompatibleTargets(dragConnection.sourceId, activeTheoremId, edges);
+        const targets = getCompatibleTargets(currentDragConnection.sourceId, activeTheoremId, edges);
         const found = targets.find((c) => c.targetId === hoveredTargetId);
         ruleBadge = found?.badgeLabel || "Valid Inferred Target";
       }
@@ -689,9 +765,34 @@ export function ProofWorkspaceClient() {
           }
         : null
     );
-  };
+  }, [edges, activeTheoremId]);
 
-  const handleCanvasPointerUp = (e: React.PointerEvent) => {
+  const handleCanvasPointerMove = React.useCallback((e: React.PointerEvent) => {
+    if (!dragConnection) return;
+    pendingConnDragRef.current = { clientX: e.clientX, clientY: e.clientY };
+
+    if (connDragRafIdRef.current === null) {
+      connDragRafIdRef.current = requestAnimationFrame(() => {
+        connDragRafIdRef.current = null;
+        if (pendingConnDragRef.current) {
+          const { clientX, clientY } = pendingConnDragRef.current;
+          pendingConnDragRef.current = null;
+          processCanvasPointerMove(clientX, clientY);
+        }
+      });
+    }
+  }, [dragConnection, processCanvasPointerMove]);
+
+  const handleCanvasPointerUp = React.useCallback((e: React.PointerEvent) => {
+    if (connDragRafIdRef.current !== null) {
+      cancelAnimationFrame(connDragRafIdRef.current);
+      connDragRafIdRef.current = null;
+    }
+    if (pendingConnDragRef.current) {
+      const { clientX, clientY } = pendingConnDragRef.current;
+      pendingConnDragRef.current = null;
+      processCanvasPointerMove(clientX, clientY);
+    }
     if (!dragConnection) return;
     try {
       (e.target as Element).releasePointerCapture(e.pointerId);
@@ -725,7 +826,7 @@ export function ProofWorkspaceClient() {
     }
 
     setDragConnection(null);
-  };
+  }, [dragConnection, edges, activeTheoremId, playSuccess, processCanvasPointerMove]);
 
   const handleResetLayout = () => {
     setNodeOffsets({});

@@ -702,9 +702,8 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
       }
     };
 
-    const anyWindow = window as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-    anyWindow.terminal = terminalApi;
-    anyWindow.imednet = terminalApi;
+    window.terminal = terminalApi;
+    window.imednet = terminalApi;
 
     // Interactive custom styled greeting in console
     console.log(
@@ -728,8 +727,8 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
 
     return () => {
       // Clean up global namespace completely on unmount (prevent leakage to other pages)
-      delete anyWindow.terminal;
-      delete anyWindow.imednet;
+      delete window.terminal;
+      delete window.imednet;
     };
   }, [slug]);
 

@@ -32,6 +32,8 @@ export const CANONICAL_ROUTES: PageBenchmarkRoute[] = [
   { path: "/case-studies/schemaflow", name: "CS: SchemaFlow", category: "case-study" },
   { path: "/case-studies/imednet-python-sdk", name: "CS: iMedNet SDK", category: "case-study" },
   { path: "/case-studies/wedding-website", name: "CS: Wedding Platform", category: "case-study" },
+  { path: "/case-studies/oxidizemath", name: "CS: OxidizeMath", category: "case-study" },
+  { path: "/case-studies/ualbf", name: "CS: UALBF Engine", category: "case-study" },
 
   // Arcade Mini-Games
   { path: "/arcade/working-with-duck", name: "Game: Duck Canvas Engine", category: "arcade" },

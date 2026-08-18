@@ -24,7 +24,7 @@ describe('build.js script execution', () => {
     spawnSpy.mockRestore();
   });
 
-  it('runs generate and next build and skips migrations if VERCEL_ENV is not production', () => {
+  it('runs generate, check:migrations, and next build offline without prisma migrate deploy', () => {
     process.env.VERCEL_ENV = 'preview';
     process.env.DATABASE_URL = 'postgresql://db:5432';
 
@@ -34,19 +34,19 @@ describe('build.js script execution', () => {
       expect(err.message).toBe('Process exited with code 0');
     }
 
-    // It should have called prisma generate and next build
+    // It should have called prisma generate, check:migrations, and next build
     expect(spawnSpy).toHaveBeenCalledWith('npx', ['prisma', 'generate'], expect.any(Object));
+    expect(spawnSpy).toHaveBeenCalledWith('npm', ['run', 'check:migrations'], expect.any(Object));
     expect(spawnSpy).toHaveBeenCalledWith('npx', ['next', 'build'], expect.any(Object));
 
-    // It should NOT have called check-migrations or prisma migrate deploy
-    expect(spawnSpy).not.toHaveBeenCalledWith('npm', ['run', 'check:migrations'], expect.any(Object));
+    // It MUST NOT execute live migration deploy
     expect(spawnSpy).not.toHaveBeenCalledWith('npx', ['prisma', 'migrate', 'deploy'], expect.any(Object));
 
     // It should exit with 0
     expect(exitMock).toHaveBeenCalledWith(0);
   });
 
-  it('runs migrations before next build if VERCEL_ENV is production', () => {
+  it('never executes prisma migrate deploy even if VERCEL_ENV is production', () => {
     process.env.VERCEL_ENV = 'production';
     process.env.DATABASE_URL = 'postgresql://db:5432';
 
@@ -56,22 +56,22 @@ describe('build.js script execution', () => {
       expect(err.message).toBe('Process exited with code 0');
     }
 
-    // It should have called prisma generate, generate-openapi, check:migrations, prisma migrate deploy, and then next build
+    // It should have called prisma generate, generate-openapi, check:migrations, and then next build
     expect(spawnSpy).toHaveBeenCalledWith('npx', ['prisma', 'generate'], expect.any(Object));
     expect(spawnSpy).toHaveBeenCalledWith('npx', ['tsx', 'scripts/generate-openapi.ts'], expect.any(Object));
     expect(spawnSpy).toHaveBeenCalledWith('npm', ['run', 'check:migrations'], expect.any(Object));
-    expect(spawnSpy).toHaveBeenCalledWith('npx', ['prisma', 'migrate', 'deploy'], expect.any(Object));
     expect(spawnSpy).toHaveBeenCalledWith('npx', ['next', 'build'], expect.any(Object));
 
-    // Verify ordering: check:migrations and migrate deploy must happen BEFORE next build
+    // It MUST NOT execute live migration deploy in static compilation
+    expect(spawnSpy).not.toHaveBeenCalledWith('npx', ['prisma', 'migrate', 'deploy'], expect.any(Object));
+
+    // Verify ordering: check:migrations happens BEFORE next build
     const calls = spawnSpy.mock.calls.map((c: any[]) => `${c[0]} ${c[1].join(' ')}`);
     const checkMigrationsIndex = calls.findIndex((c: string) => c.includes('check:migrations'));
-    const migrateDeployIndex = calls.findIndex((c: string) => c.includes('prisma migrate deploy'));
     const nextBuildIndex = calls.findIndex((c: string) => c.includes('next build'));
 
     expect(checkMigrationsIndex).toBeGreaterThan(-1);
-    expect(migrateDeployIndex).toBeGreaterThan(checkMigrationsIndex);
-    expect(nextBuildIndex).toBeGreaterThan(migrateDeployIndex);
+    expect(nextBuildIndex).toBeGreaterThan(checkMigrationsIndex);
 
     // It should exit with 0
     expect(exitMock).toHaveBeenCalledWith(0);

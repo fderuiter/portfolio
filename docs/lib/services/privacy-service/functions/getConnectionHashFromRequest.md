@@ -6,17 +6,18 @@
 
 # Function: getConnectionHashFromRequest()
 
-> **getConnectionHashFromRequest**(`req`): `Promise`\<`string`\>
+> **getConnectionHashFromRequest**(`reqOrHeaders?`): `Promise`\<`string`\>
 
-Defined in: [lib/services/privacy-service.ts:38](https://github.com/fderuiter/portfolio/blob/main/lib/services/privacy-service.ts#L38)
+Defined in: [lib/services/privacy-service.ts:94](https://github.com/fderuiter/portfolio/blob/main/lib/services/privacy-service.ts#L94)
 
-Generates an anonymous SHA-256 connection hash directly from a NextRequest.
+Generates an anonymous SHA-256 connection hash directly from a request or header map.
+Reads pre-computed connection tokens from proxy headers before recomputing client hashes.
 
 ## Parameters
 
-### req
+### reqOrHeaders?
 
-`NextRequest`
+[`RequestOrHeaders`](../type-aliases/RequestOrHeaders.md)
 
 ## Returns
 

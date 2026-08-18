@@ -72,6 +72,6 @@ Defined in: [lib/route-wrapper.ts:8](https://github.com/fderuiter/portfolio/blob
 
 ### type?
 
-> `optional` **type?**: `"body"` \| `"query"`
+> `optional` **type?**: `"query"` \| `"body"`
 
 Defined in: [lib/route-wrapper.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/route-wrapper.ts#L9)

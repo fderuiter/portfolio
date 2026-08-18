@@ -151,11 +151,11 @@ test.describe('Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite', () =>
 
   test('Audit: Active Command Palette Search State', async ({ page }, testInfo) => {
     await page.goto('/');
-    await page.waitForFunction(() => typeof (window as any).__openSearch === 'function', { timeout: 15000 });
+    await page.waitForFunction(() => typeof window.__openSearch === 'function', { timeout: 15000 });
 
     await page.evaluate(() => {
-      if (typeof (window as any).__openSearch === 'function') {
-        (window as any).__openSearch();
+      if (typeof window.__openSearch === 'function') {
+        window.__openSearch();
       }
     });
 
