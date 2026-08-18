@@ -14,11 +14,11 @@ export default function WorkingWithDuckPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: getWebApplicationSchema({
-            name: "Working With Duck: Rubber Duck Debugging",
-            description: "Interactive conversational debugging simulator. Formulate hypotheses, diagnose tricky concurrency bugs, and preserve developer sanity.",
-            url: "/arcade/working-with-duck",
+            name: ROUTE_METADATA_CONFIGS.workingWithDuck.title,
+            description: ROUTE_METADATA_CONFIGS.workingWithDuck.description,
+            url: ROUTE_METADATA_CONFIGS.workingWithDuck.path,
             applicationCategory: "GameApplication",
-            genre: "Developer Simulation",
+            genre: "Pet Simulation Arcade",
           }),
         }}
       />

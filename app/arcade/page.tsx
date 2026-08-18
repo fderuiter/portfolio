@@ -20,9 +20,9 @@ export default function ArcadePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: getCollectionPageSchema(
-            "Engineering Arcade Hub & Systems Simulators",
-            "Interactive physics engines, formal logic puzzles, and embedded memory simulators by Frederick de Ruiter.",
-            "/arcade",
+            ROUTE_METADATA_CONFIGS.arcade.title,
+            ROUTE_METADATA_CONFIGS.arcade.description,
+            ROUTE_METADATA_CONFIGS.arcade.path,
             collectionItems
           ),
         }}

@@ -14,9 +14,9 @@ export default function RetroLabyrinthPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: getWebApplicationSchema({
-            name: "Retro Labyrinth: Cellular Automata Dungeon",
-            description: "Procedurally generated cellular automata maze crawler with dynamic lighting and CRT phosphor shaders.",
-            url: "/arcade/retro-labyrinth",
+            name: ROUTE_METADATA_CONFIGS.retroLabyrinth.title,
+            description: ROUTE_METADATA_CONFIGS.retroLabyrinth.description,
+            url: ROUTE_METADATA_CONFIGS.retroLabyrinth.path,
             applicationCategory: "GameApplication",
             genre: "Roguelike Simulation",
           }),

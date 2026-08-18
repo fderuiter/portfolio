@@ -12,6 +12,7 @@ import {
 } from "@/lib/seo";
 import { resolveBaseUrl } from "@/lib/domain";
 import { ROUTE_METADATA_CONFIGS, buildRouteMetadata } from "@/lib/seo-metadata";
+import { ARCADE_GAMES_METADATA } from "@/lib/arcade-data";
 import robots from "@/app/robots";
 import sitemap from "@/app/sitemap";
 import manifest from "@/app/manifest";
@@ -295,6 +296,51 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
       expect(res).toBeDefined();
       expect(res.headers.get("content-type")).toContain("image/png");
     }
+  });
+
+  describe("Arcade Schema Realignment & Central Metadata Verification", () => {
+    it("Quasi-Perfect Puzzler route metadata describes formal verification logic rather than crystallographic tiling", () => {
+      const config = ROUTE_METADATA_CONFIGS.quasiPuzzler;
+      expect(config).toBeDefined();
+      expect(config.title).toContain("Formal Verification");
+      expect(config.description).toContain("Lean-inspired");
+      expect(config.description).toContain("deductive proof tactics");
+      expect(config.description).not.toContain("crystallographic");
+      expect(config.description).not.toContain("Penrose");
+      expect(config.description).not.toContain("deflation");
+    });
+
+    it("all arcade game catalog entries match corresponding ROUTE_METADATA_CONFIGS paths and titles", () => {
+      const arcadeRouteKeys = ["quasiPuzzler", "laserLoon", "garminWatch", "retroLabyrinth", "workingWithDuck", "clinicalChaos", "memeVault"];
+
+      for (const key of arcadeRouteKeys) {
+        const routeConfig = ROUTE_METADATA_CONFIGS[key];
+        expect(routeConfig).toBeDefined();
+        expect(routeConfig.path).toMatch(/^\/arcade\//);
+
+        const schemaStr = getWebApplicationSchema({
+          name: routeConfig.title,
+          description: routeConfig.description,
+          url: routeConfig.path,
+          applicationCategory: "GameApplication",
+        });
+
+        const parsed = JSON.parse(schemaStr);
+        expect(parsed["@context"]).toBe("https://schema.org");
+        expect(parsed["@type"]).toBe("WebApplication");
+        expect(parsed.name).toBe(routeConfig.title);
+        expect(parsed.description).toBe(routeConfig.description);
+        expect(parsed.url).toBe(`${SITE_BASE_URL}${routeConfig.path}`);
+      }
+    });
+
+    it("ARCADE_GAMES_METADATA entries align with ROUTE_METADATA_CONFIGS definitions", () => {
+      for (const game of ARCADE_GAMES_METADATA) {
+        expect(game.route).toMatch(/^\/arcade/);
+        expect(game.title).toBeTruthy();
+        expect(game.description).toBeTruthy();
+      }
+    });
   });
 });
 

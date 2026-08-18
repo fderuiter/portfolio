@@ -14,11 +14,11 @@ export default function QuasiPuzzlerPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: getWebApplicationSchema({
-            name: "Quasi-Perfect Puzzler: Aperiodic Logic",
-            description: "Crystallographic tiling game based on Penrose aperiodicity, golden ratios, and deflation rules.",
-            url: "/arcade/quasi-puzzler",
+            name: ROUTE_METADATA_CONFIGS.quasiPuzzler.title,
+            description: ROUTE_METADATA_CONFIGS.quasiPuzzler.description,
+            url: ROUTE_METADATA_CONFIGS.quasiPuzzler.path,
             applicationCategory: "GameApplication",
-            genre: "Mathematical Puzzle",
+            genre: "Formal Logic Puzzle",
           }),
         }}
       />

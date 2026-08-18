@@ -14,9 +14,9 @@ export default function GarminWatchPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: getWebApplicationSchema({
-            name: "Garmin Connect IQ Watch Face & Sensor Simulator",
-            description: "Embedded Garmin Connect IQ simulator running high-performance Monkey C graphics rendering and sensor pipelines.",
-            url: "/arcade/garmin-watch",
+            name: ROUTE_METADATA_CONFIGS.garminWatch.title,
+            description: ROUTE_METADATA_CONFIGS.garminWatch.description,
+            url: ROUTE_METADATA_CONFIGS.garminWatch.path,
             applicationCategory: "GameApplication",
             genre: "Embedded Simulation",
           }),

@@ -133,6 +133,8 @@ import GarminWatchPage from "@/app/arcade/garmin-watch/page";
 import ClinicalChaosPage from "@/app/arcade/clinical-chaos/page";
 import RetroLabyrinthPage from "@/app/arcade/retro-labyrinth/page";
 import WorkingWithDuckPage from "@/app/arcade/working-with-duck/page";
+import MemeVaultPage from "@/app/arcade/meme-vault/page";
+import { ROUTE_METADATA_CONFIGS } from "@/lib/seo-metadata";
 
 const storageStore: Record<string, string> = {};
 Object.defineProperty(globalThis, "localStorage", {
@@ -165,11 +167,11 @@ describe("Arcade Dedicated Routes Suite", () => {
     container.remove();
   });
 
-  it("renders main Arcade Hub with all 6 games listed", async () => {
+  it("renders main Arcade Hub with all games listed and valid CollectionPage JSON-LD", async () => {
     await act(async () => {
       root.render(<ArcadePage />);
     });
-    
+
     expect(container.textContent).toContain("Engineering");
     expect(container.textContent).toContain("Arcade Hub");
     expect(container.textContent).toContain("Working With Duck");
@@ -178,9 +180,17 @@ describe("Arcade Dedicated Routes Suite", () => {
     expect(container.textContent).toContain("Garmin Connect IQ 32KB Memory Runner");
     expect(container.textContent).toContain("Clinical Trial Chaos: CDISC Compliance");
     expect(container.textContent).toContain("Retro Labyrinth: Graveyard Roguelike");
+
+    const script = container.querySelector("script[type='application/ld+json']");
+    expect(script).not.toBeNull();
+    const ldJson = JSON.parse(script!.innerHTML);
+    expect(ldJson["@type"]).toBe("CollectionPage");
+    expect(ldJson.name).toBe(ROUTE_METADATA_CONFIGS.arcade.title);
+    expect(ldJson.description).toBe(ROUTE_METADATA_CONFIGS.arcade.description);
+    expect(ldJson.url).toContain(ROUTE_METADATA_CONFIGS.arcade.path);
   });
 
-  it("renders Working With Duck dedicated game page", async () => {
+  it("renders Working With Duck dedicated game page and aligned WebApplication JSON-LD", async () => {
     await act(async () => {
       root.render(<WorkingWithDuckPage />);
     });
@@ -188,50 +198,114 @@ describe("Arcade Dedicated Routes Suite", () => {
     expect(container.textContent).toContain("Working With");
     expect(container.textContent).toContain("Duck");
     expect(container.textContent).toContain("Pet Simulation / Multitasking Arcade");
+
+    const script = container.querySelector("script[type='application/ld+json']");
+    expect(script).not.toBeNull();
+    const ldJson = JSON.parse(script!.innerHTML);
+    expect(ldJson["@type"]).toBe("WebApplication");
+    expect(ldJson.name).toBe(ROUTE_METADATA_CONFIGS.workingWithDuck.title);
+    expect(ldJson.description).toBe(ROUTE_METADATA_CONFIGS.workingWithDuck.description);
+    expect(ldJson.description).toContain("Duck the puppy");
+    expect(ldJson.description).not.toContain("conversational debugging");
   });
 
-  it("renders Laser Loon dedicated game page", async () => {
+  it("renders Laser Loon dedicated game page and aligned WebApplication JSON-LD", async () => {
     await act(async () => {
       root.render(<LaserLoonPage />);
     });
     expect(container.textContent).toContain("Arcade Hub");
     expect(container.textContent).toContain("Laser Loon:");
     expect(container.textContent).toContain("Quest for the State Flag");
+
+    const script = container.querySelector("script[type='application/ld+json']");
+    expect(script).not.toBeNull();
+    const ldJson = JSON.parse(script!.innerHTML);
+    expect(ldJson["@type"]).toBe("WebApplication");
+    expect(ldJson.name).toBe(ROUTE_METADATA_CONFIGS.laserLoon.title);
+    expect(ldJson.description).toBe(ROUTE_METADATA_CONFIGS.laserLoon.description);
+    expect(ldJson.description).toContain("F277 Laser Loon");
+    expect(ldJson.description).not.toContain("stratospheric relay");
   });
 
-  it("renders Quasi-Perfect Puzzler dedicated game page", async () => {
+  it("renders Quasi-Perfect Puzzler dedicated game page and aligned formal verification JSON-LD", async () => {
     await act(async () => {
       root.render(<QuasiPuzzlerPage />);
     });
     expect(container.textContent).toContain("Arcade Hub");
     expect(container.textContent).toContain("Quasi-Perfect");
     expect(container.textContent).toContain("Puzzler");
+
+    const script = container.querySelector("script[type='application/ld+json']");
+    expect(script).not.toBeNull();
+    const ldJson = JSON.parse(script!.innerHTML);
+    expect(ldJson["@type"]).toBe("WebApplication");
+    expect(ldJson.name).toBe(ROUTE_METADATA_CONFIGS.quasiPuzzler.title);
+    expect(ldJson.description).toBe(ROUTE_METADATA_CONFIGS.quasiPuzzler.description);
+    expect(ldJson.description).toContain("Lean-inspired");
+    expect(ldJson.description).toContain("deductive proof tactics");
+    expect(ldJson.description).not.toContain("crystallographic");
+    expect(ldJson.description).not.toContain("Penrose");
   });
 
-  it("renders Garmin Watch Simulator dedicated game page", async () => {
+  it("renders Garmin Watch Simulator dedicated game page and aligned WebApplication JSON-LD", async () => {
     await act(async () => {
       root.render(<GarminWatchPage />);
     });
     expect(container.textContent).toContain("Arcade Hub");
     expect(container.textContent).toContain("Garmin Connect IQ");
     expect(container.textContent).toContain("32KB Memory Runner");
+
+    const script = container.querySelector("script[type='application/ld+json']");
+    expect(script).not.toBeNull();
+    const ldJson = JSON.parse(script!.innerHTML);
+    expect(ldJson["@type"]).toBe("WebApplication");
+    expect(ldJson.name).toBe(ROUTE_METADATA_CONFIGS.garminWatch.title);
+    expect(ldJson.description).toBe(ROUTE_METADATA_CONFIGS.garminWatch.description);
   });
 
-  it("renders Clinical Trial Chaos dedicated game page", async () => {
+  it("renders Clinical Trial Chaos dedicated game page and aligned WebApplication JSON-LD", async () => {
     await act(async () => {
       root.render(<ClinicalChaosPage />);
     });
     expect(container.textContent).toContain("Arcade Hub");
     expect(container.textContent).toContain("Clinical Trial Chaos:");
     expect(container.textContent).toContain("CDISC Compliance");
+
+    const script = container.querySelector("script[type='application/ld+json']");
+    expect(script).not.toBeNull();
+    const ldJson = JSON.parse(script!.innerHTML);
+    expect(ldJson["@type"]).toBe("WebApplication");
+    expect(ldJson.name).toBe(ROUTE_METADATA_CONFIGS.clinicalChaos.title);
+    expect(ldJson.description).toBe(ROUTE_METADATA_CONFIGS.clinicalChaos.description);
   });
 
-  it("renders Retro Labyrinth dedicated game page", async () => {
+  it("renders Retro Labyrinth dedicated game page and aligned WebApplication JSON-LD", async () => {
     await act(async () => {
       root.render(<RetroLabyrinthPage />);
     });
     expect(container.textContent).toContain("Arcade Hub");
     expect(container.textContent).toContain("Retro Labyrinth:");
     expect(container.textContent).toContain("Graveyard Roguelike");
+
+    const script = container.querySelector("script[type='application/ld+json']");
+    expect(script).not.toBeNull();
+    const ldJson = JSON.parse(script!.innerHTML);
+    expect(ldJson["@type"]).toBe("WebApplication");
+    expect(ldJson.name).toBe(ROUTE_METADATA_CONFIGS.retroLabyrinth.title);
+    expect(ldJson.description).toBe(ROUTE_METADATA_CONFIGS.retroLabyrinth.description);
+  });
+
+  it("renders Meme Vault dedicated game page and aligned WebApplication JSON-LD", async () => {
+    await act(async () => {
+      root.render(<MemeVaultPage />);
+    });
+    expect(container.textContent).toContain("Arcade Hub");
+
+    const script = container.querySelector("script[type='application/ld+json']");
+    expect(script).not.toBeNull();
+    const ldJson = JSON.parse(script!.innerHTML);
+    expect(ldJson["@type"]).toBe("WebApplication");
+    expect(ldJson.name).toBe(ROUTE_METADATA_CONFIGS.memeVault.title);
+    expect(ldJson.description).toBe(ROUTE_METADATA_CONFIGS.memeVault.description);
   });
 });

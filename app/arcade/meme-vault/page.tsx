@@ -13,9 +13,9 @@ export default function MemeVaultPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: getWebApplicationSchema({
-            name: "Secret Meme Vault & Developer Soundboard",
-            description: "Synthesized Web Audio sound effects, Easter egg achievement trophies, and interactive engineering memes.",
-            url: "/arcade/meme-vault",
+            name: ROUTE_METADATA_CONFIGS.memeVault.title,
+            description: ROUTE_METADATA_CONFIGS.memeVault.description,
+            url: ROUTE_METADATA_CONFIGS.memeVault.path,
             applicationCategory: "GameApplication",
             genre: "Secret Easter Egg Chamber",
           }),
