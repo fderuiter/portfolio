@@ -65,6 +65,24 @@ describe("Case Study Feedback & Reaction API Routes", () => {
       expect(json.error).toBe("Validation failed");
     });
 
+    it("should reject feedback submission containing profanity or toxic rant patterns with 400", async () => {
+      const req = new NextRequest("http://localhost/api/case-studies/feedback", {
+        method: "POST",
+        body: JSON.stringify({
+          caseStudySlug: "imednet-python-sdk",
+          takeaways: ["Architecture & System Design"],
+          comments: "This whole case study is complete garbage and total trash.",
+        }),
+      });
+
+      const res = await feedbackPOST(req);
+      expect(res.status).toBe(400);
+
+      const json = await res.json();
+      expect(json.error).toContain("Submission rejected: Content violates community tone standards.");
+      expect(json.details.length).toBeGreaterThan(0);
+    });
+
     it("should accept valid feedback submission with 201", async () => {
       const req = new NextRequest("http://localhost/api/case-studies/feedback", {
         method: "POST",

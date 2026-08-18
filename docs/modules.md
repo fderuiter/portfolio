@@ -103,6 +103,7 @@
 - [lib/masonry](lib/masonry/README.md)
 - [lib/meme-audio](lib/meme-audio/README.md)
 - [lib/meme-data](lib/meme-data/README.md)
+- [lib/moderation](lib/moderation/README.md)
 - [lib/neuro/asset-loader](lib/neuro/asset-loader/README.md)
 - [lib/neuro/loader](lib/neuro/loader/README.md)
 - [lib/neuro/mesh-generator](lib/neuro/mesh-generator/README.md)

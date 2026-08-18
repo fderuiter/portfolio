@@ -12,7 +12,7 @@ Defined in: [lib/dx/doctor.ts:12](https://github.com/fderuiter/portfolio/blob/ma
 
 ### category
 
-> **category**: `"security"` \| `"architecture"` \| `"routes"` \| `"database"` \| `"docs"` \| `"hydration"` \| `"accessibility"` \| `"quality"`
+> **category**: `"database"` \| `"security"` \| `"architecture"` \| `"routes"` \| `"docs"` \| `"hydration"` \| `"accessibility"` \| `"quality"`
 
 Defined in: [lib/dx/doctor.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L15)
 
