@@ -14,9 +14,9 @@ export default function ClinicalChaosPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: getWebApplicationSchema({
-            name: "Clinical Trial Chaos: CDISC Compliance",
-            description: "Fast-paced compliance arcade. Map clinical variables across SDTM domains (DM, VS, AE, LB), sign electronic submissions, and survive FDA auditor scrutiny.",
-            url: "/arcade/clinical-chaos",
+            name: ROUTE_METADATA_CONFIGS.clinicalChaos.title,
+            description: ROUTE_METADATA_CONFIGS.clinicalChaos.description,
+            url: ROUTE_METADATA_CONFIGS.clinicalChaos.path,
             applicationCategory: "GameApplication",
             genre: "Regulatory Compliance Arcade",
           }),

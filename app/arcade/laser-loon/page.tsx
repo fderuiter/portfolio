@@ -14,11 +14,11 @@ export default function LaserLoonPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: getWebApplicationSchema({
-            name: "Laser Loon: Loon Command & Stratospheric Relay",
-            description: "High-altitude atmospheric navigation and optical laser beam routing simulator.",
-            url: "/arcade/laser-loon",
+            name: ROUTE_METADATA_CONFIGS.laserLoon.title,
+            description: ROUTE_METADATA_CONFIGS.laserLoon.description,
+            url: ROUTE_METADATA_CONFIGS.laserLoon.path,
             applicationCategory: "GameApplication",
-            genre: "Stratospheric Simulation",
+            genre: "Civic Arcade Shooter",
           }),
         }}
       />
