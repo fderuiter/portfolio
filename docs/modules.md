@@ -113,6 +113,8 @@
 - [lib/security](lib/security/README.md)
 - [lib/seo](lib/seo/README.md)
 - [lib/seo-metadata](lib/seo-metadata/README.md)
+- [lib/term-compiler](lib/term-compiler/README.md)
+- [lib/term-glossary](lib/term-glossary/README.md)
 - [lib/utils](lib/utils/README.md)
 - [lib/validation-scanner](lib/validation-scanner/README.md)
 - [lib/webgl/context-manager](lib/webgl/context-manager/README.md)

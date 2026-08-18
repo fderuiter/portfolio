@@ -6,7 +6,7 @@
 
 # Interface: DomainItem
 
-Defined in: [lib/i18n-dictionary.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L10)
+Defined in: [lib/i18n-dictionary.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L12)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/i18n-dictionary.ts:10](https://github.com/fderuiter/portfolio/b
 
 > **description**: `string`
 
-Defined in: [lib/i18n-dictionary.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L14)
+Defined in: [lib/i18n-dictionary.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L16)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/i18n-dictionary.ts:14](https://github.com/fderuiter/portfolio/b
 
 > **id**: `string`
 
-Defined in: [lib/i18n-dictionary.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L11)
+Defined in: [lib/i18n-dictionary.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L13)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/i18n-dictionary.ts:11](https://github.com/fderuiter/portfolio/b
 
 > **title**: `string`
 
-Defined in: [lib/i18n-dictionary.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L12)
+Defined in: [lib/i18n-dictionary.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L14)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/i18n-dictionary.ts:12](https://github.com/fderuiter/portfolio/b
 
 > **tooltip**: `string`
 
-Defined in: [lib/i18n-dictionary.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L13)
+Defined in: [lib/i18n-dictionary.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L15)

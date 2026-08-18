@@ -6,7 +6,7 @@
 
 # Interface: TimelineItem
 
-Defined in: [lib/i18n-dictionary.ts:1](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L1)
+Defined in: [lib/i18n-dictionary.ts:3](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L3)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/i18n-dictionary.ts:1](https://github.com/fderuiter/portfolio/bl
 
 > **company**: `string`
 
-Defined in: [lib/i18n-dictionary.ts:3](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L3)
+Defined in: [lib/i18n-dictionary.ts:5](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L5)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/i18n-dictionary.ts:3](https://github.com/fderuiter/portfolio/bl
 
 > **period**: `string`
 
-Defined in: [lib/i18n-dictionary.ts:4](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L4)
+Defined in: [lib/i18n-dictionary.ts:6](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L6)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/i18n-dictionary.ts:4](https://github.com/fderuiter/portfolio/bl
 
 > **realityDescription**: `string`
 
-Defined in: [lib/i18n-dictionary.ts:6](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L6)
+Defined in: [lib/i18n-dictionary.ts:8](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L8)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/i18n-dictionary.ts:6](https://github.com/fderuiter/portfolio/bl
 
 > **recruiterDescription**: `string`
 
-Defined in: [lib/i18n-dictionary.ts:5](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L5)
+Defined in: [lib/i18n-dictionary.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L7)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/i18n-dictionary.ts:5](https://github.com/fderuiter/portfolio/bl
 
 > **role**: `string`
 
-Defined in: [lib/i18n-dictionary.ts:2](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L2)
+Defined in: [lib/i18n-dictionary.ts:4](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L4)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [lib/i18n-dictionary.ts:2](https://github.com/fderuiter/portfolio/bl
 
 > **tags**: `string`[]
 
-Defined in: [lib/i18n-dictionary.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L7)
+Defined in: [lib/i18n-dictionary.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L9)

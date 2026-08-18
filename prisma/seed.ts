@@ -8,6 +8,7 @@ import { PrismaClient } from "../app/generated/prisma/client";
 import ws from "ws";
 import { scanFile, scanText } from "../lib/validation-scanner";
 import { IMEDNET_COMMANDS_OBJ, IMEDNET_PLAYBACK_OBJ } from "../lib/case-studies-data";
+import { compileTerms } from "../lib/term-compiler";
 
 neonConfig.webSocketConstructor = ws;
 
@@ -285,7 +286,11 @@ async function main() {
   // Insert the validated payloads
   for (const payload of SEED_PAYLOADS) {
     await prisma.caseStudy.create({
-      data: payload,
+      data: {
+        ...payload,
+        editorial_content: compileTerms(payload.editorial_content),
+        architectural_narrative: compileTerms(payload.architectural_narrative),
+      },
     });
   }
 
