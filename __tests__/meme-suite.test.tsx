@@ -68,7 +68,9 @@ describe("Meme Data & ASCII Generator Invariants", () => {
     expect(cowsay).toContain("(oo)\\_______");
 
     const duck = ASCII_DUCK();
-    expect(duck).toContain("Duck is guarding the codebase");
+    expect(duck).toContain(" __/_  `.  .-\"\"\"-.");
+    expect(duck).toContain("___Y");
+    expect(duck).toContain("(_,___/...-` (_/_/");
 
     const loon = ASCII_LASER_LOON();
     expect(loon).toContain("L A K E   M I N N E T O N K A");
