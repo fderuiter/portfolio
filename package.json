@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dx": "npx tsx scripts/dx.ts",
+    "setup": "npx tsx scripts/dx.ts setup",
     "doctor": "npx tsx scripts/dx.ts doctor",
     "doctor:fix": "npx tsx scripts/dx.ts doctor --fix",
     "verify": "npx tsx scripts/dx.ts verify",

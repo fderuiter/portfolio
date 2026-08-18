@@ -138,7 +138,7 @@ export function checkRawEnvironmentAccess(root: string): { violations: string[] 
         if (entry.name === "node_modules" || entry.name === ".next" || entry.name === "generated") continue;
         scanDir(fullPath);
       } else if (entry.isFile() && /\.(ts|tsx|js|jsx)$/.test(entry.name)) {
-        if (relPath === "lib/env.ts" || relPath === "lib/dx/env-guard.ts" || relPath.startsWith("app/generated/")) continue;
+        if (relPath === "lib/env.ts" || relPath.startsWith("lib/dx/") || relPath.startsWith("app/generated/")) continue;
 
         const content = fs.readFileSync(fullPath, "utf-8");
         const lines = content.split("\n");

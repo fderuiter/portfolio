@@ -14,6 +14,7 @@ import { runAllBenchmarks, printBenchmarkReport } from "../lib/dx/bench";
 import { colors, formatHeader, badge, formatSection } from "../lib/dx/utils";
 import { ALLOWED_COMMIT_TYPES, validateCommitMessage, validateBranchName } from "../lib/dx/git-guard";
 import { checkEnvironmentVariables } from "../lib/dx/env-guard";
+import { runSetupWorkflow } from "../lib/dx/setup";
 import { scanDeadCode } from "../lib/dx/dead-code";
 import { inspectBundleChunks, DEFAULT_BUDGETS } from "../lib/dx/bundle-guard";
 
@@ -23,6 +24,7 @@ function printUsage(): void {
   console.log(formatHeader("Developer Experience (DX) Suite & Invariant Engine", "Next.js 16 • React 19 • Pretext Layout Engine"));
   console.log(`${colors.bold}Usage:${colors.reset} dx <command> [options]\n`);
   console.log(`${colors.bold}Commands:${colors.reset}`);
+  console.log(`  ${colors.cyan}setup${colors.reset}                  Interactive developer onboarding & environment setup`);
   console.log(`  ${colors.cyan}doctor${colors.reset}                 Run architectural & invariant health diagnostics`);
   console.log(`  ${colors.cyan}doctor --fix${colors.reset}           Run diagnostics and automatically fix remediable issues`);
   console.log(`  ${colors.cyan}verify${colors.reset}                 Strict invariant check for CI / pre-commit (exits with code 1 on failure)`);
@@ -45,6 +47,25 @@ function printUsage(): void {
   console.log(`  $ npm run dx analyze`);
   console.log(`  $ npm run dx scaffold arcade matrix-defender`);
   console.log(`  $ npm run dx bench\n`);
+}
+
+async function handleSetupCommand(args: string[]): Promise<void> {
+  const isYes = args.includes("--yes") || args.includes("-y");
+  const skipDb = args.includes("--skip-db");
+  const skipDbSeed = args.includes("--skip-db-seed");
+  const forceEnv = args.includes("--force-env");
+
+  const result = await runSetupWorkflow({
+    workspaceRoot,
+    interactive: !isYes,
+    skipDb,
+    skipDbSeed,
+    forceEnv,
+  });
+
+  if (!result.success) {
+    process.exit(1);
+  }
 }
 
 async function handleDoctorCommand(args: string[]): Promise<void> {
@@ -323,6 +344,7 @@ async function runInteractiveMenu(): Promise<void> {
 
   console.log(formatHeader("Developer Experience (DX) Interactive Suite", "Next.js 16 • React 19 • Pretext Layout Engine"));
   console.log(`${colors.bold}Choose an action:${colors.reset}`);
+  console.log(`  ${colors.cyan}0)${colors.reset} Interactive Developer Onboarding & Setup`);
   console.log(`  ${colors.cyan}1)${colors.reset} Invariant Doctor (Health Check)`);
   console.log(`  ${colors.cyan}2)${colors.reset} Invariant Doctor with Auto-Fix`);
   console.log(`  ${colors.cyan}3)${colors.reset} Interactive Conventional Commit Wizard`);
@@ -335,11 +357,14 @@ async function runInteractiveMenu(): Promise<void> {
   console.log(`  ${colors.cyan}10)${colors.reset} Clean Caches & Rebuild Tokens`);
   console.log(`  ${colors.cyan}11)${colors.reset} Exit\n`);
 
-  rl.question(`${colors.bold}${colors.brightWhite}Select an option [1-11]: ${colors.reset}`, async (answer) => {
+  rl.question(`${colors.bold}${colors.brightWhite}Select an option [0-11]: ${colors.reset}`, async (answer) => {
     rl.close();
     const choice = answer.trim();
 
     switch (choice) {
+      case "0":
+        await handleSetupCommand([]);
+        break;
       case "1":
         await handleDoctorCommand([]);
         break;
@@ -396,6 +421,11 @@ async function main(): Promise<void> {
   }
 
   switch (command) {
+    case "setup":
+    case "init":
+    case "onboard":
+      await handleSetupCommand(args.slice(1));
+      break;
     case "doctor":
       await handleDoctorCommand(args.slice(1));
       break;

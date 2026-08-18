@@ -82,6 +82,7 @@
 - [lib/dx/git-guard](lib/dx/git-guard/README.md)
 - [lib/dx/page-bench](lib/dx/page-bench/README.md)
 - [lib/dx/scaffolder](lib/dx/scaffolder/README.md)
+- [lib/dx/setup](lib/dx/setup/README.md)
 - [lib/dx/utils](lib/dx/utils/README.md)
 - [lib/env](lib/env/README.md)
 - [lib/error-sanitization](lib/error-sanitization/README.md)

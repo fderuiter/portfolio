@@ -21,6 +21,7 @@
 - [checkLayoutTextClippingInvariants](functions/checkLayoutTextClippingInvariants.md)
 - [checkMigrationGuard](functions/checkMigrationGuard.md)
 - [checkNavbarHierarchy](functions/checkNavbarHierarchy.md)
+- [checkOnboardingDocsDrift](functions/checkOnboardingDocsDrift.md)
 - [checkOpenApiParity](functions/checkOpenApiParity.md)
 - [checkPackageLockfile](functions/checkPackageLockfile.md)
 - [checkPageTopPadding](functions/checkPageTopPadding.md)
