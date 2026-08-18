@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import React, { createContext, useContext, useEffect, useRef, useCallback, useSyncExternalStore } from "react";
 
 export type AudioProfile = "8-bit" | "90s-retro" | "ambient";
 
@@ -42,73 +42,135 @@ const defaultAudioContext: AudioContextType = {
 
 const AudioProviderContext = createContext<AudioContextType | null>(null);
 
+const AUDIO_LISTENERS = new Set<() => void>();
+
+function notifyAudioStoreChange() {
+  AUDIO_LISTENERS.forEach((cb) => cb());
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("storage", (e) => {
+    if (e.key && (e.key.startsWith("sound_") || e.key === "sound_a11y_bypass")) {
+      notifyAudioStoreChange();
+    }
+  });
+  window.addEventListener("portfolio-audio-change", notifyAudioStoreChange);
+}
+
+function subscribeAudioStore(callback: () => void) {
+  AUDIO_LISTENERS.add(callback);
+  return () => {
+    AUDIO_LISTENERS.delete(callback);
+  };
+}
+
+function getVolumeSnapshot(): number {
+  if (typeof window === "undefined") return 0.3;
+  try {
+    if (typeof window.localStorage?.getItem === "function") {
+      const saved = window.localStorage.getItem("sound_volume");
+      if (saved !== null) {
+        const val = parseFloat(saved);
+        if (!isNaN(val)) return Math.max(0, Math.min(1, val));
+      }
+    }
+  } catch {}
+  return 0.3;
+}
+
+function getMutedSnapshot(): boolean {
+  if (typeof window === "undefined") return true;
+  try {
+    if (typeof window.localStorage?.getItem === "function") {
+      const saved = window.localStorage.getItem("sound_muted");
+      if (saved !== null) {
+        return saved === "true";
+      }
+    }
+  } catch {}
+  return true;
+}
+
+function getProfileSnapshot(): AudioProfile {
+  if (typeof window === "undefined") return "8-bit";
+  try {
+    if (typeof window.localStorage?.getItem === "function") {
+      const saved = window.localStorage.getItem("sound_profile");
+      if (saved === "8-bit" || saved === "90s-retro" || saved === "ambient") {
+        return saved;
+      }
+    }
+  } catch {}
+  return "8-bit";
+}
+
+function getBypassSnapshot(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    const forcedColors = window.matchMedia?.("(forced-colors: active)").matches;
+    const msHighContrast = window.matchMedia?.("(-ms-high-contrast: active)").matches;
+    const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const documentClasses = document.documentElement.className || "";
+    const documentHtmlContrast = document.documentElement.getAttribute("data-contrast") || "";
+    const savedBypass =
+      typeof window.localStorage?.getItem === "function"
+        ? window.localStorage.getItem("sound_a11y_bypass") === "true"
+        : false;
+
+    return !!(
+      forcedColors ||
+      msHighContrast ||
+      prefersReducedMotion ||
+      documentClasses.includes("high-contrast") ||
+      documentClasses.includes("contrast") ||
+      documentHtmlContrast === "high" ||
+      savedBypass
+    );
+  } catch {
+    return false;
+  }
+}
+
+function getServerVolumeSnapshot(): number {
+  return 0.3;
+}
+function getServerMutedSnapshot(): boolean {
+  return true;
+}
+function getServerProfileSnapshot(): AudioProfile {
+  return "8-bit";
+}
+function getServerBypassSnapshot(): boolean {
+  return false;
+}
+
 export function useAudio() {
   const context = useContext(AudioProviderContext);
   return context || defaultAudioContext;
 }
 
 export function AudioProvider({ children }: { children: React.ReactNode }) {
-  const [volume, setVolumeState] = useState(0.3);
-  const [muted, setMutedState] = useState(true);
-  const [profile, setProfileState] = useState<AudioProfile>("8-bit");
-  const [bypassActive, setBypassActive] = useState(false);
+  const volume = useSyncExternalStore(subscribeAudioStore, getVolumeSnapshot, getServerVolumeSnapshot);
+  const muted = useSyncExternalStore(subscribeAudioStore, getMutedSnapshot, getServerMutedSnapshot);
+  const profile = useSyncExternalStore(subscribeAudioStore, getProfileSnapshot, getServerProfileSnapshot);
+  const bypassActive = useSyncExternalStore(subscribeAudioStore, getBypassSnapshot, getServerBypassSnapshot);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
 
-  // Load settings on client side once mounted asynchronously to prevent react-hooks/set-state-in-effect error
   useEffect(() => {
     if (typeof window === "undefined") return;
-
-    const savedVolume = localStorage.getItem("sound_volume");
-    const savedMuted = localStorage.getItem("sound_muted");
-    const savedProfile = localStorage.getItem("sound_profile");
-
-    setTimeout(() => {
-      if (savedVolume !== null) {
-        setVolumeState(parseFloat(savedVolume));
-      }
-      if (savedMuted !== null) {
-        setMutedState(savedMuted === "true");
-      }
-      if (savedProfile !== null) {
-        setProfileState(savedProfile as AudioProfile);
-      }
-    }, 0);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const checkBypass = () => {
-      const forcedColors = window.matchMedia?.("(forced-colors: active)").matches;
-      const msHighContrast = window.matchMedia?.("(-ms-high-contrast: active)").matches;
-      const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-      const documentClasses = document.documentElement.className || "";
-      const documentHtmlContrast = document.documentElement.getAttribute("data-contrast") || "";
-
-      const shouldBypass = !!(
-        forcedColors ||
-        msHighContrast ||
-        prefersReducedMotion ||
-        documentClasses.includes("high-contrast") ||
-        documentClasses.includes("contrast") ||
-        documentHtmlContrast === "high" ||
-        localStorage.getItem("sound_a11y_bypass") === "true"
-      );
-      setBypassActive(shouldBypass);
-    };
-
-    checkBypass();
 
     const mqForced = window.matchMedia?.("(forced-colors: active)");
     const mqMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
 
-    mqForced?.addEventListener?.("change", checkBypass);
-    mqMotion?.addEventListener?.("change", checkBypass);
+    const handleChange = () => notifyAudioStoreChange();
+
+    mqForced?.addEventListener?.("change", handleChange);
+    mqMotion?.addEventListener?.("change", handleChange);
 
     return () => {
-      mqForced?.removeEventListener?.("change", checkBypass);
-      mqMotion?.removeEventListener?.("change", checkBypass);
+      mqForced?.removeEventListener?.("change", handleChange);
+      mqMotion?.removeEventListener?.("change", handleChange);
     };
   }, []);
 
@@ -132,7 +194,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     return audioCtxRef.current;
   };
 
-  const playNote = (frequency: number, duration: number, pan?: number) => {
+  const playNote = useCallback((frequency: number, duration: number, pan?: number) => {
     if (muted || bypassActive) return;
 
     const ctx = getAudioContext();
@@ -213,9 +275,9 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
         env.disconnect();
       } catch { {} }
     }, (totalDuration + 0.5) * 1000);
-  };
+  }, [muted, bypassActive, profile, volume]);
 
-  const playKeystroke = (charCode: number) => {
+  const playKeystroke = useCallback((charCode: number) => {
     if (muted || bypassActive) return;
     const pentatonicScale = [
       130.81, 146.83, 164.81, 196.00, 220.00,
@@ -224,9 +286,9 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     ];
     const idx = charCode % pentatonicScale.length;
     playNote(pentatonicScale[idx], 0.05);
-  };
+  }, [muted, bypassActive, playNote]);
 
-  const playAutocomplete = () => {
+  const playAutocomplete = useCallback(() => {
     if (muted || bypassActive) return;
     const notes = [261.63, 329.63, 392.00, 523.25];
     notes.forEach((freq, idx) => {
@@ -234,9 +296,9 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
         playNote(freq, 0.08);
       }, idx * 60);
     });
-  };
+  }, [muted, bypassActive, playNote]);
 
-  const playSuccess = () => {
+  const playSuccess = useCallback(() => {
     if (muted || bypassActive) return;
     if (profile === "ambient") {
       const notes = [261.63, 329.63, 392.00, 493.88];
@@ -251,67 +313,75 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
         }, idx * 80);
       });
     }
-  };
+  }, [muted, bypassActive, profile, playNote]);
 
-  const playSubmit = () => {
+  const playSubmit = useCallback(() => {
     if (muted || bypassActive) return;
     playNote(523.25, 0.06);
     setTimeout(() => {
       playNote(659.25, 0.08);
     }, 50);
-  };
+  }, [muted, bypassActive, playNote]);
 
-  const playError = () => {
+  const playError = useCallback(() => {
     if (muted || bypassActive) return;
     playNote(311.13, 0.08);
     setTimeout(() => {
       playNote(233.08, 0.12);
     }, 60);
-  };
+  }, [muted, bypassActive, playNote]);
 
-  const playHover = (pan?: number) => {
+  const playHover = useCallback((pan?: number) => {
     if (muted || bypassActive) return;
     if (typeof window !== "undefined" && window.matchMedia?.("(hover: none)").matches) return;
     const freq = profile === "ambient" ? 440.00 : 880.00;
     playNote(freq, 0.02, pan);
-  };
+  }, [muted, bypassActive, profile, playNote]);
 
-  const playSkillHover = () => {
+  const playSkillHover = useCallback(() => {
     if (muted || bypassActive) return;
     if (typeof window !== "undefined" && window.matchMedia?.("(hover: none)").matches) return;
     const notes = [261.63, 293.66, 329.63, 392.00, 440.00];
     const randomFreq = notes[Math.floor(Math.random() * notes.length)];
     playNote(randomFreq, 0.1);
-  };
+  }, [muted, bypassActive, playNote]);
 
-  const handleSetVolume = (v: number) => {
+  const handleSetVolume = useCallback((v: number) => {
     const val = Math.max(0, Math.min(1, v));
-    setVolumeState(val);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("sound_volume", String(val));
-    }
-  };
+    try {
+      if (typeof window !== "undefined" && typeof window.localStorage?.setItem === "function") {
+        window.localStorage.setItem("sound_volume", String(val));
+        window.dispatchEvent(new CustomEvent("portfolio-audio-change"));
+      }
+    } catch {}
+    notifyAudioStoreChange();
+  }, []);
 
-  const handleSetMuted = (m: boolean) => {
-    setMutedState(m);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("sound_muted", String(m));
-    }
+  const handleSetMuted = useCallback((m: boolean) => {
+    try {
+      if (typeof window !== "undefined" && typeof window.localStorage?.setItem === "function") {
+        window.localStorage.setItem("sound_muted", String(m));
+        window.dispatchEvent(new CustomEvent("portfolio-audio-change"));
+      }
+    } catch {}
+    notifyAudioStoreChange();
     if (!m) {
       const ctx = getAudioContext();
       if (ctx && ctx.state === "suspended") {
         ctx.resume().catch(() => {});
       }
     }
-  };
+  }, []);
 
-  const handleSetProfile = (p: AudioProfile) => {
-    setProfileState(p);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("sound_profile", p);
-    }
-    
-    // Play sound confirmation for swapped profile
+  const handleSetProfile = useCallback((p: AudioProfile) => {
+    try {
+      if (typeof window !== "undefined" && typeof window.localStorage?.setItem === "function") {
+        window.localStorage.setItem("sound_profile", p);
+        window.dispatchEvent(new CustomEvent("portfolio-audio-change"));
+      }
+    } catch {}
+    notifyAudioStoreChange();
+
     setTimeout(() => {
       let confirmFreq = 523.25; // C5
       if (p === "ambient") {
@@ -321,7 +391,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       }
       playNote(confirmFreq, 0.15);
     }, 10);
-  };
+  }, [playNote]);
 
   const value = React.useMemo(() => ({
     volume,
@@ -339,8 +409,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     playHover,
     playSkillHover,
     bypassActive
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [volume, muted, profile, bypassActive]);
+  }), [volume, muted, profile, bypassActive, handleSetVolume, handleSetMuted, handleSetProfile, playNote, playKeystroke, playAutocomplete, playSuccess, playSubmit, playError, playHover, playSkillHover]);
 
   return (
     <AudioProviderContext.Provider value={value}>

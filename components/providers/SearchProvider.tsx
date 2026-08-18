@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from "react";
 
 interface SearchContextType {
   isOpen: boolean;
@@ -14,25 +14,47 @@ const SearchContext = createContext<SearchContextType | null>(null);
 export function SearchProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const openSearch = () => setIsOpen(true);
-  const closeSearch = () => setIsOpen(false);
+  const openSearch = useCallback(() => setIsOpen(true), []);
+  const closeSearch = useCallback(() => setIsOpen(false), []);
 
-  const value = React.useMemo(
+  const value = useMemo(
     () => ({
       isOpen,
       setIsOpen,
       openSearch,
       closeSearch,
     }),
-    [isOpen]
+    [isOpen, openSearch, closeSearch]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__openSearch = () => setIsOpen(true);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable ||
+          target.closest?.("[data-keyboard-boundary]"))
+      ) {
+        return;
+      }
+
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsOpen((prev) => !prev);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
     return () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (window as any).__openSearch;
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 

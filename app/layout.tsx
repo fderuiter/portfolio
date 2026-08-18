@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SkipToContent } from "@/components/SkipToContent";
@@ -82,14 +83,18 @@ export default function RootLayout({
       className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
-        <script
+        <Script
+          id="person-schema"
           type="application/ld+json"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: getPersonSchema()
           }}
         />
-        <script
+        <Script
+          id="website-schema"
           type="application/ld+json"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: getWebsiteSchema()
           }}

@@ -969,7 +969,7 @@ export const CommandPalette: React.FC = () => {
     }
   }, [isOpen, isMounted]);
 
-  // 2. Fetch search case studies on-demand when palette opens or during idle time
+  // 2. Fetch search case studies strictly on-demand when palette opens
   useEffect(() => {
     if (!isMounted) return;
     if (studies.length > 0) return;
@@ -992,25 +992,6 @@ export const CommandPalette: React.FC = () => {
 
     if (isOpen) {
       loadStudies();
-    } else if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      const idleWindow = window as Window & {
-        requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
-        cancelIdleCallback?: (id: number) => void;
-      };
-      if (typeof idleWindow.requestIdleCallback === "function") {
-        const idleId = idleWindow.requestIdleCallback(
-          () => {
-            loadStudies();
-          },
-          { timeout: 4000 }
-        );
-        return () => {
-          isSubscribed = false;
-          if (typeof idleWindow.cancelIdleCallback === "function") {
-            idleWindow.cancelIdleCallback(idleId);
-          }
-        };
-      }
     }
 
     return () => {
