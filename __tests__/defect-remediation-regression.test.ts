@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import fs from "fs";
+import path from "path";
 import { WorkflowWizardModal } from "@/components/crf/Wizard/WorkflowWizardModal";
 
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -467,6 +469,19 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       expect(isToolSwitched).toBe(false);
 
       document.body.removeChild(simulatorBoundary);
+    });
+  });
+
+  describe("Direct Image Compression & Declarative Priority Props Invariant", () => {
+    it("ensures total footprint of public milestone JPEG assets is under 1MB", () => {
+      const duckDir = path.resolve(process.cwd(), "public/duck");
+      const files = fs.readdirSync(duckDir).filter((f) => f.endsWith(".jpg") || f.endsWith(".jpeg"));
+      let totalBytes = 0;
+      for (const file of files) {
+        totalBytes += fs.statSync(path.join(duckDir, file)).size;
+      }
+      expect(files.length).toBeGreaterThan(0);
+      expect(totalBytes).toBeLessThan(1024 * 1024);
     });
   });
 });

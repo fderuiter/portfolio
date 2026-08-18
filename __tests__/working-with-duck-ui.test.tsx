@@ -5,6 +5,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
+import ReactDOM from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 
 // Mock ResizeObserver and IntersectionObserver
@@ -217,6 +218,9 @@ describe("Working With Duck - UI & Component Suite", () => {
       expect(container.textContent).toContain("Real Photos 📷");
       expect(container.textContent).toContain("Vector Art 🎨");
 
+      const img = container.querySelector("img");
+      expect(img).not.toBeNull();
+
       const vectorModeBtn = Array.from(container.querySelectorAll("button")).find((b) =>
         b.textContent?.includes("Vector Art 🎨")
       );
@@ -229,6 +233,29 @@ describe("Working With Duck - UI & Component Suite", () => {
         expect(container.textContent).toContain("Vector Art 🎨");
       }
     }
+  });
+
+  it("triggers preloading for Polaroid Scrapbook images when opened", async () => {
+    const preloadSpy = vi.spyOn(ReactDOM, "preload").mockImplementation(() => {});
+
+    await act(async () => {
+      root.render(<WorkingWithDuck />);
+    });
+
+    const scrapbookButtons = container.querySelectorAll("button");
+    const openBtn = Array.from(scrapbookButtons).find((b) => b.textContent?.includes("Duck Scrapbook"));
+    if (openBtn) {
+      await act(async () => {
+        openBtn.click();
+      });
+
+      expect(preloadSpy).toHaveBeenCalledWith(
+        expect.stringContaining("duck"),
+        expect.objectContaining({ as: "image" })
+      );
+    }
+
+    preloadSpy.mockRestore();
   });
 
   it("navigates forward and backward in Polaroid Scrapbook carousel", async () => {
