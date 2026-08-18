@@ -18,6 +18,7 @@ import {
 import { clamp } from "@/lib/game-utils";
 import { playMemeSound } from "@/lib/meme-audio";
 import { useAnnouncer } from "@/components/providers/A11yProvider";
+import { CopyButton } from "@/components/CopyButton";
 import {
   IconSparkles,
   IconTrophy,
@@ -136,7 +137,6 @@ export const MemeVaultClient: React.FC = () => {
   const [activeSound, setActiveSound] = useState<string | null>(null);
   const [activeSoundLabel, setActiveSoundLabel] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [asciiTab, setAsciiTab] = useState<"cowsay" | "duck" | "neofetch" | "train">("cowsay");
   const [reactions, setReactions] = useState<Record<string, number>>({});
   const [celebrationAchievement, setCelebrationAchievement] = useState<string | null>(null);
@@ -152,17 +152,6 @@ export const MemeVaultClient: React.FC = () => {
     setTimeout(() => {
       setActiveSound(null);
     }, 450);
-  };
-
-  // Copy text to clipboard
-  const handleCopyText = (id: string, text: string) => {
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText(text).then(() => {
-        setCopiedId(id);
-        announce("Copied to clipboard", "polite");
-        setTimeout(() => setCopiedId(null), 2000);
-      });
-    }
   };
 
   // React to meme card
@@ -462,18 +451,15 @@ export const MemeVaultClient: React.FC = () => {
                     <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 uppercase tracking-wider text-[10px] font-bold">
                       {q.tagline || q.category}
                     </span>
-                    <button
-                      onClick={() => handleCopyText(q.id, `"${q.quote}" — ${q.author}`)}
-                      className="p-1.5 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors"
+                    <CopyButton
+                      text={`"${q.quote}" — ${q.author}`}
+                      icon={<IconCopy className="w-4 h-4" />}
+                      copiedIcon={<IconCheck className="w-4 h-4 text-emerald-400" />}
+                      className="p-1.5 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors cursor-pointer"
                       title="Copy Quote"
                       aria-label="Copy Quote"
-                    >
-                      {copiedId === q.id ? (
-                        <IconCheck className="w-4 h-4 text-emerald-400" />
-                      ) : (
-                        <IconCopy className="w-4 h-4" />
-                      )}
-                    </button>
+                      successMessage="Copied quote to clipboard"
+                    />
                   </div>
 
                   <blockquote className="text-sm font-sans text-slate-100 font-medium leading-relaxed mb-4">
@@ -525,18 +511,15 @@ export const MemeVaultClient: React.FC = () => {
         </div>
 
         <div className="relative rounded-2xl border border-slate-800 bg-slate-950 p-4 sm:p-6 overflow-x-auto shadow-inner">
-          <button
-            onClick={() => handleCopyText(`ascii-${asciiTab}`, getAsciiContent())}
-            className="absolute top-4 right-4 p-2 rounded-lg bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-700 transition-colors"
+          <CopyButton
+            text={() => getAsciiContent()}
+            icon={<IconCopy className="w-4 h-4" />}
+            copiedIcon={<IconCheck className="w-4 h-4 text-emerald-400" />}
+            className="absolute top-4 right-4 p-2 rounded-lg bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-700 transition-colors cursor-pointer"
             title="Copy ASCII Art"
             aria-label="Copy ASCII Art"
-          >
-            {copiedId === `ascii-${asciiTab}` ? (
-              <IconCheck className="w-4 h-4 text-emerald-400" />
-            ) : (
-              <IconCopy className="w-4 h-4" />
-            )}
-          </button>
+            successMessage="Copied ASCII art to clipboard"
+          />
           <pre className="text-xs sm:text-sm text-emerald-400 font-mono leading-tight select-all">
             {getAsciiContent()}
           </pre>

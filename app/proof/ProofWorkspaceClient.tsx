@@ -13,14 +13,14 @@ import {
   IconTable,
   IconAlertTriangle,
   IconDownload,
-  IconCopy,
-  IconCheck,
   IconPlayerPlay,
   IconCpu,
   IconWand,
   IconPlus,
   IconLink,
 } from "@tabler/icons-react";
+import { CopyButton } from "@/components/CopyButton";
+import { useClipboard } from "@/hooks/useClipboard";
 import {
   getSuggestion,
   evaluateProofStatus,
@@ -136,7 +136,6 @@ export function ProofWorkspaceClient() {
   // Export Modal state
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [exportFormat, setExportFormat] = useState<"lean" | "latex" | "markdown" | "mermaid">("lean");
-  const [hasCopiedExport, setHasCopiedExport] = useState(false);
 
   // CLI Console State
   const [isConsoleOpen, setIsConsoleOpen] = useState(true);
@@ -222,14 +221,19 @@ export function ProofWorkspaceClient() {
     setParam("inspect", nodeId === activeTheorem.targetNodeId ? null : nodeId, { replace: true });
   };
 
+  const { copy: copyShareLink } = useClipboard({
+    successMessage: "Proof Studio link copied to clipboard with current theorem & tab!",
+    onSuccess: () => {
+      try {
+        playSuccess();
+      } catch {}
+      showToast("Proof Studio link copied to clipboard with current theorem & tab!", "success");
+    },
+  });
+
   const handleCopyShareLink = () => {
     if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(window.location.href).then(() => {
-        try {
-          playSuccess();
-        } catch {}
-        showToast("Proof Studio link copied to clipboard with current theorem & tab!", "success");
-      });
+      copyShareLink(window.location.href);
     }
   };
 
@@ -2099,25 +2103,21 @@ export function ProofWorkspaceClient() {
                   </pre>
                 </div>
                 <div className="flex justify-end gap-3 pt-2">
-                  <button
-                    onClick={() => {
-                      const text =
-                        exportFormat === "lean"
-                          ? exportProofToLean4(activeTheoremId)
-                          : exportFormat === "latex"
-                          ? exportProofToLatex(activeTheoremId)
-                          : exportFormat === "markdown"
-                          ? exportProofToMarkdown(edges, activeTheoremId)
-                          : exportProofToMermaid(edges, activeTheoremId);
-                      navigator.clipboard.writeText(text);
-                      setHasCopiedExport(true);
-                      setTimeout(() => setHasCopiedExport(false), 2000);
-                    }}
-                    className="px-4 py-2 rounded-xl bg-brand-cyan hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition"
-                  >
-                    {hasCopiedExport ? <IconCheck className="w-4 h-4" /> : <IconCopy className="w-4 h-4" />}
-                    {hasCopiedExport ? "Copied!" : "Copy to Clipboard"}
-                  </button>
+                  <CopyButton
+                    text={() =>
+                      exportFormat === "lean"
+                        ? exportProofToLean4(activeTheoremId)
+                        : exportFormat === "latex"
+                        ? exportProofToLatex(activeTheoremId)
+                        : exportFormat === "markdown"
+                        ? exportProofToMarkdown(edges, activeTheoremId)
+                        : exportProofToMermaid(edges, activeTheoremId)
+                    }
+                    label="Copy to Clipboard"
+                    copiedLabel="Copied!"
+                    successMessage="Exported proof code copied to clipboard"
+                    className="px-4 py-2 rounded-xl bg-brand-cyan hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
+                  />
                 </div>
               </motion.div>
             </div>

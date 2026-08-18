@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
+import { useClipboard } from "@/hooks/useClipboard";
 import {
   StudyProtocol,
   StudioMode,
@@ -274,17 +275,22 @@ export const CRFStudioContainer: React.FC = () => {
     setParam("theme", nextTheme === "dark" ? null : nextTheme, { replace: true });
   }, [theme, setParam]);
 
+  const { copy: copyShareLink } = useClipboard({
+    successMessage: "Link copied to clipboard with current studio view!",
+    onSuccess: () => {
+      try {
+        playSuccess();
+      } catch {}
+      setCopyToast("Link copied to clipboard with current studio view!");
+      setTimeout(() => setCopyToast(null), 3500);
+    },
+  });
+
   const handleCopyShareLink = useCallback(() => {
     if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(window.location.href).then(() => {
-        try {
-          playSuccess();
-        } catch {}
-        setCopyToast("Link copied to clipboard with current studio view!");
-        setTimeout(() => setCopyToast(null), 3500);
-      });
+      copyShareLink(window.location.href);
     }
-  }, [playSuccess]);
+  }, [copyShareLink]);
 
   // Push new state onto undo history stack
   const updateStudyWithHistory = useCallback(

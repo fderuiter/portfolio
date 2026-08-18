@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
+import { CopyButton } from "@/components/CopyButton";
 import { LevelScore, PuzzlerLevelDef } from "@/lib/quasi-perfect/types";
 import { IconCheck, IconCopy, IconSparkles } from "@tabler/icons-react";
 
@@ -26,18 +27,6 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
 }) => {
   const isLastLevel = currentLevelIndex >= totalLevels - 1;
   const isSorry = score.usedSorry;
-  const [copied, setCopied] = useState<boolean>(false);
-
-  const handleCopyLean = async () => {
-    if (!leanCode) return;
-    try {
-      await navigator.clipboard.writeText(leanCode);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // fallback
-    }
-  };
 
   return (
     <motion.div
@@ -113,14 +102,16 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
           <div className="mb-4 text-left rounded-xl border border-zinc-800 bg-zinc-900/80 p-2.5">
             <div className="flex items-center justify-between text-[10px] text-zinc-400 mb-1 border-b border-zinc-800 pb-1">
               <span>Verified Lean 4 Script</span>
-              <button
-                type="button"
-                onClick={handleCopyLean}
-                className="flex items-center gap-1 text-purple-400 hover:text-purple-300 font-bold"
-              >
-                {copied ? <IconCheck className="w-3 h-3 text-emerald-400" /> : <IconCopy className="w-3 h-3" />}
-                <span>{copied ? "Copied!" : "Copy"}</span>
-              </button>
+              <CopyButton
+                text={leanCode}
+                label="Copy"
+                copiedLabel="Copied!"
+                icon={<IconCopy className="w-3 h-3" />}
+                copiedIcon={<IconCheck className="w-3 h-3 text-emerald-400" />}
+                className="flex items-center gap-1 text-purple-400 hover:text-purple-300 font-bold cursor-pointer"
+                aria-label="Copy Lean 4 Script"
+                successMessage="Lean 4 proof script copied to clipboard"
+              />
             </div>
             <pre className="text-[10px] text-zinc-300 font-mono whitespace-pre overflow-x-auto max-h-24">
               {leanCode}

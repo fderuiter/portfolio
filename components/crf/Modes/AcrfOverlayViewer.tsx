@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { CopyButton } from "@/components/CopyButton";
 import { StudyProtocol } from "@/lib/crf/types";
 import {
   generateAcrfHtml,
@@ -11,8 +12,6 @@ import {
 import {
   IconFileCode,
   IconPrinter,
-  IconCopy,
-  IconCheck,
   IconBook,
   IconTable,
   IconPalette,
@@ -40,7 +39,6 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
   const [selectedFormId, setSelectedFormId] = useState(
     activeFormId || study.forms[0]?.id || ""
   );
-  const [copied, setCopied] = useState(false);
 
   const activeForm = study.forms.find((f) => f.id === selectedFormId) || study.forms[0];
   const sdtmMatrix: SdtmMappingRow[] = generateSdtmMappingMatrix(study);
@@ -63,20 +61,6 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
         win.print();
       }, 500);
     }
-  };
-
-  const handleCopyHtml = () => {
-    const htmlContent =
-      viewMode === "study_book"
-        ? generateStudyAcrfBookHtml(study, { mode: "annotated", branding })
-        : activeForm
-        ? generateAcrfHtml(activeForm, study, { mode: "annotated", branding })
-        : "";
-
-    if (!htmlContent) return;
-    navigator.clipboard.writeText(htmlContent);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -118,13 +102,19 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
             </button>
           )}
 
-          <button
-            onClick={handleCopyHtml}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-850 hover:bg-zinc-800 border border-zinc-750 text-zinc-200 text-xs font-mono transition-all"
-          >
-            {copied ? <IconCheck className="w-4 h-4 text-emerald-400" /> : <IconCopy className="w-4 h-4" />}
-            <span>{copied ? "Copied HTML!" : "Copy aCRF HTML"}</span>
-          </button>
+          <CopyButton
+            text={() =>
+              viewMode === "study_book"
+                ? generateStudyAcrfBookHtml(study, { mode: "annotated", branding })
+                : activeForm
+                ? generateAcrfHtml(activeForm, study, { mode: "annotated", branding })
+                : ""
+            }
+            label="Copy aCRF HTML"
+            copiedLabel="Copied HTML!"
+            successMessage="aCRF HTML content copied to clipboard"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-850 hover:bg-zinc-800 border border-zinc-750 text-zinc-200 text-xs font-mono transition-all cursor-pointer"
+          />
           <button
             onClick={handlePrint}
             className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-brand-cyan text-black hover:bg-white font-mono text-xs font-bold transition-all shadow-sm"

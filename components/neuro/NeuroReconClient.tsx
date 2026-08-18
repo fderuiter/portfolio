@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useClipboard } from "@/hooks/useClipboard";
 import {
   ControlPoint,
   DatasetSource,
@@ -260,15 +261,20 @@ export const NeuroReconClient: React.FC = () => {
     setParam("tool", tool === currentScenario.recommendedTool ? null : tool, { replace: true });
   }, [currentScenario.recommendedTool, setParam]);
 
+  const { copy: copyShareLink } = useClipboard({
+    successMessage: "NeuroRecon Studio link copied to clipboard!",
+    onSuccess: () => {
+      try {
+        playSuccess();
+      } catch {}
+      setCopyToast("NeuroRecon Studio link copied to clipboard!");
+      setTimeout(() => setCopyToast(null), 3500);
+    },
+  });
+
   const handleCopyShareLink = () => {
     if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(window.location.href).then(() => {
-        try {
-          playSuccess();
-        } catch {}
-        setCopyToast("NeuroRecon Studio link copied to clipboard!");
-        setTimeout(() => setCopyToast(null), 3500);
-      });
+      copyShareLink(window.location.href);
     }
   };
 
