@@ -1606,8 +1606,12 @@ export const LaserLoon: React.FC = () => {
               className="w-full h-2.5 bg-neutral-950 rounded-full overflow-hidden border border-neutral-800"
             >
               <div
-                className="h-full bg-gradient-to-r from-red-500 to-amber-500 transition-all duration-150"
-                style={{ width: `${clamp((bossHp / bossMaxHp) * 100, 0, 100)}%` }}
+                className="h-full w-full bg-gradient-to-r from-red-500 to-amber-500 origin-left transform-gpu"
+                style={{
+                  transform: `scaleX(${clamp(bossHp / bossMaxHp, 0, 1)})`,
+                  transformOrigin: "left",
+                  willChange: "transform",
+                }}
               />
             </div>
           </div>

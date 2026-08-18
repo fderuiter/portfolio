@@ -220,10 +220,14 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
                 <span className="animate-pulse">Warming up CRT display...</span>
                 <span>{bootProgress}%</span>
               </div>
-              <div className="w-full h-2.5 bg-zinc-900 rounded-full border border-zinc-800 overflow-hidden">
+              <div className="w-full h-2.5 bg-zinc-900 rounded-full border border-zinc-800 overflow-hidden shadow-[0_0_8px_#10b981]">
                 <div 
-                  className="h-full bg-emerald-500 transition-all duration-100 ease-out shadow-[0_0_8px_#10b981]"
-                  style={{ width: `${bootProgress}%` }}
+                  className="h-full w-full bg-emerald-500 origin-left transform-gpu"
+                  style={{
+                    transform: `scaleX(${bootProgress / 100})`,
+                    transformOrigin: "left",
+                    willChange: "transform",
+                  }}
                 />
               </div>
             </div>
