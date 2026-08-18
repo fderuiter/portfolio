@@ -648,7 +648,7 @@ pub extern "C" fn ualbf_verify_certificate_manifest(
     }
 }
 </code></pre>
-    }.trim(),
+`.trim(),
   },
   {
     slug: "sortify",

@@ -85,10 +85,9 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
   return (
     <div
       style={{
-        height: isReady ? `${height}px` : "auto",
-        transition: "height 250ms cubic-bezier(0.16, 1, 0.3, 1)",
-      }}
-      className="relative w-full max-w-4xl mx-auto lg:mx-0 overflow-hidden min-h-[90px] sm:min-h-[110px] mb-4 sm:mb-6"
+        "--hero-headline-height": isReady ? `${height}px` : "auto",
+      } as React.CSSProperties}
+      className="relative w-full max-w-4xl mx-auto lg:mx-0 overflow-hidden min-h-[90px] sm:min-h-[110px] mb-4 sm:mb-6 h-[var(--hero-headline-height)] transition-[height] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]"
     >
       {/* 1. Custom Visual Presentation (hidden from screen readers, not selectable) */}
       <div
@@ -99,7 +98,7 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
         className="w-full select-none pointer-events-none"
       >
         {!isReady ? (
-          <p className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-left opacity-0 leading-tight">
+          <p className="fluid-heading-hero font-extrabold tracking-tight text-left opacity-0 leading-tight">
             {text}
           </p>
         ) : isMobile ? (
@@ -107,7 +106,7 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
             initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="text-3xl sm:text-4xl font-extrabold tracking-tight text-center lg:text-left leading-tight text-white heading-editorial"
+            className="fluid-heading-hero font-extrabold tracking-tight text-center lg:text-left text-white heading-editorial"
           >
             {text}
           </motion.p>
@@ -116,7 +115,7 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-center lg:text-left flex flex-wrap justify-center lg:justify-start leading-tight heading-editorial"
+            className="fluid-heading-hero font-extrabold tracking-tight text-center lg:text-left flex flex-wrap justify-center lg:justify-start heading-editorial"
           >
             {words.map((word, i) => (
               <motion.span
@@ -133,15 +132,8 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
 
       {/* 2. Transparent Standard Semantic Overlay (selectable, readable by screen readers) */}
       <h1
-        className="text-4xl md:text-6xl font-black tracking-tight text-center leading-tight md:leading-none absolute inset-0 select-text bg-transparent"
+        className="fluid-heading-hero font-black tracking-tight text-center absolute inset-0 select-text bg-transparent"
         data-pretext-layer="semantic"
-        style={{
-          color: "transparent",
-          WebkitTextFillColor: "transparent",
-          pointerEvents: "auto",
-          margin: 0,
-          padding: 0,
-        }}
       >
         {text}
       </h1>
@@ -197,10 +189,9 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
   return (
     <div
       style={{
-        height: isReady ? `${height}px` : "auto",
-        transition: "height 200ms cubic-bezier(0.16, 1, 0.3, 1)",
-      }}
-      className="relative w-full max-w-2xl mx-auto lg:mx-0 overflow-hidden min-h-[50px] mb-6 sm:mb-8"
+        "--hero-text-height": isReady ? `${height}px` : "auto",
+      } as React.CSSProperties}
+      className="relative w-full max-w-2xl mx-auto lg:mx-0 overflow-hidden min-h-[50px] mb-6 sm:mb-8 h-[var(--hero-text-height)] transition-[height] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
     >
       {/* 1. Custom Visual Presentation (hidden from screen readers, not selectable) */}
       <div
@@ -211,7 +202,7 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
         className="w-full select-none pointer-events-none"
       >
         {!isReady ? (
-          <p className="text-zinc-300 text-sm md:text-base leading-relaxed text-center lg:text-left opacity-0">
+          <p className="text-zinc-300 fluid-body leading-relaxed text-center lg:text-left opacity-0">
             {text}
           </p>
         ) : isMobile ? (
@@ -219,7 +210,7 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
             initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.35, ease: "easeOut" }}
-            className="text-zinc-300 text-sm md:text-base leading-relaxed text-center lg:text-left"
+            className="text-zinc-300 fluid-body leading-relaxed text-center lg:text-left"
           >
             {text}
           </motion.p>
@@ -228,7 +219,7 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="text-zinc-300 text-sm md:text-base leading-relaxed text-center lg:text-left flex flex-wrap justify-center lg:justify-start"
+            className="text-zinc-300 fluid-body leading-relaxed text-center lg:text-left flex flex-wrap justify-center lg:justify-start"
           >
             {words.map((word, i) => (
               <motion.span
@@ -245,15 +236,8 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
 
       {/* 2. Transparent Standard Semantic Overlay (selectable, readable by screen readers) */}
       <p
-        className="text-neutral-400 text-sm md:text-base leading-[28px] text-center absolute inset-0 select-text bg-transparent"
+        className="text-neutral-400 fluid-body text-center absolute inset-0 select-text bg-transparent"
         data-pretext-layer="semantic"
-        style={{
-          color: "transparent",
-          WebkitTextFillColor: "transparent",
-          pointerEvents: "auto",
-          margin: 0,
-          padding: 0,
-        }}
       >
         {text}
       </p>
@@ -463,11 +447,9 @@ const InteractiveEngineeringConsole: React.FC = () => {
                   <div className="w-full h-2 bg-zinc-900 rounded-full overflow-hidden border border-white/5">
                     <div
                       style={{
-                        transform: `scaleX(${garminHeapAlloc / 32})`,
-                        transformOrigin: "left",
-                        willChange: "transform",
-                      }}
-                      className="h-full w-full bg-gradient-to-r from-emerald-400 via-amber-400 to-cyan-400 origin-left transform-gpu"
+                        "--heap-scale-x": garminHeapAlloc / 32,
+                      } as React.CSSProperties}
+                      className="h-full w-full bg-gradient-to-r from-emerald-400 via-amber-400 to-cyan-400 origin-left transform-gpu scale-x-[var(--heap-scale-x)]"
                     />
                   </div>
                   <div className="flex items-center justify-between text-[10px] text-zinc-500 pt-0.5">

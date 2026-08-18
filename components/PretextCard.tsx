@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { cn } from "@/lib/utils";
 import { Card, CardTitle, CardDescription, type HeadingTag } from "@/components/BentoGrid";
 import { usePretextLayout } from "@/hooks/usePretextLayout";
 
@@ -32,13 +33,10 @@ export const PretextCard: React.FC<PretextCardProps> = ({
 
   return (
     <Card
-      className={className}
+      className={cn("min-h-[var(--pretext-card-height)] h-[var(--pretext-card-height)] transition-[height,min-height] duration-180 ease-[cubic-bezier(0.16,1,0.3,1)]", className)}
       style={{
-        // Inline min-height prevents flexbox rows stretching elements while allowing natural expansion
-        minHeight: computedHeight ? `${computedHeight}px` : "auto",
-        height: computedHeight ? `${computedHeight}px` : "auto",
-        transition: "height 180ms cubic-bezier(0.16, 1, 0.3, 1), min-height 180ms cubic-bezier(0.16, 1, 0.3, 1)",
-      }}
+        "--pretext-card-height": computedHeight ? `${computedHeight}px` : "auto",
+      } as React.CSSProperties}
     >
       <div className="flex flex-col h-full justify-between min-w-0">
         <div className="mb-4 min-w-0">
@@ -61,13 +59,6 @@ export const PretextCard: React.FC<PretextCardProps> = ({
             <p
               data-pretext-layer="semantic"
               className={`font-sans text-xs font-normal leading-relaxed absolute inset-0 select-text bg-transparent ${!isReady ? "invisible" : "transition-opacity duration-300"}`}
-              style={{
-                color: "transparent",
-                WebkitTextFillColor: "transparent",
-                pointerEvents: "auto",
-                margin: 0,
-                padding: 0,
-              }}
             >
               {description}
             </p>

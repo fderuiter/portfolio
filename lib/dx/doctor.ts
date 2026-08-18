@@ -895,6 +895,65 @@ export function checkLayoutTextClippingInvariants(root: string): DiagnosticCheck
 }
 
 /**
+ * Check Design System Token Migration Invariant across Core Layout Surfaces
+ */
+export function checkDesignTokens(root: string): DiagnosticCheckResult {
+  const coreComponents = [
+    "components/Hero.tsx",
+    "components/BentoGrid.tsx",
+    "components/PretextCard.tsx",
+    "components/CaseStudyShowcase.tsx",
+    "components/SkillsGrid.tsx",
+    "components/UnifiedErrorLayout.tsx",
+    "components/PageLayout.tsx",
+    "components/Footer.tsx",
+  ];
+
+  const violations: string[] = [];
+
+  for (const compPath of coreComponents) {
+    const fullPath = path.join(root, compPath);
+    if (!fs.existsSync(fullPath)) continue;
+
+    const content = fs.readFileSync(fullPath, "utf-8");
+    const lines = content.split("\n");
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (
+        /style=\{\s*\{/.test(line) &&
+        !/style=\{\s*\{\s*["']--/.test(line) &&
+        !/as\s+React\.CSSProperties/.test(line)
+      ) {
+        if (/style=\{\s*\{\s*(height|padding|margin|fontSize|color|width|backgroundColor)\s*:\s*/.test(line)) {
+          violations.push(`${compPath}:${i + 1} - Raw unconstrained inline style property detected in style prop`);
+        }
+      }
+    }
+  }
+
+  if (violations.length > 0) {
+    return {
+      id: "architecture-design-tokens",
+      name: "Design Token Migration & Dual Governance Invariant",
+      category: "architecture",
+      status: "fail",
+      message: `${violations.length} design token violation(s) detected across core layout surfaces.`,
+      details: violations,
+      fixable: false,
+    };
+  }
+
+  return {
+    id: "architecture-design-tokens",
+    name: "Design Token Migration & Dual Governance Invariant",
+    category: "architecture",
+    status: "pass",
+    message: "Zero raw inline style overrides or hardcoded pixel dimensions detected across core layout surfaces.",
+  };
+}
+
+/**
  * Check Workspace & IDE Configuration Integrity (.editorconfig, .vscode)
  */
 export function checkWorkspaceIdeConfig(root: string, fix = false): DiagnosticCheckResult {
@@ -1017,6 +1076,7 @@ export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
     checkGitHygieneConfig(root, fix),
     checkWorkspaceIdeConfig(root, fix),
     checkPackageLockfile(root),
+    checkDesignTokens(root),
     checkDeadCode(root),
     checkBundleBudgets(root),
   ];

@@ -85,11 +85,10 @@ describe("Polymorphic CardTitle Heading Configuration", () => {
       expect(heading.className).toContain("transition-colors");
     });
 
-    it("applies inline resets (margin: 0, marginTop/marginBottom 0.5rem) to avoid browser margin collapsing", () => {
+    it("applies margin spacing to avoid browser margin collapsing", () => {
       render(<CardTitle as="h4">Margin Check</CardTitle>);
       const heading = screen.getByRole("heading", { level: 4 });
-      expect(heading.style.marginTop).toBe("0.5rem");
-      expect(heading.style.marginBottom).toBe("0.5rem");
+      expect(heading.className).toContain("my-2");
     });
   });
 

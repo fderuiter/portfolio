@@ -67,7 +67,7 @@ export const Card = ({
       "repeating-linear-gradient( 128deg,#0e152e 0%,hsl(180,10%,60%) 3.8%,hsl(180,10%,60%) 4.5%,hsl(180,10%,60%) 5.2%,#0e152e 10%,#0e152e 12% ) var(--bg-x) var(--bg-y)/300% no-repeat",
     "--shade":
       "radial-gradient( farthest-corner circle at var(--m-x) var(--m-y),rgba(255,255,255,0.1) 12%,rgba(255,255,255,0.15) 20%,rgba(255,255,255,0.25) 120% ) var(--bg-x) var(--bg-y)/300% no-repeat",
-    backgroundBlendMode: "hue, hue, hue, overlay",
+    "--bg-blend-mode": "hue, hue, hue, overlay",
   } as React.CSSProperties;
 
   const updateStyles = () => {
@@ -179,8 +179,8 @@ export const CardTitle = ({
 
   return (
     <Component
-      className={cn("mt-2 mb-2 font-sans font-bold text-neutral-100 group-hover:text-brand-cyan transition-colors duration-300 break-words text-balance min-w-0", className)}
-      style={{ margin: 0, marginTop: "0.5rem", marginBottom: "0.5rem", ...style }}
+      className={cn("my-2 font-sans font-bold text-neutral-100 group-hover:text-brand-cyan transition-colors duration-300 break-words text-balance min-w-0", className)}
+      style={style}
     >
       {children}
     </Component>

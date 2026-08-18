@@ -292,6 +292,14 @@ body {
 
 
 
+[data-pretext-layer="semantic"] {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  pointer-events: auto;
+  margin: 0;
+  padding: 0;
+}
+
 /* Centralized Pretext High Contrast & Forced Colors Protection */
 @media (forced-colors: active), (-ms-high-contrast: active) {
   [data-pretext-layer="visual"] {
