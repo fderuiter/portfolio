@@ -201,4 +201,98 @@ describe("DiagnosticsDrawer & CDISC Conformance Studio Suite", () => {
 
     expect(onUpdateStudy).toHaveBeenCalled();
   });
+
+  it("organizes issues into dedicated Form Logic and Regulatory Conformance tabs with independent badges", async () => {
+    const studyWithBothIssues: StudyProtocol = {
+      ...ONCOLOGY_RECIST_PRESET,
+      forms: [
+        {
+          id: "form_both",
+          name: "Form With Both Issues",
+          domain: "DM",
+          description: "Testing tabbed view",
+          version: "1.0",
+          rules: [],
+          sections: [
+            {
+              id: "sec_1",
+              title: "Demographics",
+              fields: [
+                {
+                  id: "f_missing_var",
+                  variableName: "", // Form logic issue: missing variable name
+                  label: "Age Label",
+                  dataType: "text",
+                  columnSpan: 6,
+                  required: false,
+                },
+                {
+                  id: "f_long_var",
+                  variableName: "VERY_LONG_REGULATORY_VARIABLE_NAME", // Regulatory issue: name > 8 chars
+                  label: "Long Variable",
+                  dataType: "text",
+                  columnSpan: 6,
+                  required: false,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      visits: [
+        {
+          id: "v1",
+          oid: "SE.V1",
+          name: "Visit 1",
+          visitType: "Scheduled",
+          targetDay: 0,
+          windowBefore: 0,
+          windowAfter: 0,
+          assignedFormIds: ["form_both"],
+        },
+      ],
+    };
+
+    const onSelectForm = vi.fn();
+    const onClose = vi.fn();
+
+    await act(async () => {
+      root.render(
+        <DiagnosticsDrawer
+          isOpen={true}
+          study={studyWithBothIssues}
+          onClose={onClose}
+          onSelectForm={onSelectForm}
+        />
+      );
+    });
+
+    // Verify both tab headers exist
+    expect(container.textContent).toContain("Form Logic");
+    expect(container.textContent).toContain("Regulatory Conformance");
+
+    // Click "Form Logic" tab
+    const formLogicTabBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Form Logic")
+    );
+    expect(formLogicTabBtn).toBeDefined();
+
+    await act(async () => {
+      formLogicTabBtn?.click();
+    });
+
+    // Form logic item should be displayed with jump-to control
+    expect(container.textContent).toContain("missing a CDASH/SDTM Variable Name");
+    const jumpBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Jump to Field") || b.textContent?.includes("Inspect Form")
+    );
+    expect(jumpBtn).toBeDefined();
+
+    await act(async () => {
+      jumpBtn?.click();
+    });
+
+    expect(onSelectForm).toHaveBeenCalledWith("form_both", "f_missing_var");
+    expect(onClose).toHaveBeenCalled();
+  });
 });

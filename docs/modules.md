@@ -18,6 +18,7 @@
 - [hooks/usePretextLayout](hooks/usePretextLayout/README.md)
 - [hooks/useResizeObserver](hooks/useResizeObserver/README.md)
 - [hooks/useStudioHashParams](hooks/useStudioHashParams/README.md)
+- [hooks/useStudyDiagnostics](hooks/useStudyDiagnostics/README.md)
 - [hooks/useTelemetry](hooks/useTelemetry/README.md)
 - [hooks/useTimelineState](hooks/useTimelineState/README.md)
 - [hooks/useWebGLContextLoss](hooks/useWebGLContextLoss/README.md)

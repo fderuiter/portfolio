@@ -34,6 +34,7 @@ import {
   IconMoon,
 } from "@tabler/icons-react";
 import { getStudyBranding } from "@/lib/crf/branding-defaults";
+import { useStudyDiagnostics } from "@/hooks/useStudyDiagnostics";
 
 interface StudioHeaderProps {
   study: StudyProtocol;
@@ -84,7 +85,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
 }) => {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [presets, setPresets] = useState<Array<{ id: string; name: string; therapeuticArea?: string; study: { protocolNumber: string } }>>([]);
-  const [totalIssues, setTotalIssues] = useState<number>(0);
+  const { totalIssues } = useStudyDiagnostics(study);
   const branding = getStudyBranding(study);
 
   useEffect(() => {
@@ -94,16 +95,6 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
     });
     return () => { isMounted = false; };
   }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-    import("@/lib/crf/ast-evaluator").then(({ lintForm }) => {
-      if (!isMounted) return;
-      const issues = study.forms.reduce((acc, f) => acc + lintForm(f).length, 0);
-      setTotalIssues(issues);
-    });
-    return () => { isMounted = false; };
-  }, [study]);
 
   const currentPreset = presets.find((p) => p.study.protocolNumber === study.protocolNumber);
 

@@ -6,15 +6,27 @@
 
 # Interface: DiagnosticItem
 
-Defined in: [lib/crf/form-linter.ts:3](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-linter.ts#L3)
+Defined in: [lib/crf/form-linter.ts:4](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-linter.ts#L4)
+
+## Extended by
+
+- [`FormLogicDiagnostic`](../../../../hooks/useStudyDiagnostics/interfaces/FormLogicDiagnostic.md)
 
 ## Properties
+
+### fieldId?
+
+> `optional` **fieldId?**: `string`
+
+Defined in: [lib/crf/form-linter.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-linter.ts#L9)
+
+***
 
 ### id
 
 > **id**: `string`
 
-Defined in: [lib/crf/form-linter.ts:4](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-linter.ts#L4)
+Defined in: [lib/crf/form-linter.ts:5](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-linter.ts#L5)
 
 ***
 
@@ -22,7 +34,7 @@ Defined in: [lib/crf/form-linter.ts:4](https://github.com/fderuiter/portfolio/bl
 
 > **location**: `string`
 
-Defined in: [lib/crf/form-linter.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-linter.ts#L7)
+Defined in: [lib/crf/form-linter.ts:8](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-linter.ts#L8)
 
 ***
 
@@ -30,7 +42,15 @@ Defined in: [lib/crf/form-linter.ts:7](https://github.com/fderuiter/portfolio/bl
 
 > **message**: `string`
 
-Defined in: [lib/crf/form-linter.ts:6](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-linter.ts#L6)
+Defined in: [lib/crf/form-linter.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-linter.ts#L7)
+
+***
+
+### ruleId?
+
+> `optional` **ruleId?**: `string`
+
+Defined in: [lib/crf/form-linter.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-linter.ts#L10)
 
 ***
 
@@ -38,4 +58,4 @@ Defined in: [lib/crf/form-linter.ts:6](https://github.com/fderuiter/portfolio/bl
 
 > **severity**: `"error"` \| `"info"` \| `"warning"`
 
-Defined in: [lib/crf/form-linter.ts:5](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-linter.ts#L5)
+Defined in: [lib/crf/form-linter.ts:6](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-linter.ts#L6)
