@@ -9,6 +9,7 @@
 ## Interfaces
 
 - [ScanMatch](interfaces/ScanMatch.md)
+- [SecretMatch](interfaces/SecretMatch.md)
 
 ## Variables
 
@@ -18,3 +19,4 @@
 
 - [scanFile](functions/scanFile.md)
 - [scanText](functions/scanText.md)
+- [scanValueForSecrets](functions/scanValueForSecrets.md)

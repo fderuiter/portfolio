@@ -8,6 +8,6 @@
 
 > `const` **RateLimitParamsSchema**: `ZodObject`\<\{ `maxRequests`: `ZodDefault`\<`ZodNumber`\>; `windowMs`: `ZodDefault`\<`ZodNumber`\>; \}, `$strip`\>
 
-Defined in: [lib/schemas.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L24)
+Defined in: [lib/schemas.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L40)
 
 Schema for sliding window rate limit parameters

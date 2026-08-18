@@ -1,4 +1,20 @@
 import { z } from "zod";
+import { scanValueForSecrets } from "@/lib/validation-scanner";
+
+/**
+ * Validates that an input payload does not contain sensitive credentials or secrets.
+ */
+function validateNoSecrets(data: unknown, ctx: z.RefinementCtx): void {
+  const secretMatches = scanValueForSecrets(data);
+  for (const match of secretMatches) {
+    const fieldPath = match.path.length > 0 ? match.path : ["payload"];
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `Sensitive credentials detected in submission: ${match.category}`,
+      path: fieldPath,
+    });
+  }
+}
 
 /**
  * Schema for telemetry POST payload validation
@@ -84,6 +100,8 @@ export const CaseStudySubmissionSchema = z
     github_url: z.string().trim().optional(),
   })
   .superRefine((data, ctx) => {
+    validateNoSecrets(data, ctx);
+
     const lang = data.primary_language || data.language;
     if (!lang) {
       ctx.addIssue({
@@ -136,16 +154,20 @@ export const ALLOWED_REACTIONS = ["insightful", "mind_blowing", "actionable", "t
 /**
  * Schema for Feedback POST payload validation
  */
-export const FeedbackSubmissionSchema = z.object({
-  caseStudySlug: z.string().min(1, "caseStudySlug must be a non-empty string"),
-  takeaways: z
-    .array(z.string().min(1, "Takeaway cannot be empty"))
-    .min(1, "At least one learning takeaway must be selected"),
-  comments: z
-    .string()
-    .min(3, "Comments must be at least 3 characters long")
-    .max(2000, "Comments cannot exceed 2000 characters"),
-});
+export const FeedbackSubmissionSchema = z
+  .object({
+    caseStudySlug: z.string().min(1, "caseStudySlug must be a non-empty string"),
+    takeaways: z
+      .array(z.string().min(1, "Takeaway cannot be empty"))
+      .min(1, "At least one learning takeaway must be selected"),
+    comments: z
+      .string()
+      .min(3, "Comments must be at least 3 characters long")
+      .max(2000, "Comments cannot exceed 2000 characters"),
+  })
+  .superRefine((data, ctx) => {
+    validateNoSecrets(data, ctx);
+  });
 
 /**
  * Schema for Reaction POST payload validation

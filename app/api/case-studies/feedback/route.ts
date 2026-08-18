@@ -59,8 +59,9 @@ export const POST = createApiHandler(
     customJsonError: "Invalid JSON body payload",
     customValidationError: (err) => {
       const issues = (err as { issues: Array<{ path: Array<string | number>; message: string }> }).issues;
+      const hasSecret = issues.some((issue) => issue.message.toLowerCase().includes("sensitive credentials"));
       return {
-        error: "Validation failed",
+        error: hasSecret ? "Sensitive credentials detected in submission" : "Validation failed",
         details: issues.map((issue) => ({
           path: issue.path.join("."),
           message: issue.message,

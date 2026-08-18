@@ -467,4 +467,44 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       document.body.removeChild(simulatorBoundary);
     });
   });
+
+  describe("Targeted Schema-Level Secret Rejection (Requirements 1-4)", () => {
+    it("validates that scanValueForSecrets flags DB URIs, AWS keys, GitHub tokens, and private keys without leaking values", async () => {
+      const { scanValueForSecrets } = await import("@/lib/validation-scanner");
+
+      const dbPayload = {
+        editorial_content: "Postgres URI: postgresql://admin:secretPass123@db.internal:5432/prod",
+      };
+      const dbMatches = scanValueForSecrets(dbPayload);
+      expect(dbMatches.length).toBeGreaterThan(0);
+      expect(dbMatches[0].path).toEqual(["editorial_content"]);
+
+      const awsPayload = {
+        narrative: "AWS Key: AKIAIOSFODNN7EXAMPLE",
+      };
+      const awsMatches = scanValueForSecrets(awsPayload);
+      expect(awsMatches.length).toBeGreaterThan(0);
+      expect(awsMatches[0].path).toEqual(["narrative"]);
+
+      const ghPayload = {
+        comments: "GitHub token: ghp_123456789012345678901234567890123456",
+      };
+      const ghMatches = scanValueForSecrets(ghPayload);
+      expect(ghMatches.length).toBeGreaterThan(0);
+      expect(ghMatches[0].path).toEqual(["comments"]);
+
+      const keyPayload = {
+        summary: "-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA0G...\n-----END RSA PRIVATE KEY-----",
+      };
+      const keyMatches = scanValueForSecrets(keyPayload);
+      expect(keyMatches.length).toBeGreaterThan(0);
+
+      const cleanPayload = {
+        title: "Clean Postmortem",
+        comments: "Regular postmortem analysis without sensitive tokens.",
+      };
+      const cleanMatches = scanValueForSecrets(cleanPayload);
+      expect(cleanMatches.length).toBe(0);
+    });
+  });
 });

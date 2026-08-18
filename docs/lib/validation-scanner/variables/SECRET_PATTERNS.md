@@ -8,7 +8,7 @@
 
 > `const` **SECRET\_PATTERNS**: `object`[]
 
-Defined in: [lib/validation-scanner.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/validation-scanner.ts#L10)
+Defined in: [lib/validation-scanner.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/validation-scanner.ts#L15)
 
 ## Type Declaration
 

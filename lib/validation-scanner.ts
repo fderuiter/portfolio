@@ -7,6 +7,11 @@ export interface ScanMatch {
   lineContent: string;
 }
 
+export interface SecretMatch {
+  category: string;
+  path: (string | number)[];
+}
+
 export const SECRET_PATTERNS = [
   {
     category: "Database Connection String (with credentials)",
@@ -18,21 +23,64 @@ export const SECRET_PATTERNS = [
   },
   {
     category: "Generic API Key/Secret/Password",
-    regex: /(?:api[_-]?key|secret[_-]?key|private[_-]?key|password|auth[_-]?token|access[_-]?token|session[_-]?token)\s*[:=]\s*['"`][a-zA-Z0-9_.-]{16,}['"`]/gi,
+    regex: /(?:api[_-]?key|secret[_-]?key|private[_-]?key|password|auth[_-]?token|access[_-]?token|session[_-]?token|api[_-]?token)\s*[:=]\s*['"`]?[a-zA-Z0-9_.-]{16,}['"`]?/gi,
   },
   {
     category: "AWS Access Key",
-    regex: /AKIA[0-9A-Z]{16}/gi,
+    regex: /(?:AKIA|ASIA)[0-9A-Z]{16}/gi,
   },
   {
     category: "GitHub Access Token",
-    regex: /(?:ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{82})/gi,
+    regex: /(?:ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{82}|gho_[a-zA-Z0-9]{36}|ghu_[a-zA-Z0-9]{36}|ghs_[a-zA-Z0-9]{36}|ghr_[a-zA-Z0-9]{36})/gi,
   },
   {
     category: "Private Key (PEM)",
-    regex: /-----BEGIN [A-Z ]+ PRIVATE KEY-----/gi,
+    regex: /-----BEGIN [A-Z0-9 ]+ PRIVATE KEY-----/gi,
+  },
+  {
+    category: "API Token / Key",
+    regex: /(?:sk[-_]live[-_]|sk[-_]test[-_]|sk[-_]proj[-_]|sk[-_]or[-_]|xox[baprs]-)[a-zA-Z0-9-]{16,}/gi,
+  },
+  {
+    category: "Bearer Token",
+    regex: /bearer\s+[a-zA-Z0-9_.-]{20,}/gi,
   },
 ];
+
+/**
+ * Recursively scans a value (string, array, or object) for sensitive credential patterns.
+ * Returns an array of detected matches with category and field path.
+ */
+export function scanValueForSecrets(
+  value: unknown,
+  pathPrefix: (string | number)[] = []
+): SecretMatch[] {
+  const results: SecretMatch[] = [];
+
+  if (value === null || value === undefined) {
+    return results;
+  }
+
+  if (typeof value === "string") {
+    const matches = scanText(value);
+    if (matches.length > 0) {
+      results.push({
+        category: matches[0].category,
+        path: pathPrefix,
+      });
+    }
+  } else if (Array.isArray(value)) {
+    value.forEach((item, idx) => {
+      results.push(...scanValueForSecrets(item, [...pathPrefix, idx]));
+    });
+  } else if (typeof value === "object") {
+    Object.entries(value as Record<string, unknown>).forEach(([key, val]) => {
+      results.push(...scanValueForSecrets(val, [...pathPrefix, key]));
+    });
+  }
+
+  return results;
+}
 
 /**
  * Scans a given string for sensitive credential patterns.

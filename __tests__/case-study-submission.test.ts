@@ -163,6 +163,129 @@ describe("Case Study Submission API Endpoint (POST /api/case-studies)", () => {
     });
   });
 
+  describe("Secret Rejection & Credential Guard (Requirements 1-3)", () => {
+    it("rejects submissions containing database connection URIs with 400 Bad Request", async () => {
+      const dbPayload = {
+        title: "Database Incident Report",
+        slug: "database-incident-report",
+        primary_language: "TypeScript",
+        editorial_content: "Connection string used: postgresql://admin:superSecretPass123@db.example.com:5432/production",
+        architectural_narrative: "<p>The connection pool exhausted during peak load.</p>",
+        tags: "post-mortem, database",
+      };
+
+      const req = new NextRequest("http://localhost:3000/api/case-studies", {
+        method: "POST",
+        body: JSON.stringify(dbPayload),
+      });
+
+      const res = await POST(req);
+      expect(res.status).toBe(400);
+
+      const json = await res.json();
+      expect(json.error).toBe("Sensitive credentials detected in submission");
+      expect(json.details).toBeDefined();
+      expect(json.details.some((d: any) => d.path === "editorial_content")).toBe(true);
+
+      const responseStr = JSON.stringify(json);
+      expect(responseStr).not.toContain("superSecretPass123");
+      expect(responseStr).not.toContain("db.example.com");
+    });
+
+    it("rejects submissions containing AWS access keys with 400 Bad Request", async () => {
+      const awsPayload = {
+        title: "S3 Bucket Configuration",
+        slug: "s3-bucket-config",
+        primary_language: "Python",
+        editorial_content: "High level summary of AWS storage architecture.",
+        architectural_narrative: "<p>Key used was AKIAIOSFODNN7EXAMPLE for automated deployment.</p>",
+        tags: "aws, post-mortem",
+      };
+
+      const req = new NextRequest("http://localhost:3000/api/case-studies", {
+        method: "POST",
+        body: JSON.stringify(awsPayload),
+      });
+
+      const res = await POST(req);
+      expect(res.status).toBe(400);
+
+      const json = await res.json();
+      expect(json.error).toBe("Sensitive credentials detected in submission");
+      expect(json.details.some((d: any) => d.path === "architectural_narrative")).toBe(true);
+      expect(JSON.stringify(json)).not.toContain("AKIAIOSFODNN7EXAMPLE");
+    });
+
+    it("rejects submissions containing GitHub access tokens with 400 Bad Request", async () => {
+      const ghPayload = {
+        title: "GitHub Actions Workflow Incident",
+        slug: "github-actions-incident",
+        primary_language: "YAML",
+        editorial_content: "Token exposed: ghp_123456789012345678901234567890123456 in workflow logs.",
+        architectural_narrative: "<p>CI runner exposed personal access token.</p>",
+        tags: "ci, github",
+      };
+
+      const req = new NextRequest("http://localhost:3000/api/case-studies", {
+        method: "POST",
+        body: JSON.stringify(ghPayload),
+      });
+
+      const res = await POST(req);
+      expect(res.status).toBe(400);
+
+      const json = await res.json();
+      expect(json.error).toBe("Sensitive credentials detected in submission");
+      expect(JSON.stringify(json)).not.toContain("ghp_123456789012345678901234567890123456");
+    });
+
+    it("rejects submissions containing private key blocks with 400 Bad Request", async () => {
+      const keyPayload = {
+        title: "SSH Key Compromise Report",
+        slug: "ssh-key-compromise",
+        primary_language: "Bash",
+        editorial_content: "Summary of key revocation procedure.",
+        architectural_narrative: "An old key was leaked:\n-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA0G...\n-----END RSA PRIVATE KEY-----",
+        tags: "security, keys",
+      };
+
+      const req = new NextRequest("http://localhost:3000/api/case-studies", {
+        method: "POST",
+        body: JSON.stringify(keyPayload),
+      });
+
+      const res = await POST(req);
+      expect(res.status).toBe(400);
+
+      const json = await res.json();
+      expect(json.error).toBe("Sensitive credentials detected in submission");
+      expect(JSON.stringify(json)).not.toContain("MIIEowIBAAKCAQEA0G");
+    });
+
+    it("rejects submissions containing API tokens/keys with 400 Bad Request", async () => {
+      const apiPayload = {
+        title: "API Service Starvation",
+        slug: "api-service-starvation",
+        primary_language: "Go",
+        editorial_content: "Connected with api_key: 'abc123xyz456foo199'",
+        architectural_narrative: "<p>Rate limit exceeded on external endpoint.</p>",
+        tags: "api, rate-limit",
+      };
+
+      const req = new NextRequest("http://localhost:3000/api/case-studies", {
+        method: "POST",
+        body: JSON.stringify(apiPayload),
+      });
+
+      const res = await POST(req);
+      expect(res.status).toBe(400);
+
+      const json = await res.json();
+      expect(json.error).toBe("Sensitive credentials detected in submission");
+      expect(JSON.stringify(json)).not.toContain("abc123xyz456foo199");
+    });
+  });
+
   describe("Validation Errors", () => {
     it("rejects invalid JSON payloads with 400 status", async () => {
       const req = new NextRequest("http://localhost:3000/api/case-studies", {

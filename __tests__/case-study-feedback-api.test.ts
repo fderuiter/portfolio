@@ -65,6 +65,42 @@ describe("Case Study Feedback & Reaction API Routes", () => {
       expect(json.error).toBe("Validation failed");
     });
 
+    it("should reject feedback submission containing sensitive database URIs or credentials with 400", async () => {
+      const req = new NextRequest("http://localhost/api/case-studies/feedback", {
+        method: "POST",
+        body: JSON.stringify({
+          caseStudySlug: "imednet-python-sdk",
+          takeaways: ["Architecture & System Design"],
+          comments: "Check database connection at mongodb+srv://admin:secretPass123@cluster.mongodb.net/test",
+        }),
+      });
+
+      const res = await feedbackPOST(req);
+      expect(res.status).toBe(400);
+
+      const json = await res.json();
+      expect(json.error).toBe("Sensitive credentials detected in submission");
+      expect(JSON.stringify(json)).not.toContain("secretPass123");
+    });
+
+    it("should reject feedback submission containing API keys or AWS credentials with 400", async () => {
+      const req = new NextRequest("http://localhost/api/case-studies/feedback", {
+        method: "POST",
+        body: JSON.stringify({
+          caseStudySlug: "imednet-python-sdk",
+          takeaways: ["Security & Isolation"],
+          comments: "Found secret_key: 'abc123xyz456foo199' left in comment.",
+        }),
+      });
+
+      const res = await feedbackPOST(req);
+      expect(res.status).toBe(400);
+
+      const json = await res.json();
+      expect(json.error).toBe("Sensitive credentials detected in submission");
+      expect(JSON.stringify(json)).not.toContain("abc123xyz456foo199");
+    });
+
     it("should accept valid feedback submission with 201", async () => {
       const req = new NextRequest("http://localhost/api/case-studies/feedback", {
         method: "POST",

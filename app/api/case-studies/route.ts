@@ -67,8 +67,9 @@ export const POST = createApiHandler(
         path: issue.path.join(".") || "payload",
         message: issue.message,
       }));
+      const hasSecret = issues.some((issue) => issue.message.toLowerCase().includes("sensitive credentials"));
       return {
-        error: "Missing or invalid case study submission fields",
+        error: hasSecret ? "Sensitive credentials detected in submission" : "Missing or invalid case study submission fields",
         details,
       };
     },

@@ -8,6 +8,6 @@
 
 > `const` **CaseStudySummarySchema**: `ZodObject`\<\{ `id`: `ZodString`; `primary_language`: `ZodString`; `slug`: `ZodString`; `tags`: `ZodArray`\<`ZodString`\>; `title`: `ZodString`; \}, `$strip`\>
 
-Defined in: [lib/schemas.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L48)
+Defined in: [lib/schemas.ts:64](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L64)
 
 Schema for Case Study Summary item

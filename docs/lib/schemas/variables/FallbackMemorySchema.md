@@ -8,6 +8,6 @@
 
 > `const` **FallbackMemorySchema**: `ZodObject`\<\{ `redisToken`: `ZodOptional`\<`ZodString`\>; `redisUrl`: `ZodOptional`\<`ZodString`\>; `ttlSeconds`: `ZodDefault`\<`ZodNumber`\>; \}, `$strip`\>
 
-Defined in: [lib/schemas.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L32)
+Defined in: [lib/schemas.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L48)
 
 Schema for fallback secondary memory properties
