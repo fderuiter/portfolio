@@ -149,7 +149,7 @@ describe("Timeline Inline-Marked RichNarrative Integration", () => {
     expect(triggerTexts).toContain("Source Document Verification (SDV)");
   });
 
-  it("should dynamically translate terms when simplified-terminology switch is toggled", async () => {
+  it("should dynamically translate terms and render simplified timeline dictionary slice when simplified-terminology switch is toggled", async () => {
     // Enable simplified-terminology in mock localStorage
     mockStorage.setItem("simplified-terminology", JSON.stringify(true));
 
@@ -164,16 +164,18 @@ describe("Timeline Inline-Marked RichNarrative Integration", () => {
       recruiterBtn?.click();
     });
 
-    // The visible text of the terms should now be replaced with simplified terminology terms
-    const triggers = Array.from(container.querySelectorAll("span[aria-describedby]"));
-    const triggerTexts = triggers.map((t) => t.textContent);
+    // Timeline entries should display content from the simplified timeline dictionary slice
+    expect(container.textContent).toContain(
+      "Pioneered a system to identify eligible trial participants from hospital records"
+    );
+    expect(container.textContent).toContain(
+      "Coordinated operations for multiple clinical research trials, ensuring high-quality records"
+    );
 
-    expect(triggerTexts).toContain("industry-standard"); // GxP simplified term
-    expect(triggerTexts).toContain("digital case report form"); // eCRF simplified term
-    expect(triggerTexts).toContain("record verification"); // SDV simplified term
-
-    expect(triggerTexts).not.toContain("GxP");
-    expect(triggerTexts).not.toContain("eCRF");
+    // Should not contain detailed terminology strings
+    expect(container.textContent).not.toContain(
+      "Pioneered an EHR-based recruitment pipeline using SlicerDicer and MyChart"
+    );
   });
 
   it("should render tooltip elements with proper typographic style isolation ignoring parent italics", async () => {
