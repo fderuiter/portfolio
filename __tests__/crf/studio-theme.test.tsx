@@ -176,6 +176,18 @@ describe("CRF Studio - Light Mode & Theming", () => {
     expect(mockLocalStorage.getItem("crf_studio_theme")).toBe("dark");
   });
 
+  it("applies data-studio-theme='light' container attribute for theme-scoped WCAG focus ring contrast overrides", async () => {
+    mockLocalStorage.setItem("crf_studio_theme", "light");
+
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<CRFStudioContainer />);
+    });
+
+    const studioRoot = container.querySelector("[data-studio-theme='light']");
+    expect(studioRoot).not.toBeNull();
+  });
+
   it("StudioHeader renders theme toggle and triggers onToggleTheme callback", async () => {
     const handleToggle = vi.fn();
 
