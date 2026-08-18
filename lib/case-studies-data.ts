@@ -332,6 +332,51 @@ interface SchemaNode {
     created_at: new Date("2026-02-15T00:00:00Z"),
     updated_at: new Date("2026-08-14T00:00:00Z"),
   },
+  {
+    id: "canonical-6",
+    slug: "sortify",
+    title: "Sortify: Air-Gapped Document Classification & Resilient File Engine",
+    primary_language: "Python",
+    github_url: "https://github.com/fderuiter/sortify",
+    published: true,
+    simulated_telemetry: false,
+    tags: "Python, PyQt6, ONNX, SQLCipher, Machine Learning, Clinical Trials, HIPAA, Desktop",
+    editorial_content: "A **zero-telemetry**, fully `air-gapped` document classification and file organization pipeline featuring local **hybrid semantic clustering** (ONNX vector embeddings + sparse TF-IDF) and crash-resilient **2-phase file operations** backed by an encrypted `SQLCipher` metadata registry.",
+    architectural_narrative: `<h3>The Challenge</h3>
+<p>Managing and categorizing massive, unstructured document dumps (clinical trial records, financial reports, technical documentation) while strictly adhering to regulatory compliance frameworks (such as 21 CFR Part 11, HIPAA, and GDPR) presents severe security challenges. Traditional cloud-based classification tools risk data leakage and compliance violations when handling sensitive patient health information (PHI) or proprietary datasets.</p>
+
+<h3>Technical Architecture</h3>
+<p>Sortify is engineered as a zero-telemetry, fully air-gapped pipeline featuring local hybrid semantic clustering and crash-resilient file operations backed by an encrypted SQLCipher metadata registry.</p>
+
+<pre><code class="language-python">
+# Two-Phase Commit File Relocation Engine
+def stage_and_commit_move(self, src: str, dest_dir: str) -> str:
+    src_hash = compute_sha256(src)
+    shadow_path = os.path.join(self.shadow_dir, f"{uuid.uuid4()}.tmp")
+
+    # Phase 1: Copy to shadow staging and verify checksum
+    self._copy_stream(src, shadow_path)
+    if compute_sha256(shadow_path) != src_hash:
+        raise ValueError("Staged integrity mismatch")
+
+    # Phase 2: Relocate to destination and unlink original
+    os.replace(shadow_path, dest_path)
+    if compute_sha256(dest_path) == src_hash:
+        os.remove(src)
+        return dest_path
+</code></pre>
+
+<h4>1. Clean Architecture &amp; Strategy Pattern</h4>
+<p>File extraction (<code>extractor_strategies.py</code>) and classification (<code>analyzer_strategies.py</code>) isolate format-specific parsers and clustering algorithms behind unified abstract interfaces, ensuring clean extendability across PDF, DOCX, XLSX, and CSV formats.</p>
+
+<h4>2. Two-Phase Commit File Relocation</h4>
+<p>Staged file movement utilizes shadow directories, journaled state tracking, and SHA-256 integrity verification before and after file operations. Cross-partition hardlink and move failures (<code>EXDEV</code>) fall back gracefully to chunked streams with checksum verifications.</p>
+
+<h4>3. Encrypted SQLCipher Registry &amp; Worker Concurrency</h4>
+<p>Database encryption at rest is enforced via per-platform SQLCipher shared libraries with PRAGMA key derivation. Thread-isolated background workers communicate via non-blocking queues with the main UI thread (PyQt6/PySide6) to prevent interface lockups during bulk ingestion.</p>`,
+    created_at: new Date("2026-02-20T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
 ];
 
 export const FALLBACK_CASE_STUDIES: CaseStudyData[] = rawFallbackCaseStudies.map((cs) => ({
