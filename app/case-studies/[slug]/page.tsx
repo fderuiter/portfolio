@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { env } from "@/lib/env";
 import { notFound } from "next/navigation";
 import { SandboxTerminal } from "@/components/SandboxTerminal";
 import { IconTerminal } from "@tabler/icons-react";
@@ -36,11 +37,11 @@ export async function generateStaticParams() {
       slug: study.slug,
     }));
   } catch (error) {
-    if (process.env.VERCEL_ENV === "production") {
+    if (env.VERCEL_ENV === "production") {
       console.error("Failed to fetch case studies for static params:", error);
     }
-    const isProduction = process.env.VERCEL_ENV === "production";
-    const isMockEnv = process.env.CI === "true" || process.env.PLAYWRIGHT_TEST === "true" || !isProduction;
+    const isProduction = env.VERCEL_ENV === "production";
+    const isMockEnv = env.CI === "true" || env.PLAYWRIGHT_TEST === "true" || !isProduction;
     if (isMockEnv) {
       return FALLBACK_CASE_STUDIES.map((s) => ({ slug: s.slug }));
     }
@@ -57,11 +58,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       where: { slug },
     });
   } catch (err) {
-    if (process.env.VERCEL_ENV === "production") {
+    if (env.VERCEL_ENV === "production") {
       console.error("Metadata generation DB query exception:", err);
     }
-    const isProduction = process.env.VERCEL_ENV === "production";
-    const isMockEnv = process.env.CI === "true" || process.env.PLAYWRIGHT_TEST === "true" || !isProduction;
+    const isProduction = env.VERCEL_ENV === "production";
+    const isMockEnv = env.CI === "true" || env.PLAYWRIGHT_TEST === "true" || !isProduction;
     if (isMockEnv) {
       study = FALLBACK_CASE_STUDIES.find((s) => s.slug === slug);
     }
@@ -119,8 +120,8 @@ export default async function CaseStudyPage({ params }: PageProps) {
 
   let study = allStudies.find((s) => s.slug === slug);
   if (!study) {
-    const isProduction = process.env.VERCEL_ENV === "production";
-    const isMockEnv = process.env.CI === "true" || process.env.PLAYWRIGHT_TEST === "true" || !isProduction;
+    const isProduction = env.VERCEL_ENV === "production";
+    const isMockEnv = env.CI === "true" || env.PLAYWRIGHT_TEST === "true" || !isProduction;
     if (isMockEnv) {
       study = FALLBACK_CASE_STUDIES.find((s) => s.slug === slug);
     }

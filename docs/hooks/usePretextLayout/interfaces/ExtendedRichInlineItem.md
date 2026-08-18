@@ -16,7 +16,7 @@ Defined in: [hooks/usePretextLayout.tsx:287](https://github.com/fderuiter/portfo
 
 ### break?
 
-> `optional` **break?**: `"normal"` \| `"never"`
+> `optional` **break?**: `"never"` \| `"normal"`
 
 Defined in: node\_modules/@chenglou/pretext/dist/rich-inline.d.ts:6
 

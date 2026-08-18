@@ -6,9 +6,10 @@ import { z } from "zod";
  */
 export const serverEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  VERCEL_ENV: z.enum(["production", "preview", "development"]).optional(),
-  DATABASE_URL: z.string().min(1).optional(),
-  DATABASE_URL_UNPOOLED: z.string().min(1).optional(),
+  VERCEL_ENV: z.enum(["production", "preview", "development"]).optional().or(z.literal("")),
+  DATABASE_URL: z.string().optional(),
+  DATABASE_URL_UNPOOLED: z.string().optional(),
+  DIRECT_URL: z.string().optional(),
   PGHOST: z.string().optional(),
   PGHOST_UNPOOLED: z.string().optional(),
   PGUSER: z.string().optional(),
@@ -22,11 +23,21 @@ export const serverEnvSchema = z.object({
   POSTGRES_DATABASE: z.string().optional(),
   POSTGRES_URL_NO_SSL: z.string().optional(),
   POSTGRES_PRISMA_URL: z.string().optional(),
-  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
-  UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
-  CRON_SECRET: z.string().min(1).optional(),
-  GITHUB_TOKEN: z.string().min(1).optional(),
-  SENTRY_DSN: z.string().url().optional(),
+  UPSTASH_REDIS_REST_URL: z.string().url().optional().or(z.literal("")),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+  CRON_SECRET: z.string().optional(),
+  GITHUB_TOKEN: z.string().optional(),
+  SENTRY_DSN: z.string().url().optional().or(z.literal("")),
+  SENTRY_ORG: z.string().optional(),
+  SENTRY_PROJECT: z.string().optional(),
+  PLAYWRIGHT_TEST: z.string().optional(),
+  CI: z.string().optional(),
+  SKIP_DB_HEALTH_CHECK: z.string().optional(),
+  ALLOW_DESTRUCTIVE_MIGRATIONS: z.string().optional(),
+  NEXT_PHASE: z.string().optional(),
+  NEXT_RUNTIME: z.string().optional(),
+  GITHUB_ACTIONS: z.string().optional(),
+  VITEST: z.string().optional(),
 });
 
 /**
@@ -73,6 +84,7 @@ export function validateEnv(rawEnv: Record<string, string | undefined> = process
   }
 
   const data = {
+    ...(rawEnv as Record<string, string>),
     ...(serverResult.success ? serverResult.data : ({} as ServerEnv)),
     ...(clientResult.success ? clientResult.data : ({} as ClientEnv)),
   } as AppEnv;
@@ -91,15 +103,17 @@ let cachedEnv: AppEnv | null = null;
  * In development / production, logs formatted warnings if schema validation fails.
  */
 export function getEnv(): AppEnv {
-  if (cachedEnv && process.env.NODE_ENV !== "test") return cachedEnv;
+  if (cachedEnv && process.env.NODE_ENV === "production" && !process.env.VITEST) return cachedEnv;
 
   const result = validateEnv(process.env);
-  if (!result.success && process.env.NODE_ENV !== "test") {
+  if (!result.success && process.env.NODE_ENV === "production" && !process.env.VITEST) {
     console.warn("⚠️ [ENV VALIDATION WARNING] Environment schema issues detected:", result.errors);
   }
 
-  cachedEnv = result.data;
-  return cachedEnv;
+  if (process.env.NODE_ENV === "production" && !process.env.VITEST) {
+    cachedEnv = result.data;
+  }
+  return result.data;
 }
 
 /**

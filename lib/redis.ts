@@ -1,9 +1,11 @@
 import { Redis } from "@upstash/redis";
+import { getEnv } from "./env";
 
 const createRedisClient = () => {
+  const currentEnv = getEnv();
   return new Redis({
-    url: process.env.UPSTASH_REDIS_REST_URL || "http://localhost:8079",
-    token: process.env.UPSTASH_REDIS_REST_TOKEN || "example_token",
+    url: currentEnv.UPSTASH_REDIS_REST_URL || "http://localhost:8079",
+    token: currentEnv.UPSTASH_REDIS_REST_TOKEN || "example_token",
   });
 };
 
@@ -15,4 +17,4 @@ const globalForRedis = globalThis as unknown as {
 
 export const redis = globalForRedis.redis ?? createRedisClient();
 
-if (process.env.NODE_ENV !== "production") globalForRedis.redis = redis;
+if (getEnv().NODE_ENV !== "production") globalForRedis.redis = redis;

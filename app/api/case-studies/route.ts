@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { env } from "@/lib/env";
 
 // Enforce standard dynamic route behavior in Next.js 16 to query live datastores safely
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  if (process.env.PLAYWRIGHT_TEST === "true") {
+  if (env.PLAYWRIGHT_TEST === "true") {
     return NextResponse.json([
       {
         id: "clinical-data-mapper",

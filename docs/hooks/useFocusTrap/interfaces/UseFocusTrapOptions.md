@@ -6,7 +6,7 @@
 
 # Interface: UseFocusTrapOptions
 
-Defined in: [hooks/useFocusTrap.ts:5](https://github.com/fderuiter/portfolio/blob/main/hooks/useFocusTrap.ts#L5)
+Defined in: [hooks/useFocusTrap.ts:6](https://github.com/fderuiter/portfolio/blob/main/hooks/useFocusTrap.ts#L6)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [hooks/useFocusTrap.ts:5](https://github.com/fderuiter/portfolio/blo
 
 > `optional` **initialFocusRef?**: `RefObject`\<`HTMLElement` \| `null`\>
 
-Defined in: [hooks/useFocusTrap.ts:9](https://github.com/fderuiter/portfolio/blob/main/hooks/useFocusTrap.ts#L9)
+Defined in: [hooks/useFocusTrap.ts:10](https://github.com/fderuiter/portfolio/blob/main/hooks/useFocusTrap.ts#L10)
 
 Element or ref to focus immediately when the trap activates.
 
@@ -24,7 +24,7 @@ Element or ref to focus immediately when the trap activates.
 
 > `optional` **onEscape?**: () => `void`
 
-Defined in: [hooks/useFocusTrap.ts:13](https://github.com/fderuiter/portfolio/blob/main/hooks/useFocusTrap.ts#L13)
+Defined in: [hooks/useFocusTrap.ts:14](https://github.com/fderuiter/portfolio/blob/main/hooks/useFocusTrap.ts#L14)
 
 Callback triggered when Escape key is pressed.
 
@@ -38,7 +38,7 @@ Callback triggered when Escape key is pressed.
 
 > `optional` **returnFocus?**: `boolean`
 
-Defined in: [hooks/useFocusTrap.ts:18](https://github.com/fderuiter/portfolio/blob/main/hooks/useFocusTrap.ts#L18)
+Defined in: [hooks/useFocusTrap.ts:19](https://github.com/fderuiter/portfolio/blob/main/hooks/useFocusTrap.ts#L19)
 
 Whether to restore focus to previously active element upon unmount or deactivation.
 Defaults to true.

@@ -8,7 +8,7 @@
 
 > **checkNavbarHierarchy**(`root`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:148](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L148)
+Defined in: [lib/dx/doctor.ts:149](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L149)
 
 Check Layout and Navbar Invariant (AGENTS.md Invariant #2).
 No secondary Navbar components allowed outside app/layout.tsx.

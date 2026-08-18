@@ -6,7 +6,7 @@
 
 # Interface: GitHubStats
 
-Defined in: [lib/github.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L15)
+Defined in: [lib/github.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L17)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/github.ts:15](https://github.com/fderuiter/portfolio/blob/main/
 
 > **commitActivity**: `number`[]
 
-Defined in: [lib/github.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L21)
+Defined in: [lib/github.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L23)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/github.ts:21](https://github.com/fderuiter/portfolio/blob/main/
 
 > **forks**: `number`
 
-Defined in: [lib/github.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L17)
+Defined in: [lib/github.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L19)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/github.ts:17](https://github.com/fderuiter/portfolio/blob/main/
 
 > **languages**: [`GitHubLanguage`](GitHubLanguage.md)[]
 
-Defined in: [lib/github.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L19)
+Defined in: [lib/github.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L21)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/github.ts:19](https://github.com/fderuiter/portfolio/blob/main/
 
 > **openIssues**: `number`
 
-Defined in: [lib/github.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L18)
+Defined in: [lib/github.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L20)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/github.ts:18](https://github.com/fderuiter/portfolio/blob/main/
 
 > **recentCommits**: [`GitHubCommit`](GitHubCommit.md)[]
 
-Defined in: [lib/github.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L20)
+Defined in: [lib/github.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L22)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [lib/github.ts:20](https://github.com/fderuiter/portfolio/blob/main/
 
 > **stars**: `number`
 
-Defined in: [lib/github.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L16)
+Defined in: [lib/github.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L18)

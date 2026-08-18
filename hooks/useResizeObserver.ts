@@ -1,4 +1,5 @@
 import { useRef, useLayoutEffect, useEffect } from "react";
+import { env } from "@/lib/env";
 
 const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
@@ -59,7 +60,7 @@ export function useResizeObserver<T extends HTMLElement | SVGSVGElement>(
 
       // SSR/Browser-only safety checks
       if (typeof window !== "undefined") {
-        const isTestEnv = typeof process !== "undefined" && (process.env.NODE_ENV === "test" || "vi" in globalThis);
+        const isTestEnv = env.NODE_ENV === "test" || "vi" in globalThis;
         if (isTestEnv) {
           // In test environments, queue the callback via queueMicrotask or synchronous fallback
           // to make sure it plays nicely with JSDOM and React's `act(...)` testing environment.
@@ -82,7 +83,7 @@ export function useResizeObserver<T extends HTMLElement | SVGSVGElement>(
       isMountedRef.current = false;
       // Requirement: Scheduled layout frame updates are completely cancelled and cleaned up when monitored elements unmount
       if (rAFIdRef.current !== null && typeof window !== "undefined") {
-        const isTestEnv = typeof process !== "undefined" && (process.env.NODE_ENV === "test" || "vi" in globalThis);
+        const isTestEnv = env.NODE_ENV === "test" || "vi" in globalThis;
         if (isTestEnv && typeof queueMicrotask !== "function") {
           window.clearTimeout(rAFIdRef.current);
         } else if (!isTestEnv) {

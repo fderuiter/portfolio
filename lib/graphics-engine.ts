@@ -204,12 +204,14 @@ export function measureTextOffscreen({
   return result;
 }
 
+import { getEnv } from "./env";
+
 /**
  * Expose a layout validation utility that warns in non-production environments
  * when calculated layout height and actual physical DOM measurement differs by more than 2px.
  */
 export function validateLayoutHeight(calculated: number, actual: number, contextMessage?: string) {
-  if (process.env.NODE_ENV !== "production") {
+  if (getEnv().NODE_ENV !== "production") {
     if (actual === 0) {
       return;
     }

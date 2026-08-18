@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useCallback } from "react";
+import { env } from "@/lib/env";
 
 export interface UseFocusTrapOptions {
   /**
@@ -67,7 +68,7 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(
         (el) =>
           !el.hasAttribute("disabled") &&
           el.getAttribute("aria-hidden") !== "true" &&
-          (el.offsetParent !== null || typeof process.env.VITEST !== "undefined" || el.style.display !== "none")
+          (el.offsetParent !== null || typeof env.VITEST !== "undefined" || el.style.display !== "none")
       );
 
       if (focusableElements.length === 0) {

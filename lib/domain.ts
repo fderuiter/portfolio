@@ -1,3 +1,5 @@
+import { getEnv } from "./env";
+
 /**
  * Centered dynamic helper to synchronously resolve the base URL of the application.
  * Satisfies the following logic:
@@ -14,12 +16,13 @@ export function resolveBaseUrl(): string {
     baseUrl = window.location.origin;
   } else {
     // 2. Client-safe environment variable check
-    const envUrl = process.env.NEXT_PUBLIC_APP_URL;
+    const currentEnv = getEnv();
+    const envUrl = currentEnv.NEXT_PUBLIC_APP_URL;
     if (envUrl && envUrl.trim() !== "") {
       baseUrl = envUrl.trim();
     } else {
       // 3. Environment-aware fallback
-      const isProd = process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production";
+      const isProd = currentEnv.VERCEL_ENV === "production" || currentEnv.NODE_ENV === "production";
       if (isProd) {
         baseUrl = "https://www.deruiter.dev";
       } else {

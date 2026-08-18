@@ -8,7 +8,7 @@
 
 > **resolveBaseUrl**(): `string`
 
-Defined in: [lib/domain.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/domain.ts#L9)
+Defined in: [lib/domain.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/domain.ts#L11)
 
 Centered dynamic helper to synchronously resolve the base URL of the application.
 Satisfies the following logic:

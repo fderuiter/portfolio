@@ -7,6 +7,7 @@ import { checkEnvironmentVariables } from "./env-guard";
 import { checkGitHygieneConfig } from "./git-guard";
 import { checkDeadCode } from "./dead-code";
 import { checkBundleBudgets } from "./bundle-guard";
+import { getEnv } from "../env";
 
 export interface DiagnosticCheckResult {
   id: string;
@@ -370,7 +371,7 @@ export function checkMigrationGuard(root: string): DiagnosticCheckResult {
   for (const file of sqlFiles) {
     const content = fs.readFileSync(file, "utf-8");
     const dropMatches = content.match(/\b(DROP\s+TABLE|DROP\s+COLUMN)\b/gi);
-    if (dropMatches && !process.env.ALLOW_DESTRUCTIVE_MIGRATIONS) {
+    if (dropMatches && !getEnv().ALLOW_DESTRUCTIVE_MIGRATIONS) {
       destructiveViolations.push({
         file: path.relative(root, file),
         ddl: dropMatches.join(", "),

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import { env } from "@/lib/env";
 import { ProjectTeaserGrid } from "@/components/ProjectTeaserGrid";
 import { BaseCaseStudy } from "@/types/domain";
 import { Hero } from "@/components/Hero";
@@ -64,7 +65,7 @@ export default async function PortfolioHomePage() {
       })
     );
   } catch (error) {
-    if (process.env.VERCEL_ENV === "production") {
+    if (env.VERCEL_ENV === "production") {
       console.warn("Failed to load case studies from database. Falling back to local data:", error);
     }
     caseStudies = FALLBACK_CASE_STUDIES.map(cs => ({

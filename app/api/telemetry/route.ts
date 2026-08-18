@@ -5,6 +5,7 @@ import { redis } from "@/lib/redis";
 import { TelemetryEventSchema, RateLimitParamsSchema } from "@/lib/schemas";
 import { Ratelimit } from "@upstash/ratelimit";
 import * as Sentry from "@sentry/nextjs";
+import { env } from "@/lib/env";
 
 // Enforce standard dynamic route behavior in Next.js 16 to query live datastores safely
 export const dynamic = "force-dynamic";
@@ -157,7 +158,7 @@ async function isRateLimited(req: NextRequest): Promise<RateLimitResult> {
 }
 
 export async function GET() {
-  if (process.env.PLAYWRIGHT_TEST === "true") {
+  if (env.PLAYWRIGHT_TEST === "true") {
     return NextResponse.json({
       "synthetic-probe-runner": { views: 5, clicks: 2 },
       "simulator": { views: 10, clicks: 4 },
@@ -212,7 +213,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  if (process.env.PLAYWRIGHT_TEST === "true") {
+  if (env.PLAYWRIGHT_TEST === "true") {
     try {
       const payload = await req.json();
       const result = TelemetryEventSchema.safeParse(payload);

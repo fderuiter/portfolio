@@ -8,7 +8,7 @@
 
 > **checkOpenApiParity**(`root`, `fix?`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:478](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L478)
+Defined in: [lib/dx/doctor.ts:479](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L479)
 
 OpenAPI Parity & Route Completeness Check
 

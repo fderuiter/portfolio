@@ -2,26 +2,30 @@ import { neonConfig } from "@neondatabase/serverless";
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "@/app/generated/prisma/client";
 import ws from "ws";
+import { getEnv } from "./env";
 
 // Configure Neon to use native 'ws' package inside Node.js environments (like Next.js build server)
 neonConfig.webSocketConstructor = ws;
 
-// Parse connection string
-const connectionString = process.env.DATABASE_URL;
+// Parse connection string via validated schema
+const env = getEnv();
+const connectionString = env.DATABASE_URL;
 
 let isHealthy = false;
 
 const createPrismaClient = () => {
   const adapter = new PrismaNeon({ connectionString });
+  const currentEnv = getEnv();
   const baseClient = new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+    log: currentEnv.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
   });
 
   return baseClient.$extends({
     query: {
       async $allOperations({ args, query, ...rest }) {
-        if (process.env.PLAYWRIGHT_TEST === "true") {
+        const activeEnv = getEnv();
+        if (activeEnv.PLAYWRIGHT_TEST === "true") {
           const operation = (rest as Record<string, unknown>).operation;
           const model = (rest as Record<string, unknown>).model;
           if (operation === "findMany" || operation === "findFirst" || operation === "findUnique") {
@@ -53,11 +57,11 @@ const createPrismaClient = () => {
           }
           return null;
         }
-        const conn = process.env.DATABASE_URL;
+        const conn = activeEnv.DATABASE_URL;
         if (!conn || conn.includes("dummy")) {
           throw new Error("Database offline: Dummy connection URL configured.");
         }
-        if (!isHealthy && process.env.SKIP_DB_HEALTH_CHECK !== "true") {
+        if (!isHealthy && activeEnv.SKIP_DB_HEALTH_CHECK !== "true") {
           try {
             // Runtime pre-flight validation
             await baseClient.$queryRawUnsafe(`SELECT 1 FROM "TelemetryEvent" LIMIT 1`);
@@ -81,4 +85,4 @@ const globalForPrisma = globalThis as unknown as {
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (getEnv().NODE_ENV !== "production") globalForPrisma.prisma = prisma;

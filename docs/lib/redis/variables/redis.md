@@ -8,4 +8,4 @@
 
 > `const` **redis**: `Redis`
 
-Defined in: [lib/redis.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/redis.ts#L16)
+Defined in: [lib/redis.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/redis.ts#L18)

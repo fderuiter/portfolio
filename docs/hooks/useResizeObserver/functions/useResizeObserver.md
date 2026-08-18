@@ -8,7 +8,7 @@
 
 > **useResizeObserver**\<`T`\>(`callback`): `RefObject`\<`T` \| `null`\>
 
-Defined in: [hooks/useResizeObserver.ts:5](https://github.com/fderuiter/portfolio/blob/main/hooks/useResizeObserver.ts#L5)
+Defined in: [hooks/useResizeObserver.ts:6](https://github.com/fderuiter/portfolio/blob/main/hooks/useResizeObserver.ts#L6)
 
 ## Type Parameters
 
