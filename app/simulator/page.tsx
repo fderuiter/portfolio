@@ -21,6 +21,7 @@ import { NextPrevNav } from "@/components/ui/NextPrevNav";
 import { PageLayout } from "@/components/PageLayout";
 import { useClipboard } from "@/hooks/useClipboard";
 import { getActiveHostUrl } from "@/lib/clipboard";
+import { useStudioHashParams } from "@/hooks/useStudioHashParams";
 
 interface Option {
   text: string;
@@ -100,14 +101,92 @@ const branchingQuestions: Record<string, Question> = {
   },
 };
 
+function parseAnsIndices(ansStr: string | undefined): number[] {
+  if (!ansStr) return [];
+  return ansStr
+    .split(",")
+    .map((s) => parseInt(s.trim(), 10))
+    .filter((n) => !isNaN(n));
+}
+
+function replaySimulatorHistory(ansIndices: number[]): {
+  replayedStep: string;
+  replayedHistory: string[];
+  replayedAnswers: Option[];
+} {
+  let step = "welcome";
+  const history: string[] = [];
+  const answers: Option[] = [];
+
+  for (const idx of ansIndices) {
+    const question = branchingQuestions[step];
+    if (!question || !question.options[idx]) {
+      break;
+    }
+    const option = question.options[idx];
+    history.push(step);
+    answers.push(option);
+    step = option.nextStep;
+  }
+
+  return { replayedStep: step, replayedHistory: history, replayedAnswers: answers };
+}
+
 export default function RecruiterSimulator() {
   const { recordEvent } = useTelemetry();
   const { playNote, playSuccess } = useAudio();
   const { announce } = useAnnouncer();
   const cardRef = useRef<HTMLDivElement>(null);
-  const [currentStep, setCurrentStep] = useState<string>("welcome");
-  const [history, setHistory] = useState<string[]>([]);
-  const [answers, setAnswers] = useState<Option[]>([]);
+  const { params, setParams } = useStudioHashParams();
+
+  const [currentStep, setCurrentStep] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const rawHash = window.location.hash.startsWith("#")
+        ? window.location.hash.slice(1)
+        : window.location.hash;
+      const searchParams = new URLSearchParams(rawHash);
+      const rawStep = searchParams.get("step");
+      const rawAns = searchParams.get("ans");
+      const ansIndices = parseAnsIndices(rawAns || undefined);
+      const replayed = replaySimulatorHistory(ansIndices);
+      if (rawStep && (branchingQuestions[rawStep] || rawStep === "final_eval")) {
+        return rawStep;
+      }
+      if (replayed.replayedStep) {
+        return replayed.replayedStep;
+      }
+    }
+    return "welcome";
+  });
+
+  const [history, setHistory] = useState<string[]>(() => {
+    if (typeof window !== "undefined") {
+      const rawHash = window.location.hash.startsWith("#")
+        ? window.location.hash.slice(1)
+        : window.location.hash;
+      const searchParams = new URLSearchParams(rawHash);
+      const rawAns = searchParams.get("ans");
+      const ansIndices = parseAnsIndices(rawAns || undefined);
+      const replayed = replaySimulatorHistory(ansIndices);
+      return replayed.replayedHistory;
+    }
+    return [];
+  });
+
+  const [answers, setAnswers] = useState<Option[]>(() => {
+    if (typeof window !== "undefined") {
+      const rawHash = window.location.hash.startsWith("#")
+        ? window.location.hash.slice(1)
+        : window.location.hash;
+      const searchParams = new URLSearchParams(rawHash);
+      const rawAns = searchParams.get("ans");
+      const ansIndices = parseAnsIndices(rawAns || undefined);
+      const replayed = replaySimulatorHistory(ansIndices);
+      return replayed.replayedAnswers;
+    }
+    return [];
+  });
+
   const { copy, copied, error } = useClipboard({
     successMessage: "Engineering alignment assessment report successfully copied to clipboard!",
     errorMessage: "Unable to copy engineering assessment to clipboard",
@@ -121,6 +200,28 @@ export default function RecruiterSimulator() {
     recordEvent("simulator", "page_view");
   }, [recordEvent]);
 
+  // Synchronize incoming hash state on mount or browser Back/Forward navigation
+  useEffect(() => {
+    const ansIndices = parseAnsIndices(params.ans);
+    const replayed = replaySimulatorHistory(ansIndices);
+
+    let targetStep = params.step || replayed.replayedStep;
+    if (!branchingQuestions[targetStep] && targetStep !== "final_eval") {
+      targetStep = "welcome";
+    }
+
+    if (
+      targetStep !== currentStep ||
+      replayed.replayedHistory.length !== history.length ||
+      replayed.replayedAnswers.length !== answers.length
+    ) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCurrentStep(targetStep);
+      setHistory(replayed.replayedHistory);
+      setAnswers(replayed.replayedAnswers);
+    }
+  }, [params.step, params.ans, currentStep, history.length, answers.length]);
+
   // Delayed focus redirection to the active question card after step transition animation completes
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -132,33 +233,79 @@ export default function RecruiterSimulator() {
   const handleSelectOption = useCallback(
     (option: Option) => {
       playNote(440 + answers.length * 110, 0.1);
-      setAnswers((prev) => [...prev, option]);
-      setHistory((prev) => [...prev, currentStep]);
-      setCurrentStep(option.nextStep);
+
+      const optionIdx = branchingQuestions[currentStep]?.options.findIndex(
+        (o) => o.text === option.text
+      );
+
+      const currentAnsIndices = parseAnsIndices(params.ans);
+      const newAnsIndices =
+        optionIdx !== undefined && optionIdx !== -1
+          ? [...currentAnsIndices, optionIdx]
+          : currentAnsIndices;
+      const newAnsStr = newAnsIndices.join(",");
+
+      const newAnswers = [...answers, option];
+      const newHistory = [...history, currentStep];
+      const nextStep = option.nextStep;
+
+      setAnswers(newAnswers);
+      setHistory(newHistory);
+      setCurrentStep(nextStep);
+
+      setParams(
+        {
+          step: nextStep === "welcome" ? null : nextStep,
+          ans: newAnsStr || null,
+        },
+        { replace: false }
+      );
 
       recordEvent("simulator", "project_click");
-      if (option.nextStep === "final_eval") {
+      if (nextStep === "final_eval") {
         playSuccess();
       } else {
         announce("Step completed", "polite");
       }
     },
-    [answers.length, currentStep, playNote, playSuccess, recordEvent, announce]
+    [answers, currentStep, history, params.ans, playNote, playSuccess, recordEvent, announce, setParams]
   );
 
   const handleBack = useCallback(() => {
     if (history.length === 0) return;
     const previousStep = history[history.length - 1];
-    setHistory((prev) => prev.slice(0, -1));
-    setAnswers((prev) => prev.slice(0, -1));
+    const newHistory = history.slice(0, -1);
+    const newAnswers = answers.slice(0, -1);
+    const currentAnsIndices = parseAnsIndices(params.ans);
+    const newAnsIndices = currentAnsIndices.slice(0, -1);
+    const newAnsStr = newAnsIndices.length > 0 ? newAnsIndices.join(",") : null;
+
+    setHistory(newHistory);
+    setAnswers(newAnswers);
     setCurrentStep(previousStep);
-  }, [history]);
+
+    setParams(
+      {
+        step: previousStep === "welcome" ? null : previousStep,
+        ans: newAnsStr,
+      },
+      { replace: false }
+    );
+  }, [history, answers, params.ans, setParams]);
 
   const handleReset = useCallback(() => {
     setHistory([]);
     setAnswers([]);
     setCurrentStep("welcome");
-  }, []);
+
+    setParams(
+      {
+        step: null,
+        ans: null,
+      },
+      { replace: false }
+    );
+  }, [setParams]);
 
   const calculateProfile = useCallback(() => {
     const total = answers.reduce(

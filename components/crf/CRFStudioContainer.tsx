@@ -179,32 +179,33 @@ export const CRFStudioContainer: React.FC = () => {
 
   // Synchronize incoming hash state on mount or browser Back/Forward navigation
   useEffect(() => {
-    const rawMode = params.mode as StudioMode | undefined;
-    if (rawMode && ["designer", "matrix", "rules", "edc", "acrf", "export"].includes(rawMode)) {
-      if (rawMode !== activeMode) {
+    const targetMode = (params.mode as StudioMode | undefined) || "designer";
+    if (["designer", "matrix", "rules", "edc", "acrf", "export"].includes(targetMode)) {
+      if (targetMode !== activeMode) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setActiveModeState(rawMode);
+        setActiveModeState(targetMode);
       }
     }
 
-    const rawForm = params.form;
-    if (rawForm && study.forms.some((f) => f.id === rawForm)) {
-      if (rawForm !== activeFormId) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setActiveFormIdState(rawForm);
-      }
+    const defaultFormId = study.forms[0]?.id || "";
+    const targetForm = params.form && study.forms.some((f) => f.id === params.form)
+      ? params.form
+      : defaultFormId;
+    if (targetForm && targetForm !== activeFormId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setActiveFormIdState(targetForm);
     }
 
-    const rawField = params.field || null;
-    if (rawField !== selectedFieldId) {
+    const targetField = params.field || null;
+    if (targetField !== selectedFieldId) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSelectedFieldIdState(rawField);
+      setSelectedFieldIdState(targetField);
     }
 
-    const rawTab = params.tab;
-    if ((rawTab === "forms" || rawTab === "palette") && rawTab !== leftTab) {
+    const targetTab = params.tab === "palette" ? "palette" : "forms";
+    if (targetTab !== leftTab) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setLeftTabState(rawTab);
+      setLeftTabState(targetTab);
     }
 
     const rawTheme = params.theme as StudioTheme | undefined;
@@ -213,7 +214,7 @@ export const CRFStudioContainer: React.FC = () => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setTheme(rawTheme);
       }
-    } else if (rawTheme === undefined && params.theme === "" && theme !== "dark") {
+    } else if (params.theme === "" && theme !== "dark") {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setTheme("dark");
     }

@@ -187,11 +187,11 @@ export function ProofWorkspaceClient() {
 
   // Synchronize incoming hash state on mount or browser Back/Forward navigation
   useEffect(() => {
-    const rawTh = params.theorem as TheoremId | undefined;
-    if (rawTh && THEOREMS[rawTh] && rawTh !== activeTheoremId) {
-      const nextTh = THEOREMS[rawTh];
+    const targetTh = (params.theorem as TheoremId | undefined) || "modus-ponens";
+    if (THEOREMS[targetTh] && targetTh !== activeTheoremId) {
+      const nextTh = THEOREMS[targetTh];
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setActiveTheoremId(rawTh);
+      setActiveTheoremId(targetTh);
       setEdges(nextTh.initialEdges);
       setSelectedNodeIds([]);
       setInspectedNodeIdState(nextTh.targetNodeId);
@@ -199,18 +199,19 @@ export function ProofWorkspaceClient() {
       setCurrentFallacy(null);
     }
 
-    const rawTab = params.tab as "ledger" | "systems" | "fallacy" | undefined;
-    if (rawTab && ["ledger", "systems", "fallacy"].includes(rawTab) && rawTab !== activeTab) {
+    const targetTab = (params.tab as "ledger" | "systems" | "fallacy" | undefined) || "ledger";
+    if (["ledger", "systems", "fallacy"].includes(targetTab) && targetTab !== activeTab) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setActiveTabState(rawTab);
+      setActiveTabState(targetTab);
     }
 
-    const rawInspect = params.inspect;
-    if (rawInspect && rawInspect !== inspectedNodeId) {
+    const currentTh = THEOREMS[targetTh] || activeTheorem;
+    const targetInspect = params.inspect || currentTh.targetNodeId;
+    if (targetInspect !== inspectedNodeId) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setInspectedNodeIdState(rawInspect);
+      setInspectedNodeIdState(targetInspect);
     }
-  }, [params, activeTheoremId, activeTab, inspectedNodeId]);
+  }, [params, activeTheoremId, activeTab, inspectedNodeId, activeTheorem]);
 
   const setActiveTab = (tab: "ledger" | "systems" | "fallacy") => {
     setActiveTabState(tab);
