@@ -14,8 +14,7 @@ import {
   EditCheckRule,
   StudyVisit,
 } from "@/lib/crf/types";
-import { STUDY_PRESETS } from "@/lib/crf/presets";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
+import { getPresetById, getOncologyPresetSync } from "@/lib/crf/presets/loader";
 import { StudioHeader } from "./StudioHeader";
 import { FormsNavigator } from "./LeftSidebar/FormsNavigator";
 import { WidgetPalette } from "./LeftSidebar/WidgetPalette";
@@ -36,6 +35,7 @@ import {
   RuleGraphStudioSkeleton,
   LiveEdcSimulatorSkeleton,
   WorkflowWizardModalSkeleton,
+  CRFStudioSkeleton,
 } from "./Skeletons";
 
 const VisitMatrixEditor = dynamic(
@@ -85,14 +85,14 @@ import {
 export const CRFStudioContainer: React.FC = () => {
   // Study State & History
   const [study, setStudy] = useState<StudyProtocol>(() => {
-    // Check if user has a custom cached default branding profile in localStorage
+    const preset = getOncologyPresetSync();
     if (typeof window !== "undefined") {
       try {
         const cached = localStorage.getItem("crf_studio_default_branding");
         if (cached) {
           const parsedBranding = JSON.parse(cached);
           return {
-            ...ONCOLOGY_RECIST_PRESET,
+            ...preset,
             branding: parsedBranding,
           };
         }
@@ -100,8 +100,9 @@ export const CRFStudioContainer: React.FC = () => {
         // Fallback to preset
       }
     }
-    return ONCOLOGY_RECIST_PRESET;
+    return preset;
   });
+
   const [history, setHistory] = useState<StudyProtocol[]>([]);
   const [future, setFuture] = useState<StudyProtocol[]>([]);
 
@@ -120,15 +121,22 @@ export const CRFStudioContainer: React.FC = () => {
     return "designer";
   });
 
-  const [activeFormId, setActiveFormIdState] = useState<string>(() => {
-    if (typeof window !== "undefined") {
-      const rawForm = new URLSearchParams(window.location.hash.slice(1)).get("form");
-      if (rawForm && study.forms.some((f) => f.id === rawForm)) {
-        return rawForm;
+  const [activeFormId, setActiveFormIdState] = useState<string>("");
+
+  useEffect(() => {
+    if (study && !activeFormId) {
+      if (typeof window !== "undefined") {
+        const rawForm = new URLSearchParams(window.location.hash.slice(1)).get("form");
+        if (rawForm && study.forms.some((f) => f.id === rawForm)) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setActiveFormIdState(rawForm);
+          return;
+        }
       }
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setActiveFormIdState(study.forms[0]?.id || "");
     }
-    return study.forms[0]?.id || "";
-  });
+  }, [study, activeFormId]);
 
   const [selectedFieldId, setSelectedFieldIdState] = useState<string | null>(() => {
     if (typeof window !== "undefined") {
@@ -192,8 +200,8 @@ export const CRFStudioContainer: React.FC = () => {
       }
     }
 
-    const defaultFormId = study.forms[0]?.id || "";
-    const targetForm = params.form && study.forms.some((f) => f.id === params.form)
+    const defaultFormId = study?.forms[0]?.id || "";
+    const targetForm = params.form && study?.forms.some((f) => f.id === params.form)
       ? params.form
       : defaultFormId;
     if (targetForm && targetForm !== activeFormId) {
@@ -223,7 +231,7 @@ export const CRFStudioContainer: React.FC = () => {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setTheme("dark");
     }
-  }, [params, study.forms, activeMode, activeFormId, selectedFieldId, leftTab, theme]);
+  }, [params, study?.forms, activeMode, activeFormId, selectedFieldId, leftTab, theme]);
 
   // Synchronized Setters with Hybrid Navigation
   const setActiveMode = useCallback(
@@ -237,7 +245,7 @@ export const CRFStudioContainer: React.FC = () => {
   const setActiveFormId = useCallback(
     (formId: string) => {
       setActiveFormIdState(formId);
-      const isDefault = formId === study.forms[0]?.id;
+      const isDefault = formId === study?.forms?.[0]?.id;
       setParams(
         {
           form: isDefault ? null : formId,
@@ -246,7 +254,7 @@ export const CRFStudioContainer: React.FC = () => {
         { replace: true }
       );
     },
-    [setParams, study.forms]
+    [setParams, study?.forms]
   );
 
   const setSelectedFieldId = useCallback(
@@ -402,9 +410,24 @@ export const CRFStudioContainer: React.FC = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleUndo, handleRedo, selectedFieldId, setActiveMode, setSelectedFieldId]);
 
-  const activeForm = study.forms.find((f) => f.id === activeFormId) || study.forms[0];
+  const handleSaveCodelist = useCallback(
+    (newCodelist: import("@/lib/crf/types").CodelistDefinition) => {
+      if (!study) return;
+      updateStudyWithHistory({
+        ...study,
+        codelists: [...study.codelists.filter((cl) => cl.id !== newCodelist.id), newCodelist],
+      });
+    },
+    [study, updateStudyWithHistory]
+  );
+
+  const activeForm = study?.forms?.find((f) => f.id === activeFormId) || study?.forms?.[0];
   const allFields = activeForm ? activeForm.sections.flatMap((s) => s.fields) : [];
   const selectedField = allFields.find((f) => f.id === selectedFieldId) || null;
+
+  if (!study || !study.forms) {
+    return <CRFStudioSkeleton />;
+  }
 
   // Select Field on Mobile automatically slides in Inspector or updates tab
   const handleSelectField = (fieldId: string | null) => {
@@ -415,11 +438,11 @@ export const CRFStudioContainer: React.FC = () => {
   };
 
   // Preset Selector Handler
-  const handleSelectPreset = (presetId: string) => {
-    const found = STUDY_PRESETS.find((p) => p.id === presetId);
-    if (found) {
-      updateStudyWithHistory(found.study);
-      setActiveFormId(found.study.forms[0]?.id || "");
+  const handleSelectPreset = async (presetId: string) => {
+    const preset = await getPresetById(presetId);
+    if (preset) {
+      updateStudyWithHistory(preset);
+      setActiveFormId(preset.forms[0]?.id || "");
       setSelectedFieldId(null);
     }
   };
@@ -598,16 +621,6 @@ export const CRFStudioContainer: React.FC = () => {
       branding: newBranding,
     });
   };
-
-  const handleSaveCodelist = useCallback(
-    (newCodelist: import("@/lib/crf/types").CodelistDefinition) => {
-      updateStudyWithHistory({
-        ...study,
-        codelists: [...study.codelists.filter((cl) => cl.id !== newCodelist.id), newCodelist],
-      });
-    },
-    [study, updateStudyWithHistory]
-  );
 
   const activeBranding = getStudyBranding(study);
 
