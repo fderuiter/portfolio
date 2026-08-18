@@ -19,7 +19,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 ### 2. Layout & Component Hierarchy
 - `app/layout.tsx` renders the global `<Navbar />` and top-level providers (`AudioProvider`, `SearchProvider`).
-- Route pages (e.g. `app/proof/page.tsx`, `app/simulator/page.tsx`, `app/schedule/page.tsx`, `app/stack/page.tsx`) must never render a secondary `<Navbar />` component.
+- Route pages (e.g. `app/proof/page.tsx`, `app/simulator/page.tsx`, `app/schedule/page.tsx`, `app/stack/page.tsx`, `app/work/laser-loon/page.tsx`) must never render a secondary `<Navbar />` component.
 - Route entrypoint files (`app/**/page.tsx`) must directly declare root header clearance padding (`pt-24` to `pt-32` or `min-h-screen`/`min-h-dvh` or `<PageLayout />`) to satisfy static DX Doctor invariant audits.
 
 ### 3. Route Indexing & Discovery
