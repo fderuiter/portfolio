@@ -116,6 +116,70 @@ export const IMEDNET_PLAYBACK_OBJ = [
   }
 ];
 
+export const PROMPTOPS_COMMANDS_OBJ = {
+  "promptops init --template clinical": {
+    description: "Initialize a new PromptOps project with clinical workflow schemas and macros.",
+    payload: {
+      project: "clinical-trial-audit",
+      schemaVersion: "Draft-07",
+      templatesCreated: [
+        "prompts/consensus.prompt.yaml",
+        "workflows/clinical/consensus.workflow.yaml",
+        "templates/macros.j2"
+      ],
+      status: "INITIALIZED"
+    }
+  },
+  "promptops validate --all": {
+    description: "Run two-pass schema validation against Draft-07 JSON schemas and Jinja2 macros.",
+    payload: {
+      passed: true,
+      schemasChecked: 8,
+      twoPassValidation: "PASSED (Raw structural & Jinja2 rendered templates)",
+      macroLibraries: ["macros.j2", "reasoning_formats.j2"],
+      typeErrors: 0
+    }
+  },
+  "promptops run --workflow workflows/clinical/consensus.workflow.yaml": {
+    description: "Execute multi-agent DAG workflow pipeline with topological sorting and tool resolution.",
+    payload: {
+      workflowID: "clinical-consensus-arbitration",
+      steps: ["parse_protocol", "check_biosafety", "arbitrate_consensus", "sign_audit"],
+      topologicalOrder: ["step_1", "step_2", "step_3"],
+      mcpToolsCalled: ["fda_regulations_query", "cdisc_sdtm_validator"],
+      auditHash: "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "promptops mcp serve": {
+    description: "Start Model Context Protocol (MCP) server exposing PromptOps tools and prompt library.",
+    payload: {
+      protocolVersion: "2024-11-05",
+      serverStatus: "LISTENING",
+      registeredTools: ["mcp_validate_prompt", "mcp_execute_workflow", "mcp_audit_log"],
+      port: 8080
+    }
+  }
+};
+
+export const PROMPTOPS_PLAYBACK_OBJ = [
+  {
+    command: "promptops init --template clinical",
+    description: "Initialize PromptOps project with clinical workflow schemas"
+  },
+  {
+    command: "promptops validate --all",
+    description: "Run two-pass schema validation on prompts and macros"
+  },
+  {
+    command: "promptops run --workflow workflows/clinical/consensus.workflow.yaml",
+    description: "Execute multi-agent DAG workflow pipeline with tool resolution"
+  },
+  {
+    command: "promptops mcp serve",
+    description: "Start native Model Context Protocol (MCP) tool server"
+  }
+];
+
 const rawFallbackCaseStudies: CaseStudyData[] = [
   {
     id: "canonical-1",
@@ -330,6 +394,49 @@ interface SchemaNode {
 <h4>3. The AST Compiler</h4>
 <p>When state is pushed, the compiler resolves node connections into a unified AST. It then generates valid <strong>JSON Schema Draft-07</strong> or <strong>OpenAPI v3</strong> specs. The entire compilation runs in an isolated context, returning a structured output that can be directly copy-pasted or pushed to a schema registry.</p>`,
     created_at: new Date("2026-02-15T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-6",
+    slug: "promptops",
+    title: "PromptOps: Schema-Driven AI Prompt & Multi-Agent Orchestration Framework",
+    primary_language: "Python",
+    github_url: "https://github.com/fderuiter/PromptOps",
+    published: true,
+    simulated_telemetry: false,
+    tags: "Python, LLMOps, Model Context Protocol, Streamlit, Pydantic, JSON Schema",
+    editorial_content: "A **schema-driven, enterprise-grade framework** that applies **DevOps** and software engineering principles to prompt engineering, `multi-agent LLM orchestration`, and **Model Context Protocol (MCP)** tooling. Built with **Python**, **Pydantic**, **Jinja2**, and **Streamlit**.",
+    architectural_narrative: `<h3>The Challenge</h3>
+<p>Generative AI workflows in production often suffer from fragmented prompt strings, unvalidated LLM output formats, non-deterministic agent interactions, and an absence of auditability. Enterprise environments in clinical, technical, and regulatory domains require strict JSON Schema enforcement, declarative version-controlled workflows, and tamper-evident compliance trails.</p>
+
+<h3>Technical Architecture</h3>
+<p>PromptOps treats prompts and multi-agent chains as first-class software artifacts governed by declarative schemas, two-pass compile-time validation, directed acyclic graph (DAG) execution, and Model Context Protocol (MCP) tool bindings.</p>
+
+<pre><code class="language-python">
+# Pydantic v2 Contract for Prompt Specification
+from pydantic import BaseModel, Field
+from typing import List, Dict, Any, Optional
+
+class PromptSpecification(BaseModel):
+    name: str
+    version: str = "1.0.0"
+    domain: str
+    template: str
+    input_schema: Dict[str, Any] = Field(..., alias="inputSchema")
+    model_parameters: Dict[str, Any] = Field(..., alias="modelParameters")
+</code></pre>
+
+<h4>1. Schema-First Declarative Specification</h4>
+<p>All prompts (<code>.prompt.yaml</code>) and workflows (<code>.workflow.yaml</code>) are strictly validated against Draft-07 JSON Schemas. PromptOps enforces a <strong>Two-Pass Validation Engine</strong> that verifies raw structural definitions and rendered Jinja2 template outputs against parameter boundaries and variable dependencies prior to API invocation.</p>
+
+<h4>2. DAG Workflow Engine &amp; Topological Dispatch</h4>
+<p>Multi-step agent pipelines are executed as Directed Acyclic Graphs (DAGs). The execution dispatcher topologically sorts steps, manages state propagation across prompt edges, resolves MCP tool stubs dynamically, and supports dry-run sandboxed simulations without incurring live LLM API costs.</p>
+
+<h4>3. Model Context Protocol (MCP) &amp; Signed Audit Trails</h4>
+<p>An integrated Model Context Protocol server (<code>mcp_server.py</code>) exposes PromptOps capabilities to external client tools. Every execution run generates tamper-evident, cryptographically signed audit manifests (<code>compliance_manifest.json</code>) designed to satisfy GxP, FDA, and regulatory compliance standards.</p>`,
+    commands_json: JSON.stringify(PROMPTOPS_COMMANDS_OBJ),
+    playback_json: JSON.stringify(PROMPTOPS_PLAYBACK_OBJ),
+    created_at: new Date("2026-03-01T00:00:00Z"),
     updated_at: new Date("2026-08-14T00:00:00Z"),
   },
 ];

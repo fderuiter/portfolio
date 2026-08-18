@@ -26,7 +26,9 @@ export const CANONICAL_ROUTES: PageBenchmarkRoute[] = [
   { path: "/schedule", name: "Schedule / Calendar", category: "top-level" },
   { path: "/offline", name: "Offline Fallback View", category: "top-level" },
 
-  // Deep Case Studies
+  // Deep Case Studies & Frameworks
+  { path: "/projects/promptops", name: "Project: PromptOps Framework", category: "tool" },
+  { path: "/case-studies/promptops", name: "CS: PromptOps AI Framework", category: "case-study" },
   { path: "/case-studies/clinical-data-mapper", name: "CS: Clinical Data Mapper", category: "case-study" },
   { path: "/case-studies/cadence-clinical", name: "CS: Cadence Clinical", category: "case-study" },
   { path: "/case-studies/schemaflow", name: "CS: SchemaFlow", category: "case-study" },

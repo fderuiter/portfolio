@@ -10,6 +10,12 @@ export interface RouteMetaConfig {
 }
 
 export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
+  promptops: {
+    title: "PromptOps: AI Prompt Engineering & Workflow Orchestration Framework",
+    description: "Schema-driven, enterprise-grade AI prompt engineering framework, multi-agent LLM DAG orchestration engine, Model Context Protocol (MCP) tool server, and signed compliance audit trails.",
+    path: "/projects/promptops",
+    keywords: ["PromptOps", "LLMOps", "Prompt Engineering", "Model Context Protocol", "MCP", "Streamlit", "Pydantic", "JSON Schema", "DAG Workflows", "Python"],
+  },
   crf: {
     title: "CRF Studio: Next-Gen Clinical Form & Protocol Designer",
     description: "Zero-latency clinical trial form designer and EDC simulator with 12-column responsive layout, AST-powered edit checks, CDISC CDASH 2.2 / ODM-XML v1.3.2 compliance, and live publication aCRF overlays.",

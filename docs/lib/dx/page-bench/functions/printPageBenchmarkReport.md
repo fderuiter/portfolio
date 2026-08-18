@@ -8,7 +8,7 @@
 
 > **printPageBenchmarkReport**(`summaries`, `baseUrl?`): `void`
 
-Defined in: [lib/dx/page-bench.ts:358](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L358)
+Defined in: [lib/dx/page-bench.ts:360](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L360)
 
 Render Formatted Terminal Table with Core Web Vitals Ratings
 

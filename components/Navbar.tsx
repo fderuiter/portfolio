@@ -87,6 +87,12 @@ const ARCADE_ITEMS: SubNavItem[] = [
 
 const SYSTEMS_ITEMS: SubNavItem[] = [
   {
+    title: "PromptOps AI Framework",
+    subtitle: "AI prompt engineering & multi-agent DAG engine",
+    href: "/projects/promptops",
+    icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />,
+  },
+  {
     title: "Under the Hood (Stack)",
     subtitle: "Interactive architecture & live telemetry",
     href: "/stack",
@@ -801,6 +807,17 @@ export const Navbar: React.FC = () => {
                   <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 font-bold px-1">
                     Systems Studios &amp; Arcade
                   </span>
+                  <Link
+                    href="/projects/promptops"
+                    onClick={(e) => handleNavClick(e, "/projects/promptops")}
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between active:scale-[0.99] transition-all"
+                  >
+                    <span className="flex items-center gap-2">
+                      <IconTerminal className="w-4 h-4 text-brand-cyan" />
+                      PromptOps AI Framework
+                    </span>
+                    <span className="text-[10px] font-mono text-brand-cyan px-1.5 py-0.5 rounded bg-brand-cyan/10">MCP / LLM</span>
+                  </Link>
                   <Link
                     href="/crf"
                     onClick={(e) => handleNavClick(e, "/crf")}

@@ -11,6 +11,7 @@ import { getSoftwareSourceCodeSchema } from "@/lib/seo";
 import { TelemetryTracker } from "@/components/TelemetryTracker";
 import { TerminologyToggle } from "@/components/TerminologyToggle";
 import SchemaFlowWorkspaceWrapper from "@/components/SchemaFlowWorkspaceWrapper";
+import { PromptOpsArchitectureDiagram } from "@/components/PromptOpsArchitectureDiagram";
 import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
@@ -234,17 +235,24 @@ export default async function CaseStudyPage({ params }: PageProps) {
               ))}
             </div>
 
-            {/* Interactive Sandbox Terminal Shell (Issue #42) */}
-            {slug === "imednet-python-sdk" && (
+            {/* Interactive Sandbox Terminal Shell */}
+            {(slug === "imednet-python-sdk" || slug === "promptops") && (
               <div className="mt-12 border-t border-zinc-900/50 pt-10">
                 <h2 className="text-xl font-bold font-sans text-neutral-100 mb-3 flex items-center gap-2">
                   <IconTerminal className="w-5 h-5 text-brand-cyan" />
                   Interactive CLI Developer Sandbox
                 </h2>
                 <p className="text-xs font-mono text-zinc-500 mb-6 leading-relaxed">
-                  Test clinical trial EDC operations and view structured telemetry outputs directly inside the browser. Use the interactive badges or type &apos;help&apos; inside the prompt.
+                  Test operations and view structured telemetry outputs directly inside the browser. Use the interactive badges or type &apos;help&apos; inside the prompt.
                 </p>
                 <SandboxTerminal commands={commands} playback={playback} slug={slug} />
+              </div>
+            )}
+
+            {/* Interactive PromptOps Architecture Diagram */}
+            {slug === "promptops" && (
+              <div className="mt-12 border-t border-zinc-900/50 pt-10">
+                <PromptOpsArchitectureDiagram />
               </div>
             )}
 

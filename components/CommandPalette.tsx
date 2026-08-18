@@ -310,6 +310,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         ]
       },
       {
+        id: "nav-promptops",
+        title: "PromptOps AI Framework",
+        subtitle: "Schema-driven prompt engineering & multi-agent LLM DAG orchestration",
+        category: "navigation",
+        url: "/projects/promptops",
+        icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />,
+        badge: "AI Framework",
+        status: "Production LLMOps",
+        description: "Enterprise-grade prompt engineering framework applying DevOps rigor, Draft-07 JSON Schema validation, Model Context Protocol (MCP) tooling, and signed audit trails.",
+        techStack: ["Python", "LLMOps", "Model Context Protocol", "Streamlit", "Pydantic", "JSON Schema"],
+        highlights: [
+          "Interactive DAG workflow engine visualizer",
+          "Two-pass Draft-07 & Jinja2 schema validator",
+          "Native Model Context Protocol (MCP) tool server"
+        ]
+      },
+      {
         id: "nav-crf",
         title: "CRF Studio: Clinical Form & Protocol Designer",
         subtitle: "Zero-latency 12-column visual CRF builder, AST edit check logic, CDISC CDASH/ODM-XML, and live Part 11 EDC simulator",

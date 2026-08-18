@@ -206,6 +206,16 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <Link
+                  href="/projects/promptops"
+                  onMouseEnter={handleHover}
+                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                >
+                  <IconTerminal className="w-3 h-3 text-brand-cyan" />
+                  PromptOps AI Framework
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/stack"
                   onMouseEnter={handleHover}
                   className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"

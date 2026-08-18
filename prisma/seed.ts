@@ -7,7 +7,7 @@ import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "../app/generated/prisma/client";
 import ws from "ws";
 import { scanFile, scanText } from "../lib/validation-scanner";
-import { IMEDNET_COMMANDS_OBJ, IMEDNET_PLAYBACK_OBJ } from "../lib/case-studies-data";
+import { IMEDNET_COMMANDS_OBJ, IMEDNET_PLAYBACK_OBJ, PROMPTOPS_COMMANDS_OBJ, PROMPTOPS_PLAYBACK_OBJ } from "../lib/case-studies-data";
 import { compileTerms } from "../lib/term-compiler";
 
 neonConfig.webSocketConstructor = ws;
@@ -225,6 +225,48 @@ interface HouseholdRSVP {
 
 <h4>3. Design Craft &amp; Canvas Physics</h4>
 <p>Bespoke typography, smooth Framer Motion layout transitions, and subtle particle physics create a warm, unforgettable digital invitation that marries aesthetic beauty with rock-solid full-stack engineering.</p>
+    `.trim(),
+  },
+  {
+    slug: "promptops",
+    title: "PromptOps: Schema-Driven AI Prompt & Multi-Agent Orchestration Framework",
+    primary_language: "Python",
+    github_url: "https://github.com/fderuiter/PromptOps",
+    published: true,
+    simulated_telemetry: false,
+    tags: "Python, LLMOps, Model Context Protocol, Streamlit, Pydantic, JSON Schema",
+    commands_json: JSON.stringify(PROMPTOPS_COMMANDS_OBJ),
+    playback_json: JSON.stringify(PROMPTOPS_PLAYBACK_OBJ),
+    editorial_content: "A **schema-driven, enterprise-grade framework** that applies **DevOps** and software engineering principles to prompt engineering, `multi-agent LLM orchestration`, and **Model Context Protocol (MCP)** tooling. Built with **Python**, **Pydantic**, **Jinja2**, and **Streamlit**.",
+    architectural_narrative: `
+<h3>The Challenge</h3>
+<p>Generative AI workflows in production often suffer from fragmented prompt strings, unvalidated LLM output formats, non-deterministic agent interactions, and an absence of auditability. Enterprise environments in clinical, technical, and regulatory domains require strict JSON Schema enforcement, declarative version-controlled workflows, and tamper-evident compliance trails.</p>
+
+<h3>Technical Architecture</h3>
+<p>PromptOps treats prompts and multi-agent chains as first-class software artifacts governed by declarative schemas, two-pass compile-time validation, directed acyclic graph (DAG) execution, and Model Context Protocol (MCP) tool bindings.</p>
+
+<pre><code class="language-python">
+# Pydantic v2 Contract for Prompt Specification
+from pydantic import BaseModel, Field
+from typing import List, Dict, Any, Optional
+
+class PromptSpecification(BaseModel):
+    name: str
+    version: str = "1.0.0"
+    domain: str
+    template: str
+    input_schema: Dict[str, Any] = Field(..., alias="inputSchema")
+    model_parameters: Dict[str, Any] = Field(..., alias="modelParameters")
+</code></pre>
+
+<h4>1. Schema-First Declarative Specification</h4>
+<p>All prompts (<code>.prompt.yaml</code>) and workflows (<code>.workflow.yaml</code>) are strictly validated against Draft-07 JSON Schemas. PromptOps enforces a <strong>Two-Pass Validation Engine</strong> that verifies raw structural definitions and rendered Jinja2 template outputs against parameter boundaries and variable dependencies prior to API invocation.</p>
+
+<h4>2. DAG Workflow Engine &amp; Topological Dispatch</h4>
+<p>Multi-step agent pipelines are executed as Directed Acyclic Graphs (DAGs). The execution dispatcher topologically sorts steps, manages state propagation across prompt edges, resolves MCP tool stubs dynamically, and supports dry-run sandboxed simulations without incurring live LLM API costs.</p>
+
+<h4>3. Model Context Protocol (MCP) &amp; Signed Audit Trails</h4>
+<p>An integrated Model Context Protocol server (<code>mcp_server.py</code>) exposes PromptOps capabilities to external client tools. Every execution run generates tamper-evident, cryptographically signed audit manifests (<code>compliance_manifest.json</code>) designed to satisfy GxP, FDA, and regulatory compliance standards.</p>
     `.trim(),
   },
 ];
