@@ -6,15 +6,31 @@
 
 # Function: useTelemetry()
 
-> **useTelemetry**(): `object`
+> **useTelemetry**(`options?`): `object`
 
-Defined in: [hooks/useTelemetry.ts:186](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L186)
+Defined in: [hooks/useTelemetry.ts:259](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L259)
 
 Custom hook implementing a robust Stale-While-Revalidate (SWR) telemetry system with useSyncExternalStore.
 Hydrates state instantly from LocalStorage cache to prevent Cumulative Layout Shifts (CLS),
-schedules background syncs, and supports optimistic updates with automated rollback and retry queuing.
+schedules background syncs, and supports optimistic updates with automated retry queuing and FIFO eviction.
+
+## Parameters
+
+### options?
+
+[`UseTelemetryOptions`](../interfaces/UseTelemetryOptions.md)
+
+Optional configuration options including maximum retry queue capacity.
 
 ## Returns
+
+### queueCapacity
+
+> **queueCapacity**: `number`
+
+### queueLength
+
+> **queueLength**: `number`
 
 ### recordEvent
 

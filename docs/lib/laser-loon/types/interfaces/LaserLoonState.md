@@ -68,7 +68,7 @@ Defined in: [lib/laser-loon/types.ts:186](https://github.com/fderuiter/portfolio
 
 ### gameState
 
-> **gameState**: `"idle"` \| `"playing"` \| `"story-modal"` \| `"gameover"` \| `"victory"`
+> **gameState**: `"playing"` \| `"idle"` \| `"story-modal"` \| `"gameover"` \| `"victory"`
 
 Defined in: [lib/laser-loon/types.ts:170](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L170)
 

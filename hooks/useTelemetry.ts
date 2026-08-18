@@ -18,11 +18,14 @@ interface TelemetryStoreState {
   syncFailed: boolean;
 }
 
-interface QueuedEvent {
+export interface QueuedEvent {
   projectSlug: string;
   eventType: "page_view" | "project_click" | "route_error";
   retries: number;
 }
+
+export const DEFAULT_MAX_QUEUE_CAPACITY = 50;
+let maxQueueCapacity = DEFAULT_MAX_QUEUE_CAPACITY;
 
 // Global in-memory state
 let currentStoreState: TelemetryStoreState = {
@@ -34,6 +37,70 @@ let retryQueue: QueuedEvent[] = [];
 let retryTimer: NodeJS.Timeout | null = null;
 let lastRawCache: string | null = null;
 const listeners = new Set<() => void>();
+
+/**
+ * Configure the maximum capacity of the in-memory telemetry retry queue.
+ * Trims existing queue entries from the front (oldest first) if current length exceeds new capacity.
+ *
+ * @param capacity Maximum number of queued items permitted.
+ */
+export function setQueueCapacity(capacity: number): void {
+  if (capacity < 1) return;
+  maxQueueCapacity = capacity;
+  while (retryQueue.length > maxQueueCapacity) {
+    retryQueue.shift();
+  }
+}
+
+/**
+ * Get the current maximum capacity limit of the telemetry retry queue.
+ *
+ * @returns Current maximum item capacity limit.
+ */
+export function getQueueCapacity(): number {
+  return maxQueueCapacity;
+}
+
+/**
+ * Get a shallow copy of the current in-memory retry queue.
+ *
+ * @returns Array of currently queued telemetry events.
+ */
+export function getRetryQueue(): QueuedEvent[] {
+  return [...retryQueue];
+}
+
+/**
+ * Get the number of currently queued telemetry retry items.
+ *
+ * @returns Number of items currently in the retry queue.
+ */
+export function getRetryQueueLength(): number {
+  return retryQueue.length;
+}
+
+/**
+ * Clear all queued retry items and cancel any pending retry timers.
+ */
+export function clearRetryQueue(): void {
+  retryQueue = [];
+  if (retryTimer) {
+    clearTimeout(retryTimer);
+    retryTimer = null;
+  }
+}
+
+/**
+ * Enqueue a telemetry retry item using synchronous FIFO eviction when capacity is reached.
+ *
+ * @param item The telemetry event item to enqueue.
+ */
+export function enqueueRetryItem(item: QueuedEvent): void {
+  while (retryQueue.length >= maxQueueCapacity) {
+    retryQueue.shift();
+  }
+  retryQueue.push(item);
+}
 
 function notifyListeners() {
   listeners.forEach((listener) => listener());
@@ -160,12 +227,12 @@ async function processRetryQueue() {
 
       if (!response.ok) {
         if (response.status === 429 && item.retries < 3) {
-          retryQueue.push({ ...item, retries: item.retries + 1 });
+          enqueueRetryItem({ ...item, retries: item.retries + 1 });
         }
       }
     } catch {
       if (item.retries < 3) {
-        retryQueue.push({ ...item, retries: item.retries + 1 });
+        enqueueRetryItem({ ...item, retries: item.retries + 1 });
       }
     }
   }
@@ -178,12 +245,22 @@ async function processRetryQueue() {
   }
 }
 
+export interface UseTelemetryOptions {
+  maxQueueCapacity?: number;
+}
+
 /**
  * Custom hook implementing a robust Stale-While-Revalidate (SWR) telemetry system with useSyncExternalStore.
  * Hydrates state instantly from LocalStorage cache to prevent Cumulative Layout Shifts (CLS),
- * schedules background syncs, and supports optimistic updates with automated rollback and retry queuing.
+ * schedules background syncs, and supports optimistic updates with automated retry queuing and FIFO eviction.
+ *
+ * @param options Optional configuration options including maximum retry queue capacity.
  */
-export function useTelemetry() {
+export function useTelemetry(options?: UseTelemetryOptions) {
+  if (options?.maxQueueCapacity && options.maxQueueCapacity > 0) {
+    setQueueCapacity(options.maxQueueCapacity);
+  }
+
   const store = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   // Trigger SWR sync on mount
@@ -221,8 +298,8 @@ export function useTelemetry() {
         if (!response.ok) {
           if (response.status === 429) {
             console.warn("Telemetry record rate limited by API.");
-            // Enqueue for background retry
-            retryQueue.push({ projectSlug, eventType, retries: 0 });
+            // Enqueue for background retry with FIFO eviction guard
+            enqueueRetryItem({ projectSlug, eventType, retries: 0 });
             if (!retryTimer) {
               retryTimer = setTimeout(() => {
                 retryTimer = null;
@@ -254,5 +331,7 @@ export function useTelemetry() {
     syncFailed: store.syncFailed,
     recordEvent,
     refetch: fetchTelemetryAggregates,
+    queueLength: getRetryQueueLength(),
+    queueCapacity: getQueueCapacity(),
   };
 }

@@ -76,7 +76,7 @@ Defined in: [lib/garmin-engine.ts:122](https://github.com/fderuiter/portfolio/bl
 
 ### gameState
 
-> **gameState**: `"idle"` \| `"playing"` \| `"summary"` \| `"paused"` \| `"crashed"`
+> **gameState**: `"playing"` \| `"idle"` \| `"summary"` \| `"paused"` \| `"crashed"`
 
 Defined in: [lib/garmin-engine.ts:107](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L107)
 
