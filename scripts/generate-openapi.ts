@@ -244,7 +244,15 @@ export const openApiSpec = {
           },
           eventType: {
             type: "string",
-            enum: ["page_view", "project_click", "route_error"],
+            enum: [
+              "page_view",
+              "project_click",
+              "route_error",
+              "simulator_option_select",
+              "simulator_milestone_reached",
+              "simulator_schedule_click",
+              "simulator_report_copy",
+            ],
           },
         },
         required: ["projectSlug", "eventType"],

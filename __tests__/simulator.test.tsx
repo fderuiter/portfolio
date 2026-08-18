@@ -170,4 +170,46 @@ describe("RecruiterSimulator - Ecosystem-Aligned Accessibility Integration", () 
     });
     expect(foundArrow).toBe(true);
   });
+
+  it("transmits targeted telemetry events for option selection, milestone completion, schedule click, and report copy", () => {
+    render(<RecruiterSimulator />);
+
+    // Step 1: Option Select
+    const option1 = screen.getAllByText("Raw Systems & Performance Maverick")[0];
+    fireEvent.click(option1);
+    expect(mockRecordEvent).toHaveBeenCalledWith("simulator", "simulator_option_select");
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    // Step 2: Option Select
+    const option2 = screen.getAllByText("Engage Distributed Circuit Breaker & Fallback Queue")[0];
+    fireEvent.click(option2);
+    expect(mockRecordEvent).toHaveBeenCalledWith("simulator", "simulator_option_select");
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    // Step 3: Milestone Reached (Final step)
+    const option3 = screen.getAllByText("Enforce Exhaustive Idempotency Keys & Deduplication Window")[0];
+    fireEvent.click(option3);
+    expect(mockRecordEvent).toHaveBeenCalledWith("simulator", "simulator_option_select");
+    expect(mockRecordEvent).toHaveBeenCalledWith("simulator", "simulator_milestone_reached");
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    // Click Schedule on Google Calendar CTA
+    const scheduleLink = screen.getByText(/Schedule on Google Calendar/i);
+    fireEvent.click(scheduleLink);
+    expect(mockRecordEvent).toHaveBeenCalledWith("simulator", "simulator_schedule_click");
+
+    // Click Copy Report CTA
+    const copyBtn = screen.getByText(/Copy Report/i);
+    fireEvent.click(copyBtn);
+    expect(mockRecordEvent).toHaveBeenCalledWith("simulator", "simulator_report_copy");
+  });
 });
