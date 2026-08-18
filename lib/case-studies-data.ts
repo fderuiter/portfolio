@@ -332,6 +332,45 @@ interface SchemaNode {
     created_at: new Date("2026-02-15T00:00:00Z"),
     updated_at: new Date("2026-08-14T00:00:00Z"),
   },
+  {
+    id: "canonical-6",
+    slug: "hono-kiln",
+    title: "Hono-Kiln: Edge-Native Multi-Tenant Backend Runtime & Monorepo Scaffolding",
+    primary_language: "TypeScript",
+    github_url: "https://github.com/fderuiter/hono-kiln",
+    published: true,
+    simulated_telemetry: false,
+    tags: "TypeScript, Bun, Hono, Drizzle, Monorepo, Inngest, Clean Architecture, Docker",
+    editorial_content: "An enterprise-grade **TypeScript** scaffolding engine and backend runtime built on **Bun** and **Hono**. Features `modular clean architecture`, dynamic tenant-isolated module code generation, and automated schema migrations with sub-millisecond cold start execution.",
+    architectural_narrative: `<h3>The Challenge</h3>
+<p>Modern backend architectures frequently struggle between monolithic complexity and fragmented microservices. Full-stack TypeScript backends often suffer from high runtime overhead, inconsistent architectural patterns across feature teams, and cold-start latency spikes when deployed to serverless or edge environments.</p>
+
+<h3>Technical Architecture</h3>
+<p>Hono-Kiln is engineered around a modular monorepo structure separating HTTP transport, domain business logic, and persistence layers across clear workspace boundaries (<code>@kiln/api</code>, <code>@kiln/sdk</code>, <code>@kiln/shared</code>, <code>@kiln/testing</code>).</p>
+
+<pre><code class="language-typescript">
+// Type-Safe Tenant Auth Guard
+import { createMiddleware } from "hono/factory";
+
+export const tenantAuthGuard = createMiddleware(async (c, next) => {
+  const tenantId = c.req.header("x-tenant-id");
+  if (!tenantId) return c.json({ error: "Missing tenant identity" }, 401);
+  c.set("tenantId", tenantId);
+  await next();
+});
+</code></pre>
+
+<h4>1. Code-Generated Dynamic Module Scaffolding</h4>
+<p>CLI generators (<code>scripts/generate.ts</code>) dynamically provision tenant-isolated routes, repositories, and Drizzle schemas using lightweight templates, syncing OpenAPI specs automatically without manual registration.</p>
+
+<h4>2. Multi-Tenant Data Boundary Isolation</h4>
+<p>Contextual repository abstractions enforce tenant identity constraints on every database query, eliminating cross-tenant data leakage risks while maintaining clean separation of concerns.</p>
+
+<h4>3. Edge-Native Event-Driven Async Processing</h4>
+<p>Background workflows and async task queues are powered by Inngest functions embedded directly inside Hono, delivering event-driven reliability without needing persistent worker processes.</p>`,
+    created_at: new Date("2026-02-20T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
 ];
 
 export const FALLBACK_CASE_STUDIES: CaseStudyData[] = rawFallbackCaseStudies.map((cs) => ({
