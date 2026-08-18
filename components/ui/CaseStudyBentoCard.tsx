@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { cn } from "@/lib/utils";
 import { Card, CardTitle, type HeadingTag } from "@/components/BentoGrid";
 import { type ExtendedRichInlineItem } from "@/hooks/usePretextLayout";
 import { BaseCaseStudy } from "@/types/domain";
@@ -258,12 +259,10 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
 
   return (
     <Card
-      className={className}
+      className={cn("min-h-[var(--bento-card-height)] h-[var(--bento-card-height)] transition-[height,min-height] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]", className)}
       style={{
-        minHeight: cardHeightValue ? `${cardHeightValue}px` : "auto",
-        height: cardHeightValue ? `${cardHeightValue}px` : "auto",
-        transition: "height 250ms cubic-bezier(0.16, 1, 0.3, 1), min-height 250ms cubic-bezier(0.16, 1, 0.3, 1)",
-      }}
+        "--bento-card-height": cardHeightValue ? `${cardHeightValue}px` : "auto",
+      } as React.CSSProperties}
     >
       <div ref={innerRef} className="flex flex-col h-full justify-between gap-3 flex-1 min-h-0">
         <div>
@@ -288,7 +287,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
           <div className="flex p-0.5 bg-zinc-950/80 border border-zinc-900/80 rounded-lg mb-3 text-xs font-mono relative z-10 w-fit backdrop-blur-sm">
             <button
               onClick={() => handleToggleMode("pitch")}
-              className={`min-h-9 px-3.5 py-1.5 rounded-md border text-[11px] font-bold transition-all duration-200 cursor-pointer flex items-center justify-center ${
+              className={`min-h-[44px] px-3.5 py-1.5 rounded-md border text-[11px] font-bold transition-all duration-200 cursor-pointer flex items-center justify-center ${
                 mode === "pitch"
                   ? "bg-zinc-900 text-brand-cyan border-brand-cyan/30 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
                   : "border-transparent text-zinc-400 hover:text-zinc-200"
@@ -298,7 +297,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             </button>
             <button
               onClick={() => handleToggleMode("reality")}
-              className={`min-h-9 px-3.5 py-1.5 rounded-md border text-[11px] font-bold transition-all duration-200 cursor-pointer flex items-center justify-center ${
+              className={`min-h-[44px] px-3.5 py-1.5 rounded-md border text-[11px] font-bold transition-all duration-200 cursor-pointer flex items-center justify-center ${
                 mode === "reality"
                   ? "bg-zinc-900 text-brand-cyan border-brand-cyan/30 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
                   : "border-transparent text-zinc-400 hover:text-zinc-200"

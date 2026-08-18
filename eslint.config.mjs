@@ -41,6 +41,14 @@ const eslintConfig = defineConfig([
         {
           selector: "MemberExpression[object.name='navigator'][property.name='clipboard']",
           message: "Do not access navigator.clipboard directly. Use copyToClipboard from @/lib/clipboard, useClipboard hook from @/hooks/useClipboard, or <CopyButton /> component instead."
+        },
+        {
+          selector: "JSXAttribute[name.name='style'] ObjectExpression > Property[key.type='Identifier']",
+          message: "Unconstrained raw inline style property detected in JSX. Replace raw inline style properties with Tailwind utility classes or CSS custom variables (--*)."
+        },
+        {
+          selector: "JSXAttribute[name.name='style'] ObjectExpression > Property[key.type='Literal'][key.value=/^(?!--).*/]",
+          message: "Unconstrained raw inline style property detected in JSX. Replace raw inline style properties with Tailwind utility classes or CSS custom variables (--*)."
         }
       ]
     }

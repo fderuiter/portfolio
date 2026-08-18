@@ -125,10 +125,9 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
                     viewport={{ once: true }}
                     transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.8, delay: idx * 0.08 }}
                     style={{
-                      width: `${lang.percentage}%`,
-                      originX: 0,
-                    }}
-                    className="h-full bg-gradient-to-r from-amber-400 to-amber-200 rounded-full transform-gpu will-change-transform"
+                      "--skill-width": `${lang.percentage}%`,
+                    } as React.CSSProperties}
+                    className="h-full w-[var(--skill-width)] bg-gradient-to-r from-amber-400 to-amber-200 rounded-full origin-left transform-gpu will-change-transform"
                   />
                 </div>
               </div>

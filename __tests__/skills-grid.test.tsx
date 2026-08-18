@@ -90,8 +90,8 @@ describe("SkillsGrid GPU Progress Animations & Reduced Motion AA Suite", () => {
     const bar1 = bars[0] as HTMLDivElement;
     const bar2 = bars[1] as HTMLDivElement;
 
-    expect(bar1.style.width).toBe("85%");
-    expect(bar2.style.width).toBe("60%");
+    expect(bar1.style.getPropertyValue("--skill-width") || bar1.style.width).toBe("85%");
+    expect(bar2.style.getPropertyValue("--skill-width") || bar2.style.width).toBe("60%");
   });
 
   it("should support reduced motion instantly by disabling transitions", async () => {
@@ -105,6 +105,6 @@ describe("SkillsGrid GPU Progress Animations & Reduced Motion AA Suite", () => {
     expect(bars.length).toBe(2);
 
     const bar1 = bars[0] as HTMLDivElement;
-    expect(bar1.style.width).toBe("85%");
+    expect(bar1.style.getPropertyValue("--skill-width") || bar1.style.width).toBe("85%");
   });
 });

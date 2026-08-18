@@ -69,8 +69,7 @@ const CaseStudyShowcaseInner: React.FC<CaseStudyShowcaseProps> = ({ caseStudies 
           layoutState.columns.map((colCards, colIdx) => (
             <div 
               key={colIdx} 
-              className="flex flex-col gap-4 flex-1"
-              style={{ minWidth: 0 }}
+              className="flex flex-col gap-4 flex-1 min-w-0"
             >
               <AnimatePresence mode="popLayout">
                 {colCards.map((study) => (

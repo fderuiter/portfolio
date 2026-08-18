@@ -14,6 +14,7 @@ import {
   checkDocumentationParity,
   checkOpenApiParity,
   checkDefectRemediationInvariants,
+  checkDesignTokens,
   runDiagnostics,
   printDoctorReport,
 } from "@/lib/dx/doctor";
@@ -337,6 +338,28 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       const result = checkDefectRemediationInvariants(workspaceRoot);
       expect(result.status).toBe("pass");
       expect(result.category).toBe("quality");
+    });
+  });
+
+  describe("checkDesignTokens", () => {
+    it("passes when no core components contain unconstrained inline style properties", () => {
+      const workspaceRoot = path.resolve(__dirname, "..");
+      const result = checkDesignTokens(workspaceRoot);
+      expect(result.status).toBe("pass");
+      expect(result.message).toContain("Zero raw inline style overrides");
+    });
+
+    it("detects raw inline style properties in core layout components", () => {
+      const compDir = path.join(tempDir, "components");
+      fs.mkdirSync(compDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(compDir, "Hero.tsx"),
+        'export function Hero() { return <div style={{ height: "500px" }}>Hero</div>; }'
+      );
+
+      const result = checkDesignTokens(tempDir);
+      expect(result.status).toBe("fail");
+      expect(result.details?.[0]).toContain("Raw unconstrained inline style property detected");
     });
   });
 

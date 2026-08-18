@@ -155,30 +155,33 @@ export function UnifiedErrorLayout({
       <main className="min-h-screen py-32 px-6 flex flex-col items-center justify-center bg-brand-dark text-foreground relative overflow-hidden select-none">
       {/* Background Blurs */}
       <div 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none transition-all duration-700" 
-        style={showRetroLabyrinth ? {
-          transform: `translate(-50%, -50%) translate(${(normalized.x - 0.5) * 40}px, ${(normalized.y - 0.5) * 40}px)`
-        } : undefined}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none transition-all duration-700 [transform:translate(-50%,-50%)_translate(var(--blur-shift-x,0px),var(--blur-shift-y,0px))]" 
+        style={showRetroLabyrinth ? ({
+          "--blur-shift-x": `${(normalized.x - 0.5) * 40}px`,
+          "--blur-shift-y": `${(normalized.y - 0.5) * 40}px`,
+        } as React.CSSProperties) : undefined}
       />
 
       <div 
         ref={containerRef}
         onMouseMove={showRetroLabyrinth ? handleMouseMove : undefined}
         onMouseLeave={showRetroLabyrinth ? handleMouseLeave : undefined}
-        style={showRetroLabyrinth ? {
-          transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-          transition: isHovered ? "none" : "transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)"
-        } : undefined}
-        className={`relative z-10 w-full max-w-md p-8 bg-neutral-950/40 border border-neutral-900 rounded-3xl backdrop-blur-xl text-center shadow-2xl overflow-hidden ${showRetroLabyrinth ? 'group' : ''}`}
+        style={showRetroLabyrinth ? ({
+          "--tilt-x": `${tilt.x}deg`,
+          "--tilt-y": `${tilt.y}deg`,
+          "--tilt-transition": isHovered ? "none" : "transform 0.5s cubic-bezier(0.25, 1, 0.5, 1)",
+        } as React.CSSProperties) : undefined}
+        className={`relative z-10 w-full max-w-md p-8 bg-neutral-950/40 border border-neutral-900 rounded-3xl backdrop-blur-xl text-center shadow-2xl overflow-hidden [transform:perspective(1000px)_rotateX(var(--tilt-x,0deg))_rotateY(var(--tilt-y,0deg))] [transition:var(--tilt-transition,none)] ${showRetroLabyrinth ? 'group' : ''}`}
       >
         {/* Spotlight overlay effect following the mouse */}
         {showRetroLabyrinth && (
           <div 
-            className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+            className="absolute inset-0 pointer-events-none transition-opacity duration-300 [background:radial-gradient(180px_circle_at_var(--spotlight-x)_var(--spotlight-y),rgba(6,182,212,0.08),transparent_80%)] opacity-[var(--spotlight-opacity)]"
             style={{
-              background: `radial-gradient(180px circle at ${mousePos.x}px ${mousePos.y}px, rgba(6, 182, 212, 0.08), transparent 80%)`,
-              opacity: isHovered ? 1 : 0
-            }}
+              "--spotlight-x": `${mousePos.x}px`,
+              "--spotlight-y": `${mousePos.y}px`,
+              "--spotlight-opacity": isHovered ? 1 : 0,
+            } as React.CSSProperties}
           />
         )}
 

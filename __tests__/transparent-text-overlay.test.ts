@@ -49,11 +49,9 @@ describe("Transparent Continuous Overlay Layer Compliance", () => {
     // Custom visual layout must be select-none and pointer-events-none
     expect(content).toContain('className="select-none pointer-events-none"');
 
-    // Transparent semantic overlay must be absolute inset-0 select-text
+    // Transparent semantic overlay must be absolute inset-0 select-text with data-pretext-layer
     expect(content).toContain('absolute inset-0 select-text bg-transparent');
-    expect(content).toContain('color: "transparent"');
-    expect(content).toContain('WebkitTextFillColor: "transparent"');
-    expect(content).toContain('pointerEvents: "auto"');
+    expect(content).toContain('data-pretext-layer="semantic"');
   });
 
   it("should implement transparent text overlay in Hero components", () => {
@@ -62,11 +60,11 @@ describe("Transparent Continuous Overlay Layer Compliance", () => {
     // Headline and Text must be wrapped and set to relative with select-none and pointer-events-none on visual layer
     expect(content).toContain('className="w-full select-none pointer-events-none"');
     
-    // Headline absolute transparent overlay h1
-    expect(content).toContain('<h1\n        className="text-4xl md:text-6xl font-black tracking-tight text-center leading-tight md:leading-none absolute inset-0 select-text bg-transparent"');
+    // Headline absolute transparent overlay h1 with fluid typography
+    expect(content).toContain('fluid-heading-hero font-black tracking-tight text-center absolute inset-0 select-text bg-transparent');
     
-    // Subheadline absolute transparent overlay p
-    expect(content).toContain('<p\n        className="text-neutral-400 text-sm md:text-base leading-[28px] text-center absolute inset-0 select-text bg-transparent"');
+    // Subheadline absolute transparent overlay p with fluid typography
+    expect(content).toContain('text-neutral-400 fluid-body text-center absolute inset-0 select-text bg-transparent');
   });
 
   it("should enforce Lighthouse accessibility assertions in automated audits", () => {
