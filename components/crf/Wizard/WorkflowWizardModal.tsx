@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   IconX,
   IconChevronRight,
@@ -207,19 +207,7 @@ export const WorkflowWizardModal: React.FC<WorkflowWizardModalProps> = ({
 }) => {
   const [currentStageIdx, setCurrentStageIdx] = useState<number>(0);
 
-  const containerRef = useFocusTrap<HTMLDivElement>(isOpen, {
-    onEscape: onClose,
-    returnFocus: true,
-  });
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "Escape") {
-      e.preventDefault();
-      e.stopPropagation();
-      onClose();
-      return;
-    }
-
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === "ArrowRight" || e.key === "ArrowDown") {
       const activeEl = document.activeElement;
       if (
@@ -249,7 +237,13 @@ export const WorkflowWizardModal: React.FC<WorkflowWizardModalProps> = ({
       e.preventDefault();
       setCurrentStageIdx((prev) => Math.max(prev - 1, 0));
     }
-  };
+  }, []);
+
+  const containerRef = useFocusTrap<HTMLDivElement>(isOpen, {
+    onEscape: onClose,
+    onKeyDown: handleKeyDown,
+    returnFocus: true,
+  });
 
   if (!isOpen) return null;
 
@@ -278,7 +272,6 @@ export const WorkflowWizardModal: React.FC<WorkflowWizardModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
       <div
         ref={containerRef}
-        onKeyDown={handleKeyDown}
         className="w-full max-w-4xl max-h-[92vh] flex flex-col bg-zinc-950 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden"
         role="dialog"
         aria-modal="true"

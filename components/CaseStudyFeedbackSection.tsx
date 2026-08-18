@@ -12,6 +12,7 @@ import {
   IconAlertCircle,
   IconLoader2,
 } from "@tabler/icons-react";
+import { isProductionEnvironment } from "@/lib/env";
 
 interface CaseStudyFeedbackSectionProps {
   slug: string;
@@ -90,7 +91,7 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
           }
         }
       } catch (err) {
-        if (process.env.NODE_ENV !== "production") {
+        if (!isProductionEnvironment()) {
           console.error("Failed to load case study reaction/feedback status:", err);
         }
       }

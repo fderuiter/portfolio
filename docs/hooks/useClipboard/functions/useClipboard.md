@@ -8,7 +8,7 @@
 
 > **useClipboard**(`options?`): `object`
 
-Defined in: [hooks/useClipboard.ts:12](https://github.com/fderuiter/portfolio/blob/main/hooks/useClipboard.ts#L12)
+Defined in: [hooks/useClipboard.ts:15](https://github.com/fderuiter/portfolio/blob/main/hooks/useClipboard.ts#L15)
 
 ## Parameters
 
@@ -26,7 +26,7 @@ Defined in: [hooks/useClipboard.ts:12](https://github.com/fderuiter/portfolio/bl
 
 ### copy
 
-> **copy**: (`text`) => `Promise`\<`void`\>
+> **copy**: (`text`) => `Promise`\<`boolean`\>
 
 #### Parameters
 
@@ -36,7 +36,7 @@ Defined in: [hooks/useClipboard.ts:12](https://github.com/fderuiter/portfolio/bl
 
 #### Returns
 
-`Promise`\<`void`\>
+`Promise`\<`boolean`\>
 
 ### error
 

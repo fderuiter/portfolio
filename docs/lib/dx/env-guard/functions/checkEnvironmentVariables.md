@@ -8,7 +8,7 @@
 
 > **checkEnvironmentVariables**(`root`, `fix?`): [`DiagnosticCheckResult`](../../doctor/interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/env-guard.ts:113](https://github.com/fderuiter/portfolio/blob/main/lib/dx/env-guard.ts#L113)
+Defined in: [lib/dx/env-guard.ts:167](https://github.com/fderuiter/portfolio/blob/main/lib/dx/env-guard.ts#L167)
 
 Diagnostic check verifying environment schema validity and .env.example parity.
 

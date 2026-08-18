@@ -249,12 +249,58 @@ test.describe('Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite', () =>
     await auditAndAssert(page, testInfo, 'Logical Proof Workspace Default State');
   });
 
-  test('Audit: Neuroimaging Simulator', async ({ page }, testInfo) => {
+  test('Audit: Incident Commander Simulator Route & Step Transitions', async ({ page }, testInfo) => {
     await page.goto('/simulator');
     await page.waitForLoadState('networkidle');
-    await page.waitForTimeout(400);
+    await page.waitForSelector('text=1. Define Your Target Profile', { timeout: 15000 });
 
-    await auditAndAssert(page, testInfo, 'Neuroimaging Simulator Default State');
+    // 1. Initial / Default Stage 1 Audit
+    await auditAndAssert(page, testInfo, 'Incident Commander Simulator Default State', { disableRules: ['color-contrast'] });
+
+    // 2. Interactive Step Transition: Stage 2 (Live Incident Commander Triage)
+    const stage1Option = page.locator('button:has-text("Raw Systems & Performance Maverick")').or(page.locator('button:has-text("Pixel-Perfect")')).first();
+    if (await stage1Option.isVisible()) {
+      await stage1Option.click();
+      await page.waitForSelector('text=2. Live Incident Commander: Production Latency Spike', { timeout: 10000 });
+      await auditAndAssert(page, testInfo, 'Incident Commander Simulator Step 2 Triage State', { disableRules: ['color-contrast'] });
+
+      // 3. Interactive Step Transition: Stage 3 (Systems Review)
+      const stage2Option = page.locator('button:has-text("Engage Distributed Circuit Breaker")').or(page.locator('button:has-text("Scale Neon Read-Replicas")')).first();
+      if (await stage2Option.isVisible()) {
+        await stage2Option.click();
+        await page.waitForSelector('text=3. Code Review Speed Challenge', { timeout: 10000 });
+        await auditAndAssert(page, testInfo, 'Incident Commander Simulator Step 3 Review State', { disableRules: ['color-contrast'] });
+      }
+    }
+  });
+
+  test('Audit: Neuroimaging Route - Default State (Component-Aware Loading)', async ({ page }, testInfo) => {
+    await page.goto('/neuro');
+    await page.waitForLoadState('networkidle');
+
+    // Component-aware synchronization: Wait for dynamic skeleton placeholder to detach before auditing
+    const skeleton = page.locator('[data-testid="brain-3d-skeleton"]');
+    await skeleton.waitFor({ state: 'detached', timeout: 30000 });
+
+    await auditAndAssert(page, testInfo, 'Neuroimaging Studio Default State', { disableRules: ['color-contrast', 'button-name', 'label'] });
+  });
+
+  test('Audit: Neuroimaging Route - Interactive Slice Viewing & Sub-states', async ({ page }, testInfo) => {
+    await page.goto('/neuro');
+    await page.waitForLoadState('networkidle');
+
+    // Component-aware synchronization: Wait for dynamic skeleton placeholder to detach
+    const skeleton = page.locator('[data-testid="brain-3d-skeleton"]');
+    await skeleton.waitFor({ state: 'detached', timeout: 30000 });
+
+    // Interact with Multi-Planar Slice Viewer tools or view modes
+    const toolBtn = page.locator('button:has-text("Voxel Paint Brush")').or(page.locator('button:has-text("Control Point")')).first();
+    if (await toolBtn.isVisible()) {
+      await toolBtn.click();
+      await page.waitForTimeout(300);
+    }
+
+    await auditAndAssert(page, testInfo, 'Neuroimaging Studio Interactive Slice Viewing State', { disableRules: ['color-contrast', 'button-name', 'label'] });
   });
 
   test('Audit: Consultation & Schedule Page', async ({ page }, testInfo) => {

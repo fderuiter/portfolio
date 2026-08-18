@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { getEnv } from "./env";
+
 /**
  * Utility to sanitize errors for production environment console output.
  * Blocks the leak of absolute system paths and deep stack traces.
@@ -26,7 +28,7 @@ export function sanitizeError(error: any): any {
   if (!error) return error;
 
   // Sanitization rules must only run in production environments
-  if (process.env.NODE_ENV !== "production") {
+  if (getEnv().NODE_ENV !== "production") {
     return error;
   }
 

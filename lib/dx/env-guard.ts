@@ -54,6 +54,7 @@ export function generateEnvExampleContent(existingExamplePath?: string): string 
     "# Database Connections (Neon / PostgreSQL)",
     `DATABASE_URL="${existing.DATABASE_URL || mockDbUrl}"`,
     `DATABASE_URL_UNPOOLED="${existing.DATABASE_URL_UNPOOLED || mockDbUrl}"`,
+    `DIRECT_URL="${existing.DIRECT_URL || mockDbUrl}"`,
     `PGHOST="${existing.PGHOST || "localhost"}"`,
     `PGHOST_UNPOOLED="${existing.PGHOST_UNPOOLED || "localhost"}"`,
     `PGUSER="${existing.PGUSER || "local_user"}"`,
@@ -74,12 +75,22 @@ export function generateEnvExampleContent(existingExamplePath?: string): string 
     `UPSTASH_REDIS_REST_URL="${existing.UPSTASH_REDIS_REST_URL || "http://localhost:8079"}"`,
     `UPSTASH_REDIS_REST_TOKEN="${existing.UPSTASH_REDIS_REST_TOKEN || "example_dev_token"}"`,
     "",
-    "# Cron & API Telemetry Security",
+    "# Operational, Testing & Security Flags",
+    `CI="${existing.CI || ""}"`,
+    `PLAYWRIGHT_TEST="${existing.PLAYWRIGHT_TEST || ""}"`,
+    `SKIP_DB_HEALTH_CHECK="${existing.SKIP_DB_HEALTH_CHECK || ""}"`,
+    `ALLOW_DESTRUCTIVE_MIGRATIONS="${existing.ALLOW_DESTRUCTIVE_MIGRATIONS || ""}"`,
+    `NEXT_PHASE="${existing.NEXT_PHASE || ""}"`,
+    `NEXT_RUNTIME="${existing.NEXT_RUNTIME || ""}"`,
+    `GITHUB_ACTIONS="${existing.GITHUB_ACTIONS || ""}"`,
+    `VITEST="${existing.VITEST || ""}"`,
     `CRON_SECRET="${existing.CRON_SECRET || "dev_cron_secret_token"}"`,
     `GITHUB_TOKEN="${existing.GITHUB_TOKEN || ""}"`,
     "",
     "# Error Monitoring (Sentry)",
     `SENTRY_DSN="${existing.SENTRY_DSN || ""}"`,
+    `SENTRY_ORG="${existing.SENTRY_ORG || ""}"`,
+    `SENTRY_PROJECT="${existing.SENTRY_PROJECT || ""}"`,
     `NEXT_PUBLIC_SENTRY_DSN="${existing.NEXT_PUBLIC_SENTRY_DSN || ""}"`,
     "",
     "# Public Application Metadata",
@@ -88,11 +99,12 @@ export function generateEnvExampleContent(existingExamplePath?: string): string 
 
   // Append any extra keys declared in schema that aren't in the default template
   const standardKeys = new Set([
-    "DATABASE_URL", "DATABASE_URL_UNPOOLED", "PGHOST", "PGHOST_UNPOOLED", "PGUSER", "PGDATABASE", "PGPASSWORD",
+    "DATABASE_URL", "DATABASE_URL_UNPOOLED", "DIRECT_URL", "PGHOST", "PGHOST_UNPOOLED", "PGUSER", "PGDATABASE", "PGPASSWORD",
     "POSTGRES_URL", "POSTGRES_URL_NON_POOLING", "POSTGRES_USER", "POSTGRES_HOST", "POSTGRES_PASSWORD", "POSTGRES_DATABASE",
     "POSTGRES_URL_NO_SSL", "POSTGRES_PRISMA_URL", "UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN",
-    "CRON_SECRET", "GITHUB_TOKEN", "SENTRY_DSN", "NEXT_PUBLIC_SENTRY_DSN", "NEXT_PUBLIC_APP_URL",
-    "NODE_ENV", "VERCEL_ENV"
+    "CI", "PLAYWRIGHT_TEST", "SKIP_DB_HEALTH_CHECK", "ALLOW_DESTRUCTIVE_MIGRATIONS",
+    "CRON_SECRET", "GITHUB_TOKEN", "SENTRY_DSN", "SENTRY_ORG", "SENTRY_PROJECT", "NEXT_PUBLIC_SENTRY_DSN", "NEXT_PUBLIC_APP_URL",
+    "NODE_ENV", "VERCEL_ENV", "NEXT_PHASE", "NEXT_RUNTIME", "GITHUB_ACTIONS", "VITEST"
   ]);
 
   const extraKeys = allKeys.filter((k) => !standardKeys.has(k));
@@ -108,11 +120,66 @@ export function generateEnvExampleContent(existingExamplePath?: string): string 
 }
 
 /**
+ * Static analysis check to detect direct raw process.env reads in application code.
+ * Standalone build scripts, setup tools, config files, test suites, and lib/env.ts are exempted.
+ */
+export function checkRawEnvironmentAccess(root: string): { violations: string[] } {
+  const appDirs = ["app", "lib", "components", "hooks"].map((d) => path.join(root, d));
+  const violations: string[] = [];
+
+  function scanDir(dir: string) {
+    if (!fs.existsSync(dir)) return;
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      const relPath = path.relative(root, fullPath).replace(/\\/g, "/");
+
+      if (entry.isDirectory()) {
+        if (entry.name === "node_modules" || entry.name === ".next" || entry.name === "generated") continue;
+        scanDir(fullPath);
+      } else if (entry.isFile() && /\.(ts|tsx|js|jsx)$/.test(entry.name)) {
+        if (relPath === "lib/env.ts" || relPath === "lib/dx/env-guard.ts" || relPath.startsWith("app/generated/")) continue;
+
+        const content = fs.readFileSync(fullPath, "utf-8");
+        const lines = content.split("\n");
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          if (/\bprocess\.env\b/.test(line)) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith("//") || trimmed.startsWith("/*") || trimmed.startsWith("*")) continue;
+            violations.push(`${relPath}:${i + 1}: ${trimmed}`);
+          }
+        }
+      }
+    }
+  }
+
+  for (const d of appDirs) {
+    scanDir(d);
+  }
+
+  return { violations };
+}
+
+/**
  * Diagnostic check verifying environment schema validity and .env.example parity.
  */
 export function checkEnvironmentVariables(root: string, fix = false): DiagnosticCheckResult {
   const examplePath = path.join(root, ".env.example");
   const { allKeys } = getDeclaredEnvKeys();
+
+  const rawAccess = checkRawEnvironmentAccess(root);
+  if (rawAccess.violations.length > 0) {
+    return {
+      id: "env-schema-parity",
+      name: "Environment Schema & .env.example Synchronization",
+      category: "security",
+      status: "fail",
+      message: `Detected ${rawAccess.violations.length} unauthorized direct process.env access(es) in application code. Access configuration exclusively through lib/env.ts schema exports.`,
+      details: rawAccess.violations,
+      fixable: false,
+    };
+  }
 
   if (!fs.existsSync(examplePath)) {
     if (fix) {

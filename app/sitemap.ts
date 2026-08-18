@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
 import { resolveBaseUrl } from "@/lib/domain";
+import { env } from "@/lib/env";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = resolveBaseUrl();
@@ -13,11 +14,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: { slug: true, updated_at: true }
     });
   } catch (err) {
-    if (process.env.VERCEL_ENV === "production") {
+    if (env.VERCEL_ENV === "production") {
       console.error("Sitemap generation database query failure:", err);
     }
-    const isProduction = process.env.VERCEL_ENV === "production";
-    const isMockEnv = process.env.CI === "true" || process.env.PLAYWRIGHT_TEST === "true" || !isProduction;
+    const isProduction = env.VERCEL_ENV === "production";
+    const isMockEnv = env.CI === "true" || env.PLAYWRIGHT_TEST === "true" || !isProduction;
     if (isMockEnv) {
       studies = [
         { slug: "clinical-data-mapper", updated_at: new Date() },

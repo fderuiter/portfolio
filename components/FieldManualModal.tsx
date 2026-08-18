@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   IconX,
@@ -16,6 +16,7 @@ import {
 } from "@tabler/icons-react";
 import { FieldManualData } from "@/types/game-manual";
 import { useAudio } from "@/components/providers/AudioProvider";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface FieldManualModalProps {
   isOpen: boolean;
@@ -27,8 +28,12 @@ type TabType = "objective" | "controls" | "rules" | "lore";
 
 export function FieldManualModal({ isOpen, onClose, manual }: FieldManualModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>("objective");
-  const modalRef = useRef<HTMLDivElement>(null);
   const { playHover, playAutocomplete, playSuccess } = useAudio();
+
+  const modalRef = useFocusTrap<HTMLDivElement>(isOpen, {
+    onEscape: onClose,
+    returnFocus: true,
+  });
 
   // Reset tab to objective on open
   useEffect(() => {
@@ -41,21 +46,6 @@ export function FieldManualModal({ isOpen, onClose, manual }: FieldManualModalPr
       } catch {}
     }
   }, [isOpen, playSuccess]);
-
-  // Handle ESC key and focus trap
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
 
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);

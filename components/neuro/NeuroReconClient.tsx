@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useClipboard } from "@/hooks/useClipboard";
 import {
   ControlPoint,
   DatasetSource,
@@ -176,8 +177,8 @@ export const NeuroReconClient: React.FC = () => {
     },
   ]);
 
-  // Switch Scenario Handler
-  const handleSelectScenario = useCallback((scenarioId: ScenarioId) => {
+  // Apply Scenario State locally without pushing history
+  const applyScenarioState = useCallback((scenarioId: ScenarioId) => {
     if (reconTimerRef.current !== null) {
       clearTimeout(reconTimerRef.current);
       reconTimerRef.current = null;
@@ -194,14 +195,6 @@ export const NeuroReconClient: React.FC = () => {
     setVoxelEdits([]);
     setShowSuccessModal(false);
 
-    setParams(
-      {
-        scenario: scenarioId === "dura_inclusion" ? null : scenarioId,
-        tool: null,
-      },
-      { replace: false }
-    );
-
     setLogs((prev) => [
       ...prev,
       {
@@ -217,33 +210,52 @@ export const NeuroReconClient: React.FC = () => {
         timestamp: new Date().toLocaleTimeString(),
       },
     ]);
+  }, []);
 
-    recordEvent("neuro", "project_click");
-  }, [setParams, recordEvent]);
+  // Switch Scenario Handler (User Click)
+  const handleSelectScenario = useCallback(
+    (scenarioId: ScenarioId) => {
+      applyScenarioState(scenarioId);
+
+      setParams(
+        {
+          scenario: scenarioId === "dura_inclusion" ? null : scenarioId,
+          tool: null,
+        },
+        { replace: false }
+      );
+
+      recordEvent("neuro", "project_click");
+    },
+    [applyScenarioState, setParams, recordEvent]
+  );
 
   // Synchronize incoming hash state on mount or browser Back/Forward navigation
   useEffect(() => {
-    const rawSc = params.scenario as ScenarioId | undefined;
-    if (rawSc && SCENARIOS[rawSc] && rawSc !== activeScenarioId) {
+    const rawSc = (params.scenario as ScenarioId | undefined) || "dura_inclusion";
+    if (SCENARIOS[rawSc] && rawSc !== activeScenarioId) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      handleSelectScenario(rawSc);
+      applyScenarioState(rawSc);
     }
-    const rawView = params.view as "split" | "3d" | "2d" | undefined;
-    if (rawView && ["split", "3d", "2d"].includes(rawView) && rawView !== viewMode) {
+    const rawView = (params.view as "split" | "3d" | "2d" | undefined) || "split";
+    if (["split", "3d", "2d"].includes(rawView) && rawView !== viewMode) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setViewModeState(rawView);
     }
-    const rawDs = params.dataset as DatasetSource | undefined;
-    if (rawDs && ["case_study", "mni152", "oasis"].includes(rawDs) && rawDs !== activeDataset) {
+    const rawDs = (params.dataset as DatasetSource | undefined) || "case_study";
+    if (["case_study", "mni152", "oasis"].includes(rawDs) && rawDs !== activeDataset) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveDatasetState(rawDs);
     }
     const rawTool = params.tool as ToolMode | undefined;
-    if (rawTool && ["inspect", "control_point", "paint", "erase"].includes(rawTool) && rawTool !== toolMode) {
+    const targetTool = rawTool && ["inspect", "control_point", "paint", "erase"].includes(rawTool)
+      ? rawTool
+      : currentScenario.recommendedTool;
+    if (targetTool !== toolMode) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setToolModeState(rawTool);
+      setToolModeState(targetTool);
     }
-  }, [params, activeScenarioId, viewMode, activeDataset, toolMode, handleSelectScenario]);
+  }, [params, activeScenarioId, viewMode, activeDataset, toolMode, currentScenario.recommendedTool, applyScenarioState]);
 
   const setViewMode = (mode: "split" | "3d" | "2d") => {
     setViewModeState(mode);
@@ -260,15 +272,20 @@ export const NeuroReconClient: React.FC = () => {
     setParam("tool", tool === currentScenario.recommendedTool ? null : tool, { replace: true });
   }, [currentScenario.recommendedTool, setParam]);
 
+  const { copy: copyShareLink } = useClipboard({
+    successMessage: "NeuroRecon Studio link copied to clipboard!",
+    onSuccess: () => {
+      try {
+        playSuccess();
+      } catch {}
+      setCopyToast("NeuroRecon Studio link copied to clipboard!");
+      setTimeout(() => setCopyToast(null), 3500);
+    },
+  });
+
   const handleCopyShareLink = () => {
     if (typeof window !== "undefined") {
-      navigator.clipboard.writeText(window.location.href).then(() => {
-        try {
-          playSuccess();
-        } catch {}
-        setCopyToast("NeuroRecon Studio link copied to clipboard!");
-        setTimeout(() => setCopyToast(null), 3500);
-      });
+      copyShareLink(window.location.href);
     }
   };
 

@@ -12,6 +12,8 @@ export interface GitHubLanguage {
   percentage: number;
 }
 
+import { getEnv } from "./env";
+
 export interface GitHubStats {
   stars: number;
   forks: number;
@@ -81,9 +83,10 @@ async function fetchRawGitHubStats(owner: string, repo: string): Promise<GitHubS
     "User-Agent": "portfolio-app",
   };
   
-  if (process.env.GITHUB_TOKEN) {
-    headers.Authorization = `token ${process.env.GITHUB_TOKEN}`;
-  } else if (process.env.NODE_ENV === "development") {
+  const currentEnv = getEnv();
+  if (currentEnv.GITHUB_TOKEN) {
+    headers.Authorization = `token ${currentEnv.GITHUB_TOKEN}`;
+  } else if (currentEnv.NODE_ENV === "development") {
     console.warn("Warning: GITHUB_TOKEN environment variable is undefined. Unauthenticated GitHub API requests are capped at 60/hour.");
   }
 
@@ -205,7 +208,7 @@ export async function getGitHubStats(owner: string, repo: string): Promise<GitHu
     try {
       return await fetchRawGitHubStats(owner, repo);
     } catch (fallbackErr) {
-      if (process.env.VERCEL_ENV === "production") {
+      if (getEnv().VERCEL_ENV === "production") {
         console.error(`Failed to fetch raw GitHub stats for ${owner}/${repo}:`, fallbackErr);
       }
       return null;

@@ -15,13 +15,15 @@ const DynamicProofWorkspaceClient = dynamic(
   }
 );
 
+import { env } from "@/lib/env";
+
 const emptySubscribe = () => () => {};
 
 export default function ProofWorkspacePage() {
   // min-h-dvh clearance padding satisfy doctor check
   const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
 
-  if (typeof process !== "undefined" && process.env.NODE_ENV === "test") {
+  if (env.NODE_ENV === "test") {
     return <StaticProofWorkspaceClient />;
   }
 

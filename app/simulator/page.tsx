@@ -11,16 +11,14 @@ import {
   IconAward,
   IconCalendar,
   IconRefresh,
-  IconCopy,
-  IconCheck,
-  IconAlertCircle,
 } from "@tabler/icons-react";
 import { FieldManualButton } from "@/components/FieldManualButton";
+import { CopyButton } from "@/components/CopyButton";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
 import { PageLayout } from "@/components/PageLayout";
-import { useClipboard } from "@/hooks/useClipboard";
 import { getActiveHostUrl } from "@/lib/clipboard";
+import { useStudioHashParams } from "@/hooks/useStudioHashParams";
 
 interface Option {
   text: string;
@@ -100,17 +98,90 @@ const branchingQuestions: Record<string, Question> = {
   },
 };
 
+function parseAnsIndices(ansStr: string | undefined): number[] {
+  if (!ansStr) return [];
+  return ansStr
+    .split(",")
+    .map((s) => parseInt(s.trim(), 10))
+    .filter((n) => !isNaN(n));
+}
+
+function replaySimulatorHistory(ansIndices: number[]): {
+  replayedStep: string;
+  replayedHistory: string[];
+  replayedAnswers: Option[];
+} {
+  let step = "welcome";
+  const history: string[] = [];
+  const answers: Option[] = [];
+
+  for (const idx of ansIndices) {
+    const question = branchingQuestions[step];
+    if (!question || !question.options[idx]) {
+      break;
+    }
+    const option = question.options[idx];
+    history.push(step);
+    answers.push(option);
+    step = option.nextStep;
+  }
+
+  return { replayedStep: step, replayedHistory: history, replayedAnswers: answers };
+}
+
 export default function RecruiterSimulator() {
   const { recordEvent } = useTelemetry();
   const { playNote, playSuccess } = useAudio();
   const { announce } = useAnnouncer();
   const cardRef = useRef<HTMLDivElement>(null);
-  const [currentStep, setCurrentStep] = useState<string>("welcome");
-  const [history, setHistory] = useState<string[]>([]);
-  const [answers, setAnswers] = useState<Option[]>([]);
-  const { copy, copied, error } = useClipboard({
-    successMessage: "Engineering alignment assessment report successfully copied to clipboard!",
-    errorMessage: "Unable to copy engineering assessment to clipboard",
+  const { params, setParams } = useStudioHashParams();
+
+  const [currentStep, setCurrentStep] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const rawHash = window.location.hash.startsWith("#")
+        ? window.location.hash.slice(1)
+        : window.location.hash;
+      const searchParams = new URLSearchParams(rawHash);
+      const rawStep = searchParams.get("step");
+      const rawAns = searchParams.get("ans");
+      const ansIndices = parseAnsIndices(rawAns || undefined);
+      const replayed = replaySimulatorHistory(ansIndices);
+      if (rawStep && (branchingQuestions[rawStep] || rawStep === "final_eval")) {
+        return rawStep;
+      }
+      if (replayed.replayedStep) {
+        return replayed.replayedStep;
+      }
+    }
+    return "welcome";
+  });
+
+  const [history, setHistory] = useState<string[]>(() => {
+    if (typeof window !== "undefined") {
+      const rawHash = window.location.hash.startsWith("#")
+        ? window.location.hash.slice(1)
+        : window.location.hash;
+      const searchParams = new URLSearchParams(rawHash);
+      const rawAns = searchParams.get("ans");
+      const ansIndices = parseAnsIndices(rawAns || undefined);
+      const replayed = replaySimulatorHistory(ansIndices);
+      return replayed.replayedHistory;
+    }
+    return [];
+  });
+
+  const [answers, setAnswers] = useState<Option[]>(() => {
+    if (typeof window !== "undefined") {
+      const rawHash = window.location.hash.startsWith("#")
+        ? window.location.hash.slice(1)
+        : window.location.hash;
+      const searchParams = new URLSearchParams(rawHash);
+      const rawAns = searchParams.get("ans");
+      const ansIndices = parseAnsIndices(rawAns || undefined);
+      const replayed = replaySimulatorHistory(ansIndices);
+      return replayed.replayedAnswers;
+    }
+    return [];
   });
 
   const hasTracked = useRef(false);
@@ -120,6 +191,28 @@ export default function RecruiterSimulator() {
     hasTracked.current = true;
     recordEvent("simulator", "page_view");
   }, [recordEvent]);
+
+  // Synchronize incoming hash state on mount or browser Back/Forward navigation
+  useEffect(() => {
+    const ansIndices = parseAnsIndices(params.ans);
+    const replayed = replaySimulatorHistory(ansIndices);
+
+    let targetStep = params.step || replayed.replayedStep;
+    if (!branchingQuestions[targetStep] && targetStep !== "final_eval") {
+      targetStep = "welcome";
+    }
+
+    if (
+      targetStep !== currentStep ||
+      replayed.replayedHistory.length !== history.length ||
+      replayed.replayedAnswers.length !== answers.length
+    ) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCurrentStep(targetStep);
+      setHistory(replayed.replayedHistory);
+      setAnswers(replayed.replayedAnswers);
+    }
+  }, [params.step, params.ans, currentStep, history.length, answers.length]);
 
   // Delayed focus redirection to the active question card after step transition animation completes
   useEffect(() => {
@@ -132,34 +225,77 @@ export default function RecruiterSimulator() {
   const handleSelectOption = useCallback(
     (option: Option) => {
       playNote(440 + answers.length * 110, 0.1);
-      setAnswers((prev) => [...prev, option]);
-      setHistory((prev) => [...prev, currentStep]);
-      setCurrentStep(option.nextStep);
+      const currentQuestion = branchingQuestions[currentStep];
+      const optionIndex = currentQuestion ? currentQuestion.options.indexOf(option) : -1;
+
+      const newAnswers = [...answers, option];
+      const newHistory = [...history, currentStep];
+      const nextStep = option.nextStep;
+
+      let currentAnsIndices = parseAnsIndices(params.ans || undefined);
+      if (optionIndex >= 0) {
+        currentAnsIndices = [...currentAnsIndices, optionIndex];
+      }
+      const newAnsStr = currentAnsIndices.join(",");
+
+      setAnswers(newAnswers);
+      setHistory(newHistory);
+      setCurrentStep(nextStep);
+
+      setParams(
+        {
+          step: nextStep === "welcome" ? null : nextStep,
+          ans: newAnsStr || null,
+        },
+        { replace: false }
+      );
 
       recordEvent("simulator", "simulator_option_select");
-      if (option.nextStep === "final_eval") {
+      if (nextStep === "final_eval") {
         recordEvent("simulator", "simulator_milestone_reached");
         playSuccess();
       } else {
         announce("Step completed", "polite");
       }
     },
-    [answers.length, currentStep, playNote, playSuccess, recordEvent, announce]
+    [answers, currentStep, history, params.ans, playNote, playSuccess, recordEvent, announce, setParams]
   );
 
   const handleBack = useCallback(() => {
     if (history.length === 0) return;
     const previousStep = history[history.length - 1];
-    setHistory((prev) => prev.slice(0, -1));
-    setAnswers((prev) => prev.slice(0, -1));
+    const newHistory = history.slice(0, -1);
+    const newAnswers = answers.slice(0, -1);
+    const currentAnsIndices = parseAnsIndices(params.ans);
+    const newAnsIndices = currentAnsIndices.slice(0, -1);
+    const newAnsStr = newAnsIndices.length > 0 ? newAnsIndices.join(",") : null;
+
+    setHistory(newHistory);
+    setAnswers(newAnswers);
     setCurrentStep(previousStep);
-  }, [history]);
+
+    setParams(
+      {
+        step: previousStep === "welcome" ? null : previousStep,
+        ans: newAnsStr,
+      },
+      { replace: false }
+    );
+  }, [history, answers, params.ans, setParams]);
 
   const handleReset = useCallback(() => {
     setHistory([]);
     setAnswers([]);
     setCurrentStep("welcome");
-  }, []);
+
+    setParams(
+      {
+        step: null,
+        ans: null,
+      },
+      { replace: false }
+    );
+  }, [setParams]);
 
   const calculateProfile = useCallback(() => {
     const total = answers.reduce(
@@ -202,47 +338,11 @@ export default function RecruiterSimulator() {
     }
   }, [currentStep, profile, announce]);
 
-  const handleCopyCard = useCallback(() => {
-    if (!profile) return;
-    const reportText = `🏆 Engineering Alignment Assessment\nResult: ${profile.title} (${profile.score}% Match)\nSummary: ${profile.summary}\nSchedule a sync: ${getActiveHostUrl()}/schedule`;
-    copy(reportText);
-    recordEvent("simulator", "simulator_report_copy");
-  }, [profile, copy, recordEvent]);
-
   return (
     <PageLayout
       variant="standard"
       className="bg-zinc-950 text-foreground relative overflow-hidden flex flex-col items-center justify-start"
     >
-      {/* Visual Copy Alerts */}
-      <AnimatePresence>
-        {copied && (
-          <motion.div
-            role="status"
-            aria-live="polite"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="fixed top-24 right-6 z-50 flex items-center gap-2 bg-emerald-950/90 border border-emerald-500/50 text-emerald-200 text-xs font-mono px-3.5 py-2.5 rounded-xl shadow-2xl backdrop-blur-md"
-          >
-            <IconCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>Assessment report copied to clipboard!</span>
-          </motion.div>
-        )}
-        {error && (
-          <motion.div
-            role="alert"
-            aria-live="assertive"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="fixed top-24 right-6 z-50 flex items-center gap-2 bg-rose-950/90 border border-rose-500/50 text-rose-200 text-xs font-mono px-3.5 py-2.5 rounded-xl shadow-2xl backdrop-blur-md"
-          >
-            <IconAlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
-            <span>{error}</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
       {/* Dynamic Background Atmospheric Lighting */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-brand-cyan/5 blur-[160px] pointer-events-none rounded-full" />
       <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-brand-blue/5 blur-[140px] pointer-events-none rounded-full" />
@@ -429,12 +529,17 @@ export default function RecruiterSimulator() {
                   >
                     <IconCalendar className="w-4 h-4" aria-hidden="true" /> Schedule on Google Calendar
                   </Link>
-                  <button
-                    onClick={handleCopyCard}
+                  <CopyButton
+                    text={() => {
+                      if (!profile) return "";
+                      return `🏆 Engineering Alignment Assessment\nResult: ${profile.title} (${profile.score}% Match)\nSummary: ${profile.summary}\nSchedule a sync: ${getActiveHostUrl()}/schedule`;
+                    }}
+                    label="Copy Report"
+                    copiedLabel="Copied!"
+                    successMessage="Engineering alignment assessment report successfully copied to clipboard!"
+                    errorMessage="Unable to copy engineering assessment to clipboard"
                     className="flex items-center justify-center gap-2 px-4 py-3 bg-zinc-950 border border-zinc-800 hover:border-zinc-700 text-zinc-300 font-mono font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"
-                  >
-                    <IconCopy className="w-4 h-4" aria-hidden="true" /> {copied ? "Copied!" : "Copy Report"}
-                  </button>
+                  />
                   <button
                     onClick={handleReset}
                     className="flex items-center justify-center gap-2 px-4 py-3 bg-zinc-950 border border-zinc-800 hover:border-zinc-700 text-zinc-400 font-mono font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"

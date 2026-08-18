@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
+import { env } from "@/lib/env";
 import { CaseStudyShowcase } from "@/components/CaseStudyShowcase";
 import { BaseCaseStudy } from "@/types/domain";
 import { getGitHubStats, parseGitHubUrl, GitHubStats, getSimulatedStats } from "@/lib/github";
@@ -62,7 +63,7 @@ export default async function CaseStudiesPage() {
       })
     );
   } catch (error) {
-    if (process.env.VERCEL_ENV === "production") {
+    if (env.VERCEL_ENV === "production") {
       console.warn("Failed to load case studies from database. Falling back to local data:", error);
     }
     caseStudies = FALLBACK_CASE_STUDIES.map((cs) => ({

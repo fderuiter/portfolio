@@ -3,6 +3,7 @@ import DOMPurify from "isomorphic-dompurify";
 import { prisma } from "@/lib/db";
 import { CaseStudySubmissionSchema } from "@/lib/schemas";
 import { sanitizeError } from "@/lib/error-sanitization";
+import { env } from "@/lib/env";
 
 // Enforce standard dynamic route behavior in Next.js 16 to query live datastores safely
 export const dynamic = "force-dynamic";
@@ -21,7 +22,7 @@ const SANITIZE_OPTIONS = {
 };
 
 export async function GET() {
-  if (process.env.PLAYWRIGHT_TEST === "true") {
+  if (env.PLAYWRIGHT_TEST === "true") {
     return NextResponse.json([
       {
         id: "clinical-data-mapper",

@@ -14,6 +14,7 @@ import {
   IconShieldCheck,
   IconWand,
 } from "@tabler/icons-react";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface DiagnosticsDrawerProps {
   isOpen: boolean;
@@ -32,6 +33,11 @@ export const DiagnosticsDrawer: React.FC<DiagnosticsDrawerProps> = ({
 }) => {
   const [filterSeverity, setFilterSeverity] = useState<"all" | ComplianceSeverity>("all");
   const [fixedNotice, setFixedNotice] = useState<string | null>(null);
+
+  const containerRef = useFocusTrap<HTMLDivElement>(isOpen, {
+    onEscape: onClose,
+    returnFocus: true,
+  });
 
   if (!isOpen) return null;
 
@@ -82,7 +88,7 @@ export const DiagnosticsDrawer: React.FC<DiagnosticsDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm">
+    <div ref={containerRef} role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-sm">
       <div className="bg-zinc-900 border border-zinc-700/80 rounded-2xl w-full max-w-3xl max-h-[92vh] sm:max-h-[88vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-zinc-800 bg-zinc-950/70">

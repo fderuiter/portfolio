@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { CopyButton } from "@/components/CopyButton";
 import { StudyProtocol } from "@/lib/crf/types";
 import { exportStudyToCdiscOdmXml } from "@/lib/crf/odm-xml-serializer";
 import { exportFormToFhirQuestionnaire } from "@/lib/crf/fhir-questionnaire";
@@ -8,8 +9,6 @@ import { exportStudyToSas } from "@/lib/crf/export-sas";
 import { exportStudyToR } from "@/lib/crf/export-r";
 import {
   IconDownload,
-  IconCopy,
-  IconCheck,
   IconUpload,
   IconCode,
   IconFileSpreadsheet,
@@ -38,7 +37,6 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<ExportTab>("odm");
   const [selectedFormId, setSelectedFormId] = useState<string>("all");
-  const [copied, setCopied] = useState(false);
   const [importJsonText, setImportJsonText] = useState("");
   const [importError, setImportError] = useState<string | null>(null);
 
@@ -90,12 +88,6 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
       default:
         return jsonBundleContent;
     }
-  };
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(getActiveContent());
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleDownload = () => {
@@ -191,13 +183,13 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
             </button>
           )}
 
-          <button
-            onClick={handleCopy}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-850 hover:bg-zinc-800 border border-zinc-750 text-zinc-200 text-xs font-mono transition-all"
-          >
-            {copied ? <IconCheck className="w-4 h-4 text-emerald-400" /> : <IconCopy className="w-4 h-4" />}
-            <span>{copied ? "Copied!" : "Copy Code"}</span>
-          </button>
+          <CopyButton
+            text={() => getActiveContent()}
+            label="Copy Code"
+            copiedLabel="Copied!"
+            successMessage="Export code copied to clipboard"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-850 hover:bg-zinc-800 border border-zinc-750 text-zinc-200 text-xs font-mono transition-all cursor-pointer"
+          />
           <button
             onClick={handleDownload}
             className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-brand-cyan text-black hover:bg-white font-mono text-xs font-bold transition-all shadow-sm"

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
+import { CopyButton } from "@/components/CopyButton";
 import {
   IconCpu,
   IconBolt,
@@ -42,17 +43,7 @@ const CLI_SNIPPETS = [
 ];
 
 export const StackOverviewView: React.FC = () => {
-  const [copiedSnippetIdx, setCopiedSnippetIdx] = useState<number | null>(null);
   const { playHover, playSuccess } = useAudio();
-
-  const handleCopyCmd = (idx: number, cmd: string) => {
-    navigator.clipboard.writeText(cmd);
-    setCopiedSnippetIdx(idx);
-    playSuccess();
-    setTimeout(() => {
-      setCopiedSnippetIdx(null);
-    }, 2000);
-  };
 
   const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
@@ -214,7 +205,7 @@ export const StackOverviewView: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {CLI_SNIPPETS.map((snippet, idx) => (
+              {CLI_SNIPPETS.map((snippet) => (
                 <div
                   key={snippet.cmd}
                   className="p-4 rounded-xl bg-zinc-950/80 border border-zinc-800 flex flex-col justify-between"
@@ -232,18 +223,15 @@ export const StackOverviewView: React.FC = () => {
                     <code className="text-xs font-mono text-brand-cyan truncate">
                       {snippet.cmd}
                     </code>
-                    <button
-                      type="button"
-                      onClick={() => handleCopyCmd(idx, snippet.cmd)}
-                      aria-label={`Copy command ${snippet.cmd}`}
+                    <CopyButton
+                      text={snippet.cmd}
+                      icon={<IconCopy className="w-3.5 h-3.5" />}
+                      copiedIcon={<IconCheck className="w-3.5 h-3.5 text-emerald-400" />}
                       className="text-zinc-500 hover:text-white transition-colors p-1 cursor-pointer flex-shrink-0"
-                    >
-                      {copiedSnippetIdx === idx ? (
-                        <IconCheck className="w-3.5 h-3.5 text-emerald-400" />
-                      ) : (
-                        <IconCopy className="w-3.5 h-3.5" />
-                      )}
-                    </button>
+                      aria-label={`Copy command ${snippet.cmd}`}
+                      successMessage={`Command copied to clipboard: ${snippet.cmd}`}
+                      onCopySuccess={() => playSuccess()}
+                    />
                   </div>
                 </div>
               ))}

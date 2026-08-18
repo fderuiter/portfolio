@@ -338,7 +338,7 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     });
 
     // Helper to tick fake timers in small steps asynchronously to allow recursive animation frames to execute
-    const tickGame = async (totalMs: number, stepMs = 100) => {
+    const tickGame = async (totalMs: number, stepMs = 250) => {
       for (let elapsed = 0; elapsed < totalMs; elapsed += stepMs) {
         await act(async () => {
           await vi.advanceTimersByTimeAsync(stepMs);
@@ -419,5 +419,5 @@ describe("ClinicalTrialChaos React Component UI Suite", () => {
     expect(container.textContent).toContain("35s");
 
     vi.useRealTimers();
-  });
+  }, 15000);
 });

@@ -8,4 +8,4 @@
 
 > `const` **env**: [`AppEnv`](../type-aliases/AppEnv.md)
 
-Defined in: [lib/env.ts:114](https://github.com/fderuiter/portfolio/blob/main/lib/env.ts#L114)
+Defined in: [lib/env.ts:128](https://github.com/fderuiter/portfolio/blob/main/lib/env.ts#L128)

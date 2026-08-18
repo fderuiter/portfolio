@@ -23,6 +23,7 @@ import {
 import { filterFuzzySearch } from "@/lib/search-utils";
 import { useSearch } from "@/components/providers/SearchProvider";
 import { useAudio } from "@/components/providers/AudioProvider";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { unlockAchievement, setVaultUnlocked } from "@/lib/meme-data";
 import { playMemeSound } from "@/lib/meme-audio";
 
@@ -60,8 +61,13 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
 
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const searchId = useId();
+
+  const trapRef = useFocusTrap<HTMLDivElement>(true, {
+    initialFocusRef: inputRef,
+    onEscape: onClose,
+    returnFocus: true,
+  });
 
   // 1. Body scroll locking and focus trap management
   useEffect(() => {
@@ -633,7 +639,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.97, y: -8 }}
         transition={{ duration: 0.18, ease: "easeOut" }}
-        ref={containerRef}
+        ref={trapRef}
         style={{ "--cmd-glow": `0 0 50px ${hexToRgba(designManifest.colors["brand-cyan"], 0.06)}` } as React.CSSProperties}
         className="w-full max-w-3xl bg-zinc-900/95 border border-zinc-800/90 backdrop-blur-2xl shadow-[var(--cmd-glow)] rounded-3xl overflow-hidden flex flex-col relative my-auto sm:my-0 max-h-[85vh]"
       >

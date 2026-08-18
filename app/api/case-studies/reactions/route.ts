@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import crypto from "crypto";
 import { ReactionSubmissionSchema, ALLOWED_REACTIONS } from "@/lib/schemas";
 import * as Sentry from "@sentry/nextjs";
+import { env } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
@@ -67,7 +68,7 @@ export async function GET(req: NextRequest) {
       userReactions,
     });
   } catch (err) {
-    if (process.env.VERCEL_ENV === "production") {
+    if (env.VERCEL_ENV === "production") {
       console.error("Failed to query case study reactions:", err);
     }
     const counts = getDefaultCounts();
@@ -164,7 +165,7 @@ export async function POST(req: NextRequest) {
         { status: 200 }
       );
     } catch (dbErr) {
-      if (process.env.VERCEL_ENV === "production") {
+      if (env.VERCEL_ENV === "production") {
         console.error("Database reaction creation failed, using fallback:", dbErr);
       }
       if (!mockReactionsStore.has(caseStudySlug)) {

@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useKonamiCode } from "@/hooks/useKonamiCode";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { IconSparkles, IconDeviceGamepad2, IconX, IconTerminal, IconCheck } from "@tabler/icons-react";
 
 export const RetroChaosOverlay: React.FC = () => {
@@ -15,17 +16,13 @@ export const RetroChaosOverlay: React.FC = () => {
 
   const { resetActivation } = useKonamiCode(handleKonami);
 
-  // Close on Escape
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
-        setIsOpen(false);
-        resetActivation();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, resetActivation]);
+  const overlayRef = useFocusTrap<HTMLDivElement>(isOpen, {
+    onEscape: () => {
+      setIsOpen(false);
+      resetActivation();
+    },
+    returnFocus: true,
+  });
 
   // Listen for manual trigger events from Command Palette or Secret buttons
   useEffect(() => {
@@ -38,6 +35,7 @@ export const RetroChaosOverlay: React.FC = () => {
     <AnimatePresence>
       {isOpen && (
         <motion.div
+          ref={overlayRef}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

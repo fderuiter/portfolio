@@ -67,12 +67,14 @@ vi.mock("framer-motion", async (importOriginal) => {
 
 describe("RecruiterSimulator - Ecosystem-Aligned Accessibility Integration", () => {
   beforeEach(() => {
+    window.location.hash = "";
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     vi.clearAllMocks();
   });
 
   afterEach(() => {
     cleanup();
+    window.location.hash = "";
     vi.runOnlyPendingTimers();
     vi.useRealTimers();
   });
@@ -171,7 +173,7 @@ describe("RecruiterSimulator - Ecosystem-Aligned Accessibility Integration", () 
     expect(foundArrow).toBe(true);
   });
 
-  it("transmits targeted telemetry events for option selection, milestone completion, schedule click, and report copy", () => {
+  it("transmits targeted telemetry events for option selection, milestone completion, and schedule click", () => {
     render(<RecruiterSimulator />);
 
     // Step 1: Option Select
@@ -206,10 +208,40 @@ describe("RecruiterSimulator - Ecosystem-Aligned Accessibility Integration", () 
     const scheduleLink = screen.getByText(/Schedule on Google Calendar/i);
     fireEvent.click(scheduleLink);
     expect(mockRecordEvent).toHaveBeenCalledWith("simulator", "simulator_schedule_click");
+  });
 
-    // Click Copy Report CTA
-    const copyBtn = screen.getByText(/Copy Report/i);
-    fireEvent.click(copyBtn);
-    expect(mockRecordEvent).toHaveBeenCalledWith("simulator", "simulator_report_copy");
+  it("synchronizes option selections to URL hash parameters and supports direct deep link state restoration", () => {
+    window.location.hash = "#step=final_eval&ans=0,1,0";
+
+    render(<RecruiterSimulator />);
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    // Verify completed evaluation is restored directly from hash parameters
+    expect(screen.getByText("Principal Systems Engineer & Distributed Architect")).toBeDefined();
+    const gaugeContainer = screen.getByRole("img", { name: /Candidate alignment score/i });
+    expect(gaugeContainer).toBeDefined();
+  });
+
+  it("updates hash parameters on option selection and supports back button state recovery", () => {
+    render(<RecruiterSimulator />);
+
+    act(() => {
+      vi.advanceTimersByTime(400);
+    });
+
+    // Click step 1 option
+    const optionBtn = screen.getAllByText("Raw Systems & Performance Maverick")[0];
+    fireEvent.click(optionBtn);
+
+    expect(window.location.hash).toBe("#step=incident_triage&ans=0");
+
+    // Click back button in simulator
+    const backBtn = screen.getByRole("button", { name: "Back" });
+    fireEvent.click(backBtn);
+
+    expect(window.location.hash).toBe("");
   });
 });

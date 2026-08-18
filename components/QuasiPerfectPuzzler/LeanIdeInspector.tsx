@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { CopyButton } from "@/components/CopyButton";
 import { LeanProofStep, PuzzlerLevelDef } from "@/lib/quasi-perfect/types";
 import { tacticDefs } from "@/lib/quasi-perfect/tactics";
 import { generateLeanProofScript } from "@/lib/quasi-perfect/engine";
@@ -24,20 +25,9 @@ export const LeanIdeInspector: React.FC<LeanIdeInspectorProps> = ({
   isComplete,
 }) => {
   const [activeTab, setActiveTab] = useState<"code" | "encyclopedia">("code");
-  const [copied, setCopied] = useState<boolean>(false);
   const [selectedTactic, setSelectedTactic] = useState<string>("rfl");
 
   const leanCode = generateLeanProofScript(level, steps, isComplete);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(leanCode);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Clipboard fallback
-    }
-  };
 
   return (
     <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4 font-mono shadow-lg">
@@ -71,23 +61,16 @@ export const LeanIdeInspector: React.FC<LeanIdeInspectorProps> = ({
         </div>
 
         {activeTab === "code" && (
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all"
-          >
-            {copied ? (
-              <>
-                <IconCheck className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-emerald-400">Copied to Clipboard!</span>
-              </>
-            ) : (
-              <>
-                <IconCopy className="w-3.5 h-3.5" />
-                <span>Copy Lean 4 Code</span>
-              </>
-            )}
-          </button>
+          <CopyButton
+            text={leanCode}
+            label="Copy Lean 4 Code"
+            copiedLabel="Copied to Clipboard!"
+            icon={<IconCopy className="w-3.5 h-3.5" />}
+            copiedIcon={<IconCheck className="w-3.5 h-3.5 text-emerald-400" />}
+            className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all cursor-pointer"
+            aria-label="Copy Lean 4 Code"
+            successMessage="Lean 4 proof script copied to clipboard"
+          />
         )}
       </div>
 

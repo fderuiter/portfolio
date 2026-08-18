@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { CopyButton } from "@/components/CopyButton";
 import {
   IconShieldCheck,
   IconCheck,
@@ -137,18 +138,8 @@ const CATEGORIES = ["All", "Architecture", "Testing", "Accessibility", "Governan
 export const InvariantsMatrix: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [copiedId, setCopiedId] = useState<number | null>(null);
 
   const { playHover, playSuccess } = useAudio();
-
-  const handleCopyCmd = (id: number, cmd: string) => {
-    navigator.clipboard.writeText(cmd);
-    setCopiedId(id);
-    playSuccess();
-    setTimeout(() => {
-      setCopiedId(null);
-    }, 2000);
-  };
 
   const filteredInvariants = INVARIANTS.filter((inv) => {
     const matchesCategory = selectedCategory === "All" || inv.category === selectedCategory;
@@ -251,24 +242,17 @@ export const InvariantsMatrix: React.FC = () => {
                 <code className="truncate text-zinc-400">{inv.verificationCmd}</code>
               </div>
 
-              <button
-                type="button"
-                onClick={() => handleCopyCmd(inv.id, inv.verificationCmd)}
-                aria-label={`Copy command ${inv.verificationCmd}`}
+              <CopyButton
+                text={inv.verificationCmd}
+                label="Copy"
+                copiedLabel="Copied"
+                icon={<IconCopy className="w-3 h-3" />}
+                copiedIcon={<IconCheck className="w-3 h-3 text-emerald-400" />}
                 className="inline-flex items-center gap-1 px-2 py-1 rounded bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-zinc-400 hover:text-emerald-400 hover:border-emerald-500/40 transition-colors cursor-pointer flex-shrink-0"
-              >
-                {copiedId === inv.id ? (
-                  <>
-                    <IconCheck className="w-3 h-3 text-emerald-400" />
-                    <span className="text-emerald-400">Copied</span>
-                  </>
-                ) : (
-                  <>
-                    <IconCopy className="w-3 h-3" />
-                    <span>Copy</span>
-                  </>
-                )}
-              </button>
+                aria-label={`Copy command ${inv.verificationCmd}`}
+                successMessage={`Command copied to clipboard: ${inv.verificationCmd}`}
+                onCopySuccess={() => playSuccess()}
+              />
             </div>
           </div>
         ))}

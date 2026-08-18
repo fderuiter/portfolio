@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { StudyBranding } from "@/lib/crf/types";
 import { BRANDING_PRESETS, DEFAULT_STUDY_BRANDING } from "@/lib/crf/branding-defaults";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import {
   IconPalette,
   IconX,
@@ -26,23 +27,17 @@ export const BrandingConfigModal: React.FC<BrandingConfigModalProps> = ({
   onSave,
   onClose,
 }) => {
+  const containerRef = useFocusTrap<HTMLDivElement>(true, {
+    onEscape: onClose,
+    returnFocus: true,
+  });
+
   const [branding, setBranding] = useState<StudyBranding>(
     initialBranding || DEFAULT_STUDY_BRANDING
   );
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [logoError, setLogoError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Escape key handler for accessible modal closing
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
 
   const handleApplyPreset = (presetId: string) => {
     const preset = BRANDING_PRESETS.find((p) => p.id === presetId);
@@ -108,6 +103,7 @@ export const BrandingConfigModal: React.FC<BrandingConfigModalProps> = ({
 
   return (
     <div
+      ref={containerRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="branding-modal-title"

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getEnv } from "./env";
 
 /**
  * Validates that the required authorization secret is configured.
@@ -7,10 +8,11 @@ import { NextRequest, NextResponse } from "next/server";
  * it immediately throws an error to prevent route initialization.
  */
 export function validateRouteInitialization() {
-  const isDev = process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
-  const isBuild = process.env.NEXT_PHASE === "phase-production-build" || process.env.PLAYWRIGHT_TEST === "true" || process.env.CI === "true";
+  const currentEnv = getEnv();
+  const isDev = currentEnv.NODE_ENV === "development" || currentEnv.NODE_ENV === "test";
+  const isBuild = currentEnv.NEXT_PHASE === "phase-production-build" || currentEnv.PLAYWRIGHT_TEST === "true" || currentEnv.CI === "true";
   
-  if (!isDev && !isBuild && !process.env.CRON_SECRET) {
+  if (!isDev && !isBuild && !currentEnv.CRON_SECRET) {
     throw new Error("Route initialization failed: Required validation secret is missing.");
   }
 }
@@ -22,8 +24,9 @@ export function validateRouteInitialization() {
  * - In local development/test setups, requests are permitted without a secret if none is configured.
  */
 export function validateSyncRequest(req: NextRequest): { isValid: boolean; errorResponse?: NextResponse } {
-  const isDev = process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
-  const secret = process.env.CRON_SECRET;
+  const currentEnv = getEnv();
+  const isDev = currentEnv.NODE_ENV === "development" || currentEnv.NODE_ENV === "test";
+  const secret = currentEnv.CRON_SECRET;
 
   // Fail-closed: missing secret in non-development environment rejects all requests
   if (!isDev && !secret) {

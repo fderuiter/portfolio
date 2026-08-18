@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { StudyProtocol, StudyBranding } from "@/lib/crf/types";
 import { generateStudyDocx } from "@/lib/crf/export-docx";
 import { generateStudyPdf } from "@/lib/crf/export-pdf";
@@ -9,6 +9,7 @@ import {
   generateStudyAcrfBookHtml,
 } from "@/lib/crf/export-acrf";
 import { getStudyBranding } from "@/lib/crf/branding-defaults";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import {
   IconFileSpreadsheet,
   IconDownload,
@@ -35,16 +36,10 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
   onClose,
   onOpenBranding,
 }) => {
-  // Escape key handler for accessible modal closing
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
+  const containerRef = useFocusTrap<HTMLDivElement>(true, {
+    onEscape: onClose,
+    returnFocus: true,
+  });
 
   const [exportMode, setExportMode] = useState<"blank" | "annotated">("blank");
   const [scope, setScope] = useState<"all" | "single" | "selected">("all");
@@ -153,6 +148,7 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
 
   return (
     <div
+      ref={containerRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="export-modal-title"

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import crypto from "crypto";
 import { FeedbackSubmissionSchema } from "@/lib/schemas";
 import * as Sentry from "@sentry/nextjs";
+import { env } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
@@ -60,7 +61,7 @@ export async function GET(req: NextRequest) {
       })),
     });
   } catch (err) {
-    if (process.env.VERCEL_ENV === "production") {
+    if (env.VERCEL_ENV === "production") {
       console.error("Failed to query case study feedback:", err);
     }
     const mockList = mockFeedbackStore.get(slug) || [];
@@ -151,7 +152,7 @@ export async function POST(req: NextRequest) {
         { status: 201 }
       );
     } catch (dbErr) {
-      if (process.env.VERCEL_ENV === "production") {
+      if (env.VERCEL_ENV === "production") {
         console.error("Database feedback creation failed, using fallback:", dbErr);
       }
       const existingMock = (mockFeedbackStore.get(caseStudySlug) || []).find(
