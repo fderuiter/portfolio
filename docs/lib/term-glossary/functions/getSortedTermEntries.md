@@ -8,7 +8,7 @@
 
 > **getSortedTermEntries**(`glossary?`): `object`[]
 
-Defined in: [lib/term-glossary.ts:164](https://github.com/fderuiter/portfolio/blob/main/lib/term-glossary.ts#L164)
+Defined in: [lib/term-glossary.ts:227](https://github.com/fderuiter/portfolio/blob/main/lib/term-glossary.ts#L227)
 
 ## Parameters
 

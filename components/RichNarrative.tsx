@@ -16,6 +16,39 @@ interface RichNarrativeProps {
   className?: string;
 }
 
+/**
+ * Synchronously processes sanitized HTML to substitute term tags with active terminology preference
+ * before full interactive client rehydration completes.
+ */
+export function resolveTermSwap(html: string, simplified: boolean): string {
+  if (!html || !simplified) {
+    return html || "";
+  }
+
+  const unescapeAttr = (str: string): string => {
+    return str
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&apos;/g, "'")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&amp;/g, "&");
+  };
+
+  const termTagRegex = /<(span|abbr)\b([^>]*)>([\s\S]*?)<\/\1>/gi;
+
+  return html.replace(termTagRegex, (fullTag, tagName, attrs) => {
+    const termMatch = /data-term=["']([^"']*)["']/i.exec(attrs);
+    if (!termMatch || !termMatch[1]) {
+      return fullTag;
+    }
+
+    const rawTerm = termMatch[1];
+    const visibleText = unescapeAttr(rawTerm);
+    return `<${tagName}${attrs}>${visibleText}</${tagName}>`;
+  });
+}
+
 export function RichNarrative({ html, className }: RichNarrativeProps) {
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const { simplified } = useTerminology();
@@ -58,6 +91,9 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
       ]
     });
   }, [html]);
+
+  // Synchronously swap terms according to the active simplified preference for pre-hydration rendering
+  const fallbackHtml = useMemo(() => resolveTermSwap(cleanHtml, simplified), [cleanHtml, simplified]);
 
   // Defer HTML parsing and rehydration until after initial paint off the critical rendering path
   useEffect(() => {
@@ -173,7 +209,7 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
     return (
       <div
         className={className}
-        dangerouslySetInnerHTML={{ __html: cleanHtml }}
+        dangerouslySetInnerHTML={{ __html: fallbackHtml }}
       />
     );
   }

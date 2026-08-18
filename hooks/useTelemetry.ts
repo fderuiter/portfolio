@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore, useCallback, useEffect } from "react";
+import { useSyncExternalStore, useCallback, useEffect, startTransition } from "react";
 import { sanitizeError } from "@/lib/error-sanitization";
 
 export interface ProjectTelemetry {
@@ -34,6 +34,21 @@ export interface QueuedEvent {
   retries: number;
 }
 
+export interface RecordEventOptions {
+  defer?: boolean;
+}
+
+export interface PendingDeferredTask {
+  id: string;
+  projectSlug: string;
+  eventType: TelemetryEventType;
+}
+
+interface InternalDeferredTask extends PendingDeferredTask {
+  cancel: () => void;
+  execute: () => Promise<void>;
+}
+
 export const DEFAULT_MAX_QUEUE_CAPACITY = 50;
 let maxQueueCapacity = DEFAULT_MAX_QUEUE_CAPACITY;
 
@@ -44,9 +59,86 @@ let currentStoreState: TelemetryStoreState = {
 };
 
 let retryQueue: QueuedEvent[] = [];
+let pendingDeferredTasks: InternalDeferredTask[] = [];
 let retryTimer: NodeJS.Timeout | null = null;
 let lastRawCache: string | null = null;
 const listeners = new Set<() => void>();
+
+/**
+ * Schedule a task during browser idle periods with a fallback timeout mechanism.
+ *
+ * @param task The callback task to execute during idle time.
+ * @param timeout Maximum timeout delay before forcing task execution.
+ * @returns Cancellation function.
+ */
+export function scheduleIdleTask(task: () => void, timeout = 2000): () => void {
+  if (typeof window !== "undefined" && typeof window.requestIdleCallback === "function") {
+    const handle = window.requestIdleCallback(() => task(), { timeout });
+    return () => {
+      if (typeof window !== "undefined" && typeof window.cancelIdleCallback === "function") {
+        window.cancelIdleCallback(handle);
+      }
+    };
+  } else {
+    const timer = setTimeout(task, 50);
+    return () => clearTimeout(timer);
+  }
+}
+
+/**
+ * Get array of currently pending deferred telemetry tasks.
+ *
+ * @returns Array of pending deferred telemetry tasks.
+ */
+export function getPendingDeferredQueue(): PendingDeferredTask[] {
+  return pendingDeferredTasks.map(({ id, projectSlug, eventType }) => ({
+    id,
+    projectSlug,
+    eventType,
+  }));
+}
+
+/**
+ * Get count of currently pending deferred telemetry tasks.
+ *
+ * @returns Number of pending deferred tasks.
+ */
+export function getPendingDeferredQueueLength(): number {
+  return pendingDeferredTasks.length;
+}
+
+/**
+ * Clear all pending deferred tasks and cancel their idle timers.
+ */
+export function clearPendingDeferredQueue(): void {
+  for (const task of pendingDeferredTasks) {
+    task.cancel();
+  }
+  pendingDeferredTasks = [];
+}
+
+/**
+ * Flush all pending deferred tasks immediately using persistent network calls.
+ */
+export function flushPendingDeferredQueue(): void {
+  if (pendingDeferredTasks.length === 0) return;
+  const tasksToFlush = [...pendingDeferredTasks];
+  pendingDeferredTasks = [];
+
+  for (const task of tasksToFlush) {
+    task.cancel();
+    try {
+      fetch("/api/telemetry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectSlug: task.projectSlug, eventType: task.eventType }),
+        keepalive: true,
+      }).catch(() => {});
+    } catch {
+      // Safe catch on browser unload
+    }
+  }
+}
 
 /**
  * Configure the maximum capacity of the in-memory telemetry retry queue.
@@ -117,7 +209,9 @@ let lastFetchTimestamp = 0;
 const FETCH_COOLDOWN_MS = 5000;
 
 function notifyListeners() {
-  listeners.forEach((listener) => listener());
+  startTransition(() => {
+    listeners.forEach((listener) => listener());
+  });
 }
 
 function updateStore(updater: (prev: TelemetryStoreState) => TelemetryStoreState) {
@@ -200,6 +294,7 @@ if (typeof window !== "undefined") {
   });
 
   const flushQueueOnUnload = () => {
+    flushPendingDeferredQueue();
     if (retryQueue.length > 0) {
       processRetryQueue({ keepalive: true });
     }
@@ -342,7 +437,7 @@ export interface UseTelemetryOptions {
 /**
  * Custom hook implementing a robust Stale-While-Revalidate (SWR) telemetry system with useSyncExternalStore.
  * Hydrates state instantly from LocalStorage cache to prevent Cumulative Layout Shifts (CLS),
- * schedules background syncs, and supports optimistic updates with automated retry queuing and FIFO eviction.
+ * schedules background syncs during idle frames, and supports optimistic updates with automated retry queuing and FIFO eviction.
  *
  * @param options Optional configuration options including maximum retry queue capacity.
  */
@@ -353,67 +448,107 @@ export function useTelemetry(options?: UseTelemetryOptions) {
 
   const store = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  // Trigger SWR sync on mount
+  // Trigger SWR sync on mount during browser idle frame
   useEffect(() => {
-    fetchTelemetryAggregates();
+    let cancelIdle: (() => void) | null = null;
+    cancelIdle = scheduleIdleTask(() => {
+      fetchTelemetryAggregates();
+    }, 2000);
+
+    return () => {
+      if (cancelIdle) {
+        cancelIdle();
+      }
+    };
   }, []);
 
   const recordEvent = useCallback(
-    async (projectSlug: string, eventType: TelemetryEventType) => {
-      // 1. Optimistic Local State Update
-      const currentStats = store.telemetry[projectSlug] || { views: 0, clicks: 0 };
-      const updatedStats = {
-        views: eventType === "page_view" ? currentStats.views + 1 : currentStats.views,
-        clicks: eventType === "project_click" ? currentStats.clicks + 1 : currentStats.clicks,
-      };
+    async (
+      projectSlug: string,
+      eventType: TelemetryEventType,
+      options?: RecordEventOptions
+    ) => {
+      const executeDispatch = async () => {
+        // 1. Optimistic Local State Update
+        const currentStats = currentStoreState.telemetry[projectSlug] || { views: 0, clicks: 0 };
+        const updatedStats = {
+          views: eventType === "page_view" ? currentStats.views + 1 : currentStats.views,
+          clicks: eventType === "project_click" ? currentStats.clicks + 1 : currentStats.clicks,
+        };
 
-      updateStore((prev) => ({
-        ...prev,
-        telemetry: {
-          ...prev.telemetry,
-          [projectSlug]: updatedStats,
-        },
-      }));
-
-      // 2. Dispatch network POST event
-      try {
-        const response = await fetch("/api/telemetry", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ projectSlug, eventType }),
-        });
-
-        if (!response.ok) {
-          if (response.status === 429) {
-            console.warn("Telemetry record rate limited by API.");
-            // Enqueue for background retry with FIFO eviction guard
-            enqueueRetryItem({ projectSlug, eventType, retries: 0 });
-            if (!retryTimer) {
-              retryTimer = setTimeout(() => {
-                retryTimer = null;
-                processRetryQueue();
-              }, 3000);
-            }
-          } else {
-            throw new Error("Failed to persist telemetry event");
-          }
-        }
-      } catch (err) {
-        console.error("Optimistic telemetry sync persistence failed:", sanitizeError(err));
-        // Rollback optimistic increment on hard error
         updateStore((prev) => ({
           ...prev,
           telemetry: {
             ...prev.telemetry,
-            [projectSlug]: currentStats,
+            [projectSlug]: updatedStats,
           },
-          syncFailed: true,
         }));
+
+        // 2. Dispatch network POST event with HTTP status code inspection
+        try {
+          const response = await fetch("/api/telemetry", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ projectSlug, eventType }),
+          });
+
+          if (!response.ok) {
+            if (response.status === 429) {
+              console.warn("Telemetry record rate limited by API.");
+              enqueueRetryItem({ projectSlug, eventType, retries: 0 });
+              if (!retryTimer) {
+                retryTimer = setTimeout(() => {
+                  retryTimer = null;
+                  processRetryQueue();
+                }, 3000);
+              }
+            } else {
+              throw new Error(`Failed to persist telemetry event with status: ${response.status}`);
+            }
+          }
+        } catch (err) {
+          console.error("Optimistic telemetry sync persistence failed:", sanitizeError(err));
+          // Rollback optimistic increment on HTTP status error or network failure
+          updateStore((prev) => ({
+            ...prev,
+            telemetry: {
+              ...prev.telemetry,
+              [projectSlug]: currentStats,
+            },
+            syncFailed: true,
+          }));
+        }
+      };
+
+      if (options?.defer) {
+        const taskId = `${projectSlug}:${eventType}:${Date.now()}:${Math.random()}`;
+
+        let cancelTimer: (() => void) | null = null;
+        const runDeferred = async () => {
+          pendingDeferredTasks = pendingDeferredTasks.filter((t) => t.id !== taskId);
+          await executeDispatch();
+        };
+
+        cancelTimer = scheduleIdleTask(() => {
+          runDeferred();
+        }, 2000);
+
+        pendingDeferredTasks.push({
+          id: taskId,
+          projectSlug,
+          eventType,
+          cancel: () => {
+            if (cancelTimer) cancelTimer();
+          },
+          execute: executeDispatch,
+        });
+      } else {
+        await executeDispatch();
       }
     },
-    [store.telemetry]
+    []
   );
 
   return {
@@ -423,5 +558,7 @@ export function useTelemetry(options?: UseTelemetryOptions) {
     refetch: fetchTelemetryAggregates,
     queueLength: getRetryQueueLength(),
     queueCapacity: getQueueCapacity(),
+    pendingDeferredLength: getPendingDeferredQueueLength(),
   };
 }
+

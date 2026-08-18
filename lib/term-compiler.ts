@@ -4,14 +4,10 @@ import {
   getSortedTermEntries,
   TermDefinition,
 } from "./term-glossary";
+import { escapeXml } from "./utils";
 
 export function escapeAttr(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  return escapeXml(str, { singleQuoteEntity: "&#39;" });
 }
 
 /**

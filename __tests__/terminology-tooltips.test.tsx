@@ -5,6 +5,7 @@ import path from "path";
 import { renderHook } from "@testing-library/react";
 import { dictionary } from "@/lib/i18n-dictionary";
 import { useTerminology } from "@/components/providers/TerminologyProvider";
+import { resolveTermSwap } from "@/components/RichNarrative";
 
 describe("Interactive Terminology Tooltips - Sanitization Layers", () => {
   const allowedTags = [
@@ -123,6 +124,46 @@ describe("Centralized i18n Static Context & Dictionary Keys", () => {
     expect(result.current.simplified).toBe(false);
     expect(result.current.isFallback).toBe(true);
     expect(typeof result.current.setSimplified).toBe("function");
+  });
+});
+
+describe("Synchronous Initial Term Swap Helper (resolveTermSwap)", () => {
+  it("should return unchanged html when simplified is false", () => {
+    const html = `<p>Lead architect for <span data-key="gxp" data-term="industry-standard" data-definition="Good Practice standards">GxP</span> clinical trials.</p>`;
+    const swapped = resolveTermSwap(html, false);
+    expect(swapped).toBe(html);
+  });
+
+  it("should substitute inner tag content with data-term value when simplified is true", () => {
+    const html = `<p>Lead architect for <span data-key="gxp" data-term="industry-standard" data-definition="Good Practice standards">GxP</span> clinical trials.</p>`;
+    const swapped = resolveTermSwap(html, true);
+    expect(swapped).toContain('<span data-key="gxp" data-term="industry-standard" data-definition="Good Practice standards">industry-standard</span>');
+    expect(swapped).not.toContain('>GxP<');
+  });
+
+  it("should unescape attribute HTML entities when resolving simplified terms", () => {
+    const html = `<abbr data-term="AST &quot;Compiler&quot;" data-definition="Abstract Syntax Tree" data-key="ast-key">AST</abbr>`;
+    const swapped = resolveTermSwap(html, true);
+    expect(swapped).toContain('>AST "Compiler"<');
+  });
+
+  it("should handle empty strings or HTML without terminology tags gracefully", () => {
+    expect(resolveTermSwap("", true)).toBe("");
+    const plainHtml = "<p>Standard paragraph without terms.</p>";
+    expect(resolveTermSwap(plainHtml, true)).toBe(plainHtml);
+  });
+});
+
+describe("Global CSS Pre-Hydration Fallback Styling Invariants", () => {
+  it("should define fallback dashed underline and cursor help for terminology data attributes in globals.css", () => {
+    const globalsCssPath = path.resolve(__dirname, "../app/globals.css");
+    const content = fs.readFileSync(globalsCssPath, "utf-8");
+
+    expect(content).toContain("[data-term]");
+    expect(content).toContain("[data-definition]");
+    expect(content).toContain("[data-key]");
+    expect(content).toContain("cursor: help;");
+    expect(content).toContain("border-bottom: 1px dashed var(--muted, #71717a);");
   });
 });
 

@@ -203,6 +203,7 @@ describe("Concurrency & State Synchronization Guardrail Suite", () => {
       await act(async () => {
         root.render(<TelemetryComponent />);
       });
+      await new Promise((r) => setTimeout(r, 60));
 
       const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 

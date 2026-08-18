@@ -149,6 +149,69 @@ export const CANONICAL_GLOSSARY: TermDefinition[] = [
       "Abstract Syntax Tree. A hierarchical tree representation of the syntactic structure of source code or logical expressions.",
     aliases: ["AST"],
   },
+  {
+    key: "phi-term",
+    canonical: "Patient Health Information (PHI)",
+    simplified: "protected health records",
+    definition:
+      "Patient Health Information. Sensitive health data protected under federal privacy standards.",
+    aliases: ["Patient Health Information", "PHI"],
+  },
+  {
+    key: "tls-term",
+    canonical: "TLS 1.3",
+    simplified: "secure internet encryption",
+    definition:
+      "Transport Layer Security. An encrypted communication protocol protecting data transfers across internet networks.",
+    aliases: ["TLS"],
+  },
+  {
+    key: "pydantic-term",
+    canonical: "Pydantic",
+    simplified: "data validation library",
+    definition:
+      "A Python data validation and settings management library using type annotations.",
+    aliases: ["Pydantic v2"],
+  },
+  {
+    key: "json-schema-term",
+    canonical: "JSON Schema",
+    simplified: "data structure blueprint",
+    definition:
+      "A vocabulary and standard for annotating, structuring, and validating JSON data documents.",
+    aliases: ["JSON Schema Draft-07"],
+  },
+  {
+    key: "dag-term",
+    canonical: "Directed Acyclic Graph (DAG)",
+    simplified: "ordered task network",
+    definition:
+      "Directed Acyclic Graph. A directed structural graph with no closed loops, used to order computational workflows.",
+    aliases: ["Directed Acyclic Graph", "DAG"],
+  },
+  {
+    key: "openapi-term",
+    canonical: "OpenAPI",
+    simplified: "API specification standard",
+    definition:
+      "A standard specification language for defining, describing, and documenting RESTful web APIs.",
+    aliases: ["OpenAPI v3"],
+  },
+  {
+    key: "sax-term",
+    canonical: "SAX parser",
+    simplified: "stream XML reader",
+    definition:
+      "Simple API for XML. A sequential stream-based parsing method for reading large XML files without high memory usage.",
+    aliases: ["SAX", "sax-js"],
+  },
+  {
+    key: "zustand-term",
+    canonical: "Zustand",
+    simplified: "application state manager",
+    definition:
+      "A lightweight, fast state management library for managing shared application state in React.",
+  },
 ];
 
 export function getGlossaryKeyMap(

@@ -8,6 +8,7 @@ import { render } from "@testing-library/react";
 import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 import { dictionary } from "@/lib/i18n-dictionary";
 import { RichNarrative } from "@/components/RichNarrative";
+import { checkDictionaryDuplication, runTerminologyVerification } from "@/scripts/verify-terms";
 
 // Mock framer-motion to prevent transition freezes and warnings in jsdom environment
 vi.mock("framer-motion", async (importOriginal) => {
@@ -345,5 +346,14 @@ describe("Build-Time Inline Terminology Validation", () => {
     expect(container).toBeDefined();
     expect(container.textContent).toContain("Technical Architecture");
     expect(container.textContent).toContain("GxP");
+  });
+
+  it("should pass dictionary non-duplication verification and runTerminologyVerification", () => {
+    const dupErrors = checkDictionaryDuplication();
+    expect(dupErrors).toEqual([]);
+
+    const fullResult = runTerminologyVerification();
+    expect(fullResult.success).toBe(true);
+    expect(fullResult.errors).toEqual([]);
   });
 });

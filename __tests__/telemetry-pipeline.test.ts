@@ -182,6 +182,7 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
         refetch: vi.fn(),
         queueLength: 0,
         queueCapacity: 50,
+        pendingDeferredLength: 0,
       });
 
       // Set up a ref store to replicate component lifecycle mount persistence
@@ -202,7 +203,7 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
       // Simulate First Mount effect callback execution
       effectCallback!();
       expect(mockRecordEvent).toHaveBeenCalledTimes(1);
-      expect(mockRecordEvent).toHaveBeenCalledWith("/home-dashboard", "page_view");
+      expect(mockRecordEvent).toHaveBeenCalledWith("/home-dashboard", "page_view", { defer: true });
 
       // Simulate Second Mount effect callback execution (Strict Mode double-render)
       effectCallback!();

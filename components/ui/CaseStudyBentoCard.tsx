@@ -10,6 +10,8 @@ import { type RichInlineLine } from "@chenglou/pretext/rich-inline";
 import Link from "next/link";
 import { CommitSparkline } from "@/components/CommitSparkline";
 import { useBentoLayout } from "@/components/providers/BentoLayoutContext";
+import { useTerminology } from "@/components/providers/TerminologyProvider";
+import { compileTerms } from "@/lib/term-compiler";
 
 const REALITY_CONTENT: Record<string, string> = {
   schemaflow: "While the drag-and-drop canvas is extremely smooth, we initially faced major rendering bottlenecks when rendering over 150 schema nodes. We had to implement node occlusion culling and state debouncing to maintain 60 FPS, and cyclical dependency detection still requires optimized Web Worker postMessage parsing.",
@@ -23,59 +25,145 @@ const getRealityContent = (slug: string, originalContent: string) => {
   return REALITY_CONTENT[slug] || `Reality Check: ${originalContent} (Dynamic verification and performance testing in live staging revealed minor scaling limits under concurrent loads).`;
 };
 
+function unescapeEntities(str: string): string {
+  if (!str) return "";
+  return str
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+}
+
+function parseInlineNodes(
+  input: string,
+  simplified: boolean,
+  depth = 0
+): React.ReactNode[] {
+  if (!input) return [];
+  if (depth > 5) return [unescapeEntities(input)];
+
+  // Order of matching:
+  // 1. Terminology tags: <span ...>...</span> or <abbr ...>...</abbr> or any tag with data-key/data-term/data-definition
+  // 2. Bold: **...**
+  // 3. Code: `...`
+  // 4. Italic: *...*
+  const combinedRegex = /<(span|abbr)\b([^>]*)>([\s\S]*?)<\/\1>|<([a-z0-9]+)\b([^>]*(?:data-key|data-term|data-definition)[^>]*)>([\s\S]*?)<\/\4>|(\*\*[\s\S]*?\*\*)|(`[^`\n]+`)|(\*[^\*\n]+\*)/gi;
+
+  const nodes: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = combinedRegex.exec(input)) !== null) {
+    const matchIndex = match.index;
+
+    // Plain text before match
+    if (matchIndex > lastIndex) {
+      const textChunk = unescapeEntities(
+        input.slice(lastIndex, matchIndex).replace(/<[^>]+>/g, "")
+      );
+      if (textChunk) {
+        nodes.push(<span key={`text-${lastIndex}`}>{textChunk}</span>);
+      }
+    }
+
+    // Check if it's a tag match (Match groups 1..6)
+    if (match[1] || match[4]) {
+      const rawAttrs = match[2] || match[5] || "";
+      const innerContent = match[3] || match[6] || "";
+
+      const termMatch = /data-term=["']([^"']*)["']/i.exec(rawAttrs);
+      const keyMatch = /data-key=["']([^"']*)["']/i.exec(rawAttrs);
+
+      const termVal = termMatch ? termMatch[1] : "";
+      const hasTermVal = Boolean(termVal && termVal.trim());
+
+      let textToDisplay = innerContent;
+      if (simplified && hasTermVal) {
+        textToDisplay = termVal;
+      }
+
+      const keyVal = keyMatch ? keyMatch[1] : `term-${matchIndex}`;
+      const unescapedDisplay = unescapeEntities(textToDisplay);
+
+      const children = parseInlineNodes(unescapedDisplay, simplified, depth + 1);
+
+      nodes.push(
+        <React.Fragment key={`term-${keyVal}-${matchIndex}`}>
+          {children.length > 0 ? children : unescapedDisplay}
+        </React.Fragment>
+      );
+    } else if (match[7]) {
+      // Bold: **...**
+      const rawBold = match[7];
+      const boldContent = rawBold.slice(2, -2);
+      const children = parseInlineNodes(boldContent, simplified, depth + 1);
+
+      nodes.push(
+        <strong key={`bold-${matchIndex}`} className="font-bold text-neutral-100">
+          {children.length > 0 ? children : unescapeEntities(boldContent)}
+        </strong>
+      );
+    } else if (match[8]) {
+      // Code: `...`
+      const rawCode = match[8];
+      const codeContent = rawCode.slice(1, -1);
+
+      nodes.push(
+        <code
+          key={`code-${matchIndex}`}
+          className="px-1.5 py-0.5 mx-0.5 text-[11px] font-mono font-bold bg-brand-cyan/10 border border-brand-cyan/20 text-brand-cyan rounded-md inline-block shadow-[0_0_10px_rgba(6,182,212,0.05)] align-baseline leading-none"
+        >
+          {unescapeEntities(codeContent)}
+        </code>
+      );
+    } else if (match[9]) {
+      // Italic: *...*
+      const rawItalic = match[9];
+      const italicContent = rawItalic.slice(1, -1);
+      const children = parseInlineNodes(italicContent, simplified, depth + 1);
+
+      nodes.push(
+        <em key={`italic-${matchIndex}`} className="italic text-zinc-300">
+          {children.length > 0 ? children : unescapeEntities(italicContent)}
+        </em>
+      );
+    }
+
+    lastIndex = combinedRegex.lastIndex;
+  }
+
+  // Trailing text
+  if (lastIndex < input.length) {
+    const trailingChunk = unescapeEntities(
+      input.slice(lastIndex).replace(/<[^>]+>/g, "")
+    );
+    if (trailingChunk) {
+      nodes.push(<span key={`text-${lastIndex}`}>{trailingChunk}</span>);
+    }
+  }
+
+  return nodes;
+}
+
 const FormattedMarkdownText: React.FC<{ text: string; className?: string }> = ({ text, className }) => {
-  const paragraphs = React.useMemo(() => {
-    return text.split(/\r?\n+/).map((p) => p.trim()).filter(Boolean);
+  const { simplified } = useTerminology();
+
+  const compiledText = React.useMemo(() => {
+    return compileTerms(text || "");
   }, [text]);
+
+  const paragraphs = React.useMemo(() => {
+    return compiledText.split(/\r?\n+/).map((p) => p.trim()).filter(Boolean);
+  }, [compiledText]);
 
   return (
     <div className="flex flex-col gap-3">
       {paragraphs.map((para, pIdx) => {
-        const tokens: { type: "text" | "bold" | "italic" | "code"; content: string }[] = [];
-        const regex = /(\*\*.*?\*\*|`.*?`|\*.*?\*|[^*`\n]+|\n)/g;
-        let match;
-        while ((match = regex.exec(para)) !== null) {
-          const raw = match[0];
-          if (raw.startsWith("**") && raw.endsWith("**") && raw.length > 4) {
-            tokens.push({ type: "bold", content: raw.slice(2, -2) });
-          } else if (raw.startsWith("`") && raw.endsWith("`") && raw.length > 2) {
-            tokens.push({ type: "code", content: raw.slice(1, -1) });
-          } else if (raw.startsWith("*") && raw.endsWith("*") && raw.length > 2) {
-            tokens.push({ type: "italic", content: raw.slice(1, -1) });
-          } else {
-            tokens.push({ type: "text", content: raw });
-          }
-        }
-
+        const nodes = parseInlineNodes(para, simplified);
         return (
           <p key={pIdx} className={className}>
-            {tokens.map((token, idx) => {
-              if (token.type === "bold") {
-                return (
-                  <strong key={idx} className="font-bold text-neutral-100">
-                    {token.content}
-                  </strong>
-                );
-              }
-              if (token.type === "code") {
-                return (
-                  <code
-                    key={idx}
-                    className="px-1.5 py-0.5 mx-0.5 text-[11px] font-mono font-bold bg-brand-cyan/10 border border-brand-cyan/20 text-brand-cyan rounded-md inline-block shadow-[0_0_10px_rgba(6,182,212,0.05)] align-baseline leading-none"
-                  >
-                    {token.content}
-                  </code>
-                );
-              }
-              if (token.type === "italic") {
-                return (
-                  <em key={idx} className="italic text-zinc-300">
-                    {token.content}
-                  </em>
-                );
-              }
-              return <span key={idx}>{token.content}</span>;
-            })}
+            {nodes}
           </p>
         );
       })}

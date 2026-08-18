@@ -10,6 +10,7 @@ import {
   SubjectFormStatus,
 } from "@/lib/crf/types";
 import { evaluateFormula, evaluateRule } from "@/lib/crf/ast-evaluator";
+import { generateId } from "@/lib/utils";
 import {
   IconShieldCheck,
   IconHistory,
@@ -23,15 +24,15 @@ import {
 } from "@tabler/icons-react";
 
 function generateAuditId(): string {
-  return `aud_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  return generateId("aud_");
 }
 
 function generateSignatureId(): string {
-  return `sig_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  return generateId("sig_");
 }
 
 function generateQueryId(): string {
-  return `qry_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  return generateId("qry_");
 }
 
 interface LiveEdcSimulatorProps {

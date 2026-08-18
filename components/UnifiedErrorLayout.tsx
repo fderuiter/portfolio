@@ -7,10 +7,14 @@ import { useTelemetry } from "@/hooks/useTelemetry";
 import { clamp } from "@/lib/game-utils";
 import { useSearch } from "@/components/providers/SearchProvider";
 import dynamic from "next/dynamic";
+import { RetroLabyrinthSkeleton } from "@/components/RetroLabyrinthSkeleton";
 
 const RetroLabyrinth = dynamic(
   () => import("@/components/RetroLabyrinth").then((mod) => mod.RetroLabyrinth),
-  { ssr: false }
+  {
+    ssr: false,
+    loading: () => <RetroLabyrinthSkeleton />,
+  }
 );
 import { getClosestMatches, type CaseStudyItem } from "@/lib/search-utils";
 import { resolveBaseUrl } from "@/lib/domain";
