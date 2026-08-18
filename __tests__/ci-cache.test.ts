@@ -80,4 +80,42 @@ describe("CI Workflow Dual Caching and Isolation Suite", () => {
       }
     });
   });
+
+  describe("Synthetic Probes Workflow Caching and Dependency Suite", () => {
+    const syntheticWorkflowPath = path.join(process.cwd(), ".github/workflows/synthetic-probes.yml");
+
+    it("should have the synthetic-probes.yml workflow file present", () => {
+      expect(fs.existsSync(syntheticWorkflowPath)).toBe(true);
+    });
+
+    const syntheticContent = fs.readFileSync(syntheticWorkflowPath, "utf8");
+
+    it("should configure Playwright cache and conditional host dependency installation on cache hit", () => {
+      // Find the Playwright cache block in synthetic probes
+      const playwrightCacheSection = syntheticContent.split("- name:").find(section => section.includes("Cache Playwright Browsers"));
+      expect(playwrightCacheSection).toBeDefined();
+
+      if (playwrightCacheSection) {
+        expect(playwrightCacheSection).toContain("path: ~/.cache/ms-playwright");
+        expect(playwrightCacheSection).toMatch(/key:\s*playwright-synthetic-\$\{\{\s*hashFiles\(['"]package-lock\.json['"]\)\s*\}\}/);
+      }
+
+      // Check cache miss installation step
+      const cacheMissSection = syntheticContent.split("- name:").find(section => section.includes("Install Playwright Browsers (Cache Miss)"));
+      expect(cacheMissSection).toBeDefined();
+      if (cacheMissSection) {
+        expect(cacheMissSection).toContain("if: steps.playwright-cache.outputs.cache-hit != 'true'");
+        expect(cacheMissSection).toContain("run: npx playwright install chromium --with-deps");
+      }
+
+      // Check cache hit dependency-only installation step
+      const cacheHitSection = syntheticContent.split("- name:").find(section => section.includes("Install Playwright Dependencies Only (Cache Hit)"));
+      expect(cacheHitSection).toBeDefined();
+      if (cacheHitSection) {
+        expect(cacheHitSection).toContain("if: steps.playwright-cache.outputs.cache-hit == 'true'");
+        expect(cacheHitSection).toContain("run: npx playwright install-deps chromium");
+      }
+    });
+  });
 });
+
