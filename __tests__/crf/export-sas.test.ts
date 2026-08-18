@@ -5,7 +5,6 @@ import {
   escapeSasString,
   getFieldSasAttributes,
   getExpandedSasAttributes,
-  getFieldOptions,
   parseMultiSelectValue,
   generateSasProcFormat,
   generateSasDataStepForForm,

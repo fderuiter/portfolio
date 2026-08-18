@@ -8,7 +8,7 @@
 
 > **calculateBlockHeight**(`block`, `containerWidth`, `lineHeight?`): `number`
 
-Defined in: [lib/pretext-block-parser.ts:204](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L204)
+Defined in: [lib/pretext-block-parser.ts:203](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L203)
 
 Calculates the accurate offscreen height of a structured block prior to layout scheduling.
 
