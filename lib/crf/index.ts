@@ -16,6 +16,7 @@ export * from "./branding-defaults";
 export * from "./export-acrf";
 export * from "./export-docx";
 export * from "./export-pdf";
+export { getFieldOptions, parseMultiSelectValue } from "./export-sas";
 export * from "./export-r";
 export * from "./export-sas";
 export * from "./fhir-questionnaire";

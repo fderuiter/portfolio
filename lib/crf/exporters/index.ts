@@ -3,6 +3,7 @@
  * Standardized exporters for Clinical Data Management, Regulatory Submissions, and Biostatistics
  */
 
+export { getFieldOptions, parseMultiSelectValue } from "../export-sas";
 export * from "../export-sas";
 export * from "../export-r";
 export * from "../export-acrf";

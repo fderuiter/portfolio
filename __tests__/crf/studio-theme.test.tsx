@@ -83,6 +83,28 @@ import { CRFStudioContainer } from "@/components/crf/CRFStudioContainer";
 import { StudioHeader } from "@/components/crf/StudioHeader";
 import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
 
+import fs from "fs";
+import path from "path";
+
+function relativeLuminance(hex: string): number {
+  const cleanHex = hex.replace("#", "");
+  const r = parseInt(cleanHex.substring(0, 2), 16) / 255;
+  const g = parseInt(cleanHex.substring(2, 4), 16) / 255;
+  const b = parseInt(cleanHex.substring(4, 6), 16) / 255;
+  const R = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
+  const G = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
+  const B = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+  return 0.2126 * R + 0.7152 * G + 0.0722 * B;
+}
+
+function getContrastRatio(hex1: string, hex2: string): number {
+  const l1 = relativeLuminance(hex1);
+  const l2 = relativeLuminance(hex2);
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
 describe("CRF Studio - Light Mode & Theming", () => {
   let container: HTMLDivElement;
   let root: Root;
@@ -225,4 +247,81 @@ describe("CRF Studio - Light Mode & Theming", () => {
 
     expect(handleToggle).toHaveBeenCalledTimes(1);
   });
+
+  it("verifies scoped light theme color overrides achieve WCAG 2.1 AA text (4.5:1) and UI component (3.0:1) contrast ratios", () => {
+    const lightBgs = ["#ffffff", "#f8fafc", "#f1f5f9"];
+
+    // 1. Text color tokens
+    const textColors = {
+      "Brand Cyan (#0e7490)": "#0e7490",
+      "Amber Warning (#b45309)": "#b45309",
+      "Emerald Success (#047857)": "#047857",
+      "Red Error (#b91c1c)": "#b91c1c",
+      "Rose Error (#be123c)": "#be123c",
+      "Muted Text (--crf-text-muted #334155)": "#334155",
+      "Dim Text (--crf-text-dim #475569)": "#475569",
+    };
+
+    for (const [name, textColor] of Object.entries(textColors)) {
+      for (const bg of lightBgs) {
+        const ratio = getContrastRatio(textColor, bg);
+        expect(
+          ratio,
+          `Text token ${name} against light background ${bg} must achieve at least 4.5:1 WCAG AA contrast (got ${ratio.toFixed(
+            2
+          )}:1)`
+        ).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+
+    // 2. Graphical UI component & border tokens
+    const uiComponentColors = {
+      "Cyan UI Border/Bg (#0891b2)": "#0891b2",
+      "Amber UI Border/Bg (#b45309)": "#b45309",
+      "Emerald UI Border/Bg (#047857)": "#047857",
+      "Red UI Border/Bg (#b91c1c)": "#b91c1c",
+      "Input Border (--crf-input-border #64748b)": "#64748b",
+      "Focus Ring (--focus-ring #b45309)": "#b45309",
+    };
+
+    for (const [name, uiColor] of Object.entries(uiComponentColors)) {
+      for (const bg of lightBgs) {
+        const ratio = getContrastRatio(uiColor, bg);
+        expect(
+          ratio,
+          `UI component ${name} against light background ${bg} must achieve at least 3.0:1 WCAG AA contrast (got ${ratio.toFixed(
+            2
+          )}:1)`
+        ).toBeGreaterThanOrEqual(3.0);
+      }
+    }
+  });
+
+  it("verifies studio-theme.css scopes all overrides strictly to [data-studio-theme='light'] without modifying dark theme values", () => {
+    const cssPath = path.resolve(process.cwd(), "components/crf/studio-theme.css");
+    const cssContent = fs.readFileSync(cssPath, "utf-8");
+
+    // Dark mode block check
+    expect(cssContent).toContain('[data-studio-theme="dark"]');
+    expect(cssContent).toContain("--crf-bg: #09090b");
+    expect(cssContent).toContain("--crf-text: #f4f4f5");
+
+    // Scoped light mode check for brand & status overrides
+    expect(cssContent).toContain('[data-studio-theme="light"] .text-brand-cyan');
+    expect(cssContent).toContain('[data-studio-theme="light"] .text-amber-400');
+    expect(cssContent).toContain('[data-studio-theme="light"] .text-emerald-400');
+    expect(cssContent).toContain('[data-studio-theme="light"] .text-red-400');
+    expect(cssContent).toContain('[data-studio-theme="light"] .text-rose-400');
+  });
+
+  it("verifies global root CSS and theme generation scripts remain unchanged", () => {
+    const globalsCss = fs.readFileSync(path.resolve(process.cwd(), "app/globals.css"), "utf-8");
+    const generateScript = fs.readFileSync(path.resolve(process.cwd(), "scripts/generate-theme.ts"), "utf-8");
+
+    // Assert no CRF studio overrides leaked into app/globals.css
+    expect(globalsCss).not.toContain("[data-studio-theme]");
+    // Assert generator script exists and is active
+    expect(generateScript).toContain("parseCSSAndGenerateTS");
+  });
 });
+

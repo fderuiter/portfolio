@@ -8,7 +8,7 @@
 
 > **exportFormToR**(`form`, `study`, `options?`): `string`
 
-Defined in: [lib/crf/export-r.ts:299](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L299)
+Defined in: [lib/crf/export-r.ts:446](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L446)
 
 Exports a single form as a self-contained R script.
 

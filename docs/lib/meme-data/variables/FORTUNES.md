@@ -8,4 +8,4 @@
 
 > `const` **FORTUNES**: `string`[]
 
-Defined in: [lib/meme-data.ts:304](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L304)
+Defined in: [lib/meme-data.ts:305](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L305)

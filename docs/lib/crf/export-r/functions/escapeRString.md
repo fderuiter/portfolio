@@ -8,7 +8,7 @@
 
 > **escapeRString**(`text`): `string`
 
-Defined in: [lib/crf/export-r.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L29)
+Defined in: [lib/crf/export-r.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L30)
 
 Escapes strings for R string literals.
 
