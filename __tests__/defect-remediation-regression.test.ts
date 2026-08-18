@@ -89,7 +89,7 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       { id: "f3", variableName: "ZERO_DIV", label: "Zero Field", dataType: "number", columnSpan: 6, required: false },
     ];
 
-    it("safely resolves dynamic division by zero returning 0 instead of NaN or Infinity", () => {
+    it("safely resolves dynamic division by zero returning explicit null instead of NaN or Infinity", () => {
       // BMI formula: WEIGHT / ((HEIGHT / 100) ^ 2)
       // If HEIGHT is 0
       const resultZeroHeight = evaluateFormula(
@@ -97,16 +97,14 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
         { HEIGHT: 0, WEIGHT: 70 },
         mockFields
       );
-      expect(Number.isFinite(resultZeroHeight)).toBe(true);
-      expect(resultZeroHeight).toBe(0);
+      expect(resultZeroHeight).toBeNull();
 
       // Direct division by zero in expression
       const resultDivZero = evaluateFormula("100 / ZERO_DIV", { ZERO_DIV: 0 }, mockFields);
-      expect(Number.isFinite(resultDivZero)).toBe(true);
-      expect(resultDivZero).toBe(0);
+      expect(resultDivZero).toBeNull();
     });
 
-    it("handles empty function arguments in min/max without -Infinity / +Infinity", () => {
+    it("handles empty function arguments in min/max returning null without throwing", () => {
       const evaluator = new ExpressionEvaluator(
         [
           { type: "IDENTIFIER", value: "max" },
@@ -116,7 +114,7 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
         {}
       );
       const res = evaluator.parse();
-      expect(res).toBe(0);
+      expect(res).toBeNull();
 
       const minEvaluator = new ExpressionEvaluator(
         [
@@ -127,7 +125,7 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
         {}
       );
       const minRes = minEvaluator.parse();
-      expect(minRes).toBe(0);
+      expect(minRes).toBeNull();
     });
 
     it("handles token spans and diagnostics for malformed clinical formulas", () => {

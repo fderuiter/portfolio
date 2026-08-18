@@ -417,7 +417,7 @@ export const AstRuleEditor: React.FC<AstRuleEditorProps> = ({
               Live Evaluation Preview
             </span>
             <div className="text-xs font-mono font-bold text-white bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-700/50">
-              Result: {previewResult !== null ? previewResult : "—"}
+              Result: {previewResult !== null ? previewResult : ""}
             </div>
           </div>
 

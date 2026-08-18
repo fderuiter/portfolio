@@ -79,10 +79,13 @@ describe("CRF Studio - AST Formula & Rule Evaluator", () => {
       expect(evaluateFormula("round(3.14159, 2)", {}, fields)).toBe(3.14);
     });
 
-    it("handles zero division and invalid tokens gracefully without throwing", () => {
-      expect(evaluateFormula("10 / 0", {}, [])).toBe(0);
-      expect(evaluateFormula("invalid token #@$", {}, [])).toBe(0);
-      expect(evaluateFormula("", {}, [])).toBe(0);
+    it("returns explicit null for division/modulo by zero and missing inputs without throwing", () => {
+      expect(evaluateFormula("10 / 0", {}, [])).toBeNull();
+      expect(evaluateFormula("10 % 0", {}, [])).toBeNull();
+      expect(evaluateFormula("100 / MISSING_VAR", {}, sampleFields)).toBeNull();
+      expect(evaluateFormula("WEIGHT / ((HEIGHT / 100) ^ 2)", { WEIGHT: 70, HEIGHT: 0 }, sampleFields)).toBeNull();
+      expect(evaluateFormula("invalid token #@$", {}, [])).toBeNull();
+      expect(evaluateFormula("", {}, [])).toBeNull();
     });
   });
 

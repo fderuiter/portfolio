@@ -6,9 +6,9 @@
 
 # Function: calculateCockcroftGaultCrCl()
 
-> **calculateCockcroftGaultCrCl**(`age`, `weightKg`, `serumCrMgDl`, `isFemale`): `number`
+> **calculateCockcroftGaultCrCl**(`age`, `weightKg`, `serumCrMgDl`, `isFemale`): `number` \| `null`
 
-Defined in: [lib/crf/expression-evaluator.ts:320](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L320)
+Defined in: [lib/crf/expression-evaluator.ts:375](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L375)
 
 Calculates Cockcroft-Gault Creatinine Clearance (CrCl) in mL/min.
 
@@ -32,4 +32,4 @@ Calculates Cockcroft-Gault Creatinine Clearance (CrCl) in mL/min.
 
 ## Returns
 
-`number`
+`number` \| `null`

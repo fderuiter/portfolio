@@ -6,9 +6,9 @@
 
 # Function: calculateBazettQTc()
 
-> **calculateBazettQTc**(`qtMs`, `rrSec`): `number`
+> **calculateBazettQTc**(`qtMs`, `rrSec`): `number` \| `null`
 
-Defined in: [lib/crf/expression-evaluator.ts:335](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L335)
+Defined in: [lib/crf/expression-evaluator.ts:390](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L390)
 
 Calculates Bazett Corrected QT interval (QTcB) in milliseconds.
 
@@ -24,4 +24,4 @@ Calculates Bazett Corrected QT interval (QTcB) in milliseconds.
 
 ## Returns
 
-`number`
+`number` \| `null`
