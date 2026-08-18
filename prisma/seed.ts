@@ -228,6 +228,116 @@ interface HouseholdRSVP {
     `.trim(),
   },
   {
+    slug: "ualbf",
+    title: "UALBF: Verified Computational Proof Engine & Search Architecture",
+    primary_language: "Rust",
+    github_url: "https://github.com/fderuiter/ualbf",
+    published: true,
+    simulated_telemetry: false,
+    tags: "Rust, Lean 4, Python, C, Formal Verification, Number Theory",
+    editorial_content: "A **verified hybrid computational engine** pairing high-throughput **Rust** branch-and-bound search with a **Lean 4** formal verification pipeline. Automates large-scale search space exploration over `prime signature lattices` to investigate **quasiperfect numbers** ($\\sigma(n) = 2n + 1$) with zero unproven mathematical axioms.",
+    architectural_narrative: `
+<h3>The Challenge</h3>
+<p>Investigating the existence of quasiperfect numbers (integers <code>n</code> where the sum of positive divisors <code>σ(n) = 2n + 1</code>) requires searching vast prime exponent lattices. Unverified heuristic search algorithms are fast but vulnerable to arithmetic bugs or missed edge cases. Writing the entire search engine inside a formal theorem prover like Lean 4 introduces massive execution overhead, making exhaustive lattice traversals intractable.</p>
+
+<h3>Technical Architecture</h3>
+<p>UALBF utilizes the <strong>Verified Engine Bridge Pattern</strong>, decoupling raw CPU branch-and-bound search from formal mathematical verification. High-throughput search, cyclotomic polynomial evaluation, and bipartite sieve pruning run in Rust (<code>ualbf-project/rust-engine</code>). When obstruction boundaries are encountered, deterministic proof certificates are serialized over C/FFI (<code>lean_ffi.rs</code>) and verified by the lightweight Lean 4 kernel (<code>ualbf-project/lean4-proofs</code>).</p>
+
+<pre><code class="language-rust">
+// rust-engine/src/dfs_tree.rs
+use crate::cyclotomic::CyclotomicGraph;
+use crate::sieve::BipartitionSieve;
+use crate::manifest::ProofCertificate;
+
+pub struct LatticeSearchEngine {
+    max_prime_bound: u32,
+    abundancy_threshold: f64,
+    sieve: BipartitionSieve,
+}
+
+impl LatticeSearchEngine {
+    pub fn traverse_lattice(
+        &mut self,
+        current_node: &PrimeSignatureNode,
+        certificates: &mut Vec&lt;ProofCertificate&gt;,
+    ) -&gt; SearchStatus {
+        if current_node.abundancy() &gt; self.abundancy_threshold {
+            return SearchStatus::PrunedAbundancy;
+        }
+
+        if let Some(obstruction) = self.sieve.evaluate_cyclotomic_obstruction(current_node) {
+            certificates.push(ProofCertificate::from_obstruction(current_node, obstruction));
+            return SearchStatus::PrunedCyclotomicObstruction;
+        }
+
+        for next_signature in current_node.expand_children(self.max_prime_bound) {
+            self.traverse_lattice(&amp;next_signature, certificates);
+        }
+
+        SearchStatus::Exhausted
+    }
+}
+</code></pre>
+
+<h4>1. Type-Safe Domain Specific Pruning</h4>
+<p>The Rust engine implements cyclotomic polynomial factorizations, Euler product evaluators, and Touchard congruence bridges to prune unreachable branches early. Fixed 64-bit rational interval bounds (<code>Fixed64.lean</code>) allow rapid sieving before falling back to arbitrary-precision cyclotomic evaluations.</p>
+
+<pre><code class="language-lean">
+-- ualbf-project/lean4-proofs/UALBF/Engine/Bipartition.lean
+import UALBF.Algebra.EulerProduct
+import UALBF.Algebra.CyclotomicGraph
+import UALBF.Engine.Fixed64
+
+namespace UALBF.Engine
+
+structure ObstructionCertificate where
+  node_id : Nat
+  prime_bounds : List Nat
+  abundancy_ratio : Fixed64
+  is_valid_obstruction : Bool
+
+theorem bipartition_sieve_soundness
+    (cert : ObstructionCertificate)
+    (h_cert : cert.is_valid_obstruction = true)
+    (n : Nat) (h_node : n ∈ PrimeLattice cert.prime_bounds) :
+    sigma n ≠ 2 * n + 1 := by
+  intro h_quasi
+  have h_bound : abundancyRatio n &gt; 2 + 1 / (n : Fixed64) := by
+    exact abundancy_bound_from_certificate cert h_cert h_node
+  have h_eq : abundancyRatio n = 2 + 1 / (n : Fixed64) := by
+    rw [h_quasi]
+    ring
+  linarith
+</code></pre>
+
+<h4>2. FFI Memory Safety &amp; Zero-Axiom Soundness</h4>
+<p>To eliminate memory alignment mismatches across the Rust/C/Lean boundary, C shims (<code>c_shims.c</code>, <code>ffi.c</code>) and Lean FFI abstractions maintain deterministic struct layouts. Automated CI gates (<code>test_zero_axiom_enforcement.py</code>) strictly audit the Lean 4 environment via <code>#print axioms</code> to guarantee 100% sound mathematical proofs with zero unverified hypotheses.</p>
+
+<pre><code class="language-rust">
+// lean_ffi.rs
+#[repr(C)]
+pub struct LeanObstructionManifest {
+    pub node_id: u64,
+    pub prime_bound: u32,
+    pub abundancy_q64: u64,
+    pub holds_obstruction: u8,
+}
+
+#[no_mangle]
+pub extern "C" fn ualbf_verify_certificate_manifest(
+    manifest_ptr: *const LeanObstructionManifest,
+    out_json_buf: *mut c_char,
+    buf_len: usize,
+) -&gt; c_int {
+    if manifest_ptr.is_null() { return -1; }
+    let manifest = unsafe { &amp;*manifest_ptr };
+    if manifest.holds_obstruction == 1 &amp;&amp; manifest.abundancy_q64 &gt; 0 {
+        0
+    } else {
+        -2
+    }
+}
+</code></pre>
     slug: "sortify",
     title: "Sortify: Air-Gapped Document Classification & Resilient File Engine",
     primary_language: "Python",
