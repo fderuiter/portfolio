@@ -8,7 +8,7 @@
 
 > **useTelemetry**(): `object`
 
-Defined in: [hooks/useTelemetry.ts:186](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L186)
+Defined in: [hooks/useTelemetry.ts:246](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L246)
 
 Custom hook implementing a robust Stale-While-Revalidate (SWR) telemetry system with useSyncExternalStore.
 Hydrates state instantly from LocalStorage cache to prevent Cumulative Layout Shifts (CLS),
@@ -36,9 +36,18 @@ schedules background syncs, and supports optimistic updates with automated rollb
 
 ### refetch
 
-> **refetch**: () => `Promise`\<`void`\> = `fetchTelemetryAggregates`
+> **refetch**: (`options?`) => `Promise`\<`void`\> = `fetchTelemetryAggregates`
 
 Fetch latest telemetry aggregates from the server.
+Reuses active in-flight Promises for concurrent callers and enforces cooldown throttling.
+
+#### Parameters
+
+##### options?
+
+###### force?
+
+`boolean`
 
 #### Returns
 

@@ -436,4 +436,184 @@ describe("useTelemetry Hook Integration & Isolation", () => {
       (process.env as any).NODE_ENV = originalEnv;
     }
   });
+
+  it("should deduplicate concurrent aggregate fetch requests across multiple mounting components", async () => {
+    let resolveGet: any;
+    const pendingGet = new Promise((resolve) => {
+      resolveGet = resolve;
+    });
+
+    fetchMock.mockImplementation(async (url: string, init?: any) => {
+      if (url === "/api/telemetry" && (!init || init.method === "GET")) {
+        await pendingGet;
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ "project-abc": { views: 15, clicks: 30 } }),
+        };
+      }
+      return { ok: true, json: async () => ({}) };
+    });
+
+    function WidgetA() {
+      useTelemetry();
+      return <div>Widget A</div>;
+    }
+
+    function WidgetB() {
+      useTelemetry();
+      return <div>Widget B</div>;
+    }
+
+    function WidgetC() {
+      useTelemetry();
+      return <div>Widget C</div>;
+    }
+
+    await act(async () => {
+      root = createRoot(container);
+      root.render(
+        <div>
+          <WidgetA />
+          <WidgetB />
+          <WidgetC />
+        </div>
+      );
+    });
+
+    // Verify GET fetch was initiated exactly once for all 3 components
+    const getCalls = fetchMock.mock.calls.filter(([url, init]: [string, any]) => url === "/api/telemetry" && (!init || init.method === "GET"));
+    expect(getCalls.length).toBe(1);
+
+    // Resolve the single in-flight fetch
+    await act(async () => {
+      resolveGet();
+    });
+  });
+
+  it("should enforce throttling cooldown timer between aggregate telemetry fetches", async () => {
+    let callCount = 0;
+    fetchMock.mockImplementation(async (url: string, init?: any) => {
+      if (url === "/api/telemetry" && (!init || init.method === "GET")) {
+        callCount++;
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ "project-abc": { views: callCount * 10, clicks: 0 } }),
+        };
+      }
+      return { ok: true, json: async () => ({}) };
+    });
+
+    let hookResult: any;
+    await act(async () => {
+      root = createRoot(container);
+      root.render(
+        <TelemetryTestComponent
+          onHookValue={(val) => {
+            hookResult = val;
+          }}
+        />
+      );
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(0);
+    });
+
+    expect(callCount).toBe(1);
+
+    // Call refetch immediately within 5000ms cooldown
+    await act(async () => {
+      vi.advanceTimersByTime(2000);
+      await hookResult.refetch();
+    });
+
+    // Should NOT have made a new network call
+    expect(callCount).toBe(1);
+
+    // Advance past the 5000ms cooldown window (total 6000ms)
+    await act(async () => {
+      vi.advanceTimersByTime(4000);
+      await hookResult.refetch();
+    });
+
+    // Should now make a second network call
+    expect(callCount).toBe(2);
+  });
+
+  it("should flush queued retry events with keepalive on page visibility change and unload lifecycle events", async () => {
+    let hookResult: any;
+    await act(async () => {
+      root = createRoot(container);
+      root.render(
+        <TelemetryTestComponent
+          onHookValue={(val) => {
+            hookResult = val;
+          }}
+        />
+      );
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(0);
+    });
+
+    // Simulate 429 rate limit to enqueue an event
+    fetchMock.mockImplementationOnce(async () => {
+      return { ok: false, status: 429 };
+    });
+
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    await act(async () => {
+      await hookResult.recordEvent("project-abc", "page_view");
+    });
+    warnSpy.mockRestore();
+
+    // Setup fetch mock for flushing
+    const postCallsWithKeepalive: any[] = [];
+    fetchMock.mockImplementation(async (url: string, init?: any) => {
+      if (init?.method === "POST") {
+        postCallsWithKeepalive.push(init);
+        return { ok: true, status: 201, json: async () => ({ success: true }) };
+      }
+      return { ok: true, json: async () => ({}) };
+    });
+
+    // Dispatch pagehide lifecycle event
+    await act(async () => {
+      window.dispatchEvent(new Event("pagehide"));
+    });
+
+    // Verify queued retry was processed with keepalive: true
+    expect(postCallsWithKeepalive.length).toBe(1);
+    expect(postCallsWithKeepalive[0].keepalive).toBe(true);
+
+    // Test visibilitychange when visibilityState is 'hidden'
+    // First, enqueue another rate-limited event
+    fetchMock.mockImplementationOnce(async () => {
+      return { ok: false, status: 429 };
+    });
+
+    const warnSpy2 = vi.spyOn(console, "warn").mockImplementation(() => {});
+    await act(async () => {
+      await hookResult.recordEvent("project-abc", "project_click");
+    });
+    warnSpy2.mockRestore();
+
+    postCallsWithKeepalive.length = 0;
+
+    Object.defineProperty(document, "visibilityState", {
+      value: "hidden",
+      writable: true,
+      configurable: true,
+    });
+
+    await act(async () => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
+    expect(postCallsWithKeepalive.length).toBe(1);
+    expect(postCallsWithKeepalive[0].keepalive).toBe(true);
+  });
 });
