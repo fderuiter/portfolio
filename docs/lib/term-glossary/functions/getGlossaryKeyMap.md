@@ -8,7 +8,7 @@
 
 > **getGlossaryKeyMap**(`glossary?`): `Map`\<`string`, [`TermDefinition`](../interfaces/TermDefinition.md)\>
 
-Defined in: [lib/term-glossary.ts:154](https://github.com/fderuiter/portfolio/blob/main/lib/term-glossary.ts#L154)
+Defined in: [lib/term-glossary.ts:217](https://github.com/fderuiter/portfolio/blob/main/lib/term-glossary.ts#L217)
 
 ## Parameters
 
