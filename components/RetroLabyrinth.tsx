@@ -1404,7 +1404,10 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
 
   if (!isMounted) {
     return (
-      <div className="relative w-full h-[240px] bg-neutral-950/80 border border-neutral-900 rounded-2xl flex flex-col items-center justify-center font-mono select-none overflow-hidden my-6">
+      <div
+        className="relative w-full aspect-[15/9] min-h-[240px] h-[240px] bg-neutral-950/80 border border-neutral-900 rounded-2xl flex flex-col items-center justify-center font-mono select-none overflow-hidden my-6"
+        data-testid="retro-labyrinth-skeleton"
+      >
         <div className="absolute top-3 left-4 right-4 flex justify-between items-center text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
           <span>SYSTEM_LABYRINTH.EXE</span>
           <span className="text-neutral-600">OFFLINE</span>

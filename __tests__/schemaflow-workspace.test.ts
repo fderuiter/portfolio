@@ -42,4 +42,16 @@ describe("SchemaFlowWorkspace Component Architectural & Logical Validation", () 
     expect(content).toContain("connect");
     expect(content).toContain("disconnect");
   });
+
+  it("configures SchemaFlowWorkspaceWrapper with high-fidelity loading skeleton fallback to eliminate CLS", () => {
+    const wrapperPath = path.resolve(__dirname, "../components/SchemaFlowWorkspaceWrapper.tsx");
+    const wrapperContent = fs.readFileSync(wrapperPath, "utf-8");
+    expect(wrapperContent).toContain("SchemaFlowWorkspaceSkeleton");
+    expect(wrapperContent).toContain("loading:");
+
+    const skeletonPath = path.resolve(__dirname, "../components/SchemaFlowWorkspaceSkeleton.tsx");
+    const skeletonContent = fs.readFileSync(skeletonPath, "utf-8");
+    expect(skeletonContent).toContain('data-testid="schemaflow-skeleton"');
+    expect(skeletonContent).toContain("min-h-[520px]");
+  });
 });
