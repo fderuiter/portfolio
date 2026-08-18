@@ -166,6 +166,12 @@ Re-exports [replaceNode](../quasi-perfect/engine/functions/replaceNode.md)
 
 ***
 
+### resolveHypothesis
+
+Re-exports [resolveHypothesis](../quasi-perfect/tactics/functions/resolveHypothesis.md)
+
+***
+
 ### simplifyNode
 
 Re-exports [simplifyNode](../quasi-perfect/engine/functions/simplifyNode.md)

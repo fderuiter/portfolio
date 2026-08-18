@@ -152,6 +152,12 @@ Re-exports [replaceNode](engine/functions/replaceNode.md)
 
 ***
 
+### resolveHypothesis
+
+Re-exports [resolveHypothesis](tactics/functions/resolveHypothesis.md)
+
+***
+
 ### simplifyNode
 
 Re-exports [simplifyNode](engine/functions/simplifyNode.md)

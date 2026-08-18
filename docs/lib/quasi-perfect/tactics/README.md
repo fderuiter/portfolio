@@ -9,3 +9,7 @@
 ## Variables
 
 - [tacticDefs](variables/tacticDefs.md)
+
+## Functions
+
+- [resolveHypothesis](functions/resolveHypothesis.md)

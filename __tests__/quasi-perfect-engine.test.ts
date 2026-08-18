@@ -764,4 +764,140 @@ describe("Quasi-Perfect Puzzler Granular 18-Level Step-by-Step Solvability", () 
     expect(areRingEquivalent(const5, const5)).toBe(true);
     expect(areRingEquivalent(const5, const0)).toBe(false);
   });
+
+  // =========================================================================
+  // LIFO REVERSE LOOKUP RESOLUTION SUITE
+  // =========================================================================
+
+  describe("LIFO Reverse Lookup Resolution Suite", () => {
+    it("prioritizes innermost / most recently introduced hypothesis when names collide (LIFO order)", () => {
+      const outerHyp: ASTNode = {
+        id: "hyp-outer-disj",
+        type: "Disjunction",
+        value: "∨",
+        metadata: { name: "h_left" },
+        children: [
+          { id: "var-a", type: "Variable", value: "A" },
+          { id: "var-b", type: "Variable", value: "B" },
+        ],
+      };
+
+      const innerHyp: ASTNode = {
+        id: "hyp-inner-val",
+        type: "Variable",
+        value: "A",
+        metadata: { name: "h_left" },
+      };
+
+      const targetGoal: ASTNode = {
+        id: "goal-a",
+        type: "Variable",
+        value: "A",
+      };
+
+      const hypotheses = [outerHyp, innerHyp];
+
+      const result = tacticDefs.exact.execute(targetGoal, targetGoal, hypotheses, "h_left");
+      expect(result.success).toBe(true);
+      expect(result.isProofComplete).toBe(true);
+      expect(result.leanProofStep).toBe("exact h_left");
+      expect(result.ramConsumed).toBe(1);
+    });
+
+    it("evaluates case-insensitive hypothesis names in LIFO reverse order", () => {
+      const outerHyp: ASTNode = {
+        id: "hyp-1",
+        type: "Equality",
+        value: "=",
+        metadata: { name: "H_LEFT" },
+        children: [
+          { id: "v1", type: "Variable", value: "x" },
+          { id: "c1", type: "Constant", value: 1 },
+        ],
+      };
+
+      const innerHyp: ASTNode = {
+        id: "hyp-2",
+        type: "Equality",
+        value: "=",
+        metadata: { name: "h_left" },
+        children: [
+          { id: "v2", type: "Variable", value: "x" },
+          { id: "c2", type: "Constant", value: 2 },
+        ],
+      };
+
+      const targetNode: ASTNode = { id: "v-target", type: "Variable", value: "x" };
+      const hypotheses = [outerHyp, innerHyp];
+
+      const result = tacticDefs.rw.execute(targetNode, targetNode, hypotheses, "H_LEFT");
+      expect(result.success).toBe(true);
+      expect(result.newAST?.value).toBe(2);
+    });
+
+    it("applies structural fallback in LIFO reverse order when no name argument is provided", () => {
+      const outerHyp: ASTNode = {
+        id: "hyp-imp-outer",
+        type: "Implication",
+        value: "→",
+        metadata: { name: "h_imp_1" },
+        children: [
+          { id: "p1", type: "Variable", value: "P" },
+          { id: "q1", type: "Variable", value: "Q" },
+        ],
+      };
+
+      const innerHyp: ASTNode = {
+        id: "hyp-imp-inner",
+        type: "Implication",
+        value: "→",
+        metadata: { name: "h_imp_2" },
+        children: [
+          { id: "r2", type: "Variable", value: "R" },
+          { id: "q2", type: "Variable", value: "Q" },
+        ],
+      };
+
+      const targetGoal: ASTNode = { id: "q-target", type: "Variable", value: "Q" };
+      const hypotheses = [outerHyp, innerHyp];
+
+      const result = tacticDefs.apply.execute(targetGoal, targetGoal, hypotheses);
+      expect(result.success).toBe(true);
+      expect(result.newAST?.value).toBe("R");
+      expect(result.leanProofStep).toBe("apply h_imp_2");
+    });
+
+    it("handles cases tactic LIFO lookup with duplicate disjunction hypothesis names", () => {
+      const outerDisj: ASTNode = {
+        id: "hyp-disj-outer",
+        type: "Disjunction",
+        value: "∨",
+        metadata: { name: "h_or" },
+        children: [
+          { id: "d1", type: "Variable", value: "A" },
+          { id: "d2", type: "Variable", value: "B" },
+        ],
+      };
+
+      const innerDisj: ASTNode = {
+        id: "hyp-disj-inner",
+        type: "Disjunction",
+        value: "∨",
+        metadata: { name: "h_or" },
+        children: [
+          { id: "d3", type: "Variable", value: "X" },
+          { id: "d4", type: "Variable", value: "Y" },
+        ],
+      };
+
+      const globalAST: ASTNode = { id: "goal-z", type: "Variable", value: "Z" };
+      const hypotheses = [outerDisj, innerDisj];
+
+      const result = tacticDefs.cases.execute(globalAST, globalAST, hypotheses, "h_or");
+      expect(result.success).toBe(true);
+      expect(result.newSubGoals?.length).toBe(2);
+      expect(result.newSubGoals![0].label).toContain("Case 1: X");
+      expect(result.newSubGoals![1].label).toContain("Case 2: Y");
+    });
+  });
 });
