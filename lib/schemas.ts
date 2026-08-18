@@ -50,3 +50,33 @@ export const CaseStudySummarySchema = z.object({
  */
 export const CaseStudyListResponseSchema = z.array(CaseStudySummarySchema);
 
+/**
+ * Allowed reaction types
+ */
+export const ALLOWED_REACTIONS = ["insightful", "mind_blowing", "actionable", "thorough"] as const;
+
+/**
+ * Schema for Feedback POST payload validation
+ */
+export const FeedbackSubmissionSchema = z.object({
+  caseStudySlug: z.string().min(1, "caseStudySlug must be a non-empty string"),
+  takeaways: z
+    .array(z.string().min(1, "Takeaway cannot be empty"))
+    .min(1, "At least one learning takeaway must be selected"),
+  comments: z
+    .string()
+    .min(3, "Comments must be at least 3 characters long")
+    .max(2000, "Comments cannot exceed 2000 characters"),
+});
+
+/**
+ * Schema for Reaction POST payload validation
+ */
+export const ReactionSubmissionSchema = z.object({
+  caseStudySlug: z.string().min(1, "caseStudySlug must be a non-empty string"),
+  reactionType: z.enum(ALLOWED_REACTIONS, {
+    message: "Allowed reactionType values: 'insightful', 'mind_blowing', 'actionable', 'thorough'",
+  }),
+});
+
+

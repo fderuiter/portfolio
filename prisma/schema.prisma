@@ -38,3 +38,27 @@ model TelemetryEvent {
   @@index([projectSlug])
   @@index([eventType])
 }
+
+model CaseStudyFeedback {
+  id             String   @id @default(cuid())
+  caseStudySlug  String
+  takeaways      String
+  comments       String
+  connectionHash String
+  createdAt      DateTime @default(now())
+
+  @@index([caseStudySlug])
+  @@index([connectionHash])
+}
+
+model CaseStudyReaction {
+  id             String   @id @default(cuid())
+  caseStudySlug  String
+  reactionType   String
+  connectionHash String
+  createdAt      DateTime @default(now())
+
+  @@index([caseStudySlug])
+  @@index([caseStudySlug, reactionType])
+  @@index([connectionHash])
+}

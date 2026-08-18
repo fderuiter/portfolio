@@ -66,6 +66,105 @@ export const openApiSpec = {
         },
       },
     },
+    "/api/case-studies/feedback": {
+      get: {
+        summary: "Query case study learning feedback",
+        description: "Retrieves learning feedback for a case study slug.",
+        parameters: [
+          {
+            name: "slug",
+            in: "query",
+            required: true,
+            description: "Case study slug identifier",
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Successful retrieval of feedback",
+          },
+          400: {
+            description: "Missing required query parameter",
+          },
+        },
+      },
+      post: {
+        summary: "Submit structured learning feedback",
+        description: "Validates and persists structured learning takeaways and free-form constructive text.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/FeedbackSubmission",
+              },
+            },
+          },
+        },
+        responses: {
+          201: {
+            description: "Feedback submitted successfully",
+          },
+          400: {
+            description: "Validation error on payload",
+          },
+          429: {
+            description: "Rate limit or duplicate submission limit reached",
+          },
+          500: {
+            description: "Internal server error",
+          },
+        },
+      },
+    },
+    "/api/case-studies/reactions": {
+      get: {
+        summary: "Retrieve case study reaction counts",
+        description: "Fetches aggregate quick reaction counts for a case study slug.",
+        parameters: [
+          {
+            name: "slug",
+            in: "query",
+            required: true,
+            description: "Case study slug identifier",
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Successful retrieval of reaction counts",
+          },
+          400: {
+            description: "Missing required query parameter",
+          },
+        },
+      },
+      post: {
+        summary: "Submit quick reaction badge",
+        description: "Increments quick reaction badge count for a case study slug.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ReactionSubmission",
+              },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: "Reaction registered successfully",
+          },
+          400: {
+            description: "Validation error on payload",
+          },
+          500: {
+            description: "Internal server error",
+          },
+        },
+      },
+    },
     "/api/telemetry": {
       get: {
         summary: "Retrieve compiled telemetry metrics",
@@ -312,6 +411,29 @@ export const openApiSpec = {
           },
         },
         required: ["error"],
+      },
+      FeedbackSubmission: {
+        type: "object",
+        properties: {
+          caseStudySlug: { type: "string" },
+          takeaways: {
+            type: "array",
+            items: { type: "string" },
+          },
+          comments: { type: "string" },
+        },
+        required: ["caseStudySlug", "takeaways", "comments"],
+      },
+      ReactionSubmission: {
+        type: "object",
+        properties: {
+          caseStudySlug: { type: "string" },
+          reactionType: {
+            type: "string",
+            enum: ["insightful", "mind_blowing", "actionable", "thorough"],
+          },
+        },
+        required: ["caseStudySlug", "reactionType"],
       },
     },
   },
