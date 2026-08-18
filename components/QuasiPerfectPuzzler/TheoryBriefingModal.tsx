@@ -2,7 +2,7 @@
 
 import React, { useCallback } from "react";
 import { GameMode, PuzzlerLevelDef } from "@/lib/quasi-perfect/types";
-import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { ModalContainer } from "@/components/ui/ModalContainer";
 import {
   IconSparkles,
   IconBook,
@@ -37,25 +37,19 @@ export const TheoryBriefingModal: React.FC<TheoryBriefingModalProps> = ({
     [onClose]
   );
 
-  const containerRef = useFocusTrap<HTMLDivElement>(isOpen, {
-    onEscape: onClose,
-    onKeyDown: handleKeyDown,
-    returnFocus: true,
-  });
-
   if (!isOpen) return null;
 
   const concept = level.educationalConcept;
 
   return (
-    <div
-      ref={containerRef}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="briefing-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200"
+    <ModalContainer
+      isOpen={isOpen}
+      onClose={onClose}
+      onKeyDown={handleKeyDown}
+      titleId="briefing-title"
+      maxWidth="max-w-2xl"
+      className="border-brand-cyan/40 bg-zinc-950 p-6 font-mono text-zinc-200 shadow-[0_0_50px_-10px_rgba(6,182,212,0.3)] animate-in fade-in duration-200"
     >
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-brand-cyan/40 bg-zinc-950 p-6 font-mono text-zinc-200 shadow-[0_0_50px_-10px_rgba(6,182,212,0.3)]">
         {/* Close Button */}
         <button
           type="button"
@@ -196,7 +190,6 @@ export const TheoryBriefingModal: React.FC<TheoryBriefingModalProps> = ({
             <span>→</span>
           </button>
         </div>
-      </div>
-    </div>
+    </ModalContainer>
   );
 };

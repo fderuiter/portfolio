@@ -7,7 +7,7 @@ import {
   generateStudyAcrfBookHtml,
 } from "@/lib/crf/export-acrf";
 import { getStudyBranding } from "@/lib/crf/branding-defaults";
-import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { ModalContainer } from "@/components/ui/ModalContainer";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import {
   IconFileSpreadsheet,
@@ -36,10 +36,6 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
   onClose,
   onOpenBranding,
 }) => {
-  const containerRef = useFocusTrap<HTMLDivElement>(true, {
-    onEscape: onClose,
-    returnFocus: true,
-  });
   const { recordEvent } = useTelemetry();
 
   const [exportMode, setExportMode] = useState<"blank" | "annotated">("blank");
@@ -153,14 +149,13 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
       : selectedFormIds.length;
 
   return (
-    <div
-      ref={containerRef}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="export-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+    <ModalContainer
+      isOpen={true}
+      onClose={onClose}
+      titleId="export-modal-title"
+      maxWidth="max-w-3xl"
+      className="bg-zinc-900 border-zinc-750"
     >
-      <div className="bg-zinc-900 border border-zinc-750 rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-950">
           <div className="flex items-center gap-3">
@@ -414,7 +409,6 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
             </button>
           </div>
         </div>
-      </div>
-    </div>
+    </ModalContainer>
   );
 };

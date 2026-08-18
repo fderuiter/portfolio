@@ -17,6 +17,7 @@ import { SearchWrapper } from "@/components/SearchWrapper";
 import { resolveBaseUrl } from "@/lib/domain";
 
 import { SerwistRegister } from "@/components/providers/SerwistRegister";
+import { DevOverflowHud } from "@/components/ui/DevOverflowHud";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -130,6 +131,7 @@ export default function RootLayout({
                   <Analytics />
                   <SearchWrapper />
                   <SerwistRegister />
+                  <DevOverflowHud />
                 </AudioProvider>
               </A11yProvider>
             </SearchProvider>

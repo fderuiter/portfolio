@@ -16,7 +16,7 @@ import {
 } from "@tabler/icons-react";
 import { FieldManualData } from "@/types/game-manual";
 import { useAudio } from "@/components/providers/AudioProvider";
-import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { ModalContainer } from "@/components/ui/ModalContainer";
 
 interface FieldManualModalProps {
   isOpen: boolean;
@@ -29,11 +29,6 @@ type TabType = "objective" | "controls" | "rules" | "lore";
 export function FieldManualModal({ isOpen, onClose, manual }: FieldManualModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>("objective");
   const { playHover, playAutocomplete, playSuccess } = useAudio();
-
-  const modalRef = useFocusTrap<HTMLDivElement>(isOpen, {
-    onEscape: onClose,
-    returnFocus: true,
-  });
 
   // Reset tab to objective on open
   useEffect(() => {
@@ -57,30 +52,13 @@ export function FieldManualModal({ isOpen, onClose, manual }: FieldManualModalPr
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/80 backdrop-blur-md"
-            aria-hidden="true"
-          />
-
-          {/* Dialog Container */}
-          <motion.div
-            ref={modalRef}
-            initial={{ opacity: 0, scale: 0.95, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 16 }}
-            transition={{ type: "spring", stiffness: 350, damping: 28 }}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="manual-title"
-            className="relative w-full max-w-3xl max-h-[90vh] bg-zinc-950 border border-zinc-800/80 rounded-3xl shadow-2xl shadow-cyan-950/20 overflow-hidden flex flex-col z-10"
-          >
+        <ModalContainer
+          isOpen={isOpen}
+          onClose={onClose}
+          titleId="manual-title"
+          maxWidth="max-w-3xl"
+          className="border border-zinc-800/80 rounded-3xl shadow-2xl shadow-cyan-950/20"
+        >
             {/* Ambient Gradient Header Background */}
             <div
               className={`absolute top-0 left-0 right-0 h-36 bg-gradient-to-b ${manual.accentColor} pointer-events-none opacity-60`}
@@ -403,8 +381,7 @@ export function FieldManualModal({ isOpen, onClose, manual }: FieldManualModalPr
                 Dismiss
               </button>
             </div>
-          </motion.div>
-        </div>
+        </ModalContainer>
       )}
     </AnimatePresence>
   );
