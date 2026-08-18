@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useSyncExternalStore, useCallback, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import {
   MEME_QUOTES,
   SOUNDBOARD_BUTTONS,
@@ -118,6 +119,7 @@ const AudioWaveformVisualizer: React.FC<{ isPlaying: boolean; soundLabel?: strin
 };
 
 export const MemeVaultClient: React.FC = () => {
+  const shouldReduceMotion = useReducedMotion();
   const { announce } = useAnnouncer();
 
   const rawAchievements = useSyncExternalStore(
@@ -215,9 +217,10 @@ export const MemeVaultClient: React.FC = () => {
       <AnimatePresence>
         {celebrationAchievement && (
           <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -20, scale: 0.95 }}
+            animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -20, scale: 0.95 }}
+            transition={shouldReduceMotion ? { duration: 0.15, ease: "linear" } : undefined}
             className="fixed top-20 right-4 sm:right-8 z-50 p-4 rounded-2xl bg-gradient-to-r from-emerald-950 via-slate-900 to-amber-950 border border-amber-400/50 shadow-[0_0_30px_rgba(245,158,11,0.3)] max-w-md"
           >
             <div className="flex items-start justify-between gap-3">
@@ -295,7 +298,7 @@ export const MemeVaultClient: React.FC = () => {
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPercent}%` }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
+                transition={shouldReduceMotion ? { duration: 0, ease: "linear" } : { duration: 0.8, ease: "easeOut" }}
                 className="h-full bg-gradient-to-r from-emerald-500 via-cyan-400 to-amber-400 rounded-full"
               />
             </div>
@@ -330,8 +333,8 @@ export const MemeVaultClient: React.FC = () => {
               <motion.button
                 key={btn.id}
                 onClick={() => handlePlaySound(btn)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.96 }}
+                whileHover={shouldReduceMotion ? undefined : { scale: 1.02 }}
+                whileTap={shouldReduceMotion ? undefined : { scale: 0.96 }}
                 className={`relative flex flex-col items-start p-4 sm:p-5 rounded-2xl border bg-gradient-to-b ${btn.accent} transition-all duration-200 text-left focus:outline-none focus:ring-2 focus:ring-emerald-400 shadow-md active:scale-[0.97] ${
                   isPlaying ? "ring-2 ring-white shadow-[0_0_25px_rgba(255,255,255,0.3)]" : ""
                 }`}

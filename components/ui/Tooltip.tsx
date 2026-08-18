@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useId } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export const Tooltip = ({
   children,
@@ -11,6 +12,7 @@ export const Tooltip = ({
 }) => {
   const [show, setShow] = useState(false);
   const tooltipId = useId();
+  const shouldReduceMotion = useReducedMotion();
 
   // Test validation requirement: aria-describedby={tooltipId}
   const ariaDescribedByValue = show ? tooltipId : undefined;
@@ -44,9 +46,10 @@ export const Tooltip = ({
           <motion.div
             id={tooltipId}
             role="tooltip"
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 5 }}
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 5 }}
+            animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 5 }}
+            transition={shouldReduceMotion ? { duration: 0.15, ease: "linear" } : undefined}
             className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-xs p-2 text-xs font-sans not-italic font-normal normal-case text-left tracking-normal text-neutral-200 bg-zinc-800 border border-zinc-700 rounded-lg shadow-lg z-50 pointer-events-auto"
           >
             {text}

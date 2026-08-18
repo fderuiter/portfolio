@@ -3,6 +3,7 @@
 import React from "react";
 import { clamp } from "@/lib/game-utils";
 import { motion } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface RAMGaugeProps {
   currentRam: number;
@@ -10,6 +11,7 @@ interface RAMGaugeProps {
 }
 
 export const RAMGauge: React.FC<RAMGaugeProps> = ({ currentRam, initialRam }) => {
+  const shouldReduceMotion = useReducedMotion();
   const percentage = clamp((currentRam / initialRam) * 100, 0, 100);
   const isOOM = currentRam <= 0;
   const isLowMemory = currentRam > 0 && percentage <= 30;
@@ -60,7 +62,7 @@ export const RAMGauge: React.FC<RAMGaugeProps> = ({ currentRam, initialRam }) =>
           className={`h-full rounded-full transition-all duration-300 ${getBarColor()}`}
           initial={{ width: `${percentage}%` }}
           animate={{ width: `${percentage}%` }}
-          transition={{ ease: "easeOut", duration: 0.3 }}
+          transition={shouldReduceMotion ? { duration: 0, ease: "linear" } : { ease: "easeOut", duration: 0.3 }}
         />
       </div>
     </div>

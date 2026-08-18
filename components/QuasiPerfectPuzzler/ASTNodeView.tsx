@@ -2,6 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { ASTNode } from "@/lib/quasi-perfect/types";
 import { renderASTString } from "@/lib/quasi-perfect/engine";
 
@@ -25,6 +26,7 @@ export const ASTNodeView: React.FC<ASTNodeViewProps> = React.memo(
     onHoverTarget,
     isInteractive = true,
   }) => {
+    const shouldReduceMotion = useReducedMotion();
     const isSelected = selectedTargetId === node.id;
     const isHovered = hoveredTargetId === node.id;
 
@@ -99,7 +101,7 @@ export const ASTNodeView: React.FC<ASTNodeViewProps> = React.memo(
         <motion.button
           type="button"
           data-node-id={node.id}
-          layoutId={`ast-node-${node.id}`}
+          layoutId={shouldReduceMotion ? undefined : `ast-node-${node.id}`}
           onClick={(e) => {
             e.stopPropagation();
             if (isInteractive) onSelectTarget(node.id);
@@ -118,8 +120,8 @@ export const ASTNodeView: React.FC<ASTNodeViewProps> = React.memo(
               ? "ring-1 ring-brand-cyan/70 scale-102"
               : "hover:border-zinc-500"
           }`}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
+          whileHover={shouldReduceMotion ? undefined : { scale: 1.03 }}
+          whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
         >
           {/* Node Type Pill Indicator */}
           <span className="text-[9px] uppercase tracking-wider opacity-60 font-sans font-semibold">

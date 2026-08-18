@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { hexToRgba } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { IconBriefcase, IconFlame, IconSwitchHorizontal } from "@tabler/icons-react";
 import { designManifest } from "@/lib/design-manifest";
 import { RichNarrative } from "@/components/RichNarrative";
@@ -13,6 +14,7 @@ import { dictionary, TimelineItem } from "@/lib/i18n-dictionary";
 export type { TimelineItem };
 
 export const Timeline: React.FC = () => {
+  const shouldReduceMotion = useReducedMotion();
   const { persona, setPersona } = usePersona();
   const { simplified } = useTerminology();
   const [localMode, setLocalMode] = useState<"recruiter" | "reality" | null>(null);
@@ -96,10 +98,10 @@ export const Timeline: React.FC = () => {
           return (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 40 }}
+              whileInView={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8, delay: idx * 0.08, ...designManifest.motion.springs.timeline }}
+              transition={shouldReduceMotion ? { duration: 0.15, ease: "linear" } : { duration: 0.8, delay: idx * 0.08, ...designManifest.motion.springs.timeline }}
               className={`relative flex flex-col md:flex-row items-start md:items-center ${
                 isLeft ? "md:flex-row-reverse" : ""
               }`}
@@ -171,10 +173,10 @@ export const Timeline: React.FC = () => {
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={isReality ? "reality" : "recruiter"}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -6 }}
-                        transition={{ duration: 0.2 }}
+                        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
+                        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                        exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -6 }}
+                        transition={shouldReduceMotion ? { duration: 0.15, ease: "linear" } : { duration: 0.2 }}
                         className={`text-xs leading-relaxed font-sans ${
                           isReality ? "text-amber-200/90 italic" : "text-zinc-300"
                         }`}

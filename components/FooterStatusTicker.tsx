@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { STATUS_TICKER_ITEMS, unlockAchievement, isVaultUnlocked } from "@/lib/meme-data";
 import { playMemeSound } from "@/lib/meme-audio";
 import { generateId } from "@/lib/utils";
@@ -42,6 +43,7 @@ interface TreatParticle {
 }
 
 export const FooterStatusTicker: React.FC = () => {
+  const shouldReduceMotion = useReducedMotion();
   const [tickerIndex, setTickerIndex] = useState(0);
   const [duckBubble, setDuckBubble] = useState<string | null>(null);
   const [duckBarks, setDuckBarks] = useState(0);
@@ -98,10 +100,10 @@ export const FooterStatusTicker: React.FC = () => {
             <AnimatePresence mode="wait">
               <motion.span
                 key={tickerIndex}
-                initial={{ y: 12, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -12, opacity: 0 }}
-                transition={{ duration: 0.25 }}
+                initial={shouldReduceMotion ? { opacity: 0 } : { y: 12, opacity: 0 }}
+                animate={shouldReduceMotion ? { opacity: 1 } : { y: 0, opacity: 1 }}
+                exit={shouldReduceMotion ? { opacity: 0 } : { y: -12, opacity: 0 }}
+                transition={shouldReduceMotion ? { duration: 0.15, ease: "linear" } : { duration: 0.25 }}
                 className="text-zinc-300 truncate block"
               >
                 {STATUS_TICKER_ITEMS[tickerIndex]}
@@ -128,9 +130,10 @@ export const FooterStatusTicker: React.FC = () => {
             <AnimatePresence>
               {duckBubble && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: -8 }}
-                  exit={{ opacity: 0, scale: 0.8, y: 10 }}
+                  initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8, y: 10 }}
+                  animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: -8 }}
+                  exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.8, y: 10 }}
+                  transition={shouldReduceMotion ? { duration: 0.15, ease: "linear" } : undefined}
                   className="absolute bottom-full right-0 mb-2 w-56 sm:w-64 p-2.5 rounded-xl bg-amber-950/90 border border-amber-500/40 text-amber-200 text-xs shadow-xl z-20 pointer-events-none"
                 >
                   <p className="leading-snug font-sans">{duckBubble}</p>
@@ -143,15 +146,19 @@ export const FooterStatusTicker: React.FC = () => {
             {treats.map((treat) => (
               <motion.span
                 key={treat.id}
-                initial={{ y: 0, opacity: 1, scale: 1, rotate: 0 }}
-                animate={{
-                  y: [0, -35, 15],
-                  x: treat.x,
-                  opacity: [1, 1, 0],
-                  scale: [1, 1.25, 0.75],
-                  rotate: [0, treat.x > 0 ? 60 : -60, treat.x > 0 ? 120 : -120],
-                }}
-                transition={{ duration: 0.9, ease: "easeOut" }}
+                initial={shouldReduceMotion ? { opacity: 1 } : { y: 0, opacity: 1, scale: 1, rotate: 0 }}
+                animate={
+                  shouldReduceMotion
+                    ? { opacity: 0 }
+                    : {
+                        y: [0, -35, 15],
+                        x: treat.x,
+                        opacity: [1, 1, 0],
+                        scale: [1, 1.25, 0.75],
+                        rotate: [0, treat.x > 0 ? 60 : -60, treat.x > 0 ? 120 : -120],
+                      }
+                }
+                transition={shouldReduceMotion ? { duration: 0.2, ease: "linear" } : { duration: 0.9, ease: "easeOut" }}
                 className="absolute -top-3 left-2 text-sm pointer-events-none z-10 select-none"
               >
                 🦴

@@ -3,12 +3,14 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useKonamiCode } from "@/hooks/useKonamiCode";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { IconSparkles, IconDeviceGamepad2, IconX, IconTerminal, IconCheck } from "@tabler/icons-react";
 
 export const RetroChaosOverlay: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
 
   const handleKonami = useCallback(() => {
     setIsOpen(true);
@@ -51,10 +53,10 @@ export const RetroChaosOverlay: React.FC = () => {
 
           {/* Modal Container */}
           <motion.div
-            initial={{ scale: 0.85, y: 20 }}
-            animate={{ scale: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 350, damping: 25 }}
+            initial={shouldReduceMotion ? { opacity: 0 } : { scale: 0.85, y: 20 }}
+            animate={shouldReduceMotion ? { opacity: 1 } : { scale: 1, y: 0 }}
+            exit={shouldReduceMotion ? { opacity: 0 } : { scale: 0.9, opacity: 0 }}
+            transition={shouldReduceMotion ? { duration: 0.15, ease: "linear" } : { type: "spring", stiffness: 350, damping: 25 }}
             className="relative z-10 w-full max-w-xl p-6 sm:p-8 rounded-2xl border-2 border-emerald-500/50 bg-slate-900/95 shadow-[0_0_50px_rgba(16,185,129,0.25)] text-slate-100 overflow-hidden"
           >
             {/* Top Close Button */}

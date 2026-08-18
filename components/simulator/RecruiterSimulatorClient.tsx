@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
@@ -130,6 +131,7 @@ function replaySimulatorHistory(ansIndices: number[]): {
 }
 
 export default function RecruiterSimulatorClient() {
+  const shouldReduceMotion = useReducedMotion();
   const { recordEvent } = useTelemetry();
   const { playNote, playSuccess } = useAudio();
   const { announce } = useAnnouncer();
@@ -388,10 +390,10 @@ export default function RecruiterSimulatorClient() {
                 ref={cardRef}
                 tabIndex={-1}
                 key={currentStep}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -15 }}
-                transition={{ duration: 0.25 }}
+                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 15 }}
+                animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -15 }}
+                transition={shouldReduceMotion ? { duration: 0.15, ease: "linear" } : { duration: 0.25 }}
                 className="bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-6 sm:p-10 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] flex flex-col focus:outline-none"
               >
                 {/* Stage Badge */}
@@ -440,10 +442,10 @@ export default function RecruiterSimulatorClient() {
                 ref={cardRef}
                 tabIndex={-1}
                 key="final"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.35 }}
+                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+                animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+                transition={shouldReduceMotion ? { duration: 0.15, ease: "linear" } : { duration: 0.35 }}
                 className="bg-zinc-900/40 border border-zinc-800/80 rounded-3xl p-6 sm:p-10 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.7)] flex flex-col items-center text-center focus:outline-none"
               >
                 {/* Circular Match Gauge */}
@@ -468,7 +470,7 @@ export default function RecruiterSimulatorClient() {
                       strokeDasharray="377"
                       initial={{ strokeDashoffset: 377 }}
                       animate={{ strokeDashoffset: 377 - (377 * profile.score) / 100 }}
-                      transition={{ duration: 1, ease: "easeOut" }}
+                      transition={shouldReduceMotion ? { duration: 0, ease: "linear" } : { duration: 1, ease: "easeOut" }}
                     />
                     <defs>
                       <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">

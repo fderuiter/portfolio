@@ -2,7 +2,8 @@
 
 import React, { useRef } from "react";
 import { hexToRgba } from "@/lib/utils";
-import { motion, useScroll, useSpring, useTransform, useReducedMotion } from "framer-motion";
+import { motion, useScroll, useSpring, useTransform } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { cn } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
 

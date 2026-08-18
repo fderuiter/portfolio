@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef, startTransition } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTerminology } from "@/components/providers/TerminologyProvider";

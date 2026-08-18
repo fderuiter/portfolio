@@ -2,6 +2,7 @@
 
 import React from "react";
 import { motion, PanInfo } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { TacticDef } from "@/lib/quasi-perfect/types";
 
 interface TacticCardProps {
@@ -27,14 +28,15 @@ export const TacticCard: React.FC<TacticCardProps> = ({
 }) => {
   const isSorry = tactic.id === "sorry";
   const displayLabel = labelOverride || tactic.label || tactic.name;
+  const shouldReduceMotion = useReducedMotion();
 
   return (
     <motion.div
       drag={!disabled}
       dragSnapToOrigin={true}
-      whileDrag={{ scale: 1.08, zIndex: 50, cursor: "grabbing" }}
-      whileHover={!disabled ? { scale: 1.04, y: -2 } : {}}
-      whileTap={!disabled ? { scale: 0.96 } : {}}
+      whileDrag={shouldReduceMotion ? { zIndex: 50, cursor: "grabbing" } : { scale: 1.08, zIndex: 50, cursor: "grabbing" }}
+      whileHover={!disabled && !shouldReduceMotion ? { scale: 1.04, y: -2 } : {}}
+      whileTap={!disabled && !shouldReduceMotion ? { scale: 0.96 } : {}}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       data-tactic-id={tactic.id}

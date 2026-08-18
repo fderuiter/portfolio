@@ -15,6 +15,7 @@
 - [hooks/useMasonryLayout](hooks/useMasonryLayout/README.md)
 - [hooks/usePersistentState](hooks/usePersistentState/README.md)
 - [hooks/usePretextLayout](hooks/usePretextLayout/README.md)
+- [hooks/useReducedMotion](hooks/useReducedMotion/README.md)
 - [hooks/useResizeObserver](hooks/useResizeObserver/README.md)
 - [hooks/useStudioHashParams](hooks/useStudioHashParams/README.md)
 - [hooks/useTelemetry](hooks/useTelemetry/README.md)

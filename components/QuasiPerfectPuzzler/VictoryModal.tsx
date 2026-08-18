@@ -2,6 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { CopyButton } from "@/components/CopyButton";
 import { LevelScore, PuzzlerLevelDef } from "@/lib/quasi-perfect/types";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
@@ -28,6 +29,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
 }) => {
   const isLastLevel = currentLevelIndex >= totalLevels - 1;
   const isSorry = score.usedSorry;
+  const shouldReduceMotion = useReducedMotion();
   const modalRef = useFocusTrap<HTMLDivElement>(true, {
     returnFocus: true,
   });
@@ -37,9 +39,10 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
       ref={modalRef}
       role="dialog"
       aria-modal="true"
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
+      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+      exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+      transition={shouldReduceMotion ? { duration: 0.15, ease: "linear" } : undefined}
       className="absolute inset-0 z-40 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 rounded-2xl"
     >
       <div className="max-w-md w-full rounded-2xl border border-zinc-700 bg-zinc-950 p-6 text-center shadow-2xl font-mono">

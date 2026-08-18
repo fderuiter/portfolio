@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useId, useMemo } from "react";
 import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
 import { motion, AnimatePresence } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useRouter } from "next/navigation";
 import {
   IconSearch,
@@ -55,6 +56,7 @@ interface CommandPaletteModalProps {
 }
 
 const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, studies }) => {
+  const shouldReduceMotion = useReducedMotion();
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const { playHover, playSubmit } = useAudio();
@@ -627,7 +629,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.15 }}
+      transition={shouldReduceMotion ? { duration: 0.15, ease: "linear" } : { duration: 0.15 }}
       onClick={handleBackdropClick}
       className="fixed inset-0 z-50 flex items-start justify-center pt-[max(1.5rem,env(safe-area-inset-top)+1rem)] sm:pt-[12vh] px-3 sm:px-4 pb-[max(1.5rem,env(safe-area-inset-bottom)+1rem)] bg-zinc-950/85 backdrop-blur-md transition-all duration-300 overflow-y-auto"
     >
@@ -635,10 +637,10 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         role="dialog"
         aria-modal="true"
         aria-label="Command Palette"
-        initial={{ opacity: 0, scale: 0.97, y: -8 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.97, y: -8 }}
-        transition={{ duration: 0.18, ease: "easeOut" }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: -8 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+        exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.97, y: -8 }}
+        transition={shouldReduceMotion ? { duration: 0.15, ease: "linear" } : { duration: 0.18, ease: "easeOut" }}
         ref={trapRef}
         style={{ "--cmd-glow": `0 0 50px ${hexToRgba(designManifest.colors["brand-cyan"], 0.06)}` } as React.CSSProperties}
         className="w-full max-w-3xl bg-zinc-900/95 border border-zinc-800/90 backdrop-blur-2xl shadow-[var(--cmd-glow)] rounded-3xl overflow-hidden flex flex-col relative my-auto sm:my-0 max-h-[85vh]"

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import {
   IconX,
   IconBook,
@@ -21,6 +22,7 @@ export const NeuroFieldManual: React.FC<NeuroFieldManualProps> = ({
   isOpen,
   onClose,
 }) => {
+  const shouldReduceMotion = useReducedMotion();
   const [activeTab, setActiveTab] = useState<"physics" | "defects" | "shortcuts" | "pipeline">(
     "physics"
   );
@@ -33,9 +35,10 @@ export const NeuroFieldManual: React.FC<NeuroFieldManualProps> = ({
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-md"
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.96, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.96, y: 10 }}
+        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 10 }}
+        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+        exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 10 }}
+        transition={shouldReduceMotion ? { duration: 0.15, ease: "linear" } : undefined}
         onClick={(e) => e.stopPropagation()}
         className="w-full max-w-3xl max-h-[85vh] bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col"
       >

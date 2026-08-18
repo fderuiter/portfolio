@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import {
   IconTerminal,
   IconSparkles,
@@ -73,6 +74,7 @@ interface TerminalLog {
 }
 
 export function ProofWorkspaceClient() {
+  const shouldReduceMotion = useReducedMotion();
   const { params, setParam, setParams } = useStudioHashParams();
 
   const [activeTheoremId, setActiveTheoremId] = useState<TheoremId>(() => {
@@ -2044,9 +2046,10 @@ export function ProofWorkspaceClient() {
         <AnimatePresence>
           {feedbackToast && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+              animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+              exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+              transition={shouldReduceMotion ? { duration: 0.15, ease: "linear" } : undefined}
               className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl border text-xs font-medium shadow-2xl flex items-center gap-2 ${
                 feedbackToast.type === "success"
                   ? "bg-emerald-950 border-emerald-700 text-emerald-200"
@@ -2065,9 +2068,10 @@ export function ProofWorkspaceClient() {
           {isExportModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
+                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+                animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+                transition={shouldReduceMotion ? { duration: 0.15, ease: "linear" } : undefined}
                 className="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-6 flex flex-col gap-4 shadow-2xl"
               >
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -2132,9 +2136,10 @@ export function ProofWorkspaceClient() {
           {isCustomStudioOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
+                initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+                animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1 }}
+                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+                transition={shouldReduceMotion ? { duration: 0.15, ease: "linear" } : undefined}
                 className="w-full max-w-xl rounded-2xl border border-slate-800 bg-slate-900 p-6 flex flex-col gap-4 shadow-2xl"
               >
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">

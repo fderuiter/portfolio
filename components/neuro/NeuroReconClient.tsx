@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useClipboard } from "@/hooks/useClipboard";
 import {
   ControlPoint,
@@ -90,6 +91,7 @@ import {
 } from "@tabler/icons-react";
 
 export const NeuroReconClient: React.FC = () => {
+  const shouldReduceMotion = useReducedMotion();
   const { playNote, playSuccess } = useAudio();
   const { recordEvent } = useTelemetry();
   const { params, setParam, setParams } = useStudioHashParams();
@@ -824,9 +826,10 @@ export const NeuroReconClient: React.FC = () => {
         {showSuccessModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-md">
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 20 }}
+              animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+              exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 20 }}
+              transition={shouldReduceMotion ? { duration: 0.15, ease: "linear" } : undefined}
               className="w-full max-w-lg bg-zinc-900 border border-emerald-500/40 rounded-3xl p-6 shadow-2xl space-y-5 text-center relative overflow-hidden"
             >
               <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -900,9 +903,10 @@ export const NeuroReconClient: React.FC = () => {
       <AnimatePresence>
         {copyToast && (
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 15 }}
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 15 }}
+            animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 15 }}
+            transition={shouldReduceMotion ? { duration: 0.15, ease: "linear" } : undefined}
             className="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-xl border border-brand-cyan/40 bg-zinc-900/95 text-xs font-mono text-brand-cyan shadow-2xl flex items-center gap-2 backdrop-blur-md"
           >
             <IconLink className="w-4 h-4 text-brand-cyan" />

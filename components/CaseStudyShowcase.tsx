@@ -6,6 +6,7 @@ import { BaseCaseStudy } from "@/types/domain";
 import { hexToRgba } from "@/lib/utils";
 import { GitHubStats } from "@/lib/github";
 import { motion, AnimatePresence } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { designManifest } from "@/lib/design-manifest";
 import { useMasonryLayout } from "@/hooks/useMasonryLayout";
 import { BentoLayoutProvider } from "@/components/providers/BentoLayoutContext";
@@ -22,6 +23,7 @@ const FILTER_TABS = ["All", "TypeScript", "Python"];
 
 const CaseStudyShowcaseInner: React.FC<CaseStudyShowcaseProps> = ({ caseStudies }) => {
   const [selectedFilter, setSelectedFilter] = useState("All");
+  const shouldReduceMotion = useReducedMotion();
 
   // Client-side interactive filter
   const filteredStudies = useMemo(() => {
@@ -51,7 +53,7 @@ const CaseStudyShowcaseInner: React.FC<CaseStudyShowcaseProps> = ({ caseStudies 
                   layoutId="activeTab"
                   style={{ "--tab-glow": `0 0 15px ${hexToRgba(designManifest.colors["brand-cyan"], 0.12)}` } as React.CSSProperties}
                   className="absolute inset-0 bg-zinc-950 border border-zinc-800/80 rounded-xl -z-10 shadow-[var(--tab-glow)]"
-                  transition={designManifest.motion.springs.snappy}
+                  transition={shouldReduceMotion ? { duration: 0.15, ease: "linear" } : designManifest.motion.springs.snappy}
                 />
               )}
               {tab === "All" ? "ALL PROJECTS" : tab.toUpperCase()}
@@ -76,11 +78,11 @@ const CaseStudyShowcaseInner: React.FC<CaseStudyShowcaseProps> = ({ caseStudies 
                 {colCards.map((study) => (
                   <motion.div
                     key={study.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.96, y: 10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.96, y: -10 }}
-                    transition={{ duration: 0.22, ease: "easeInOut" }}
+                    layout={shouldReduceMotion ? false : true}
+                    initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: 10 }}
+                    animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
+                    exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, y: -10 }}
+                    transition={shouldReduceMotion ? { duration: 0.15, ease: "linear" } : { duration: 0.22, ease: "easeInOut" }}
                     className="w-full"
                   >
                     <CaseStudyBentoCard 

@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react"
 import { motion, MotionValue, useScroll, useTransform } from "framer-motion"
+import { useReducedMotion } from "@/hooks/useReducedMotion"
 
 import { cn } from "@/lib/utils"
 
@@ -16,6 +17,7 @@ interface TextRevealProps extends ComponentPropsWithoutRef<"div"> {
 }
 
 export const TextReveal: FC<TextRevealProps> = ({ children, className }) => {
+  const shouldReduceMotion = useReducedMotion()
   const sectionRef = useRef<HTMLDivElement | null>(null)
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -43,7 +45,7 @@ export const TextReveal: FC<TextRevealProps> = ({ children, className }) => {
             const start = i / words.length
             const end = start + 1 / words.length
             return (
-              <Word key={i} progress={scrollYProgress} range={[start, end]}>
+              <Word key={i} progress={scrollYProgress} range={[start, end]} shouldReduceMotion={shouldReduceMotion}>
                 {word}
               </Word>
             )
@@ -58,10 +60,12 @@ interface WordProps {
   children: ReactNode
   progress: MotionValue<number>
   range: [number, number]
+  shouldReduceMotion?: boolean
 }
 
-const Word: FC<WordProps> = ({ children, progress, range }) => {
-  const color = useTransform(progress, range, ["#a1a1aa", "#ffffff"])
+const Word: FC<WordProps> = ({ children, progress, range, shouldReduceMotion }) => {
+  const colorTransform = useTransform(progress, range, ["#a1a1aa", "#ffffff"])
+  const color = shouldReduceMotion ? "#ffffff" : colorTransform
   return (
     <span className="xl:lg-3 relative mx-1 lg:mx-1.5">
       <motion.span

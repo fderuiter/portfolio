@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { cn } from "@/lib/utils";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useSearch } from "@/components/providers/SearchProvider";
@@ -147,6 +148,7 @@ export const Navbar: React.FC = () => {
 
   const triggerRef = useRef<HTMLButtonElement>(null);
   const navContainerRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
 
   const handleLinkHover = (e: React.MouseEvent<HTMLElement>) => {
     if (typeof window === "undefined") return;
@@ -355,10 +357,10 @@ export const Navbar: React.FC = () => {
                   <AnimatePresence>
                     {activeDropdown === "arcade" && (
                       <motion.div
-                        initial={{ opacity: 0, y: 8, scale: 0.98 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                        transition={{ duration: 0.15 }}
+                        initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.98 }}
+                        animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+                        exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.98 }}
+                        transition={{ duration: 0.15, ease: "linear" }}
                         className="absolute left-0 mt-3 w-80 p-2.5 rounded-2xl border border-zinc-800 bg-zinc-950/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_20px_rgba(6,182,212,0.08)] z-50 flex flex-col gap-1"
                         role="menu"
                       >
@@ -431,10 +433,10 @@ export const Navbar: React.FC = () => {
                 <AnimatePresence>
                   {activeDropdown === "systems" && (
                     <motion.div
-                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                      transition={{ duration: 0.15 }}
+                      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.98 }}
+                      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+                      exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 6, scale: 0.98 }}
+                      transition={{ duration: 0.15, ease: "linear" }}
                       className="absolute left-0 mt-3 w-72 p-2.5 rounded-2xl border border-zinc-800 bg-zinc-950/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_20px_rgba(6,182,212,0.08)] z-50 flex flex-col gap-1"
                       role="menu"
                     >
@@ -606,9 +608,10 @@ export const Navbar: React.FC = () => {
                       onClick={() => setShowAudioPanel(false)}
                     />
                     <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
+                      initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
+                      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                      exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
+                      transition={{ duration: 0.15, ease: "linear" }}
                       className="absolute right-0 mt-2 w-64 p-4 rounded-2xl border border-zinc-800/80 bg-zinc-950/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_25px_rgba(6,182,212,0.08)] z-50 flex flex-col gap-3.5"
                     >
                       <div className="flex items-center justify-between">
@@ -734,7 +737,12 @@ export const Navbar: React.FC = () => {
       {/* Mobile Full-Screen Navigation Slide-out */}
       <AnimatePresence>
         {isOpen && (
-          <div
+          <motion.div
+            key="mobile-nav"
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
+            animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
+            transition={{ duration: 0.15, ease: "linear" }}
             ref={mobileMenuTrapRef}
             id="mobile-navigation"
             role="dialog"
@@ -969,7 +977,7 @@ export const Navbar: React.FC = () => {
                 GitHub ↗
               </a>
             </div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </>
