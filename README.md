@@ -17,6 +17,14 @@ The core objective of this project is to create an interactive showcase that dyn
 - **Masonry Layout:** Parent-level zero-whitespace masonry Bento Grid using a greedy LPT column scheduler with ResizeObserver-driven sub-millisecond recalculations
 - **Performance:** DOM-free layout calculations maintaining 60FPS during complex animations
 
+## Featured Case Studies
+
+### InBody QR Data Decoder & Analyzer
+- **Stack:** Python 3.8+, Poetry, Flask, BeautifulSoup4, jsQR, Pillow, Pytest
+- **Domain:** Reverse Engineering, Biomedical Data, Monorepo Architecture, Data Parsing
+- **GitHub Topics:** `reverse-engineering`, `inbody`, `qr-decoder`, `biometrics`, `data-extraction`, `monorepo`, `python`
+- **Description:** Reverse-engineers the fixed-width binary serialization protocol of InBody BIA hardware query strings (`IBData`). Features an automated Differential Mutation Oracle ("Delta Testing Engine") that isolates contiguous byte slices and programmatically derives field boundaries without official schemas.
+
 ## Visual Architecture
 
 The portfolio utilizes a "Design Engineering" approach, combining lightweight libraries like Aceternity UI and Magic UI with Framer Motion. This approach handles complex micro-interactions, hardware-accelerated physics, and typographic animations to provide a premium interactive experience without heavy, monolithic component libraries.
