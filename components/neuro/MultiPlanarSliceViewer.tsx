@@ -5,6 +5,10 @@ import { clamp } from "@/lib/game-utils";
 import { ControlPoint, SlicePlane, ToolMode, VoxelCoord, VoxelEdit } from "@/lib/neuro/types";
 import { extractSlice, SyntheticVolume, VOLUME_SIZE } from "@/lib/neuro/volume-generator";
 import { IconLayersSubtract } from "@tabler/icons-react";
+import {
+  getCanvasEventCoordinates,
+  globalTouchDeduplicator,
+} from "@/lib/graphics-engine";
 
 interface MultiPlanarSliceViewerProps {
   volume: SyntheticVolume;
@@ -263,22 +267,17 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
   }, [renderSliceToCanvas, crosshair]);
 
   /**
-   * Convert canvas mouse event to 3D Voxel Coordinate
+   * Convert canvas mouse or touch event to 3D Voxel Coordinate
    */
-  const getVoxelFromCanvas = (
-    e: React.MouseEvent<HTMLCanvasElement>,
+  const getVoxelFromEvent = (
+    e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>,
     plane: SlicePlane
   ): VoxelCoord => {
     const canvas = e.currentTarget;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
+    const { x: clickX, y: clickY } = getCanvasEventCoordinates(e, canvas);
 
-    const clickX = Math.floor((e.clientX - rect.left) * scaleX);
-    const clickY = Math.floor((e.clientY - rect.top) * scaleY);
-
-    const clampedX = clamp(clickX, 0, VOLUME_SIZE - 1);
-    const clampedY = clamp(clickY, 0, VOLUME_SIZE - 1);
+    const clampedX = clamp(Math.floor(clickX), 0, VOLUME_SIZE - 1);
+    const clampedY = clamp(Math.floor(clickY), 0, VOLUME_SIZE - 1);
 
     if (plane === "axial") {
       return { x: clampedX, y: clampedY, z: crosshair.z };
@@ -344,43 +343,15 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
     }
   };
 
-  /**
-   * Convert canvas touch event to 3D Voxel Coordinate
-   */
-  const getVoxelFromTouchEvent = (
-    e: React.TouchEvent<HTMLCanvasElement>,
-    plane: SlicePlane
-  ): VoxelCoord => {
-    const touch = e.touches[0] || e.changedTouches[0];
-    const canvas = e.currentTarget;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-
-    const touchX = Math.floor((touch.clientX - rect.left) * scaleX);
-    const touchY = Math.floor((touch.clientY - rect.top) * scaleY);
-
-    const clampedX = clamp(touchX, 0, VOLUME_SIZE - 1);
-    const clampedY = clamp(touchY, 0, VOLUME_SIZE - 1);
-
-    if (plane === "axial") {
-      return { x: clampedX, y: clampedY, z: crosshair.z };
-    } else if (plane === "coronal") {
-      const z = VOLUME_SIZE - 1 - clampedY;
-      return { x: clampedX, y: crosshair.y, z: clamp(z, 0, VOLUME_SIZE - 1) };
-    } else {
-      const z = VOLUME_SIZE - 1 - clampedY;
-      return { x: crosshair.x, y: clampedX, z: clamp(z, 0, VOLUME_SIZE - 1) };
-    }
-  };
-
   const handleCanvasTouchStart = (
     e: React.TouchEvent<HTMLCanvasElement>,
     plane: SlicePlane
   ) => {
+    if (e.cancelable) e.preventDefault();
+    globalTouchDeduplicator.recordTouch();
     isMouseDownRef.current = true;
     activePlaneRef.current = plane;
-    const coord = getVoxelFromTouchEvent(e, plane);
+    const coord = getVoxelFromEvent(e, plane);
     onCrosshairChange(coord);
     handleToolAction(coord);
   };
@@ -389,14 +360,16 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
     e: React.TouchEvent<HTMLCanvasElement>,
     plane: SlicePlane
   ) => {
-    const coord = getVoxelFromTouchEvent(e, plane);
+    if (e.cancelable) e.preventDefault();
+    const coord = getVoxelFromEvent(e, plane);
     if (isMouseDownRef.current && (toolMode === "paint" || toolMode === "erase")) {
       onCrosshairChange(coord);
       handleToolAction(coord);
     }
   };
 
-  const handleCanvasTouchEnd = () => {
+  const handleCanvasTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.cancelable) e.preventDefault();
     isMouseDownRef.current = false;
   };
 
@@ -404,9 +377,10 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
     e: React.MouseEvent<HTMLCanvasElement>,
     plane: SlicePlane
   ) => {
+    if (globalTouchDeduplicator.shouldSuppressMouseEvent()) return;
     isMouseDownRef.current = true;
     activePlaneRef.current = plane;
-    const coord = getVoxelFromCanvas(e, plane);
+    const coord = getVoxelFromEvent(e, plane);
     onCrosshairChange(coord);
     handleToolAction(coord);
   };
@@ -415,7 +389,7 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
     e: React.MouseEvent<HTMLCanvasElement>,
     plane: SlicePlane
   ) => {
-    const coord = getVoxelFromCanvas(e, plane);
+    const coord = getVoxelFromEvent(e, plane);
 
     // Get intensity under cursor
     const sliceData = extractSlice(
@@ -517,7 +491,7 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
               <span className="text-brand-cyan font-bold">CORONAL (Y={crosshair.y})</span>
               <span className="text-zinc-400">ANT / POST</span>
             </div>
-            <div className="flex-1 flex items-center justify-center relative overflow-hidden rounded-lg bg-black">
+            <div className="flex-1 flex items-center justify-center relative overflow-hidden rounded-lg bg-black aspect-square">
               {/* Anatomical Compass Badges */}
               <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">S</span>
               <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">I</span>
@@ -553,7 +527,7 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
               <span className="text-brand-cyan font-bold">AXIAL (Z={crosshair.z})</span>
               <span className="text-zinc-400">SUP / INF</span>
             </div>
-            <div className="flex-1 flex items-center justify-center relative overflow-hidden rounded-lg bg-black">
+            <div className="flex-1 flex items-center justify-center relative overflow-hidden rounded-lg bg-black aspect-square">
               {/* Anatomical Compass Badges */}
               <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">A</span>
               <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">P</span>
@@ -589,7 +563,7 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
               <span className="text-brand-cyan font-bold">SAGITTAL (X={crosshair.x})</span>
               <span className="text-zinc-400">LEFT / RIGHT</span>
             </div>
-            <div className="flex-1 flex items-center justify-center relative overflow-hidden rounded-lg bg-black">
+            <div className="flex-1 flex items-center justify-center relative overflow-hidden rounded-lg bg-black aspect-square">
               {/* Anatomical Compass Badges */}
               <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">S</span>
               <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">I</span>
@@ -649,7 +623,7 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
             </span>
           </div>
 
-          <div className="flex-1 flex items-center justify-center relative overflow-hidden rounded-lg bg-black max-h-[480px]">
+          <div className="flex-1 flex items-center justify-center relative overflow-hidden rounded-lg bg-black aspect-square max-h-[480px]">
             {activePlane === "axial" && (
               <canvas
                 ref={axialCanvasRef}

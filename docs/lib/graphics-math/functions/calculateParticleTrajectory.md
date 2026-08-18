@@ -8,7 +8,7 @@
 
 > **calculateParticleTrajectory**(`initial`, `velocity`, `gravity`, `time`): [`Point2D`](../type-aliases/Point2D.md)
 
-Defined in: [lib/graphics-math.ts:288](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L288)
+Defined in: [lib/graphics-math.ts:443](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L443)
 
 Trajectory calculation formula.
 Computes current position of a particle at a given time ratio under trajectory velocity.

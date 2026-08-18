@@ -3,6 +3,10 @@
 import React, { useState, useEffect, useRef, useSyncExternalStore, useCallback } from "react";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import {
+  getCanvasEventCoordinates,
+  globalTouchDeduplicator,
+} from "@/lib/graphics-engine";
 import { clamp } from "@/lib/game-utils";
 import {
   IconFlame,
@@ -1219,14 +1223,11 @@ export const LaserLoon: React.FC = () => {
   ]);
 
   // Pointer / Mouse / Touch Controls
-  const updatePointerAim = (clientX: number, clientY: number) => {
+  const updatePointerAim = (
+    e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement> | { clientX: number; clientY: number }
+  ) => {
     if (!canvasRef.current) return;
-    const rect = canvasRef.current.getBoundingClientRect();
-    const scaleX = (canvasRef.current.width || DEFAULT_CANVAS_WIDTH) / (rect.width || 1);
-    const scaleY = (canvasRef.current.height || DEFAULT_CANVAS_HEIGHT) / (rect.height || 1);
-
-    const mouseX = (clientX - rect.left) * scaleX;
-    const mouseY = (clientY - rect.top) * scaleY;
+    const { x: mouseX, y: mouseY } = getCanvasEventCoordinates(e, canvasRef.current);
 
     aimPosRef.current = { x: mouseX, y: mouseY };
 
@@ -1241,18 +1242,15 @@ export const LaserLoon: React.FC = () => {
   };
 
   const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    updatePointerAim(e.clientX, e.clientY);
+    updatePointerAim(e);
   };
 
   const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (globalTouchDeduplicator.shouldSuppressMouseEvent()) return;
     if (!canvasRef.current) return;
     containerRef.current?.focus({ preventScroll: true });
 
-    const rect = canvasRef.current.getBoundingClientRect();
-    const scaleX = (canvasRef.current.width || DEFAULT_CANVAS_WIDTH) / (rect.width || 1);
-    const scaleY = (canvasRef.current.height || DEFAULT_CANVAS_HEIGHT) / (rect.height || 1);
-    const mouseX = (e.clientX - rect.left) * scaleX;
-    const mouseY = (e.clientY - rect.top) * scaleY;
+    const { x: mouseX, y: mouseY } = getCanvasEventCoordinates(e, canvasRef.current);
 
     const distToLoon = Math.hypot(mouseX - loonPosRef.current.x, mouseY - loonPosRef.current.y);
     if (mode === "sandbox" && distToLoon < 45) {
@@ -1269,17 +1267,16 @@ export const LaserLoon: React.FC = () => {
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    if (e.touches.length > 0) {
-      updatePointerAim(e.touches[0].clientX, e.touches[0].clientY);
-    }
+    if (e.cancelable) e.preventDefault();
+    updatePointerAim(e);
   };
 
   const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    if (e.touches.length > 0) {
-      updatePointerAim(e.touches[0].clientX, e.touches[0].clientY);
-      isFiringRef.current = true;
-      fireWeapon();
-    }
+    if (e.cancelable) e.preventDefault();
+    globalTouchDeduplicator.recordTouch();
+    updatePointerAim(e);
+    isFiringRef.current = true;
+    fireWeapon();
   };
 
   const handleTouchEnd = () => {
@@ -1522,7 +1519,7 @@ export const LaserLoon: React.FC = () => {
         className={`relative outline-none transition-all duration-300 shadow-2xl flex flex-col justify-between ${
           isFullscreen
             ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none bg-black p-2 sm:p-4 overflow-hidden"
-            : `w-full max-w-3xl h-[420px] bg-neutral-950 border rounded-3xl overflow-hidden ${
+            : `w-full max-w-3xl aspect-[768/420] bg-neutral-950 border rounded-3xl overflow-hidden ${
                 isFocused
                   ? "border-red-500 ring-4 ring-red-500/20 shadow-[0_0_40px_rgba(239,68,68,0.25)]"
                   : "border-neutral-800 hover:border-neutral-700"
@@ -1650,11 +1647,7 @@ export const LaserLoon: React.FC = () => {
           role="application"
           aria-label="Laser Loon Arcade Game. Use arrow keys to reposition the loon, spacebar or enter to fire weapons, and number keys 1 to 4 to select weapons."
           tabIndex={0}
-          className={
-            isFullscreen
-              ? "max-h-[calc(100vh-140px)] max-w-full aspect-[768/420] object-contain block cursor-crosshair touch-none my-auto"
-              : "w-full h-full block cursor-crosshair touch-none"
-          }
+          className="w-full h-full aspect-[768/420] object-contain block cursor-crosshair touch-none"
         />
 
         {/* Start Overlay Screen */}

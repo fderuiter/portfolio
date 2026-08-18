@@ -5,6 +5,10 @@ import { useTelemetry } from "@/hooks/useTelemetry";
 import { clamp } from "@/lib/game-utils";
 import { useAudio } from "@/components/providers/AudioProvider";
 import {
+  getCanvasEventCoordinates,
+  globalTouchDeduplicator,
+} from "@/lib/graphics-engine";
+import {
   IconTrophy,
   IconRefresh,
   IconArrowRight,
@@ -876,20 +880,15 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
   }, [selectedClass.starterWeapons, activeWeaponId, weapons, handleFireWeapon]);
 
   // BlinkBrowse cursor movement handler
-  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleCanvasMouseMove = (
+    e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>
+  ) => {
     if (gameMode !== "roguelike" || roomIndex !== 2 || gameStatus !== "playing") return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const rect = canvas.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) return;
-
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-
-    const canvasX = (e.clientX - rect.left) * scaleX;
-    const canvasY = (e.clientY - rect.top) * scaleY;
+    const { x: canvasX, y: canvasY } = getCanvasEventCoordinates(e, canvas);
 
     const cols = currentMaze[0]?.length || 15;
     const rows = currentMaze.length || 9;
@@ -1666,9 +1665,9 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
             isFullscreen
               ? "w-full max-h-[calc(100vh-220px)] aspect-[240/144]"
               : isExpanded
-              ? "w-[360px] h-[216px]"
-              : "w-[240px] h-[144px]"
-          } flex items-center justify-center transition-all duration-300`}
+              ? "w-[360px] aspect-[240/144]"
+              : "w-[240px] aspect-[240/144]"
+          } flex items-center justify-center transition-all duration-300 aspect-[240/144]`}
           style={
             crtCalibration.curvature > 0.05
               ? {
@@ -1683,16 +1682,25 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
             width={240}
             height={144}
             onMouseMove={handleCanvasMouseMove}
+            onTouchStart={(e) => {
+              if (e.cancelable) e.preventDefault();
+              globalTouchDeduplicator.recordTouch();
+            }}
+            onTouchMove={(e) => {
+              if (e.cancelable) e.preventDefault();
+              handleCanvasMouseMove(e);
+            }}
             onMouseLeave={() => {
               cursorGridPosRef.current = null;
             }}
+            style={{ touchAction: "none" }}
             className={`block ${
               isFullscreen
                 ? "w-full h-full max-h-[calc(100vh-220px)] object-contain"
                 : isExpanded
-                ? "w-[360px] h-[216px]"
-                : "w-[240px] h-[144px]"
-            } rounded-lg border border-neutral-900/60 bg-neutral-950 cursor-crosshair`}
+                ? "w-[360px] aspect-[240/144]"
+                : "w-[240px] aspect-[240/144]"
+            } rounded-lg border border-neutral-900/60 bg-neutral-950 cursor-crosshair touch-none`}
           />
 
           {/* Victory Overlay */}

@@ -52,6 +52,18 @@ Re-exports [calculateParticleTrajectory](../graphics-math/functions/calculatePar
 
 ***
 
+### CanvasDimensions
+
+Re-exports [CanvasDimensions](../graphics-math/interfaces/CanvasDimensions.md)
+
+***
+
+### CanvasRect
+
+Re-exports [CanvasRect](../graphics-math/interfaces/CanvasRect.md)
+
+***
+
 ### checkBeamContainerCollision
 
 Re-exports [checkBeamContainerCollision](../graphics-math/functions/checkBeamContainerCollision.md)
@@ -61,6 +73,12 @@ Re-exports [checkBeamContainerCollision](../graphics-math/functions/checkBeamCon
 ### distributeItemsGreedily
 
 Re-exports [distributeItemsGreedily](../graphics-math/functions/distributeItemsGreedily.md)
+
+***
+
+### extractClientCoordinates
+
+Re-exports [extractClientCoordinates](../graphics-math/functions/extractClientCoordinates.md)
 
 ***
 
@@ -82,6 +100,18 @@ Re-exports [generateHermiteSplinePath](../graphics-math/functions/generateHermit
 
 ***
 
+### getCanvasEventCoordinates
+
+Re-exports [getCanvasEventCoordinates](../graphics-math/functions/getCanvasEventCoordinates.md)
+
+***
+
+### globalTouchDeduplicator
+
+Re-exports [globalTouchDeduplicator](../graphics-math/variables/globalTouchDeduplicator.md)
+
+***
+
 ### LRUCache
 
 Re-exports [LRUCache](../graphics-math/classes/LRUCache.md)
@@ -91,6 +121,12 @@ Re-exports [LRUCache](../graphics-math/classes/LRUCache.md)
 ### mapDataToCoordinates
 
 Re-exports [mapDataToCoordinates](../graphics-math/functions/mapDataToCoordinates.md)
+
+***
+
+### normalizeCanvasCoordinates
+
+Re-exports [normalizeCanvasCoordinates](../graphics-math/functions/normalizeCanvasCoordinates.md)
 
 ***
 
@@ -109,3 +145,9 @@ Re-exports [Point2D](../graphics-math/type-aliases/Point2D.md)
 ### Rect
 
 Re-exports [Rect](../graphics-math/interfaces/Rect.md)
+
+***
+
+### TouchMouseDeduplicator
+
+Re-exports [TouchMouseDeduplicator](../graphics-math/classes/TouchMouseDeduplicator.md)

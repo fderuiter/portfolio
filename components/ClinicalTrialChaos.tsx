@@ -12,6 +12,10 @@ import Link from "next/link";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import {
+  getCanvasEventCoordinates,
+  globalTouchDeduplicator,
+} from "@/lib/graphics-engine";
+import {
   IconAlertTriangle,
   IconCheck,
   IconRefresh,
@@ -1104,12 +1108,12 @@ export const ClinicalTrialChaos: React.FC = () => {
     );
   }
 
-  const handleCanvasClickOrTouch = (clientX: number, clientY: number) => {
+  const handleCanvasClickOrTouch = (
+    e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement> | { clientX: number; clientY: number }
+  ) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = (clientX - rect.left) * (canvas.width / rect.width);
-    const y = (clientY - rect.top) * (canvas.height / rect.height);
+    const { x, y } = getCanvasEventCoordinates(e, canvas);
     const beltY = canvas.height * 0.44;
     const slotWidth = (canvas.width - 70) / 5;
 
@@ -1384,18 +1388,22 @@ export const ClinicalTrialChaos: React.FC = () => {
       {activeTab === "conveyor" && (
         <>
           {/* HTML5 Canvas Simulation */}
-          <div className="mt-4 relative rounded-xl border border-zinc-800 bg-black overflow-hidden">
+          <div className="mt-4 relative rounded-xl border border-zinc-800 bg-black overflow-hidden aspect-[760/200] w-full">
             <canvas
               ref={canvasRef}
               width={760}
               height={200}
-              onClick={(e) => handleCanvasClickOrTouch(e.clientX, e.clientY)}
+              onClick={(e) => {
+                if (globalTouchDeduplicator.shouldSuppressMouseEvent()) return;
+                handleCanvasClickOrTouch(e);
+              }}
               onTouchStart={(e) => {
-                const touch = e.touches[0];
-                if (touch) handleCanvasClickOrTouch(touch.clientX, touch.clientY);
+                if (e.cancelable) e.preventDefault();
+                globalTouchDeduplicator.recordTouch();
+                handleCanvasClickOrTouch(e);
               }}
               style={{ touchAction: "none" }}
-              className={`w-full ${isFullscreen ? "h-auto max-h-[300px] aspect-[760/200] object-contain" : "h-[180px]"} block cursor-pointer`}
+              className="w-full h-full aspect-[760/200] object-contain block cursor-pointer touch-none"
             />
 
             {/* Overlays for Idle / Paused / Game Over / Cleared */}

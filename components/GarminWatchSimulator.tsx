@@ -16,6 +16,10 @@ import { useFullscreen } from "@/hooks/useFullscreen";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import {
+  getCanvasEventCoordinates,
+  globalTouchDeduplicator,
+} from "@/lib/graphics-engine";
+import {
   DeviceTarget,
   DEVICE_PROFILES,
   createInitialState,
@@ -226,11 +230,7 @@ export const GarminWatchSimulator: React.FC = () => {
     if (!isDraggingFog && e.buttons === 0) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = CANVAS_SIZE / rect.width;
-    const scaleY = CANVAS_SIZE / rect.height;
-    const x = (e.clientX - rect.left) * scaleX;
-    const y = (e.clientY - rect.top) * scaleY;
+    const { x, y } = getCanvasEventCoordinates(e, canvas);
     handleWipeFog(x, y);
   };
 
@@ -516,19 +516,20 @@ export const GarminWatchSimulator: React.FC = () => {
         </div>
 
         {/* Watch Inner Circular 280x280 Screen Display */}
-        <div className="relative w-[280px] h-[280px] rounded-full overflow-hidden border-2 border-zinc-800 bg-black shadow-[inset_0_0_20px_rgba(0,0,0,0.9)] flex items-center justify-center">
+        <div className="relative w-[280px] h-[280px] aspect-square rounded-full overflow-hidden border-2 border-zinc-800 bg-black shadow-[inset_0_0_20px_rgba(0,0,0,0.9)] flex items-center justify-center">
           <canvas
             ref={canvasRef}
             width={CANVAS_SIZE}
             height={CANVAS_SIZE}
             onPointerDown={(e) => {
+              globalTouchDeduplicator.recordTouch();
               setIsDraggingFog(true);
               handleCanvasPointerMove(e);
               containerRef.current?.focus({ preventScroll: true });
             }}
             onPointerUp={() => setIsDraggingFog(false)}
             onPointerMove={handleCanvasPointerMove}
-            className="w-full h-full rounded-full cursor-crosshair touch-none"
+            className="w-full h-full aspect-square rounded-full cursor-crosshair touch-none"
           />
 
           {/* Idle Menu Overlay */}

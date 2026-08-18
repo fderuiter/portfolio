@@ -12,6 +12,10 @@ import { useFullscreen } from "@/hooks/useFullscreen";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
 import {
+  getCanvasEventCoordinates,
+  globalTouchDeduplicator,
+} from "@/lib/graphics-engine";
+import {
   IconPlayerPlay,
   IconRotate,
   IconBone,
@@ -1819,12 +1823,11 @@ export const WorkingWithDuck: React.FC = () => {
   }, [uiState, announce]);
 
   // Canvas Mouse Interactions
-  const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if (globalTouchDeduplicator.shouldSuppressMouseEvent()) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (CANVAS_WIDTH / rect.width);
-    const y = (e.clientY - rect.top) * (CANVAS_HEIGHT / rect.height);
+    const { x, y } = getCanvasEventCoordinates(e, canvas);
 
     const state = gameStateRef.current;
 
@@ -1985,12 +1988,10 @@ export const WorkingWithDuck: React.FC = () => {
     setUiState({ ...gameStateRef.current });
   };
 
-  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (CANVAS_WIDTH / rect.width);
-    const y = (e.clientY - rect.top) * (CANVAS_HEIGHT / rect.height);
+    const { x, y } = getCanvasEventCoordinates(e, canvas);
 
     const state = gameStateRef.current;
 
@@ -2060,26 +2061,18 @@ export const WorkingWithDuck: React.FC = () => {
   };
 
   const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    if (e.touches.length > 0) {
-      const touch = e.touches[0];
-      handleCanvasMouseDown({
-        clientX: touch.clientX,
-        clientY: touch.clientY,
-      } as unknown as React.MouseEvent<HTMLCanvasElement>);
-    }
+    if (e.cancelable) e.preventDefault();
+    globalTouchDeduplicator.recordTouch();
+    handleCanvasMouseDown(e);
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    if (e.touches.length > 0) {
-      const touch = e.touches[0];
-      handleCanvasMouseMove({
-        clientX: touch.clientX,
-        clientY: touch.clientY,
-      } as unknown as React.MouseEvent<HTMLCanvasElement>);
-    }
+    if (e.cancelable) e.preventDefault();
+    handleCanvasMouseMove(e);
   };
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.cancelable) e.preventDefault();
     handleCanvasMouseUp();
   };
 
@@ -2267,7 +2260,7 @@ export const WorkingWithDuck: React.FC = () => {
       )}
 
       {/* Main Canvas Screen Container */}
-      <div className="relative rounded-3xl border border-zinc-800 bg-zinc-950 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)]">
+      <div className="relative rounded-3xl border border-zinc-800 bg-zinc-950 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] aspect-[800/500] w-full">
         <FullscreenButton
           isFullscreen={isFullscreen}
           onToggle={toggleFullscreen}
@@ -2286,11 +2279,7 @@ export const WorkingWithDuck: React.FC = () => {
           role="application"
           aria-label="Workspace Pet Companion Simulator. Focus this container to operate simulator. Press Tab to select items, Arrow keys to drag the duck around the canvas to guide actions like potty and bath, and Q, W, E, R to issue training commands."
           tabIndex={0}
-          className={
-            isFullscreen
-              ? "max-h-[calc(100vh-220px)] max-w-full aspect-[800/500] object-contain block cursor-crosshair touch-none my-auto mx-auto"
-              : "w-full h-auto cursor-crosshair block touch-none"
-          }
+          className="w-full h-full aspect-[800/500] object-contain block cursor-crosshair touch-none"
         />
 
         {/* Start Overlay Screen */}

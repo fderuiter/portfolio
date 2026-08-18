@@ -75,20 +75,23 @@ describe("RetroLabyrinth Component Architecture & Functional Rules", () => {
 
 describe("Direct Inline Coordinate Scaling & Index Clamping Invariants", () => {
   const componentPath = path.resolve(__dirname, "../components/RetroLabyrinth.tsx");
+  const mathPath = path.resolve(__dirname, "../lib/graphics-math.ts");
   const content = fs.readFileSync(componentPath, "utf-8");
+  const mathContent = fs.readFileSync(mathPath, "utf-8");
 
   it("includes defensive zero-dimension guard for canvas bounding box", () => {
-    expect(content).toContain("if (rect.width <= 0 || rect.height <= 0) return;");
+    expect(mathContent).toContain("rect.width <= 0");
+    expect(mathContent).toContain("rect.height <= 0");
   });
 
   it("calculates scaling ratio based on internal canvas resolution and bounding rect", () => {
-    expect(content).toContain("const scaleX = canvas.width / rect.width;");
-    expect(content).toContain("const scaleY = canvas.height / rect.height;");
+    expect(mathContent).toContain("const scaleX = dimensions.width / rect.width");
+    expect(mathContent).toContain("const scaleY = dimensions.height / rect.height");
   });
 
   it("transforms client event offsets to internal canvas logical coordinates", () => {
-    expect(content).toContain("const canvasX = (e.clientX - rect.left) * scaleX;");
-    expect(content).toContain("const canvasY = (e.clientY - rect.top) * scaleY;");
+    expect(content).toContain("getCanvasEventCoordinates(e, canvas)");
+    expect(mathContent).toContain("(clientX - rect.left) * scaleX");
   });
 
   it("clamps calculated grid indices within valid column and row bounds", () => {
