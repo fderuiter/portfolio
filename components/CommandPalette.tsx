@@ -394,6 +394,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
           "Interactive meme quotes & sound triggers"
         ]
       },
+      {
+        id: "nav-offline",
+        title: "Offline Fallback View",
+        subtitle: "Dedicated connection loss recovery page",
+        category: "navigation",
+        url: "/offline",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Offline Shell",
+        status: "Fallback View",
+        description: "Dedicated offline fallback view explaining connection loss and providing retry options for precached core tools.",
+        techStack: ["Serwist", "Service Worker", "Cache-First", "React 19"],
+        highlights: [
+          "Precaching core application shell routes",
+          "Cache-first 3D asset caching with procedural fallback",
+          "Bypasses error-tracking telemetry endpoints"
+        ]
+      },
     ];
 
     const safeStudies = Array.isArray(studies) ? studies : [];

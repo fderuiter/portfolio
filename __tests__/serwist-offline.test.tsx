@@ -1,0 +1,128 @@
+import React from "react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
+import OfflineFallbackPage from "@/app/offline/page";
+import { SerwistRegister } from "@/components/providers/SerwistRegister";
+import { loadExternalBrainMesh } from "@/lib/neuro/asset-loader";
+import fs from "fs";
+import path from "path";
+
+// Mock next/navigation
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+  }),
+  usePathname: () => "/offline",
+}));
+
+describe("Serwist PWA Engine & Offline App Shell Integration", () => {
+  let originalLocation: Location;
+
+  beforeEach(() => {
+    originalLocation = window.location;
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  describe("Requirement 1 & 3: Offline Fallback Page", () => {
+    it("renders the dedicated offline fallback page with status and retry controls", () => {
+      render(<OfflineFallbackPage />);
+
+      expect(screen.getByText(/Offline Application Shell/i)).toBeDefined();
+      expect(screen.getByText(/You are currently offline|Your network connection has been re-established/i)).toBeDefined();
+      expect(screen.getAllByRole("button", { name: /Retry Connection/i })[0]).toBeDefined();
+      expect(screen.getByText(/Precached App Shell Workspaces/i)).toBeDefined();
+    });
+
+    it("triggers window location reload when Retry Connection is clicked", () => {
+      const reloadMock = vi.fn();
+      Object.defineProperty(window, "location", {
+        configurable: true,
+        value: { ...originalLocation, reload: reloadMock },
+      });
+
+      render(<OfflineFallbackPage />);
+      const retryButtons = screen.getAllByRole("button", { name: /Retry Connection/i });
+      fireEvent.click(retryButtons[0]);
+
+      expect(reloadMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("displays links to all core precached app shell routes", () => {
+      render(<OfflineFallbackPage />);
+
+      const expectedLinks = ["/", "/proof", "/simulator", "/neuro", "/crf", "/stack", "/arcade"];
+      const anchorElements = screen.getAllByRole("link");
+      const hrefs = anchorElements.map((a) => a.getAttribute("href"));
+
+      expectedLinks.forEach((expectedHref) => {
+        expect(hrefs).toContain(expectedHref);
+      });
+    });
+  });
+
+  describe("Requirement 2: 3D Model Procedural Fallback Verification", () => {
+    it("falls back gracefully to procedural cortical mesh when external 3D model fails to load", async () => {
+      // Pass a non-existent URL to force fetch/load failure in loadExternalBrainMesh
+      const resultGroup = await loadExternalBrainMesh("/models/non-existent-brain.glb", "pial", "both");
+
+      expect(resultGroup).toBeDefined();
+      expect(resultGroup.children.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("Requirement 5: Silent Service Worker Registration", () => {
+    it("executes registration silently on client mount without throwing errors", () => {
+      const mockRegister = vi.fn().mockResolvedValue(undefined as unknown as ServiceWorkerRegistration);
+      
+      Object.defineProperty(navigator, "serviceWorker", {
+        configurable: true,
+        value: {
+          register: mockRegister,
+        },
+      });
+
+      const { container } = render(<SerwistRegister />);
+      expect(container.firstChild).toBeNull();
+      expect(mockRegister).toHaveBeenCalledWith("/sw.js", { scope: "/" });
+    });
+
+    it("uses window.serwist.register when available", () => {
+      const mockSerwistRegister = vi.fn().mockResolvedValue(undefined);
+      (window as unknown as { serwist: { register: () => Promise<void> } }).serwist = {
+        register: mockSerwistRegister,
+      };
+
+      render(<SerwistRegister />);
+      expect(mockSerwistRegister).toHaveBeenCalledTimes(1);
+
+      delete (window as unknown as { serwist?: unknown }).serwist;
+    });
+  });
+
+  describe("Requirement 4 & Architecture Verification: Service Worker Configuration Invariants", () => {
+    it("verifies app/sw.ts enforces NetworkOnly strategy for telemetry and Sentry", () => {
+      const swFilePath = path.resolve(process.cwd(), "app/sw.ts");
+      expect(fs.existsSync(swFilePath)).toBe(true);
+
+      const swContent = fs.readFileSync(swFilePath, "utf-8");
+
+      // Verify Telemetry & Sentry matching
+      expect(swContent).toContain("pathname.startsWith(\"/api/telemetry\")");
+      expect(swContent).toContain("hostname.includes(\"sentry\")");
+      expect(swContent).toContain("new NetworkOnly()");
+
+      // Verify 3D Model CacheFirst
+      expect(swContent).toContain("new CacheFirst");
+      expect(swContent).toContain("3d-models-cache");
+
+      // Verify Offline Fallback Route
+      expect(swContent).toContain("url: \"/offline\"");
+      expect(swContent).toContain("request.destination === \"document\"");
+    });
+  });
+});

@@ -24,6 +24,7 @@ export const CANONICAL_ROUTES: PageBenchmarkRoute[] = [
   { path: "/crf", name: "CRF Builder & AST", category: "tool" },
   { path: "/simulator", name: "System Dynamics Simulator", category: "tool" },
   { path: "/schedule", name: "Schedule / Calendar", category: "top-level" },
+  { path: "/offline", name: "Offline Fallback View", category: "top-level" },
 
   // Deep Case Studies
   { path: "/case-studies/clinical-data-mapper", name: "CS: Clinical Data Mapper", category: "case-study" },

@@ -1,5 +1,13 @@
+import withSerwistInit from "@serwist/next";
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
+
+const withSerwist = withSerwistInit({
+  swSrc: "app/sw.ts",
+  swDest: "public/sw.js",
+  disable: process.env.NODE_ENV === "development",
+  reloadOnOnline: true,
+});
 
 const nextConfig: NextConfig = {
   compiler: {
@@ -55,7 +63,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
+export default withSentryConfig(withSerwist(nextConfig), {
   silent: true,
   org: process.env.SENTRY_ORG || "dummy-org",
   project: process.env.SENTRY_PROJECT || "dummy-project",
