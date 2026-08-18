@@ -33,6 +33,7 @@ import {
   performTrick,
 } from "@/lib/working-with-duck-engine";
 import { sanitizeError, sanitizeString } from "@/lib/error-sanitization";
+import { evaluateCanaryRollout } from "@/scripts/canary-analyzer";
 
 describe("Defect Remediation & Regression Verification Suite (Invariant #11)", () => {
   describe("Proof AST Solver Resilience & Deep Recursion Guards", () => {
@@ -334,6 +335,34 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
 
       // Clean up input
       dialog.removeChild(input);
+    });
+  });
+
+  describe("Automated Canary Analysis Rate Normalization & Window Mismatch Guards", () => {
+    it("prevents false-positive approval when canary has fewer total exceptions but higher rate over shorter window", () => {
+      const evaluation = evaluateCanaryRollout(
+        {
+          totalRequests: 10000,
+          serverErrors5xx: 0,
+          p95LatencyMs: 120,
+          sentryExceptionCount: 8, // 8 exceptions in 10 mins = 0.8/min
+          windowDurationMinutes: 10,
+        },
+        {
+          totalRequests: 60000,
+          serverErrors5xx: 0,
+          p95LatencyMs: 120,
+          sentryExceptionCount: 15, // 15 exceptions in 60 mins = 0.25/min
+          windowDurationMinutes: 60,
+        }
+      );
+
+      // Raw counts: 8 < 15, but per-min rate: 0.8 / 0.25 = 3.2x > 2.0x threshold
+      expect(evaluation.decision).toBe("ROLLBACK_REQUIRED");
+      expect(evaluation.rollbackTriggered).toBe(true);
+      expect(evaluation.canaryMetrics.exceptionRatePerMinute).toBe(0.8);
+      expect(evaluation.baselineMetrics?.exceptionRatePerMinute).toBe(0.25);
+      expect(evaluation.metricsComparison.exceptionRatio).toBe(3.2);
     });
   });
 });

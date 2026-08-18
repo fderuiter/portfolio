@@ -89,6 +89,75 @@ describe("Automated Canary Analysis (ACA) & Anomaly Detection", () => {
     expect(result.reasons.some((r) => r.includes("Sentry exception count spiked"))).toBe(true);
   });
 
+  it("triggers ROLLBACK_REQUIRED on duration mismatch when canary has lower total exceptions but higher rate per minute", () => {
+    // Baseline: 60 minutes, 20 exceptions -> 0.333 exceptions/min
+    const baseline: TelemetryMetrics = {
+      totalRequests: 60000,
+      serverErrors5xx: 10,
+      p95LatencyMs: 120,
+      sentryExceptionCount: 20,
+      windowDurationMinutes: 60,
+    };
+
+    // Canary: 10 minutes, 10 exceptions -> 1.0 exception/min (3.0x spike vs baseline rate)
+    // Note total count (10) < baseline total count (20)
+    const shortCanary: TelemetryMetrics = {
+      totalRequests: 10000,
+      serverErrors5xx: 2,
+      p95LatencyMs: 125,
+      sentryExceptionCount: 10,
+      windowDurationMinutes: 10,
+    };
+
+    const result = evaluateCanaryRollout(shortCanary, baseline);
+    expect(result.decision).toBe("ROLLBACK_REQUIRED");
+    expect(result.rollbackTriggered).toBe(true);
+    expect(result.canaryMetrics.exceptionRatePerMinute).toBe(1.0);
+    expect(result.baselineMetrics?.exceptionRatePerMinute).toBeCloseTo(0.3333, 4);
+    expect(result.metricsComparison.exceptionRatio).toBeCloseTo(3.0, 1);
+    expect(result.reasons.some((r) => r.includes("Sentry exception count spiked by 3.0x"))).toBe(true);
+  });
+
+  it("applies standard default durations when windowDurationMinutes is missing or non-positive", () => {
+    // Missing duration metrics from canary and baseline
+    const canaryWithoutDuration: TelemetryMetrics = {
+      totalRequests: 10000,
+      serverErrors5xx: 5,
+      p95LatencyMs: 120,
+      sentryExceptionCount: 15, // Defaults to 15 min -> 1.0/min
+    };
+
+    const baselineWithInvalidDuration: TelemetryMetrics = {
+      totalRequests: 50000,
+      serverErrors5xx: 20,
+      p95LatencyMs: 115,
+      sentryExceptionCount: 12,
+      windowDurationMinutes: 0, // Defaults to 60 min -> 0.2/min
+    };
+
+    const result = evaluateCanaryRollout(canaryWithoutDuration, baselineWithInvalidDuration);
+    expect(result.canaryMetrics.exceptionRatePerMinute).toBe(1.0); // 15 / 15 min
+    expect(result.baselineMetrics?.exceptionRatePerMinute).toBe(0.2); // 12 / 60 min
+    expect(result.metricsComparison.exceptionRatio).toBe(5.0); // 1.0 / 0.2
+    expect(result.decision).toBe("ROLLBACK_REQUIRED");
+  });
+
+  it("populates exceptionRatePerMinute in canaryMetrics and baselineMetrics payloads", () => {
+    const canaryMetrics: TelemetryMetrics = {
+      totalRequests: 20000,
+      serverErrors5xx: 10,
+      p95LatencyMs: 125,
+      sentryExceptionCount: 6,
+      windowDurationMinutes: 15,
+    };
+
+    const result = evaluateCanaryRollout(canaryMetrics, healthyBaseline);
+    expect(result.canaryMetrics).toHaveProperty("exceptionRatePerMinute");
+    expect(result.canaryMetrics.exceptionRatePerMinute).toBe(0.4); // 6 / 15
+    expect(result.baselineMetrics).toHaveProperty("exceptionRatePerMinute");
+    expect(result.baselineMetrics?.exceptionRatePerMinute).toBeCloseTo(0.0333, 4); // 2 / 60
+  });
+
   describe("executeAutomatedRollback", () => {
     it("returns no-op message for healthy evaluation", async () => {
       const evaluation = evaluateCanaryRollout(
