@@ -24,10 +24,9 @@ import {
 import { ExpressionTree } from "./ExpressionTree";
 import { TacticHand } from "./TacticHand";
 import { RAMGauge } from "./RAMGauge";
-import { TerminalLog } from "./TerminalLog";
 import { VictoryModal } from "./VictoryModal";
 import { MultiGoalTabs } from "./MultiGoalTabs";
-import { LeanIdeInspector } from "./LeanIdeInspector";
+import { DiagnosticDrawers } from "./DiagnosticDrawers";
 import { HintSystem } from "./HintSystem";
 import { SandboxMode } from "./SandboxMode";
 import { TheoryBriefingModal } from "./TheoryBriefingModal";
@@ -82,7 +81,12 @@ export const QuasiPerfectPuzzler: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"campaign" | "sandbox">("campaign");
   const [selectedChapter, setSelectedChapter] = useState<number | "all">("all");
   const [showHints, setShowHints] = useState<boolean>(false);
-  const [showLeanInspector, setShowLeanInspector] = useState<boolean>(true);
+  const [showLeanInspector, setShowLeanInspector] = useState<boolean>(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      return false;
+    }
+    return true;
+  });
   const [showBriefingModal, setShowBriefingModal] = useState<boolean>(false);
 
   // Dual Game Mode State (Story/Casual vs Hacker/Speedrun)
@@ -228,6 +232,9 @@ export const QuasiPerfectPuzzler: React.FC = () => {
       setLevelSolved(false);
       setCurrentScore(null);
       setShowHints(false);
+      if (typeof window !== "undefined" && window.innerWidth < 768) {
+        setShowLeanInspector(false);
+      }
       setLogs([
         {
           id: `lvl-${targetLvl.id}-${Date.now()}`,
@@ -907,6 +914,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
               }}
               onHoverTarget={setHoveredTargetId}
               isProofComplete={levelSolved || activeSubgoal.isCompleted}
+              isTacticActive={selectedTacticIndex !== null}
             />
           </div>
 
@@ -933,20 +941,18 @@ export const QuasiPerfectPuzzler: React.FC = () => {
             />
           </div>
 
-          {/* Live Lean IDE Inspector & Tactic Encyclopedia */}
-          {showLeanInspector && (
-            <div className="mt-4">
-              <LeanIdeInspector
-                level={currentLevel}
-                steps={proofSteps}
-                isComplete={levelSolved}
-              />
-            </div>
-          )}
-
-          {/* Diagnostic Terminal Log */}
+          {/* Accordion Drawers for Secondary IDE Panels & Diagnostic Terminal Log */}
           <div className="mt-4">
-            <TerminalLog logs={logs} />
+            <DiagnosticDrawers
+              key={currentLevelIndex}
+              level={currentLevel}
+              proofSteps={proofSteps}
+              isComplete={levelSolved}
+              logs={logs}
+              isLeanInspectorOpen={showLeanInspector}
+              onToggleLeanInspector={() => setShowLeanInspector((prev) => !prev)}
+              currentLevelIndex={currentLevelIndex}
+            />
           </div>
 
           {/* Theory Briefing Modal */}

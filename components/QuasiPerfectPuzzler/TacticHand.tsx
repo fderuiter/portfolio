@@ -42,7 +42,7 @@ export const TacticHand: React.FC<TacticHandProps> = ({
         </span>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
         {availableTactics.map((item, idx) => {
           const tacticId = typeof item === "string" ? item : item.id;
           const hypothesisTarget = typeof item === "object" ? item.hypothesis : undefined;
