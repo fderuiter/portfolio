@@ -88,10 +88,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/.next/cache
-          key: nextjs-${{ github.head_ref || github.ref_name }}-${{ hashFiles('package-lock.json') }}-${{ github.sha }}
+          key: nextjs-${{ github.head_ref || github.ref_name }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
-            nextjs-${{ github.head_ref || github.ref_name }}-${{ hashFiles('package-lock.json') }}-
-            nextjs-main-${{ hashFiles('package-lock.json') }}-
+            nextjs-${{ github.head_ref || github.ref_name }}-${{ hashFiles('package-lock.json') }}
+            nextjs-main-${{ hashFiles('package-lock.json') }}
 
       - name: Build Production
         run: npx next build
