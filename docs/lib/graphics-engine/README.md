@@ -19,7 +19,9 @@
 ## Functions
 
 - [isBrowser](functions/isBrowser.md)
+- [isStylesheetLoaded](functions/isStylesheetLoaded.md)
 - [measureTextOffscreen](functions/measureTextOffscreen.md)
+- [resetStylesheetLoadedCache](functions/resetStylesheetLoadedCache.md)
 - [resolveCodeChipExtraWidth](functions/resolveCodeChipExtraWidth.md)
 - [resolveFontFamily](functions/resolveFontFamily.md)
 - [validateLayoutHeight](functions/validateLayoutHeight.md)

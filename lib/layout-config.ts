@@ -1,5 +1,5 @@
 import { designManifest } from "@/lib/design-manifest";
-import { cssPropertyCache, fontConfigCache } from "@/lib/graphics-engine";
+import { cssPropertyCache, fontConfigCache, isStylesheetLoaded } from "@/lib/graphics-engine";
 
 export const LAYOUT_CONFIG = {
   // Height offsets used for fallback and SSR
@@ -41,6 +41,26 @@ export function resolveThemeFonts(
   fontSize: number,
   fontFamilyVariable: string = "--font-inter"
 ): ThemeFonts {
+  const cacheKey = `themeFonts|${fontSize}|${fontFamilyVariable}`;
+  const cached = fontConfigCache.get(cacheKey);
+  if (cached) {
+    return cached as ThemeFonts;
+  }
+
+  let resolvedFontFamily = cssPropertyCache.get(fontFamilyVariable);
+  let resolvedMonoFamily = cssPropertyCache.get("--font-mono");
+
+  if (resolvedFontFamily && resolvedMonoFamily) {
+    const result = {
+      baseFont: `400 ${fontSize}px ${resolvedFontFamily}`,
+      boldFont: `700 ${fontSize}px ${resolvedFontFamily}`,
+      italicFont: `italic 400 ${fontSize}px ${resolvedFontFamily}`,
+      codeFont: `500 ${fontSize - 1}px ${resolvedMonoFamily}`,
+    };
+    fontConfigCache.set(cacheKey, result);
+    return result;
+  }
+
   if (typeof window === "undefined") {
     const fallbackSans = designManifest.typography.fonts.sans;
     const fallbackMono = designManifest.typography.fonts.mono;
@@ -52,29 +72,19 @@ export function resolveThemeFonts(
     };
   }
 
-  const cacheKey = `themeFonts|${fontSize}|${fontFamilyVariable}`;
-  const cached = fontConfigCache.get(cacheKey);
-  if (cached) {
-    return cached as ThemeFonts;
-  }
-
   try {
-    let resolvedFontFamily = cssPropertyCache.get(fontFamilyVariable);
-    let resolvedMonoFamily = cssPropertyCache.get("--font-mono");
-
-    if (resolvedFontFamily && resolvedMonoFamily) {
-      const result = {
-        baseFont: `400 ${fontSize}px ${resolvedFontFamily}`,
-        boldFont: `700 ${fontSize}px ${resolvedFontFamily}`,
-        italicFont: `italic 400 ${fontSize}px ${resolvedFontFamily}`,
-        codeFont: `500 ${fontSize - 1}px ${resolvedMonoFamily}`,
+    const rootStyle = window.getComputedStyle(document.documentElement);
+    if (!isStylesheetLoaded(rootStyle)) {
+      const fallbackSans = designManifest.typography.fonts.sans;
+      const fallbackMono = designManifest.typography.fonts.mono;
+      return {
+        baseFont: `400 ${fontSize}px ${fallbackSans}`,
+        boldFont: `700 ${fontSize}px ${fallbackSans}`,
+        italicFont: `italic 400 ${fontSize}px ${fallbackSans}`,
+        codeFont: `500 ${fontSize - 1}px ${fallbackMono}`,
       };
-      fontConfigCache.set(cacheKey, result);
-      return result;
     }
 
-    const rootStyle = window.getComputedStyle(document.documentElement);
-    
     if (!resolvedFontFamily) {
       const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
       resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
@@ -111,27 +121,31 @@ export function resolveSingleThemeFont(
   fontSize: number,
   fontFamilyVariable: string = "--font-inter"
 ): string {
-  if (typeof window === "undefined") {
-    const fallbackSans = designManifest.typography.fonts.sans;
-    return `${fontSize}px ${fallbackSans}`;
-  }
-
   const cacheKey = `singleThemeFont|${fontSize}|${fontFamilyVariable}`;
   const cached = fontConfigCache.get(cacheKey);
   if (cached) {
     return cached as string;
   }
 
+  let resolvedFontFamily = cssPropertyCache.get(fontFamilyVariable);
+  if (resolvedFontFamily) {
+    const result = `${fontSize}px ${resolvedFontFamily}`;
+    fontConfigCache.set(cacheKey, result);
+    return result;
+  }
+
+  if (typeof window === "undefined") {
+    const fallbackSans = designManifest.typography.fonts.sans;
+    return `${fontSize}px ${fallbackSans}`;
+  }
+
   try {
-    let resolvedFontFamily = cssPropertyCache.get(fontFamilyVariable);
-    if (resolvedFontFamily) {
-      const result = `${fontSize}px ${resolvedFontFamily}`;
-      fontConfigCache.set(cacheKey, result);
-      return result;
+    const rootStyle = window.getComputedStyle(document.documentElement);
+    if (!isStylesheetLoaded(rootStyle)) {
+      const fallbackSans = designManifest.typography.fonts.sans;
+      return `${fontSize}px ${fallbackSans}`;
     }
 
-    const rootStyle = window.getComputedStyle(document.documentElement);
-    
     const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
     resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
     cssPropertyCache.set(fontFamilyVariable, resolvedFontFamily);

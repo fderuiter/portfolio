@@ -44,6 +44,9 @@ export class LRUCache<K, V> {
   clear() {
     this.cache.clear();
   }
+  get size(): number {
+    return this.cache.size;
+  }
 }
 
 // --- Masonry Calculations (Browser-Free) ---

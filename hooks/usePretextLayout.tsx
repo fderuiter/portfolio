@@ -26,7 +26,8 @@ import {
   richPrepareCache,
   richLayoutCache,
   cssPropertyCache,
-  fontConfigCache
+  fontConfigCache,
+  isStylesheetLoaded
 } from "@/lib/graphics-engine";
 
 export interface UsePretextLayoutOptions {
@@ -98,20 +99,25 @@ export function usePretextLayout({
     fontStringRef.current = fontString;
 
     const prepareKey = `${text}|${fontString}`;
-    let prepared = textPrepareCache.get(prepareKey);
+    const stylesheetLoaded = isStylesheetLoaded();
+    let prepared = stylesheetLoaded ? textPrepareCache.get(prepareKey) : undefined;
     if (!prepared) {
       prepared = prepare(text, fontString);
-      textPrepareCache.set(prepareKey, prepared);
+      if (stylesheetLoaded) {
+        textPrepareCache.set(prepareKey, prepared);
+      }
     }
     preparedTextRef.current = prepared;
 
     const flooredWidth = Math.floor(maxWidth);
     const cacheKey = `${text}|${fontString}|${flooredWidth}|${activeLineHeight}`;
-    let result = textLayoutCache.get(cacheKey);
+    let result = stylesheetLoaded ? textLayoutCache.get(cacheKey) : undefined;
 
     if (!result) {
       result = layout(prepared, flooredWidth, activeLineHeight);
-      textLayoutCache.set(cacheKey, result);
+      if (stylesheetLoaded) {
+        textLayoutCache.set(cacheKey, result);
+      }
     }
 
     setState((prev) => {
@@ -170,10 +176,13 @@ export function usePretextLayout({
       }
       fontStringRef.current = fontString;
       const prepareKey = `${text}|${fontString}`;
-      let prepared = textPrepareCache.get(prepareKey);
+      const stylesheetLoaded = isStylesheetLoaded();
+      let prepared = stylesheetLoaded ? textPrepareCache.get(prepareKey) : undefined;
       if (!prepared) {
         prepared = prepare(text, fontString);
-        textPrepareCache.set(prepareKey, prepared);
+        if (stylesheetLoaded) {
+          textPrepareCache.set(prepareKey, prepared);
+        }
       }
       preparedTextRef.current = prepared;
       setState((prev) => ({ ...prev, isReady: true }));
@@ -382,7 +391,8 @@ export function usePretextRichLayout({
 
     const flooredWidth = Math.floor(maxWidth);
     const layoutKey = `${itemsKeyRef.current}|${flooredWidth}|${lineHeight}`;
-    let cachedResult = richLayoutCache.get(layoutKey);
+    const stylesheetLoaded = isStylesheetLoaded();
+    let cachedResult = stylesheetLoaded ? richLayoutCache.get(layoutKey) : undefined;
 
     if (!cachedResult) {
       const materializedLines: RichInlineLine[] = [];
@@ -419,7 +429,9 @@ export function usePretextRichLayout({
         height: materializedLines.length * lineHeight,
         lines: materializedLines,
       };
-      richLayoutCache.set(layoutKey, cachedResult);
+      if (stylesheetLoaded) {
+        richLayoutCache.set(layoutKey, cachedResult);
+      }
     }
 
     const { height: calculatedHeight, lines: materializedLines } = cachedResult;
@@ -481,7 +493,8 @@ export function usePretextRichLayout({
     const itemsKey = `${text}|${fontsKey}`;
     itemsKeyRef.current = itemsKey;
 
-    let parsedParagraphs = richItemsCache.get(itemsKey) as ParagraphData[] | undefined;
+    const stylesheetLoaded = isStylesheetLoaded();
+    let parsedParagraphs = stylesheetLoaded ? (richItemsCache.get(itemsKey) as ParagraphData[] | undefined) : undefined;
     if (!parsedParagraphs) {
       let accumulatedItemOffset = 0;
       const paragraphs = text.split("\n");
@@ -505,7 +518,9 @@ export function usePretextRichLayout({
         accumulatedItemOffset += items.length;
         return res;
       });
-      richItemsCache.set(itemsKey, parsedParagraphs);
+      if (stylesheetLoaded) {
+        richItemsCache.set(itemsKey, parsedParagraphs);
+      }
     }
     paragraphsRef.current = parsedParagraphs;
 
