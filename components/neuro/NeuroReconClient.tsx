@@ -63,8 +63,8 @@ const Brain3DViewerSkeleton: React.FC = () => {
   );
 };
 
-const Brain3DViewer = dynamic(
-  () => import("./Brain3DViewer").then((mod) => mod.Brain3DViewer),
+const AdaptiveBrain3DViewer = dynamic(
+  () => import("./AdaptiveBrain3DViewer").then((mod) => mod.AdaptiveBrain3DViewer),
   {
     ssr: false,
     loading: () => <Brain3DViewerSkeleton />,
@@ -773,7 +773,7 @@ export const NeuroReconClient: React.FC = () => {
               viewMode === "3d" ? "lg:col-span-12" : "lg:col-span-5"
             }`}
           >
-            <Brain3DViewer
+            <AdaptiveBrain3DViewer
               surfaceMode={surfaceMode}
               crosshair={crosshair}
               modelUrl={DATASET_CONFIGS[activeDataset].modelUrl}

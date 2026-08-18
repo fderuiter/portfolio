@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useLayoutEffect, useRef, useCallback } from "react";
+import React, { useState, useLayoutEffect, useRef, useCallback, startTransition } from "react";
+import { scheduleIdleTask } from "@/lib/idle-scheduler";
 import { useResizeObserver } from "./useResizeObserver";
 import { prepare, layout, clearCache, type PreparedText } from "@chenglou/pretext";
 import { 
@@ -120,15 +121,17 @@ export function usePretextLayout({
       }
     }
 
-    setState((prev) => {
-      if (prev.height === result.height && prev.lineCount === result.lineCount) {
-        return prev;
-      }
-      return {
-        isReady: true,
-        height: result.height,
-        lineCount: result.lineCount,
-      };
+    startTransition(() => {
+      setState((prev) => {
+        if (prev.height === result.height && prev.lineCount === result.lineCount) {
+          return prev;
+        }
+        return {
+          isReady: true,
+          height: result.height,
+          lineCount: result.lineCount,
+        };
+      });
     });
   }, [text, fontSize, lineHeight, fontFamilyVariable, getResponsiveMetrics]);
 
@@ -155,9 +158,13 @@ export function usePretextLayout({
   useLayoutEffect(() => {
     if (!isBrowser()) return;
 
+    let cancelIdle: (() => void) | null = null;
+
     if (containerRef.current) {
       const initialWidth = containerRef.current.getBoundingClientRect().width;
-      measureText(initialWidth);
+      cancelIdle = scheduleIdleTask(() => {
+        measureText(initialWidth);
+      }, { timeout: 500 });
     } else {
       let fontString = "";
       if (
@@ -185,8 +192,14 @@ export function usePretextLayout({
         }
       }
       preparedTextRef.current = prepared;
-      setState((prev) => ({ ...prev, isReady: true }));
+      startTransition(() => {
+        setState((prev) => ({ ...prev, isReady: true }));
+      });
     }
+
+    return () => {
+      if (cancelIdle) cancelIdle();
+    };
   }, [text, fontSize, fontFamilyVariable, measureText, containerRef, translationMode, activeTheme, simplified]);
 
   // Removed custom ResizeObserver in favor of unified useResizeObserver hook

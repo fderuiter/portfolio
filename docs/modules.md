@@ -6,6 +6,7 @@
 
 ## Modules
 
+- [hooks/useAdaptiveResource](hooks/useAdaptiveResource/README.md)
 - [hooks/useAnnouncer](hooks/useAnnouncer/README.md)
 - [hooks/useClipboard](hooks/useClipboard/README.md)
 - [hooks/useConsoleArt](hooks/useConsoleArt/README.md)
@@ -21,6 +22,7 @@
 - [hooks/useTimelineState](hooks/useTimelineState/README.md)
 - [hooks/useWebGLContextLoss](hooks/useWebGLContextLoss/README.md)
 - [lib/accessibility-utils](lib/accessibility-utils/README.md)
+- [lib/adaptive-resource](lib/adaptive-resource/README.md)
 - [lib/arcade](lib/arcade/README.md)
 - [lib/arcade-data](lib/arcade-data/README.md)
 - [lib/arcade/crt-pipeline](lib/arcade/crt-pipeline/README.md)
@@ -85,6 +87,7 @@
 - [lib/graphics-engine](lib/graphics-engine/README.md)
 - [lib/graphics-math](lib/graphics-math/README.md)
 - [lib/i18n-dictionary](lib/i18n-dictionary/README.md)
+- [lib/idle-scheduler](lib/idle-scheduler/README.md)
 - [lib/laser-loon](lib/laser-loon/README.md)
 - [lib/laser-loon/constants](lib/laser-loon/constants/README.md)
 - [lib/laser-loon/engine](lib/laser-loon/engine/README.md)
