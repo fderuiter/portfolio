@@ -305,16 +305,13 @@ export function getOrCreatePhosphorPattern(
   }
 }
 
+import { isReducedMotionPreferred as checkReducedMotion } from "@/hooks/useReducedMotion";
+
 /**
  * Checks whether user has requested reduced motion in their OS/browser settings.
  */
 export function isReducedMotionPreferred(): boolean {
-  if (typeof window === "undefined" || !window.matchMedia) return false;
-  try {
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  } catch {
-    return false;
-  }
+  return checkReducedMotion();
 }
 
 /**

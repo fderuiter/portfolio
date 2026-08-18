@@ -2,6 +2,8 @@
  * Synthesized Web Audio Sound Effects for Memes, Easter Eggs, and Soundboard
  */
 
+import { isReducedMotionPreferred } from "@/hooks/useReducedMotion";
+
 let globalAudioCtx: AudioContext | null = null;
 
 function getMemeAudioContext(): AudioContext | null {
@@ -21,7 +23,7 @@ export function isSoundAllowed(): boolean {
     if (window.localStorage.getItem("sound_muted") === "true") return false;
     if (window.localStorage.getItem("sound_a11y_bypass") === "true") return false;
   }
-  if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return false;
+  if (isReducedMotionPreferred()) return false;
   if (window.matchMedia?.("(forced-colors: active)").matches) return false;
   return true;
 }

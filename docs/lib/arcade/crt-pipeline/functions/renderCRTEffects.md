@@ -8,7 +8,7 @@
 
 > **renderCRTEffects**(`ctx`, `width`, `height`, `config`, `theme`, `frameCount?`): `void`
 
-Defined in: [lib/arcade/crt-pipeline.ts:330](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L330)
+Defined in: [lib/arcade/crt-pipeline.ts:327](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L327)
 
 Applies calibrated CRT post-processing passes to a 2D canvas rendering context.
 

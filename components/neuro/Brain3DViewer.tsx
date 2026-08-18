@@ -7,6 +7,7 @@ import { AnatomicalParcel, HemisphereFilter, SurfaceMode, VoxelCoord } from "@/l
 import { createCorticalSurfaceMesh, getAnatomicalParcelAtCoordinate } from "@/lib/neuro/mesh-generator";
 import { loadExternalBrainMesh } from "@/lib/neuro/asset-loader";
 import { useWebGLContextLoss } from "@/hooks/useWebGLContextLoss";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { Icon3dCubeSphere, IconCheck, IconLayersSubtract, IconRefresh } from "@tabler/icons-react";
 
 interface Brain3DViewerProps {
@@ -46,6 +47,12 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
       setContextKey((k) => k + 1);
     },
   });
+
+  const prefersReducedMotion = useReducedMotion();
+  const prefersReducedMotionRef = useRef(prefersReducedMotion);
+  useEffect(() => {
+    prefersReducedMotionRef.current = prefersReducedMotion;
+  }, [prefersReducedMotion]);
 
   const [isRotating, setIsRotating] = useState(true);
   const isRotatingRef = useRef(isRotating);
@@ -127,7 +134,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
       if (isContextLostRef.current) return;
 
       if (meshGroupRef.current) {
-        if (isRotatingRef.current && !isDraggingRef.current) {
+        if (isRotatingRef.current && !isDraggingRef.current && !prefersReducedMotionRef.current) {
           rotationRef.current.y += 0.004;
         }
         meshGroupRef.current.rotation.x = rotationRef.current.x;

@@ -4,6 +4,7 @@
 import { cn } from "@/lib/utils";
 import React, { useRef } from "react";
 import { clamp } from "@/lib/game-utils";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export const BentoGrid = ({
   className,
@@ -33,6 +34,7 @@ export const Card = ({
   className?: string;
   style?: React.CSSProperties;
 }) => {
+  const prefersReducedMotion = useReducedMotion();
   const isPointerInside = useRef(false);
   const refElement = useRef<HTMLDivElement>(null);
   const state = useRef({
@@ -92,7 +94,7 @@ export const Card = ({
       ref={refElement}
       onPointerMove={(event) => {
         if (event.pointerType === "touch") return;
-        if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        if (prefersReducedMotion) return;
         const rotateFactor = 0.35;
         const rect = event.currentTarget.getBoundingClientRect();
         const position = {

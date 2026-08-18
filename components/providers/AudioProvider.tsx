@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export type AudioProfile = "8-bit" | "90s-retro" | "ambient";
 
@@ -48,6 +49,7 @@ export function useAudio() {
 }
 
 export function AudioProvider({ children }: { children: React.ReactNode }) {
+  const prefersReducedMotion = useReducedMotion();
   const [volume, setVolumeState] = useState(0.3);
   const [muted, setMutedState] = useState(true);
   const [profile, setProfileState] = useState<AudioProfile>("8-bit");
@@ -82,7 +84,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     const checkBypass = () => {
       const forcedColors = window.matchMedia?.("(forced-colors: active)").matches;
       const msHighContrast = window.matchMedia?.("(-ms-high-contrast: active)").matches;
-      const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
       const documentClasses = document.documentElement.className || "";
       const documentHtmlContrast = document.documentElement.getAttribute("data-contrast") || "";
 
@@ -101,16 +102,13 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     checkBypass();
 
     const mqForced = window.matchMedia?.("(forced-colors: active)");
-    const mqMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
 
     mqForced?.addEventListener?.("change", checkBypass);
-    mqMotion?.addEventListener?.("change", checkBypass);
 
     return () => {
       mqForced?.removeEventListener?.("change", checkBypass);
-      mqMotion?.removeEventListener?.("change", checkBypass);
     };
-  }, []);
+  }, [prefersReducedMotion]);
 
   useEffect(() => {
     return () => {

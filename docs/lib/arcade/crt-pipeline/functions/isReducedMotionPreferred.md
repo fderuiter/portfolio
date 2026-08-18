@@ -8,7 +8,7 @@
 
 > **isReducedMotionPreferred**(): `boolean`
 
-Defined in: [lib/arcade/crt-pipeline.ts:311](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L311)
+Defined in: [lib/arcade/crt-pipeline.ts:313](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/crt-pipeline.ts#L313)
 
 Checks whether user has requested reduced motion in their OS/browser settings.
 

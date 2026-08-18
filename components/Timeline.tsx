@@ -9,12 +9,14 @@ import { RichNarrative } from "@/components/RichNarrative";
 import { usePersona } from "@/components/providers/PersonaProvider";
 import { useTerminology } from "@/components/providers/TerminologyProvider";
 import { dictionary, TimelineItem } from "@/lib/i18n-dictionary";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export type { TimelineItem };
 
 export const Timeline: React.FC = () => {
   const { persona, setPersona } = usePersona();
   const { simplified } = useTerminology();
+  const prefersReducedMotion = useReducedMotion();
   const [localMode, setLocalMode] = useState<"recruiter" | "reality" | null>(null);
   const [cardOverrides, setCardOverrides] = useState<Record<number, "recruiter" | "reality">>({});
 
@@ -96,10 +98,11 @@ export const Timeline: React.FC = () => {
           return (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+              animate={prefersReducedMotion ? { opacity: 1, y: 0 } : undefined}
+              whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8, delay: idx * 0.08, ...designManifest.motion.springs.timeline }}
+              transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.8, delay: idx * 0.08, ...designManifest.motion.springs.timeline }}
               className={`relative flex flex-col md:flex-row items-start md:items-center ${
                 isLeft ? "md:flex-row-reverse" : ""
               }`}
@@ -171,10 +174,10 @@ export const Timeline: React.FC = () => {
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={isReality ? "reality" : "recruiter"}
-                        initial={{ opacity: 0, y: 6 }}
+                        initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -6 }}
-                        transition={{ duration: 0.2 }}
+                        exit={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: -6 }}
+                        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2 }}
                         className={`text-xs leading-relaxed font-sans ${
                           isReality ? "text-amber-200/90 italic" : "text-zinc-300"
                         }`}

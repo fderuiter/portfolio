@@ -6,6 +6,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { getPersonSchema, getWebsiteSchema } from "@/lib/seo";
 import { A11yProvider } from "@/components/providers/A11yProvider";
+import { MotionProvider } from "@/components/providers/MotionProvider";
 import { AudioProvider } from "@/components/providers/AudioProvider";
 import { SearchProvider } from "@/components/providers/SearchProvider";
 import { TerminologyProvider } from "@/components/providers/TerminologyProvider";
@@ -112,7 +113,8 @@ export default function RootLayout({
           <TerminologyProvider>
             <SearchProvider>
               <A11yProvider>
-                <AudioProvider>
+                <MotionProvider>
+                  <AudioProvider>
                   <Navbar />
                   <main id="main-content" tabIndex={-1} className="flex-grow flex flex-col focus:outline-none">
                     {children}
@@ -122,7 +124,8 @@ export default function RootLayout({
                   <Analytics />
                   <SearchWrapper />
                 </AudioProvider>
-              </A11yProvider>
+              </MotionProvider>
+            </A11yProvider>
             </SearchProvider>
           </TerminologyProvider>
         </PersonaProvider>

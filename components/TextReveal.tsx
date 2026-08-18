@@ -10,6 +10,7 @@ import {
 import { motion, MotionValue, useScroll, useTransform } from "framer-motion"
 
 import { cn } from "@/lib/utils"
+import { useReducedMotion } from "@/hooks/useReducedMotion"
 
 interface TextRevealProps extends ComponentPropsWithoutRef<"div"> {
   children: string
@@ -61,7 +62,9 @@ interface WordProps {
 }
 
 const Word: FC<WordProps> = ({ children, progress, range }) => {
-  const color = useTransform(progress, range, ["#a1a1aa", "#ffffff"])
+  const prefersReducedMotion = useReducedMotion()
+  const animatedColor = useTransform(progress, range, ["#a1a1aa", "#ffffff"])
+  const color = prefersReducedMotion ? "#ffffff" : animatedColor
   return (
     <span className="xl:lg-3 relative mx-1 lg:mx-1.5">
       <motion.span
