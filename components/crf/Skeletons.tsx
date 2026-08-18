@@ -208,3 +208,54 @@ export const WorkflowWizardModalSkeleton: React.FC = () => {
     </div>
   );
 };
+
+export const CRFStudioSkeleton: React.FC = () => {
+  return (
+    <div className="w-full h-[800px] min-h-[600px] bg-zinc-950 rounded-3xl border border-zinc-800 overflow-hidden flex flex-col p-4 select-none animate-pulse" data-testid="crf-studio-skeleton">
+      {/* Studio Header Skeleton */}
+      <div className="flex items-center justify-between pb-4 border-b border-zinc-800/80">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-zinc-800" />
+          <div className="h-5 w-48 bg-zinc-800 rounded-md" />
+          <div className="h-4 w-24 bg-zinc-800/60 rounded-full" />
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-20 h-8 bg-zinc-800 rounded-xl" />
+          <div className="w-24 h-8 bg-zinc-800 rounded-xl" />
+          <div className="w-8 h-8 bg-zinc-800 rounded-xl" />
+        </div>
+      </div>
+      {/* Body Grid Skeleton */}
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 pt-4 overflow-hidden">
+        {/* Left Navigator Skeleton */}
+        <div className="lg:col-span-3 bg-zinc-900/50 rounded-2xl border border-zinc-800/60 p-4 space-y-3">
+          <div className="h-4 bg-zinc-800 rounded w-1/2" />
+          <div className="space-y-2 pt-2">
+            <div className="h-10 bg-zinc-800/60 rounded-xl" />
+            <div className="h-10 bg-zinc-800/60 rounded-xl" />
+            <div className="h-10 bg-zinc-800/60 rounded-xl" />
+          </div>
+        </div>
+        {/* Center Canvas Skeleton */}
+        <div className="lg:col-span-6 bg-zinc-900/30 rounded-2xl border border-zinc-800/60 p-6 flex flex-col justify-between">
+          <div className="space-y-4">
+            <div className="h-6 bg-zinc-800 rounded w-1/3" />
+            <div className="h-12 bg-zinc-800/60 rounded-xl" />
+            <div className="h-12 bg-zinc-800/60 rounded-xl" />
+            <div className="h-12 bg-zinc-800/60 rounded-xl" />
+          </div>
+          <div className="flex items-center justify-between text-xs font-mono text-zinc-500">
+            <span>LOADING CRF STUDIO WORKSPACE...</span>
+            <span>INITIALIZING PRESETS</span>
+          </div>
+        </div>
+        {/* Right Inspector Skeleton */}
+        <div className="lg:col-span-3 bg-zinc-900/50 rounded-2xl border border-zinc-800/60 p-4 space-y-3">
+          <div className="h-4 bg-zinc-800 rounded w-2/3" />
+          <div className="h-24 bg-zinc-800/40 rounded-xl" />
+          <div className="h-24 bg-zinc-800/40 rounded-xl" />
+        </div>
+      </div>
+    </div>
+  );
+};
