@@ -8,7 +8,7 @@
 
 > **validateLayoutHeight**(`calculated`, `actual`, `contextMessage?`): `void`
 
-Defined in: [lib/graphics-engine.ts:156](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L156)
+Defined in: [lib/graphics-engine.ts:211](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L211)
 
 Expose a layout validation utility that warns in non-production environments
 when calculated layout height and actual physical DOM measurement differs by more than 2px.

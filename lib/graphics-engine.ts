@@ -27,19 +27,62 @@ if (typeof window !== "undefined") {
   });
 }
 
+let stylesheetLoadedCache = false;
+
+/**
+ * Checks for the presence of key custom properties defined under the root style
+ * configuration to verify if the stylesheet has loaded.
+ */
+export function isStylesheetLoaded(rootStyle?: CSSStyleDeclaration): boolean {
+  if (!isBrowser()) {
+    return false;
+  }
+  if (typeof (globalThis as typeof globalThis & { __mockStylesheetLoaded?: boolean }).__mockStylesheetLoaded !== "undefined") {
+    return !!(globalThis as typeof globalThis & { __mockStylesheetLoaded?: boolean }).__mockStylesheetLoaded;
+  }
+  if (stylesheetLoadedCache) {
+    return true;
+  }
+  try {
+    const style = rootStyle || window.getComputedStyle(document.documentElement);
+    const gap = style.getPropertyValue("--layout-gap").trim();
+    const brandCyan = style.getPropertyValue("--brand-cyan").trim();
+    const fontSizeSm = style.getPropertyValue("--font-size-sm").trim();
+    const isLoaded = gap !== "" || brandCyan !== "" || fontSizeSm !== "";
+    if (isLoaded) {
+      stylesheetLoadedCache = true;
+    }
+    return isLoaded;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Resets the cached stylesheet loaded flag. Primarily used for unit testing.
+ */
+export function resetStylesheetLoadedCache(): void {
+  stylesheetLoadedCache = false;
+}
+
 /**
  * Resolves styled inline code chip extra width dynamically using Computed Style.
- * Returns fallback if run in SSR.
+ * Returns fallback if run in SSR or if stylesheet has not loaded yet.
  */
 export function resolveCodeChipExtraWidth(): number {
   if (!isBrowser()) {
     return 12; // Fallback for SSR
   }
 
+  // Intercept with cache lookups FIRST before stylesheetLoaded checks
   const cacheKey = "code-chip-extra-width";
   const cached = cssPropertyCache.get(cacheKey);
   if (cached !== undefined) {
     return Number(cached);
+  }
+
+  if (!isStylesheetLoaded()) {
+    return 12; // Return default fallback during unready stylesheet states without cache write
   }
 
   try {
@@ -81,14 +124,16 @@ export function isBrowser(): boolean {
 
 /**
  * Resolves font family variable dynamically using Computed Style.
- * Returns designManifest sans-serif fallback if run in SSR or variables are missing.
+ * Returns designManifest sans-serif fallback if run in SSR, unready stylesheet states, or variables are missing.
  */
 export function resolveFontFamily(variableName: string = "--font-inter"): string {
   if (!isBrowser()) {
-    return designManifest.typography.fonts.sans;
+    return variableName === "--font-mono"
+      ? designManifest.typography.fonts.mono
+      : designManifest.typography.fonts.sans;
   }
 
-  // Intercept repeated queries with the bounded cache
+  // Intercept repeated queries with the bounded cache FIRST
   const cached = cssPropertyCache.get(variableName);
   if (cached !== undefined) {
     return cached;
@@ -96,6 +141,11 @@ export function resolveFontFamily(variableName: string = "--font-inter"): string
 
   try {
     const rootStyle = window.getComputedStyle(document.documentElement);
+    if (!isStylesheetLoaded(rootStyle)) {
+      return variableName === "--font-mono"
+        ? designManifest.typography.fonts.mono
+        : designManifest.typography.fonts.sans;
+    }
     const rawFontFamily = rootStyle.getPropertyValue(variableName).trim();
     const resolved = rawFontFamily || designManifest.typography.fonts.sans;
     cssPropertyCache.set(variableName, resolved);
@@ -132,18 +182,23 @@ export function measureTextOffscreen({
   const fontString = `${fontSize}px ${fontFamily}`;
 
   const prepareKey = `${text}|${fontString}`;
-  let prepared = textPrepareCache.get(prepareKey);
+  const stylesheetLoaded = isStylesheetLoaded();
+  let prepared = stylesheetLoaded ? textPrepareCache.get(prepareKey) : undefined;
   if (!prepared) {
     prepared = prepare(text, fontString);
-    textPrepareCache.set(prepareKey, prepared);
+    if (stylesheetLoaded) {
+      textPrepareCache.set(prepareKey, prepared);
+    }
   }
 
   const flooredWidth = Math.floor(maxWidth);
   const cacheKey = `${text}|${fontString}|${flooredWidth}|${lineHeight}`;
-  let result = textLayoutCache.get(cacheKey);
+  let result = stylesheetLoaded ? textLayoutCache.get(cacheKey) : undefined;
   if (!result) {
     result = layout(prepared, flooredWidth, lineHeight);
-    textLayoutCache.set(cacheKey, result);
+    if (stylesheetLoaded) {
+      textLayoutCache.set(cacheKey, result);
+    }
   }
 
   return result;

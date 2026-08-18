@@ -36,6 +36,20 @@ Defined in: [lib/graphics-math.ts:25](https://github.com/fderuiter/portfolio/blo
 
 `LRUCache`\<`K`, `V`\>
 
+## Accessors
+
+### size
+
+#### Get Signature
+
+> **get** **size**(): `number`
+
+Defined in: [lib/graphics-math.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L47)
+
+##### Returns
+
+`number`
+
 ## Methods
 
 ### clear()

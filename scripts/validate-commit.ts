@@ -45,6 +45,18 @@ function main() {
   console.log("Starting Pre-Commit Regex Guards validation...");
 
   const stagedFiles = getStagedFiles();
+
+  // Block the inclusion of alternative lockfiles
+  const alternativeLockfiles = ["bun.lock", "bun.lockb", "yarn.lock", "pnpm-lock.yaml"];
+  for (const file of stagedFiles) {
+    const baseName = path.basename(file);
+    if (alternativeLockfiles.includes(baseName)) {
+      console.error(`\n❌ [BLOCKER] Alternative lockfile detected: ${file}`);
+      console.error("This repository has standardized on npm exclusively. Alternative lockfiles are strictly prohibited.\n");
+      process.exit(1);
+    }
+  }
+
   let hasViolation = false;
 
   for (const file of stagedFiles) {

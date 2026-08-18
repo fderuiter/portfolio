@@ -1518,6 +1518,9 @@ export function ProofWorkspaceClient() {
               {/* SVG Canvas Area (Responsive scroll wrapper) */}
               <div
                 ref={canvasWrapperRef}
+                tabIndex={0}
+                role="region"
+                aria-label="Proof workspace canvas"
                 onPointerMove={handleCanvasPointerMove}
                 onPointerUp={handleCanvasPointerUp}
                 className="relative w-full h-[420px] bg-gradient-to-b from-slate-950/60 via-slate-900 to-slate-950 select-none overflow-x-auto overflow-y-hidden"

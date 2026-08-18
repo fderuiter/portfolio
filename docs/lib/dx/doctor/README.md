@@ -21,6 +21,7 @@
 - [checkMigrationGuard](functions/checkMigrationGuard.md)
 - [checkNavbarHierarchy](functions/checkNavbarHierarchy.md)
 - [checkOpenApiParity](functions/checkOpenApiParity.md)
+- [checkPackageLockfile](functions/checkPackageLockfile.md)
 - [checkPageTopPadding](functions/checkPageTopPadding.md)
 - [checkProactiveDefectInterception](functions/checkProactiveDefectInterception.md)
 - [checkRouteIndexing](functions/checkRouteIndexing.md)

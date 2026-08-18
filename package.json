@@ -29,6 +29,7 @@
     "lint": "eslint",
     "check": "tsc --noEmit && npm run lint",
     "prepare": "husky",
+    "preinstall": "node scripts/enforce-npm.js",
     "pretest": "npx tsx scripts/generate-theme.ts && npx prisma generate",
     "test": "VITE_CONFIG_NATIVE_IGNORE_WARNING=1 vitest run",
     "test:ci": "VITE_CONFIG_NATIVE_IGNORE_WARNING=1 vitest run --coverage",
@@ -36,8 +37,16 @@
     "test:watch": "VITE_CONFIG_NATIVE_IGNORE_WARNING=1 vitest",
     "test:fuzz": "VITE_CONFIG_NATIVE_IGNORE_WARNING=1 vitest run __tests__/property-fuzz.test.ts",
     "test:mutation": "npx tsx scripts/run-mutation-tests.ts",
+    "audit:security": "npx tsx scripts/security-audit.ts",
     "probe:synthetic": "playwright test __tests__/e2e/synthetic-probes.spec.ts",
     "canary:eval": "npx tsx scripts/canary-analyzer.ts"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "overrides": {
+    "deepmerge-ts": "^8.0.1"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -53,8 +62,8 @@
   "dependencies": {
     "@chenglou/pretext": "^0.0.5",
     "@neondatabase/serverless": "^1.1.0",
-    "@prisma/adapter-neon": "^7.8.0",
-    "@prisma/client": "^7.7.0",
+    "@prisma/adapter-neon": "^7.9.1",
+    "@prisma/client": "^7.9.1",
     "@sentry/nextjs": "^10.55.0",
     "@tabler/icons-react": "^3.41.1",
     "@types/three": "^0.185.4",
@@ -65,10 +74,10 @@
     "clsx": "^2.1.1",
     "docx": "^9.7.1",
     "framer-motion": "^12.38.0",
-    "isomorphic-dompurify": "^3.19.0",
+    "isomorphic-dompurify": "^3.22.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
-    "next": "16.2.6",
+    "next": "16.3.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "tailwind-merge": "^3.5.0",
@@ -88,7 +97,7 @@
     "@types/react-dom": "^19",
     "@types/ws": "^8.18.1",
     "@vitest/coverage-v8": "^4.1.10",
-    "concurrently": "^9.2.1",
+    "concurrently": "^9.2.4",
     "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
@@ -97,7 +106,7 @@
     "jsdom": "^30.0.1",
     "lint-staged": "^17.0.5",
     "markdownlint-cli": "^0.49.1",
-    "prisma": "^7.7.0",
+    "prisma": "^7.9.1",
     "tailwindcss": "^4",
     "tsx": "^4.23.12",
     "typedoc": "^0.28.20",

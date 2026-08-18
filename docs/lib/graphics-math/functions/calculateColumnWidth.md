@@ -8,7 +8,7 @@
 
 > **calculateColumnWidth**(`containerWidth`, `colCount`, `gap`): `number`
 
-Defined in: [lib/graphics-math.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L70)
+Defined in: [lib/graphics-math.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L73)
 
 Calculates individual column width in masonry layout.
 
