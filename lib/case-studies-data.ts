@@ -893,6 +893,107 @@ def stage_and_commit_move(self, src: str, dest_dir: str) -> str:
     updated_at: new Date("2026-08-14T00:00:00Z"),
   },
   {
+    id: "canonical-14",
+    slug: "sonos-network-controller",
+    title: "Sonos Network Controller: Technical Breakdown & Portfolio Integration",
+    primary_language: "Python",
+    github_url: "https://github.com/fderuiter/sonos-network-controller",
+    published: true,
+    simulated_telemetry: false,
+    tags: "python, fastapi, upnp, sonos, htmx, asyncio, reverse-engineering, iot",
+    editorial_content: "A lightweight, local-network control plane and REST API for **Sonos** smart speakers that bypasses external cloud dependencies in favor of direct local network UPnP/SOAP orchestration. Built with **FastAPI**, **asyncio**, **aiohttp**, **HTMX**, and **TailwindCSS**.",
+    architectural_narrative: `<h3>1. Executive Summary & Value Proposition</h3>
+<p>Official proprietary speaker management applications often introduce heavy resource overhead, vendor lock-in, cloud dependencies, and sluggish user interfaces. This repository provides a lightweight, local-network control plane and REST API for Sonos smart speakers, bypassing external cloud intermediaries in favor of direct local network orchestration.</p>
+<p><strong>Core Technical Highlight:</strong> Engineered a non-blocking, asynchronous UPnP/SOAP protocol client stack using aiohttp and asyncio, backed by an extensible registry pattern and dynamic XML schema parsing (handling complex nested XML, DIDL-Lite metadata, and UPnP SOAP faults) to manage multi-room audio, topology sync, and real-time state manipulation.</p>
+
+<h3>2. Architecture & Patterns</h3>
+<ul>
+  <li><strong>Layered Service-Oriented Architecture (SOA):</strong> Segregates lower-level SOAP transport primitives (<code>BaseSonosClient</code>) from domain-specific UPnP services (<code>AVTransportClient</code>, <code>RenderingControlClient</code>, <code>ZoneGroupTopologyClient</code>) and business domain orchestration services (<code>RadioService</code>, <code>SonosZoneService</code>, <code>AlarmService</code>).</li>
+  <li><strong>Command / Registry Pattern:</strong> Centralized dispatch via <code>ACTION_REGISTRY</code> mapping string commands directly to asynchronous lambdas and service methods, eliminating verbose endpoint routing trees.</li>
+  <li><strong>Hypermedia-Driven Single Page Architecture (HDA):</strong> HTMX-powered frontend integration with server-rendered Jinja2 HTML fragments, achieving dynamic UI reactivity without the bundle size and state synchronization overhead of heavy JavaScript frameworks.</li>
+</ul>
+
+<h3>3. High-Impact Featured Code Snippets</h3>
+
+<h4>Dynamic SOAP Invocation & Robust XML Extraction</h4>
+<pre><code class="language-python">
+async def _invoke_soap_request(
+    self, path: str, service_urn: str, action: str, body_content: str = ""
+) -> str:
+    url = f"http://{self.ip}:{self.port}{path}"
+    soap_action = f"{service_urn}#{action}"
+    soap_body = (
+        '<?xml version="1.0"?>'
+        '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" '
+        's:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">'
+        "<s:Body>"
+        f'<u:{action} xmlns:u="{service_urn}">'
+        f"{body_content}"
+        f"</u:{action}>"
+        "</s:Body>"
+        "</s:Envelope>"
+    )
+    headers = {
+        "SOAPAction": f'"{soap_action}"',
+        "Content-Type": "text/xml; charset=utf-8",
+        "Accept-Encoding": "gzip",
+    }
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers=headers, data=soap_body.encode("utf-8")) as response:
+            content = await response.text()
+            if response.status >= 400:
+                response.raise_for_status()
+            return content
+</code></pre>
+
+<h4>Declarative Dynamic Command Routing</h4>
+<pre><code class="language-python">
+ACTION_REGISTRY = {
+    "setvolume": lambda ip, value: get_rendering_control_client(ip).set_volume(int(value)),
+    "getvolume": lambda ip, value=None: get_rendering_control_client(ip).get_volume(),
+    "play": lambda ip, value=None: get_av_transport_client(ip).play(),
+    "pause": lambda ip, value=None: get_av_transport_client(ip).pause(),
+    "seek": lambda ip, value: get_av_transport_client(ip).seek(value),
+    "settrack": lambda ip, value: get_av_transport_client(ip).set_av_transport_uri(value),
+    "status": lambda ip, value=None: get_av_transport_client(ip).get_transport_info(),
+}
+</code></pre>
+
+<h3>4. System Design & Routing Architecture</h3>
+<pre><code class="language-mermaid">
+flowchart TD
+    Client[Browser / HTMX Client] -->|HTTP / Form Data| Router[FastAPI Application Gateway]
+
+    subgraph Routing & Middleware
+        Router --> ErrorDecorator[@api_error_handler Decorator]
+        Router --> Registry[Action Registry Dispatcher]
+    end
+
+    subgraph Service Layer
+        Registry --> AVService[AVTransport Client]
+        Registry --> RenderService[RenderingControl Client]
+        Router --> ZoneService[Zone & Topology Service]
+        Router --> RadioService[Radio Service / pyradios]
+    end
+
+    subgraph Hardware Integration
+        AVService -->|SOAP / XML POST| SonosHW[Sonos Speaker - Port 1400]
+        RenderService -->|SOAP / XML POST| SonosHW
+        ZoneService -->|SOAP / XML POST| SonosHW
+        Router -->|SSDP Multicast / UDP 1900| SonosHW
+    end
+</code></pre>
+
+<h3>5. Lessons Learned & Trade-Offs</h3>
+<ul>
+  <li><strong>Direct UPnP/SOAP Implementation vs. Heavy 3rd-Party SDKs:</strong> Implemented a bespoke, lightweight asynchronous client over aiohttp to ensure strict async event-loop compatibility, predictable error boundaries, and minimal container image size.</li>
+  <li><strong>Server-Driven HTMX Swaps vs. Client-Side SPA:</strong> Traded client-side JavaScript state machines for HTMX polling (hx-trigger="every 2s") and partial DOM updates, drastically lowering memory footprint for low-power edge hosting (e.g., Raspberry Pi).</li>
+  <li><strong>SSDP Multicast Discovery with Nmap Fallback:</strong> Leveraged UDP SSDP discovery (M-SEARCH) for standard zero-conf resolution, with optional raw socket/nmap port scanning on port 1400 for hardened local networks.</li>
+</ul>`,
+    created_at: new Date("2026-03-12T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
     id: "canonical-13",
     slug: "clintrials",
     title: "clintrials: Adaptive Clinical Trial Design & Biostatistical WebAssembly Engine",
