@@ -1,17 +1,15 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor, act, cleanup } from "@testing-library/react";
+import { render, screen, fireEvent, act, cleanup } from "@testing-library/react";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   useOfflineQueue,
   enqueueOfflineRequest,
-  dequeueOfflineRequest,
   clearOfflineQueue,
   getOfflineQueue,
   getOfflineQueueLength,
   flushOfflineQueue,
 } from "@/hooks/useOfflineQueue";
 import { CaseStudyFeedbackSection } from "@/components/CaseStudyFeedbackSection";
-import { useTelemetry } from "@/hooks/useTelemetry";
 
 // Standard mock storage implementation
 class MockStorage {
