@@ -5,6 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import {
+  triggerHapticFeedback,
+  triggerAudioFeedback,
+  isolateGesture,
+} from "@/lib/arcade/virtual-input-bridge";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { FullscreenButton } from "@/components/arcade/FullscreenButton";
 import { DynamicTabletOrientationHint as TabletOrientationHint } from "@/components/arcade/DynamicTabletOrientationHint";
@@ -2367,14 +2372,20 @@ export const WorkingWithDuck: React.FC = () => {
         {/* --- MOBILE VIEWPORT CONTROL DECK (<md) --- */}
         <div className="flex md:hidden flex-col gap-2">
           {/* Segmented Switcher Tabs */}
-          <div className="grid grid-cols-3 p-1 rounded-2xl bg-zinc-900/90 border border-zinc-800 gap-1 text-xs font-bold">
+          <div className="grid grid-cols-3 p-1 rounded-2xl bg-zinc-900/60 border border-zinc-800 gap-1 text-xs font-bold backdrop-blur-md">
             <button
-              onClick={() => setMobileTab("toys")}
-              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[40px] cursor-pointer ${
+              onClick={(e) => {
+                isolateGesture(e);
+                triggerHapticFeedback(10);
+                triggerAudioFeedback(750, 0.02);
+                setMobileTab("toys");
+              }}
+              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[44px] min-w-[44px] cursor-pointer touch-none ${
                 mobileTab === "toys"
                   ? "bg-brand-cyan text-black shadow-md font-bold"
                   : "text-zinc-400 hover:text-white"
               }`}
+              style={{ touchAction: "none" }}
             >
               <span>🧸 Toys</span>
               {uiState.duck.state === "NO_TAKE_THROW" && (
@@ -2383,12 +2394,18 @@ export const WorkingWithDuck: React.FC = () => {
             </button>
 
             <button
-              onClick={() => setMobileTab("tricks")}
-              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[40px] cursor-pointer ${
+              onClick={(e) => {
+                isolateGesture(e);
+                triggerHapticFeedback(10);
+                triggerAudioFeedback(750, 0.02);
+                setMobileTab("tricks");
+              }}
+              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[44px] min-w-[44px] cursor-pointer touch-none ${
                 mobileTab === "tricks"
                   ? "bg-brand-cyan text-black shadow-md font-bold"
                   : "text-zinc-400 hover:text-white"
               }`}
+              style={{ touchAction: "none" }}
             >
               <span>✨ Tricks</span>
               {uiState.excitement > 80 && (
@@ -2397,12 +2414,18 @@ export const WorkingWithDuck: React.FC = () => {
             </button>
 
             <button
-              onClick={() => setMobileTab("actions")}
-              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[40px] cursor-pointer ${
+              onClick={(e) => {
+                isolateGesture(e);
+                triggerHapticFeedback(10);
+                triggerAudioFeedback(750, 0.02);
+                setMobileTab("actions");
+              }}
+              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[44px] min-w-[44px] cursor-pointer touch-none ${
                 mobileTab === "actions"
                   ? "bg-brand-cyan text-black shadow-md font-bold"
                   : "text-zinc-400 hover:text-white"
               }`}
+              style={{ touchAction: "none" }}
             >
               <span>⚡ Actions</span>
               {(uiState.inDogPark || uiState.inBathtub || uiState.isMuddy) && (

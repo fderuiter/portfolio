@@ -2,6 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 import {
+  triggerHapticFeedback,
+  triggerAudioFeedback,
+  isolateGesture,
+} from "@/lib/arcade/virtual-input-bridge";
+import {
   IconArrowUp,
   IconArrowDown,
   IconArrowLeft,
@@ -25,7 +30,9 @@ export const VirtualDPad: React.FC<VirtualDPadProps> = ({
     e: React.SyntheticEvent,
     direction: "up" | "down" | "left" | "right"
   ) => {
-    if (e.cancelable) e.preventDefault();
+    isolateGesture(e);
+    triggerHapticFeedback(15);
+    triggerAudioFeedback(880, 0.02);
     onDirectionPress?.(direction);
   };
 
@@ -33,7 +40,7 @@ export const VirtualDPad: React.FC<VirtualDPadProps> = ({
     e: React.SyntheticEvent,
     direction: "up" | "down" | "left" | "right"
   ) => {
-    if (e.cancelable) e.preventDefault();
+    isolateGesture(e);
     onDirectionRelease?.(direction);
   };
 
@@ -41,7 +48,8 @@ export const VirtualDPad: React.FC<VirtualDPadProps> = ({
     <div
       role="group"
       aria-label="Virtual D-Pad"
-      className={`relative w-32 h-32 grid grid-cols-3 grid-rows-3 gap-1 p-1 rounded-2xl bg-zinc-900/70 border border-zinc-800/80 backdrop-blur-md shadow-lg select-none touch-none ${className}`}
+      className={`relative w-36 h-36 grid grid-cols-3 grid-rows-3 gap-1 p-1 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 backdrop-blur-md shadow-lg select-none touch-none ${className}`}
+      style={{ touchAction: "none" }}
     >
       <div />
       <button
@@ -57,9 +65,9 @@ export const VirtualDPad: React.FC<VirtualDPadProps> = ({
         onPointerUp={(e) => handleRelease(e, "up")}
         onPointerLeave={(e) => handleRelease(e, "up")}
         onPointerCancel={(e) => handleRelease(e, "up")}
-        className="flex items-center justify-center rounded-xl bg-zinc-800/80 active:bg-brand-cyan/40 active:text-brand-cyan border border-zinc-700 text-zinc-300 active:scale-95 transition-transform"
+        className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-zinc-800/80 active:bg-brand-cyan/40 active:text-brand-cyan border border-zinc-700 text-zinc-300 active:scale-95 transition-transform cursor-pointer"
       >
-        <IconArrowUp className="w-5 h-5" />
+        <IconArrowUp className="w-5 h-5 pointer-events-none" />
       </button>
       <div />
       <button
@@ -75,9 +83,9 @@ export const VirtualDPad: React.FC<VirtualDPadProps> = ({
         onPointerUp={(e) => handleRelease(e, "left")}
         onPointerLeave={(e) => handleRelease(e, "left")}
         onPointerCancel={(e) => handleRelease(e, "left")}
-        className="flex items-center justify-center rounded-xl bg-zinc-800/80 active:bg-brand-cyan/40 active:text-brand-cyan border border-zinc-700 text-zinc-300 active:scale-95 transition-transform"
+        className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-zinc-800/80 active:bg-brand-cyan/40 active:text-brand-cyan border border-zinc-700 text-zinc-300 active:scale-95 transition-transform cursor-pointer"
       >
-        <IconArrowLeft className="w-5 h-5" />
+        <IconArrowLeft className="w-5 h-5 pointer-events-none" />
       </button>
       <div className="flex items-center justify-center rounded-lg bg-zinc-950/60 border border-zinc-800">
         <div className="w-2 h-2 rounded-full bg-zinc-600" />
@@ -95,9 +103,9 @@ export const VirtualDPad: React.FC<VirtualDPadProps> = ({
         onPointerUp={(e) => handleRelease(e, "right")}
         onPointerLeave={(e) => handleRelease(e, "right")}
         onPointerCancel={(e) => handleRelease(e, "right")}
-        className="flex items-center justify-center rounded-xl bg-zinc-800/80 active:bg-brand-cyan/40 active:text-brand-cyan border border-zinc-700 text-zinc-300 active:scale-95 transition-transform"
+        className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-zinc-800/80 active:bg-brand-cyan/40 active:text-brand-cyan border border-zinc-700 text-zinc-300 active:scale-95 transition-transform cursor-pointer"
       >
-        <IconArrowRight className="w-5 h-5" />
+        <IconArrowRight className="w-5 h-5 pointer-events-none" />
       </button>
       <div />
       <button
@@ -113,9 +121,9 @@ export const VirtualDPad: React.FC<VirtualDPadProps> = ({
         onPointerUp={(e) => handleRelease(e, "down")}
         onPointerLeave={(e) => handleRelease(e, "down")}
         onPointerCancel={(e) => handleRelease(e, "down")}
-        className="flex items-center justify-center rounded-xl bg-zinc-800/80 active:bg-brand-cyan/40 active:text-brand-cyan border border-zinc-700 text-zinc-300 active:scale-95 transition-transform"
+        className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-zinc-800/80 active:bg-brand-cyan/40 active:text-brand-cyan border border-zinc-700 text-zinc-300 active:scale-95 transition-transform cursor-pointer"
       >
-        <IconArrowDown className="w-5 h-5" />
+        <IconArrowDown className="w-5 h-5 pointer-events-none" />
       </button>
       <div />
     </div>
@@ -182,7 +190,9 @@ export const VirtualGamepad: React.FC<VirtualGamepadProps> = ({
     e: React.SyntheticEvent,
     callback?: () => void
   ) => {
-    if (e.cancelable) e.preventDefault();
+    isolateGesture(e);
+    triggerHapticFeedback(15);
+    triggerAudioFeedback(950, 0.02);
     callback?.();
   };
 
@@ -190,7 +200,8 @@ export const VirtualGamepad: React.FC<VirtualGamepadProps> = ({
     <div
       role="group"
       aria-label="Virtual Gamepad Touch Controls"
-      className={`select-none touch-none pointer-events-auto flex items-end justify-between gap-4 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent ${className}`}
+      className={`select-none touch-none pointer-events-auto flex items-end justify-between gap-4 p-3 bg-gradient-to-t from-black/60 via-black/30 to-transparent ${className}`}
+      style={{ touchAction: "none" }}
     >
       {/* 4-Way D-Pad on Left */}
       <VirtualDPad
@@ -200,13 +211,18 @@ export const VirtualGamepad: React.FC<VirtualGamepadProps> = ({
 
       {/* Center Weapon Selector (if provided) */}
       {weaponLabels && weaponLabels.length > 0 && onWeaponSelect && (
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-zinc-900/80 border border-zinc-800 backdrop-blur-md">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-zinc-900/60 border border-zinc-800 backdrop-blur-md">
           {weaponLabels.map((label, idx) => (
             <button
               key={label}
               type="button"
-              onClick={() => onWeaponSelect(idx)}
-              className={`px-2.5 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-all ${
+              onClick={(e) => {
+                isolateGesture(e);
+                triggerHapticFeedback(10);
+                triggerAudioFeedback(750, 0.02);
+                onWeaponSelect(idx);
+              }}
+              className={`min-w-[44px] min-h-[44px] px-3 py-2 rounded-lg text-[10px] font-mono font-bold transition-all cursor-pointer flex items-center justify-center ${
                 selectedWeapon === idx
                   ? "bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/40 shadow-[0_0_10px_rgba(34,211,238,0.2)]"
                   : "bg-zinc-800/60 text-zinc-400 border border-zinc-700/60"
@@ -233,10 +249,10 @@ export const VirtualGamepad: React.FC<VirtualGamepadProps> = ({
             onPointerDown={(e) => handleAction(e, onActionBPress)}
             onPointerUp={(e) => handleAction(e, onActionBRelease)}
             onPointerLeave={(e) => handleAction(e, onActionBRelease)}
-            className="flex flex-col items-center justify-center w-14 h-14 rounded-2xl bg-rose-500/20 active:bg-rose-500/40 border border-rose-500/40 text-rose-300 active:scale-95 transition-transform shadow-lg"
+            className="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] w-14 h-14 rounded-2xl bg-rose-500/20 active:bg-rose-500/40 border border-rose-500/40 text-rose-300 active:scale-95 transition-transform shadow-lg cursor-pointer"
           >
-            <IconFlask className="w-5 h-5 mb-0.5" />
-            <span className="text-[9px] font-mono font-bold uppercase">{actionBLabel}</span>
+            <IconFlask className="w-5 h-5 mb-0.5 pointer-events-none" />
+            <span className="text-[9px] font-mono font-bold uppercase pointer-events-none">{actionBLabel}</span>
           </button>
         )}
 
@@ -253,10 +269,10 @@ export const VirtualGamepad: React.FC<VirtualGamepadProps> = ({
             onPointerDown={(e) => handleAction(e, onActionAPress)}
             onPointerUp={(e) => handleAction(e, onActionARelease)}
             onPointerLeave={(e) => handleAction(e, onActionARelease)}
-            className="flex flex-col items-center justify-center w-16 h-16 rounded-2xl bg-brand-cyan/20 active:bg-brand-cyan/40 border border-brand-cyan/40 text-brand-cyan active:scale-95 transition-transform shadow-lg"
+            className="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] w-16 h-16 rounded-2xl bg-brand-cyan/20 active:bg-brand-cyan/40 border border-brand-cyan/40 text-brand-cyan active:scale-95 transition-transform shadow-lg cursor-pointer"
           >
-            <IconSword className="w-6 h-6 mb-0.5" />
-            <span className="text-[10px] font-mono font-bold uppercase">{actionALabel}</span>
+            <IconSword className="w-6 h-6 mb-0.5 pointer-events-none" />
+            <span className="text-[10px] font-mono font-bold uppercase pointer-events-none">{actionALabel}</span>
           </button>
         )}
       </div>

@@ -1692,8 +1692,25 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                 : isExpanded
                 ? "w-[360px] h-[216px]"
                 : "w-[240px] h-[144px]"
-            } rounded-lg border border-neutral-900/60 bg-neutral-950 cursor-crosshair`}
+            } rounded-lg border border-neutral-900/60 bg-neutral-950 cursor-crosshair touch-none`}
+            style={{ touchAction: "none" }}
           />
+
+          {/* Floating Translucent HUD Overlay */}
+          {gameStatus === "playing" && (
+            <div className="absolute bottom-1.5 left-1.5 right-1.5 z-20 pointer-events-none flex items-end justify-between gap-1">
+              <VirtualDPad
+                onDirectionPress={handleDirectionalMove}
+                onActionAPress={() => handleFireWeapon("emp_blast")}
+                onActionBPress={cycleWeapon}
+                actionALabel="EMP"
+                actionASubtitle="SURGE"
+                actionBLabel="EXPLOIT"
+                actionBSubtitle={activeWeaponId.substring(0, 4).toUpperCase()}
+                className="pointer-events-auto bg-zinc-950/60 backdrop-blur-md p-1.5 scale-90 sm:scale-100 origin-bottom-left max-w-[280px]"
+              />
+            </div>
+          )}
 
           {/* Victory Overlay */}
           {gameStatus === "victory" && (
@@ -2042,20 +2059,6 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
             <div className="text-neutral-500 uppercase tracking-wider hidden md:block">
               WASD / ARROWS · C: CRT SCANLINES
             </div>
-          </div>
-
-          {/* Enhanced Touch D-Pad for Mobile & Tablet */}
-          <div className="w-full pt-1.5 flex flex-col items-center">
-            <VirtualDPad
-              onDirectionPress={handleDirectionalMove}
-              onActionAPress={() => handleFireWeapon("emp_blast")}
-              onActionBPress={cycleWeapon}
-              actionALabel="EMP"
-              actionASubtitle="SURGE"
-              actionBLabel="EXPLOIT"
-              actionBSubtitle={activeWeaponId.substring(0, 4).toUpperCase()}
-              className="w-full max-w-sm py-2 px-3"
-            />
           </div>
         </div>
       </div>

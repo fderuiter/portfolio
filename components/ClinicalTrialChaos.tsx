@@ -9,6 +9,7 @@ import React, {
   useMemo,
 } from "react";
 import Link from "next/link";
+import { VirtualGamepad } from "@/components/arcade/VirtualGamepad";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import {
@@ -1397,6 +1398,48 @@ export const ClinicalTrialChaos: React.FC = () => {
               style={{ touchAction: "none" }}
               className={`w-full ${isFullscreen ? "h-auto max-h-[300px] aspect-[760/200] object-contain" : "h-[180px]"} block cursor-pointer`}
             />
+
+            {/* Translucent Floating Virtual Gamepad HUD Overlay for Mobile */}
+            {playState === "playing" && (
+              <div className="absolute bottom-1.5 left-1.5 right-1.5 z-20 pointer-events-none flex items-end justify-between gap-1.5">
+                <VirtualGamepad
+                  forceVisible={false}
+                  onDirectionPress={(dir) => {
+                    if (dir === "left" || dir === "up") {
+                      if (conveyorSubjects.length > 0) {
+                        const currentIdx = conveyorSubjects.findIndex((s) => s.id === selectedSubjectId);
+                        const nextIdx = currentIdx > 0 ? currentIdx - 1 : conveyorSubjects.length - 1;
+                        setSelectedSubjectId(conveyorSubjects[nextIdx].id);
+                      }
+                    } else if (dir === "right" || dir === "down") {
+                      if (conveyorSubjects.length > 0) {
+                        const currentIdx = conveyorSubjects.findIndex((s) => s.id === selectedSubjectId);
+                        const nextIdx = currentIdx < conveyorSubjects.length - 1 ? currentIdx + 1 : 0;
+                        setSelectedSubjectId(conveyorSubjects[nextIdx].id);
+                      }
+                    }
+                  }}
+                  onActionAPress={() => {
+                    handleInitiateSubmission(targetRoutingStation);
+                  }}
+                  onActionBPress={() => {
+                    const domains: CDISCDomain[] = ["DM", "VS", "AE", "LB"];
+                    const currIdx = domains.indexOf(targetRoutingStation);
+                    const nextDomain = domains[(currIdx + 1) % domains.length];
+                    setTargetRoutingStation(nextDomain);
+                  }}
+                  actionALabel="ROUTE"
+                  actionBLabel="DOMAIN"
+                  weaponLabels={["DM", "VS", "AE", "LB"]}
+                  selectedWeapon={["DM", "VS", "AE", "LB"].indexOf(targetRoutingStation)}
+                  onWeaponSelect={(idx) => {
+                    const domains: CDISCDomain[] = ["DM", "VS", "AE", "LB"];
+                    if (domains[idx]) setTargetRoutingStation(domains[idx]);
+                  }}
+                  className="w-full pointer-events-auto bg-zinc-950/60 backdrop-blur-md rounded-2xl p-1.5"
+                />
+              </div>
+            )}
 
             {/* Overlays for Idle / Paused / Game Over / Cleared */}
             {playState !== "playing" && (

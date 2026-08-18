@@ -50,6 +50,12 @@ Re-exports [getOrCreatePhosphorPattern](crt-pipeline/functions/getOrCreatePhosph
 
 ***
 
+### isolateGesture
+
+Re-exports [isolateGesture](virtual-input-bridge/functions/isolateGesture.md)
+
+***
+
 ### isReducedMotionPreferred
 
 Re-exports [isReducedMotionPreferred](crt-pipeline/functions/isReducedMotionPreferred.md)
@@ -77,3 +83,39 @@ Re-exports [renderCRTEffects](crt-pipeline/functions/renderCRTEffects.md)
 ### saveCRTCalibration
 
 Re-exports [saveCRTCalibration](crt-pipeline/functions/saveCRTCalibration.md)
+
+***
+
+### triggerAudioFeedback
+
+Re-exports [triggerAudioFeedback](virtual-input-bridge/functions/triggerAudioFeedback.md)
+
+***
+
+### triggerHapticFeedback
+
+Re-exports [triggerHapticFeedback](virtual-input-bridge/functions/triggerHapticFeedback.md)
+
+***
+
+### useVirtualInputBridge
+
+Re-exports [useVirtualInputBridge](virtual-input-bridge/functions/useVirtualInputBridge.md)
+
+***
+
+### VirtualDirection
+
+Re-exports [VirtualDirection](virtual-input-bridge/type-aliases/VirtualDirection.md)
+
+***
+
+### VirtualInputBridgeOptions
+
+Re-exports [VirtualInputBridgeOptions](virtual-input-bridge/interfaces/VirtualInputBridgeOptions.md)
+
+***
+
+### VirtualInputState
+
+Re-exports [VirtualInputState](virtual-input-bridge/interfaces/VirtualInputState.md)

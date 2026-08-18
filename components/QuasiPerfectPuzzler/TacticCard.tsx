@@ -3,6 +3,11 @@
 import React from "react";
 import { motion, PanInfo } from "framer-motion";
 import { TacticDef } from "@/lib/quasi-perfect/types";
+import {
+  triggerHapticFeedback,
+  triggerAudioFeedback,
+  isolateGesture,
+} from "@/lib/arcade/virtual-input-bridge";
 
 interface TacticCardProps {
   tactic: TacticDef;
@@ -39,7 +44,8 @@ export const TacticCard: React.FC<TacticCardProps> = ({
       onDragEnd={onDragEnd}
       data-tactic-id={tactic.id}
       data-tactic-arg={hypothesisTarget}
-      className={`relative cursor-grab active:cursor-grabbing rounded-xl border p-3 font-mono transition-colors duration-150 select-none ${
+      style={{ touchAction: "none" }}
+      className={`relative cursor-grab active:cursor-grabbing rounded-xl border p-3 font-mono transition-colors duration-150 select-none min-h-[44px] min-w-[44px] touch-none ${
         disabled
           ? "border-zinc-800/60 bg-zinc-950/40 opacity-40 cursor-not-allowed"
           : isSorry
@@ -49,7 +55,9 @@ export const TacticCard: React.FC<TacticCardProps> = ({
           : "border-zinc-700 bg-zinc-900/80 text-zinc-100 hover:border-brand-cyan/60 hover:bg-zinc-850"
       }`}
       onClick={(e) => {
-        e.stopPropagation();
+        isolateGesture(e);
+        triggerHapticFeedback(15);
+        triggerAudioFeedback(880, 0.02);
         if (!disabled) onSelect();
       }}
       role="button"
@@ -57,6 +65,8 @@ export const TacticCard: React.FC<TacticCardProps> = ({
       onKeyDown={(e) => {
         if ((e.key === "Enter" || e.key === " ") && !disabled) {
           e.preventDefault();
+          triggerHapticFeedback(15);
+          triggerAudioFeedback(880, 0.02);
           onSelect();
         }
       }}

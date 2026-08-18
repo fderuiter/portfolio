@@ -16,6 +16,11 @@ import { useFullscreen } from "@/hooks/useFullscreen";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import {
+  triggerHapticFeedback,
+  triggerAudioFeedback,
+  isolateGesture,
+} from "@/lib/arcade/virtual-input-bridge";
+import {
   DeviceTarget,
   DEVICE_PROFILES,
   createInitialState,
@@ -430,12 +435,15 @@ export const GarminWatchSimulator: React.FC = () => {
         {/* 1. LIGHT BUTTON (Top Left) */}
         <button
           onClick={(e) => {
-            e.stopPropagation();
+            isolateGesture(e);
+            triggerHapticFeedback(15);
+            triggerAudioFeedback(700, 0.02);
             handleToggleLight();
             containerRef.current?.focus({ preventScroll: true });
           }}
           title="Backlight (L): +0.3%/s Battery"
-          className="absolute -left-3.5 top-[24%] px-2 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-amber-500 hover:to-amber-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
+          className="absolute -left-4 top-[22%] min-w-[44px] min-h-[44px] px-2 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-amber-500 hover:to-amber-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center justify-center touch-none"
+          style={{ touchAction: "none" }}
         >
           <span>LIGHT</span>
           <span className="text-[6px] text-amber-300/80">[L]</span>
@@ -444,12 +452,15 @@ export const GarminWatchSimulator: React.FC = () => {
         {/* 2. UP BUTTON (Middle Left) */}
         <button
           onClick={(e) => {
-            e.stopPropagation();
+            isolateGesture(e);
+            triggerHapticFeedback(15);
+            triggerAudioFeedback(880, 0.02);
             handleJump();
             containerRef.current?.focus({ preventScroll: true });
           }}
           title="Jump (ArrowUp / UP)"
-          className="absolute -left-3.5 top-[46%] px-2.5 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
+          className="absolute -left-4 top-[44%] min-w-[44px] min-h-[44px] px-2.5 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center justify-center touch-none"
+          style={{ touchAction: "none" }}
         >
           <span>UP</span>
           <span className="text-[6px] text-cyan-300/80">[▲]</span>
@@ -458,12 +469,15 @@ export const GarminWatchSimulator: React.FC = () => {
         {/* 3. DOWN BUTTON (Bottom Left) */}
         <button
           onClick={(e) => {
-            e.stopPropagation();
+            isolateGesture(e);
+            triggerHapticFeedback(15);
+            triggerAudioFeedback(600, 0.02);
             handleJettison();
             containerRef.current?.focus({ preventScroll: true });
           }}
           title="Jettison Variable (ArrowDown / DOWN)"
-          className="absolute -left-3.5 top-[68%] px-2 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-rose-500 hover:to-rose-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
+          className="absolute -left-4 top-[66%] min-w-[44px] min-h-[44px] px-2 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-rose-500 hover:to-rose-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center justify-center touch-none"
+          style={{ touchAction: "none" }}
         >
           <span>DOWN</span>
           <span className="text-[6px] text-rose-300/80">[▼] POP</span>
@@ -472,12 +486,15 @@ export const GarminWatchSimulator: React.FC = () => {
         {/* 4. START/STOP BUTTON (Top Right) */}
         <button
           onClick={(e) => {
-            e.stopPropagation();
+            isolateGesture(e);
+            triggerHapticFeedback(20);
+            triggerAudioFeedback(1050, 0.03);
             handleStartStop();
             containerRef.current?.focus({ preventScroll: true });
           }}
           title="Start / Pause / Restart (Enter / Space)"
-          className="absolute -right-3.5 top-[30%] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-emerald-500 hover:to-emerald-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
+          className="absolute -right-4 top-[28%] min-w-[44px] min-h-[44px] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-emerald-500 hover:to-emerald-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center justify-center touch-none"
+          style={{ touchAction: "none" }}
         >
           <span>START</span>
           <span className="text-[6px] text-emerald-300/80">[ENTER]</span>
@@ -486,12 +503,15 @@ export const GarminWatchSimulator: React.FC = () => {
         {/* 5. BACK/GC BUTTON (Bottom Right) */}
         <button
           onClick={(e) => {
-            e.stopPropagation();
+            isolateGesture(e);
+            triggerHapticFeedback(20);
+            triggerAudioFeedback(950, 0.03);
             handleForceGc();
             containerRef.current?.focus({ preventScroll: true });
           }}
           title="Force Garbage Collection (Backspace / Escape): 500ms Freeze"
-          className="absolute -right-3.5 top-[62%] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-purple-500 hover:to-purple-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
+          className="absolute -right-4 top-[60%] min-w-[44px] min-h-[44px] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-purple-500 hover:to-purple-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center justify-center touch-none"
+          style={{ touchAction: "none" }}
         >
           <span>BACK</span>
           <span className="text-[6px] text-purple-300/80">[GC]</span>
@@ -586,8 +606,14 @@ export const GarminWatchSimulator: React.FC = () => {
           {/* Overheat Fog Quick Wipe Floating Badge */}
           {gameState.fogLevel > 0.35 && gameState.gameState === "playing" && (
             <button
-              onClick={() => handleWipeFog()}
-              className="absolute top-16 right-12 z-30 px-2 py-0.5 bg-amber-500/90 text-black font-bold text-[8px] font-mono rounded-full border border-amber-300 shadow-md animate-bounce cursor-pointer"
+              onClick={(e) => {
+                isolateGesture(e);
+                triggerHapticFeedback(15);
+                triggerAudioFeedback(1100, 0.02);
+                handleWipeFog();
+              }}
+              className="absolute top-12 right-8 z-30 min-w-[44px] min-h-[44px] px-3 py-2 bg-amber-500/90 text-black font-bold text-xs font-mono rounded-full border border-amber-300 shadow-md animate-bounce cursor-pointer flex items-center justify-center touch-none"
+              style={{ touchAction: "none" }}
             >
               WIPE [W]
             </button>

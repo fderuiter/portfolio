@@ -21,6 +21,7 @@ import {
 } from "@tabler/icons-react";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { FullscreenButton } from "@/components/arcade/FullscreenButton";
+import { VirtualGamepad } from "@/components/arcade/VirtualGamepad";
 import { DynamicTabletOrientationHint as TabletOrientationHint } from "@/components/arcade/DynamicTabletOrientationHint";
 import { useFullscreen } from "@/hooks/useFullscreen";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
@@ -1655,7 +1656,42 @@ export const LaserLoon: React.FC = () => {
               ? "max-h-[calc(100vh-140px)] max-w-full aspect-[768/420] object-contain block cursor-crosshair touch-none my-auto"
               : "w-full h-full block cursor-crosshair touch-none"
           }
+          style={{ touchAction: "none" }}
         />
+
+        {/* Translucent Floating Virtual Gamepad HUD Overlay for Mobile */}
+        {gameState === "playing" && (
+          <div className="absolute bottom-2 left-2 right-2 z-20 pointer-events-none flex items-end justify-between gap-2">
+            <VirtualGamepad
+              forceVisible={false}
+              onDirectionPress={(dir) => {
+                const step = 25;
+                if (dir === "up") loonPosRef.current.targetY = Math.max(40, loonPosRef.current.targetY - step);
+                if (dir === "down") loonPosRef.current.targetY = Math.min(380, loonPosRef.current.targetY + step);
+                if (dir === "left") loonPosRef.current.targetX = Math.max(40, loonPosRef.current.targetX - step);
+                if (dir === "right") loonPosRef.current.targetX = Math.min(380, loonPosRef.current.targetX + step);
+              }}
+              onActionAPress={() => {
+                isFiringRef.current = true;
+              }}
+              onActionARelease={() => {
+                isFiringRef.current = false;
+              }}
+              onActionBPress={() => {
+                fireUltimateTremolo();
+              }}
+              actionALabel="FIRE"
+              actionBLabel="TREMOLO"
+              weaponLabels={["Ruby", "Cyan", "Aurora", "Ice"]}
+              selectedWeapon={["ruby-laser", "cyan-pulse", "aurora-wave", "ice-cannon"].indexOf(laserType)}
+              onWeaponSelect={(idx) => {
+                const types: LaserType[] = ["ruby-laser", "cyan-pulse", "aurora-wave", "ice-cannon"];
+                if (types[idx]) selectLaserType(types[idx]);
+              }}
+              className="w-full pointer-events-auto bg-zinc-950/60 backdrop-blur-md rounded-2xl"
+            />
+          </div>
+        )}
 
         {/* Start Overlay Screen */}
         {gameState === "idle" && (
