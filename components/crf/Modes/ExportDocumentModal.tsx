@@ -2,8 +2,6 @@
 
 import React, { useState } from "react";
 import { StudyProtocol, StudyBranding } from "@/lib/crf/types";
-import { generateStudyDocx } from "@/lib/crf/export-docx";
-import { generateStudyPdf } from "@/lib/crf/export-pdf";
 import {
   generateAcrfHtml,
   generateStudyAcrfBookHtml,
@@ -83,6 +81,7 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
       setIsExportingDocx(true);
       recordEvent("crf", "project_click");
       const options = getEffectiveOptions();
+      const { generateStudyDocx } = await import("@/lib/crf/export-docx");
       const blob = await generateStudyDocx(study, options);
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -107,6 +106,7 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
       setIsExportingPdf(true);
       recordEvent("crf", "project_click");
       const options = getEffectiveOptions();
+      const { generateStudyPdf } = await import("@/lib/crf/export-pdf");
       const blob = await generateStudyPdf(study, options);
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");

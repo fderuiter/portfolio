@@ -91,7 +91,7 @@ describe("ExportDocumentModal Component", () => {
 
     await act(async () => {
       exportWordBtn?.click();
-      await new Promise((r) => setTimeout(r, 300));
+      await new Promise((r) => setTimeout(r, 1000));
     });
 
     expect(window.URL.createObjectURL).toHaveBeenCalled();
@@ -123,5 +123,34 @@ describe("ExportDocumentModal Component", () => {
     });
 
     expect(handleOpenBranding).toHaveBeenCalledTimes(1);
+  });
+
+  it("triggers PDF export with dynamic loading state without crashing", async () => {
+    const handleClose = vi.fn();
+    const handleOpenBranding = vi.fn();
+
+    await act(async () => {
+      root = createRoot(container);
+      root.render(
+        <ExportDocumentModal
+          study={ONCOLOGY_RECIST_PRESET}
+          activeFormId={ONCOLOGY_RECIST_PRESET.forms[0].id}
+          onClose={handleClose}
+          onOpenBranding={handleOpenBranding}
+        />
+      );
+    });
+
+    const exportPdfBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Export PDF (.pdf)")
+    );
+    expect(exportPdfBtn).toBeDefined();
+
+    await act(async () => {
+      exportPdfBtn?.click();
+      await new Promise((r) => setTimeout(r, 1000));
+    });
+
+    expect(window.URL.createObjectURL).toHaveBeenCalled();
   });
 });
