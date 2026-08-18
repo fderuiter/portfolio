@@ -314,7 +314,7 @@ export const tenantAuthGuard = createMiddleware(async (c, next) => {
 <p>Contextual repository abstractions enforce tenant identity constraints on every database query, eliminating cross-tenant data leakage risks while maintaining clean separation of concerns.</p>
 
 <h4>3. Edge-Native Event-Driven Async Processing</h4>
-<p>Background workflows and async task queues are powered by Inngest functions embedded directly inside Hono, delivering event-driven reliability without needing persistent worker processes.</p>
+<p>Background workflows and async task queues are powered by Inngest functions embedded directly inside Hono, delivering event-driven reliability without needing persistent worker processes.</p>`,
     slug: "inbody-qr-decoder",
     title: "InBody QR Data Decoder & Analyzer: BIA Reverse Engineering",
     primary_language: "Python",
@@ -349,7 +349,7 @@ def decode_digits(raw_slice: str, scale_factor: float = 0.1, precision: int = 2)
 <p>A critical bug was resolved where URL percent-encoding (<code>%21</code>) of literal <code>!</code> delimiters caused byte-slice alignment shifts, inducing a $10\\times$ calculation error on Leg Lean Mass. Seed strings are strictly decoded and normalized before delimiter parsing.</p>
 
 <h4>3. Multi-Block Segment Parsing &amp; Biomarker Derivation</h4>
-<p>Primary body composition parameters reside in Segment Index 4 (<code>meas_blob</code>), while secondary metrics (BMR and Visceral Fat) are extracted from Segment Index 5 in kilocalories. Derived biomarkers, including Appendicular Skeletal Muscle Mass (ASM) and Skeletal Muscle Index ($\\text{SMI} = \\frac{\\text{ASM}}{\\text{Height}^2}$), are computed deterministically.</p>
+<p>Primary body composition parameters reside in Segment Index 4 (<code>meas_blob</code>), while secondary metrics (BMR and Visceral Fat) are extracted from Segment Index 5 in kilocalories. Derived biomarkers, including Appendicular Skeletal Muscle Mass (ASM) and Skeletal Muscle Index ($\\text{SMI} = \\frac{\\text{ASM}}{\\text{Height}^2}$), are computed deterministically.</p>`,
     slug: "polyglot-tsp",
     title: "Polyglot-TSP: Technical Breakdown & Portfolio Integration",
     primary_language: "Rust",
@@ -464,7 +464,7 @@ endmodule
 <h3>Trade-Offs & Key Decisions</h3>
 <p>1. <strong>Exhaustive Permutations ($O(N!)$) vs. Dynamic Programming / Heuristics ($O(N^2 2^N)$)</strong>: Prioritized strict brute-force permutation generation across all targets to maintain an identical baseline for syntactic and runtime execution comparisons across obscure and exotic paradigms.</p>
 
-<p>2. <strong>Subprocess CLI Execution vs. Foreign Function Interface (FFI)</strong>: Chose process-level standard stream (stdout/stderr) assertion over C ABI bindings to accommodate non-standardized runtimes, HDL simulation pipelines (ghdl, iverilog), and legacy/esoteric environments (INTERCAL, COBOL, Modula-2).</p>
+<p>2. <strong>Subprocess CLI Execution vs. Foreign Function Interface (FFI)</strong>: Chose process-level standard stream (stdout/stderr) assertion over C ABI bindings to accommodate non-standardized runtimes, HDL simulation pipelines (ghdl, iverilog), and legacy/esoteric environments (INTERCAL, COBOL, Modula-2).</p>`,
     slug: "oxidizemath",
     title: "OxidizeMath: Verified Numerical Computation Framework in Rust",
     primary_language: "Rust",
@@ -525,7 +525,7 @@ where
 <p>Implements thread-safe state swapping via <code>oxidize_core::double_buffer</code> for grid-based PDEs and Lattice Boltzmann fluid models, decoupling numerical compute loops from egui immediate-mode rendering threads.</p>
 
 <h4>3. WASM-First GUI Architecture</h4>
-<p>Deploys identical single-binary desktop execution and zero-install WebAssembly browser builds using egui and custom <code>egui_plot</code> engines.</p>
+<p>Deploys identical single-binary desktop execution and zero-install WebAssembly browser builds using egui and custom <code>egui_plot</code> engines.</p>`,
     slug: "ualbf",
     title: "UALBF: Verified Computational Proof Engine & Search Architecture",
     primary_language: "Rust",
@@ -635,7 +635,9 @@ pub extern "C" fn ualbf_verify_certificate_manifest(
         -2
     }
 }
-</code></pre>
+</code></pre>`.trim(),
+  },
+  {
     slug: "sortify",
     title: "Sortify: Air-Gapped Document Classification & Resilient File Engine",
     primary_language: "Python",

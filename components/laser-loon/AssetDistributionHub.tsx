@@ -3,16 +3,16 @@
 import React from "react";
 import {
   IconDownload,
-  IconFileTypeAi,
+  IconFileCode,
   IconFileTypeSvg,
   IconFileTypePdf,
-  IconFileTypePsd,
+  IconFileText,
   IconFileTypePng,
   IconFileTypeJpg,
   IconArchive,
   IconShieldCheck,
   IconShare,
-  IconBrandCreativeCommons,
+  IconCreativeCommons,
   IconCheck,
 } from "@tabler/icons-react";
 
@@ -36,7 +36,7 @@ const ASSET_ITEMS: AssetFormatItem[] = [
     targetApp: "Adobe Illustrator / Vector Editors",
     attributes: "Layered vectors, global swatches, infinite resolution scaling",
     href: "/files/Laser_loon.ai",
-    icon: <IconFileTypeAi className="w-5 h-5 text-amber-400" />,
+    icon: <IconFileCode className="w-5 h-5 text-amber-400" />,
     category: "vector",
   },
   {
@@ -46,7 +46,7 @@ const ASSET_ITEMS: AssetFormatItem[] = [
     targetApp: "Commercial Print & Vinyl Plotting",
     attributes: "Spot color separation, CMYK print pipeline compatibility",
     href: "/files/Laser_loon.eps",
-    icon: <IconFileTypeAi className="w-5 h-5 text-orange-400" />,
+    icon: <IconFileCode className="w-5 h-5 text-orange-400" />,
     category: "vector",
   },
   {
@@ -88,7 +88,7 @@ const ASSET_ITEMS: AssetFormatItem[] = [
     targetApp: "Adobe Photoshop / Raster Editing",
     attributes: "High-resolution layered compositing file",
     href: "/files/Laser_loon.psd",
-    icon: <IconFileTypePsd className="w-5 h-5 text-blue-400" />,
+    icon: <IconFileText className="w-5 h-5 text-blue-400" />,
     category: "raster",
   },
   {
@@ -203,7 +203,7 @@ export const AssetDistributionHub: React.FC = () => {
       <div className="mt-10 p-5 rounded-2xl bg-zinc-900/60 border border-zinc-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative z-10">
         <div className="flex items-start gap-3">
           <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 shrink-0">
-            <IconBrandCreativeCommons className="w-6 h-6" />
+            <IconCreativeCommons className="w-6 h-6" />
           </div>
           <div>
             <h4 className="text-sm font-bold font-mono text-white flex items-center gap-2">

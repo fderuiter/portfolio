@@ -26,6 +26,18 @@ Re-exports [escapeSasString](../export-sas/functions/escapeSasString.md)
 
 ***
 
+### ExpandedRField
+
+Re-exports [ExpandedRField](../export-r/interfaces/ExpandedRField.md)
+
+***
+
+### ExpandedSasField
+
+Re-exports [ExpandedSasField](../export-sas/interfaces/ExpandedSasField.md)
+
+***
+
 ### exportFormToFhirQuestionnaire
 
 Re-exports [exportFormToFhirQuestionnaire](../fhir-questionnaire/functions/exportFormToFhirQuestionnaire.md)
@@ -128,6 +140,24 @@ Re-exports [generateStudyPdf](../export-pdf/functions/generateStudyPdf.md)
 
 ***
 
+### getExpandedRFields
+
+Re-exports [getExpandedRFields](../export-r/functions/getExpandedRFields.md)
+
+***
+
+### getExpandedSasAttributes
+
+Re-exports [getExpandedSasAttributes](../export-sas/functions/getExpandedSasAttributes.md)
+
+***
+
+### getFieldOptions
+
+Re-exports [getFieldOptions](../export-sas/functions/getFieldOptions.md)
+
+***
+
 ### getFieldSasAttributes
 
 Re-exports [getFieldSasAttributes](../export-sas/functions/getFieldSasAttributes.md)
@@ -137,6 +167,12 @@ Re-exports [getFieldSasAttributes](../export-sas/functions/getFieldSasAttributes
 ### getSasFormatName
 
 Re-exports [getSasFormatName](../export-sas/functions/getSasFormatName.md)
+
+***
+
+### parseMultiSelectValue
+
+Re-exports [parseMultiSelectValue](../export-sas/functions/parseMultiSelectValue.md)
 
 ***
 

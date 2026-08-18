@@ -230,6 +230,18 @@ Re-exports [evaluateRule](expression-evaluator/functions/evaluateRule.md)
 
 ***
 
+### ExpandedRField
+
+Re-exports [ExpandedRField](export-r/interfaces/ExpandedRField.md)
+
+***
+
+### ExpandedSasField
+
+Re-exports [ExpandedSasField](export-sas/interfaces/ExpandedSasField.md)
+
+***
+
 ### ExportDocxOptions
 
 Re-exports [ExportDocxOptions](types/interfaces/ExportDocxOptions.md)
@@ -380,6 +392,24 @@ Re-exports [generateStudyPdf](export-pdf/functions/generateStudyPdf.md)
 
 ***
 
+### getExpandedRFields
+
+Re-exports [getExpandedRFields](export-r/functions/getExpandedRFields.md)
+
+***
+
+### getExpandedSasAttributes
+
+Re-exports [getExpandedSasAttributes](export-sas/functions/getExpandedSasAttributes.md)
+
+***
+
+### getFieldOptions
+
+Re-exports [getFieldOptions](export-sas/functions/getFieldOptions.md)
+
+***
+
 ### getFieldSasAttributes
 
 Re-exports [getFieldSasAttributes](export-sas/functions/getFieldSasAttributes.md)
@@ -431,6 +461,12 @@ Re-exports [mapPresetToFormVariables](formula-presets/functions/mapPresetToFormV
 ### NUMERIC\_DATA\_TYPES
 
 Re-exports [NUMERIC_DATA_TYPES](formula-linter/variables/NUMERIC_DATA_TYPES.md)
+
+***
+
+### parseMultiSelectValue
+
+Re-exports [parseMultiSelectValue](export-sas/functions/parseMultiSelectValue.md)
 
 ***
 
