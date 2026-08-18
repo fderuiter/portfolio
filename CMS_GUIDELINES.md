@@ -4,7 +4,11 @@ This document outlines our strategy for utilizing Prisma ORM as a local headless
 
 ## Schema Design
 
-We abstract editorial content and narratives away from the raw GitHub codebase using a serverless Neon PostgreSQL database, managed via Prisma. The primary schema mapping our portfolio projects is the `CaseStudy` model:
+We abstract editorial content, narratives, feedback, and user interactions away from the raw GitHub codebase using a serverless Neon PostgreSQL database, managed via Prisma.
+
+### Core Content Schema (`CaseStudy`)
+
+The primary schema mapping our portfolio projects is the `CaseStudy` model:
 
 ```prisma
 model CaseStudy {
@@ -26,6 +30,58 @@ model CaseStudy {
 ```
 
 This ensures we can dynamically inject rich text and architectural explanations into our UI components.
+
+### Feedback & Interaction Schemas (`CaseStudyFeedback` & `CaseStudyReaction`)
+
+User feedback and quick reaction badges attached to case studies are captured via two dedicated interaction models:
+
+```prisma
+model CaseStudyFeedback {
+  id             String   @id @default(cuid())
+  caseStudySlug  String
+  takeaways      String
+  comments       String
+  connectionHash String
+  createdAt      DateTime @default(now())
+
+  @@index([caseStudySlug])
+  @@index([connectionHash])
+}
+
+model CaseStudyReaction {
+  id             String   @id @default(cuid())
+  caseStudySlug  String
+  reactionType   String
+  connectionHash String
+  createdAt      DateTime @default(now())
+
+  @@index([caseStudySlug])
+  @@index([caseStudySlug, reactionType])
+  @@index([connectionHash])
+}
+```
+
+### Schema Design Rules for Feedback & Reactions
+
+1. **Relational Coupling via Slugs:**
+   - Feedback and reaction records decouple relational key constraints by referencing `caseStudySlug` directly, matching `CaseStudy.slug`.
+   - Single and compound indexes (`[caseStudySlug]` and `[caseStudySlug, reactionType]`) are placed on foreign slug queries for fast lookup and aggregation performance.
+
+2. **Serialized Array Format for `takeaways`:**
+   - The `takeaways` field in `CaseStudyFeedback` stores a JSON string representation of selected key takeaways (e.g., `["architectural_narrative", "telemetry"]`).
+   - Validated at submission (minimum 1 item) and parsed back into string arrays when served via the API.
+
+3. **Constructive Comment Bounds:**
+   - The `comments` field holds free-form text feedback.
+   - Enforces validation boundaries between 3 and 2000 characters.
+
+4. **Strict Reaction Type Enums:**
+   - The `reactionType` field in `CaseStudyReaction` only accepts valid reaction badge tokens: `"insightful"`, `"mind_blowing"`, `"actionable"`, or `"thorough"`.
+   - Aggregated in database queries using Prisma `groupBy` operations.
+
+5. **Privacy-Preserving Connection Hash (`connectionHash`):**
+   - The `connectionHash` field stores a SHA-256 hash computed from client connection context (`IP:User-Agent`).
+   - Prevents duplicate feedback submissions within a 1-hour sliding window (returning HTTP 429) and identifies active user reactions while guaranteeing zero raw IP address or PII retention.
 
 ## Prototyping Workflows
 
