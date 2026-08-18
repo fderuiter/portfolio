@@ -8,7 +8,7 @@
 
 > **generateId**(`prefix?`): `string`
 
-Defined in: [lib/utils.ts:198](https://github.com/fderuiter/portfolio/blob/main/lib/utils.ts#L198)
+Defined in: [lib/utils.ts:96](https://github.com/fderuiter/portfolio/blob/main/lib/utils.ts#L96)
 
 Standardized random identifier generator.
 Generates element or component IDs using a clean hash string.

@@ -30,7 +30,7 @@ function printUsage(): void {
   console.log(`  ${colors.cyan}branch${colors.reset}                 Interactive branch generator with convention validation`);
   console.log(`  ${colors.cyan}env${colors.reset}                    Validate runtime environment schema & sync .env.example`);
   console.log(`  ${colors.cyan}dead-code${colors.reset}              Scan for unused exports and orphaned modules`);
-  console.log(`  ${colors.cyan}analyze${colors.reset}                Inspect production bundle chunk sizes and performance budgets`);
+  console.log(`  ${colors.cyan}analyze [--strict]${colors.reset}     Inspect production bundle chunk sizes and performance budgets`);
   console.log(`  ${colors.cyan}scaffold <type> <name>${colors.reset} Scaffold code templates (types: arcade, api, adr, case-study, component, hook)`);
   console.log(`  ${colors.cyan}bench${colors.reset}                  Run Pretext, Masonry Scheduler, and Security benchmarks`);
   console.log(`  ${colors.cyan}bench --pages${colors.reset}          Run real-browser Core Web Vitals & page speed benchmarks`);
@@ -121,13 +121,20 @@ function handleDeadCodeCommand(): void {
   console.log("");
 }
 
-function handleAnalyzeCommand(): void {
+export function handleAnalyzeCommand(args: string[] = []): void {
+  const strict = args.includes("--strict") || args.includes("strict");
   console.log(formatHeader("DX Bundle Analyzer & Chunk Budget Guard", ".next/static/chunks • Gzip Size Assertions"));
+  if (strict) {
+    console.log(`${colors.magenta}⚙ Mode: Strict Enforcement (--strict)${colors.reset}\n`);
+  }
 
   const report = inspectBundleChunks(workspaceRoot);
 
   if (!report.isBuilt) {
     console.log(`${colors.yellow}No build artifacts detected in .next/static/chunks/. Run 'npm run build' first.${colors.reset}\n`);
+    if (strict) {
+      process.exit(1);
+    }
     return;
   }
 
@@ -161,6 +168,9 @@ function handleAnalyzeCommand(): void {
       console.log(`  ${colors.red}• ${v}${colors.reset}`);
     }
     console.log("");
+    if (strict) {
+      process.exit(1);
+    }
   } else {
     console.log(`\n${colors.brightGreen}✔ All chunks comply with production performance budgets.${colors.reset}\n`);
   }
@@ -349,7 +359,7 @@ async function runInteractiveMenu(): Promise<void> {
         handleDeadCodeCommand();
         break;
       case "7":
-        handleAnalyzeCommand();
+        handleAnalyzeCommand([]);
         break;
       case "8": {
         const rl2 = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -409,7 +419,7 @@ async function main(): Promise<void> {
       break;
     case "analyze":
     case "bundle":
-      handleAnalyzeCommand();
+      handleAnalyzeCommand(args.slice(1));
       break;
     case "scaffold":
     case "g":

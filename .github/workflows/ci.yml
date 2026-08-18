@@ -62,12 +62,13 @@ jobs:
           npx tsx scripts/generate-theme.ts
           npx prisma generate
 
-      - name: Check Migration Metadata
-        run: npm run check:migrations
+      - name: Execute Pipeline Release Gate (Migrations & Integrity)
+        run: npm run release:gate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/portfolio_ci?schema=replay
 
-      - name: Replay Migrations and Check Schema Drift
+      - name: Check Schema Drift
         run: |
-          npx prisma migrate deploy
           npm run check:migrations:drift
           npx prisma migrate status
         env:
@@ -97,6 +98,10 @@ jobs:
         run: npx next build
         env:
           DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
+
+      - name: Verify Bundle Performance Budgets
+        id: bundle
+        run: npm run analyze:bundle -- --strict
 
       - name: Run Logic Tests (Vitest)
         id: vitest
@@ -144,6 +149,7 @@ jobs:
           echo "| **Visual & Drift Guard** (Playwright) | ${{ steps.playwright.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Sub-pixel pixel matching & layout constant sync |" >> $GITHUB_STEP_SUMMARY
           echo "| **Accessibility Audits** (Playwright-Axe) | $ACC_STATUS | Automated WCAG compliance scans on interactive states |" >> $GITHUB_STEP_SUMMARY
           echo "| **Performance Gates** (Lighthouse) | ${{ steps.lighthouse.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Web Vitals & >95 Lighthouse score |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Bundle Performance Budgets** | ${{ steps.bundle.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Initial bundle & chunk gzip performance limits |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "*(Generated via automated unified CI pipeline)*" >> $GITHUB_STEP_SUMMARY
 

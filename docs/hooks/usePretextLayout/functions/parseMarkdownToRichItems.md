@@ -8,7 +8,7 @@
 
 > **parseMarkdownToRichItems**(`text`, `baseFont`, `boldFont`, `italicFont`, `codeFont`): [`ExtendedRichInlineItem`](../interfaces/ExtendedRichInlineItem.md)[]
 
-Defined in: [hooks/usePretextLayout.tsx:294](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L294)
+Defined in: [hooks/usePretextLayout.tsx:296](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L296)
 
 Tokenizes markdown-like inline text (**bold**, *italic*, `code`) into RichInlineItem arrays.
 

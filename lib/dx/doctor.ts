@@ -351,10 +351,13 @@ export function checkSecretLeaks(root: string): DiagnosticCheckResult {
 }
 
 /**
- * Migration Integrity & Destructive Migration Guard
+ * Migration Integrity, Provider Parity & Destructive Migration Guard
  */
 export function checkMigrationGuard(root: string): DiagnosticCheckResult {
   const migrationsDir = path.join(root, "prisma", "migrations");
+  const schemaPath = path.join(root, "prisma", "schema.prisma");
+  const lockPath = path.join(migrationsDir, "migration_lock.toml");
+
   if (!fs.existsSync(migrationsDir)) {
     return {
       id: "database-migrations",
@@ -365,9 +368,42 @@ export function checkMigrationGuard(root: string): DiagnosticCheckResult {
     };
   }
 
-  const sqlFiles = findFiles(migrationsDir, /\.sql$/);
-  const destructiveViolations: { file: string; ddl: string }[] = [];
+  const failures: string[] = [];
 
+  // 1. Check Provider Parity
+  if (fs.existsSync(schemaPath) && fs.existsSync(lockPath)) {
+    try {
+      const schemaContent = fs.readFileSync(schemaPath, "utf-8");
+      const lockContent = fs.readFileSync(lockPath, "utf-8");
+      const schemaProviderMatch = schemaContent.match(/datasource\s+\w+\s*\{[\s\S]*?provider\s*=\s*["']([^"']+)["']/);
+      const lockProviderMatch = lockContent.match(/^provider\s*=\s*["']([^"']+)["']/m);
+
+      if (schemaProviderMatch && lockProviderMatch) {
+        if (schemaProviderMatch[1] !== lockProviderMatch[1]) {
+          failures.push(`Provider mismatch: schema.prisma uses '${schemaProviderMatch[1]}', migration_lock.toml uses '${lockProviderMatch[1]}'.`);
+        }
+      }
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      failures.push(`Failed to verify provider parity: ${msg}`);
+    }
+  }
+
+  // 2. Check File Integrity
+  const sqlFiles = findFiles(migrationsDir, /\.sql$/);
+  if (sqlFiles.length === 0) {
+    failures.push("No migration SQL files found in prisma/migrations.");
+  } else {
+    for (const sqlFile of sqlFiles) {
+      const content = fs.readFileSync(sqlFile, "utf-8");
+      if (content.trim() === "") {
+        failures.push(`Empty migration SQL file found at ${path.relative(root, sqlFile)}.`);
+      }
+    }
+  }
+
+  // 3. Check Destructive Queries
+  const destructiveViolations: { file: string; ddl: string }[] = [];
   for (const file of sqlFiles) {
     const content = fs.readFileSync(file, "utf-8");
     const dropMatches = content.match(/\b(DROP\s+TABLE|DROP\s+COLUMN)\b/gi);
@@ -378,8 +414,11 @@ export function checkMigrationGuard(root: string): DiagnosticCheckResult {
       });
     }
   }
+  for (const v of destructiveViolations) {
+    failures.push(`Destructive DDL detected in ${v.file}: ${v.ddl}`);
+  }
 
-  if (destructiveViolations.length === 0) {
+  if (failures.length === 0) {
     return {
       id: "database-migrations",
       name: "Prisma Migration Integrity & Destructive Guard",
@@ -394,8 +433,8 @@ export function checkMigrationGuard(root: string): DiagnosticCheckResult {
     name: "Prisma Migration Integrity & Destructive Guard",
     category: "database",
     status: "fail",
-    message: `Destructive DDL detected in ${destructiveViolations.length} migration(s) without ALLOW_DESTRUCTIVE_MIGRATIONS flag`,
-    details: destructiveViolations.map((v) => `${v.file}: ${v.ddl}`),
+    message: `${failures.length} database migration invariant issue(s) detected`,
+    details: failures,
     fixable: false,
   };
 }
