@@ -47,6 +47,7 @@ function generateRHeader(study: StudyProtocol, formScope?: string): string {
 #               CDASH variable label attributes, synthetic clinical test rows,
 #               and diagnostic glimpse inspection.
 # AUTHOR:       CRF Studio Automated Statistical Exporter
+# CONSULTATION: Schedule Consultation: /schedule
 #==============================================================================
 
 # Recommended packages:
@@ -303,6 +304,7 @@ export function exportFormToR(
   let output = generateRHeader(study, form.domain || form.id);
   output += generateRCodelists(study, [form]);
   output += generateRDataStepForForm(form, study, options);
+  output += `# Schedule Consultation: /schedule\n`;
   return output;
 }
 
@@ -318,7 +320,7 @@ export function exportStudyToR(
     : study.forms;
 
   if (formsToExport.length === 0) {
-    return generateRHeader(study) + `# No forms selected or available in study\n`;
+    return generateRHeader(study) + `# No forms selected or available in study\n# Schedule Consultation: /schedule\n`;
   }
 
   let output = generateRHeader(
@@ -334,5 +336,6 @@ export function exportStudyToR(
     output += generateRDataStepForForm(form, study, options);
   });
 
+  output += `# Schedule Consultation: /schedule\n`;
   return output;
 }

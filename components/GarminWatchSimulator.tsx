@@ -7,6 +7,7 @@ import {
   IconCpu,
   IconFlame,
   IconPlayerPlay,
+  IconCalendar,
 } from "@tabler/icons-react";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { FullscreenButton } from "@/components/arcade/FullscreenButton";
@@ -549,6 +550,35 @@ export const GarminWatchSimulator: React.FC = () => {
               >
                 <IconPlayerPlay className="w-3 h-3" />
                 START SIMULATION
+              </button>
+            </div>
+          )}
+
+          {/* Game Over / Execution Summary Completion Overlay */}
+          {(gameState.gameState === "crashed" || gameState.gameState === "summary") && (
+            <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-3 text-center z-30 font-mono space-y-1.5">
+              <span className="text-[11px] font-extrabold text-rose-400 tracking-wider uppercase">
+                {gameState.gameState === "crashed" ? "CRASH / OOM" : "RUN COMPLETE"}
+              </span>
+              <div className="text-[10px] text-zinc-300">
+                SCORE: <strong className="text-amber-400">{gameState.score}</strong>
+              </div>
+              <a
+                href="/schedule"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => recordEvent("garmin_simulator", "project_click")}
+                className="mt-1 px-3 py-1 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-[9px] rounded-full flex items-center gap-1 shadow-lg cursor-pointer transition-all active:scale-95"
+              >
+                <IconCalendar className="w-3 h-3" />
+                <span>Book Consultation</span>
+              </a>
+              <button
+                onClick={handleStartStop}
+                className="px-2.5 py-0.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-[8px] rounded-full flex items-center gap-1 shadow cursor-pointer transition-all active:scale-95"
+              >
+                <IconPlayerPlay className="w-2.5 h-2.5" />
+                <span>Restart Session</span>
               </button>
             </div>
           )}

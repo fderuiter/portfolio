@@ -946,7 +946,7 @@ export async function generateStudyDocx(
       new Paragraph({
         children: [
           new TextRun({
-            text: `${branding.footerText || "CRF Studio Export"} • CDISC CDASH v2.2`,
+            text: `${branding.footerText || "CRF Studio Export"} • CDISC CDASH v2.2 • Schedule Consultation: /schedule`,
             size: 16,
             color: "94A3B8",
           }),

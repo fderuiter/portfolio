@@ -39,6 +39,7 @@ export function exportStudyToCdiscOdmXml(study: StudyProtocol): string {
   const metaOid = `MDV.${study.version || "1.0"}`;
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<!-- Schedule Consultation: /schedule -->
 <ODM xmlns="http://www.cdisc.org/ns/odm/v1.3"
      xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -50,7 +51,7 @@ export function exportStudyToCdiscOdmXml(study: StudyProtocol): string {
   <Study OID="${studyOid}">
     <GlobalVariables>
       <StudyName>${escapeXml(study.studyName)}</StudyName>
-      <StudyDescription>Protocol ${escapeXml(study.protocolNumber)} - ${escapeXml(study.phase)}</StudyDescription>
+      <StudyDescription>Protocol ${escapeXml(study.protocolNumber)} - ${escapeXml(study.phase)} • Schedule Consultation: /schedule</StudyDescription>
       <ProtocolName>${escapeXml(study.protocolNumber)}</ProtocolName>
     </GlobalVariables>
     <MetaDataVersion OID="${metaOid}" Name="Protocol Definition Version ${escapeXml(study.version)}">
