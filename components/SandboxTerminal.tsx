@@ -967,16 +967,16 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
         className="w-full border border-zinc-900 focus-within:border-brand-cyan/40 bg-zinc-950/80 rounded-2xl overflow-hidden shadow-[var(--term-glow)] focus-within:shadow-[0_0_40px_rgba(6,182,212,0.08),0_0_80px_rgba(6,182,212,0.02)] relative backdrop-blur-md cursor-text transition-all duration-300"
       >
         {/* Terminal Header */}
-        <div className="border-b border-zinc-900/60 bg-zinc-950/90 px-4 py-3.5 flex justify-between items-center select-none">
-          <div className="flex items-center gap-2">
-            <IconCircle className="w-3 h-3 fill-red-500/80 stroke-none" />
-            <IconCircle className="w-3 h-3 fill-yellow-500/80 stroke-none" />
-            <IconCircle className="w-3 h-3 fill-green-500/80 stroke-none" />
-            <span className="text-[10px] font-mono font-bold text-zinc-500 tracking-wider ml-2 uppercase">
+        <div className="border-b border-zinc-900/60 bg-zinc-950/90 px-4 py-3.5 flex justify-between items-center select-none min-w-0 gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <IconCircle className="w-3 h-3 fill-red-500/80 stroke-none shrink-0" />
+            <IconCircle className="w-3 h-3 fill-yellow-500/80 stroke-none shrink-0" />
+            <IconCircle className="w-3 h-3 fill-green-500/80 stroke-none shrink-0" />
+            <span className="text-[10px] font-mono font-bold text-zinc-500 tracking-wider ml-2 uppercase truncate min-w-0">
               imednet-python-sdk // interactive CLI shell
             </span>
           </div>
-          <IconTerminal className="w-4 h-4 text-zinc-600" />
+          <IconTerminal className="w-4 h-4 text-zinc-600 shrink-0" />
         </div>
 
         {/* Console logs output viewport */}
@@ -987,29 +987,29 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
           className="p-5 font-mono text-[11px] leading-relaxed max-h-[380px] overflow-y-auto space-y-4 text-zinc-300"
         >
           {logs.map((log) => (
-            <div key={log.id} className="space-y-1">
+            <div key={log.id} className="space-y-1 min-w-0">
               {log.type === "command" && (
-                <div className="flex items-center gap-2 text-zinc-400 font-bold select-none">
-                  <span className="text-zinc-600 font-bold">~</span>
-                  <span className="text-zinc-400 font-bold">imednet-sdk $</span>
-                  <span className="text-zinc-100 font-bold select-text">{log.text}</span>
+                <div className="flex items-center gap-2 text-zinc-400 font-bold select-none min-w-0">
+                  <span className="text-zinc-600 font-bold shrink-0">~</span>
+                  <span className="text-zinc-400 font-bold shrink-0">imednet-sdk $</span>
+                  <span className="text-zinc-100 font-bold select-text min-w-0 break-all">{log.text}</span>
                 </div>
               )}
               {log.type === "info" && (
-                <div className="text-zinc-500 whitespace-pre-wrap leading-relaxed select-text">
+                <div className="text-zinc-500 whitespace-pre-wrap leading-relaxed select-text min-w-0 break-all">
                   {log.text}
                 </div>
               )}
               {log.type === "error" && (
-                <div className="text-red-400/90 font-medium select-text">
+                <div className="text-red-400/90 font-medium select-text min-w-0 break-all">
                   ✖ {log.text}
                 </div>
               )}
               {log.type === "output" && log.jsonPayload !== undefined && (
-                <div className="bg-zinc-950 border border-zinc-900/50 rounded-xl p-3.5 mt-1">
-                  <div className="flex items-center justify-between border-b border-zinc-900 pb-2 mb-2 text-[9px] text-zinc-500 select-none">
-                    <span>200 OK // TRANSACTION RETRUSTED</span>
-                    <span>JSON PAYLOAD</span>
+                <div className="bg-zinc-950 border border-zinc-900/50 rounded-xl p-3.5 mt-1 min-w-0">
+                  <div className="flex items-center justify-between border-b border-zinc-900 pb-2 mb-2 text-[9px] text-zinc-500 select-none min-w-0 gap-2">
+                    <span className="truncate">200 OK // TRANSACTION RETRUSTED</span>
+                    <span className="shrink-0">JSON PAYLOAD</span>
                   </div>
                   {renderJsonPayload(log.jsonPayload)}
                 </div>
@@ -1019,17 +1019,17 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
 
           {/* Loading execution state */}
           {isExecuting && (
-            <div className="flex items-center gap-2 text-brand-cyan/80 font-bold italic select-none">
-              <span className="animate-pulse">◌</span>
-              <span>Executing clinical API query...</span>
+            <div className="flex items-center gap-2 text-brand-cyan/80 font-bold italic select-none min-w-0">
+              <span className="animate-pulse shrink-0">◌</span>
+              <span className="truncate">Executing clinical API query...</span>
             </div>
           )}
         </div>
 
         {/* Live Input Field Prompt */}
-        <div className="border-t border-zinc-900/60 bg-zinc-950/60 px-5 py-3.5 flex items-center gap-2">
-          <span className="text-zinc-600 font-bold font-mono text-[11px] select-none">~</span>
-          <span className="text-zinc-400 font-bold font-mono text-[11px] select-none">imednet-sdk $</span>
+        <div className="border-t border-zinc-900/60 bg-zinc-950/60 px-5 py-3.5 flex items-center gap-2 min-w-0">
+          <span className="text-zinc-600 font-bold font-mono text-[11px] select-none shrink-0">~</span>
+          <span className="text-zinc-400 font-bold font-mono text-[11px] select-none shrink-0 truncate max-w-[110px] xs:max-w-none">imednet-sdk $</span>
           <input
             ref={inputRef}
             type="text"
@@ -1038,7 +1038,7 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
             onKeyDown={handleKeyDown}
             disabled={isExecuting || isTyping}
             placeholder="Type 'help' or execute dynamic clinical queries..."
-            className="flex-1 bg-transparent border-none outline-none font-mono text-[11px] text-zinc-100 placeholder-zinc-700 caret-brand-cyan select-text"
+            className="flex-1 min-w-0 bg-transparent border-none outline-none font-mono text-[11px] text-zinc-100 placeholder-zinc-700 caret-brand-cyan select-text"
             autoCapitalize="off"
             autoComplete="off"
             autoCorrect="off"
@@ -1047,7 +1047,7 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
           <button
             onClick={() => executeCommand(input)}
             disabled={isExecuting || isTyping || !input.trim()}
-            className="p-1.5 text-zinc-600 hover:text-brand-cyan hover:bg-brand-cyan/10 active:scale-90 disabled:text-zinc-800 disabled:hover:text-zinc-800 disabled:hover:bg-transparent transition-all rounded-lg cursor-pointer focus:outline-none focus:text-brand-cyan focus:ring-2 focus:ring-brand-cyan/50 focus:ring-offset-1 focus:ring-offset-zinc-950"
+            className="p-1.5 text-zinc-600 hover:text-brand-cyan hover:bg-brand-cyan/10 active:scale-90 disabled:text-zinc-800 disabled:hover:text-zinc-800 disabled:hover:bg-transparent transition-all rounded-lg cursor-pointer focus:outline-none focus:text-brand-cyan focus:ring-2 focus:ring-brand-cyan/50 focus:ring-offset-1 focus:ring-offset-zinc-950 shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center"
             title="Execute Command (Enter)"
           >
             <IconCornerDownLeft className="w-4 h-4" />
