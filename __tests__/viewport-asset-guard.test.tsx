@@ -22,7 +22,7 @@ vi.mock("three", async () => {
 });
 
 describe("Viewport-Driven Component Asset Guard", () => {
-  let mockObserverCallback: IntersectionObserverCallback | null = null;
+  let mockObserverCallbacks: IntersectionObserverCallback[] = [];
   let mockObserve: (target: Element) => void;
   let mockDisconnect: () => void;
   let originalIntersectionObserver: typeof window.IntersectionObserver;
@@ -31,7 +31,7 @@ describe("Viewport-Driven Component Asset Guard", () => {
     vi.restoreAllMocks();
     mockObserve = vi.fn();
     mockDisconnect = vi.fn();
-    mockObserverCallback = null;
+    mockObserverCallbacks = [];
 
     originalIntersectionObserver = window.IntersectionObserver;
 
@@ -41,7 +41,7 @@ describe("Viewport-Driven Component Asset Guard", () => {
       readonly thresholds: ReadonlyArray<number> = [];
 
       constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
-        mockObserverCallback = callback;
+        mockObserverCallbacks.push(callback);
         if (options?.rootMargin) {
           (this as { rootMargin: string }).rootMargin = options.rootMargin;
         }
@@ -83,15 +83,15 @@ describe("Viewport-Driven Component Asset Guard", () => {
       );
 
       // Verify IntersectionObserver was instantiated and observed container
-      expect(mockObserve).toHaveBeenCalledTimes(1);
+      expect(mockObserve).toHaveBeenCalledTimes(2);
 
       // On initial render while off-screen (isIntersecting is false), external mesh MUST NOT be fetched
       expect(loadExternalSpy).not.toHaveBeenCalled();
 
-      // Trigger viewport intersection
+      // Trigger viewport intersection across all registered observers
       await act(async () => {
-        if (mockObserverCallback) {
-          mockObserverCallback(
+        for (const cb of mockObserverCallbacks) {
+          cb(
             [{ isIntersecting: true } as IntersectionObserverEntry],
             {} as IntersectionObserver
           );
@@ -130,10 +130,10 @@ describe("Viewport-Driven Component Asset Guard", () => {
       // Verify observer attached to WorkingWithDuck container
       expect(mockObserve).toHaveBeenCalledTimes(1);
 
-      // Trigger viewport intersection
+      // Trigger viewport intersection across all registered observers
       await act(async () => {
-        if (mockObserverCallback) {
-          mockObserverCallback(
+        for (const cb of mockObserverCallbacks) {
+          cb(
             [{ isIntersecting: true } as IntersectionObserverEntry],
             {} as IntersectionObserver
           );

@@ -227,6 +227,80 @@ interface HouseholdRSVP {
 <p>Bespoke typography, smooth Framer Motion layout transitions, and subtle particle physics create a warm, unforgettable digital invitation that marries aesthetic beauty with rock-solid full-stack engineering.</p>
     `.trim(),
   },
+  {
+    slug: "crf-xl",
+    title: "CRF.xl: Excel-Native Clinical Trial Compiler & CDISC Engine",
+    primary_language: "TypeScript",
+    github_url: "https://github.com/fderuiter/crf-xl",
+    published: true,
+    simulated_telemetry: false,
+    tags: "clinical-trials, cdisc-odm, office-js, typescript, dag-validation, regulatory-compliance",
+    editorial_content: "An in-process, non-blocking **Web Worker compilation engine** built directly in **Microsoft Excel** via `Office.js` that bridges clinical trial design in spreadsheets with regulatory `CDISC ODM 1.3.2` compliance. Features a **DAG rule validation solver** and streaming serialization pipeline for instantaneous submission-ready export.",
+    architectural_narrative: `
+<h3>Executive Summary &amp; Value Proposition</h3>
+<p>In clinical research, medical data managers rely heavily on Microsoft Excel for protocol definitions due to its ubiquity and flexible tabular layout. However, regulatory submissions to bodies like the FDA demand strictly structured schemas (CDISC ODM, aCRF, CDASH). Manual translation between unstructured spreadsheets and compliant submission deliverables is notoriously slow and error-prone.</p>
+
+<p>CRF.xl bridges this gap by embedding an enterprise-grade compiler and compliance suite directly within Microsoft Excel. It features a non-blocking Web Worker compilation engine, a Directed Acyclic Graph (DAG) rule validation solver, and a streaming serialization pipeline capable of transforming raw Excel cell grids into schema-valid CDISC ODM 1.3.2 XML and regulatory aCRF documents.</p>
+
+<h3>Deep Dive Technical Focus Areas</h3>
+
+<h4>1. Decoupled Engine &amp; Web Worker Pipeline</h4>
+<p>Heavy parsing, Abstract Syntax Tree (AST) construction, and XML serialization are offloaded to dedicated background Web Workers (<code>engine.worker.ts</code>, <code>customxml-worker.ts</code>). This guarantees near-zero UI thread latency during parsing and schema validation on 10,000+ item clinical definitions, even within constrained Office Webview runtimes.</p>
+
+<pre><code class="language-typescript">
+// Topological DAG Dependency & Circular Reference Validator
+export class DAGValidator {
+  private nodes: Map<string, DAGNode> = new Map();
+
+  public validate(): DAGValidationResult {
+    const visited = new Set<string>();
+    const inStack = new Set<string>();
+    const stack: string[] = [];
+    const topologicalOrder: string[] = [];
+
+    const dfs = (nodeId: string): boolean => {
+      visited.add(nodeId);
+      inStack.add(nodeId);
+      stack.push(nodeId);
+
+      const node = this.nodes.get(nodeId);
+      if (node) {
+        for (const depId of node.dependencies) {
+          if (!visited.has(depId)) {
+            if (dfs(depId)) return true;
+          } else if (inStack.has(depId)) {
+            return true; // Circular dependency detected!
+          }
+        }
+      }
+
+      inStack.delete(nodeId);
+      stack.pop();
+      topologicalOrder.push(nodeId);
+      return false;
+    };
+
+    for (const [nodeId] of this.nodes) {
+      if (!visited.has(nodeId)) {
+        if (dfs(nodeId)) return { hasCircularDependency: true, cyclePath: [], topologicalOrder: [] };
+      }
+    }
+
+    return { hasCircularDependency: false, cyclePath: [], topologicalOrder: topologicalOrder.reverse() };
+  }
+}
+</code></pre>
+
+<h4>2. DAG Dependency Graph &amp; Rule Validation</h4>
+<p>AST validation for conditional logic and form item display skips uses topological DAG traversal (<code>dag-validator.ts</code>) to detect circular dependencies and unresolvable item references at authoring time. This prevents runtime form skip logic errors during active trial execution.</p>
+
+<h4>3. Office.js Sync &amp; Chunking Ingestion Runtime</h4>
+<p>To bypass Office.js <code>context.sync()</code> payload bottlenecks when processing massive workbooks, an asynchronous chunking runtime (<code>chunking-runtime.ts</code>) breaks down cell regions into batched reads, yielding execution back to the browser event loop to prevent UI freezes.</p>
+
+<h4>4. 21 CFR Part 11 Baseline Hashing &amp; CustomXML Bindings</h4>
+<p>To eliminate silent metadata drift and concurrent cell overwrites, CRF.xl maintains cryptographic baseline hashing (<code>baseline-workbook-service.ts</code>) and CustomXML part bindings that track semantic diffs without corrupting native Excel files.</p>
+    `.trim(),
+  },
 ];
 
 async function main() {
