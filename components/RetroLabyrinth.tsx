@@ -1581,9 +1581,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
         className={`relative w-full ${
           isFullscreen
             ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none bg-black flex flex-col items-center justify-between p-2 sm:p-4 overflow-y-auto"
-            : isExpanded
-            ? "h-[420px]"
-            : "h-[320px]"
+            : "h-auto"
         } bg-neutral-950/90 border rounded-2xl flex flex-col items-center justify-between p-2.5 overflow-hidden outline-none transition-all duration-300 ${
           isFocused
             ? "border-brand-cyan ring-2 ring-brand-cyan/10 shadow-[0_0_20px_rgba(34,211,238,0.1)] scale-[1.005]"
@@ -1666,8 +1664,8 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
             isFullscreen
               ? "w-full max-h-[calc(100vh-220px)] aspect-[240/144]"
               : isExpanded
-              ? "w-[360px] h-[216px]"
-              : "w-[240px] h-[144px]"
+              ? "w-full max-w-[360px] aspect-[240/144] h-auto"
+              : "w-full max-w-[240px] aspect-[240/144] h-auto"
           } flex items-center justify-center transition-all duration-300`}
           style={
             crtCalibration.curvature > 0.05
@@ -1690,8 +1688,8 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
               isFullscreen
                 ? "w-full h-full max-h-[calc(100vh-220px)] object-contain"
                 : isExpanded
-                ? "w-[360px] h-[216px]"
-                : "w-[240px] h-[144px]"
+                ? "w-full max-w-[360px] aspect-[240/144] h-auto"
+                : "w-full max-w-[240px] aspect-[240/144] h-auto"
             } rounded-lg border border-neutral-900/60 bg-neutral-950 cursor-crosshair`}
           />
 
