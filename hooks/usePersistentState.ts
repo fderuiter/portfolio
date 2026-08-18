@@ -1,16 +1,9 @@
 "use client";
 
 import { useSyncExternalStore, useCallback, Dispatch, SetStateAction } from "react";
+import { safeStorage, STORAGE_CHANGE_EVENT, type StorageOptions } from "@/lib/safe-storage";
+import { sanitizeError } from "@/lib/error-sanitization";
 
-const STORAGE_CHANGE_EVENT = "portfolio-persistent-state-change";
-
-// In-memory cache for raw strings and parsed objects to maintain referential identity
-interface CachedEntry<T> {
-  raw: string | null;
-  parsed: T;
-}
-
-const memoryCache = new Map<string, CachedEntry<unknown>>();
 const subscribers = new Set<() => void>();
 
 function notifySubscribers() {
@@ -20,7 +13,7 @@ function notifySubscribers() {
 if (typeof window !== "undefined") {
   window.addEventListener("storage", (event) => {
     if (event.key) {
-      memoryCache.delete(event.key);
+      safeStorage.invalidateCacheKey(event.key);
       notifySubscribers();
     }
   });
@@ -41,45 +34,22 @@ function getStoredSnapshot<T>(key: string, initialValue: T): T {
   if (typeof window === "undefined") {
     return initialValue;
   }
-
-  let raw: string | null = null;
-  try {
-    raw = window.localStorage.getItem(key);
-  } catch (error) {
-    console.warn(`Error reading localStorage key "${key}":`, error);
-  }
-
-  const cached = memoryCache.get(key) as CachedEntry<T> | undefined;
-  if (cached && cached.raw === raw) {
-    return cached.parsed;
-  }
-
-  if (raw === null) {
-    memoryCache.set(key, { raw: null, parsed: initialValue });
-    return initialValue;
-  }
-
-  try {
-    const parsed = JSON.parse(raw) as T;
-    memoryCache.set(key, { raw, parsed });
-    return parsed;
-  } catch (error) {
-    console.warn(`Error parsing localStorage key "${key}":`, error);
-    memoryCache.set(key, { raw, parsed: initialValue });
-    return initialValue;
-  }
+  const item = safeStorage.getItem<T>(key, initialValue);
+  return item !== null ? item : initialValue;
 }
 
 /**
- * Custom hook that works like useState but persists state to localStorage using useSyncExternalStore.
+ * Custom hook that works like useState but persists state to safeStorage using useSyncExternalStore.
  * Synchronizes seamlessly across multiple hook instances and browser tabs with zero tearing.
  *
  * @param key - The localStorage key to use for this state
  * @param initialValue - The default value if nothing is found in localStorage
+ * @param options - Optional StorageOptions for expiration and LRU eviction tagging
  */
 export function usePersistentState<T>(
   key: string,
-  initialValue: T
+  initialValue: T,
+  options?: StorageOptions
 ): [T, Dispatch<SetStateAction<T>>] {
   const getSnapshot = useCallback(() => getStoredSnapshot(key, initialValue), [key, initialValue]);
   const getServerSnapshot = useCallback(() => initialValue, [initialValue]);
@@ -95,19 +65,16 @@ export function usePersistentState<T>(
             ? (value as (prev: T) => T)(current)
             : value;
 
-        if (typeof window !== "undefined") {
-          const stringified = JSON.stringify(newValue);
-          window.localStorage.setItem(key, stringified);
-          memoryCache.set(key, { raw: stringified, parsed: newValue });
-          window.dispatchEvent(new CustomEvent(STORAGE_CHANGE_EVENT, { detail: { key } }));
-        }
+        safeStorage.setItem(key, newValue, options);
         notifySubscribers();
       } catch (error) {
-        console.warn(`Error setting localStorage key "${key}":`, error);
+        const sanitized = sanitizeError(error);
+        console.warn(`Error setting localStorage key "${key}":`, sanitized);
       }
     },
-    [key, initialValue]
+    [key, initialValue, options]
   );
 
   return [state, setPersistentState];
 }
+
