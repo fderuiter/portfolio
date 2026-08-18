@@ -62,9 +62,9 @@ export const TacticCard: React.FC<TacticCardProps> = ({
       }}
       aria-label={`Tactic ${displayLabel}. Costs ${tactic.baseRamCost} GB RAM. ${tactic.description}`}
     >
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-1 sm:gap-2">
         <span
-          className={`text-sm font-bold tracking-tight ${
+          className={`text-xs sm:text-sm font-bold tracking-tight break-words min-w-0 max-w-full ${
             isSorry ? "text-rose-400" : isSelected ? "text-brand-cyan" : "text-zinc-100"
           }`}
         >
@@ -72,7 +72,7 @@ export const TacticCard: React.FC<TacticCardProps> = ({
         </span>
 
         <span
-          className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold ${
+          className={`shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-bold ${
             isSorry
               ? "bg-rose-500/20 text-rose-300"
               : tactic.baseRamCost >= 6
@@ -84,7 +84,7 @@ export const TacticCard: React.FC<TacticCardProps> = ({
         </span>
       </div>
 
-      <p className="mt-1.5 text-[11px] leading-tight text-zinc-400 line-clamp-2">
+      <p className="mt-1.5 text-[10px] sm:text-[11px] leading-tight text-zinc-400 break-words line-clamp-2">
         {tactic.description}
       </p>
 

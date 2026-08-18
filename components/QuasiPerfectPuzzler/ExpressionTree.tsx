@@ -14,6 +14,7 @@ interface ExpressionTreeProps {
   onSelectTarget: (nodeId: string) => void;
   onHoverTarget: (nodeId: string | null) => void;
   isProofComplete?: boolean;
+  isTacticActive?: boolean;
 }
 
 export const ExpressionTree: React.FC<ExpressionTreeProps> = ({
@@ -24,6 +25,7 @@ export const ExpressionTree: React.FC<ExpressionTreeProps> = ({
   onSelectTarget,
   onHoverTarget,
   isProofComplete = false,
+  isTacticActive = false,
 }) => {
   const mathematicalNotation = renderASTString(goalAST);
 
@@ -53,11 +55,13 @@ export const ExpressionTree: React.FC<ExpressionTreeProps> = ({
               const hypFormula = renderASTString(hyp);
               const isSelected = selectedTargetId === hyp.id;
               const isHovered = hoveredTargetId === hyp.id;
+              const isTargetEligible = isTacticActive && !isProofComplete;
               return (
                 <button
                   type="button"
                   key={hyp.id}
                   data-node-id={hyp.id}
+                  data-target-eligible={isTargetEligible ? "true" : undefined}
                   onClick={() => onSelectTarget(hyp.id)}
                   onMouseEnter={() => onHoverTarget(hyp.id)}
                   onMouseLeave={() => onHoverTarget(null)}
@@ -66,6 +70,8 @@ export const ExpressionTree: React.FC<ExpressionTreeProps> = ({
                       ? "border-purple-400 bg-purple-600/30 text-white shadow-[0_0_12px_rgba(168,85,247,0.5)] ring-2 ring-purple-400"
                       : isHovered
                       ? "border-purple-500/60 bg-purple-950/40 text-purple-100"
+                      : isTargetEligible
+                      ? "border-purple-400 bg-purple-950/60 text-purple-100 shadow-[0_0_12px_rgba(168,85,247,0.5)] ring-1 ring-purple-400 animate-pulse"
                       : "border-purple-500/30 bg-purple-950/20 text-purple-200 hover:border-purple-400"
                   }`}
                 >
@@ -117,6 +123,7 @@ export const ExpressionTree: React.FC<ExpressionTreeProps> = ({
             onSelectTarget={onSelectTarget}
             onHoverTarget={onHoverTarget}
             isInteractive={!isProofComplete}
+            isTacticActive={isTacticActive}
           />
         </div>
 

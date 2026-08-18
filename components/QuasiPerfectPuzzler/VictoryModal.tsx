@@ -40,7 +40,7 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="absolute inset-0 z-40 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 rounded-2xl"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4"
     >
       <div className="max-w-md w-full rounded-2xl border border-zinc-700 bg-zinc-950 p-6 text-center shadow-2xl font-mono">
         {/* Title Badge */}

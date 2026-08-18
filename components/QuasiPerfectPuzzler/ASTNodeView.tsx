@@ -13,6 +13,7 @@ interface ASTNodeViewProps {
   onSelectTarget: (nodeId: string) => void;
   onHoverTarget: (nodeId: string | null) => void;
   isInteractive?: boolean;
+  isTacticActive?: boolean;
 }
 
 export const ASTNodeView: React.FC<ASTNodeViewProps> = React.memo(
@@ -24,9 +25,11 @@ export const ASTNodeView: React.FC<ASTNodeViewProps> = React.memo(
     onSelectTarget,
     onHoverTarget,
     isInteractive = true,
+    isTacticActive = false,
   }) => {
     const isSelected = selectedTargetId === node.id;
     const isHovered = hoveredTargetId === node.id;
+    const isTargetEligible = isTacticActive && isInteractive;
 
     const getNodeStyling = () => {
       switch (node.type) {
@@ -99,6 +102,7 @@ export const ASTNodeView: React.FC<ASTNodeViewProps> = React.memo(
         <motion.button
           type="button"
           data-node-id={node.id}
+          data-target-eligible={isTargetEligible ? "true" : undefined}
           layoutId={`ast-node-${node.id}`}
           onClick={(e) => {
             e.stopPropagation();
@@ -116,6 +120,8 @@ export const ASTNodeView: React.FC<ASTNodeViewProps> = React.memo(
               ? "ring-2 ring-brand-cyan scale-105 shadow-[0_0_20px_rgba(6,182,212,0.6)]"
               : isHovered
               ? "ring-1 ring-brand-cyan/70 scale-102"
+              : isTargetEligible
+              ? "ring-2 ring-brand-cyan/80 border-brand-cyan bg-cyan-950/50 text-cyan-200 shadow-[0_0_15px_rgba(6,182,212,0.5)] animate-pulse cursor-pointer"
               : "hover:border-zinc-500"
           }`}
           whileHover={{ scale: 1.03 }}
@@ -151,6 +157,7 @@ export const ASTNodeView: React.FC<ASTNodeViewProps> = React.memo(
                   onSelectTarget={onSelectTarget}
                   onHoverTarget={onHoverTarget}
                   isInteractive={isInteractive}
+                  isTacticActive={isTacticActive}
                 />
               </div>
             ))}

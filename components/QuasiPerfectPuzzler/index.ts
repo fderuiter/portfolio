@@ -8,5 +8,6 @@ export * from "./TerminalLog";
 export * from "./VictoryModal";
 export * from "./MultiGoalTabs";
 export * from "./LeanIdeInspector";
+export * from "./DiagnosticDrawers";
 export * from "./HintSystem";
 export * from "./SandboxMode";
