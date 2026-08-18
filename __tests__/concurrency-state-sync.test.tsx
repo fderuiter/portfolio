@@ -8,11 +8,14 @@ import { NextRequest } from "next/server";
 
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
-const { mockLpush, mockExpire, mockExec, mockRpop, mockCreateMany } = vi.hoisted(() => ({
+const { mockLpush, mockExpire, mockExec, mockRpop, mockLmove, mockLrange, mockDel, mockCreateMany } = vi.hoisted(() => ({
   mockLpush: vi.fn(),
   mockExpire: vi.fn(),
   mockExec: vi.fn(),
   mockRpop: vi.fn(),
+  mockLmove: vi.fn(),
+  mockLrange: vi.fn().mockResolvedValue([]),
+  mockDel: vi.fn(),
   mockCreateMany: vi.fn(),
 }));
 
@@ -24,8 +27,11 @@ vi.mock("@upstash/redis", () => {
         lpush: mockLpush,
         expire: mockExpire,
         exec: mockExec,
+        lmove: mockLmove,
       };
     }
+    lrange = mockLrange;
+    del = mockDel;
   }
   return { Redis: MockRedis };
 });
@@ -220,7 +226,7 @@ describe("Concurrency & State Synchronization Guardrail Suite", () => {
   });
 
   describe("Telemetry Sync Secondary Buffer Re-enqueue Resilience", () => {
-    it("safely re-enqueues popped events to Redis buffer on primary database write failure", async () => {
+    it("preserves events in processing queue on primary database write failure without data loss", async () => {
       process.env.CRON_SECRET = "test-secret";
 
       const mockBufferEvents = [
@@ -228,6 +234,7 @@ describe("Concurrency & State Synchronization Guardrail Suite", () => {
         { id: "evt-2", projectSlug: "beta", eventType: "project_click", createdAt: new Date().toISOString() },
       ];
 
+      mockLrange.mockResolvedValueOnce([]);
       mockExec.mockReset().mockResolvedValueOnce([mockBufferEvents[0], mockBufferEvents[1]]);
       mockCreateMany.mockReset().mockRejectedValue(
         new Error("Neon Serverless Connection Lost / Deadlock Detected")
@@ -248,10 +255,9 @@ describe("Concurrency & State Synchronization Guardrail Suite", () => {
       const json = await res.json();
       expect(json.error).toBe("Failed to sync events to primary database");
 
-      // Verify that popped items were re-enqueued back to Redis
-      expect(mockLpush).toHaveBeenCalledWith("telemetry_buffer", mockBufferEvents[0]);
-      expect(mockLpush).toHaveBeenCalledWith("telemetry_buffer", mockBufferEvents[1]);
-      expect(mockExpire).toHaveBeenCalledWith("telemetry_buffer", 48 * 60 * 60);
+      // Verify atomic transfer via lmove and that processing queue was not deleted on failure
+      expect(mockLmove).toHaveBeenCalledWith("telemetry_buffer", "telemetry_processing", "right", "left");
+      expect(mockDel).not.toHaveBeenCalledWith("telemetry_processing");
 
       warnSpy.mockRestore();
       errorSpy.mockRestore();

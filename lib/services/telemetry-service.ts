@@ -42,14 +42,6 @@ function swapGenerations() {
   lastSwapTime = Date.now();
 }
 
-const intervalId = setInterval(() => {
-  swapGenerations();
-}, SWAP_INTERVAL_MS);
-
-if (typeof intervalId !== "undefined" && typeof intervalId.unref === "function") {
-  intervalId.unref();
-}
-
 function checkAndSwapPassive() {
   const now = Date.now();
   if (now - lastSwapTime >= SWAP_INTERVAL_MS) {
@@ -201,20 +193,10 @@ export class TelemetryService {
 
   /**
    * Synchronizes buffered telemetry events from Redis into PostgreSQL.
+   * Atomically transfers event batches from 'telemetry_buffer' to 'telemetry_processing'
+   * using LMOVE to guarantee zero telemetry loss during synchronization failures.
    */
   static async syncBufferedEvents(batchSize: number) {
-    const p = redis.pipeline();
-    for (let i = 0; i < batchSize; i++) {
-      p.rpop("telemetry_buffer");
-    }
-
-    const results = await p.exec();
-    const events = results.filter((e) => e !== null);
-
-    if (events.length === 0) {
-      return { processed: 0, inserted: 0 };
-    }
-
     interface BufferedEvent {
       id: string;
       projectSlug: string;
@@ -222,10 +204,36 @@ export class TelemetryService {
       createdAt: string | Date;
     }
 
+    // 1. Fetch any pending events previously transferred to processing queue but not yet synced to DB
+    const existingProcessing = (await redis.lrange("telemetry_processing", 0, -1)) as BufferedEvent[];
+    let events: BufferedEvent[] = Array.isArray(existingProcessing) ? existingProcessing : [];
+
+    // 2. If existing processing queue has fewer items than batchSize, atomically move remaining batch from buffer
+    if (events.length < batchSize) {
+      const needed = batchSize - events.length;
+      const p = redis.pipeline();
+      for (let i = 0; i < needed; i++) {
+        p.lmove("telemetry_buffer", "telemetry_processing", "right", "left");
+      }
+      p.expire("telemetry_processing", 48 * 60 * 60);
+      const moveResults = await p.exec();
+
+      const newlyMoved = moveResults.filter(
+        (item): item is BufferedEvent =>
+          item !== null && typeof item === "object" && "id" in item
+      );
+
+      events = [...events, ...newlyMoved];
+    }
+
+    if (events.length === 0) {
+      return { processed: 0, inserted: 0 };
+    }
+
     let createResult;
     try {
       createResult = await prisma.telemetryEvent.createMany({
-        data: (events as BufferedEvent[]).map((e) => ({
+        data: events.map((e) => ({
           id: e.id,
           projectSlug: e.projectSlug,
           eventType: e.eventType,
@@ -234,19 +242,12 @@ export class TelemetryService {
         skipDuplicates: true,
       });
     } catch (dbErr) {
-      console.warn("Primary database write failed during sync. Re-enqueueing popped events to Redis buffer.", dbErr);
-      try {
-        const rollbackPipeline = redis.pipeline();
-        for (const evt of events) {
-          rollbackPipeline.lpush("telemetry_buffer", evt);
-        }
-        rollbackPipeline.expire("telemetry_buffer", 48 * 60 * 60);
-        await rollbackPipeline.exec();
-      } catch (redisErr) {
-        console.error("Critical: Failed to re-enqueue buffered telemetry events to Redis:", redisErr);
-      }
+      console.warn("Primary database write failed during sync. Telemetry event batch remains intact in processing queue.", dbErr);
       throw dbErr;
     }
+
+    // On successful DB write, clear the processed events from the processing queue
+    await redis.del("telemetry_processing");
 
     return { processed: events.length, inserted: createResult.count };
   }
