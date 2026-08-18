@@ -15,6 +15,15 @@ import {
 import { designManifest } from "@/lib/design-manifest";
 import { resolveThemeFonts, resolveSingleThemeFont, type ThemeFonts } from "@/lib/layout-config";
 import { useTerminology } from "@/components/providers/TerminologyProvider";
+import { 
+  parsePretextBlocks, 
+  calculateBlockHeight, 
+  BLOCK_LAYOUT_CONFIG,
+  preparePretextBlocks,
+  type StructuredBlock,
+  type PreparedBlock,
+  type StructuredBlockType
+} from "@/lib/pretext-block-parser";
 
 import { 
   isBrowser, 
@@ -98,6 +107,43 @@ export function usePretextLayout({
     }
     fontStringRef.current = fontString;
 
+    const flooredWidth = Math.floor(maxWidth);
+    const blocks = parsePretextBlocks(text);
+    const hasSpecialBlocks = blocks.some((b) => b.type !== "paragraph");
+
+    if (hasSpecialBlocks) {
+      let totalHeight = 0;
+      let totalLines = 0;
+      for (const b of blocks) {
+        if (b.type === "paragraph") {
+          const prepKey = `${b.raw}|${fontString}`;
+          let prep = textPrepareCache.get(prepKey);
+          if (!prep) {
+            prep = prepare(b.raw, fontString);
+            textPrepareCache.set(prepKey, prep);
+          }
+          const res = layout(prep, flooredWidth, activeLineHeight);
+          totalHeight += res.height;
+          totalLines += res.lineCount;
+        } else {
+          const blockH = calculateBlockHeight(b, flooredWidth, activeLineHeight);
+          totalHeight += blockH;
+          totalLines += b.lines.length;
+        }
+      }
+      if (blocks.length > 1) {
+        totalHeight += (blocks.length - 1) * BLOCK_LAYOUT_CONFIG.PARAGRAPH_GAP;
+      }
+
+      setState((prev) => {
+        if (prev.height === totalHeight && prev.lineCount === totalLines) {
+          return prev;
+        }
+        return { isReady: true, height: totalHeight, lineCount: totalLines };
+      });
+      return;
+    }
+
     const prepareKey = `${text}|${fontString}`;
     const stylesheetLoaded = isStylesheetLoaded();
     let prepared = stylesheetLoaded ? textPrepareCache.get(prepareKey) : undefined;
@@ -109,7 +155,6 @@ export function usePretextLayout({
     }
     preparedTextRef.current = prepared;
 
-    const flooredWidth = Math.floor(maxWidth);
     const cacheKey = `${text}|${fontString}|${flooredWidth}|${activeLineHeight}`;
     let result = stylesheetLoaded ? textLayoutCache.get(cacheKey) : undefined;
 
@@ -725,5 +770,15 @@ export const PretextRichText: React.FC<PretextRichTextProps> = ({
       </p>
     </div>
   );
+};
+
+export {
+  parsePretextBlocks,
+  preparePretextBlocks,
+  calculateBlockHeight,
+  BLOCK_LAYOUT_CONFIG,
+  type StructuredBlock,
+  type PreparedBlock,
+  type StructuredBlockType
 };
 
