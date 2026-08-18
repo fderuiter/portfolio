@@ -9,6 +9,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { SearchProvider } from "@/components/providers/SearchProvider";
 import { AudioProvider } from "@/components/providers/AudioProvider";
 import NotFound from "@/app/not-found";
+import CaseStudyNotFound from "@/app/case-studies/[slug]/not-found";
 
 const MockRetroLabyrinth = () => <div>SYSTEM_LABYRINTH.EXE</div>;
 
@@ -100,5 +101,32 @@ describe("NotFound component & dynamic metadata hoisting", () => {
     const canonicalLink = document.head.querySelector('link[rel="canonical"]');
     expect(canonicalLink).toBeDefined();
     expect(canonicalLink?.getAttribute("href")).toBe("https://my-custom-test-domain.com/some-broken-path");
+  });
+
+  it("renders CaseStudyNotFound with custom badge, title, and interactive retro mini-game", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(
+        <AudioProvider>
+          <SearchProvider>
+            <CaseStudyNotFound />
+          </SearchProvider>
+        </AudioProvider>
+      );
+    });
+
+    // Check custom case study badge, title, and description
+    expect(container.textContent).toContain("CASE_NOT_FOUND");
+    expect(container.textContent).toContain("Case Study Unresolved");
+    expect(container.textContent).toContain("The requested clinical case study narrative does not exist");
+
+    // Check retro mini-game is rendered
+    expect(container.textContent).toContain("SYSTEM_LABYRINTH.EXE");
+
+    // Check secondary action link
+    expect(container.textContent).toContain("Return to Core Feed");
+
+    // Check page title hoisted in head
+    expect(document.title).toBe("CASE_NOT_FOUND - Case Study Unresolved");
   });
 });

@@ -10,7 +10,7 @@ export default function CaseStudyNotFound() {
       description="The requested clinical case study narrative does not exist or has not been published to the active database partition."
       secondaryActionText="Return to Core Feed"
       secondaryActionHref="/"
-      showRetroLabyrinth={false}
+      showRetroLabyrinth={true}
     />
   );
 }
