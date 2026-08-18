@@ -867,14 +867,27 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    if (rect.width <= 0 || rect.height <= 0) return;
 
-    const cellW = canvas.width / currentMaze[0].length;
-    const cellH = canvas.height / currentMaze.length;
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
 
-    const gridX = Math.floor(x / cellW);
-    const gridY = Math.floor(y / cellH);
+    const canvasX = (e.clientX - rect.left) * scaleX;
+    const canvasY = (e.clientY - rect.top) * scaleY;
+
+    const cols = currentMaze[0]?.length || 15;
+    const rows = currentMaze.length || 9;
+
+    const cellW = canvas.width / cols;
+    const cellH = canvas.height / rows;
+
+    if (cellW <= 0 || cellH <= 0) return;
+
+    const rawGridX = Math.floor(canvasX / cellW);
+    const rawGridY = Math.floor(canvasY / cellH);
+
+    const gridX = clamp(rawGridX, 0, cols - 1);
+    const gridY = clamp(rawGridY, 0, rows - 1);
 
     cursorGridPosRef.current = { x: gridX, y: gridY };
 
@@ -1292,6 +1305,27 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
             return true;
           });
 
+          // Draw Cursor Hover Highlight Tile
+          if (
+            cursorGridPosRef.current &&
+            gameMode === "roguelike" &&
+            roomIndex === 2 &&
+            gameStatus === "playing"
+          ) {
+            const { x: hx, y: hy } = cursorGridPosRef.current;
+            if (hx >= 0 && hx < cols && hy >= 0 && hy < rows) {
+              const hpx = hx * cellW;
+              const hpy = hy * cellH;
+              ctx.save();
+              ctx.fillStyle = "rgba(34, 211, 238, 0.2)";
+              ctx.fillRect(hpx, hpy, cellW, cellH);
+              ctx.strokeStyle = currentTheme.accentColor || "#22d3ee";
+              ctx.lineWidth = 1.5;
+              ctx.strokeRect(hpx + 0.5, hpy + 0.5, cellW - 1, cellH - 1);
+              ctx.restore();
+            }
+          }
+
           // Calibrated CRT Post-Processing Pipeline (Phosphor mask, Scanlines, Bloom, Vignette)
           renderCRTEffects(
             ctx,
@@ -1630,6 +1664,9 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
             width={240}
             height={144}
             onMouseMove={handleCanvasMouseMove}
+            onMouseLeave={() => {
+              cursorGridPosRef.current = null;
+            }}
             className={`block ${
               isFullscreen
                 ? "w-full h-full max-h-[calc(100vh-220px)] object-contain"

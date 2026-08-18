@@ -73,6 +73,39 @@ describe("RetroLabyrinth Component Architecture & Functional Rules", () => {
   });
 });
 
+describe("Direct Inline Coordinate Scaling & Index Clamping Invariants", () => {
+  const componentPath = path.resolve(__dirname, "../components/RetroLabyrinth.tsx");
+  const content = fs.readFileSync(componentPath, "utf-8");
+
+  it("includes defensive zero-dimension guard for canvas bounding box", () => {
+    expect(content).toContain("if (rect.width <= 0 || rect.height <= 0) return;");
+  });
+
+  it("calculates scaling ratio based on internal canvas resolution and bounding rect", () => {
+    expect(content).toContain("const scaleX = canvas.width / rect.width;");
+    expect(content).toContain("const scaleY = canvas.height / rect.height;");
+  });
+
+  it("transforms client event offsets to internal canvas logical coordinates", () => {
+    expect(content).toContain("const canvasX = (e.clientX - rect.left) * scaleX;");
+    expect(content).toContain("const canvasY = (e.clientY - rect.top) * scaleY;");
+  });
+
+  it("clamps calculated grid indices within valid column and row bounds", () => {
+    expect(content).toContain("const gridX = clamp(rawGridX, 0, cols - 1);");
+    expect(content).toContain("const gridY = clamp(rawGridY, 0, rows - 1);");
+  });
+
+  it("resets cursor grid position on mouse leave", () => {
+    expect(content).toContain("cursorGridPosRef.current = null;");
+  });
+
+  it("renders hover highlight overlay for target cell", () => {
+    expect(content).toContain("Draw Cursor Hover Highlight Tile");
+    expect(content).toContain("cursorGridPosRef.current");
+  });
+});
+
 describe("CommandPalette Roguelike Registration", () => {
   const cmdPath = path.resolve(__dirname, "../components/CommandPalette.tsx");
   const content = fs.readFileSync(cmdPath, "utf-8");
