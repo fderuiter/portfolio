@@ -8,6 +8,11 @@ const {
   validateMigrationFiles,
 } = require("../scripts/check-migration-integrity.js");
 
+const {
+  runUnifiedMigrationCheck,
+  checkDestructiveMigrations,
+} = require("../scripts/check-migrations.js");
+
 describe("Prisma migration integrity", () => {
   it("reads the provider from a Prisma datasource block", () => {
     expect(
@@ -38,5 +43,25 @@ describe("Prisma migration integrity", () => {
     expect(() => getSchemaProvider("datasource db { url = env(\"DATABASE_URL\") }")).toThrow(
       "Could not read the datasource provider",
     );
+  });
+
+  it("executes unified migration validator cleanly across current codebase", () => {
+    expect(() => runUnifiedMigrationCheck()).not.toThrow();
+  });
+
+  it("detects destructive migrations when present and respects override flag", () => {
+    const fs = require("fs");
+    const path = require("path");
+    const os = require("os");
+
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "migration-test-"));
+    const migrationDir = path.join(tmpDir, "20260901_drop_test");
+    fs.mkdirSync(migrationDir, { recursive: true });
+    fs.writeFileSync(path.join(migrationDir, "migration.sql"), "ALTER TABLE \"CaseStudy\" DROP COLUMN \"title\";");
+
+    expect(() => checkDestructiveMigrations(tmpDir, false)).toThrow("Destructive migrations are blocked");
+    expect(() => checkDestructiveMigrations(tmpDir, true)).not.toThrow();
+
+    fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 });

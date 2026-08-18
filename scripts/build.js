@@ -42,26 +42,9 @@ runStep('npx', ['tsx', 'scripts/generate-openapi.ts']);
 console.log("\n--- Phase 1.3: Verifying Terminology Glossary & Template Compiler Integrity ---");
 runStep('npx', ['tsx', 'scripts/verify-terms.ts']);
 
-// 3. Pre-Build Database Migrations (Phase 1.5)
-const isProduction = process.env.VERCEL_ENV === 'production';
-console.log(`\nChecking environment: VERCEL_ENV=${process.env.VERCEL_ENV || 'undefined'}`);
-
-if (isProduction) {
-  console.log("\n--- Phase 1.5: Production Environment Detected - Running Migration Checks and Deploys ---");
-  
-  // A. Migration Integrity and Safety Checks
-  console.log("Running migration integrity and safety checks...");
-  runStep('npm', ['run', 'check:migrations']);
-  
-  // B. Deploy Migrations
-  console.log("Deploying database migrations...");
-  runStep('npx', ['prisma', 'migrate', 'deploy']);
-  
-  console.log("Database migrations applied successfully!");
-} else {
-  console.log("\n--- Phase 1.5: Non-Production Environment - Skipping Database Migrations ---");
-  console.log("Skipping check:migrations and prisma migrate deploy because this is not a production environment.");
-}
+// 3. Pre-Build Offline Migration Validation (Phase 1.5)
+console.log("\n--- Phase 1.5: Offline Migration Integrity and Safety Validation ---");
+runStep('npm', ['run', 'check:migrations']);
 
 // 3.5. Documentation Compilation Phase (Phase 1.8)
 console.log("\n--- Phase 1.8: Strictly Compiling and Verifying Documentation ---");
