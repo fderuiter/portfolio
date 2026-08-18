@@ -6,7 +6,7 @@
 
 # Interface: MetricSummary
 
-Defined in: [lib/dx/page-bench.ts:62](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L62)
+Defined in: [lib/dx/page-bench.ts:63](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L63)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/dx/page-bench.ts:62](https://github.com/fderuiter/portfolio/blo
 
 > **max**: `number`
 
-Defined in: [lib/dx/page-bench.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L65)
+Defined in: [lib/dx/page-bench.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L66)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/dx/page-bench.ts:65](https://github.com/fderuiter/portfolio/blo
 
 > **median**: `number`
 
-Defined in: [lib/dx/page-bench.ts:63](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L63)
+Defined in: [lib/dx/page-bench.ts:64](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L64)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/dx/page-bench.ts:63](https://github.com/fderuiter/portfolio/blo
 
 > **min**: `number`
 
-Defined in: [lib/dx/page-bench.ts:64](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L64)
+Defined in: [lib/dx/page-bench.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L65)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/dx/page-bench.ts:64](https://github.com/fderuiter/portfolio/blo
 
 > **p95**: `number`
 
-Defined in: [lib/dx/page-bench.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L66)
+Defined in: [lib/dx/page-bench.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L67)
