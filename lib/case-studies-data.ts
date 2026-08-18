@@ -420,6 +420,11 @@ export const tenantAuthGuard = createMiddleware(async (c, next) => {
 
 <h4>3. Edge-Native Event-Driven Async Processing</h4>
 <p>Background workflows and async task queues are powered by Inngest functions embedded directly inside Hono, delivering event-driven reliability without needing persistent worker processes.</p>`,
+    created_at: new Date("2026-02-18T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-7",
     slug: "inbody-qr-decoder",
     title: "InBody QR Data Decoder & Analyzer: BIA Reverse Engineering",
     primary_language: "Python",
@@ -454,6 +459,11 @@ def decode_digits(raw_slice: str, scale_factor: float = 0.1, precision: int = 2)
 
 <h4>3. Multi-Block Segment Parsing &amp; Biomarker Derivation</h4>
 <p>Primary body composition parameters reside in Segment Index 4 (<code>meas_blob</code>), while secondary metrics (BMR and Visceral Fat) are extracted from Segment Index 5 in kilocalories. Derived biomarkers, including Appendicular Skeletal Muscle Mass (ASM) and Skeletal Muscle Index ($\\text{SMI} = \\frac{\\text{ASM}}{\\text{Height}^2}$), are computed deterministically.</p>`,
+    created_at: new Date("2026-02-20T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-8",
     slug: "polyglot-tsp",
     title: "Polyglot-TSP: Technical Breakdown & Portfolio Integration",
     primary_language: "Rust",
@@ -567,6 +577,11 @@ endmodule
 <h3>Trade-Offs & Key Decisions</h3>
 <p>1. <strong>Exhaustive Permutations ($O(N!)$) vs. Dynamic Programming / Heuristics ($O(N^2 2^N)$)</strong>: Prioritized strict brute-force permutation generation across all targets to maintain an identical baseline for syntactic and runtime execution comparisons across obscure and exotic paradigms.</p>
 <p>2. <strong>Subprocess CLI Execution vs. Foreign Function Interface (FFI)</strong>: Chose process-level standard stream (stdout/stderr) assertion over C ABI bindings to accommodate non-standardized runtimes, HDL simulation pipelines (ghdl, iverilog), and legacy/esoteric environments (INTERCAL, COBOL, Modula-2).</p>`,
+    created_at: new Date("2026-02-25T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-9",
     slug: "oxidizemath",
     title: "OxidizeMath: Verified Numerical Computation Framework in Rust",
     primary_language: "Rust",
@@ -627,6 +642,11 @@ where
 
 <h4>3. WASM-First GUI Architecture</h4>
 <p>Deploys identical single-binary desktop execution and zero-install WebAssembly browser builds using egui and custom <code>egui_plot</code> engines.</p>`,
+    created_at: new Date("2026-02-28T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-10",
     slug: "ualbf",
     title: "UALBF: Verified Computational Proof Engine & Search Architecture",
     primary_language: "Rust",
@@ -737,6 +757,10 @@ pub extern "C" fn ualbf_verify_certificate_manifest(
 }
 </code></pre>`,
     created_at: new Date("2026-03-01T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-11",
     slug: "sortify",
     title: "Sortify: Air-Gapped Document Classification & Resilient File Engine",
     primary_language: "Python",
@@ -780,6 +804,135 @@ def stage_and_commit_move(self, src: str, dest_dir: str) -> str:
     created_at: new Date("2026-02-20T00:00:00Z"),
     updated_at: new Date("2026-08-14T00:00:00Z"),
   },
+  {
+    id: "canonical-12",
+    slug: "sonos-network-controller",
+    title: "Sonos Network Controller: Async UPnP & Local REST API",
+    primary_language: "Python",
+    github_url: "https://github.com/fderuiter/sonos-network-controller",
+    published: true,
+    simulated_telemetry: false,
+    tags: "python, fastapi, upnp, sonos, htmx, asyncio, reverse-engineering, iot",
+    editorial_content: "A **lightweight**, local-network control plane and `REST API` for **Sonos smart speakers**, bypassing external cloud dependencies. Engineered with an asynchronous **UPnP/SOAP** client stack using `aiohttp` and `asyncio`, an extensible **registry pattern**, and dynamic `DIDL-Lite XML` schema parsing.",
+    architectural_narrative: `<h3>Context &amp; Motivation</h3>
+<p>Official proprietary speaker management applications often introduce heavy resource overhead, vendor lock-in, cloud dependencies, and sluggish user interfaces. This project provides a lightweight, local-network control plane and REST API for Sonos smart speakers, bypassing external cloud intermediaries in favor of direct local network orchestration over UPnP and SOAP.</p>
+
+<h3>System Design &amp; Architecture</h3>
+<p>The system segregates lower-level SOAP transport primitives from domain-specific UPnP services and business domain orchestration services, backed by dynamic command dispatch and server-driven HTMX frontend updates.</p>
+
+<pre><code class="language-mermaid">
+flowchart TD
+    Client[Browser / HTMX Client] --&gt;|HTTP / Form Data| Router[FastAPI Application Gateway]
+
+    subgraph Routing &amp; Middleware
+        Router --&gt; ErrorDecorator[@api_error_handler Decorator]
+        Router --&gt; Registry[Action Registry Dispatcher]
+    end
+
+    subgraph Service Layer
+        Registry --&gt; AVService[AVTransport Client]
+        Registry --&gt; RenderService[RenderingControl Client]
+        Router --&gt; ZoneService[Zone &amp; Topology Service]
+        Router --&gt; RadioService[Radio Service / pyradios]
+    end
+
+    subgraph Hardware Integration
+        AVService --&gt;|SOAP / XML POST| SonosHW[Sonos Speaker - Port 1400]
+        RenderService --&gt;|SOAP / XML POST| SonosHW
+        ZoneService --&gt;|SOAP / XML POST| SonosHW
+        Router --&gt;|SSDP Multicast / UDP 1900| SonosHW
+    end
+</code></pre>
+
+<h3>Key Technical Challenges</h3>
+
+<h4>1. Dynamic SOAP Invocation &amp; Robust XML Extraction</h4>
+<p>UPnP responses mix XML namespaces and return inner XML strings inside SOAP payloads. A reusable <code>BaseSonosClient</code> provides robust SOAP envelope encapsulation, HTTP status verification, and fallback XML search parsing.</p>
+
+<pre><code class="language-python">
+async def _invoke_soap_request(
+    self, path: str, service_urn: str, action: str, body_content: str = ""
+) -&gt; str:
+    url = f"http://{self.ip}:{self.port}{path}"
+    soap_action = f"{service_urn}#{action}"
+    soap_body = (
+        '&lt;?xml version="1.0"?&gt;'
+        '&lt;s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" '
+        's:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"&gt;'
+        "&lt;s:Body&gt;"
+        f'&lt;u:{action} xmlns:u="{service_urn}"&gt;'
+        f"{body_content}"
+        f"&lt;/u:{action}&gt;"
+        "&lt;/s:Body&gt;"
+        "&lt;/s:Envelope&gt;"
+    )
+    headers = {
+        "SOAPAction": f'"{soap_action}"',
+        "Content-Type": "text/xml; charset=utf-8",
+        "Accept-Encoding": "gzip",
+    }
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers=headers, data=soap_body.encode("utf-8")) as response:
+            content = await response.text()
+            if response.status &gt;= 400:
+                response.raise_for_status()
+            return content
+</code></pre>
+
+<h4>2. Declarative Dynamic Command Routing</h4>
+<p>Exposing granular device actions (volume, EQ, playback, seek, group) without dozens of repetitive boilerplate controller routes. Functional execution is centralized in an <code>ACTION_REGISTRY</code> mapping HTTP form actions directly to underlying client coroutines.</p>
+
+<pre><code class="language-python">
+ACTION_REGISTRY = {
+    "setvolume": lambda ip, value: get_rendering_control_client(ip).set_volume(int(value)),
+    "getvolume": lambda ip, value=None: get_rendering_control_client(ip).get_volume(),
+    "play": lambda ip, value=None: get_av_transport_client(ip).play(),
+    "pause": lambda ip, value=None: get_av_transport_client(ip).pause(),
+    "seek": lambda ip, value: get_av_transport_client(ip).seek(value),
+    "settrack": lambda ip, value: get_av_transport_client(ip).set_av_transport_uri(value),
+    "status": lambda ip, value=None: get_av_transport_client(ip).get_transport_info(),
+}
+</code></pre>
+
+<h4>3. SSDP Multicast Discovery &amp; Network Query Optimization</h4>
+<p>SSDP M-SEARCH multicast discovery over UDP port 1900 uses a 10-second TTL memoization cache (<code>cachetools.TTLCache</code>) to eliminate socket exhaustion and broadcast flooding on local LANs.</p>
+
+<pre><code class="language-python">
+async def discover_sonos_devices(timeout: float = 2.0, ttl_seconds: int = 10) -&gt; List[Dict[str, str]]:
+    """SSDP M-SEARCH multicast discovery over UDP port 1900 with TTLCache memoization."""
+    cached = _discovery_cache.get("devices")
+    if cached is not None:
+        return cached
+
+    msg = (
+        'M-SEARCH * HTTP/1.1\r\n'
+        'HOST: 239.255.255.250:1900\r\n'
+        'MAN: "ssdp:discover"\r\n'
+        'MX: 1\r\n'
+        'ST: urn:schemas-upnp-org:device:ZonePlayer:1\r\n\r\n'
+    )
+    devices = []
+    # Async UDP socket binding &amp; response parsing...
+    _discovery_cache["devices"] = devices
+    return devices
+</code></pre>
+
+<h3>Trade-Offs &amp; Key Decisions</h3>
+<ul>
+  <li><strong>Bespoke Async UPnP Client vs. Heavy 3rd-Party SDKs (e.g. SoCo)</strong>: Implemented a bespoke, lightweight asynchronous client over <code>aiohttp</code> to guarantee event-loop compatibility, predictable error boundaries, and minimal container image size.</li>
+  <li><strong>Server-Driven HTMX Swaps vs. Client-Side SPA</strong>: Traded client-side JS state machines for HTMX polling (<code>hx-trigger="every 2s"</code>) and partial DOM updates, lowering memory footprint for edge hosting on low-power devices.</li>
+  <li><strong>SSDP Discovery with Nmap Fallback</strong>: Standard UDP SSDP discovery (M-SEARCH) handles zero-conf resolution, with optional socket/nmap port scanning on port 1400 for hardened networks.</li>
+</ul>
+
+<h3>Lessons Learned &amp; Future Roadmap</h3>
+<ul>
+  <li><strong>WebSocket / EventSub Integration</strong>: Transition from HTMX interval polling (every 2s) to UPnP GENA event notifications or WebSockets for instant state pushes.</li>
+  <li><strong>Persistent Connection Pooling</strong>: Reuse persistent <code>aiohttp.ClientSession</code> instances across requests to reduce socket churn.</li>
+  <li><strong>Queue Management UI</strong>: Expand ContentDirectory pagination to support large music library browsing and reorderable queues.</li>
+</ul>`,
+    created_at: new Date("2026-03-15T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
 ];
 
 export const FALLBACK_CASE_STUDIES: CaseStudyData[] = rawFallbackCaseStudies.map((cs) => ({
@@ -787,4 +940,3 @@ export const FALLBACK_CASE_STUDIES: CaseStudyData[] = rawFallbackCaseStudies.map
   editorial_content: compileTerms(cs.editorial_content),
   architectural_narrative: compileTerms(cs.architectural_narrative),
 }));
-

@@ -191,6 +191,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         ]
       },
       {
+        id: "nav-sonos-network-controller",
+        title: "Sonos Network Controller: Async UPnP & Local REST API",
+        subtitle: "Deep-dive technical case study — async UPnP/SOAP protocol client, HTMX UI & action registry",
+        category: "navigation",
+        url: "/case-studies/sonos-network-controller",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Case Study",
+        status: "Python / AsyncIO",
+        description: "Lightweight local-network control plane and REST API for Sonos speakers, bypassing cloud dependencies via async UPnP/SOAP orchestration.",
+        techStack: ["Python", "FastAPI", "AsyncIO", "UPnP", "HTMX", "TailwindCSS"],
+        highlights: [
+          "Non-blocking async UPnP/SOAP protocol stack",
+          "Centralized ACTION_REGISTRY dispatching",
+          "10s TTL memoized SSDP multicast discovery"
+        ]
+      },
+      {
         id: "nav-laser-loon",
         title: "Laser Loon: Quest for the State Flag",
         subtitle: "Playable civic physics shooter — pilot F277 Laser Loon on the Road to the Capitol",

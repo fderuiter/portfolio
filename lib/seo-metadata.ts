@@ -107,6 +107,13 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     keywords: ["Rust", "Scientific Computing", "Simulation", "PDE Solver", "Formal Verification", "egui", "WebAssembly"],
     ogType: "article",
   },
+  sonosNetworkController: {
+    title: "Sonos Network Controller Case Study | Technical Breakdown & Architecture",
+    description: "Deep dive technical breakdown of Sonos Network Controller — a lightweight, non-blocking async UPnP/SOAP control plane and REST API for Sonos speakers.",
+    path: "/case-studies/sonos-network-controller",
+    keywords: ["Python", "FastAPI", "UPnP", "Sonos", "HTMX", "AsyncIO", "Reverse Engineering", "IoT", "SOAP"],
+    ogType: "article",
+  },
 };
 
 /**
