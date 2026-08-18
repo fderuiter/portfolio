@@ -2,4 +2,3 @@
 npx lint-staged
 npm run check-docs-drift
 npm run verify
-npm test

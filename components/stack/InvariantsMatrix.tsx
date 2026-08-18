@@ -125,9 +125,9 @@ const INVARIANTS: InvariantItem[] = [
   {
     id: 12,
     code: "INV-12",
-    name: "Property Fuzzing & Mutation Thresholds",
+    name: "Property Fuzzing Gates",
     category: "Reliability",
-    description: "Deterministic AST calculation engines pass property-based fuzz tests via fast-check and exceed Stryker mutation threshold gates (>=80% score).",
+    description: "Deterministic AST calculation engines pass fast-check property-based fuzz testing gates.",
     verificationCmd: "npm run test:fuzz",
     status: "Verified",
   },

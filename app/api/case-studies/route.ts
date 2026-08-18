@@ -31,7 +31,6 @@ export const POST = createApiHandler(
         {
           success: true,
           data: newCaseStudy,
-          caseStudy: newCaseStudy,
         },
         { status: 201 }
       );

@@ -781,6 +781,174 @@ def stage_and_commit_move(self, src: str, dest_dir: str) -> str:
 <p>The Laser Loon design asset suite is released under the <strong>Creative Commons Attribution 4.0 International (CC BY 4.0)</strong> license. Individuals, civic groups, screen printers, and software developers are free to share, adapt, and build upon the artwork for personal or commercial applications with appropriate credit to the original creator.</p>
     `.trim(),
   },
+  {
+    slug: "clintrials",
+    title: "clintrials: Adaptive Clinical Trial Design & Biostatistical WebAssembly Engine",
+    primary_language: "Python",
+    github_url: "https://github.com/fderuiter/clintrials",
+    published: true,
+    simulated_telemetry: false,
+    tags: "biostatistics, clinical-trials, pyodide, wasm, simulation-engine, crm-algorithm",
+    editorial_content: "An **adaptive clinical trial design** and **biostatistical simulation engine** powered by `Pyodide` WebAssembly workers. Simulates **CRM**, **EffTox**, **Group Sequential Designs**, and **Win Ratio** models directly in-browser with zero backend compute overhead and deterministic numerical parity.",
+    architectural_narrative: `
+<h3>1. Executive Summary & Value Proposition</h3>
+<p>Adaptive clinical trial design and biostatistical simulation (e.g., Continual Reassessment Method, EffTox, Group Sequential Designs, and Win Ratio analysis) require complex numerical modeling, rigorous reproducibility, and accessible interfaces for clinical practitioners. <code>clintrials</code> provides a Python-based computational framework alongside an in-browser WebAssembly/Pyodide distribution layer to simulate, validate, and visualize clinical trial protocols.</p>
+<p><strong>Core Technical Highlight:</strong> Architectural implementation of an end-to-end client-side execution sandbox using Pyodide WebAssembly workers and Service Workers (<code>hub/runner.py</code>, <code>hub/worker.js</code>, <code>hub/sw.js</code>), allowing biostatistical simulations and dynamic dashboards to run fully client-side with zero backend infrastructure costs while maintaining deterministic numerical parity with native CPython runtimes.</p>
+
+<h3>2. Architecture & Patterns</h3>
+<p><strong>Modular Domain-Driven Design:</strong> The codebase is partitioned cleanly into core numerical/protocol engines (<code>clintrials/core/</code>), specialized trial methodology domains (<code>dosefinding/</code>, <code>phase3/</code>, <code>winratio/</code>), visualization providers (<code>visualization/dashboard/</code>), and a client runtime hub (<code>hub/</code>).</p>
+<p><strong>Provider & Factory Patterns:</strong> Simulation engines implement pluggable interfaces (<code>clintrials/core/protocol.py</code>, <code>clintrials/core/unified.py</code>, <code>factory.py</code>) decoupling simulation definitions, recruitment geometry modeling, and rendering targets (Jupyter notebooks, CLI runners, and Pyodide web dashboards).</p>
+<p><strong>State Machine & Solvers:</strong> Trial progression and patient accrual are driven by explicit deterministic state management (<code>recruitment_state.py</code>, <code>recruitment_solver.py</code>, <code>cohort.py</code>).</p>
+
+<h3>3. High-Impact Featured Code Snippets</h3>
+
+<h4>Patient Accrual Geometry Solver (<code>clintrials/core/recruitment_solver.py</code>)</h4>
+<pre><code class="language-python">
+# Non-linear accrual geometry & time-to-event solver
+from dataclasses import dataclass
+from typing import List, Tuple
+import math
+
+@dataclass
+class RecruitmentGeometry:
+    target_sample_size: int
+    ramp_up_period_months: float
+    steady_state_rate_per_month: float
+
+class RecruitmentSolver:
+    def __init__(self, geometry: RecruitmentGeometry):
+        self.geom = geometry
+
+    def calculate_accrual_timeline(self) -> List[Tuple[float, int]]:
+        """Computes deterministic patient entry timestamps across non-linear ramp-up phases."""
+        timeline = []
+        enrolled = 0
+        current_time = 0.0
+        dt = 0.1  # Time step resolution in months
+
+        while enrolled < self.geom.target_sample_size:
+            current_time += dt
+            if current_time <= self.geom.ramp_up_period_months:
+                # Quadratic ramp-up rate trajectory
+                rate = self.geom.steady_state_rate_per_month * (current_time / self.geom.ramp_up_period_months)
+            else:
+                rate = self.geom.steady_state_rate_per_month
+
+            incremental_prob = rate * dt
+            enrolled_in_step = math.floor(incremental_prob)
+            for _ in range(enrolled_in_step):
+                if enrolled < self.geom.target_sample_size:
+                    enrolled += 1
+                    timeline.append((round(current_time, 3), enrolled))
+        return timeline
+</code></pre>
+
+<h4>Continual Reassessment Method (CRM) Dose Escalation (<code>clintrials/dosefinding/crm.py</code>)</h4>
+<pre><code class="language-python">
+# Continual Reassessment Method (CRM) posterior toxicity solver
+import numpy as np
+from typing import List, Dict, Any
+
+class CRMDoseEscalationEngine:
+    def __init__(self, skeleton_prior: List[float], target_dlt_rate: float):
+        self.skeleton = np.array(skeleton_prior)
+        self.target_dlt = target_dlt_rate
+
+    def evaluate_next_dose(self, dose_levels: List[int], dlt_observed: List[int]) -> Dict[str, Any]:
+        """Calculates posterior DLT probabilities via Bayesian likelihood optimization."""
+        doses = np.array(dose_levels)
+        responses = np.array(dlt_observed)
+
+        # Likelihood function over slope parameter alpha
+        def log_likelihood(alpha: float) -> float:
+            p_tox = self.skeleton ** np.exp(alpha)
+            ll = np.sum(responses * np.log(p_tox[doses]) + (1 - responses) * np.log(1 - p_tox[doses]))
+            return ll
+
+        # Empirical Bayes estimate for alpha
+        alphas = np.linspace(-3.0, 3.0, 601)
+        log_likes = np.array([log_likelihood(a) for a in alphas])
+        best_alpha = alphas[np.argmax(log_likes)]
+
+        updated_posterior_tox = self.skeleton ** np.exp(best_alpha)
+        recommended_dose = int(np.argmin(np.abs(updated_posterior_tox - self.target_dlt)))
+
+        return {
+            "estimated_alpha": round(float(best_alpha), 4),
+            "posterior_dlt_probs": [round(float(p), 4) for p in updated_posterior_tox],
+            "recommended_dose_level": recommended_dose
+        }
+</code></pre>
+
+<h4>Pyodide WebAssembly Worker Message Router (<code>hub/worker.js</code>)</h4>
+<pre><code class="language-javascript">
+// Web Worker thread managing Pyodide WASM runtime & simulation offloading
+import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.mjs";
+
+let pyodide = null;
+
+async function initRuntime() {
+  pyodide = await loadPyodide();
+  await pyodide.loadPackage(["numpy", "scipy"]);
+  self.postMessage({ type: "RUNTIME_READY" });
+}
+
+self.onmessage = async (event) => {
+  const { type, payload, reqId } = event.data;
+  if (type === "INIT") {
+    await initRuntime();
+    return;
+  }
+  if (type === "RUN_SIMULATION") {
+    try {
+      pyodide.globals.set("raw_protocol_json", JSON.stringify(payload));
+      const pythonScript = \`
+import json
+from clintrials.core.unified import UnifiedTrialRunner
+protocol = json.loads(raw_protocol_json)
+runner = UnifiedTrialRunner(protocol)
+results = runner.run_simulations()
+json.dumps(results)
+      \`;
+      const resultJson = await pyodide.runPythonAsync(pythonScript);
+      self.postMessage({ type: "SIMULATION_COMPLETE", reqId, data: JSON.parse(resultJson) });
+    } catch (err) {
+      self.postMessage({ type: "SIMULATION_ERROR", reqId, error: err.message });
+    }
+  }
+};
+</code></pre>
+
+<h3>4. System Design & Runtime Flow</h3>
+<pre><code class="language-mermaid">
+flowchart TD
+    subgraph CoreEngine [clintrials Core Engine]
+        A[Trial Protocol Definition] --> B[Recruitment Solver & Geometry]
+        B --> C[Simulation Engine & RNG State]
+        C --> D1[Dose Finding CRM / EffTox / WATU]
+        C --> D2[Phase 3 Group Sequential Designs]
+        C --> D3[Win Ratio Analysis]
+    end
+
+    subgraph RuntimeTargets [Execution & Distribution]
+        D1 & D2 & D3 --> E1[Python CLI & PyPI Package]
+        D1 & D2 & D3 --> E2[Jupyter Interactive Notebooks]
+        D1 & D2 & D3 --> E3[Pyodide WebAssembly Worker]
+    end
+
+    subgraph HubClient [Browser Client & Hub]
+        E3 --> F[Service Worker Cache]
+        F --> G[Dashboard Visualizations & UI Views]
+    end
+</code></pre>
+
+<h3>5. Lessons Learned & Trade-Offs</h3>
+<ul>
+  <li><strong>Client-Side Pyodide WASM vs. Cloud APIs:</strong> Chose client-side execution over hosted API microservices (FastAPI/Celery) to eliminate server hosting overhead, maintain strict data privacy for clinical protocol designers, and enable offline-first simulation via Service Workers.</li>
+  <li><strong>Deterministic Parity:</strong> MCMC and CRM escalation models produce identical outputs on native CPython and Pyodide WebAssembly environments, verified via automated fixture suites (<code>test_crm_fixtures.py</code>).</li>
+</ul>
+    `.trim(),
+  },
 ];
 
 async function main() {
