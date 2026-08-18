@@ -8,7 +8,7 @@
 
 > **isVaultUnlocked**(): `boolean`
 
-Defined in: [lib/meme-data.ts:354](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L354)
+Defined in: [lib/meme-data.ts:355](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L355)
 
 ## Returns
 

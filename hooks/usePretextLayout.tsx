@@ -134,9 +134,17 @@ export function usePretextLayout({
 
   const containerRef = useResizeObserver<HTMLDivElement>((entry) => {
     const maxWidth = Math.floor(entry.contentRect.width);
+    const contentHeight = Math.floor(entry.contentRect.height);
     if (maxWidth > 0 && maxWidth !== lastWidthRef.current) {
       lastWidthRef.current = maxWidth;
       measureText(maxWidth);
+    }
+    if (contentHeight > 0) {
+      validateLayoutHeight(
+        state.height,
+        contentHeight,
+        `usePretextLayout (text: "${text.slice(0, 30)}...")`
+      );
     }
   });
 
@@ -155,53 +163,40 @@ export function usePretextLayout({
   useLayoutEffect(() => {
     if (!isBrowser()) return;
 
-    if (containerRef.current) {
-      const initialWidth = containerRef.current.getBoundingClientRect().width;
-      measureText(initialWidth);
+    let fontString = "";
+    if (
+      resolvedFontRef.current &&
+      resolvedFontRef.current.fontSize === fontSize &&
+      resolvedFontRef.current.fontFamilyVariable === fontFamilyVariable
+    ) {
+      fontString = resolvedFontRef.current.fontString;
     } else {
-      let fontString = "";
-      if (
-        resolvedFontRef.current &&
-        resolvedFontRef.current.fontSize === fontSize &&
-        resolvedFontRef.current.fontFamilyVariable === fontFamilyVariable
-      ) {
-        fontString = resolvedFontRef.current.fontString;
-      } else {
-        fontString = resolveSingleThemeFont(fontSize, fontFamilyVariable);
-        resolvedFontRef.current = {
-          fontSize,
-          fontFamilyVariable,
-          fontString,
-        };
-      }
-      fontStringRef.current = fontString;
-      const prepareKey = `${text}|${fontString}`;
-      const stylesheetLoaded = isStylesheetLoaded();
-      let prepared = stylesheetLoaded ? textPrepareCache.get(prepareKey) : undefined;
-      if (!prepared) {
-        prepared = prepare(text, fontString);
-        if (stylesheetLoaded) {
-          textPrepareCache.set(prepareKey, prepared);
-        }
-      }
-      preparedTextRef.current = prepared;
-      setState((prev) => ({ ...prev, isReady: true }));
+      fontString = resolveSingleThemeFont(fontSize, fontFamilyVariable);
+      resolvedFontRef.current = {
+        fontSize,
+        fontFamilyVariable,
+        fontString,
+      };
     }
-  }, [text, fontSize, fontFamilyVariable, measureText, containerRef, translationMode, activeTheme, simplified]);
-
-  // Removed custom ResizeObserver in favor of unified useResizeObserver hook
-
-  // Layout Height Validation Trigger
-  useLayoutEffect(() => {
-    if (state.isReady && containerRef.current) {
-      const actualHeight = containerRef.current.getBoundingClientRect().height;
-      validateLayoutHeight(
-        state.height,
-        actualHeight,
-        `usePretextLayout (text: "${text.slice(0, 30)}...")`
-      );
+    fontStringRef.current = fontString;
+    const prepareKey = `${text}|${fontString}`;
+    const stylesheetLoaded = isStylesheetLoaded();
+    let prepared = stylesheetLoaded ? textPrepareCache.get(prepareKey) : undefined;
+    if (!prepared) {
+      prepared = prepare(text, fontString);
+      if (stylesheetLoaded) {
+        textPrepareCache.set(prepareKey, prepared);
+      }
     }
-  }, [state.isReady, state.height, text, containerRef]);
+    preparedTextRef.current = prepared;
+    queueMicrotask(() => {
+      setState((prev) => (prev.isReady ? prev : { ...prev, isReady: true }));
+    });
+
+    if (lastWidthRef.current > 0) {
+      measureText(lastWidthRef.current);
+    }
+  }, [text, fontSize, fontFamilyVariable, measureText, translationMode, activeTheme, simplified]);
 
   return {
     ref: containerRef,
@@ -453,9 +448,17 @@ export function usePretextRichLayout({
 
   const containerRef = useResizeObserver<HTMLDivElement>((entry) => {
     const maxWidth = Math.floor(entry.contentRect.width);
+    const contentHeight = Math.floor(entry.contentRect.height);
     if (maxWidth > 0 && maxWidth !== lastWidthRef.current) {
       lastWidthRef.current = maxWidth;
       measureRichText(maxWidth);
+    }
+    if (contentHeight > 0) {
+      validateLayoutHeight(
+        state.height,
+        contentHeight,
+        `usePretextRichLayout (text: "${text.slice(0, 30)}...")`
+      );
     }
   });
 
@@ -532,27 +535,14 @@ export function usePretextRichLayout({
     });
     itemsRef.current = allItems;
 
-    if (containerRef.current) {
-      const initialWidth = containerRef.current.getBoundingClientRect().width;
-      measureRichText(initialWidth);
-    } else {
-      setState((prev) => ({ ...prev, isReady: true }));
-    }
-  }, [text, fontSize, fontFamilyVariable, measureRichText, containerRef, translationMode, activeTheme, simplified]);
+    queueMicrotask(() => {
+      setState((prev) => (prev.isReady ? prev : { ...prev, isReady: true }));
+    });
 
-  // Removed custom ResizeObserver in favor of unified useResizeObserver hook
-
-  // Layout Height Validation Trigger
-  useLayoutEffect(() => {
-    if (state.isReady && containerRef.current) {
-      const actualHeight = containerRef.current.getBoundingClientRect().height;
-      validateLayoutHeight(
-        state.height,
-        actualHeight,
-        `usePretextRichLayout (text: "${text.slice(0, 30)}...")`
-      );
+    if (lastWidthRef.current > 0) {
+      measureRichText(lastWidthRef.current);
     }
-  }, [state.isReady, state.height, text, containerRef]);
+  }, [text, fontSize, fontFamilyVariable, measureRichText, translationMode, activeTheme, simplified]);
 
   return {
     ref: containerRef,

@@ -2,7 +2,7 @@
 // Source: https://ui.aceternity.com/components/glare-card
 "use client";
 import { cn } from "@/lib/utils";
-import React, { useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import { clamp } from "@/lib/game-utils";
 
 export const BentoGrid = ({
@@ -35,11 +35,49 @@ export const Card = ({
 }) => {
   const isPointerInside = useRef(false);
   const refElement = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<DOMRectReadOnly | null>(null);
+  const rafIdRef = useRef<number | null>(null);
+
   const state = useRef({
     glare: { x: 50, y: 50 },
     background: { x: 50, y: 50 },
     rotate: { x: 0, y: 0 },
   });
+
+  const updateCachedRect = () => {
+    if (refElement.current) {
+      rectRef.current = refElement.current.getBoundingClientRect();
+    }
+  };
+
+  useEffect(() => {
+    const el = refElement.current;
+    if (!el) return;
+
+    updateCachedRect();
+
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(() => {
+        updateCachedRect();
+      });
+      observer.observe(el);
+
+      return () => {
+        observer.disconnect();
+        if (rafIdRef.current !== null) {
+          cancelAnimationFrame(rafIdRef.current);
+          rafIdRef.current = null;
+        }
+      };
+    } else {
+      return () => {
+        if (rafIdRef.current !== null) {
+          cancelAnimationFrame(rafIdRef.current);
+          rafIdRef.current = null;
+        }
+      };
+    }
+  }, []);
 
   const containerStyle = {
     "--m-x": "50%",
@@ -93,8 +131,14 @@ export const Card = ({
       onPointerMove={(event) => {
         if (event.pointerType === "touch") return;
         if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+        if (!rectRef.current && refElement.current) {
+          updateCachedRect();
+        }
+        const rect = rectRef.current;
+        if (!rect || rect.width === 0 || rect.height === 0) return;
+
         const rotateFactor = 0.35;
-        const rect = event.currentTarget.getBoundingClientRect();
         const position = {
           x: event.clientX - rect.left,
           y: event.clientY - rect.top,
@@ -118,10 +162,16 @@ export const Card = ({
         glare.x = percentage.x;
         glare.y = percentage.y;
 
-        updateStyles();
+        if (rafIdRef.current === null) {
+          rafIdRef.current = requestAnimationFrame(() => {
+            rafIdRef.current = null;
+            updateStyles();
+          });
+        }
       }}
       onPointerEnter={() => {
         isPointerInside.current = true;
+        updateCachedRect();
         if (refElement.current) {
           setTimeout(() => {
             if (isPointerInside.current) {
@@ -132,6 +182,10 @@ export const Card = ({
       }}
       onPointerLeave={() => {
         isPointerInside.current = false;
+        if (rafIdRef.current !== null) {
+          cancelAnimationFrame(rafIdRef.current);
+          rafIdRef.current = null;
+        }
         if (refElement.current) {
           refElement.current.style.removeProperty("--duration");
           refElement.current.style.setProperty("--r-x", `0deg`);

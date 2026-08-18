@@ -43,6 +43,51 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
   const coronalCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const sagittalCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  const rectsRef = useRef<Record<SlicePlane, DOMRectReadOnly | null>>({
+    axial: null,
+    coronal: null,
+    sagittal: null,
+  });
+
+  const getCanvasRect = useCallback((canvas: HTMLCanvasElement, plane: SlicePlane): DOMRectReadOnly => {
+    if (!rectsRef.current[plane] && canvas) {
+      rectsRef.current[plane] = canvas.getBoundingClientRect();
+    }
+    return rectsRef.current[plane] || canvas.getBoundingClientRect();
+  }, []);
+
+  useEffect(() => {
+    const updateAllRects = () => {
+      if (axialCanvasRef.current) {
+        rectsRef.current.axial = axialCanvasRef.current.getBoundingClientRect();
+      }
+      if (coronalCanvasRef.current) {
+        rectsRef.current.coronal = coronalCanvasRef.current.getBoundingClientRect();
+      }
+      if (sagittalCanvasRef.current) {
+        rectsRef.current.sagittal = sagittalCanvasRef.current.getBoundingClientRect();
+      }
+    };
+
+    updateAllRects();
+
+    if (typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver(() => {
+      updateAllRects();
+    });
+
+    [axialCanvasRef, coronalCanvasRef, sagittalCanvasRef].forEach((ref) => {
+      if (ref.current) {
+        observer.observe(ref.current);
+      }
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [viewLayout]);
+
   /**
    * Render an individual 2D anatomical slice onto a Canvas 2D context
    */
@@ -270,7 +315,7 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
     plane: SlicePlane
   ): VoxelCoord => {
     const canvas = e.currentTarget;
-    const rect = canvas.getBoundingClientRect();
+    const rect = getCanvasRect(canvas, plane);
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
 
@@ -353,7 +398,7 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
   ): VoxelCoord => {
     const touch = e.touches[0] || e.changedTouches[0];
     const canvas = e.currentTarget;
-    const rect = canvas.getBoundingClientRect();
+    const rect = getCanvasRect(canvas, plane);
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
 
@@ -380,6 +425,9 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
   ) => {
     isMouseDownRef.current = true;
     activePlaneRef.current = plane;
+    if (e.currentTarget) {
+      rectsRef.current[plane] = e.currentTarget.getBoundingClientRect();
+    }
     const coord = getVoxelFromTouchEvent(e, plane);
     onCrosshairChange(coord);
     handleToolAction(coord);
@@ -406,6 +454,9 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
   ) => {
     isMouseDownRef.current = true;
     activePlaneRef.current = plane;
+    if (e.currentTarget) {
+      rectsRef.current[plane] = e.currentTarget.getBoundingClientRect();
+    }
     const coord = getVoxelFromCanvas(e, plane);
     onCrosshairChange(coord);
     handleToolAction(coord);
@@ -424,7 +475,7 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
       plane === "axial" ? crosshair.z : plane === "coronal" ? crosshair.y : crosshair.x
     );
     const canvas = e.currentTarget;
-    const rect = canvas.getBoundingClientRect();
+    const rect = getCanvasRect(canvas, plane);
     const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
     const y = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height));
     const idx = y * sliceData.width + x;

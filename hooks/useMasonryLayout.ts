@@ -52,6 +52,24 @@ export function useMasonryLayout<T extends MasonryItem>(
     isReady: false,
   });
 
+  const recalculateLayout = useCallback((containerWidth: number) => {
+    if (Object.keys(preparedDataRef.current).length === 0) return;
+
+    const { colCount, columns } = calculateMasonryLayout(
+      containerWidth,
+      filteredItems,
+      preparedDataRef.current,
+      LAYOUT_CONFIG,
+      heightOverrides
+    );
+
+    setLayoutState({
+      colCount,
+      columns,
+      isReady: true,
+    });
+  }, [filteredItems, heightOverrides]);
+
   useLayoutEffect(() => {
     if (!isBrowser()) return;
 
@@ -78,39 +96,13 @@ export function useMasonryLayout<T extends MasonryItem>(
     }
     
     preparedDataRef.current = data;
-  }, [allItems]);
-
-  const recalculateLayout = useCallback((containerWidth: number) => {
-    if (Object.keys(preparedDataRef.current).length === 0) return;
-
-    const { colCount, columns } = calculateMasonryLayout(
-      containerWidth,
-      filteredItems,
-      preparedDataRef.current,
-      LAYOUT_CONFIG,
-      heightOverrides
-    );
-
-    setLayoutState({
-      colCount,
-      columns,
-      isReady: true,
-    });
-  }, [filteredItems, heightOverrides]);
+    recalculateLayout(containerWidthRef.current);
+  }, [allItems, recalculateLayout]);
 
   const containerRef = useResizeObserver<HTMLDivElement>((entry) => {
     containerWidthRef.current = entry.contentRect.width;
     recalculateLayout(entry.contentRect.width);
   });
-
-  useLayoutEffect(() => {
-    if (containerRef.current) {
-      const initialWidth = containerRef.current.getBoundingClientRect().width;
-      containerWidthRef.current = initialWidth;
-      recalculateLayout(initialWidth);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useLayoutEffect(() => {
     if (containerWidthRef.current > 0) {

@@ -8,7 +8,7 @@
 
 > **exportStudyToSas**(`study`, `options?`): `string`
 
-Defined in: [lib/crf/export-sas.ts:468](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L468)
+Defined in: [lib/crf/export-sas.ts:640](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L640)
 
 Exports all forms in a study into a complete SAS Clinical Program Suite.
 
