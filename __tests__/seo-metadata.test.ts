@@ -186,6 +186,35 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     expect(urls).toContain(`${expectedBase}/schedule`);
   });
 
+  it("sitemap generator in production strictly produces canonical https://www.deruiter.dev URLs without localhost leakage", async () => {
+    const originalWin = global.window;
+    const originalVercelEnv = process.env.VERCEL_ENV;
+    const originalAppUrl = process.env.NEXT_PUBLIC_APP_URL;
+    try {
+      // @ts-expect-error - simulate Next.js SSR server runtime
+      global.window = undefined;
+      process.env.VERCEL_ENV = "production";
+      delete process.env.NEXT_PUBLIC_APP_URL;
+
+      const map = await sitemap();
+      expect(map.length).toBeGreaterThanOrEqual(16);
+
+      for (const entry of map) {
+        expect(entry.url).toMatch(/^https:\/\/www\.deruiter\.dev(\/.*)?$/);
+        expect(entry.url).not.toContain("localhost");
+        expect(entry.url).not.toContain("http://");
+      }
+    } finally {
+      global.window = originalWin;
+      process.env.VERCEL_ENV = originalVercelEnv;
+      if (originalAppUrl !== undefined) {
+        process.env.NEXT_PUBLIC_APP_URL = originalAppUrl;
+      } else {
+        delete process.env.NEXT_PUBLIC_APP_URL;
+      }
+    }
+  });
+
   it("root layout metadata configures SVG, ICO, Apple Touch, and web manifest", async () => {
     const { metadata } = await import("@/app/layout");
     expect(metadata.icons).toBeDefined();

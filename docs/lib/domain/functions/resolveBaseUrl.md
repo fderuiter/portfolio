@@ -8,14 +8,13 @@
 
 > **resolveBaseUrl**(): `string`
 
-Defined in: [lib/domain.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/domain.ts#L11)
+Defined in: [lib/domain.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/domain.ts#L10)
 
 Centered dynamic helper to synchronously resolve the base URL of the application.
 Satisfies the following logic:
-1. Checks if a NEXT_PUBLIC_APP_URL environment variable is explicitly configured.
-2. If running in a browser environment, safely uses window.location.origin to maintain SSR and browser synchronization.
-3. Falls back gracefully to the production canonical domain (https://www.deruiter.dev) in production.
-4. Falls back to a local address (http://localhost:3000) in development/preview if omitted.
+1. If running in a browser environment, safely uses window.location.origin to maintain SSR and browser synchronization.
+2. In production (VERCEL_ENV="production" or NODE_ENV="production"), defaults strictly to the canonical domain (https://www.deruiter.dev), or uses NEXT_PUBLIC_APP_URL if explicitly configured with a non-localhost domain.
+3. In non-production environments, uses NEXT_PUBLIC_APP_URL if provided, or falls back to a local address (http://localhost:3000).
 
 ## Returns
 

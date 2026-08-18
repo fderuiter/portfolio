@@ -3,10 +3,9 @@ import { getEnv } from "./env";
 /**
  * Centered dynamic helper to synchronously resolve the base URL of the application.
  * Satisfies the following logic:
- * 1. Checks if a NEXT_PUBLIC_APP_URL environment variable is explicitly configured.
- * 2. If running in a browser environment, safely uses window.location.origin to maintain SSR and browser synchronization.
- * 3. Falls back gracefully to the production canonical domain (https://www.deruiter.dev) in production.
- * 4. Falls back to a local address (http://localhost:3000) in development/preview if omitted.
+ * 1. If running in a browser environment, safely uses window.location.origin to maintain SSR and browser synchronization.
+ * 2. In production (VERCEL_ENV="production" or NODE_ENV="production"), defaults strictly to the canonical domain (https://www.deruiter.dev), or uses NEXT_PUBLIC_APP_URL if explicitly configured with a non-localhost domain.
+ * 3. In non-production environments, uses NEXT_PUBLIC_APP_URL if provided, or falls back to a local address (http://localhost:3000).
  */
 export function resolveBaseUrl(): string {
   let baseUrl = "";
@@ -18,19 +17,23 @@ export function resolveBaseUrl(): string {
     // 2. Client-safe environment variable check
     const currentEnv = getEnv();
     const envUrl = currentEnv.NEXT_PUBLIC_APP_URL;
-    if (envUrl && envUrl.trim() !== "") {
+    const isProd = currentEnv.VERCEL_ENV === "production" || currentEnv.NODE_ENV === "production";
+
+    if (isProd) {
+      // In production, guard against errant localhost values and prioritize the canonical domain
+      if (envUrl && envUrl.trim() !== "" && !envUrl.includes("localhost")) {
+        baseUrl = envUrl.trim();
+      } else {
+        baseUrl = "https://www.deruiter.dev";
+      }
+    } else if (envUrl && envUrl.trim() !== "") {
       baseUrl = envUrl.trim();
     } else {
-      // 3. Environment-aware fallback
-      const isProd = currentEnv.VERCEL_ENV === "production" || currentEnv.NODE_ENV === "production";
-      if (isProd) {
-        baseUrl = "https://www.deruiter.dev";
-      } else {
-        baseUrl = "http://localhost:3000";
-      }
+      baseUrl = "http://localhost:3000";
     }
   }
 
   // Remove any trailing slash to ensure consistency
   return baseUrl.replace(/\/$/, "");
 }
+

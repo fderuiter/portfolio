@@ -45,7 +45,7 @@ export const serverEnvSchema = z.object({
  * Safe to be bundled and exposed in the browser.
  */
 export const clientEnvSchema = z.object({
-  NEXT_PUBLIC_APP_URL: z.string().url().optional().default("http://localhost:3000"),
+  NEXT_PUBLIC_APP_URL: z.string().url().optional(),
   NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
 });
 

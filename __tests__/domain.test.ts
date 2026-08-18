@@ -26,13 +26,19 @@ describe("Dynamic Domain Helper (resolveBaseUrl)", () => {
     expect(resolveBaseUrl()).toBe("https://browser-resolved-domain.com");
   });
 
-  it("prioritizes NEXT_PUBLIC_APP_URL on the server", () => {
-    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://env-resolved-domain.com/");
-    expect(resolveBaseUrl()).toBe("https://env-resolved-domain.com");
+  it("prioritizes valid non-localhost NEXT_PUBLIC_APP_URL in production", () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://custom.deruiter.dev/");
+    expect(resolveBaseUrl()).toBe("https://custom.deruiter.dev");
   });
 
-  it("falls back to the production canonical URL in production environment if NEXT_PUBLIC_APP_URL is omitted", () => {
-    vi.stubEnv("NEXT_PUBLIC_APP_URL", "");
+  it("defensively ignores localhost NEXT_PUBLIC_APP_URL in production and returns canonical domain", () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "http://localhost:3000");
+    expect(resolveBaseUrl()).toBe("https://www.deruiter.dev");
+  });
+
+  it("falls back to the production canonical URL in production environment if NEXT_PUBLIC_APP_URL is omitted or undefined", () => {
     vi.stubEnv("VERCEL_ENV", "production");
     expect(resolveBaseUrl()).toBe("https://www.deruiter.dev");
 
@@ -41,8 +47,14 @@ describe("Dynamic Domain Helper (resolveBaseUrl)", () => {
     expect(resolveBaseUrl()).toBe("https://www.deruiter.dev");
   });
 
+  it("prioritizes NEXT_PUBLIC_APP_URL in non-production environments", () => {
+    vi.stubEnv("VERCEL_ENV", "development");
+    vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://staging.deruiter.dev/");
+    expect(resolveBaseUrl()).toBe("https://staging.deruiter.dev");
+  });
+
   it("falls back to localhost in non-production environments if NEXT_PUBLIC_APP_URL is omitted", () => {
-    vi.stubEnv("NEXT_PUBLIC_APP_URL", "");
     vi.stubEnv("VERCEL_ENV", "development");
     vi.stubEnv("NODE_ENV", "development");
     expect(resolveBaseUrl()).toBe("http://localhost:3000");
