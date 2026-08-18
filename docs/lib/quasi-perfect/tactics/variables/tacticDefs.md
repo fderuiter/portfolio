@@ -8,4 +8,4 @@
 
 > `const` **tacticDefs**: `Record`\<[`TacticId`](../../types/type-aliases/TacticId.md), [`TacticDef`](../../types/interfaces/TacticDef.md)\>
 
-Defined in: [lib/quasi-perfect/tactics.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/tactics.ts#L15)
+Defined in: [lib/quasi-perfect/tactics.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/tactics.ts#L41)

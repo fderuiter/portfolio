@@ -12,6 +12,32 @@ import {
   cloneAST,
 } from "./engine";
 
+/**
+ * Resolves a hypothesis from context using LIFO (reverse array search) order.
+ * Tier 1: Searches by metadata.name (case-insensitive) or node id in reverse order.
+ * Tier 2: Structural predicate fallback searching in reverse order.
+ */
+export function resolveHypothesis(
+  hypotheses: ASTNode[] = [],
+  arg?: string,
+  structuralPredicate?: (h: ASTNode) => boolean
+): ASTNode | undefined {
+  const reversed = [...hypotheses].reverse();
+
+  if (arg) {
+    const nameMatched = reversed.find(
+      (h) => (h.metadata?.name as string)?.toLowerCase() === arg.toLowerCase() || h.id === arg
+    );
+    if (nameMatched) return nameMatched;
+  }
+
+  if (structuralPredicate) {
+    return reversed.find(structuralPredicate);
+  }
+
+  return undefined;
+}
+
 export const tacticDefs: Record<TacticId, TacticDef> = {
   rfl: {
     id: "rfl",
@@ -73,22 +99,15 @@ export const tacticDefs: Record<TacticId, TacticDef> = {
         };
       }
 
-      // Find matching hypothesis by name (arg) or find one matching targetNode
-      let matchedHypothesis: ASTNode | undefined;
-      if (arg) {
-        matchedHypothesis = hypotheses.find(
-          (h) => (h.metadata?.name as string)?.toLowerCase() === arg.toLowerCase() || h.id === arg
-        );
-      }
-
-      if (!matchedHypothesis) {
-        matchedHypothesis = hypotheses.find(
-          (h) =>
-            h.type === "Equality" &&
-            h.children?.length === 2 &&
-            (areNodesEqual(h.children[0], targetNode) || areNodesEqual(h.children[1], targetNode))
-        );
-      }
+      // Find matching hypothesis using LIFO resolution (Tier 1: Name/ID, Tier 2: Structural)
+      const matchedHypothesis = resolveHypothesis(
+        hypotheses,
+        arg,
+        (h) =>
+          h.type === "Equality" &&
+          h.children?.length === 2 &&
+          (areNodesEqual(h.children[0], targetNode) || areNodesEqual(h.children[1], targetNode))
+      );
 
       if (
         !matchedHypothesis ||
@@ -269,18 +288,11 @@ export const tacticDefs: Record<TacticId, TacticDef> = {
         };
       }
 
-      let matchedHyp: ASTNode | undefined;
-      if (arg) {
-        matchedHyp = hypotheses.find(
-          (h) => (h.metadata?.name as string)?.toLowerCase() === arg.toLowerCase() || h.id === arg
-        );
-      }
-
-      if (!matchedHyp) {
-        matchedHyp = hypotheses.find(
-          (h) => h.type === "Implication" && h.children?.length === 2 && areNodesEqual(h.children[1], targetNode)
-        );
-      }
+      const matchedHyp = resolveHypothesis(
+        hypotheses,
+        arg,
+        (h) => h.type === "Implication" && h.children?.length === 2 && areNodesEqual(h.children[1], targetNode)
+      );
 
       if (!matchedHyp || matchedHyp.type !== "Implication" || !matchedHyp.children || matchedHyp.children.length !== 2) {
         return {
@@ -321,16 +333,11 @@ export const tacticDefs: Record<TacticId, TacticDef> = {
     baseRamCost: 1,
     failureCost: 1,
     execute: (targetNode, globalAST, hypotheses, arg) => {
-      let matchedHyp: ASTNode | undefined;
-      if (arg) {
-        matchedHyp = hypotheses.find(
-          (h) => (h.metadata?.name as string)?.toLowerCase() === arg.toLowerCase() || h.id === arg
-        );
-      }
-
-      if (!matchedHyp) {
-        matchedHyp = hypotheses.find((h) => areNodesEqual(h, targetNode));
-      }
+      const matchedHyp = resolveHypothesis(
+        hypotheses,
+        arg,
+        (h) => areNodesEqual(h, targetNode)
+      );
 
       if (!matchedHyp || !areNodesEqual(matchedHyp, targetNode)) {
         return {
@@ -367,16 +374,11 @@ export const tacticDefs: Record<TacticId, TacticDef> = {
     baseRamCost: 4,
     failureCost: 1,
     execute: (_targetNode, globalAST, hypotheses, arg) => {
-      let matchedHyp: ASTNode | undefined;
-      if (arg) {
-        matchedHyp = hypotheses.find(
-          (h) => (h.metadata?.name as string)?.toLowerCase() === arg.toLowerCase() || h.id === arg
-        );
-      }
-
-      if (!matchedHyp) {
-        matchedHyp = hypotheses.find((h) => h.type === "Disjunction" && h.children?.length === 2);
-      }
+      const matchedHyp = resolveHypothesis(
+        hypotheses,
+        arg,
+        (h) => h.type === "Disjunction" && h.children?.length === 2
+      );
 
       if (!matchedHyp || matchedHyp.type !== "Disjunction" || !matchedHyp.children || matchedHyp.children.length !== 2) {
         return {

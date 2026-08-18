@@ -271,7 +271,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
         if (foundInGoal) {
           targetNode = foundInGoal;
         } else {
-          for (const hyp of activeHypotheses) {
+          for (const hyp of [...activeHypotheses].reverse()) {
             const foundInHyp = findNodeById(hyp, targetNodeId);
             if (foundInHyp) {
               targetNode = foundInHyp;
