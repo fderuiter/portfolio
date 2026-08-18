@@ -148,17 +148,48 @@ export const openApiSpec = {
           {
             name: "slug",
             in: "query",
-            required: true,
-            description: "Case study slug identifier",
+            required: false,
+            description: "Case study slug identifier (interchangeable with caseStudySlug)",
+            schema: { type: "string" },
+          },
+          {
+            name: "caseStudySlug",
+            in: "query",
+            required: false,
+            description: "Case study slug identifier (interchangeable with slug)",
             schema: { type: "string" },
           },
         ],
         responses: {
           200: {
             description: "Successful retrieval of feedback",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/FeedbackGetResponse",
+                },
+              },
+            },
           },
           400: {
             description: "Missing required query parameter",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
+          },
+          500: {
+            description: "Internal server error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
           },
         },
       },
@@ -178,15 +209,43 @@ export const openApiSpec = {
         responses: {
           201: {
             description: "Feedback submitted successfully",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/FeedbackPostResponse",
+                },
+              },
+            },
           },
           400: {
             description: "Validation error on payload",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ValidationError",
+                },
+              },
+            },
           },
           429: {
             description: "Rate limit or duplicate submission limit reached",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
           },
           500: {
             description: "Internal server error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
           },
         },
       },
@@ -199,17 +258,48 @@ export const openApiSpec = {
           {
             name: "slug",
             in: "query",
-            required: true,
-            description: "Case study slug identifier",
+            required: false,
+            description: "Case study slug identifier (interchangeable with caseStudySlug)",
+            schema: { type: "string" },
+          },
+          {
+            name: "caseStudySlug",
+            in: "query",
+            required: false,
+            description: "Case study slug identifier (interchangeable with slug)",
             schema: { type: "string" },
           },
         ],
         responses: {
           200: {
             description: "Successful retrieval of reaction counts",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ReactionGetResponse",
+                },
+              },
+            },
           },
           400: {
             description: "Missing required query parameter",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
+          },
+          500: {
+            description: "Internal server error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
           },
         },
       },
@@ -229,12 +319,33 @@ export const openApiSpec = {
         responses: {
           200: {
             description: "Reaction registered successfully",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ReactionPostResponse",
+                },
+              },
+            },
           },
           400: {
             description: "Validation error on payload",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ValidationError",
+                },
+              },
+            },
           },
           500: {
             description: "Internal server error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
           },
         },
       },
@@ -525,6 +636,59 @@ export const openApiSpec = {
         },
         required: ["caseStudySlug", "takeaways", "comments"],
       },
+      FeedbackItem: {
+        type: "object",
+        properties: {
+          id: { type: "string", description: "Feedback record ID" },
+          takeaways: {
+            type: "array",
+            items: { type: "string" },
+            description: "Selected key learning takeaways",
+          },
+          comments: { type: "string", description: "Constructive user comments" },
+          createdAt: { type: "string", format: "date-time", description: "Submission timestamp" },
+        },
+        required: ["id", "takeaways", "comments", "createdAt"],
+      },
+      FeedbackGetResponse: {
+        type: "object",
+        properties: {
+          success: { type: "boolean" },
+          caseStudySlug: { type: "string" },
+          hasSubmitted: {
+            type: "boolean",
+            description: "Indicates whether user with same connection hash has submitted feedback",
+          },
+          totalFeedback: { type: "integer" },
+          feedback: {
+            type: "array",
+            items: { $ref: "#/components/schemas/FeedbackItem" },
+          },
+        },
+        required: ["success", "caseStudySlug", "hasSubmitted", "totalFeedback", "feedback"],
+      },
+      FeedbackPostResponse: {
+        type: "object",
+        properties: {
+          success: { type: "boolean" },
+          message: { type: "string" },
+          feedback: {
+            type: "object",
+            properties: {
+              id: { type: "string" },
+              caseStudySlug: { type: "string" },
+              takeaways: {
+                type: "array",
+                items: { type: "string" },
+              },
+              comments: { type: "string" },
+              createdAt: { type: "string", format: "date-time" },
+            },
+            required: ["id", "caseStudySlug", "takeaways", "comments", "createdAt"],
+          },
+        },
+        required: ["success", "message", "feedback"],
+      },
       ReactionSubmission: {
         type: "object",
         properties: {
@@ -535,6 +699,46 @@ export const openApiSpec = {
           },
         },
         required: ["caseStudySlug", "reactionType"],
+      },
+      ReactionCounts: {
+        type: "object",
+        properties: {
+          insightful: { type: "integer" },
+          mind_blowing: { type: "integer" },
+          actionable: { type: "integer" },
+          thorough: { type: "integer" },
+        },
+        required: ["insightful", "mind_blowing", "actionable", "thorough"],
+      },
+      ReactionGetResponse: {
+        type: "object",
+        properties: {
+          success: { type: "boolean" },
+          caseStudySlug: { type: "string" },
+          counts: { $ref: "#/components/schemas/ReactionCounts" },
+          userReactions: {
+            type: "array",
+            items: { type: "string" },
+            description: "Reaction types submitted by current user connection hash",
+          },
+        },
+        required: ["success", "caseStudySlug", "counts", "userReactions"],
+      },
+      ReactionPostResponse: {
+        type: "object",
+        properties: {
+          success: { type: "boolean" },
+          reactionType: {
+            type: "string",
+            enum: ["insightful", "mind_blowing", "actionable", "thorough"],
+          },
+          counts: { $ref: "#/components/schemas/ReactionCounts" },
+          userReactions: {
+            type: "array",
+            items: { type: "string" },
+          },
+        },
+        required: ["success", "reactionType", "counts", "userReactions"],
       },
     },
   },
