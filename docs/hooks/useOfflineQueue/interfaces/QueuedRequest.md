@@ -66,7 +66,7 @@ Defined in: [hooks/useOfflineQueue.ts:16](https://github.com/fderuiter/portfolio
 
 ### method?
 
-> `optional` **method?**: `"POST"` \| `"PUT"` \| `"PATCH"` \| `"DELETE"`
+> `optional` **method?**: `"POST"` \| `"DELETE"` \| `"PATCH"` \| `"PUT"`
 
 Defined in: [hooks/useOfflineQueue.ts:11](https://github.com/fderuiter/portfolio/blob/main/hooks/useOfflineQueue.ts#L11)
 

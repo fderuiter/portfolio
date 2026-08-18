@@ -69,15 +69,17 @@ export const NeuroMetricsPanel: React.FC<NeuroMetricsPanelProps> = ({
         </div>
         <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden mt-1">
           <div
-            className="bg-brand-cyan h-full transition-all duration-300"
+            className="bg-brand-cyan h-full w-full origin-left transform-gpu"
             style={{
-              width: `${clamp(
+              transform: `scaleX(${clamp(
                 scenario.initialDefects > 0
-                  ? ((scenario.initialDefects - metrics.defectCount) / scenario.initialDefects) * 100
-                  : 100,
+                  ? (scenario.initialDefects - metrics.defectCount) / scenario.initialDefects
+                  : 1,
                 0,
-                100
-              )}%`,
+                1
+              )})`,
+              transformOrigin: "left",
+              willChange: "transform",
             }}
           />
         </div>

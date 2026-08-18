@@ -26,9 +26,12 @@ vi.mock("@upstash/redis", () => {
         lpush: vi.fn(),
         expire: vi.fn(),
         rpop: vi.fn(),
+        lmove: vi.fn(),
         exec: vi.fn().mockResolvedValue([]),
       };
     }
+    lrange = vi.fn().mockResolvedValue([]);
+    del = vi.fn().mockResolvedValue(1);
   }
   return { Redis: MockRedis };
 });

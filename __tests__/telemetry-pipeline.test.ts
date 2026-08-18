@@ -1,13 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // 1. Hoisted mocks definition
-const { mockRatelimitLimit, mockLpush, mockExpire, mockExec, mockRpop, mockUseRef, mockUseEffect } = vi.hoisted(() => {
+const { mockRatelimitLimit, mockLpush, mockExpire, mockExec, mockRpop, mockLmove, mockLrange, mockDel, mockUseRef, mockUseEffect } = vi.hoisted(() => {
   return {
     mockRatelimitLimit: vi.fn(),
     mockLpush: vi.fn(),
     mockExpire: vi.fn(),
     mockExec: vi.fn(),
     mockRpop: vi.fn(),
+    mockLmove: vi.fn(),
+    mockLrange: vi.fn().mockResolvedValue([]),
+    mockDel: vi.fn(),
     mockUseRef: vi.fn(),
     mockUseEffect: vi.fn(),
   };
@@ -47,8 +50,11 @@ vi.mock("@upstash/redis", () => {
         expire: mockExpire,
         exec: mockExec,
         rpop: mockRpop,
+        lmove: mockLmove,
       };
     }
+    lrange = mockLrange;
+    del = mockDel;
   }
   return { Redis: MockRedis };
 });
@@ -213,13 +219,14 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
 
   // --- REQUIREMENT 3 ---
   describe("Batch Synchronization Service (Requirement 3)", () => {
-    it("pulls buffered items from Redis in groups of 50 and ignores duplicate payloads", async () => {
-      // Mock Redis exec response returning 2 mock items and 48 null values (representing empty queue entries)
+    it("pulls buffered items from Redis in groups of 50 via atomic LMOVE and ignores duplicate payloads", async () => {
+      // Mock Redis exec response returning 2 mock items and 48 null values
       const mockEvents = [
         { id: "uuid-1", projectSlug: "/project-a", eventType: "page_view", createdAt: new Date() },
         { id: "uuid-2", projectSlug: "/project-b", eventType: "project_click", createdAt: new Date() },
         ...Array(48).fill(null),
       ];
+      mockLrange.mockResolvedValueOnce([]);
       mockExec.mockResolvedValue(mockEvents);
 
       const req = new NextRequest("http://localhost:3000/api/telemetry/sync", {
@@ -235,8 +242,10 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
       expect(data.success).toBe(true);
       expect(data.processed).toBe(2); // 2 non-null events processed from the batch
 
-      // Check that it popped items exactly 50 times
-      expect(mockRpop).toHaveBeenCalledTimes(50);
+      // Check that it transferred items atomically via lmove exactly 50 times
+      expect(mockLmove).toHaveBeenCalledTimes(50);
+      expect(mockLmove).toHaveBeenCalledWith("telemetry_buffer", "telemetry_processing", "right", "left");
+      expect(mockDel).toHaveBeenCalledWith("telemetry_processing");
 
       // Verify skipping of duplicate payloads logged in database
       if (isLiveDb) {
@@ -281,11 +290,12 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
       expect(response.status).toBe(401);
     });
 
-    it("handles primary database write failure during sync and re-enqueues popped events to Redis buffer", async () => {
+    it("handles primary database write failure during sync and preserves event batch intact in processing queue", async () => {
       const mockEvents = [
         { id: "uuid-1", projectSlug: "/project-a", eventType: "page_view", createdAt: new Date() },
       ];
-      mockExec.mockResolvedValueOnce(mockEvents); // for GET pop
+      mockLrange.mockResolvedValueOnce([]);
+      mockExec.mockResolvedValueOnce(mockEvents);
 
       // Simulate prisma createMany failure
       const dbError = new Error("Database Write Error");
@@ -304,27 +314,17 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
       const response = await GETSync(req);
       expect(response.status).toBe(500);
 
-      // Verify that popped events were re-enqueued (lpush)
-      expect(mockLpush).toHaveBeenCalledWith("telemetry_buffer", mockEvents[0]);
-      expect(mockExpire).toHaveBeenCalledWith("telemetry_buffer", 172800);
+      // Verify that events were moved via lmove and NOT deleted from processing queue on failure
+      expect(mockLmove).toHaveBeenCalledWith("telemetry_buffer", "telemetry_processing", "right", "left");
+      expect(mockDel).not.toHaveBeenCalledWith("telemetry_processing");
     });
 
-    it("logs critical error when Redis re-enqueue fails during database sync rollback", async () => {
-      const mockEvents = [
-        { id: "uuid-1", projectSlug: "/project-a", eventType: "page_view", createdAt: new Date() },
+    it("re-syncs previously failed processing queue batch before pulling new events", async () => {
+      const pendingEvents = [
+        { id: "uuid-pending-1", projectSlug: "/project-pending", eventType: "page_view", createdAt: new Date() },
       ];
-      mockExec.mockResolvedValueOnce(mockEvents); // GET pop
-      
-      const dbError = new Error("Database Write Error");
-      if (isLiveDb) {
-        vi.spyOn(prisma.telemetryEvent, "createMany").mockRejectedValueOnce(dbError);
-      } else {
-        vi.mocked(prisma.telemetryEvent.createMany).mockRejectedValueOnce(dbError);
-      }
-
-      // Simulate redis rollback exec failure
-      const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-      mockExec.mockRejectedValueOnce(new Error("Redis rollback failed"));
+      mockLrange.mockResolvedValueOnce(pendingEvents);
+      mockExec.mockResolvedValueOnce([]);
 
       const req = new NextRequest("http://localhost:3000/api/telemetry/sync", {
         headers: {
@@ -333,13 +333,12 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
       });
 
       const response = await GETSync(req);
-      expect(response.status).toBe(500);
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Critical: Failed to re-enqueue buffered telemetry events to Redis:",
-        expect.any(Error)
-      );
+      expect(response.status).toBe(200);
 
-      consoleErrorSpy.mockRestore();
+      const data = await response.json();
+      expect(data.success).toBe(true);
+      expect(data.processed).toBe(1);
+      expect(mockDel).toHaveBeenCalledWith("telemetry_processing");
     });
   });
 
