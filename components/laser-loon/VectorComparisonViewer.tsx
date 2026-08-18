@@ -141,6 +141,7 @@ export const VectorComparisonViewer: React.FC = () => {
             style={{ width: `${sliderPos}%` }}
           >
             <div className="absolute inset-0 w-full min-w-[800px] h-full">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/files/Laser_loon.svg" alt="Laser Loon Master Vector" className="w-full h-full object-cover" />
             </div>
             <div className="absolute top-3 left-3 px-2.5 py-1 rounded bg-red-950/80 border border-red-500/40 text-red-300 font-mono text-[10px] font-bold uppercase whitespace-nowrap">
@@ -197,6 +198,7 @@ export const VectorComparisonViewer: React.FC = () => {
               Pass 2: Laser Optics &amp; Rays
             </span>
             <div className="w-full aspect-[16/10] rounded-xl overflow-hidden border border-zinc-800 bg-[#070b12]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/files/Laser_loon.svg" alt="Laser Loon Master Vector" className="w-full h-full object-cover" />
             </div>
           </div>
@@ -229,6 +231,7 @@ export const VectorComparisonViewer: React.FC = () => {
               </svg>
             </div>
           ) : (
+            /* eslint-disable-next-line @next/next/no-img-element */
             <img src="/files/Laser_loon.svg" alt="Laser Loon Master Combined Vector" className="w-full h-full object-cover" />
           )}
         </div>

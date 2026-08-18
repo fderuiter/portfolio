@@ -8,7 +8,7 @@
 
 > `const` **BLOCK\_LAYOUT\_CONFIG**: `object`
 
-Defined in: [lib/pretext-block-parser.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L29)
+Defined in: [lib/pretext-block-parser.ts:28](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L28)
 
 ## Type Declaration
 

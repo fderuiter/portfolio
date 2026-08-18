@@ -1,6 +1,5 @@
 import { 
   walkRichInlineLineRanges, 
-  materializeRichInlineLineRange,
   prepareRichInline,
   type PreparedRichInline,
   type RichInlineLineRange

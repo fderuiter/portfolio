@@ -225,6 +225,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         ]
       },
       {
+        id: "nav-equipose-randomization",
+        title: "Equipose Randomization: Technical Breakdown & Portfolio Integration",
+        subtitle: "Deep-dive technical case study — MT19937 transpiler, Pocock-Simon minimization & zero-exfiltration Web Workers",
+        category: "navigation",
+        url: "/case-studies/equipose-randomization",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Case Study",
+        status: "Angular / TS",
+        description: "Fully client-side clinical trial randomization engine with cross-runtime deterministic MT19937 PRNG parity across Python, R, SAS, and Stata.",
+        techStack: ["Angular", "TypeScript", "Web Workers", "CDISC ADaM-Lite", "Transpiler"],
+        highlights: [
+          "Sub-10ms in-browser statistical code transpilation",
+          "Zero PHI data exfiltration via Web Workers",
+          "Pocock-Simon covariate adaptive minimization"
+        ]
+      },
+      {
         id: "nav-lambda-wave",
         title: "Lambda-Wave: Real-Time SGRT FMCW Radar System",
         subtitle: "Deep-dive technical case study — Haskell DSP core, lock-free C++ ring buffers & IEC 62304 Class C safety watchdog",

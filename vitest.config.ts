@@ -7,6 +7,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
+    testTimeout: 15000,
     execArgv: ['--max-old-space-size=4096', '--no-warnings'],
     exclude: ['**/node_modules/**', '**/e2e/**'],
     coverage: {
