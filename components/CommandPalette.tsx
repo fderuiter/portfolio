@@ -191,6 +191,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         ]
       },
       {
+        id: "nav-clintrials",
+        title: "clintrials: Adaptive Clinical Trial Design & WebAssembly Engine",
+        subtitle: "Deep-dive technical case study — Pyodide WASM workers, CRM Bayesian escalation & accrual solvers",
+        category: "navigation",
+        url: "/case-studies/clintrials",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Case Study",
+        status: "Python / WASM",
+        description: "Adaptive clinical trial simulation framework powered by Pyodide WebAssembly workers running CRM, EffTox, and Win Ratio models directly in-browser.",
+        techStack: ["Python", "Pyodide", "WebAssembly", "Biostatistics", "Service Worker"],
+        highlights: [
+          "Zero backend infrastructure costs via Web Workers",
+          "Deterministic numerical parity with CPython",
+          "Bayesian CRM & EffTox dose finding algorithms"
+        ]
+      },
+      {
         id: "nav-laser-loon",
         title: "Laser Loon: Quest for the State Flag",
         subtitle: "Playable civic physics shooter — pilot F277 Laser Loon on the Road to the Capitol",
