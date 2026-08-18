@@ -2,10 +2,6 @@
 
 import React, { useState } from "react";
 import { StudyProtocol, StudyBranding } from "@/lib/crf/types";
-import {
-  generateAcrfHtml,
-  generateStudyAcrfBookHtml,
-} from "@/lib/crf/export-acrf";
 import { getStudyBranding } from "@/lib/crf/branding-defaults";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useTelemetry } from "@/hooks/useTelemetry";
@@ -126,8 +122,11 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
     }
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     recordEvent("crf", "project_click");
+    const { generateAcrfHtml, generateStudyAcrfBookHtml } = await import(
+      "@/lib/crf/export-acrf"
+    );
     const htmlContent =
       scope === "single" && activeForm
         ? generateAcrfHtml(activeForm, study, { mode: exportMode, branding })
@@ -383,7 +382,7 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
             <button
               type="button"
               onClick={handleDownloadDocx}
-              disabled={isExportingDocx}
+              disabled={isExportingDocx || isExportingPdf}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition-all shadow-md disabled:opacity-50"
             >
               {isExportingDocx ? (
@@ -400,7 +399,7 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
             <button
               type="button"
               onClick={handleDownloadPdf}
-              disabled={isExportingPdf}
+              disabled={isExportingDocx || isExportingPdf}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-cyan text-black hover:bg-white font-mono text-xs font-bold transition-all shadow-md disabled:opacity-50"
             >
               {isExportingPdf ? (
