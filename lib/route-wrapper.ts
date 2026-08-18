@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ZodSchema } from "zod";
+import { z, ZodSchema } from "zod";
 import * as Sentry from "@sentry/nextjs";
 import { sanitizeError } from "@/lib/error-sanitization";
 import { applySecurityHeaders } from "@/lib/security-headers";
@@ -23,7 +23,24 @@ export type ApiHandler<TData = unknown> = (
  * Sentry exception logging, error sanitization, and security header enforcement.
  */
 export function createApiHandler<TSchema extends ZodSchema>(
-  handler: ApiHandler<TSchema extends ZodSchema ? TSchema["_output"] : undefined>,
+  handler: ApiHandler<z.infer<TSchema>>,
+  options: ApiWrapperOptions<TSchema> & { schema: TSchema }
+): (
+  rawReq?: NextRequest,
+  routeParams?: { params?: Promise<Record<string, string>> | Record<string, string> }
+) => Promise<NextResponse>;
+
+export function createApiHandler(
+  handler: ApiHandler<undefined>,
+  options?: ApiWrapperOptions
+): (
+  rawReq?: NextRequest,
+  routeParams?: { params?: Promise<Record<string, string>> | Record<string, string> }
+) => Promise<NextResponse>;
+
+export function createApiHandler<TSchema extends ZodSchema>(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  handler: ApiHandler<any>,
   options?: ApiWrapperOptions<TSchema>
 ) {
   return async (
@@ -95,8 +112,7 @@ export function createApiHandler<TSchema extends ZodSchema>(
       }
 
       const response = await handler(req, {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        data: validatedData as any,
+        data: validatedData,
         params: resolvedParams,
       });
 
