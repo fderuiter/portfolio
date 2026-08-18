@@ -1395,7 +1395,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                 if (touch) handleCanvasClickOrTouch(touch.clientX, touch.clientY);
               }}
               style={{ touchAction: "none" }}
-              className={`w-full ${isFullscreen ? "h-auto max-h-[300px] aspect-[760/200] object-contain" : "h-[180px]"} block cursor-pointer`}
+              className={`w-full ${isFullscreen ? "h-auto max-h-[300px] aspect-[760/200] object-contain" : "h-auto aspect-[760/200]"} block cursor-pointer`}
             />
 
             {/* Overlays for Idle / Paused / Game Over / Cleared */}
