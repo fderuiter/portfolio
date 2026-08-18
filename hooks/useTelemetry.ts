@@ -112,6 +112,10 @@ export function enqueueRetryItem(item: QueuedEvent): void {
   retryQueue.push(item);
 }
 
+let inFlightFetch: Promise<void> | null = null;
+let lastFetchTimestamp = 0;
+const FETCH_COOLDOWN_MS = 5000;
+
 function notifyListeners() {
   listeners.forEach((listener) => listener());
 }
@@ -194,6 +198,38 @@ if (typeof window !== "undefined") {
       syncFromStorage();
     }
   });
+
+  const flushQueueOnUnload = () => {
+    if (retryQueue.length > 0) {
+      processRetryQueue({ keepalive: true });
+    }
+  };
+
+  const handleVisibilityChange = () => {
+    if (typeof document !== "undefined" && document.visibilityState === "hidden") {
+      flushQueueOnUnload();
+    }
+  };
+
+  const win = window as unknown as Record<string, EventListener | undefined>;
+  if (win.__telemetryUnloadListener) {
+    window.removeEventListener("pagehide", win.__telemetryUnloadListener);
+    window.removeEventListener("beforeunload", win.__telemetryUnloadListener);
+    window.removeEventListener("unload", win.__telemetryUnloadListener);
+  }
+  win.__telemetryUnloadListener = flushQueueOnUnload as EventListener;
+  window.addEventListener("pagehide", flushQueueOnUnload);
+  window.addEventListener("beforeunload", flushQueueOnUnload);
+  window.addEventListener("unload", flushQueueOnUnload);
+
+  if (typeof document !== "undefined") {
+    const doc = document as unknown as Record<string, EventListener | undefined>;
+    if (doc.__telemetryVisibilityListener) {
+      document.removeEventListener("visibilitychange", doc.__telemetryVisibilityListener);
+    }
+    doc.__telemetryVisibilityListener = handleVisibilityChange as EventListener;
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+  }
 }
 
 function subscribe(listener: () => void) {
@@ -219,33 +255,56 @@ function getServerSnapshot(): TelemetryStoreState {
 
 /**
  * Fetch latest telemetry aggregates from the server.
+ * Reuses active in-flight Promises for concurrent callers and enforces cooldown throttling.
  */
-async function fetchTelemetryAggregates() {
-  try {
-    const res = await fetch("/api/telemetry");
-    if (!res.ok) throw new Error("Telemetry sync fetch failure");
-    const data = (await res.json()) as TelemetryData;
-
-    updateStore((prev) => ({
-      telemetry: { ...prev.telemetry, ...data },
-      syncFailed: false,
-    }));
-  } catch (err) {
-    console.error("Background telemetry synchronization failed:", sanitizeError(err));
-    updateStore((prev) => ({
-      ...prev,
-      syncFailed: true,
-    }));
+async function fetchTelemetryAggregates(options?: { force?: boolean }): Promise<void> {
+  if (inFlightFetch) {
+    return inFlightFetch;
   }
+
+  const now = Date.now();
+  if (!options?.force && now - lastFetchTimestamp < FETCH_COOLDOWN_MS) {
+    return Promise.resolve();
+  }
+
+  lastFetchTimestamp = now;
+
+  inFlightFetch = (async () => {
+    try {
+      const res = await fetch("/api/telemetry");
+      if (!res.ok) throw new Error("Telemetry sync fetch failure");
+      const data = (await res.json()) as TelemetryData;
+
+      updateStore((prev) => ({
+        telemetry: { ...prev.telemetry, ...data },
+        syncFailed: false,
+      }));
+    } catch (err) {
+      console.error("Background telemetry synchronization failed:", sanitizeError(err));
+      updateStore((prev) => ({
+        ...prev,
+        syncFailed: true,
+      }));
+    } finally {
+      inFlightFetch = null;
+    }
+  })();
+
+  return inFlightFetch;
 }
 
 /**
  * Process queued retry events with exponential backoff.
  */
-async function processRetryQueue() {
+async function processRetryQueue(options?: { keepalive?: boolean }) {
   if (retryQueue.length === 0) return;
   const currentBatch = [...retryQueue];
   retryQueue = [];
+
+  if (retryTimer) {
+    clearTimeout(retryTimer);
+    retryTimer = null;
+  }
 
   for (const item of currentBatch) {
     try {
@@ -253,6 +312,7 @@ async function processRetryQueue() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ projectSlug: item.projectSlug, eventType: item.eventType }),
+        keepalive: options?.keepalive ?? false,
       });
 
       if (!response.ok) {
