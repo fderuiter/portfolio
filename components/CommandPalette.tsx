@@ -174,6 +174,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         ]
       },
       {
+        id: "nav-wedding-website",
+        title: "Wedding Website & Interactive Guest Platform",
+        subtitle: "Full-stack case study — Next.js, Three.js 3D physics, Prisma & automated scraper",
+        category: "navigation",
+        url: "/projects/wedding-website",
+        icon: <IconDirections className="w-4 h-4 text-rose-400" />,
+        badge: "Full-Stack Project",
+        status: "Production Live",
+        description: "Enterprise-grade wedding website featuring real-time multi-household RSVP, WebGL 3D physics canvas, OpenGraph product scraper, and snapshot versioning.",
+        techStack: ["Next.js", "TypeScript", "Three.js", "Prisma", "Tailwind CSS", "Docker"],
+        highlights: [
+          "Interactive 3D WebGL physics canvas simulation",
+          "Automated OpenGraph gift registry product scraper",
+          "One-click database snapshot rollback CMS"
+        ]
+      },
+      {
         id: "nav-oxidizemath",
         title: "OxidizeMath: Verified Numerical Framework in Rust",
         subtitle: "Deep-dive technical case study — proc-macro verification, double-buffer PDEs & egui WASM",

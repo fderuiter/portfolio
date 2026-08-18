@@ -107,6 +107,13 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     keywords: ["Rust", "Scientific Computing", "Simulation", "PDE Solver", "Formal Verification", "egui", "WebAssembly"],
     ogType: "article",
   },
+  weddingWebsite: {
+    title: "Wedding Website & Interactive Guest Platform | Case Study",
+    description: "Enterprise-grade full-stack wedding website and guest logistics portal built with Next.js, Three.js 3D physics, Prisma ORM, and automated product scraper.",
+    path: "/projects/wedding-website",
+    keywords: ["Wedding Website", "Guest Management", "Three.js", "Next.js", "Prisma", "Full-Stack", "Docker", "Playwright"],
+    ogType: "article",
+  },
 };
 
 /**

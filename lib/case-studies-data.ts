@@ -308,42 +308,136 @@ class SubjectRecord(BaseModel):
   {
     id: "canonical-4",
     slug: "wedding-website",
-    title: "The Nuptial Engine: Bespoke Event Portal & Guest Logistics",
+    title: "Wedding Website & Interactive Guest Platform",
     primary_language: "TypeScript",
-    github_url: "https://github.com/fderuiter/wedding-website",
+    github_url: "https://github.com/fderuiter/wedding_website",
     published: true,
     simulated_telemetry: false,
-    tags: "TypeScript, Next.js, React, TailwindCSS, Framer Motion, Logistics, RSVP",
-    editorial_content: "A **bespoke event portal** and guest operations engine crafted in **Next.js** and **Framer Motion**. Features real-time multi-household `RSVP tracking`, interactive personalized travel timelines, accommodation logistics, and custom canvas physics animations built to survive zero-downtime family scrutiny.",
-    architectural_narrative: `<h3>The Challenge</h3>
-<p>Off-the-shelf wedding websites are notoriously cookie-cutter, rigid, and cluttered with third-party tracking scripts. Coordinating multi-event logistics across multiple time zones—including rehearsal dinners, hotel blocks, dietary accommodations, and real-time RSVPs—demanded a high-craft, bespoke digital experience engineered with zero-downtime reliability.</p>
+    tags: "Full-Stack, Next.js, TypeScript, Three.js, Prisma, Tailwind CSS, Playwright, Docker",
+    editorial_content: "An enterprise-grade, feature-driven full-stack web application built using **Next.js**, **TypeScript**, **React**, **Prisma ORM**, and **Three.js**. Designed as both a personalized guest portal and a dynamic content management system, it integrates custom real-time gift registry tracking, an automated product metadata web scraper, interactive 3D WebGL canvas simulations, and an administrative control suite with database versioning and snapshot restoration.",
+    architectural_narrative: `<h3>Project Overview &amp; Architecture</h3>
+<p>The Wedding Website &amp; Interactive Guest Platform is an enterprise-grade, feature-driven full-stack web application built using Next.js, TypeScript, React, Prisma ORM, and Three.js. Designed as both a personalized guest portal and a dynamic content management system, it integrates custom real-time gift registry tracking, an automated product metadata web scraper, interactive 3D WebGL canvas simulations, and an administrative control suite with database versioning and snapshot restoration.</p>
 
-<h3>Technical Architecture</h3>
-<p>The platform is designed around three architectural pillars: the <strong>Multi-Party RSVP State Machine</strong>, the <strong>Personalized Guest Timeline Engine</strong>, and the <strong>Hardware-Accelerated Canvas Presentation Layer</strong>.</p>
+<pre><code class="language-text">
++-------------------------------------------------------------------------+
+|                              Next.js Frontend                           |
+|  +-------------------+  +--------------------+  +--------------------+  |
+|  | Guest Experience  |  | 3D Physics Canvas  |  | Admin Dashboard    |  |
+|  | (RSVP, Registry,  |  | (Three.js, Bounds, |  | (Site Manager, D&amp;D |  |
+|  |  Logistics, Maps) |  |  Spring Physics)   |  |  Version Restore)  |  |
+|  +---------+---------+  +---------+----------+  +---------+----------+  |
++------------|----------------------|-----------------------|-------------+
+             |                      |                       |
++------------v----------------------v-----------------------v-------------+
+|                     Next.js API Routes &amp; Middleware                     |
+|  +-------------------------------------------------------------------+  |
+|  | Validation Engine (Zod) | Auth Guards &amp; JWT | Audit Logger        |  |
+|  +-------------------------------------------------------------------+  |
+|  | Rate Limiting Engine    | SSRF SafeFetch    | Image Optim Pipeline|  |
+|  +-------------------------------------------------------------------+  |
++-----------------------------------+-------------------------------------+
+                                    |
++-----------------------------------v-------------------------------------+
+|                         Data &amp; Persistence Tier                         |
+|  +-------------------------------------------------------------------+  |
+|  | Prisma ORM (Relational Models, Cascade Migrations, Snapshots)     |  |
+|  +-------------------------------------------------------------------+  |
+|  | File Storage / Media System  | External APIs (Weather / Scraper)  |  |
++-------------------------------------------------------------------------+
+</code></pre>
+
+<h3>Key Architectural Pillars</h3>
+
+<h4>1. Interactive 3D Canvas &amp; Physics Simulation</h4>
+<p><strong>Three.js &amp; React Three Fiber Engine:</strong> Built an interactive physics simulation displaying real-time responsive 3D floating geometries with collision detection and boundary constraints (<code>Heart3D.tsx</code>, <code>useHeartPhysics.ts</code>).</p>
+<p><strong>Unified Input &amp; Reduced Motion:</strong> Handled pointer tracking and multi-touch interactions normalized across device viewports with fallback rendering paths for accessibility and users preferring reduced motion (<code>useReducedMotion.ts</code>, <code>useUnified3DInput.ts</code>).</p>
 
 <pre><code class="language-typescript">
-// Guest RSVP State Model
-interface HouseholdRSVP {
-  householdId: string;
-  passcode: string;
-  guests: Array<{
-    guestId: string;
-    fullName: string;
-    attendingCeremony: boolean;
-    attendingReception: boolean;
-    dietaryRestrictions: string[];
-  }>;
+// 3D Physics Hook & Boundary Springs
+export function useHeartPhysics(boundary: { width: number; height: number }) {
+  const [position, setPosition] = useState([0, 0, 0]);
+  const [velocity, setVelocity] = useState([0, 0, 0]);
+
+  useFrame((state, delta) => {
+    // Spring physics step with boundary collision constraints
+    const damp = 0.85;
+    const springK = 120.0;
+    // Compute forces and boundary reflections
+  });
+
+  return { position, velocity };
 }
 </code></pre>
 
-<h4>1. Multi-Party RSVP State Machine</h4>
-<p>Handles household groupings where one recipient can respond for their entire party without data conflicts. Backed by optimistic UI updates and localized transactional caching, the interface delivers instantaneous visual feedback even on congested mobile cellular networks.</p>
+<h4>2. Custom Gift Registry with Scraper &amp; Concurrency Control</h4>
+<p><strong>Universal Metadata Scraper:</strong> Implemented an automated registry product scraper leveraging OpenGraph and JSON-LD parsing to dynamically import product details, images, and prices from external URLs.</p>
+<p><strong>Transactional Contributions &amp; Masking:</strong> Built atomic multi-contributor transaction management to prevent race conditions during simultaneous cash and item pledges, complete with donor identity masking for public-facing privacy.</p>
 
-<h4>2. Interactive Guest Itinerary &amp; Logistics</h4>
-<p>Guests receive contextual schedules customized to their specific invite group (e.g. bridal party vs general guests). Travel directions, hotel accommodations, and local recommendations are presented via interactive micro-animations and offline-accessible guides.</p>
+<pre><code class="language-typescript">
+// Universal OpenGraph & JSON-LD Registry Scraper
+export async function scrapeRegistryProduct(url: string): Promise&lt;ScrapedProduct&gt; {
+  const safeUrl = validateSSRFSafeUrl(url); // Blocks RFC 1918 / loopback IPs
+  const res = await fetch(safeUrl, { headers: { "User-Agent": "NuptialScraper/1.0" } });
+  const html = await res.text();
+  const ogTitle = extractMetaProperty(html, "og:title");
+  const ogImage = extractMetaProperty(html, "og:image");
+  const jsonLd = parseJsonLdProduct(html);
+  return { title: ogTitle || jsonLd?.name, image: ogImage || jsonLd?.image, price: jsonLd?.offers?.price };
+}
+</code></pre>
 
-<h4>3. Design Craft &amp; Canvas Physics</h4>
-<p>Bespoke typography, smooth Framer Motion layout transitions, and subtle particle physics create a warm, unforgettable digital invitation that marries aesthetic beauty with rock-solid full-stack engineering.</p>`,
+<h4>3. Administrative CMS, Drag-and-Drop Layouts &amp; Versioning</h4>
+<p><strong>Dynamic Site Layout Engine:</strong> Empowered full administration over landing page sections, wedding party ordering, and local attractions with direct drag-and-drop interface ordering (<code>DragDropContainer.tsx</code>).</p>
+<p><strong>Snapshot Versioning &amp; Rollback:</strong> Integrated automated schema and entity snapshot generation on mutation, enabling one-click audit logging and historical state rollbacks (<code>admin/versions/[id]/restore</code>).</p>
+<p><strong>Maintenance &amp; Backup System:</strong> Provided native JSON export/import data migration pipelines with cryptographic verification and foreign key reconciliation.</p>
+
+<h4>4. Security Hardening &amp; Resilient Infrastructure</h4>
+<p><strong>SSRF Defense:</strong> Implemented strict URL and IP sanitation (<code>ssrf.ts</code>) prohibiting loopback, link-local, and private RFC 1918 address resolutions during web scraping.</p>
+<p><strong>Rate Limiting &amp; Secure Authentication:</strong> Added token-bucket rate limiting (<code>rateLimit.ts</code>) alongside HTTP-only secure cookie authentication and role verification middleware.</p>
+<p><strong>Media &amp; Image Processing:</strong> Engineered a centralized upload and transform pipeline converting raster images to optimized WebP formats with strict size validation.</p>
+
+<h3>Technical Highlights &amp; Specifications</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Dimension</th>
+      <th>Implementation Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Frontend Framework</strong></td>
+      <td>Next.js (App Router), React, Tailwind CSS, Lucide Icons</td>
+    </tr>
+    <tr>
+      <td><strong>Graphics &amp; Animation</strong></td>
+      <td>Three.js, React Three Fiber, Custom Springs &amp; Physics Hooks</td>
+    </tr>
+    <tr>
+      <td><strong>Database &amp; Schema</strong></td>
+      <td>Prisma ORM, Migration Tracking, Relational Schema Management</td>
+    </tr>
+    <tr>
+      <td><strong>Security &amp; Middleware</strong></td>
+      <td>SSRF SafeFetch, Rate Limiting, Audit Logging, HTTP-Only Session Cookies</td>
+    </tr>
+    <tr>
+      <td><strong>Quality &amp; Testing</strong></td>
+      <td>Jest, Playwright E2E Crawlers, Axe-Core A11y Verification, Custom ESLint Rules</td>
+    </tr>
+    <tr>
+      <td><strong>DevOps &amp; CI/CD</strong></td>
+      <td>Multi-stage Docker containerization, GitHub Actions Workflows, OpenAPI Generation</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Engineering Impact &amp; Key Takeaways</h3>
+<ul>
+  <li><strong>Modularity:</strong> Implemented strict domain separation across features (registry, content, wedding-party, attractions, media), promoting zero-coupling between administrative services and client views.</li>
+  <li><strong>Accessibility-First Design:</strong> Enforced automated accessibility testing pipelines (a11y-report.mjs, Playwright tests), ensuring consistent focus traps, ARIA live regions, and semantic landmark scaffolding.</li>
+  <li><strong>Production Reliability:</strong> Backed by a full test suite spanning unit, integration, and E2E regression tests with zero downtime containerized deployments.</li>
+</ul>`,
     created_at: new Date("2026-02-10T00:00:00Z"),
     updated_at: new Date("2026-08-14T00:00:00Z"),
   },
@@ -420,6 +514,11 @@ export const tenantAuthGuard = createMiddleware(async (c, next) => {
 
 <h4>3. Edge-Native Event-Driven Async Processing</h4>
 <p>Background workflows and async task queues are powered by Inngest functions embedded directly inside Hono, delivering event-driven reliability without needing persistent worker processes.</p>`,
+    created_at: new Date("2026-02-18T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-7",
     slug: "inbody-qr-decoder",
     title: "InBody QR Data Decoder & Analyzer: BIA Reverse Engineering",
     primary_language: "Python",
@@ -454,6 +553,11 @@ def decode_digits(raw_slice: str, scale_factor: float = 0.1, precision: int = 2)
 
 <h4>3. Multi-Block Segment Parsing &amp; Biomarker Derivation</h4>
 <p>Primary body composition parameters reside in Segment Index 4 (<code>meas_blob</code>), while secondary metrics (BMR and Visceral Fat) are extracted from Segment Index 5 in kilocalories. Derived biomarkers, including Appendicular Skeletal Muscle Mass (ASM) and Skeletal Muscle Index ($\\text{SMI} = \\frac{\\text{ASM}}{\\text{Height}^2}$), are computed deterministically.</p>`,
+    created_at: new Date("2026-02-22T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-8",
     slug: "polyglot-tsp",
     title: "Polyglot-TSP: Technical Breakdown & Portfolio Integration",
     primary_language: "Rust",
@@ -567,6 +671,11 @@ endmodule
 <h3>Trade-Offs & Key Decisions</h3>
 <p>1. <strong>Exhaustive Permutations ($O(N!)$) vs. Dynamic Programming / Heuristics ($O(N^2 2^N)$)</strong>: Prioritized strict brute-force permutation generation across all targets to maintain an identical baseline for syntactic and runtime execution comparisons across obscure and exotic paradigms.</p>
 <p>2. <strong>Subprocess CLI Execution vs. Foreign Function Interface (FFI)</strong>: Chose process-level standard stream (stdout/stderr) assertion over C ABI bindings to accommodate non-standardized runtimes, HDL simulation pipelines (ghdl, iverilog), and legacy/esoteric environments (INTERCAL, COBOL, Modula-2).</p>`,
+    created_at: new Date("2026-02-25T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-9",
     slug: "oxidizemath",
     title: "OxidizeMath: Verified Numerical Computation Framework in Rust",
     primary_language: "Rust",
@@ -627,6 +736,11 @@ where
 
 <h4>3. WASM-First GUI Architecture</h4>
 <p>Deploys identical single-binary desktop execution and zero-install WebAssembly browser builds using egui and custom <code>egui_plot</code> engines.</p>`,
+    created_at: new Date("2026-02-28T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-10",
     slug: "ualbf",
     title: "UALBF: Verified Computational Proof Engine & Search Architecture",
     primary_language: "Rust",
@@ -737,6 +851,10 @@ pub extern "C" fn ualbf_verify_certificate_manifest(
 }
 </code></pre>`,
     created_at: new Date("2026-03-01T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-11",
     slug: "sortify",
     title: "Sortify: Air-Gapped Document Classification & Resilient File Engine",
     primary_language: "Python",
