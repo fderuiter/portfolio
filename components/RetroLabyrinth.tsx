@@ -916,6 +916,51 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
     }
   };
 
+  // Loop State Mirroring Ref for Stable Animation Lifecycle
+  const loopStateRef = useRef({
+    isMounted,
+    currentMaze,
+    playerPosition,
+    visibleMap,
+    exploredMap,
+    enemies,
+    drones,
+    dronesStunned,
+    items,
+    boss,
+    tspNodes,
+    gameMode,
+    roomIndex,
+    gameStatus,
+    activeSideEffect,
+    currentTheme,
+    crtCalibration,
+    playNote,
+  });
+
+  useEffect(() => {
+    loopStateRef.current = {
+      isMounted,
+      currentMaze,
+      playerPosition,
+      visibleMap,
+      exploredMap,
+      enemies,
+      drones,
+      dronesStunned,
+      items,
+      boss,
+      tspNodes,
+      gameMode,
+      roomIndex,
+      gameStatus,
+      activeSideEffect,
+      currentTheme,
+      crtCalibration,
+      playNote,
+    };
+  });
+
   // Main Real-Time Game Loop
   useEffect(() => {
     if (!isMounted) return;
@@ -944,8 +989,28 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
     const loop = (timestamp: number) => {
       if (!isRunning || isContextLost) return;
 
+      const {
+        currentMaze,
+        playerPosition,
+        visibleMap,
+        exploredMap,
+        enemies,
+        drones,
+        dronesStunned,
+        items,
+        boss,
+        tspNodes,
+        gameMode,
+        roomIndex,
+        gameStatus,
+        activeSideEffect,
+        currentTheme,
+        crtCalibration,
+        playNote,
+      } = loopStateRef.current;
+
       if (!lastTimeRef.current) lastTimeRef.current = timestamp;
-      const deltaMs = timestamp - lastTimeRef.current;
+      const deltaMs = Math.min(40, timestamp - lastTimeRef.current);
       lastTimeRef.current = timestamp;
 
       // 1. Update active side effect expiry
@@ -1367,26 +1432,8 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
       }
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [
-    isMounted,
-    currentMaze,
-    playerPosition,
-    visibleMap,
-    exploredMap,
-    enemies,
-    drones,
-    dronesStunned,
-    items,
-    boss,
-    tspNodes,
-    gameMode,
-    roomIndex,
-    gameStatus,
-    activeSideEffect,
-    currentTheme,
-    crtCalibration,
-    playNote,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMounted]);
 
   // ASCII Fallback for SSR & Initial Hydration
   const renderAsciiFallback = () => {

@@ -797,6 +797,8 @@ export const ClinicalTrialChaos: React.FC = () => {
   const auditorRef = useRef(auditor);
   const stationsRef = useRef(stations);
   const scoreStateRef = useRef(scoreState);
+  const powerUpsRef = useRef(powerUps);
+  const activeAmendmentRef = useRef(activeAmendment);
   const auditLogsRef = useRef(auditLogs);
   const addAuditLogRef = useRef(addAuditLog);
   const triggerSoundRef = useRef(triggerSound);
@@ -813,6 +815,8 @@ export const ClinicalTrialChaos: React.FC = () => {
     auditorRef.current = auditor;
     stationsRef.current = stations;
     scoreStateRef.current = scoreState;
+    powerUpsRef.current = powerUps;
+    activeAmendmentRef.current = activeAmendment;
     auditLogsRef.current = auditLogs;
     addAuditLogRef.current = addAuditLog;
     triggerSoundRef.current = triggerSound;
@@ -851,94 +855,101 @@ export const ClinicalTrialChaos: React.FC = () => {
 
       const now = Date.now();
       const isPausedByModal = !!validatingObsRef.current || !!signatureModalRef.current?.isOpen;
-      const deltaSeconds = isPausedByModal ? 0 : Math.min(0.1, (now - lastTickTimeRef.current) / 1000);
+      const deltaMs = Math.min(100, now - lastTickTimeRef.current);
+      const deltaSeconds = isPausedByModal ? 0 : deltaMs / 1000;
       lastTickTimeRef.current = now;
 
+      let uiNeedsSync = false;
+
       // 1. Tick subjects on conveyor
-      setConveyorSubjects((prev) => {
-        const { updatedSubjects, expiredSubjects } = tickSubjectTimers(prev, deltaSeconds);
+      const { updatedSubjects, expiredSubjects } = tickSubjectTimers(
+        conveyorSubjectsRef.current,
+        deltaSeconds
+      );
+      conveyorSubjectsRef.current = updatedSubjects;
 
-        if (expiredSubjects.length > 0) {
-          expiredSubjects.forEach((exp) => {
-            triggerSoundRef.current("error");
-            addAuditLogRef.current(
-              `[AUDIT TIMEOUT] Subject ${exp.subjectLabel} expired unverified on conveyor! Auditor suspicion +20%`,
-              "CRITICAL",
-              20
-            );
-          });
+      if (expiredSubjects.length > 0) {
+        uiNeedsSync = true;
+        expiredSubjects.forEach((exp) => {
+          triggerSoundRef.current("error");
+          addAuditLogRef.current(
+            `[AUDIT TIMEOUT] Subject ${exp.subjectLabel} expired unverified on conveyor! Auditor suspicion +20%`,
+            "CRITICAL",
+            20
+          );
+        });
 
-          setAuditor((aud) => {
-            if (aud.isPaused || aud.behavior === "coffee_break") return aud;
-            const nextSusp = Math.min(100, aud.suspicion + expiredSubjects.length * 20);
-            return {
-              ...aud,
-              suspicion: nextSusp,
-              behavior: nextSusp >= 100 ? "issuing_483" : "suspicious",
-            };
-          });
-
-          setScoreState((sc) => ({
-            ...sc,
-            combo: 0,
-            multiplier: 1,
-            auditViolations: sc.auditViolations + expiredSubjects.length,
-          }));
+        if (!auditorRef.current.isPaused && auditorRef.current.behavior !== "coffee_break") {
+          const nextSusp = Math.min(100, auditorRef.current.suspicion + expiredSubjects.length * 20);
+          auditorRef.current = {
+            ...auditorRef.current,
+            suspicion: nextSusp,
+            behavior: nextSusp >= 100 ? "issuing_483" : "suspicious",
+          };
+          setAuditor({ ...auditorRef.current });
         }
 
-        return updatedSubjects;
-      });
+        scoreStateRef.current = {
+          ...scoreStateRef.current,
+          combo: 0,
+          multiplier: 1,
+          auditViolations: scoreStateRef.current.auditViolations + expiredSubjects.length,
+        };
+        setScoreState({ ...scoreStateRef.current });
+      }
 
       // 2. Tick Auditor AI
-      setAuditor((prev) => {
-        const updatedAuditor = tickAuditor(prev, deltaSeconds, conveyorSubjectsRef.current.length);
-        if (updatedAuditor.suspicion >= 100 && playStateRef.current === "playing") {
-          triggerSoundRef.current("alarm");
-          setPlayState("game_over");
-          addAuditLogRef.current(
-            `[FDA NOTICE OF STUDY TERMINATION] 21 CFR Part 11 Audit Suspicion reached 100%. Form 483 Issued.`,
-            "CRITICAL"
-          );
-          const report = generateBIMOReport(scoreStateRef.current, updatedAuditor, auditLogsRef.current);
-          setBimoReport(report);
-        }
-        return updatedAuditor;
-      });
+      const updatedAuditor = tickAuditor(auditorRef.current, deltaSeconds, conveyorSubjectsRef.current.length);
+      auditorRef.current = updatedAuditor;
+      if (updatedAuditor.suspicion >= 100 && playStateRef.current === "playing") {
+        uiNeedsSync = true;
+        triggerSoundRef.current("alarm");
+        setPlayState("game_over");
+        addAuditLogRef.current(
+          `[FDA NOTICE OF STUDY TERMINATION] 21 CFR Part 11 Audit Suspicion reached 100%. Form 483 Issued.`,
+          "CRITICAL"
+        );
+        const report = generateBIMOReport(scoreStateRef.current, updatedAuditor, auditLogsRef.current);
+        setBimoReport(report);
+        setAuditor({ ...updatedAuditor });
+      }
 
       // 3. Tick Power-ups
-      setPowerUps((prevPu) => {
-        const nextPu = tickPowerUps(prevPu, deltaSeconds);
-        if (prevPu["fda-coffee-break"].activeSecondsRemaining > 0 && nextPu["fda-coffee-break"].activeSecondsRemaining === 0) {
-          setAuditor((aud) => {
-            if (aud.behavior === "coffee_break") {
-              return {
-                ...aud,
-                behavior: "patrolling",
-                isPaused: false,
-              };
-            }
-            return aud;
-          });
-          addAuditLogRef.current("☕ FDA Coffee Break ended. Auditor resumed inspection floor patrol.", "INFO");
+      const prevPu = powerUpsRef.current;
+      const nextPu = tickPowerUps(prevPu, deltaSeconds);
+      powerUpsRef.current = nextPu;
+      if (prevPu["fda-coffee-break"].activeSecondsRemaining > 0 && nextPu["fda-coffee-break"].activeSecondsRemaining === 0) {
+        uiNeedsSync = true;
+        if (auditorRef.current.behavior === "coffee_break") {
+          auditorRef.current = {
+            ...auditorRef.current,
+            behavior: "patrolling",
+            isPaused: false,
+          };
+          setAuditor({ ...auditorRef.current });
         }
-        return nextPu;
-      });
+        addAuditLogRef.current("☕ FDA Coffee Break ended. Auditor resumed inspection floor patrol.", "INFO");
+        setPowerUps({ ...nextPu });
+      }
 
       // 4. Tick Protocol Amendment countdown
-      setActiveAmendment((prev) => {
-        if (!prev || !prev.active) return null;
-        const remaining = prev.timeRemaining - deltaSeconds;
+      if (activeAmendmentRef.current && activeAmendmentRef.current.active) {
+        const remaining = activeAmendmentRef.current.timeRemaining - deltaSeconds;
         if (remaining <= 0) {
-          addAuditLogRef.current(`Protocol Amendment ${prev.version} concluded. Standard site procedures resumed.`, "INFO");
-          return null;
+          uiNeedsSync = true;
+          addAuditLogRef.current(`Protocol Amendment ${activeAmendmentRef.current.version} concluded. Standard site procedures resumed.`, "INFO");
+          activeAmendmentRef.current = null;
+          setActiveAmendment(null);
+        } else {
+          activeAmendmentRef.current = { ...activeAmendmentRef.current, timeRemaining: remaining };
         }
-        return { ...prev, timeRemaining: remaining };
-      });
+      }
 
       // 5. Random Protocol Amendments
       amendmentTimerRef.current += deltaSeconds;
       const amendmentInterval = phaseRef.current === 1 ? 40 : phaseRef.current === 2 ? 28 : 20;
       if (amendmentTimerRef.current > amendmentInterval) {
+        uiNeedsSync = true;
         amendmentTimerRef.current = 0;
         const newAmendment = triggerRandomAmendment();
         setActiveAmendment(newAmendment);
@@ -949,7 +960,8 @@ export const ClinicalTrialChaos: React.FC = () => {
           setStations((st) => scrambleStations(st));
         } else if (newAmendment.type === "sae-priority-rush") {
           const saeSubj = generateClinicalSubject(0.7, true, undefined, stationsRef.current.map((s) => s.id));
-          setConveyorSubjects((cs) => [saeSubj, ...cs]);
+          conveyorSubjectsRef.current = [saeSubj, ...conveyorSubjectsRef.current];
+          setConveyorSubjects([...conveyorSubjectsRef.current]);
         }
       }
 
@@ -957,6 +969,7 @@ export const ClinicalTrialChaos: React.FC = () => {
       spawnTimerRef.current += deltaSeconds;
       const spawnInterval = phaseRef.current === 1 ? 6.5 : phaseRef.current === 2 ? 4.8 : 3.5;
       if (spawnTimerRef.current > spawnInterval && conveyorSubjectsRef.current.length < 5) {
+        uiNeedsSync = true;
         spawnTimerRef.current = 0;
         const errorChance = phaseRef.current === 1 ? 0.45 : phaseRef.current === 2 ? 0.65 : 0.8;
         const isSAE = Math.random() < (phaseRef.current === 1 ? 0.1 : 0.3);
@@ -966,13 +979,25 @@ export const ClinicalTrialChaos: React.FC = () => {
           undefined,
           stationsRef.current.map((s) => s.id)
         );
-        setConveyorSubjects((prev) => [...prev, newSub]);
+        conveyorSubjectsRef.current = [...conveyorSubjectsRef.current, newSub];
+        setConveyorSubjects([...conveyorSubjectsRef.current]);
         if (!selectedSubjectIdRef.current) {
           setSelectedSubjectId(newSub.id);
         }
       }
 
-      // 7. Render Canvas Simulation
+      // 7. UI State Sync: Sync React state only when DOM second display value changes or milestones occur
+      const secondsChanged = conveyorSubjectsRef.current.some(
+        (s, i) => Math.ceil(s.timeRemaining) !== Math.ceil(conveyorSubjects[i]?.timeRemaining ?? 0)
+      );
+
+      if (uiNeedsSync || secondsChanged) {
+        setConveyorSubjects([...conveyorSubjectsRef.current]);
+        setAuditor({ ...auditorRef.current });
+        setPowerUps({ ...powerUpsRef.current });
+      }
+
+      // 8. Render Canvas Simulation
       const canvas = canvasRef.current;
       if (canvas) {
         const ctx = canvas.getContext("2d");
@@ -1002,6 +1027,7 @@ export const ClinicalTrialChaos: React.FC = () => {
       }
       if (animFrameIdRef.current) cancelAnimationFrame(animFrameIdRef.current);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playState]);
 
   // 18. Hotkeys and Keyboard Boundary
