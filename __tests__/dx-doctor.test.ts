@@ -15,6 +15,7 @@ import {
   checkOpenApiParity,
   checkDefectRemediationInvariants,
   checkDesignTokens,
+  checkSecurityExemptionManifest,
   runDiagnostics,
   printDoctorReport,
 } from "@/lib/dx/doctor";
@@ -360,6 +361,40 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       const result = checkDesignTokens(tempDir);
       expect(result.status).toBe("fail");
       expect(result.details?.[0]).toContain("Raw unconstrained inline style property detected");
+    });
+  });
+
+  describe("checkSecurityExemptionManifest", () => {
+    it("fails when exemption manifest file is missing in workspace", () => {
+      const result = checkSecurityExemptionManifest(tempDir);
+      expect(result.status).toBe("fail");
+      expect(result.message).toContain("missing");
+    });
+
+    it("fails when exemption manifest contains malformed entries missing rationale/advisory", () => {
+      fs.writeFileSync(
+        path.join(tempDir, "security-audit-exemptions.json"),
+        JSON.stringify([{ package: "bad-pkg" }])
+      );
+      const result = checkSecurityExemptionManifest(tempDir);
+      expect(result.status).toBe("fail");
+      expect(result.message).toContain("malformed");
+    });
+
+    it("passes when valid exemption manifest is present in workspace", () => {
+      fs.writeFileSync(
+        path.join(tempDir, "security-audit-exemptions.json"),
+        JSON.stringify([
+          {
+            package: "test-pkg",
+            rationale: "Dev test dependency justification",
+            advisory: "GHSA-1234",
+          },
+        ])
+      );
+      const result = checkSecurityExemptionManifest(tempDir);
+      expect(result.status).toBe("pass");
+      expect(result.message).toContain("validated successfully");
     });
   });
 

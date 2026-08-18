@@ -1,0 +1,142 @@
+[
+  {
+    "package": "concurrently",
+    "rationale": "Development CLI task runner tool not exposed in production runtime environment.",
+    "advisory": "GHSA-shell-quote-eval",
+    "reviewDate": "2026-08-18",
+    "approvedBy": "Security Team"
+  },
+  {
+    "package": "@lhci/cli",
+    "rationale": "Lighthouse CI automation dependency restricted to offline CI test suites.",
+    "advisory": "GHSA-jmr9-qjv8-65gv",
+    "reviewDate": "2026-08-18",
+    "approvedBy": "Security Team"
+  },
+  {
+    "package": "@lhci/utils",
+    "rationale": "Lighthouse CI utility module restricted to build-time performance evaluation.",
+    "advisory": "GHSA-52cp-r559-cp3m",
+    "reviewDate": "2026-08-18",
+    "approvedBy": "Security Team"
+  },
+  {
+    "package": "@prisma/config",
+    "rationale": "Development-time ORM configuration parser used exclusively in build/migration steps.",
+    "advisory": "GHSA-prisma-config-audit",
+    "reviewDate": "2026-08-18",
+    "approvedBy": "Security Team"
+  },
+  {
+    "package": "@puppeteer/browsers",
+    "rationale": "Automated headless browser downloader used strictly in local and CI test pipelines.",
+    "advisory": "GHSA-jmr9-qjv8-65gv",
+    "reviewDate": "2026-08-18",
+    "approvedBy": "Security Team"
+  },
+  {
+    "package": "brace-expansion",
+    "rationale": "Transitive devDependency used for globbing in development build utilities.",
+    "advisory": "GHSA-brace-expansion-dos",
+    "reviewDate": "2026-08-18",
+    "approvedBy": "Security Team"
+  },
+  {
+    "package": "deepmerge-ts",
+    "rationale": "Type-level utility library used at compile time with zero runtime payload.",
+    "advisory": "GHSA-deepmerge-ts-audit",
+    "reviewDate": "2026-08-18",
+    "approvedBy": "Security Team"
+  },
+  {
+    "package": "extract-zip",
+    "rationale": "Transitive zip extractor dependency used during dev browser binary extraction.",
+    "advisory": "GHSA-jmr9-qjv8-65gv",
+    "reviewDate": "2026-08-18",
+    "approvedBy": "Security Team"
+  },
+  {
+    "package": "fast-uri",
+    "rationale": "Strict URI validator used in schema evaluation tools; non-exploitable input vectors.",
+    "advisory": "GHSA-fast-uri-audit",
+    "reviewDate": "2026-08-18",
+    "approvedBy": "Security Team"
+  },
+  {
+    "package": "js-yaml",
+    "rationale": "YAML parser used strictly in build/CI script configuration parsing.",
+    "advisory": "GHSA-52cp-r559-cp3m",
+    "reviewDate": "2026-08-18",
+    "approvedBy": "Security Team"
+  },
+  {
+    "package": "lighthouse",
+    "rationale": "Audit reporting utility restricted to CI web performance evaluation.",
+    "advisory": "GHSA-jmr9-qjv8-65gv",
+    "reviewDate": "2026-08-18",
+    "approvedBy": "Security Team"
+  },
+  {
+    "package": "next",
+    "rationale": "Core framework web framework package monitored for upstream patch releases.",
+    "advisory": "GHSA-nextjs-audit",
+    "reviewDate": "2026-08-18",
+    "approvedBy": "Security Team"
+  },
+  {
+    "package": "postcss",
+    "rationale": "CSS build-time transformation tool used strictly during compilation.",
+    "advisory": "GHSA-postcss-audit",
+    "reviewDate": "2026-08-18",
+    "approvedBy": "Security Team"
+  },
+  {
+    "package": "prisma",
+    "rationale": "Database CLI migration tool used in development and deployment pipelines.",
+    "advisory": "GHSA-prisma-audit",
+    "reviewDate": "2026-08-18",
+    "approvedBy": "Security Team"
+  },
+  {
+    "package": "puppeteer-core",
+    "rationale": "Headless browser driver used exclusively in e2e test execution.",
+    "advisory": "GHSA-jmr9-qjv8-65gv",
+    "reviewDate": "2026-08-18",
+    "approvedBy": "Security Team"
+  },
+  {
+    "package": "sharp",
+    "rationale": "Image processing library operating on controlled build assets.",
+    "advisory": "GHSA-sharp-audit",
+    "reviewDate": "2026-08-18",
+    "approvedBy": "Security Team"
+  },
+  {
+    "package": "shell-quote",
+    "rationale": "Command string escaper used in build tools; inputs are static strings.",
+    "advisory": "GHSA-shell-quote-audit",
+    "reviewDate": "2026-08-18",
+    "approvedBy": "Security Team"
+  },
+  {
+    "package": "tmp",
+    "rationale": "Temporary file helper restricted to dev CLI scripts.",
+    "advisory": "GHSA-52f5-9888-hmc6",
+    "reviewDate": "2026-08-18",
+    "approvedBy": "Security Team"
+  },
+  {
+    "package": "hono",
+    "rationale": "Lightweight web framework utility used for isolated edge route helpers.",
+    "advisory": "GHSA-hono-audit",
+    "reviewDate": "2026-08-18",
+    "approvedBy": "Security Team"
+  },
+  {
+    "package": "ip-address",
+    "rationale": "IPv6 address parsing library used in server network utilities.",
+    "advisory": "GHSA-ip-address-audit",
+    "reviewDate": "2026-08-18",
+    "approvedBy": "Security Team"
+  }
+]

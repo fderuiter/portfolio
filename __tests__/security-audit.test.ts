@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { MockInstance } from "vitest";
 import { spawnSync } from "child_process";
+import fs from "fs";
+import path from "path";
+import os from "os";
 
 vi.mock("child_process", () => {
   const mSpawnSync = vi.fn();
@@ -12,7 +15,12 @@ vi.mock("child_process", () => {
   };
 });
 
-import { isPretextRelated, loadIgnoreList, runSecurityAudit } from "../scripts/security-audit";
+import {
+  isPretextRelated,
+  loadIgnoreList,
+  loadAndValidateExemptionManifest,
+  runSecurityAudit,
+} from "../scripts/security-audit";
 import type { VulnerabilityInfo } from "../scripts/security-audit";
 
 describe("Security Audit Script", () => {
@@ -60,8 +68,96 @@ describe("Security Audit Script", () => {
     });
   });
 
+  describe("loadAndValidateExemptionManifest", () => {
+    let tempDir: string;
+
+    beforeEach(() => {
+      tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "manifest-test-"));
+    });
+
+    afterEach(() => {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    });
+
+    it("returns found=false when exemption manifest file is missing", () => {
+      const result = loadAndValidateExemptionManifest(tempDir);
+      expect(result.found).toBe(false);
+      expect(result.valid).toBe(false);
+      expect(result.errors.length).toBeGreaterThan(0);
+      expect(result.errors[0]).toContain("missing");
+    });
+
+    it("returns valid=false when an exemption entry lacks mandatory justification (rationale)", () => {
+      const manifestPath = path.join(tempDir, "security-audit-exemptions.json");
+      fs.writeFileSync(
+        manifestPath,
+        JSON.stringify([
+          {
+            package: "vulnerable-pkg",
+            advisory: "GHSA-1234",
+            // missing rationale
+          },
+        ])
+      );
+
+      const result = loadAndValidateExemptionManifest(tempDir);
+      expect(result.found).toBe(true);
+      expect(result.valid).toBe(false);
+      expect(result.errors.some((e) => e.includes("rationale"))).toBe(true);
+    });
+
+    it("returns valid=false when an exemption entry lacks mandatory advisory metadata", () => {
+      const manifestPath = path.join(tempDir, "security-audit-exemptions.json");
+      fs.writeFileSync(
+        manifestPath,
+        JSON.stringify([
+          {
+            package: "vulnerable-pkg",
+            rationale: "Testing rationale text",
+            // missing advisory
+          },
+        ])
+      );
+
+      const result = loadAndValidateExemptionManifest(tempDir);
+      expect(result.found).toBe(true);
+      expect(result.valid).toBe(false);
+      expect(result.errors.some((e) => e.includes("advisory"))).toBe(true);
+    });
+
+    it("returns valid=false when legacy string array format is used", () => {
+      const manifestPath = path.join(tempDir, "security-audit-exemptions.json");
+      fs.writeFileSync(manifestPath, JSON.stringify(["concurrently", "next"]));
+
+      const result = loadAndValidateExemptionManifest(tempDir);
+      expect(result.found).toBe(true);
+      expect(result.valid).toBe(false);
+      expect(result.errors.length).toBe(2);
+    });
+
+    it("returns valid=true and parsed entries for a valid manifest", () => {
+      const manifestPath = path.join(tempDir, "security-audit-exemptions.json");
+      fs.writeFileSync(
+        manifestPath,
+        JSON.stringify([
+          {
+            package: "concurrently",
+            rationale: "Dev CLI tool, non-exploitable at runtime",
+            advisory: "GHSA-shell-quote",
+          },
+        ])
+      );
+
+      const result = loadAndValidateExemptionManifest(tempDir);
+      expect(result.found).toBe(true);
+      expect(result.valid).toBe(true);
+      expect(result.entries.length).toBe(1);
+      expect(result.entries[0].package).toBe("concurrently");
+    });
+  });
+
   describe("loadIgnoreList", () => {
-    it("returns default ignore list", () => {
+    it("returns package list from valid repository manifest", () => {
       const list = loadIgnoreList();
       expect(list).toContain("concurrently");
       expect(list).toContain("next");
@@ -69,7 +165,7 @@ describe("Security Audit Script", () => {
   });
 
   describe("runSecurityAudit", () => {
-    it("should pass when there are no vulnerabilities", () => {
+    it("should pass when there are no vulnerabilities and manifest is valid", () => {
       vi.mocked(spawnSync).mockReturnValue({
         stdout: JSON.stringify({
           auditReportVersion: 2,
@@ -103,7 +199,7 @@ describe("Security Audit Script", () => {
       expect(exitSpy).toHaveBeenCalledWith(0);
     });
 
-    it("should pass when high/critical vulnerabilities are in the ignore list", () => {
+    it("should pass when high/critical vulnerabilities match exempted packages in manifest", () => {
       vi.mocked(spawnSync).mockReturnValue({
         stdout: JSON.stringify({
           auditReportVersion: 2,
@@ -121,13 +217,13 @@ describe("Security Audit Script", () => {
       expect(exitSpy).toHaveBeenCalledWith(0);
     });
 
-    it("should fail when unignored high/critical vulnerabilities exist", () => {
+    it("should fail when unexempted high/critical vulnerabilities exist", () => {
       vi.mocked(spawnSync).mockReturnValue({
         stdout: JSON.stringify({
           auditReportVersion: 2,
           vulnerabilities: {
-            "unsafe-package": {
-              name: "unsafe-package",
+            "unvetted-dangerous-pkg": {
+              name: "unvetted-dangerous-pkg",
               severity: "high",
               via: [
                 {
@@ -171,7 +267,7 @@ describe("Security Audit Script", () => {
       // Check that redacted warning was logged
       const errorCalls = errorSpy.mock.calls.map((call) => call[0] as string).join("\n");
       expect(errorCalls).toContain("A dependency vulnerability affecting a core layout component has been detected");
-      
+
       // Check that specific advisory details were NOT logged (private handling invariant)
       expect(errorCalls).not.toContain("Denial of service via extremely long input");
       expect(errorCalls).not.toContain("https://github.com/advisories/GHSA-pretext");

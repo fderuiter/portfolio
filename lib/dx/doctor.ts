@@ -7,6 +7,7 @@ import { checkEnvironmentVariables } from "./env-guard";
 import { checkGitHygieneConfig } from "./git-guard";
 import { checkDeadCode } from "./dead-code";
 import { checkBundleBudgets } from "./bundle-guard";
+import { loadAndValidateExemptionManifest } from "../../scripts/security-audit";
 import { getEnv } from "../env";
 
 export interface DiagnosticCheckResult {
@@ -1044,6 +1045,48 @@ export function checkPackageLockfile(root: string): DiagnosticCheckResult {
 }
 
 /**
+ * Check Mandatory Security Audit Exemption Manifest Invariant
+ */
+export function checkSecurityExemptionManifest(root: string): DiagnosticCheckResult {
+  const manifestResult = loadAndValidateExemptionManifest(root);
+
+  if (!manifestResult.found) {
+    return {
+      id: "security-exemption-manifest",
+      name: "Mandatory Security Audit Exemption Manifest",
+      category: "security",
+      status: "fail",
+      message: "Security audit exemption manifest file is missing.",
+      details: [
+        "Missing manifest file (e.g. security-audit-exemptions.json or security-audit-ignore.json).",
+        "Security audits fail closed without an explicit, documented exemption manifest."
+      ],
+      fixable: false,
+    };
+  }
+
+  if (!manifestResult.valid) {
+    return {
+      id: "security-exemption-manifest",
+      name: "Mandatory Security Audit Exemption Manifest",
+      category: "security",
+      status: "fail",
+      message: `Security audit exemption manifest (${manifestResult.filePath ? path.basename(manifestResult.filePath) : "manifest"}) contains malformed or incomplete entries.`,
+      details: manifestResult.errors,
+      fixable: false,
+    };
+  }
+
+  return {
+    id: "security-exemption-manifest",
+    name: "Mandatory Security Audit Exemption Manifest",
+    category: "security",
+    status: "pass",
+    message: `Security audit exemption manifest validated successfully with ${manifestResult.entries.length} documented package exemption(s).`,
+  };
+}
+
+/**
  * Run All Diagnostics
  */
 export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
@@ -1076,6 +1119,7 @@ export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
     checkGitHygieneConfig(root, fix),
     checkWorkspaceIdeConfig(root, fix),
     checkPackageLockfile(root),
+    checkSecurityExemptionManifest(root),
     checkDesignTokens(root),
     checkDeadCode(root),
     checkBundleBudgets(root),

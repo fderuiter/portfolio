@@ -8,7 +8,7 @@
 
 > **runDiagnostics**(`options?`): `Promise`\<\{ `hasFailures`: `boolean`; `hasWarnings`: `boolean`; `results`: [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)[]; `totalFailed`: `number`; `totalFixed`: `number`; `totalPassed`: `number`; `totalWarned`: `number`; \}\>
 
-Defined in: [lib/dx/doctor.ts:1049](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1049)
+Defined in: [lib/dx/doctor.ts:1092](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1092)
 
 Run All Diagnostics
 
