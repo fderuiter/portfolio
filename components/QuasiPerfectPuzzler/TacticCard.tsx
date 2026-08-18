@@ -3,6 +3,7 @@
 import React from "react";
 import { motion, PanInfo } from "framer-motion";
 import { TacticDef } from "@/lib/quasi-perfect/types";
+import { sharedInputBridge } from "@/lib/virtual-input-bridge";
 
 interface TacticCardProps {
   tactic: TacticDef;
@@ -39,7 +40,7 @@ export const TacticCard: React.FC<TacticCardProps> = ({
       onDragEnd={onDragEnd}
       data-tactic-id={tactic.id}
       data-tactic-arg={hypothesisTarget}
-      className={`relative cursor-grab active:cursor-grabbing rounded-xl border p-3 font-mono transition-colors duration-150 select-none ${
+      className={`relative cursor-grab active:cursor-grabbing rounded-xl border p-3 font-mono transition-colors duration-150 select-none min-h-[44px] min-w-[44px] ${
         disabled
           ? "border-zinc-800/60 bg-zinc-950/40 opacity-40 cursor-not-allowed"
           : isSorry
@@ -50,7 +51,10 @@ export const TacticCard: React.FC<TacticCardProps> = ({
       }`}
       onClick={(e) => {
         e.stopPropagation();
-        if (!disabled) onSelect();
+        if (!disabled) {
+          sharedInputBridge.emitActionPress(`tactic_${tactic.id}`);
+          onSelect();
+        }
       }}
       role="button"
       tabIndex={disabled ? -1 : 0}

@@ -39,6 +39,8 @@ import { FieldManualButton } from "@/components/FieldManualButton";
 import { FullscreenButton } from "@/components/arcade/FullscreenButton";
 import { DynamicTabletOrientationHint as TabletOrientationHint } from "@/components/arcade/DynamicTabletOrientationHint";
 import { useFullscreen } from "@/hooks/useFullscreen";
+import { FloatingHUDOverlay } from "@/components/arcade/FloatingHUDOverlay";
+import { VirtualInputDirection } from "@/lib/virtual-input-bridge";
 
 import {
   CDISCDomain,
@@ -201,6 +203,22 @@ export const ClinicalTrialChaos: React.FC = () => {
       setAuditLogs((prev) => [...prev.slice(-50), entry]);
     },
     []
+  );
+
+  const handleDirectionalClinicalNav = useCallback(
+    (dir: VirtualInputDirection) => {
+      if (conveyorSubjects.length === 0) return;
+      const currIdx = conveyorSubjects.findIndex((s) => s.id === selectedSubjectId);
+      if (dir === "left" || dir === "up") {
+        const prevIdx = currIdx <= 0 ? conveyorSubjects.length - 1 : currIdx - 1;
+        setSelectedSubjectId(conveyorSubjects[prevIdx]?.id || null);
+      } else if (dir === "right" || dir === "down") {
+        const nextIdx =
+          currIdx < 0 || currIdx >= conveyorSubjects.length - 1 ? 0 : currIdx + 1;
+        setSelectedSubjectId(conveyorSubjects[nextIdx]?.id || null);
+      }
+    },
+    [conveyorSubjects, selectedSubjectId]
   );
 
   // 6. Sound Effects Handler
@@ -1423,6 +1441,42 @@ export const ClinicalTrialChaos: React.FC = () => {
               style={{ touchAction: "none" }}
               className={`w-full ${isFullscreen ? "h-auto max-h-[300px] aspect-[760/200] object-contain" : "h-auto aspect-[760/200]"} block cursor-pointer`}
             />
+
+            {/* Floating Touch HUD Overlay for Mobile & Tablet */}
+            {playState === "playing" && (
+              <FloatingHUDOverlay
+                onDirectionPress={handleDirectionalClinicalNav}
+                onActionAPress={() => {
+                  const activeSub =
+                    conveyorSubjects.find((s) => s.id === selectedSubjectId) ||
+                    conveyorSubjects[0];
+                  if (activeSub && activeSub.observations.length > 0) {
+                    setValidatingObs({
+                      subjectId: activeSub.id,
+                      obs: activeSub.observations[0],
+                    });
+                  }
+                }}
+                onActionBPress={() => {
+                  const activeSub =
+                    conveyorSubjects.find((s) => s.id === selectedSubjectId) ||
+                    conveyorSubjects[0];
+                  if (activeSub) {
+                    setSignatureModal((prev) => ({
+                      ...prev,
+                      isOpen: true,
+                      subject: activeSub,
+                    }));
+                  }
+                }}
+                onActionCPress={() => {
+                  setPowerUps((prev) => chargePowerUps(prev, 100));
+                }}
+                actionALabel="VERIFY"
+                actionBLabel="e-SIGN"
+                actionCLabel="POWERUP"
+              />
+            )}
 
             {/* Overlays for Idle / Paused / Game Over / Cleared */}
             {playState !== "playing" && (

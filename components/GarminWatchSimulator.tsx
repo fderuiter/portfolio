@@ -15,6 +15,7 @@ import { DynamicTabletOrientationHint as TabletOrientationHint } from "@/compone
 import { useFullscreen } from "@/hooks/useFullscreen";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { sharedInputBridge } from "@/lib/virtual-input-bridge";
 import {
   DeviceTarget,
   DEVICE_PROFILES,
@@ -450,11 +451,12 @@ export const GarminWatchSimulator: React.FC = () => {
         <button
           onClick={(e) => {
             e.stopPropagation();
+            sharedInputBridge.emitActionPress("light");
             handleToggleLight();
             containerRef.current?.focus({ preventScroll: true });
           }}
           title="Backlight (L): +0.3%/s Battery"
-          className="absolute -left-3.5 top-[24%] px-2 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-amber-500 hover:to-amber-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
+          className="absolute -left-3.5 top-[24%] min-w-[44px] min-h-[44px] px-2 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-amber-500 hover:to-amber-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center justify-center"
         >
           <span>LIGHT</span>
           <span className="text-[6px] text-amber-300/80">[L]</span>
@@ -464,11 +466,12 @@ export const GarminWatchSimulator: React.FC = () => {
         <button
           onClick={(e) => {
             e.stopPropagation();
+            sharedInputBridge.emitDirectionPress("up");
             handleJump();
             containerRef.current?.focus({ preventScroll: true });
           }}
           title="Jump (ArrowUp / UP)"
-          className="absolute -left-3.5 top-[46%] px-2.5 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
+          className="absolute -left-3.5 top-[46%] min-w-[44px] min-h-[44px] px-2.5 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center justify-center"
         >
           <span>UP</span>
           <span className="text-[6px] text-cyan-300/80">[▲]</span>
@@ -478,11 +481,12 @@ export const GarminWatchSimulator: React.FC = () => {
         <button
           onClick={(e) => {
             e.stopPropagation();
+            sharedInputBridge.emitDirectionPress("down");
             handleJettison();
             containerRef.current?.focus({ preventScroll: true });
           }}
           title="Jettison Variable (ArrowDown / DOWN)"
-          className="absolute -left-3.5 top-[68%] px-2 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-rose-500 hover:to-rose-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
+          className="absolute -left-3.5 top-[68%] min-w-[44px] min-h-[44px] px-2 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-rose-500 hover:to-rose-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center justify-center"
         >
           <span>DOWN</span>
           <span className="text-[6px] text-rose-300/80">[▼] POP</span>
@@ -492,11 +496,12 @@ export const GarminWatchSimulator: React.FC = () => {
         <button
           onClick={(e) => {
             e.stopPropagation();
+            sharedInputBridge.emitActionPress("start");
             handleStartStop();
             containerRef.current?.focus({ preventScroll: true });
           }}
           title="Start / Pause / Restart (Enter / Space)"
-          className="absolute -right-3.5 top-[30%] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-emerald-500 hover:to-emerald-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
+          className="absolute -right-3.5 top-[30%] min-w-[44px] min-h-[44px] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-emerald-500 hover:to-emerald-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center justify-center"
         >
           <span>START</span>
           <span className="text-[6px] text-emerald-300/80">[ENTER]</span>
@@ -506,11 +511,12 @@ export const GarminWatchSimulator: React.FC = () => {
         <button
           onClick={(e) => {
             e.stopPropagation();
+            sharedInputBridge.emitActionPress("back");
             handleForceGc();
             containerRef.current?.focus({ preventScroll: true });
           }}
           title="Force Garbage Collection (Backspace / Escape): 500ms Freeze"
-          className="absolute -right-3.5 top-[62%] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-purple-500 hover:to-purple-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
+          className="absolute -right-3.5 top-[62%] min-w-[44px] min-h-[44px] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-purple-500 hover:to-purple-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center justify-center"
         >
           <span>BACK</span>
           <span className="text-[6px] text-purple-300/80">[GC]</span>

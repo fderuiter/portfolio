@@ -16,7 +16,7 @@ import {
   IconShoppingCart,
   IconDeviceTv,
 } from "@tabler/icons-react";
-import { VirtualDPad } from "@/components/ui/VirtualDPad";
+import { FloatingHUDOverlay } from "@/components/arcade/FloatingHUDOverlay";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { FullscreenButton } from "@/components/arcade/FullscreenButton";
 import { DynamicTabletOrientationHint as TabletOrientationHint } from "@/components/arcade/DynamicTabletOrientationHint";
@@ -1740,6 +1740,17 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
             } rounded-lg border border-neutral-900/60 bg-neutral-950 cursor-crosshair`}
           />
 
+          {/* Translucent Floating HUD Overlay for Mobile & Touch */}
+          {gameStatus === "playing" && (
+            <FloatingHUDOverlay
+              onDirectionPress={handleDirectionalMove}
+              onActionAPress={() => handleFireWeapon("emp_blast")}
+              onActionBPress={cycleWeapon}
+              actionALabel="EMP"
+              actionBLabel="EXPLOIT"
+            />
+          )}
+
           {/* Victory Overlay */}
           {gameStatus === "victory" && (
             <div className="absolute inset-0 bg-neutral-950/95 backdrop-blur-sm flex flex-col items-center justify-center text-center p-3 rounded-lg border border-brand-cyan/30 z-30">
@@ -2087,20 +2098,6 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
             <div className="text-neutral-500 uppercase tracking-wider hidden md:block">
               WASD / ARROWS · C: CRT SCANLINES
             </div>
-          </div>
-
-          {/* Enhanced Touch D-Pad for Mobile & Tablet */}
-          <div className="w-full pt-1.5 flex flex-col items-center">
-            <VirtualDPad
-              onDirectionPress={handleDirectionalMove}
-              onActionAPress={() => handleFireWeapon("emp_blast")}
-              onActionBPress={cycleWeapon}
-              actionALabel="EMP"
-              actionASubtitle="SURGE"
-              actionBLabel="EXPLOIT"
-              actionBSubtitle={activeWeaponId.substring(0, 4).toUpperCase()}
-              className="w-full max-w-sm py-2 px-3"
-            />
           </div>
         </div>
       </div>

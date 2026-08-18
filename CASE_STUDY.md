@@ -8,7 +8,7 @@
   - **Sub-millisecond Routing Latency**: Delivered via Bun/Hono edge-native primitives.
   - **End-to-End Type Safety**: Shared schema contracts across `@kiln/api`, `@kiln/sdk`, `@kiln/shared`, and `@kiln/testing`.
   - **100% CI Gatekeeper Coverage**: Pipeline spanning strict linting, automated testing, duplicate code detection (`jscpd`), and dead code pruning (`knip`).
-# Polyglot-TSP: Technical Breakdown & Portfolio Integration
+## Polyglot-TSP: Technical Breakdown & Portfolio Integration
 
 ## 1. Executive Summary & Value Proposition
 
@@ -22,7 +22,7 @@ Polyglot test harness and unified verification architecture integrating compiled
 - **50+ Language Implementations**: Covering imperative, functional, array-oriented, stack-based, logic, actor, and HDL paradigms.
 - **100% Target Parity**: Deterministic output alignment verified across standard matrices (3-city: `60`, 4-city: `80`, 5-city: `97`).
 - **Dual-Tier Test Suite**: Unified execution pipeline (`scripts/run_all.py`) and granular per-language test suites across native runtimes (`cargo test`, `go test`, `ghdl`, `iverilog`, `gnatmake`, `sunit`).
-# Case Study: OxidizeMath — Technical Breakdown & Portfolio Integration
+## Case Study: OxidizeMath — Technical Breakdown & Portfolio Integration
 
 ## 1. Executive Summary & Value Proposition
 
@@ -34,7 +34,7 @@ Polyglot test harness and unified verification architecture integrating compiled
 - **Domain Monorepo:** 10+ decoupled, domain-focused crates (`domain_ai`, `domain_physics`, `domain_applied`, `domain_biology`, `math_commons`, `oxidize_core`, `pure_math`, `verified_engine`, `verified_engine_macros`, `math_explorer_gui`).
 - **Target Deployment:** Identical cross-platform single-binary desktop execution and zero-install WebAssembly (WASM via Trunk) deployment using immediate-mode GUI (`egui`).
 - **Verification Guarantee:** 100% deterministic test suites across differential PDE solvers, Lattice Boltzmann fluid simulations, and high-energy physics modules.
-# [Case Study] UALBF: Verified Computational Proof Engine & Search Architecture
+## [Case Study] UALBF: Verified Computational Proof Engine & Search Architecture
 
 ## 1. Executive Summary & Value Proposition
 

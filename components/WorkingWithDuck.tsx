@@ -6,6 +6,7 @@ import { clamp } from "@/lib/game-utils";
 import Image from "next/image";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { sharedInputBridge } from "@/lib/virtual-input-bridge";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { FullscreenButton } from "@/components/arcade/FullscreenButton";
 import { DynamicTabletOrientationHint as TabletOrientationHint } from "@/components/arcade/DynamicTabletOrientationHint";
@@ -2411,8 +2412,11 @@ export const WorkingWithDuck: React.FC = () => {
           {/* Segmented Switcher Tabs */}
           <div className="grid grid-cols-3 p-1 rounded-2xl bg-zinc-900/90 border border-zinc-800 gap-1 text-xs font-bold">
             <button
-              onClick={() => setMobileTab("toys")}
-              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[40px] cursor-pointer ${
+              onClick={() => {
+                sharedInputBridge.emitActionPress("tab_toys");
+                setMobileTab("toys");
+              }}
+              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[44px] min-w-[44px] cursor-pointer ${
                 mobileTab === "toys"
                   ? "bg-brand-cyan text-black shadow-md font-bold"
                   : "text-zinc-400 hover:text-white"
@@ -2425,8 +2429,11 @@ export const WorkingWithDuck: React.FC = () => {
             </button>
 
             <button
-              onClick={() => setMobileTab("tricks")}
-              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[40px] cursor-pointer ${
+              onClick={() => {
+                sharedInputBridge.emitActionPress("tab_tricks");
+                setMobileTab("tricks");
+              }}
+              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[44px] min-w-[44px] cursor-pointer ${
                 mobileTab === "tricks"
                   ? "bg-brand-cyan text-black shadow-md font-bold"
                   : "text-zinc-400 hover:text-white"
@@ -2439,8 +2446,11 @@ export const WorkingWithDuck: React.FC = () => {
             </button>
 
             <button
-              onClick={() => setMobileTab("actions")}
-              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[40px] cursor-pointer ${
+              onClick={() => {
+                sharedInputBridge.emitActionPress("tab_actions");
+                setMobileTab("actions");
+              }}
+              className={`py-2 px-2 rounded-xl transition-all flex items-center justify-center gap-1 min-h-[44px] min-w-[44px] cursor-pointer ${
                 mobileTab === "actions"
                   ? "bg-brand-cyan text-black shadow-md font-bold"
                   : "text-zinc-400 hover:text-white"

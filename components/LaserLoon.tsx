@@ -19,6 +19,8 @@ import {
   IconChevronRight,
   IconTarget,
 } from "@tabler/icons-react";
+import { FloatingHUDOverlay } from "@/components/arcade/FloatingHUDOverlay";
+import { VirtualInputDirection } from "@/lib/virtual-input-bridge";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { FullscreenButton } from "@/components/arcade/FullscreenButton";
 import { DynamicTabletOrientationHint as TabletOrientationHint } from "@/components/arcade/DynamicTabletOrientationHint";
@@ -404,6 +406,18 @@ export const LaserLoon: React.FC = () => {
     spawnExplosion,
     addFloatingText,
   ]);
+
+  const handleDirectionalLoonMove = useCallback((dir: VirtualInputDirection) => {
+    if (dir === "up") {
+      loonPosRef.current.targetY = Math.max(40, loonPosRef.current.targetY - 30);
+    } else if (dir === "down") {
+      loonPosRef.current.targetY = Math.min(380, loonPosRef.current.targetY + 30);
+    } else if (dir === "left") {
+      loonPosRef.current.targetX = Math.max(40, loonPosRef.current.targetX - 30);
+    } else if (dir === "right") {
+      loonPosRef.current.targetX = Math.min(720, loonPosRef.current.targetX + 30);
+    }
+  }, []);
 
   // Start campaign act
   const startAct = useCallback((actNum: number) => {
@@ -1660,6 +1674,28 @@ export const LaserLoon: React.FC = () => {
               : "w-full h-auto aspect-[768/420] block cursor-crosshair touch-none"
           }
         />
+
+        {/* Floating Touch HUD Overlay for Mobile & Tablet */}
+        {gameState === "playing" && (
+          <FloatingHUDOverlay
+            onDirectionPress={handleDirectionalLoonMove}
+            onActionAPress={() => {
+              isFiringRef.current = true;
+            }}
+            onActionARelease={() => {
+              isFiringRef.current = false;
+            }}
+            onActionBPress={fireUltimateTremolo}
+            actionALabel="LASER"
+            actionBLabel="TREMOLO"
+            weaponLabels={["Ruby", "Cyan", "Aurora", "Cryo"]}
+            selectedWeapon={["ruby-laser", "cyan-pulse", "aurora-wave", "ice-cannon"].indexOf(laserType)}
+            onWeaponSelect={(idx) => {
+              const types: LaserType[] = ["ruby-laser", "cyan-pulse", "aurora-wave", "ice-cannon"];
+              if (types[idx]) selectLaserType(types[idx]);
+            }}
+          />
+        )}
 
         {/* Start Overlay Screen */}
         {gameState === "idle" && (
