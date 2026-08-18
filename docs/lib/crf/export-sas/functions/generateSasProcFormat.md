@@ -8,7 +8,7 @@
 
 > **generateSasProcFormat**(`study`, `formsToInclude`): `string`
 
-Defined in: [lib/crf/export-sas.ts:363](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L363)
+Defined in: [lib/crf/export-sas.ts:372](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L372)
 
 Generates PROC FORMAT library for study codelists.
 

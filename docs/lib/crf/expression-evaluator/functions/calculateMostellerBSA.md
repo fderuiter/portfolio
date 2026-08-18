@@ -6,9 +6,9 @@
 
 # Function: calculateMostellerBSA()
 
-> **calculateMostellerBSA**(`heightCm`, `weightKg`): `number`
+> **calculateMostellerBSA**(`heightCm`, `weightKg`): `number` \| `null`
 
-Defined in: [lib/crf/expression-evaluator.ts:303](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L303)
+Defined in: [lib/crf/expression-evaluator.ts:358](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L358)
 
 Calculates Mosteller Body Surface Area (BSA) in m^2.
 
@@ -24,4 +24,4 @@ Calculates Mosteller Body Surface Area (BSA) in m^2.
 
 ## Returns
 
-`number`
+`number` \| `null`

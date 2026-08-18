@@ -347,7 +347,7 @@ export const RuleGraphStudio: React.FC<RuleGraphStudioProps> = ({ study }) => {
               />
               <div className="px-4 py-2 bg-brand-cyan/15 border border-brand-cyan/40 rounded-xl font-mono text-sm font-bold text-white flex items-center gap-2 shrink-0">
                 <span className="text-zinc-400 text-xs">=</span>
-                <span className="text-brand-cyan">{calculatedResult}</span>
+                <span className="text-brand-cyan">{calculatedResult !== null ? calculatedResult : ""}</span>
               </div>
             </div>
           </div>

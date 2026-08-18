@@ -2,11 +2,6 @@
 const fs = require("fs");
 const path = require("path");
 
-const root = path.resolve(__dirname, "..");
-const schemaPath = path.join(root, "prisma/schema.prisma");
-const migrationsPath = path.join(root, "prisma/migrations");
-const lockPath = path.join(migrationsPath, "migration_lock.toml");
-
 function readProvider(source, pattern, sourceName) {
   const match = source.match(pattern);
   if (!match) {
@@ -56,9 +51,53 @@ function validateMigrationFiles(directory) {
   return migrations;
 }
 
-function checkMigrationIntegrity() {
-  const schemaProvider = getSchemaProvider(fs.readFileSync(schemaPath, "utf8"));
-  const lockProvider = getLockProvider(fs.readFileSync(lockPath, "utf8"));
+function getDocMigrations(docContent) {
+  if (typeof docContent !== "string") return [];
+  const matches = docContent.match(/\b\d{14}_[a-z0-9_]+\b/gi) || [];
+  return Array.from(new Set(matches.map((m) => m.toLowerCase()))).sort();
+}
+
+function validateDocMigrations(docPath, migrationsPath) {
+  if (!fs.existsSync(docPath)) {
+    throw new Error(`Migration documentation file not found at ${docPath}.`);
+  }
+  const docContent = fs.readFileSync(docPath, "utf8");
+  const documentedMigrations = getDocMigrations(docContent);
+  const actualMigrations = validateMigrationFiles(migrationsPath);
+
+  const actualLowerMap = new Map(actualMigrations.map((m) => [m.toLowerCase(), m]));
+  const missingInDoc = actualMigrations.filter(
+    (m) => !documentedMigrations.includes(m.toLowerCase()),
+  );
+  const extraInDoc = documentedMigrations.filter(
+    (m) => !actualLowerMap.has(m),
+  );
+
+  if (missingInDoc.length > 0 || extraInDoc.length > 0) {
+    const details = [];
+    if (missingInDoc.length > 0) {
+      details.push(`Missing in documentation: ${missingInDoc.join(", ")}`);
+    }
+    if (extraInDoc.length > 0) {
+      details.push(`Extra/mismatched in documentation: ${extraInDoc.join(", ")}`);
+    }
+    throw new Error(
+      `Documentation drift detected in ${path.basename(docPath)}:\n  ${details.join("\n  ")}\nPlease update ${path.basename(docPath)} to match active repository migrations.`,
+    );
+  }
+
+  return documentedMigrations;
+}
+
+function checkMigrationIntegrity(options = {}) {
+  const rootDir = options.rootDir || path.resolve(__dirname, "..");
+  const schemaFile = options.schemaPath || path.join(rootDir, "prisma/schema.prisma");
+  const lockFile = options.lockPath || path.join(rootDir, "prisma/migrations/migration_lock.toml");
+  const migrationsDir = options.migrationsPath || path.join(rootDir, "prisma/migrations");
+  const docFile = options.docPath || path.join(rootDir, "DATABASE_MIGRATIONS.md");
+
+  const schemaProvider = getSchemaProvider(fs.readFileSync(schemaFile, "utf8"));
+  const lockProvider = getLockProvider(fs.readFileSync(lockFile, "utf8"));
 
   if (schemaProvider !== lockProvider) {
     throw new Error(
@@ -67,9 +106,11 @@ function checkMigrationIntegrity() {
     );
   }
 
-  const migrations = validateMigrationFiles(migrationsPath);
+  const migrations = validateMigrationFiles(migrationsDir);
+  const docMigrations = validateDocMigrations(docFile, migrationsDir);
+
   console.log(
-    `Migration integrity check passed: provider=${schemaProvider}, migrations=${migrations.length}.`,
+    `Migration integrity check passed: provider=${schemaProvider}, migrations=${migrations.length}, docMigrations=${docMigrations.length}.`,
   );
 }
 
@@ -84,7 +125,9 @@ if (require.main === module) {
 
 module.exports = {
   checkMigrationIntegrity,
+  getDocMigrations,
   getLockProvider,
   getSchemaProvider,
+  validateDocMigrations,
   validateMigrationFiles,
 };

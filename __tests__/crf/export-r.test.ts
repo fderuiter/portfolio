@@ -164,6 +164,7 @@ describe("CRF Studio - Automated R & Pharmaverse Scaffolding Exporter", () => {
       expect(parseMultiSelectValue("HYPERTEN, ASTHMA", "HYPERTEN")).toBe("Y");
       expect(parseMultiSelectValue("HYPERTEN, ASTHMA", "DIABETES")).toBe("N");
       expect(parseMultiSelectValue("HYPERTEN, ASTHMA", "ASTHMA")).toBe("Y");
+      expect(parseMultiSelectValue('"HYPERTEN", "ASTHMA"', "HYPERTEN")).toBe("Y");
     });
 
     it("generates R script with factor vectors using cl_cl_ny_levels and cl_cl_ny_labels and labelled attributes", () => {

@@ -241,6 +241,7 @@ describe("CRF Studio - Automated SAS Statistical Exporter", () => {
       expect(parseMultiSelectValue("HYPERTEN, ASTHMA", "HYPERTEN")).toBe("Y");
       expect(parseMultiSelectValue("HYPERTEN, ASTHMA", "DIABETES")).toBe("N");
       expect(parseMultiSelectValue("HYPERTEN, ASTHMA", "ASTHMA")).toBe("Y");
+      expect(parseMultiSelectValue('"HYPERTEN", "ASTHMA"', "HYPERTEN")).toBe("Y");
       expect(parseMultiSelectValue(null, "HYPERTEN")).toBe("N");
     });
 
