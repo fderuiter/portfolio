@@ -27,5 +27,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function LaserLoonWorkPage() {
-  return <CaseStudyPage params={Promise.resolve({ slug: "laser-loon" })} />;
+  return (
+    <div className="min-h-dvh">
+      <CaseStudyPage params={Promise.resolve({ slug: "laser-loon" })} />
+    </div>
+  );
 }
