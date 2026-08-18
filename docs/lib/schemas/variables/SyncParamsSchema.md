@@ -8,6 +8,6 @@
 
 > `const` **SyncParamsSchema**: `ZodObject`\<\{ `batch`: `ZodDefault`\<`ZodCoercedNumber`\<`unknown`\>\>; \}, `$strip`\>
 
-Defined in: [lib/schemas.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L41)
+Defined in: [lib/schemas.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L45)
 
 Schema for background sync cron query parameters

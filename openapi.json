@@ -641,7 +641,11 @@
               "simulator_option_select",
               "simulator_milestone_reached",
               "simulator_schedule_click",
-              "simulator_report_copy"
+              "simulator_report_copy",
+              "post_mortem_reaction_select",
+              "post_mortem_takeaway_select",
+              "post_mortem_feedback_submit",
+              "post_mortem_view"
             ]
           }
         },
@@ -873,7 +877,11 @@
               "insightful",
               "mind_blowing",
               "actionable",
-              "thorough"
+              "thorough",
+              "root_cause",
+              "lessons_learned",
+              "systemic_fix",
+              "preventative_action"
             ]
           }
         },
@@ -896,13 +904,29 @@
           },
           "thorough": {
             "type": "integer"
+          },
+          "root_cause": {
+            "type": "integer"
+          },
+          "lessons_learned": {
+            "type": "integer"
+          },
+          "systemic_fix": {
+            "type": "integer"
+          },
+          "preventative_action": {
+            "type": "integer"
           }
         },
         "required": [
           "insightful",
           "mind_blowing",
           "actionable",
-          "thorough"
+          "thorough",
+          "root_cause",
+          "lessons_learned",
+          "systemic_fix",
+          "preventative_action"
         ]
       },
       "ReactionGetResponse": {
@@ -944,7 +968,11 @@
               "insightful",
               "mind_blowing",
               "actionable",
-              "thorough"
+              "thorough",
+              "root_cause",
+              "lessons_learned",
+              "systemic_fix",
+              "preventative_action"
             ]
           },
           "counts": {

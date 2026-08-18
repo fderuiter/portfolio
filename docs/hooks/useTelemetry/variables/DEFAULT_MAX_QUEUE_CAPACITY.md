@@ -8,4 +8,4 @@
 
 > `const` **DEFAULT\_MAX\_QUEUE\_CAPACITY**: `50` = `50`
 
-Defined in: [hooks/useTelemetry.ts:52](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L52)
+Defined in: [hooks/useTelemetry.ts:56](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L56)

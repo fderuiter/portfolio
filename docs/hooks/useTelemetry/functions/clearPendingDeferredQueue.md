@@ -8,7 +8,7 @@
 
 > **clearPendingDeferredQueue**(): `void`
 
-Defined in: [hooks/useTelemetry.ts:113](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L113)
+Defined in: [hooks/useTelemetry.ts:117](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L117)
 
 Clear all pending deferred tasks and cancel their idle timers.
 

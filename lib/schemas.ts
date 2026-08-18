@@ -13,8 +13,12 @@ export const TelemetryEventSchema = z.object({
     "simulator_milestone_reached",
     "simulator_schedule_click",
     "simulator_report_copy",
+    "post_mortem_reaction_select",
+    "post_mortem_takeaway_select",
+    "post_mortem_feedback_submit",
+    "post_mortem_view",
   ], {
-    message: "Allowed: 'page_view', 'project_click', 'route_error', 'simulator_option_select', 'simulator_milestone_reached', 'simulator_schedule_click', 'simulator_report_copy'",
+    message: "Allowed: 'page_view', 'project_click', 'route_error', 'simulator_option_select', 'simulator_milestone_reached', 'simulator_schedule_click', 'simulator_report_copy', 'post_mortem_reaction_select', 'post_mortem_takeaway_select', 'post_mortem_feedback_submit', 'post_mortem_view'",
   }),
 });
 
@@ -129,9 +133,18 @@ export const CaseStudySubmissionSchema = z
   });
 
 /**
- * Allowed reaction types
+ * Allowed reaction types (praise and post-mortem categories)
  */
-export const ALLOWED_REACTIONS = ["insightful", "mind_blowing", "actionable", "thorough"] as const;
+export const ALLOWED_REACTIONS = [
+  "insightful",
+  "mind_blowing",
+  "actionable",
+  "thorough",
+  "root_cause",
+  "lessons_learned",
+  "systemic_fix",
+  "preventative_action",
+] as const;
 
 /**
  * Schema for Feedback POST payload validation
@@ -153,7 +166,7 @@ export const FeedbackSubmissionSchema = z.object({
 export const ReactionSubmissionSchema = z.object({
   caseStudySlug: z.string().min(1, "caseStudySlug must be a non-empty string"),
   reactionType: z.enum(ALLOWED_REACTIONS, {
-    message: "Allowed reactionType values: 'insightful', 'mind_blowing', 'actionable', 'thorough'",
+    message: `Allowed reactionType values: ${ALLOWED_REACTIONS.map((r) => `'${r}'`).join(", ")}`,
   }),
 });
 

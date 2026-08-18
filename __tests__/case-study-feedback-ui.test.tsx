@@ -73,7 +73,7 @@ describe("CaseStudyFeedbackSection UI Component", () => {
     cleanup();
   });
 
-  it("renders reaction options and predefined takeaways", async () => {
+  it("renders reaction options and predefined takeaways including post-mortem categories", async () => {
     render(<CaseStudyFeedbackSection slug={slug} />);
 
     expect(screen.getByText("Learning Feedback & Article Reactions")).toBeDefined();
@@ -82,9 +82,38 @@ describe("CaseStudyFeedbackSection UI Component", () => {
     expect(screen.getByText("Actionable")).toBeDefined();
     expect(screen.getByText("Thorough")).toBeDefined();
 
+    // Post-mortem reaction badges
+    expect(screen.getByText("Root Cause")).toBeDefined();
+    expect(screen.getByText("Lessons Learned")).toBeDefined();
+    expect(screen.getByText("Systemic Fix")).toBeDefined();
+    expect(screen.getByText("Preventative Action")).toBeDefined();
+
     for (const takeaway of PREDEFINED_TAKEAWAYS) {
       expect(screen.getByText(takeaway, { exact: false })).toBeDefined();
     }
+  });
+
+  it("submits post-mortem takeaway pills successfully", async () => {
+    render(<CaseStudyFeedbackSection slug={slug} />);
+
+    // Select post-mortem takeaway pills
+    const rootCauseBtn = screen.getByText("Root Cause Analysis", { exact: false });
+    const failureModeBtn = screen.getByText("Failure Mode & Mitigation", { exact: false });
+    fireEvent.click(rootCauseBtn);
+    fireEvent.click(failureModeBtn);
+
+    // Enter comment
+    const textarea = screen.getByPlaceholderText(/Describe key insights/i);
+    fireEvent.change(textarea, { target: { value: "Post-mortem analysis identified cascade failure root cause." } });
+
+    // Submit
+    const submitBtn = screen.getByRole("button", { name: /Submit Learning Feedback/i });
+    fireEvent.click(submitBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText("Feedback Submitted!")).toBeDefined();
+      expect(screen.getByText("Thank you! Your learning feedback has been recorded.")).toBeDefined();
+    });
   });
 
   it("increments reaction count and updates button state on click", async () => {

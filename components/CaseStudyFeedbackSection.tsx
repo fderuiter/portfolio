@@ -11,9 +11,14 @@ import {
   IconSend,
   IconAlertCircle,
   IconLoader2,
+  IconBug,
+  IconNotebook,
+  IconTools,
+  IconShieldCheck,
 } from "@tabler/icons-react";
 import { isProductionEnvironment } from "@/lib/env";
 import { useOfflineQueue, getOfflineQueue } from "@/hooks/useOfflineQueue";
+import { useTelemetry } from "@/hooks/useTelemetry";
 
 interface CaseStudyFeedbackSectionProps {
   slug: string;
@@ -26,9 +31,21 @@ export const PREDEFINED_TAKEAWAYS = [
   "Performance Optimization",
   "Security & Privacy Practice",
   "Developer Experience (DX)",
+  "Root Cause Analysis",
+  "Failure Mode & Mitigation",
+  "Incident Response & Recovery",
+  "Post-Mortem Guardrails",
 ] as const;
 
-type ReactionType = "insightful" | "mind_blowing" | "actionable" | "thorough";
+type ReactionType =
+  | "insightful"
+  | "mind_blowing"
+  | "actionable"
+  | "thorough"
+  | "root_cause"
+  | "lessons_learned"
+  | "systemic_fix"
+  | "preventative_action";
 
 interface ReactionConfig {
   type: ReactionType;
@@ -41,10 +58,15 @@ const REACTIONS: ReactionConfig[] = [
   { type: "mind_blowing", label: "Mind-Blowing", icon: IconFlame },
   { type: "actionable", label: "Actionable", icon: IconTarget },
   { type: "thorough", label: "Thorough", icon: IconSearch },
+  { type: "root_cause", label: "Root Cause", icon: IconBug },
+  { type: "lessons_learned", label: "Lessons Learned", icon: IconNotebook },
+  { type: "systemic_fix", label: "Systemic Fix", icon: IconTools },
+  { type: "preventative_action", label: "Preventative Action", icon: IconShieldCheck },
 ];
 
 export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps) {
   const { enqueue } = useOfflineQueue();
+  const { recordEvent } = useTelemetry();
 
   // Reactions state
   const [counts, setCounts] = useState<Record<string, number>>({
@@ -52,6 +74,10 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
     mind_blowing: 0,
     actionable: 0,
     thorough: 0,
+    root_cause: 0,
+    lessons_learned: 0,
+    systemic_fix: 0,
+    preventative_action: 0,
   });
   const [userReactions, setUserReactions] = useState<string[]>([]);
   const [reactionLoading, setReactionLoading] = useState<string | null>(null);
@@ -136,6 +162,9 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
     if (reactionLoading) return;
     setReactionLoading(type);
 
+    // Record passive telemetry event for post-mortem interaction
+    recordEvent(slug, "post_mortem_reaction_select");
+
     // Optimistic UI update
     const alreadyReacted = userReactions.includes(type);
 
@@ -190,10 +219,14 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
   // Toggle takeaway selection
   const toggleTakeaway = (takeaway: string) => {
     setErrorMsg(null);
+    const willSelect = !selectedTakeaways.includes(takeaway);
+    if (willSelect) {
+      recordEvent(slug, "post_mortem_takeaway_select");
+    }
     setSelectedTakeaways((prev) =>
-      prev.includes(takeaway)
-        ? prev.filter((t) => t !== takeaway)
-        : [...prev, takeaway]
+      willSelect
+        ? [...prev, takeaway]
+        : prev.filter((t) => t !== takeaway)
     );
   };
 
@@ -212,6 +245,8 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
       setErrorMsg("Please provide constructive comments (at least 3 characters).");
       return;
     }
+
+    recordEvent(slug, "post_mortem_feedback_submit");
 
     const payload = {
       caseStudySlug: slug,

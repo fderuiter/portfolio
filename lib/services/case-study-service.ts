@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import DOMPurify from "isomorphic-dompurify";
 import { env } from "@/lib/env";
+import { ALLOWED_REACTIONS } from "@/lib/schemas";
 
 export interface CaseStudySubmissionInput {
   title: string;
@@ -35,8 +36,6 @@ const SANITIZE_OPTIONS = {
     "role", "tabindex", "aria-label", "aria-describedby", "aria-hidden"
   ]
 };
-
-const ALLOWED_REACTIONS = ["insightful", "mind_blowing", "actionable", "thorough"] as const;
 
 // In-memory fallback stores for offline/mock environments
 const mockFeedbackStore = new Map<string, Array<{ takeaways: string[]; comments: string; connectionHash: string; createdAt: string }>>();

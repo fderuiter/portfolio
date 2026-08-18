@@ -126,7 +126,7 @@ describe("Case Study Feedback & Reaction API Routes", () => {
       expect(res.status).toBe(400);
     });
 
-    it("should return default reaction counts on GET for valid slug", async () => {
+    it("should return default reaction counts on GET for valid slug including post-mortem reactions", async () => {
       const req = new NextRequest("http://localhost/api/case-studies/reactions?slug=imednet-python-sdk");
       const res = await reactionGET(req);
       expect(res.status).toBe(200);
@@ -137,6 +137,10 @@ describe("Case Study Feedback & Reaction API Routes", () => {
       expect(json.counts).toHaveProperty("mind_blowing");
       expect(json.counts).toHaveProperty("actionable");
       expect(json.counts).toHaveProperty("thorough");
+      expect(json.counts).toHaveProperty("root_cause");
+      expect(json.counts).toHaveProperty("lessons_learned");
+      expect(json.counts).toHaveProperty("systemic_fix");
+      expect(json.counts).toHaveProperty("preventative_action");
     });
 
     it("should reject invalid reaction type with 400", async () => {
@@ -155,23 +159,26 @@ describe("Case Study Feedback & Reaction API Routes", () => {
       expect(json.error).toBe("Validation failed");
     });
 
-    it("should increment reaction count upon POST with 200", async () => {
-      const uniqueSlug = `rx-study-${Date.now()}`;
-      const req = new NextRequest("http://localhost/api/case-studies/reactions", {
-        method: "POST",
-        headers: { "x-forwarded-for": "10.0.1.1", "user-agent": "rx-agent" },
-        body: JSON.stringify({
-          caseStudySlug: uniqueSlug,
-          reactionType: "insightful",
-        }),
-      });
+    it("should accept post-mortem reaction types upon POST with 200", async () => {
+      const postMortemReactions = ["root_cause", "lessons_learned", "systemic_fix", "preventative_action"];
+      for (const rx of postMortemReactions) {
+        const uniqueSlug = `post-mortem-rx-${rx}-${Date.now()}`;
+        const req = new NextRequest("http://localhost/api/case-studies/reactions", {
+          method: "POST",
+          headers: { "x-forwarded-for": "10.0.2.1", "user-agent": "rx-pm-agent" },
+          body: JSON.stringify({
+            caseStudySlug: uniqueSlug,
+            reactionType: rx,
+          }),
+        });
 
-      const res = await reactionPOST(req);
-      expect(res.status).toBe(200);
+        const res = await reactionPOST(req);
+        expect(res.status).toBe(200);
 
-      const json = await res.json();
-      expect(json.success).toBe(true);
-      expect(json.counts.insightful).toBeGreaterThanOrEqual(1);
+        const json = await res.json();
+        expect(json.success).toBe(true);
+        expect(json.counts[rx]).toBeGreaterThanOrEqual(1);
+      }
     });
   });
 });

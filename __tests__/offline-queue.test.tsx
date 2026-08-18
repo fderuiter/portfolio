@@ -214,6 +214,60 @@ describe("Reusable Offline Queue Hook with Optimistic Feedback Sync Suite", () =
   });
 
   describe("Requirement 3 & Acceptance Criterion 3: Sequential Online Event Flush", () => {
+    it("flushes post-mortem reaction and feedback queued offline with zero validation failures", async () => {
+      Object.defineProperty(navigator, "onLine", { value: false, configurable: true });
+
+      enqueueOfflineRequest({
+        type: "reaction",
+        endpoint: "/api/case-studies/reactions",
+        body: { caseStudySlug: "clinical-trial-chaos", reactionType: "root_cause" },
+      });
+
+      enqueueOfflineRequest({
+        type: "feedback",
+        endpoint: "/api/case-studies/feedback",
+        body: {
+          caseStudySlug: "clinical-trial-chaos",
+          takeaways: ["Root Cause Analysis", "Incident Response & Recovery"],
+          comments: "Root cause analysis indicates unhandled async exception in job queue.",
+        },
+      });
+
+      enqueueOfflineRequest({
+        type: "telemetry",
+        endpoint: "/api/telemetry",
+        body: { projectSlug: "clinical-trial-chaos", eventType: "post_mortem_reaction_select" },
+      });
+
+      expect(getOfflineQueueLength()).toBe(3);
+
+      Object.defineProperty(navigator, "onLine", { value: true, configurable: true });
+
+      await act(async () => {
+        await flushOfflineQueue();
+      });
+
+      expect(getOfflineQueueLength()).toBe(0);
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/case-studies/reactions",
+        expect.objectContaining({
+          method: "POST",
+          body: JSON.stringify({ caseStudySlug: "clinical-trial-chaos", reactionType: "root_cause" }),
+        })
+      );
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/case-studies/feedback",
+        expect.objectContaining({
+          method: "POST",
+          body: JSON.stringify({
+            caseStudySlug: "clinical-trial-chaos",
+            takeaways: ["Root Cause Analysis", "Incident Response & Recovery"],
+            comments: "Root cause analysis indicates unhandled async exception in job queue.",
+          }),
+        })
+      );
+    });
+
     it("automatically flushes queued requests sequentially when browser fires online event", async () => {
       Object.defineProperty(navigator, "onLine", { value: false, configurable: true });
 
