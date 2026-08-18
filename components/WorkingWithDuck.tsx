@@ -2963,6 +2963,8 @@ export const WorkingWithDuck: React.FC = () => {
                     src={uiState.latestUnlockedFact.photoUrl}
                     alt={uiState.latestUnlockedFact.title}
                     fill
+                    priority
+                    fetchPriority="high"
                     className="object-cover"
                     sizes="(max-width: 640px) 220px, 320px"
                   />
@@ -3199,6 +3201,8 @@ export const WorkingWithDuck: React.FC = () => {
                         src={activeImageSource}
                         alt={currentFact.title}
                         fill
+                        priority
+                        fetchPriority="high"
                         className="object-cover"
                         sizes="(max-width: 640px) 280px, 480px"
                       />

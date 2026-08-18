@@ -202,6 +202,26 @@ describe("Working With Duck - UI & Component Suite", () => {
     expect(container.querySelector("canvas")).toBeDefined();
   });
 
+  it("enforces high priority loading attributes on active scrapbook milestone photo elements", async () => {
+    await act(async () => {
+      root.render(<WorkingWithDuck />);
+    });
+
+    const scrapbookButtons = container.querySelectorAll("button");
+    const openBtn = Array.from(scrapbookButtons).find((b) => b.textContent?.includes("Duck Scrapbook"));
+    if (openBtn) {
+      await act(async () => {
+        openBtn.click();
+      });
+
+      const milestoneImg = container.querySelector("img");
+      expect(milestoneImg).not.toBeNull();
+      if (milestoneImg) {
+        expect(milestoneImg.getAttribute("fetchpriority")).toBe("high");
+      }
+    }
+  });
+
   it("toggles Scrapbook view mode between Real Photos and Vector Art", async () => {
     await act(async () => {
       root.render(<WorkingWithDuck />);
