@@ -11,6 +11,8 @@ import { getSoftwareSourceCodeSchema, getBreadcrumbSchema } from "@/lib/seo";
 import { TelemetryTracker } from "@/components/TelemetryTracker";
 import { TerminologyToggle } from "@/components/TerminologyToggle";
 import SchemaFlowWorkspaceWrapper from "@/components/SchemaFlowWorkspaceWrapper";
+import { VectorComparisonViewer } from "@/components/laser-loon/VectorComparisonViewer";
+import { AssetDistributionHub } from "@/components/laser-loon/AssetDistributionHub";
 import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
@@ -271,6 +273,14 @@ export default async function CaseStudyPage({ params }: PageProps) {
                   Apply logical tactics to branch and navigate the mathematical proof tree. Click nodes to connect/disconnect, track real-time telemetry, and run/rollback proof states.
                 </p>
                 <SchemaFlowWorkspaceWrapper />
+              </div>
+            )}
+
+            {/* Interactive Vector Comparison Viewer & Asset Distribution Hub */}
+            {slug === "laser-loon" && (
+              <div className="mt-12 border-t border-zinc-900/50 pt-10 space-y-12">
+                <VectorComparisonViewer />
+                <AssetDistributionHub />
               </div>
             )}
 

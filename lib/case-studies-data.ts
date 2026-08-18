@@ -420,6 +420,11 @@ export const tenantAuthGuard = createMiddleware(async (c, next) => {
 
 <h4>3. Edge-Native Event-Driven Async Processing</h4>
 <p>Background workflows and async task queues are powered by Inngest functions embedded directly inside Hono, delivering event-driven reliability without needing persistent worker processes.</p>`,
+    created_at: new Date("2026-02-18T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-8",
     slug: "inbody-qr-decoder",
     title: "InBody QR Data Decoder & Analyzer: BIA Reverse Engineering",
     primary_language: "Python",
@@ -454,6 +459,11 @@ def decode_digits(raw_slice: str, scale_factor: float = 0.1, precision: int = 2)
 
 <h4>3. Multi-Block Segment Parsing &amp; Biomarker Derivation</h4>
 <p>Primary body composition parameters reside in Segment Index 4 (<code>meas_blob</code>), while secondary metrics (BMR and Visceral Fat) are extracted from Segment Index 5 in kilocalories. Derived biomarkers, including Appendicular Skeletal Muscle Mass (ASM) and Skeletal Muscle Index ($\\text{SMI} = \\frac{\\text{ASM}}{\\text{Height}^2}$), are computed deterministically.</p>`,
+    created_at: new Date("2026-02-22T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-9",
     slug: "polyglot-tsp",
     title: "Polyglot-TSP: Technical Breakdown & Portfolio Integration",
     primary_language: "Rust",
@@ -567,6 +577,11 @@ endmodule
 <h3>Trade-Offs & Key Decisions</h3>
 <p>1. <strong>Exhaustive Permutations ($O(N!)$) vs. Dynamic Programming / Heuristics ($O(N^2 2^N)$)</strong>: Prioritized strict brute-force permutation generation across all targets to maintain an identical baseline for syntactic and runtime execution comparisons across obscure and exotic paradigms.</p>
 <p>2. <strong>Subprocess CLI Execution vs. Foreign Function Interface (FFI)</strong>: Chose process-level standard stream (stdout/stderr) assertion over C ABI bindings to accommodate non-standardized runtimes, HDL simulation pipelines (ghdl, iverilog), and legacy/esoteric environments (INTERCAL, COBOL, Modula-2).</p>`,
+    created_at: new Date("2026-02-25T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-10",
     slug: "oxidizemath",
     title: "OxidizeMath: Verified Numerical Computation Framework in Rust",
     primary_language: "Rust",
@@ -778,6 +793,94 @@ def stage_and_commit_move(self, src: str, dest_dir: str) -> str:
 <h4>3. Encrypted SQLCipher Registry &amp; Worker Concurrency</h4>
 <p>Database encryption at rest is enforced via per-platform SQLCipher shared libraries with PRAGMA key derivation. Thread-isolated background workers communicate via non-blocking queues with the main UI thread (PyQt6/PySide6) to prevent interface lockups during bulk ingestion.</p>`,
     created_at: new Date("2026-02-20T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-7",
+    slug: "laser-loon",
+    title: "The Laser Loon: Vector Illustration, Cultural Branding & Open Asset Distribution",
+    primary_language: "Graphic Design",
+    github_url: "https://github.com/fderuiter/laser-loon",
+    published: true,
+    simulated_telemetry: false,
+    tags: "Graphic Design, Vector Illustration, Iconography, Open Asset Distribution, Cultural Branding",
+    editorial_content: "A production-grade **Vector Illustration & Cultural Branding** asset suite formalized during the 2023–2024 Minnesota State Flag redesign initiative. Fuses the serene profile of the Common Loon with retro-futuristic `crimson laser optics`, packaged across standard print and web formats (`.ai`, `.eps`, `.pdf`, `.svg`, `.psd`, `.png`, `.jpg`).",
+    architectural_narrative: `<h3>Project Overview &amp; Cultural Impact</h3>
+<p>The Laser Loon began as a grassroots design movement during the 2023–2024 Minnesota State Flag redesign initiative (Submission F277). By fusing the serene, natural icon of the Common Loon (<em>Gavia immer</em>) with an over-the-top, retro-futuristic red optical laser beam, the artwork achieved immediate viral status and widespread community adoption. The goal of this project was to formalize the visual concept into a production-grade, highly scalable vector design asset package distributed across every standard graphic production format.</p>
+
+<h3>Design Strategy &amp; Visual Architecture</h3>
+
+<h4>1. Anatomical Accuracy &amp; Stylization</h4>
+<ul>
+  <li><strong>Iconic Silhouette:</strong> Crafted a clean, recognizable side-profile of the Common Loon floating on calm water, capturing the distinctive bill curve, crested crown, and patterned plumage.</li>
+  <li><strong>Minimalist High Contrast:</strong> Used stark black-and-white field blocking to maintain immediate readability at micro-favicons and billboard scales alike.</li>
+</ul>
+
+<h4>2. The Laser Dynamic</h4>
+<ul>
+  <li><strong>Focal Convergence:</strong> Engineered the crimson laser beam directly along the eye's sightline, providing directional motion across the composition.</li>
+  <li><strong>Beam Illumination:</strong> Designed clean hard-edge vector rays with layered radial glows to ensure high visibility across both light and dark display backdrops.</li>
+</ul>
+
+<h3>Production Asset Architecture</h3>
+<table class="w-full text-xs font-mono border-collapse my-4">
+  <thead>
+    <tr class="border-b border-zinc-800 text-amber-400 text-left">
+      <th class="py-2 px-3">File Format</th>
+      <th class="py-2 px-3">Classification</th>
+      <th class="py-2 px-3">Target Application</th>
+      <th class="py-2 px-3">Key Attributes</th>
+    </tr>
+  </thead>
+  <tbody class="divide-y divide-zinc-900 text-zinc-300">
+    <tr>
+      <td class="py-2 px-3 font-bold text-white">Laser_loon.ai</td>
+      <td class="py-2 px-3">Master Vector</td>
+      <td class="py-2 px-3">Source Editing</td>
+      <td class="py-2 px-3">Layered vectors, global swatches, full scalability</td>
+    </tr>
+    <tr>
+      <td class="py-2 px-3 font-bold text-white">Laser_loon.svg</td>
+      <td class="py-2 px-3">Scalable Web Vector</td>
+      <td class="py-2 px-3">Web UI, Icons</td>
+      <td class="py-2 px-3">Minimized DOM footprint, responsive rendering</td>
+    </tr>
+    <tr>
+      <td class="py-2 px-3 font-bold text-white">Laser_loon.eps</td>
+      <td class="py-2 px-3">Print Vector</td>
+      <td class="py-2 px-3">Commercial Print</td>
+      <td class="py-2 px-3">Spot color separation, CMYK print pipeline compatibility</td>
+    </tr>
+    <tr>
+      <td class="py-2 px-3 font-bold text-white">Laser_loon.pdf</td>
+      <td class="py-2 px-3">Vector Document</td>
+      <td class="py-2 px-3">Universal Proofing</td>
+      <td class="py-2 px-3">High-res vector embeds, universal document exchange</td>
+    </tr>
+    <tr>
+      <td class="py-2 px-3 font-bold text-white">Laser_loon.psd</td>
+      <td class="py-2 px-3">Master Raster</td>
+      <td class="py-2 px-3">Layered Compositing</td>
+      <td class="py-2 px-3">High-resolution layered raster for digital mockups</td>
+    </tr>
+    <tr>
+      <td class="py-2 px-3 font-bold text-white">Laser_loon.png</td>
+      <td class="py-2 px-3">Transparent Raster</td>
+      <td class="py-2 px-3">Social Media / Web UI</td>
+      <td class="py-2 px-3">300 DPI lossless alpha transparency</td>
+    </tr>
+    <tr>
+      <td class="py-2 px-3 font-bold text-white">Laser_Loon.jpg</td>
+      <td class="py-2 px-3">Compressed Raster</td>
+      <td class="py-2 px-3">Thumbnails & Previews</td>
+      <td class="py-2 px-3">Standard web display compression</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Open Source &amp; Licensing Guidelines</h3>
+<p>The Laser Loon design asset suite is released under the <strong>Creative Commons Attribution 4.0 International (CC BY 4.0)</strong> license. Individuals, civic groups, screen printers, and software developers are free to share, adapt, and build upon the artwork for personal or commercial applications with appropriate credit to the original creator.</p>`,
+    created_at: new Date("2026-03-05T00:00:00Z"),
     updated_at: new Date("2026-08-14T00:00:00Z"),
   },
 ];

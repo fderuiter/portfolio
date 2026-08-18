@@ -1,0 +1,138 @@
+%PDF-1.5
+%ª«¬
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0a0e17" />
+      <stop offset="60%" stop-color="#121d2d" />
+      <stop offset="100%" stop-color="#070b12" />
+    </linearGradient>
+
+    <!-- Water Ripple Gradient -->
+    <linearGradient id="waterGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284c7" stop-opacity="0.2" />
+      <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0.2" />
+    </linearGradient>
+
+    <!-- Laser Beam Crimson Glow Filters -->
+    <filter id="laserGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur1" />
+      <feGaussianBlur stdDeviation="18" result="blur2" />
+      <feMerge>
+        <feMergeNode in="blur2" />
+        <feMergeNode in="blur1" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <radialGradient id="beamCore" cx="0%" cy="50%" r="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="25%" stop-color="#ff3366" />
+      <stop offset="70%" stop-color="#dc2626" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#990000" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Eye Ruby Radial -->
+    <radialGradient id="rubyEye" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="40%" stop-color="#ff0044" />
+      <stop offset="100%" stop-color="#880015" />
+    </radialGradient>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="800" height="500" fill="url(#bgGrad)" />
+
+  <!-- Calm Water Surface & Wavelets -->
+  <g id="water-surface">
+    <ellipse cx="400" cy="420" rx="360" ry="40" fill="url(#waterGrad)" />
+    <path d="M 80 430 Q 200 425 320 430 T 560 430 T 720 430" stroke="#0284c7" stroke-width="2" fill="none" opacity="0.4" />
+    <path d="M 140 445 Q 280 440 400 445 T 660 445" stroke="#38bdf8" stroke-width="1.5" fill="none" opacity="0.3" />
+  </g>
+
+  <!-- Laser Beam Illumination Pass (Red Vector Rays & Particle Bursts) -->
+  <g id="laser-pass" filter="url(#laserGlow)">
+    <!-- Main Crimson Beam emitted from Sightline Eye (x: 275, y: 220) to edge (x: 800, y: 190) -->
+    <polygon points="275,217 800,165 800,215 275,223" fill="url(#beamCore)" opacity="0.95" />
+    <line x1="275" y1="220" x2="800" y2="190" stroke="#ffffff" stroke-width="4" stroke-linecap="round" />
+
+    <!-- Optical Energy Rings -->
+    <ellipse cx="340" cy="216" rx="6" ry="18" fill="none" stroke="#ff6688" stroke-width="2" transform="rotate(-3, 340, 216)" opacity="0.8" />
+    <ellipse cx="450" cy="210" rx="10" ry="30" fill="none" stroke="#ff3366" stroke-width="2" transform="rotate(-3, 450, 210)" opacity="0.7" />
+    <ellipse cx="580" cy="202" rx="14" ry="42" fill="none" stroke="#dc2626" stroke-width="1.5" transform="rotate(-3, 580, 202)" opacity="0.5" />
+
+    <!-- Laser Dispersal Rays -->
+    <line x1="275" y1="220" x2="800" y2="110" stroke="#ff0044" stroke-width="1.5" opacity="0.4" />
+    <line x1="275" y1="220" x2="800" y2="280" stroke="#ff0044" stroke-width="1.5" opacity="0.4" />
+  </g>
+
+  <!-- Common Loon Silhouette & Plumage Geometry -->
+  <g id="loon-body">
+    <!-- Main Body & Floating Silhouette on Water -->
+    <path d="M 120 380
+             C 100 340 110 290 150 260
+             C 180 238 210 230 230 200
+             C 240 180 238 150 255 135
+             C 270 122 300 125 315 145
+             C 325 160 320 185 305 205
+             C 290 225 275 235 270 255
+             C 260 295 310 320 390 320
+             C 470 320 540 290 580 320
+             C 610 342 600 380 570 395
+             C 480 415 220 420 120 380 Z"
+          fill="#0a0c10" stroke="#1e293b" stroke-width="3" />
+
+    <!-- Pure White Chest & Neck Field -->
+    <path d="M 230 260
+             C 245 285 260 315 310 330
+             C 360 345 430 345 470 330
+             C 420 375 320 380 240 365
+             C 200 355 170 330 180 300
+             C 190 275 215 265 230 260 Z"
+          fill="#ffffff" />
+
+    <!-- Checkerboard Patterned Back Plumage -->
+    <g fill="#ffffff" opacity="0.9">
+      <rect x="360" y="325" width="8" height="8" rx="1" />
+      <rect x="380" y="323" width="8" height="8" rx="1" />
+      <rect x="400" y="322" width="8" height="8" rx="1" />
+      <rect x="420" y="323" width="8" height="8" rx="1" />
+      <rect x="440" y="326" width="8" height="8" rx="1" />
+
+      <rect x="350" y="338" width="9" height="9" rx="1" />
+      <rect x="372" y="336" width="9" height="9" rx="1" />
+      <rect x="395" y="335" width="9" height="9" rx="1" />
+      <rect x="418" y="336" width="9" height="9" rx="1" />
+      <rect x="441" y="339" width="9" height="9" rx="1" />
+
+      <rect x="362" y="352" width="10" height="10" rx="1.5" />
+      <rect x="388" y="350" width="10" height="10" rx="1.5" />
+      <rect x="414" y="351" width="10" height="10" rx="1.5" />
+      <rect x="440" y="354" width="10" height="10" rx="1.5" />
+    </g>
+
+    <!-- Iconic White Neck Collar Stripes -->
+    <g stroke="#ffffff" stroke-width="4" stroke-linecap="round">
+      <line x1="250" y1="210" x2="275" y2="213" />
+      <line x1="248" y1="218" x2="277" y2="222" />
+      <line x1="247" y1="226" x2="279" y2="231" />
+      <line x1="247" y1="234" x2="280" y2="240" />
+    </g>
+
+    <!-- Sharp Dagger Bill & Head Curve -->
+    <path d="M 285 155 L 200 170 L 275 182 Z" fill="#05070a" stroke="#1e293b" stroke-width="1.5" />
+
+    <!-- Crimson Ruby Optical Eye -->
+    <circle cx="275" cy="162" r="8" fill="url(#rubyEye)" stroke="#ffffff" stroke-width="1.5" />
+    <circle cx="273" cy="160" r="2.5" fill="#ffffff" />
+  </g>
+
+  <!-- Title Badge Metadata -->
+  <text x="30" y="40" font-family="monospace" font-size="12" font-weight="bold" fill="#0284c7" letter-spacing="2">SUBMISSION F277 // THE LASER LOON</text>
+  <text x="30" y="58" font-family="sans-serif" font-size="10" fill="#64748b">MINNESOTA STATE FLAG REDESIGN VECTOR MASTER (CC BY 4.0)</text>
+</svg>

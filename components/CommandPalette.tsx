@@ -208,6 +208,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         ]
       },
       {
+        id: "nav-laser-loon-cs",
+        title: "The Laser Loon: Graphic Design Case Study & Open Asset Hub",
+        subtitle: "Vector illustration case study, side-by-side pass comparison, and open asset downloads",
+        category: "navigation",
+        url: "/work/laser-loon",
+        icon: <IconDirections className="w-4 h-4 text-amber-400" />,
+        badge: "Graphic Design",
+        status: "Vector Assets",
+        description: "Production-grade graphic design case study and open vector asset distribution hub (.ai, .eps, .pdf, .svg, .psd, .png, .jpg).",
+        techStack: ["Graphic Design", "Adobe Illustrator", "Adobe Photoshop", "Vector Optics", "CC BY 4.0"],
+        highlights: [
+          "Side-by-side vector pass comparison viewer",
+          "7 production file classifications + 1-click ZIP archive",
+          "Creative Commons CC BY 4.0 open source license"
+        ]
+      },
+      {
         id: "nav-quasi-puzzler",
         title: "Quasi-Perfect Puzzler",
         subtitle: "Formal-methods arcade scaffold — tactics, proof goals, and simulated Lean RAM",
