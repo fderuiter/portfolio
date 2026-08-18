@@ -39,6 +39,7 @@ export const CANONICAL_ROUTES: PageBenchmarkRoute[] = [
   { path: "/case-studies/laser-loon", name: "CS: Laser Loon", category: "case-study" },
   { path: "/work/laser-loon", name: "CS: Laser Loon Work Route", category: "case-study" },
   { path: "/case-studies/clintrials", name: "CS: clintrials WASM Engine", category: "case-study" },
+  { path: "/case-studies/equipose-randomization", name: "CS: Equipose Randomization", category: "case-study" },
 
   // Arcade Mini-Games
   { path: "/arcade/working-with-duck", name: "Game: Duck Canvas Engine", category: "arcade" },
