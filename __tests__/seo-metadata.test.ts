@@ -280,7 +280,7 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     expect(faviconStat.size).toBeLessThan(10000);
   });
 
-  it("createSocialImageResponse generates valid ImageResponse with 1200x630 dimensions", async () => {
+  it("createSocialImageResponse generates valid ImageResponse with 1200x630 dimensions and Edge CDN cache headers", async () => {
     const { createSocialImageResponse, OG_IMAGE_SIZE, OG_IMAGE_CONTENT_TYPE } = await import("@/lib/og-image");
     expect(OG_IMAGE_SIZE).toEqual({ width: 1200, height: 630 });
     expect(OG_IMAGE_CONTENT_TYPE).toBe("image/png");
@@ -294,6 +294,11 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
 
     expect(res).toBeDefined();
     expect(res.headers.get("content-type")).toContain("image/png");
+    const cacheControl = res.headers.get("cache-control");
+    expect(cacheControl).toBeTruthy();
+    expect(cacheControl).toContain("public");
+    expect(cacheControl).toContain("s-maxage=");
+    expect(cacheControl).toContain("stale-while-revalidate=");
   });
 
   it("root opengraph-image and twitter-image generators return valid responses", async () => {
@@ -324,6 +329,46 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
       const res = generator();
       expect(res).toBeDefined();
       expect(res.headers.get("content-type")).toContain("image/png");
+      expect(res.headers.get("cache-control")).toContain("public");
+    }
+  });
+
+  it("all 8 targeted showcase and arcade route social preview cards exist and return edge-cached image responses", async () => {
+    const { default: crfOg } = await import("@/app/crf/opengraph-image");
+    const { default: neuroOg } = await import("@/app/neuro/opengraph-image");
+    const { default: clinicalChaosOg } = await import("@/app/arcade/clinical-chaos/opengraph-image");
+    const { default: garminWatchOg } = await import("@/app/arcade/garmin-watch/opengraph-image");
+    const { default: laserLoonOg } = await import("@/app/arcade/laser-loon/opengraph-image");
+    const { default: quasiPuzzlerOg } = await import("@/app/arcade/quasi-puzzler/opengraph-image");
+    const { default: retroLabyrinthOg } = await import("@/app/arcade/retro-labyrinth/opengraph-image");
+    const { default: workingWithDuckOg } = await import("@/app/arcade/working-with-duck/opengraph-image");
+
+    const targetedGenerators = [
+      { name: "/crf", generator: crfOg, routeKey: "crf" },
+      { name: "/neuro", generator: neuroOg, routeKey: "neuro" },
+      { name: "/arcade/clinical-chaos", generator: clinicalChaosOg, routeKey: "clinicalChaos" },
+      { name: "/arcade/garmin-watch", generator: garminWatchOg, routeKey: "garminWatch" },
+      { name: "/arcade/laser-loon", generator: laserLoonOg, routeKey: "laserLoon" },
+      { name: "/arcade/quasi-puzzler", generator: quasiPuzzlerOg, routeKey: "quasiPuzzler" },
+      { name: "/arcade/retro-labyrinth", generator: retroLabyrinthOg, routeKey: "retroLabyrinth" },
+      { name: "/arcade/working-with-duck", generator: workingWithDuckOg, routeKey: "workingWithDuck" },
+    ];
+
+    expect(targetedGenerators).toHaveLength(8);
+
+    for (const item of targetedGenerators) {
+      const res = item.generator();
+      expect(res).toBeDefined();
+      expect(res.headers.get("content-type")).toContain("image/png");
+
+      const cacheControl = res.headers.get("cache-control");
+      expect(cacheControl).toBeTruthy();
+      expect(cacheControl).toContain("public");
+      expect(cacheControl).toContain("s-maxage=");
+      expect(cacheControl).toContain("stale-while-revalidate=");
+
+      const routeConfig = ROUTE_METADATA_CONFIGS[item.routeKey];
+      expect(routeConfig).toBeDefined();
     }
   });
 

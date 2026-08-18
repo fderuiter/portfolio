@@ -8,7 +8,7 @@
 
 > **buildRouteMetadata**(`config`): `Metadata`
 
-Defined in: [lib/seo-metadata.ts:96](https://github.com/fderuiter/portfolio/blob/main/lib/seo-metadata.ts#L96)
+Defined in: [lib/seo-metadata.ts:102](https://github.com/fderuiter/portfolio/blob/main/lib/seo-metadata.ts#L102)
 
 Helper to construct standardized Next.js Metadata for any route configuration.
 

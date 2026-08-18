@@ -10,6 +10,12 @@ export interface RouteMetaConfig {
 }
 
 export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
+  crf: {
+    title: "CRF Studio: Next-Gen Clinical Form & Protocol Designer",
+    description: "Zero-latency clinical trial form designer and EDC simulator with 12-column responsive layout, AST-powered edit checks, CDISC CDASH 2.2 / ODM-XML v1.3.2 compliance, and live publication aCRF overlays.",
+    path: "/crf",
+    keywords: ["CRF Studio", "Clinical Trial Designer", "CDISC CDASH", "ODM-XML", "EDC Simulator", "AST Edit Checks", "aCRF Overlays"],
+  },
   arcade: {
     title: "Engineering Arcade Hub & Systems Simulators",
     description: "Playable canvas physics engines, formal verification logic puzzles, embedded Monkey C simulators, and CDISC compliance arcades built with zero external gaming frameworks.",
