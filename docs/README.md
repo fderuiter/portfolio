@@ -4,11 +4,13 @@
 
 # Portfolio Hub
 
-![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
-![PyQt6](https://img.shields.io/badge/PyQt6-v6.6-41CD52?logo=qt&logoColor=white)
-![ONNX Runtime](https://img.shields.io/badge/ONNX_Runtime-v1.17-005CED?logo=onnx&logoColor=white)
-![SQLCipher](https://img.shields.io/badge/SQLCipher-v4.5-003B5C?logo=sqlite&logoColor=white)
-![Pytest Coverage](https://img.shields.io/badge/Pytest_Coverage-%3E90%25-brightgreen?logo=pytest&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-22.x-339933?logo=nodedotjs&logoColor=white)
+![npm](https://img.shields.io/badge/npm-%3E%3D10.0.0-CB3837?logo=npm&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-16.3.1-000000?logo=nextdotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-19.2.4-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-v5-3178C6?logo=typescript&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-v7-2D3748?logo=prisma&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?logo=tailwindcss&logoColor=white)
 
 > **Repository Topics:** `document-classification` · `machine-learning-offline` · `clinical-trials` · `sqlcipher` · `hipaa-compliant` · `desktop-application`
 
@@ -94,10 +96,18 @@ The full 5-phase development roadmap, milestone progress, and issue tracker are 
 ## Prerequisites
 
 To work on this repository, you will need:
-- **Node.js** (v20+)
-- **npm** or **bun** as the package manager
+- **Node.js**: 22.x (sole supported runtime)
+- **npm**: >=10.0.0 (sole supported package manager; bun, yarn, and pnpm are unsupported)
 
 ## Setup Instructions
+
+Automated Interactive Setup:
+You can run the interactive setup command to configure your environment, check dependencies, push database schema, and seed initial data:
+```bash
+npm run setup
+```
+
+Or follow manual setup steps:
 
 1. **Install Dependencies**
    ```bash
@@ -105,11 +115,13 @@ To work on this repository, you will need:
    ```
 
 2. **Configure Environment**
-   Copy `.env.local.example` to `.env.local` and set your `DATABASE_URL` (Neon Postgres connection string) and optionally `GITHUB_TOKEN` to avoid API rate limits.
+   Copy `.env.example` to `.env.local` and set your `DATABASE_URL` (Neon Postgres connection string) and optionally `GITHUB_TOKEN` to avoid API rate limits.
 
 3. **Initialize Database & Prisma Client**
+   Generate the Prisma client and push the schema to your database:
    ```bash
    npx prisma generate
+   npx prisma db push
    ```
 
 4. **Seed Database**

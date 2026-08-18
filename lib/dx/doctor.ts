@@ -513,6 +513,106 @@ export function checkDocumentationParity(root: string, fix = false): DiagnosticC
 }
 
 /**
+ * Onboarding Documentation & Engine Constraint Drift Check
+ */
+export function checkOnboardingDocsDrift(root: string, fix = false): DiagnosticCheckResult {
+  const readmePath = path.join(root, "README.md");
+  const docsReadmePath = path.join(root, "docs", "README.md");
+  const targetFiles = [readmePath];
+  if (fs.existsSync(docsReadmePath)) {
+    targetFiles.push(docsReadmePath);
+  }
+
+  const failures: string[] = [];
+
+  const obsoleteBadges = [
+    /img\.shields\.io\/badge\/Python/i,
+    /img\.shields\.io\/badge\/PyQt6/i,
+    /img\.shields\.io\/badge\/ONNX_Runtime/i,
+    /img\.shields\.io\/badge\/SQLCipher/i,
+    /img\.shields\.io\/badge\/Pytest_Coverage/i,
+  ];
+
+  for (const filePath of targetFiles) {
+    if (!fs.existsSync(filePath)) {
+      failures.push(`Target onboarding doc missing: ${path.relative(root, filePath)}`);
+      continue;
+    }
+
+    const relative = path.relative(root, filePath);
+    const content = fs.readFileSync(filePath, "utf-8");
+
+    // 1. Obsolete Badges Check
+    for (const badgeRegex of obsoleteBadges) {
+      if (badgeRegex.test(content)) {
+        failures.push(`${relative}: Obsolete Python technology badge detected in top header.`);
+        break;
+      }
+    }
+
+    // 2. Node & npm Engine Requirements Check
+    if (!/Node\.js.*22/i.test(content)) {
+      failures.push(`${relative}: Missing explicit requirement for Node.js 22.x in prerequisites.`);
+    }
+
+    if (/\b(v20\+|v18\+|v16\+)\b/i.test(content)) {
+      failures.push(`${relative}: Incorrect Node version (v20+/v18+/v16+) listed in prerequisites.`);
+    }
+
+    if (/\b(bun|yarn|pnpm)\b.*as the package manager/i.test(content) || /npm\s+or\s+bun/i.test(content)) {
+      failures.push(`${relative}: Lists unsupported package manager (bun/yarn/pnpm) in prerequisites.`);
+    }
+
+    // 3. Environment Template Reference Check
+    if (content.includes(".env.local.example")) {
+      failures.push(`${relative}: References invalid environment template '.env.local.example' instead of '.env.example'.`);
+    }
+
+    if (!content.includes(".env.example")) {
+      failures.push(`${relative}: Missing reference to valid environment template '.env.example'.`);
+    }
+
+    // 4. Database Setup Sequence Check (prisma db push before prisma db seed)
+    const pushIndex = content.indexOf("prisma db push");
+    const seedIndex = content.indexOf("prisma db seed");
+
+    if (pushIndex === -1) {
+      failures.push(`${relative}: Missing database schema push command ('npx prisma db push') in setup instructions.`);
+    } else if (seedIndex !== -1 && pushIndex > seedIndex) {
+      failures.push(`${relative}: Schema push command ('prisma db push') must precede database seeding ('prisma db seed').`);
+    }
+  }
+
+  if (failures.length > 0) {
+    if (fix) {
+      try {
+        execSync("npm run compile-docs", { cwd: root, stdio: "ignore" });
+      } catch {
+        // ignore
+      }
+    }
+
+    return {
+      id: "docs-onboarding-drift",
+      name: "Onboarding Documentation & Engine Sync Guard",
+      category: "docs",
+      status: "fail",
+      message: `${failures.length} onboarding documentation drift issue(s) detected.`,
+      details: failures,
+      fixable: true,
+    };
+  }
+
+  return {
+    id: "docs-onboarding-drift",
+    name: "Onboarding Documentation & Engine Sync Guard",
+    category: "docs",
+    status: "pass",
+    message: "Onboarding documentation matches Node.js 22.x/npm engine constraints, environment templates, and database setup sequence.",
+  };
+}
+
+/**
  * OpenAPI Parity & Route Completeness Check
  */
 export function checkOpenApiParity(root: string, fix = false): DiagnosticCheckResult {
@@ -1066,6 +1166,7 @@ export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
     checkSecretLeaks(root),
     checkMigrationGuard(root),
     checkDocumentationParity(root, fix),
+    checkOnboardingDocsDrift(root, fix),
     checkOpenApiParity(root, fix),
     checkHydrationSafety(root),
     checkAccessibilityStandards(root, fix),

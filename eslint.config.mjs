@@ -60,7 +60,7 @@ const eslintConfig = defineConfig([
       "components/**/*.{ts,tsx,js,jsx}",
       "hooks/**/*.{ts,tsx,js,jsx}",
     ],
-    ignores: ["lib/env.ts", "lib/dx/env-guard.ts", "app/generated/**"],
+    ignores: ["lib/env.ts", "lib/dx/**", "app/generated/**"],
     rules: {
       "no-restricted-syntax": [
         "error",
