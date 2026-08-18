@@ -64,6 +64,42 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
   const prevMouseRef = useRef({ x: 0, y: 0 });
   const rotationRef = useRef({ x: 0.2, y: -0.4 });
 
+  // IntersectionObserver Guard to pause rendering loops when scrolled offscreen
+  const isIntersectingRef = useRef(true);
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry) {
+          isIntersectingRef.current = entry.isIntersecting;
+        }
+      },
+      { threshold: 0.0, rootMargin: "50px" }
+    );
+
+    observer.observe(container);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  // Frame Throttling Refs for 3D Mesh Hover Raycasting
+  const hoverRafIdRef = useRef<number | null>(null);
+  const pendingHoverRef = useRef<{ clientX: number; clientY: number } | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (hoverRafIdRef.current !== null) {
+        cancelAnimationFrame(hoverRafIdRef.current);
+        hoverRafIdRef.current = null;
+      }
+    };
+  }, []);
+
   // Initialize Three.js Scene, Camera, and Renderer
   useEffect(() => {
     const container = containerRef.current;
@@ -124,7 +160,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
     const animate = () => {
       animId = requestAnimationFrame(animate);
 
-      if (isContextLostRef.current) return;
+      if (isContextLostRef.current || !isIntersectingRef.current) return;
 
       if (meshGroupRef.current) {
         if (isRotatingRef.current && !isDraggingRef.current) {
@@ -241,27 +277,8 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
     };
   };
 
-  // Mouse & Touch Orbit Handlers
-  const handleMouseDown = (e: React.MouseEvent) => {
-    isDraggingRef.current = true;
-    dragStartRef.current = { x: e.clientX, y: e.clientY };
-    prevMouseRef.current = { x: e.clientX, y: e.clientY };
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDraggingRef.current) {
-      const deltaX = e.clientX - prevMouseRef.current.x;
-      const deltaY = e.clientY - prevMouseRef.current.y;
-      rotationRef.current.y += deltaX * 0.008;
-      rotationRef.current.x += deltaY * 0.008;
-      prevMouseRef.current = { x: e.clientX, y: e.clientY };
-      setHoveredParcel(null);
-      setTooltipPos(null);
-      return;
-    }
-
-    // Hover parcel detection
-    const result = performRaycast(e.clientX, e.clientY);
+  const processHover = React.useCallback((clientX: number, clientY: number) => {
+    const result = performRaycast(clientX, clientY);
     if (result) {
       const isLeft = result.localPoint.x < 0;
       const parcel = getAnatomicalParcelAtCoordinate(result.localPoint, isLeft);
@@ -276,6 +293,56 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
       setHoveredParcel(null);
       setTooltipPos(null);
     }
+  }, []);
+
+  // Mouse & Touch Orbit Handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    isDraggingRef.current = true;
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    prevMouseRef.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDraggingRef.current) {
+      if (hoverRafIdRef.current !== null) {
+        cancelAnimationFrame(hoverRafIdRef.current);
+        hoverRafIdRef.current = null;
+      }
+      pendingHoverRef.current = null;
+      const deltaX = e.clientX - prevMouseRef.current.x;
+      const deltaY = e.clientY - prevMouseRef.current.y;
+      rotationRef.current.y += deltaX * 0.008;
+      rotationRef.current.x += deltaY * 0.008;
+      prevMouseRef.current = { x: e.clientX, y: e.clientY };
+      setHoveredParcel(null);
+      setTooltipPos(null);
+      return;
+    }
+
+    // Hover parcel detection throttled to frame refresh boundary
+    pendingHoverRef.current = { clientX: e.clientX, clientY: e.clientY };
+
+    if (hoverRafIdRef.current === null) {
+      hoverRafIdRef.current = requestAnimationFrame(() => {
+        hoverRafIdRef.current = null;
+        if (pendingHoverRef.current) {
+          const { clientX, clientY } = pendingHoverRef.current;
+          pendingHoverRef.current = null;
+          processHover(clientX, clientY);
+        }
+      });
+    }
+  };
+
+  const handleMouseLeave = (e: React.MouseEvent) => {
+    if (hoverRafIdRef.current !== null) {
+      cancelAnimationFrame(hoverRafIdRef.current);
+      hoverRafIdRef.current = null;
+    }
+    pendingHoverRef.current = null;
+    handleMouseUp(e);
+    setHoveredParcel(null);
+    setTooltipPos(null);
   };
 
   const handleMouseUp = (e: React.MouseEvent) => {
@@ -458,7 +525,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
