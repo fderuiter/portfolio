@@ -6,6 +6,10 @@
 
 # lib/crf/export-r
 
+## Interfaces
+
+- [ExpandedRField](interfaces/ExpandedRField.md)
+
 ## Functions
 
 - [escapeRString](functions/escapeRString.md)
@@ -13,4 +17,7 @@
 - [exportStudyToR](functions/exportStudyToR.md)
 - [generateRCodelists](functions/generateRCodelists.md)
 - [generateRDataStepForForm](functions/generateRDataStepForForm.md)
+- [getExpandedRFields](functions/getExpandedRFields.md)
+- [getFieldOptions](functions/getFieldOptions.md)
+- [parseMultiSelectValue](functions/parseMultiSelectValue.md)
 - [sanitizeRName](functions/sanitizeRName.md)

@@ -17,6 +17,13 @@ export * from "./export-acrf";
 export * from "./export-docx";
 export * from "./export-pdf";
 export * from "./export-r";
-export * from "./export-sas";
+export {
+  exportStudyToSas,
+  exportFormToSas,
+  generateSasProcFormat,
+  sanitizeSasName,
+  getSasFormatName,
+  escapeSasString,
+} from "./export-sas";
 export * from "./fhir-questionnaire";
 export * from "./odm-xml-serializer";
