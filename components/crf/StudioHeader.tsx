@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   StudyProtocol,
   StudioMode,
   StudioTheme,
 } from "@/lib/crf/types";
-import { getStudyPresets } from "@/lib/crf/presets/loader";
+import { getStudyPresetsSync } from "@/lib/crf/presets/loader";
+import { lintForm } from "@/lib/crf/ast-evaluator";
 import {
   IconLayoutGrid,
   IconCalendar,
@@ -83,27 +84,9 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
   onCopyShareLink,
 }) => {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-  const [presets, setPresets] = useState<Array<{ id: string; name: string; therapeuticArea?: string; study: { protocolNumber: string } }>>([]);
-  const [totalIssues, setTotalIssues] = useState<number>(0);
+  const [presets] = useState<Array<{ id: string; name: string; therapeuticArea?: string; study: { protocolNumber: string } }>>(() => getStudyPresetsSync());
   const branding = getStudyBranding(study);
-
-  useEffect(() => {
-    let isMounted = true;
-    getStudyPresets().then((loadedPresets) => {
-      if (isMounted) setPresets(loadedPresets);
-    });
-    return () => { isMounted = false; };
-  }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-    import("@/lib/crf/ast-evaluator").then(({ lintForm }) => {
-      if (!isMounted) return;
-      const issues = study.forms.reduce((acc, f) => acc + lintForm(f).length, 0);
-      setTotalIssues(issues);
-    });
-    return () => { isMounted = false; };
-  }, [study]);
+  const totalIssues = study.forms.reduce((acc, f) => acc + lintForm(f).length, 0);
 
   const currentPreset = presets.find((p) => p.study.protocolNumber === study.protocolNumber);
 

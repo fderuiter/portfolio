@@ -109,7 +109,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/portfolio_ci?schema=replay
 
-      - name: Run Shift-Left Mutation & Fuzz Testing Gate
+      - name: Run Shift-Left Property Fuzz Testing Gate
         id: mutation
         run: npm run test:mutation
 
@@ -145,7 +145,7 @@ jobs:
           echo "| Verification Layer | Status | Description |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
           echo "| **Mathematical Logic** (Vitest) | ${{ steps.vitest.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Masonry scheduling algorithms & text metrics |" >> $GITHUB_STEP_SUMMARY
-          echo "| **Shift-Left Mutation & Fuzz Gate** | ${{ steps.mutation.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Stryker mutation & fast-check generative invariants |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Shift-Left Property Fuzz Gate** | ${{ steps.mutation.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Fast-check generative invariants & property-based fuzz testing |" >> $GITHUB_STEP_SUMMARY
           echo "| **Visual & Drift Guard** (Playwright) | ${{ steps.playwright.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Sub-pixel pixel matching & layout constant sync |" >> $GITHUB_STEP_SUMMARY
           echo "| **Accessibility Audits** (Playwright-Axe) | $ACC_STATUS | Automated WCAG compliance scans on interactive states |" >> $GITHUB_STEP_SUMMARY
           echo "| **Performance Gates** (Lighthouse) | ${{ steps.lighthouse.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Web Vitals & >95 Lighthouse score |" >> $GITHUB_STEP_SUMMARY

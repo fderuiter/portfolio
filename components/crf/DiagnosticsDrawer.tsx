@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { StudyProtocol, ComplianceViolation, ComplianceSeverity } from "@/lib/crf/types";
+import { lintForm } from "@/lib/crf/ast-evaluator";
 import {
   validateStudyCompliance,
   autoFixViolation,
@@ -32,30 +33,6 @@ export const DiagnosticsDrawer: React.FC<DiagnosticsDrawerProps> = ({
 }) => {
   const [filterSeverity, setFilterSeverity] = useState<"all" | ComplianceSeverity>("all");
   const [fixedNotice, setFixedNotice] = useState<string | null>(null);
-  const [astDiagnostics, setAstDiagnostics] = useState<{ formName: string; formId: string; message: string; severity: string }[]>([]);
-
-  useEffect(() => {
-    let isMounted = true;
-    import("@/lib/crf/ast-evaluator").then(({ lintForm }) => {
-      if (!isMounted) return;
-      const diags: { formName: string; formId: string; message: string; severity: string }[] = [];
-      study.forms.forEach((form) => {
-        const items = lintForm(form);
-        items.forEach((item) => {
-          diags.push({
-            formName: form.name,
-            formId: form.id,
-            message: item.message,
-            severity: item.severity,
-          });
-        });
-      });
-      setAstDiagnostics(diags);
-    });
-    return () => {
-      isMounted = false;
-    };
-  }, [study]);
 
   const containerRef = useFocusTrap<HTMLDivElement>(isOpen, {
     onEscape: onClose,
@@ -63,6 +40,20 @@ export const DiagnosticsDrawer: React.FC<DiagnosticsDrawerProps> = ({
   });
 
   if (!isOpen) return null;
+
+  // 1. AST Lint Diagnostics
+  const astDiagnostics: { formName: string; formId: string; message: string; severity: string }[] = [];
+  study.forms.forEach((form) => {
+    const items = lintForm(form);
+    items.forEach((item) => {
+      astDiagnostics.push({
+        formName: form.name,
+        formId: form.id,
+        message: item.message,
+        severity: item.severity,
+      });
+    });
+  });
 
   // 2. CDISC Conformance & Regulatory Engine Violations
   const complianceViolations = validateStudyCompliance(study);
