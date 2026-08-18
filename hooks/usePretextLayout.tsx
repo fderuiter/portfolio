@@ -258,6 +258,7 @@ export const PretextText: React.FC<PretextTextProps> = ({
         ref={ref}
         aria-hidden="true"
         role="presentation"
+        data-pretext-layer="visual"
         className={`${className || ""} select-none pointer-events-none`}
       >
         {children || text}
@@ -265,6 +266,7 @@ export const PretextText: React.FC<PretextTextProps> = ({
 
       {/* 2. Transparent Standard Semantic Overlay (selectable, readable by screen readers) */}
       <SemanticElement
+        data-pretext-layer="semantic"
         className={`${className || ""} absolute inset-0 select-text bg-transparent`}
         style={{
           color: "transparent",
@@ -589,6 +591,7 @@ export const PretextRichText: React.FC<PretextRichTextProps> = ({
       <div 
         aria-hidden="true" 
         role="presentation" 
+        data-pretext-layer="visual"
         className={`${className || ""} select-none pointer-events-none`}
         style={{ display: "flex", flexDirection: "column" }}
       >
@@ -639,6 +642,7 @@ export const PretextRichText: React.FC<PretextRichTextProps> = ({
 
       {/* 2. Transparent Standard Semantic Overlay (selectable, readable by screen readers) */}
       <p 
+        data-pretext-layer="semantic"
         className={`${className || ""} absolute inset-0 select-text bg-transparent`}
         style={{
           color: "transparent",
