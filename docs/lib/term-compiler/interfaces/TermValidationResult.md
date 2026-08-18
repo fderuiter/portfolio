@@ -6,7 +6,7 @@
 
 # Interface: TermValidationResult
 
-Defined in: [lib/term-compiler.ts:125](https://github.com/fderuiter/portfolio/blob/main/lib/term-compiler.ts#L125)
+Defined in: [lib/term-compiler.ts:151](https://github.com/fderuiter/portfolio/blob/main/lib/term-compiler.ts#L151)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/term-compiler.ts:125](https://github.com/fderuiter/portfolio/bl
 
 > **errors**: `string`[]
 
-Defined in: [lib/term-compiler.ts:127](https://github.com/fderuiter/portfolio/blob/main/lib/term-compiler.ts#L127)
+Defined in: [lib/term-compiler.ts:153](https://github.com/fderuiter/portfolio/blob/main/lib/term-compiler.ts#L153)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [lib/term-compiler.ts:127](https://github.com/fderuiter/portfolio/bl
 
 > **valid**: `boolean`
 
-Defined in: [lib/term-compiler.ts:126](https://github.com/fderuiter/portfolio/blob/main/lib/term-compiler.ts#L126)
+Defined in: [lib/term-compiler.ts:152](https://github.com/fderuiter/portfolio/blob/main/lib/term-compiler.ts#L152)
