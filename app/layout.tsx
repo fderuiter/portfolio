@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
-import { preconnect } from "react-dom";
 import "./globals.css";
 import { SkipToContent } from "@/components/SkipToContent";
 import { Navbar } from "@/components/Navbar";
@@ -79,9 +78,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  preconnect("https://fonts.googleapis.com");
-  preconnect("https://fonts.gstatic.com", { crossOrigin: "anonymous" });
-
   return (
     <html
       lang="en"

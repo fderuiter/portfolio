@@ -114,14 +114,14 @@ describe("Mobile Performance & Asset Optimization Suite", () => {
       }
     });
 
-    it("issues preconnect for font origins in RootLayout without eager preloading 3D models", async () => {
+    it("verifies zero preconnect directives for external font origins in RootLayout without eager preloading 3D models", async () => {
       const RootLayoutModule = await import("../app/layout");
       const RootLayout = RootLayoutModule.default;
 
       RootLayout({ children: <div /> });
 
-      expect(mockPreconnect).toHaveBeenCalledWith("https://fonts.googleapis.com");
-      expect(mockPreconnect).toHaveBeenCalledWith("https://fonts.gstatic.com", { crossOrigin: "anonymous" });
+      expect(mockPreconnect).not.toHaveBeenCalledWith("https://fonts.googleapis.com");
+      expect(mockPreconnect).not.toHaveBeenCalledWith("https://fonts.gstatic.com", expect.anything());
 
       expect(mockPreload).not.toHaveBeenCalledWith("/models/brain-surface.glb", expect.anything());
       expect(mockPreload).not.toHaveBeenCalledWith("/models/brain.obj", expect.anything());
