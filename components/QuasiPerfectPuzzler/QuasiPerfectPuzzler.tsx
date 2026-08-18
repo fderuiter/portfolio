@@ -594,10 +594,10 @@ export const QuasiPerfectPuzzler: React.FC = () => {
       tabIndex={0}
       data-keyboard-boundary="true"
       onKeyDown={handleKeyDown}
-      className={`relative font-mono outline-none transition-all ${
+      className={`relative font-mono outline-none transition-all w-full max-w-full min-w-0 ${
         isFullscreen
           ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none bg-black p-4 sm:p-6 overflow-y-auto"
-          : "rounded-2xl border border-brand-cyan/30 bg-zinc-950/90 p-5 shadow-[0_0_35px_-10px_rgba(6,182,212,0.35)] focus:border-brand-cyan"
+          : "rounded-2xl border border-brand-cyan/30 bg-zinc-950/90 p-3 sm:p-5 shadow-[0_0_35px_-10px_rgba(6,182,212,0.35)] focus:border-brand-cyan overflow-x-hidden"
       }`}
     >
       <FullscreenButton

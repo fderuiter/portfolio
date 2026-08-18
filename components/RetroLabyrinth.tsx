@@ -1666,8 +1666,8 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
             isFullscreen
               ? "w-full max-h-[calc(100vh-220px)] aspect-[240/144]"
               : isExpanded
-              ? "w-[360px] h-[216px]"
-              : "w-[240px] h-[144px]"
+              ? "w-full max-w-[480px] aspect-[240/144] h-auto"
+              : "w-full max-w-[360px] aspect-[240/144] h-auto"
           } flex items-center justify-center transition-all duration-300`}
           style={
             crtCalibration.curvature > 0.05
@@ -1686,13 +1686,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
             onMouseLeave={() => {
               cursorGridPosRef.current = null;
             }}
-            className={`block ${
-              isFullscreen
-                ? "w-full h-full max-h-[calc(100vh-220px)] object-contain"
-                : isExpanded
-                ? "w-[360px] h-[216px]"
-                : "w-[240px] h-[144px]"
-            } rounded-lg border border-neutral-900/60 bg-neutral-950 cursor-crosshair`}
+            className="block w-full h-full aspect-[240/144] object-contain rounded-lg border border-neutral-900/60 bg-neutral-950 cursor-crosshair"
           />
 
           {/* Victory Overlay */}

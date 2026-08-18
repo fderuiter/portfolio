@@ -420,7 +420,7 @@ export const GarminWatchSimulator: React.FC = () => {
         onBlur={() => setIsFocused(false)}
         onKeyDown={handleKeyDown}
         data-keyboard-boundary="true"
-        className={`relative w-84 h-84 rounded-full bg-gradient-to-br p-6 flex items-center justify-center border-4 select-none outline-none transition-all duration-300 ${getThemeChassis()} ${
+        className={`relative w-full max-w-[336px] aspect-square h-auto max-h-[84vw] sm:w-84 sm:h-84 rounded-full bg-gradient-to-br p-4 sm:p-6 flex items-center justify-center border-4 select-none outline-none transition-all duration-300 ${getThemeChassis()} ${
           isFocused
             ? "ring-4 ring-brand-cyan/20 shadow-[0_0_40px_rgba(34,211,238,0.25)] scale-[1.01]"
             : "shadow-2xl"
@@ -516,7 +516,7 @@ export const GarminWatchSimulator: React.FC = () => {
         </div>
 
         {/* Watch Inner Circular 280x280 Screen Display */}
-        <div className="relative w-[280px] h-[280px] rounded-full overflow-hidden border-2 border-zinc-800 bg-black shadow-[inset_0_0_20px_rgba(0,0,0,0.9)] flex items-center justify-center">
+        <div className="relative w-full max-w-[280px] aspect-square h-auto max-h-[70vw] sm:w-[280px] sm:h-[280px] rounded-full overflow-hidden border-2 border-zinc-800 bg-black shadow-[inset_0_0_20px_rgba(0,0,0,0.9)] flex items-center justify-center">
           <canvas
             ref={canvasRef}
             width={CANVAS_SIZE}

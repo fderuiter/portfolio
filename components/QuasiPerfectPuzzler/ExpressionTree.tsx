@@ -79,7 +79,7 @@ export const ExpressionTree: React.FC<ExpressionTreeProps> = ({
       )}
 
       {/* 2. Main Goal Tree Container */}
-      <div className="relative flex flex-col items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-950/90 p-6 min-h-[220px] overflow-x-auto">
+      <div className="relative flex flex-col items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-950/90 p-3 sm:p-6 min-h-[220px] overflow-x-auto w-full max-w-full min-w-0">
         {/* Goal Formula Banner */}
         <div className="w-full flex flex-wrap items-center justify-between border-b border-zinc-800/70 pb-3 mb-6 gap-2">
           <div className="flex items-center gap-2">

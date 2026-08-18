@@ -2267,7 +2267,7 @@ export const WorkingWithDuck: React.FC = () => {
       )}
 
       {/* Main Canvas Screen Container */}
-      <div className="relative rounded-3xl border border-zinc-800 bg-zinc-950 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)]">
+      <div className="relative rounded-3xl border border-zinc-800 bg-zinc-950 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] w-full max-w-full min-w-0">
         <FullscreenButton
           isFullscreen={isFullscreen}
           onToggle={toggleFullscreen}
@@ -2289,7 +2289,7 @@ export const WorkingWithDuck: React.FC = () => {
           className={
             isFullscreen
               ? "max-h-[calc(100vh-220px)] max-w-full aspect-[800/500] object-contain block cursor-crosshair touch-none my-auto mx-auto"
-              : "w-full h-auto cursor-crosshair block touch-none"
+              : "w-full h-auto aspect-[800/500] object-contain cursor-crosshair block touch-none"
           }
         />
 

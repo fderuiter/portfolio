@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { IconPlayerPlay, IconPower, IconTerminal } from "@tabler/icons-react";
+import { useResizeObserver } from "@/hooks/useResizeObserver";
 
 interface ControlItem {
   key: string;
@@ -151,17 +152,46 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
     return () => clearInterval(timer);
   }, [isWarmingUp, isLoaded]);
 
+  const [scale, setScale] = useState<number>(1);
+  const viewportRef = useRef<HTMLDivElement>(null);
+
+  const containerRef = useResizeObserver<HTMLDivElement>((entry) => {
+    if (!entry || !entry.contentRect) return;
+    const availableWidth = entry.contentRect.width;
+    const baseWidth = viewportRef.current?.scrollWidth || 768;
+
+    if (availableWidth > 0 && availableWidth < baseWidth) {
+      const computedScale = Math.max(0.4, Math.min(1, availableWidth / baseWidth));
+      setScale(computedScale);
+    } else {
+      setScale(1);
+    }
+  });
+
   const handleExit = () => {
     setIsLaunched(false);
     setIsWarmingUp(false);
     setBootProgress(0);
+    setScale(1);
   };
 
   if (isLaunched) {
     return (
-      <div className="relative w-full flex flex-col items-center">
+      <div ref={containerRef} className="relative w-full max-w-full min-w-0 flex flex-col items-center overflow-x-hidden">
         {/* Game Area Container with Reset Cabinet Button overlay */}
-        <div className="w-full relative">
+        <div
+          ref={viewportRef}
+          className="w-full relative min-w-0 transition-transform duration-200"
+          style={
+            scale < 1
+              ? {
+                  transform: `scale(${scale})`,
+                  transformOrigin: "top center",
+                  willChange: "transform",
+                }
+              : undefined
+          }
+        >
           {children}
         </div>
         

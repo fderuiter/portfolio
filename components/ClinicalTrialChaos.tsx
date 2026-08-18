@@ -1384,7 +1384,7 @@ export const ClinicalTrialChaos: React.FC = () => {
       {activeTab === "conveyor" && (
         <>
           {/* HTML5 Canvas Simulation */}
-          <div className="mt-4 relative rounded-xl border border-zinc-800 bg-black overflow-hidden">
+          <div className="mt-4 relative rounded-xl border border-zinc-800 bg-black overflow-hidden w-full max-w-full min-w-0">
             <canvas
               ref={canvasRef}
               width={760}
@@ -1395,7 +1395,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                 if (touch) handleCanvasClickOrTouch(touch.clientX, touch.clientY);
               }}
               style={{ touchAction: "none" }}
-              className={`w-full ${isFullscreen ? "h-auto max-h-[300px] aspect-[760/200] object-contain" : "h-[180px]"} block cursor-pointer`}
+              className={`w-full ${isFullscreen ? "h-auto max-h-[300px]" : "h-auto"} aspect-[760/200] object-contain block cursor-pointer`}
             />
 
             {/* Overlays for Idle / Paused / Game Over / Cleared */}
