@@ -11,7 +11,7 @@ export interface TelemetryEventInput {
   eventType: string;
 }
 
-interface LocalCacheEntry {
+export interface LocalCacheEntry {
   count: number;
   expiresAt: number;
 }

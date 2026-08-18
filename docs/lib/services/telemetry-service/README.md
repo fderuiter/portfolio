@@ -12,6 +12,7 @@
 
 ## Interfaces
 
+- [LocalCacheEntry](interfaces/LocalCacheEntry.md)
 - [TelemetryEventInput](interfaces/TelemetryEventInput.md)
 
 ## Variables

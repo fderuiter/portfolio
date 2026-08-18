@@ -16,21 +16,21 @@ Defined in: [lib/services/telemetry-service.ts:66](https://github.com/fderuiter/
 
 #### Get Signature
 
-> **get** **active**(): `Map`\<`string`, `LocalCacheEntry`\>
+> **get** **active**(): `Map`\<`string`, [`LocalCacheEntry`](../interfaces/LocalCacheEntry.md)\>
 
 ##### Returns
 
-`Map`\<`string`, `LocalCacheEntry`\>
+`Map`\<`string`, [`LocalCacheEntry`](../interfaces/LocalCacheEntry.md)\>
 
 ### inactive
 
 #### Get Signature
 
-> **get** **inactive**(): `Map`\<`string`, `LocalCacheEntry`\>
+> **get** **inactive**(): `Map`\<`string`, [`LocalCacheEntry`](../interfaces/LocalCacheEntry.md)\>
 
 ##### Returns
 
-`Map`\<`string`, `LocalCacheEntry`\>
+`Map`\<`string`, [`LocalCacheEntry`](../interfaces/LocalCacheEntry.md)\>
 
 ### reset()
 
