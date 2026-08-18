@@ -7,7 +7,12 @@ import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "../app/generated/prisma/client";
 import ws from "ws";
 import { scanFile, scanText } from "../lib/validation-scanner";
-import { IMEDNET_COMMANDS_OBJ, IMEDNET_PLAYBACK_OBJ } from "../lib/case-studies-data";
+import {
+  IMEDNET_COMMANDS_OBJ,
+  IMEDNET_PLAYBACK_OBJ,
+  PROMPTOPS_COMMANDS_OBJ,
+  PROMPTOPS_PLAYBACK_OBJ,
+} from "../lib/case-studies-data";
 import { compileTerms } from "../lib/term-compiler";
 
 neonConfig.webSocketConstructor = ws;
@@ -315,6 +320,9 @@ export const tenantAuthGuard = createMiddleware(async (c, next) => {
 
 <h4>3. Edge-Native Event-Driven Async Processing</h4>
 <p>Background workflows and async task queues are powered by Inngest functions embedded directly inside Hono, delivering event-driven reliability without needing persistent worker processes.</p>
+    `.trim(),
+  },
+  {
     slug: "inbody-qr-decoder",
     title: "InBody QR Data Decoder & Analyzer: BIA Reverse Engineering",
     primary_language: "Python",
@@ -350,6 +358,9 @@ def decode_digits(raw_slice: str, scale_factor: float = 0.1, precision: int = 2)
 
 <h4>3. Multi-Block Segment Parsing &amp; Biomarker Derivation</h4>
 <p>Primary body composition parameters reside in Segment Index 4 (<code>meas_blob</code>), while secondary metrics (BMR and Visceral Fat) are extracted from Segment Index 5 in kilocalories. Derived biomarkers, including Appendicular Skeletal Muscle Mass (ASM) and Skeletal Muscle Index ($\\text{SMI} = \\frac{\\text{ASM}}{\\text{Height}^2}$), are computed deterministically.</p>
+    `.trim(),
+  },
+  {
     slug: "polyglot-tsp",
     title: "Polyglot-TSP: Technical Breakdown & Portfolio Integration",
     primary_language: "Rust",
@@ -465,6 +476,9 @@ endmodule
 <p>1. <strong>Exhaustive Permutations ($O(N!)$) vs. Dynamic Programming / Heuristics ($O(N^2 2^N)$)</strong>: Prioritized strict brute-force permutation generation across all targets to maintain an identical baseline for syntactic and runtime execution comparisons across obscure and exotic paradigms.</p>
 
 <p>2. <strong>Subprocess CLI Execution vs. Foreign Function Interface (FFI)</strong>: Chose process-level standard stream (stdout/stderr) assertion over C ABI bindings to accommodate non-standardized runtimes, HDL simulation pipelines (ghdl, iverilog), and legacy/esoteric environments (INTERCAL, COBOL, Modula-2).</p>
+    `.trim(),
+  },
+  {
     slug: "oxidizemath",
     title: "OxidizeMath: Verified Numerical Computation Framework in Rust",
     primary_language: "Rust",
@@ -526,6 +540,9 @@ where
 
 <h4>3. WASM-First GUI Architecture</h4>
 <p>Deploys identical single-binary desktop execution and zero-install WebAssembly browser builds using egui and custom <code>egui_plot</code> engines.</p>
+    `.trim(),
+  },
+  {
     slug: "ualbf",
     title: "UALBF: Verified Computational Proof Engine & Search Architecture",
     primary_language: "Rust",
@@ -636,6 +653,9 @@ pub extern "C" fn ualbf_verify_certificate_manifest(
     }
 }
 </code></pre>
+    `.trim(),
+  },
+  {
     slug: "sortify",
     title: "Sortify: Air-Gapped Document Classification & Resilient File Engine",
     primary_language: "Python",
@@ -766,6 +786,77 @@ def stage_and_commit_move(self, src: str, dest_dir: str) -> str:
 <p>The Laser Loon design asset suite is released under the <strong>Creative Commons Attribution 4.0 International (CC BY 4.0)</strong> license. Individuals, civic groups, screen printers, and software developers are free to share, adapt, and build upon the artwork for personal or commercial applications with appropriate credit to the original creator.</p>
     `.trim(),
   },
+  {
+    slug: "promptops",
+    title: "PromptOps: AI Prompt Engineering & Workflow Orchestration Framework",
+    primary_language: "Python",
+    github_url: "https://github.com/fderuiter/PromptOps",
+    published: true,
+    simulated_telemetry: true,
+    tags: "Python, LLMOps, Model Context Protocol, Streamlit, Pydantic, JSON Schema, Jinja2, DAG Workflows",
+    commands_json: JSON.stringify(PROMPTOPS_COMMANDS_OBJ),
+    playback_json: JSON.stringify(PROMPTOPS_PLAYBACK_OBJ),
+    editorial_content: "A schema-driven, production-grade **prompt engineering framework** and multi-agent workflow orchestration engine. Brings standard software engineering rigor—including strict Draft-07 JSON Schema validation, version-controlled declarative DAGs, Jinja2 template compilation, Model Context Protocol (MCP) tooling, Streamlit Studio GUI, and signed cryptographic audit trails to generative AI workflows.",
+    architectural_narrative: `
+<h3 id="architecture">Project Overview &amp; Architecture</h3>
+<p>PromptOps is an open-source, production-grade prompt engineering framework and multi-agent workflow orchestration engine. It brings standard software engineering rigor—including schema validation, linting, continuous testing, signed audit trails, and version-controlled declarative DAGs—to generative AI workflows across scientific, clinical, technical, regulatory, and executive domains.</p>
+
+<pre><code class="language-text">
++-----------------------------------------------------------------------------------+
+|                                Developer Interfaces                              |
+|   +----------------------------------+   +------------------------------------+   |
+|   |         CLI &amp; Rich Console       |   |       Streamlit Studio GUI         |   |
+|   |  (init, validate, run, simulate, |   | (Prompt Editor, Workflow Canvas,   |   |
+|   |   sync, export, docgen, vibe)    |   |  Simulation Runner, Git Sync)      |   |
+|   +-----------------+----------------+   +-----------------+------------------+   |
++---------------------|--------------------------------------|----------------------+
+                      |                                      |
++---------------------v--------------------------------------v----------------------+
+|                               Core PromptOps Engine                               |
+|   +---------------------------+  +------------------------+  +-----------------+  |
+|   | Jinja2 Template Compiler  |  | 2-Pass Schema Validator|  | Execution Guard |  |
+|   | (macros.j2, variable sub) |  | (Draft-07 JSON Schema) |  | &amp; Sanitization  |  |
+|   +---------------------------+  +------------------------+  +-----------------+  |
+|   +----------------------------------------------------------------------------+  |
+|   |                    DAG Workflow Engine &amp; Step Dispatcher                   |  |
+|   |            (Topological Sort, State Propagation, Tool Resolution)          |  |
+|   +----------------------------------------------------------------------------+  |
++------------------------------------+----------------------------------------------+
+                                     |
++------------------------------------v----------------------------------------------+
+|                         Interoperability &amp; Governance                             |
+|   +--------------------------+  +---------------------+  +---------------------+  |
+|   | Model Context Protocol   |  | Signed Audit Trails |  | Automated DocGen    |  |
+|   | (MCP Server &amp; Tool Stubs)|  | &amp; Gap Reports (JSON)|  | (MkDocs / Markdown) |  |
+|   +--------------------------+  +---------------------+  +---------------------+  |
++-----------------------------------------------------------------------------------+
+</code></pre>
+
+<h3 id="schema-validation">1. Schema-First Declarative Prompt &amp; Workflow Specification</h3>
+<p><strong>Strict JSON Schema Contracts:</strong> All prompts (<code>.prompt.yaml</code>) and workflows (<code>.workflow.yaml</code>) adhere to formal Draft-07 JSON Schemas (<code>prompt.schema.json</code>, <code>workflow.schema.json</code>, <code>InputSchema.schema.json</code>, <code>ModelParameters.schema.json</code>).</p>
+
+<p><strong>Two-Pass Validation Engine:</strong> Validates raw structural definitions and rendered Jinja2 templates (<code>macros.j2</code>) against model parameter boundaries, variable requirements, and input types (<code>validation.py</code>, <code>test_two_pass_validation.py</code>).</p>
+
+<p><strong>Modular Macro Libraries:</strong> Centralizes common system instruction patterns, reasoning formats, and guardrail constraints into reusable template components.</p>
+
+<h3 id="workflow-engine">2. Directed Acyclic Graph (DAG) Workflow Orchestration</h3>
+<p><strong>Topological Execution &amp; Chaining:</strong> Orchestrates multi-step agentic pipelines where outputs from upstream prompts feed directly into downstream context inputs via explicit edges (<code>WorkflowEdge.schema.json</code>, <code>WorkflowStep.schema.json</code>).</p>
+
+<p><strong>Specialized Domain Workflows:</strong> Ships with pre-configured, production-tested pipelines for high-stakes domains, including clinical consensus arbitration, biological safety verification, regulatory gap analysis, and agentic coding (<code>workflows/clinical/</code>, <code>workflows/scientific/</code>, <code>workflows/technical/</code>).</p>
+
+<p><strong>Simulation Runner &amp; Mocking:</strong> Enables sandbox evaluation and dry-run execution of complex chains without invoking live LLM API calls (<code>simulation.py</code>, <code>pages/3_Simulation_Runner.py</code>).</p>
+
+<h3 id="mcp-tooling">3. Model Context Protocol (MCP) Integration</h3>
+<p><strong>Native Tool Server:</strong> Features an integrated Model Context Protocol server (<code>mcp_server.py</code>) exposing PromptOps capabilities and external tool endpoints to compliant clients.</p>
+
+<p><strong>Tool Schema Validation:</strong> Validates client-side tool calls, inputs, and schemas through dedicated tool definitions (<code>MCPTool.schema.json</code>, <code>ToolCall.schema.json</code>).</p>
+
+<h3 id="governance">4. Dual Developer Experience &amp; Cryptographic Governance</h3>
+<p><strong>CLI &amp; Streamlit Studio:</strong> Powered by Typer/Rich for CLI commands and Streamlit Studio for visual prompt composition, workflow editing, and Git synchronization.</p>
+
+<p><strong>Signed Audit Trails:</strong> Generates tamper-evident execution logs and compliance manifests (<code>compliance_manifest.json</code>, <code>test_signed_audit_trails.py</code>) for regulated environments (FDA, CDISC, GxP).</p>
+    `.trim(),
+  },
 ];
 
 async function main() {
@@ -797,9 +888,6 @@ async function main() {
   const seedMatches = scanFile(seedFile);
   const fallbackMatches = scanFile(fallbackFile);
 
-  // Filter out any connection strings in seed.ts that match the actual DB connection string template / process.env lines,
-  // but we want to fail on actual hardcoded secrets/connection strings.
-  // Note: scanFile checks line-by-line. If there's any actual hardcoded connection string or secret, it will fail.
   const allStaticMatches = [...seedMatches, ...fallbackMatches];
 
   if (allStaticMatches.length > 0) {

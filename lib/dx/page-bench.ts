@@ -38,6 +38,8 @@ export const CANONICAL_ROUTES: PageBenchmarkRoute[] = [
   { path: "/case-studies/ualbf", name: "CS: UALBF Engine", category: "case-study" },
   { path: "/case-studies/laser-loon", name: "CS: Laser Loon", category: "case-study" },
   { path: "/work/laser-loon", name: "CS: Laser Loon Work Route", category: "case-study" },
+  { path: "/case-studies/promptops", name: "CS: PromptOps Framework", category: "case-study" },
+  { path: "/projects/promptops", name: "CS: PromptOps Project Route", category: "case-study" },
 
   // Arcade Mini-Games
   { path: "/arcade/working-with-duck", name: "Game: Duck Canvas Engine", category: "arcade" },

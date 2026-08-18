@@ -114,6 +114,20 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     keywords: ["Laser Loon", "Graphic Design", "Vector Illustration", "Iconography", "Asset Distribution", "Minnesota State Flag", "Creative Commons"],
     ogType: "article",
   },
+  promptOps: {
+    title: "PromptOps Case Study | AI Prompt Engineering & Orchestration Framework",
+    description: "In-depth architecture study of PromptOps — a schema-driven LLMOps framework featuring declarative DAG workflows, MCP server tools, Jinja2 compilation, and signed audit trails.",
+    path: "/case-studies/promptops",
+    keywords: ["PromptOps", "LLMOps", "Prompt Engineering", "Model Context Protocol", "MCP", "JSON Schema", "DAG Workflows", "Streamlit Studio", "Pydantic", "Python"],
+    ogType: "article",
+  },
+  promptOpsProject: {
+    title: "PromptOps Project Showcase | AI Prompt Engineering & Workflow Orchestration",
+    description: "A schema-driven, enterprise-grade framework that applies DevOps and software engineering principles to prompt engineering, multi-agent LLM orchestration, and Model Context Protocol (MCP) tooling.",
+    path: "/projects/promptops",
+    keywords: ["PromptOps", "LLMOps", "Prompt Engineering", "Model Context Protocol", "MCP", "JSON Schema", "DAG Workflows", "Streamlit Studio", "Pydantic", "Python"],
+    ogType: "article",
+  },
 };
 
 /**

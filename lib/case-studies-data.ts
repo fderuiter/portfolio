@@ -116,6 +116,78 @@ export const IMEDNET_PLAYBACK_OBJ = [
   }
 ];
 
+export const PROMPTOPS_COMMANDS_OBJ = {
+  "promptops init": {
+    description: "Initialize a new PromptOps project workspace with schema contracts and macro library.",
+    payload: {
+      status: "SUCCESS",
+      workspace: "promptops-workspace",
+      filesCreated: [
+        "promptops.config.yaml",
+        "schemas/prompt.schema.json",
+        "schemas/workflow.schema.json",
+        "templates/macros.j2",
+        "workflows/clinical/consensus_arbitration.workflow.yaml"
+      ],
+      mcpServer: "configured (mcp_server.py)",
+      validation: "Draft-07 JSON Schema Enforced"
+    }
+  },
+  "promptops validate --all": {
+    description: "Execute 2-pass schema validation over Jinja2 macros, prompt specs, and DAG workflow graphs.",
+    payload: {
+      status: "PASSED",
+      pass1_structural: { status: "OK", validFiles: 14, schemaVersion: "Draft-07" },
+      pass2_template_macro: { status: "OK", renderedTemplates: 14, unresolvedVars: 0 },
+      dagCycleCheck: { status: "OK", cyclicEdgesDetected: 0, topologicalOrder: ["step_1_extract", "step_2_verify", "step_3_arbitrate"] },
+      auditHash: "sha256-a9f4c32b810e"
+    }
+  },
+  "promptops run --workflow workflows/clinical/consensus_arbitration.workflow.yaml": {
+    description: "Execute multi-agent DAG workflow pipeline with state propagation and tool dispatch.",
+    payload: {
+      executionId: "exec_20260814_0091",
+      workflow: "clinical_consensus_arbitration",
+      totalSteps: 3,
+      stepsExecuted: [
+        { step: "step_1_extract", status: "COMPLETED", durationMs: 142, toolCalls: ["ncbi_mesh_lookup"] },
+        { step: "step_2_verify", status: "COMPLETED", durationMs: 198, toolCalls: ["fda_orange_book"] },
+        { step: "step_3_arbitrate", status: "COMPLETED", durationMs: 215, outputSchemaValid: true }
+      ],
+      complianceManifest: "compliance_manifest.json (Signed RSA-PSS)"
+    }
+  },
+  "promptops mcp serve": {
+    description: "Launch integrated Model Context Protocol (MCP) server exposing tools and workflow endpoints.",
+    payload: {
+      serverStatus: "LISTENING",
+      protocol: "Model Context Protocol v1.0",
+      transport: "stdio/SSE",
+      registeredTools: ["promptops_validate", "promptops_run_dag", "ncbi_mesh_lookup", "fda_orange_book"],
+      auditLogging: "ACTIVE"
+    }
+  }
+};
+
+export const PROMPTOPS_PLAYBACK_OBJ = [
+  {
+    command: "promptops init",
+    description: "Initialize PromptOps project workspace and schemas."
+  },
+  {
+    command: "promptops validate --all",
+    description: "Run 2-pass schema validation and DAG cycle check."
+  },
+  {
+    command: "promptops run --workflow workflows/clinical/consensus_arbitration.workflow.yaml",
+    description: "Execute multi-agent clinical consensus workflow chain."
+  },
+  {
+    command: "promptops mcp serve",
+    description: "Start native Model Context Protocol (MCP) tool server."
+  }
+];
+
 const rawFallbackCaseStudies: CaseStudyData[] = [
   {
     id: "canonical-1",
@@ -642,6 +714,11 @@ where
 
 <h4>3. WASM-First GUI Architecture</h4>
 <p>Deploys identical single-binary desktop execution and zero-install WebAssembly browser builds using egui and custom <code>egui_plot</code> engines.</p>`,
+    created_at: new Date("2026-02-28T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-11",
     slug: "ualbf",
     title: "UALBF: Verified Computational Proof Engine & Search Architecture",
     primary_language: "Rust",
@@ -752,6 +829,10 @@ pub extern "C" fn ualbf_verify_certificate_manifest(
 }
 </code></pre>`,
     created_at: new Date("2026-03-01T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-12",
     slug: "sortify",
     title: "Sortify: Air-Gapped Document Classification & Resilient File Engine",
     primary_language: "Python",
@@ -796,7 +877,7 @@ def stage_and_commit_move(self, src: str, dest_dir: str) -> str:
     updated_at: new Date("2026-08-14T00:00:00Z"),
   },
   {
-    id: "canonical-7",
+    id: "canonical-13",
     slug: "laser-loon",
     title: "The Laser Loon: Vector Illustration, Cultural Branding & Open Asset Distribution",
     primary_language: "Graphic Design",
@@ -883,6 +964,80 @@ def stage_and_commit_move(self, src: str, dest_dir: str) -> str:
     created_at: new Date("2026-03-05T00:00:00Z"),
     updated_at: new Date("2026-08-14T00:00:00Z"),
   },
+  {
+    id: "canonical-14",
+    slug: "promptops",
+    title: "PromptOps: AI Prompt Engineering & Workflow Orchestration Framework",
+    primary_language: "Python",
+    github_url: "https://github.com/fderuiter/PromptOps",
+    published: true,
+    simulated_telemetry: true,
+    tags: "Python, LLMOps, Model Context Protocol, Streamlit, Pydantic, JSON Schema, Jinja2, DAG Workflows",
+    editorial_content: "A schema-driven, production-grade **prompt engineering framework** and multi-agent workflow orchestration engine. Brings standard software engineering rigor—including strict Draft-07 JSON Schema validation, version-controlled declarative DAGs, Jinja2 template compilation, Model Context Protocol (MCP) tooling, Streamlit Studio GUI, and signed cryptographic audit trails to generative AI workflows.",
+    architectural_narrative: `
+<h3 id="architecture">Project Overview &amp; Architecture</h3>
+<p>PromptOps is an open-source, production-grade prompt engineering framework and multi-agent workflow orchestration engine. It brings standard software engineering rigor—including schema validation, linting, continuous testing, signed audit trails, and version-controlled declarative DAGs—to generative AI workflows across scientific, clinical, technical, regulatory, and executive domains.</p>
+
+<pre><code class="language-text">
++-----------------------------------------------------------------------------------+
+|                                Developer Interfaces                              |
+|   +----------------------------------+   +------------------------------------+   |
+|   |         CLI &amp; Rich Console       |   |       Streamlit Studio GUI         |   |
+|   |  (init, validate, run, simulate, |   | (Prompt Editor, Workflow Canvas,   |   |
+|   |   sync, export, docgen, vibe)    |   |  Simulation Runner, Git Sync)      |   |
+|   +-----------------+----------------+   +-----------------+------------------+   |
++---------------------|--------------------------------------|----------------------+
+                      |                                      |
++---------------------v--------------------------------------v----------------------+
+|                               Core PromptOps Engine                               |
+|   +---------------------------+  +------------------------+  +-----------------+  |
+|   | Jinja2 Template Compiler  |  | 2-Pass Schema Validator|  | Execution Guard |  |
+|   | (macros.j2, variable sub) |  | (Draft-07 JSON Schema) |  | &amp; Sanitization  |  |
+|   +---------------------------+  +------------------------+  +-----------------+  |
+|   +----------------------------------------------------------------------------+  |
+|   |                    DAG Workflow Engine &amp; Step Dispatcher                   |  |
+|   |            (Topological Sort, State Propagation, Tool Resolution)          |  |
+|   +----------------------------------------------------------------------------+  |
++------------------------------------+----------------------------------------------+
+                                     |
++------------------------------------v----------------------------------------------+
+|                         Interoperability &amp; Governance                             |
+|   +--------------------------+  +---------------------+  +---------------------+  |
+|   | Model Context Protocol   |  | Signed Audit Trails |  | Automated DocGen    |  |
+|   | (MCP Server &amp; Tool Stubs)|  | &amp; Gap Reports (JSON)|  | (MkDocs / Markdown) |  |
+|   +--------------------------+  +---------------------+  +---------------------+  |
++-----------------------------------------------------------------------------------+
+</code></pre>
+
+<h3 id="schema-validation">1. Schema-First Declarative Prompt &amp; Workflow Specification</h3>
+<p><strong>Strict JSON Schema Contracts:</strong> All prompts (<code>.prompt.yaml</code>) and workflows (<code>.workflow.yaml</code>) adhere to formal Draft-07 JSON Schemas (<code>prompt.schema.json</code>, <code>workflow.schema.json</code>, <code>InputSchema.schema.json</code>, <code>ModelParameters.schema.json</code>).</p>
+
+<p><strong>Two-Pass Validation Engine:</strong> Validates raw structural definitions and rendered Jinja2 templates (<code>macros.j2</code>) against model parameter boundaries, variable requirements, and input types (<code>validation.py</code>, <code>test_two_pass_validation.py</code>).</p>
+
+<p><strong>Modular Macro Libraries:</strong> Centralizes common system instruction patterns, reasoning formats, and guardrail constraints into reusable template components.</p>
+
+<h3 id="workflow-engine">2. Directed Acyclic Graph (DAG) Workflow Orchestration</h3>
+<p><strong>Topological Execution &amp; Chaining:</strong> Orchestrates multi-step agentic pipelines where outputs from upstream prompts feed directly into downstream context inputs via explicit edges (<code>WorkflowEdge.schema.json</code>, <code>WorkflowStep.schema.json</code>).</p>
+
+<p><strong>Specialized Domain Workflows:</strong> Ships with pre-configured, production-tested pipelines for high-stakes domains, including clinical consensus arbitration, biological safety verification, regulatory gap analysis, and agentic coding (<code>workflows/clinical/</code>, <code>workflows/scientific/</code>, <code>workflows/technical/</code>).</p>
+
+<p><strong>Simulation Runner &amp; Mocking:</strong> Enables sandbox evaluation and dry-run execution of complex chains without invoking live LLM API calls (<code>simulation.py</code>, <code>pages/3_Simulation_Runner.py</code>).</p>
+
+<h3 id="mcp-tooling">3. Model Context Protocol (MCP) Integration</h3>
+<p><strong>Native Tool Server:</strong> Features an integrated Model Context Protocol server (<code>mcp_server.py</code>) exposing PromptOps capabilities and external tool endpoints to compliant clients.</p>
+
+<p><strong>Tool Schema Validation:</strong> Validates client-side tool calls, inputs, and schemas through dedicated tool definitions (<code>MCPTool.schema.json</code>, <code>ToolCall.schema.json</code>).</p>
+
+<h3 id="governance">4. Dual Developer Experience &amp; Cryptographic Governance</h3>
+<p><strong>CLI &amp; Streamlit Studio:</strong> Powered by Typer/Rich for CLI commands and Streamlit Studio for visual prompt composition, workflow editing, and Git synchronization.</p>
+
+<p><strong>Signed Audit Trails:</strong> Generates tamper-evident execution logs and compliance manifests (<code>compliance_manifest.json</code>, <code>test_signed_audit_trails.py</code>) for regulated environments (FDA, CDISC, GxP).</p>
+`,
+    commands_json: JSON.stringify(PROMPTOPS_COMMANDS_OBJ),
+    playback_json: JSON.stringify(PROMPTOPS_PLAYBACK_OBJ),
+    created_at: new Date("2026-03-10T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
 ];
 
 export const FALLBACK_CASE_STUDIES: CaseStudyData[] = rawFallbackCaseStudies.map((cs) => ({
@@ -890,4 +1045,3 @@ export const FALLBACK_CASE_STUDIES: CaseStudyData[] = rawFallbackCaseStudies.map
   editorial_content: compileTerms(cs.editorial_content),
   architectural_narrative: compileTerms(cs.architectural_narrative),
 }));
-

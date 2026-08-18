@@ -4,7 +4,16 @@
  */
 
 export * from "../export-sas";
-export * from "../export-r";
+export {
+  exportFormToR,
+  exportStudyToR,
+  generateRCodelists,
+  generateRDataStepForForm,
+  sanitizeRName,
+  escapeRString,
+  getExpandedRFields,
+  type ExpandedRField
+} from "../export-r";
 export * from "../export-acrf";
 export * from "../export-docx";
 export * from "../export-pdf";

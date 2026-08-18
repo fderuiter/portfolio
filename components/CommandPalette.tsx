@@ -174,6 +174,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         ]
       },
       {
+        id: "nav-promptops",
+        title: "PromptOps: AI Prompt Engineering & Workflow Orchestration",
+        subtitle: "Schema-driven prompt engineering, DAG execution engine, MCP tooling & signed audit trails",
+        category: "navigation",
+        url: "/projects/promptops",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Case Study",
+        status: "Python / LLMOps",
+        description: "Enterprise prompt engineering framework applying software engineering rigor, JSON schema validation, DAG multi-agent orchestration, and MCP server tooling.",
+        techStack: ["Python", "LLMOps", "Model Context Protocol", "Streamlit", "Pydantic", "JSON Schema"],
+        highlights: [
+          "Draft-07 JSON Schema 2-pass validation engine",
+          "Declarative DAG workflow topological sort engine",
+          "Integrated Model Context Protocol (MCP) server"
+        ]
+      },
+      {
         id: "nav-oxidizemath",
         title: "OxidizeMath: Verified Numerical Framework in Rust",
         subtitle: "Deep-dive technical case study — proc-macro verification, double-buffer PDEs & egui WASM",

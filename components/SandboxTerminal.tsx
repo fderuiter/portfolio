@@ -154,11 +154,19 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
   const { announce } = useAnnouncer();
   const { playKeystroke, playAutocomplete, playSuccess } = useAudio();
   const [input, setInput] = useState("");
+
+  const isPromptOps = slug === "promptops";
+  const shellPromptText = isPromptOps ? "promptops $" : "imednet-sdk $";
+  const bannerTitleText = isPromptOps ? "PROMPTOPS // INTERACTIVE CLI SHELL" : "IMEDNET-PYTHON-SDK // INTERACTIVE CLI SHELL";
+  const initInfoText = isPromptOps
+    ? "PromptOps LLMOps Framework CLI Sandbox [Version 1.0.0]\nType 'help' to list available commands. Click the badges below for instant inputs."
+    : "iMednet Python SDK CLI Sandbox [Version 2.3.1]\nType 'help' to list available commands. Click the badges below for instant inputs.";
+
   const [logs, setLogs] = useState<LogItem[]>([
     {
       id: "init",
       type: "info",
-      text: "iMednet Python SDK CLI Sandbox [Version 2.3.1]\nType 'help' to list available commands. Click the badges below for instant inputs.",
+      text: initInfoText,
     },
   ]);
   const [commandHistory, setCommandHistory] = usePersistentState<string[]>("sandbox_terminal_history", []);
@@ -555,7 +563,7 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
           {
             id: "init",
             type: "info",
-            text: "iMednet Python SDK CLI Sandbox [Version 2.3.1]\nType 'help' to list available commands. Click the badges below for instant inputs.",
+            text: initInfoText,
           },
         ]);
         setCurrentStepIndex(0);
@@ -615,7 +623,7 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
       {
         id: "init",
         type: "info",
-        text: "iMednet Python SDK CLI Sandbox [Version 2.3.1]\nType 'help' to list available commands. Click the badges below for instant inputs.",
+        text: initInfoText,
       },
     ];
 
@@ -667,7 +675,7 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
       {
         id: "init",
         type: "info",
-        text: "iMednet Python SDK CLI Sandbox [Version 2.3.1]\nType 'help' to list available commands. Click the badges below for instant inputs.",
+        text: initInfoText,
       },
     ]);
   };
@@ -676,9 +684,9 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Strict constraint check: Only enable this on the active case study bento page
+    // Strict constraint check: Only enable this on the active case study page
     const targetSlug = slug || "imednet-python-sdk";
-    if (!window.location.pathname.includes(`/case-studies/${targetSlug}`)) {
+    if (!window.location.pathname.includes(`/case-studies/${targetSlug}`) && !window.location.pathname.includes(`/projects/${targetSlug}`)) {
       return;
     }
 
@@ -693,11 +701,7 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
       help: () => {
         console.log(
           "Supported API commands:\n" +
-          "  imednet.run('imednet studies list')\n" +
-          "  imednet.run('imednet subjects get --id 123')\n" +
-          "  imednet.run('imednet records search --study BRIGHT-01')\n" +
-          "  imednet.run('help')\n" +
-          "  imednet.run('clear')"
+          Object.keys(activeRegistry).map((c) => `  terminal.run('${c}')`).join("\n")
         );
       }
     };
@@ -705,32 +709,12 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
     window.terminal = terminalApi;
     window.imednet = terminalApi;
 
-    // Interactive custom styled greeting in console
-    console.log(
-      `%c╔══════════════════════════════════════════════════════════════════════════╗\n` +
-      `║               iMednet SDK Developer Console Sandbox                      ║\n` +
-      `╚══════════════════════════════════════════════════════════════════════════╝\n` +
-      `Welcome, developer! You've unlocked the interactive CLI simulator console API.\n` +
-      `Try programmatically controlling the on-page terminal bento-card from here!\n\n` +
-      `Run this function to query the simulated SDK API directly:\n` +
-      `  %cimednet.run("imednet studies list")%c\n\n` +
-      `Supported Commands:\n` +
-      `  • imednet.run("imednet studies list")\n` +
-      `  • imednet.run("imednet subjects get --id 123")\n` +
-      `  • imednet.run("imednet records search --study BRIGHT-01")\n` +
-      `  • imednet.run("help")\n` +
-      `  • imednet.run("clear")`,
-      "color: #06b6d4; font-weight: bold;",
-      "color: #10b981; font-weight: bold; background: #18181b; padding: 2px 4px; border-radius: 4px;",
-      "color: inherit;"
-    );
-
     return () => {
       // Clean up global namespace completely on unmount (prevent leakage to other pages)
       delete window.terminal;
       delete window.imednet;
     };
-  }, [slug]);
+  }, [slug, activeRegistry]);
 
   // Handle incoming terminal:run custom events
   useEffect(() => {
@@ -973,7 +957,7 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
             <IconCircle className="w-3 h-3 fill-yellow-500/80 stroke-none" />
             <IconCircle className="w-3 h-3 fill-green-500/80 stroke-none" />
             <span className="text-[10px] font-mono font-bold text-zinc-500 tracking-wider ml-2 uppercase">
-              imednet-python-sdk // interactive CLI shell
+              {bannerTitleText}
             </span>
           </div>
           <IconTerminal className="w-4 h-4 text-zinc-600" />
@@ -991,7 +975,7 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
               {log.type === "command" && (
                 <div className="flex items-center gap-2 text-zinc-400 font-bold select-none">
                   <span className="text-zinc-600 font-bold">~</span>
-                  <span className="text-zinc-400 font-bold">imednet-sdk $</span>
+                  <span className="text-zinc-400 font-bold">{shellPromptText}</span>
                   <span className="text-zinc-100 font-bold select-text">{log.text}</span>
                 </div>
               )}
@@ -1029,7 +1013,7 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
         {/* Live Input Field Prompt */}
         <div className="border-t border-zinc-900/60 bg-zinc-950/60 px-5 py-3.5 flex items-center gap-2">
           <span className="text-zinc-600 font-bold font-mono text-[11px] select-none">~</span>
-          <span className="text-zinc-400 font-bold font-mono text-[11px] select-none">imednet-sdk $</span>
+          <span className="text-zinc-400 font-bold font-mono text-[11px] select-none">{shellPromptText}</span>
           <input
             ref={inputRef}
             type="text"
@@ -1037,7 +1021,7 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={isExecuting || isTyping}
-            placeholder="Type 'help' or execute dynamic clinical queries..."
+            placeholder="Type 'help' or execute dynamic queries..."
             className="flex-1 bg-transparent border-none outline-none font-mono text-[11px] text-zinc-100 placeholder-zinc-700 caret-brand-cyan select-text"
             autoCapitalize="off"
             autoComplete="off"

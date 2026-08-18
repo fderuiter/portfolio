@@ -54,7 +54,10 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
     return false;
   });
 
+  const isIntersectingRef = useRef(true);
+
   // Native IntersectionObserver to defer external model fetches until within 200px of viewport
+  // and pause rendering loops when scrolled offscreen
   useEffect(() => {
     const container = containerRef.current;
     if (!container || typeof IntersectionObserver === "undefined") return;
@@ -65,9 +68,10 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
           if (entry.isIntersecting) {
             setIsNearViewport(true);
           }
+          isIntersectingRef.current = entry.isIntersecting;
         });
       },
-      { rootMargin: "200px" }
+      { rootMargin: "200px", threshold: 0.0 }
     );
 
     observer.observe(container);
@@ -93,29 +97,6 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
   const dragStartRef = useRef({ x: 0, y: 0 });
   const prevMouseRef = useRef({ x: 0, y: 0 });
   const rotationRef = useRef({ x: 0.2, y: -0.4 });
-
-  // IntersectionObserver Guard to pause rendering loops when scrolled offscreen
-  const isIntersectingRef = useRef(true);
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container || typeof IntersectionObserver === "undefined") return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (entry) {
-          isIntersectingRef.current = entry.isIntersecting;
-        }
-      },
-      { threshold: 0.0, rootMargin: "50px" }
-    );
-
-    observer.observe(container);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
 
   // Frame Throttling Refs for 3D Mesh Hover Raycasting
   const hoverRafIdRef = useRef<number | null>(null);
