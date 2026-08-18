@@ -34,6 +34,27 @@ Callback triggered when Escape key is pressed.
 
 ***
 
+### onKeyDown?
+
+> `optional` **onKeyDown?**: (`event`) => `void`
+
+Defined in: [hooks/useFocusTrap.ts:23](https://github.com/fderuiter/portfolio/blob/main/hooks/useFocusTrap.ts#L23)
+
+Custom keydown handler to process shortcuts (e.g., Arrow keys, letter hotkeys)
+while the trap is active before or along with standard trap behavior.
+
+#### Parameters
+
+##### event
+
+`KeyboardEvent`
+
+#### Returns
+
+`void`
+
+***
+
 ### returnFocus?
 
 > `optional` **returnFocus?**: `boolean`

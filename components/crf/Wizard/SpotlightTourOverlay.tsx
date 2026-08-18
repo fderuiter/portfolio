@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import {
   IconX,
   IconChevronRight,
@@ -84,21 +85,21 @@ export const SpotlightTourOverlay: React.FC<SpotlightTourOverlayProps> = ({
 }) => {
   const [currentStepIdx, setCurrentStepIdx] = useState<number>(0);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen) return;
-      if (e.key === "Escape") {
-        onClose();
-      } else if (e.key === "ArrowRight") {
-        setCurrentStepIdx((prev) => Math.min(prev + 1, TOUR_STEPS.length - 1));
-      } else if (e.key === "ArrowLeft") {
-        setCurrentStepIdx((prev) => Math.max(prev - 1, 0));
-      }
-    };
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === "ArrowRight") {
+      e.preventDefault();
+      setCurrentStepIdx((prev) => Math.min(prev + 1, TOUR_STEPS.length - 1));
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      setCurrentStepIdx((prev) => Math.max(prev - 1, 0));
+    }
+  }, []);
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  const containerRef = useFocusTrap<HTMLDivElement>(isOpen, {
+    onEscape: onClose,
+    onKeyDown: handleKeyDown,
+    returnFocus: true,
+  });
 
   if (!isOpen) return null;
 
@@ -119,7 +120,7 @@ export const SpotlightTourOverlay: React.FC<SpotlightTourOverlayProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 pointer-events-auto flex items-end justify-center sm:items-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+    <div ref={containerRef} className="fixed inset-0 z-50 pointer-events-auto flex items-end justify-center sm:items-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
       <div
         className="w-full max-w-lg bg-zinc-950 border border-brand-cyan/40 rounded-3xl shadow-2xl overflow-hidden ring-1 ring-brand-cyan/30 animate-scale-in"
         role="dialog"

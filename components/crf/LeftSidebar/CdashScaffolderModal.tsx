@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { IconDatabase, IconPlus, IconX, IconCheck } from "@tabler/icons-react";
 import { scaffoldCdashDomain } from "@/lib/crf/cdisc-cdash-library";
 import { CRFForm } from "@/lib/crf/types";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface CdashScaffolderModalProps {
   isOpen: boolean;
@@ -141,6 +142,11 @@ export const CdashScaffolderModal: React.FC<CdashScaffolderModalProps> = ({
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<DomainCategory>("all");
 
+  const containerRef = useFocusTrap<HTMLDivElement>(isOpen, {
+    onEscape: onClose,
+    returnFocus: true,
+  });
+
   if (!isOpen) return null;
 
   const filteredDomains =
@@ -149,7 +155,7 @@ export const CdashScaffolderModal: React.FC<CdashScaffolderModalProps> = ({
       : AVAILABLE_DOMAINS.filter((d) => d.category === selectedCategory);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div ref={containerRef} role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
       <div className="bg-zinc-900 border border-zinc-700/80 rounded-2xl w-full max-w-3xl max-h-[88vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-950/60">

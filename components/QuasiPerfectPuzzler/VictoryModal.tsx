@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { LevelScore, PuzzlerLevelDef } from "@/lib/quasi-perfect/types";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { IconCheck, IconCopy, IconSparkles } from "@tabler/icons-react";
 
 interface VictoryModalProps {
@@ -28,6 +29,10 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
   const isSorry = score.usedSorry;
   const [copied, setCopied] = useState<boolean>(false);
 
+  const modalRef = useFocusTrap<HTMLDivElement>(true, {
+    returnFocus: true,
+  });
+
   const handleCopyLean = async () => {
     if (!leanCode) return;
     try {
@@ -41,6 +46,9 @@ export const VictoryModal: React.FC<VictoryModalProps> = ({
 
   return (
     <motion.div
+      ref={modalRef}
+      role="dialog"
+      aria-modal="true"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}

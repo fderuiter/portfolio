@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useCallback } from "react";
 import { GameMode, PuzzlerLevelDef } from "@/lib/quasi-perfect/types";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import {
   IconSparkles,
   IconBook,
@@ -26,18 +27,21 @@ export const TheoryBriefingModal: React.FC<TheoryBriefingModalProps> = ({
   onClose,
   onToggleMode,
 }) => {
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" || e.key === "b" || e.key === "B") {
-        if (isOpen) {
-          e.preventDefault();
-          onClose();
-        }
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "b" || e.key === "B") {
+        e.preventDefault();
+        onClose();
       }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+    },
+    [onClose]
+  );
+
+  const containerRef = useFocusTrap<HTMLDivElement>(isOpen, {
+    onEscape: onClose,
+    onKeyDown: handleKeyDown,
+    returnFocus: true,
+  });
 
   if (!isOpen) return null;
 
@@ -45,6 +49,7 @@ export const TheoryBriefingModal: React.FC<TheoryBriefingModalProps> = ({
 
   return (
     <div
+      ref={containerRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="briefing-title"

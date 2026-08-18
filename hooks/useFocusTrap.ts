@@ -16,6 +16,11 @@ export interface UseFocusTrapOptions {
    * Defaults to true.
    */
   returnFocus?: boolean;
+  /**
+   * Custom keydown handler to process shortcuts (e.g., Arrow keys, letter hotkeys)
+   * while the trap is active before or along with standard trap behavior.
+   */
+  onKeyDown?: (event: KeyboardEvent) => void;
 }
 
 const FOCUSABLE_SELECTOR = [
@@ -45,17 +50,33 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(
 ): React.RefObject<T | null> {
   const containerRef = useRef<T | null>(null);
   const previousActiveElementRef = useRef<HTMLElement | null>(null);
-  const { initialFocusRef, onEscape, returnFocus = true } = options;
+  const { initialFocusRef, onEscape, returnFocus = true, onKeyDown } = options;
+
+  const onEscapeRef = useRef(onEscape);
+  const onKeyDownRef = useRef(onKeyDown);
+
+  useEffect(() => {
+    onEscapeRef.current = onEscape;
+    onKeyDownRef.current = onKeyDown;
+  }, [onEscape, onKeyDown]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (!active || !containerRef.current) return;
 
-      if (event.key === "Escape" && onEscape) {
+      if (event.key === "Escape" && onEscapeRef.current) {
         event.preventDefault();
         event.stopPropagation();
-        onEscape();
+        onEscapeRef.current();
         return;
+      }
+
+      if (onKeyDownRef.current) {
+        onKeyDownRef.current(event);
+        if (event.defaultPrevented) {
+          event.stopPropagation();
+          return;
+        }
       }
 
       if (event.key !== "Tab") return;
@@ -93,7 +114,7 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(
         }
       }
     },
-    [active, onEscape]
+    [active]
   );
 
   useEffect(() => {
@@ -116,11 +137,15 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(
       }
     }, 50);
 
-    document.addEventListener("keydown", handleKeyDown);
+    if (typeof window !== "undefined") {
+      window.addEventListener("keydown", handleKeyDown);
+    }
 
     return () => {
       clearTimeout(timer);
-      document.removeEventListener("keydown", handleKeyDown);
+      if (typeof window !== "undefined") {
+        window.removeEventListener("keydown", handleKeyDown);
+      }
       if (returnFocus && previousActiveElementRef.current) {
         const target = previousActiveElementRef.current;
         setTimeout(() => {

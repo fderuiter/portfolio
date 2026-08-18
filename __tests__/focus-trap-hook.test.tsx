@@ -136,4 +136,42 @@ describe("useFocusTrap Hook & Accessibility Keyboard Boundary", () => {
 
     expect(document.activeElement).toBe(lastBtn);
   });
+
+  it("executes custom onKeyDown handler when key is pressed", async () => {
+    const handleKeyDown = vi.fn((e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+      }
+    });
+
+    function CustomModal({ isOpen }: { isOpen: boolean }) {
+      const trapRef = useFocusTrap<HTMLDivElement>(isOpen, {
+        onKeyDown: handleKeyDown,
+      });
+
+      if (!isOpen) return null;
+
+      return (
+        <div ref={trapRef} role="dialog">
+          <button id="btn-1">Button 1</button>
+        </div>
+      );
+    }
+
+    render(<CustomModal isOpen={true} />);
+    act(() => {
+      vi.advanceTimersByTime(60);
+    });
+
+    act(() => {
+      const arrowEvent = new KeyboardEvent("keydown", {
+        key: "ArrowRight",
+        bubbles: true,
+        cancelable: true,
+      });
+      document.dispatchEvent(arrowEvent);
+    });
+
+    expect(handleKeyDown).toHaveBeenCalledTimes(1);
+  });
 });

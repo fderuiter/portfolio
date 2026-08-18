@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useSearch } from "@/components/providers/SearchProvider";
 import { usePersona } from "@/components/providers/PersonaProvider";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import {
   IconVolume,
   IconVolumeOff,
@@ -144,7 +145,6 @@ export const Navbar: React.FC = () => {
     }
   }, [pathname]);
 
-  const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const navContainerRef = useRef<HTMLDivElement>(null);
 
@@ -215,63 +215,42 @@ export const Navbar: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // 4. Accessibility: Keyboard focus trapping and Esc key listener
+  const mobileMenuTrapRef = useFocusTrap<HTMLDivElement>(isOpen, {
+    onEscape: () => {
+      setIsOpen(false);
+      triggerRef.current?.focus();
+    },
+    returnFocus: true,
+  });
+
+  // Body scroll locking when mobile menu is open
   useEffect(() => {
-    if (!isOpen && !activeDropdown && !showAudioPanel) return;
+    if (!isOpen) return;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  // Accessibility: Esc key listener for dropdowns and audio panel
+  useEffect(() => {
+    if (!activeDropdown && !showAudioPanel) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         if (showAudioPanel) {
           setShowAudioPanel(false);
-          return;
-        }
-        if (activeDropdown) {
+        } else if (activeDropdown) {
           setActiveDropdown(null);
-          return;
-        }
-        if (isOpen) {
-          setIsOpen(false);
-          triggerRef.current?.focus();
-          return;
-        }
-      }
-
-      if (isOpen && e.key === "Tab") {
-        if (!menuRef.current) return;
-        const focusableElements = menuRef.current.querySelectorAll(
-          'a[href], button:not([disabled]), input:not([disabled])'
-        );
-        const elements = Array.from(focusableElements) as HTMLElement[];
-        if (elements.length === 0) return;
-
-        const firstElement = elements[0];
-        const lastElement = elements[elements.length - 1];
-
-        if (e.shiftKey) {
-          if (document.activeElement === firstElement) {
-            lastElement.focus();
-            e.preventDefault();
-          }
-        } else {
-          if (document.activeElement === lastElement) {
-            firstElement.focus();
-            e.preventDefault();
-          }
         }
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
-
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    }
-
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
     };
-  }, [isOpen, activeDropdown, showAudioPanel]);
+  }, [activeDropdown, showAudioPanel]);
 
   // Handle smooth scroll clicks on homepage and universal mobile drawer dismissal
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -756,7 +735,7 @@ export const Navbar: React.FC = () => {
       <AnimatePresence>
         {isOpen && (
           <div
-            ref={menuRef}
+            ref={mobileMenuTrapRef}
             id="mobile-navigation"
             role="dialog"
             aria-modal="true"
