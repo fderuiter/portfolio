@@ -124,6 +124,15 @@ body {
   outline-color: #b45309;
 }
 
+/* Fallback Terminology Styling (Pre-Hydration) */
+[data-term],
+[data-definition],
+[data-key] {
+  cursor: help;
+  border-bottom: 1px dashed var(--muted, #71717a);
+  text-decoration: none;
+}
+
 /* High-Assurance Architectural & Editorial Utilities */
 .border-hairline {
   border: 1px solid var(--border);
