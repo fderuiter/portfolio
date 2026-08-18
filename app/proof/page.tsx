@@ -2,10 +2,14 @@
 
 import React, { useSyncExternalStore } from "react";
 import dynamic from "next/dynamic";
+import { env } from "@/lib/env";
 import { ProofWorkspaceSkeleton } from "./ProofWorkspaceSkeleton";
 
-// Statically import only for the unit tests, to bypass dynamic routing asynchronous behavior in jsdom
-import { ProofWorkspaceClient as StaticProofWorkspaceClient } from "./ProofWorkspaceClient";
+let TestProofWorkspaceClient: React.ComponentType | null = null;
+if (env.NODE_ENV === "test") {
+  // Top-level await import ensures synchronous availability during Vitest module loading while staying isolated from production static imports
+  TestProofWorkspaceClient = (await import("./ProofWorkspaceClient")).ProofWorkspaceClient;
+}
 
 const DynamicProofWorkspaceClient = dynamic(
   () => import("./ProofWorkspaceClient").then((mod) => mod.ProofWorkspaceClient),
@@ -15,16 +19,14 @@ const DynamicProofWorkspaceClient = dynamic(
   }
 );
 
-import { env } from "@/lib/env";
-
 const emptySubscribe = () => () => {};
 
 export default function ProofWorkspacePage() {
-  // min-h-dvh clearance padding satisfy doctor check
   const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
 
-  if (env.NODE_ENV === "test") {
-    return <StaticProofWorkspaceClient />;
+  if (env.NODE_ENV === "test" && TestProofWorkspaceClient) {
+    const Component = TestProofWorkspaceClient;
+    return <Component />;
   }
 
   if (!isMounted) {
