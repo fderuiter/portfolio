@@ -28,11 +28,9 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   );
 
   React.useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).__openSearch = () => setIsOpen(true);
+    window.__openSearch = () => setIsOpen(true);
     return () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      delete (window as any).__openSearch;
+      delete window.__openSearch;
     };
   }, []);
 

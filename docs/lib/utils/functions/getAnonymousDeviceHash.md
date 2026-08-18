@@ -8,16 +8,16 @@
 
 > **getAnonymousDeviceHash**(`reqOrHeaders?`, `includeUserAgent?`): `string`
 
-Defined in: [lib/utils.ts:179](https://github.com/fderuiter/portfolio/blob/main/lib/utils.ts#L179)
+Defined in: [lib/utils.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/utils.ts#L77)
 
 Computes an anonymous device hash incorporating trimmed proxy IP and optional User-Agent.
-Standardizes client identification across telemetry and feedback endpoints.
+Utility alias wrapper forwarding callers to standard privacy service hashing primitives.
 
 ## Parameters
 
 ### reqOrHeaders?
 
-[`RequestOrHeaders`](../type-aliases/RequestOrHeaders.md)
+[`RequestOrHeaders`](../../services/privacy-service/type-aliases/RequestOrHeaders.md)
 
 ### includeUserAgent?
 

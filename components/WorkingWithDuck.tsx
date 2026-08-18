@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useSyncExternalStore, useCallback } from "react";
 import Link from "next/link";
+import { clamp } from "@/lib/game-utils";
 import Image from "next/image";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
@@ -2169,9 +2170,11 @@ export const WorkingWithDuck: React.FC = () => {
             className="w-full bg-zinc-950 rounded-full h-2 sm:h-2.5 overflow-hidden border border-zinc-800"
           >
             <div
-              className="h-full bg-gradient-to-r from-cyan-500 to-teal-400 transition-all duration-150"
+              className="h-full w-full bg-gradient-to-r from-cyan-500 to-teal-400 origin-left transform-gpu"
               style={{
-                width: `${Math.min(100, (uiState.workProgress / uiState.targetWorkProgress) * 100)}%`,
+                transform: `scaleX(${Math.min(1, uiState.workProgress / uiState.targetWorkProgress)})`,
+                transformOrigin: "left",
+                willChange: "transform",
               }}
             />
           </div>
@@ -2205,12 +2208,16 @@ export const WorkingWithDuck: React.FC = () => {
             className="w-full bg-zinc-950 rounded-full h-2 sm:h-2.5 overflow-hidden border border-zinc-800"
           >
             <div
-              className={`h-full transition-all duration-150 ${
+              className={`h-full w-full origin-left transform-gpu ${
                 uiState.excitement > 80
                   ? "bg-gradient-to-r from-amber-500 to-rose-500"
                   : "bg-gradient-to-r from-sky-400 to-amber-400"
               }`}
-              style={{ width: `${uiState.excitement}%` }}
+              style={{
+                transform: `scaleX(${clamp(uiState.excitement / 100, 0, 1)})`,
+                transformOrigin: "left",
+                willChange: "transform",
+              }}
             />
           </div>
           <div className="flex justify-between items-center mt-1 text-[9px] sm:text-[10px] font-mono text-zinc-500">
@@ -2241,12 +2248,16 @@ export const WorkingWithDuck: React.FC = () => {
             className="w-full bg-zinc-950 rounded-full h-2 sm:h-2.5 overflow-hidden border border-zinc-800"
           >
             <div
-              className={`h-full transition-all duration-150 ${
+              className={`h-full w-full origin-left transform-gpu ${
                 uiState.bladder > 85
                   ? "bg-rose-500 animate-pulse"
                   : "bg-gradient-to-r from-cyan-400 to-sky-500"
               }`}
-              style={{ width: `${uiState.bladder}%` }}
+              style={{
+                transform: `scaleX(${clamp(uiState.bladder / 100, 0, 1)})`,
+                transformOrigin: "left",
+                willChange: "transform",
+              }}
             />
           </div>
           <div className="flex justify-between items-center mt-1 text-[9px] sm:text-[10px] font-mono text-zinc-500">
@@ -2272,10 +2283,11 @@ export const WorkingWithDuck: React.FC = () => {
             className="w-full bg-zinc-950 rounded-full h-2 sm:h-2.5 overflow-hidden border border-zinc-800 relative"
           >
             <div
-              className="h-full bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-400 transition-all duration-200"
+              className="h-full w-full bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-400 origin-left transform-gpu"
               style={{
-                width: "100%",
-                clipPath: `inset(0 ${Math.max(0, 100 - (uiState.naughtyVsGood + 100) / 2)}% 0 0)`,
+                transform: `scaleX(${clamp((uiState.naughtyVsGood + 100) / 200, 0, 1)})`,
+                transformOrigin: "left",
+                willChange: "transform",
               }}
             />
             {/* Center line */}

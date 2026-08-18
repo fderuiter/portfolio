@@ -32,10 +32,15 @@ vi.mock("@/lib/db", async (importOriginal) => {
   };
 });
 
-const mockLpush = vi.fn();
-const mockExpire = vi.fn();
-const mockExec = vi.fn();
-const mockRpop = vi.fn();
+const { mockLpush, mockExpire, mockExec, mockRpop, mockLmove, mockLrange, mockDel } = vi.hoisted(() => ({
+  mockLpush: vi.fn(),
+  mockExpire: vi.fn(),
+  mockExec: vi.fn(),
+  mockRpop: vi.fn(),
+  mockLmove: vi.fn(),
+  mockLrange: vi.fn().mockResolvedValue([]),
+  mockDel: vi.fn(),
+}));
 
 vi.mock("@upstash/redis", () => {
   class MockRedis {
@@ -45,8 +50,11 @@ vi.mock("@upstash/redis", () => {
         expire: mockExpire,
         exec: mockExec,
         rpop: mockRpop,
+        lmove: mockLmove,
       };
     }
+    lrange = mockLrange;
+    del = mockDel;
   }
   return { Redis: MockRedis };
 });

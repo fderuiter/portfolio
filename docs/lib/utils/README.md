@@ -10,10 +10,6 @@
 
 - [EscapeXmlOptions](interfaces/EscapeXmlOptions.md)
 
-## Type Aliases
-
-- [RequestOrHeaders](type-aliases/RequestOrHeaders.md)
-
 ## Variables
 
 - [generateRandomId](variables/generateRandomId.md)
@@ -30,3 +26,9 @@
 - [getClientIp](functions/getClientIp.md)
 - [hexToRgba](functions/hexToRgba.md)
 - [isValidIsoDate](functions/isValidIsoDate.md)
+
+## References
+
+### RequestOrHeaders
+
+Re-exports [RequestOrHeaders](../services/privacy-service/type-aliases/RequestOrHeaders.md)

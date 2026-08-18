@@ -15,6 +15,9 @@ const nextConfig: NextConfig = {
       exclude: ["error", "warn"],
     },
   },
+  experimental: {
+    optimizePackageImports: ["@tabler/icons-react"],
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [360, 414, 640, 750, 828, 1080, 1200, 1920],
@@ -24,7 +27,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/:all*(svg|jpg|png|webp|avif|glb|obj|ico|txt)",
+        source: "/:all*(svg|jpg|png|webp|avif|glb|obj|ico|txt|woff|woff2|ttf|eot|otf)",
         headers: [
           {
             key: "Cache-Control",

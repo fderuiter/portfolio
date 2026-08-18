@@ -7,7 +7,24 @@ import { runPageBenchmarks, CANONICAL_ROUTES } from "@/lib/dx/page-bench";
 
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
+vi.mock("next/font/google", () => ({
+  Inter: () => ({ variable: "--font-inter" }),
+  Geist_Mono: () => ({ variable: "--font-geist-mono" }),
+}));
+
 // Mock audio provider functions
+const mockPreconnect = vi.fn();
+const mockPreload = vi.fn();
+
+vi.mock("react-dom", async () => {
+  const actual = await vi.importActual<typeof import("react-dom")>("react-dom");
+  return {
+    ...actual,
+    preconnect: (...args: unknown[]) => mockPreconnect(...args),
+    preload: (...args: unknown[]) => mockPreload(...args),
+  };
+});
+
 vi.mock("@/components/providers/AudioProvider", () => ({
   useAudio: () => ({
     playHover: vi.fn(),
@@ -17,6 +34,7 @@ vi.mock("@/components/providers/AudioProvider", () => ({
     volume: 0.3,
     muted: false,
   }),
+  AudioProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 // Mock Next.js router
@@ -39,6 +57,7 @@ vi.mock("@/components/providers/SearchProvider", () => ({
     setIsOpen: mockSetIsOpen,
     closeSearch: mockCloseSearch,
   }),
+  SearchProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 describe("Mobile Performance & Asset Optimization Suite", () => {
@@ -73,6 +92,11 @@ describe("Mobile Performance & Asset Optimization Suite", () => {
 
         const staticHeader = headers.find((h: { source: string }) => h.source.includes("glb") || h.source.includes("svg"));
         expect(staticHeader).toBeDefined();
+        expect(staticHeader?.source).toContain("woff");
+        expect(staticHeader?.source).toContain("woff2");
+        expect(staticHeader?.source).toContain("ttf");
+        expect(staticHeader?.source).toContain("eot");
+        expect(staticHeader?.source).toContain("otf");
         expect(staticHeader?.headers[0]?.value).toContain("immutable");
 
         const modelsHeader = headers.find((h: { source: string }) => h.source === "/models/:path*");
@@ -88,6 +112,19 @@ describe("Mobile Performance & Asset Optimization Suite", () => {
         expect(nextConfig.images.formats).toEqual(["image/avif", "image/webp"]);
         expect(nextConfig.images.minimumCacheTTL).toBe(31536000);
       }
+    });
+
+    it("issues preconnect for font origins and preload for primary 3D assets in RootLayout", async () => {
+      const RootLayoutModule = await import("../app/layout");
+      const RootLayout = RootLayoutModule.default;
+
+      RootLayout({ children: <div /> });
+
+      expect(mockPreconnect).toHaveBeenCalledWith("https://fonts.googleapis.com");
+      expect(mockPreconnect).toHaveBeenCalledWith("https://fonts.gstatic.com", { crossOrigin: "anonymous" });
+
+      expect(mockPreload).toHaveBeenCalledWith("/models/brain-surface.glb", { as: "fetch", crossOrigin: "anonymous" });
+      expect(mockPreload).toHaveBeenCalledWith("/models/brain.obj", { as: "fetch" });
     });
   });
 

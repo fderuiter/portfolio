@@ -1,6 +1,52 @@
 # Portfolio Hub
 
+![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![PyQt6](https://img.shields.io/badge/PyQt6-v6.6-41CD52?logo=qt&logoColor=white)
+![ONNX Runtime](https://img.shields.io/badge/ONNX_Runtime-v1.17-005CED?logo=onnx&logoColor=white)
+![SQLCipher](https://img.shields.io/badge/SQLCipher-v4.5-003B5C?logo=sqlite&logoColor=white)
+![Pytest Coverage](https://img.shields.io/badge/Pytest_Coverage-%3E90%25-brightgreen?logo=pytest&logoColor=white)
+
+> **Repository Topics:** `document-classification` · `machine-learning-offline` · `clinical-trials` · `sqlcipher` · `hipaa-compliant` · `desktop-application`
+
 A bleeding-edge interactive portfolio designed to unify disparate Python, Rust, and TypeScript repositories into a single, cohesive experience.
+
+---
+
+## Sortify Case Study & Air-Gapped Engine Showcase
+
+Sortify is an air-gapped document classification and resilient file operations engine designed for regulated clinical trials and enterprise document ingestion. Detailed technical specifications, threat models, and code deep dives are available in [**`docs/CASE_STUDY.md`**](docs/CASE_STUDY.md).
+
+### Dataflow Pipeline Architecture
+
+```mermaid
+flowchart TD
+    A[Unstructured Directory Scan] --> B[Multi-Format Extractor Engine]
+    B --> C[Text Sanitization & Forensic Scanner]
+    C --> D[Hybrid Classifier: TF-IDF + ONNX Embedding]
+    D --> E[Clinical Taxonomy & Policy Verification]
+    E --> F[SQLCipher Encrypted Journal Registry]
+    F --> G[Atomic 2-Phase File Mover]
+    G --> H[Organized Clinical Repository / Audit Log]
+    G -. Error Trigger .-> I[Automatic Rollback Recovery]
+```
+
+### Automatic Rollback & Recovery Lifecycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> IngestionRequested: Ingest File
+    IngestionRequested --> StagingPhase: Create Shadow Copy
+    StagingPhase --> IntegrityVerification: Compute SHA-256
+    IntegrityVerification --> CommitPhase: Hashes Match
+    IntegrityVerification --> AbortRollback: Hash Mismatch / Crash
+    CommitPhase --> OriginalUnlinked: Verified Relocation
+    OriginalUnlinked --> [*]: Success
+    AbortRollback --> RestoredInitialState: Purge Shadow File & Revert Journal
+    RestoredInitialState --> [*]: Error Handled
+```
+
+---
 
 ## Project Goals
 
@@ -72,4 +118,3 @@ To work on this repository, you will need:
 Schema changes must include a checked-in Prisma migration. See
 [DATABASE_MIGRATIONS.md](DATABASE_MIGRATIONS.md) for the development workflow,
 production rollout order, and the one-time production baseline procedure.
-
