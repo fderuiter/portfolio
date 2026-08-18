@@ -87,21 +87,27 @@ non-nullable Boolean column defaulting to `false`, and all four existing rows
 preserved with `false`. Run `npx prisma migrate deploy` once more and confirm it
 is a no-op. Then smoke-test the home page, case studies, and telemetry endpoints.
 
-## Release ordering and pre-build execution
+## Release ordering and release gate execution
 
-The Vercel build pipeline (`scripts/build.js`) executes migrations in Phase 1.5
-(pre-build), strictly before `next build` (Phase 2). This guarantees that
-Next.js static site generation (SSG) and dynamic prerendering always query
-the upgraded schema. Database connectivity in `lib/db.ts` uses a connection `Pool`
-via `@neondatabase/serverless` to support parallel queries during prerendering.
+Live database migrations execute strictly inside the dedicated Pipeline Release
+Gate stage (`npm run release:gate` / `scripts/release-gate.ts`), isolated from
+static application build compilation (`scripts/build.js`). Direct database write
+credentials exist exclusively within the release gate stage, eliminating sensitive
+credential exposure and database lock conflicts during application compilation.
+
+The application build step (`scripts/build.js`) executes offline using fallback
+credentials (`DATABASE_URL`, `DIRECT_URL`, `CRON_SECRET`), running unified
+migration checks (`npm run check:migrations`) without live database connections.
 
 Every release must follow expand-and-contract:
 
 1. Expand with backward-compatible, additive migration SQL.
-2. Deploy code alongside the pre-build migration runner.
-3. Automated destructive migration guards (`scripts/check-migrations.js`)
-   block `DROP TABLE` or `DROP COLUMN` in production unless explicitly approved.
-4. Remove old fields only in a later release after all readers have migrated.
+2. Execute the Pipeline Release Gate (`npm run release:gate`) to run unified validation
+   (provider parity, file integrity, destructive schema checks) and apply `prisma migrate deploy`.
+3. Build and deploy static application assets offline (`scripts/build.js`).
+4. Automated destructive migration guards (`scripts/check-migrations.js`)
+   block `DROP TABLE` or `DROP COLUMN` unless `ALLOW_DESTRUCTIVE_MIGRATIONS=true` is explicitly provided.
+5. Remove old fields only in a later release after all readers have migrated.
 
 Prisma serializes concurrent migration attempts with its PostgreSQL advisory
 lock. Never automate `migrate resolve`; it is a one-time recovery operation that

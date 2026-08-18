@@ -75,4 +75,35 @@ describe("Transparent Continuous Overlay Layer Compliance", () => {
     // Ensure accessibility category has a minScore of 1.0 (strict enforcement, zero failures)
     expect(content).toContain("'categories:accessibility': ['error', {minScore: 1.0}]");
   });
+
+  it("should tag all pretext visual and semantic layers for high contrast forced-colors protection", () => {
+    const usePretextLayoutContent = fs.readFileSync(usePretextLayoutPath, "utf-8");
+    const pretextCardContent = fs.readFileSync(pretextCardPath, "utf-8");
+    const heroContent = fs.readFileSync(heroPath, "utf-8");
+
+    // PretextText & PretextRichText data attributes
+    expect(usePretextLayoutContent).toContain('data-pretext-layer="visual"');
+    expect(usePretextLayoutContent).toContain('data-pretext-layer="semantic"');
+
+    // PretextCard data attributes
+    expect(pretextCardContent).toContain('data-pretext-layer="visual"');
+    expect(pretextCardContent).toContain('data-pretext-layer="semantic"');
+
+    // HeroHeadline & HeroText data attributes
+    expect(heroContent).toContain('data-pretext-layer="visual"');
+    expect(heroContent).toContain('data-pretext-layer="semantic"');
+  });
+
+  it("should define centralized forced-colors CSS media queries for pretext layer suppression", () => {
+    const globalsCssPath = path.resolve(__dirname, "../app/globals.css");
+    const cssContent = fs.readFileSync(globalsCssPath, "utf-8");
+
+    expect(cssContent).toContain("@media (forced-colors: active)");
+    expect(cssContent).toContain('[data-pretext-layer="visual"]');
+    expect(cssContent).toContain('opacity: 0 !important');
+    expect(cssContent).toContain('visibility: hidden !important');
+    expect(cssContent).toContain('[data-pretext-layer="semantic"]');
+    expect(cssContent).toContain('color: CanvasText !important');
+  });
 });
+

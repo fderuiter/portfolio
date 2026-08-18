@@ -6,8 +6,14 @@
 
 # lib/services/privacy-service
 
+## Type Aliases
+
+- [RequestOrHeaders](type-aliases/RequestOrHeaders.md)
+
 ## Functions
 
 - [extractClientIp](functions/extractClientIp.md)
+- [extractHeaderValue](functions/extractHeaderValue.md)
 - [generateClientConnectionHash](functions/generateClientConnectionHash.md)
+- [generateClientConnectionHashSync](functions/generateClientConnectionHashSync.md)
 - [getConnectionHashFromRequest](functions/getConnectionHashFromRequest.md)

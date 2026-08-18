@@ -95,6 +95,7 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
         ref={ref}
         aria-hidden="true"
         role="presentation"
+        data-pretext-layer="visual"
         className="w-full select-none pointer-events-none"
       >
         {!isReady ? (
@@ -133,6 +134,7 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
       {/* 2. Transparent Standard Semantic Overlay (selectable, readable by screen readers) */}
       <h1
         className="text-4xl md:text-6xl font-black tracking-tight text-center leading-tight md:leading-none absolute inset-0 select-text bg-transparent"
+        data-pretext-layer="semantic"
         style={{
           color: "transparent",
           WebkitTextFillColor: "transparent",
@@ -205,6 +207,7 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
         ref={ref}
         aria-hidden="true"
         role="presentation"
+        data-pretext-layer="visual"
         className="w-full select-none pointer-events-none"
       >
         {!isReady ? (
@@ -243,6 +246,7 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
       {/* 2. Transparent Standard Semantic Overlay (selectable, readable by screen readers) */}
       <p
         className="text-neutral-400 text-sm md:text-base leading-[28px] text-center absolute inset-0 select-text bg-transparent"
+        data-pretext-layer="semantic"
         style={{
           color: "transparent",
           WebkitTextFillColor: "transparent",
@@ -458,8 +462,12 @@ const InteractiveEngineeringConsole: React.FC = () => {
                   {/* Visual memory bar */}
                   <div className="w-full h-2 bg-zinc-900 rounded-full overflow-hidden border border-white/5">
                     <div
-                      style={{ width: `${(garminHeapAlloc / 32) * 100}%` }}
-                      className="h-full bg-gradient-to-r from-emerald-400 via-amber-400 to-cyan-400 transition-all duration-300"
+                      style={{
+                        transform: `scaleX(${garminHeapAlloc / 32})`,
+                        transformOrigin: "left",
+                        willChange: "transform",
+                      }}
+                      className="h-full w-full bg-gradient-to-r from-emerald-400 via-amber-400 to-cyan-400 origin-left transform-gpu"
                     />
                   </div>
                   <div className="flex items-center justify-between text-[10px] text-zinc-500 pt-0.5">

@@ -59,7 +59,9 @@ export const GarminWatchSimulator: React.FC = () => {
   // Hardware & Simulation State
   const [bezelTheme, setBezelTheme] = useState<WatchBezelTheme>("slate");
   const [deviceTarget, setDeviceTarget] = useState<DeviceTarget>("fenix");
-  const [gameState, setGameState] = useState<GameEngineState>(() => createInitialState("fenix", loadedHighScore));
+  const initialState = createInitialState("fenix", loadedHighScore);
+  const stateRef = useRef<GameEngineState>(initialState);
+  const [gameState, setGameState] = useState<GameEngineState>(initialState);
   const effectiveHighScore = Math.max(gameState.highScore, loadedHighScore);
   const [isFocused, setIsFocused] = useState(false);
   const [isDraggingFog, setIsDraggingFog] = useState(false);
@@ -71,22 +73,7 @@ export const GarminWatchSimulator: React.FC = () => {
   const { isFullscreen, toggleFullscreen } = useFullscreen(outerContainerRef);
   const gameLoopRef = useRef<number | null>(null);
   const lastFrameTimeRef = useRef<number>(0);
-  const stateRef = useRef<GameEngineState>(gameState);
-
-  useEffect(() => {
-    stateRef.current = gameState;
-  }, [gameState]);
-
-  // Save new high scores safely
-  useEffect(() => {
-    if (gameState.score > gameState.highScore) {
-      if (typeof window !== "undefined") {
-        try {
-          localStorage.setItem("garmin_simulator_high_score", gameState.score.toString());
-        } catch {}
-      }
-    }
-  }, [gameState.score, gameState.highScore]);
+  const frameCountRef = useRef<number>(0);
 
   // Audio Beep Helpers (Authentic Garmin 1200-1600Hz Piezo)
   const playBeep = useCallback(
@@ -107,11 +94,13 @@ export const GarminWatchSimulator: React.FC = () => {
     const current = stateRef.current;
     if (current.gameState !== "playing" || !current.isGrounded) return;
     playBeep(900, 0.03);
-    setGameState((prev) => ({
-      ...prev,
+    const nextState = {
+      ...current,
       playerVy: JUMP_FORCE,
       isGrounded: false,
-    }));
+    };
+    stateRef.current = nextState;
+    setGameState(nextState);
   }, [playBeep]);
 
   // Jettison Oldest Variable (DOWN)
@@ -119,25 +108,25 @@ export const GarminWatchSimulator: React.FC = () => {
     const current = stateRef.current;
     if (current.gameState !== "playing") return;
     playBeep(650, 0.035);
-    setGameState((prev) => {
-      const { state: nextState } = jettisonOldestVariable(prev);
-      return nextState;
-    });
+    const { state: nextState } = jettisonOldestVariable(current);
+    stateRef.current = nextState;
+    setGameState(nextState);
   }, [playBeep]);
 
   // Trigger Backlight / Flashlight (LIGHT)
   const handleToggleLight = useCallback(() => {
     playButtonTone();
-    setGameState((prev) => {
-      const nextLight = !prev.isLightOn;
-      if (nextLight && prev.battery > 0) {
-        playBeep(1600, 0.04);
-      }
-      return {
-        ...prev,
-        isLightOn: prev.battery > 0 ? nextLight : false,
-      };
-    });
+    const current = stateRef.current;
+    const nextLight = !current.isLightOn;
+    if (nextLight && current.battery > 0) {
+      playBeep(1600, 0.04);
+    }
+    const nextState = {
+      ...current,
+      isLightOn: current.battery > 0 ? nextLight : false,
+    };
+    stateRef.current = nextState;
+    setGameState(nextState);
   }, [playButtonTone, playBeep]);
 
   // Force Garbage Collection (BACK)
@@ -145,10 +134,9 @@ export const GarminWatchSimulator: React.FC = () => {
     const current = stateRef.current;
     if (current.gameState !== "playing" || current.isGcActive) return;
     playBeep(450, 0.08);
-    setGameState((prev) => {
-      const { state: nextState } = triggerGarbageCollection(prev);
-      return nextState;
-    });
+    const { state: nextState } = triggerGarbageCollection(current);
+    stateRef.current = nextState;
+    setGameState(nextState);
   }, [playBeep]);
 
   // Start / Pause / Restart (START)
@@ -157,13 +145,18 @@ export const GarminWatchSimulator: React.FC = () => {
     const current = stateRef.current;
     if (current.gameState === "idle" || current.gameState === "crashed" || current.gameState === "summary") {
       const next = startGame(current, deviceTarget);
+      stateRef.current = next;
       setGameState(next);
       recordEvent("garmin_simulator_start", "project_click").catch(() => {});
       playSuccess();
     } else if (current.gameState === "playing") {
-      setGameState((prev) => ({ ...prev, gameState: "paused" }));
+      const next = { ...current, gameState: "paused" as const };
+      stateRef.current = next;
+      setGameState(next);
     } else if (current.gameState === "paused") {
-      setGameState((prev) => ({ ...prev, gameState: "playing" }));
+      const next = { ...current, gameState: "playing" as const };
+      stateRef.current = next;
+      setGameState(next);
     }
   }, [deviceTarget, playButtonTone, playSuccess, recordEvent]);
 
@@ -171,7 +164,9 @@ export const GarminWatchSimulator: React.FC = () => {
   const handleWipeFog = useCallback(
     (canvasX = CANVAS_SIZE / 2, canvasY = CANVAS_SIZE / 2) => {
       playBeep(1100, 0.015);
-      setGameState((prev) => wipeScreenFog(prev, canvasX, canvasY, 35));
+      const next = wipeScreenFog(stateRef.current, canvasX, canvasY, 35);
+      stateRef.current = next;
+      setGameState(next);
     },
     [playBeep]
   );
@@ -180,7 +175,9 @@ export const GarminWatchSimulator: React.FC = () => {
   const handleSelectDevice = (target: DeviceTarget) => {
     playButtonTone();
     setDeviceTarget(target);
-    setGameState((prev) => createInitialState(target, prev.highScore));
+    const next = createInitialState(target, stateRef.current.highScore);
+    stateRef.current = next;
+    setGameState(next);
   };
 
   // Keyboard Event Handlers
@@ -269,12 +266,34 @@ export const GarminWatchSimulator: React.FC = () => {
       const deltaMs = Math.min(40, timestamp - lastFrameTimeRef.current);
       lastFrameTimeRef.current = timestamp;
 
-      // Update simulation if active
+      // Update simulation in mutable ref if active
       if (stateRef.current.gameState === "playing") {
-        setGameState((current) => updateGameSimulation(current, deltaMs));
+        const prevStatus = stateRef.current.gameState;
+        const nextState = updateGameSimulation(stateRef.current, deltaMs);
+        stateRef.current = nextState;
+
+        // Save high scores safely
+        if (nextState.score > nextState.highScore) {
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.setItem("garmin_simulator_high_score", nextState.score.toString());
+            } catch {}
+          }
+        }
+
+        // On milestone status transition, update React UI immediately.
+        // Otherwise, update low-frequency React UI throttled to 10 FPS (every 6 frames).
+        if (nextState.gameState !== prevStatus) {
+          setGameState({ ...nextState });
+        } else {
+          frameCountRef.current++;
+          if (frameCountRef.current % 6 === 0) {
+            setGameState({ ...nextState });
+          }
+        }
       }
 
-      // Render Canvas Frame
+      // Render Canvas Frame directly from mutable ref
       if (canvas) {
         const ctx = canvas.getContext("2d");
         if (ctx) {

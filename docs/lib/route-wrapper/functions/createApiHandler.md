@@ -6,7 +6,9 @@
 
 # Function: createApiHandler()
 
-> **createApiHandler**\<`TSchema`\>(`handler`, `options?`): (`rawReq?`, `routeParams?`) => `Promise`\<`NextResponse`\<`unknown`\>\>
+## Call Signature
+
+> **createApiHandler**\<`TSchema`\>(`handler`, `options`): (`rawReq?`, `routeParams?`) => `Promise`\<`NextResponse`\<`unknown`\>\>
 
 Defined in: [lib/route-wrapper.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/route-wrapper.ts#L25)
 
@@ -14,22 +16,46 @@ Higher-order API route handler wrapper.
 Provides automated Zod request schema validation, uniform error transformation,
 Sentry exception logging, error sanitization, and security header enforcement.
 
-## Type Parameters
+### Type Parameters
 
-### TSchema
+#### TSchema
 
 `TSchema` *extends* `ZodType`\<`unknown`, `unknown`, `$ZodTypeInternals`\<`unknown`, `unknown`\>\>
 
-## Parameters
+### Parameters
 
-### handler
+#### handler
 
-[`ApiHandler`](../type-aliases/ApiHandler.md)\<`TSchema` *extends* `ZodType`\<`unknown`, `unknown`, `$ZodTypeInternals`\<`unknown`, `unknown`\>\> ? `TSchema`\[`"_output"`\] : `undefined`\>
+[`ApiHandler`](../type-aliases/ApiHandler.md)\<`output`\<`TSchema`\>\>
 
-### options?
+#### options
 
-[`ApiWrapperOptions`](../interfaces/ApiWrapperOptions.md)\<`TSchema`\>
+[`ApiWrapperOptions`](../interfaces/ApiWrapperOptions.md)\<`TSchema`\> & `object`
 
-## Returns
+### Returns
+
+(`rawReq?`, `routeParams?`) => `Promise`\<`NextResponse`\<`unknown`\>\>
+
+## Call Signature
+
+> **createApiHandler**(`handler`, `options?`): (`rawReq?`, `routeParams?`) => `Promise`\<`NextResponse`\<`unknown`\>\>
+
+Defined in: [lib/route-wrapper.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/route-wrapper.ts#L33)
+
+Higher-order API route handler wrapper.
+Provides automated Zod request schema validation, uniform error transformation,
+Sentry exception logging, error sanitization, and security header enforcement.
+
+### Parameters
+
+#### handler
+
+[`ApiHandler`](../type-aliases/ApiHandler.md)\<`undefined`\>
+
+#### options?
+
+[`ApiWrapperOptions`](../interfaces/ApiWrapperOptions.md)\<`ZodType`\<`unknown`, `unknown`, `$ZodTypeInternals`\<`unknown`, `unknown`\>\>\>
+
+### Returns
 
 (`rawReq?`, `routeParams?`) => `Promise`\<`NextResponse`\<`unknown`\>\>

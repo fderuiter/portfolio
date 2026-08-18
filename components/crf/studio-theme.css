@@ -1,0 +1,144 @@
+/* CRF Studio Clinical Light Mode Scoped Styling */
+[data-studio-theme="light"] *:focus-visible {
+  outline-color: #b45309;
+}
+
+[data-studio-theme="light"] {
+  --focus-ring: #b45309;
+  --crf-bg: #f8fafc;
+  --crf-canvas-bg: #f1f5f9;
+  --crf-surface-1: #ffffff;
+  --crf-surface-2: #f8fafc;
+  --crf-surface-3: #f1f5f9;
+  --crf-border: #e2e8f0;
+  --crf-border-subtle: #cbd5e1;
+  --crf-border-hover: #94a3b8;
+  --crf-text: #0f172a;
+  --crf-text-muted: #475569;
+  --crf-text-dim: #64748b;
+  --crf-input-bg: #ffffff;
+  --crf-input-border: #cbd5e1;
+  --crf-pill-bg: #e2e8f0;
+  --crf-pill-text: #1e293b;
+  --crf-shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  --crf-shadow-elevated: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+}
+
+[data-studio-theme="dark"] {
+  --crf-bg: #09090b;
+  --crf-canvas-bg: rgba(9, 9, 11, 0.8);
+  --crf-surface-1: #18181b;
+  --crf-surface-2: #27272a;
+  --crf-surface-3: #18181b;
+  --crf-border: #27272a;
+  --crf-border-subtle: #3f3f46;
+  --crf-border-hover: #52525b;
+  --crf-text: #f4f4f5;
+  --crf-text-muted: #a1a1aa;
+  --crf-text-dim: #71717a;
+  --crf-input-bg: #18181b;
+  --crf-input-border: #3f3f46;
+  --crf-pill-bg: #27272a;
+  --crf-pill-text: #e4e4e7;
+  --crf-shadow-card: none;
+  --crf-shadow-elevated: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+/* Scoped Studio Light Mode Cascades */
+[data-studio-theme="light"] {
+  color-scheme: light;
+}
+
+[data-studio-theme="light"] .bg-zinc-950,
+[data-studio-theme="light"] .bg-zinc-950\/95,
+[data-studio-theme="light"] .bg-zinc-950\/80 {
+  background-color: var(--crf-bg) !important;
+}
+
+[data-studio-theme="light"] .bg-zinc-900,
+[data-studio-theme="light"] .bg-zinc-900\/70,
+[data-studio-theme="light"] .bg-zinc-900\/80,
+[data-studio-theme="light"] .bg-zinc-900\/90,
+[data-studio-theme="light"] .bg-zinc-900\/95,
+[data-studio-theme="light"] .bg-zinc-900\/50 {
+  background-color: var(--crf-surface-1) !important;
+}
+
+[data-studio-theme="light"] .bg-zinc-850 {
+  background-color: var(--crf-surface-2) !important;
+}
+
+[data-studio-theme="light"] .bg-zinc-800,
+[data-studio-theme="light"] .bg-zinc-800\/60,
+[data-studio-theme="light"] .bg-zinc-800\/80,
+[data-studio-theme="light"] .bg-zinc-800\/50,
+[data-studio-theme="light"] .hover\:bg-zinc-800:hover {
+  background-color: var(--crf-surface-3) !important;
+}
+
+[data-studio-theme="light"] .hover\:bg-zinc-850:hover {
+  background-color: var(--crf-surface-2) !important;
+}
+
+[data-studio-theme="light"] .hover\:bg-zinc-900:hover {
+  background-color: #f1f5f9 !important;
+}
+
+[data-studio-theme="light"] .border-zinc-900,
+[data-studio-theme="light"] .border-zinc-850,
+[data-studio-theme="light"] .border-zinc-800,
+[data-studio-theme="light"] .border-zinc-800\/80,
+[data-studio-theme="light"] .border-zinc-800\/50,
+[data-studio-theme="light"] .border-zinc-700,
+[data-studio-theme="light"] .border-zinc-700\/80 {
+  border-color: var(--crf-border) !important;
+}
+
+[data-studio-theme="light"] .text-white,
+[data-studio-theme="light"] .text-zinc-100,
+[data-studio-theme="light"] .text-zinc-200 {
+  color: var(--crf-text) !important;
+}
+
+[data-studio-theme="light"] .text-zinc-300,
+[data-studio-theme="light"] .text-zinc-400 {
+  color: var(--crf-text-muted) !important;
+}
+
+[data-studio-theme="light"] .text-zinc-500,
+[data-studio-theme="light"] .text-zinc-600 {
+  color: var(--crf-text-dim) !important;
+}
+
+[data-studio-theme="light"] input:not([type="checkbox"]):not([type="radio"]),
+[data-studio-theme="light"] select,
+[data-studio-theme="light"] textarea {
+  background-color: var(--crf-input-bg) !important;
+  color: var(--crf-text) !important;
+  border-color: var(--crf-input-border) !important;
+}
+
+[data-studio-theme="light"] input::placeholder,
+[data-studio-theme="light"] textarea::placeholder {
+  color: var(--crf-text-dim) !important;
+}
+
+[data-studio-theme="light"] .crf-canvas-area {
+  background-color: var(--crf-canvas-bg) !important;
+}
+
+[data-studio-theme="light"] .crf-paper-sheet {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: var(--crf-shadow-elevated) !important;
+}
+
+[data-studio-theme="light"] .crf-field-card {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: var(--crf-shadow-card) !important;
+}
+
+[data-studio-theme="light"] .crf-field-card:hover {
+  border-color: #cbd5e1 !important;
+}

@@ -289,6 +289,157 @@ where
 
 <h4>3. WASM-First GUI Architecture</h4>
 <p>Deploys identical single-binary desktop execution and zero-install WebAssembly browser builds using egui and custom <code>egui_plot</code> engines.</p>
+    slug: "ualbf",
+    title: "UALBF: Verified Computational Proof Engine & Search Architecture",
+    primary_language: "Rust",
+    github_url: "https://github.com/fderuiter/ualbf",
+    published: true,
+    simulated_telemetry: false,
+    tags: "Rust, Lean 4, Python, C, Formal Verification, Number Theory",
+    editorial_content: "A **verified hybrid computational engine** pairing high-throughput **Rust** branch-and-bound search with a **Lean 4** formal verification pipeline. Automates large-scale search space exploration over `prime signature lattices` to investigate **quasiperfect numbers** ($\\sigma(n) = 2n + 1$) with zero unproven mathematical axioms.",
+    architectural_narrative: `
+<h3>The Challenge</h3>
+<p>Investigating the existence of quasiperfect numbers (integers <code>n</code> where the sum of positive divisors <code>σ(n) = 2n + 1</code>) requires searching vast prime exponent lattices. Unverified heuristic search algorithms are fast but vulnerable to arithmetic bugs or missed edge cases. Writing the entire search engine inside a formal theorem prover like Lean 4 introduces massive execution overhead, making exhaustive lattice traversals intractable.</p>
+
+<h3>Technical Architecture</h3>
+<p>UALBF utilizes the <strong>Verified Engine Bridge Pattern</strong>, decoupling raw CPU branch-and-bound search from formal mathematical verification. High-throughput search, cyclotomic polynomial evaluation, and bipartite sieve pruning run in Rust (<code>ualbf-project/rust-engine</code>). When obstruction boundaries are encountered, deterministic proof certificates are serialized over C/FFI (<code>lean_ffi.rs</code>) and verified by the lightweight Lean 4 kernel (<code>ualbf-project/lean4-proofs</code>).</p>
+
+<pre><code class="language-rust">
+// rust-engine/src/dfs_tree.rs
+use crate::cyclotomic::CyclotomicGraph;
+use crate::sieve::BipartitionSieve;
+use crate::manifest::ProofCertificate;
+
+pub struct LatticeSearchEngine {
+    max_prime_bound: u32,
+    abundancy_threshold: f64,
+    sieve: BipartitionSieve,
+}
+
+impl LatticeSearchEngine {
+    pub fn traverse_lattice(
+        &mut self,
+        current_node: &PrimeSignatureNode,
+        certificates: &mut Vec&lt;ProofCertificate&gt;,
+    ) -&gt; SearchStatus {
+        if current_node.abundancy() &gt; self.abundancy_threshold {
+            return SearchStatus::PrunedAbundancy;
+        }
+
+        if let Some(obstruction) = self.sieve.evaluate_cyclotomic_obstruction(current_node) {
+            certificates.push(ProofCertificate::from_obstruction(current_node, obstruction));
+            return SearchStatus::PrunedCyclotomicObstruction;
+        }
+
+        for next_signature in current_node.expand_children(self.max_prime_bound) {
+            self.traverse_lattice(&amp;next_signature, certificates);
+        }
+
+        SearchStatus::Exhausted
+    }
+}
+</code></pre>
+
+<h4>1. Type-Safe Domain Specific Pruning</h4>
+<p>The Rust engine implements cyclotomic polynomial factorizations, Euler product evaluators, and Touchard congruence bridges to prune unreachable branches early. Fixed 64-bit rational interval bounds (<code>Fixed64.lean</code>) allow rapid sieving before falling back to arbitrary-precision cyclotomic evaluations.</p>
+
+<pre><code class="language-lean">
+-- ualbf-project/lean4-proofs/UALBF/Engine/Bipartition.lean
+import UALBF.Algebra.EulerProduct
+import UALBF.Algebra.CyclotomicGraph
+import UALBF.Engine.Fixed64
+
+namespace UALBF.Engine
+
+structure ObstructionCertificate where
+  node_id : Nat
+  prime_bounds : List Nat
+  abundancy_ratio : Fixed64
+  is_valid_obstruction : Bool
+
+theorem bipartition_sieve_soundness
+    (cert : ObstructionCertificate)
+    (h_cert : cert.is_valid_obstruction = true)
+    (n : Nat) (h_node : n ∈ PrimeLattice cert.prime_bounds) :
+    sigma n ≠ 2 * n + 1 := by
+  intro h_quasi
+  have h_bound : abundancyRatio n &gt; 2 + 1 / (n : Fixed64) := by
+    exact abundancy_bound_from_certificate cert h_cert h_node
+  have h_eq : abundancyRatio n = 2 + 1 / (n : Fixed64) := by
+    rw [h_quasi]
+    ring
+  linarith
+</code></pre>
+
+<h4>2. FFI Memory Safety &amp; Zero-Axiom Soundness</h4>
+<p>To eliminate memory alignment mismatches across the Rust/C/Lean boundary, C shims (<code>c_shims.c</code>, <code>ffi.c</code>) and Lean FFI abstractions maintain deterministic struct layouts. Automated CI gates (<code>test_zero_axiom_enforcement.py</code>) strictly audit the Lean 4 environment via <code>#print axioms</code> to guarantee 100% sound mathematical proofs with zero unverified hypotheses.</p>
+
+<pre><code class="language-rust">
+// lean_ffi.rs
+#[repr(C)]
+pub struct LeanObstructionManifest {
+    pub node_id: u64,
+    pub prime_bound: u32,
+    pub abundancy_q64: u64,
+    pub holds_obstruction: u8,
+}
+
+#[no_mangle]
+pub extern "C" fn ualbf_verify_certificate_manifest(
+    manifest_ptr: *const LeanObstructionManifest,
+    out_json_buf: *mut c_char,
+    buf_len: usize,
+) -&gt; c_int {
+    if manifest_ptr.is_null() { return -1; }
+    let manifest = unsafe { &amp;*manifest_ptr };
+    if manifest.holds_obstruction == 1 &amp;&amp; manifest.abundancy_q64 &gt; 0 {
+        0
+    } else {
+        -2
+    }
+}
+</code></pre>
+    slug: "sortify",
+    title: "Sortify: Air-Gapped Document Classification & Resilient File Engine",
+    primary_language: "Python",
+    github_url: "https://github.com/fderuiter/sortify",
+    published: true,
+    simulated_telemetry: false,
+    tags: "Python, PyQt6, ONNX, SQLCipher, Machine Learning, Clinical Trials, HIPAA, Desktop",
+    editorial_content: "A **zero-telemetry**, fully `air-gapped` document classification and file organization pipeline featuring local **hybrid semantic clustering** (ONNX vector embeddings + sparse TF-IDF) and crash-resilient **2-phase file operations** backed by an encrypted `SQLCipher` metadata registry.",
+    architectural_narrative: `
+<h3>The Challenge</h3>
+<p>Managing and categorizing massive, unstructured document dumps (clinical trial records, financial reports, technical documentation) while strictly adhering to regulatory compliance frameworks (such as 21 CFR Part 11, HIPAA, and GDPR) presents severe security challenges. Traditional cloud-based classification tools risk data leakage and compliance violations when handling sensitive patient health information (PHI) or proprietary datasets.</p>
+
+<h3>Technical Architecture</h3>
+<p>Sortify is engineered as a zero-telemetry, fully air-gapped pipeline featuring local hybrid semantic clustering and crash-resilient file operations backed by an encrypted SQLCipher metadata registry.</p>
+
+<pre><code class="language-python">
+# Two-Phase Commit File Relocation Engine
+def stage_and_commit_move(self, src: str, dest_dir: str) -> str:
+    src_hash = compute_sha256(src)
+    shadow_path = os.path.join(self.shadow_dir, f"{uuid.uuid4()}.tmp")
+
+    # Phase 1: Copy to shadow staging and verify checksum
+    self._copy_stream(src, shadow_path)
+    if compute_sha256(shadow_path) != src_hash:
+        raise ValueError("Staged integrity mismatch")
+
+    # Phase 2: Relocate to destination and unlink original
+    os.replace(shadow_path, dest_path)
+    if compute_sha256(dest_path) == src_hash:
+        os.remove(src)
+        return dest_path
+</code></pre>
+
+<h4>1. Clean Architecture &amp; Strategy Pattern</h4>
+<p>File extraction (<code>extractor_strategies.py</code>) and classification (<code>analyzer_strategies.py</code>) isolate format-specific parsers and clustering algorithms behind unified abstract interfaces, ensuring clean extendability across PDF, DOCX, XLSX, and CSV formats.</p>
+
+<h4>2. Two-Phase Commit File Relocation</h4>
+<p>Staged file movement utilizes shadow directories, journaled state tracking, and SHA-256 integrity verification before and after file operations. Cross-partition hardlink and move failures (<code>EXDEV</code>) fall back gracefully to chunked streams with checksum verifications.</p>
+
+<h4>3. Encrypted SQLCipher Registry &amp; Worker Concurrency</h4>
+<p>Database encryption at rest is enforced via per-platform SQLCipher shared libraries with PRAGMA key derivation. Thread-isolated background workers communicate via non-blocking queues with the main UI thread (PyQt6/PySide6) to prevent interface lockups during bulk ingestion.</p>
     `.trim(),
   },
 ];

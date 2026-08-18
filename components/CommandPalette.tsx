@@ -985,13 +985,11 @@ export const CommandPalette: React.FC = () => {
   // Expose test helper globally to open search modal programmatically
   useEffect(() => {
     if (!isMounted) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).__openSearch = () => {
+    window.__openSearch = () => {
       setIsOpen(true);
     };
     return () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      delete (window as any).__openSearch;
+      delete window.__openSearch;
     };
   }, [isMounted, setIsOpen]);
 

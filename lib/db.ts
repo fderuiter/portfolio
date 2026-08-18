@@ -12,6 +12,23 @@ const env = getEnv();
 const connectionString = env.DATABASE_URL;
 
 let isHealthy = false;
+let healthCheckPromise: Promise<void> | null = null;
+
+const verifyDatabaseHealthAsync = (baseClient: PrismaClient) => {
+  if (isHealthy || healthCheckPromise) return;
+
+  healthCheckPromise = baseClient
+    .$queryRawUnsafe(`SELECT 1 FROM "TelemetryEvent" LIMIT 1`)
+    .then(() => {
+      isHealthy = true;
+    })
+    .catch((error) => {
+      console.error("Database health check failed: Schema version is behind. Missing TelemetryEvent.", error);
+    })
+    .finally(() => {
+      healthCheckPromise = null;
+    });
+};
 
 const createPrismaClient = () => {
   const adapter = new PrismaNeon({ connectionString });
@@ -62,14 +79,7 @@ const createPrismaClient = () => {
           throw new Error("Database offline: Dummy connection URL configured.");
         }
         if (!isHealthy && activeEnv.SKIP_DB_HEALTH_CHECK !== "true") {
-          try {
-            // Runtime pre-flight validation
-            await baseClient.$queryRawUnsafe(`SELECT 1 FROM "TelemetryEvent" LIMIT 1`);
-            isHealthy = true;
-          } catch (error) {
-            console.error("Database health check failed: Schema version is behind. Missing TelemetryEvent.", error);
-            throw new Error("Database health check failed: Schema version is behind. Missing TelemetryEvent.");
-          }
+          verifyDatabaseHealthAsync(baseClient as unknown as PrismaClient);
         }
         return query(args);
       }

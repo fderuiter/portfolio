@@ -1,4 +1,46 @@
-import { NextRequest } from "next/server";
+import crypto from "crypto";
+
+export type RequestOrHeaders =
+  | Request
+  | Headers
+  | { headers: Headers | { get(name: string): string | null } }
+  | Record<string, string | string[] | undefined>
+  | null
+  | undefined;
+
+/**
+ * Safely extracts header value from request objects, Headers, or plain header maps.
+ */
+export function extractHeaderValue(
+  reqOrHeaders: RequestOrHeaders,
+  name: string
+): string | null | undefined {
+  if (!reqOrHeaders) return undefined;
+
+  if (
+    "headers" in reqOrHeaders &&
+    reqOrHeaders.headers &&
+    typeof reqOrHeaders.headers === "object" &&
+    "get" in reqOrHeaders.headers &&
+    typeof reqOrHeaders.headers.get === "function"
+  ) {
+    return reqOrHeaders.headers.get(name);
+  }
+
+  if ("get" in reqOrHeaders && typeof reqOrHeaders.get === "function") {
+    return (reqOrHeaders as Headers).get(name);
+  }
+
+  if (typeof reqOrHeaders === "object") {
+    const record = reqOrHeaders as Record<string, string | string[] | undefined>;
+    const lower = name.toLowerCase();
+    const val = record[lower] ?? record[name];
+    if (Array.isArray(val)) return val[0];
+    return val;
+  }
+
+  return undefined;
+}
 
 /**
  * Computes a privacy-preserving SHA-256 hash token from client IP / connection info
@@ -15,32 +57,47 @@ export async function generateClientConnectionHash(ip: string): Promise<string> 
 }
 
 /**
- * Extracts client IP address from proxy headers without logging or retaining raw IP.
+ * Synchronous SHA-256 connection hash helper using native platform crypto,
+ * preserving legacy synchronous signatures without custom JS crypto logic.
  */
-export function extractClientIp(req: NextRequest): string {
-  const forwardedFor = req.headers.get("x-forwarded-for");
-  if (forwardedFor) {
-    const ips = forwardedFor.split(",");
-    if (ips[0]) {
-      return ips[0].trim();
-    }
+export function generateClientConnectionHashSync(input: string): string {
+  const normalized = input?.trim() || "127.0.0.1";
+  return crypto.createHash("sha256").update(normalized).digest("hex");
+}
+
+/**
+ * Centralized primary proxy IP extraction routine.
+ * Extracts client IP address from proxy headers without logging or retaining raw IP.
+ * Supports HTTP request objects, Headers instances, and header maps.
+ */
+export function extractClientIp(reqOrHeaders?: RequestOrHeaders): string {
+  if (!reqOrHeaders) return "127.0.0.1";
+
+  const rawXff = extractHeaderValue(reqOrHeaders, "x-forwarded-for");
+  if (rawXff) {
+    const firstIp = rawXff.split(",")[0]?.trim();
+    if (firstIp) return firstIp;
   }
-  const realIp = req.headers.get("x-real-ip");
-  if (realIp) {
+
+  const realIp = extractHeaderValue(reqOrHeaders, "x-real-ip");
+  if (realIp && realIp.trim()) {
     return realIp.trim();
   }
+
   return "127.0.0.1";
 }
 
 /**
- * Generates an anonymous SHA-256 connection hash directly from a NextRequest.
+ * Generates an anonymous SHA-256 connection hash directly from a request or header map.
+ * Reads pre-computed connection tokens from proxy headers before recomputing client hashes.
  */
-export async function getConnectionHashFromRequest(req: NextRequest): Promise<string> {
-  const existingHash = req.headers.get("x-connection-hash");
+export async function getConnectionHashFromRequest(reqOrHeaders?: RequestOrHeaders): Promise<string> {
+  const existingHash = extractHeaderValue(reqOrHeaders, "x-connection-hash");
   if (existingHash) {
     return existingHash;
   }
-  const userAgent = req.headers.get("user-agent") || "";
-  const ip = extractClientIp(req);
+  const userAgent = extractHeaderValue(reqOrHeaders, "user-agent") || "";
+  const ip = extractClientIp(reqOrHeaders);
   return generateClientConnectionHash(`${ip}:${userAgent}`);
 }
+
