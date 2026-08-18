@@ -16,6 +16,7 @@
 - [checkAccessibilityStandards](functions/checkAccessibilityStandards.md)
 - [checkDefectRemediationInvariants](functions/checkDefectRemediationInvariants.md)
 - [checkDocumentationParity](functions/checkDocumentationParity.md)
+- [checkExporterBarrelSegregation](functions/checkExporterBarrelSegregation.md)
 - [checkHydrationSafety](functions/checkHydrationSafety.md)
 - [checkLayoutTextClippingInvariants](functions/checkLayoutTextClippingInvariants.md)
 - [checkMigrationGuard](functions/checkMigrationGuard.md)

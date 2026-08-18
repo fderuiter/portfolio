@@ -41,6 +41,8 @@
 - [lib/crf/export-r](lib/crf/export-r/README.md)
 - [lib/crf/export-sas](lib/crf/export-sas/README.md)
 - [lib/crf/exporters](lib/crf/exporters/README.md)
+- [lib/crf/exporters/heavy](lib/crf/exporters/heavy/README.md)
+- [lib/crf/exporters/light](lib/crf/exporters/light/README.md)
 - [lib/crf/fhir-questionnaire](lib/crf/fhir-questionnaire/README.md)
 - [lib/crf/odm-xml-serializer](lib/crf/odm-xml-serializer/README.md)
 - [lib/crf/presets](lib/crf/presets/README.md)

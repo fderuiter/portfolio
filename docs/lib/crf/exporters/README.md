@@ -68,18 +68,6 @@ Re-exports [generateAcrfHtml](../export-acrf/functions/generateAcrfHtml.md)
 
 ***
 
-### generateFormDocx
-
-Re-exports [generateFormDocx](../export-docx/functions/generateFormDocx.md)
-
-***
-
-### generateFormPdf
-
-Re-exports [generateFormPdf](../export-pdf/functions/generateFormPdf.md)
-
-***
-
 ### generateRCodelists
 
 Re-exports [generateRCodelists](../export-r/functions/generateRCodelists.md)
@@ -113,18 +101,6 @@ Re-exports [generateSdtmMappingMatrix](../export-acrf/functions/generateSdtmMapp
 ### generateStudyAcrfBookHtml
 
 Re-exports [generateStudyAcrfBookHtml](../export-acrf/functions/generateStudyAcrfBookHtml.md)
-
-***
-
-### generateStudyDocx
-
-Re-exports [generateStudyDocx](../export-docx/functions/generateStudyDocx.md)
-
-***
-
-### generateStudyPdf
-
-Re-exports [generateStudyPdf](../export-pdf/functions/generateStudyPdf.md)
 
 ***
 

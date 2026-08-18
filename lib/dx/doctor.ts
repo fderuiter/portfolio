@@ -946,6 +946,58 @@ export function checkPackageLockfile(root: string): DiagnosticCheckResult {
 }
 
 /**
+ * Diagnostic Check: Exporter Barrel Segregation Entry Points
+ */
+export function checkExporterBarrelSegregation(root: string): DiagnosticCheckResult {
+  const mainIndexPath = path.join(root, "lib", "crf", "exporters", "index.ts");
+  const heavySubpath = path.join(root, "lib", "crf", "exporters", "heavy.ts");
+
+  if (!fs.existsSync(mainIndexPath)) {
+    return {
+      id: "exporter-barrel-segregation",
+      name: "Exporter Barrel Segregation & Entry Point Invariant",
+      category: "architecture",
+      status: "fail",
+      message: "Main exporter index (lib/crf/exporters/index.ts) is missing.",
+    };
+  }
+
+  const mainContent = fs.readFileSync(mainIndexPath, "utf-8");
+  if (
+    mainContent.includes("export-docx") ||
+    mainContent.includes("export-pdf") ||
+    mainContent.includes("docx") ||
+    mainContent.includes("jspdf")
+  ) {
+    return {
+      id: "exporter-barrel-segregation",
+      name: "Exporter Barrel Segregation & Entry Point Invariant",
+      category: "architecture",
+      status: "fail",
+      message: "Main exporter index re-exports heavy document generators, violating bundle segregation.",
+    };
+  }
+
+  if (!fs.existsSync(heavySubpath)) {
+    return {
+      id: "exporter-barrel-segregation",
+      name: "Exporter Barrel Segregation & Entry Point Invariant",
+      category: "architecture",
+      status: "fail",
+      message: "Heavy exporter subpath entry point (lib/crf/exporters/heavy.ts) is missing.",
+    };
+  }
+
+  return {
+    id: "exporter-barrel-segregation",
+    name: "Exporter Barrel Segregation & Entry Point Invariant",
+    category: "architecture",
+    status: "pass",
+    message: "Main exporter barrel contains lightweight utilities; heavy document generators are isolated in dedicated subpath.",
+  };
+}
+
+/**
  * Run All Diagnostics
  */
 export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
@@ -980,6 +1032,7 @@ export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
     checkPackageLockfile(root),
     checkDeadCode(root),
     checkBundleBudgets(root),
+    checkExporterBarrelSegregation(root),
   ];
 
   const totalPassed = checks.filter((c) => c.status === "pass").length;

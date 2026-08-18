@@ -81,7 +81,7 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
       setIsExportingDocx(true);
       recordEvent("crf", "project_click");
       const options = getEffectiveOptions();
-      const { generateStudyDocx } = await import("@/lib/crf/export-docx");
+      const { generateStudyDocx } = await import("@/lib/crf/exporters/heavy");
       const blob = await generateStudyDocx(study, options);
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -106,7 +106,7 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
       setIsExportingPdf(true);
       recordEvent("crf", "project_click");
       const options = getEffectiveOptions();
-      const { generateStudyPdf } = await import("@/lib/crf/export-pdf");
+      const { generateStudyPdf } = await import("@/lib/crf/exporters/heavy");
       const blob = await generateStudyPdf(study, options);
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
