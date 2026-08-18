@@ -8,7 +8,7 @@
 
 > **setQueueCapacity**(`capacity`): `void`
 
-Defined in: [hooks/useTelemetry.ts:149](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L149)
+Defined in: [hooks/useTelemetry.ts:176](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L176)
 
 Configure the maximum capacity of the in-memory telemetry retry queue.
 Trims existing queue entries from the front (oldest first) if current length exceeds new capacity.
