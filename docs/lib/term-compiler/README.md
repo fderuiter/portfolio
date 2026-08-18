@@ -14,4 +14,5 @@
 
 - [compileTerms](functions/compileTerms.md)
 - [escapeAttr](functions/escapeAttr.md)
+- [resetPatternCache](functions/resetPatternCache.md)
 - [validateTermTags](functions/validateTermTags.md)

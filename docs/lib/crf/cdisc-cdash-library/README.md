@@ -6,11 +6,20 @@
 
 # lib/crf/cdisc-cdash-library
 
-## Variables
+## References
 
-- [CDASH\_STANDARD\_VARIABLES](variables/CDASH_STANDARD_VARIABLES.md)
-- [STANDARD\_CODELISTS](variables/STANDARD_CODELISTS.md)
+### CDASH\_STANDARD\_VARIABLES
 
-## Functions
+Re-exports [CDASH_STANDARD_VARIABLES](../cdash-domain-templates/variables/CDASH_STANDARD_VARIABLES.md)
 
-- [scaffoldCdashDomain](functions/scaffoldCdashDomain.md)
+***
+
+### scaffoldCdashDomain
+
+Re-exports [scaffoldCdashDomain](../cdash-domain-templates/functions/scaffoldCdashDomain.md)
+
+***
+
+### STANDARD\_CODELISTS
+
+Re-exports [STANDARD_CODELISTS](../cdisc-controlled-terminology/variables/STANDARD_CODELISTS.md)
