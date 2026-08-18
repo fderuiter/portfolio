@@ -55,7 +55,9 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
   });
 
   // IntersectionObserver Guard to pause rendering loops when scrolled offscreen and defer external model fetches
-  const isIntersectingRef = useRef(true);
+  const isIntersectingRef = useRef<boolean>(
+    typeof window === "undefined" || typeof IntersectionObserver === "undefined"
+  );
   useEffect(() => {
     const container = containerRef.current;
     if (!container || typeof IntersectionObserver === "undefined") return;
