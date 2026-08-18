@@ -14,8 +14,9 @@ import { resolveBaseUrl } from "@/lib/domain";
 import { ROUTE_METADATA_CONFIGS, buildRouteMetadata } from "@/lib/seo-metadata";
 import { ARCADE_GAMES_METADATA } from "@/lib/arcade-data";
 import robots from "@/app/robots";
-import sitemap from "@/app/sitemap";
+import sitemap, { revalidate, STATIC_ROUTE_LAST_MODIFIED } from "@/app/sitemap";
 import manifest from "@/app/manifest";
+import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 
 vi.mock("next/font/google", () => ({
   Inter: () => ({ variable: "--font-inter" }),
@@ -184,6 +185,45 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     expect(urls).toContain(`${expectedBase}/proof`);
     expect(urls).toContain(`${expectedBase}/simulator`);
     expect(urls).toContain(`${expectedBase}/schedule`);
+  });
+
+  it("sitemap configuration exports a 24-hour revalidation interval (86400 seconds)", () => {
+    expect(revalidate).toBe(86400);
+  });
+
+  it("static route entries serve identical static modification dates across repeated requests", async () => {
+    const map1 = await sitemap();
+    await new Promise((resolve) => setTimeout(resolve, 15));
+    const map2 = await sitemap();
+
+    expect(map1.length).toBe(map2.length);
+
+    // Verify static routes maintain identical timestamps matching STATIC_ROUTE_LAST_MODIFIED
+    for (let i = 0; i < 16; i++) {
+      expect(map1[i].lastModified).toEqual(STATIC_ROUTE_LAST_MODIFIED);
+      expect(map2[i].lastModified).toEqual(STATIC_ROUTE_LAST_MODIFIED);
+      const val1 = map1[i].lastModified;
+      const val2 = map2[i].lastModified;
+      const date1 = val1 instanceof Date ? val1 : new Date(val1 as string);
+      const date2 = val2 instanceof Date ? val2 : new Date(val2 as string);
+      expect(date1.getTime()).toBe(date2.getTime());
+    }
+  });
+
+  it("fallback and mock content items retain explicit pre-defined update dates rather than generating execution timestamps", async () => {
+    const map = await sitemap();
+    const caseStudyEntries = map.filter((entry) => entry.url.includes("/case-studies/"));
+
+    expect(caseStudyEntries.length).toBeGreaterThan(0);
+
+    for (const entry of caseStudyEntries) {
+      const slug = entry.url.split("/case-studies/")[1];
+      const fallbackMatch = FALLBACK_CASE_STUDIES.find((cs) => cs.slug === slug);
+      if (fallbackMatch && entry.lastModified) {
+        const entryDate = entry.lastModified instanceof Date ? entry.lastModified : new Date(entry.lastModified);
+        expect(entryDate.toISOString()).toBe(fallbackMatch.updated_at.toISOString());
+      }
+    }
   });
 
   it("sitemap generator in production strictly produces canonical https://www.deruiter.dev URLs without localhost leakage", async () => {
