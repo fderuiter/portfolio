@@ -174,6 +174,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         ]
       },
       {
+        id: "nav-4glory",
+        title: "4Glory | Does Fred Know Ball?",
+        subtitle: "Predictive basketball analytics & machine learning pipeline breakdown",
+        category: "navigation",
+        url: "/case-studies/4glory-does-fred-know-ball",
+        icon: <IconFileCode className="w-4 h-4 text-brand-cyan" />,
+        badge: "Machine Learning",
+        status: "Predictive ML",
+        description: "End-to-end predictive basketball analytics pipeline using XGBoost, vectorized rolling possession ratings, expanding-window temporal validation, and SHAP interpretability.",
+        techStack: ["Python", "XGBoost", "Pandas", "Scikit-Learn", "Kaggle"],
+        highlights: [
+          "Vectorized rolling possession efficiency pipeline",
+          "Temporal leakage prevention via expanding-window CV",
+          "Model explainability via TreeSHAP value plots"
+        ]
+      },
+      {
         id: "nav-laser-loon",
         title: "Laser Loon: Quest for the State Flag",
         subtitle: "Playable civic physics shooter — pilot F277 Laser Loon on the Road to the Capitol",

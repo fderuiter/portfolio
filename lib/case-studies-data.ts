@@ -332,6 +332,66 @@ interface SchemaNode {
     created_at: new Date("2026-02-15T00:00:00Z"),
     updated_at: new Date("2026-08-14T00:00:00Z"),
   },
+  {
+    id: "canonical-6",
+    slug: "4glory-does-fred-know-ball",
+    title: "4Glory | Does Fred Know Ball?: Predictive Basketball Analytics & ML Pipeline",
+    primary_language: "Python",
+    github_url: "https://github.com/fderuiter/4Glory",
+    published: true,
+    simulated_telemetry: false,
+    tags: "Python, XGBoost, Pandas, Scikit-Learn, Kaggle, machine-learning, sports-analytics, predictive-modeling, feature-engineering, basketball-analytics",
+    editorial_content: "An end-to-end **predictive basketball analytics pipeline** built in **Python**, **XGBoost**, and **Pandas** that evaluates human domain expertise ('knowing ball') against supervised machine learning models using vectorized rolling possession ratings, expanding-window temporal validation, and `SHAP explainability`.",
+    architectural_narrative: `<h3>The Challenge</h3>
+<p>Sports analytics and forecasting often rely on unquantified box-score scouting or naive historical aggregates. Predictive game outcome and player projection models suffer from severe temporal look-ahead bias if temporal validation splits are not strictly enforced. Additionally, dynamic lineup changes, garbage-time stat padding, and cold-start early season anomalies introduce significant variance into statistical models.</p>
+
+<h3>Technical Architecture</h3>
+<p>4Glory deconstructs monolithic analytics logic into a modular, four-tier pipeline: <strong>Vectorized Ingestion &amp; Cleaning</strong>, <strong>Possession-Adjusted Feature Engine</strong>, <strong>Expanding-Window Temporal Splitter</strong>, and <strong>Probabilistic Calibration &amp; SHAP Evaluation</strong>.</p>
+
+<pre><code class="language-python">
+import pandas as pd
+import numpy as np
+
+# Vectorized rolling possession-adjusted team efficiency feature pipeline
+def compute_rolling_possession_features(df: pd.DataFrame, window: int = 10) -> pd.DataFrame:
+    df = df.sort_values(["team_id", "game_date"]).reset_index(drop=True)
+    df["possessions"] = df["fga"] + 0.44 * df["fta"] - df["oreb"] + df["turnovers"]
+    df["off_rtg"] = (df["points"] / df["possessions"]) * 100
+    df["def_rtg"] = (df["opp_points"] / df["possessions"]) * 100
+    df["net_rtg"] = df["off_rtg"] - df["def_rtg"]
+
+    # Shift by 1 to guarantee zero look-ahead bias across game dates
+    rolling_cols = ["off_rtg", "def_rtg", "net_rtg", "possessions"]
+    rolling_features = df.groupby("team_id")[rolling_cols].shift(1).rolling(window=window, min_periods=3).mean()
+    rolling_features.columns = [f"{col}_roll_{window}" for col in rolling_cols]
+    return pd.concat([df, rolling_features], axis=1)
+</code></pre>
+
+<h4>1. Vectorized Feature Engineering &amp; Four Factors</h4>
+<p>Custom transformer pipelines compute possession-adjusted efficiency ratings (Dean Oliver's Four Factors), rest and travel differential multipliers, and rolling team metrics using high-performance vectorized Pandas/NumPy operations executing within tight Kaggle memory constraints.</p>
+
+<h4>2. Temporal Leakage Prevention via Expanding-Window CV</h4>
+<p>To eliminate look-ahead bias across consecutive game days, 4Glory implements an expanding-window time-series validation strategy rather than randomized K-Fold splits, strictly separating historical training windows from future game prediction targets.</p>
+
+<pre><code class="language-python">
+# Time-series expanding-window validation split generator
+def expanding_window_temporal_split(df: pd.DataFrame, date_col: str, initial_train_months: int = 12, step_months: int = 1):
+    df[date_col] = pd.to_datetime(df[date_col])
+    current_train_end = df[date_col].min() + pd.DateOffset(months=initial_train_months)
+    while current_train_end < df[date_col].max():
+        val_end = current_train_end + pd.DateOffset(months=step_months)
+        train_indices = df[df[date_col] < current_train_end].index.values
+        val_indices = df[(df[date_col] >= current_train_end) & (df[date_col] < val_end)].index.values
+        if len(train_indices) > 0 and len(val_indices) > 0:
+            yield train_indices, val_indices
+        current_train_end = val_end
+</code></pre>
+
+<h4>3. Supervised Ensemble &amp; Model Interpretability</h4>
+<p>Gradient boosted decision trees (XGBoost / LightGBM) are trained and calibrated using Platt scaling and isotonic regression to yield reliable win probabilities. TreeSHAP explainer plots generate feature importance rankings, quantifying the exact impact of net rating deltas, rest advantages, and rebound margins on outcome predictions.</p>`,
+    created_at: new Date("2026-03-01T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
 ];
 
 export const FALLBACK_CASE_STUDIES: CaseStudyData[] = rawFallbackCaseStudies.map((cs) => ({

@@ -74,4 +74,15 @@ describe("ProjectTeaserGrid Component Suite", () => {
 
     expect(container.textContent).toContain(FALLBACK_CASE_STUDIES[0].primary_language);
   });
+
+  it("includes 4Glory Does Fred Know Ball case study in fallback case studies dataset", () => {
+    const fourGloryStudy = FALLBACK_CASE_STUDIES.find(
+      (s) => s.slug === "4glory-does-fred-know-ball"
+    );
+    expect(fourGloryStudy).toBeDefined();
+    expect(fourGloryStudy?.title).toContain("4Glory | Does Fred Know Ball?");
+    expect(fourGloryStudy?.primary_language).toBe("Python");
+    expect(fourGloryStudy?.tags).toContain("machine-learning");
+    expect(fourGloryStudy?.tags).toContain("basketball-analytics");
+  });
 });

@@ -100,6 +100,13 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     path: "/offline",
     keywords: ["Offline", "PWA", "Service Worker", "Precached Shell", "Frederick de Ruiter"],
   },
+  fourGlory: {
+    title: "4Glory | Does Fred Know Ball?: Predictive Basketball Analytics & ML Pipeline",
+    description: "Predictive basketball analytics pipeline evaluating human domain expertise against supervised machine learning pipelines using XGBoost, vectorized rolling possession ratings, expanding-window temporal validation, and SHAP interpretability.",
+    path: "/case-studies/4glory-does-fred-know-ball",
+    keywords: ["4Glory", "Basketball Analytics", "XGBoost", "Machine Learning", "Predictive Modeling", "Feature Engineering", "Sports Analytics", "SHAP"],
+    ogType: "article",
+  },
 };
 
 /**
