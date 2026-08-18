@@ -17,7 +17,7 @@ interface NeuroMetricsPanelProps {
   scoreState: ScoreState;
 }
 
-export const NeuroMetricsPanel: React.FC<NeuroMetricsPanelProps> = ({
+const NeuroMetricsPanelComponent: React.FC<NeuroMetricsPanelProps> = ({
   scenario,
   metrics,
   scoreState,
@@ -174,3 +174,5 @@ export const NeuroMetricsPanel: React.FC<NeuroMetricsPanelProps> = ({
     </div>
   );
 };
+
+export const NeuroMetricsPanel = React.memo(NeuroMetricsPanelComponent);

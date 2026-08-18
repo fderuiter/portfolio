@@ -29,7 +29,7 @@ interface NeuroToolbarProps {
   onOpenFieldManual: () => void;
 }
 
-export const NeuroToolbar: React.FC<NeuroToolbarProps> = ({
+const NeuroToolbarComponent: React.FC<NeuroToolbarProps> = ({
   toolMode,
   brushRadius,
   showPialContour,
@@ -180,3 +180,5 @@ export const NeuroToolbar: React.FC<NeuroToolbarProps> = ({
     </div>
   );
 };
+
+export const NeuroToolbar = React.memo(NeuroToolbarComponent);

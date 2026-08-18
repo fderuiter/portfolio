@@ -34,7 +34,7 @@ interface FieldRendererProps {
   codelists: CodelistDefinition[];
 }
 
-export const FieldRenderer: React.FC<FieldRendererProps> = ({
+const FieldRendererComponent: React.FC<FieldRendererProps> = ({
   field,
   isSelected,
   onSelect,
@@ -525,3 +525,5 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
     </div>
   );
 };
+
+export const FieldRenderer = React.memo(FieldRendererComponent);

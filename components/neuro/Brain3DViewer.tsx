@@ -18,7 +18,7 @@ interface Brain3DViewerProps {
   onCrosshairChange?: (coord: VoxelCoord) => void;
 }
 
-export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
+const Brain3DViewerComponent: React.FC<Brain3DViewerProps> = ({
   surfaceMode,
   crosshair,
   modelUrl,
@@ -200,7 +200,9 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
 
     return () => {
       cancelAnimationFrame(animId);
-      window.removeEventListener("resize", handleResize);
+      if (typeof window !== "undefined") {
+        window.removeEventListener("resize", handleResize);
+      }
       bindCanvas(null);
       if (renderer) {
         renderer.dispose();
@@ -609,3 +611,5 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
     </div>
   );
 };
+
+export const Brain3DViewer = React.memo(Brain3DViewerComponent);

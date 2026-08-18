@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import { clamp } from "@/lib/game-utils";
 import { ControlPoint, SlicePlane, ToolMode, VoxelCoord, VoxelEdit } from "@/lib/neuro/types";
 import { extractSlice, SyntheticVolume, VOLUME_SIZE } from "@/lib/neuro/volume-generator";
+import { neuroStore } from "@/lib/neuro/neuro-store";
+import { useStoreSelector } from "@/lib/pubsub-store";
 import { IconLayersSubtract } from "@tabler/icons-react";
 
 interface MultiPlanarSliceViewerProps {
@@ -19,7 +21,7 @@ interface MultiPlanarSliceViewerProps {
   onApplyVoxelEdits: (edits: VoxelEdit[]) => void;
 }
 
-export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
+const MultiPlanarSliceViewerComponent: React.FC<MultiPlanarSliceViewerProps> = ({
   volume,
   crosshair,
   toolMode,
@@ -33,7 +35,7 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
 }) => {
   const [activePlane, setActivePlane] = useState<SlicePlane>("coronal");
   const [viewLayout, setViewLayout] = useState<"focused" | "multi">("multi");
-  const [hoverIntensity, setHoverIntensity] = useState<number | null>(null);
+  const hoverIntensity = useStoreSelector(neuroStore, (s) => s.hoverIntensity);
 
   const isMouseDownRef = useRef(false);
   const activePlaneRef = useRef<SlicePlane>("coronal");
@@ -59,8 +61,9 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
       const sliceData = extractSlice(volume, plane, sliceIdx);
       const { width, height, pixels, mask, wm } = sliceData;
 
-      canvas.width = width;
-      canvas.height = height;
+      // Preserve browser graphics hardware buffers
+      if (canvas.width !== width) canvas.width = width;
+      if (canvas.height !== height) canvas.height = height;
 
       // Draw grayscale MRI pixels
       const imgData = ctx.createImageData(width, height);
@@ -225,18 +228,24 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
     [volume, crosshair, showPialContour, showWmContour, controlPoints]
   );
 
-  // Render all active slice views on state update and context restoration
-  useEffect(() => {
-    const redrawAll = () => {
+  const animFrameRef = useRef<number | null>(null);
+
+  const scheduleRedraw = useCallback(() => {
+    if (animFrameRef.current !== null) return;
+    animFrameRef.current = requestAnimationFrame(() => {
+      animFrameRef.current = null;
       renderSliceToCanvas(axialCanvasRef.current, "axial", crosshair.z);
       renderSliceToCanvas(coronalCanvasRef.current, "coronal", crosshair.y);
       renderSliceToCanvas(sagittalCanvasRef.current, "sagittal", crosshair.x);
-    };
+    });
+  }, [renderSliceToCanvas, crosshair]);
 
-    redrawAll();
+  // Render all active slice views on state update and context restoration
+  useEffect(() => {
+    scheduleRedraw();
 
     const handleRestore = () => {
-      redrawAll();
+      scheduleRedraw();
     };
 
     const handleLoss = (e: Event) => {
@@ -255,12 +264,16 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
     });
 
     return () => {
+      if (animFrameRef.current !== null) {
+        cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = null;
+      }
       canvases.forEach((c) => {
         c.removeEventListener("contextlost", handleLoss);
         c.removeEventListener("contextrestored", handleRestore);
       });
     };
-  }, [renderSliceToCanvas, crosshair]);
+  }, [scheduleRedraw]);
 
   /**
    * Convert canvas mouse event to 3D Voxel Coordinate
@@ -429,7 +442,7 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
     const y = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height));
     const idx = y * sliceData.width + x;
     if (idx >= 0 && idx < sliceData.pixels.length) {
-      setHoverIntensity(sliceData.pixels[idx]);
+      neuroStore.set({ hoverIntensity: sliceData.pixels[idx] });
     }
 
     if (isMouseDownRef.current && (toolMode === "paint" || toolMode === "erase")) {
@@ -695,3 +708,5 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
     </div>
   );
 };
+
+export const MultiPlanarSliceViewer = React.memo(MultiPlanarSliceViewerComponent);

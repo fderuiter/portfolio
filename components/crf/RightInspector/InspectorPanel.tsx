@@ -5,6 +5,7 @@ import { CRFForm, CRFField, CodelistDefinition, EditCheckRule } from "@/lib/crf/
 import { FieldPropertiesTab } from "./FieldPropertiesTab";
 import { LogicRulesTab } from "./LogicRulesTab";
 import { CdiscMetadataTab } from "./CdiscMetadataTab";
+import { BufferedInput } from "./BufferedInput";
 import {
   IconAdjustments,
   IconMathFunction,
@@ -26,7 +27,7 @@ interface InspectorPanelProps {
 
 type InspectorTab = "properties" | "logic" | "cdash";
 
-export const InspectorPanel: React.FC<InspectorPanelProps> = ({
+const InspectorPanelComponent: React.FC<InspectorPanelProps> = ({
   form,
   selectedField,
   codelists,
@@ -141,19 +142,20 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
               <div className="text-xs font-bold text-white font-mono">Form-Level Configuration</div>
               <div>
                 <label className="block text-[10px] font-mono text-zinc-400 mb-1">Form Name</label>
-                <input
+                <BufferedInput
                   type="text"
                   value={form.name}
-                  onChange={(e) => onUpdateFormMeta({ name: e.target.value })}
+                  onCommit={(val) => onUpdateFormMeta({ name: val })}
                   className="w-full px-2.5 py-1 bg-zinc-950 border border-zinc-800 rounded text-xs text-white"
                 />
               </div>
               <div>
                 <label className="block text-[10px] font-mono text-zinc-400 mb-1">CDASH Domain</label>
-                <input
+                <BufferedInput
                   type="text"
                   value={form.domain}
-                  onChange={(e) => onUpdateFormMeta({ domain: e.target.value.toUpperCase() })}
+                  transform={(v) => v.toUpperCase()}
+                  onCommit={(val) => onUpdateFormMeta({ domain: val })}
                   className="w-full px-2.5 py-1 bg-zinc-950 border border-zinc-800 rounded text-xs text-white font-mono uppercase"
                 />
               </div>
@@ -181,3 +183,5 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
     </div>
   );
 };
+
+export const InspectorPanel = React.memo(InspectorPanelComponent);

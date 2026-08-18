@@ -32,7 +32,7 @@ interface FormCanvasProps {
   onOpenPalette: () => void;
 }
 
-export const FormCanvas: React.FC<FormCanvasProps> = ({
+const FormCanvasComponent: React.FC<FormCanvasProps> = ({
   form,
   selectedFieldId,
   viewport,
@@ -496,3 +496,5 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
     </div>
   );
 };
+
+export const FormCanvas = React.memo(FormCanvasComponent);

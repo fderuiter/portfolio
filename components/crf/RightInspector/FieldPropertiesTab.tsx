@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { CRFField, CodelistDefinition, CodelistOption, ClinicalDataType } from "@/lib/crf/types";
 import { generateId } from "@/lib/utils";
 import { AstRuleEditor } from "./AstRuleEditor";
+import { BufferedInput, BufferedTextarea } from "./BufferedInput";
 import {
   IconPlus,
   IconTrash,
@@ -116,7 +117,7 @@ const QUICK_TEMPLATES: QuickTemplate[] = [
   },
 ];
 
-export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
+const FieldPropertiesTabComponent: React.FC<FieldPropertiesTabProps> = ({
   field,
   allFieldsInForm,
   codelists,
@@ -285,10 +286,11 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
         <label className="block text-[11px] font-mono text-zinc-400 mb-1">
           CDASH / SDTM Variable Name <span className="text-brand-cyan">*</span>
         </label>
-        <input
+        <BufferedInput
           type="text"
           value={field.variableName}
-          onChange={(e) => onUpdateField({ variableName: e.target.value.toUpperCase() })}
+          transform={(v) => v.toUpperCase()}
+          onCommit={(val) => onUpdateField({ variableName: val })}
           className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-white font-mono uppercase focus:border-brand-cyan focus:outline-none"
           placeholder="e.g. BRTHYR, SYSBP, AETERM, DITERM"
         />
@@ -298,10 +300,10 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
         <label className="block text-[11px] font-mono text-zinc-400 mb-1">
           Question Text / Form Label <span className="text-brand-cyan">*</span>
         </label>
-        <input
+        <BufferedInput
           type="text"
           value={field.label}
-          onChange={(e) => onUpdateField({ label: e.target.value })}
+          onCommit={(val) => onUpdateField({ label: val })}
           className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-white font-sans focus:border-brand-cyan focus:outline-none"
           placeholder="e.g. Primary Device Deficiency Classification"
         />
@@ -311,10 +313,10 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
         <label className="block text-[11px] font-mono text-zinc-400 mb-1">
           Instruction / Clinical Description
         </label>
-        <textarea
+        <BufferedTextarea
           rows={2}
           value={field.description || ""}
-          onChange={(e) => onUpdateField({ description: e.target.value })}
+          onCommit={(val) => onUpdateField({ description: val })}
           className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-zinc-300 font-sans focus:border-brand-cyan focus:outline-none resize-none"
           placeholder="e.g. Select the primary reason observed during procedure."
         />
@@ -389,21 +391,21 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
           <div className="grid grid-cols-3 gap-2">
             <div>
               <label className="block text-[10px] font-mono text-zinc-500 mb-1">Unit</label>
-              <input
+              <BufferedInput
                 type="text"
                 value={field.unit || ""}
-                onChange={(e) => onUpdateField({ unit: e.target.value })}
+                onCommit={(val) => onUpdateField({ unit: val })}
                 className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-xs text-white font-mono"
                 placeholder="mmHg, kg, °C"
               />
             </div>
             <div>
               <label className="block text-[10px] font-mono text-zinc-500 mb-1">Min Value</label>
-              <input
+              <BufferedInput
                 type="number"
                 value={field.minValue !== undefined ? field.minValue : ""}
-                onChange={(e) =>
-                  onUpdateField({ minValue: e.target.value === "" ? undefined : parseFloat(e.target.value) })
+                onCommit={(val) =>
+                  onUpdateField({ minValue: val === "" ? undefined : parseFloat(val) })
                 }
                 className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-xs text-white font-mono"
                 placeholder="None"
@@ -411,11 +413,11 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
             </div>
             <div>
               <label className="block text-[10px] font-mono text-zinc-500 mb-1">Max Value</label>
-              <input
+              <BufferedInput
                 type="number"
                 value={field.maxValue !== undefined ? field.maxValue : ""}
-                onChange={(e) =>
-                  onUpdateField({ maxValue: e.target.value === "" ? undefined : parseFloat(e.target.value) })
+                onCommit={(val) =>
+                  onUpdateField({ maxValue: val === "" ? undefined : parseFloat(val) })
                 }
                 className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-xs text-white font-mono"
                 placeholder="None"
@@ -728,3 +730,5 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
     </div>
   );
 };
+
+export const FieldPropertiesTab = React.memo(FieldPropertiesTabComponent);

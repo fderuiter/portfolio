@@ -3,6 +3,7 @@
 import React from "react";
 import { CRFField, CRFForm, CdashVariableMetadata } from "@/lib/crf/types";
 import { CDASH_STANDARD_VARIABLES } from "@/lib/crf/cdisc-cdash-library";
+import { BufferedInput } from "./BufferedInput";
 import { IconDatabase, IconSparkles } from "@tabler/icons-react";
 
 interface CdiscMetadataTabProps {
@@ -11,7 +12,7 @@ interface CdiscMetadataTabProps {
   onUpdateField: (updates: Partial<CRFField>) => void;
 }
 
-export const CdiscMetadataTab: React.FC<CdiscMetadataTabProps> = ({
+const CdiscMetadataTabComponent: React.FC<CdiscMetadataTabProps> = ({
   field,
   form,
   onUpdateField,
@@ -83,10 +84,11 @@ export const CdiscMetadataTab: React.FC<CdiscMetadataTabProps> = ({
           <label className="block text-[11px] font-mono text-zinc-400 mb-1">
             SDTM Target Domain
           </label>
-          <input
+          <BufferedInput
             type="text"
             value={cdashMeta.domain}
-            onChange={(e) => handleUpdateCdash({ domain: e.target.value.toUpperCase() })}
+            transform={(v) => v.toUpperCase()}
+            onCommit={(val) => handleUpdateCdash({ domain: val })}
             className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-white font-mono uppercase focus:border-brand-cyan focus:outline-none"
           />
         </div>
@@ -95,10 +97,11 @@ export const CdiscMetadataTab: React.FC<CdiscMetadataTabProps> = ({
           <label className="block text-[11px] font-mono text-zinc-400 mb-1">
             SDTM Variable
           </label>
-          <input
+          <BufferedInput
             type="text"
             value={cdashMeta.sdtmVariable}
-            onChange={(e) => handleUpdateCdash({ sdtmVariable: e.target.value.toUpperCase() })}
+            transform={(v) => v.toUpperCase()}
+            onCommit={(val) => handleUpdateCdash({ sdtmVariable: val })}
             className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-white font-mono uppercase focus:border-brand-cyan focus:outline-none"
           />
         </div>
@@ -127,10 +130,10 @@ export const CdiscMetadataTab: React.FC<CdiscMetadataTabProps> = ({
           <label className="block text-[11px] font-mono text-zinc-400 mb-1">
             NCI Concept ID
           </label>
-          <input
+          <BufferedInput
             type="text"
             value={cdashMeta.nciConceptId || ""}
-            onChange={(e) => handleUpdateCdash({ nciConceptId: e.target.value })}
+            onCommit={(val) => handleUpdateCdash({ nciConceptId: val })}
             className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-white font-mono focus:border-brand-cyan focus:outline-none"
             placeholder="e.g. C49487"
           />
@@ -142,10 +145,10 @@ export const CdiscMetadataTab: React.FC<CdiscMetadataTabProps> = ({
         <label className="block text-[11px] font-mono text-zinc-400 mb-1">
           Annotated CRF (aCRF) Text Overlay <span className="text-brand-cyan">*</span>
         </label>
-        <input
+        <BufferedInput
           type="text"
           value={cdashMeta.acrfAnnotation}
-          onChange={(e) => handleUpdateCdash({ acrfAnnotation: e.target.value })}
+          onCommit={(val) => handleUpdateCdash({ acrfAnnotation: val })}
           className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-brand-cyan font-mono text-xs focus:border-brand-cyan focus:outline-none"
           placeholder="e.g. AE.AESTDTC or VS.VSSTRESN [VSTESTCD=HEIGHT]"
         />
@@ -156,3 +159,5 @@ export const CdiscMetadataTab: React.FC<CdiscMetadataTabProps> = ({
     </div>
   );
 };
+
+export const CdiscMetadataTab = React.memo(CdiscMetadataTabComponent);

@@ -11,7 +11,7 @@ interface LogicRulesTabProps {
   onUpdateRules: (rules: EditCheckRule[]) => void;
 }
 
-export const LogicRulesTab: React.FC<LogicRulesTabProps> = ({
+const LogicRulesTabComponent: React.FC<LogicRulesTabProps> = ({
   form,
   selectedField,
   onUpdateRules,
@@ -333,3 +333,5 @@ export const LogicRulesTab: React.FC<LogicRulesTabProps> = ({
     </div>
   );
 };
+
+export const LogicRulesTab = React.memo(LogicRulesTabComponent);

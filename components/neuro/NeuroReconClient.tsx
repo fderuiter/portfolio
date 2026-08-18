@@ -18,6 +18,8 @@ import {
 import { SCENARIOS, SCENARIO_LIST, DATASET_CONFIGS } from "@/lib/neuro/scenarios";
 import { generateSyntheticVolume, SyntheticVolume, VOLUME_SIZE } from "@/lib/neuro/volume-generator";
 import { evaluateQAMetrics } from "@/lib/neuro/qa-engine";
+import { neuroStore } from "@/lib/neuro/neuro-store";
+import { useStoreSelector } from "@/lib/pubsub-store";
 import { MultiPlanarSliceViewer } from "./MultiPlanarSliceViewer";
 import dynamic from "next/dynamic";
 
@@ -110,7 +112,11 @@ export const NeuroReconClient: React.FC = () => {
     generateSyntheticVolume(activeScenarioId)
   );
 
-  const [crosshair, setCrosshair] = useState<VoxelCoord>(currentScenario.targetCoords);
+  const crosshair = useStoreSelector(neuroStore, (s) => s.crosshair);
+  const handleCrosshairChange = useCallback((coord: VoxelCoord) => {
+    neuroStore.set({ crosshair: coord });
+  }, []);
+
   const [toolMode, setToolModeState] = useState<ToolMode>(() => {
     if (typeof window !== "undefined") {
       const rawTool = new URLSearchParams(window.location.hash.slice(1)).get("tool") as ToolMode;
@@ -190,7 +196,7 @@ export const NeuroReconClient: React.FC = () => {
     const newConfig = SCENARIOS[scenarioId];
     const newVol = generateSyntheticVolume(scenarioId);
     setVolume(newVol);
-    setCrosshair(newConfig.targetCoords);
+    neuroStore.set({ crosshair: newConfig.targetCoords, hoverIntensity: null });
     setToolModeState(newConfig.recommendedTool);
     setControlPoints([]);
     setVoxelEdits([]);
@@ -359,7 +365,7 @@ export const NeuroReconClient: React.FC = () => {
     setVolume(freshVol);
     setControlPoints([]);
     setVoxelEdits([]);
-    setCrosshair(currentScenario.targetCoords);
+    neuroStore.set({ crosshair: currentScenario.targetCoords, hoverIntensity: null });
     playNote(300, 0.1);
 
     setLogs((prev) => [
@@ -778,7 +784,7 @@ export const NeuroReconClient: React.FC = () => {
               crosshair={crosshair}
               modelUrl={DATASET_CONFIGS[activeDataset].modelUrl}
               onSurfaceChange={setSurfaceMode}
-              onCrosshairChange={setCrosshair}
+              onCrosshairChange={handleCrosshairChange}
             />
           </div>
         )}
@@ -798,7 +804,7 @@ export const NeuroReconClient: React.FC = () => {
               showPialContour={showPialContour}
               showWmContour={showWmContour}
               controlPoints={controlPoints}
-              onCrosshairChange={setCrosshair}
+              onCrosshairChange={handleCrosshairChange}
               onAddControlPoint={handleAddControlPoint}
               onApplyVoxelEdits={handleApplyVoxelEdits}
             />

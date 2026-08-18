@@ -15,7 +15,7 @@ interface RuleGraphStudioProps {
   study: StudyProtocol;
 }
 
-export const RuleGraphStudio: React.FC<RuleGraphStudioProps> = ({ study }) => {
+const RuleGraphStudioComponent: React.FC<RuleGraphStudioProps> = ({ study }) => {
   // Extract all rules and fields across forms
   const allForms = study.forms;
   const allRulesWithForm = useMemo(
@@ -397,3 +397,5 @@ export const RuleGraphStudio: React.FC<RuleGraphStudioProps> = ({ study }) => {
     </div>
   );
 };
+
+export const RuleGraphStudio = React.memo(RuleGraphStudioComponent);
