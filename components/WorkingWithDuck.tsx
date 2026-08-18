@@ -1410,6 +1410,36 @@ export const WorkingWithDuck: React.FC = () => {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const [isNearViewport, setIsNearViewport] = useState<boolean>(() => {
+    if (typeof window === "undefined" || typeof IntersectionObserver === "undefined") {
+      return true;
+    }
+    return false;
+  });
+
+  // Native IntersectionObserver to defer loading high-res scrapbook photos until container is within 200px of viewport
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsNearViewport(true);
+          }
+        });
+      },
+      { rootMargin: "200px" }
+    );
+
+    observer.observe(container);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
   const animFrameIdRef = useRef<number | null>(null);
   const lastBellyScrubPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
@@ -2959,13 +2989,19 @@ export const WorkingWithDuck: React.FC = () => {
             {uiState.latestUnlockedFact && (
               <div className="mb-4 sm:mb-6 rounded-2xl bg-white p-2.5 sm:p-3 shadow-2xl text-black rotate-1 max-w-[220px] sm:max-w-xs mx-auto">
                 <div className="relative w-full aspect-[4/3] sm:aspect-square rounded-lg overflow-hidden bg-amber-50 mb-2 border border-zinc-200">
-                  <Image
-                    src={uiState.latestUnlockedFact.photoUrl}
-                    alt={uiState.latestUnlockedFact.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 220px, 320px"
-                  />
+                  {isNearViewport ? (
+                    <Image
+                      src={uiState.latestUnlockedFact.photoUrl}
+                      alt={uiState.latestUnlockedFact.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 220px, 320px"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-zinc-200 animate-pulse flex items-center justify-center">
+                      <IconPhoto className="w-8 h-8 text-zinc-400" />
+                    </div>
+                  )}
                 </div>
                 <h4 className="font-bold text-xs text-zinc-900">{uiState.latestUnlockedFact.title}</h4>
                 <p className="text-[10px] sm:text-[11px] text-zinc-600 font-sans mt-1 leading-snug line-clamp-3 sm:line-clamp-none">
@@ -3195,13 +3231,19 @@ export const WorkingWithDuck: React.FC = () => {
                 <div className="rounded-2xl bg-white p-3 sm:p-4 text-black shadow-2xl">
                   <div className="relative w-full aspect-4/3 rounded-xl overflow-hidden bg-zinc-100 mb-2.5 sm:mb-3 border border-zinc-200">
                     {isUnlocked ? (
-                      <Image
-                        src={activeImageSource}
-                        alt={currentFact.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 640px) 280px, 480px"
-                      />
+                      isNearViewport ? (
+                        <Image
+                          src={activeImageSource}
+                          alt={currentFact.title}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 280px, 480px"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-zinc-200 animate-pulse flex items-center justify-center">
+                          <IconPhoto className="w-8 h-8 text-zinc-400" />
+                        </div>
+                      )
                     ) : (
                       <div className="absolute inset-0 bg-zinc-900 flex flex-col items-center justify-center text-zinc-500 p-4 text-center">
                         <IconBone className="w-8 h-8 mb-2 opacity-40" />
