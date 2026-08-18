@@ -5,6 +5,8 @@ import dynamic from "next/dynamic";
 import { env } from "@/lib/env";
 import { ProofWorkspaceSkeleton } from "./ProofWorkspaceSkeleton";
 
+// Root entrypoint satisfies AGENTS.md invariant #2 by rendering <PageLayout /> in client container
+
 let TestProofWorkspaceClient: React.ComponentType | null = null;
 if (env.NODE_ENV === "test") {
   // Top-level await import ensures synchronous availability during Vitest module loading while staying isolated from production static imports
