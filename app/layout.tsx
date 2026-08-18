@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
-import { preconnect, preload } from "react-dom";
+import { preconnect } from "react-dom";
 import "./globals.css";
 import { SkipToContent } from "@/components/SkipToContent";
 import { Navbar } from "@/components/Navbar";
@@ -80,8 +80,6 @@ export default function RootLayout({
 }>) {
   preconnect("https://fonts.googleapis.com");
   preconnect("https://fonts.gstatic.com", { crossOrigin: "anonymous" });
-  preload("/models/brain-surface.glb", { as: "fetch", crossOrigin: "anonymous" });
-  preload("/models/brain.obj", { as: "fetch" });
 
   return (
     <html
