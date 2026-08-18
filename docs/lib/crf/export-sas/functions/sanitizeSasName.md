@@ -8,7 +8,7 @@
 
 > **sanitizeSasName**(`name`, `maxLength?`): `string`
 
-Defined in: [lib/crf/export-sas.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L20)
+Defined in: [lib/crf/export-sas.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L21)
 
 Sanitizes a string into a valid SAS variable or dataset name.
 - Maximum 32 characters
