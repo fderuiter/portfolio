@@ -87,5 +87,98 @@ export const designManifest = {
       heroBeam: { type: "spring", stiffness: 110, damping: 30 },
       timeline: { type: "spring", stiffness: 60, damping: 20 },
     }
+  },
+  themes: {
+    light: {
+      colors: {
+        /** Original CSS Variable: --background */
+        "background": "#f8fafc",
+        /** Original CSS Variable: --foreground */
+        "foreground": "#0f172a",
+        /** Original CSS Variable: --surface-1 */
+        "surface-1": "rgba(255, 255, 255, 0.85)",
+        /** Original CSS Variable: --surface-2 */
+        "surface-2": "rgba(241, 245, 249, 0.75)",
+        /** Original CSS Variable: --border */
+        "border": "rgba(0, 0, 0, 0.12)",
+        /** Original CSS Variable: --border-active */
+        "border-active": "rgba(217, 119, 6, 0.6)",
+        /** Original CSS Variable: --muted */
+        "muted": "#64748b",
+        /** Original CSS Variable: --muted-strong */
+        "muted-strong": "#334155",
+        /** Original CSS Variable: --brand-cyan */
+        "brand-cyan": "#0891b2",
+        /** Original CSS Variable: --brand-cyan-glow */
+        "brand-cyan-glow": "rgba(8, 145, 178, 0.15)",
+        /** Original CSS Variable: --brand-blue */
+        "brand-blue": "#2563eb",
+        /** Original CSS Variable: --brand-blue-glow */
+        "brand-blue-glow": "rgba(37, 99, 235, 0.10)",
+        /** Original CSS Variable: --brand-dark */
+        "brand-dark": "#f8fafc",
+        /** Original CSS Variable: --success */
+        "success": "#059669",
+        /** Original CSS Variable: --error */
+        "error": "#dc2626",
+        /** Original CSS Variable: --warning */
+        "warning": "#d97706",
+      },
+      typography: {
+        fonts: {
+          /** Font stack for sans-serif */
+          sans: "var(--font-inter), system-ui, -apple-system, sans-serif",
+          /** Font stack for monospace */
+          mono: "var(--font-geist-mono), ui-monospace, monospace",
+        },
+        sizes: {
+          sm: {
+            /** Original CSS Variable: --font-size-sm */
+            fontSize: 13,
+            /** Original CSS Variable: --line-height-sm */
+            lineHeight: 18,
+          }
+        }
+      },
+      masonry: {
+        /** Original CSS Variable: --layout-masonry-padding-with-stats */
+        paddingWithStats: 604,
+        /** Original CSS Variable: --layout-masonry-padding-without-stats */
+        paddingWithoutStats: 254,
+      },
+      layout: {
+        /** Original CSS Variable: --layout-gap */
+        gap: 16,
+        /** Original CSS Variable: --layout-card-padding */
+        cardPadding: 20,
+      },
+      breakpoints: {
+        /** Original CSS Variable: --breakpoint-sm */
+        "sm": 640,
+        /** Original CSS Variable: --breakpoint-md */
+        "md": 768,
+        /** Original CSS Variable: --breakpoint-lg */
+        "lg": 1024,
+        /** Original CSS Variable: --breakpoint-xl */
+        "xl": 1280,
+        /** Original CSS Variable: --breakpoint-2xl */
+        "2xl": 1536,
+      },
+      motion: {
+        springs: {
+          snappy: { type: "spring", stiffness: 380, damping: 30 },
+          smooth: { type: "spring", stiffness: 80, damping: 20 },
+          gentle: { type: "spring", stiffness: 60, damping: 20 },
+          hero: { type: "spring", stiffness: 100, damping: 18 },
+          heroBeam: { type: "spring", stiffness: 110, damping: 30 },
+          timeline: { type: "spring", stiffness: 60, damping: 20 },
+        }
+      },
+    }
   }
 } as const;
+
+export const themes = designManifest.themes;
+export const lightTheme = designManifest.themes.light;
+export type DesignManifest = typeof designManifest;
+export type ThemeDictionary = typeof designManifest.themes.light;

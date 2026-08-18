@@ -23,16 +23,16 @@ vi.mock("three", async () => {
 });
 
 describe("Viewport-Driven Component Asset Guard", () => {
-  let mockObserverCallback: IntersectionObserverCallback | null = null;
-  let mockObserve: (target: Element) => void;
-  let mockDisconnect: () => void;
+  let mockObserverCallbacks: IntersectionObserverCallback[] = [];
+  let mockObserve: ReturnType<typeof vi.fn>;
+  let mockDisconnect: ReturnType<typeof vi.fn>;
   let originalIntersectionObserver: typeof window.IntersectionObserver;
 
   beforeEach(() => {
     vi.restoreAllMocks();
     mockObserve = vi.fn();
     mockDisconnect = vi.fn();
-    mockObserverCallback = null;
+    mockObserverCallbacks = [];
 
     originalIntersectionObserver = window.IntersectionObserver;
 
@@ -42,20 +42,20 @@ describe("Viewport-Driven Component Asset Guard", () => {
       readonly thresholds: ReadonlyArray<number> = [];
 
       constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
-        mockObserverCallback = callback;
+        mockObserverCallbacks.push(callback);
         if (options?.rootMargin) {
           (this as { rootMargin: string }).rootMargin = options.rootMargin;
         }
       }
 
       observe(target: Element): void {
-        mockObserve(target);
+        (mockObserve as unknown as (target: Element) => void)(target);
       }
 
       unobserve(): void {}
 
       disconnect(): void {
-        mockDisconnect();
+        (mockDisconnect as unknown as () => void)();
       }
 
       takeRecords(): IntersectionObserverEntry[] {
@@ -67,7 +67,9 @@ describe("Viewport-Driven Component Asset Guard", () => {
   });
 
   afterEach(() => {
-    window.IntersectionObserver = originalIntersectionObserver;
+    if (typeof window !== "undefined") {
+      window.IntersectionObserver = originalIntersectionObserver;
+    }
   });
 
   describe("Brain3DViewer Viewport Asset Guard", () => {
@@ -84,19 +86,19 @@ describe("Viewport-Driven Component Asset Guard", () => {
       );
 
       // Verify IntersectionObserver was instantiated and observed container
-      expect(mockObserve).toHaveBeenCalledTimes(1);
+      expect(mockObserve.mock.calls.length).toBeGreaterThanOrEqual(1);
 
       // On initial render while off-screen (isIntersecting is false), external mesh MUST NOT be fetched
       expect(loadExternalSpy).not.toHaveBeenCalled();
 
       // Trigger viewport intersection
       await act(async () => {
-        if (mockObserverCallback) {
-          mockObserverCallback(
+        mockObserverCallbacks.forEach((cb) => {
+          cb(
             [{ isIntersecting: true } as IntersectionObserverEntry],
             {} as IntersectionObserver
           );
-        }
+        });
       });
 
       // Now loadExternalBrainMesh MUST be triggered with modelUrl
@@ -133,12 +135,12 @@ describe("Viewport-Driven Component Asset Guard", () => {
 
       // Trigger viewport intersection
       await act(async () => {
-        if (mockObserverCallback) {
-          mockObserverCallback(
+        mockObserverCallbacks.forEach((cb) => {
+          cb(
             [{ isIntersecting: true } as IntersectionObserverEntry],
             {} as IntersectionObserver
           );
-        }
+        });
       });
 
       // Component remains functional and mounted

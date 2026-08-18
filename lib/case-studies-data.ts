@@ -583,6 +583,8 @@ endmodule
   {
     id: "canonical-10",
     slug: "oxidizemath",
+    created_at: new Date("2026-03-01T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
     title: "OxidizeMath: Verified Numerical Computation Framework in Rust",
     primary_language: "Rust",
     github_url: "https://github.com/fderuiter/OxidizeMath",
@@ -642,7 +644,11 @@ where
 
 <h4>3. WASM-First GUI Architecture</h4>
 <p>Deploys identical single-binary desktop execution and zero-install WebAssembly browser builds using egui and custom <code>egui_plot</code> engines.</p>`,
+  },
+  {
+    id: "canonical-11",
     slug: "ualbf",
+    updated_at: new Date("2026-08-14T00:00:00Z"),
     title: "UALBF: Verified Computational Proof Engine & Search Architecture",
     primary_language: "Rust",
     github_url: "https://github.com/fderuiter/ualbf",
@@ -752,6 +758,9 @@ pub extern "C" fn ualbf_verify_certificate_manifest(
 }
 </code></pre>`,
     created_at: new Date("2026-03-01T00:00:00Z"),
+  },
+  {
+    id: "canonical-12",
     slug: "sortify",
     title: "Sortify: Air-Gapped Document Classification & Resilient File Engine",
     primary_language: "Python",

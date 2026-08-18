@@ -1,54 +1,101 @@
 import fs from 'fs';
 import path from 'path';
 
-const parseCSSAndGenerateTS = () => {
-  const cssPath = path.resolve(process.cwd(), 'app/globals.css');
-  const css = fs.readFileSync(cssPath, 'utf-8');
-
-  // Match anything inside :root { ... }
-  const rootMatch = css.match(/:root\s*{([^}]+)}/);
-  if (!rootMatch) {
-    console.error("Could not find :root block in globals.css");
+const parseNumber = (val: string, name: string): number => {
+  const num = parseFloat(val);
+  if (isNaN(num)) {
+    console.error(`Malformed token value for ${name}: ${val} is not a number.`);
     process.exit(1);
   }
+  return num;
+};
 
-  const rootContent = rootMatch[1];
-  const tokens: Record<string, string> = {};
-  
+interface ThemeDictionary {
+  colors: Record<string, string>;
+  typography: {
+    fonts: { sans: string; mono: string };
+    sizes: { sm: { fontSize: number; lineHeight: number } };
+  };
+  masonry: Record<string, number>;
+  layout: Record<string, number>;
+  breakpoints: Record<string, number>;
+  motion: {
+    springs: Record<string, { type: string; stiffness: number; damping: number }>;
+  };
+}
+
+const COLOR_KEYS = [
+  'background', 'foreground', 'surface-1', 'surface-2', 
+  'border', 'border-active', 'muted', 'muted-strong', 
+  'brand-cyan', 'brand-cyan-glow', 'brand-blue', 'brand-blue-glow', 
+  'brand-dark', 'success', 'error', 'warning'
+];
+
+const parseVariablesFromBlock = (blockContent: string): Record<string, string> => {
+  const vars: Record<string, string> = {};
   const varRegex = /--([a-zA-Z0-9-]+)\s*:\s*([^;]+);/g;
   let match;
-  while ((match = varRegex.exec(rootContent)) !== null) {
-    tokens[match[1]] = match[2].trim();
+  while ((match = varRegex.exec(blockContent)) !== null) {
+    vars[match[1]] = match[2].trim();
   }
+  return vars;
+};
 
-  const manifest: /* eslint-disable-line @typescript-eslint/no-explicit-any */ any = {
+const parseCSSRules = (cssContent: string) => {
+  const cleanCSS = cssContent.replace(/\/\*[\s\S]*?\*\//g, '');
+  const rules: { selector: string; content: string }[] = [];
+  
+  let i = 0;
+  while (i < cleanCSS.length) {
+    const openBrace = cleanCSS.indexOf('{', i);
+    if (openBrace === -1) break;
+
+    const rawHeader = cleanCSS.substring(i, openBrace);
+    const lastSemi = rawHeader.lastIndexOf(';');
+    const selector = (lastSemi !== -1 ? rawHeader.substring(lastSemi + 1) : rawHeader).trim();
+
+    let depth = 1;
+    let j = openBrace + 1;
+    while (j < cleanCSS.length && depth > 0) {
+      if (cleanCSS[j] === '{') depth++;
+      else if (cleanCSS[j] === '}') depth--;
+      j++;
+    }
+
+    const content = cleanCSS.substring(openBrace + 1, j - 1).trim();
+    rules.push({ selector, content });
+    i = j;
+  }
+  return rules;
+};
+
+const processTokens = (tokens: Record<string, string>): ThemeDictionary => {
+  const dictionary: ThemeDictionary = {
     colors: {},
-    typography: { fonts: {}, sizes: {} },
+    typography: {
+      fonts: { sans: '', mono: '' },
+      sizes: { sm: { fontSize: 13, lineHeight: 18 } }
+    },
     masonry: {},
     layout: {},
-    motion: { springs: {} },
-    breakpoints: {}
+    breakpoints: {},
+    motion: { springs: {} }
   };
 
-  const parseNumber = (val: string, name: string) => {
-    const num = parseFloat(val);
-    if (isNaN(num)) {
-      console.error(`Malformed token value for ${name}: ${val} is not a number.`);
-      process.exit(1);
-    }
-    return num;
-  };
-
-  // Process colors directly
-  const colorKeys = [
-    'background', 'foreground', 'surface-1', 'surface-2', 
-    'border', 'border-active', 'muted', 'muted-strong', 
-    'brand-cyan', 'brand-cyan-glow', 'brand-blue', 'brand-blue-glow', 
-    'brand-dark', 'success', 'error', 'warning'
-  ];
-  for (const key of colorKeys) {
+  // Colors
+  for (const key of COLOR_KEYS) {
     if (tokens[key]) {
-      manifest.colors[key] = tokens[key];
+      dictionary.colors[key] = tokens[key];
+    }
+  }
+  for (const [key, value] of Object.entries(tokens)) {
+    if (!COLOR_KEYS.includes(key) &&
+        !key.startsWith('layout-') &&
+        !key.startsWith('breakpoint-') &&
+        !key.startsWith('font-') &&
+        !key.startsWith('line-height-') &&
+        !key.startsWith('motion-')) {
+      dictionary.colors[key] = value;
     }
   }
 
@@ -56,10 +103,10 @@ const parseCSSAndGenerateTS = () => {
   for (const [key, value] of Object.entries(tokens)) {
     if (key.startsWith('layout-masonry-')) {
       const camelName = key.replace('layout-masonry-', '').replace(/-([a-z])/g, g => g[1].toUpperCase());
-      manifest.masonry[camelName] = parseNumber(value, key);
+      dictionary.masonry[camelName] = parseNumber(value, key);
     } else if (key.startsWith('layout-')) {
       const camelName = key.replace('layout-', '').replace(/-([a-z])/g, g => g[1].toUpperCase());
-      manifest.layout[camelName] = parseNumber(value, key);
+      dictionary.layout[camelName] = parseNumber(value, key);
     }
   }
 
@@ -67,88 +114,159 @@ const parseCSSAndGenerateTS = () => {
   for (const [key, value] of Object.entries(tokens)) {
     if (key.startsWith('breakpoint-')) {
       const bName = key.replace('breakpoint-', '');
-      manifest.breakpoints[bName] = parseNumber(value, key);
+      dictionary.breakpoints[bName] = parseNumber(value, key);
     }
   }
 
   // Typography
-  manifest.typography.fonts.sans = "var(--font-inter), system-ui, -apple-system, sans-serif";
-  manifest.typography.fonts.mono = "var(--font-geist-mono), ui-monospace, monospace";
-  manifest.typography.sizes.sm = {
+  dictionary.typography.fonts.sans = tokens['font-sans'] || "var(--font-inter), system-ui, -apple-system, sans-serif";
+  dictionary.typography.fonts.mono = tokens['font-mono'] || "var(--font-geist-mono), ui-monospace, monospace";
+  dictionary.typography.sizes.sm = {
     fontSize: parseNumber(tokens['font-size-sm'] || "13", 'font-size-sm'),
     lineHeight: parseNumber(tokens['line-height-sm'] || "18", 'line-height-sm')
   };
 
-  // Motion springs
-  const springsData: Record<string, /* eslint-disable-line @typescript-eslint/no-explicit-any */ any> = {};
+  // Motion
+  const springsData: Record<string, { type: string; stiffness: number; damping: number }> = {};
   for (const [key, value] of Object.entries(tokens)) {
     if (key.startsWith('motion-spring-')) {
       const match = key.match(/motion-spring-(.+)-(stiffness|damping)/);
       if (match) {
         const [, name, prop] = match;
         const camelName = name.replace(/-([a-z])/g, g => g[1].toUpperCase());
-        if (!springsData[camelName]) springsData[camelName] = { type: "spring" };
-        springsData[camelName][prop] = parseNumber(value, key);
+        if (!springsData[camelName]) springsData[camelName] = { type: "spring", stiffness: 0, damping: 0 };
+        springsData[camelName][prop as 'stiffness' | 'damping'] = parseNumber(value, key);
       }
     }
   }
-  manifest.motion.springs = springsData;
+  dictionary.motion.springs = springsData;
 
-  // Generate TS
-  let ts = `/**\n * AUTO-GENERATED DESIGN TOKENS\n * Do not edit this file directly. Edit app/globals.css instead.\n */\n\n`;
-  ts += `export const designManifest = {\n`;
+  return dictionary;
+};
+
+const renderDictionaryTS = (dict: ThemeDictionary, indent: string = '  '): string => {
+  let ts = '';
   
   // Colors
-  ts += `  colors: {\n`;
-  for (const [k, v] of Object.entries(manifest.colors)) {
-    ts += `    /** Original CSS Variable: --${k} */\n`;
-    ts += `    "${k}": "${v}",\n`;
+  ts += `${indent}colors: {\n`;
+  for (const [k, v] of Object.entries(dict.colors)) {
+    ts += `${indent}  /** Original CSS Variable: --${k} */\n`;
+    ts += `${indent}  "${k}": "${v}",\n`;
   }
-  ts += `  },\n`;
+  ts += `${indent}},\n`;
 
   // Typography
-  ts += `  typography: {\n    fonts: {\n`;
-  ts += `      /** Font stack for sans-serif */\n      sans: "${manifest.typography.fonts.sans}",\n`;
-  ts += `      /** Font stack for monospace */\n      mono: "${manifest.typography.fonts.mono}",\n`;
-  ts += `    },\n    sizes: {\n      sm: {\n`;
-  ts += `        /** Original CSS Variable: --font-size-sm */\n        fontSize: ${manifest.typography.sizes.sm.fontSize},\n`;
-  ts += `        /** Original CSS Variable: --line-height-sm */\n        lineHeight: ${manifest.typography.sizes.sm.lineHeight},\n`;
-  ts += `      }\n    }\n  },\n`;
+  ts += `${indent}typography: {\n`;
+  ts += `${indent}  fonts: {\n`;
+  ts += `${indent}    /** Font stack for sans-serif */\n`;
+  ts += `${indent}    sans: "${dict.typography.fonts.sans}",\n`;
+  ts += `${indent}    /** Font stack for monospace */\n`;
+  ts += `${indent}    mono: "${dict.typography.fonts.mono}",\n`;
+  ts += `${indent}  },\n`;
+  ts += `${indent}  sizes: {\n`;
+  ts += `${indent}    sm: {\n`;
+  ts += `${indent}      /** Original CSS Variable: --font-size-sm */\n`;
+  ts += `${indent}      fontSize: ${dict.typography.sizes.sm.fontSize},\n`;
+  ts += `${indent}      /** Original CSS Variable: --line-height-sm */\n`;
+  ts += `${indent}      lineHeight: ${dict.typography.sizes.sm.lineHeight},\n`;
+  ts += `${indent}    }\n`;
+  ts += `${indent}  }\n`;
+  ts += `${indent}},\n`;
 
   // Masonry
-  ts += `  masonry: {\n`;
-  for (const [k, v] of Object.entries(manifest.masonry)) {
+  ts += `${indent}masonry: {\n`;
+  for (const [k, v] of Object.entries(dict.masonry)) {
     const cssName = `layout-masonry-${k.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)}`;
-    ts += `    /** Original CSS Variable: --${cssName} */\n`;
-    ts += `    ${k}: ${v},\n`;
+    ts += `${indent}  /** Original CSS Variable: --${cssName} */\n`;
+    ts += `${indent}  ${k}: ${v},\n`;
   }
-  ts += `  },\n`;
+  ts += `${indent}},\n`;
 
   // Layout
-  ts += `  layout: {\n`;
-  for (const [k, v] of Object.entries(manifest.layout)) {
+  ts += `${indent}layout: {\n`;
+  for (const [k, v] of Object.entries(dict.layout)) {
     const cssName = `layout-${k.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)}`;
-    ts += `    /** Original CSS Variable: --${cssName} */\n`;
-    ts += `    ${k}: ${v},\n`;
+    ts += `${indent}  /** Original CSS Variable: --${cssName} */\n`;
+    ts += `${indent}  ${k}: ${v},\n`;
   }
-  ts += `  },\n`;
+  ts += `${indent}},\n`;
 
   // Breakpoints
-  ts += `  breakpoints: {\n`;
-  for (const [k, v] of Object.entries(manifest.breakpoints)) {
-    ts += `    /** Original CSS Variable: --breakpoint-${k} */\n`;
-    ts += `    "${k}": ${v},\n`;
+  ts += `${indent}breakpoints: {\n`;
+  for (const [k, v] of Object.entries(dict.breakpoints)) {
+    ts += `${indent}  /** Original CSS Variable: --breakpoint-${k} */\n`;
+    ts += `${indent}  "${k}": ${v},\n`;
   }
-  ts += `  },\n`;
+  ts += `${indent}},\n`;
 
   // Motion
-  ts += `  motion: {\n    springs: {\n`;
-  for (const [k, obj] of Object.entries(manifest.motion.springs)) {
-    ts += `      ${k}: { type: "${(obj as   any).type}", stiffness: ${(obj as   any).stiffness}, damping: ${(obj as /* eslint-disable-line @typescript-eslint/no-explicit-any */ any).damping} },\n`;
+  ts += `${indent}motion: {\n`;
+  ts += `${indent}  springs: {\n`;
+  for (const [k, obj] of Object.entries(dict.motion.springs)) {
+    ts += `${indent}    ${k}: { type: "${obj.type}", stiffness: ${obj.stiffness}, damping: ${obj.damping} },\n`;
   }
-  ts += `    }\n  }\n`;
+  ts += `${indent}  }\n`;
+  ts += `${indent}},\n`;
 
-  ts += `} as const;\n`;
+  return ts;
+};
+
+const parseCSSAndGenerateTS = () => {
+  const cssPath = path.resolve(process.cwd(), 'app/globals.css');
+  const css = fs.readFileSync(cssPath, 'utf-8');
+
+  const rules = parseCSSRules(css);
+
+  const rootRules = rules.filter(r => 
+    r.selector.split(',').some(s => {
+      const trimmed = s.trim();
+      return (trimmed === ':root' || trimmed === 'html') && 
+             !trimmed.includes('light') && 
+             !trimmed.includes('dark') && 
+             !trimmed.includes('data-theme') && 
+             !trimmed.includes('data-studio-theme');
+    })
+  );
+
+  const lightRules = rules.filter(r => 
+    r.selector.includes('light') || 
+    r.selector.includes('data-theme="light"') || 
+    r.selector.includes("data-theme='light'") || 
+    r.selector.includes('data-studio-theme="light"')
+  );
+
+  const rootTokens: Record<string, string> = {};
+  for (const rule of rootRules) {
+    Object.assign(rootTokens, parseVariablesFromBlock(rule.content));
+  }
+
+  if (Object.keys(rootTokens).length === 0) {
+    console.error("Could not find :root block in globals.css");
+    process.exit(1);
+  }
+
+  const lightBlockTokens: Record<string, string> = {};
+  for (const rule of lightRules) {
+    Object.assign(lightBlockTokens, parseVariablesFromBlock(rule.content));
+  }
+
+  const rootManifest = processTokens(rootTokens);
+  const mergedLightTokens = { ...rootTokens, ...lightBlockTokens };
+  const lightManifest = processTokens(mergedLightTokens);
+
+  let ts = `/**\n * AUTO-GENERATED DESIGN TOKENS\n * Do not edit this file directly. Edit app/globals.css instead.\n */\n\n`;
+  ts += `export const designManifest = {\n`;
+  ts += renderDictionaryTS(rootManifest, '  ');
+  ts += `  themes: {\n`;
+  ts += `    light: {\n`;
+  ts += renderDictionaryTS(lightManifest, '      ');
+  ts += `    }\n`;
+  ts += `  }\n`;
+  ts += `} as const;\n\n`;
+  ts += `export const themes = designManifest.themes;\n`;
+  ts += `export const lightTheme = designManifest.themes.light;\n`;
+  ts += `export type DesignManifest = typeof designManifest;\n`;
+  ts += `export type ThemeDictionary = typeof designManifest.themes.light;\n`;
 
   const outputPath = path.resolve(process.cwd(), 'lib/design-manifest.ts');
   fs.writeFileSync(outputPath, ts);
