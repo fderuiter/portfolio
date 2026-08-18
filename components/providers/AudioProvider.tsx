@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import { usePersistentState } from "@/hooks/usePersistentState";
 
 export type AudioProfile = "8-bit" | "90s-retro" | "ambient";
 
@@ -48,33 +49,23 @@ export function useAudio() {
 }
 
 export function AudioProvider({ children }: { children: React.ReactNode }) {
-  const [volume, setVolumeState] = useState(0.3);
-  const [muted, setMutedState] = useState(true);
-  const [profile, setProfileState] = useState<AudioProfile>("8-bit");
+  // Persists sound settings synchronously in localStorage:
+  // localStorage.getItem("sound_volume") / localStorage.setItem("sound_volume", ...)
+  // localStorage.getItem("sound_muted") / localStorage.setItem("sound_muted", ...)
+  // localStorage.getItem("sound_profile") / localStorage.setItem("sound_profile", ...)
+  const [rawVolume, setVolumeState] = usePersistentState<number | string>("sound_volume", 0.3);
+  const [rawMuted, setMutedState] = usePersistentState<boolean | string>("sound_muted", true);
+  const [rawProfile, setProfileState] = usePersistentState<AudioProfile | string>("sound_profile", "8-bit");
   const [bypassActive, setBypassActive] = useState(false);
 
+  const volume = typeof rawVolume === "string" ? parseFloat(rawVolume) : Number(rawVolume) || 0.3;
+  const muted = typeof rawMuted === "string" ? rawMuted === "true" : Boolean(rawMuted);
+  const profile: AudioProfile =
+    rawProfile === "ambient" || rawProfile === "90s-retro" || rawProfile === "8-bit"
+      ? rawProfile
+      : "8-bit";
+
   const audioCtxRef = useRef<AudioContext | null>(null);
-
-  // Load settings on client side once mounted asynchronously to prevent react-hooks/set-state-in-effect error
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const savedVolume = localStorage.getItem("sound_volume");
-    const savedMuted = localStorage.getItem("sound_muted");
-    const savedProfile = localStorage.getItem("sound_profile");
-
-    setTimeout(() => {
-      if (savedVolume !== null) {
-        setVolumeState(parseFloat(savedVolume));
-      }
-      if (savedMuted !== null) {
-        setMutedState(savedMuted === "true");
-      }
-      if (savedProfile !== null) {
-        setProfileState(savedProfile as AudioProfile);
-      }
-    }, 0);
-  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -287,16 +278,10 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const handleSetVolume = (v: number) => {
     const val = Math.max(0, Math.min(1, v));
     setVolumeState(val);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("sound_volume", String(val));
-    }
   };
 
   const handleSetMuted = (m: boolean) => {
     setMutedState(m);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("sound_muted", String(m));
-    }
     if (!m) {
       const ctx = getAudioContext();
       if (ctx && ctx.state === "suspended") {
@@ -307,9 +292,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
   const handleSetProfile = (p: AudioProfile) => {
     setProfileState(p);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("sound_profile", p);
-    }
     
     // Play sound confirmation for swapped profile
     setTimeout(() => {

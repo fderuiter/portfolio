@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useContext, useState, useMemo, useEffect } from "react";
+import React, { createContext, useContext, useMemo, useCallback } from "react";
+import { usePersistentState } from "@/hooks/usePersistentState";
 
 type PersonaType = "recruiter" | "technical";
 
@@ -12,37 +13,25 @@ interface PersonaContextType {
 const PersonaContext = createContext<PersonaContextType | null>(null);
 
 export function PersonaProvider({ children }: { children: React.ReactNode }) {
-  const [persona, setPersonaState] = useState<PersonaType>("recruiter");
+  const [rawPersona, setPersonaState] = usePersistentState<PersonaType | string>(
+    "global-persona",
+    "recruiter"
+  );
+  const persona: PersonaType = rawPersona === "technical" ? "technical" : "recruiter";
 
-  // Hydrate from localStorage on client mount to persist choice across navigation/refreshes
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("global-persona");
-      if (saved === "technical" || saved === "recruiter") {
-        setTimeout(() => {
-          setPersonaState(saved);
-        }, 0);
-      }
-    } catch (e) {
-      console.error("Failed to load global-persona from localStorage", e);
-    }
-  }, []);
-
-  const setPersona = (newPersona: PersonaType) => {
-    setPersonaState(newPersona);
-    try {
-      localStorage.setItem("global-persona", newPersona);
-    } catch (e) {
-      console.error("Failed to save global-persona to localStorage", e);
-    }
-  };
+  const setPersona = useCallback(
+    (newPersona: PersonaType) => {
+      setPersonaState(newPersona);
+    },
+    [setPersonaState]
+  );
 
   const value = useMemo(
     () => ({
       persona,
       setPersona,
     }),
-    [persona]
+    [persona, setPersona]
   );
 
   return (
