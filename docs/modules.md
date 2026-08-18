@@ -107,6 +107,7 @@
 - [lib/quasi-perfect/levels](lib/quasi-perfect/levels/README.md)
 - [lib/quasi-perfect/tactics](lib/quasi-perfect/tactics/README.md)
 - [lib/quasi-perfect/types](lib/quasi-perfect/types/README.md)
+- [lib/rate-limit](lib/rate-limit/README.md)
 - [lib/redis](lib/redis/README.md)
 - [lib/schemas](lib/schemas/README.md)
 - [lib/search-utils](lib/search-utils/README.md)
