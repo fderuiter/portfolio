@@ -11,8 +11,11 @@ export interface TelemetryMetrics {
   p95LatencyMs: number;
   p99LatencyMs?: number;
   sentryExceptionCount: number;
-  windowDurationMinutes: number;
+  windowDurationMinutes?: number;
 }
+
+export const DEFAULT_CANARY_WINDOW_MINUTES = 15;
+export const DEFAULT_BASELINE_WINDOW_MINUTES = 60;
 
 export interface CanaryAnalysisThresholds {
   maxErrorRate: number; // Max allowed 5xx error rate (default: 0.005 = 0.5%)
@@ -38,12 +41,14 @@ export interface CanaryEvaluationResult {
     errorRatePct: string;
     p95LatencyMs: number;
     sentryExceptionCount: number;
+    exceptionRatePerMinute: number;
   };
   baselineMetrics?: {
     errorRate: number;
     errorRatePct: string;
     p95LatencyMs: number;
     sentryExceptionCount: number;
+    exceptionRatePerMinute: number;
   };
   metricsComparison: {
     latencyDeltaMs: number;
@@ -53,6 +58,10 @@ export interface CanaryEvaluationResult {
   };
   rollbackTriggered: boolean;
   timestamp: string;
+}
+
+function getWindowDuration(duration?: number, defaultDuration: number = 15): number {
+  return typeof duration === "number" && duration > 0 ? duration : defaultDuration;
 }
 
 /**
@@ -72,15 +81,25 @@ export function evaluateCanaryRollout(
   const canaryErrorRate = canary.totalRequests > 0 ? canary.serverErrors5xx / canary.totalRequests : 0;
   const baselineErrorRate = baseline && baseline.totalRequests > 0 ? baseline.serverErrors5xx / baseline.totalRequests : 0;
 
+  const canaryDuration = getWindowDuration(canary.windowDurationMinutes, DEFAULT_CANARY_WINDOW_MINUTES);
+  const baselineDuration = baseline
+    ? getWindowDuration(baseline.windowDurationMinutes, DEFAULT_BASELINE_WINDOW_MINUTES)
+    : DEFAULT_BASELINE_WINDOW_MINUTES;
+
+  const canaryExceptionRate = canary.sentryExceptionCount / canaryDuration;
+  const baselineExceptionRate = baseline
+    ? baseline.sentryExceptionCount / baselineDuration
+    : 0;
+
   const latencyDeltaMs = baseline ? canary.p95LatencyMs - baseline.p95LatencyMs : 0;
   const latencyDeltaPct = baseline && baseline.p95LatencyMs > 0
     ? ((canary.p95LatencyMs - baseline.p95LatencyMs) / baseline.p95LatencyMs) * 100
     : 0;
 
   const errorRateDelta = canaryErrorRate - baselineErrorRate;
-  const exceptionRatio = baseline && baseline.sentryExceptionCount > 0
-    ? canary.sentryExceptionCount / baseline.sentryExceptionCount
-    : canary.sentryExceptionCount > 0 ? Infinity : 1.0;
+  const exceptionRatio = baseline && baselineExceptionRate > 0
+    ? canaryExceptionRate / baselineExceptionRate
+    : canaryExceptionRate > 0 ? Infinity : 1.0;
 
   let decision: CanaryDecision = "HEALTHY";
 
@@ -129,6 +148,7 @@ export function evaluateCanaryRollout(
       errorRatePct: `${(canaryErrorRate * 100).toFixed(2)}%`,
       p95LatencyMs: canary.p95LatencyMs,
       sentryExceptionCount: canary.sentryExceptionCount,
+      exceptionRatePerMinute: canaryExceptionRate,
     },
     baselineMetrics: baseline
       ? {
@@ -136,6 +156,7 @@ export function evaluateCanaryRollout(
           errorRatePct: `${(baselineErrorRate * 100).toFixed(2)}%`,
           p95LatencyMs: baseline.p95LatencyMs,
           sentryExceptionCount: baseline.sentryExceptionCount,
+          exceptionRatePerMinute: baselineExceptionRate,
         }
       : undefined,
     metricsComparison: {
@@ -217,6 +238,6 @@ if (require.main === module) {
   console.log(`\nMetrics Summary:`);
   console.log(`  Canary Error Rate: ${evaluation.canaryMetrics.errorRatePct}`);
   console.log(`  p95 Latency: ${evaluation.canaryMetrics.p95LatencyMs}ms`);
-  console.log(`  Sentry Exceptions: ${evaluation.canaryMetrics.sentryExceptionCount}`);
+  console.log(`  Sentry Exceptions: ${evaluation.canaryMetrics.sentryExceptionCount} (${evaluation.canaryMetrics.exceptionRatePerMinute.toFixed(2)}/min)`);
   console.log("");
 }
