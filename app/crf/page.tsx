@@ -1,8 +1,17 @@
 import React from "react";
-import { CRFStudioContainer } from "@/components/crf/CRFStudioContainer";
+import dynamic from "next/dynamic";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
 import { PageLayout } from "@/components/PageLayout";
+import { CRFStudioSkeleton } from "@/components/crf/Skeletons";
+
+const CRFStudioContainer = dynamic(
+  () => import("@/components/crf/CRFStudioContainer").then((mod) => mod.CRFStudioContainer),
+  {
+    ssr: false,
+    loading: () => <CRFStudioSkeleton />,
+  }
+);
 
 export default function CRFStudioPage() {
   return (

@@ -3,7 +3,7 @@ import React from "react";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, screen, fireEvent, cleanup, act } from "@testing-library/react";
 import { Brain3DViewer } from "@/components/neuro/Brain3DViewer";
-import ProofWorkspacePage from "@/app/proof/page";
+import { ProofWorkspaceClient as ProofWorkspacePage } from "@/app/proof/ProofWorkspaceClient";
 
 describe("Frame-Bound Throttling & Intersection Guard Suite", () => {
   let intersectionCallbacks: ((entries: IntersectionObserverEntry[]) => void)[] = [];

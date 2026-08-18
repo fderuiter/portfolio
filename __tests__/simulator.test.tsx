@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React from "react";
 import { render, screen, fireEvent, act, cleanup } from "@testing-library/react";
-import RecruiterSimulator from "@/app/simulator/page";
+import RecruiterSimulator from "@/components/simulator/RecruiterSimulatorClient";
 
 const mockRecordEvent = vi.fn();
 const mockPlayNote = vi.fn();

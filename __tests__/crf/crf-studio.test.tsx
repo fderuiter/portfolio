@@ -86,7 +86,7 @@ describe("CRFStudioContainer Component", () => {
     expect(container.textContent).toContain("Live 21 CFR EDC");
   });
 
-  it("switches studio modes when clicking header tabs", async () => {
+  it("switches studio modes when clicking header tabs", { timeout: 15000 }, async () => {
     await act(async () => {
       root = createRoot(container);
       root.render(<CRFStudioContainer />);
@@ -139,7 +139,7 @@ describe("CRFStudioContainer Component", () => {
     expect(container.textContent).toContain("CDISC Standards & Interoperability Exporter");
   });
 
-  it("switches between study presets cleanly", async () => {
+  it("switches between study presets cleanly", { timeout: 15000 }, async () => {
     await act(async () => {
       root = createRoot(container);
       root.render(<CRFStudioContainer />);

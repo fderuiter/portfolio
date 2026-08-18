@@ -1,12 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { CopyButton } from "@/components/CopyButton";
 import { StudyProtocol } from "@/lib/crf/types";
-import { exportStudyToCdiscOdmXml } from "@/lib/crf/odm-xml-serializer";
-import { exportFormToFhirQuestionnaire } from "@/lib/crf/fhir-questionnaire";
-import { exportStudyToSas } from "@/lib/crf/export-sas";
-import { exportStudyToR } from "@/lib/crf/export-r";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import {
   IconDownload,
@@ -20,6 +16,7 @@ import {
   IconFileCode,
   IconAdjustments,
   IconCalendar,
+  IconLoader2,
 } from "@tabler/icons-react";
 
 interface ExportImportModalProps {
@@ -42,62 +39,70 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   const [selectedFormId, setSelectedFormId] = useState<string>("all");
   const [importJsonText, setImportJsonText] = useState("");
   const [importError, setImportError] = useState<string | null>(null);
+  const [activeContent, setActiveContent] = useState<string>("");
+  const [isGenerating, setIsGenerating] = useState<boolean>(true);
 
-  // Serialized formats
-  const odmXmlContent = exportStudyToCdiscOdmXml(study);
-  const jsonBundleContent = JSON.stringify(study, null, 2);
   const selectedForm = selectedFormId === "all" ? undefined : study.forms.find((f) => f.id === selectedFormId);
-  const targetFormForFhir = selectedForm || study.forms[0] || {
-    id: "crf-1",
-    name: "General Form",
-    domain: "DM",
-    description: "",
-    version: "1.0",
-    sections: [],
-    rules: [],
-  };
-  const fhirContent = JSON.stringify(
-    exportFormToFhirQuestionnaire(targetFormForFhir, study),
-    null,
-    2
-  );
 
-  const sasContent = exportStudyToSas(study, {
-    selectedFormId: selectedFormId === "all" ? undefined : selectedFormId,
-    includeSampleData: true,
-    includeProcContents: true,
-    includeProcFreq: true,
-  });
+  useEffect(() => {
+    let isMounted = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsGenerating(true);
 
-  const rContent = exportStudyToR(study, {
-    selectedFormId: selectedFormId === "all" ? undefined : selectedFormId,
-    includeSampleData: true,
-    includeGlimpse: true,
-    useLabelledPackage: true,
-  });
+    const computeContent = async () => {
+      let content = "";
+      if (activeTab === "odm") {
+        const { exportStudyToCdiscOdmXml } = await import("@/lib/crf/odm-xml-serializer");
+        content = exportStudyToCdiscOdmXml(study);
+      } else if (activeTab === "sas") {
+        const { exportStudyToSas } = await import("@/lib/crf/export-sas");
+        content = exportStudyToSas(study, {
+          selectedFormId: selectedFormId === "all" ? undefined : selectedFormId,
+          includeSampleData: true,
+          includeProcContents: true,
+          includeProcFreq: true,
+        });
+      } else if (activeTab === "r") {
+        const { exportStudyToR } = await import("@/lib/crf/export-r");
+        content = exportStudyToR(study, {
+          selectedFormId: selectedFormId === "all" ? undefined : selectedFormId,
+          includeSampleData: true,
+          includeGlimpse: true,
+          useLabelledPackage: true,
+        });
+      } else if (activeTab === "fhir") {
+        const { exportFormToFhirQuestionnaire } = await import("@/lib/crf/fhir-questionnaire");
+        const targetFormForFhir = selectedForm || study.forms[0] || {
+          id: "crf-1",
+          name: "General Form",
+          domain: "DM",
+          description: "",
+          version: "1.0",
+          sections: [],
+          rules: [],
+        };
+        content = JSON.stringify(exportFormToFhirQuestionnaire(targetFormForFhir, study), null, 2);
+      } else {
+        content = JSON.stringify(study, null, 2);
+      }
 
-  const getActiveContent = () => {
-    switch (activeTab) {
-      case "odm":
-        return odmXmlContent;
-      case "sas":
-        return sasContent;
-      case "r":
-        return rContent;
-      case "json":
-        return jsonBundleContent;
-      case "fhir":
-        return fhirContent;
-      default:
-        return jsonBundleContent;
-    }
-  };
+      if (isMounted) {
+        setActiveContent(content);
+        setIsGenerating(false);
+      }
+    };
+
+    computeContent();
+    return () => {
+      isMounted = false;
+    };
+  }, [activeTab, selectedFormId, study, selectedForm]);
 
   const handleDownload = () => {
     recordEvent("crf", "project_click");
     let filename = `study-${study.protocolNumber}.json`;
     let mimeType = "application/json";
-    const content = getActiveContent();
+    const content = activeContent;
     const domainSuffix = selectedForm ? `-${selectedForm.domain || selectedForm.id}` : "";
 
     if (activeTab === "odm") {
@@ -199,7 +204,7 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
           )}
 
           <CopyButton
-            text={() => getActiveContent()}
+            text={activeContent}
             label="Copy Code"
             copiedLabel="Copied!"
             successMessage="Export code copied to clipboard"
@@ -362,9 +367,16 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         </div>
       ) : (
         <div className="rounded-2xl border border-zinc-800 bg-zinc-950 p-4 font-mono text-xs overflow-x-auto max-h-[450px]">
-          <pre className="text-zinc-300 whitespace-pre-wrap leading-relaxed">
-            {getActiveContent()}
-          </pre>
+          {isGenerating ? (
+            <div className="flex items-center gap-2 text-zinc-400 py-6 justify-center font-mono">
+              <IconLoader2 className="w-4 h-4 animate-spin text-brand-cyan" />
+              <span>Generating export representation...</span>
+            </div>
+          ) : (
+            <pre className="text-zinc-300 whitespace-pre-wrap leading-relaxed">
+              {activeContent}
+            </pre>
+          )}
         </div>
       )}
 
