@@ -931,8 +931,11 @@ export const CRFStudioContainer: React.FC = () => {
         isOpen={isDiagnosticsOpen}
         study={study}
         onClose={() => setIsDiagnosticsOpen(false)}
-        onSelectForm={(fId) => {
+        onSelectForm={(fId, fieldId) => {
           setActiveFormId(fId);
+          if (fieldId) {
+            setSelectedFieldId(fieldId);
+          }
           setActiveMode("designer");
           setMobileActiveView("canvas");
         }}

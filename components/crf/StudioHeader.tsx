@@ -8,6 +8,7 @@ import {
 } from "@/lib/crf/types";
 import { STUDY_PRESETS } from "@/lib/crf/presets";
 import { lintForm } from "@/lib/crf/ast-evaluator";
+import { validateStudyCompliance } from "@/lib/crf/cdisc-conformance-linter";
 import {
   IconLayoutGrid,
   IconCalendar,
@@ -85,8 +86,10 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
 }) => {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const branding = getStudyBranding(study);
-  // Aggregate lint issues across study
-  const totalIssues = study.forms.reduce((acc, f) => acc + lintForm(f).length, 0);
+  // Aggregate combined lint issues across study (Form Logic + CDISC Conformance)
+  const regulatoryCount = validateStudyCompliance(study).length;
+  const formLogicCount = study.forms.reduce((acc, f) => acc + lintForm(f).length, 0);
+  const totalIssues = regulatoryCount + formLogicCount;
   const currentPreset = STUDY_PRESETS.find((p) => p.study.protocolNumber === study.protocolNumber);
 
   const MODES: { mode: StudioMode; label: string; shortLabel: string; shortcut: string; icon: React.ReactNode }[] = [

@@ -8,7 +8,7 @@
 
 > **rateTtfb**(`ms`): [`WebVitalRating`](../type-aliases/WebVitalRating.md)
 
-Defined in: [lib/dx/page-bench.ts:120](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L120)
+Defined in: [lib/dx/page-bench.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L123)
 
 ## Parameters
 

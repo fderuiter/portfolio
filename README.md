@@ -10,11 +10,11 @@
 
 A bleeding-edge interactive portfolio designed to unify disparate Python, Rust, and TypeScript repositories into a single, cohesive experience.
 
----
+***
 
 ## Sortify Case Study & Air-Gapped Engine Showcase
 
-Sortify is an air-gapped document classification and resilient file operations engine designed for regulated clinical trials and enterprise document ingestion. Detailed technical specifications, threat models, and code deep dives are available in [**`docs/CASE_STUDY.md`**](docs/CASE_STUDY.md).
+Sortify is an air-gapped document classification and resilient file operations engine designed for regulated clinical trials and enterprise document ingestion. Detailed technical specifications, threat models, and code deep dives are available in [**`CASE_STUDY.md`**](CASE_STUDY.md).
 
 ### Dataflow Pipeline Architecture
 
@@ -46,7 +46,7 @@ stateDiagram-v2
     RestoredInitialState --> [*]: Error Handled
 ```
 
----
+***
 
 ## Project Goals
 
