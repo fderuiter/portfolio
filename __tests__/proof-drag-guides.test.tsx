@@ -6,7 +6,7 @@ import {
   getCompatibleTargets,
   computeMagneticSnap,
 } from "@/lib/proof-utils";
-import ProofWorkspacePage from "@/app/proof/page";
+import { ProofWorkspaceClient as ProofWorkspacePage } from "@/app/proof/ProofWorkspaceClient";
 
 describe("Magnetic Snapping & Drag Guides Suite", () => {
   beforeEach(() => {

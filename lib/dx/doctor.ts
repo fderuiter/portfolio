@@ -916,7 +916,7 @@ export function checkProactiveDefectInterception(root: string): DiagnosticCheckR
       name: "Proactive Defect Interception & Synthetic Reliability Invariant",
       category: "quality",
       status: "pass",
-      message: "Shift-left property fuzzing, mutation configs, synthetic journey probes, and canary analyzer are active.",
+      message: "Shift-left property fuzzing, synthetic journey probes, and canary analyzer are active.",
     };
   }
 

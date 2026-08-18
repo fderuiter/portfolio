@@ -8,6 +8,8 @@ import {
   DatasetSource,
   QAMetrics,
   ScenarioId,
+  ScenarioConfig,
+  DatasetConfig,
   ScoreState,
   SurfaceMode,
   TerminalLog,
@@ -15,11 +17,22 @@ import {
   VoxelCoord,
   VoxelEdit,
 } from "@/lib/neuro/types";
-import { SCENARIOS, SCENARIO_LIST, DATASET_CONFIGS } from "@/lib/neuro/scenarios";
-import { generateSyntheticVolume, SyntheticVolume, VOLUME_SIZE } from "@/lib/neuro/volume-generator";
-import { evaluateQAMetrics } from "@/lib/neuro/qa-engine";
+import {
+  getNeuroScenarios,
+  getNeuroDatasetConfigs,
+  getNeuroScenarioList,
+  computeSyntheticVolume,
+  computeQAMetrics,
+  getNeuroScenariosSync,
+  getNeuroDatasetConfigsSync,
+  getNeuroScenarioListSync,
+  computeSyntheticVolumeSync,
+  computeQAMetricsSync,
+} from "@/lib/neuro/loader";
+import { SyntheticVolume, VOLUME_SIZE } from "@/lib/neuro/volume-generator";
 import { MultiPlanarSliceViewer } from "./MultiPlanarSliceViewer";
 import dynamic from "next/dynamic";
+import { NeuroReconSkeleton } from "./NeuroReconSkeleton";
 
 const Brain3DViewerSkeleton: React.FC = () => {
   return (
@@ -98,19 +111,52 @@ export const NeuroReconClient: React.FC = () => {
   const [activeScenarioId, setActiveScenarioId] = useState<ScenarioId>(() => {
     if (typeof window !== "undefined") {
       const rawSc = new URLSearchParams(window.location.hash.slice(1)).get("scenario") as ScenarioId;
-      if (rawSc && SCENARIOS[rawSc]) {
+      if (rawSc && ["dura_inclusion", "wm_hypointensity", "skull_strip_erosion", "sandbox"].includes(rawSc)) {
         return rawSc;
       }
     }
     return "dura_inclusion";
   });
-  const currentScenario = SCENARIOS[activeScenarioId];
 
-  const [volume, setVolume] = useState<SyntheticVolume>(() =>
-    generateSyntheticVolume(activeScenarioId)
-  );
+  const [scenarios, setScenarios] = useState<Record<ScenarioId, ScenarioConfig>>(() => getNeuroScenariosSync());
+  const [datasetConfigs, setDatasetConfigs] = useState<Record<DatasetSource, DatasetConfig>>(() => getNeuroDatasetConfigsSync());
+  const [scenarioList, setScenarioList] = useState<ScenarioId[]>(() => getNeuroScenarioListSync());
+  const [volume, setVolume] = useState<SyntheticVolume>(() => computeSyntheticVolumeSync(activeScenarioId));
+  const [qaMetrics, setQaMetrics] = useState<QAMetrics>(() => {
+    const scs = getNeuroScenariosSync();
+    const vol = computeSyntheticVolumeSync(activeScenarioId);
+    return computeQAMetricsSync(scs[activeScenarioId], vol, [], []);
+  });
 
-  const [crosshair, setCrosshair] = useState<VoxelCoord>(currentScenario.targetCoords);
+  useEffect(() => {
+    let isMounted = true;
+    Promise.all([
+      getNeuroScenarios(),
+      getNeuroDatasetConfigs(),
+      getNeuroScenarioList(),
+      computeSyntheticVolume(activeScenarioId),
+    ]).then(([scs, dCfgs, scList, vol]) => {
+      if (!isMounted) return;
+      setScenarios(scs);
+      setDatasetConfigs(dCfgs);
+      setScenarioList(scList);
+      setVolume(vol);
+      const sc = scs[activeScenarioId];
+      if (sc) {
+        computeQAMetrics(sc, vol, [], []).then((metrics) => {
+          if (isMounted) setQaMetrics(metrics);
+        });
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const currentScenario = scenarios ? scenarios[activeScenarioId] : null;
+
+  const [crosshair, setCrosshair] = useState<VoxelCoord>({ x: 42, y: 58, z: 28 });
   const [toolMode, setToolModeState] = useState<ToolMode>(() => {
     if (typeof window !== "undefined") {
       const rawTool = new URLSearchParams(window.location.hash.slice(1)).get("tool") as ToolMode;
@@ -118,8 +164,16 @@ export const NeuroReconClient: React.FC = () => {
         return rawTool;
       }
     }
-    return currentScenario.recommendedTool;
+    return "inspect";
   });
+
+  useEffect(() => {
+    if (currentScenario) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCrosshair((prev) => (prev.x === 42 && prev.y === 58 && prev.z === 28 ? currentScenario.targetCoords : prev));
+    }
+  }, [currentScenario]);
+
   const [brushRadius, setBrushRadius] = useState<number>(2);
   const [surfaceMode, setSurfaceMode] = useState<SurfaceMode>("pial");
   const [showPialContour, setShowPialContour] = useState(true);
@@ -167,19 +221,19 @@ export const NeuroReconClient: React.FC = () => {
     {
       id: "log-init-2",
       type: "output",
-      text: `Loaded subject sub-01 [Scenario: ${currentScenario.title}]`,
+      text: `Loaded subject sub-01 [Scenario: Case 01: Dura Over-Inclusion in Temporal Lobe]`,
       timestamp: "00:00:02",
     },
     {
       id: "log-init-3",
       type: "output",
-      text: `Initial Euler χ = ${currentScenario.initialEuler}, Target = ${currentScenario.targetEuler}. ${currentScenario.initialDefects} defect voxels detected.`,
+      text: `Initial Euler χ = -12, Target = 2. 412 defect voxels detected.`,
       timestamp: "00:00:03",
     },
   ]);
 
   // Apply Scenario State locally without pushing history
-  const applyScenarioState = useCallback((scenarioId: ScenarioId) => {
+  const applyScenarioState = useCallback(async (scenarioId: ScenarioId) => {
     if (reconTimerRef.current !== null) {
       clearTimeout(reconTimerRef.current);
       reconTimerRef.current = null;
@@ -187,11 +241,14 @@ export const NeuroReconClient: React.FC = () => {
     }
 
     setActiveScenarioId(scenarioId);
-    const newConfig = SCENARIOS[scenarioId];
-    const newVol = generateSyntheticVolume(scenarioId);
+    const scs = scenarios || await getNeuroScenarios();
+    const newConfig = scs[scenarioId];
+    const newVol = await computeSyntheticVolume(scenarioId);
     setVolume(newVol);
-    setCrosshair(newConfig.targetCoords);
-    setToolModeState(newConfig.recommendedTool);
+    if (newConfig) {
+      setCrosshair(newConfig.targetCoords);
+      setToolModeState(newConfig.recommendedTool);
+    }
     setControlPoints([]);
     setVoxelEdits([]);
     setShowSuccessModal(false);
@@ -207,11 +264,11 @@ export const NeuroReconClient: React.FC = () => {
       {
         id: `log-sw-out-${Date.now()}`,
         type: "info",
-        text: `Loaded ${newConfig.title}. ${newConfig.defectDescription}`,
+        text: newConfig ? `Loaded ${newConfig.title}. ${newConfig.defectDescription}` : `Loaded ${scenarioId}`,
         timestamp: new Date().toLocaleTimeString(),
       },
     ]);
-  }, []);
+  }, [scenarios]);;
 
   // Switch Scenario Handler (User Click)
   const handleSelectScenario = useCallback(
@@ -234,7 +291,7 @@ export const NeuroReconClient: React.FC = () => {
   // Synchronize incoming hash state on mount or browser Back/Forward navigation
   useEffect(() => {
     const rawSc = (params.scenario as ScenarioId | undefined) || "dura_inclusion";
-    if (SCENARIOS[rawSc] && rawSc !== activeScenarioId) {
+    if (scenarios && scenarios[rawSc] && rawSc !== activeScenarioId) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       applyScenarioState(rawSc);
     }
@@ -249,14 +306,16 @@ export const NeuroReconClient: React.FC = () => {
       setActiveDatasetState(rawDs);
     }
     const rawTool = params.tool as ToolMode | undefined;
+    const recommendedTool = currentScenario?.recommendedTool || "inspect";
     const targetTool = rawTool && ["inspect", "control_point", "paint", "erase"].includes(rawTool)
       ? rawTool
-      : currentScenario.recommendedTool;
+      : recommendedTool;
     if (targetTool !== toolMode) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setToolModeState(targetTool);
     }
-  }, [params, activeScenarioId, viewMode, activeDataset, toolMode, currentScenario.recommendedTool, applyScenarioState]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params, activeScenarioId, viewMode, activeDataset, toolMode, currentScenario, applyScenarioState]);
 
   const setViewMode = (mode: "split" | "3d" | "2d") => {
     setViewModeState(mode);
@@ -270,8 +329,8 @@ export const NeuroReconClient: React.FC = () => {
 
   const setToolMode = useCallback((tool: ToolMode) => {
     setToolModeState(tool);
-    setParam("tool", tool === currentScenario.recommendedTool ? null : tool, { replace: true });
-  }, [currentScenario.recommendedTool, setParam]);
+    setParam("tool", tool === (currentScenario?.recommendedTool || "inspect") ? null : tool, { replace: true });
+  }, [currentScenario, setParam]);
 
   const { copy: copyShareLink } = useClipboard({
     successMessage: "NeuroRecon Studio link copied to clipboard!",
@@ -299,13 +358,17 @@ export const NeuroReconClient: React.FC = () => {
     };
   }, []);
 
-  // Evaluate QA metrics
-  const qaMetrics: QAMetrics = evaluateQAMetrics(
-    currentScenario,
-    volume,
-    controlPoints,
-    voxelEdits
-  );
+  // Re-evaluate QA metrics on state changes
+  useEffect(() => {
+    if (!currentScenario || !volume) return;
+    let isMounted = true;
+    computeQAMetrics(currentScenario, volume, controlPoints, voxelEdits).then((metrics) => {
+      if (isMounted) setQaMetrics(metrics);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [currentScenario, volume, controlPoints, voxelEdits]);
 
   // Add Control Point Handler
   const handleAddControlPoint = (point: Omit<ControlPoint, "id" | "timestamp">) => {
@@ -348,18 +411,20 @@ export const NeuroReconClient: React.FC = () => {
   };
 
   // Reset Scenario Edits
-  const handleReset = () => {
+  const handleReset = async () => {
     if (reconTimerRef.current !== null) {
       clearTimeout(reconTimerRef.current);
       reconTimerRef.current = null;
       setIsProcessing(false);
     }
 
-    const freshVol = generateSyntheticVolume(activeScenarioId);
+    const freshVol = await computeSyntheticVolume(activeScenarioId);
     setVolume(freshVol);
     setControlPoints([]);
     setVoxelEdits([]);
-    setCrosshair(currentScenario.targetCoords);
+    if (currentScenario) {
+      setCrosshair(currentScenario.targetCoords);
+    }
     playNote(300, 0.1);
 
     setLogs((prev) => [
@@ -380,7 +445,8 @@ export const NeuroReconClient: React.FC = () => {
   };
 
   // Run recon-all Pipeline Execution
-  const handleRunRecon = useCallback(() => {
+  const handleRunRecon = useCallback(async () => {
+    if (!currentScenario || !volume) return;
     if (reconTimerRef.current !== null) {
       clearTimeout(reconTimerRef.current);
     }
@@ -405,10 +471,11 @@ export const NeuroReconClient: React.FC = () => {
       },
     ]);
 
+    const metrics = await computeQAMetrics(currentScenario, volume, controlPoints, voxelEdits);
+
     reconTimerRef.current = setTimeout(() => {
       reconTimerRef.current = null;
       setIsProcessing(false);
-      const metrics = evaluateQAMetrics(currentScenario, volume, controlPoints, voxelEdits);
 
       if (metrics.isResolved) {
         playSuccess();
@@ -447,7 +514,7 @@ export const NeuroReconClient: React.FC = () => {
   }, [toolMode, activeScenarioId, currentScenario, volume, controlPoints, voxelEdits, playNote, playSuccess, recordEvent, setLogs]);
 
   // CLI Command Execution Router
-  const handleExecuteCliCommand = (cmd: string) => {
+  const handleExecuteCliCommand = async (cmd: string) => {
     const trimmed = cmd.trim().toLowerCase();
     const timestamp = new Date().toLocaleTimeString();
 
@@ -469,29 +536,33 @@ export const NeuroReconClient: React.FC = () => {
         },
       ]);
     } else if (trimmed === "stats") {
-      setLogs((prev) => [
-        ...prev,
-        {
-          id: `out-stats-${Date.now()}`,
-          type: "output",
-          text: `Morphometric Stats (aseg.stats / aparc.stats):\n  Total Intracranial Volume (eTIV): 1,482,910 mm³\n  Total Gray Matter Volume: 712,450 mm³\n  Total White Matter Volume: 489,120 mm³\n  Mean Cortical Thickness: ${qaMetrics.meanCorticalThicknessMm} mm\n  Dice Ground Truth Similarity: ${(qaMetrics.diceScore * 100).toFixed(1)}%\n  Topological Defect Count: ${qaMetrics.defectCount}`,
-          timestamp,
-        },
-      ]);
+      if (qaMetrics) {
+        setLogs((prev) => [
+          ...prev,
+          {
+            id: `out-stats-${Date.now()}`,
+            type: "output",
+            text: `Morphometric Stats (aseg.stats / aparc.stats):\n  Total Intracranial Volume (eTIV): 1,482,910 mm³\n  Total Gray Matter Volume: 712,450 mm³\n  Total White Matter Volume: 489,120 mm³\n  Mean Cortical Thickness: ${qaMetrics.meanCorticalThicknessMm} mm\n  Dice Ground Truth Similarity: ${(qaMetrics.diceScore * 100).toFixed(1)}%\n  Topological Defect Count: ${qaMetrics.defectCount}`,
+            timestamp,
+          },
+        ]);
+      }
     } else if (trimmed === "euler") {
-      setLogs((prev) => [
-        ...prev,
-        {
-          id: `out-euler-${Date.now()}`,
-          type: "output",
-          text: `Euler Characteristic: χ = ${qaMetrics.eulerCharacteristic} (Target = ${currentScenario.targetEuler})\nFormula: χ = V - E + F = 2 - 2g (g = genus / handles)\nStatus: ${
-            qaMetrics.eulerCharacteristic === currentScenario.targetEuler
-              ? "Valid 2-Sphere Topology ($S^2$)"
-              : "Defect present (Genus g >= 1)"
-          }`,
-          timestamp,
-        },
-      ]);
+      if (qaMetrics && currentScenario) {
+        setLogs((prev) => [
+          ...prev,
+          {
+            id: `out-euler-${Date.now()}`,
+            type: "output",
+            text: `Euler Characteristic: χ = ${qaMetrics.eulerCharacteristic} (Target = ${currentScenario.targetEuler})\nFormula: χ = V - E + F = 2 - 2g (g = genus / handles)\nStatus: ${
+              qaMetrics.eulerCharacteristic === currentScenario.targetEuler
+                ? "Valid 2-Sphere Topology ($S^2$)"
+                : "Defect present (Genus g >= 1)"
+            }`,
+            timestamp,
+          },
+        ]);
+      }
     } else if (trimmed === "cp list") {
       if (controlPoints.length === 0) {
         setLogs((prev) => [
@@ -516,12 +587,14 @@ export const NeuroReconClient: React.FC = () => {
         if (dId !== "case_study") {
           handleSelectScenario("sandbox");
         }
+        const dCfgs = datasetConfigs || await getNeuroDatasetConfigs();
+        const dCfg = dCfgs[dId];
         setLogs((prev) => [
           ...prev,
           {
             id: `out-ds-${Date.now()}`,
             type: "success",
-            text: `Active dataset set to: ${DATASET_CONFIGS[dId].name} (${DATASET_CONFIGS[dId].sourceRepo})`,
+            text: `Active dataset set to: ${dCfg ? dCfg.name : dId} (${dCfg ? dCfg.sourceRepo : ""})`,
             timestamp,
           },
         ]);
@@ -587,15 +660,22 @@ export const NeuroReconClient: React.FC = () => {
   }, [isProcessing, handleRunRecon, setToolMode]);
 
   // Next Scenario Advancer
-  const handleAdvanceNextScenario = () => {
+  const handleAdvanceNextScenario = async () => {
     setShowSuccessModal(false);
-    const currIdx = SCENARIO_LIST.indexOf(activeScenarioId);
-    if (currIdx < SCENARIO_LIST.length - 1) {
-      handleSelectScenario(SCENARIO_LIST[currIdx + 1]);
+    const scList = scenarioList.length > 0 ? scenarioList : await getNeuroScenarioList();
+    const currIdx = scList.indexOf(activeScenarioId);
+    if (currIdx < scList.length - 1) {
+      handleSelectScenario(scList[currIdx + 1]);
     } else {
       handleSelectScenario("sandbox");
     }
   };
+
+  if (!scenarios || !datasetConfigs || !volume || !qaMetrics || !currentScenario) {
+    return <NeuroReconSkeleton />;
+  }
+
+  const activeDatasetConfig = datasetConfigs[activeDataset];
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6" data-keyboard-boundary="true">
@@ -635,7 +715,7 @@ export const NeuroReconClient: React.FC = () => {
           {/* Dataset Source Selector */}
           <div className="flex items-center gap-1 bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs font-mono">
             {(["case_study", "mni152", "oasis"] as DatasetSource[]).map((dId) => {
-              const dCfg = DATASET_CONFIGS[dId];
+              const dCfg = datasetConfigs[dId];
               const isSelected = activeDataset === dId;
               return (
                 <button
@@ -647,7 +727,7 @@ export const NeuroReconClient: React.FC = () => {
                     }
                     playNote(440, 0.08);
                   }}
-                  title={dCfg.subtitle}
+                  title={dCfg ? dCfg.subtitle : dId}
                   className={`px-2.5 py-1 rounded-lg transition-all ${
                     isSelected
                       ? "bg-zinc-800 text-white font-bold border border-zinc-700 shadow-sm"
@@ -662,7 +742,7 @@ export const NeuroReconClient: React.FC = () => {
 
           {/* Scenario Carousel Tabs */}
           <div className="flex flex-wrap items-center gap-1.5 bg-zinc-950 p-1.5 rounded-2xl border border-zinc-800 self-stretch md:self-auto overflow-x-auto">
-            {SCENARIO_LIST.map((scId, idx) => {
+            {scenarioList.map((scId, idx) => {
               const isResolved = scoreState.resolvedScenarios.includes(scId);
               const isActive = activeScenarioId === scId;
               return (
@@ -776,7 +856,7 @@ export const NeuroReconClient: React.FC = () => {
             <Brain3DViewer
               surfaceMode={surfaceMode}
               crosshair={crosshair}
-              modelUrl={DATASET_CONFIGS[activeDataset].modelUrl}
+              modelUrl={activeDatasetConfig?.modelUrl || "/models/brain-surface.glb"}
               onSurfaceChange={setSurfaceMode}
               onCrosshairChange={setCrosshair}
             />

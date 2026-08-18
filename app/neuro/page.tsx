@@ -1,8 +1,17 @@
 import React from "react";
-import { NeuroReconClient } from "@/components/neuro/NeuroReconClient";
+import dynamic from "next/dynamic";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
 import { PageLayout } from "@/components/PageLayout";
+import { NeuroReconSkeleton } from "@/components/neuro/NeuroReconSkeleton";
+
+const NeuroReconClient = dynamic(
+  () => import("@/components/neuro/NeuroReconClient").then((mod) => mod.NeuroReconClient),
+  {
+    ssr: false,
+    loading: () => <NeuroReconSkeleton />,
+  }
+);
 
 export default function NeuroReconPage() {
   return (

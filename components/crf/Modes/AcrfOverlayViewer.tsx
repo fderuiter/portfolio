@@ -1,14 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { CopyButton } from "@/components/CopyButton";
 import { StudyProtocol } from "@/lib/crf/types";
-import {
-  generateAcrfHtml,
-  generateStudyAcrfBookHtml,
-  generateSdtmMappingMatrix,
-  SdtmMappingRow,
-} from "@/lib/crf/export-acrf";
+import type { SdtmMappingRow } from "@/lib/crf/export-acrf";
 import {
   IconFileCode,
   IconPrinter,
@@ -41,15 +36,38 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
   );
 
   const activeForm = study.forms.find((f) => f.id === selectedFormId) || study.forms[0];
-  const sdtmMatrix: SdtmMappingRow[] = generateSdtmMappingMatrix(study);
+  const [sdtmMatrix, setSdtmMatrix] = useState<SdtmMappingRow[]>([]);
+  const [acrfHtml, setAcrfHtml] = useState<string>("");
 
-  const handlePrint = () => {
-    const htmlContent =
-      viewMode === "study_book"
-        ? generateStudyAcrfBookHtml(study, { mode: "annotated", branding })
-        : activeForm
-        ? generateAcrfHtml(activeForm, study, { mode: "annotated", branding })
-        : "";
+  useEffect(() => {
+    let isMounted = true;
+    import("@/lib/crf/export-acrf").then(({ generateSdtmMappingMatrix, generateStudyAcrfBookHtml, generateAcrfHtml }) => {
+      if (!isMounted) return;
+      setSdtmMatrix(generateSdtmMappingMatrix(study));
+      const html =
+        viewMode === "study_book"
+          ? generateStudyAcrfBookHtml(study, { mode: "annotated", branding })
+          : activeForm
+          ? generateAcrfHtml(activeForm, study, { mode: "annotated", branding })
+          : "";
+      setAcrfHtml(html);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [study, viewMode, activeForm, branding]);
+
+  const handlePrint = async () => {
+    let htmlContent = acrfHtml;
+    if (!htmlContent) {
+      const { generateStudyAcrfBookHtml, generateAcrfHtml } = await import("@/lib/crf/export-acrf");
+      htmlContent =
+        viewMode === "study_book"
+          ? generateStudyAcrfBookHtml(study, { mode: "annotated", branding })
+          : activeForm
+          ? generateAcrfHtml(activeForm, study, { mode: "annotated", branding })
+          : "";
+    }
 
     if (!htmlContent) return;
     const win = window.open("", "_blank");
@@ -103,13 +121,7 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
           )}
 
           <CopyButton
-            text={() =>
-              viewMode === "study_book"
-                ? generateStudyAcrfBookHtml(study, { mode: "annotated", branding })
-                : activeForm
-                ? generateAcrfHtml(activeForm, study, { mode: "annotated", branding })
-                : ""
-            }
+            text={acrfHtml}
             label="Copy aCRF HTML"
             copiedLabel="Copied HTML!"
             successMessage="aCRF HTML content copied to clipboard"

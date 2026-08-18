@@ -42,8 +42,7 @@ export const DiagnosticsDrawer: React.FC<DiagnosticsDrawerProps> = ({
   if (!isOpen) return null;
 
   // 1. AST Lint Diagnostics
-  const astDiagnostics: { formName: string; formId: string; message: string; severity: string }[] =
-    [];
+  const astDiagnostics: { formName: string; formId: string; message: string; severity: string }[] = [];
   study.forms.forEach((form) => {
     const items = lintForm(form);
     items.forEach((item) => {
