@@ -8,7 +8,7 @@
 
 > **generateClientConnectionHash**(`ip`): `Promise`\<`string`\>
 
-Defined in: [lib/services/privacy-service.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/services/privacy-service.ts#L50)
+Defined in: [lib/services/privacy-service.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/services/privacy-service.ts#L48)
 
 Computes a privacy-preserving SHA-256 hash token from client IP / connection info
 using standard Web Crypto APIs (crypto.subtle), safe for Edge and Node runtimes.
