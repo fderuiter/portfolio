@@ -27,7 +27,59 @@ export interface BenchmarkResult {
   iterations: number;
   durationMs: number;
   opsPerSec: number;
+  minOpsPerSec?: number;
+  passedBudget?: boolean;
   metrics?: Record<string, string | number>;
+}
+
+export const DEFAULT_COMPUTE_BUDGETS: Record<string, number> = {
+  "Greedy Column Pack (100 items, 3 cols)": 1000,
+  "Greedy Column Pack (1,000 items, 3 cols)": 500,
+  "Greedy Column Pack (10,000 items, 3 cols)": 50,
+  "Spline generation (100 points, Hermite & Cubic)": 500,
+  "Rich Inline Walk & Materialize (5 styled segments)": 1000,
+  "Regex Credential & Entropy Scan (ARCHITECTURE.md)": 100,
+  "Expression Evaluation & Lint (BMI / BSA)": 1000,
+  "Propositional AST Parse & Truth Table Solver": 1000,
+  "Autonomous State Step & Park Simulation": 2000,
+  "32KB Embedded Allocator & GC Cycle": 1000,
+};
+
+export interface ComputeBudgetReport {
+  passed: boolean;
+  results: BenchmarkResult[];
+  violations: string[];
+}
+
+export function verifyComputeBudgets(
+  results: BenchmarkResult[],
+  customBudgets?: Record<string, number>
+): ComputeBudgetReport {
+  const budgets = { ...DEFAULT_COMPUTE_BUDGETS, ...customBudgets };
+  const violations: string[] = [];
+
+  const evaluatedResults = results.map((r) => {
+    const targetMinOps = r.minOpsPerSec ?? budgets[r.name] ?? 0;
+    const passed = targetMinOps > 0 ? r.opsPerSec >= targetMinOps : true;
+
+    if (!passed) {
+      violations.push(
+        `Compute benchmark "${r.name}" breached budget: achieved ${r.opsPerSec.toLocaleString()} ops/s, minimum target is ${targetMinOps.toLocaleString()} ops/s`
+      );
+    }
+
+    return {
+      ...r,
+      minOpsPerSec: targetMinOps,
+      passedBudget: passed,
+    };
+  });
+
+  return {
+    passed: violations.length === 0,
+    results: evaluatedResults,
+    violations,
+  };
 }
 
 /**
@@ -431,4 +483,23 @@ export function printBenchmarkReport(results: BenchmarkResult[]): void {
       console.log(`  ${colors.bold}${r.name}${colors.reset}: ${metricStr}`);
     }
   }
+}
+
+export function generateComputeMarkdownReport(results: BenchmarkResult[]): string {
+  const lines: string[] = [];
+  lines.push("### ⚡ Compute Engine Micro-Benchmarks Summary");
+  lines.push("");
+  lines.push("| Suite | Benchmark Test | Iterations | Duration | Throughput | Target Min | Budget Status |");
+  lines.push("| :--- | :--- | ---: | ---: | ---: | ---: | :---: |");
+
+  for (const r of results) {
+    const targetStr = r.minOpsPerSec ? `${r.minOpsPerSec.toLocaleString()} ops/s` : "N/A";
+    const statusStr = r.passedBudget === false ? "❌ FAIL" : "✅ PASS";
+    lines.push(
+      `| ${r.suite} | ${r.name} | ${r.iterations.toLocaleString()} | ${r.durationMs}ms | ${r.opsPerSec.toLocaleString()} ops/s | ${targetStr} | ${statusStr} |`
+    );
+  }
+
+  lines.push("");
+  return lines.join("\n");
 }

@@ -14,8 +14,16 @@ export interface PageBenchmarkRoute {
   category: "top-level" | "case-study" | "arcade" | "tool";
 }
 
+export const KEY_ROUTES: PageBenchmarkRoute[] = [
+  { path: "/", name: "Homepage (Pretext & Bio)", category: "top-level" },
+  { path: "/case-studies", name: "Case Studies Index", category: "top-level" },
+  { path: "/proof", name: "Formal Proof Studio", category: "tool" },
+  { path: "/simulator", name: "System Dynamics Simulator", category: "tool" },
+  { path: "/crf", name: "CRF Builder & AST", category: "tool" },
+  { path: "/arcade/working-with-duck", name: "Game: Duck Canvas Engine", category: "arcade" },
+];
+
 export const CANONICAL_ROUTES: PageBenchmarkRoute[] = [
-  // Top-Level Navigation
   { path: "/", name: "Homepage (Pretext & Bio)", category: "top-level" },
   { path: "/case-studies", name: "Case Studies Index", category: "top-level" },
   { path: "/arcade", name: "Arcade Hub", category: "top-level" },

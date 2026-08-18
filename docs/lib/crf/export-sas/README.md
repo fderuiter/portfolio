@@ -8,6 +8,7 @@
 
 ## Interfaces
 
+- [ExpandedSasField](interfaces/ExpandedSasField.md)
 - [SasFieldAttributes](interfaces/SasFieldAttributes.md)
 
 ## Functions
@@ -17,6 +18,19 @@
 - [exportStudyToSas](functions/exportStudyToSas.md)
 - [generateSasDataStepForForm](functions/generateSasDataStepForForm.md)
 - [generateSasProcFormat](functions/generateSasProcFormat.md)
+- [getExpandedSasAttributes](functions/getExpandedSasAttributes.md)
 - [getFieldSasAttributes](functions/getFieldSasAttributes.md)
 - [getSasFormatName](functions/getSasFormatName.md)
 - [sanitizeSasName](functions/sanitizeSasName.md)
+
+## References
+
+### getFieldOptions
+
+Re-exports [getFieldOptions](../export-utils/functions/getFieldOptions.md)
+
+***
+
+### parseMultiSelectValue
+
+Re-exports [parseMultiSelectValue](../export-utils/functions/parseMultiSelectValue.md)

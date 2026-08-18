@@ -8,7 +8,7 @@
 
 > **escapeSasString**(`text`): `string`
 
-Defined in: [lib/crf/export-sas.ts:43](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L43)
+Defined in: [lib/crf/export-sas.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L44)
 
 Escapes single quotes for SAS string literals.
 

@@ -10,6 +10,8 @@ import {
   benchmarkGarminMemory,
   runAllBenchmarks,
   printBenchmarkReport,
+  verifyComputeBudgets,
+  generateComputeMarkdownReport,
 } from "@/lib/dx/bench";
 
 describe("DX Micro-Benchmark Suite", () => {
@@ -77,5 +79,36 @@ describe("DX Micro-Benchmark Suite", () => {
     expect(results.length).toBe(10);
 
     expect(() => printBenchmarkReport(results)).not.toThrow();
+  });
+
+  it("evaluates compute benchmark budget assertions correctly", () => {
+    const sampleResults = [
+      {
+        suite: "Test Suite",
+        name: "Greedy Column Pack (100 items, 3 cols)",
+        iterations: 1000,
+        durationMs: 10,
+        opsPerSec: 5000,
+      },
+      {
+        suite: "Test Suite",
+        name: "Slow Test",
+        iterations: 100,
+        durationMs: 1000,
+        opsPerSec: 10,
+        minOpsPerSec: 100,
+      },
+    ];
+
+    const report = verifyComputeBudgets(sampleResults);
+    expect(report.passed).toBe(false);
+    expect(report.violations.length).toBe(1);
+    expect(report.results[0].passedBudget).toBe(true);
+    expect(report.results[1].passedBudget).toBe(false);
+
+    const markdown = generateComputeMarkdownReport(report.results);
+    expect(markdown).toContain("Compute Engine Micro-Benchmarks Summary");
+    expect(markdown).toContain("❌ FAIL");
+    expect(markdown).toContain("✅ PASS");
   });
 });

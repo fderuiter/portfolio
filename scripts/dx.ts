@@ -10,7 +10,7 @@ import fs from "fs";
 import { execSync, execFileSync } from "child_process";
 import { runDiagnostics, printDoctorReport } from "../lib/dx/doctor";
 import { scaffold, type ScaffoldType } from "../lib/dx/scaffolder";
-import { runAllBenchmarks, printBenchmarkReport } from "../lib/dx/bench";
+import { runAllBenchmarks, printBenchmarkReport, verifyComputeBudgets } from "../lib/dx/bench";
 import { colors, formatHeader, badge, formatSection } from "../lib/dx/utils";
 import { ALLOWED_COMMIT_TYPES, validateCommitMessage, validateBranchName } from "../lib/dx/git-guard";
 import { checkEnvironmentVariables } from "../lib/dx/env-guard";
@@ -284,12 +284,23 @@ async function handleScaffoldCommand(args: string[]): Promise<void> {
 function handleBenchCommand(args: string[] = []): void {
   if (args.includes("--pages") || args.includes("pages")) {
     console.log(formatHeader("DX Bench: Page Speed & Core Web Vitals", "Real-Browser Chromium • Navigation Timing L2 • Web Vitals"));
-    execSync("npx tsx scripts/benchmark-pages.ts", { cwd: workspaceRoot, stdio: "inherit" });
+    const passthrough = args.filter((a) => a !== "bench" && a !== "--pages" && a !== "pages").join(" ");
+    execSync(`npx tsx scripts/benchmark-pages.ts ${passthrough}`, { cwd: workspaceRoot, stdio: "inherit" });
     return;
   }
   console.log(formatHeader("DX Bench: Micro-Benchmark Suite", "Pretext Layout • Greedy Masonry • Security Scanner"));
+  const assertBudget = args.includes("--assert") || args.includes("--budget");
   const results = runAllBenchmarks();
-  printBenchmarkReport(results);
+  const evaluation = verifyComputeBudgets(results);
+  printBenchmarkReport(evaluation.results);
+
+  if (assertBudget && !evaluation.passed) {
+    console.error(`\n${colors.brightRed}❌ Compute Benchmark SLA Budget Breached!${colors.reset}`);
+    for (const v of evaluation.violations) {
+      console.error(`  ${colors.red}• ${v}${colors.reset}`);
+    }
+    process.exit(1);
+  }
 }
 
 function handleCleanCommand(): void {

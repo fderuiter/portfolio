@@ -23,6 +23,7 @@
 
 - [CANONICAL\_ROUTES](variables/CANONICAL_ROUTES.md)
 - [DEFAULT\_THRESHOLDS](variables/DEFAULT_THRESHOLDS.md)
+- [KEY\_ROUTES](variables/KEY_ROUTES.md)
 
 ## Functions
 

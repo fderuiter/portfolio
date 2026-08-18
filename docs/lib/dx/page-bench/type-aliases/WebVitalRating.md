@@ -8,4 +8,4 @@
 
 > **WebVitalRating** = `"good"` \| `"needs-improvement"` \| `"poor"`
 
-Defined in: [lib/dx/page-bench.ts:64](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L64)
+Defined in: [lib/dx/page-bench.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L77)

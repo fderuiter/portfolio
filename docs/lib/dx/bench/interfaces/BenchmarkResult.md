@@ -30,6 +30,14 @@ Defined in: [lib/dx/bench.ts:27](https://github.com/fderuiter/portfolio/blob/mai
 
 > `optional` **metrics?**: `Record`\<`string`, `string` \| `number`\>
 
+Defined in: [lib/dx/bench.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L32)
+
+***
+
+### minOpsPerSec?
+
+> `optional` **minOpsPerSec?**: `number`
+
 Defined in: [lib/dx/bench.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L30)
 
 ***
@@ -47,6 +55,14 @@ Defined in: [lib/dx/bench.ts:26](https://github.com/fderuiter/portfolio/blob/mai
 > **opsPerSec**: `number`
 
 Defined in: [lib/dx/bench.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L29)
+
+***
+
+### passedBudget?
+
+> `optional` **passedBudget?**: `boolean`
+
+Defined in: [lib/dx/bench.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L31)
 
 ***
 

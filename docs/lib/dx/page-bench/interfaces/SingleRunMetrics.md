@@ -6,7 +6,7 @@
 
 # Interface: SingleRunMetrics
 
-Defined in: [lib/dx/page-bench.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L47)
+Defined in: [lib/dx/page-bench.ts:60](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L60)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/dx/page-bench.ts:47](https://github.com/fderuiter/portfolio/blo
 
 > **cls**: `number`
 
-Defined in: [lib/dx/page-bench.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L51)
+Defined in: [lib/dx/page-bench.ts:64](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L64)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/dx/page-bench.ts:51](https://github.com/fderuiter/portfolio/blo
 
 > **domContentLoaded**: `number`
 
-Defined in: [lib/dx/page-bench.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L52)
+Defined in: [lib/dx/page-bench.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L65)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/dx/page-bench.ts:52](https://github.com/fderuiter/portfolio/blo
 
 > **fcp**: `number`
 
-Defined in: [lib/dx/page-bench.ts:49](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L49)
+Defined in: [lib/dx/page-bench.ts:62](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L62)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/dx/page-bench.ts:49](https://github.com/fderuiter/portfolio/blo
 
 > **lcp**: `number`
 
-Defined in: [lib/dx/page-bench.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L50)
+Defined in: [lib/dx/page-bench.ts:63](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L63)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/dx/page-bench.ts:50](https://github.com/fderuiter/portfolio/blo
 
 > **loadDuration**: `number`
 
-Defined in: [lib/dx/page-bench.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L53)
+Defined in: [lib/dx/page-bench.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L66)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/dx/page-bench.ts:53](https://github.com/fderuiter/portfolio/blo
 
 > **transferSizeKb**: `number`
 
-Defined in: [lib/dx/page-bench.ts:54](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L54)
+Defined in: [lib/dx/page-bench.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L67)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [lib/dx/page-bench.ts:54](https://github.com/fderuiter/portfolio/blo
 
 > **ttfb**: `number`
 
-Defined in: [lib/dx/page-bench.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L48)
+Defined in: [lib/dx/page-bench.ts:61](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L61)

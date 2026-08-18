@@ -8,4 +8,4 @@
 
 > `const` **CANONICAL\_ROUTES**: [`PageBenchmarkRoute`](../interfaces/PageBenchmarkRoute.md)[]
 
-Defined in: [lib/dx/page-bench.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L17)
+Defined in: [lib/dx/page-bench.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L26)

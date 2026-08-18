@@ -8,7 +8,7 @@
 
 > **benchmarkMasonryScheduler**(`iterations?`): [`BenchmarkResult`](../interfaces/BenchmarkResult.md)[]
 
-Defined in: [lib/dx/bench.ts:36](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L36)
+Defined in: [lib/dx/bench.ts:88](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L88)
 
 Benchmark Greedy Masonry Column Distribution
 

@@ -10,6 +10,7 @@ import path from "path";
 import fs from "fs";
 import {
   CANONICAL_ROUTES,
+  KEY_ROUTES,
   runPageBenchmarks,
   printPageBenchmarkReport,
   exportBenchmarkResults,
@@ -65,6 +66,7 @@ export async function main(): Promise<void> {
   let assertBudget = false;
   let isMobile = false;
   let routeFilter: string | null = null;
+  let keyOnly = false;
   let outputDir = process.cwd();
 
   for (let i = 0; i < args.length; i++) {
@@ -77,6 +79,8 @@ export async function main(): Promise<void> {
       assertBudget = true;
     } else if (arg === "--mobile" || arg === "-m") {
       isMobile = true;
+    } else if (arg === "--key-routes" || arg === "--key-only" || arg === "--fast") {
+      keyOnly = true;
     } else if (arg === "--routes" && args[i + 1]) {
       routeFilter = args[++i];
     } else if (arg === "--output" && args[i + 1]) {
@@ -88,7 +92,8 @@ export async function main(): Promise<void> {
       console.log(`  --url <url>        Target server URL (default: http://localhost:3000)`);
       console.log(`  --runs <n>         Number of measured runs per page (default: 3)`);
       console.log(`  --mobile, -m       Emulate mobile device viewport (iPhone/Pixel 390x844 with touch)`);
-      console.log(`  --routes <pattern> Filter routes by pattern (e.g. 'arcade', 'proof', 'case-studies')`);
+      console.log(`  --key-routes       Benchmark key routes subset only`);
+      console.log(`  --routes <pattern> Filter routes by pattern (e.g. 'arcade', 'proof', 'key')`);
       console.log(`  --assert, --budget Exit with code 1 if any page fails Web Vitals budget`);
       console.log(`  --output <dir>     Export directory for benchmark-results.md/.json`);
       console.log(`  --help, -h         Show help menu\n`);
@@ -96,10 +101,14 @@ export async function main(): Promise<void> {
     }
   }
 
-  let selectedRoutes: PageBenchmarkRoute[] = CANONICAL_ROUTES;
+  let selectedRoutes: PageBenchmarkRoute[] = keyOnly ? KEY_ROUTES : CANONICAL_ROUTES;
   if (routeFilter) {
-    const regex = new RegExp(routeFilter, "i");
-    selectedRoutes = CANONICAL_ROUTES.filter((r) => regex.test(r.path) || regex.test(r.name));
+    if (routeFilter.toLowerCase() === "key" || routeFilter.toLowerCase() === "key-routes") {
+      selectedRoutes = KEY_ROUTES;
+    } else {
+      const regex = new RegExp(routeFilter, "i");
+      selectedRoutes = CANONICAL_ROUTES.filter((r) => regex.test(r.path) || regex.test(r.name));
+    }
     if (selectedRoutes.length === 0) {
       console.error(`${colors.brightRed}Error: No routes matched filter '${routeFilter}'.${colors.reset}`);
       process.exit(1);

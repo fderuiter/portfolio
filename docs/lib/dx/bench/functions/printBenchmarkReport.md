@@ -8,7 +8,7 @@
 
 > **printBenchmarkReport**(`results`): `void`
 
-Defined in: [lib/dx/bench.ts:401](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L401)
+Defined in: [lib/dx/bench.ts:453](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L453)
 
 ## Parameters
 
