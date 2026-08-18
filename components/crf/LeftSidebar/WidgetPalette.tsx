@@ -14,6 +14,7 @@ import {
   IconPlus,
 } from "@tabler/icons-react";
 import { ClinicalDataType, CRFField } from "@/lib/crf/types";
+import { generateId } from "@/lib/utils";
 
 interface WidgetItem {
   type: ClinicalDataType;
@@ -221,7 +222,7 @@ const WIDGETS: WidgetItem[] = [
 ];
 
 function generateFieldId(type: string): string {
-  return `f_${type}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  return generateId(`f_${type}`);
 }
 
 interface WidgetPaletteProps {

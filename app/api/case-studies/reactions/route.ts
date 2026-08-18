@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import crypto from "crypto";
 import { ReactionSubmissionSchema, ALLOWED_REACTIONS } from "@/lib/schemas";
+import { getAnonymousDeviceHash } from "@/lib/utils";
 import * as Sentry from "@sentry/nextjs";
 import { env } from "@/lib/env";
 
@@ -11,12 +11,7 @@ export const dynamic = "force-dynamic";
 const mockReactionsStore = new Map<string, Map<string, number>>();
 
 function getConnectionHash(req: NextRequest): string {
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    req.headers.get("x-real-ip") ||
-    "127.0.0.1";
-  const userAgent = req.headers.get("user-agent") || "";
-  return crypto.createHash("sha256").update(`${ip}:${userAgent}`).digest("hex");
+  return getAnonymousDeviceHash(req);
 }
 
 function getDefaultCounts(): Record<string, number> {
