@@ -191,6 +191,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         ]
       },
       {
+        id: "nav-lambda-wave",
+        title: "Lambda-Wave: Real-Time SGRT FMCW Radar System",
+        subtitle: "Deep-dive technical case study — Haskell/C++ lock-free ring buffers, Kalman state tracking & sub-5ms LINAC interlock",
+        category: "navigation",
+        url: "/case-studies/lambda-wave",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Case Study",
+        status: "IEC 62304 Class C",
+        description: "Safety-critical FMCW mmWave radar processing pipeline for respiratory motion monitoring and real-time LINAC beam gating in radiation therapy.",
+        techStack: ["Haskell", "C++", "OpenGL", "DSP", "IEC-62304", "Real-Time"],
+        highlights: [
+          "Zero-copy C++ lock-free ring buffer bridge",
+          "Pure Haskell Kalman kinematic state estimation",
+          "Sub-5ms watchdog fail-safe interlock propagation"
+        ]
+      },
+      {
         id: "nav-laser-loon",
         title: "Laser Loon: Quest for the State Flag",
         subtitle: "Playable civic physics shooter — pilot F277 Laser Loon on the Road to the Capitol",

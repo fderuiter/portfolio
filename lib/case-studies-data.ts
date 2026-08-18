@@ -420,6 +420,11 @@ export const tenantAuthGuard = createMiddleware(async (c, next) => {
 
 <h4>3. Edge-Native Event-Driven Async Processing</h4>
 <p>Background workflows and async task queues are powered by Inngest functions embedded directly inside Hono, delivering event-driven reliability without needing persistent worker processes.</p>`,
+    created_at: new Date("2026-02-18T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-7",
     slug: "inbody-qr-decoder",
     title: "InBody QR Data Decoder & Analyzer: BIA Reverse Engineering",
     primary_language: "Python",
@@ -454,6 +459,11 @@ def decode_digits(raw_slice: str, scale_factor: float = 0.1, precision: int = 2)
 
 <h4>3. Multi-Block Segment Parsing &amp; Biomarker Derivation</h4>
 <p>Primary body composition parameters reside in Segment Index 4 (<code>meas_blob</code>), while secondary metrics (BMR and Visceral Fat) are extracted from Segment Index 5 in kilocalories. Derived biomarkers, including Appendicular Skeletal Muscle Mass (ASM) and Skeletal Muscle Index ($\\text{SMI} = \\frac{\\text{ASM}}{\\text{Height}^2}$), are computed deterministically.</p>`,
+    created_at: new Date("2026-02-22T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-8",
     slug: "polyglot-tsp",
     title: "Polyglot-TSP: Technical Breakdown & Portfolio Integration",
     primary_language: "Rust",
@@ -567,6 +577,11 @@ endmodule
 <h3>Trade-Offs & Key Decisions</h3>
 <p>1. <strong>Exhaustive Permutations ($O(N!)$) vs. Dynamic Programming / Heuristics ($O(N^2 2^N)$)</strong>: Prioritized strict brute-force permutation generation across all targets to maintain an identical baseline for syntactic and runtime execution comparisons across obscure and exotic paradigms.</p>
 <p>2. <strong>Subprocess CLI Execution vs. Foreign Function Interface (FFI)</strong>: Chose process-level standard stream (stdout/stderr) assertion over C ABI bindings to accommodate non-standardized runtimes, HDL simulation pipelines (ghdl, iverilog), and legacy/esoteric environments (INTERCAL, COBOL, Modula-2).</p>`,
+    created_at: new Date("2026-02-25T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-9",
     slug: "oxidizemath",
     title: "OxidizeMath: Verified Numerical Computation Framework in Rust",
     primary_language: "Rust",
@@ -627,6 +642,11 @@ where
 
 <h4>3. WASM-First GUI Architecture</h4>
 <p>Deploys identical single-binary desktop execution and zero-install WebAssembly browser builds using egui and custom <code>egui_plot</code> engines.</p>`,
+    created_at: new Date("2026-02-28T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-10",
     slug: "ualbf",
     title: "UALBF: Verified Computational Proof Engine & Search Architecture",
     primary_language: "Rust",
@@ -737,6 +757,10 @@ pub extern "C" fn ualbf_verify_certificate_manifest(
 }
 </code></pre>`,
     created_at: new Date("2026-03-01T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-11",
     slug: "sortify",
     title: "Sortify: Air-Gapped Document Classification & Resilient File Engine",
     primary_language: "Python",
@@ -778,6 +802,107 @@ def stage_and_commit_move(self, src: str, dest_dir: str) -> str:
 <h4>3. Encrypted SQLCipher Registry &amp; Worker Concurrency</h4>
 <p>Database encryption at rest is enforced via per-platform SQLCipher shared libraries with PRAGMA key derivation. Thread-isolated background workers communicate via non-blocking queues with the main UI thread (PyQt6/PySide6) to prevent interface lockups during bulk ingestion.</p>`,
     created_at: new Date("2026-02-20T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-12",
+    slug: "lambda-wave",
+    title: "Lambda-Wave: Real-Time SGRT FMCW Radar System",
+    primary_language: "Haskell",
+    github_url: "https://github.com/fderuiter/lambda-wave",
+    published: true,
+    simulated_telemetry: false,
+    tags: "haskell, embedded-systems, dsp, fmcw-radar, sgrt, medical-device, iec-62304, real-time",
+    editorial_content: "A **safety-critical**, high-throughput `FMCW millimeter-wave radar processing pipeline` for Surface Guided Radiation Therapy (**SGRT**). Built with a hybrid **Haskell / C++** functional core / imperative shell architecture featuring `lock-free ring buffers`, real-time **Kalman** kinematic state tracking, and sub-5ms **LINAC beam-hold** interlock gating meeting **IEC 62304 Class C** medical compliance.",
+    architectural_narrative: `<h3>Clinical Motivation &amp; Regulatory Context</h3>
+<p>Surface Guided Radiation Therapy (SGRT) demands sub-millimeter patient tracking and respiratory gating without exposing patients to ionizing radiation or suffering from optical occlusion in treatment rooms. This repository implements a high-throughput FMCW millimeter-wave radar pipeline monitoring chest wall motion and triggering LINAC beam-hold interlocks under IEC 62304 Class C medical software compliance.</p>
+
+<h3>Technical Architecture &amp; Data Pipeline</h3>
+<p>The system follows a pure Functional Core / Imperative Shell architecture. Mathematical modules (<code>Numeric.Kinematics</code>, <code>SignalProcessing.FMCW</code>, <code>SignalProcessing.Kalman</code>) remain side-effect free, while hardware ingestion and OpenGL Dear ImGui HUD rendering are encapsulated in lightweight C++ FFI wrappers.</p>
+
+<pre><code class="language-mermaid">
+flowchart LR
+    A[TI IWR6843ISK mmWave Radar] --&gt;|UART Raw Chirps| B[C++ Lock-Free RingBuffer]
+    B --&gt;|Haskell FFI| C[FMCW Range-Doppler DSP]
+    C --&gt; D[Kalman Kinematic Filter]
+    D --&gt; E[Surface Mesher &amp; Displacement Engine]
+    E --&gt; F{Gating Logic &amp; Safety Watchdog}
+    F --&gt;|Within Gate| G[Beam Enable State]
+    F --&gt;|Excursion / Failure| H[LINAC Beam Hold GPIO Interlock]
+    D --&gt;|FFI Bridge| I[C++ / OpenGL ImGui HUD Visualizer]
+</code></pre>
+
+<h4>1. Zero-Copy C++ / Haskell FFI Bridge</h4>
+<p>To eliminate garbage collector pauses during raw UART chirp ingestion from TI IWR6843ISK mmWave sensors, raw bytes are buffered in C++ lock-free circular ring buffers (<code>cbits/src/ring_buffer_ffi.cpp</code>) and safely transferred into Haskell functional primitives via foreign pointer bindings (<code>src/FFI/RingBuffer/IO.hs</code>).</p>
+
+<pre><code class="language-cpp">
+// cbits/src/ring_buffer_ffi.cpp
+#include "RingBuffer.h"
+#include &lt;atomic&gt;
+#include &lt;cstring&gt;
+
+extern "C" {
+struct RawRadarFrame {
+    uint64_t timestamp_ns;
+    uint32_t frame_seq;
+    uint32_t chirp_count;
+    float raw_payload[512];
+};
+
+struct LockFreeRingBuffer {
+    std::atomic&lt;uint32_t&gt; head{0};
+    std::atomic&lt;uint32_t&gt; tail{0};
+    RawRadarFrame buffer[1024];
+};
+
+int ring_buffer_pop(LockFreeRingBuffer* rb, RawRadarFrame* out_frame) {
+    uint32_t current_tail = rb-&gt;tail.load(std::memory_order_relaxed);
+    if (current_tail == rb-&gt;head.load(std::memory_order_acquire)) {
+        return -1; // Buffer empty
+    }
+    std::memcpy(out_frame, &amp;rb-&gt;buffer[current_tail], sizeof(RawRadarFrame));
+    rb-&gt;tail.store((current_tail + 1) % 1024, std::memory_order_release);
+    return 0;
+}
+}
+</code></pre>
+
+<h4>2. Pure Kinematic State Estimation via Kalman Filtering</h4>
+<p>SignalProcessing.Kalman tracks multi-point chest-wall displacement in real time, filtering transient packet loss and inter-frame clock jitter via high-resolution hardware timestamp extrapolation (<code>Data.Time.HighRes.hsc</code>).</p>
+
+<pre><code class="language-haskell">
+-- src-math/SignalProcessing/Kalman.hs
+module SignalProcessing.Kalman (predictState, updateMeasurement) where
+
+predictState :: Double -&gt; KalmanState -&gt; KalmanState
+predictState dt (KalmanState (KinematicVector x v a) ((p00, p01), (p10, p11)) q) =
+  let x' = x + v * dt + 0.5 * a * dt * dt
+      v' = v + a * dt
+      p00' = p00 + dt * (p10 + p01) + dt * dt * p11 + q
+      p01' = p01 + dt * p11
+      p10' = p10 + dt * p11
+      p11' = p11 + q
+  in KalmanState (KinematicVector x' v' a) ((p00', p01'), (p10', p11')) q
+</code></pre>
+
+<h4>3. Fail-Safe Watchdog &amp; Monotonic Safety Interlock</h4>
+<p>An independent watchdog (<code>Safety.Watchdog</code>) continuously validates cryptographically signed monotonically increasing safety tokens (<code>Safety.Crypto</code>). Any heartbeat starvation or latency exceeding the 10ms budget forces an immediate LINAC beam-hold interlock assertion in under 5ms.</p>
+
+<pre><code class="language-haskell">
+-- src/Safety/Watchdog.hs
+module Safety.Watchdog (evaluateSafetyState) where
+
+evaluateSafetyState :: WatchdogConfig -&gt; UTCTime -&gt; SafetyToken -&gt; Double -&gt; SafetyStatus
+evaluateSafetyState cfg currentTime token currentDisplacement
+  | not (validateTokenSignature token) =
+      BeamHoldInterlock "CRITICAL: Invalid safety token signature"
+  | realToFrac (diffUTCTime currentTime (tokenTimestamp token)) &gt; maxLatencyBudgetSec cfg =
+      BeamHoldInterlock "CRITICAL: Watchdog heartbeat starvation"
+  | abs currentDisplacement &gt; maxDisplacementMm cfg =
+      BeamHoldInterlock "WARNING: Respiratory motion excursion detected"
+  | otherwise = BeamEnable
+</code></pre>`,
+    created_at: new Date("2026-03-05T00:00:00Z"),
     updated_at: new Date("2026-08-14T00:00:00Z"),
   },
 ];

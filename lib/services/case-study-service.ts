@@ -84,6 +84,13 @@ export class CaseStudyService {
           title: "InBody QR Data Decoder",
           primary_language: "Python",
           tags: "python, reverse-engineering, qr-decoder, biometrics"
+        },
+        {
+          id: "lambda-wave",
+          slug: "lambda-wave",
+          title: "Lambda-Wave Radar System",
+          primary_language: "Haskell",
+          tags: "haskell, embedded-systems, dsp, fmcw-radar, sgrt, medical-device, iec-62304, real-time"
         }
       ];
     }

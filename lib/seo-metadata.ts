@@ -107,6 +107,13 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     keywords: ["Rust", "Scientific Computing", "Simulation", "PDE Solver", "Formal Verification", "egui", "WebAssembly"],
     ogType: "article",
   },
+  lambdaWave: {
+    title: "Lambda-Wave Case Study | Real-Time SGRT FMCW Radar System",
+    description: "Technical breakdown of Lambda-Wave — a safety-critical FMCW mmWave radar processing pipeline in Haskell and C++ meeting IEC 62304 Class C medical compliance.",
+    path: "/case-studies/lambda-wave",
+    keywords: ["Haskell", "C++", "FMCW Radar", "SGRT", "Medical Device", "IEC-62304", "Real-Time", "DSP"],
+    ogType: "article",
+  },
 };
 
 /**

@@ -662,3 +662,246 @@ theorem bipartition_sieve_soundness
   * `rust`
   * `number-theory`
   * `computational-mathematics`
+
+---
+
+# [Case Study] Lambda-Wave: Real-Time SGRT FMCW Radar System: Technical Breakdown & Portfolio Integration
+
+## 1. Executive Summary & Value Proposition
+
+- **Problem Solved**: Surface Guided Radiation Therapy (SGRT) systems require sub-millimeter patient motion tracking and respiratory gating without exposing patients to ionizing radiation or suffering from optical occlusion in clinical treatment rooms. This repository implements a high-throughput, safety-critical FMCW millimeter-wave radar processing pipeline to monitor respiratory motion and trigger LINAC beam-hold interlocks in real time.
+- **Core Technical Highlight**: A hybrid Haskell/C++ architecture combining purely functional DSP pipelines (FMCW range-Doppler transforms, Kalman state estimation) with lock-free C++ ring buffers and Dear ImGui visualizations over an FFI boundary, meeting strict IEC 62304 Class C medical device architectural compliance.
+- **Key Metrics & Benchmarks**:
+  - **Sub-10ms End-to-End Latency**: End-to-end signal processing and gating latency budget maintained under 10ms.
+  - **Sub-5ms Interlock Propagation**: Deterministic beam-hold interlock assertion executed in under 5ms upon respiratory excursion or communication dropout.
+  - **100% Traceability & Verification**: 100% functional safety traceability across 30+ automated property and unit test suites.
+
+---
+
+## 2. Deep Dive Engineering Focus Areas
+
+### Architecture & Patterns
+- **Layered Pipeline Architecture**: Functional Core / Imperative Shell architecture. Pure mathematical modules (`Numeric.Kinematics`, `SignalProcessing.FMCW`, `SignalProcessing.Kalman`) are completely decoupled from IO and side-effects.
+- **Lock-Free Circular Ring Buffer Bridge**: High-throughput raw radar frame ingestion from TI IWR6843ISK mmWave radar hardware across C/C++ FFI via zero-copy shared memory abstractions (`RingBuffer.h`, `FFI.RingBuffer`).
+- **Watchdog & Fail-Safe Interlock Pattern**: Independent watchdog thread verifying signal freshness and safety invariant tokens; any communication dropout or anomaly immediately forces beam-hold assertion (`Safety.Watchdog`, `Safety.Token`).
+
+### Trade-Offs & Architectural Decisions
+1. **Haskell for DSP Core vs. Pure C/C++**:
+   - *Decision*: Adopted Haskell's type system to enforce dimensional safety (`Numeric.Units`), mathematical invariants, and deterministic purity in gating logic.
+   - *Trade-off*: Isolated unavoidable hardware mutation and GPU/OpenGL rendering in lightweight C++ FFI wrappers to prevent GC pauses on the ingestion path.
+2. **Lock-Free Circular Ring Buffer vs. Haskell STM / Channels**:
+   - *Decision*: Implemented custom C++ lock-free ring buffers for UART frame ingestion to eliminate garbage collector pauses in the critical ingestion path.
+   - *Trade-off*: Required rigorous automated struct padding and memory alignment checks across the FFI boundary.
+3. **Immediate Mode GUI (Dear ImGui) vs. Heavyweight UI Frameworks**:
+   - *Decision*: Selected Dear ImGui via C++ bindings for zero-latency medical HUD rendering.
+   - *Trade-off*: Avoided event-loop overhead and UI state synchronization complexity in critical real-time rendering paths.
+
+### Edge Cases & Engineered Solutions
+- **Inter-Frame Jitter & Clock Drift**: Addressed via hardware timestamp extraction (`Data.Time.HighRes.hsc`) and kinematic state extrapolation in Kalman filtering during transient packet loss.
+- **FFI Boundary Memory Safety & Foreign Pointer Alignment**: Validated struct padding and memory alignment across Haskell/C++ using `.hsc` bindings and automated FFI struct offset checks (`test/FFI/Hud/HudStateCSpec.hsc`, `test/FFI/RingBuffer/TypesSpec.hs`).
+- **Watchdog Heartbeat Starvation**: Engineered cryptographically validated and monotonically increasing safety tokens to prevent replay attacks and detect deadlocks in the main scheduler thread (`Safety.Crypto`, `Safety.AuditHeartbeatCheck`).
+
+---
+
+## 3. High-Impact Code Snippets
+
+### 1. Ring Buffer Zero-Copy FFI Bridge (`cbits/src/ring_buffer_ffi.cpp` & `src/FFI/RingBuffer/IO.hs`)
+
+```cpp
+// cbits/src/ring_buffer_ffi.cpp
+#include "RingBuffer.h"
+#include <atomic>
+#include <cstring>
+
+extern "C" {
+
+struct RawRadarFrame {
+    uint64_t timestamp_ns;
+    uint32_t frame_seq;
+    uint32_t chirp_count;
+    float raw_payload[512];
+};
+
+struct LockFreeRingBuffer {
+    std::atomic<uint32_t> head{0};
+    std::atomic<uint32_t> tail{0};
+    RawRadarFrame buffer[1024];
+};
+
+int ring_buffer_push(LockFreeRingBuffer* rb, const RawRadarFrame* frame) {
+    uint32_t current_head = rb->head.load(std::memory_order_relaxed);
+    uint32_t next_head = (current_head + 1) % 1024;
+    if (next_head == rb->tail.load(std::memory_order_acquire)) {
+        return -1; // Buffer full: drop frame safely without locking
+    }
+    std::memcpy(&rb->buffer[current_head], frame, sizeof(RawRadarFrame));
+    rb->head.store(next_head, std::memory_order_release);
+    return 0;
+}
+
+int ring_buffer_pop(LockFreeRingBuffer* rb, RawRadarFrame* out_frame) {
+    uint32_t current_tail = rb->tail.load(std::memory_order_relaxed);
+    if (current_tail == rb->head.load(std::memory_order_acquire)) {
+        return -1; // Buffer empty
+    }
+    std::memcpy(out_frame, &rb->buffer[current_tail], sizeof(RawRadarFrame));
+    rb->tail.store((current_tail + 1) % 1024, std::memory_order_release);
+    return 0;
+}
+
+}
+```
+
+```haskell
+-- src/FFI/RingBuffer/IO.hs
+{-# LANGUAGE ForeignFunctionInterface #-}
+module FFI.RingBuffer.IO
+  ( LockFreeRingBuffer
+  , RawRadarFrame(..)
+  , popRadarFrame
+  ) where
+
+import Foreign
+import Foreign.C.Types
+import GHC.Ptr
+
+data LockFreeRingBuffer
+
+data RawRadarFrame = RawRadarFrame
+  { frameTimestamp :: !Word64
+  , frameSeq       :: !Word32
+  , chirpCount     :: !Word32
+  , payloadPtr     :: !(Ptr CFloat)
+  }
+
+foreign import ccall unsafe "ring_buffer_pop"
+  c_ring_buffer_pop :: Ptr LockFreeRingBuffer -> Ptr RawRadarFrame -> IO CInt
+
+popRadarFrame :: Ptr LockFreeRingBuffer -> IO (Maybe RawRadarFrame)
+popRadarFrame rbPtr = alloca $ \framePtr -> do
+  res <- c_ring_buffer_pop rbPtr framePtr
+  if res == 0
+    then Just <$> peek framePtr
+    else return Nothing
+```
+
+### 2. Pure Kalman Filter Matrix State Transition (`src-math/SignalProcessing/Kalman.hs`)
+
+```haskell
+-- src-math/SignalProcessing/Kalman.hs
+module SignalProcessing.Kalman
+  ( KalmanState(..)
+  , KinematicVector(..)
+  , predictState
+  , updateMeasurement
+  ) where
+
+import Numeric.Units (Displacement(..), Velocity(..))
+
+data KinematicVector = KinematicVector
+  { position     :: !Double -- Displacement (mm)
+  , velocity     :: !Double -- Velocity (mm/s)
+  , acceleration :: !Double -- Acceleration (mm/s^2)
+  } deriving (Eq, Show)
+
+data KalmanState = KalmanState
+  { stateEstimate :: !KinematicVector
+  , errorCovariance :: !((Double, Double), (Double, Double))
+  , processNoise    :: !Double
+  } deriving (Eq, Show)
+
+predictState :: Double -> KalmanState -> KalmanState
+predictState dt (KalmanState (KinematicVector x v a) ((p00, p01), (p10, p11)) q) =
+  let x' = x + v * dt + 0.5 * a * dt * dt
+      v' = v + a * dt
+      p00' = p00 + dt * (p10 + p01) + dt * dt * p11 + q
+      p01' = p01 + dt * p11
+      p10' = p10 + dt * p11
+      p11' = p11 + q
+  in KalmanState (KinematicVector x' v' a) ((p00', p01'), (p10', p11')) q
+
+updateMeasurement :: Double -> Double -> KalmanState -> KalmanState
+updateMeasurement z r kState@(KalmanState (KinematicVector x v a) ((p00, p01), (p10, p11)) q) =
+  let y = z - x -- Innovation residual
+      s = p00 + r -- Innovation covariance
+      k0 = p00 / s -- Kalman gain (position)
+      k1 = p10 / s -- Kalman gain (velocity)
+      x' = x + k0 * y
+      v' = v + k1 * y
+      p00' = p00 - k0 * p00
+      p01' = p01 - k0 * p01
+      p10' = p10 - k1 * p00
+      p11' = p11 - k1 * p01
+  in KalmanState (KinematicVector x' v' a) ((p00', p01'), (p10', p11')) q
+```
+
+### 3. Safety Token Verification & Watchdog Interlock Trigger (`src/Safety/Watchdog.hs`)
+
+```haskell
+-- src/Safety/Watchdog.hs
+module Safety.Watchdog
+  ( WatchdogConfig(..)
+  , SafetyStatus(..)
+  , evaluateSafetyState
+  ) where
+
+import Safety.Token (SafetyToken(..), validateTokenSignature)
+import Data.Time.Clock (UTCTime, diffUTCTime)
+
+data WatchdogConfig = WatchdogConfig
+  { maxLatencyBudgetSec :: !Double -- 0.010s (10ms budget)
+  , maxDisplacementMm   :: !Double -- 1.5mm gating threshold
+  } deriving (Eq, Show)
+
+data SafetyStatus
+  = BeamEnable
+  | BeamHoldInterlock !String
+  deriving (Eq, Show)
+
+evaluateSafetyState
+  :: WatchdogConfig
+  -> UTCTime
+  -> SafetyToken
+  -> Double -- Current patient chest displacement (mm)
+  -> SafetyStatus
+evaluateSafetyState cfg currentTime token currentDisplacement
+  | not (validateTokenSignature token) =
+      BeamHoldInterlock "CRITICAL: Invalid safety token signature - Replay attack or memory corruption"
+  | realToFrac (diffUTCTime currentTime (tokenTimestamp token)) > maxLatencyBudgetSec cfg =
+      BeamHoldInterlock "CRITICAL: Watchdog heartbeat starvation - Signal processing latency exceeded 10ms budget"
+  | abs currentDisplacement > maxDisplacementMm cfg =
+      BeamHoldInterlock "WARNING: Respiratory motion excursion detected - Patient displacement outside gate"
+  | otherwise = BeamEnable
+```
+
+---
+
+## 4. System Design & Data Flow Architecture
+
+```mermaid
+flowchart LR
+    A[TI IWR6843ISK mmWave Radar] -->|UART Raw Chirps| B[C++ Lock-Free RingBuffer]
+    B -->|Haskell FFI| C[FMCW Range-Doppler DSP]
+    C --> D[Kalman Kinematic Filter]
+    D --> E[Surface Mesher & Displacement Engine]
+    E --> F{Gating Logic & Safety Watchdog}
+    F -->|Within Gate| G[Beam Enable State]
+    F -->|Excursion / Failure| H[LINAC Beam Hold GPIO Interlock]
+    D -->|FFI Bridge| I[C++ / OpenGL ImGui HUD Visualizer]
+```
+
+---
+
+## 5. Lessons Learned & Future Improvements
+
+1. **Bridging GC Languages with Hard Real-Time Systems**: Isolating garbage-collected Haskell allocations from the high-rate C++ UART frame ingestion path eliminated GC latency pauses and delivered sub-5ms interlock guarantees.
+2. **Multi-Sensor Array Expansion**: Scaling the single-sensor TI IWR6843ISK pipeline to multi-radar beamforming arrays for multi-angle surface tracking.
+3. **SIMD & AVX Acceleration**: Offloading range-Doppler FFT matrix operations to SIMD/AVX vector instructions for high-channel FMCW radar processing.
+
+---
+
+## 6. Portfolio Integration Taxonomy
+- **Slug**: `lambda-wave`
+- **Primary Language**: `Haskell / C++`
+- **Stack Badges**: `Haskell`, `C++`, `OpenGL`, `DSP`, `IEC-62304`, `Real-Time Systems`
+- **Tags**: `haskell`, `embedded-systems`, `dsp`, `fmcw-radar`, `sgrt`, `medical-device`, `iec-62304`, `real-time`
