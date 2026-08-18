@@ -100,6 +100,13 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     path: "/offline",
     keywords: ["Offline", "PWA", "Service Worker", "Precached Shell", "Frederick de Ruiter"],
   },
+  oxidizeMath: {
+    title: "OxidizeMath Case Study | Technical Breakdown & Architecture",
+    description: "Deep dive technical breakdown of OxidizeMath — a unified, memory-safe, verified numerical computation framework in Rust across scientific computing domains.",
+    path: "/case-studies/oxidizemath",
+    keywords: ["Rust", "Scientific Computing", "Simulation", "PDE Solver", "Formal Verification", "egui", "WebAssembly"],
+    ogType: "article",
+  },
 };
 
 /**
