@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useId, useMemo } from "react";
 import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouterTransition } from "@/hooks/useRouterTransition";
 import {
   IconSearch,
   IconTerminal,
@@ -59,7 +59,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
   const [activeIndex, setActiveIndex] = useState(0);
   const { playHover, playSubmit } = useAudio();
 
-  const router = useRouter();
+  const { startNavigation, prefetchRoute } = useRouterTransition();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const searchId = useId();
 
@@ -645,22 +645,9 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
       return;
     }
 
-    // Handle in-page dynamic smooth scrolls
-    if (item.url.startsWith("/#")) {
-      const targetId = item.url.substring(2);
-      const targetElement = document.getElementById(targetId);
-      if (targetElement) {
-        router.push("/");
-        // Allow thread transition to complete
-        setTimeout(() => {
-          targetElement.scrollIntoView({ behavior: "smooth" });
-        }, 100);
-      } else {
-        router.push(item.url);
-      }
-    } else {
-      router.push(item.url);
-    }
+    // Execute client-side transition via NavigationProvider
+    onClose();
+    startNavigation(item.url, item.title);
   };
 
   // Close when clicking directly on the backdrop container
@@ -754,6 +741,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
                       onClick={() => handleSelectItem(item)}
                       style={{ "--cmd-item-glow": hexToRgba(designManifest.colors["brand-cyan"], 0.04) } as React.CSSProperties}
                       onMouseEnter={() => {
+                        prefetchRoute(item.url);
                         if (index !== activeIndex) {
                           setActiveIndex(index);
                           playHover();

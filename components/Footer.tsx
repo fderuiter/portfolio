@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { TransitionLink } from "@/components/ui/TransitionLink";
 import { usePathname } from "next/navigation";
 import {
   IconArrowUp,
@@ -105,83 +106,83 @@ export const Footer: React.FC = () => {
               </span>
               <ul className="space-y-2 text-xs font-mono">
                 <li>
-                  <Link
+                  <TransitionLink
                     href="/arcade"
                     onMouseEnter={handleHover}
                     className="text-zinc-400 hover:text-brand-cyan transition-colors"
                   >
                     Arcade Hub Index ↗
-                  </Link>
+                  </TransitionLink>
                 </li>
                 <li>
-                  <Link
+                  <TransitionLink
                     href="/arcade/laser-loon"
                     onMouseEnter={handleHover}
                     className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                   >
                     <IconCrosshair className="w-3 h-3 text-cyan-400" />
                     Laser Loon
-                  </Link>
+                  </TransitionLink>
                 </li>
                 <li>
-                  <Link
+                  <TransitionLink
                     href="/arcade/quasi-puzzler"
                     onMouseEnter={handleHover}
                     className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                   >
                     <IconBrain className="w-3 h-3 text-cyan-400" />
                     Quasi-Puzzler
-                  </Link>
+                  </TransitionLink>
                 </li>
                 <li>
-                  <Link
+                  <TransitionLink
                     href="/arcade/garmin-watch"
                     onMouseEnter={handleHover}
                     className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                   >
                     <IconCpu className="w-3 h-3 text-cyan-400" />
                     Garmin 32KB Runner
-                  </Link>
+                  </TransitionLink>
                 </li>
                 <li>
-                  <Link
+                  <TransitionLink
                     href="/arcade/clinical-chaos"
                     onMouseEnter={handleHover}
                     className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                   >
                     <IconShieldCheck className="w-3 h-3 text-cyan-400" />
                     Clinical Trial Chaos
-                  </Link>
+                  </TransitionLink>
                 </li>
                 <li>
-                  <Link
+                  <TransitionLink
                     href="/arcade/retro-labyrinth"
                     onMouseEnter={handleHover}
                     className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                   >
                     <IconTerminal className="w-3 h-3 text-cyan-400" />
                     Retro Labyrinth
-                  </Link>
+                  </TransitionLink>
                 </li>
                 <li>
-                  <Link
+                  <TransitionLink
                     href="/arcade/working-with-duck"
                     onMouseEnter={handleHover}
                     className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                   >
                     <IconBone className="w-3 h-3 text-amber-400" />
                     Working With Duck
-                  </Link>
+                  </TransitionLink>
                 </li>
                 <li>
-                  <Link
+                  <TransitionLink
                     href="/arcade/meme-vault"
                     onMouseEnter={handleHover}
                     className="text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1.5"
                   >
                     <IconDeviceGamepad2 className="w-3 h-3 text-emerald-400" />
                     Secret Meme Vault 🔓
-                  </Link>
+                  </TransitionLink>
                 </li>
               </ul>
             </div>
@@ -195,66 +196,66 @@ export const Footer: React.FC = () => {
             </span>
             <ul className="space-y-2 text-xs font-mono">
               <li>
-                <Link
+                <TransitionLink
                   href="/#case-studies"
                   onClick={(e) => handleHashClick(e, "case-studies")}
                   onMouseEnter={handleHover}
                   className="text-zinc-400 hover:text-brand-cyan transition-colors"
                 >
                   Featured Projects
-                </Link>
+                </TransitionLink>
               </li>
               <li>
-                <Link
+                <TransitionLink
                   href="/stack"
                   onMouseEnter={handleHover}
                   className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                 >
                   <IconCpu className="w-3 h-3 text-brand-cyan" />
                   Under the Hood (Stack)
-                </Link>
+                </TransitionLink>
               </li>
               <li>
-                <Link
+                <TransitionLink
                   href="/crf"
                   onMouseEnter={handleHover}
                   className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                 >
                   <IconFileSpreadsheet className="w-3 h-3 text-brand-cyan" />
                   CRF Studio &amp; EDC
-                </Link>
+                </TransitionLink>
               </li>
               <li>
-                <Link
+                <TransitionLink
                   href="/proof"
                   onMouseEnter={handleHover}
                   className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                 >
                   <IconBrain className="w-3 h-3 text-brand-cyan" />
                   Proof Workspace
-                </Link>
+                </TransitionLink>
               </li>
               {persona !== "technical" && (
                 <li>
-                  <Link
+                  <TransitionLink
                     href="/simulator"
                     onMouseEnter={handleHover}
                     className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                   >
                     <IconActivity className="w-3 h-3 text-brand-cyan" />
                     Incident Simulator
-                  </Link>
+                  </TransitionLink>
                 </li>
               )}
               <li>
-                <Link
+                <TransitionLink
                   href="/#about"
                   onClick={(e) => handleHashClick(e, "about")}
                   onMouseEnter={handleHover}
                   className="text-zinc-400 hover:text-brand-cyan transition-colors"
                 >
                   About &amp; Experience
-                </Link>
+                </TransitionLink>
               </li>
             </ul>
           </div>
@@ -267,14 +268,14 @@ export const Footer: React.FC = () => {
             </span>
             <ul className="space-y-2 text-xs font-mono">
               <li>
-                <Link
+                <TransitionLink
                   href="/schedule"
                   onMouseEnter={handleHover}
                   className="text-brand-cyan font-bold hover:underline transition-all flex items-center gap-1.5"
                 >
                   <IconCalendar className="w-3 h-3 text-brand-cyan" />
                   Schedule 1:1 Sync ↗
-                </Link>
+                </TransitionLink>
               </li>
               <li>
                 <a

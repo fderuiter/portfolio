@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import Link from "next/link";
+import { TransitionLink } from "@/components/ui/TransitionLink";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -289,25 +289,26 @@ export const Navbar: React.FC = () => {
           className="max-w-6xl mx-auto px-4 sm:px-6 md:px-12 flex justify-between items-center w-full"
         >
           {/* Logo / Wordmark */}
-          <Link
+          <TransitionLink
             href="/"
             onClick={(e) => handleNavClick(e, "/#hero")}
             onMouseEnter={handleLinkHover}
             className="group flex min-h-6 items-center gap-2.5 font-mono text-sm tracking-widest font-extrabold text-foreground cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-cyan rounded-md shrink-0"
             aria-label="Frederick de Ruiter Homepage"
+            label="Home"
           >
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-cyan/70 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-cyan"></span>
             </span>
             <span className="tracking-wider">FDERUITER</span>
-          </Link>
+          </TransitionLink>
 
           {/* Desktop Navigation Links */}
           <div className="hidden md:flex items-center gap-3 lg:gap-6 shrink-0">
             <nav className="flex items-center gap-3 md:gap-4 lg:gap-6 shrink-0" aria-label="Main Navigation">
               {/* Work Pillar */}
-              <Link
+              <TransitionLink
                 href={pathname === "/" ? "/#case-studies" : "/case-studies"}
                 onClick={(e) => {
                   if (pathname === "/") {
@@ -323,9 +324,10 @@ export const Navbar: React.FC = () => {
                     ? "text-brand-cyan font-bold"
                     : "text-muted"
                 )}
+                label="Engineering Case Studies"
               >
                 Work
-              </Link>
+              </TransitionLink>
 
               {/* Arcade & Labs Dropdown */}
               {persona !== "technical" && (
@@ -371,7 +373,7 @@ export const Navbar: React.FC = () => {
                         {ARCADE_ITEMS.map((item) => {
                           const isActive = pathname === item.href;
                           return (
-                            <Link
+                            <TransitionLink
                               key={item.href}
                               href={item.href}
                               onClick={() => setActiveDropdown(null)}
@@ -383,6 +385,7 @@ export const Navbar: React.FC = () => {
                                   : "hover:bg-zinc-900/80 text-zinc-300 hover:text-white"
                               )}
                               role="menuitem"
+                              label={item.title}
                             >
                               <div className="mt-0.5 p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 group-hover:border-brand-cyan/30 transition-colors">
                                 {item.icon}
@@ -395,7 +398,7 @@ export const Navbar: React.FC = () => {
                                   {item.subtitle}
                                 </span>
                               </div>
-                            </Link>
+                            </TransitionLink>
                           );
                         })}
                       </motion.div>
@@ -446,7 +449,7 @@ export const Navbar: React.FC = () => {
                       {SYSTEMS_ITEMS.filter((item) => !(persona === "technical" && item.href === "/simulator")).map((item) => {
                         const isActive = pathname === item.href;
                         return (
-                          <Link
+                          <TransitionLink
                             key={item.href}
                             href={item.href}
                             onClick={() => setActiveDropdown(null)}
@@ -458,6 +461,7 @@ export const Navbar: React.FC = () => {
                                 : "hover:bg-zinc-900/80 text-zinc-300 hover:text-white"
                             )}
                             role="menuitem"
+                            label={item.title}
                           >
                             <div className="mt-0.5 p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 group-hover:border-brand-cyan/30 transition-colors">
                               {item.icon}
@@ -470,7 +474,7 @@ export const Navbar: React.FC = () => {
                                 {item.subtitle}
                               </span>
                             </div>
-                          </Link>
+                          </TransitionLink>
                         );
                       })}
                     </motion.div>
@@ -479,7 +483,7 @@ export const Navbar: React.FC = () => {
               </div>
 
               {/* About Pillar */}
-              <Link
+              <TransitionLink
                 href="/#about"
                 onClick={(e) => handleNavClick(e, "/#about")}
                 onMouseEnter={handleLinkHover}
@@ -489,12 +493,13 @@ export const Navbar: React.FC = () => {
                     ? "text-brand-cyan font-bold"
                     : "text-muted"
                 )}
+                label="About & Experience"
               >
                 About
-              </Link>
+              </TransitionLink>
 
               {/* Contact Pillar */}
-              <Link
+              <TransitionLink
                 href="/#contact"
                 onClick={(e) => handleNavClick(e, "/#contact")}
                 onMouseEnter={handleLinkHover}
@@ -504,9 +509,10 @@ export const Navbar: React.FC = () => {
                     ? "text-brand-cyan font-bold"
                     : "text-muted"
                 )}
+                label="Contact"
               >
                 Contact
-              </Link>
+              </TransitionLink>
 
               {/* GitHub External */}
               <a
@@ -762,38 +768,42 @@ export const Navbar: React.FC = () => {
                   <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 font-bold px-1">
                     Core Navigation
                   </span>
-                  <Link
+                  <TransitionLink
                     href={pathname === "/" ? "/#case-studies" : "/case-studies"}
                     onClick={(e) => handleNavClick(e, pathname === "/" ? "/#case-studies" : "/case-studies")}
                     className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between active:scale-[0.99] transition-all"
+                    label="Engineering Case Studies"
                   >
                     <span>Engineering Case Studies</span>
                     <span className="text-xs font-mono text-zinc-500">→</span>
-                  </Link>
-                  <Link
+                  </TransitionLink>
+                  <TransitionLink
                     href="/#about"
                     onClick={(e) => handleNavClick(e, "/#about")}
                     className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between active:scale-[0.99] transition-all"
+                    label="About & Experience"
                   >
                     <span>About &amp; Experience</span>
                     <span className="text-xs font-mono text-zinc-500">→</span>
-                  </Link>
-                  <Link
+                  </TransitionLink>
+                  <TransitionLink
                     href="/#contact"
                     onClick={(e) => handleNavClick(e, "/#contact")}
                     className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between active:scale-[0.99] transition-all"
+                    label="Contact"
                   >
                     <span>Contact</span>
                     <span className="text-xs font-mono text-zinc-500">→</span>
-                  </Link>
-                  <Link
+                  </TransitionLink>
+                  <TransitionLink
                     href="/schedule"
                     onClick={(e) => handleNavClick(e, "/schedule")}
                     className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-300 hover:text-white flex items-center justify-between active:scale-[0.99] transition-all"
+                    label="Office Hours & Schedule"
                   >
                     <span>Office Hours &amp; Schedule</span>
                     <span className="text-xs font-mono text-zinc-500">→</span>
-                  </Link>
+                  </TransitionLink>
                 </div>
 
                 {/* Interactive Tools & Arcade */}
@@ -801,62 +811,67 @@ export const Navbar: React.FC = () => {
                   <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 font-bold px-1">
                     Systems Studios &amp; Arcade
                   </span>
-                  <Link
+                  <TransitionLink
                     href="/crf"
                     onClick={(e) => handleNavClick(e, "/crf")}
                     className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between active:scale-[0.99] transition-all"
+                    label="CRF Studio & EDC"
                   >
                     <span className="flex items-center gap-2">
                       <IconFileSpreadsheet className="w-4 h-4 text-brand-cyan" />
                       CRF Studio &amp; EDC
                     </span>
                     <span className="text-[10px] font-mono text-brand-cyan px-1.5 py-0.5 rounded bg-brand-cyan/10">CDISC</span>
-                  </Link>
-                  <Link
+                  </TransitionLink>
+                  <TransitionLink
                     href="/proof"
                     onClick={(e) => handleNavClick(e, "/proof")}
                     className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between active:scale-[0.99] transition-all"
+                    label="Proof Canvas"
                   >
                     <span className="flex items-center gap-2">
                       <IconBrain className="w-4 h-4 text-brand-purple" />
                       Proof Canvas
                     </span>
                     <span className="text-[10px] font-mono text-brand-purple px-1.5 py-0.5 rounded bg-brand-purple/10">AST</span>
-                  </Link>
-                  <Link
+                  </TransitionLink>
+                  <TransitionLink
                     href="/neuro"
                     onClick={(e) => handleNavClick(e, "/neuro")}
                     className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between active:scale-[0.99] transition-all"
+                    label="NeuroRecon Studio"
                   >
                     <span className="flex items-center gap-2">
                       <IconBrain className="w-4 h-4 text-emerald-400" />
                       NeuroRecon Studio
                     </span>
                     <span className="text-[10px] font-mono text-emerald-400 px-1.5 py-0.5 rounded bg-emerald-500/10">3D MRI</span>
-                  </Link>
-                  <Link
+                  </TransitionLink>
+                  <TransitionLink
                     href="/stack"
                     onClick={(e) => handleNavClick(e, "/stack")}
                     className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between active:scale-[0.99] transition-all"
+                    label="Under the Hood (Stack)"
                   >
                     <span className="flex items-center gap-2">
                       <IconCpu className="w-4 h-4 text-brand-cyan" />
                       Under the Hood (Stack)
                     </span>
                     <span className="text-[10px] font-mono text-brand-cyan px-1.5 py-0.5 rounded bg-brand-cyan/10">Architecture</span>
-                  </Link>
+                  </TransitionLink>
                   {persona !== "technical" && (
-                    <Link
+                    <TransitionLink
                       href="/arcade"
                       onClick={(e) => handleNavClick(e, "/arcade")}
                       className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-brand-cyan hover:bg-brand-cyan/10 flex items-center justify-between active:scale-[0.99] transition-all"
+                      label="Arcade Games Hub"
                     >
                       <span className="flex items-center gap-2">
                         <IconDeviceGamepad2 className="w-4 h-4" />
                         Arcade Games Hub
                       </span>
                       <span className="text-xs font-mono text-brand-cyan">6 Games</span>
-                    </Link>
+                    </TransitionLink>
                   )}
                 </div>
               </div>

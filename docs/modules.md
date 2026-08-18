@@ -17,6 +17,7 @@
 - [hooks/usePersistentState](hooks/usePersistentState/README.md)
 - [hooks/usePretextLayout](hooks/usePretextLayout/README.md)
 - [hooks/useResizeObserver](hooks/useResizeObserver/README.md)
+- [hooks/useRouterTransition](hooks/useRouterTransition/README.md)
 - [hooks/useStudioHashParams](hooks/useStudioHashParams/README.md)
 - [hooks/useTelemetry](hooks/useTelemetry/README.md)
 - [hooks/useTimelineState](hooks/useTimelineState/README.md)
