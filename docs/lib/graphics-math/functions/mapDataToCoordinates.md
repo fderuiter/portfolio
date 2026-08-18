@@ -8,7 +8,7 @@
 
 > **mapDataToCoordinates**(`data`, `width`, `height`, `padding`, `minVal?`, `maxVal?`): [`Point2D`](../type-aliases/Point2D.md)[]
 
-Defined in: [lib/graphics-math.ts:115](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L115)
+Defined in: [lib/graphics-math.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-math.ts#L117)
 
 Maps a list of 1D data values to 2D Cartesian coordinates within a specified bounding box.
 Takes min/max overrides or computes them from data.

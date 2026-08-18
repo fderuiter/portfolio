@@ -70,8 +70,8 @@ describe("Graphics Math Isolation Library (Browser-Free)", () => {
 
       const { columns, columnHeights } = distributeItemsGreedily(items, 2, 10);
       expect(columns).toHaveLength(2);
-      expect(columnHeights[0]).toBe(200);
-      expect(columnHeights[1]).toBe(290);
+      expect(columnHeights[0]).toBe(250);
+      expect(columnHeights[1]).toBe(240);
     });
   });
 

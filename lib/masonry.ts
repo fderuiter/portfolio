@@ -54,7 +54,7 @@ export function calculateMasonryLayout<T extends { id: string }>(
     const paragraphsLines: RichInlineLine[][] = [];
     const paragraphsItems: ExtendedRichInlineItem[][] = [];
 
-    const textWidth = columnWidth - (config.CARD_PADDING * 2);
+    const textWidth = Math.max(1, columnWidth - (config.CARD_PADDING * 2));
 
     let paragraphs = cached.paragraphs;
     /* eslint-disable @typescript-eslint/no-explicit-any */

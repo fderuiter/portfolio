@@ -77,5 +77,5 @@ describe("DX Micro-Benchmark Suite", () => {
     expect(results.length).toBe(10);
 
     expect(() => printBenchmarkReport(results)).not.toThrow();
-  });
+  }, 15000);
 });

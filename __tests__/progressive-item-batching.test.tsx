@@ -109,7 +109,7 @@ describe("Progressive Item Batching & Deferred Narrative Parsing Suite", () => {
       const grid = container.firstChild as HTMLDivElement;
       expect(grid.className).toContain("grid");
       expect(grid.className).toContain("grid-cols-1");
-      expect(grid.className).toContain("md:grid-cols-3");
+      expect(grid.className).toContain("md:grid-cols-2");
     });
   });
 

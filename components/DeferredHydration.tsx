@@ -94,9 +94,9 @@ export const DeferredHydration: React.FC<DeferredHydrationProps> = ({ children, 
 
 export const SkillsGridSkeleton: React.FC = () => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 w-full max-w-4xl mx-auto select-none animate-pulse">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 w-full max-w-4xl mx-auto select-none animate-pulse">
       {/* 1. Bio Card Skeleton */}
-      <div className="md:col-span-2 p-5 sm:p-6 md:p-8 bg-zinc-900/10 border border-zinc-900/50 rounded-3xl min-h-[220px] sm:min-h-[250px] flex flex-col justify-between">
+      <div className="md:col-span-1 lg:col-span-2 p-5 sm:p-6 md:p-8 bg-zinc-900/10 border border-zinc-900/50 rounded-3xl min-h-[220px] sm:min-h-[250px] flex flex-col justify-between">
         <div>
           <div className="flex items-center gap-3.5 sm:gap-4 mb-4 sm:mb-5">
             <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-zinc-800/50 border border-zinc-800/80" />
@@ -114,7 +114,7 @@ export const SkillsGridSkeleton: React.FC = () => {
       </div>
 
       {/* 2. Languages Card Skeleton */}
-      <div className="p-5 sm:p-6 bg-zinc-900/10 border border-zinc-900/50 rounded-3xl min-h-[220px] sm:min-h-[250px] flex flex-col justify-between">
+      <div className="md:col-span-1 lg:col-span-1 p-5 sm:p-6 bg-zinc-900/10 border border-zinc-900/50 rounded-3xl min-h-[220px] sm:min-h-[250px] flex flex-col justify-between">
         <div>
           <div className="h-4 w-36 bg-zinc-800/60 rounded mb-3 sm:mb-4" />
           <div className="h-3 w-full bg-zinc-800/40 rounded mb-4 sm:mb-6" />
@@ -135,7 +135,7 @@ export const SkillsGridSkeleton: React.FC = () => {
       </div>
 
       {/* 3. Pillars Card Skeleton */}
-      <div className="md:col-span-3 p-5 sm:p-6 md:p-8 bg-zinc-900/5 border border-zinc-900/40 rounded-3xl">
+      <div className="md:col-span-2 lg:col-span-3 p-5 sm:p-6 md:p-8 bg-zinc-900/5 border border-zinc-900/40 rounded-3xl">
         <div className="h-4 w-40 bg-zinc-800/60 rounded mx-auto md:mx-0 mb-5 sm:mb-6" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {[1, 2, 3, 4].map((i) => (

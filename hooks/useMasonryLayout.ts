@@ -98,10 +98,15 @@ export function useMasonryLayout<T extends MasonryItem>(
     });
   }, [filteredItems, heightOverrides]);
 
-  const containerRef = useResizeObserver<HTMLDivElement>((entry) => {
-    containerWidthRef.current = entry.contentRect.width;
-    recalculateLayout(entry.contentRect.width);
-  });
+  const handleResize = useCallback((entry: ResizeObserverEntry) => {
+    const width = entry.contentRect.width;
+    if (width > 0 && width !== containerWidthRef.current) {
+      containerWidthRef.current = width;
+      recalculateLayout(width);
+    }
+  }, [recalculateLayout]);
+
+  const containerRef = useResizeObserver<HTMLDivElement>(handleResize);
 
   useLayoutEffect(() => {
     if (containerRef.current) {

@@ -4,7 +4,8 @@ import { env } from "@/lib/env";
 const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 export function useResizeObserver<T extends HTMLElement | SVGSVGElement>(
-  callback: (entry: ResizeObserverEntry) => void
+  callback: (entry: ResizeObserverEntry) => void,
+  initialWidth?: number
 ) {
   const containerRef = useRef<T | null>(null);
   const callbackRef = useRef(callback);
@@ -17,12 +18,21 @@ export function useResizeObserver<T extends HTMLElement | SVGSVGElement>(
 
   const rAFIdRef = useRef<number | null>(null);
   const latestEntryRef = useRef<ResizeObserverEntry | null>(null);
-  const lastWidthRef = useRef<number>(-1);
+  const lastWidthRef = useRef<number>(
+    initialWidth !== undefined && initialWidth > 0 ? Math.floor(initialWidth) : -1
+  );
 
   useIsomorphicLayoutEffect(() => {
     isMountedRef.current = true;
     const element = containerRef.current;
     if (!element) return;
+
+    if (lastWidthRef.current === -1) {
+      const rectWidth = Math.floor(element.getBoundingClientRect().width);
+      if (rectWidth > 0) {
+        lastWidthRef.current = rectWidth;
+      }
+    }
 
     const observer = new ResizeObserver((entries) => {
       if (!entries || entries.length === 0) return;

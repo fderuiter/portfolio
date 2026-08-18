@@ -58,21 +58,21 @@ describe("Centralized Graphics and Layout Engine", () => {
       const { columns, columnHeights } = distributeItemsGreedily(items, 2, 10);
       expect(columns).toHaveLength(2);
       
-      // Greedy distribution trace:
-      // Item 1 (h=100) -> Col 0 (heights: 100 + 10 = 110, 0)
-      // Item 2 (h=150) -> Col 1 (heights: 110, 150 + 10 = 160)
-      // Item 3 (h=80) -> Col 0 (heights: 110 + 80 + 10 = 200, 160)
-      // Item 4 (h=120) -> Col 1 (heights: 200, 160 + 120 + 10 = 290)
+      // Greedy distribution trace (height descending order: 2 [h=150], 4 [h=120], 1 [h=100], 3 [h=80]):
+      // Item 2 (h=150) -> Col 0 (heights: 150 + 10 = 160, 0)
+      // Item 4 (h=120) -> Col 1 (heights: 160, 120 + 10 = 130)
+      // Item 1 (h=100) -> Col 1 (heights: 160, 130 + 100 + 10 = 240)
+      // Item 3 (h=80) -> Col 0 (heights: 160 + 80 + 10 = 250, 240)
       expect(columns[0]).toHaveLength(2);
-      expect(columns[0][0].id).toBe("1");
+      expect(columns[0][0].id).toBe("2");
       expect(columns[0][1].id).toBe("3");
 
       expect(columns[1]).toHaveLength(2);
-      expect(columns[1][0].id).toBe("2");
-      expect(columns[1][1].id).toBe("4");
+      expect(columns[1][0].id).toBe("4");
+      expect(columns[1][1].id).toBe("1");
 
-      expect(columnHeights[0]).toBe(200);
-      expect(columnHeights[1]).toBe(290);
+      expect(columnHeights[0]).toBe(250);
+      expect(columnHeights[1]).toBe(240);
     });
   });
 

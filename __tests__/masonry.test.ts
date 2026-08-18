@@ -33,10 +33,10 @@ describe('calculateMasonryLayout', () => {
     const result = calculateMasonryLayout(500, items, preparedData, MOCK_CONFIG);
     expect(result.colCount).toBe(1);
     expect(result.columns[0]).toHaveLength(3);
-    // 2 lines * 20 line height = 40. 40 + padding height
-    expect(result.columns[0][0].height).toBe(140);
-    expect(result.columns[0][1].height).toBe(190);
-    expect(result.columns[0][2].height).toBe(160);
+    // Sorted descending by height (padding + line height): item 2 (190), item 3 (160), item 1 (140)
+    expect(result.columns[0][0].height).toBe(190);
+    expect(result.columns[0][1].height).toBe(160);
+    expect(result.columns[0][2].height).toBe(140);
   });
 
   it('distributes items into columns greedily (MD - 2 columns)', () => {
@@ -50,20 +50,18 @@ describe('calculateMasonryLayout', () => {
 
     const result = calculateMasonryLayout(800, items, preparedData, MOCK_CONFIG);
     expect(result.colCount).toBe(2);
-    // col0 height tracker: 0 -> 140 -> 140 + 10(gap) + 160 = 310
-    // col1 height tracker: 0 -> 190 -> 190 + 10(gap) + 120 = 320
-    // Actually greedy algorithm assigns to minHeight col:
-    // item 1 -> col 0 (heights: 140, 0)
-    // item 2 -> col 1 (heights: 140, 190)
-    // item 3 -> col 0 (min is 140) (heights: 310, 190)
-    // item 4 -> col 1 (min is 190) (heights: 310, 320)
+    // Height descending order: item 2 (190), item 3 (160), item 1 (140), item 4 (120)
+    // item 2 -> col 0 (heights: 190, 0)
+    // item 3 -> col 1 (heights: 190, 160)
+    // item 1 -> col 1 (min is 160) (heights: 190, 310)
+    // item 4 -> col 0 (min is 190) (heights: 320, 310)
     expect(result.columns[0]).toEqual(expect.arrayContaining([
-      expect.objectContaining({ id: '1' }),
-      expect.objectContaining({ id: '3' })
-    ]));
-    expect(result.columns[1]).toEqual(expect.arrayContaining([
       expect.objectContaining({ id: '2' }),
       expect.objectContaining({ id: '4' })
+    ]));
+    expect(result.columns[1]).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: '3' }),
+      expect.objectContaining({ id: '1' })
     ]));
   });
 

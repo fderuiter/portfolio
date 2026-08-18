@@ -89,7 +89,9 @@ export function distributeItemsGreedily<T extends { height: number }>(
   const columns: T[][] = Array.from({ length: colCount }, () => []);
   const columnHeights = Array(colCount).fill(0);
 
-  for (const item of items) {
+  const sortedItems = [...items].sort((a, b) => b.height - a.height);
+
+  for (const item of sortedItems) {
     let minColIdx = 0;
     let minHeight = columnHeights[0];
     for (let i = 1; i < colCount; i++) {

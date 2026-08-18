@@ -54,7 +54,7 @@ export const ProjectTeaserGrid: React.FC<ProjectTeaserGridProps> = ({ caseStudie
   return (
     <div className="w-full flex flex-col items-center">
       {/* 3-Column Systems Dossier Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 w-full mb-8 sm:mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 w-full mb-8 sm:mb-10">
         {topProjects.map((study, idx) => {
           const style = LANGUAGE_STYLES[study.primary_language] || DEFAULT_STYLE;
           const sysId = `SYS-0${idx + 1}`;
