@@ -181,6 +181,28 @@ export interface ExportROptions {
   tibblePrefix?: string;
 }
 
+export interface FieldAliasMapping {
+  id: string;
+  publishedVersion: string;
+  formId: string;
+  fieldId: string;
+  currentVariableName: string;
+  legacyVariableName: string;
+  previousDataType?: ClinicalDataType;
+  newDataType?: ClinicalDataType;
+  dataTypeChanged?: boolean;
+  publishedAt: string;
+}
+
+export interface ProtocolRelease {
+  version: string;
+  publishedAt: string;
+  publishedBy: string;
+  notes?: string;
+  protocolSnapshot: StudyProtocol;
+  fieldAliasMap: FieldAliasMapping[];
+}
+
 export interface StudyProtocol {
   id: string;
   protocolNumber: string;    // e.g. "ONC-2026-003"
@@ -188,12 +210,16 @@ export interface StudyProtocol {
   phase: "Phase I" | "Phase I/II" | "Phase II" | "Phase III" | "Phase IV" | "Registry";
   sponsor: string;
   therapeuticArea: string;   // Oncology, Neurology, Cardiology, Infectious Disease, etc.
-  version: string;
+  version: string;           // Current Working / Draft version
+  publishedVersion?: string; // Active published version in live EDC
+  isDraftModified?: boolean; // Flag indicating unpublished draft modifications
   lastModified: string;
   forms: CRFForm[];
   visits: StudyVisit[];
   codelists: CodelistDefinition[];
   branding?: StudyBranding;
+  releases?: ProtocolRelease[];
+  fieldAliasMap?: FieldAliasMapping[];
 }
 
 export interface EDCQuery {
@@ -237,6 +263,8 @@ export interface ElectronicSignature {
   timestamp: string;
   meaning: "Author" | "Investigator Approval" | "Data Lock" | "Monitor Verification";
   digest: string;            // Cryptographic SHA-256 simulated signature hash
+  protocolVersion: string;   // Published version under which signature was executed
+  signedDataSnapshot?: Record<string, string | number | boolean | null>;
 }
 
 export type ComplianceSeverity = "error" | "warning" | "notice";

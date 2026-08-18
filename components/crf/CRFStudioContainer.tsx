@@ -30,6 +30,7 @@ const ExportDocumentModal = dynamic(
   { ssr: false }
 );
 import { BrandingConfigModal } from "./Branding/BrandingConfigModal";
+import { PublishReleaseModal } from "./Modes/PublishReleaseModal";
 import { DiagnosticsDrawer } from "./DiagnosticsDrawer";
 import {
   VisitMatrixEditorSkeleton,
@@ -83,7 +84,7 @@ import {
 } from "@tabler/icons-react";
 
 export const CRFStudioContainer: React.FC = () => {
-  // Study State & History
+  // Study State & History (Draft Protocol)
   const [study, setStudy] = useState<StudyProtocol>(() => {
     // Check if user has a custom cached default branding profile in localStorage
     if (typeof window !== "undefined") {
@@ -93,6 +94,9 @@ export const CRFStudioContainer: React.FC = () => {
           const parsedBranding = JSON.parse(cached);
           return {
             ...ONCOLOGY_RECIST_PRESET,
+            publishedVersion: ONCOLOGY_RECIST_PRESET.publishedVersion || ONCOLOGY_RECIST_PRESET.version || "1.0.0",
+            fieldAliasMap: ONCOLOGY_RECIST_PRESET.fieldAliasMap || [],
+            releases: ONCOLOGY_RECIST_PRESET.releases || [],
             branding: parsedBranding,
           };
         }
@@ -100,14 +104,33 @@ export const CRFStudioContainer: React.FC = () => {
         // Fallback to preset
       }
     }
-    return ONCOLOGY_RECIST_PRESET;
+    return {
+      ...ONCOLOGY_RECIST_PRESET,
+      publishedVersion: ONCOLOGY_RECIST_PRESET.publishedVersion || ONCOLOGY_RECIST_PRESET.version || "1.0.0",
+      fieldAliasMap: ONCOLOGY_RECIST_PRESET.fieldAliasMap || [],
+      releases: ONCOLOGY_RECIST_PRESET.releases || [],
+    };
   });
+
+  // Active Published Release Protocol State (EDC Simulator Sessions)
+  const [publishedStudy, setPublishedStudy] = useState<StudyProtocol>(() => {
+    return {
+      ...ONCOLOGY_RECIST_PRESET,
+      publishedVersion: ONCOLOGY_RECIST_PRESET.publishedVersion || ONCOLOGY_RECIST_PRESET.version || "1.0.0",
+      fieldAliasMap: ONCOLOGY_RECIST_PRESET.fieldAliasMap || [],
+      releases: ONCOLOGY_RECIST_PRESET.releases || [],
+    };
+  });
+
   const [history, setHistory] = useState<StudyProtocol[]>([]);
   const [future, setFuture] = useState<StudyProtocol[]>([]);
 
   const { params, setParam, setParams } = useStudioHashParams();
   const { playSuccess } = useAudio();
   const [copyToast, setCopyToast] = useState<string | null>(null);
+
+  // Modals State
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
 
   // Studio Navigation & Selection State
   const [activeMode, setActiveModeState] = useState<StudioMode>(() => {
@@ -302,7 +325,10 @@ export const CRFStudioContainer: React.FC = () => {
     (newStudy: StudyProtocol) => {
       setHistory((prev) => [...prev.slice(-20), study]);
       setFuture([]);
-      setStudy(newStudy);
+      setStudy({
+        ...newStudy,
+        isDraftModified: true,
+      });
     },
     [study]
   );
@@ -648,6 +674,7 @@ export const CRFStudioContainer: React.FC = () => {
         onOpenWizard={() => setIsWizardOpen(true)}
         onStartSpotlightTour={() => setIsSpotlightTourOpen(true)}
         onCopyShareLink={handleCopyShareLink}
+        onOpenPublishModal={() => setIsPublishModalOpen(true)}
       />
 
       {/* Copy Toast Alert */}
@@ -821,7 +848,7 @@ export const CRFStudioContainer: React.FC = () => {
 
         {activeMode === "rules" && <RuleGraphStudio study={study} />}
 
-        {activeMode === "edc" && <LiveEdcSimulator study={study} />}
+        {activeMode === "edc" && <LiveEdcSimulator study={publishedStudy} />}
 
         {activeMode === "acrf" && (
           <AcrfOverlayViewer
@@ -972,6 +999,27 @@ export const CRFStudioContainer: React.FC = () => {
       <SpotlightTourOverlay
         isOpen={isSpotlightTourOpen}
         onClose={() => setIsSpotlightTourOpen(false)}
+      />
+
+      {/* Protocol Release Publication & Field Alias Mapping Modal */}
+      <PublishReleaseModal
+        isOpen={isPublishModalOpen}
+        publishedStudy={publishedStudy}
+        draftStudy={study}
+        onClose={() => setIsPublishModalOpen(false)}
+        onPublish={(updatedPublished, newRelease, newAliasMappings) => {
+          setPublishedStudy(updatedPublished);
+          setStudy(updatedPublished);
+          try {
+            playSuccess();
+          } catch {}
+          setCopyToast(
+            `Protocol v${newRelease.version} published! Built ${newAliasMappings.length} field alias ${
+              newAliasMappings.length === 1 ? "mapping" : "mappings"
+            }.`
+          );
+          setTimeout(() => setCopyToast(null), 4000);
+        }}
       />
     </div>
   );

@@ -33,6 +33,7 @@
 - [lib/clinical-trial-chaos/types](lib/clinical-trial-chaos/types/README.md)
 - [lib/clipboard](lib/clipboard/README.md)
 - [lib/crf](lib/crf/README.md)
+- [lib/crf/alias-mapping](lib/crf/alias-mapping/README.md)
 - [lib/crf/ast-evaluator](lib/crf/ast-evaluator/README.md)
 - [lib/crf/branding-defaults](lib/crf/branding-defaults/README.md)
 - [lib/crf/cdash-domain-templates](lib/crf/cdash-domain-templates/README.md)

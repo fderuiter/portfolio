@@ -3,6 +3,7 @@
  */
 
 export * from "./types";
+export * from "./alias-mapping";
 export * from "./expression-evaluator";
 export * from "./formula-linter";
 export * from "./formula-presets";

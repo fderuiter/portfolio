@@ -24,6 +24,8 @@
 - [ExportPdfOptions](interfaces/ExportPdfOptions.md)
 - [ExportROptions](interfaces/ExportROptions.md)
 - [ExportSasOptions](interfaces/ExportSasOptions.md)
+- [FieldAliasMapping](interfaces/FieldAliasMapping.md)
+- [ProtocolRelease](interfaces/ProtocolRelease.md)
 - [StudyBranding](interfaces/StudyBranding.md)
 - [StudyProtocol](interfaces/StudyProtocol.md)
 - [StudyVisit](interfaces/StudyVisit.md)

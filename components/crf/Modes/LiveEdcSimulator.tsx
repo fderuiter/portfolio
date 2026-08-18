@@ -10,6 +10,11 @@ import {
   SubjectFormStatus,
 } from "@/lib/crf/types";
 import { evaluateFormula, evaluateRule } from "@/lib/crf/ast-evaluator";
+import {
+  resolveFieldAlias,
+  verifySignatureHash,
+  generateSignatureDigest,
+} from "@/lib/crf/alias-mapping";
 import { generateId } from "@/lib/utils";
 import {
   IconShieldCheck,
@@ -278,6 +283,29 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
     setAuditLog((prev) => [auditEntry, ...prev]);
   };
 
+  // Helper: Retrieve field value checking fieldId, variableName, and legacy alias mappings
+  const getFieldValueForField = (subjId: string, visId: string, field: CRFField) => {
+    const primaryKey = `${subjId}_${visId}_${field.id}`;
+    if (formValues[primaryKey] !== undefined && formValues[primaryKey] !== null) {
+      return formValues[primaryKey];
+    }
+
+    const varKey = `${subjId}_${visId}_${field.variableName}`;
+    if (formValues[varKey] !== undefined && formValues[varKey] !== null) {
+      return formValues[varKey];
+    }
+
+    const aliasInfo = resolveFieldAlias(field.id || field.variableName, study.fieldAliasMap || []);
+    if (aliasInfo.legacyName) {
+      const legacyKey = `${subjId}_${visId}_${aliasInfo.legacyName}`;
+      if (formValues[legacyKey] !== undefined && formValues[legacyKey] !== null) {
+        return formValues[legacyKey];
+      }
+    }
+
+    return undefined;
+  };
+
   // Toggle Form Lock (PI)
   const handleToggleLockForm = () => {
     if (!activeForm) return;
@@ -295,6 +323,14 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
     }));
 
     if (newLocked) {
+      const pubVersion = study.publishedVersion || study.version || "1.0.0";
+      const fields = activeForm.sections.flatMap((s) => s.fields);
+      const valsSnapshot: Record<string, string | number | boolean | null> = {};
+      fields.forEach((f) => {
+        const val = getFieldValueForField(subjectId, activeVisitId, f);
+        valsSnapshot[f.id] = val ?? null;
+      });
+
       const signature: ElectronicSignature = {
         id: generateSignatureId(),
         subjectId,
@@ -303,7 +339,17 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
         userRole: "Principal Investigator",
         timestamp: new Date().toISOString(),
         meaning: "Data Lock",
-        digest: `SHA256-${Math.random().toString(36).substring(2)}${Math.random().toString(36).substring(2)}`,
+        protocolVersion: pubVersion,
+        signedDataSnapshot: valsSnapshot,
+        digest: generateSignatureDigest({
+          subjectId,
+          formId: activeForm.id,
+          signedBy: "Dr. Sarah Jenkins, M.D. (Investigator)",
+          userRole: "Principal Investigator",
+          meaning: "Data Lock",
+          protocolVersion: pubVersion,
+          fieldValuesSnapshot: valsSnapshot,
+        }),
       };
       setSignatures((prev) => [...prev, signature]);
     }
@@ -373,6 +419,16 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
             <h1 className="text-base sm:text-lg font-bold text-white font-mono truncate">
               Live 21 CFR Part 11 EDC Simulation Mode
             </h1>
+          </div>
+          <div className="flex items-center gap-2 mt-1 font-mono text-[11px]">
+            <span className="px-2 py-0.5 rounded font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              Active EDC Release: v{study.publishedVersion || study.version || "1.0.0"}
+            </span>
+            {study.fieldAliasMap && study.fieldAliasMap.length > 0 && (
+              <span className="px-2 py-0.5 rounded font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                {study.fieldAliasMap.length} Active Field {study.fieldAliasMap.length === 1 ? "Alias" : "Aliases"}
+              </span>
+            )}
           </div>
           <p className="text-xs text-zinc-400 font-sans mt-1">
             Test live subject patient entry, CRA source data verification (SDV), investigator locking, and longitudinal visit matrix.
@@ -582,9 +638,33 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                 )}
 
                 {isFormSigned && (
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-xs">
-                    <IconShieldCheck className="w-4 h-4" />
-                    <span>Signed</span>
+                  <div className="flex flex-col items-end gap-1">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-xs font-bold">
+                      <IconShieldCheck className="w-4 h-4" />
+                      <span>
+                        Signed (v
+                        {signatures.find((s) => s.subjectId === subjectId && s.formId === activeForm?.id)
+                          ?.protocolVersion || study.publishedVersion || "1.0.0"}
+                        )
+                      </span>
+                    </div>
+                    {(() => {
+                      const sig = signatures.find(
+                        (s) => s.subjectId === subjectId && s.formId === activeForm?.id
+                      );
+                      if (!sig) return null;
+                      const ver = verifySignatureHash(sig, study.releases || [], formValues);
+                      return (
+                        <span
+                          className={`text-[10px] font-mono font-bold flex items-center gap-1 ${
+                            ver.isValid ? "text-emerald-400" : "text-red-400"
+                          }`}
+                          title={ver.message}
+                        >
+                          {ver.isValid ? "✓ Hash Verified" : "✖ Hash Mismatch"}
+                        </span>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
@@ -600,7 +680,8 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                 <div className="grid grid-cols-12 gap-3 sm:gap-4">
                   {section.fields.map((field) => {
                     const key = `${subjectId}_${activeVisitId}_${field.id}`;
-                    const currentVal = formValues[key];
+                    const currentVal = getFieldValueForField(subjectId, activeVisitId, field);
+                    const aliasInfo = resolveFieldAlias(field.id || field.variableName, study.fieldAliasMap || []);
                     const isSdv = sdvMap[key]?.verified || false;
                     const fieldQueries = activeFormQueries.filter(
                       (q) => q.fieldId === field.id && q.status === "Open"
@@ -636,8 +717,16 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                                 {isSdv ? "✓ SDV Done" : "SDV Verify"}
                               </button>
                             )}
-                            <span className="text-[10px] font-mono text-zinc-500">
-                              {field.variableName}
+                            <span className="text-[10px] font-mono text-zinc-500 flex items-center gap-1">
+                              <span>{field.variableName}</span>
+                              {aliasInfo.legacyName && aliasInfo.legacyName !== field.variableName && (
+                                <span
+                                  className="text-[9px] text-amber-400 bg-amber-500/10 px-1 rounded border border-amber-500/20 font-bold"
+                                  title={`Legacy variable ${aliasInfo.legacyName} mapped to ${field.variableName} in Protocol v${aliasInfo.mapping?.publishedVersion}`}
+                                >
+                                  (formerly {aliasInfo.legacyName})
+                                </span>
+                              )}
                             </span>
                           </div>
                         </div>
@@ -980,23 +1069,39 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-850">
-                {auditLog.map((entry) => (
-                  <tr key={entry.id} className="hover:bg-zinc-850/30">
-                    <td className="p-2.5 text-zinc-500 whitespace-nowrap">
-                      {entry.timestamp.slice(0, 19)}
-                    </td>
-                    <td className="p-2.5 text-brand-cyan font-bold">{entry.subjectId}</td>
-                    <td className="p-2.5 text-white">{entry.fieldName}</td>
-                    <td className="p-2.5 text-zinc-400">{String(entry.previousValue ?? "—")}</td>
-                    <td className="p-2.5 text-emerald-400 font-bold">
-                      {String(entry.newValue ?? "—")}
-                    </td>
-                    <td className="p-2.5 text-zinc-300">{entry.userRole}</td>
-                    <td className="p-2.5 text-zinc-400 font-sans text-xs">
-                      {entry.reasonForChange}
-                    </td>
-                  </tr>
-                ))}
+                {auditLog.map((entry) => {
+                  const aliasInfo = resolveFieldAlias(entry.fieldId || entry.fieldName, study.fieldAliasMap || []);
+                  const currentVarName = aliasInfo.currentName || entry.fieldName;
+                  const legacyVarName = aliasInfo.legacyName;
+
+                  return (
+                    <tr key={entry.id} className="hover:bg-zinc-850/30">
+                      <td className="p-2.5 text-zinc-500 whitespace-nowrap">
+                        {entry.timestamp.slice(0, 19)}
+                      </td>
+                      <td className="p-2.5 text-brand-cyan font-bold">{entry.subjectId}</td>
+                      <td className="p-2.5 text-white">
+                        <span className="font-bold">{currentVarName}</span>
+                        {legacyVarName && legacyVarName !== currentVarName && (
+                          <span
+                            className="ml-1.5 px-1.5 py-0.5 rounded text-[9px] font-mono bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold"
+                            title={`Legacy variable ${legacyVarName} mapped to ${currentVarName} in Protocol v${aliasInfo.mapping?.publishedVersion}`}
+                          >
+                            formerly {legacyVarName}
+                          </span>
+                        )}
+                      </td>
+                      <td className="p-2.5 text-zinc-400">{String(entry.previousValue ?? "—")}</td>
+                      <td className="p-2.5 text-emerald-400 font-bold">
+                        {String(entry.newValue ?? "—")}
+                      </td>
+                      <td className="p-2.5 text-zinc-300">{entry.userRole}</td>
+                      <td className="p-2.5 text-zinc-400 font-sans text-xs">
+                        {entry.reasonForChange}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

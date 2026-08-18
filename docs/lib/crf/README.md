@@ -50,6 +50,12 @@ Re-exports [BrandingPalettePreset](branding-defaults/interfaces/BrandingPaletteP
 
 ***
 
+### buildFieldAliasMap
+
+Re-exports [buildFieldAliasMap](alias-mapping/functions/buildFieldAliasMap.md)
+
+***
+
 ### calculateBazettQTc
 
 Re-exports [calculateBazettQTc](expression-evaluator/functions/calculateBazettQTc.md)
@@ -167,6 +173,12 @@ Re-exports [CRFSection](types/interfaces/CRFSection.md)
 ### DEFAULT\_STUDY\_BRANDING
 
 Re-exports [DEFAULT_STUDY_BRANDING](branding-defaults/variables/DEFAULT_STUDY_BRANDING.md)
+
+***
+
+### detectTypeIncompatibilities
+
+Re-exports [detectTypeIncompatibilities](alias-mapping/functions/detectTypeIncompatibilities.md)
 
 ***
 
@@ -302,6 +314,12 @@ Re-exports [ExpressionEvaluator](expression-evaluator/classes/ExpressionEvaluato
 
 ***
 
+### FieldAliasMapping
+
+Re-exports [FieldAliasMapping](types/interfaces/FieldAliasMapping.md)
+
+***
+
 ### FormulaDiagnostic
 
 Re-exports [FormulaDiagnostic](formula-linter/interfaces/FormulaDiagnostic.md)
@@ -362,6 +380,12 @@ Re-exports [generateSdtmMappingMatrix](export-acrf/functions/generateSdtmMapping
 
 ***
 
+### generateSignatureDigest
+
+Re-exports [generateSignatureDigest](alias-mapping/functions/generateSignatureDigest.md)
+
+***
+
 ### generateStudyAcrfBookHtml
 
 Re-exports [generateStudyAcrfBookHtml](export-acrf/functions/generateStudyAcrfBookHtml.md)
@@ -389,6 +413,12 @@ Re-exports [getExpandedRFields](export-r/functions/getExpandedRFields.md)
 ### getFieldOptions
 
 Re-exports [getFieldOptions](export-r/functions/getFieldOptions.md)
+
+***
+
+### getNextReleaseVersion
+
+Re-exports [getNextReleaseVersion](alias-mapping/functions/getNextReleaseVersion.md)
 
 ***
 
@@ -443,6 +473,18 @@ Re-exports [NUMERIC_DATA_TYPES](formula-linter/variables/NUMERIC_DATA_TYPES.md)
 ### parseMultiSelectValue
 
 Re-exports [parseMultiSelectValue](export-r/functions/parseMultiSelectValue.md)
+
+***
+
+### ProtocolRelease
+
+Re-exports [ProtocolRelease](types/interfaces/ProtocolRelease.md)
+
+***
+
+### resolveFieldAlias
+
+Re-exports [resolveFieldAlias](alias-mapping/functions/resolveFieldAlias.md)
 
 ***
 
@@ -530,6 +572,18 @@ Re-exports [TokenType](expression-evaluator/type-aliases/TokenType.md)
 
 ***
 
+### TypeIncompatibilityNotice
+
+Re-exports [TypeIncompatibilityNotice](alias-mapping/interfaces/TypeIncompatibilityNotice.md)
+
+***
+
 ### validateStudyCompliance
 
 Re-exports [validateStudyCompliance](cdisc-conformance-linter/functions/validateStudyCompliance.md)
+
+***
+
+### verifySignatureHash
+
+Re-exports [verifySignatureHash](alias-mapping/functions/verifySignatureHash.md)

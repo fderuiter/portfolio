@@ -33,6 +33,7 @@ import {
   IconLink,
   IconSun,
   IconMoon,
+  IconRocket,
 } from "@tabler/icons-react";
 import { getStudyBranding } from "@/lib/crf/branding-defaults";
 
@@ -58,6 +59,7 @@ interface StudioHeaderProps {
   onOpenWizard: () => void;
   onStartSpotlightTour?: () => void;
   onCopyShareLink?: () => void;
+  onOpenPublishModal?: () => void;
 }
 
 export const StudioHeader: React.FC<StudioHeaderProps> = ({
@@ -82,6 +84,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
   onOpenWizard,
   onStartSpotlightTour,
   onCopyShareLink,
+  onOpenPublishModal,
 }) => {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const branding = getStudyBranding(study);
@@ -192,6 +195,34 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
           <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-brand-cyan/10 text-brand-cyan border border-brand-cyan/20 hidden xl:inline">
             {study.phase}
           </span>
+
+          {/* Draft vs Release Version Badge */}
+          <span
+            className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold hidden sm:inline-flex items-center gap-1 border ${
+              study.isDraftModified
+                ? "bg-amber-500/10 text-amber-300 border-amber-500/20"
+                : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+            }`}
+            title={study.isDraftModified ? "Draft schema has unpublished edits" : "Published release active"}
+          >
+            {study.isDraftModified ? `Draft v${study.version}` : `Release v${study.publishedVersion || study.version || "1.0.0"}`}
+          </span>
+
+          {/* Publish Release Button */}
+          {onOpenPublishModal && (
+            <button
+              onClick={onOpenPublishModal}
+              className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold inline-flex items-center gap-1.5 transition-all ${
+                study.isDraftModified
+                  ? "bg-brand-cyan text-black hover:bg-white shadow-sm"
+                  : "bg-zinc-900 text-zinc-300 border border-zinc-800 hover:text-white"
+              }`}
+              title="Publish Protocol Release & Build Field Alias Maps"
+            >
+              <IconRocket className="w-3.5 h-3.5" />
+              <span className="hidden md:inline">Publish Release</span>
+            </button>
+          )}
         </div>
 
         {/* Right Side: Desktop Actions & Responsive More Menu */}

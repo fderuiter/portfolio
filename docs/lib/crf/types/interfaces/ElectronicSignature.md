@@ -6,7 +6,7 @@
 
 # Interface: ElectronicSignature
 
-Defined in: [lib/crf/types.ts:231](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L231)
+Defined in: [lib/crf/types.ts:257](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L257)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/types.ts:231](https://github.com/fderuiter/portfolio/blob/m
 
 > **digest**: `string`
 
-Defined in: [lib/crf/types.ts:239](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L239)
+Defined in: [lib/crf/types.ts:265](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L265)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/types.ts:239](https://github.com/fderuiter/portfolio/blob/m
 
 > **formId**: `string`
 
-Defined in: [lib/crf/types.ts:234](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L234)
+Defined in: [lib/crf/types.ts:260](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L260)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/types.ts:234](https://github.com/fderuiter/portfolio/blob/m
 
 > **id**: `string`
 
-Defined in: [lib/crf/types.ts:232](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L232)
+Defined in: [lib/crf/types.ts:258](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L258)
 
 ***
 
@@ -38,7 +38,15 @@ Defined in: [lib/crf/types.ts:232](https://github.com/fderuiter/portfolio/blob/m
 
 > **meaning**: `"Author"` \| `"Investigator Approval"` \| `"Data Lock"` \| `"Monitor Verification"`
 
-Defined in: [lib/crf/types.ts:238](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L238)
+Defined in: [lib/crf/types.ts:264](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L264)
+
+***
+
+### protocolVersion
+
+> **protocolVersion**: `string`
+
+Defined in: [lib/crf/types.ts:266](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L266)
 
 ***
 
@@ -46,7 +54,15 @@ Defined in: [lib/crf/types.ts:238](https://github.com/fderuiter/portfolio/blob/m
 
 > **signedBy**: `string`
 
-Defined in: [lib/crf/types.ts:235](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L235)
+Defined in: [lib/crf/types.ts:261](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L261)
+
+***
+
+### signedDataSnapshot?
+
+> `optional` **signedDataSnapshot?**: `Record`\<`string`, `string` \| `number` \| `boolean` \| `null`\>
+
+Defined in: [lib/crf/types.ts:267](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L267)
 
 ***
 
@@ -54,7 +70,7 @@ Defined in: [lib/crf/types.ts:235](https://github.com/fderuiter/portfolio/blob/m
 
 > **subjectId**: `string`
 
-Defined in: [lib/crf/types.ts:233](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L233)
+Defined in: [lib/crf/types.ts:259](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L259)
 
 ***
 
@@ -62,7 +78,7 @@ Defined in: [lib/crf/types.ts:233](https://github.com/fderuiter/portfolio/blob/m
 
 > **timestamp**: `string`
 
-Defined in: [lib/crf/types.ts:237](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L237)
+Defined in: [lib/crf/types.ts:263](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L263)
 
 ***
 
@@ -70,4 +86,4 @@ Defined in: [lib/crf/types.ts:237](https://github.com/fderuiter/portfolio/blob/m
 
 > **userRole**: `string`
 
-Defined in: [lib/crf/types.ts:236](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L236)
+Defined in: [lib/crf/types.ts:262](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L262)
