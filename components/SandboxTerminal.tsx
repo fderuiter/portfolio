@@ -871,7 +871,7 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col items-center">
+    <div className="w-full flex flex-col items-center" data-keyboard-boundary="true">
       {/* Incident Playback Controller Panel */}
       <div className="w-full bg-zinc-900/20 border border-zinc-900 rounded-2xl p-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 select-none">
         <div className="flex flex-col gap-1">

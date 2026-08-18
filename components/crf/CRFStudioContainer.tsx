@@ -324,7 +324,8 @@ export const CRFStudioContainer: React.FC = () => {
         target?.tagName === "INPUT" ||
         target?.tagName === "TEXTAREA" ||
         target?.tagName === "SELECT" ||
-        target?.isContentEditable;
+        target?.isContentEditable ||
+        !!target?.closest?.("[data-keyboard-boundary]");
 
       // Undo / Redo
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") {
@@ -602,6 +603,7 @@ export const CRFStudioContainer: React.FC = () => {
   return (
     <div
       data-studio-theme={theme}
+      data-keyboard-boundary="true"
       style={
         {
           "--brand-primary": activeBranding.primaryColor || "#0284c7",
