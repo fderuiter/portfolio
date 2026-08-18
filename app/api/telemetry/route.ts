@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import crypto from "crypto";
 import { redis } from "@/lib/redis";
 import { TelemetryEventSchema, RateLimitParamsSchema } from "@/lib/schemas";
+import { getAnonymousDeviceHash } from "@/lib/utils";
 import { Ratelimit } from "@upstash/ratelimit";
 import * as Sentry from "@sentry/nextjs";
 import { env } from "@/lib/env";
@@ -96,14 +97,8 @@ async function isRateLimited(req: NextRequest): Promise<RateLimitResult> {
   // Passively check and perform generational swap if needed
   checkAndSwapPassive();
 
-  // Extract client IP address from standard proxies or request socket
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0] ||
-    req.headers.get("x-real-ip") ||
-    "127.0.0.1";
-
-  // Hash IP to establish anonymous tracking token (no plain text IP is logged or stored)
-  const ipHash = crypto.createHash("sha256").update(ip).digest("hex");
+  // Extract anonymous device hash using standardized utility helper
+  const ipHash = getAnonymousDeviceHash(req);
 
   const now = Date.now();
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { STATUS_TICKER_ITEMS, unlockAchievement, isVaultUnlocked } from "@/lib/meme-data";
 import { playMemeSound } from "@/lib/meme-audio";
+import { generateId } from "@/lib/utils";
 import { IconDeviceGamepad2 } from "@tabler/icons-react";
 
 function subscribeVaultUnlock(callback: () => void) {
@@ -35,7 +36,7 @@ const DUCK_QUOTES = [
 ];
 
 interface TreatParticle {
-  id: number;
+  id: string | number;
   x: number;
   y: number;
 }
@@ -72,7 +73,7 @@ export const FooterStatusTicker: React.FC = () => {
     setDuckBubble(nextQuote);
 
     // Spawn a bouncing treat particle
-    const treatId = Date.now() + Math.random();
+    const treatId = generateId("treat-");
     setTreats((prev) => [...prev.slice(-4), { id: treatId, x: Math.random() * 40 - 20, y: -40 }]);
 
     // Dismiss quote bubble after 3.5 seconds

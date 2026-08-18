@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { CRFField, CodelistDefinition, CodelistOption, ClinicalDataType } from "@/lib/crf/types";
+import { generateId } from "@/lib/utils";
 import { AstRuleEditor } from "./AstRuleEditor";
 import {
   IconPlus,
@@ -259,7 +260,7 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
   const handleSaveAsStudyCodelist = () => {
     if (!field.customOptions || field.customOptions.length === 0 || !onSaveToStudyCodelist) return;
 
-    const codelistId = `CL_${field.variableName || "CUSTOM"}_${Date.now().toString(36).toUpperCase()}`;
+    const codelistId = generateId(`CL_${field.variableName || "CUSTOM"}_`).toUpperCase();
     const newCodelist: CodelistDefinition = {
       id: codelistId,
       name: `${field.label || field.variableName} (${field.customOptions.length} Options)`,

@@ -8,7 +8,7 @@
 
 > **compileTerms**(`input`, `glossary?`): `string`
 
-Defined in: [lib/term-compiler.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/term-compiler.ts#L58)
+Defined in: [lib/term-compiler.ts:54](https://github.com/fderuiter/portfolio/blob/main/lib/term-compiler.ts#L54)
 
 Compiles plain text or HTML prose into standardized terminology markup tags.
 Preserves code blocks, existing term tags, and word boundaries.
