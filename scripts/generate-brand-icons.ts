@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+// @ts-expect-error sharp is an optional dev tool script dependency
 import sharp from "sharp";
 
 const SVG_BRAND_MARK = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="100%" height="100%">

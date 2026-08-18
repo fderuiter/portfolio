@@ -9,6 +9,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { SearchProvider } from "@/components/providers/SearchProvider";
 import { AudioProvider } from "@/components/providers/AudioProvider";
 import NotFound from "@/app/not-found";
+import CaseStudyNotFound from "@/app/case-studies/[slug]/not-found";
 
 const MockRetroLabyrinth = () => <div>SYSTEM_LABYRINTH.EXE</div>;
 
@@ -100,5 +101,39 @@ describe("NotFound component & dynamic metadata hoisting", () => {
     const canonicalLink = document.head.querySelector('link[rel="canonical"]');
     expect(canonicalLink).toBeDefined();
     expect(canonicalLink?.getAttribute("href")).toBe("https://my-custom-test-domain.com/some-broken-path");
+  });
+
+  it("global NotFound recovery action targets the top of primary landing page /", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(
+        <AudioProvider>
+          <SearchProvider>
+            <NotFound />
+          </SearchProvider>
+        </AudioProvider>
+      );
+    });
+
+    const actionLink = container.querySelector('a[href="/"]');
+    expect(actionLink).not.toBeNull();
+    expect(actionLink?.textContent).toContain("Return to Core");
+  });
+
+  it("CaseStudyNotFound recovery action targets the portfolio project feed section anchor /#case-studies", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(
+        <AudioProvider>
+          <SearchProvider>
+            <CaseStudyNotFound />
+          </SearchProvider>
+        </AudioProvider>
+      );
+    });
+
+    const actionLink = container.querySelector('a[href="/#case-studies"]');
+    expect(actionLink).not.toBeNull();
+    expect(actionLink?.textContent).toContain("Return to Core Feed");
   });
 });
