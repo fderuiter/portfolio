@@ -42,6 +42,9 @@ runStep('npx', ['tsx', 'scripts/generate-openapi.ts']);
 console.log("\n--- Phase 1.3: Verifying Terminology Glossary & Template Compiler Integrity ---");
 runStep('npx', ['tsx', 'scripts/verify-terms.ts']);
 
+console.log("\n--- Phase 1.4: Verifying Static Media Asset Budgets ---");
+runStep('npx', ['tsx', 'scripts/check-media-budgets.ts']);
+
 // 3. Pre-Build Database Migrations (Phase 1.5)
 const isProduction = process.env.VERCEL_ENV === 'production';
 console.log(`\nChecking environment: VERCEL_ENV=${process.env.VERCEL_ENV || 'undefined'}`);

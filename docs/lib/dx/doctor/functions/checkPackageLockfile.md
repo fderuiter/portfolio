@@ -8,7 +8,7 @@
 
 > **checkPackageLockfile**(`root`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:923](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L923)
+Defined in: [lib/dx/doctor.ts:924](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L924)
 
 ## Parameters
 

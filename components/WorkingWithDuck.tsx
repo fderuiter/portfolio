@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useSyncExternalStore, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { ScheduledImage } from "@/components/ui/ScheduledImage";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { FieldManualButton } from "@/components/FieldManualButton";
@@ -3195,12 +3196,12 @@ export const WorkingWithDuck: React.FC = () => {
                 <div className="rounded-2xl bg-white p-3 sm:p-4 text-black shadow-2xl">
                   <div className="relative w-full aspect-4/3 rounded-xl overflow-hidden bg-zinc-100 mb-2.5 sm:mb-3 border border-zinc-200">
                     {isUnlocked ? (
-                      <Image
+                      <ScheduledImage
                         src={activeImageSource}
                         alt={currentFact.title}
-                        fill
-                        className="object-cover"
-                        sizes="(max-width: 640px) 280px, 480px"
+                        aspectRatio="4/3"
+                        isAboveTheFold={false}
+                        containerClassName="w-full h-full border-0 rounded-none bg-transparent"
                       />
                     ) : (
                       <div className="absolute inset-0 bg-zinc-900 flex flex-col items-center justify-center text-zinc-500 p-4 text-center">

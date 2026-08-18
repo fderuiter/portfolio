@@ -8,9 +8,10 @@
 
 > **loadExternalBrainMesh**(`modelUrl`, `mode?`, `hemiFilter?`): `Promise`\<`Group`\<`Object3DEventMap`\>\>
 
-Defined in: [lib/neuro/asset-loader.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/asset-loader.ts#L17)
+Defined in: [lib/neuro/asset-loader.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/asset-loader.ts#L19)
 
 Load external 3D brain mesh model (.glb, .gltf, or .obj) with automatic centering and scale normalization.
+Network requests are scheduled via mediaScheduler to prevent initial load network contention.
 
 ## Parameters
 

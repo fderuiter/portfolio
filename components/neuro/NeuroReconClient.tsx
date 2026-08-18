@@ -19,6 +19,8 @@ import { SCENARIOS, SCENARIO_LIST, DATASET_CONFIGS } from "@/lib/neuro/scenarios
 import { generateSyntheticVolume, SyntheticVolume, VOLUME_SIZE } from "@/lib/neuro/volume-generator";
 import { evaluateQAMetrics } from "@/lib/neuro/qa-engine";
 import { MultiPlanarSliceViewer } from "./MultiPlanarSliceViewer";
+import { ScheduledMediaContainer } from "@/components/ui/ScheduledMediaContainer";
+import { MEDIA_PRIORITY } from "@/lib/media-scheduler";
 import dynamic from "next/dynamic";
 
 const Brain3DViewerSkeleton: React.FC = () => {
@@ -773,13 +775,20 @@ export const NeuroReconClient: React.FC = () => {
               viewMode === "3d" ? "lg:col-span-12" : "lg:col-span-5"
             }`}
           >
-            <Brain3DViewer
-              surfaceMode={surfaceMode}
-              crosshair={crosshair}
-              modelUrl={DATASET_CONFIGS[activeDataset].modelUrl}
-              onSurfaceChange={setSurfaceMode}
-              onCrosshairChange={setCrosshair}
-            />
+            <ScheduledMediaContainer
+              isAboveTheFold={false}
+              priority={MEDIA_PRIORITY.LOW}
+              minHeight="460px"
+              placeholder={<Brain3DViewerSkeleton />}
+            >
+              <Brain3DViewer
+                surfaceMode={surfaceMode}
+                crosshair={crosshair}
+                modelUrl={DATASET_CONFIGS[activeDataset].modelUrl}
+                onSurfaceChange={setSurfaceMode}
+                onCrosshairChange={setCrosshair}
+              />
+            </ScheduledMediaContainer>
           </div>
         )}
 

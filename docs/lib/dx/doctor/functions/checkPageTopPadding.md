@@ -8,7 +8,7 @@
 
 > **checkPageTopPadding**(`root`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:192](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L192)
+Defined in: [lib/dx/doctor.ts:193](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L193)
 
 Check Page Top-Padding Invariant (AGENTS.md Invariant #2).
 Root page wrappers must feature pt-24 to pt-32 to clear fixed header.

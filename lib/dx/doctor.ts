@@ -7,6 +7,7 @@ import { checkEnvironmentVariables } from "./env-guard";
 import { checkGitHygieneConfig } from "./git-guard";
 import { checkDeadCode } from "./dead-code";
 import { checkBundleBudgets } from "./bundle-guard";
+import { checkMediaBudgets } from "../media-budget";
 import { getEnv } from "../env";
 
 export interface DiagnosticCheckResult {
@@ -980,6 +981,7 @@ export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
     checkPackageLockfile(root),
     checkDeadCode(root),
     checkBundleBudgets(root),
+    checkMediaBudgets(root),
   ];
 
   const totalPassed = checks.filter((c) => c.status === "pass").length;
