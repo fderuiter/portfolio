@@ -359,14 +359,14 @@ export const Navbar: React.FC = () => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 6, scale: 0.98 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute left-0 mt-3 w-80 p-2.5 rounded-2xl border border-zinc-800 bg-zinc-950/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_20px_rgba(6,182,212,0.08)] z-50 flex flex-col gap-1"
+                        className="absolute left-0 mt-3 w-[calc(100vw-2rem)] sm:w-80 max-w-[calc(100vw-2rem)] p-2.5 rounded-2xl border border-zinc-800 bg-zinc-950/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_20px_rgba(6,182,212,0.08)] z-50 flex flex-col gap-1"
                         role="menu"
                       >
-                        <div className="px-3 py-1.5 border-b border-zinc-800/80 mb-1 flex items-center justify-between">
-                          <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-zinc-400">
+                        <div className="px-3 py-1.5 border-b border-zinc-800/80 mb-1 flex items-center justify-between min-w-0">
+                          <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-zinc-400 truncate">
                             Interactive Arcade &amp; Labs
                           </span>
-                          <span className="text-[9px] font-mono text-brand-cyan">60 FPS</span>
+                          <span className="text-[9px] font-mono text-brand-cyan shrink-0 ml-2">60 FPS</span>
                         </div>
                         {ARCADE_ITEMS.map((item) => {
                           const isActive = pathname === item.href;
@@ -377,18 +377,18 @@ export const Navbar: React.FC = () => {
                               onClick={() => setActiveDropdown(null)}
                               onMouseEnter={handleLinkHover}
                               className={cn(
-                                "flex items-start gap-3 p-2.5 rounded-xl transition-all duration-150 group",
+                                "flex items-start gap-3 p-2.5 rounded-xl transition-all duration-150 group min-w-0",
                                 isActive
                                   ? "bg-brand-cyan/10 border border-brand-cyan/30 text-white"
                                   : "hover:bg-zinc-900/80 text-zinc-300 hover:text-white"
                               )}
                               role="menuitem"
                             >
-                              <div className="mt-0.5 p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 group-hover:border-brand-cyan/30 transition-colors">
+                              <div className="mt-0.5 p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 group-hover:border-brand-cyan/30 transition-colors shrink-0">
                                 {item.icon}
                               </div>
                               <div className="flex flex-col min-w-0">
-                                <span className="text-xs font-mono font-bold tracking-tight text-neutral-200 group-hover:text-brand-cyan transition-colors">
+                                <span className="text-xs font-mono font-bold tracking-tight text-neutral-200 group-hover:text-brand-cyan transition-colors truncate">
                                   {item.title}
                                 </span>
                                 <span className="text-[11px] font-sans text-zinc-400 truncate">
@@ -435,11 +435,11 @@ export const Navbar: React.FC = () => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 6, scale: 0.98 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute left-0 mt-3 w-72 p-2.5 rounded-2xl border border-zinc-800 bg-zinc-950/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_20px_rgba(6,182,212,0.08)] z-50 flex flex-col gap-1"
+                      className="absolute left-0 mt-3 w-[calc(100vw-2rem)] sm:w-72 max-w-[calc(100vw-2rem)] p-2.5 rounded-2xl border border-zinc-800 bg-zinc-950/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_20px_rgba(6,182,212,0.08)] z-50 flex flex-col gap-1"
                       role="menu"
                     >
-                      <div className="px-3 py-1.5 border-b border-zinc-800/80 mb-1">
-                        <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-zinc-400">
+                      <div className="px-3 py-1.5 border-b border-zinc-800/80 mb-1 min-w-0">
+                        <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-zinc-400 truncate block">
                           Workspaces &amp; Verification
                         </span>
                       </div>
@@ -452,18 +452,18 @@ export const Navbar: React.FC = () => {
                             onClick={() => setActiveDropdown(null)}
                             onMouseEnter={handleLinkHover}
                             className={cn(
-                              "flex items-start gap-3 p-2.5 rounded-xl transition-all duration-150 group",
+                              "flex items-start gap-3 p-2.5 rounded-xl transition-all duration-150 group min-w-0",
                               isActive
                                 ? "bg-brand-cyan/10 border border-brand-cyan/30 text-white"
                                 : "hover:bg-zinc-900/80 text-zinc-300 hover:text-white"
                             )}
                             role="menuitem"
                           >
-                            <div className="mt-0.5 p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 group-hover:border-brand-cyan/30 transition-colors">
+                            <div className="mt-0.5 p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 group-hover:border-brand-cyan/30 transition-colors shrink-0">
                               {item.icon}
                             </div>
                             <div className="flex flex-col min-w-0">
-                              <span className="text-xs font-mono font-bold tracking-tight text-neutral-200 group-hover:text-brand-cyan transition-colors">
+                              <span className="text-xs font-mono font-bold tracking-tight text-neutral-200 group-hover:text-brand-cyan transition-colors truncate">
                                 {item.title}
                               </span>
                               <span className="text-[11px] font-sans text-zinc-400 truncate">
@@ -804,58 +804,58 @@ export const Navbar: React.FC = () => {
                   <Link
                     href="/crf"
                     onClick={(e) => handleNavClick(e, "/crf")}
-                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between active:scale-[0.99] transition-all"
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between gap-2 active:scale-[0.99] transition-all min-w-0"
                   >
-                    <span className="flex items-center gap-2">
-                      <IconFileSpreadsheet className="w-4 h-4 text-brand-cyan" />
-                      CRF Studio &amp; EDC
+                    <span className="flex items-center gap-2 min-w-0">
+                      <IconFileSpreadsheet className="w-4 h-4 text-brand-cyan shrink-0" />
+                      <span className="truncate">CRF Studio &amp; EDC</span>
                     </span>
-                    <span className="text-[10px] font-mono text-brand-cyan px-1.5 py-0.5 rounded bg-brand-cyan/10">CDISC</span>
+                    <span className="text-[10px] font-mono text-brand-cyan px-1.5 py-0.5 rounded bg-brand-cyan/10 shrink-0">CDISC</span>
                   </Link>
                   <Link
                     href="/proof"
                     onClick={(e) => handleNavClick(e, "/proof")}
-                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between active:scale-[0.99] transition-all"
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between gap-2 active:scale-[0.99] transition-all min-w-0"
                   >
-                    <span className="flex items-center gap-2">
-                      <IconBrain className="w-4 h-4 text-brand-purple" />
-                      Proof Canvas
+                    <span className="flex items-center gap-2 min-w-0">
+                      <IconBrain className="w-4 h-4 text-brand-purple shrink-0" />
+                      <span className="truncate">Proof Canvas</span>
                     </span>
-                    <span className="text-[10px] font-mono text-brand-purple px-1.5 py-0.5 rounded bg-brand-purple/10">AST</span>
+                    <span className="text-[10px] font-mono text-brand-purple px-1.5 py-0.5 rounded bg-brand-purple/10 shrink-0">AST</span>
                   </Link>
                   <Link
                     href="/neuro"
                     onClick={(e) => handleNavClick(e, "/neuro")}
-                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between active:scale-[0.99] transition-all"
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between gap-2 active:scale-[0.99] transition-all min-w-0"
                   >
-                    <span className="flex items-center gap-2">
-                      <IconBrain className="w-4 h-4 text-emerald-400" />
-                      NeuroRecon Studio
+                    <span className="flex items-center gap-2 min-w-0">
+                      <IconBrain className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <span className="truncate">NeuroRecon Studio</span>
                     </span>
-                    <span className="text-[10px] font-mono text-emerald-400 px-1.5 py-0.5 rounded bg-emerald-500/10">3D MRI</span>
+                    <span className="text-[10px] font-mono text-emerald-400 px-1.5 py-0.5 rounded bg-emerald-500/10 shrink-0">3D MRI</span>
                   </Link>
                   <Link
                     href="/stack"
                     onClick={(e) => handleNavClick(e, "/stack")}
-                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between active:scale-[0.99] transition-all"
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between gap-2 active:scale-[0.99] transition-all min-w-0"
                   >
-                    <span className="flex items-center gap-2">
-                      <IconCpu className="w-4 h-4 text-brand-cyan" />
-                      Under the Hood (Stack)
+                    <span className="flex items-center gap-2 min-w-0">
+                      <IconCpu className="w-4 h-4 text-brand-cyan shrink-0" />
+                      <span className="truncate">Under the Hood (Stack)</span>
                     </span>
-                    <span className="text-[10px] font-mono text-brand-cyan px-1.5 py-0.5 rounded bg-brand-cyan/10">Architecture</span>
+                    <span className="text-[10px] font-mono text-brand-cyan px-1.5 py-0.5 rounded bg-brand-cyan/10 shrink-0">Architecture</span>
                   </Link>
                   {persona !== "technical" && (
                     <Link
                       href="/arcade"
                       onClick={(e) => handleNavClick(e, "/arcade")}
-                      className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-brand-cyan hover:bg-brand-cyan/10 flex items-center justify-between active:scale-[0.99] transition-all"
+                      className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-brand-cyan hover:bg-brand-cyan/10 flex items-center justify-between gap-2 active:scale-[0.99] transition-all min-w-0"
                     >
-                      <span className="flex items-center gap-2">
-                        <IconDeviceGamepad2 className="w-4 h-4" />
-                        Arcade Games Hub
+                      <span className="flex items-center gap-2 min-w-0">
+                        <IconDeviceGamepad2 className="w-4 h-4 shrink-0" />
+                        <span className="truncate">Arcade Games Hub</span>
                       </span>
-                      <span className="text-xs font-mono text-brand-cyan">6 Games</span>
+                      <span className="text-xs font-mono text-brand-cyan shrink-0">6 Games</span>
                     </Link>
                   )}
                 </div>
