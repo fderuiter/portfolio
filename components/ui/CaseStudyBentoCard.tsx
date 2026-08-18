@@ -364,7 +364,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
                             width: `${lang.percentage}%`,
                             backgroundColor: color.hex,
                           }}
-                          className="h-full transition-all"
+                          className="h-full transition-[width,background-color]"
                           title={`${lang.name}: ${lang.percentage}%`}
                         />
                       );

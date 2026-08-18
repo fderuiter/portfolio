@@ -155,7 +155,7 @@ export function UnifiedErrorLayout({
       <main className="min-h-screen py-32 px-6 flex flex-col items-center justify-center bg-brand-dark text-foreground relative overflow-hidden select-none">
       {/* Background Blurs */}
       <div 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none transition-all duration-700" 
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none transition-colors duration-700" 
         style={showRetroLabyrinth ? {
           transform: `translate(-50%, -50%) translate(${(normalized.x - 0.5) * 40}px, ${(normalized.y - 0.5) * 40}px)`
         } : undefined}
@@ -199,7 +199,7 @@ export function UnifiedErrorLayout({
         {/* Interactive target reticle/crosshair indicator */}
         {showRetroLabyrinth && (
           <div 
-            className="absolute pointer-events-none mix-blend-screen transition-all duration-75"
+            className="absolute pointer-events-none mix-blend-screen transition-opacity duration-150"
             style={{
               left: `${mousePos.x}px`,
               top: `${mousePos.y}px`,

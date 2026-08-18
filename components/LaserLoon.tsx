@@ -1519,7 +1519,7 @@ export const LaserLoon: React.FC = () => {
         onKeyDown={handleKeyDown}
         onKeyUp={handleKeyUp}
         data-keyboard-boundary="true"
-        className={`relative outline-none transition-all duration-300 shadow-2xl flex flex-col justify-between ${
+        className={`relative outline-none transition-colors duration-300 shadow-2xl flex flex-col justify-between ${
           isFullscreen
             ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none bg-black p-2 sm:p-4 overflow-hidden"
             : `w-full max-w-3xl h-[420px] bg-neutral-950 border rounded-3xl overflow-hidden ${
@@ -1606,7 +1606,7 @@ export const LaserLoon: React.FC = () => {
               className="w-full h-2.5 bg-neutral-950 rounded-full overflow-hidden border border-neutral-800"
             >
               <div
-                className="h-full bg-gradient-to-r from-red-500 to-amber-500 transition-all duration-150"
+                className="h-full bg-gradient-to-r from-red-500 to-amber-500 transition-[width] duration-150"
                 style={{ width: `${clamp((bossHp / bossMaxHp) * 100, 0, 100)}%` }}
               />
             </div>

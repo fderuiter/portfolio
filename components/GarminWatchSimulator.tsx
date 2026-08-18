@@ -420,7 +420,7 @@ export const GarminWatchSimulator: React.FC = () => {
         onBlur={() => setIsFocused(false)}
         onKeyDown={handleKeyDown}
         data-keyboard-boundary="true"
-        className={`relative w-84 h-84 rounded-full bg-gradient-to-br p-6 flex items-center justify-center border-4 select-none outline-none transition-all duration-300 ${getThemeChassis()} ${
+        className={`relative w-84 h-84 rounded-full bg-gradient-to-br p-6 flex items-center justify-center border-4 select-none outline-none transition-colors duration-300 ${getThemeChassis()} ${
           isFocused
             ? "ring-4 ring-brand-cyan/20 shadow-[0_0_40px_rgba(34,211,238,0.25)] scale-[1.01]"
             : "shadow-2xl"

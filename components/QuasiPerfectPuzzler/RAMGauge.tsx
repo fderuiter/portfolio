@@ -57,7 +57,7 @@ export const RAMGauge: React.FC<RAMGaugeProps> = ({ currentRam, initialRam }) =>
       {/* Progress Track */}
       <div className="h-2.5 w-full rounded-full bg-zinc-900 border border-zinc-800 p-0.5 overflow-hidden">
         <motion.div
-          className={`h-full rounded-full transition-all duration-300 ${getBarColor()}`}
+          className={`h-full rounded-full transition-colors duration-300 ${getBarColor()}`}
           initial={{ width: `${percentage}%` }}
           animate={{ width: `${percentage}%` }}
           transition={{ ease: "easeOut", duration: 0.3 }}

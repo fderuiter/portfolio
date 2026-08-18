@@ -184,7 +184,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
   }
 
   return (
-    <div className={`w-full ${colors.shadow} transition-all duration-300`}>
+    <div className={`w-full ${colors.shadow} transition-colors duration-300`}>
       {/* Static Retro Cabinet Preview Screen with scanlines */}
       <div 
         className="w-full aspect-[16/10] min-h-[380px] rounded-2xl border border-zinc-800 bg-zinc-950 flex flex-col justify-between p-6 sm:p-8 relative overflow-hidden select-none"
@@ -222,7 +222,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
               </div>
               <div className="w-full h-2.5 bg-zinc-900 rounded-full border border-zinc-800 overflow-hidden">
                 <div 
-                  className="h-full bg-emerald-500 transition-all duration-100 ease-out shadow-[0_0_8px_#10b981]"
+                  className="h-full bg-emerald-500 transition-[width] duration-100 ease-out shadow-[0_0_8px_#10b981]"
                   style={{ width: `${bootProgress}%` }}
                 />
               </div>

@@ -69,7 +69,7 @@ export const NeuroMetricsPanel: React.FC<NeuroMetricsPanelProps> = ({
         </div>
         <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden mt-1">
           <div
-            className="bg-brand-cyan h-full transition-all duration-300"
+            className="bg-brand-cyan h-full transition-[width] duration-300"
             style={{
               width: `${clamp(
                 scenario.initialDefects > 0

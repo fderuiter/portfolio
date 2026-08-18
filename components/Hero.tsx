@@ -289,7 +289,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto lg:max-w-none bg-[#13151a]/90 border border-white/10 rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-xl flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:border-amber-500/30">
+    <div className="w-full max-w-xl mx-auto lg:max-w-none bg-[#13151a]/90 border border-white/10 rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-xl flex flex-col justify-between relative overflow-hidden transition-colors duration-300 hover:border-amber-500/30">
       {/* Precision grid decorative corner cues */}
       <div className="absolute top-2.5 right-3 flex items-center gap-1.5 font-mono text-[9px] text-zinc-500 uppercase tracking-wider select-none">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -459,7 +459,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
                   <div className="w-full h-2 bg-zinc-900 rounded-full overflow-hidden border border-white/5">
                     <div
                       style={{ width: `${(garminHeapAlloc / 32) * 100}%` }}
-                      className="h-full bg-gradient-to-r from-emerald-400 via-amber-400 to-cyan-400 transition-all duration-300"
+                      className="h-full bg-gradient-to-r from-emerald-400 via-amber-400 to-cyan-400 transition-[width] duration-300"
                     />
                   </div>
                   <div className="flex items-center justify-between text-[10px] text-zinc-500 pt-0.5">

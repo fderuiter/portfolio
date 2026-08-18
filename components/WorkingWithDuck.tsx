@@ -2139,7 +2139,7 @@ export const WorkingWithDuck: React.FC = () => {
             className="w-full bg-zinc-950 rounded-full h-2 sm:h-2.5 overflow-hidden border border-zinc-800"
           >
             <div
-              className="h-full bg-gradient-to-r from-cyan-500 to-teal-400 transition-all duration-150"
+              className="h-full bg-gradient-to-r from-cyan-500 to-teal-400 transition-[width] duration-150"
               style={{
                 width: `${Math.min(100, (uiState.workProgress / uiState.targetWorkProgress) * 100)}%`,
               }}
@@ -2175,7 +2175,7 @@ export const WorkingWithDuck: React.FC = () => {
             className="w-full bg-zinc-950 rounded-full h-2 sm:h-2.5 overflow-hidden border border-zinc-800"
           >
             <div
-              className={`h-full transition-all duration-150 ${
+              className={`h-full transition-[width,background-color] duration-150 ${
                 uiState.excitement > 80
                   ? "bg-gradient-to-r from-amber-500 to-rose-500"
                   : "bg-gradient-to-r from-sky-400 to-amber-400"
@@ -2211,7 +2211,7 @@ export const WorkingWithDuck: React.FC = () => {
             className="w-full bg-zinc-950 rounded-full h-2 sm:h-2.5 overflow-hidden border border-zinc-800"
           >
             <div
-              className={`h-full transition-all duration-150 ${
+              className={`h-full transition-[width,background-color] duration-150 ${
                 uiState.bladder > 85
                   ? "bg-rose-500 animate-pulse"
                   : "bg-gradient-to-r from-cyan-400 to-sky-500"
@@ -2242,7 +2242,7 @@ export const WorkingWithDuck: React.FC = () => {
             className="w-full bg-zinc-950 rounded-full h-2 sm:h-2.5 overflow-hidden border border-zinc-800 relative"
           >
             <div
-              className="h-full bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-400 transition-all duration-200"
+              className="h-full bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-400 transition-[clip-path] duration-200"
               style={{
                 width: "100%",
                 clipPath: `inset(0 ${Math.max(0, 100 - (uiState.naughtyVsGood + 100) / 2)}% 0 0)`,

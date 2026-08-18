@@ -1440,14 +1440,14 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
       <div className="mb-2 w-full flex flex-wrap items-center justify-between gap-2 px-1 text-[10px]">
         <div className="flex items-center gap-2">
           <span
-            className={`inline-flex items-center gap-2 px-3 py-1 rounded-full font-bold uppercase tracking-wider border transition-all duration-300 ${
+            className={`inline-flex items-center gap-2 px-3 py-1 rounded-full font-bold uppercase tracking-wider border transition-colors duration-300 ${
               isFocused
                 ? "bg-brand-cyan/10 text-brand-cyan border-brand-cyan/30 shadow-[0_0_10px_rgba(34,211,238,0.15)] animate-pulse"
                 : "bg-neutral-950 text-neutral-500 border-neutral-900"
             }`}
           >
             <span
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              className={`w-2 h-2 rounded-full transition-colors duration-300 ${
                 isFocused
                   ? "bg-brand-cyan shadow-[0_0_8px_rgba(6,182,212,0.8)]"
                   : "bg-neutral-700"
@@ -1584,7 +1584,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
             : isExpanded
             ? "h-[420px]"
             : "h-[320px]"
-        } bg-neutral-950/90 border rounded-2xl flex flex-col items-center justify-between p-2.5 overflow-hidden outline-none transition-all duration-300 ${
+        } bg-neutral-950/90 border rounded-2xl flex flex-col items-center justify-between p-2.5 overflow-hidden outline-none transition-colors duration-300 ${
           isFocused
             ? "border-brand-cyan ring-2 ring-brand-cyan/10 shadow-[0_0_20px_rgba(34,211,238,0.1)] scale-[1.005]"
             : "border-neutral-900"
@@ -1610,7 +1610,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
               <span className="text-neutral-500">HP</span>
               <div className="w-14 h-2 bg-neutral-900 rounded-full overflow-hidden border border-neutral-800">
                 <div
-                  className={`h-full transition-all duration-200 ${
+                  className={`h-full transition-[width] duration-200 ${
                     playerHp > 50
                       ? "bg-emerald-500"
                       : playerHp > 25
@@ -1628,7 +1628,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
               <span className="text-cyan-500">RAM</span>
               <div className="w-14 h-2 bg-neutral-900 rounded-full overflow-hidden border border-neutral-800">
                 <div
-                  className="h-full bg-cyan-400 transition-all duration-200"
+                  className="h-full bg-cyan-400 transition-[width] duration-200"
                   style={{ width: `${Math.max(0, (currentRam / maxRam) * 100)}%` }}
                 />
               </div>
@@ -1668,7 +1668,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
               : isExpanded
               ? "w-[360px] h-[216px]"
               : "w-[240px] h-[144px]"
-          } flex items-center justify-center transition-all duration-300`}
+          } flex items-center justify-center transition-colors duration-300`}
           style={
             crtCalibration.curvature > 0.05
               ? {

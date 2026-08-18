@@ -182,7 +182,7 @@ export const SpotlightTourOverlay: React.FC<SpotlightTourOverlayProps> = ({
               <button
                 key={s.id}
                 onClick={() => setCurrentStepIdx(idx)}
-                className={`h-1.5 rounded-full transition-all ${
+                className={`h-1.5 rounded-full transition-[width,background-color] ${
                   idx === currentStepIdx
                     ? "w-6 bg-brand-cyan"
                     : idx < currentStepIdx

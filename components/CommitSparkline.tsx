@@ -79,7 +79,7 @@ export const CommitSparkline: React.FC<CommitSparklineProps> = ({
           <path
             d={areaD}
             fill={`url(#${uniqueId}-area)`}
-            className="transition-all duration-300"
+            className="transition-opacity duration-300"
           />
 
           {/* Sparkline Neon Path */}
@@ -90,7 +90,7 @@ export const CommitSparkline: React.FC<CommitSparklineProps> = ({
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="svg-glow-cyan transition-all duration-300"
+            className="svg-glow-cyan transition-colors duration-300"
           />
         </svg>
       </div>

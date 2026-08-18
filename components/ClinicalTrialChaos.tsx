@@ -1308,7 +1308,7 @@ export const ClinicalTrialChaos: React.FC = () => {
           </div>
           <div className="w-full h-3 rounded-full bg-zinc-950 border border-zinc-800 overflow-hidden relative">
             <div
-              className={`h-full transition-all duration-300 ${
+              className={`h-full transition-[width,background-color] duration-300 ${
                 auditor.suspicion > 75
                   ? "bg-gradient-to-r from-amber-500 to-rose-600"
                   : auditor.suspicion > 40

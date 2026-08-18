@@ -278,7 +278,7 @@ export const Navbar: React.FC = () => {
       {/* Navbar Container */}
       <header
         className={cn(
-          "fixed top-0 inset-x-0 z-50 transition-all duration-300 w-full select-none",
+          "fixed top-0 inset-x-0 z-50 transition-colors duration-300 w-full select-none",
           isScrolled
             ? "bg-zinc-950/85 backdrop-blur-xl border-b border-zinc-800/60 py-3 shadow-[0_4px_30px_rgba(0,0,0,0.5)]"
             : "bg-transparent py-5"
@@ -701,7 +701,7 @@ export const Navbar: React.FC = () => {
                   height="2"
                   rx="1"
                   className={cn(
-                    "origin-center transition-all duration-300",
+                    "origin-center transition-transform duration-300",
                     isOpen ? "rotate-45 translate-y-[6px]" : ""
                   )}
                 />
@@ -711,7 +711,7 @@ export const Navbar: React.FC = () => {
                   height="2"
                   rx="1"
                   className={cn(
-                    "transition-all duration-300",
+                    "transition-opacity duration-300",
                     isOpen ? "opacity-0" : ""
                   )}
                 />
@@ -721,7 +721,7 @@ export const Navbar: React.FC = () => {
                   height="2"
                   rx="1"
                   className={cn(
-                    "origin-center transition-all duration-300",
+                    "origin-center transition-transform duration-300",
                     isOpen ? "-rotate-45 -translate-y-[8px]" : ""
                   )}
                 />
