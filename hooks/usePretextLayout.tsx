@@ -18,7 +18,6 @@ import { useTerminology } from "@/components/providers/TerminologyProvider";
 
 import { 
   isBrowser, 
-  validateLayoutHeight,
   resolveCodeChipExtraWidth,
   textPrepareCache,
   textLayoutCache,
@@ -56,7 +55,7 @@ export function usePretextLayout({
   getResponsiveMetrics,
 }: UsePretextLayoutOptions) {
   const [state, setState] = useState<PretextLayoutState>({
-    isReady: false,
+    isReady: true,
     height: 0,
     lineCount: 0,
   });
@@ -155,53 +154,35 @@ export function usePretextLayout({
   useLayoutEffect(() => {
     if (!isBrowser()) return;
 
-    if (containerRef.current) {
-      const initialWidth = containerRef.current.getBoundingClientRect().width;
-      measureText(initialWidth);
+    let fontString = "";
+    if (
+      resolvedFontRef.current &&
+      resolvedFontRef.current.fontSize === fontSize &&
+      resolvedFontRef.current.fontFamilyVariable === fontFamilyVariable
+    ) {
+      fontString = resolvedFontRef.current.fontString;
     } else {
-      let fontString = "";
-      if (
-        resolvedFontRef.current &&
-        resolvedFontRef.current.fontSize === fontSize &&
-        resolvedFontRef.current.fontFamilyVariable === fontFamilyVariable
-      ) {
-        fontString = resolvedFontRef.current.fontString;
-      } else {
-        fontString = resolveSingleThemeFont(fontSize, fontFamilyVariable);
-        resolvedFontRef.current = {
-          fontSize,
-          fontFamilyVariable,
-          fontString,
-        };
-      }
-      fontStringRef.current = fontString;
-      const prepareKey = `${text}|${fontString}`;
-      const stylesheetLoaded = isStylesheetLoaded();
-      let prepared = stylesheetLoaded ? textPrepareCache.get(prepareKey) : undefined;
-      if (!prepared) {
-        prepared = prepare(text, fontString);
-        if (stylesheetLoaded) {
-          textPrepareCache.set(prepareKey, prepared);
-        }
-      }
-      preparedTextRef.current = prepared;
-      setState((prev) => ({ ...prev, isReady: true }));
+      fontString = resolveSingleThemeFont(fontSize, fontFamilyVariable);
+      resolvedFontRef.current = {
+        fontSize,
+        fontFamilyVariable,
+        fontString,
+      };
     }
+    fontStringRef.current = fontString;
+    const prepareKey = `${text}|${fontString}`;
+    const stylesheetLoaded = isStylesheetLoaded();
+    let prepared = stylesheetLoaded ? textPrepareCache.get(prepareKey) : undefined;
+    if (!prepared) {
+      prepared = prepare(text, fontString);
+      if (stylesheetLoaded) {
+        textPrepareCache.set(prepareKey, prepared);
+      }
+    }
+    preparedTextRef.current = prepared;
   }, [text, fontSize, fontFamilyVariable, measureText, containerRef, translationMode, activeTheme, simplified]);
 
   // Removed custom ResizeObserver in favor of unified useResizeObserver hook
-
-  // Layout Height Validation Trigger
-  useLayoutEffect(() => {
-    if (state.isReady && containerRef.current) {
-      const actualHeight = containerRef.current.getBoundingClientRect().height;
-      validateLayoutHeight(
-        state.height,
-        actualHeight,
-        `usePretextLayout (text: "${text.slice(0, 30)}...")`
-      );
-    }
-  }, [state.isReady, state.height, text, containerRef]);
 
   return {
     ref: containerRef,
@@ -372,7 +353,7 @@ export function usePretextRichLayout({
     lines: RichInlineLine[];
     items: ExtendedRichInlineItem[];
   }>({
-    isReady: false,
+    isReady: true,
     height: 0,
     lines: [],
     items: [],
@@ -529,28 +510,9 @@ export function usePretextRichLayout({
       allItems.push(...p.items);
     });
     itemsRef.current = allItems;
-
-    if (containerRef.current) {
-      const initialWidth = containerRef.current.getBoundingClientRect().width;
-      measureRichText(initialWidth);
-    } else {
-      setState((prev) => ({ ...prev, isReady: true }));
-    }
   }, [text, fontSize, fontFamilyVariable, measureRichText, containerRef, translationMode, activeTheme, simplified]);
 
   // Removed custom ResizeObserver in favor of unified useResizeObserver hook
-
-  // Layout Height Validation Trigger
-  useLayoutEffect(() => {
-    if (state.isReady && containerRef.current) {
-      const actualHeight = containerRef.current.getBoundingClientRect().height;
-      validateLayoutHeight(
-        state.height,
-        actualHeight,
-        `usePretextRichLayout (text: "${text.slice(0, 30)}...")`
-      );
-    }
-  }, [state.isReady, state.height, text, containerRef]);
 
   return {
     ref: containerRef,

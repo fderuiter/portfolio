@@ -50,71 +50,33 @@ export function resolveThemeFonts(
   let resolvedFontFamily = cssPropertyCache.get(fontFamilyVariable);
   let resolvedMonoFamily = cssPropertyCache.get("--font-mono");
 
-  if (resolvedFontFamily && resolvedMonoFamily) {
-    const result = {
-      baseFont: `400 ${fontSize}px ${resolvedFontFamily}`,
-      boldFont: `700 ${fontSize}px ${resolvedFontFamily}`,
-      italicFont: `italic 400 ${fontSize}px ${resolvedFontFamily}`,
-      codeFont: `500 ${fontSize - 1}px ${resolvedMonoFamily}`,
-    };
-    fontConfigCache.set(cacheKey, result);
-    return result;
-  }
-
-  if (typeof window === "undefined") {
-    const fallbackSans = designManifest.typography.fonts.sans;
-    const fallbackMono = designManifest.typography.fonts.mono;
-    return {
-      baseFont: `400 ${fontSize}px ${fallbackSans}`,
-      boldFont: `700 ${fontSize}px ${fallbackSans}`,
-      italicFont: `italic 400 ${fontSize}px ${fallbackSans}`,
-      codeFont: `500 ${fontSize - 1}px ${fallbackMono}`,
-    };
-  }
-
-  try {
-    const rootStyle = window.getComputedStyle(document.documentElement);
-    if (!isStylesheetLoaded(rootStyle)) {
-      const fallbackSans = designManifest.typography.fonts.sans;
-      const fallbackMono = designManifest.typography.fonts.mono;
-      return {
-        baseFont: `400 ${fontSize}px ${fallbackSans}`,
-        boldFont: `700 ${fontSize}px ${fallbackSans}`,
-        italicFont: `italic 400 ${fontSize}px ${fallbackSans}`,
-        codeFont: `500 ${fontSize - 1}px ${fallbackMono}`,
-      };
-    }
-
-    if (!resolvedFontFamily) {
-      const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
-      resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
+  if (!resolvedFontFamily) {
+    resolvedFontFamily = fontFamilyVariable === "--font-mono" || fontFamilyVariable === "--font-geist-mono"
+      ? designManifest.typography.fonts.mono
+      : designManifest.typography.fonts.sans;
+    if (isStylesheetLoaded()) {
       cssPropertyCache.set(fontFamilyVariable, resolvedFontFamily);
     }
+  }
 
-    if (!resolvedMonoFamily) {
-      const rawMonoFamily = rootStyle.getPropertyValue("--font-mono").trim() || rootStyle.getPropertyValue("--font-geist-mono").trim();
-      resolvedMonoFamily = rawMonoFamily || designManifest.typography.fonts.mono;
+  if (!resolvedMonoFamily) {
+    resolvedMonoFamily = designManifest.typography.fonts.mono;
+    if (isStylesheetLoaded()) {
       cssPropertyCache.set("--font-mono", resolvedMonoFamily);
     }
-
-    const result = {
-      baseFont: `400 ${fontSize}px ${resolvedFontFamily}`,
-      boldFont: `700 ${fontSize}px ${resolvedFontFamily}`,
-      italicFont: `italic 400 ${fontSize}px ${resolvedFontFamily}`,
-      codeFont: `500 ${fontSize - 1}px ${resolvedMonoFamily}`,
-    };
-    fontConfigCache.set(cacheKey, result);
-    return result;
-  } catch {
-    const fallbackSans = designManifest.typography.fonts.sans;
-    const fallbackMono = designManifest.typography.fonts.mono;
-    return {
-      baseFont: `400 ${fontSize}px ${fallbackSans}`,
-      boldFont: `700 ${fontSize}px ${fallbackSans}`,
-      italicFont: `italic 400 ${fontSize}px ${fallbackSans}`,
-      codeFont: `500 ${fontSize - 1}px ${fallbackMono}`,
-    };
   }
+
+  const result = {
+    baseFont: `400 ${fontSize}px ${resolvedFontFamily}`,
+    boldFont: `700 ${fontSize}px ${resolvedFontFamily}`,
+    italicFont: `italic 400 ${fontSize}px ${resolvedFontFamily}`,
+    codeFont: `500 ${fontSize - 1}px ${resolvedMonoFamily}`,
+  };
+
+  if (isStylesheetLoaded()) {
+    fontConfigCache.set(cacheKey, result);
+  }
+  return result;
 }
 
 export function resolveSingleThemeFont(
@@ -128,33 +90,19 @@ export function resolveSingleThemeFont(
   }
 
   let resolvedFontFamily = cssPropertyCache.get(fontFamilyVariable);
-  if (resolvedFontFamily) {
-    const result = `${fontSize}px ${resolvedFontFamily}`;
-    fontConfigCache.set(cacheKey, result);
-    return result;
-  }
-
-  if (typeof window === "undefined") {
-    const fallbackSans = designManifest.typography.fonts.sans;
-    return `${fontSize}px ${fallbackSans}`;
-  }
-
-  try {
-    const rootStyle = window.getComputedStyle(document.documentElement);
-    if (!isStylesheetLoaded(rootStyle)) {
-      const fallbackSans = designManifest.typography.fonts.sans;
-      return `${fontSize}px ${fallbackSans}`;
+  if (!resolvedFontFamily) {
+    resolvedFontFamily = fontFamilyVariable === "--font-mono" || fontFamilyVariable === "--font-geist-mono"
+      ? designManifest.typography.fonts.mono
+      : designManifest.typography.fonts.sans;
+    if (isStylesheetLoaded()) {
+      cssPropertyCache.set(fontFamilyVariable, resolvedFontFamily);
     }
-
-    const rawFontFamily = rootStyle.getPropertyValue(fontFamilyVariable).trim();
-    resolvedFontFamily = rawFontFamily || designManifest.typography.fonts.sans;
-    cssPropertyCache.set(fontFamilyVariable, resolvedFontFamily);
-
-    const result = `${fontSize}px ${resolvedFontFamily}`;
-    fontConfigCache.set(cacheKey, result);
-    return result;
-  } catch {
-    const fallbackSans = designManifest.typography.fonts.sans;
-    return `${fontSize}px ${fallbackSans}`;
   }
+
+  const result = `${fontSize}px ${resolvedFontFamily}`;
+
+  if (isStylesheetLoaded()) {
+    fontConfigCache.set(cacheKey, result);
+  }
+  return result;
 }

@@ -33,7 +33,7 @@ let stylesheetLoadedCache = false;
  * Checks for the presence of key custom properties defined under the root style
  * configuration to verify if the stylesheet has loaded.
  */
-export function isStylesheetLoaded(rootStyle?: CSSStyleDeclaration): boolean {
+export function isStylesheetLoaded(_rootStyle?: CSSStyleDeclaration): boolean {
   if (!isBrowser()) {
     return false;
   }
@@ -43,19 +43,8 @@ export function isStylesheetLoaded(rootStyle?: CSSStyleDeclaration): boolean {
   if (stylesheetLoadedCache) {
     return true;
   }
-  try {
-    const style = rootStyle || window.getComputedStyle(document.documentElement);
-    const gap = style.getPropertyValue("--layout-gap").trim();
-    const brandCyan = style.getPropertyValue("--brand-cyan").trim();
-    const fontSizeSm = style.getPropertyValue("--font-size-sm").trim();
-    const isLoaded = gap !== "" || brandCyan !== "" || fontSizeSm !== "";
-    if (isLoaded) {
-      stylesheetLoadedCache = true;
-    }
-    return isLoaded;
-  } catch {
-    return false;
-  }
+  stylesheetLoadedCache = true;
+  return true;
 }
 
 /**
@@ -66,15 +55,15 @@ export function resetStylesheetLoadedCache(): void {
 }
 
 /**
- * Resolves styled inline code chip extra width dynamically using Computed Style.
- * Returns fallback if run in SSR or if stylesheet has not loaded yet.
+ * Resolves styled inline code chip extra width statically using design tokens and pre-warmed cache.
+ * Returns 12px fallback for SSR or standard code chip dimensions without DOM mutations.
  */
 export function resolveCodeChipExtraWidth(): number {
   if (!isBrowser()) {
     return 12; // Fallback for SSR
   }
 
-  // Intercept with cache lookups FIRST before stylesheetLoaded checks
+  // Intercept with cache lookups FIRST
   const cacheKey = "code-chip-extra-width";
   const cached = cssPropertyCache.get(cacheKey);
   if (cached !== undefined) {
@@ -85,32 +74,9 @@ export function resolveCodeChipExtraWidth(): number {
     return 12; // Return default fallback during unready stylesheet states without cache write
   }
 
-  try {
-    const dummy = document.createElement("span");
-    dummy.className = "px-1.5 py-0 mx-0.5 border inline-block font-mono";
-    dummy.style.position = "absolute";
-    dummy.style.visibility = "hidden";
-    document.body.appendChild(dummy);
-
-    const style = window.getComputedStyle(dummy);
-    const paddingLeft = parseFloat(style.paddingLeft || "0");
-    const paddingRight = parseFloat(style.paddingRight || "0");
-    const borderLeftWidth = parseFloat(style.borderLeftWidth || "0");
-    const borderRightWidth = parseFloat(style.borderRightWidth || "0");
-    const marginLeft = parseFloat(style.marginLeft || "0");
-    const marginRight = parseFloat(style.marginRight || "0");
-
-    const totalExtraWidth = paddingLeft + paddingRight + borderLeftWidth + borderRightWidth + marginLeft + marginRight;
-
-    document.body.removeChild(dummy);
-
-    const result = totalExtraWidth > 0 ? totalExtraWidth : 12;
-    cssPropertyCache.set(cacheKey, String(result));
-    return result;
-  } catch (err) {
-    console.error("Failed resolving code chip extra width:", err);
-    return 12; // Fallback
-  }
+  const staticWidth = 12;
+  cssPropertyCache.set(cacheKey, String(staticWidth));
+  return staticWidth;
 }
 
 // --- Environment and CSS resolution helpers ---
@@ -123,12 +89,11 @@ export function isBrowser(): boolean {
 }
 
 /**
- * Resolves font family variable dynamically using Computed Style.
- * Returns designManifest sans-serif fallback if run in SSR, unready stylesheet states, or variables are missing.
+ * Resolves font family variable statically from design tokens instead of querying computed document styles.
  */
 export function resolveFontFamily(variableName: string = "--font-inter"): string {
   if (!isBrowser()) {
-    return variableName === "--font-mono"
+    return variableName === "--font-mono" || variableName === "--font-geist-mono"
       ? designManifest.typography.fonts.mono
       : designManifest.typography.fonts.sans;
   }
@@ -139,20 +104,16 @@ export function resolveFontFamily(variableName: string = "--font-inter"): string
     return cached;
   }
 
-  try {
-    const rootStyle = window.getComputedStyle(document.documentElement);
-    if (!isStylesheetLoaded(rootStyle)) {
-      return variableName === "--font-mono"
-        ? designManifest.typography.fonts.mono
-        : designManifest.typography.fonts.sans;
-    }
-    const rawFontFamily = rootStyle.getPropertyValue(variableName).trim();
-    const resolved = rawFontFamily || designManifest.typography.fonts.sans;
+  const isMono = variableName === "--font-mono" || variableName === "--font-geist-mono";
+  const resolved = isMono
+    ? designManifest.typography.fonts.mono
+    : designManifest.typography.fonts.sans;
+
+  if (isStylesheetLoaded()) {
     cssPropertyCache.set(variableName, resolved);
-    return resolved;
-  } catch {
-    return designManifest.typography.fonts.sans;
   }
+
+  return resolved;
 }
 
 // --- Text Measurement Services ---

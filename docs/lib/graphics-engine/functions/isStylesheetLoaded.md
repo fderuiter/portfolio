@@ -6,7 +6,7 @@
 
 # Function: isStylesheetLoaded()
 
-> **isStylesheetLoaded**(`rootStyle?`): `boolean`
+> **isStylesheetLoaded**(`_rootStyle?`): `boolean`
 
 Defined in: [lib/graphics-engine.ts:36](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L36)
 
@@ -15,7 +15,7 @@ configuration to verify if the stylesheet has loaded.
 
 ## Parameters
 
-### rootStyle?
+### \_rootStyle?
 
 `CSSStyleDeclaration`
 

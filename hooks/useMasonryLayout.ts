@@ -49,7 +49,7 @@ export function useMasonryLayout<T extends MasonryItem>(
         paragraphsItems: [],
       })),
     ],
-    isReady: false,
+    isReady: true,
   });
 
   useLayoutEffect(() => {
@@ -102,15 +102,6 @@ export function useMasonryLayout<T extends MasonryItem>(
     containerWidthRef.current = entry.contentRect.width;
     recalculateLayout(entry.contentRect.width);
   });
-
-  useLayoutEffect(() => {
-    if (containerRef.current) {
-      const initialWidth = containerRef.current.getBoundingClientRect().width;
-      containerWidthRef.current = initialWidth;
-      recalculateLayout(initialWidth);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useLayoutEffect(() => {
     if (containerWidthRef.current > 0) {

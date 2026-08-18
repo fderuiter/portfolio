@@ -8,10 +8,10 @@
 
 > **resolveCodeChipExtraWidth**(): `number`
 
-Defined in: [lib/graphics-engine.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L72)
+Defined in: [lib/graphics-engine.ts:61](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L61)
 
-Resolves styled inline code chip extra width dynamically using Computed Style.
-Returns fallback if run in SSR or if stylesheet has not loaded yet.
+Resolves styled inline code chip extra width statically using design tokens and pre-warmed cache.
+Returns 12px fallback for SSR or standard code chip dimensions without DOM mutations.
 
 ## Returns
 

@@ -229,15 +229,12 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
 
     const element = innerRef.current;
     
-    const observer = new ResizeObserver(() => {
-      const cardEl = element.closest('div.isolate') as HTMLElement;
-      if (cardEl) {
-        const originalHeight = cardEl.style.height;
-        cardEl.style.height = 'auto'; // Disable fixed height to measure natural footprint
-        const actualHeight = cardEl.getBoundingClientRect().height;
-        cardEl.style.height = originalHeight; // Restore immediately
-        
-        registerHeightOverride(study.id, actualHeight);
+    const observer = new ResizeObserver((entries) => {
+      if (!entries || entries.length === 0) return;
+      const entry = entries[0];
+      const contentHeight = Math.ceil(entry.contentRect.height);
+      if (contentHeight > 0) {
+        registerHeightOverride(study.id, contentHeight + 40);
       }
     });
 

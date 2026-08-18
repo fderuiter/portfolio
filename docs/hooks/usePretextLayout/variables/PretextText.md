@@ -8,4 +8,4 @@
 
 > `const` **PretextText**: `React.FC`\<[`PretextTextProps`](../interfaces/PretextTextProps.md)\>
 
-Defined in: [hooks/usePretextLayout.tsx:227](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L227)
+Defined in: [hooks/usePretextLayout.tsx:208](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L208)

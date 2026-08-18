@@ -8,7 +8,7 @@
 
 > **measureTextOffscreen**(`__namedParameters`): `object`
 
-Defined in: [lib/graphics-engine.ts:164](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L164)
+Defined in: [lib/graphics-engine.ts:125](https://github.com/fderuiter/portfolio/blob/main/lib/graphics-engine.ts#L125)
 
 Offscreen text measurement utilizing Pretext layout calculations.
 SSR-safe fallback mechanism returns height 0 if running on server.
