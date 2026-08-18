@@ -486,7 +486,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
           e.stopPropagation();
           onOpenPalette();
         }}
-        className="fixed sm:hidden bottom-20 right-4 z-30 flex items-center gap-1.5 px-3.5 py-2.5 rounded-full bg-brand-cyan text-black font-mono text-xs font-extrabold shadow-2xl hover:bg-white transition-all active:scale-95"
+        className="fixed sm:hidden bottom-20 right-4 bottom-[max(5rem,env(safe-area-inset-bottom)+4rem)] right-[max(1rem,env(safe-area-inset-right))] z-30 flex items-center justify-center gap-1.5 px-3.5 py-2.5 min-h-[44px] min-w-[44px] rounded-full bg-brand-cyan text-black font-mono text-xs font-extrabold shadow-2xl hover:bg-white transition-all active:scale-95"
         title="Add Field / Open Widget Palette"
         aria-label="Add Field Widget"
       >

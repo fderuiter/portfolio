@@ -210,13 +210,13 @@ export function DevOverflowHud({
       )}
 
       {/* Floating Interactive Dev HUD Toolbar */}
-      <div className="fixed bottom-4 right-4 z-50 font-mono text-xs select-none">
+      <div className="fixed bottom-4 right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))] z-50 font-mono text-xs select-none">
         {minimized ? (
           <button
             type="button"
             onClick={() => setMinimized(false)}
             data-testid="hud-expand-btn"
-            className={`flex items-center gap-2 px-3 py-2 rounded-full border shadow-xl backdrop-blur-md transition-all ${
+            className={`flex items-center justify-center gap-2 px-3.5 py-2.5 min-h-[44px] min-w-[44px] rounded-full border shadow-xl backdrop-blur-md transition-all ${
               overflowElements.length > 0
                 ? "bg-rose-950/90 text-rose-200 border-rose-500/80 hover:bg-rose-900"
                 : "bg-zinc-900/90 text-zinc-300 border-zinc-700/80 hover:bg-zinc-800"
@@ -244,7 +244,7 @@ export function DevOverflowHud({
                   onClick={() => setMinimized(true)}
                   aria-label="Minimize Dev HUD"
                   data-testid="hud-minimize-btn"
-                  className="px-1.5 py-0.5 text-zinc-400 hover:text-white rounded hover:bg-zinc-800 transition-colors"
+                  className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-zinc-400 hover:text-white rounded hover:bg-zinc-800 transition-colors font-bold"
                 >
                   —
                 </button>
@@ -269,7 +269,7 @@ export function DevOverflowHud({
                 type="button"
                 onClick={scheduleScan}
                 data-testid="hud-rescan-btn"
-                className="text-[10px] px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-colors"
+                className="text-[10px] px-3 py-2 min-h-[44px] flex items-center justify-center rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-colors font-semibold"
               >
                 Scan Now
               </button>
@@ -281,7 +281,7 @@ export function DevOverflowHud({
                 type="button"
                 onClick={() => setEnabled(!enabled)}
                 data-testid="hud-toggle-btn"
-                className={`flex-1 py-1.5 px-2 rounded-lg font-bold text-[11px] border transition-all ${
+                className={`flex-1 min-h-[44px] py-2 px-3 rounded-lg font-bold text-[11px] border transition-all flex items-center justify-center ${
                   enabled
                     ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/40 hover:bg-cyan-500/20"
                     : "bg-zinc-800/80 text-zinc-400 border-zinc-700/60 hover:bg-zinc-800"
@@ -297,7 +297,7 @@ export function DevOverflowHud({
                     onClick={() => handleInspect("prev")}
                     aria-label="Previous overflowing element"
                     data-testid="hud-prev-btn"
-                    className="px-2 py-1 bg-zinc-800 hover:bg-zinc-700 rounded text-zinc-200 text-[11px]"
+                    className="px-3 py-2 min-h-[44px] min-w-[44px] flex items-center justify-center bg-zinc-800 hover:bg-zinc-700 rounded text-zinc-200 text-[11px] font-bold"
                   >
                     ←
                   </button>
@@ -309,7 +309,7 @@ export function DevOverflowHud({
                     onClick={() => handleInspect("next")}
                     aria-label="Next overflowing element"
                     data-testid="hud-next-btn"
-                    className="px-2 py-1 bg-zinc-800 hover:bg-zinc-700 rounded text-zinc-200 text-[11px]"
+                    className="px-3 py-2 min-h-[44px] min-w-[44px] flex items-center justify-center bg-zinc-800 hover:bg-zinc-700 rounded text-zinc-200 text-[11px] font-bold"
                   >
                     →
                   </button>

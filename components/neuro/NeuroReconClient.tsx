@@ -983,7 +983,7 @@ export const NeuroReconClient: React.FC = () => {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 15 }}
-            className="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-xl border border-brand-cyan/40 bg-zinc-900/95 text-xs font-mono text-brand-cyan shadow-2xl flex items-center gap-2 backdrop-blur-md"
+            className="fixed bottom-28 right-6 bottom-[max(7rem,env(safe-area-inset-bottom)+6rem)] right-[max(1.5rem,env(safe-area-inset-right))] z-50 px-4 py-2.5 min-h-[44px] rounded-xl border border-brand-cyan/40 bg-zinc-900/95 text-xs font-mono text-brand-cyan shadow-2xl flex items-center gap-2 backdrop-blur-md"
           >
             <IconLink className="w-4 h-4 text-brand-cyan" />
             <span>{copyToast}</span>

@@ -912,7 +912,7 @@ export const CRFStudioContainer: React.FC = () => {
             className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs md:hidden"
             onClick={() => setIsMobileWidgetDrawerOpen(false)}
           />
-          <div className="fixed bottom-0 inset-x-0 z-50 max-h-[75vh] bg-zinc-950 border-t border-zinc-800 rounded-t-3xl p-4 overflow-y-auto md:hidden shadow-2xl space-y-3 animate-in slide-in-from-bottom duration-200">
+          <div className="fixed bottom-0 inset-x-0 z-50 max-h-[75vh] bg-zinc-950 border-t border-zinc-800 rounded-t-3xl p-4 pb-[max(1.5rem,env(safe-area-inset-bottom)+1rem)] overflow-y-auto md:hidden shadow-2xl space-y-3 animate-in slide-in-from-bottom duration-200">
             <div className="flex items-center justify-between pb-2 border-b border-zinc-850">
               <div className="flex items-center gap-2">
                 <IconSparkles className="w-4 h-4 text-brand-cyan" />
@@ -922,7 +922,7 @@ export const CRFStudioContainer: React.FC = () => {
               </div>
               <button
                 onClick={() => setIsMobileWidgetDrawerOpen(false)}
-                className="p-1 rounded-full bg-zinc-900 text-zinc-400 hover:text-white"
+                className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full bg-zinc-900 text-zinc-400 hover:text-white"
                 aria-label="Close Widget Palette"
               >
                 <IconX className="w-4 h-4" />

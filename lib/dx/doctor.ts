@@ -949,7 +949,7 @@ export function checkLayoutTextClippingInvariants(root: string): DiagnosticCheck
     }
   }
 
-  // Scan components and app files for rogue z-[9999]
+  // Scan components and app files for rogue or invalid z-index escalation and coordinate collisions
   const sourceFiles = [
     ...findFiles(path.join(root, "components"), /\.(tsx|jsx|ts|js)$/),
     ...findFiles(path.join(root, "app"), /\.(tsx|jsx|ts|js)$/),
@@ -957,9 +957,76 @@ export function checkLayoutTextClippingInvariants(root: string): DiagnosticCheck
 
   for (const file of sourceFiles) {
     const content = fs.readFileSync(file, "utf-8");
+    const relPath = path.relative(root, file);
+
     if (content.includes("z-[9999]")) {
-      const relPath = path.relative(root, file);
       violations.push(`Rogue z-index escalation 'z-[9999]' found in ${relPath}`);
+    }
+
+    const arbitraryZMatches = content.match(/z-\[\d+\]|z-(?!0|10|20|30|40|50)\d+/g);
+    if (arbitraryZMatches) {
+      for (const match of arbitraryZMatches) {
+        if (match !== "z-0" && !match.startsWith("z-0/")) {
+          violations.push(`Invalid z-index escalation '${match}' found in ${relPath} (must adhere to 4-tier elevation hierarchy: -z-10 to z-50)`);
+        }
+      }
+    }
+  }
+
+  // Scan for duplicate bottom-right coordinate declarations across floating components
+  const floatingCoordsMap = new Map<string, string[]>();
+  for (const file of sourceFiles) {
+    const content = fs.readFileSync(file, "utf-8");
+    const relPath = path.relative(root, file);
+
+    const lines = content.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if ((line.includes("fixed") || line.includes("absolute")) && line.includes("bottom-") && line.includes("right-")) {
+        // Ignore decorative background ambient shapes
+        if (line.includes("pointer-events-none") && line.includes("blur")) continue;
+        // Ignore full-width bottom bars
+        if (line.includes("inset-x") || line.includes("left-")) continue;
+
+        const bMatch = line.match(/\bbottom-([0-9a-zA-Z\/\[\]_-]+)\b/);
+        const rMatch = line.match(/\bright-([0-9a-zA-Z\/\[\]_-]+)\b/);
+
+        if (bMatch && rMatch) {
+          const coordKey = `bottom-${bMatch[1]} right-${rMatch[1]}`;
+          if (!floatingCoordsMap.has(coordKey)) {
+            floatingCoordsMap.set(coordKey, []);
+          }
+          const existingList = floatingCoordsMap.get(coordKey)!;
+          if (!existingList.includes(relPath)) {
+            existingList.push(relPath);
+          }
+        }
+      }
+    }
+  }
+
+  for (const [coord, fileList] of floatingCoordsMap.entries()) {
+    if (fileList.length > 1) {
+      violations.push(`Duplicate floating bottom-right coordinate declaration '${coord}' found across multiple components: ${fileList.join(", ")}`);
+    }
+  }
+
+  // Scan bottom-anchored floating elements for mobile safe-area inset calculation
+  const floatingBottomFiles = [
+    "components/ui/DevOverflowHud.tsx",
+    "app/proof/ProofWorkspaceClient.tsx",
+    "components/neuro/NeuroReconClient.tsx",
+    "components/crf/CenterCanvas/FormCanvas.tsx",
+    "components/crf/CRFStudioContainer.tsx",
+  ];
+
+  for (const relFile of floatingBottomFiles) {
+    const fullPath = path.join(root, relFile);
+    if (fs.existsSync(fullPath)) {
+      const content = fs.readFileSync(fullPath, "utf-8");
+      if (!content.includes("env(safe-area-inset-bottom")) {
+        violations.push(`Floating bottom component ${relFile} is missing mobile safe-area inset calculation (env(safe-area-inset-bottom))`);
+      }
     }
   }
 

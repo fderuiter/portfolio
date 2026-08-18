@@ -2148,7 +2148,7 @@ export function ProofWorkspaceClient() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl border text-xs font-medium shadow-2xl flex items-center gap-2 ${
+              className={`fixed bottom-24 right-6 bottom-[max(6rem,env(safe-area-inset-bottom)+5rem)] right-[max(1.5rem,env(safe-area-inset-right))] z-50 px-4 py-3 min-h-[44px] rounded-xl border text-xs font-medium shadow-2xl flex items-center gap-2 ${
                 feedbackToast.type === "success"
                   ? "bg-emerald-950 border-emerald-700 text-emerald-200"
                   : feedbackToast.type === "error"

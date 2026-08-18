@@ -167,6 +167,138 @@ Because serverless functions terminate database connections rapidly, standard TC
 ### 2. Dynamic Prisma Client Pooling
 To prevent connection leaks across Next.js Hot Module Replacement (HMR) refreshes during development, the client caches the active connection inside a global object (`globalThis.prisma`). It instantiates a fresh connection pool only when the global instance is undefined.
 
+## Interactive Case Study Feedback & Reaction Subsystem
+
+To capture reader engagement and quantitative feedback on published technical post-mortems, the portfolio integrates an interactive feedback and quick reaction subsystem backed by Prisma PostgreSQL models and declarative Zod validation handlers.
+
+### 1. Database Data Models & Relations
+
+The interaction subsystem is structured around two dedicated Prisma models:
+
+- **`CaseStudyFeedback` Model:**
+  - `id`: Unique string primary key (`cuid`).
+  - `caseStudySlug`: String slug linking feedback to the target case study.
+  - `takeaways`: String storing a JSON-serialized array of key takeaway selections (e.g., `["architectural_narrative", "telemetry"]`).
+  - `comments`: Free-form constructive user text feedback (3–2000 characters).
+  - `connectionHash`: SHA-256 hash derived from the client's connection context (`IP:User-Agent`).
+  - `createdAt`: Timestamp defaults to current date/time.
+  - Indexes: Single-field indexes on `caseStudySlug` and `connectionHash`.
+
+- **`CaseStudyReaction` Model:**
+  - `id`: Unique string primary key (`cuid`).
+  - `caseStudySlug`: String slug linking reaction to the target case study.
+  - `reactionType`: String enum token (`"insightful"`, `"mind_blowing"`, `"actionable"`, or `"thorough"`).
+  - `connectionHash`: SHA-256 hash derived from the client's connection context (`IP:User-Agent`).
+  - `createdAt`: Timestamp defaults to current date/time.
+  - Indexes: Single-field index on `caseStudySlug`, compound index on `[caseStudySlug, reactionType]`, and single-field index on `connectionHash`.
+
+- **Relationship to Core `CaseStudy` Content:**
+  - Feedback and reaction records maintain a decoupled slug-based relation (`caseStudySlug` matching `CaseStudy.slug`), eliminating foreign key constraints for fast serverless execution.
+
+- **Privacy-Preserving Connection Hashing:**
+  - Client identifiers (`connectionHash`) are generated using SHA-256 hashing (`crypto`) over normalized `ip:userAgent` strings.
+  - Guarantees zero plain-text storage or logging of IP addresses or personal identifiable information (PII).
+
+### 2. Feedback & Reaction API Endpoint Specification
+
+#### `/api/case-studies/feedback` Route Handler
+
+- **`GET /api/case-studies/feedback`**
+  - **Query Parameters:** `slug` or `caseStudySlug` (string, required).
+  - **Behavior:** Queries the 20 most recent feedback entries for the specified case study slug and determines whether the active client has already submitted feedback using `connectionHash`.
+  - **Response Payload (200 OK):**
+    ```json
+    {
+      "success": true,
+      "caseStudySlug": "clinical-data-mapper",
+      "hasSubmitted": false,
+      "totalFeedback": 12,
+      "feedback": [
+        {
+          "id": "clx...",
+          "takeaways": ["architectural_narrative", "telemetry"],
+          "comments": "Exceptional post-mortem detailing serverless migration.",
+          "createdAt": "2026-08-18T10:00:00.000Z"
+        }
+      ]
+    }
+    ```
+  - **Error Responses:** 400 Bad Request if `slug` query parameter is missing; 500 Internal Server Error.
+
+- **`POST /api/case-studies/feedback`**
+  - **Request Body Payload:**
+    ```json
+    {
+      "caseStudySlug": "clinical-data-mapper",
+      "takeaways": ["architectural_narrative"],
+      "comments": "Comprehensive breakdown of serverless architecture."
+    }
+    ```
+  - **Validation (`FeedbackSubmissionSchema`):** Validates `caseStudySlug` (non-empty string), `takeaways` (string array, min 1 item), and `comments` (string, min 3, max 2000 chars).
+  - **Rate-Limiting & Duplicate Submission Protection:** Checks whether the same `connectionHash` has submitted feedback for the target `caseStudySlug` within a 1-hour sliding window. If found, returns HTTP 429 Too Many Requests (`{ "error": "Feedback already submitted for this case study. Please try again later." }`).
+  - **Response Payload (201 Created):**
+    ```json
+    {
+      "success": true,
+      "message": "Feedback submitted successfully",
+      "feedback": {
+        "id": "clx...",
+        "caseStudySlug": "clinical-data-mapper",
+        "takeaways": ["architectural_narrative"],
+        "comments": "Comprehensive breakdown of serverless architecture.",
+        "createdAt": "2026-08-18T11:00:00.000Z"
+      }
+    }
+    ```
+  - **Error Responses:** 400 Bad Request (validation failure), 429 Too Many Requests (duplicate submission rate limit), 500 Internal Server Error.
+
+#### `/api/case-studies/reactions` Route Handler
+
+- **`GET /api/case-studies/reactions`**
+  - **Query Parameters:** `slug` or `caseStudySlug` (string, required).
+  - **Behavior:** Executes Prisma `groupBy` query on `reactionType` to aggregate reaction counts (`insightful`, `mind_blowing`, `actionable`, `thorough`) for the target case study slug, and fetches all reaction types registered by the active client `connectionHash`.
+  - **Response Payload (200 OK):**
+    ```json
+    {
+      "success": true,
+      "caseStudySlug": "clinical-data-mapper",
+      "counts": {
+        "insightful": 14,
+        "mind_blowing": 8,
+        "actionable": 5,
+        "thorough": 11
+      },
+      "userReactions": ["insightful", "thorough"]
+    }
+    ```
+  - **Error Responses:** 400 Bad Request if `slug` parameter is missing; 500 Internal Server Error.
+
+- **`POST /api/case-studies/reactions`**
+  - **Request Body Payload:**
+    ```json
+    {
+      "caseStudySlug": "clinical-data-mapper",
+      "reactionType": "insightful"
+    }
+    ```
+  - **Validation (`ReactionSubmissionSchema`):** Validates `caseStudySlug` (non-empty string) and `reactionType` (`enum`: `"insightful"`, `"mind_blowing"`, `"actionable"`, `"thorough"`).
+  - **Idempotent Reaction Registration:** Idempotently inserts reaction record if no existing entry matches `caseStudySlug`, `reactionType`, and `connectionHash`, then returns updated aggregate counts.
+  - **Response Payload (200 OK):**
+    ```json
+    {
+      "success": true,
+      "reactionType": "insightful",
+      "counts": {
+        "insightful": 15,
+        "mind_blowing": 8,
+        "actionable": 5,
+        "thorough": 11
+      },
+      "userReactions": ["insightful", "thorough"]
+    }
+    ```
+  - **Error Responses:** 400 Bad Request (validation error), 500 Internal Server Error.
+
 ## Safe Rich-Text Rendering Pipeline (Issue #35)
 
 To prevent Stored Cross-Site Scripting (XSS) attacks when rendering complex HTML strings stored in the database's `architectural_narrative` field, we implement a secure HTML sanitization strategy (Option A):
