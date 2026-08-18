@@ -18,7 +18,8 @@ const REALITY_CONTENT: Record<string, string> = {
   "clinical-data-mapper": "Handling 2GB+ XML structures in Node.js was a memory nightmare. Even with SAX streaming, V8 garbage collection spikes caused transient API container restarts in production. We had to tune Kubernetes memory limits and implement chunked database transaction commits to stabilize the service under heavy load.",
   "imednet-python-sdk": "The platform SOAP endpoints are notoriously flaky and poorly documented. We spent over 80 hours reverse-engineering session token validation schemas. Retries are frequent, and TLS handshake timeouts on legacy endpoints require an aggressive connection pooling and cache synchronization strategy.",
   "cadence-clinical": "Building a unified eCRF orchestrator sounds elegant until clinical trial coordinators attempt to create dynamic conditional logic trees with 40 circular dependencies. We had to write a custom DAG resolution engine and aggressive client-side form debouncing to keep the UI from lagging during 50-field visits.",
-  "wedding-website": "Building a bespoke event portal for your own wedding is the ultimate high-stakes deployment. Zero downtime tolerance when 150 relatives try to RSVP at once, and debugging custom Framer Motion spring physics on aunties' 7-year-old iPads at midnight before the rehearsal dinner was a character-building experience."
+  "wedding-website": "Building a bespoke event portal for your own wedding is the ultimate high-stakes deployment. Zero downtime tolerance when 150 relatives try to RSVP at once, and debugging custom Framer Motion spring physics on aunties' 7-year-old iPads at midnight before the rehearsal dinner was a character-building experience.",
+  ualbf: "Synchronizing Rust multi-threaded DFS tree search with Lean 4 formal verification required strict deterministic FFI serialization. Initial cross-language memory overhead caused GC pauses in Lean 4 during 10M+ certificate streams, resolved by introducing fixed-size binary manifests and bounded C shims."
 };
 
 const getRealityContent = (slug: string, originalContent: string) => {
@@ -185,6 +186,7 @@ const LANGUAGE_COLORS: Record<string, { bg: string; text: string; hex: string }>
   TypeScript: { bg: "bg-blue-500/10", text: "text-blue-400", hex: "#3178c6" },
   JavaScript: { bg: "bg-yellow-500/10", text: "text-yellow-400", hex: "#f1e05a" },
   Python: { bg: "bg-emerald-500/10", text: "text-emerald-400", hex: "#3572a5" },
+  Rust: { bg: "bg-amber-500/10", text: "text-amber-400", hex: "#dea584" },
   Haskell: { bg: "bg-indigo-500/10", text: "text-indigo-400", hex: "#5e5086" },
   CSS: { bg: "bg-purple-500/10", text: "text-purple-400", hex: "#563d7c" },
   HTML: { bg: "bg-orange-500/10", text: "text-orange-400", hex: "#e34c26" },
