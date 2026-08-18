@@ -18,7 +18,7 @@ Defined in: [lib/dx/utils.ts:42](https://github.com/fderuiter/portfolio/blob/mai
 
 ### type
 
-`"warn"` \| `"fixed"` \| `"info"` \| `"fail"` \| `"pass"`
+`"warn"` \| `"info"` \| `"fixed"` \| `"fail"` \| `"pass"`
 
 ## Returns
 

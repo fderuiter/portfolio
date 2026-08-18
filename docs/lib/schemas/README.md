@@ -9,6 +9,7 @@
 ## Variables
 
 - [CaseStudyListResponseSchema](variables/CaseStudyListResponseSchema.md)
+- [CaseStudySubmissionSchema](variables/CaseStudySubmissionSchema.md)
 - [CaseStudySummarySchema](variables/CaseStudySummarySchema.md)
 - [FallbackMemorySchema](variables/FallbackMemorySchema.md)
 - [RateLimitParamsSchema](variables/RateLimitParamsSchema.md)
