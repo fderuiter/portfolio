@@ -10,7 +10,7 @@
 
 A bleeding-edge interactive portfolio designed to unify disparate Python, Rust, and TypeScript repositories into a single, cohesive experience.
 
----
+***
 
 ## Sortify Case Study & Air-Gapped Engine Showcase
 
@@ -46,7 +46,7 @@ stateDiagram-v2
     RestoredInitialState --> [*]: Error Handled
 ```
 
----
+***
 
 ## Project Goals
 

@@ -20,3 +20,4 @@ export * from "./export-r";
 export * from "./export-sas";
 export * from "./fhir-questionnaire";
 export * from "./odm-xml-serializer";
+export * from "./grid-reorder";

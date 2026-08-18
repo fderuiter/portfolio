@@ -92,6 +92,18 @@ Re-exports [calculateRecistSldChange](expression-evaluator/functions/calculateRe
 
 ***
 
+### calculateRowBoundaries
+
+Re-exports [calculateRowBoundaries](grid-reorder/functions/calculateRowBoundaries.md)
+
+***
+
+### calculateRowRelativeMoveIndex
+
+Re-exports [calculateRowRelativeMoveIndex](grid-reorder/functions/calculateRowRelativeMoveIndex.md)
+
+***
+
 ### CDASH\_STANDARD\_VARIABLES
 
 Re-exports [CDASH_STANDARD_VARIABLES](cdash-domain-templates/variables/CDASH_STANDARD_VARIABLES.md)
@@ -101,6 +113,12 @@ Re-exports [CDASH_STANDARD_VARIABLES](cdash-domain-templates/variables/CDASH_STA
 ### CdashVariableMetadata
 
 Re-exports [CdashVariableMetadata](types/interfaces/CdashVariableMetadata.md)
+
+***
+
+### clampColumnSpan
+
+Re-exports [clampColumnSpan](grid-reorder/functions/clampColumnSpan.md)
 
 ***
 
@@ -296,6 +314,12 @@ Re-exports [ExpressionEvaluator](expression-evaluator/classes/ExpressionEvaluato
 
 ***
 
+### findFieldRow
+
+Re-exports [findFieldRow](grid-reorder/functions/findFieldRow.md)
+
+***
+
 ### FormulaDiagnostic
 
 Re-exports [FormulaDiagnostic](formula-linter/interfaces/FormulaDiagnostic.md)
@@ -434,6 +458,24 @@ Re-exports [NUMERIC_DATA_TYPES](formula-linter/variables/NUMERIC_DATA_TYPES.md)
 
 ***
 
+### reorderFieldWithRowSplice
+
+Re-exports [reorderFieldWithRowSplice](grid-reorder/functions/reorderFieldWithRowSplice.md)
+
+***
+
+### RowInfo
+
+Re-exports [RowInfo](grid-reorder/interfaces/RowInfo.md)
+
+***
+
+### sanitizeFieldColumnSpans
+
+Re-exports [sanitizeFieldColumnSpans](grid-reorder/functions/sanitizeFieldColumnSpans.md)
+
+***
+
 ### sanitizeRName
 
 Re-exports [sanitizeRName](export-r/functions/sanitizeRName.md)
@@ -461,6 +503,12 @@ Re-exports [scaffoldCdashDomain](cdash-domain-templates/functions/scaffoldCdashD
 ### SdtmMappingRow
 
 Re-exports [SdtmMappingRow](export-acrf/interfaces/SdtmMappingRow.md)
+
+***
+
+### spliceFieldIntoSection
+
+Re-exports [spliceFieldIntoSection](grid-reorder/functions/spliceFieldIntoSection.md)
 
 ***
 

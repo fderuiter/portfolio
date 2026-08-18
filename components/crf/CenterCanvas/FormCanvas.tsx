@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   IconFolderPlus,
   IconTrash,
@@ -12,6 +12,11 @@ import {
   IconSparkles,
 } from "@tabler/icons-react";
 import { CRFForm, CRFField, CodelistDefinition, DeviceViewport } from "@/lib/crf/types";
+import {
+  calculateRowRelativeMoveIndex,
+  spliceFieldIntoSection,
+  clampColumnSpan,
+} from "@/lib/crf/grid-reorder";
 import { FieldRenderer } from "./FieldRenderer";
 import { ViewportSwitcher } from "./ViewportSwitcher";
 
@@ -66,6 +71,16 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
     targetIndex: number;
   } | null>(null);
 
+  const dragRafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (dragRafRef.current !== null) {
+        cancelAnimationFrame(dragRafRef.current);
+      }
+    };
+  }, []);
+
   const handleSaveTitle = () => {
     onUpdateFormMeta({
       name: titleInput,
@@ -86,19 +101,25 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
     onUpdateFormMeta({ sections: newSections });
   };
 
-  // Field move up / down (touch & accessible navigation)
+  // Field move up / down across cumulative row boundaries
   const handleMoveField = (sectionId: string, fieldIndex: number, direction: "up" | "down") => {
-    const targetIndex = direction === "up" ? fieldIndex - 1 : fieldIndex + 1;
     const targetSec = form.sections.find((s) => s.id === sectionId);
-    if (!targetSec || targetIndex < 0 || targetIndex >= targetSec.fields.length) return;
+    if (!targetSec || fieldIndex < 0 || fieldIndex >= targetSec.fields.length) return;
 
-    const updatedSections = form.sections.map((sec) => {
-      if (sec.id !== sectionId) return sec;
-      const fields = [...sec.fields];
-      const [moved] = fields.splice(fieldIndex, 1);
-      fields.splice(targetIndex, 0, moved);
-      return { ...sec, fields };
-    });
+    const targetIndex = calculateRowRelativeMoveIndex(targetSec.fields, fieldIndex, direction);
+    if (targetIndex === fieldIndex) return;
+
+    const { updatedSourceFields } = spliceFieldIntoSection(
+      targetSec.fields,
+      targetSec.fields,
+      fieldIndex,
+      targetIndex,
+      true
+    );
+
+    const updatedSections = form.sections.map((sec) =>
+      sec.id === sectionId ? { ...sec, fields: updatedSourceFields } : sec
+    );
 
     onUpdateFormMeta({ sections: updatedSections });
   };
@@ -113,12 +134,25 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
   const handleFieldDragOver = (e: React.DragEvent, sectionId: string, targetIndex: number) => {
     e.preventDefault();
     e.stopPropagation();
-    setDropTargetInfo({ sectionId, targetIndex });
+
+    if (dragRafRef.current !== null) {
+      cancelAnimationFrame(dragRafRef.current);
+    }
+
+    dragRafRef.current = requestAnimationFrame(() => {
+      dragRafRef.current = null;
+      setDropTargetInfo({ sectionId, targetIndex });
+    });
   };
 
   const handleFieldDrop = (e: React.DragEvent, targetSectionId: string, targetIndex: number) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (dragRafRef.current !== null) {
+      cancelAnimationFrame(dragRafRef.current);
+      dragRafRef.current = null;
+    }
 
     if (!draggedFieldInfo) {
       setDropTargetInfo(null);
@@ -127,37 +161,43 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
 
     const { sectionId: sourceSectionId, fieldId: sourceFieldId } = draggedFieldInfo;
 
-    // Find source field
     const sourceSec = form.sections.find((s) => s.id === sourceSectionId);
-    const draggedField = sourceSec?.fields.find((f) => f.id === sourceFieldId);
+    const targetSec = form.sections.find((s) => s.id === targetSectionId);
 
-    if (!draggedField) {
+    if (!sourceSec || !targetSec) {
       setDraggedFieldInfo(null);
       setDropTargetInfo(null);
       return;
     }
 
-    const updatedSections = form.sections.map((section) => {
-      let fields = [...section.fields];
+    const sourceIndex = sourceSec.fields.findIndex((f) => f.id === sourceFieldId);
+    if (sourceIndex === -1) {
+      setDraggedFieldInfo(null);
+      setDropTargetInfo(null);
+      return;
+    }
 
-      // Remove from source
-      if (section.id === sourceSectionId) {
-        fields = fields.filter((f) => f.id !== sourceFieldId);
+    const isSameSection = sourceSectionId === targetSectionId;
+
+    const { updatedSourceFields, updatedTargetFields } = spliceFieldIntoSection(
+      sourceSec.fields,
+      targetSec.fields,
+      sourceIndex,
+      targetIndex,
+      isSameSection
+    );
+
+    const updatedSections = form.sections.map((sec) => {
+      if (sec.id === sourceSectionId && sec.id === targetSectionId) {
+        return { ...sec, fields: updatedSourceFields };
       }
-
-      // Insert into target
-      if (section.id === targetSectionId) {
-        const adjustedIndex =
-          section.id === sourceSectionId &&
-          sourceSec &&
-          sourceSec.fields.findIndex((f) => f.id === sourceFieldId) < targetIndex
-            ? Math.max(0, targetIndex - 1)
-            : targetIndex;
-
-        fields.splice(adjustedIndex, 0, draggedField);
+      if (sec.id === sourceSectionId) {
+        return { ...sec, fields: updatedSourceFields };
       }
-
-      return { ...section, fields };
+      if (sec.id === targetSectionId) {
+        return { ...sec, fields: updatedTargetFields };
+      }
+      return sec;
     });
 
     onUpdateFormMeta({ sections: updatedSections });
@@ -171,6 +211,31 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
     tablet: "w-full max-w-2xl",
     mobile: "w-full max-w-sm",
   }[viewport];
+
+  const activeDraggedField = draggedFieldInfo
+    ? form.sections
+        .flatMap((s) => s.fields)
+        .find((f) => f.id === draggedFieldInfo.fieldId)
+    : null;
+
+  const activeDraggedSpan = clampColumnSpan(activeDraggedField?.columnSpan || 12);
+
+  const dropColSpanClasses: Record<number, string> = {
+    1: "col-span-12 sm:col-span-1",
+    2: "col-span-12 sm:col-span-2",
+    3: "col-span-12 sm:col-span-3",
+    4: "col-span-12 sm:col-span-4",
+    5: "col-span-12 sm:col-span-5",
+    6: "col-span-12 sm:col-span-6",
+    7: "col-span-12 sm:col-span-7",
+    8: "col-span-12 sm:col-span-8",
+    9: "col-span-12 sm:col-span-9",
+    10: "col-span-12 sm:col-span-10",
+    11: "col-span-12 sm:col-span-11",
+    12: "col-span-12 sm:col-span-12",
+  };
+
+  const dropIndicatorSpanClass = dropColSpanClasses[activeDraggedSpan] || "col-span-12 sm:col-span-6";
 
   return (
     <div
@@ -429,11 +494,20 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                   <div className="grid grid-cols-12 gap-2.5 sm:gap-4">
                     {section.fields.map((field, fIdx) => (
                       <React.Fragment key={field.id}>
-                        {/* Drop indicator line if dragging over this position */}
+                        {/* Drop indicator matching active dragged field column span */}
                         {dropTargetInfo?.sectionId === section.id &&
                           dropTargetInfo?.targetIndex === fIdx &&
                           draggedFieldInfo?.fieldId !== field.id && (
-                            <div className="col-span-12 h-1 bg-brand-cyan rounded-full animate-pulse my-1" />
+                            <div
+                              data-testid="drop-indicator"
+                              className={`${dropIndicatorSpanClass} rounded-2xl border-2 border-dashed border-brand-cyan bg-brand-cyan/15 p-3 sm:p-4 min-h-[72px] flex items-center justify-center animate-pulse transition-all shadow-[0_0_15px_rgba(6,182,212,0.2)]`}
+                              aria-label={`Drop indicator position for ${activeDraggedSpan}-column field`}
+                            >
+                              <span className="text-xs font-mono font-bold text-brand-cyan flex items-center gap-1.5">
+                                <IconSparkles className="w-3.5 h-3.5" />
+                                <span>Drop Here ({activeDraggedSpan} Col{activeDraggedSpan > 1 ? "s" : ""})</span>
+                              </span>
+                            </div>
                           )}
 
                         <FieldRenderer
@@ -458,6 +532,21 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                         />
                       </React.Fragment>
                     ))}
+
+                    {/* Drop indicator if dropping at the end of section */}
+                    {dropTargetInfo?.sectionId === section.id &&
+                      dropTargetInfo?.targetIndex === section.fields.length && (
+                        <div
+                          data-testid="drop-indicator"
+                          className={`${dropIndicatorSpanClass} rounded-2xl border-2 border-dashed border-brand-cyan bg-brand-cyan/15 p-3 sm:p-4 min-h-[72px] flex items-center justify-center animate-pulse transition-all shadow-[0_0_15px_rgba(6,182,212,0.2)]`}
+                          aria-label={`Drop indicator position for ${activeDraggedSpan}-column field`}
+                        >
+                          <span className="text-xs font-mono font-bold text-brand-cyan flex items-center gap-1.5">
+                            <IconSparkles className="w-3.5 h-3.5" />
+                            <span>Drop Here ({activeDraggedSpan} Col{activeDraggedSpan > 1 ? "s" : ""})</span>
+                          </span>
+                        </div>
+                      )}
                   </div>
                 )}
               </div>

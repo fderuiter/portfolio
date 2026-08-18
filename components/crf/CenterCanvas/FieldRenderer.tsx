@@ -211,17 +211,17 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           )}
         </div>
 
-        {/* Action icons (Desktop hover + Mobile touch menu) */}
+        {/* Action icons (Directional move controls + Desktop hover + Mobile menu) */}
         <div className="flex items-center gap-1">
-          {/* Touch Move Up/Down Controls for touch devices & smaller screens */}
+          {/* Directional Move Up/Down Controls */}
           {onMoveUp && canMoveUp && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onMoveUp();
               }}
-              className="p-1 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white sm:hidden"
-              title="Move Up"
+              className="p-1 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+              title="Move Field Up"
               aria-label="Move Field Up"
             >
               <IconArrowUp className="w-3.5 h-3.5" />
@@ -234,8 +234,8 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                 e.stopPropagation();
                 onMoveDown();
               }}
-              className="p-1 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white sm:hidden"
-              title="Move Down"
+              className="p-1 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
+              title="Move Field Down"
               aria-label="Move Field Down"
             >
               <IconArrowDown className="w-3.5 h-3.5" />

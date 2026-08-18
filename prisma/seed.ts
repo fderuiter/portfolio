@@ -350,6 +350,9 @@ def decode_digits(raw_slice: str, scale_factor: float = 0.1, precision: int = 2)
 
 <h4>3. Multi-Block Segment Parsing &amp; Biomarker Derivation</h4>
 <p>Primary body composition parameters reside in Segment Index 4 (<code>meas_blob</code>), while secondary metrics (BMR and Visceral Fat) are extracted from Segment Index 5 in kilocalories. Derived biomarkers, including Appendicular Skeletal Muscle Mass (ASM) and Skeletal Muscle Index ($\\text{SMI} = \\frac{\\text{ASM}}{\\text{Height}^2}$), are computed deterministically.</p>
+    `.trim(),
+  },
+  {
     slug: "polyglot-tsp",
     title: "Polyglot-TSP: Technical Breakdown & Portfolio Integration",
     primary_language: "Rust",
@@ -526,6 +529,9 @@ where
 
 <h4>3. WASM-First GUI Architecture</h4>
 <p>Deploys identical single-binary desktop execution and zero-install WebAssembly browser builds using egui and custom <code>egui_plot</code> engines.</p>
+    `.trim(),
+  },
+  {
     slug: "ualbf",
     title: "UALBF: Verified Computational Proof Engine & Search Architecture",
     primary_language: "Rust",

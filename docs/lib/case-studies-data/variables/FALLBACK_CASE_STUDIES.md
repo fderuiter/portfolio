@@ -8,4 +8,4 @@
 
 > `const` **FALLBACK\_CASE\_STUDIES**: [`CaseStudyData`](../interfaces/CaseStudyData.md)[]
 
-Defined in: [lib/case-studies-data.ts:376](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L376)
+Defined in: [lib/case-studies-data.ts:809](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L809)

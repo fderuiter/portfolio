@@ -420,6 +420,11 @@ export const tenantAuthGuard = createMiddleware(async (c, next) => {
 
 <h4>3. Edge-Native Event-Driven Async Processing</h4>
 <p>Background workflows and async task queues are powered by Inngest functions embedded directly inside Hono, delivering event-driven reliability without needing persistent worker processes.</p>`,
+    created_at: new Date("2026-02-15T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-7",
     slug: "inbody-qr-decoder",
     title: "InBody QR Data Decoder & Analyzer: BIA Reverse Engineering",
     primary_language: "Python",
@@ -454,6 +459,11 @@ def decode_digits(raw_slice: str, scale_factor: float = 0.1, precision: int = 2)
 
 <h4>3. Multi-Block Segment Parsing &amp; Biomarker Derivation</h4>
 <p>Primary body composition parameters reside in Segment Index 4 (<code>meas_blob</code>), while secondary metrics (BMR and Visceral Fat) are extracted from Segment Index 5 in kilocalories. Derived biomarkers, including Appendicular Skeletal Muscle Mass (ASM) and Skeletal Muscle Index ($\\text{SMI} = \\frac{\\text{ASM}}{\\text{Height}^2}$), are computed deterministically.</p>`,
+    created_at: new Date("2026-02-15T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-8",
     slug: "polyglot-tsp",
     title: "Polyglot-TSP: Technical Breakdown & Portfolio Integration",
     primary_language: "Rust",
@@ -567,6 +577,11 @@ endmodule
 <h3>Trade-Offs & Key Decisions</h3>
 <p>1. <strong>Exhaustive Permutations ($O(N!)$) vs. Dynamic Programming / Heuristics ($O(N^2 2^N)$)</strong>: Prioritized strict brute-force permutation generation across all targets to maintain an identical baseline for syntactic and runtime execution comparisons across obscure and exotic paradigms.</p>
 <p>2. <strong>Subprocess CLI Execution vs. Foreign Function Interface (FFI)</strong>: Chose process-level standard stream (stdout/stderr) assertion over C ABI bindings to accommodate non-standardized runtimes, HDL simulation pipelines (ghdl, iverilog), and legacy/esoteric environments (INTERCAL, COBOL, Modula-2).</p>`,
+    created_at: new Date("2026-02-15T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-9",
     slug: "oxidizemath",
     title: "OxidizeMath: Verified Numerical Computation Framework in Rust",
     primary_language: "Rust",
@@ -627,6 +642,11 @@ where
 
 <h4>3. WASM-First GUI Architecture</h4>
 <p>Deploys identical single-binary desktop execution and zero-install WebAssembly browser builds using egui and custom <code>egui_plot</code> engines.</p>`,
+    created_at: new Date("2026-02-15T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-10",
     slug: "ualbf",
     title: "UALBF: Verified Computational Proof Engine & Search Architecture",
     primary_language: "Rust",
@@ -737,6 +757,10 @@ pub extern "C" fn ualbf_verify_certificate_manifest(
 }
 </code></pre>`,
     created_at: new Date("2026-03-01T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-11",
     slug: "sortify",
     title: "Sortify: Air-Gapped Document Classification & Resilient File Engine",
     primary_language: "Python",

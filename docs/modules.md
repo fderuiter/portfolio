@@ -50,6 +50,7 @@
 - [lib/crf/form-linter](lib/crf/form-linter/README.md)
 - [lib/crf/formula-linter](lib/crf/formula-linter/README.md)
 - [lib/crf/formula-presets](lib/crf/formula-presets/README.md)
+- [lib/crf/grid-reorder](lib/crf/grid-reorder/README.md)
 - [lib/crf/odm-xml-serializer](lib/crf/odm-xml-serializer/README.md)
 - [lib/crf/presets](lib/crf/presets/README.md)
 - [lib/crf/presets/clinical-instruments](lib/crf/presets/clinical-instruments/README.md)
