@@ -76,6 +76,7 @@ export const QuasiPuzzlerClient: React.FC = () => {
         {/* Game Container */}
         <div className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-6 shadow-[0_0_50px_rgba(168,85,247,0.1)]">
           <PlayCabinet
+            gameId="quasi-puzzler"
             title="Quasi-Perfect Puzzler"
             subtitle="Formal Verification & Proof Tactics Engine"
             accentColor="purple"

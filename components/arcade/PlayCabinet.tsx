@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { IconPlayerPlay, IconPower, IconTerminal } from "@tabler/icons-react";
+import { IconPlayerPlay, IconPower, IconTerminal, IconAdjustments } from "@tabler/icons-react";
+import { PreGameSetupWizard, getSavedSetupConfig, GameSetupConfig } from "@/components/arcade/PreGameSetupWizard";
 
 interface ControlItem {
   key: string;
@@ -9,6 +10,7 @@ interface ControlItem {
 }
 
 interface PlayCabinetProps {
+  gameId?: string;
   title: string;
   subtitle?: string;
   accentColor: "amber" | "red" | "purple" | "emerald" | "rose";
@@ -20,6 +22,7 @@ interface PlayCabinetProps {
 }
 
 export const PlayCabinet: React.FC<PlayCabinetProps> = ({
+  gameId: rawGameId,
   title,
   subtitle,
   accentColor,
@@ -29,11 +32,15 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
   importComponent,
   children,
 }) => {
+  const gameId = rawGameId || title.toLowerCase().replace(/[^a-z0-9]/g, "-");
   const [isLaunched, setIsLaunched] = useState(false);
   const [isPrefetched, setIsPrefetched] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isWarmingUp, setIsWarmingUp] = useState(false);
   const [bootProgress, setBootProgress] = useState(0);
+
+  const [showWizard, setShowWizard] = useState(false);
+  const [setupConfig, setSetupConfig] = useState<GameSetupConfig>(() => getSavedSetupConfig(gameId));
 
   const colors = {
     amber: {
@@ -133,6 +140,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
           const next = prev + Math.floor(Math.random() * 30) + 15;
           if (next >= 100) {
             setIsLaunched(true);
+            setShowWizard(true);
             setIsWarmingUp(false);
             return 100;
           }
@@ -158,26 +166,57 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
   };
 
   if (isLaunched) {
+    const bezelClasses = {
+      classic: "border-amber-800/80 shadow-[0_0_30px_rgba(217,119,6,0.15)]",
+      neon: "border-cyan-500/80 shadow-[0_0_30px_rgba(6,182,212,0.25)]",
+      woodgrain: "border-yellow-600/80 shadow-[0_0_30px_rgba(234,179,8,0.2)]",
+      minimal: "border-zinc-800/80 shadow-[0_0_30px_rgba(0,0,0,0.5)]",
+    }[setupConfig.bezelStyle] || "border-zinc-800";
+
     return (
       <div className="relative w-full flex flex-col items-center">
-        {/* Game Area Container with Reset Cabinet Button overlay */}
-        <div className="w-full relative">
+        {/* Game Area Container with Reset Cabinet & Setup Wizard Overlay */}
+        <div className={`w-full relative rounded-2xl border-2 transition-all duration-300 overflow-hidden ${bezelClasses}`}>
           {children}
+
+          {/* 3-Step Setup Wizard Overlay prior to active gameplay / when reconfiguring */}
+          <PreGameSetupWizard
+            gameId={gameId}
+            gameTitle={title}
+            isOpen={showWizard}
+            isCircularDisplay={gameId === "garmin-watch"}
+            onComplete={(cfg) => {
+              setSetupConfig(cfg);
+              setShowWizard(false);
+            }}
+            onCancel={() => setShowWizard(false)}
+          />
         </div>
         
         {/* Discrete Retro Controller Menu */}
-        <div className="mt-4 flex items-center justify-between w-full border border-zinc-800 bg-zinc-900/60 rounded-2xl px-4 py-2 font-mono text-xs text-zinc-500">
+        <div className="mt-4 flex items-center justify-between w-full border border-zinc-800 bg-zinc-900/60 rounded-2xl px-4 py-2 font-mono text-xs text-zinc-500 flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="uppercase tracking-wider">Cabinet Engaged</span>
           </div>
-          <button
-            onClick={handleExit}
-            className={`px-3 py-1 bg-zinc-950 text-zinc-400 hover:text-white rounded-lg border border-zinc-800 transition-all font-bold uppercase text-[10px] tracking-wider flex items-center gap-1 hover:bg-zinc-900 hover:border-zinc-700`}
-          >
-            <IconPower className="w-3.5 h-3.5 text-red-500" />
-            <span>Reset Cabinet</span>
-          </button>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowWizard(true)}
+              className="px-3 py-1 bg-zinc-950 text-amber-400 hover:text-amber-300 rounded-lg border border-amber-500/30 transition-all font-bold uppercase text-[10px] tracking-wider flex items-center gap-1 hover:bg-zinc-900 hover:border-amber-500/50 cursor-pointer"
+            >
+              <IconAdjustments className="w-3.5 h-3.5 text-amber-400" />
+              <span>Setup Wizard</span>
+            </button>
+
+            <button
+              onClick={handleExit}
+              className="px-3 py-1 bg-zinc-950 text-zinc-400 hover:text-white rounded-lg border border-zinc-800 transition-all font-bold uppercase text-[10px] tracking-wider flex items-center gap-1 hover:bg-zinc-900 hover:border-zinc-700 cursor-pointer"
+            >
+              <IconPower className="w-3.5 h-3.5 text-red-500" />
+              <span>Reset Cabinet</span>
+            </button>
+          </div>
         </div>
       </div>
     );
