@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 
 // The production guard is CommonJS because it runs directly under Node.
 const {
+  getDocMigrations,
   getLockProvider,
   getSchemaProvider,
+  validateDocMigrations,
   validateMigrationFiles,
 } = require("../scripts/check-migration-integrity.js");
 
@@ -37,6 +39,88 @@ describe("Prisma migration integrity", () => {
       "20260818000000_add_feedback_and_reactions",
       "20261014000000_add_commands_and_playback",
     ]);
+  });
+
+  it("extracts migration identifiers from markdown documentation", () => {
+    const sampleDoc = `
+      # Database Migrations
+      - \`20260417215437_init\`
+      - \`20260528000000_add_telemetry_event\`
+      Some random text with 20260814000000_add_simulated_telemetry in code block.
+    `;
+    expect(getDocMigrations(sampleDoc)).toEqual([
+      "20260417215437_init",
+      "20260528000000_add_telemetry_event",
+      "20260814000000_add_simulated_telemetry",
+    ]);
+  });
+
+  it("validates documentation parity against active repository migration assets", () => {
+    expect(
+      validateDocMigrations("DATABASE_MIGRATIONS.md", "prisma/migrations"),
+    ).toEqual([
+      "20260417215437_init",
+      "20260528000000_add_telemetry_event",
+      "20260814000000_add_simulated_telemetry",
+      "20260818000000_add_feedback_and_reactions",
+      "20261014000000_add_commands_and_playback",
+    ]);
+  });
+
+  it("fails drift check with diagnostic error when documentation misses a migration folder", () => {
+    const fs = require("fs");
+    const path = require("path");
+    const os = require("os");
+
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "doc-drift-test-"));
+    const migrationsDir = path.join(tmpDir, "migrations");
+    const docFile = path.join(tmpDir, "DATABASE_MIGRATIONS.md");
+
+    const mig1 = path.join(migrationsDir, "20260101000000_first_migration");
+    const mig2 = path.join(migrationsDir, "20260201000000_second_migration");
+    fs.mkdirSync(mig1, { recursive: true });
+    fs.mkdirSync(mig2, { recursive: true });
+    fs.writeFileSync(path.join(mig1, "migration.sql"), "-- first");
+    fs.writeFileSync(path.join(mig2, "migration.sql"), "-- second");
+
+    fs.writeFileSync(
+      docFile,
+      "# Migrations\n- `20260101000000_first_migration`\n",
+    );
+
+    expect(() => validateDocMigrations(docFile, migrationsDir)).toThrowError(
+      /Documentation drift detected/,
+    );
+    expect(() => validateDocMigrations(docFile, migrationsDir)).toThrowError(
+      /Missing in documentation: 20260201000000_second_migration/,
+    );
+
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it("fails drift check with diagnostic error when documentation has mismatched or extra migrations", () => {
+    const fs = require("fs");
+    const path = require("path");
+    const os = require("os");
+
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "doc-drift-extra-test-"));
+    const migrationsDir = path.join(tmpDir, "migrations");
+    const docFile = path.join(tmpDir, "DATABASE_MIGRATIONS.md");
+
+    const mig1 = path.join(migrationsDir, "20260101000000_first_migration");
+    fs.mkdirSync(mig1, { recursive: true });
+    fs.writeFileSync(path.join(mig1, "migration.sql"), "-- first");
+
+    fs.writeFileSync(
+      docFile,
+      "# Migrations\n- `20260101000000_first_migration`\n- `20260909000000_obsolete_migration`\n",
+    );
+
+    expect(() => validateDocMigrations(docFile, migrationsDir)).toThrowError(
+      /Extra\/mismatched in documentation: 20260909000000_obsolete_migration/,
+    );
+
+    fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
   it("rejects a datasource with no literal provider", () => {
