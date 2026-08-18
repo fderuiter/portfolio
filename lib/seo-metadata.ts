@@ -107,6 +107,13 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     keywords: ["Rust", "Scientific Computing", "Simulation", "PDE Solver", "Formal Verification", "egui", "WebAssembly"],
     ogType: "article",
   },
+  clintrials: {
+    title: "clintrials Case Study | Technical Breakdown & Architecture",
+    description: "Technical breakdown of clintrials — Python-based biostatistical simulation framework and Pyodide WebAssembly worker runtime for adaptive clinical trial design.",
+    path: "/case-studies/clintrials",
+    keywords: ["clintrials", "Biostatistics", "Clinical Trials", "Pyodide", "WebAssembly", "CRM Algorithm", "Python", "Simulation Engine"],
+    ogType: "article",
+  },
 };
 
 /**

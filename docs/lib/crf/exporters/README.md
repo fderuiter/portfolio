@@ -128,15 +128,51 @@ Re-exports [generateStudyPdf](../export-pdf/functions/generateStudyPdf.md)
 
 ***
 
+### getExpandedRFields
+
+Re-exports [getExpandedRFields](../export-r/functions/getExpandedRFields.md)
+
+***
+
+### getExpandedSasAttributes
+
+Re-exports [getExpandedSasAttributes](../export-sas/functions/getExpandedSasAttributes.md)
+
+***
+
 ### getFieldSasAttributes
 
 Re-exports [getFieldSasAttributes](../export-sas/functions/getFieldSasAttributes.md)
 
 ***
 
+### getRFieldOptions
+
+Renames and re-exports [getFieldOptions](../export-r/functions/getFieldOptions.md)
+
+***
+
+### getSASFieldOptions
+
+Renames and re-exports [getFieldOptions](../export-sas/functions/getFieldOptions.md)
+
+***
+
 ### getSasFormatName
 
 Re-exports [getSasFormatName](../export-sas/functions/getSasFormatName.md)
+
+***
+
+### parseRMultiSelectValue
+
+Renames and re-exports [parseMultiSelectValue](../export-r/functions/parseMultiSelectValue.md)
+
+***
+
+### parseSASMultiSelectValue
+
+Renames and re-exports [parseMultiSelectValue](../export-sas/functions/parseMultiSelectValue.md)
 
 ***
 
@@ -149,12 +185,6 @@ Re-exports [sanitizeRName](../export-r/functions/sanitizeRName.md)
 ### sanitizeSasName
 
 Re-exports [sanitizeSasName](../export-sas/functions/sanitizeSasName.md)
-
-***
-
-### SasFieldAttributes
-
-Re-exports [SasFieldAttributes](../export-sas/interfaces/SasFieldAttributes.md)
 
 ***
 

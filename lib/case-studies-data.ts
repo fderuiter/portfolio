@@ -420,6 +420,11 @@ export const tenantAuthGuard = createMiddleware(async (c, next) => {
 
 <h4>3. Edge-Native Event-Driven Async Processing</h4>
 <p>Background workflows and async task queues are powered by Inngest functions embedded directly inside Hono, delivering event-driven reliability without needing persistent worker processes.</p>`,
+    created_at: new Date("2026-02-18T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-7",
     slug: "inbody-qr-decoder",
     title: "InBody QR Data Decoder & Analyzer: BIA Reverse Engineering",
     primary_language: "Python",
@@ -454,6 +459,11 @@ def decode_digits(raw_slice: str, scale_factor: float = 0.1, precision: int = 2)
 
 <h4>3. Multi-Block Segment Parsing &amp; Biomarker Derivation</h4>
 <p>Primary body composition parameters reside in Segment Index 4 (<code>meas_blob</code>), while secondary metrics (BMR and Visceral Fat) are extracted from Segment Index 5 in kilocalories. Derived biomarkers, including Appendicular Skeletal Muscle Mass (ASM) and Skeletal Muscle Index ($\\text{SMI} = \\frac{\\text{ASM}}{\\text{Height}^2}$), are computed deterministically.</p>`,
+    created_at: new Date("2026-02-22T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-8",
     slug: "polyglot-tsp",
     title: "Polyglot-TSP: Technical Breakdown & Portfolio Integration",
     primary_language: "Rust",
@@ -567,6 +577,11 @@ endmodule
 <h3>Trade-Offs & Key Decisions</h3>
 <p>1. <strong>Exhaustive Permutations ($O(N!)$) vs. Dynamic Programming / Heuristics ($O(N^2 2^N)$)</strong>: Prioritized strict brute-force permutation generation across all targets to maintain an identical baseline for syntactic and runtime execution comparisons across obscure and exotic paradigms.</p>
 <p>2. <strong>Subprocess CLI Execution vs. Foreign Function Interface (FFI)</strong>: Chose process-level standard stream (stdout/stderr) assertion over C ABI bindings to accommodate non-standardized runtimes, HDL simulation pipelines (ghdl, iverilog), and legacy/esoteric environments (INTERCAL, COBOL, Modula-2).</p>`,
+    created_at: new Date("2026-02-25T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-10",
     slug: "oxidizemath",
     title: "OxidizeMath: Verified Numerical Computation Framework in Rust",
     primary_language: "Rust",
@@ -627,6 +642,11 @@ where
 
 <h4>3. WASM-First GUI Architecture</h4>
 <p>Deploys identical single-binary desktop execution and zero-install WebAssembly browser builds using egui and custom <code>egui_plot</code> engines.</p>`,
+    created_at: new Date("2026-02-28T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-11",
     slug: "ualbf",
     title: "UALBF: Verified Computational Proof Engine & Search Architecture",
     primary_language: "Rust",
@@ -737,6 +757,10 @@ pub extern "C" fn ualbf_verify_certificate_manifest(
 }
 </code></pre>`,
     created_at: new Date("2026-03-01T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-12",
     slug: "sortify",
     title: "Sortify: Air-Gapped Document Classification & Resilient File Engine",
     primary_language: "Python",
@@ -778,6 +802,133 @@ def stage_and_commit_move(self, src: str, dest_dir: str) -> str:
 <h4>3. Encrypted SQLCipher Registry &amp; Worker Concurrency</h4>
 <p>Database encryption at rest is enforced via per-platform SQLCipher shared libraries with PRAGMA key derivation. Thread-isolated background workers communicate via non-blocking queues with the main UI thread (PyQt6/PySide6) to prevent interface lockups during bulk ingestion.</p>`,
     created_at: new Date("2026-02-20T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-9",
+    slug: "clintrials",
+    title: "clintrials: Adaptive Clinical Trial Design & Pyodide Execution Sandbox",
+    primary_language: "Python",
+    github_url: "https://github.com/fderuiter/clintrials",
+    published: true,
+    simulated_telemetry: false,
+    tags: "biostatistics, clinical-trials, pyodide, wasm, simulation-engine, crm-algorithm, Python, WebAssembly",
+    editorial_content: "An adaptive **clinical trial simulation engine** and biostatistical computation framework featuring an in-browser `Pyodide WebAssembly worker` layer (`hub/runner.py`, `hub/worker.js`). Simulates **Continual Reassessment Method (CRM)** dose escalations, EffTox curves, and Group Sequential Designs with zero server infrastructure costs.",
+    architectural_narrative: `<h3>Executive Summary & Value Proposition</h3>
+<p>Adaptive clinical trial design and biostatistical simulation (e.g., Continual Reassessment Method, EffTox, Group Sequential Designs, and Win Ratio analysis) require complex numerical modeling, rigorous reproducibility, and accessible interfaces for clinical practitioners. <code>clintrials</code> provides a Python-based computational framework alongside an in-browser WebAssembly/Pyodide distribution layer to simulate, validate, and visualize clinical trial protocols.</p>
+
+<h3>System Design & Architecture</h3>
+<p>The codebase is partitioned cleanly into core numerical engines (<code>clintrials/core/</code>), specialized trial methodology domains (<code>dosefinding/</code>, <code>phase3/</code>, <code>winratio/</code>), visualization providers, and a client runtime hub (<code>hub/</code>).</p>
+
+<pre><code class="language-mermaid">
+flowchart TD
+    subgraph CoreEngine [clintrials Core Engine]
+        A[Trial Protocol Definition] --&gt; B[Recruitment Solver &amp; Geometry]
+        B --&gt; C[Simulation Engine &amp; RNG State]
+        C --&gt; D1[Dose Finding CRM / EffTox / WATU]
+        C --&gt; D2[Phase 3 Group Sequential Designs]
+        C --&gt; D3[Win Ratio Analysis]
+    end
+
+    subgraph RuntimeTargets [Execution &amp; Distribution]
+        D1 &amp; D2 &amp; D3 --&gt; E1[Python CLI &amp; PyPI Package]
+        D1 &amp; D2 &amp; D3 --&gt; E2[Jupyter Interactive Notebooks]
+        D1 &amp; D2 &amp; D3 --&gt; E3[Pyodide WebAssembly Worker]
+    end
+
+    subgraph HubClient [Browser Client &amp; Hub]
+        E3 --&gt; F[Service Worker Cache]
+        F --&gt; G[Dashboard Visualizations &amp; UI Views]
+    end
+</code></pre>
+
+<h3>Key Technical Highlights & Code Implementations</h3>
+
+<h4>1. Recruitment Geometry Solver (clintrials/core/recruitment_solver.py)</h4>
+<pre><code class="language-python">
+import math
+from typing import List, Tuple
+
+class RecruitmentGeometrySolver:
+    """Deterministic recruitment geometry solver for dynamic trial patient accrual."""
+    def __init__(self, target_accrual: int, ramp_up_months: float, steady_rate: float):
+        self.target_accrual = target_accrual
+        self.ramp_up_months = ramp_up_months
+        self.steady_rate = steady_rate
+
+    def calculate_accrual_timeline(self) -> List[Tuple[float, int]]:
+        timeline, accumulated, current_time, time_step = [], 0, 0.0, 0.1
+        while accumulated < self.target_accrual:
+            current_time += time_step
+            rate = self.steady_rate * (current_time / self.ramp_up_months) if current_time <= self.ramp_up_months else self.steady_rate
+            accumulated_prev = accumulated
+            accumulated += rate * time_step
+            if math.floor(accumulated) > math.floor(accumulated_prev):
+                timeline.append((round(current_time, 2), math.floor(accumulated)))
+        return timeline
+</code></pre>
+
+<h4>2. Continual Reassessment Method (clintrials/dosefinding/crm.py)</h4>
+<pre><code class="language-python">
+import numpy as np
+from typing import List
+
+class ContinualReassessmentMethod:
+    """Bayesian Continual Reassessment Method (CRM) for dose-finding clinical trials."""
+    def __init__(self, skeleton: List[float], target_dlt_rate: float, prior_sd: float = 1.0):
+        self.skeleton = np.array(skeleton)
+        self.target_dlt_rate = target_dlt_rate
+        self.prior_sd = prior_sd
+
+    def update_posterior(self, dose_levels: List[int], dlt_responses: List[int]) -> np.ndarray:
+        doses, responses = np.array(dose_levels), np.array(dlt_responses)
+        theta_grid = np.linspace(-3.0, 3.0, 601)
+        prior = np.exp(-0.5 * (theta_grid / self.prior_sd) ** 2)
+        prior /= np.sum(prior)
+        likelihood = np.ones_like(theta_grid)
+        for d, r in zip(doses, responses):
+            p_d = self.skeleton[d] ** np.exp(theta_grid)
+            likelihood *= (p_d ** r) * ((1.0 - p_d) ** (1 - r))
+        posterior = likelihood * prior
+        posterior /= np.sum(posterior)
+        hat_theta = np.sum(theta_grid * posterior)
+        return self.skeleton ** np.exp(hat_theta)
+</code></pre>
+
+<h4>3. Client-Side Pyodide Worker Bridge (hub/worker.js)</h4>
+<pre><code class="language-javascript">
+import { loadPyodide } from "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.mjs";
+
+let pyodide = null;
+async function initPyodideWorker() {
+  pyodide = await loadPyodide();
+  await pyodide.loadPackage(["numpy", "scipy", "micropip"]);
+  self.postMessage({ type: "READY" });
+}
+
+self.onmessage = async (event) => {
+  const { id, type, payload } = event.data;
+  if (type === "INIT") return await initPyodideWorker();
+  if (type === "RUN_SIMULATION") {
+    try {
+      pyodide.globals.set("sim_config_json", JSON.stringify(payload));
+      const resultJson = await pyodide.runPythonAsync(
+        "import json\\nfrom clintrials.core.unified import run_simulation_from_json\\nrun_simulation_from_json(sim_config_json)"
+      );
+      self.postMessage({ id, type: "SIMULATION_SUCCESS", data: JSON.parse(resultJson) });
+    } catch (error) {
+      self.postMessage({ id, type: "SIMULATION_ERROR", error: error.message });
+    }
+  }
+};
+</code></pre>
+
+<h3>Trade-Offs & Key Decisions</h3>
+<ul>
+  <li><strong>Pyodide/Wasm vs. Cloud Server Infrastructure</strong>: Chose client-side WebAssembly execution over hosted API services (FastAPI/Celery) to eliminate server hosting overhead, maintain data privacy for clinical protocol designers, and enable offline-first simulation via Service Workers.</li>
+  <li><strong>Custom Schema Enforcement</strong>: Implemented targeted schema serialization (<code>serialize_schemas.py</code>) and explicit validation layers (<code>clintrials/validation.py</code>, <code>api_manifest.json</code>) instead of coupling execution code directly to heavyweight web frameworks.</li>
+</ul>`,
+    created_at: new Date("2026-03-10T00:00:00Z"),
     updated_at: new Date("2026-08-14T00:00:00Z"),
   },
 ];

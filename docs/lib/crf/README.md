@@ -380,6 +380,18 @@ Re-exports [generateStudyPdf](export-pdf/functions/generateStudyPdf.md)
 
 ***
 
+### getExpandedRFields
+
+Re-exports [getExpandedRFields](export-r/functions/getExpandedRFields.md)
+
+***
+
+### getExpandedSasAttributes
+
+Re-exports [getExpandedSasAttributes](export-sas/functions/getExpandedSasAttributes.md)
+
+***
+
 ### getFieldSasAttributes
 
 Re-exports [getFieldSasAttributes](export-sas/functions/getFieldSasAttributes.md)
@@ -443,12 +455,6 @@ Re-exports [sanitizeRName](export-r/functions/sanitizeRName.md)
 ### sanitizeSasName
 
 Re-exports [sanitizeSasName](export-sas/functions/sanitizeSasName.md)
-
-***
-
-### SasFieldAttributes
-
-Re-exports [SasFieldAttributes](export-sas/interfaces/SasFieldAttributes.md)
 
 ***
 
