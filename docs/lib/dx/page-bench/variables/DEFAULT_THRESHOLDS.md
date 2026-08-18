@@ -8,4 +8,4 @@
 
 > `const` **DEFAULT\_THRESHOLDS**: [`BenchmarkThresholds`](../interfaces/BenchmarkThresholds.md)
 
-Defined in: [lib/dx/page-bench.ts:90](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L90)
+Defined in: [lib/dx/page-bench.ts:91](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L91)

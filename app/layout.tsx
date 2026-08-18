@@ -15,6 +15,8 @@ import { Analytics } from "@vercel/analytics/next";
 import { SearchWrapper } from "@/components/SearchWrapper";
 import { resolveBaseUrl } from "@/lib/domain";
 
+import { SerwistRegister } from "@/components/providers/SerwistRegister";
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
@@ -121,6 +123,7 @@ export default function RootLayout({
                   <RetroChaosOverlay />
                   <Analytics />
                   <SearchWrapper />
+                  <SerwistRegister />
                 </AudioProvider>
               </A11yProvider>
             </SearchProvider>

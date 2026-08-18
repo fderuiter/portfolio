@@ -88,6 +88,12 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     path: "/arcade/meme-vault",
     keywords: ["Developer Memes", "Easter Eggs", "Soundboard", "Web Audio API", "CDISC Humor", "Duck Mascot", "Retro Arcade"],
   },
+  offline: {
+    title: "Offline Fallback View | Frederick de Ruiter",
+    description: "Dedicated offline application shell fallback view providing connection recovery actions and access to precached core tools.",
+    path: "/offline",
+    keywords: ["Offline", "PWA", "Service Worker", "Precached Shell", "Frederick de Ruiter"],
+  },
 };
 
 /**
