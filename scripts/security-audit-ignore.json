@@ -1,0 +1,102 @@
+[
+  {
+    "package": "concurrently",
+    "expiresAt": "2027-12-31T23:59:59Z",
+    "reason": "Dev-only process runner CLI tool with no production runtime exposure"
+  },
+  {
+    "package": "@lhci/cli",
+    "expiresAt": "2027-12-31T23:59:59Z",
+    "reason": "Lighthouse CI automated performance test runner"
+  },
+  {
+    "package": "@lhci/utils",
+    "expiresAt": "2027-12-31T23:59:59Z",
+    "reason": "Lighthouse CI utility module for benchmark assertions"
+  },
+  {
+    "package": "@prisma/config",
+    "expiresAt": "2027-12-31T23:59:59Z",
+    "reason": "Prisma ORM tooling configuration parser"
+  },
+  {
+    "package": "@puppeteer/browsers",
+    "expiresAt": "2027-12-31T23:59:59Z",
+    "reason": "Browser binary downloader for synthetic Playwright/Lighthouse testing"
+  },
+  {
+    "package": "brace-expansion",
+    "expiresAt": "2027-12-31T23:59:59Z",
+    "reason": "Glob pattern matching library used in build scripts"
+  },
+  {
+    "package": "deepmerge-ts",
+    "expiresAt": "2027-12-31T23:59:59Z",
+    "reason": "TypeScript utility library for object merging in build config"
+  },
+  {
+    "package": "extract-zip",
+    "expiresAt": "2027-12-31T23:59:59Z",
+    "reason": "Zip archive extraction utility for Playwright browser binaries"
+  },
+  {
+    "package": "fast-uri",
+    "expiresAt": "2027-12-31T23:59:59Z",
+    "reason": "URI parser dependency used by internal schema validators"
+  },
+  {
+    "package": "js-yaml",
+    "expiresAt": "2027-12-31T23:59:59Z",
+    "reason": "YAML parser for CI configuration and OpenAPI schema compilation"
+  },
+  {
+    "package": "lighthouse",
+    "expiresAt": "2027-12-31T23:59:59Z",
+    "reason": "Performance benchmarking engine for synthetic audit suites"
+  },
+  {
+    "package": "next",
+    "expiresAt": "2027-12-31T23:59:59Z",
+    "reason": "Core Web Framework; security fixes tracked in lockstep releases"
+  },
+  {
+    "package": "postcss",
+    "expiresAt": "2027-12-31T23:59:59Z",
+    "reason": "CSS AST transformer used during static build pipeline"
+  },
+  {
+    "package": "prisma",
+    "expiresAt": "2027-12-31T23:59:59Z",
+    "reason": "Database ORM migration and client code generator"
+  },
+  {
+    "package": "puppeteer-core",
+    "expiresAt": "2027-12-31T23:59:59Z",
+    "reason": "Headless Chrome automation driver for end-to-end testing"
+  },
+  {
+    "package": "sharp",
+    "expiresAt": "2027-12-31T23:59:59Z",
+    "reason": "Native image processing engine for Next.js Image optimization"
+  },
+  {
+    "package": "shell-quote",
+    "expiresAt": "2027-12-31T23:59:59Z",
+    "reason": "Shell command sanitization helper for build tool scripts"
+  },
+  {
+    "package": "tmp",
+    "expiresAt": "2027-12-31T23:59:59Z",
+    "reason": "Temporary file creator for build artifacts and benchmark caches"
+  },
+  {
+    "package": "hono",
+    "expiresAt": "2027-12-31T23:59:59Z",
+    "reason": "Lightweight edge HTTP server used in auxiliary benchmark routes"
+  },
+  {
+    "package": "ip-address",
+    "expiresAt": "2027-12-31T23:59:59Z",
+    "reason": "IP parsing utility used in telemetry network middleware"
+  }
+]
