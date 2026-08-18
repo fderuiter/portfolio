@@ -189,7 +189,7 @@ export default function RecruiterSimulator() {
   useEffect(() => {
     if (hasTracked.current) return;
     hasTracked.current = true;
-    recordEvent("simulator", "page_view");
+    recordEvent("simulator", "page_view", { defer: true });
   }, [recordEvent]);
 
   // Synchronize incoming hash state on mount or browser Back/Forward navigation

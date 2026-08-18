@@ -8,7 +8,7 @@ interface TelemetryTrackerProps {
 }
 
 /**
- * Lightweight Client Component tracker designed to silently capture page_view events on mount.
+ * Lightweight Client Component tracker designed to silently capture page_view events during browser idle frames.
  * Bypasses SSR restrictions on server pages without compromising SEO rankings or speed metrics.
  */
 export const TelemetryTracker: React.FC<TelemetryTrackerProps> = ({ slug }) => {
@@ -20,8 +20,9 @@ export const TelemetryTracker: React.FC<TelemetryTrackerProps> = ({ slug }) => {
     if (hasTracked.current) return;
     hasTracked.current = true;
 
-    recordEvent(slug, "page_view");
+    recordEvent(slug, "page_view", { defer: true });
   }, [slug, recordEvent]);
 
   return null;
 };
+
