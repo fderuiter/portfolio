@@ -6,7 +6,7 @@
 
 # Interface: PageBenchmarkSummary
 
-Defined in: [lib/dx/page-bench.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L72)
+Defined in: [lib/dx/page-bench.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L73)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/dx/page-bench.ts:72](https://github.com/fderuiter/portfolio/blo
 
 > **cls**: [`MetricSummary`](MetricSummary.md)
 
-Defined in: [lib/dx/page-bench.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L78)
+Defined in: [lib/dx/page-bench.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L79)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/dx/page-bench.ts:78](https://github.com/fderuiter/portfolio/blo
 
 > **domContentLoaded**: [`MetricSummary`](MetricSummary.md)
 
-Defined in: [lib/dx/page-bench.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L79)
+Defined in: [lib/dx/page-bench.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L80)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/dx/page-bench.ts:79](https://github.com/fderuiter/portfolio/blo
 
 > **fcp**: [`MetricSummary`](MetricSummary.md)
 
-Defined in: [lib/dx/page-bench.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L76)
+Defined in: [lib/dx/page-bench.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L77)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/dx/page-bench.ts:76](https://github.com/fderuiter/portfolio/blo
 
 > **lcp**: [`MetricSummary`](MetricSummary.md)
 
-Defined in: [lib/dx/page-bench.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L77)
+Defined in: [lib/dx/page-bench.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L78)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/dx/page-bench.ts:77](https://github.com/fderuiter/portfolio/blo
 
 > **loadDuration**: [`MetricSummary`](MetricSummary.md)
 
-Defined in: [lib/dx/page-bench.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L80)
+Defined in: [lib/dx/page-bench.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L81)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/dx/page-bench.ts:80](https://github.com/fderuiter/portfolio/blo
 
 > **passedBudget**: `boolean`
 
-Defined in: [lib/dx/page-bench.ts:88](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L88)
+Defined in: [lib/dx/page-bench.ts:89](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L89)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/dx/page-bench.ts:88](https://github.com/fderuiter/portfolio/blo
 
 > **ratings**: `object`
 
-Defined in: [lib/dx/page-bench.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L82)
+Defined in: [lib/dx/page-bench.ts:83](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L83)
 
 #### cls
 
@@ -86,7 +86,7 @@ Defined in: [lib/dx/page-bench.ts:82](https://github.com/fderuiter/portfolio/blo
 
 > **route**: [`PageBenchmarkRoute`](PageBenchmarkRoute.md)
 
-Defined in: [lib/dx/page-bench.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L73)
+Defined in: [lib/dx/page-bench.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L74)
 
 ***
 
@@ -94,7 +94,7 @@ Defined in: [lib/dx/page-bench.ts:73](https://github.com/fderuiter/portfolio/blo
 
 > **runs**: `number`
 
-Defined in: [lib/dx/page-bench.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L74)
+Defined in: [lib/dx/page-bench.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L75)
 
 ***
 
@@ -102,7 +102,7 @@ Defined in: [lib/dx/page-bench.ts:74](https://github.com/fderuiter/portfolio/blo
 
 > **transferSizeKb**: [`MetricSummary`](MetricSummary.md)
 
-Defined in: [lib/dx/page-bench.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L81)
+Defined in: [lib/dx/page-bench.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L82)
 
 ***
 
@@ -110,4 +110,4 @@ Defined in: [lib/dx/page-bench.ts:81](https://github.com/fderuiter/portfolio/blo
 
 > **ttfb**: [`MetricSummary`](MetricSummary.md)
 
-Defined in: [lib/dx/page-bench.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L75)
+Defined in: [lib/dx/page-bench.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L76)
