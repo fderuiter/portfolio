@@ -332,18 +332,18 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
               />
 
               {/* Refined Inline Badges Row */}
-              <div className="flex justify-between items-center text-[10px] font-mono text-zinc-400 border-b border-zinc-900/60 pb-2.5 mb-1">
-                <span className="flex items-center gap-1">
-                  <IconStar className="w-3.5 h-3.5 text-amber-500" />
-                  <span className="text-zinc-300 font-bold">{githubStats.stars.toLocaleString()}</span> STARS
+              <div className="flex justify-between items-center text-[10px] font-mono text-zinc-400 border-b border-zinc-900/60 pb-2.5 mb-1 gap-1 min-w-0">
+                <span className="flex items-center gap-1 min-w-0 shrink">
+                  <IconStar className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  <span className="text-zinc-300 font-bold truncate">{githubStats.stars.toLocaleString()}</span> <span className="truncate">STARS</span>
                 </span>
-                <span className="flex items-center gap-1">
-                  <IconGitFork className="w-3.5 h-3.5 text-blue-500" />
-                  <span className="text-zinc-300 font-bold">{githubStats.forks.toLocaleString()}</span> FORKS
+                <span className="flex items-center gap-1 min-w-0 shrink">
+                  <IconGitFork className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                  <span className="text-zinc-300 font-bold truncate">{githubStats.forks.toLocaleString()}</span> <span className="truncate">FORKS</span>
                 </span>
-                <span className="flex items-center gap-1">
-                  <IconAlertCircle className="w-3.5 h-3.5 text-emerald-500" />
-                  <span className="text-zinc-300 font-bold">{githubStats.openIssues.toLocaleString()}</span> ISSUES
+                <span className="flex items-center gap-1 min-w-0 shrink">
+                  <IconAlertCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span className="text-zinc-300 font-bold truncate">{githubStats.openIssues.toLocaleString()}</span> <span className="truncate">ISSUES</span>
                 </span>
               </div>
 

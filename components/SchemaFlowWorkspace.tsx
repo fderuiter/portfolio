@@ -723,51 +723,51 @@ export default function SchemaFlowWorkspace() {
           aria-label="Accessible command log console"
         >
           {/* Terminal window bar */}
-          <div className="border-b border-zinc-900 bg-zinc-950/80 px-4 py-3 flex justify-between items-center select-none">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500/80"></span>
-              <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></span>
-              <span className="w-2.5 h-2.5 rounded-full bg-green-500/80"></span>
-              <span className="text-[10px] font-mono text-zinc-500 font-bold ml-2">
+          <div className="border-b border-zinc-900 bg-zinc-950/80 px-4 py-3 flex justify-between items-center select-none min-w-0 gap-2">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="w-2.5 h-2.5 rounded-full bg-red-500/80 shrink-0"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80 shrink-0"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-green-500/80 shrink-0"></span>
+              <span className="text-[10px] font-mono text-zinc-500 font-bold ml-2 truncate min-w-0">
                 PROOF-TACTIC-SHELL
               </span>
             </div>
-            <IconTerminal className="w-4 h-4 text-zinc-600" />
+            <IconTerminal className="w-4 h-4 text-zinc-600 shrink-0" />
           </div>
 
           {/* Console logs output */}
           <div 
             ref={terminalLogsContainerRef}
-            className="flex-1 p-4 font-mono text-[10px] leading-normal overflow-y-auto max-h-[300px] lg:max-h-[350px] min-h-[220px] space-y-3 scrollbar-thin text-zinc-300 select-text"
+            className="flex-1 p-4 font-mono text-[10px] leading-normal overflow-y-auto max-h-[300px] lg:max-h-[350px] min-h-[220px] space-y-3 scrollbar-thin text-zinc-300 select-text min-w-0"
             role="log"
             aria-label="Terminal feedback records"
           >
             {consoleLogs.map((log) => (
-              <div key={log.id} className="space-y-0.5">
+              <div key={log.id} className="space-y-0.5 min-w-0">
                 {log.type === "command" && (
-                  <div className="flex items-center gap-1.5 text-zinc-500 font-bold select-none">
-                    <span className="text-zinc-700 font-bold">~</span>
-                    <span className="text-zinc-500">tactic-cli $</span>
-                    <span className="text-zinc-100 font-bold select-text">{log.text}</span>
+                  <div className="flex items-center gap-1.5 text-zinc-500 font-bold select-none min-w-0">
+                    <span className="text-zinc-700 font-bold shrink-0">~</span>
+                    <span className="text-zinc-500 shrink-0">tactic-cli $</span>
+                    <span className="text-zinc-100 font-bold select-text min-w-0 break-all">{log.text}</span>
                   </div>
                 )}
                 {log.type === "info" && (
-                  <div className="text-zinc-500 whitespace-pre-wrap leading-relaxed select-text">
+                  <div className="text-zinc-500 whitespace-pre-wrap leading-relaxed select-text min-w-0 break-all">
                     {log.text}
                   </div>
                 )}
                 {log.type === "error" && (
-                  <div className="text-red-400 font-bold select-text">
+                  <div className="text-red-400 font-bold select-text min-w-0 break-all">
                     ✖ {log.text}
                   </div>
                 )}
                 {log.type === "success" && (
-                  <div className="text-emerald-400 font-bold select-text">
+                  <div className="text-emerald-400 font-bold select-text min-w-0 break-all">
                     ✔ {log.text}
                   </div>
                 )}
                 {log.type === "output" && (
-                  <div className="text-zinc-300 whitespace-pre-wrap select-text leading-relaxed">
+                  <div className="text-zinc-300 whitespace-pre-wrap select-text leading-relaxed min-w-0 break-all">
                     {log.text}
                   </div>
                 )}
@@ -776,14 +776,14 @@ export default function SchemaFlowWorkspace() {
           </div>
 
           {/* Input Prompt panel */}
-          <div className="border-t border-zinc-900 bg-zinc-950 px-4 py-3 flex flex-col gap-1.5">
-            <div className="flex items-center gap-2 relative">
-              <span className="text-zinc-700 font-bold font-mono text-[10px] select-none">~</span>
-              <span className="text-zinc-500 font-bold font-mono text-[10px] select-none">tactic-cli $</span>
+          <div className="border-t border-zinc-900 bg-zinc-950 px-4 py-3 flex flex-col gap-1.5 min-w-0">
+            <div className="flex items-center gap-2 relative min-w-0">
+              <span className="text-zinc-700 font-bold font-mono text-[10px] select-none shrink-0">~</span>
+              <span className="text-zinc-500 font-bold font-mono text-[10px] select-none shrink-0 truncate max-w-[90px] xs:max-w-none">tactic-cli $</span>
               
-              <div className="flex-1 relative flex items-center min-h-[1.5rem]">
+              <div className="flex-1 relative flex items-center min-h-[1.5rem] min-w-0">
                 {suggestion && (
-                  <div className="absolute inset-0 pointer-events-none font-mono text-[10px] text-zinc-700 flex items-center select-none z-0">
+                  <div className="absolute inset-0 pointer-events-none font-mono text-[10px] text-zinc-700 flex items-center select-none z-0 truncate">
                     <span>{consoleInput}</span>
                     <span>{suggestion.substring(consoleInput.length)}</span>
                   </div>
@@ -796,7 +796,7 @@ export default function SchemaFlowWorkspace() {
                   onChange={(e) => setConsoleInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Type 'help' or syntax commands..."
-                  className="w-full bg-transparent border-none outline-none font-mono text-[10px] text-zinc-100 placeholder-zinc-800 caret-brand-cyan z-10 select-text"
+                  className="w-full min-w-0 bg-transparent border-none outline-none font-mono text-[10px] text-zinc-100 placeholder-zinc-800 caret-brand-cyan z-10 select-text"
                   autoCapitalize="off"
                   autoComplete="off"
                   autoCorrect="off"

@@ -363,4 +363,25 @@ describe("Working With Duck - UI & Component Suite", () => {
       });
     }
   });
+
+  it("applies high-priority priority loading flags to active unlocked scrapbook card image element", async () => {
+    await act(async () => {
+      root.render(<WorkingWithDuck />);
+    });
+
+    const scrapbookButtons = container.querySelectorAll("button");
+    const openBtn = Array.from(scrapbookButtons).find((b) => b.textContent?.includes("Duck Scrapbook"));
+    expect(openBtn).toBeDefined();
+
+    if (openBtn) {
+      await act(async () => {
+        openBtn.click();
+      });
+
+      const img = container.querySelector("img");
+      expect(img).not.toBeNull();
+      expect(img?.getAttribute("src")).toContain("duck-prince.jpg");
+      expect(img?.getAttribute("loading")).not.toBe("lazy");
+    }
+  });
 });

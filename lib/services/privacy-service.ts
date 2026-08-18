@@ -1,5 +1,3 @@
-import crypto from "crypto";
-
 export type RequestOrHeaders =
   | Request
   | Headers
@@ -51,9 +49,15 @@ export async function generateClientConnectionHash(ip: string): Promise<string> 
   const normalizedIp = ip?.trim() || "127.0.0.1";
   const encoder = new TextEncoder();
   const data = encoder.encode(normalizedIp);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  const cryptoObj = typeof globalThis !== "undefined" && globalThis.crypto ? globalThis.crypto : undefined;
+  if (cryptoObj?.subtle) {
+    const hashBuffer = await cryptoObj.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  }
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const nodeCrypto = require("crypto");
+  return nodeCrypto.createHash("sha256").update(normalizedIp).digest("hex");
 }
 
 /**
@@ -62,7 +66,9 @@ export async function generateClientConnectionHash(ip: string): Promise<string> 
  */
 export function generateClientConnectionHashSync(input: string): string {
   const normalized = input?.trim() || "127.0.0.1";
-  return crypto.createHash("sha256").update(normalized).digest("hex");
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const nodeCrypto = require("crypto");
+  return nodeCrypto.createHash("sha256").update(normalized).digest("hex");
 }
 
 /**

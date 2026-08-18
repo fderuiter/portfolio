@@ -6,11 +6,11 @@
 
 # Function: usePersistentState()
 
-> **usePersistentState**\<`T`\>(`key`, `initialValue`): \[`T`, `Dispatch`\<`SetStateAction`\<`T`\>\>\]
+> **usePersistentState**\<`T`\>(`key`, `initialValue`, `options?`): \[`T`, `Dispatch`\<`SetStateAction`\<`T`\>\>\]
 
-Defined in: [hooks/usePersistentState.ts:80](https://github.com/fderuiter/portfolio/blob/main/hooks/usePersistentState.ts#L80)
+Defined in: [hooks/usePersistentState.ts:49](https://github.com/fderuiter/portfolio/blob/main/hooks/usePersistentState.ts#L49)
 
-Custom hook that works like useState but persists state to localStorage using useSyncExternalStore.
+Custom hook that works like useState but persists state to safeStorage using useSyncExternalStore.
 Synchronizes seamlessly across multiple hook instances and browser tabs with zero tearing.
 
 ## Type Parameters
@@ -32,6 +32,12 @@ The localStorage key to use for this state
 `T`
 
 The default value if nothing is found in localStorage
+
+### options?
+
+[`StorageOptions`](../../../lib/safe-storage/interfaces/StorageOptions.md)
+
+Optional StorageOptions for expiration and LRU eviction tagging
 
 ## Returns
 
