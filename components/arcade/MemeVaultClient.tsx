@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useSyncExternalStore, useCallback, useRef } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   MEME_QUOTES,
   SOUNDBOARD_BUTTONS,
@@ -54,29 +54,38 @@ const AudioWaveformVisualizer: React.FC<{ isPlaying: boolean; soundLabel?: strin
   isPlaying,
   soundLabel,
 }) => {
-  const [frequencies, setFrequencies] = useState<number[]>(() =>
-    Array.from({ length: 24 }, () => 10 + Math.random() * 15)
-  );
+  const barRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   useEffect(() => {
     let animFrame: number;
-    let lastTime = performance.now();
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReduced) {
+      for (let i = 0; i < 24; i++) {
+        const el = barRefs.current[i];
+        if (el) {
+          el.style.setProperty("--bar-scale", "0.15");
+        }
+      }
+      return;
+    }
 
     const updateFrequencies = (currentTime: number) => {
-      if (currentTime - lastTime > 40) {
-        lastTime = currentTime;
-        setFrequencies((prev) =>
-          prev.map((_, i) => {
-            if (isPlaying) {
-              const base = 25 + Math.sin(currentTime * 0.01 + i * 0.4) * 20;
-              const spike = Math.random() * 55;
-              return clamp(base + spike, 15, 100);
-            } else {
-              // Idle ambient breath
-              return 10 + Math.sin(currentTime * 0.002 + i * 0.3) * 6;
-            }
-          })
-        );
+      for (let i = 0; i < 24; i++) {
+        const el = barRefs.current[i];
+        if (!el) continue;
+        let scaleVal: number;
+        if (isPlaying) {
+          const base = 0.25 + Math.sin(currentTime * 0.01 + i * 0.4) * 0.2;
+          const spike = Math.random() * 0.55;
+          scaleVal = clamp(base + spike, 0.15, 1.0);
+        } else {
+          // Idle ambient breath
+          scaleVal = 0.10 + Math.sin(currentTime * 0.002 + i * 0.3) * 0.06;
+        }
+        el.style.setProperty("--bar-scale", scaleVal.toFixed(4));
       }
       animFrame = requestAnimationFrame(updateFrequencies);
     };
@@ -99,17 +108,29 @@ const AudioWaveformVisualizer: React.FC<{ isPlaying: boolean; soundLabel?: strin
 
       {/* Spectrum Waveform Bars */}
       <div className="flex items-end justify-between gap-1 sm:gap-1.5 h-14 sm:h-16 w-full px-1">
-        {frequencies.map((height, idx) => (
+        {Array.from({ length: 24 }).map((_, idx) => (
           <div key={idx} className="flex-1 flex flex-col items-center justify-end h-full">
-            <motion.div
-              animate={{ height: `${height}%` }}
-              transition={{ duration: 0.05, ease: "linear" }}
-              className={`w-full rounded-t-sm transition-colors duration-150 ${
-                isPlaying
-                  ? "bg-gradient-to-t from-emerald-500 via-teal-400 to-cyan-300 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
-                  : "bg-emerald-950/50 hover:bg-emerald-800/40"
+            <div
+              className={`w-full h-full rounded-t-sm overflow-hidden ${
+                isPlaying ? "shadow-[0_0_8px_rgba(16,185,129,0.5)]" : ""
               }`}
-            />
+            >
+              <div
+                ref={(el) => {
+                  barRefs.current[idx] = el;
+                }}
+                className={`w-full h-full origin-bottom transform-gpu ${
+                  isPlaying
+                    ? "bg-gradient-to-t from-emerald-500 via-teal-400 to-cyan-300"
+                    : "bg-emerald-950/50 hover:bg-emerald-800/40"
+                }`}
+                style={{
+                  transform: "scaleY(var(--bar-scale, 0.15))",
+                  transformOrigin: "bottom",
+                  willChange: "transform",
+                }}
+              />
+            </div>
           </div>
         ))}
       </div>
@@ -119,6 +140,7 @@ const AudioWaveformVisualizer: React.FC<{ isPlaying: boolean; soundLabel?: strin
 
 export const MemeVaultClient: React.FC = () => {
   const { announce } = useAnnouncer();
+  const prefersReducedMotion = useReducedMotion();
 
   const rawAchievements = useSyncExternalStore(
     subscribeAchievements,
@@ -293,10 +315,11 @@ export const MemeVaultClient: React.FC = () => {
             </div>
             <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
               <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${progressPercent}%` }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="h-full bg-gradient-to-r from-emerald-500 via-cyan-400 to-amber-400 rounded-full"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: progressPercent / 100 }}
+                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.8, ease: "easeOut" }}
+                className="h-full w-full bg-gradient-to-r from-emerald-500 via-cyan-400 to-amber-400 rounded-full origin-left transform-gpu"
+                style={{ transformOrigin: "left", willChange: "transform" }}
               />
             </div>
           </div>

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { clamp } from "@/lib/game-utils";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
 interface RAMGaugeProps {
   currentRam: number;
@@ -10,6 +10,7 @@ interface RAMGaugeProps {
 }
 
 export const RAMGauge: React.FC<RAMGaugeProps> = ({ currentRam, initialRam }) => {
+  const prefersReducedMotion = useReducedMotion();
   const percentage = clamp((currentRam / initialRam) * 100, 0, 100);
   const isOOM = currentRam <= 0;
   const isLowMemory = currentRam > 0 && percentage <= 30;
@@ -57,10 +58,11 @@ export const RAMGauge: React.FC<RAMGaugeProps> = ({ currentRam, initialRam }) =>
       {/* Progress Track */}
       <div className="h-2.5 w-full rounded-full bg-zinc-900 border border-zinc-800 p-0.5 overflow-hidden">
         <motion.div
-          className={`h-full rounded-full transition-all duration-300 ${getBarColor()}`}
-          initial={{ width: `${percentage}%` }}
-          animate={{ width: `${percentage}%` }}
-          transition={{ ease: "easeOut", duration: 0.3 }}
+          className={`h-full w-full rounded-full origin-left transform-gpu ${getBarColor()}`}
+          initial={{ scaleX: percentage / 100 }}
+          animate={{ scaleX: percentage / 100 }}
+          transition={prefersReducedMotion ? { duration: 0 } : { ease: "easeOut", duration: 0.3 }}
+          style={{ transformOrigin: "left", willChange: "transform" }}
         />
       </div>
     </div>

@@ -462,8 +462,12 @@ const InteractiveEngineeringConsole: React.FC = () => {
                   {/* Visual memory bar */}
                   <div className="w-full h-2 bg-zinc-900 rounded-full overflow-hidden border border-white/5">
                     <div
-                      style={{ width: `${(garminHeapAlloc / 32) * 100}%` }}
-                      className="h-full bg-gradient-to-r from-emerald-400 via-amber-400 to-cyan-400 transition-all duration-300"
+                      style={{
+                        transform: `scaleX(${garminHeapAlloc / 32})`,
+                        transformOrigin: "left",
+                        willChange: "transform",
+                      }}
+                      className="h-full w-full bg-gradient-to-r from-emerald-400 via-amber-400 to-cyan-400 origin-left transform-gpu"
                     />
                   </div>
                   <div className="flex items-center justify-between text-[10px] text-zinc-500 pt-0.5">
