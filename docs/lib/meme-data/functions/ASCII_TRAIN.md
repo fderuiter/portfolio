@@ -8,7 +8,7 @@
 
 > **ASCII\_TRAIN**(): `string`
 
-Defined in: [lib/meme-data.ts:275](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L275)
+Defined in: [lib/meme-data.ts:294](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L294)
 
 ## Returns
 

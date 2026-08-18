@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useSyncExternalStore, useCallback } from "react";
+import React, { useState, useEffect, useSyncExternalStore, useCallback, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -9,14 +9,14 @@ import {
   EASTER_EGG_ACHIEVEMENTS,
   ASCII_COWSAY,
   ASCII_DUCK,
-  ASCII_NEOFETCH,
+  ASCII_LASER_LOON,
   ASCII_TRAIN,
   getUnlockedAchievements,
   unlockAchievement,
   type SoundboardButton,
 } from "@/lib/meme-data";
 import { clamp } from "@/lib/game-utils";
-import { playMemeSound } from "@/lib/meme-audio";
+import { playMemeSound, getMemeSoundDuration } from "@/lib/meme-audio";
 import { useAnnouncer } from "@/components/providers/A11yProvider";
 import { CopyButton } from "@/components/CopyButton";
 import {
@@ -137,21 +137,36 @@ export const MemeVaultClient: React.FC = () => {
   const [activeSound, setActiveSound] = useState<string | null>(null);
   const [activeSoundLabel, setActiveSoundLabel] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [asciiTab, setAsciiTab] = useState<"cowsay" | "duck" | "neofetch" | "train">("cowsay");
+  const [asciiTab, setAsciiTab] = useState<"cowsay" | "duck" | "loon" | "train">("cowsay");
   const [reactions, setReactions] = useState<Record<string, number>>({});
   const [celebrationAchievement, setCelebrationAchievement] = useState<string | null>(null);
+  const soundTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (soundTimeoutRef.current) {
+        clearTimeout(soundTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Trigger soundboard sound
   const handlePlaySound = (button: SoundboardButton) => {
+    if (soundTimeoutRef.current) {
+      clearTimeout(soundTimeoutRef.current);
+    }
+
     setActiveSound(button.id);
     setActiveSoundLabel(button.label);
     playMemeSound(button.synthType);
     unlockAchievement("soundboard-maestro");
     announce(`Played sound: ${button.label}`, "polite");
 
-    setTimeout(() => {
+    const duration = getMemeSoundDuration(button.synthType);
+    soundTimeoutRef.current = setTimeout(() => {
       setActiveSound(null);
-    }, 450);
+      soundTimeoutRef.current = null;
+    }, duration);
   };
 
   // React to meme card
@@ -187,8 +202,8 @@ export const MemeVaultClient: React.FC = () => {
         return ASCII_COWSAY("100% Type-Safe & MedTech Ready!");
       case "duck":
         return ASCII_DUCK();
-      case "neofetch":
-        return ASCII_NEOFETCH();
+      case "loon":
+        return ASCII_LASER_LOON();
       case "train":
         return ASCII_TRAIN();
     }
@@ -494,7 +509,7 @@ export const MemeVaultClient: React.FC = () => {
           </div>
 
           <div className="flex gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs">
-            {(["cowsay", "duck", "neofetch", "train"] as const).map((tab) => (
+            {(["cowsay", "duck", "loon", "train"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setAsciiTab(tab)}
@@ -504,7 +519,7 @@ export const MemeVaultClient: React.FC = () => {
                     : "text-slate-400 hover:text-white"
                 }`}
               >
-                {tab}
+                {tab === "loon" ? "laser loon" : tab}
               </button>
             ))}
           </div>

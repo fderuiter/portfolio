@@ -293,7 +293,7 @@ export const Navbar: React.FC = () => {
             href="/"
             onClick={(e) => handleNavClick(e, "/#hero")}
             onMouseEnter={handleLinkHover}
-            className="group flex min-h-6 items-center gap-2.5 font-mono text-sm tracking-widest font-extrabold text-foreground cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-cyan rounded-md"
+            className="group flex min-h-6 items-center gap-2.5 font-mono text-sm tracking-widest font-extrabold text-foreground cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-cyan rounded-md shrink-0"
             aria-label="Frederick de Ruiter Homepage"
           >
             <span className="relative flex h-2 w-2">
@@ -304,8 +304,8 @@ export const Navbar: React.FC = () => {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center gap-6 lg:gap-8">
-            <nav className="flex items-center gap-6 lg:gap-7" aria-label="Main Navigation">
+          <div className="hidden md:flex items-center gap-3 lg:gap-6 shrink-0">
+            <nav className="flex items-center gap-3 md:gap-4 lg:gap-6 shrink-0" aria-label="Main Navigation">
               {/* Work Pillar */}
               <Link
                 href={pathname === "/" ? "/#case-studies" : "/case-studies"}
@@ -318,7 +318,7 @@ export const Navbar: React.FC = () => {
                 }}
                 onMouseEnter={handleLinkHover}
                 className={cn(
-                  "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1",
+                  "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0",
                   (pathname === "/" && activeSection === "case-studies") || pathname === "/case-studies" || pathname.startsWith("/case-studies/")
                     ? "text-brand-cyan font-bold"
                     : "text-muted"
@@ -329,13 +329,13 @@ export const Navbar: React.FC = () => {
 
               {/* Arcade & Labs Dropdown */}
               {persona !== "technical" && (
-                <div className="relative">
+                <div className="relative shrink-0">
                   <button
                     type="button"
                     onClick={() => setActiveDropdown(activeDropdown === "arcade" ? null : "arcade")}
                     onMouseEnter={handleLinkHover}
                     className={cn(
-                      "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-brand-cyan rounded",
+                      "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-brand-cyan rounded whitespace-nowrap shrink-0",
                       isArcadeActive || activeDropdown === "arcade"
                         ? "text-brand-cyan font-bold"
                         : "text-muted"
@@ -343,10 +343,10 @@ export const Navbar: React.FC = () => {
                     aria-expanded={activeDropdown === "arcade"}
                     aria-haspopup="true"
                   >
-                    <span>Arcade &amp; Labs</span>
+                    <span className="whitespace-nowrap">Arcade &amp; Labs</span>
                     <IconChevronDown
                       className={cn(
-                        "w-3 h-3 transition-transform duration-200",
+                        "w-3 h-3 transition-transform duration-200 shrink-0",
                         activeDropdown === "arcade" ? "rotate-180 text-brand-cyan" : "text-zinc-500"
                       )}
                     />
@@ -405,13 +405,13 @@ export const Navbar: React.FC = () => {
               )}
 
               {/* Systems & Proof Dropdown */}
-              <div className="relative">
+              <div className="relative shrink-0">
                 <button
                   type="button"
                   onClick={() => setActiveDropdown(activeDropdown === "systems" ? null : "systems")}
                   onMouseEnter={handleLinkHover}
                   className={cn(
-                    "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-brand-cyan rounded",
+                    "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-brand-cyan rounded whitespace-nowrap shrink-0",
                     isSystemsActive || activeDropdown === "systems"
                       ? "text-brand-cyan font-bold"
                       : "text-muted"
@@ -419,10 +419,10 @@ export const Navbar: React.FC = () => {
                   aria-expanded={activeDropdown === "systems"}
                   aria-haspopup="true"
                 >
-                  <span>Systems</span>
+                  <span className="whitespace-nowrap">Systems</span>
                   <IconChevronDown
                     className={cn(
-                      "w-3 h-3 transition-transform duration-200",
+                      "w-3 h-3 transition-transform duration-200 shrink-0",
                       activeDropdown === "systems" ? "rotate-180 text-brand-cyan" : "text-zinc-500"
                     )}
                   />
@@ -484,7 +484,7 @@ export const Navbar: React.FC = () => {
                 onClick={(e) => handleNavClick(e, "/#about")}
                 onMouseEnter={handleLinkHover}
                 className={cn(
-                  "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1",
+                  "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0",
                   pathname === "/" && activeSection === "about"
                     ? "text-brand-cyan font-bold"
                     : "text-muted"
@@ -499,7 +499,7 @@ export const Navbar: React.FC = () => {
                 onClick={(e) => handleNavClick(e, "/#contact")}
                 onMouseEnter={handleLinkHover}
                 className={cn(
-                  "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1",
+                  "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0",
                   pathname === "/" && activeSection === "contact"
                     ? "text-brand-cyan font-bold"
                     : "text-muted"
@@ -514,7 +514,7 @@ export const Navbar: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onMouseEnter={handleLinkHover}
-                className="py-1 text-xs font-mono tracking-wider font-semibold text-muted hover:text-foreground transition-all duration-200 cursor-pointer flex items-center gap-1 group"
+                className="py-1 text-xs font-mono tracking-wider font-semibold text-muted hover:text-foreground transition-all duration-200 cursor-pointer flex items-center gap-1 group whitespace-nowrap shrink-0"
                 aria-label="View source repository on GitHub"
               >
                 <span>GitHub</span>
@@ -529,10 +529,10 @@ export const Navbar: React.FC = () => {
               type="button"
               onClick={openSearch}
               onMouseEnter={handleLinkHover}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-brand-cyan/40 hover:bg-zinc-900 text-zinc-400 hover:text-white transition-all cursor-pointer shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-cyan/40"
+              className="flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1.5 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-brand-cyan/40 hover:bg-zinc-900 text-zinc-400 hover:text-white transition-all cursor-pointer shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-cyan/40 shrink-0 whitespace-nowrap"
               aria-label="Search portfolio and commands (Press Command+K)"
             >
-              <IconSearch className="w-3.5 h-3.5 text-zinc-400" />
+              <IconSearch className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
               <span className="text-xs font-mono hidden lg:inline">Search</span>
               <kbd className="kbd-badge text-[10px] text-zinc-400 font-mono">⌘K</kbd>
             </button>
@@ -543,7 +543,7 @@ export const Navbar: React.FC = () => {
                 type="button"
                 onClick={() => setPersona("technical")}
                 className={cn(
-                  "flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer min-h-8",
+                  "flex items-center justify-center gap-1 px-2 md:px-2.5 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer min-h-8 shrink-0 whitespace-nowrap",
                   persona === "technical"
                     ? "bg-zinc-950 text-amber-400 border border-amber-400/20 shadow-[0_0_8px_rgba(251,191,36,0.15)]"
                     : "text-zinc-500 hover:text-zinc-300 border border-transparent"
@@ -551,13 +551,13 @@ export const Navbar: React.FC = () => {
                 aria-label="Switch to Technical Persona"
               >
                 <IconFlame className="w-3.5 h-3.5 shrink-0" />
-                <span className="hidden lg:inline">TECHNICAL</span>
+                <span className="hidden xl:inline">TECHNICAL</span>
               </button>
               <button
                 type="button"
                 onClick={() => setPersona("recruiter")}
                 className={cn(
-                  "flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer min-h-8",
+                  "flex items-center justify-center gap-1 px-2 md:px-2.5 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer min-h-8 shrink-0 whitespace-nowrap",
                   persona === "recruiter"
                     ? "bg-zinc-950 text-brand-cyan border border-brand-cyan/20 shadow-[0_0_8px_rgba(6,182,212,0.15)]"
                     : "text-zinc-500 hover:text-zinc-300 border border-transparent"
@@ -565,17 +565,17 @@ export const Navbar: React.FC = () => {
                 aria-label="Switch to Recruiter Persona"
               >
                 <IconBriefcase className="w-3.5 h-3.5 shrink-0" />
-                <span className="hidden lg:inline">RECRUITER</span>
+                <span className="hidden xl:inline">RECRUITER</span>
               </button>
             </div>
 
             {/* Audio Controller Desktop */}
-            <div className="relative">
+            <div className="relative shrink-0">
               <button
                 type="button"
                 onClick={() => setShowAudioPanel(!showAudioPanel)}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-cyan/40",
+                  "flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-full border transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-cyan/40 shrink-0 whitespace-nowrap",
                   !muted
                     ? "border-brand-cyan/40 bg-brand-cyan/5 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.15)]"
                     : "border-zinc-900 bg-zinc-900/40 hover:border-brand-cyan/40 text-zinc-400 hover:text-foreground"

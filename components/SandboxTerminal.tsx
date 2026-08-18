@@ -19,7 +19,7 @@ import { useAudio } from "@/components/providers/AudioProvider";
 import {
   ASCII_COWSAY,
   ASCII_DUCK,
-  ASCII_NEOFETCH,
+  ASCII_LASER_LOON,
   ASCII_TRAIN,
   FORTUNES,
   unlockAchievement,
@@ -272,18 +272,18 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
         return;
       }
 
-      if (lower === "neofetch" || lower === "fastfetch") {
+      if (lower === "loon" || lower === "laser" || lower === "laser-loon") {
         unlockAchievement("terminal-cowboy");
-        playMemeSound("matrix-glitch");
+        playMemeSound("laser");
         setLogs((prev) => [
           ...prev,
           {
             id: outputId,
             type: "info",
-            text: ASCII_NEOFETCH(),
+            text: ASCII_LASER_LOON(),
           },
         ]);
-        announce("Neofetch system profile rendered.", "polite");
+        announce("Laser Loon cryo-optics rendered.", "polite");
         return;
       }
 
@@ -453,7 +453,7 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
           {
             id: outputId,
             type: "error",
-            text: `Command not found: '${trimmed}'. Type 'help' to review supported registry entries or try 'neofetch', 'cowsay', or 'duck'.`,
+            text: `Command not found: '${trimmed}'. Type 'help' to review supported registry entries or try 'loon', 'cowsay', or 'duck'.`,
           },
         ]);
         announce(`Command execution failed. Unknown command: '${trimmed}'.`, "polite");

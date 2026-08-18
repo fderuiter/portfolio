@@ -14,14 +14,14 @@ import {
   FORTUNES,
   ASCII_COWSAY,
   ASCII_DUCK,
-  ASCII_NEOFETCH,
+  ASCII_LASER_LOON,
   ASCII_TRAIN,
   getUnlockedAchievements,
   unlockAchievement,
   isVaultUnlocked,
   setVaultUnlocked,
 } from "@/lib/meme-data";
-import { playMemeSound, isSoundAllowed } from "@/lib/meme-audio";
+import { playMemeSound, isSoundAllowed, getMemeSoundDuration, type MemeSoundType } from "@/lib/meme-audio";
 import { MemeVaultClient } from "@/components/arcade/MemeVaultClient";
 import { FooterStatusTicker } from "@/components/FooterStatusTicker";
 import { RetroChaosOverlay } from "@/components/RetroChaosOverlay";
@@ -70,8 +70,11 @@ describe("Meme Data & ASCII Generator Invariants", () => {
     const duck = ASCII_DUCK();
     expect(duck).toContain("Duck is guarding the codebase");
 
-    const neofetch = ASCII_NEOFETCH();
-    expect(neofetch).toContain("FredOS 2026");
+    const loon = ASCII_LASER_LOON();
+    expect(loon).toContain("L A K E   M I N N E T O N K A");
+    expect(loon).toContain("Purify yourself in the waters");
+    expect(loon).toContain("P E W !");
+    expect(loon).toContain("*ZAP!*");
 
     const train = ASCII_TRAIN();
     expect(train).toContain("DEV  EXPRESS");
@@ -139,12 +142,40 @@ describe("Meme Web Audio Synthesizer", () => {
       connect: vi.fn(),
     };
 
+    const mockBiquadFilter = {
+      type: "bandpass",
+      frequency: {
+        setValueAtTime: vi.fn(),
+        linearRampToValueAtTime: vi.fn(),
+        exponentialRampToValueAtTime: vi.fn(),
+      },
+      Q: {
+        setValueAtTime: vi.fn(),
+      },
+      connect: vi.fn(),
+    };
+
+    const mockBufferSource = {
+      buffer: null,
+      connect: vi.fn(),
+      start: vi.fn(),
+      stop: vi.fn(),
+    };
+
+    const mockAudioBuffer = {
+      getChannelData: vi.fn(() => new Float32Array(4410)),
+    };
+
     const mockAudioContext = vi.fn().mockImplementation(function (this: Record<string, unknown>) {
       this.state = "running";
       this.currentTime = 0;
+      this.sampleRate = 44100;
       this.destination = {};
       this.createOscillator = vi.fn(() => mockOscillator);
       this.createGain = vi.fn(() => mockGain);
+      this.createBiquadFilter = vi.fn(() => mockBiquadFilter);
+      this.createBufferSource = vi.fn(() => mockBufferSource);
+      this.createBuffer = vi.fn(() => mockAudioBuffer);
       this.resume = vi.fn().mockResolvedValue(undefined);
       this.close = vi.fn().mockResolvedValue(undefined);
     });
@@ -153,7 +184,7 @@ describe("Meme Web Audio Synthesizer", () => {
   });
 
   it("should synthesize all sound effects without throwing", () => {
-    const soundTypes = [
+    const soundTypes: MemeSoundType[] = [
       "bark",
       "laser",
       "friday-alarm",
@@ -163,11 +194,35 @@ describe("Meme Web Audio Synthesizer", () => {
       "fda-siren",
       "level-up",
       "fanfare",
-    ] as const;
+    ];
 
     soundTypes.forEach((type) => {
       expect(() => playMemeSound(type)).not.toThrow();
     });
+  });
+
+  it("should provide exact positive durations for all soundboard types", () => {
+    const soundTypes: MemeSoundType[] = [
+      "bark",
+      "laser",
+      "friday-alarm",
+      "matrix-glitch",
+      "teapot-whistle",
+      "modem",
+      "fda-siren",
+      "level-up",
+      "fanfare",
+    ];
+
+    soundTypes.forEach((type) => {
+      const duration = getMemeSoundDuration(type);
+      expect(duration).toBeGreaterThan(0);
+      expect(typeof duration).toBe("number");
+    });
+
+    expect(getMemeSoundDuration("modem")).toBe(1250);
+    expect(getMemeSoundDuration("teapot-whistle")).toBe(850);
+    expect(getMemeSoundDuration("bark")).toBe(450);
   });
 });
 

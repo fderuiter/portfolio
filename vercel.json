@@ -1,4 +1,6 @@
 {
+  "buildCommand": "npm run build",
+  "installCommand": "npm ci",
   "crons": [
     {
       "path": "/api/telemetry/sync",

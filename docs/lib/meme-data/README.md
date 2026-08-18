@@ -25,7 +25,7 @@
 
 - [ASCII\_COWSAY](functions/ASCII_COWSAY.md)
 - [ASCII\_DUCK](functions/ASCII_DUCK.md)
-- [ASCII\_NEOFETCH](functions/ASCII_NEOFETCH.md)
+- [ASCII\_LASER\_LOON](functions/ASCII_LASER_LOON.md)
 - [ASCII\_TRAIN](functions/ASCII_TRAIN.md)
 - [getUnlockedAchievements](functions/getUnlockedAchievements.md)
 - [isVaultUnlocked](functions/isVaultUnlocked.md)

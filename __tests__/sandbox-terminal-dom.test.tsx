@@ -255,4 +255,69 @@ describe("SandboxTerminal JSDOM Emulator States", () => {
 
     expect(document.activeElement).not.toBe(inputEl);
   });
+
+  it("should execute loon easter egg and render Laser Loon ASCII", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<SandboxTerminal />);
+    });
+
+    const inputEl = container.querySelector("input") as HTMLInputElement;
+
+    await act(async () => {
+      setInputValue(inputEl, "loon");
+    });
+
+    await act(async () => {
+      inputEl.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "Enter",
+          code: "Enter",
+          keyCode: 13,
+          which: 13,
+          bubbles: true,
+          cancelable: true,
+        })
+      );
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(450);
+    });
+
+    expect(container.textContent).toContain("L A K E   M I N N E T O N K A");
+    expect(container.textContent).toContain("P E W !");
+  });
+
+  it("should display updated suggestions on unknown command", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<SandboxTerminal />);
+    });
+
+    const inputEl = container.querySelector("input") as HTMLInputElement;
+
+    await act(async () => {
+      setInputValue(inputEl, "unknown-cmd-xyz");
+    });
+
+    await act(async () => {
+      inputEl.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "Enter",
+          code: "Enter",
+          keyCode: 13,
+          which: 13,
+          bubbles: true,
+          cancelable: true,
+        })
+      );
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(450);
+    });
+
+    expect(container.textContent).toContain("try 'loon', 'cowsay', or 'duck'");
+  });
 });

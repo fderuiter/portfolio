@@ -189,7 +189,7 @@ export const EASTER_EGG_ACHIEVEMENTS: EasterEggAchievement[] = [
   {
     id: "terminal-cowboy",
     title: "Terminal Cowboy",
-    description: "Executed UNIX easter eggs (cowsay, neofetch, sl, or matrix) in the Sandbox Terminal.",
+    description: "Executed UNIX easter eggs (cowsay, loon, sl, or matrix) in the Sandbox Terminal.",
     icon: "💻",
     hint: "Explore UNIX and dev commands in the interactive terminal.",
   },
@@ -255,20 +255,39 @@ export const ASCII_DUCK = (): string => {
   `;
 };
 
-export const ASCII_NEOFETCH = (): string => {
+export const ASCII_LASER_LOON = (): string => {
   return `
-    .---.      fred@portfolio-minnetonka
-   /     \\     -------------------------
-  | () () |    OS: FredOS 2026.2 (Next.js 15.2 / React 19)
-   \\  _  /     Host: Lake Minnetonka Supercluster
-    \`---\`      Kernel: 6.14.0-antigravity-arm64
-   /     \\     Uptime: 99.999% (Zero Friday downtime)
-  |       |    Packages: 42 (bun), 1 (duck-engine)
-  |  |_|  |    Shell: zsh 5.9 (duck-theme)
-  \`---\`---\`    Terminal: SandboxTerminal v2.3.1
-               CPU: Apple M-Series Silicon (Neural Engine)
-               Memory: 31.8KB / 32.0KB (Garmin Mode)
-               Mascot: Duck 🐾 (Fluffy Golden Retriever)
+.             *             .
+             *      .                                                        *
+                           *            _..._                   .
+          .                            .'     \`.     *
+                            .         /         \\                      .
+                  .                  |           |           .
+                                     |           |                  *
+             ^         ^              \\         /              ^         ^
+            / \\       / \\              \`._   _.'              / \\       / \\
+           /___\\     /___\\                \`\`\`                /___\\     /___\\
+          /_____\\   /_____\\      ^          ^          ^    /_____\\   /_____\\
+         /_______\\ /_______\\    / \\        / \\        / \\  /_______\\ /_______\\
+            | |       | |      /___\\      /___\\      /___\\    | |       | |
+      ^^^^^^^^^^^^^^^^^^^^^^^^/_____\\^^^^/_____\\^^^^/_____\\^^^^^^^^^^^^^^^^^^^^^
+      ~~~~~~~~~~~~~~~~~~~~~~~/_______\\~~/_______\\~~/_______\\~~~~~~~~~~~~~~~~~~~~
+      ~~~~~^~~~~~~~~~~~~~^~~~~~~| |~~~~~~~~| |~~~~~~~~| |~~~~^~~~~~~~~~~~~~~~^~~
+      ~~~~~~~~~~~ L A K E   M I N N E T O N K A ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      ~~~~~~~ "Purify yourself in the waters..." ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~
+                 ___                                                      
+               /\`   \`\\                                                \\|/  
+              |  \\ _  \\____                                        -- -O- --
+              |  (O)   ____>========================================> /|\\ *ZAP!*
+               \\       /                       P E W !                 bzzz
+               /  ==  /                                              
+              /  ==  /_______________                                 
+             |  :: :: :: :: :: ::    \`\\                               
+~~~~~~~~~~~~~| :: :: :: :: :: :: ::    |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~\\_______________________/~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~    ~      ~      ~      ~      ~      ~      ~      ~      ~      ~       
+    ~      ~      ~      ~      ~      ~      ~      ~      ~      ~      ~
   `;
 };
 

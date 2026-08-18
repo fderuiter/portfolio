@@ -45,6 +45,7 @@
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
   },
+  "packageManager": "npm@10.9.2",
   "overrides": {
     "deepmerge-ts": "^8.0.1"
   },

@@ -6,7 +6,12 @@
 
 # lib/meme-audio
 
+## Type Aliases
+
+- [MemeSoundType](type-aliases/MemeSoundType.md)
+
 ## Functions
 
+- [getMemeSoundDuration](functions/getMemeSoundDuration.md)
 - [isSoundAllowed](functions/isSoundAllowed.md)
 - [playMemeSound](functions/playMemeSound.md)
