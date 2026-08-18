@@ -8,7 +8,7 @@
 
 > **useTelemetry**(`options?`): `object`
 
-Defined in: [hooks/useTelemetry.ts:444](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L444)
+Defined in: [hooks/useTelemetry.ts:485](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L485)
 
 Custom hook implementing a robust Stale-While-Revalidate (SWR) telemetry system with useSyncExternalStore.
 Hydrates state instantly from LocalStorage cache to prevent Cumulative Layout Shifts (CLS),

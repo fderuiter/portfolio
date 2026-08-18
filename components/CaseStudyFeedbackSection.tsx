@@ -13,6 +13,7 @@ import {
   IconLoader2,
 } from "@tabler/icons-react";
 import { isProductionEnvironment } from "@/lib/env";
+import { useOfflineQueue, getOfflineQueue } from "@/hooks/useOfflineQueue";
 
 interface CaseStudyFeedbackSectionProps {
   slug: string;
@@ -43,6 +44,8 @@ const REACTIONS: ReactionConfig[] = [
 ];
 
 export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps) {
+  const { enqueue } = useOfflineQueue();
+
   // Reactions state
   const [counts, setCounts] = useState<Record<string, number>>({
     insightful: 0,
@@ -94,6 +97,30 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
         if (!isProductionEnvironment()) {
           console.error("Failed to load case study reaction/feedback status:", err);
         }
+      } finally {
+        if (isMounted) {
+          const pendingItems = getOfflineQueue();
+          for (const item of pendingItems) {
+            if (item.endpoint === "/api/case-studies/reactions" && item.body) {
+              const body = item.body as { caseStudySlug?: string; reactionType?: string };
+              if (body.caseStudySlug === slug && body.reactionType) {
+                setUserReactions((prev) =>
+                  prev.includes(body.reactionType!) ? prev : [...prev, body.reactionType!]
+                );
+                setCounts((prev) => ({
+                  ...prev,
+                  [body.reactionType!]: (prev[body.reactionType!] || 0) + 1,
+                }));
+              }
+            } else if (item.endpoint === "/api/case-studies/feedback" && item.body) {
+              const body = item.body as { caseStudySlug?: string };
+              if (body.caseStudySlug === slug) {
+                setHasSubmittedFeedback(true);
+                setSuccessMsg("Thank you! Your learning feedback has been recorded.");
+              }
+            }
+          }
+        }
       }
     }
 
@@ -111,12 +138,20 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
 
     // Optimistic UI update
     const alreadyReacted = userReactions.includes(type);
-    const prevCounts = { ...counts };
-    const prevUserRx = [...userReactions];
 
     if (!alreadyReacted) {
       setCounts((prev) => ({ ...prev, [type]: (prev[type] || 0) + 1 }));
       setUserReactions((prev) => [...prev, type]);
+    }
+
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      enqueue({
+        type: "reaction",
+        endpoint: "/api/case-studies/reactions",
+        body: { caseStudySlug: slug, reactionType: type },
+      });
+      setReactionLoading(null);
+      return;
     }
 
     try {
@@ -135,13 +170,18 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
           setUserReactions(data.userReactions);
         }
       } else {
-        // Rollback on error
-        setCounts(prevCounts);
-        setUserReactions(prevUserRx);
+        enqueue({
+          type: "reaction",
+          endpoint: "/api/case-studies/reactions",
+          body: { caseStudySlug: slug, reactionType: type },
+        });
       }
     } catch {
-      setCounts(prevCounts);
-      setUserReactions(prevUserRx);
+      enqueue({
+        type: "reaction",
+        endpoint: "/api/case-studies/reactions",
+        body: { caseStudySlug: slug, reactionType: type },
+      });
     } finally {
       setReactionLoading(null);
     }
@@ -173,31 +213,64 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
       return;
     }
 
+    const payload = {
+      caseStudySlug: slug,
+      takeaways: selectedTakeaways,
+      comments: comments.trim(),
+    };
+
     setSubmitting(true);
+    setHasSubmittedFeedback(true);
+    setSuccessMsg("Thank you! Your learning feedback has been recorded.");
+
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      enqueue({
+        type: "feedback",
+        endpoint: "/api/case-studies/feedback",
+        body: payload,
+      });
+      setSelectedTakeaways([]);
+      setComments("");
+      setSubmitting(false);
+      return;
+    }
 
     try {
       const res = await fetch("/api/case-studies/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          caseStudySlug: slug,
-          takeaways: selectedTakeaways,
-          comments: comments.trim(),
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        setErrorMsg(data.error || "Failed to submit feedback. Please try again.");
+        if (res.status === 400 && data.error) {
+          setErrorMsg(data.error);
+          setHasSubmittedFeedback(false);
+          setSuccessMsg(null);
+        } else {
+          enqueue({
+            type: "feedback",
+            endpoint: "/api/case-studies/feedback",
+            body: payload,
+          });
+          setSelectedTakeaways([]);
+          setComments("");
+        }
       } else {
         setSuccessMsg(data.message || "Thank you! Your learning feedback has been recorded.");
-        setHasSubmittedFeedback(true);
         setSelectedTakeaways([]);
         setComments("");
       }
     } catch {
-      setErrorMsg("Network error submitting feedback. Please check connection.");
+      enqueue({
+        type: "feedback",
+        endpoint: "/api/case-studies/feedback",
+        body: payload,
+      });
+      setSelectedTakeaways([]);
+      setComments("");
     } finally {
       setSubmitting(false);
     }

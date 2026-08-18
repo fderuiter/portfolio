@@ -140,6 +140,33 @@ export function flushPendingDeferredQueue(): void {
   }
 }
 
+const RETRY_QUEUE_CACHE_KEY = "portfolio_telemetry_retry_queue";
+
+function loadPersistedRetryQueue(): QueuedEvent[] {
+  if (typeof window !== "undefined" && typeof window.localStorage?.getItem === "function") {
+    try {
+      const raw = localStorage.getItem(RETRY_QUEUE_CACHE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.warn("Failed to retrieve local storage telemetry retry queue:", sanitizeError(e));
+    }
+  }
+  return [];
+}
+
+function persistRetryQueue(): void {
+  if (typeof window !== "undefined" && typeof window.localStorage?.setItem === "function") {
+    try {
+      localStorage.setItem(RETRY_QUEUE_CACHE_KEY, JSON.stringify(retryQueue));
+    } catch (e) {
+      console.warn("Failed to write local storage telemetry retry queue:", sanitizeError(e));
+    }
+  }
+}
+
 /**
  * Configure the maximum capacity of the in-memory telemetry retry queue.
  * Trims existing queue entries from the front (oldest first) if current length exceeds new capacity.
@@ -152,6 +179,7 @@ export function setQueueCapacity(capacity: number): void {
   while (retryQueue.length > maxQueueCapacity) {
     retryQueue.shift();
   }
+  persistRetryQueue();
 }
 
 /**
@@ -163,12 +191,18 @@ export function getQueueCapacity(): number {
   return maxQueueCapacity;
 }
 
+let hasLoadedRetryQueue = false;
+
 /**
  * Get a shallow copy of the current in-memory retry queue.
  *
  * @returns Array of currently queued telemetry events.
  */
 export function getRetryQueue(): QueuedEvent[] {
+  if (!hasLoadedRetryQueue && typeof window !== "undefined") {
+    hasLoadedRetryQueue = true;
+    retryQueue = loadPersistedRetryQueue();
+  }
   return [...retryQueue];
 }
 
@@ -178,6 +212,10 @@ export function getRetryQueue(): QueuedEvent[] {
  * @returns Number of items currently in the retry queue.
  */
 export function getRetryQueueLength(): number {
+  if (!hasLoadedRetryQueue && typeof window !== "undefined") {
+    hasLoadedRetryQueue = true;
+    retryQueue = loadPersistedRetryQueue();
+  }
   return retryQueue.length;
 }
 
@@ -186,6 +224,7 @@ export function getRetryQueueLength(): number {
  */
 export function clearRetryQueue(): void {
   retryQueue = [];
+  persistRetryQueue();
   if (retryTimer) {
     clearTimeout(retryTimer);
     retryTimer = null;
@@ -202,6 +241,7 @@ export function enqueueRetryItem(item: QueuedEvent): void {
     retryQueue.shift();
   }
   retryQueue.push(item);
+  persistRetryQueue();
 }
 
 let inFlightFetch: Promise<void> | null = null;
@@ -395,6 +435,7 @@ async function processRetryQueue(options?: { keepalive?: boolean }) {
   if (retryQueue.length === 0) return;
   const currentBatch = [...retryQueue];
   retryQueue = [];
+  persistRetryQueue();
 
   if (retryTimer) {
     clearTimeout(retryTimer);
