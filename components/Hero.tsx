@@ -95,6 +95,7 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
         ref={ref}
         aria-hidden="true"
         role="presentation"
+        data-pretext-layer="visual"
         className="w-full select-none pointer-events-none"
       >
         {!isReady ? (
@@ -133,6 +134,7 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
       {/* 2. Transparent Standard Semantic Overlay (selectable, readable by screen readers) */}
       <h1
         className="text-4xl md:text-6xl font-black tracking-tight text-center leading-tight md:leading-none absolute inset-0 select-text bg-transparent"
+        data-pretext-layer="semantic"
         style={{
           color: "transparent",
           WebkitTextFillColor: "transparent",
@@ -205,6 +207,7 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
         ref={ref}
         aria-hidden="true"
         role="presentation"
+        data-pretext-layer="visual"
         className="w-full select-none pointer-events-none"
       >
         {!isReady ? (
@@ -243,6 +246,7 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
       {/* 2. Transparent Standard Semantic Overlay (selectable, readable by screen readers) */}
       <p
         className="text-neutral-400 text-sm md:text-base leading-[28px] text-center absolute inset-0 select-text bg-transparent"
+        data-pretext-layer="semantic"
         style={{
           color: "transparent",
           WebkitTextFillColor: "transparent",

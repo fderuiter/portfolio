@@ -435,3 +435,17 @@ body {
   border-color: #cbd5e1 !important;
 }
 
+/* Centralized Pretext High Contrast & Forced Colors Protection */
+@media (forced-colors: active), (-ms-high-contrast: active) {
+  [data-pretext-layer="visual"] {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  [data-pretext-layer="semantic"] {
+    color: CanvasText !important;
+    -webkit-text-fill-color: CanvasText !important;
+    forced-color-adjust: auto !important;
+  }
+}
+
