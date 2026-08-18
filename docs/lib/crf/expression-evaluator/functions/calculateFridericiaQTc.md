@@ -6,9 +6,9 @@
 
 # Function: calculateFridericiaQTc()
 
-> **calculateFridericiaQTc**(`qtMs`, `rrSec`): `number`
+> **calculateFridericiaQTc**(`qtMs`, `rrSec`): `number` \| `null`
 
-Defined in: [lib/crf/expression-evaluator.ts:343](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L343)
+Defined in: [lib/crf/expression-evaluator.ts:398](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L398)
 
 Calculates Fridericia Corrected QT interval (QTcF) in milliseconds.
 
@@ -24,4 +24,4 @@ Calculates Fridericia Corrected QT interval (QTcF) in milliseconds.
 
 ## Returns
 
-`number`
+`number` \| `null`

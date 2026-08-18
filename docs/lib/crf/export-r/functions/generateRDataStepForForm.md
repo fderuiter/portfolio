@@ -8,7 +8,7 @@
 
 > **generateRDataStepForForm**(`form`, `study`, `options?`): `string`
 
-Defined in: [lib/crf/export-r.ts:332](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L332)
+Defined in: [lib/crf/export-r.ts:352](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L352)
 
 Generates an R tibble construction and variable labeling block for a CRFForm.
 

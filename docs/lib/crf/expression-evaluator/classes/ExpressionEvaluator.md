@@ -24,7 +24,7 @@ Defined in: [lib/crf/expression-evaluator.ts:87](https://github.com/fderuiter/po
 
 ##### context
 
-`Record`\<`string`, `number`\>
+`Record`\<`string`, `number` \| `null`\>
 
 #### Returns
 
@@ -34,10 +34,10 @@ Defined in: [lib/crf/expression-evaluator.ts:87](https://github.com/fderuiter/po
 
 ### parse()
 
-> **parse**(): `number`
+> **parse**(): `number` \| `null`
 
 Defined in: [lib/crf/expression-evaluator.ts:115](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L115)
 
 #### Returns
 
-`number`
+`number` \| `null`

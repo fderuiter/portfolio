@@ -6,9 +6,9 @@
 
 # Function: evaluateFormula()
 
-> **evaluateFormula**(`formula`, `fieldValues`, `fieldsList`): `number`
+> **evaluateFormula**(`formula`, `fieldValues`, `fieldsList`): `number` \| `null`
 
-Defined in: [lib/crf/expression-evaluator.ts:256](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L256)
+Defined in: [lib/crf/expression-evaluator.ts:297](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L297)
 
 Safely evaluates a math formula with dynamic field variables
 
@@ -34,6 +34,6 @@ Array of form fields for identifier resolution
 
 ## Returns
 
-`number`
+`number` \| `null`
 
-Evaluated numeric result
+Evaluated numeric result or null when uncalculated / zero denominator

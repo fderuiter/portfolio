@@ -146,7 +146,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
       if (field.dataType === "calculated" && field.calculationFormula) {
         const calculatedVal = evaluateFormula(field.calculationFormula, subjectVals, fields);
         const key = `${subjectId}_${activeVisitId}_${field.id}`;
-        if (formValues[key] !== calculatedVal && Number.isFinite(calculatedVal)) {
+        if (formValues[key] !== calculatedVal) {
           setFormValues((prev) => ({ ...prev, [key]: calculatedVal }));
         }
       }
@@ -784,11 +784,11 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                         )}
 
                         {field.dataType === "calculated" && (
-                          <div className="p-2 rounded-lg bg-brand-cyan/10 border border-brand-cyan/30 flex items-center justify-between font-mono">
+                          <div className="p-2 rounded-lg bg-brand-cyan/10 border border-brand-cyan/30 flex items-center justify-between font-mono min-h-[34px]">
                             <span className="text-xs text-brand-cyan font-bold">
                               {currentVal !== undefined && currentVal !== null
                                 ? String(currentVal)
-                                : "Pending Calculation"}
+                                : ""}
                             </span>
                             {field.unit && (
                               <span className="text-[10px] text-zinc-400">{field.unit}</span>
