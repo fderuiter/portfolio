@@ -13,6 +13,7 @@ import { CommitSparkline } from "@/components/CommitSparkline";
 import { useBentoLayout } from "@/components/providers/BentoLayoutContext";
 import { useTerminology } from "@/components/providers/TerminologyProvider";
 import { compileTerms } from "@/lib/term-compiler";
+import { parsePretextBlocks } from "@/lib/pretext-block-parser";
 
 const REALITY_CONTENT: Record<string, string> = {
   schemaflow: "While the drag-and-drop canvas is extremely smooth, we initially faced major rendering bottlenecks when rendering over 150 schema nodes. We had to implement node occlusion culling and state debouncing to maintain 60 FPS, and cyclical dependency detection still requires optimized Web Worker postMessage parsing.",
@@ -155,20 +156,88 @@ function parseInlineNodes(
 const FormattedMarkdownText: React.FC<{ text: string; className?: string }> = ({ text, className }) => {
   const { simplified } = useTerminology();
 
-  const compiledText = React.useMemo(() => {
-    return compileTerms(text || "");
+  const blocks = React.useMemo(() => {
+    return parsePretextBlocks(compileTerms(text || ""));
   }, [text]);
-
-  const paragraphs = React.useMemo(() => {
-    return compiledText.split(/\r?\n+/).map((p) => p.trim()).filter(Boolean);
-  }, [compiledText]);
 
   return (
     <div className="flex flex-col gap-3">
-      {paragraphs.map((para, pIdx) => {
-        const nodes = parseInlineNodes(para, simplified);
+      {blocks.map((block, bIdx) => {
+        if (block.type === "log") {
+          return (
+            <div
+              key={bIdx}
+              className="my-1.5 p-2 bg-black/80 border border-zinc-800/80 rounded-lg font-mono text-[11px] leading-[18px] text-zinc-300 overflow-x-auto select-text"
+            >
+              {block.lines.map((line, lIdx) => {
+                let lineStyle = "text-zinc-300";
+                if (/\[\s*ERROR\s*\]|ERROR:|FATAL/i.test(line)) {
+                  lineStyle = "text-rose-400 font-bold bg-rose-500/10 -mx-2 px-2 rounded-sm";
+                } else if (/\[\s*WARN\s*\]|WARN:/i.test(line)) {
+                  lineStyle = "text-amber-300 font-semibold";
+                } else if (/\[\s*INFO\s*\]|INFO:/i.test(line)) {
+                  lineStyle = "text-cyan-300";
+                } else if (/\[\s*DEBUG\s*\]|DEBUG:/i.test(line)) {
+                  lineStyle = "text-zinc-500";
+                }
+                return (
+                  <div key={lIdx} className={cn("whitespace-pre-wrap break-words", lineStyle)}>
+                    {line}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        }
+
+        if (block.type === "diff") {
+          return (
+            <div
+              key={bIdx}
+              className="my-1.5 p-2 bg-black/80 border border-zinc-800/80 rounded-lg font-mono text-[11px] leading-[18px] overflow-x-auto select-text"
+            >
+              {block.lines.map((line, lIdx) => {
+                let lineStyle = "text-zinc-300";
+                if (line.startsWith("+")) {
+                  lineStyle = "text-emerald-400 font-semibold bg-emerald-500/10 -mx-2 px-2 rounded-sm";
+                } else if (line.startsWith("-")) {
+                  lineStyle = "text-rose-400 font-semibold bg-rose-500/10 -mx-2 px-2 rounded-sm";
+                } else if (line.startsWith("@@") || line.startsWith("***") || line.startsWith("---") || line.startsWith("+++")) {
+                  lineStyle = "text-brand-cyan font-bold";
+                }
+                return (
+                  <div key={lIdx} className={cn("whitespace-pre-wrap break-words", lineStyle)}>
+                    {line}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        }
+
+        if (block.type === "code") {
+          return (
+            <div
+              key={bIdx}
+              className="my-1.5 p-2 bg-black/80 border border-zinc-800/80 rounded-lg font-mono text-[11px] leading-[18px] text-brand-cyan/90 overflow-x-auto select-text"
+            >
+              {block.language && block.language !== "code" && (
+                <div className="text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1 border-b border-zinc-800/60 pb-0.5">
+                  {block.language}
+                </div>
+              )}
+              {block.lines.map((line, lIdx) => (
+                <div key={lIdx} className="whitespace-pre-wrap break-words">
+                  {line || "\u00A0"}
+                </div>
+              ))}
+            </div>
+          );
+        }
+
+        const nodes = parseInlineNodes(block.raw, simplified);
         return (
-          <p key={pIdx} className={className}>
+          <p key={bIdx} className={className}>
             {nodes}
           </p>
         );
