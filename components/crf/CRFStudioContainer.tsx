@@ -14,7 +14,7 @@ import {
   EditCheckRule,
   StudyVisit,
 } from "@/lib/crf/types";
-import { getPresetById, getOncologyPresetSync } from "@/lib/crf/presets/loader";
+import { getPresetByIdSync, getOncologyPresetSync } from "@/lib/crf/presets/loader";
 import { StudioHeader } from "./StudioHeader";
 import { FormsNavigator } from "./LeftSidebar/FormsNavigator";
 import { WidgetPalette } from "./LeftSidebar/WidgetPalette";
@@ -438,8 +438,8 @@ export const CRFStudioContainer: React.FC = () => {
   };
 
   // Preset Selector Handler
-  const handleSelectPreset = async (presetId: string) => {
-    const preset = await getPresetById(presetId);
+  const handleSelectPreset = (presetId: string) => {
+    const preset = getPresetByIdSync(presetId);
     if (preset) {
       updateStudyWithHistory(preset);
       setActiveFormId(preset.forms[0]?.id || "");
