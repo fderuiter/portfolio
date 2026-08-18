@@ -62,6 +62,11 @@ const nextConfig: NextConfig = {
         destination: "/proof",
         permanent: true,
       },
+      {
+        source: "/projects/:slug*",
+        destination: "/case-studies/:slug*",
+        permanent: true,
+      },
     ];
   },
 };

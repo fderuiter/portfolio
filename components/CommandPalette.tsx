@@ -191,6 +191,24 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         ]
       },
       {
+        id: "nav-wedding-website",
+        title: "Wedding Website & Guest Management Platform",
+        subtitle: "Full-stack event portal — Three.js 3D physics canvas, gift scraper, and admin CMS",
+        category: "navigation",
+        url: "/case-studies/wedding-website",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Case Study",
+        status: "Full-Stack / 3D",
+        description: "Enterprise-grade full-stack wedding website and guest management portal with Three.js 3D WebGL physics, automated registry scraper, drag-and-drop CMS layout management, snapshot versioning, and SSRF security hardening.",
+        techStack: ["Next.js", "TypeScript", "Three.js", "Prisma", "Tailwind CSS", "Playwright", "Docker"],
+        highlights: [
+          "3D interactive physics canvas simulation (Three.js)",
+          "Universal OpenGraph & JSON-LD gift registry scraper",
+          "Drag-and-drop CMS with snapshot versioning & rollback",
+          "SSRF sanitation & token-bucket rate limiting"
+        ]
+      },
+      {
         id: "nav-laser-loon",
         title: "Laser Loon: Quest for the State Flag",
         subtitle: "Playable civic physics shooter — pilot F277 Laser Loon on the Road to the Capitol",
