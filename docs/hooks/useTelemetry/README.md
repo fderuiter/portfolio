@@ -13,6 +13,7 @@
 ## Type Aliases
 
 - [TelemetryData](type-aliases/TelemetryData.md)
+- [TelemetryEventType](type-aliases/TelemetryEventType.md)
 
 ## Functions
 

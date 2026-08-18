@@ -136,8 +136,9 @@ export default function RecruiterSimulator() {
       setHistory((prev) => [...prev, currentStep]);
       setCurrentStep(option.nextStep);
 
-      recordEvent("simulator", "project_click");
+      recordEvent("simulator", "simulator_option_select");
       if (option.nextStep === "final_eval") {
+        recordEvent("simulator", "simulator_milestone_reached");
         playSuccess();
       } else {
         announce("Step completed", "polite");
@@ -205,7 +206,8 @@ export default function RecruiterSimulator() {
     if (!profile) return;
     const reportText = `🏆 Engineering Alignment Assessment\nResult: ${profile.title} (${profile.score}% Match)\nSummary: ${profile.summary}\nSchedule a sync: ${getActiveHostUrl()}/schedule`;
     copy(reportText);
-  }, [profile, copy]);
+    recordEvent("simulator", "simulator_report_copy");
+  }, [profile, copy, recordEvent]);
 
   return (
     <PageLayout
@@ -422,6 +424,7 @@ export default function RecruiterSimulator() {
                 <div className="flex flex-col sm:flex-row gap-3 w-full justify-center">
                   <Link
                     href="/schedule"
+                    onClick={() => recordEvent("simulator", "simulator_schedule_click")}
                     className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-brand-cyan to-brand-blue text-zinc-950 hover:text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.2)] transition-all cursor-pointer hover:scale-[1.02]"
                   >
                     <IconCalendar className="w-4 h-4" aria-hidden="true" /> Schedule on Google Calendar

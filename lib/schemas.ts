@@ -5,8 +5,16 @@ import { z } from "zod";
  */
 export const TelemetryEventSchema = z.object({
   projectSlug: z.string().min(1, "projectSlug must be a non-empty string"),
-  eventType: z.enum(["page_view", "project_click", "route_error"], {
-    message: "Allowed: 'page_view', 'project_click', 'route_error'",
+  eventType: z.enum([
+    "page_view",
+    "project_click",
+    "route_error",
+    "simulator_option_select",
+    "simulator_milestone_reached",
+    "simulator_schedule_click",
+    "simulator_report_copy",
+  ], {
+    message: "Allowed: 'page_view', 'project_click', 'route_error', 'simulator_option_select', 'simulator_milestone_reached', 'simulator_schedule_click', 'simulator_report_copy'",
   }),
 });
 

@@ -222,7 +222,7 @@ export async function POST(req: NextRequest) {
         if (firstIssue.path[0] === "projectSlug") {
           errorMessage = "Missing or invalid projectSlug identifier";
         } else if (firstIssue.path[0] === "eventType") {
-          errorMessage = "Missing or invalid eventType. Allowed: 'page_view', 'project_click', 'route_error'";
+          errorMessage = "Missing or invalid eventType. Allowed: 'page_view', 'project_click', 'route_error', 'simulator_option_select', 'simulator_milestone_reached', 'simulator_schedule_click', 'simulator_report_copy'";
         }
         return NextResponse.json(
           {
@@ -261,7 +261,7 @@ export async function POST(req: NextRequest) {
       if (firstIssue.path[0] === "projectSlug") {
         errorMessage = "Missing or invalid projectSlug identifier";
       } else if (firstIssue.path[0] === "eventType") {
-        errorMessage = "Missing or invalid eventType. Allowed: 'page_view', 'project_click', 'route_error'";
+        errorMessage = "Missing or invalid eventType. Allowed: 'page_view', 'project_click', 'route_error', 'simulator_option_select', 'simulator_milestone_reached', 'simulator_schedule_click', 'simulator_report_copy'";
       }
       return NextResponse.json(
         {

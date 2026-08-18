@@ -18,9 +18,19 @@ interface TelemetryStoreState {
   syncFailed: boolean;
 }
 
+export type TelemetryEventType =
+  | "page_view"
+  | "project_click"
+  | "route_error"
+  | "simulator_option_select"
+  | "simulator_milestone_reached"
+  | "simulator_schedule_click"
+  | "simulator_report_copy"
+  | (string & {});
+
 interface QueuedEvent {
   projectSlug: string;
-  eventType: "page_view" | "project_click" | "route_error";
+  eventType: TelemetryEventType;
   retries: number;
 }
 
@@ -192,7 +202,7 @@ export function useTelemetry() {
   }, []);
 
   const recordEvent = useCallback(
-    async (projectSlug: string, eventType: "page_view" | "project_click" | "route_error") => {
+    async (projectSlug: string, eventType: TelemetryEventType) => {
       // 1. Optimistic Local State Update
       const currentStats = store.telemetry[projectSlug] || { views: 0, clicks: 0 };
       const updatedStats = {

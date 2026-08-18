@@ -110,6 +110,43 @@ describe("Telemetry API Route - Route Error Telemetry", () => {
     expect(mockExpire).toHaveBeenCalledWith("telemetry_buffer", 172800);
   });
 
+  it("should accept candidate simulator event types and persist them in the memory buffer", async () => {
+    const simulatorEventTypes = [
+      "simulator_option_select",
+      "simulator_milestone_reached",
+      "simulator_schedule_click",
+      "simulator_report_copy",
+    ];
+
+    for (const eventType of simulatorEventTypes) {
+      const payload = {
+        projectSlug: "simulator",
+        eventType,
+      };
+
+      const req = new NextRequest("http://localhost:3000/api/telemetry", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+
+      const response = await POST(req);
+      expect(response.status).toBe(201);
+
+      const data = await response.json();
+      expect(data.success).toBe(true);
+      expect(data.event.projectSlug).toBe("simulator");
+      expect(data.event.eventType).toBe(eventType);
+
+      expect(mockLpush).toHaveBeenCalledWith(
+        "telemetry_buffer",
+        expect.objectContaining({
+          projectSlug: "simulator",
+          eventType,
+        })
+      );
+    }
+  });
+
   it("should reject invalid event types with 400 status", async () => {
     const payload = {
       projectSlug: "/some-path",
