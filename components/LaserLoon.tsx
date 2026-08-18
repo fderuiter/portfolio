@@ -74,7 +74,33 @@ const getHighScoreSnapshot = () => {
 };
 const getHighScoreServerSnapshot = () => "0";
 
-export const LaserLoon: React.FC = () => {
+export interface LaserLoonConfig {
+  mode?: LaserMode;
+  difficulty?: "easy" | "normal" | "hard";
+  startingAct?: number;
+  laserType?: LaserType;
+  seed?: number | string;
+  speedMultiplier?: number;
+}
+
+export interface LaserLoonProps {
+  mode?: LaserMode;
+  difficulty?: "easy" | "normal" | "hard";
+  startingAct?: number;
+  laserType?: LaserType;
+  seed?: number | string;
+  speedMultiplier?: number;
+  initialConfig?: LaserLoonConfig;
+}
+
+export const LaserLoon: React.FC<LaserLoonProps> = (props) => {
+  const config = props.initialConfig || props;
+  const initialMode = (config.mode || props.mode || "campaign") as LaserMode;
+  const initialLaserType = (config.laserType || props.laserType || "ruby-laser") as LaserType;
+  const initialAct = config.startingAct ?? props.startingAct ?? 1;
+  const difficulty = config.difficulty ?? props.difficulty ?? "normal";
+  const seed = config.seed ?? props.seed;
+
   const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const rawHighScore = useSyncExternalStore(
     subscribeHighScore,
@@ -86,10 +112,10 @@ export const LaserLoon: React.FC = () => {
   const { recordEvent } = useTelemetry();
 
   // Game configuration & React state
-  const [mode, setMode] = useState<LaserMode>("campaign");
-  const [laserType, setLaserType] = useState<LaserType>("ruby-laser");
+  const [mode, setMode] = useState<LaserMode>(initialMode);
+  const [laserType, setLaserType] = useState<LaserType>(initialLaserType);
   const [gameState, setGameState] = useState<"idle" | "playing" | "act-intro" | "act-victory" | "gameover" | "campaign-victory">("idle");
-  const [currentActNum, setCurrentActNum] = useState(1);
+  const [currentActNum, setCurrentActNum] = useState(initialAct);
   const [actKills, setActKills] = useState(0);
   const [bossActive, setBossActive] = useState(false);
   const [bossHp, setBossHp] = useState(100);

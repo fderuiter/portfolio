@@ -129,7 +129,29 @@ interface Particle {
   life: number;
 }
 
-export const ClinicalTrialChaos: React.FC = () => {
+export interface ClinicalChaosConfig {
+  gameMode?: GameMode;
+  difficulty?: "standard" | "hardcore" | "audit-crunch";
+  startingStress?: number;
+  seed?: number | string;
+  speedMultiplier?: number;
+}
+
+export interface ClinicalTrialChaosProps {
+  gameMode?: GameMode;
+  difficulty?: "standard" | "hardcore" | "audit-crunch";
+  startingStress?: number;
+  seed?: number | string;
+  speedMultiplier?: number;
+  initialConfig?: ClinicalChaosConfig;
+}
+
+export const ClinicalTrialChaos: React.FC<ClinicalTrialChaosProps> = (props) => {
+  const config = props.initialConfig || props;
+  const initialMode = (config.gameMode || props.gameMode || "campaign") as GameMode;
+  const initialStress = config.startingStress ?? props.startingStress ?? 0;
+  const seed = config.seed ?? props.seed;
+
   const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const rawHighScore = useSyncExternalStore(
     subscribeHighScore,
@@ -141,7 +163,7 @@ export const ClinicalTrialChaos: React.FC = () => {
   const { recordEvent } = useTelemetry();
 
   // 1. Game configuration & modes
-  const [gameMode, setGameMode] = useState<GameMode>("campaign");
+  const [gameMode, setGameMode] = useState<GameMode>(initialMode);
   const [phase, setPhase] = useState<GamePhase>(1);
   const [playState, setPlayState] = useState<PlayState>("idle");
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -152,7 +174,10 @@ export const ClinicalTrialChaos: React.FC = () => {
   // 2. Entities & Engine State
   const [scoreState, setScoreState] = useState<GameScoreState>(createInitialScoreState);
   const effectiveHighScore = Math.max(scoreState.highScore, loadedHighScore);
-  const [auditor, setAuditor] = useState<AuditorState>(createInitialAuditorState);
+  const [auditor, setAuditor] = useState<AuditorState>(() => {
+    const base = createInitialAuditorState();
+    return { ...base, suspicion: Math.max(base.suspicion, initialStress) };
+  });
   const [stations, setStations] = useState<StationConfig[]>(() => getStationsForPhase(1, "campaign"));
   const [conveyorSubjects, setConveyorSubjects] = useState<ClinicalSubject[]>([]);
   const [submittedHistory, setSubmittedHistory] = useState<ClinicalSubject[]>([]);

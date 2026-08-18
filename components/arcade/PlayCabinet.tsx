@@ -1,14 +1,19 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { IconPlayerPlay, IconPower, IconTerminal } from "@tabler/icons-react";
+import { IconPlayerPlay, IconPower, IconTerminal, IconAdjustmentsHorizontal, IconDice } from "@tabler/icons-react";
+import {
+  ArcadeBaseGameConfig,
+  PreflightControlField,
+  getGamePreflightFields,
+} from "@/lib/arcade-config";
 
 interface ControlItem {
   key: string;
   action: string;
 }
 
-interface PlayCabinetProps {
+export interface PlayCabinetProps {
   title: string;
   subtitle?: string;
   accentColor: "amber" | "red" | "purple" | "emerald" | "rose";
@@ -16,7 +21,35 @@ interface PlayCabinetProps {
   instructions: string;
   controls: ControlItem[];
   importComponent: () => Promise<unknown>;
-  children: React.ReactNode;
+  gameId?: string;
+  preflightOptions?: PreflightControlField[];
+  initialConfig?: ArcadeBaseGameConfig;
+  onConfigChange?: (config: ArcadeBaseGameConfig) => void;
+  children: React.ReactNode | ((config: ArcadeBaseGameConfig) => React.ReactNode);
+}
+
+function cloneWithProps(children: React.ReactNode, config: ArcadeBaseGameConfig): React.ReactNode {
+  if (typeof children === "function") {
+    return (children as (cfg: ArcadeBaseGameConfig) => React.ReactNode)(config);
+  }
+  if (!React.isValidElement(children)) {
+    return children;
+  }
+
+  const element = children as React.ReactElement<Record<string, unknown>>;
+  const elementProps = element.props || {};
+
+  const newProps: Record<string, unknown> = {
+    ...config,
+    initialConfig: config,
+    ...elementProps,
+  };
+
+  if (elementProps.children && React.isValidElement(elementProps.children)) {
+    newProps.children = cloneWithProps(elementProps.children, config);
+  }
+
+  return React.cloneElement(element, newProps);
 }
 
 export const PlayCabinet: React.FC<PlayCabinetProps> = ({
@@ -27,6 +60,10 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
   instructions,
   controls,
   importComponent,
+  gameId,
+  preflightOptions,
+  initialConfig,
+  onConfigChange,
   children,
 }) => {
   const [isLaunched, setIsLaunched] = useState(false);
@@ -34,6 +71,27 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const [isWarmingUp, setIsWarmingUp] = useState(false);
   const [bootProgress, setBootProgress] = useState(0);
+
+  const fields = preflightOptions || getGamePreflightFields(gameId || title);
+
+  const [config, setConfig] = useState<ArcadeBaseGameConfig>(() => {
+    const defaults: ArcadeBaseGameConfig = {};
+    fields.forEach((f) => {
+      defaults[f.id] = f.defaultValue;
+    });
+    return { ...defaults, ...initialConfig };
+  });
+
+  const handleFieldChange = (id: string, value: string | number) => {
+    const updated = { ...config, [id]: value };
+    setConfig(updated);
+    if (onConfigChange) onConfigChange(updated);
+  };
+
+  const handleRandomizeSeed = () => {
+    const newSeed = Math.floor(Math.random() * 899999 + 100000);
+    handleFieldChange("seed", newSeed);
+  };
 
   const colors = {
     amber: {
@@ -162,7 +220,9 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
       <div className="relative w-full flex flex-col items-center">
         {/* Game Area Container with Reset Cabinet Button overlay */}
         <div className="w-full relative">
-          {children}
+          {typeof children === "function"
+            ? (children as (cfg: ArcadeBaseGameConfig) => React.ReactNode)(config)
+            : cloneWithProps(children as React.ReactElement, config)}
         </div>
         
         {/* Discrete Retro Controller Menu */}
@@ -170,6 +230,11 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="uppercase tracking-wider">Cabinet Engaged</span>
+            {config.seed !== undefined && (
+              <span className="ml-2 text-[10px] text-zinc-400 bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800">
+                SEED: {String(config.seed)}
+              </span>
+            )}
           </div>
           <button
             onClick={handleExit}
@@ -187,7 +252,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
     <div className={`w-full ${colors.shadow} transition-all duration-300`}>
       {/* Static Retro Cabinet Preview Screen with scanlines */}
       <div 
-        className="w-full aspect-[16/10] min-h-[380px] rounded-2xl border border-zinc-800 bg-zinc-950 flex flex-col justify-between p-6 sm:p-8 relative overflow-hidden select-none"
+        className="w-full min-h-[420px] rounded-2xl border border-zinc-800 bg-zinc-950 flex flex-col justify-between p-6 sm:p-8 relative overflow-hidden select-none"
         style={{
           backgroundImage: "radial-gradient(circle at center, #09090b 40%, #020202 100%)"
         }}
@@ -206,6 +271,8 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
               <div className="text-zinc-600 mt-2">=================================</div>
               <div>&gt; INITIALIZING PORT CLIENT... <span className="text-emerald-500">OK</span></div>
               <div>&gt; ISOLATING ENGINE MEMORY... <span className="text-emerald-500">COMPLETE</span></div>
+              <div>&gt; APPLYING PRE-FLIGHT PROPS... <span className="text-emerald-500">APPLIED</span></div>
+              <div>&gt; INITIALIZING SEED ({String(config.seed)})... <span className="text-emerald-500">DETERMINISTIC</span></div>
               <div>&gt; CONSTRUCTING AUDIO GRAPH... <span className="text-emerald-500">READY</span></div>
               {bootProgress > 50 && (
                 <div>&gt; ESTABLISHING BUFFER CANVAS PORT... <span className="text-emerald-500">STABLE</span></div>
@@ -247,8 +314,8 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
             </div>
 
             {/* Cabinet Game Display Details */}
-            <div className="flex-1 flex flex-col items-center justify-center text-center my-6 max-w-xl mx-auto z-10">
-              <div className={`p-4 rounded-full bg-zinc-900/60 border border-zinc-800/80 text-white mb-4 shadow-inner group-hover:scale-105 transition-transform`}>
+            <div className="flex-1 flex flex-col items-center justify-center text-center my-4 max-w-2xl mx-auto z-10 w-full">
+              <div className={`p-3.5 rounded-full bg-zinc-900/60 border border-zinc-800/80 text-white mb-3 shadow-inner group-hover:scale-105 transition-transform`}>
                 {icon}
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold font-mono text-white tracking-tight uppercase">
@@ -259,9 +326,76 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
                   {subtitle}
                 </p>
               )}
-              <p className="text-xs text-zinc-400 font-mono mt-3 leading-relaxed">
+              <p className="text-xs text-zinc-400 font-mono mt-2 leading-relaxed max-w-lg">
                 {instructions}
               </p>
+
+              {/* Dynamic Pre-flight Parameter Selector Panel */}
+              <div className="mt-5 w-full bg-zinc-900/70 border border-zinc-800/90 rounded-xl p-3.5 font-mono text-xs text-left shadow-inner">
+                <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2 mb-3">
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-zinc-300">
+                    <IconAdjustmentsHorizontal className={`w-4 h-4 ${colors.text}`} />
+                    <span>Pre-Flight Launch Configuration</span>
+                  </div>
+                  <div className="text-[9px] uppercase tracking-widest text-zinc-500">
+                    Prop Injection Active
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {fields.map((field) => {
+                    if (field.id === "seed") {
+                      return (
+                        <div key={field.id} className="sm:col-span-2 lg:col-span-1 space-y-1">
+                          <label className="block text-[10px] uppercase font-bold text-zinc-400 tracking-wider">
+                            {field.label}
+                          </label>
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="text"
+                              value={String(config[field.id] ?? field.defaultValue)}
+                              onChange={(e) => handleFieldChange(field.id, e.target.value)}
+                              className="w-full bg-zinc-950 border border-zinc-700/80 rounded px-2.5 py-1 text-xs text-amber-300 font-bold focus:outline-none focus:border-amber-500"
+                              placeholder="e.g. 12345"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleRandomizeSeed}
+                              title="Randomize Seed"
+                              className="px-2 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded border border-zinc-700 flex items-center gap-1 text-[10px] font-bold whitespace-nowrap transition-colors"
+                            >
+                              <IconDice className="w-3.5 h-3.5 text-amber-400" />
+                              <span>Rand</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div key={field.id} className="space-y-1">
+                        <label className="block text-[10px] uppercase font-bold text-zinc-400 tracking-wider">
+                          {field.label}
+                        </label>
+                        <select
+                          value={String(config[field.id] ?? field.defaultValue)}
+                          onChange={(e) => {
+                            const val = field.options?.find((o) => String(o.value) === e.target.value)?.value;
+                            handleFieldChange(field.id, val !== undefined ? val : e.target.value);
+                          }}
+                          className="w-full bg-zinc-950 border border-zinc-700/80 rounded px-2.5 py-1 text-xs text-zinc-200 font-bold focus:outline-none focus:border-amber-500 cursor-pointer"
+                        >
+                          {field.options?.map((opt) => (
+                            <option key={String(opt.value)} value={String(opt.value)}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
 
             {/* Bottom Actions & Controls HUD */}
@@ -297,3 +431,4 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
     </div>
   );
 };
+

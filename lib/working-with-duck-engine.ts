@@ -498,9 +498,17 @@ export function clampBounds(x: number, y: number): { x: number; y: number } {
 export function createInitialDuckGameState(
   level = 1,
   mode: "campaign" | "endless" = "campaign",
-  preservedAccessories: DuckAccessory[] = ["none", "bucket-hat"]
+  preservedAccessories: DuckAccessory[] = ["none", "bucket-hat"],
+  seed?: number | string,
+  difficulty: "chill" | "standard" | "chaos" = "standard",
+  speedMultiplier = 1.0
 ): WorkingWithDuckState {
   const sprint = SPRINTS.find((s) => s.level === level) || SPRINTS[0];
+
+  const initialExcitement = difficulty === "chill" ? 10 : difficulty === "chaos" ? 35 : 15;
+  const initialBladder = difficulty === "chill" ? 5 : difficulty === "chaos" ? 25 : 10;
+  const initialThirst = difficulty === "chill" ? 10 : difficulty === "chaos" ? 30 : 20;
+  const initialHunger = difficulty === "chill" ? 10 : difficulty === "chaos" ? 30 : 15;
 
   const unlockedAcc: DuckAccessory[] = Array.from(
     new Set<DuckAccessory>([
@@ -519,12 +527,12 @@ export function createInitialDuckGameState(
     currentLevel: level,
     workProgress: 0,
     targetWorkProgress: mode === "endless" ? 999999 : sprint.targetWork,
-    excitement: 15,
-    bladder: 10,
-    thirst: 20,
-    hunger: 15,
+    excitement: initialExcitement,
+    bladder: initialBladder,
+    thirst: initialThirst,
+    hunger: initialHunger,
     naughtyVsGood: 15,
-    multiplier: 1.2,
+    multiplier: 1.2 * speedMultiplier,
     ticks: 0,
     totalScore: 0,
     calmBuffTimer: 0,

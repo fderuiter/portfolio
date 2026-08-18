@@ -54,28 +54,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
     return false;
   });
 
-  // Native IntersectionObserver to defer external model fetches until within 200px of viewport
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container || typeof IntersectionObserver === "undefined") return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setIsNearViewport(true);
-          }
-        });
-      },
-      { rootMargin: "200px" }
-    );
-
-    observer.observe(container);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
+  const isIntersectingRef = useRef(true);
 
   const [isRotating, setIsRotating] = useState(true);
   const isRotatingRef = useRef(isRotating);
@@ -94,20 +73,21 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
   const prevMouseRef = useRef({ x: 0, y: 0 });
   const rotationRef = useRef({ x: 0.2, y: -0.4 });
 
-  // IntersectionObserver Guard to pause rendering loops when scrolled offscreen
-  const isIntersectingRef = useRef(true);
+  // Native IntersectionObserver to defer external model fetches and pause rendering loops
   useEffect(() => {
     const container = containerRef.current;
     if (!container || typeof IntersectionObserver === "undefined") return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        const entry = entries[0];
-        if (entry) {
+        entries.forEach((entry) => {
           isIntersectingRef.current = entry.isIntersecting;
-        }
+          if (entry.isIntersecting) {
+            setIsNearViewport(true);
+          }
+        });
       },
-      { threshold: 0.0, rootMargin: "50px" }
+      { rootMargin: "200px" }
     );
 
     observer.observe(container);

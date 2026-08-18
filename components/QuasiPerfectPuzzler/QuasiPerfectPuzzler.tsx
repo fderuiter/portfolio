@@ -75,7 +75,31 @@ interface StepHistory {
   logText: string;
 }
 
-export const QuasiPerfectPuzzler: React.FC = () => {
+export interface QuasiPuzzlerConfig {
+  gameMode?: GameMode;
+  difficulty?: "story" | "hacker" | "expert";
+  startingLevelIndex?: number;
+  ramLimit?: number;
+  seed?: number | string;
+  speedMultiplier?: number;
+}
+
+export interface QuasiPerfectPuzzlerProps {
+  gameMode?: GameMode;
+  difficulty?: "story" | "hacker" | "expert";
+  startingLevelIndex?: number;
+  ramLimit?: number;
+  seed?: number | string;
+  speedMultiplier?: number;
+  initialConfig?: QuasiPuzzlerConfig;
+}
+
+export const QuasiPerfectPuzzler: React.FC<QuasiPerfectPuzzlerProps> = (props) => {
+  const config = props.initialConfig || props;
+  const initialMode = (config.gameMode || props.gameMode || "story") as GameMode;
+  const initialLevelIndex = config.startingLevelIndex ?? props.startingLevelIndex ?? 0;
+  const ramLimitProp = config.ramLimit ?? props.ramLimit;
+
   const { playNote, playSuccess } = useAudio();
 
   const [activeTab, setActiveTab] = useState<"campaign" | "sandbox">("campaign");
@@ -91,6 +115,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
 
   // Dual Game Mode State (Story/Casual vs Hacker/Speedrun)
   const [gameMode, setGameMode] = useState<GameMode>(() => {
+    if (config.gameMode || props.gameMode) return initialMode;
     if (typeof window === "undefined") return "story";
     try {
       return (localStorage.getItem(MODE_STORAGE_KEY) as GameMode) || "story";
@@ -99,7 +124,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
     }
   });
 
-  const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
+  const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(initialLevelIndex);
   const currentLevel: PuzzlerLevelDef = puzzleLevels[currentLevelIndex] || puzzleLevels[0];
 
   // Multi-Goal State

@@ -29,19 +29,33 @@ import {
   ULTIMATE_CHARGE_PER_KILL,
 } from "./constants";
 
-export function createInitialState(mode: LaserMode = "campaign"): LaserLoonState {
+export interface LaserLoonEngineOptions {
+  difficulty?: "easy" | "normal" | "hard";
+  startingAct?: number;
+  laserType?: LaserType;
+  seed?: number | string;
+  speedMultiplier?: number;
+}
+
+export function createInitialState(
+  mode: LaserMode = "campaign",
+  options?: LaserLoonEngineOptions
+): LaserLoonState {
+  const currentAct = options?.startingAct ?? 1;
+  const laserType = options?.laserType ?? "ruby-laser";
+
   return {
     mode,
-    laserType: "ruby-laser",
+    laserType,
     gameState: "idle",
-    currentAct: 1,
+    currentAct,
     actKills: 0,
     score: 0,
     highScore: 0,
     combo: 0,
     multiplier: 1,
     timeLeft: mode === "arcade" ? ARCADE_GAME_DURATION_SECS : 999,
-    gravity: 0.15,
+    gravity: options?.difficulty === "easy" ? 0.1 : options?.difficulty === "hard" ? 0.25 : 0.15,
     ultimateMeter: 0,
     activePowerUp: null,
     targets: [],

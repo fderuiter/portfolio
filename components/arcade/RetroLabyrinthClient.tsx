@@ -76,6 +76,7 @@ export const RetroLabyrinthClient: React.FC = () => {
         {/* Game Container */}
         <div className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-6 shadow-[0_0_50px_rgba(244,63,94,0.1)] flex flex-col items-center">
           <PlayCabinet
+            gameId="retro-labyrinth"
             title="Retro Labyrinth: Graveyard Roguelike"
             subtitle="Procedural Dungeon Generation & CRT Filter Engine"
             accentColor="rose"

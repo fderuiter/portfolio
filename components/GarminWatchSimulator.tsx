@@ -46,7 +46,29 @@ const getHighScoreSnapshot = () => {
 };
 const getHighScoreServerSnapshot = () => "0";
 
-export const GarminWatchSimulator: React.FC = () => {
+export interface GarminWatchConfig {
+  deviceTarget?: DeviceTarget;
+  bezelTheme?: WatchBezelTheme;
+  difficulty?: "relaxed" | "standard" | "strict";
+  seed?: number | string;
+  speedMultiplier?: number;
+}
+
+export interface GarminWatchSimulatorProps {
+  deviceTarget?: DeviceTarget;
+  bezelTheme?: WatchBezelTheme;
+  difficulty?: "relaxed" | "standard" | "strict";
+  seed?: number | string;
+  speedMultiplier?: number;
+  initialConfig?: GarminWatchConfig;
+}
+
+export const GarminWatchSimulator: React.FC<GarminWatchSimulatorProps> = (props) => {
+  const config = props.initialConfig || props;
+  const rawDevice = config.deviceTarget || props.deviceTarget || "fenix";
+  const initialDevice: DeviceTarget = DEVICE_PROFILES[rawDevice as DeviceTarget] ? (rawDevice as DeviceTarget) : "fenix";
+  const initialBezel = (config.bezelTheme || props.bezelTheme || "slate") as WatchBezelTheme;
+
   const rawHighScore = useSyncExternalStore(
     subscribeHighScore,
     getHighScoreSnapshot,
@@ -57,9 +79,9 @@ export const GarminWatchSimulator: React.FC = () => {
   const { recordEvent } = useTelemetry();
 
   // Hardware & Simulation State
-  const [bezelTheme, setBezelTheme] = useState<WatchBezelTheme>("slate");
-  const [deviceTarget, setDeviceTarget] = useState<DeviceTarget>("fenix");
-  const initialState = createInitialState("fenix", loadedHighScore);
+  const [bezelTheme, setBezelTheme] = useState<WatchBezelTheme>(initialBezel);
+  const [deviceTarget, setDeviceTarget] = useState<DeviceTarget>(initialDevice);
+  const initialState = createInitialState(initialDevice, loadedHighScore);
   const stateRef = useRef<GameEngineState>(initialState);
   const [gameState, setGameState] = useState<GameEngineState>(initialState);
   const effectiveHighScore = Math.max(gameState.highScore, loadedHighScore);

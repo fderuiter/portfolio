@@ -93,7 +93,21 @@ interface Drone {
   maxX: number;
 }
 
-interface RetroLabyrinthProps {
+export interface RetroLabyrinthConfig {
+  difficulty?: "easy" | "normal" | "nightmare";
+  cyberdeckClass?: CyberdeckClassId;
+  startingWeapon?: WeaponId;
+  seed?: number | string;
+  speedMultiplier?: number;
+}
+
+export interface RetroLabyrinthProps {
+  difficulty?: "easy" | "normal" | "nightmare";
+  cyberdeckClass?: CyberdeckClassId;
+  startingWeapon?: WeaponId;
+  seed?: number | string;
+  speedMultiplier?: number;
+  initialConfig?: RetroLabyrinthConfig;
   isMounted?: boolean;
 }
 
@@ -112,7 +126,12 @@ const getHighScoreSnapshot = () => {
 const getHighScoreServerSnapshot = () => "0";
 const emptySubscribe = () => () => {};
 
-export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propIsMounted }) => {
+export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = (props) => {
+  const config = props.initialConfig || props;
+  const propIsMounted = props.isMounted;
+  const initialClassId = (config.cyberdeckClass || props.cyberdeckClass || "script_kiddie") as CyberdeckClassId;
+  const seed = config.seed ?? props.seed;
+
   const clientMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const isMounted = propIsMounted ?? clientMounted;
   const rawHighScore = useSyncExternalStore(
@@ -124,7 +143,9 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
 
   // Persistent Cyberdeck Profile & Meta-Progression
   const [profile, setProfile] = useState<CyberdeckProfile>(() => loadCyberdeckProfile());
-  const [selectedClassId, setSelectedClassId] = useState<CyberdeckClassId>("script_kiddie");
+  const [selectedClassId, setSelectedClassId] = useState<CyberdeckClassId>(
+    CYBERDECK_CLASSES[initialClassId] ? initialClassId : "script_kiddie"
+  );
   const selectedClass = CYBERDECK_CLASSES[selectedClassId] || CYBERDECK_CLASSES.script_kiddie;
 
   // CRT Phosphor Theme & Calibration

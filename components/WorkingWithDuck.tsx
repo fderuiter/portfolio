@@ -1363,7 +1363,31 @@ function drawCanvas(
 
 // --- Main React Component ---
 
-export const WorkingWithDuck: React.FC = () => {
+export interface WorkingWithDuckConfig {
+  initialLevel?: number;
+  mode?: "campaign" | "endless";
+  difficulty?: "chill" | "standard" | "chaos";
+  seed?: number | string;
+  speedMultiplier?: number;
+}
+
+export interface WorkingWithDuckProps {
+  initialLevel?: number;
+  mode?: "campaign" | "endless";
+  difficulty?: "chill" | "standard" | "chaos";
+  seed?: number | string;
+  speedMultiplier?: number;
+  initialConfig?: WorkingWithDuckConfig;
+}
+
+export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = (props) => {
+  const config = props.initialConfig || props;
+  const initialLevel = config.initialLevel ?? props.initialLevel ?? 1;
+  const mode = (config.mode || props.mode || "campaign") as "campaign" | "endless";
+  const difficulty = (config.difficulty || props.difficulty || "standard") as "chill" | "standard" | "chaos";
+  const seed = config.seed ?? props.seed;
+  const speedMultiplier = config.speedMultiplier ?? props.speedMultiplier ?? 1.0;
+
   const rawHighScore = useSyncExternalStore(subscribeStorage, getHighScoreSnapshot, getServerSnapshot);
   const loadedHighScore = parseInt(rawHighScore, 10) || 0;
 
@@ -1371,9 +1395,13 @@ export const WorkingWithDuck: React.FC = () => {
   const { recordEvent } = useTelemetry();
 
   // Core Game State Ref for 60 FPS deterministic engine
-  const gameStateRef = useRef<WorkingWithDuckState>(createInitialDuckGameState(1, "campaign"));
+  const gameStateRef = useRef<WorkingWithDuckState>(
+    createInitialDuckGameState(initialLevel, mode, ["none", "bucket-hat"], seed, difficulty, speedMultiplier)
+  );
   // UI React State for rendering HUD, modals, and overlays
-  const [uiState, setUiState] = useState<WorkingWithDuckState>(() => createInitialDuckGameState(1, "campaign"));
+  const [uiState, setUiState] = useState<WorkingWithDuckState>(() =>
+    createInitialDuckGameState(initialLevel, mode, ["none", "bucket-hat"], seed, difficulty, speedMultiplier)
+  );
   const [isScrapbookOpen, setIsScrapbookOpen] = useState(false);
   const [isWardrobeOpen, setIsWardrobeOpen] = useState(false);
   const [activeScrapbookIndex, setActiveScrapbookIndex] = useState(0);
