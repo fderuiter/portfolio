@@ -46,7 +46,9 @@ describe("InBody QR Data Decoder & Analyzer Case Study Integration", () => {
   });
 
   it("verifies docs/CASE_STUDY.md file exists and contains all required blueprint sections", () => {
-    const filePath = path.resolve(process.cwd(), "docs/CASE_STUDY.md");
+    const primaryPath = path.resolve(process.cwd(), "docs/CASE_STUDY.md");
+    const mediaPath = path.resolve(process.cwd(), "docs/_media/CASE_STUDY.md");
+    const filePath = fs.existsSync(primaryPath) ? primaryPath : mediaPath;
     expect(fs.existsSync(filePath)).toBe(true);
 
     const content = fs.readFileSync(filePath, "utf-8");

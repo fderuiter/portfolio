@@ -225,6 +225,79 @@ function generateFieldId(type: string): string {
   return generateId(`f_${type}`);
 }
 
+export function validateFieldPayload(data: unknown): CRFField | null {
+  if (!data || typeof data !== "object") return null;
+
+  const payload = data as Record<string, unknown>;
+  let dataType: ClinicalDataType | undefined;
+  let label: string | undefined;
+  let defaultField: Partial<CRFField> = {};
+
+  if (payload.type === "palette_widget" || payload.widgetType) {
+    dataType = (payload.widgetType || payload.dataType) as ClinicalDataType | undefined;
+    label = typeof payload.label === "string" ? payload.label : undefined;
+    if (payload.defaultField && typeof payload.defaultField === "object") {
+      defaultField = payload.defaultField as Partial<CRFField>;
+    }
+  } else if (payload.dataType && typeof payload.dataType === "string") {
+    dataType = payload.dataType as ClinicalDataType;
+    label = typeof payload.label === "string" ? payload.label : undefined;
+    defaultField = payload as Partial<CRFField>;
+  }
+
+  if (!dataType || typeof dataType !== "string") return null;
+
+  const validTypes: ClinicalDataType[] = [
+    "text",
+    "textarea",
+    "number",
+    "integer",
+    "date",
+    "partial_date",
+    "time",
+    "datetime",
+    "single_select",
+    "multi_select",
+    "radio",
+    "checkbox",
+    "vas_scale",
+    "nrs_scale",
+    "calculated",
+    "repeating_table",
+    "signature",
+  ];
+
+  if (!validTypes.includes(dataType as ClinicalDataType)) {
+    return null;
+  }
+
+  const finalLabel = defaultField.label || label || "New Question";
+  const variableName = defaultField.variableName || `${dataType.toUpperCase()}_Q`;
+
+  const field: CRFField = {
+    id: generateFieldId(dataType),
+    variableName,
+    label: finalLabel,
+    dataType: dataType as ClinicalDataType,
+    columnSpan: typeof defaultField.columnSpan === "number" ? defaultField.columnSpan : 6,
+    required: !!defaultField.required,
+    readOnly: defaultField.readOnly,
+    placeholder: defaultField.placeholder,
+    unit: defaultField.unit,
+    minValue: defaultField.minValue,
+    maxValue: defaultField.maxValue,
+    codelistId: defaultField.codelistId,
+    customOptions: Array.isArray(defaultField.customOptions)
+      ? defaultField.customOptions.map((o) => ({ ...o }))
+      : undefined,
+    calculationFormula: defaultField.calculationFormula,
+    scaleMinLabel: defaultField.scaleMinLabel,
+    scaleMaxLabel: defaultField.scaleMaxLabel,
+  };
+
+  return field;
+}
+
 interface WidgetPaletteProps {
   onAddField: (field: CRFField) => void;
 }
@@ -236,6 +309,19 @@ export const WidgetPalette: React.FC<WidgetPaletteProps> = ({ onAddField }) => {
     { key: "inputs", label: "Standard Inputs" },
     { key: "timing", label: "Timing & Dates" },
   ] as const;
+
+  const handleDragStart = (e: React.DragEvent, widget: WidgetItem) => {
+    const payload = {
+      type: "palette_widget",
+      widgetType: widget.type,
+      label: widget.label,
+      defaultField: widget.defaultField,
+    };
+    const jsonString = JSON.stringify(payload);
+    e.dataTransfer.setData("application/json", jsonString);
+    e.dataTransfer.setData("text/plain", jsonString);
+    e.dataTransfer.effectAllowed = "copy";
+  };
 
   const handleAdd = (widget: WidgetItem) => {
     const newField: CRFField = {
@@ -278,8 +364,10 @@ export const WidgetPalette: React.FC<WidgetPaletteProps> = ({ onAddField }) => {
               {items.map((widget) => (
                 <button
                   key={widget.type}
+                  draggable={true}
+                  onDragStart={(e) => handleDragStart(e, widget)}
                   onClick={() => handleAdd(widget)}
-                  className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg bg-zinc-950/60 border border-zinc-800/80 hover:border-brand-cyan/40 hover:bg-zinc-900 text-left transition-all group"
+                  className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg bg-zinc-950/60 border border-zinc-800/80 hover:border-brand-cyan/40 hover:bg-zinc-900 text-left transition-all group cursor-grab active:cursor-grabbing"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <span className="p-1 rounded bg-zinc-900 border border-zinc-800 group-hover:border-zinc-700 transition-colors">

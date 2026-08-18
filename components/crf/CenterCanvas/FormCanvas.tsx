@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   IconFolderPlus,
   IconTrash,
@@ -14,6 +14,7 @@ import {
 import { CRFForm, CRFField, CodelistDefinition, DeviceViewport } from "@/lib/crf/types";
 import { FieldRenderer } from "./FieldRenderer";
 import { ViewportSwitcher } from "./ViewportSwitcher";
+import { validateFieldPayload } from "../LeftSidebar/WidgetPalette";
 
 interface FormCanvasProps {
   form: CRFForm;
@@ -66,6 +67,22 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
     targetIndex: number;
   } | null>(null);
 
+  // Clear drop indicators when drag ends or is cancelled anywhere
+  useEffect(() => {
+    const handleGlobalDragEnd = () => {
+      setDropTargetInfo(null);
+      setDraggedFieldInfo(null);
+    };
+
+    window.addEventListener("dragend", handleGlobalDragEnd);
+    window.addEventListener("drop", handleGlobalDragEnd);
+
+    return () => {
+      window.removeEventListener("dragend", handleGlobalDragEnd);
+      window.removeEventListener("drop", handleGlobalDragEnd);
+    };
+  }, []);
+
   const handleSaveTitle = () => {
     onUpdateFormMeta({
       name: titleInput,
@@ -103,16 +120,26 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
     onUpdateFormMeta({ sections: updatedSections });
   };
 
-  // Drag & drop field reordering
+  // Canvas drag leave handler
+  const handleCanvasDragLeave = (e: React.DragEvent) => {
+    if (e.relatedTarget && !e.currentTarget.contains(e.relatedTarget as Node)) {
+      setDropTargetInfo(null);
+    }
+  };
+
+  // Drag & drop field reordering & palette item insertion
   const handleFieldDragStart = (e: React.DragEvent, sectionId: string, fieldId: string) => {
     e.stopPropagation();
     setDraggedFieldInfo({ sectionId, fieldId });
-    e.dataTransfer.setData("text/plain", JSON.stringify({ sectionId, fieldId }));
+    const payload = JSON.stringify({ sectionId, fieldId });
+    e.dataTransfer.setData("application/json", payload);
+    e.dataTransfer.setData("text/plain", payload);
   };
 
   const handleFieldDragOver = (e: React.DragEvent, sectionId: string, targetIndex: number) => {
     e.preventDefault();
     e.stopPropagation();
+    e.dataTransfer.dropEffect = draggedFieldInfo ? "move" : "copy";
     setDropTargetInfo({ sectionId, targetIndex });
   };
 
@@ -120,47 +147,110 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
     e.preventDefault();
     e.stopPropagation();
 
-    if (!draggedFieldInfo) {
-      setDropTargetInfo(null);
-      return;
+    let rawData = "";
+    try {
+      rawData = e.dataTransfer.getData("application/json") || e.dataTransfer.getData("text/plain");
+    } catch {
+      rawData = "";
     }
 
-    const { sectionId: sourceSectionId, fieldId: sourceFieldId } = draggedFieldInfo;
+    if (rawData) {
+      try {
+        const parsed = JSON.parse(rawData);
 
-    // Find source field
-    const sourceSec = form.sections.find((s) => s.id === sourceSectionId);
-    const draggedField = sourceSec?.fields.find((f) => f.id === sourceFieldId);
+        // Check if internal reorder payload
+        if (parsed.sectionId && parsed.fieldId && parsed.type !== "palette_widget" && !parsed.widgetType) {
+          const { sectionId: sourceSectionId, fieldId: sourceFieldId } = parsed;
+          const sourceSec = form.sections.find((s) => s.id === sourceSectionId);
+          const draggedField = sourceSec?.fields.find((f) => f.id === sourceFieldId);
 
-    if (!draggedField) {
-      setDraggedFieldInfo(null);
-      setDropTargetInfo(null);
-      return;
+          if (draggedField) {
+            const updatedSections = form.sections.map((section) => {
+              let fields = [...section.fields];
+
+              if (section.id === sourceSectionId) {
+                fields = fields.filter((f) => f.id !== sourceFieldId);
+              }
+
+              if (section.id === targetSectionId) {
+                const sourceIndex = sourceSec?.fields.findIndex((f) => f.id === sourceFieldId) ?? -1;
+                const adjustedIndex =
+                  section.id === sourceSectionId &&
+                  sourceIndex >= 0 &&
+                  sourceIndex < targetIndex
+                    ? Math.max(0, targetIndex - 1)
+                    : targetIndex;
+
+                fields.splice(adjustedIndex, 0, draggedField);
+              }
+
+              return { ...section, fields };
+            });
+
+            onUpdateFormMeta({ sections: updatedSections });
+          }
+          setDraggedFieldInfo(null);
+          setDropTargetInfo(null);
+          return;
+        }
+
+        // Palette widget field payload
+        const newField = validateFieldPayload(parsed);
+        if (newField) {
+          const updatedSections = form.sections.map((section) => {
+            if (section.id !== targetSectionId) return section;
+            const fields = [...section.fields];
+            const insertIdx = Math.min(Math.max(0, targetIndex), fields.length);
+            fields.splice(insertIdx, 0, newField);
+            return { ...section, fields };
+          });
+
+          onUpdateFormMeta({ sections: updatedSections });
+          if (onSelectField) {
+            onSelectField(newField.id);
+          }
+          setDraggedFieldInfo(null);
+          setDropTargetInfo(null);
+          return;
+        }
+      } catch (err) {
+        console.warn("Failed to process drop payload:", err);
+      }
     }
 
-    const updatedSections = form.sections.map((section) => {
-      let fields = [...section.fields];
+    // Fallback: internal field reorder using state
+    if (draggedFieldInfo) {
+      const { sectionId: sourceSectionId, fieldId: sourceFieldId } = draggedFieldInfo;
+      const sourceSec = form.sections.find((s) => s.id === sourceSectionId);
+      const draggedField = sourceSec?.fields.find((f) => f.id === sourceFieldId);
 
-      // Remove from source
-      if (section.id === sourceSectionId) {
-        fields = fields.filter((f) => f.id !== sourceFieldId);
+      if (draggedField) {
+        const updatedSections = form.sections.map((section) => {
+          let fields = [...section.fields];
+
+          if (section.id === sourceSectionId) {
+            fields = fields.filter((f) => f.id !== sourceFieldId);
+          }
+
+          if (section.id === targetSectionId) {
+            const sourceIndex = sourceSec?.fields.findIndex((f) => f.id === sourceFieldId) ?? -1;
+            const adjustedIndex =
+              section.id === sourceSectionId &&
+              sourceIndex >= 0 &&
+              sourceIndex < targetIndex
+                ? Math.max(0, targetIndex - 1)
+                : targetIndex;
+
+            fields.splice(adjustedIndex, 0, draggedField);
+          }
+
+          return { ...section, fields };
+        });
+
+        onUpdateFormMeta({ sections: updatedSections });
       }
+    }
 
-      // Insert into target
-      if (section.id === targetSectionId) {
-        const adjustedIndex =
-          section.id === sourceSectionId &&
-          sourceSec &&
-          sourceSec.fields.findIndex((f) => f.id === sourceFieldId) < targetIndex
-            ? Math.max(0, targetIndex - 1)
-            : targetIndex;
-
-        fields.splice(adjustedIndex, 0, draggedField);
-      }
-
-      return { ...section, fields };
-    });
-
-    onUpdateFormMeta({ sections: updatedSections });
     setDraggedFieldInfo(null);
     setDropTargetInfo(null);
   };
@@ -175,6 +265,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
   return (
     <div
       onClick={() => onSelectField(null)}
+      onDragLeave={handleCanvasDragLeave}
       className="flex-1 flex flex-col h-full bg-zinc-950/80 crf-canvas-area overflow-y-auto p-3 sm:p-6 transition-all relative"
     >
       {/* Top Canvas Controls Bar */}
@@ -415,14 +506,23 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                       e.stopPropagation();
                       onOpenPalette();
                     }}
-                    className="p-6 sm:p-8 border-2 border-dashed border-zinc-800 hover:border-brand-cyan/40 rounded-xl text-center cursor-pointer transition-all bg-zinc-950/30 group"
+                    onDragOver={(e) => handleFieldDragOver(e, section.id, 0)}
+                    onDrop={(e) => handleFieldDrop(e, section.id, 0)}
+                    className={`p-6 sm:p-8 border-2 border-dashed rounded-xl text-center cursor-pointer transition-all bg-zinc-950/30 group ${
+                      dropTargetInfo?.sectionId === section.id
+                        ? "border-brand-cyan bg-brand-cyan/10"
+                        : "border-zinc-800 hover:border-brand-cyan/40"
+                    }`}
                   >
+                    {dropTargetInfo?.sectionId === section.id && (
+                      <div className="col-span-12 h-1 bg-brand-cyan rounded-full animate-pulse mb-3" />
+                    )}
                     <IconPlus className="w-5 h-5 sm:w-6 sm:h-6 text-zinc-600 group-hover:text-brand-cyan mx-auto mb-2 transition-colors" />
                     <p className="text-xs text-zinc-400 font-mono">
                       No fields in this section yet.
                     </p>
                     <p className="text-[11px] text-zinc-500 mt-1">
-                      Tap or click to pick a widget from the palette.
+                      Tap, click, or drop a widget here from the palette.
                     </p>
                   </div>
                 ) : (
@@ -433,7 +533,11 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                         {dropTargetInfo?.sectionId === section.id &&
                           dropTargetInfo?.targetIndex === fIdx &&
                           draggedFieldInfo?.fieldId !== field.id && (
-                            <div className="col-span-12 h-1 bg-brand-cyan rounded-full animate-pulse my-1" />
+                            <div
+                              onDragOver={(e) => handleFieldDragOver(e, section.id, fIdx)}
+                              onDrop={(e) => handleFieldDrop(e, section.id, fIdx)}
+                              className="col-span-12 h-1 bg-brand-cyan rounded-full animate-pulse my-1"
+                            />
                           )}
 
                         <FieldRenderer
@@ -458,6 +562,16 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                         />
                       </React.Fragment>
                     ))}
+
+                    {/* Drop indicator line at the end of section fields list */}
+                    {dropTargetInfo?.sectionId === section.id &&
+                      dropTargetInfo?.targetIndex === section.fields.length && (
+                        <div
+                          onDragOver={(e) => handleFieldDragOver(e, section.id, section.fields.length)}
+                          onDrop={(e) => handleFieldDrop(e, section.id, section.fields.length)}
+                          className="col-span-12 h-1 bg-brand-cyan rounded-full animate-pulse my-1"
+                        />
+                      )}
                   </div>
                 )}
               </div>

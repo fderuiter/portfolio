@@ -5,7 +5,7 @@ import { clamp } from "@/lib/game-utils";
 import * as THREE from "three";
 import { AnatomicalParcel, HemisphereFilter, SurfaceMode, VoxelCoord } from "@/lib/neuro/types";
 import { createCorticalSurfaceMesh, getAnatomicalParcelAtCoordinate } from "@/lib/neuro/mesh-generator";
-import { loadExternalBrainMesh } from "@/lib/neuro/asset-loader";
+import * as assetLoader from "@/lib/neuro/asset-loader";
 import { useWebGLContextLoss } from "@/hooks/useWebGLContextLoss";
 import { Icon3dCubeSphere, IconCheck, IconLayersSubtract, IconRefresh } from "@tabler/icons-react";
 
@@ -257,7 +257,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
       scene.add(fallbackGroup);
       meshGroupRef.current = fallbackGroup;
 
-      loadExternalBrainMesh(modelUrl, surfaceMode, hemiFilter).then((externalGroup) => {
+      assetLoader.loadExternalBrainMesh(modelUrl, surfaceMode, hemiFilter).then((externalGroup) => {
         if (!isMounted || !sceneRef.current) return;
         sceneRef.current.remove(fallbackGroup);
         fallbackGroup.traverse((obj) => {
