@@ -8,7 +8,8 @@
  * 5. Diagnostic dplyr::glimpse() and summary() verification suites
  */
 
-import { StudyProtocol, CRFForm, CRFField, ExportROptions } from "./types";
+import { StudyProtocol, CRFForm, CRFField, ExportROptions, CodelistOption } from "./types";
+import { STANDARD_CODELISTS } from "./cdisc-controlled-terminology";
 
 /**
  * Sanitizes a string into a valid R variable name.
@@ -29,6 +30,118 @@ export function sanitizeRName(name: string, maxLength = 32): string {
 export function escapeRString(text: string): string {
   if (!text) return "";
   return text.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+/**
+ * Retrieves field options from custom options or referenced codelists.
+ */
+export function getFieldOptions(field: CRFField, study: StudyProtocol): CodelistOption[] {
+  if (field.customOptions && field.customOptions.length > 0) {
+    return field.customOptions;
+  }
+  if (field.codelistId) {
+    const cl = study.codelists?.find((c) => c.id === field.codelistId) ||
+               STANDARD_CODELISTS.find((c) => c.id === field.codelistId);
+    if (cl && cl.options && cl.options.length > 0) {
+      return cl.options;
+    }
+  }
+  if (field.dataType === "checkbox" || field.dataType === "multi_select") {
+    const nyCodelist = STANDARD_CODELISTS.find((c) => c.id === "CL_NY");
+    if (nyCodelist) return nyCodelist.options;
+  }
+  return [];
+}
+
+/**
+ * Parses a comma-separated multi-select EDC response string
+ * and checks whether a specific option code is selected.
+ * Returns 'Y' if selected, 'N' if absent/unselected.
+ */
+export function parseMultiSelectValue(
+  edcValue: string | string[] | null | undefined,
+  optionCode: string
+): "Y" | "N" {
+  if (!edcValue) return "N";
+  let selectedCodes: string[] = [];
+  if (Array.isArray(edcValue)) {
+    selectedCodes = edcValue.map((s) => String(s).trim().toUpperCase());
+  } else if (typeof edcValue === "string") {
+    selectedCodes = edcValue
+      .split(/[,;]/)
+      .map((s) => s.trim().toUpperCase())
+      .filter(Boolean);
+  }
+  const targetCode = String(optionCode).trim().toUpperCase();
+  return selectedCodes.includes(targetCode) ? "Y" : "N";
+}
+
+/**
+ * Generates a unique R variable name guaranteed not to collide with usedNames and within maxLength.
+ */
+function generateUniqueRName(baseName: string, usedNames: Set<string>, maxLength = 32): string {
+  let counter = 1;
+  let candidate = baseName.substring(0, maxLength).toUpperCase();
+  while (usedNames.has(candidate)) {
+    const suffix = `_${counter}`;
+    const maxPrefixLen = maxLength - suffix.length;
+    candidate = `${baseName.substring(0, maxPrefixLen)}${suffix}`.toUpperCase();
+    counter++;
+  }
+  return candidate;
+}
+
+export interface ExpandedRField {
+  field: CRFField;
+  varName: string;
+  optionCode?: string;
+  optLabel?: string;
+}
+
+export function getExpandedRFields(
+  field: CRFField,
+  study: StudyProtocol,
+  usedNames = new Set<string>()
+): ExpandedRField[] {
+  if (field.dataType !== "multi_select" && field.dataType !== "checkbox") {
+    let varName = sanitizeRName(field.variableName || field.id).toUpperCase();
+    if (usedNames.has(varName)) {
+      varName = generateUniqueRName(varName, usedNames, 32);
+    }
+    usedNames.add(varName);
+    return [{ field, varName }];
+  }
+
+  const options = getFieldOptions(field, study);
+  const baseVar = sanitizeRName(field.variableName || field.id).toUpperCase();
+
+  if (options.length === 0) {
+    let varName = baseVar;
+    if (usedNames.has(varName)) {
+      varName = generateUniqueRName(varName, usedNames, 32);
+    }
+    usedNames.add(varName);
+    return [{ field, varName }];
+  }
+
+  const result: ExpandedRField[] = [];
+  options.forEach((opt) => {
+    const rawName = `${baseVar}_${opt.code}`;
+    let subVarName = sanitizeRName(rawName, 32).toUpperCase();
+    if (usedNames.has(subVarName)) {
+      subVarName = generateUniqueRName(rawName, usedNames, 32);
+    }
+    usedNames.add(subVarName);
+
+    result.push({
+      field,
+      varName: subVarName,
+      optionCode: opt.code,
+      optLabel: opt.label || opt.code,
+    });
+  });
+
+  return result;
 }
 
 /**
@@ -68,16 +181,21 @@ suppressPackageStartupMessages({
  */
 export function generateRCodelists(study: StudyProtocol, formsToInclude: CRFForm[]): string {
   const referencedCodelistIds = new Set<string>();
+  let hasMultiOrCheckbox = false;
+
   formsToInclude.forEach((f) => {
     f.sections.forEach((s) => {
       s.fields.forEach((fld) => {
         if (fld.codelistId) referencedCodelistIds.add(fld.codelistId);
+        if (fld.dataType === "multi_select" || fld.dataType === "checkbox") {
+          hasMultiOrCheckbox = true;
+        }
       });
     });
   });
 
   const relevantCodelists = (study.codelists || []).filter(
-    (cl) => referencedCodelistIds.has(cl.id) || cl.isStandard
+    (cl) => referencedCodelistIds.has(cl.id) || (hasMultiOrCheckbox && cl.id === "CL_NY") || cl.isStandard
   );
 
   if (relevantCodelists.length === 0) {
@@ -101,6 +219,17 @@ export function generateRCodelists(study: StudyProtocol, formsToInclude: CRFForm
   });
 
   return output;
+}
+
+/**
+ * Generates dichotomous Yes/No factor code for expanded sub-variables.
+ */
+function getRSubVarSampleCode(optionCode: string | undefined, rowCount = 3): string {
+  const codeIdx = optionCode ? optionCode.charCodeAt(0) : 0;
+  const vals = Array.from({ length: rowCount }, (_, i) =>
+    (i + codeIdx) % 2 === 1 ? '"Y"' : '"N"'
+  );
+  return `factor(c(${vals.join(", ")}), levels = cl_cl_ny_levels, labels = cl_cl_ny_labels)`;
 }
 
 /**
@@ -185,7 +314,7 @@ function getRSampleColumnCode(
 
     case "multi_select":
     case "checkbox":
-      return `c("OPTION_A", "OPTION_A, OPTION_B", "OPTION_B")`;
+      return getRSubVarSampleCode(undefined, rowCount);
 
     case "textarea":
     case "signature":
@@ -213,6 +342,20 @@ export function generateRDataStepForForm(
   const useLabelled = options?.useLabelledPackage !== false;
 
   const fields = form.sections.flatMap((s) => s.fields);
+  const usedNames = new Set<string>([
+    "STUDYID",
+    "DOMAIN",
+    "USUBJID",
+    "VISIT",
+    "VISITNUM",
+    "DTC_INIT",
+  ]);
+
+  const expandedFields: ExpandedRField[] = [];
+  fields.forEach((field) => {
+    const expanded = getExpandedRFields(field, study, usedNames);
+    expanded.forEach((item) => expandedFields.push(item));
+  });
 
   let code = `#------------------------------------------------------------------------------
 # DATASET:      ${tibbleName}
@@ -233,15 +376,16 @@ export function generateRDataStepForForm(
   code += `  VISITNUM  = c(1, 2, 3),\n`;
   code += `  DTC_INIT  = as.Date(c("2026-03-01", "2026-03-02", "2026-03-03")),\n`;
 
-  if (fields.length > 0) {
+  if (expandedFields.length > 0) {
     code += `\n  # Form Specific CDASH Fields\n`;
-    fields.forEach((field, fIdx) => {
-      const varName = sanitizeRName(field.variableName || field.id).toUpperCase();
+    expandedFields.forEach((item, fIdx) => {
       const colCode = includeSample
-        ? getRSampleColumnCode(field, study, 3)
+        ? (item.field.dataType === "multi_select" || item.field.dataType === "checkbox"
+            ? getRSubVarSampleCode(item.optionCode, 3)
+            : getRSampleColumnCode(item.field, study, 3))
         : "character(0)";
-      const isLast = fIdx === fields.length - 1;
-      code += `  ${varName.padEnd(10)} = ${colCode}${isLast ? "" : ",\n"}`;
+      const isLast = fIdx === expandedFields.length - 1;
+      code += `  ${item.varName.padEnd(10)} = ${colCode}${isLast ? "" : ",\n"}`;
     });
     code += `\n`;
   }
@@ -260,25 +404,28 @@ export function generateRDataStepForForm(
     code += `    VISITNUM  = "Visit Number",\n`;
     code += `    DTC_INIT  = "Form Initiation Date",\n`;
 
-    fields.forEach((field, fIdx) => {
-      const varName = sanitizeRName(field.variableName || field.id).toUpperCase();
-      const label = escapeRString(field.cdashMetadata?.cdashLabel || field.label || varName);
-      const isLast = fIdx === fields.length - 1;
-      code += `    ${varName.padEnd(10)} = "${label}"${isLast ? "" : ",\n"}`;
+    expandedFields.forEach((item, fIdx) => {
+      const baseLabel = item.field.cdashMetadata?.cdashLabel || item.field.label || item.varName;
+      const fullLabel = item.optLabel ? `${baseLabel} - ${item.optLabel}` : baseLabel;
+      const escapedLabel = escapeRString(fullLabel);
+      const isLast = fIdx === expandedFields.length - 1;
+      code += `    ${item.varName.padEnd(10)} = "${escapedLabel}"${isLast ? "" : ",\n"}`;
     });
     code += `\n  )\n} else {\n`;
     code += `  # Fallback to base R attributes\n`;
-    fields.forEach((field) => {
-      const varName = sanitizeRName(field.variableName || field.id).toUpperCase();
-      const label = escapeRString(field.cdashMetadata?.cdashLabel || field.label || varName);
-      code += `  attr(${tibbleName}$${varName}, "label") <- "${label}"\n`;
+    expandedFields.forEach((item) => {
+      const baseLabel = item.field.cdashMetadata?.cdashLabel || item.field.label || item.varName;
+      const fullLabel = item.optLabel ? `${baseLabel} - ${item.optLabel}` : baseLabel;
+      const escapedLabel = escapeRString(fullLabel);
+      code += `  attr(${tibbleName}$${item.varName}, "label") <- "${escapedLabel}"\n`;
     });
     code += `}\n\n`;
   } else {
-    fields.forEach((field) => {
-      const varName = sanitizeRName(field.variableName || field.id).toUpperCase();
-      const label = escapeRString(field.cdashMetadata?.cdashLabel || field.label || varName);
-      code += `attr(${tibbleName}$${varName}, "label") <- "${label}"\n`;
+    expandedFields.forEach((item) => {
+      const baseLabel = item.field.cdashMetadata?.cdashLabel || item.field.label || item.varName;
+      const fullLabel = item.optLabel ? `${baseLabel} - ${item.optLabel}` : baseLabel;
+      const escapedLabel = escapeRString(fullLabel);
+      code += `attr(${tibbleName}$${item.varName}, "label") <- "${escapedLabel}"\n`;
     });
     code += `\n`;
   }
