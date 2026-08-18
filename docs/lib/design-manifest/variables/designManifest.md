@@ -185,6 +185,530 @@ Original CSS Variable: --layout-masonry-padding-with-stats
 
 > `readonly` **motion**: `object`
 
+#### motion.durations
+
+> `readonly` **durations**: `object`
+
+#### motion.durations.deliberate
+
+> `readonly` **deliberate**: `500` = `500`
+
+#### motion.durations.fast
+
+> `readonly` **fast**: `150` = `150`
+
+#### motion.durations.instant
+
+> `readonly` **instant**: `50` = `50`
+
+#### motion.durations.normal
+
+> `readonly` **normal**: `250` = `250`
+
+#### motion.durations.slow
+
+> `readonly` **slow**: `350` = `350`
+
+#### motion.easings
+
+> `readonly` **easings**: `object`
+
+#### motion.easings.bounce
+
+> `readonly` **bounce**: `"cubic-bezier(0.34, 1.56, 0.64, 1)"` = `"cubic-bezier(0.34, 1.56, 0.64, 1)"`
+
+#### motion.easings.default
+
+> `readonly` **default**: `"cubic-bezier(0.16, 1, 0.3, 1)"` = `"cubic-bezier(0.16, 1, 0.3, 1)"`
+
+#### motion.easings.in
+
+> `readonly` **in**: `"cubic-bezier(0.32, 0, 0.67, 0)"` = `"cubic-bezier(0.32, 0, 0.67, 0)"`
+
+#### motion.easings.inOut
+
+> `readonly` **inOut**: `"cubic-bezier(0.65, 0, 0.35, 1)"` = `"cubic-bezier(0.65, 0, 0.35, 1)"`
+
+#### motion.easings.out
+
+> `readonly` **out**: `"cubic-bezier(0, 0, 0.15, 1)"` = `"cubic-bezier(0, 0, 0.15, 1)"`
+
+#### motion.easings.spring
+
+> `readonly` **spring**: `"cubic-bezier(0.175, 0.885, 0.32, 1.275)"` = `"cubic-bezier(0.175, 0.885, 0.32, 1.275)"`
+
+#### motion.presets
+
+> `readonly` **presets**: `object`
+
+#### motion.presets.backdrop
+
+> `readonly` **backdrop**: `object`
+
+#### motion.presets.backdrop.animate
+
+> `readonly` **animate**: `object`
+
+#### motion.presets.backdrop.animate.opacity
+
+> `readonly` **opacity**: `1` = `1`
+
+#### motion.presets.backdrop.exit
+
+> `readonly` **exit**: `object`
+
+#### motion.presets.backdrop.exit.opacity
+
+> `readonly` **opacity**: `0` = `0`
+
+#### motion.presets.backdrop.initial
+
+> `readonly` **initial**: `object`
+
+#### motion.presets.backdrop.initial.opacity
+
+> `readonly` **opacity**: `0` = `0`
+
+#### motion.presets.backdrop.transition
+
+> `readonly` **transition**: `object`
+
+#### motion.presets.backdrop.transition.duration
+
+> `readonly` **duration**: `0.15` = `0.15`
+
+#### motion.presets.backdrop.transition.ease
+
+> `readonly` **ease**: readonly \[`0.16`, `1`, `0.3`, `1`\]
+
+#### motion.presets.commandPalette
+
+> `readonly` **commandPalette**: `object`
+
+#### motion.presets.commandPalette.animate
+
+> `readonly` **animate**: `object`
+
+#### motion.presets.commandPalette.animate.opacity
+
+> `readonly` **opacity**: `1` = `1`
+
+#### motion.presets.commandPalette.animate.scale
+
+> `readonly` **scale**: `1` = `1`
+
+#### motion.presets.commandPalette.animate.y
+
+> `readonly` **y**: `0` = `0`
+
+#### motion.presets.commandPalette.exit
+
+> `readonly` **exit**: `object`
+
+#### motion.presets.commandPalette.exit.opacity
+
+> `readonly` **opacity**: `0` = `0`
+
+#### motion.presets.commandPalette.exit.scale
+
+> `readonly` **scale**: `0.97` = `0.97`
+
+#### motion.presets.commandPalette.exit.y
+
+> `readonly` **y**: `-8` = `-8`
+
+#### motion.presets.commandPalette.initial
+
+> `readonly` **initial**: `object`
+
+#### motion.presets.commandPalette.initial.opacity
+
+> `readonly` **opacity**: `0` = `0`
+
+#### motion.presets.commandPalette.initial.scale
+
+> `readonly` **scale**: `0.97` = `0.97`
+
+#### motion.presets.commandPalette.initial.y
+
+> `readonly` **y**: `-8` = `-8`
+
+#### motion.presets.commandPalette.transition
+
+> `readonly` **transition**: `object`
+
+#### motion.presets.commandPalette.transition.damping
+
+> `readonly` **damping**: `30` = `30`
+
+#### motion.presets.commandPalette.transition.stiffness
+
+> `readonly` **stiffness**: `380` = `380`
+
+#### motion.presets.commandPalette.transition.type
+
+> `readonly` **type**: `"spring"` = `"spring"`
+
+#### motion.presets.fadeIn
+
+> `readonly` **fadeIn**: `object`
+
+#### motion.presets.fadeIn.animate
+
+> `readonly` **animate**: `object`
+
+#### motion.presets.fadeIn.animate.opacity
+
+> `readonly` **opacity**: `1` = `1`
+
+#### motion.presets.fadeIn.exit
+
+> `readonly` **exit**: `object`
+
+#### motion.presets.fadeIn.exit.opacity
+
+> `readonly` **opacity**: `0` = `0`
+
+#### motion.presets.fadeIn.initial
+
+> `readonly` **initial**: `object`
+
+#### motion.presets.fadeIn.initial.opacity
+
+> `readonly` **opacity**: `0` = `0`
+
+#### motion.presets.fadeIn.transition
+
+> `readonly` **transition**: `object`
+
+#### motion.presets.fadeIn.transition.duration
+
+> `readonly` **duration**: `0.25` = `0.25`
+
+#### motion.presets.fadeIn.transition.ease
+
+> `readonly` **ease**: readonly \[`0.16`, `1`, `0.3`, `1`\]
+
+#### motion.presets.heroHeadline
+
+> `readonly` **heroHeadline**: `object`
+
+#### motion.presets.heroHeadline.animate
+
+> `readonly` **animate**: `object`
+
+#### motion.presets.heroHeadline.animate.opacity
+
+> `readonly` **opacity**: `1` = `1`
+
+#### motion.presets.heroHeadline.animate.scale
+
+> `readonly` **scale**: `1` = `1`
+
+#### motion.presets.heroHeadline.animate.y
+
+> `readonly` **y**: `0` = `0`
+
+#### motion.presets.heroHeadline.initial
+
+> `readonly` **initial**: `object`
+
+#### motion.presets.heroHeadline.initial.opacity
+
+> `readonly` **opacity**: `0` = `0`
+
+#### motion.presets.heroHeadline.initial.scale
+
+> `readonly` **scale**: `0.97` = `0.97`
+
+#### motion.presets.heroHeadline.initial.y
+
+> `readonly` **y**: `14` = `14`
+
+#### motion.presets.heroHeadline.transition
+
+> `readonly` **transition**: `object`
+
+#### motion.presets.heroHeadline.transition.damping
+
+> `readonly` **damping**: `18` = `18`
+
+#### motion.presets.heroHeadline.transition.stiffness
+
+> `readonly` **stiffness**: `100` = `100`
+
+#### motion.presets.heroHeadline.transition.type
+
+> `readonly` **type**: `"spring"` = `"spring"`
+
+#### motion.presets.heroText
+
+> `readonly` **heroText**: `object`
+
+#### motion.presets.heroText.animate
+
+> `readonly` **animate**: `object`
+
+#### motion.presets.heroText.animate.opacity
+
+> `readonly` **opacity**: `1` = `1`
+
+#### motion.presets.heroText.animate.scale
+
+> `readonly` **scale**: `1` = `1`
+
+#### motion.presets.heroText.animate.y
+
+> `readonly` **y**: `0` = `0`
+
+#### motion.presets.heroText.initial
+
+> `readonly` **initial**: `object`
+
+#### motion.presets.heroText.initial.opacity
+
+> `readonly` **opacity**: `0` = `0`
+
+#### motion.presets.heroText.initial.scale
+
+> `readonly` **scale**: `0.98` = `0.98`
+
+#### motion.presets.heroText.initial.y
+
+> `readonly` **y**: `8` = `8`
+
+#### motion.presets.heroText.transition
+
+> `readonly` **transition**: `object`
+
+#### motion.presets.heroText.transition.damping
+
+> `readonly` **damping**: `30` = `30`
+
+#### motion.presets.heroText.transition.stiffness
+
+> `readonly` **stiffness**: `110` = `110`
+
+#### motion.presets.heroText.transition.type
+
+> `readonly` **type**: `"spring"` = `"spring"`
+
+#### motion.presets.modal
+
+> `readonly` **modal**: `object`
+
+#### motion.presets.modal.animate
+
+> `readonly` **animate**: `object`
+
+#### motion.presets.modal.animate.opacity
+
+> `readonly` **opacity**: `1` = `1`
+
+#### motion.presets.modal.animate.scale
+
+> `readonly` **scale**: `1` = `1`
+
+#### motion.presets.modal.animate.y
+
+> `readonly` **y**: `0` = `0`
+
+#### motion.presets.modal.exit
+
+> `readonly` **exit**: `object`
+
+#### motion.presets.modal.exit.opacity
+
+> `readonly` **opacity**: `0` = `0`
+
+#### motion.presets.modal.exit.scale
+
+> `readonly` **scale**: `0.95` = `0.95`
+
+#### motion.presets.modal.exit.y
+
+> `readonly` **y**: `8` = `8`
+
+#### motion.presets.modal.initial
+
+> `readonly` **initial**: `object`
+
+#### motion.presets.modal.initial.opacity
+
+> `readonly` **opacity**: `0` = `0`
+
+#### motion.presets.modal.initial.scale
+
+> `readonly` **scale**: `0.95` = `0.95`
+
+#### motion.presets.modal.initial.y
+
+> `readonly` **y**: `8` = `8`
+
+#### motion.presets.modal.transition
+
+> `readonly` **transition**: `object`
+
+#### motion.presets.modal.transition.damping
+
+> `readonly` **damping**: `30` = `30`
+
+#### motion.presets.modal.transition.stiffness
+
+> `readonly` **stiffness**: `380` = `380`
+
+#### motion.presets.modal.transition.type
+
+> `readonly` **type**: `"spring"` = `"spring"`
+
+#### motion.presets.scaleUp
+
+> `readonly` **scaleUp**: `object`
+
+#### motion.presets.scaleUp.animate
+
+> `readonly` **animate**: `object`
+
+#### motion.presets.scaleUp.animate.opacity
+
+> `readonly` **opacity**: `1` = `1`
+
+#### motion.presets.scaleUp.animate.scale
+
+> `readonly` **scale**: `1` = `1`
+
+#### motion.presets.scaleUp.exit
+
+> `readonly` **exit**: `object`
+
+#### motion.presets.scaleUp.exit.opacity
+
+> `readonly` **opacity**: `0` = `0`
+
+#### motion.presets.scaleUp.exit.scale
+
+> `readonly` **scale**: `0.95` = `0.95`
+
+#### motion.presets.scaleUp.initial
+
+> `readonly` **initial**: `object`
+
+#### motion.presets.scaleUp.initial.opacity
+
+> `readonly` **opacity**: `0` = `0`
+
+#### motion.presets.scaleUp.initial.scale
+
+> `readonly` **scale**: `0.95` = `0.95`
+
+#### motion.presets.scaleUp.transition
+
+> `readonly` **transition**: `object`
+
+#### motion.presets.scaleUp.transition.duration
+
+> `readonly` **duration**: `0.15` = `0.15`
+
+#### motion.presets.scaleUp.transition.ease
+
+> `readonly` **ease**: readonly \[`0.16`, `1`, `0.3`, `1`\]
+
+#### motion.presets.timelineCard
+
+> `readonly` **timelineCard**: `object`
+
+#### motion.presets.timelineCard.animate
+
+> `readonly` **animate**: `object`
+
+#### motion.presets.timelineCard.animate.opacity
+
+> `readonly` **opacity**: `1` = `1`
+
+#### motion.presets.timelineCard.animate.y
+
+> `readonly` **y**: `0` = `0`
+
+#### motion.presets.timelineCard.exit
+
+> `readonly` **exit**: `object`
+
+#### motion.presets.timelineCard.exit.opacity
+
+> `readonly` **opacity**: `0` = `0`
+
+#### motion.presets.timelineCard.exit.y
+
+> `readonly` **y**: `-6` = `-6`
+
+#### motion.presets.timelineCard.initial
+
+> `readonly` **initial**: `object`
+
+#### motion.presets.timelineCard.initial.opacity
+
+> `readonly` **opacity**: `0` = `0`
+
+#### motion.presets.timelineCard.initial.y
+
+> `readonly` **y**: `6` = `6`
+
+#### motion.presets.timelineCard.transition
+
+> `readonly` **transition**: `object`
+
+#### motion.presets.timelineCard.transition.duration
+
+> `readonly` **duration**: `0.2` = `0.2`
+
+#### motion.presets.timelineCard.transition.ease
+
+> `readonly` **ease**: readonly \[`0.16`, `1`, `0.3`, `1`\]
+
+#### motion.presets.timelineNode
+
+> `readonly` **timelineNode**: `object`
+
+#### motion.presets.timelineNode.animate
+
+> `readonly` **animate**: `object`
+
+#### motion.presets.timelineNode.animate.opacity
+
+> `readonly` **opacity**: `1` = `1`
+
+#### motion.presets.timelineNode.animate.y
+
+> `readonly` **y**: `0` = `0`
+
+#### motion.presets.timelineNode.initial
+
+> `readonly` **initial**: `object`
+
+#### motion.presets.timelineNode.initial.opacity
+
+> `readonly` **opacity**: `0` = `0`
+
+#### motion.presets.timelineNode.initial.y
+
+> `readonly` **y**: `40` = `40`
+
+#### motion.presets.timelineNode.transition
+
+> `readonly` **transition**: `object`
+
+#### motion.presets.timelineNode.transition.damping
+
+> `readonly` **damping**: `20` = `20`
+
+#### motion.presets.timelineNode.transition.stiffness
+
+> `readonly` **stiffness**: `60` = `60`
+
+#### motion.presets.timelineNode.transition.type
+
+> `readonly` **type**: `"spring"` = `"spring"`
+
 #### motion.springs
 
 > `readonly` **springs**: `object`

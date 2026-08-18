@@ -6,7 +6,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { usePretextLayout } from "@/hooks/usePretextLayout";
 import { AnimatedGridPattern } from "@/components/AnimatedGridPattern";
-import { designManifest } from "@/lib/design-manifest";
+import { designManifest, resolveMotionPreset } from "@/lib/design-manifest";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { 
   IconDeviceGamepad2, 
@@ -69,24 +69,16 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
     },
   };
 
-  const wordVariants = shouldReduceMotion ? {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.3 } },
-  } : {
-    hidden: { opacity: 0, y: 14, scale: 0.97 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: { ...designManifest.motion.springs.hero, mass: 0.35 },
-    },
-  };
+  const wordVariants = resolveMotionPreset(
+    designManifest.motion.presets.heroHeadline,
+    shouldReduceMotion
+  );
 
   return (
     <div
       style={{
         height: isReady ? `${height}px` : "auto",
-        transition: "height 250ms cubic-bezier(0.16, 1, 0.3, 1)",
+        transition: `height ${designManifest.motion.durations.normal}ms var(--motion-ease-default)`,
       }}
       className="relative w-full max-w-4xl mx-auto lg:mx-0 overflow-hidden min-h-[90px] sm:min-h-[110px] mb-4 sm:mb-6"
     >
@@ -105,7 +97,7 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
           <motion.p
             initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
+            transition={{ duration: designManifest.motion.durations.slow / 1000, ease: "easeOut" }}
             className="text-3xl sm:text-4xl font-extrabold tracking-tight text-center lg:text-left leading-tight text-white heading-editorial"
           >
             {text}
@@ -179,24 +171,16 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
     },
   };
 
-  const wordVariants = shouldReduceMotion ? {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.3 } },
-  } : {
-    hidden: { opacity: 0, y: 8, scale: 0.98 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: { ...designManifest.motion.springs.heroBeam, mass: 0.25 },
-    },
-  };
+  const wordVariants = resolveMotionPreset(
+    designManifest.motion.presets.heroText,
+    shouldReduceMotion
+  );
 
   return (
     <div
       style={{
         height: isReady ? `${height}px` : "auto",
-        transition: "height 200ms cubic-bezier(0.16, 1, 0.3, 1)",
+        transition: `height ${designManifest.motion.durations.fast}ms var(--motion-ease-default)`,
       }}
       className="relative w-full max-w-2xl mx-auto lg:mx-0 overflow-hidden min-h-[50px] mb-6 sm:mb-8"
     >
@@ -215,7 +199,7 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
           <motion.p
             initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.35, ease: "easeOut" }}
+            transition={{ delay: 0.1, duration: designManifest.motion.durations.slow / 1000, ease: "easeOut" }}
             className="text-zinc-300 text-sm md:text-base leading-relaxed text-center lg:text-left"
           >
             {text}
@@ -351,7 +335,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.15 }}
+                transition={{ duration: designManifest.motion.durations.fast / 1000 }}
                 className="space-y-3"
               >
                 <div className="flex items-center justify-between text-[11px] text-zinc-400">
@@ -399,7 +383,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.15 }}
+                transition={{ duration: designManifest.motion.durations.fast / 1000 }}
                 className="space-y-3"
               >
                 <div className="flex items-center justify-between text-[11px] text-zinc-400">
@@ -442,7 +426,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.15 }}
+                transition={{ duration: designManifest.motion.durations.fast / 1000 }}
                 className="space-y-3"
               >
                 <div className="flex items-center justify-between text-[11px] text-zinc-400">
@@ -544,7 +528,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
           <motion.div
             initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={{ duration: designManifest.motion.durations.deliberate / 1000, ease: "easeOut" }}
             className="inline-flex items-center gap-2 px-3 py-1 mb-5 sm:mb-6 text-[10px] sm:text-xs font-mono font-semibold tracking-[0.15em] uppercase text-amber-300 bg-amber-500/10 border border-amber-500/25 rounded-full"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />

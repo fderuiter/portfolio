@@ -2,9 +2,9 @@
 
 import React, { useState } from "react";
 import { hexToRgba } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { IconBriefcase, IconFlame, IconSwitchHorizontal } from "@tabler/icons-react";
-import { designManifest } from "@/lib/design-manifest";
+import { designManifest, resolveMotionPreset } from "@/lib/design-manifest";
 import { RichNarrative } from "@/components/RichNarrative";
 import { usePersona } from "@/components/providers/PersonaProvider";
 import { useTerminology } from "@/components/providers/TerminologyProvider";
@@ -13,10 +13,14 @@ import { dictionary, TimelineItem } from "@/lib/i18n-dictionary";
 export type { TimelineItem };
 
 export const Timeline: React.FC = () => {
+  const shouldReduceMotion = useReducedMotion();
   const { persona, setPersona } = usePersona();
   const { simplified } = useTerminology();
   const [localMode, setLocalMode] = useState<"recruiter" | "reality" | null>(null);
   const [cardOverrides, setCardOverrides] = useState<Record<number, "recruiter" | "reality">>({});
+
+  const nodePreset = resolveMotionPreset(designManifest.motion.presets.timelineNode, shouldReduceMotion);
+  const cardPreset = resolveMotionPreset(designManifest.motion.presets.timelineCard, shouldReduceMotion);
 
   const globalMode = localMode ?? (persona === "technical" ? "reality" : "recruiter");
 
@@ -96,10 +100,9 @@ export const Timeline: React.FC = () => {
           return (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              {...nodePreset}
               viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.8, delay: idx * 0.08, ...designManifest.motion.springs.timeline }}
+              transition={{ ...nodePreset.transition, delay: idx * 0.08 }}
               className={`relative flex flex-col md:flex-row items-start md:items-center ${
                 isLeft ? "md:flex-row-reverse" : ""
               }`}
@@ -171,10 +174,7 @@ export const Timeline: React.FC = () => {
                     <AnimatePresence mode="wait">
                       <motion.div
                         key={isReality ? "reality" : "recruiter"}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -6 }}
-                        transition={{ duration: 0.2 }}
+                        {...cardPreset}
                         className={`text-xs leading-relaxed font-sans ${
                           isReality ? "text-amber-200/90 italic" : "text-zinc-300"
                         }`}

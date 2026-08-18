@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { designManifest, resolveMotionPreset } from "@/lib/design-manifest";
 import {
   IconX,
   IconTarget,
@@ -27,8 +28,13 @@ interface FieldManualModalProps {
 type TabType = "objective" | "controls" | "rules" | "lore";
 
 export function FieldManualModal({ isOpen, onClose, manual }: FieldManualModalProps) {
+  const shouldReduceMotion = useReducedMotion();
   const [activeTab, setActiveTab] = useState<TabType>("objective");
   const { playHover, playAutocomplete, playSuccess } = useAudio();
+
+  const backdropPreset = resolveMotionPreset(designManifest.motion.presets.backdrop, shouldReduceMotion);
+  const modalPreset = resolveMotionPreset(designManifest.motion.presets.modal, shouldReduceMotion);
+  const fadeInPreset = resolveMotionPreset(designManifest.motion.presets.fadeIn, shouldReduceMotion);
 
   const modalRef = useFocusTrap<HTMLDivElement>(isOpen, {
     onEscape: onClose,
@@ -60,10 +66,7 @@ export function FieldManualModal({ isOpen, onClose, manual }: FieldManualModalPr
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
           {/* Backdrop */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            {...backdropPreset}
             onClick={onClose}
             className="fixed inset-0 bg-black/80 backdrop-blur-md"
             aria-hidden="true"
@@ -72,10 +75,7 @@ export function FieldManualModal({ isOpen, onClose, manual }: FieldManualModalPr
           {/* Dialog Container */}
           <motion.div
             ref={modalRef}
-            initial={{ opacity: 0, scale: 0.95, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 16 }}
-            transition={{ type: "spring", stiffness: 350, damping: 28 }}
+            {...modalPreset}
             role="dialog"
             aria-modal="true"
             aria-labelledby="manual-title"
@@ -174,9 +174,7 @@ export function FieldManualModal({ isOpen, onClose, manual }: FieldManualModalPr
               {/* Tab 1: Objective */}
               {activeTab === "objective" && (
                 <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2 }}
+                  {...fadeInPreset}
                   className="space-y-5"
                 >
                   {/* Primary Objective Banner */}
@@ -222,9 +220,7 @@ export function FieldManualModal({ isOpen, onClose, manual }: FieldManualModalPr
               {/* Tab 2: Controls & Hotkeys */}
               {activeTab === "controls" && (
                 <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2 }}
+                  {...fadeInPreset}
                   className="space-y-4"
                 >
                   <div className="grid grid-cols-1 gap-3">
@@ -271,9 +267,7 @@ export function FieldManualModal({ isOpen, onClose, manual }: FieldManualModalPr
               {/* Tab 3: Rules & Pro Tips */}
               {activeTab === "rules" && (
                 <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2 }}
+                  {...fadeInPreset}
                   className="space-y-5"
                 >
                   {/* Detailed Rules */}
@@ -342,9 +336,7 @@ export function FieldManualModal({ isOpen, onClose, manual }: FieldManualModalPr
               {/* Tab 4: Engineering Lore */}
               {activeTab === "lore" && (
                 <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2 }}
+                  {...fadeInPreset}
                   className="space-y-5"
                 >
                   <div className="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-5 space-y-3">

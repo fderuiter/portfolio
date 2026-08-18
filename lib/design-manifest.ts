@@ -79,6 +79,21 @@ export const designManifest = {
     "2xl": 1536,
   },
   motion: {
+    durations: {
+      instant: 50,
+      fast: 150,
+      normal: 250,
+      slow: 350,
+      deliberate: 500,
+    },
+    easings: {
+      default: "cubic-bezier(0.16, 1, 0.3, 1)",
+      in: "cubic-bezier(0.32, 0, 0.67, 0)",
+      out: "cubic-bezier(0, 0, 0.15, 1)",
+      inOut: "cubic-bezier(0.65, 0, 0.35, 1)",
+      bounce: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+      spring: "cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+    },
     springs: {
       snappy: { type: "spring", stiffness: 380, damping: 30 },
       smooth: { type: "spring", stiffness: 80, damping: 20 },
@@ -86,6 +101,43 @@ export const designManifest = {
       hero: { type: "spring", stiffness: 100, damping: 18 },
       heroBeam: { type: "spring", stiffness: 110, damping: 30 },
       timeline: { type: "spring", stiffness: 60, damping: 20 },
+    },
+    presets: {
+      fadeIn: { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] } },
+      scaleUp: { initial: { opacity: 0, scale: 0.95 }, animate: { opacity: 1, scale: 1 }, exit: { opacity: 0, scale: 0.95 }, transition: { duration: 0.15, ease: [0.16, 1, 0.3, 1] } },
+      modal: { initial: { opacity: 0, scale: 0.95, y: 8 }, animate: { opacity: 1, scale: 1, y: 0 }, exit: { opacity: 0, scale: 0.95, y: 8 }, transition: { type: "spring", stiffness: 380, damping: 30 } },
+      commandPalette: { initial: { opacity: 0, scale: 0.97, y: -8 }, animate: { opacity: 1, scale: 1, y: 0 }, exit: { opacity: 0, scale: 0.97, y: -8 }, transition: { type: "spring", stiffness: 380, damping: 30 } },
+      backdrop: { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.15, ease: [0.16, 1, 0.3, 1] } },
+      heroHeadline: { initial: { opacity: 0, y: 14, scale: 0.97 }, animate: { opacity: 1, y: 0, scale: 1 }, transition: { type: "spring", stiffness: 100, damping: 18 } },
+      heroText: { initial: { opacity: 0, y: 8, scale: 0.98 }, animate: { opacity: 1, y: 0, scale: 1 }, transition: { type: "spring", stiffness: 110, damping: 30 } },
+      timelineNode: { initial: { opacity: 0, y: 40 }, animate: { opacity: 1, y: 0 }, transition: { type: "spring", stiffness: 60, damping: 20 } },
+      timelineCard: { initial: { opacity: 0, y: 6 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -6 }, transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] } },
     }
   }
 } as const;
+
+/**
+ * Resolves a motion preset with non-animating fallbacks when reduced motion is preferred.
+ */
+export function resolveMotionPreset<T extends { initial?: Record<string, unknown>; animate?: Record<string, unknown>; exit?: Record<string, unknown>; transition?: Record<string, unknown> }>(
+  preset: T,
+  shouldReduceMotion?: boolean | null
+): T {
+  if (!shouldReduceMotion) return preset;
+  const sanitize = (target?: Record<string, unknown>) => {
+    if (!target) return target;
+    const copy = { ...target };
+    delete copy.x;
+    delete copy.y;
+    delete copy.scale;
+    delete copy.rotate;
+    return copy;
+  };
+  return {
+    ...preset,
+    initial: sanitize(preset.initial),
+    animate: sanitize(preset.animate),
+    exit: sanitize(preset.exit),
+    transition: { duration: 0.01 },
+  };
+}

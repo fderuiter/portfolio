@@ -9,3 +9,7 @@
 ## Variables
 
 - [designManifest](variables/designManifest.md)
+
+## Functions
+
+- [resolveMotionPreset](functions/resolveMotionPreset.md)
