@@ -114,6 +114,13 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     keywords: ["Laser Loon", "Graphic Design", "Vector Illustration", "Iconography", "Asset Distribution", "Minnesota State Flag", "Creative Commons"],
     ogType: "article",
   },
+  clintrials: {
+    title: "clintrials Case Study | Adaptive Clinical Trial Design & WebAssembly Engine",
+    description: "Deep dive technical breakdown of clintrials — an adaptive clinical trial design and biostatistical simulation engine powered by Pyodide WebAssembly workers.",
+    path: "/case-studies/clintrials",
+    keywords: ["Python", "Pyodide", "WebAssembly", "Biostatistics", "Clinical Trials", "CRM Algorithm", "Simulation Engine"],
+    ogType: "article",
+  },
 };
 
 /**

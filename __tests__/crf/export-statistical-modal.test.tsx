@@ -83,6 +83,10 @@ describe("ExportImportModal Statistical Tabs & Domain Filtering", () => {
     await act(async () => {
       sasTabBtn?.click();
     });
+    await act(async () => {
+      await Promise.resolve();
+      await new Promise((r) => setTimeout(r, 50));
+    });
 
     const pre = container.querySelector("pre");
     expect(pre?.textContent).toContain("PROC FORMAT;");
@@ -110,6 +114,10 @@ describe("ExportImportModal Statistical Tabs & Domain Filtering", () => {
 
     await act(async () => {
       rTabBtn?.click();
+    });
+    await act(async () => {
+      await Promise.resolve();
+      await new Promise((r) => setTimeout(r, 50));
     });
 
     const pre = container.querySelector("pre");

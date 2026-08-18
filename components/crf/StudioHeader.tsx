@@ -6,7 +6,7 @@ import {
   StudioMode,
   StudioTheme,
 } from "@/lib/crf/types";
-import { STUDY_PRESETS } from "@/lib/crf/presets";
+import { getStudyPresetsSync } from "@/lib/crf/presets/loader";
 import { lintForm } from "@/lib/crf/ast-evaluator";
 import {
   IconLayoutGrid,
@@ -84,10 +84,11 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
   onCopyShareLink,
 }) => {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const [presets] = useState<Array<{ id: string; name: string; therapeuticArea?: string; study: { protocolNumber: string } }>>(() => getStudyPresetsSync());
   const branding = getStudyBranding(study);
-  // Aggregate lint issues across study
   const totalIssues = study.forms.reduce((acc, f) => acc + lintForm(f).length, 0);
-  const currentPreset = STUDY_PRESETS.find((p) => p.study.protocolNumber === study.protocolNumber);
+
+  const currentPreset = presets.find((p) => p.study.protocolNumber === study.protocolNumber);
 
   const MODES: { mode: StudioMode; label: string; shortLabel: string; shortcut: string; icon: React.ReactNode }[] = [
     {
@@ -175,7 +176,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
               aria-label="Select Clinical Protocol Preset"
               className="bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-200 rounded-lg px-2 py-1 focus:border-brand-cyan focus:ring-1 focus:ring-brand-cyan focus:outline-none max-w-[140px] xs:max-w-[180px] sm:max-w-xs truncate"
             >
-              {STUDY_PRESETS.map((p) => (
+              {presets.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name} ({p.study.protocolNumber})
                 </option>
