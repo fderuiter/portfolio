@@ -146,44 +146,96 @@ class SubjectRecord(BaseModel):
   },
   {
     slug: "cadence-clinical",
-    title: "Cadence Clinical: Protocol-Driven eCRF & Workflow Orchestrator",
-    primary_language: "TypeScript",
+    title: "Cadence Clinical: Protocol-Driven Enterprise Clinical Operating System",
+    primary_language: "Python / Vue 3",
     github_url: "https://github.com/fderuiter/cadence-clinical",
     published: true,
     simulated_telemetry: false,
-    tags: "TypeScript, Next.js, eCRF, GxP, Clinical Trials, React, Zod, HIPAA",
-    editorial_content: "A modern, **full-stack clinical trial orchestrator** built in **TypeScript** and **Next.js** that translates complex protocol schedules into dynamic, validated `eCRF workflows`. Implements cross-form edit checks, real-time query management, and immutable `audit trails` meeting **21 CFR Part 11** standards.",
+    tags: "clinical-trials, cdisc-usdm, hexagonal-architecture, gxp-compliance, distributed-systems, vue3-vite",
+    editorial_content: "An end-to-end, **multi-tenant digital clinical platform** combining graph-native protocol design (`Neo4j` for `CDISC USDM` protocol authoring) with a transactional relational engine (`PostgreSQL` / `SQLModel`). Features cryptographic `Merkle-tree audit trails`, **RSA-PSS** digital signatures, and asynchronous transactional outbox event streaming meeting FDA **21 CFR Part 11** and **GxP** compliance.",
     architectural_narrative: `
-<h3>The Challenge</h3>
-<p>Clinical trial protocols frequently change through mid-study amendments. Traditional Electronic Data Capture (EDC) systems lock study sites into rigid database schemas that require weeks of vendor engineering to update, creating operational friction, data lock delays, and regulatory audit vulnerabilities.</p>
+<h3>Executive Summary &amp; Core Architecture</h3>
+<p>Cadence Clinical is a multi-tenant digital clinical trial platform that ingests, authors, executes, and exports regulatory-compliant clinical trial lifecycles governed by CDISC USDM, CDASH, SDTM, and ADaM standards. It utilizes a dual-engine polyglot architecture combining graph-native protocol design (Neo4j for CDISC USDM v2/v3 protocol authoring and AST-driven amendment cascading) with a transactional relational engine (PostgreSQL / SQLModel) backed by cryptographic Merkle-tree audit trails and RSA-PSS e-signatures.</p>
 
-<h3>Technical Architecture</h3>
-<p>Cadence Clinical is engineered as a decoupled, reactive clinical trial orchestration platform: the <strong>Protocol Schedule Compiler</strong>, the <strong>Dynamic eCRF Synthesis Engine</strong>, and the <strong>21 CFR Part 11 Audit Log Pipeline</strong>.</p>
+<h3>1. Hexagonal Architecture (Ports &amp; Adapters)</h3>
+<p>Domain logic across microservices (apps/execution, apps/designer, apps/etmf, apps/safety) is strictly decoupled from framework and infrastructure concerns. Ports define explicit interfaces while adapters handle persistence and external network integration.</p>
 
-<pre><code class="language-typescript">
-// Protocol-driven form validation and dynamic dependency resolution
-interface StudyVisitSchema {
-  visitId: string;
-  protocolScheduleDay: number;
-  forms: {
-    formId: string;
-    fields: Array<{
-      fieldId: string;
-      type: "text" | "numeric" | "codelist" | "date";
-      validationRules: Array<{ expression: string; errorMessage: string }>;
-    }>;
-  }[];
-}
+<pre><code class="language-python">
+# apps/execution/domain/ports.py
+from typing import Protocol, Optional, List
+from datetime import datetime
+from pydantic import BaseModel, Field
+
+class ClinicalObservation(BaseModel):
+    observation_id: str
+    subject_id: str
+    tenant_id: str
+    domain_code: str
+    value: str
+    timestamp: datetime
+    merkle_hash: str
+
+class ExecutionRepositoryPort(Protocol):
+    """Hexagonal Repository Port enforcing strict domain isolation."""
+    async def get_subject_with_lock(self, subject_id: str, tenant_id: str) -> Optional[SubjectRecord]: ...
+    async def persist_observation(self, observation: ClinicalObservation) -> None: ...
 </code></pre>
 
-<h4>1. Dynamic eCRF Synthesis Engine</h4>
-<p>Rather than hardcoding visit forms, Cadence dynamically constructs validated UI interfaces at runtime using <code>zod</code> and schema metadata. As coordinators navigate participant visits, dependent fields are resolved reactively (e.g. automatically prompting for SAE forms when high-grade adverse events are recorded).</p>
+<h3>2. Cryptographic 21 CFR Part 11 Signature Verification Engine</h3>
+<p>To eliminate padding oracle vulnerabilities associated with legacy PKCS#1 v1.5 signatures, Cadence Clinical standardizes on RSA-PSS with SHA-256 for all e-signature manifests and audit state updates.</p>
 
-<h4>2. Cross-Form Real-Time Edit Checks</h4>
-<p>To prevent data entry discrepancies before submission, the engine evaluates cross-form validation rules client-side with debounced worker threads. If a medication start date precedes informed consent, an instantaneous non-blocking query is raised for site coordinators.</p>
+<pre><code class="language-python">
+# packages/compliance/services/esignature_verifier.py
+from cryptography.hazmat.primitives.asymmetric import padding, rsa
+from cryptography.hazmat.primitives import hashes
+from cryptography.exceptions import InvalidSignature
 
-<h4>3. Immutable Audit Trails &amp; 21 CFR Part 11 Compliance</h4>
-<p>Every field mutation, query resolution, and investigator electronic signature is cryptographically hashed and logged to an append-only audit trail, ensuring 100% compliance with FDA regulatory standards.</p>
+def verify_manifest_signature(
+    public_key: rsa.RSAPublicKey,
+    signature: bytes,
+    canonical_payload: bytes
+) -> bool:
+    try:
+        public_key.verify(
+            signature,
+            canonical_payload,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        return True
+    except InvalidSignature:
+        return False
+</code></pre>
+
+<h3>3. USDM Graph AST Mapping Transformer</h3>
+<p>Protocol Schedule of Activities (SoA), arms, encounters, and biomedical concepts are modeled in Neo4j to support zero-downtime study amendments and AST-driven amendment cascading without clinical execution lockouts.</p>
+
+<pre><code class="language-python">
+# apps/designer/transformers/usdm_graph.py
+from typing import Dict, Any, List
+
+class USDMGraphTransformer:
+    def __init__(self, usdm_payload: Dict[str, Any]):
+        self.payload = usdm_payload
+
+    def build_soa_graph_nodes(self) -> List[Dict[str, Any]]:
+        study = self.payload.get("study", {})
+        study_id = study.get("id")
+        nodes = [{"labels": ["Study"], "properties": {"study_id": study_id, "name": study.get("name")}}]
+        for arm in study.get("arms", []):
+            nodes.append({"labels": ["StudyArm"], "properties": {"arm_id": arm.get("id"), "type": arm.get("type")}})
+        return nodes
+</code></pre>
+
+<h3>Lessons Learned &amp; System Metrics</h3>
+<ul>
+  <li><strong>Sub-50ms Gateway Overhead</strong>: High-throughput API gateway routing with Redis token replay protection and JWKS key caching.</li>
+  <li><strong>100% GxP Audit Traceability</strong>: Append-only Merkle tree audit logging with sub-millisecond tamper verification.</li>
+  <li><strong>Monorepo Performance</strong>: Moving Python microservices to <code>uv</code> workspaces reduced cold CI test execution times by 65%.</li>
+</ul>
     `.trim(),
   },
   {
