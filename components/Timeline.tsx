@@ -7,12 +7,14 @@ import { IconBriefcase, IconFlame, IconSwitchHorizontal } from "@tabler/icons-re
 import { designManifest } from "@/lib/design-manifest";
 import { RichNarrative } from "@/components/RichNarrative";
 import { usePersona } from "@/components/providers/PersonaProvider";
+import { useTerminology } from "@/components/providers/TerminologyProvider";
 import { dictionary, TimelineItem } from "@/lib/i18n-dictionary";
 
 export type { TimelineItem };
 
 export const Timeline: React.FC = () => {
   const { persona, setPersona } = usePersona();
+  const { simplified } = useTerminology();
   const [localMode, setLocalMode] = useState<"recruiter" | "reality" | null>(null);
   const [cardOverrides, setCardOverrides] = useState<Record<number, "recruiter" | "reality">>({});
 
@@ -44,7 +46,8 @@ export const Timeline: React.FC = () => {
     return cardOverrides[idx] ?? globalMode;
   };
 
-  const activeTimeline = dictionary.detailed.timeline;
+  const dict = simplified ? dictionary.simplified : dictionary.detailed;
+  const activeTimeline = dict.timeline;
 
   return (
     <div className="w-full max-w-3xl mx-auto py-6 sm:py-8 relative select-none">
