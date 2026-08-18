@@ -37,6 +37,50 @@ function extractSeedNarratives(fileContent: string): string[] {
   return narratives;
 }
 
+export function checkDictionaryDuplication(): string[] {
+  const errors: string[] = [];
+
+  const detailedTimelineStrings = new Set<string>();
+  dictionary.detailed.timeline.forEach((item) => {
+    if (item.recruiterDescription) detailedTimelineStrings.add(item.recruiterDescription.trim());
+    if (item.realityDescription) detailedTimelineStrings.add(item.realityDescription.trim());
+  });
+
+  const detailedDomainStrings = new Set<string>();
+  dictionary.detailed.domains.items.forEach((item) => {
+    if (item.description) detailedDomainStrings.add(item.description.trim());
+    if (item.tooltip) detailedDomainStrings.add(item.tooltip.trim());
+  });
+
+  dictionary.simplified.timeline.forEach((item, idx) => {
+    if (detailedTimelineStrings.has(item.recruiterDescription.trim())) {
+      errors.push(
+        `[lib/i18n-dictionary.ts] Simplified timeline item [index=${idx}].recruiterDescription is duplicate of detailed timeline content: "${item.recruiterDescription}"`
+      );
+    }
+    if (detailedTimelineStrings.has(item.realityDescription.trim())) {
+      errors.push(
+        `[lib/i18n-dictionary.ts] Simplified timeline item [index=${idx}].realityDescription is duplicate of detailed timeline content: "${item.realityDescription}"`
+      );
+    }
+  });
+
+  dictionary.simplified.domains.items.forEach((item, idx) => {
+    if (detailedDomainStrings.has(item.description.trim())) {
+      errors.push(
+        `[lib/i18n-dictionary.ts] Simplified domain item [index=${idx}].description is duplicate of detailed domain content: "${item.description}"`
+      );
+    }
+    if (detailedDomainStrings.has(item.tooltip.trim())) {
+      errors.push(
+        `[lib/i18n-dictionary.ts] Simplified domain item [index=${idx}].tooltip is duplicate of detailed domain content: "${item.tooltip}"`
+      );
+    }
+  });
+
+  return errors;
+}
+
 export function runTerminologyVerification(): { success: boolean; errors: string[] } {
   const errors: string[] = [];
 
@@ -84,6 +128,12 @@ export function runTerminologyVerification(): { success: boolean; errors: string
       );
       if (!res.valid) errors.push(...res.errors);
     });
+  }
+
+  // 4. Verify non-duplication between detailed and simplified dictionary entries
+  const duplicationErrors = checkDictionaryDuplication();
+  if (duplicationErrors.length > 0) {
+    errors.push(...duplicationErrors);
   }
 
   return {

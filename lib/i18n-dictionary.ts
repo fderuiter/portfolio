@@ -94,19 +94,19 @@ const rawTimelineSimplified: TimelineItem[] = [
     company: "BRIGHT Research Partners, Inc.",
     period: "March 2023 — Present",
     recruiterDescription:
-      "Lead technical architect for GxP-compliant eClinical databases, translating 100+ page scientific protocols into validated eCRF systems. Engineer automated cross-form edit checks and dynamic logic rules to enforce protocol compliance and point-of-entry data integrity. Manage clinical data lifecycles (DMP authoring, SAE reconciliation, database locks) and administer 21 CFR 812 investigational device accountability.",
+      "Lead database designer for clinical research, creating digital medical forms and automated validation rules to ensure error-free data collection. Oversee trial data quality across study milestones and maintain full regulatory compliance for medical device studies.",
     realityDescription:
-      "Translating dense 150-page clinical trial protocols into relational schemas and dynamic eCRFs. Developing cross-form edit check suites to catch edge-case clinician input discrepancies at point-of-entry, and maintaining 100% device traceability under 21 CFR 812.",
-    tags: ["GxP Systems", "21 CFRPart 11", "Database Design", "Data Validation", "Clinical Operations"]
+      "Designing online medical trial forms and database schemas from complex protocol guidelines. Building automated rules to catch clinical data entry errors in real time, and maintaining complete accountability logs for medical device trials.",
+    tags: ["GxP Systems", "21 CFR Part 11", "Database Design", "Data Validation", "Clinical Operations"]
   },
   {
     role: "Research Program Coordinator",
     company: "Mayo Clinic",
     period: "July 2021 — March 2023",
     recruiterDescription:
-      "Pioneered a system to identify eligible trial participants from hospital records, increasing enrollment fivefold.",
+      "Created automated participant search tools using hospital electronic health records, boosting monthly study enrollment fivefold while reducing screening disqualifications.",
     realityDescription:
-      "Pioneered a system to identify eligible trial participants from hospital records, increasing enrollment fivefold.",
+      "Automated patient recruitment queries in hospital systems, built secure research databases, processed brain scan imaging workflows, and compiled federal study safety reports.",
     tags: ["Mayo Clinic", "Trial Enrollment", "Database Management", "Data Safety dossiers"]
   },
   {
@@ -114,9 +114,9 @@ const rawTimelineSimplified: TimelineItem[] = [
     company: "Mayo Clinic",
     period: "October 2019 — July 2021",
     recruiterDescription:
-      "Coordinated operations for multiple clinical research trials, ensuring high-quality records and full compliance.",
+      "Managed operations for federally funded clinical trials from launch to completion, overseeing ethics board submissions and staff software training.",
     realityDescription:
-      "Coordinated operations for multiple clinical research trials, ensuring high-quality records and full compliance.",
+      "Coordinated daily study operations, managed ethics board approvals and patient consent paperwork, and provided on-site electronic health record support for clinical staff.",
     tags: ["Mayo Clinic", "Trial Operations", "Compliance Checks", "Staff Training"]
   },
   {
@@ -124,9 +124,9 @@ const rawTimelineSimplified: TimelineItem[] = [
     company: "Mayo Clinic",
     period: "February 2018 — October 2019",
     recruiterDescription:
-      "Assisted with large patient record migrations and provided frontline technical troubleshooting for medical staff.",
+      "Directed large-scale medical record transfers for cancer care departments, maintaining technical support and verifying software updates with IT teams.",
     realityDescription:
-      "Assisted with large patient record migrations and provided frontline technical troubleshooting for medical staff.",
+      "Transferred and verified high-volume patient medical records during hospital software upgrades while troubleshooting software issues for clinical staff.",
     tags: ["Mayo Clinic", "Data Migration", "IT Support", "Workflow Optimization"]
   },
   {
@@ -134,9 +134,9 @@ const rawTimelineSimplified: TimelineItem[] = [
     company: "Minnesota State University, Mankato",
     period: "July 2017 — February 2018",
     recruiterDescription:
-      "Logistics and venue operations coordinator for summer program events, managing logistics, high security, and billing.",
+      "Managed venue operations, broadcast logistics, and secure arrangements for major sports teams and university summer programs.",
     realityDescription:
-      "Logistics and venue operations coordinator for summer program events, managing logistics, high security, and billing.",
+      "Coordinated event logistics, media broadcast setups, facility security, and financial billing reconciliations for professional sports teams and campus events.",
     tags: ["Event Coordination", "Operations Logistics", "Financial Reconciliations", "Facilities Management"]
   }
 ];
@@ -210,13 +210,13 @@ export const dictionary = {
           id: "03",
           title: "Civic Open Source",
           tooltip: "Creating open-source software and tools that benefit public libraries and local organizations.",
-          description: "Creating open-source CC0 tools and viral designs that raised $13.5k+ for community public libraries (NYT & WaPo covered)."
+          description: "Building open-source public software and creative awareness campaigns that raised over $13,500 for local public libraries."
         },
         {
           id: "04",
           title: "Ski Patrol & Team Safety",
           tooltip: "Applying situational clarity and rapid medical decision-making to build secure, fault-tolerant systems.",
-          description: "Certified Alpine Ski Patroller (OEC/OET) applying rapid triage and situational clarity to build fault-tolerant, resilient software."
+          description: "Applying emergency medical response experience and rapid decision-making from ski patrolling to build reliable, high-availability software."
         }
       ]
     },

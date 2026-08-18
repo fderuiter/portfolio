@@ -166,10 +166,10 @@ describe("Timeline Inline-Marked RichNarrative Integration", () => {
 
     // Timeline entries should display content from the simplified timeline dictionary slice
     expect(container.textContent).toContain(
-      "Pioneered a system to identify eligible trial participants from hospital records"
+      "Created automated participant search tools using hospital electronic health records"
     );
     expect(container.textContent).toContain(
-      "Coordinated operations for multiple clinical research trials, ensuring high-quality records"
+      "Managed operations for federally funded clinical trials from launch to completion"
     );
 
     // Should not contain detailed terminology strings
