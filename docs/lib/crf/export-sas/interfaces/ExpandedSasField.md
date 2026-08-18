@@ -6,7 +6,7 @@
 
 # Interface: ExpandedSasField
 
-Defined in: [lib/crf/export-sas.ts:129](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L129)
+Defined in: [lib/crf/export-sas.ts:138](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L138)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/export-sas.ts:129](https://github.com/fderuiter/portfolio/b
 
 > **attrs**: [`SasFieldAttributes`](SasFieldAttributes.md)
 
-Defined in: [lib/crf/export-sas.ts:131](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L131)
+Defined in: [lib/crf/export-sas.ts:140](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L140)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/export-sas.ts:131](https://github.com/fderuiter/portfolio/b
 
 > **field**: [`CRFField`](../../types/interfaces/CRFField.md)
 
-Defined in: [lib/crf/export-sas.ts:130](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L130)
+Defined in: [lib/crf/export-sas.ts:139](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L139)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [lib/crf/export-sas.ts:130](https://github.com/fderuiter/portfolio/b
 
 > `optional` **optionCode?**: `string`
 
-Defined in: [lib/crf/export-sas.ts:132](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L132)
+Defined in: [lib/crf/export-sas.ts:141](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L141)

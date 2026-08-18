@@ -18,7 +18,7 @@ Returns 'Y' if selected, 'N' if absent/unselected.
 
 ### edcValue
 
-`string` \| `string`[] \| `null` \| `undefined`
+`string` \| `boolean` \| `string`[] \| `null` \| `undefined`
 
 ### optionCode
 

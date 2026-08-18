@@ -6,7 +6,7 @@
 
 # Interface: SasFieldAttributes
 
-Defined in: [lib/crf/export-sas.ts:119](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L119)
+Defined in: [lib/crf/export-sas.ts:128](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L128)
 
 Maps a ClinicalDataType to SAS Variable Attributes (Type, Length, Format, Informat).
 
@@ -16,7 +16,7 @@ Maps a ClinicalDataType to SAS Variable Attributes (Type, Length, Format, Inform
 
 > `optional` **codelistRef?**: [`CodelistDefinition`](../../types/interfaces/CodelistDefinition.md)
 
-Defined in: [lib/crf/export-sas.ts:126](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L126)
+Defined in: [lib/crf/export-sas.ts:135](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L135)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [lib/crf/export-sas.ts:126](https://github.com/fderuiter/portfolio/b
 
 > `optional` **format?**: `string`
 
-Defined in: [lib/crf/export-sas.ts:124](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L124)
+Defined in: [lib/crf/export-sas.ts:133](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L133)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [lib/crf/export-sas.ts:124](https://github.com/fderuiter/portfolio/b
 
 > `optional` **informat?**: `string`
 
-Defined in: [lib/crf/export-sas.ts:125](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L125)
+Defined in: [lib/crf/export-sas.ts:134](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L134)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [lib/crf/export-sas.ts:125](https://github.com/fderuiter/portfolio/b
 
 > **isNumeric**: `boolean`
 
-Defined in: [lib/crf/export-sas.ts:121](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L121)
+Defined in: [lib/crf/export-sas.ts:130](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L130)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [lib/crf/export-sas.ts:121](https://github.com/fderuiter/portfolio/b
 
 > **label**: `string`
 
-Defined in: [lib/crf/export-sas.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L123)
+Defined in: [lib/crf/export-sas.ts:132](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L132)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [lib/crf/export-sas.ts:123](https://github.com/fderuiter/portfolio/b
 
 > **length**: `string`
 
-Defined in: [lib/crf/export-sas.ts:122](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L122)
+Defined in: [lib/crf/export-sas.ts:131](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L131)
 
 ***
 
@@ -64,4 +64,4 @@ Defined in: [lib/crf/export-sas.ts:122](https://github.com/fderuiter/portfolio/b
 
 > **sasVarName**: `string`
 
-Defined in: [lib/crf/export-sas.ts:120](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L120)
+Defined in: [lib/crf/export-sas.ts:129](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L129)

@@ -8,7 +8,7 @@
 
 > **getExpandedSasAttributes**(`field`, `study`, `usedNames?`): [`ExpandedSasField`](../interfaces/ExpandedSasField.md)[]
 
-Defined in: [lib/crf/export-sas.ts:263](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L263)
+Defined in: [lib/crf/export-sas.ts:272](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L272)
 
 Expands fields, converting multi_select and checkbox fields into individual dichotomous sub-variables.
 
