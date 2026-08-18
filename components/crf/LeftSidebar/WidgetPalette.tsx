@@ -262,7 +262,7 @@ export const WidgetPalette: React.FC<WidgetPaletteProps> = ({ onAddField }) => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="@container space-y-4">
       <div className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 font-semibold px-1">
         Clinical Field Palette
       </div>
@@ -274,7 +274,7 @@ export const WidgetPalette: React.FC<WidgetPaletteProps> = ({ onAddField }) => {
             <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest px-1">
               {cat.label}
             </div>
-            <div className="grid grid-cols-1 gap-1.5">
+            <div className="grid grid-cols-1 @[320px]:grid-cols-2 gap-1.5">
               {items.map((widget) => (
                 <button
                   key={widget.type}

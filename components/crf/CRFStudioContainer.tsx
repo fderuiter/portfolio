@@ -676,12 +676,12 @@ export const CRFStudioContainer: React.FC = () => {
       )}
 
       {/* Main Workspace Body based on Mode */}
-      <div className="flex-1 flex overflow-hidden relative">
+      <div className="@container flex-1 flex overflow-hidden relative">
         {activeMode === "designer" && activeForm && (
           <>
             {/* Desktop / Tablet Left Sidebar: Forms Navigator & Widget Palette */}
             {isLeftSidebarOpen && (
-              <aside className="hidden md:flex w-64 lg:w-72 bg-zinc-950 border-r border-zinc-850 flex-col shrink-0 transition-all">
+              <aside className="@container hidden md:flex w-64 lg:w-72 bg-zinc-950 border-r border-zinc-850 flex-col shrink-0 transition-all">
                 {/* Left Sub-Tabs */}
                 <div className="flex border-b border-zinc-850 bg-zinc-900/40">
                   <button
@@ -788,7 +788,7 @@ export const CRFStudioContainer: React.FC = () => {
             </div>
 
             {/* Center Canvas for Desktop/Tablet (Visible on md+ screens) */}
-            <main className="hidden md:flex flex-1 flex-col overflow-hidden">
+            <main className="@container hidden md:flex flex-1 flex-col overflow-hidden">
               <FormCanvas
                 form={activeForm}
                 selectedFieldId={selectedFieldId}
@@ -812,7 +812,7 @@ export const CRFStudioContainer: React.FC = () => {
 
             {/* Desktop / Tablet Right Inspector Panel */}
             {isRightInspectorOpen && (
-              <aside className="hidden md:flex w-72 lg:w-96 bg-zinc-950 shrink-0 flex-col transition-all">
+              <aside className="@container hidden md:flex w-72 lg:w-96 bg-zinc-950 shrink-0 flex-col transition-all">
                 <InspectorPanel
                   form={activeForm}
                   selectedField={selectedField}

@@ -437,7 +437,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full min-h-[380px] bg-zinc-950 rounded-2xl border border-zinc-800/80 overflow-hidden flex flex-col select-none">
+    <div className="@container relative w-full h-full min-h-[320px] bg-zinc-950 rounded-2xl border border-zinc-800/80 overflow-hidden flex flex-col select-none">
       {/* 3D Viewport Header */}
       <div className="absolute top-3 left-3 z-10 flex items-center gap-2 bg-zinc-900/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-zinc-750 text-xs font-mono">
         <Icon3dCubeSphere className="w-4 h-4 text-brand-cyan" />

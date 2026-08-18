@@ -40,7 +40,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
   const allFields = form.sections.flatMap((s) => s.fields);
 
   return (
-    <div className="flex flex-col h-full bg-zinc-950/90 border-l border-zinc-800/80">
+    <div className="@container flex flex-col h-full bg-zinc-950/90 border-l border-zinc-800/80">
       {/* Top Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800/80 bg-zinc-900/60">
         <div className="flex items-center gap-2 min-w-0">

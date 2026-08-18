@@ -18,8 +18,28 @@ interface PlayCabinetProps {
   instructions: string;
   controls: ControlItem[];
   importComponent: () => Promise<unknown>;
+  aspectRatio?: string;
   children: React.ReactNode;
 }
+
+const DEFAULT_GAME_ASPECT_RATIOS: Record<string, string> = {
+  "garmin-watch": "1/1",
+  "working-with-duck": "16/9",
+  "laser-loon": "16/9",
+  "retro-labyrinth": "16/10",
+  "clinical-chaos": "16/10",
+  "quasi-puzzler": "16/10",
+};
+
+const ASPECT_RATIO_CLASSES: Record<string, string> = {
+  "1/1": "aspect-square",
+  square: "aspect-square",
+  "16/9": "aspect-video",
+  video: "aspect-video",
+  "16/10": "aspect-[16/10]",
+  "4/3": "aspect-[4/3]",
+  "4/5": "aspect-[4/5]",
+};
 
 export const PlayCabinet: React.FC<PlayCabinetProps> = ({
   gameId: rawGameId,
@@ -30,9 +50,13 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
   instructions,
   controls,
   importComponent,
+  aspectRatio,
   children,
 }) => {
   const gameId = rawGameId || title.toLowerCase().replace(/[^a-z0-9]/g, "-");
+  const effectiveRatio = aspectRatio || DEFAULT_GAME_ASPECT_RATIOS[gameId] || "16/10";
+  const aspectClass = ASPECT_RATIO_CLASSES[effectiveRatio] || `aspect-[${effectiveRatio}]`;
+  const isSquare = effectiveRatio === "1/1" || effectiveRatio === "square";
   const [isLaunched, setIsLaunched] = useState(false);
   const [isPrefetched, setIsPrefetched] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -226,9 +250,10 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
     <div className={`w-full ${colors.shadow} transition-all duration-300`}>
       {/* Static Retro Cabinet Preview Screen with scanlines */}
       <div 
-        className="w-full aspect-[16/10] min-h-[380px] rounded-2xl border border-zinc-800 bg-zinc-950 flex flex-col justify-between p-6 sm:p-8 relative overflow-hidden select-none"
+        className={`@container w-full ${aspectClass} ${isSquare ? "min-h-[280px]" : "min-h-[320px] sm:min-h-[380px]"} rounded-2xl border border-zinc-800 bg-zinc-950 flex flex-col justify-between p-6 sm:p-8 relative overflow-hidden select-none`}
         style={{
-          backgroundImage: "radial-gradient(circle at center, #09090b 40%, #020202 100%)"
+          backgroundImage: "radial-gradient(circle at center, #09090b 40%, #020202 100%)",
+          aspectRatio: effectiveRatio,
         }}
       >
         {/* Scanlines Effect */}

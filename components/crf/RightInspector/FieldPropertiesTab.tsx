@@ -279,7 +279,7 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
   };
 
   return (
-    <div className="space-y-4 p-4 text-xs font-sans">
+    <div className="@container space-y-4 p-4 text-xs font-sans">
       {/* Variable Name & Display Label */}
       <div>
         <label className="block text-[11px] font-mono text-zinc-400 mb-1">
@@ -321,7 +321,7 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
       </div>
 
       {/* Data Type & Grid Width */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 @[260px]:grid-cols-2 gap-3">
         <div>
           <label className="block text-[11px] font-mono text-zinc-400 mb-1">
             Data Type

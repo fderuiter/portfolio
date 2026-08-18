@@ -60,7 +60,8 @@ describe("NeuroRecon Dynamic Import & Skeleton Placeholder Suite", () => {
     expect(container.textContent).toContain("Loading heavy WebGL visualizer and 3D brain mesh...");
     expect(container.textContent).toContain("PREPARING T1 MESH BUFFER");
 
-    // Verify strictly 460px height styling
-    expect(skeleton?.classList.contains("h-[460px]")).toBe(true);
+    // Verify responsive height styling with unclamped mobile reflow
+    expect(skeleton?.classList.contains("lg:h-[460px]")).toBe(true);
+    expect(skeleton?.classList.contains("min-h-[320px]")).toBe(true);
   });
 });

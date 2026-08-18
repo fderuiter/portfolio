@@ -1631,7 +1631,7 @@ export function ProofWorkspaceClient() {
                 aria-label="Proof workspace canvas"
                 onPointerMove={handleCanvasPointerMove}
                 onPointerUp={handleCanvasPointerUp}
-                className="relative w-full h-[420px] bg-gradient-to-b from-slate-950/60 via-slate-900 to-slate-950 select-none overflow-x-auto overflow-y-hidden"
+                className="@container relative w-full h-auto min-h-[360px] lg:h-[420px] bg-gradient-to-b from-slate-950/60 via-slate-900 to-slate-950 select-none overflow-x-auto overflow-y-hidden flex flex-col"
               >
                 <div className="relative min-w-[760px] h-full">
                   <svg ref={svgCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none">
@@ -1971,7 +1971,7 @@ export function ProofWorkspaceClient() {
               </div>
 
               {/* Tab Content */}
-              <div className="p-4 flex flex-col gap-4 min-h-[380px] max-h-[460px] overflow-y-auto">
+              <div className="@container p-4 flex flex-col gap-4 min-h-[280px] h-auto overflow-y-auto">
                 {activeTab === "ledger" && (
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center justify-between">

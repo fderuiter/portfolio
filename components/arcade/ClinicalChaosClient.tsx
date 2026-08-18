@@ -76,6 +76,7 @@ export const ClinicalChaosClient: React.FC = () => {
         <div className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-6 shadow-[0_0_50px_rgba(16,185,129,0.1)]">
           <PlayCabinet
             gameId="clinical-chaos"
+            aspectRatio="16/10"
             title="Clinical Trial Chaos: CDISC Compliance"
             subtitle="21 CFR Part 11 Compliance & Domain Mapper"
             accentColor="emerald"

@@ -76,6 +76,7 @@ export const WorkingWithDuckClient: React.FC = () => {
         <div className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-6 shadow-[0_0_50px_rgba(251,191,36,0.08)]">
           <PlayCabinet
             gameId="working-with-duck"
+            aspectRatio="16/9"
             title="Working With Duck"
             subtitle="Autonomous State Machine & Multitasking Simulation"
             accentColor="amber"

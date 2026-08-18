@@ -461,7 +461,7 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
     <div
       onMouseUp={handleCanvasMouseUp}
       onMouseLeave={handleCanvasMouseUp}
-      className="relative w-full h-full min-h-[380px] bg-zinc-950 rounded-2xl border border-zinc-800/80 p-3 flex flex-col gap-3 select-none"
+      className="@container relative w-full h-full min-h-[320px] bg-zinc-950 rounded-2xl border border-zinc-800/80 p-3 flex flex-col gap-3 select-none"
     >
       {/* Top Header / View Mode Controls */}
       <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2.5">
@@ -649,7 +649,7 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
             </span>
           </div>
 
-          <div className="flex-1 flex items-center justify-center relative overflow-hidden rounded-lg bg-black max-h-[480px]">
+          <div className="flex-1 w-full h-auto flex items-center justify-center relative overflow-hidden rounded-lg bg-black max-h-[480px]">
             {activePlane === "axial" && (
               <canvas
                 ref={axialCanvasRef}

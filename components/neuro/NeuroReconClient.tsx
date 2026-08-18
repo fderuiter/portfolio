@@ -37,7 +37,7 @@ import { NeuroReconSkeleton } from "./NeuroReconSkeleton";
 const Brain3DViewerSkeleton: React.FC = () => {
   return (
     <div 
-      className="relative w-full h-[460px] bg-zinc-950 rounded-2xl border border-zinc-800/80 overflow-hidden flex flex-col justify-between p-4 select-none animate-pulse"
+      className="relative w-full h-auto min-h-[320px] lg:h-[460px] bg-zinc-950 rounded-2xl border border-zinc-800/80 overflow-hidden flex flex-col justify-between p-4 select-none animate-pulse"
       data-testid="brain-3d-skeleton"
     >
       {/* Skeleton Header */}
@@ -845,11 +845,11 @@ export const NeuroReconClient: React.FC = () => {
       />
 
       {/* Main Viewport Canvas Workspace */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div className="@container grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* 3D Brain Surface Canvas (Span 5 or 12 or 0) */}
         {(viewMode === "split" || viewMode === "3d") && (
           <div
-            className={`h-[460px] ${
+            className={`h-auto min-h-[320px] lg:h-[460px] ${
               viewMode === "3d" ? "lg:col-span-12" : "lg:col-span-5"
             }`}
           >
@@ -866,7 +866,7 @@ export const NeuroReconClient: React.FC = () => {
         {/* 2D Multi-Planar Orthoview Slices (Span 7 or 12 or 0) */}
         {(viewMode === "split" || viewMode === "2d") && (
           <div
-            className={`h-[460px] ${
+            className={`h-auto min-h-[320px] lg:h-[460px] ${
               viewMode === "2d" ? "lg:col-span-12" : "lg:col-span-7"
             }`}
           >

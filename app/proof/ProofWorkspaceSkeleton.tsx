@@ -112,7 +112,7 @@ export function ProofWorkspaceSkeleton() {
                 tabIndex={0}
                 role="region"
                 aria-label="Proof workspace canvas skeleton"
-                className="relative w-full h-[420px] bg-gradient-to-b from-slate-950/60 via-slate-900 to-slate-950 select-none overflow-x-auto overflow-y-hidden"
+                className="@container relative w-full h-auto min-h-[360px] lg:h-[420px] bg-gradient-to-b from-slate-950/60 via-slate-900 to-slate-950 select-none overflow-x-auto overflow-y-hidden"
               >
                 <div className="relative min-w-[760px] h-full flex items-center justify-center">
                   <svg className="absolute inset-0 w-full h-full pointer-events-none">
@@ -160,7 +160,7 @@ export function ProofWorkspaceSkeleton() {
               </div>
 
               {/* Tab Content */}
-              <div className="p-4 flex flex-col gap-4 min-h-[380px] max-h-[460px] overflow-y-auto">
+              <div className="@container p-4 flex flex-col gap-4 min-h-[280px] h-auto overflow-y-auto">
                 <div className="space-y-3">
                   <div className="w-full h-12 bg-slate-800/60 rounded-xl animate-pulse" />
                   <div className="w-full h-12 bg-slate-800/60 rounded-xl animate-pulse" />
