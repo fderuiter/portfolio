@@ -9,6 +9,7 @@ import { useAudio } from "@/components/providers/AudioProvider";
 import { useSearch } from "@/components/providers/SearchProvider";
 import { usePersona } from "@/components/providers/PersonaProvider";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useInteractiveRouter } from "@/hooks/useInteractiveRouter";
 import {
   IconVolume,
   IconVolumeOff,
@@ -127,6 +128,7 @@ export const Navbar: React.FC = () => {
   const { volume, muted, profile, setVolume, setMuted, setProfile, playHover } = useAudio();
   const { openSearch } = useSearch();
   const { persona, setPersona } = usePersona();
+  const { isPending, pendingHref, prefetch, navigate } = useInteractiveRouter();
   const [showAudioPanel, setShowAudioPanel] = useState(false);
 
   const pathname = usePathname();
@@ -148,7 +150,10 @@ export const Navbar: React.FC = () => {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const navContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleLinkHover = (e: React.MouseEvent<HTMLElement>) => {
+  const handleLinkHover = (e: React.MouseEvent<HTMLElement>, href?: string) => {
+    if (href) {
+      prefetch(href);
+    }
     if (typeof window === "undefined") return;
     const rect = e.currentTarget.getBoundingClientRect();
     const pan = (rect.left + rect.width / 2) / window.innerWidth * 2 - 1;
@@ -252,22 +257,14 @@ export const Navbar: React.FC = () => {
     };
   }, [activeDropdown, showAudioPanel]);
 
-  // Handle smooth scroll clicks on homepage and universal mobile drawer dismissal
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  // Handle smooth scroll clicks on homepage and universal transition navigation
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string, title?: string) => {
     setActiveDropdown(null);
     setIsOpen(false);
     if (typeof document !== "undefined") {
       document.body.style.overflow = "";
     }
-    if (pathname === "/" && href.startsWith("/#")) {
-      e.preventDefault();
-      const targetId = href.substring(2);
-      const targetElement = document.getElementById(targetId);
-      if (targetElement) {
-        targetElement.scrollIntoView({ behavior: "smooth" });
-        setActiveSection(targetId);
-      }
-    }
+    navigate(href, title, e);
   };
 
   const isArcadeActive = pathname.startsWith("/arcade");
@@ -370,12 +367,13 @@ export const Navbar: React.FC = () => {
                         </div>
                         {ARCADE_ITEMS.map((item) => {
                           const isActive = pathname === item.href;
+                          const isItemPending = isPending && pendingHref === item.href;
                           return (
                             <Link
                               key={item.href}
                               href={item.href}
-                              onClick={() => setActiveDropdown(null)}
-                              onMouseEnter={handleLinkHover}
+                              onClick={(e) => handleNavClick(e, item.href, item.title)}
+                              onMouseEnter={(e) => handleLinkHover(e, item.href)}
                               className={cn(
                                 "flex items-start gap-3 p-2.5 rounded-xl transition-all duration-150 group",
                                 isActive
@@ -384,12 +382,21 @@ export const Navbar: React.FC = () => {
                               )}
                               role="menuitem"
                             >
-                              <div className="mt-0.5 p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 group-hover:border-brand-cyan/30 transition-colors">
-                                {item.icon}
+                              <div className="mt-0.5 p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 group-hover:border-brand-cyan/30 transition-colors flex items-center justify-center">
+                                {isItemPending ? (
+                                  <span className="inline-block w-4 h-4 border-2 border-brand-cyan border-t-transparent rounded-full animate-spin shrink-0" role="status" aria-label="Loading route" />
+                                ) : (
+                                  item.icon
+                                )}
                               </div>
                               <div className="flex flex-col min-w-0">
-                                <span className="text-xs font-mono font-bold tracking-tight text-neutral-200 group-hover:text-brand-cyan transition-colors">
-                                  {item.title}
+                                <span className="text-xs font-mono font-bold tracking-tight text-neutral-200 group-hover:text-brand-cyan transition-colors flex items-center gap-1.5">
+                                  <span>{item.title}</span>
+                                  {isItemPending && (
+                                    <span className="text-[10px] text-brand-cyan font-normal animate-pulse">
+                                      Loading...
+                                    </span>
+                                  )}
                                 </span>
                                 <span className="text-[11px] font-sans text-zinc-400 truncate">
                                   {item.subtitle}
@@ -445,12 +452,13 @@ export const Navbar: React.FC = () => {
                       </div>
                       {SYSTEMS_ITEMS.filter((item) => !(persona === "technical" && item.href === "/simulator")).map((item) => {
                         const isActive = pathname === item.href;
+                        const isItemPending = isPending && pendingHref === item.href;
                         return (
                           <Link
                             key={item.href}
                             href={item.href}
-                            onClick={() => setActiveDropdown(null)}
-                            onMouseEnter={handleLinkHover}
+                            onClick={(e) => handleNavClick(e, item.href, item.title)}
+                            onMouseEnter={(e) => handleLinkHover(e, item.href)}
                             className={cn(
                               "flex items-start gap-3 p-2.5 rounded-xl transition-all duration-150 group",
                               isActive
@@ -459,12 +467,21 @@ export const Navbar: React.FC = () => {
                             )}
                             role="menuitem"
                           >
-                            <div className="mt-0.5 p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 group-hover:border-brand-cyan/30 transition-colors">
-                              {item.icon}
+                            <div className="mt-0.5 p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 group-hover:border-brand-cyan/30 transition-colors flex items-center justify-center">
+                              {isItemPending ? (
+                                <span className="inline-block w-4 h-4 border-2 border-brand-cyan border-t-transparent rounded-full animate-spin shrink-0" role="status" aria-label="Loading route" />
+                              ) : (
+                                item.icon
+                              )}
                             </div>
                             <div className="flex flex-col min-w-0">
-                              <span className="text-xs font-mono font-bold tracking-tight text-neutral-200 group-hover:text-brand-cyan transition-colors">
-                                {item.title}
+                              <span className="text-xs font-mono font-bold tracking-tight text-neutral-200 group-hover:text-brand-cyan transition-colors flex items-center gap-1.5">
+                                <span>{item.title}</span>
+                                {isItemPending && (
+                                  <span className="text-[10px] text-brand-cyan font-normal animate-pulse">
+                                    Loading...
+                                  </span>
+                                )}
                               </span>
                               <span className="text-[11px] font-sans text-zinc-400 truncate">
                                 {item.subtitle}

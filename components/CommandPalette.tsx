@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef, useId, useMemo } from "react";
 import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
 import {
   IconSearch,
   IconTerminal,
@@ -23,6 +22,7 @@ import {
 import { filterFuzzySearch } from "@/lib/search-utils";
 import { useSearch } from "@/components/providers/SearchProvider";
 import { useAudio } from "@/components/providers/AudioProvider";
+import { useInteractiveRouter } from "@/hooks/useInteractiveRouter";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { unlockAchievement, setVaultUnlocked } from "@/lib/meme-data";
 import { playMemeSound } from "@/lib/meme-audio";
@@ -58,8 +58,8 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const { playHover, playSubmit } = useAudio();
+  const { navigate, prefetch } = useInteractiveRouter();
 
-  const router = useRouter();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const searchId = useId();
 
@@ -530,6 +530,13 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
     return [...secretItems, ...baseMatches];
   }, [allItems, query]);
 
+  useEffect(() => {
+    const activeTarget = filteredItems[activeIndex];
+    if (activeTarget?.url && !activeTarget.url.startsWith("action:")) {
+      prefetch(activeTarget.url);
+    }
+  }, [activeIndex, filteredItems, prefetch]);
+
   // 4. Keyboard Control Handlers (↑↓, Enter, Escape)
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (filteredItems.length === 0) {
@@ -599,16 +606,16 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
       const targetId = item.url.substring(2);
       const targetElement = document.getElementById(targetId);
       if (targetElement) {
-        router.push("/");
+        navigate("/");
         // Allow thread transition to complete
         setTimeout(() => {
           targetElement.scrollIntoView({ behavior: "smooth" });
         }, 100);
       } else {
-        router.push(item.url);
+        navigate(item.url, item.title);
       }
     } else {
-      router.push(item.url);
+      navigate(item.url, item.title);
     }
   };
 

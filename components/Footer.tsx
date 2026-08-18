@@ -22,14 +22,19 @@ import {
 } from "@tabler/icons-react";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { usePersona } from "@/components/providers/PersonaProvider";
+import { useInteractiveRouter } from "@/hooks/useInteractiveRouter";
 import { FooterStatusTicker } from "@/components/FooterStatusTicker";
 
 export const Footer: React.FC = () => {
   const pathname = usePathname();
   const { playHover, playSuccess } = useAudio();
   const { persona } = usePersona();
+  const { prefetch } = useInteractiveRouter();
 
-  const handleHover = (e: React.MouseEvent<HTMLElement>) => {
+  const handleHover = (e: React.MouseEvent<HTMLElement>, href?: string) => {
+    if (href) {
+      prefetch(href);
+    }
     if (typeof window === "undefined") return;
     const rect = e.currentTarget.getBoundingClientRect();
     const pan = ((rect.left + rect.width / 2) / window.innerWidth) * 2 - 1;

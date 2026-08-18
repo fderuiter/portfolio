@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer";
 import { getPersonSchema, getWebsiteSchema } from "@/lib/seo";
 import { A11yProvider } from "@/components/providers/A11yProvider";
 import { AudioProvider } from "@/components/providers/AudioProvider";
+import { RouterTransitionProvider } from "@/components/providers/RouterTransitionProvider";
 import { SearchProvider } from "@/components/providers/SearchProvider";
 import { TerminologyProvider } from "@/components/providers/TerminologyProvider";
 import { PersonaProvider } from "@/components/providers/PersonaProvider";
@@ -113,14 +114,16 @@ export default function RootLayout({
             <SearchProvider>
               <A11yProvider>
                 <AudioProvider>
-                  <Navbar />
-                  <main id="main-content" tabIndex={-1} className="flex-grow flex flex-col focus:outline-none">
-                    {children}
-                  </main>
-                  <Footer />
-                  <RetroChaosOverlay />
-                  <Analytics />
-                  <SearchWrapper />
+                  <RouterTransitionProvider>
+                    <Navbar />
+                    <main id="main-content" tabIndex={-1} className="flex-grow flex flex-col focus:outline-none">
+                      {children}
+                    </main>
+                    <Footer />
+                    <RetroChaosOverlay />
+                    <Analytics />
+                    <SearchWrapper />
+                  </RouterTransitionProvider>
                 </AudioProvider>
               </A11yProvider>
             </SearchProvider>
