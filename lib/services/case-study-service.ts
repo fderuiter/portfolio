@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import DOMPurify from "isomorphic-dompurify";
 import { env } from "@/lib/env";
+import { redis } from "@/lib/redis";
 
 export interface CaseStudySubmissionInput {
   title: string;
@@ -41,6 +42,58 @@ const ALLOWED_REACTIONS = ["insightful", "mind_blowing", "actionable", "thorough
 // In-memory fallback stores for offline/mock environments
 const mockFeedbackStore = new Map<string, Array<{ takeaways: string[]; comments: string; connectionHash: string; createdAt: string }>>();
 const mockReactionsStore = new Map<string, Map<string, number>>();
+
+interface RedisFeedbackEntry {
+  id: string;
+  caseStudySlug: string;
+  takeaways: string[];
+  comments: string;
+  connectionHash: string;
+  createdAt: string;
+}
+
+interface RedisReactionEntry {
+  caseStudySlug: string;
+  reactionType: string;
+  connectionHash: string;
+  createdAt: string;
+}
+
+async function getRedisFallbackFeedback(slug: string): Promise<RedisFeedbackEntry[]> {
+  try {
+    const rawList = await redis.lrange(`fallback:feedback:${slug}`, 0, -1);
+    if (!Array.isArray(rawList)) return [];
+    return rawList
+      .map((item) => {
+        try {
+          return typeof item === "string" ? JSON.parse(item) : item;
+        } catch {
+          return null;
+        }
+      })
+      .filter((item): item is RedisFeedbackEntry => item !== null && typeof item === "object" && !!item.connectionHash);
+  } catch {
+    return [];
+  }
+}
+
+async function getRedisFallbackReactions(slug: string): Promise<RedisReactionEntry[]> {
+  try {
+    const rawList = await redis.lrange(`fallback:reactions:${slug}`, 0, -1);
+    if (!Array.isArray(rawList)) return [];
+    return rawList
+      .map((item) => {
+        try {
+          return typeof item === "string" ? JSON.parse(item) : item;
+        } catch {
+          return null;
+        }
+      })
+      .filter((item): item is RedisReactionEntry => item !== null && typeof item === "object" && !!item.reactionType);
+  } catch {
+    return [];
+  }
+}
 
 function getDefaultReactionCounts(): Record<string, number> {
   const counts: Record<string, number> = {};
@@ -137,8 +190,11 @@ export class CaseStudyService {
    * Fetches user feedback for a given case study slug.
    */
   static async getFeedback(slug: string, connectionHash: string) {
+    const fallbackList = await getRedisFallbackFeedback(slug);
+    const mockList = mockFeedbackStore.get(slug) || [];
+
     try {
-      const feedbackList = await prisma.caseStudyFeedback.findMany({
+      const dbFeedbackList = await prisma.caseStudyFeedback.findMany({
         where: { caseStudySlug: slug },
         select: {
           id: true,
@@ -151,36 +207,66 @@ export class CaseStudyService {
         take: 20,
       });
 
-      const hasSubmitted = feedbackList.some((f) => f.connectionHash === connectionHash);
+      const hasSubmitted =
+        dbFeedbackList.some((f) => f.connectionHash === connectionHash) ||
+        fallbackList.some((f) => f.connectionHash === connectionHash) ||
+        mockList.some((f) => f.connectionHash === connectionHash);
+
+      const formattedDbFeedback = dbFeedbackList.map((f) => ({
+        id: f.id,
+        takeaways: JSON.parse(f.takeaways || "[]"),
+        comments: f.comments,
+        createdAt: f.createdAt,
+      }));
+
+      const dbIds = new Set(formattedDbFeedback.map((f) => f.id));
+      const formattedFallbackFeedback = fallbackList
+        .filter((f) => !dbIds.has(f.id))
+        .map((f) => ({
+          id: f.id,
+          takeaways: f.takeaways,
+          comments: f.comments,
+          createdAt: f.createdAt ? new Date(f.createdAt) : new Date(),
+        }));
+
+      const mergedFeedback = [...formattedDbFeedback, ...formattedFallbackFeedback];
 
       return {
         success: true,
         caseStudySlug: slug,
         hasSubmitted,
-        totalFeedback: feedbackList.length,
-        feedback: feedbackList.map((f) => ({
-          id: f.id,
-          takeaways: JSON.parse(f.takeaways || "[]"),
-          comments: f.comments,
-          createdAt: f.createdAt,
-        })),
+        totalFeedback: mergedFeedback.length,
+        feedback: mergedFeedback,
       };
     } catch (err) {
       if (env.VERCEL_ENV === "production") {
         console.error("Failed to query case study feedback:", err);
       }
-      const mockList = mockFeedbackStore.get(slug) || [];
-      const hasSubmitted = mockList.some((f) => f.connectionHash === connectionHash);
+
+      const combinedFallback = [
+        ...fallbackList,
+        ...mockList.map((f, i) => ({
+          id: `mock-${i}`,
+          caseStudySlug: slug,
+          takeaways: f.takeaways,
+          comments: f.comments,
+          connectionHash: f.connectionHash,
+          createdAt: f.createdAt,
+        })),
+      ];
+
+      const hasSubmitted = combinedFallback.some((f) => f.connectionHash === connectionHash);
+
       return {
         success: true,
         caseStudySlug: slug,
         hasSubmitted,
-        totalFeedback: mockList.length,
-        feedback: mockList.map((f, i) => ({
-          id: `mock-${i}`,
+        totalFeedback: combinedFallback.length,
+        feedback: combinedFallback.map((f) => ({
+          id: f.id,
           takeaways: f.takeaways,
           comments: f.comments,
-          createdAt: f.createdAt,
+          createdAt: f.createdAt ? new Date(f.createdAt) : new Date(),
         })),
       };
     }
@@ -191,6 +277,22 @@ export class CaseStudyService {
    */
   static async submitFeedback(input: FeedbackSubmissionInput, connectionHash: string) {
     const { caseStudySlug, takeaways, comments } = input;
+
+    // Check duplicate in Redis fallback storage first
+    const fallbackList = await getRedisFallbackFeedback(caseStudySlug);
+    const existingFallback = fallbackList.find((f) => f.connectionHash === connectionHash);
+
+    // Check duplicate in mock store
+    const existingMock = (mockFeedbackStore.get(caseStudySlug) || []).find(
+      (f) => f.connectionHash === connectionHash
+    );
+
+    if (existingFallback || existingMock) {
+      return {
+        rateLimited: true,
+        message: "Feedback already submitted for this case study. Please try again later.",
+      };
+    }
 
     try {
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
@@ -234,23 +336,28 @@ export class CaseStudyService {
       if (env.VERCEL_ENV === "production") {
         console.error("Database feedback creation failed, using fallback:", dbErr);
       }
-      const existingMock = (mockFeedbackStore.get(caseStudySlug) || []).find(
-        (f) => f.connectionHash === connectionHash
-      );
-      if (existingMock) {
-        return {
-          rateLimited: true,
-          message: "Feedback already submitted for this case study. Please try again later.",
-        };
-      }
 
-      const list = mockFeedbackStore.get(caseStudySlug) || [];
-      const newEntry = {
+      const newEntry: RedisFeedbackEntry = {
+        id: `fallback-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        caseStudySlug,
         takeaways,
         comments,
         connectionHash,
         createdAt: new Date().toISOString(),
       };
+
+      try {
+        const p = redis.pipeline();
+        p.lpush(`fallback:feedback:${caseStudySlug}`, JSON.stringify(newEntry));
+        p.expire(`fallback:feedback:${caseStudySlug}`, 172800);
+        await p.exec();
+      } catch (redisErr) {
+        if (env.VERCEL_ENV === "production") {
+          console.error("Redis fallback feedback write failed:", redisErr);
+        }
+      }
+
+      const list = mockFeedbackStore.get(caseStudySlug) || [];
       mockFeedbackStore.set(caseStudySlug, [...list, newEntry]);
 
       return {
@@ -258,7 +365,7 @@ export class CaseStudyService {
         success: true,
         message: "Feedback submitted successfully",
         feedback: {
-          id: `mock-${Date.now()}`,
+          id: newEntry.id,
           caseStudySlug,
           takeaways,
           comments,
@@ -272,6 +379,9 @@ export class CaseStudyService {
    * Gets aggregated reactions for a case study.
    */
   static async getReactions(slug: string, connectionHash: string) {
+    const fallbackList = await getRedisFallbackReactions(slug);
+    const mockMap = mockReactionsStore.get(slug);
+
     try {
       const reactions = await prisma.caseStudyReaction.groupBy({
         by: ["reactionType"],
@@ -291,28 +401,66 @@ export class CaseStudyService {
         }
       }
 
+      for (const fb of fallbackList) {
+        if (counts[fb.reactionType] !== undefined) {
+          counts[fb.reactionType] += 1;
+        }
+      }
+
+      if (mockMap) {
+        for (const [r, count] of mockMap.entries()) {
+          if (counts[r] !== undefined) {
+            counts[r] += count;
+          }
+        }
+      }
+
+      const userReactionsSet = new Set(userReactionsList.map((ur) => ur.reactionType));
+      for (const fb of fallbackList) {
+        if (fb.connectionHash === connectionHash) {
+          userReactionsSet.add(fb.reactionType);
+        }
+      }
+
       return {
         success: true,
         caseStudySlug: slug,
         counts,
-        userReactions: userReactionsList.map((ur) => ur.reactionType),
+        userReactions: Array.from(userReactionsSet),
       };
     } catch (err) {
       if (env.VERCEL_ENV === "production") {
         console.error("Failed to query case study reactions:", err);
       }
+
       const counts = getDefaultReactionCounts();
-      const slugMap = mockReactionsStore.get(slug);
-      if (slugMap) {
-        for (const [r, count] of slugMap.entries()) {
-          counts[r] = count;
+
+      for (const fb of fallbackList) {
+        if (counts[fb.reactionType] !== undefined) {
+          counts[fb.reactionType] += 1;
         }
       }
+
+      if (mockMap) {
+        for (const [r, count] of mockMap.entries()) {
+          if (counts[r] !== undefined) {
+            counts[r] += count;
+          }
+        }
+      }
+
+      const userReactionsSet = new Set<string>();
+      for (const fb of fallbackList) {
+        if (fb.connectionHash === connectionHash) {
+          userReactionsSet.add(fb.reactionType);
+        }
+      }
+
       return {
         success: true,
         caseStudySlug: slug,
         counts,
-        userReactions: [],
+        userReactions: Array.from(userReactionsSet),
       };
     }
   }
@@ -323,6 +471,11 @@ export class CaseStudyService {
   static async submitReaction(input: ReactionSubmissionInput, connectionHash: string) {
     const { caseStudySlug, reactionType } = input;
 
+    const fallbackList = await getRedisFallbackReactions(caseStudySlug);
+    const existingFallback = fallbackList.some(
+      (fb) => fb.reactionType === reactionType && fb.connectionHash === connectionHash
+    );
+
     try {
       const existing = await prisma.caseStudyReaction.findFirst({
         where: {
@@ -332,7 +485,7 @@ export class CaseStudyService {
         },
       });
 
-      if (!existing) {
+      if (!existing && !existingFallback) {
         await prisma.caseStudyReaction.create({
           data: {
             caseStudySlug,
@@ -342,51 +495,75 @@ export class CaseStudyService {
         });
       }
 
-      const reactions = await prisma.caseStudyReaction.groupBy({
-        by: ["reactionType"],
-        where: { caseStudySlug },
-        _count: { id: true },
-      });
-
-      const userReactionsList = await prisma.caseStudyReaction.findMany({
-        where: { caseStudySlug, connectionHash },
-        select: { reactionType: true },
-      });
-
-      const counts = getDefaultReactionCounts();
-      for (const r of reactions) {
-        if (counts[r.reactionType] !== undefined) {
-          counts[r.reactionType] = r._count.id;
-        }
-      }
-
+      const res = await CaseStudyService.getReactions(caseStudySlug, connectionHash);
       return {
-        success: true,
+        ...res,
         reactionType,
-        counts,
-        userReactions: userReactionsList.map((ur) => ur.reactionType),
       };
     } catch (dbErr) {
       if (env.VERCEL_ENV === "production") {
         console.error("Database reaction creation failed, using fallback:", dbErr);
       }
-      if (!mockReactionsStore.has(caseStudySlug)) {
-        mockReactionsStore.set(caseStudySlug, new Map());
-      }
-      const slugMap = mockReactionsStore.get(caseStudySlug)!;
-      const currentCount = slugMap.get(reactionType) || 0;
-      slugMap.set(reactionType, currentCount + 1);
 
+      if (!existingFallback) {
+        const newReaction: RedisReactionEntry = {
+          caseStudySlug,
+          reactionType,
+          connectionHash,
+          createdAt: new Date().toISOString(),
+        };
+
+        try {
+          const p = redis.pipeline();
+          p.lpush(`fallback:reactions:${caseStudySlug}`, JSON.stringify(newReaction));
+          p.expire(`fallback:reactions:${caseStudySlug}`, 172800);
+          await p.exec();
+        } catch (redisErr) {
+          if (env.VERCEL_ENV === "production") {
+            console.error("Redis fallback reaction write failed:", redisErr);
+          }
+          if (!mockReactionsStore.has(caseStudySlug)) {
+            mockReactionsStore.set(caseStudySlug, new Map());
+          }
+          const slugMap = mockReactionsStore.get(caseStudySlug)!;
+          const currentCount = slugMap.get(reactionType) || 0;
+          slugMap.set(reactionType, currentCount + 1);
+        }
+      }
+
+      const updatedFallbackList = await getRedisFallbackReactions(caseStudySlug);
+      const mockMap = mockReactionsStore.get(caseStudySlug);
       const counts = getDefaultReactionCounts();
-      for (const [r, count] of slugMap.entries()) {
-        counts[r] = count;
+
+      for (const fb of updatedFallbackList) {
+        if (counts[fb.reactionType] !== undefined) {
+          counts[fb.reactionType] += 1;
+        }
+      }
+
+      if (mockMap) {
+        for (const [r, count] of mockMap.entries()) {
+          if (counts[r] !== undefined) {
+            counts[r] += count;
+          }
+        }
+      }
+
+      const userReactionsSet = new Set<string>();
+      for (const fb of updatedFallbackList) {
+        if (fb.connectionHash === connectionHash) {
+          userReactionsSet.add(fb.reactionType);
+        }
+      }
+      if (mockMap && mockMap.has(reactionType)) {
+        userReactionsSet.add(reactionType);
       }
 
       return {
         success: true,
         reactionType,
         counts,
-        userReactions: [reactionType],
+        userReactions: Array.from(userReactionsSet),
       };
     }
   }

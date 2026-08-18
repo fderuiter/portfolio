@@ -545,7 +545,7 @@ where
     published: true,
     simulated_telemetry: false,
     tags: "Rust, Lean 4, Python, C, Formal Verification, Number Theory",
-    editorial_content: "A **verified hybrid computational engine** pairing high-throughput **Rust** branch-and-bound search with a **Lean 4** formal verification pipeline. Automates large-scale search space exploration over `prime signature lattices` to investigate **quasiperfect numbers** ($\\sigma(n) = 2n + 1$) with zero unproven mathematical axioms.",
+    editorial_content: "A **verified hybrid computational engine** pairing high-throughput **Rust** branch-and-bound search with a **Lean 4** formal verification pipeline. Automates large-scale search space exploration over `prime signature lattices` to investigate **quasiperfect numbers** ($\\\\sigma(n) = 2n + 1$) with zero unproven mathematical axioms.",
     architectural_narrative: `
 <h3>The Challenge</h3>
 <p>Investigating the existence of quasiperfect numbers (integers <code>n</code> where the sum of positive divisors <code>σ(n) = 2n + 1</code>) requires searching vast prime exponent lattices. Unverified heuristic search algorithms are fast but vulnerable to arithmetic bugs or missed edge cases. Writing the entire search engine inside a formal theorem prover like Lean 4 introduces massive execution overhead, making exhaustive lattice traversals intractable.</p>
@@ -648,7 +648,7 @@ pub extern "C" fn ualbf_verify_certificate_manifest(
     }
 }
 </code></pre>
-    }.trim(),
+    `.trim(),
   },
   {
     slug: "sortify",
@@ -658,7 +658,7 @@ pub extern "C" fn ualbf_verify_certificate_manifest(
     published: true,
     simulated_telemetry: false,
     tags: "Python, PyQt6, ONNX, SQLCipher, Machine Learning, Clinical Trials, HIPAA, Desktop",
-    editorial_content: "A **zero-telemetry**, fully `air-gapped` document classification and file organization pipeline featuring local **hybrid semantic clustering** (ONNX vector embeddings + sparse TF-IDF) and crash-resilient **2-phase file operations** backed by an encrypted `SQLCipher` metadata registry.",
+    editorial_content: 'A **zero-telemetry**, fully `air-gapped` document classification and file organization pipeline featuring local **hybrid semantic clustering** (ONNX vector embeddings + sparse TF-IDF) and crash-resilient **2-phase file operations** backed by an encrypted `SQLCipher` metadata registry.',
     architectural_narrative: `
 <h3>The Challenge</h3>
 <p>Managing and categorizing massive, unstructured document dumps (clinical trial records, financial reports, technical documentation) while strictly adhering to regulatory compliance frameworks (such as 21 CFR Part 11, HIPAA, and GDPR) presents severe security challenges. Traditional cloud-based classification tools risk data leakage and compliance violations when handling sensitive patient health information (PHI) or proprietary datasets.</p>

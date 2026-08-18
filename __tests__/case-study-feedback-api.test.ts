@@ -1,11 +1,65 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
+
+const mockRedisStore = new Map<string, string[]>();
+
+const { mockRatelimitLimit } = vi.hoisted(() => ({
+  mockRatelimitLimit: vi.fn().mockResolvedValue({
+    success: true,
+    limit: 100,
+    remaining: 99,
+    reset: Date.now() + 60000,
+  }),
+}));
+
+vi.mock("@upstash/redis", () => {
+  class MockRedis {
+    async lrange(key: string, _start: number, _stop: number) {
+      return mockRedisStore.get(key) || [];
+    }
+    pipeline() {
+      const operations: Array<() => void> = [];
+      return {
+        lpush(key: string, value: string) {
+          operations.push(() => {
+            const list = mockRedisStore.get(key) || [];
+            mockRedisStore.set(key, [value, ...list]);
+          });
+        },
+        expire(_key: string, _seconds: number) {},
+        async exec() {
+          operations.forEach((op) => op());
+          return [1];
+        },
+      };
+    }
+  }
+  return { Redis: MockRedis };
+});
+
+vi.mock("@upstash/ratelimit", () => {
+  return {
+    Ratelimit: class {
+      static slidingWindow = vi.fn();
+      limit = mockRatelimitLimit;
+    },
+  };
+});
+
 import { POST as feedbackPOST, GET as feedbackGET } from "@/app/api/case-studies/feedback/route";
 import { POST as reactionPOST, GET as reactionGET } from "@/app/api/case-studies/reactions/route";
+import { prisma } from "@/lib/db";
 
 describe("Case Study Feedback & Reaction API Routes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockRedisStore.clear();
+    mockRatelimitLimit.mockResolvedValue({
+      success: true,
+      limit: 100,
+      remaining: 99,
+      reset: Date.now() + 60000,
+    });
   });
 
   describe("Feedback API (/api/case-studies/feedback)", () => {
@@ -172,6 +226,134 @@ describe("Case Study Feedback & Reaction API Routes", () => {
       const json = await res.json();
       expect(json.success).toBe(true);
       expect(json.counts.insightful).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe("Durable Redis Fallback & Rate Limiting Verification", () => {
+    it("should enforce sliding window rate limiting on feedback POST route returning 429 when rate limited", async () => {
+      mockRatelimitLimit.mockResolvedValueOnce({
+        success: false,
+        limit: 100,
+        remaining: 0,
+        reset: Date.now() + 60000,
+      });
+
+      const req = new NextRequest("http://localhost/api/case-studies/feedback", {
+        method: "POST",
+        headers: { "x-forwarded-for": "203.0.113.1", "user-agent": "rate-limit-test" },
+        body: JSON.stringify({
+          caseStudySlug: "imednet-python-sdk",
+          takeaways: ["Testing Rate Limit"],
+          comments: "Testing rate limit enforcement on feedback route.",
+        }),
+      });
+
+      const res = await feedbackPOST(req);
+      expect(res.status).toBe(429);
+      const json = await res.json();
+      expect(json.error).toContain("Too many requests");
+    });
+
+    it("should enforce sliding window rate limiting on reaction POST route returning 429 when rate limited", async () => {
+      mockRatelimitLimit.mockResolvedValueOnce({
+        success: false,
+        limit: 100,
+        remaining: 0,
+        reset: Date.now() + 60000,
+      });
+
+      const req = new NextRequest("http://localhost/api/case-studies/reactions", {
+        method: "POST",
+        headers: { "x-forwarded-for": "203.0.113.2", "user-agent": "rate-limit-test" },
+        body: JSON.stringify({
+          caseStudySlug: "imednet-python-sdk",
+          reactionType: "mind_blowing",
+        }),
+      });
+
+      const res = await reactionPOST(req);
+      expect(res.status).toBe(429);
+      const json = await res.json();
+      expect(json.error).toContain("Too many requests");
+    });
+
+    it("should store feedback in Redis fallback storage during database failure and prevent duplicates", async () => {
+      const uniqueSlug = `outage-study-${Date.now()}`;
+      const uniqueIp = "198.51.100.42";
+
+      // Mock database failure on feedback creation
+      const createSpy = vi.spyOn(prisma.caseStudyFeedback, "create").mockRejectedValueOnce(
+        new Error("Database connection timeout error")
+      );
+
+      const req1 = new NextRequest("http://localhost/api/case-studies/feedback", {
+        method: "POST",
+        headers: { "x-forwarded-for": uniqueIp, "user-agent": "outage-agent" },
+        body: JSON.stringify({
+          caseStudySlug: uniqueSlug,
+          takeaways: ["Outage Resilience"],
+          comments: "Feedback captured during DB outage.",
+        }),
+      });
+
+      const res1 = await feedbackPOST(req1);
+      expect(res1.status).toBe(201);
+      const json1 = await res1.json();
+      expect(json1.success).toBe(true);
+
+      // Verify stored in Redis fallback key
+      const stored = mockRedisStore.get(`fallback:feedback:${uniqueSlug}`);
+      expect(stored).toBeDefined();
+      expect(stored!.length).toBe(1);
+
+      // Subsequent submission attempt with same connection hash must be detected as duplicate via Redis fallback evaluation
+      const req2 = new NextRequest("http://localhost/api/case-studies/feedback", {
+        method: "POST",
+        headers: { "x-forwarded-for": uniqueIp, "user-agent": "outage-agent" },
+        body: JSON.stringify({
+          caseStudySlug: uniqueSlug,
+          takeaways: ["Outage Resilience"],
+          comments: "Duplicate attempt during DB outage.",
+        }),
+      });
+
+      const res2 = await feedbackPOST(req2);
+      expect(res2.status).toBe(429);
+      const json2 = await res2.json();
+      expect(json2.error).toContain("already submitted");
+
+      createSpy.mockRestore();
+    });
+
+    it("should store reaction in Redis fallback storage during database failure", async () => {
+      const uniqueSlug = `rx-outage-study-${Date.now()}`;
+      const uniqueIp = "198.51.100.43";
+
+      const findSpy = vi.spyOn(prisma.caseStudyReaction, "findFirst").mockRejectedValueOnce(
+        new Error("Database connection failure")
+      );
+
+      const req = new NextRequest("http://localhost/api/case-studies/reactions", {
+        method: "POST",
+        headers: { "x-forwarded-for": uniqueIp, "user-agent": "rx-outage-agent" },
+        body: JSON.stringify({
+          caseStudySlug: uniqueSlug,
+          reactionType: "thorough",
+        }),
+      });
+
+      const res = await reactionPOST(req);
+      expect(res.status).toBe(200);
+      const json = await res.json();
+      expect(json.success).toBe(true);
+      expect(json.counts.thorough).toBe(1);
+
+      // Verify stored in Redis fallback key
+      const stored = mockRedisStore.get(`fallback:reactions:${uniqueSlug}`);
+      expect(stored).toBeDefined();
+      expect(stored!.length).toBe(1);
+
+      findSpy.mockRestore();
     });
   });
 });
