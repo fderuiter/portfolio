@@ -6,9 +6,9 @@
 
 # Function: calculateBMI()
 
-> **calculateBMI**(`weightKg`, `heightCm`): `number`
+> **calculateBMI**(`weightKg`, `heightCm`): `number` \| `null`
 
-Defined in: [lib/crf/expression-evaluator.ts:294](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L294)
+Defined in: [lib/crf/expression-evaluator.ts:349](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L349)
 
 Calculates Body Mass Index (BMI) in kg/m^2.
 
@@ -24,4 +24,4 @@ Calculates Body Mass Index (BMI) in kg/m^2.
 
 ## Returns
 
-`number`
+`number` \| `null`

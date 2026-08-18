@@ -6,9 +6,9 @@
 
 # Function: calculateDuboisBSA()
 
-> **calculateDuboisBSA**(`heightCm`, `weightKg`): `number`
+> **calculateDuboisBSA**(`heightCm`, `weightKg`): `number` \| `null`
 
-Defined in: [lib/crf/expression-evaluator.ts:311](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L311)
+Defined in: [lib/crf/expression-evaluator.ts:366](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L366)
 
 Calculates DuBois & DuBois Body Surface Area (BSA) in m^2.
 
@@ -24,4 +24,4 @@ Calculates DuBois & DuBois Body Surface Area (BSA) in m^2.
 
 ## Returns
 
-`number`
+`number` \| `null`

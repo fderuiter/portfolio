@@ -82,9 +82,9 @@ function tokenize(input: string): Token[] {
 export class ExpressionEvaluator {
   private tokens: Token[];
   private pos: number;
-  private context: Record<string, number>;
+  private context: Record<string, number | null>;
 
-  constructor(tokens: Token[], context: Record<string, number>) {
+  constructor(tokens: Token[], context: Record<string, number | null>) {
     this.tokens = tokens;
     this.pos = 0;
     this.context = context;
@@ -112,13 +112,18 @@ export class ExpressionEvaluator {
   // PowExpr::= Primary ('^' PowExpr)?
   // Primary::= NUMBER | IDENTIFIER | FunctionCall | '(' Expr ')' | '-' Primary
 
-  public parse(): number {
-    if (this.tokens.length === 0) return 0;
-    const res = this.parseAdd();
-    return Number.isFinite(res) ? res : 0;
+  public parse(): number | null {
+    if (this.tokens.length === 0) return null;
+    try {
+      const res = this.parseAdd();
+      if (res === null || !Number.isFinite(res)) return null;
+      return res;
+    } catch {
+      return null;
+    }
   }
 
-  private parseAdd(): number {
+  private parseAdd(): number | null {
     let left = this.parseMul();
 
     while (this.pos < this.tokens.length) {
@@ -126,8 +131,13 @@ export class ExpressionEvaluator {
       if (next && next.type === "OP" && (next.value === "+" || next.value === "-")) {
         const op = this.consume().value;
         const right = this.parseMul();
-        if (op === "+") left += right;
-        else left -= right;
+        if (left === null || right === null) {
+          left = null;
+        } else if (op === "+") {
+          left = left + right;
+        } else {
+          left = left - right;
+        }
       } else {
         break;
       }
@@ -135,7 +145,7 @@ export class ExpressionEvaluator {
     return left;
   }
 
-  private parseMul(): number {
+  private parseMul(): number | null {
     let left = this.parsePow();
 
     while (this.pos < this.tokens.length) {
@@ -143,9 +153,23 @@ export class ExpressionEvaluator {
       if (next && next.type === "OP" && (next.value === "*" || next.value === "/" || next.value === "%")) {
         const op = this.consume().value;
         const right = this.parsePow();
-        if (op === "*") left *= right;
-        else if (op === "/") left = right === 0 ? 0 : left / right;
-        else left = right === 0 ? 0 : left % right;
+        if (left === null || right === null) {
+          left = null;
+        } else if (op === "*") {
+          left = left * right;
+        } else if (op === "/") {
+          if (right === 0) {
+            left = null;
+          } else {
+            left = left / right;
+          }
+        } else if (op === "%") {
+          if (right === 0) {
+            left = null;
+          } else {
+            left = left % right;
+          }
+        }
       } else {
         break;
       }
@@ -153,31 +177,34 @@ export class ExpressionEvaluator {
     return left;
   }
 
-  private parsePow(): number {
+  private parsePow(): number | null {
     const base = this.parsePrimary();
 
     const next = this.peek();
     if (next && next.type === "OP" && next.value === "^") {
       this.consume();
       const exponent = this.parsePow();
+      if (base === null || exponent === null) return null;
       return Math.pow(base, exponent);
     }
     return base;
   }
 
-  private parsePrimary(): number {
+  private parsePrimary(): number | null {
     const token = this.peek();
     if (!token) throw new Error("Unexpected end of expression in primary");
 
     // Unary minus
     if (token.type === "OP" && token.value === "-") {
       this.consume();
-      return -this.parsePrimary();
+      const val = this.parsePrimary();
+      return val === null ? null : -val;
     }
 
     if (token.type === "NUMBER") {
       this.consume();
-      return parseFloat(token.value);
+      const val = parseFloat(token.value);
+      return Number.isFinite(val) ? val : null;
     }
 
     if (token.type === "LPAREN") {
@@ -194,7 +221,7 @@ export class ExpressionEvaluator {
       // Function Call (e.g. round(x, 1), sqrt(x), abs(x), max(a,b), min(a,b))
       if (next && next.type === "LPAREN") {
         this.consume("LPAREN");
-        const args: number[] = [];
+        const args: (number | null)[] = [];
         if (this.peek()?.type !== "RPAREN") {
           args.push(this.parseAdd());
           while (this.peek()?.type === "COMMA") {
@@ -204,32 +231,46 @@ export class ExpressionEvaluator {
         }
         this.consume("RPAREN");
 
+        if (args.some((a) => a === null)) {
+          return null;
+        }
+        const numArgs = args as number[];
+
         const fnName = idToken.value.toLowerCase();
         switch (fnName) {
           case "round":
-            if (args.length >= 2) {
-              const factor = Math.pow(10, args[1]);
-              return Math.round(args[0] * factor) / factor;
+            if (numArgs.length === 0) return null;
+            if (numArgs.length >= 2) {
+              const factor = Math.pow(10, numArgs[1]);
+              return Math.round(numArgs[0] * factor) / factor;
             }
-            return Math.round(args[0] ?? 0);
+            return Math.round(numArgs[0]);
           case "sqrt":
-            return Math.sqrt(Math.max(0, args[0] ?? 0));
+            if (numArgs.length === 0 || numArgs[0] < 0) return null;
+            return Math.sqrt(numArgs[0]);
           case "abs":
-            return Math.abs(args[0] ?? 0);
+            if (numArgs.length === 0) return null;
+            return Math.abs(numArgs[0]);
           case "max":
-            return Math.max(...args);
+            if (numArgs.length === 0) return null;
+            return Math.max(...numArgs);
           case "min":
-            return Math.min(...args);
+            if (numArgs.length === 0) return null;
+            return Math.min(...numArgs);
           case "floor":
-            return Math.floor(args[0] ?? 0);
+            if (numArgs.length === 0) return null;
+            return Math.floor(numArgs[0]);
           case "ceil":
-            return Math.ceil(args[0] ?? 0);
+            if (numArgs.length === 0) return null;
+            return Math.ceil(numArgs[0]);
           case "exp":
-            return Math.exp(args[0] ?? 0);
+            if (numArgs.length === 0) return null;
+            return Math.exp(numArgs[0]);
           case "log":
-            return Math.log(Math.max(0.0001, args[0] ?? 1));
+            if (numArgs.length === 0 || numArgs[0] <= 0) return null;
+            return Math.log(numArgs[0]);
           default:
-            return args[0] ?? 0;
+            return numArgs[0] ?? null;
         }
       }
 
@@ -238,7 +279,7 @@ export class ExpressionEvaluator {
       if (varKey in this.context) {
         return this.context[varKey];
       }
-      return 0;
+      return null;
     }
 
     throw new Error(`Unexpected token ${token.type} (${token.value})`);
@@ -251,31 +292,45 @@ export class ExpressionEvaluator {
  * @param formula - Arithmetic string expression
  * @param fieldValues - Map of variable names and field IDs to values
  * @param fieldsList - Array of form fields for identifier resolution
- * @returns Evaluated numeric result
+ * @returns Evaluated numeric result or null when uncalculated / zero denominator
  */
 export function evaluateFormula(
   formula: string,
   fieldValues: Record<string, string | number | boolean | null | undefined>,
   fieldsList: CRFField[]
-): number {
-  if (!formula || typeof formula !== "string") return 0;
+): number | null {
+  if (!formula || typeof formula !== "string") return null;
 
-  // Build lookup mapping lowercase variable names and field IDs to numeric values
-  const context: Record<string, number> = {};
+  // Build lookup mapping lowercase variable names and field IDs to numeric values or null
+  const context: Record<string, number | null> = {};
 
   Object.entries(fieldValues).forEach(([k, rawVal]) => {
-    const num = typeof rawVal === "number" ? rawVal : parseFloat(String(rawVal ?? "0"));
-    const safeNum = Number.isFinite(num) ? num : 0;
-    context[k.toLowerCase()] = safeNum;
+    if (rawVal === null || rawVal === undefined || rawVal === "") {
+      context[k.toLowerCase()] = null;
+    } else {
+      const num = typeof rawVal === "number" ? rawVal : parseFloat(String(rawVal));
+      context[k.toLowerCase()] = Number.isFinite(num) ? num : null;
+    }
   });
 
   fieldsList.forEach((f) => {
-    const rawVal = fieldValues[f.id] ?? fieldValues[f.variableName];
-    if (rawVal !== undefined && rawVal !== null) {
+    const rawVal =
+      fieldValues[f.id] ??
+      fieldValues[f.id.toLowerCase()] ??
+      fieldValues[f.variableName] ??
+      fieldValues[f.variableName.toLowerCase()];
+
+    const idKey = f.id.toLowerCase();
+    const varKey = f.variableName.toLowerCase();
+
+    if (rawVal !== undefined && rawVal !== null && rawVal !== "") {
       const num = typeof rawVal === "number" ? rawVal : parseFloat(String(rawVal));
-      const safeNum = Number.isFinite(num) ? num : 0;
-      context[f.id.toLowerCase()] = safeNum;
-      context[f.variableName.toLowerCase()] = safeNum;
+      const safeNum = Number.isFinite(num) ? num : null;
+      context[idKey] = safeNum;
+      context[varKey] = safeNum;
+    } else {
+      if (!(idKey in context)) context[idKey] = null;
+      if (!(varKey in context)) context[varKey] = null;
     }
   });
 
@@ -284,15 +339,15 @@ export function evaluateFormula(
     const evaluator = new ExpressionEvaluator(tokens, context);
     return evaluator.parse();
   } catch {
-    return 0;
+    return null;
   }
 }
 
 /**
  * Calculates Body Mass Index (BMI) in kg/m^2.
  */
-export function calculateBMI(weightKg: number, heightCm: number): number {
-  if (!weightKg || !heightCm || heightCm <= 0) return 0;
+export function calculateBMI(weightKg: number, heightCm: number): number | null {
+  if (heightCm <= 0) return null;
   const heightM = heightCm / 100;
   return Math.round((weightKg / (heightM * heightM)) * 10) / 10;
 }
@@ -300,16 +355,16 @@ export function calculateBMI(weightKg: number, heightCm: number): number {
 /**
  * Calculates Mosteller Body Surface Area (BSA) in m^2.
  */
-export function calculateMostellerBSA(heightCm: number, weightKg: number): number {
-  if (!heightCm || !weightKg || heightCm <= 0 || weightKg <= 0) return 0;
+export function calculateMostellerBSA(heightCm: number, weightKg: number): number | null {
+  if (heightCm <= 0 || weightKg < 0) return null;
   return Math.round(Math.sqrt((heightCm * weightKg) / 3600) * 100) / 100;
 }
 
 /**
  * Calculates DuBois & DuBois Body Surface Area (BSA) in m^2.
  */
-export function calculateDuboisBSA(heightCm: number, weightKg: number): number {
-  if (!heightCm || !weightKg || heightCm <= 0 || weightKg <= 0) return 0;
+export function calculateDuboisBSA(heightCm: number, weightKg: number): number | null {
+  if (heightCm <= 0 || weightKg < 0) return null;
   const bsa = 0.007184 * Math.pow(heightCm, 0.725) * Math.pow(weightKg, 0.425);
   return Math.round(bsa * 100) / 100;
 }
@@ -322,8 +377,8 @@ export function calculateCockcroftGaultCrCl(
   weightKg: number,
   serumCrMgDl: number,
   isFemale: boolean
-): number {
-  if (!age || !weightKg || !serumCrMgDl || serumCrMgDl <= 0) return 0;
+): number | null {
+  if (serumCrMgDl <= 0) return null;
   const base = ((140 - age) * weightKg) / (72 * serumCrMgDl);
   const factor = isFemale ? 0.85 : 1.0;
   return Math.round(base * factor * 10) / 10;
@@ -332,24 +387,24 @@ export function calculateCockcroftGaultCrCl(
 /**
  * Calculates Bazett Corrected QT interval (QTcB) in milliseconds.
  */
-export function calculateBazettQTc(qtMs: number, rrSec: number): number {
-  if (!qtMs || !rrSec || rrSec <= 0) return 0;
+export function calculateBazettQTc(qtMs: number, rrSec: number): number | null {
+  if (rrSec <= 0) return null;
   return Math.round(qtMs / Math.sqrt(rrSec));
 }
 
 /**
  * Calculates Fridericia Corrected QT interval (QTcF) in milliseconds.
  */
-export function calculateFridericiaQTc(qtMs: number, rrSec: number): number {
-  if (!qtMs || !rrSec || rrSec <= 0) return 0;
+export function calculateFridericiaQTc(qtMs: number, rrSec: number): number | null {
+  if (rrSec <= 0) return null;
   return Math.round(qtMs / Math.cbrt(rrSec));
 }
 
 /**
  * Calculates RECIST 1.1 Sum of Longest Diameters percentage change from baseline.
  */
-export function calculateRecistSldChange(baselineSldMm: number, currentSldMm: number): number {
-  if (!baselineSldMm || baselineSldMm <= 0) return 0;
+export function calculateRecistSldChange(baselineSldMm: number, currentSldMm: number): number | null {
+  if (baselineSldMm <= 0) return null;
   const diff = currentSldMm - baselineSldMm;
   return Math.round((diff / baselineSldMm) * 1000) / 10;
 }
