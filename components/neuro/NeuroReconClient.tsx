@@ -536,8 +536,15 @@ export const NeuroReconClient: React.FC = () => {
   // Keyboard Shortcuts Listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Avoid hotkeys when typing in input
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+      // Avoid hotkeys when typing in input or when focused within a keyboard boundary
+      const target = e.target as HTMLElement | null;
+      if (
+        !target ||
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable ||
+        target.closest?.("[data-keyboard-boundary]")
+      ) {
         return;
       }
 
@@ -573,7 +580,7 @@ export const NeuroReconClient: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6" data-keyboard-boundary="true">
       {/* Top Banner / Scenario Selector Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-zinc-900/90 border border-zinc-800 p-4 rounded-3xl backdrop-blur-xl">
         <div className="flex items-center gap-3.5">

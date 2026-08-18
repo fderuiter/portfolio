@@ -147,9 +147,17 @@ export function useFullscreen(
     if (!enableKeyShortcut || typeof window === "undefined") return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't intercept if typing in an input or textarea
+      // Don't intercept if typing in an input, textarea, contentEditable, or inside an external keyboard boundary
       const target = e.target as HTMLElement;
-      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) {
+      const el = targetRef.current;
+      const isWithin = !!(el && target && target instanceof Node && el.contains(target));
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable ||
+          (target.closest?.("[data-keyboard-boundary]") && !isWithin))
+      ) {
         return;
       }
 

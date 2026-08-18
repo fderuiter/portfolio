@@ -277,11 +277,13 @@ export function ProofWorkspaceClient() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      const targetTag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+      const targetEl = e.target as HTMLElement | null;
+      const targetTag = targetEl?.tagName?.toLowerCase();
       if (
         targetTag === "input" ||
         targetTag === "textarea" ||
-        (e.target as HTMLElement)?.isContentEditable
+        targetEl?.isContentEditable ||
+        targetEl?.closest?.("[data-keyboard-boundary]")
       ) {
         return;
       }

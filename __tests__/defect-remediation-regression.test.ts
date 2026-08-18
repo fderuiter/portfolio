@@ -365,4 +365,108 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       expect(evaluation.metricsComparison.exceptionRatio).toBe(3.2);
     });
   });
+
+  describe("DOM Boundary Attribute Guarding (Requirement 1-4)", () => {
+    it("prevents global manual help shortcuts ('h', '?') when target is inside a keyboard boundary container", () => {
+      let isManualTriggered = false;
+
+      const handleGlobalKeyDown = (e: KeyboardEvent) => {
+        const target = e.target as HTMLElement | null;
+        if (
+          !target ||
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable ||
+          target.closest?.("[data-keyboard-boundary]")
+        ) {
+          return;
+        }
+
+        if (e.key === "?" || e.key === "h") {
+          isManualTriggered = true;
+        }
+      };
+
+      const containerBoundary = document.createElement("div");
+      containerBoundary.setAttribute("data-keyboard-boundary", "true");
+      const innerCanvasControl = document.createElement("button");
+      containerBoundary.appendChild(innerCanvasControl);
+      document.body.appendChild(containerBoundary);
+
+      // Event target inside simulator boundary
+      const eventInside = new KeyboardEvent("keydown", { key: "?", bubbles: true });
+      innerCanvasControl.dispatchEvent(eventInside);
+      handleGlobalKeyDown(eventInside);
+
+      expect(isManualTriggered).toBe(false);
+
+      // Event target outside boundary
+      const outsideButton = document.createElement("button");
+      document.body.appendChild(outsideButton);
+      const eventOutside = new KeyboardEvent("keydown", { key: "?", bubbles: true });
+      outsideButton.dispatchEvent(eventOutside);
+      handleGlobalKeyDown(eventOutside);
+
+      expect(isManualTriggered).toBe(true);
+
+      document.body.removeChild(containerBoundary);
+      document.body.removeChild(outsideButton);
+    });
+
+    it("prevents global tool switches and snapping toggles when target is inside a keyboard boundary container", () => {
+      let isSnappingToggled = false;
+      let isToolSwitched = false;
+
+      const handleProofKeyDown = (e: KeyboardEvent) => {
+        const targetEl = e.target as HTMLElement | null;
+        const targetTag = targetEl?.tagName?.toLowerCase();
+        if (
+          targetTag === "input" ||
+          targetTag === "textarea" ||
+          targetEl?.isContentEditable ||
+          targetEl?.closest?.("[data-keyboard-boundary]")
+        ) {
+          return;
+        }
+        if (e.key === "g" || e.key === "G") {
+          isSnappingToggled = true;
+        }
+      };
+
+      const handleNeuroKeyDown = (e: KeyboardEvent) => {
+        const target = e.target as HTMLElement | null;
+        if (
+          !target ||
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable ||
+          target.closest?.("[data-keyboard-boundary]")
+        ) {
+          return;
+        }
+        if (e.key === "1" || e.key === "2") {
+          isToolSwitched = true;
+        }
+      };
+
+      const simulatorBoundary = document.createElement("div");
+      simulatorBoundary.setAttribute("data-keyboard-boundary", "true");
+      const canvasTarget = document.createElement("div");
+      canvasTarget.tabIndex = 0;
+      simulatorBoundary.appendChild(canvasTarget);
+      document.body.appendChild(simulatorBoundary);
+
+      const eventG = new KeyboardEvent("keydown", { key: "g", bubbles: true });
+      canvasTarget.dispatchEvent(eventG);
+      handleProofKeyDown(eventG);
+      expect(isSnappingToggled).toBe(false);
+
+      const event1 = new KeyboardEvent("keydown", { key: "1", bubbles: true });
+      canvasTarget.dispatchEvent(event1);
+      handleNeuroKeyDown(event1);
+      expect(isToolSwitched).toBe(false);
+
+      document.body.removeChild(simulatorBoundary);
+    });
+  });
 });

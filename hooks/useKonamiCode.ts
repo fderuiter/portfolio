@@ -25,13 +25,14 @@ export function useKonamiCode(onSuccess?: () => void) {
     if (typeof window === "undefined") return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if user is currently typing in an input, textarea, or contentEditable element
+      // Ignore if user is currently typing in an input, textarea, contentEditable element, or within a keyboard boundary zone
       const target = e.target as HTMLElement | null;
       if (
         target &&
         (target.tagName === "INPUT" ||
           target.tagName === "TEXTAREA" ||
-          target.isContentEditable)
+          target.isContentEditable ||
+          target.closest?.("[data-keyboard-boundary]"))
       ) {
         return;
       }

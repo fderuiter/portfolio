@@ -46,12 +46,14 @@ export function FieldManualButton({
   // Global hotkey listener ('?' or 'h' / 'H')
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input, textarea, or contentEditable
-      const target = e.target as HTMLElement;
+      // Don't trigger if user is typing in an input, textarea, contentEditable, or within a keyboard boundary zone
+      const target = e.target as HTMLElement | null;
       if (
+        !target ||
         target.tagName === "INPUT" ||
         target.tagName === "TEXTAREA" ||
-        target.isContentEditable
+        target.isContentEditable ||
+        target.closest?.("[data-keyboard-boundary]")
       ) {
         return;
       }
