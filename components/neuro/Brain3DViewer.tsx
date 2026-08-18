@@ -47,6 +47,36 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
     },
   });
 
+  const [isNearViewport, setIsNearViewport] = useState<boolean>(() => {
+    if (typeof window === "undefined" || typeof IntersectionObserver === "undefined") {
+      return true;
+    }
+    return false;
+  });
+
+  // Native IntersectionObserver to defer external model fetches until within 200px of viewport
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsNearViewport(true);
+          }
+        });
+      },
+      { rootMargin: "200px" }
+    );
+
+    observer.observe(container);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   const [isRotating, setIsRotating] = useState(true);
   const isRotatingRef = useRef(isRotating);
   useEffect(() => {
@@ -164,7 +194,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
     };
   }, [contextKey, bindCanvas]);
 
-  // Update Cortical Mesh on surfaceMode, modelUrl, wireframeActive, hemiFilter, or contextKey change
+  // Update Cortical Mesh on surfaceMode, modelUrl, wireframeActive, hemiFilter, contextKey, or isNearViewport change
   useEffect(() => {
     const scene = sceneRef.current;
     if (!scene) return;
@@ -185,9 +215,25 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
       });
     }
 
-    if (modelUrl && surfaceMode === "pial" && hemiFilter === "both") {
+    if (isNearViewport && modelUrl && surfaceMode === "pial" && hemiFilter === "both") {
+      // Immediately render procedural fallback geometry while awaiting network asset retrieval
+      const fallbackGroup = createCorticalSurfaceMesh(surfaceMode, wireframeActive, hemiFilter);
+      scene.add(fallbackGroup);
+      meshGroupRef.current = fallbackGroup;
+
       loadExternalBrainMesh(modelUrl, surfaceMode, hemiFilter).then((externalGroup) => {
         if (!isMounted || !sceneRef.current) return;
+        sceneRef.current.remove(fallbackGroup);
+        fallbackGroup.traverse((obj) => {
+          if (obj instanceof THREE.Mesh) {
+            obj.geometry?.dispose();
+            if (Array.isArray(obj.material)) {
+              obj.material.forEach((m) => m.dispose());
+            } else {
+              obj.material?.dispose();
+            }
+          }
+        });
         sceneRef.current.add(externalGroup);
         meshGroupRef.current = externalGroup;
       });
@@ -200,7 +246,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [surfaceMode, modelUrl, wireframeActive, hemiFilter, contextKey]);
+  }, [surfaceMode, modelUrl, wireframeActive, hemiFilter, contextKey, isNearViewport]);
 
   // Update Crosshair Marker Position in 3D Space
   useEffect(() => {
