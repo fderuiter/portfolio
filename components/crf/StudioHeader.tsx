@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StudyProtocol,
   StudioMode,
   StudioTheme,
 } from "@/lib/crf/types";
-import { STUDY_PRESETS } from "@/lib/crf/presets";
-import { lintForm } from "@/lib/crf/ast-evaluator";
+import { getStudyPresets } from "@/lib/crf/presets/loader";
 import {
   IconLayoutGrid,
   IconCalendar,
@@ -84,10 +83,29 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
   onCopyShareLink,
 }) => {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const [presets, setPresets] = useState<Array<{ id: string; name: string; therapeuticArea?: string; study: { protocolNumber: string } }>>([]);
+  const [totalIssues, setTotalIssues] = useState<number>(0);
   const branding = getStudyBranding(study);
-  // Aggregate lint issues across study
-  const totalIssues = study.forms.reduce((acc, f) => acc + lintForm(f).length, 0);
-  const currentPreset = STUDY_PRESETS.find((p) => p.study.protocolNumber === study.protocolNumber);
+
+  useEffect(() => {
+    let isMounted = true;
+    getStudyPresets().then((loadedPresets) => {
+      if (isMounted) setPresets(loadedPresets);
+    });
+    return () => { isMounted = false; };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    import("@/lib/crf/ast-evaluator").then(({ lintForm }) => {
+      if (!isMounted) return;
+      const issues = study.forms.reduce((acc, f) => acc + lintForm(f).length, 0);
+      setTotalIssues(issues);
+    });
+    return () => { isMounted = false; };
+  }, [study]);
+
+  const currentPreset = presets.find((p) => p.study.protocolNumber === study.protocolNumber);
 
   const MODES: { mode: StudioMode; label: string; shortLabel: string; shortcut: string; icon: React.ReactNode }[] = [
     {
@@ -175,7 +193,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
               aria-label="Select Clinical Protocol Preset"
               className="bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-200 rounded-lg px-2 py-1 focus:border-brand-cyan focus:ring-1 focus:ring-brand-cyan focus:outline-none max-w-[140px] xs:max-w-[180px] sm:max-w-xs truncate"
             >
-              {STUDY_PRESETS.map((p) => (
+              {presets.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name} ({p.study.protocolNumber})
                 </option>
