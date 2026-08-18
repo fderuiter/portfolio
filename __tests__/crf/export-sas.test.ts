@@ -4,13 +4,16 @@ import {
   getSasFormatName,
   escapeSasString,
   getFieldSasAttributes,
+  getExpandedSasAttributes,
+  getFieldOptions,
+  parseMultiSelectValue,
   generateSasProcFormat,
   generateSasDataStepForForm,
   exportFormToSas,
   exportStudyToSas,
 } from "@/lib/crf/export-sas";
 import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
-import { StudyProtocol, CRFField } from "@/lib/crf/types";
+import { StudyProtocol, CRFForm, CRFField } from "@/lib/crf/types";
 
 describe("CRF Studio - Automated SAS Statistical Exporter", () => {
   describe("Sanitization & Utility Functions", () => {
@@ -161,6 +164,104 @@ describe("CRF Studio - Automated SAS Statistical Exporter", () => {
 
       expect(filtered).toContain("DATA raw_ae");
       expect(filtered).not.toContain("DATA raw_dm");
+    });
+  });
+
+  describe("Dichotomous Sub-Variable Expansion (SAS)", () => {
+    const multiSelectField: CRFField = {
+      id: "f_mh_cat",
+      variableName: "MH",
+      label: "Medical History Category",
+      dataType: "multi_select",
+      columnSpan: 6,
+      required: false,
+      customOptions: [
+        { code: "HYPERTEN", label: "Hypertension", order: 1 },
+        { code: "DIABETES", label: "Diabetes Mellitus", order: 2 },
+        { code: "ASTHMA", label: "Asthma", order: 3 },
+      ],
+    };
+
+    const multiForm: CRFForm = {
+      id: "form_mh",
+      name: "Medical History",
+      domain: "MH",
+      description: "Medical History Questionnaire",
+      version: "1.0",
+      sections: [
+        {
+          id: "sec_mh",
+          title: "Medical History",
+          fields: [multiSelectField],
+        },
+      ],
+      rules: [],
+    };
+
+    it("expands multi-select choices into distinct dichotomous sub-variables with $NYF. format", () => {
+      const usedNames = new Set<string>();
+      const expanded = getExpandedSasAttributes(multiSelectField, ONCOLOGY_RECIST_PRESET, usedNames);
+
+      expect(expanded).toHaveLength(3);
+      expect(expanded[0].attrs.sasVarName).toBe("MH_HYPERTEN");
+      expect(expanded[0].attrs.format).toBe("$NYF.");
+      expect(expanded[0].attrs.length).toBe("$1");
+      expect(expanded[0].attrs.label).toBe("Medical History Category - Hypertension");
+
+      expect(expanded[1].attrs.sasVarName).toBe("MH_DIABETES");
+      expect(expanded[1].attrs.label).toBe("Medical History Category - Diabetes Mellitus");
+
+      expect(expanded[2].attrs.sasVarName).toBe("MH_ASTHMA");
+    });
+
+    it("prevents variable name collisions and enforces SAS 32 character limit", () => {
+      const longField: CRFField = {
+        id: "f_long",
+        variableName: "VERY_LONG_BASE_VARIABLE_NAME_THAT_EXCEEDS_LIMIT",
+        label: "Long Category",
+        dataType: "multi_select",
+        columnSpan: 6,
+        required: false,
+        customOptions: [
+          { code: "LONG_OPTION_CODE_1", label: "Option 1", order: 1 },
+          { code: "LONG_OPTION_CODE_2", label: "Option 2", order: 2 },
+        ],
+      };
+
+      const usedNames = new Set<string>();
+      const expanded = getExpandedSasAttributes(longField, ONCOLOGY_RECIST_PRESET, usedNames);
+
+      expect(expanded).toHaveLength(2);
+      expect(expanded[0].attrs.sasVarName.length).toBeLessThanOrEqual(32);
+      expect(expanded[1].attrs.sasVarName.length).toBeLessThanOrEqual(32);
+      expect(expanded[0].attrs.sasVarName).not.toBe(expanded[1].attrs.sasVarName);
+    });
+
+    it("parses comma-separated multi-select EDC values accurately", () => {
+      expect(parseMultiSelectValue("HYPERTEN, ASTHMA", "HYPERTEN")).toBe("Y");
+      expect(parseMultiSelectValue("HYPERTEN, ASTHMA", "DIABETES")).toBe("N");
+      expect(parseMultiSelectValue("HYPERTEN, ASTHMA", "ASTHMA")).toBe("Y");
+      expect(parseMultiSelectValue(null, "HYPERTEN")).toBe("N");
+    });
+
+    it("generates PROC FORMAT and DATA step with dichotomous ATTRIB definitions and synthetic Yes/No records", () => {
+      const sasCode = exportFormToSas(multiForm, ONCOLOGY_RECIST_PRESET);
+
+      expect(sasCode).toContain("PROC FORMAT;");
+      expect(sasCode).toContain("VALUE $NYF");
+      expect(sasCode).toContain("'N' = 'No'");
+      expect(sasCode).toContain("'Y' = 'Yes'");
+
+      expect(sasCode).toContain("MH_HYPERTEN");
+      expect(sasCode).toContain("MH_DIABETES");
+      expect(sasCode).toContain("MH_ASTHMA");
+
+      expect(sasCode).toContain("LENGTH=$1");
+      expect(sasCode).toContain("FORMAT=$NYF.");
+
+      // Check synthetic mock data has Y or N
+      expect(sasCode).toContain("CARDS;");
+      expect(sasCode).not.toContain("TEST_MH_HYPERTEN_1");
     });
   });
 });
