@@ -24,7 +24,10 @@ import { InspectorPanel } from "./RightInspector/InspectorPanel";
 import dynamic from "next/dynamic";
 import { AcrfOverlayViewer } from "./Modes/AcrfOverlayViewer";
 import { ExportImportModal } from "./Modes/ExportImportModal";
-import { ExportDocumentModal } from "./Modes/ExportDocumentModal";
+const ExportDocumentModal = dynamic(
+  () => import("./Modes/ExportDocumentModal").then((mod) => ({ default: mod.ExportDocumentModal })),
+  { ssr: false }
+);
 import { BrandingConfigModal } from "./Branding/BrandingConfigModal";
 import { DiagnosticsDrawer } from "./DiagnosticsDrawer";
 import {
