@@ -1,6 +1,6 @@
 export default function CaseStudyLoading() {
   return (
-    <main className="min-h-screen py-24 px-6 md:px-16 bg-brand-dark text-foreground flex flex-col items-center">
+    <div className="min-h-screen py-24 px-6 md:px-16 bg-brand-dark text-foreground flex flex-col items-center">
       {/* Background Blurs */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none" />
 
@@ -37,6 +37,6 @@ export default function CaseStudyLoading() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

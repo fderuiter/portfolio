@@ -109,7 +109,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
   study, 
   className,
   preCalculatedHeight,
-  headingTag,
+  headingTag = "h2",
 }) => {
   const { githubStats } = study;
   const tagsList = study.tags ? study.tags.split(",").map((t) => t.trim()) : [];

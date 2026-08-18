@@ -10,3 +10,11 @@
 
 - [FocusBridge](classes/FocusBridge.md)
 - [PDFEngine](classes/PDFEngine.md)
+
+## Interfaces
+
+- [DiscoveredRoute](interfaces/DiscoveredRoute.md)
+
+## Functions
+
+- [getDiscoveredRoutes](functions/getDiscoveredRoutes.md)

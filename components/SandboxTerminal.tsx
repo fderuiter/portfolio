@@ -973,11 +973,11 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
             <IconCircle className="w-3 h-3 fill-red-500/80 stroke-none" />
             <IconCircle className="w-3 h-3 fill-yellow-500/80 stroke-none" />
             <IconCircle className="w-3 h-3 fill-green-500/80 stroke-none" />
-            <span className="text-[10px] font-mono font-bold text-zinc-500 tracking-wider ml-2 uppercase">
+            <span className="text-[10px] font-mono font-bold text-zinc-400 tracking-wider ml-2 uppercase">
               imednet-python-sdk // interactive CLI shell
             </span>
           </div>
-          <IconTerminal className="w-4 h-4 text-zinc-600" />
+          <IconTerminal className="w-4 h-4 text-zinc-400" />
         </div>
 
         {/* Console logs output viewport */}
@@ -991,13 +991,13 @@ export const SandboxTerminal: React.FC<SandboxTerminalProps> = ({
             <div key={log.id} className="space-y-1">
               {log.type === "command" && (
                 <div className="flex items-center gap-2 text-zinc-400 font-bold select-none">
-                  <span className="text-zinc-600 font-bold">~</span>
+                  <span className="text-zinc-400 font-bold">~</span>
                   <span className="text-zinc-400 font-bold">imednet-sdk $</span>
                   <span className="text-zinc-100 font-bold select-text">{log.text}</span>
                 </div>
               )}
               {log.type === "info" && (
-                <div className="text-zinc-500 whitespace-pre-wrap leading-relaxed select-text">
+                <div className="text-zinc-400 whitespace-pre-wrap leading-relaxed select-text">
                   {log.text}
                 </div>
               )}

@@ -104,10 +104,10 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
   return (
     <div
       data-field-id={field.id}
-      role="button"
+      data-selected={isSelected}
+      role="group"
       tabIndex={0}
       aria-label={`Field ${field.variableName}: ${field.label}`}
-      aria-pressed={isSelected}
       draggable
       onDragStart={onDragStart}
       onDragOver={onDragOver}

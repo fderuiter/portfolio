@@ -67,7 +67,9 @@ if (totalChecked === 0) {
   markdown += `| --- | --- | --- | --- |\n`;
   
   results.forEach(r => {
-    markdown += `| **${r.project}** | ${r.state} | ${r.status} | ${r.violationsCount} |\n`;
+    const safeProject = String(r.project).replace(/\|/g, '\\|');
+    const safeState = String(r.state).replace(/\|/g, '\\|');
+    markdown += `| **${safeProject}** | ${safeState} | ${r.status} | ${r.violationsCount} |\n`;
   });
   
   markdown += `\n`;

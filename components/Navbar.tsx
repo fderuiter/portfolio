@@ -567,7 +567,7 @@ export const Navbar: React.FC = () => {
                   "flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer min-h-8",
                   persona === "technical"
                     ? "bg-zinc-950 text-amber-400 border border-amber-400/20 shadow-[0_0_8px_rgba(251,191,36,0.15)]"
-                    : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                    : "text-zinc-400 hover:text-zinc-200 border border-transparent"
                 )}
                 aria-label="Switch to Technical Persona"
               >
@@ -581,7 +581,7 @@ export const Navbar: React.FC = () => {
                   "flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer min-h-8",
                   persona === "recruiter"
                     ? "bg-zinc-950 text-brand-cyan border border-brand-cyan/20 shadow-[0_0_8px_rgba(6,182,212,0.15)]"
-                    : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                    : "text-zinc-400 hover:text-zinc-200 border border-transparent"
                 )}
                 aria-label="Switch to Recruiter Persona"
               >

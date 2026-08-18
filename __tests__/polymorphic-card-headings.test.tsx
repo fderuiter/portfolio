@@ -115,9 +115,9 @@ describe("Polymorphic CardTitle Heading Configuration", () => {
       githubStats: null,
     };
 
-    it("renders nested CardTitle as h3 by default", () => {
+    it("renders nested CardTitle as h2 by default", () => {
       render(<CaseStudyBentoCard study={mockStudy} />);
-      const heading = screen.getByRole("heading", { level: 3 });
+      const heading = screen.getByRole("heading", { level: 2 });
       expect(heading).toBeDefined();
       expect(heading.textContent).toBe(mockStudy.title);
     });

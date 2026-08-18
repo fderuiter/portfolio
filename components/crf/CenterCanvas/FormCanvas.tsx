@@ -217,10 +217,11 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
               <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                   <div className="sm:col-span-3">
-                    <label className="block text-[11px] font-mono text-zinc-400 mb-1">
+                    <label htmlFor="crf-form-title-input" className="block text-[11px] font-mono text-zinc-400 mb-1">
                       Form Display Name
                     </label>
                     <input
+                      id="crf-form-title-input"
                       type="text"
                       value={titleInput}
                       onChange={(e) => setTitleInput(e.target.value)}
@@ -228,10 +229,11 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-mono text-zinc-400 mb-1">
+                    <label htmlFor="crf-form-domain-input" className="block text-[11px] font-mono text-zinc-400 mb-1">
                       CDASH Domain
                     </label>
                     <input
+                      id="crf-form-domain-input"
                       type="text"
                       value={domainInput}
                       onChange={(e) => setDomainInput(e.target.value)}
@@ -241,10 +243,11 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-mono text-zinc-400 mb-1">
+                  <label htmlFor="crf-form-desc-input" className="block text-[11px] font-mono text-zinc-400 mb-1">
                     Form Description &amp; Scope
                   </label>
                   <textarea
+                    id="crf-form-desc-input"
                     rows={2}
                     value={descInput}
                     onChange={(e) => setDescInput(e.target.value)}

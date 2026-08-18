@@ -77,7 +77,7 @@ export const ProjectTeaserGrid: React.FC<ProjectTeaserGridProps> = ({ caseStudie
                       {study.primary_language}
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono text-zinc-500 truncate max-w-[120px]">
+                  <span className="text-[10px] font-mono text-zinc-400 truncate max-w-[120px]">
                     {study.slug}
                   </span>
                 </div>
@@ -108,7 +108,7 @@ export const ProjectTeaserGrid: React.FC<ProjectTeaserGridProps> = ({ caseStudie
                     <IconChevronRight className="ml-1 w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-200" />
                   </Link>
 
-                  <span className="text-[10px] font-mono text-zinc-600 uppercase">INSPECT // DOSSIER</span>
+                  <span className="text-[10px] font-mono text-zinc-400 uppercase">INSPECT // DOSSIER</span>
                 </div>
               </div>
 

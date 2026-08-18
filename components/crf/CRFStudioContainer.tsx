@@ -722,7 +722,7 @@ export const CRFStudioContainer: React.FC = () => {
               )}
 
               {mobileActiveView === "canvas" && (
-                <main className="flex-1 flex flex-col overflow-hidden">
+                <div className="flex-1 flex flex-col overflow-hidden">
                   <FormCanvas
                     form={activeForm}
                     selectedFieldId={selectedFieldId}
@@ -739,7 +739,7 @@ export const CRFStudioContainer: React.FC = () => {
                     onUpdateField={handleUpdateField}
                     onOpenPalette={() => setIsMobileWidgetDrawerOpen(true)}
                   />
-                </main>
+                </div>
               )}
 
               {mobileActiveView === "inspector" && (
@@ -762,7 +762,7 @@ export const CRFStudioContainer: React.FC = () => {
             </div>
 
             {/* Center Canvas for Desktop/Tablet (Visible on md+ screens) */}
-            <main className="hidden md:flex flex-1 flex-col overflow-hidden">
+            <div className="hidden md:flex flex-1 flex-col overflow-hidden">
               <FormCanvas
                 form={activeForm}
                 selectedFieldId={selectedFieldId}
@@ -782,7 +782,7 @@ export const CRFStudioContainer: React.FC = () => {
                   setLeftTab("palette");
                 }}
               />
-            </main>
+            </div>
 
             {/* Desktop / Tablet Right Inspector Panel */}
             {isRightInspectorOpen && (

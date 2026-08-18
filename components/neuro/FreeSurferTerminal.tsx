@@ -153,6 +153,7 @@ export const FreeSurferTerminal: React.FC<FreeSurferTerminalProps> = ({
         />
         <button
           type="submit"
+          aria-label="Execute FreeSurfer Command"
           className="p-1 rounded text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
         >
           <IconCornerDownLeft className="w-4 h-4" />

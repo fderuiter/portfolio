@@ -264,7 +264,7 @@ export default async function PortfolioHomePage() {
             </a>
           </div>
           
-          <div className="mt-12 sm:mt-16 text-xs font-mono text-zinc-500 tracking-[0.2em] text-center select-none">
+          <div className="mt-12 sm:mt-16 text-xs font-mono text-zinc-400 tracking-[0.2em] text-center select-none">
             ARCHITECTED &amp; DEVELOPED BY FREDERICK DE RUITER
           </div>
         </div>

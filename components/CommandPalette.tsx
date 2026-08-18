@@ -784,6 +784,8 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
           <div
             id="palette-preview-pane"
             aria-live="polite"
+            tabIndex={0}
+            aria-label="Item preview panel"
             className="hidden md:flex md:col-span-5 flex-col justify-between p-4 bg-zinc-950/60 min-h-0 overflow-y-auto max-h-[380px] scrollbar-none"
           >
             {activeItem ? (
@@ -813,9 +815,9 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
                       {activeItem.icon}
                     </div>
                     <div className="min-w-0">
-                      <h4 className="text-sm font-bold text-white leading-tight">
+                      <h3 className="text-sm font-bold text-white leading-tight">
                         {activeItem.title}
-                      </h4>
+                      </h3>
                       <p className="text-[11px] font-mono text-zinc-400 mt-0.5 truncate">
                         {activeItem.url}
                       </p>
