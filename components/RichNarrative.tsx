@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useMemo, useSyncExternalStore } from "react";
+import React, { useMemo, useState, useEffect, useSyncExternalStore, startTransition } from "react";
 import DOMPurify from "isomorphic-dompurify";
 import { Tooltip } from "@/components/ui/Tooltip";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -18,6 +18,7 @@ interface RichNarrativeProps {
 export function RichNarrative({ html, className }: RichNarrativeProps) {
   const mounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
   const { simplified } = useTerminology();
+  const [rehydratedContent, setRehydratedContent] = useState<React.ReactNode>(null);
 
   // Enforce a strict security allowlist to prevent Stored XSS injections while maintaining beautiful layout aesthetics.
   const cleanHtml = useMemo(() => {
@@ -57,98 +58,120 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
     });
   }, [html]);
 
-  // On the client, parse the HTML and rehydrate it to React components once mounted
-  const rehydratedContent = useMemo(() => {
+  // Defer HTML parsing and rehydration until after initial paint off the critical rendering path
+  useEffect(() => {
     if (!mounted || typeof window === "undefined") {
-      return null;
+      return;
     }
 
-    try {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(`<div>${cleanHtml}</div>`, "text/html");
-      const root = doc.body.firstChild;
-      if (!root) return null;
+    let isCancelled = false;
 
-      // Map DOM children to React components recursively
-      const domToReact = (node: Node, index: number): React.ReactNode => {
-        if (node.nodeType === Node.TEXT_NODE) {
-          return node.textContent;
-        }
+    const parseAndRehydrate = () => {
+      try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(`<div>${cleanHtml}</div>`, "text/html");
+        const root = doc.body.firstChild;
+        if (!root || isCancelled) return;
 
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          const element = node as Element;
-          const tagName = element.tagName.toLowerCase();
-
-          // Check if it is a terminology tag
-          const isTermTag =
-            (tagName === "span" || tagName === "abbr") &&
-            (element.hasAttribute("data-term") ||
-              element.hasAttribute("data-definition") ||
-              element.hasAttribute("data-key"));
-
-          if (isTermTag) {
-            const term = element.getAttribute("data-term") || "";
-            const definition = element.getAttribute("data-definition") || "";
-            const termKey = element.getAttribute("data-key") || "";
-            const originalContent = element.textContent || "";
-
-            // If simplified is true and a simplified term exists, show it. Otherwise original content.
-            const visibleText = (simplified && term) ? term : originalContent;
-
-            return (
-              <Tooltip key={`${termKey || tagName}-${index}`} text={definition}>
-                {visibleText}
-              </Tooltip>
-            );
+        // Map DOM children to React components recursively
+        const domToReact = (node: Node, index: number): React.ReactNode => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            return node.textContent;
           }
 
-          // Recursive mapping of children
-          const children = Array.from(node.childNodes).map((child, idx) =>
-            domToReact(child, idx)
-          );
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            const element = node as Element;
+            const tagName = element.tagName.toLowerCase();
 
-          // Build safe attributes
-          const props: Record<string, any> = { key: `${tagName}-${index}` };
-          if (element.hasAttribute("class")) {
-            props.className = element.getAttribute("class");
-          }
-          if (element.hasAttribute("href")) {
-            props.href = element.getAttribute("href");
-          }
-          if (element.hasAttribute("target")) {
-            props.target = element.getAttribute("target");
-          }
-          if (element.hasAttribute("rel")) {
-            props.rel = element.getAttribute("rel");
-          }
+            // Check if it is a terminology tag
+            const isTermTag =
+              (tagName === "span" || tagName === "abbr") &&
+              (element.hasAttribute("data-term") ||
+                element.hasAttribute("data-definition") ||
+                element.hasAttribute("data-key"));
 
-          // Parse and preserve standard accessibility attributes starting with aria-, role, and tabindex
-          Array.from(element.attributes).forEach((attr) => {
-            const name = attr.name.toLowerCase();
-            if (name.startsWith("aria-")) {
-              props[attr.name] = attr.value;
-            } else if (name === "role") {
-              props.role = attr.value;
-            } else if (name === "tabindex") {
-              const parsed = parseInt(attr.value, 10);
-              props.tabIndex = isNaN(parsed) ? 0 : parsed;
+            if (isTermTag) {
+              const term = element.getAttribute("data-term") || "";
+              const definition = element.getAttribute("data-definition") || "";
+              const termKey = element.getAttribute("data-key") || "";
+              const originalContent = element.textContent || "";
+
+              // If simplified is true and a simplified term exists, show it. Otherwise original content.
+              const visibleText = (simplified && term) ? term : originalContent;
+
+              return (
+                <Tooltip key={`${termKey || tagName}-${index}`} text={definition}>
+                  {visibleText}
+                </Tooltip>
+              );
             }
+
+            // Recursive mapping of children
+            const children = Array.from(node.childNodes).map((child, idx) =>
+              domToReact(child, idx)
+            );
+
+            // Build safe attributes
+            const props: Record<string, any> = { key: `${tagName}-${index}` };
+            if (element.hasAttribute("class")) {
+              props.className = element.getAttribute("class");
+            }
+            if (element.hasAttribute("href")) {
+              props.href = element.getAttribute("href");
+            }
+            if (element.hasAttribute("target")) {
+              props.target = element.getAttribute("target");
+            }
+            if (element.hasAttribute("rel")) {
+              props.rel = element.getAttribute("rel");
+            }
+
+            // Parse and preserve standard accessibility attributes starting with aria-, role, and tabindex
+            Array.from(element.attributes).forEach((attr) => {
+              const name = attr.name.toLowerCase();
+              if (name.startsWith("aria-")) {
+                props[attr.name] = attr.value;
+              } else if (name === "role") {
+                props.role = attr.value;
+              } else if (name === "tabindex") {
+                const parsed = parseInt(attr.value, 10);
+                props.tabIndex = isNaN(parsed) ? 0 : parsed;
+              }
+            });
+
+            return React.createElement(tagName, props, children);
+          }
+
+          return null;
+        };
+
+        const result = Array.from(root.childNodes).map((child, idx) => domToReact(child, idx));
+        if (!isCancelled) {
+          startTransition(() => {
+            setRehydratedContent(result);
           });
-
-          return React.createElement(tagName, props, children);
         }
+      } catch (e) {
+        console.error("Error rehydrating rich narrative terminology tags:", e);
+      }
+    };
 
-        return null;
+    if (typeof window !== "undefined" && window.requestIdleCallback) {
+      const idleId = window.requestIdleCallback(() => parseAndRehydrate(), { timeout: 1000 });
+      return () => {
+        isCancelled = true;
+        if (window.cancelIdleCallback) window.cancelIdleCallback(idleId);
       };
-
-      return Array.from(root.childNodes).map((child, idx) => domToReact(child, idx));
-    } catch (e) {
-      console.error("Error rehydrating rich narrative terminology tags:", e);
-      return null;
+    } else {
+      const timerId = setTimeout(() => parseAndRehydrate(), 0);
+      return () => {
+        isCancelled = true;
+        clearTimeout(timerId);
+      };
     }
   }, [cleanHtml, mounted, simplified]);
 
-  // Fallback to basic dangerouslySetInnerHTML for SSR and initial client hydration
+  // Display sanitized text/HTML immediately on initial paint before asynchronous rehydration completes
   if (!mounted || !rehydratedContent) {
     return (
       <div

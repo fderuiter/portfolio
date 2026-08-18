@@ -20,7 +20,7 @@ Defined in: [lib/dx/dead-code.ts:8](https://github.com/fderuiter/portfolio/blob/
 
 ### kind
 
-> **kind**: `"function"` \| `"default"` \| `"type"` \| `"const"` \| `"interface"` \| `"class"` \| `"enum"`
+> **kind**: `"function"` \| `"default"` \| `"enum"` \| `"type"` \| `"class"` \| `"const"` \| `"interface"`
 
 Defined in: [lib/dx/dead-code.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/dx/dead-code.ts#L7)
 

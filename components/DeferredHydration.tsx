@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, startTransition } from "react";
 
 interface DeferredHydrationProps {
   children: React.ReactNode;
@@ -12,19 +12,41 @@ export const DeferredHydration: React.FC<DeferredHydrationProps> = ({ children, 
   const [shouldRenderInteractive, setShouldRenderInteractive] = useState(false);
 
   useEffect(() => {
-    // Delay mounting the interactive tree slightly to ensure the page has completed mounting first.
-    // This allows the initial paint of the skeleton to load instantly with zero blocking work.
-    const idleCallback = window.requestIdleCallback 
-      ? (cb: () => void) => window.requestIdleCallback(cb) 
-      : (cb: () => void) => setTimeout(cb, 100);
+    let idleId: number | null = null;
+    let animId: number | null = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
-    idleCallback(() => {
-      setShouldRenderInteractive(true);
-      // Let the interactive component mount in the DOM, then fade it in.
-      setTimeout(() => {
-        setIsMounted(true);
-      }, 50);
-    });
+    const scheduleMount = () => {
+      // Step 1: Schedule interactive tree mount as a non-blocking transition during background idle window
+      startTransition(() => {
+        setShouldRenderInteractive(true);
+      });
+
+      // Step 2: Schedule fade-in / mounted status in next frame via non-blocking transition
+      animId = requestAnimationFrame(() => {
+        startTransition(() => {
+          setIsMounted(true);
+        });
+      });
+    };
+
+    if (typeof window !== "undefined" && window.requestIdleCallback) {
+      idleId = window.requestIdleCallback(() => scheduleMount(), { timeout: 1000 });
+    } else {
+      timeoutId = setTimeout(() => scheduleMount(), 50);
+    }
+
+    return () => {
+      if (idleId !== null && typeof window !== "undefined" && window.cancelIdleCallback) {
+        window.cancelIdleCallback(idleId);
+      }
+      if (animId !== null && typeof window !== "undefined") {
+        cancelAnimationFrame(animId);
+      }
+      if (timeoutId !== null) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, []);
 
   const isServer = typeof window === "undefined";

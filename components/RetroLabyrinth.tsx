@@ -73,6 +73,18 @@ const START_Y = 1;
 const EXIT_X = 13;
 const EXIT_Y = 7;
 
+const WEAPON_SHORT_LABELS: Record<WeaponId, string> = {
+  npm_install: "npm i",
+  git_force_push: "git push -f",
+  stack_overflow: "StackOverflow",
+  emp_blast: "EMP",
+  port_scan: "Port Scan",
+  buffer_overflow: "Buffer Overflow",
+  zero_day: "0-Day",
+  mitm_spoof: "MitM Spoof",
+  ransomware_lock: "Ransomware",
+};
+
 interface Drone {
   x: number;
   y: number;
@@ -162,7 +174,12 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
 
   // Combat & Weapons
   const [weapons, setWeapons] = useState<Record<WeaponId, Weapon>>(DEFAULT_WEAPONS);
-  const [activeWeaponId, setActiveWeaponId] = useState<WeaponId>("npm_install");
+  const [rawActiveWeaponId, setActiveWeaponId] = useState<WeaponId>(() => {
+    return selectedClass.starterWeapons?.[0] || "npm_install";
+  });
+  const activeWeaponId = selectedClass.starterWeapons.includes(rawActiveWeaponId)
+    ? rawActiveWeaponId
+    : selectedClass.starterWeapons[0] || "npm_install";
   const [dronesStunned, setDronesStunned] = useState(false);
   const [activeSideEffect, setActiveSideEffect] = useState<ActiveSideEffect | null>(null);
 
@@ -294,6 +311,10 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
     setCurrentRam(chosenClass.baseRam);
     setMaxRam(chosenClass.baseRam);
     setBypassChips(chosenClass.startBypassChips);
+    setWeapons(DEFAULT_WEAPONS);
+    if (chosenClass.starterWeapons?.[0]) {
+      setActiveWeaponId(chosenClass.starterWeapons[0]);
+    }
     setScore(0);
     setCryptoBounty(0);
     loadRoom("roguelike", 0);
@@ -781,21 +802,13 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
         activeSideEffect?.type === "scrambled_keys" &&
         activeSideEffect.expiresAt > Date.now();
 
-      if (key === "1") {
-        setActiveWeaponId("npm_install");
-        handleFireWeapon("npm_install");
-      } else if (key === "2") {
-        setActiveWeaponId("git_force_push");
-        handleFireWeapon("git_force_push");
-      } else if (key === "3") {
-        setActiveWeaponId("stack_overflow");
-        handleFireWeapon("stack_overflow");
-      } else if (key === "4") {
-        setActiveWeaponId("mitm_spoof");
-        handleFireWeapon("mitm_spoof");
-      } else if (key === "5") {
-        setActiveWeaponId("ransomware_lock");
-        handleFireWeapon("ransomware_lock");
+      if (key === "1" || key === "2" || key === "3" || key === "4" || key === "5") {
+        const slotIdx = parseInt(key, 10) - 1;
+        const weaponId = selectedClass.starterWeapons[slotIdx];
+        if (weaponId && weapons[weaponId] && weapons[weaponId].ammo > 0) {
+          setActiveWeaponId(weaponId);
+          handleFireWeapon(weaponId);
+        }
       } else if (key === " ") {
         handleFireWeapon("emp_blast");
       } else if (key.toLowerCase() === "c") {
@@ -817,6 +830,8 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
     [
       activeSideEffect,
       gameStatus,
+      selectedClass,
+      weapons,
       handleFireWeapon,
       handleSubmitTimesheet,
       closeHackingModal,
@@ -845,19 +860,20 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
   );
 
   const cycleWeapon = useCallback(() => {
-    const order: WeaponId[] = [
-      "npm_install",
-      "git_force_push",
-      "stack_overflow",
-      "port_scan",
-      "buffer_overflow",
-      "zero_day",
-    ];
-    const nextIdx = (order.indexOf(activeWeaponId) + 1) % order.length;
-    const nextWeapon = order[nextIdx];
-    setActiveWeaponId(nextWeapon);
-    handleFireWeapon(nextWeapon);
-  }, [activeWeaponId, handleFireWeapon]);
+    const starterWeapons = selectedClass.starterWeapons;
+    if (!starterWeapons || starterWeapons.length === 0) return;
+    const currentIdx = starterWeapons.indexOf(activeWeaponId);
+
+    for (let i = 1; i <= starterWeapons.length; i++) {
+      const candidateIdx = (currentIdx + i) % starterWeapons.length;
+      const candidateWeaponId = starterWeapons[candidateIdx];
+      if (candidateWeaponId && weapons[candidateWeaponId] && weapons[candidateWeaponId].ammo > 0) {
+        setActiveWeaponId(candidateWeaponId);
+        handleFireWeapon(candidateWeaponId);
+        break;
+      }
+    }
+  }, [selectedClass.starterWeapons, activeWeaponId, weapons, handleFireWeapon]);
 
   // BlinkBrowse cursor movement handler
   const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -867,14 +883,27 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    if (rect.width <= 0 || rect.height <= 0) return;
 
-    const cellW = canvas.width / currentMaze[0].length;
-    const cellH = canvas.height / currentMaze.length;
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
 
-    const gridX = Math.floor(x / cellW);
-    const gridY = Math.floor(y / cellH);
+    const canvasX = (e.clientX - rect.left) * scaleX;
+    const canvasY = (e.clientY - rect.top) * scaleY;
+
+    const cols = currentMaze[0]?.length || 15;
+    const rows = currentMaze.length || 9;
+
+    const cellW = canvas.width / cols;
+    const cellH = canvas.height / rows;
+
+    if (cellW <= 0 || cellH <= 0) return;
+
+    const rawGridX = Math.floor(canvasX / cellW);
+    const rawGridY = Math.floor(canvasY / cellH);
+
+    const gridX = clamp(rawGridX, 0, cols - 1);
+    const gridY = clamp(rawGridY, 0, rows - 1);
 
     cursorGridPosRef.current = { x: gridX, y: gridY };
 
@@ -1292,6 +1321,27 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
             return true;
           });
 
+          // Draw Cursor Hover Highlight Tile
+          if (
+            cursorGridPosRef.current &&
+            gameMode === "roguelike" &&
+            roomIndex === 2 &&
+            gameStatus === "playing"
+          ) {
+            const { x: hx, y: hy } = cursorGridPosRef.current;
+            if (hx >= 0 && hx < cols && hy >= 0 && hy < rows) {
+              const hpx = hx * cellW;
+              const hpy = hy * cellH;
+              ctx.save();
+              ctx.fillStyle = "rgba(34, 211, 238, 0.2)";
+              ctx.fillRect(hpx, hpy, cellW, cellH);
+              ctx.strokeStyle = currentTheme.accentColor || "#22d3ee";
+              ctx.lineWidth = 1.5;
+              ctx.strokeRect(hpx + 0.5, hpy + 0.5, cellW - 1, cellH - 1);
+              ctx.restore();
+            }
+          }
+
           // Calibrated CRT Post-Processing Pipeline (Phosphor mask, Scanlines, Bloom, Vignette)
           renderCRTEffects(
             ctx,
@@ -1630,6 +1680,9 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
             width={240}
             height={144}
             onMouseMove={handleCanvasMouseMove}
+            onMouseLeave={() => {
+              cursorGridPosRef.current = null;
+            }}
             className={`block ${
               isFullscreen
                 ? "w-full h-full max-h-[calc(100vh-220px)] object-contain"
@@ -1842,6 +1895,15 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                     key={cls.id}
                     onClick={() => {
                       setSelectedClassId(cls.id);
+                      if (cls.starterWeapons?.[0]) {
+                        setActiveWeaponId(cls.starterWeapons[0]);
+                      }
+                      setPlayerHp(cls.baseHp);
+                      setMaxPlayerHp(cls.baseHp);
+                      setCurrentRam(cls.baseRam);
+                      setMaxRam(cls.baseRam);
+                      setBypassChips(cls.startBypassChips);
+                      setWeapons(DEFAULT_WEAPONS);
                       setGameStatus("playing");
                     }}
                     className={`p-1.5 rounded border text-left flex flex-col justify-between transition-all cursor-pointer ${
@@ -1909,65 +1971,54 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
           <div className="flex flex-wrap items-center justify-between gap-1 text-[8px]">
             {/* Weapon Hotkeys */}
             <div className="flex items-center gap-1 flex-wrap">
-              <button
-                onClick={() => handleFireWeapon("npm_install")}
-                className={`px-1.5 py-0.5 rounded border flex items-center gap-1 transition-all cursor-pointer ${
-                  activeWeaponId === "npm_install"
-                    ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
-                    : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-neutral-200"
-                }`}
-              >
-                <span className="font-bold">[1] npm i</span>
-                <span className="text-amber-400">({weapons.npm_install.ammo})</span>
-              </button>
+              {[0, 1, 2, 3, 4].map((slotIdx) => {
+                const keyNum = slotIdx + 1;
+                const weaponId = selectedClass.starterWeapons[slotIdx];
+                const weapon = weaponId ? weapons[weaponId] : null;
+                const isActive = weaponId ? activeWeaponId === weaponId : false;
+                const hasAmmo = weapon ? weapon.ammo > 0 : false;
+                const isDisabled = !weapon || !hasAmmo;
+                const shortLabel = weaponId
+                  ? WEAPON_SHORT_LABELS[weaponId] || weapon?.name || weaponId
+                  : "---";
 
-              <button
-                onClick={() => handleFireWeapon("git_force_push")}
-                className={`px-1.5 py-0.5 rounded border flex items-center gap-1 transition-all cursor-pointer ${
-                  activeWeaponId === "git_force_push"
-                    ? "bg-rose-500/20 text-rose-300 border-rose-500/40"
-                    : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-neutral-200"
-                }`}
-              >
-                <span className="font-bold">[2] git push -f</span>
-                <span className="text-rose-400">({weapons.git_force_push.ammo})</span>
-              </button>
+                if (!weapon) {
+                  return (
+                    <button
+                      key={`hotbar-slot-${keyNum}`}
+                      disabled
+                      className="px-1.5 py-0.5 rounded border flex items-center gap-1 bg-neutral-950 text-neutral-600 border-neutral-900 opacity-50 cursor-not-allowed"
+                    >
+                      <span className="font-bold">[{keyNum}] {shortLabel}</span>
+                    </button>
+                  );
+                }
 
-              <button
-                onClick={() => handleFireWeapon("stack_overflow")}
-                className={`px-1.5 py-0.5 rounded border flex items-center gap-1 transition-all cursor-pointer ${
-                  activeWeaponId === "stack_overflow"
-                    ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                    : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-neutral-200"
-                }`}
-              >
-                <span className="font-bold">[3] StackOverflow</span>
-                <span className="text-emerald-400">({weapons.stack_overflow.ammo})</span>
-              </button>
-
-              <button
-                onClick={() => handleFireWeapon("mitm_spoof")}
-                className={`px-1.5 py-0.5 rounded border flex items-center gap-1 transition-all cursor-pointer ${
-                  activeWeaponId === "mitm_spoof"
-                    ? "bg-pink-500/20 text-pink-300 border-pink-500/40"
-                    : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-neutral-200"
-                }`}
-              >
-                <span className="font-bold">[4] MitM Spoof</span>
-                <span className="text-pink-400">({weapons.mitm_spoof.ammo})</span>
-              </button>
-
-              <button
-                onClick={() => handleFireWeapon("ransomware_lock")}
-                className={`px-1.5 py-0.5 rounded border flex items-center gap-1 transition-all cursor-pointer ${
-                  activeWeaponId === "ransomware_lock"
-                    ? "bg-purple-500/20 text-purple-300 border-purple-500/40"
-                    : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-neutral-200"
-                }`}
-              >
-                <span className="font-bold">[5] Ransomware</span>
-                <span className="text-purple-400">({weapons.ransomware_lock.ammo})</span>
-              </button>
+                return (
+                  <button
+                    key={`hotbar-slot-${keyNum}`}
+                    onClick={() => {
+                      if (weaponId && hasAmmo) {
+                        setActiveWeaponId(weaponId);
+                        handleFireWeapon(weaponId);
+                      }
+                    }}
+                    disabled={isDisabled}
+                    className={`px-1.5 py-0.5 rounded border flex items-center gap-1 transition-all ${
+                      isDisabled
+                        ? "bg-neutral-900/50 text-neutral-600 border-neutral-800/50 cursor-not-allowed opacity-60"
+                        : isActive
+                        ? "bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-[0_0_8px_rgba(245,158,11,0.2)] cursor-pointer"
+                        : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-neutral-200 cursor-pointer"
+                    }`}
+                  >
+                    <span className="font-bold">[{keyNum}] {shortLabel}</span>
+                    <span className={hasAmmo ? "text-amber-400" : "text-rose-500"}>
+                      ({weapon.ammo})
+                    </span>
+                  </button>
+                );
+              })}
 
               <button
                 onClick={() => handleFireWeapon("emp_blast")}

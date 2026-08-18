@@ -133,7 +133,8 @@ describe("RetroLabyrinth React Component UI Suite", () => {
     expect(container.textContent).toContain("HP");
     expect(container.textContent).toContain("SCORE:");
     expect(container.textContent).toContain("[1] npm i");
-    expect(container.textContent).toContain("[2] git push -f");
+    expect(container.textContent).toContain("[2] Port Scan");
+    expect(container.textContent).toContain("[3] EMP");
   });
 
   it("should render ASCII fallback when isMounted is false", async () => {
@@ -162,17 +163,84 @@ describe("RetroLabyrinth React Component UI Suite", () => {
 
     const boundary = container.querySelector('[data-keyboard-boundary="true"]') as HTMLElement;
 
-    // Press '2' to switch to git push --force
+    // Press '2' to switch to slot 2 (Port Scan for Script Kiddie)
     await act(async () => {
       boundary.dispatchEvent(
         new KeyboardEvent("keydown", { key: "2", bubbles: true, cancelable: true })
       );
     });
 
-    const gitWeaponBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("git push -f")
+    const portScanBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Port Scan")
     );
-    expect(gitWeaponBtn?.className).toContain("bg-rose-500/20");
+    expect(portScanBtn?.className).toContain("bg-amber-500/20");
+  });
+
+  it("should dynamically populate HUD hotbar with starter weapons when changing class", async () => {
+    await act(async () => {
+      root.render(<RetroLabyrinth isMounted={true} />);
+    });
+
+    // Open class select modal
+    const classBadge = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Script Kiddie")
+    );
+    await act(async () => {
+      classBadge?.click();
+    });
+
+    // Select Cryptanalyst class
+    const cryptanalystBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("Cryptanalyst")
+    );
+    await act(async () => {
+      cryptanalystBtn?.click();
+    });
+
+    // Cryptanalyst starterWeapons are ["port_scan", "zero_day", "npm_install"]
+    expect(container.textContent).toContain("[1] Port Scan");
+    expect(container.textContent).toContain("[2] 0-Day");
+    expect(container.textContent).toContain("[3] npm i");
+    expect(container.textContent).toContain("[4] ---");
+    expect(container.textContent).toContain("[5] ---");
+  });
+
+  it("should select and fire weapon on HUD hotbar button click", async () => {
+    await act(async () => {
+      root.render(<RetroLabyrinth isMounted={true} />);
+    });
+
+    const portScanBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("[2] Port Scan")
+    );
+    expect(portScanBtn).toBeTruthy();
+
+    await act(async () => {
+      portScanBtn?.click();
+    });
+
+    expect(portScanBtn?.className).toContain("bg-amber-500/20");
+  });
+
+  it("should prevent selection or firing of unassigned empty slots", async () => {
+    await act(async () => {
+      root.render(<RetroLabyrinth isMounted={true} />);
+    });
+
+    const boundary = container.querySelector('[data-keyboard-boundary="true"]') as HTMLElement;
+
+    // Press '4' (unassigned in Script Kiddie loadout)
+    await act(async () => {
+      boundary.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "4", bubbles: true, cancelable: true })
+      );
+    });
+
+    // Slot 1 (npm i) should remain active
+    const npmBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.textContent?.includes("[1] npm i")
+    );
+    expect(npmBtn?.className).toContain("bg-amber-500/20");
   });
 
   it("should respond to directional keyboard input", async () => {

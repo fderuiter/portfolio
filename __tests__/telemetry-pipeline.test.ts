@@ -180,6 +180,8 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
         telemetry: {},
         syncFailed: false,
         refetch: vi.fn(),
+        queueLength: 0,
+        queueCapacity: 50,
       });
 
       // Set up a ref store to replicate component lifecycle mount persistence

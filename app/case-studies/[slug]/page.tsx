@@ -15,6 +15,7 @@ import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
 import { PageLayout } from "@/components/PageLayout";
 import { resolveBaseUrl } from "@/lib/domain";
+import { CaseStudyFeedbackSection } from "@/components/CaseStudyFeedbackSection";
 
 import type { Metadata } from "next";
 
@@ -275,6 +276,9 @@ export default async function CaseStudyPage({ params }: PageProps) {
               />
             </div>
           </article>
+
+          {/* Structured Learning Feedback & Reaction Engine */}
+          <CaseStudyFeedbackSection slug={slug} />
 
           {/* Sequential Next / Previous Case Study Navigation */}
           {prevStudy && nextStudy && (

@@ -182,7 +182,7 @@ test.describe('Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite', () =>
       await expect(combobox).toBeVisible();
       await expect(combobox).toBeFocused();
 
-      await auditAndAssert(page, testInfo, 'Command Palette Focus State', { disableRules: ['color-contrast'] });
+      await auditAndAssert(page, testInfo, 'Command Palette Focus State');
 
       await page.keyboard.press('Escape');
       await expect(combobox).not.toBeVisible();
@@ -215,7 +215,7 @@ test.describe('Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite', () =>
       });
       expect(isFocusedInitiallyInside).toBe(true);
 
-      await auditAndAssert(page, testInfo, 'Mobile Navigation Open State', { disableRules: ['color-contrast'] });
+      await auditAndAssert(page, testInfo, 'Mobile Navigation Open State');
 
       // Tab trapping test
       let focusEscaped = false;
@@ -238,7 +238,7 @@ test.describe('Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite', () =>
     await page.waitForLoadState('networkidle');
     await page.waitForSelector('text=CRF Studio', { timeout: 15000 });
 
-    await auditAndAssert(page, testInfo, 'CRF Studio Default State', { disableRules: ['color-contrast'] });
+    await auditAndAssert(page, testInfo, 'CRF Studio Default State');
   });
 
   test('Audit: Logical Proof Workspace', async ({ page }, testInfo) => {
@@ -246,7 +246,7 @@ test.describe('Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite', () =>
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(400);
 
-    await auditAndAssert(page, testInfo, 'Logical Proof Workspace Default State', { disableRules: ['color-contrast'] });
+    await auditAndAssert(page, testInfo, 'Logical Proof Workspace Default State');
   });
 
   test('Audit: Neuroimaging Simulator', async ({ page }, testInfo) => {
@@ -254,7 +254,7 @@ test.describe('Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite', () =>
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(400);
 
-    await auditAndAssert(page, testInfo, 'Neuroimaging Simulator Default State', { disableRules: ['color-contrast'] });
+    await auditAndAssert(page, testInfo, 'Neuroimaging Simulator Default State');
   });
 
   test('Audit: Consultation & Schedule Page', async ({ page }, testInfo) => {
@@ -286,7 +286,7 @@ test.describe('Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite', () =>
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(400);
 
-    await auditAndAssert(page, testInfo, 'Arcade Game: Clinical Chaos', { disableRules: ['color-contrast'] });
+    await auditAndAssert(page, testInfo, 'Arcade Game: Clinical Chaos');
   });
 
   test('Audit: Arcade Game - Garmin Watch Simulator', async ({ page }, testInfo) => {
@@ -294,7 +294,7 @@ test.describe('Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite', () =>
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(400);
 
-    await auditAndAssert(page, testInfo, 'Arcade Game: Garmin Watch', { disableRules: ['color-contrast'] });
+    await auditAndAssert(page, testInfo, 'Arcade Game: Garmin Watch');
   });
 
   test('Audit: Arcade Game - Laser Loon', async ({ page }, testInfo) => {
@@ -302,7 +302,7 @@ test.describe('Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite', () =>
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(400);
 
-    await auditAndAssert(page, testInfo, 'Arcade Game: Laser Loon', { disableRules: ['color-contrast'] });
+    await auditAndAssert(page, testInfo, 'Arcade Game: Laser Loon');
   });
 
   test('Audit: Arcade Game - Quasi-Perfect Puzzler', async ({ page }, testInfo) => {
@@ -310,7 +310,7 @@ test.describe('Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite', () =>
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(400);
 
-    await auditAndAssert(page, testInfo, 'Arcade Game: Quasi Puzzler', { disableRules: ['color-contrast'] });
+    await auditAndAssert(page, testInfo, 'Arcade Game: Quasi Puzzler');
   });
 
   test('Audit: Arcade Game - Retro Labyrinth', async ({ page }, testInfo) => {
@@ -318,7 +318,7 @@ test.describe('Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite', () =>
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(400);
 
-    await auditAndAssert(page, testInfo, 'Arcade Game: Retro Labyrinth', { disableRules: ['color-contrast'] });
+    await auditAndAssert(page, testInfo, 'Arcade Game: Retro Labyrinth');
   });
 
   test('Audit: Arcade Game - Working With Duck', async ({ page }, testInfo) => {
@@ -326,6 +326,6 @@ test.describe('Continuous Accessibility (a11y) & WCAG 2.1 AA Audit Suite', () =>
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(400);
 
-    await auditAndAssert(page, testInfo, 'Arcade Game: Working With Duck', { disableRules: ['color-contrast'] });
+    await auditAndAssert(page, testInfo, 'Arcade Game: Working With Duck');
   });
 });

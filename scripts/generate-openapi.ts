@@ -65,6 +65,179 @@ export const openApiSpec = {
           },
         },
       },
+      post: {
+        summary: "Submit draft technical post-mortem case study",
+        description: "Submits a new technical case study or prototype post-mortem as an unpublished draft record.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/CaseStudySubmission",
+              },
+            },
+          },
+        },
+        responses: {
+          201: {
+            description: "Case study submitted successfully in unpublished draft state",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" },
+                    data: {
+                      type: "object",
+                      properties: {
+                        id: { type: "string" },
+                        slug: { type: "string" },
+                        title: { type: "string" },
+                        primary_language: { type: "string" },
+                        editorial_content: { type: "string" },
+                        architectural_narrative: { type: "string" },
+                        published: { type: "boolean" },
+                        tags: { type: "string" },
+                        created_at: { type: "string", format: "date-time" },
+                      },
+                      required: [
+                        "id",
+                        "slug",
+                        "title",
+                        "primary_language",
+                        "editorial_content",
+                        "architectural_narrative",
+                        "published",
+                        "tags",
+                      ],
+                    },
+                  },
+                  required: ["success", "data"],
+                },
+              },
+            },
+          },
+          400: {
+            description: "Missing or malformed payload fields or duplicate slug",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ValidationError",
+                },
+              },
+            },
+          },
+          500: {
+            description: "Internal server error",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/case-studies/feedback": {
+      get: {
+        summary: "Query case study learning feedback",
+        description: "Retrieves learning feedback for a case study slug.",
+        parameters: [
+          {
+            name: "slug",
+            in: "query",
+            required: true,
+            description: "Case study slug identifier",
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Successful retrieval of feedback",
+          },
+          400: {
+            description: "Missing required query parameter",
+          },
+        },
+      },
+      post: {
+        summary: "Submit structured learning feedback",
+        description: "Validates and persists structured learning takeaways and free-form constructive text.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/FeedbackSubmission",
+              },
+            },
+          },
+        },
+        responses: {
+          201: {
+            description: "Feedback submitted successfully",
+          },
+          400: {
+            description: "Validation error on payload",
+          },
+          429: {
+            description: "Rate limit or duplicate submission limit reached",
+          },
+          500: {
+            description: "Internal server error",
+          },
+        },
+      },
+    },
+    "/api/case-studies/reactions": {
+      get: {
+        summary: "Retrieve case study reaction counts",
+        description: "Fetches aggregate quick reaction counts for a case study slug.",
+        parameters: [
+          {
+            name: "slug",
+            in: "query",
+            required: true,
+            description: "Case study slug identifier",
+            schema: { type: "string" },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Successful retrieval of reaction counts",
+          },
+          400: {
+            description: "Missing required query parameter",
+          },
+        },
+      },
+      post: {
+        summary: "Submit quick reaction badge",
+        description: "Increments quick reaction badge count for a case study slug.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ReactionSubmission",
+              },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: "Reaction registered successfully",
+          },
+          400: {
+            description: "Validation error on payload",
+          },
+          500: {
+            description: "Internal server error",
+          },
+        },
+      },
     },
     "/api/telemetry": {
       get: {
@@ -228,6 +401,25 @@ export const openApiSpec = {
         },
         required: ["id", "slug", "title", "primary_language", "tags"],
       },
+      CaseStudySubmission: {
+        type: "object",
+        properties: {
+          title: { type: "string", description: "Title of the post-mortem or case study" },
+          slug: { type: "string", description: "Unique URL slug" },
+          primary_language: { type: "string", description: "Primary programming language or tech stack" },
+          editorial_content: { type: "string", description: "Summary description markdown" },
+          architectural_narrative: { type: "string", description: "Detailed architectural narrative HTML markup" },
+          tags: {
+            oneOf: [
+              { type: "string" },
+              { type: "array", items: { type: "string" } },
+            ],
+            description: "Tags as comma-separated string or array of tag strings",
+          },
+          github_url: { type: "string", description: "Optional GitHub repository URL" },
+        },
+        required: ["title", "slug", "tags"],
+      },
       ErrorResponse: {
         type: "object",
         properties: {
@@ -320,6 +512,29 @@ export const openApiSpec = {
           },
         },
         required: ["error"],
+      },
+      FeedbackSubmission: {
+        type: "object",
+        properties: {
+          caseStudySlug: { type: "string" },
+          takeaways: {
+            type: "array",
+            items: { type: "string" },
+          },
+          comments: { type: "string" },
+        },
+        required: ["caseStudySlug", "takeaways", "comments"],
+      },
+      ReactionSubmission: {
+        type: "object",
+        properties: {
+          caseStudySlug: { type: "string" },
+          reactionType: {
+            type: "string",
+            enum: ["insightful", "mind_blowing", "actionable", "thorough"],
+          },
+        },
+        required: ["caseStudySlug", "reactionType"],
       },
     },
   },
