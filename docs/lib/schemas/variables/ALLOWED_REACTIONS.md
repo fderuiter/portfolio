@@ -8,6 +8,6 @@
 
 > `const` **ALLOWED\_REACTIONS**: readonly \[`"insightful"`, `"mind_blowing"`, `"actionable"`, `"thorough"`\]
 
-Defined in: [lib/schemas.ts:134](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L134)
+Defined in: [lib/schemas.ts:181](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L181)
 
 Allowed reaction types

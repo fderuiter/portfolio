@@ -8,7 +8,7 @@
 
 > **measurePageRoute**(`page`, `url`): `Promise`\<[`SingleRunMetrics`](../interfaces/SingleRunMetrics.md)\>
 
-Defined in: [lib/dx/page-bench.ts:163](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L163)
+Defined in: [lib/dx/page-bench.ts:165](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L165)
 
 Capture raw performance metrics for a single navigation via Playwright
 

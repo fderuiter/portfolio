@@ -8,7 +8,7 @@
 
 > **generateMarkdownReport**(`summaries`, `baseUrl?`): `string`
 
-Defined in: [lib/dx/page-bench.ts:427](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L427)
+Defined in: [lib/dx/page-bench.ts:429](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L429)
 
 Generate Markdown Report of Benchmark Results
 

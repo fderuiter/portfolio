@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { validateConstructiveContent } from "@/lib/moderation";
 
 /**
  * Schema for telemetry POST payload validation
@@ -110,6 +111,52 @@ export const CaseStudySubmissionSchema = z
         path: ["architectural_narrative"],
       });
     }
+
+    // Content Moderation & Tone Validation
+    if (data.title) {
+      const check = validateConstructiveContent(data.title);
+      if (!check.isValid) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: check.reason || "Title violates community tone standards",
+          path: ["title"],
+        });
+      }
+    }
+
+    if (ed) {
+      const check = validateConstructiveContent(ed);
+      if (!check.isValid) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: check.reason || "Summary violates community tone standards",
+          path: ["editorial_content"],
+        });
+      }
+    }
+
+    if (arch) {
+      const check = validateConstructiveContent(arch);
+      if (!check.isValid) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: check.reason || "Architectural narrative violates community tone standards",
+          path: ["architectural_narrative"],
+        });
+      }
+    }
+
+    const tagsStr = Array.isArray(data.tags) ? data.tags.join(" ") : data.tags;
+    if (tagsStr) {
+      const check = validateConstructiveContent(tagsStr);
+      if (!check.isValid) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: check.reason || "Tags violate community tone standards",
+          path: ["tags"],
+        });
+      }
+    }
   })
   .transform((data) => {
     const lang = data.primary_language || data.language || "";
@@ -145,6 +192,30 @@ export const FeedbackSubmissionSchema = z.object({
     .string()
     .min(3, "Comments must be at least 3 characters long")
     .max(2000, "Comments cannot exceed 2000 characters"),
+}).superRefine((data, ctx) => {
+  if (data.comments) {
+    const commentsCheck = validateConstructiveContent(data.comments);
+    if (!commentsCheck.isValid) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: commentsCheck.reason || "Submission text violates community tone standards",
+        path: ["comments"],
+      });
+    }
+  }
+
+  if (Array.isArray(data.takeaways)) {
+    data.takeaways.forEach((takeaway, idx) => {
+      const takeawayCheck = validateConstructiveContent(takeaway);
+      if (!takeawayCheck.isValid) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: takeawayCheck.reason || "Submission text violates community tone standards",
+          path: ["takeaways", idx],
+        });
+      }
+    });
+  }
 });
 
 /**

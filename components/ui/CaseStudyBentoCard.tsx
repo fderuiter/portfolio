@@ -13,6 +13,7 @@ import { CommitSparkline } from "@/components/CommitSparkline";
 import { useBentoLayout } from "@/components/providers/BentoLayoutContext";
 import { useTerminology } from "@/components/providers/TerminologyProvider";
 import { compileTerms } from "@/lib/term-compiler";
+import { parsePretextBlocks } from "@/lib/pretext-block-parser";
 
 const REALITY_CONTENT: Record<string, string> = {
   schemaflow: "While the drag-and-drop canvas is extremely smooth, we initially faced major rendering bottlenecks when rendering over 150 schema nodes. We had to implement node occlusion culling and state debouncing to maintain 60 FPS, and cyclical dependency detection still requires optimized Web Worker postMessage parsing.",
@@ -24,7 +25,8 @@ const REALITY_CONTENT: Record<string, string> = {
   "inbody-qr-decoder": "Reverse-engineering proprietary ASCII payloads without official documentation required building an automated fuzzing oracle. Probing production web services with mutated byte slices triggered aggressive rate limits and occasional session token invalidation, requiring us to implement a multi-stage session warmup loop and static offset caching to achieve sub-millisecond execution times.",
   "ualbf": "Synchronizing Rust multi-threaded DFS tree search with Lean 4 formal verification required strict deterministic FFI serialization. Initial cross-language memory overhead caused GC pauses in Lean 4 during 10M+ certificate streams, resolved by introducing fixed-size binary manifests and bounded C shims.",
   "sonos-network-controller": "Bypassing official cloud APIs requires handling inconsistent XML namespaces and escaped DIDL-Lite metadata blocks returned inside SOAP body payloads across varying Sonos firmware versions. Un-memoized SSDP multicast queries caused UDP socket exhaustion on congested local networks, resolved by implementing a 10-second TTL memoization cache.",
-  clintrials: "Executing multi-arm stochastic Monte Carlo loops directly inside Pyodide Web Workers eliminates server infrastructure costs, but browser memory constraints and Web Worker serialization overhead required custom memory buffers and deterministic seed synchronization to maintain parity with CPython."
+  "clintrials": "Executing multi-arm stochastic Monte Carlo loops directly inside Pyodide Web Workers eliminates server infrastructure costs, but browser memory constraints and Web Worker serialization overhead required custom memory buffers and deterministic seed synchronization to maintain parity with CPython."
+  "lambda-wave": "Combining Haskell's garbage-collected runtime with sub-10ms hard real-time medical device constraints required strict allocation control. We eliminated GC pauses in the raw data ingestion path by implementing C++ lock-free ring buffers over FFI, while automated struct alignment tests verified zero memory padding mismatches across language boundaries."
 };
 
 const getRealityContent = (slug: string, originalContent: string) => {
@@ -155,20 +157,88 @@ function parseInlineNodes(
 const FormattedMarkdownText: React.FC<{ text: string; className?: string }> = ({ text, className }) => {
   const { simplified } = useTerminology();
 
-  const compiledText = React.useMemo(() => {
-    return compileTerms(text || "");
+  const blocks = React.useMemo(() => {
+    return parsePretextBlocks(compileTerms(text || ""));
   }, [text]);
-
-  const paragraphs = React.useMemo(() => {
-    return compiledText.split(/\r?\n+/).map((p) => p.trim()).filter(Boolean);
-  }, [compiledText]);
 
   return (
     <div className="flex flex-col gap-3">
-      {paragraphs.map((para, pIdx) => {
-        const nodes = parseInlineNodes(para, simplified);
+      {blocks.map((block, bIdx) => {
+        if (block.type === "log") {
+          return (
+            <div
+              key={bIdx}
+              className="my-1.5 p-2 bg-black/80 border border-zinc-800/80 rounded-lg font-mono text-[11px] leading-[18px] text-zinc-300 overflow-x-auto select-text"
+            >
+              {block.lines.map((line, lIdx) => {
+                let lineStyle = "text-zinc-300";
+                if (/\[\s*ERROR\s*\]|ERROR:|FATAL/i.test(line)) {
+                  lineStyle = "text-rose-400 font-bold bg-rose-500/10 -mx-2 px-2 rounded-sm";
+                } else if (/\[\s*WARN\s*\]|WARN:/i.test(line)) {
+                  lineStyle = "text-amber-300 font-semibold";
+                } else if (/\[\s*INFO\s*\]|INFO:/i.test(line)) {
+                  lineStyle = "text-cyan-300";
+                } else if (/\[\s*DEBUG\s*\]|DEBUG:/i.test(line)) {
+                  lineStyle = "text-zinc-500";
+                }
+                return (
+                  <div key={lIdx} className={cn("whitespace-pre-wrap break-words", lineStyle)}>
+                    {line}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        }
+
+        if (block.type === "diff") {
+          return (
+            <div
+              key={bIdx}
+              className="my-1.5 p-2 bg-black/80 border border-zinc-800/80 rounded-lg font-mono text-[11px] leading-[18px] overflow-x-auto select-text"
+            >
+              {block.lines.map((line, lIdx) => {
+                let lineStyle = "text-zinc-300";
+                if (line.startsWith("+")) {
+                  lineStyle = "text-emerald-400 font-semibold bg-emerald-500/10 -mx-2 px-2 rounded-sm";
+                } else if (line.startsWith("-")) {
+                  lineStyle = "text-rose-400 font-semibold bg-rose-500/10 -mx-2 px-2 rounded-sm";
+                } else if (line.startsWith("@@") || line.startsWith("***") || line.startsWith("---") || line.startsWith("+++")) {
+                  lineStyle = "text-brand-cyan font-bold";
+                }
+                return (
+                  <div key={lIdx} className={cn("whitespace-pre-wrap break-words", lineStyle)}>
+                    {line}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        }
+
+        if (block.type === "code") {
+          return (
+            <div
+              key={bIdx}
+              className="my-1.5 p-2 bg-black/80 border border-zinc-800/80 rounded-lg font-mono text-[11px] leading-[18px] text-brand-cyan/90 overflow-x-auto select-text"
+            >
+              {block.language && block.language !== "code" && (
+                <div className="text-[9px] font-bold uppercase tracking-wider text-zinc-500 mb-1 border-b border-zinc-800/60 pb-0.5">
+                  {block.language}
+                </div>
+              )}
+              {block.lines.map((line, lIdx) => (
+                <div key={lIdx} className="whitespace-pre-wrap break-words">
+                  {line || "\u00A0"}
+                </div>
+              ))}
+            </div>
+          );
+        }
+
+        const nodes = parseInlineNodes(block.raw, simplified);
         return (
-          <p key={pIdx} className={className}>
+          <p key={bIdx} className={className}>
             {nodes}
           </p>
         );

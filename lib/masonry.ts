@@ -11,6 +11,11 @@ import {
   calculateColumnWidth, 
   distributeItemsGreedily 
 } from "@/lib/graphics-math";
+import { 
+  calculateBlockHeight, 
+  BLOCK_LAYOUT_CONFIG, 
+  type PreparedBlock 
+} from "@/lib/pretext-block-parser";
 
 export interface MasonryConfig {
   COLS: { SM: number; MD: number; LG: number };
@@ -29,6 +34,7 @@ export interface PreparedParagraph {
 
 export interface PreparedData {
   paragraphs?: PreparedParagraph[];
+  blocks?: PreparedBlock[];
   paddingHeight: number;
 }
 
@@ -56,36 +62,66 @@ export function calculateMasonryLayout<T extends { id: string }>(
 
     const textWidth = columnWidth - (config.CARD_PADDING * 2);
 
-    let paragraphs = cached.paragraphs;
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    if (!paragraphs && (cached as any).prepared) {
-      paragraphs = [{
-        prepared: (cached as any).prepared,
-        items: (cached as any).items || [],
-      }];
-    }
-    /* eslint-enable @typescript-eslint/no-explicit-any */
+    if (cached.blocks && cached.blocks.length > 0) {
+      for (const block of cached.blocks) {
+        if (block.type === "paragraph" && block.prepared) {
+          const linesRanges: RichInlineLineRange[] = [];
+          walkRichInlineLineRanges(block.prepared, textWidth, (range) => {
+            linesRanges.push(range);
+          });
 
-    for (const paragraph of paragraphs || []) {
-      const linesRanges: RichInlineLineRange[] = [];
-      walkRichInlineLineRanges(paragraph.prepared, textWidth, (range) => {
-        linesRanges.push(range);
-      });
+          const materializedLines = linesRanges.map((range) =>
+            materializeRichInlineLineRange(block.prepared!, range)
+          );
 
-      const materializedLines = linesRanges.map((range) =>
-        materializeRichInlineLineRange(paragraph.prepared, range)
-      );
+          paragraphsLines.push(materializedLines);
+          if (block.items) paragraphsItems.push(block.items);
 
-      paragraphsLines.push(materializedLines);
-      paragraphsItems.push(paragraph.items);
+          const paragraphHeight = materializedLines.length * config.LINE_HEIGHT;
+          totalTextHeight += paragraphHeight;
+        } else {
+          // Code / Log / Diff structured block
+          const blockHeight = calculateBlockHeight(block, textWidth, config.LINE_HEIGHT);
+          totalTextHeight += blockHeight;
+        }
+      }
 
-      const paragraphHeight = materializedLines.length * config.LINE_HEIGHT;
-      totalTextHeight += paragraphHeight;
-    }
+      const PARAGRAPH_GAP = BLOCK_LAYOUT_CONFIG.PARAGRAPH_GAP;
+      if (cached.blocks.length > 1) {
+        totalTextHeight += (cached.blocks.length - 1) * PARAGRAPH_GAP;
+      }
+    } else {
+      let paragraphs = cached.paragraphs;
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      if (!paragraphs && (cached as any).prepared) {
+        paragraphs = [{
+          prepared: (cached as any).prepared,
+          items: (cached as any).items || [],
+        }];
+      }
+      /* eslint-enable @typescript-eslint/no-explicit-any */
 
-    const PARAGRAPH_GAP = 12;
-    if (paragraphs && paragraphs.length > 1) {
-      totalTextHeight += (paragraphs.length - 1) * PARAGRAPH_GAP;
+      for (const paragraph of paragraphs || []) {
+        const linesRanges: RichInlineLineRange[] = [];
+        walkRichInlineLineRanges(paragraph.prepared, textWidth, (range) => {
+          linesRanges.push(range);
+        });
+
+        const materializedLines = linesRanges.map((range) =>
+          materializeRichInlineLineRange(paragraph.prepared, range)
+        );
+
+        paragraphsLines.push(materializedLines);
+        paragraphsItems.push(paragraph.items);
+
+        const paragraphHeight = materializedLines.length * config.LINE_HEIGHT;
+        totalTextHeight += paragraphHeight;
+      }
+
+      const PARAGRAPH_GAP = BLOCK_LAYOUT_CONFIG.PARAGRAPH_GAP;
+      if (paragraphs && paragraphs.length > 1) {
+        totalTextHeight += (paragraphs.length - 1) * PARAGRAPH_GAP;
+      }
     }
 
     const override = heightOverrides?.[study.id];
@@ -110,3 +146,4 @@ export function calculateMasonryLayout<T extends { id: string }>(
 
   return { colCount, columns };
 }
+
