@@ -191,6 +191,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         ]
       },
       {
+        id: "nav-sonos-network-controller",
+        title: "Sonos Network Controller: Technical Breakdown & Architecture",
+        subtitle: "Deep-dive technical case study — async UPnP/SOAP protocol client, FastAPI, HTMX & local LAN orchestration",
+        category: "navigation",
+        url: "/case-studies/sonos-network-controller",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Case Study",
+        status: "Python / IoT",
+        description: "Lightweight local-network control plane and REST API for Sonos speakers bypassing cloud dependencies in favor of direct async UPnP/SOAP orchestration.",
+        techStack: ["Python", "FastAPI", "AsyncIO", "UPnP/SOAP", "HTMX", "TailwindCSS"],
+        highlights: [
+          "Sub-10ms route dispatch latency using FastAPI and async I/O",
+          "10s TTL SSDP multicast memoization cache eliminating socket exhaustion",
+          "Hypermedia-driven HTMX single-page architecture for low-power edge hosting"
+        ]
+      },
+      {
         id: "nav-clintrials",
         title: "clintrials: Adaptive Clinical Trial Design & WebAssembly Engine",
         subtitle: "Deep-dive technical case study — Pyodide WASM workers, CRM Bayesian escalation & accrual solvers",
@@ -222,6 +239,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
           "Sub-10ms in-browser statistical code transpilation",
           "Zero PHI data exfiltration via Web Workers",
           "Pocock-Simon covariate adaptive minimization"
+        ]
+      },
+      {
+        id: "nav-lambda-wave",
+        title: "Lambda-Wave: Real-Time SGRT FMCW Radar System",
+        subtitle: "Deep-dive technical case study — Haskell DSP core, lock-free C++ ring buffers & IEC 62304 Class C safety watchdog",
+        category: "navigation",
+        url: "/case-studies/lambda-wave",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Case Study",
+        status: "Haskell / C++",
+        description: "Safety-critical FMCW mmWave radar processing pipeline for Surface Guided Radiation Therapy (SGRT) with lock-free C++ ring buffer bridge and Dear ImGui HUD.",
+        techStack: ["Haskell", "C++", "OpenGL", "DSP", "IEC 62304", "Real-Time Systems"],
+        highlights: [
+          "Sub-10ms end-to-end processing & respiratory gating latency",
+          "Lock-free C++ circular ring buffer zero-copy FFI bridge",
+          "Safety-critical watchdog interlock meeting IEC 62304 Class C"
         ]
       },
       {

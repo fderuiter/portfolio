@@ -114,6 +114,13 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     keywords: ["Laser Loon", "Graphic Design", "Vector Illustration", "Iconography", "Asset Distribution", "Minnesota State Flag", "Creative Commons"],
     ogType: "article",
   },
+  sonosNetworkController: {
+    title: "Sonos Network Controller Case Study | Technical Breakdown & Architecture",
+    description: "Deep dive technical breakdown of Sonos Network Controller — a lightweight, local-network control plane and REST API for Sonos smart speakers bypassing cloud intermediaries.",
+    path: "/case-studies/sonos-network-controller",
+    keywords: ["Python", "FastAPI", "AsyncIO", "UPnP", "SOAP", "Sonos", "HTMX", "IoT", "Reverse Engineering"],
+    ogType: "article",
+  },
   clintrials: {
     title: "clintrials Case Study | Adaptive Clinical Trial Design & WebAssembly Engine",
     description: "Deep dive technical breakdown of clintrials — an adaptive clinical trial design and biostatistical simulation engine powered by Pyodide WebAssembly workers.",
@@ -126,6 +133,13 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     description: "Deep dive technical breakdown of Equipose Randomization — a client-side clinical trial randomization engine with deterministic Mersenne Twister transpilation across R, Python, SAS, and Stata.",
     path: "/case-studies/equipose-randomization",
     keywords: ["Angular", "TypeScript", "Web Workers", "Clinical Informatics", "Transpiler Design", "Deterministic Algorithms", "CDISC", "ADaM-Lite"],
+    ogType: "article",
+  },
+  lambdaWave: {
+    title: "Lambda-Wave Case Study | Real-Time SGRT FMCW Radar System",
+    description: "Technical breakdown of Lambda-Wave — a safety-critical FMCW mmWave radar processing pipeline for SGRT respiratory motion tracking built with Haskell, C++, OpenGL, and IEC 62304 Class C compliance.",
+    path: "/case-studies/lambda-wave",
+    keywords: ["Haskell", "C++", "DSP", "FMCW Radar", "SGRT", "IEC 62304", "Medical Device", "Real-Time Systems", "OpenGL"],
     ogType: "article",
   },
 };

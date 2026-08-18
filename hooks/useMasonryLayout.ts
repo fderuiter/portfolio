@@ -1,18 +1,14 @@
 import { useState, useLayoutEffect, useRef, useCallback } from "react";
 import { useResizeObserver } from "./useResizeObserver";
-import { 
-  parseMarkdownToRichItems, 
-  type ExtendedRichInlineItem 
-} from "@/hooks/usePretextLayout";
-import { 
-  prepareRichInline, 
-  type RichInlineLine,
-} from "@chenglou/pretext/rich-inline";
-import { LAYOUT_CONFIG, resolveThemeFonts } from "@/lib/layout-config";
+import { type ExtendedRichInlineItem } from "@/hooks/usePretextLayout";
+import { type RichInlineLine } from "@chenglou/pretext/rich-inline";
+import { LAYOUT_CONFIG } from "@/lib/layout-config";
 import { GitHubStats } from "@/lib/github";
 import { calculateMasonryLayout, type PreparedData } from "@/lib/masonry";
 import { isBrowser } from "@/lib/graphics-engine";
 import { useBentoLayout } from "@/components/providers/BentoLayoutContext";
+
+import { preparePretextBlocks } from "@/lib/pretext-block-parser";
 
 export interface MasonryItem {
   id: string;
@@ -55,23 +51,17 @@ export function useMasonryLayout<T extends MasonryItem>(
   useLayoutEffect(() => {
     if (!isBrowser()) return;
 
-    const { baseFont, boldFont, italicFont, codeFont } = resolveThemeFonts(LAYOUT_CONFIG.FONT_SIZE, "--font-inter");
-
     const data: Record<string, PreparedData> = {};
     for (const study of allItems) {
-      const paragraphTexts = study.editorial_content.split(/\r?\n+/).map(p => p.trim()).filter(Boolean);
-      const paragraphs = paragraphTexts.map((text) => {
-        const parsedItems = parseMarkdownToRichItems(text, baseFont, boldFont, italicFont, codeFont);
-        const prepared = prepareRichInline(parsedItems);
-        return {
-          prepared,
-          items: parsedItems,
-        };
-      });
+      const blocks = preparePretextBlocks(study.editorial_content || "", LAYOUT_CONFIG.FONT_SIZE, "--font-inter");
+      const paragraphs = blocks
+        .filter((b) => b.type === "paragraph" && b.prepared)
+        .map((b) => ({ prepared: b.prepared!, items: b.items || [] }));
 
       const paddingHeight = study.githubStats ? LAYOUT_CONFIG.PADDING_WITH_STATS : LAYOUT_CONFIG.PADDING_WITHOUT_STATS;
       
       data[study.id] = {
+        blocks,
         paragraphs,
         paddingHeight,
       };

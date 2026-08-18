@@ -6,15 +6,23 @@
 
 # Interface: PreparedData
 
-Defined in: [lib/masonry.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L30)
+Defined in: [lib/masonry.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L35)
 
 ## Properties
+
+### blocks?
+
+> `optional` **blocks?**: [`PreparedBlock`](../../pretext-block-parser/interfaces/PreparedBlock.md)[]
+
+Defined in: [lib/masonry.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L37)
+
+***
 
 ### paddingHeight
 
 > **paddingHeight**: `number`
 
-Defined in: [lib/masonry.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L32)
+Defined in: [lib/masonry.ts:38](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L38)
 
 ***
 
@@ -22,4 +30,4 @@ Defined in: [lib/masonry.ts:32](https://github.com/fderuiter/portfolio/blob/main
 
 > `optional` **paragraphs?**: [`PreparedParagraph`](PreparedParagraph.md)[]
 
-Defined in: [lib/masonry.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L31)
+Defined in: [lib/masonry.ts:36](https://github.com/fderuiter/portfolio/blob/main/lib/masonry.ts#L36)

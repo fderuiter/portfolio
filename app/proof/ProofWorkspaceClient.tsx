@@ -253,15 +253,15 @@ export function ProofWorkspaceClient() {
     }
   }, [params, activeTheoremId, activeTab, inspectedNodeId, activeTheorem]);
 
-  const setActiveTab = (tab: "ledger" | "systems" | "fallacy") => {
+  const setActiveTab = React.useCallback((tab: "ledger" | "systems" | "fallacy") => {
     setActiveTabState(tab);
     setParam("tab", tab === "ledger" ? null : tab, { replace: true });
-  };
+  }, [setParam]);
 
-  const setInspectedNodeId = (nodeId: string) => {
+  const setInspectedNodeId = React.useCallback((nodeId: string) => {
     setInspectedNodeIdState(nodeId);
     setParam("inspect", nodeId === activeTheorem.targetNodeId ? null : nodeId, { replace: true });
-  };
+  }, [activeTheorem.targetNodeId, setParam]);
 
   const { copy: copyShareLink } = useClipboard({
     successMessage: "Proof Studio link copied to clipboard with current theorem & tab!",
@@ -826,7 +826,7 @@ export function ProofWorkspaceClient() {
     }
 
     setDragConnection(null);
-  }, [dragConnection, edges, activeTheoremId, playSuccess, processCanvasPointerMove]);
+  }, [dragConnection, edges, activeTheoremId, playSuccess, processCanvasPointerMove, announceToScreenReader, setActiveTab, showToast]);
 
   const handleResetLayout = () => {
     setNodeOffsets({});

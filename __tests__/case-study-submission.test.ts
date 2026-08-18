@@ -200,6 +200,29 @@ describe("Case Study Submission API Endpoint (POST /api/case-studies)", () => {
       expect(json.details.some((d: any) => d.path === "title")).toBe(true);
     });
 
+    it("rejects payloads containing blocked profanity or toxic rant patterns with community tone error message", async () => {
+      const payload = {
+        title: "Complete Garbage Architecture Post-Mortem",
+        slug: "complete-garbage-post-mortem",
+        primary_language: "TypeScript",
+        editorial_content: "This whole system is a total piece of shit and utter trash.",
+        architectural_narrative: "<p>Everything is broken and this is complete garbage.</p>",
+        tags: "garbage, trash",
+      };
+
+      const req = new NextRequest("http://localhost:3000/api/case-studies", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+
+      const res = await POST(req);
+      expect(res.status).toBe(400);
+
+      const json = await res.json();
+      expect(json.error).toContain("Submission rejected: Content violates community tone standards.");
+      expect(json.details.length).toBeGreaterThan(0);
+    });
+
     it("rejects payload missing slug with field-level validation error", async () => {
       const payload = {
         title: "Missing Slug Case",

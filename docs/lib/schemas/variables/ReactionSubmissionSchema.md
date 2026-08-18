@@ -8,6 +8,6 @@
 
 > `const` **ReactionSubmissionSchema**: `ZodObject`\<\{ `caseStudySlug`: `ZodString`; `reactionType`: `ZodEnum`\<\{ `actionable`: `"actionable"`; `insightful`: `"insightful"`; `mind_blowing`: `"mind_blowing"`; `thorough`: `"thorough"`; \}\>; \}, `$strip`\>
 
-Defined in: [lib/schemas.ts:153](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L153)
+Defined in: [lib/schemas.ts:224](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L224)
 
 Schema for Reaction POST payload validation

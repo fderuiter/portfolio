@@ -30,7 +30,7 @@ export interface SetupResult {
 export function validateNodeRuntime(): { valid: boolean; currentVersion: string } {
   const currentVersion = process.versions.node;
   const major = parseInt(currentVersion.split(".")[0], 10);
-  return { valid: major === 22, currentVersion };
+  return { valid: major >= 22, currentVersion };
 }
 
 /**

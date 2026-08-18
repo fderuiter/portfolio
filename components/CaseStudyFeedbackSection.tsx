@@ -14,6 +14,7 @@ import {
 } from "@tabler/icons-react";
 import { isProductionEnvironment } from "@/lib/env";
 import { useOfflineQueue, getOfflineQueue } from "@/hooks/useOfflineQueue";
+import { validateConstructiveContent } from "@/lib/moderation";
 
 interface CaseStudyFeedbackSectionProps {
   slug: string;
@@ -213,6 +214,12 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
       return;
     }
 
+    const toneCheck = validateConstructiveContent(comments.trim());
+    if (!toneCheck.isValid) {
+      setErrorMsg(toneCheck.reason || "Submission text violates community tone standards.");
+      return;
+    }
+
     const payload = {
       caseStudySlug: slug,
       takeaways: selectedTakeaways,
@@ -220,8 +227,6 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
     };
 
     setSubmitting(true);
-    setHasSubmittedFeedback(true);
-    setSuccessMsg("Thank you! Your learning feedback has been recorded.");
 
     if (typeof navigator !== "undefined" && !navigator.onLine) {
       enqueue({
@@ -229,6 +234,8 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
         endpoint: "/api/case-studies/feedback",
         body: payload,
       });
+      setHasSubmittedFeedback(true);
+      setSuccessMsg("Thank you! Your learning feedback has been recorded.");
       setSelectedTakeaways([]);
       setComments("");
       setSubmitting(false);
@@ -245,8 +252,9 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
       const data = await res.json();
 
       if (!res.ok) {
-        if (res.status === 400 && data.error) {
-          setErrorMsg(data.error);
+        if (res.status >= 400 && res.status < 500) {
+          const detailMsg = data.details?.[0]?.message || data.error || "Submission rejected.";
+          setErrorMsg(detailMsg);
           setHasSubmittedFeedback(false);
           setSuccessMsg(null);
         } else {
@@ -255,10 +263,13 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
             endpoint: "/api/case-studies/feedback",
             body: payload,
           });
+          setHasSubmittedFeedback(true);
+          setSuccessMsg("Thank you! Your learning feedback has been recorded.");
           setSelectedTakeaways([]);
           setComments("");
         }
       } else {
+        setHasSubmittedFeedback(true);
         setSuccessMsg(data.message || "Thank you! Your learning feedback has been recorded.");
         setSelectedTakeaways([]);
         setComments("");
@@ -269,6 +280,8 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
         endpoint: "/api/case-studies/feedback",
         body: payload,
       });
+      setHasSubmittedFeedback(true);
+      setSuccessMsg("Thank you! Your learning feedback has been recorded.");
       setSelectedTakeaways([]);
       setComments("");
     } finally {

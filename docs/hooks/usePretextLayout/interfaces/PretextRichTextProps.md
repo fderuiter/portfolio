@@ -6,7 +6,7 @@
 
 # Interface: PretextRichTextProps
 
-Defined in: [hooks/usePretextLayout.tsx:563](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L563)
+Defined in: [hooks/usePretextLayout.tsx:608](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L608)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [hooks/usePretextLayout.tsx:563](https://github.com/fderuiter/portfo
 
 > `optional` **className?**: `string`
 
-Defined in: [hooks/usePretextLayout.tsx:567](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L567)
+Defined in: [hooks/usePretextLayout.tsx:612](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L612)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [hooks/usePretextLayout.tsx:567](https://github.com/fderuiter/portfo
 
 > `optional` **fallbackText?**: `string`
 
-Defined in: [hooks/usePretextLayout.tsx:569](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L569)
+Defined in: [hooks/usePretextLayout.tsx:614](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L614)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [hooks/usePretextLayout.tsx:569](https://github.com/fderuiter/portfo
 
 > `optional` **isReady?**: `boolean`
 
-Defined in: [hooks/usePretextLayout.tsx:568](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L568)
+Defined in: [hooks/usePretextLayout.tsx:613](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L613)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [hooks/usePretextLayout.tsx:568](https://github.com/fderuiter/portfo
 
 > **items**: [`ExtendedRichInlineItem`](ExtendedRichInlineItem.md)[]
 
-Defined in: [hooks/usePretextLayout.tsx:565](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L565)
+Defined in: [hooks/usePretextLayout.tsx:610](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L610)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [hooks/usePretextLayout.tsx:565](https://github.com/fderuiter/portfo
 
 > **lineHeight**: `number`
 
-Defined in: [hooks/usePretextLayout.tsx:566](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L566)
+Defined in: [hooks/usePretextLayout.tsx:611](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L611)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [hooks/usePretextLayout.tsx:566](https://github.com/fderuiter/portfo
 
 > **lines**: `RichInlineLine`[]
 
-Defined in: [hooks/usePretextLayout.tsx:564](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L564)
+Defined in: [hooks/usePretextLayout.tsx:609](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L609)

@@ -3,6 +3,7 @@ import { FeedbackSubmissionSchema } from "@/lib/schemas";
 import { CaseStudyService } from "@/lib/services/case-study-service";
 import { getConnectionHashFromRequest } from "@/lib/services/privacy-service";
 import { createApiHandler } from "@/lib/route-wrapper";
+import { checkSubmissionAttemptRateLimit } from "@/lib/moderation";
 import * as Sentry from "@sentry/nextjs";
 
 export const dynamic = "force-dynamic";
@@ -27,6 +28,15 @@ export const POST = createApiHandler(
   async (req: NextRequest, { data }) => {
     try {
       const connectionHash = await getConnectionHashFromRequest(req);
+
+      const rateLimitCheck = checkSubmissionAttemptRateLimit(connectionHash);
+      if (rateLimitCheck.isRateLimited) {
+        return NextResponse.json(
+          { error: "Too many submission attempts. Please try again later." },
+          { status: 429 }
+        );
+      }
+
       const result = await CaseStudyService.submitFeedback(data, connectionHash);
 
       if (result.rateLimited) {
@@ -59,8 +69,15 @@ export const POST = createApiHandler(
     customJsonError: "Invalid JSON body payload",
     customValidationError: (err) => {
       const issues = (err as { issues: Array<{ path: Array<string | number>; message: string }> }).issues;
+      const isToneViolation = issues.some((i) =>
+        i.message.toLowerCase().includes("tone") ||
+        i.message.toLowerCase().includes("constructive") ||
+        i.message.toLowerCase().includes("profanity")
+      );
       return {
-        error: "Validation failed",
+        error: isToneViolation
+          ? "Submission rejected: Content violates community tone standards."
+          : "Validation failed",
         details: issues.map((issue) => ({
           path: issue.path.join("."),
           message: issue.message,
