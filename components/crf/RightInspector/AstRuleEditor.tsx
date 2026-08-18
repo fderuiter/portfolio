@@ -231,7 +231,7 @@ export const AstRuleEditor: React.FC<AstRuleEditorProps> = ({
   const warningCount = lintResult.diagnostics.filter((d: FormulaDiagnostic) => d.severity === "warning").length;
 
   return (
-    <div className={`space-y-2.5 ${className}`}>
+    <div className={`space-y-2.5 [contain:layout_style] ${className}`}>
       {/* Header & Quick Action Buttons */}
       <div className="flex items-center justify-between">
         <label className="text-[11px] font-mono text-brand-cyan font-semibold uppercase flex items-center gap-1">

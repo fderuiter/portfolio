@@ -210,7 +210,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
 
       {/* Main Canvas Scroll Area with Centered Viewport */}
       <div className="flex-1 flex justify-center pb-28">
-        <div className={`${viewportWidthClass} transition-all duration-300 space-y-4 sm:space-y-6`}>
+        <div className={`${viewportWidthClass} transition-all duration-300 space-y-4 sm:space-y-6 [contain:layout_style]`}>
           {/* Form Header Card */}
           <div className="p-4 sm:p-5 rounded-2xl bg-zinc-900/70 crf-paper-sheet border border-zinc-800/80 shadow-lg relative group">
             {isEditingTitle ? (

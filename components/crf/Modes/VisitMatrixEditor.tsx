@@ -306,7 +306,7 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
                       <td
                         key={visit.id}
                         onClick={() => handleToggleFormAtVisit(visit.id, form.id)}
-                        className="p-3 text-center border-l border-zinc-800/60 cursor-pointer hover:bg-brand-cyan/5 transition-colors"
+                        className="p-3 text-center border-l border-zinc-800/60 cursor-pointer hover:bg-brand-cyan/5 transition-colors [contain:layout_style]"
                       >
                         <div className="flex items-center justify-center">
                           <div

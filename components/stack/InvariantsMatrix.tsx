@@ -214,7 +214,7 @@ export const InvariantsMatrix: React.FC = () => {
         {filteredInvariants.map((inv) => (
           <div
             key={inv.id}
-            className="p-4 rounded-xl bg-zinc-950/70 border border-zinc-800/90 hover:border-emerald-500/30 transition-all flex flex-col justify-between group"
+            className="p-4 rounded-xl bg-zinc-950/70 border border-zinc-800/90 hover:border-emerald-500/30 transition-all flex flex-col justify-between group [contain:layout_style] [content-visibility:auto] [contain-intrinsic-size:100px_100px]"
           >
             <div>
               <div className="flex items-center justify-between gap-2 mb-2">

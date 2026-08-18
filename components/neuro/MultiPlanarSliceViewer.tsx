@@ -517,7 +517,7 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
               <span className="text-brand-cyan font-bold">CORONAL (Y={crosshair.y})</span>
               <span className="text-zinc-400">ANT / POST</span>
             </div>
-            <div className="flex-1 flex items-center justify-center relative overflow-hidden rounded-lg bg-black">
+            <div className="flex-1 min-h-[220px] flex items-center justify-center relative overflow-hidden rounded-lg bg-black [contain:layout_style]">
               {/* Anatomical Compass Badges */}
               <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">S</span>
               <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">I</span>
@@ -553,7 +553,7 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
               <span className="text-brand-cyan font-bold">AXIAL (Z={crosshair.z})</span>
               <span className="text-zinc-400">SUP / INF</span>
             </div>
-            <div className="flex-1 flex items-center justify-center relative overflow-hidden rounded-lg bg-black">
+            <div className="flex-1 min-h-[220px] flex items-center justify-center relative overflow-hidden rounded-lg bg-black [contain:layout_style]">
               {/* Anatomical Compass Badges */}
               <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">A</span>
               <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">P</span>
@@ -589,7 +589,7 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
               <span className="text-brand-cyan font-bold">SAGITTAL (X={crosshair.x})</span>
               <span className="text-zinc-400">LEFT / RIGHT</span>
             </div>
-            <div className="flex-1 flex items-center justify-center relative overflow-hidden rounded-lg bg-black">
+            <div className="flex-1 min-h-[220px] flex items-center justify-center relative overflow-hidden rounded-lg bg-black [contain:layout_style]">
               {/* Anatomical Compass Badges */}
               <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">S</span>
               <span className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[10px] font-mono font-bold text-zinc-500 bg-zinc-950/80 px-1 rounded pointer-events-none z-10">I</span>
