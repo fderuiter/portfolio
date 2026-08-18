@@ -84,18 +84,44 @@ export interface BreadcrumbItem {
 }
 
 /**
+ * Normalizes breadcrumb items to enforce a single root location entry across all routes and schemas.
+ * Strips any initial or duplicate root entries (links to "/", empty string, SITE_BASE_URL, or named "Home")
+ * and prepends exactly one root location entry ({ name: "Home", url: "/" }).
+ */
+export function normalizeBreadcrumbs(items: BreadcrumbItem[]): BreadcrumbItem[] {
+  const isRootItem = (item: BreadcrumbItem) => {
+    const nameLower = (item.name || "").trim().toLowerCase();
+    const urlTrim = (item.url || "").trim();
+    return (
+      nameLower === "home" ||
+      (item.url !== undefined && (urlTrim === "/" || urlTrim === SITE_BASE_URL || urlTrim === `${SITE_BASE_URL}/`))
+    );
+  };
+
+  const filtered = (items || []).filter((item) => !isRootItem(item));
+  return [{ name: "Home", url: "/" }, ...filtered];
+}
+
+/**
  * Returns a Schema.org BreadcrumbList for hierarchical page navigation.
+ * Enforces a single root location entry and securely sanitizes angle brackets against script injection.
  */
 export function getBreadcrumbSchema(items: BreadcrumbItem[]): string {
+  const normalized = normalizeBreadcrumbs(items);
   const schema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    "itemListElement": items.map((item, index) => ({
-      "@type": "ListItem",
-      "position": index + 1,
-      "name": item.name,
-      "item": item.url.startsWith("http") ? item.url : `${SITE_BASE_URL}${item.url}`
-    }))
+    "itemListElement": normalized.map((item, index) => {
+      const formattedUrl = item.url.startsWith("http")
+        ? item.url
+        : `${SITE_BASE_URL}${item.url.startsWith("/") ? item.url : "/" + item.url}`;
+      return {
+        "@type": "ListItem",
+        "position": index + 1,
+        "name": item.name,
+        "item": formattedUrl,
+      };
+    }),
   };
 
   return JSON.stringify(schema).replace(/</g, "\\u003c");

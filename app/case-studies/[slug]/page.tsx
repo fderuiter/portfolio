@@ -7,10 +7,12 @@ import { TracingBeam } from "@/components/ui/TracingBeam";
 import { RichNarrative } from "@/components/RichNarrative";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { getGitHubStats, parseGitHubUrl, getSimulatedStats } from "@/lib/github";
-import { getSoftwareSourceCodeSchema } from "@/lib/seo";
+import { getSoftwareSourceCodeSchema, getBreadcrumbSchema } from "@/lib/seo";
 import { TelemetryTracker } from "@/components/TelemetryTracker";
 import { TerminologyToggle } from "@/components/TerminologyToggle";
 import SchemaFlowWorkspaceWrapper from "@/components/SchemaFlowWorkspaceWrapper";
+import { VectorComparisonViewer } from "@/components/laser-loon/VectorComparisonViewer";
+import { AssetDistributionHub } from "@/components/laser-loon/AssetDistributionHub";
 import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
@@ -181,6 +183,16 @@ export default async function CaseStudyPage({ params }: PageProps) {
           __html: getSoftwareSourceCodeSchema(study, stats),
         }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: getBreadcrumbSchema([
+            { name: "Home", url: "/" },
+            { name: "Case Studies", url: "/case-studies" },
+            { name: study.title, url: `/case-studies/${study.slug}` },
+          ]),
+        }}
+      />
       {/* Background Blurs */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 w-80 h-80 rounded-full bg-brand-blue/5 blur-[120px] pointer-events-none" />
@@ -261,6 +273,14 @@ export default async function CaseStudyPage({ params }: PageProps) {
                   Apply logical tactics to branch and navigate the mathematical proof tree. Click nodes to connect/disconnect, track real-time telemetry, and run/rollback proof states.
                 </p>
                 <SchemaFlowWorkspaceWrapper />
+              </div>
+            )}
+
+            {/* Interactive Vector Comparison Viewer & Asset Distribution Hub */}
+            {slug === "laser-loon" && (
+              <div className="mt-12 border-t border-zinc-900/50 pt-10 space-y-12">
+                <VectorComparisonViewer />
+                <AssetDistributionHub />
               </div>
             )}
 

@@ -114,6 +114,13 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     keywords: ["Rust", "Scientific Computing", "Simulation", "PDE Solver", "Formal Verification", "egui", "WebAssembly"],
     ogType: "article",
   },
+  laserLoonCaseStudy: {
+    title: "The Laser Loon Case Study | Graphic Design & Open Asset Distribution",
+    description: "Comprehensive graphic design case study and open vector asset distribution hub for the Laser Loon (MN Flag Submission F277). Download source .ai, .eps, .pdf, .svg, .psd, .png, and .jpg master files.",
+    path: "/work/laser-loon",
+    keywords: ["Laser Loon", "Graphic Design", "Vector Illustration", "Iconography", "Asset Distribution", "Minnesota State Flag", "Creative Commons"],
+    ogType: "article",
+  },
 };
 
 /**

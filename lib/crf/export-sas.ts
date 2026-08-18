@@ -8,7 +8,8 @@
  * 5. Diagnostic PROC CONTENTS, PROC FREQ, and PROC PRINT steps
  */
 
-import { StudyProtocol, CRFForm, CRFField, CodelistDefinition, ExportSasOptions } from "./types";
+import { StudyProtocol, CRFForm, CRFField, CodelistDefinition, ExportSasOptions, CodelistOption } from "./types";
+import { STANDARD_CODELISTS } from "./cdisc-controlled-terminology";
 
 /**
  * Sanitizes a string into a valid SAS variable or dataset name.
@@ -46,6 +47,65 @@ export function escapeSasString(text: string): string {
 }
 
 /**
+ * Retrieves field options from custom options or referenced codelists.
+ */
+export function getFieldOptions(field: CRFField, study: StudyProtocol): CodelistOption[] {
+  if (field.customOptions && field.customOptions.length > 0) {
+    return field.customOptions;
+  }
+  if (field.codelistId) {
+    const cl = study.codelists?.find((c) => c.id === field.codelistId) ||
+               STANDARD_CODELISTS.find((c) => c.id === field.codelistId);
+    if (cl && cl.options && cl.options.length > 0) {
+      return cl.options;
+    }
+  }
+  if (field.dataType === "checkbox" || field.dataType === "multi_select") {
+    const nyCodelist = STANDARD_CODELISTS.find((c) => c.id === "CL_NY");
+    if (nyCodelist) return nyCodelist.options;
+  }
+  return [];
+}
+
+/**
+ * Parses a comma-separated multi-select EDC response string
+ * and checks whether a specific option code is selected.
+ * Returns 'Y' if selected, 'N' if absent/unselected.
+ */
+export function parseMultiSelectValue(
+  edcValue: string | string[] | null | undefined,
+  optionCode: string
+): "Y" | "N" {
+  if (!edcValue) return "N";
+  let selectedCodes: string[] = [];
+  if (Array.isArray(edcValue)) {
+    selectedCodes = edcValue.map((s) => String(s).trim().toUpperCase());
+  } else if (typeof edcValue === "string") {
+    selectedCodes = edcValue
+      .split(/[,;]/)
+      .map((s) => s.trim().toUpperCase())
+      .filter(Boolean);
+  }
+  const targetCode = String(optionCode).trim().toUpperCase();
+  return selectedCodes.includes(targetCode) ? "Y" : "N";
+}
+
+/**
+ * Generates a unique SAS variable name guaranteed not to collide with usedNames and within maxLength.
+ */
+function generateUniqueSasName(baseName: string, usedNames: Set<string>, maxLength = 32): string {
+  let counter = 1;
+  let candidate = baseName.substring(0, maxLength).toUpperCase();
+  while (usedNames.has(candidate)) {
+    const suffix = `_${counter}`;
+    const maxPrefixLen = maxLength - suffix.length;
+    candidate = `${baseName.substring(0, maxPrefixLen)}${suffix}`.toUpperCase();
+    counter++;
+  }
+  return candidate;
+}
+
+/**
  * Determines if a codelist contains strictly numeric codes.
  */
 function isNumericCodelist(codelist: CodelistDefinition): boolean {
@@ -64,6 +124,12 @@ export interface SasFieldAttributes {
   format?: string;
   informat?: string;
   codelistRef?: CodelistDefinition;
+}
+
+export interface ExpandedSasField {
+  field: CRFField;
+  attrs: SasFieldAttributes;
+  optionCode?: string;
 }
 
 export function getFieldSasAttributes(field: CRFField, study: StudyProtocol): SasFieldAttributes {
@@ -166,6 +232,17 @@ export function getFieldSasAttributes(field: CRFField, study: StudyProtocol): Sa
 
     case "multi_select":
     case "checkbox":
+      const nyCodelist = STANDARD_CODELISTS.find((c) => c.id === "CL_NY");
+      return {
+        sasVarName,
+        isNumeric: false,
+        length: "$1",
+        label,
+        format: "$NYF.",
+        informat: "$1.",
+        codelistRef: nyCodelist,
+      };
+
     case "repeating_table":
     case "text":
     default:
@@ -178,6 +255,82 @@ export function getFieldSasAttributes(field: CRFField, study: StudyProtocol): Sa
         informat: "$200.",
       };
   }
+}
+
+/**
+ * Expands fields, converting multi_select and checkbox fields into individual dichotomous sub-variables.
+ */
+export function getExpandedSasAttributes(
+  field: CRFField,
+  study: StudyProtocol,
+  usedNames = new Set<string>()
+): ExpandedSasField[] {
+  if (field.dataType !== "multi_select" && field.dataType !== "checkbox") {
+    const attrs = getFieldSasAttributes(field, study);
+    let sasVarName = attrs.sasVarName;
+    if (usedNames.has(sasVarName)) {
+      sasVarName = generateUniqueSasName(sasVarName, usedNames, 32);
+      attrs.sasVarName = sasVarName;
+    }
+    usedNames.add(sasVarName);
+    return [{ field, attrs }];
+  }
+
+  const options = getFieldOptions(field, study);
+  const baseVar = sanitizeSasName(field.variableName || field.id);
+  const fieldLabel = field.cdashMetadata?.cdashLabel || field.label || baseVar;
+  const nyCodelist = STANDARD_CODELISTS.find((c) => c.id === "CL_NY");
+
+  if (options.length === 0) {
+    let sasVarName = baseVar;
+    if (usedNames.has(sasVarName)) {
+      sasVarName = generateUniqueSasName(sasVarName, usedNames, 32);
+    }
+    usedNames.add(sasVarName);
+    return [
+      {
+        field,
+        attrs: {
+          sasVarName,
+          isNumeric: false,
+          length: "$1",
+          label: escapeSasString(fieldLabel),
+          format: "$NYF.",
+          informat: "$1.",
+          codelistRef: nyCodelist,
+        },
+      },
+    ];
+  }
+
+  const result: ExpandedSasField[] = [];
+  options.forEach((opt) => {
+    const rawName = `${baseVar}_${opt.code}`;
+    let subVarName = sanitizeSasName(rawName, 32);
+    if (usedNames.has(subVarName)) {
+      subVarName = generateUniqueSasName(rawName, usedNames, 32);
+    }
+    usedNames.add(subVarName);
+
+    const optLabel = opt.label || opt.code;
+    const combinedLabel = `${fieldLabel} - ${optLabel}`;
+
+    result.push({
+      field,
+      optionCode: opt.code,
+      attrs: {
+        sasVarName: subVarName,
+        isNumeric: false,
+        length: "$1",
+        label: escapeSasString(combinedLabel),
+        format: "$NYF.",
+        informat: "$1.",
+        codelistRef: nyCodelist,
+      },
+    });
+  });
+
+  return result;
 }
 
 /**
@@ -210,16 +363,21 @@ TITLE1 "Study ${escapeSasString(study.protocolNumber)} - Clinical Data Acquisiti
 export function generateSasProcFormat(study: StudyProtocol, formsToInclude: CRFForm[]): string {
   // Collect all unique codelists referenced in the included forms or defined in the study
   const referencedCodelistIds = new Set<string>();
+  let hasMultiOrCheckbox = false;
+
   formsToInclude.forEach((f) => {
     f.sections.forEach((s) => {
       s.fields.forEach((fld) => {
         if (fld.codelistId) referencedCodelistIds.add(fld.codelistId);
+        if (fld.dataType === "multi_select" || fld.dataType === "checkbox") {
+          hasMultiOrCheckbox = true;
+        }
       });
     });
   });
 
   const relevantCodelists = (study.codelists || []).filter(
-    (cl) => referencedCodelistIds.has(cl.id) || cl.isStandard
+    (cl) => referencedCodelistIds.has(cl.id) || (hasMultiOrCheckbox && cl.id === "CL_NY") || cl.isStandard
   );
 
   if (relevantCodelists.length === 0) {
@@ -268,7 +426,7 @@ export function generateSasProcFormat(study: StudyProtocol, formsToInclude: CRFF
  */
 function generateSyntheticMockData(
   form: CRFForm,
-  fieldsWithAttrs: { field: CRFField; attrs: SasFieldAttributes }[],
+  fieldsWithAttrs: ExpandedSasField[],
   study: StudyProtocol,
   rowCount = 3
 ): string {
@@ -292,8 +450,12 @@ function generateSyntheticMockData(
       "2026-03-15",
     ];
 
-    fieldsWithAttrs.forEach(({ field, attrs }) => {
-      if (field.dataType === "number" || field.dataType === "integer" || field.dataType === "calculated") {
+    fieldsWithAttrs.forEach(({ field, attrs, optionCode }, idx) => {
+      if (field.dataType === "multi_select" || field.dataType === "checkbox") {
+        const charVal = optionCode ? optionCode.charCodeAt(0) : idx;
+        const isYes = (i + charVal) % 2 === 1;
+        rowValues.push(isYes ? "Y" : "N");
+      } else if (field.dataType === "number" || field.dataType === "integer" || field.dataType === "calculated") {
         if (field.minValue !== undefined && field.maxValue !== undefined) {
           const val = Math.round(field.minValue + ((field.maxValue - field.minValue) * i) / (rowCount + 1));
           rowValues.push(String(val));
@@ -360,12 +522,22 @@ export function generateSasDataStepForForm(
   const includeProcContents = options?.includeProcContents !== false;
   const includeProcFreq = options?.includeProcFreq !== false;
 
-  // Flatten fields in section order
+  // Flatten fields in section order and expand multi_select / checkbox fields
   const fields = form.sections.flatMap((s) => s.fields);
-  const fieldsWithAttrs = fields.map((field) => ({
-    field,
-    attrs: getFieldSasAttributes(field, study),
-  }));
+  const usedNames = new Set<string>([
+    "STUDYID",
+    "DOMAIN",
+    "USUBJID",
+    "VISIT",
+    "VISITNUM",
+    "DTC_INIT",
+  ]);
+
+  const fieldsWithAttrs: ExpandedSasField[] = [];
+  fields.forEach((field) => {
+    const expanded = getExpandedSasAttributes(field, study, usedNames);
+    expanded.forEach((item) => fieldsWithAttrs.push(item));
+  });
 
   let code = `/*-----------------------------------------------------------------------------
   DATASET:      ${datasetName}

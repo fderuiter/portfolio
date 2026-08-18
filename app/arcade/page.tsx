@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ArcadeHubClient } from "@/components/arcade/ArcadeHubClient";
 import { buildRouteMetadata, ROUTE_METADATA_CONFIGS } from "@/lib/seo-metadata";
-import { getCollectionPageSchema } from "@/lib/seo";
+import { getCollectionPageSchema, getWebApplicationSchema, getBreadcrumbSchema } from "@/lib/seo";
 import { ARCADE_GAMES_METADATA } from "@/lib/arcade-data";
 import { PageLayout } from "@/components/PageLayout";
 
@@ -25,6 +25,27 @@ export default function ArcadePage() {
             ROUTE_METADATA_CONFIGS.arcade.path,
             collectionItems
           ),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: getWebApplicationSchema({
+            name: ROUTE_METADATA_CONFIGS.arcade.title,
+            description: ROUTE_METADATA_CONFIGS.arcade.description,
+            url: ROUTE_METADATA_CONFIGS.arcade.path,
+            applicationCategory: "GameApplication",
+            genre: "Interactive Arcade Hub",
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: getBreadcrumbSchema([
+            { name: "Home", url: "/" },
+            { name: "Arcade Hub", url: "/arcade" },
+          ]),
         }}
       />
       <ArcadeHubClient />

@@ -24,3 +24,4 @@
 - [getSoftwareSourceCodeSchema](functions/getSoftwareSourceCodeSchema.md)
 - [getWebApplicationSchema](functions/getWebApplicationSchema.md)
 - [getWebsiteSchema](functions/getWebsiteSchema.md)
+- [normalizeBreadcrumbs](functions/normalizeBreadcrumbs.md)
