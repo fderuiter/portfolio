@@ -191,6 +191,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         ]
       },
       {
+        id: "nav-four-glory",
+        title: "4Glory | Does Fred Know Ball?: Predictive Basketball Analytics Engine",
+        subtitle: "Sports forecasting pipeline — rolling possession ratings, temporal splits & XGBoost probability calibration",
+        category: "navigation",
+        url: "/case-studies/four-glory",
+        icon: <IconDirections className="w-4 h-4 text-emerald-400" />,
+        badge: "Case Study",
+        status: "Python / ML",
+        description: "End-to-end reproducible analytical and modeling pipeline contrasting human domain heuristics against XGBoost/LightGBM predictive models.",
+        techStack: ["Python", "XGBoost", "Scikit-Learn", "Pandas", "Basketball Analytics"],
+        highlights: [
+          "Vectorized rolling possession-adjusted team efficiency metrics",
+          "Strict temporal expanding-window split validation engine",
+          "Platt scaling probability calibration & SHAP explainability"
+        ]
+      },
+      {
         id: "nav-laser-loon",
         title: "Laser Loon: Quest for the State Flag",
         subtitle: "Playable civic physics shooter — pilot F277 Laser Loon on the Road to the Capitol",

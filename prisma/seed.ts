@@ -315,6 +315,9 @@ export const tenantAuthGuard = createMiddleware(async (c, next) => {
 
 <h4>3. Edge-Native Event-Driven Async Processing</h4>
 <p>Background workflows and async task queues are powered by Inngest functions embedded directly inside Hono, delivering event-driven reliability without needing persistent worker processes.</p>
+    `.trim(),
+  },
+  {
     slug: "inbody-qr-decoder",
     title: "InBody QR Data Decoder & Analyzer: BIA Reverse Engineering",
     primary_language: "Python",
@@ -350,6 +353,9 @@ def decode_digits(raw_slice: str, scale_factor: float = 0.1, precision: int = 2)
 
 <h4>3. Multi-Block Segment Parsing &amp; Biomarker Derivation</h4>
 <p>Primary body composition parameters reside in Segment Index 4 (<code>meas_blob</code>), while secondary metrics (BMR and Visceral Fat) are extracted from Segment Index 5 in kilocalories. Derived biomarkers, including Appendicular Skeletal Muscle Mass (ASM) and Skeletal Muscle Index ($\\text{SMI} = \\frac{\\text{ASM}}{\\text{Height}^2}$), are computed deterministically.</p>
+    `.trim(),
+  },
+  {
     slug: "polyglot-tsp",
     title: "Polyglot-TSP: Technical Breakdown & Portfolio Integration",
     primary_language: "Rust",
@@ -465,6 +471,9 @@ endmodule
 <p>1. <strong>Exhaustive Permutations ($O(N!)$) vs. Dynamic Programming / Heuristics ($O(N^2 2^N)$)</strong>: Prioritized strict brute-force permutation generation across all targets to maintain an identical baseline for syntactic and runtime execution comparisons across obscure and exotic paradigms.</p>
 
 <p>2. <strong>Subprocess CLI Execution vs. Foreign Function Interface (FFI)</strong>: Chose process-level standard stream (stdout/stderr) assertion over C ABI bindings to accommodate non-standardized runtimes, HDL simulation pipelines (ghdl, iverilog), and legacy/esoteric environments (INTERCAL, COBOL, Modula-2).</p>
+    `.trim(),
+  },
+  {
     slug: "oxidizemath",
     title: "OxidizeMath: Verified Numerical Computation Framework in Rust",
     primary_language: "Rust",
@@ -526,6 +535,9 @@ where
 
 <h4>3. WASM-First GUI Architecture</h4>
 <p>Deploys identical single-binary desktop execution and zero-install WebAssembly browser builds using egui and custom <code>egui_plot</code> engines.</p>
+    `.trim(),
+  },
+  {
     slug: "ualbf",
     title: "UALBF: Verified Computational Proof Engine & Search Architecture",
     primary_language: "Rust",
@@ -636,6 +648,9 @@ pub extern "C" fn ualbf_verify_certificate_manifest(
     }
 }
 </code></pre>
+    `.trim(),
+  },
+  {
     slug: "sortify",
     title: "Sortify: Air-Gapped Document Classification & Resilient File Engine",
     primary_language: "Python",
@@ -764,6 +779,127 @@ def stage_and_commit_move(self, src: str, dest_dir: str) -> str:
 
 <h3>Open Source &amp; Licensing Guidelines</h3>
 <p>The Laser Loon design asset suite is released under the <strong>Creative Commons Attribution 4.0 International (CC BY 4.0)</strong> license. Individuals, civic groups, screen printers, and software developers are free to share, adapt, and build upon the artwork for personal or commercial applications with appropriate credit to the original creator.</p>
+    `.trim(),
+  },
+  {
+    slug: "four-glory",
+    title: "4Glory | Does Fred Know Ball?: Predictive Basketball Analytics Engine",
+    primary_language: "Python",
+    github_url: "https://github.com/fderuiter/four-glory",
+    published: true,
+    simulated_telemetry: false,
+    tags: "Python, XGBoost, Scikit-Learn, Pandas, Machine Learning, Predictive Modeling, Basketball Analytics",
+    editorial_content: "Quantifies predictive heuristics in **basketball analytics** by contrasting human domain expertise against statistical baseline models and supervised `machine learning pipelines` (`XGBoost`, `LightGBM`). Features `rolling possession-adjusted ratings`, rest/travel differentials, and automated `cross-validation benchmarking`.",
+    architectural_narrative: `
+<h3>Executive Summary &amp; Value Proposition</h3>
+<p>Quantifies and evaluates predictive heuristics in basketball analytics by contrasting human domain expertise ("knowing ball") against statistical baseline models and supervised machine learning pipelines. Resolves unstructured game and player datasets into structured, feature-engineered evaluation matrices to predict game outcomes and player performance distributions.</p>
+
+<h3>Deep Dive Engineering Focus Areas</h3>
+<h4>Architecture &amp; Patterns</h4>
+<ul>
+  <li><strong>Modular Pipeline Architecture (ETL &rarr; Feature Store &rarr; Model Inference &rarr; Evaluation):</strong> Deconstructs monolithic notebook logic into decoupled stages: raw tabular ingestion, vectorized feature transformations, hyperparameter-tuned model training, and probabilistic evaluation.</li>
+  <li><strong>Declarative Feature Pipelines:</strong> Utilizes functional chaining and scikit-learn compatible transformer pipelines to ensure zero data leakage between temporal train/test splits.</li>
+</ul>
+
+<h4>Trade-Offs &amp; Decisions</h4>
+<p>1. <strong>Gradient Boosted Trees (XGBoost/LightGBM) vs. Deep Neural Networks:</strong> Opted for tree-based gradient boosting over deep learning architectures due to superior performance and interpretability on dense tabular sports data with high collinearity and non-linear interactions.</p>
+<p>2. <strong>Time-Series Expanding-Window Cross-Validation vs. K-Fold CV:</strong> Strict temporal split strategy selected over standard randomized K-Fold cross-validation to reflect real-world forecasting constraints and eliminate look-ahead bias across consecutive game days.</p>
+<p>3. <strong>Kaggle Kernel Portability vs. Distributed Cloud Frameworks:</strong> Engineered memory-efficient in-memory transformations using optimized data types (float32, category encodings) to run deterministically within self-contained Kaggle compute limits without requiring external cluster infrastructure.</p>
+
+<h4>Edge Cases &amp; Edge Solutions</h4>
+<ul>
+  <li><strong>Handling Dynamic Lineup &amp; Rotation Volatility:</strong> Managed sudden player scratches and minutes variance by implementing rate-based metrics scaled per-100-possessions rather than raw per-game aggregates.</li>
+  <li><strong>Class Imbalance &amp; Blowout Noise Reduction:</strong> Mitigated garbage-time distortion by weighting high-leverage possessions and regularizing garbage-time stats against baseline performance distributions.</li>
+  <li><strong>Cold-Start Season Transitions:</strong> Applied Bayesian shrinkage priors to early-season game data, regressing early sample anomalies back toward multi-season rolling team efficiency averages.</li>
+</ul>
+
+<h3>Key Technical Challenges &amp; Code Snippets</h3>
+
+<h4>1. Vectorized Rolling Feature Pipeline &amp; Temporal Leakage Prevention</h4>
+<pre><code class="language-python">
+import pandas as pd
+import numpy as np
+
+def compute_rolling_possession_features(df: pd.DataFrame, window: int = 10) -> pd.DataFrame:
+    """Computes rolling possession-adjusted team efficiency metrics without look-ahead bias."""
+    df = df.sort_values(["team_id", "game_date"]).reset_index(drop=True)
+
+    # Calculate raw offensive/defensive ratings per 100 possessions
+    df["off_rating"] = 100 * (df["points_scored"] / df["possessions"])
+    df["def_rating"] = 100 * (df["points_allowed"] / df["possessions"])
+    df["net_rating"] = df["off_rating"] - df["def_rating"]
+
+    # Compute expanding and rolling window aggregates shifted by 1 game
+    df[f"rolling_off_rating_{window}"] = (
+        df.groupby("team_id")["off_rating"]
+        .transform(lambda x: x.shift(1).rolling(window, min_periods=3).mean())
+    )
+    df[f"rolling_net_rating_{window}"] = (
+        df.groupby("team_id")["net_rating"]
+        .transform(lambda x: x.shift(1).rolling(window, min_periods=3).mean())
+    )
+    return df
+</code></pre>
+
+<h4>2. Temporal Expanding-Window Splitter</h4>
+<pre><code class="language-python">
+from typing import Generator, Tuple
+
+def temporal_expanding_window_split(
+    df: pd.DataFrame,
+    date_col: str,
+    min_train_days: int = 180,
+    test_step_days: int = 14
+) -> Generator[Tuple[np.ndarray, np.ndarray], None, None]:
+    """Generates expanding temporal train/test indices enforcing zero data leakage."""
+    dates = pd.to_datetime(df[date_col]).sort_values().unique()
+    min_date = dates[0]
+    max_date = dates[-1]
+
+    current_split_date = min_date + pd.Timedelta(days=min_train_days)
+
+    while current_split_date + pd.Timedelta(days=test_step_days) <= max_date:
+        train_mask = pd.to_datetime(df[date_col]) < current_split_date
+        test_mask = (pd.to_datetime(df[date_col]) >= current_split_date) & (
+            pd.to_datetime(df[date_col]) < current_split_date + pd.Timedelta(days=test_step_days)
+        )
+
+        train_indices = np.where(train_mask)[0]
+        test_indices = np.where(test_mask)[0]
+
+        if len(train_indices) > 0 and len(test_indices) > 0:
+            yield train_indices, test_indices
+
+        current_split_date += pd.Timedelta(days=test_step_days)
+</code></pre>
+
+<h4>3. Probability Calibration &amp; SHAP Explainability Export</h4>
+<pre><code class="language-python">
+import xgboost as xgb
+import shap
+from sklearn.calibration import CalibratedClassifierCV
+
+def train_calibrated_xgboost(X_train, y_train, X_test, feature_names):
+    """Trains XGBoost classifier with Platt scaling probability calibration and exports SHAP feature importance."""
+    base_model = xgb.XGBClassifier(
+        n_estimators=500,
+        max_depth=4,
+        learning_rate=0.03,
+        subsample=0.8,
+        colsample_bytree=0.8,
+        eval_metric="logloss",
+        random_state=42
+    )
+
+    calibrated_clf = CalibratedClassifierCV(estimator=base_model, method="sigmoid", cv=5)
+    calibrated_clf.fit(X_train, y_train)
+
+    # Calculate SHAP values on calibrated underlying booster
+    explainer = shap.TreeExplainer(calibrated_clf.calibrated_classifiers_[0].estimator)
+    shap_values = explainer.shap_values(X_test)
+
+    return calibrated_clf, shap_values
+</code></pre>
     `.trim(),
   },
 ];

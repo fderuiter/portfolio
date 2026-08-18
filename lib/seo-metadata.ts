@@ -114,6 +114,13 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     keywords: ["Laser Loon", "Graphic Design", "Vector Illustration", "Iconography", "Asset Distribution", "Minnesota State Flag", "Creative Commons"],
     ogType: "article",
   },
+  fourGloryCaseStudy: {
+    title: "4Glory | Does Fred Know Ball? Case Study | Technical Breakdown",
+    description: "Technical breakdown of 4Glory — a predictive basketball analytics engine evaluating human heuristics against XGBoost and LightGBM machine learning pipelines.",
+    path: "/case-studies/four-glory",
+    keywords: ["4Glory", "Basketball Analytics", "XGBoost", "Machine Learning", "Predictive Modeling", "Feature Engineering", "Python", "Sports Forecasting"],
+    ogType: "article",
+  },
 };
 
 /**
