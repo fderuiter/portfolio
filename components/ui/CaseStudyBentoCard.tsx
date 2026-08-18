@@ -19,8 +19,8 @@ const REALITY_CONTENT: Record<string, string> = {
   "imednet-python-sdk": "The platform SOAP endpoints are notoriously flaky and poorly documented. We spent over 80 hours reverse-engineering session token validation schemas. Retries are frequent, and TLS handshake timeouts on legacy endpoints require an aggressive connection pooling and cache synchronization strategy.",
   "cadence-clinical": "Building a unified eCRF orchestrator sounds elegant until clinical trial coordinators attempt to create dynamic conditional logic trees with 40 circular dependencies. We had to write a custom DAG resolution engine and aggressive client-side form debouncing to keep the UI from lagging during 50-field visits.",
   "wedding-website": "Building a bespoke event portal for your own wedding is the ultimate high-stakes deployment. Zero downtime tolerance when 150 relatives try to RSVP at once, and debugging custom Framer Motion spring physics on aunties' 7-year-old iPads at midnight before the rehearsal dinner was a character-building experience.",
-  "hono-kiln": "Building an edge-native multi-tenant runtime requires intense discipline around dynamic imports and driver abstractions. We initially experienced subtle connection pool exhaustion during peak serverless burst traffic, which we resolved by implementing HTTP-based Neon database connection pooling and contextual tenant repository proxies."
-  "inbody-qr-decoder": "Reverse-engineering proprietary ASCII payloads without official documentation required building an automated fuzzing oracle. Probing production web services with mutated byte slices triggered aggressive rate limits and occasional session token invalidation, requiring us to implement a multi-stage session warmup loop and static offset caching to achieve sub-millisecond execution times."
+  "hono-kiln": "Building an edge-native multi-tenant runtime requires intense discipline around dynamic imports and driver abstractions. We initially experienced subtle connection pool exhaustion during peak serverless burst traffic, which we resolved by implementing HTTP-based Neon database connection pooling and contextual tenant repository proxies.",
+  "inbody-qr-decoder": "Reverse-engineering proprietary ASCII payloads without official documentation required building an automated fuzzing oracle. Probing production web services with mutated byte slices triggered aggressive rate limits and occasional session token invalidation, requiring us to implement a multi-stage session warmup loop and static offset caching to achieve sub-millisecond execution times.",
   "ualbf": "Synchronizing Rust multi-threaded DFS tree search with Lean 4 formal verification required strict deterministic FFI serialization. Initial cross-language memory overhead caused GC pauses in Lean 4 during 10M+ certificate streams, resolved by introducing fixed-size binary manifests and bounded C shims."
 };
 
@@ -103,7 +103,7 @@ function parseInlineNodes(
       const children = parseInlineNodes(boldContent, simplified, depth + 1);
 
       nodes.push(
-        <strong key={`bold-${matchIndex}`} className="font-bold text-neutral-100">
+        <strong key={`bold-${matchIndex}`} className="font-bold text-[var(--foreground,#f4f4f6)]">
           {children.length > 0 ? children : unescapeEntities(boldContent)}
         </strong>
       );
@@ -115,7 +115,14 @@ function parseInlineNodes(
       nodes.push(
         <code
           key={`code-${matchIndex}`}
-          className="px-1.5 py-0.5 mx-0.5 text-[11px] font-mono font-bold bg-brand-cyan/10 border border-brand-cyan/20 text-brand-cyan rounded-md inline-block shadow-[0_0_10px_rgba(6,182,212,0.05)] align-baseline leading-none"
+          className="px-1.5 py-0.5 mx-0.5 text-[11px] font-mono font-bold rounded-md inline-block shadow-[0_0_10px_rgba(6,182,212,0.05)] align-baseline leading-none"
+          style={{
+            backgroundColor: "var(--brand-cyan-glow, rgba(6, 182, 212, 0.1))",
+            borderColor: "var(--brand-cyan, rgba(6, 182, 212, 0.2))",
+            borderWidth: "1px",
+            borderStyle: "solid",
+            color: "var(--brand-cyan, #06b6d4)",
+          }}
         >
           {unescapeEntities(codeContent)}
         </code>
@@ -127,7 +134,7 @@ function parseInlineNodes(
       const children = parseInlineNodes(italicContent, simplified, depth + 1);
 
       nodes.push(
-        <em key={`italic-${matchIndex}`} className="italic text-zinc-300">
+        <em key={`italic-${matchIndex}`} className="italic text-[var(--muted-strong,#cbd5e1)]">
           {children.length > 0 ? children : unescapeEntities(italicContent)}
         </em>
       );
@@ -273,7 +280,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
               {study.primary_language}
             </span>
             <span 
-              className="text-[10px] font-mono text-zinc-400 truncate max-w-[160px] text-right"
+              className="text-[10px] font-mono text-[var(--muted,#94a3b8)] truncate max-w-[160px] text-right"
               title={study.slug.toUpperCase()}
             >
               {study.slug.toUpperCase()}
@@ -285,13 +292,13 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
           </CardTitle>
 
           {/* Premium Segmented Mode Switcher */}
-          <div className="flex p-0.5 bg-zinc-950/80 border border-zinc-900/80 rounded-lg mb-3 text-xs font-mono relative z-10 w-fit backdrop-blur-sm">
+          <div className="flex p-0.5 bg-[var(--surface-1,rgba(9,9,11,0.8))] border border-[var(--border,rgba(255,255,255,0.08))] rounded-lg mb-3 text-xs font-mono relative z-10 w-fit backdrop-blur-sm">
             <button
               onClick={() => handleToggleMode("pitch")}
               className={`min-h-9 px-3.5 py-1.5 rounded-md border text-[11px] font-bold transition-all duration-200 cursor-pointer flex items-center justify-center ${
                 mode === "pitch"
-                  ? "bg-zinc-900 text-brand-cyan border-brand-cyan/30 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
-                  : "border-transparent text-zinc-400 hover:text-zinc-200"
+                  ? "bg-[var(--surface-2,rgba(24,24,27,0.9))] text-[var(--brand-cyan,#06b6d4)] border-[var(--brand-cyan,rgba(6,182,212,0.3))]/30 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                  : "border-transparent text-[var(--muted,#94a3b8)] hover:text-[var(--foreground,#f4f4f6)]"
               }`}
             >
               THE PITCH
@@ -300,8 +307,8 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
               onClick={() => handleToggleMode("reality")}
               className={`min-h-9 px-3.5 py-1.5 rounded-md border text-[11px] font-bold transition-all duration-200 cursor-pointer flex items-center justify-center ${
                 mode === "reality"
-                  ? "bg-zinc-900 text-brand-cyan border-brand-cyan/30 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
-                  : "border-transparent text-zinc-400 hover:text-zinc-200"
+                  ? "bg-[var(--surface-2,rgba(24,24,27,0.9))] text-[var(--brand-cyan,#06b6d4)] border-[var(--brand-cyan,rgba(6,182,212,0.3))]/30 shadow-[0_0_12px_rgba(6,182,212,0.2)]"
+                  : "border-transparent text-[var(--muted,#94a3b8)] hover:text-[var(--foreground,#f4f4f6)]"
               }`}
             >
               THE REALITY
@@ -313,19 +320,19 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
             {mode === "pitch" ? (
               <FormattedMarkdownText
                 text={study.editorial_content}
-                className="text-zinc-400 text-xs md:text-sm leading-relaxed font-sans"
+                className="text-[var(--muted,#94a3b8)] text-xs md:text-sm leading-relaxed font-sans"
               />
             ) : (
               <FormattedMarkdownText
                 text={getRealityContent(study.slug, study.editorial_content)}
-                className="text-zinc-400 text-xs md:text-sm leading-relaxed font-sans"
+                className="text-[var(--muted,#94a3b8)] text-xs md:text-sm leading-relaxed font-sans"
               />
             )}
           </div>
 
           {/* Dynamic GitHub Statistics Hydration */}
           {githubStats && (
-            <div className="space-y-3 mb-3 border-t border-zinc-900/60 pt-3">
+            <div className="space-y-3 mb-3 border-t border-[var(--border,rgba(255,255,255,0.08))] pt-3">
               {/* Glowing SVG Commit Timeline Sparkline */}
               <CommitSparkline 
                 activity={githubStats.commitActivity} 
@@ -333,18 +340,18 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
               />
 
               {/* Refined Inline Badges Row */}
-              <div className="flex justify-between items-center text-[10px] font-mono text-zinc-400 border-b border-zinc-900/60 pb-2.5 mb-1">
+              <div className="flex justify-between items-center text-[10px] font-mono text-[var(--muted,#94a3b8)] border-b border-[var(--border,rgba(255,255,255,0.08))] pb-2.5 mb-1">
                 <span className="flex items-center gap-1">
                   <IconStar className="w-3.5 h-3.5 text-amber-500" />
-                  <span className="text-zinc-300 font-bold">{githubStats.stars.toLocaleString()}</span> STARS
+                  <span className="text-[var(--muted-strong,#cbd5e1)] font-bold">{githubStats.stars.toLocaleString()}</span> STARS
                 </span>
                 <span className="flex items-center gap-1">
                   <IconGitFork className="w-3.5 h-3.5 text-blue-500" />
-                  <span className="text-zinc-300 font-bold">{githubStats.forks.toLocaleString()}</span> FORKS
+                  <span className="text-[var(--muted-strong,#cbd5e1)] font-bold">{githubStats.forks.toLocaleString()}</span> FORKS
                 </span>
                 <span className="flex items-center gap-1">
                   <IconAlertCircle className="w-3.5 h-3.5 text-emerald-500" />
-                  <span className="text-zinc-300 font-bold">{githubStats.openIssues.toLocaleString()}</span> ISSUES
+                  <span className="text-[var(--muted-strong,#cbd5e1)] font-bold">{githubStats.openIssues.toLocaleString()}</span> ISSUES
                 </span>
               </div>
 

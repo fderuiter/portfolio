@@ -51,6 +51,27 @@
   --breakpoint-2xl: 1536px;
 }
 
+[data-theme="light"],
+[data-studio-theme="light"],
+.light {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --surface-1: rgba(255, 255, 255, 0.95);
+  --surface-2: rgba(241, 245, 249, 0.9);
+  --border: rgba(0, 0, 0, 0.12);
+  --border-active: rgba(2, 132, 199, 0.4);
+  --muted: #475569;
+  --muted-strong: #1e293b;
+  --brand-cyan: #0284c7;
+  --brand-cyan-glow: rgba(2, 132, 199, 0.15);
+  --brand-blue: #2563eb;
+  --brand-blue-glow: rgba(37, 99, 235, 0.10);
+  --brand-dark: #f8fafc;
+  --success: #059669;
+  --error: #dc2626;
+  --warning: #d97706;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -177,11 +198,11 @@ body {
 
 /* Standardized SVG Visual Filters */
 .svg-glow-cyan {
-  filter: drop-shadow(0 0 1.5px rgba(6, 182, 212, 0.8)) drop-shadow(0 0 4px rgba(6, 182, 212, 0.45));
+  filter: drop-shadow(0 0 1.5px var(--brand-cyan, rgba(6, 182, 212, 0.8))) drop-shadow(0 0 4px var(--brand-cyan-glow, rgba(6, 182, 212, 0.45)));
 }
 
 .svg-glow-blue {
-  filter: drop-shadow(0 0 1.5px rgba(59, 130, 246, 0.8)) drop-shadow(0 0 4px rgba(59, 130, 246, 0.45));
+  filter: drop-shadow(0 0 1.5px var(--brand-blue, rgba(59, 130, 246, 0.8))) drop-shadow(0 0 4px var(--brand-blue-glow, rgba(59, 130, 246, 0.45)));
 }
 
 .svg-shadow {

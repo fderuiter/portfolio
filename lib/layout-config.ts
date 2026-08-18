@@ -39,7 +39,8 @@ export interface ThemeFonts {
 
 export function resolveThemeFonts(
   fontSize: number,
-  fontFamilyVariable: string = "--font-inter"
+  fontFamilyVariable: string = "--font-inter",
+  element?: HTMLElement | null
 ): ThemeFonts {
   const cacheKey = `themeFonts|${fontSize}|${fontFamilyVariable}`;
   const cached = fontConfigCache.get(cacheKey);
@@ -73,7 +74,7 @@ export function resolveThemeFonts(
   }
 
   try {
-    const rootStyle = window.getComputedStyle(document.documentElement);
+    const rootStyle = window.getComputedStyle(element || document.documentElement);
     if (!isStylesheetLoaded(rootStyle)) {
       const fallbackSans = designManifest.typography.fonts.sans;
       const fallbackMono = designManifest.typography.fonts.mono;
@@ -119,7 +120,8 @@ export function resolveThemeFonts(
 
 export function resolveSingleThemeFont(
   fontSize: number,
-  fontFamilyVariable: string = "--font-inter"
+  fontFamilyVariable: string = "--font-inter",
+  element?: HTMLElement | null
 ): string {
   const cacheKey = `singleThemeFont|${fontSize}|${fontFamilyVariable}`;
   const cached = fontConfigCache.get(cacheKey);
@@ -140,7 +142,7 @@ export function resolveSingleThemeFont(
   }
 
   try {
-    const rootStyle = window.getComputedStyle(document.documentElement);
+    const rootStyle = window.getComputedStyle(element || document.documentElement);
     if (!isStylesheetLoaded(rootStyle)) {
       const fallbackSans = designManifest.typography.fonts.sans;
       return `${fontSize}px ${fallbackSans}`;

@@ -230,6 +230,12 @@ Re-exports [evaluateRule](expression-evaluator/functions/evaluateRule.md)
 
 ***
 
+### ExpandedSasField
+
+Re-exports [ExpandedSasField](export-sas/interfaces/ExpandedSasField.md)
+
+***
+
 ### ExportDocxOptions
 
 Re-exports [ExportDocxOptions](types/interfaces/ExportDocxOptions.md)
@@ -239,12 +245,6 @@ Re-exports [ExportDocxOptions](types/interfaces/ExportDocxOptions.md)
 ### exportFormToFhirQuestionnaire
 
 Re-exports [exportFormToFhirQuestionnaire](fhir-questionnaire/functions/exportFormToFhirQuestionnaire.md)
-
-***
-
-### exportFormToR
-
-Re-exports [exportFormToR](export-r/functions/exportFormToR.md)
 
 ***
 
@@ -344,6 +344,12 @@ Re-exports [generateRDataStepForForm](export-r/functions/generateRDataStepForFor
 
 ***
 
+### generateRHeader
+
+Re-exports [generateRHeader](export-r/functions/generateRHeader.md)
+
+***
+
 ### generateSasDataStepForForm
 
 Re-exports [generateSasDataStepForForm](export-sas/functions/generateSasDataStepForForm.md)
@@ -377,6 +383,18 @@ Re-exports [generateStudyDocx](export-docx/functions/generateStudyDocx.md)
 ### generateStudyPdf
 
 Re-exports [generateStudyPdf](export-pdf/functions/generateStudyPdf.md)
+
+***
+
+### getExpandedSasAttributes
+
+Re-exports [getExpandedSasAttributes](export-sas/functions/getExpandedSasAttributes.md)
+
+***
+
+### getFieldOptions
+
+Re-exports [getFieldOptions](export-sas/functions/getFieldOptions.md)
 
 ***
 
@@ -431,6 +449,12 @@ Re-exports [mapPresetToFormVariables](formula-presets/functions/mapPresetToFormV
 ### NUMERIC\_DATA\_TYPES
 
 Re-exports [NUMERIC_DATA_TYPES](formula-linter/variables/NUMERIC_DATA_TYPES.md)
+
+***
+
+### parseMultiSelectValue
+
+Re-exports [parseMultiSelectValue](export-sas/functions/parseMultiSelectValue.md)
 
 ***
 

@@ -147,7 +147,7 @@ export function getExpandedRFields(
 /**
  * Generates R Header Comments.
  */
-function generateRHeader(study: StudyProtocol, formScope?: string): string {
+export function generateRHeader(study: StudyProtocol, formScope?: string): string {
   const timestamp = new Date().toISOString();
   return `#==============================================================================
 # PROGRAM:      create_raw_${formScope ? formScope.toLowerCase() : "datasets"}.R

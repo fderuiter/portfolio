@@ -4,7 +4,14 @@
  */
 
 export * from "../export-sas";
-export * from "../export-r";
+export {
+  sanitizeRName,
+  escapeRString,
+  generateRHeader,
+  generateRCodelists,
+  generateRDataStepForForm,
+  exportStudyToR,
+} from "../export-r";
 export * from "../export-acrf";
 export * from "../export-docx";
 export * from "../export-pdf";

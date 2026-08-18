@@ -6,7 +6,7 @@
 
 # Function: resolveThemeFonts()
 
-> **resolveThemeFonts**(`fontSize`, `fontFamilyVariable?`): [`ThemeFonts`](../interfaces/ThemeFonts.md)
+> **resolveThemeFonts**(`fontSize`, `fontFamilyVariable?`, `element?`): [`ThemeFonts`](../interfaces/ThemeFonts.md)
 
 Defined in: [lib/layout-config.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L40)
 
@@ -19,6 +19,10 @@ Defined in: [lib/layout-config.ts:40](https://github.com/fderuiter/portfolio/blo
 ### fontFamilyVariable?
 
 `string` = `"--font-inter"`
+
+### element?
+
+`HTMLElement` \| `null`
 
 ## Returns
 

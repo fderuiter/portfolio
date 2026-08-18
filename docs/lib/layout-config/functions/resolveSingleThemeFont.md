@@ -6,9 +6,9 @@
 
 # Function: resolveSingleThemeFont()
 
-> **resolveSingleThemeFont**(`fontSize`, `fontFamilyVariable?`): `string`
+> **resolveSingleThemeFont**(`fontSize`, `fontFamilyVariable?`, `element?`): `string`
 
-Defined in: [lib/layout-config.ts:120](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L120)
+Defined in: [lib/layout-config.ts:121](https://github.com/fderuiter/portfolio/blob/main/lib/layout-config.ts#L121)
 
 ## Parameters
 
@@ -19,6 +19,10 @@ Defined in: [lib/layout-config.ts:120](https://github.com/fderuiter/portfolio/bl
 ### fontFamilyVariable?
 
 `string` = `"--font-inter"`
+
+### element?
+
+`HTMLElement` \| `null`
 
 ## Returns
 

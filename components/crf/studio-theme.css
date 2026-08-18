@@ -5,6 +5,19 @@
 
 [data-studio-theme="light"] {
   --focus-ring: #b45309;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --surface-1: #ffffff;
+  --surface-2: #f8fafc;
+  --surface-3: #f1f5f9;
+  --border: #e2e8f0;
+  --border-active: #0284c7;
+  --muted: #475569;
+  --muted-strong: #1e293b;
+  --brand-cyan: #0284c7;
+  --brand-cyan-glow: rgba(2, 132, 199, 0.12);
+  --brand-blue: #2563eb;
+  --brand-blue-glow: rgba(37, 99, 235, 0.10);
   --crf-bg: #f8fafc;
   --crf-canvas-bg: #f1f5f9;
   --crf-surface-1: #ffffff;

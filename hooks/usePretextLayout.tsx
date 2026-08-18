@@ -608,8 +608,13 @@ export const PretextRichText: React.FC<PretextRichTextProps> = ({
                 return (
                   <span
                     key={fragIdx}
-                    className="px-1.5 py-0 mx-0.5 text-[11px] font-mono font-bold bg-brand-cyan/10 border border-brand-cyan/20 text-brand-cyan rounded-md inline-block shadow-[0_0_10px_rgba(6,182,212,0.05)] align-middle leading-[1.3]"
+                    className="px-1.5 py-0 mx-0.5 text-[11px] font-mono font-bold rounded-md inline-block shadow-[0_0_10px_rgba(6,182,212,0.05)] align-middle leading-[1.3]"
                     style={{ 
+                      backgroundColor: "var(--brand-cyan-glow, rgba(6, 182, 212, 0.1))",
+                      borderColor: "var(--brand-cyan, rgba(6, 182, 212, 0.2))",
+                      borderWidth: "1px",
+                      borderStyle: "solid",
+                      color: "var(--brand-cyan, #06b6d4)",
                       marginLeft: frag.gapBefore > 0 ? `${frag.gapBefore}px` : undefined,
                     }}
                   >
@@ -619,10 +624,10 @@ export const PretextRichText: React.FC<PretextRichTextProps> = ({
               }
 
               const style = item?.type === "bold"
-                ? "font-bold text-neutral-100"
+                ? "font-bold text-[var(--foreground,#f4f4f6)]"
                 : item?.type === "italic"
-                ? "italic text-zinc-300"
-                : "text-zinc-400";
+                ? "italic text-[var(--muted-strong,#cbd5e1)]"
+                : "text-[var(--muted,#94a3b8)]";
 
               return (
                 <span

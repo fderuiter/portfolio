@@ -44,15 +44,15 @@ export const CommitSparkline: React.FC<CommitSparklineProps> = ({
   return (
     <div className={`w-full relative select-none ${className || ""}`}>
       {/* Sparkline Title Metadata */}
-      <div className="flex justify-between items-center text-[10px] font-mono text-zinc-400 mb-2">
+      <div className="flex justify-between items-center text-[10px] font-mono text-[var(--muted,#94a3b8)] mb-2">
         <span className="tracking-widest uppercase">Commit Activity (12 Months)</span>
-        <span className="text-brand-cyan font-bold">{totalCommits} Commits</span>
+        <span className="text-[var(--brand-cyan,#06b6d4)] font-bold">{totalCommits} Commits</span>
       </div>
 
       {/* SVG Canvas Sparkline Graph */}
-      <div className="relative bg-zinc-950/40 border border-zinc-900/60 rounded-xl p-2.5 overflow-hidden flex items-center justify-center">
+      <div className="relative bg-[var(--surface-1,rgba(20,22,28,0.4))] border border-[var(--border,rgba(255,255,255,0.08))] rounded-xl p-2.5 overflow-hidden flex items-center justify-center">
         {/* Glow ambient accent light */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-12 rounded-full bg-brand-cyan/5 blur-2xl pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-12 rounded-full bg-[var(--brand-cyan-glow,rgba(6,182,212,0.05))] blur-2xl pointer-events-none" />
 
         <svg
           viewBox="0 0 300 60"
@@ -63,15 +63,15 @@ export const CommitSparkline: React.FC<CommitSparklineProps> = ({
           <defs>
             {/* Area gradient under the path */}
             <linearGradient id={`${uniqueId}-area`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.25" />
-              <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0" />
+              <stop offset="0%" stopColor="var(--brand-cyan, #06b6d4)" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="var(--brand-cyan, #06b6d4)" stopOpacity="0.0" />
             </linearGradient>
             
             {/* Timeline color stroke gradient */}
             <linearGradient id={`${uniqueId}-stroke`} x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#06b6d4" />
-              <stop offset="50%" stopColor="#3b82f6" />
-              <stop offset="100%" stopColor="#06b6d4" />
+              <stop offset="0%" stopColor="var(--brand-cyan, #06b6d4)" />
+              <stop offset="50%" stopColor="var(--brand-blue, #3b82f6)" />
+              <stop offset="100%" stopColor="var(--brand-cyan, #06b6d4)" />
             </linearGradient>
           </defs>
 
