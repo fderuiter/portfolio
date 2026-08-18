@@ -100,6 +100,13 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     path: "/offline",
     keywords: ["Offline", "PWA", "Service Worker", "Precached Shell", "Frederick de Ruiter"],
   },
+  equiposeRandomization: {
+    title: "Equipose Randomization Case Study | Technical Breakdown & Architecture",
+    description: "Deep dive technical breakdown of Equipose Randomization — zero-server client-side trial randomization engine with cross-runtime seed parity (Python/R/SAS/Stata) and Web Worker Monte Carlo simulations.",
+    path: "/case-studies/equipose-randomization",
+    keywords: ["Angular", "TypeScript", "Web Workers", "Clinical Informatics", "Transpiler", "CDISC", "ADaM-Lite", "Randomization"],
+    ogType: "article",
+  },
   oxidizeMath: {
     title: "OxidizeMath Case Study | Technical Breakdown & Architecture",
     description: "Deep dive technical breakdown of OxidizeMath — a unified, memory-safe, verified numerical computation framework in Rust across scientific computing domains.",

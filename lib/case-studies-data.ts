@@ -420,6 +420,11 @@ export const tenantAuthGuard = createMiddleware(async (c, next) => {
 
 <h4>3. Edge-Native Event-Driven Async Processing</h4>
 <p>Background workflows and async task queues are powered by Inngest functions embedded directly inside Hono, delivering event-driven reliability without needing persistent worker processes.</p>`,
+    created_at: new Date("2026-02-18T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-7",
     slug: "inbody-qr-decoder",
     title: "InBody QR Data Decoder & Analyzer: BIA Reverse Engineering",
     primary_language: "Python",
@@ -454,6 +459,11 @@ def decode_digits(raw_slice: str, scale_factor: float = 0.1, precision: int = 2)
 
 <h4>3. Multi-Block Segment Parsing &amp; Biomarker Derivation</h4>
 <p>Primary body composition parameters reside in Segment Index 4 (<code>meas_blob</code>), while secondary metrics (BMR and Visceral Fat) are extracted from Segment Index 5 in kilocalories. Derived biomarkers, including Appendicular Skeletal Muscle Mass (ASM) and Skeletal Muscle Index ($\\text{SMI} = \\frac{\\text{ASM}}{\\text{Height}^2}$), are computed deterministically.</p>`,
+    created_at: new Date("2026-02-22T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-8",
     slug: "polyglot-tsp",
     title: "Polyglot-TSP: Technical Breakdown & Portfolio Integration",
     primary_language: "Rust",
@@ -567,6 +577,11 @@ endmodule
 <h3>Trade-Offs & Key Decisions</h3>
 <p>1. <strong>Exhaustive Permutations ($O(N!)$) vs. Dynamic Programming / Heuristics ($O(N^2 2^N)$)</strong>: Prioritized strict brute-force permutation generation across all targets to maintain an identical baseline for syntactic and runtime execution comparisons across obscure and exotic paradigms.</p>
 <p>2. <strong>Subprocess CLI Execution vs. Foreign Function Interface (FFI)</strong>: Chose process-level standard stream (stdout/stderr) assertion over C ABI bindings to accommodate non-standardized runtimes, HDL simulation pipelines (ghdl, iverilog), and legacy/esoteric environments (INTERCAL, COBOL, Modula-2).</p>`,
+    created_at: new Date("2026-02-25T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-9",
     slug: "oxidizemath",
     title: "OxidizeMath: Verified Numerical Computation Framework in Rust",
     primary_language: "Rust",
@@ -627,6 +642,11 @@ where
 
 <h4>3. WASM-First GUI Architecture</h4>
 <p>Deploys identical single-binary desktop execution and zero-install WebAssembly browser builds using egui and custom <code>egui_plot</code> engines.</p>`,
+    created_at: new Date("2026-02-28T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-10",
     slug: "ualbf",
     title: "UALBF: Verified Computational Proof Engine & Search Architecture",
     primary_language: "Rust",
@@ -737,6 +757,10 @@ pub extern "C" fn ualbf_verify_certificate_manifest(
 }
 </code></pre>`,
     created_at: new Date("2026-03-01T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-11",
     slug: "sortify",
     title: "Sortify: Air-Gapped Document Classification & Resilient File Engine",
     primary_language: "Python",
@@ -778,6 +802,62 @@ def stage_and_commit_move(self, src: str, dest_dir: str) -> str:
 <h4>3. Encrypted SQLCipher Registry &amp; Worker Concurrency</h4>
 <p>Database encryption at rest is enforced via per-platform SQLCipher shared libraries with PRAGMA key derivation. Thread-isolated background workers communicate via non-blocking queues with the main UI thread (PyQt6/PySide6) to prevent interface lockups during bulk ingestion.</p>`,
     created_at: new Date("2026-02-20T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-12",
+    slug: "equipose-randomization",
+    title: "Equipose Randomization: Deterministic Clinical Trial Schema Engine",
+    primary_language: "Angular / TypeScript",
+    github_url: "https://github.com/fderuiter/equipose-randomization",
+    published: true,
+    simulated_telemetry: false,
+    tags: "Angular, TypeScript, Web Workers, Clinical Informatics, Transpiler Design, Deterministic Algorithms, CDISC, ADaM-Lite",
+    editorial_content: "A **client-side clinical randomization engine** and Intermediate Representation compiler built with **Angular Signals** and **Web Workers**. Guarantees zero-data-exfiltration compliance (FDA 21 CFR Part 11 / GxP) and bitwise seed parity across **Python**, **R**, **SAS**, and **Stata** runtimes.",
+    architectural_narrative: `<h3>Executive Summary &amp; Value Proposition</h3>
+<p>Clinical trial randomization and schema definition traditionally rely on proprietary statistical software or unverified ad-hoc scripts. Equipose Randomization delivers a zero-server, client-side web architecture featuring a deterministic Mersenne Twister (MT19937) engine transpiler that guarantees cross-platform bitwise parity and audit hash parity across Python, R, SAS, and Stata runtimes.</p>
+
+<h3>1. Hexagonal Architecture &amp; Signal-Based State</h3>
+<p>Core domain algorithms (Pocock-Simon covariate adaptive minimization, Fisher-Yates shuffle, Largest Remainder Method) are strictly decoupled from presentation layers. Angular signals drive multi-step clinical schema authoring without external heavy state stores.</p>
+
+<pre><code class="language-typescript">
+// Pocock-Simon Covariate Adaptive Minimization Engine
+export class PocockSimonMinimizationEngine {
+  private allocationMatrix: Map&lt;string, Map&lt;string, number&gt;&gt; = new Map();
+
+  public allocateSubject(covariates: CovariateFactor[], prng: () =&gt; number): string {
+    const imbalances = this.arms.map((arm) =&gt; ({
+      armCode: arm.code,
+      score: this.calculateImbalanceScore(arm.code, covariates),
+    }));
+    imbalances.sort((a, b) =&gt; a.score - b.score);
+    return imbalances[0].armCode;
+  }
+}
+</code></pre>
+
+<h3>2. Intermediate Representation (IR) Compiler Pipeline</h3>
+<p>A centralized IR domain generator compiles clinical study parameters into executable statistical companion scripts across Python, R, SAS, and Stata, validated via AST static guards.</p>
+
+<pre><code class="language-typescript">
+// IR Transpiler Target Dispatcher
+export class SchemaTranspiler {
+  private strategies = new Map&lt;TranspilerTarget, CodeGenerationStrategy&gt;([
+    ['R', new RStrategy()],
+    ['Python', new PythonStrategy()],
+    ['SAS', new SASStrategy()],
+    ['Stata', new StataStrategy()],
+  ]);
+
+  public transpile(ir: StudyIRModel, target: TranspilerTarget): string {
+    return this.strategies.get(target)!.generateCode(ir);
+  }
+}
+</code></pre>
+
+<h3>3. Off-Main-Thread Monte Carlo Simulation</h3>
+<p>Computational heavy lifting (Monte Carlo balance simulations and large-stratum permutations) runs inside isolated Web Workers over a structured RPC message protocol, keeping UI frame rates locked at 60 FPS.</p>`,
+    created_at: new Date("2026-03-05T00:00:00Z"),
     updated_at: new Date("2026-08-14T00:00:00Z"),
   },
 ];

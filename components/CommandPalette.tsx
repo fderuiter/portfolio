@@ -174,6 +174,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         ]
       },
       {
+        id: "nav-equipose-randomization",
+        title: "Equipose Randomization: Clinical Trial Schema Engine",
+        subtitle: "Deep-dive case study — Angular signals, IR transpiler (Python/R/SAS/Stata) & Web Workers",
+        category: "navigation",
+        url: "/case-studies/equipose-randomization",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Case Study",
+        status: "Angular / Transpiler",
+        description: "Zero-server client-side clinical trial randomization engine with cross-runtime seed parity and Web Worker Monte Carlo simulations.",
+        techStack: ["Angular", "TypeScript", "Web Workers", "IR Transpiler", "CDISC ADaM"],
+        highlights: [
+          "Cross-platform bitwise PRNG seed alignment",
+          "Pocock-Simon covariate adaptive minimization",
+          "Off-main-thread Web Worker simulations"
+        ]
+      },
+      {
         id: "nav-oxidizemath",
         title: "OxidizeMath: Verified Numerical Framework in Rust",
         subtitle: "Deep-dive technical case study — proc-macro verification, double-buffer PDEs & egui WASM",

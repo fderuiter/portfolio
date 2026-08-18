@@ -29,6 +29,7 @@ export const CANONICAL_ROUTES: PageBenchmarkRoute[] = [
   // Deep Case Studies
   { path: "/case-studies/clinical-data-mapper", name: "CS: Clinical Data Mapper", category: "case-study" },
   { path: "/case-studies/cadence-clinical", name: "CS: Cadence Clinical", category: "case-study" },
+  { path: "/case-studies/equipose-randomization", name: "CS: Equipose Randomization", category: "case-study" },
   { path: "/case-studies/schemaflow", name: "CS: SchemaFlow", category: "case-study" },
   { path: "/case-studies/imednet-python-sdk", name: "CS: iMedNet SDK", category: "case-study" },
   { path: "/case-studies/wedding-website", name: "CS: Wedding Platform", category: "case-study" },
