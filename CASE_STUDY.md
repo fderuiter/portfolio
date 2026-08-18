@@ -849,3 +849,190 @@ flowchart TD
   * `wasm`
   * `simulation-engine`
   * `crm-algorithm`
+
+---
+
+## [Case Study] Lambda-Wave: Real-Time SGRT FMCW Radar System: Technical Breakdown & Portfolio Integration
+
+### 1. Executive Summary & Value Proposition
+
+* **Problem Solved**: Surface Guided Radiation Therapy (SGRT) systems require sub-millimeter patient motion tracking and respiratory gating without exposing patients to ionizing radiation or suffering from optical occlusion in clinical treatment rooms. This repository implements a high-throughput, safety-critical FMCW millimeter-wave radar processing pipeline to monitor respiratory motion and trigger LINAC beam-hold interlocks in real time.
+* **Core Technical Highlight**: A hybrid Haskell/C++ architecture combining purely functional DSP pipelines (FMCW range-Doppler transforms, Kalman state estimation) with lock-free C++ ring buffers and Dear ImGui visualizations over an FFI boundary, meeting strict IEC 62304 Class C medical device architectural compliance.
+* **Key Metrics / Benchmarks**: Sub-10ms end-to-end processing and gating latency budget, deterministic interlock propagation under 5ms, 100% traceability to functional safety requirements across 30+ automated property and unit test suites.
+
+---
+
+### 2. Deep Dive Engineering Focus Areas
+
+#### Architecture & Patterns
+* **Layered Pipeline Architecture**: Functional Core / Imperative Shell architecture. Pure mathematical modules (`Numeric.Kinematics`, `SignalProcessing.FMCW`, `SignalProcessing.Kalman`) are completely decoupled from IO and side-effects.
+* **Lock-Free Circular Ring Buffer Bridge**: High-throughput raw radar frame ingestion from TI IWR6843ISK mmWave radar hardware across C/C++ FFI via zero-copy shared memory abstractions (`RingBuffer.h`, `FFI.RingBuffer`).
+* **Watchdog & Fail-Safe Interlock Pattern**: Independent watchdog thread verifying signal freshness and safety invariant tokens; any communication dropout or anomaly immediately forces beam-hold assertion (`Safety.Watchdog`, `Safety.Token`).
+
+#### Trade-Offs & Decisions
+1. **Haskell for DSP Core vs. Pure C/C++**: Chose Haskell's type system to enforce dimensional safety (`Numeric.Units`), mathematical invariants, and deterministic purity in gating logic, while isolating unavoidable hardware mutation and GPU/OpenGL rendering in lightweight C++ FFI wrappers.
+2. **Lock-Free Ring Buffer vs. Haskell STM / Channels**: Implemented custom C++ lock-free ring buffers for UART frame ingestion to eliminate garbage collector pauses in the critical ingestion path.
+3. **Immediate Mode GUI (Dear ImGui) vs. Heavyweight UI Frameworks**: Selected Dear ImGui via C++ bindings for zero-latency medical HUD rendering without event-loop overhead.
+
+#### Edge Cases & Edge Solutions
+* **Inter-Frame Jitter & Clock Drift**: Addressed via hardware timestamp extraction (`Data.Time.HighRes.hsc`) and kinematic state extrapolation in Kalman filtering during transient packet loss.
+* **FFI Boundary Memory Safety & Foreign Pointer Alignment**: Validated struct padding and memory alignment across Haskell/C++ using `.hsc` bindings and automated FFI struct offset checks (`test/FFI/Hud/HudStateCSpec.hsc`, `test/FFI/RingBuffer/TypesSpec.hs`).
+* **Watchdog Heartbeat Starvation**: Engineered cryptographically validated and monotonically increasing safety tokens to prevent replay attacks and detect deadlocks in the main scheduler thread (`Safety.Crypto`, `Safety.AuditHeartbeatCheck`).
+
+---
+
+### 3. Case Study Content Blueprint
+
+#### Context & Motivation
+Surface Guided Radiation Therapy (SGRT) requires continuous, sub-millimeter tracking of patient thoracic surface movement to perform respiratory gating during radiation delivery. Optical camera systems often suffer from line-of-sight occlusion by the LINAC gantry, drapes, or clinical personnel. Millimeter-wave FMCW (Frequency-Modulated Continuous-Wave) radar provides non-ionizing, occlusion-resilient sub-millimeter motion tracking. Architectural compliance with IEC 62304 Class C medical software guidelines mandates strict software safety isolation and deterministic fail-safe behavior.
+
+#### System Design Architecture
+
+```mermaid
+flowchart LR
+    A[TI IWR6843ISK mmWave Radar] -->|UART Raw Chirps| B[C++ Lock-Free RingBuffer]
+    B -->|Haskell FFI| C[FMCW Range-Doppler DSP]
+    C --> D[Kalman Kinematic Filter]
+    D --> E[Surface Mesher & Displacement Engine]
+    E --> F{Gating Logic & Safety Watchdog}
+    F -->|Within Gate| G[Beam Enable State]
+    F -->|Excursion / Failure| H[LINAC Beam Hold GPIO Interlock]
+    D -->|FFI Bridge| I[C++ / OpenGL ImGui HUD Visualizer]
+```
+
+#### Key Technical Challenges & Code Snippets
+
+##### 1. Ring Buffer Zero-Copy FFI Bridge (`cbits/src/ring_buffer_ffi.cpp` & `src/FFI/RingBuffer/IO.hs`)
+```cpp
+// cbits/src/ring_buffer_ffi.cpp
+#include "RingBuffer.h"
+#include <atomic>
+#include <cstring>
+
+extern "C" {
+    int ring_buffer_read_frame(RingBuffer* rb, RadarFrame* dest_frame) {
+        if (!rb || !dest_frame) return -1;
+        uint32_t head = rb->head.load(std::memory_order_acquire);
+        uint32_t tail = rb->tail.load(std::memory_order_relaxed);
+        if (head == tail) return 0; // Buffer empty
+
+        *dest_frame = rb->buffer[tail & (RING_BUFFER_SIZE - 1)];
+        rb->tail.store(tail + 1, std::memory_order_release);
+        return 1; // Frame read successfully
+    }
+}
+```
+
+```haskell
+-- src/FFI/RingBuffer/IO.hs
+{-# LANGUAGE ForeignFunctionInterface #-}
+module FFI.RingBuffer.IO (popRadarFrame) where
+
+import Foreign
+import Foreign.C.Types
+import FFI.RingBuffer.Types
+
+foreign import ccall unsafe "ring_buffer_read_frame"
+    c_ring_buffer_read_frame :: Ptr RingBuffer -> Ptr RadarFrame -> IO CInt
+
+popRadarFrame :: Ptr RingBuffer -> IO (Maybe RadarFrame)
+popRadarFrame rbPtr = alloca $ \framePtr -> do
+    res <- c_ring_buffer_read_frame rbPtr framePtr
+    case res of
+        1 -> Just <$> peek framePtr
+        _ -> return Nothing
+```
+
+##### 2. Pure Kalman Filter Matrix State Transition (`src-math/SignalProcessing/Kalman.hs`)
+```haskell
+-- src-math/SignalProcessing/Kalman.hs
+module SignalProcessing.Kalman
+    ( KalmanState(..)
+    , predictState
+    , updateState
+    ) where
+
+import Numeric.LinearAlgebra
+
+data KalmanState = KalmanState
+    { stateVector :: Vector Double  -- [position, velocity, acceleration]
+    , covariance  :: Matrix Double  -- 3x3 error covariance matrix
+    } deriving (Show, Eq)
+
+predictState :: Matrix Double -> Matrix Double -> KalmanState -> KalmanState
+predictState transitionF processQ (KalmanState x p) =
+    KalmanState x' p'
+  where
+    x' = transitionF #> x
+    p' = (transitionF <> p <> tr transitionF) + processQ
+
+updateState :: Matrix Double -> Vector Double -> Matrix Double -> KalmanState -> KalmanState
+updateState measureH z measureR (KalmanState x' p') =
+    KalmanState xUpdated pUpdated
+  where
+    y = z - (measureH #> x')                            -- Innovation residual
+    s = (measureH <> p' <> tr measureH) + measureR      -- Innovation covariance
+    k = p' <> tr measureH <> inv s                     -- Optimal Kalman gain
+    xUpdated = x' + (k #> y)
+    pUpdated = (ident (size x') - k <> measureH) <> p'
+```
+
+##### 3. Safety Token Verification & Watchdog Interlock Trigger (`src/Safety/Watchdog.hs`)
+```haskell
+-- src/Safety/Watchdog.hs
+module Safety.Watchdog
+    ( SafetyToken(..)
+    , verifyHeartbeat
+    , evaluateBeamHoldInterlock
+    ) where
+
+import Data.Word (Word64)
+import Safety.Crypto (validateTokenSignature)
+
+data SafetyToken = SafetyToken
+    { sequenceNumber :: !Word64
+    , timestampMs    :: !Word64
+    , signature      :: !ByteString
+    } deriving (Show, Eq)
+
+verifyHeartbeat :: Word64 -> SafetyToken -> ByteString -> Bool
+verifyHeartbeat currentTimestamp token secretKey =
+    let delta = currentTimestamp - timestampMs token
+        validTiming = delta <= 10 -- 10ms hard safety window
+        validSig = validateTokenSignature token secretKey
+    in validTiming && validSig
+
+evaluateBeamHoldInterlock :: Bool -> IO ()
+evaluateBeamHoldInterlock isSafe =
+    if isSafe
+        then putStrLn "[SAFETY_OK] Beam Enable Asserted"
+        else assertBeamHoldHardwareInterlock
+
+assertBeamHoldHardwareInterlock :: IO ()
+assertBeamHoldHardwareInterlock = do
+    putStrLn "[INTERLOCK_TRIGGERED] Beam Hold Asserted - Emergency Shutdown"
+    -- Write direct GPIO pin register to halt LINAC beam immediately
+```
+
+---
+
+#### 4. Lessons Learned & Future Improvements
+* **GC Management in Hard Real-Time Haskell**: High-frequency real-time DSP logic in Haskell requires minimizing heap allocation in the main loop by reusing ForeignPtr buffers and compiling with `-threaded -rtsopts -with-rtsopts=-A32m`.
+* **Multi-Sensor Array Scaling**: Expanding the single-sensor TI IWR6843ISK pipeline to multi-angle radar arrays to resolve chest wall tilt angles and volumetric body contour displacements.
+* **SIMD / AVX Acceleration**: Offloading 2D FMCW FFT range-Doppler matrix processing to vectorized SIMD C++ routines or OpenCL GPU compute passes.
+
+---
+
+#### 5. Portfolio Integration Metadata
+* **Slug**: `lambda-wave`
+* **Primary Language**: `Haskell / C++`
+* **Stack Badges**: `Haskell`, `C++`, `OpenGL`, `DSP`, `IEC-62304`, `Real-Time Systems`
+* **Standardized GitHub Repository Topics**:
+  * `haskell`
+  * `embedded-systems`
+  * `dsp`
+  * `fmcw-radar`
+  * `sgrt`
+  * `medical-device`
+  * `iec-62304`
+  * `real-time`

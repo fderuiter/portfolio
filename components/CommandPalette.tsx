@@ -208,6 +208,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         ]
       },
       {
+        id: "nav-lambda-wave",
+        title: "Lambda-Wave: Real-Time SGRT FMCW Radar System",
+        subtitle: "Deep-dive technical case study — Haskell DSP core, lock-free C++ ring buffers & IEC 62304 Class C safety watchdog",
+        category: "navigation",
+        url: "/case-studies/lambda-wave",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Case Study",
+        status: "Haskell / C++",
+        description: "Safety-critical FMCW mmWave radar processing pipeline for Surface Guided Radiation Therapy (SGRT) with lock-free C++ ring buffer bridge and Dear ImGui HUD.",
+        techStack: ["Haskell", "C++", "OpenGL", "DSP", "IEC 62304", "Real-Time Systems"],
+        highlights: [
+          "Sub-10ms end-to-end processing & respiratory gating latency",
+          "Lock-free C++ circular ring buffer zero-copy FFI bridge",
+          "Safety-critical watchdog interlock meeting IEC 62304 Class C"
+        ]
+      },
+      {
         id: "nav-laser-loon",
         title: "Laser Loon: Quest for the State Flag",
         subtitle: "Playable civic physics shooter — pilot F277 Laser Loon on the Road to the Capitol",

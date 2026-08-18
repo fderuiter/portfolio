@@ -6,7 +6,7 @@
 
 # Interface: RunOptions
 
-Defined in: [lib/dx/page-bench.ts:240](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L240)
+Defined in: [lib/dx/page-bench.ts:241](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L241)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/dx/page-bench.ts:240](https://github.com/fderuiter/portfolio/bl
 
 > `optional` **baseUrl?**: `string`
 
-Defined in: [lib/dx/page-bench.ts:241](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L241)
+Defined in: [lib/dx/page-bench.ts:242](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L242)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/dx/page-bench.ts:241](https://github.com/fderuiter/portfolio/bl
 
 > `optional` **device?**: `object`
 
-Defined in: [lib/dx/page-bench.ts:246](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L246)
+Defined in: [lib/dx/page-bench.ts:247](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L247)
 
 #### hasTouch?
 
@@ -54,7 +54,7 @@ Defined in: [lib/dx/page-bench.ts:246](https://github.com/fderuiter/portfolio/bl
 
 > `optional` **isMobile?**: `boolean`
 
-Defined in: [lib/dx/page-bench.ts:245](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L245)
+Defined in: [lib/dx/page-bench.ts:246](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L246)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/dx/page-bench.ts:245](https://github.com/fderuiter/portfolio/bl
 
 > `optional` **onProgress?**: (`progress`) => `void`
 
-Defined in: [lib/dx/page-bench.ts:252](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L252)
+Defined in: [lib/dx/page-bench.ts:253](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L253)
 
 #### Parameters
 
@@ -94,7 +94,7 @@ Defined in: [lib/dx/page-bench.ts:252](https://github.com/fderuiter/portfolio/bl
 
 > `optional` **routes?**: [`PageBenchmarkRoute`](PageBenchmarkRoute.md)[]
 
-Defined in: [lib/dx/page-bench.ts:243](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L243)
+Defined in: [lib/dx/page-bench.ts:244](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L244)
 
 ***
 
@@ -102,7 +102,7 @@ Defined in: [lib/dx/page-bench.ts:243](https://github.com/fderuiter/portfolio/bl
 
 > `optional` **runs?**: `number`
 
-Defined in: [lib/dx/page-bench.ts:242](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L242)
+Defined in: [lib/dx/page-bench.ts:243](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L243)
 
 ***
 
@@ -110,4 +110,4 @@ Defined in: [lib/dx/page-bench.ts:242](https://github.com/fderuiter/portfolio/bl
 
 > `optional` **thresholds?**: [`BenchmarkThresholds`](BenchmarkThresholds.md)
 
-Defined in: [lib/dx/page-bench.ts:244](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L244)
+Defined in: [lib/dx/page-bench.ts:245](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L245)
