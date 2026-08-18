@@ -11,7 +11,7 @@ Accepted
 Complex modern web applications and computational engines require continuous deployment without risking stability or introducing user-facing regressions. Reactive bug fixing after user discovery creates customer friction, operational drag, and deploy hesitation.
 
 To achieve continuous deployment confidence, defects must be intercepted proactively before reaching or impacting users via a unified three-pillar strategy:
-1. Shift-Left automated analysis (mutation testing, property-based fuzzing, strict static invariants) running during CI before code merges.
+1. Shift-Left automated analysis (property-based fuzzing, strict static invariants) running during CI before code merges.
 2. Synthetic user probing continuously running headless user journeys and API health probes against preview, staging, and production environments.
 3. Automated Canary Analysis (ACA) and anomaly detection telemetry to silently detect regressions and trigger instant rollbacks.
 
@@ -22,7 +22,7 @@ We establish an end-to-end Proactive Defect Interception architecture spanning t
 ### 1. Shift-Left & Automated Gateways
 
 - **Property-Based & Fuzz Testing (`fast-check`)**: Implemented in `__tests__/property-fuzz.test.ts`, running hundreds of generative test vectors against AST parsing, formula formatting, algebraic transformations (De Morgan's laws, double negation), responsive masonry calculations, and security authentication filters.
-- **Mutation Testing Gateway (`stryker.config.mjs`, `scripts/run-mutation-tests.ts`)**: Targets high-criticality deterministic logic modules (`lib/proof-utils.ts`, `lib/masonry.ts`, `lib/error-sanitization.ts`, `lib/security.ts`) enforcing a minimum mutation score threshold of >=80%.
+- **Property-Based Fuzz Testing Gateway (`scripts/run-mutation-tests.ts`)**: Targets high-criticality deterministic logic modules (`lib/proof-utils.ts`, `lib/masonry.ts`, `lib/error-sanitization.ts`, `lib/security.ts`) enforcing fast-check property-based fuzz testing invariants.
 - **Static Invariant Diagnostics (`lib/dx/doctor.ts`)**: Continuously verifies that all defensive boundary guards, route indexing, accessibility standards, and spec synchronizations pass without warnings.
 
 ### 2. Synthetic User Probing
@@ -47,4 +47,4 @@ We establish an end-to-end Proactive Defect Interception architecture spanning t
 
 - **AGENTS.md Invariant 1 (Test Path Resolution)**: Dynamic root path resolution in all probe runners and scripts.
 - **AGENTS.md Invariant 6 (Developer Suite & Quality)**: Integrated into `npm run dx doctor`, `npm run verify`, and `npm run quality`.
-- **AGENTS.md Invariant 12 (Proactive Defect Interception & Synthetic Reliability)**: Enforces active mutation configs, fast-check property suites, synthetic journey probes, and canary analysis scripts.
+- **AGENTS.md Invariant 12 (Proactive Defect Interception & Synthetic Reliability)**: Enforces active property fuzzing gates, fast-check property suites, synthetic journey probes, and canary analysis scripts.

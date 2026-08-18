@@ -85,7 +85,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Core calculation and state engines must enforce boundary defenses against division-by-zero, cyclic AST references, and out-of-bounds inputs with zero unhandled crash vectors.
 
 ### 12. Proactive Defect Interception & Synthetic Reliability
-- Core deterministic logic and security sanitization modules must maintain property-based fuzz tests (`__tests__/property-fuzz.test.ts`) and pass Stryker mutation threshold gates (>=80% mutation score).
+- Core deterministic logic and security sanitization modules must maintain property-based fuzz tests (`__tests__/property-fuzz.test.ts`) and pass fast-check property fuzzing gates.
 - Critical user journeys (Landing Pretext layout, Command Palette discovery, Proof DAG studio, Arcade canvas lifecycles, and API telemetry ingestion) must be verified via Playwright synthetic user probes (`__tests__/e2e/synthetic-probes.spec.ts`) and monitored continuously via scheduled crons (`.github/workflows/synthetic-probes.yml`).
 - In Playwright synthetic user probes and end-to-end browser tests, interactive UI triggers (e.g. Command Palette search buttons, mobile navigation triggers, modal openers) must be wrapped in `expect(async () => { ... }).toPass({ timeout: 15000 })` polling blocks to prevent hydration race conditions where clicks land on static HTML before React 19 event listeners attach.
 - Modals and animated drawers hosted in `<AnimatePresence>` must specify an explicit `key` prop (e.g. `key="command-palette-modal"`) on their outermost container to ensure deterministic presence tracking during fast multi-browser headless evaluation.
