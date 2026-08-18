@@ -140,8 +140,8 @@ export const Card = ({
       }}
     >
       <div className="h-full grid [grid-template-areas:'stack'] transform-gpu [transform-style:preserve-3d] rounded-[var(--radius)]">
-        {/* Layer 1: Solid Dark Background & Subtle Border */}
-        <div className="border border-zinc-800/80 [grid-area:1/1] rounded-[var(--radius)] bg-zinc-950/70 backdrop-blur-md" />
+        {/* Layer 1: Solid Background & Subtle Border */}
+        <div className="border border-border [grid-area:1/1] rounded-[var(--radius)] bg-surface-1 backdrop-blur-md" />
 
         {/* Layer 2: Dynamic Holographic Glare Pattern */}
         <div
@@ -179,7 +179,7 @@ export const CardTitle = ({
 
   return (
     <Component
-      className={cn("mt-2 mb-2 font-sans font-bold text-neutral-100 group-hover:text-brand-cyan transition-colors duration-300 break-words text-balance min-w-0", className)}
+      className={cn("mt-2 mb-2 font-sans font-bold text-foreground group-hover:text-brand-cyan transition-colors duration-300 break-words text-balance min-w-0", className)}
       style={{ margin: 0, marginTop: "0.5rem", marginBottom: "0.5rem", ...style }}
     >
       {children}

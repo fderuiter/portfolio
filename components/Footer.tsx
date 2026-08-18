@@ -54,7 +54,7 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="w-full bg-zinc-950 border-t border-zinc-900 relative z-20 select-none">
+    <footer className="w-full bg-background border-t border-border relative z-20 select-none">
       {/* Top Ambient Highlight */}
       <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-cyan/20 to-transparent" />
 
@@ -78,7 +78,7 @@ export const Footer: React.FC = () => {
                 </span>
                 <span className="group-hover:text-brand-cyan transition-colors">FDERUITER</span>
               </Link>
-              <p className="text-xs font-mono text-zinc-400 max-w-sm leading-relaxed">
+              <p className="text-xs font-mono text-muted max-w-sm leading-relaxed">
                 Clinical data specialist by day, creative coder by night. Building reliable software and fun interactive web stuff.
               </p>
             </div>
@@ -87,19 +87,19 @@ export const Footer: React.FC = () => {
             <Link
               href="/stack"
               onMouseEnter={handleHover}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900/80 hover:bg-zinc-900 border border-zinc-800 hover:border-brand-cyan/40 text-[11px] font-mono text-zinc-300 hover:text-white transition-all w-fit group"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-1/80 hover:bg-surface-1 border border-border hover:border-brand-cyan/40 text-[11px] font-mono text-muted-strong hover:text-foreground transition-all w-fit group"
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500 group-hover:animate-pulse" />
               <span>All Systems Operational</span>
-              <span className="text-zinc-600">|</span>
-              <span className="text-zinc-400 group-hover:text-brand-cyan transition-colors">Inspect Stack ↗</span>
+              <span className="text-muted">|</span>
+              <span className="text-muted group-hover:text-brand-cyan transition-colors">Inspect Stack ↗</span>
             </Link>
           </div>
 
           {/* Col 2: Interactive Arcade */}
           {persona !== "technical" && (
             <div className="space-y-4">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-muted-strong flex items-center gap-1.5">
                 <IconSparkles className="w-3.5 h-3.5 text-brand-cyan" />
                 Arcade &amp; Labs
               </span>
@@ -189,7 +189,7 @@ export const Footer: React.FC = () => {
 
           {/* Col 3: Systems & Verification */}
           <div className="space-y-4">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-muted-strong flex items-center gap-1.5">
               <IconTerminal className="w-3.5 h-3.5 text-brand-cyan" />
               Systems
             </span>
@@ -199,7 +199,7 @@ export const Footer: React.FC = () => {
                   href="/#case-studies"
                   onClick={(e) => handleHashClick(e, "case-studies")}
                   onMouseEnter={handleHover}
-                  className="text-zinc-400 hover:text-brand-cyan transition-colors"
+                  className="text-muted hover:text-brand-cyan transition-colors"
                 >
                   Featured Projects
                 </Link>
@@ -208,7 +208,7 @@ export const Footer: React.FC = () => {
                 <Link
                   href="/stack"
                   onMouseEnter={handleHover}
-                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                  className="text-muted hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                 >
                   <IconCpu className="w-3 h-3 text-brand-cyan" />
                   Under the Hood (Stack)
@@ -218,7 +218,7 @@ export const Footer: React.FC = () => {
                 <Link
                   href="/crf"
                   onMouseEnter={handleHover}
-                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                  className="text-muted hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                 >
                   <IconFileSpreadsheet className="w-3 h-3 text-brand-cyan" />
                   CRF Studio &amp; EDC
@@ -228,7 +228,7 @@ export const Footer: React.FC = () => {
                 <Link
                   href="/proof"
                   onMouseEnter={handleHover}
-                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                  className="text-muted hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                 >
                   <IconBrain className="w-3 h-3 text-brand-cyan" />
                   Proof Workspace
@@ -239,7 +239,7 @@ export const Footer: React.FC = () => {
                   <Link
                     href="/simulator"
                     onMouseEnter={handleHover}
-                    className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                    className="text-muted hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                   >
                     <IconActivity className="w-3 h-3 text-brand-cyan" />
                     Incident Simulator
@@ -251,7 +251,7 @@ export const Footer: React.FC = () => {
                   href="/#about"
                   onClick={(e) => handleHashClick(e, "about")}
                   onMouseEnter={handleHover}
-                  className="text-zinc-400 hover:text-brand-cyan transition-colors"
+                  className="text-muted hover:text-brand-cyan transition-colors"
                 >
                   About &amp; Experience
                 </Link>
@@ -261,7 +261,7 @@ export const Footer: React.FC = () => {
 
           {/* Col 4: Connect & Schedule */}
           <div className="space-y-4">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-muted-strong flex items-center gap-1.5">
               <IconCalendar className="w-3.5 h-3.5 text-brand-cyan" />
               Connect
             </span>
@@ -280,9 +280,9 @@ export const Footer: React.FC = () => {
                 <a
                   href="mailto:fpderuiter@gmail.com"
                   onMouseEnter={handleHover}
-                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                  className="text-muted hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                 >
-                  <IconMail className="w-3 h-3 text-zinc-400" />
+                  <IconMail className="w-3 h-3 text-muted" />
                   fpderuiter@gmail.com
                 </a>
               </li>
@@ -292,9 +292,9 @@ export const Footer: React.FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   onMouseEnter={handleHover}
-                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                  className="text-muted hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                 >
-                  <IconBrandGithub className="w-3 h-3 text-zinc-400" />
+                  <IconBrandGithub className="w-3 h-3 text-muted" />
                   GitHub Repos ↗
                 </a>
               </li>
@@ -304,9 +304,9 @@ export const Footer: React.FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   onMouseEnter={handleHover}
-                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                  className="text-muted hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                 >
-                  <IconBrandLinkedin className="w-3 h-3 text-zinc-400" />
+                  <IconBrandLinkedin className="w-3 h-3 text-muted" />
                   LinkedIn Network ↗
                 </a>
               </li>
@@ -315,7 +315,7 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Strip */}
-        <div className="pt-8 border-t border-zinc-900/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-zinc-400">
+        <div className="pt-8 border-t border-border/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-muted">
           <div className="flex items-center gap-3">
             <span>&copy; {new Date().getFullYear()} Frederick de Ruiter. All rights reserved.</span>
           </div>
@@ -328,12 +328,12 @@ export const Footer: React.FC = () => {
             >
               Systems Proof &amp; Verification
             </Link>
-            <span className="text-zinc-700">&bull;</span>
+            <span className="text-border">&bull;</span>
             <button
               type="button"
               onClick={scrollToTop}
               onMouseEnter={handleHover}
-              className="inline-flex items-center gap-1 text-zinc-400 hover:text-brand-cyan transition-colors cursor-pointer group"
+              className="inline-flex items-center gap-1 text-muted hover:text-brand-cyan transition-colors cursor-pointer group"
               aria-label="Scroll back to top of page"
             >
               <span>Back to Top</span>

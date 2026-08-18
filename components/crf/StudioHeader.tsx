@@ -135,45 +135,45 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
   ];
 
   return (
-    <header className="border-b border-zinc-850 bg-zinc-950/95 sticky top-0 z-30 backdrop-blur-xl">
+    <header className="border-b border-crf-border bg-crf-surface-1 sticky top-0 z-30 backdrop-blur-xl">
       {/* Top Banner Row */}
-      <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 gap-2 border-b border-zinc-900">
+      <div className="flex items-center justify-between px-3 sm:px-5 py-2.5 gap-2 border-b border-crf-border">
         {/* Left Side: Brand & Protocol Selector & Left Sidebar Toggle */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           {/* Left Sidebar Toggle Button (Only in Designer mode) */}
           {activeMode === "designer" && onToggleLeftSidebar && (
             <button
               onClick={onToggleLeftSidebar}
-              className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800 transition-colors hidden md:inline-flex items-center gap-1 text-[11px] font-mono"
+              className="p-1.5 rounded-lg bg-crf-surface-2 hover:bg-crf-border-subtle text-crf-text-muted hover:text-crf-text border border-crf-border transition-colors hidden md:inline-flex items-center gap-1 text-[11px] font-mono"
               title={`Toggle Left Navigator (${navigator?.platform?.toUpperCase()?.includes("MAC") ? "⌘B" : "Ctrl+B"})`}
             >
               {isLeftSidebarOpen ? (
                 <IconLayoutSidebarLeftCollapse className="w-4 h-4 text-brand-cyan" />
               ) : (
-                <IconLayoutSidebarLeftExpand className="w-4 h-4 text-zinc-400" />
+                <IconLayoutSidebarLeftExpand className="w-4 h-4 text-crf-text-muted" />
               )}
             </button>
           )}
 
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-brand-cyan animate-pulse shrink-0" />
-            <span className="font-mono text-xs sm:text-sm font-extrabold text-white tracking-wider uppercase truncate">
+            <span className="font-mono text-xs sm:text-sm font-extrabold text-crf-text tracking-wider uppercase truncate">
               CRF Studio
             </span>
           </div>
 
-          <div className="h-4 w-px bg-zinc-800 hidden sm:block" />
+          <div className="h-4 w-px bg-crf-border hidden sm:block" />
 
           {/* Preset / Protocol Selector */}
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className="text-[10px] font-mono text-zinc-500 uppercase hidden lg:inline">
+            <span className="text-[10px] font-mono text-crf-text-dim uppercase hidden lg:inline">
               Protocol:
             </span>
             <select
               onChange={(e) => onSelectPreset(e.target.value)}
               value={currentPreset?.id || "custom"}
               aria-label="Select Clinical Protocol Preset"
-              className="bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-200 rounded-lg px-2 py-1 focus:border-brand-cyan focus:ring-1 focus:ring-brand-cyan focus:outline-none max-w-[140px] xs:max-w-[180px] sm:max-w-xs truncate"
+              className="bg-crf-input-bg border border-crf-input-border text-xs font-mono text-crf-text rounded-lg px-2 py-1 focus:border-brand-cyan focus:ring-1 focus:ring-brand-cyan focus:outline-none max-w-[140px] xs:max-w-[180px] sm:max-w-xs truncate"
             >
               {STUDY_PRESETS.map((p) => (
                 <option key={p.id} value={p.id}>

@@ -230,6 +230,12 @@ Re-exports [evaluateRule](expression-evaluator/functions/evaluateRule.md)
 
 ***
 
+### ExpandedRField
+
+Re-exports [ExpandedRField](export-r/interfaces/ExpandedRField.md)
+
+***
+
 ### ExportDocxOptions
 
 Re-exports [ExportDocxOptions](types/interfaces/ExportDocxOptions.md)
@@ -380,6 +386,24 @@ Re-exports [generateStudyPdf](export-pdf/functions/generateStudyPdf.md)
 
 ***
 
+### getExpandedRFields
+
+Re-exports [getExpandedRFields](export-r/functions/getExpandedRFields.md)
+
+***
+
+### getExpandedSasAttributes
+
+Re-exports [getExpandedSasAttributes](export-sas/functions/getExpandedSasAttributes.md)
+
+***
+
+### getFieldOptions
+
+Re-exports [getFieldOptions](export-r/functions/getFieldOptions.md)
+
+***
+
 ### getFieldSasAttributes
 
 Re-exports [getFieldSasAttributes](export-sas/functions/getFieldSasAttributes.md)
@@ -434,6 +458,12 @@ Re-exports [NUMERIC_DATA_TYPES](formula-linter/variables/NUMERIC_DATA_TYPES.md)
 
 ***
 
+### parseMultiSelectValue
+
+Re-exports [parseMultiSelectValue](export-r/functions/parseMultiSelectValue.md)
+
+***
+
 ### sanitizeRName
 
 Re-exports [sanitizeRName](export-r/functions/sanitizeRName.md)
@@ -443,12 +473,6 @@ Re-exports [sanitizeRName](export-r/functions/sanitizeRName.md)
 ### sanitizeSasName
 
 Re-exports [sanitizeSasName](export-sas/functions/sanitizeSasName.md)
-
-***
-
-### SasFieldAttributes
-
-Re-exports [SasFieldAttributes](export-sas/interfaces/SasFieldAttributes.md)
 
 ***
 

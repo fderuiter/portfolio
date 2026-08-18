@@ -1,6 +1,5 @@
 "use client";
 
-import "./studio-theme.css";
 import React, { useState, useCallback, useEffect } from "react";
 import { useClipboard } from "@/hooks/useClipboard";
 import {

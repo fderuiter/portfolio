@@ -19,6 +19,26 @@
   --error: #f87171;
   --warning: #f59e0b;
 
+  /* CRF Studio Default Dark Tokens */
+  --focus-ring: var(--warning);
+  --crf-bg: #09090b;
+  --crf-canvas-bg: rgba(9, 9, 11, 0.8);
+  --crf-surface-1: #18181b;
+  --crf-surface-2: #27272a;
+  --crf-surface-3: #18181b;
+  --crf-border: #27272a;
+  --crf-border-subtle: #3f3f46;
+  --crf-border-hover: #52525b;
+  --crf-text: #f4f4f5;
+  --crf-text-muted: #a1a1aa;
+  --crf-text-dim: #71717a;
+  --crf-input-bg: #18181b;
+  --crf-input-border: #3f3f46;
+  --crf-pill-bg: #27272a;
+  --crf-pill-text: #e4e4e7;
+  --crf-shadow-card: none;
+  --crf-shadow-elevated: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+
   /* Typography Sizes */
   --font-size-sm: 13px;
   --line-height-sm: 18px;
@@ -51,6 +71,87 @@
   --breakpoint-2xl: 1536px;
 }
 
+/* Global & Scoped Light Mode Tokens (WCAG 2.1 Level AA Compliant) */
+[data-theme="light"],
+[data-studio-theme="light"] {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --surface-1: #ffffff;
+  --surface-2: #f1f5f9;
+  --border: #e2e8f0;
+  --border-active: #b45309;
+  --muted: #475569;
+  --muted-strong: #334155;
+  --brand-cyan: #0284c7;
+  --brand-cyan-glow: rgba(2, 132, 199, 0.15);
+  --brand-blue: #2563eb;
+  --brand-blue-glow: rgba(37, 99, 235, 0.10);
+  --brand-dark: #f8fafc;
+  --success: #059669;
+  --error: #dc2626;
+  --warning: #b45309;
+
+  --focus-ring: #b45309;
+  --crf-bg: #f8fafc;
+  --crf-canvas-bg: #f1f5f9;
+  --crf-surface-1: #ffffff;
+  --crf-surface-2: #f8fafc;
+  --crf-surface-3: #f1f5f9;
+  --crf-border: #e2e8f0;
+  --crf-border-subtle: #cbd5e1;
+  --crf-border-hover: #94a3b8;
+  --crf-text: #0f172a;
+  --crf-text-muted: #475569;
+  --crf-text-dim: #64748b;
+  --crf-input-bg: #ffffff;
+  --crf-input-border: #cbd5e1;
+  --crf-pill-bg: #e2e8f0;
+  --crf-pill-text: #1e293b;
+  --crf-shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  --crf-shadow-elevated: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  color-scheme: light;
+}
+
+[data-theme="dark"],
+[data-studio-theme="dark"] {
+  --background: #0d0e11;
+  --foreground: #f4f4f6;
+  --surface-1: rgba(20, 22, 28, 0.75);
+  --surface-2: rgba(28, 31, 39, 0.55);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-active: rgba(245, 158, 11, 0.4);
+  --muted: #94a3b8;
+  --muted-strong: #cbd5e1;
+  --brand-cyan: #06b6d4;
+  --brand-cyan-glow: rgba(6, 182, 212, 0.15);
+  --brand-blue: #3b82f6;
+  --brand-blue-glow: rgba(59, 130, 246, 0.10);
+  --brand-dark: #0d0e11;
+  --success: #10b981;
+  --error: #f87171;
+  --warning: #f59e0b;
+
+  --focus-ring: var(--warning);
+  --crf-bg: #09090b;
+  --crf-canvas-bg: rgba(9, 9, 11, 0.8);
+  --crf-surface-1: #18181b;
+  --crf-surface-2: #27272a;
+  --crf-surface-3: #18181b;
+  --crf-border: #27272a;
+  --crf-border-subtle: #3f3f46;
+  --crf-border-hover: #52525b;
+  --crf-text: #f4f4f5;
+  --crf-text-muted: #a1a1aa;
+  --crf-text-dim: #71717a;
+  --crf-input-bg: #18181b;
+  --crf-input-border: #3f3f46;
+  --crf-pill-bg: #27272a;
+  --crf-pill-text: #e4e4e7;
+  --crf-shadow-card: none;
+  --crf-shadow-elevated: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+  color-scheme: dark;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -68,6 +169,22 @@
   --color-success: var(--success);
   --color-error: var(--error);
   --color-warning: var(--warning);
+
+  --color-crf-bg: var(--crf-bg);
+  --color-crf-canvas-bg: var(--crf-canvas-bg);
+  --color-crf-surface-1: var(--crf-surface-1);
+  --color-crf-surface-2: var(--crf-surface-2);
+  --color-crf-surface-3: var(--crf-surface-3);
+  --color-crf-border: var(--crf-border);
+  --color-crf-border-subtle: var(--crf-border-subtle);
+  --color-crf-border-hover: var(--crf-border-hover);
+  --color-crf-text: var(--crf-text);
+  --color-crf-text-muted: var(--crf-text-muted);
+  --color-crf-text-dim: var(--crf-text-dim);
+  --color-crf-input-bg: var(--crf-input-bg);
+  --color-crf-input-border: var(--crf-input-border);
+  --color-crf-pill-bg: var(--crf-pill-bg);
+  --color-crf-pill-text: var(--crf-pill-text);
 
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
