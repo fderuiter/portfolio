@@ -8,6 +8,7 @@ import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageLayout } from "@/components/PageLayout";
 import { resolveBaseUrl } from "@/lib/domain";
+import { getBreadcrumbSchema } from "@/lib/seo";
 
 export const revalidate = 3600;
 
@@ -78,6 +79,15 @@ export default async function CaseStudiesPage() {
       className="relative bg-zinc-950 text-foreground outline-none"
     >
       {/* Ambient background glows */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: getBreadcrumbSchema([
+            { name: "Home", url: "/" },
+            { name: "Case Studies", url: "/case-studies" },
+          ]),
+        }}
+      />
       <div className="absolute top-20 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full bg-brand-cyan/5 blur-[140px] pointer-events-none" />
       <div className="absolute top-60 left-1/3 w-80 h-80 rounded-full bg-brand-blue/5 blur-[160px] pointer-events-none" />
 

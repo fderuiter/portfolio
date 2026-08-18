@@ -7,7 +7,7 @@ import { TracingBeam } from "@/components/ui/TracingBeam";
 import { RichNarrative } from "@/components/RichNarrative";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { getGitHubStats, parseGitHubUrl, getSimulatedStats } from "@/lib/github";
-import { getSoftwareSourceCodeSchema } from "@/lib/seo";
+import { getSoftwareSourceCodeSchema, getBreadcrumbSchema } from "@/lib/seo";
 import { TelemetryTracker } from "@/components/TelemetryTracker";
 import { TerminologyToggle } from "@/components/TerminologyToggle";
 import SchemaFlowWorkspaceWrapper from "@/components/SchemaFlowWorkspaceWrapper";
@@ -179,6 +179,16 @@ export default async function CaseStudyPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: getSoftwareSourceCodeSchema(study, stats),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: getBreadcrumbSchema([
+            { name: "Home", url: "/" },
+            { name: "Case Studies", url: "/case-studies" },
+            { name: study.title, url: `/case-studies/${study.slug}` },
+          ]),
         }}
       />
       {/* Background Blurs */}

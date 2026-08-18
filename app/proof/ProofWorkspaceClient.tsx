@@ -1427,7 +1427,7 @@ export function ProofWorkspaceClient() {
         {/* Header and Breadcrumbs */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
           <div className="space-y-1">
-            <Breadcrumbs items={[{ label: "Interactive Suite", href: "/" }, { label: "Logical Proof Workspace" }]} />
+            <Breadcrumbs items={[{ label: "Logical Proof Workspace", href: "/proof" }]} />
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2">
               <IconCpu className="w-8 h-8 text-brand-cyan animate-pulse" />
               Logical Proof Canvas

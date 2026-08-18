@@ -10,7 +10,6 @@ export default function NeuroReconPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 w-full">
         <Breadcrumbs
           items={[
-            { label: "Home", href: "/" },
             { label: "Systems", href: "/#about" },
             { label: "NeuroRecon Studio", href: "/neuro" },
           ]}

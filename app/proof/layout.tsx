@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { buildRouteMetadata, ROUTE_METADATA_CONFIGS } from "@/lib/seo-metadata";
-import { getWebApplicationSchema } from "@/lib/seo";
+import { getWebApplicationSchema, getBreadcrumbSchema } from "@/lib/seo";
 
 export const metadata: Metadata = buildRouteMetadata(ROUTE_METADATA_CONFIGS.proof);
 
@@ -17,6 +17,15 @@ export default function ProofLayout({ children }: { children: React.ReactNode })
             applicationCategory: "EducationalApplication",
             genre: "Formal Verification Logic Workspace",
           }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: getBreadcrumbSchema([
+            { name: "Home", url: "/" },
+            { name: "Logical Proof Workspace", url: "/proof" },
+          ]),
         }}
       />
       {children}
