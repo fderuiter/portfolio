@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore, useCallback, useEffect, startTransition } from "react";
 import { sanitizeError } from "@/lib/error-sanitization";
+import { safeStorage } from "@/lib/safe-storage";
 
 export interface ProjectTelemetry {
   views: number;
@@ -219,10 +220,10 @@ function updateStore(updater: (prev: TelemetryStoreState) => TelemetryStoreState
   if (next.telemetry !== currentStoreState.telemetry || next.syncFailed !== currentStoreState.syncFailed) {
     currentStoreState = next;
     try {
-      if (typeof window !== "undefined" && typeof window.localStorage?.setItem === "function") {
+      if (typeof window !== "undefined") {
         const stringified = JSON.stringify(currentStoreState.telemetry);
         lastRawCache = stringified;
-        localStorage.setItem(CACHE_KEY, stringified);
+        safeStorage.setItem(CACHE_KEY, currentStoreState.telemetry, { expirable: true, ttlMs: 7 * 24 * 60 * 60 * 1000 });
         window.dispatchEvent(new CustomEvent(TELEMETRY_CHANGE_EVENT));
       }
     } catch (e) {
@@ -233,18 +234,18 @@ function updateStore(updater: (prev: TelemetryStoreState) => TelemetryStoreState
 }
 
 function syncFromStorage() {
-  if (typeof window !== "undefined" && typeof window.localStorage?.getItem === "function") {
+  if (typeof window !== "undefined") {
     try {
-      const raw = localStorage.getItem(CACHE_KEY);
+      const stored = safeStorage.getItem<TelemetryData>(CACHE_KEY);
+      const raw = stored ? JSON.stringify(stored) : null;
       if (raw !== lastRawCache) {
         lastRawCache = raw;
-        if (raw) {
-          const parsed = JSON.parse(raw);
+        if (stored) {
           currentStoreState = {
             ...currentStoreState,
             telemetry: {
               ...currentStoreState.telemetry,
-              ...parsed,
+              ...stored,
             },
           };
         }

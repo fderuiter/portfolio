@@ -143,7 +143,7 @@ describe("Concurrency & State Synchronization Guardrail Suite", () => {
 
       expect(container.querySelector('[data-testid="val-a"]')?.textContent).toBe("from_a");
       expect(container.querySelector('[data-testid="val-b"]')?.textContent).toBe("from_a");
-      expect(mockStorage.getItem("shared_setting")).toBe(JSON.stringify("from_a"));
+      expect(JSON.parse(mockStorage.getItem("shared_setting")!).value).toBe("from_a");
 
       // Mutate from Component B
       await act(async () => {

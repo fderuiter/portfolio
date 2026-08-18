@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext } from "react";
 import { usePersistentState } from "@/hooks/usePersistentState";
+import { safeStorage } from "@/lib/safe-storage";
 
 interface TerminologyContextType {
   simplified: boolean;
@@ -28,9 +29,9 @@ export const useTerminology = () => {
     let initialSimplified = false;
     if (typeof window !== "undefined") {
       try {
-        const stored = window.localStorage.getItem("simplified-terminology");
+        const stored = safeStorage.getItem<boolean | string>("simplified-terminology");
         if (stored !== null) {
-          initialSimplified = JSON.parse(stored) === true;
+          initialSimplified = stored === true || stored === "true";
         }
       } catch {
         // ignore parse error
@@ -44,3 +45,4 @@ export const useTerminology = () => {
   }
   return context;
 };
+

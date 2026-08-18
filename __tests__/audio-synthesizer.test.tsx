@@ -37,12 +37,12 @@ describe("Audio Synthesizer & Sound Settings Engine", () => {
   });
 
   it("should persist user configuration settings inside localStorage", () => {
-    expect(providerContent).toContain('localStorage.getItem("sound_volume")');
-    expect(providerContent).toContain('localStorage.getItem("sound_muted")');
-    expect(providerContent).toContain('localStorage.getItem("sound_profile")');
-    expect(providerContent).toContain('localStorage.setItem("sound_volume"');
-    expect(providerContent).toContain('localStorage.setItem("sound_muted"');
-    expect(providerContent).toContain('localStorage.setItem("sound_profile"');
+    expect(providerContent).toContain('safeStorage.getItem<string | number>("sound_volume")');
+    expect(providerContent).toContain('safeStorage.getItem<string | boolean>("sound_muted")');
+    expect(providerContent).toContain('safeStorage.getItem<string>("sound_profile")');
+    expect(providerContent).toContain('safeStorage.setItem("sound_volume"');
+    expect(providerContent).toContain('safeStorage.setItem("sound_muted"');
+    expect(providerContent).toContain('safeStorage.setItem("sound_profile"');
   });
 
   it("should implement automatic high-contrast mode bypass to protect assistive technologies", () => {

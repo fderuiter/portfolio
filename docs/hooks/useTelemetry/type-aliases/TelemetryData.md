@@ -8,4 +8,4 @@
 
 > **TelemetryData** = `Record`\<`string`, [`ProjectTelemetry`](../interfaces/ProjectTelemetry.md)\>
 
-Defined in: [hooks/useTelemetry.ts:11](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L11)
+Defined in: [hooks/useTelemetry.ts:12](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L12)

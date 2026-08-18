@@ -207,7 +207,7 @@ describe("useTelemetry Hook Integration & Isolation", () => {
 
     // Optimistic update: Views should IMMEDIATELY increment to 6 before POST resolves
     expect(viewsEl?.textContent).toBe("6");
-    expect(JSON.parse(localStorage.getItem("portfolio_telemetry_cache")!))
+    expect(JSON.parse(localStorage.getItem("portfolio_telemetry_cache")!).value)
       .toEqual({ "project-abc": { views: 6, clicks: 10 } });
 
     // Now resolve the POST promise

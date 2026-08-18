@@ -1,8 +1,7 @@
 "use client";
 
 import { useSyncExternalStore, useCallback, Dispatch, SetStateAction } from "react";
-
-const STORAGE_CHANGE_EVENT = "portfolio-persistent-state-change";
+import { safeStorage } from "@/lib/safe-storage";
 
 // In-memory cache for raw strings and parsed objects to maintain referential identity
 interface CachedEntry<T> {
@@ -11,30 +10,9 @@ interface CachedEntry<T> {
 }
 
 const memoryCache = new Map<string, CachedEntry<unknown>>();
-const subscribers = new Set<() => void>();
-
-function notifySubscribers() {
-  subscribers.forEach((callback) => callback());
-}
-
-if (typeof window !== "undefined") {
-  window.addEventListener("storage", (event) => {
-    if (event.key) {
-      memoryCache.delete(event.key);
-      notifySubscribers();
-    }
-  });
-
-  window.addEventListener(STORAGE_CHANGE_EVENT, () => {
-    notifySubscribers();
-  });
-}
 
 function subscribe(callback: () => void) {
-  subscribers.add(callback);
-  return () => {
-    subscribers.delete(callback);
-  };
+  return safeStorage.subscribe(callback);
 }
 
 function getStoredSnapshot<T>(key: string, initialValue: T): T {
@@ -42,36 +20,28 @@ function getStoredSnapshot<T>(key: string, initialValue: T): T {
     return initialValue;
   }
 
-  let raw: string | null = null;
+  let value: T | null = null;
   try {
-    raw = window.localStorage.getItem(key);
+    value = safeStorage.getItem<T>(key, initialValue);
   } catch (error) {
     console.warn(`Error reading localStorage key "${key}":`, error);
+    value = initialValue;
   }
 
+  const raw = value !== null ? JSON.stringify(value) : null;
   const cached = memoryCache.get(key) as CachedEntry<T> | undefined;
+
   if (cached && cached.raw === raw) {
     return cached.parsed;
   }
 
-  if (raw === null) {
-    memoryCache.set(key, { raw: null, parsed: initialValue });
-    return initialValue;
-  }
-
-  try {
-    const parsed = JSON.parse(raw) as T;
-    memoryCache.set(key, { raw, parsed });
-    return parsed;
-  } catch (error) {
-    console.warn(`Error parsing localStorage key "${key}":`, error);
-    memoryCache.set(key, { raw, parsed: initialValue });
-    return initialValue;
-  }
+  const resolvedValue = value ?? initialValue;
+  memoryCache.set(key, { raw, parsed: resolvedValue });
+  return resolvedValue;
 }
 
 /**
- * Custom hook that works like useState but persists state to localStorage using useSyncExternalStore.
+ * Custom hook that works like useState but persists state to localStorage using useSyncExternalStore and safeStorage.
  * Synchronizes seamlessly across multiple hook instances and browser tabs with zero tearing.
  *
  * @param key - The localStorage key to use for this state
@@ -95,13 +65,11 @@ export function usePersistentState<T>(
             ? (value as (prev: T) => T)(current)
             : value;
 
-        if (typeof window !== "undefined") {
-          const stringified = JSON.stringify(newValue);
-          window.localStorage.setItem(key, stringified);
-          memoryCache.set(key, { raw: stringified, parsed: newValue });
-          window.dispatchEvent(new CustomEvent(STORAGE_CHANGE_EVENT, { detail: { key } }));
+        const success = safeStorage.setItem(key, newValue, { expirable: false });
+        if (!success) {
+          console.warn(`Error setting localStorage key "${key}": Storage unavailable or quota exceeded`);
         }
-        notifySubscribers();
+        memoryCache.set(key, { raw: JSON.stringify(newValue), parsed: newValue });
       } catch (error) {
         console.warn(`Error setting localStorage key "${key}":`, error);
       }
@@ -111,3 +79,4 @@ export function usePersistentState<T>(
 
   return [state, setPersistentState];
 }
+

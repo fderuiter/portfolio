@@ -109,6 +109,7 @@
 - [lib/quasi-perfect/types](lib/quasi-perfect/types/README.md)
 - [lib/redis](lib/redis/README.md)
 - [lib/route-wrapper](lib/route-wrapper/README.md)
+- [lib/safe-storage](lib/safe-storage/README.md)
 - [lib/schemas](lib/schemas/README.md)
 - [lib/search-utils](lib/search-utils/README.md)
 - [lib/security](lib/security/README.md)

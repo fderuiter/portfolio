@@ -6,7 +6,7 @@
 
 # Interface: PendingDeferredTask
 
-Defined in: [hooks/useTelemetry.ts:41](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L41)
+Defined in: [hooks/useTelemetry.ts:42](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L42)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [hooks/useTelemetry.ts:41](https://github.com/fderuiter/portfolio/bl
 
 > **eventType**: [`TelemetryEventType`](../type-aliases/TelemetryEventType.md)
 
-Defined in: [hooks/useTelemetry.ts:44](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L44)
+Defined in: [hooks/useTelemetry.ts:45](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L45)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [hooks/useTelemetry.ts:44](https://github.com/fderuiter/portfolio/bl
 
 > **id**: `string`
 
-Defined in: [hooks/useTelemetry.ts:42](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L42)
+Defined in: [hooks/useTelemetry.ts:43](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L43)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [hooks/useTelemetry.ts:42](https://github.com/fderuiter/portfolio/bl
 
 > **projectSlug**: `string`
 
-Defined in: [hooks/useTelemetry.ts:43](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L43)
+Defined in: [hooks/useTelemetry.ts:44](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L44)

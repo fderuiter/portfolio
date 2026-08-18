@@ -8,9 +8,9 @@
 
 > **usePersistentState**\<`T`\>(`key`, `initialValue`): \[`T`, `Dispatch`\<`SetStateAction`\<`T`\>\>\]
 
-Defined in: [hooks/usePersistentState.ts:80](https://github.com/fderuiter/portfolio/blob/main/hooks/usePersistentState.ts#L80)
+Defined in: [hooks/usePersistentState.ts:50](https://github.com/fderuiter/portfolio/blob/main/hooks/usePersistentState.ts#L50)
 
-Custom hook that works like useState but persists state to localStorage using useSyncExternalStore.
+Custom hook that works like useState but persists state to localStorage using useSyncExternalStore and safeStorage.
 Synchronizes seamlessly across multiple hook instances and browser tabs with zero tearing.
 
 ## Type Parameters

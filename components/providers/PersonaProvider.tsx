@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useMemo, useEffect } from "react";
+import { safeStorage } from "@/lib/safe-storage";
 
 type PersonaType = "recruiter" | "technical";
 
@@ -17,10 +18,10 @@ export function PersonaProvider({ children }: { children: React.ReactNode }) {
   // Hydrate from localStorage on client mount to persist choice across navigation/refreshes
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("global-persona");
+      const saved = safeStorage.getItem<string>("global-persona");
       if (saved === "technical" || saved === "recruiter") {
         setTimeout(() => {
-          setPersonaState(saved);
+          setPersonaState(saved as PersonaType);
         }, 0);
       }
     } catch (e) {
@@ -31,7 +32,7 @@ export function PersonaProvider({ children }: { children: React.ReactNode }) {
   const setPersona = (newPersona: PersonaType) => {
     setPersonaState(newPersona);
     try {
-      localStorage.setItem("global-persona", newPersona);
+      safeStorage.setItem("global-persona", newPersona, { expirable: false });
     } catch (e) {
       console.error("Failed to save global-persona to localStorage", e);
     }
@@ -58,9 +59,9 @@ export function usePersona() {
     let saved: PersonaType | null = null;
     if (typeof window !== "undefined") {
       try {
-        const stored = localStorage.getItem("global-persona");
+        const stored = safeStorage.getItem<string>("global-persona");
         if (stored === "technical" || stored === "recruiter") {
-          saved = stored;
+          saved = stored as PersonaType;
         }
       } catch {
         // ignore storage read failure
@@ -73,3 +74,4 @@ export function usePersona() {
   }
   return context;
 }
+

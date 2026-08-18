@@ -8,7 +8,7 @@
 
 > **getRetryQueueLength**(): `number`
 
-Defined in: [hooks/useTelemetry.ts:180](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L180)
+Defined in: [hooks/useTelemetry.ts:181](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L181)
 
 Get the number of currently queued telemetry retry items.
 

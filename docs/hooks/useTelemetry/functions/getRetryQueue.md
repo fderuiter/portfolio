@@ -8,7 +8,7 @@
 
 > **getRetryQueue**(): [`QueuedEvent`](../interfaces/QueuedEvent.md)[]
 
-Defined in: [hooks/useTelemetry.ts:171](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L171)
+Defined in: [hooks/useTelemetry.ts:172](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L172)
 
 Get a shallow copy of the current in-memory retry queue.
 

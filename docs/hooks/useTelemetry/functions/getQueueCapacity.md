@@ -8,7 +8,7 @@
 
 > **getQueueCapacity**(): `number`
 
-Defined in: [hooks/useTelemetry.ts:162](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L162)
+Defined in: [hooks/useTelemetry.ts:163](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L163)
 
 Get the current maximum capacity limit of the telemetry retry queue.
 

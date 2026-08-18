@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import { safeStorage } from "@/lib/safe-storage";
 
 export type AudioProfile = "8-bit" | "90s-retro" | "ambient";
 
@@ -59,19 +60,19 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const savedVolume = localStorage.getItem("sound_volume");
-    const savedMuted = localStorage.getItem("sound_muted");
-    const savedProfile = localStorage.getItem("sound_profile");
+    const savedVolume = safeStorage.getItem<string | number>("sound_volume");
+    const savedMuted = safeStorage.getItem<string | boolean>("sound_muted");
+    const savedProfile = safeStorage.getItem<string>("sound_profile");
 
     setTimeout(() => {
-      if (savedVolume !== null) {
-        setVolumeState(parseFloat(savedVolume));
+      if (savedVolume !== null && savedVolume !== undefined) {
+        setVolumeState(typeof savedVolume === "number" ? savedVolume : parseFloat(String(savedVolume)));
       }
-      if (savedMuted !== null) {
-        setMutedState(savedMuted === "true");
+      if (savedMuted !== null && savedMuted !== undefined) {
+        setMutedState(savedMuted === true || savedMuted === "true");
       }
-      if (savedProfile !== null) {
-        setProfileState(savedProfile as AudioProfile);
+      if (savedProfile !== null && savedProfile !== undefined) {
+        setProfileState(String(savedProfile) as AudioProfile);
       }
     }, 0);
   }, []);
@@ -288,14 +289,14 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     const val = Math.max(0, Math.min(1, v));
     setVolumeState(val);
     if (typeof window !== "undefined") {
-      localStorage.setItem("sound_volume", String(val));
+      safeStorage.setItem("sound_volume", val, { expirable: false });
     }
   };
 
   const handleSetMuted = (m: boolean) => {
     setMutedState(m);
     if (typeof window !== "undefined") {
-      localStorage.setItem("sound_muted", String(m));
+      safeStorage.setItem("sound_muted", m, { expirable: false });
     }
     if (!m) {
       const ctx = getAudioContext();
@@ -308,7 +309,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const handleSetProfile = (p: AudioProfile) => {
     setProfileState(p);
     if (typeof window !== "undefined") {
-      localStorage.setItem("sound_profile", p);
+      safeStorage.setItem("sound_profile", p, { expirable: false });
     }
     
     // Play sound confirmation for swapped profile
