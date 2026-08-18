@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { CaseStudySubmissionSchema } from "@/lib/schemas";
 import { CaseStudyService } from "@/lib/services/case-study-service";
 import { createApiHandler } from "@/lib/route-wrapper";
 import { sanitizeError } from "@/lib/error-sanitization";
+import { checkRequestSubmissionRateLimit } from "@/lib/moderation";
 
 export const dynamic = "force-dynamic";
 
@@ -24,8 +25,16 @@ export const GET = createApiHandler(async () => {
 });
 
 export const POST = createApiHandler(
-  async (_req, { data }) => {
+  async (req: NextRequest, { data }) => {
     try {
+      const rateLimitCheck = checkRequestSubmissionRateLimit(req);
+      if (rateLimitCheck.isRateLimited) {
+        return NextResponse.json(
+          { error: "Too many submission attempts. Please try again later." },
+          { status: 429 }
+        );
+      }
+
       const newCaseStudy = await CaseStudyService.submitCaseStudy(data);
       return NextResponse.json(
         {
@@ -67,8 +76,15 @@ export const POST = createApiHandler(
         path: issue.path.join(".") || "payload",
         message: issue.message,
       }));
+      const isToneViolation = issues.some((i) =>
+        i.message.toLowerCase().includes("tone") ||
+        i.message.toLowerCase().includes("constructive") ||
+        i.message.toLowerCase().includes("profanity")
+      );
       return {
-        error: "Missing or invalid case study submission fields",
+        error: isToneViolation
+          ? "Submission rejected: Content violates community tone standards."
+          : "Missing or invalid case study submission fields",
         details,
       };
     },
