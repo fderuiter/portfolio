@@ -56,7 +56,9 @@ export function exportFormToFhirQuestionnaire(form: CRFForm, study: StudyProtoco
     status: "active",
     date: new Date().toISOString().split("T")[0],
     publisher: study.sponsor || "Clinical Study Sponsor",
-    description: form.description,
+    description: form.description
+      ? `${form.description} • Schedule Consultation: /schedule`
+      : "Schedule Consultation: /schedule",
     item: form.sections.map((sec, sIdx) => ({
       linkId: `section-${sIdx + 1}`,
       text: sec.title,

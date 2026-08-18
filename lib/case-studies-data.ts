@@ -1,3 +1,5 @@
+import { compileTerms } from "./term-compiler";
+
 export interface CaseStudyData {
   id: string;
   slug: string;
@@ -114,7 +116,7 @@ export const IMEDNET_PLAYBACK_OBJ = [
   }
 ];
 
-export const FALLBACK_CASE_STUDIES: CaseStudyData[] = [
+const rawFallbackCaseStudies: CaseStudyData[] = [
   {
     id: "canonical-1",
     slug: "clinical-data-mapper",
@@ -331,3 +333,10 @@ interface SchemaNode {
     updated_at: new Date("2026-08-14T00:00:00Z"),
   },
 ];
+
+export const FALLBACK_CASE_STUDIES: CaseStudyData[] = rawFallbackCaseStudies.map((cs) => ({
+  ...cs,
+  editorial_content: compileTerms(cs.editorial_content),
+  architectural_narrative: compileTerms(cs.architectural_narrative),
+}));
+

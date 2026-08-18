@@ -376,7 +376,7 @@ export async function generateStudyPdf(
     // Running Footer
     doc.line(margin, pageHeight - 11, pageWidth - margin, pageHeight - 11);
     doc.text(
-      `${branding.footerText || "CRF Studio"} • CDISC CDASH 2.2`,
+      `${branding.footerText || "CRF Studio"} • CDISC CDASH 2.2 • Schedule Consultation: /schedule`,
       margin,
       pageHeight - 7
     );

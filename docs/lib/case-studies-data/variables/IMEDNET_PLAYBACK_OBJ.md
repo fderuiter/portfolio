@@ -8,7 +8,7 @@
 
 > `const` **IMEDNET\_PLAYBACK\_OBJ**: `object`[]
 
-Defined in: [lib/case-studies-data.ts:102](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L102)
+Defined in: [lib/case-studies-data.ts:104](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L104)
 
 ## Type Declaration
 

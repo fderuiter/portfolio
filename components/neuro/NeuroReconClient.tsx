@@ -86,6 +86,7 @@ import {
   IconLayersSubtract,
   IconShieldCheck,
   IconLink,
+  IconCalendar,
 } from "@tabler/icons-react";
 
 export const NeuroReconClient: React.FC = () => {
@@ -865,7 +866,17 @@ export const NeuroReconClient: React.FC = () => {
               </div>
 
               {/* Action buttons */}
-              <div className="flex items-center justify-center gap-3 pt-2">
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <a
+                  href="/schedule"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => recordEvent("neuro", "project_click")}
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-mono font-bold text-xs shadow-lg shadow-emerald-500/20 transition-all"
+                >
+                  <IconCalendar className="w-4 h-4" />
+                  <span>Schedule Consultation</span>
+                </a>
                 <button
                   onClick={() => setShowSuccessModal(false)}
                   className="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-mono transition-all"

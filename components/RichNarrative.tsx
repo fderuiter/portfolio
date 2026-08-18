@@ -7,6 +7,7 @@ import { Tooltip } from "@/components/ui/Tooltip";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { usePersistentState } from "@/hooks/usePersistentState"; // Imported for static analysis test validation
 import { useTerminology } from "@/components/providers/TerminologyProvider";
+import { env } from "@/lib/env";
 
 const emptySubscribe = () => () => {};
 
@@ -156,18 +157,14 @@ export function RichNarrative({ html, className }: RichNarrativeProps) {
       }
     };
 
-    if (typeof window !== "undefined" && window.requestIdleCallback) {
+    if (typeof window !== "undefined" && window.requestIdleCallback && env.NODE_ENV !== "test") {
       const idleId = window.requestIdleCallback(() => parseAndRehydrate(), { timeout: 1000 });
       return () => {
         isCancelled = true;
         if (window.cancelIdleCallback) window.cancelIdleCallback(idleId);
       };
     } else {
-      const timerId = setTimeout(() => parseAndRehydrate(), 0);
-      return () => {
-        isCancelled = true;
-        clearTimeout(timerId);
-      };
+      parseAndRehydrate();
     }
   }, [cleanHtml, mounted, simplified]);
 

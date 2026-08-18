@@ -10,6 +10,7 @@ import {
 } from "@/lib/crf/export-acrf";
 import { getStudyBranding } from "@/lib/crf/branding-defaults";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useTelemetry } from "@/hooks/useTelemetry";
 import {
   IconFileSpreadsheet,
   IconDownload,
@@ -21,6 +22,7 @@ import {
   IconBook,
   IconListCheck,
   IconLoader2,
+  IconCalendar,
 } from "@tabler/icons-react";
 
 interface ExportDocumentModalProps {
@@ -40,6 +42,7 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
     onEscape: onClose,
     returnFocus: true,
   });
+  const { recordEvent } = useTelemetry();
 
   const [exportMode, setExportMode] = useState<"blank" | "annotated">("blank");
   const [scope, setScope] = useState<"all" | "single" | "selected">("all");
@@ -78,6 +81,7 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
   const handleDownloadDocx = async () => {
     try {
       setIsExportingDocx(true);
+      recordEvent("crf", "project_click");
       const options = getEffectiveOptions();
       const blob = await generateStudyDocx(study, options);
       const url = URL.createObjectURL(blob);
@@ -101,6 +105,7 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
   const handleDownloadPdf = async () => {
     try {
       setIsExportingPdf(true);
+      recordEvent("crf", "project_click");
       const options = getEffectiveOptions();
       const blob = await generateStudyPdf(study, options);
       const url = URL.createObjectURL(blob);
@@ -122,6 +127,7 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
   };
 
   const handlePrint = () => {
+    recordEvent("crf", "project_click");
     const htmlContent =
       scope === "single" && activeForm
         ? generateAcrfHtml(activeForm, study, { mode: exportMode, branding })
@@ -351,14 +357,26 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
 
         {/* Footer Actions */}
         <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 border-t border-zinc-800 bg-zinc-950">
-          <button
-            type="button"
-            onClick={handlePrint}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-850 hover:bg-zinc-800 border border-zinc-750 text-zinc-200 font-mono text-xs transition-colors"
-          >
-            <IconPrinter className="w-4 h-4" />
-            <span>Print / Browser Preview</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handlePrint}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-850 hover:bg-zinc-800 border border-zinc-750 text-zinc-200 font-mono text-xs transition-colors"
+            >
+              <IconPrinter className="w-4 h-4" />
+              <span>Print / Preview</span>
+            </button>
+            <a
+              href="/schedule"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => recordEvent("crf", "project_click")}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold transition-all shadow-sm"
+            >
+              <IconCalendar className="w-4 h-4" />
+              <span>Schedule Consultation</span>
+            </a>
+          </div>
 
           <div className="flex items-center gap-2.5">
             {/* Word (.docx) Button */}

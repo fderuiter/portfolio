@@ -8,7 +8,7 @@
 
 > `const` **IMEDNET\_COMMANDS\_OBJ**: `object`
 
-Defined in: [lib/case-studies-data.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L18)
+Defined in: [lib/case-studies-data.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L20)
 
 ## Type Declaration
 

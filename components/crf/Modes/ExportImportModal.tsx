@@ -7,6 +7,7 @@ import { exportStudyToCdiscOdmXml } from "@/lib/crf/odm-xml-serializer";
 import { exportFormToFhirQuestionnaire } from "@/lib/crf/fhir-questionnaire";
 import { exportStudyToSas } from "@/lib/crf/export-sas";
 import { exportStudyToR } from "@/lib/crf/export-r";
+import { useTelemetry } from "@/hooks/useTelemetry";
 import {
   IconDownload,
   IconUpload,
@@ -18,6 +19,7 @@ import {
   IconTerminal,
   IconFileCode,
   IconAdjustments,
+  IconCalendar,
 } from "@tabler/icons-react";
 
 interface ExportImportModalProps {
@@ -35,6 +37,7 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   onOpenExportDocument,
   onOpenBranding,
 }) => {
+  const { recordEvent } = useTelemetry();
   const [activeTab, setActiveTab] = useState<ExportTab>("odm");
   const [selectedFormId, setSelectedFormId] = useState<string>("all");
   const [importJsonText, setImportJsonText] = useState("");
@@ -91,6 +94,7 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   };
 
   const handleDownload = () => {
+    recordEvent("crf", "project_click");
     let filename = `study-${study.protocolNumber}.json`;
     let mimeType = "application/json";
     const content = getActiveContent();
@@ -163,6 +167,17 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
+          <a
+            href="/schedule"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => recordEvent("crf", "project_click")}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold transition-all shadow-sm"
+          >
+            <IconCalendar className="w-4 h-4" />
+            <span>Schedule Consultation</span>
+          </a>
+
           {onOpenBranding && (
             <button
               onClick={onOpenBranding}

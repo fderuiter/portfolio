@@ -6,7 +6,7 @@
 
 # Interface: Dictionary
 
-Defined in: [lib/i18n-dictionary.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L17)
+Defined in: [lib/i18n-dictionary.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L19)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/i18n-dictionary.ts:17](https://github.com/fderuiter/portfolio/b
 
 > **bio**: `object`
 
-Defined in: [lib/i18n-dictionary.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L18)
+Defined in: [lib/i18n-dictionary.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L20)
 
 #### description
 
@@ -34,7 +34,7 @@ Defined in: [lib/i18n-dictionary.ts:18](https://github.com/fderuiter/portfolio/b
 
 > **domains**: `object`
 
-Defined in: [lib/i18n-dictionary.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L23)
+Defined in: [lib/i18n-dictionary.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L25)
 
 #### items
 
@@ -50,4 +50,4 @@ Defined in: [lib/i18n-dictionary.ts:23](https://github.com/fderuiter/portfolio/b
 
 > **timeline**: [`TimelineItem`](TimelineItem.md)[]
 
-Defined in: [lib/i18n-dictionary.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L27)
+Defined in: [lib/i18n-dictionary.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L29)

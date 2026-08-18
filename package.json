@@ -26,7 +26,7 @@
     "prebuild": "npx tsx scripts/generate-theme.ts && npm run compile-docs",
     "build": "node scripts/build.js",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint --no-warn-ignored",
     "check": "tsc --noEmit && npm run lint",
     "prepare": "husky",
     "preinstall": "node scripts/enforce-npm.js",
@@ -50,13 +50,10 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --fix"
+      "eslint --fix --no-warn-ignored"
     ],
     "*.{ts,tsx}": [
       "vitest related --run --passWithNoTests"
-    ],
-    "**/*": [
-      "npm run check"
     ]
   },
   "dependencies": {

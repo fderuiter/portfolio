@@ -219,7 +219,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
           <article className="prose prose-invert max-w-none text-neutral-300 leading-relaxed space-y-8">
             {/* Editorial Content Highlight block */}
             <div className="text-lg text-muted-strong font-medium border-l-2 border-brand-cyan/60 pl-6 py-2 italic bg-zinc-900/10 rounded-r-xl">
-              {study.editorial_content}
+              <RichNarrative html={study.editorial_content} />
             </div>
 
             {/* Tags list row */}
