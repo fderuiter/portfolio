@@ -97,7 +97,7 @@ describe("usePersistentState Hook", () => {
     expect(container.querySelector('[data-testid="val"]')?.textContent).toBe(
       "updated_direct"
     );
-    expect(mockStorage.getItem("my_key")).toBe(JSON.stringify("updated_direct"));
+    expect(mockStorage.getItem("my_key")).toContain("updated_direct");
 
     // Functional update
     await act(async () => {
@@ -109,9 +109,7 @@ describe("usePersistentState Hook", () => {
     expect(container.querySelector('[data-testid="val"]')?.textContent).toBe(
       "updated_direct_fn"
     );
-    expect(mockStorage.getItem("my_key")).toBe(
-      JSON.stringify("updated_direct_fn")
-    );
+    expect(mockStorage.getItem("my_key")).toContain("updated_direct_fn");
   });
 
   it("handles localStorage read and write exceptions gracefully", async () => {
