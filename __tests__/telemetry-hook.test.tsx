@@ -157,12 +157,8 @@ describe("useTelemetry Hook Integration & Isolation", () => {
 
     // Let background fetch resolve and verify update
     await act(async () => {
+      vi.advanceTimersByTime(2000);
       resolveGet();
-    });
-
-    // Run pending timers/microtasks
-    await act(async () => {
-      vi.advanceTimersByTime(0);
     });
 
     // Fetch returns 5 views, which merges/updates globalTelemetryData
@@ -186,7 +182,7 @@ describe("useTelemetry Hook Integration & Isolation", () => {
     const viewsEl = container.querySelector('[data-testid="views"]');
     // Before click, wait for background fetch to resolve
     await act(async () => {
-      vi.advanceTimersByTime(0);
+      vi.advanceTimersByTime(2000);
     });
     expect(viewsEl?.textContent).toBe("5");
 
@@ -243,7 +239,7 @@ describe("useTelemetry Hook Integration & Isolation", () => {
 
     const viewsEl = container.querySelector('[data-testid="views"]');
     await act(async () => {
-      vi.advanceTimersByTime(0);
+      vi.advanceTimersByTime(2000);
     });
     expect(viewsEl?.textContent).toBe("5");
 
@@ -272,7 +268,7 @@ describe("useTelemetry Hook Integration & Isolation", () => {
 
     // Resolve initial fetch GET
     await act(async () => {
-      vi.advanceTimersByTime(0);
+      vi.advanceTimersByTime(2000);
     });
 
     // 1. Test project_click
@@ -511,6 +507,10 @@ describe("useTelemetry Hook Integration & Isolation", () => {
       );
     });
 
+    await act(async () => {
+      vi.advanceTimersByTime(2000);
+    });
+
     // Verify GET fetch was initiated exactly once for all 3 components
     const getCalls = fetchMock.mock.calls.filter(([url, init]: [string, any]) => url === "/api/telemetry" && (!init || init.method === "GET"));
     expect(getCalls.length).toBe(1);
@@ -548,7 +548,7 @@ describe("useTelemetry Hook Integration & Isolation", () => {
     });
 
     await act(async () => {
-      vi.advanceTimersByTime(0);
+      vi.advanceTimersByTime(2000);
     });
 
     expect(callCount).toBe(1);
