@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from "react";
-import { render, screen, act } from "@testing-library/react";
+import { render, screen, act, cleanup } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Brain3DViewer } from "@/components/neuro/Brain3DViewer";
 import { WorkingWithDuck } from "@/components/WorkingWithDuck";
@@ -67,6 +67,7 @@ describe("Viewport-Driven Component Asset Guard", () => {
   });
 
   afterEach(() => {
+    cleanup();
     window.IntersectionObserver = originalIntersectionObserver;
   });
 

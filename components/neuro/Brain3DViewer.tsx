@@ -6,6 +6,7 @@ import * as THREE from "three";
 import { AnatomicalParcel, HemisphereFilter, SurfaceMode, VoxelCoord } from "@/lib/neuro/types";
 import { createCorticalSurfaceMesh, getAnatomicalParcelAtCoordinate } from "@/lib/neuro/mesh-generator";
 import { loadExternalBrainMesh } from "@/lib/neuro/asset-loader";
+import { globalNetworkScheduler } from "@/lib/network-scheduler";
 import { useWebGLContextLoss } from "@/hooks/useWebGLContextLoss";
 import { Icon3dCubeSphere, IconCheck, IconLayersSubtract, IconRefresh } from "@tabler/icons-react";
 
@@ -236,22 +237,34 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
       scene.add(fallbackGroup);
       meshGroupRef.current = fallbackGroup;
 
-      loadExternalBrainMesh(modelUrl, surfaceMode, hemiFilter).then((externalGroup) => {
-        if (!isMounted || !sceneRef.current) return;
-        sceneRef.current.remove(fallbackGroup);
-        fallbackGroup.traverse((obj) => {
-          if (obj instanceof THREE.Mesh) {
-            obj.geometry?.dispose();
-            if (Array.isArray(obj.material)) {
-              obj.material.forEach((m) => m.dispose());
-            } else {
-              obj.material?.dispose();
+      const cancelTask = globalNetworkScheduler.scheduleTask<THREE.Group>({
+        id: `brain-3d-${modelUrl}`,
+        priority: "low",
+        viewportProximity: isNearViewport,
+        deferOnSlowNetwork: true,
+        execute: () => loadExternalBrainMesh(modelUrl, surfaceMode, hemiFilter),
+        onSuccess: (externalGroup) => {
+          if (!isMounted || !sceneRef.current) return;
+          sceneRef.current.remove(fallbackGroup);
+          fallbackGroup.traverse((obj) => {
+            if (obj instanceof THREE.Mesh) {
+              obj.geometry?.dispose();
+              if (Array.isArray(obj.material)) {
+                obj.material.forEach((m) => m.dispose());
+              } else {
+                obj.material?.dispose();
+              }
             }
-          }
-        });
-        sceneRef.current.add(externalGroup);
-        meshGroupRef.current = externalGroup;
+          });
+          sceneRef.current.add(externalGroup);
+          meshGroupRef.current = externalGroup;
+        },
       });
+
+      return () => {
+        isMounted = false;
+        cancelTask();
+      };
     } else {
       const newGroup = createCorticalSurfaceMesh(surfaceMode, wireframeActive, hemiFilter);
       scene.add(newGroup);

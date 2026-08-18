@@ -30,3 +30,9 @@
 - [checkWorkspaceIdeConfig](functions/checkWorkspaceIdeConfig.md)
 - [printDoctorReport](functions/printDoctorReport.md)
 - [runDiagnostics](functions/runDiagnostics.md)
+
+## References
+
+### checkMediaBudgets
+
+Re-exports [checkMediaBudgets](../media-guard/functions/checkMediaBudgets.md)

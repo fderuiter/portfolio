@@ -8,7 +8,7 @@
 
 > **checkProactiveDefectInterception**(`root`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:794](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L794)
+Defined in: [lib/dx/doctor.ts:797](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L797)
 
 Check Proactive Defect Interception, Shift-Left Gateways & Synthetic Probes (AGENTS.md Invariant #12).
 

@@ -42,6 +42,9 @@ runStep('npx', ['tsx', 'scripts/generate-openapi.ts']);
 console.log("\n--- Phase 1.3: Verifying Terminology Glossary & Template Compiler Integrity ---");
 runStep('npx', ['tsx', 'scripts/verify-terms.ts']);
 
+console.log("\n--- Phase 1.4: Verifying Static Media Asset Budgets ---");
+runStep('npx', ['tsx', 'scripts/verify-media-budgets.ts']);
+
 // 3. Pre-Build Offline Migration Validation (Phase 1.5)
 console.log("\n--- Phase 1.5: Offline Migration Integrity and Safety Validation ---");
 runStep('npm', ['run', 'check:migrations']);
