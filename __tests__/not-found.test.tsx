@@ -103,7 +103,24 @@ describe("NotFound component & dynamic metadata hoisting", () => {
     expect(canonicalLink?.getAttribute("href")).toBe("https://my-custom-test-domain.com/some-broken-path");
   });
 
-  it("renders CaseStudyNotFound with custom badge, title, and interactive retro mini-game", async () => {
+  it("global NotFound recovery action targets the top of primary landing page /", async () => {
+    await act(async () => {
+      root = createRoot(container);
+      root.render(
+        <AudioProvider>
+          <SearchProvider>
+            <NotFound />
+          </SearchProvider>
+        </AudioProvider>
+      );
+    });
+
+    const actionLink = container.querySelector('a[href="/"]');
+    expect(actionLink).not.toBeNull();
+    expect(actionLink?.textContent).toContain("Return to Core");
+  });
+
+  it("renders CaseStudyNotFound with custom badge, title, interactive retro mini-game, and /#case-studies anchor", async () => {
     await act(async () => {
       root = createRoot(container);
       root.render(
@@ -123,8 +140,10 @@ describe("NotFound component & dynamic metadata hoisting", () => {
     // Check retro mini-game is rendered
     expect(container.textContent).toContain("SYSTEM_LABYRINTH.EXE");
 
-    // Check secondary action link
-    expect(container.textContent).toContain("Return to Core Feed");
+    // Check secondary action link targets portfolio section anchor
+    const actionLink = container.querySelector('a[href="/#case-studies"]');
+    expect(actionLink).not.toBeNull();
+    expect(actionLink?.textContent).toContain("Return to Core Feed");
 
     // Check page title hoisted in head
     expect(document.title).toBe("CASE_NOT_FOUND - Case Study Unresolved");

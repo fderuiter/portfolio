@@ -9,7 +9,7 @@ export default function CaseStudyNotFound() {
       title="Case Study Unresolved"
       description="The requested clinical case study narrative does not exist or has not been published to the active database partition."
       secondaryActionText="Return to Core Feed"
-      secondaryActionHref="/"
+      secondaryActionHref="/#case-studies"
       showRetroLabyrinth={true}
     />
   );
