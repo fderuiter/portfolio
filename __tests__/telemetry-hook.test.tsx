@@ -436,4 +436,34 @@ describe("useTelemetry Hook Integration & Isolation", () => {
       (process.env as any).NODE_ENV = originalEnv;
     }
   });
+
+  it("should evaluate telemetry state snapshot queries strictly in-memory without synchronous storage reads during component rendering", async () => {
+    const getItemSpy = vi.spyOn(window.localStorage, "getItem");
+
+    let renderCount = 0;
+    const PureRenderComponent = () => {
+      renderCount++;
+      const { telemetry } = useTelemetry();
+      return <div data-testid="telemetry-views">{telemetry["project-abc"]?.views ?? 0}</div>;
+    };
+
+    getItemSpy.mockClear();
+
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<PureRenderComponent />);
+    });
+
+    // Clear calls from subscription phase
+    getItemSpy.mockClear();
+
+    // Re-render component without triggering external storage changes
+    await act(async () => {
+      root.render(<PureRenderComponent />);
+    });
+
+    expect(renderCount).toBeGreaterThan(1);
+    // During pure render evaluation, getSnapshot MUST NOT call localStorage.getItem
+    expect(getItemSpy).not.toHaveBeenCalled();
+  });
 });

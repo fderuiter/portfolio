@@ -57,9 +57,35 @@ function updateStore(updater: (prev: TelemetryStoreState) => TelemetryStoreState
   }
 }
 
+function syncFromStorage() {
+  if (typeof window !== "undefined" && typeof window.localStorage?.getItem === "function") {
+    try {
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (raw !== lastRawCache) {
+        lastRawCache = raw;
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          currentStoreState = {
+            ...currentStoreState,
+            telemetry: {
+              ...currentStoreState.telemetry,
+              ...parsed,
+            },
+          };
+        }
+        notifyListeners();
+      }
+    } catch (e) {
+      console.warn("Failed to retrieve local storage telemetry cache:", sanitizeError(e));
+    }
+  }
+}
+
 if (typeof window !== "undefined") {
+  syncFromStorage();
+
   window.addEventListener("storage", (e) => {
-    if (e.key === CACHE_KEY) {
+    if (e.key === CACHE_KEY || !e.key) {
       lastRawCache = e.newValue;
       if (e.newValue) {
         try {
@@ -72,42 +98,36 @@ if (typeof window !== "undefined") {
         } catch (err) {
           console.warn("Failed to parse cross-tab telemetry storage event:", sanitizeError(err));
         }
+      } else {
+        currentStoreState = {
+          ...currentStoreState,
+          telemetry: {},
+        };
+        notifyListeners();
       }
     }
   });
 
   window.addEventListener(TELEMETRY_CHANGE_EVENT, () => {
-    notifyListeners();
+    syncFromStorage();
+  });
+
+  window.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      syncFromStorage();
+    }
   });
 }
 
 function subscribe(listener: () => void) {
   listeners.add(listener);
+  syncFromStorage();
   return () => {
     listeners.delete(listener);
   };
 }
 
 function getSnapshot(): TelemetryStoreState {
-  if (typeof window !== "undefined" && typeof window.localStorage?.getItem === "function") {
-    try {
-      const raw = localStorage.getItem(CACHE_KEY);
-      if (raw !== lastRawCache) {
-        lastRawCache = raw;
-        if (raw) {
-          currentStoreState = {
-            ...currentStoreState,
-            telemetry: {
-              ...currentStoreState.telemetry,
-              ...JSON.parse(raw),
-            },
-          };
-        }
-      }
-    } catch (e) {
-      console.warn("Failed to retrieve local storage telemetry cache:", sanitizeError(e));
-    }
-  }
   return currentStoreState;
 }
 
