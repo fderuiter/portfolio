@@ -7,7 +7,7 @@
 import readline from "readline";
 import path from "path";
 import fs from "fs";
-import { execSync } from "child_process";
+import { execSync, execFileSync } from "child_process";
 import { runDiagnostics, printDoctorReport } from "../lib/dx/doctor";
 import { scaffold, type ScaffoldType } from "../lib/dx/scaffolder";
 import { runAllBenchmarks, printBenchmarkReport } from "../lib/dx/bench";
@@ -166,7 +166,7 @@ function handleAnalyzeCommand(): void {
   }
 }
 
-async function handleCommitCommand(): Promise<void> {
+export async function handleCommitCommand(): Promise<void> {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
   console.log(formatHeader("DX Conventional Commit Wizard"));
@@ -199,7 +199,7 @@ async function handleCommitCommand(): Promise<void> {
 
   console.log(`\n${colors.brightGreen}Commit Message:${colors.reset} ${colors.bold}${header}${colors.reset}`);
   try {
-    execSync(`git commit -m "${header.replace(/"/g, '\\"')}"`, { stdio: "inherit" });
+    execFileSync("git", ["commit", "-m", header], { stdio: "inherit" });
     console.log(`\n${colors.brightGreen}✔ Commit created successfully.${colors.reset}\n`);
   } catch {
     console.error(`\n${colors.red}Git commit command failed.${colors.reset}\n`);

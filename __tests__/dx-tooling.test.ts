@@ -136,6 +136,21 @@ describe("Developer Experience (DX) Tooling Suite", () => {
       expect(validateCommitMessage("v1.0.0").valid).toBe(true);
     });
 
+    it("validates messages containing shell metacharacters such as backticks, subshell syntax, or semicolons", () => {
+      const metacharacterMessages = [
+        "fix(dx): support `code_symbol` in commit header",
+        "feat(a11y): prevent $(rm -rf /) subshell evaluation",
+        "chore(deps): update package; echo injected",
+        'refactor(crf): handling "double quotes" and \'single quotes\'',
+      ];
+
+      for (const msg of metacharacterMessages) {
+        const result = validateCommitMessage(msg);
+        expect(result.valid).toBe(true);
+        expect(result.errors).toHaveLength(0);
+      }
+    });
+
     it("validates branch names against team conventions", () => {
       expect(validateBranchName("main").valid).toBe(true);
       expect(validateBranchName("feat/add-dx-suite").valid).toBe(true);
