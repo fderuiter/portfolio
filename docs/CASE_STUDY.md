@@ -151,6 +151,9 @@ $$\text{SMI} = \frac{\text{ASM}}{\text{Height}^2} \quad (\text{kg/m}^2)$$
 - **Stack:** Python 3.8+, Poetry, Flask, BeautifulSoup4, jsQR, Pillow, Pytest
 - **Domain:** Reverse Engineering, Biomedical Data, Monorepo Architecture, Data Parsing
 - **GitHub Repository Topics:** `reverse-engineering`, `inbody`, `qr-decoder`, `biometrics`, `data-extraction`, `monorepo`, `python`
+
+---
+
 # Sortify: Air-Gapped Document Classification & Resilient File Operations Engine
 
 ## 1. Executive Summary & Value Proposition

@@ -114,6 +114,13 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     keywords: ["Laser Loon", "Graphic Design", "Vector Illustration", "Iconography", "Asset Distribution", "Minnesota State Flag", "Creative Commons"],
     ogType: "article",
   },
+  sortify: {
+    title: "Sortify Case Study | Air-Gapped Document Classification & Resilient File Engine",
+    description: "Deep dive technical breakdown of Sortify — a zero-telemetry, fully air-gapped document classification and crash-resilient file organization engine.",
+    path: "/case-studies/sortify",
+    keywords: ["Python", "PyQt6", "ONNX", "SQLCipher", "Document Classification", "Air-Gapped", "HIPAA", "21 CFR Part 11"],
+    ogType: "article",
+  },
 };
 
 /**

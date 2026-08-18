@@ -191,6 +191,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         ]
       },
       {
+        id: "nav-sortify",
+        title: "Sortify: Air-Gapped Document Classification & Resilient File Engine",
+        subtitle: "Deep-dive technical case study — zero-telemetry, ONNX hybrid clustering & 2-phase moving",
+        category: "navigation",
+        url: "/case-studies/sortify",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Case Study",
+        status: "Python / PyQt6",
+        description: "Zero-telemetry, fully air-gapped document classification and file organization engine for regulated clinical research.",
+        techStack: ["Python 3.12", "PyQt6", "ONNX Runtime", "SQLCipher", "21 CFR Part 11"],
+        highlights: [
+          "100% offline air-gapped execution",
+          "Hybrid ONNX vector embeddings + sparse TF-IDF",
+          "Two-phase commit file relocation with SHA-256 verification"
+        ]
+      },
+      {
         id: "nav-laser-loon",
         title: "Laser Loon: Quest for the State Flag",
         subtitle: "Playable civic physics shooter — pilot F277 Laser Loon on the Road to the Capitol",
