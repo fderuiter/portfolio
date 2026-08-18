@@ -200,12 +200,6 @@ Re-exports [ElectronicSignature](types/interfaces/ElectronicSignature.md)
 
 ***
 
-### escapeRString
-
-Re-exports [escapeRString](export-r/functions/escapeRString.md)
-
-***
-
 ### escapeSasString
 
 Re-exports [escapeSasString](export-sas/functions/escapeSasString.md)
@@ -227,6 +221,12 @@ Re-exports [evaluateFormula](expression-evaluator/functions/evaluateFormula.md)
 ### evaluateRule
 
 Re-exports [evaluateRule](expression-evaluator/functions/evaluateRule.md)
+
+***
+
+### ExpandedSasField
+
+Re-exports [ExpandedSasField](export-sas/interfaces/ExpandedSasField.md)
 
 ***
 
@@ -332,18 +332,6 @@ Re-exports [generateFormPdf](export-pdf/functions/generateFormPdf.md)
 
 ***
 
-### generateRCodelists
-
-Re-exports [generateRCodelists](export-r/functions/generateRCodelists.md)
-
-***
-
-### generateRDataStepForForm
-
-Re-exports [generateRDataStepForForm](export-r/functions/generateRDataStepForForm.md)
-
-***
-
 ### generateSasDataStepForForm
 
 Re-exports [generateSasDataStepForForm](export-sas/functions/generateSasDataStepForForm.md)
@@ -377,6 +365,18 @@ Re-exports [generateStudyDocx](export-docx/functions/generateStudyDocx.md)
 ### generateStudyPdf
 
 Re-exports [generateStudyPdf](export-pdf/functions/generateStudyPdf.md)
+
+***
+
+### getExpandedSasAttributes
+
+Re-exports [getExpandedSasAttributes](export-sas/functions/getExpandedSasAttributes.md)
+
+***
+
+### getFieldOptions
+
+Re-exports [getFieldOptions](export-sas/functions/getFieldOptions.md)
 
 ***
 
@@ -434,9 +434,9 @@ Re-exports [NUMERIC_DATA_TYPES](formula-linter/variables/NUMERIC_DATA_TYPES.md)
 
 ***
 
-### sanitizeRName
+### parseMultiSelectValue
 
-Re-exports [sanitizeRName](export-r/functions/sanitizeRName.md)
+Re-exports [parseMultiSelectValue](export-sas/functions/parseMultiSelectValue.md)
 
 ***
 

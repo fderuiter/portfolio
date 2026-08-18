@@ -641,7 +641,13 @@ where
 <p>Implements thread-safe state swapping via <code>oxidize_core::double_buffer</code> for grid-based PDEs and Lattice Boltzmann fluid models, decoupling numerical compute loops from egui immediate-mode rendering threads.</p>
 
 <h4>3. WASM-First GUI Architecture</h4>
-<p>Deploys identical single-binary desktop execution and zero-install WebAssembly browser builds using egui and custom <code>egui_plot</code> engines.</p>`,
+<p>Deploys identical single-binary desktop execution and zero-install WebAssembly browser builds using egui and custom <code>egui_plot</code> engines.</p>
+    `.trim(),
+    created_at: new Date("2026-02-22T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-5",
     slug: "ualbf",
     title: "UALBF: Verified Computational Proof Engine & Search Architecture",
     primary_language: "Rust",
@@ -750,8 +756,13 @@ pub extern "C" fn ualbf_verify_certificate_manifest(
         -2
     }
 }
-</code></pre>`,
-    created_at: new Date("2026-03-01T00:00:00Z"),
+</code></pre>
+    `.trim(),
+    created_at: new Date("2026-02-21T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-6",
     slug: "sortify",
     title: "Sortify: Air-Gapped Document Classification & Resilient File Engine",
     primary_language: "Python",
@@ -791,7 +802,8 @@ def stage_and_commit_move(self, src: str, dest_dir: str) -> str:
 <p>Staged file movement utilizes shadow directories, journaled state tracking, and SHA-256 integrity verification before and after file operations. Cross-partition hardlink and move failures (<code>EXDEV</code>) fall back gracefully to chunked streams with checksum verifications.</p>
 
 <h4>3. Encrypted SQLCipher Registry &amp; Worker Concurrency</h4>
-<p>Database encryption at rest is enforced via per-platform SQLCipher shared libraries with PRAGMA key derivation. Thread-isolated background workers communicate via non-blocking queues with the main UI thread (PyQt6/PySide6) to prevent interface lockups during bulk ingestion.</p>`,
+<p>Database encryption at rest is enforced via per-platform SQLCipher shared libraries with PRAGMA key derivation. Thread-isolated background workers communicate via non-blocking queues with the main UI thread (PyQt6/PySide6) to prevent interface lockups during bulk ingestion.</p>
+    `.trim(),
     created_at: new Date("2026-02-20T00:00:00Z"),
     updated_at: new Date("2026-08-14T00:00:00Z"),
   },

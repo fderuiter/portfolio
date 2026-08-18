@@ -4,7 +4,7 @@
  */
 
 export * from "../export-sas";
-export * from "../export-r";
+export { exportFormToR, exportStudyToR } from "../export-r";
 export * from "../export-acrf";
 export * from "../export-docx";
 export * from "../export-pdf";
