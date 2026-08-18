@@ -250,10 +250,10 @@ export const ASCII_DUCK = (): string => {
   return `
               ___
           __/_  \`\.  .-"""-.
- *woof!*  \\_,\` | \\-'  /   )\`-')      Duck is guarding the codebase
-            "") \`"\`    \\  ((\`"\`     Status: 100% Good Boy
+ *woof!*  \\_,\` | \\-'  /    )\`-')      Duck is guarding the codebase
+            "") \`"\`    \\  ((\`"\`      Status: 100% Good Boy
             ___Y  ,    .'7 /|
-           (_,___/...-\` (_/_/`;
+         (_,___/...-\` (_/_/`;
 };
 
 export const ASCII_LASER_LOON = (): string => {
