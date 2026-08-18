@@ -648,7 +648,7 @@ pub extern "C" fn ualbf_verify_certificate_manifest(
     }
 }
 </code></pre>
-    }.trim(),
+    `.trim(),
   },
   {
     slug: "sortify",
@@ -670,7 +670,7 @@ pub extern "C" fn ualbf_verify_certificate_manifest(
 # Two-Phase Commit File Relocation Engine
 def stage_and_commit_move(self, src: str, dest_dir: str) -> str:
     src_hash = compute_sha256(src)
-    shadow_path = os.path.join(self.shadow_dir, f"{uuid.uuid4()}.tmp")
+    shadow_path = os.path.join(self.shadow_dir, f"\${uuid.uuid4()}.tmp")
 
     # Phase 1: Copy to shadow staging and verify checksum
     self._copy_stream(src, shadow_path)
