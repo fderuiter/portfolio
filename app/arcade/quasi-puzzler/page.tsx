@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { QuasiPuzzlerClient } from "@/components/arcade/QuasiPuzzlerClient";
 import { buildRouteMetadata, ROUTE_METADATA_CONFIGS } from "@/lib/seo-metadata";
-import { getWebApplicationSchema } from "@/lib/seo";
+import { getWebApplicationSchema, getBreadcrumbSchema } from "@/lib/seo";
 
 import { PageLayout } from "@/components/PageLayout";
 
@@ -20,6 +20,16 @@ export default function QuasiPuzzlerPage() {
             applicationCategory: "GameApplication",
             genre: "Formal Logic Puzzle",
           }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: getBreadcrumbSchema([
+            { name: "Home", url: "/" },
+            { name: "Arcade Hub", url: "/arcade" },
+            { name: "Quasi-Perfect Puzzler", url: "/arcade/quasi-puzzler" },
+          ]),
         }}
       />
       <QuasiPuzzlerClient />

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { GarminWatchClient } from "@/components/arcade/GarminWatchClient";
 import { buildRouteMetadata, ROUTE_METADATA_CONFIGS } from "@/lib/seo-metadata";
-import { getWebApplicationSchema } from "@/lib/seo";
+import { getWebApplicationSchema, getBreadcrumbSchema } from "@/lib/seo";
 
 import { PageLayout } from "@/components/PageLayout";
 
@@ -20,6 +20,16 @@ export default function GarminWatchPage() {
             applicationCategory: "GameApplication",
             genre: "Embedded Simulation",
           }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: getBreadcrumbSchema([
+            { name: "Home", url: "/" },
+            { name: "Arcade Hub", url: "/arcade" },
+            { name: "Garmin 32KB Memory Runner", url: "/arcade/garmin-watch" },
+          ]),
         }}
       />
       <GarminWatchClient />
