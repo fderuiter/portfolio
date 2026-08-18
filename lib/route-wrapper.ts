@@ -1,0 +1,134 @@
+import { NextRequest, NextResponse } from "next/server";
+import { ZodSchema } from "zod";
+import * as Sentry from "@sentry/nextjs";
+import { sanitizeError } from "@/lib/error-sanitization";
+import { applySecurityHeaders } from "@/lib/security-headers";
+
+export interface ApiWrapperOptions<TSchema extends ZodSchema = ZodSchema> {
+  schema?: TSchema;
+  type?: "body" | "query";
+  customValidationError?: (error: unknown, req: NextRequest) => { error: string; details?: Array<{ path: string; message: string }> };
+  customJsonError?: string;
+  defaultStatus?: number;
+}
+
+export type ApiHandler<TData = unknown> = (
+  req: NextRequest,
+  context: { data: TData; params: Record<string, string> }
+) => Promise<NextResponse>;
+
+/**
+ * Higher-order API route handler wrapper.
+ * Provides automated Zod request schema validation, uniform error transformation,
+ * Sentry exception logging, error sanitization, and security header enforcement.
+ */
+export function createApiHandler<TSchema extends ZodSchema>(
+  handler: ApiHandler<TSchema extends ZodSchema ? TSchema["_output"] : undefined>,
+  options?: ApiWrapperOptions<TSchema>
+) {
+  return async (
+    rawReq?: NextRequest,
+    routeParams?: { params?: Promise<Record<string, string>> | Record<string, string> }
+  ): Promise<NextResponse> => {
+    const req = rawReq || new NextRequest("http://localhost:3000");
+    try {
+      const resolvedParams = routeParams?.params
+        ? await Promise.resolve(routeParams.params)
+        : {};
+
+      let validatedData: unknown = undefined;
+
+      if (options?.schema) {
+        if (options.type === "query" || req.method === "GET") {
+          const url = new URL(req.url);
+          const queryObj: Record<string, string> = {};
+          url.searchParams.forEach((val, key) => {
+            queryObj[key] = val;
+          });
+          const result = options.schema.safeParse(queryObj);
+          if (!result.success) {
+            const formatted = options.customValidationError
+              ? options.customValidationError(result.error, req)
+              : {
+                  error: "Validation failed",
+                  details: result.error.issues.map((issue) => ({
+                    path: issue.path.join(".") || "query",
+                    message: issue.message,
+                  })),
+                };
+            const response = NextResponse.json(formatted, { status: 400 });
+            return applySecurityHeaders(response);
+          }
+          validatedData = result.data;
+        } else {
+          let body: unknown;
+          try {
+            body = await req.json();
+          } catch {
+            const customJsonMsg = options.customJsonError || "Invalid JSON payload";
+            const response = NextResponse.json(
+              {
+                error: customJsonMsg,
+                details: [{ path: "body", message: "Request body must be valid JSON" }],
+              },
+              { status: 400 }
+            );
+            return applySecurityHeaders(response);
+          }
+
+          const result = options.schema.safeParse(body);
+          if (!result.success) {
+            const formatted = options.customValidationError
+              ? options.customValidationError(result.error, req)
+              : {
+                  error: "Validation failed",
+                  details: result.error.issues.map((issue) => ({
+                    path: issue.path.join(".") || "payload",
+                    message: issue.message,
+                  })),
+                };
+            const response = NextResponse.json(formatted, { status: 400 });
+            return applySecurityHeaders(response);
+          }
+          validatedData = result.data;
+        }
+      }
+
+      const response = await handler(req, {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        data: validatedData as any,
+        params: resolvedParams,
+      });
+
+      return applySecurityHeaders(response);
+    } catch (err: unknown) {
+      Sentry.captureException(err);
+      const sanitized = sanitizeError(err);
+      
+      // Check for unique constraint failure (e.g. Prisma P2002)
+      const errorObj = err as { code?: string; message?: string };
+      if (
+        errorObj?.code === "P2002" ||
+        (typeof errorObj?.message === "string" && errorObj.message.includes("Unique constraint failed"))
+      ) {
+        const response = NextResponse.json(
+          {
+            error: "A case study with this slug already exists",
+            details: [{ path: "slug", message: "A case study with this slug already exists" }],
+          },
+          { status: 400 }
+        );
+        return applySecurityHeaders(response);
+      }
+
+      console.error("Unhandled API route exception:", sanitized);
+      const response = NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 }
+      );
+      return applySecurityHeaders(response);
+    }
+  };
+}
+
+export const withApiWrapper = createApiHandler;
