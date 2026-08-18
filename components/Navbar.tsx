@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useSearch } from "@/components/providers/SearchProvider";
 import { usePersona } from "@/components/providers/PersonaProvider";
+import { useTheme } from "@/components/providers/ThemeProvider";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import {
   IconVolume,
@@ -24,6 +25,9 @@ import {
   IconFileSpreadsheet,
   IconBriefcase,
   IconFlame,
+  IconSun,
+  IconMoon,
+  IconDeviceDesktop,
 } from "@tabler/icons-react";
 
 interface SubNavItem {
@@ -127,6 +131,7 @@ export const Navbar: React.FC = () => {
   const { volume, muted, profile, setVolume, setMuted, setProfile, playHover } = useAudio();
   const { openSearch } = useSearch();
   const { persona, setPersona } = usePersona();
+  const { theme, setTheme } = useTheme();
   const [showAudioPanel, setShowAudioPanel] = useState(false);
 
   const pathname = usePathname();
@@ -569,6 +574,55 @@ export const Navbar: React.FC = () => {
               </button>
             </div>
 
+            {/* Theme Segmented Control (Desktop) */}
+            <div className="flex p-0.5 bg-zinc-900/85 border border-zinc-800/80 rounded-xl text-[10px] font-mono shrink-0 select-none" role="group" aria-label="Theme mode selection">
+              <button
+                type="button"
+                onClick={() => setTheme("light")}
+                className={cn(
+                  "flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer min-h-8 shrink-0 whitespace-nowrap",
+                  theme === "light"
+                    ? "bg-zinc-950 text-amber-400 border border-amber-400/20 shadow-[0_0_8px_rgba(251,191,36,0.15)]"
+                    : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                )}
+                aria-label="Light theme mode"
+                aria-pressed={theme === "light"}
+              >
+                <IconSun className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden xl:inline">LIGHT</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setTheme("dark")}
+                className={cn(
+                  "flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer min-h-8 shrink-0 whitespace-nowrap",
+                  theme === "dark"
+                    ? "bg-zinc-950 text-brand-cyan border border-brand-cyan/20 shadow-[0_0_8px_rgba(6,182,212,0.15)]"
+                    : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                )}
+                aria-label="Dark theme mode"
+                aria-pressed={theme === "dark"}
+              >
+                <IconMoon className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden xl:inline">DARK</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setTheme("system")}
+                className={cn(
+                  "flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer min-h-8 shrink-0 whitespace-nowrap",
+                  theme === "system"
+                    ? "bg-zinc-950 text-emerald-400 border border-emerald-400/20 shadow-[0_0_8px_rgba(52,211,153,0.15)]"
+                    : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                )}
+                aria-label="System theme mode"
+                aria-pressed={theme === "system"}
+              >
+                <IconDeviceDesktop className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden xl:inline">SYSTEM</span>
+              </button>
+            </div>
+
             {/* Audio Controller Desktop */}
             <div className="relative shrink-0">
               <button
@@ -892,6 +946,60 @@ export const Navbar: React.FC = () => {
                   >
                     <IconBriefcase className="w-3.5 h-3.5 text-brand-cyan shrink-0" />
                     <span>RECRUITER</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Mobile Theme Preference */}
+              <div className="border-t border-zinc-900/80 pt-4 flex flex-col gap-2.5">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 font-bold px-1">
+                  Theme Preference
+                </span>
+                <div className="flex p-1 bg-zinc-900 border border-zinc-800 rounded-2xl text-xs font-mono w-full select-none" role="group" aria-label="Mobile theme mode selection">
+                  <button
+                    type="button"
+                    onClick={() => setTheme("light")}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-1.5 min-h-11 py-2.5 rounded-xl font-bold transition-all cursor-pointer",
+                      theme === "light"
+                        ? "bg-zinc-950 text-amber-400 border border-amber-400/20 shadow-[0_0_12px_rgba(251,191,36,0.15)]"
+                        : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                    )}
+                    aria-label="Light mode"
+                    aria-pressed={theme === "light"}
+                  >
+                    <IconSun className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span>LIGHT</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTheme("dark")}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-1.5 min-h-11 py-2.5 rounded-xl font-bold transition-all cursor-pointer",
+                      theme === "dark"
+                        ? "bg-zinc-950 text-brand-cyan border border-brand-cyan/20 shadow-[0_0_12px_rgba(6,182,212,0.15)]"
+                        : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                    )}
+                    aria-label="Dark mode"
+                    aria-pressed={theme === "dark"}
+                  >
+                    <IconMoon className="w-3.5 h-3.5 text-brand-cyan shrink-0" />
+                    <span>DARK</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTheme("system")}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-1.5 min-h-11 py-2.5 rounded-xl font-bold transition-all cursor-pointer",
+                      theme === "system"
+                        ? "bg-zinc-950 text-emerald-400 border border-emerald-400/20 shadow-[0_0_12px_rgba(52,211,153,0.15)]"
+                        : "text-zinc-500 hover:text-zinc-300 border border-transparent"
+                    )}
+                    aria-label="System mode"
+                    aria-pressed={theme === "system"}
+                  >
+                    <IconDeviceDesktop className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <span>SYSTEM</span>
                   </button>
                 </div>
               </div>

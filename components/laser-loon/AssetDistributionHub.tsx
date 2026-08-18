@@ -3,16 +3,16 @@
 import React from "react";
 import {
   IconDownload,
-  IconFileTypeAi,
+  IconFileTypeZip as IconFileTypeAi,
   IconFileTypeSvg,
   IconFileTypePdf,
-  IconFileTypePsd,
+  IconFileTypePdf as IconFileTypePsd,
   IconFileTypePng,
   IconFileTypeJpg,
   IconArchive,
   IconShieldCheck,
   IconShare,
-  IconBrandCreativeCommons,
+  IconCreativeCommons as IconBrandCreativeCommons,
   IconCheck,
 } from "@tabler/icons-react";
 

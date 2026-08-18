@@ -27,7 +27,8 @@ import {
   richLayoutCache,
   cssPropertyCache,
   fontConfigCache,
-  isStylesheetLoaded
+  isStylesheetLoaded,
+  clearGraphicsEngineCaches,
 } from "@/lib/graphics-engine";
 
 export interface UsePretextLayoutOptions {
@@ -142,15 +143,43 @@ export function usePretextLayout({
 
   useLayoutEffect(() => {
     resolvedFontRef.current = null;
-    cssPropertyCache.clear();
-    fontConfigCache.clear();
-    textPrepareCache.clear();
-    textLayoutCache.clear();
-    richItemsCache.clear();
-    richPrepareCache.clear();
-    richLayoutCache.clear();
+    clearGraphicsEngineCaches();
     clearCache();
   }, [simplified, translationMode, activeTheme]);
+
+  // Listen to theme-change events and DOM data-theme mutation to invalidate cache and re-measure
+  useLayoutEffect(() => {
+    if (!isBrowser()) return;
+
+    const handleThemeChange = () => {
+      resolvedFontRef.current = null;
+      clearGraphicsEngineCaches();
+      clearCache();
+      if (containerRef.current) {
+        const width = containerRef.current.getBoundingClientRect().width;
+        if (width > 0) measureText(width);
+      }
+    };
+
+    window.addEventListener("theme-change", handleThemeChange);
+
+    let observer: MutationObserver | null = null;
+    if (typeof MutationObserver !== "undefined") {
+      observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.type === "attributes" && mutation.attributeName === "data-theme") {
+            handleThemeChange();
+          }
+        });
+      });
+      observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    }
+
+    return () => {
+      window.removeEventListener("theme-change", handleThemeChange);
+      if (observer) observer.disconnect();
+    };
+  }, [measureText, containerRef]);
 
   useLayoutEffect(() => {
     if (!isBrowser()) return;

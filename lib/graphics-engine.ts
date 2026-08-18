@@ -66,6 +66,21 @@ export function resetStylesheetLoadedCache(): void {
 }
 
 /**
+ * Flushes all graphics engine LRU caches and resets stylesheet loaded flags.
+ * Must be called synchronously during theme shifts or layout recalculation events.
+ */
+export function clearGraphicsEngineCaches(): void {
+  textPrepareCache.clear();
+  textLayoutCache.clear();
+  richItemsCache.clear();
+  richPrepareCache.clear();
+  richLayoutCache.clear();
+  cssPropertyCache.clear();
+  fontConfigCache.clear();
+  resetStylesheetLoadedCache();
+}
+
+/**
  * Resolves styled inline code chip extra width dynamically using Computed Style.
  * Returns fallback if run in SSR or if stylesheet has not loaded yet.
  */

@@ -18,7 +18,7 @@
     "predev": "npx tsx scripts/generate-theme.ts",
     "dev": "concurrently -n \"turbo,tsc\" -c \"cyan,magenta\" \"next dev --turbo\" \"tsc --noEmit --watch\"",
     "precompile-docs": "npx prisma generate",
-    "compile-docs": "npx typedoc --entryPoints hooks --entryPoints types --entryPoints lib --exclude \"**/env.d.ts\" --entryPointStrategy expand --out docs --plugin typedoc-plugin-markdown --hideGenerator --cleanOutputDir --gitRevision main --sourceLinkTemplate \"https://github.com/fderuiter/portfolio/blob/{gitRevision}/{path}#L{line}\" --intentionallyNotExported TypeMap --intentionallyNotExported GlobalOmitConfig --intentionallyNotExported TypeMapCb",
+    "compile-docs": "npx tsx -e \"const fs=require('fs'); if(fs.existsSync('docs/CASE_STUDY.md')) fs.copyFileSync('docs/CASE_STUDY.md', 'CASE_STUDY.tmp.md');\" && npx typedoc --entryPoints hooks --entryPoints types --entryPoints lib --exclude \"**/env.d.ts\" --entryPointStrategy expand --out docs --plugin typedoc-plugin-markdown --hideGenerator --gitRevision main --sourceLinkTemplate \"https://github.com/fderuiter/portfolio/blob/{gitRevision}/{path}#L{line}\" --intentionallyNotExported TypeMap --intentionallyNotExported GlobalOmitConfig --intentionallyNotExported TypeMapCb; npx tsx -e \"const fs=require('fs'); if(fs.existsSync('CASE_STUDY.tmp.md')) { fs.copyFileSync('CASE_STUDY.tmp.md', 'docs/CASE_STUDY.md'); fs.unlinkSync('CASE_STUDY.tmp.md'); }\"",
     "check-docs-drift": "npx tsx scripts/check-drift.ts",
     "check:migrations": "node scripts/check-migrations.js",
     "check:migrations:drift": "prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code",

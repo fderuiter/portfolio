@@ -14,18 +14,6 @@ Re-exports [AcrfHtmlOptions](../export-acrf/interfaces/AcrfHtmlOptions.md)
 
 ***
 
-### escapeRString
-
-Re-exports [escapeRString](../export-r/functions/escapeRString.md)
-
-***
-
-### escapeSasString
-
-Re-exports [escapeSasString](../export-sas/functions/escapeSasString.md)
-
-***
-
 ### exportFormToFhirQuestionnaire
 
 Re-exports [exportFormToFhirQuestionnaire](../fhir-questionnaire/functions/exportFormToFhirQuestionnaire.md)
@@ -80,30 +68,6 @@ Re-exports [generateFormPdf](../export-pdf/functions/generateFormPdf.md)
 
 ***
 
-### generateRCodelists
-
-Re-exports [generateRCodelists](../export-r/functions/generateRCodelists.md)
-
-***
-
-### generateRDataStepForForm
-
-Re-exports [generateRDataStepForForm](../export-r/functions/generateRDataStepForForm.md)
-
-***
-
-### generateSasDataStepForForm
-
-Re-exports [generateSasDataStepForForm](../export-sas/functions/generateSasDataStepForForm.md)
-
-***
-
-### generateSasProcFormat
-
-Re-exports [generateSasProcFormat](../export-sas/functions/generateSasProcFormat.md)
-
-***
-
 ### generateSdtmMappingMatrix
 
 Re-exports [generateSdtmMappingMatrix](../export-acrf/functions/generateSdtmMappingMatrix.md)
@@ -128,15 +92,15 @@ Re-exports [generateStudyPdf](../export-pdf/functions/generateStudyPdf.md)
 
 ***
 
-### getFieldSasAttributes
+### getFieldOptions
 
-Re-exports [getFieldSasAttributes](../export-sas/functions/getFieldSasAttributes.md)
+Re-exports [getFieldOptions](../export-sas/functions/getFieldOptions.md)
 
 ***
 
-### getSasFormatName
+### parseMultiSelectValue
 
-Re-exports [getSasFormatName](../export-sas/functions/getSasFormatName.md)
+Re-exports [parseMultiSelectValue](../export-sas/functions/parseMultiSelectValue.md)
 
 ***
 
@@ -149,12 +113,6 @@ Re-exports [sanitizeRName](../export-r/functions/sanitizeRName.md)
 ### sanitizeSasName
 
 Re-exports [sanitizeSasName](../export-sas/functions/sanitizeSasName.md)
-
-***
-
-### SasFieldAttributes
-
-Re-exports [SasFieldAttributes](../export-sas/interfaces/SasFieldAttributes.md)
 
 ***
 

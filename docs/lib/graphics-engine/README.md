@@ -18,6 +18,7 @@
 
 ## Functions
 
+- [clearGraphicsEngineCaches](functions/clearGraphicsEngineCaches.md)
 - [isBrowser](functions/isBrowser.md)
 - [isStylesheetLoaded](functions/isStylesheetLoaded.md)
 - [measureTextOffscreen](functions/measureTextOffscreen.md)

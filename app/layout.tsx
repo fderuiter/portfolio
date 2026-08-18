@@ -11,6 +11,7 @@ import { AudioProvider } from "@/components/providers/AudioProvider";
 import { SearchProvider } from "@/components/providers/SearchProvider";
 import { TerminologyProvider } from "@/components/providers/TerminologyProvider";
 import { PersonaProvider } from "@/components/providers/PersonaProvider";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { RetroChaosOverlay } from "@/components/RetroChaosOverlay";
 import { Analytics } from "@vercel/analytics/next";
 import { SearchWrapper } from "@/components/SearchWrapper";
@@ -107,34 +108,44 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
+                  var saved = localStorage.getItem('portfolio-theme');
+                  var theme = saved || 'system';
+                  var resolved = theme;
+                  if (theme === 'system') {
+                    resolved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                  }
+                  document.documentElement.setAttribute('data-theme', resolved);
+                } catch(e) {
                   document.documentElement.setAttribute('data-theme', 'dark');
-                } catch(e) {}
+                }
               })();
             `
           }}
         />
       </head>
-      <body className="min-h-full flex flex-col bg-zinc-950 text-foreground antialiased">
+      <body className="min-h-full flex flex-col bg-background text-foreground antialiased">
         <SkipToContent />
-        <PersonaProvider>
-          <TerminologyProvider>
-            <SearchProvider>
-              <A11yProvider>
-                <AudioProvider>
-                  <Navbar />
-                  <main id="main-content" tabIndex={-1} className="flex-grow flex flex-col focus:outline-none">
-                    {children}
-                  </main>
-                  <Footer />
-                  <RetroChaosOverlay />
-                  <Analytics />
-                  <SearchWrapper />
-                  <SerwistRegister />
-                </AudioProvider>
-              </A11yProvider>
-            </SearchProvider>
-          </TerminologyProvider>
-        </PersonaProvider>
+        <ThemeProvider>
+          <PersonaProvider>
+            <TerminologyProvider>
+              <SearchProvider>
+                <A11yProvider>
+                  <AudioProvider>
+                    <Navbar />
+                    <main id="main-content" tabIndex={-1} className="flex-grow flex flex-col focus:outline-none">
+                      {children}
+                    </main>
+                    <Footer />
+                    <RetroChaosOverlay />
+                    <Analytics />
+                    <SearchWrapper />
+                    <SerwistRegister />
+                  </AudioProvider>
+                </A11yProvider>
+              </SearchProvider>
+            </TerminologyProvider>
+          </PersonaProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
