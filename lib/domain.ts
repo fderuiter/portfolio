@@ -37,3 +37,39 @@ export function resolveBaseUrl(): string {
   return baseUrl.replace(/\/$/, "");
 }
 
+/**
+ * Constructs a fully qualified absolute canonical URL by combining the resolved base origin with a normalized route path.
+ * Automatically resolves duplicate/multiple slashes to a single slash, normalizes leading/trailing path slashes,
+ * and strips query parameters or hash fragments.
+ */
+export function constructCanonicalUrl(path?: string): string {
+  const baseUrl = resolveBaseUrl();
+  if (!path || path.trim() === "") {
+    return `${baseUrl}/`;
+  }
+
+  let rawPath = path.trim();
+  if (rawPath.startsWith("http://") || rawPath.startsWith("https://")) {
+    try {
+      const parsed = new URL(rawPath);
+      rawPath = parsed.pathname;
+    } catch {
+      // Fallback if URL parsing fails
+    }
+  }
+
+  // Strip query parameters and hash fragments
+  rawPath = rawPath.split("?")[0].split("#")[0];
+
+  // Ensure leading slash and collapse multiple consecutive slashes into a single slash
+  const cleanPath = ("/" + rawPath).replace(/\/+/g, "/");
+
+  if (cleanPath === "/") {
+    return `${baseUrl}/`;
+  }
+
+  // Strip trailing slash for subpaths
+  const formattedPath = cleanPath.replace(/\/$/, "");
+  return `${baseUrl}${formattedPath}`;
+}
+

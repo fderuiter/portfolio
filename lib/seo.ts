@@ -1,6 +1,6 @@
 import { BaseCaseStudy } from "@/types/domain";
 import { GitHubStats } from "@/lib/github";
-import { resolveBaseUrl } from "./domain";
+import { resolveBaseUrl, constructCanonicalUrl } from "./domain";
 
 export const SITE_BASE_URL = resolveBaseUrl();
 
@@ -64,7 +64,7 @@ export function getWebApplicationSchema(options: WebApplicationSchemaOptions): s
     "@type": "WebApplication",
     "name": options.name,
     "description": options.description,
-    "url": options.url.startsWith("http") ? options.url : `${SITE_BASE_URL}${options.url}`,
+    "url": constructCanonicalUrl(options.url),
     "applicationCategory": options.applicationCategory,
     "operatingSystem": options.operatingSystem || "Any modern web browser (HTML5, Canvas 2D, Web Audio API)",
     "browserRequirements": options.browserRequirements || "Requires JavaScript. Requires HTML5 Canvas support.",
@@ -94,7 +94,7 @@ export function getBreadcrumbSchema(items: BreadcrumbItem[]): string {
       "@type": "ListItem",
       "position": index + 1,
       "name": item.name,
-      "item": item.url.startsWith("http") ? item.url : `${SITE_BASE_URL}${item.url}`
+      "item": constructCanonicalUrl(item.url)
     }))
   };
 
@@ -121,14 +121,14 @@ export function getCollectionPageSchema(
     "@type": "CollectionPage",
     "name": name,
     "description": description,
-    "url": url.startsWith("http") ? url : `${SITE_BASE_URL}${url}`,
+    "url": constructCanonicalUrl(url),
     "mainEntity": {
       "@type": "ItemList",
       "itemListElement": items.map((item, index) => ({
         "@type": "ListItem",
         "position": index + 1,
         "name": item.name,
-        "url": item.url.startsWith("http") ? item.url : `${SITE_BASE_URL}${item.url}`,
+        "url": constructCanonicalUrl(item.url),
         ...(item.description ? { "description": item.description } : {})
       }))
     },

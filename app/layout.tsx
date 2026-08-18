@@ -13,7 +13,7 @@ import { PersonaProvider } from "@/components/providers/PersonaProvider";
 import { RetroChaosOverlay } from "@/components/RetroChaosOverlay";
 import { Analytics } from "@vercel/analytics/next";
 import { SearchWrapper } from "@/components/SearchWrapper";
-import { resolveBaseUrl } from "@/lib/domain";
+import { resolveBaseUrl, constructCanonicalUrl } from "@/lib/domain";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -48,12 +48,12 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.webmanifest",
   alternates: {
-    canonical: "/",
+    canonical: constructCanonicalUrl("/"),
   },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: resolveBaseUrl(),
+    url: constructCanonicalUrl("/"),
     siteName: "Frederick de Ruiter Portfolio",
     title: "Frederick de Ruiter | Principal Systems Engineer & Designer",
     description: "A high-performance design engineering showcase combining DOM-free canvas layout physics, serverless Neon Postgres data streams, and robust clinical CDISC data engines.",

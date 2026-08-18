@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SITE_BASE_URL } from "@/lib/seo";
+import { constructCanonicalUrl } from "@/lib/domain";
 
 export interface RouteMetaConfig {
   title: string;
@@ -94,14 +94,14 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
  * Helper to construct standardized Next.js Metadata for any route configuration.
  */
 export function buildRouteMetadata(config: RouteMetaConfig): Metadata {
-  const url = `${SITE_BASE_URL}${config.path}`;
+  const url = constructCanonicalUrl(config.path);
 
   return {
     title: config.title,
     description: config.description,
     keywords: config.keywords,
     alternates: {
-      canonical: config.path,
+      canonical: url,
     },
     openGraph: {
       type: config.ogType || "website",

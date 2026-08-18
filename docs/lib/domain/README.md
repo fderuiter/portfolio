@@ -8,4 +8,5 @@
 
 ## Functions
 
+- [constructCanonicalUrl](functions/constructCanonicalUrl.md)
 - [resolveBaseUrl](functions/resolveBaseUrl.md)

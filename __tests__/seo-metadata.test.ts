@@ -10,7 +10,7 @@ import {
   getSoftwareSourceCodeSchema,
   SITE_BASE_URL,
 } from "@/lib/seo";
-import { resolveBaseUrl } from "@/lib/domain";
+import { resolveBaseUrl, constructCanonicalUrl } from "@/lib/domain";
 import { ROUTE_METADATA_CONFIGS, buildRouteMetadata } from "@/lib/seo-metadata";
 import { ARCADE_GAMES_METADATA } from "@/lib/arcade-data";
 import robots from "@/app/robots";
@@ -127,7 +127,8 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
 
       expect(meta.title).toBe(config.title);
       expect(meta.description).toBe(config.description);
-      expect(meta.alternates?.canonical).toBe(config.path);
+      expect(meta.alternates?.canonical).toBe(constructCanonicalUrl(config.path));
+      expect(meta.alternates?.canonical).toMatch(/^https?:\/\//);
       expect(meta.openGraph?.title).toContain(config.title);
       expect(meta.openGraph?.description).toBe(config.description);
       expect(meta.twitter?.title).toContain(config.title);
@@ -215,7 +216,7 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     }
   });
 
-  it("root layout metadata configures SVG, ICO, Apple Touch, and web manifest", async () => {
+  it("root layout metadata configures SVG, ICO, Apple Touch, web manifest, and absolute root canonical URL", async () => {
     const { metadata } = await import("@/app/layout");
     expect(metadata.icons).toBeDefined();
     expect(metadata.icons).toEqual({
@@ -229,6 +230,21 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
       ],
     });
     expect(metadata.manifest).toBe("/manifest.webmanifest");
+    expect(metadata.alternates?.canonical).toBe(constructCanonicalUrl("/"));
+    expect(metadata.alternates?.canonical).toMatch(/^https?:\/\//);
+  });
+
+  it("case-studies listing page specifies fully qualified absolute canonical URL", async () => {
+    const { metadata } = await import("@/app/case-studies/page");
+    expect(metadata.alternates?.canonical).toBe(constructCanonicalUrl("/case-studies"));
+    expect(metadata.alternates?.canonical).toMatch(/^https?:\/\/[^\/]+\/case-studies$/);
+  });
+
+  it("dynamic case study route metadata generates fully qualified absolute canonical URL with slug", async () => {
+    const { generateMetadata } = await import("@/app/case-studies/[slug]/page");
+    const meta = await generateMetadata({ params: Promise.resolve({ slug: "schemaflow" }) });
+    expect(meta.alternates?.canonical).toBe(constructCanonicalUrl("/case-studies/schemaflow"));
+    expect(meta.alternates?.canonical).toMatch(/^https?:\/\/[^\/]+\/case-studies\/schemaflow$/);
   });
 
   it("app/manifest.ts generates valid PWA Web App Manifest", () => {

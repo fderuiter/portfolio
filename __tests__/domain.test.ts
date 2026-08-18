@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { resolveBaseUrl } from "@/lib/domain";
+import { resolveBaseUrl, constructCanonicalUrl } from "@/lib/domain";
 
 describe("Dynamic Domain Helper (resolveBaseUrl)", () => {
   const originalWin = global.window;
@@ -61,5 +61,53 @@ describe("Dynamic Domain Helper (resolveBaseUrl)", () => {
 
     vi.stubEnv("VERCEL_ENV", "preview");
     expect(resolveBaseUrl()).toBe("http://localhost:3000");
+  });
+});
+
+describe("Absolute Canonical URL Construction (constructCanonicalUrl)", () => {
+  const originalWin = global.window;
+
+  beforeEach(() => {
+    // @ts-expect-error - simulating SSR environment
+    global.window = undefined;
+    vi.stubEnv("VERCEL_ENV", "production");
+  });
+
+  afterEach(() => {
+    global.window = originalWin;
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("produces fully qualified root URL for homepage", () => {
+    expect(constructCanonicalUrl("/")).toBe("https://www.deruiter.dev/");
+    expect(constructCanonicalUrl("")).toBe("https://www.deruiter.dev/");
+    expect(constructCanonicalUrl()).toBe("https://www.deruiter.dev/");
+  });
+
+  it("constructs absolute canonical URL for static hub pages", () => {
+    expect(constructCanonicalUrl("/arcade")).toBe("https://www.deruiter.dev/arcade");
+    expect(constructCanonicalUrl("arcade")).toBe("https://www.deruiter.dev/arcade");
+    expect(constructCanonicalUrl("/case-studies")).toBe("https://www.deruiter.dev/case-studies");
+  });
+
+  it("constructs absolute canonical URL for dynamic routes with path slugs", () => {
+    expect(constructCanonicalUrl("/case-studies/schemaflow")).toBe("https://www.deruiter.dev/case-studies/schemaflow");
+    expect(constructCanonicalUrl("/arcade/laser-loon")).toBe("https://www.deruiter.dev/arcade/laser-loon");
+  });
+
+  it("normalizes leading and trailing path slashes and eliminates duplicate slashes", () => {
+    expect(constructCanonicalUrl("//arcade///laser-loon//")).toBe("https://www.deruiter.dev/arcade/laser-loon");
+    expect(constructCanonicalUrl("/proof/")).toBe("https://www.deruiter.dev/proof");
+    expect(constructCanonicalUrl("///")).toBe("https://www.deruiter.dev/");
+  });
+
+  it("strips query parameters and hash fragments to maintain clean canonical URLs", () => {
+    expect(constructCanonicalUrl("/proof?step=2&mode=cli#terminal")).toBe("https://www.deruiter.dev/proof");
+    expect(constructCanonicalUrl("/crf?theme=light")).toBe("https://www.deruiter.dev/crf");
+  });
+
+  it("handles fully qualified URLs passed as input gracefully", () => {
+    expect(constructCanonicalUrl("https://www.deruiter.dev/stack")).toBe("https://www.deruiter.dev/stack");
   });
 });

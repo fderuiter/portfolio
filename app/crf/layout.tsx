@@ -1,14 +1,19 @@
 import { Metadata } from "next";
+import { constructCanonicalUrl } from "@/lib/domain";
 
 export const metadata: Metadata = {
   title: "CRF Studio: Next-Gen Clinical Form & Protocol Designer | Fred de Ruiter",
   description:
     "Zero-latency clinical trial form designer and EDC simulator with 12-column responsive layout, AST-powered edit checks, CDISC CDASH 2.2 / ODM-XML v1.3.2 compliance, and live publication aCRF overlays.",
+  alternates: {
+    canonical: constructCanonicalUrl("/crf"),
+  },
   openGraph: {
     title: "CRF Studio: Next-Gen Clinical Form Designer",
     description:
       "Design clinical trial forms, schedule visit matrices, evaluate dynamic edit checks, and simulate 21 CFR Part 11 electronic data capture in real time.",
     type: "website",
+    url: constructCanonicalUrl("/crf"),
   },
 };
 

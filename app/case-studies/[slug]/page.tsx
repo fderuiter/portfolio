@@ -15,7 +15,7 @@ import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
 import { PageLayout } from "@/components/PageLayout";
-import { resolveBaseUrl } from "@/lib/domain";
+import { constructCanonicalUrl } from "@/lib/domain";
 import { CaseStudyFeedbackSection } from "@/components/CaseStudyFeedbackSection";
 
 import type { Metadata } from "next";
@@ -86,13 +86,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: `${study.title} | Case Study`,
     description: cleanDescription,
     alternates: {
-      canonical: `/case-studies/${slug}`,
+      canonical: constructCanonicalUrl(`/case-studies/${slug}`),
     },
     openGraph: {
       title: `${study.title} | Case Study`,
       description: cleanDescription,
       type: "article",
-      url: `${resolveBaseUrl()}/case-studies/${slug}`,
+      url: constructCanonicalUrl(`/case-studies/${slug}`),
       publishedTime: study.created_at.toISOString(),
       modifiedTime: study.updated_at.toISOString(),
       tags: study.tags.split(",").map((t) => t.trim()),
