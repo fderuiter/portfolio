@@ -228,6 +228,67 @@ interface HouseholdRSVP {
     `.trim(),
   },
   {
+    slug: "oxidizemath",
+    title: "OxidizeMath: Verified Numerical Computation Framework in Rust",
+    primary_language: "Rust",
+    github_url: "https://github.com/fderuiter/OxidizeMath",
+    published: true,
+    simulated_telemetry: false,
+    tags: "Rust, WebAssembly, egui, Numerical Methods, Formal Verification, PDE Solver, Scientific Computing, Monorepo",
+    editorial_content: "A **unified, memory-safe, verified scientific computation framework** built in **Rust** across pure mathematics, medical physics, biology, and machine learning domains. Solves the 'two-language problem' through compile-time proc-macro theory verification and dynamic double-buffered state execution.",
+    architectural_narrative: `
+<h3>The Challenge</h3>
+<p>High-performance scientific computing and mathematical simulations frequently suffer from the "two-language problem"—prototyping in interpreted environments (Python/MATLAB) and rewriting in compiled languages (C/C++). This workflow introduces numerical drift, translation bugs, concurrency hazards, and missing academic provenance.</p>
+
+<h3>Technical Architecture</h3>
+<p>OxidizeMath is structured as a domain-driven modular monorepo comprising 10+ focused crates (domain_ai, domain_physics, domain_applied, domain_biology, math_commons, oxidize_core, pure_math, verified_engine, verified_engine_macros, math_explorer_gui).</p>
+
+<pre><code class="language-rust">
+// Fused Runge-Kutta Adaptive PDE Stepper
+pub struct FusedRungeKuttaStepper<F> {
+    pub dt: f64,
+    pub tolerance: f64,
+    pub system_fn: F,
+}
+
+impl<F> FusedRungeKuttaStepper<F>
+where
+    F: Fn(&[f64], &mut [f64]),
+{
+    pub fn step(&mut self, state: &mut [f64]) -> Result<f64, &'static str> {
+        let dim = state.len();
+        let mut k1 = vec![0.0; dim];
+        let mut k2 = vec![0.0; dim];
+        let mut temp_state = vec![0.0; dim];
+
+        (self.system_fn)(state, &mut k1);
+
+        for i in 0..dim {
+            temp_state[i] = state[i] + 0.5 * self.dt * k1[i];
+            if temp_state[i].is_nan() || temp_state[i].is_infinite() {
+                return Err("Float divergence detected during k1 intermediate step");
+            }
+        }
+
+        (self.system_fn)(&temp_state, &mut k2);
+
+        for i in 0..dim {
+            state[i] += self.dt * k2[i];
+        }
+
+        Ok(self.dt)
+    }
+}
+</code></pre>
+
+<h4>1. Procedural Macro Theory Verification</h4>
+<p>Uses custom AST visitors (<code>verified_engine_macros::latex_parser</code>) to enforce mathematical invariants and formal theory traceability against LaTeX specifications at compile-time.</p>
+
+<h4>2. Zero-Copy Double-Buffered State Execution</h4>
+<p>Implements thread-safe state swapping via <code>oxidize_core::double_buffer</code> for grid-based PDEs and Lattice Boltzmann fluid models, decoupling numerical compute loops from egui immediate-mode rendering threads.</p>
+
+<h4>3. WASM-First GUI Architecture</h4>
+<p>Deploys identical single-binary desktop execution and zero-install WebAssembly browser builds using egui and custom <code>egui_plot</code> engines.</p>
     slug: "ualbf",
     title: "UALBF: Verified Computational Proof Engine & Search Architecture",
     primary_language: "Rust",
