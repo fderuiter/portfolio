@@ -77,6 +77,13 @@ export class CaseStudyService {
           title: "iMedNet Python SDK",
           primary_language: "Python",
           tags: "sdk, clinical, integration"
+        },
+        {
+          id: "inbody-qr-decoder",
+          slug: "inbody-qr-decoder",
+          title: "InBody QR Data Decoder",
+          primary_language: "Python",
+          tags: "python, reverse-engineering, qr-decoder, biometrics"
         }
       ];
     }

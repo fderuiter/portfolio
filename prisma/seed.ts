@@ -228,6 +228,41 @@ interface HouseholdRSVP {
     `.trim(),
   },
   {
+    slug: "inbody-qr-decoder",
+    title: "InBody QR Data Decoder & Analyzer: BIA Reverse Engineering",
+    primary_language: "Python",
+    github_url: "https://github.com/fderuiter/inbody-qr-decoder",
+    published: true,
+    simulated_telemetry: false,
+    tags: "Python, Poetry, Reverse Engineering, Biomedical Data, Monorepo Architecture, Data Parsing, QR Decoder",
+    editorial_content: "A **multi-package Python monorepo** (`inbody-core`, `inbody-decoder`, `inbody-client`, `inbody-cli`) that reverse-engineers the fixed-width binary serialization protocol of `InBody BIA QR codes`. Features an automated `Differential Mutation Oracle` for dynamic positional field discovery and static zero-dependency `sub-millisecond parsing`.",
+    architectural_narrative: `
+<h3>The Challenge</h3>
+<p>Proprietary Bioelectrical Impedance Analysis (BIA) hardware, such as the InBody 570, encodes comprehensive body composition biometrics into an opaque, high-density query string (<code>IBData</code>) within user-facing QR codes. Users and researchers are traditionally locked into vendor ecosystems or forced to rely on physical printouts and client-side web dashboards. Developing a vendor-agnostic pipeline required reverse-engineering undocumented ASCII payloads without official schemas.</p>
+
+<h3>Technical Architecture</h3>
+<p>The solution is architected as a modular Python monorepo decoupled into discrete, single-responsibility packages linked via Poetry path dependencies:</p>
+
+<pre><code class="language-python">
+# Positional place-value matrix decoder in inbody-decoder
+def decode_digits(raw_slice: str, scale_factor: float = 0.1, precision: int = 2) -> float:
+    """Fixed-width positional matrix deserializer for place-value byte windows."""
+    clean_digits = raw_slice.strip()
+    accumulated_value = sum(
+        (ord(char) - ord('0')) * (10 ** idx)
+        for idx, char in enumerate(reversed(clean_digits))
+    )
+    return round(accumulated_value * scale_factor, precision)
+</code></pre>
+
+<h4>1. Differential Mutation Oracle ("Delta Testing Engine")</h4>
+<p>To discover undocumented field boundaries, the engine in <code>inbody-cli/mapping.py</code> systematically isolates contiguous byte slice windows ($w \\in [1..5]$), injects controlled integer perturbations ($\\pm 1$), and evaluates downstream server response variations to programmatically derive offset matrices and floating-point scaling factors.</p>
+
+<h4>2. Seed Normalization &amp; Percent-Encoding Resilience</h4>
+<p>A critical bug was resolved where URL percent-encoding (<code>%21</code>) of literal <code>!</code> delimiters caused byte-slice alignment shifts, inducing a $10\\times$ calculation error on Leg Lean Mass. Seed strings are strictly decoded and normalized before delimiter parsing.</p>
+
+<h4>3. Multi-Block Segment Parsing &amp; Biomarker Derivation</h4>
+<p>Primary body composition parameters reside in Segment Index 4 (<code>meas_blob</code>), while secondary metrics (BMR and Visceral Fat) are extracted from Segment Index 5 in kilocalories. Derived biomarkers, including Appendicular Skeletal Muscle Mass (ASM) and Skeletal Muscle Index ($\\text{SMI} = \\frac{\\text{ASM}}{\\text{Height}^2}$), are computed deterministically.</p>
     slug: "polyglot-tsp",
     title: "Polyglot-TSP: Technical Breakdown & Portfolio Integration",
     primary_language: "Rust",
