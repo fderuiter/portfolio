@@ -8,7 +8,7 @@
 
 > **exportStudyToR**(`study`, `options?`): `string`
 
-Defined in: [lib/crf/export-r.ts:461](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L461)
+Defined in: [lib/crf/export-r.ts:481](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L481)
 
 Exports all forms in a study into a complete R Pharmaverse Suite.
 

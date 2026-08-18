@@ -59,17 +59,25 @@ export function getFieldOptions(field: CRFField, study: StudyProtocol): Codelist
  * Returns 'Y' if selected, 'N' if absent/unselected.
  */
 export function parseMultiSelectValue(
-  edcValue: string | string[] | null | undefined,
+  edcValue: string | string[] | boolean | null | undefined,
   optionCode: string
 ): "Y" | "N" {
-  if (!edcValue) return "N";
+  if (edcValue === null || edcValue === undefined || edcValue === false) return "N";
+  if (edcValue === true) return "Y";
   let selectedCodes: string[] = [];
   if (Array.isArray(edcValue)) {
     selectedCodes = edcValue.map((s) => String(s).trim().toUpperCase());
   } else if (typeof edcValue === "string") {
-    selectedCodes = edcValue
+    const trimmed = edcValue.trim().toUpperCase();
+    if (trimmed === "TRUE" || trimmed === "1" || trimmed === "Y" || trimmed === "YES") {
+      const targetUpper = String(optionCode).trim().toUpperCase();
+      if (targetUpper === "Y" || targetUpper === "1" || targetUpper === "YES" || targetUpper === "TRUE") {
+        return "Y";
+      }
+    }
+    selectedCodes = trimmed
       .split(/[,;]/)
-      .map((s) => s.trim().toUpperCase())
+      .map((s) => s.trim().replace(/^['"]+|['"]+$/g, ""))
       .filter(Boolean);
   }
   const targetCode = String(optionCode).trim().toUpperCase();
@@ -81,11 +89,12 @@ export function parseMultiSelectValue(
  */
 function generateUniqueRName(baseName: string, usedNames: Set<string>, maxLength = 32): string {
   let counter = 1;
-  let candidate = baseName.substring(0, maxLength).toUpperCase();
+  const sanitizedBase = sanitizeRName(baseName, maxLength).toUpperCase();
+  let candidate = sanitizedBase;
   while (usedNames.has(candidate)) {
     const suffix = `_${counter}`;
     const maxPrefixLen = maxLength - suffix.length;
-    candidate = `${baseName.substring(0, maxPrefixLen)}${suffix}`.toUpperCase();
+    candidate = `${sanitizedBase.substring(0, maxPrefixLen)}${suffix}`;
     counter++;
   }
   return candidate;
@@ -194,7 +203,18 @@ export function generateRCodelists(study: StudyProtocol, formsToInclude: CRFForm
     });
   });
 
-  const relevantCodelists = (study.codelists || []).filter(
+  const userCodelists = study.codelists || [];
+  if (userCodelists.length === 0) {
+    return `# No codelists defined for this study\n\n`;
+  }
+
+  const allAvailableCodelists = [...userCodelists];
+  if (hasMultiOrCheckbox && !allAvailableCodelists.some((c) => c.id === "CL_NY")) {
+    const ny = STANDARD_CODELISTS.find((c) => c.id === "CL_NY");
+    if (ny) allAvailableCodelists.push(ny);
+  }
+
+  const relevantCodelists = allAvailableCodelists.filter(
     (cl) => referencedCodelistIds.has(cl.id) || (hasMultiOrCheckbox && cl.id === "CL_NY") || cl.isStandard
   );
 

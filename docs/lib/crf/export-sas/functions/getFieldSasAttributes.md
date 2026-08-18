@@ -8,7 +8,7 @@
 
 > **getFieldSasAttributes**(`field`, `study`): [`SasFieldAttributes`](../interfaces/SasFieldAttributes.md)
 
-Defined in: [lib/crf/export-sas.ts:135](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L135)
+Defined in: [lib/crf/export-sas.ts:144](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L144)
 
 ## Parameters
 
