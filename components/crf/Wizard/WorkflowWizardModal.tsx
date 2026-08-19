@@ -93,26 +93,26 @@ export const WorkflowWizardModal: React.FC<WorkflowWizardModalProps> = ({
     }
   }, [isOpen, currentStudy]);
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent | KeyboardEvent) => {
     if (e.key === "ArrowRight") {
-      const activeEl = document.activeElement;
+      const target = (e.target || document.activeElement) as HTMLElement | null;
       if (
-        activeEl &&
-        (activeEl.tagName === "INPUT" ||
-          activeEl.tagName === "TEXTAREA" ||
-          activeEl.tagName === "SELECT")
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT")
       ) {
         return;
       }
       e.preventDefault();
       setCurrentStageIdx((prev) => Math.min(prev + 1, 4));
     } else if (e.key === "ArrowLeft") {
-      const activeEl = document.activeElement;
+      const target = (e.target || document.activeElement) as HTMLElement | null;
       if (
-        activeEl &&
-        (activeEl.tagName === "INPUT" ||
-          activeEl.tagName === "TEXTAREA" ||
-          activeEl.tagName === "SELECT")
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT")
       ) {
         return;
       }
@@ -123,7 +123,7 @@ export const WorkflowWizardModal: React.FC<WorkflowWizardModalProps> = ({
 
   const containerRef = useFocusTrap<HTMLDivElement>(isOpen, {
     onEscape: onClose,
-    onKeyDown: handleKeyDown,
+    onKeyDown: handleKeyDown as (e: KeyboardEvent) => void,
     returnFocus: true,
   });
 

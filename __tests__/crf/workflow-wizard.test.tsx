@@ -61,7 +61,7 @@ describe("WorkflowWizardModal Component", () => {
     });
 
     expect(container.textContent).toContain("CRF Protocol Authoring Wizard");
-    expect(container.textContent).toContain("Step 1 of 5");
+    expect(container.textContent).toContain("Stage 1 of 5");
     expect(container.textContent).toContain("Choose Starting Archetype");
 
     // Click "Next Stage" button
@@ -74,7 +74,7 @@ describe("WorkflowWizardModal Component", () => {
     await act(async () => {
       nextButtons[0].click();
     });
-    expect(container.textContent).toContain("Step 2 of 5");
+    expect(container.textContent).toContain("Stage 2 of 5");
     expect(container.textContent).toContain("Select CDASH & Medical Device Domains");
 
     // Step to Stage 3
@@ -84,7 +84,7 @@ describe("WorkflowWizardModal Component", () => {
     await act(async () => {
       nextBtn2?.click();
     });
-    expect(container.textContent).toContain("Step 3 of 5");
+    expect(container.textContent).toContain("Stage 3 of 5");
     expect(container.textContent).toContain("Schedule of Activities (SoA) Matrix");
 
     // Step to Stage 4
@@ -94,7 +94,7 @@ describe("WorkflowWizardModal Component", () => {
     await act(async () => {
       nextBtn3?.click();
     });
-    expect(container.textContent).toContain("Step 4 of 5");
+    expect(container.textContent).toContain("Stage 4 of 5");
     expect(container.textContent).toContain("Clinical Calculations & AST Edit Checks");
 
     // Step to Stage 5
@@ -104,7 +104,7 @@ describe("WorkflowWizardModal Component", () => {
     await act(async () => {
       nextBtn4?.click();
     });
-    expect(container.textContent).toContain("Step 5 of 5");
+    expect(container.textContent).toContain("Stage 5 of 5");
     expect(container.textContent).toContain("Regulatory & Logic Conformance Audit");
     expect(container.textContent).toContain("Deploy Protocol to Studio Canvas");
 
