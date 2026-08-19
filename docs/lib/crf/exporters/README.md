@@ -56,6 +56,12 @@ Re-exports [exportStudyToCdiscOdmXml](../odm-xml-serializer/functions/exportStud
 
 ***
 
+### exportStudyToFhirQuestionnaire
+
+Re-exports [exportStudyToFhirQuestionnaire](../fhir-questionnaire/functions/exportStudyToFhirQuestionnaire.md)
+
+***
+
 ### exportStudyToR
 
 Re-exports [exportStudyToR](../export-r/functions/exportStudyToR.md)

@@ -104,3 +104,18 @@ export function exportFormToFhirQuestionnaire(form: CRFForm, study: StudyProtoco
     })),
   };
 }
+
+/**
+ * Converts an entire StudyProtocol into an HL7 FHIR Bundle of Questionnaire Resources
+ */
+export function exportStudyToFhirQuestionnaire(study: StudyProtocol): object {
+  return {
+    resourceType: "Bundle",
+    type: "collection",
+    id: `bundle-${study.protocolNumber.toLowerCase().replace(/[^a-z0-9-]/g, "-")}`,
+    entry: study.forms.map((form) => ({
+      resource: exportFormToFhirQuestionnaire(form, study),
+    })),
+  };
+}
+

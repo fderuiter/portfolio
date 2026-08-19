@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dx": "npx tsx scripts/dx.ts",
+    "crf": "npx tsx scripts/crf.ts",
     "setup": "npx tsx scripts/dx.ts setup",
     "setup:clerk": "./scripts/setup-clerk-wizard.sh",
     "doctor": "npx tsx scripts/dx.ts doctor",

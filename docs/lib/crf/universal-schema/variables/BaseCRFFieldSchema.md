@@ -1,0 +1,11 @@
+[**fderuiter-portfolio**](../../../../README.md)
+
+***
+
+[fderuiter-portfolio](../../../../modules.md) / [lib/crf/universal-schema](../README.md) / BaseCRFFieldSchema
+
+# Variable: BaseCRFFieldSchema
+
+> `const` **BaseCRFFieldSchema**: `ZodObject`\<\{ `calculationFormula`: `ZodOptional`\<`ZodString`\>; `cdashMetadata`: `ZodOptional`\<`ZodObject`\<\{ `acrfAnnotation`: `ZodString`; `cdashLabel`: `ZodString`; `core`: `ZodEnum`\<\{ `HR`: `"HR"`; `O`: `"O"`; `R`: `"R"`; \}\>; `dataCategory`: `ZodOptional`\<`ZodString`\>; `domain`: `ZodString`; `nciConceptId`: `ZodOptional`\<`ZodString`\>; `sdtmVariable`: `ZodString`; \}, `$strip`\>\>; `codelistId`: `ZodOptional`\<`ZodString`\>; `columnSpan`: `ZodDefault`\<`ZodNumber`\>; `customOptions`: `ZodOptional`\<`ZodArray`\<`ZodObject`\<\{ `code`: `ZodString`; `label`: `ZodString`; `nciCode`: `ZodOptional`\<`ZodString`\>; `order`: `ZodDefault`\<`ZodNumber`\>; \}, `$strip`\>\>\>; `dataType`: `ZodEnum`\<\{ `boolean`: `"boolean"`; `calculated`: `"calculated"`; `checkbox`: `"checkbox"`; `date`: `"date"`; `datetime`: `"datetime"`; `integer`: `"integer"`; `multi_select`: `"multi_select"`; `nrs_scale`: `"nrs_scale"`; `number`: `"number"`; `partial_date`: `"partial_date"`; `radio`: `"radio"`; `repeating_table`: `"repeating_table"`; `signature`: `"signature"`; `single_select`: `"single_select"`; `text`: `"text"`; `textarea`: `"textarea"`; `time`: `"time"`; `vas_scale`: `"vas_scale"`; \}\>; `defaultValue`: `ZodOptional`\<`ZodUnion`\<readonly \[`ZodString`, `ZodNumber`, `ZodBoolean`\]\>\>; `description`: `ZodOptional`\<`ZodString`\>; `id`: `ZodString`; `label`: `ZodString`; `maxValue`: `ZodOptional`\<`ZodNumber`\>; `minValue`: `ZodOptional`\<`ZodNumber`\>; `placeholder`: `ZodOptional`\<`ZodString`\>; `readOnly`: `ZodOptional`\<`ZodBoolean`\>; `required`: `ZodDefault`\<`ZodBoolean`\>; `scaleMaxLabel`: `ZodOptional`\<`ZodString`\>; `scaleMinLabel`: `ZodOptional`\<`ZodString`\>; `sdvAuditedBy`: `ZodOptional`\<`ZodString`\>; `sdvTimestamp`: `ZodOptional`\<`ZodString`\>; `sdvVerified`: `ZodOptional`\<`ZodBoolean`\>; `unit`: `ZodOptional`\<`ZodString`\>; `unitOptions`: `ZodOptional`\<`ZodArray`\<`ZodString`\>\>; `variableName`: `ZodString`; \}, `$strip`\>
+
+Defined in: [lib/crf/universal-schema.ts:88](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L88)

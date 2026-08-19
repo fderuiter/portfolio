@@ -37,6 +37,7 @@ function printUsage(): void {
   console.log(`  ${colors.cyan}bench${colors.reset}                  Run Pretext, Masonry Scheduler, and Security benchmarks`);
   console.log(`  ${colors.cyan}bench --pages${colors.reset}          Run real-browser Core Web Vitals & page speed benchmarks`);
   console.log(`  ${colors.cyan}clean${colors.reset}                  Clean build artifacts and reset developer cache`);
+  console.log(`  ${colors.cyan}crf <cmd> [options]${colors.reset}    Clinical Research Form (CRF) authoring & CDISC validation CLI`);
   console.log(`  ${colors.cyan}help${colors.reset}                   Show this help menu\n`);
   console.log(`${colors.bold}Examples:${colors.reset}`);
   console.log(`  $ npm run dx doctor`);
@@ -460,6 +461,9 @@ async function main(): Promise<void> {
     case "benchmark":
     case "bench:pages":
       handleBenchCommand(command === "bench:pages" ? ["--pages", ...args.slice(1)] : args.slice(1));
+      break;
+    case "crf":
+      execSync(`npx tsx ${path.resolve(__dirname, "crf.ts")} ${args.slice(1).join(" ")}`, { stdio: "inherit" });
       break;
     case "clean":
     case "reset":

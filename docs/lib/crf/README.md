@@ -14,9 +14,21 @@ Re-exports [AcrfHtmlOptions](export-acrf/interfaces/AcrfHtmlOptions.md)
 
 ***
 
+### ansi
+
+Re-exports [ansi](cli-engine/variables/ansi.md)
+
+***
+
 ### AstCondition
 
 Re-exports [AstCondition](types/interfaces/AstCondition.md)
+
+***
+
+### AstConditionSchema
+
+Re-exports [AstConditionSchema](universal-schema/variables/AstConditionSchema.md)
 
 ***
 
@@ -35,6 +47,12 @@ Re-exports [autoFixAllViolations](cdisc-conformance-linter/functions/autoFixAllV
 ### autoFixViolation
 
 Re-exports [autoFixViolation](cdisc-conformance-linter/functions/autoFixViolation.md)
+
+***
+
+### BaseCRFFieldSchema
+
+Re-exports [BaseCRFFieldSchema](universal-schema/variables/BaseCRFFieldSchema.md)
 
 ***
 
@@ -104,6 +122,24 @@ Re-exports [CdashVariableMetadata](types/interfaces/CdashVariableMetadata.md)
 
 ***
 
+### CdashVariableMetadataSchema
+
+Re-exports [CdashVariableMetadataSchema](universal-schema/variables/CdashVariableMetadataSchema.md)
+
+***
+
+### CliCommandResult
+
+Re-exports [CliCommandResult](cli-engine/interfaces/CliCommandResult.md)
+
+***
+
+### CliExecutionOptions
+
+Re-exports [CliExecutionOptions](cli-engine/interfaces/CliExecutionOptions.md)
+
+***
+
 ### CLINICAL\_FORMULA\_PRESETS
 
 Re-exports [CLINICAL_FORMULA_PRESETS](formula-presets/variables/CLINICAL_FORMULA_PRESETS.md)
@@ -128,9 +164,21 @@ Re-exports [CodelistDefinition](types/interfaces/CodelistDefinition.md)
 
 ***
 
+### CodelistDefinitionSchema
+
+Re-exports [CodelistDefinitionSchema](universal-schema/variables/CodelistDefinitionSchema.md)
+
+***
+
 ### CodelistOption
 
 Re-exports [CodelistOption](types/interfaces/CodelistOption.md)
+
+***
+
+### CodelistOptionSchema
+
+Re-exports [CodelistOptionSchema](universal-schema/variables/CodelistOptionSchema.md)
 
 ***
 
@@ -182,6 +230,12 @@ Re-exports [DiagnosticItem](form-linter/interfaces/DiagnosticItem.md)
 
 ***
 
+### diffUniversalCrfStudies
+
+Re-exports [diffUniversalCrfStudies](universal-schema/functions/diffUniversalCrfStudies.md)
+
+***
+
 ### EDCQuery
 
 Re-exports [EDCQuery](types/interfaces/EDCQuery.md)
@@ -191,6 +245,12 @@ Re-exports [EDCQuery](types/interfaces/EDCQuery.md)
 ### EditCheckRule
 
 Re-exports [EditCheckRule](types/interfaces/EditCheckRule.md)
+
+***
+
+### EditCheckRuleSchema
+
+Re-exports [EditCheckRuleSchema](universal-schema/variables/EditCheckRuleSchema.md)
 
 ***
 
@@ -227,6 +287,48 @@ Re-exports [evaluateFormula](expression-evaluator/functions/evaluateFormula.md)
 ### evaluateRule
 
 Re-exports [evaluateRule](expression-evaluator/functions/evaluateRule.md)
+
+***
+
+### executeAddFieldCommand
+
+Re-exports [executeAddFieldCommand](cli-engine/functions/executeAddFieldCommand.md)
+
+***
+
+### executeAddFormCommand
+
+Re-exports [executeAddFormCommand](cli-engine/functions/executeAddFormCommand.md)
+
+***
+
+### executeCliString
+
+Re-exports [executeCliString](cli-engine/functions/executeCliString.md)
+
+***
+
+### executeDiffCommand
+
+Re-exports [executeDiffCommand](cli-engine/functions/executeDiffCommand.md)
+
+***
+
+### executeExportCommand
+
+Re-exports [executeExportCommand](cli-engine/functions/executeExportCommand.md)
+
+***
+
+### executeInfoCommand
+
+Re-exports [executeInfoCommand](cli-engine/functions/executeInfoCommand.md)
+
+***
+
+### executeValidateCommand
+
+Re-exports [executeValidateCommand](cli-engine/functions/executeValidateCommand.md)
 
 ***
 
@@ -284,6 +386,12 @@ Re-exports [exportStudyToCdiscOdmXml](odm-xml-serializer/functions/exportStudyTo
 
 ***
 
+### exportStudyToFhirQuestionnaire
+
+Re-exports [exportStudyToFhirQuestionnaire](fhir-questionnaire/functions/exportStudyToFhirQuestionnaire.md)
+
+***
+
 ### exportStudyToR
 
 Re-exports [exportStudyToR](export-r/functions/exportStudyToR.md)
@@ -293,6 +401,18 @@ Re-exports [exportStudyToR](export-r/functions/exportStudyToR.md)
 ### exportStudyToSas
 
 Re-exports [exportStudyToSas](export-sas/functions/exportStudyToSas.md)
+
+***
+
+### exportUniversalCrfJson
+
+Re-exports [exportUniversalCrfJson](universal-schema/functions/exportUniversalCrfJson.md)
+
+***
+
+### exportUniversalCrfYaml
+
+Re-exports [exportUniversalCrfYaml](universal-schema/functions/exportUniversalCrfYaml.md)
 
 ***
 
@@ -323,6 +443,18 @@ Re-exports [FormulaTokenType](formula-linter/type-aliases/FormulaTokenType.md)
 ### generateAcrfHtml
 
 Re-exports [generateAcrfHtml](export-acrf/functions/generateAcrfHtml.md)
+
+***
+
+### generateCliCommandForField
+
+Re-exports [generateCliCommandForField](universal-schema/functions/generateCliCommandForField.md)
+
+***
+
+### generateCliCommandForForm
+
+Re-exports [generateCliCommandForForm](universal-schema/functions/generateCliCommandForForm.md)
 
 ***
 
@@ -446,6 +578,18 @@ Re-exports [parseMultiSelectValue](export-r/functions/parseMultiSelectValue.md)
 
 ***
 
+### parseUniversalCrf
+
+Re-exports [parseUniversalCrf](universal-schema/functions/parseUniversalCrf.md)
+
+***
+
+### ProtocolDiffSummary
+
+Re-exports [ProtocolDiffSummary](universal-schema/interfaces/ProtocolDiffSummary.md)
+
+***
+
 ### sanitizeRName
 
 Re-exports [sanitizeRName](export-r/functions/sanitizeRName.md)
@@ -473,6 +617,12 @@ Re-exports [SdtmMappingRow](export-acrf/interfaces/SdtmMappingRow.md)
 ### STANDARD\_CODELISTS
 
 Re-exports [STANDARD_CODELISTS](cdisc-controlled-terminology/variables/STANDARD_CODELISTS.md)
+
+***
+
+### stripAnsi
+
+Re-exports [stripAnsi](cli-engine/functions/stripAnsi.md)
 
 ***
 
@@ -530,6 +680,132 @@ Re-exports [TokenType](expression-evaluator/type-aliases/TokenType.md)
 
 ***
 
+### UniversalAstCondition
+
+Re-exports [UniversalAstCondition](universal-schema/type-aliases/UniversalAstCondition.md)
+
+***
+
+### UniversalCdashMetadata
+
+Re-exports [UniversalCdashMetadata](universal-schema/type-aliases/UniversalCdashMetadata.md)
+
+***
+
+### UniversalClinicalDataType
+
+Re-exports [UniversalClinicalDataType](universal-schema/type-aliases/UniversalClinicalDataType.md)
+
+***
+
+### UniversalClinicalDataTypeSchema
+
+Re-exports [UniversalClinicalDataTypeSchema](universal-schema/variables/UniversalClinicalDataTypeSchema.md)
+
+***
+
+### UniversalCodelist
+
+Re-exports [UniversalCodelist](universal-schema/type-aliases/UniversalCodelist.md)
+
+***
+
+### UniversalCodelistOption
+
+Re-exports [UniversalCodelistOption](universal-schema/type-aliases/UniversalCodelistOption.md)
+
+***
+
+### UniversalCrfBranding
+
+Re-exports [UniversalCrfBranding](universal-schema/type-aliases/UniversalCrfBranding.md)
+
+***
+
+### UniversalCrfBrandingSchema
+
+Re-exports [UniversalCrfBrandingSchema](universal-schema/variables/UniversalCrfBrandingSchema.md)
+
+***
+
+### UniversalCrfField
+
+Re-exports [UniversalCrfField](universal-schema/type-aliases/UniversalCrfField.md)
+
+***
+
+### UniversalCrfFieldSchema
+
+Re-exports [UniversalCrfFieldSchema](universal-schema/variables/UniversalCrfFieldSchema.md)
+
+***
+
+### UniversalCrfForm
+
+Re-exports [UniversalCrfForm](universal-schema/type-aliases/UniversalCrfForm.md)
+
+***
+
+### UniversalCrfFormSchema
+
+Re-exports [UniversalCrfFormSchema](universal-schema/variables/UniversalCrfFormSchema.md)
+
+***
+
+### UniversalCrfProtocol
+
+Re-exports [UniversalCrfProtocol](universal-schema/type-aliases/UniversalCrfProtocol.md)
+
+***
+
+### UniversalCrfProtocolSchema
+
+Re-exports [UniversalCrfProtocolSchema](universal-schema/variables/UniversalCrfProtocolSchema.md)
+
+***
+
+### UniversalCrfSection
+
+Re-exports [UniversalCrfSection](universal-schema/type-aliases/UniversalCrfSection.md)
+
+***
+
+### UniversalCrfSectionSchema
+
+Re-exports [UniversalCrfSectionSchema](universal-schema/variables/UniversalCrfSectionSchema.md)
+
+***
+
+### UniversalCrfValidationResult
+
+Re-exports [UniversalCrfValidationResult](universal-schema/interfaces/UniversalCrfValidationResult.md)
+
+***
+
+### UniversalCrfVisit
+
+Re-exports [UniversalCrfVisit](universal-schema/type-aliases/UniversalCrfVisit.md)
+
+***
+
+### UniversalCrfVisitSchema
+
+Re-exports [UniversalCrfVisitSchema](universal-schema/variables/UniversalCrfVisitSchema.md)
+
+***
+
+### UniversalEditCheckRule
+
+Re-exports [UniversalEditCheckRule](universal-schema/type-aliases/UniversalEditCheckRule.md)
+
+***
+
 ### validateStudyCompliance
 
 Re-exports [validateStudyCompliance](cdisc-conformance-linter/functions/validateStudyCompliance.md)
+
+***
+
+### validateUniversalCrf
+
+Re-exports [validateUniversalCrf](universal-schema/functions/validateUniversalCrf.md)

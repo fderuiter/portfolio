@@ -30,6 +30,7 @@ const ExportDocumentModal = dynamic(
 );
 import { BrandingConfigModal } from "./Branding/BrandingConfigModal";
 import { DiagnosticsDrawer } from "./DiagnosticsDrawer";
+import { StudioTerminal } from "./Terminal/StudioTerminal";
 import {
   VisitMatrixEditorSkeleton,
   RuleGraphStudioSkeleton,
@@ -182,6 +183,7 @@ export const CRFStudioContainer: React.FC = () => {
   const [isExportDocModalOpen, setIsExportDocModalOpen] = useState(false);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isSpotlightTourOpen, setIsSpotlightTourOpen] = useState(false);
+  const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [leftTab, setLeftTabState] = useState<"forms" | "palette">(() => {
     if (typeof window !== "undefined") {
       const rawTab = new URLSearchParams(window.location.hash.slice(1)).get("tab");
@@ -387,7 +389,18 @@ export const CRFStudioContainer: React.FC = () => {
         }
       }
 
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "j") {
+        e.preventDefault();
+        setIsTerminalOpen((prev) => !prev);
+        return;
+      }
+
       if (!isInput) {
+        if (e.key === "`") {
+          e.preventDefault();
+          setIsTerminalOpen((prev) => !prev);
+          return;
+        }
         if (e.key === "?" || e.key === "F1") {
           e.preventDefault();
           setIsWizardOpen((prev) => !prev);
@@ -648,8 +661,10 @@ export const CRFStudioContainer: React.FC = () => {
         onToggleTheme={handleToggleTheme}
         isLeftSidebarOpen={isLeftSidebarOpen}
         isRightInspectorOpen={isRightInspectorOpen}
+        isTerminalOpen={isTerminalOpen}
         onToggleLeftSidebar={() => setIsLeftSidebarOpen((prev) => !prev)}
         onToggleRightInspector={() => setIsRightInspectorOpen((prev) => !prev)}
+        onToggleTerminal={() => setIsTerminalOpen((prev) => !prev)}
         onUndo={handleUndo}
         onRedo={handleRedo}
         onChangeMode={setActiveMode}
@@ -858,6 +873,19 @@ export const CRFStudioContainer: React.FC = () => {
           />
         )}
       </div>
+
+      {/* In-Studio Interactive Terminal Drawer */}
+      <StudioTerminal
+        isOpen={isTerminalOpen}
+        study={study}
+        onClose={() => setIsTerminalOpen(false)}
+        onUpdateStudy={(updated) => {
+          updateStudyWithHistory(updated);
+          if (updated.forms[0] && !updated.forms.some((f) => f.id === activeFormId)) {
+            setActiveFormId(updated.forms[0].id);
+          }
+        }}
+      />
 
       {/* Mobile Stack Bottom Navigation Bar (Visible only in Designer mode on mobile < md) */}
       {activeMode === "designer" && (

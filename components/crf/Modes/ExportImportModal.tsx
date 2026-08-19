@@ -19,6 +19,11 @@ import {
   IconLoader2,
 } from "@tabler/icons-react";
 
+import {
+  exportUniversalCrfJson,
+  parseUniversalCrf,
+} from "@/lib/crf/universal-schema";
+
 interface ExportImportModalProps {
   study: StudyProtocol;
   onImportStudy: (importedStudy: StudyProtocol) => void;
@@ -26,7 +31,7 @@ interface ExportImportModalProps {
   onOpenBranding?: () => void;
 }
 
-type ExportTab = "odm" | "sas" | "r" | "json" | "fhir" | "sdtm_spec";
+type ExportTab = "universal" | "odm" | "sas" | "r" | "json" | "fhir" | "sdtm_spec";
 
 export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   study,
@@ -35,7 +40,7 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   onOpenBranding,
 }) => {
   const { recordEvent } = useTelemetry();
-  const [activeTab, setActiveTab] = useState<ExportTab>("odm");
+  const [activeTab, setActiveTab] = useState<ExportTab>("universal");
   const [selectedFormId, setSelectedFormId] = useState<string>("all");
   const [importJsonText, setImportJsonText] = useState("");
   const [importError, setImportError] = useState<string | null>(null);
@@ -51,7 +56,9 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
 
     const computeContent = async () => {
       let content = "";
-      if (activeTab === "odm") {
+      if (activeTab === "universal") {
+        content = exportUniversalCrfJson(study);
+      } else if (activeTab === "odm") {
         const { exportStudyToCdiscOdmXml } = await import("@/lib/crf/odm-xml-serializer");
         content = exportStudyToCdiscOdmXml(study);
       } else if (activeTab === "sas") {
@@ -100,12 +107,15 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
 
   const handleDownload = () => {
     recordEvent("crf", "project_click");
-    let filename = `study-${study.protocolNumber}.json`;
+    let filename = `study-${study.protocolNumber}.crf.json`;
     let mimeType = "application/json";
     const content = activeContent;
     const domainSuffix = selectedForm ? `-${selectedForm.domain || selectedForm.id}` : "";
 
-    if (activeTab === "odm") {
+    if (activeTab === "universal") {
+      filename = `${study.protocolNumber}.crf.json`;
+      mimeType = "application/json";
+    } else if (activeTab === "odm") {
       filename = `study-${study.protocolNumber}-odm.xml`;
       mimeType = "application/xml";
     } else if (activeTab === "sas") {
@@ -133,14 +143,11 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   const handlePerformImport = () => {
     setImportError(null);
     try {
-      const parsed = JSON.parse(importJsonText);
-      if (!parsed.protocolNumber || !Array.isArray(parsed.forms)) {
-        throw new Error("Invalid Study Protocol JSON: Missing 'protocolNumber' or 'forms' array.");
-      }
+      const parsed = parseUniversalCrf(importJsonText);
       onImportStudy(parsed);
       setImportJsonText("");
     } catch (err: unknown) {
-      setImportError((err as Error).message || "Invalid JSON syntax");
+      setImportError((err as Error).message || "Invalid Universal CRF syntax");
     }
   };
 
@@ -253,6 +260,18 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
 
       {/* Tabs */}
       <div className="flex border-b border-zinc-800 gap-2 overflow-x-auto">
+        <button
+          onClick={() => setActiveTab("universal")}
+          className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
+            activeTab === "universal"
+              ? "border-brand-cyan text-brand-cyan font-bold"
+              : "border-transparent text-zinc-400 hover:text-zinc-200"
+          }`}
+        >
+          <IconFileText className="w-4 h-4 text-brand-cyan" />
+          <span>Universal CRF (.json)</span>
+        </button>
+
         <button
           onClick={() => setActiveTab("odm")}
           className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${

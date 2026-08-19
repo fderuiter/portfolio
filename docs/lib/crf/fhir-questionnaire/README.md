@@ -9,3 +9,4 @@
 ## Functions
 
 - [exportFormToFhirQuestionnaire](functions/exportFormToFhirQuestionnaire.md)
+- [exportStudyToFhirQuestionnaire](functions/exportStudyToFhirQuestionnaire.md)

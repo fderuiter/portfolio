@@ -166,10 +166,10 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
         </div>
 
         {/* Right Actions & Progressive Micro-Toolbar */}
-        <div className="flex items-center gap-1">
-          {/* Progressive Column Span Controls (Visible on Hover / Focus / Selection) */}
+        <div className="flex items-center gap-1 shrink-0">
+          {/* Compact Column Span Stepper (Visible on Hover / Focus / Selection) */}
           <div
-            className={`hidden sm:flex items-center bg-zinc-900/90 border border-zinc-800 rounded-lg px-1 py-0.5 text-[9px] font-mono text-zinc-400 gap-1 transition-opacity ${
+            className={`hidden sm:flex items-center bg-zinc-900/90 border border-zinc-800 rounded-lg px-1.5 py-0.5 text-[9px] font-mono text-zinc-400 gap-1 transition-opacity ${
               isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-within:opacity-100"
             }`}
           >
@@ -179,43 +179,23 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                 handleAdjustSpan(-1);
               }}
               disabled={field.columnSpan <= 1}
-              className="hover:text-white disabled:opacity-30 px-0.5"
+              className="hover:text-white disabled:opacity-30 px-0.5 font-bold"
               title="Shrink column span"
             >
               -
             </button>
-            <span className="text-zinc-300 font-bold">{field.columnSpan}/12</span>
+            <span className="text-brand-cyan font-bold">{field.columnSpan}/12</span>
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 handleAdjustSpan(1);
               }}
               disabled={field.columnSpan >= 12}
-              className="hover:text-white disabled:opacity-30 px-0.5"
+              className="hover:text-white disabled:opacity-30 px-0.5 font-bold"
               title="Expand column span"
             >
               +
             </button>
-
-            <div className="h-2.5 w-px bg-zinc-800 mx-0.5" />
-
-            {[3, 4, 6, 12].map((s) => (
-              <button
-                key={s}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onUpdateField?.({ columnSpan: s });
-                }}
-                className={`px-1 py-0.2 rounded text-[8px] font-bold ${
-                  field.columnSpan === s
-                    ? "bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/40"
-                    : "text-zinc-500 hover:text-zinc-200"
-                }`}
-                title={`Set width to ${s} columns (${Math.round((s / 12) * 100)}%)`}
-              >
-                {s}c
-              </button>
-            ))}
           </div>
 
           {/* Touch Move Up/Down Controls for touch devices & smaller screens */}

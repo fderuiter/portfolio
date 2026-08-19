@@ -3,6 +3,8 @@
  */
 
 export * from "./types";
+export * from "./universal-schema";
+export * from "./cli-engine";
 export * from "./expression-evaluator";
 export * from "./formula-linter";
 export * from "./formula-presets";
