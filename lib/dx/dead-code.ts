@@ -60,6 +60,7 @@ function isConventionEntrypoint(filePath: string): boolean {
       "apple-icon.tsx",
       "instrumentation.ts",
       "middleware.ts",
+      "proxy.ts",
       "global-error.tsx",
       "template.tsx",
       "default.tsx",

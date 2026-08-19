@@ -21,6 +21,7 @@ if (!process.env.CRON_SECRET) {
 if (!process.env.NODE_OPTIONS || !process.env.NODE_OPTIONS.includes('--no-warnings')) {
   process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS || ''} --no-warnings`.trim();
 }
+process.env.SERWIST_SUPPRESS_TURBOPACK_WARNING = '1';
 
 // Helper function to run a step and exit if it fails
 function runStep(command, args) {

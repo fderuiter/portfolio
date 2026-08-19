@@ -17,6 +17,8 @@ import { resolveBaseUrl } from "@/lib/domain";
 
 import { SerwistRegister } from "@/components/providers/SerwistRegister";
 import { DevOverflowHud } from "@/components/ui/DevOverflowHud";
+import { ClerkProvider } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -79,59 +81,74 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      data-theme="dark"
-      className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
+    <ClerkProvider
+      appearance={{
+        theme: dark,
+        elements: {
+          card: "border border-white/10 shadow-2xl bg-[#0d0e11]",
+          headerTitle: "text-zinc-100 font-mono tracking-tight",
+          headerSubtitle: "text-zinc-400 font-sans text-xs",
+          formButtonPrimary: "bg-amber-500 hover:bg-amber-400 text-zinc-950 font-mono text-xs uppercase tracking-wider font-semibold transition-all",
+          formFieldInput: "bg-[#13151a] border-white/10 text-zinc-100 focus:border-amber-500 focus:ring-amber-500 font-mono text-sm",
+          footerActionText: "text-zinc-400 font-sans text-xs",
+          footerActionLink: "text-amber-400 hover:text-amber-300 font-mono text-xs",
+        },
+      }}
     >
-      <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: getPersonSchema()
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: getWebsiteSchema()
-          }}
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  document.documentElement.setAttribute('data-theme', 'dark');
-                } catch(e) {}
-              })();
-            `
-          }}
-        />
-      </head>
-      <body className="min-h-full flex flex-col bg-zinc-950 text-foreground antialiased">
-        <SkipToContent />
-        <PersonaProvider>
-          <TerminologyProvider>
-            <SearchProvider>
-              <A11yProvider>
-                <AudioProvider>
-                  <Navbar />
-                  <main id="main-content" tabIndex={-1} className="flex-grow flex flex-col focus:outline-none">
-                    {children}
-                  </main>
-                  <Footer />
-                  <RetroChaosOverlay />
-                  <Analytics />
-                  <SearchWrapper />
-                  <SerwistRegister />
-                  <DevOverflowHud />
-                </AudioProvider>
-              </A11yProvider>
-            </SearchProvider>
-          </TerminologyProvider>
-        </PersonaProvider>
-      </body>
-    </html>
+      <html
+        lang="en"
+        data-theme="dark"
+        className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
+      >
+        <head>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: getPersonSchema()
+            }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: getWebsiteSchema()
+            }}
+          />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                (function() {
+                  try {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                  } catch(e) {}
+                })();
+              `
+            }}
+          />
+        </head>
+        <body className="min-h-full flex flex-col bg-zinc-950 text-foreground antialiased">
+          <SkipToContent />
+          <PersonaProvider>
+            <TerminologyProvider>
+              <SearchProvider>
+                <A11yProvider>
+                  <AudioProvider>
+                    <Navbar />
+                    <main id="main-content" tabIndex={-1} className="flex-grow flex flex-col focus:outline-none">
+                      {children}
+                    </main>
+                    <Footer />
+                    <RetroChaosOverlay />
+                    <Analytics />
+                    <SearchWrapper />
+                    <SerwistRegister />
+                    <DevOverflowHud />
+                  </AudioProvider>
+                </A11yProvider>
+              </SearchProvider>
+            </TerminologyProvider>
+          </PersonaProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

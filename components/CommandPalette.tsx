@@ -598,6 +598,14 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
           "Bypasses error-tracking telemetry endpoints"
         ]
       },
+      {
+        id: "nav-admin",
+        title: "Admin",
+        subtitle: "Navigate to Admin view",
+        category: "navigation",
+        url: "/admin",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />
+      },
     ];
 
     const safeStudies = Array.isArray(studies) ? studies : [];

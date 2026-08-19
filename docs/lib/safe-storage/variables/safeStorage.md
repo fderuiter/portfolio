@@ -6,6 +6,6 @@
 
 # Variable: safeStorage
 
-> `const` **safeStorage**: `SafeStorageAdapter`
+> `const` **safeStorage**: [`SafeStorageAdapter`](../classes/SafeStorageAdapter.md)
 
 Defined in: [lib/safe-storage.ts:469](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L469)

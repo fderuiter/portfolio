@@ -122,5 +122,42 @@ describe("GitHub Telemetry & Caching Suite", () => {
       expect(stats?.forks).toBe(10);
       expect(stats?.languages[0].name).toBe("TypeScript");
     });
+
+    it("should return simulated stats on 404 when fallbackLanguage is provided", async () => {
+      vi.spyOn(global, "fetch").mockResolvedValue({
+        ok: false,
+        status: 404,
+      } as Response);
+
+      const stats = await getGitHubStats("nonexistent-owner", "nonexistent-repo", "TypeScript");
+
+      expect(stats).not.toBeNull();
+      expect(stats?.stars).toBe(148);
+      expect(stats?.languages[0].name).toBe("TypeScript");
+    });
+
+    it("should return simulated stats on 403 rate limit when fallbackLanguage is provided", async () => {
+      vi.spyOn(global, "fetch").mockResolvedValue({
+        ok: false,
+        status: 403,
+      } as Response);
+
+      const stats = await getGitHubStats("rate-limited-owner", "rate-limited-repo", "Python");
+
+      expect(stats).not.toBeNull();
+      expect(stats?.stars).toBe(112);
+      expect(stats?.languages[0].name).toBe("Python");
+    });
+
+    it("should return null on 404 when no fallbackLanguage is provided", async () => {
+      vi.spyOn(global, "fetch").mockResolvedValue({
+        ok: false,
+        status: 404,
+      } as Response);
+
+      const stats = await getGitHubStats("nonexistent-owner", "nonexistent-repo");
+
+      expect(stats).toBeNull();
+    });
   });
 });

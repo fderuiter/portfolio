@@ -8,7 +8,7 @@
 
 > **getEnv**(): [`AppEnv`](../type-aliases/AppEnv.md)
 
-Defined in: [lib/env.ts:105](https://github.com/fderuiter/portfolio/blob/main/lib/env.ts#L105)
+Defined in: [lib/env.ts:109](https://github.com/fderuiter/portfolio/blob/main/lib/env.ts#L109)
 
 Get validated application environment object.
 In development / production, logs formatted warnings if schema validation fails.

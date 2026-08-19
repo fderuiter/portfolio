@@ -6,6 +6,10 @@
 
 # lib/safe-storage
 
+## Classes
+
+- [SafeStorageAdapter](classes/SafeStorageAdapter.md)
+
 ## Interfaces
 
 - [StorageEnvelope](interfaces/StorageEnvelope.md)

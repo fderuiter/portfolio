@@ -8,4 +8,4 @@
 
 > **AppEnv** = [`ServerEnv`](ServerEnv.md) & [`ClientEnv`](ClientEnv.md)
 
-Defined in: [lib/env.ts:54](https://github.com/fderuiter/portfolio/blob/main/lib/env.ts#L54)
+Defined in: [lib/env.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/env.ts#L58)

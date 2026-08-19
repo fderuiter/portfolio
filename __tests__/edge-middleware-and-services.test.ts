@@ -73,7 +73,7 @@ vi.mock("@upstash/ratelimit", () => {
   };
 });
 
-import { middleware } from "@/middleware";
+import { proxy } from "@/proxy";
 import { CaseStudyService } from "@/lib/services/case-study-service";
 import { TelemetryService } from "@/lib/services/telemetry-service";
 import { generateClientConnectionHash, extractClientIp } from "@/lib/services/privacy-service";
@@ -82,21 +82,27 @@ import { SECURITY_HEADERS } from "@/lib/security-headers";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 
-describe("Edge Middleware & Modular Domain Services Suite", () => {
+describe("Next.js 16 Edge Proxy & Modular Domain Services Suite", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe("Edge Middleware & Security Headers", () => {
+  describe("Edge Proxy & Security Headers", () => {
     it("attaches all standard HTTP security headers to API responses", async () => {
       const req = new NextRequest("http://localhost/api/case-studies", {
         headers: { "x-forwarded-for": "203.0.113.195" },
       });
 
-      const res = await middleware(req);
+      const mockEvent = {
+        waitUntil: vi.fn(),
+        passThroughOnException: vi.fn(),
+      };
 
+      const res = await proxy(req, mockEvent as unknown as import("next/server").NextFetchEvent);
+
+      expect(res).toBeDefined();
       Object.entries(SECURITY_HEADERS).forEach(([header, value]) => {
-        expect(res.headers.get(header)).toBe(value);
+        expect(res?.headers.get(header)).toBe(value);
       });
     });
 

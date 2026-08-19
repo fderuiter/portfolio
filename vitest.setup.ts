@@ -160,3 +160,45 @@ HTMLCanvasElement.prototype.getContext = function (
   }
   return null;
 } as typeof HTMLCanvasElement.prototype.getContext;
+
+// Mock Clerk Next.js client and server modules for offline testing
+vi.mock("@clerk/nextjs", () => {
+  return {
+    ClerkProvider: ({ children }: { children: React.ReactNode }) => children,
+    SignIn: () => null,
+    SignUp: () => null,
+    UserButton: () => null,
+    useAuth: () => ({ isLoaded: true, isSignedIn: false, userId: null }),
+    useUser: () => ({ isLoaded: true, isSignedIn: false, user: null }),
+  };
+});
+
+vi.mock("@clerk/nextjs/server", () => {
+  return {
+    auth: vi.fn().mockResolvedValue({ userId: null, sessionId: null }),
+    currentUser: vi.fn().mockResolvedValue(null),
+    clerkMiddleware: vi.fn((cb) => {
+      return (req: unknown, ...args: unknown[]) => {
+        const mockAuth = {
+          protect: vi.fn().mockResolvedValue(undefined),
+          userId: null,
+          sessionId: null,
+        };
+        return cb(mockAuth, req, ...args);
+      };
+    }),
+    createRouteMatcher: vi.fn((routes: string[]) => (req: { nextUrl: { pathname: string } }) => {
+      return routes.some((pattern) => {
+        const regex = new RegExp("^" + pattern.replace(/\(\.\*\)/g, ".*") + "$");
+        return regex.test(req.nextUrl.pathname);
+      });
+    }),
+  };
+});
+
+vi.mock("@clerk/themes", () => {
+  return {
+    dark: {},
+  };
+});
+

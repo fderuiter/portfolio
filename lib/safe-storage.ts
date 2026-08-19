@@ -25,7 +25,7 @@ interface CacheRecord<T = unknown> {
   parsedValue: T;
 }
 
-class SafeStorageAdapter {
+export class SafeStorageAdapter {
   private memoryCache = new Map<string, CacheRecord<any>>();
 
   constructor() {

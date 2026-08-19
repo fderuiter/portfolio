@@ -8,7 +8,7 @@
 
 > **scanDeadCode**(`workspaceRoot`): [`DeadCodeReport`](../interfaces/DeadCodeReport.md)
 
-Defined in: [lib/dx/dead-code.ts:167](https://github.com/fderuiter/portfolio/blob/main/lib/dx/dead-code.ts#L167)
+Defined in: [lib/dx/dead-code.ts:168](https://github.com/fderuiter/portfolio/blob/main/lib/dx/dead-code.ts#L168)
 
 Scans the workspace for dead code and unreferenced exports.
 

@@ -6,7 +6,7 @@
 
 # Interface: SimulatedTerminalLog
 
-Defined in: [lib/github.ts:219](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L219)
+Defined in: [lib/github.ts:227](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L227)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/github.ts:219](https://github.com/fderuiter/portfolio/blob/main
 
 > `optional` **color?**: `string`
 
-Defined in: [lib/github.ts:221](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L221)
+Defined in: [lib/github.ts:229](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L229)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [lib/github.ts:221](https://github.com/fderuiter/portfolio/blob/main
 
 > **text**: `string`
 
-Defined in: [lib/github.ts:220](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L220)
+Defined in: [lib/github.ts:228](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L228)

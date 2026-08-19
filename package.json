@@ -44,7 +44,7 @@
     "canary:eval": "npx tsx scripts/canary-analyzer.ts"
   },
   "engines": {
-    "node": "22.x",
+    "node": ">=22.0.0",
     "npm": ">=10.0.0"
   },
   "packageManager": "npm@10.9.2",
@@ -67,6 +67,8 @@
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.5",
+    "@clerk/nextjs": "^7.7.8",
+    "@clerk/themes": "^2.4.57",
     "@neondatabase/serverless": "^1.1.0",
     "@prisma/adapter-neon": "^7.9.1",
     "@prisma/client": "^7.9.1",

@@ -95,7 +95,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
   } else if (study.github_url) {
     const parsed = parseGitHubUrl(study.github_url);
     if (parsed) {
-      stats = await getGitHubStats(parsed.owner, parsed.repo);
+      stats = await getGitHubStats(parsed.owner, parsed.repo, study.primary_language);
     }
   }
 

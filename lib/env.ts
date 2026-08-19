@@ -30,6 +30,9 @@ export const serverEnvSchema = z.object({
   SENTRY_DSN: z.string().url().optional().or(z.literal("")),
   SENTRY_ORG: z.string().optional(),
   SENTRY_PROJECT: z.string().optional(),
+  CLERK_SECRET_KEY: z.string().optional(),
+  ADMIN_USER_IDS: z.string().optional(),
+  ADMIN_EMAILS: z.string().optional(),
   PLAYWRIGHT_TEST: z.string().optional(),
   CI: z.string().optional(),
   SKIP_DB_HEALTH_CHECK: z.string().optional(),
@@ -47,6 +50,7 @@ export const serverEnvSchema = z.object({
 export const clientEnvSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url().optional(),
   NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().optional(),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

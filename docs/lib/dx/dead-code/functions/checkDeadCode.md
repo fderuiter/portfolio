@@ -8,7 +8,7 @@
 
 > **checkDeadCode**(`root`): [`DiagnosticCheckResult`](../../doctor/interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/dead-code.ts:268](https://github.com/fderuiter/portfolio/blob/main/lib/dx/dead-code.ts#L268)
+Defined in: [lib/dx/dead-code.ts:269](https://github.com/fderuiter/portfolio/blob/main/lib/dx/dead-code.ts#L269)
 
 Diagnostic check for Dead Code & Unused Exports in doctor.ts.
 

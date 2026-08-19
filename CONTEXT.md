@@ -188,4 +188,16 @@ Formal inference rules used to derive logical steps from valid premises:
 - **Resilient Hybrid Fallback**: The unified data retrieval strategy implemented in `CaseStudyService` that queries the remote PostgreSQL/Neon database first, seamlessly unions or falls back to static compilation data (`FALLBACK_CASE_STUDIES`) upon missing records or connection errors, and returns `notFound()` for invalid entities rather than failing static builds.
 - **Database-Priority Sourcing**: Sourcing protocol where live database records take precedence for matching entity slugs, while any newly introduced or unseeded static case studies in the codebase are automatically appended to the collection.
 - **5-Point Discovery Matrix**: The unified multi-surface synchronization invariant linking every first-class case study and interactive tool across Command Palette (`CommandPalette.tsx`), Desktop/Mobile Navigation (`Navbar.tsx`), Footer (`Footer.tsx`), SEO/Sitemap registries (`sitemap.ts`, `seo-metadata.ts`), and Real-Browser Benchmark configs (`page-bench.ts`).
+- **Deterministic SSG Telemetry Fallback**: The resilient build-time data acquisition strategy in `lib/github.ts` that gracefully absorbs GitHub API 404/403 rate-limit states during static page prerendering, returning mathematical simulated commit and language telemetry without emitting false-alarm stderr noise.
+
+## Identity, Authentication & Admin Governance
+
+### Edge Authentication & Access Control
+- **Next.js 16 Edge Proxy**: The network-edge request interception handler (`proxy.ts`) in Next.js 16 executing before route rendering to attach standard HTTP security headers, rate limit incoming API requests, and generate anonymous Web Crypto SHA-256 connection fingerprint tokens.
+- **Admin & Author Portal**: A dedicated protected workspace (`/admin`, `/api/admin`) providing administrative tools for drafting case studies, modifying editorial content, and inspecting raw analytics telemetry without exposing write capabilities to public visitors.
+- **Clerk Edge Middleware Chaining**: The edge pipeline composing `@clerk/nextjs` `clerkMiddleware` with standard HTTP security headers (`applySecurityHeaders`) and privacy-preserving client connection hashing (`generateClientConnectionHash`), enforcing route protection via `createRouteMatcher` while allowing public route bypass.
+- **Environment-Gated Admin Authorization**: Server-side access control validating authenticated Clerk identities (`userId`, `emailAddress`) against typed environment variable allowlists (`ADMIN_USER_IDS`, `ADMIN_EMAILS`) declared in `lib/env.ts`.
+- **Architectural Dark Auth Surface**: Custom Clerk UI appearance configurations and dedicated login entrypoint (`/admin/login`) styled with `@clerk/themes` dark presets to seamlessly match the portfolio's architectural graphite (`#0d0e11`), Swiss mono typography, and WCAG 2.1 Level AA contrast standards.
+
+
 

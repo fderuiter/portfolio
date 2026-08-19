@@ -44,7 +44,7 @@ export default async function CaseStudiesPage() {
       } else if (d.github_url) {
         const parsed = parseGitHubUrl(d.github_url);
         if (parsed) {
-          stats = await getGitHubStats(parsed.owner, parsed.repo);
+          stats = await getGitHubStats(parsed.owner, parsed.repo, d.primary_language);
         }
       }
       return {
