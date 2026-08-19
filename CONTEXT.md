@@ -81,6 +81,7 @@ Formal inference rules used to derive logical steps from valid premises:
 - **Modal Focus Trap**: An event-controlled keyboard boundary (`useFocusTrap`) that restricts `Tab` / `Shift+Tab` cycling strictly within active dialogs, bottom sheets, or command palettes until dismissed via `Escape` or interactive trigger, automatically restoring focus to the originating element.
 - **Dynamic Live Region (Live Announcer)**: An off-screen `aria-live="polite"` / `role="status"` notification hub (`useAnnouncer`) providing timely audio cues for asynchronous state mutations, mathematical proof discharges, telemetry streams, and form validation alerts.
 - **Canvas Accessible Alternative**: Contextual screen-reader accessible DOM descriptors, tabular mirrors, and high-contrast status overlays providing equivalent functional information for 2D/3D WebGL and HTML5 canvas experiences.
+- **Arcade 3-Pillar Accessibility Protocol**: The unified accessibility standard for interactive arcade games combining 1. Live screen reader state mirrors (`aria-live="polite"`), 2. High-contrast focus rings with keyboard trap safety, and 3. Complete 1:1 keyboard-to-touch input parity.
 
 ## Graphics & Context Loss Resilience
 
