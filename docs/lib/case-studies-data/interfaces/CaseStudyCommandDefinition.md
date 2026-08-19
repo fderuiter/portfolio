@@ -6,7 +6,7 @@
 
 # Interface: CaseStudyCommandDefinition
 
-Defined in: [lib/case-studies-data.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L20)
+Defined in: [lib/case-studies-data.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L25)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/case-studies-data.ts:20](https://github.com/fderuiter/portfolio
 
 > **description**: `string`
 
-Defined in: [lib/case-studies-data.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L21)
+Defined in: [lib/case-studies-data.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L26)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [lib/case-studies-data.ts:21](https://github.com/fderuiter/portfolio
 
 > **payload**: `unknown`
 
-Defined in: [lib/case-studies-data.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L22)
+Defined in: [lib/case-studies-data.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L27)

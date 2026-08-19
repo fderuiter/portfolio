@@ -6,9 +6,10 @@ import { TracingBeam } from "@/components/ui/TracingBeam";
 import { RichNarrative } from "@/components/RichNarrative";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { getGitHubStats, parseGitHubUrl, getSimulatedStats } from "@/lib/github";
-import { getSoftwareSourceCodeSchema, getBreadcrumbSchema } from "@/lib/seo";
+import { getSoftwareSourceCodeSchema, getBreadcrumbSchema, getVisualArtworkSchema } from "@/lib/seo";
 import { TelemetryTracker } from "@/components/TelemetryTracker";
 import { TerminologyToggle } from "@/components/TerminologyToggle";
+import { CaseStudyHeroActions } from "@/components/CaseStudyHeroActions";
 import SchemaFlowWorkspaceWrapper from "@/components/SchemaFlowWorkspaceWrapper";
 import { VectorComparisonViewer } from "@/components/laser-loon/VectorComparisonViewer";
 import { AssetDistributionHub } from "@/components/laser-loon/AssetDistributionHub";
@@ -62,7 +63,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url: `${resolveBaseUrl()}/case-studies/${slug}`,
       publishedTime: study.created_at.toISOString(),
       modifiedTime: study.updated_at.toISOString(),
-      tags: study.tags.split(",").map((t) => t.trim()),
+      tags: (study.tags || "").split(",").map((t) => t.trim()).filter(Boolean),
     },
     twitter: {
       card: "summary_large_image",
@@ -124,11 +125,21 @@ export default async function CaseStudyPage({ params }: PageProps) {
       className="py-24 md:py-32 px-6 md:px-12 lg:px-24 bg-zinc-950 text-foreground flex flex-col items-center relative overflow-hidden outline-none"
     >
       <TelemetryTracker slug={slug} />
-      {/* Dynamic JSON-LD SoftwareSourceCode Schema */}
+      {/* Dynamic JSON-LD Schema: VisualArtwork for Laser Loon, SoftwareSourceCode for systems engineering */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: getSoftwareSourceCodeSchema(study, stats),
+          __html:
+            study.slug === "laser-loon"
+              ? getVisualArtworkSchema({
+                  name: study.title,
+                  description: study.editorial_content.replace(/\*\*/g, "").replace(/`/g, "").slice(0, 200),
+                  url: `/case-studies/${study.slug}`,
+                  imageUrl: `${resolveBaseUrl()}/images/laser-loon-preview.png`,
+                  formats: ["image/svg+xml", "application/illustrator", "application/pdf", "image/png"],
+                  license: "https://creativecommons.org/licenses/by/4.0/",
+                })
+              : getSoftwareSourceCodeSchema(study, stats),
         }}
       />
       <script
@@ -162,8 +173,16 @@ export default async function CaseStudyPage({ params }: PageProps) {
             {study.title}
           </h1>
 
+          {/* CRF.xl FluentUI Easter Egg Banner */}
+          {slug === "crf-xl" && (
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 text-xs font-mono mb-6 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="font-semibold">Microsoft Office / Fluent Design Accent Active (Easter Egg)</span>
+            </div>
+          )}
+
           {/* Metadata badges row */}
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-10 border-b border-zinc-900 pb-8">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6 border-b border-zinc-900 pb-6">
             <div className="flex flex-wrap items-center gap-3">
               <span className="px-3 py-1 text-xs font-mono font-bold bg-brand-cyan/5 border border-brand-cyan/20 text-brand-cyan rounded-md">
                 {study.primary_language}
@@ -175,12 +194,25 @@ export default async function CaseStudyPage({ params }: PageProps) {
             <TerminologyToggle />
           </div>
 
+          {/* Multi-Action Hero Bar: Source Code, Kaggle Notebook & Live Studio Links */}
+          <CaseStudyHeroActions
+            slug={slug}
+            githubUrl={study.github_url}
+            externalPlatformUrl={study.external_platform_url}
+            externalPlatformType={study.external_platform_type}
+            interactiveUrl={study.interactive_url}
+            interactiveLabel={study.interactive_label}
+            primaryLanguage={study.primary_language}
+            stats={stats}
+          />
+
           {/* Long-form Article Narrative */}
           <article className="prose prose-invert max-w-none text-neutral-300 leading-relaxed space-y-8">
             {/* Editorial Content Highlight block */}
             <div className="text-lg text-muted-strong font-medium border-l-2 border-brand-cyan/60 pl-6 py-2 italic bg-zinc-900/10 rounded-r-xl">
               <RichNarrative html={study.editorial_content} />
             </div>
+
 
             {/* Tags list row */}
             <div className="flex flex-wrap gap-2 pt-4">

@@ -6,7 +6,7 @@
 
 # Interface: ClinicalDataCaseStudy
 
-Defined in: [types/domain.ts:19](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L19)
+Defined in: [types/domain.ts:27](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L27)
 
 ## Extends
 
@@ -90,7 +90,7 @@ Defined in: [types/domain.ts:2](https://github.com/fderuiter/portfolio/blob/main
 
 > **parsing\_mechanisms**: `"SAX_STREAMING"` \| `"DOM_PARSING"`
 
-Defined in: [types/domain.ts:21](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L21)
+Defined in: [types/domain.ts:29](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L29)
 
 ***
 
@@ -134,7 +134,7 @@ Defined in: [types/domain.ts:9](https://github.com/fderuiter/portfolio/blob/main
 
 > **regulatory\_targets**: (`"FDA"` \| `"PMDA"` \| `"EMA"`)[]
 
-Defined in: [types/domain.ts:22](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L22)
+Defined in: [types/domain.ts:30](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L30)
 
 ***
 
@@ -166,7 +166,7 @@ Defined in: [types/domain.ts:3](https://github.com/fderuiter/portfolio/blob/main
 
 > **standards\_validated**: (`"CDISC_ODM"` \| `"CDISC_SDTM"`)[]
 
-Defined in: [types/domain.ts:20](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L20)
+Defined in: [types/domain.ts:28](https://github.com/fderuiter/portfolio/blob/main/types/domain.ts#L28)
 
 ***
 

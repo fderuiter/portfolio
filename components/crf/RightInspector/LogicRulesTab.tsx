@@ -118,11 +118,17 @@ export const LogicRulesTab: React.FC<LogicRulesTabProps> = ({
                     <div className="text-xs font-bold text-white font-mono truncate">
                       {rule.name}
                     </div>
-                    <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-400">
-                      <span className="px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-brand-cyan">
+                    <div className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 flex-wrap">
+                      <span className="px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-brand-cyan font-bold">
                         {rule.actionType}
                       </span>
-                      <span>Target: {allFields.find((f) => f.id === rule.targetFieldId)?.variableName || rule.targetFieldId}</span>
+                      <span className="text-zinc-500">→</span>
+                      <span className="text-zinc-300">Target: {allFields.find((f) => f.id === rule.targetFieldId)?.variableName || rule.targetFieldId}</span>
+                      {rule.conditions.length > 0 && (
+                        <span className="px-1.5 py-0.2 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
+                          {rule.conditions.length} {rule.conditions.length === 1 ? "condition" : "conditions"}
+                        </span>
+                      )}
                     </div>
                   </div>
 

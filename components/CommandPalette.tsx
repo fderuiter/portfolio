@@ -107,19 +107,19 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
       },
       {
         id: "nav-about",
-        title: "About System Architect",
-        subtitle: "Read professional credentials, skills grid, and career timeline",
+        title: "About Frederick (Bio & Timeline)",
+        subtitle: "Origin story, Mayo Clinic background, and problem-solving skills",
         category: "navigation",
         url: "/#about",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
         badge: "Bio & Skills",
-        status: "Verified Credentials",
-        description: "Professional background, verified clinical architecture experience, full-stack skills breakdown, and career timeline.",
-        techStack: ["TypeScript", "Distributed Systems", "CDISC Standards", "Cloud Architecture"],
+        status: "Origin Story",
+        description: "Personal origin story, Mayo Clinic operations background, interactive skills matrix, and career track record.",
+        techStack: ["TypeScript", "Mayo Clinic Operations", "Interactive Graphics", "Emergency Triage"],
         highlights: [
           "Interactive skills matrix with audio feedback",
-          "FDA & regulatory compliance track record",
-          "Architecture decision records (ADRs)"
+          "Mayo Clinic operations & research track record",
+          "Authentic career timeline & stories"
         ]
       },
       {

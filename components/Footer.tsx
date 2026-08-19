@@ -79,7 +79,7 @@ export const Footer: React.FC = () => {
                 <span className="group-hover:text-brand-cyan transition-colors">FDERUITER</span>
               </Link>
               <p className="text-xs font-mono text-zinc-400 max-w-sm leading-relaxed">
-                Clinical data specialist by day, creative coder by night. Building reliable software and fun interactive web stuff.
+                Problem solver by trade, builder by obsession. Turning complex challenges into simple, bulletproof software.
               </p>
             </div>
 

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { CaseStudyService } from "@/lib/services/case-study-service";
 import { resolveBaseUrl } from "@/lib/domain";
+import { ROUTE_METADATA_CONFIGS } from "@/lib/seo-metadata";
 
 export const revalidate = 86400;
 
@@ -8,115 +9,66 @@ export const STATIC_ROUTE_LAST_MODIFIED = new Date("2026-08-14T00:00:00Z");
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = resolveBaseUrl();
+  const sitemapMap = new Map<string, MetadataRoute.Sitemap[number]>();
 
-  // Fetch all published case studies to dynamically generate sitemap URLs
+  // 1. Root and Hub entries
+  sitemapMap.set(baseUrl, {
+    url: baseUrl,
+    lastModified: STATIC_ROUTE_LAST_MODIFIED,
+    changeFrequency: "daily",
+    priority: 1.0,
+  });
+
+  sitemapMap.set(`${baseUrl}/case-studies`, {
+    url: `${baseUrl}/case-studies`,
+    lastModified: STATIC_ROUTE_LAST_MODIFIED,
+    changeFrequency: "weekly",
+    priority: 0.9,
+  });
+
+  sitemapMap.set(`${baseUrl}/arcade`, {
+    url: `${baseUrl}/arcade`,
+    lastModified: STATIC_ROUTE_LAST_MODIFIED,
+    changeFrequency: "weekly",
+    priority: 0.9,
+  });
+
+  // 2. Derive all registered route entries from ROUTE_METADATA_CONFIGS (excluding /offline)
+  for (const config of Object.values(ROUTE_METADATA_CONFIGS)) {
+    if (config.path === "/offline") continue;
+    const url = `${baseUrl}${config.path.startsWith("/") ? config.path : "/" + config.path}`;
+    
+    let priority = 0.8;
+    let changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] = "weekly";
+
+    if (config.path === "/crf" || config.path === "/stack" || config.path === "/work/laser-loon") {
+      priority = 0.9;
+    } else if (config.path === "/schedule") {
+      priority = 0.7;
+      changeFrequency = "monthly";
+    }
+
+    sitemapMap.set(url, {
+      url,
+      lastModified: STATIC_ROUTE_LAST_MODIFIED,
+      changeFrequency,
+      priority,
+    });
+  }
+
+  // 3. Fetch all published case studies to dynamically attach or update dynamic case study URLs
   const studies = await CaseStudyService.getAllPublishedCaseStudies();
+  for (const study of studies) {
+    const url = `${baseUrl}/case-studies/${study.slug}`;
+    sitemapMap.set(url, {
+      url,
+      lastModified: study.updated_at,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    });
+  }
 
-  const caseStudyUrls = studies.map((study) => ({
-    url: `${baseUrl}/case-studies/${study.slug}`,
-    lastModified: study.updated_at,
-    changeFrequency: "weekly" as const,
-    priority: 0.8,
-  }));
-
-  return [
-    {
-      url: baseUrl,
-      lastModified: STATIC_ROUTE_LAST_MODIFIED,
-      changeFrequency: "daily",
-      priority: 1.0,
-    },
-    {
-      url: `${baseUrl}/case-studies`,
-      lastModified: STATIC_ROUTE_LAST_MODIFIED,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/arcade`,
-      lastModified: STATIC_ROUTE_LAST_MODIFIED,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/arcade/working-with-duck`,
-      lastModified: STATIC_ROUTE_LAST_MODIFIED,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/arcade/laser-loon`,
-      lastModified: STATIC_ROUTE_LAST_MODIFIED,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/arcade/quasi-puzzler`,
-      lastModified: STATIC_ROUTE_LAST_MODIFIED,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/arcade/garmin-watch`,
-      lastModified: STATIC_ROUTE_LAST_MODIFIED,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/arcade/clinical-chaos`,
-      lastModified: STATIC_ROUTE_LAST_MODIFIED,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/arcade/retro-labyrinth`,
-      lastModified: STATIC_ROUTE_LAST_MODIFIED,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/arcade/meme-vault`,
-      lastModified: STATIC_ROUTE_LAST_MODIFIED,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/proof`,
-      lastModified: STATIC_ROUTE_LAST_MODIFIED,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/neuro`,
-      lastModified: STATIC_ROUTE_LAST_MODIFIED,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/crf`,
-      lastModified: STATIC_ROUTE_LAST_MODIFIED,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/simulator`,
-      lastModified: STATIC_ROUTE_LAST_MODIFIED,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/stack`,
-      lastModified: STATIC_ROUTE_LAST_MODIFIED,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/schedule`,
-      lastModified: STATIC_ROUTE_LAST_MODIFIED,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    ...caseStudyUrls,
-  ];
+  return Array.from(sitemapMap.values());
 }
+
 

@@ -4,7 +4,7 @@ import "./globals.css";
 import { SkipToContent } from "@/components/SkipToContent";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { getPersonSchema, getWebsiteSchema } from "@/lib/seo";
+import { getUnifiedGraphSchema, getPersonNode, getWebsiteNode } from "@/lib/seo";
 import { A11yProvider } from "@/components/providers/A11yProvider";
 import { AudioProvider } from "@/components/providers/AudioProvider";
 import { SearchProvider } from "@/components/providers/SearchProvider";
@@ -103,13 +103,7 @@ export default function RootLayout({
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{
-              __html: getPersonSchema()
-            }}
-          />
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: getWebsiteSchema()
+              __html: getUnifiedGraphSchema([getPersonNode(), getWebsiteNode()]),
             }}
           />
           <script

@@ -8,4 +8,4 @@
 
 > `const` **IMEDNET\_PLAYBACK\_OBJ**: [`CaseStudyPlayback`](../type-aliases/CaseStudyPlayback.md)
 
-Defined in: [lib/case-studies-data.ts:118](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L118)
+Defined in: [lib/case-studies-data.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L123)

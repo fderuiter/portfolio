@@ -7,7 +7,48 @@ export const OG_IMAGE_SIZE = {
 
 export const OG_IMAGE_CONTENT_TYPE = "image/png";
 
+export type SocialPreset =
+  | "SYSTEMS_ARCHITECTURE"
+  | "CLINICAL_SYSTEMS"
+  | "FORMAL_VERIFICATION"
+  | "VECTOR_ARTWORK"
+  | "EMBEDDED_SIMULATOR";
+
+export const PRESET_CONFIGS: Record<SocialPreset, { category: string; badge: string; systemStatus: string; tags: string[] }> = {
+  SYSTEMS_ARCHITECTURE: {
+    category: "SYSTEMS ARCHITECTURE",
+    badge: "SYS-ARCH",
+    systemStatus: "SYSTEMS ONLINE // READY",
+    tags: ["React 19", "Next.js 16", "TypeScript", "Pretext Engine", "Neon Postgres"],
+  },
+  CLINICAL_SYSTEMS: {
+    category: "CLINICAL DATA SYSTEMS",
+    badge: "CDISC 2.2",
+    systemStatus: "CDISC COMPLIANT // GxP READY",
+    tags: ["CDISC CDASH", "ODM-XML", "AST Edit Checks", "21 CFR Part 11", "EDC Simulator"],
+  },
+  FORMAL_VERIFICATION: {
+    category: "FORMAL METHODS & LOGIC",
+    badge: "LEAN AST",
+    systemStatus: "THEOREM PROVEN // Q.E.D.",
+    tags: ["Deductive Logic", "Formal Proofs", "AST Verification", "Graph Theory", "Type Systems"],
+  },
+  VECTOR_ARTWORK: {
+    category: "GRAPHIC DESIGN & OPEN ASSETS",
+    badge: "MN FLAG F277",
+    systemStatus: "CREATIVE COMMONS // OPEN ASSETS",
+    tags: ["Vector Asset Hub", "SVG / AI / EPS", "Laser Loon", "State Flag F277", "Creative Commons"],
+  },
+  EMBEDDED_SIMULATOR: {
+    category: "EMBEDDED SYSTEMS & HARDWARE",
+    badge: "CONNECT IQ",
+    systemStatus: "32KB HEAP // CPU BOUND",
+    tags: ["Garmin Monkey C", "32KB RAM Profiling", "MIP Display", "Thermal Modeling", "Embedded OS"],
+  },
+};
+
 export interface SocialImageOptions {
+  preset?: SocialPreset;
   category?: string;
   title: string;
   description?: string;
@@ -21,13 +62,15 @@ export interface SocialImageOptions {
  * featuring the Frederick de Ruiter systems architecture visual identity.
  */
 export function createSocialImageResponse(options: SocialImageOptions): ImageResponse {
+  const presetConfig = options.preset ? PRESET_CONFIGS[options.preset] : undefined;
+
   const {
-    category = "SYSTEMS ARCHITECTURE",
+    category = presetConfig?.category || "SYSTEMS ARCHITECTURE",
     title,
     description = "A high-performance design engineering showcase combining DOM-free canvas layout physics, serverless Neon Postgres data streams, and robust clinical CDISC data engines.",
-    badge,
-    tags = ["React 19", "Canvas 2D", "TypeScript", "Pretext Engine", "Neon Postgres"],
-    systemStatus = "SYSTEMS ONLINE // READY",
+    badge = presetConfig?.badge,
+    tags = presetConfig?.tags || ["React 19", "Canvas 2D", "TypeScript", "Pretext Engine", "Neon Postgres"],
+    systemStatus = presetConfig?.systemStatus || "SYSTEMS ONLINE // READY",
   } = options;
 
   return new ImageResponse(

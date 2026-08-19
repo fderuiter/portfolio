@@ -112,11 +112,11 @@ export function validateCommitMessage(message: string): CommitValidationResult {
  */
 export function validateBranchName(branch: string): { valid: boolean; error?: string } {
   const cleanBranch = branch.trim();
-  if (["main", "master", "develop", "HEAD"].includes(cleanBranch)) {
+  if (["main", "master", "develop", "dev", "HEAD"].includes(cleanBranch)) {
     return { valid: true };
   }
 
-  const validPrefixes = ["feat/", "fix/", "chore/", "refactor/", "docs/", "perf/", "dx/", "test/"];
+  const validPrefixes = ["feat/", "fix/", "chore/", "refactor/", "docs/", "perf/", "dx/", "test/", "dev/"];
   const hasValidPrefix = validPrefixes.some((p) => cleanBranch.startsWith(p));
 
   if (!hasValidPrefix) {

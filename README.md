@@ -112,6 +112,11 @@ Or follow manual setup steps:
 
 2. **Configure Environment**
    Copy `.env.example` to `.env.local` and set your `DATABASE_URL` (Neon Postgres connection string) and optionally `GITHUB_TOKEN` to avoid API rate limits.
+   
+   To configure Clerk authentication and author access allowlists interactively:
+   ```bash
+   npm run setup:clerk
+   ```
 
 3. **Initialize Database & Prisma Client**
    Generate the Prisma client and push the schema to your database:

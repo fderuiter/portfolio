@@ -8,7 +8,7 @@
 
 > `const` **dictionary**: `object`
 
-Defined in: [lib/i18n-dictionary.ts:150](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L150)
+Defined in: [lib/i18n-dictionary.ts:152](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L152)
 
 ## Type Declaration
 
@@ -22,15 +22,15 @@ Defined in: [lib/i18n-dictionary.ts:150](https://github.com/fderuiter/portfolio/
 
 #### detailed.bio.description
 
-> **description**: `string` = `"I spend my days turning 150-page FDA clinical trial protocols into clean, type-safe data pipelines. By night, I build zero-dependency canvas games, retro simulations, and civic open-source tools (like a laser loon design that accidentally raised $13.5k for libraries). When I'm not writing TypeScript or Python, I'm out on the mountain doing alpine ski patrol."`
+> **description**: `string` = `"I build software that doesn't break, and make complex systems actually fun to use. My background spans translating 150-page FDA clinical trial protocols into bulletproof databases at Mayo Clinic, serving as the university operations liaison for the Minnesota Vikings Training Camp, advocating for campus health improvements at Mankato, and 3D printing participant MRI brain models. On side projects, I build fast browser engines, canvas games, and civic tools—including the Laser Loon design that became a Minnesota cultural icon and raised $13.5k for public libraries. When I'm off-screen, I do emergency medical triage on alpine ski patrol."`
 
 #### detailed.bio.subtitle
 
-> **subtitle**: `string` = `"Clinical Data • Interactive Graphics • Ski Patrol"`
+> **subtitle**: `string` = `"Clinical Data • Interactive Graphics • High-Stakes Troubleshooting"`
 
 #### detailed.bio.title
 
-> **title**: `string` = `"Systems Engineer & Clinical Data Specialist"`
+> **title**: `string` = `"Pragmatic Problem Solver & Systems Engineer"`
 
 #### detailed.domains
 
@@ -42,7 +42,7 @@ Defined in: [lib/i18n-dictionary.ts:150](https://github.com/fderuiter/portfolio/
 
 #### detailed.domains.title
 
-> **title**: `string` = `"Technical Domains"`
+> **title**: `string` = `"Core Toolkit & Domains"`
 
 #### detailed.timeline
 
@@ -58,15 +58,15 @@ Defined in: [lib/i18n-dictionary.ts:150](https://github.com/fderuiter/portfolio/
 
 #### simplified.bio.description
 
-> **description**: `string` = `"I spend my days designing secure databases and type-safe data pipelines for FDA clinical trials. On side projects, I build clean, zero-dependency browser games and civic open-source tools. I am also an active Alpine Ski Patroller, using medical triage and emergency decision-making experience to build highly resilient, fault-tolerant software."`
+> **description**: `string` = `"I'm a builder and problem solver who likes making things work smoothly. From managing clinical research databases and 3D printing brain models at Mayo Clinic to coordinating logistics for NFL training camps and creating viral community projects, I specialize in taking complicated, messy challenges and turning them into simple, reliable software."`
 
 #### simplified.bio.subtitle
 
-> **subtitle**: `string` = `"Clinical Data • Interactive Graphics • Ski Patrol"`
+> **subtitle**: `string` = `"Web Apps • Clinical Systems • Interactive Tools"`
 
 #### simplified.bio.title
 
-> **title**: `string` = `"Systems Engineer & Clinical Data Specialist"`
+> **title**: `string` = `"Problem Solver & Systems Engineer"`
 
 #### simplified.domains
 
@@ -78,7 +78,7 @@ Defined in: [lib/i18n-dictionary.ts:150](https://github.com/fderuiter/portfolio/
 
 #### simplified.domains.title
 
-> **title**: `string` = `"Technical Domains (Simplified)"`
+> **title**: `string` = `"What I Build (Simplified)"`
 
 #### simplified.timeline
 

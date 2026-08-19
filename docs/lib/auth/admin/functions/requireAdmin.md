@@ -8,7 +8,7 @@
 
 > **requireAdmin**(): `Promise`\<\{ `userId`: `string`; \}\>
 
-Defined in: [lib/auth/admin.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/auth/admin.ts#L72)
+Defined in: [lib/auth/admin.ts:119](https://github.com/fderuiter/portfolio/blob/main/lib/auth/admin.ts#L119)
 
 Enforces admin authorization on Server Components or Server Actions.
 Redirects to /admin/login if unauthenticated, or throws an authorization error if unauthorized.

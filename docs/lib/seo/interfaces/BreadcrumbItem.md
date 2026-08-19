@@ -6,7 +6,7 @@
 
 # Interface: BreadcrumbItem
 
-Defined in: [lib/seo.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L81)
+Defined in: [lib/seo.ts:222](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L222)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/seo.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib
 
 > **name**: `string`
 
-Defined in: [lib/seo.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L82)
+Defined in: [lib/seo.ts:223](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L223)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [lib/seo.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib
 
 > **url**: `string`
 
-Defined in: [lib/seo.ts:83](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L83)
+Defined in: [lib/seo.ts:224](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L224)

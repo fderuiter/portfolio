@@ -21,6 +21,9 @@ export interface GitHubStats {
   languages: GitHubLanguage[];
   recentCommits: GitHubCommit[];
   commitActivity: number[];
+  commitsCount?: number;
+  primaryLanguage?: string;
+  updatedAt?: string;
 }
 
 /**

@@ -7,6 +7,7 @@ import { getGitHubStats, parseGitHubUrl, GitHubStats, getSimulatedStats } from "
 import { TextReveal } from "@/components/TextReveal";
 import dynamic from "next/dynamic";
 import { DeferredHydration, SkillsGridSkeleton, TimelineSkeleton } from "@/components/DeferredHydration";
+import { ContactForm } from "@/components/ContactForm";
 
 const DynamicSkillsGrid = dynamic(
   () => import("@/components/SkillsGrid").then((mod) => mod.SkillsGrid),
@@ -95,15 +96,15 @@ export default async function PortfolioHomePage() {
           <div className="relative z-10 w-full max-w-6xl flex flex-col items-center">
             {/* Section Index Marker */}
             <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-white/[0.04] border border-white/10 text-[10px] sm:text-xs font-mono font-bold text-amber-300 uppercase tracking-widest">
-              <span>SECTION 01 // SYSTEMS DOSSIERS</span>
+              <span>SECTION 01 // SELECTED PROJECTS</span>
             </div>
 
             {/* Title Block */}
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white text-center mb-2 heading-editorial">
-              Architectural Systems &amp; Dossiers
+              Interactive Systems &amp; Real-World Tools
             </h2>
             <p className="text-xs sm:text-sm font-mono text-zinc-400 mb-8 sm:mb-12 text-center max-w-xl">
-              Formal deductive logic engines, 21 CFR Part 11 clinical pipelines, and zero-engine canvas simulations.
+              From medical trial platforms and deductive logic assistants to 60FPS canvas games and smartwatch emulators.
             </p>
 
             {/* Interactive Systems Highlights Section */}
@@ -128,21 +129,21 @@ export default async function PortfolioHomePage() {
 
       {/* 2. Philosophy TextReveal Highlight */}
       <div className="bg-[#0d0e11] border-t border-white/10">
-        <TextReveal>I like taking messy, scary-sounding regulatory rules and turning them into clean code and fast web apps.</TextReveal>
+        <TextReveal>I like taking complicated, scary-sounding systems and turning them into clean code and software that is actually fun to use.</TextReveal>
       </div>
 
       {/* 3. About & Architecture Foundations Section */}
       <section id="about" className="relative py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 lg:px-12 flex flex-col items-center border-t border-white/10 bg-[#101217] overflow-hidden">
         <div className="relative z-10 w-full max-w-6xl flex flex-col items-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-white/[0.04] border border-white/10 text-[10px] sm:text-xs font-mono font-bold text-amber-300 uppercase tracking-widest">
-            <span>SECTION 02 // DOMAIN ARCHITECTURE</span>
+            <span>SECTION 02 // TOOLKIT &amp; DOMAINS</span>
           </div>
 
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white text-center mb-2 heading-editorial">
-            Domain Foundations &amp; Stack
+            The Problem-Solving Toolkit
           </h2>
           <p className="text-xs sm:text-sm font-mono text-zinc-400 mb-8 sm:mb-12 text-center max-w-md">
-            Clinical operations background at Mayo Clinic, regulatory standards, and embedded systems.
+            Mayo Clinic clinical operations, low-level canvas graphics, civic open-source projects, and emergency triage.
           </p>
           
           {/* Dynamic Bento Skills Grid Card Layout */}
@@ -153,14 +154,14 @@ export default async function PortfolioHomePage() {
           </div>
 
           <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-white/[0.04] border border-white/10 text-[10px] sm:text-xs font-mono font-bold text-amber-300 uppercase tracking-widest">
-            <span>SECTION 03 // CAREER TRAJECTORY</span>
+            <span>SECTION 03 // ORIGIN STORY</span>
           </div>
 
           <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white text-center mb-2 heading-editorial">
-            Engineering &amp; Operations Record
+            Career Trajectory &amp; Track Record
           </h3>
           <p className="text-xs sm:text-sm font-mono text-zinc-400 mb-8 sm:mb-12 text-center max-w-md">
-            From emergency wilderness response and Mayo Clinic operations to high-assurance data architecture.
+            From Minnesota Vikings NFL camp logistics and Mankato campus advocacy to Mayo Clinic operations and modern web systems.
           </p>
 
           {/* Interactive Staggered Timeline Component */}
@@ -176,14 +177,14 @@ export default async function PortfolioHomePage() {
       <section id="contact" className="relative py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 lg:px-12 flex flex-col items-center border-t border-white/10 bg-[#0d0e11]">
         <div className="relative z-10 w-full max-w-6xl flex flex-col items-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-white/[0.04] border border-white/10 text-[10px] sm:text-xs font-mono font-bold text-amber-300 uppercase tracking-widest">
-            <span>SECTION 04 // DISPATCH</span>
+            <span>SECTION 04 // SAY HELLO</span>
           </div>
 
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white text-center mb-2 heading-editorial">
-            Initiate Contact
+            Let&#39;s Build Something Great
           </h2>
           <p className="text-xs sm:text-sm font-mono text-zinc-400 mb-8 sm:mb-12 text-center max-w-md">
-            Always up for discussing high-assurance systems, clinical architectures, or creative experiments.
+            Whether it&#39;s a fast web app, a complex technical challenge, or just geeking out over interactive physics—drop me a line.
           </p>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full max-w-6xl justify-center items-stretch">
@@ -196,7 +197,7 @@ export default async function PortfolioHomePage() {
               <span className="w-10 h-10 rounded-xl bg-black/50 border border-white/10 flex items-center justify-center text-zinc-400 group-hover:text-amber-400 group-hover:border-amber-500/30 transition-colors mb-3 shrink-0">
                 <IconMail className="w-4 h-4" />
               </span>
-              <span className="text-xs font-mono font-bold text-zinc-200 mb-1">Direct Dispatch</span>
+              <span className="text-xs font-mono font-bold text-zinc-200 mb-1">Direct Email</span>
               <span className="text-xs font-mono text-zinc-400">fpderuiter@gmail.com</span>
             </a>
 
@@ -212,8 +213,8 @@ export default async function PortfolioHomePage() {
               <span className="w-10 h-10 rounded-xl bg-black/50 border border-amber-500/40 flex items-center justify-center text-amber-400 group-hover:scale-110 transition-transform mb-3 shrink-0">
                 <IconCalendar className="w-4 h-4" />
               </span>
-              <span className="text-xs font-mono font-bold text-white mb-1">Schedule 1:1 Sync</span>
-              <span className="text-xs font-mono text-amber-300">Calendar Booking ↗</span>
+              <span className="text-xs font-mono font-bold text-white mb-1">Quick 30-Min Chat</span>
+              <span className="text-xs font-mono text-amber-300">Book on Calendar ↗</span>
             </Link>
             
             {/* GitHub Portal */}
@@ -227,7 +228,7 @@ export default async function PortfolioHomePage() {
               <span className="w-10 h-10 rounded-xl bg-black/50 border border-white/10 flex items-center justify-center text-zinc-400 group-hover:text-amber-400 group-hover:border-amber-500/30 transition-colors mb-3 shrink-0">
                 <IconBrandGithub className="w-4 h-4" />
               </span>
-              <span className="text-xs font-mono font-bold text-zinc-200 mb-1">Source Repositories</span>
+              <span className="text-xs font-mono font-bold text-zinc-200 mb-1">Open Source Code</span>
               <span className="text-xs font-mono text-zinc-400">github.com/fderuiter</span>
             </a>
 
@@ -242,13 +243,26 @@ export default async function PortfolioHomePage() {
               <span className="w-10 h-10 rounded-xl bg-black/50 border border-white/10 flex items-center justify-center text-zinc-400 group-hover:text-amber-400 group-hover:border-amber-500/30 transition-colors mb-3 shrink-0">
                 <IconBrandLinkedin className="w-4 h-4" />
               </span>
-              <span className="text-xs font-mono font-bold text-zinc-200 mb-1">Professional Network</span>
+              <span className="text-xs font-mono font-bold text-zinc-200 mb-1">LinkedIn Network</span>
               <span className="text-xs font-mono text-zinc-400">Connect on LinkedIn ↗</span>
             </a>
           </div>
+
+          {/* Integrated Direct Contact Inquiry Form */}
+          <div className="w-full max-w-3xl mt-12">
+            <div className="text-center mb-6">
+              <h3 className="text-lg sm:text-xl font-mono font-bold text-white mb-1.5">
+                Send a Direct Message
+              </h3>
+              <p className="text-xs font-mono text-zinc-400">
+                Delivered instantly to my inbox via encrypted transactional relay.
+              </p>
+            </div>
+            <ContactForm />
+          </div>
           
           <div className="mt-12 sm:mt-16 text-xs font-mono text-zinc-500 tracking-[0.2em] text-center select-none">
-            ARCHITECTED &amp; DEVELOPED BY FREDERICK DE RUITER
+            CRAFTED &amp; DEVELOPED BY FREDERICK DE RUITER
           </div>
         </div>
       </section>

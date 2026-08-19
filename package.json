@@ -5,6 +5,7 @@
   "scripts": {
     "dx": "npx tsx scripts/dx.ts",
     "setup": "npx tsx scripts/dx.ts setup",
+    "setup:clerk": "./scripts/setup-clerk-wizard.sh",
     "doctor": "npx tsx scripts/dx.ts doctor",
     "doctor:fix": "npx tsx scripts/dx.ts doctor --fix",
     "verify": "npx tsx scripts/dx.ts verify",
@@ -89,6 +90,7 @@
     "next": "16.3.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "resend": "^6.20.0",
     "tailwind-merge": "^3.5.0",
     "three": "^0.185.1",
     "ws": "^8.21.0",

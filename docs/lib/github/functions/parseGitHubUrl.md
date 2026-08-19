@@ -8,7 +8,7 @@
 
 > **parseGitHubUrl**(`url`): \{ `owner`: `string`; `repo`: `string`; \} \| `null`
 
-Defined in: [lib/github.ts:59](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L59)
+Defined in: [lib/github.ts:62](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L62)
 
 Robust helper to parse owner and repository name from arbitrary GitHub URLs.
 Sanitizes trailing .git extensions and correctly extracts segments.

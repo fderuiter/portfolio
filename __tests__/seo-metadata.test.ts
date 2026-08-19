@@ -44,6 +44,66 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     expect(parsed.author["@type"]).toBe("Person");
   });
 
+  it("getUnifiedGraphSchema generates interconnected @graph with valid node IDs", async () => {
+    const { getUnifiedGraphSchema, getPersonNode, getWebsiteNode, getWebPageNode, getBreadcrumbNode } = await import("@/lib/seo");
+    
+    const pageUrl = `${SITE_BASE_URL}/crf`;
+    const graphStr = getUnifiedGraphSchema([
+      getPersonNode(),
+      getWebsiteNode(),
+      getWebPageNode({
+        name: "CRF Studio: Clinical Form Designer",
+        description: "Design clinical trial CRFs.",
+        url: "/crf",
+        breadcrumbs: [{ name: "Home", url: "/" }, { name: "CRF Studio", url: "/crf" }],
+      }),
+      getBreadcrumbNode([{ name: "Home", url: "/" }, { name: "CRF Studio", url: "/crf" }], pageUrl),
+    ]);
+
+    expect(graphStr).not.toContain("<script");
+    const parsed = JSON.parse(graphStr);
+    expect(parsed["@context"]).toBe("https://schema.org");
+    expect(Array.isArray(parsed["@graph"])).toBe(true);
+    expect(parsed["@graph"]).toHaveLength(4);
+
+    const person = parsed["@graph"].find((n: Record<string, unknown>) => n["@type"] === "Person");
+    const website = parsed["@graph"].find((n: Record<string, unknown>) => n["@type"] === "WebSite");
+    const webpage = parsed["@graph"].find((n: Record<string, unknown>) => n["@type"] === "WebPage");
+    const breadcrumb = parsed["@graph"].find((n: Record<string, unknown>) => n["@type"] === "BreadcrumbList");
+
+    expect(person["@id"]).toBe(`${SITE_BASE_URL}/#person`);
+    expect(website["@id"]).toBe(`${SITE_BASE_URL}/#website`);
+    expect(website.publisher["@id"]).toBe(`${SITE_BASE_URL}/#person`);
+    expect(webpage.isPartOf["@id"]).toBe(`${SITE_BASE_URL}/#website`);
+    expect(webpage.author["@id"]).toBe(`${SITE_BASE_URL}/#person`);
+    expect(webpage.breadcrumb["@id"]).toBe(`${pageUrl}/#breadcrumb`);
+    expect(breadcrumb["@id"]).toBe(`${pageUrl}/#breadcrumb`);
+  });
+
+  it("getVisualArtworkSchema generates rich VisualArtwork and MediaObject schema for Laser Loon", async () => {
+    const { getVisualArtworkSchema } = await import("@/lib/seo");
+    
+    const raw = getVisualArtworkSchema({
+      name: "The Laser Loon (Minnesota State Flag Submission F277)",
+      description: "Open vector asset hub and graphic design case study for the Laser Loon.",
+      url: "/work/laser-loon",
+      imageUrl: `${SITE_BASE_URL}/images/laser-loon-preview.png`,
+      formats: ["image/svg+xml", "application/illustrator", "application/pdf", "image/png"],
+      license: "https://creativecommons.org/licenses/by/4.0/",
+    });
+
+    expect(raw).not.toContain("<script");
+    const parsed = JSON.parse(raw);
+    expect(parsed["@context"]).toBe("https://schema.org");
+    expect(parsed["@type"]).toBe("VisualArtwork");
+    expect(parsed.name).toContain("Laser Loon");
+    expect(parsed.creator["@type"]).toBe("Person");
+    expect(parsed.license).toBe("https://creativecommons.org/licenses/by/4.0/");
+    expect(parsed.encodingFormat).toContain("image/svg+xml");
+    expect(parsed.encodingFormat).toContain("application/illustrator");
+  });
+
+
   it("getWebApplicationSchema generates valid WebApplication schema for games", () => {
     const raw = getWebApplicationSchema({
       name: "Laser Loon: Quest for the State Flag",
@@ -135,6 +195,44 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     }
   });
 
+  it("enforces front-loaded SERP length bounds, active CTR verbs, and long-tail keywords across all route configs", () => {
+    const routeKeys = Object.keys(ROUTE_METADATA_CONFIGS);
+    expect(routeKeys.length).toBeGreaterThanOrEqual(15);
+
+    const activeVerbRegex = /^(Design|Explore|Pilot|Solve|Survive|Master|Balance|Construct|Navigate|Schedule|Inspect|Unlock|Access|Download)/;
+
+    for (const key of routeKeys) {
+      const config = ROUTE_METADATA_CONFIGS[key];
+      
+      // Title must be front-loaded, concise, and bounded between 25 and 60 characters
+      expect(
+        config.title.length,
+        `Route config "${key}" title is ${config.title.length} chars (must be <= 60): "${config.title}"`
+      ).toBeLessThanOrEqual(60);
+      expect(config.title.length).toBeGreaterThanOrEqual(25);
+
+      // Description must be between 120 and 160 characters for optimal SERP snippets
+      expect(
+        config.description.length,
+        `Route config "${key}" description is ${config.description.length} chars (must be >= 120 and <= 160): "${config.description}"`
+      ).toBeGreaterThanOrEqual(120);
+      expect(
+        config.description.length,
+        `Route config "${key}" description is ${config.description.length} chars (must be <= 160): "${config.description}"`
+      ).toBeLessThanOrEqual(160);
+
+      // Description must start with an active CTR verb
+      expect(
+        config.description,
+        `Route config "${key}" description must start with an active action verb: "${config.description}"`
+      ).toMatch(activeVerbRegex);
+
+      // Keywords must contain >= 3 long-tail phrases
+      expect(config.keywords?.length || 0).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+
   it("robots configuration allows indexing and references sitemap in production", () => {
     const originalVercelEnv = process.env.VERCEL_ENV;
     try {
@@ -144,7 +242,7 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
       expect(Array.isArray(result.rules) ? result.rules[0] : result.rules).toEqual({
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/_next/"]
+        disallow: ["/api/", "/_next/", "/admin", "/admin/"]
       });
       expect(result.sitemap).toBe(`${resolveBaseUrl()}/sitemap.xml`);
     } finally {
@@ -168,7 +266,7 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     }
   });
 
-  it("sitemap generator returns all first-class routes and dynamic case studies", async () => {
+  it("sitemap generator returns all first-class routes, asset hubs, and dynamic case studies", async () => {
     const map = await sitemap();
     expect(Array.isArray(map)).toBe(true);
 
@@ -177,6 +275,7 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     expect(urls).toContain(expectedBase);
     expect(urls).toContain(`${expectedBase}/arcade`);
     expect(urls).toContain(`${expectedBase}/arcade/laser-loon`);
+    expect(urls).toContain(`${expectedBase}/work/laser-loon`);
     expect(urls).toContain(`${expectedBase}/arcade/quasi-puzzler`);
     expect(urls).toContain(`${expectedBase}/arcade/garmin-watch`);
     expect(urls).toContain(`${expectedBase}/arcade/clinical-chaos`);
@@ -185,6 +284,16 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     expect(urls).toContain(`${expectedBase}/proof`);
     expect(urls).toContain(`${expectedBase}/simulator`);
     expect(urls).toContain(`${expectedBase}/schedule`);
+    expect(urls).toContain(`${expectedBase}/crf`);
+    expect(urls).toContain(`${expectedBase}/neuro`);
+    expect(urls).toContain(`${expectedBase}/stack`);
+
+    // Verify 100% route coverage from ROUTE_METADATA_CONFIGS (excluding /offline)
+    for (const config of Object.values(ROUTE_METADATA_CONFIGS)) {
+      if (config.path === "/offline") continue;
+      const expectedUrl = `${expectedBase}${config.path.startsWith("/") ? config.path : "/" + config.path}`;
+      expect(urls, `Sitemap missing route: ${expectedUrl}`).toContain(expectedUrl);
+    }
   });
 
   it("sitemap configuration exports a 24-hour revalidation interval (86400 seconds)", () => {
@@ -199,14 +308,12 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     expect(map1.length).toBe(map2.length);
 
     // Verify static routes maintain identical timestamps matching STATIC_ROUTE_LAST_MODIFIED
-    for (let i = 0; i < 16; i++) {
-      expect(map1[i].lastModified).toEqual(STATIC_ROUTE_LAST_MODIFIED);
-      expect(map2[i].lastModified).toEqual(STATIC_ROUTE_LAST_MODIFIED);
-      const val1 = map1[i].lastModified;
-      const val2 = map2[i].lastModified;
-      const date1 = val1 instanceof Date ? val1 : new Date(val1 as string);
-      const date2 = val2 instanceof Date ? val2 : new Date(val2 as string);
-      expect(date1.getTime()).toBe(date2.getTime());
+    const staticEntries = map1.filter((entry) => !entry.url.includes("/case-studies/"));
+    for (const entry of staticEntries) {
+      const match = map2.find((e) => e.url === entry.url);
+      expect(match).toBeDefined();
+      expect(entry.lastModified).toEqual(STATIC_ROUTE_LAST_MODIFIED);
+      expect(match?.lastModified).toEqual(STATIC_ROUTE_LAST_MODIFIED);
     }
   });
 
@@ -373,12 +480,13 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     }
   });
 
-  it("all 8 targeted showcase and arcade route social preview cards exist and return edge-cached image responses", async () => {
+  it("all 9 targeted showcase, asset hub, and arcade route social preview cards exist and return edge-cached image responses", async () => {
     const { default: crfOg } = await import("@/app/crf/opengraph-image");
     const { default: neuroOg } = await import("@/app/neuro/opengraph-image");
     const { default: clinicalChaosOg } = await import("@/app/arcade/clinical-chaos/opengraph-image");
     const { default: garminWatchOg } = await import("@/app/arcade/garmin-watch/opengraph-image");
     const { default: laserLoonOg } = await import("@/app/arcade/laser-loon/opengraph-image");
+    const { default: laserLoonWorkOg } = await import("@/app/work/laser-loon/opengraph-image");
     const { default: quasiPuzzlerOg } = await import("@/app/arcade/quasi-puzzler/opengraph-image");
     const { default: retroLabyrinthOg } = await import("@/app/arcade/retro-labyrinth/opengraph-image");
     const { default: workingWithDuckOg } = await import("@/app/arcade/working-with-duck/opengraph-image");
@@ -389,12 +497,13 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
       { name: "/arcade/clinical-chaos", generator: clinicalChaosOg, routeKey: "clinicalChaos" },
       { name: "/arcade/garmin-watch", generator: garminWatchOg, routeKey: "garminWatch" },
       { name: "/arcade/laser-loon", generator: laserLoonOg, routeKey: "laserLoon" },
+      { name: "/work/laser-loon", generator: laserLoonWorkOg, routeKey: "laserLoonCaseStudy" },
       { name: "/arcade/quasi-puzzler", generator: quasiPuzzlerOg, routeKey: "quasiPuzzler" },
       { name: "/arcade/retro-labyrinth", generator: retroLabyrinthOg, routeKey: "retroLabyrinth" },
       { name: "/arcade/working-with-duck", generator: workingWithDuckOg, routeKey: "workingWithDuck" },
     ];
 
-    expect(targetedGenerators).toHaveLength(8);
+    expect(targetedGenerators).toHaveLength(9);
 
     for (const item of targetedGenerators) {
       const res = item.generator();

@@ -281,12 +281,12 @@ const InteractiveEngineeringConsole: React.FC = () => {
       {/* Precision grid decorative corner cues */}
       <div className="absolute top-2.5 right-3 flex items-center gap-1.5 font-mono text-[9px] text-zinc-500 uppercase tracking-wider select-none">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-        <span>SYS.RUNTIME // ONLINE</span>
+        <span>SYS.RUNTIME // LIVE PLAYGROUND</span>
       </div>
 
       <div>
         {/* Header Tabs */}
-        <div className="flex items-center gap-1.5 sm:gap-2 mb-4 pb-3 border-b border-white/10 overflow-x-auto scrollbar-none" role="tablist" aria-label="Engineering System Demos">
+        <div className="flex items-center gap-1.5 sm:gap-2 mb-4 pb-3 border-b border-white/10 overflow-x-auto scrollbar-none" role="tablist" aria-label="Interactive Systems Demos">
           <button
             role="tab"
             aria-selected={mode === "logic"}
@@ -298,7 +298,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
             }`}
           >
             <IconAtom className="w-3.5 h-3.5" />
-            <span>01. Proof AST</span>
+            <span>01. Logic Puzzle</span>
           </button>
 
           <button
@@ -312,7 +312,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
             }`}
           >
             <IconShieldCheck className="w-3.5 h-3.5" />
-            <span>02. 21 CFR Part 11</span>
+            <span>02. Clinical Form Engine</span>
           </button>
 
           <button
@@ -326,7 +326,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
             }`}
           >
             <IconCpu className="w-3.5 h-3.5" />
-            <span>03. 32KB Monkey C</span>
+            <span>03. Smartwatch Simulator</span>
           </button>
         </div>
 
@@ -343,23 +343,23 @@ const InteractiveEngineeringConsole: React.FC = () => {
                 className="space-y-3"
               >
                 <div className="flex items-center justify-between text-[11px] text-zinc-400">
-                  <span>DEDUCTIVE THEOREM ENGINE</span>
+                  <span>DEDUCTIVE LOGIC SOLVER</span>
                   <span className="text-amber-400 font-semibold">RULE: MODUS PONENS</span>
                 </div>
 
                 <div className="p-3 bg-black/40 border border-white/5 rounded-xl space-y-1.5 text-xs text-zinc-300">
                   <div className="flex items-center justify-between">
-                    <span className="text-zinc-500">1. Premise:</span>
-                    <span className="text-amber-300 font-semibold">P → Q (Valid Input → Sound System)</span>
+                    <span className="text-zinc-500">1. Rule:</span>
+                    <span className="text-amber-300 font-semibold">P → Q (Valid Input → Reliable App)</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-zinc-500">2. Premise:</span>
-                    <span className="text-amber-300 font-semibold">P (Input Validated)</span>
+                    <span className="text-zinc-500">2. Fact:</span>
+                    <span className="text-amber-300 font-semibold">P (Input Checked & Validated)</span>
                   </div>
                   <div className="pt-1.5 mt-1 border-t border-white/10 flex items-center justify-between">
-                    <span className="text-zinc-400">3. Resolution:</span>
+                    <span className="text-zinc-400">3. Conclusion:</span>
                     <span className={logicDischarged ? "text-emerald-400 font-bold" : "text-zinc-500 italic"}>
-                      {logicDischarged ? "Q ⊢ Sound System State (Q.E.D.)" : "[Pending Discharge...]"}
+                      {logicDischarged ? "Q ⊢ System 100% Bug-Free (Q.E.D.)" : "[Click button to prove theorem...]"}
                     </span>
                   </div>
                 </div>
@@ -370,12 +370,12 @@ const InteractiveEngineeringConsole: React.FC = () => {
                     className="inline-flex items-center gap-2 px-3.5 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98]"
                   >
                     <IconRefresh className={`w-3.5 h-3.5 ${logicDischarged ? "rotate-180" : ""} transition-transform duration-300`} />
-                    <span>{logicDischarged ? "Reset Inference" : "Discharge Invariant"}</span>
+                    <span>{logicDischarged ? "Reset Logic Step" : "Prove Invariant Step"}</span>
                   </button>
 
                   <div className="flex items-center gap-1.5 text-[10px]">
                     <span className={`w-2 h-2 rounded-full ${logicDischarged ? "bg-emerald-400" : "bg-amber-400"} transition-colors`} />
-                    <span className="text-zinc-400">{logicDischarged ? "STATUS: 100% SOUND" : "STATUS: READY"}</span>
+                    <span className="text-zinc-400">{logicDischarged ? "STATUS: PROVEN SOUND" : "STATUS: READY"}</span>
                   </div>
                 </div>
               </motion.div>
@@ -391,22 +391,22 @@ const InteractiveEngineeringConsole: React.FC = () => {
                 className="space-y-3"
               >
                 <div className="flex items-center justify-between text-[11px] text-zinc-400">
-                  <span>STUDY: MAYO-ONC-04</span>
-                  <span className="text-emerald-400 font-semibold">CDASH DM / 21 CFR 11</span>
+                  <span>CLINICAL TRIAL FORM ENGINE</span>
+                  <span className="text-emerald-400 font-semibold">AUTOMATED VALIDATION</span>
                 </div>
 
                 <div className="p-3 bg-black/40 border border-white/5 rounded-xl space-y-1.5 text-xs text-zinc-300">
                   <div className="flex items-center justify-between">
-                    <span className="text-zinc-500">Variable:</span>
-                    <span className="text-white font-mono">AGE (Demographics)</span>
+                    <span className="text-zinc-500">Field:</span>
+                    <span className="text-white font-mono">Patient Age (Demographics)</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-zinc-500">NCI Concept:</span>
-                    <span className="text-amber-300">C66742 [Controlled Term]</span>
+                    <span className="text-zinc-500">Validation:</span>
+                    <span className="text-amber-300">Range &amp; Type Safety Check</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-zinc-500">Audit Digest:</span>
-                    <span className="text-zinc-400 truncate max-w-[200px]">SHA256: 8f9b...3c12 (Signed)</span>
+                    <span className="text-zinc-500">Audit Security:</span>
+                    <span className="text-zinc-400 truncate max-w-[200px]">SHA256: Verified &amp; Signed</span>
                   </div>
                 </div>
 
@@ -416,7 +416,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
                     className="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98]"
                   >
                     <IconCheck className="w-3.5 h-3.5" />
-                    <span>{fhirValidationActive ? "FDA / PMDA Conformance: ACTIVE" : "Toggle Conformance"}</span>
+                    <span>{fhirValidationActive ? "Data Integrity Rule: ACTIVE" : "Toggle Integrity Rule"}</span>
                   </button>
 
                   <span className="text-[10px] text-zinc-400">ZERO DATA LOSS</span>
@@ -434,13 +434,13 @@ const InteractiveEngineeringConsole: React.FC = () => {
                 className="space-y-3"
               >
                 <div className="flex items-center justify-between text-[11px] text-zinc-400">
-                  <span>GARMIN MONKEY C RUNTIME</span>
+                  <span>SMARTWATCH RUNTIME</span>
                   <span className="text-cyan-400 font-semibold">32KB MEMORY BUDGET</span>
                 </div>
 
                 <div className="p-3 bg-black/40 border border-white/5 rounded-xl space-y-2 text-xs text-zinc-300">
                   <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-zinc-400">Heap Allocated:</span>
+                    <span className="text-zinc-400">RAM Used:</span>
                     <span className="text-amber-300 font-bold">{garminHeapAlloc.toFixed(1)} KB / 32.0 KB ({Math.round((garminHeapAlloc / 32) * 100)}%)</span>
                   </div>
                   {/* Visual memory bar */}
@@ -454,7 +454,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
                   </div>
                   <div className="flex items-center justify-between text-[10px] text-zinc-500 pt-0.5">
                     <span>Frame Budget: 16.6ms</span>
-                    <span className="text-emerald-400">60 FPS Target Locked</span>
+                    <span className="text-emerald-400">Silky 60 FPS Locked</span>
                   </div>
                 </div>
 
@@ -465,10 +465,10 @@ const InteractiveEngineeringConsole: React.FC = () => {
                     className="inline-flex items-center gap-2 px-3.5 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98] disabled:opacity-50"
                   >
                     <IconRefresh className={`w-3.5 h-3.5 ${isGarminGcRunning ? "animate-spin" : ""}`} />
-                    <span>{isGarminGcRunning ? "Sweeping Heap..." : "Trigger GC Sweep"}</span>
+                    <span>{isGarminGcRunning ? "Freeing RAM..." : "Clean Memory (GC)"}</span>
                   </button>
 
-                  <span className="text-[10px] text-zinc-400">HEAP DETERMINISTIC</span>
+                  <span className="text-[10px] text-zinc-400">HEAP OPTIMIZED</span>
                 </div>
               </motion.div>
             )}
@@ -480,7 +480,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
       <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[10px] font-mono text-zinc-500">
         <span className="flex items-center gap-1.5">
           <IconTerminal className="w-3 h-3 text-zinc-400" />
-          <span>ZERO RUNTIME BLOCKING</span>
+          <span>ZERO LATENCY // ZERO BLOAT</span>
         </span>
         <span className="text-zinc-400">LATENCY: &lt; 0.2ms</span>
       </div>
@@ -494,8 +494,8 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ className }) => {
   const shouldReduceMotion = useReducedMotion();
-  const headline = "High-assurance systems, clinical architectures & creative engines.";
-  const introText = "Clinical operations background at Mayo Clinic combined with high-assurance data systems, formal deductive logic engines, and bespoke canvas physics.";
+  const headline = "I build software that doesn't break, and make complex systems fun to use.";
+  const introText = "I spent years at Mayo Clinic turning messy medical protocols into smooth digital workflows. Today, I build ultra-fast web apps, interactive tools, and little canvas games with obsessive attention to detail.";
 
   return (
     <section
@@ -519,7 +519,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
       {/* 2. Architectural Blueprint Corner Cues (desktop) */}
       <div className="hidden lg:flex absolute top-24 left-12 items-center gap-2 text-[10px] font-mono text-zinc-600 select-none">
         <span className="text-amber-500/60">[+]</span>
-        <span>SYS.SPEC // MONOGRAPH 2026</span>
+        <span>BUILDER // PROBLEM SOLVER</span>
       </div>
       <div className="hidden lg:flex absolute top-24 right-12 items-center gap-2 text-[10px] font-mono text-zinc-600 select-none">
         <span>LOC: ROCHESTER &amp; NYC</span>
@@ -527,7 +527,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
       </div>
 
       {/* 3. Hero Split Grid Container */}
-      <div className="relative z-10 w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+      <div className="relative z-10 w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10 lg:gap-12 items-center">
         {/* Left Column: Editorial Statement & Actions */}
         <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left">
           {/* Micro Brand Identifier */}
@@ -538,7 +538,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
             className="inline-flex items-center gap-2 px-3 py-1 mb-5 sm:mb-6 text-[10px] sm:text-xs font-mono font-semibold tracking-[0.15em] uppercase text-amber-300 bg-amber-500/10 border border-amber-500/25 rounded-full"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-            <span>FREDERICK DE RUITER · SYSTEMS ARCHITECT</span>
+            <span>FREDERICK DE RUITER · PROBLEM SOLVER &amp; BUILDER</span>
           </motion.div>
 
           {/* Dynamic Staggered Pretext-powered Title */}
@@ -559,7 +559,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
               href="#case-studies"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 text-xs sm:text-sm font-mono font-bold text-black bg-amber-400 hover:bg-amber-300 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-amber-500/10 cursor-pointer"
             >
-              <span>Inspect Systems Dossiers</span>
+              <span>Explore My Work</span>
               <IconArrowRight className="w-4 h-4" />
             </a>
 
@@ -570,7 +570,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
                 className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-3 text-xs font-mono font-semibold text-zinc-200 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-200 active:scale-[0.98] cursor-pointer"
               >
                 <IconDeviceGamepad2 className="w-4 h-4 text-amber-400 shrink-0" />
-                <span className="truncate">Labs Hub</span>
+                <span className="truncate">Arcade &amp; Labs</span>
               </Link>
 
               <a
@@ -589,15 +589,15 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
           <div className="mt-8 pt-6 border-t border-white/5 w-full flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 text-[10px] font-mono text-zinc-400 select-none">
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span>3 FORMAL PROOF ENGINES</span>
+              <span>3 INTERACTIVE ENGINES</span>
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              <span>21 CFR PART 11 VALIDATED</span>
+              <span>CLINICAL TRIAL TESTED</span>
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-              <span>100% TYPE-SAFE CONTRACTS</span>
+              <span>ZERO JARGON GUARANTEE</span>
             </span>
           </div>
         </div>

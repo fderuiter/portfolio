@@ -6,7 +6,7 @@
 
 # Interface: SocialImageOptions
 
-Defined in: [lib/og-image.tsx:10](https://github.com/fderuiter/portfolio/blob/main/lib/og-image.tsx#L10)
+Defined in: [lib/og-image.tsx:50](https://github.com/fderuiter/portfolio/blob/main/lib/og-image.tsx#L50)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/og-image.tsx:10](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **badge?**: `string`
 
-Defined in: [lib/og-image.tsx:14](https://github.com/fderuiter/portfolio/blob/main/lib/og-image.tsx#L14)
+Defined in: [lib/og-image.tsx:55](https://github.com/fderuiter/portfolio/blob/main/lib/og-image.tsx#L55)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/og-image.tsx:14](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **category?**: `string`
 
-Defined in: [lib/og-image.tsx:11](https://github.com/fderuiter/portfolio/blob/main/lib/og-image.tsx#L11)
+Defined in: [lib/og-image.tsx:52](https://github.com/fderuiter/portfolio/blob/main/lib/og-image.tsx#L52)
 
 ***
 
@@ -30,7 +30,15 @@ Defined in: [lib/og-image.tsx:11](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **description?**: `string`
 
-Defined in: [lib/og-image.tsx:13](https://github.com/fderuiter/portfolio/blob/main/lib/og-image.tsx#L13)
+Defined in: [lib/og-image.tsx:54](https://github.com/fderuiter/portfolio/blob/main/lib/og-image.tsx#L54)
+
+***
+
+### preset?
+
+> `optional` **preset?**: [`SocialPreset`](../type-aliases/SocialPreset.md)
+
+Defined in: [lib/og-image.tsx:51](https://github.com/fderuiter/portfolio/blob/main/lib/og-image.tsx#L51)
 
 ***
 
@@ -38,7 +46,7 @@ Defined in: [lib/og-image.tsx:13](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **systemStatus?**: `string`
 
-Defined in: [lib/og-image.tsx:16](https://github.com/fderuiter/portfolio/blob/main/lib/og-image.tsx#L16)
+Defined in: [lib/og-image.tsx:57](https://github.com/fderuiter/portfolio/blob/main/lib/og-image.tsx#L57)
 
 ***
 
@@ -46,7 +54,7 @@ Defined in: [lib/og-image.tsx:16](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **tags?**: `string`[]
 
-Defined in: [lib/og-image.tsx:15](https://github.com/fderuiter/portfolio/blob/main/lib/og-image.tsx#L15)
+Defined in: [lib/og-image.tsx:56](https://github.com/fderuiter/portfolio/blob/main/lib/og-image.tsx#L56)
 
 ***
 
@@ -54,4 +62,4 @@ Defined in: [lib/og-image.tsx:15](https://github.com/fderuiter/portfolio/blob/ma
 
 > **title**: `string`
 
-Defined in: [lib/og-image.tsx:12](https://github.com/fderuiter/portfolio/blob/main/lib/og-image.tsx#L12)
+Defined in: [lib/og-image.tsx:53](https://github.com/fderuiter/portfolio/blob/main/lib/og-image.tsx#L53)

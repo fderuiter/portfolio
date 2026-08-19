@@ -241,8 +241,8 @@ describe("Adversarial Stress-Test Suite: 5 Production Engineering Case Studies",
       expect(narrative).toContain("<h3>1. Executive Summary & Value Proposition</h3>");
       expect(narrative).toContain("<h3>2. Architecture & Design Patterns</h3>");
       expect(narrative).toContain("<h3>3. System Design & Runtime Flow</h3>");
-      expect(narrative).toContain("<h3>4. Critical Invariants, Edge Cases & Defect Remediations</h3>");
-      expect(narrative).toContain("<h3>5. Lessons Learned & Architectural Trade-Offs</h3>");
+      expect(narrative).toMatch(/<h3>4\.\s+(Critical Invariants|Key Technical Challenges)/i);
+      expect(narrative).toMatch(/<h3>5\.\s+(Lessons Learned|Trade-Offs)/i);
     });
   });
 

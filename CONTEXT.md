@@ -51,15 +51,20 @@ Formal inference rules used to derive logical steps from valid premises:
 - **Reason for Change Prompt**: Mandatory justification audit prompts when modifying existing clinical data points.
 - **Immutable Chronological Audit Log**: Timestamped record tracking previous value, new value, user identity, role, and justification.
 - **Electronic Signatures**: Cryptographic simulated SHA-256 digital signatures attesting investigator review and data lock.
+- **Executive Form Health Dashboard**: An interactive telemetry summary in the Inspector presenting CDASH conformance score, total variable counts, SDV readiness, and domain settings when no individual field is selected.
+- **Progressive Micro-Toolbar**: A contextual, floating action bar on clinical canvas cards that selectively surfaces column width steppers, inline label editors, and deletion controls only during active hover or focus states.
 
 ## Mobile Touch & Responsive Architecture
 
 ### Multi-Modal Mobile Stack
 - **Mobile Stack View**: A segmented view navigation paradigm for complex desktop studio tools (CRF Studio, Proof Canvas, Neuro Simulator) that decomposes multi-column desktop layouts into discrete, focused views (e.g. Canvas, Inspector, Ledger, Terminal) accessible via bottom tab bars on screens < 768px.
+- **Canvas-Priority Auto-Dock**: A responsive workspace layout protocol on tablet and compact screens (`768px` to `1199px`) that collapses sidebar panels into floating overlay drawers to preserve 100% width for the multi-column clinical canvas.
 - **Slide-Up Action Sheet (Bottom Sheet)**: A mobile modal drawer pattern used for widget palettes, command inputs, and tool selectors that slides up from the bottom of the viewport with backdrop blur and swipe-to-dismiss capabilities.
 - **Horizontal Overflow Invariant**: The structural requirement that all rendered pages, canvas elements, tables, and overlays must satisfy `element.scrollWidth <= element.clientWidth` to prevent unintended horizontal scrolling or layout tearing on mobile viewports (320px to 480px).
 
 ### Virtual Gamepad & Canvas Ergonomics
+- **Viewport-Budgeted Game Shell (Single-Screen Viewport Fit)**: An arcade cabinet container layout standard that dynamically clamps game canvas heights to available vertical viewport space (`100dvh` minus safe-area insets, HUD bar, and touch controls dock) on mobile and tablet screens, ensuring that the canvas, game HUD, and interactive touch controls fit completely within a single screen fold with zero page scrolling required during active gameplay.
+- **Archetype-Based Control Docks**: A structured taxonomy of four standardized responsive touch control layouts (`DpadActionDock`, `TwinStickAimDock`, `BezelClusterDock`, `ActionStripDock`) providing accessible 48×48px minimum touch targets, pointer capture, active tactile animations (`scale-[0.96]`), and Web Audio synthesis for different arcade game genres.
 - **Virtual D-Pad**: An on-screen, high-contrast touch controller component with minimum 48x48px directional buttons supporting rapid touch/mouse down-up events, haptic/audio feedback, and pointer capture for responsive action in arcade games.
 - **Canvas Touch Action Isolation**: The explicit setting of `touch-action: none` or `touch-action: pan-y` on interactive HTML5 / WebGL canvas elements during active gameplay to prevent touch gestures from triggering browser pull-to-refresh or unwanted page scrolling.
 - **Safe Area Inset Adaptation**: Dynamic spacing integration using CSS `env(safe-area-inset-top)`, `env(safe-area-inset-bottom)`, `env(safe-area-inset-left)`, and `env(safe-area-inset-right)` to protect fixed navigation bars, floating buttons, and game controllers from iPhone notches, Dynamic Islands, and mobile home indicator bars.
@@ -80,6 +85,7 @@ Formal inference rules used to derive logical steps from valid premises:
 ## Graphics & Context Loss Resilience
 
 ### GPU Context Management
+- **Responsive Canvas Lifecycle Engine**: A centralized canvas management protocol providing dynamic device pixel ratio (DPR) clamping ($\le 2.0$ on desktop/tablet, $\le 1.0$ on mobile/CRT), zero-division-by-zero touch coordinate normalization, debounced resize handling, and automatic 2D/WebGL context loss recovery.
 - **WebGL Context Loss Handler**: An isolated browser event management protocol intercepting `webglcontextlost` (calling `preventDefault()` to enable automatic recovery) and pausing active animation frame loops to guard GPU state.
 - **WebGL Context Restoration Lifecycle**: An automated re-instantiation pipeline triggered upon `webglcontextrestored` that re-binds GPU vertex buffers, shader programs, and materials while preserving exact user session state (camera rotation, surface modes, crosshairs, active tools).
 - **Canvas 2D Context Resilience**: Event-driven restoration managing HTML5 2D canvas `contextlost` / `contextrestored` events to preserve simulation states and rendering pipelines across mobile tab suspension and GPU power state switches.
@@ -136,6 +142,7 @@ Formal inference rules used to derive logical steps from valid premises:
 
 ### Defensive CSS & Component Independence
 - **Container Query Encapsulation (`@container`)**: The practice of wrapping modular cards and widgets in CSS container contexts (`@container`) so internal layout shifts, font sizing, and flex directions react directly to parent container width rather than global viewport dimensions (`@media`).
+- **Tablet-Adaptive Layout Invariant**: The structural layout rule ensuring mid-sized viewports (640px to 1023px) receive dedicated layout composition (e.g. 2-column bento grids, vertical hero console docking with balanced margins, slide-out tablet drawer navigation) preventing the cramped layouts caused by prematurely applying desktop-wide rules to tablet viewports.
 - **Dynamic Content Stress Invariant**: The requirement that all text containers and card wrappers maintain visual integrity when populated with edge-case data: localized translations (+40% character expansion), long unbroken URLs/identifiers (100+ characters without spaces), and 200% simulated browser zoom.
 - **Design Token Governance**: The architectural enforcement preventing arbitrary inline magic numbers (e.g. ad-hoc `h-[...px]`, `text-[...px]`, `z-[9999]`) in favor of centralized design manifest tokens and responsive clamp scales.
 
@@ -175,11 +182,17 @@ Formal inference rules used to derive logical steps from valid premises:
 
 ### Garmin Watch Hardware & Thermal Emulation
 - **Garmin Thermal & CPU Telemetry Engine**: Deterministic physical simulation engine (`lib/garmin-engine.ts`, `components/arcade/GarminWatch.tsx`) modeling Connect IQ runtime CPU workloads, heat generation curves, passive wrist thermal dissipation, battery discharge profiles, and ANT+ heart rate sensor telemetry under active workload stress.
-- **Monkey C Bytecode Emulation Scaffold**: Canvas-driven graphical rendering pipeline emulating high-contrast MIP (Memory-in-Pixel) transflective smartwatch displays, hardware bezel buttons, and Connect IQ OS lifecycle states with zero native C dependencies.## Scientific & Engineering Editorial Design System
+- **Monkey C Bytecode Emulation Scaffold**: Canvas-driven graphical rendering pipeline emulating high-contrast MIP (Memory-in-Pixel) transflective smartwatch displays, hardware bezel buttons, and Connect IQ OS lifecycle states with zero native C dependencies.
+
+## Scientific & Engineering Editorial Design System
 
 ### Visual Identity & Interactive Telemetry
 - **Hero Engineering Console**: An interactive, multi-modal hero telemetry component allowing visitors to interactively test and verify domain invariants (AST Premise Discharging in Formal Logic, CDISC 21 CFR Part 11 Conformance Auditing, and Garmin 32KB Memory Heap Allocation) with contextual handoff links to full interactive studio workspaces.
 - **Scientific & Engineering Editorial Design System**: A high-assurance visual and interaction design architecture emphasizing Swiss grid precision, deep architectural graphite surfaces (`#0d0e11`, `#13151a`), crisp hairline structural borders (`rgba(255, 255, 255, 0.08)` / `border-zinc-800`), and semantic status indicators (Precision Amber `#f59e0b`, Emerald `#10b981`, Steel `#94a3b8`) eliminating generic AI tropes (falling collision particles, diffuse neon glows).
+- **Dual-Layer Editorial Persona**: An editorial and narrative framework blending warm, self-deprecating storytelling with dry, battle-tested engineering and clinical operations wit as the baseline voice, while using interactive toggles ("Recruiter vs. Reality") and micro-copy to expose unvarnished, hilarious technical reality.
+- **The "Make Things Better" Ethos**: The personal philosophy and track record defining Frederick's journey: finding practical solutions to real human problems and leaving every environment better than he found it—from securing free menstrual products in campus bathrooms and serving as university liaison for the Minnesota Vikings Training Camp, to 3D printing MRI brain models at Mayo Clinic, sparking the cultural Laser Loon phenomenon, and engineering intuitive, bulletproof software.
+- **System-Agnostic Problem Solver**: The core positioning and ethos defining Frederick not by rigid software titles or academic jargon, but as a pragmatic, relentless troubleshooter who dives into any system—campus initiatives, hospital EHRs, Linux pipelines, smartwatches, or modern web apps—to find fixes, help people out, and make things work smoothly.
+- **Plain-Language Clarity Invariant**: The requirement that the primary narrative, headlines, hero copy, and project introductions must pass the "Family & Friends" test—explaining who Frederick is, what was built, why it matters, and why it's cool in clear, relatable, engaging human terms with zero alienating buzzwords before offering optional deep-dive technical telemetry.
 - **Systems Dossier & Spec Index**: A numbered engineering project showcase (`SYS-01`, `SYS-02`, `SYS-03`, `SYS-04`) surfacing explicit architectural constraints, test coverage badges, language specs, and direct pathways to deep-dive case studies.
 
 ## Resilient Hybrid Fallback Data Architecture
@@ -197,7 +210,48 @@ Formal inference rules used to derive logical steps from valid premises:
 - **Admin & Author Portal**: A dedicated protected workspace (`/admin`, `/api/admin`) providing administrative tools for drafting case studies, modifying editorial content, and inspecting raw analytics telemetry without exposing write capabilities to public visitors.
 - **Clerk Edge Middleware Chaining**: The edge pipeline composing `@clerk/nextjs` `clerkMiddleware` with standard HTTP security headers (`applySecurityHeaders`) and privacy-preserving client connection hashing (`generateClientConnectionHash`), enforcing route protection via `createRouteMatcher` while allowing public route bypass.
 - **Environment-Gated Admin Authorization**: Server-side access control validating authenticated Clerk identities (`userId`, `emailAddress`) against typed environment variable allowlists (`ADMIN_USER_IDS`, `ADMIN_EMAILS`) declared in `lib/env.ts`.
-- **Architectural Dark Auth Surface**: Custom Clerk UI appearance configurations and dedicated login entrypoint (`/admin/login`) styled with `@clerk/themes` dark presets to seamlessly match the portfolio's architectural graphite (`#0d0e11`), Swiss mono typography, and WCAG 2.1 Level AA contrast standards.
+- **In-Route Access Denied Console**: An in-route 403 authorization boundary surface on `/admin` that gracefully displays an authenticated visitor's Clerk UID, primary email address, and 1-click copyable environment configuration instructions alongside account-switching actions, preventing unhandled server exception crashes and false-alarm Sentry error reports.
 
+## Case Study Domain & Editorial Architecture
+
+### Content Structure & Bidirectional Discovery
+- **High-Assurance Systems Case Study Standard**: The canonical 5-section technical structure governing all portfolio case studies: 1. Executive Summary & Problem Solved, 2. Deep Dive Architecture & Design Patterns, 3. System Design & Runtime Data Flow (Mermaid), 4. Key Technical Challenges & Production Code Snippets, and 5. Trade-Offs, Edge Cases & Lessons Learned.
+- **Bidirectional Project Seam**: The linkage contract ensuring every case study explicitly pairs its external source repository (`github_url`) or primary artifact (e.g. Kaggle notebook) with relevant internal interactive tools or live simulators (`interactive_url`) and vice versa.
+- **Multi-Action Hero Bar**: A prominent action header on case study pages rendering primary source links (GitHub repository, Kaggle notebook, PyPI/npm package), live/simulated repository telemetry, and internal interactive studio launcher shortcuts.
+- **Platform-Agnostic Source Linking**: A flexible source linkage model gracefully supporting projects where the primary artifact is an external platform (e.g. Kaggle notebook or package registry) rather than a traditional GitHub repository, adapting badges and telemetry without build-time or runtime exceptions.
+- **Interactive CLI Developer Sandbox**: The client-side terminal interface (`commands_json`, `playback_json`, `SandboxTerminal`) rendering realistic command outputs and step-by-step playback workflows directly inside case study pages.
+- **FluentUI Case Study Easter Egg**: A scoped Office Fluent Design System visual override active on `/case-studies/crf-xl` evoking classic Microsoft Excel taskpane aesthetics without compromising global dark-mode layout integrity.
+- **Tracer-Bullet Case Study Rollout**: The phased verification protocol establishing generalized UI contracts and multi-source telemetry first before sequentially integrating, testing, and closing individual case study issues.
+
+## Search Engine Optimization & Discovery Architecture
+
+### Search Strategy & Intent Hierarchy
+- **Omni-Channel Tiered Search Funnel**: A three-tier organic discovery architecture that captures broad top-of-funnel traffic via viral cultural asset hubs (Laser Loon vector distribution) and interactive browser utilities (CRF Studio, Proof Workspace, NeuroRecon), seamlessly channeling high-intent visitors toward high-assurance systems case studies, technical dossiers, and direct 1:1 consultation scheduling (`/schedule`).
+- **Target Search Intent Hierarchy**: The structured segmentation of search queries into three distinct intent classes: 1. High-Intent Systems & Recruiter Discovery (clinical software architecture, formal verification, embedded systems), 2. Open Creative Commons Asset Distribution (Laser Loon vector downloads, Minnesota state flag submission F277), and 3. Public Web Utility Tooling (online CDASH/ODM-XML validators, deductive logic solvers, FreeSurfer mesh repair).
+
+### Structured Data & Entity Graph Architecture
+- **Unified Schema.org `@graph` Engine**: A centralized structured data generator (`lib/seo.ts`) linking all page-level entities (`Person`, `WebSite`, `WebPage`, `BreadcrumbList`, `SoftwareApplication`, `TechArticle`, `VisualArtwork`) into a single interconnected JSON-LD `@graph` with deterministic `@id` URI nodes (`#person`, `#website`).
+- **Specialized Schema Dispatcher**: A tier-aware schema generator routing page types to optimal Schema.org definitions (e.g. `VisualArtwork` & `MediaObject` with Creative Commons licensing for graphic design assets like Laser Loon, `WebApplication` for browser-based interactive studios, and `SoftwareSourceCode` / `TechArticle` for deep-dive systems case studies).
+
+### Visual & Media Discovery
+- **Tiered Dynamic Social Preview Generator**: The Satori-based OpenGraph and Twitter card rendering pipeline (`lib/og-image.tsx`) providing tier-specific visual presets (`CLINICAL_SYSTEMS`, `FORMAL_VERIFICATION`, `VECTOR_ARTWORK`, `EMBEDDED_SIMULATOR`) with live GitHub telemetry badges and 1200x630 dimension compliance.
+- **Google Image Sitemap Extension**: XML image metadata integration in `app/sitemap.ts` attaching image locations, captions, titles, and Creative Commons licensing tags directly to canonical route entries for Google Image Search crawling.
+
+### Semantic Metadata & Search Copy Standards
+- **Front-Loaded SERP Optimization Standard**: The metadata authoring rule in `lib/seo-metadata.ts` restricting page titles to 50–60 characters with high-intent primary capability keywords front-loaded before brand suffixes, pairing 145–155 character action-oriented descriptions with active CTR verbs (*Explore*, *Download*, *Simulate*, *Verify*).
+- **Long-Tail Semantic Tagging**: The practice of replacing generic single-word tags (`"React"`, `"TypeScript"`) with specialized multi-word domain search phrases (`"CDISC ODM-XML validator"`, `"Laser Loon vector download"`, `"Lean formal proof simulator"`).
+
+### Crawl Governance & Sitemap Invariants
+- **Dynamic Sitemap Registry**: The automated route compilation architecture in `app/sitemap.ts` dynamically aggregating routes from `ROUTE_METADATA_CONFIGS` in `lib/seo-metadata.ts` and dynamic database records in `CaseStudyService` to guarantee 100% route indexing coverage with zero manual drift.
+- **Robots Crawl Boundary Invariant**: The robots governance policy in `app/robots.ts` ensuring private routes (`/admin`, `/api/`, `/_next/`) remain strictly excluded from search crawler indexing while publishing canonical sitemap endpoints.
+
+## Transactional Communication & Outbound Notification Architecture
+
+### Inbound & Outbound Messaging
+- **Inbound Visitor Inquiry**: A direct message submitted through the portfolio contact surface containing visitor contact coordinates, intent category (e.g. general, collaboration, consulting), subject, and message content.
+- **Admin Feedback Alert**: An automated notification dispatched to site administrators upon new case study feedback submissions, telemetry anomalies, or critical system events.
+- **Transactional Email Dispatcher**: The unified outbound communication engine responsible for validating payloads, enforcing anti-abuse rate limits, orchestrating message delivery via Resend, and providing environment-isolated mock fallbacks.
+- **Architectural Email Template**: High-contrast, responsive HTML email markup adhering to Swiss typography and portfolio design tokens (`#0d0e11`, Precision Amber `#f59e0b`, hairline micro-borders) with DOM-purified content.
+- **Frictionless Bot Barrier**: Multi-layered anti-abuse defense combining invisible honeypot traps, timestamp duration gates, anonymous connection-hash rate limiting, and content tone moderation without third-party CAPTCHA scripts.
 
 
