@@ -15,6 +15,8 @@ import { DynamicTabletOrientationHint as TabletOrientationHint } from "@/compone
 import { useFullscreen } from "@/hooks/useFullscreen";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { useResponsiveCanvas } from "@/hooks/useResponsiveCanvas";
+import { BezelClusterDock } from "@/components/arcade/ControlDocks";
 import {
   DeviceTarget,
   DEVICE_PROFILES,
@@ -68,6 +70,12 @@ export const GarminWatchSimulator: React.FC = () => {
 
   // References for Canvas and Animation Loop
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { toGameCoordinates } = useResponsiveCanvas({
+    canvasRef,
+    internalWidth: CANVAS_SIZE,
+    internalHeight: CANVAS_SIZE,
+    maxDpr: 1.5,
+  });
   const containerRef = useRef<HTMLDivElement | null>(null);
   const outerContainerRef = useRef<HTMLDivElement | null>(null);
   const { isFullscreen, toggleFullscreen } = useFullscreen(outerContainerRef);
@@ -221,13 +229,7 @@ export const GarminWatchSimulator: React.FC = () => {
   // Canvas Mouse & Touch Drag Wiping for Overheat Fog
   const handleCanvasPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!isDraggingFog && e.buttons === 0) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = CANVAS_SIZE / rect.width;
-    const scaleY = CANVAS_SIZE / rect.height;
-    const x = (e.clientX - rect.left) * scaleX;
-    const y = (e.clientY - rect.top) * scaleY;
+    const { x, y } = toGameCoordinates(e.clientX, e.clientY);
     handleWipeFog(x, y);
   };
 
@@ -612,6 +614,19 @@ export const GarminWatchSimulator: React.FC = () => {
             </button>
           )}
         </div>
+      </div>
+
+      {/* Mobile/Tablet Smartwatch Hardware Bezel Pushbuttons */}
+      <div className="w-full max-w-xl mt-4 flex justify-center">
+        <BezelClusterDock
+          onButtonPress={(btn) => {
+            if (btn === "light") handleToggleLight();
+            else if (btn === "up") handleJump();
+            else if (btn === "down") handleJettison();
+            else if (btn === "start") handleStartStop();
+            else if (btn === "back") handleForceGc();
+          }}
+        />
       </div>
 
       {/* Real-time Engineering Telemetry & Controls Dashboard Below Watch */}

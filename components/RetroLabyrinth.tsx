@@ -16,7 +16,8 @@ import {
   IconShoppingCart,
   IconDeviceTv,
 } from "@tabler/icons-react";
-import { VirtualDPad } from "@/components/ui/VirtualDPad";
+import { DpadActionDock } from "@/components/arcade/ControlDocks";
+import { useResponsiveCanvas } from "@/hooks/useResponsiveCanvas";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { FullscreenButton } from "@/components/arcade/FullscreenButton";
 import { DynamicTabletOrientationHint as TabletOrientationHint } from "@/components/arcade/DynamicTabletOrientationHint";
@@ -210,6 +211,12 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  useResponsiveCanvas({
+    canvasRef,
+    internalWidth: 240,
+    internalHeight: 144,
+    maxDpr: 1.5,
+  });
   const { isFullscreen, toggleFullscreen } = useFullscreen(containerRef);
   const { recordEvent } = useTelemetry();
   const { playNote, playSuccess } = useAudio();
@@ -2091,14 +2098,12 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
 
           {/* Enhanced Touch D-Pad for Mobile & Tablet */}
           <div className="w-full pt-1.5 flex flex-col items-center">
-            <VirtualDPad
+            <DpadActionDock
               onDirectionPress={handleDirectionalMove}
               onActionAPress={() => handleFireWeapon("emp_blast")}
               onActionBPress={cycleWeapon}
               actionALabel="EMP"
-              actionASubtitle="SURGE"
               actionBLabel="EXPLOIT"
-              actionBSubtitle={activeWeaponId.substring(0, 4).toUpperCase()}
               className="w-full max-w-sm py-2 px-3"
             />
           </div>

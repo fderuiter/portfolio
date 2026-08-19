@@ -12,6 +12,7 @@ import { DynamicTabletOrientationHint as TabletOrientationHint } from "@/compone
 import { useFullscreen } from "@/hooks/useFullscreen";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
+import { useResponsiveCanvas } from "@/hooks/useResponsiveCanvas";
 import {
   IconPlayerPlay,
   IconRotate,
@@ -1410,6 +1411,12 @@ export const WorkingWithDuck: React.FC = () => {
   });
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { toGameCoordinates } = useResponsiveCanvas({
+    canvasRef,
+    internalWidth: CANVAS_WIDTH,
+    internalHeight: CANVAS_HEIGHT,
+    maxDpr: 2.0,
+  });
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [_isNearViewport, setIsNearViewport] = useState<boolean>(() => {
@@ -1851,11 +1858,7 @@ export const WorkingWithDuck: React.FC = () => {
 
   // Canvas Mouse Interactions
   const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (CANVAS_WIDTH / rect.width);
-    const y = (e.clientY - rect.top) * (CANVAS_HEIGHT / rect.height);
+    const { x, y } = toGameCoordinates(e.clientX, e.clientY);
 
     const state = gameStateRef.current;
 
@@ -2017,11 +2020,7 @@ export const WorkingWithDuck: React.FC = () => {
   };
 
   const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (CANVAS_WIDTH / rect.width);
-    const y = (e.clientY - rect.top) * (CANVAS_HEIGHT / rect.height);
+    const { x, y } = toGameCoordinates(e.clientX, e.clientY);
 
     const state = gameStateRef.current;
 

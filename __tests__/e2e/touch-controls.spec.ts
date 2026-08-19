@@ -35,6 +35,7 @@ test.describe('Mobile & Tablet Touch Interactions Suite', () => {
     '/arcade/garmin-watch',
     '/arcade/working-with-duck',
     '/arcade/quasi-puzzler',
+    '/arcade/meme-vault',
   ];
 
   for (const route of TEST_ROUTES) {
