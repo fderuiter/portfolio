@@ -6,7 +6,7 @@
 
 # Interface: CodelistOption
 
-Defined in: [lib/crf/types.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L25)
+Defined in: [lib/crf/types.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L26)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/types.ts:25](https://github.com/fderuiter/portfolio/blob/ma
 
 > **code**: `string`
 
-Defined in: [lib/crf/types.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L26)
+Defined in: [lib/crf/types.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L27)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/types.ts:26](https://github.com/fderuiter/portfolio/blob/ma
 
 > **label**: `string`
 
-Defined in: [lib/crf/types.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L27)
+Defined in: [lib/crf/types.ts:28](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L28)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/types.ts:27](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **nciCode?**: `string`
 
-Defined in: [lib/crf/types.ts:28](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L28)
+Defined in: [lib/crf/types.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L29)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/crf/types.ts:28](https://github.com/fderuiter/portfolio/blob/ma
 
 > **order**: `number`
 
-Defined in: [lib/crf/types.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L29)
+Defined in: [lib/crf/types.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L30)

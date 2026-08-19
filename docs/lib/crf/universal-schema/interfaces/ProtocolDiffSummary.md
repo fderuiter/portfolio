@@ -6,7 +6,7 @@
 
 # Interface: ProtocolDiffSummary
 
-Defined in: [lib/crf/universal-schema.ts:381](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L381)
+Defined in: [lib/crf/universal-schema.ts:396](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L396)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/universal-schema.ts:381](https://github.com/fderuiter/portf
 
 > **addedForms**: `string`[]
 
-Defined in: [lib/crf/universal-schema.ts:384](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L384)
+Defined in: [lib/crf/universal-schema.ts:399](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L399)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/universal-schema.ts:384](https://github.com/fderuiter/portf
 
 > **addedVisits**: `string`[]
 
-Defined in: [lib/crf/universal-schema.ts:395](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L395)
+Defined in: [lib/crf/universal-schema.ts:410](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L410)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/universal-schema.ts:395](https://github.com/fderuiter/portf
 
 > **hasChanges**: `boolean`
 
-Defined in: [lib/crf/universal-schema.ts:383](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L383)
+Defined in: [lib/crf/universal-schema.ts:398](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L398)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/universal-schema.ts:383](https://github.com/fderuiter/portf
 
 > **modifiedForms**: `object`[]
 
-Defined in: [lib/crf/universal-schema.ts:386](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L386)
+Defined in: [lib/crf/universal-schema.ts:401](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L401)
 
 #### addedFields
 
@@ -74,7 +74,7 @@ Defined in: [lib/crf/universal-schema.ts:386](https://github.com/fderuiter/portf
 
 > **protocolNumber**: `string`
 
-Defined in: [lib/crf/universal-schema.ts:382](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L382)
+Defined in: [lib/crf/universal-schema.ts:397](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L397)
 
 ***
 
@@ -82,7 +82,7 @@ Defined in: [lib/crf/universal-schema.ts:382](https://github.com/fderuiter/portf
 
 > **removedForms**: `string`[]
 
-Defined in: [lib/crf/universal-schema.ts:385](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L385)
+Defined in: [lib/crf/universal-schema.ts:400](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L400)
 
 ***
 
@@ -90,4 +90,4 @@ Defined in: [lib/crf/universal-schema.ts:385](https://github.com/fderuiter/portf
 
 > **removedVisits**: `string`[]
 
-Defined in: [lib/crf/universal-schema.ts:396](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L396)
+Defined in: [lib/crf/universal-schema.ts:411](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L411)

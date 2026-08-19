@@ -8,7 +8,7 @@
 
 > **UniversalCrfField** = `z.infer`\<*typeof* [`BaseCRFFieldSchema`](../variables/BaseCRFFieldSchema.md)\> & `object`
 
-Defined in: [lib/crf/universal-schema.ts:114](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L114)
+Defined in: [lib/crf/universal-schema.ts:122](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L122)
 
 ## Type Declaration
 

@@ -6,7 +6,7 @@
 
 # Type Alias: ClinicalDataType
 
-> **ClinicalDataType** = `"text"` \| `"textarea"` \| `"number"` \| `"integer"` \| `"date"` \| `"partial_date"` \| `"time"` \| `"datetime"` \| `"single_select"` \| `"multi_select"` \| `"radio"` \| `"checkbox"` \| `"vas_scale"` \| `"nrs_scale"` \| `"calculated"` \| `"repeating_table"` \| `"signature"`
+> **ClinicalDataType** = `"text"` \| `"textarea"` \| `"number"` \| `"integer"` \| `"date"` \| `"partial_date"` \| `"precision_date"` \| `"time"` \| `"datetime"` \| `"single_select"` \| `"multi_select"` \| `"radio"` \| `"checkbox"` \| `"vas_scale"` \| `"nrs_scale"` \| `"calculated"` \| `"repeating_table"` \| `"signature"`
 
 Defined in: [lib/crf/types.ts:6](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L6)
 

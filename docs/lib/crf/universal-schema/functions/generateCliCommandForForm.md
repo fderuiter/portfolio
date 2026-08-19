@@ -8,7 +8,7 @@
 
 > **generateCliCommandForForm**(`form`): `string`
 
-Defined in: [lib/crf/universal-schema.ts:375](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L375)
+Defined in: [lib/crf/universal-schema.ts:390](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L390)
 
 Generates the CLI subcommand string to scaffold a form via terminal
 

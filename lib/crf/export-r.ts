@@ -305,7 +305,8 @@ function getRSampleColumnCode(
     }
 
     case "date":
-    case "partial_date": {
+    case "partial_date":
+    case "precision_date": {
       const vals = Array.from({ length: rowCount }, (_, i) => `"2026-03-0${i + 1}"`);
       return `as.Date(c(${vals.join(", ")}))`;
     }

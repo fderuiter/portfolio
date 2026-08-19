@@ -12,6 +12,13 @@ import {
 import { evaluateFormula, evaluateRule } from "@/lib/crf/ast-evaluator";
 import { generateId } from "@/lib/utils";
 import {
+  parsePrecisionDate,
+  formatPrecisionDate,
+  isCdiscNullFlavor,
+  validatePrecisionDate,
+  CDISC_NULL_FLAVORS,
+} from "@/lib/crf/precision-date";
+import {
   IconShieldCheck,
   IconHistory,
   IconCheck,
@@ -21,6 +28,9 @@ import {
   IconTable,
   IconFileText,
   IconMessageCircleQuestion,
+  IconAlertTriangle,
+  IconDeviceFloppy,
+  IconEyeOff,
 } from "@tabler/icons-react";
 
 function generateAuditId(): string {
@@ -116,6 +126,15 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
   // Query Response Modal State
   const [activeQueryToAnswer, setActiveQueryToAnswer] = useState<EDCQuery | null>(null);
   const [queryResponseText, setQueryResponseText] = useState("");
+
+  // 3-Tier Missing Data & Validation State
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [saveStatus, setSaveStatus] = useState<{
+    type: "success" | "error";
+    message: string;
+    hardStops?: string[];
+    autoQueries?: string[];
+  } | null>(null);
 
   const activeForm = study.forms.find((f) => f.id === activeFormId) || study.forms[0];
   const formLockKey = `${subjectId}_${activeVisitId}_${activeForm?.id || ""}`;
@@ -307,6 +326,108 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
       };
       setSignatures((prev) => [...prev, signature]);
     }
+  };
+
+  // 3-Tier Missing Data & Date Validation Engine (Save / Complete Form)
+  const handleSaveForm = () => {
+    if (!activeForm) return;
+
+    const fields = activeForm.sections.flatMap((s) => s.fields);
+    const newErrors: Record<string, string> = {};
+    const hardStopVars: string[] = [];
+    const autoQueryVars: string[] = [];
+    const newQueriesToRaise: EDCQuery[] = [];
+
+    fields.forEach((field) => {
+      const key = `${subjectId}_${activeVisitId}_${field.id}`;
+      const val = formValues[key];
+      const hasNullFlavor = isCdiscNullFlavor(val);
+      const isEmpty = val === null || val === undefined || val === "";
+
+      // 1. Missing data checks
+      const isHardStop =
+        field.requirementTier === "hard_stop" ||
+        (!field.requirementTier && field.required);
+      const isAutoQuery = field.requirementTier === "auto_query";
+
+      if (isEmpty && !hasNullFlavor) {
+        if (isHardStop) {
+          newErrors[field.id] = `Mandatory variable '${field.variableName}' is missing (Hard Stop).`;
+          hardStopVars.push(field.variableName);
+        } else if (isAutoQuery) {
+          autoQueryVars.push(field.variableName);
+          const newQuery: EDCQuery = {
+            id: generateQueryId(),
+            fieldId: field.id,
+            fieldName: field.variableName,
+            ruleId: `rule_auto_query_${field.id}`,
+            formId: activeForm.id,
+            visitId: activeVisitId,
+            subjectId,
+            status: "Open",
+            severity: "warning",
+            message: `Auto-Query: Required clinical variable '${field.variableName}' (${field.label}) is missing upon form submission.`,
+            raisedBy: "3-Tier Missing Data Engine",
+            raisedAt: new Date().toISOString(),
+          };
+          newQueriesToRaise.push(newQuery);
+        }
+      }
+
+      // 2. Date validation (Precision dates & future date checks)
+      if (
+        !isEmpty &&
+        !hasNullFlavor &&
+        (field.dataType === "precision_date" ||
+          field.dataType === "date" ||
+          field.dataType === "partial_date")
+      ) {
+        const valRes = validatePrecisionDate(String(val), {
+          allowPartial:
+            field.allowPartial ??
+            (field.dataType === "partial_date" || field.dataType === "precision_date"),
+          preventFutureDate: field.preventFutureDate,
+          allowNullFlavor: field.allowNullFlavor,
+        });
+        if (!valRes.isValid) {
+          newErrors[field.id] = valRes.error || "Date validation failed.";
+          hardStopVars.push(field.variableName);
+        }
+      }
+    });
+
+    setValidationErrors(newErrors);
+
+    if (newQueriesToRaise.length > 0) {
+      setQueries((prev) => {
+        const existingKeys = new Set(
+          prev.map((q) => `${q.subjectId}_${q.visitId}_${q.fieldId}_${q.ruleId}`)
+        );
+        const filteredNew = newQueriesToRaise.filter(
+          (q) => !existingKeys.has(`${q.subjectId}_${q.visitId}_${q.fieldId}_${q.ruleId}`)
+        );
+        return [...prev, ...filteredNew];
+      });
+    }
+
+    if (hardStopVars.length > 0) {
+      setSaveStatus({
+        type: "error",
+        message: `Form submission blocked! ${hardStopVars.length} mandatory field(s) failed hard-stop validation.`,
+        hardStops: hardStopVars,
+      });
+      return;
+    }
+
+    setSaveStatus({
+      type: "success",
+      message: `Form saved successfully for Subject ${subjectId} at ${activeVisitId}.${
+        autoQueryVars.length > 0
+          ? ` Registered ${autoQueryVars.length} auto-query ticket(s).`
+          : ""
+      }`,
+      autoQueries: autoQueryVars,
+    });
   };
 
   const isFormSigned = signatures.some(
@@ -558,6 +679,15 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
               </div>
 
               <div className="flex items-center gap-2">
+                <button
+                  onClick={handleSaveForm}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-mono text-xs font-bold bg-brand-cyan text-black hover:bg-white transition-all shadow-sm"
+                  title="Save Form Data and run 3-Tier Missing Data Engine"
+                >
+                  <IconDeviceFloppy className="w-4 h-4" />
+                  <span>Save Form</span>
+                </button>
+
                 {currentRole === "Principal Investigator" && (
                   <button
                     onClick={handleToggleLockForm}
@@ -590,6 +720,36 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
               </div>
             </div>
 
+            {/* Save Status Notification Banner */}
+            {saveStatus && (
+              <div
+                className={`p-3 rounded-xl border flex items-start gap-2.5 font-mono text-xs ${
+                  saveStatus.type === "error"
+                    ? "bg-red-500/10 border-red-500/40 text-red-300"
+                    : "bg-emerald-500/10 border-emerald-500/40 text-emerald-300"
+                }`}
+              >
+                {saveStatus.type === "error" ? (
+                  <IconAlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                ) : (
+                  <IconCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                )}
+                <div className="flex-1 space-y-1">
+                  <div className="font-bold">{saveStatus.message}</div>
+                  {saveStatus.hardStops && saveStatus.hardStops.length > 0 && (
+                    <div className="text-[11px] text-red-400 font-sans">
+                      Hard-stop blocked fields: {saveStatus.hardStops.join(", ")}
+                    </div>
+                  )}
+                  {saveStatus.autoQueries && saveStatus.autoQueries.length > 0 && (
+                    <div className="text-[11px] text-amber-300 font-sans">
+                      Auto-generated open queries raised for: {saveStatus.autoQueries.join(", ")}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Form Fields Rendering */}
             {activeForm.sections.map((section) => (
               <div key={section.id} className="space-y-3">
@@ -605,23 +765,75 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                     const fieldQueries = activeFormQueries.filter(
                       (q) => q.fieldId === field.id && q.status === "Open"
                     );
+                    const fieldError = validationErrors[field.id];
+                    const hasNullFlavor = isCdiscNullFlavor(currentVal);
+                    const isBlindedForUser =
+                      field.isBlinded && currentRole !== "Principal Investigator";
+
+                    const parsedPrecision =
+                      field.dataType === "precision_date"
+                        ? parsePrecisionDate(String(currentVal || ""))
+                        : null;
 
                     return (
                       <div
                         key={field.id}
                         className={`p-3 rounded-xl border transition-all ${
-                          fieldQueries.length > 0
-                            ? "bg-red-500/5 border-red-500/40 ring-1 ring-red-500/20"
+                          fieldError
+                            ? "bg-red-500/10 border-red-500/60 ring-1 ring-red-500/30"
+                            : fieldQueries.length > 0
+                            ? "bg-amber-500/5 border-amber-500/40 ring-1 ring-amber-500/20"
                             : "bg-zinc-950/70 border-zinc-800/80"
                         }`}
                         style={{ gridColumn: `span ${field.columnSpan}` }}
                       >
-                        <div className="flex items-center justify-between mb-1.5">
-                          <label className="block text-xs font-semibold text-zinc-200">
-                            {field.label}
-                            {field.required && <span className="text-red-400 ml-0.5">*</span>}
-                          </label>
-                          <div className="flex items-center gap-1.5">
+                        {/* Field Header */}
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div>
+                            <label className="block text-xs font-semibold text-zinc-200">
+                              {field.label}
+                              {field.required && <span className="text-red-400 ml-0.5">*</span>}
+                            </label>
+                            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                              <span className="text-[10px] font-mono text-zinc-500">
+                                {field.variableName}
+                              </span>
+
+                              {/* Requirement Tier Badge */}
+                              <span
+                                className={`px-1.5 py-0.2 rounded text-[9px] font-mono font-bold border ${
+                                  field.requirementTier === "auto_query"
+                                    ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+                                    : field.requirementTier === "hard_stop" ||
+                                      (!field.requirementTier && field.required)
+                                    ? "bg-red-500/15 text-red-300 border-red-500/30"
+                                    : "bg-zinc-900 text-zinc-400 border-zinc-800"
+                                }`}
+                              >
+                                {field.requirementTier === "auto_query"
+                                  ? "? Auto-Query"
+                                  : field.requirementTier === "hard_stop" ||
+                                    (!field.requirementTier && field.required)
+                                  ? "* Hard Stop"
+                                  : "Opt"}
+                              </span>
+
+                              {field.requiresSdv && (
+                                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[9px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
+                                  <IconShieldCheck className="w-3 h-3" />
+                                  <span>SDV</span>
+                                </span>
+                              )}
+
+                              {field.isBlinded && (
+                                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[9px] font-mono text-indigo-400 bg-indigo-500/10 border border-indigo-500/20">
+                                  <span>Blinded</span>
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1 shrink-0">
                             {/* CRA SDV Toggle */}
                             {currentRole === "CRA Monitor" && (
                               <button
@@ -636,164 +848,430 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                                 {isSdv ? "✓ SDV Done" : "SDV Verify"}
                               </button>
                             )}
-                            <span className="text-[10px] font-mono text-zinc-500">
-                              {field.variableName}
-                            </span>
+
+                            {/* CDISC Null Flavor Toggle Pills */}
+                            {(field.allowNullFlavor || true) && (
+                              <div className="flex items-center gap-0.5 bg-zinc-900/80 p-0.5 rounded-lg border border-zinc-800">
+                                {(["ND", "NA", "UNK"] as const).map((nf) => {
+                                  const isSelectedNf = currentVal === nf;
+                                  return (
+                                    <button
+                                      key={nf}
+                                      type="button"
+                                      onClick={() => {
+                                        if (isSelectedNf) {
+                                          handleFieldChange(field, null);
+                                        } else {
+                                          handleFieldChange(field, nf);
+                                        }
+                                      }}
+                                      disabled={
+                                        isCurrentFormLocked &&
+                                        currentRole !== "Principal Investigator"
+                                      }
+                                      className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-bold transition-all border ${
+                                        isSelectedNf
+                                          ? "bg-brand-cyan text-black border-brand-cyan font-black"
+                                          : "bg-zinc-950 text-zinc-400 border-zinc-850 hover:text-zinc-200"
+                                      }`}
+                                      title={`Set Null Flavor: ${CDISC_NULL_FLAVORS[nf]} (${nf})`}
+                                    >
+                                      {nf}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
                           </div>
                         </div>
 
-                        {/* Field Controls */}
-                        {field.dataType === "text" && (
-                          <input
-                            type="text"
-                            value={String(currentVal || "")}
-                            onChange={(e) => handleFieldChange(field, e.target.value)}
-                            disabled={isCurrentFormLocked && currentRole !== "Principal Investigator"}
-                            className="w-full px-2.5 py-1.5 text-xs bg-zinc-900 border border-zinc-700 rounded-lg text-white font-sans focus:border-brand-cyan focus:outline-none disabled:opacity-50"
-                            placeholder={field.placeholder || "Enter value..."}
-                          />
-                        )}
-
-                        {field.dataType === "textarea" && (
-                          <textarea
-                            rows={2}
-                            value={String(currentVal || "")}
-                            onChange={(e) => handleFieldChange(field, e.target.value)}
-                            disabled={isCurrentFormLocked && currentRole !== "Principal Investigator"}
-                            className="w-full px-2.5 py-1.5 text-xs bg-zinc-900 border border-zinc-700 rounded-lg text-white font-sans focus:border-brand-cyan focus:outline-none resize-none disabled:opacity-50"
-                            placeholder={field.placeholder || "Enter narrative..."}
-                          />
-                        )}
-
-                        {(field.dataType === "number" || field.dataType === "integer") && (
-                          <div className="relative">
-                            <input
-                              type="number"
-                              value={currentVal !== undefined && currentVal !== null ? Number(currentVal) : ""}
-                              onChange={(e) =>
-                                handleFieldChange(
-                                  field,
-                                  e.target.value === "" ? null : parseFloat(e.target.value)
-                                )
-                              }
-                              disabled={isCurrentFormLocked && currentRole !== "Principal Investigator"}
-                              className="w-full px-2.5 py-1.5 text-xs bg-zinc-900 border border-zinc-700 rounded-lg text-white font-mono focus:border-brand-cyan focus:outline-none disabled:opacity-50"
-                              placeholder={field.placeholder || "0"}
-                            />
-                            {field.unit && (
-                              <span className="absolute right-2.5 top-1.5 text-[11px] font-mono text-zinc-400">
-                                {field.unit}
-                              </span>
-                            )}
+                        {/* Field Input Area */}
+                        {isBlindedForUser ? (
+                          <div className="p-2.5 bg-zinc-900/90 border border-zinc-800 rounded-lg text-zinc-400 font-mono text-xs flex items-center gap-2">
+                            <IconEyeOff className="w-4 h-4 text-indigo-400 shrink-0" />
+                            <span>[MASKED PROTOCOL DATA — BLINDED TO SPONSOR]</span>
                           </div>
-                        )}
-
-                        {(field.dataType === "date" || field.dataType === "datetime") && (
-                          <input
-                            type="text"
-                            value={String(currentVal || "")}
-                            onChange={(e) => handleFieldChange(field, e.target.value)}
-                            disabled={isCurrentFormLocked && currentRole !== "Principal Investigator"}
-                            placeholder="YYYY-MM-DD"
-                            className="w-full px-2.5 py-1.5 text-xs bg-zinc-900 border border-zinc-700 rounded-lg text-white font-mono focus:border-brand-cyan focus:outline-none disabled:opacity-50"
-                          />
-                        )}
-
-                        {field.dataType === "radio" && (
-                          <div className="space-y-1.5 pt-0.5">
-                            {(
-                              field.customOptions ||
-                              study.codelists.find((cl) => cl.id === field.codelistId)?.options || [
-                                { code: "Y", label: "Yes", order: 1 },
-                                { code: "N", label: "No", order: 2 },
-                              ]
-                            ).map((opt) => (
-                              <label
-                                key={opt.code}
-                                className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer"
-                              >
-                                <input
-                                  type="radio"
-                                  name={key}
-                                  value={opt.code}
-                                  checked={currentVal === opt.code}
-                                  onChange={(e) => handleFieldChange(field, e.target.value)}
-                                  disabled={isCurrentFormLocked && currentRole !== "Principal Investigator"}
-                                  className="text-brand-cyan focus:ring-0"
-                                />
-                                <span>{opt.label}</span>
-                              </label>
-                            ))}
-                          </div>
-                        )}
-
-                        {field.dataType === "single_select" && (
-                          <select
-                            value={String(currentVal || "")}
-                            onChange={(e) => handleFieldChange(field, e.target.value)}
-                            disabled={isCurrentFormLocked && currentRole !== "Principal Investigator"}
-                            className="w-full px-2.5 py-1.5 text-xs bg-zinc-900 border border-zinc-700 rounded-lg text-white font-sans focus:border-brand-cyan focus:outline-none disabled:opacity-50"
-                          >
-                            <option value="">-- Select Option --</option>
-                            {(
-                              field.customOptions ||
-                              study.codelists.find((cl) => cl.id === field.codelistId)?.options || []
-                            ).map((opt) => (
-                              <option key={opt.code} value={opt.code}>
-                                {opt.label} ({opt.code})
-                              </option>
-                            ))}
-                          </select>
-                        )}
-
-                        {field.dataType === "multi_select" && (
-                          <div className="space-y-1.5 pt-0.5">
-                            {(
-                              field.customOptions ||
-                              study.codelists.find((cl) => cl.id === field.codelistId)?.options || []
-                            ).map((opt) => {
-                              const selectedArray: string[] = Array.isArray(currentVal)
-                                ? currentVal
-                                : typeof currentVal === "string" && currentVal
-                                ? currentVal.split(",")
-                                : [];
-                              const isChecked = selectedArray.includes(opt.code);
-
-                              return (
-                                <label
-                                  key={opt.code}
-                                  className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={isChecked}
-                                    onChange={(e) => {
-                                      const updated = e.target.checked
-                                        ? [...selectedArray, opt.code]
-                                        : selectedArray.filter((c) => c !== opt.code);
-                                      handleFieldChange(field, updated.join(","));
-                                    }}
-                                    disabled={isCurrentFormLocked && currentRole !== "Principal Investigator"}
-                                    className="text-brand-cyan rounded border-zinc-700 bg-zinc-900 focus:ring-0"
-                                  />
-                                  <span>{opt.label}</span>
-                                </label>
-                              );
-                            })}
-                          </div>
-                        )}
-
-                        {field.dataType === "calculated" && (
-                          <div className="p-2 rounded-lg bg-brand-cyan/10 border border-brand-cyan/30 flex items-center justify-between font-mono min-h-[34px]">
-                            <span className="text-xs text-brand-cyan font-bold">
-                              {currentVal !== undefined && currentVal !== null
-                                ? String(currentVal)
-                                : ""}
+                        ) : hasNullFlavor ? (
+                          <div className="p-2 bg-zinc-900 border border-brand-cyan/40 rounded-lg text-brand-cyan font-mono text-xs flex items-center justify-between">
+                            <span className="font-bold">
+                              Null Flavor: {currentVal} (
+                              {CDISC_NULL_FLAVORS[currentVal as keyof typeof CDISC_NULL_FLAVORS]})
                             </span>
-                            {field.unit && (
-                              <span className="text-[10px] text-zinc-400">{field.unit}</span>
-                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleFieldChange(field, null)}
+                              disabled={
+                                isCurrentFormLocked && currentRole !== "Principal Investigator"
+                              }
+                              className="text-[10px] text-zinc-400 hover:text-white underline font-mono"
+                            >
+                              Clear Null Flavor
+                            </button>
                           </div>
+                        ) : (
+                          <>
+                            {/* Precision Date Input */}
+                            {field.dataType === "precision_date" && (
+                              <div className="space-y-1.5">
+                                <div className="grid grid-cols-3 gap-2">
+                                  {/* Day Selector */}
+                                  <div>
+                                    <label className="block text-[9px] font-mono text-zinc-500 mb-0.5">
+                                      Day
+                                    </label>
+                                    <select
+                                      value={
+                                        parsedPrecision?.day !== null &&
+                                        parsedPrecision?.day !== undefined
+                                          ? String(parsedPrecision.day).padStart(2, "0")
+                                          : parsedPrecision?.isPartial &&
+                                            parsedPrecision?.day === null
+                                          ? "UNK"
+                                          : ""
+                                      }
+                                      onChange={(e) => {
+                                        const dVal = e.target.value;
+                                        const yVal = parsedPrecision?.year || 2026;
+                                        const mVal =
+                                          parsedPrecision?.month !== null &&
+                                          parsedPrecision?.month !== undefined
+                                            ? parsedPrecision.month
+                                            : field.allowPartial
+                                            ? "UNK"
+                                            : 1;
+                                        const newIso = formatPrecisionDate(yVal, mVal, dVal || null);
+                                        handleFieldChange(field, newIso);
+                                      }}
+                                      disabled={
+                                        isCurrentFormLocked &&
+                                        currentRole !== "Principal Investigator"
+                                      }
+                                      className="w-full px-2 py-1 text-xs bg-zinc-900 border border-zinc-700 rounded text-white font-mono focus:border-brand-cyan focus:outline-none disabled:opacity-50"
+                                    >
+                                      <option value="">-- Day --</option>
+                                      {field.allowPartial && <option value="UNK">UNK (Unknown)</option>}
+                                      {Array.from({ length: 31 }, (_, i) =>
+                                        String(i + 1).padStart(2, "0")
+                                      ).map((d) => (
+                                        <option key={d} value={d}>
+                                          {d}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+
+                                  {/* Month Selector */}
+                                  <div>
+                                    <label className="block text-[9px] font-mono text-zinc-500 mb-0.5">
+                                      Month
+                                    </label>
+                                    <select
+                                      value={
+                                        parsedPrecision?.month !== null &&
+                                        parsedPrecision?.month !== undefined
+                                          ? String(parsedPrecision.month).padStart(2, "0")
+                                          : parsedPrecision?.isPartial &&
+                                            parsedPrecision?.month === null
+                                          ? "UNK"
+                                          : ""
+                                      }
+                                      onChange={(e) => {
+                                        const mVal = e.target.value;
+                                        const yVal = parsedPrecision?.year || 2026;
+                                        const dVal =
+                                          parsedPrecision?.day !== null &&
+                                          parsedPrecision?.day !== undefined
+                                            ? parsedPrecision.day
+                                            : field.allowPartial
+                                            ? "UNK"
+                                            : null;
+                                        const newIso = formatPrecisionDate(yVal, mVal || null, dVal);
+                                        handleFieldChange(field, newIso);
+                                      }}
+                                      disabled={
+                                        isCurrentFormLocked &&
+                                        currentRole !== "Principal Investigator"
+                                      }
+                                      className="w-full px-2 py-1 text-xs bg-zinc-900 border border-zinc-700 rounded text-white font-mono focus:border-brand-cyan focus:outline-none disabled:opacity-50"
+                                    >
+                                      <option value="">-- Month --</option>
+                                      {field.allowPartial && <option value="UNK">UNK (Unknown)</option>}
+                                      {[
+                                        "01 (Jan)",
+                                        "02 (Feb)",
+                                        "03 (Mar)",
+                                        "04 (Apr)",
+                                        "05 (May)",
+                                        "06 (Jun)",
+                                        "07 (Jul)",
+                                        "08 (Aug)",
+                                        "09 (Sep)",
+                                        "10 (Oct)",
+                                        "11 (Nov)",
+                                        "12 (Dec)",
+                                      ].map((m, idx) => (
+                                        <option key={m} value={String(idx + 1).padStart(2, "0")}>
+                                          {m}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+
+                                  {/* Year Input */}
+                                  <div>
+                                    <label className="block text-[9px] font-mono text-zinc-500 mb-0.5">
+                                      Year
+                                    </label>
+                                    <input
+                                      type="number"
+                                      min={1900}
+                                      max={2100}
+                                      value={
+                                        parsedPrecision?.year !== null &&
+                                        parsedPrecision?.year !== undefined
+                                          ? parsedPrecision.year
+                                          : ""
+                                      }
+                                      placeholder="YYYY"
+                                      onChange={(e) => {
+                                        const yVal = e.target.value;
+                                        const mVal =
+                                          parsedPrecision?.month !== null &&
+                                          parsedPrecision?.month !== undefined
+                                            ? parsedPrecision.month
+                                            : field.allowPartial
+                                            ? "UNK"
+                                            : null;
+                                        const dVal =
+                                          parsedPrecision?.day !== null &&
+                                          parsedPrecision?.day !== undefined
+                                            ? parsedPrecision.day
+                                            : field.allowPartial
+                                            ? "UNK"
+                                            : null;
+                                        const newIso = formatPrecisionDate(yVal, mVal, dVal);
+                                        handleFieldChange(field, newIso);
+                                      }}
+                                      disabled={
+                                        isCurrentFormLocked &&
+                                        currentRole !== "Principal Investigator"
+                                      }
+                                      className="w-full px-2 py-1 text-xs bg-zinc-900 border border-zinc-700 rounded text-white font-mono focus:border-brand-cyan focus:outline-none disabled:opacity-50"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center justify-between text-[10px] font-mono text-zinc-400 pt-0.5">
+                                  <span>
+                                    ISO:{" "}
+                                    <strong className="text-brand-cyan">
+                                      {String(currentVal || "—")}
+                                    </strong>
+                                  </span>
+                                  {field.preventFutureDate && (
+                                    <span className="text-amber-400/90">≤ Current UTC</span>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Standard Text Input */}
+                            {field.dataType === "text" && (
+                              <input
+                                type="text"
+                                value={String(currentVal || "")}
+                                onChange={(e) => handleFieldChange(field, e.target.value)}
+                                disabled={
+                                  isCurrentFormLocked &&
+                                  currentRole !== "Principal Investigator"
+                                }
+                                className="w-full px-2.5 py-1.5 text-xs bg-zinc-900 border border-zinc-700 rounded-lg text-white font-sans focus:border-brand-cyan focus:outline-none disabled:opacity-50"
+                                placeholder={field.placeholder || "Enter value..."}
+                              />
+                            )}
+
+                            {field.dataType === "textarea" && (
+                              <textarea
+                                rows={2}
+                                value={String(currentVal || "")}
+                                onChange={(e) => handleFieldChange(field, e.target.value)}
+                                disabled={
+                                  isCurrentFormLocked &&
+                                  currentRole !== "Principal Investigator"
+                                }
+                                className="w-full px-2.5 py-1.5 text-xs bg-zinc-900 border border-zinc-700 rounded-lg text-white font-sans focus:border-brand-cyan focus:outline-none resize-none disabled:opacity-50"
+                                placeholder={field.placeholder || "Enter narrative..."}
+                              />
+                            )}
+
+                            {(field.dataType === "number" || field.dataType === "integer") && (
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  value={
+                                    currentVal !== undefined && currentVal !== null
+                                      ? Number(currentVal)
+                                      : ""
+                                  }
+                                  onChange={(e) =>
+                                    handleFieldChange(
+                                      field,
+                                      e.target.value === "" ? null : parseFloat(e.target.value)
+                                    )
+                                  }
+                                  disabled={
+                                    isCurrentFormLocked &&
+                                    currentRole !== "Principal Investigator"
+                                  }
+                                  className="w-full px-2.5 py-1.5 text-xs bg-zinc-900 border border-zinc-700 rounded-lg text-white font-mono focus:border-brand-cyan focus:outline-none disabled:opacity-50"
+                                  placeholder={field.placeholder || "0"}
+                                />
+                                {field.unit && (
+                                  <span className="absolute right-2.5 top-1.5 text-[11px] font-mono text-zinc-400">
+                                    {field.unit}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+
+                            {(field.dataType === "date" ||
+                              field.dataType === "partial_date" ||
+                              field.dataType === "datetime") && (
+                              <input
+                                type="text"
+                                value={String(currentVal || "")}
+                                onChange={(e) => handleFieldChange(field, e.target.value)}
+                                disabled={
+                                  isCurrentFormLocked &&
+                                  currentRole !== "Principal Investigator"
+                                }
+                                placeholder={
+                                  field.placeholder ||
+                                  (field.dataType === "partial_date"
+                                    ? "YYYY-MM-DD (e.g. 2026-08-UNK)"
+                                    : "YYYY-MM-DD")
+                                }
+                                className="w-full px-2.5 py-1.5 text-xs bg-zinc-900 border border-zinc-700 rounded-lg text-white font-mono focus:border-brand-cyan focus:outline-none disabled:opacity-50"
+                              />
+                            )}
+
+                            {field.dataType === "radio" && (
+                              <div className="space-y-1.5 pt-0.5">
+                                {(
+                                  field.customOptions ||
+                                  study.codelists.find((cl) => cl.id === field.codelistId)
+                                    ?.options || [
+                                    { code: "Y", label: "Yes", order: 1 },
+                                    { code: "N", label: "No", order: 2 },
+                                  ]
+                                ).map((opt) => (
+                                  <label
+                                    key={opt.code}
+                                    className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer"
+                                  >
+                                    <input
+                                      type="radio"
+                                      name={key}
+                                      value={opt.code}
+                                      checked={currentVal === opt.code}
+                                      onChange={(e) => handleFieldChange(field, e.target.value)}
+                                      disabled={
+                                        isCurrentFormLocked &&
+                                        currentRole !== "Principal Investigator"
+                                      }
+                                      className="text-brand-cyan focus:ring-0"
+                                    />
+                                    <span>{opt.label}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            )}
+
+                            {field.dataType === "single_select" && (
+                              <select
+                                value={String(currentVal || "")}
+                                onChange={(e) => handleFieldChange(field, e.target.value)}
+                                disabled={
+                                  isCurrentFormLocked &&
+                                  currentRole !== "Principal Investigator"
+                                }
+                                className="w-full px-2.5 py-1.5 text-xs bg-zinc-900 border border-zinc-700 rounded-lg text-white font-sans focus:border-brand-cyan focus:outline-none disabled:opacity-50"
+                              >
+                                <option value="">-- Select Option --</option>
+                                {(
+                                  field.customOptions ||
+                                  study.codelists.find((cl) => cl.id === field.codelistId)
+                                    ?.options || []
+                                ).map((opt) => (
+                                  <option key={opt.code} value={opt.code}>
+                                    {opt.label} ({opt.code})
+                                  </option>
+                                ))}
+                              </select>
+                            )}
+
+                            {field.dataType === "multi_select" && (
+                              <div className="space-y-1.5 pt-0.5">
+                                {(
+                                  field.customOptions ||
+                                  study.codelists.find((cl) => cl.id === field.codelistId)
+                                    ?.options || []
+                                ).map((opt) => {
+                                  const selectedArray: string[] = Array.isArray(currentVal)
+                                    ? currentVal
+                                    : typeof currentVal === "string" && currentVal
+                                    ? currentVal.split(",")
+                                    : [];
+                                  const isChecked = selectedArray.includes(opt.code);
+
+                                  return (
+                                    <label
+                                      key={opt.code}
+                                      className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={isChecked}
+                                        onChange={(e) => {
+                                          const updated = e.target.checked
+                                            ? [...selectedArray, opt.code]
+                                            : selectedArray.filter((c) => c !== opt.code);
+                                          handleFieldChange(field, updated.join(","));
+                                        }}
+                                        disabled={
+                                          isCurrentFormLocked &&
+                                          currentRole !== "Principal Investigator"
+                                        }
+                                        className="text-brand-cyan rounded border-zinc-700 bg-zinc-900 focus:ring-0"
+                                      />
+                                      <span>{opt.label}</span>
+                                    </label>
+                                  );
+                                })}
+                              </div>
+                            )}
+
+                            {field.dataType === "calculated" && (
+                              <div className="p-2 rounded-lg bg-brand-cyan/10 border border-brand-cyan/30 flex items-center justify-between font-mono min-h-[34px]">
+                                <span className="text-xs text-brand-cyan font-bold">
+                                  {currentVal !== undefined && currentVal !== null
+                                    ? String(currentVal)
+                                    : ""}
+                                </span>
+                                {field.unit && (
+                                  <span className="text-[10px] text-zinc-400">{field.unit}</span>
+                                )}
+                              </div>
+                            )}
+                          </>
+                        )}
+
+                        {/* Validation Error Feedback */}
+                        {fieldError && (
+                          <p className="text-[10px] text-red-400 font-mono mt-1.5 flex items-center gap-1">
+                            <IconAlertTriangle className="w-3 h-3 text-red-400 shrink-0" />
+                            <span>{fieldError}</span>
+                          </p>
                         )}
                       </div>
                     );
@@ -801,6 +1279,20 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                 </div>
               </div>
             ))}
+
+            {/* Bottom Save Action */}
+            <div className="pt-4 border-t border-zinc-800 flex items-center justify-between">
+              <div className="text-xs text-zinc-400 font-mono">
+                Active Form: <strong>{activeForm.name}</strong> ({activeForm.domain})
+              </div>
+              <button
+                onClick={handleSaveForm}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-mono text-xs font-bold bg-brand-cyan text-black hover:bg-white transition-all shadow-sm"
+              >
+                <IconDeviceFloppy className="w-4 h-4" />
+                <span>Save &amp; Validate Form Data</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

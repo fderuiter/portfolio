@@ -8,7 +8,7 @@
 
 > **generateFormPdf**(`form`, `study`, `options?`): `Promise`\<`Blob`\>
 
-Defined in: [lib/crf/export-pdf.ts:396](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-pdf.ts#L396)
+Defined in: [lib/crf/export-pdf.ts:401](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-pdf.ts#L401)
 
 Convenience helper to export a single form to PDF.
 

@@ -173,3 +173,9 @@ Re-exports [sanitizeSasName](../export-sas/functions/sanitizeSasName.md)
 ### SdtmMappingRow
 
 Re-exports [SdtmMappingRow](../export-acrf/interfaces/SdtmMappingRow.md)
+
+***
+
+### serializeStudyToOdmXml
+
+Re-exports [serializeStudyToOdmXml](../odm-xml-serializer/variables/serializeStudyToOdmXml.md)

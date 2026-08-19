@@ -14,8 +14,10 @@ function mapDataTypeToOdm(type: string): string {
     case "nrs_scale":
       return "float";
     case "date":
-    case "partial_date":
       return "date";
+    case "partial_date":
+    case "precision_date":
+      return "partialDate";
     case "time":
       return "time";
     case "datetime":
@@ -35,8 +37,10 @@ function mapDataTypeToOdm(type: string): string {
  */
 export function exportStudyToCdiscOdmXml(study: StudyProtocol): string {
   const timestamp = new Date().toISOString();
-  const studyOid = `STUDY.${study.protocolNumber.replace(/[^A-Za-z0-9_]/g, "_")}`;
+  const protoNum = study.protocolNumber || "STUDY01";
+  const studyOid = `STUDY.${protoNum.replace(/[^A-Za-z0-9_]/g, "_")}`;
   const metaOid = `MDV.${study.version || "1.0"}`;
+  const studyTitle = study.studyName || protoNum;
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <!-- Schedule Consultation: /schedule -->
@@ -45,30 +49,33 @@ export function exportStudyToCdiscOdmXml(study: StudyProtocol): string {
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xmlns:def="http://www.cdisc.org/ns/def/v2.1"
      FileType="Snapshot"
-     FileOID="ODM.${study.protocolNumber}.${Date.now()}"
+     FileOID="ODM.${protoNum}.${Date.now()}"
      CreationDateTime="${timestamp}"
      ODMVersion="1.3.2">
   <Study OID="${studyOid}">
     <GlobalVariables>
-      <StudyName>${escapeXml(study.studyName)}</StudyName>
-      <StudyDescription>Protocol ${escapeXml(study.protocolNumber)} - ${escapeXml(study.phase)} • Schedule Consultation: /schedule</StudyDescription>
-      <ProtocolName>${escapeXml(study.protocolNumber)}</ProtocolName>
+      <StudyName>${escapeXml(studyTitle)}</StudyName>
+      <StudyDescription>Protocol ${escapeXml(protoNum)} - ${escapeXml(study.phase || "")} • Schedule Consultation: /schedule</StudyDescription>
+      <ProtocolName>${escapeXml(protoNum)}</ProtocolName>
     </GlobalVariables>
-    <MetaDataVersion OID="${metaOid}" Name="Protocol Definition Version ${escapeXml(study.version)}">
+    <MetaDataVersion OID="${metaOid}" Name="Protocol Definition Version ${escapeXml(study.version || "1.0")}">
       <Protocol>
 `;
 
   // StudyEventRefs
   study.visits.forEach((v, idx) => {
-    xml += `        <StudyEventRef StudyEventOID="${escapeXml(v.oid)}" OrderNumber="${idx + 1}" Mandatory="Yes"/>\n`;
+    const vOid = v.oid || v.id || `VIS_${idx + 1}`;
+    xml += `        <StudyEventRef StudyEventOID="${escapeXml(vOid)}" OrderNumber="${idx + 1}" Mandatory="Yes"/>\n`;
   });
 
   xml += `      </Protocol>\n\n`;
 
   // StudyEventDefs (Visits)
-  study.visits.forEach((v) => {
-    xml += `      <StudyEventDef OID="${escapeXml(v.oid)}" Name="${escapeXml(v.name)}" Repeating="${v.isRepeating ? "Yes" : "No"}" Type="${v.visitType}">\n`;
-    v.assignedFormIds.forEach((fId, fIdx) => {
+  study.visits.forEach((v, idx) => {
+    const vOid = v.oid || v.id || `VIS_${idx + 1}`;
+    const formIds = v.assignedFormIds || [];
+    xml += `      <StudyEventDef OID="${escapeXml(vOid)}" Name="${escapeXml(v.name)}" Repeating="${v.isRepeating ? "Yes" : "No"}" Type="${v.visitType || "Scheduled"}">\n`;
+    formIds.forEach((fId: string, fIdx: number) => {
       xml += `        <FormRef FormOID="FORM.${escapeXml(fId)}" OrderNumber="${fIdx + 1}" Mandatory="Yes"/>\n`;
     });
     xml += `      </StudyEventDef>\n`;
@@ -172,3 +179,5 @@ export function exportStudyToCdiscOdmXml(study: StudyProtocol): string {
 
   return xml;
 }
+
+export const serializeStudyToOdmXml = exportStudyToCdiscOdmXml;

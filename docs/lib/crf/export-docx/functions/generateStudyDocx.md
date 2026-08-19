@@ -8,7 +8,7 @@
 
 > **generateStudyDocx**(`study`, `options`): `Promise`\<`Blob`\>
 
-Defined in: [lib/crf/export-docx.ts:622](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-docx.ts#L622)
+Defined in: [lib/crf/export-docx.ts:639](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-docx.ts#L639)
 
 Generates a complete Microsoft Word (.docx) document representing the CRF Study or a Single Form.
 

@@ -91,7 +91,9 @@ describe("Canvas Field Ergonomics & Micro-Interactions", () => {
       reqBtn?.click();
     });
 
-    expect(handleUpdate).toHaveBeenCalledWith({ required: true });
+    expect(handleUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ required: true })
+    );
   });
 
   it("supports quick inline label editing", async () => {

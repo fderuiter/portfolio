@@ -8,7 +8,7 @@
 
 > **exportUniversalCrfYaml**(`study`): `string`
 
-Defined in: [lib/crf/universal-schema.ts:263](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L263)
+Defined in: [lib/crf/universal-schema.ts:278](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L278)
 
 Lightweight Zero-dependency YAML Serializer for Universal CRF
 

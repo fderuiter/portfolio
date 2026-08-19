@@ -6,7 +6,7 @@
 
 # Interface: EditCheckRule
 
-Defined in: [lib/crf/types.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L57)
+Defined in: [lib/crf/types.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L58)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/types.ts:57](https://github.com/fderuiter/portfolio/blob/ma
 
 > **actionType**: `"show_field"` \| `"hide_field"` \| `"require_field"` \| `"raise_query"` \| `"set_value"`
 
-Defined in: [lib/crf/types.ts:62](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L62)
+Defined in: [lib/crf/types.ts:63](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L63)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/types.ts:62](https://github.com/fderuiter/portfolio/blob/ma
 
 > **conditions**: [`AstCondition`](AstCondition.md)[]
 
-Defined in: [lib/crf/types.ts:64](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L64)
+Defined in: [lib/crf/types.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L65)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/types.ts:64](https://github.com/fderuiter/portfolio/blob/ma
 
 > **description**: `string`
 
-Defined in: [lib/crf/types.ts:60](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L60)
+Defined in: [lib/crf/types.ts:61](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L61)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/types.ts:60](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **formulaExpression?**: `string`
 
-Defined in: [lib/crf/types.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L68)
+Defined in: [lib/crf/types.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L69)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/crf/types.ts:68](https://github.com/fderuiter/portfolio/blob/ma
 
 > **id**: `string`
 
-Defined in: [lib/crf/types.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L58)
+Defined in: [lib/crf/types.ts:59](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L59)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/crf/types.ts:58](https://github.com/fderuiter/portfolio/blob/ma
 
 > **logicalOperator**: `"AND"` \| `"OR"`
 
-Defined in: [lib/crf/types.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L65)
+Defined in: [lib/crf/types.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L66)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/crf/types.ts:65](https://github.com/fderuiter/portfolio/blob/ma
 
 > **name**: `string`
 
-Defined in: [lib/crf/types.ts:59](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L59)
+Defined in: [lib/crf/types.ts:60](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L60)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/crf/types.ts:59](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **queryMessage?**: `string`
 
-Defined in: [lib/crf/types.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L67)
+Defined in: [lib/crf/types.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L68)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/crf/types.ts:67](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **querySeverity?**: `"error"` \| `"info"` \| `"warning"`
 
-Defined in: [lib/crf/types.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L66)
+Defined in: [lib/crf/types.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L67)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [lib/crf/types.ts:66](https://github.com/fderuiter/portfolio/blob/ma
 
 > **targetFieldId**: `string`
 
-Defined in: [lib/crf/types.ts:63](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L63)
+Defined in: [lib/crf/types.ts:64](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L64)
 
 ***
 
@@ -94,4 +94,4 @@ Defined in: [lib/crf/types.ts:63](https://github.com/fderuiter/portfolio/blob/ma
 
 > **triggerFieldIds**: `string`[]
 
-Defined in: [lib/crf/types.ts:61](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L61)
+Defined in: [lib/crf/types.ts:62](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L62)

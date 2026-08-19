@@ -16,7 +16,7 @@ Defined in: [lib/crf/cdash-domain-templates.ts:123](https://github.com/fderuiter
 
 ### domainCode
 
-`"DM"` \| `"VS"` \| `"AE"` \| `"LB"` \| `"CM"` \| `"EX"` \| `"DS"` \| `"MH"` \| `"DE"` \| `"DI"` \| `"DU"` \| `"DA"` \| `"RECIST"`
+`"DM"` \| `"VS"` \| `"AE"` \| `"LB"` \| `"CM"` \| `"EX"` \| `"DS"` \| `"MH"` \| `"DI"` \| `"DU"` \| `"DE"` \| `"DA"` \| `"RECIST"`
 
 ## Returns
 

@@ -96,10 +96,17 @@ export function validateStudyCompliance(study: StudyProtocol): ComplianceViolati
 
       // Rule SD0004: Date format validation
       if (
-        (field.dataType === "date" || field.dataType === "datetime" || field.dataType === "partial_date") &&
+        (field.dataType === "date" ||
+          field.dataType === "datetime" ||
+          field.dataType === "partial_date" ||
+          field.dataType === "precision_date") &&
         field.defaultValue &&
         typeof field.defaultValue === "string" &&
-        !/^\d{4}(-\d{2}(-\d{2}(T\d{2}:\d{2}(:\d{2})?)?)?)?$/.test(field.defaultValue)
+        !/^\d{4}(-\d{2}(-\d{2}(T\d{2}:\d{2}(:\d{2})?)?)?)?$/.test(field.defaultValue) &&
+        !/^\d{4}(-\d{2})?(-UNK)?$/.test(field.defaultValue) &&
+        field.defaultValue !== "ND" &&
+        field.defaultValue !== "NA" &&
+        field.defaultValue !== "UNK"
       ) {
         violations.push({
           id: `viol_sd0004_${form.id}_${field.id}`,

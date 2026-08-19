@@ -10,6 +10,7 @@ export type ClinicalDataType =
   | "integer"
   | "date"
   | "partial_date"
+  | "precision_date"
   | "time"
   | "datetime"
   | "single_select"
@@ -90,6 +91,13 @@ export interface CRFField {
   repeatingColumns?: CRFField[]; // When dataType is 'repeating_table'
   scaleMinLabel?: string;    // For VAS/NRS e.g. "No Pain"
   scaleMaxLabel?: string;    // For VAS/NRS e.g. "Worst Possible Pain"
+  allowPartial?: boolean;    // Allow omission of unknown day/month in date capture
+  preventFutureDate?: boolean; // Enforce date <= current UTC timestamp
+  allowNullFlavor?: boolean; // Enable compact CDISC null-flavor pills (ND, NA, UNK)
+  requirementTier?: "optional" | "hard_stop" | "auto_query"; // 3-tier missing data engine
+  requiresSdv?: boolean;     // Mandatory CRA Source Document Verification governance flag
+  isBlinded?: boolean;       // Protocol masking from unblinded sponsor roles until DB lock
+  nullFlavorValue?: string;  // Active/selected CDISC null-flavor code (e.g. "ND" | "NA" | "UNK")
   sdvVerified?: boolean;     // CRA Source Data Verification flag
   sdvTimestamp?: string;
   sdvAuditedBy?: string;

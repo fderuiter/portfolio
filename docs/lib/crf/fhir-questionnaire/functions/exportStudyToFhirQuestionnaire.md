@@ -8,7 +8,7 @@
 
 > **exportStudyToFhirQuestionnaire**(`study`): `object`
 
-Defined in: [lib/crf/fhir-questionnaire.ts:111](https://github.com/fderuiter/portfolio/blob/main/lib/crf/fhir-questionnaire.ts#L111)
+Defined in: [lib/crf/fhir-questionnaire.ts:112](https://github.com/fderuiter/portfolio/blob/main/lib/crf/fhir-questionnaire.ts#L112)
 
 Converts an entire StudyProtocol into an HL7 FHIR Bundle of Questionnaire Resources
 

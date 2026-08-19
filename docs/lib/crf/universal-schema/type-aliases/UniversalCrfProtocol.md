@@ -8,4 +8,4 @@
 
 > **UniversalCrfProtocol** = `z.infer`\<*typeof* [`UniversalCrfProtocolSchema`](../variables/UniversalCrfProtocolSchema.md)\>
 
-Defined in: [lib/crf/universal-schema.ts:197](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L197)
+Defined in: [lib/crf/universal-schema.ts:210](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L210)

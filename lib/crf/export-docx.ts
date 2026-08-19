@@ -124,6 +124,23 @@ function renderFieldResponseMock(
     ];
   }
 
+  if (field.dataType === "precision_date") {
+    const nullFlavorText = field.allowNullFlavor ? "   [ND] [NA] [UNK]" : "";
+    return [
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `[ YYYY - MM - DD ]${field.allowPartial ? " (Partial Allowed)" : ""}${nullFlavorText}`,
+            color: "64748B",
+            size: 20,
+            font: "Courier New",
+          }),
+        ],
+        spacing: { before: 80, after: 80 },
+      }),
+    ];
+  }
+
   if (field.dataType === "repeating_table") {
     return [
       new Paragraph({

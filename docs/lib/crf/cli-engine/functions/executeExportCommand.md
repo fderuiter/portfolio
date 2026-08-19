@@ -8,7 +8,7 @@
 
 > **executeExportCommand**(`study`, `format`, `_options?`): [`CliCommandResult`](../interfaces/CliCommandResult.md)
 
-Defined in: [lib/crf/cli-engine.ts:401](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L401)
+Defined in: [lib/crf/cli-engine.ts:600](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L600)
 
 Multi-Format Export Command
 

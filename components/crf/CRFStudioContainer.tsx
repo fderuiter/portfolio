@@ -879,6 +879,14 @@ export const CRFStudioContainer: React.FC = () => {
         isOpen={isTerminalOpen}
         study={study}
         onClose={() => setIsTerminalOpen(false)}
+        onOpenWizard={() => setIsWizardOpen(true)}
+        onSwitchMode={setActiveMode}
+        onOpenModal={(modal) => {
+          if (modal === "wizard") setIsWizardOpen(true);
+          else if (modal === "branding") setIsBrandingOpen(true);
+          else if (modal === "diagnostics") setIsDiagnosticsOpen(true);
+          else if (modal === "export") setIsExportDocModalOpen(true);
+        }}
         onUpdateStudy={(updated) => {
           updateStudyWithHistory(updated);
           if (updated.forms[0] && !updated.forms.some((f) => f.id === activeFormId)) {
@@ -1000,12 +1008,20 @@ export const CRFStudioContainer: React.FC = () => {
         />
       )}
 
-      {/* 5-Stage Interactive Clinical Walkthrough Wizard */}
+      {/* 5-Stage Interactive Clinical Authoring Wizard */}
       <WorkflowWizardModal
         isOpen={isWizardOpen}
+        study={study}
         onClose={() => setIsWizardOpen(false)}
         onSwitchMode={setActiveMode}
         onLoadPreset={handleSelectPreset}
+        onApplyStudy={(updated) => {
+          updateStudyWithHistory(updated);
+          if (updated.forms[0]) {
+            setActiveFormId(updated.forms[0].id);
+          }
+          playSuccess();
+        }}
         onStartSpotlightTour={() => setIsSpotlightTourOpen(true)}
       />
 

@@ -8,4 +8,4 @@
 
 > **UniversalEditCheckRule** = `z.infer`\<*typeof* [`EditCheckRuleSchema`](../variables/EditCheckRuleSchema.md)\>
 
-Defined in: [lib/crf/universal-schema.ts:85](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L85)
+Defined in: [lib/crf/universal-schema.ts:86](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L86)

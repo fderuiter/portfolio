@@ -6,7 +6,7 @@
 
 # Interface: AstCondition
 
-Defined in: [lib/crf/types.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L50)
+Defined in: [lib/crf/types.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L51)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/types.ts:50](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **crossVisitId?**: `string`
 
-Defined in: [lib/crf/types.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L52)
+Defined in: [lib/crf/types.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L53)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/types.ts:52](https://github.com/fderuiter/portfolio/blob/ma
 
 > **fieldId**: `string`
 
-Defined in: [lib/crf/types.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L51)
+Defined in: [lib/crf/types.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L52)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/types.ts:51](https://github.com/fderuiter/portfolio/blob/ma
 
 > **operator**: `"gte"` \| `"in"` \| `"lt"` \| `"lte"` \| `"gt"` \| `"contains"` \| `"eq"` \| `"neq"` \| `"is_empty"` \| `"is_not_empty"`
 
-Defined in: [lib/crf/types.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L53)
+Defined in: [lib/crf/types.ts:54](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L54)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/crf/types.ts:53](https://github.com/fderuiter/portfolio/blob/ma
 
 > **value**: `string` \| `number` \| `boolean` \| `string`[]
 
-Defined in: [lib/crf/types.ts:54](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L54)
+Defined in: [lib/crf/types.ts:55](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L55)
