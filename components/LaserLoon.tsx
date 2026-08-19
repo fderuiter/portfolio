@@ -25,6 +25,8 @@ import { DynamicTabletOrientationHint as TabletOrientationHint } from "@/compone
 import { useFullscreen } from "@/hooks/useFullscreen";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
+import { useResponsiveCanvas } from "@/hooks/useResponsiveCanvas";
+import { TwinStickAimDock } from "@/components/arcade/ControlDocks";
 import {
   LaserMode,
   LaserType,
@@ -118,6 +120,12 @@ export const LaserLoon: React.FC = () => {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { toGameCoordinates } = useResponsiveCanvas({
+    canvasRef,
+    internalWidth: DEFAULT_CANVAS_WIDTH,
+    internalHeight: DEFAULT_CANVAS_HEIGHT,
+    maxDpr: 2.0,
+  });
   const audioCtxRef = useRef<AudioContext | null>(null);
 
   const { isFullscreen, toggleFullscreen } = useFullscreen(containerRef);
@@ -1220,13 +1228,7 @@ export const LaserLoon: React.FC = () => {
 
   // Pointer / Mouse / Touch Controls
   const updatePointerAim = (clientX: number, clientY: number) => {
-    if (!canvasRef.current) return;
-    const rect = canvasRef.current.getBoundingClientRect();
-    const scaleX = (canvasRef.current.width || DEFAULT_CANVAS_WIDTH) / (rect.width || 1);
-    const scaleY = (canvasRef.current.height || DEFAULT_CANVAS_HEIGHT) / (rect.height || 1);
-
-    const mouseX = (clientX - rect.left) * scaleX;
-    const mouseY = (clientY - rect.top) * scaleY;
+    const { x: mouseX, y: mouseY } = toGameCoordinates(clientX, clientY);
 
     aimPosRef.current = { x: mouseX, y: mouseY };
 
@@ -2014,6 +2016,40 @@ export const LaserLoon: React.FC = () => {
             </button>
           )}
         </div>
+      </div>
+
+      {/* Mobile/Tablet Touch Aim & Fire Dock */}
+      <div className="w-full max-w-3xl mt-3 flex justify-center">
+        <TwinStickAimDock
+          onFirePress={() => {
+            isFiringRef.current = true;
+            fireWeapon();
+          }}
+          onFireRelease={() => {
+            isFiringRef.current = false;
+          }}
+          onTremoloPress={fireUltimateTremolo}
+          onWeaponSelect={(idx) => {
+            const types: LaserType[] = ["ruby-laser", "cyan-pulse", "aurora-wave", "ice-cannon"];
+            if (types[idx]) selectLaserType(types[idx]);
+          }}
+          selectedWeapon={
+            laserType === "ruby-laser"
+              ? 0
+              : laserType === "cyan-pulse"
+              ? 1
+              : laserType === "aurora-wave"
+              ? 2
+              : 3
+          }
+          weapons={[
+            { id: "ruby-laser", label: "Ruby", color: "red" },
+            { id: "cyan-pulse", label: "Pulse", color: "cyan" },
+            { id: "aurora-wave", label: "Aurora", color: "emerald" },
+            { id: "ice-cannon", label: "Mortar", color: "amber" },
+          ]}
+          energyPercent={ultimateMeter}
+        />
       </div>
 
       {/* Footer Controls & Toggles */}

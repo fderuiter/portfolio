@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import {
   IconArrowUp,
   IconArrowDown,
@@ -10,14 +10,13 @@ import {
   IconFlask,
   IconCrosshair,
   IconSparkles,
-  IconBolt,
   IconPlayerPlay,
   IconArrowBackUp,
   IconBrightnessUp,
 } from "@tabler/icons-react";
 import { useAudio } from "@/components/providers/AudioProvider";
 
-export function useIsTouchDevice(): boolean {
+function useIsTouchDevice(): boolean {
   const [isTouch, setIsTouch] = useState<boolean>(false);
 
   useEffect(() => {
@@ -46,7 +45,7 @@ export function useIsTouchDevice(): boolean {
    1. DPAD ACTION DOCK (Retro Labyrinth / Grid Games)
    ========================================================================= */
 
-export interface DpadActionDockProps {
+interface DpadActionDockProps {
   onDirectionPress?: (direction: "up" | "down" | "left" | "right") => void;
   onDirectionRelease?: (direction: "up" | "down" | "left" | "right") => void;
   onActionAPress?: () => void;
@@ -224,13 +223,13 @@ export const DpadActionDock: React.FC<DpadActionDockProps> = ({
    2. TWIN STICK / AIM DOCK (Laser Loon / Shooter Games)
    ========================================================================= */
 
-export interface WeaponOption {
+interface WeaponOption {
   id: string;
   label: string;
   color?: "red" | "cyan" | "purple" | "amber" | "emerald";
 }
 
-export interface TwinStickAimDockProps {
+interface TwinStickAimDockProps {
   onFirePress?: () => void;
   onFireRelease?: () => void;
   onTremoloPress?: () => void;
@@ -352,9 +351,9 @@ export const TwinStickAimDock: React.FC<TwinStickAimDockProps> = ({
    3. BEZEL CLUSTER DOCK (Garmin Smartwatch Hardware Buttons)
    ========================================================================= */
 
-export type BezelButtonId = "light" | "up" | "down" | "start" | "back";
+type BezelButtonId = "light" | "up" | "down" | "start" | "back";
 
-export interface BezelClusterDockProps {
+interface BezelClusterDockProps {
   onButtonPress?: (btn: BezelButtonId) => void;
   onButtonRelease?: (btn: BezelButtonId) => void;
   activeButton?: BezelButtonId | null;
@@ -423,7 +422,7 @@ export const BezelClusterDock: React.FC<BezelClusterDockProps> = ({
    4. ACTION STRIP DOCK (Clinical Chaos / Duck / Quasi Puzzler / Meme Vault)
    ========================================================================= */
 
-export interface ActionItem {
+interface ActionItem {
   id: string;
   label: string;
   icon?: React.ReactNode;
@@ -433,7 +432,7 @@ export interface ActionItem {
   color?: "cyan" | "emerald" | "amber" | "rose" | "purple";
 }
 
-export interface ActionStripDockProps {
+interface ActionStripDockProps {
   actions: ActionItem[];
   onAction: (id: string) => void;
   activeActionId?: string | null;

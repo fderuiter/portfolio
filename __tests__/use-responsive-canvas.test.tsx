@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
-import { useResponsiveCanvas, UseResponsiveCanvasOptions } from "@/hooks/useResponsiveCanvas";
+import { useResponsiveCanvas } from "@/hooks/useResponsiveCanvas";
 
 function renderHookHelper<T>(useHook: () => T) {
   const result = { current: null as unknown as T };
