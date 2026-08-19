@@ -8,7 +8,7 @@
 
 > **tokenizeWithSpans**(`input`): [`HighlightToken`](../interfaces/HighlightToken.md)[]
 
-Defined in: [lib/crf/formula-linter.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/crf/formula-linter.ts#L72)
+Defined in: [lib/crf/formula-linter.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/crf/formula-linter.ts#L74)
 
 Enhanced Tokenizer with character start/end coordinates and bracket matching
 

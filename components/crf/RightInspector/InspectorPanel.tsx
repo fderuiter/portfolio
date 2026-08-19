@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { CRFForm, CRFField, CodelistDefinition, EditCheckRule } from "@/lib/crf/types";
+import { computeFormHealthMetrics } from "@/lib/crf/form-health";
 import { FieldPropertiesTab } from "./FieldPropertiesTab";
 import { LogicRulesTab } from "./LogicRulesTab";
 import { CdiscMetadataTab } from "./CdiscMetadataTab";
@@ -38,6 +39,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<InspectorTab>("properties");
   const allFields = form.sections.flatMap((s) => s.fields);
+  const healthMetrics = computeFormHealthMetrics(form);
 
   return (
     <div className="flex flex-col h-full bg-zinc-950/90 border-l border-zinc-800/80">
@@ -147,7 +149,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                   </span>
                 </div>
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-cyan/10 text-brand-cyan border border-brand-cyan/20 font-bold">
-                  CDASH 2.2
+                  CDASH {healthMetrics.cdashConformancePercentage}%
                 </span>
               </div>
 
@@ -155,24 +157,24 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
               <div className="grid grid-cols-2 gap-2 pt-1">
                 <div className="p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-850">
                   <div className="text-[10px] font-mono text-zinc-500 uppercase">Total Fields</div>
-                  <div className="text-sm font-mono font-extrabold text-white mt-0.5">{allFields.length}</div>
+                  <div className="text-sm font-mono font-extrabold text-white mt-0.5">{healthMetrics.totalFields}</div>
                 </div>
                 <div className="p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-850">
                   <div className="text-[10px] font-mono text-zinc-500 uppercase">Mandatory</div>
                   <div className="text-sm font-mono font-extrabold text-amber-400 mt-0.5">
-                    {allFields.filter((f) => f.required).length}
+                    {healthMetrics.mandatoryFields}
                   </div>
                 </div>
                 <div className="p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-850">
                   <div className="text-[10px] font-mono text-zinc-500 uppercase">Codelists</div>
                   <div className="text-sm font-mono font-extrabold text-purple-400 mt-0.5">
-                    {allFields.filter((f) => f.codelistId || f.customOptions).length}
+                    {healthMetrics.codelistsAttached}
                   </div>
                 </div>
                 <div className="p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-850">
                   <div className="text-[10px] font-mono text-zinc-500 uppercase">SDV Verified</div>
                   <div className="text-sm font-mono font-extrabold text-emerald-400 mt-0.5">
-                    {allFields.filter((f) => f.sdvVerified).length} / {allFields.length}
+                    {healthMetrics.sdvVerifiedCount} / {healthMetrics.totalFields} ({healthMetrics.sdvReadinessPercentage}%)
                   </div>
                 </div>
               </div>

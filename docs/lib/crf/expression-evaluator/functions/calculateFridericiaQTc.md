@@ -8,7 +8,7 @@
 
 > **calculateFridericiaQTc**(`qtMs`, `rrSec`): `number` \| `null`
 
-Defined in: [lib/crf/expression-evaluator.ts:398](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L398)
+Defined in: [lib/crf/expression-evaluator.ts:404](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L404)
 
 Calculates Fridericia Corrected QT interval (QTcF) in milliseconds.
 
