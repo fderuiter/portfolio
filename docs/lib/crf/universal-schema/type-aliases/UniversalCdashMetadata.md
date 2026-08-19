@@ -8,4 +8,4 @@
 
 > **UniversalCdashMetadata** = `z.infer`\<*typeof* [`CdashVariableMetadataSchema`](../variables/CdashVariableMetadataSchema.md)\>
 
-Defined in: [lib/crf/universal-schema.ts:61](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L61)
+Defined in: [lib/crf/universal-schema.ts:62](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L62)

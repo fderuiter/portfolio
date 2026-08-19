@@ -8,7 +8,7 @@
 
 > **parseUniversalCrf**(`raw`): [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
 
-Defined in: [lib/crf/universal-schema.ts:234](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L234)
+Defined in: [lib/crf/universal-schema.ts:249](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L249)
 
 Parses raw JSON string or object into a typed StudyProtocol.
 Throws a descriptive Error on schema violation.

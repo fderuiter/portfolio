@@ -8,7 +8,7 @@
 
 > **generateStudyAcrfBookHtml**(`study`, `options?`): `string`
 
-Defined in: [lib/crf/export-acrf.ts:234](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-acrf.ts#L234)
+Defined in: [lib/crf/export-acrf.ts:242](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-acrf.ts#L242)
 
 Generates a complete, multi-page Study aCRF Book covering all forms with Table of Contents.
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { CRFField, CodelistDefinition, CodelistOption, ClinicalDataType } from "@/lib/crf/types";
+import { validateCdashVariableName } from "@/lib/crf/precision-date";
 import { generateId } from "@/lib/utils";
 import { AstRuleEditor } from "./AstRuleEditor";
 import {
@@ -29,6 +30,7 @@ const DATA_TYPES: { type: ClinicalDataType; label: string }[] = [
   { type: "textarea", label: "Multiline Textarea" },
   { type: "number", label: "Decimal Number (Float)" },
   { type: "integer", label: "Integer Count" },
+  { type: "precision_date", label: "Precision Date (Segmented / Partial ISO 8601)" },
   { type: "date", label: "Standard Date" },
   { type: "partial_date", label: "Partial Date (UN-UNK-YYYY)" },
   { type: "datetime", label: "Date & Time Stamp" },
@@ -278,20 +280,37 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
     setTimeout(() => setSaveSuccessMessage(null), 4000);
   };
 
+  const varValidation = validateCdashVariableName(field.variableName);
+
   return (
     <div className="space-y-4 p-4 text-xs font-sans">
       {/* Variable Name & Display Label */}
       <div>
-        <label className="block text-[11px] font-mono text-zinc-400 mb-1">
-          CDASH / SDTM Variable Name <span className="text-brand-cyan">*</span>
-        </label>
+        <div className="flex items-center justify-between mb-1">
+          <label className="block text-[11px] font-mono text-zinc-400">
+            CDASH / SDTM Variable Name <span className="text-brand-cyan">*</span>
+          </label>
+          <span className="text-[10px] font-mono text-zinc-500">
+            {field.variableName.length}/8 chars
+          </span>
+        </div>
         <input
           type="text"
+          maxLength={8}
           value={field.variableName}
           onChange={(e) => onUpdateField({ variableName: e.target.value.toUpperCase() })}
-          className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-white font-mono uppercase focus:border-brand-cyan focus:outline-none"
+          className={`w-full px-2.5 py-1.5 bg-zinc-950 border rounded-lg text-white font-mono uppercase focus:outline-none ${
+            !varValidation.isValid && field.variableName
+              ? "border-red-500/70 focus:border-red-400 ring-1 ring-red-500/20"
+              : "border-zinc-800 focus:border-brand-cyan"
+          }`}
           placeholder="e.g. BRTHYR, SYSBP, AETERM, DITERM"
         />
+        {!varValidation.isValid && field.variableName && (
+          <p className="text-[10px] text-red-400 font-mono mt-1">
+            ⚠ {varValidation.error}
+          </p>
+        )}
       </div>
 
       <div>
@@ -357,27 +376,171 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
         </div>
       </div>
 
-      {/* Required & ReadOnly Toggles */}
-      <div className="flex items-center gap-6 p-2.5 rounded-xl bg-zinc-950/60 border border-zinc-850">
-        <label className="flex items-center gap-2 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={field.required}
-            onChange={(e) => onUpdateField({ required: e.target.checked })}
-            className="rounded border-zinc-700 bg-zinc-900 text-brand-cyan focus:ring-0"
-          />
-          <span className="text-xs text-zinc-300 font-medium">Mandatory Field</span>
-        </label>
+      {/* 3-Tier Missing Data Engine */}
+      <div className="p-3 rounded-xl bg-zinc-950/60 border border-zinc-850 space-y-2.5">
+        <div className="flex items-center justify-between">
+          <label className="text-[11px] font-mono text-zinc-300 font-bold uppercase">
+            3-Tier Missing Data Engine
+          </label>
+          <span className="text-[10px] font-mono text-brand-cyan">
+            {field.requirementTier || (field.required ? "hard_stop" : "optional")}
+          </span>
+        </div>
 
-        <label className="flex items-center gap-2 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={field.readOnly || false}
-            onChange={(e) => onUpdateField({ readOnly: e.target.checked })}
-            className="rounded border-zinc-700 bg-zinc-900 text-brand-cyan focus:ring-0"
-          />
-          <span className="text-xs text-zinc-300 font-medium">Read-Only</span>
-        </label>
+        <div className="grid grid-cols-3 gap-1.5">
+          <button
+            type="button"
+            onClick={() => onUpdateField({ requirementTier: "optional", required: false })}
+            className={`px-2 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-all border ${
+              field.requirementTier === "optional" || (!field.requirementTier && !field.required)
+                ? "bg-zinc-800 text-white border-zinc-600 shadow-sm"
+                : "bg-zinc-900/60 text-zinc-400 border-zinc-800 hover:text-zinc-200"
+            }`}
+          >
+            Optional
+          </button>
+          <button
+            type="button"
+            onClick={() => onUpdateField({ requirementTier: "hard_stop", required: true })}
+            className={`px-2 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-all border ${
+              field.requirementTier === "hard_stop" || (!field.requirementTier && field.required)
+                ? "bg-red-500/20 text-red-300 border-red-500/40 shadow-sm"
+                : "bg-zinc-900/60 text-zinc-400 border-zinc-800 hover:text-red-300"
+            }`}
+          >
+            Hard Stop
+          </button>
+          <button
+            type="button"
+            onClick={() => onUpdateField({ requirementTier: "auto_query", required: true })}
+            className={`px-2 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-all border ${
+              field.requirementTier === "auto_query"
+                ? "bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm"
+                : "bg-zinc-900/60 text-zinc-400 border-zinc-800 hover:text-amber-300"
+            }`}
+          >
+            Auto-Query
+          </button>
+        </div>
+
+        <p className="text-[10px] text-zinc-400 leading-normal">
+          {field.requirementTier === "auto_query"
+            ? "Allows form save when empty, but registers an open EDC discrepancy query ticket."
+            : field.requirementTier === "hard_stop" || (!field.requirementTier && field.required)
+            ? "Mandatory variable. Physically blocks saving form with red error border if empty."
+            : "Optional variable. May be left blank without errors or queries."}
+        </p>
+
+        <div className="pt-1 flex items-center gap-4">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={field.readOnly || false}
+              onChange={(e) => onUpdateField({ readOnly: e.target.checked })}
+              className="rounded border-zinc-700 bg-zinc-900 text-brand-cyan focus:ring-0"
+            />
+            <span className="text-xs text-zinc-300">Read-Only</span>
+          </label>
+        </div>
+      </div>
+
+      {/* Precision Date Controls */}
+      {(field.dataType === "precision_date" ||
+        field.dataType === "date" ||
+        field.dataType === "partial_date") && (
+        <div className="p-3 rounded-xl bg-zinc-950/60 border border-zinc-850 space-y-2.5">
+          <div className="text-[11px] font-mono text-zinc-300 font-bold uppercase flex items-center justify-between">
+            <span>Precision Date Controls</span>
+            <span className="text-[10px] text-brand-cyan">ISO 8601</span>
+          </div>
+          <div className="space-y-2">
+            <label className="flex items-center justify-between cursor-pointer p-1.5 rounded-lg bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700">
+              <div>
+                <span className="text-xs text-zinc-200 block font-medium">Allow Partial Dates</span>
+                <span className="text-[10px] text-zinc-400">
+                  Permit missing/unknown day or month (e.g. 2026-08-UNK, 2026-UNK-UNK)
+                </span>
+              </div>
+              <input
+                type="checkbox"
+                checked={
+                  field.allowPartial ??
+                  (field.dataType === "partial_date" || field.dataType === "precision_date")
+                }
+                onChange={(e) => onUpdateField({ allowPartial: e.target.checked })}
+                className="rounded border-zinc-700 bg-zinc-900 text-brand-cyan focus:ring-0 ml-2"
+              />
+            </label>
+
+            <label className="flex items-center justify-between cursor-pointer p-1.5 rounded-lg bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700">
+              <div>
+                <span className="text-xs text-zinc-200 block font-medium">Prevent Future Dates</span>
+                <span className="text-[10px] text-zinc-400">
+                  Enforce boundary check against current UTC timestamp
+                </span>
+              </div>
+              <input
+                type="checkbox"
+                checked={field.preventFutureDate ?? false}
+                onChange={(e) => onUpdateField({ preventFutureDate: e.target.checked })}
+                className="rounded border-zinc-700 bg-zinc-900 text-brand-cyan focus:ring-0 ml-2"
+              />
+            </label>
+          </div>
+        </div>
+      )}
+
+      {/* Clinical Governance & Null Flavors */}
+      <div className="p-3 rounded-xl bg-zinc-950/60 border border-zinc-850 space-y-2.5">
+        <div className="text-[11px] font-mono text-zinc-300 font-bold uppercase">
+          Clinical Governance &amp; Null Flavors
+        </div>
+        <div className="space-y-2">
+          <label className="flex items-center justify-between cursor-pointer p-1.5 rounded-lg bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700">
+            <div>
+              <span className="text-xs text-zinc-200 block font-medium">Allow CDISC Null Flavors</span>
+              <span className="text-[10px] text-zinc-400">
+                Attach compact ND (Not Done), NA (Not Applicable), UNK (Unknown) badges
+              </span>
+            </div>
+            <input
+              type="checkbox"
+              checked={field.allowNullFlavor ?? false}
+              onChange={(e) => onUpdateField({ allowNullFlavor: e.target.checked })}
+              className="rounded border-zinc-700 bg-zinc-900 text-brand-cyan focus:ring-0 ml-2"
+            />
+          </label>
+
+          <label className="flex items-center justify-between cursor-pointer p-1.5 rounded-lg bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700">
+            <div>
+              <span className="text-xs text-zinc-200 block font-medium">Requires SDV (CRA Monitor)</span>
+              <span className="text-[10px] text-zinc-400">
+                Flag variable for mandatory Source Document Verification audit
+              </span>
+            </div>
+            <input
+              type="checkbox"
+              checked={field.requiresSdv ?? false}
+              onChange={(e) => onUpdateField({ requiresSdv: e.target.checked })}
+              className="rounded border-zinc-700 bg-zinc-900 text-brand-cyan focus:ring-0 ml-2"
+            />
+          </label>
+
+          <label className="flex items-center justify-between cursor-pointer p-1.5 rounded-lg bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700">
+            <div>
+              <span className="text-xs text-zinc-200 block font-medium">Blinded Variable</span>
+              <span className="text-[10px] text-zinc-400">
+                Mask observation from sponsor roles until database lock
+              </span>
+            </div>
+            <input
+              type="checkbox"
+              checked={field.isBlinded ?? false}
+              onChange={(e) => onUpdateField({ isBlinded: e.target.checked })}
+              className="rounded border-zinc-700 bg-zinc-900 text-brand-cyan focus:ring-0 ml-2"
+            />
+          </label>
+        </div>
       </div>
 
       {/* Specific Properties for Numeric Fields */}

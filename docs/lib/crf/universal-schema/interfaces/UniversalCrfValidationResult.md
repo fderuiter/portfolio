@@ -6,7 +6,7 @@
 
 # Interface: UniversalCrfValidationResult
 
-Defined in: [lib/crf/universal-schema.ts:201](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L201)
+Defined in: [lib/crf/universal-schema.ts:216](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L216)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/universal-schema.ts:201](https://github.com/fderuiter/portf
 
 > **errors**: `object`[]
 
-Defined in: [lib/crf/universal-schema.ts:204](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L204)
+Defined in: [lib/crf/universal-schema.ts:219](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L219)
 
 #### code?
 
@@ -34,7 +34,7 @@ Defined in: [lib/crf/universal-schema.ts:204](https://github.com/fderuiter/portf
 
 > `optional` **study?**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
 
-Defined in: [lib/crf/universal-schema.ts:203](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L203)
+Defined in: [lib/crf/universal-schema.ts:218](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L218)
 
 ***
 
@@ -42,4 +42,4 @@ Defined in: [lib/crf/universal-schema.ts:203](https://github.com/fderuiter/portf
 
 > **success**: `boolean`
 
-Defined in: [lib/crf/universal-schema.ts:202](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L202)
+Defined in: [lib/crf/universal-schema.ts:217](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L217)

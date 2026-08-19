@@ -15,6 +15,7 @@ export const UniversalClinicalDataTypeSchema = z.enum([
   "integer",
   "date",
   "partial_date",
+  "precision_date",
   "time",
   "datetime",
   "boolean",
@@ -106,6 +107,13 @@ export const BaseCRFFieldSchema = z.object({
   cdashMetadata: CdashVariableMetadataSchema.optional(),
   scaleMinLabel: z.string().optional(),
   scaleMaxLabel: z.string().optional(),
+  allowPartial: z.boolean().optional(),
+  preventFutureDate: z.boolean().optional(),
+  allowNullFlavor: z.boolean().optional(),
+  requirementTier: z.enum(["optional", "hard_stop", "auto_query"]).optional(),
+  requiresSdv: z.boolean().optional(),
+  isBlinded: z.boolean().optional(),
+  nullFlavorValue: z.string().optional(),
   sdvVerified: z.boolean().optional(),
   sdvTimestamp: z.string().optional(),
   sdvAuditedBy: z.string().optional(),
@@ -148,13 +156,15 @@ export type UniversalCrfForm = z.infer<typeof UniversalCrfFormSchema>;
 // 7. Schedule of Activities (SoA) Visits
 export const UniversalCrfVisitSchema = z.object({
   id: z.string().min(1),
-  oid: z.string().min(1),
+  oid: z.string().optional(),
   name: z.string().min(1),
   visitType: z.enum(["Scheduled", "Unscheduled", "Common"]).default("Scheduled"),
   targetDay: z.number().default(0),
+  timepointDays: z.number().optional(),
   windowBefore: z.number().default(0),
   windowAfter: z.number().default(0),
   assignedFormIds: z.array(z.string()).default([]),
+  formIds: z.array(z.string()).optional(),
   isRepeating: z.boolean().optional(),
   repeatMax: z.number().optional(),
 });
@@ -182,9 +192,11 @@ export const UniversalCrfProtocolSchema = z.object({
   $schema: z.string().optional(),
   schemaVersion: z.string().default("1.0.0"),
   id: z.string().min(1),
-  protocolNumber: z.string().min(1),
-  studyName: z.string().min(1),
-  phase: z.enum(["Phase I", "Phase I/II", "Phase II", "Phase III", "Phase IV", "Registry"]).default("Phase III"),
+  protocolNumber: z.string().optional(),
+  protocolId: z.string().optional(),
+  studyName: z.string().optional(),
+  title: z.string().optional(),
+  phase: z.string().default("Phase III"),
   sponsor: z.string().default("Clinical Sponsor"),
   therapeuticArea: z.string().default("General Medicine"),
   version: z.string().default("1.0"),
@@ -192,9 +204,12 @@ export const UniversalCrfProtocolSchema = z.object({
   forms: z.array(UniversalCrfFormSchema).default([]),
   visits: z.array(UniversalCrfVisitSchema).default([]),
   codelists: z.array(CodelistDefinitionSchema).default([]),
+  rules: z.array(EditCheckRuleSchema).optional(),
   branding: UniversalCrfBrandingSchema.optional(),
 });
 export type UniversalCrfProtocol = z.infer<typeof UniversalCrfProtocolSchema>;
+export const UniversalStudyProtocolSchema = UniversalCrfProtocolSchema;
+export type UniversalStudyProtocol = UniversalCrfProtocol;
 
 // 10. Validation & Serialization Utilities
 
@@ -428,7 +443,13 @@ export function diffUniversalCrfStudies(studyA: StudyProtocol, studyB: StudyProt
             fA.dataType !== fB.dataType ||
             fA.required !== fB.required ||
             fA.label !== fB.label ||
-            fA.unit !== fB.unit
+            fA.unit !== fB.unit ||
+            fA.allowPartial !== fB.allowPartial ||
+            fA.preventFutureDate !== fB.preventFutureDate ||
+            fA.allowNullFlavor !== fB.allowNullFlavor ||
+            fA.requirementTier !== fB.requirementTier ||
+            fA.requiresSdv !== fB.requiresSdv ||
+            fA.isBlinded !== fB.isBlinded
           ) {
             modifiedFields.push(vName);
           }
@@ -441,8 +462,8 @@ export function diffUniversalCrfStudies(studyA: StudyProtocol, studyB: StudyProt
         }
       }
 
-      const rulesA = new Set(formA.rules.map((r) => r.name));
-      const rulesB = new Set(formB.rules.map((r) => r.name));
+      const rulesA = new Set((formA.rules || []).map((r) => r.name || r.id));
+      const rulesB = new Set((formB.rules || []).map((r) => r.name || r.id));
 
       const addedRules = [...rulesB].filter((r) => !rulesA.has(r));
       const removedRules = [...rulesA].filter((r) => !rulesB.has(r));
@@ -473,8 +494,8 @@ export function diffUniversalCrfStudies(studyA: StudyProtocol, studyB: StudyProt
     }
   }
 
-  const visitIdsA = new Set(studyA.visits.map((v) => v.oid));
-  const visitIdsB = new Set(studyB.visits.map((v) => v.oid));
+  const visitIdsA = new Set((studyA.visits || []).map((v) => v.oid || v.id));
+  const visitIdsB = new Set((studyB.visits || []).map((v) => v.oid || v.id));
 
   const addedVisits = [...visitIdsB].filter((v) => !visitIdsA.has(v));
   const removedVisits = [...visitIdsA].filter((v) => !visitIdsB.has(v));
@@ -487,7 +508,7 @@ export function diffUniversalCrfStudies(studyA: StudyProtocol, studyB: StudyProt
     removedVisits.length > 0;
 
   return {
-    protocolNumber: studyB.protocolNumber,
+    protocolNumber: studyB.protocolNumber || "STUDY01",
     hasChanges,
     addedForms,
     removedForms,

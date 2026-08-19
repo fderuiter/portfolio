@@ -8,4 +8,4 @@
 
 > **UniversalCrfForm** = `z.infer`\<*typeof* [`UniversalCrfFormSchema`](../variables/UniversalCrfFormSchema.md)\>
 
-Defined in: [lib/crf/universal-schema.ts:146](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L146)
+Defined in: [lib/crf/universal-schema.ts:154](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L154)

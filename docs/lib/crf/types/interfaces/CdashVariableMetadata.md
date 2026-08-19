@@ -6,7 +6,7 @@
 
 # Interface: CdashVariableMetadata
 
-Defined in: [lib/crf/types.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L40)
+Defined in: [lib/crf/types.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L41)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/types.ts:40](https://github.com/fderuiter/portfolio/blob/ma
 
 > **acrfAnnotation**: `string`
 
-Defined in: [lib/crf/types.ts:46](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L46)
+Defined in: [lib/crf/types.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L47)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/types.ts:46](https://github.com/fderuiter/portfolio/blob/ma
 
 > **cdashLabel**: `string`
 
-Defined in: [lib/crf/types.ts:43](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L43)
+Defined in: [lib/crf/types.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L44)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/types.ts:43](https://github.com/fderuiter/portfolio/blob/ma
 
 > **core**: `"R"` \| `"HR"` \| `"O"`
 
-Defined in: [lib/crf/types.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L45)
+Defined in: [lib/crf/types.ts:46](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L46)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/types.ts:45](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **dataCategory?**: `string`
 
-Defined in: [lib/crf/types.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L47)
+Defined in: [lib/crf/types.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L48)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/crf/types.ts:47](https://github.com/fderuiter/portfolio/blob/ma
 
 > **domain**: `string`
 
-Defined in: [lib/crf/types.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L41)
+Defined in: [lib/crf/types.ts:42](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L42)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/crf/types.ts:41](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **nciConceptId?**: `string`
 
-Defined in: [lib/crf/types.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L44)
+Defined in: [lib/crf/types.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L45)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [lib/crf/types.ts:44](https://github.com/fderuiter/portfolio/blob/ma
 
 > **sdtmVariable**: `string`
 
-Defined in: [lib/crf/types.ts:42](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L42)
+Defined in: [lib/crf/types.ts:43](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L43)

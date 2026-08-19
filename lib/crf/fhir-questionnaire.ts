@@ -14,6 +14,7 @@ function mapToFhirItemType(type: string): string {
       return "decimal";
     case "date":
     case "partial_date":
+    case "precision_date":
       return "date";
     case "time":
       return "time";
@@ -109,10 +110,11 @@ export function exportFormToFhirQuestionnaire(form: CRFForm, study: StudyProtoco
  * Converts an entire StudyProtocol into an HL7 FHIR Bundle of Questionnaire Resources
  */
 export function exportStudyToFhirQuestionnaire(study: StudyProtocol): object {
+  const protoNum = study.protocolNumber || "study";
   return {
     resourceType: "Bundle",
     type: "collection",
-    id: `bundle-${study.protocolNumber.toLowerCase().replace(/[^a-z0-9-]/g, "-")}`,
+    id: `bundle-${protoNum.toLowerCase().replace(/[^a-z0-9-]/g, "-")}`,
     entry: study.forms.map((form) => ({
       resource: exportFormToFhirQuestionnaire(form, study),
     })),

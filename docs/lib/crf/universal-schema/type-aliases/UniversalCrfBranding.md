@@ -8,4 +8,4 @@
 
 > **UniversalCrfBranding** = `z.infer`\<*typeof* [`UniversalCrfBrandingSchema`](../variables/UniversalCrfBrandingSchema.md)\>
 
-Defined in: [lib/crf/universal-schema.ts:178](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L178)
+Defined in: [lib/crf/universal-schema.ts:188](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L188)

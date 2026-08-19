@@ -6,7 +6,7 @@
 
 # Interface: AuditTrailEntry
 
-Defined in: [lib/crf/types.ts:217](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L217)
+Defined in: [lib/crf/types.ts:225](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L225)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/types.ts:217](https://github.com/fderuiter/portfolio/blob/m
 
 > **changedBy**: `string`
 
-Defined in: [lib/crf/types.ts:226](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L226)
+Defined in: [lib/crf/types.ts:234](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L234)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/types.ts:226](https://github.com/fderuiter/portfolio/blob/m
 
 > **fieldId**: `string`
 
-Defined in: [lib/crf/types.ts:222](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L222)
+Defined in: [lib/crf/types.ts:230](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L230)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/types.ts:222](https://github.com/fderuiter/portfolio/blob/m
 
 > **fieldName**: `string`
 
-Defined in: [lib/crf/types.ts:223](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L223)
+Defined in: [lib/crf/types.ts:231](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L231)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/types.ts:223](https://github.com/fderuiter/portfolio/blob/m
 
 > **formId**: `string`
 
-Defined in: [lib/crf/types.ts:221](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L221)
+Defined in: [lib/crf/types.ts:229](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L229)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/crf/types.ts:221](https://github.com/fderuiter/portfolio/blob/m
 
 > **id**: `string`
 
-Defined in: [lib/crf/types.ts:218](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L218)
+Defined in: [lib/crf/types.ts:226](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L226)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/crf/types.ts:218](https://github.com/fderuiter/portfolio/blob/m
 
 > **newValue**: `string` \| `number` \| `boolean` \| `null`
 
-Defined in: [lib/crf/types.ts:225](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L225)
+Defined in: [lib/crf/types.ts:233](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L233)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/crf/types.ts:225](https://github.com/fderuiter/portfolio/blob/m
 
 > **previousValue**: `string` \| `number` \| `boolean` \| `null`
 
-Defined in: [lib/crf/types.ts:224](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L224)
+Defined in: [lib/crf/types.ts:232](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L232)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/crf/types.ts:224](https://github.com/fderuiter/portfolio/blob/m
 
 > **reasonForChange**: `string`
 
-Defined in: [lib/crf/types.ts:228](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L228)
+Defined in: [lib/crf/types.ts:236](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L236)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/crf/types.ts:228](https://github.com/fderuiter/portfolio/blob/m
 
 > **subjectId**: `string`
 
-Defined in: [lib/crf/types.ts:220](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L220)
+Defined in: [lib/crf/types.ts:228](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L228)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [lib/crf/types.ts:220](https://github.com/fderuiter/portfolio/blob/m
 
 > **timestamp**: `string`
 
-Defined in: [lib/crf/types.ts:219](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L219)
+Defined in: [lib/crf/types.ts:227](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L227)
 
 ***
 
@@ -94,4 +94,4 @@ Defined in: [lib/crf/types.ts:219](https://github.com/fderuiter/portfolio/blob/m
 
 > **userRole**: `"Site Coordinator"` \| `"Principal Investigator"` \| `"CRA Monitor"` \| `"Data Manager"`
 
-Defined in: [lib/crf/types.ts:227](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L227)
+Defined in: [lib/crf/types.ts:235](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L235)

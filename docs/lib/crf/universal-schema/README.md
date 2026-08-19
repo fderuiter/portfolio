@@ -25,6 +25,7 @@
 - [UniversalCrfSection](type-aliases/UniversalCrfSection.md)
 - [UniversalCrfVisit](type-aliases/UniversalCrfVisit.md)
 - [UniversalEditCheckRule](type-aliases/UniversalEditCheckRule.md)
+- [UniversalStudyProtocol](type-aliases/UniversalStudyProtocol.md)
 
 ## Variables
 
@@ -41,6 +42,7 @@
 - [UniversalCrfProtocolSchema](variables/UniversalCrfProtocolSchema.md)
 - [UniversalCrfSectionSchema](variables/UniversalCrfSectionSchema.md)
 - [UniversalCrfVisitSchema](variables/UniversalCrfVisitSchema.md)
+- [UniversalStudyProtocolSchema](variables/UniversalStudyProtocolSchema.md)
 
 ## Functions
 

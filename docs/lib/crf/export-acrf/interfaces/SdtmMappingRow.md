@@ -62,7 +62,7 @@ Defined in: [lib/crf/export-acrf.ts:16](https://github.com/fderuiter/portfolio/b
 
 ### origin
 
-> **origin**: `"CRF"` \| `"Derived"` \| `"Assigned"`
+> **origin**: `"Derived"` \| `"CRF"` \| `"Assigned"`
 
 Defined in: [lib/crf/export-acrf.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-acrf.ts#L14)
 

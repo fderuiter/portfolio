@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { StudyProtocol } from "@/lib/crf/types";
+import { StudyProtocol, StudioMode } from "@/lib/crf/types";
 import { executeCliString, stripAnsi } from "@/lib/crf/cli-engine";
 import {
   IconTerminal2,
@@ -10,6 +10,7 @@ import {
   IconTrash,
   IconCheck,
   IconCopy,
+  IconSparkles,
 } from "@tabler/icons-react";
 
 interface StudioTerminalProps {
@@ -17,6 +18,9 @@ interface StudioTerminalProps {
   study: StudyProtocol;
   onClose: () => void;
   onUpdateStudy: (updated: StudyProtocol) => void;
+  onOpenWizard?: () => void;
+  onSwitchMode?: (mode: StudioMode) => void;
+  onOpenModal?: (modal: "wizard" | "branding" | "diagnostics" | "export") => void;
 }
 
 interface TerminalHistoryItem {
@@ -32,6 +36,9 @@ export const StudioTerminal: React.FC<StudioTerminalProps> = ({
   study,
   onClose,
   onUpdateStudy,
+  onOpenWizard,
+  onSwitchMode,
+  onOpenModal,
 }) => {
   const [inputVal, setInputVal] = useState("");
   const cmdCounterRef = useRef<number>(1);
@@ -39,7 +46,7 @@ export const StudioTerminal: React.FC<StudioTerminalProps> = ({
     {
       id: "init",
       command: "crf info",
-      output: `CRF Studio Headless Command Engine initialized.\nProtocol: ${study.protocolNumber} (${study.forms.length} forms, ${study.visits.length} visits).\nType 'help' for available CLI commands.`,
+      output: `CRF Studio Headless Command Engine & Terminal initialized.\nProtocol: ${study.protocolNumber} (${study.forms.length} domains, ${study.visits.length} visits).\nType 'crf wizard' to launch the 5-stage authoring wizard, or 'help' for command matrix.`,
       success: true,
       timestamp: "READY",
     },
@@ -90,6 +97,25 @@ export const StudioTerminal: React.FC<StudioTerminalProps> = ({
     if (res.updatedStudy) {
       onUpdateStudy(res.updatedStudy);
     }
+
+    // Handle UI actions dispatched from terminal CLI
+    if (res.uiAction) {
+      if (res.uiAction.type === "launch_wizard") {
+        if (onOpenWizard) {
+          onOpenWizard();
+        } else if (onOpenModal) {
+          onOpenModal("wizard");
+        }
+      } else if (res.uiAction.type === "switch_mode" && res.uiAction.payload) {
+        onSwitchMode?.(res.uiAction.payload as StudioMode);
+      } else if (res.uiAction.type === "open_modal" && res.uiAction.payload) {
+        if (res.uiAction.payload === "wizard") {
+          onOpenWizard?.();
+        } else {
+          onOpenModal?.(res.uiAction.payload as "wizard" | "branding" | "diagnostics" | "export");
+        }
+      }
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -129,8 +155,11 @@ export const StudioTerminal: React.FC<StudioTerminalProps> = ({
   };
 
   const QUICK_COMMANDS = [
+    "crf wizard",
     "crf info",
     "crf validate",
+    "crf list domains",
+    "crf preset list",
     "crf add form VS",
     "crf add field VS --var TEMPC --type number --unit C",
     "crf export --format odm",
@@ -163,7 +192,14 @@ export const StudioTerminal: React.FC<StudioTerminalProps> = ({
               onClick={() => handleExecute(qc)}
               className="px-2 py-0.5 rounded text-[10px] bg-zinc-950 hover:bg-zinc-800 text-zinc-400 hover:text-brand-cyan border border-zinc-800 transition-colors whitespace-nowrap"
             >
-              {qc}
+              {qc === "crf wizard" ? (
+                <span className="inline-flex items-center gap-1 text-sky-400 font-bold">
+                  <IconSparkles className="w-2.5 h-2.5" />
+                  <span>{qc}</span>
+                </span>
+              ) : (
+                qc
+              )}
             </button>
           ))}
         </div>
@@ -233,7 +269,7 @@ export const StudioTerminal: React.FC<StudioTerminalProps> = ({
           value={inputVal}
           onChange={(e) => setInputVal(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Type 'help', 'crf validate', 'crf add form VS', 'crf export --format odm'..."
+          placeholder="Type 'crf wizard', 'crf validate', 'crf list domains', 'crf add form VS'..."
           className="flex-1 bg-transparent text-xs text-white placeholder:text-zinc-600 focus:outline-none font-mono"
         />
         <button

@@ -6,7 +6,7 @@
 
 # Interface: CliCommandResult
 
-Defined in: [lib/crf/cli-engine.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L26)
+Defined in: [lib/crf/cli-engine.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L16)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/cli-engine.ts:26](https://github.com/fderuiter/portfolio/bl
 
 > `optional` **data?**: `unknown`
 
-Defined in: [lib/crf/cli-engine.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L29)
+Defined in: [lib/crf/cli-engine.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L19)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/cli-engine.ts:29](https://github.com/fderuiter/portfolio/bl
 
 > **document**: `string`
 
-Defined in: [lib/crf/cli-engine.ts:28](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L28)
+Defined in: [lib/crf/cli-engine.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L18)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/cli-engine.ts:28](https://github.com/fderuiter/portfolio/bl
 
 > `optional` **error?**: `string`
 
-Defined in: [lib/crf/cli-engine.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L31)
+Defined in: [lib/crf/cli-engine.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L21)
 
 ***
 
@@ -38,7 +38,23 @@ Defined in: [lib/crf/cli-engine.ts:31](https://github.com/fderuiter/portfolio/bl
 
 > **success**: `boolean`
 
-Defined in: [lib/crf/cli-engine.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L27)
+Defined in: [lib/crf/cli-engine.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L17)
+
+***
+
+### uiAction?
+
+> `optional` **uiAction?**: `object`
+
+Defined in: [lib/crf/cli-engine.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L22)
+
+#### payload?
+
+> `optional` **payload?**: `string`
+
+#### type
+
+> **type**: `"switch_mode"` \| `"open_modal"` \| `"load_preset"` \| `"launch_wizard"`
 
 ***
 
@@ -46,4 +62,4 @@ Defined in: [lib/crf/cli-engine.ts:27](https://github.com/fderuiter/portfolio/bl
 
 > `optional` **updatedStudy?**: [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
 
-Defined in: [lib/crf/cli-engine.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L30)
+Defined in: [lib/crf/cli-engine.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L20)

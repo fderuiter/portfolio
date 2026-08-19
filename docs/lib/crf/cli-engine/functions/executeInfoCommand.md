@@ -8,7 +8,7 @@
 
 > **executeInfoCommand**(`study`, `options?`): [`CliCommandResult`](../interfaces/CliCommandResult.md)
 
-Defined in: [lib/crf/cli-engine.ts:64](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L64)
+Defined in: [lib/crf/cli-engine.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cli-engine.ts#L58)
 
 Summary Info Document
 

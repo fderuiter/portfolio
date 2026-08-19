@@ -8,7 +8,7 @@
 
 > **diffUniversalCrfStudies**(`studyA`, `studyB`): [`ProtocolDiffSummary`](../interfaces/ProtocolDiffSummary.md)
 
-Defined in: [lib/crf/universal-schema.ts:402](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L402)
+Defined in: [lib/crf/universal-schema.ts:417](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L417)
 
 Performs semantic protocol comparison between two StudyProtocol objects.
 

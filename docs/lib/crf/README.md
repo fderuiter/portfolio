@@ -128,6 +128,18 @@ Re-exports [CdashVariableMetadataSchema](universal-schema/variables/CdashVariabl
 
 ***
 
+### CDISC\_NULL\_FLAVORS
+
+Re-exports [CDISC_NULL_FLAVORS](precision-date/variables/CDISC_NULL_FLAVORS.md)
+
+***
+
+### CdiscNullFlavorCode
+
+Re-exports [CdiscNullFlavorCode](precision-date/type-aliases/CdiscNullFlavorCode.md)
+
+***
+
 ### CliCommandResult
 
 Re-exports [CliCommandResult](cli-engine/interfaces/CliCommandResult.md)
@@ -209,6 +221,12 @@ Re-exports [CRFForm](types/interfaces/CRFForm.md)
 ### CRFSection
 
 Re-exports [CRFSection](types/interfaces/CRFSection.md)
+
+***
+
+### daysInMonth
+
+Re-exports [daysInMonth](precision-date/functions/daysInMonth.md)
 
 ***
 
@@ -326,9 +344,45 @@ Re-exports [executeInfoCommand](cli-engine/functions/executeInfoCommand.md)
 
 ***
 
+### executeListCommand
+
+Re-exports [executeListCommand](cli-engine/functions/executeListCommand.md)
+
+***
+
+### executePresetCommand
+
+Re-exports [executePresetCommand](cli-engine/functions/executePresetCommand.md)
+
+***
+
+### executeRemoveFieldCommand
+
+Re-exports [executeRemoveFieldCommand](cli-engine/functions/executeRemoveFieldCommand.md)
+
+***
+
+### executeRemoveFormCommand
+
+Re-exports [executeRemoveFormCommand](cli-engine/functions/executeRemoveFormCommand.md)
+
+***
+
+### executeRuleCommand
+
+Re-exports [executeRuleCommand](cli-engine/functions/executeRuleCommand.md)
+
+***
+
 ### executeValidateCommand
 
 Re-exports [executeValidateCommand](cli-engine/functions/executeValidateCommand.md)
+
+***
+
+### executeVisitCommand
+
+Re-exports [executeVisitCommand](cli-engine/functions/executeVisitCommand.md)
 
 ***
 
@@ -419,6 +473,12 @@ Re-exports [exportUniversalCrfYaml](universal-schema/functions/exportUniversalCr
 ### ExpressionEvaluator
 
 Re-exports [ExpressionEvaluator](expression-evaluator/classes/ExpressionEvaluator.md)
+
+***
+
+### formatPrecisionDate
+
+Re-exports [formatPrecisionDate](precision-date/functions/formatPrecisionDate.md)
 
 ***
 
@@ -542,6 +602,18 @@ Re-exports [HighlightToken](formula-linter/interfaces/HighlightToken.md)
 
 ***
 
+### isCdiscNullFlavor
+
+Re-exports [isCdiscNullFlavor](precision-date/functions/isCdiscNullFlavor.md)
+
+***
+
+### isFutureDate
+
+Re-exports [isFutureDate](precision-date/functions/isFutureDate.md)
+
+***
+
 ### KNOWN\_MATH\_FUNCTIONS
 
 Re-exports [KNOWN_MATH_FUNCTIONS](formula-linter/variables/KNOWN_MATH_FUNCTIONS.md)
@@ -572,15 +644,39 @@ Re-exports [NUMERIC_DATA_TYPES](formula-linter/variables/NUMERIC_DATA_TYPES.md)
 
 ***
 
+### ParsedPrecisionDate
+
+Re-exports [ParsedPrecisionDate](precision-date/interfaces/ParsedPrecisionDate.md)
+
+***
+
 ### parseMultiSelectValue
 
 Re-exports [parseMultiSelectValue](export-r/functions/parseMultiSelectValue.md)
 
 ***
 
+### parsePrecisionDate
+
+Re-exports [parsePrecisionDate](precision-date/functions/parsePrecisionDate.md)
+
+***
+
 ### parseUniversalCrf
 
 Re-exports [parseUniversalCrf](universal-schema/functions/parseUniversalCrf.md)
+
+***
+
+### PrecisionDateValidationOptions
+
+Re-exports [PrecisionDateValidationOptions](precision-date/interfaces/PrecisionDateValidationOptions.md)
+
+***
+
+### PrecisionDateValidationResult
+
+Re-exports [PrecisionDateValidationResult](precision-date/interfaces/PrecisionDateValidationResult.md)
 
 ***
 
@@ -611,6 +707,12 @@ Re-exports [scaffoldCdashDomain](cdash-domain-templates/functions/scaffoldCdashD
 ### SdtmMappingRow
 
 Re-exports [SdtmMappingRow](export-acrf/interfaces/SdtmMappingRow.md)
+
+***
+
+### serializeStudyToOdmXml
+
+Re-exports [serializeStudyToOdmXml](odm-xml-serializer/variables/serializeStudyToOdmXml.md)
 
 ***
 
@@ -797,6 +899,30 @@ Re-exports [UniversalCrfVisitSchema](universal-schema/variables/UniversalCrfVisi
 ### UniversalEditCheckRule
 
 Re-exports [UniversalEditCheckRule](universal-schema/type-aliases/UniversalEditCheckRule.md)
+
+***
+
+### UniversalStudyProtocol
+
+Re-exports [UniversalStudyProtocol](universal-schema/type-aliases/UniversalStudyProtocol.md)
+
+***
+
+### UniversalStudyProtocolSchema
+
+Re-exports [UniversalStudyProtocolSchema](universal-schema/variables/UniversalStudyProtocolSchema.md)
+
+***
+
+### validateCdashVariableName
+
+Re-exports [validateCdashVariableName](precision-date/functions/validateCdashVariableName.md)
+
+***
+
+### validatePrecisionDate
+
+Re-exports [validatePrecisionDate](precision-date/functions/validatePrecisionDate.md)
 
 ***
 
