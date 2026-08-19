@@ -89,10 +89,10 @@ export default async function PortfolioHomePage() {
       <Hero />
 
       {/* 1. Architectural Systems Dossiers */}
-      <div className="relative py-14 sm:py-20 md:py-24 px-4 sm:px-6 md:px-12 lg:px-20 flex flex-col items-center border-t border-white/10 bg-[#0d0e11] outline-none">
+      <div className="relative py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 lg:px-12 flex flex-col items-center border-t border-white/10 bg-[#0d0e11] outline-none">
         <section id="case-studies" className="w-full flex flex-col items-center">
           {/* Main Container */}
-          <div className="relative z-10 w-full max-w-7xl flex flex-col items-center">
+          <div className="relative z-10 w-full max-w-6xl flex flex-col items-center">
             {/* Section Index Marker */}
             <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-white/[0.04] border border-white/10 text-[10px] sm:text-xs font-mono font-bold text-amber-300 uppercase tracking-widest">
               <span>SECTION 01 // SYSTEMS DOSSIERS</span>
@@ -132,8 +132,8 @@ export default async function PortfolioHomePage() {
       </div>
 
       {/* 3. About & Architecture Foundations Section */}
-      <section id="about" className="relative py-14 sm:py-20 md:py-24 px-4 sm:px-6 md:px-12 lg:px-20 flex flex-col items-center border-t border-white/10 bg-[#101217] overflow-hidden">
-        <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
+      <section id="about" className="relative py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 lg:px-12 flex flex-col items-center border-t border-white/10 bg-[#101217] overflow-hidden">
+        <div className="relative z-10 w-full max-w-6xl flex flex-col items-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-white/[0.04] border border-white/10 text-[10px] sm:text-xs font-mono font-bold text-amber-300 uppercase tracking-widest">
             <span>SECTION 02 // DOMAIN ARCHITECTURE</span>
           </div>
@@ -173,8 +173,8 @@ export default async function PortfolioHomePage() {
       </section>
 
       {/* 4. Contact Section */}
-      <section id="contact" className="relative py-14 sm:py-20 md:py-24 px-4 sm:px-6 md:px-12 lg:px-20 flex flex-col items-center border-t border-white/10 bg-[#0d0e11]">
-        <div className="relative z-10 w-full max-w-4xl flex flex-col items-center">
+      <section id="contact" className="relative py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 lg:px-12 flex flex-col items-center border-t border-white/10 bg-[#0d0e11]">
+        <div className="relative z-10 w-full max-w-6xl flex flex-col items-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-white/[0.04] border border-white/10 text-[10px] sm:text-xs font-mono font-bold text-amber-300 uppercase tracking-widest">
             <span>SECTION 04 // DISPATCH</span>
           </div>
@@ -186,7 +186,7 @@ export default async function PortfolioHomePage() {
             Always up for discussing high-assurance systems, clinical architectures, or creative experiments.
           </p>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full max-w-4xl justify-center items-stretch">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full max-w-6xl justify-center items-stretch">
             {/* Direct Email */}
             <a
               href="mailto:fpderuiter@gmail.com"

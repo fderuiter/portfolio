@@ -42,7 +42,6 @@ components/                                # React UI Component Ecosystem
 │   ├── Breadcrumbs.tsx                    # Accessible navigation trail
 │   ├── CaseStudyBentoCard.tsx             # Pretext-synchronized zero-reflow masonry bento card
 │   ├── CopyButton.tsx                     # One-click clipboard utility trigger
-│   ├── DevOverflowHud.tsx                 # Viewport overflow debugging HUD
 │   ├── LayoutPrimitives.tsx               # Defensive container wrappers
 │   ├── ModalContainer.tsx                 # Trapped-focus accessible modal frame
 │   ├── NextPrevNav.tsx                    # Step navigation controls

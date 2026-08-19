@@ -46,15 +46,15 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
   const { ref, height, isReady } = usePretextLayout({
     text,
     fontSize: 54,
-    lineHeight: 58,
+    lineHeight: 60,
     fontFamilyVariable: "--font-inter",
     getResponsiveMetrics: (width) => {
-      if (width < 640) {
-        return { fontSize: 32, lineHeight: 38 };
-      } else if (width < 1024) {
-        return { fontSize: 44, lineHeight: 50 };
+      if (width < 450) {
+        return { fontSize: 32, lineHeight: 36 };
+      } else if (width < 768) {
+        return { fontSize: 40, lineHeight: 46 };
       }
-      return { fontSize: 54, lineHeight: 58 };
+      return { fontSize: 54, lineHeight: 60 };
     },
   });
 
@@ -87,7 +87,7 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
       style={{
         "--hero-headline-height": isReady ? `${height}px` : "auto",
       } as React.CSSProperties}
-      className="relative w-full max-w-4xl mx-auto lg:mx-0 overflow-hidden min-h-[90px] sm:min-h-[110px] mb-4 sm:mb-6 h-[var(--hero-headline-height)] transition-[height] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      className="relative w-full max-w-4xl mx-auto lg:mx-0 min-h-[90px] sm:min-h-[110px] mb-4 sm:mb-6 min-h-[var(--hero-headline-height)] transition-[min-height] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]"
     >
       {/* 1. Custom Visual Presentation (hidden from screen readers, not selectable) */}
       <div
@@ -191,7 +191,7 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
       style={{
         "--hero-text-height": isReady ? `${height}px` : "auto",
       } as React.CSSProperties}
-      className="relative w-full max-w-2xl mx-auto lg:mx-0 overflow-hidden min-h-[50px] mb-6 sm:mb-8 h-[var(--hero-text-height)] transition-[height] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      className="relative w-full max-w-2xl mx-auto lg:mx-0 min-h-[50px] mb-6 sm:mb-8 min-h-[var(--hero-text-height)] transition-[min-height] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
     >
       {/* 1. Custom Visual Presentation (hidden from screen readers, not selectable) */}
       <div
@@ -501,7 +501,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
     <section
       id="hero"
       className={cn(
-        "relative min-h-[90dvh] lg:min-h-[100dvh] w-full flex flex-col justify-center items-center overflow-hidden bg-[#0d0e11] px-4 sm:px-6 md:px-12 lg:px-20 pt-28 pb-16 lg:py-24",
+        "relative min-h-[90dvh] lg:min-h-[100dvh] w-full flex flex-col justify-center items-center overflow-hidden bg-[#0d0e11] px-4 sm:px-6 md:px-8 lg:px-12 pt-28 pb-16 lg:py-24",
         className
       )}
     >
@@ -527,7 +527,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
       </div>
 
       {/* 3. Hero Split Grid Container */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+      <div className="relative z-10 w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         {/* Left Column: Editorial Statement & Actions */}
         <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left">
           {/* Micro Brand Identifier */}

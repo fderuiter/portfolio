@@ -16,7 +16,6 @@ import { SearchWrapper } from "@/components/SearchWrapper";
 import { resolveBaseUrl } from "@/lib/domain";
 
 import { SerwistRegister } from "@/components/providers/SerwistRegister";
-import { DevOverflowHud } from "@/components/ui/DevOverflowHud";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 
@@ -141,7 +140,6 @@ export default function RootLayout({
                     <Analytics />
                     <SearchWrapper />
                     <SerwistRegister />
-                    <DevOverflowHud />
                   </AudioProvider>
                 </A11yProvider>
               </SearchProvider>

@@ -57,7 +57,7 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
   const dict = simplified ? dictionary.simplified : dictionary.detailed;
 
   return (
-    <div ref={containerRef} className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 w-full max-w-4xl mx-auto select-none">
+    <div ref={containerRef} className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 w-full max-w-6xl mx-auto select-none">
       {/* 1. Professional Bio Card (Batch Pass 1) */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
