@@ -1160,7 +1160,7 @@ export const ClinicalTrialChaos: React.FC = () => {
       onKeyDown={handleKeyDown}
       className={`relative w-full font-mono focus:outline-none transition-all ${
         isFullscreen
-          ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none bg-black p-4 sm:p-6 overflow-y-auto overflow-x-hidden"
+          ? "fixed inset-0 z-50 w-full h-[100dvh] max-h-[100dvh] max-w-none rounded-none border-none bg-black p-3 sm:p-6 overflow-y-auto select-none"
           : "rounded-2xl border border-blue-500/30 bg-zinc-950 p-4 md:p-6 shadow-2xl focus:ring-1 focus:ring-brand-cyan"
       }`}
     >

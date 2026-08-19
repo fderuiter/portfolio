@@ -11,6 +11,8 @@
 - [ContactIntent](type-aliases/ContactIntent.md)
 - [ContactResponse](type-aliases/ContactResponse.md)
 - [ContactSubmission](type-aliases/ContactSubmission.md)
+- [NewsletterResponse](type-aliases/NewsletterResponse.md)
+- [NewsletterSubscription](type-aliases/NewsletterSubscription.md)
 
 ## Variables
 
@@ -23,6 +25,8 @@
 - [ContactSubmissionSchema](variables/ContactSubmissionSchema.md)
 - [FallbackMemorySchema](variables/FallbackMemorySchema.md)
 - [FeedbackSubmissionSchema](variables/FeedbackSubmissionSchema.md)
+- [NewsletterResponseSchema](variables/NewsletterResponseSchema.md)
+- [NewsletterSubscriptionSchema](variables/NewsletterSubscriptionSchema.md)
 - [RateLimitParamsSchema](variables/RateLimitParamsSchema.md)
 - [ReactionSubmissionSchema](variables/ReactionSubmissionSchema.md)
 - [SyncParamsSchema](variables/SyncParamsSchema.md)

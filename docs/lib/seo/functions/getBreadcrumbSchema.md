@@ -8,7 +8,7 @@
 
 > **getBreadcrumbSchema**(`items`): `string`
 
-Defined in: [lib/seo.ts:250](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L250)
+Defined in: [lib/seo.ts:249](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L249)
 
 Returns a Schema.org BreadcrumbList for hierarchical page navigation.
 Enforces a single root location entry and securely sanitizes angle brackets against script injection.

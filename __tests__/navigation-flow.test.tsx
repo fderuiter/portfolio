@@ -126,9 +126,11 @@ describe("Navigation Flow Components Suite", () => {
       expect(container.textContent).toContain("Proof Workspace");
       expect(container.textContent).toContain("Incident Simulator");
 
-      // Connect links
+      // Connect links & Newsletter
       expect(container.textContent).toContain("Schedule 1:1 Sync ↗");
-      expect(container.textContent).toContain("fpderuiter@gmail.com");
+      expect(container.textContent).toContain("Direct Contact Form ↗");
+      expect(container.textContent).toContain("Systems Dispatch");
+      expect(container.textContent).not.toContain("fpderuiter@gmail.com");
 
       // Back to top button
       const backToTopBtn = container.querySelector('button[aria-label="Scroll back to top of page"]');

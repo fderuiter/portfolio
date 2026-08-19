@@ -18,7 +18,6 @@ export function getPersonNode(): Record<string, unknown> {
     "url": SITE_BASE_URL,
     "image": `${SITE_BASE_URL}/favicon.ico`,
     "jobTitle": "Principal Systems Engineer & Designer",
-    "email": "fpderuiter@gmail.com",
     "sameAs": [
       "https://github.com/fderuiter",
       "https://www.linkedin.com/in/frederick-de-ruiter-88012467/"

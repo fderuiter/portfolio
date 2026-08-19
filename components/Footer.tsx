@@ -7,7 +7,6 @@ import {
   IconArrowUp,
   IconBrandGithub,
   IconBrandLinkedin,
-  IconMail,
   IconCalendar,
   IconTerminal,
   IconActivity,
@@ -19,10 +18,12 @@ import {
   IconSparkles,
   IconFileSpreadsheet,
   IconDeviceGamepad2,
+  IconMessageCode,
 } from "@tabler/icons-react";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { usePersona } from "@/components/providers/PersonaProvider";
 import { FooterStatusTicker } from "@/components/FooterStatusTicker";
+import { NewsletterForm } from "@/components/NewsletterForm";
 
 export const Footer: React.FC = () => {
   const pathname = usePathname();
@@ -277,14 +278,14 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <a
-                  href="mailto:fpderuiter@gmail.com"
+                <Link
+                  href="/contact"
                   onMouseEnter={handleHover}
                   className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                 >
-                  <IconMail className="w-3 h-3 text-zinc-400" />
-                  fpderuiter@gmail.com
-                </a>
+                  <IconMessageCode className="w-3 h-3 text-brand-cyan" />
+                  Direct Contact Form ↗
+                </Link>
               </li>
               <li>
                 <a
@@ -311,6 +312,27 @@ export const Footer: React.FC = () => {
                 </a>
               </li>
             </ul>
+          </div>
+        </div>
+
+        {/* Newsletter Subscription Strip */}
+        <div className="mb-12 p-6 bg-[#13151a]/90 border border-white/10 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl">
+          <div className="space-y-1 max-w-md">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
+              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-brand-cyan">
+                Systems Dispatch
+              </span>
+            </div>
+            <h4 className="text-sm font-mono font-bold text-white">
+              Engineering &amp; Architecture Notes
+            </h4>
+            <p className="text-xs font-mono text-zinc-400">
+              Occasional deep-dives into formal verification, AST compilers, CDISC clinical architectures, and bare-metal browser physics. Zero fluff.
+            </p>
+          </div>
+          <div className="w-full md:w-auto md:min-w-[340px]">
+            <NewsletterForm variant="compact" />
           </div>
         </div>
 

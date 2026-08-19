@@ -148,8 +148,8 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
     });
 
     expect(mockPlayHover).toHaveBeenCalledTimes(2);
-    expect(previewPane?.textContent).toContain("Say Hi & Connect");
-    expect(previewPane?.textContent).toContain("Open for Sync");
+    expect(previewPane?.textContent).toContain("Contact & Direct Inquiries");
+    expect(previewPane?.textContent).toContain("Relay Active");
 
     // Press ArrowUp to move back
     await act(async () => {

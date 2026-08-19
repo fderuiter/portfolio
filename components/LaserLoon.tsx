@@ -1523,7 +1523,7 @@ export const LaserLoon: React.FC = () => {
         data-keyboard-boundary="true"
         className={`relative outline-none transition-all duration-300 shadow-2xl flex flex-col justify-between ${
           isFullscreen
-            ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none bg-black p-2 sm:p-4 overflow-hidden"
+            ? "fixed inset-0 z-50 w-full h-[100dvh] max-h-[100dvh] max-w-none rounded-none border-none bg-black p-2 sm:p-4 overflow-hidden select-none touch-none"
             : `w-full max-w-3xl h-auto aspect-[768/420] bg-neutral-950 border rounded-3xl overflow-hidden ${
                 isFocused
                   ? "border-red-500 ring-4 ring-red-500/20 shadow-[0_0_40px_rgba(239,68,68,0.25)]"
@@ -1658,7 +1658,7 @@ export const LaserLoon: React.FC = () => {
           tabIndex={0}
           className={
             isFullscreen
-              ? "max-h-[calc(100vh-140px)] max-w-full aspect-[768/420] object-contain block cursor-crosshair touch-none my-auto"
+              ? "max-h-[calc(100dvh-120px)] max-w-full aspect-[768/420] object-contain block cursor-crosshair touch-none my-auto"
               : "w-full h-auto aspect-[768/420] block cursor-crosshair touch-none"
           }
         />

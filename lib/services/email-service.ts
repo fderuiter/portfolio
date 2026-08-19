@@ -6,6 +6,7 @@ import {
   renderContactAdminEmail,
   renderContactConfirmationEmail,
   renderFeedbackNotificationEmail,
+  renderNewsletterWelcomeEmail,
   FeedbackNotificationPayload,
 } from "@/lib/email-templates";
 
@@ -195,4 +196,44 @@ export class EmailService {
       ],
     });
   }
+
+  /**
+   * Dispatches a newsletter subscription workflow:
+   * 1. Delivers welcome confirmation email to the subscriber
+   * 2. Alerts admin of the new subscription
+   */
+  static async subscribeNewsletter(
+    email: string,
+    connectionHash?: string
+  ): Promise<EmailDispatchResult> {
+    const welcomeTemplate = renderNewsletterWelcomeEmail({ email });
+    const adminEmail = env.CONTACT_NOTIFICATION_EMAIL || "fpderuiter@gmail.com";
+
+    // 1. Deliver Welcome Confirmation to Subscriber
+    const welcomeResult = await this.sendRawEmail({
+      to: email,
+      subject: welcomeTemplate.subject,
+      html: welcomeTemplate.html,
+      text: welcomeTemplate.text,
+      tags: [
+        { name: "category", value: "newsletter-welcome" },
+      ],
+    });
+
+    // 2. Alert Admin of New Subscriber
+    if (welcomeResult.success) {
+      await this.sendRawEmail({
+        to: adminEmail,
+        subject: `[Newsletter] New Subscriber: ${email}`,
+        html: `<p>New subscriber registered: <strong>${email}</strong></p><p>Fingerprint: ${connectionHash || "anonymous"}</p>`,
+        text: `New subscriber registered: ${email}\nFingerprint: ${connectionHash || "anonymous"}`,
+        tags: [
+          { name: "category", value: "newsletter-admin-alert" },
+        ],
+      });
+    }
+
+    return welcomeResult;
+  }
 }
+

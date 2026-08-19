@@ -43,8 +43,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     if (config.path === "/crf" || config.path === "/stack" || config.path === "/work/laser-loon") {
       priority = 0.9;
-    } else if (config.path === "/schedule") {
-      priority = 0.7;
+    } else if (config.path === "/schedule" || config.path === "/contact") {
+      priority = 0.8;
       changeFrequency = "monthly";
     }
 

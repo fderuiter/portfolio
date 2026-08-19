@@ -11,6 +11,7 @@
 - [ContactAdminEmailPayload](interfaces/ContactAdminEmailPayload.md)
 - [ContactConfirmationEmailPayload](interfaces/ContactConfirmationEmailPayload.md)
 - [FeedbackNotificationPayload](interfaces/FeedbackNotificationPayload.md)
+- [NewsletterWelcomePayload](interfaces/NewsletterWelcomePayload.md)
 - [RenderedEmail](interfaces/RenderedEmail.md)
 
 ## Functions
@@ -19,3 +20,4 @@
 - [renderContactAdminEmail](functions/renderContactAdminEmail.md)
 - [renderContactConfirmationEmail](functions/renderContactConfirmationEmail.md)
 - [renderFeedbackNotificationEmail](functions/renderFeedbackNotificationEmail.md)
+- [renderNewsletterWelcomeEmail](functions/renderNewsletterWelcomeEmail.md)

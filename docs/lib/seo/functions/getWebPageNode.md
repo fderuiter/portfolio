@@ -8,7 +8,7 @@
 
 > **getWebPageNode**(`options`): `Record`\<`string`, `unknown`\>
 
-Defined in: [lib/seo.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L75)
+Defined in: [lib/seo.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L74)
 
 Returns a canonical WebPage entity node linked to the root WebSite and Person.
 

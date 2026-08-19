@@ -4,12 +4,12 @@ import React, { useState, useEffect } from "react";
 import { IconPlayerPlay, IconPower, IconTerminal, IconAdjustments } from "@tabler/icons-react";
 import { PreGameSetupWizard, getSavedSetupConfig, GameSetupConfig } from "@/components/arcade/PreGameSetupWizard";
 
-export interface ControlItem {
+interface ControlItem {
   key: string;
   action: string;
 }
 
-export interface PlayCabinetProps {
+interface PlayCabinetProps {
   gameId?: string;
   title: string;
   subtitle?: string;

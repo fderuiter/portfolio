@@ -300,4 +300,25 @@ export const ContactResponseSchema = z.object({
 
 export type ContactResponse = z.infer<typeof ContactResponseSchema>;
 
+/**
+ * Schema for Newsletter subscription POST payload validation
+ */
+export const NewsletterSubscriptionSchema = z.object({
+  email: z.string().trim().email("Please provide a valid email address"),
+  _gotcha: z.string().optional(),
+  _clientTimestamp: z.number().int().positive().optional(),
+});
 
+export type NewsletterSubscription = z.infer<typeof NewsletterSubscriptionSchema>;
+
+/**
+ * Schema for Newsletter subscription API response
+ */
+export const NewsletterResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+  subscriberId: z.string().optional(),
+  simulated: z.boolean().optional(),
+});
+
+export type NewsletterResponse = z.infer<typeof NewsletterResponseSchema>;

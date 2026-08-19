@@ -2140,7 +2140,7 @@ export const WorkingWithDuck: React.FC = () => {
       data-keyboard-boundary="true"
       className={`relative w-full max-w-5xl mx-auto select-none font-sans outline-none ${
         isFullscreen
-          ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none bg-black p-2 sm:p-4 overflow-y-auto overflow-x-hidden flex flex-col justify-between"
+          ? "fixed inset-0 z-50 w-full h-[100dvh] max-h-[100dvh] max-w-none rounded-none bg-black p-2 sm:p-4 overflow-y-auto overflow-x-hidden flex flex-col justify-between"
           : ""
       }`}
     >

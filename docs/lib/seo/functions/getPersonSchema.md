@@ -8,7 +8,7 @@
 
 > **getPersonSchema**(): `string`
 
-Defined in: [lib/seo.ts:168](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L168)
+Defined in: [lib/seo.ts:167](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L167)
 
 Returns the canonical Person schema representing Frederick de Ruiter.
 Securely escapes angle brackets to neutralize potential XSS script injections.

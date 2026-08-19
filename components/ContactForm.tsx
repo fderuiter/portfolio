@@ -197,6 +197,7 @@ export function ContactForm({
           </label>
           <input
             id="contact_name"
+            name="name"
             type="text"
             required
             value={name}
@@ -228,6 +229,7 @@ export function ContactForm({
           </label>
           <input
             id="contact_email"
+            name="email"
             type="email"
             required
             value={email}
@@ -287,6 +289,7 @@ export function ContactForm({
         </label>
         <input
           id="contact_subject"
+          name="subject"
           type="text"
           required
           value={subject}
@@ -323,6 +326,7 @@ export function ContactForm({
         </label>
         <textarea
           id="contact_message"
+          name="message"
           required
           rows={4}
           value={message}

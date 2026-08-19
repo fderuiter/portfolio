@@ -495,12 +495,18 @@ export const Navbar: React.FC = () => {
 
               {/* Contact Pillar */}
               <Link
-                href="/#contact"
-                onClick={(e) => handleNavClick(e, "/#contact")}
+                href={pathname === "/" ? "/#contact" : "/contact"}
+                onClick={(e) => {
+                  if (pathname === "/") {
+                    handleNavClick(e, "/#contact");
+                  } else {
+                    setActiveDropdown(null);
+                  }
+                }}
                 onMouseEnter={handleLinkHover}
                 className={cn(
                   "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0",
-                  pathname === "/" && activeSection === "contact"
+                  (pathname === "/" && activeSection === "contact") || pathname === "/contact"
                     ? "text-brand-cyan font-bold"
                     : "text-muted"
                 )}
@@ -779,11 +785,11 @@ export const Navbar: React.FC = () => {
                     <span className="text-xs font-mono text-zinc-500">→</span>
                   </Link>
                   <Link
-                    href="/#contact"
-                    onClick={(e) => handleNavClick(e, "/#contact")}
+                    href={pathname === "/" ? "/#contact" : "/contact"}
+                    onClick={(e) => handleNavClick(e, pathname === "/" ? "/#contact" : "/contact")}
                     className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between active:scale-[0.99] transition-all"
                   >
-                    <span>Contact</span>
+                    <span>Contact &amp; Inquiries</span>
                     <span className="text-xs font-mono text-zinc-500">→</span>
                   </Link>
                   <Link

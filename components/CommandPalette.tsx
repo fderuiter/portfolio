@@ -124,19 +124,19 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
       },
       {
         id: "nav-contact",
-        title: "Say Hi & Connect",
-        subtitle: "Drop a line, book a chat, or check out GitHub and LinkedIn",
+        title: "Contact & Direct Inquiries",
+        subtitle: "Send a direct message, consulting inquiry, or systems collaboration",
         category: "navigation",
-        url: "/#contact",
+        url: "/contact",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
-        badge: "Direct Connect",
-        status: "Open for Sync",
-        description: "Direct channels for collaboration, technical discussions, code reviews, and project advisory.",
-        techStack: ["Web API", "Calendly Sync", "PGP Key", "Open Source"],
+        badge: "Direct Inquiries",
+        status: "Relay Active",
+        description: "Secure, rate-limited direct messaging channel for systems architecture inquiries, consulting, and collaboration.",
+        techStack: ["Next.js 16", "Resend API", "Zod", "Rate Limiting", "Honeypot"],
         highlights: [
-          "30-minute friendly technical sync",
-          "Direct verified social links",
-          "PGP security verification"
+          "Encrypted transactional relay dispatch",
+          "Automated instant confirmation receipt",
+          "Zero-friction bot and spam protection"
         ]
       },
       {
@@ -171,6 +171,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
           "Interactive bento-box case study grid",
           "Live telemetry and commit logs",
           "Deep architectural retrospectives"
+        ]
+      },
+      {
+        id: "nav-newsletter",
+        title: "Systems Dispatch Newsletter",
+        subtitle: "Subscribe to engineering retrospectives, AST logic, and browser physics",
+        category: "navigation",
+        url: "/contact",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Newsletter",
+        status: "Bi-Weekly",
+        description: "High-density technical dispatches covering formal verification, CDISC clinical data systems, and bare-metal browser physics.",
+        techStack: ["Resend API", "Next.js 16", "TypeScript", "Transactional Email"],
+        highlights: [
+          "Formal verification & logic AST case studies",
+          "Clinical EDC & CDISC architectural breakdowns",
+          "Zero tracking beacons and zero spam"
         ]
       },
       {

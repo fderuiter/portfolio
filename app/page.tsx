@@ -21,7 +21,7 @@ const DynamicTimeline = dynamic(
 import { InteractiveHighlights } from "@/components/InteractiveHighlights";
 import { PageLayout } from "@/components/PageLayout";
 import { 
-  IconMail, 
+  IconMessageCode, 
   IconCalendar, 
   IconBrandGithub, 
   IconBrandLinkedin
@@ -188,18 +188,18 @@ export default async function PortfolioHomePage() {
           </p>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full max-w-6xl justify-center items-stretch">
-            {/* Direct Email */}
-            <a
-              href="mailto:fpderuiter@gmail.com"
-              aria-label="Send an email to Frederick de Ruiter at fpderuiter@gmail.com"
+            {/* Direct Inquiries & Contact Form */}
+            <Link
+              href="/contact"
+              aria-label="Send a direct inquiry to Frederick de Ruiter via the secure contact form"
               className="group flex flex-col items-center justify-center p-5 sm:p-6 bg-[#13151a]/80 border border-white/10 rounded-2xl transition-all duration-200 hover:border-amber-500/40 hover:bg-[#181b22] active:scale-[0.98] text-center cursor-pointer min-h-[110px] shadow-lg"
             >
               <span className="w-10 h-10 rounded-xl bg-black/50 border border-white/10 flex items-center justify-center text-zinc-400 group-hover:text-amber-400 group-hover:border-amber-500/30 transition-colors mb-3 shrink-0">
-                <IconMail className="w-4 h-4" />
+                <IconMessageCode className="w-4 h-4" />
               </span>
-              <span className="text-xs font-mono font-bold text-zinc-200 mb-1">Direct Email</span>
-              <span className="text-xs font-mono text-zinc-400">fpderuiter@gmail.com</span>
-            </a>
+              <span className="text-xs font-mono font-bold text-zinc-200 mb-1">Direct Inquiries</span>
+              <span className="text-xs font-mono text-amber-300">Open Contact Form ↗</span>
+            </Link>
 
             {/* Schedule 1:1 */}
             <Link

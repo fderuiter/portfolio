@@ -553,6 +553,64 @@ export const openApiSpec = {
         },
       },
     },
+    "/api/newsletter": {
+      post: {
+        summary: "Subscribe email address to the systems engineering dispatch newsletter",
+        description: "Validates email address, verifies spam and duration gates, registers subscriber, and delivers a welcome confirmation receipt.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/NewsletterSubmission",
+              },
+            },
+          },
+        },
+        responses: {
+          201: {
+            description: "Newsletter subscription registered successfully",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/NewsletterResponse",
+                },
+              },
+            },
+          },
+          400: {
+            description: "Invalid request payload or malformed email address",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ValidationError",
+                },
+              },
+            },
+          },
+          429: {
+            description: "Too many subscription attempts",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
+          },
+          500: {
+            description: "Internal server error registering subscription",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   },
   components: {
     schemas: {
@@ -822,6 +880,25 @@ export const openApiSpec = {
           success: { type: "boolean" },
           message: { type: "string" },
           messageId: { type: "string", description: "Dispatched email message identifier" },
+          simulated: { type: "boolean", description: "Indicates simulated dispatch during testing or local development" },
+        },
+        required: ["success", "message"],
+      },
+      NewsletterSubmission: {
+        type: "object",
+        properties: {
+          email: { type: "string", format: "email", description: "Subscriber email address" },
+          _gotcha: { type: "string", description: "Honeypot spam trap field" },
+          _clientTimestamp: { type: "integer", description: "Form client mount timestamp for duration check" },
+        },
+        required: ["email"],
+      },
+      NewsletterResponse: {
+        type: "object",
+        properties: {
+          success: { type: "boolean" },
+          message: { type: "string" },
+          subscriberId: { type: "string", description: "Registered subscriber identifier" },
           simulated: { type: "boolean", description: "Indicates simulated dispatch during testing or local development" },
         },
         required: ["success", "message"],

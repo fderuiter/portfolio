@@ -76,6 +76,12 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     path: "/schedule",
     keywords: ["Schedule Systems Consultation", "1:1 Technical Architecture Sync", "Engineering Advisory", "Frederick de Ruiter Calendar"],
   },
+  contact: {
+    title: "Contact & Direct Inquiries | Frederick de Ruiter",
+    description: "Access direct communication channels for systems engineering inquiries, consulting opportunities, and clinical data architecture collaboration.",
+    path: "/contact",
+    keywords: ["Contact Frederick de Ruiter", "Direct Inquiries", "Engineering Consultation", "Clinical Data Systems", "Systems Architecture Collaboration"],
+  },
   neuro: {
     title: "NeuroRecon: FreeSurfer QA & Cortical Mesh Studio",
     description: "Inspect 3D cortical surfaces, place intensity control points, resolve topological Euler defects, and slice 2D MRI orthoviews in this neuro CAD studio.",

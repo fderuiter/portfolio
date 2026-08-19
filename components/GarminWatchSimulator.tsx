@@ -341,7 +341,7 @@ export const GarminWatchSimulator: React.FC = () => {
       ref={outerContainerRef}
       className={`w-full select-none ${
         isFullscreen
-          ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none bg-black p-4 sm:p-6 overflow-y-auto flex flex-col items-center justify-between"
+          ? "fixed inset-0 z-50 w-full h-[100dvh] max-h-[100dvh] max-w-none rounded-none border-none bg-black p-2 sm:p-6 overflow-hidden flex flex-col items-center justify-between touch-none"
           : "flex flex-col items-center my-8"
       }`}
     >
