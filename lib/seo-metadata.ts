@@ -142,6 +142,41 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     keywords: ["Haskell", "C++", "DSP", "FMCW Radar", "SGRT", "IEC 62304", "Medical Device", "Real-Time Systems", "OpenGL"],
     ogType: "article",
   },
+  duckDeploy: {
+    title: "DuckDeploy Case Study | Dynamic UI Synthesis & Web Worker Compiler",
+    description: "Technical breakdown of DuckDeploy — a schema-driven dynamic UI synthesis engine compiling JSON Schema manifests into polymorphic form state via Web Workers.",
+    path: "/case-studies/duckdeploy",
+    keywords: ["TypeScript", "Dynamic UI", "JSON Schema", "Web Workers", "Zod", "State Machine", "Polymorphic State"],
+    ogType: "article",
+  },
+  cardiacRiskModeling: {
+    title: "Predictive Cardiac Risk Modeling Case Study | Clinical Tabular ML Pipeline",
+    description: "Technical breakdown of clinical tabular ML pipeline with adversarial validation, leak-free Stratified OOF cross-validation, and calibrated risk scoring.",
+    path: "/case-studies/cardiac-risk-modeling",
+    keywords: ["Python", "Machine Learning", "Clinical ML", "LightGBM", "Adversarial Validation", "Cross-Validation", "ROC-AUC", "SHAP"],
+    ogType: "article",
+  },
+  fourGlory: {
+    title: "4Glory Case Study | Real-Time Sports Analytics & Evaluation Engine",
+    description: "Technical breakdown of 4Glory — a real-time sports prediction and evaluation engine computing play-by-play Expected Points Added and Monte Carlo simulations.",
+    path: "/case-studies/4glory",
+    keywords: ["Sports Analytics", "Expected Points Added", "EPA", "Monte Carlo", "Data Pipeline", "Python", "TypeScript", "Real-Time Systems"],
+    ogType: "article",
+  },
+  crfXl: {
+    title: "CRF.xl Case Study | Spreadsheet-to-CDISC CRF Compiler & AST Engine",
+    description: "Technical breakdown of CRF.xl — a spreadsheet compiler converting clinical protocol workbooks into CDISC CDASH CRFs and ODM-XML exports.",
+    path: "/case-studies/crf-xl",
+    keywords: ["CDISC", "CDASH", "ODM-XML", "Spreadsheet Compiler", "AST Engine", "Clinical Trials", "21 CFR Part 11", "TypeScript"],
+    ogType: "article",
+  },
+  promptOps: {
+    title: "PromptOps Framework Case Study | LLM Prompt Orchestration & Evals",
+    description: "Technical breakdown of PromptOps — LLM prompt orchestration featuring deterministic evaluation gates, semantic versioning, and prompt drift detection.",
+    path: "/case-studies/promptops",
+    keywords: ["LLM", "Prompt Engineering", "PromptOps", "Evaluation Pipelines", "Semantic Versioning", "Prompt Drift", "AI Engineering"],
+    ogType: "article",
+  },
 };
 
 /**

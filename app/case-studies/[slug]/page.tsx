@@ -1,5 +1,4 @@
-import { prisma } from "@/lib/db";
-import { env } from "@/lib/env";
+import { CaseStudyService } from "@/lib/services/case-study-service";
 import { notFound } from "next/navigation";
 import { SandboxTerminal } from "@/components/SandboxTerminal";
 import { IconTerminal } from "@tabler/icons-react";
@@ -13,7 +12,6 @@ import { TerminologyToggle } from "@/components/TerminologyToggle";
 import SchemaFlowWorkspaceWrapper from "@/components/SchemaFlowWorkspaceWrapper";
 import { VectorComparisonViewer } from "@/components/laser-loon/VectorComparisonViewer";
 import { AssetDistributionHub } from "@/components/laser-loon/AssetDistributionHub";
-import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
 import { PageLayout } from "@/components/PageLayout";
@@ -30,46 +28,13 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  try {
-    const studies = await prisma.caseStudy.findMany({
-      where: { published: true },
-      select: { slug: true },
-    });
-    
-    return studies.map((study) => ({
-      slug: study.slug,
-    }));
-  } catch (error) {
-    if (env.VERCEL_ENV === "production") {
-      console.error("Failed to fetch case studies for static params:", error);
-    }
-    const isProduction = env.VERCEL_ENV === "production";
-    const isMockEnv = env.CI === "true" || env.PLAYWRIGHT_TEST === "true" || !isProduction;
-    if (isMockEnv) {
-      return FALLBACK_CASE_STUDIES.map((s) => ({ slug: s.slug }));
-    }
-    return [];
-  }
+  const slugs = await CaseStudyService.getAllPublishedSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-
-  let study;
-  try {
-    study = await prisma.caseStudy.findUnique({
-      where: { slug },
-    });
-  } catch (err) {
-    if (env.VERCEL_ENV === "production") {
-      console.error("Metadata generation DB query exception:", err);
-    }
-    const isProduction = env.VERCEL_ENV === "production";
-    const isMockEnv = env.CI === "true" || env.PLAYWRIGHT_TEST === "true" || !isProduction;
-    if (isMockEnv) {
-      study = FALLBACK_CASE_STUDIES.find((s) => s.slug === slug);
-    }
-  }
+  const study = await CaseStudyService.getCaseStudyBySlug(slug);
 
   if (!study) {
     return {
@@ -111,27 +76,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function CaseStudyPage({ params }: PageProps) {
   const { slug } = await params;
 
-  let allStudies = [];
-  try {
-    allStudies = await prisma.caseStudy.findMany({
-      where: { published: true },
-      orderBy: { created_at: "asc" },
-    });
-  } catch {
-    allStudies = FALLBACK_CASE_STUDIES;
-  }
-
-  let study = allStudies.find((s) => s.slug === slug);
-  if (!study) {
-    const isProduction = env.VERCEL_ENV === "production";
-    const isMockEnv = env.CI === "true" || env.PLAYWRIGHT_TEST === "true" || !isProduction;
-    if (isMockEnv) {
-      study = FALLBACK_CASE_STUDIES.find((s) => s.slug === slug);
-    }
-    if (!study && !isMockEnv) {
-      throw new Error("Unable to fetch case study records from serverless Neon database.");
-    }
-  }
+  const [allStudies, study] = await Promise.all([
+    CaseStudyService.getAllPublishedCaseStudies(),
+    CaseStudyService.getCaseStudyBySlug(slug),
+  ]);
 
   if (!study) {
     notFound();
@@ -246,15 +194,15 @@ export default async function CaseStudyPage({ params }: PageProps) {
               ))}
             </div>
 
-            {/* Interactive Sandbox Terminal Shell (Issue #42) */}
-            {slug === "imednet-python-sdk" && (
+            {/* Interactive Sandbox Terminal Shell */}
+            {(Boolean(commands || study.commands_json) || slug === "imednet-python-sdk") && (
               <div className="mt-12 border-t border-zinc-900/50 pt-10">
                 <h2 className="text-xl font-bold font-sans text-neutral-100 mb-3 flex items-center gap-2">
                   <IconTerminal className="w-5 h-5 text-brand-cyan" />
                   Interactive CLI Developer Sandbox
                 </h2>
                 <p className="text-xs font-mono text-zinc-500 mb-6 leading-relaxed">
-                  Test clinical trial EDC operations and view structured telemetry outputs directly inside the browser. Use the interactive badges or type &apos;help&apos; inside the prompt.
+                  Test interactive CLI commands and view structured telemetry outputs directly inside the browser. Use the interactive badges or type &apos;help&apos; inside the prompt.
                 </p>
                 <SandboxTerminal commands={commands} playback={playback} slug={slug} />
               </div>

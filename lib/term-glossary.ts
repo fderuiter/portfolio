@@ -212,6 +212,102 @@ export const CANONICAL_GLOSSARY: TermDefinition[] = [
     definition:
       "A lightweight, fast state management library for managing shared application state in React.",
   },
+  {
+    key: "cdash-term",
+    canonical: "CDASH",
+    simplified: "clinical data collection standard",
+    definition:
+      "Clinical Data Acquisition Standards Harmonization. CDISC standard defining basic data collection fields in clinical study forms.",
+    aliases: ["CDISC CDASH", "CDASH 2.2"],
+  },
+  {
+    key: "acrf-term",
+    canonical: "Annotated CRF (aCRF)",
+    simplified: "annotated case report form",
+    definition:
+      "Annotated Case Report Form. A blank clinical form mapping individual data entry fields directly to CDISC SDTM submission variables.",
+    aliases: ["Annotated CRF", "aCRF", "aCRFs"],
+  },
+  {
+    key: "web-worker-term",
+    canonical: "Web Worker",
+    simplified: "background browser worker",
+    definition:
+      "A background browser thread executing scripts independently of the main UI thread to prevent interface freezing.",
+    aliases: ["Web Workers"],
+  },
+  {
+    key: "roc-auc-term",
+    canonical: "ROC-AUC",
+    simplified: "model classification score",
+    definition:
+      "Receiver Operating Characteristic Area Under Curve. A performance metric measuring classification discrimination across diagnostic thresholds.",
+    aliases: ["ROC-AUC", "AUC-ROC", "Area Under the Curve"],
+  },
+  {
+    key: "pr-auc-term",
+    canonical: "PR-AUC",
+    simplified: "precision-recall accuracy score",
+    definition:
+      "Precision-Recall Area Under Curve. A classification metric evaluating positive prediction accuracy on imbalanced clinical datasets.",
+    aliases: ["PR-AUC", "Precision-Recall AUC"],
+  },
+  {
+    key: "adversarial-validation-term",
+    canonical: "Adversarial Validation",
+    simplified: "data shift detector",
+    definition:
+      "A machine learning technique that trains a binary classifier to distinguish training from test data to detect feature distribution drift.",
+    aliases: ["Adversarial Validation"],
+  },
+  {
+    key: "shap-term",
+    canonical: "SHAP",
+    simplified: "model explanation metric",
+    definition:
+      "SHapley Additive exPlanations. A game-theoretic approach to explain individual predictions by computing feature contributions.",
+    aliases: ["SHAP values", "Shapley Additive exPlanations"],
+  },
+  {
+    key: "epa-term",
+    canonical: "Expected Points Added (EPA)",
+    simplified: "expected play value",
+    definition:
+      "Expected Points Added. A sports analytics metric quantifying the net value of an individual play relative to baseline historical expectation.",
+    aliases: ["Expected Points Added", "EPA"],
+  },
+  {
+    key: "monte-carlo-term",
+    canonical: "Monte Carlo Simulation",
+    simplified: "probability simulation",
+    definition:
+      "A computational algorithm that relies on repeated random sampling to compute numerical probability distributions and risk outcomes.",
+    aliases: ["Monte Carlo", "Monte Carlo Simulation"],
+  },
+  {
+    key: "rag-term",
+    canonical: "Retrieval-Augmented Generation (RAG)",
+    simplified: "search-enhanced AI",
+    definition:
+      "Retrieval-Augmented Generation. An architecture that retrieves external reference documents into an LLM context window to ground responses.",
+    aliases: ["RAG", "Retrieval-Augmented Generation"],
+  },
+  {
+    key: "prompt-drift-term",
+    canonical: "Prompt Drift",
+    simplified: "AI prompt degradation",
+    definition:
+      "Gradual degradation in LLM prompt effectiveness or output format adherence resulting from upstream model version updates.",
+    aliases: ["Prompt Drift"],
+  },
+  {
+    key: "semver-term",
+    canonical: "Semantic Versioning (SemVer)",
+    simplified: "software version rules",
+    definition:
+      "A formal software versioning convention using MAJOR.MINOR.PATCH to signal breaking changes, features, and fixes.",
+    aliases: ["Semantic Versioning", "SemVer"],
+  },
 ];
 
 export function getGlossaryKeyMap(

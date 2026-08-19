@@ -1,8 +1,6 @@
 import type { MetadataRoute } from "next";
-import { prisma } from "@/lib/db";
+import { CaseStudyService } from "@/lib/services/case-study-service";
 import { resolveBaseUrl } from "@/lib/domain";
-import { env } from "@/lib/env";
-import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 
 export const revalidate = 86400;
 
@@ -12,27 +10,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = resolveBaseUrl();
 
   // Fetch all published case studies to dynamically generate sitemap URLs
-  let studies: { slug: string; updated_at: Date }[] = [];
-  try {
-    studies = await prisma.caseStudy.findMany({
-      where: { published: true },
-      select: { slug: true, updated_at: true },
-    });
-  } catch (err) {
-    if (env.VERCEL_ENV === "production") {
-      console.error("Sitemap generation database query failure:", err);
-    }
-  }
-
-  const isProduction = env.VERCEL_ENV === "production";
-  const isMockEnv = env.CI === "true" || env.PLAYWRIGHT_TEST === "true" || !isProduction;
-
-  if (studies.length === 0 || (isMockEnv && studies.length === 0)) {
-    studies = FALLBACK_CASE_STUDIES.map((study) => ({
-      slug: study.slug,
-      updated_at: study.updated_at,
-    }));
-  }
+  const studies = await CaseStudyService.getAllPublishedCaseStudies();
 
   const caseStudyUrls = studies.map((study) => ({
     url: `${baseUrl}/case-studies/${study.slug}`,

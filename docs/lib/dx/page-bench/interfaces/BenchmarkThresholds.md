@@ -6,7 +6,7 @@
 
 # Interface: BenchmarkThresholds
 
-Defined in: [lib/dx/page-bench.ts:94](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L94)
+Defined in: [lib/dx/page-bench.ts:99](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L99)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/dx/page-bench.ts:94](https://github.com/fderuiter/portfolio/blo
 
 > **maxCls**: `number`
 
-Defined in: [lib/dx/page-bench.ts:98](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L98)
+Defined in: [lib/dx/page-bench.ts:103](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L103)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/dx/page-bench.ts:98](https://github.com/fderuiter/portfolio/blo
 
 > **maxFcpMs**: `number`
 
-Defined in: [lib/dx/page-bench.ts:96](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L96)
+Defined in: [lib/dx/page-bench.ts:101](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L101)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/dx/page-bench.ts:96](https://github.com/fderuiter/portfolio/blo
 
 > **maxLcpMs**: `number`
 
-Defined in: [lib/dx/page-bench.ts:97](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L97)
+Defined in: [lib/dx/page-bench.ts:102](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L102)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/dx/page-bench.ts:97](https://github.com/fderuiter/portfolio/blo
 
 > **maxTtfbMs**: `number`
 
-Defined in: [lib/dx/page-bench.ts:95](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L95)
+Defined in: [lib/dx/page-bench.ts:100](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L100)

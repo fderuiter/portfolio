@@ -468,7 +468,7 @@ Defined in: [lib/working-with-duck-engine.ts:485](https://github.com/fderuiter/p
 
 ### status
 
-> **status**: `"idle"` \| `"paused"` \| `"running"` \| `"failed"` \| `"won"`
+> **status**: `"running"` \| `"failed"` \| `"idle"` \| `"paused"` \| `"won"`
 
 Defined in: [lib/working-with-duck-engine.ts:375](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L375)
 

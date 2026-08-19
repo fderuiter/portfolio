@@ -12,7 +12,7 @@ Defined in: [lib/dx/page-bench.ts:11](https://github.com/fderuiter/portfolio/blo
 
 ### category
 
-> **category**: `"arcade"` \| `"case-study"` \| `"top-level"` \| `"tool"`
+> **category**: `"arcade"` \| `"top-level"` \| `"case-study"` \| `"tool"`
 
 Defined in: [lib/dx/page-bench.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L14)
 

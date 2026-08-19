@@ -182,3 +182,10 @@ Formal inference rules used to derive logical steps from valid premises:
 - **Scientific & Engineering Editorial Design System**: A high-assurance visual and interaction design architecture emphasizing Swiss grid precision, deep architectural graphite surfaces (`#0d0e11`, `#13151a`), crisp hairline structural borders (`rgba(255, 255, 255, 0.08)` / `border-zinc-800`), and semantic status indicators (Precision Amber `#f59e0b`, Emerald `#10b981`, Steel `#94a3b8`) eliminating generic AI tropes (falling collision particles, diffuse neon glows).
 - **Systems Dossier & Spec Index**: A numbered engineering project showcase (`SYS-01`, `SYS-02`, `SYS-03`, `SYS-04`) surfacing explicit architectural constraints, test coverage badges, language specs, and direct pathways to deep-dive case studies.
 
+## Resilient Hybrid Fallback Data Architecture
+
+### Serverless Prerender Resilience & Data Sourcing
+- **Resilient Hybrid Fallback**: The unified data retrieval strategy implemented in `CaseStudyService` that queries the remote PostgreSQL/Neon database first, seamlessly unions or falls back to static compilation data (`FALLBACK_CASE_STUDIES`) upon missing records or connection errors, and returns `notFound()` for invalid entities rather than failing static builds.
+- **Database-Priority Sourcing**: Sourcing protocol where live database records take precedence for matching entity slugs, while any newly introduced or unseeded static case studies in the codebase are automatically appended to the collection.
+- **5-Point Discovery Matrix**: The unified multi-surface synchronization invariant linking every first-class case study and interactive tool across Command Palette (`CommandPalette.tsx`), Desktop/Mobile Navigation (`Navbar.tsx`), Footer (`Footer.tsx`), SEO/Sitemap registries (`sitemap.ts`, `seo-metadata.ts`), and Real-Browser Benchmark configs (`page-bench.ts`).
+

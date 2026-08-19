@@ -34,6 +34,7 @@ import {
 } from "@/lib/working-with-duck-engine";
 import { sanitizeError, sanitizeString } from "@/lib/error-sanitization";
 import { evaluateCanaryRollout } from "@/scripts/canary-analyzer";
+import { CaseStudyService } from "@/lib/services/case-study-service";
 
 describe("Defect Remediation & Regression Verification Suite (Invariant #11)", () => {
   describe("Proof AST Solver Resilience & Deep Recursion Guards", () => {
@@ -465,6 +466,22 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       expect(isToolSwitched).toBe(false);
 
       document.body.removeChild(simulatorBoundary);
+    });
+  });
+
+  describe("Case Study Serverless Prerender Resilience & Fallback Invariant", () => {
+    it("safely retrieves static case studies when serverless database is missing records or offline", async () => {
+      const study = await CaseStudyService.getCaseStudyBySlug("laser-loon");
+      expect(study).not.toBeNull();
+      expect(study?.slug).toBe("laser-loon");
+      expect(study?.title).toContain("Laser Loon");
+
+      const allStudies = await CaseStudyService.getAllPublishedCaseStudies();
+      expect(allStudies.length).toBeGreaterThan(0);
+      expect(allStudies.some((s) => s.slug === "laser-loon")).toBe(true);
+
+      const allSlugs = await CaseStudyService.getAllPublishedSlugs();
+      expect(allSlugs).toContain("laser-loon");
     });
   });
 });

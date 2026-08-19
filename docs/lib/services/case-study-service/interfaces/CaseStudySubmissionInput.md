@@ -6,7 +6,7 @@
 
 # Interface: CaseStudySubmissionInput
 
-Defined in: [lib/services/case-study-service.ts:5](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L5)
+Defined in: [lib/services/case-study-service.ts:8](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L8)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/services/case-study-service.ts:5](https://github.com/fderuiter/
 
 > **architectural\_narrative**: `string`
 
-Defined in: [lib/services/case-study-service.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L10)
+Defined in: [lib/services/case-study-service.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L13)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/services/case-study-service.ts:10](https://github.com/fderuiter
 
 > **editorial\_content**: `string`
 
-Defined in: [lib/services/case-study-service.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L9)
+Defined in: [lib/services/case-study-service.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L12)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/services/case-study-service.ts:9](https://github.com/fderuiter/
 
 > `optional` **github\_url?**: `string` \| `null`
 
-Defined in: [lib/services/case-study-service.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L12)
+Defined in: [lib/services/case-study-service.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L15)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/services/case-study-service.ts:12](https://github.com/fderuiter
 
 > **primary\_language**: `string`
 
-Defined in: [lib/services/case-study-service.ts:8](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L8)
+Defined in: [lib/services/case-study-service.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L11)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/services/case-study-service.ts:8](https://github.com/fderuiter/
 
 > **slug**: `string`
 
-Defined in: [lib/services/case-study-service.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L7)
+Defined in: [lib/services/case-study-service.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L10)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/services/case-study-service.ts:7](https://github.com/fderuiter/
 
 > **tags**: `string`
 
-Defined in: [lib/services/case-study-service.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L11)
+Defined in: [lib/services/case-study-service.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L14)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [lib/services/case-study-service.ts:11](https://github.com/fderuiter
 
 > **title**: `string`
 
-Defined in: [lib/services/case-study-service.ts:6](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L6)
+Defined in: [lib/services/case-study-service.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L9)

@@ -42,6 +42,11 @@ export const CANONICAL_ROUTES: PageBenchmarkRoute[] = [
   { path: "/case-studies/clintrials", name: "CS: clintrials WASM Engine", category: "case-study" },
   { path: "/case-studies/equipose-randomization", name: "CS: Equipose Randomization", category: "case-study" },
   { path: "/case-studies/lambda-wave", name: "CS: Lambda-Wave Radar", category: "case-study" },
+  { path: "/case-studies/duckdeploy", name: "CS: DuckDeploy Dynamic UI", category: "case-study" },
+  { path: "/case-studies/cardiac-risk-modeling", name: "CS: Cardiac Risk Modeling", category: "case-study" },
+  { path: "/case-studies/4glory", name: "CS: 4Glory Sports Analytics", category: "case-study" },
+  { path: "/case-studies/crf-xl", name: "CS: CRF.xl CDISC Compiler", category: "case-study" },
+  { path: "/case-studies/promptops", name: "CS: PromptOps LLM Framework", category: "case-study" },
 
   // Arcade Mini-Games
   { path: "/arcade/working-with-duck", name: "Game: Duck Canvas Engine", category: "arcade" },

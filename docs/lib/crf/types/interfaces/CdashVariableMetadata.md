@@ -28,7 +28,7 @@ Defined in: [lib/crf/types.ts:43](https://github.com/fderuiter/portfolio/blob/ma
 
 ### core
 
-> **core**: `"HR"` \| `"R"` \| `"O"`
+> **core**: `"R"` \| `"HR"` \| `"O"`
 
 Defined in: [lib/crf/types.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L45)
 

@@ -8,7 +8,7 @@
 
 > **validateTermTags**(`html`, `glossary?`, `source?`): [`TermValidationResult`](../interfaces/TermValidationResult.md)
 
-Defined in: [lib/term-compiler.ts:160](https://github.com/fderuiter/portfolio/blob/main/lib/term-compiler.ts#L160)
+Defined in: [lib/term-compiler.ts:165](https://github.com/fderuiter/portfolio/blob/main/lib/term-compiler.ts#L165)
 
 Validates term tags in HTML or text strings against the canonical glossary.
 Extracts element metadata attributes (keys, terms, definitions) in a single pass per tag.

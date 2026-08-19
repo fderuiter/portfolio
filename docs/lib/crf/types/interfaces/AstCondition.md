@@ -28,7 +28,7 @@ Defined in: [lib/crf/types.ts:51](https://github.com/fderuiter/portfolio/blob/ma
 
 ### operator
 
-> **operator**: `"gt"` \| `"lt"` \| `"contains"` \| `"eq"` \| `"gte"` \| `"lte"` \| `"in"` \| `"neq"` \| `"is_empty"` \| `"is_not_empty"`
+> **operator**: `"gte"` \| `"in"` \| `"lt"` \| `"lte"` \| `"gt"` \| `"contains"` \| `"eq"` \| `"neq"` \| `"is_empty"` \| `"is_not_empty"`
 
 Defined in: [lib/crf/types.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L53)
 

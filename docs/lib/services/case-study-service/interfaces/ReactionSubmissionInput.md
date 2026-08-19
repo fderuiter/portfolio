@@ -6,7 +6,7 @@
 
 # Interface: ReactionSubmissionInput
 
-Defined in: [lib/services/case-study-service.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L21)
+Defined in: [lib/services/case-study-service.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L24)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/services/case-study-service.ts:21](https://github.com/fderuiter
 
 > **caseStudySlug**: `string`
 
-Defined in: [lib/services/case-study-service.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L22)
+Defined in: [lib/services/case-study-service.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L25)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [lib/services/case-study-service.ts:22](https://github.com/fderuiter
 
 > **reactionType**: `string`
 
-Defined in: [lib/services/case-study-service.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L23)
+Defined in: [lib/services/case-study-service.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L26)

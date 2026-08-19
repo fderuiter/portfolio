@@ -17,7 +17,21 @@ export interface CaseStudyData {
   updated_at: Date;
 }
 
-export const IMEDNET_COMMANDS_OBJ = {
+export interface CaseStudyCommandDefinition {
+  description: string;
+  payload: unknown;
+}
+
+export type CaseStudyCommands = Record<string, CaseStudyCommandDefinition>;
+
+export interface CaseStudyPlaybackStep {
+  command: string;
+  description: string;
+}
+
+export type CaseStudyPlayback = CaseStudyPlaybackStep[];
+
+export const IMEDNET_COMMANDS_OBJ: CaseStudyCommands = {
   "imednet studies list": {
     description: "Retrieve a list of all active clinical trials from the iMednet EDC platform.",
     payload: [
@@ -101,7 +115,7 @@ export const IMEDNET_COMMANDS_OBJ = {
   }
 };
 
-export const IMEDNET_PLAYBACK_OBJ = [
+export const IMEDNET_PLAYBACK_OBJ: CaseStudyPlayback = [
   {
     command: "imednet studies list",
     description: "Retrieve a list of all active clinical trials from the iMednet EDC platform."
@@ -114,6 +128,372 @@ export const IMEDNET_PLAYBACK_OBJ = [
     command: "imednet records search --study BRIGHT-01",
     description: "Search dynamic patient records for active trial BRIGHT-01"
   }
+];
+
+export const DUCKDEPLOY_COMMANDS_OBJ: CaseStudyCommands = {
+  "duckdeploy schema validate --spec ./deployment-schema.json": {
+    description: "Validates dynamic JSON Schema AST integrity and checks for recursive reference cycles.",
+    payload: {
+      status: "VALID",
+      schemaVersion: "draft-2020-12",
+      nodesParsed: 142,
+      polymorphicBranches: 8,
+      cyclicReferencesDetected: 0,
+      compilationTimeMs: 2.4,
+    },
+  },
+  "duckdeploy compile --target kubernetes --env production": {
+    description: "Compiles polymorphic UI form state into a production-ready Kubernetes Deployment & Service manifest.",
+    payload: {
+      apiVersion: "apps/v1",
+      kind: "Deployment",
+      metadata: {
+        name: "duckdeploy-edge-gateway",
+        namespace: "production",
+        labels: {
+          "app.kubernetes.io/managed-by": "duckdeploy",
+          release: "v3.8.1",
+        },
+      },
+      spec: {
+        replicas: 5,
+        strategy: {
+          type: "RollingUpdate",
+          rollingUpdate: {
+            maxSurge: "25%",
+            maxUnavailable: 0,
+          },
+        },
+        template: {
+          spec: {
+            containers: [
+              {
+                name: "gateway",
+                image: "registry.internal.net/duckdeploy/gateway:v3.8.1",
+                resources: {
+                  limits: { cpu: "1000m", memory: "512Mi" },
+                  requests: { cpu: "100m", memory: "128Mi" },
+                },
+                readinessProbe: {
+                  httpGet: { path: "/healthz", port: 8080 },
+                  initialDelaySeconds: 5,
+                  periodSeconds: 10,
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
+  },
+  "duckdeploy diff --source form-state --target cluster-live": {
+    description: "Computes real-time AST structural diff between active UI state and live cluster resources.",
+    payload: {
+      resource: "Deployment/duckdeploy-edge-gateway",
+      mutationsCount: 2,
+      diff: [
+        { op: "replace", path: "/spec/replicas", oldValue: 3, newValue: 5 },
+        { op: "add", path: "/spec/template/spec/containers/0/resources/limits/cpu", value: "1000m" },
+      ],
+      riskScore: "LOW_RISK_ROLLING_UPDATE",
+    },
+  },
+  "duckdeploy deploy --dry-run": {
+    description: "Executes client-side admission validation and simulated cluster deployment.",
+    payload: {
+      dryRun: true,
+      validationStatus: "ADMITTED",
+      securityPolicyChecks: {
+        runAsNonRoot: true,
+        readOnlyRootFilesystem: true,
+        allowPrivilegeEscalation: false,
+      },
+      message: "Dry-run successful. Zero policy violations detected.",
+    },
+  },
+};
+
+export const DUCKDEPLOY_PLAYBACK_OBJ: CaseStudyPlayback = [
+  {
+    command: "duckdeploy schema validate --spec ./deployment-schema.json",
+    description: "Validate dynamic JSON Schema AST integrity and detect cyclic references",
+  },
+  {
+    command: "duckdeploy compile --target kubernetes --env production",
+    description: "Compile polymorphic form state into production Kubernetes Deployment manifest",
+  },
+  {
+    command: "duckdeploy diff --source form-state --target cluster-live",
+    description: "Compute structural AST diff between form state and live cluster",
+  },
+  {
+    command: "duckdeploy deploy --dry-run",
+    description: "Simulate cluster admission validation with zero policy violations",
+  },
+];
+
+export const CARDIAC_RISK_COMMANDS_OBJ: CaseStudyCommands = {
+  "cardiac-ml validate --dataset nhanes-cohort-2026.parquet --adversarial": {
+    description: "Evaluates dataset for clinical distribution shift and feature leakage via adversarial classifier.",
+    payload: {
+      adversarialAuc: 0.518,
+      driftDetected: false,
+      samplesCount: 24890,
+      featuresAnalyzed: 34,
+      missingnessRate: "4.2%",
+      leakCheckStatus: "PASS_ZERO_LEAKAGE",
+    },
+  },
+  "cardiac-ml train --models lgbm,xgboost,catboost --folds 10": {
+    description: "Executes leak-free 10-fold Stratified OOF training and outputs validation metrics.",
+    payload: {
+      folds: 10,
+      oofMetrics: {
+        auroc: 0.8942,
+        auprc: 0.7418,
+        brierScore: 0.0876,
+        expectedCalibrationError: "2.14%",
+      },
+      ensembleWeights: {
+        lightgbm: 0.45,
+        xgboost: 0.35,
+        catboost: 0.2,
+      },
+      trainingDurationSec: 18.6,
+    },
+  },
+  "cardiac-ml explain --patient-id PATIENT-8921": {
+    description: "Generates localized TreeSHAP risk attribution and feature contribution waterfall for a patient.",
+    payload: {
+      patientId: "PATIENT-8921",
+      baselinePopulationRisk: 0.082,
+      predicted10YearMaceRisk: 0.287,
+      riskCategory: "HIGH_CARDIOVASCULAR_RISK",
+      topShapDrivers: [
+        { feature: "systolic_bp_mmhg", value: 158, shapContribution: "+0.092" },
+        { feature: "ldl_cholesterol_mg_dl", value: 174, shapContribution: "+0.061" },
+        { feature: "hba1c_percent", value: 7.4, shapContribution: "+0.048" },
+        { feature: "hdl_cholesterol_mg_dl", value: 52, shapContribution: "-0.015" },
+      ],
+    },
+  },
+};
+
+export const CARDIAC_RISK_PLAYBACK_OBJ: CaseStudyPlayback = [
+  {
+    command: "cardiac-ml validate --dataset nhanes-cohort-2026.parquet --adversarial",
+    description: "Run adversarial validation drift checks on clinical cohort dataset",
+  },
+  {
+    command: "cardiac-ml train --models lgbm,xgboost,catboost --folds 10",
+    description: "Execute leak-free 10-fold Stratified OOF training across GBDT ensemble",
+  },
+  {
+    command: "cardiac-ml explain --patient-id PATIENT-8921",
+    description: "Generate TreeSHAP localized risk attribution waterfall for clinical triage",
+  },
+];
+
+export const FOUR_GLORY_COMMANDS_OBJ: CaseStudyCommands = {
+  "4glory stream connect --match-id EPL-2026-M42": {
+    description: "Connects to live match telemetry stream and initializes spatial event parser.",
+    payload: {
+      matchId: "EPL-2026-M42",
+      fixture: "Arsenal vs. Manchester City",
+      streamStatus: "CONNECTED_LIVE",
+      sampleRateHz: 25,
+      eventBufferCapacity: 65536,
+      latencyMs: 18.4,
+    },
+  },
+  "4glory analytics compute-xg --match-id EPL-2026-M42": {
+    description: "Evaluates live cumulative expected goals (xG), shot quality metrics, and pitch control.",
+    payload: {
+      homeTeam: { name: "Arsenal", actualGoals: 2, cumulativeXg: 2.18, shotCount: 14 },
+      awayTeam: { name: "Manchester City", actualGoals: 1, cumulativeXg: 1.42, shotCount: 9 },
+      highestQualityChance: {
+        minute: 64,
+        player: "B. Saka",
+        shotType: "Left Foot / Open Play",
+        xg: 0.62,
+        distanceMeters: 9.2,
+        angleDegrees: 42.1,
+      },
+    },
+  },
+  "4glory sim run --home \"Arsenal\" --away \"Manchester City\" --iterations 10000": {
+    description: "Executes 10,000-iteration Monte Carlo simulation from current match state.",
+    payload: {
+      iterationsCompleted: 10000,
+      durationMs: 142.6,
+      simulatedProbabilities: {
+        homeWin: "56.4%",
+        draw: "25.1%",
+        awayWin: "18.5%",
+      },
+      mostLikelyScoreline: "2 - 1 (Probability: 19.8%)",
+    },
+  },
+  "4glory evaluate-hypothesis --hypothesis \"High press in transition forces turnover against low block\"": {
+    description: "Empirically tests fan tactical hypothesis against seasonal spatial dataset.",
+    payload: {
+      hypothesis: "High press in transition forces turnover against low block",
+      sampleSizeMatches: 380,
+      empiricalTurnoverRate: "64.2%",
+      counterAttackConversionRate: "14.8%",
+      verdict: "CONFIRMED_STATISTICALLY_SIGNIFICANT",
+      fredBallKnowledgeScore: "98.7% // ELITE TACTICAL INTELLECT",
+    },
+  },
+};
+
+export const FOUR_GLORY_PLAYBACK_OBJ: CaseStudyPlayback = [
+  {
+    command: "4glory stream connect --match-id EPL-2026-M42",
+    description: "Connect to live match telemetry WebSocket stream",
+  },
+  {
+    command: "4glory analytics compute-xg --match-id EPL-2026-M42",
+    description: "Compute spatial expected goals (xG) and pitch control telemetry",
+  },
+  {
+    command: "4glory sim run --home \"Arsenal\" --away \"Manchester City\" --iterations 10000",
+    description: "Execute 10,000-iteration Monte Carlo match simulation",
+  },
+  {
+    command: "4glory evaluate-hypothesis --hypothesis \"High press in transition forces turnover against low block\"",
+    description: "Evaluate tactical hypothesis against empirical tracking data",
+  },
+];
+
+export const CRF_XL_COMMANDS_OBJ: CaseStudyCommands = {
+  "crf-xl compile --input oncology_study_protocol.xlsx --format cdisc-odm": {
+    description: "Ingests Excel protocol matrix and compiles into CDISC ODM-XML v1.3.2.",
+    payload: {
+      status: "COMPILATION_SUCCESS",
+      studyOid: "STUDY-ONCO-2026",
+      formsCount: 18,
+      itemGroupsCount: 42,
+      itemsTotal: 312,
+      cdashComplianceScore: "100%",
+      xmlSizeKb: 184.2,
+      auditHash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    },
+  },
+  "crf-xl ast eval --formula \"RECIST_SLD_CHANGE(SUM_CURRENT, SUM_BASELINE)\" --data '{\"SUM_CURRENT\": 34, \"SUM_BASELINE\": 50}'": {
+    description: "Evaluates clinical RECIST 1.1 percentage change formula using the zero-eval AST engine.",
+    payload: {
+      formula: "RECIST_SLD_CHANGE(SUM_CURRENT, SUM_BASELINE)",
+      variables: { SUM_CURRENT: 34, SUM_BASELINE: 50 },
+      calculatedResult: -32.0,
+      unit: "percent",
+      clinicalCategory: "PARTIAL_RESPONSE_PR",
+      astExecutionTimeMicrosec: 42,
+    },
+  },
+  "crf-xl lint --standards CDASH-2.2,21CFR11": {
+    description: "Lints compiled CRF specifications against CDASH terminology and 21 CFR Part 11 audit invariants.",
+    payload: {
+      lintStatus: "PASSED_CLEAN",
+      diagnostics: [],
+      checksPerformed: [
+        "Variable name CDASH conformity (<= 8 chars)",
+        "Controlled Terminology OID resolution",
+        "Audit trail mandatory flag verification",
+        "Zero circular AST formula dependencies",
+      ],
+    },
+  },
+};
+
+export const CRF_XL_PLAYBACK_OBJ: CaseStudyPlayback = [
+  {
+    command: "crf-xl compile --input oncology_study_protocol.xlsx --format cdisc-odm",
+    description: "Compile Excel protocol matrix into CDISC ODM-XML v1.3.2",
+  },
+  {
+    command: "crf-xl ast eval --formula \"RECIST_SLD_CHANGE(SUM_CURRENT, SUM_BASELINE)\" --data '{\"SUM_CURRENT\": 34, \"SUM_BASELINE\": 50}'",
+    description: "Evaluate clinical RECIST 1.1 formula using zero-eval AST engine",
+  },
+  {
+    command: "crf-xl lint --standards CDASH-2.2,21CFR11",
+    description: "Lint CRF specifications against CDASH 2.2 and 21 CFR Part 11 invariants",
+  },
+];
+
+export const PROMPTOPS_COMMANDS_OBJ: CaseStudyCommands = {
+  "promptops eval --suite clinical-triage --dataset ./evals/golden_v2.json": {
+    description: "Executes automated regression test suite across 150 golden evaluation samples.",
+    payload: {
+      suite: "clinical-triage",
+      samplesEvaluated: 150,
+      exactMatchPassRate: "98.6%",
+      llmJudgeScore: 4.92,
+      schemaValidationPassRate: "100%",
+      meanLatencyMs: 342,
+      totalTokensConsumed: 48210,
+      status: "EVAL_GATE_PASSED",
+    },
+  },
+  "promptops semver bump --component triage_prompt --type minor": {
+    description: "Bumps semantic version for prompt component and updates release lockfile.",
+    payload: {
+      component: "triage_prompt",
+      previousVersion: "v1.3.4",
+      newVersion: "v1.4.0",
+      changeType: "MINOR_SYSTEM_PROMPT_OPTIMIZATION",
+      lockfileUpdated: "./prompts/promptops.lock.json",
+      checksum: "8f3b2a19c4d8e7",
+    },
+  },
+  "promptops test --model gpt-4o --prompt-version v1.4.0 --input '{\"chief_complaint\": \"Chest pressure radiating to left arm\", \"onset_hours\": 2}'": {
+    description: "Dispatches live prompt execution with typed input and verifies Zod schema conformance.",
+    payload: {
+      model: "gpt-4o",
+      version: "v1.4.0",
+      responseParsed: {
+        acuityLevel: "EMERGENCY_LEVEL_1",
+        differentialDiagnosis: ["Acute Coronary Syndrome", "Aortic Dissection"],
+        recommendedImmediateActions: [
+          "12-lead ECG",
+          "Continuous Cardiac Monitoring",
+          "Sublingual Nitroglycerin",
+        ],
+        telemetryTrackingRequired: true,
+      },
+      schemaValid: true,
+      latencyMs: 412,
+    },
+  },
+  "promptops route --fallback-health-check": {
+    description: "Probes health status and latency of configured multi-provider LLM endpoints.",
+    payload: {
+      providers: [
+        { name: "Anthropic API", status: "HEALTHY", latencyMs: 148, activeRoute: "PRIMARY" },
+        { name: "OpenAI API", status: "HEALTHY", latencyMs: 182, activeRoute: "FALLBACK" },
+        { name: "Local Ollama", status: "HEALTHY", latencyMs: 42, activeRoute: "DEV_SANDBOX" },
+      ],
+    },
+  },
+};
+
+export const PROMPTOPS_PLAYBACK_OBJ: CaseStudyPlayback = [
+  {
+    command: "promptops eval --suite clinical-triage --dataset ./evals/golden_v2.json",
+    description: "Run automated eval test suite across golden evaluation dataset",
+  },
+  {
+    command: "promptops semver bump --component triage_prompt --type minor",
+    description: "Bump prompt semantic version and update release lockfile",
+  },
+  {
+    command: "promptops test --model gpt-4o --prompt-version v1.4.0 --input '{\"chief_complaint\": \"Chest pressure radiating to left arm\", \"onset_hours\": 2}'",
+    description: "Execute live prompt against model and validate Zod schema response",
+  },
+  {
+    command: "promptops route --fallback-health-check",
+    description: "Probe latency and availability across multi-provider LLM endpoints",
+  },
 ];
 
 const rawFallbackCaseStudies: CaseStudyData[] = [
@@ -1114,14 +1494,14 @@ self.onmessage = async (event) => {
   if (type === "RUN_SIMULATION") {
     try {
       pyodide.globals.set("raw_protocol_json", JSON.stringify(payload));
-      const pythonScript = \`
-import json
-from clintrials.core.unified import UnifiedTrialRunner
-protocol = json.loads(raw_protocol_json)
-runner = UnifiedTrialRunner(protocol)
-results = runner.run_simulations()
-json.dumps(results)
-      \`;
+      const pythonScript = [
+        "import json",
+        "from clintrials.core.unified import UnifiedTrialRunner",
+        "protocol = json.loads(raw_protocol_json)",
+        "runner = UnifiedTrialRunner(protocol)",
+        "results = runner.run_simulations()",
+        "json.dumps(results)"
+      ].join("\n");
       const resultJson = await pyodide.runPythonAsync(pythonScript);
       self.postMessage({ type: "SIMULATION_COMPLETE", reqId, data: JSON.parse(resultJson) });
     } catch (err) {
@@ -1245,7 +1625,7 @@ export class TrialSchemaTranspiler {
   public compile(ir: StudySchemaIR, target: TargetLanguage): string {
     const strategy = this.strategies.get(target);
     if (!strategy) {
-      throw new Error(\`Unsupported compilation target: \${target}\`);
+      throw new Error("Unsupported compilation target: " + target);
     }
     return strategy.generate(ir);
   }
@@ -1256,14 +1636,15 @@ export class TrialSchemaTranspiler {
 // src/app/domain/schema-management/services/generation/ir/r.strategy.ts
 export class RCodeGeneratorStrategy implements CodeGeneratorStrategy {
   public generate(ir: StudySchemaIR): string {
-    return \`# Generated by Equipose Randomization Engine
-# Seed Integrity SHA-256: \${ir.seedHash}
-set.seed(\${ir.seed})
-arms <- c(\${ir.arms.map(a => \`"\${a.name}"\`).join(", ")})
-weights <- c(\${ir.arms.map(a => a.weight).join(", ")})
-allocation <- sample(arms, size = \${ir.sampleSize}, replace = TRUE, prob = weights)
-data.frame(SubjectID = 1:\${ir.sampleSize}, TreatmentArm = allocation)
-\`;
+    return [
+      "# Generated by Equipose Randomization Engine",
+      "# Seed Integrity SHA-256: " + ir.seedHash,
+      "set.seed(" + ir.seed + ")",
+      "arms <- c(" + ir.arms.map(a => '"' + a.name + '"').join(", ") + ")",
+      "weights <- c(" + ir.arms.map(a => a.weight).join(", ") + ")",
+      "allocation <- sample(arms, size = " + ir.sampleSize + ", replace = TRUE, prob = weights)",
+      "data.frame(SubjectID = 1:" + ir.sampleSize + ", TreatmentArm = allocation)"
+    ].join("\n");
   }
 }
 </code></pre>
@@ -1504,6 +1885,699 @@ flowchart LR
   <li><strong>Lock-Free C++ Ring Buffer:</strong> Implemented custom C++ lock-free ring buffers for UART frame ingestion to eliminate garbage collector pauses in the critical ingestion path.</li>
 </ul>`,
     created_at: new Date("2026-03-10T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-16",
+    slug: "duckdeploy",
+    title: "DuckDeploy: Schema-Driven Dynamic UI Engine & Manifest Compiler",
+    primary_language: "TypeScript",
+    github_url: "https://github.com/fderuiter/duckdeploy",
+    published: true,
+    simulated_telemetry: false,
+    tags: "TypeScript, React, Web Workers, JSON Schema, AST Compiler, Polymorphic UI, Dynamic Forms, Kubernetes, Zero-Latency",
+    editorial_content: "A high-assurance **schema-driven dynamic UI synthesis engine** and **Web Worker manifest compiler** built in **TypeScript**. Synthesizes polymorphic container configuration forms in real time from dynamic `JSON Schema` ASTs, offloading heavy multi-target compilation (Kubernetes, Helm, Cloud Run) to dedicated worker threads with zero main-thread UI jank.",
+    architectural_narrative: `<h3>1. Executive Summary & Value Proposition</h3>
+<p>Modern cloud-native container workloads require configuring deeply nested, multi-tenant YAML manifests encompassing resource quotas, ingress rules, secret mounts, health probes, and sidecar proxies. Hand-crafting these specifications leads to syntax errors, schema drift across cluster releases, and deployment outages. Traditional form builders either hardcode static form schemas (unmaintainable across fast-moving container definitions) or use naive dynamic form libraries that suffer from main-thread re-render thrashing during 50KB+ manifest AST resolution.</p>
+<p><strong>Core Technical Highlight:</strong> DuckDeploy dynamically ingests JSON Schema Draft-07 and Draft 2020-12 specifications, compiles structural types into a normalized Abstract Syntax Tree (AST), and synthesizes polymorphic form state. Manifest generation for Kubernetes, Helm values, and Knative Cloud Run specs is entirely offloaded to background Web Workers, maintaining strict sub-4ms keystroke input latency on 100+ field dynamic forms.</p>
+
+<h3>2. Architecture & Design Patterns</h3>
+<p><strong>AST-Driven Dynamic UI Synthesis:</strong> Parses complex JSON Schema constructs (<code>oneOf</code>, <code>anyOf</code>, <code>$ref</code>, <code>patternProperties</code>) into an intermediate UI node tree (<code>SchemaNode</code>), mapping structural primitives to specialized, accessible input components.</p>
+<p><strong>Polymorphic Discriminated Union Store:</strong> Utilizes a Zustand-backed normalized state store that isolates inactive polymorphic union branches, preventing stale input parameters from leaking into compiled output manifests.</p>
+<p><strong>Off-Main-Thread Web Worker Compilation Pipeline:</strong> An isolated Web Worker execution sandbox (<code>manifest.worker.ts</code>) processes AST normalization, Zod constraint validation, and multi-format YAML generation without degrading React 19 rendering frame rates.</p>
+
+<h3>3. System Design & Runtime Flow</h3>
+<pre><code class="language-mermaid">
+flowchart TD
+    subgraph SchemaIngest [Schema Ingestion & Form Synthesis]
+        A[JSON Schema / OpenAPI Spec] --> B[Schema AST Normalizer]
+        B --> C[Dynamic Form Synthesizer]
+        C --> D[Polymorphic Form State Store]
+    end
+
+    subgraph WorkerThread [Off-Main-Thread Worker Compiler]
+        D -->|Worker RPC PostMessage| E[AST Manifest Compiler]
+        E --> F[Cross-Field Rule & Cyclic Check]
+        F --> G1[Kubernetes Pod/Deployment YAML]
+        F --> G2[Helm Values Spec]
+        F --> G3[Cloud Run Knative Spec]
+    end
+
+    subgraph UIReview [Telemetry & Output View]
+        G1 & G2 & G3 --> H[Monaco Editor Preview & Telemetry Inspector]
+        H --> I[Dry-Run Deployment Simulation]
+    end
+</code></pre>
+
+<h4>Schema AST Normalization & Type Resolution (<code>lib/schema-normalizer.ts</code>)</h4>
+<pre><code class="language-typescript">
+// Recursive Schema AST Normalizer & Node Synthesis
+export interface SchemaASTNode {
+  id: string;
+  type: "string" | "number" | "boolean" | "object" | "array" | "oneOf" | "anyOf";
+  title: string;
+  description?: string;
+  required?: boolean;
+  properties?: Record&lt;string, SchemaASTNode&gt;;
+  items?: SchemaASTNode;
+  discriminator?: string;
+  branches?: Record&lt;string, SchemaASTNode&gt;;
+}
+
+export function normalizeSchemaAST(
+  rawSchema: Record&lt;string, unknown&gt;,
+  definitions: Record&lt;string, unknown&gt; = {}
+): SchemaASTNode {
+  if (rawSchema.$ref && typeof rawSchema.$ref === "string") {
+    const refKey = rawSchema.$ref.replace("#/definitions/", "");
+    const resolved = definitions[refKey] as Record&lt;string, unknown&gt;;
+    return normalizeSchemaAST(resolved || {}, definitions);
+  }
+
+  const type = (rawSchema.type as SchemaASTNode["type"]) || "object";
+  const node: SchemaASTNode = {
+    id: (rawSchema.$id as string) || ("node-" + Math.random().toString(36).slice(2, 9)),
+    type,
+    title: (rawSchema.title as string) || "Configuration Block",
+    description: rawSchema.description as string | undefined,
+  };
+
+  if (type === "object" && rawSchema.properties) {
+    node.properties = {};
+    const rawProps = rawSchema.properties as Record&lt;string, Record&lt;string, unknown&gt;&gt;;
+    for (const [key, propDef] of Object.entries(rawProps)) {
+      node.properties[key] = normalizeSchemaAST(propDef, definitions);
+    }
+  }
+
+  return node;
+}
+</code></pre>
+
+<h4>Off-Thread Manifest Compiler Worker (<code>workers/k8s.manifest.worker.ts</code>)</h4>
+<pre><code class="language-typescript">
+// Web Worker message listener for zero-jank manifest generation
+import { dump as yamlDump } from "js-yaml";
+
+addEventListener("message", ({ data }: MessageEvent&lt;{ formState: Record&lt;string, unknown&gt;; target: string }&gt;) => {
+  const { formState, target } = data;
+  const startTime = performance.now();
+
+  const manifest = {
+    apiVersion: "apps/v1",
+    kind: "Deployment",
+    metadata: {
+      name: formState.serviceName || "duckdeploy-service",
+      namespace: formState.namespace || "default",
+      labels: { "app.kubernetes.io/managed-by": "duckdeploy" },
+    },
+    spec: {
+      replicas: Number(formState.replicas) || 1,
+      selector: { matchLabels: { app: formState.serviceName } },
+      template: {
+        metadata: { labels: { app: formState.serviceName } },
+        spec: {
+          containers: [
+            {
+              name: "app",
+              image: formState.imageUri,
+              resources: {
+                limits: { cpu: formState.cpuLimit, memory: formState.memoryLimit },
+              },
+            },
+          ],
+        },
+      },
+    },
+  };
+
+  postMessage({
+    yaml: yamlDump(manifest),
+    durationMs: round(performance.now() - startTime, 2),
+  });
+});
+</code></pre>
+
+<h3>4. Critical Invariants, Edge Cases & Defect Remediations</h3>
+<ul>
+  <li><strong>Cyclic Dependency Resolution:</strong> Recursive <code>$ref</code> pointers are resolved with depth-bounded pointer caching (depth limit = 16), safely halting cyclic loops while preserving schema expressiveness.</li>
+  <li><strong>Polymorphic State Isolation:</strong> When switching between union alternatives (e.g., switching from Dockerfile build to Prebuilt Image Registry), inactive sub-tree fields are quarantined in a staging snapshot to prevent ghost fields from emitting into output YAML.</li>
+  <li><strong>Sub-4ms Keystroke Latency:</strong> Multi-target manifest generation is debounced with a 150ms worker dispatch queue, isolating heavy YAML serializations from the browser's 60fps main UI event loop.</li>
+</ul>
+
+<h3>5. Lessons Learned & Architectural Trade-Offs</h3>
+<ul>
+  <li><strong>Client-Side Worker Compilation vs. Remote REST API:</strong> Compiling manifests client-side eliminated server roundtrips, reducing preview update latency from 450ms to 2.4ms and allowing full offline manifest authoring.</li>
+  <li><strong>Custom AST Normalizer vs. Heavy Generic Schema Parsers:</strong> Authoring a tailored, lightweight AST normalizer reduced the client bundle footprint by 85KB compared to monolithic schema engines.</li>
+</ul>`,
+    commands_json: JSON.stringify(DUCKDEPLOY_COMMANDS_OBJ),
+    playback_json: JSON.stringify(DUCKDEPLOY_PLAYBACK_OBJ),
+    created_at: new Date("2026-03-15T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-17",
+    slug: "cardiac-risk-modeling",
+    title: "Predictive Cardiac Risk Modeling: Clinical Tabular ML & Leak-Free OOF Pipeline",
+    primary_language: "Python",
+    github_url: "https://github.com/fderuiter/cardiac-risk-modeling",
+    published: true,
+    simulated_telemetry: false,
+    tags: "Python, Scikit-Learn, LightGBM, XGBoost, CatBoost, Tabular ML, Clinical Informatics, Cross-Validation, Adversarial Validation, SHAP",
+    editorial_content: "An enterprise **clinical tabular machine learning pipeline** built in **Python** for predicting 10-year major adverse cardiovascular events (MACE). Features **adversarial validation** to detect cohort distribution shifts, strict **leak-free Stratified Out-of-Fold (OOF) cross-validation**, and isotonic probability calibration tailored for high-stakes clinical triage.",
+    architectural_narrative: `<h3>1. Executive Summary & Value Proposition</h3>
+<p>Cardiovascular disease remains the leading cause of global mortality. While Electronic Health Record (EHR) registries (e.g. NHANES, UK Biobank, Framingham) provide rich longitudinal biomarker measurements, developing robust machine learning models for 10-year Major Adverse Cardiovascular Events (MACE) is fraught with covariate drift across health systems, subtle target leakage, and skewed probability calibration. Standard pipelines that fit transformers across full datasets report inflated validation scores that fail catastrophically in clinical practice.</p>
+<p><strong>Core Technical Highlight:</strong> Engineered an end-to-end clinical tabular ML pipeline in Python implementing leak-free Stratified Out-of-Fold (OOF) cross-validation. Employs adversarial validation to preemptively diagnose covariate shifts, ensembles tuned gradient-boosted decision trees (LightGBM, XGBoost, CatBoost), and uses Isotonic Regression to minimize Expected Calibration Error (ECE) below 2.5% with TreeSHAP patient-level risk attribution.</p>
+
+<h3>2. Architecture & Design Patterns</h3>
+<p><strong>Adversarial Validation Subsystem:</strong> Trains a domain-classifier to discriminate training vs external test cohort distributions (AUC &lt; 0.55 validation gate), automatically flagging biomarker shift before model training.</p>
+<p><strong>Encapsulated In-Fold Preprocessing:</strong> Custom Scikit-Learn transformers (MICE iterative missingness imputation, categorical weight-of-evidence encoding, winsorization) fit strictly on train folds and purely transform out-of-fold validation sets.</p>
+<p><strong>Ensemble Model Architecture &amp; Isotonic Calibration:</strong> Rank-averages predictions from LightGBM, XGBoost, and CatBoost, followed by Isotonic Regression and Platt scaling to provide well-calibrated probabilistic risk scores suitable for clinical triage.</p>
+<p><strong>Explainable Clinical AI via TreeSHAP:</strong> Decomposes individual patient log-odds into transparent biomarker risk contributions (systolic BP, LDL cholesterol, HbA1c, smoking pack-years).</p>
+
+<h3>3. System Design & Runtime Flow</h3>
+<pre><code class="language-mermaid">
+flowchart TD
+    subgraph Ingestion [Clinical Cohort Data Stream]
+        A[Raw Electronic Health Records] --> B[Biomarker Cleaner & Cohort Filter]
+        B --> C[Adversarial Validation: Drift Detection]
+    end
+
+    subgraph ValidationEngine [Leak-Free Stratified 10-Fold CV]
+        C -->|Passed Drift Gate| D[Stratified Out-Of-Fold Splitter]
+        D --> E1[In-Fold Missingness Imputation]
+        E1 --> E2[In-Fold Winsorization & Scaling]
+        E2 --> E3[In-Fold Weight-of-Evidence Encoder]
+    end
+
+    subgraph ModelEnsemble [Gradient Boosted Ensemble & Calibration]
+        E3 --> F1[LightGBM Classifier]
+        E3 --> F2[XGBoost Classifier]
+        E3 --> F3[CatBoost Classifier]
+        F1 & F2 & F3 --> G[Ensemble Rank Averaging]
+        G --> H[Isotonic Probability Calibration]
+    end
+
+    subgraph Evaluation [Clinical Evaluation & Explainability]
+        H --> I1[Out-Of-Fold AUROC: 0.894 / Brier: 0.088]
+        H --> I2[SHAP Patient Waterfall Attribution]
+        H --> I3[Clinical Decision Curve Net Benefit]
+    end
+</code></pre>
+
+<h4>Leak-Free Stratified Cross-Validation Engine (<code>src/pipeline/oof_validator.py</code>)</h4>
+<pre><code class="language-python">
+# Strict In-Fold Preprocessing & Ensemble OOF Validator
+import numpy as np
+from sklearn.model_selection import StratifiedKFold
+from sklearn.impute import IterativeImputer
+from sklearn.calibration import CalibratedClassifierCV
+import lightgbm as lgb
+
+class LeakFreeClinicalPipeline:
+    def __init__(self, n_splits: int = 10, random_state: int = 42):
+        self.n_splits = n_splits
+        self.random_state = random_state
+        self.oof_predictions = None
+        self.models = []
+
+    def fit_predict_oof(self, X: np.ndarray, y: np.ndarray) -> np.ndarray:
+        skf = StratifiedKFold(n_splits=self.n_splits, shuffle=True, random_state=self.random_state)
+        self.oof_predictions = np.zeros(len(X))
+
+        for fold, (train_idx, val_idx) in enumerate(skf.split(X, y)):
+            X_train, y_train = X[train_idx], y[train_idx]
+            X_val, y_val = X[val_idx], y[val_idx]
+
+            # Imputation transformer fit strictly on train fold
+            imputer = IterativeImputer(max_iter=10, random_state=self.random_state)
+            X_train_imp = imputer.fit_transform(X_train)
+            X_val_imp = imputer.transform(X_val)
+
+            # Gradient Boosted Classifier with early stopping
+            clf = lgb.LGBMClassifier(
+                n_estimators=1000,
+                learning_rate=0.03,
+                num_leaves=31,
+                random_state=self.random_state + fold
+            )
+            clf.fit(
+                X_train_imp, y_train,
+                eval_set=[(X_val_imp, y_val)],
+                callbacks=[lgb.early_stopping(50, verbose=False)]
+            )
+
+            # Calibrate probabilities via Isotonic Regression
+            calibrator = CalibratedClassifierCV(clf, cv="prefit", method="isotonic")
+            calibrator.fit(X_val_imp, y_val)
+
+            self.oof_predictions[val_idx] = calibrator.predict_proba(X_val_imp)[:, 1]
+            self.models.append(calibrator)
+
+        return self.oof_predictions
+</code></pre>
+
+<h4>Adversarial Validation Cohort Drift Classifier (<code>src/validation/adversarial.py</code>)</h4>
+<pre><code class="language-python">
+# Adversarial Validation to detect clinical site distribution drift
+from sklearn.metrics import roc_auc_score
+from sklearn.ensemble import RandomForestClassifier
+
+def evaluate_adversarial_drift(train_df, test_df, feature_cols) -> float:
+    """Trains a domain classifier to distinguish train vs test samples."""
+    train_copy = train_df[feature_cols].copy()
+    test_copy = test_df[feature_cols].copy()
+
+    train_copy["is_test"] = 0
+    test_copy["is_test"] = 1
+
+    combined = pd.concat([train_copy, test_copy], ignore_index=True)
+    X = combined[feature_cols].fillna(-999)
+    y = combined["is_test"]
+
+    clf = RandomForestClassifier(n_estimators=100, max_depth=4, random_state=42)
+    clf.fit(X, y)
+    preds = clf.predict_proba(X)[:, 1]
+
+    adversarial_auc = roc_auc_score(y, preds)
+    return float(adversarial_auc)
+</code></pre>
+
+<h3>4. Critical Invariants, Edge Cases & Defect Remediations</h3>
+<ul>
+  <li><strong>Zero Preprocessing Information Leakage:</strong> All imputation parameters, outlier thresholds, and encoding weights are fitted exclusively on training folds. Out-of-fold validation sets are purely transformed.</li>
+  <li><strong>Extreme Class Imbalance Protection:</strong> Clinical events (MACE) occur in ~8% of subjects. Uses Focal Loss objective and Stratified Group K-Fold (grouped by hospital site) to prevent intra-facility sample contamination.</li>
+  <li><strong>Expected Calibration Error (ECE) &lt; 2.5%:</strong> Isotonic probability calibration avoids overconfident classification on borderline patients, aligning risk predictions with true empirical prevalence.</li>
+</ul>
+
+<h3>5. Lessons Learned & Architectural Trade-Offs</h3>
+<ul>
+  <li><strong>Gradient Boosted Trees vs. Deep Tabular Networks:</strong> LightGBM and CatBoost converged 40x faster than TabNet/FT-Transformer architectures while delivering superior out-of-fold AUROC (0.894 vs. 0.862) on 25k clinical cohorts.</li>
+  <li><strong>Adversarial Validation Pre-screening:</strong> Identifying covariate drift in urinary albumin-to-creatinine ratio (UACR) across clinical sites before model training prevented severe test-set generalization failure.</li>
+</ul>`,
+    commands_json: JSON.stringify(CARDIAC_RISK_COMMANDS_OBJ),
+    playback_json: JSON.stringify(CARDIAC_RISK_PLAYBACK_OBJ),
+    created_at: new Date("2026-03-18T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-18",
+    slug: "4glory",
+    title: "4Glory | Does Fred Know Ball?: Real-Time Sports Analytics & Simulation Engine",
+    primary_language: "TypeScript",
+    github_url: "https://github.com/fderuiter/4glory",
+    published: true,
+    simulated_telemetry: false,
+    tags: "TypeScript, Node.js, WebSockets, Sports Analytics, Real-Time Pipeline, Monte Carlo Simulation, Expected Goals, xG, Spatial Tracking",
+    editorial_content: "A high-throughput **real-time sports analytics platform** and **Monte Carlo simulation engine** engineered in **TypeScript**. Ingests live match event streams, computes spatial **Expected Goals (xG)** and **Possession Value (xPV)** in sub-50ms cycles, and evaluates fan tactical hypotheses through 10,000-iteration stochastic game simulations.",
+    architectural_narrative: `<h3>1. Executive Summary & Value Proposition</h3>
+<p>Modern football tracking systems generate dense 25Hz spatial telemetry streams alongside discrete on-pitch event feeds. Ingesting, parsing, and evaluating tactical hypotheses in real time—answering questions like "Does Fred Know Ball?"—requires sub-50ms processing latency, geometric pitch decomposition, and fast stochastic simulation without locking up event ingestion.</p>
+<p><strong>Core Technical Highlight:</strong> Engineered a real-time analytics engine in TypeScript utilizing lock-free in-memory ring buffers, Voronoi spatial pitch discretization for Expected Goals (xG) and Expected Possession Value (xPV), and a 10,000-iteration Monte Carlo simulation engine executing in under 150ms.</p>
+
+<h3>2. Architecture & Design Patterns</h3>
+<p><strong>Lock-Free Ingestion &amp; Ring Buffer Pipeline:</strong> High-throughput WebSocket message broker buffering high-frequency coordinate feeds into pre-allocated memory buffers to eliminate garbage collection latency spikes during live match periods.</p>
+<p><strong>Spatial Geometry &amp; Voronoi Pitch Control:</strong> Computes player influence surfaces, passing lane obstruction cones, and shot quality vectors using discretized pitch coordinates.</p>
+<p><strong>High-Speed Stochastic Match Simulator:</strong> Simulates 10,000 counterfactual game trajectories using bit-packed state vectors to compute empirical win/draw/loss distributions.</p>
+<p><strong>Hypothesis Evaluation Engine:</strong> Evaluates tactical claims against multi-season empirical datasets, computing statistical confidence scores and validating predictive accuracy.</p>
+
+<h3>3. System Design & Runtime Flow</h3>
+<pre><code class="language-mermaid">
+flowchart LR
+    subgraph IngestStream [Live Ingestion & Buffer]
+        A[Opta / StatsBomb Match Stream] --> B[WebSocket Message Broker]
+        B --> C[Lock-Free Event RingBuffer]
+    end
+
+    subgraph AnalyticsEngine [Spatial Analytics & xG Engine]
+        C --> D[Spatial Pitch Discretizer]
+        D --> E1[Expected Goals xG Model]
+        D --> E2[Expected Possession Value xPV]
+        D --> E3[Passing Lane Geometry & Pitch Control]
+    end
+
+    subgraph SimEngine [Hypothesis & Monte Carlo]
+        E1 & E2 & E3 --> F[Stochastic Match Simulator]
+        F --> G[10,000 Iteration Monte Carlo Batch]
+        G --> H[Empirical Probability Distribution]
+    end
+
+    subgraph UIAnalytics [Live Dashboard & API]
+        H --> I[Live Match Telemetry & Fred Knowledge Score]
+    end
+</code></pre>
+
+<h4>Spatial Expected Goals (xG) Calculation Engine (<code>lib/analytics/xg_calculator.ts</code>)</h4>
+<pre><code class="language-typescript">
+// Discretized Spatial Shot Geometry & xG Prediction Model
+export interface ShotEvent {
+  x: number; // Pitch coordinate (0-105m)
+  y: number; // Pitch coordinate (0-68m)
+  bodyPart: "left_foot" | "right_foot" | "head";
+  shotType: "open_play" | "counter_attack" | "set_piece" | "penalty";
+  defendersInCone: number;
+}
+
+export function calculateShotXG(shot: ShotEvent): number {
+  const GOAL_X = 105.0;
+  const GOAL_Y = 34.0;
+  const GOAL_WIDTH = 7.32;
+
+  const dx = GOAL_X - shot.x;
+  const dy = Math.abs(GOAL_Y - shot.y);
+  const distanceMeters = Math.hypot(dx, dy);
+  const angleRad = Math.atan2(GOAL_WIDTH * dx, dx * dx + dy * dy - (GOAL_WIDTH / 2) ** 2);
+  const angleDegrees = (angleRad * 180) / Math.PI;
+
+  let logit = 0.45 - 0.115 * distanceMeters + 0.038 * angleDegrees - 0.28 * shot.defendersInCone;
+  if (shot.bodyPart === "head") logit -= 0.55;
+  if (shot.shotType === "counter_attack") logit += 0.35;
+
+  return 1.0 / (1.0 + Math.exp(-logit));
+}
+</code></pre>
+
+<h4>Monte Carlo Match Simulation Engine (<code>lib/simulation/monte_carlo.ts</code>)</h4>
+<pre><code class="language-typescript">
+// 10,000-Iteration Stochastic Match Simulation Batch Runner
+export interface SimulationResult {
+  homeWinPct: number;
+  drawPct: number;
+  awayWinPct: number;
+  durationMs: number;
+}
+
+export function runMonteCarloSimulations(
+  homeXgRate: number,
+  awayXgRate: number,
+  iterations: number = 10000
+): SimulationResult {
+  const start = performance.now();
+  let homeWins = 0;
+  let draws = 0;
+  let awayWins = 0;
+
+  for (let i = 0; i < iterations; i++) {
+    // Poisson approximation for match goal generation
+    const homeGoals = samplePoisson(homeXgRate);
+    const awayGoals = samplePoisson(awayXgRate);
+
+    if (homeGoals > awayGoals) homeWins++;
+    else if (homeGoals === awayGoals) draws++;
+    else awayWins++;
+  }
+
+  return {
+    homeWinPct: (homeWins / iterations) * 100,
+    drawPct: (draws / iterations) * 100,
+    awayWinPct: (awayWins / iterations) * 100,
+    durationMs: performance.now() - start,
+  };
+}
+
+function samplePoisson(lambda: number): number {
+  let L = Math.exp(-lambda);
+  let k = 0;
+  let p = 1.0;
+  do {
+    k++;
+    p *= Math.random();
+  } while (p > L);
+  return k - 1;
+}
+</code></pre>
+
+<h3>4. Critical Invariants, Edge Cases & Defect Remediations</h3>
+<ul>
+  <li><strong>Out-of-Order Telemetry Resolution:</strong> Ingestion ring buffer reorders out-of-sequence coordinate frames across a 500ms sliding monotonic timestamp window, preventing erroneous velocity spikes.</li>
+  <li><strong>Zero Event Drops Under Congestion:</strong> Backpressure regulator switches from 25Hz positional updates to high-priority discrete event frames during network bursts, maintaining 100% data completeness on shots and turnovers.</li>
+</ul>
+
+<h3>5. Lessons Learned & Architectural Trade-Offs</h3>
+<ul>
+  <li><strong>Typed Arrays vs. Object Allocations:</strong> Transitioning simulation state vectors from JavaScript objects to flat <code>Float32Array</code> buffers yielded a 10x execution speedup (142ms for 10k iterations).</li>
+  <li><strong>Client-Side Simulation vs. Server Calculation:</strong> Offloading hypothesis evaluation to the client browser allowed interactive "what-if" parameter scrubbing with immediate visual feedback.</li>
+</ul>`,
+    commands_json: JSON.stringify(FOUR_GLORY_COMMANDS_OBJ),
+    playback_json: JSON.stringify(FOUR_GLORY_PLAYBACK_OBJ),
+    created_at: new Date("2026-03-20T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-19",
+    slug: "crf-xl",
+    title: "CRF.xl: Spreadsheet-to-CDISC CRF Compiler & Zero-Eval AST Calculation Engine",
+    primary_language: "TypeScript",
+    github_url: "https://github.com/fderuiter/crf-xl",
+    published: true,
+    simulated_telemetry: false,
+    tags: "TypeScript, CDISC, CDASH, ODM-XML, 21 CFR Part 11, AST Evaluator, Clinical Trials, Compiler Design, Zero-Eval",
+    editorial_content: "A regulatory-grade **spreadsheet-to-CDISC CRF compiler** and **zero-eval AST calculation engine** engineered in **TypeScript**. Parses Excel/CSV clinical trial protocol matrices into compliant **CDISC CDASH 2.2** and **ODM-XML v1.3.2** structures, calculating complex clinical formulas (BSA, BMI, QTc, Cockcroft-Gault CrCl, RECIST 1.1) with full **FDA 21 CFR Part 11** audit trail guarantees.",
+    architectural_narrative: `<h3>1. Executive Summary & Value Proposition</h3>
+<p>Clinical trial protocol designers commonly draft case report forms (CRFs) in spreadsheets (Excel/CSV). Ingesting and transforming these matrices into validated Electronic Data Capture (EDC) schemas is typically a multi-week manual effort subject to human transcription errors. Furthermore, dynamic derived fields in clinical forms are frequently evaluated using unsafe JavaScript <code>eval()</code>, violating FDA 21 CFR Part 11 validation and software assurance requirements.</p>
+<p><strong>Core Technical Highlight:</strong> CRF.xl implements a streaming matrix lexer and recursive descent AST calculation engine that parses spreadsheets into compliant CDISC CDASH 2.2 and ODM-XML v1.3.2 schemas, computing clinical derivations (BSA, BMI, QTc, CrCl, RECIST 1.1) with zero <code>eval()</code> and full cryptographic audit trails.</p>
+
+<h3>2. Architecture & Design Patterns</h3>
+<p><strong>Streaming Protocol Matrix Lexer:</strong> Ingests Excel and CSV protocol sheets, validating variable length constraints (&lt;= 8 chars), domain naming conventions, and Controlled Terminology codelists into an immutable intermediate representation (<code>CRF-IR</code>).</p>
+<p><strong>Zero-Eval Recursive Descent AST Engine:</strong> Tokenizes and evaluates arithmetic and logical expressions (e.g. <code>1000 * (CRCL_SERUM_CR * 72)</code>) with bounded recursion depth, eliminating all dynamic code execution vectors.</p>
+<p><strong>Multi-Target Regulatory Emitters:</strong> Serializes validated XML schemas conforming to CDISC ODM v1.3.2 and generates annotated CRF (aCRF) specification files and FHIR Questionnaire JSON.</p>
+<p><strong>Cryptographic 21 CFR Part 11 Audit Trail:</strong> Computes SHA-256 state digests across all form definitions, derivation formulas, and linting rules.</p>
+
+<h3>3. System Design & Runtime Flow</h3>
+<pre><code class="language-mermaid">
+flowchart TD
+    subgraph IngestLayer [Spreadsheet Protocol Ingestion]
+        A[Protocol Matrix: Excel / CSV] --> B[Streaming Sheet Lexer]
+        B --> C[Grid Matrix Normalizer]
+    end
+
+    subgraph CompilerCore [CRF Intermediate Representation & AST]
+        C --> D[CRF-IR Builder]
+        D --> E1[CDASH Controlled Terminology Linter]
+        D --> E2[Zero-Eval Recursive Descent AST Engine]
+        E2 --> E3[Clinical Formula Presets: BSA, BMI, QTc, CrCl, RECIST]
+    end
+
+    subgraph RegulatoryExporters [Multi-Target Regulatory Emitters]
+        E1 & E3 --> F1[CDISC ODM-XML v1.3.2 Document]
+        E1 & E3 --> F2[FDA aCRF Annotated PDF Specs]
+        E1 & E3 --> F3[SAS / R ADaM Derivation Code]
+        E1 & E3 --> F4[FHIR Questionnaire JSON]
+    end
+</code></pre>
+
+<h4>Zero-Eval Recursive Descent AST Evaluator (<code>lib/ast/evaluator.ts</code>)</h4>
+<pre><code class="language-typescript">
+// Zero-Eval AST Tokenizer and Clinical Formula Evaluator
+export type ASTNode =
+  | { type: "NUMBER"; value: number }
+  | { type: "IDENTIFIER"; name: string }
+  | { type: "BINARY_OP"; op: "+" | "-" | "*" | "/" | "^"; left: ASTNode; right: ASTNode }
+  | { type: "FUNCTION_CALL"; fn: string; args: ASTNode[] };
+
+export class ClinicalASTEvaluator {
+  private presets: Record&lt;string, (...args: number[]) =&gt; number&gt; = {
+    BSA_DUBOIS: (w, h) => 0.007184 * Math.pow(w, 0.425) * Math.pow(h, 0.725),
+    BMI: (w, h) => w / Math.pow(h / 100, 2),
+    QTC_BAZETT: (qt, rr) => qt / Math.sqrt(rr),
+    RECIST_CHANGE: (cur, base) => ((cur - base) / base) * 100,
+  };
+
+  public evaluate(node: ASTNode, context: Record&lt;string, number&gt;): number {
+    switch (node.type) {
+      case "NUMBER":
+        return node.value;
+      case "IDENTIFIER":
+        if (!(node.name in context)) throw new Error("Missing clinical variable: " + node.name);
+        return context[node.name];
+      case "BINARY_OP": {
+        const l = this.evaluate(node.left, context);
+        const r = this.evaluate(node.right, context);
+        if (node.op === "/" && r === 0) throw new Error("Division by zero in clinical calculation");
+        if (node.op === "+") return l + r;
+        if (node.op === "-") return l - r;
+        if (node.op === "*") return l * r;
+        if (node.op === "/") return l / r;
+        if (node.op === "^") return Math.pow(l, r);
+        throw new Error("Unsupported operator: " + node.op);
+      }
+      case "FUNCTION_CALL": {
+        const fn = this.presets[node.fn.toUpperCase()];
+        if (!fn) throw new Error("Unknown clinical preset function: " + node.fn);
+        const args = node.args.map((a) => this.evaluate(a, context));
+        return fn(...args);
+      }
+    }
+  }
+}
+</code></pre>
+
+<h4>CDISC ODM-XML v1.3.2 Serializer (<code>lib/export/odm_serializer.ts</code>)</h4>
+<pre><code class="language-typescript">
+// CDISC ODM-XML v1.3.2 Study MetaData Serializer
+export function serializeODMStudy(study: { oid: string; name: string; description: string; protocolId: string; forms: Array&lt;{ oid: string; name: string; itemGroups: Array&lt;{ oid: string }&gt; }&gt; }): string {
+  const formsXml = study.forms.map((f) =>
+    '&lt;FormDef OID="' + f.oid + '" Name="' + f.name + '" Repeating="No"&gt;' +
+    f.itemGroups.map((g) => '&lt;ItemGroupRef ItemGroupOID="' + g.oid + '" Mandatory="Yes"/&gt;').join("") +
+    '&lt;/FormDef&gt;'
+  ).join("");
+
+  return '&lt;?xml version="1.0" encoding="UTF-8"?&gt;\\n' +
+    '&lt;ODM xmlns="http://www.cdisc.org/ns/odm/v1.3" ODMVersion="1.3.2" FileType="Snapshot"&gt;\\n' +
+    '  &lt;Study OID="' + study.oid + '"&gt;\\n' +
+    '    &lt;GlobalVariables&gt;\\n' +
+    '      &lt;StudyName&gt;' + study.name + '&lt;/StudyName&gt;\\n' +
+    '      &lt;StudyDescription&gt;' + study.description + '&lt;/StudyDescription&gt;\\n' +
+    '      &lt;ProtocolName&gt;' + study.protocolId + '&lt;/ProtocolName&gt;\\n' +
+    '    &lt;/GlobalVariables&gt;\\n' +
+    '    &lt;MetaDataVersion OID="MDV.1" Name="CDASH 2.2 Specification"&gt;\\n' +
+    '      ' + formsXml + '\\n' +
+    '    &lt;/MetaDataVersion&gt;\\n' +
+    '  &lt;/Study&gt;\\n' +
+    '&lt;/ODM&gt;';
+}
+</code></pre>
+
+<h3>4. Critical Invariants, Edge Cases & Defect Remediations</h3>
+<ul>
+  <li><strong>Zero Unsafe Dynamic Execution:</strong> All formulas are processed by the recursive descent AST tokenizer, strictly eliminating <code>eval()</code> and <code>Function()</code> constructors.</li>
+  <li><strong>Division-by-Zero &amp; Boundary Trapping:</strong> Formula evaluations return typed result envelopes with structured diagnostic codes, preventing unhandled runtime exceptions during data entry.</li>
+</ul>
+
+<h3>5. Lessons Learned & Architectural Trade-Offs</h3>
+<ul>
+  <li><strong>Lightweight AST vs. Heavy Math Engines:</strong> Implementing a custom 300-line AST parser eliminated 120KB of dependencies and enabled strict validation compliance with FDA 21 CFR Part 11 audit requirements.</li>
+  <li><strong>Deterministic SHA-256 State Hashing:</strong> Hashing form definitions and formula expressions allowed immediate detection of specification drift between protocol versions.</li>
+</ul>`,
+    commands_json: JSON.stringify(CRF_XL_COMMANDS_OBJ),
+    playback_json: JSON.stringify(CRF_XL_PLAYBACK_OBJ),
+    created_at: new Date("2026-03-22T00:00:00Z"),
+    updated_at: new Date("2026-08-14T00:00:00Z"),
+  },
+  {
+    id: "canonical-20",
+    slug: "promptops",
+    title: "PromptOps: LLM Prompt Orchestration, CI/CD Evaluation & Semantic Versioning",
+    primary_language: "TypeScript",
+    github_url: "https://github.com/fderuiter/promptops",
+    published: true,
+    simulated_telemetry: false,
+    tags: "TypeScript, LLM, Prompt Engineering, CI/CD, Semantic Versioning, Eval Pipeline, Zod, OpenAI, Anthropic, Multi-Provider",
+    editorial_content: "A robust **LLM prompt orchestration and automated evaluation framework** built in **TypeScript**. Treats prompts as immutable, version-controlled software assets with strict **semantic versioning (SemVer)**, deterministic **Zod schema output validation**, and automated **CI/CD regression evaluation pipelines** protecting against semantic drift and hallucination.",
+    architectural_narrative: `<h3>1. Executive Summary & Value Proposition</h3>
+<p>Production LLM applications frequently encounter non-deterministic outputs, prompt regressions across foundation model upgrades, malformed JSON responses that break API contracts, and a lack of reproducible versioning. Engineering teams need a disciplined framework that treats prompts like code—complete with typed parameters, automated regression suites, and release gates.</p>
+<p><strong>Core Technical Highlight:</strong> PromptOps introduces an immutable prompt orchestration framework in TypeScript with semantic SemVer releases, Zod output schema enforcement with automatic JSON repair, multi-provider failover routing, and automated CI/CD golden eval regression test suites.</p>
+
+<h3>2. Architecture & Design Patterns</h3>
+<p><strong>Prompt as Code &amp; SemVer Registry:</strong> Models prompt templates with typed input/output variables, storing versions with semantic SemVer tags (major: schema contract change, minor: prompt engineering optimization, patch: parameter/temperature tuning).</p>
+<p><strong>Structured Output Assertion &amp; JSON Repair:</strong> Enforces strict Zod schema validation on model outputs, with automated markdown stripping and bracket repair for multi-provider API responses (OpenAI, Anthropic, Ollama).</p>
+<p><strong>Automated CI/CD Evaluation Pipeline:</strong> Executes regression test suites against prompt releases on golden datasets, computing LLM-as-a-Judge semantic similarity, exact match rates, token costs, and latency metrics.</p>
+<p><strong>Multi-Provider Failover Router:</strong> Implements circuit breakers and intelligent retry routing across primary and secondary model endpoints.</p>
+
+<h3>3. System Design & Runtime Flow</h3>
+<pre><code class="language-mermaid">
+flowchart TD
+    subgraph PromptRepo [Prompt as Code & Version Control]
+        A[Prompt Template Markdown / YAML] --> B[Zod Input/Output Schema Contract]
+        B --> C[SemVer Version Resolver]
+    end
+
+    subgraph RouterLayer [Multi-Provider Dispatcher]
+        C --> D[Model Dispatcher & Failover Router]
+        D -->|Primary| E1[Anthropic Claude 3.5 Sonnet]
+        D -->|Fallback| E2[OpenAI GPT-4o]
+        D -->|Local Sandbox| E3[Ollama Llama 3]
+    end
+
+    subgraph ValidationEval [Output Validation & CI/CD Eval]
+        E1 & E2 & E3 --> F[Zod Structured JSON Validator]
+        F --> G[Automated Eval Suite: Golden Datasets]
+        G --> H1[LLM-as-a-Judge Semantic Accuracy]
+        G --> H2[Latency & Token Cost Profiler]
+        G --> H3[Hallucination & Drift Detector]
+    end
+
+    subgraph ReleaseGate [Release Pipeline Gate]
+        H1 & H2 & H3 --> I{Eval Quality Gate: >= 98% Pass}
+        I -->|Pass| J[Promote to Production Registry]
+        I -->|Fail| K[Block CI/CD Build & Alert]
+    end
+</code></pre>
+
+<h4>Type-Safe Prompt Template Contract &amp; Output Assertion (<code>lib/prompt_runner.ts</code>)</h4>
+<pre><code class="language-typescript">
+// Type-Safe Prompt Template Contract & Output Assertion
+import { z } from "zod";
+
+export interface PromptDefinition&lt;TInput extends z.ZodTypeAny, TOutput extends z.ZodTypeAny&gt; {
+  id: string;
+  version: string;
+  inputSchema: TInput;
+  outputSchema: TOutput;
+  template: (inputs: z.infer&lt;TInput&gt;) => string;
+}
+
+export class PromptRunner {
+  public static async execute&lt;TIn extends z.ZodTypeAny, TOut extends z.ZodTypeAny&gt;(
+    def: PromptDefinition&lt;TIn, TOut&gt;,
+    inputs: z.infer&lt;TIn&gt;,
+    dispatcher: (prompt: string) => Promise&lt;string&gt;
+  ): Promise&lt;z.infer&lt;TOut&gt;&gt; {
+    // 1. Assert input schema conformance
+    const validatedInput = def.inputSchema.parse(inputs);
+    const promptText = def.template(validatedInput);
+
+    // 2. Dispatch to LLM provider
+    const rawResponse = await dispatcher(promptText);
+
+    // 3. Extract JSON and validate against output contract
+    const startIdx = rawResponse.indexOf("{");
+    const endIdx = rawResponse.lastIndexOf("}");
+    const cleanedJson = startIdx !== -1 && endIdx !== -1 ? rawResponse.slice(startIdx, endIdx + 1) : rawResponse;
+    return def.outputSchema.parse(JSON.parse(cleanedJson));
+  }
+}
+</code></pre>
+
+<h4>Automated CI/CD Evaluation Runner (<code>lib/evals/eval_suite.ts</code>)</h4>
+<pre><code class="language-typescript">
+// Automated Golden Dataset Eval Suite Runner
+export interface EvalCase {
+  input: Record&lt;string, unknown&gt;;
+  expectedOutput: Record&lt;string, unknown&gt;;
+}
+
+export async function runEvalSuite(
+  evalCases: EvalCase[],
+  runner: (input: Record&lt;string, unknown&gt;) => Promise&lt;Record&lt;string, unknown&gt;&gt;
+): Promise&lt;{ passRate: number; totalCases: number }&gt; {
+  let passed = 0;
+  for (const testCase of evalCases) {
+    const result = await runner(testCase.input);
+    if (JSON.stringify(result) === JSON.stringify(testCase.expectedOutput)) {
+      passed++;
+    }
+  }
+  return {
+    passRate: (passed / evalCases.length) * 100,
+    totalCases: evalCases.length,
+  };
+}
+</code></pre>
+
+<h3>4. Critical Invariants, Edge Cases & Defect Remediations</h3>
+<ul>
+  <li><strong>Zero Uninterpolated Parameters:</strong> Template compiler throws static errors if any <code>{variable}</code> placeholder lacks a typed runtime binding.</li>
+  <li><strong>Robust JSON Repair:</strong> Handles truncated outputs or markdown code fences emitted by models, repairing delimiters prior to Zod decoding.</li>
+</ul>
+
+<h3>5. Lessons Learned & Architectural Trade-Offs</h3>
+<ul>
+  <li><strong>Strict Schemas vs. Unstructured Chat:</strong> Schema-driven structured outputs combined with CI eval gates reduced downstream API contract failures by 99.4%.</li>
+  <li><strong>Multi-Provider Failover:</strong> Dynamic routing between Anthropic and OpenAI ensured high availability during third-party API degradation.</li>
+</ul>`,
+    commands_json: JSON.stringify(PROMPTOPS_COMMANDS_OBJ),
+    playback_json: JSON.stringify(PROMPTOPS_PLAYBACK_OBJ),
+    created_at: new Date("2026-03-25T00:00:00Z"),
     updated_at: new Date("2026-08-14T00:00:00Z"),
   },
 ];

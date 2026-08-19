@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/db";
 import DOMPurify from "isomorphic-dompurify";
 import { env } from "@/lib/env";
+import { FALLBACK_CASE_STUDIES, CaseStudyData } from "@/lib/case-studies-data";
+
+export type { CaseStudyData };
 
 export interface CaseStudySubmissionInput {
   title: string;
@@ -52,6 +55,98 @@ function getDefaultReactionCounts(): Record<string, number> {
 
 export class CaseStudyService {
   /**
+   * Retrieves all published case studies combining database records with static fallbacks.
+   * Prioritizes live database records and seamlessly appends missing static case studies.
+   */
+  static async getAllPublishedCaseStudies(): Promise<CaseStudyData[]> {
+    let dbStudies: CaseStudyData[] = [];
+    try {
+      const records = await prisma.caseStudy.findMany({
+        where: { published: true },
+        orderBy: { created_at: "asc" },
+      });
+      dbStudies = records.map((r) => ({
+        id: r.id,
+        slug: r.slug,
+        title: r.title,
+        primary_language: r.primary_language,
+        github_url: r.github_url ?? "",
+        published: r.published,
+        simulated_telemetry: r.simulated_telemetry,
+        tags: r.tags,
+        editorial_content: r.editorial_content,
+        architectural_narrative: r.architectural_narrative,
+        commands_json: r.commands_json ?? undefined,
+        playback_json: r.playback_json ?? undefined,
+        created_at: new Date(r.created_at),
+        updated_at: new Date(r.updated_at),
+      }));
+    } catch (err) {
+      if (env.VERCEL_ENV === "production") {
+        console.warn("CaseStudyService.getAllPublishedCaseStudies: Database query failed, using static fallbacks:", err);
+      }
+      return [...FALLBACK_CASE_STUDIES];
+    }
+
+    const seenSlugs = new Set(dbStudies.map((s) => s.slug));
+    const merged: CaseStudyData[] = [...dbStudies];
+
+    for (const fallback of FALLBACK_CASE_STUDIES) {
+      if (!seenSlugs.has(fallback.slug)) {
+        merged.push(fallback);
+        seenSlugs.add(fallback.slug);
+      }
+    }
+
+    return merged;
+  }
+
+  /**
+   * Retrieves a single published case study by slug, falling back to static data if absent from database.
+   * Returns null if not found in database or static fallbacks.
+   */
+  static async getCaseStudyBySlug(slug: string): Promise<CaseStudyData | null> {
+    try {
+      const r = await prisma.caseStudy.findUnique({
+        where: { slug },
+      });
+      if (r && r.published) {
+        return {
+          id: r.id,
+          slug: r.slug,
+          title: r.title,
+          primary_language: r.primary_language,
+          github_url: r.github_url ?? "",
+          published: r.published,
+          simulated_telemetry: r.simulated_telemetry,
+          tags: r.tags,
+          editorial_content: r.editorial_content,
+          architectural_narrative: r.architectural_narrative,
+          commands_json: r.commands_json ?? undefined,
+          playback_json: r.playback_json ?? undefined,
+          created_at: new Date(r.created_at),
+          updated_at: new Date(r.updated_at),
+        };
+      }
+    } catch (err) {
+      if (env.VERCEL_ENV === "production") {
+        console.warn(`CaseStudyService.getCaseStudyBySlug: DB query failed for slug "${slug}", falling back:`, err);
+      }
+    }
+
+    const fallback = FALLBACK_CASE_STUDIES.find((s) => s.slug === slug);
+    return fallback ?? null;
+  }
+
+  /**
+   * Retrieves all published case study slugs for static route generation and sitemaps.
+   */
+  static async getAllPublishedSlugs(): Promise<string[]> {
+    const studies = await CaseStudyService.getAllPublishedCaseStudies();
+    return studies.map((s) => s.slug);
+  }
+
+  /**
    * Retrieves all published case studies for public search/discovery.
    */
   static async getPublishedCaseStudies() {
@@ -88,16 +183,14 @@ export class CaseStudyService {
       ];
     }
 
-    return await prisma.caseStudy.findMany({
-      where: { published: true },
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        primary_language: true,
-        tags: true
-      }
-    });
+    const allStudies = await CaseStudyService.getAllPublishedCaseStudies();
+    return allStudies.map((s) => ({
+      id: s.id,
+      slug: s.slug,
+      title: s.title,
+      primary_language: s.primary_language,
+      tags: s.tags,
+    }));
   }
 
   /**

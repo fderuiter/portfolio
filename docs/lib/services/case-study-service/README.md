@@ -15,3 +15,9 @@
 - [CaseStudySubmissionInput](interfaces/CaseStudySubmissionInput.md)
 - [FeedbackSubmissionInput](interfaces/FeedbackSubmissionInput.md)
 - [ReactionSubmissionInput](interfaces/ReactionSubmissionInput.md)
+
+## References
+
+### CaseStudyData
+
+Re-exports [CaseStudyData](../../case-studies-data/interfaces/CaseStudyData.md)

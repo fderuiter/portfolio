@@ -12,7 +12,7 @@ Defined in: [lib/dx/doctor.ts:12](https://github.com/fderuiter/portfolio/blob/ma
 
 ### category
 
-> **category**: `"database"` \| `"security"` \| `"architecture"` \| `"routes"` \| `"docs"` \| `"hydration"` \| `"accessibility"` \| `"quality"`
+> **category**: `"security"` \| `"database"` \| `"architecture"` \| `"routes"` \| `"docs"` \| `"hydration"` \| `"accessibility"` \| `"quality"`
 
 Defined in: [lib/dx/doctor.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L15)
 
@@ -68,6 +68,6 @@ Defined in: [lib/dx/doctor.ts:14](https://github.com/fderuiter/portfolio/blob/ma
 
 ### status
 
-> **status**: `"warn"` \| `"fixed"` \| `"fail"` \| `"pass"`
+> **status**: `"warn"` \| `"fixed"` \| `"pass"` \| `"fail"`
 
 Defined in: [lib/dx/doctor.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L16)

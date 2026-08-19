@@ -259,6 +259,91 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
         ]
       },
       {
+        id: "nav-duckdeploy",
+        title: "DuckDeploy: Schema-Driven Dynamic UI Engine",
+        subtitle: "Deep-dive technical case study — Web Worker manifest compiler, polymorphic form state & zero-eval JSON Schema",
+        category: "navigation",
+        url: "/case-studies/duckdeploy",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Case Study",
+        status: "TypeScript / UI",
+        description: "Schema-driven dynamic UI synthesis engine compiling JSON Schema Draft-07 manifests into reactive, polymorphic form state via Web Workers.",
+        techStack: ["TypeScript", "React 19", "Web Workers", "JSON Schema", "Zod", "State Machine"],
+        highlights: [
+          "Sub-5ms Web Worker JSON Schema manifest compilation",
+          "Zero-eval polymorphic form state synthesizer",
+          "AST-level schema dependency resolution"
+        ]
+      },
+      {
+        id: "nav-cardiac-risk-modeling",
+        title: "Predictive Cardiac Risk Modeling Pipeline",
+        subtitle: "Deep-dive technical case study — clinical tabular ML, adversarial validation & leak-free Stratified OOF",
+        category: "navigation",
+        url: "/case-studies/cardiac-risk-modeling",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Case Study",
+        status: "Python / ML",
+        description: "High-assurance clinical tabular ML pipeline with adversarial validation, leak-free Stratified Out-of-Fold cross-validation, and calibrated risk scoring.",
+        techStack: ["Python", "LightGBM", "Scikit-Learn", "SHAP", "Adversarial Validation", "ROC-AUC"],
+        highlights: [
+          "Adversarial validation detecting covariate distribution drift",
+          "Leak-free 5-fold Stratified OOF ensemble architecture",
+          "Brier-calibrated probabilistic clinical risk outputs"
+        ]
+      },
+      {
+        id: "nav-4glory",
+        title: "4Glory | Does Fred Know Ball?: Sports Analytics Engine",
+        subtitle: "Deep-dive technical case study — real-time sports analytics, data pipeline & interactive evaluation engine",
+        category: "navigation",
+        url: "/case-studies/4glory",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Case Study",
+        status: "Full Stack / Analytics",
+        description: "Real-time sports prediction and evaluation engine computing play-by-play Expected Points Added (EPA), Win Probability, and Monte Carlo season projections.",
+        techStack: ["TypeScript", "Python", "Monte Carlo", "EPA Modeling", "Next.js 16", "TailwindCSS"],
+        highlights: [
+          "Sub-15ms real-time EPA and win probability evaluation",
+          "10,000-run vectorized Monte Carlo tournament simulator",
+          "Interactive prediction calibration ledger"
+        ]
+      },
+      {
+        id: "nav-crf-xl",
+        title: "CRF.xl: Spreadsheet-to-CDISC CRF Compiler",
+        subtitle: "Deep-dive technical case study — spreadsheet-to-CDISC compiler, AST calculation engine & ODM-XML export",
+        category: "navigation",
+        url: "/case-studies/crf-xl",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Case Study",
+        status: "CDISC / Compiler",
+        description: "High-throughput spreadsheet compiler converting clinical protocol workbooks into compliant CDISC CDASH CRFs, ODM-XML definitions, and AST edit check rules.",
+        techStack: ["TypeScript", "CDISC CDASH", "ODM-XML", "AST Engine", "Excel Parser", "21 CFR Part 11"],
+        highlights: [
+          "Zero-dependency Excel AST formula transpiler",
+          "Automated CDISC CDASH 2.2 variable mapping linter",
+          "Deterministic ODM-XML v1.3.2 export generator"
+        ]
+      },
+      {
+        id: "nav-promptops",
+        title: "PromptOps: LLM Prompt Orchestration & Eval Engine",
+        subtitle: "Deep-dive technical case study — prompt orchestration, CI/CD evaluation pipelines & semantic versioning",
+        category: "navigation",
+        url: "/case-studies/promptops",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Case Study",
+        status: "LLM / DevOps",
+        description: "Production LLM prompt orchestration framework featuring deterministic evaluation gates, semantic versioning, prompt drift detection, and automated regression testing.",
+        techStack: ["TypeScript", "Python", "LLM Evals", "SemVer", "RAG", "CI/CD Pipeline"],
+        highlights: [
+          "Automated prompt drift and regression test harness",
+          "Semantic versioning and schema lock for LLM prompts",
+          "Zero-cost local deterministic evaluation mock suites"
+        ]
+      },
+      {
         id: "nav-laser-loon",
         title: "Laser Loon: Quest for the State Flag",
         subtitle: "Playable civic physics shooter — pilot F277 Laser Loon on the Road to the Capitol",

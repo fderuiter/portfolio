@@ -6,7 +6,7 @@
 
 # Interface: FeedbackSubmissionInput
 
-Defined in: [lib/services/case-study-service.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L15)
+Defined in: [lib/services/case-study-service.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L18)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/services/case-study-service.ts:15](https://github.com/fderuiter
 
 > **caseStudySlug**: `string`
 
-Defined in: [lib/services/case-study-service.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L16)
+Defined in: [lib/services/case-study-service.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L19)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/services/case-study-service.ts:16](https://github.com/fderuiter
 
 > **comments**: `string`
 
-Defined in: [lib/services/case-study-service.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L18)
+Defined in: [lib/services/case-study-service.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L21)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [lib/services/case-study-service.ts:18](https://github.com/fderuiter
 
 > **takeaways**: `string`[]
 
-Defined in: [lib/services/case-study-service.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L17)
+Defined in: [lib/services/case-study-service.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/services/case-study-service.ts#L20)

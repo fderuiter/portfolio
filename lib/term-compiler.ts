@@ -92,8 +92,13 @@ export function compileTerms(
 
   const termEntries = getSortedTermEntries(glossary);
   let tokens = tokenizeHtml(input);
+  const inputLower = input.toLowerCase();
 
   for (const { phrase, entry } of termEntries) {
+    if (!inputLower.includes(phrase.toLowerCase())) {
+      continue;
+    }
+
     const nextTokens: Array<{ isText: boolean; content: string }> = [];
 
     for (const token of tokens) {

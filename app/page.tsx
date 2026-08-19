@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { prisma } from "@/lib/db";
-import { env } from "@/lib/env";
+import { CaseStudyService } from "@/lib/services/case-study-service";
 import { ProjectTeaserGrid } from "@/components/ProjectTeaserGrid";
 import { BaseCaseStudy } from "@/types/domain";
 import { Hero } from "@/components/Hero";
@@ -19,7 +18,6 @@ const DynamicTimeline = dynamic(
   { ssr: true }
 );
 import { InteractiveHighlights } from "@/components/InteractiveHighlights";
-import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 import { PageLayout } from "@/components/PageLayout";
 import { 
   IconMail, 
@@ -35,44 +33,28 @@ interface HydratedCaseStudy extends BaseCaseStudy {
 }
 
 export default async function PortfolioHomePage() {
-  let caseStudies: HydratedCaseStudy[] = [];
-
-  try {
-    // Query case studies from Neon database via Prisma
-    const data = await prisma.caseStudy.findMany({
-      where: { published: true },
-      orderBy: { created_at: "desc" },
-    });
-    
-    // Aggregated server-side hydration for each case study
-    caseStudies = await Promise.all(
-      data.map(async (d) => {
-        let stats: GitHubStats | null = null;
-        if (d.simulated_telemetry) {
-          stats = getSimulatedStats(d.primary_language);
-        } else if (d.github_url) {
-          const parsed = parseGitHubUrl(d.github_url);
-          if (parsed) {
-            stats = await getGitHubStats(parsed.owner, parsed.repo);
-          }
+  const data = await CaseStudyService.getAllPublishedCaseStudies();
+  
+  // Aggregated server-side hydration for each case study
+  const caseStudies: HydratedCaseStudy[] = await Promise.all(
+    data.map(async (d) => {
+      let stats: GitHubStats | null = null;
+      if (d.simulated_telemetry) {
+        stats = getSimulatedStats(d.primary_language);
+      } else if (d.github_url) {
+        const parsed = parseGitHubUrl(d.github_url);
+        if (parsed) {
+          stats = await getGitHubStats(parsed.owner, parsed.repo);
         }
-        return {
-          ...d,
-          created_at: new Date(d.created_at),
-          updated_at: new Date(d.updated_at),
-          githubStats: stats,
-        };
-      })
-    );
-  } catch (error) {
-    if (env.VERCEL_ENV === "production") {
-      console.warn("Failed to load case studies from database. Falling back to local data:", error);
-    }
-    caseStudies = FALLBACK_CASE_STUDIES.map(cs => ({
-      ...cs,
-      githubStats: getSimulatedStats(cs.primary_language)
-    }));
-  }
+      }
+      return {
+        ...d,
+        created_at: new Date(d.created_at),
+        updated_at: new Date(d.updated_at),
+        githubStats: stats,
+      };
+    })
+  );
 
   // Aggregate language profiles from fetched case study stats
   const languagesMap: Record<string, number> = {};
