@@ -10,7 +10,8 @@ import {
   evaluateCondition,
   evaluateRule,
 } from "@/lib/crf/ast-evaluator";
-import { CRFField, EditCheckRule } from "@/lib/crf/types";
+import { evaluateMatrixFormObligations } from "@/lib/crf/cross-visit-rules";
+import { CRFField, EditCheckRule, StudyVisit } from "@/lib/crf/types";
 
 describe("AST Clinical Calculations & Cross-Visit Logic Engine", () => {
   it("should accurately compute BMI", () => {
@@ -115,5 +116,57 @@ describe("AST Clinical Calculations & Cross-Visit Logic Engine", () => {
     expect(evaluateRule(rule, { f_age: 25, f_ic: "Y" }, fieldsList)).toBe(true);
     expect(evaluateRule(rule, { f_age: 16, f_ic: "Y" }, fieldsList)).toBe(false);
     expect(evaluateRule(rule, { f_age: 25, f_ic: "N" }, fieldsList)).toBe(false);
+  });
+
+  it("evaluates matrix-level conditional form obligations across study visits", () => {
+    const studyVisits: StudyVisit[] = [
+      {
+        id: "v_screen",
+        oid: "SE.SCREEN",
+        name: "Screening",
+        visitType: "Scheduled",
+        targetDay: 0,
+        windowBefore: 0,
+        windowAfter: 0,
+        assignedFormIds: ["f_dm", "f_vs"],
+      },
+      {
+        id: "v_w1",
+        oid: "SE.W1",
+        name: "Week 1",
+        visitType: "Scheduled",
+        targetDay: 7,
+        windowBefore: 1,
+        windowAfter: 1,
+        assignedFormIds: ["f_vs"],
+      },
+      {
+        id: "v_w4",
+        oid: "SE.W4",
+        name: "Week 4",
+        visitType: "Scheduled",
+        targetDay: 28,
+        windowBefore: 3,
+        windowAfter: 3,
+        assignedFormIds: ["f_vs", "f_ae"],
+      },
+    ];
+
+    const conditionalRules = [
+      {
+        formId: "f_pk",
+        condition: { fieldId: "ARM", operator: "eq" as const, value: "Active" },
+        targetVisitIds: ["v_w1", "v_w4"],
+      },
+    ];
+
+    // When subject is on Active ARM, PK form is added to Week 1 and Week 4
+    const resolvedActive = evaluateMatrixFormObligations(studyVisits, conditionalRules, { ARM: "Active" });
+    expect(resolvedActive.find((v) => v.id === "v_w1")?.assignedFormIds).toContain("f_pk");
+    expect(resolvedActive.find((v) => v.id === "v_screen")?.assignedFormIds).not.toContain("f_pk");
+
+    // When subject is on Placebo, PK form is not added
+    const resolvedPlacebo = evaluateMatrixFormObligations(studyVisits, conditionalRules, { ARM: "Placebo" });
+    expect(resolvedPlacebo.find((v) => v.id === "v_w1")?.assignedFormIds).not.toContain("f_pk");
   });
 });

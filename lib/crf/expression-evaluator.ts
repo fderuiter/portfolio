@@ -248,6 +248,12 @@ export class ExpressionEvaluator {
           case "sqrt":
             if (numArgs.length === 0 || numArgs[0] < 0) return null;
             return Math.sqrt(numArgs[0]);
+          case "cbrt":
+            if (numArgs.length === 0) return null;
+            return Math.cbrt(numArgs[0]);
+          case "clamp":
+            if (numArgs.length < 3) return null;
+            return Math.min(Math.max(numArgs[0], numArgs[1]), numArgs[2]);
           case "abs":
             if (numArgs.length === 0) return null;
             return Math.abs(numArgs[0]);

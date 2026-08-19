@@ -9,7 +9,6 @@ vi.mock("@clerk/nextjs", () => ({
       ClerkSignInWidget
     </div>
   ),
-  UserButton: () => <div data-testid="clerk-user-button">ClerkUserButton</div>,
 }));
 
 describe("AdminLoginGateway Production Component Suite", () => {
@@ -70,23 +69,57 @@ describe("AdminLoginGateway Production Component Suite", () => {
     expect(screen.getByText("Rate-Limited")).toBeDefined();
   });
 
-  it("toggles the architecture and allowlist setup drawer and copies setup command", async () => {
+  it("toggles the architecture and allowlist setup drawer and copies snippets", async () => {
     render(<AdminLoginGateway />);
 
-    // Toggle drawer
+    // Toggle drawer open
     const toggleButton = screen.getByRole("button", { name: /Environment Setup & Architecture/i });
     expect(toggleButton).toBeDefined();
 
     fireEvent.click(toggleButton);
 
     expect(screen.getByText("npm run setup:clerk")).toBeDefined();
-    expect(screen.getByText("ADMIN_EMAILS=\"your-email@example.com\"")).toBeDefined();
+    expect(screen.getByText('ADMIN_EMAILS="your-email@example.com"')).toBeDefined();
 
-    // Copy command
-    const copyButton = screen.getByRole("button", { name: /Copy setup wizard command/i });
-    fireEvent.click(copyButton);
-
+    // Copy wizard command
+    const copyWizardButton = screen.getByRole("button", { name: /Copy setup wizard command/i });
+    fireEvent.click(copyWizardButton);
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith("npm run setup:clerk");
+
+    // Copy email snippet
+    const copyEmailButton = screen.getByRole("button", { name: /Copy admin email template/i });
+    fireEvent.click(copyEmailButton);
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('ADMIN_EMAILS="your-email@example.com"');
+
+    // Toggle drawer closed
+    fireEvent.click(toggleButton);
+    expect(screen.queryByText("npm run setup:clerk")).toBeNull();
+  });
+
+  it("handles clipboard write failures gracefully", async () => {
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    navigator.clipboard.writeText = vi.fn().mockRejectedValue(new Error("Clipboard denied"));
+    const originalExecCommand = document.execCommand;
+    document.execCommand = vi.fn().mockReturnValue(false);
+
+    render(<AdminLoginGateway />);
+
+    const toggleButton = screen.getByRole("button", { name: /Environment Setup & Architecture/i });
+    fireEvent.click(toggleButton);
+
+    const copyWizardButton = screen.getByRole("button", { name: /Copy setup wizard command/i });
+    fireEvent.click(copyWizardButton);
+
+    // Allow promise rejection to propagate
+    await vi.waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "Failed to copy snippet to clipboard:",
+        expect.any(Error)
+      );
+    });
+
+    consoleSpy.mockRestore();
+    document.execCommand = originalExecCommand;
   });
 
   it("provides an accessible return navigation link to case studies", () => {

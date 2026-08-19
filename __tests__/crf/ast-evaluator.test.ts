@@ -77,6 +77,10 @@ describe("CRF Studio - AST Formula & Rule Evaluator", () => {
       expect(evaluateFormula("min(val1, val2)", values, fields)).toBe(16);
       expect(evaluateFormula("abs(-42)", {}, fields)).toBe(42);
       expect(evaluateFormula("round(3.14159, 2)", {}, fields)).toBe(3.14);
+      expect(evaluateFormula("cbrt(27)", {}, fields)).toBe(3);
+      expect(evaluateFormula("clamp(120, 0, 100)", {}, fields)).toBe(100);
+      expect(evaluateFormula("clamp(-5, 0, 100)", {}, fields)).toBe(0);
+      expect(evaluateFormula("clamp(50, 0, 100)", {}, fields)).toBe(50);
     });
 
     it("returns explicit null for division/modulo by zero and missing inputs without throwing", () => {

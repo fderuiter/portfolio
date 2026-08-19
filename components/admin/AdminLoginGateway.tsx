@@ -22,11 +22,43 @@ import {
 } from "@tabler/icons-react";
 import { copyToClipboard } from "@/lib/clipboard";
 
+interface CopySnippetProps {
+  snippetKey: "wizard" | "email";
+  text: string;
+  label: string;
+  copiedKey: string | null;
+  onCopy: (key: "wizard" | "email", text: string) => void;
+}
+
+function CopySnippet({ snippetKey, text, label, copiedKey, onCopy }: CopySnippetProps) {
+  const isCopied = copiedKey === snippetKey;
+  return (
+    <div className="flex items-center justify-between p-2.5 rounded bg-[#13151a] border border-white/10 min-w-0">
+      <code className="text-emerald-400 select-all overflow-x-auto whitespace-nowrap text-xs font-mono min-w-0">
+        {text}
+      </code>
+      <button
+        type="button"
+        onClick={() => onCopy(snippetKey, text)}
+        className="shrink-0 ml-2 px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] flex items-center gap-1 cursor-pointer transition-colors focus:outline-none focus:ring-1 focus:ring-amber-400"
+        aria-label={`Copy ${label}`}
+      >
+        {isCopied ? (
+          <IconCheck className="w-3 h-3 text-emerald-400" aria-hidden="true" />
+        ) : (
+          <IconCopy className="w-3 h-3" aria-hidden="true" />
+        )}
+        <span>{isCopied ? "Copied" : "Copy"}</span>
+      </button>
+    </div>
+  );
+}
+
 export function AdminLoginGateway() {
   const [showConfigDrawer, setShowConfigDrawer] = useState(false);
-  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [copiedKey, setCopiedKey] = useState<"wizard" | "email" | null>(null);
 
-  const handleCopy = async (key: string, text: string) => {
+  const handleCopy = async (key: "wizard" | "email", text: string) => {
     try {
       await copyToClipboard(text);
       setCopiedKey(key);
@@ -75,48 +107,48 @@ export function AdminLoginGateway() {
 
             {/* Node Specs Matrix */}
             <div className="grid grid-cols-2 gap-2 text-[11px] py-1 border-b border-white/5">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-zinc-500 text-[10px] uppercase flex items-center gap-1">
-                  <IconServer className="w-3 h-3 text-zinc-400" />
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="text-zinc-400 text-[10px] uppercase flex items-center gap-1">
+                  <IconServer className="w-3 h-3 text-zinc-400" aria-hidden="true" />
                   Edge Region
                 </span>
-                <span className="text-zinc-200">iad1-us-east</span>
+                <span className="text-zinc-200 truncate">iad1-us-east</span>
               </div>
-              <div className="flex flex-col gap-0.5">
-                <span className="text-zinc-500 text-[10px] uppercase flex items-center gap-1">
-                  <IconCpu className="w-3 h-3 text-zinc-400" />
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="text-zinc-400 text-[10px] uppercase flex items-center gap-1">
+                  <IconCpu className="w-3 h-3 text-zinc-400" aria-hidden="true" />
                   Latency / SSR
                 </span>
-                <span className="text-emerald-400">0.00ms penalty</span>
+                <span className="text-emerald-400 truncate">0.00ms penalty</span>
               </div>
-              <div className="flex flex-col gap-0.5">
-                <span className="text-zinc-500 text-[10px] uppercase flex items-center gap-1">
-                  <IconLockCheck className="w-3 h-3 text-zinc-400" />
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="text-zinc-400 text-[10px] uppercase flex items-center gap-1">
+                  <IconLockCheck className="w-3 h-3 text-zinc-400" aria-hidden="true" />
                   Edge Security
                 </span>
-                <span className="text-zinc-200">SHA-256 Token</span>
+                <span className="text-zinc-200 truncate">SHA-256 Token</span>
               </div>
-              <div className="flex flex-col gap-0.5">
-                <span className="text-zinc-500 text-[10px] uppercase flex items-center gap-1">
-                  <IconActivity className="w-3 h-3 text-zinc-400" />
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="text-zinc-400 text-[10px] uppercase flex items-center gap-1">
+                  <IconActivity className="w-3 h-3 text-zinc-400" aria-hidden="true" />
                   Auth Guard
                 </span>
-                <span className="text-amber-400">Env Allowlist</span>
+                <span className="text-amber-400 truncate">Env Allowlist</span>
               </div>
             </div>
 
             {/* Rolling Edge Log Feed */}
             <div className="flex flex-col gap-1 text-[10px] text-zinc-400 pt-1">
-              <span className="text-zinc-500 font-semibold">[LIVE STREAM]</span>
+              <span className="text-zinc-400 font-semibold">[EDGE LOG MATRIX]</span>
               <div className="p-2 rounded bg-[#13151a] border border-white/5 flex flex-col gap-1 text-[10px]">
                 <span className="text-zinc-400">
-                  <span className="text-amber-400">› 10:04:12</span> clerkMiddleware chained with HTTP security headers
+                  <span className="text-amber-400">› EDGE_INIT</span> clerkMiddleware chained with HTTP security headers
                 </span>
                 <span className="text-zinc-400">
-                  <span className="text-emerald-400">› 10:04:15</span> Edge route matcher active on /admin(.*)
+                  <span className="text-emerald-400">› ROUTE_GUARD</span> Edge route matcher active on /admin(.*)
                 </span>
                 <span className="text-zinc-400">
-                  <span className="text-zinc-500">› 10:04:18</span> Ready for hardware Passkey / OAuth
+                  <span className="text-zinc-300">› AUTH_GATE</span> Ready for hardware Passkey / OAuth
                 </span>
               </div>
             </div>
@@ -194,26 +226,26 @@ export function AdminLoginGateway() {
             <div className="grid grid-cols-3 gap-2 p-2.5 rounded-lg bg-[#0d0e11] border border-white/10 font-mono text-[10px] text-center">
               <div className="flex flex-col items-center gap-0.5">
                 <span className="flex items-center gap-1 text-amber-400 font-medium">
-                  <IconFingerprint className="w-3 h-3" />
+                  <IconFingerprint className="w-3 h-3" aria-hidden="true" />
                   WebAuthn
                 </span>
-                <span className="text-zinc-500">Passkey Ready</span>
+                <span className="text-zinc-400">Passkey Ready</span>
               </div>
 
               <div className="flex flex-col items-center gap-0.5 border-x border-white/10 px-1">
                 <span className="flex items-center gap-1 text-emerald-400 font-medium">
-                  <IconCpu className="w-3 h-3" />
+                  <IconCpu className="w-3 h-3" aria-hidden="true" />
                   0ms Penalty
                 </span>
-                <span className="text-zinc-500">Zero-Prerender</span>
+                <span className="text-zinc-400">Zero-Prerender</span>
               </div>
 
               <div className="flex flex-col items-center gap-0.5">
                 <span className="flex items-center gap-1 text-cyan-400 font-medium">
-                  <IconBolt className="w-3 h-3" />
+                  <IconBolt className="w-3 h-3" aria-hidden="true" />
                   Edge Guard
                 </span>
-                <span className="text-zinc-500">Rate-Limited</span>
+                <span className="text-zinc-400">Rate-Limited</span>
               </div>
             </div>
           </div>
@@ -225,7 +257,7 @@ export function AdminLoginGateway() {
         <div className="w-full p-6 rounded-xl border border-white/10 bg-[#0d0e11] flex flex-col gap-4 font-mono text-xs animate-in fade-in slide-in-from-top-2 duration-200 shadow-xl">
           <div className="flex items-center justify-between pb-3 border-b border-white/10">
             <div className="flex items-center gap-2 text-zinc-100 font-bold text-sm">
-              <IconCode className="w-4 h-4 text-amber-400" />
+              <IconCode className="w-4 h-4 text-amber-400" aria-hidden="true" />
               <span>Admin Allowlist &amp; Edge Architecture</span>
             </div>
             <span className="text-[10px] text-zinc-400">ADR-0014 Architecture</span>
@@ -241,41 +273,23 @@ export function AdminLoginGateway() {
                 </p>
               </div>
 
-              <div className="flex items-center justify-between p-2.5 rounded bg-[#13151a] border border-white/10">
-                <code className="text-emerald-400">npm run setup:clerk</code>
-                <button
-                  type="button"
-                  onClick={() => handleCopy("wizard", "npm run setup:clerk")}
-                  className="px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] flex items-center gap-1 cursor-pointer transition-colors"
-                  aria-label="Copy setup wizard command"
-                >
-                  {copiedKey === "wizard" ? (
-                    <IconCheck className="w-3 h-3 text-emerald-400" />
-                  ) : (
-                    <IconCopy className="w-3 h-3" />
-                  )}
-                  <span>{copiedKey === "wizard" ? "Copied" : "Copy"}</span>
-                </button>
-              </div>
+              <CopySnippet
+                snippetKey="wizard"
+                text="npm run setup:clerk"
+                label="setup wizard command"
+                copiedKey={copiedKey}
+                onCopy={handleCopy}
+              />
 
               <div className="flex flex-col gap-1 pt-1">
                 <span className="text-zinc-300 font-semibold text-xs">2. Manual Environment Allowlist</span>
-                <div className="flex items-center justify-between p-2.5 rounded bg-[#13151a] border border-white/10">
-                  <code className="text-amber-300 select-all overflow-x-auto">ADMIN_EMAILS=&quot;your-email@example.com&quot;</code>
-                  <button
-                    type="button"
-                    onClick={() => handleCopy("email", 'ADMIN_EMAILS="your-email@example.com"')}
-                    className="shrink-0 ml-2 px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] flex items-center gap-1 cursor-pointer transition-colors"
-                    aria-label="Copy admin email template"
-                  >
-                    {copiedKey === "email" ? (
-                      <IconCheck className="w-3 h-3 text-emerald-400" />
-                    ) : (
-                      <IconCopy className="w-3 h-3" />
-                    )}
-                    <span>{copiedKey === "email" ? "Copied" : "Copy"}</span>
-                  </button>
-                </div>
+                <CopySnippet
+                  snippetKey="email"
+                  text='ADMIN_EMAILS="your-email@example.com"'
+                  label="admin email template"
+                  copiedKey={copiedKey}
+                  onCopy={handleCopy}
+                />
               </div>
             </div>
 
@@ -295,3 +309,4 @@ export function AdminLoginGateway() {
     </div>
   );
 }
+

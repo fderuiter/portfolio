@@ -49,6 +49,8 @@ export interface FormulaLintResult {
 export const KNOWN_MATH_FUNCTIONS = new Set([
   "round",
   "sqrt",
+  "cbrt",
+  "clamp",
   "abs",
   "max",
   "min",
@@ -389,10 +391,18 @@ export function lintFormula(
         }
 
         if (depth === 0) {
-          if (fnName === "sqrt" && argCount !== 1) {
+          if ((fnName === "sqrt" || fnName === "cbrt") && argCount !== 1) {
             diagnostics.push({
               severity: "error",
-              message: `Function "sqrt(x)" expects exactly 1 argument, but received ${argCount}`,
+              message: `Function "${fnName}(x)" expects exactly 1 argument, but received ${argCount}`,
+              start: token.start,
+              end: tokens[endIdx]?.end ?? token.end,
+              code: "INVALID_ARITY",
+            });
+          } else if (fnName === "clamp" && argCount !== 3) {
+            diagnostics.push({
+              severity: "error",
+              message: `Function "clamp(val, min, max)" expects exactly 3 arguments, but received ${argCount}`,
               start: token.start,
               end: tokens[endIdx]?.end ?? token.end,
               code: "INVALID_ARITY",

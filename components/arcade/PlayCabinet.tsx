@@ -4,12 +4,12 @@ import React, { useState, useEffect } from "react";
 import { IconPlayerPlay, IconPower, IconTerminal, IconAdjustments } from "@tabler/icons-react";
 import { PreGameSetupWizard, getSavedSetupConfig, GameSetupConfig } from "@/components/arcade/PreGameSetupWizard";
 
-interface ControlItem {
+export interface ControlItem {
   key: string;
   action: string;
 }
 
-interface PlayCabinetProps {
+export interface PlayCabinetProps {
   gameId?: string;
   title: string;
   subtitle?: string;
@@ -18,6 +18,10 @@ interface PlayCabinetProps {
   instructions: string;
   controls: ControlItem[];
   importComponent: () => Promise<unknown>;
+  statusAnnouncement?: string;
+  controlDock?: React.ReactNode;
+  onLaunch?: () => void;
+  onExit?: () => void;
   children: React.ReactNode;
 }
 
@@ -30,6 +34,10 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
   instructions,
   controls,
   importComponent,
+  statusAnnouncement,
+  controlDock,
+  onLaunch,
+  onExit,
   children,
 }) => {
   const gameId = rawGameId || title.toLowerCase().replace(/[^a-z0-9]/g, "-");
@@ -128,6 +136,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
     handlePrefetch();
     setIsWarmingUp(true);
     setBootProgress(0);
+    onLaunch?.();
   };
 
   useEffect(() => {
@@ -135,9 +144,8 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
 
     const updateProgress = () => {
       setBootProgress((prev) => {
-        // If loaded, we can accelerate to 100 quickly
         if (isLoaded) {
-          const next = prev + Math.floor(Math.random() * 30) + 15;
+          const next = prev + Math.floor(Math.random() * 30) + 25;
           if (next >= 100) {
             setIsLaunched(true);
             setShowWizard(true);
@@ -146,16 +154,15 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
           }
           return next;
         } else {
-          // If not loaded, we cap it at 85 until loaded is true
           if (prev >= 85) {
             return 85;
           }
-          return prev + Math.floor(Math.random() * 10) + 5;
+          return prev + Math.floor(Math.random() * 10) + 10;
         }
       });
     };
 
-    const timer = setInterval(updateProgress, 100);
+    const timer = setInterval(updateProgress, 60);
     return () => clearInterval(timer);
   }, [isWarmingUp, isLoaded]);
 
@@ -163,6 +170,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
     setIsLaunched(false);
     setIsWarmingUp(false);
     setBootProgress(0);
+    onExit?.();
   };
 
   if (isLaunched) {
@@ -174,9 +182,22 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
     }[setupConfig.bezelStyle] || "border-zinc-800";
 
     return (
-      <div className="relative w-full flex flex-col items-center">
-        {/* Game Area Container with Reset Cabinet & Setup Wizard Overlay */}
-        <div className={`w-full relative rounded-2xl border-2 transition-all duration-300 overflow-hidden ${bezelClasses}`}>
+      <div className="relative w-full flex flex-col items-center max-w-full min-w-0 @container">
+        {/* Accessible screen reader live status mirror */}
+        <div
+          role="region"
+          aria-label="Game Telemetry & Status Announcements"
+          aria-live="polite"
+          aria-atomic="true"
+          className="sr-only"
+        >
+          {statusAnnouncement || `${title} cabinet active.`}
+        </div>
+
+        {/* Game Area Container with Dynamic Viewport Height Budgeting */}
+        <div
+          className={`w-full relative rounded-2xl border-2 transition-all duration-300 overflow-hidden max-h-[calc(100dvh-200px)] min-h-[280px] flex items-center justify-center bg-black ${bezelClasses}`}
+        >
           {children}
 
           {/* 3-Step Setup Wizard Overlay prior to active gameplay / when reconfiguring */}
@@ -192,7 +213,14 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
             onCancel={() => setShowWizard(false)}
           />
         </div>
-        
+
+        {/* Optional Control Dock Slot (e.g. Virtual Gamepad, Bezel cluster) */}
+        {controlDock && (
+          <div className="w-full mt-3 flex justify-center">
+            {controlDock}
+          </div>
+        )}
+
         {/* Discrete Retro Controller Menu */}
         <div className="mt-4 flex items-center justify-between w-full border border-zinc-800 bg-zinc-900/60 rounded-2xl px-4 py-2 font-mono text-xs text-zinc-500 flex-wrap gap-2">
           <div className="flex items-center gap-2">
@@ -203,7 +231,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowWizard(true)}
-              className="px-3 py-1 bg-zinc-950 text-amber-400 hover:text-amber-300 rounded-lg border border-amber-500/30 transition-all font-bold uppercase text-[10px] tracking-wider flex items-center gap-1 hover:bg-zinc-900 hover:border-amber-500/50 cursor-pointer"
+              className="px-3 py-1 bg-zinc-950 text-amber-400 hover:text-amber-300 rounded-lg border border-amber-500/30 transition-all font-bold uppercase text-[10px] tracking-wider flex items-center gap-1 hover:bg-zinc-900 hover:border-amber-500/50 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
             >
               <IconAdjustments className="w-3.5 h-3.5 text-amber-400" />
               <span>Setup Wizard</span>
@@ -211,7 +239,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
 
             <button
               onClick={handleExit}
-              className="px-3 py-1 bg-zinc-950 text-zinc-400 hover:text-white rounded-lg border border-zinc-800 transition-all font-bold uppercase text-[10px] tracking-wider flex items-center gap-1 hover:bg-zinc-900 hover:border-zinc-700 cursor-pointer"
+              className="px-3 py-1 bg-zinc-950 text-zinc-400 hover:text-white rounded-lg border border-zinc-800 transition-all font-bold uppercase text-[10px] tracking-wider flex items-center gap-1 hover:bg-zinc-900 hover:border-zinc-700 cursor-pointer focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
             >
               <IconPower className="w-3.5 h-3.5 text-red-500" />
               <span>Reset Cabinet</span>

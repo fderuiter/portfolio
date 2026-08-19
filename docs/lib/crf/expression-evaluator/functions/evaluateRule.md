@@ -8,7 +8,7 @@
 
 > **evaluateRule**(`rule`, `fieldValues`, `fieldsList`, `visitContext?`): `boolean`
 
-Defined in: [lib/crf/expression-evaluator.ts:484](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L484)
+Defined in: [lib/crf/expression-evaluator.ts:490](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L490)
 
 Evaluate full edit check rule conditions
 
