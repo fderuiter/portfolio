@@ -137,36 +137,77 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
           </>
         ) : (
           <div className="p-4 space-y-4">
-            <div className="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-3">
-              <div className="text-xs font-bold text-white font-mono">Form-Level Configuration</div>
-              <div>
-                <label className="block text-[10px] font-mono text-zinc-400 mb-1">Form Name</label>
-                <input
-                  type="text"
-                  value={form.name}
-                  onChange={(e) => onUpdateFormMeta({ name: e.target.value })}
-                  className="w-full px-2.5 py-1 bg-zinc-950 border border-zinc-800 rounded text-xs text-white"
-                />
+            {/* Executive Form Health Dashboard */}
+            <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 space-y-3.5 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span className="text-xs font-bold text-white font-mono uppercase tracking-wider">
+                    Form Conformance &amp; Telemetry
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-cyan/10 text-brand-cyan border border-brand-cyan/20 font-bold">
+                  CDASH 2.2
+                </span>
               </div>
-              <div>
-                <label className="block text-[10px] font-mono text-zinc-400 mb-1">CDASH Domain</label>
-                <input
-                  type="text"
-                  value={form.domain}
-                  onChange={(e) => onUpdateFormMeta({ domain: e.target.value.toUpperCase() })}
-                  className="w-full px-2.5 py-1 bg-zinc-950 border border-zinc-800 rounded text-xs text-white font-mono uppercase"
-                />
+
+              {/* 4-Metric Grid */}
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                <div className="p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-850">
+                  <div className="text-[10px] font-mono text-zinc-500 uppercase">Total Fields</div>
+                  <div className="text-sm font-mono font-extrabold text-white mt-0.5">{allFields.length}</div>
+                </div>
+                <div className="p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-850">
+                  <div className="text-[10px] font-mono text-zinc-500 uppercase">Mandatory</div>
+                  <div className="text-sm font-mono font-extrabold text-amber-400 mt-0.5">
+                    {allFields.filter((f) => f.required).length}
+                  </div>
+                </div>
+                <div className="p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-850">
+                  <div className="text-[10px] font-mono text-zinc-500 uppercase">Codelists</div>
+                  <div className="text-sm font-mono font-extrabold text-purple-400 mt-0.5">
+                    {allFields.filter((f) => f.codelistId || f.customOptions).length}
+                  </div>
+                </div>
+                <div className="p-2.5 rounded-xl bg-zinc-950/80 border border-zinc-850">
+                  <div className="text-[10px] font-mono text-zinc-500 uppercase">SDV Verified</div>
+                  <div className="text-sm font-mono font-extrabold text-emerald-400 mt-0.5">
+                    {allFields.filter((f) => f.sdvVerified).length} / {allFields.length}
+                  </div>
+                </div>
               </div>
-              <div>
-                <label className="flex items-center gap-2 cursor-pointer select-none pt-1">
+
+              {/* Form Metadata Settings */}
+              <div className="space-y-2.5 pt-2 border-t border-zinc-850">
+                <div>
+                  <label className="block text-[10px] font-mono text-zinc-400 mb-1">Form Name</label>
                   <input
-                    type="checkbox"
-                    checked={form.isLogForm || false}
-                    onChange={(e) => onUpdateFormMeta({ isLogForm: e.target.checked })}
-                    className="rounded border-zinc-700 bg-zinc-900 text-brand-cyan focus:ring-0"
+                    type="text"
+                    value={form.name}
+                    onChange={(e) => onUpdateFormMeta({ name: e.target.value })}
+                    className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white focus:border-brand-cyan focus:outline-none font-sans"
                   />
-                  <span className="text-xs text-zinc-300">Continuous Log Form (e.g. AE / ConMeds)</span>
-                </label>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-mono text-zinc-400 mb-1">CDASH Domain</label>
+                  <input
+                    type="text"
+                    value={form.domain}
+                    onChange={(e) => onUpdateFormMeta({ domain: e.target.value.toUpperCase() })}
+                    className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-brand-cyan font-mono uppercase focus:border-brand-cyan focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="flex items-center gap-2 cursor-pointer select-none pt-1">
+                    <input
+                      type="checkbox"
+                      checked={form.isLogForm || false}
+                      onChange={(e) => onUpdateFormMeta({ isLogForm: e.target.checked })}
+                      className="rounded border-zinc-700 bg-zinc-900 text-brand-cyan focus:ring-0"
+                    />
+                    <span className="text-xs text-zinc-300">Continuous Log Form (e.g. AE / ConMeds)</span>
+                  </label>
+                </div>
               </div>
             </div>
 

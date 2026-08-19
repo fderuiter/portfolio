@@ -9,6 +9,14 @@ import { createRoot, type Root } from "react-dom/client";
 import { ExportDocumentModal } from "@/components/crf/Modes/ExportDocumentModal";
 import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
 
+vi.mock("@/lib/crf/export-docx", () => ({
+  generateStudyDocx: vi.fn().mockResolvedValue(new Blob(["mock-docx"], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" })),
+}));
+
+vi.mock("@/lib/crf/export-pdf", () => ({
+  generateStudyPdf: vi.fn().mockResolvedValue(new Blob(["mock-pdf"], { type: "application/pdf" })),
+}));
+
 describe("ExportDocumentModal Component", () => {
   let container: HTMLDivElement;
   let root: Root;

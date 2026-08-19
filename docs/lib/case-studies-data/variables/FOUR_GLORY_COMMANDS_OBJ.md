@@ -8,4 +8,4 @@
 
 > `const` **FOUR\_GLORY\_COMMANDS\_OBJ**: [`CaseStudyCommands`](../type-aliases/CaseStudyCommands.md)
 
-Defined in: [lib/case-studies-data.ts:297](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L297)
+Defined in: [lib/case-studies-data.ts:302](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L302)

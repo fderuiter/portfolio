@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { isUserAuthorizedAdmin, requireAdmin, isCurrentUserAdmin } from "@/lib/auth/admin";
+import { isUserAuthorizedAdmin, requireAdmin, isCurrentUserAdmin, getAdminAuthSession } from "@/lib/auth/admin";
 import * as envModule from "@/lib/env";
 
 const mockAuth = vi.fn();
@@ -121,4 +121,58 @@ describe("Clerk Admin Authorization & Allowlist Engine", () => {
       expect(result).toEqual({ userId: "user_authorized" });
     });
   });
+
+  describe("getAdminAuthSession() Graceful Authorization Lifecycle", () => {
+    it("redirects to /admin/login when session is unauthenticated", async () => {
+      mockAuth.mockResolvedValue({ userId: null });
+
+      const session = await getAdminAuthSession();
+      expect(mockRedirect).toHaveBeenCalledWith("/admin/login");
+      expect(session.isAuthenticated).toBe(false);
+      expect(session.isAdmin).toBe(false);
+    });
+
+    it("returns non-admin session object when authenticated user is not in allowlist", async () => {
+      vi.spyOn(envModule, "getEnv").mockReturnValue({
+        ADMIN_USER_IDS: "user_other_admin",
+        ADMIN_EMAILS: "admin@portfolio.com",
+      } as ReturnType<typeof envModule.getEnv>);
+
+      mockAuth.mockResolvedValue({ userId: "user_visitor_999" });
+      mockCurrentUser.mockResolvedValue({
+        id: "user_visitor_999",
+        fullName: "Visitor Author",
+        emailAddresses: [{ emailAddress: "visitor@custom.org" }],
+      });
+
+      const session = await getAdminAuthSession();
+      expect(session.isAuthenticated).toBe(true);
+      expect(session.isAdmin).toBe(false);
+      expect(session.userId).toBe("user_visitor_999");
+      expect(session.primaryEmail).toBe("visitor@custom.org");
+      expect(session.displayName).toBe("Visitor Author");
+    });
+
+    it("returns authorized admin session object when user is in allowlist", async () => {
+      vi.spyOn(envModule, "getEnv").mockReturnValue({
+        ADMIN_USER_IDS: "",
+        ADMIN_EMAILS: "fred@deruiter.dev",
+      } as ReturnType<typeof envModule.getEnv>);
+
+      mockAuth.mockResolvedValue({ userId: "user_admin_fred" });
+      mockCurrentUser.mockResolvedValue({
+        id: "user_admin_fred",
+        firstName: "Fred",
+        emailAddresses: [{ emailAddress: "fred@deruiter.dev" }],
+      });
+
+      const session = await getAdminAuthSession();
+      expect(session.isAuthenticated).toBe(true);
+      expect(session.isAdmin).toBe(true);
+      expect(session.userId).toBe("user_admin_fred");
+      expect(session.primaryEmail).toBe("fred@deruiter.dev");
+      expect(session.displayName).toBe("Fred");
+    });
+  });
 });
+

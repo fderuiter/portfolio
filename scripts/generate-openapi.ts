@@ -495,6 +495,64 @@ export const openApiSpec = {
         },
       },
     },
+    "/api/contact": {
+      post: {
+        summary: "Submit visitor contact and collaboration inquiry",
+        description: "Validates and processes inbound contact form submissions, evaluates spam protection gates, and dispatches notification emails.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ContactSubmission",
+              },
+            },
+          },
+        },
+        responses: {
+          201: {
+            description: "Contact inquiry dispatched successfully",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ContactPostResponse",
+                },
+              },
+            },
+          },
+          400: {
+            description: "Validation or tone policy violation on submission payload",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ValidationError",
+                },
+              },
+            },
+          },
+          429: {
+            description: "Too many contact submission attempts",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
+          },
+          500: {
+            description: "Internal server error delivering message",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   },
   components: {
     schemas: {
@@ -739,6 +797,34 @@ export const openApiSpec = {
           },
         },
         required: ["success", "reactionType", "counts", "userReactions"],
+      },
+      ContactSubmission: {
+        type: "object",
+        properties: {
+          name: { type: "string", minLength: 2, maxLength: 100, description: "Sender full name" },
+          email: { type: "string", format: "email", description: "Sender email address" },
+          intent: {
+            type: "string",
+            enum: ["general", "collaboration", "consulting", "recruiting", "other"],
+            default: "general",
+            description: "Inquiry intent category",
+          },
+          subject: { type: "string", minLength: 3, maxLength: 150, description: "Inquiry subject line" },
+          message: { type: "string", minLength: 10, maxLength: 5000, description: "Detailed inquiry message text" },
+          _gotcha: { type: "string", description: "Honeypot spam filter field" },
+          _clientTimestamp: { type: "integer", description: "Form client mount timestamp for duration check" },
+        },
+        required: ["name", "email", "intent", "subject", "message"],
+      },
+      ContactPostResponse: {
+        type: "object",
+        properties: {
+          success: { type: "boolean" },
+          message: { type: "string" },
+          messageId: { type: "string", description: "Dispatched email message identifier" },
+          simulated: { type: "boolean", description: "Indicates simulated dispatch during testing or local development" },
+        },
+        required: ["success", "message"],
       },
     },
   },

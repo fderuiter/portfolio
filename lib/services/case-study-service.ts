@@ -65,22 +65,30 @@ export class CaseStudyService {
         where: { published: true },
         orderBy: { created_at: "asc" },
       });
-      dbStudies = records.map((r) => ({
-        id: r.id,
-        slug: r.slug,
-        title: r.title,
-        primary_language: r.primary_language,
-        github_url: r.github_url ?? "",
-        published: r.published,
-        simulated_telemetry: r.simulated_telemetry,
-        tags: r.tags,
-        editorial_content: r.editorial_content,
-        architectural_narrative: r.architectural_narrative,
-        commands_json: r.commands_json ?? undefined,
-        playback_json: r.playback_json ?? undefined,
-        created_at: new Date(r.created_at),
-        updated_at: new Date(r.updated_at),
-      }));
+      dbStudies = records.map((r) => {
+        const fallback = FALLBACK_CASE_STUDIES.find((f) => f.slug === r.slug);
+        return {
+          id: r.id,
+          slug: r.slug,
+          title: r.title,
+          primary_language: r.primary_language,
+          github_url: r.github_url ?? fallback?.github_url ?? "",
+          external_platform_url: fallback?.external_platform_url,
+          external_platform_type: fallback?.external_platform_type,
+          interactive_url: fallback?.interactive_url,
+          interactive_label: fallback?.interactive_label,
+          benchmarks: fallback?.benchmarks,
+          published: r.published,
+          simulated_telemetry: r.simulated_telemetry,
+          tags: r.tags,
+          editorial_content: r.editorial_content,
+          architectural_narrative: r.architectural_narrative,
+          commands_json: r.commands_json ?? fallback?.commands_json ?? undefined,
+          playback_json: r.playback_json ?? fallback?.playback_json ?? undefined,
+          created_at: new Date(r.created_at),
+          updated_at: new Date(r.updated_at),
+        };
+      });
     } catch (err) {
       if (env.VERCEL_ENV === "production") {
         console.warn("CaseStudyService.getAllPublishedCaseStudies: Database query failed, using static fallbacks:", err);
@@ -111,19 +119,25 @@ export class CaseStudyService {
         where: { slug },
       });
       if (r && r.published) {
+        const fallback = FALLBACK_CASE_STUDIES.find((f) => f.slug === r.slug);
         return {
           id: r.id,
           slug: r.slug,
           title: r.title,
           primary_language: r.primary_language,
-          github_url: r.github_url ?? "",
+          github_url: r.github_url ?? fallback?.github_url ?? "",
+          external_platform_url: fallback?.external_platform_url,
+          external_platform_type: fallback?.external_platform_type,
+          interactive_url: fallback?.interactive_url,
+          interactive_label: fallback?.interactive_label,
+          benchmarks: fallback?.benchmarks,
           published: r.published,
           simulated_telemetry: r.simulated_telemetry,
           tags: r.tags,
           editorial_content: r.editorial_content,
           architectural_narrative: r.architectural_narrative,
-          commands_json: r.commands_json ?? undefined,
-          playback_json: r.playback_json ?? undefined,
+          commands_json: r.commands_json ?? fallback?.commands_json ?? undefined,
+          playback_json: r.playback_json ?? fallback?.playback_json ?? undefined,
           created_at: new Date(r.created_at),
           updated_at: new Date(r.updated_at),
         };
@@ -137,6 +151,7 @@ export class CaseStudyService {
     const fallback = FALLBACK_CASE_STUDIES.find((s) => s.slug === slug);
     return fallback ?? null;
   }
+
 
   /**
    * Retrieves all published case study slugs for static route generation and sitemaps.

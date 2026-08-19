@@ -123,11 +123,12 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           : "bg-zinc-950/80 border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/50"
       }`}
     >
-      {/* Field Top Meta Bar */}
+      {/* Field Top Meta & Progressive Micro-Toolbar */}
       <div className="flex items-center justify-between gap-2 mb-2">
+        {/* Left Badges */}
         <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
           <div
-            className="cursor-grab active:cursor-grabbing p-1 text-zinc-600 hover:text-zinc-300 hidden sm:block"
+            className="cursor-grab active:cursor-grabbing p-1 text-zinc-600 group-hover:text-zinc-300 hidden sm:block transition-colors"
             title="Drag to reorder"
           >
             <IconGripVertical className="w-3.5 h-3.5" />
@@ -140,8 +141,38 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             {field.dataType}
           </span>
 
-          {/* Quick Column Span Controls (Hidden on narrow mobile screens) */}
-          <div className="hidden sm:flex items-center bg-zinc-900 border border-zinc-800 rounded px-1 py-0.5 text-[9px] font-mono text-zinc-400 gap-1">
+          {/* Quick Required Toggle */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onUpdateField?.({ required: !field.required });
+            }}
+            className={`px-1.5 py-0.5 rounded text-[9px] font-mono transition-colors border ${
+              field.required
+                ? "bg-red-500/15 text-red-400 border-red-500/30 font-bold"
+                : "bg-zinc-900 text-zinc-600 border-zinc-800 hover:text-zinc-400"
+            }`}
+            title={field.required ? "Required question (click to make optional)" : "Optional question (click to make required)"}
+          >
+            {field.required ? "* Req" : "Opt"}
+          </button>
+
+          {field.sdvVerified && (
+            <span className="inline-flex items-center gap-0.5 font-mono text-[9px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+              <IconShieldCheck className="w-3 h-3" />
+              <span>SDV</span>
+            </span>
+          )}
+        </div>
+
+        {/* Right Actions & Progressive Micro-Toolbar */}
+        <div className="flex items-center gap-1">
+          {/* Progressive Column Span Controls (Visible on Hover / Focus / Selection) */}
+          <div
+            className={`hidden sm:flex items-center bg-zinc-900/90 border border-zinc-800 rounded-lg px-1 py-0.5 text-[9px] font-mono text-zinc-400 gap-1 transition-opacity ${
+              isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-within:opacity-100"
+            }`}
+          >
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -168,7 +199,7 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 
             <div className="h-2.5 w-px bg-zinc-800 mx-0.5" />
 
-            {[3, 6, 12].map((s) => (
+            {[3, 4, 6, 12].map((s) => (
               <button
                 key={s}
                 onClick={(e) => {
@@ -187,32 +218,6 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             ))}
           </div>
 
-          {/* Quick Required Toggle */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onUpdateField?.({ required: !field.required });
-            }}
-            className={`px-1.5 py-0.5 rounded text-[9px] font-mono transition-colors border ${
-              field.required
-                ? "bg-red-500/15 text-red-400 border-red-500/30 font-bold"
-                : "bg-zinc-900 text-zinc-600 border-zinc-800 hover:text-zinc-400"
-            }`}
-            title={field.required ? "Required question (click to make optional)" : "Optional question (click to make required)"}
-          >
-            {field.required ? "* Req" : "Opt"}
-          </button>
-
-          {field.sdvVerified && (
-            <span className="inline-flex items-center gap-0.5 font-mono text-[9px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
-              <IconShieldCheck className="w-3 h-3" />
-              <span>SDV</span>
-            </span>
-          )}
-        </div>
-
-        {/* Action icons (Desktop hover + Mobile touch menu) */}
-        <div className="flex items-center gap-1">
           {/* Touch Move Up/Down Controls for touch devices & smaller screens */}
           {onMoveUp && canMoveUp && (
             <button
@@ -244,8 +249,8 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
 
           {/* Desktop Hover Actions */}
           <div
-            className={`hidden sm:flex items-center gap-1 transition-opacity ${
-              isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            className={`hidden sm:flex items-center gap-0.5 transition-opacity ${
+              isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-within:opacity-100"
             }`}
           >
             <button

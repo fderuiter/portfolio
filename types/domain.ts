@@ -15,6 +15,14 @@ export interface BaseCaseStudy {
   updated_at: Date;
 }
 
+export interface ExtendedCaseStudy extends BaseCaseStudy {
+  external_platform_url?: string | null;
+  external_platform_type?: "github" | "kaggle" | "pypi" | "npm" | null;
+  interactive_url?: string | null;
+  interactive_label?: string | null;
+  benchmarks?: Record<string, string | number> | null;
+}
+
 // CDISC ODM & SDTM Specialized Case Study Structure
 export interface ClinicalDataCaseStudy extends BaseCaseStudy {
   standards_validated: ("CDISC_ODM" | "CDISC_SDTM")[];

@@ -228,3 +228,76 @@ export const ReactionSubmissionSchema = z.object({
   }),
 });
 
+/**
+ * Allowed intent categories for visitor contact submissions
+ */
+export const CONTACT_INTENTS = ["general", "collaboration", "consulting", "recruiting", "other"] as const;
+export type ContactIntent = (typeof CONTACT_INTENTS)[number];
+
+/**
+ * Schema for Contact submission POST payload validation
+ */
+export const ContactSubmissionSchema = z
+  .object({
+    name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name cannot exceed 100 characters"),
+    email: z.string().trim().email("Please provide a valid email address"),
+    intent: z
+      .enum(CONTACT_INTENTS, {
+        message: "Intent must be one of: 'general', 'collaboration', 'consulting', 'recruiting', 'other'",
+      })
+      .default("general"),
+    subject: z.string().trim().min(3, "Subject must be at least 3 characters").max(150, "Subject cannot exceed 150 characters"),
+    message: z.string().trim().min(10, "Message must be at least 10 characters").max(5000, "Message cannot exceed 5000 characters"),
+    _gotcha: z.string().optional(),
+    _clientTimestamp: z.number().int().positive().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.name) {
+      const check = validateConstructiveContent(data.name);
+      if (!check.isValid) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: check.reason || "Name violates community tone standards",
+          path: ["name"],
+        });
+      }
+    }
+
+    if (data.subject) {
+      const check = validateConstructiveContent(data.subject);
+      if (!check.isValid) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: check.reason || "Subject violates community tone standards",
+          path: ["subject"],
+        });
+      }
+    }
+
+    if (data.message) {
+      const check = validateConstructiveContent(data.message);
+      if (!check.isValid) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: check.reason || "Message violates community tone standards",
+          path: ["message"],
+        });
+      }
+    }
+  });
+
+export type ContactSubmission = z.infer<typeof ContactSubmissionSchema>;
+
+/**
+ * Schema for Contact submission API response
+ */
+export const ContactResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+  messageId: z.string().optional(),
+  simulated: z.boolean().optional(),
+});
+
+export type ContactResponse = z.infer<typeof ContactResponseSchema>;
+
+

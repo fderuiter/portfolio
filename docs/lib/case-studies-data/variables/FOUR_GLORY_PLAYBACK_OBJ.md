@@ -8,4 +8,4 @@
 
 > `const` **FOUR\_GLORY\_PLAYBACK\_OBJ**: [`CaseStudyPlayback`](../type-aliases/CaseStudyPlayback.md)
 
-Defined in: [lib/case-studies-data.ts:350](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L350)
+Defined in: [lib/case-studies-data.ts:355](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L355)

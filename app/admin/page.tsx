@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { UserButton } from "@clerk/nextjs";
-import { currentUser } from "@clerk/nextjs/server";
 import { PageLayout } from "@/components/PageLayout";
-import { requireAdmin } from "@/lib/auth/admin";
+import { getAdminAuthSession } from "@/lib/auth/admin";
+import { AdminAccessDenied } from "@/components/admin/AdminAccessDenied";
 import { IconDashboard, IconFileText, IconActivity, IconLockCheck } from "@tabler/icons-react";
 import Link from "next/link";
 
@@ -16,11 +16,22 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminDashboardPage() {
-  const { userId } = await requireAdmin();
-  const user = await currentUser();
+  const session = await getAdminAuthSession();
 
-  const primaryEmail = user?.emailAddresses?.[0]?.emailAddress ?? "N/A";
-  const displayName = user?.fullName || user?.firstName || "Administrator";
+  if (!session.isAdmin) {
+    return (
+      <PageLayout variant="standard">
+        <AdminAccessDenied
+          userId={session.userId}
+          primaryEmail={session.primaryEmail}
+          displayName={session.displayName}
+        />
+      </PageLayout>
+    );
+  }
+
+  const { userId, primaryEmail, displayName } = session;
+
 
   return (
     <PageLayout variant="standard">

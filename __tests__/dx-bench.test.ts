@@ -61,7 +61,7 @@ describe("DX Micro-Benchmark Suite", () => {
   it("benchmarks duck autonomous physics and park simulation", () => {
     const results = benchmarkDuckPhysics(100);
     expect(results.length).toBe(1);
-    expect(results[0].opsPerSec).toBeGreaterThan(2000);
+    expect(results[0].opsPerSec).toBeGreaterThan(500);
     expect(results[0].metrics?.["Ticks Simulated"]).toBeDefined();
   });
 

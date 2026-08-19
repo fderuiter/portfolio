@@ -4,6 +4,7 @@ import { CaseStudyService } from "@/lib/services/case-study-service";
 import { getConnectionHashFromRequest } from "@/lib/services/privacy-service";
 import { createApiHandler } from "@/lib/route-wrapper";
 import { checkSubmissionAttemptRateLimit } from "@/lib/moderation";
+import { EmailService } from "@/lib/services/email-service";
 import * as Sentry from "@sentry/nextjs";
 
 export const dynamic = "force-dynamic";
@@ -44,6 +45,19 @@ export const POST = createApiHandler(
           { error: result.message },
           { status: 429 }
         );
+      }
+
+      // Non-blocking notification dispatch
+      if (result.success) {
+        EmailService.sendFeedbackNotification({
+          caseStudySlug: data.caseStudySlug,
+          takeaways: data.takeaways,
+          comments: data.comments,
+          connectionHash,
+          submittedAt: new Date(),
+        }).catch((err) => {
+          console.error("Non-blocking feedback email dispatch error:", err);
+        });
       }
 
       return NextResponse.json(

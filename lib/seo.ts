@@ -4,14 +4,16 @@ import { resolveBaseUrl } from "./domain";
 
 export const SITE_BASE_URL = resolveBaseUrl();
 
+export const PERSON_NODE_ID = `${SITE_BASE_URL}/#person`;
+export const WEBSITE_NODE_ID = `${SITE_BASE_URL}/#website`;
+
 /**
- * Returns the canonical Person schema representing Frederick de Ruiter.
- * Securely escapes angle brackets to neutralize potential XSS script injections.
+ * Returns the canonical Person Schema.org entity node with #person @id.
  */
-export function getPersonSchema(): string {
-  const schema = {
-    "@context": "https://schema.org",
+export function getPersonNode(): Record<string, unknown> {
+  return {
     "@type": "Person",
+    "@id": PERSON_NODE_ID,
     "name": "Frederick de Ruiter",
     "url": SITE_BASE_URL,
     "image": `${SITE_BASE_URL}/favicon.ico`,
@@ -20,7 +22,153 @@ export function getPersonSchema(): string {
     "sameAs": [
       "https://github.com/fderuiter",
       "https://www.linkedin.com/in/frederick-de-ruiter-88012467/"
+    ],
+    "knowsAbout": [
+      "Systems Architecture",
+      "CDISC CDASH & ODM-XML",
+      "Formal Verification",
+      "Embedded Systems",
+      "Next.js 16 & React 19",
+      "TypeScript & Rust"
     ]
+  };
+}
+
+/**
+ * Returns the canonical WebSite Schema.org entity node with `#website` `@id` and Sitelinks SearchAction.
+ */
+export function getWebsiteNode(): Record<string, unknown> {
+  return {
+    "@type": "WebSite",
+    "@id": WEBSITE_NODE_ID,
+    "name": "Frederick de Ruiter Portfolio",
+    "url": SITE_BASE_URL,
+    "description": "High-performance systems engineering showcase, canvas physics engines, and CDISC data engines by Frederick de Ruiter.",
+    "publisher": {
+      "@type": "Person",
+      "@id": PERSON_NODE_ID,
+      "name": "Frederick de Ruiter"
+    },
+    "author": {
+      "@type": "Person",
+      "@id": PERSON_NODE_ID,
+      "name": "Frederick de Ruiter"
+    },
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": `${SITE_BASE_URL}/?search={search_term_string}`,
+      "query-input": "required name=search_term_string"
+    }
+  };
+}
+
+export interface WebPageNodeOptions {
+  name: string;
+  description: string;
+  url: string;
+  breadcrumbs?: BreadcrumbItem[];
+}
+
+/**
+ * Returns a canonical WebPage entity node linked to the root WebSite and Person.
+ */
+export function getWebPageNode(options: WebPageNodeOptions): Record<string, unknown> {
+  const fullUrl = options.url.startsWith("http") ? options.url : `${SITE_BASE_URL}${options.url.startsWith("/") ? options.url : "/" + options.url}`;
+  return {
+    "@type": "WebPage",
+    "@id": `${fullUrl}/#webpage`,
+    "url": fullUrl,
+    "name": options.name,
+    "description": options.description,
+    "isPartOf": {
+      "@id": WEBSITE_NODE_ID
+    },
+    "author": {
+      "@id": PERSON_NODE_ID
+    },
+    ...(options.breadcrumbs ? { "breadcrumb": { "@id": `${fullUrl}/#breadcrumb` } } : {})
+  };
+}
+
+/**
+ * Returns a normalized BreadcrumbList entity node with explicit #breadcrumb @id.
+ */
+export function getBreadcrumbNode(items: BreadcrumbItem[], pageUrl: string): Record<string, unknown> {
+  const normalized = normalizeBreadcrumbs(items);
+  const fullPageUrl = pageUrl.startsWith("http") ? pageUrl : `${SITE_BASE_URL}${pageUrl.startsWith("/") ? pageUrl : "/" + pageUrl}`;
+  return {
+    "@type": "BreadcrumbList",
+    "@id": `${fullPageUrl}/#breadcrumb`,
+    "itemListElement": normalized.map((item, index) => {
+      const formattedUrl = item.url.startsWith("http")
+        ? item.url
+        : `${SITE_BASE_URL}${item.url.startsWith("/") ? item.url : "/" + item.url}`;
+      return {
+        "@type": "ListItem",
+        "position": index + 1,
+        "name": item.name,
+        "item": formattedUrl,
+      };
+    }),
+  };
+}
+
+export interface VisualArtworkSchemaOptions {
+  name: string;
+  description: string;
+  url: string;
+  imageUrl?: string;
+  formats?: string[];
+  license?: string;
+  creator?: string;
+}
+
+/**
+ * Returns a specialized VisualArtwork & MediaObject Schema.org representation for open graphic design assets (e.g. Laser Loon).
+ */
+export function getVisualArtworkSchema(options: VisualArtworkSchemaOptions): string {
+  const fullUrl = options.url.startsWith("http") ? options.url : `${SITE_BASE_URL}${options.url.startsWith("/") ? options.url : "/" + options.url}`;
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "VisualArtwork",
+    "@id": `${fullUrl}/#artwork`,
+    "name": options.name,
+    "description": options.description,
+    "url": fullUrl,
+    "image": options.imageUrl || `${SITE_BASE_URL}/images/laser-loon-preview.png`,
+    "encodingFormat": options.formats || ["image/svg+xml", "application/illustrator", "application/pdf", "image/png"],
+    "license": options.license || "https://creativecommons.org/licenses/by/4.0/",
+    "creator": {
+      "@type": "Person",
+      "@id": PERSON_NODE_ID,
+      "name": options.creator || "Frederick de Ruiter"
+    }
+  };
+
+  return JSON.stringify(schema).replace(/</g, "\\u003c");
+}
+
+/**
+ * Returns an interconnected Schema.org `@graph` linking all provided entity nodes into a single structured payload.
+ */
+export function getUnifiedGraphSchema(nodes: (Record<string, unknown> | null | undefined)[]): string {
+  const filteredNodes = nodes.filter((n): n is Record<string, unknown> => Boolean(n));
+  const schema = {
+    "@context": "https://schema.org",
+    "@graph": filteredNodes,
+  };
+
+  return JSON.stringify(schema).replace(/</g, "\\u003c");
+}
+
+/**
+ * Returns the canonical Person schema representing Frederick de Ruiter.
+ * Securely escapes angle brackets to neutralize potential XSS script injections.
+ */
+export function getPersonSchema(): string {
+  const schema = {
+    "@context": "https://schema.org",
+    ...getPersonNode(),
   };
 
   return JSON.stringify(schema).replace(/</g, "\\u003c");
@@ -32,14 +180,7 @@ export function getPersonSchema(): string {
 export function getWebsiteSchema(): string {
   const schema = {
     "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "Frederick de Ruiter Portfolio",
-    "url": SITE_BASE_URL,
-    "description": "High-performance systems engineering showcase, canvas physics engines, and CDISC data engines by Frederick de Ruiter.",
-    "author": {
-      "@type": "Person",
-      "name": "Frederick de Ruiter"
-    }
+    ...getWebsiteNode(),
   };
 
   return JSON.stringify(schema).replace(/</g, "\\u003c");
@@ -209,3 +350,4 @@ export function getSoftwareSourceCodeSchema(
 
   return JSON.stringify(schema).replace(/</g, "\\u003c");
 }
+

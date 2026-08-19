@@ -8,7 +8,7 @@
 
 > **isProductionEnvironment**(): `boolean`
 
-Defined in: [lib/env.ts:127](https://github.com/fderuiter/portfolio/blob/main/lib/env.ts#L127)
+Defined in: [lib/env.ts:130](https://github.com/fderuiter/portfolio/blob/main/lib/env.ts#L130)
 
 Centered dynamic helper to check if current deployment is production.
 Uses the existing environment validation schema to prevent unvalidated configurations.

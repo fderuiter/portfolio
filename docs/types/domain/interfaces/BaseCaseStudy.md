@@ -10,6 +10,7 @@ Defined in: [types/domain.ts:1](https://github.com/fderuiter/portfolio/blob/main
 
 ## Extended by
 
+- [`ExtendedCaseStudy`](ExtendedCaseStudy.md)
 - [`ClinicalDataCaseStudy`](ClinicalDataCaseStudy.md)
 
 ## Properties

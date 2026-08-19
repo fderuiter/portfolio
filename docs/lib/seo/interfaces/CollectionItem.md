@@ -6,7 +6,7 @@
 
 # Interface: CollectionItem
 
-Defined in: [lib/seo.ts:130](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L130)
+Defined in: [lib/seo.ts:271](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L271)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/seo.ts:130](https://github.com/fderuiter/portfolio/blob/main/li
 
 > `optional` **description?**: `string`
 
-Defined in: [lib/seo.ts:133](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L133)
+Defined in: [lib/seo.ts:274](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L274)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/seo.ts:133](https://github.com/fderuiter/portfolio/blob/main/li
 
 > **name**: `string`
 
-Defined in: [lib/seo.ts:131](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L131)
+Defined in: [lib/seo.ts:272](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L272)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [lib/seo.ts:131](https://github.com/fderuiter/portfolio/blob/main/li
 
 > **url**: `string`
 
-Defined in: [lib/seo.ts:132](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L132)
+Defined in: [lib/seo.ts:273](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L273)

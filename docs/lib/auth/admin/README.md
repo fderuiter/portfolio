@@ -6,8 +6,13 @@
 
 # lib/auth/admin
 
+## Interfaces
+
+- [AdminAuthSession](interfaces/AdminAuthSession.md)
+
 ## Functions
 
+- [getAdminAuthSession](functions/getAdminAuthSession.md)
 - [isCurrentUserAdmin](functions/isCurrentUserAdmin.md)
 - [isUserAuthorizedAdmin](functions/isUserAuthorizedAdmin.md)
 - [requireAdmin](functions/requireAdmin.md)

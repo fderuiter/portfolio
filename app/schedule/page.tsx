@@ -15,6 +15,7 @@ import {
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
 import { PageLayout } from "@/components/PageLayout";
+import { ContactForm } from "@/components/ContactForm";
 
 const GOOGLE_CALENDAR_URL = "https://calendar.app.google/YnR5oxos7ZTLyvUp8";
 
@@ -141,7 +142,7 @@ export default function SchedulePage() {
           <p className="text-xs font-mono text-zinc-400 uppercase tracking-widest mb-4">
             Prefer direct email or messaging?
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
             <a
               href="mailto:fpderuiter@gmail.com"
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-brand-cyan hover:border-brand-cyan/40 transition-colors"
@@ -159,6 +160,10 @@ export default function SchedulePage() {
               <span>LinkedIn Profile</span>
               <IconExternalLink className="w-3.5 h-3.5 text-zinc-500" />
             </a>
+          </div>
+
+          <div className="w-full max-w-2xl text-left">
+            <ContactForm initialIntent="consulting" />
           </div>
         </div>
 

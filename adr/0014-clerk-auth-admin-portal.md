@@ -17,11 +17,14 @@ We adopt `@clerk/nextjs` configured with an **Edge Middleware Chaining & Environ
 - **Edge Middleware Chaining**: Wrap `middleware.ts` with `clerkMiddleware()` using `createRouteMatcher` to guard `/admin(.*)` and `/api/admin(.*)`, while chaining existing security headers and anonymous connection hash generation across all requests.
 - **Environment-Gated Admin Authorization**: Admin access is verified server-side against typed environment variable allowlists (`ADMIN_USER_IDS`, `ADMIN_EMAILS`) defined in `lib/env.ts`, avoiding unnecessary database user table synchronization.
 - **Architectural Dark Auth Surface**: Auth pages (`/admin/login`) utilize `@clerk/themes` dark presets with bespoke styling aligned with `#0d0e11` graphite containers and monospace typography.
+- **In-Route Access Denied Console & Graceful Authorization**: Rather than throwing unhandled server exceptions when authenticated non-admin visitors access `/admin`, `getAdminAuthSession()` returns structured authorization state, rendering an in-route 403 console with 1-click clipboard helpers for `ADMIN_EMAILS` and `ADMIN_USER_IDS`, account switching, and re-verification triggers.
 - **Defensive Environment & Test Stubs**: Clerk keys (`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`) are validated in `lib/env.ts` with test mocks in `vitest.setup.ts` to allow 100% offline static prerendering and test suite execution.
 
 ## Consequences
 
 - The portfolio gains a secure, production-ready admin layer for content drafting and analytics inspection.
+- Unlisted authenticated users receive clear, actionable self-service guidance with exact Clerk UIDs and emails without triggering Next.js error boundaries or false-alarm Sentry exceptions.
 - Public routes remain 100% static, fast, and accessible without auth friction.
 - Edge security headers and anonymous telemetry fingerprinting are preserved without conflict.
 - The build, quality verification, and CI pipelines continue to run cleanly offline.
+

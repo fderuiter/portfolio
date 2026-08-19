@@ -18,6 +18,14 @@ Defined in: [lib/github.ts:23](https://github.com/fderuiter/portfolio/blob/main/
 
 ***
 
+### commitsCount?
+
+> `optional` **commitsCount?**: `number`
+
+Defined in: [lib/github.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L24)
+
+***
+
 ### forks
 
 > **forks**: `number`
@@ -42,6 +50,14 @@ Defined in: [lib/github.ts:20](https://github.com/fderuiter/portfolio/blob/main/
 
 ***
 
+### primaryLanguage?
+
+> `optional` **primaryLanguage?**: `string`
+
+Defined in: [lib/github.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L25)
+
+***
+
 ### recentCommits
 
 > **recentCommits**: [`GitHubCommit`](GitHubCommit.md)[]
@@ -55,3 +71,11 @@ Defined in: [lib/github.ts:22](https://github.com/fderuiter/portfolio/blob/main/
 > **stars**: `number`
 
 Defined in: [lib/github.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L18)
+
+***
+
+### updatedAt?
+
+> `optional` **updatedAt?**: `string`
+
+Defined in: [lib/github.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L26)

@@ -138,9 +138,9 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
     });
 
     expect(mockPlayHover).toHaveBeenCalledTimes(1);
-    expect(previewPane?.textContent).toContain("About System Architect");
-    expect(previewPane?.textContent).toContain("Verified Credentials");
-    expect(previewPane?.textContent).toContain("Distributed Systems");
+    expect(previewPane?.textContent).toContain("About Frederick (Bio & Timeline)");
+    expect(previewPane?.textContent).toContain("Origin Story");
+    expect(previewPane?.textContent).toContain("Mayo Clinic Operations");
 
     // Press ArrowDown again to navigate to third item (Say Hi & Connect)
     await act(async () => {
@@ -157,7 +157,7 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
     });
 
     expect(mockPlayHover).toHaveBeenCalledTimes(3);
-    expect(previewPane?.textContent).toContain("About System Architect");
+    expect(previewPane?.textContent).toContain("About Frederick (Bio & Timeline)");
   });
 
   it("updates active preview when navigating or hovering over a list item", async () => {

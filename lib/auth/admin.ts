@@ -66,6 +66,53 @@ export async function isCurrentUserAdmin(): Promise<boolean> {
 }
 
 /**
+ * Structured auth session state for admin and author interfaces.
+ */
+export interface AdminAuthSession {
+  isAuthenticated: boolean;
+  isAdmin: boolean;
+  userId: string;
+  primaryEmail: string;
+  displayName: string;
+  user: Awaited<ReturnType<typeof currentUser>>;
+}
+
+/**
+ * Server-side helper to acquire the active session for admin pages.
+ * Redirects unauthenticated visitors to `/admin/login`, and returns
+ * structured authorization state without throwing runtime exceptions.
+ */
+export async function getAdminAuthSession(): Promise<AdminAuthSession> {
+  const { userId } = await auth();
+  if (!userId) {
+    redirect("/admin/login");
+    return {
+      isAuthenticated: false,
+      isAdmin: false,
+      userId: "",
+      primaryEmail: "",
+      displayName: "",
+      user: null,
+    };
+  }
+
+  const user = await currentUser();
+  const emails = user?.emailAddresses?.map((e) => e.emailAddress) || [];
+  const primaryEmail = user?.emailAddresses?.[0]?.emailAddress ?? (emails[0] || "N/A");
+  const displayName = user?.fullName || user?.firstName || "Author";
+  const isAdmin = isUserAuthorizedAdmin(userId, emails);
+
+  return {
+    isAuthenticated: true,
+    isAdmin,
+    userId,
+    primaryEmail,
+    displayName,
+    user,
+  };
+}
+
+/**
  * Enforces admin authorization on Server Components or Server Actions.
  * Redirects to /admin/login if unauthenticated, or throws an authorization error if unauthorized.
  */
@@ -83,3 +130,4 @@ export async function requireAdmin(): Promise<{ userId: string }> {
 
   return { userId };
 }
+
