@@ -1240,6 +1240,59 @@ export function checkDirectoryTopology(root: string): DiagnosticCheckResult {
 }
 
 /**
+ * Real-Browser Sub-Route Web Vitals & SLA Performance Gate (AGENTS.md Invariant #14)
+ */
+export function checkSubRoutePerformance(root: string): DiagnosticCheckResult {
+  const jsonPath = path.join(root, "benchmark-results.json");
+  if (!fs.existsSync(jsonPath)) {
+    return {
+      id: "quality-subroute-performance",
+      name: "Sub-Route Real-Browser Core Web Vitals Performance SLA",
+      category: "quality",
+      status: "pass",
+      message: "No recorded benchmark-results.json found. Budget assertions are active during 'npm run bench:pages -- --assert' and CI.",
+    };
+  }
+
+  try {
+    const data = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
+    const routes = data.routes || [];
+    const failed = routes.filter((r: { passedBudget?: boolean }) => r.passedBudget === false);
+
+    if (failed.length > 0) {
+      const details = failed.map(
+        (f: { route?: { path: string; name: string }; lcp?: { median: number }; cls?: { median: number }; ttfb?: { median: number } }) =>
+          `Route '${f.route?.path}' (${f.route?.name}): TTFB=${f.ttfb?.median}ms, LCP=${f.lcp?.median}ms, CLS=${f.cls?.median}`
+      );
+      return {
+        id: "quality-subroute-performance",
+        name: "Sub-Route Real-Browser Core Web Vitals Performance SLA",
+        category: "quality",
+        status: "fail",
+        message: `${failed.length} sub-route(s) breached Core Web Vitals SLA performance budgets in benchmark-results.json`,
+        details,
+      };
+    }
+
+    return {
+      id: "quality-subroute-performance",
+      name: "Sub-Route Real-Browser Core Web Vitals Performance SLA",
+      category: "quality",
+      status: "pass",
+      message: `All ${routes.length} benchmarked sub-routes comply with Core Web Vitals SLA budgets (LCP <= 2500ms, TTFB <= 800ms, CLS <= 0.1).`,
+    };
+  } catch {
+    return {
+      id: "quality-subroute-performance",
+      name: "Sub-Route Real-Browser Core Web Vitals Performance SLA",
+      category: "quality",
+      status: "fail",
+      message: "benchmark-results.json is not valid JSON.",
+    };
+  }
+}
+
+/**
  * Run All Diagnostics
  */
 export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
@@ -1277,6 +1330,7 @@ export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
     checkDesignTokens(root),
     checkDeadCode(root),
     checkBundleBudgets(root),
+    checkSubRoutePerformance(root),
   ];
 
   const totalPassed = checks.filter((c) => c.status === "pass").length;
