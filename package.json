@@ -17,7 +17,7 @@
     "bench": "npx tsx scripts/dx.ts bench",
     "bench:pages": "npx tsx scripts/benchmark-pages.ts",
     "scaffold": "npx tsx scripts/dx.ts scaffold",
-    "quality": "npm run check && npm run lint:docs && npm run check-docs-drift && npm run verify",
+    "quality": "npm run check && npm run lint:docs && npm run check-docs-drift && npm run bench:pages -- --assert && npm run verify",
     "predev": "npx tsx scripts/generate-theme.ts",
     "dev": "concurrently -n \"turbo,tsc\" -c \"cyan,magenta\" \"next dev --turbo\" \"tsc --noEmit --watch\"",
     "precompile-docs": "npx prisma generate",

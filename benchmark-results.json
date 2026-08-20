@@ -1,6 +1,6 @@
 {
   "targetUrl": "http://localhost:3000",
-  "timestamp": "2026-08-16T02:29:07.903Z",
+  "timestamp": "2026-08-20T17:12:21.174Z",
   "thresholds": {
     "maxTtfbMs": 800,
     "maxFcpMs": 1800,
@@ -10,142 +10,28 @@
   "routes": [
     {
       "route": {
-        "path": "/",
-        "name": "Homepage (Pretext & Bio)",
-        "category": "top-level"
-      },
-      "runs": 3,
-      "ttfb": {
-        "median": 3.5,
-        "min": 2.8,
-        "max": 4.2,
-        "p95": 4.2
-      },
-      "fcp": {
-        "median": 68,
-        "min": 60,
-        "max": 68,
-        "p95": 68
-      },
-      "lcp": {
-        "median": 68,
-        "min": 60,
-        "max": 68,
-        "p95": 68
-      },
-      "cls": {
-        "median": 0,
-        "min": 0,
-        "max": 0,
-        "p95": 0
-      },
-      "domContentLoaded": {
-        "median": 13.4,
-        "min": 11.6,
-        "max": 21.2,
-        "p95": 21.2
-      },
-      "loadDuration": {
-        "median": 34.7,
-        "min": 23.2,
-        "max": 41.7,
-        "p95": 41.7
-      },
-      "transferSizeKb": {
-        "median": 32.8,
-        "min": 32.8,
-        "max": 32.8,
-        "p95": 32.8
-      },
-      "ratings": {
-        "ttfb": "good",
-        "fcp": "good",
-        "lcp": "good",
-        "cls": "good"
-      },
-      "passedBudget": true
-    },
-    {
-      "route": {
-        "path": "/case-studies",
-        "name": "Case Studies Index",
-        "category": "top-level"
-      },
-      "runs": 3,
-      "ttfb": {
-        "median": 1.6,
-        "min": 1.6,
-        "max": 1.9,
-        "p95": 1.9
-      },
-      "fcp": {
-        "median": 40,
-        "min": 28,
-        "max": 40,
-        "p95": 40
-      },
-      "lcp": {
-        "median": 40,
-        "min": 28,
-        "max": 40,
-        "p95": 40
-      },
-      "cls": {
-        "median": 0,
-        "min": 0,
-        "max": 0,
-        "p95": 0
-      },
-      "domContentLoaded": {
-        "median": 8.4,
-        "min": 8.4,
-        "max": 18.9,
-        "p95": 18.9
-      },
-      "loadDuration": {
-        "median": 10.3,
-        "min": 10.3,
-        "max": 19,
-        "p95": 19
-      },
-      "transferSizeKb": {
-        "median": 9.4,
-        "min": 9.4,
-        "max": 9.4,
-        "p95": 9.4
-      },
-      "ratings": {
-        "ttfb": "good",
-        "fcp": "good",
-        "lcp": "good",
-        "cls": "good"
-      },
-      "passedBudget": true
-    },
-    {
-      "route": {
         "path": "/arcade",
         "name": "Arcade Hub",
         "category": "top-level"
       },
       "runs": 3,
       "ttfb": {
-        "median": 2.3,
-        "min": 2.1,
-        "max": 2.3,
-        "p95": 2.3
+        "median": 70.2,
+        "min": 69.8,
+        "max": 93.6,
+        "p95": 93.6
       },
       "fcp": {
-        "median": 60,
-        "min": 52,
-        "max": 60,
-        "p95": 60
+        "median": 116,
+        "min": 104,
+        "max": 140,
+        "p95": 140
       },
       "lcp": {
-        "median": 60,
-        "min": 52,
-        "max": 60,
-        "p95": 60
+        "median": 116,
+        "min": 104,
+        "max": 140,
+        "p95": 140
       },
       "cls": {
         "median": 0,
@@ -154,592 +40,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 10.8,
-        "min": 9.7,
-        "max": 11.2,
-        "p95": 11.2
+        "median": 95.1,
+        "min": 93.1,
+        "max": 122.2,
+        "p95": 122.2
       },
       "loadDuration": {
-        "median": 36.4,
-        "min": 22.1,
-        "max": 36.7,
-        "p95": 36.7
+        "median": 95.4,
+        "min": 93.8,
+        "max": 123,
+        "p95": 123
       },
       "transferSizeKb": {
-        "median": 13.8,
-        "min": 13.8,
-        "max": 13.8,
-        "p95": 13.8
-      },
-      "ratings": {
-        "ttfb": "good",
-        "fcp": "good",
-        "lcp": "good",
-        "cls": "good"
-      },
-      "passedBudget": true
-    },
-    {
-      "route": {
-        "path": "/proof",
-        "name": "Formal Proof Studio",
-        "category": "tool"
-      },
-      "runs": 3,
-      "ttfb": {
-        "median": 1.6,
-        "min": 1.1,
-        "max": 2.4,
-        "p95": 2.4
-      },
-      "fcp": {
-        "median": 36,
-        "min": 36,
-        "max": 36,
-        "p95": 36
-      },
-      "lcp": {
-        "median": 36,
-        "min": 36,
-        "max": 36,
-        "p95": 36
-      },
-      "cls": {
-        "median": 0,
-        "min": 0,
-        "max": 0,
-        "p95": 0
-      },
-      "domContentLoaded": {
-        "median": 5.7,
-        "min": 5,
-        "max": 6.7,
-        "p95": 6.7
-      },
-      "loadDuration": {
-        "median": 13,
-        "min": 12.9,
-        "max": 15.4,
-        "p95": 15.4
-      },
-      "transferSizeKb": {
-        "median": 10.6,
-        "min": 10.6,
-        "max": 10.6,
-        "p95": 10.6
-      },
-      "ratings": {
-        "ttfb": "good",
-        "fcp": "good",
-        "lcp": "good",
-        "cls": "good"
-      },
-      "passedBudget": true
-    },
-    {
-      "route": {
-        "path": "/neuro",
-        "name": "Neuro 3D Simulator",
-        "category": "tool"
-      },
-      "runs": 3,
-      "ttfb": {
-        "median": 1.3,
-        "min": 1.2,
-        "max": 1.4,
-        "p95": 1.4
-      },
-      "fcp": {
-        "median": 40,
-        "min": 40,
-        "max": 56,
-        "p95": 56
-      },
-      "lcp": {
-        "median": 40,
-        "min": 40,
-        "max": 56,
-        "p95": 56
-      },
-      "cls": {
-        "median": 0,
-        "min": 0,
-        "max": 0,
-        "p95": 0
-      },
-      "domContentLoaded": {
-        "median": 6.2,
-        "min": 6,
-        "max": 6.4,
-        "p95": 6.4
-      },
-      "loadDuration": {
-        "median": 14.2,
-        "min": 13.3,
-        "max": 29.5,
-        "p95": 29.5
-      },
-      "transferSizeKb": {
-        "median": 15.3,
-        "min": 15.3,
-        "max": 15.3,
-        "p95": 15.3
-      },
-      "ratings": {
-        "ttfb": "good",
-        "fcp": "good",
-        "lcp": "good",
-        "cls": "good"
-      },
-      "passedBudget": true
-    },
-    {
-      "route": {
-        "path": "/crf",
-        "name": "CRF Builder & AST",
-        "category": "tool"
-      },
-      "runs": 3,
-      "ttfb": {
-        "median": 1.1,
-        "min": 1.1,
-        "max": 1.2,
-        "p95": 1.2
-      },
-      "fcp": {
-        "median": 52,
-        "min": 48,
-        "max": 68,
-        "p95": 68
-      },
-      "lcp": {
-        "median": 52,
-        "min": 48,
-        "max": 68,
-        "p95": 68
-      },
-      "cls": {
-        "median": 0,
-        "min": 0,
-        "max": 0,
-        "p95": 0
-      },
-      "domContentLoaded": {
-        "median": 6.5,
-        "min": 6.3,
-        "max": 6.9,
-        "p95": 6.9
-      },
-      "loadDuration": {
-        "median": 14.5,
-        "min": 13.2,
-        "max": 17,
-        "p95": 17
-      },
-      "transferSizeKb": {
-        "median": 21.2,
-        "min": 21.2,
-        "max": 21.2,
-        "p95": 21.2
-      },
-      "ratings": {
-        "ttfb": "good",
-        "fcp": "good",
-        "lcp": "good",
-        "cls": "good"
-      },
-      "passedBudget": true
-    },
-    {
-      "route": {
-        "path": "/simulator",
-        "name": "System Dynamics Simulator",
-        "category": "tool"
-      },
-      "runs": 3,
-      "ttfb": {
-        "median": 1.8,
-        "min": 1.7,
-        "max": 1.9,
-        "p95": 1.9
-      },
-      "fcp": {
-        "median": 56,
-        "min": 52,
-        "max": 56,
-        "p95": 56
-      },
-      "lcp": {
-        "median": 56,
-        "min": 52,
-        "max": 56,
-        "p95": 56
-      },
-      "cls": {
-        "median": 0,
-        "min": 0,
-        "max": 0,
-        "p95": 0
-      },
-      "domContentLoaded": {
-        "median": 8.4,
-        "min": 7.9,
-        "max": 8.9,
-        "p95": 8.9
-      },
-      "loadDuration": {
-        "median": 28.1,
-        "min": 19.6,
-        "max": 33.2,
-        "p95": 33.2
-      },
-      "transferSizeKb": {
-        "median": 10.7,
-        "min": 10.7,
-        "max": 10.7,
-        "p95": 10.7
-      },
-      "ratings": {
-        "ttfb": "good",
-        "fcp": "good",
-        "lcp": "good",
-        "cls": "good"
-      },
-      "passedBudget": true
-    },
-    {
-      "route": {
-        "path": "/schedule",
-        "name": "Schedule / Calendar",
-        "category": "top-level"
-      },
-      "runs": 3,
-      "ttfb": {
-        "median": 2,
-        "min": 2,
-        "max": 2.2,
-        "p95": 2.2
-      },
-      "fcp": {
-        "median": 52,
-        "min": 52,
-        "max": 60,
-        "p95": 60
-      },
-      "lcp": {
-        "median": 52,
-        "min": 52,
-        "max": 60,
-        "p95": 60
-      },
-      "cls": {
-        "median": 0,
-        "min": 0,
-        "max": 0,
-        "p95": 0
-      },
-      "domContentLoaded": {
-        "median": 11.2,
-        "min": 9.8,
-        "max": 11.5,
-        "p95": 11.5
-      },
-      "loadDuration": {
-        "median": 35.6,
-        "min": 35,
-        "max": 36,
-        "p95": 36
-      },
-      "transferSizeKb": {
-        "median": 11.1,
-        "min": 11.1,
-        "max": 11.1,
-        "p95": 11.1
-      },
-      "ratings": {
-        "ttfb": "good",
-        "fcp": "good",
-        "lcp": "good",
-        "cls": "good"
-      },
-      "passedBudget": true
-    },
-    {
-      "route": {
-        "path": "/case-studies/clinical-data-mapper",
-        "name": "CS: Clinical Data Mapper",
-        "category": "case-study"
-      },
-      "runs": 3,
-      "ttfb": {
-        "median": 2,
-        "min": 1.5,
-        "max": 2.4,
-        "p95": 2.4
-      },
-      "fcp": {
-        "median": 44,
-        "min": 44,
-        "max": 56,
-        "p95": 56
-      },
-      "lcp": {
-        "median": 44,
-        "min": 44,
-        "max": 56,
-        "p95": 56
-      },
-      "cls": {
-        "median": 0,
-        "min": 0,
-        "max": 0,
-        "p95": 0
-      },
-      "domContentLoaded": {
-        "median": 9.3,
-        "min": 6.4,
-        "max": 9.7,
-        "p95": 9.7
-      },
-      "loadDuration": {
-        "median": 28.9,
-        "min": 20,
-        "max": 31.1,
-        "p95": 31.1
-      },
-      "transferSizeKb": {
-        "median": 14.6,
-        "min": 14.6,
-        "max": 14.6,
-        "p95": 14.6
-      },
-      "ratings": {
-        "ttfb": "good",
-        "fcp": "good",
-        "lcp": "good",
-        "cls": "good"
-      },
-      "passedBudget": true
-    },
-    {
-      "route": {
-        "path": "/case-studies/cadence-clinical",
-        "name": "CS: Cadence Clinical",
-        "category": "case-study"
-      },
-      "runs": 3,
-      "ttfb": {
-        "median": 1.6,
-        "min": 1.4,
-        "max": 2.5,
-        "p95": 2.5
-      },
-      "fcp": {
-        "median": 44,
-        "min": 44,
-        "max": 56,
-        "p95": 56
-      },
-      "lcp": {
-        "median": 44,
-        "min": 44,
-        "max": 56,
-        "p95": 56
-      },
-      "cls": {
-        "median": 0,
-        "min": 0,
-        "max": 0,
-        "p95": 0
-      },
-      "domContentLoaded": {
-        "median": 7,
-        "min": 6.6,
-        "max": 10.8,
-        "p95": 10.8
-      },
-      "loadDuration": {
-        "median": 21.4,
-        "min": 15.5,
-        "max": 30.3,
-        "p95": 30.3
-      },
-      "transferSizeKb": {
-        "median": 14.5,
-        "min": 14.5,
-        "max": 14.5,
-        "p95": 14.5
-      },
-      "ratings": {
-        "ttfb": "good",
-        "fcp": "good",
-        "lcp": "good",
-        "cls": "good"
-      },
-      "passedBudget": true
-    },
-    {
-      "route": {
-        "path": "/case-studies/schemaflow",
-        "name": "CS: SchemaFlow",
-        "category": "case-study"
-      },
-      "runs": 3,
-      "ttfb": {
-        "median": 2.6,
-        "min": 1.9,
-        "max": 2.9,
-        "p95": 2.9
-      },
-      "fcp": {
-        "median": 56,
-        "min": 48,
-        "max": 60,
-        "p95": 60
-      },
-      "lcp": {
-        "median": 56,
-        "min": 48,
-        "max": 60,
-        "p95": 60
-      },
-      "cls": {
-        "median": 0,
-        "min": 0,
-        "max": 0,
-        "p95": 0
-      },
-      "domContentLoaded": {
-        "median": 12.3,
-        "min": 9.3,
-        "max": 13.5,
-        "p95": 13.5
-      },
-      "loadDuration": {
-        "median": 42.4,
-        "min": 35.9,
-        "max": 42.6,
-        "p95": 42.6
-      },
-      "transferSizeKb": {
-        "median": 15.1,
-        "min": 15.1,
-        "max": 15.1,
-        "p95": 15.1
-      },
-      "ratings": {
-        "ttfb": "good",
-        "fcp": "good",
-        "lcp": "good",
-        "cls": "good"
-      },
-      "passedBudget": true
-    },
-    {
-      "route": {
-        "path": "/case-studies/imednet-python-sdk",
-        "name": "CS: iMedNet SDK",
-        "category": "case-study"
-      },
-      "runs": 3,
-      "ttfb": {
-        "median": 2.4,
-        "min": 2.2,
-        "max": 3,
-        "p95": 3
-      },
-      "fcp": {
-        "median": 56,
-        "min": 52,
-        "max": 60,
-        "p95": 60
-      },
-      "lcp": {
-        "median": 56,
-        "min": 52,
-        "max": 60,
-        "p95": 60
-      },
-      "cls": {
-        "median": 0,
-        "min": 0,
-        "max": 0,
-        "p95": 0
-      },
-      "domContentLoaded": {
-        "median": 12.5,
-        "min": 10.4,
-        "max": 13.3,
-        "p95": 13.3
-      },
-      "loadDuration": {
-        "median": 39.2,
-        "min": 37.6,
-        "max": 41.9,
-        "p95": 41.9
-      },
-      "transferSizeKb": {
-        "median": 16.2,
-        "min": 16.2,
-        "max": 16.2,
-        "p95": 16.2
-      },
-      "ratings": {
-        "ttfb": "good",
-        "fcp": "good",
-        "lcp": "good",
-        "cls": "good"
-      },
-      "passedBudget": true
-    },
-    {
-      "route": {
-        "path": "/case-studies/wedding-website",
-        "name": "CS: Wedding Platform",
-        "category": "case-study"
-      },
-      "runs": 3,
-      "ttfb": {
-        "median": 2.8,
-        "min": 2,
-        "max": 2.9,
-        "p95": 2.9
-      },
-      "fcp": {
-        "median": 48,
-        "min": 44,
-        "max": 52,
-        "p95": 52
-      },
-      "lcp": {
-        "median": 48,
-        "min": 44,
-        "max": 52,
-        "p95": 52
-      },
-      "cls": {
-        "median": 0,
-        "min": 0,
-        "max": 0,
-        "p95": 0
-      },
-      "domContentLoaded": {
-        "median": 12.2,
-        "min": 9.7,
-        "max": 13.1,
-        "p95": 13.1
-      },
-      "loadDuration": {
-        "median": 25.6,
-        "min": 24.6,
-        "max": 26.9,
-        "p95": 26.9
-      },
-      "transferSizeKb": {
-        "median": 14.2,
-        "min": 14.2,
-        "max": 14.2,
-        "p95": 14.2
+        "median": 0.3,
+        "min": 0.3,
+        "max": 0.3,
+        "p95": 0.3
       },
       "ratings": {
         "ttfb": "good",
@@ -757,22 +73,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 2.2,
-        "min": 2.1,
-        "max": 2.5,
-        "p95": 2.5
+        "median": 85.3,
+        "min": 75.8,
+        "max": 1192.1,
+        "p95": 1192.1
       },
       "fcp": {
-        "median": 64,
-        "min": 56,
-        "max": 76,
-        "p95": 76
+        "median": 244,
+        "min": 120,
+        "max": 1356,
+        "p95": 1356
       },
       "lcp": {
-        "median": 64,
-        "min": 56,
-        "max": 76,
-        "p95": 76
+        "median": 244,
+        "min": 120,
+        "max": 1356,
+        "p95": 1356
       },
       "cls": {
         "median": 0,
@@ -781,22 +97,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 11.1,
-        "min": 11,
-        "max": 12,
-        "p95": 12
+        "median": 218,
+        "min": 104.9,
+        "max": 1236.6,
+        "p95": 1236.6
       },
       "loadDuration": {
-        "median": 36.5,
-        "min": 24.3,
-        "max": 40,
-        "p95": 40
+        "median": 218.1,
+        "min": 105.6,
+        "max": 1358.3,
+        "p95": 1358.3
       },
       "transferSizeKb": {
-        "median": 13.9,
-        "min": 13.9,
-        "max": 13.9,
-        "p95": 13.9
+        "median": 0.3,
+        "min": 0.3,
+        "max": 14.9,
+        "p95": 14.9
       },
       "ratings": {
         "ttfb": "good",
@@ -814,22 +130,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 1.9,
-        "min": 1.7,
-        "max": 2.7,
-        "p95": 2.7
+        "median": 8.9,
+        "min": 8.8,
+        "max": 32.3,
+        "p95": 32.3
       },
       "fcp": {
-        "median": 40,
-        "min": 40,
-        "max": 52,
-        "p95": 52
+        "median": 148,
+        "min": 108,
+        "max": 228,
+        "p95": 228
       },
       "lcp": {
-        "median": 40,
-        "min": 40,
-        "max": 52,
-        "p95": 52
+        "median": 148,
+        "min": 108,
+        "max": 228,
+        "p95": 228
       },
       "cls": {
         "median": 0,
@@ -838,22 +154,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 11,
-        "min": 8.6,
-        "max": 12.1,
-        "p95": 12.1
+        "median": 33.1,
+        "min": 31.7,
+        "max": 123.5,
+        "p95": 123.5
       },
       "loadDuration": {
-        "median": 25.2,
-        "min": 24.1,
-        "max": 40,
-        "p95": 40
+        "median": 180.5,
+        "min": 118.5,
+        "max": 479,
+        "p95": 479
       },
       "transferSizeKb": {
-        "median": 10.9,
-        "min": 10.9,
-        "max": 10.9,
-        "p95": 10.9
+        "median": 15,
+        "min": 15,
+        "max": 15,
+        "p95": 15
       },
       "ratings": {
         "ttfb": "good",
@@ -871,22 +187,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 2.5,
-        "min": 2.4,
-        "max": 2.7,
-        "p95": 2.7
+        "median": 78.3,
+        "min": 72.5,
+        "max": 87.2,
+        "p95": 87.2
       },
       "fcp": {
-        "median": 56,
-        "min": 52,
-        "max": 56,
-        "p95": 56
+        "median": 120,
+        "min": 112,
+        "max": 144,
+        "p95": 144
       },
       "lcp": {
-        "median": 56,
-        "min": 52,
-        "max": 56,
-        "p95": 56
+        "median": 120,
+        "min": 112,
+        "max": 144,
+        "p95": 144
       },
       "cls": {
         "median": 0,
@@ -895,22 +211,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 13,
-        "min": 11.2,
-        "max": 13.3,
-        "p95": 13.3
+        "median": 109,
+        "min": 105.6,
+        "max": 126.6,
+        "p95": 126.6
       },
       "loadDuration": {
-        "median": 42.6,
-        "min": 27,
-        "max": 47.1,
-        "p95": 47.1
+        "median": 109.8,
+        "min": 106.3,
+        "max": 126.8,
+        "p95": 126.8
       },
       "transferSizeKb": {
-        "median": 14.8,
-        "min": 14.8,
-        "max": 14.8,
-        "p95": 14.8
+        "median": 0.3,
+        "min": 0.3,
+        "max": 0.3,
+        "p95": 0.3
       },
       "ratings": {
         "ttfb": "good",
@@ -928,22 +244,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 2,
-        "min": 1.7,
-        "max": 3.2,
-        "p95": 3.2
+        "median": 8.3,
+        "min": 8.3,
+        "max": 15.5,
+        "p95": 15.5
       },
       "fcp": {
-        "median": 48,
-        "min": 44,
-        "max": 48,
-        "p95": 48
+        "median": 152,
+        "min": 108,
+        "max": 164,
+        "p95": 164
       },
       "lcp": {
-        "median": 48,
-        "min": 44,
-        "max": 48,
-        "p95": 48
+        "median": 152,
+        "min": 108,
+        "max": 164,
+        "p95": 164
       },
       "cls": {
         "median": 0,
@@ -952,22 +268,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 11.6,
-        "min": 8.8,
-        "max": 12.4,
-        "p95": 12.4
+        "median": 35.3,
+        "min": 32,
+        "max": 60.2,
+        "p95": 60.2
       },
       "loadDuration": {
-        "median": 25.2,
-        "min": 24.5,
-        "max": 36.8,
-        "p95": 36.8
+        "median": 158.9,
+        "min": 122.5,
+        "max": 185.5,
+        "p95": 185.5
       },
       "transferSizeKb": {
-        "median": 12.9,
-        "min": 12.9,
-        "max": 12.9,
-        "p95": 12.9
+        "median": 14.8,
+        "min": 14.8,
+        "max": 14.8,
+        "p95": 14.8
       },
       "ratings": {
         "ttfb": "good",
@@ -985,22 +301,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 2.2,
-        "min": 1.7,
-        "max": 2.6,
-        "p95": 2.6
+        "median": 75,
+        "min": 26.8,
+        "max": 92.9,
+        "p95": 92.9
       },
       "fcp": {
-        "median": 44,
-        "min": 40,
-        "max": 48,
-        "p95": 48
+        "median": 124,
+        "min": 116,
+        "max": 208,
+        "p95": 208
       },
       "lcp": {
-        "median": 44,
-        "min": 40,
-        "max": 48,
-        "p95": 48
+        "median": 124,
+        "min": 116,
+        "max": 208,
+        "p95": 208
       },
       "cls": {
         "median": 0,
@@ -1009,22 +325,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 11.5,
-        "min": 8.6,
-        "max": 12,
-        "p95": 12
+        "median": 96.9,
+        "min": 72.2,
+        "max": 112.3,
+        "p95": 112.3
       },
       "loadDuration": {
-        "median": 25.9,
-        "min": 24.2,
-        "max": 26.2,
-        "p95": 26.2
+        "median": 112.6,
+        "min": 97.4,
+        "max": 479.8,
+        "p95": 479.8
       },
       "transferSizeKb": {
-        "median": 10.8,
-        "min": 10.8,
-        "max": 10.8,
-        "p95": 10.8
+        "median": 0.3,
+        "min": 0.3,
+        "max": 14.8,
+        "p95": 14.8
       },
       "ratings": {
         "ttfb": "good",
@@ -1042,22 +358,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 2.5,
-        "min": 1.8,
-        "max": 2.9,
-        "p95": 2.9
+        "median": 93.8,
+        "min": 7.9,
+        "max": 106.1,
+        "p95": 106.1
       },
       "fcp": {
-        "median": 64,
-        "min": 56,
-        "max": 64,
-        "p95": 64
+        "median": 140,
+        "min": 124,
+        "max": 172,
+        "p95": 172
       },
       "lcp": {
-        "median": 64,
-        "min": 56,
-        "max": 64,
-        "p95": 64
+        "median": 140,
+        "min": 124,
+        "max": 172,
+        "p95": 172
       },
       "cls": {
         "median": 0,
@@ -1066,22 +382,79 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 12.5,
-        "min": 9.4,
-        "max": 13.2,
-        "p95": 13.2
+        "median": 114.2,
+        "min": 28.9,
+        "max": 156.6,
+        "p95": 156.6
       },
       "loadDuration": {
-        "median": 26.7,
-        "min": 25.9,
-        "max": 37.8,
-        "p95": 37.8
+        "median": 156.6,
+        "min": 114.7,
+        "max": 156.7,
+        "p95": 156.7
       },
       "transferSizeKb": {
-        "median": 13.4,
-        "min": 13.4,
-        "max": 13.4,
-        "p95": 13.4
+        "median": 0.3,
+        "min": 0.3,
+        "max": 14.8,
+        "p95": 14.8
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/arcade/meme-vault",
+        "name": "Game: Secret Meme Vault",
+        "category": "arcade"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 8.9,
+        "min": 7.5,
+        "max": 24.9,
+        "p95": 24.9
+      },
+      "fcp": {
+        "median": 212,
+        "min": 184,
+        "max": 328,
+        "p95": 328
+      },
+      "lcp": {
+        "median": 212,
+        "min": 184,
+        "max": 328,
+        "p95": 328
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 31.6,
+        "min": 30.3,
+        "max": 71.1,
+        "p95": 71.1
+      },
+      "loadDuration": {
+        "median": 267.7,
+        "min": 240.8,
+        "max": 548.6,
+        "p95": 548.6
+      },
+      "transferSizeKb": {
+        "median": 17.5,
+        "min": 17.5,
+        "max": 17.5,
+        "p95": 17.5
       },
       "ratings": {
         "ttfb": "good",

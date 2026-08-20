@@ -125,6 +125,14 @@ jobs:
         env:
           DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
 
+      - name: Run Real-Browser Sub-Route Web Vitals Performance Gate
+        id: page-bench
+        run: npm run bench:pages -- --assert
+        env:
+          DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk"
+          CLERK_SECRET_KEY: "sk_test_example_secret_key"
+
       - name: Generate Centralized Health Dashboard
         if: always()
         run: |
@@ -149,6 +157,7 @@ jobs:
           echo "| **Visual & Drift Guard** (Playwright) | ${{ steps.playwright.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Sub-pixel pixel matching & layout constant sync |" >> $GITHUB_STEP_SUMMARY
           echo "| **Accessibility Audits** (Playwright-Axe) | $ACC_STATUS | Automated WCAG compliance scans on interactive states |" >> $GITHUB_STEP_SUMMARY
           echo "| **Performance Gates** (Lighthouse) | ${{ steps.lighthouse.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Web Vitals & >95 Lighthouse score |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Sub-Route Real-Browser Performance Gate** | ${{ steps.page-bench.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Real-browser Core Web Vitals (LCP, CLS, TTFB) SLA assertions across sub-routes |" >> $GITHUB_STEP_SUMMARY
           echo "| **Bundle Performance Budgets** | ${{ steps.bundle.outcome == 'success' && '✅ Pass' || '❌ Fail' }} | Initial bundle & chunk gzip performance limits |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "*(Generated via automated unified CI pipeline)*" >> $GITHUB_STEP_SUMMARY

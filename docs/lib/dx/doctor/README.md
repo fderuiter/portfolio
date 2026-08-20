@@ -29,6 +29,7 @@
 - [checkProactiveDefectInterception](functions/checkProactiveDefectInterception.md)
 - [checkRouteIndexing](functions/checkRouteIndexing.md)
 - [checkSecretLeaks](functions/checkSecretLeaks.md)
+- [checkSubRoutePerformance](functions/checkSubRoutePerformance.md)
 - [checkTestPathResolution](functions/checkTestPathResolution.md)
 - [checkWorkspaceIdeConfig](functions/checkWorkspaceIdeConfig.md)
 - [printDoctorReport](functions/printDoctorReport.md)

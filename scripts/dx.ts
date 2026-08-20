@@ -306,7 +306,9 @@ async function handleScaffoldCommand(args: string[]): Promise<void> {
 function handleBenchCommand(args: string[] = []): void {
   if (args.includes("--pages") || args.includes("pages")) {
     console.log(formatHeader("DX Bench: Page Speed & Core Web Vitals", "Real-Browser Chromium • Navigation Timing L2 • Web Vitals"));
-    execSync("npx tsx scripts/benchmark-pages.ts", { cwd: workspaceRoot, stdio: "inherit" });
+    const extraArgs = args.filter((a) => a !== "--pages" && a !== "pages");
+    const cmd = "npx tsx scripts/benchmark-pages.ts" + (extraArgs.length > 0 ? " " + extraArgs.join(" ") : "");
+    execSync(cmd, { cwd: workspaceRoot, stdio: "inherit" });
     return;
   }
   console.log(formatHeader("DX Bench: Micro-Benchmark Suite", "Pretext Layout • Greedy Masonry • Security Scanner"));
