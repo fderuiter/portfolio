@@ -54,8 +54,8 @@ const ARCADE_ITEMS: SubNavItem[] = [
     icon: <IconBrain className="w-4 h-4 text-brand-cyan" />,
   },
   {
-    title: "Garmin 32KB Runner",
-    subtitle: "Smartwatch hardware & RAM simulator",
+    title: "Monkey C Mayhem: Garmin Schvitz App",
+    subtitle: "Smartwatch hardware & Garmin Schvitz App simulator",
     href: "/arcade/garmin-watch",
     icon: <IconCpu className="w-4 h-4 text-brand-cyan" />,
   },
