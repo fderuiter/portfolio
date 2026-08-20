@@ -116,3 +116,26 @@ describe("CommandPalette Roguelike Registration", () => {
     expect(content).toContain('url: "/arcade/retro-labyrinth"');
   });
 });
+
+describe("Component-Level Pathfinding Memoization Invariants", () => {
+  const componentPath = path.resolve(__dirname, "../components/RetroLabyrinth.tsx");
+  const content = fs.readFileSync(componentPath, "utf-8");
+
+  it("imports useMemo from react", () => {
+    expect(content).toMatch(/import\s+.*useMemo.*from\s+["']react["']/);
+  });
+
+  it("memoizes Traveling Salesman pathfinding tour using useMemo", () => {
+    expect(content).toContain("const tspTour = useMemo(");
+    expect(content).toContain("computeShortestTour(");
+  });
+
+  it("configures exhaustive dependencies for pathfinding useMemo", () => {
+    expect(content).toContain("[playerPosition.x, playerPosition.y, tspNodes]");
+  });
+
+  it("mirrors tspTour in loopStateRef to prevent canvas render loop re-calculations", () => {
+    expect(content).toContain("tspTour,");
+    expect(content).toContain("const tour = tspTour;");
+  });
+});

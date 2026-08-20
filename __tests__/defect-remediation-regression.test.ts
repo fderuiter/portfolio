@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import fs from "fs";
+import path from "path";
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { WorkflowWizardModal } from "@/components/crf/Wizard/WorkflowWizardModal";
@@ -565,6 +567,26 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       generatedSectionIds.forEach((id) => {
         expect(id).toMatch(uuidPattern);
       });
+    });
+  });
+
+  describe("RetroLabyrinth Canvas Loop Pathfinding Memoization", () => {
+    it("ensures Traveling Salesman pathfinding tour calculation is memoized at component level", () => {
+      const retroLabyrinthPath = path.resolve(__dirname, "../components/RetroLabyrinth.tsx");
+      const code = fs.readFileSync(retroLabyrinthPath, "utf-8");
+
+      expect(code).toContain("useMemo");
+      expect(code).toContain("const tspTour = useMemo(");
+      expect(code).toContain("computeShortestTour(");
+      expect(code).toContain("tspTour,");
+
+      // Verify computeShortestTour is not invoked inside the real-time canvas drawing loop
+      const loopStart = code.indexOf("const loop = ");
+      const loopEnd = code.indexOf("animFrameRef.current = requestAnimationFrame(loop);", loopStart);
+      const loopBody = code.slice(loopStart, loopEnd);
+
+      expect(loopBody).not.toContain("computeShortestTour(");
+      expect(loopBody).toContain("tspTour");
     });
   });
 });

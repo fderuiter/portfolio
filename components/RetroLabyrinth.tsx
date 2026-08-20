@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback, useSyncExternalStore } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo, useSyncExternalStore } from "react";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { clamp } from "@/lib/game-utils";
 import { useAudio } from "@/components/providers/AudioProvider";
@@ -923,6 +923,17 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
     }
   };
 
+  // Memoized Traveling Salesman Pathfinding Tour
+  const tspTour = useMemo(() => {
+    return computeShortestTour(
+      playerPosition.x,
+      playerPosition.y,
+      tspNodes,
+      EXIT_X,
+      EXIT_Y
+    ).tour;
+  }, [playerPosition.x, playerPosition.y, tspNodes]);
+
   // Loop State Mirroring Ref for Stable Animation Lifecycle
   const loopStateRef = useRef({
     isMounted,
@@ -936,6 +947,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
     items,
     boss,
     tspNodes,
+    tspTour,
     gameMode,
     roomIndex,
     gameStatus,
@@ -958,6 +970,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
       items,
       boss,
       tspNodes,
+      tspTour,
       gameMode,
       roomIndex,
       gameStatus,
@@ -1007,6 +1020,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
         items,
         boss,
         tspNodes,
+        tspTour,
         gameMode,
         roomIndex,
         gameStatus,
@@ -1212,13 +1226,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
 
           // TSP Route Line in Room 1/3
           if (gameMode === "roguelike" && tspNodes.length > 0) {
-            const { tour } = computeShortestTour(
-              playerPosition.x,
-              playerPosition.y,
-              tspNodes,
-              EXIT_X,
-              EXIT_Y
-            );
+            const tour = tspTour;
 
             ctx.save();
             ctx.strokeStyle = "rgba(56, 189, 248, 0.4)";
