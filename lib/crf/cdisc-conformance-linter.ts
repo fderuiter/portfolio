@@ -11,6 +11,47 @@ import {
 import { CDASH_STANDARD_VARIABLES, STANDARD_CODELISTS } from "./cdisc-cdash-library";
 
 /**
+ * Generates a high-entropy cryptographic UUID string for CDISC compliance auto-fix remediation.
+ */
+function generateCryptoUuid(): string {
+  if (typeof globalThis !== "undefined" && globalThis.crypto) {
+    if (typeof globalThis.crypto.randomUUID === "function") {
+      try {
+        return globalThis.crypto.randomUUID();
+      } catch {
+        // Fall through
+      }
+    }
+    if (typeof globalThis.crypto.getRandomValues === "function") {
+      try {
+        const bytes = new Uint8Array(16);
+        globalThis.crypto.getRandomValues(bytes);
+        bytes[6] = (bytes[6] & 0x0f) | 0x40;
+        bytes[8] = (bytes[8] & 0x3f) | 0x80;
+        const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+        return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+      } catch {
+        // Fall through
+      }
+    }
+  }
+
+  try {
+    // Node.js runtime fallback
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const nodeCrypto = require("crypto");
+    if (typeof nodeCrypto.randomUUID === "function") {
+      return nodeCrypto.randomUUID();
+    }
+  } catch {
+    // Fall through
+  }
+
+  const rHex = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+  return `${rHex()}${rHex()}-${rHex()}-4${rHex().substring(1)}-8${rHex().substring(1)}-${rHex()}${rHex()}${rHex()}`;
+}
+
+/**
  * Validates an entire study protocol against CDISC CDASH and regulatory submission conformance rules.
  *
  * @param study - The study protocol to validate
@@ -230,7 +271,7 @@ export function autoFixViolation(
         if (!stdVar) return form;
 
         const newField: CRFField = {
-          id: `f_autofix_${stdVar.sdtmVariable.toLowerCase()}_${Date.now()}`,
+          id: `f_autofix_${stdVar.sdtmVariable.toLowerCase()}_${generateCryptoUuid()}`,
           variableName: stdVar.sdtmVariable,
           label: stdVar.cdashLabel,
           dataType:
@@ -248,7 +289,7 @@ export function autoFixViolation(
         };
 
         const targetSection = form.sections[0] || {
-          id: `sec_autofix_${Date.now()}`,
+          id: `sec_autofix_${generateCryptoUuid()}`,
           title: "Core Demographics / Assessments",
           fields: [],
         };

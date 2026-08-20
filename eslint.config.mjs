@@ -6,6 +6,9 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
+    plugins: {
+      "react-hooks": nextVitals[0].plugins["react-hooks"],
+    },
     linterOptions: {
       reportUnusedDisableDirectives: "off",
     },
