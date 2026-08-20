@@ -8,13 +8,21 @@
 
 ## Interfaces
 
+- [AnnounceItem](interfaces/AnnounceItem.md)
 - [AnnouncerContextType](interfaces/AnnouncerContextType.md)
+- [AnnouncerState](interfaces/AnnouncerState.md)
 
 ## Type Aliases
 
-- [AnnouncementMode](type-aliases/AnnouncementMode.md)
+- [Priority](type-aliases/Priority.md)
 
 ## Functions
 
 - [LiveAnnouncerProvider](functions/LiveAnnouncerProvider.md)
 - [useAnnouncer](functions/useAnnouncer.md)
+
+## References
+
+### AnnouncementMode
+
+Renames and re-exports [Priority](type-aliases/Priority.md)

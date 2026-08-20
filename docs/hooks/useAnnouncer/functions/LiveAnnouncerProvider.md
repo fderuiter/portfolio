@@ -8,7 +8,7 @@
 
 > **LiveAnnouncerProvider**(`__namedParameters`): `Element`
 
-Defined in: [components/providers/A11yProvider.tsx:26](https://github.com/fderuiter/portfolio/blob/main/components/providers/A11yProvider.tsx#L26)
+Defined in: [components/providers/A11yProvider.tsx:142](https://github.com/fderuiter/portfolio/blob/main/components/providers/A11yProvider.tsx#L142)
 
 ## Parameters
 
