@@ -103,6 +103,7 @@
 - [lib/github](lib/github/README.md)
 - [lib/graphics-engine](lib/graphics-engine/README.md)
 - [lib/graphics-math](lib/graphics-math/README.md)
+- [lib/haptics](lib/haptics/README.md)
 - [lib/i18n-dictionary](lib/i18n-dictionary/README.md)
 - [lib/laser-loon](lib/laser-loon/README.md)
 - [lib/laser-loon/constants](lib/laser-loon/constants/README.md)
