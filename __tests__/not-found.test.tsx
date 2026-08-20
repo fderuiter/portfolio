@@ -137,7 +137,18 @@ describe("NotFound component & dynamic metadata hoisting", () => {
     expect(container.textContent).toContain("Case Study Unresolved");
     expect(container.textContent).toContain("The requested clinical case study narrative does not exist");
 
-    // Check retro mini-game is rendered
+    // Check retro mini-game Insert Coin preview is rendered initially
+    expect(container.textContent).toContain("INSERT COIN");
+    expect(container.textContent).toContain("HOVER OR CLICK TO LAUNCH MINI-GAME");
+
+    const preview = container.querySelector('[data-testid="insert-coin-preview"]') as HTMLDivElement;
+    expect(preview).not.toBeNull();
+
+    // Trigger hover interaction on the Insert Coin preview card to activate game
+    await act(async () => {
+      preview.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    });
+
     expect(container.textContent).toContain("SYSTEM_LABYRINTH.EXE");
 
     // Check secondary action link targets portfolio section anchor

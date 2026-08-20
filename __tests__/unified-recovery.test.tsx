@@ -102,7 +102,7 @@ describe("UnifiedErrorLayout JSDOM state and interactivity", () => {
     expect(container.textContent).not.toContain("SYSTEM_LABYRINTH.EXE");
   });
 
-  it("renders RetroLabyrinth when showRetroLabyrinth is true", async () => {
+  it("renders Insert Coin preview initially when showRetroLabyrinth is true and activates RetroLabyrinth upon interaction", async () => {
     await act(async () => {
       root = createRoot(container);
       root.render(
@@ -119,6 +119,19 @@ describe("UnifiedErrorLayout JSDOM state and interactivity", () => {
       );
     });
 
+    // Check preview graphic prompt is rendered initially
+    expect(container.textContent).toContain("INSERT COIN");
+    expect(container.textContent).toContain("HOVER OR CLICK TO LAUNCH MINI-GAME");
+
+    const preview = container.querySelector('[data-testid="insert-coin-preview"]') as HTMLDivElement;
+    expect(preview).not.toBeNull();
+
+    // Trigger hover interaction to dynamically activate the game
+    await act(async () => {
+      preview.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+    });
+
+    // Verify game component is mounted after activation
     expect(container.textContent).toContain("SYSTEM_LABYRINTH.EXE");
   });
 
