@@ -182,6 +182,8 @@ export const ClinicalTrialChaos: React.FC = () => {
   // 4. DOM & Canvas references
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const lastPointerTimeRef = useRef(0);
+  const isPointerDownRef = useRef(false);
   const { isFullscreen, toggleFullscreen } = useFullscreen(containerRef);
   const animFrameIdRef = useRef<number | null>(null);
   const lastTickTimeRef = useRef<number>(0);
@@ -1150,6 +1152,45 @@ export const ClinicalTrialChaos: React.FC = () => {
     }
   };
 
+  const handleCanvasPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    lastPointerTimeRef.current = Date.now();
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // Ignored for environments without setPointerCapture mock
+    }
+    isPointerDownRef.current = true;
+    handleCanvasClickOrTouch(e.clientX, e.clientY);
+  };
+
+  const handleCanvasPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (isPointerDownRef.current) {
+      handleCanvasClickOrTouch(e.clientX, e.clientY);
+    }
+  };
+
+  const handleCanvasPointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        // Ignored
+      }
+    }
+    isPointerDownRef.current = false;
+  };
+
+  const handleCanvasPointerCancel = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        // Ignored
+      }
+    }
+    isPointerDownRef.current = false;
+  };
+
   const sortedStations = [...stations].sort((a, b) => a.positionIndex - b.positionIndex);
 
   return (
@@ -1415,13 +1456,24 @@ export const ClinicalTrialChaos: React.FC = () => {
               ref={canvasRef}
               width={760}
               height={200}
-              onClick={(e) => handleCanvasClickOrTouch(e.clientX, e.clientY)}
+              onPointerDown={handleCanvasPointerDown}
+              onPointerMove={handleCanvasPointerMove}
+              onPointerUp={handleCanvasPointerUp}
+              onPointerCancel={handleCanvasPointerCancel}
+              onClick={(e) => {
+                if (Date.now() - lastPointerTimeRef.current < 100) return;
+                handleCanvasClickOrTouch(e.clientX, e.clientY);
+              }}
               onTouchStart={(e) => {
+                if (Date.now() - lastPointerTimeRef.current < 100) return;
                 const touch = e.touches[0];
                 if (touch) handleCanvasClickOrTouch(touch.clientX, touch.clientY);
               }}
+              onTouchCancel={() => {
+                isPointerDownRef.current = false;
+              }}
               style={{ touchAction: "none" }}
-              className={`w-full ${isFullscreen ? "h-auto max-h-[300px] aspect-[760/200] object-contain" : "h-auto aspect-[760/200]"} block cursor-pointer`}
+              className={`w-full ${isFullscreen ? "h-auto max-h-[300px] aspect-[760/200] object-contain" : "h-auto aspect-[760/200]"} block cursor-pointer touch-none`}
             />
 
             {/* Overlays for Idle / Paused / Game Over / Cleared */}

@@ -1777,7 +1777,7 @@ export const WorkingWithDuck: React.FC = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [announce]);
 
-  // Global Window Pointer Up Handler (Prevents Drag Locking Off-Canvas)
+  // Global Window Pointer Up & Cancel Handler (Prevents Drag Locking Off-Canvas)
   useEffect(() => {
     const handleGlobalPointerUp = () => {
       const state = gameStateRef.current;
@@ -1798,9 +1798,31 @@ export const WorkingWithDuck: React.FC = () => {
       }
     };
 
+    const handleGlobalPointerCancel = () => {
+      const state = gameStateRef.current;
+      let needsUpdate = false;
+      if (isThrowingParkBallRef.current) {
+        isThrowingParkBallRef.current = false;
+        aimParkStartRef.current = null;
+        needsUpdate = true;
+      }
+      if (isDraggingDuckStateRef.current) {
+        isDraggingDuckStateRef.current = false;
+        gameStateRef.current = releaseDuck(state);
+        needsUpdate = true;
+      }
+      if (needsUpdate) {
+        setUiState({ ...gameStateRef.current });
+      }
+    };
+
+    window.addEventListener("pointerup", handleGlobalPointerUp);
+    window.addEventListener("pointercancel", handleGlobalPointerCancel);
     window.addEventListener("mouseup", handleGlobalPointerUp);
     window.addEventListener("touchend", handleGlobalPointerUp);
     return () => {
+      window.removeEventListener("pointerup", handleGlobalPointerUp);
+      window.removeEventListener("pointercancel", handleGlobalPointerCancel);
       window.removeEventListener("mouseup", handleGlobalPointerUp);
       window.removeEventListener("touchend", handleGlobalPointerUp);
     };
@@ -2089,7 +2111,71 @@ export const WorkingWithDuck: React.FC = () => {
     }
   };
 
+  const lastPointerTimeRef = useRef(0);
+
+  const handleCanvasPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    lastPointerTimeRef.current = Date.now();
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // Ignored for environments without pointer capture mock
+    }
+    const fakeMouseEvent = {
+      clientX: e.clientX,
+      clientY: e.clientY,
+    } as React.MouseEvent<HTMLCanvasElement>;
+    handleCanvasMouseDown(fakeMouseEvent);
+  };
+
+  const handleCanvasPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const fakeMouseEvent = {
+      clientX: e.clientX,
+      clientY: e.clientY,
+    } as React.MouseEvent<HTMLCanvasElement>;
+    handleCanvasMouseMove(fakeMouseEvent);
+  };
+
+  const handleCanvasPointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        // Ignored
+      }
+    }
+    handleCanvasMouseUp();
+  };
+
+  const handleCanvasPointerCancel = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        // Ignored
+      }
+    }
+    const state = gameStateRef.current;
+    let needsUpdate = false;
+
+    if (isDraggingDuckStateRef.current) {
+      isDraggingDuckStateRef.current = false;
+      gameStateRef.current = releaseDuck(state);
+      needsUpdate = true;
+    }
+
+    if (isThrowingParkBallRef.current) {
+      isThrowingParkBallRef.current = false;
+      aimParkStartRef.current = null;
+      needsUpdate = true;
+    }
+
+    if (needsUpdate) {
+      setUiState({ ...gameStateRef.current });
+    }
+  };
+
   const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (Date.now() - lastPointerTimeRef.current < 100) return;
     if (e.touches.length > 0) {
       const touch = e.touches[0];
       handleCanvasMouseDown({
@@ -2100,6 +2186,7 @@ export const WorkingWithDuck: React.FC = () => {
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (Date.now() - lastPointerTimeRef.current < 100) return;
     if (e.touches.length > 0) {
       const touch = e.touches[0];
       handleCanvasMouseMove({
@@ -2110,7 +2197,27 @@ export const WorkingWithDuck: React.FC = () => {
   };
 
   const handleTouchEnd = () => {
+    if (Date.now() - lastPointerTimeRef.current < 100) return;
     handleCanvasMouseUp();
+  };
+
+  const handleTouchCancel = () => {
+    if (Date.now() - lastPointerTimeRef.current < 100) return;
+    const state = gameStateRef.current;
+    let needsUpdate = false;
+    if (isDraggingDuckStateRef.current) {
+      isDraggingDuckStateRef.current = false;
+      gameStateRef.current = releaseDuck(state);
+      needsUpdate = true;
+    }
+    if (isThrowingParkBallRef.current) {
+      isThrowingParkBallRef.current = false;
+      aimParkStartRef.current = null;
+      needsUpdate = true;
+    }
+    if (needsUpdate) {
+      setUiState({ ...gameStateRef.current });
+    }
   };
 
   const currentSprint = SPRINTS.find((s) => s.level === uiState.currentLevel) || SPRINTS[0];
@@ -2318,12 +2425,18 @@ export const WorkingWithDuck: React.FC = () => {
           ref={canvasRef}
           width={CANVAS_WIDTH}
           height={CANVAS_HEIGHT}
+          onPointerDown={handleCanvasPointerDown}
+          onPointerMove={handleCanvasPointerMove}
+          onPointerUp={handleCanvasPointerUp}
+          onPointerCancel={handleCanvasPointerCancel}
           onMouseDown={handleCanvasMouseDown}
           onMouseMove={handleCanvasMouseMove}
           onMouseUp={handleCanvasMouseUp}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchCancel}
+          style={{ touchAction: "none" }}
           role="application"
           aria-label="Workspace Pet Companion Simulator. Focus this container to operate simulator. Press Tab to select items, Arrow keys to drag the duck around the canvas to guide actions like potty and bath, and Q, W, E, R to issue training commands."
           tabIndex={0}
