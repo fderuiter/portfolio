@@ -12,6 +12,7 @@ import {
   checkHydrationSafety,
   checkAccessibilityStandards,
   checkDocumentationParity,
+  checkDirectoryTopology,
   checkOpenApiParity,
   checkDefectRemediationInvariants,
   checkDesignTokens,
@@ -186,6 +187,43 @@ describe("DX Invariant Doctor Engine", () => {
 
       const result = checkDocumentationParity(tempDir, false);
       expect(result.status).toBe("pass");
+    });
+  });
+
+  describe("checkDirectoryTopology", () => {
+    it("fails when ARCHITECTURE.md is missing", () => {
+      const result = checkDirectoryTopology(tempDir);
+      expect(result.status).toBe("fail");
+      expect(result.message).toContain("ARCHITECTURE.md file not found");
+    });
+
+    it("fails when a top-level directory is missing from ARCHITECTURE.md topology section", () => {
+      fs.writeFileSync(
+        path.join(tempDir, "ARCHITECTURE.md"),
+        `# Architecture\n\n## System Architecture & Directory Topology\n\n\`\`\`text\napp/\ncomponents/\n\`\`\`\n`
+      );
+      fs.mkdirSync(path.join(tempDir, "app"), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, "components"), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, "scripts"), { recursive: true });
+
+      const result = checkDirectoryTopology(tempDir);
+      expect(result.status).toBe("fail");
+      expect(result.message).toContain("1 top-level directory/directories missing");
+      expect(result.details?.some((d) => d.includes("scripts/"))).toBe(true);
+    });
+
+    it("passes when all top-level repository directories are documented in ARCHITECTURE.md", () => {
+      fs.writeFileSync(
+        path.join(tempDir, "ARCHITECTURE.md"),
+        `# Architecture\n\n## System Architecture & Directory Topology\n\n\`\`\`text\napp/\ncomponents/\nscripts/\n\`\`\`\n`
+      );
+      fs.mkdirSync(path.join(tempDir, "app"), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, "components"), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, "scripts"), { recursive: true });
+
+      const result = checkDirectoryTopology(tempDir);
+      expect(result.status).toBe("pass");
+      expect(result.message).toContain("All top-level repository directories are explicitly documented");
     });
   });
 

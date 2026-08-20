@@ -16,6 +16,7 @@
 - [checkAccessibilityStandards](functions/checkAccessibilityStandards.md)
 - [checkDefectRemediationInvariants](functions/checkDefectRemediationInvariants.md)
 - [checkDesignTokens](functions/checkDesignTokens.md)
+- [checkDirectoryTopology](functions/checkDirectoryTopology.md)
 - [checkDocumentationParity](functions/checkDocumentationParity.md)
 - [checkHydrationSafety](functions/checkHydrationSafety.md)
 - [checkLayoutTextClippingInvariants](functions/checkLayoutTextClippingInvariants.md)

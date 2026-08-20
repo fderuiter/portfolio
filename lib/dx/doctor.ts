@@ -479,11 +479,11 @@ export function checkDocumentationParity(root: string, fix = false): DiagnosticC
   const driftDetails: string[] = [];
 
   try {
-    const diff = execSync("git diff --name-only docs", { cwd: root, encoding: "utf-8" }).trim();
+    const diff = execSync("git diff --name-only docs", { cwd: root, encoding: "utf-8", stdio: ["pipe", "pipe", "ignore"] }).trim();
     if (diff.length > 0) {
       driftDetails.push(...diff.split("\n").map((f) => `Modified: ${f}`));
     }
-    const untracked = execSync("git ls-files --others --exclude-standard docs", { cwd: root, encoding: "utf-8" }).trim();
+    const untracked = execSync("git ls-files --others --exclude-standard docs", { cwd: root, encoding: "utf-8", stdio: ["pipe", "pipe", "ignore"] }).trim();
     if (untracked.length > 0) {
       driftDetails.push(...untracked.split("\n").map((f) => `Untracked: ${f}`));
     }
@@ -1144,6 +1144,102 @@ export function checkPackageLockfile(root: string): DiagnosticCheckResult {
 }
 
 /**
+ * Check System Architecture & Directory Topology Sync (AGENTS.md & ARCHITECTURE.md).
+ * Asserts that all non-hidden top-level repository directories are explicitly represented in ARCHITECTURE.md.
+ */
+export function checkDirectoryTopology(root: string): DiagnosticCheckResult {
+  const archFile = path.join(root, "ARCHITECTURE.md");
+
+  if (!fs.existsSync(archFile)) {
+    return {
+      id: "docs-topology-drift",
+      name: "System Architecture Directory Topology Parity",
+      category: "architecture",
+      status: "fail",
+      message: "ARCHITECTURE.md file not found in workspace root.",
+      details: ["Missing ARCHITECTURE.md file in workspace root."],
+      fixable: false,
+    };
+  }
+
+  const ignoredDirs = new Set([
+    "node_modules",
+    ".git",
+    ".next",
+    "dist",
+    "coverage",
+    "out",
+    "build",
+    "tmp",
+    "scratch",
+    "test-results",
+    ".agents",
+    ".husky",
+    ".vscode",
+    ".github",
+  ]);
+
+  let topDirs: string[] = [];
+  try {
+    const entries = fs.readdirSync(root, { withFileTypes: true });
+    topDirs = entries
+      .filter((e) => e.isDirectory() && !e.name.startsWith(".") && !ignoredDirs.has(e.name))
+      .map((e) => e.name);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return {
+      id: "docs-topology-drift",
+      name: "System Architecture Directory Topology Parity",
+      category: "architecture",
+      status: "fail",
+      message: `Failed to read top-level workspace directories: ${msg}`,
+      fixable: false,
+    };
+  }
+
+  const archContent = fs.readFileSync(archFile, "utf-8");
+
+  // Extract topology section if present, or search full document
+  let topologyContent = archContent;
+  const topologyHeaderMatch = archContent.match(/##\s+System Architecture & Directory Topology[\s\S]*?(?=\n##\s+|\b$)/);
+  if (topologyHeaderMatch) {
+    topologyContent = topologyHeaderMatch[0];
+  }
+
+  const missingDirs: string[] = [];
+
+  for (const dir of topDirs) {
+    // Search for directory name in topology content
+    const regex = new RegExp(`\\b${dir}(\\/|\\b)`, "i");
+    if (!regex.test(topologyContent)) {
+      missingDirs.push(dir);
+    }
+  }
+
+  if (missingDirs.length > 0) {
+    return {
+      id: "docs-topology-drift",
+      name: "System Architecture Directory Topology Parity",
+      category: "architecture",
+      status: "fail",
+      message: `${missingDirs.length} top-level directory/directories missing from ARCHITECTURE.md topology overview.`,
+      details: missingDirs.map(
+        (d) => `Missing directory in ARCHITECTURE.md: '${d}/'. Please update ## System Architecture & Directory Topology in ARCHITECTURE.md.`
+      ),
+      fixable: false,
+    };
+  }
+
+  return {
+    id: "docs-topology-drift",
+    name: "System Architecture Directory Topology Parity",
+    category: "architecture",
+    status: "pass",
+    message: "All top-level repository directories are explicitly documented in ARCHITECTURE.md.",
+  };
+}
+
+/**
  * Run All Diagnostics
  */
 export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
@@ -1167,6 +1263,7 @@ export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
     checkMigrationGuard(root),
     checkDocumentationParity(root, fix),
     checkOnboardingDocsDrift(root, fix),
+    checkDirectoryTopology(root),
     checkOpenApiParity(root, fix),
     checkHydrationSafety(root),
     checkAccessibilityStandards(root, fix),
