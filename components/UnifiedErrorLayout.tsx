@@ -48,11 +48,18 @@ export function UnifiedErrorLayout({
   const [caseStudies, setCaseStudies] = useState<CaseStudyItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [canonicalUrl, setCanonicalUrl] = useState<string>(`${resolveBaseUrl()}/`);
+  const [isGameActivated, setIsGameActivated] = useState(false);
   const isMounted = useSyncExternalStore(
     () => () => {},
     () => true,
     () => false,
   );
+
+  const handleActivateGame = () => {
+    if (!isGameActivated) {
+      setIsGameActivated(true);
+    }
+  };
 
   const { recordEvent } = useTelemetry();
   const { openSearch } = useSearch();
@@ -255,7 +262,63 @@ export function UnifiedErrorLayout({
 
         {/* Progressive Retro Labyrinth */}
         {showRetroLabyrinth && (
-          <RetroLabyrinth isMounted={isMounted} />
+          isGameActivated ? (
+            <RetroLabyrinth isMounted={isMounted} />
+          ) : (
+            <div
+              role="button"
+              tabIndex={0}
+              aria-label="Insert Coin to start Retro Labyrinth mini-game"
+              data-testid="insert-coin-preview"
+              onClick={handleActivateGame}
+              onMouseEnter={handleActivateGame}
+              onFocus={handleActivateGame}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleActivateGame();
+                }
+              }}
+              className="relative w-full aspect-[15/9] min-h-[240px] h-[240px] bg-neutral-950/90 border border-neutral-900 hover:border-brand-cyan/60 rounded-2xl flex flex-col items-center justify-center font-mono select-none overflow-hidden my-6 cursor-pointer group/coin transition-all duration-300 shadow-xl"
+            >
+              {/* Cyberpunk grid background effect */}
+              <div className="absolute inset-0 pointer-events-none opacity-10 group-hover/coin:opacity-20 transition-opacity duration-300">
+                <div className="w-full h-full bg-[linear-gradient(to_right,#06b6d4_1px,transparent_1px),linear-gradient(to_bottom,#06b6d4_1px,transparent_1px)] bg-[size:16px_16px]" />
+              </div>
+
+              {/* Header Bar */}
+              <div className="absolute top-3 left-4 right-4 flex justify-between items-center text-[10px] font-bold text-neutral-500 uppercase tracking-wider">
+                <span>SYSTEM_LABYRINTH.EXE</span>
+                <span className="text-brand-cyan/70 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan" />
+                  IDLE_STANDBY
+                </span>
+              </div>
+
+              {/* Center Insert Coin Prompts */}
+              <div className="flex flex-col items-center justify-center gap-3 p-4 z-10 text-center">
+                {/* Arcade Coin Slot Icon / Badge */}
+                <div className="w-12 h-12 rounded-full border-2 border-brand-cyan/40 group-hover/coin:border-brand-cyan group-hover/coin:scale-105 flex items-center justify-center bg-brand-cyan/10 transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+                  <span className="text-brand-cyan font-extrabold text-sm tracking-tighter">1¢</span>
+                </div>
+
+                {/* Glowing Blinking INSERT COIN */}
+                <div className="space-y-1">
+                  <div className="text-base sm:text-lg font-black text-brand-cyan tracking-widest animate-pulse drop-shadow-[0_0_8px_rgba(6,182,212,0.6)]">
+                    INSERT COIN
+                  </div>
+                  <p className="text-[10px] sm:text-[11px] text-neutral-400 font-medium tracking-wide">
+                    [ HOVER OR CLICK TO LAUNCH MINI-GAME ]
+                  </p>
+                </div>
+              </div>
+
+              {/* Bottom Status Footer */}
+              <div className="absolute bottom-3 left-4 right-4 text-center text-[9px] font-bold text-neutral-500 uppercase tracking-widest group-hover/coin:text-brand-cyan/80 transition-colors">
+                ▶ DEFERRED ENGINE ACTIVATION READY
+              </div>
+            </div>
+          )
         )}
 
         {/* Closest Matching Case Study Suggestions */}
