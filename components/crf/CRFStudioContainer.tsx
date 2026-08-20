@@ -669,7 +669,7 @@ export const CRFStudioContainer: React.FC = () => {
           "--brand-accent": activeBranding.accentColor || "#0ea5e9",
         } as React.CSSProperties
       }
-      className={`flex flex-col h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] ${
+      className={`flex flex-col h-[calc(100dvh-var(--header-height,80px))] max-h-[calc(100dvh-var(--header-height,80px))] ${
         theme === "light" ? "bg-slate-50 text-slate-900" : "bg-zinc-950 text-foreground"
       } overflow-hidden relative`}
     >

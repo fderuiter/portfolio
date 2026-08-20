@@ -1,6 +1,13 @@
 @import "tailwindcss";
 
 :root {
+  /* Layout Space Contract Variables */
+  --header-height: 80px;
+  --navbar-height: 80px;
+  --footer-height: 48px;
+  --ticker-height: 48px;
+  --viewport-height: 100dvh;
+
   /* Colors - Warm Architectural Graphite & Precision Accents */
   --background: #0d0e11;
   --foreground: #f4f4f6;
@@ -109,7 +116,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
   will-change: background-color, color;
 }

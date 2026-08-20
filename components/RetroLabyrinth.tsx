@@ -1723,7 +1723,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
         <div
           className={`relative ${
             isFullscreen
-              ? "w-full flex-1 max-h-[calc(100dvh-200px)] sm:max-h-[calc(100dvh-150px)] aspect-[240/144] min-h-0"
+              ? "w-full flex-1 max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] aspect-[240/144] min-h-0"
               : isExpanded
               ? "w-full max-w-[360px] aspect-[240/144] h-auto"
               : "w-full max-w-[240px] aspect-[240/144] h-auto"

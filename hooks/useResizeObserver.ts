@@ -4,11 +4,14 @@ import { env } from "@/lib/env";
 const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 export function useResizeObserver<T extends HTMLElement | SVGSVGElement>(
-  callback: (entry: ResizeObserverEntry) => void
+  callback: (entry: ResizeObserverEntry) => void,
+  options?: { trackVertical?: boolean } | boolean
 ) {
   const containerRef = useRef<T | null>(null);
   const callbackRef = useRef(callback);
   const isMountedRef = useRef(true);
+
+  const trackVertical = typeof options === "boolean" ? options : (options?.trackVertical ?? false);
 
   // Keep callback reference updated without triggering observer recreation
   useIsomorphicLayoutEffect(() => {
@@ -18,6 +21,7 @@ export function useResizeObserver<T extends HTMLElement | SVGSVGElement>(
   const rAFIdRef = useRef<number | null>(null);
   const latestEntryRef = useRef<ResizeObserverEntry | null>(null);
   const lastWidthRef = useRef<number>(-1);
+  const lastHeightRef = useRef<number>(-1);
 
   useIsomorphicLayoutEffect(() => {
     isMountedRef.current = true;
@@ -28,16 +32,23 @@ export function useResizeObserver<T extends HTMLElement | SVGSVGElement>(
       if (!entries || entries.length === 0) return;
       const entry = entries[0];
       const currentWidth = Math.floor(entry.contentRect.width);
+      const currentHeight = Math.floor(entry.contentRect.height);
 
-      // Requirement 4: Ignore height changes caused by vertical page scrolling (Layout Isolation)
-      if (currentWidth === lastWidthRef.current) {
-        return;
+      // Unless opt-in vertical resize mode is enabled, ignore height changes caused by vertical page scrolling
+      if (trackVertical) {
+        if (currentWidth === lastWidthRef.current && currentHeight === lastHeightRef.current) {
+          return;
+        }
+      } else {
+        if (currentWidth === lastWidthRef.current) {
+          return;
+        }
       }
 
       // Store the latest entry for trailing-edge resolution
       latestEntryRef.current = entry;
 
-      // Requirement 2: Subsequent width events within the same animation frame do not trigger intermediate React updates (Throttling)
+      // Requirement 2: Subsequent resize events within the same animation frame do not trigger intermediate React updates (Throttling)
       if (rAFIdRef.current !== null) {
         return;
       }
@@ -50,9 +61,15 @@ export function useResizeObserver<T extends HTMLElement | SVGSVGElement>(
         if (latestEntryRef.current) {
           const finalEntry = latestEntryRef.current;
           const finalWidth = Math.floor(finalEntry.contentRect.width);
+          const finalHeight = Math.floor(finalEntry.contentRect.height);
 
-          if (finalWidth !== lastWidthRef.current) {
+          const isChanged = trackVertical
+            ? finalWidth !== lastWidthRef.current || finalHeight !== lastHeightRef.current
+            : finalWidth !== lastWidthRef.current;
+
+          if (isChanged) {
             lastWidthRef.current = finalWidth;
+            lastHeightRef.current = finalHeight;
             callbackRef.current(finalEntry);
           }
         }
