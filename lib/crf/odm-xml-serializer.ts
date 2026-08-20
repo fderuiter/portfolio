@@ -49,16 +49,16 @@ export function exportStudyToCdiscOdmXml(study: StudyProtocol): string {
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
      xmlns:def="http://www.cdisc.org/ns/def/v2.1"
      FileType="Snapshot"
-     FileOID="ODM.${protoNum}.${Date.now()}"
+     FileOID="ODM.${escapeXml(protoNum)}.${Date.now()}"
      CreationDateTime="${timestamp}"
      ODMVersion="1.3.2">
-  <Study OID="${studyOid}">
+  <Study OID="${escapeXml(studyOid)}">
     <GlobalVariables>
       <StudyName>${escapeXml(studyTitle)}</StudyName>
       <StudyDescription>Protocol ${escapeXml(protoNum)} - ${escapeXml(study.phase || "")} • Schedule Consultation: /schedule</StudyDescription>
       <ProtocolName>${escapeXml(protoNum)}</ProtocolName>
     </GlobalVariables>
-    <MetaDataVersion OID="${metaOid}" Name="Protocol Definition Version ${escapeXml(study.version || "1.0")}">
+    <MetaDataVersion OID="${escapeXml(metaOid)}" Name="Protocol Definition Version ${escapeXml(study.version || "1.0")}">
       <Protocol>
 `;
 
@@ -74,9 +74,9 @@ export function exportStudyToCdiscOdmXml(study: StudyProtocol): string {
   study.visits.forEach((v, idx) => {
     const vOid = v.oid || v.id || `VIS_${idx + 1}`;
     const formIds = v.assignedFormIds || [];
-    xml += `      <StudyEventDef OID="${escapeXml(vOid)}" Name="${escapeXml(v.name)}" Repeating="${v.isRepeating ? "Yes" : "No"}" Type="${v.visitType || "Scheduled"}">\n`;
+    xml += `      <StudyEventDef OID="${escapeXml(vOid)}" Name="${escapeXml(v.name)}" Repeating="${v.isRepeating ? "Yes" : "No"}" Type="${escapeXml(v.visitType || "Scheduled")}">\n`;
     formIds.forEach((fId: string, fIdx: number) => {
-      xml += `        <FormRef FormOID="FORM.${escapeXml(fId)}" OrderNumber="${fIdx + 1}" Mandatory="Yes"/>\n`;
+      xml += `        <FormRef FormOID="${escapeXml(`FORM.${fId}`)}" OrderNumber="${fIdx + 1}" Mandatory="Yes"/>\n`;
     });
     xml += `      </StudyEventDef>\n`;
   });
@@ -86,10 +86,10 @@ export function exportStudyToCdiscOdmXml(study: StudyProtocol): string {
   // FormDefs
   study.forms.forEach((form) => {
     const formOid = `FORM.${form.id}`;
-    xml += `      <FormDef OID="${formOid}" Name="${escapeXml(form.name)}" Repeating="${form.isLogForm ? "Yes" : "No"}">\n`;
+    xml += `      <FormDef OID="${escapeXml(formOid)}" Name="${escapeXml(form.name)}" Repeating="${form.isLogForm ? "Yes" : "No"}">\n`;
     form.sections.forEach((sec, sIdx) => {
       const igOid = `IG.${form.domain || "CRF"}.${sec.id}`;
-      xml += `        <ItemGroupRef ItemGroupOID="${igOid}" OrderNumber="${sIdx + 1}" Mandatory="Yes"/>\n`;
+      xml += `        <ItemGroupRef ItemGroupOID="${escapeXml(igOid)}" OrderNumber="${sIdx + 1}" Mandatory="Yes"/>\n`;
     });
     xml += `      </FormDef>\n`;
   });
@@ -100,10 +100,10 @@ export function exportStudyToCdiscOdmXml(study: StudyProtocol): string {
   study.forms.forEach((form) => {
     form.sections.forEach((sec) => {
       const igOid = `IG.${form.domain || "CRF"}.${sec.id}`;
-      xml += `      <ItemGroupDef OID="${igOid}" Name="${escapeXml(sec.title)}" Repeating="${sec.isRepeating ? "Yes" : "No"}">\n`;
+      xml += `      <ItemGroupDef OID="${escapeXml(igOid)}" Name="${escapeXml(sec.title)}" Repeating="${sec.isRepeating ? "Yes" : "No"}">\n`;
       sec.fields.forEach((field, fIdx) => {
         const itemOid = `IT.${field.variableName || field.id}`;
-        xml += `        <ItemRef ItemOID="${itemOid}" OrderNumber="${fIdx + 1}" Mandatory="${field.required ? "Yes" : "No"}"/>\n`;
+        xml += `        <ItemRef ItemOID="${escapeXml(itemOid)}" OrderNumber="${fIdx + 1}" Mandatory="${field.required ? "Yes" : "No"}"/>\n`;
       });
       xml += `      </ItemGroupDef>\n`;
     });
@@ -138,7 +138,7 @@ export function exportStudyToCdiscOdmXml(study: StudyProtocol): string {
         const odmType = mapDataTypeToOdm(field.dataType);
         const codelistAttr = effectiveCodelistId ? ` CodeListOID="${escapeXml(effectiveCodelistId)}"` : "";
 
-        xml += `      <ItemDef OID="${itemOid}" Name="${escapeXml(field.variableName)}" DataType="${odmType}"${codelistAttr}>\n`;
+        xml += `      <ItemDef OID="${escapeXml(itemOid)}" Name="${escapeXml(field.variableName)}" DataType="${escapeXml(odmType)}"${codelistAttr}>\n`;
         xml += `        <Description><TranslatedText xml:lang="en">${escapeXml(field.label)}</TranslatedText></Description>\n`;
         if (field.cdashMetadata) {
           xml += `        <def:AnnotatedCRF>

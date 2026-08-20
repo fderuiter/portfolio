@@ -8,7 +8,7 @@
 
 > **generateBIMOReport**(`scoreState`, `auditorState`, `_logs?`): [`BIMOInspectionReport`](../../types/interfaces/BIMOInspectionReport.md)
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:567](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L567)
+Defined in: [lib/clinical-trial-chaos/engine.ts:576](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L576)
 
 Generates an FDA Bioresearch Monitoring (BIMO) inspection compliance report.
 

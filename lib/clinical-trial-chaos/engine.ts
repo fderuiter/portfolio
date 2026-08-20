@@ -467,11 +467,20 @@ export function exportToCDISCODMXML(
   const timestamp = new Date().toISOString();
   const subjectNodes = subjects
     .map((s) => {
+      const fullSubjectId = s.studySite?.slice(5, 8)
+        ? `CTC-${s.studySite.slice(5, 8)}-${s.subjectLabel}`
+        : s.subjectLabel;
+
       const itemDataNodes = sdtmRows
-        .filter((r) => r.USUBJID.includes(s.subjectLabel))
+        .filter(
+          (r) =>
+            r.USUBJID === s.subjectLabel ||
+            r.USUBJID === fullSubjectId ||
+            r.USUBJID === s.id
+        )
         .map(
           (r) =>
-            `          <ItemData ItemOID="IT.${r.DOMAIN}.${r.TESTCD}" Value="${escapeXml(r.STRESC)}">
+            `          <ItemData ItemOID="${escapeXml(`IT.${r.DOMAIN}.${r.TESTCD}`)}" Value="${escapeXml(r.STRESC)}">
             <AuditRecord>
               <UserOID>USR.DATAMANAGER</UserOID>
               <DateTimeStamp>${timestamp}</DateTimeStamp>
@@ -483,8 +492,8 @@ export function exportToCDISCODMXML(
 
       return `      <SubjectData SubjectKey="${escapeXml(s.subjectLabel)}">
         <StudyEventData StudyEventOID="SE.VISIT1">
-          <FormData FormOID="FRM.${s.observations[0]?.destination || "DM"}">
-            <ItemGroupData ItemGroupOID="IG.${s.observations[0]?.destination || "DM"}" ItemGroupRepeatKey="1">
+          <FormData FormOID="${escapeXml(`FRM.${s.observations[0]?.destination || "DM"}`)}">
+            <ItemGroupData ItemGroupOID="${escapeXml(`IG.${s.observations[0]?.destination || "DM"}`)}" ItemGroupRepeatKey="1">
 ${itemDataNodes}
             </ItemGroupData>
           </FormData>
