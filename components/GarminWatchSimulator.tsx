@@ -27,6 +27,8 @@ import {
   wipeScreenFog,
   updateGameSimulation,
   renderCanvasFrame,
+  allocateFlashVariable,
+  clearFlashStorage,
   JUMP_FORCE,
   CANVAS_SIZE,
   GameEngineState,
@@ -147,11 +149,47 @@ export const GarminWatchSimulator: React.FC = () => {
     setGameState(nextState);
   }, [playBeep]);
 
+  // Save Persistent Variable to Flash NVRAM
+  const handleSaveFlash = useCallback(() => {
+    playBeep(800, 0.03);
+    const current = stateRef.current;
+    const { state: nextState } = allocateFlashVariable(current, 8.0);
+    stateRef.current = nextState;
+    setGameState(nextState);
+  }, [playBeep]);
+
+  // Clear NVRAM Flash Storage
+  const handleClearFlash = useCallback(() => {
+    playBeep(500, 0.04);
+    const current = stateRef.current;
+    const nextState = clearFlashStorage(current);
+    stateRef.current = nextState;
+    setGameState(nextState);
+  }, [playBeep]);
+
+  // Drain Battery for Power Loss Testing
+  const handleDrainBattery = useCallback(() => {
+    playBeep(400, 0.05);
+    const current = stateRef.current;
+    const nextBattery = Math.max(0, current.battery - 20);
+    const nextState = {
+      ...current,
+      battery: nextBattery,
+    };
+    stateRef.current = nextState;
+    setGameState(nextState);
+  }, [playBeep]);
+
   // Start / Pause / Restart (START)
   const handleStartStop = useCallback(() => {
     playButtonTone();
     const current = stateRef.current;
-    if (current.gameState === "idle" || current.gameState === "crashed" || current.gameState === "summary") {
+    if (
+      current.gameState === "idle" ||
+      current.gameState === "crashed" ||
+      current.gameState === "shutdown" ||
+      current.gameState === "summary"
+    ) {
       const next = startGame(current, deviceTarget);
       stateRef.current = next;
       setGameState(next);
@@ -575,15 +613,26 @@ export const GarminWatchSimulator: React.FC = () => {
             </div>
           )}
 
-          {/* Game Over / Execution Summary Completion Overlay */}
-          {(gameState.gameState === "crashed" || gameState.gameState === "summary") && (
+          {/* Game Over / Power Loss Shutdown / Completion Overlay */}
+          {(gameState.gameState === "crashed" || gameState.gameState === "shutdown" || gameState.gameState === "summary") && (
             <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-3 text-center z-30 font-mono space-y-1.5">
               <span className="text-[11px] font-extrabold text-rose-400 tracking-wider uppercase">
-                {gameState.gameState === "crashed" ? "CRASH / OOM" : "RUN COMPLETE"}
+                {gameState.gameState === "shutdown"
+                  ? "⚡ BROWNOUT SHUTDOWN"
+                  : gameState.gameState === "crashed"
+                  ? gameState.crashReport?.errorType === "Out Of Storage"
+                    ? "OUT OF FLASH STORAGE"
+                    : "CRASH / OOM"
+                  : "RUN COMPLETE"}
               </span>
               <div className="text-[10px] text-zinc-300">
                 SCORE: <strong className="text-amber-400">{gameState.score}</strong>
               </div>
+              {gameState.gameState === "shutdown" && (
+                <div className="text-[8px] text-rose-300 max-w-[180px] leading-tight">
+                  Power loss score penalty applied (-50 PTS)
+                </div>
+              )}
               <a
                 href="/schedule"
                 target="_blank"
@@ -599,7 +648,7 @@ export const GarminWatchSimulator: React.FC = () => {
                 className="px-2.5 py-0.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-[8px] rounded-full flex items-center gap-1 shadow cursor-pointer transition-all active:scale-95"
               >
                 <IconPlayerPlay className="w-2.5 h-2.5" />
-                <span>Restart Session</span>
+                <span>Reboot &amp; Restart</span>
               </button>
             </div>
           )}
@@ -630,18 +679,25 @@ export const GarminWatchSimulator: React.FC = () => {
       </div>
 
       {/* Real-time Engineering Telemetry & Controls Dashboard Below Watch */}
-      <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs font-mono text-zinc-400 max-w-xl text-center">
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-xs font-mono text-zinc-400 max-w-xl text-center">
         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg">
           <IconCpu className="w-3.5 h-3.5 text-brand-cyan" />
           <span>RAM: <strong className="text-white">{gameState.allocatedRamKb.toFixed(1)} / {currentProfile.ramLimitKb} KB</strong></span>
         </div>
         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg">
-          <IconBolt className="w-3.5 h-3.5 text-amber-400" />
+          <IconCpu className="w-3.5 h-3.5 text-amber-500" />
+          <span>FLASH: <strong className="text-white">{gameState.allocatedFlashKb.toFixed(1)} / {currentProfile.flashLimitKb} KB</strong></span>
+        </div>
+        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg">
+          <IconBolt className={`w-3.5 h-3.5 ${gameState.battery < 15 ? "text-rose-500 animate-pulse" : "text-amber-400"}`} />
           <span>BATTERY: <strong className="text-white">{Math.round(gameState.battery)}%</strong></span>
+          {gameState.battery < 15 && gameState.battery > 0 && (
+            <span className="ml-1 text-[9px] text-rose-400 font-bold bg-rose-950/80 px-1.5 py-0.5 rounded border border-rose-800 animate-pulse">LOW POWER</span>
+          )}
         </div>
         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg">
           <IconFlame className={`w-3.5 h-3.5 ${gameState.thermalStress > 0.4 ? "text-orange-500 animate-pulse" : "text-zinc-500"}`} />
-          <span>THERMAL STRESS: <strong className="text-white">{Math.round((gameState.thermalStress ?? 0) * 100)}%</strong></span>
+          <span>THERMAL: <strong className="text-white">{Math.round((gameState.thermalStress ?? 0) * 100)}%</strong></span>
         </div>
         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg">
           <IconFlame className={`w-3.5 h-3.5 ${gameState.fogLevel > 0.4 ? "text-rose-500 animate-pulse" : "text-zinc-500"}`} />
@@ -651,6 +707,28 @@ export const GarminWatchSimulator: React.FC = () => {
           <span className="text-amber-400 font-bold">🏆 HI-SCORE:</span>
           <strong className="text-amber-300">{effectiveHighScore}</strong>
         </div>
+      </div>
+
+      {/* NV Flash & Power Simulation Action Controls */}
+      <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-[10px] font-mono">
+        <button
+          onClick={handleSaveFlash}
+          className="px-2.5 py-1 bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/40 rounded shadow cursor-pointer transition-all active:scale-95"
+        >
+          💾 Write NV Flash (+8KB)
+        </button>
+        <button
+          onClick={handleClearFlash}
+          className="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 rounded shadow cursor-pointer transition-all active:scale-95"
+        >
+          🗑️ Clear Flash Storage
+        </button>
+        <button
+          onClick={handleDrainBattery}
+          className="px-2.5 py-1 bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 border border-rose-800/50 rounded shadow cursor-pointer transition-all active:scale-95"
+        >
+          ⚡ Drain Battery (-20%)
+        </button>
       </div>
 
       {/* Control Quick Reference Guide */}

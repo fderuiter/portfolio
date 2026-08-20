@@ -8,4 +8,4 @@
 
 > `const` **GRAVITY**: `0.65` = `0.65`
 
-Defined in: [lib/garmin-engine.ts:138](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L138)
+Defined in: [lib/garmin-engine.ts:185](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L185)

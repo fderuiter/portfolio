@@ -14,13 +14,21 @@ Defined in: [lib/garmin-engine.ts:12](https://github.com/fderuiter/portfolio/blo
 
 > **color**: `string`
 
-Defined in: [lib/garmin-engine.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L17)
+Defined in: [lib/garmin-engine.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L18)
 
 ***
 
 ### description
 
 > **description**: `string`
+
+Defined in: [lib/garmin-engine.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L17)
+
+***
+
+### flashLimitKb
+
+> **flashLimitKb**: `number`
 
 Defined in: [lib/garmin-engine.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L16)
 

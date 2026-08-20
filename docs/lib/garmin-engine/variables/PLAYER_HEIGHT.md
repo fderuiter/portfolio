@@ -8,4 +8,4 @@
 
 > `const` **PLAYER\_HEIGHT**: `24` = `24`
 
-Defined in: [lib/garmin-engine.ts:137](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L137)
+Defined in: [lib/garmin-engine.ts:184](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L184)

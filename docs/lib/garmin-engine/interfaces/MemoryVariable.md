@@ -6,7 +6,7 @@
 
 # Interface: MemoryVariable
 
-Defined in: [lib/garmin-engine.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L71)
+Defined in: [lib/garmin-engine.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L75)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/garmin-engine.ts:71](https://github.com/fderuiter/portfolio/blo
 
 > **allocatedAt**: `number`
 
-Defined in: [lib/garmin-engine.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L76)
+Defined in: [lib/garmin-engine.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L80)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/garmin-engine.ts:76](https://github.com/fderuiter/portfolio/blo
 
 > **id**: `number`
 
-Defined in: [lib/garmin-engine.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L72)
+Defined in: [lib/garmin-engine.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L76)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/garmin-engine.ts:72](https://github.com/fderuiter/portfolio/blo
 
 > **name**: `string`
 
-Defined in: [lib/garmin-engine.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L73)
+Defined in: [lib/garmin-engine.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L77)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/garmin-engine.ts:73](https://github.com/fderuiter/portfolio/blo
 
 > **sizeKb**: `number`
 
-Defined in: [lib/garmin-engine.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L75)
+Defined in: [lib/garmin-engine.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L79)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [lib/garmin-engine.ts:75](https://github.com/fderuiter/portfolio/blo
 
 > **type**: [`VariableType`](../type-aliases/VariableType.md)
 
-Defined in: [lib/garmin-engine.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L74)
+Defined in: [lib/garmin-engine.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L78)
