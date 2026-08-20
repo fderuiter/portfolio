@@ -73,9 +73,11 @@ describe("Workspace Skeletons & Reserved Aspect Ratios Suite", () => {
     });
 
     it("renders SchemaFlowWorkspaceWrapper with initial dynamic loading fallback", async () => {
+      vi.resetModules();
+      const { default: DynamicSchemaFlowWorkspaceWrapper } = await import("@/components/SchemaFlowWorkspaceWrapper");
       await act(async () => {
         root = createRoot(container);
-        root.render(<SchemaFlowWorkspaceWrapper />);
+        root.render(<DynamicSchemaFlowWorkspaceWrapper />);
       });
 
       // Wrapper renders skeleton during dynamic import fetch
