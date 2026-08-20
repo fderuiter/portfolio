@@ -8,4 +8,4 @@
 
 > `const` **VARIABLE\_RAM\_COSTS**: `Record`\<[`VariableType`](../type-aliases/VariableType.md), `number`\>
 
-Defined in: [lib/garmin-engine.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L44)
+Defined in: [lib/garmin-engine.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L48)

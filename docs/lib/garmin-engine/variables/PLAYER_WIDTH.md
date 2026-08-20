@@ -8,4 +8,4 @@
 
 > `const` **PLAYER\_WIDTH**: `20` = `20`
 
-Defined in: [lib/garmin-engine.ts:136](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L136)
+Defined in: [lib/garmin-engine.ts:183](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L183)

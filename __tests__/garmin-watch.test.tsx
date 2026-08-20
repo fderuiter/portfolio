@@ -13,6 +13,11 @@ import {
   wipeScreenFog,
   updateGameSimulation,
   renderCanvasFrame,
+  allocateFlashVariable,
+  clearFlashStorage,
+  loadPersistedFlashStorage,
+  savePersistedFlashStorage,
+  FLASH_STORAGE_KEY,
   GROUND_Y,
   PLAYER_HEIGHT,
   JUMP_FORCE,
@@ -415,5 +420,136 @@ describe("Garmin Connect IQ Simulation Engine (lib/garmin-engine.ts)", () => {
     state.fogLevel = 0.8;
     const wiped = wipeScreenFog(state, 140, 140, 30);
     expect(wiped.fogLevel).toBeCloseTo(0.58, 2);
+  });
+
+  describe("Staged Power Brownout & Low Battery Management", () => {
+    it("should render visual low power warning when battery drops below 15%", () => {
+      const state = startGame(createInitialState("fenix"));
+      state.battery = 12.0;
+
+      const mockCtx = new Proxy(
+        {
+          fillStyle: "",
+          strokeStyle: "",
+          font: "",
+          textAlign: "",
+          createRadialGradient: () => ({ addColorStop: () => {} }),
+        },
+        {
+          get(target, prop) {
+            if (prop in target) return (target as Record<string | symbol, unknown>)[prop];
+            return () => {};
+          },
+        }
+      ) as unknown as CanvasRenderingContext2D;
+
+      expect(() => renderCanvasFrame(mockCtx, state)).not.toThrow();
+    });
+
+    it("should immediately halt physics and simulation execution upon 0% battery power loss", () => {
+      let state = startGame(createInitialState("fenix"));
+      state.score = 100;
+      state.battery = 0.05;
+
+      // Drain remaining battery to 0
+      state = updateGameSimulation(state, 1000);
+      expect(state.battery).toBe(0);
+      expect(state.gameState).toBe("shutdown");
+      expect(state.crashReport?.errorType).toBe("Power Loss");
+
+      // Subsequence ticks should keep simulation halted
+      const halted = updateGameSimulation(state, 1000);
+      expect(halted.distanceMeters).toBe(state.distanceMeters);
+      expect(halted.gameState).toBe("shutdown");
+    });
+
+    it("should apply score penalty on total power loss without reducing score below zero", () => {
+      const state1 = startGame(createInitialState("fenix"));
+      state1.score = 200;
+      state1.battery = 0;
+      const result1 = updateGameSimulation(state1, 100);
+      expect(result1.gameState).toBe("shutdown");
+      expect(result1.score).toBe(150); // 200 - 50 = 150
+
+      const state2 = startGame(createInitialState("fenix"));
+      state2.score = 30; // Less than 50 penalty
+      state2.battery = 0;
+      const result2 = updateGameSimulation(state2, 100);
+      expect(result2.gameState).toBe("shutdown");
+      expect(result2.score).toBe(0); // Clamped at 0
+    });
+  });
+
+  describe("Non-Volatile Flash Storage Caps & Local Storage Sync", () => {
+    it("should define flash storage caps in device profiles", () => {
+      expect(FLASH_STORAGE_KEY).toBe("garmin_simulator_flash_storage");
+      expect(DEVICE_PROFILES.fenix.flashLimitKb).toBe(64.0);
+      expect(DEVICE_PROFILES.forerunner.flashLimitKb).toBe(256.0);
+      expect(DEVICE_PROFILES.edge.flashLimitKb).toBe(512.0);
+    });
+
+    it("should allocate flash storage variables and track allocated Flash KB", () => {
+      const state = startGame(createInitialState("fenix"));
+      const initialFlash = state.allocatedFlashKb;
+
+      const { state: nextState, crashed } = allocateFlashVariable(state, 8.0, "user_settings.dat");
+      expect(crashed).toBe(false);
+      expect(nextState.allocatedFlashKb).toBeCloseTo(initialFlash + 8.0, 1);
+      expect(nextState.flashVariables.some((f) => f.name === "user_settings.dat")).toBe(true);
+    });
+
+    it("should throw Out Of Storage crash when flash allocations exceed device limit", () => {
+      const state = startGame(createInitialState("fenix"));
+      state.allocatedFlashKb = 60.0; // Fēnix limit is 64.0 KB
+
+      const { state: crashedState, crashed } = allocateFlashVariable(state, 10.0, "large_blob.bin");
+      expect(crashed).toBe(true);
+      expect(crashedState.gameState).toBe("crashed");
+      expect(crashedState.crashReport?.errorType).toBe("Out Of Storage");
+      expect(crashedState.crashReport?.flashLimitKb).toBe(64.0);
+    });
+
+    it("should persist flash variables to browser local storage for cross-session reload", () => {
+      const flashVars = [
+        { id: 10, name: "session_state.json", sizeKb: 12.0, allocatedAt: Date.now() },
+      ];
+      savePersistedFlashStorage(flashVars);
+
+      const loaded = loadPersistedFlashStorage();
+      expect(loaded).toEqual(flashVars);
+
+      const newState = createInitialState("fenix", 0, loaded);
+      expect(newState.allocatedFlashKb).toBe(12.0);
+      expect(newState.flashVariables[0].name).toBe("session_state.json");
+
+      // Clean up test storage
+      clearFlashStorage(newState);
+    });
+
+    it("should handle flash_token obstacles collected during gameplay", () => {
+      const state = startGame(createInitialState("fenix"));
+      const initialFlash = state.allocatedFlashKb;
+
+      const tokenState = {
+        ...state,
+        lastObstacleTime: Date.now(),
+        obstacles: [
+          {
+            id: 999,
+            x: 52,
+            y: GROUND_Y - 32,
+            width: 14,
+            height: 14,
+            type: "flash_token" as const,
+            label: "NV",
+            speed: 2.2,
+          },
+        ],
+      };
+
+      const updated = updateGameSimulation(tokenState, 16.6);
+      expect(updated.allocatedFlashKb).toBeGreaterThan(initialFlash);
+      expect(updated.obstacles.length).toBe(0);
+    });
   });
 });

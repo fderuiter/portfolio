@@ -8,7 +8,7 @@
 
 > **renderCanvasFrame**(`ctx`, `state`): `void`
 
-Defined in: [lib/garmin-engine.ts:641](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L641)
+Defined in: [lib/garmin-engine.ts:871](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L871)
 
 16-Color CIQ Retro Canvas 2D Renderer
 

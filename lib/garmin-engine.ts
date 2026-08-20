@@ -7,12 +7,13 @@ import { clamp } from "./game-utils";
 
 export type DeviceTarget = "fenix" | "forerunner" | "edge";
 export type VariableType = "int" | "float" | "string" | "array";
-export type ObstacleType = "null_pointer" | "watchdog" | "stack_overflow" | "mem_token";
+export type ObstacleType = "null_pointer" | "watchdog" | "stack_overflow" | "mem_token" | "flash_token";
 
 export interface DeviceProfile {
   id: DeviceTarget;
   name: string;
   ramLimitKb: number;
+  flashLimitKb: number;
   description: string;
   color: string;
 }
@@ -22,21 +23,24 @@ export const DEVICE_PROFILES: Record<DeviceTarget, DeviceProfile> = {
     id: "fenix",
     name: "Fēnix 5 (32KB)",
     ramLimitKb: 32.0,
-    description: "Hard: Brutal 32KB RAM ceiling with rapid allocations",
+    flashLimitKb: 64.0,
+    description: "Hard: Brutal 32KB RAM ceiling & 64KB Flash limit",
     color: "#ef4444",
   },
   forerunner: {
     id: "forerunner",
     name: "Forerunner 245 (64KB)",
     ramLimitKb: 64.0,
-    description: "Medium: 64KB memory limit with standard heap pressure",
+    flashLimitKb: 256.0,
+    description: "Medium: 64KB memory limit & 256KB Flash capacity",
     color: "#eab308",
   },
   edge: {
     id: "edge",
     name: "Edge 1030 (128KB)",
     ramLimitKb: 128.0,
-    description: "Casual: 128KB generous heap for experimental apps",
+    flashLimitKb: 512.0,
+    description: "Casual: 128KB generous heap & 512KB Flash storage",
     color: "#22c55e",
   },
 };
@@ -76,6 +80,44 @@ export interface MemoryVariable {
   allocatedAt: number;
 }
 
+export interface FlashVariable {
+  id: number;
+  name: string;
+  sizeKb: number;
+  allocatedAt: number;
+}
+
+export const FLASH_STORAGE_KEY = "garmin_simulator_flash_storage";
+
+export function loadPersistedFlashStorage(): FlashVariable[] {
+  if (typeof window === "undefined") return [];
+  try {
+    if (typeof window.localStorage?.getItem === "function") {
+      const raw = window.localStorage.getItem(FLASH_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
+      }
+    }
+  } catch {
+    // Fall back safely when browser local storage is unavailable
+  }
+  return [];
+}
+
+export function savePersistedFlashStorage(flashVars: FlashVariable[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (typeof window.localStorage?.setItem === "function") {
+      window.localStorage.setItem(FLASH_STORAGE_KEY, JSON.stringify(flashVars));
+    }
+  } catch {
+    // Fall back safely when browser local storage is unavailable
+  }
+}
+
 export interface Obstacle {
   id: number;
   x: number; // 0 - 280
@@ -89,12 +131,14 @@ export interface Obstacle {
 }
 
 export interface CrashReport {
-  errorType: "Out Of Memory" | "Symbol Not Found" | "Watchdog Tripped" | "Null Pointer";
+  errorType: "Out Of Memory" | "Symbol Not Found" | "Watchdog Tripped" | "Null Pointer" | "Out Of Storage" | "Power Loss";
   file: string;
   line: number;
   stackTrace: string[];
   heapUsedKb: number;
   heapLimitKb: number;
+  flashUsedKb?: number;
+  flashLimitKb?: number;
 }
 
 export interface FogPoint {
@@ -104,7 +148,7 @@ export interface FogPoint {
 }
 
 export interface GameEngineState {
-  gameState: "idle" | "playing" | "paused" | "crashed" | "summary";
+  gameState: "idle" | "playing" | "paused" | "crashed" | "shutdown" | "summary";
   device: DeviceTarget;
   playerY: number; // Y position in 280x280 canvas
   playerVy: number; // Vertical velocity
@@ -114,6 +158,9 @@ export interface GameEngineState {
   distanceMeters: number;
   variables: MemoryVariable[];
   allocatedRamKb: number;
+  flashVariables: FlashVariable[];
+  flashFiles?: FlashVariable[];
+  allocatedFlashKb: number;
   obstacles: Obstacle[];
   isLightOn: boolean;
   battery: number; // 0 - 100%
@@ -141,7 +188,20 @@ export const JUMP_FORCE = -10.5;
 /**
  * Initializes a new fresh game state
  */
-export function createInitialState(device: DeviceTarget = "fenix", highScore = 0): GameEngineState {
+export function createInitialState(
+  device: DeviceTarget = "fenix",
+  highScore = 0,
+  initialFlash?: FlashVariable[]
+): GameEngineState {
+  const flashVars = initialFlash || loadPersistedFlashStorage();
+  const defaultFlashVars: FlashVariable[] =
+    flashVars.length > 0
+      ? flashVars
+      : [{ id: 1, name: "sys_log.dat", sizeKb: 4.0, allocatedAt: 0 }];
+  const allocatedFlashKb = Number(
+    defaultFlashVars.reduce((acc, v) => acc + v.sizeKb, 0).toFixed(2)
+  );
+
   return {
     gameState: "idle",
     device,
@@ -156,6 +216,9 @@ export function createInitialState(device: DeviceTarget = "fenix", highScore = 0
       { id: 2, name: "displayGfx", type: "array", sizeKb: 1.6, allocatedAt: 0 },
     ],
     allocatedRamKb: 1.8,
+    flashVariables: defaultFlashVars,
+    flashFiles: defaultFlashVars,
+    allocatedFlashKb,
     obstacles: [],
     isLightOn: false,
     battery: 100,
@@ -304,6 +367,79 @@ export function allocateVariable(
 }
 
 /**
+ * Allocate a new persistent variable into Non-Volatile Flash storage
+ */
+export function allocateFlashVariable(
+  state: GameEngineState,
+  sizeKb = 4.0,
+  name?: string
+): { state: GameEngineState; crashed: boolean } {
+  const newFlash = Number((state.allocatedFlashKb + sizeKb).toFixed(2));
+  const flashLimit = DEVICE_PROFILES[state.device].flashLimitKb;
+
+  const newVar: FlashVariable = {
+    id: Date.now() + Math.random(),
+    name: name || `nv_data_${Math.floor(Math.random() * 900 + 100)}.bin`,
+    sizeKb,
+    allocatedAt: Date.now(),
+  };
+
+  if (newFlash > flashLimit) {
+    const crashReport: CrashReport = {
+      errorType: "Out Of Storage",
+      file: "FlashNVStorage.mc",
+      line: 28,
+      stackTrace: [
+        `Failed to allocate ${sizeKb}KB to NVRAM Flash`,
+        `Out of Storage: ${newFlash}KB / ${flashLimit}KB limit exceeded`,
+        "at Application.Storage.setValue() [Storage.mc:104]",
+        "at Garmin_Schvitz_App.saveState() [App.mc:95]",
+      ],
+      heapUsedKb: state.allocatedRamKb,
+      heapLimitKb: DEVICE_PROFILES[state.device].ramLimitKb,
+      flashUsedKb: newFlash,
+      flashLimitKb: flashLimit,
+    };
+
+    return {
+      state: {
+        ...state,
+        allocatedFlashKb: newFlash,
+        gameState: "crashed",
+        crashReport,
+      },
+      crashed: true,
+    };
+  }
+
+  const nextFlashVars = [...state.flashVariables, newVar];
+  savePersistedFlashStorage(nextFlashVars);
+
+  return {
+    state: {
+      ...state,
+      flashVariables: nextFlashVars,
+      flashFiles: nextFlashVars,
+      allocatedFlashKb: newFlash,
+    },
+    crashed: false,
+  };
+}
+
+/**
+ * Clears persistent NV Flash storage and resets local storage
+ */
+export function clearFlashStorage(state: GameEngineState): GameEngineState {
+  savePersistedFlashStorage([]);
+  return {
+    ...state,
+    flashVariables: [],
+    flashFiles: [],
+    allocatedFlashKb: 0,
+  };
+}
+
+/**
  * Adds a wipe trail to defog the screen
  */
 export function wipeScreenFog(state: GameEngineState, x: number, y: number, radius = 28): GameEngineState {
@@ -320,7 +456,33 @@ export function wipeScreenFog(state: GameEngineState, x: number, y: number, radi
  * Primary Game Physics & Simulation Update Loop (Called by requestAnimationFrame)
  */
 export function updateGameSimulation(state: GameEngineState, deltaMs: number): GameEngineState {
-  if (state.gameState !== "playing") {
+  if (state.gameState !== "playing" || state.battery <= 0) {
+    if (state.gameState === "playing" && state.battery <= 0) {
+      const penalty = 50;
+      const penalizedScore = Math.max(0, state.score - penalty);
+      return {
+        ...state,
+        battery: 0,
+        isLightOn: false,
+        score: penalizedScore,
+        gameState: "shutdown",
+        crashReport: {
+          errorType: "Power Loss",
+          file: "PowerManager.mc",
+          line: 1,
+          stackTrace: [
+            "CRITICAL VOLTAGE BROWNOUT DETECTED",
+            "Battery power dropped to 0.0%",
+            "Engine updates & physics halted",
+            `Power loss penalty applied: -${penalty} PTS`,
+          ],
+          heapUsedKb: state.allocatedRamKb,
+          heapLimitKb: DEVICE_PROFILES[state.device].ramLimitKb,
+          flashUsedKb: state.allocatedFlashKb,
+          flashLimitKb: DEVICE_PROFILES[state.device].flashLimitKb,
+        },
+      };
+    }
     return state;
   }
 
@@ -370,6 +532,35 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
       nextFogLevel = Math.max(nextThermalStress, nextFogLevel - (1.0 / 14900) * safeDelta);
     }
 
+    if (nextBattery <= 0) {
+      const penalty = 50;
+      const penalizedScore = Math.max(0, state.score - penalty);
+      return {
+        ...state,
+        battery: 0,
+        isLightOn: false,
+        score: penalizedScore,
+        gameState: "shutdown",
+        isGcActive: false,
+        gcTimerMs: 0,
+        crashReport: {
+          errorType: "Power Loss",
+          file: "PowerManager.mc",
+          line: 1,
+          stackTrace: [
+            "CRITICAL VOLTAGE BROWNOUT DETECTED",
+            "Battery power dropped to 0.0%",
+            "Engine updates & physics halted",
+            `Power loss penalty applied: -${penalty} PTS`,
+          ],
+          heapUsedKb: state.allocatedRamKb,
+          heapLimitKb: DEVICE_PROFILES[state.device].ramLimitKb,
+          flashUsedKb: state.allocatedFlashKb,
+          flashLimitKb: DEVICE_PROFILES[state.device].flashLimitKb,
+        },
+      };
+    }
+
     if (remainingGc <= 0) {
       return {
         ...state,
@@ -409,6 +600,33 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
   if (nextBattery <= 0) {
     nextLight = false;
     nextBattery = 0;
+  }
+
+  if (nextBattery <= 0) {
+    const penalty = 50;
+    const penalizedScore = Math.max(0, state.score - penalty);
+    return {
+      ...state,
+      battery: 0,
+      isLightOn: false,
+      score: penalizedScore,
+      gameState: "shutdown",
+      crashReport: {
+        errorType: "Power Loss",
+        file: "PowerManager.mc",
+        line: 1,
+        stackTrace: [
+          "CRITICAL VOLTAGE BROWNOUT DETECTED",
+          "Battery power dropped to 0.0%",
+          "Engine updates & physics halted",
+          `Power loss penalty applied: -${penalty} PTS`,
+        ],
+        heapUsedKb: state.allocatedRamKb,
+        heapLimitKb: DEVICE_PROFILES[state.device].ramLimitKb,
+        flashUsedKb: state.allocatedFlashKb,
+        flashLimitKb: DEVICE_PROFILES[state.device].flashLimitKb,
+      },
+    };
   }
 
   if (state.isLightOn) {
@@ -529,6 +747,13 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
         updatedState = allocRes.state;
         // Don't keep obstacle after collection
         continue;
+      } else if (obs.type === "flash_token") {
+        const flashRes = allocateFlashVariable(updatedState, 4.0);
+        if (flashRes.crashed) {
+          return flashRes.state;
+        }
+        updatedState = flashRes.state;
+        continue;
       } else if (obs.type === "watchdog") {
         crashTriggered = {
           errorType: "Watchdog Tripped",
@@ -580,7 +805,7 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
   if (now - updatedState.lastObstacleTime > obstacleInterval && nextObstacles.length < 3) {
     const maxX = nextObstacles.reduce((max, o) => Math.max(max, o.x), 0);
     if (maxX < 190) {
-      const obstacleTypes: ObstacleType[] = ["null_pointer", "watchdog", "stack_overflow", "mem_token"];
+      const obstacleTypes: ObstacleType[] = ["null_pointer", "watchdog", "stack_overflow", "mem_token", "flash_token"];
       const chosen = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
 
       let width = 16;
@@ -611,6 +836,11 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
         width = 14;
         height = 14;
         y = GROUND_Y - 36 - Math.floor(Math.random() * 20); // Floating in air
+      } else if (chosen === "flash_token") {
+        label = "NV";
+        width = 14;
+        height = 14;
+        y = GROUND_Y - 32 - Math.floor(Math.random() * 20);
       }
 
       nextObstacles.push({
@@ -647,6 +877,13 @@ export function renderCanvasFrame(ctx: CanvasRenderingContext2D, state: GameEngi
   ctx.beginPath();
   ctx.arc(CANVAS_SIZE / 2, CANVAS_SIZE / 2, CANVAS_SIZE / 2 - 2, 0, Math.PI * 2);
   ctx.clip();
+
+  // If Shut Down / Total Power Loss (0% battery): Render Blackout Shutdown Screen
+  if (state.gameState === "shutdown" || state.battery <= 0) {
+    renderShutdownScreen(ctx, state);
+    ctx.restore();
+    return;
+  }
 
   // Background Display (Black / Dark Navy)
   ctx.fillStyle = state.isLightOn ? "#0c1f2d" : CIQ_PALETTE.black;
@@ -711,10 +948,16 @@ export function renderCanvasFrame(ctx: CanvasRenderingContext2D, state: GameEngi
     ctx.fillText(`RECLAIMING HEAP...`, CANVAS_SIZE / 2, 108);
   }
 
-  // 4. Draw HUD Overlays (Top Arc & Bottom RAM Bar)
+  // 4. Low Power Visual Dimming Effect (< 15% charge warning)
+  if (state.battery < 15 && state.battery > 0) {
+    ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
+    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+  }
+
+  // 5. Draw HUD Overlays (Top Arc & Bottom RAM/Flash Meter)
   drawHud(ctx, state);
 
-  // 5. Draw Overheat Fog & Condensation Layer
+  // 6. Draw Overheat Fog & Condensation Layer
   if (state.fogLevel > 0.05) {
     drawOverheatFog(ctx, state);
   }
@@ -728,59 +971,76 @@ export function renderCanvasFrame(ctx: CanvasRenderingContext2D, state: GameEngi
 function drawHud(ctx: CanvasRenderingContext2D, state: GameEngineState) {
   const ramLimit = DEVICE_PROFILES[state.device].ramLimitKb;
   const ramPct = Math.min(1.0, state.allocatedRamKb / ramLimit);
+  const flashLimit = DEVICE_PROFILES[state.device].flashLimitKb;
+  const flashPct = Math.min(1.0, state.allocatedFlashKb / flashLimit);
 
   // Top Status Bar: Battery & Profile
   ctx.font = "bold 9px monospace";
   ctx.textAlign = "left";
-  ctx.fillStyle = state.battery < 20 ? CIQ_PALETTE.red : CIQ_PALETTE.green;
-  ctx.fillText(`BAT: ${Math.round(state.battery)}%`, 50, 42);
+  ctx.fillStyle = state.battery < 15 ? CIQ_PALETTE.red : state.battery < 30 ? CIQ_PALETTE.yellow : CIQ_PALETTE.green;
+  ctx.fillText(`BAT: ${Math.round(state.battery)}%`, 45, 40);
+
+  // Low power alarm badge
+  if (state.battery < 15 && state.battery > 0) {
+    ctx.fillStyle = CIQ_PALETTE.red;
+    ctx.fillRect(45, 43, 62, 10);
+    ctx.fillStyle = CIQ_PALETTE.white;
+    ctx.font = "bold 7px monospace";
+    ctx.fillText("⚠️ LOW POWER", 47, 51);
+  }
 
   ctx.textAlign = "right";
   ctx.fillStyle = CIQ_PALETTE.lightGray;
-  ctx.fillText(state.device.toUpperCase(), CANVAS_SIZE - 50, 42);
+  ctx.font = "bold 9px monospace";
+  ctx.fillText(state.device.toUpperCase(), CANVAS_SIZE - 45, 40);
 
   // Top Center: Score & Heart Rate
   ctx.textAlign = "center";
   ctx.fillStyle = CIQ_PALETTE.white;
   ctx.font = "bold 11px monospace";
-  ctx.fillText(`${state.score} PTS`, CANVAS_SIZE / 2, 54);
+  ctx.fillText(`${state.score} PTS`, CANVAS_SIZE / 2, 52);
 
-  // Bottom RAM Meter HUD (Crucial Game Mechanic)
-  const ramY = 222;
+  // Bottom HUD Box (RAM & Flash Meter Gauges)
+  const ramY = 214;
   const ramBarW = 160;
-  const ramBarH = 10;
+  const ramBarH = 6;
   const ramBarX = (CANVAS_SIZE - ramBarW) / 2;
 
   // Background Box
-  ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
-  ctx.fillRect(ramBarX - 4, ramY - 14, ramBarW + 8, 38);
+  ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
+  ctx.fillRect(ramBarX - 4, ramY - 12, ramBarW + 8, 48);
   ctx.strokeStyle = CIQ_PALETTE.darkGray;
-  ctx.strokeRect(ramBarX - 4, ramY - 14, ramBarW + 8, 38);
+  ctx.strokeRect(ramBarX - 4, ramY - 12, ramBarW + 8, 48);
 
-  // RAM Text
-  ctx.font = "bold 8px monospace";
+  // RAM Text & Progress Bar
+  ctx.font = "bold 7.5px monospace";
   ctx.textAlign = "left";
   ctx.fillStyle = ramPct > 0.85 ? CIQ_PALETTE.red : ramPct > 0.65 ? CIQ_PALETTE.yellow : CIQ_PALETTE.brightCyan;
-  ctx.fillText(`RAM: ${state.allocatedRamKb.toFixed(1)} / ${ramLimit.toFixed(1)} KB`, ramBarX, ramY - 4);
+  ctx.fillText(`RAM: ${state.allocatedRamKb.toFixed(1)} / ${ramLimit.toFixed(0)} KB`, ramBarX, ramY - 3);
 
-  // RAM Progress Bar
   ctx.fillStyle = CIQ_PALETTE.darkGray;
   ctx.fillRect(ramBarX, ramY, ramBarW, ramBarH);
 
-  const fillW = Math.max(0, ramBarW * ramPct);
+  const fillRam = Math.max(0, ramBarW * ramPct);
   ctx.fillStyle = ramPct > 0.9 ? CIQ_PALETTE.red : ramPct > 0.7 ? CIQ_PALETTE.yellow : CIQ_PALETTE.brightGreen;
-  ctx.fillRect(ramBarX, ramY, fillW, ramBarH);
-  ctx.strokeStyle = CIQ_PALETTE.white;
-  ctx.strokeRect(ramBarX, ramY, ramBarW, ramBarH);
+  ctx.fillRect(ramBarX, ramY, fillRam, ramBarH);
 
-  // Variable Allocation Queue Preview
-  ctx.font = "7px monospace";
+  // Flash Storage Text & Progress Bar
+  const flashY = ramY + 14;
+  ctx.fillStyle = flashPct > 0.85 ? CIQ_PALETTE.red : flashPct > 0.65 ? CIQ_PALETTE.yellow : CIQ_PALETTE.orange;
+  ctx.fillText(`FLASH: ${state.allocatedFlashKb.toFixed(1)} / ${flashLimit.toFixed(0)} KB`, ramBarX, flashY - 2);
+
+  ctx.fillStyle = CIQ_PALETTE.darkGray;
+  ctx.fillRect(ramBarX, flashY, ramBarW, ramBarH);
+
+  const fillFlash = Math.max(0, ramBarW * flashPct);
+  ctx.fillStyle = flashPct > 0.9 ? CIQ_PALETTE.red : flashPct > 0.7 ? CIQ_PALETTE.yellow : CIQ_PALETTE.orange;
+  ctx.fillRect(ramBarX, flashY, fillFlash, ramBarH);
+
+  // NV Flash Files Summary Text
+  ctx.font = "6.5px monospace";
   ctx.fillStyle = CIQ_PALETTE.lightGray;
-  const queueSummary = state.variables
-    .slice(-4)
-    .map((v) => `${v.type[0].toUpperCase()}:${v.sizeKb}k`)
-    .join(" ");
-  ctx.fillText(`QUEUE: ${queueSummary || "EMPTY"}`, ramBarX, ramY + 18);
+  ctx.fillText(`NV FILES: ${state.flashVariables.length} saved (${state.allocatedFlashKb.toFixed(1)}KB)`, ramBarX, flashY + 13);
 }
 
 /**
@@ -850,6 +1110,17 @@ function drawObstacle(ctx: CanvasRenderingContext2D, obs: Obstacle) {
     ctx.font = "bold 6px monospace";
     ctx.textAlign = "center";
     ctx.fillText(obs.label, obs.width / 2, obs.height / 2 + 2);
+  } else if (obs.type === "flash_token") {
+    // Floating Flash NV Token
+    ctx.fillStyle = CIQ_PALETTE.orange;
+    ctx.fillRect(0, 0, obs.width, obs.height);
+    ctx.strokeStyle = CIQ_PALETTE.yellow;
+    ctx.strokeRect(0, 0, obs.width, obs.height);
+
+    ctx.fillStyle = CIQ_PALETTE.black;
+    ctx.font = "bold 6px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("NV", obs.width / 2, obs.height / 2 + 2);
   } else if (obs.type === "null_pointer") {
     // Red Spiky Bug Obstacle
     ctx.fillStyle = CIQ_PALETTE.red;
@@ -931,6 +1202,36 @@ function drawOverheatFog(ctx: CanvasRenderingContext2D, state: GameEngineState) 
 }
 
 /**
+ * Draws the Blackout Shutdown Screen when battery hits zero
+ */
+function renderShutdownScreen(ctx: CanvasRenderingContext2D, state: GameEngineState) {
+  ctx.fillStyle = "#050508";
+  ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+  ctx.fillStyle = CIQ_PALETTE.red;
+  ctx.font = "bold 11px monospace";
+  ctx.textAlign = "center";
+  ctx.fillText("⚡ POWER DEPLETED ⚡", CANVAS_SIZE / 2, 75);
+
+  ctx.fillStyle = CIQ_PALETTE.yellow;
+  ctx.font = "bold 9px monospace";
+  ctx.fillText("BROWNOUT SHUTDOWN", CANVAS_SIZE / 2, 92);
+
+  ctx.fillStyle = CIQ_PALETTE.white;
+  ctx.font = "8px monospace";
+  ctx.fillText("0.0% BATTERY REMAINING", CANVAS_SIZE / 2, 112);
+
+  ctx.fillStyle = CIQ_PALETTE.lightGray;
+  ctx.font = "7.5px monospace";
+  ctx.fillText("System halted to protect NV flash", CANVAS_SIZE / 2, 128);
+  ctx.fillText(`Final Score: ${state.score} PTS`, CANVAS_SIZE / 2, 144);
+
+  ctx.fillStyle = CIQ_PALETTE.brightGreen;
+  ctx.font = "bold 9px monospace";
+  ctx.fillText("PRESS START TO REBOOT", CANVAS_SIZE / 2, 185);
+}
+
+/**
  * Draws the CIQ Blue Error Console when crashed
  */
 function renderCrashScreen(ctx: CanvasRenderingContext2D, state: GameEngineState) {
@@ -968,7 +1269,13 @@ function renderCrashScreen(ctx: CanvasRenderingContext2D, state: GameEngineState
   ctx.fillStyle = CIQ_PALETTE.white;
   ctx.font = "bold 7.5px monospace";
   ctx.textAlign = "center";
-  ctx.fillText(`PEAK RAM: ${report.heapUsedKb.toFixed(1)} / ${report.heapLimitKb.toFixed(1)} KB`, CANVAS_SIZE / 2, 175);
+  if (report.errorType === "Out Of Storage") {
+    const used = report.flashUsedKb ?? state.allocatedFlashKb;
+    const limit = report.flashLimitKb ?? DEVICE_PROFILES[state.device].flashLimitKb;
+    ctx.fillText(`FLASH: ${used.toFixed(1)} / ${limit.toFixed(1)} KB`, CANVAS_SIZE / 2, 175);
+  } else {
+    ctx.fillText(`PEAK RAM: ${report.heapUsedKb.toFixed(1)} / ${report.heapLimitKb.toFixed(1)} KB`, CANVAS_SIZE / 2, 175);
+  }
   ctx.fillText(`SCORE: ${state.score}  |  HI: ${state.highScore}`, CANVAS_SIZE / 2, 190);
 
   // Restart instructions
