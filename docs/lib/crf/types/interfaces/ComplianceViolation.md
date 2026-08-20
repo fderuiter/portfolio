@@ -6,7 +6,7 @@
 
 # Interface: ComplianceViolation
 
-Defined in: [lib/crf/types.ts:252](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L252)
+Defined in: [lib/crf/types.ts:259](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L259)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/types.ts:252](https://github.com/fderuiter/portfolio/blob/m
 
 > **autoFixAvailable**: `boolean`
 
-Defined in: [lib/crf/types.ts:262](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L262)
+Defined in: [lib/crf/types.ts:269](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L269)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/types.ts:262](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **autoFixType?**: `"truncate_variable"` \| `"add_core_variable"` \| `"assign_nci_codelist"` \| `"fix_date_format"` \| `"assign_visit_form"`
 
-Defined in: [lib/crf/types.ts:263](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L263)
+Defined in: [lib/crf/types.ts:270](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L270)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/types.ts:263](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **fieldId?**: `string`
 
-Defined in: [lib/crf/types.ts:259](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L259)
+Defined in: [lib/crf/types.ts:266](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L266)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/types.ts:259](https://github.com/fderuiter/portfolio/blob/m
 
 > **formId**: `string`
 
-Defined in: [lib/crf/types.ts:257](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L257)
+Defined in: [lib/crf/types.ts:264](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L264)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/crf/types.ts:257](https://github.com/fderuiter/portfolio/blob/m
 
 > **formName**: `string`
 
-Defined in: [lib/crf/types.ts:258](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L258)
+Defined in: [lib/crf/types.ts:265](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L265)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/crf/types.ts:258](https://github.com/fderuiter/portfolio/blob/m
 
 > **id**: `string`
 
-Defined in: [lib/crf/types.ts:253](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L253)
+Defined in: [lib/crf/types.ts:260](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L260)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/crf/types.ts:253](https://github.com/fderuiter/portfolio/blob/m
 
 > **message**: `string`
 
-Defined in: [lib/crf/types.ts:261](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L261)
+Defined in: [lib/crf/types.ts:268](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L268)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/crf/types.ts:261](https://github.com/fderuiter/portfolio/blob/m
 
 > **ruleDescription**: `string`
 
-Defined in: [lib/crf/types.ts:255](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L255)
+Defined in: [lib/crf/types.ts:262](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L262)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/crf/types.ts:255](https://github.com/fderuiter/portfolio/blob/m
 
 > **ruleId**: `"SD0001"` \| `"SD0002"` \| `"SD0003"` \| `"SD0004"` \| `"SD0005"`
 
-Defined in: [lib/crf/types.ts:254](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L254)
+Defined in: [lib/crf/types.ts:261](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L261)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [lib/crf/types.ts:254](https://github.com/fderuiter/portfolio/blob/m
 
 > **severity**: [`ComplianceSeverity`](../type-aliases/ComplianceSeverity.md)
 
-Defined in: [lib/crf/types.ts:256](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L256)
+Defined in: [lib/crf/types.ts:263](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L263)
 
 ***
 
@@ -94,7 +94,7 @@ Defined in: [lib/crf/types.ts:256](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **suggestedFix?**: `string`
 
-Defined in: [lib/crf/types.ts:264](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L264)
+Defined in: [lib/crf/types.ts:271](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L271)
 
 ***
 
@@ -102,4 +102,4 @@ Defined in: [lib/crf/types.ts:264](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **variableName?**: `string`
 
-Defined in: [lib/crf/types.ts:260](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L260)
+Defined in: [lib/crf/types.ts:267](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L267)

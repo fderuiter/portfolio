@@ -8,9 +8,10 @@
 
 > **exportUniversalCrfYaml**(`study`): `string`
 
-Defined in: [lib/crf/universal-schema.ts:278](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L278)
+Defined in: [lib/crf/universal-schema.ts:279](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L279)
 
-Lightweight Zero-dependency YAML Serializer for Universal CRF
+Lossless Zero-dependency YAML Serializer for Universal CRF
+Serializes all study protocol attributes 1:1 without data loss, omitting redundant summary count fields.
 
 ## Parameters
 

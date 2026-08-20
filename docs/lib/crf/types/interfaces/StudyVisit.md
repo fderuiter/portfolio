@@ -14,7 +14,15 @@ Defined in: [lib/crf/types.ts:129](https://github.com/fderuiter/portfolio/blob/m
 
 > **assignedFormIds**: `string`[]
 
-Defined in: [lib/crf/types.ts:137](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L137)
+Defined in: [lib/crf/types.ts:138](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L138)
+
+***
+
+### formIds?
+
+> `optional` **formIds?**: `string`[]
+
+Defined in: [lib/crf/types.ts:139](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L139)
 
 ***
 
@@ -30,7 +38,7 @@ Defined in: [lib/crf/types.ts:130](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **isRepeating?**: `boolean`
 
-Defined in: [lib/crf/types.ts:138](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L138)
+Defined in: [lib/crf/types.ts:140](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L140)
 
 ***
 
@@ -54,7 +62,7 @@ Defined in: [lib/crf/types.ts:131](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **repeatMax?**: `number`
 
-Defined in: [lib/crf/types.ts:139](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L139)
+Defined in: [lib/crf/types.ts:141](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L141)
 
 ***
 
@@ -63,6 +71,14 @@ Defined in: [lib/crf/types.ts:139](https://github.com/fderuiter/portfolio/blob/m
 > **targetDay**: `number`
 
 Defined in: [lib/crf/types.ts:134](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L134)
+
+***
+
+### timepointDays?
+
+> `optional` **timepointDays?**: `number`
+
+Defined in: [lib/crf/types.ts:135](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L135)
 
 ***
 
@@ -78,7 +94,7 @@ Defined in: [lib/crf/types.ts:133](https://github.com/fderuiter/portfolio/blob/m
 
 > **windowAfter**: `number`
 
-Defined in: [lib/crf/types.ts:136](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L136)
+Defined in: [lib/crf/types.ts:137](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L137)
 
 ***
 
@@ -86,4 +102,4 @@ Defined in: [lib/crf/types.ts:136](https://github.com/fderuiter/portfolio/blob/m
 
 > **windowBefore**: `number`
 
-Defined in: [lib/crf/types.ts:135](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L135)
+Defined in: [lib/crf/types.ts:136](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L136)

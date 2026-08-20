@@ -132,9 +132,11 @@ export interface StudyVisit {
   name: string;              // e.g. "Screening", "Cycle 1 Day 1"
   visitType: "Scheduled" | "Unscheduled" | "Common";
   targetDay: number;         // e.g. Day 0, Day 28
+  timepointDays?: number;
   windowBefore: number;      // -3 days
   windowAfter: number;       // +3 days
   assignedFormIds: string[]; // Forms collected at this visit
+  formIds?: string[];
   isRepeating?: boolean;
   repeatMax?: number;
 }
@@ -190,9 +192,13 @@ export interface ExportROptions {
 }
 
 export interface StudyProtocol {
+  $schema?: string;
+  schemaVersion?: string;
   id: string;
   protocolNumber: string;    // e.g. "ONC-2026-003"
+  protocolId?: string;
   studyName: string;         // e.g. "Phase III Multicenter Study of Immuno-Oncology..."
+  title?: string;
   phase: "Phase I" | "Phase I/II" | "Phase II" | "Phase III" | "Phase IV" | "Registry";
   sponsor: string;
   therapeuticArea: string;   // Oncology, Neurology, Cardiology, Infectious Disease, etc.
@@ -201,6 +207,7 @@ export interface StudyProtocol {
   forms: CRFForm[];
   visits: StudyVisit[];
   codelists: CodelistDefinition[];
+  rules?: EditCheckRule[];
   branding?: StudyBranding;
 }
 

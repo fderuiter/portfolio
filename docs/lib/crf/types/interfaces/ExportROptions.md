@@ -6,7 +6,7 @@
 
 # Interface: ExportROptions
 
-Defined in: [lib/crf/types.ts:184](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L184)
+Defined in: [lib/crf/types.ts:186](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L186)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/types.ts:184](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **includeGlimpse?**: `boolean`
 
-Defined in: [lib/crf/types.ts:187](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L187)
+Defined in: [lib/crf/types.ts:189](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L189)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/types.ts:187](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **includeSampleData?**: `boolean`
 
-Defined in: [lib/crf/types.ts:186](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L186)
+Defined in: [lib/crf/types.ts:188](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L188)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/types.ts:186](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **selectedFormId?**: `string`
 
-Defined in: [lib/crf/types.ts:185](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L185)
+Defined in: [lib/crf/types.ts:187](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L187)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/types.ts:185](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **tibblePrefix?**: `string`
 
-Defined in: [lib/crf/types.ts:189](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L189)
+Defined in: [lib/crf/types.ts:191](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L191)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [lib/crf/types.ts:189](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **useLabelledPackage?**: `boolean`
 
-Defined in: [lib/crf/types.ts:188](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L188)
+Defined in: [lib/crf/types.ts:190](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L190)
