@@ -7,6 +7,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { RetroLabyrinth } from "@/components/RetroLabyrinth";
+import * as dungeon from "@/lib/dungeon";
 
 class LocalStorageMock {
   private store: Record<string, string> = {};
@@ -349,6 +350,43 @@ describe("RetroLabyrinth React Component UI Suite", () => {
     });
 
     expect(container.textContent).not.toContain("Display Archetype Presets");
+  });
+
+  it("should memoize Traveling Salesman shortest tour calculation and skip recalculation on non-position state updates", async () => {
+    const tourSpy = vi.spyOn(dungeon, "computeShortestTour");
+
+    await act(async () => {
+      root.render(<RetroLabyrinth isMounted={true} />);
+    });
+
+    const initialCallCount = tourSpy.mock.calls.length;
+    expect(initialCallCount).toBeGreaterThan(0);
+
+    // Trigger a non-coordinate state update, e.g. switching CRT phosphor theme
+    const amberThemeBtn = Array.from(container.querySelectorAll("button")).find((b) =>
+      b.getAttribute("title")?.includes("Amber Hacker")
+    );
+    expect(amberThemeBtn).toBeTruthy();
+
+    await act(async () => {
+      amberThemeBtn?.click();
+    });
+
+    // computeShortestTour should NOT have been called again during theme switch
+    expect(tourSpy.mock.calls.length).toBe(initialCallCount);
+
+    // Trigger a coordinate change by moving right
+    const boundary = container.querySelector('[data-keyboard-boundary="true"]') as HTMLElement;
+    await act(async () => {
+      boundary.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true })
+      );
+    });
+
+    // computeShortestTour SHOULD have been called when position updated
+    expect(tourSpy.mock.calls.length).toBeGreaterThan(initialCallCount);
+
+    tourSpy.mockRestore();
   });
 });
 
