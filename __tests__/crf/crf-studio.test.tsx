@@ -81,6 +81,10 @@ describe("CRFStudioContainer Component", () => {
   beforeEach(() => {
     container = document.createElement("div");
     document.body.appendChild(container);
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ status: "ok", data: {} }),
+    } as any);
   });
 
   afterEach(() => {
