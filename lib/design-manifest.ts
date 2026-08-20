@@ -65,6 +65,20 @@ export const designManifest = {
     gap: 16,
     /** Original CSS Variable: --layout-card-padding */
     cardPadding: 20,
+    /** Original CSS Variable: --layout-header-height */
+    headerHeight: 7,
+    /** Original CSS Variable: --layout-footer-height */
+    footerHeight: 4,
+    /** Original CSS Variable: --layout-dock-height */
+    dockHeight: 0,
+    /** Original CSS Variable: --layout-studio-header-height */
+    studioHeaderHeight: 3.5,
+    /** Original CSS Variable: --layout-studio-budget */
+    studioBudget: "calc(100dvh - var(--layout-header-height))",
+    /** Original CSS Variable: --layout-viewport-budget */
+    viewportBudget: "calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px))",
+    /** Original CSS Variable: --layout-workspace-budget */
+    workspaceBudget: "calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px) - var(--layout-studio-header-height, 0px))",
   },
   breakpoints: {
     /** Original CSS Variable: --breakpoint-sm */

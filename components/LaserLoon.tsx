@@ -1658,7 +1658,7 @@ export const LaserLoon: React.FC = () => {
           tabIndex={0}
           className={
             isFullscreen
-              ? "max-h-[calc(100dvh-120px)] max-w-full aspect-[768/420] object-contain block cursor-crosshair touch-none my-auto"
+              ? "max-h-[var(--layout-viewport-budget,calc(100dvh-12rem))] max-w-full aspect-[768/420] object-contain block cursor-crosshair touch-none my-auto"
               : "w-full h-auto aspect-[768/420] block cursor-crosshair touch-none"
           }
         />
