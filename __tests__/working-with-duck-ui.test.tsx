@@ -364,7 +364,7 @@ describe("Working With Duck - UI & Component Suite", () => {
     }
   });
 
-  it("applies high-priority priority loading flags to active unlocked scrapbook card image element", async () => {
+  it("applies default lazy loading to active unlocked scrapbook card image element without high-priority flags", async () => {
     await act(async () => {
       root.render(<WorkingWithDuck />);
     });
@@ -381,7 +381,8 @@ describe("Working With Duck - UI & Component Suite", () => {
       const img = container.querySelector("img");
       expect(img).not.toBeNull();
       expect(img?.getAttribute("src")).toContain("duck-prince.jpg");
-      expect(img?.getAttribute("loading")).not.toBe("lazy");
+      expect(img?.getAttribute("loading")).toBe("lazy");
+      expect(img?.getAttribute("fetchpriority")).toBeNull();
     }
   });
 });
