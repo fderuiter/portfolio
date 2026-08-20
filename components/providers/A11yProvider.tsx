@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useReducer, useCallback, useEffect, useMemo } from "react";
+import React, { createContext, useContext, useReducer, useCallback, useEffect, useMemo, useRef } from "react";
 import { useConsoleArt } from "@/hooks/useConsoleArt";
 
 export type Priority = "polite" | "assertive";
@@ -156,17 +156,41 @@ export function A11yProvider({ children }: { children: React.ReactNode }) {
 
   const activeAssertiveId = state.activeAssertive?.id;
   const activePoliteId = state.activePolite?.id;
+  const activeTimerIdRef = useRef<string | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const activeId = activeAssertiveId || activePoliteId;
-    if (!activeId) return;
+    if (!activeId) {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+      activeTimerIdRef.current = null;
+      return;
+    }
 
-    const timer = setTimeout(() => {
+    if (activeTimerIdRef.current === activeId && timerRef.current !== null) {
+      return;
+    }
+
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+
+    activeTimerIdRef.current = activeId;
+    timerRef.current = setTimeout(() => {
+      activeTimerIdRef.current = null;
+      timerRef.current = null;
       dispatch({ type: "TIMER_EXPIRED" });
     }, 3000);
 
     return () => {
-      clearTimeout(timer);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+      activeTimerIdRef.current = null;
     };
   }, [activeAssertiveId, activePoliteId]);
 
