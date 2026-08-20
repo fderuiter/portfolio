@@ -50,6 +50,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .replace(/\*/g, "")
     .slice(0, 160);
 
+  const ogImageUrl = `${resolveBaseUrl()}/case-studies/${slug}/opengraph-image`;
+
   return {
     title: `${study.title} | Case Study`,
     description: cleanDescription,
@@ -64,12 +66,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       publishedTime: study.created_at.toISOString(),
       modifiedTime: study.updated_at.toISOString(),
       tags: (study.tags || "").split(",").map((t) => t.trim()).filter(Boolean),
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${study.title} | Case Study`,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: `${study.title} | Case Study`,
       description: cleanDescription,
       creator: "@laser_loon",
+      images: [ogImageUrl],
     },
   };
 }

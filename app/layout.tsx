@@ -61,12 +61,21 @@ export const metadata: Metadata = {
     siteName: "Frederick de Ruiter Portfolio",
     title: "Frederick de Ruiter | Principal Systems Engineer & Designer",
     description: "A high-performance design engineering showcase combining DOM-free canvas layout physics, serverless Neon Postgres data streams, and robust clinical CDISC data engines.",
+    images: [
+      {
+        url: `${resolveBaseUrl()}/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "Frederick de Ruiter | Principal Systems Engineer & Designer",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     creator: "@laser_loon",
     title: "Frederick de Ruiter | Principal Systems Engineer & Designer",
     description: "A high-performance design engineering showcase combining DOM-free canvas layout physics, serverless Neon Postgres data streams, and robust clinical CDISC data engines.",
+    images: [`${resolveBaseUrl()}/twitter-image`],
   },
   robots: {
     index: true,

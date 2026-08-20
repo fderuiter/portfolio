@@ -1,5 +1,6 @@
 import CaseStudyPage, { generateMetadata as generateCSMetadata } from "@/app/case-studies/[slug]/page";
 import type { Metadata } from "next";
+import { resolveBaseUrl } from "@/lib/domain";
 
 export const revalidate = 3600;
 
@@ -22,6 +23,18 @@ export async function generateMetadata(): Promise<Metadata> {
       description:
         "Comprehensive graphic design case study and open vector asset distribution hub for the Laser Loon (MN Flag Submission F277). Download source .ai, .eps, .pdf, .svg, .psd, .png, and .jpg master files.",
       url: "/work/laser-loon",
+      images: [
+        {
+          url: `${resolveBaseUrl()}/work/laser-loon/opengraph-image`,
+          width: 1200,
+          height: 630,
+          alt: "The Laser Loon: Graphic Design Case Study & Open Asset Repository",
+        },
+      ],
+    },
+    twitter: {
+      ...baseMeta.twitter,
+      images: [`${resolveBaseUrl()}/work/laser-loon/opengraph-image`],
     },
   };
 }

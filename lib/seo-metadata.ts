@@ -190,6 +190,10 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
  */
 export function buildRouteMetadata(config: RouteMetaConfig): Metadata {
   const url = `${SITE_BASE_URL}${config.path}`;
+  const ogImageUrl = `${SITE_BASE_URL}${config.path.startsWith("/") ? config.path : "/" + config.path}/opengraph-image`;
+  const fullTitle = config.title.includes("Frederick de Ruiter")
+    ? config.title
+    : `${config.title} | Frederick de Ruiter`;
 
   return {
     title: config.title,
@@ -201,15 +205,24 @@ export function buildRouteMetadata(config: RouteMetaConfig): Metadata {
     openGraph: {
       type: config.ogType || "website",
       url,
-      title: `${config.title} | Frederick de Ruiter`,
+      title: fullTitle,
       description: config.description,
       siteName: "Frederick de Ruiter Portfolio",
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: fullTitle,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
-      title: `${config.title} | Frederick de Ruiter`,
+      title: fullTitle,
       description: config.description,
       creator: "@laser_loon",
+      images: [ogImageUrl],
     },
   };
 }

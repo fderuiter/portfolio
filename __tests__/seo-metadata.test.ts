@@ -178,7 +178,7 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     expect(parsed.interactionStatistic).toHaveLength(2);
   });
 
-  it("buildRouteMetadata generates complete Next.js metadata objects for all registered routes", () => {
+  it("buildRouteMetadata generates complete Next.js metadata objects for all registered routes with explicit social images", () => {
     const routeKeys = Object.keys(ROUTE_METADATA_CONFIGS);
     expect(routeKeys.length).toBeGreaterThanOrEqual(10);
 
@@ -192,7 +192,41 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
       expect(meta.openGraph?.title).toContain(config.title);
       expect(meta.openGraph?.description).toBe(config.description);
       expect(meta.twitter?.title).toContain(config.title);
+
+      // Verify explicit OpenGraph image array
+      expect(meta.openGraph?.images).toBeDefined();
+      expect(Array.isArray(meta.openGraph?.images)).toBe(true);
+      const ogImages = meta.openGraph?.images as Array<{ url: string; width?: number; height?: number; alt?: string }>;
+      expect(ogImages.length).toBeGreaterThan(0);
+      expect(ogImages[0].url).toContain(`${config.path}/opengraph-image`);
+      expect(ogImages[0].width).toBe(1200);
+      expect(ogImages[0].height).toBe(630);
+
+      // Verify explicit Twitter card image
+      expect(meta.twitter?.images).toBeDefined();
+      expect(Array.isArray(meta.twitter?.images)).toBe(true);
+      const twImages = meta.twitter?.images as Array<string>;
+      expect(twImages.length).toBeGreaterThan(0);
+      expect(twImages[0]).toContain(`${config.path}/opengraph-image`);
     }
+  });
+
+  it("contact route layout exports dedicated page metadata with title, description, and social images", async () => {
+    const { metadata } = await import("@/app/contact/layout");
+    expect(metadata.title).toBe("Contact & Direct Inquiries | Frederick de Ruiter");
+    expect(metadata.description).toContain("direct communication channels");
+    expect(metadata.openGraph?.title).toContain("Contact & Direct Inquiries");
+    expect(metadata.openGraph?.description).toBe(metadata.description);
+
+    const ogImages = metadata.openGraph?.images as Array<{ url: string; width?: number; height?: number; alt?: string }>;
+    expect(ogImages).toBeDefined();
+    expect(ogImages[0].url).toContain("/contact/opengraph-image");
+    expect(ogImages[0].width).toBe(1200);
+    expect(ogImages[0].height).toBe(630);
+
+    const twImages = metadata.twitter?.images as Array<string>;
+    expect(twImages).toBeDefined();
+    expect(twImages[0]).toContain("/contact/opengraph-image");
   });
 
   it("enforces front-loaded SERP length bounds, active CTR verbs, and long-tail keywords across all route configs", () => {
