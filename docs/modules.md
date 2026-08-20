@@ -9,6 +9,7 @@
 - [hooks/useAnnouncer](hooks/useAnnouncer/README.md)
 - [hooks/useClipboard](hooks/useClipboard/README.md)
 - [hooks/useConsoleArt](hooks/useConsoleArt/README.md)
+- [hooks/useDebouncedDiagnostics](hooks/useDebouncedDiagnostics/README.md)
 - [hooks/useFocusTrap](hooks/useFocusTrap/README.md)
 - [hooks/useFullscreen](hooks/useFullscreen/README.md)
 - [hooks/useKonamiCode](hooks/useKonamiCode/README.md)

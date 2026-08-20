@@ -7,7 +7,7 @@ import {
   StudioTheme,
 } from "@/lib/crf/types";
 import { getStudyPresetsSync } from "@/lib/crf/presets/loader";
-import { lintForm } from "@/lib/crf/ast-evaluator";
+import { useDebouncedDiagnostics } from "@/hooks/useDebouncedDiagnostics";
 import {
   IconLayoutGrid,
   IconCalendar,
@@ -91,7 +91,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [presets] = useState<Array<{ id: string; name: string; therapeuticArea?: string; study: { protocolNumber: string } }>>(() => getStudyPresetsSync());
   const branding = getStudyBranding(study);
-  const totalIssues = study.forms.reduce((acc, f) => acc + lintForm(f).length, 0);
+  const { totalIssues } = useDebouncedDiagnostics(study);
 
   const currentPreset = presets.find((p) => p.study.protocolNumber === study.protocolNumber);
 
