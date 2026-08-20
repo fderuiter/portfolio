@@ -17,7 +17,8 @@ import {
   ExpressionEvaluator,
   tokenizeWithSpans,
 } from "@/lib/crf/ast-evaluator";
-import { CRFField } from "@/lib/crf/types";
+import { CRFField, StudyProtocol } from "@/lib/crf/types";
+import { autoFixAllViolations } from "@/lib/crf/cdisc-conformance-linter";
 import {
   createInitialState,
   updateGameSimulation,
@@ -482,6 +483,88 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
 
       const allSlugs = await CaseStudyService.getAllPublishedSlugs();
       expect(allSlugs).toContain("laser-loon");
+    });
+  });
+
+  describe("CDISC Auto-Fix Cryptographic UUID Identifier Generation (Targeted UUID Autofix Repair)", () => {
+    it("ensures batch auto-fix generates unique cryptographic UUID identifiers across synchronous execution loops", () => {
+      const mockProtocol: StudyProtocol = {
+        id: "study_test_autofix",
+        studyName: "Test Protocol",
+        sponsor: "Test Pharma",
+        therapeuticArea: "Oncology",
+        phase: "Phase I",
+        protocolNumber: "PROTOCOL-001",
+        version: "1.0",
+        lastModified: "2026-08-20",
+        codelists: [],
+        branding: {
+          primaryColor: "#000000",
+          accentColor: "#000000",
+          organizationName: "Test Pharma",
+          footerText: "Confidential",
+        },
+        forms: [
+          {
+            id: "form_demographics_empty",
+            name: "Demographics",
+            domain: "DM",
+            description: "Demographics domain missing all core variables",
+            version: "1.0",
+            rules: [],
+            sections: [],
+          },
+          {
+            id: "form_vitals_empty",
+            name: "Vital Signs",
+            domain: "VS",
+            description: "Vital signs domain missing all core variables",
+            version: "1.0",
+            rules: [],
+            sections: [],
+          },
+        ],
+        visits: [
+          {
+            id: "v1",
+            oid: "SE.V1",
+            name: "Screening",
+            visitType: "Scheduled",
+            targetDay: 0,
+            windowBefore: 0,
+            windowAfter: 0,
+            assignedFormIds: ["form_demographics_empty", "form_vitals_empty"],
+          },
+        ],
+      };
+
+      const { updatedStudy, fixedCount } = autoFixAllViolations(mockProtocol);
+      expect(fixedCount).toBeGreaterThan(0);
+
+      const generatedFieldIds = updatedStudy.forms
+        .flatMap((f) => f.sections)
+        .flatMap((s) => s.fields)
+        .map((f) => f.id);
+
+      const generatedSectionIds = updatedStudy.forms
+        .flatMap((f) => f.sections)
+        .map((s) => s.id);
+
+      // Verify no duplicate field or section IDs exist
+      const uniqueFieldIds = new Set(generatedFieldIds);
+      const uniqueSectionIds = new Set(generatedSectionIds);
+
+      expect(uniqueFieldIds.size).toBe(generatedFieldIds.length);
+      expect(uniqueSectionIds.size).toBe(generatedSectionIds.length);
+
+      // Verify high-entropy UUID format
+      const uuidPattern = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
+      generatedFieldIds.forEach((id) => {
+        expect(id).toMatch(uuidPattern);
+      });
+      generatedSectionIds.forEach((id) => {
+        expect(id).toMatch(uuidPattern);
+      });
     });
   });
 });

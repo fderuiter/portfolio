@@ -4,6 +4,7 @@ import {
   autoFixViolation,
   autoFixAllViolations,
 } from "@/lib/crf/cdisc-conformance-linter";
+import { lintForm } from "@/lib/crf/form-linter";
 import { StudyProtocol, CRFForm } from "@/lib/crf/types";
 import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
 
@@ -197,5 +198,87 @@ describe("CDISC Conformance & Regulatory Validation Linter & Auto-Fix Engine", (
     const { updatedStudy, fixedCount } = autoFixAllViolations(brokenStudy);
     expect(fixedCount).toBeGreaterThan(0);
     expect(updatedStudy.visits[0].assignedFormIds).toContain("form_broken");
+  });
+
+  it("should generate high-entropy cryptographic UUIDs for fields and sections during batch auto-fix without ID collisions", () => {
+    // Protocol with empty section-less forms missing multiple core variables
+    const multiErrorStudy: StudyProtocol = {
+      ...ONCOLOGY_RECIST_PRESET,
+      forms: [
+        {
+          id: "form_empty_dm",
+          name: "Empty Demographics",
+          domain: "DM",
+          description: "No fields or sections",
+          version: "1.0",
+          rules: [],
+          sections: [],
+        },
+        {
+          id: "form_empty_vs",
+          name: "Empty Vital Signs",
+          domain: "VS",
+          description: "No fields or sections",
+          version: "1.0",
+          rules: [],
+          sections: [],
+        },
+      ],
+      visits: [
+        {
+          id: "v1",
+          oid: "SE.V1",
+          name: "Visit 1",
+          visitType: "Scheduled",
+          targetDay: 0,
+          windowBefore: 0,
+          windowAfter: 0,
+          assignedFormIds: ["form_empty_dm", "form_empty_vs"],
+        },
+      ],
+    };
+
+    const { updatedStudy, fixedCount } = autoFixAllViolations(multiErrorStudy);
+    expect(fixedCount).toBeGreaterThan(3);
+
+    // Collect all field IDs and section IDs across the updated study
+    const allFieldIds: string[] = [];
+    const allSectionIds: string[] = [];
+
+    updatedStudy.forms.forEach((form) => {
+      form.sections.forEach((sec) => {
+        allSectionIds.push(sec.id);
+        sec.fields.forEach((f) => {
+          allFieldIds.push(f.id);
+        });
+      });
+
+      // Assert form-level field ID uniqueness checks pass via lintForm
+      const diagnostics = lintForm(form);
+      const duplicateIdErrors = diagnostics.filter((d) => d.id.startsWith("dup_id_"));
+      expect(duplicateIdErrors.length).toBe(0);
+    });
+
+    // Check that all field IDs and section IDs are strictly unique
+    const uniqueFieldIds = new Set(allFieldIds);
+    const uniqueSectionIds = new Set(allSectionIds);
+
+    expect(uniqueFieldIds.size).toBe(allFieldIds.length);
+    expect(uniqueSectionIds.size).toBe(allSectionIds.length);
+
+    // Assert auto-fixed IDs follow UUID format pattern and contain high entropy UUIDs
+    const autoFixedFieldIds = allFieldIds.filter((id) => id.startsWith("f_autofix_"));
+    const autoFixedSectionIds = allSectionIds.filter((id) => id.startsWith("sec_autofix_"));
+
+    expect(autoFixedFieldIds.length).toBeGreaterThan(0);
+    expect(autoFixedSectionIds.length).toBeGreaterThan(0);
+
+    const uuidRegex = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
+    autoFixedFieldIds.forEach((id) => {
+      expect(id).toMatch(uuidRegex);
+    });
+    autoFixedSectionIds.forEach((id) => {
+      expect(id).toMatch(uuidRegex);
+    });
   });
 });
