@@ -16,6 +16,8 @@ import { useFullscreen } from "@/hooks/useFullscreen";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useResponsiveCanvas } from "@/hooks/useResponsiveCanvas";
+import { useAnnouncer } from "@/hooks/useAnnouncer";
+import { triggerHaptic } from "@/lib/haptics";
 import { BezelClusterDock } from "@/components/arcade/ControlDocks";
 import {
   DeviceTarget,
@@ -57,6 +59,15 @@ export const GarminWatchSimulator: React.FC = () => {
   const loadedHighScore = parseInt(rawHighScore, 10) || 0;
   const { playNote, playSuccess } = useAudio();
   const { recordEvent } = useTelemetry();
+  const { announce } = useAnnouncer();
+  const [alertMessage, setAlertMessage] = useState<string>("");
+
+  const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
+  const swipeHandledRef = useRef<boolean>(false);
+
+  const hasAlertedMemoryRef = useRef<boolean>(false);
+  const hasAlertedGcRef = useRef<boolean>(false);
+  const hasAlertedCrashRef = useRef<boolean>(false);
 
   // Hardware & Simulation State
   const [bezelTheme, setBezelTheme] = useState<WatchBezelTheme>("slate");
@@ -101,6 +112,7 @@ export const GarminWatchSimulator: React.FC = () => {
   const handleJump = useCallback(() => {
     const current = stateRef.current;
     if (current.gameState !== "playing" || !current.isGrounded) return;
+    triggerHaptic(20);
     playBeep(900, 0.03);
     const nextState = {
       ...current,
@@ -115,6 +127,7 @@ export const GarminWatchSimulator: React.FC = () => {
   const handleJettison = useCallback(() => {
     const current = stateRef.current;
     if (current.gameState !== "playing") return;
+    triggerHaptic(20);
     playBeep(650, 0.035);
     const { state: nextState } = jettisonOldestVariable(current);
     stateRef.current = nextState;
@@ -123,6 +136,7 @@ export const GarminWatchSimulator: React.FC = () => {
 
   // Trigger Backlight / Flashlight (LIGHT)
   const handleToggleLight = useCallback(() => {
+    triggerHaptic(20);
     playButtonTone();
     const current = stateRef.current;
     const nextLight = !current.isLightOn;
@@ -141,6 +155,7 @@ export const GarminWatchSimulator: React.FC = () => {
   const handleForceGc = useCallback(() => {
     const current = stateRef.current;
     if (current.gameState !== "playing" || current.isGcActive) return;
+    triggerHaptic(20);
     playBeep(450, 0.08);
     const { state: nextState } = triggerGarbageCollection(current);
     stateRef.current = nextState;
@@ -149,6 +164,7 @@ export const GarminWatchSimulator: React.FC = () => {
 
   // Start / Pause / Restart (START)
   const handleStartStop = useCallback(() => {
+    triggerHaptic(20);
     playButtonTone();
     const current = stateRef.current;
     if (current.gameState === "idle" || current.gameState === "crashed" || current.gameState === "summary") {
@@ -181,12 +197,38 @@ export const GarminWatchSimulator: React.FC = () => {
 
   // Switch Device Profile
   const handleSelectDevice = (target: DeviceTarget) => {
+    triggerHaptic(15);
     playButtonTone();
     setDeviceTarget(target);
     const next = createInitialState(target, stateRef.current.highScore);
     stateRef.current = next;
     setGameState(next);
   };
+
+  // Process Directional Touch Swipe Gestures
+  const processSwipeGesture = useCallback(
+    (dx: number, dy: number) => {
+      const absX = Math.abs(dx);
+      const absY = Math.abs(dy);
+
+      triggerHaptic(15);
+
+      if (absY > absX) {
+        if (dy < -35) {
+          handleJump();
+        } else if (dy > 35) {
+          handleJettison();
+        }
+      } else {
+        if (dx > 35) {
+          handleStartStop();
+        } else if (dx < -35) {
+          handleForceGc();
+        }
+      }
+    },
+    [handleJump, handleJettison, handleStartStop, handleForceGc]
+  );
 
   // Keyboard Event Handlers
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -226,12 +268,94 @@ export const GarminWatchSimulator: React.FC = () => {
     }
   };
 
-  // Canvas Mouse & Touch Drag Wiping for Overheat Fog
+  // Canvas Mouse & Touch Drag Wiping for Overheat Fog & Swipe Detection
+  const handleCanvasPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    setIsDraggingFog(true);
+    pointerStartRef.current = { x: e.clientX, y: e.clientY };
+    swipeHandledRef.current = false;
+    const { x, y } = toGameCoordinates(e.clientX, e.clientY);
+    handleWipeFog(x, y);
+    containerRef.current?.focus({ preventScroll: true });
+  };
+
   const handleCanvasPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!isDraggingFog && e.buttons === 0) return;
     const { x, y } = toGameCoordinates(e.clientX, e.clientY);
     handleWipeFog(x, y);
+
+    if (pointerStartRef.current && !swipeHandledRef.current) {
+      const dx = e.clientX - pointerStartRef.current.x;
+      const dy = e.clientY - pointerStartRef.current.y;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist >= 35) {
+        swipeHandledRef.current = true;
+        processSwipeGesture(dx, dy);
+      }
+    }
   };
+
+  const handleCanvasPointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (pointerStartRef.current && !swipeHandledRef.current) {
+      const dx = e.clientX - pointerStartRef.current.x;
+      const dy = e.clientY - pointerStartRef.current.y;
+      const dist = Math.hypot(dx, dy);
+
+      if (dist >= 35) {
+        swipeHandledRef.current = true;
+        processSwipeGesture(dx, dy);
+      }
+    }
+    setIsDraggingFog(false);
+    pointerStartRef.current = null;
+    swipeHandledRef.current = false;
+  };
+
+  const handleCanvasPointerCancel = () => {
+    setIsDraggingFog(false);
+    pointerStartRef.current = null;
+    swipeHandledRef.current = false;
+  };
+
+  // Screen Reader Critical Alert Vocalizations Effect
+  useEffect(() => {
+    const ramLimit = DEVICE_PROFILES[deviceTarget].ramLimitKb;
+    const ramUsage = gameState.allocatedRamKb;
+    const isHighMemory = ramUsage / ramLimit > 0.85;
+
+    // 1. High Memory Pressure (>85%)
+    if (isHighMemory && !hasAlertedMemoryRef.current && gameState.gameState === "playing") {
+      hasAlertedMemoryRef.current = true;
+      const msg = `Warning: High memory pressure. RAM usage at ${Math.round((ramUsage / ramLimit) * 100)}% (${ramUsage.toFixed(1)} KB of ${ramLimit} KB).`;
+      setAlertMessage(msg);
+      announce(msg, "assertive");
+      triggerHaptic([30, 20, 30]);
+    } else if (!isHighMemory && ramUsage / ramLimit <= 0.80) {
+      hasAlertedMemoryRef.current = false;
+    }
+
+    // 2. Garbage Collection Freeze
+    if (gameState.isGcActive && !hasAlertedGcRef.current) {
+      hasAlertedGcRef.current = true;
+      const msg = "Garbage collection active. 500 millisecond execution freeze.";
+      setAlertMessage(msg);
+      announce(msg, "assertive");
+    } else if (!gameState.isGcActive) {
+      hasAlertedGcRef.current = false;
+    }
+
+    // 3. System Crash / Out Of Memory
+    if (gameState.gameState === "crashed" && !hasAlertedCrashRef.current) {
+      hasAlertedCrashRef.current = true;
+      const errorType = gameState.crashReport?.errorType || "Out Of Memory";
+      const msg = `System crash: ${errorType}. ${gameState.crashReport?.file ? "File: " + gameState.crashReport.file : ""}`;
+      setAlertMessage(msg);
+      announce(msg, "assertive");
+      triggerHaptic([50, 50, 50]);
+    } else if (gameState.gameState !== "crashed") {
+      hasAlertedCrashRef.current = false;
+    }
+  }, [gameState, deviceTarget, announce]);
 
   // Main 60FPS Game Physics and Rendering Loop
   useEffect(() => {
@@ -452,6 +576,7 @@ export const GarminWatchSimulator: React.FC = () => {
         <button
           onClick={(e) => {
             e.stopPropagation();
+            triggerHaptic(20);
             handleToggleLight();
             containerRef.current?.focus({ preventScroll: true });
           }}
@@ -466,6 +591,7 @@ export const GarminWatchSimulator: React.FC = () => {
         <button
           onClick={(e) => {
             e.stopPropagation();
+            triggerHaptic(20);
             handleJump();
             containerRef.current?.focus({ preventScroll: true });
           }}
@@ -480,6 +606,7 @@ export const GarminWatchSimulator: React.FC = () => {
         <button
           onClick={(e) => {
             e.stopPropagation();
+            triggerHaptic(20);
             handleJettison();
             containerRef.current?.focus({ preventScroll: true });
           }}
@@ -494,6 +621,7 @@ export const GarminWatchSimulator: React.FC = () => {
         <button
           onClick={(e) => {
             e.stopPropagation();
+            triggerHaptic(20);
             handleStartStop();
             containerRef.current?.focus({ preventScroll: true });
           }}
@@ -508,6 +636,7 @@ export const GarminWatchSimulator: React.FC = () => {
         <button
           onClick={(e) => {
             e.stopPropagation();
+            triggerHaptic(20);
             handleForceGc();
             containerRef.current?.focus({ preventScroll: true });
           }}
@@ -542,13 +671,18 @@ export const GarminWatchSimulator: React.FC = () => {
             ref={canvasRef}
             width={CANVAS_SIZE}
             height={CANVAS_SIZE}
-            onPointerDown={(e) => {
-              setIsDraggingFog(true);
-              handleCanvasPointerMove(e);
-              containerRef.current?.focus({ preventScroll: true });
-            }}
-            onPointerUp={() => setIsDraggingFog(false)}
+            role="img"
+            aria-label={`Smartwatch display simulator. Status: ${gameState.gameState}. Score: ${
+              gameState.score
+            }, High Score: ${effectiveHighScore}. Memory: ${gameState.allocatedRamKb.toFixed(
+              1
+            )} of ${currentProfile.ramLimitKb} KB. Battery: ${Math.round(
+              gameState.battery
+            )}%. Condensation: ${Math.round(gameState.fogLevel * 100)}%.`}
+            onPointerDown={handleCanvasPointerDown}
+            onPointerUp={handleCanvasPointerUp}
             onPointerMove={handleCanvasPointerMove}
+            onPointerCancel={handleCanvasPointerCancel}
             className="w-full h-full aspect-square rounded-full cursor-crosshair touch-none"
           />
 
@@ -660,6 +794,23 @@ export const GarminWatchSimulator: React.FC = () => {
         <span className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded"><strong className="text-zinc-300">BACK / [GC]:</strong> Trigger Garbage Collector</span>
         <span className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded"><strong className="text-zinc-300">LIGHT / [L]:</strong> Backlight (Burns Bat)</span>
         <span className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded"><strong className="text-zinc-300">SWIPE / [W]:</strong> Wipe Screen Fog</span>
+      </div>
+
+      {/* Off-screen Live Regions for Screen Reader Telemetry & Assertive Alerts */}
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {`Garmin Simulator Telemetry. Status: ${gameState.gameState}. Memory: ${gameState.allocatedRamKb.toFixed(
+          1
+        )} / ${currentProfile.ramLimitKb} KB. Battery: ${Math.round(
+          gameState.battery
+        )}%. Thermal Stress: ${Math.round(
+          (gameState.thermalStress ?? 0) * 100
+        )}%. Condensation: ${Math.round(
+          gameState.fogLevel * 100
+        )}%. Score: ${gameState.score}. High Score: ${effectiveHighScore}.`}
+      </div>
+
+      <div className="sr-only" role="alert" aria-live="assertive" aria-atomic="true">
+        {alertMessage}
       </div>
     </div>
   );
