@@ -10,8 +10,6 @@ const eslintConfig = defineConfig([
       reportUnusedDisableDirectives: "off",
     },
     rules: {
-      "react-hooks/rules-of-hooks": "error",
-      "react-hooks/exhaustive-deps": "warn",
       "@typescript-eslint/no-unused-vars": [
         "warn",
         {

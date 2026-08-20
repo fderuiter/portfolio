@@ -4,10 +4,12 @@ This document tracks the core, bleeding-edge technical decisions established dur
 
 ## System Architecture & Directory Topology
 
-The application structure maps App Router routes, Python backend core utilities, and nested client UI components:
+The application structure maps App Router routes, Python backend core utilities, React UI components, developer experience utilities, and automation scripts:
 
 ```text
-app/
+__tests__/                                 # Vitest unit/integration tests, Playwright E2E, & fuzzing
+adr/                                       # Architectural Decision Records (ADRs)
+app/                                       # Next.js 16 App Router routes, layouts & API endpoints
 ├── (routes)
 │   ├── page.tsx                           # Portfolio Hub landing page & bento showcase
 │   ├── layout.tsx                         # Global layout shell, Providers & Cmd+K palette portal
@@ -58,6 +60,15 @@ components/                                # React UI Component Ecosystem
 ├── CommandPalette.tsx                     # Cmd+K spotlight search palette portal
 ├── Navbar.tsx                             # Top navigation bar
 └── Footer.tsx                             # Global footer & telemetry ticker
+
+docs/                                      # Auto-generated TypeDoc markdown & technical specs
+hooks/                                     # Custom React hooks (pretext, telemetry, sound, theme)
+lib/                                       # Core TypeScript utilities, DX engine, & domain logic
+portfolio/                                 # Extended project case studies & showcase content
+prisma/                                    # Database schemas, migrations, & seed scripts
+public/                                    # Static public assets, fonts, icons, & manifests
+scripts/                                   # DX CLI tools, release gates, & benchmark scripts
+types/                                     # Shared TypeScript interfaces & ambient declarations
 ```
 
 ## Next.js 16 & Turbopack
