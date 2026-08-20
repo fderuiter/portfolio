@@ -510,7 +510,13 @@ export function useTelemetry(options?: UseTelemetryOptions) {
       options?: RecordEventOptions
     ) => {
       const executeDispatch = async () => {
-        // 1. Optimistic Local State Update
+        // 1. Snapshot pre-update full telemetry state
+        const snapshotTelemetry: TelemetryData = {};
+        for (const [key, val] of Object.entries(currentStoreState.telemetry)) {
+          snapshotTelemetry[key] = { ...val };
+        }
+
+        // 2. Optimistic Local State Update
         const currentStats = currentStoreState.telemetry[projectSlug] || { views: 0, clicks: 0 };
         const updatedStats = {
           views: eventType === "page_view" ? currentStats.views + 1 : currentStats.views,
@@ -525,7 +531,7 @@ export function useTelemetry(options?: UseTelemetryOptions) {
           },
         }));
 
-        // 2. Dispatch network POST event with HTTP status code inspection
+        // 3. Dispatch network POST event with HTTP status code inspection
         try {
           const response = await fetch("/api/telemetry", {
             method: "POST",
@@ -545,19 +551,22 @@ export function useTelemetry(options?: UseTelemetryOptions) {
                   processRetryQueue();
                 }, 3000);
               }
+              // Roll back optimistic state and local storage to pre-update snapshot on rate limiting
+              updateStore((prev) => ({
+                ...prev,
+                telemetry: snapshotTelemetry,
+                syncFailed: true,
+              }));
             } else {
               throw new Error(`Failed to persist telemetry event with status: ${response.status}`);
             }
           }
         } catch (err) {
           console.error("Optimistic telemetry sync persistence failed:", sanitizeError(err));
-          // Rollback optimistic increment on HTTP status error or network failure
+          // Roll back optimistic state and local storage to pre-update snapshot on HTTP error or network failure
           updateStore((prev) => ({
             ...prev,
-            telemetry: {
-              ...prev.telemetry,
-              [projectSlug]: currentStats,
-            },
+            telemetry: snapshotTelemetry,
             syncFailed: true,
           }));
         }
