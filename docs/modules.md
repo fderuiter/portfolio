@@ -117,6 +117,7 @@
 - [lib/neuro/asset-loader](lib/neuro/asset-loader/README.md)
 - [lib/neuro/loader](lib/neuro/loader/README.md)
 - [lib/neuro/mesh-generator](lib/neuro/mesh-generator/README.md)
+- [lib/neuro/progress-bus](lib/neuro/progress-bus/README.md)
 - [lib/neuro/qa-engine](lib/neuro/qa-engine/README.md)
 - [lib/neuro/scenarios](lib/neuro/scenarios/README.md)
 - [lib/neuro/types](lib/neuro/types/README.md)
