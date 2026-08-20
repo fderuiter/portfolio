@@ -19,3 +19,4 @@
 
 - [checkBundleBudgets](functions/checkBundleBudgets.md)
 - [inspectBundleChunks](functions/inspectBundleChunks.md)
+- [inspectStandaloneBundle](functions/inspectStandaloneBundle.md)

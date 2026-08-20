@@ -141,7 +141,7 @@ export const Footer: React.FC = () => {
                     className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                   >
                     <IconCpu className="w-3 h-3 text-cyan-400" />
-                    Garmin 32KB Runner
+                    Monkey C Mayhem: Garmin Schvitz App
                   </Link>
                 </li>
                 <li>

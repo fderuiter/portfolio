@@ -45,13 +45,13 @@ export const GarminWatchClient: React.FC = () => {
             <Breadcrumbs
               items={[
                 { label: "Arcade Hub", href: "/arcade" },
-                { label: "Garmin 32KB Runner" },
+                { label: "Monkey C Mayhem" },
               ]}
             />
           </div>
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-amber-500/10 text-amber-300 border border-amber-500/30">
-              Embedded Systems / Monkey C Simulator
+              Monkey C Mayhem / Garmin Schvitz App
             </span>
           </div>
         </div>
@@ -64,10 +64,10 @@ export const GarminWatchClient: React.FC = () => {
             </div>
             <div>
               <h1 className="text-3xl sm:text-4xl font-extrabold font-mono text-white tracking-tight">
-                Garmin Connect IQ <span className="text-amber-400">32KB Memory Runner</span>
+                Monkey C Mayhem: <span className="text-amber-400">Garmin Schvitz App</span>
               </h1>
               <p className="text-xs sm:text-sm text-zinc-400 font-mono mt-1">
-                Circular 280×280 smartwatch simulator. Navigate severe 32KB RAM memory constraints, manage garbage collection (GC) freezes, and wipe thermal condensation.
+                Circular 280×280 Monkey C Mayhem smartwatch simulator running the Garmin Schvitz App artifact under severe 32KB RAM memory constraints.
               </p>
             </div>
           </div>
@@ -77,11 +77,11 @@ export const GarminWatchClient: React.FC = () => {
         <div className="rounded-3xl border border-zinc-800 bg-zinc-950/90 p-4 sm:p-6 shadow-[0_0_50px_rgba(245,158,11,0.1)] flex flex-col items-center">
           <PlayCabinet
             gameId="garmin-watch"
-            title="Garmin Connect IQ 32KB Memory Runner"
-            subtitle="Embedded Systems Memory & Display Simulator"
+            title="Monkey C Mayhem: Garmin Schvitz App"
+            subtitle="Embedded Systems & Garmin Schvitz App Simulator"
             accentColor="amber"
             icon={<IconDeviceWatch className="w-8 h-8 text-amber-400" />}
-            instructions="Circular 280×280 smartwatch simulator operating under strict 32KB RAM constraints with real-time garbage collection lifecycle tracking and simulated thermal condensation."
+            instructions="Circular 280×280 Monkey C Mayhem smartwatch simulator running the Garmin Schvitz App artifact under strict 32KB RAM constraints with real-time garbage collection lifecycle tracking."
             controls={[
               { key: "UP", action: "Jump" },
               { key: "DOWN", action: "Jettison RAM" },
