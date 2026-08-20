@@ -14,6 +14,7 @@
 ## Functions
 
 - [checkAccessibilityStandards](functions/checkAccessibilityStandards.md)
+- [checkArchitectureTopologyDrift](functions/checkArchitectureTopologyDrift.md)
 - [checkDefectRemediationInvariants](functions/checkDefectRemediationInvariants.md)
 - [checkDesignTokens](functions/checkDesignTokens.md)
 - [checkDocumentationParity](functions/checkDocumentationParity.md)

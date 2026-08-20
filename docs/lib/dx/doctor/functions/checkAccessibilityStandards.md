@@ -8,7 +8,7 @@
 
 > **checkAccessibilityStandards**(`root`, `fix?`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:749](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L749)
+Defined in: [lib/dx/doctor.ts:868](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L868)
 
 Accessibility Standards & WCAG 2.1 Conformance Guard (Invariant #10)
 Ensures bypass skip links, semantic main landmark, live announcer provider, and alt/label tags are present.

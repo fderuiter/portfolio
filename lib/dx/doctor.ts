@@ -612,6 +612,125 @@ export function checkOnboardingDocsDrift(root: string, fix = false): DiagnosticC
   };
 }
 
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Architecture Topology Drift Verification Check
+ * Asserts that all top-level repository directories are explicitly represented in ARCHITECTURE.md
+ */
+export function checkArchitectureTopologyDrift(root: string, fix = false): DiagnosticCheckResult {
+  const archPath = path.join(root, "ARCHITECTURE.md");
+  const mediaArchPath = path.join(root, "docs", "_media", "ARCHITECTURE.md");
+
+  if (!fs.existsSync(archPath)) {
+    return {
+      id: "docs-topology-drift",
+      name: "Architecture Directory Topology Overview Guard",
+      category: "architecture",
+      status: "fail",
+      message: "ARCHITECTURE.md file not found in workspace root.",
+      fixable: false,
+    };
+  }
+
+  const archContent = fs.readFileSync(archPath, "utf-8");
+
+  const topologyHeaderMatch = archContent.match(/##\s+System Architecture & Directory Topology/i);
+  if (!topologyHeaderMatch) {
+    return {
+      id: "docs-topology-drift",
+      name: "Architecture Directory Topology Overview Guard",
+      category: "architecture",
+      status: "fail",
+      message: "## System Architecture & Directory Topology section missing from ARCHITECTURE.md.",
+      fixable: false,
+    };
+  }
+
+  const startIndex = topologyHeaderMatch.index! + topologyHeaderMatch[0].length;
+  const nextHeaderMatch = archContent.slice(startIndex).match(/\n##\s+/);
+  const topologySection = nextHeaderMatch
+    ? archContent.slice(startIndex, startIndex + nextHeaderMatch.index!)
+    : archContent.slice(startIndex);
+
+  const ignoreDirs = new Set([
+    "node_modules",
+    "dist",
+    "coverage",
+    "build",
+    "out",
+    ".next",
+    ".git",
+    ".github",
+    ".husky",
+    ".jules",
+    ".agents",
+    "tmp",
+    "scratch",
+  ]);
+
+  const entries = fs.readdirSync(root, { withFileTypes: true });
+  const topLevelDirs = entries
+    .filter((entry) => entry.isDirectory() && !entry.name.startsWith(".") && !ignoreDirs.has(entry.name))
+    .map((entry) => entry.name);
+
+  const missingDirs: string[] = [];
+
+  for (const dirName of topLevelDirs) {
+    const dirPattern = new RegExp(`(?:^|[\\s/│├└──-])${escapeRegExp(dirName)}\\/?(?:[\\s/#:│]|$|\\n)`, "m");
+    if (!dirPattern.test(topologySection)) {
+      missingDirs.push(dirName);
+    }
+  }
+
+  if (missingDirs.length > 0) {
+    return {
+      id: "docs-topology-drift",
+      name: "Architecture Directory Topology Overview Guard",
+      category: "architecture",
+      status: "fail",
+      message: `${missingDirs.length} top-level directory/directories missing from ARCHITECTURE.md topology section.`,
+      details: missingDirs.map((d) => `Missing top-level directory in ARCHITECTURE.md: ${d}/`),
+      fixable: false,
+    };
+  }
+
+  if (fs.existsSync(mediaArchPath)) {
+    const mediaContent = fs.readFileSync(mediaArchPath, "utf-8");
+    if (mediaContent !== archContent) {
+      if (fix) {
+        fs.copyFileSync(archPath, mediaArchPath);
+        return {
+          id: "docs-topology-drift",
+          name: "Architecture Directory Topology Overview Guard",
+          category: "architecture",
+          status: "fixed",
+          message: "Synchronized docs/_media/ARCHITECTURE.md with ARCHITECTURE.md.",
+        };
+      }
+      return {
+        id: "docs-topology-drift",
+        name: "Architecture Directory Topology Overview Guard",
+        category: "architecture",
+        status: "fail",
+        message: "docs/_media/ARCHITECTURE.md is out of sync with workspace root ARCHITECTURE.md.",
+        details: ["Run 'npm run doctor:fix' or 'cp ARCHITECTURE.md docs/_media/ARCHITECTURE.md' to synchronize."],
+        fixable: true,
+      };
+    }
+  }
+
+  return {
+    id: "docs-topology-drift",
+    name: "Architecture Directory Topology Overview Guard",
+    category: "architecture",
+    status: "pass",
+    message: "All top-level repository directories are accurately represented in ARCHITECTURE.md topology overview.",
+  };
+}
+
 /**
  * OpenAPI Parity & Route Completeness Check
  */
@@ -1167,6 +1286,7 @@ export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
     checkMigrationGuard(root),
     checkDocumentationParity(root, fix),
     checkOnboardingDocsDrift(root, fix),
+    checkArchitectureTopologyDrift(root, fix),
     checkOpenApiParity(root, fix),
     checkHydrationSafety(root),
     checkAccessibilityStandards(root, fix),

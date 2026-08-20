@@ -7,57 +7,66 @@ This document tracks the core, bleeding-edge technical decisions established dur
 The application structure maps App Router routes, Python backend core utilities, and nested client UI components:
 
 ```text
-app/
-├── (routes)
-│   ├── page.tsx                           # Portfolio Hub landing page & bento showcase
-│   ├── layout.tsx                         # Global layout shell, Providers & Cmd+K palette portal
-│   ├── arcade/                            # Interactive game cabinet sub-system
-│   │   ├── clinical-chaos/page.tsx        # Clinical Trial Chaos simulation
-│   │   ├── garmin-watch/page.tsx          # Garmin smartwatch telemetry engine
-│   │   ├── laser-loon/page.tsx            # Arcade Laser Loon game route
-│   │   ├── meme-vault/page.tsx            # Meme Vault interactive showcase
-│   │   ├── quasi-puzzler/page.tsx         # Quasi-Perfect proof puzzler
-│   │   ├── retro-labyrinth/page.tsx       # Retro Labyrinth game engine
-│   │   └── working-with-duck/page.tsx     # Working With Duck simulation
-│   ├── case-studies/                      # Dynamic editorial case studies
-│   │   └── [slug]/page.tsx                # Case study narrative route
-│   ├── crf/page.tsx                       # CRF Studio workspace route
-│   ├── neuro/page.tsx                     # Neuroimaging 3D/slice viewer route
-│   ├── proof/page.tsx                     # Formal proof AST workspace route
-│   ├── schedule/page.tsx                  # Interactive calendar & schedule route
-│   ├── simulator/page.tsx                 # Recruiter simulator route
-│   ├── stack/page.tsx                     # System architecture & stack lab route
-│   └── work/                              # Professional case study work routes
-│       └── laser-loon/page.tsx            # Laser Loon work route & technical breakdown
-├── api/                                   # Serverless API contracts & edge functions
-│   ├── case-studies/route.ts              # Case study dynamic search & indexing endpoint
-│   └── telemetry/route.ts                 # Anonymized sliding-window telemetry ingestion
-└── core/                                  # Python Backend Core Engine & Utilities
-    ├── analyzer_strategies.py             # Hybrid offline feature extraction & TF-IDF classification
-    ├── crypto.py                          # Encrypted DB concurrency & SQLCipher security lifecycle
-    └── resilient_file_ops.py              # Crash-resilient 2-phase file operations & rollback
-
-components/                                # React UI Component Ecosystem
-├── ui/                                    # Shared Micro-Interactions & Layout Primitives
-│   ├── Breadcrumbs.tsx                    # Accessible navigation trail
-│   ├── CaseStudyBentoCard.tsx             # Pretext-synchronized zero-reflow masonry bento card
-│   ├── CopyButton.tsx                     # One-click clipboard utility trigger
-│   ├── LayoutPrimitives.tsx               # Defensive container wrappers
-│   ├── ModalContainer.tsx                 # Trapped-focus accessible modal frame
-│   ├── NextPrevNav.tsx                    # Step navigation controls
-│   ├── Tooltip.tsx                        # Floating contextual popover
-│   ├── TracingBeam.tsx                    # Scroll-driven margin rail tracing physics
-│   └── VirtualDPad.tsx                    # Mobile virtual controller interface
-├── arcade/                                # Game canvas clients & cabinet wrappers
-├── crf/                                   # CRF builder canvas, sidebars & export modals
-├── neuro/                                 # 3D brain viewer, slice canvas & terminal
-├── proof/                                 # Interactive truth tables & proof DAG canvas
-├── providers/                             # React context providers (A11y, Audio, Persona, Search)
-├── stack/                                 # Pretext benchmark lab & audio synth components
-├── CaseStudyShowcase.tsx                  # Zero-whitespace bento grid scheduler container
-├── CommandPalette.tsx                     # Cmd+K spotlight search palette portal
-├── Navbar.tsx                             # Top navigation bar
-└── Footer.tsx                             # Global footer & telemetry ticker
+├── __tests__/                             # Unit, integration, E2E, accessibility, and regression test suites
+├── adr/                                   # Architectural Decision Records tracking technical choices & invariants
+├── app/                                   # Next.js App Router pages, layouts, API routes, and core utilities
+│   ├── (routes)
+│   │   ├── page.tsx                       # Portfolio Hub landing page & bento showcase
+│   │   ├── layout.tsx                     # Global layout shell, Providers & Cmd+K palette portal
+│   │   ├── arcade/                        # Interactive game cabinet sub-system
+│   │   │   ├── clinical-chaos/page.tsx    # Clinical Trial Chaos simulation
+│   │   │   ├── garmin-watch/page.tsx      # Garmin smartwatch telemetry engine
+│   │   │   ├── laser-loon/page.tsx        # Arcade Laser Loon game route
+│   │   │   ├── meme-vault/page.tsx        # Meme Vault interactive showcase
+│   │   │   ├── quasi-puzzler/page.tsx     # Quasi-Perfect proof puzzler
+│   │   │   ├── retro-labyrinth/page.tsx   # Retro Labyrinth game engine
+│   │   │   └── working-with-duck/page.tsx # Working With Duck simulation
+│   │   ├── case-studies/                  # Dynamic editorial case studies
+│   │   │   └── [slug]/page.tsx            # Case study narrative route
+│   │   ├── crf/page.tsx                   # CRF Studio workspace route
+│   │   ├── neuro/page.tsx                 # Neuroimaging 3D/slice viewer route
+│   │   ├── proof/page.tsx                 # Formal proof AST workspace route
+│   │   ├── schedule/page.tsx              # Interactive calendar & schedule route
+│   │   ├── simulator/page.tsx             # Recruiter simulator route
+│   │   ├── stack/page.tsx                 # System architecture & stack lab route
+│   │   └── work/                          # Professional case study work routes
+│   │       └── laser-loon/page.tsx        # Laser Loon work route & technical breakdown
+│   ├── api/                               # Serverless API contracts & edge functions
+│   │   ├── case-studies/route.ts          # Case study dynamic search & indexing endpoint
+│   │   └── telemetry/route.ts             # Anonymized sliding-window telemetry ingestion
+│   └── core/                              # Python Backend Core Engine & Utilities
+│       ├── analyzer_strategies.py         # Hybrid offline feature extraction & TF-IDF classification
+│       ├── crypto.py                      # Encrypted DB concurrency & SQLCipher security lifecycle
+│       └── resilient_file_ops.py          # Crash-resilient 2-phase file operations & rollback
+├── components/                            # React UI Component Ecosystem
+│   ├── ui/                                # Shared Micro-Interactions & Layout Primitives
+│   │   ├── Breadcrumbs.tsx                # Accessible navigation trail
+│   │   ├── CaseStudyBentoCard.tsx         # Pretext-synchronized zero-reflow masonry bento card
+│   │   ├── CopyButton.tsx                 # One-click clipboard utility trigger
+│   │   ├── LayoutPrimitives.tsx           # Defensive container wrappers
+│   │   ├── ModalContainer.tsx             # Trapped-focus accessible modal frame
+│   │   ├── NextPrevNav.tsx                # Step navigation controls
+│   │   ├── Tooltip.tsx                    # Floating contextual popover
+│   │   ├── TracingBeam.tsx                # Scroll-driven margin rail tracing physics
+│   │   └── VirtualDPad.tsx                # Mobile virtual controller interface
+│   ├── arcade/                            # Game canvas clients & cabinet wrappers
+│   ├── crf/                               # CRF builder canvas, sidebars & export modals
+│   ├── neuro/                             # 3D brain viewer, slice canvas & terminal
+│   ├── proof/                             # Interactive truth tables & proof DAG canvas
+│   ├── providers/                         # React context providers (A11y, Audio, Persona, Search)
+│   ├── stack/                             # Pretext benchmark lab & audio synth components
+│   ├── CaseStudyShowcase.tsx              # Zero-whitespace bento grid scheduler container
+│   ├── CommandPalette.tsx                 # Cmd+K spotlight search palette portal
+│   ├── Navbar.tsx                         # Top navigation bar
+│   └── Footer.tsx                         # Global footer & telemetry ticker
+├── docs/                                  # System documentation and generated TypeDoc specs
+├── hooks/                                 # Custom React hooks (audio, pretext, telemetry, a11y)
+├── lib/                                   # Shared business logic, domain engines, and DX utilities
+├── portfolio/                             # Portfolio sub-projects, showcase projects, and static content
+├── prisma/                                # Database schemas, migration scripts, and seed configurations
+├── public/                                # Static assets, icons, fonts, and public media resources
+├── scripts/                               # Automation scripts for OpenAPI generation, DX doctor, and CI verification
+└── types/                                 # Shared TypeScript type definitions and domain interfaces
 ```
 
 ## Next.js 16 & Turbopack

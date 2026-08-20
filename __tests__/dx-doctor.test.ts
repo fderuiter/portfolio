@@ -15,6 +15,7 @@ import {
   checkOpenApiParity,
   checkDefectRemediationInvariants,
   checkDesignTokens,
+  checkArchitectureTopologyDrift,
   runDiagnostics,
   printDoctorReport,
 } from "@/lib/dx/doctor";
@@ -360,6 +361,72 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       const result = checkDesignTokens(tempDir);
       expect(result.status).toBe("fail");
       expect(result.details?.[0]).toContain("Raw unconstrained inline style property detected");
+    });
+  });
+
+  describe("checkArchitectureTopologyDrift", () => {
+    it("fails when ARCHITECTURE.md is missing", () => {
+      const result = checkArchitectureTopologyDrift(tempDir);
+      expect(result.status).toBe("fail");
+      expect(result.message).toContain("ARCHITECTURE.md file not found");
+    });
+
+    it("fails when topology section header is missing from ARCHITECTURE.md", () => {
+      fs.writeFileSync(path.join(tempDir, "ARCHITECTURE.md"), "# Architecture\n\nNo topology here.");
+      const result = checkArchitectureTopologyDrift(tempDir);
+      expect(result.status).toBe("fail");
+      expect(result.message).toContain("Directory Topology section missing");
+    });
+
+    it("fails when a top-level directory is omitted from topology section", () => {
+      // Create top-level directories app, components, and scripts
+      fs.mkdirSync(path.join(tempDir, "app"), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, "components"), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, "scripts"), { recursive: true });
+
+      // ARCHITECTURE.md only lists app/ and components/
+      const archContent = `# Architecture\n\n## System Architecture & Directory Topology\n\n\`\`\`text\napp/\ncomponents/\n\`\`\`\n\n## Next Section\n`;
+      fs.writeFileSync(path.join(tempDir, "ARCHITECTURE.md"), archContent);
+
+      const result = checkArchitectureTopologyDrift(tempDir);
+      expect(result.status).toBe("fail");
+      expect(result.message).toContain("1 top-level directory/directories missing");
+      expect(result.details).toContain("Missing top-level directory in ARCHITECTURE.md: scripts/");
+    });
+
+    it("passes cleanly when all top-level non-hidden directories are represented and executes in < 5 seconds", () => {
+      fs.mkdirSync(path.join(tempDir, "app"), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, "components"), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, "scripts"), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, "lib"), { recursive: true });
+
+      const archContent = `# Architecture\n\n## System Architecture & Directory Topology\n\n\`\`\`text\n├── app/\n├── components/\n├── lib/\n└── scripts/\n\`\`\`\n\n## Next Section\n`;
+      fs.writeFileSync(path.join(tempDir, "ARCHITECTURE.md"), archContent);
+
+      const start = Date.now();
+      const result = checkArchitectureTopologyDrift(tempDir);
+      const durationMs = Date.now() - start;
+
+      expect(result.status).toBe("pass");
+      expect(durationMs).toBeLessThan(5000);
+    });
+
+    it("auto-fixes docs/_media/ARCHITECTURE.md when out of sync and fix=true", () => {
+      fs.mkdirSync(path.join(tempDir, "app"), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, "docs", "_media"), { recursive: true });
+      const archContent = `# Architecture\n\n## System Architecture & Directory Topology\n\n\`\`\`text\n├── app/\n└── docs/\n\`\`\`\n`;
+      fs.writeFileSync(path.join(tempDir, "ARCHITECTURE.md"), archContent);
+
+      const mediaFile = path.join(tempDir, "docs", "_media", "ARCHITECTURE.md");
+      fs.writeFileSync(mediaFile, "# Old Content");
+
+      const checkResult = checkArchitectureTopologyDrift(tempDir, false);
+      expect(checkResult.status).toBe("fail");
+      expect(checkResult.message).toContain("docs/_media/ARCHITECTURE.md is out of sync");
+
+      const fixResult = checkArchitectureTopologyDrift(tempDir, true);
+      expect(fixResult.status).toBe("fixed");
+      expect(fs.readFileSync(mediaFile, "utf-8")).toBe(archContent);
     });
   });
 
