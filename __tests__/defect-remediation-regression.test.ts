@@ -38,6 +38,7 @@ import {
 import { sanitizeError, sanitizeString } from "@/lib/error-sanitization";
 import { evaluateCanaryRollout } from "@/scripts/canary-analyzer";
 import { CaseStudyService } from "@/lib/services/case-study-service";
+import { resolveSnippetTerminology } from "@/components/ProjectTeaserGrid";
 
 describe("Defect Remediation & Regression Verification Suite (Invariant #11)", () => {
   describe("Proof AST Solver Resilience & Deep Recursion Guards", () => {
@@ -587,6 +588,27 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
 
       expect(loopBody).not.toContain("computeShortestTour(");
       expect(loopBody).toContain("tspTour");
+    });
+  });
+
+  describe("Homepage Teaser Snippet Terminology Swap & Post-Substitution Truncation", () => {
+    it("synchronously resolves compiled terminology tags prior to character truncation and strips raw markup", () => {
+      const sampleContent =
+        'An enterprise-grade **TypeScript** mapping pipeline that transforms raw `<span data-key="edc" data-term="digital trial forms" data-definition="def">Electronic Data Capture (EDC)</span>` datasets into compliant **<span data-key="cdisc-sdtm" data-term="standardized study domain tables" data-definition="Format for study datasets.">CDISC SDTM</span>** domains.';
+
+      const simplifiedText = resolveSnippetTerminology(sampleContent, true);
+      expect(simplifiedText).toContain("standardized study domain tables");
+      expect(simplifiedText).toContain("digital trial forms");
+      expect(simplifiedText).not.toContain("CDISC SDTM");
+      expect(simplifiedText).not.toContain("data-key=");
+      expect(simplifiedText).not.toContain("<span");
+
+      const technicalText = resolveSnippetTerminology(sampleContent, false);
+      expect(technicalText).toContain("CDISC SDTM");
+      expect(technicalText).toContain("Electronic Data Capture (EDC)");
+      expect(technicalText).not.toContain("standardized study domain tables");
+      expect(technicalText).not.toContain("data-key=");
+      expect(technicalText).not.toContain("<span");
     });
   });
 });
