@@ -63,10 +63,10 @@ export const ARCADE_GAMES_METADATA: ArcadeGameMetadata[] = [
   {
     id: "garmin-watch",
     slug: "garmin-watch",
-    title: "Garmin Connect IQ 32KB Memory Runner",
-    subtitle: "Embedded Systems & Monkey C Emulator",
+    title: "Monkey C Mayhem: Garmin Schvitz App",
+    subtitle: "Embedded Systems & Garmin Schvitz App Simulator",
     genre: "Embedded Simulation",
-    description: "Circular 280×280 smartwatch simulator. Navigate severe 32KB RAM memory constraints, manage garbage collection (GC) freezes, and wipe thermal condensation.",
+    description: "Circular 280×280 Monkey C Mayhem smartwatch simulator running the Garmin Schvitz App artifact under strict 32KB RAM constraints.",
     mechanics: ["32KB RAM Allocation Tracker", "GC Sweep Pressure", "Display Condensation Wipe"],
     techStack: ["Monkey C Runtime Simulation", "Canvas Bitmaps", "Memory Profiler"],
     accentColor: "text-amber-400",

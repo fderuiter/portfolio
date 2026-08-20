@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, startTransition } from "react";
 import { StudyProtocol, ComplianceViolation, ComplianceSeverity } from "@/lib/crf/types";
 import { lintForm } from "@/lib/crf/ast-evaluator";
 import {
@@ -39,32 +39,43 @@ export const DiagnosticsDrawer: React.FC<DiagnosticsDrawerProps> = ({
     returnFocus: true,
   });
 
-  if (!isOpen) return null;
-
-  // 1. AST Lint Diagnostics
-  const astDiagnostics: { formName: string; formId: string; message: string; severity: string }[] = [];
-  study.forms.forEach((form) => {
-    const items = lintForm(form);
-    items.forEach((item) => {
-      astDiagnostics.push({
-        formName: form.name,
-        formId: form.id,
-        message: item.message,
-        severity: item.severity,
+  // Requirement 3: Memoize diagnostic drawer evaluation results so compliance scans run only when study protocol state changes
+  const { astDiagnostics, complianceViolations, totalErrors, totalWarnings } = useMemo(() => {
+    if (!isOpen) {
+      return { astDiagnostics: [], complianceViolations: [], totalErrors: 0, totalWarnings: 0 };
+    }
+    const astDiags: { formName: string; formId: string; message: string; severity: string }[] = [];
+    study.forms.forEach((form) => {
+      const items = lintForm(form);
+      items.forEach((item) => {
+        astDiags.push({
+          formName: form.name,
+          formId: form.id,
+          message: item.message,
+          severity: item.severity,
+        });
       });
     });
-  });
 
-  // 2. CDISC Conformance & Regulatory Engine Violations
-  const complianceViolations = validateStudyCompliance(study);
+    const compViolations = validateStudyCompliance(study);
 
-  const totalErrors =
-    complianceViolations.filter((v) => v.severity === "error").length +
-    astDiagnostics.filter((d) => d.severity === "error").length;
+    const errs =
+      compViolations.filter((v) => v.severity === "error").length +
+      astDiags.filter((d) => d.severity === "error").length;
 
-  const totalWarnings =
-    complianceViolations.filter((v) => v.severity === "warning").length +
-    astDiagnostics.filter((d) => d.severity === "warning").length;
+    const warns =
+      compViolations.filter((v) => v.severity === "warning").length +
+      astDiags.filter((d) => d.severity === "warning").length;
+
+    return {
+      astDiagnostics: astDiags,
+      complianceViolations: compViolations,
+      totalErrors: errs,
+      totalWarnings: warns,
+    };
+  }, [isOpen, study]);
+
+  if (!isOpen) return null;
 
   const filteredViolations = complianceViolations.filter((v) =>
     filterSeverity === "all" ? true : v.severity === filterSeverity
@@ -73,7 +84,9 @@ export const DiagnosticsDrawer: React.FC<DiagnosticsDrawerProps> = ({
   const handleFixSingle = (violation: ComplianceViolation) => {
     if (!onUpdateStudy) return;
     const fixed = autoFixViolation(study, violation);
-    onUpdateStudy(fixed);
+    startTransition(() => {
+      onUpdateStudy(fixed);
+    });
     setFixedNotice(`Remediated ${violation.ruleId}: ${violation.suggestedFix}`);
     setTimeout(() => setFixedNotice(null), 3000);
   };
@@ -81,7 +94,9 @@ export const DiagnosticsDrawer: React.FC<DiagnosticsDrawerProps> = ({
   const handleFixAll = () => {
     if (!onUpdateStudy) return;
     const { updatedStudy, fixedCount } = autoFixAllViolations(study);
-    onUpdateStudy(updatedStudy);
+    startTransition(() => {
+      onUpdateStudy(updatedStudy);
+    });
     setFixedNotice(`Successfully auto-fixed ${fixedCount} compliance issues across the study!`);
     setTimeout(() => setFixedNotice(null), 4000);
   };

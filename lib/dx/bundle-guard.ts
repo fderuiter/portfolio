@@ -144,12 +144,44 @@ export function inspectBundleChunks(workspaceRoot: string): BundleBudgetReport {
 }
 
 /**
+ * Inspects standalone JavaScript bundle assets in public/ and checks budget limits.
+ */
+export function inspectStandaloneBundle(workspaceRoot: string): { exists: boolean; sizeBytes: number; violation?: string } {
+  const targetPath = path.join(workspaceRoot, "public", "garmin-engine.js");
+  if (!fs.existsSync(targetPath)) {
+    return { exists: false, sizeBytes: 0 };
+  }
+  const stats = fs.statSync(targetPath);
+  const maxBytes = 50 * 1024;
+  let violation: string | undefined;
+  if (stats.size > maxBytes) {
+    violation = `Standalone JavaScript asset 'garmin-engine.js' (${(stats.size / 1024).toFixed(1)} kB) exceeds maximum budget of 50.0 kB.`;
+  }
+  return { exists: true, sizeBytes: stats.size, violation };
+}
+
+/**
  * Diagnostic check for bundle performance budgets in doctor.ts.
  */
 export function checkBundleBudgets(root: string): DiagnosticCheckResult {
   const report = inspectBundleChunks(root);
+  const standaloneReport = inspectStandaloneBundle(root);
+
+  if (standaloneReport.exists && standaloneReport.violation) {
+    report.violations.push(standaloneReport.violation);
+  }
 
   if (!report.isBuilt) {
+    if (standaloneReport.violation) {
+      return {
+        id: "bundle-performance-budgets",
+        name: "Production Bundle & Chunk Performance Budgets",
+        category: "quality",
+        status: "warn",
+        message: `Standalone JS artifact exceeded defined 50KB size budget.`,
+        details: [standaloneReport.violation],
+      };
+    }
     return {
       id: "bundle-performance-budgets",
       name: "Production Bundle & Chunk Performance Budgets",

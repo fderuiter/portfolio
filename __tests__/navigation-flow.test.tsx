@@ -120,7 +120,7 @@ describe("Navigation Flow Components Suite", () => {
       expect(container.textContent).toContain("Arcade Hub Index ↗");
       expect(container.textContent).toContain("Laser Loon");
       expect(container.textContent).toContain("Quasi-Puzzler");
-      expect(container.textContent).toContain("Garmin 32KB Runner");
+      expect(container.textContent).toContain("Monkey C Mayhem");
 
       // Systems links
       expect(container.textContent).toContain("Proof Workspace");

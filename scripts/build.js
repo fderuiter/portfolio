@@ -51,6 +51,10 @@ runStep('npm', ['run', 'check:migrations']);
 console.log("\n--- Phase 1.8: Strictly Compiling and Verifying Documentation ---");
 runStep('npm', ['run', 'compile-docs']);
 
+// 3.8. Standalone Engine Asset Target Compilation & Budget Validation Phase (Phase 1.9)
+console.log("\n--- Phase 1.9: Compiling & Verifying Standalone Engine Asset Target ---");
+runStep('npx', ['tsx', 'scripts/build-standalone-engine.ts']);
+
 // 4. Application Compilation Phase (Phase 2)
 console.log("\n--- Phase 2: Compiling Frontend Application ---");
 runStep('npx', ['next', 'build']);

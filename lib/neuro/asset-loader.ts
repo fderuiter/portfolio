@@ -8,6 +8,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import { createCorticalSurfaceMesh } from "./mesh-generator";
 import { HemisphereFilter, SurfaceMode } from "./types";
+import { progressBus } from "./progress-bus";
 
 const meshCache = new Map<string, THREE.Group>();
 
@@ -25,6 +26,33 @@ export async function loadExternalBrainMesh(
     return cached.clone();
   }
 
+  let lastLoaded = 0;
+  let lastTotal = 0;
+
+  const handleProgress = (event: ProgressEvent) => {
+    const loaded = event?.loaded || 0;
+    const total = event?.total || 0;
+    lastLoaded = loaded;
+    lastTotal = total;
+    const percentage = total > 0 ? Math.min(100, Math.round((loaded / total) * 100)) : 0;
+    progressBus.publish({
+      url: modelUrl,
+      loaded,
+      total,
+      percentage,
+      status: "loading",
+    });
+  };
+
+  // Publish initial loading state event
+  progressBus.publish({
+    url: modelUrl,
+    loaded: 0,
+    total: 0,
+    percentage: 0,
+    status: "loading",
+  });
+
   try {
     const isObj = modelUrl.endsWith(".obj");
     const group = new THREE.Group();
@@ -32,7 +60,7 @@ export async function loadExternalBrainMesh(
     if (isObj) {
       const loader = new OBJLoader();
       const obj = await new Promise<THREE.Group>((resolve, reject) => {
-        loader.load(modelUrl, resolve, undefined, reject);
+        loader.load(modelUrl, resolve, handleProgress, reject);
       });
 
       // Apply standard clinical brain material
@@ -67,7 +95,7 @@ export async function loadExternalBrainMesh(
       // GLTF / GLB loader
       const loader = new GLTFLoader();
       const gltf = await new Promise<{ scene: THREE.Group }>((resolve, reject) => {
-        loader.load(modelUrl, resolve, undefined, reject);
+        loader.load(modelUrl, resolve, handleProgress, reject);
       });
 
       const model = gltf.scene;
@@ -87,9 +115,28 @@ export async function loadExternalBrainMesh(
       group.add(model);
     }
 
+    const finalLoaded = lastTotal || lastLoaded;
+    const finalTotal = lastTotal || lastLoaded;
+    progressBus.publish({
+      url: modelUrl,
+      loaded: finalLoaded,
+      total: finalTotal,
+      percentage: 100,
+      status: "complete",
+    });
+
     meshCache.set(cacheKey, group);
     return group.clone();
   } catch (err) {
+    progressBus.publish({
+      url: modelUrl,
+      loaded: lastLoaded,
+      total: lastTotal,
+      percentage: 0,
+      status: "error",
+      error: err instanceof Error ? err.message : String(err),
+    });
+
     // Graceful fallback to procedural cortical surface mesh
     console.warn(`Failed to load external model from ${modelUrl}, falling back to procedural mesh:`, err);
     const fallback = createCorticalSurfaceMesh(mode, false, hemiFilter);

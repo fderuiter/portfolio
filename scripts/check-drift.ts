@@ -2,7 +2,7 @@
 import { execSync } from "child_process";
 import path from "path";
 import { generateOpenApi } from "./generate-openapi";
-import { checkOnboardingDocsDrift } from "../lib/dx/doctor";
+import { checkOnboardingDocsDrift, checkDirectoryTopology } from "../lib/dx/doctor";
 
 function checkDrift() {
   console.log("Checking for documentation and specification drift...");
@@ -58,6 +58,14 @@ function checkDrift() {
   if (onboardingResult.status === "fail") {
     docsDrift = true;
     driftSummary += "• Onboarding documentation drift detected:\n" + (onboardingResult.details || []).map((d) => `  - ${d}`).join("\n") + "\n";
+  }
+
+  // 4. Check System Architecture Directory Topology alignment
+  console.log("Checking architectural directory topology synchronization...");
+  const topologyResult = checkDirectoryTopology(workspaceRoot);
+  if (topologyResult.status === "fail") {
+    docsDrift = true;
+    driftSummary += "• Architectural directory topology drift detected:\n" + (topologyResult.details || []).map((d) => `  - ${d}`).join("\n") + "\n";
   }
 
   if (docsDrift) {

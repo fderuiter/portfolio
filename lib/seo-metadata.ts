@@ -35,10 +35,10 @@ export const ROUTE_METADATA_CONFIGS: Record<string, RouteMetaConfig> = {
     keywords: ["Formal Verification Game", "Lean Proof Tactics", "AST Logic Puzzles", "Deductive Type Theory", "Canvas Game Engine"],
   },
   garminWatch: {
-    title: "Garmin Connect IQ 32KB Memory Runner | Simulator",
-    description: "Survive strict 32KB RAM allocations, avoid GC latency freezes, and prevent thermal overheating in this Monkey C smartwatch engineering simulator.",
+    title: "Monkey C Mayhem: Garmin Schvitz App | Smartwatch Simulator",
+    description: "Survive 32KB RAM limits, GC freezes, and thermal overheating in Monkey C Mayhem (Garmin Schvitz App smartwatch engineering simulator).",
     path: "/arcade/garmin-watch",
-    keywords: ["Garmin Connect IQ Simulator", "Monkey C Memory Profiling", "32KB Embedded RAM", "Smartwatch Engine", "Retro MIP Simulator"],
+    keywords: ["Monkey C Mayhem", "Garmin Schvitz App", "Garmin Connect IQ Simulator", "Monkey C Memory Profiling", "32KB Embedded RAM", "Smartwatch Engine", "Retro MIP Simulator"],
   },
   clinicalChaos: {
     title: "Clinical Trial Chaos: CDISC Compliance Arcade",

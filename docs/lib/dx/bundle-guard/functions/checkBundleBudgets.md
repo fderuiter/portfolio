@@ -8,7 +8,7 @@
 
 > **checkBundleBudgets**(`root`): [`DiagnosticCheckResult`](../../doctor/interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/bundle-guard.ts:149](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bundle-guard.ts#L149)
+Defined in: [lib/dx/bundle-guard.ts:166](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bundle-guard.ts#L166)
 
 Diagnostic check for bundle performance budgets in doctor.ts.
 

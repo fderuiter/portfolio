@@ -453,3 +453,6 @@ export const TISSUE_LABELS: TissueSegmentLabels = {
   DURA: 5,
   SKULL: 6,
 };
+
+export type { AssetProgressEvent, ProgressSubscriber } from "./progress-bus";
+export { progressBus, formatBytes } from "./progress-bus";

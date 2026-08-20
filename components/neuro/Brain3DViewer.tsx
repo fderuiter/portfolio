@@ -7,6 +7,7 @@ import { AnatomicalParcel, HemisphereFilter, SurfaceMode, VoxelCoord } from "@/l
 import { createCorticalSurfaceMesh, getAnatomicalParcelAtCoordinate } from "@/lib/neuro/mesh-generator";
 import { loadExternalBrainMesh } from "@/lib/neuro/asset-loader";
 import { useWebGLContextLoss } from "@/hooks/useWebGLContextLoss";
+import { ProgressHUD } from "./ProgressHUD";
 import { Icon3dCubeSphere, IconCheck, IconLayersSubtract, IconRefresh } from "@tabler/icons-react";
 
 interface Brain3DViewerProps {
@@ -559,6 +560,9 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
         style={{ touchAction: "none" }}
         className="w-full flex-1 cursor-grab active:cursor-grabbing"
       />
+
+      {/* Floating Visual Progress HUD Overlay */}
+      <ProgressHUD />
 
       {/* Interactive Anatomical Parcel Tooltip HUD */}
       {hoveredParcel && tooltipPos && (
