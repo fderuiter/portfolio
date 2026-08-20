@@ -22,14 +22,37 @@ import { CdashScaffolderModal } from "./LeftSidebar/CdashScaffolderModal";
 import { FormCanvas } from "./CenterCanvas/FormCanvas";
 import { InspectorPanel } from "./RightInspector/InspectorPanel";
 import dynamic from "next/dynamic";
-import { AcrfOverlayViewer } from "./Modes/AcrfOverlayViewer";
-import { ExportImportModal } from "./Modes/ExportImportModal";
+
+const AcrfOverlayViewer = dynamic(
+  () => import("./Modes/AcrfOverlayViewer").then((mod) => mod.AcrfOverlayViewer),
+  { ssr: false }
+);
+
+const ExportImportModal = dynamic(
+  () => import("./Modes/ExportImportModal").then((mod) => mod.ExportImportModal),
+  { ssr: false }
+);
+
 const ExportDocumentModal = dynamic(
   () => import("./Modes/ExportDocumentModal").then((mod) => ({ default: mod.ExportDocumentModal })),
   { ssr: false }
 );
-import { BrandingConfigModal } from "./Branding/BrandingConfigModal";
-import { DiagnosticsDrawer } from "./DiagnosticsDrawer";
+
+const BrandingConfigModal = dynamic(
+  () => import("./Branding/BrandingConfigModal").then((mod) => mod.BrandingConfigModal),
+  { ssr: false }
+);
+
+const DiagnosticsDrawer = dynamic(
+  () => import("./DiagnosticsDrawer").then((mod) => mod.DiagnosticsDrawer),
+  { ssr: false }
+);
+
+const SpotlightTourOverlay = dynamic(
+  () => import("./Wizard/SpotlightTourOverlay").then((mod) => mod.SpotlightTourOverlay),
+  { ssr: false }
+);
+
 import { StudioTerminal } from "./Terminal/StudioTerminal";
 import {
   VisitMatrixEditorSkeleton,
@@ -70,7 +93,6 @@ const WorkflowWizardModal = dynamic(
     loading: () => <WorkflowWizardModalSkeleton />,
   }
 );
-import { SpotlightTourOverlay } from "./Wizard/SpotlightTourOverlay";
 import { getStudyBranding } from "@/lib/crf/branding-defaults";
 import { useStudioHashParams } from "@/hooks/useStudioHashParams";
 import { useAudio } from "@/components/providers/AudioProvider";
