@@ -21,11 +21,20 @@ export const metadata: Metadata = {
     description: "Deep-dive architectural breakdowns, clinical data systems, CDISC standards pipelines, and full-stack systems engineering.",
     type: "website",
     url: `${resolveBaseUrl()}/case-studies`,
+    images: [
+      {
+        url: `${resolveBaseUrl()}/case-studies/opengraph-image`,
+        width: 1200,
+        height: 630,
+        alt: "Engineering Case Studies | Frederick de Ruiter",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Engineering Case Studies | Frederick de Ruiter",
     description: "Deep-dive architectural breakdowns, clinical data systems, and full-stack engineering.",
+    images: [`${resolveBaseUrl()}/case-studies/opengraph-image`],
   },
 };
 
