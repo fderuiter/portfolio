@@ -2442,7 +2442,7 @@ export const WorkingWithDuck: React.FC = () => {
           tabIndex={0}
           className={
             isFullscreen
-              ? "max-h-[var(--layout-viewport-budget,calc(100dvh-12rem))] max-w-full aspect-[800/500] object-contain block cursor-crosshair touch-none my-auto mx-auto"
+              ? "max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--footer-height,48px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] max-w-full aspect-[800/500] object-contain block cursor-crosshair touch-none my-auto mx-auto"
               : "w-full h-auto aspect-[800/500] cursor-crosshair block touch-none"
           }
         />

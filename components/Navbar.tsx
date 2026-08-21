@@ -9,6 +9,7 @@ import { useAudio } from "@/components/providers/AudioProvider";
 import { useSearch } from "@/components/providers/SearchProvider";
 import { usePersona } from "@/components/providers/PersonaProvider";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useResizeObserver } from "@/hooks/useResizeObserver";
 import {
   IconVolume,
   IconVolumeOff,
@@ -273,10 +274,19 @@ export const Navbar: React.FC = () => {
   const isArcadeActive = pathname.startsWith("/arcade");
   const isSystemsActive = pathname === "/proof" || pathname === "/simulator" || pathname === "/crf" || pathname === "/neuro" || pathname === "/stack";
 
+  const headerObserverRef = useResizeObserver<HTMLElement>((entry) => {
+    const h = Math.round(entry.contentRect.height);
+    if (typeof document !== "undefined" && h > 0) {
+      document.documentElement.style.setProperty("--header-height", `${h}px`);
+      document.documentElement.style.setProperty("--navbar-height", `${h}px`);
+    }
+  }, { trackVertical: true });
+
   return (
     <>
       {/* Navbar Container */}
       <header
+        ref={headerObserverRef}
         className={cn(
           "fixed top-0 inset-x-0 z-50 transition-all duration-300 w-full select-none",
           isScrolled

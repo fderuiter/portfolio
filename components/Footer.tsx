@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useResizeObserver } from "@/hooks/useResizeObserver";
 import {
   IconArrowUp,
   IconBrandGithub,
@@ -54,8 +55,15 @@ export const Footer: React.FC = () => {
     }
   };
 
+  const footerObserverRef = useResizeObserver<HTMLElement>((entry) => {
+    const h = Math.round(entry.contentRect.height);
+    if (typeof document !== "undefined" && h > 0) {
+      document.documentElement.style.setProperty("--footer-height", `${h}px`);
+    }
+  }, { trackVertical: true });
+
   return (
-    <footer className="w-full bg-zinc-950 border-t border-zinc-900 relative z-20 select-none">
+    <footer ref={footerObserverRef} className="w-full bg-zinc-950 border-t border-zinc-900 relative z-20 select-none">
       {/* Top Ambient Highlight */}
       <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-cyan/20 to-transparent" />
 

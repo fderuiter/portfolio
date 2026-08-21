@@ -76,8 +76,45 @@ describe("useResizeObserver Hook - Throttling & Layout Isolation", () => {
       ]);
     });
 
-    // Callback should NOT be called
+    // Callback should NOT be called when trackVertical is default (false)
     expect(handleResize).not.toHaveBeenCalled();
+  });
+
+  it("observes height changes when opt-in vertical resize mode is enabled (trackVertical = true)", async () => {
+    function VerticalComponent({ onResize }: { onResize: (entry: ResizeObserverEntry) => void }) {
+      const ref = useResizeObserver<HTMLDivElement>(onResize, { trackVertical: true });
+      return <div ref={ref} data-testid="observe-vertical-target" style={{ width: "100px", height: "100px" }} />;
+    }
+
+    const handleResize = vi.fn();
+    render(<VerticalComponent onResize={handleResize} />);
+
+    // Trigger initial size
+    await act(async () => {
+      observerCallback!([
+        {
+          contentRect: { width: 100, height: 100 },
+          target: null,
+        },
+      ]);
+    });
+
+    expect(handleResize).toHaveBeenCalledTimes(1);
+    handleResize.mockClear();
+
+    // Trigger height-only change
+    await act(async () => {
+      observerCallback!([
+        {
+          contentRect: { width: 100, height: 300 },
+          target: null,
+        },
+      ]);
+    });
+
+    // Callback SHOULD be called when trackVertical is true
+    expect(handleResize).toHaveBeenCalledTimes(1);
+    expect(handleResize.mock.calls[0][0].contentRect.height).toBe(300);
   });
 
   it("throttles multiple width changes and resolves with trailing-edge dimensions", async () => {

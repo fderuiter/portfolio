@@ -1,7 +1,10 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { BaseCaseStudy } from "@/types/domain";
 import { IconChevronRight, IconArrowRight, IconLayersIntersect } from "@tabler/icons-react";
+import { useTerminology } from "@/components/providers/TerminologyProvider";
 
 interface ProjectTeaserGridProps {
   caseStudies: BaseCaseStudy[];
@@ -17,9 +20,56 @@ const LANGUAGE_STYLES: Record<string, { bg: string; text: string; border: string
 
 const DEFAULT_STYLE = { bg: "bg-zinc-800/40", text: "text-zinc-300", border: "border-white/10" };
 
+/**
+ * Synchronously swaps compiled terminology tags for either simplified plain-text definitions
+ * or original technical terms, then strips remaining raw HTML tags.
+ */
+export function resolveSnippetTerminology(html: string, simplified: boolean): string {
+  if (!html) return "";
+
+  const unescapeAttr = (str: string): string => {
+    return str
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&apos;/g, "'")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&amp;/g, "&");
+  };
+
+  const termTagRegex = /<(span|abbr)\b([^>]*)>([\s\S]*?)<\/\1>/gi;
+
+  let resolved = html.replace(termTagRegex, (fullTag, _tagName, attrs, innerContent) => {
+    const isTermTag =
+      /data-term=/i.test(attrs) ||
+      /data-definition=/i.test(attrs) ||
+      /data-key=/i.test(attrs);
+
+    if (!isTermTag) {
+      return fullTag;
+    }
+
+    if (simplified) {
+      const termMatch = /data-term=["']([^"']*)["']/i.exec(attrs);
+      if (termMatch && termMatch[1]) {
+        return unescapeAttr(termMatch[1]);
+      }
+    }
+
+    return unescapeAttr(innerContent);
+  });
+
+  // Strip any remaining or unclosed HTML tags to prevent broken markup in card text
+  resolved = resolved.replace(/<[^>]*>/g, "");
+
+  return resolved;
+}
+
 // Clean inline text formatter that converts markdown bold/code markers without heavy parsing
 function CleanMarkdownSnippet({ text }: { text: string }) {
-  const trimmed = text.length > 220 ? `${text.slice(0, 217).trim()}...` : text;
+  const { simplified } = useTerminology();
+  const resolvedText = resolveSnippetTerminology(text, simplified);
+  const trimmed = resolvedText.length > 220 ? `${resolvedText.slice(0, 217).trim()}...` : resolvedText;
   const parts = trimmed.split(/(\*\*.*?\*\*|`.*?`)/g);
 
   return (
