@@ -7,11 +7,13 @@ import { GitHubStats } from "@/lib/github";
 import { calculateMasonryLayout, type PreparedData } from "@/lib/masonry";
 import { isBrowser } from "@/lib/graphics-engine";
 import { useBentoLayout } from "@/components/providers/BentoLayoutContext";
+import { getRealityContent } from "@/components/ui/CaseStudyBentoCard";
 
 import { preparePretextBlocks } from "@/lib/pretext-block-parser";
 
 export interface MasonryItem {
   id: string;
+  slug?: string;
   editorial_content: string;
   githubStats?: GitHubStats | null;
 }
@@ -19,6 +21,7 @@ export interface MasonryItem {
 export interface LayoutItem<T extends MasonryItem> {
   item: T;
   height: number;
+  preCalculatedRealityHeight?: number;
   paragraphsLines: RichInlineLine[][];
   paragraphsItems: ExtendedRichInlineItem[][];
 }
@@ -33,7 +36,7 @@ export function useMasonryLayout<T extends MasonryItem>(
 
   const [layoutState, setLayoutState] = useState<{
     colCount: number;
-    columns: (T & { height: number; paragraphsLines: RichInlineLine[][]; paragraphsItems: ExtendedRichInlineItem[][] })[][];
+    columns: (T & { height: number; preCalculatedRealityHeight?: number; paragraphsLines: RichInlineLine[][]; paragraphsItems: ExtendedRichInlineItem[][] })[][];
     isReady: boolean;
   }>({
     colCount: LAYOUT_CONFIG.COLS.SM,
@@ -41,6 +44,7 @@ export function useMasonryLayout<T extends MasonryItem>(
       allItems.map((s) => ({
         ...s,
         height: LAYOUT_CONFIG.FALLBACK_ITEM_HEIGHT,
+        preCalculatedRealityHeight: LAYOUT_CONFIG.FALLBACK_ITEM_HEIGHT,
         paragraphsLines: [],
         paragraphsItems: [],
       })),
@@ -54,6 +58,9 @@ export function useMasonryLayout<T extends MasonryItem>(
     const data: Record<string, PreparedData> = {};
     for (const study of allItems) {
       const blocks = preparePretextBlocks(study.editorial_content || "", LAYOUT_CONFIG.FONT_SIZE, "--font-inter");
+      const realityContent = getRealityContent(study.slug || study.id, study.editorial_content || "");
+      const realityBlocks = preparePretextBlocks(realityContent, LAYOUT_CONFIG.FONT_SIZE, "--font-inter");
+
       const paragraphs = blocks
         .filter((b) => b.type === "paragraph" && b.prepared)
         .map((b) => ({ prepared: b.prepared!, items: b.items || [] }));
@@ -62,6 +69,7 @@ export function useMasonryLayout<T extends MasonryItem>(
       
       data[study.id] = {
         blocks,
+        realityBlocks,
         paragraphs,
         paddingHeight,
       };

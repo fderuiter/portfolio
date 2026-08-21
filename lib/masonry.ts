@@ -35,7 +35,34 @@ export interface PreparedParagraph {
 export interface PreparedData {
   paragraphs?: PreparedParagraph[];
   blocks?: PreparedBlock[];
+  realityBlocks?: PreparedBlock[];
   paddingHeight: number;
+}
+
+export function calculateCardHeightFromBlocks(
+  blocks: PreparedBlock[],
+  textWidth: number,
+  paddingHeight: number,
+  config: MasonryConfig,
+  colCount: number
+): number {
+  let totalTextHeight = 0;
+  for (const block of blocks) {
+    if (block.type === "paragraph" && block.prepared) {
+      let lineCount = 0;
+      walkRichInlineLineRanges(block.prepared, textWidth, () => {
+        lineCount++;
+      });
+      totalTextHeight += lineCount * config.LINE_HEIGHT;
+    } else {
+      totalTextHeight += calculateBlockHeight(block, textWidth, config.LINE_HEIGHT);
+    }
+  }
+  if (blocks.length > 1) {
+    totalTextHeight += (blocks.length - 1) * BLOCK_LAYOUT_CONFIG.PARAGRAPH_GAP;
+  }
+  const responsivePaddingAdjustment = colCount === 1 ? (config.MOBILE_PADDING_ADJUSTMENT ?? 0) : 0;
+  return totalTextHeight + paddingHeight - responsivePaddingAdjustment;
 }
 
 export function calculateMasonryLayout<T extends { id: string }>(
@@ -53,7 +80,7 @@ export function calculateMasonryLayout<T extends { id: string }>(
     if (!cached) {
       const override = heightOverrides?.[study.id];
       const height = override !== undefined ? override : config.FALLBACK_ITEM_HEIGHT;
-      return { ...study, height, paragraphsLines: [], paragraphsItems: [] };
+      return { ...study, height, preCalculatedRealityHeight: height, paragraphsLines: [], paragraphsItems: [] };
     }
 
     let totalTextHeight = 0;
@@ -134,9 +161,14 @@ export function calculateMasonryLayout<T extends { id: string }>(
       ? override
       : totalTextHeight + cached.paddingHeight - responsivePaddingAdjustment;
 
+    const preCalculatedRealityHeight = cached.realityBlocks && cached.realityBlocks.length > 0
+      ? calculateCardHeightFromBlocks(cached.realityBlocks, textWidth, cached.paddingHeight, config, colCount)
+      : totalHeight;
+
     return {
       ...study,
       height: totalHeight,
+      preCalculatedRealityHeight,
       paragraphsLines,
       paragraphsItems,
     };

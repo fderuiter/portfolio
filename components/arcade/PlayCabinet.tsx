@@ -194,7 +194,14 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
     }[setupConfig.bezelStyle] || "border-zinc-800";
 
     return (
-      <div className="relative w-full flex flex-col items-center max-w-full min-w-0 @container">
+      <div
+        className="relative w-full flex flex-col items-center max-w-full min-w-0 @container"
+        style={
+          {
+            "--layout-dock-height": controlDock ? "120px" : "0px",
+          } as React.CSSProperties
+        }
+      >
         {/* Accessible screen reader live status mirror */}
         <div
           role="region"
@@ -208,7 +215,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
 
         {/* Game Area Container with Dynamic Viewport Height Budgeting */}
         <div
-          className={`w-full relative rounded-2xl border-2 transition-all duration-300 overflow-hidden max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] min-h-[280px] flex items-center justify-center bg-black ${bezelClasses}`}
+          className={`w-full relative rounded-2xl border-2 transition-all duration-300 overflow-hidden max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--footer-height,48px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] min-h-[280px] flex items-center justify-center bg-black ${bezelClasses}`}
         >
           {children}
 

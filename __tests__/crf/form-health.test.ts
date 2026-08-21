@@ -93,4 +93,118 @@ describe("computeFormHealthMetrics", () => {
     expect(metrics.cdashConformancePercentage).toBeLessThan(100);
     expect(metrics.missingCoreVariables).toContain("SEX");
   });
+
+  it("safely handles forms with undefined, null, empty, and whitespace variable names without runtime exceptions", () => {
+    const unassignedForm = {
+      id: "form_unassigned",
+      name: "Draft Form",
+      domain: "DM",
+      description: "Form with unassigned field properties",
+      version: "1.0",
+      sections: [
+        {
+          id: "sec_1",
+          title: "Section 1",
+          fields: [
+            {
+              id: "f1",
+              variableName: undefined as unknown as string,
+              label: "Unassigned Field 1",
+              dataType: "text",
+              required: true,
+              columnSpan: 6,
+            },
+            {
+              id: "f2",
+              variableName: null as unknown as string,
+              label: "Unassigned Field 2",
+              dataType: "number",
+              required: false,
+              columnSpan: 6,
+            },
+            {
+              id: "f3",
+              variableName: "",
+              label: "Unassigned Field 3",
+              dataType: "date",
+              required: false,
+              columnSpan: 6,
+            },
+            {
+              id: "f4",
+              variableName: "   ",
+              label: "Unassigned Field 4",
+              dataType: "single_select",
+              required: true,
+              columnSpan: 6,
+            },
+            {
+              id: "f5",
+              variableName: "SEX",
+              label: "Sex",
+              dataType: "radio",
+              required: true,
+              columnSpan: 6,
+            },
+          ],
+        },
+      ],
+      rules: [],
+    } as CRFForm;
+
+    let metrics;
+    expect(() => {
+      metrics = computeFormHealthMetrics(unassignedForm);
+    }).not.toThrow();
+
+    expect(metrics).toBeDefined();
+    expect(metrics!.totalFields).toBe(5);
+    expect(metrics!.mandatoryFields).toBe(3);
+    // Core variables for DM are ["SEX", "AGE", "RACE"].
+    // Only "SEX" is present among the 5 fields. The 4 unassigned fields score 0.
+    expect(metrics!.missingCoreVariables).toEqual(["AGE", "RACE"]);
+    // 1 out of 3 core variables present = 33% conformance
+    expect(metrics!.cdashConformancePercentage).toBe(33);
+  });
+
+  it("scores zero for standards conformance when all fields in domain have unassigned variable names", () => {
+    const allUnassignedDMForm = {
+      id: "form_dm_unassigned",
+      name: "Unassigned Demographics",
+      domain: "DM",
+      description: "Draft DM Form with no variable names",
+      version: "1.0",
+      sections: [
+        {
+          id: "sec_1",
+          title: "Demographics",
+          fields: [
+            {
+              id: "f1",
+              label: "Field 1",
+              dataType: "text",
+              required: true,
+              columnSpan: 6,
+            },
+            {
+              id: "f2",
+              variableName: "",
+              label: "Field 2",
+              dataType: "integer",
+              required: false,
+              columnSpan: 6,
+            },
+          ],
+        },
+      ],
+      rules: [],
+    } as CRFForm;
+
+    const metrics = computeFormHealthMetrics(allUnassignedDMForm);
+
+    expect(metrics.totalFields).toBe(2);
+    expect(metrics.mandatoryFields).toBe(1);
+    expect(metrics.cdashConformancePercentage).toBe(0);
+    expect(metrics.missingCoreVariables).toEqual(["SEX", "AGE", "RACE"]);
+  });
 });

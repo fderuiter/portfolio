@@ -36,6 +36,15 @@
   --layout-gap: 16px;
   --layout-card-padding: 20px;
 
+  /* Vertical Layout Budget Tokens */
+  --layout-header-height: 7rem;
+  --layout-footer-height: 4rem;
+  --layout-dock-height: 0px;
+  --layout-studio-header-height: 3.5rem;
+  --layout-studio-budget: calc(100dvh - var(--layout-header-height));
+  --layout-viewport-budget: calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px));
+  --layout-workspace-budget: calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px) - var(--layout-studio-header-height, 0px));
+
   /* Motion Springs (stiffness, damping) */
   --motion-spring-snappy-stiffness: 380;
   --motion-spring-snappy-damping: 30;
@@ -84,9 +93,14 @@
 html {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  scrollbar-gutter: stable;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.scrollbar-gutter-stable {
+  scrollbar-gutter: stable;
 }
 
 @supports not (scrollbar-color: auto) {
