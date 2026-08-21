@@ -1,4 +1,5 @@
 #!/bin/sh
 npx lint-staged
+npm run audit:security
 npm run check-docs-drift
 npm run verify
