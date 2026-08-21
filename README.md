@@ -149,3 +149,8 @@ Or follow manual setup steps:
 Schema changes must include a checked-in Prisma migration. See
 [DATABASE_MIGRATIONS.md](DATABASE_MIGRATIONS.md) for the development workflow,
 production rollout order, and the one-time production baseline procedure.
+
+## Contributing Guidelines
+
+For full details on developer onboarding, architectural invariants, conventional commits, and interactive CLI feature scaffolding (`npm run scaffold`), please refer to the [**`CONTRIBUTING.md`**](CONTRIBUTING.md) guide.
+
