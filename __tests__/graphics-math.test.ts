@@ -5,6 +5,7 @@ import {
   distributeItemsGreedily,
   mapDataToCoordinates,
   generateCubicSplinePath,
+  generateHermiteSplinePath,
   LRUCache
 } from "@/lib/graphics-math";
 
@@ -80,6 +81,31 @@ describe("Graphics Math Isolation Library (Browser-Free)", () => {
       const points = [{ x: 0, y: 50 }, { x: 50, y: 100 }];
       const paths = generateCubicSplinePath(points, 200);
       expect(paths.pathD).toBe("M 0 50 C 25 50, 25 100, 50 100");
+    });
+
+    it("clamps Hermite spline control point tangents to stay within [0, frameHeight]", () => {
+      // Point sequence with sharp directional change near SVG top boundary (y=0) and bottom boundary (y=60)
+      const points = [
+        { x: 0, y: 5 },
+        { x: 50, y: 1 },
+        { x: 100, y: 50 }
+      ];
+      const frameHeight = 60;
+      const paths = generateHermiteSplinePath(points, frameHeight);
+
+      // Parse cubic bezier control points from path string
+      // Format: M 0 5 C cp1x cp1y, cp2x cp2y, endX endY ...
+      const matches = [...paths.pathD.matchAll(/C\s+([\d.-]+)\s+([\d.-]+),\s+([\d.-]+)\s+([\d.-]+)/g)];
+      expect(matches.length).toBeGreaterThan(0);
+
+      for (const match of matches) {
+        const cp1y = parseFloat(match[2]);
+        const cp2y = parseFloat(match[4]);
+        expect(cp1y).toBeGreaterThanOrEqual(0);
+        expect(cp1y).toBeLessThanOrEqual(frameHeight);
+        expect(cp2y).toBeGreaterThanOrEqual(0);
+        expect(cp2y).toBeLessThanOrEqual(frameHeight);
+      }
     });
   });
 });
