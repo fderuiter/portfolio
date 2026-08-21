@@ -14,7 +14,7 @@ import { resolveBaseUrl } from "@/lib/domain";
 import { ROUTE_METADATA_CONFIGS, buildRouteMetadata } from "@/lib/seo-metadata";
 import { ARCADE_GAMES_METADATA } from "@/lib/arcade-data";
 import robots from "@/app/robots";
-import sitemap, { revalidate, STATIC_ROUTE_LAST_MODIFIED } from "@/app/sitemap";
+import sitemap, { revalidate } from "@/app/sitemap";
 import manifest from "@/app/manifest";
 import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 
@@ -334,21 +334,29 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     expect(revalidate).toBe(86400);
   });
 
-  it("static route entries serve identical static modification dates across repeated requests", async () => {
+  it("static route entries serve route-specific source file modification dates dynamically", async () => {
     const map1 = await sitemap();
     await new Promise((resolve) => setTimeout(resolve, 15));
     const map2 = await sitemap();
 
     expect(map1.length).toBe(map2.length);
 
-    // Verify static routes maintain identical timestamps matching STATIC_ROUTE_LAST_MODIFIED
+    // Verify static routes maintain consistent timestamps matching source file modification times
     const staticEntries = map1.filter((entry) => !entry.url.includes("/case-studies/"));
     for (const entry of staticEntries) {
       const match = map2.find((e) => e.url === entry.url);
       expect(match).toBeDefined();
-      expect(entry.lastModified).toEqual(STATIC_ROUTE_LAST_MODIFIED);
-      expect(match?.lastModified).toEqual(STATIC_ROUTE_LAST_MODIFIED);
+      expect(entry.lastModified).toEqual(match?.lastModified);
     }
+
+    // Verify root static route matches source file mtime
+    const rootEntry = map1.find((e) => e.url === resolveBaseUrl());
+    expect(rootEntry).toBeDefined();
+    const rootStat = fs.statSync(path.resolve(process.cwd(), "app/page.tsx"));
+    const rootEntryDate = rootEntry?.lastModified instanceof Date
+      ? rootEntry.lastModified
+      : new Date(rootEntry?.lastModified ?? 0);
+    expect(rootEntryDate.getTime()).toBe(rootStat.mtime.getTime());
   });
 
   it("fallback and mock content items retain explicit pre-defined update dates rather than generating execution timestamps", async () => {
