@@ -6,7 +6,7 @@
 
 # Class: ArcadeInputManager
 
-Defined in: lib/arcade/core/input.ts:31
+Defined in: [lib/arcade/core/input.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L31)
 
 Unified Arcade Input Manager.
 Captures Pointer Events, Keyboard events, and virtual ControlDocks buttons,
@@ -28,7 +28,7 @@ normalizing them into a single coherent action state vector.
 
 > **attach**(`canvas`, `getMetrics`): `void`
 
-Defined in: lib/arcade/core/input.ts:60
+Defined in: [lib/arcade/core/input.ts:60](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L60)
 
 Attaches DOM event listeners to the canvas and window.
 
@@ -52,7 +52,7 @@ Attaches DOM event listeners to the canvas and window.
 
 > **detach**(): `void`
 
-Defined in: lib/arcade/core/input.ts:80
+Defined in: [lib/arcade/core/input.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L80)
 
 Detaches DOM event listeners cleanly.
 
@@ -66,7 +66,7 @@ Detaches DOM event listeners cleanly.
 
 > **getSnapshot**(): [`InputSnapshot`](../interfaces/InputSnapshot.md)
 
-Defined in: lib/arcade/core/input.ts:191
+Defined in: [lib/arcade/core/input.ts:191](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L191)
 
 Derives normalized input snapshot across all physical and virtual input sources.
 
@@ -80,7 +80,7 @@ Derives normalized input snapshot across all physical and virtual input sources.
 
 > **handleKeyDown**(`code`): `void`
 
-Defined in: lib/arcade/core/input.ts:115
+Defined in: [lib/arcade/core/input.ts:115](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L115)
 
 #### Parameters
 
@@ -98,7 +98,7 @@ Defined in: lib/arcade/core/input.ts:115
 
 > **handleKeyUp**(`code`): `void`
 
-Defined in: lib/arcade/core/input.ts:119
+Defined in: [lib/arcade/core/input.ts:119](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L119)
 
 #### Parameters
 
@@ -116,7 +116,7 @@ Defined in: lib/arcade/core/input.ts:119
 
 > **handlePointerCancel**(): `void`
 
-Defined in: lib/arcade/core/input.ts:165
+Defined in: [lib/arcade/core/input.ts:165](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L165)
 
 #### Returns
 
@@ -128,7 +128,7 @@ Defined in: lib/arcade/core/input.ts:165
 
 > **handlePointerDown**(`e`): `void`
 
-Defined in: lib/arcade/core/input.ts:123
+Defined in: [lib/arcade/core/input.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L123)
 
 #### Parameters
 
@@ -164,7 +164,7 @@ Defined in: lib/arcade/core/input.ts:123
 
 > **handlePointerMove**(`e`): `void`
 
-Defined in: lib/arcade/core/input.ts:140
+Defined in: [lib/arcade/core/input.ts:140](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L140)
 
 #### Parameters
 
@@ -196,7 +196,7 @@ Defined in: lib/arcade/core/input.ts:140
 
 > **handlePointerUp**(`e`): `void`
 
-Defined in: lib/arcade/core/input.ts:153
+Defined in: [lib/arcade/core/input.ts:153](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L153)
 
 #### Parameters
 
@@ -228,7 +228,7 @@ Defined in: lib/arcade/core/input.ts:153
 
 > **reset**(): `void`
 
-Defined in: lib/arcade/core/input.ts:98
+Defined in: [lib/arcade/core/input.ts:98](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L98)
 
 #### Returns
 
@@ -240,7 +240,7 @@ Defined in: lib/arcade/core/input.ts:98
 
 > **setVirtualAction**(`action`, `pressed`): `void`
 
-Defined in: lib/arcade/core/input.ts:182
+Defined in: [lib/arcade/core/input.ts:182](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L182)
 
 #### Parameters
 
@@ -262,7 +262,7 @@ Defined in: lib/arcade/core/input.ts:182
 
 > **setVirtualDirection**(`dir`, `pressed`): `void`
 
-Defined in: lib/arcade/core/input.ts:169
+Defined in: [lib/arcade/core/input.ts:169](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L169)
 
 #### Parameters
 
@@ -284,7 +284,7 @@ Defined in: lib/arcade/core/input.ts:169
 
 > **setVirtualStick**(`x`, `y`): `void`
 
-Defined in: lib/arcade/core/input.ts:177
+Defined in: [lib/arcade/core/input.ts:177](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L177)
 
 #### Parameters
 

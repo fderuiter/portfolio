@@ -6,7 +6,7 @@
 
 # Interface: ViewportConfig
 
-Defined in: lib/arcade/core/viewport.ts:9
+Defined in: [lib/arcade/core/viewport.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L9)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: lib/arcade/core/viewport.ts:9
 
 > **baseHeight**: `number`
 
-Defined in: lib/arcade/core/viewport.ts:12
+Defined in: [lib/arcade/core/viewport.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L12)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: lib/arcade/core/viewport.ts:12
 
 > **baseWidth**: `number`
 
-Defined in: lib/arcade/core/viewport.ts:11
+Defined in: [lib/arcade/core/viewport.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L11)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: lib/arcade/core/viewport.ts:11
 
 > `optional` **maxDpr?**: `number`
 
-Defined in: lib/arcade/core/viewport.ts:13
+Defined in: [lib/arcade/core/viewport.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L13)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: lib/arcade/core/viewport.ts:13
 
 > **mode**: [`ViewportMode`](../type-aliases/ViewportMode.md)
 
-Defined in: lib/arcade/core/viewport.ts:10
+Defined in: [lib/arcade/core/viewport.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L10)

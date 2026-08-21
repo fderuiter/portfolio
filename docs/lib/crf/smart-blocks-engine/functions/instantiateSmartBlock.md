@@ -8,7 +8,7 @@
 
 > **instantiateSmartBlock**(`blockId`): `object`
 
-Defined in: lib/crf/smart-blocks-engine.ts:1568
+Defined in: [lib/crf/smart-blocks-engine.ts:1568](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L1568)
 
 Instantiates a compound Clinical Smart Block by ID
 
