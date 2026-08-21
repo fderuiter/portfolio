@@ -7,6 +7,7 @@ import { STATUS_TICKER_ITEMS, unlockAchievement, isVaultUnlocked } from "@/lib/m
 import { playMemeSound } from "@/lib/meme-audio";
 import { generateId } from "@/lib/utils";
 import { IconDeviceGamepad2 } from "@tabler/icons-react";
+import { useResizeObserver } from "@/hooks/useResizeObserver";
 
 function subscribeVaultUnlock(callback: () => void) {
   if (typeof window === "undefined") return () => {};
@@ -82,8 +83,16 @@ export const FooterStatusTicker: React.FC = () => {
     }, 3500);
   }, []);
 
+  const tickerObserverRef = useResizeObserver<HTMLDivElement>((entry) => {
+    const h = Math.round(entry.contentRect.height);
+    if (typeof document !== "undefined" && h > 0) {
+      document.documentElement.style.setProperty("--footer-height", `${h}px`);
+      document.documentElement.style.setProperty("--ticker-height", `${h}px`);
+    }
+  }, { trackVertical: true });
+
   return (
-    <div className="w-full border-t border-zinc-800/60 bg-zinc-950/60 backdrop-blur-md px-4 py-3 text-xs font-mono">
+    <div ref={tickerObserverRef} className="w-full border-t border-zinc-800/60 bg-zinc-950/60 backdrop-blur-md px-4 py-3 text-xs font-mono">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
         {/* Live Status Ticker */}
         <div className="flex items-center gap-2.5 overflow-hidden w-full sm:w-auto">
