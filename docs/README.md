@@ -81,6 +81,10 @@ The core objective of this project is to create an interactive showcase that dyn
 
 The portfolio utilizes a "Design Engineering" approach, combining lightweight libraries like Aceternity UI and Magic UI with Framer Motion. For complete architectural documentation—including the App Router route tree (`app/work/laser-loon/page.tsx`), Python backend core utilities (`app/core/crypto.py`, `app/core/resilient_file_ops.py`, `app/core/analyzer_strategies.py`), and UI component hierarchy (`components/ui/CaseStudyBentoCard.tsx`)—refer to [**`ARCHITECTURE.md`**](_media/ARCHITECTURE.md).
 
+## Deployment & Synthetic Monitoring
+
+Operational workflows for production releases—including Automated Canary Analysis (ACA) commands, service-level agreement (SLA) threshold gates, automated rollback webhooks, and step-by-step synthetic probe failure triage runbooks—are detailed in [**`DEPLOYMENT.md`**](_media/DEPLOYMENT.md).
+
 ## Project Roadmap
 
 The full 5-phase development roadmap, milestone progress, and issue tracker are maintained in **[GitHub Issue #18 — Portfolio Hub V1 Architecture Master 5-Phase Development Plan](https://github.com/fderuiter/portfolio/issues/18)**.
