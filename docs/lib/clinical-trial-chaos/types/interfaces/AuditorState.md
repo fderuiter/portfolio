@@ -6,7 +6,7 @@
 
 # Interface: AuditorState
 
-Defined in: [lib/clinical-trial-chaos/types.ts:59](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L59)
+Defined in: [lib/clinical-trial-chaos/types.ts:64](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L64)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:59](https://github.com/fderuiter/
 
 > **behavior**: [`AuditorBehavior`](../type-aliases/AuditorBehavior.md)
 
-Defined in: [lib/clinical-trial-chaos/types.ts:63](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L63)
+Defined in: [lib/clinical-trial-chaos/types.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L68)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:63](https://github.com/fderuiter/
 
 > **direction**: `-1` \| `1`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:62](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L62)
+Defined in: [lib/clinical-trial-chaos/types.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L67)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:62](https://github.com/fderuiter/
 
 > **inspectTimer**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L67)
+Defined in: [lib/clinical-trial-chaos/types.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L72)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:67](https://github.com/fderuiter/
 
 > `optional` **isPaused?**: `boolean`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L69)
+Defined in: [lib/clinical-trial-chaos/types.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L74)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:69](https://github.com/fderuiter/
 
 > **suspicion**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:64](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L64)
+Defined in: [lib/clinical-trial-chaos/types.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L69)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:64](https://github.com/fderuiter/
 
 > **suspicionDecayRate**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L65)
+Defined in: [lib/clinical-trial-chaos/types.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L70)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:65](https://github.com/fderuiter/
 
 > `optional` **targetStationId?**: [`CDISCDomain`](../type-aliases/CDISCDomain.md)
 
-Defined in: [lib/clinical-trial-chaos/types.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L66)
+Defined in: [lib/clinical-trial-chaos/types.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L71)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:66](https://github.com/fderuiter/
 
 > **total483Citations**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L68)
+Defined in: [lib/clinical-trial-chaos/types.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L73)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:68](https://github.com/fderuiter/
 
 > **x**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:60](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L60)
+Defined in: [lib/clinical-trial-chaos/types.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L65)
 
 ***
 
@@ -86,4 +86,4 @@ Defined in: [lib/clinical-trial-chaos/types.ts:60](https://github.com/fderuiter/
 
 > **y**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:61](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L61)
+Defined in: [lib/clinical-trial-chaos/types.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L66)

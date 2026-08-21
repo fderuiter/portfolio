@@ -8,6 +8,7 @@ import {
   StationConfig,
   ValidationErrorType,
 } from "./types";
+import { EditCheckRule, StudyProtocol } from "../crf/types";
 
 export interface MockObservationTemplate {
   field: string;
@@ -732,6 +733,23 @@ export function generateClinicalSubject(
     if (hasError && template.corruptions.length > 0) {
       const corruption =
         template.corruptions[Math.floor(Math.random() * template.corruptions.length)];
+      const astRule: EditCheckRule = {
+        id: `ast_rule_${seq}_${idx}`,
+        name: `CDISC Standard ${template.field} Rule`,
+        description: corruption.explanation,
+        triggerFieldIds: [template.field],
+        actionType: "raise_query",
+        targetFieldId: template.field,
+        conditions: [
+          {
+            fieldId: template.field,
+            operator: "eq",
+            value: corruption.correctedValue,
+          },
+        ],
+        logicalOperator: "AND",
+        queryMessage: corruption.explanation,
+      };
       return {
         id: `obs-${seq}-${idx}`,
         field: template.field,
@@ -745,10 +763,27 @@ export function generateClinicalSubject(
         ctCode: corruption.ctCode,
         options: corruption.options,
         isResolved: false,
+        astRule,
       };
     } else {
       const validVal =
         template.validValues[Math.floor(Math.random() * template.validValues.length)];
+      const astRule: EditCheckRule = {
+        id: `ast_rule_valid_${seq}_${idx}`,
+        name: `CDISC Standard ${template.field} Rule`,
+        description: `Value must equal ${validVal}`,
+        triggerFieldIds: [template.field],
+        actionType: "raise_query",
+        targetFieldId: template.field,
+        conditions: [
+          {
+            fieldId: template.field,
+            operator: "eq",
+            value: validVal,
+          },
+        ],
+        logicalOperator: "AND",
+      };
       return {
         id: `obs-${seq}-${idx}`,
         field: template.field,
@@ -757,9 +792,119 @@ export function generateClinicalSubject(
         destination: template.destination,
         ctCode: template.testCode,
         isResolved: true,
+        astRule,
       };
     }
   });
+
+  const maxTime = forceSAE ? 22 : 36;
+
+  return {
+    id: `subject-${seq}-${Date.now()}`,
+    subjectLabel,
+    studySite,
+    observations,
+    status: "queued",
+    isSAE: forceSAE,
+    timeRemaining: maxTime,
+    maxTime,
+    createdAt: Date.now(),
+  };
+}
+
+/**
+ * Generates a ClinicalSubject populated directly from an active StudyProtocol definition.
+ */
+export function generateClinicalSubjectFromProtocol(
+  protocol: StudyProtocol,
+  errorProbability = 0.5,
+  forceSAE = false,
+  customSeq?: number
+): ClinicalSubject {
+  const seq = customSeq ?? globalSubjSeq++;
+  const subjectLabel = `SUBJ-${seq}`;
+  const siteIndex = seq % STUDY_SITES.length;
+  const studySite = STUDY_SITES[siteIndex];
+
+  const observations: ClinicalObservation[] = [];
+
+  const formsToUse = protocol.forms && protocol.forms.length > 0 ? protocol.forms : [];
+
+  formsToUse.forEach((form, fIdx) => {
+    const fields = form.sections.flatMap((s) => s.fields);
+    if (fields.length === 0) return;
+
+    const field = fields[fIdx % fields.length];
+    const domain = (form.domain.toUpperCase() as CDISCDomain) || "DM";
+
+    const matchingRules = [
+      ...(form.rules || []),
+      ...(protocol.rules || []),
+    ].filter(
+      (r) =>
+        r.targetFieldId === field.id ||
+        r.targetFieldId === field.variableName ||
+        r.triggerFieldIds.includes(field.id) ||
+        r.triggerFieldIds.includes(field.variableName)
+    );
+
+    const activeRule: EditCheckRule = matchingRules[0] || {
+      id: `rule_${field.id}_${seq}`,
+      name: `Protocol Rule for ${field.variableName}`,
+      description: `Protocol validation for ${field.label || field.variableName}`,
+      triggerFieldIds: [field.id],
+      actionType: "raise_query",
+      targetFieldId: field.id,
+      conditions: [
+        {
+          fieldId: field.variableName,
+          operator: "eq",
+          value: field.defaultValue !== undefined && field.defaultValue !== null ? String(field.defaultValue) : "Standard Value",
+        },
+      ],
+      logicalOperator: "AND",
+    };
+
+    const hasError = Math.random() < errorProbability;
+
+    let validVal = "Compliant";
+    let invalidVal = "Non-Compliant";
+
+    if (field.customOptions && field.customOptions.length > 0) {
+      validVal = field.customOptions[0].label || field.customOptions[0].code;
+      invalidVal = field.customOptions[1]?.label || field.customOptions[1]?.code || "Invalid Code";
+    } else if (field.unit) {
+      validVal = `100 ${field.unit}`;
+      invalidVal = `10000 ${field.unit}`;
+    }
+
+    if (activeRule.conditions && activeRule.conditions[0]) {
+      validVal = String(activeRule.conditions[0].value);
+    }
+
+    const rawValue = hasError ? invalidVal : validVal;
+
+    observations.push({
+      id: `obs-proto-${seq}-${fIdx}`,
+      field: field.label || field.variableName,
+      fieldId: field.id,
+      rawValue,
+      correctedValue: validVal,
+      currentValue: rawValue,
+      destination: domain,
+      errorType: hasError ? "casing-mismatch" : undefined,
+      hint: `Protocol rule: ${activeRule.name}`,
+      explanation: activeRule.description || `Field must comply with protocol edit check ${activeRule.name}`,
+      ctCode: field.variableName,
+      options: [validVal, invalidVal, "Unverified Code", "Unknown"],
+      isResolved: !hasError,
+      astRule: activeRule,
+    });
+  });
+
+  if (observations.length === 0) {
+    return generateClinicalSubject(errorProbability, forceSAE, customSeq);
+  }
 
   const maxTime = forceSAE ? 22 : 36;
 

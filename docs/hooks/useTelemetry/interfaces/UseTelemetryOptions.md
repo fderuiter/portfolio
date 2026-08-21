@@ -6,7 +6,7 @@
 
 # Interface: UseTelemetryOptions
 
-Defined in: [hooks/useTelemetry.ts:474](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L474)
+Defined in: [hooks/useTelemetry.ts:485](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L485)
 
 ## Properties
 
@@ -14,4 +14,4 @@ Defined in: [hooks/useTelemetry.ts:474](https://github.com/fderuiter/portfolio/b
 
 > `optional` **maxQueueCapacity?**: `number`
 
-Defined in: [hooks/useTelemetry.ts:475](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L475)
+Defined in: [hooks/useTelemetry.ts:486](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L486)

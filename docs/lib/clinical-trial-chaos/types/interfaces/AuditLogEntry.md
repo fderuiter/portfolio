@@ -6,7 +6,7 @@
 
 # Interface: AuditLogEntry
 
-Defined in: [lib/clinical-trial-chaos/types.ts:91](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L91)
+Defined in: [lib/clinical-trial-chaos/types.ts:96](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L96)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:91](https://github.com/fderuiter/
 
 > **id**: `string`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:92](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L92)
+Defined in: [lib/clinical-trial-chaos/types.ts:97](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L97)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:92](https://github.com/fderuiter/
 
 > **level**: `"INFO"` \| `"WARN"` \| `"CRITICAL"` \| `"COMPLIANT"`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:94](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L94)
+Defined in: [lib/clinical-trial-chaos/types.ts:99](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L99)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:94](https://github.com/fderuiter/
 
 > **message**: `string`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:95](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L95)
+Defined in: [lib/clinical-trial-chaos/types.ts:100](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L100)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:95](https://github.com/fderuiter/
 
 > **suspicionDelta**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:96](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L96)
+Defined in: [lib/clinical-trial-chaos/types.ts:101](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L101)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [lib/clinical-trial-chaos/types.ts:96](https://github.com/fderuiter/
 
 > **timestamp**: `string`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:93](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L93)
+Defined in: [lib/clinical-trial-chaos/types.ts:98](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L98)

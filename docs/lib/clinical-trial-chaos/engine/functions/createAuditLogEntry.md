@@ -8,7 +8,7 @@
 
 > **createAuditLogEntry**(`message`, `level`, `suspicionDelta?`): [`AuditLogEntry`](../../types/interfaces/AuditLogEntry.md)
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:101](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L101)
+Defined in: [lib/clinical-trial-chaos/engine.ts:105](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L105)
 
 ## Parameters
 

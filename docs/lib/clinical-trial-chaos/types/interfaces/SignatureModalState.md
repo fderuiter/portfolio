@@ -6,7 +6,7 @@
 
 # Interface: SignatureModalState
 
-Defined in: [lib/clinical-trial-chaos/types.ts:115](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L115)
+Defined in: [lib/clinical-trial-chaos/types.ts:120](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L120)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:115](https://github.com/fderuiter
 
 > **isOpen**: `boolean`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:116](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L116)
+Defined in: [lib/clinical-trial-chaos/types.ts:121](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L121)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:116](https://github.com/fderuiter
 
 > **passwordInput**: `string`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:119](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L119)
+Defined in: [lib/clinical-trial-chaos/types.ts:124](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L124)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:119](https://github.com/fderuiter
 
 > **requiresReason**: `boolean`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:120](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L120)
+Defined in: [lib/clinical-trial-chaos/types.ts:125](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L125)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:120](https://github.com/fderuiter
 
 > **selectedReason**: [`SignatureReason`](../type-aliases/SignatureReason.md)
 
-Defined in: [lib/clinical-trial-chaos/types.ts:118](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L118)
+Defined in: [lib/clinical-trial-chaos/types.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L123)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [lib/clinical-trial-chaos/types.ts:118](https://github.com/fderuiter
 
 > **subject**: [`ClinicalSubject`](ClinicalSubject.md) \| `null`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L117)
+Defined in: [lib/clinical-trial-chaos/types.ts:122](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L122)

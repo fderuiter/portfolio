@@ -8,7 +8,7 @@
 
 > **generateClinicalSubject**(`errorProbability?`, `forceSAE?`, `customSeq?`, `activeDomains?`): [`ClinicalSubject`](../../types/interfaces/ClinicalSubject.md)
 
-Defined in: [lib/clinical-trial-chaos/scenarios.ts:701](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L701)
+Defined in: [lib/clinical-trial-chaos/scenarios.ts:702](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L702)
 
 Generates a random or seeded ClinicalSubject with 2-4 observations.
 
