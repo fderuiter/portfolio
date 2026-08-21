@@ -12,6 +12,8 @@
 
 ## Functions
 
+- [compileConditionToR](functions/compileConditionToR.md)
+- [compileRuleToR](functions/compileRuleToR.md)
 - [escapeRString](functions/escapeRString.md)
 - [exportFormToR](functions/exportFormToR.md)
 - [exportStudyToR](functions/exportStudyToR.md)

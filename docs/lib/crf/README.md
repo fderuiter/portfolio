@@ -194,6 +194,30 @@ Re-exports [CodelistOptionSchema](universal-schema/variables/CodelistOptionSchem
 
 ***
 
+### compileConditionToOdm
+
+Re-exports [compileConditionToOdm](odm-xml-serializer/functions/compileConditionToOdm.md)
+
+***
+
+### compileConditionToR
+
+Re-exports [compileConditionToR](export-r/functions/compileConditionToR.md)
+
+***
+
+### compileRuleToOdmExpression
+
+Re-exports [compileRuleToOdmExpression](odm-xml-serializer/functions/compileRuleToOdmExpression.md)
+
+***
+
+### compileRuleToR
+
+Re-exports [compileRuleToR](export-r/functions/compileRuleToR.md)
+
+***
+
 ### ComplianceSeverity
 
 Re-exports [ComplianceSeverity](types/type-aliases/ComplianceSeverity.md)
@@ -611,6 +635,12 @@ Re-exports [isCdiscNullFlavor](precision-date/functions/isCdiscNullFlavor.md)
 ### isFutureDate
 
 Re-exports [isFutureDate](precision-date/functions/isFutureDate.md)
+
+***
+
+### isSingleFormRule
+
+Re-exports [isSingleFormRule](expression-evaluator/functions/isSingleFormRule.md)
 
 ***
 

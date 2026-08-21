@@ -1,5 +1,59 @@
-import { StudyProtocol } from "./types";
+import { StudyProtocol, EditCheckRule, AstCondition, CRFField } from "./types";
 import { escapeXml } from "../utils";
+import { isSingleFormRule } from "./expression-evaluator";
+
+/**
+ * Formats an AstCondition into a CDISC ODM formal expression string
+ */
+export function compileConditionToOdm(cond: AstCondition, fieldsList: CRFField[] = []): string {
+  const field = fieldsList.find((f) => f.id === cond.fieldId || f.variableName === cond.fieldId);
+  const varName = field ? field.variableName : cond.fieldId;
+
+  const formatVal = (v: string | number | boolean | string[]): string => {
+    if (Array.isArray(v)) return `(${v.map((item) => `"${item}"`).join(", ")})`;
+    if (typeof v === "string") return `"${v}"`;
+    return String(v);
+  };
+
+  switch (cond.operator) {
+    case "eq":
+      return `${varName} == ${formatVal(cond.value)}`;
+    case "neq":
+      return `${varName} != ${formatVal(cond.value)}`;
+    case "gt":
+      return `${varName} > ${cond.value}`;
+    case "gte":
+      return `${varName} >= ${cond.value}`;
+    case "lt":
+      return `${varName} < ${cond.value}`;
+    case "lte":
+      return `${varName} <= ${cond.value}`;
+    case "in":
+      return `${varName} IN ${formatVal(cond.value)}`;
+    case "contains":
+      return `CONTAINS(${varName}, ${formatVal(cond.value)})`;
+    case "is_empty":
+      return `IS_EMPTY(${varName})`;
+    case "is_not_empty":
+      return `IS_NOT_EMPTY(${varName})`;
+    default:
+      return `${varName} ${cond.operator} ${formatVal(cond.value)}`;
+  }
+}
+
+/**
+ * Compiles a single-form EditCheckRule into a formal ODM expression
+ */
+export function compileRuleToOdmExpression(rule: EditCheckRule, fieldsList: CRFField[] = []): string {
+  const conds = rule.conditions.map((c) => compileConditionToOdm(c, fieldsList));
+  const operator = rule.logicalOperator === "OR" ? " OR " : " AND ";
+  let expr = conds.length > 1 ? conds.map((c) => `(${c})`).join(operator) : conds[0] || "";
+
+  if (rule.formulaExpression) {
+    expr = expr ? `${expr} => ${rule.targetFieldId} = ${rule.formulaExpression}` : `${rule.targetFieldId} = ${rule.formulaExpression}`;
+  }
+  return expr;
+}
 
 /**
  * Maps ClinicalDataType to CDISC ODM DataType
@@ -41,6 +95,37 @@ export function exportStudyToCdiscOdmXml(study: StudyProtocol): string {
   const studyOid = `STUDY.${protoNum.replace(/[^A-Za-z0-9_]/g, "_")}`;
   const metaOid = `MDV.${study.version || "1.0"}`;
   const studyTitle = study.studyName || protoNum;
+
+  // Flatten all fields across forms for OID & rule compilation
+  const allFields = study.forms.flatMap((f) => f.sections.flatMap((s) => s.fields));
+
+  // Collect single-form rules
+  const singleFormRules: EditCheckRule[] = [];
+  const processedRuleIds = new Set<string>();
+
+  study.forms.forEach((form) => {
+    (form.rules || []).forEach((rule) => {
+      if (isSingleFormRule(rule) && !processedRuleIds.has(rule.id)) {
+        processedRuleIds.add(rule.id);
+        singleFormRules.push(rule);
+      }
+    });
+  });
+
+  (study.rules || []).forEach((rule) => {
+    if (isSingleFormRule(rule) && !processedRuleIds.has(rule.id)) {
+      processedRuleIds.add(rule.id);
+      singleFormRules.push(rule);
+    }
+  });
+
+  // Map targetFieldId to rule for CollectionExceptionConditionOID
+  const fieldTargetRules = new Map<string, string>();
+  singleFormRules.forEach((rule) => {
+    if (rule.targetFieldId) {
+      fieldTargetRules.set(rule.targetFieldId, rule.id);
+    }
+  });
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <!-- Schedule Consultation: /schedule -->
@@ -103,7 +188,9 @@ export function exportStudyToCdiscOdmXml(study: StudyProtocol): string {
       xml += `      <ItemGroupDef OID="${igOid}" Name="${escapeXml(sec.title)}" Repeating="${sec.isRepeating ? "Yes" : "No"}">\n`;
       sec.fields.forEach((field, fIdx) => {
         const itemOid = `IT.${field.variableName || field.id}`;
-        xml += `        <ItemRef ItemOID="${itemOid}" OrderNumber="${fIdx + 1}" Mandatory="${field.required ? "Yes" : "No"}"/>\n`;
+        const targetRuleId = fieldTargetRules.get(field.id) || fieldTargetRules.get(field.variableName);
+        const condAttr = targetRuleId ? ` CollectionExceptionConditionOID="CND.${escapeXml(targetRuleId)}"` : "";
+        xml += `        <ItemRef ItemOID="${itemOid}" OrderNumber="${fIdx + 1}" Mandatory="${field.required ? "Yes" : "No"}"${condAttr}/>\n`;
       });
       xml += `      </ItemGroupDef>\n`;
     });
@@ -173,6 +260,20 @@ export function exportStudyToCdiscOdmXml(study: StudyProtocol): string {
     xml += `      </CodeList>\n`;
   });
 
+  // ConditionDefs (Single-Form Edit Check Rules)
+  if (singleFormRules.length > 0) {
+    xml += `\n`;
+    singleFormRules.forEach((rule) => {
+      const cndOid = `CND.${rule.id}`;
+      const expr = compileRuleToOdmExpression(rule, allFields);
+      const desc = rule.queryMessage || rule.description || rule.name;
+      xml += `      <ConditionDef OID="${escapeXml(cndOid)}" Name="${escapeXml(rule.name)}">\n`;
+      xml += `        <Description><TranslatedText xml:lang="en">${escapeXml(desc)}</TranslatedText></Description>\n`;
+      xml += `        <FormalExpression Context="CRFStudio">${escapeXml(expr)}</FormalExpression>\n`;
+      xml += `      </ConditionDef>\n`;
+    });
+  }
+
   xml += `    </MetaDataVersion>
   </Study>
 </ODM>`;
@@ -181,3 +282,4 @@ export function exportStudyToCdiscOdmXml(study: StudyProtocol): string {
 }
 
 export const serializeStudyToOdmXml = exportStudyToCdiscOdmXml;
+

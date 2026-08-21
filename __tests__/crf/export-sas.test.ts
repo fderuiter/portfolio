@@ -264,4 +264,100 @@ describe("CRF Studio - Automated SAS Statistical Exporter", () => {
       expect(sasCode).not.toContain("TEST_MH_HYPERTEN_1");
     });
   });
+
+  describe("Single-Form Edit Check Execution in SAS", () => {
+    it("compiles AST conditions into executable SAS IF/THEN validation blocks", () => {
+      const vsFormWithRule: CRFForm = {
+        id: "form_vs_rules",
+        name: "Vital Signs",
+        domain: "VS",
+        description: "Vital Signs",
+        version: "1.0",
+        sections: [
+          {
+            id: "sec_vs",
+            title: "Vitals",
+            fields: [
+              { id: "f_sysbp", variableName: "SYSBP", label: "Systolic BP", dataType: "number", columnSpan: 6, required: true },
+              { id: "f_diabp", variableName: "DIABP", label: "Diastolic BP", dataType: "number", columnSpan: 6, required: true },
+            ],
+          },
+        ],
+        rules: [
+          {
+            id: "rule_hypertension_alert",
+            name: "Hypertension Stage 2 Alert",
+            description: "Alert if SYSBP >= 140 AND DIABP >= 90",
+            triggerFieldIds: ["f_sysbp", "f_diabp"],
+            actionType: "raise_query",
+            targetFieldId: "f_sysbp",
+            conditions: [
+              { fieldId: "f_sysbp", operator: "gte", value: 140 },
+              { fieldId: "f_diabp", operator: "gte", value: 90 },
+            ],
+            logicalOperator: "AND",
+            querySeverity: "warning",
+            queryMessage: "Systolic BP >= 140 and Diastolic BP >= 90.",
+          },
+        ],
+      };
+
+      const sasCode = exportFormToSas(vsFormWithRule, ONCOLOGY_RECIST_PRESET);
+
+      expect(sasCode).toContain("Single-Form Edit Check Execution & Data Validation");
+      expect(sasCode).toContain("IF (SYSBP >= 140) AND (DIABP >= 90) THEN DO;");
+      expect(sasCode).toContain('_RULE_ID = "RULE_HYPERTENSION_ALERT";');
+      expect(sasCode).toContain('_QUERY_MSG = "Systolic BP >= 140 and Diastolic BP >= 90.";');
+    });
+
+    it("strictly enforces 32-character limit for variable names in SAS validation rules", () => {
+      const longFieldForm: CRFForm = {
+        id: "form_long_rules",
+        name: "Long Variable Form",
+        domain: "LB",
+        description: "Laboratory",
+        version: "1.0",
+        sections: [
+          {
+            id: "sec_lb",
+            title: "Labs",
+            fields: [
+              {
+                id: "f_extremely_long_variable_name_exceeding_32_chars",
+                variableName: "EXTREMELY_LONG_VARIABLE_NAME_EXCEEDING_32_CHARS",
+                label: "Long Lab Val",
+                dataType: "number",
+                columnSpan: 6,
+                required: true,
+              },
+            ],
+          },
+        ],
+        rules: [
+          {
+            id: "rule_long_var_check",
+            name: "Long Variable Threshold Rule",
+            description: "Check long var threshold",
+            triggerFieldIds: ["f_extremely_long_variable_name_exceeding_32_chars"],
+            actionType: "raise_query",
+            targetFieldId: "f_extremely_long_variable_name_exceeding_32_chars",
+            conditions: [
+              {
+                fieldId: "f_extremely_long_variable_name_exceeding_32_chars",
+                operator: "gt",
+                value: 50,
+              },
+            ],
+            logicalOperator: "AND",
+            queryMessage: "Threshold exceeded.",
+          },
+        ],
+      };
+
+      const sasCode = exportFormToSas(longFieldForm, ONCOLOGY_RECIST_PRESET);
+
+      expect(sasCode).toContain("IF EXTREMELY_LONG_VARIABLE_NAME_EXC > 50 THEN DO;");
+      expect(sasCode).not.toContain("EXTREMELY_LONG_VARIABLE_NAME_EXCEEDING_32_CHARS > 50");
+    });
+  });
 });

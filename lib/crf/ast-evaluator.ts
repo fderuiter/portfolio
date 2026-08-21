@@ -8,6 +8,7 @@ export {
   evaluateFormula,
   evaluateCondition,
   evaluateRule,
+  isSingleFormRule,
   calculateBMI,
   calculateMostellerBSA,
   calculateDuboisBSA,

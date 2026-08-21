@@ -186,4 +186,49 @@ describe("CRF Studio - Automated R & Pharmaverse Scaffolding Exporter", () => {
       expect(rScript).not.toContain("OPTION_A, OPTION_B");
     });
   });
+
+  describe("Single-Form Edit Check Execution in R (validate Framework)", () => {
+    it("includes validate library import and validator/confront statements", () => {
+      const vsFormWithRule: CRFForm = {
+        id: "form_vs_rules_r",
+        name: "Vital Signs",
+        domain: "VS",
+        description: "Vital Signs Assessment",
+        version: "1.0",
+        sections: [
+          {
+            id: "sec_vs",
+            title: "Vitals",
+            fields: [
+              { id: "f_sysbp", variableName: "SYSBP", label: "Systolic BP", dataType: "number", columnSpan: 6, required: true },
+              { id: "f_diabp", variableName: "DIABP", label: "Diastolic BP", dataType: "number", columnSpan: 6, required: true },
+            ],
+          },
+        ],
+        rules: [
+          {
+            id: "rule_hypertension_alert",
+            name: "Hypertension Alert",
+            description: "Alert if SYSBP >= 140 AND DIABP >= 90",
+            triggerFieldIds: ["f_sysbp", "f_diabp"],
+            actionType: "raise_query",
+            targetFieldId: "f_sysbp",
+            conditions: [
+              { fieldId: "f_sysbp", operator: "gte", value: 140 },
+              { fieldId: "f_diabp", operator: "gte", value: 90 },
+            ],
+            logicalOperator: "AND",
+          },
+        ],
+      };
+
+      const rScript = exportFormToR(vsFormWithRule, ONCOLOGY_RECIST_PRESET);
+
+      expect(rScript).toContain("library(validate)");
+      expect(rScript).toContain("v_tbl_vs <- validate::validator(");
+      expect(rScript).toContain("rule_rule_hypertension_alert = (SYSBP >= 140) & (DIABP >= 90)");
+      expect(rScript).toContain("cf_tbl_vs <- validate::confront(tbl_vs, v_tbl_vs)");
+      expect(rScript).toContain("summary(cf_tbl_vs)");
+    });
+  });
 });

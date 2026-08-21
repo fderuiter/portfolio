@@ -8,7 +8,7 @@
 
 > **getFieldOptions**(`field`, `study`): [`CodelistOption`](../../types/interfaces/CodelistOption.md)[]
 
-Defined in: [lib/crf/export-r.ts:38](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L38)
+Defined in: [lib/crf/export-r.ts:132](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L132)
 
 Retrieves field options from custom options or referenced codelists.
 

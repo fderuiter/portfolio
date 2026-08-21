@@ -14,6 +14,30 @@ Re-exports [AcrfHtmlOptions](../export-acrf/interfaces/AcrfHtmlOptions.md)
 
 ***
 
+### compileConditionToOdm
+
+Re-exports [compileConditionToOdm](../odm-xml-serializer/functions/compileConditionToOdm.md)
+
+***
+
+### compileConditionToR
+
+Re-exports [compileConditionToR](../export-r/functions/compileConditionToR.md)
+
+***
+
+### compileRuleToOdmExpression
+
+Re-exports [compileRuleToOdmExpression](../odm-xml-serializer/functions/compileRuleToOdmExpression.md)
+
+***
+
+### compileRuleToR
+
+Re-exports [compileRuleToR](../export-r/functions/compileRuleToR.md)
+
+***
+
 ### escapeRString
 
 Re-exports [escapeRString](../export-r/functions/escapeRString.md)

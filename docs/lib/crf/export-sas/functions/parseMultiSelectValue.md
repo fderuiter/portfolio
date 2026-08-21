@@ -8,7 +8,7 @@
 
 > **parseMultiSelectValue**(`edcValue`, `optionCode`): `"N"` \| `"Y"`
 
-Defined in: [lib/crf/export-sas.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L75)
+Defined in: [lib/crf/export-sas.ts:177](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L177)
 
 Parses a comma-separated multi-select EDC response string
 and checks whether a specific option code is selected.

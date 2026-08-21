@@ -8,7 +8,7 @@
 
 > **sanitizeRName**(`name`, `maxLength?`): `string`
 
-Defined in: [lib/crf/export-r.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L18)
+Defined in: [lib/crf/export-r.ts:112](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L112)
 
 Sanitizes a string into a valid R variable name.
 R names should start with a letter and contain letters, numbers, dots, or underscores.

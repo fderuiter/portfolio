@@ -501,3 +501,11 @@ export function evaluateRule(
     return rule.conditions.every((cond) => evaluateCondition(cond, fieldValues, fieldsList, visitContext));
   }
 }
+
+/**
+ * Checks if an EditCheckRule is a single-form rule (i.e. contains no cross-visit conditions)
+ */
+export function isSingleFormRule(rule: EditCheckRule): boolean {
+  if (!rule || !rule.conditions || rule.conditions.length === 0) return false;
+  return rule.conditions.every((cond) => !cond.crossVisitId);
+}

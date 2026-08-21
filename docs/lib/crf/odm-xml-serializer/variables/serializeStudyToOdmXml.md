@@ -8,7 +8,7 @@
 
 > `const` **serializeStudyToOdmXml**: (`study`) => `string` = `exportStudyToCdiscOdmXml`
 
-Defined in: [lib/crf/odm-xml-serializer.ts:183](https://github.com/fderuiter/portfolio/blob/main/lib/crf/odm-xml-serializer.ts#L183)
+Defined in: [lib/crf/odm-xml-serializer.ts:284](https://github.com/fderuiter/portfolio/blob/main/lib/crf/odm-xml-serializer.ts#L284)
 
 Serializes a StudyProtocol into standard CDISC ODM-XML v1.3.2 format
 

@@ -8,8 +8,102 @@
  * 5. Diagnostic dplyr::glimpse() and summary() verification suites
  */
 
-import { StudyProtocol, CRFForm, CRFField, ExportROptions, CodelistOption } from "./types";
+import { StudyProtocol, CRFForm, CRFField, ExportROptions, CodelistOption, EditCheckRule, AstCondition } from "./types";
 import { STANDARD_CODELISTS } from "./cdisc-controlled-terminology";
+import { isSingleFormRule } from "./expression-evaluator";
+
+/**
+ * Compiles a single AstCondition into an R comparison statement.
+ */
+export function compileConditionToR(
+  cond: AstCondition,
+  formFields: CRFField[] = [],
+  study?: StudyProtocol
+): string {
+  const allFields = [
+    ...formFields,
+    ...(study ? study.forms.flatMap((f) => f.sections.flatMap((s) => s.fields)) : []),
+  ];
+  const field = allFields.find((f) => f.id === cond.fieldId || f.variableName === cond.fieldId);
+  const rawVar = field ? field.variableName || field.id : cond.fieldId;
+  const rVar = sanitizeRName(rawVar, 32).toUpperCase();
+
+  const isNumeric = field
+    ? field.dataType === "number" ||
+      field.dataType === "integer" ||
+      field.dataType === "calculated" ||
+      field.dataType === "vas_scale" ||
+      field.dataType === "nrs_scale"
+    : typeof cond.value === "number";
+
+  switch (cond.operator) {
+    case "eq":
+      return isNumeric
+        ? `${rVar} == ${cond.value}`
+        : `${rVar} == "${escapeRString(String(cond.value))}"`;
+    case "neq":
+      return isNumeric
+        ? `${rVar} != ${cond.value}`
+        : `${rVar} != "${escapeRString(String(cond.value))}"`;
+    case "gt":
+      return `${rVar} > ${cond.value}`;
+    case "gte":
+      return `${rVar} >= ${cond.value}`;
+    case "lt":
+      return `${rVar} < ${cond.value}`;
+    case "lte":
+      return `${rVar} <= ${cond.value}`;
+    case "in": {
+      const vals = Array.isArray(cond.value) ? cond.value : [cond.value];
+      return `${rVar} %in% c(${vals.map((v) => `"${escapeRString(String(v))}"`).join(", ")})`;
+    }
+    case "contains":
+      return `grepl("${escapeRString(String(cond.value))}", ${rVar}, ignore.case = TRUE)`;
+    case "is_empty":
+      return `(is.na(${rVar}) | ${rVar} == "")`;
+    case "is_not_empty":
+      return `(!is.na(${rVar}) & ${rVar} != "")`;
+    default:
+      return `${rVar} == "${escapeRString(String(cond.value))}"`;
+  }
+}
+
+/**
+ * Compiles an EditCheckRule AST into an R validate assertion statement.
+ */
+export function compileRuleToR(
+  rule: EditCheckRule,
+  formFields: CRFField[] = [],
+  study?: StudyProtocol
+): string {
+  const condExprs = rule.conditions.map((c) => compileConditionToR(c, formFields, study));
+  const logicalOp = rule.logicalOperator === "OR" ? " | " : " & ";
+  const fullCond = condExprs.length > 1 ? condExprs.map((c) => `(${c})`).join(logicalOp) : condExprs[0] || "TRUE";
+
+  const ruleName = `rule_${sanitizeRName(rule.id, 32).toLowerCase()}`;
+  const allFields = [
+    ...formFields,
+    ...(study ? study.forms.flatMap((f) => f.sections.flatMap((s) => s.fields)) : []),
+  ];
+
+  if (rule.actionType === "set_value" && rule.formulaExpression) {
+    const targetField = allFields.find((f) => f.id === rule.targetFieldId || f.variableName === rule.targetFieldId);
+    const targetVar = sanitizeRName(targetField ? targetField.variableName || targetField.id : rule.targetFieldId, 32).toUpperCase();
+
+    let rFormula = rule.formulaExpression;
+    allFields.forEach((f) => {
+      const rName = sanitizeRName(f.variableName || f.id, 32).toUpperCase();
+      rFormula = rFormula.replace(new RegExp(`\\b${f.id}\\b`, "g"), rName);
+      if (f.variableName) {
+        rFormula = rFormula.replace(new RegExp(`\\b${f.variableName}\\b`, "g"), rName);
+      }
+    });
+
+    return `${ruleName} = (${targetVar} == (${rFormula}))`;
+  }
+
+  return `${ruleName} = ${fullCond}`;
+}
 
 /**
  * Sanitizes a string into a valid R variable name.
@@ -173,10 +267,13 @@ function generateRHeader(study: StudyProtocol, formScope?: string): string {
 #==============================================================================
 
 # Recommended packages:
-# install.packages(c("tibble", "dplyr", "labelled"))
+# install.packages(c("tibble", "dplyr", "validate", "labelled"))
 suppressPackageStartupMessages({
   library(tibble)
   library(dplyr)
+  if (requireNamespace("validate", quietly = TRUE)) {
+    library(validate)
+  }
   if (requireNamespace("labelled", quietly = TRUE)) {
     library(labelled)
   }
@@ -449,6 +546,35 @@ export function generateRDataStepForForm(
       code += `attr(${tibbleName}$${item.varName}, "label") <- "${escapedLabel}"\n`;
     });
     code += `\n`;
+  }
+
+  // Single-Form Edit Check Validation Rules (R validate Framework)
+  const formFields = form.sections.flatMap((s) => s.fields);
+  const formSingleRules = (form.rules || []).filter(isSingleFormRule);
+  const studySingleRules = (study?.rules || []).filter((r) => {
+    if (!isSingleFormRule(r)) return false;
+    return (
+      r.triggerFieldIds?.some((tid) => formFields.some((f) => f.id === tid || f.variableName === tid)) ||
+      formFields.some((f) => f.id === r.targetFieldId || f.variableName === r.targetFieldId)
+    );
+  });
+  const rulesToExecute = [
+    ...formSingleRules,
+    ...studySingleRules.filter((sr) => !formSingleRules.some((r) => r.id === sr.id)),
+  ];
+
+  if (rulesToExecute.length > 0) {
+    code += `#------------------------------------------------------------------------------\n`;
+    code += `# Single-Form Edit Check Validation Rules (R validate Framework)\n`;
+    code += `#------------------------------------------------------------------------------\n`;
+    code += `v_${tibbleName} <- validate::validator(\n`;
+    rulesToExecute.forEach((rule, rIdx) => {
+      const isLast = rIdx === rulesToExecute.length - 1;
+      code += `  ${compileRuleToR(rule, formFields, study)}${isLast ? "" : ",\n"}`;
+    });
+    code += `\n)\n\n`;
+    code += `cf_${tibbleName} <- validate::confront(${tibbleName}, v_${tibbleName})\n`;
+    code += `summary(cf_${tibbleName})\n\n`;
   }
 
   // Diagnostics

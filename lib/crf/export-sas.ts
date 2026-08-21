@@ -8,8 +8,110 @@
  * 5. Diagnostic PROC CONTENTS, PROC FREQ, and PROC PRINT steps
  */
 
-import { StudyProtocol, CRFForm, CRFField, CodelistDefinition, ExportSasOptions, CodelistOption } from "./types";
+import { StudyProtocol, CRFForm, CRFField, CodelistDefinition, ExportSasOptions, CodelistOption, EditCheckRule, AstCondition } from "./types";
 import { STANDARD_CODELISTS } from "./cdisc-controlled-terminology";
+import { isSingleFormRule } from "./expression-evaluator";
+
+export { isSingleFormRule };
+
+/**
+ * Compiles a single AstCondition into a SAS logical expression.
+ * Variable names are guaranteed to strictly adhere to the 32-character SAS limit.
+ */
+export function compileConditionToSas(
+  cond: AstCondition,
+  formFields: CRFField[] = [],
+  study?: StudyProtocol
+): string {
+  const allFields = [
+    ...formFields,
+    ...(study ? study.forms.flatMap((f) => f.sections.flatMap((s) => s.fields)) : []),
+  ];
+  const field = allFields.find((f) => f.id === cond.fieldId || f.variableName === cond.fieldId);
+  const rawVar = field ? field.variableName || field.id : cond.fieldId;
+  const sasVar = sanitizeSasName(rawVar, 32);
+
+  const isNumeric = field
+    ? field.dataType === "number" ||
+      field.dataType === "integer" ||
+      field.dataType === "calculated" ||
+      field.dataType === "vas_scale" ||
+      field.dataType === "nrs_scale"
+    : typeof cond.value === "number";
+
+  switch (cond.operator) {
+    case "eq":
+      return isNumeric
+        ? `${sasVar} = ${cond.value}`
+        : `${sasVar} = '${escapeSasString(String(cond.value))}'`;
+    case "neq":
+      return isNumeric
+        ? `${sasVar} NE ${cond.value}`
+        : `${sasVar} NE '${escapeSasString(String(cond.value))}'`;
+    case "gt":
+      return `${sasVar} > ${cond.value}`;
+    case "gte":
+      return `${sasVar} >= ${cond.value}`;
+    case "lt":
+      return `${sasVar} < ${cond.value}`;
+    case "lte":
+      return `${sasVar} <= ${cond.value}`;
+    case "in": {
+      const vals = Array.isArray(cond.value) ? cond.value : [cond.value];
+      return isNumeric
+        ? `${sasVar} IN (${vals.join(", ")})`
+        : `${sasVar} IN (${vals.map((v) => `'${escapeSasString(String(v))}'`).join(", ")})`;
+    }
+    case "contains":
+      return `INDEX(UPPER(${sasVar}), UPPER('${escapeSasString(String(cond.value))}')) > 0`;
+    case "is_empty":
+      return isNumeric ? `MISSING(${sasVar})` : `(MISSING(${sasVar}) OR ${sasVar} = '')`;
+    case "is_not_empty":
+      return isNumeric ? `NOT MISSING(${sasVar})` : `(NOT MISSING(${sasVar}) AND ${sasVar} NE '')`;
+    default:
+      return `${sasVar} = '${escapeSasString(String(cond.value))}'`;
+  }
+}
+
+/**
+ * Compiles an EditCheckRule AST into executable SAS IF/THEN validation blocks.
+ */
+export function compileRuleToSas(
+  rule: EditCheckRule,
+  formFields: CRFField[] = [],
+  study?: StudyProtocol
+): string {
+  const condExprs = rule.conditions.map((c) => compileConditionToSas(c, formFields, study));
+  const logicalOp = rule.logicalOperator === "OR" ? " OR " : " AND ";
+  const fullCond = condExprs.length > 1 ? condExprs.map((c) => `(${c})`).join(logicalOp) : condExprs[0] || "1";
+
+  const ruleId = sanitizeSasName(rule.id, 32);
+  const queryMsg = escapeSasString(rule.queryMessage || rule.description || rule.name);
+  const severity = rule.querySeverity || "warning";
+
+  const allFields = [
+    ...formFields,
+    ...(study ? study.forms.flatMap((f) => f.sections.flatMap((s) => s.fields)) : []),
+  ];
+
+  if (rule.actionType === "set_value" && rule.formulaExpression) {
+    const targetField = allFields.find((f) => f.id === rule.targetFieldId || f.variableName === rule.targetFieldId);
+    const targetVar = sanitizeSasName(targetField ? targetField.variableName || targetField.id : rule.targetFieldId, 32);
+
+    let sasFormula = rule.formulaExpression;
+    allFields.forEach((f) => {
+      const sName = sanitizeSasName(f.variableName || f.id, 32);
+      sasFormula = sasFormula.replace(new RegExp(`\\b${f.id}\\b`, "g"), sName);
+      if (f.variableName) {
+        sasFormula = sasFormula.replace(new RegExp(`\\b${f.variableName}\\b`, "g"), sName);
+      }
+    });
+
+    return `  /* Edit Check Calculation Rule: ${escapeSasString(rule.name)} [ID: ${ruleId}] */\n  IF ${fullCond} THEN DO;\n    ${targetVar} = ${sasFormula};\n  END;`;
+  }
+
+  return `  /* Edit Check Validation Rule: ${escapeSasString(rule.name)} [ID: ${ruleId}] */\n  IF ${fullCond} THEN DO;\n    _RULE_ID = "${ruleId}";\n    _QUERY_MSG = "${queryMsg}";\n    _SEVERITY = "${severity}";\n    PUT "VALIDATION FLAG [" _SEVERITY "] " USUBJID= _RULE_ID= _QUERY_MSG=;\n  END;`;
+}
 
 /**
  * Sanitizes a string into a valid SAS variable or dataset name.
@@ -612,6 +714,29 @@ export function generateSasDataStepForForm(
     code += `  INFILE DATALINES DSD DLM=',' TRUNCOVER;\n`;
     code += `  INPUT\n    ${allInputVars.join("\n    ")};\n\n`;
     code += generateSyntheticMockData(form, fieldsWithAttrs, study, 3);
+  }
+
+  // Single-Form Edit Check Validation Rules
+  const formFields = form.sections.flatMap((s) => s.fields);
+  const formSingleRules = (form.rules || []).filter(isSingleFormRule);
+  const studySingleRules = (study?.rules || []).filter((r) => {
+    if (!isSingleFormRule(r)) return false;
+    return (
+      r.triggerFieldIds?.some((tid) => formFields.some((f) => f.id === tid || f.variableName === tid)) ||
+      formFields.some((f) => f.id === r.targetFieldId || f.variableName === r.targetFieldId)
+    );
+  });
+  const rulesToExecute = [
+    ...formSingleRules,
+    ...studySingleRules.filter((sr) => !formSingleRules.some((r) => r.id === sr.id)),
+  ];
+
+  if (rulesToExecute.length > 0) {
+    code += `  /* Single-Form Edit Check Execution & Data Validation */\n`;
+    rulesToExecute.forEach((rule) => {
+      code += `${compileRuleToSas(rule, formFields, study)}\n`;
+    });
+    code += `\n`;
   }
 
   code += `RUN;\n\n`;

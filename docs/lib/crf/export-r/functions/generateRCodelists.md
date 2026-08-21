@@ -8,7 +8,7 @@
 
 > **generateRCodelists**(`study`, `formsToInclude`): `string`
 
-Defined in: [lib/crf/export-r.ts:191](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L191)
+Defined in: [lib/crf/export-r.ts:288](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L288)
 
 Generates Factor definitions for study codelists.
 

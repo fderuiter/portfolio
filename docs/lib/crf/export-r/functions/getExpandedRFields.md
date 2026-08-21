@@ -8,7 +8,7 @@
 
 > **getExpandedRFields**(`field`, `study`, `usedNames?`): [`ExpandedRField`](../interfaces/ExpandedRField.md)[]
 
-Defined in: [lib/crf/export-r.ts:110](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L110)
+Defined in: [lib/crf/export-r.ts:204](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L204)
 
 ## Parameters
 

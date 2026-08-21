@@ -8,7 +8,7 @@
 
 > **exportFormToSas**(`form`, `study`, `options?`): `string`
 
-Defined in: [lib/crf/export-sas.ts:647](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L647)
+Defined in: [lib/crf/export-sas.ts:772](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L772)
 
 Exports a single form as a self-contained SAS program.
 

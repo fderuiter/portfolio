@@ -6,7 +6,7 @@
 
 # Interface: ExpandedRField
 
-Defined in: [lib/crf/export-r.ts:103](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L103)
+Defined in: [lib/crf/export-r.ts:197](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L197)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/export-r.ts:103](https://github.com/fderuiter/portfolio/blo
 
 > **field**: [`CRFField`](../../types/interfaces/CRFField.md)
 
-Defined in: [lib/crf/export-r.ts:104](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L104)
+Defined in: [lib/crf/export-r.ts:198](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L198)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/export-r.ts:104](https://github.com/fderuiter/portfolio/blo
 
 > `optional` **optionCode?**: `string`
 
-Defined in: [lib/crf/export-r.ts:106](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L106)
+Defined in: [lib/crf/export-r.ts:200](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L200)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/export-r.ts:106](https://github.com/fderuiter/portfolio/blo
 
 > `optional` **optLabel?**: `string`
 
-Defined in: [lib/crf/export-r.ts:107](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L107)
+Defined in: [lib/crf/export-r.ts:201](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L201)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/crf/export-r.ts:107](https://github.com/fderuiter/portfolio/blo
 
 > **varName**: `string`
 
-Defined in: [lib/crf/export-r.ts:105](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L105)
+Defined in: [lib/crf/export-r.ts:199](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-r.ts#L199)

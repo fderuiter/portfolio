@@ -42,4 +42,67 @@ describe("CRF Studio - CDISC ODM-XML v1.3.2 Serializer", () => {
     const xml = exportStudyToCdiscOdmXml(specialStudy);
     expect(xml).toContain("Phase III Study &lt;A &amp; B&gt; with &quot;quotes&quot; &amp; &apos;apostrophes&apos;");
   });
+
+  it("exports single-form edit check rules as ConditionDef elements and links them in ItemRefs", () => {
+    const studyWithRules = {
+      ...ONCOLOGY_RECIST_PRESET,
+      forms: ONCOLOGY_RECIST_PRESET.forms.map((f) => {
+        if (f.domain === "VS") {
+          return {
+            ...f,
+            rules: [
+              {
+                id: "rule_sysbp_high",
+                name: "High Systolic Blood Pressure Warning",
+                description: "Warn if Systolic BP >= 140 mmHg",
+                triggerFieldIds: ["f_sysbp"],
+                actionType: "raise_query" as const,
+                targetFieldId: "f_sysbp",
+                conditions: [{ fieldId: "f_sysbp", operator: "gte" as const, value: 140 }],
+                logicalOperator: "AND" as const,
+                querySeverity: "warning" as const,
+                queryMessage: "Systolic Blood Pressure is >= 140 mmHg.",
+              },
+            ],
+          };
+        }
+        return f;
+      }),
+    };
+
+    const xml = exportStudyToCdiscOdmXml(studyWithRules);
+
+    expect(xml).toContain('<ConditionDef OID="CND.rule_sysbp_high" Name="High Systolic Blood Pressure Warning">');
+    expect(xml).toContain("<FormalExpression Context=\"CRFStudio\">SYSBP &gt;= 140</FormalExpression>");
+    expect(xml).toContain('CollectionExceptionConditionOID="CND.rule_sysbp_high"');
+  });
+
+  it("excludes cross-visit rules from single-form ConditionDef export", () => {
+    const studyWithCrossVisit = {
+      ...ONCOLOGY_RECIST_PRESET,
+      forms: ONCOLOGY_RECIST_PRESET.forms.map((f) => {
+        if (f.domain === "VS") {
+          return {
+            ...f,
+            rules: [
+              {
+                id: "rule_cross_visit_check",
+                name: "Cross Visit Weight Delta Check",
+                description: "Compare weight to baseline screening visit",
+                triggerFieldIds: ["f_weight"],
+                actionType: "raise_query" as const,
+                targetFieldId: "f_weight",
+                conditions: [{ fieldId: "f_weight", crossVisitId: "v_screen", operator: "gte" as const, value: 100 }],
+                logicalOperator: "AND" as const,
+              },
+            ],
+          };
+        }
+        return f;
+      }),
+    };
+
+    const xml = exportStudyToCdiscOdmXml(studyWithCrossVisit);
+    expect(xml).not.toContain('<ConditionDef OID="CND.rule_cross_visit_check"');
+  });
 });

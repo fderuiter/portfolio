@@ -116,6 +116,12 @@ Re-exports [HighlightToken](../formula-linter/interfaces/HighlightToken.md)
 
 ***
 
+### isSingleFormRule
+
+Re-exports [isSingleFormRule](../expression-evaluator/functions/isSingleFormRule.md)
+
+***
+
 ### KNOWN\_MATH\_FUNCTIONS
 
 Re-exports [KNOWN_MATH_FUNCTIONS](../formula-linter/variables/KNOWN_MATH_FUNCTIONS.md)

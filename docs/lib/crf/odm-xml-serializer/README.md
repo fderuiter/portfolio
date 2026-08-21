@@ -12,4 +12,6 @@
 
 ## Functions
 
+- [compileConditionToOdm](functions/compileConditionToOdm.md)
+- [compileRuleToOdmExpression](functions/compileRuleToOdmExpression.md)
 - [exportStudyToCdiscOdmXml](functions/exportStudyToCdiscOdmXml.md)
