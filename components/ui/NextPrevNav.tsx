@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { IconArrowLeft, IconArrowRight, IconGridDots } from "@tabler/icons-react";
-import { useAudio } from "@/components/providers/AudioProvider";
+import { useSpatialAudioBounds } from "@/hooks/useSpatialAudioBounds";
 
 interface NavItemTarget {
   title: string;
@@ -25,17 +25,10 @@ export const NextPrevNav: React.FC<NextPrevNavProps> = ({
   backToHub,
   className = "",
 }) => {
-  const { playHover } = useAudio();
-
-  const handleHover = (e: React.MouseEvent<HTMLElement>) => {
-    if (typeof window === "undefined") return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const pan = ((rect.left + rect.width / 2) / window.innerWidth) * 2 - 1;
-    playHover(pan);
-  };
+  const { containerRef, handleHover } = useSpatialAudioBounds<HTMLDivElement>();
 
   return (
-    <div className={`w-full mt-16 pt-10 border-t border-zinc-900 ${className}`}>
+    <div ref={containerRef} className={`w-full mt-16 pt-10 border-t border-zinc-900 ${className}`}>
       {backToHub && (
         <div className="flex justify-center mb-6">
           <Link

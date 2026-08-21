@@ -22,9 +22,14 @@ export const fontConfigCache = new LRUCache<string, unknown>(100);
 
 let lastResizeTime = 0;
 if (typeof window !== "undefined") {
-  window.addEventListener("resize", () => {
+  const updateResizeTime = () => {
     lastResizeTime = Date.now();
-  });
+  };
+  window.addEventListener("resize", updateResizeTime);
+  if (typeof ResizeObserver !== "undefined" && document.documentElement) {
+    const rootObserver = new ResizeObserver(updateResizeTime);
+    rootObserver.observe(document.documentElement);
+  }
 }
 
 let stylesheetLoadedCache = false;

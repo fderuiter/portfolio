@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useResizeObserver } from "@/hooks/useResizeObserver";
+import { useSpatialAudioBounds } from "@/hooks/useSpatialAudioBounds";
 import {
   IconArrowUp,
   IconBrandGithub,
@@ -28,15 +29,10 @@ import { NewsletterForm } from "@/components/NewsletterForm";
 
 export const Footer: React.FC = () => {
   const pathname = usePathname();
-  const { playHover, playSuccess } = useAudio();
+  const { playSuccess } = useAudio();
   const { persona } = usePersona();
 
-  const handleHover = (e: React.MouseEvent<HTMLElement>) => {
-    if (typeof window === "undefined") return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const pan = ((rect.left + rect.width / 2) / window.innerWidth) * 2 - 1;
-    playHover(pan);
-  };
+  const { containerRef: spatialAudioBoundsRef, handleHover } = useSpatialAudioBounds<HTMLElement>();
 
   const scrollToTop = () => {
     if (typeof window !== "undefined") {
@@ -70,7 +66,7 @@ export const Footer: React.FC = () => {
       {/* Live Status Ticker & Interactive Mascot */}
       <FooterStatusTicker />
 
-      <div className="max-w-6xl mx-auto px-6 md:px-12 pt-12 pb-[max(4rem,env(safe-area-inset-bottom)+2rem)]">
+      <div ref={spatialAudioBoundsRef} className="max-w-6xl mx-auto px-6 md:px-12 pt-12 pb-[max(4rem,env(safe-area-inset-bottom)+2rem)]">
         {/* Main Grid */}
         <div className={`grid grid-cols-1 sm:grid-cols-2 ${persona === "technical" ? "lg:grid-cols-4" : "lg:grid-cols-5"} gap-10 lg:gap-8 mb-16`}>
           {/* Col 1: Brand & Bio */}

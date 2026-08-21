@@ -10,6 +10,7 @@ import { useSearch } from "@/components/providers/SearchProvider";
 import { usePersona } from "@/components/providers/PersonaProvider";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useResizeObserver } from "@/hooks/useResizeObserver";
+import { useSpatialAudioBounds } from "@/hooks/useSpatialAudioBounds";
 import {
   IconVolume,
   IconVolumeOff,
@@ -125,7 +126,7 @@ export const Navbar: React.FC = () => {
   const [activeSection, setActiveSection] = useState("hero");
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
-  const { volume, muted, profile, setVolume, setMuted, setProfile, playHover } = useAudio();
+  const { volume, muted, profile, setVolume, setMuted, setProfile } = useAudio();
   const { openSearch } = useSearch();
   const { persona, setPersona } = usePersona();
   const [showAudioPanel, setShowAudioPanel] = useState(false);
@@ -149,25 +150,28 @@ export const Navbar: React.FC = () => {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const navContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleLinkHover = (e: React.MouseEvent<HTMLElement>) => {
-    if (typeof window === "undefined") return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const pan = (rect.left + rect.width / 2) / window.innerWidth * 2 - 1;
-    playHover(pan);
-  };
+  const { containerRef: spatialAudioBoundsRef, handleHover: handleLinkHover } = useSpatialAudioBounds<HTMLDivElement>();
 
-  // 1. Scroll-driven backdrop color transition
+  // 1. Scroll-driven backdrop color transition via IntersectionObserver handle
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
+    if (typeof window === "undefined" || typeof IntersectionObserver === "undefined") return;
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    const sentinel = document.getElementById("nav-scroll-sentinel");
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsScrolled(!entry.isIntersecting);
+      },
+      {
+        rootMargin: "-20px 0px 0px 0px",
+        threshold: 0,
+      }
+    );
+
+    observer.observe(sentinel);
+
+    return () => observer.disconnect();
   }, []);
 
   // 2. Scroll Spy: active section observer
@@ -284,6 +288,9 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
+      {/* Scroll Sentinel for Backdrop Color Observer Handle */}
+      <div id="nav-scroll-sentinel" aria-hidden="true" className="absolute top-0 left-0 w-full h-[20px] pointer-events-none opacity-0" />
+
       {/* Navbar Container */}
       <header
         ref={headerObserverRef}
@@ -295,7 +302,10 @@ export const Navbar: React.FC = () => {
         )}
       >
         <div
-          ref={navContainerRef}
+          ref={(node) => {
+            (navContainerRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+            spatialAudioBoundsRef(node);
+          }}
           className="max-w-6xl mx-auto px-4 sm:px-6 md:px-12 flex justify-between items-center w-full"
         >
           {/* Logo / Wordmark */}

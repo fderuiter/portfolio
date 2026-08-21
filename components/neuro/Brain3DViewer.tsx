@@ -189,20 +189,37 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
     };
     animate();
 
-    const handleResize = () => {
-      if (!container || !renderer || !camera) return;
-      const w = container.clientWidth;
-      const h = container.clientHeight;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    };
+    let resizeObserver: ResizeObserver | null = null;
+    let resizeRAFId: number | null = null;
 
-    window.addEventListener("resize", handleResize);
+    if (typeof ResizeObserver !== "undefined" && container) {
+      resizeObserver = new ResizeObserver((entries) => {
+        if (!entries || entries.length === 0) return;
+        if (resizeRAFId !== null) return;
+        resizeRAFId = requestAnimationFrame(() => {
+          resizeRAFId = null;
+          if (!container || !renderer || !camera) return;
+          const entry = entries[0];
+          const w = Math.floor(entry.contentRect.width);
+          const h = Math.floor(entry.contentRect.height);
+          if (w > 0 && h > 0) {
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+          }
+        });
+      });
+      resizeObserver.observe(container);
+    }
 
     return () => {
       cancelAnimationFrame(animId);
-      window.removeEventListener("resize", handleResize);
+      if (resizeRAFId !== null) {
+        cancelAnimationFrame(resizeRAFId);
+      }
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
       bindCanvas(null);
       if (renderer) {
         renderer.dispose();

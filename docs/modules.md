@@ -19,6 +19,7 @@
 - [hooks/usePretextLayout](hooks/usePretextLayout/README.md)
 - [hooks/useResizeObserver](hooks/useResizeObserver/README.md)
 - [hooks/useResponsiveCanvas](hooks/useResponsiveCanvas/README.md)
+- [hooks/useSpatialAudioBounds](hooks/useSpatialAudioBounds/README.md)
 - [hooks/useStudioHashParams](hooks/useStudioHashParams/README.md)
 - [hooks/useTelemetry](hooks/useTelemetry/README.md)
 - [hooks/useTimelineState](hooks/useTimelineState/README.md)

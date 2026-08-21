@@ -55,7 +55,7 @@ describe("Audio Synthesizer & Sound Settings Engine", () => {
     expect(navbarContent).toContain('import { useAudio } from "@/components/providers/AudioProvider";');
     expect(navbarContent).toContain("SOUND: {muted ? \"OFF\" : profile.toUpperCase()}");
     expect(navbarContent).toContain("onMouseEnter={handleLinkHover}");
-    expect(navbarContent).toContain("const pan = (rect.left + rect.width / 2) / window.innerWidth * 2 - 1;");
+    expect(navbarContent).toContain("useSpatialAudioBounds");
   });
 
   it("should integrate terminal keystrokes, autocomplete and success audio feedback", () => {

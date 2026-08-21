@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { IconChevronRight, IconHome } from "@tabler/icons-react";
-import { useAudio } from "@/components/providers/AudioProvider";
+import { useSpatialAudioBounds } from "@/hooks/useSpatialAudioBounds";
 
 interface BreadcrumbCrumb {
   label: string;
@@ -16,7 +16,7 @@ interface BreadcrumbsProps {
 }
 
 export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className = "" }) => {
-  const { playHover } = useAudio();
+  const { containerRef, handleHover } = useSpatialAudioBounds<HTMLElement>();
 
   const isRootCrumb = (crumb: BreadcrumbCrumb) => {
     const labelLower = (crumb.label || "").trim().toLowerCase();
@@ -33,15 +33,9 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className = "" 
     ...filteredItems,
   ];
 
-  const handleHover = (e: React.MouseEvent<HTMLElement>) => {
-    if (typeof window === "undefined") return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const pan = ((rect.left + rect.width / 2) / window.innerWidth) * 2 - 1;
-    playHover(pan);
-  };
-
   return (
     <nav
+      ref={containerRef}
       aria-label="Breadcrumb"
       className={`flex items-center text-xs font-mono text-zinc-400 select-none ${className}`}
     >

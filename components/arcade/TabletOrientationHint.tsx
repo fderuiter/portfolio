@@ -28,12 +28,28 @@ export const TabletOrientationHint: React.FC<TabletOrientationHintProps> = ({
     };
 
     checkOrientation();
-    window.addEventListener("resize", checkOrientation);
-    window.addEventListener("orientationchange", checkOrientation);
+
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined" && document.documentElement) {
+      observer = new ResizeObserver(() => {
+        checkOrientation();
+      });
+      observer.observe(document.documentElement);
+    }
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("resize", checkOrientation);
+      window.addEventListener("orientationchange", checkOrientation);
+    }
 
     return () => {
-      window.removeEventListener("resize", checkOrientation);
-      window.removeEventListener("orientationchange", checkOrientation);
+      if (observer) {
+        observer.disconnect();
+      }
+      if (typeof window !== "undefined") {
+        window.removeEventListener("resize", checkOrientation);
+        window.removeEventListener("orientationchange", checkOrientation);
+      }
     };
   }, []);
 
