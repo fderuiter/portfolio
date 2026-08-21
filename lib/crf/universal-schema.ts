@@ -85,9 +85,61 @@ export const EditCheckRuleSchema = z.object({
 });
 export type UniversalEditCheckRule = z.infer<typeof EditCheckRuleSchema>;
 
-// 5. Recursive CRF Field Schema
+// 5. Study Arms, Epochs, Cohorts & Biomedical Concepts
+export const StudyArmSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  type: z.string().default("Experimental"),
+  description: z.string().optional(),
+  epochIds: z.array(z.string()).optional(),
+});
+export type UniversalStudyArm = z.infer<typeof StudyArmSchema>;
+
+export const StudyEpochSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  sequenceNumber: z.number().int().default(1),
+  type: z.string().optional(),
+  description: z.string().optional(),
+});
+export type UniversalStudyEpoch = z.infer<typeof StudyEpochSchema>;
+
+export const StudyCohortSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  armIds: z.array(z.string()).optional(),
+  targetSize: z.number().optional(),
+});
+export type UniversalStudyCohort = z.infer<typeof StudyCohortSchema>;
+
+export const BiomedicalConceptPropertySchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  code: z.string().optional(),
+  datatype: z.string().optional(),
+});
+export type UniversalBiomedicalConceptProperty = z.infer<typeof BiomedicalConceptPropertySchema>;
+
+export const BiomedicalConceptSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  conceptId: z.string().optional(),
+  code: z.string().optional(),
+  domain: z.string().optional(),
+  synonyms: z.array(z.string()).optional(),
+  properties: z.union([z.array(BiomedicalConceptPropertySchema), z.record(z.string(), z.unknown())]).optional(),
+  variableName: z.string().optional(),
+  dataType: z.string().optional(),
+  label: z.string().optional(),
+  unit: z.string().optional(),
+});
+export type UniversalBiomedicalConcept = z.infer<typeof BiomedicalConceptSchema>;
+
+// 6. Recursive CRF Field Schema
 export const BaseCRFFieldSchema = z.object({
   id: z.string().min(1),
+  conceptId: z.string().optional(),
   variableName: z.string().min(1).max(8),
   label: z.string().min(1),
   description: z.string().optional(),
@@ -167,6 +219,9 @@ export const UniversalCrfVisitSchema = z.object({
   formIds: z.array(z.string()).optional(),
   isRepeating: z.boolean().optional(),
   repeatMax: z.number().optional(),
+  epochId: z.string().optional(),
+  armIds: z.array(z.string()).optional(),
+  armFormAssignments: z.record(z.string(), z.array(z.string())).optional(),
 });
 export type UniversalCrfVisit = z.infer<typeof UniversalCrfVisitSchema>;
 
@@ -206,6 +261,10 @@ export const UniversalCrfProtocolSchema = z.object({
   codelists: z.array(CodelistDefinitionSchema).default([]),
   rules: z.array(EditCheckRuleSchema).optional(),
   branding: UniversalCrfBrandingSchema.optional(),
+  arms: z.array(StudyArmSchema).default([]),
+  epochs: z.array(StudyEpochSchema).default([]),
+  cohorts: z.array(StudyCohortSchema).default([]),
+  biomedicalConcepts: z.array(BiomedicalConceptSchema).default([]),
 });
 export type UniversalCrfProtocol = z.infer<typeof UniversalCrfProtocolSchema>;
 export const UniversalStudyProtocolSchema = UniversalCrfProtocolSchema;
@@ -432,6 +491,14 @@ export interface ProtocolDiffSummary {
   }>;
   addedVisits: string[];
   removedVisits: string[];
+  addedArms: string[];
+  removedArms: string[];
+  addedEpochs: string[];
+  removedEpochs: string[];
+  addedCohorts: string[];
+  removedCohorts: string[];
+  addedConcepts: string[];
+  removedConcepts: string[];
 }
 
 /**
@@ -523,12 +590,41 @@ export function diffUniversalCrfStudies(studyA: StudyProtocol, studyB: StudyProt
   const addedVisits = [...visitIdsB].filter((v) => !visitIdsA.has(v));
   const removedVisits = [...visitIdsA].filter((v) => !visitIdsB.has(v));
 
+  // Graph entities diffing
+  const armsA = new Set((studyA.arms || []).map((a) => a.id));
+  const armsB = new Set((studyB.arms || []).map((a) => a.id));
+  const addedArms = [...armsB].filter((a) => !armsA.has(a));
+  const removedArms = [...armsA].filter((a) => !armsB.has(a));
+
+  const epochsA = new Set((studyA.epochs || []).map((e) => e.id));
+  const epochsB = new Set((studyB.epochs || []).map((e) => e.id));
+  const addedEpochs = [...epochsB].filter((e) => !epochsA.has(e));
+  const removedEpochs = [...epochsA].filter((e) => !epochsB.has(e));
+
+  const cohortsA = new Set((studyA.cohorts || []).map((c) => c.id));
+  const cohortsB = new Set((studyB.cohorts || []).map((c) => c.id));
+  const addedCohorts = [...cohortsB].filter((c) => !cohortsA.has(c));
+  const removedCohorts = [...cohortsA].filter((c) => !cohortsB.has(c));
+
+  const conceptsA = new Set((studyA.biomedicalConcepts || []).map((c) => c.id));
+  const conceptsB = new Set((studyB.biomedicalConcepts || []).map((c) => c.id));
+  const addedConcepts = [...conceptsB].filter((c) => !conceptsA.has(c));
+  const removedConcepts = [...conceptsA].filter((c) => !conceptsB.has(c));
+
   const hasChanges =
     addedForms.length > 0 ||
     removedForms.length > 0 ||
     modifiedForms.length > 0 ||
     addedVisits.length > 0 ||
-    removedVisits.length > 0;
+    removedVisits.length > 0 ||
+    addedArms.length > 0 ||
+    removedArms.length > 0 ||
+    addedEpochs.length > 0 ||
+    removedEpochs.length > 0 ||
+    addedCohorts.length > 0 ||
+    removedCohorts.length > 0 ||
+    addedConcepts.length > 0 ||
+    removedConcepts.length > 0;
 
   return {
     protocolNumber: studyB.protocolNumber || "STUDY01",
@@ -538,5 +634,13 @@ export function diffUniversalCrfStudies(studyA: StudyProtocol, studyB: StudyProt
     modifiedForms,
     addedVisits,
     removedVisits,
+    addedArms,
+    removedArms,
+    addedEpochs,
+    removedEpochs,
+    addedCohorts,
+    removedCohorts,
+    addedConcepts,
+    removedConcepts,
   };
 }
