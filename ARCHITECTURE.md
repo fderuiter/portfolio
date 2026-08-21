@@ -461,8 +461,10 @@ To guarantee that technical specifications, API documentation, and internal arch
   - All API routes (`/api/telemetry`, `/api/telemetry/sync`, `/api/case-studies`) define declarative Zod contracts.
   - The OpenAPI generator (`scripts/generate-openapi.ts`) compiles these schemas into OpenAPI 3.0 specifications.
   - Automated route discovery enforces 100% route coverage, failing verification if any handler in `app/api/**/route.ts` lacks specification coverage.
-- **TypeDoc Markdown Parity (`docs/`):**
-  - Public hooks, types, and library symbols automatically compile to Markdown documentation via `npm run compile-docs`.
+- **TypeDoc Markdown Parity & API Documentation Compilation (`docs/`):**
+  - Public hooks, types, and library symbols automatically compile to Markdown documentation via the explicit CLI command `npm run compile-docs`.
+- **Local Documentation Drift Verification (`scripts/check-drift.ts`):**
+  - Contributors run `npm run check-docs-drift` prior to committing to detect uncommitted documentation mutations or undocumented API routes.
   - `scripts/check-drift.ts` verifies zero uncommitted modifications and zero untracked documentation files.
 - **DX Doctor Invariant Verification & One-Command Auto-Remediation:**
   - `npm run dx doctor` and `npm run verify` check documentation and API parity alongside 9 core architectural invariants.
