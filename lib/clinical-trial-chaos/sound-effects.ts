@@ -1,37 +1,28 @@
 /**
  * Audio helpers for retro chiptune SFX and procedural synth BGM in Clinical Trial Chaos.
- * Uses Web Audio oscillator synthesis with graceful degradation and zero external assets.
+ * Uses Web Audio oscillator synthesis with central AudioProvider governance.
  */
+import { useEffect } from "react";
 import { clamp } from "../game-utils";
+import {
+  getGovernedAudioContext,
+  getGovernedVolume,
+  isGovernedSoundAllowed,
+  registerAudioCleanup,
+} from "@/components/providers/AudioProvider";
 
-let globalAudioCtx: AudioContext | null = null;
 let bgmTimer: NodeJS.Timeout | number | null = null;
 let bgmStep = 0;
 let bgmTempoMs = 280; // milliseconds per beat
 let isBgmPlaying = false;
 
-function getAudioContext(): AudioContext | null {
-  if (typeof window === "undefined") return null;
-  try {
-    if (!globalAudioCtx) {
-      const AudioCtxClass =
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (AudioCtxClass) {
-        globalAudioCtx = new AudioCtxClass();
-      }
-    }
-    if (globalAudioCtx && globalAudioCtx.state === "suspended") {
-      globalAudioCtx.resume().catch(() => {});
-    }
-    return globalAudioCtx;
-  } catch {
-    return null;
-  }
-}
+// Register BGM stop with central governance cleanup registry
+registerAudioCleanup(() => {
+  stopProceduralBGM();
+});
 
 /**
- * Play a short custom synthetic beep/tone.
+ * Play a short custom synthetic beep/tone routed through AudioProvider governance.
  */
 export function playSyntheticTone(
   frequency: number,
@@ -39,17 +30,22 @@ export function playSyntheticTone(
   type: OscillatorType = "square",
   gainLevel = 0.15
 ) {
-  const ctx = getAudioContext();
+  if (!isGovernedSoundAllowed()) return;
+
+  const ctx = getGovernedAudioContext();
   if (!ctx) return;
 
   try {
+    const masterVolume = getGovernedVolume();
+    const effectiveGain = Math.max(0.0001, gainLevel * masterVolume);
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
     osc.type = type;
     osc.frequency.setValueAtTime(frequency, ctx.currentTime);
 
-    gain.gain.setValueAtTime(gainLevel, ctx.currentTime);
+    gain.gain.setValueAtTime(effectiveGain, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + durationSeconds);
 
     osc.connect(gain);
@@ -129,13 +125,17 @@ const BGM_BASS = [130.81, 146.83, 164.81, 130.81]; // C3, D3, E3, C3
  * Starts the procedural retro 8-bit chiptune background synth loop.
  */
 export function startProceduralBGM(initialTempoMs = 280) {
+  if (!isGovernedSoundAllowed()) return;
   if (isBgmPlaying) return;
   isBgmPlaying = true;
   bgmTempoMs = initialTempoMs;
   bgmStep = 0;
 
   const tickBgm = () => {
-    if (!isBgmPlaying) return;
+    if (!isBgmPlaying || !isGovernedSoundAllowed()) {
+      stopProceduralBGM();
+      return;
+    }
 
     // Play melody note
     const noteFreq = BGM_MELODY[bgmStep % BGM_MELODY.length];
@@ -164,12 +164,45 @@ export function updateBGMTempo(suspicion: number) {
 }
 
 /**
- * Stops procedural background music.
+ * Stops procedural background music and clears active timers.
  */
 export function stopProceduralBGM() {
   isBgmPlaying = false;
-  if (bgmTimer) {
+  if (bgmTimer !== null) {
     clearTimeout(bgmTimer as NodeJS.Timeout);
     bgmTimer = null;
   }
+}
+
+/**
+ * React hook to automatically stop procedural audio and clean up on component unmount.
+ */
+export function useClinicalAudioCleanup() {
+  useEffect(() => {
+    return () => {
+      stopProceduralBGM();
+    };
+  }, []);
+}
+
+/**
+ * React hook to manage procedural BGM lifecycle with automatic unmount cleanup.
+ */
+export function useProceduralBGM(enabled: boolean, suspicion = 0) {
+  useEffect(() => {
+    if (enabled && isGovernedSoundAllowed()) {
+      startProceduralBGM();
+    } else {
+      stopProceduralBGM();
+    }
+    return () => {
+      stopProceduralBGM();
+    };
+  }, [enabled]);
+
+  useEffect(() => {
+    if (enabled) {
+      updateBGMTempo(suspicion);
+    }
+  }, [enabled, suspicion]);
 }

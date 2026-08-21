@@ -13,3 +13,7 @@
 ## Variables
 
 - [retroAudio](variables/retroAudio.md)
+
+## Functions
+
+- [useRetroAudioCleanup](functions/useRetroAudioCleanup.md)

@@ -6,7 +6,7 @@
 
 # Interface: MockObservationTemplate
 
-Defined in: [lib/clinical-trial-chaos/scenarios.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L12)
+Defined in: [lib/clinical-trial-chaos/scenarios.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L13)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/clinical-trial-chaos/scenarios.ts:12](https://github.com/fderui
 
 > **corruptions**: `object`[]
 
-Defined in: [lib/clinical-trial-chaos/scenarios.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L17)
+Defined in: [lib/clinical-trial-chaos/scenarios.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L18)
 
 #### correctedValue
 
@@ -50,7 +50,7 @@ Defined in: [lib/clinical-trial-chaos/scenarios.ts:17](https://github.com/fderui
 
 > **destination**: [`CDISCDomain`](../../types/type-aliases/CDISCDomain.md)
 
-Defined in: [lib/clinical-trial-chaos/scenarios.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L14)
+Defined in: [lib/clinical-trial-chaos/scenarios.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L15)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: [lib/clinical-trial-chaos/scenarios.ts:14](https://github.com/fderui
 
 > **field**: `string`
 
-Defined in: [lib/clinical-trial-chaos/scenarios.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L13)
+Defined in: [lib/clinical-trial-chaos/scenarios.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L14)
 
 ***
 
@@ -66,7 +66,7 @@ Defined in: [lib/clinical-trial-chaos/scenarios.ts:13](https://github.com/fderui
 
 > **testCode**: `string`
 
-Defined in: [lib/clinical-trial-chaos/scenarios.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L16)
+Defined in: [lib/clinical-trial-chaos/scenarios.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L17)
 
 ***
 
@@ -74,4 +74,4 @@ Defined in: [lib/clinical-trial-chaos/scenarios.ts:16](https://github.com/fderui
 
 > **validValues**: `string`[]
 
-Defined in: [lib/clinical-trial-chaos/scenarios.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L15)
+Defined in: [lib/clinical-trial-chaos/scenarios.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L16)

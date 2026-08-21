@@ -25,17 +25,21 @@ vi.mock("react-dom", async () => {
   };
 });
 
-vi.mock("@/components/providers/AudioProvider", () => ({
-  useAudio: () => ({
-    playHover: vi.fn(),
-    playSubmit: vi.fn(),
-    playSuccess: vi.fn(),
-    playNote: vi.fn(),
-    volume: 0.3,
-    muted: false,
-  }),
-  AudioProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-}));
+vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/providers/AudioProvider")>();
+  return {
+    ...actual,
+    useAudio: () => ({
+      playHover: vi.fn(),
+      playSubmit: vi.fn(),
+      playSuccess: vi.fn(),
+      playNote: vi.fn(),
+      volume: 0.3,
+      muted: false,
+    }),
+    AudioProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+});
 
 // Mock Next.js router
 vi.mock("next/navigation", () => ({

@@ -8,7 +8,7 @@
 
 > **getStationsForPhase**(`phase`, `mode?`): [`StationConfig`](../../types/interfaces/StationConfig.md)[]
 
-Defined in: [lib/clinical-trial-chaos/scenarios.ts:631](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L631)
+Defined in: [lib/clinical-trial-chaos/scenarios.ts:632](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/scenarios.ts#L632)
 
 ## Parameters
 

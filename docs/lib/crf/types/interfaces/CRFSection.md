@@ -6,7 +6,7 @@
 
 # Interface: CRFSection
 
-Defined in: [lib/crf/types.ts:106](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L106)
+Defined in: [lib/crf/types.ts:152](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L152)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/types.ts:106](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **collapsible?**: `boolean`
 
-Defined in: [lib/crf/types.ts:110](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L110)
+Defined in: [lib/crf/types.ts:156](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L156)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/types.ts:110](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **description?**: `string`
 
-Defined in: [lib/crf/types.ts:109](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L109)
+Defined in: [lib/crf/types.ts:155](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L155)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/types.ts:109](https://github.com/fderuiter/portfolio/blob/m
 
 > **fields**: [`CRFField`](CRFField.md)[]
 
-Defined in: [lib/crf/types.ts:112](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L112)
+Defined in: [lib/crf/types.ts:158](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L158)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/types.ts:112](https://github.com/fderuiter/portfolio/blob/m
 
 > **id**: `string`
 
-Defined in: [lib/crf/types.ts:107](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L107)
+Defined in: [lib/crf/types.ts:153](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L153)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/crf/types.ts:107](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **isRepeating?**: `boolean`
 
-Defined in: [lib/crf/types.ts:111](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L111)
+Defined in: [lib/crf/types.ts:157](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L157)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [lib/crf/types.ts:111](https://github.com/fderuiter/portfolio/blob/m
 
 > **title**: `string`
 
-Defined in: [lib/crf/types.ts:108](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L108)
+Defined in: [lib/crf/types.ts:154](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L154)

@@ -8,7 +8,7 @@
 
 > **playValidationSound**(): `void`
 
-Defined in: [lib/clinical-trial-chaos/sound-effects.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L66)
+Defined in: [lib/clinical-trial-chaos/sound-effects.ts:62](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L62)
 
 Sound: Stamp / Validation Success (quick ascending 2-tone)
 

@@ -8,7 +8,7 @@
 
 > **playMemeSound**(`type`): `void`
 
-Defined in: [lib/meme-audio.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib/meme-audio.ts#L82)
+Defined in: [lib/meme-audio.ts:104](https://github.com/fderuiter/portfolio/blob/main/lib/meme-audio.ts#L104)
 
 ## Parameters
 

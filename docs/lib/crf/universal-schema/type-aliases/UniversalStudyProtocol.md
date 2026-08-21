@@ -8,4 +8,4 @@
 
 > **UniversalStudyProtocol** = [`UniversalCrfProtocol`](UniversalCrfProtocol.md)
 
-Defined in: [lib/crf/universal-schema.ts:212](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L212)
+Defined in: [lib/crf/universal-schema.ts:271](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L271)

@@ -86,6 +86,57 @@ Tailwind CSS v4 introduces a radical, **CSS-first configuration model**. As such
 - All Tailwind utilities are loaded via the `@import "tailwindcss";` directive located at the top of `app/globals.css`.
 - Any custom design tokens, colors, and typography (such as the Inter font) are managed natively via the new `@theme` and `@theme inline` CSS rules directly in `app/globals.css`.
 
+## Asset Build Scripts & Design Token Compiler Pipeline
+
+To eliminate hidden asset dependencies and provide zero-friction developer onboarding, asset generation and theme compilation workflows are exposed via standardized CLI commands.
+
+### 1. Brand Icon Rasterization Pipeline
+
+- **CLI Command:** `npm run build:icons` (or `npm run generate:icons` / `npx tsx scripts/dx.ts build:icons`)
+- **Script Target:** `scripts/generate-brand-icons.ts`
+- **Source Input Location:** Vector SVG artwork at `public/favicon.svg` (or `app/icon.svg`).
+- **Build Pipeline & Output Asset Targets:**
+  - **SVG Synchronization:** Reads source vector definitions and synchronizes `app/icon.svg` and `public/favicon.svg`.
+  - **Multi-Resolution ICO Container:** Utilizes `sharp` to rasterize the source vector into 16x16, 32x32, and 48x48 PNG buffers, then constructs a valid binary Windows ICO file container stored at `app/favicon.ico` and `public/favicon.ico`.
+  - **High-DPI iOS Touch Icon:** Rasterizes 180x180 PNG output targeting `public/apple-touch-icon.png`.
+  - **PWA Web App Manifest Icons:** Rasterizes 192x192 and 512x512 PNG outputs targeting `public/icon-192.png` and `public/icon-512.png`.
+
+```mermaid
+flowchart TD
+    A["Vector SVG Source<br/>(public/favicon.svg)"] --> B["Headless Sharp Rasterizer<br/>(scripts/generate-brand-icons.ts)"]
+    B --> C1["Vector SVG Sync<br/>(app/icon.svg & public/favicon.svg)"]
+    B --> C2["Binary ICO Container<br/>16px, 32px, 48px PNG Layers<br/>(app/favicon.ico & public/favicon.ico)"]
+    B --> C3["Apple Touch Icon<br/>180x180 PNG<br/>(public/apple-touch-icon.png)"]
+    B --> C4["PWA Manifest Icons<br/>192x192 & 512x512 PNG<br/>(public/icon-192.png & icon-512.png)"]
+```
+
+### 2. Design Token Compiler Pipeline
+
+- **CLI Command:** `npm run build:theme` (or `npm run generate:theme` / `npx tsx scripts/dx.ts build:theme`)
+- **Script Target:** `scripts/generate-theme.ts` (executed automatically during `predev`, `prebuild`, `pretest`, and `dx clean`)
+- **Source Input Location:** CSS custom properties declared within the `:root` block of `app/globals.css`.
+- **Compiler Pipeline Stages:**
+  - **AST / Regex Extraction:** Reads `app/globals.css` and isolates all `--var-name: value;` custom properties declared inside the `:root` selector.
+  - **Domain Token Normalization:** Maps raw CSS strings into distinct domain categories:
+    - `colors`: Palette colors (`background`, `foreground`, `surface-1`, `surface-2`, `border`, `brand-cyan`, `brand-blue`, `success`, `error`, `warning`).
+    - `typography`: Font stack constants (`sans`, `mono`) and text metric objects (`font-size-sm`, `line-height-sm`).
+    - `masonry`: LPT column scheduler thresholds (`layout-masonry-*`).
+    - `layout`: Spatial and component dimensions (`layout-*`).
+    - `breakpoints`: Viewport media query thresholds (`breakpoint-*`).
+    - `motion`: Framer Motion spring physics configurations (`motion-spring-*-stiffness`, `motion-spring-*-damping`).
+  - **Type Coercion & Validation:** Parses numeric string values into native JavaScript numbers, throwing actionable error diagnostics if malformed tokens are detected.
+  - **TypeScript Manifest Emission:** Generates an immutable, auto-documented TypeScript module declaring `export const designManifest = { ... } as const;` and writes it directly to `lib/design-manifest.ts`.
+- **Runtime Manifest Consumption:** `lib/design-manifest.ts` is imported across application components, Framer Motion animations, `@chenglou/pretext` text layout calculators, and Bento Grid schedulers, providing 100% type safety and eliminating runtime CSS custom property reads.
+
+```mermaid
+flowchart LR
+    A["CSS Custom Properties<br/>(app/globals.css :root)"] --> B["Theme Compiler Engine<br/>(scripts/generate-theme.ts)"]
+    B --> C1["Extract & Validate Tokens"]
+    C1 --> C2["Map Domain Categories<br/>(colors, layout, motion, typography)"]
+    C2 --> D["Emit TS Design Manifest<br/>(lib/design-manifest.ts)"]
+    D --> E["Runtime UI Ecosystem<br/>(Pretext, Bento Grid, Canvas 2D, Framer Motion)"]
+```
+
 ## Visual & Component Strategy
 
 ### "Copy-and-Paste" Component Model
