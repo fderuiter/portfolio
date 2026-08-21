@@ -1,7 +1,14 @@
 import { describe, it, expect } from "vitest";
-import { StudyAuditor, AuditDiagnostic, StudyAuditReport } from "@/lib/crf/study-auditor";
-import { StudyProtocol, CRFForm } from "@/lib/crf/types";
-import { getOncologyPresetSync, getStudyPresetsSync } from "@/lib/crf/presets/loader";
+import {
+  StudyAuditor,
+  AuditDiagnostic,
+  StudyAuditReport,
+} from "@/lib/crf/study-auditor";
+import { StudyProtocol, CRFForm, CRFField } from "@/lib/crf/types";
+import {
+  getOncologyPresetSync,
+  getStudyPresetsSync,
+} from "@/lib/crf/presets/loader";
 
 describe("StudyAuditor Domain Engine (TDD Red-Green-Refactor)", () => {
   const oncologyStudy: StudyProtocol = getOncologyPresetSync();
@@ -44,6 +51,7 @@ describe("StudyAuditor Domain Engine (TDD Red-Green-Refactor)", () => {
                     variableName: "LONGVARIABLENAME",
                     label: "Overlength Field",
                     dataType: "text",
+                    required: true,
                     columnSpan: 6,
                   },
                 ],
@@ -98,7 +106,8 @@ describe("StudyAuditor Domain Engine (TDD Red-Green-Refactor)", () => {
 
       const report = StudyAuditor.audit(unassignedStudy);
       const orphanDiag = report.diagnostics.find(
-        (d: AuditDiagnostic) => d.ruleId === "SD0005" || (d.tier === "soa" && d.formId === "f_orphan")
+        (d: AuditDiagnostic) =>
+          d.ruleId === "SD0005" || (d.tier === "soa" && d.formId === "f_orphan")
       );
 
       expect(orphanDiag).toBeDefined();
@@ -127,6 +136,7 @@ describe("StudyAuditor Domain Engine (TDD Red-Green-Refactor)", () => {
                     variableName: "SYSBP",
                     label: "Systolic BP",
                     dataType: "number",
+                    required: true,
                     columnSpan: 6,
                   },
                 ],
@@ -162,7 +172,8 @@ describe("StudyAuditor Domain Engine (TDD Red-Green-Refactor)", () => {
 
       const report = StudyAuditor.audit(brokenRuleStudy);
       const ruleDiag = report.diagnostics.find(
-        (d: AuditDiagnostic) => d.tier === "ast" && d.message.includes("non-existent trigger field")
+        (d: AuditDiagnostic) =>
+          d.tier === "ast" && d.message.includes("non-existent trigger field")
       );
 
       expect(ruleDiag).toBeDefined();
@@ -172,41 +183,75 @@ describe("StudyAuditor Domain Engine (TDD Red-Green-Refactor)", () => {
 
   describe("Form-Level Audit (StudyAuditor.auditForm)", () => {
     it("computes accurate health, SDV readiness, and CDASH conformance for individual forms", () => {
-      const dmForm = oncologyStudy.forms.find((f: CRFForm) => f.domain === "DM") || oncologyStudy.forms[0];
+      const dmForm =
+        oncologyStudy.forms.find((f: CRFForm) => f.domain === "DM") ||
+        oncologyStudy.forms[0];
       const formReport = StudyAuditor.auditForm(dmForm, oncologyStudy);
 
       expect(formReport).toBeDefined();
       expect(formReport.formId).toBe(dmForm.id);
       expect(formReport.health.totalFields).toBeGreaterThan(0);
-      expect(formReport.health.cdashConformancePercentage).toBeGreaterThanOrEqual(0);
-      expect(formReport.health.cdashConformancePercentage).toBeLessThanOrEqual(100);
+      expect(
+        formReport.health.cdashConformancePercentage
+      ).toBeGreaterThanOrEqual(0);
+      expect(formReport.health.cdashConformancePercentage).toBeLessThanOrEqual(
+        100
+      );
       expect(Array.isArray(formReport.diagnostics)).toBe(true);
     });
   });
 
   describe("Formula-Level Audit (StudyAuditor.auditFormula)", () => {
     it("validates valid arithmetic expressions with variable references", () => {
-      const fields = [
-        { id: "weight", variableName: "WEIGHT", label: "Weight", dataType: "number" as const, columnSpan: 6 },
-        { id: "height", variableName: "HEIGHT", label: "Height", dataType: "number" as const, columnSpan: 6 },
+      const fields: CRFField[] = [
+        {
+          id: "weight",
+          variableName: "WEIGHT",
+          label: "Weight",
+          dataType: "number",
+          required: true,
+          columnSpan: 6,
+        },
+        {
+          id: "height",
+          variableName: "HEIGHT",
+          label: "Height",
+          dataType: "number",
+          required: true,
+          columnSpan: 6,
+        },
       ];
 
-      const res = StudyAuditor.auditFormula("weight / ((height / 100) ^ 2)", fields);
+      const res = StudyAuditor.auditFormula(
+        "weight / ((height / 100) ^ 2)",
+        fields
+      );
       expect(res.isValid).toBe(true);
       expect(res.referencedVariables.length).toBe(2);
     });
 
     it("detects syntax errors, unbalanced parentheses, and division by zero", () => {
-      const fields = [
-        { id: "f1", variableName: "V1", label: "V1", dataType: "number" as const, columnSpan: 6 },
+      const fields: CRFField[] = [
+        {
+          id: "f1",
+          variableName: "V1",
+          label: "V1",
+          dataType: "number",
+          required: true,
+          columnSpan: 6,
+        },
       ];
 
       const unbalanced = StudyAuditor.auditFormula("(f1 + 10", fields);
       expect(unbalanced.isValid).toBe(false);
-      expect(unbalanced.diagnostics.some((d) => d.code === "UNMATCHED_LPAREN")).toBe(true);
+      expect(
+        unbalanced.diagnostics.some((d) => d.code === "UNMATCHED_LPAREN")
+      ).toBe(true);
 
       const divZero = StudyAuditor.auditFormula("f1 / 0", fields);
-      expect(divZero.diagnostics.some((d) => d.code === "DIVISION_BY_ZERO")).toBe(true);
+      expect(
+        divZero.diagnostics.some((d) => d.code === "DIVISION_BY_ZERO")
+      ).toBe(true);
     });
   });
 
@@ -232,6 +277,7 @@ describe("StudyAuditor Domain Engine (TDD Red-Green-Refactor)", () => {
                     variableName: "LONGVARNAMEEXCEEDING8",
                     label: "Long Name",
                     dataType: "text",
+                    required: true,
                     columnSpan: 6,
                   },
                 ],
@@ -255,12 +301,15 @@ describe("StudyAuditor Domain Engine (TDD Red-Green-Refactor)", () => {
       };
 
       const initialReport = StudyAuditor.audit(dirtyStudy);
-      expect(initialReport.summary.errors + initialReport.summary.warnings).toBeGreaterThan(0);
+      expect(
+        initialReport.summary.errors + initialReport.summary.warnings
+      ).toBeGreaterThan(0);
 
       const { protocol: fixedStudy, fixedCount } = initialReport.autoFixAll();
       expect(fixedCount).toBeGreaterThan(0);
 
       const cleanedReport = StudyAuditor.audit(fixedStudy);
+      expect(cleanedReport.summary.errors).toBe(0);
       // Truncated variable name should now be <= 8 chars
       const fixedField = fixedStudy.forms[0].sections[0].fields[0];
       expect(fixedField.variableName.length).toBeLessThanOrEqual(8);
@@ -275,7 +324,8 @@ describe("StudyAuditor Domain Engine (TDD Red-Green-Refactor)", () => {
       expect(presets.length).toBeGreaterThan(0);
 
       presets.forEach((preset) => {
-        const report = StudyAuditor.audit(preset);
+        const protocol = preset.study;
+        const report = StudyAuditor.audit(protocol);
         expect(report.health.totalFields).toBeGreaterThanOrEqual(0);
         expect(typeof report.score).toBe("number");
       });

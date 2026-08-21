@@ -21,12 +21,10 @@ import {
   IconMathFunction,
   IconClock,
   IconList,
-  IconCheck,
 } from "@tabler/icons-react";
 import {
   searchSlashCommands,
   SlashCommandItem,
-  ClinicalSmartBlockDefinition,
   instantiateSmartBlock,
   instantiateAtomicField,
 } from "@/lib/crf/smart-blocks-engine";
@@ -35,8 +33,15 @@ import { CRFSection, CRFField, EditCheckRule } from "@/lib/crf/types";
 export interface SlashCommandMenuProps {
   isOpen: boolean;
   onClose: () => void;
-  onInsertSmartBlock: (block: { section: CRFSection; rules: EditCheckRule[] }) => void;
-  onInsertField: (field: CRFField, targetSectionId?: string, targetIndex?: number) => void;
+  onInsertSmartBlock: (block: {
+    section: CRFSection;
+    rules: EditCheckRule[];
+  }) => void;
+  onInsertField: (
+    field: CRFField,
+    targetSectionId?: string,
+    targetIndex?: number
+  ) => void;
   onInsertSection: () => void;
   targetSectionId?: string;
   targetIndex?: number;
@@ -63,7 +68,9 @@ export const SlashCommandMenu: React.FC<SlashCommandMenuProps> = ({
 
   useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setQuery(initialQuery);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedIndex(0);
       setTimeout(() => {
         inputRef.current?.focus();
@@ -73,13 +80,16 @@ export const SlashCommandMenu: React.FC<SlashCommandMenuProps> = ({
   }, [isOpen, initialQuery]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedIndex(0);
   }, [query]);
 
   // Keep selected item visible during arrow navigation
   useEffect(() => {
     if (listRef.current) {
-      const selectedEl = listRef.current.querySelector<HTMLElement>(`[data-index="${selectedIndex}"]`);
+      const selectedEl = listRef.current.querySelector<HTMLElement>(
+        `[data-index="${selectedIndex}"]`
+      );
       if (selectedEl) {
         selectedEl.scrollIntoView({ block: "nearest" });
       }
@@ -104,10 +114,16 @@ export const SlashCommandMenu: React.FC<SlashCommandMenuProps> = ({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setSelectedIndex((prev) => (filteredCommands.length > 0 ? (prev + 1) % filteredCommands.length : 0));
+      setSelectedIndex((prev) =>
+        filteredCommands.length > 0 ? (prev + 1) % filteredCommands.length : 0
+      );
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setSelectedIndex((prev) => (filteredCommands.length > 0 ? (prev - 1 + filteredCommands.length) % filteredCommands.length : 0));
+      setSelectedIndex((prev) =>
+        filteredCommands.length > 0
+          ? (prev - 1 + filteredCommands.length) % filteredCommands.length
+          : 0
+      );
     } else if (e.key === "Enter") {
       e.preventDefault();
       const current = filteredCommands[selectedIndex];
@@ -167,7 +183,9 @@ export const SlashCommandMenu: React.FC<SlashCommandMenuProps> = ({
     }
   };
 
-  const smartBlocks = filteredCommands.filter((c) => c.category === "smart_block");
+  const smartBlocks = filteredCommands.filter(
+    (c) => c.category === "smart_block"
+  );
   const widgets = filteredCommands.filter((c) => c.category === "widget");
   const layouts = filteredCommands.filter((c) => c.category === "layout");
 
@@ -381,7 +399,9 @@ export const SlashCommandMenu: React.FC<SlashCommandMenuProps> = ({
             <span>↵ Select</span>
             <span>ESC Close</span>
           </div>
-          <span className="text-[10px] text-brand-cyan">Clinical Smart Blocks v2.0</span>
+          <span className="text-[10px] text-brand-cyan">
+            Clinical Smart Blocks v2.0
+          </span>
         </div>
       </div>
     </div>

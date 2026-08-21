@@ -8,7 +8,7 @@
 
 > **jettisonOldestVariable**(`state`): `object`
 
-Defined in: [lib/garmin-engine.ts:254](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L254)
+Defined in: [lib/garmin-engine.ts:264](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L264)
 
 Jettison (pop) the oldest variable in the heap
 

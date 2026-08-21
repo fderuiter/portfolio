@@ -6,9 +6,9 @@
 
 # Function: createCorticalSurfaceMeshBuffers()
 
-> **createCorticalSurfaceMeshBuffers**(`mode?`, `wireframe?`, `hemiFilter?`): [`RawGeometryBuffer`](../../types/interfaces/RawGeometryBuffer.md)[]
+> **createCorticalSurfaceMeshBuffers**(`mode?`, `_wireframe?`, `hemiFilter?`): [`RawGeometryBuffer`](../../types/interfaces/RawGeometryBuffer.md)[]
 
-Defined in: [lib/neuro/mesh-generator.ts:403](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/mesh-generator.ts#L403)
+Defined in: [lib/neuro/mesh-generator.ts:495](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/mesh-generator.ts#L495)
 
 Procedurally generates raw cortical surface geometry array buffers synchronously.
 
@@ -18,7 +18,7 @@ Procedurally generates raw cortical surface geometry array buffers synchronously
 
 [`SurfaceMode`](../../types/type-aliases/SurfaceMode.md) = `"pial"`
 
-### wireframe?
+### \_wireframe?
 
 `boolean` = `false`
 

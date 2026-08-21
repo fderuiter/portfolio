@@ -6,7 +6,7 @@
 
 # Interface: UsdmStudy
 
-Defined in: [lib/crf/usdm-adapter.ts:103](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L103)
+Defined in: [lib/crf/usdm-adapter.ts:111](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L111)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/usdm-adapter.ts:103](https://github.com/fderuiter/portfolio
 
 > `optional` **activities?**: [`UsdmActivity`](UsdmActivity.md)[]
 
-Defined in: [lib/crf/usdm-adapter.ts:119](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L119)
+Defined in: [lib/crf/usdm-adapter.ts:127](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L127)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/usdm-adapter.ts:119](https://github.com/fderuiter/portfolio
 
 > `optional` **arms?**: [`UsdmArm`](UsdmArm.md)[]
 
-Defined in: [lib/crf/usdm-adapter.ts:115](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L115)
+Defined in: [lib/crf/usdm-adapter.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L123)
 
 ***
 
@@ -30,7 +30,23 @@ Defined in: [lib/crf/usdm-adapter.ts:115](https://github.com/fderuiter/portfolio
 
 > `optional` **biomedicalConcepts?**: [`UsdmBiomedicalConcept`](UsdmBiomedicalConcept.md)[]
 
-Defined in: [lib/crf/usdm-adapter.ts:120](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L120)
+Defined in: [lib/crf/usdm-adapter.ts:128](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L128)
+
+***
+
+### codelists?
+
+> `optional` **codelists?**: [`CodelistDefinition`](../../types/interfaces/CodelistDefinition.md)[]
+
+Defined in: [lib/crf/usdm-adapter.ts:131](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L131)
+
+***
+
+### codeLists?
+
+> `optional` **codeLists?**: [`CodelistDefinition`](../../types/interfaces/CodelistDefinition.md)[] \| `Record`\<`string`, `unknown`\>[]
+
+Defined in: [lib/crf/usdm-adapter.ts:129](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L129)
 
 ***
 
@@ -38,7 +54,7 @@ Defined in: [lib/crf/usdm-adapter.ts:120](https://github.com/fderuiter/portfolio
 
 > `optional` **cohorts?**: [`UsdmCohort`](UsdmCohort.md)[]
 
-Defined in: [lib/crf/usdm-adapter.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L117)
+Defined in: [lib/crf/usdm-adapter.ts:125](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L125)
 
 ***
 
@@ -46,7 +62,7 @@ Defined in: [lib/crf/usdm-adapter.ts:117](https://github.com/fderuiter/portfolio
 
 > `optional` **encounters?**: [`UsdmEncounter`](UsdmEncounter.md)[]
 
-Defined in: [lib/crf/usdm-adapter.ts:118](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L118)
+Defined in: [lib/crf/usdm-adapter.ts:126](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L126)
 
 ***
 
@@ -54,7 +70,7 @@ Defined in: [lib/crf/usdm-adapter.ts:118](https://github.com/fderuiter/portfolio
 
 > `optional` **epochs?**: [`UsdmEpoch`](UsdmEpoch.md)[]
 
-Defined in: [lib/crf/usdm-adapter.ts:116](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L116)
+Defined in: [lib/crf/usdm-adapter.ts:124](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L124)
 
 ***
 
@@ -62,7 +78,7 @@ Defined in: [lib/crf/usdm-adapter.ts:116](https://github.com/fderuiter/portfolio
 
 > **id**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:104](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L104)
+Defined in: [lib/crf/usdm-adapter.ts:112](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L112)
 
 ***
 
@@ -70,7 +86,7 @@ Defined in: [lib/crf/usdm-adapter.ts:104](https://github.com/fderuiter/portfolio
 
 > `optional` **lastModified?**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:113](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L113)
+Defined in: [lib/crf/usdm-adapter.ts:121](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L121)
 
 ***
 
@@ -78,7 +94,7 @@ Defined in: [lib/crf/usdm-adapter.ts:113](https://github.com/fderuiter/portfolio
 
 > `optional` **name?**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:105](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L105)
+Defined in: [lib/crf/usdm-adapter.ts:113](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L113)
 
 ***
 
@@ -86,7 +102,7 @@ Defined in: [lib/crf/usdm-adapter.ts:105](https://github.com/fderuiter/portfolio
 
 > `optional` **phase?**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:109](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L109)
+Defined in: [lib/crf/usdm-adapter.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L117)
 
 ***
 
@@ -94,7 +110,7 @@ Defined in: [lib/crf/usdm-adapter.ts:109](https://github.com/fderuiter/portfolio
 
 > `optional` **protocolId?**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:108](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L108)
+Defined in: [lib/crf/usdm-adapter.ts:116](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L116)
 
 ***
 
@@ -102,7 +118,15 @@ Defined in: [lib/crf/usdm-adapter.ts:108](https://github.com/fderuiter/portfolio
 
 > `optional` **protocolNumber?**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:107](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L107)
+Defined in: [lib/crf/usdm-adapter.ts:115](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L115)
+
+***
+
+### rules?
+
+> `optional` **rules?**: [`EditCheckRule`](../../types/interfaces/EditCheckRule.md)[]
+
+Defined in: [lib/crf/usdm-adapter.ts:132](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L132)
 
 ***
 
@@ -110,7 +134,7 @@ Defined in: [lib/crf/usdm-adapter.ts:107](https://github.com/fderuiter/portfolio
 
 > `optional` **sponsor?**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:110](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L110)
+Defined in: [lib/crf/usdm-adapter.ts:118](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L118)
 
 ***
 
@@ -118,7 +142,7 @@ Defined in: [lib/crf/usdm-adapter.ts:110](https://github.com/fderuiter/portfolio
 
 > `optional` **studyDesigns?**: [`UsdmStudyDesign`](UsdmStudyDesign.md)[]
 
-Defined in: [lib/crf/usdm-adapter.ts:114](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L114)
+Defined in: [lib/crf/usdm-adapter.ts:122](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L122)
 
 ***
 
@@ -126,7 +150,7 @@ Defined in: [lib/crf/usdm-adapter.ts:114](https://github.com/fderuiter/portfolio
 
 > `optional` **therapeuticArea?**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:111](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L111)
+Defined in: [lib/crf/usdm-adapter.ts:119](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L119)
 
 ***
 
@@ -134,7 +158,15 @@ Defined in: [lib/crf/usdm-adapter.ts:111](https://github.com/fderuiter/portfolio
 
 > `optional` **title?**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:106](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L106)
+Defined in: [lib/crf/usdm-adapter.ts:114](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L114)
+
+***
+
+### valueSets?
+
+> `optional` **valueSets?**: `Record`\<`string`, `unknown`\>[]
+
+Defined in: [lib/crf/usdm-adapter.ts:130](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L130)
 
 ***
 
@@ -142,4 +174,4 @@ Defined in: [lib/crf/usdm-adapter.ts:106](https://github.com/fderuiter/portfolio
 
 > `optional` **version?**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:112](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L112)
+Defined in: [lib/crf/usdm-adapter.ts:120](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L120)

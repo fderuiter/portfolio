@@ -8,7 +8,7 @@
 
 > **updateIceBlocksAndCollisions**(`iceBlocks`, `targets`, `dt`, `mode`, `gravity`, `width?`, `height?`): [`IceCollisionResult`](../interfaces/IceCollisionResult.md)
 
-Defined in: [lib/laser-loon/engine.ts:278](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L278)
+Defined in: [lib/laser-loon/engine.ts:297](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L297)
 
 ## Parameters
 

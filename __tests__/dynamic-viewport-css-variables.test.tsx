@@ -33,7 +33,6 @@ vi.mock("@/components/providers/AudioProvider", () => ({
     muted: false,
     profile: "synth",
   }),
-  registerAudioCleanup: vi.fn(),
 }));
 
 vi.mock("@/components/providers/SearchProvider", () => ({
@@ -79,8 +78,12 @@ describe("Dynamic Viewport Heights & CSS Custom Variable Space Contract", () => 
         }
       });
 
-      expect(document.documentElement.style.getPropertyValue("--header-height")).toBe("72px");
-      expect(document.documentElement.style.getPropertyValue("--navbar-height")).toBe("72px");
+      expect(
+        document.documentElement.style.getPropertyValue("--header-height")
+      ).toBe("72px");
+      expect(
+        document.documentElement.style.getPropertyValue("--navbar-height")
+      ).toBe("72px");
     });
 
     it("FooterStatusTicker exposes --footer-height and --ticker-height CSS properties when observed", async () => {
@@ -94,8 +97,12 @@ describe("Dynamic Viewport Heights & CSS Custom Variable Space Contract", () => 
         }
       });
 
-      expect(document.documentElement.style.getPropertyValue("--footer-height")).toBe("44px");
-      expect(document.documentElement.style.getPropertyValue("--ticker-height")).toBe("44px");
+      expect(
+        document.documentElement.style.getPropertyValue("--footer-height")
+      ).toBe("44px");
+      expect(
+        document.documentElement.style.getPropertyValue("--ticker-height")
+      ).toBe("44px");
     });
   });
 
@@ -117,7 +124,9 @@ describe("Dynamic Viewport Heights & CSS Custom Variable Space Contract", () => 
         </PlayCabinet>
       );
 
-      const launchBtn = screen.getByRole("button", { name: /launch|play|start/i });
+      const launchBtn = screen.getByRole("button", {
+        name: /launch|play|start/i,
+      });
       await act(async () => {
         launchBtn.click();
         await Promise.resolve();

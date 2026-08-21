@@ -2,11 +2,12 @@ import {
   StudyProtocol,
   CRFForm,
   CRFField,
-  ComplianceViolation,
-  ComplianceSeverity,
   CdashVariableMetadata,
 } from "@/lib/crf/types";
-import { CDASH_CORE_DOMAIN_VARIABLES } from "@/lib/crf/form-health";
+import {
+  CDASH_STANDARD_VARIABLES,
+  STANDARD_CODELISTS,
+} from "@/lib/crf/cdisc-cdash-library";
 import { lintFormula, FormulaLintResult } from "@/lib/crf/formula-linter";
 
 /**
@@ -34,7 +35,12 @@ export interface AuditDiagnostic {
   ruleDescription?: string;
   message: string;
   autoFixAvailable: boolean;
-  autoFixType?: "truncate_variable" | "add_core_variable" | "assign_nci_codelist" | "fix_date_format" | "assign_visit_form";
+  autoFixType?:
+    | "truncate_variable"
+    | "add_core_variable"
+    | "assign_nci_codelist"
+    | "fix_date_format"
+    | "assign_visit_form";
   suggestedFix?: string;
 }
 
@@ -106,15 +112,18 @@ export class StudyAuditor {
 
     const forms = study.forms || [];
     const visits = study.visits || [];
-    const codelists = study.codelists || [];
 
-    const codelistMap = new Map(codelists.map((c) => [c.id, c]));
     const assignedFormIds = new Set<string>();
     visits.forEach((v) => {
-      (v.assignedFormIds || v.formIds || []).forEach((id) => assignedFormIds.add(id));
+      (v.assignedFormIds || v.formIds || []).forEach((id) =>
+        assignedFormIds.add(id)
+      );
     });
 
-    const variableOccurrenceMap = new Map<string, Array<{ formId: string; fieldId: string }>>();
+    const variableOccurrenceMap = new Map<
+      string,
+      Array<{ formId: string; fieldId: string }>
+    >();
 
     // 1. Audit Forms, Sections, and Fields
     forms.forEach((form) => {
@@ -126,8 +135,13 @@ export class StudyAuditor {
           formFields.push(field);
           totalFields++;
           if (field.required) mandatoryFields++;
-          if (field.codelistId || (field.options && field.options.length > 0)) codelistsAttached++;
-          if (field.dataType === "calculated" || field.formulaExpression) calculatedFields++;
+          if (
+            field.codelistId ||
+            (field.customOptions && field.customOptions.length > 0)
+          )
+            codelistsAttached++;
+          if (field.dataType === "calculated" || field.calculationFormula)
+            calculatedFields++;
           if (field.sdvVerified) sdvVerifiedCount++;
 
           // Tier 1: AST / Syntax linting
@@ -156,7 +170,8 @@ export class StudyAuditor {
                 tier: "cdash",
                 severity: "error",
                 ruleId: "SD0001",
-                ruleDescription: "Variable name exceeds 8-character CDISC SDTM/CDASH limit",
+                ruleDescription:
+                  "Variable name exceeds 8-character CDISC SDTM/CDASH limit",
                 formId: form.id,
                 formName: form.name,
                 fieldId: field.id,
@@ -170,14 +185,24 @@ export class StudyAuditor {
           }
 
           // Rule SD0003: Choice fields missing controlled terminology
-          const isChoiceType = ["single_select", "multi_select", "radio", "checkbox"].includes(field.dataType);
-          if (isChoiceType && !field.codelistId && (!field.options || field.options.length === 0)) {
+          const isChoiceType = [
+            "single_select",
+            "multi_select",
+            "radio",
+            "checkbox",
+          ].includes(field.dataType);
+          if (
+            isChoiceType &&
+            !field.codelistId &&
+            (!field.customOptions || field.customOptions.length === 0)
+          ) {
             diagnostics.push({
               id: `SD0003_${form.id}_${field.id}`,
               tier: "cdash",
               severity: "warning",
               ruleId: "SD0003",
-              ruleDescription: "Choice field missing controlled terminology (NCI Codelist)",
+              ruleDescription:
+                "Choice field missing controlled terminology (NCI Codelist)",
               formId: form.id,
               formName: form.name,
               fieldId: field.id,
@@ -185,20 +210,27 @@ export class StudyAuditor {
               message: `Choice field "${field.label}" has no attached codelist or discrete choice options.`,
               autoFixAvailable: true,
               autoFixType: "assign_nci_codelist",
-              suggestedFix: "Attach standard NCI codelist or generate default choice options.",
+              suggestedFix:
+                "Attach standard NCI codelist or generate default choice options.",
             });
           }
 
           // Rule SD0004: Date defaults not in ISO 8601 format (YYYY-MM-DD)
-          if (["date", "datetime", "precision_date"].includes(field.dataType) && field.defaultValue) {
-            const isIso = /^\d{4}(-\d{2}(-\d{2})?)?$/.test(String(field.defaultValue));
+          if (
+            ["date", "datetime", "precision_date"].includes(field.dataType) &&
+            field.defaultValue
+          ) {
+            const isIso = /^\d{4}(-\d{2}(-\d{2})?)?$/.test(
+              String(field.defaultValue)
+            );
             if (!isIso) {
               diagnostics.push({
                 id: `SD0004_${form.id}_${field.id}`,
                 tier: "cdash",
                 severity: "warning",
                 ruleId: "SD0004",
-                ruleDescription: "Date default value not compliant with ISO 8601",
+                ruleDescription:
+                  "Date default value not compliant with ISO 8601",
                 formId: form.id,
                 formName: form.name,
                 fieldId: field.id,
@@ -215,11 +247,15 @@ export class StudyAuditor {
 
       // Tier 2: CDASH Rule SD0002 (Missing Core variables for domain)
       const domain = form.domain?.toUpperCase();
-      const domainMetadata = CDASH_CORE_DOMAIN_VARIABLES[domain];
-      if (domainMetadata) {
-        const presentVars = new Set(formFields.map((f) => f.variableName?.trim().toUpperCase()));
+      const domainMetadata = CDASH_STANDARD_VARIABLES[domain];
+      if (domainMetadata && Array.isArray(domainMetadata)) {
+        const presentVars = new Set(
+          formFields.map((f) => f.variableName?.trim().toUpperCase())
+        );
         const missingCore = domainMetadata.filter(
-          (v: CdashVariableMetadata) => (v.core === "HR" || v.core === "R") && !presentVars.has(v.sdtmVariable)
+          (v: CdashVariableMetadata) =>
+            (v.core === "HR" || v.core === "R") &&
+            !presentVars.has(v.sdtmVariable)
         );
 
         missingCore.forEach((coreVar: CdashVariableMetadata) => {
@@ -248,13 +284,15 @@ export class StudyAuditor {
           tier: "soa",
           severity: "warning",
           ruleId: "SD0005",
-          ruleDescription: "Form is orphaned and not assigned to any visit in Schedule of Activities",
+          ruleDescription:
+            "Form is orphaned and not assigned to any visit in Schedule of Activities",
           formId: form.id,
           formName: form.name,
           message: `Form "${form.name}" is not scheduled in any study visit. It will not be collected in the EDC workflow.`,
           autoFixAvailable: true,
           autoFixType: "assign_visit_form",
-          suggestedFix: "Assign this form to the primary baseline/screening visit.",
+          suggestedFix:
+            "Assign this form to the primary baseline/screening visit.",
         });
       }
 
@@ -314,11 +352,22 @@ export class StudyAuditor {
     });
 
     // Compute Health and Scoring
-    const sdvReadiness = totalFields > 0 ? Math.round((sdvVerifiedCount / totalFields) * 100) : 0;
-    const totalExpectedCore = Object.values(CDASH_CORE_DOMAIN_VARIABLES).reduce((sum, vars) => sum + vars.length, 0);
+    const sdvReadiness =
+      totalFields > 0 ? Math.round((sdvVerifiedCount / totalFields) * 100) : 0;
+    const totalExpectedCore = Object.values(CDASH_STANDARD_VARIABLES).reduce(
+      (sum, vars) => sum + vars.length,
+      0
+    );
     const cdashConformance =
       totalExpectedCore > 0
-        ? Math.max(0, Math.round(((totalExpectedCore - allMissingCoreVariables.size) / totalExpectedCore) * 100))
+        ? Math.max(
+            0,
+            Math.round(
+              ((totalExpectedCore - allMissingCoreVariables.size) /
+                totalExpectedCore) *
+                100
+            )
+          )
         : 100;
 
     const errors = diagnostics.filter((d) => d.severity === "error").length;
@@ -352,7 +401,8 @@ export class StudyAuditor {
         infos,
         fixable,
       },
-      autoFix: (diagnosticId: string) => StudyAuditor.applyAutoFix(study, diagnosticId),
+      autoFix: (diagnosticId: string) =>
+        StudyAuditor.applyAutoFix(study, diagnosticId),
       autoFixAll: () => StudyAuditor.applyAutoFixAll(study, diagnostics),
     };
   }
@@ -360,18 +410,28 @@ export class StudyAuditor {
   /**
    * Audits an individual CRF Form.
    */
-  public static auditForm(form: CRFForm, studyContext?: StudyProtocol): FormAuditReport {
+  public static auditForm(
+    form: CRFForm,
+    studyContext?: StudyProtocol
+  ): FormAuditReport {
     const syntheticStudy: StudyProtocol = studyContext || {
       id: "synthetic_study",
       protocolNumber: "SYNTH-001",
       studyName: "Single Form Context",
+      phase: "Phase III",
+      sponsor: "Synthetic Sponsor",
+      therapeuticArea: "Oncology",
+      version: "1.0",
+      lastModified: new Date().toISOString(),
       forms: [form],
       visits: [],
       codelists: [],
     };
 
     const fullReport = StudyAuditor.audit(syntheticStudy);
-    const formDiagnostics = fullReport.diagnostics.filter((d) => d.formId === form.id);
+    const formDiagnostics = fullReport.diagnostics.filter(
+      (d) => d.formId === form.id
+    );
 
     return {
       formId: form.id,
@@ -385,14 +445,20 @@ export class StudyAuditor {
   /**
    * Evaluates and tokenizes an arithmetic formula expression against a list of fields.
    */
-  public static auditFormula(formula: string, fields: CRFField[]): FormulaLintResult {
+  public static auditFormula(
+    formula: string,
+    fields: CRFField[]
+  ): FormulaLintResult {
     return lintFormula(formula, fields);
   }
 
   /**
    * Applies an individual 1-click auto-fix remediation to a StudyProtocol instance.
    */
-  public static applyAutoFix(study: StudyProtocol, diagnosticId: string): StudyProtocol {
+  public static applyAutoFix(
+    study: StudyProtocol,
+    diagnosticId: string
+  ): StudyProtocol {
     const report = StudyAuditor.audit(study);
     const target = report.diagnostics.find((d) => d.id === diagnosticId);
     if (!target || !target.autoFixAvailable) {
@@ -401,7 +467,11 @@ export class StudyAuditor {
 
     const cloned: StudyProtocol = JSON.parse(JSON.stringify(study));
 
-    if (target.autoFixType === "truncate_variable" && target.fieldId && target.formId) {
+    if (
+      target.autoFixType === "truncate_variable" &&
+      target.fieldId &&
+      target.formId
+    ) {
       const form = cloned.forms.find((f) => f.id === target.formId);
       if (form) {
         form.sections.forEach((sec) => {
@@ -423,22 +493,34 @@ export class StudyAuditor {
       }
     }
 
-    if (target.autoFixType === "assign_nci_codelist" && target.fieldId && target.formId) {
+    if (
+      target.autoFixType === "assign_nci_codelist" &&
+      target.fieldId &&
+      target.formId
+    ) {
       const form = cloned.forms.find((f) => f.id === target.formId);
       if (form) {
         form.sections.forEach((sec) => {
           const fld = sec.fields.find((f) => f.id === target.fieldId);
-          if (fld && (!fld.options || fld.options.length === 0)) {
-            fld.options = [
-              { code: "Y", label: "Yes", order: 1 },
-              { code: "N", label: "No", order: 2 },
-            ];
+          if (fld && (!fld.customOptions || fld.customOptions.length === 0)) {
+            const nyCodelist = STANDARD_CODELISTS.find((c) => c.id === "CL_NY");
+            fld.codelistId = "CL_NY";
+            fld.customOptions = nyCodelist
+              ? nyCodelist.options
+              : [
+                  { code: "Y", label: "Yes", order: 1 },
+                  { code: "N", label: "No", order: 2 },
+                ];
           }
         });
       }
     }
 
-    if (target.autoFixType === "fix_date_format" && target.fieldId && target.formId) {
+    if (
+      target.autoFixType === "fix_date_format" &&
+      target.fieldId &&
+      target.formId
+    ) {
       const form = cloned.forms.find((f) => f.id === target.formId);
       if (form) {
         form.sections.forEach((sec) => {
@@ -455,7 +537,11 @@ export class StudyAuditor {
       }
     }
 
-    if (target.autoFixType === "add_core_variable" && target.variableName && target.formId) {
+    if (
+      target.autoFixType === "add_core_variable" &&
+      target.variableName &&
+      target.formId
+    ) {
       const form = cloned.forms.find((f) => f.id === target.formId);
       if (form && form.sections.length > 0) {
         const targetSection = form.sections[0];

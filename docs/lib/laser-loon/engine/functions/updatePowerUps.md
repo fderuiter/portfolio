@@ -8,7 +8,7 @@
 
 > **updatePowerUps**(`powerUps`, `dt`, `loonX`, `loonY`, `loonRadius?`): `object`
 
-Defined in: [lib/laser-loon/engine.ts:212](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L212)
+Defined in: [lib/laser-loon/engine.ts:231](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L231)
 
 ## Parameters
 

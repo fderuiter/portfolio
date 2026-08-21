@@ -8,7 +8,7 @@
 
 > **stepBathtubGame**(`state`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:1720](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1720)
+Defined in: [lib/working-with-duck-engine.ts:1821](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1821)
 
 ## Parameters
 

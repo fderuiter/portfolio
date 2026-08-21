@@ -8,7 +8,7 @@
 
 > **updateTargetsPosition**(`targets`, `dt`, `mode`, `gravity`, `height?`, `width?`): [`Target`](../../types/interfaces/Target.md)[]
 
-Defined in: [lib/laser-loon/engine.ts:352](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L352)
+Defined in: [lib/laser-loon/engine.ts:371](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L371)
 
 ## Parameters
 

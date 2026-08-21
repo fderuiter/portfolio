@@ -8,7 +8,7 @@
 
 > **createExplosionParticles**(`x`, `y`, `color`, `count?`, `isIce?`, `isStar?`): [`Particle`](../../types/interfaces/Particle.md)[]
 
-Defined in: [lib/laser-loon/engine.ts:561](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L561)
+Defined in: [lib/laser-loon/engine.ts:584](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L584)
 
 ## Parameters
 

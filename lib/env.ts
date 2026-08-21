@@ -5,8 +5,13 @@ import { z } from "zod";
  * Secret keys that must never be exposed to the browser.
  */
 export const serverEnvSchema = z.object({
-  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  VERCEL_ENV: z.enum(["production", "preview", "development"]).optional().or(z.literal("")),
+  NODE_ENV: z
+    .enum(["development", "production", "test"])
+    .default("development"),
+  VERCEL_ENV: z
+    .enum(["production", "preview", "development"])
+    .optional()
+    .or(z.literal("")),
   DATABASE_URL: z.string().optional(),
   DATABASE_URL_UNPOOLED: z.string().optional(),
   DIRECT_URL: z.string().optional(),
@@ -35,7 +40,9 @@ export const serverEnvSchema = z.object({
   ADMIN_EMAILS: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
   RESEND_WEBHOOK_SECRET: z.string().optional(),
-  RESEND_FROM_EMAIL: z.string().default("Frederick de Ruiter <notifications@deruiter.dev>"),
+  RESEND_FROM_EMAIL: z
+    .string()
+    .default("Frederick de Ruiter <notifications@deruiter.dev>"),
   CONTACT_NOTIFICATION_EMAIL: z.string().default("fpderuiter@gmail.com"),
   PLAYWRIGHT_TEST: z.string().optional(),
   CI: z.string().optional(),
@@ -52,9 +59,9 @@ export const serverEnvSchema = z.object({
  * Safe to be bundled and exposed in the browser.
  */
 export const clientEnvSchema = z.object({
-  NEXT_PUBLIC_APP_URL: z.string().url().optional(),
-  NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
-  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().optional(),
+  NEXT_PUBLIC_APP_URL: z.string().url().optional().or(z.literal("")),
+  NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional().or(z.literal("")),
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().optional().or(z.literal("")),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
@@ -65,7 +72,9 @@ export type AppEnv = ServerEnv & ClientEnv;
  * Validate and parse environment variables against the defined schemas.
  * Returns parsed object and validation issues (if any).
  */
-export function validateEnv(rawEnv: Record<string, string | undefined> = process.env): {
+export function validateEnv(
+  rawEnv: Record<string, string | undefined> = process.env
+): {
   success: boolean;
   data: AppEnv;
   errors: Record<string, string[]>;
@@ -111,11 +120,19 @@ let cachedEnv: AppEnv | null = null;
  * In development / production, logs formatted warnings if schema validation fails.
  */
 export function getEnv(): AppEnv {
-  if (cachedEnv && process.env.NODE_ENV === "production" && !process.env.VITEST) return cachedEnv;
+  if (cachedEnv && process.env.NODE_ENV === "production" && !process.env.VITEST)
+    return cachedEnv;
 
   const result = validateEnv(process.env);
-  if (!result.success && process.env.NODE_ENV === "production" && !process.env.VITEST) {
-    console.warn("⚠️ [ENV VALIDATION WARNING] Environment schema issues detected:", result.errors);
+  if (
+    !result.success &&
+    process.env.NODE_ENV === "production" &&
+    !process.env.VITEST
+  ) {
+    console.warn(
+      "⚠️ [ENV VALIDATION WARNING] Environment schema issues detected:",
+      result.errors
+    );
   }
 
   if (process.env.NODE_ENV === "production" && !process.env.VITEST) {

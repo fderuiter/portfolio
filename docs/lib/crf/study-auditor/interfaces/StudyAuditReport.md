@@ -6,7 +6,7 @@
 
 # Interface: StudyAuditReport
 
-Defined in: [lib/crf/study-auditor.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L70)
+Defined in: [lib/crf/study-auditor.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L76)
 
 Global study audit report returned by StudyAuditor.audit().
 
@@ -16,7 +16,7 @@ Global study audit report returned by StudyAuditor.audit().
 
 > **autoFix**: (`diagnosticId`) => [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
 
-Defined in: [lib/crf/study-auditor.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L81)
+Defined in: [lib/crf/study-auditor.ts:87](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L87)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [lib/crf/study-auditor.ts:81](https://github.com/fderuiter/portfolio
 
 > **autoFixAll**: () => `object`
 
-Defined in: [lib/crf/study-auditor.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L82)
+Defined in: [lib/crf/study-auditor.ts:88](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L88)
 
 #### Returns
 
@@ -54,7 +54,7 @@ Defined in: [lib/crf/study-auditor.ts:82](https://github.com/fderuiter/portfolio
 
 > **diagnostics**: [`AuditDiagnostic`](AuditDiagnostic.md)[]
 
-Defined in: [lib/crf/study-auditor.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L74)
+Defined in: [lib/crf/study-auditor.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L80)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/crf/study-auditor.ts:74](https://github.com/fderuiter/portfolio
 
 > **health**: [`FormHealthMetrics`](FormHealthMetrics.md)
 
-Defined in: [lib/crf/study-auditor.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L73)
+Defined in: [lib/crf/study-auditor.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L79)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/crf/study-auditor.ts:73](https://github.com/fderuiter/portfolio
 
 > **isCompliant**: `boolean`
 
-Defined in: [lib/crf/study-auditor.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L71)
+Defined in: [lib/crf/study-auditor.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L77)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/crf/study-auditor.ts:71](https://github.com/fderuiter/portfolio
 
 > **score**: `number`
 
-Defined in: [lib/crf/study-auditor.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L72)
+Defined in: [lib/crf/study-auditor.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L78)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [lib/crf/study-auditor.ts:72](https://github.com/fderuiter/portfolio
 
 > **summary**: `object`
 
-Defined in: [lib/crf/study-auditor.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L75)
+Defined in: [lib/crf/study-auditor.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L81)
 
 #### errors
 

@@ -13,7 +13,11 @@ Zero framework dependencies. Testable in pure Node.js/Vitest.
 
 ## Extended by
 
+- [`ClinicalTrialChaosEngine`](../../../../clinical-trial-chaos/engine/classes/ClinicalTrialChaosEngine.md)
+- [`GarminWatchEngine`](../../../../garmin-engine/classes/GarminWatchEngine.md)
+- [`LaserLoonEngine`](../../../../laser-loon/engine/classes/LaserLoonEngine.md)
 - [`RetroLabyrinthEngine`](../../../../retro-labyrinth/engine/classes/RetroLabyrinthEngine.md)
+- [`WorkingWithDuckEngine`](../../../../working-with-duck-engine/classes/WorkingWithDuckEngine.md)
 
 ## Type Parameters
 
@@ -31,7 +35,7 @@ Zero framework dependencies. Testable in pure Node.js/Vitest.
 
 > **new ArcadeEngine**\<`TState`, `TSnapshot`\>(`initialState`): `ArcadeEngine`\<`TState`, `TSnapshot`\>
 
-Defined in: [lib/arcade/core/engine.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L12)
+Defined in: [lib/arcade/core/engine.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L15)
 
 #### Parameters
 
@@ -65,7 +69,7 @@ Defined in: [lib/arcade/core/engine.ts:7](https://github.com/fderuiter/portfolio
 
 > `abstract` **createSnapshot**(): `TSnapshot`
 
-Defined in: [lib/arcade/core/engine.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L34)
+Defined in: [lib/arcade/core/engine.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L37)
 
 Generates a fresh immutable state snapshot.
 
@@ -79,7 +83,7 @@ Generates a fresh immutable state snapshot.
 
 > **destroy**(): `void`
 
-Defined in: [lib/arcade/core/engine.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L57)
+Defined in: [lib/arcade/core/engine.ts:60](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L60)
 
 Cleans up engine timers, event subscriptions, and resources.
 
@@ -93,7 +97,7 @@ Cleans up engine timers, event subscriptions, and resources.
 
 > **emit**\<`T`\>(`event`, `payload`): `void`
 
-Defined in: [lib/arcade/core/engine.ts:104](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L104)
+Defined in: [lib/arcade/core/engine.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L117)
 
 Emits a typed event to registered listeners.
 
@@ -123,7 +127,7 @@ Emits a typed event to registered listeners.
 
 > **getSnapshot**(): `TSnapshot`
 
-Defined in: [lib/arcade/core/engine.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L40)
+Defined in: [lib/arcade/core/engine.ts:43](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L43)
 
 Returns a cached immutable state snapshot for React useSyncExternalStore.
 Reference is preserved until notifySubscribers() is explicitly called.
@@ -138,9 +142,23 @@ Reference is preserved until notifySubscribers() is explicitly called.
 
 > `abstract` **init**(): `void`
 
-Defined in: [lib/arcade/core/engine.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L19)
+Defined in: [lib/arcade/core/engine.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L22)
 
 Initializes engine resources, object pools, and audio bindings.
+
+#### Returns
+
+`void`
+
+***
+
+### invalidateSnapshot()
+
+> **invalidateSnapshot**(): `void`
+
+Defined in: [lib/arcade/core/engine.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L78)
+
+Invalidates cached snapshot so the next getSnapshot() recomputes fresh state.
 
 #### Returns
 
@@ -152,7 +170,7 @@ Initializes engine resources, object pools, and audio bindings.
 
 > **notifySubscribers**(): `void`
 
-Defined in: [lib/arcade/core/engine.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L75)
+Defined in: [lib/arcade/core/engine.ts:85](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L85)
 
 Invalidates cached snapshot and broadcasts a state change to subscribers.
 
@@ -166,7 +184,7 @@ Invalidates cached snapshot and broadcasts a state change to subscribers.
 
 > **on**\<`T`\>(`event`, `callback`): () => `void`
 
-Defined in: [lib/arcade/core/engine.ts:85](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L85)
+Defined in: [lib/arcade/core/engine.ts:95](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L95)
 
 Subscribes to a typed one-shot action event (e.g. sfx, haptic, screen shake).
 
@@ -196,7 +214,7 @@ Subscribes to a typed one-shot action event (e.g. sfx, haptic, screen shake).
 
 > `abstract` **render**(`ctx`, `alpha`): `void`
 
-Defined in: [lib/arcade/core/engine.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L29)
+Defined in: [lib/arcade/core/engine.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L32)
 
 Renders in-world graphics to the 2D canvas with sub-frame alpha interpolation.
 
@@ -220,7 +238,7 @@ Renders in-world graphics to the 2D canvas with sub-frame alpha interpolation.
 
 > **resize**(`_width`, `_height`, `_dpr`): `void`
 
-Defined in: [lib/arcade/core/engine.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L50)
+Defined in: [lib/arcade/core/engine.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L53)
 
 Handles canvas dimension and device pixel ratio resize events.
 
@@ -248,7 +266,7 @@ Handles canvas dimension and device pixel ratio resize events.
 
 > **subscribe**(`callback`): () => `void`
 
-Defined in: [lib/arcade/core/engine.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L65)
+Defined in: [lib/arcade/core/engine.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L68)
 
 Subscribes a listener to snapshot state updates (React useSyncExternalStore).
 
@@ -268,7 +286,7 @@ Subscribes a listener to snapshot state updates (React useSyncExternalStore).
 
 > `abstract` **update**(`dt`): `void`
 
-Defined in: [lib/arcade/core/engine.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L24)
+Defined in: [lib/arcade/core/engine.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/engine.ts#L27)
 
 Advances deterministic simulation physics by fixed delta time dt (in seconds).
 

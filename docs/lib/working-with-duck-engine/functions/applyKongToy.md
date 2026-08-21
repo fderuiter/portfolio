@@ -8,7 +8,7 @@
 
 > **applyKongToy**(`state`, `x`, `y`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:1895](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1895)
+Defined in: [lib/working-with-duck-engine.ts:2005](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2005)
 
 Player Action: Use Kong Chew Toy (Distracts from Hazards & Calms)
 

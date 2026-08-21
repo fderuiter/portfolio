@@ -7,7 +7,8 @@ import { clamp } from "./game-utils";
 
 export type DeviceTarget = "fenix" | "forerunner" | "edge";
 export type VariableType = "int" | "float" | "string" | "array";
-export type ObstacleType = "null_pointer" | "watchdog" | "stack_overflow" | "mem_token" | "flash_token";
+export type ObstacleType =
+  "null_pointer" | "watchdog" | "stack_overflow" | "mem_token" | "flash_token";
 
 export interface DeviceProfile {
   id: DeviceTarget;
@@ -131,7 +132,13 @@ export interface Obstacle {
 }
 
 export interface CrashReport {
-  errorType: "Out Of Memory" | "Symbol Not Found" | "Watchdog Tripped" | "Null Pointer" | "Out Of Storage" | "Power Loss";
+  errorType:
+    | "Out Of Memory"
+    | "Symbol Not Found"
+    | "Watchdog Tripped"
+    | "Null Pointer"
+    | "Out Of Storage"
+    | "Power Loss";
   file: string;
   line: number;
   stackTrace: string[];
@@ -239,7 +246,10 @@ export function createInitialState(
 /**
  * Start a new game session
  */
-export function startGame(state: GameEngineState, device?: DeviceTarget): GameEngineState {
+export function startGame(
+  state: GameEngineState,
+  device?: DeviceTarget
+): GameEngineState {
   const targetDevice = device || state.device;
   const initial = createInitialState(targetDevice, state.highScore);
   return {
@@ -251,7 +261,10 @@ export function startGame(state: GameEngineState, device?: DeviceTarget): GameEn
 /**
  * Jettison (pop) the oldest variable in the heap
  */
-export function jettisonOldestVariable(state: GameEngineState): { state: GameEngineState; popped?: MemoryVariable } {
+export function jettisonOldestVariable(state: GameEngineState): {
+  state: GameEngineState;
+  popped?: MemoryVariable;
+} {
   if (state.gameState !== "playing" || state.variables.length === 0) {
     return { state };
   }
@@ -274,7 +287,10 @@ export function jettisonOldestVariable(state: GameEngineState): { state: GameEng
  * Force Garbage Collection (GC)
  * Freezes game for 500ms and frees 2.0 to 4.0 KB of garbage
  */
-export function triggerGarbageCollection(state: GameEngineState): { state: GameEngineState; freedKb: number } {
+export function triggerGarbageCollection(state: GameEngineState): {
+  state: GameEngineState;
+  freedKb: number;
+} {
   if (state.gameState !== "playing" || state.isGcActive) {
     return { state, freedKb: 0 };
   }
@@ -287,14 +303,20 @@ export function triggerGarbageCollection(state: GameEngineState): { state: GameE
   // Remove variables from oldest to newest until target freed is met
   for (let i = 0; i < state.variables.length; i++) {
     const v = state.variables[i];
-    if (accumulatedFreed < targetFreedKb && state.variables.length - remainingVars.length > 2) {
+    if (
+      accumulatedFreed < targetFreedKb &&
+      state.variables.length - remainingVars.length > 2
+    ) {
       accumulatedFreed += v.sizeKb;
     } else {
       remainingVars.push(v);
     }
   }
 
-  const newRam = Math.max(0.4, Number((state.allocatedRamKb - accumulatedFreed).toFixed(2)));
+  const newRam = Math.max(
+    0.4,
+    Number((state.allocatedRamKb - accumulatedFreed).toFixed(2))
+  );
 
   return {
     state: {
@@ -442,7 +464,12 @@ export function clearFlashStorage(state: GameEngineState): GameEngineState {
 /**
  * Adds a wipe trail to defog the screen
  */
-export function wipeScreenFog(state: GameEngineState, x: number, y: number, radius = 28): GameEngineState {
+export function wipeScreenFog(
+  state: GameEngineState,
+  x: number,
+  y: number,
+  radius = 28
+): GameEngineState {
   const newWipes = [...state.fogWipes.slice(-15), { x, y, radius }];
   const newFogLevel = Math.max(0, state.fogLevel - 0.22);
   return {
@@ -455,7 +482,10 @@ export function wipeScreenFog(state: GameEngineState, x: number, y: number, radi
 /**
  * Primary Game Physics & Simulation Update Loop (Called by requestAnimationFrame)
  */
-export function updateGameSimulation(state: GameEngineState, deltaMs: number): GameEngineState {
+export function updateGameSimulation(
+  state: GameEngineState,
+  deltaMs: number
+): GameEngineState {
   if (state.gameState !== "playing" || state.battery <= 0) {
     if (state.gameState === "playing" && state.battery <= 0) {
       const penalty = 50;
@@ -491,14 +521,15 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
   // Handle GC Freeze
   if (state.isGcActive) {
     const remainingGc = state.gcTimerMs - safeDelta;
-    
+
     // Calculate battery, backlight, thermal stress, fog level updates during GC
     const ramLimit = DEVICE_PROFILES[state.device].ramLimitKb;
     const ramPct = state.allocatedRamKb / ramLimit;
 
     const baseDrainPerMs = 0.0001;
     const lightDrainPerMs = 0.0003;
-    const totalDrain = (baseDrainPerMs + (state.isLightOn ? lightDrainPerMs : 0)) * safeDelta;
+    const totalDrain =
+      (baseDrainPerMs + (state.isLightOn ? lightDrainPerMs : 0)) * safeDelta;
     const nextBattery = Math.max(0, state.battery - totalDrain);
 
     let nextLight = state.isLightOn;
@@ -513,23 +544,38 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
       lightDuration = Math.max(0, lightDuration - safeDelta * 0.5);
     }
 
-    const backlightStress = state.isLightOn ? Math.min(1.0, lightDuration / 6000) : 0;
-    const ramStress = ramPct > 0.8 ? Math.min(1.0, 0.4 + (ramPct - 0.8) * 3.0) : 0;
+    const backlightStress = state.isLightOn
+      ? Math.min(1.0, lightDuration / 6000)
+      : 0;
+    const ramStress =
+      ramPct > 0.8 ? Math.min(1.0, 0.4 + (ramPct - 0.8) * 3.0) : 0;
     const gcStress = 1.0; // GC is active!
 
     const targetStress = Math.max(backlightStress, ramStress, gcStress);
     let nextThermalStress = state.thermalStress ?? 0;
     if (targetStress > nextThermalStress) {
-      nextThermalStress = Math.min(targetStress, nextThermalStress + 0.0005 * safeDelta);
+      nextThermalStress = Math.min(
+        targetStress,
+        nextThermalStress + 0.0005 * safeDelta
+      );
     } else {
-      nextThermalStress = Math.max(targetStress, nextThermalStress - (1.0 / 14900) * safeDelta);
+      nextThermalStress = Math.max(
+        targetStress,
+        nextThermalStress - (1.0 / 14900) * safeDelta
+      );
     }
 
     let nextFogLevel = state.fogLevel;
     if (nextThermalStress > nextFogLevel) {
-      nextFogLevel = Math.min(nextThermalStress, nextFogLevel + 0.0004 * safeDelta);
+      nextFogLevel = Math.min(
+        nextThermalStress,
+        nextFogLevel + 0.0004 * safeDelta
+      );
     } else {
-      nextFogLevel = Math.max(nextThermalStress, nextFogLevel - (1.0 / 14900) * safeDelta);
+      nextFogLevel = Math.max(
+        nextThermalStress,
+        nextFogLevel - (1.0 / 14900) * safeDelta
+      );
     }
 
     if (nextBattery <= 0) {
@@ -593,7 +639,8 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
   // Base battery drain: 0.1%/sec; With light: +0.3%/sec (0.4%/sec total)
   const baseDrainPerMs = 0.0001;
   const lightDrainPerMs = 0.0003;
-  const totalDrain = (baseDrainPerMs + (state.isLightOn ? lightDrainPerMs : 0)) * safeDelta;
+  const totalDrain =
+    (baseDrainPerMs + (state.isLightOn ? lightDrainPerMs : 0)) * safeDelta;
   nextBattery = Math.max(0, nextBattery - totalDrain);
 
   let nextLight = state.isLightOn;
@@ -639,23 +686,38 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
   const ramPct = state.allocatedRamKb / ramLimit;
 
   // Calculate combined target stress
-  const backlightStress = state.isLightOn ? Math.min(1.0, lightDuration / 6000) : 0;
-  const ramStress = ramPct > 0.8 ? Math.min(1.0, 0.4 + (ramPct - 0.8) * 3.0) : 0;
+  const backlightStress = state.isLightOn
+    ? Math.min(1.0, lightDuration / 6000)
+    : 0;
+  const ramStress =
+    ramPct > 0.8 ? Math.min(1.0, 0.4 + (ramPct - 0.8) * 3.0) : 0;
   const gcStress = state.isGcActive ? 0.8 : 0;
 
   const targetStress = Math.max(backlightStress, ramStress, gcStress);
   let nextThermalStress = state.thermalStress ?? 0;
   if (targetStress > nextThermalStress) {
-    nextThermalStress = Math.min(targetStress, nextThermalStress + 0.0005 * safeDelta);
+    nextThermalStress = Math.min(
+      targetStress,
+      nextThermalStress + 0.0005 * safeDelta
+    );
   } else {
-    nextThermalStress = Math.max(targetStress, nextThermalStress - (1.0 / 14900) * safeDelta);
+    nextThermalStress = Math.max(
+      targetStress,
+      nextThermalStress - (1.0 / 14900) * safeDelta
+    );
   }
 
   let nextFogLevel = state.fogLevel;
   if (nextThermalStress > nextFogLevel) {
-    nextFogLevel = Math.min(nextThermalStress, nextFogLevel + 0.0004 * safeDelta);
+    nextFogLevel = Math.min(
+      nextThermalStress,
+      nextFogLevel + 0.0004 * safeDelta
+    );
   } else {
-    nextFogLevel = Math.max(nextThermalStress, nextFogLevel - (1.0 / 14900) * safeDelta);
+    nextFogLevel = Math.max(
+      nextThermalStress,
+      nextFogLevel - (1.0 / 14900) * safeDelta
+    );
   }
 
   // 2. Player Jump & Gravity Physics
@@ -694,7 +756,12 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
   };
 
   const now = Date.now();
-  const allocInterval = state.device === "fenix" ? 3200 : state.device === "forerunner" ? 4000 : 5000;
+  const allocInterval =
+    state.device === "fenix"
+      ? 3200
+      : state.device === "forerunner"
+        ? 4000
+        : 5000;
   if (now - state.lastAllocTime > allocInterval) {
     const types: VariableType[] = ["int", "float", "string", "array"];
     const chosenType = types[Math.floor(Math.random() * types.length)];
@@ -770,7 +837,8 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
         break;
       } else if (obs.type === "null_pointer" || obs.type === "stack_overflow") {
         crashTriggered = {
-          errorType: obs.type === "null_pointer" ? "Null Pointer" : "Symbol Not Found",
+          errorType:
+            obs.type === "null_pointer" ? "Null Pointer" : "Symbol Not Found",
           file: "Garmin_Schvitz_App.mc",
           line: 77,
           stackTrace: [
@@ -802,11 +870,21 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
 
   // 6. Spawn new Obstacles
   const obstacleInterval = 1800 + Math.random() * 1200;
-  if (now - updatedState.lastObstacleTime > obstacleInterval && nextObstacles.length < 3) {
+  if (
+    now - updatedState.lastObstacleTime > obstacleInterval &&
+    nextObstacles.length < 3
+  ) {
     const maxX = nextObstacles.reduce((max, o) => Math.max(max, o.x), 0);
     if (maxX < 190) {
-      const obstacleTypes: ObstacleType[] = ["null_pointer", "watchdog", "stack_overflow", "mem_token", "flash_token"];
-      const chosen = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
+      const obstacleTypes: ObstacleType[] = [
+        "null_pointer",
+        "watchdog",
+        "stack_overflow",
+        "mem_token",
+        "flash_token",
+      ];
+      const chosen =
+        obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
 
       let width = 16;
       let height = 20;
@@ -868,14 +946,23 @@ export function updateGameSimulation(state: GameEngineState, deltaMs: number): G
 /**
  * 16-Color CIQ Retro Canvas 2D Renderer
  */
-export function renderCanvasFrame(ctx: CanvasRenderingContext2D, state: GameEngineState) {
+export function renderCanvasFrame(
+  ctx: CanvasRenderingContext2D,
+  state: GameEngineState
+) {
   // Clear full 280x280 frame
   ctx.save();
   ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
   // Circular Clip Path for 280x280 Round Smartwatch Display
   ctx.beginPath();
-  ctx.arc(CANVAS_SIZE / 2, CANVAS_SIZE / 2, CANVAS_SIZE / 2 - 2, 0, Math.PI * 2);
+  ctx.arc(
+    CANVAS_SIZE / 2,
+    CANVAS_SIZE / 2,
+    CANVAS_SIZE / 2 - 2,
+    0,
+    Math.PI * 2
+  );
   ctx.clip();
 
   // If Shut Down / Total Power Loss (0% battery): Render Blackout Shutdown Screen
@@ -977,7 +1064,12 @@ function drawHud(ctx: CanvasRenderingContext2D, state: GameEngineState) {
   // Top Status Bar: Battery & Profile
   ctx.font = "bold 9px monospace";
   ctx.textAlign = "left";
-  ctx.fillStyle = state.battery < 15 ? CIQ_PALETTE.red : state.battery < 30 ? CIQ_PALETTE.yellow : CIQ_PALETTE.green;
+  ctx.fillStyle =
+    state.battery < 15
+      ? CIQ_PALETTE.red
+      : state.battery < 30
+        ? CIQ_PALETTE.yellow
+        : CIQ_PALETTE.green;
   ctx.fillText(`BAT: ${Math.round(state.battery)}%`, 45, 40);
 
   // Low power alarm badge
@@ -1015,38 +1107,75 @@ function drawHud(ctx: CanvasRenderingContext2D, state: GameEngineState) {
   // RAM Text & Progress Bar
   ctx.font = "bold 7.5px monospace";
   ctx.textAlign = "left";
-  ctx.fillStyle = ramPct > 0.85 ? CIQ_PALETTE.red : ramPct > 0.65 ? CIQ_PALETTE.yellow : CIQ_PALETTE.brightCyan;
-  ctx.fillText(`RAM: ${state.allocatedRamKb.toFixed(1)} / ${ramLimit.toFixed(0)} KB`, ramBarX, ramY - 3);
+  ctx.fillStyle =
+    ramPct > 0.85
+      ? CIQ_PALETTE.red
+      : ramPct > 0.65
+        ? CIQ_PALETTE.yellow
+        : CIQ_PALETTE.brightCyan;
+  ctx.fillText(
+    `RAM: ${state.allocatedRamKb.toFixed(1)} / ${ramLimit.toFixed(0)} KB`,
+    ramBarX,
+    ramY - 3
+  );
 
   ctx.fillStyle = CIQ_PALETTE.darkGray;
   ctx.fillRect(ramBarX, ramY, ramBarW, ramBarH);
 
   const fillRam = Math.max(0, ramBarW * ramPct);
-  ctx.fillStyle = ramPct > 0.9 ? CIQ_PALETTE.red : ramPct > 0.7 ? CIQ_PALETTE.yellow : CIQ_PALETTE.brightGreen;
+  ctx.fillStyle =
+    ramPct > 0.9
+      ? CIQ_PALETTE.red
+      : ramPct > 0.7
+        ? CIQ_PALETTE.yellow
+        : CIQ_PALETTE.brightGreen;
   ctx.fillRect(ramBarX, ramY, fillRam, ramBarH);
 
   // Flash Storage Text & Progress Bar
   const flashY = ramY + 14;
-  ctx.fillStyle = flashPct > 0.85 ? CIQ_PALETTE.red : flashPct > 0.65 ? CIQ_PALETTE.yellow : CIQ_PALETTE.orange;
-  ctx.fillText(`FLASH: ${state.allocatedFlashKb.toFixed(1)} / ${flashLimit.toFixed(0)} KB`, ramBarX, flashY - 2);
+  ctx.fillStyle =
+    flashPct > 0.85
+      ? CIQ_PALETTE.red
+      : flashPct > 0.65
+        ? CIQ_PALETTE.yellow
+        : CIQ_PALETTE.orange;
+  ctx.fillText(
+    `FLASH: ${state.allocatedFlashKb.toFixed(1)} / ${flashLimit.toFixed(0)} KB`,
+    ramBarX,
+    flashY - 2
+  );
 
   ctx.fillStyle = CIQ_PALETTE.darkGray;
   ctx.fillRect(ramBarX, flashY, ramBarW, ramBarH);
 
   const fillFlash = Math.max(0, ramBarW * flashPct);
-  ctx.fillStyle = flashPct > 0.9 ? CIQ_PALETTE.red : flashPct > 0.7 ? CIQ_PALETTE.yellow : CIQ_PALETTE.orange;
+  ctx.fillStyle =
+    flashPct > 0.9
+      ? CIQ_PALETTE.red
+      : flashPct > 0.7
+        ? CIQ_PALETTE.yellow
+        : CIQ_PALETTE.orange;
   ctx.fillRect(ramBarX, flashY, fillFlash, ramBarH);
 
   // NV Flash Files Summary Text
   ctx.font = "6.5px monospace";
   ctx.fillStyle = CIQ_PALETTE.lightGray;
-  ctx.fillText(`NV FILES: ${state.flashVariables.length} saved (${state.allocatedFlashKb.toFixed(1)}KB)`, ramBarX, flashY + 13);
+  ctx.fillText(
+    `NV FILES: ${state.flashVariables.length} saved (${state.allocatedFlashKb.toFixed(1)}KB)`,
+    ramBarX,
+    flashY + 13
+  );
 }
 
 /**
  * Draws the Pixel Art Monkey Runner
  */
-function drawMonkeyRunner(ctx: CanvasRenderingContext2D, x: number, y: number, isFrozen: boolean) {
+function drawMonkeyRunner(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  isFrozen: boolean
+) {
   ctx.save();
   ctx.translate(x, y);
 
@@ -1166,7 +1295,10 @@ function drawObstacle(ctx: CanvasRenderingContext2D, obs: Obstacle) {
 /**
  * Draws the Overheat Screen Fog and Condensation Layer
  */
-function drawOverheatFog(ctx: CanvasRenderingContext2D, state: GameEngineState) {
+function drawOverheatFog(
+  ctx: CanvasRenderingContext2D,
+  state: GameEngineState
+) {
   ctx.save();
 
   // Create temporary offscreen fog layer
@@ -1177,7 +1309,14 @@ function drawOverheatFog(ctx: CanvasRenderingContext2D, state: GameEngineState) 
   // Cut out swiped / wiped areas using destination-out
   ctx.globalCompositeOperation = "destination-out";
   for (const wipe of state.fogWipes) {
-    const grad = ctx.createRadialGradient(wipe.x, wipe.y, 0, wipe.x, wipe.y, wipe.radius);
+    const grad = ctx.createRadialGradient(
+      wipe.x,
+      wipe.y,
+      0,
+      wipe.x,
+      wipe.y,
+      wipe.radius
+    );
     grad.addColorStop(0, "rgba(0, 0, 0, 1.0)");
     grad.addColorStop(0.7, "rgba(0, 0, 0, 0.8)");
     grad.addColorStop(1, "rgba(0, 0, 0, 0)");
@@ -1204,7 +1343,10 @@ function drawOverheatFog(ctx: CanvasRenderingContext2D, state: GameEngineState) 
 /**
  * Draws the Blackout Shutdown Screen when battery hits zero
  */
-function renderShutdownScreen(ctx: CanvasRenderingContext2D, state: GameEngineState) {
+function renderShutdownScreen(
+  ctx: CanvasRenderingContext2D,
+  state: GameEngineState
+) {
   ctx.fillStyle = "#050508";
   ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
@@ -1234,7 +1376,10 @@ function renderShutdownScreen(ctx: CanvasRenderingContext2D, state: GameEngineSt
 /**
  * Draws the CIQ Blue Error Console when crashed
  */
-function renderCrashScreen(ctx: CanvasRenderingContext2D, state: GameEngineState) {
+function renderCrashScreen(
+  ctx: CanvasRenderingContext2D,
+  state: GameEngineState
+) {
   const report = state.crashReport;
   if (!report) return;
 
@@ -1271,15 +1416,131 @@ function renderCrashScreen(ctx: CanvasRenderingContext2D, state: GameEngineState
   ctx.textAlign = "center";
   if (report.errorType === "Out Of Storage") {
     const used = report.flashUsedKb ?? state.allocatedFlashKb;
-    const limit = report.flashLimitKb ?? DEVICE_PROFILES[state.device].flashLimitKb;
-    ctx.fillText(`FLASH: ${used.toFixed(1)} / ${limit.toFixed(1)} KB`, CANVAS_SIZE / 2, 175);
+    const limit =
+      report.flashLimitKb ?? DEVICE_PROFILES[state.device].flashLimitKb;
+    ctx.fillText(
+      `FLASH: ${used.toFixed(1)} / ${limit.toFixed(1)} KB`,
+      CANVAS_SIZE / 2,
+      175
+    );
   } else {
-    ctx.fillText(`PEAK RAM: ${report.heapUsedKb.toFixed(1)} / ${report.heapLimitKb.toFixed(1)} KB`, CANVAS_SIZE / 2, 175);
+    ctx.fillText(
+      `PEAK RAM: ${report.heapUsedKb.toFixed(1)} / ${report.heapLimitKb.toFixed(1)} KB`,
+      CANVAS_SIZE / 2,
+      175
+    );
   }
-  ctx.fillText(`SCORE: ${state.score}  |  HI: ${state.highScore}`, CANVAS_SIZE / 2, 190);
+  ctx.fillText(
+    `SCORE: ${state.score}  |  HI: ${state.highScore}`,
+    CANVAS_SIZE / 2,
+    190
+  );
 
   // Restart instructions
   ctx.fillStyle = CIQ_PALETTE.brightGreen;
   ctx.font = "bold 9px monospace";
   ctx.fillText("PRESS START TO REBUILD", CANVAS_SIZE / 2, 218);
+}
+
+import { ArcadeEngine } from "@/lib/arcade/core/engine";
+
+export interface GarminWatchSnapshot {
+  device: DeviceTarget;
+  gameState: GameEngineState["gameState"];
+  batteryPercent: number;
+  cpuLoadPercent: number;
+  allocatedRamKb: number;
+  allocatedFlashKb: number;
+  temperatureC: number;
+  score: number;
+  highScore: number;
+}
+
+export class GarminWatchEngine extends ArcadeEngine<
+  GameEngineState,
+  GarminWatchSnapshot
+> {
+  constructor(device: DeviceTarget = "fenix") {
+    super(createInitialState(device));
+  }
+
+  public override init(): void {
+    // init
+  }
+
+  public startGame(): void {
+    this.state = startGame(this.state, this.state.device);
+    this.notifySubscribers();
+  }
+
+  public triggerGc(): void {
+    const { state } = triggerGarbageCollection(this.state);
+    this.state = state;
+    this.notifySubscribers();
+  }
+
+  public jettisonOldest(): void {
+    const { state } = jettisonOldestVariable(this.state);
+    this.state = state;
+    this.notifySubscribers();
+  }
+
+  public jump(): void {
+    if (this.state.isGrounded && this.state.gameState === "playing") {
+      this.state.playerVy = JUMP_FORCE;
+      this.state.isGrounded = false;
+      this.notifySubscribers();
+    }
+  }
+
+  public pressButton(btn: "up" | "down" | "start" | "back" | "light"): void {
+    if (btn === "start") {
+      if (
+        this.state.gameState === "idle" ||
+        this.state.gameState === "crashed" ||
+        this.state.gameState === "shutdown"
+      ) {
+        this.startGame();
+      } else if (this.state.gameState === "playing") {
+        this.jump();
+      }
+    } else if (btn === "down") {
+      this.triggerGc();
+    } else if (btn === "back") {
+      this.jettisonOldest();
+    } else if (btn === "light") {
+      this.state.isLightOn = !this.state.isLightOn;
+      this.notifySubscribers();
+    }
+  }
+
+  public override update(dt: number): void {
+    if (this.state.gameState === "playing") {
+      this.state = updateGameSimulation(this.state, dt * 1000);
+    }
+    this.invalidateSnapshot();
+  }
+
+  public override render(ctx: CanvasRenderingContext2D, _alpha: number): void {
+    if (!ctx) return;
+    renderCanvasFrame(ctx, this.state);
+  }
+
+  public override createSnapshot(): GarminWatchSnapshot {
+    return {
+      device: this.state.device,
+      gameState: this.state.gameState,
+      batteryPercent: Math.round(this.state.battery),
+      cpuLoadPercent: Math.round(
+        (this.state.allocatedRamKb /
+          (DEVICE_PROFILES[this.state.device]?.ramLimitKb || 32)) *
+          100
+      ),
+      allocatedRamKb: this.state.allocatedRamKb,
+      allocatedFlashKb: this.state.allocatedFlashKb,
+      temperatureC: Math.round(37 + this.state.thermalStress * 15),
+      score: this.state.score,
+      highScore: this.state.highScore,
+    };
+  }
 }

@@ -6,7 +6,7 @@
 
 # Interface: CrashReport
 
-Defined in: [lib/garmin-engine.ts:133](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L133)
+Defined in: [lib/garmin-engine.ts:134](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L134)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/garmin-engine.ts:133](https://github.com/fderuiter/portfolio/bl
 
 > **errorType**: `"Out Of Memory"` \| `"Symbol Not Found"` \| `"Watchdog Tripped"` \| `"Null Pointer"` \| `"Out Of Storage"` \| `"Power Loss"`
 
-Defined in: [lib/garmin-engine.ts:134](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L134)
+Defined in: [lib/garmin-engine.ts:135](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L135)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/garmin-engine.ts:134](https://github.com/fderuiter/portfolio/bl
 
 > **file**: `string`
 
-Defined in: [lib/garmin-engine.ts:135](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L135)
+Defined in: [lib/garmin-engine.ts:142](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L142)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/garmin-engine.ts:135](https://github.com/fderuiter/portfolio/bl
 
 > `optional` **flashLimitKb?**: `number`
 
-Defined in: [lib/garmin-engine.ts:141](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L141)
+Defined in: [lib/garmin-engine.ts:148](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L148)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/garmin-engine.ts:141](https://github.com/fderuiter/portfolio/bl
 
 > `optional` **flashUsedKb?**: `number`
 
-Defined in: [lib/garmin-engine.ts:140](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L140)
+Defined in: [lib/garmin-engine.ts:147](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L147)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/garmin-engine.ts:140](https://github.com/fderuiter/portfolio/bl
 
 > **heapLimitKb**: `number`
 
-Defined in: [lib/garmin-engine.ts:139](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L139)
+Defined in: [lib/garmin-engine.ts:146](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L146)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/garmin-engine.ts:139](https://github.com/fderuiter/portfolio/bl
 
 > **heapUsedKb**: `number`
 
-Defined in: [lib/garmin-engine.ts:138](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L138)
+Defined in: [lib/garmin-engine.ts:145](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L145)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/garmin-engine.ts:138](https://github.com/fderuiter/portfolio/bl
 
 > **line**: `number`
 
-Defined in: [lib/garmin-engine.ts:136](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L136)
+Defined in: [lib/garmin-engine.ts:143](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L143)
 
 ***
 
@@ -70,4 +70,4 @@ Defined in: [lib/garmin-engine.ts:136](https://github.com/fderuiter/portfolio/bl
 
 > **stackTrace**: `string`[]
 
-Defined in: [lib/garmin-engine.ts:137](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L137)
+Defined in: [lib/garmin-engine.ts:144](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L144)

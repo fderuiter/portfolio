@@ -6,7 +6,7 @@
 
 # Interface: UsdmEpoch
 
-Defined in: [lib/crf/usdm-adapter.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L48)
+Defined in: [lib/crf/usdm-adapter.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L52)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/usdm-adapter.ts:48](https://github.com/fderuiter/portfolio/
 
 > `optional` **description?**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L53)
+Defined in: [lib/crf/usdm-adapter.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L57)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/usdm-adapter.ts:53](https://github.com/fderuiter/portfolio/
 
 > **id**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:49](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L49)
+Defined in: [lib/crf/usdm-adapter.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L53)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/usdm-adapter.ts:49](https://github.com/fderuiter/portfolio/
 
 > **name**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L50)
+Defined in: [lib/crf/usdm-adapter.ts:54](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L54)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/usdm-adapter.ts:50](https://github.com/fderuiter/portfolio/
 
 > **sequenceNumber**: `number`
 
-Defined in: [lib/crf/usdm-adapter.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L51)
+Defined in: [lib/crf/usdm-adapter.ts:55](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L55)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [lib/crf/usdm-adapter.ts:51](https://github.com/fderuiter/portfolio/
 
 > `optional` **type?**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L52)
+Defined in: [lib/crf/usdm-adapter.ts:56](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L56)

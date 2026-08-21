@@ -6,7 +6,7 @@
 
 # Interface: OfficeStations
 
-Defined in: [lib/working-with-duck-engine.ts:359](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L359)
+Defined in: [lib/working-with-duck-engine.ts:383](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L383)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/working-with-duck-engine.ts:359](https://github.com/fderuiter/p
 
 > **foodLevel**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:361](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L361)
+Defined in: [lib/working-with-duck-engine.ts:385](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L385)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/working-with-duck-engine.ts:361](https://github.com/fderuiter/p
 
 > **isFoodEating**: `boolean`
 
-Defined in: [lib/working-with-duck-engine.ts:363](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L363)
+Defined in: [lib/working-with-duck-engine.ts:387](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L387)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/working-with-duck-engine.ts:363](https://github.com/fderuiter/p
 
 > **isWaterDrinking**: `boolean`
 
-Defined in: [lib/working-with-duck-engine.ts:362](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L362)
+Defined in: [lib/working-with-duck-engine.ts:386](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L386)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/working-with-duck-engine.ts:362](https://github.com/fderuiter/p
 
 > **waterLevel**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:360](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L360)
+Defined in: [lib/working-with-duck-engine.ts:384](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L384)

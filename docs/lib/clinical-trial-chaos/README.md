@@ -94,6 +94,24 @@ Re-exports [ClinicalSubject](types/interfaces/ClinicalSubject.md)
 
 ***
 
+### ClinicalTrialChaosEngine
+
+Re-exports [ClinicalTrialChaosEngine](engine/classes/ClinicalTrialChaosEngine.md)
+
+***
+
+### ClinicalTrialChaosSnapshot
+
+Re-exports [ClinicalTrialChaosSnapshot](engine/interfaces/ClinicalTrialChaosSnapshot.md)
+
+***
+
+### ClinicalTrialChaosState
+
+Re-exports [ClinicalTrialChaosState](engine/interfaces/ClinicalTrialChaosState.md)
+
+***
+
 ### createAuditLogEntry
 
 Re-exports [createAuditLogEntry](engine/functions/createAuditLogEntry.md)

@@ -3,7 +3,11 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ArcadeEngine } from "@/lib/arcade/core/engine";
 import { ArcadeGameLoop } from "@/lib/arcade/core/game-loop";
-import { ArcadeViewport, ViewportMode, ViewportMetrics } from "@/lib/arcade/core/viewport";
+import {
+  ArcadeViewport,
+  ViewportMode,
+  ViewportMetrics,
+} from "@/lib/arcade/core/viewport";
 import { ArcadeInputManager } from "@/lib/arcade/core/input";
 
 export interface UseArcadeEngineOptions {
@@ -15,7 +19,10 @@ export interface UseArcadeEngineOptions {
   paused?: boolean;
 }
 
-export interface UseArcadeEngineReturn<TEngine extends ArcadeEngine<any, TSnapshot>, TSnapshot> {
+export interface UseArcadeEngineReturn<
+  TEngine extends ArcadeEngine<unknown, TSnapshot>,
+  TSnapshot,
+> {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   engine: TEngine;
   snapshot: TSnapshot;
@@ -25,53 +32,38 @@ export interface UseArcadeEngineReturn<TEngine extends ArcadeEngine<any, TSnapsh
   isContextLost: boolean;
 }
 
-export function useArcadeEngine<TEngine extends ArcadeEngine<any, TSnapshot>, TSnapshot>(
+export function useArcadeEngine<
+  TEngine extends ArcadeEngine<unknown, TSnapshot>,
+  TSnapshot,
+>(
   engineFactory: () => TEngine,
   options: UseArcadeEngineOptions
 ): UseArcadeEngineReturn<TEngine, TSnapshot> {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isContextLost, setIsContextLost] = useState(false);
 
-  // Maintain stable instances of engine, loop, viewport, and input
-  const engineRef = useRef<TEngine | null>(null);
-  if (!engineRef.current) {
-    engineRef.current = engineFactory();
-  }
-  const engine = engineRef.current;
+  // Maintain stable instances of engine, loop, viewport, and input via useState initializers
+  const [engine] = useState<TEngine>(engineFactory);
 
-  const viewportRef = useRef<ArcadeViewport | null>(null);
-  if (!viewportRef.current) {
-    viewportRef.current = new ArcadeViewport({
-      mode: options.viewportMode ?? "safe-zone",
-      baseWidth: options.baseWidth,
-      baseHeight: options.baseHeight,
-      maxDpr: options.maxDpr ?? 2.0,
-    });
-  }
-  const viewport = viewportRef.current;
+  const [viewport] = useState<ArcadeViewport>(
+    () =>
+      new ArcadeViewport({
+        mode: options.viewportMode ?? "safe-zone",
+        baseWidth: options.baseWidth,
+        baseHeight: options.baseHeight,
+        maxDpr: options.maxDpr ?? 2.0,
+      })
+  );
 
   const metricsRef = useRef<ViewportMetrics>(
     viewport.calculateMetrics(options.baseWidth, options.baseHeight, 1.0)
   );
 
-  const inputRef = useRef<ArcadeInputManager | null>(null);
-  if (!inputRef.current) {
-    inputRef.current = new ArcadeInputManager();
-  }
-  const input = inputRef.current;
+  const [input] = useState<ArcadeInputManager>(() => new ArcadeInputManager());
 
-  const loopRef = useRef<ArcadeGameLoop | null>(null);
-  if (!loopRef.current) {
-    loopRef.current = new ArcadeGameLoop(
-      engine,
-      () => {
-        const canvas = canvasRef.current;
-        return canvas ? canvas.getContext("2d") : null;
-      },
-      { fixedDt: options.fixedDt }
-    );
-  }
-  const loop = loopRef.current;
+  const [loop] = useState<ArcadeGameLoop>(
+    () => new ArcadeGameLoop(engine, () => null, { fixedDt: options.fixedDt })
+  );
 
   // Subscribe to engine state mutations via useSyncExternalStore
   const snapshot = useSyncExternalStore(
@@ -94,6 +86,9 @@ export function useArcadeEngine<TEngine extends ArcadeEngine<any, TSnapshot>, TS
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    // Connect context getter to canvas
+    loop.setContextGetter(() => canvas.getContext("2d"));
+
     // Handle 2D Context Loss / Restored
     const handleContextLost = (e: Event) => {
       e.preventDefault();
@@ -110,13 +105,21 @@ export function useArcadeEngine<TEngine extends ArcadeEngine<any, TSnapshot>, TS
     canvas.addEventListener("contextrestored", handleContextRestored);
 
     // Attach input manager
-    input.attach(canvas, () => metricsRef.current);
+    input.attach(
+      canvas,
+      () =>
+        metricsRef.current ||
+        viewport.calculateMetrics(options.baseWidth, options.baseHeight, 1.0)
+    );
 
     // Resize handler
     const updateSize = () => {
       const parent = canvas.parentElement;
-      const rect = parent ? parent.getBoundingClientRect() : canvas.getBoundingClientRect();
-      const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1.0 : 1.0;
+      const rect = parent
+        ? parent.getBoundingClientRect()
+        : canvas.getBoundingClientRect();
+      const dpr =
+        typeof window !== "undefined" ? window.devicePixelRatio || 1.0 : 1.0;
 
       const w = Math.max(1, Math.floor(rect.width));
       const h = Math.max(1, Math.floor(rect.height));
@@ -163,7 +166,7 @@ export function useArcadeEngine<TEngine extends ArcadeEngine<any, TSnapshot>, TS
       }
       engine.destroy();
     };
-  }, [engine, loop, viewport, input]);
+  }, [engine, loop, viewport, input, options.baseWidth, options.baseHeight]);
 
   return {
     canvasRef,

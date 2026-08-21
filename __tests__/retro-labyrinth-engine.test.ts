@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { RetroLabyrinthEngine } from "@/lib/retro-labyrinth/engine";
 
 describe("RetroLabyrinthEngine", () => {
@@ -49,10 +49,14 @@ describe("RetroLabyrinthEngine", () => {
       gameMode: "roguelike",
     });
 
-    const initialAmmo = engine.getSnapshot().weapons.find((w) => w.id === "npm_install")?.ammo ?? 0;
+    const initialAmmo =
+      engine.getSnapshot().weapons.find((w) => w.id === "npm_install")?.ammo ??
+      0;
     engine.fireActiveWeapon();
 
-    const currentAmmo = engine.getSnapshot().weapons.find((w) => w.id === "npm_install")?.ammo ?? 0;
+    const currentAmmo =
+      engine.getSnapshot().weapons.find((w) => w.id === "npm_install")?.ammo ??
+      0;
     expect(currentAmmo).toBeLessThanOrEqual(initialAmmo);
   });
 

@@ -7,7 +7,10 @@ export abstract class ArcadeEngine<TState, TSnapshot> {
   protected state: TState;
   protected cachedSnapshot: TSnapshot | null = null;
   private readonly subscribers = new Set<() => void>();
-  private readonly eventListeners = new Map<string, Set<(payload: unknown) => void>>();
+  private readonly eventListeners = new Map<
+    string,
+    Set<(payload: unknown) => void>
+  >();
 
   constructor(initialState: TState) {
     this.state = initialState;
@@ -70,6 +73,13 @@ export abstract class ArcadeEngine<TState, TSnapshot> {
   }
 
   /**
+   * Invalidates cached snapshot so the next getSnapshot() recomputes fresh state.
+   */
+  public invalidateSnapshot(): void {
+    this.cachedSnapshot = null;
+  }
+
+  /**
    * Invalidates cached snapshot and broadcasts a state change to subscribers.
    */
   public notifySubscribers(): void {
@@ -82,7 +92,10 @@ export abstract class ArcadeEngine<TState, TSnapshot> {
   /**
    * Subscribes to a typed one-shot action event (e.g. sfx, haptic, screen shake).
    */
-  public on<T = unknown>(event: string, callback: (payload: T) => void): () => void {
+  public on<T = unknown>(
+    event: string,
+    callback: (payload: T) => void
+  ): () => void {
     let set = this.eventListeners.get(event);
     if (!set) {
       set = new Set();

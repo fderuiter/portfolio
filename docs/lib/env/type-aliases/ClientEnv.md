@@ -8,4 +8,4 @@
 
 > **ClientEnv** = `z.infer`\<*typeof* [`clientEnvSchema`](../variables/clientEnvSchema.md)\>
 
-Defined in: [lib/env.ts:61](https://github.com/fderuiter/portfolio/blob/main/lib/env.ts#L61)
+Defined in: [lib/env.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/env.ts#L68)

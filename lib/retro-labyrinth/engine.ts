@@ -1,48 +1,39 @@
-import { ArcadeEngine } from "@/lib/arcade/core/engine";
+/**
+ * Headless Arcade Engine implementation for Retro Labyrinth
+ * Manages game state, cyberdeck classes, roguelike rooms, enemies, weapons, and FOV calculations.
+ */
+
+import { ArcadeEngine } from "@/lib/arcade";
+import { CRT_THEMES, CYBERDECK_CLASSES } from "@/lib/dungeon/metaprogression";
+import { DEFAULT_WEAPONS } from "@/lib/dungeon/weapons";
 import {
-  ActiveSideEffect,
-  BossState,
-  CRTThemeId,
+  generateRoguelikeCampaign,
+  STAGE_1_MAZE,
+} from "@/lib/dungeon/generator";
+import { calculateFOV } from "@/lib/dungeon/fov";
+import { updateEnemyAI } from "@/lib/dungeon/ai";
+import {
   CyberdeckClassId,
-  CyberdeckProfile,
-  DEFAULT_WEAPONS,
-  DungeonRoom,
-  Enemy,
-  FloatingNotification,
-  HexMatrixPuzzle,
-  ItemPickup,
-  ParticleEffect,
+  CRTThemeId,
   Weapon,
   WeaponId,
-  calculateFOV,
-  computeShortestTour,
-  fireWeapon,
-  generateClassicStage1,
-  generateClassicStage2,
-  generateRoguelikeCampaign,
-  generateTSPRoom,
-  generateHexMatrixPuzzle,
-  selectHexCell,
-  consumeBypassChip,
-  renderWireframeMesh,
-  updateEnemyAI,
-  updateFaceForgeBoss,
-  updateTSPMovingWalls,
-  CRT_THEMES,
-  CYBERDECK_CLASSES,
-  loadCyberdeckProfile,
-  STAGE_1_MAZE,
-} from "@/lib/dungeon";
-import { clamp } from "@/lib/game-utils";
+  Enemy,
+  ItemPickup,
+  ActiveSideEffect,
+  FloatingNotification,
+  ParticleEffect,
+  BossState,
+  DungeonRoom,
+} from "@/lib/dungeon/types";
 
 export interface RetroLabyrinthConfig {
   classId?: CyberdeckClassId;
-  gameMode?: "roguelike" | "classic";
+  gameMode?: "classic" | "roguelike";
   crtThemeId?: CRTThemeId;
 }
 
 export interface RetroLabyrinthState {
-  gameMode: "roguelike" | "classic";
+  gameMode: "classic" | "roguelike";
   stage: number;
   roomIndex: number;
   campaignRooms: DungeonRoom[];
@@ -54,11 +45,11 @@ export interface RetroLabyrinthState {
   highScore: number;
   gameStatus: "playing" | "victory" | "game_over";
   weapons: Weapon[];
-  activeWeaponId: WeaponId;
+  activeWeaponId: string;
   selectedWeaponIndex: number;
   cryptoCredits: number;
-  visitedNodes: { x: number; y: number }[];
-  tspTour: { x: number; y: number }[];
+  visitedNodes: number[];
+  tspTour: number[];
   faceForgeBoss: BossState | null;
   enemies: Enemy[];
   items: ItemPickup[];
@@ -67,13 +58,13 @@ export interface RetroLabyrinthState {
   particles: ParticleEffect[];
   visibleCells: boolean[][];
   exploredCells: boolean[][];
-  hexPuzzle: HexMatrixPuzzle | null;
+  hexPuzzle: unknown;
   crtThemeId: CRTThemeId;
   selectedClassId: CyberdeckClassId;
 }
 
 export interface RetroLabyrinthSnapshot {
-  gameMode: "roguelike" | "classic";
+  gameMode: "classic" | "roguelike";
   stage: number;
   roomIndex: number;
   totalRooms: number;
@@ -84,7 +75,7 @@ export interface RetroLabyrinthSnapshot {
   highScore: number;
   gameStatus: "playing" | "victory" | "game_over";
   weapons: Weapon[];
-  activeWeaponId: WeaponId;
+  activeWeaponId: string;
   selectedWeaponIndex: number;
   cryptoCredits: number;
   crtThemeId: CRTThemeId;
@@ -94,27 +85,51 @@ export interface RetroLabyrinthSnapshot {
 const START_X = 1;
 const START_Y = 1;
 
-export class RetroLabyrinthEngine extends ArcadeEngine<RetroLabyrinthState, RetroLabyrinthSnapshot> {
+export class RetroLabyrinthEngine extends ArcadeEngine<
+  RetroLabyrinthState,
+  RetroLabyrinthSnapshot
+> {
   private tickCounter = 0;
 
   constructor(config: RetroLabyrinthConfig = {}) {
     const classId = config.classId ?? "script_kiddie";
-    const selectedClass = CYBERDECK_CLASSES[classId] || CYBERDECK_CLASSES.script_kiddie;
+    const selectedClass =
+      CYBERDECK_CLASSES[classId] || CYBERDECK_CLASSES.script_kiddie;
     const gameMode = config.gameMode ?? "roguelike";
     const crtThemeId = config.crtThemeId ?? "emerald";
 
-    const campaignRooms = gameMode === "roguelike" ? generateRoguelikeCampaign() : [];
-    const currentMaze = gameMode === "roguelike" ? campaignRooms[0]?.maze || STAGE_1_MAZE : STAGE_1_MAZE;
+    const campaignRooms =
+      gameMode === "roguelike" ? generateRoguelikeCampaign() : [];
+    const currentMaze =
+      gameMode === "roguelike"
+        ? campaignRooms[0]?.grid || STAGE_1_MAZE
+        : STAGE_1_MAZE;
+    const startX =
+      gameMode === "roguelike"
+        ? (campaignRooms[0]?.startX ?? START_X)
+        : START_X;
+    const startY =
+      gameMode === "roguelike"
+        ? (campaignRooms[0]?.startY ?? START_Y)
+        : START_Y;
+    const initialEnemies =
+      gameMode === "roguelike" ? campaignRooms[0]?.enemies || [] : [];
+    const initialItems =
+      gameMode === "roguelike" ? campaignRooms[0]?.items || [] : [];
 
-    const initialWeapons = selectedClass.starterWeapons.map((id) => {
+    const initialWeapons = selectedClass.starterWeapons.map((id: WeaponId) => {
       const template = DEFAULT_WEAPONS[id] || DEFAULT_WEAPONS.npm_install;
       return { ...template };
     });
 
     const rows = currentMaze.length || 9;
     const cols = currentMaze[0]?.length || 15;
-    const visibleCells = Array.from({ length: rows }, () => Array(cols).fill(false));
-    const exploredCells = Array.from({ length: rows }, () => Array(cols).fill(false));
+    const visibleCells = Array.from({ length: rows }, () =>
+      Array(cols).fill(false)
+    );
+    const exploredCells = Array.from({ length: rows }, () =>
+      Array(cols).fill(false)
+    );
 
     super({
       gameMode,
@@ -122,7 +137,7 @@ export class RetroLabyrinthEngine extends ArcadeEngine<RetroLabyrinthState, Retr
       roomIndex: 0,
       campaignRooms,
       currentMaze,
-      playerPosition: { x: START_X, y: START_Y },
+      playerPosition: { x: startX, y: startY },
       playerHp: selectedClass.baseHp,
       maxHp: selectedClass.baseHp,
       score: 0,
@@ -135,8 +150,8 @@ export class RetroLabyrinthEngine extends ArcadeEngine<RetroLabyrinthState, Retr
       visitedNodes: [],
       tspTour: [],
       faceForgeBoss: null,
-      enemies: [],
-      items: [],
+      enemies: initialEnemies,
+      items: initialItems,
       sideEffects: [],
       floatingTexts: [],
       particles: [],
@@ -161,12 +176,24 @@ export class RetroLabyrinthEngine extends ArcadeEngine<RetroLabyrinthState, Retr
     // Update enemy AI every 12 ticks
     if (this.tickCounter % 12 === 0) {
       if (this.state.enemies.length > 0) {
-        const updatedEnemies = updateEnemyAI(
+        const aiRes = updateEnemyAI(
           this.state.enemies,
-          this.state.playerPosition,
-          this.state.currentMaze
+          this.state.currentMaze,
+          this.state.playerPosition.x,
+          this.state.playerPosition.y,
+          dt * 1000
         );
-        this.state.enemies = updatedEnemies;
+        this.state.enemies = aiRes.updatedEnemies;
+        if (aiRes.damageToPlayer > 0) {
+          this.state.playerHp = Math.max(
+            0,
+            this.state.playerHp - aiRes.damageToPlayer
+          );
+          if (this.state.playerHp <= 0) {
+            this.state.gameStatus = "game_over";
+            this.emit("gameOver", { score: this.state.score });
+          }
+        }
       }
     }
 
@@ -176,17 +203,17 @@ export class RetroLabyrinthEngine extends ArcadeEngine<RetroLabyrinthState, Retr
         ...p,
         x: p.x + p.vx * dt,
         y: p.y + p.vy * dt,
-        life: p.life - dt,
+        alpha: p.alpha - p.decay * dt,
       }))
-      .filter((p) => p.life > 0);
+      .filter((p) => p.alpha > 0);
 
     this.state.floatingTexts = this.state.floatingTexts
       .map((t) => ({
         ...t,
-        y: t.y - 10 * dt,
-        life: t.life - dt,
+        y: t.y + (t.vy || -10) * dt,
+        alpha: t.alpha - dt,
       }))
-      .filter((t) => t.life > 0);
+      .filter((t) => t.alpha > 0);
   }
 
   public override render(ctx: CanvasRenderingContext2D, _alpha: number): void {
@@ -216,10 +243,12 @@ export class RetroLabyrinthEngine extends ArcadeEngine<RetroLabyrinthState, Retr
         const isVisible = this.state.visibleCells[r]?.[c] ?? true;
 
         if (char === "#") {
-          ctx.fillStyle = isVisible ? theme.primary : theme.dim;
+          ctx.fillStyle = isVisible
+            ? theme.primaryColor
+            : theme.bgDark || "#002b11";
           ctx.fillRect(px, py, cellW, cellH);
         } else if (char === "E") {
-          ctx.fillStyle = theme.accent;
+          ctx.fillStyle = theme.accentColor;
           ctx.fillRect(px + 2, py + 2, cellW - 4, cellH - 4);
         }
       }
@@ -235,7 +264,12 @@ export class RetroLabyrinthEngine extends ArcadeEngine<RetroLabyrinthState, Retr
     ctx.fillStyle = "#ef4444";
     for (const enemy of this.state.enemies) {
       if (enemy.hp > 0) {
-        ctx.fillRect(enemy.x * cellW + 2, enemy.y * cellH + 2, cellW - 4, cellH - 4);
+        ctx.fillRect(
+          enemy.x * cellW + 2,
+          enemy.y * cellH + 2,
+          cellW - 4,
+          cellH - 4
+        );
       }
     }
   }
@@ -318,13 +352,27 @@ export class RetroLabyrinthEngine extends ArcadeEngine<RetroLabyrinthState, Retr
   }
 
   public resetGame(): void {
-    const selectedClass = CYBERDECK_CLASSES[this.state.selectedClassId] || CYBERDECK_CLASSES.script_kiddie;
-    const campaignRooms = this.state.gameMode === "roguelike" ? generateRoguelikeCampaign() : [];
-    const currentMaze = this.state.gameMode === "roguelike" ? campaignRooms[0]?.maze || STAGE_1_MAZE : STAGE_1_MAZE;
+    const selectedClass =
+      CYBERDECK_CLASSES[this.state.selectedClassId] ||
+      CYBERDECK_CLASSES.script_kiddie;
+    const campaignRooms =
+      this.state.gameMode === "roguelike" ? generateRoguelikeCampaign() : [];
+    const currentMaze =
+      this.state.gameMode === "roguelike"
+        ? campaignRooms[0]?.grid || STAGE_1_MAZE
+        : STAGE_1_MAZE;
+    const startX =
+      this.state.gameMode === "roguelike"
+        ? (campaignRooms[0]?.startX ?? START_X)
+        : START_X;
+    const startY =
+      this.state.gameMode === "roguelike"
+        ? (campaignRooms[0]?.startY ?? START_Y)
+        : START_Y;
 
     this.state.campaignRooms = campaignRooms;
     this.state.currentMaze = currentMaze;
-    this.state.playerPosition = { x: START_X, y: START_Y };
+    this.state.playerPosition = { x: startX, y: startY };
     this.state.playerHp = selectedClass.baseHp;
     this.state.score = 0;
     this.state.gameStatus = "playing";

@@ -6,7 +6,7 @@
 
 # Interface: FlashVariable
 
-Defined in: [lib/garmin-engine.ts:83](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L83)
+Defined in: [lib/garmin-engine.ts:84](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L84)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/garmin-engine.ts:83](https://github.com/fderuiter/portfolio/blo
 
 > **allocatedAt**: `number`
 
-Defined in: [lib/garmin-engine.ts:87](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L87)
+Defined in: [lib/garmin-engine.ts:88](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L88)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/garmin-engine.ts:87](https://github.com/fderuiter/portfolio/blo
 
 > **id**: `number`
 
-Defined in: [lib/garmin-engine.ts:84](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L84)
+Defined in: [lib/garmin-engine.ts:85](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L85)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/garmin-engine.ts:84](https://github.com/fderuiter/portfolio/blo
 
 > **name**: `string`
 
-Defined in: [lib/garmin-engine.ts:85](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L85)
+Defined in: [lib/garmin-engine.ts:86](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L86)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/garmin-engine.ts:85](https://github.com/fderuiter/portfolio/blo
 
 > **sizeKb**: `number`
 
-Defined in: [lib/garmin-engine.ts:86](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L86)
+Defined in: [lib/garmin-engine.ts:87](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L87)

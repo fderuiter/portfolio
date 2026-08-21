@@ -19,7 +19,6 @@ vi.mock("@/components/providers/AudioProvider", () => ({
     volume: 0.3,
     muted: false,
   }),
-  registerAudioCleanup: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -72,7 +71,9 @@ describe("CommandPalette Performance & Concurrency Refactor", () => {
       root.render(<CommandPalette />);
     });
 
-    const combobox = document.querySelector('input[role="combobox"]') as HTMLInputElement;
+    const combobox = document.querySelector(
+      'input[role="combobox"]'
+    ) as HTMLInputElement;
     expect(combobox).not.toBeNull();
 
     // Type query
@@ -100,7 +101,12 @@ describe("CommandPalette Performance & Concurrency Refactor", () => {
 
     // Mouseover second option (triggers React onMouseEnter synthetic event)
     await act(async () => {
-      options[1].dispatchEvent(new MouseEvent("mouseover", { bubbles: true, relatedTarget: document.body }));
+      options[1].dispatchEvent(
+        new MouseEvent("mouseover", {
+          bubbles: true,
+          relatedTarget: document.body,
+        })
+      );
     });
 
     expect(mockPlayHover).toHaveBeenCalledTimes(1);
@@ -113,13 +119,21 @@ describe("CommandPalette Performance & Concurrency Refactor", () => {
       root.render(<CommandPalette />);
     });
 
-    const combobox = document.querySelector('input[role="combobox"]') as HTMLInputElement;
+    const combobox = document.querySelector(
+      'input[role="combobox"]'
+    ) as HTMLInputElement;
 
     // Rapid ArrowDown presses
     await act(async () => {
-      combobox.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
-      combobox.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
-      combobox.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+      combobox.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })
+      );
+      combobox.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })
+      );
+      combobox.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })
+      );
     });
 
     // All keydowns moved index, audio trigger was throttled or executed

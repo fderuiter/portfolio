@@ -25,4 +25,5 @@
 - [diffUsdmProtocols](functions/diffUsdmProtocols.md)
 - [exportStudyToUsdm](functions/exportStudyToUsdm.md)
 - [exportStudyToUsdmObject](functions/exportStudyToUsdmObject.md)
+- [extractCodelistFromUsdmObject](functions/extractCodelistFromUsdmObject.md)
 - [importStudyFromUsdm](functions/importStudyFromUsdm.md)

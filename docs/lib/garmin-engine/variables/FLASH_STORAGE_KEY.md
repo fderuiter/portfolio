@@ -8,4 +8,4 @@
 
 > `const` **FLASH\_STORAGE\_KEY**: `"garmin_simulator_flash_storage"` = `"garmin_simulator_flash_storage"`
 
-Defined in: [lib/garmin-engine.ts:90](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L90)
+Defined in: [lib/garmin-engine.ts:91](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L91)

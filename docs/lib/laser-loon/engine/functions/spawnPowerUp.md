@@ -8,7 +8,7 @@
 
 > **spawnPowerUp**(`powerUps`, `nextId`, `canvasWidth?`, `canvasHeight?`, `forcedType?`): `object`
 
-Defined in: [lib/laser-loon/engine.ts:181](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L181)
+Defined in: [lib/laser-loon/engine.ts:200](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L200)
 
 ## Parameters
 

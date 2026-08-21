@@ -8,6 +8,6 @@
 
 > **DiagnosticSeverity** = `"error"` \| `"warning"` \| `"info"`
 
-Defined in: [lib/crf/study-auditor.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L20)
+Defined in: [lib/crf/study-auditor.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L21)
 
 Severity level of an audit finding.

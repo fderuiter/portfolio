@@ -8,4 +8,4 @@
 
 > `const` **ATOMIC\_SLASH\_COMMANDS**: [`SlashCommandItem`](../interfaces/SlashCommandItem.md)[]
 
-Defined in: [lib/crf/smart-blocks-engine.ts:1256](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L1256)
+Defined in: [lib/crf/smart-blocks-engine.ts:1353](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L1353)

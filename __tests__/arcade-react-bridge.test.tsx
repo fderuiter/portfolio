@@ -1,5 +1,5 @@
 import React from "react";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import { ArcadeEngine } from "@/lib/arcade/core/engine";
 import { useArcadeEngine } from "@/components/arcade/useArcadeEngine";
@@ -39,22 +39,29 @@ class MockGameEngine extends ArcadeEngine<TestState, TestState> {
   }
 }
 
-const TestGameComponent: React.FC<{ engine: MockGameEngine }> = ({ engine }) => {
-  const { canvasRef, snapshot, isContextLost } = useArcadeEngine<MockGameEngine, TestState>(
-    () => engine,
-    {
-      viewportMode: "safe-zone",
-      baseWidth: 800,
-      baseHeight: 500,
-    }
-  );
+const TestGameComponent: React.FC<{ engine: MockGameEngine }> = ({
+  engine,
+}) => {
+  const { canvasRef, snapshot, isContextLost } = useArcadeEngine<
+    MockGameEngine,
+    TestState
+  >(() => engine, {
+    viewportMode: "safe-zone",
+    baseWidth: 800,
+    baseHeight: 500,
+  });
 
   return (
-    <div data-testid="game-container" style={{ position: "relative", width: "800px", height: "500px" }}>
+    <div
+      data-testid="game-container"
+      style={{ position: "relative", width: "800px", height: "500px" }}
+    >
       <canvas ref={canvasRef} data-testid="game-canvas" />
       <div id="ui-layer" className="absolute inset-0 pointer-events-none">
         <div data-testid="score-display">Score: {snapshot.score}</div>
-        {isContextLost && <div data-testid="context-lost-banner">Restoring Graphics...</div>}
+        {isContextLost && (
+          <div data-testid="context-lost-banner">Restoring Graphics...</div>
+        )}
       </div>
     </div>
   );

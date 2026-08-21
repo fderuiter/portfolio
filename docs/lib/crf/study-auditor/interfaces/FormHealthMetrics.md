@@ -6,7 +6,7 @@
 
 # Interface: FormHealthMetrics
 
-Defined in: [lib/crf/study-auditor.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L44)
+Defined in: [lib/crf/study-auditor.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L50)
 
 Form-level health and compliance metrics.
 
@@ -16,7 +16,7 @@ Form-level health and compliance metrics.
 
 > **calculatedFields**: `number`
 
-Defined in: [lib/crf/study-auditor.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L48)
+Defined in: [lib/crf/study-auditor.ts:54](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L54)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [lib/crf/study-auditor.ts:48](https://github.com/fderuiter/portfolio
 
 > **cdashConformancePercentage**: `number`
 
-Defined in: [lib/crf/study-auditor.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L52)
+Defined in: [lib/crf/study-auditor.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L58)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [lib/crf/study-auditor.ts:52](https://github.com/fderuiter/portfolio
 
 > **codelistsAttached**: `number`
 
-Defined in: [lib/crf/study-auditor.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L47)
+Defined in: [lib/crf/study-auditor.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L53)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [lib/crf/study-auditor.ts:47](https://github.com/fderuiter/portfolio
 
 > **conditionalRules**: `number`
 
-Defined in: [lib/crf/study-auditor.ts:49](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L49)
+Defined in: [lib/crf/study-auditor.ts:55](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L55)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [lib/crf/study-auditor.ts:49](https://github.com/fderuiter/portfolio
 
 > **mandatoryFields**: `number`
 
-Defined in: [lib/crf/study-auditor.ts:46](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L46)
+Defined in: [lib/crf/study-auditor.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L52)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [lib/crf/study-auditor.ts:46](https://github.com/fderuiter/portfolio
 
 > **missingCoreVariables**: `string`[]
 
-Defined in: [lib/crf/study-auditor.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L53)
+Defined in: [lib/crf/study-auditor.ts:59](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L59)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [lib/crf/study-auditor.ts:53](https://github.com/fderuiter/portfolio
 
 > **sdvReadinessPercentage**: `number`
 
-Defined in: [lib/crf/study-auditor.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L51)
+Defined in: [lib/crf/study-auditor.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L57)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [lib/crf/study-auditor.ts:51](https://github.com/fderuiter/portfolio
 
 > **sdvVerifiedCount**: `number`
 
-Defined in: [lib/crf/study-auditor.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L50)
+Defined in: [lib/crf/study-auditor.ts:56](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L56)
 
 ***
 
@@ -80,4 +80,4 @@ Defined in: [lib/crf/study-auditor.ts:50](https://github.com/fderuiter/portfolio
 
 > **totalFields**: `number`
 
-Defined in: [lib/crf/study-auditor.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L45)
+Defined in: [lib/crf/study-auditor.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L51)

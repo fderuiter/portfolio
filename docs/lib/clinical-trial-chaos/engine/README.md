@@ -6,6 +6,15 @@
 
 # lib/clinical-trial-chaos/engine
 
+## Classes
+
+- [ClinicalTrialChaosEngine](classes/ClinicalTrialChaosEngine.md)
+
+## Interfaces
+
+- [ClinicalTrialChaosSnapshot](interfaces/ClinicalTrialChaosSnapshot.md)
+- [ClinicalTrialChaosState](interfaces/ClinicalTrialChaosState.md)
+
 ## Functions
 
 - [calculateSubmissionPoints](functions/calculateSubmissionPoints.md)

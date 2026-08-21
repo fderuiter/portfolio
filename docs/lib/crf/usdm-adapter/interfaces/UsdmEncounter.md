@@ -6,7 +6,7 @@
 
 # Interface: UsdmEncounter
 
-Defined in: [lib/crf/usdm-adapter.ts:64](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L64)
+Defined in: [lib/crf/usdm-adapter.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L68)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/usdm-adapter.ts:64](https://github.com/fderuiter/portfolio/
 
 > `optional` **armFormAssignments?**: `Record`\<`string`, `string`[]\>
 
-Defined in: [lib/crf/usdm-adapter.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L76)
+Defined in: [lib/crf/usdm-adapter.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L80)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/usdm-adapter.ts:76](https://github.com/fderuiter/portfolio/
 
 > `optional` **armIds?**: `string`[]
 
-Defined in: [lib/crf/usdm-adapter.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L74)
+Defined in: [lib/crf/usdm-adapter.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L78)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/usdm-adapter.ts:74](https://github.com/fderuiter/portfolio/
 
 > `optional` **assignedFormIds?**: `string`[]
 
-Defined in: [lib/crf/usdm-adapter.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L75)
+Defined in: [lib/crf/usdm-adapter.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L79)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/usdm-adapter.ts:75](https://github.com/fderuiter/portfolio/
 
 > `optional` **epochId?**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L73)
+Defined in: [lib/crf/usdm-adapter.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L77)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/crf/usdm-adapter.ts:73](https://github.com/fderuiter/portfolio/
 
 > **id**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L65)
+Defined in: [lib/crf/usdm-adapter.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L69)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/crf/usdm-adapter.ts:65](https://github.com/fderuiter/portfolio/
 
 > `optional` **isRepeating?**: `boolean`
 
-Defined in: [lib/crf/usdm-adapter.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L77)
+Defined in: [lib/crf/usdm-adapter.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L81)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/crf/usdm-adapter.ts:77](https://github.com/fderuiter/portfolio/
 
 > **name**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L67)
+Defined in: [lib/crf/usdm-adapter.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L71)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/crf/usdm-adapter.ts:67](https://github.com/fderuiter/portfolio/
 
 > `optional` **oid?**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L66)
+Defined in: [lib/crf/usdm-adapter.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L70)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/crf/usdm-adapter.ts:66](https://github.com/fderuiter/portfolio/
 
 > `optional` **repeatMax?**: `number`
 
-Defined in: [lib/crf/usdm-adapter.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L78)
+Defined in: [lib/crf/usdm-adapter.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L82)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [lib/crf/usdm-adapter.ts:78](https://github.com/fderuiter/portfolio/
 
 > **targetDay**: `number`
 
-Defined in: [lib/crf/usdm-adapter.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L69)
+Defined in: [lib/crf/usdm-adapter.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L73)
 
 ***
 
@@ -94,7 +94,7 @@ Defined in: [lib/crf/usdm-adapter.ts:69](https://github.com/fderuiter/portfolio/
 
 > `optional` **timepointDays?**: `number`
 
-Defined in: [lib/crf/usdm-adapter.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L70)
+Defined in: [lib/crf/usdm-adapter.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L74)
 
 ***
 
@@ -102,7 +102,7 @@ Defined in: [lib/crf/usdm-adapter.ts:70](https://github.com/fderuiter/portfolio/
 
 > **type**: `"Scheduled"` \| `"Unscheduled"` \| `"Common"`
 
-Defined in: [lib/crf/usdm-adapter.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L68)
+Defined in: [lib/crf/usdm-adapter.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L72)
 
 ***
 
@@ -110,7 +110,7 @@ Defined in: [lib/crf/usdm-adapter.ts:68](https://github.com/fderuiter/portfolio/
 
 > **windowAfter**: `number`
 
-Defined in: [lib/crf/usdm-adapter.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L72)
+Defined in: [lib/crf/usdm-adapter.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L76)
 
 ***
 
@@ -118,4 +118,4 @@ Defined in: [lib/crf/usdm-adapter.ts:72](https://github.com/fderuiter/portfolio/
 
 > **windowBefore**: `number`
 
-Defined in: [lib/crf/usdm-adapter.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L71)
+Defined in: [lib/crf/usdm-adapter.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L75)

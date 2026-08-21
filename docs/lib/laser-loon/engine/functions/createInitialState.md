@@ -8,7 +8,7 @@
 
 > **createInitialState**(`mode?`): [`LaserLoonState`](../../types/interfaces/LaserLoonState.md)
 
-Defined in: [lib/laser-loon/engine.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L32)
+Defined in: [lib/laser-loon/engine.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L33)
 
 ## Parameters
 

@@ -8,7 +8,7 @@
 
 > **searchSlashCommands**(`query`): [`SlashCommandItem`](../interfaces/SlashCommandItem.md)[]
 
-Defined in: [lib/crf/smart-blocks-engine.ts:1553](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L1553)
+Defined in: [lib/crf/smart-blocks-engine.ts:1658](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L1658)
 
 Searches and ranks slash commands by match relevance
 

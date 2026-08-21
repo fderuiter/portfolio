@@ -32,15 +32,23 @@ export function getAnatomicalParcelAtCoordinate(
 
   // Medial Wall & Cingulate Cortex
   if (x < 0.28) {
-    if (y > 0.45 && z > -0.1) return DESIKAN_KILLIANY_PARCELS.rostralanteriorcingulate;
-    if (y > 0.0 && y <= 0.45 && z > 0.1) return DESIKAN_KILLIANY_PARCELS.caudalanteriorcingulate;
-    if (y < 0.0 && y >= -0.65 && z > 0.0) return DESIKAN_KILLIANY_PARCELS.posteriorcingulate;
-    if (y < -0.65 && z > -0.2 && z < 0.3) return DESIKAN_KILLIANY_PARCELS.isthmuscingulate;
+    if (y > 0.45 && z > -0.1)
+      return DESIKAN_KILLIANY_PARCELS.rostralanteriorcingulate;
+    if (y > 0.0 && y <= 0.45 && z > 0.1)
+      return DESIKAN_KILLIANY_PARCELS.caudalanteriorcingulate;
+    if (y < 0.0 && y >= -0.65 && z > 0.0)
+      return DESIKAN_KILLIANY_PARCELS.posteriorcingulate;
+    if (y < -0.65 && z > -0.2 && z < 0.3)
+      return DESIKAN_KILLIANY_PARCELS.isthmuscingulate;
     if (y > 0.0 && z > 0.4) return DESIKAN_KILLIANY_PARCELS.paracentral;
     if (y < -0.5 && z > 0.2) return DESIKAN_KILLIANY_PARCELS.precuneus;
     if (y < -0.7 && z > 0.0) return DESIKAN_KILLIANY_PARCELS.cuneus;
     if (y < -0.6 && z <= 0.0) return DESIKAN_KILLIANY_PARCELS.pericalcarine;
-    if (y < 0.0 && z <= -0.2) return DESIKAN_KILLIANY_PARCELS.parahippocampal || DESIKAN_KILLIANY_PARCELS.entorhinal;
+    if (y < 0.0 && z <= -0.2)
+      return (
+        DESIKAN_KILLIANY_PARCELS.parahippocampal ||
+        DESIKAN_KILLIANY_PARCELS.entorhinal
+      );
     return DESIKAN_KILLIANY_PARCELS.superiorfrontal;
   }
 
@@ -120,7 +128,9 @@ export function getAnatomicalParcelAtCoordinate(
   }
 
   // Default fallback
-  return isLeft ? DESIKAN_KILLIANY_PARCELS.superiorfrontal : DESIKAN_KILLIANY_PARCELS.superiorfrontal;
+  return isLeft
+    ? DESIKAN_KILLIANY_PARCELS.superiorfrontal
+    : DESIKAN_KILLIANY_PARCELS.superiorfrontal;
 }
 
 /**
@@ -164,7 +174,7 @@ export function generateHemisphereBuffers(
       const rz = 1.45 * baseScale;
 
       let x = rx * sinTheta * cosPhi * hemiSign + (isLeft ? -0.06 : 0.06);
-      let y = ry * sinTheta * sinPhi - (ry * 0.5);
+      let y = ry * sinTheta * sinPhi - ry * 0.5;
       let z = rz * cosTheta;
 
       // Temporal lobe anterior hook & Sylvian fissure indentation
@@ -176,13 +186,15 @@ export function generateHemisphereBuffers(
       let centralSulcusDepth = 0;
       if (y > -0.15 && y < 0.15 && z > -0.2) {
         const distToCentral = Math.abs(y - (0.05 + (z - 0.2) * 0.18));
-        centralSulcusDepth = Math.exp(-Math.pow(distToCentral / 0.12, 2)) * 0.14;
+        centralSulcusDepth =
+          Math.exp(-Math.pow(distToCentral / 0.12, 2)) * 0.14;
       }
 
       let sylvianFissureDepth = 0;
       if (z > -0.4 && z < 0.15 && y > -0.4 && y < 0.5) {
         const distToSylvian = Math.abs(z - (-0.12 - (y - 0.1) * 0.25));
-        sylvianFissureDepth = Math.exp(-Math.pow(distToSylvian / 0.14, 2)) * 0.18;
+        sylvianFissureDepth =
+          Math.exp(-Math.pow(distToSylvian / 0.14, 2)) * 0.18;
       }
 
       // Sulcal and gyral folding patterns
@@ -361,21 +373,101 @@ function generateSphereBuffer(
 /**
  * Generate subcortical structure geometry buffers (Ventricles, Thalamus, Caudate, Putamen, Hippocampus, Amygdala, Brainstem)
  */
-export function generateSubcorticalBuffers(hemiFilter: HemisphereFilter = "both"): RawGeometryBuffer[] {
+export function generateSubcorticalBuffers(
+  hemiFilter: HemisphereFilter = "both"
+): RawGeometryBuffer[] {
   const structures = [
-    { name: "Left-Lateral-Ventricle", hemi: "lh", pos: [-0.38, 0.1, 0.15], scale: [0.22, 0.75, 0.28], color: 0x7890cd },
-    { name: "Right-Lateral-Ventricle", hemi: "rh", pos: [0.38, 0.1, 0.15], scale: [0.22, 0.75, 0.28], color: 0x7890cd },
-    { name: "Left-Thalamus", hemi: "lh", pos: [-0.35, -0.15, -0.05], scale: [0.32, 0.45, 0.35], color: 0x00760e },
-    { name: "Right-Thalamus", hemi: "rh", pos: [0.35, -0.15, -0.05], scale: [0.32, 0.45, 0.35], color: 0x00760e },
-    { name: "Left-Caudate", hemi: "lh", pos: [-0.55, 0.25, 0.2], scale: [0.22, 0.48, 0.25], color: 0x7aff88 },
-    { name: "Right-Caudate", hemi: "rh", pos: [0.55, 0.25, 0.2], scale: [0.22, 0.48, 0.25], color: 0x7aff88 },
-    { name: "Left-Putamen", hemi: "lh", pos: [-0.75, 0.05, -0.02], scale: [0.28, 0.55, 0.32], color: 0xeb4095 },
-    { name: "Right-Putamen", hemi: "rh", pos: [0.75, 0.05, -0.02], scale: [0.28, 0.55, 0.32], color: 0xeb4095 },
-    { name: "Left-Hippocampus", hemi: "lh", pos: [-0.62, -0.32, -0.38], scale: [0.2, 0.55, 0.2], color: 0xd0e83b },
-    { name: "Right-Hippocampus", hemi: "rh", pos: [0.62, -0.32, -0.38], scale: [0.2, 0.55, 0.2], color: 0xd0e83b },
-    { name: "Left-Amygdala", hemi: "lh", pos: [-0.58, 0.02, -0.36], scale: [0.18, 0.22, 0.18], color: 0x67a8ff },
-    { name: "Right-Amygdala", hemi: "rh", pos: [0.58, 0.02, -0.36], scale: [0.18, 0.22, 0.18], color: 0x67a8ff },
-    { name: "Brain-Stem", hemi: "both", pos: [0, -0.25, -0.75], scale: [0.45, 0.48, 0.75], color: 0x776655 },
+    {
+      name: "Left-Lateral-Ventricle",
+      hemi: "lh",
+      pos: [-0.38, 0.1, 0.15],
+      scale: [0.22, 0.75, 0.28],
+      color: 0x7890cd,
+    },
+    {
+      name: "Right-Lateral-Ventricle",
+      hemi: "rh",
+      pos: [0.38, 0.1, 0.15],
+      scale: [0.22, 0.75, 0.28],
+      color: 0x7890cd,
+    },
+    {
+      name: "Left-Thalamus",
+      hemi: "lh",
+      pos: [-0.35, -0.15, -0.05],
+      scale: [0.32, 0.45, 0.35],
+      color: 0x00760e,
+    },
+    {
+      name: "Right-Thalamus",
+      hemi: "rh",
+      pos: [0.35, -0.15, -0.05],
+      scale: [0.32, 0.45, 0.35],
+      color: 0x00760e,
+    },
+    {
+      name: "Left-Caudate",
+      hemi: "lh",
+      pos: [-0.55, 0.25, 0.2],
+      scale: [0.22, 0.48, 0.25],
+      color: 0x7aff88,
+    },
+    {
+      name: "Right-Caudate",
+      hemi: "rh",
+      pos: [0.55, 0.25, 0.2],
+      scale: [0.22, 0.48, 0.25],
+      color: 0x7aff88,
+    },
+    {
+      name: "Left-Putamen",
+      hemi: "lh",
+      pos: [-0.75, 0.05, -0.02],
+      scale: [0.28, 0.55, 0.32],
+      color: 0xeb4095,
+    },
+    {
+      name: "Right-Putamen",
+      hemi: "rh",
+      pos: [0.75, 0.05, -0.02],
+      scale: [0.28, 0.55, 0.32],
+      color: 0xeb4095,
+    },
+    {
+      name: "Left-Hippocampus",
+      hemi: "lh",
+      pos: [-0.62, -0.32, -0.38],
+      scale: [0.2, 0.55, 0.2],
+      color: 0xd0e83b,
+    },
+    {
+      name: "Right-Hippocampus",
+      hemi: "rh",
+      pos: [0.62, -0.32, -0.38],
+      scale: [0.2, 0.55, 0.2],
+      color: 0xd0e83b,
+    },
+    {
+      name: "Left-Amygdala",
+      hemi: "lh",
+      pos: [-0.58, 0.02, -0.36],
+      scale: [0.18, 0.22, 0.18],
+      color: 0x67a8ff,
+    },
+    {
+      name: "Right-Amygdala",
+      hemi: "rh",
+      pos: [0.58, 0.02, -0.36],
+      scale: [0.18, 0.22, 0.18],
+      color: 0x67a8ff,
+    },
+    {
+      name: "Brain-Stem",
+      hemi: "both",
+      pos: [0, -0.25, -0.75],
+      scale: [0.45, 0.48, 0.75],
+      color: 0x776655,
+    },
   ] as const;
 
   const buffers: RawGeometryBuffer[] = [];
@@ -402,7 +494,7 @@ export function generateSubcorticalBuffers(hemiFilter: HemisphereFilter = "both"
  */
 export function createCorticalSurfaceMeshBuffers(
   mode: SurfaceMode = "pial",
-  wireframe = false,
+  _wireframe = false,
   hemiFilter: HemisphereFilter = "both"
 ): RawGeometryBuffer[] {
   if (mode === "aseg") {
@@ -441,7 +533,10 @@ export function createCorticalSurfaceMeshBuffers(
 // Background Web Worker Management & Async Interface
 let workerInstance: Worker | null = null;
 let requestCounter = 0;
-const pendingRequests = new Map<string, (response: MeshWorkerResponse) => void>();
+const pendingRequests = new Map<
+  string,
+  (response: MeshWorkerResponse) => void
+>();
 
 function getMeshWorker(): Worker | null {
   if (typeof window === "undefined" || typeof Worker === "undefined") {

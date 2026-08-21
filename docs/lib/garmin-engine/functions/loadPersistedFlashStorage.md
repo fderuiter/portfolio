@@ -8,7 +8,7 @@
 
 > **loadPersistedFlashStorage**(): [`FlashVariable`](../interfaces/FlashVariable.md)[]
 
-Defined in: [lib/garmin-engine.ts:92](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L92)
+Defined in: [lib/garmin-engine.ts:93](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L93)
 
 ## Returns
 

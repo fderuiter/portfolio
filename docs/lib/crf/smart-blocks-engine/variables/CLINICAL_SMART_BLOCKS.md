@@ -8,4 +8,4 @@
 
 > `const` **CLINICAL\_SMART\_BLOCKS**: [`ClinicalSmartBlockDefinition`](../interfaces/ClinicalSmartBlockDefinition.md)[]
 
-Defined in: [lib/crf/smart-blocks-engine.ts:42](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L42)
+Defined in: [lib/crf/smart-blocks-engine.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L48)

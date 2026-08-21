@@ -14,6 +14,24 @@ Re-exports [AcrfHtmlOptions](../export-acrf/interfaces/AcrfHtmlOptions.md)
 
 ***
 
+### ANNOTATED\_COL\_WIDTH\_1
+
+Re-exports [ANNOTATED_COL_WIDTH_1](../export-docx/variables/ANNOTATED_COL_WIDTH_1.md)
+
+***
+
+### ANNOTATED\_COL\_WIDTH\_2
+
+Re-exports [ANNOTATED_COL_WIDTH_2](../export-docx/variables/ANNOTATED_COL_WIDTH_2.md)
+
+***
+
+### ANNOTATED\_COL\_WIDTH\_3
+
+Re-exports [ANNOTATED_COL_WIDTH_3](../export-docx/variables/ANNOTATED_COL_WIDTH_3.md)
+
+***
+
 ### diffUsdmProtocols
 
 Re-exports [diffUsdmProtocols](../usdm-adapter/functions/diffUsdmProtocols.md)
@@ -89,6 +107,12 @@ Re-exports [exportStudyToUsdm](../usdm-adapter/functions/exportStudyToUsdm.md)
 ### exportStudyToUsdmObject
 
 Re-exports [exportStudyToUsdmObject](../usdm-adapter/functions/exportStudyToUsdmObject.md)
+
+***
+
+### extractCodelistFromUsdmObject
+
+Re-exports [extractCodelistFromUsdmObject](../usdm-adapter/functions/extractCodelistFromUsdmObject.md)
 
 ***
 
@@ -194,6 +218,42 @@ Re-exports [sanitizeSasName](../export-sas/functions/sanitizeSasName.md)
 
 ***
 
+### SDTM\_COL\_WIDTH\_1
+
+Re-exports [SDTM_COL_WIDTH_1](../export-docx/variables/SDTM_COL_WIDTH_1.md)
+
+***
+
+### SDTM\_COL\_WIDTH\_2
+
+Re-exports [SDTM_COL_WIDTH_2](../export-docx/variables/SDTM_COL_WIDTH_2.md)
+
+***
+
+### SDTM\_COL\_WIDTH\_3
+
+Re-exports [SDTM_COL_WIDTH_3](../export-docx/variables/SDTM_COL_WIDTH_3.md)
+
+***
+
+### SDTM\_COL\_WIDTH\_4
+
+Re-exports [SDTM_COL_WIDTH_4](../export-docx/variables/SDTM_COL_WIDTH_4.md)
+
+***
+
+### SDTM\_COL\_WIDTH\_5
+
+Re-exports [SDTM_COL_WIDTH_5](../export-docx/variables/SDTM_COL_WIDTH_5.md)
+
+***
+
+### SDTM\_COL\_WIDTH\_6
+
+Re-exports [SDTM_COL_WIDTH_6](../export-docx/variables/SDTM_COL_WIDTH_6.md)
+
+***
+
 ### SdtmMappingRow
 
 Re-exports [SdtmMappingRow](../export-acrf/interfaces/SdtmMappingRow.md)
@@ -203,6 +263,54 @@ Re-exports [SdtmMappingRow](../export-acrf/interfaces/SdtmMappingRow.md)
 ### serializeStudyToOdmXml
 
 Re-exports [serializeStudyToOdmXml](../odm-xml-serializer/variables/serializeStudyToOdmXml.md)
+
+***
+
+### STANDARD\_COL\_WIDTH\_1
+
+Re-exports [STANDARD_COL_WIDTH_1](../export-docx/variables/STANDARD_COL_WIDTH_1.md)
+
+***
+
+### STANDARD\_COL\_WIDTH\_2
+
+Re-exports [STANDARD_COL_WIDTH_2](../export-docx/variables/STANDARD_COL_WIDTH_2.md)
+
+***
+
+### TABLE\_WIDTH\_DXA
+
+Re-exports [TABLE_WIDTH_DXA](../export-docx/variables/TABLE_WIDTH_DXA.md)
+
+***
+
+### TOC\_COL\_WIDTH\_1
+
+Re-exports [TOC_COL_WIDTH_1](../export-docx/variables/TOC_COL_WIDTH_1.md)
+
+***
+
+### TOC\_COL\_WIDTH\_2
+
+Re-exports [TOC_COL_WIDTH_2](../export-docx/variables/TOC_COL_WIDTH_2.md)
+
+***
+
+### TOC\_COL\_WIDTH\_3
+
+Re-exports [TOC_COL_WIDTH_3](../export-docx/variables/TOC_COL_WIDTH_3.md)
+
+***
+
+### TOC\_COL\_WIDTH\_4
+
+Re-exports [TOC_COL_WIDTH_4](../export-docx/variables/TOC_COL_WIDTH_4.md)
+
+***
+
+### TOC\_COL\_WIDTH\_5
+
+Re-exports [TOC_COL_WIDTH_5](../export-docx/variables/TOC_COL_WIDTH_5.md)
 
 ***
 

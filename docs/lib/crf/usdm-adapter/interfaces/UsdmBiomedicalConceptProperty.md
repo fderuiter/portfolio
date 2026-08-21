@@ -6,7 +6,7 @@
 
 # Interface: UsdmBiomedicalConceptProperty
 
-Defined in: [lib/crf/usdm-adapter.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L19)
+Defined in: [lib/crf/usdm-adapter.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L23)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/usdm-adapter.ts:19](https://github.com/fderuiter/portfolio/
 
 > `optional` **code?**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L22)
+Defined in: [lib/crf/usdm-adapter.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L26)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/usdm-adapter.ts:22](https://github.com/fderuiter/portfolio/
 
 > `optional` **datatype?**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L23)
+Defined in: [lib/crf/usdm-adapter.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L27)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/usdm-adapter.ts:23](https://github.com/fderuiter/portfolio/
 
 > **id**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L20)
+Defined in: [lib/crf/usdm-adapter.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L24)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/crf/usdm-adapter.ts:20](https://github.com/fderuiter/portfolio/
 
 > **name**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L21)
+Defined in: [lib/crf/usdm-adapter.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L25)

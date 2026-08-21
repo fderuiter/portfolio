@@ -6,7 +6,7 @@
 
 # Interface: RetroLabyrinthConfig
 
-Defined in: [lib/retro-labyrinth/engine.ts:38](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L38)
+Defined in: [lib/retro-labyrinth/engine.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L29)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/retro-labyrinth/engine.ts:38](https://github.com/fderuiter/port
 
 > `optional` **classId?**: [`CyberdeckClassId`](../../../dungeon/types/type-aliases/CyberdeckClassId.md)
 
-Defined in: [lib/retro-labyrinth/engine.ts:39](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L39)
+Defined in: [lib/retro-labyrinth/engine.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L30)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/retro-labyrinth/engine.ts:39](https://github.com/fderuiter/port
 
 > `optional` **crtThemeId?**: [`CRTThemeId`](../../../dungeon/types/type-aliases/CRTThemeId.md)
 
-Defined in: [lib/retro-labyrinth/engine.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L41)
+Defined in: [lib/retro-labyrinth/engine.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L32)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [lib/retro-labyrinth/engine.ts:41](https://github.com/fderuiter/port
 
 > `optional` **gameMode?**: `"classic"` \| `"roguelike"`
 
-Defined in: [lib/retro-labyrinth/engine.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L40)
+Defined in: [lib/retro-labyrinth/engine.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L31)

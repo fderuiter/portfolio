@@ -6,6 +6,10 @@
 
 # lib/garmin-engine
 
+## Classes
+
+- [GarminWatchEngine](classes/GarminWatchEngine.md)
+
 ## Interfaces
 
 - [CrashReport](interfaces/CrashReport.md)
@@ -13,6 +17,7 @@
 - [FlashVariable](interfaces/FlashVariable.md)
 - [FogPoint](interfaces/FogPoint.md)
 - [GameEngineState](interfaces/GameEngineState.md)
+- [GarminWatchSnapshot](interfaces/GarminWatchSnapshot.md)
 - [MemoryVariable](interfaces/MemoryVariable.md)
 - [Obstacle](interfaces/Obstacle.md)
 

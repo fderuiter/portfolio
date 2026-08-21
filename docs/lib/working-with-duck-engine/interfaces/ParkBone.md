@@ -6,7 +6,7 @@
 
 # Interface: ParkBone
 
-Defined in: [lib/working-with-duck-engine.ts:83](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L83)
+Defined in: [lib/working-with-duck-engine.ts:91](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L91)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/working-with-duck-engine.ts:83](https://github.com/fderuiter/po
 
 > **collected**: `boolean`
 
-Defined in: [lib/working-with-duck-engine.ts:87](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L87)
+Defined in: [lib/working-with-duck-engine.ts:95](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L95)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/working-with-duck-engine.ts:87](https://github.com/fderuiter/po
 
 > **id**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:84](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L84)
+Defined in: [lib/working-with-duck-engine.ts:92](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L92)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/working-with-duck-engine.ts:84](https://github.com/fderuiter/po
 
 > **x**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:85](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L85)
+Defined in: [lib/working-with-duck-engine.ts:93](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L93)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/working-with-duck-engine.ts:85](https://github.com/fderuiter/po
 
 > **y**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:86](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L86)
+Defined in: [lib/working-with-duck-engine.ts:94](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L94)

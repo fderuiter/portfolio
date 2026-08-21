@@ -20,6 +20,24 @@ Re-exports [ALL_SLASH_COMMANDS](smart-blocks-engine/variables/ALL_SLASH_COMMANDS
 
 ***
 
+### ANNOTATED\_COL\_WIDTH\_1
+
+Re-exports [ANNOTATED_COL_WIDTH_1](export-docx/variables/ANNOTATED_COL_WIDTH_1.md)
+
+***
+
+### ANNOTATED\_COL\_WIDTH\_2
+
+Re-exports [ANNOTATED_COL_WIDTH_2](export-docx/variables/ANNOTATED_COL_WIDTH_2.md)
+
+***
+
+### ANNOTATED\_COL\_WIDTH\_3
+
+Re-exports [ANNOTATED_COL_WIDTH_3](export-docx/variables/ANNOTATED_COL_WIDTH_3.md)
+
+***
+
 ### ansi
 
 Re-exports [ansi](cli-engine/variables/ansi.md)
@@ -572,6 +590,12 @@ Re-exports [ExpressionEvaluator](expression-evaluator/classes/ExpressionEvaluato
 
 ***
 
+### extractCodelistFromUsdmObject
+
+Re-exports [extractCodelistFromUsdmObject](usdm-adapter/functions/extractCodelistFromUsdmObject.md)
+
+***
+
 ### formatPrecisionDate
 
 Re-exports [formatPrecisionDate](precision-date/functions/formatPrecisionDate.md)
@@ -586,7 +610,7 @@ Re-exports [FormAuditReport](study-auditor/interfaces/FormAuditReport.md)
 
 ### FormHealthMetrics
 
-Re-exports [FormHealthMetrics](form-health/interfaces/FormHealthMetrics.md)
+Re-exports [FormHealthMetrics](study-auditor/interfaces/FormHealthMetrics.md)
 
 ***
 
@@ -836,6 +860,42 @@ Re-exports [scaffoldCdashDomain](cdash-domain-templates/functions/scaffoldCdashD
 
 ***
 
+### SDTM\_COL\_WIDTH\_1
+
+Re-exports [SDTM_COL_WIDTH_1](export-docx/variables/SDTM_COL_WIDTH_1.md)
+
+***
+
+### SDTM\_COL\_WIDTH\_2
+
+Re-exports [SDTM_COL_WIDTH_2](export-docx/variables/SDTM_COL_WIDTH_2.md)
+
+***
+
+### SDTM\_COL\_WIDTH\_3
+
+Re-exports [SDTM_COL_WIDTH_3](export-docx/variables/SDTM_COL_WIDTH_3.md)
+
+***
+
+### SDTM\_COL\_WIDTH\_4
+
+Re-exports [SDTM_COL_WIDTH_4](export-docx/variables/SDTM_COL_WIDTH_4.md)
+
+***
+
+### SDTM\_COL\_WIDTH\_5
+
+Re-exports [SDTM_COL_WIDTH_5](export-docx/variables/SDTM_COL_WIDTH_5.md)
+
+***
+
+### SDTM\_COL\_WIDTH\_6
+
+Re-exports [SDTM_COL_WIDTH_6](export-docx/variables/SDTM_COL_WIDTH_6.md)
+
+***
+
 ### SdtmMappingRow
 
 Re-exports [SdtmMappingRow](export-acrf/interfaces/SdtmMappingRow.md)
@@ -869,6 +929,18 @@ Re-exports [SlashCommandItem](smart-blocks-engine/interfaces/SlashCommandItem.md
 ### STANDARD\_CODELISTS
 
 Re-exports [STANDARD_CODELISTS](cdisc-controlled-terminology/variables/STANDARD_CODELISTS.md)
+
+***
+
+### STANDARD\_COL\_WIDTH\_1
+
+Re-exports [STANDARD_COL_WIDTH_1](export-docx/variables/STANDARD_COL_WIDTH_1.md)
+
+***
+
+### STANDARD\_COL\_WIDTH\_2
+
+Re-exports [STANDARD_COL_WIDTH_2](export-docx/variables/STANDARD_COL_WIDTH_2.md)
 
 ***
 
@@ -959,6 +1031,42 @@ Re-exports [StudyVisit](types/interfaces/StudyVisit.md)
 ### SubjectFormStatus
 
 Re-exports [SubjectFormStatus](types/interfaces/SubjectFormStatus.md)
+
+***
+
+### TABLE\_WIDTH\_DXA
+
+Re-exports [TABLE_WIDTH_DXA](export-docx/variables/TABLE_WIDTH_DXA.md)
+
+***
+
+### TOC\_COL\_WIDTH\_1
+
+Re-exports [TOC_COL_WIDTH_1](export-docx/variables/TOC_COL_WIDTH_1.md)
+
+***
+
+### TOC\_COL\_WIDTH\_2
+
+Re-exports [TOC_COL_WIDTH_2](export-docx/variables/TOC_COL_WIDTH_2.md)
+
+***
+
+### TOC\_COL\_WIDTH\_3
+
+Re-exports [TOC_COL_WIDTH_3](export-docx/variables/TOC_COL_WIDTH_3.md)
+
+***
+
+### TOC\_COL\_WIDTH\_4
+
+Re-exports [TOC_COL_WIDTH_4](export-docx/variables/TOC_COL_WIDTH_4.md)
+
+***
+
+### TOC\_COL\_WIDTH\_5
+
+Re-exports [TOC_COL_WIDTH_5](export-docx/variables/TOC_COL_WIDTH_5.md)
 
 ***
 

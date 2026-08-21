@@ -8,7 +8,7 @@
 
 > **validateEnv**(`rawEnv?`): `object`
 
-Defined in: [lib/env.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/env.ts#L68)
+Defined in: [lib/env.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/env.ts#L75)
 
 Validate and parse environment variables against the defined schemas.
 Returns parsed object and validation issues (if any).

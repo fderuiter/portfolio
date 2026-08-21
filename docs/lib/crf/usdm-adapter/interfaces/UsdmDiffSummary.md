@@ -6,7 +6,7 @@
 
 # Interface: UsdmDiffSummary
 
-Defined in: [lib/crf/usdm-adapter.ts:129](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L129)
+Defined in: [lib/crf/usdm-adapter.ts:210](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L210)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/usdm-adapter.ts:129](https://github.com/fderuiter/portfolio
 
 > **addedActivities**: `string`[]
 
-Defined in: [lib/crf/usdm-adapter.ts:144](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L144)
+Defined in: [lib/crf/usdm-adapter.ts:225](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L225)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/usdm-adapter.ts:144](https://github.com/fderuiter/portfolio
 
 > **addedArms**: `string`[]
 
-Defined in: [lib/crf/usdm-adapter.ts:132](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L132)
+Defined in: [lib/crf/usdm-adapter.ts:213](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L213)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/usdm-adapter.ts:132](https://github.com/fderuiter/portfolio
 
 > **addedCohorts**: `string`[]
 
-Defined in: [lib/crf/usdm-adapter.ts:136](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L136)
+Defined in: [lib/crf/usdm-adapter.ts:217](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L217)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/usdm-adapter.ts:136](https://github.com/fderuiter/portfolio
 
 > **addedConcepts**: `string`[]
 
-Defined in: [lib/crf/usdm-adapter.ts:138](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L138)
+Defined in: [lib/crf/usdm-adapter.ts:219](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L219)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/crf/usdm-adapter.ts:138](https://github.com/fderuiter/portfolio
 
 > **addedEncounters**: `string`[]
 
-Defined in: [lib/crf/usdm-adapter.ts:141](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L141)
+Defined in: [lib/crf/usdm-adapter.ts:222](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L222)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/crf/usdm-adapter.ts:141](https://github.com/fderuiter/portfolio
 
 > **addedEpochs**: `string`[]
 
-Defined in: [lib/crf/usdm-adapter.ts:134](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L134)
+Defined in: [lib/crf/usdm-adapter.ts:215](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L215)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/crf/usdm-adapter.ts:134](https://github.com/fderuiter/portfolio
 
 > **hasChanges**: `boolean`
 
-Defined in: [lib/crf/usdm-adapter.ts:131](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L131)
+Defined in: [lib/crf/usdm-adapter.ts:212](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L212)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/crf/usdm-adapter.ts:131](https://github.com/fderuiter/portfolio
 
 > **modifiedConcepts**: `string`[]
 
-Defined in: [lib/crf/usdm-adapter.ts:140](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L140)
+Defined in: [lib/crf/usdm-adapter.ts:221](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L221)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/crf/usdm-adapter.ts:140](https://github.com/fderuiter/portfolio
 
 > **modifiedEncounters**: `string`[]
 
-Defined in: [lib/crf/usdm-adapter.ts:143](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L143)
+Defined in: [lib/crf/usdm-adapter.ts:224](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L224)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [lib/crf/usdm-adapter.ts:143](https://github.com/fderuiter/portfolio
 
 > **protocolNumber**: `string`
 
-Defined in: [lib/crf/usdm-adapter.ts:130](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L130)
+Defined in: [lib/crf/usdm-adapter.ts:211](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L211)
 
 ***
 
@@ -94,7 +94,7 @@ Defined in: [lib/crf/usdm-adapter.ts:130](https://github.com/fderuiter/portfolio
 
 > **removedActivities**: `string`[]
 
-Defined in: [lib/crf/usdm-adapter.ts:145](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L145)
+Defined in: [lib/crf/usdm-adapter.ts:226](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L226)
 
 ***
 
@@ -102,7 +102,7 @@ Defined in: [lib/crf/usdm-adapter.ts:145](https://github.com/fderuiter/portfolio
 
 > **removedArms**: `string`[]
 
-Defined in: [lib/crf/usdm-adapter.ts:133](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L133)
+Defined in: [lib/crf/usdm-adapter.ts:214](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L214)
 
 ***
 
@@ -110,7 +110,7 @@ Defined in: [lib/crf/usdm-adapter.ts:133](https://github.com/fderuiter/portfolio
 
 > **removedCohorts**: `string`[]
 
-Defined in: [lib/crf/usdm-adapter.ts:137](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L137)
+Defined in: [lib/crf/usdm-adapter.ts:218](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L218)
 
 ***
 
@@ -118,7 +118,7 @@ Defined in: [lib/crf/usdm-adapter.ts:137](https://github.com/fderuiter/portfolio
 
 > **removedConcepts**: `string`[]
 
-Defined in: [lib/crf/usdm-adapter.ts:139](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L139)
+Defined in: [lib/crf/usdm-adapter.ts:220](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L220)
 
 ***
 
@@ -126,7 +126,7 @@ Defined in: [lib/crf/usdm-adapter.ts:139](https://github.com/fderuiter/portfolio
 
 > **removedEncounters**: `string`[]
 
-Defined in: [lib/crf/usdm-adapter.ts:142](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L142)
+Defined in: [lib/crf/usdm-adapter.ts:223](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L223)
 
 ***
 
@@ -134,4 +134,4 @@ Defined in: [lib/crf/usdm-adapter.ts:142](https://github.com/fderuiter/portfolio
 
 > **removedEpochs**: `string`[]
 
-Defined in: [lib/crf/usdm-adapter.ts:135](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L135)
+Defined in: [lib/crf/usdm-adapter.ts:216](https://github.com/fderuiter/portfolio/blob/main/lib/crf/usdm-adapter.ts#L216)

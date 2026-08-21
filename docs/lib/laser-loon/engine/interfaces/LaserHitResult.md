@@ -6,7 +6,7 @@
 
 # Interface: LaserHitResult
 
-Defined in: [lib/laser-loon/engine.ts:426](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L426)
+Defined in: [lib/laser-loon/engine.ts:446](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L446)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/laser-loon/engine.ts:426](https://github.com/fderuiter/portfoli
 
 > **damagedPoints**: `object`[]
 
-Defined in: [lib/laser-loon/engine.ts:430](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L430)
+Defined in: [lib/laser-loon/engine.ts:450](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L450)
 
 #### color
 
@@ -34,7 +34,7 @@ Defined in: [lib/laser-loon/engine.ts:430](https://github.com/fderuiter/portfoli
 
 > **hitAny**: `boolean`
 
-Defined in: [lib/laser-loon/engine.ts:428](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L428)
+Defined in: [lib/laser-loon/engine.ts:448](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L448)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: [lib/laser-loon/engine.ts:428](https://github.com/fderuiter/portfoli
 
 > **killedTargets**: [`Target`](../../types/interfaces/Target.md)[]
 
-Defined in: [lib/laser-loon/engine.ts:429](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L429)
+Defined in: [lib/laser-loon/engine.ts:449](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L449)
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: [lib/laser-loon/engine.ts:429](https://github.com/fderuiter/portfoli
 
 > **ultimateGained**: `number`
 
-Defined in: [lib/laser-loon/engine.ts:431](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L431)
+Defined in: [lib/laser-loon/engine.ts:451](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L451)
 
 ***
 
@@ -58,4 +58,4 @@ Defined in: [lib/laser-loon/engine.ts:431](https://github.com/fderuiter/portfoli
 
 > **updatedTargets**: [`Target`](../../types/interfaces/Target.md)[]
 
-Defined in: [lib/laser-loon/engine.ts:427](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L427)
+Defined in: [lib/laser-loon/engine.ts:447](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L447)

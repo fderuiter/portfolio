@@ -8,7 +8,7 @@
 
 > **createCorticalSurfaceMeshBuffersAsync**(`mode?`, `wireframe?`, `hemiFilter?`): `Promise`\<[`RawGeometryBuffer`](../../types/interfaces/RawGeometryBuffer.md)[]\>
 
-Defined in: [lib/neuro/mesh-generator.ts:479](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/mesh-generator.ts#L479)
+Defined in: [lib/neuro/mesh-generator.ts:574](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/mesh-generator.ts#L574)
 
 Offloads vertex spatial point checks and Desikan-Killiany atlas parcellations
 to a background Web Worker thread, returning raw binary ArrayBuffers via zero-copy transfers.

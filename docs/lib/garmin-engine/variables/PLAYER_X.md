@@ -8,4 +8,4 @@
 
 > `const` **PLAYER\_X**: `52` = `52`
 
-Defined in: [lib/garmin-engine.ts:182](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L182)
+Defined in: [lib/garmin-engine.ts:189](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L189)

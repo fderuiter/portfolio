@@ -13,7 +13,7 @@ export interface ArcadeGameLoopOptions {
  */
 export class ArcadeGameLoop {
   private readonly engine: ArcadeEngine<unknown, unknown>;
-  private readonly getContext: () => CanvasRenderingContext2D | null;
+  private getContext: () => CanvasRenderingContext2D | null;
   private readonly fixedDt: number;
   private readonly maxAccumulatorSec: number;
 
@@ -25,13 +25,20 @@ export class ArcadeGameLoop {
 
   constructor(
     engine: ArcadeEngine<unknown, unknown>,
-    getContext: () => CanvasRenderingContext2D | null,
+    getContext: () => CanvasRenderingContext2D | null = () => null,
     options?: ArcadeGameLoopOptions
   ) {
     this.engine = engine;
     this.getContext = getContext;
     this.fixedDt = options?.fixedDt ?? 1 / 60;
     this.maxAccumulatorSec = options?.maxAccumulatorSec ?? 0.25;
+  }
+
+  /**
+   * Updates the context getter delegate.
+   */
+  public setContextGetter(getter: () => CanvasRenderingContext2D | null): void {
+    this.getContext = getter;
   }
 
   /**
@@ -46,7 +53,10 @@ export class ArcadeGameLoop {
 
     this.engine.init();
 
-    if (typeof window !== "undefined" && typeof requestAnimationFrame === "function") {
+    if (
+      typeof window !== "undefined" &&
+      typeof requestAnimationFrame === "function"
+    ) {
       this.animFrameId = requestAnimationFrame(this.onFrame);
     }
   }
@@ -57,7 +67,10 @@ export class ArcadeGameLoop {
   public stop(): void {
     this.running = false;
     this.paused = false;
-    if (this.animFrameId !== null && typeof cancelAnimationFrame === "function") {
+    if (
+      this.animFrameId !== null &&
+      typeof cancelAnimationFrame === "function"
+    ) {
       cancelAnimationFrame(this.animFrameId);
       this.animFrameId = null;
     }

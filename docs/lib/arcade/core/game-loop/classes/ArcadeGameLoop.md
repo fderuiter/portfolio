@@ -15,7 +15,7 @@ accumulator clamping against frame spikes, and sub-frame alpha render interpolat
 
 ### Constructor
 
-> **new ArcadeGameLoop**(`engine`, `getContext`, `options?`): `ArcadeGameLoop`
+> **new ArcadeGameLoop**(`engine`, `getContext?`, `options?`): `ArcadeGameLoop`
 
 Defined in: [lib/arcade/core/game-loop.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L26)
 
@@ -25,7 +25,7 @@ Defined in: [lib/arcade/core/game-loop.ts:26](https://github.com/fderuiter/portf
 
 [`ArcadeEngine`](../../engine/classes/ArcadeEngine.md)\<`unknown`, `unknown`\>
 
-##### getContext
+##### getContext?
 
 () => `CanvasRenderingContext2D` \| `null`
 
@@ -43,7 +43,7 @@ Defined in: [lib/arcade/core/game-loop.ts:26](https://github.com/fderuiter/portf
 
 > **isPaused**(): `boolean`
 
-Defined in: [lib/arcade/core/game-loop.ts:86](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L86)
+Defined in: [lib/arcade/core/game-loop.ts:99](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L99)
 
 #### Returns
 
@@ -55,7 +55,7 @@ Defined in: [lib/arcade/core/game-loop.ts:86](https://github.com/fderuiter/portf
 
 > **isRunning**(): `boolean`
 
-Defined in: [lib/arcade/core/game-loop.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L82)
+Defined in: [lib/arcade/core/game-loop.ts:95](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L95)
 
 #### Returns
 
@@ -67,7 +67,7 @@ Defined in: [lib/arcade/core/game-loop.ts:82](https://github.com/fderuiter/portf
 
 > **pause**(): `void`
 
-Defined in: [lib/arcade/core/game-loop.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L69)
+Defined in: [lib/arcade/core/game-loop.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L82)
 
 Pauses simulation updates without tearing down the loop.
 
@@ -81,9 +81,29 @@ Pauses simulation updates without tearing down the loop.
 
 > **resume**(): `void`
 
-Defined in: [lib/arcade/core/game-loop.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L76)
+Defined in: [lib/arcade/core/game-loop.ts:89](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L89)
 
 Resumes simulation updates and resets frame timestamps to prevent jump spikes.
+
+#### Returns
+
+`void`
+
+***
+
+### setContextGetter()
+
+> **setContextGetter**(`getter`): `void`
+
+Defined in: [lib/arcade/core/game-loop.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L40)
+
+Updates the context getter delegate.
+
+#### Parameters
+
+##### getter
+
+() => `CanvasRenderingContext2D` \| `null`
 
 #### Returns
 
@@ -95,7 +115,7 @@ Resumes simulation updates and resets frame timestamps to prevent jump spikes.
 
 > **start**(): `void`
 
-Defined in: [lib/arcade/core/game-loop.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L40)
+Defined in: [lib/arcade/core/game-loop.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L47)
 
 Starts the game loop and invokes engine.init().
 
@@ -109,7 +129,7 @@ Starts the game loop and invokes engine.init().
 
 > **stepOnce**(): `void`
 
-Defined in: [lib/arcade/core/game-loop.ts:93](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L93)
+Defined in: [lib/arcade/core/game-loop.ts:106](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L106)
 
 Manually steps the simulation forward by 1 frame (useful for debugging and tests).
 
@@ -123,7 +143,7 @@ Manually steps the simulation forward by 1 frame (useful for debugging and tests
 
 > **stop**(): `void`
 
-Defined in: [lib/arcade/core/game-loop.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L57)
+Defined in: [lib/arcade/core/game-loop.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L67)
 
 Stops the game loop and cancels active requestAnimationFrames.
 
@@ -137,7 +157,7 @@ Stops the game loop and cancels active requestAnimationFrames.
 
 > **tick**(`deltaMs`): `void`
 
-Defined in: [lib/arcade/core/game-loop.ts:104](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L104)
+Defined in: [lib/arcade/core/game-loop.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/game-loop.ts#L117)
 
 Drives the accumulator and update steps by an explicit delta time in milliseconds.
 

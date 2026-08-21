@@ -6,15 +6,15 @@
 
 # Interface: RetroLabyrinthSnapshot
 
-Defined in: [lib/retro-labyrinth/engine.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L75)
+Defined in: [lib/retro-labyrinth/engine.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L66)
 
 ## Properties
 
 ### activeWeaponId
 
-> **activeWeaponId**: [`WeaponId`](../../../dungeon/types/type-aliases/WeaponId.md)
+> **activeWeaponId**: `string`
 
-Defined in: [lib/retro-labyrinth/engine.ts:87](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L87)
+Defined in: [lib/retro-labyrinth/engine.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L78)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/retro-labyrinth/engine.ts:87](https://github.com/fderuiter/port
 
 > **crtThemeId**: [`CRTThemeId`](../../../dungeon/types/type-aliases/CRTThemeId.md)
 
-Defined in: [lib/retro-labyrinth/engine.ts:90](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L90)
+Defined in: [lib/retro-labyrinth/engine.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L81)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/retro-labyrinth/engine.ts:90](https://github.com/fderuiter/port
 
 > **cryptoCredits**: `number`
 
-Defined in: [lib/retro-labyrinth/engine.ts:89](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L89)
+Defined in: [lib/retro-labyrinth/engine.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L80)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/retro-labyrinth/engine.ts:89](https://github.com/fderuiter/port
 
 > **gameMode**: `"classic"` \| `"roguelike"`
 
-Defined in: [lib/retro-labyrinth/engine.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L76)
+Defined in: [lib/retro-labyrinth/engine.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L67)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/retro-labyrinth/engine.ts:76](https://github.com/fderuiter/port
 
 > **gameStatus**: `"playing"` \| `"victory"` \| `"game_over"`
 
-Defined in: [lib/retro-labyrinth/engine.ts:85](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L85)
+Defined in: [lib/retro-labyrinth/engine.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L76)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/retro-labyrinth/engine.ts:85](https://github.com/fderuiter/port
 
 > **highScore**: `number`
 
-Defined in: [lib/retro-labyrinth/engine.ts:84](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L84)
+Defined in: [lib/retro-labyrinth/engine.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L75)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/retro-labyrinth/engine.ts:84](https://github.com/fderuiter/port
 
 > **maxHp**: `number`
 
-Defined in: [lib/retro-labyrinth/engine.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L82)
+Defined in: [lib/retro-labyrinth/engine.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L73)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/retro-labyrinth/engine.ts:82](https://github.com/fderuiter/port
 
 > **playerHp**: `number`
 
-Defined in: [lib/retro-labyrinth/engine.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L81)
+Defined in: [lib/retro-labyrinth/engine.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L72)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/retro-labyrinth/engine.ts:81](https://github.com/fderuiter/port
 
 > **playerPosition**: `object`
 
-Defined in: [lib/retro-labyrinth/engine.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L80)
+Defined in: [lib/retro-labyrinth/engine.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L71)
 
 #### x
 
@@ -94,7 +94,7 @@ Defined in: [lib/retro-labyrinth/engine.ts:80](https://github.com/fderuiter/port
 
 > **roomIndex**: `number`
 
-Defined in: [lib/retro-labyrinth/engine.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L78)
+Defined in: [lib/retro-labyrinth/engine.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L69)
 
 ***
 
@@ -102,7 +102,7 @@ Defined in: [lib/retro-labyrinth/engine.ts:78](https://github.com/fderuiter/port
 
 > **score**: `number`
 
-Defined in: [lib/retro-labyrinth/engine.ts:83](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L83)
+Defined in: [lib/retro-labyrinth/engine.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L74)
 
 ***
 
@@ -110,7 +110,7 @@ Defined in: [lib/retro-labyrinth/engine.ts:83](https://github.com/fderuiter/port
 
 > **selectedClassId**: [`CyberdeckClassId`](../../../dungeon/types/type-aliases/CyberdeckClassId.md)
 
-Defined in: [lib/retro-labyrinth/engine.ts:91](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L91)
+Defined in: [lib/retro-labyrinth/engine.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L82)
 
 ***
 
@@ -118,7 +118,7 @@ Defined in: [lib/retro-labyrinth/engine.ts:91](https://github.com/fderuiter/port
 
 > **selectedWeaponIndex**: `number`
 
-Defined in: [lib/retro-labyrinth/engine.ts:88](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L88)
+Defined in: [lib/retro-labyrinth/engine.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L79)
 
 ***
 
@@ -126,7 +126,7 @@ Defined in: [lib/retro-labyrinth/engine.ts:88](https://github.com/fderuiter/port
 
 > **stage**: `number`
 
-Defined in: [lib/retro-labyrinth/engine.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L77)
+Defined in: [lib/retro-labyrinth/engine.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L68)
 
 ***
 
@@ -134,7 +134,7 @@ Defined in: [lib/retro-labyrinth/engine.ts:77](https://github.com/fderuiter/port
 
 > **totalRooms**: `number`
 
-Defined in: [lib/retro-labyrinth/engine.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L79)
+Defined in: [lib/retro-labyrinth/engine.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L70)
 
 ***
 
@@ -142,4 +142,4 @@ Defined in: [lib/retro-labyrinth/engine.ts:79](https://github.com/fderuiter/port
 
 > **weapons**: [`Weapon`](../../../dungeon/types/interfaces/Weapon.md)[]
 
-Defined in: [lib/retro-labyrinth/engine.ts:86](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L86)
+Defined in: [lib/retro-labyrinth/engine.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L77)
