@@ -6,7 +6,7 @@ import {
   ComplianceSeverity,
   CdashVariableMetadata,
 } from "@/lib/crf/types";
-import { CDASH_CORE_DOMAIN_VARIABLES } from "@/lib/crf/cdisc-metadata";
+import { CDASH_CORE_DOMAIN_VARIABLES } from "@/lib/crf/form-health";
 import { lintFormula, FormulaLintResult } from "@/lib/crf/formula-linter";
 
 /**
