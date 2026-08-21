@@ -8,7 +8,7 @@
 
 > **checkLayoutTextClippingInvariants**(`root`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:937](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L937)
+Defined in: [lib/dx/doctor.ts:980](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L980)
 
 Check Layout Integrity, Defensive CSS & Stacking Context Isolation (AGENTS.md Invariant #13)
 

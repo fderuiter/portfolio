@@ -18,9 +18,9 @@ The repository contains five active Prisma migrations:
 
 1. Change `prisma/schema.prisma` on a disposable development database.
 2. Create and review a migration with `npx prisma migrate dev --name <name>`.
-3. Run `npm run check:migrations` and the test suite.
+3. Run `npm run check:migrations`, `npm run check:migrations:drift`, and the test suite.
 4. Commit the schema, migration SQL, and `migration_lock.toml` together.
-5. Apply committed migrations in production with `prisma migrate deploy`.
+5. Apply committed migrations in production with `prisma migrate deploy` or `npm run release:gate`.
 
 CI checks that the schema provider matches the migration lock, replays every
 migration on clean PostgreSQL, and compares the replayed database with
@@ -111,13 +111,51 @@ Expected results are all five finished and non-rolled-back migrations recorded i
 Run `npx prisma migrate deploy` once more and confirm it is a no-op. Then smoke-test
 the home page, case studies, and telemetry endpoints.
 
-## Release ordering and release gate execution
+## Release ordering, schema drift & release gate execution
 
-Live database migrations execute strictly inside the dedicated Pipeline Release
-Gate stage (`npm run release:gate` / `scripts/release-gate.ts`), isolated from
-static application build compilation (`scripts/build.js`). Direct database write
-credentials exist exclusively within the release gate stage, eliminating sensitive
-credential exposure and database lock conflicts during application compilation.
+### Schema drift verification
+To verify that the database schema is synchronized with `prisma/schema.prisma` without executing live database connections or making mutations, run the schema drift check:
+
+```bash
+npm run check:migrations:drift
+```
+
+This command runs `prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code`, exiting with code 1 if drift is detected.
+
+To run offline migration safety and integrity checks (provider parity, SQL file integrity, and destructive query scanning):
+
+```bash
+npm run check:migrations
+```
+
+### Pipeline release gate execution
+Live database migrations execute strictly inside the dedicated Pipeline Release Gate stage (`npm run release:gate` / `scripts/release-gate.ts`), isolated from static application build compilation (`scripts/build.js`). Direct database write credentials exist exclusively within the release gate stage, eliminating sensitive credential exposure and database lock conflicts during application compilation.
+
+To execute the release gate locally or in continuous integration pipelines:
+
+```bash
+npm run release:gate
+```
+
+The Pipeline Release Gate performs:
+1. Vulnerability security audit gate (`scripts/security-audit.ts`).
+2. Unified migration safety & integrity validation (`scripts/check-migrations.js`).
+3. Database migration deployment (`npx prisma migrate deploy`).
+
+### Destructive migration environment variables
+Automated migration safety checks (`scripts/check-migrations.js`) block any migration SQL containing destructive operations (`DROP TABLE` or `DROP COLUMN`) by default to prevent accidental data loss.
+
+To explicitly authorize destructive migrations during release gate execution or verification:
+
+```bash
+ALLOW_DESTRUCTIVE_MIGRATIONS=true npm run release:gate
+```
+
+or for local integrity validation:
+
+```bash
+ALLOW_DESTRUCTIVE_MIGRATIONS=true npm run check:migrations
+```
 
 The application build step (`scripts/build.js`) executes offline using fallback
 credentials (`DATABASE_URL`, `DIRECT_URL`, `CRON_SECRET`), running unified

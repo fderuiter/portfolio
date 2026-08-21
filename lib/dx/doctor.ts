@@ -418,6 +418,49 @@ export function checkMigrationGuard(root: string): DiagnosticCheckResult {
     failures.push(`Destructive DDL detected in ${v.file}: ${v.ddl}`);
   }
 
+  // 4. Check Migration Documentation Parity & Operational Command Completeness
+  const docPath = path.join(root, "DATABASE_MIGRATIONS.md");
+  if (!fs.existsSync(docPath)) {
+    failures.push("DATABASE_MIGRATIONS.md file is missing from repository root.");
+  } else {
+    try {
+      const docContent = fs.readFileSync(docPath, "utf-8");
+      // Check migration identifier parity
+      const documentedMigrations = Array.from(
+        new Set((docContent.match(/\b\d{14}_[a-z0-9_]+\b/gi) || []).map((m) => m.toLowerCase()))
+      ).sort();
+      const actualMigrations = fs
+        .readdirSync(migrationsDir, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => entry.name)
+        .sort();
+
+      const missingInDoc = actualMigrations.filter(
+        (m) => !documentedMigrations.includes(m.toLowerCase())
+      );
+      if (missingInDoc.length > 0) {
+        failures.push(`DATABASE_MIGRATIONS.md is missing active migration(s): ${missingInDoc.join(", ")}`);
+      }
+
+      // Check required operational commands & environment variables
+      const requiredDocCommands = [
+        { name: "schema drift verification ('npm run check:migrations:drift' or 'prisma migrate diff')", pattern: /check:migrations:drift|prisma migrate diff/i },
+        { name: "pipeline release gate execution ('npm run release:gate' or 'release-gate.ts')", pattern: /release:gate|release-gate\.ts/i },
+        { name: "destructive migration environment variable ('ALLOW_DESTRUCTIVE_MIGRATIONS')", pattern: /ALLOW_DESTRUCTIVE_MIGRATIONS/i },
+        { name: "unified migration check ('npm run check:migrations')", pattern: /check:migrations\b/i },
+      ];
+
+      for (const cmd of requiredDocCommands) {
+        if (!cmd.pattern.test(docContent)) {
+          failures.push(`DATABASE_MIGRATIONS.md is missing documentation for ${cmd.name}`);
+        }
+      }
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      failures.push(`Failed to verify DATABASE_MIGRATIONS.md completeness: ${msg}`);
+    }
+  }
+
   if (failures.length === 0) {
     return {
       id: "database-migrations",

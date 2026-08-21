@@ -150,6 +150,23 @@ describe("DX Invariant Doctor Engine", () => {
       expect(result.status).toBe("fail");
       expect(result.details?.[0]).toContain("DROP COLUMN");
     });
+
+    it("flags DATABASE_MIGRATIONS.md when missing mandatory release or drift commands", () => {
+      const migDir = path.join(tempDir, "prisma", "migrations", "20260814000000_init");
+      fs.mkdirSync(migDir, { recursive: true });
+      fs.writeFileSync(path.join(migDir, "migration.sql"), "CREATE TABLE users (id INT);");
+
+      // Incomplete DATABASE_MIGRATIONS.md without release:gate or check:migrations:drift
+      fs.writeFileSync(
+        path.join(tempDir, "DATABASE_MIGRATIONS.md"),
+        "# Migrations\n- `20260814000000_init`\n\nRun `npm run check:migrations`."
+      );
+
+      const result = checkMigrationGuard(tempDir);
+      expect(result.status).toBe("fail");
+      expect(result.details?.some((d) => d.includes("schema drift verification"))).toBe(true);
+      expect(result.details?.some((d) => d.includes("pipeline release gate"))).toBe(true);
+    });
   });
 
   describe("checkPageTopPadding", () => {
