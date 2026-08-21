@@ -6,7 +6,7 @@
 
 # Interface: PowerUpState
 
-Defined in: [lib/clinical-trial-chaos/types.ts:131](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L131)
+Defined in: [lib/clinical-trial-chaos/types.ts:136](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L136)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:131](https://github.com/fderuiter
 
 > **activeSecondsRemaining**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:138](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L138)
+Defined in: [lib/clinical-trial-chaos/types.ts:143](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L143)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:138](https://github.com/fderuiter
 
 > **charge**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:136](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L136)
+Defined in: [lib/clinical-trial-chaos/types.ts:141](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L141)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:136](https://github.com/fderuiter
 
 > **description**: `string`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:134](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L134)
+Defined in: [lib/clinical-trial-chaos/types.ts:139](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L139)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:134](https://github.com/fderuiter
 
 > **duration**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:139](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L139)
+Defined in: [lib/clinical-trial-chaos/types.ts:144](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L144)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:139](https://github.com/fderuiter
 
 > **hotkey**: `string`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:135](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L135)
+Defined in: [lib/clinical-trial-chaos/types.ts:140](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L140)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:135](https://github.com/fderuiter
 
 > **id**: [`PowerUpType`](../type-aliases/PowerUpType.md)
 
-Defined in: [lib/clinical-trial-chaos/types.ts:132](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L132)
+Defined in: [lib/clinical-trial-chaos/types.ts:137](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L137)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:132](https://github.com/fderuiter
 
 > **maxCharge**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:137](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L137)
+Defined in: [lib/clinical-trial-chaos/types.ts:142](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L142)
 
 ***
 
@@ -70,4 +70,4 @@ Defined in: [lib/clinical-trial-chaos/types.ts:137](https://github.com/fderuiter
 
 > **name**: `string`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:133](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L133)
+Defined in: [lib/clinical-trial-chaos/types.ts:138](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L138)

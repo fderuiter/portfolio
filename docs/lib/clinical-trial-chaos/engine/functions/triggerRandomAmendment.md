@@ -8,7 +8,7 @@
 
 > **triggerRandomAmendment**(): [`ProtocolAmendment`](../../types/interfaces/ProtocolAmendment.md)
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:415](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L415)
+Defined in: [lib/clinical-trial-chaos/engine.ts:522](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L522)
 
 Spawns a random mid-game protocol amendment.
 

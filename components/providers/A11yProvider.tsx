@@ -1,259 +1,66 @@
 "use client";
 
-import React, { createContext, useContext, useReducer, useCallback, useEffect, useMemo, useRef } from "react";
+import React, { createContext, useContext, useSyncExternalStore, useMemo } from "react";
 import { useConsoleArt } from "@/hooks/useConsoleArt";
+import {
+  liveAnnouncer,
+  initialAnnouncerState,
+  type Priority,
+  type AnnounceItem,
+  type AnnouncerState,
+  LiveAnnouncer,
+} from "@/lib/a11y/announcer";
 
-export type Priority = "polite" | "assertive";
-
-export interface AnnounceItem {
-  id: string;
-  text: string;
-  priority: Priority;
-}
-
-export interface AnnouncerState {
-  activePolite: AnnounceItem | null;
-  activeAssertive: AnnounceItem | null;
-  politeQueue: AnnounceItem[];
-  assertiveQueue: AnnounceItem[];
-}
-
-export type AnnouncerAction =
-  | { type: "ENQUEUE"; item: AnnounceItem }
-  | { type: "DEQUEUE_NEXT" }
-  | { type: "ASSERTIVE_PREEMPT"; item: AnnounceItem }
-  | { type: "TIMER_COMPLETE" }
-  | { type: "ANNOUNCE"; item: AnnounceItem }
-  | { type: "TIMER_EXPIRED" };
+export type { Priority, AnnounceItem, AnnouncerState };
+export { sanitizePII, initialAnnouncerState, liveAnnouncer, LiveAnnouncer } from "@/lib/a11y/announcer";
 
 export interface AnnouncerContextType {
   announce: (message: string, priority?: Priority) => void;
 }
 
-export const initialAnnouncerState: AnnouncerState = {
-  activePolite: null,
-  activeAssertive: null,
-  politeQueue: [],
-  assertiveQueue: [],
-};
-
-/**
- * Sanitizes Social Security Numbers and sensitive personal identifiers prior to live region updates.
- */
-export function sanitizePII(message: string): string {
-  if (typeof message !== "string") return "";
-  return message.replace(/\b\d{3}[-.\s]?\d{2}[-.\s]?\d{4}\b/g, "***-**-****");
-}
-
-/**
- * Atomic reducer managing polite and assertive announcement queues and active playback states.
- */
-export function announcerReducer(state: AnnouncerState, action: AnnouncerAction): AnnouncerState {
-  switch (action.type) {
-    case "ENQUEUE":
-    case "ANNOUNCE": {
-      const { item } = action;
-      if (item.priority === "assertive") {
-        if (state.activeAssertive === null) {
-          return {
-            ...state,
-            activePolite: null,
-            activeAssertive: item,
-          };
-        }
-        return {
-          ...state,
-          activePolite: null,
-          assertiveQueue: [...state.assertiveQueue, item],
-        };
-      } else {
-        if (state.activeAssertive === null && state.activePolite === null) {
-          return {
-            ...state,
-            activePolite: item,
-          };
-        }
-        return {
-          ...state,
-          politeQueue: [...state.politeQueue, item],
-        };
-      }
-    }
-
-    case "ASSERTIVE_PREEMPT": {
-      const { item } = action;
-      if (state.activeAssertive === null) {
-        return {
-          ...state,
-          activePolite: null,
-          activeAssertive: item,
-        };
-      }
-      return {
-        ...state,
-        activePolite: null,
-        assertiveQueue: [...state.assertiveQueue, item],
-      };
-    }
-
-    case "DEQUEUE_NEXT":
-    case "TIMER_COMPLETE":
-    case "TIMER_EXPIRED": {
-      if (state.activeAssertive !== null) {
-        if (state.assertiveQueue.length > 0) {
-          return {
-            ...state,
-            activeAssertive: state.assertiveQueue[0],
-            assertiveQueue: state.assertiveQueue.slice(1),
-            activePolite: null,
-          };
-        }
-        if (state.politeQueue.length > 0) {
-          return {
-            ...state,
-            activeAssertive: null,
-            activePolite: state.politeQueue[0],
-            politeQueue: state.politeQueue.slice(1),
-          };
-        }
-        return {
-          ...state,
-          activeAssertive: null,
-          activePolite: null,
-        };
-      }
-
-      if (state.activePolite !== null) {
-        if (state.assertiveQueue.length > 0) {
-          return {
-            ...state,
-            activePolite: null,
-            activeAssertive: state.assertiveQueue[0],
-            assertiveQueue: state.assertiveQueue.slice(1),
-          };
-        }
-        if (state.politeQueue.length > 0) {
-          return {
-            ...state,
-            activePolite: state.politeQueue[0],
-            politeQueue: state.politeQueue.slice(1),
-          };
-        }
-        return {
-          ...state,
-          activePolite: null,
-          activeAssertive: null,
-        };
-      }
-
-      if (state.assertiveQueue.length > 0) {
-        return {
-          ...state,
-          activeAssertive: state.assertiveQueue[0],
-          assertiveQueue: state.assertiveQueue.slice(1),
-        };
-      }
-
-      if (state.politeQueue.length > 0) {
-        return {
-          ...state,
-          activePolite: state.politeQueue[0],
-          politeQueue: state.politeQueue.slice(1),
-        };
-      }
-
-      return state;
-    }
-
-    default:
-      return state;
-  }
-}
-
-let nextAnnounceId = 0;
-function generateAnnounceId(): string {
-  return `announcement-${++nextAnnounceId}-${Math.random().toString(36).substring(2, 9)}`;
-}
-
 const AnnouncerContext = createContext<AnnouncerContextType | null>(null);
 
 const fallbackAnnouncer: AnnouncerContextType = {
-  announce: (_message: string, _priority?: Priority) => {
-    // Fallback announcer to prevent crashing in direct component mounts/tests
+  announce: (message: string, priority?: Priority) => {
+    liveAnnouncer.announce(message, priority);
   },
 };
 
+/**
+ * Hook providing access to the screen reader LiveAnnouncer dispatcher.
+ */
 export function useAnnouncer(): AnnouncerContextType {
   const ctx = useContext(AnnouncerContext);
-  if (!ctx) {
-    return fallbackAnnouncer;
-  }
-  return ctx;
+  return ctx ?? fallbackAnnouncer;
 }
 
-export function A11yProvider({ children }: { children: React.ReactNode }) {
+export interface A11yProviderProps {
+  children: React.ReactNode;
+  announcer?: LiveAnnouncer;
+}
+
+/**
+ * Lightweight screen reader live region DOM renderer and context provider.
+ */
+export function A11yProvider({ children, announcer = liveAnnouncer }: A11yProviderProps) {
   useConsoleArt();
-  const [state, dispatch] = useReducer(announcerReducer, initialAnnouncerState);
+  const state = useSyncExternalStore(
+    (cb) => announcer.subscribe(cb),
+    () => announcer.getSnapshot(),
+    () => initialAnnouncerState
+  );
 
-  const announce = useCallback((message: string, priority: Priority = "polite") => {
-    if (typeof message !== "string") return;
-    const filteredMessage = sanitizePII(message);
-    const item: AnnounceItem = {
-      id: generateAnnounceId(),
-      text: filteredMessage,
-      priority,
-    };
-    if (priority === "assertive") {
-      dispatch({ type: "ASSERTIVE_PREEMPT", item });
-    } else {
-      dispatch({ type: "ENQUEUE", item });
-    }
-  }, []);
-
-  const activeAssertiveId = state.activeAssertive?.id;
-  const activePoliteId = state.activePolite?.id;
-  const activeTimerIdRef = useRef<string | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    const activeId = activeAssertiveId || activePoliteId;
-    if (!activeId) {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
-      activeTimerIdRef.current = null;
-      return;
-    }
-
-    if (activeTimerIdRef.current === activeId && timerRef.current !== null) {
-      return;
-    }
-
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-
-    activeTimerIdRef.current = activeId;
-    timerRef.current = setTimeout(() => {
-      activeTimerIdRef.current = null;
-      timerRef.current = null;
-      dispatch({ type: "TIMER_COMPLETE" });
-    }, 3000);
-
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
-      activeTimerIdRef.current = null;
-    };
-  }, [activeAssertiveId, activePoliteId]);
-
-  const contextValue = useMemo(() => ({ announce }), [announce]);
+  const value = useMemo<AnnouncerContextType>(
+    () => ({
+      announce: (message: string, priority?: Priority) => {
+        announcer.announce(message, priority);
+      },
+    }),
+    [announcer]
+  );
 
   return (
-    <AnnouncerContext.Provider value={contextValue}>
+    <AnnouncerContext.Provider value={value}>
       {children}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
         {state.activePolite?.text || ""}
@@ -264,4 +71,3 @@ export function A11yProvider({ children }: { children: React.ReactNode }) {
     </AnnouncerContext.Provider>
   );
 }
-

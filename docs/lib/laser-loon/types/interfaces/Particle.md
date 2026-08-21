@@ -52,7 +52,7 @@ Defined in: [lib/laser-loon/types.ts:109](https://github.com/fderuiter/portfolio
 
 ### shape?
 
-> `optional` **shape?**: `"circle"` \| `"star"` \| `"crystal"` \| `"smoke"`
+> `optional` **shape?**: `"circle"` \| `"crystal"` \| `"star"` \| `"smoke"`
 
 Defined in: [lib/laser-loon/types.ts:108](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/types.ts#L108)
 

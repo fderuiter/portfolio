@@ -8,7 +8,7 @@
 
 > **generateSDTMDataset**(`subjects`): [`SDTMRow`](../../types/interfaces/SDTMRow.md)[]
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:427](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L427)
+Defined in: [lib/clinical-trial-chaos/engine.ts:534](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L534)
 
 Converts submitted subjects into compliant CDISC SDTM observation rows.
 

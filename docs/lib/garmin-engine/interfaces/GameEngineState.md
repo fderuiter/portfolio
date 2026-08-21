@@ -100,7 +100,7 @@ Defined in: [lib/garmin-engine.ts:169](https://github.com/fderuiter/portfolio/bl
 
 ### gameState
 
-> **gameState**: `"playing"` \| `"summary"` \| `"idle"` \| `"paused"` \| `"crashed"` \| `"shutdown"`
+> **gameState**: `"idle"` \| `"playing"` \| `"paused"` \| `"crashed"` \| `"shutdown"` \| `"summary"`
 
 Defined in: [lib/garmin-engine.ts:151](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L151)
 

@@ -8,7 +8,7 @@
 
 > **tickAuditor**(`auditor`, `deltaSeconds`, `unresolvedBacklogCount`): [`AuditorState`](../../types/interfaces/AuditorState.md)
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:235](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L235)
+Defined in: [lib/clinical-trial-chaos/engine.ts:342](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L342)
 
 Updates Auditor AI physics and state machine.
 

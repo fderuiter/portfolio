@@ -15,6 +15,10 @@
 
 - [ScaffoldType](type-aliases/ScaffoldType.md)
 
+## Variables
+
+- [VALID\_SCAFFOLD\_TYPES](variables/VALID_SCAFFOLD_TYPES.md)
+
 ## Functions
 
 - [scaffold](functions/scaffold.md)
@@ -23,3 +27,6 @@
 - [scaffoldArcadeGame](functions/scaffoldArcadeGame.md)
 - [scaffoldCaseStudy](functions/scaffoldCaseStudy.md)
 - [scaffoldComponent](functions/scaffoldComponent.md)
+- [scaffoldHook](functions/scaffoldHook.md)
+- [validateScaffoldName](functions/validateScaffoldName.md)
+- [validateScaffoldType](functions/validateScaffoldType.md)

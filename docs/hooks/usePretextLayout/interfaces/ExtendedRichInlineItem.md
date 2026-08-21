@@ -16,7 +16,7 @@ Defined in: [hooks/usePretextLayout.tsx:334](https://github.com/fderuiter/portfo
 
 ### break?
 
-> `optional` **break?**: `"never"` \| `"normal"`
+> `optional` **break?**: `"normal"` \| `"never"`
 
 Defined in: node\_modules/@chenglou/pretext/dist/rich-inline.d.ts:6
 
@@ -64,6 +64,6 @@ Defined in: node\_modules/@chenglou/pretext/dist/rich-inline.d.ts:4
 
 ### type
 
-> **type**: `"text"` \| `"bold"` \| `"code"` \| `"italic"`
+> **type**: `"text"` \| `"bold"` \| `"italic"` \| `"code"`
 
 Defined in: [hooks/usePretextLayout.tsx:335](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L335)

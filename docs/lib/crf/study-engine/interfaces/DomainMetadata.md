@@ -6,7 +6,7 @@
 
 # Interface: DomainMetadata
 
-Defined in: [lib/crf/study-engine.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L48)
+Defined in: [lib/crf/study-engine.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L53)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/study-engine.ts:48](https://github.com/fderuiter/portfolio/
 
 > **category**: `"core"` \| `"device"` \| `"pharma"` \| `"specialty"`
 
-Defined in: [lib/crf/study-engine.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L52)
+Defined in: [lib/crf/study-engine.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L57)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/study-engine.ts:52](https://github.com/fderuiter/portfolio/
 
 > **code**: `string`
 
-Defined in: [lib/crf/study-engine.ts:49](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L49)
+Defined in: [lib/crf/study-engine.ts:54](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L54)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/study-engine.ts:49](https://github.com/fderuiter/portfolio/
 
 > **description**: `string`
 
-Defined in: [lib/crf/study-engine.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L51)
+Defined in: [lib/crf/study-engine.ts:56](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L56)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/study-engine.ts:51](https://github.com/fderuiter/portfolio/
 
 > **label**: `string`
 
-Defined in: [lib/crf/study-engine.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L50)
+Defined in: [lib/crf/study-engine.ts:55](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L55)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/crf/study-engine.ts:50](https://github.com/fderuiter/portfolio/
 
 > **sampleVariables**: `string`[]
 
-Defined in: [lib/crf/study-engine.ts:54](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L54)
+Defined in: [lib/crf/study-engine.ts:59](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L59)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [lib/crf/study-engine.ts:54](https://github.com/fderuiter/portfolio/
 
 > **variableCount**: `number`
 
-Defined in: [lib/crf/study-engine.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L53)
+Defined in: [lib/crf/study-engine.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L58)

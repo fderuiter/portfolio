@@ -6,7 +6,9 @@
 
 # Interface: QueuedEvent
 
-Defined in: [hooks/useTelemetry.ts:31](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L31)
+Defined in: [hooks/useTelemetry.ts:40](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L40)
+
+Queued telemetry retry event descriptor.
 
 ## Properties
 
@@ -14,7 +16,7 @@ Defined in: [hooks/useTelemetry.ts:31](https://github.com/fderuiter/portfolio/bl
 
 > **eventType**: [`TelemetryEventType`](../type-aliases/TelemetryEventType.md)
 
-Defined in: [hooks/useTelemetry.ts:33](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L33)
+Defined in: [hooks/useTelemetry.ts:42](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L42)
 
 ***
 
@@ -22,7 +24,7 @@ Defined in: [hooks/useTelemetry.ts:33](https://github.com/fderuiter/portfolio/bl
 
 > **projectSlug**: `string`
 
-Defined in: [hooks/useTelemetry.ts:32](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L32)
+Defined in: [hooks/useTelemetry.ts:41](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L41)
 
 ***
 
@@ -30,4 +32,4 @@ Defined in: [hooks/useTelemetry.ts:32](https://github.com/fderuiter/portfolio/bl
 
 > **retries**: `number`
 
-Defined in: [hooks/useTelemetry.ts:34](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L34)
+Defined in: [hooks/useTelemetry.ts:43](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L43)

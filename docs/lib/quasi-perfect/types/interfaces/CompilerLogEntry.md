@@ -36,6 +36,6 @@ Defined in: [lib/quasi-perfect/types.ts:112](https://github.com/fderuiter/portfo
 
 ### type
 
-> **type**: `"error"` \| `"success"` \| `"info"` \| `"warning"`
+> **type**: `"error"` \| `"warning"` \| `"info"` \| `"success"`
 
 Defined in: [lib/quasi-perfect/types.ts:113](https://github.com/fderuiter/portfolio/blob/main/lib/quasi-perfect/types.ts#L113)

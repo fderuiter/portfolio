@@ -3,40 +3,13 @@
  */
 
 import { useEffect } from "react";
-import {
-  getGovernedAudioContext,
-  getGovernedVolume,
-  isGovernedSoundAllowed,
-  registerAudioCleanup,
-} from "@/components/providers/AudioProvider";
-
-const activeMemeSources = new Set<AudioScheduledSourceNode>();
-
-function trackSource<T extends AudioScheduledSourceNode>(source: T): T {
-  activeMemeSources.add(source);
-  try {
-    source.addEventListener("ended", () => {
-      activeMemeSources.delete(source);
-    });
-  } catch {}
-  return source;
-}
+import { getSoundEngine } from "@/lib/audio/sound-engine";
 
 export function stopAllMemeSounds(): void {
-  activeMemeSources.forEach((src) => {
-    try {
-      src.stop();
-      src.disconnect();
-    } catch {}
-  });
-  activeMemeSources.clear();
+  getSoundEngine().stopAll();
 }
 
-registerAudioCleanup(() => {
-  stopAllMemeSounds();
-});
-
-export function useMemeAudioCleanup() {
+export function useMemeAudioCleanup(): void {
   useEffect(() => {
     return () => {
       stopAllMemeSounds();
@@ -45,7 +18,7 @@ export function useMemeAudioCleanup() {
 }
 
 export function isSoundAllowed(): boolean {
-  return isGovernedSoundAllowed();
+  return getSoundEngine().isSoundAllowed();
 }
 
 export type MemeSoundType =
@@ -104,11 +77,12 @@ function createNoiseBuffer(ctx: AudioContext, duration: number): AudioBuffer | n
 export function playMemeSound(
   type: "bark" | "laser" | "friday-alarm" | "matrix-glitch" | "teapot-whistle" | "modem" | "fda-siren" | "level-up" | "fanfare"
 ): void {
-  if (!isSoundAllowed()) return;
-  const ctx = getGovernedAudioContext();
+  const engine = getSoundEngine();
+  if (!engine.isSoundAllowed()) return;
+  const ctx = engine.getAudioContext();
   if (!ctx) return;
 
-  const masterVol = getGovernedVolume();
+  const masterVol = engine.getVolume();
   if (masterVol <= 0) return;
 
   if (ctx.state === "suspended") {
@@ -121,7 +95,7 @@ export function playMemeSound(
     case "bark": {
       // Synthesize a playful two-stage puppy bark ("yip-woof!")
       // Stage 1: Quick high-frequency "yip"
-      const osc1 = trackSource(ctx.createOscillator());
+      const osc1 = engine.trackSource(ctx.createOscillator());
       const gain1 = ctx.createGain();
       osc1.type = "triangle";
       osc1.frequency.setValueAtTime(450, now);
@@ -149,7 +123,7 @@ export function playMemeSound(
       // Breath puff for Stage 1
       const noiseBuf1 = createNoiseBuffer(ctx, 0.1);
       if (noiseBuf1 && typeof ctx.createBufferSource === "function" && typeof ctx.createBiquadFilter === "function") {
-        const noiseSource1 = trackSource(ctx.createBufferSource());
+        const noiseSource1 = engine.trackSource(ctx.createBufferSource());
         const noiseGain1 = ctx.createGain();
         const noiseFilter1 = ctx.createBiquadFilter();
 
@@ -171,8 +145,8 @@ export function playMemeSound(
 
       // Stage 2: Richer "woof" body
       const t2 = now + 0.15;
-      const osc2 = trackSource(ctx.createOscillator());
-      const osc2Harmonic = trackSource(ctx.createOscillator());
+      const osc2 = engine.trackSource(ctx.createOscillator());
+      const osc2Harmonic = engine.trackSource(ctx.createOscillator());
       const gain2 = ctx.createGain();
       const harmonicGain2 = ctx.createGain();
 
@@ -219,7 +193,7 @@ export function playMemeSound(
       // Breath puff for Stage 2
       const noiseBuf2 = createNoiseBuffer(ctx, 0.18);
       if (noiseBuf2 && typeof ctx.createBufferSource === "function" && typeof ctx.createBiquadFilter === "function") {
-        const noiseSource2 = trackSource(ctx.createBufferSource());
+        const noiseSource2 = engine.trackSource(ctx.createBufferSource());
         const noiseGain2 = ctx.createGain();
         const noiseFilter2 = ctx.createBiquadFilter();
 
@@ -243,7 +217,7 @@ export function playMemeSound(
 
     case "laser": {
       // Frequency sweep downward for laser raycast
-      const osc = trackSource(ctx.createOscillator());
+      const osc = engine.trackSource(ctx.createOscillator());
       const gain = ctx.createGain();
       osc.type = "sawtooth";
       osc.frequency.setValueAtTime(1400, now);
@@ -259,7 +233,7 @@ export function playMemeSound(
 
     case "friday-alarm": {
       // High-low alternating siren pulse
-      const osc = trackSource(ctx.createOscillator());
+      const osc = engine.trackSource(ctx.createOscillator());
       const gain = ctx.createGain();
       osc.type = "square";
       osc.frequency.setValueAtTime(880, now);
@@ -277,7 +251,7 @@ export function playMemeSound(
     case "matrix-glitch": {
       // Rapid stepped cyber tones
       [300, 600, 450, 900, 1200].forEach((freq, idx) => {
-        const osc = trackSource(ctx.createOscillator());
+        const osc = engine.trackSource(ctx.createOscillator());
         const gain = ctx.createGain();
         osc.type = "sawtooth";
         osc.frequency.setValueAtTime(freq, now + idx * 0.03);
@@ -293,8 +267,8 @@ export function playMemeSound(
 
     case "teapot-whistle": {
       // Authentic boiling kettle whistle with steam vortex flutter & pressure release
-      const whistleOsc = trackSource(ctx.createOscillator());
-      const whistleHarmonic = trackSource(ctx.createOscillator());
+      const whistleOsc = engine.trackSource(ctx.createOscillator());
+      const whistleHarmonic = engine.trackSource(ctx.createOscillator());
       const whistleGain = ctx.createGain();
       const harmonicGain = ctx.createGain();
 
@@ -310,7 +284,7 @@ export function playMemeSound(
       whistleHarmonic.frequency.exponentialRampToValueAtTime(3800, now + 0.82);
 
       // Tremolo / air flutter LFO
-      const lfo = trackSource(ctx.createOscillator());
+      const lfo = engine.trackSource(ctx.createOscillator());
       const lfoGain = ctx.createGain();
       lfo.frequency.setValueAtTime(6.5, now);
       lfoGain.gain.setValueAtTime(28, now);
@@ -340,7 +314,7 @@ export function playMemeSound(
       // Steam hiss layer
       const steamBuf = createNoiseBuffer(ctx, 0.85);
       if (steamBuf && typeof ctx.createBufferSource === "function" && typeof ctx.createBiquadFilter === "function") {
-        const steamSource = trackSource(ctx.createBufferSource());
+        const steamSource = engine.trackSource(ctx.createBufferSource());
         const steamGain = ctx.createGain();
         const steamFilter = ctx.createBiquadFilter();
 
@@ -368,7 +342,7 @@ export function playMemeSound(
     case "modem": {
       // Authentic condensed 56k dialup handshake (~1.2s sequence)
       // Stage 1: 2100Hz V.8 / V.25 Answer Tone
-      const oscAnswer = trackSource(ctx.createOscillator());
+      const oscAnswer = engine.trackSource(ctx.createOscillator());
       const gainAnswer = ctx.createGain();
       oscAnswer.type = "sine";
       oscAnswer.frequency.setValueAtTime(2100, now);
@@ -385,8 +359,8 @@ export function playMemeSound(
 
       // Stage 2: Dual-frequency carrier negotiation chirps
       const tNegotiation = now + 0.24;
-      const oscNeg1 = trackSource(ctx.createOscillator());
-      const oscNeg2 = trackSource(ctx.createOscillator());
+      const oscNeg1 = engine.trackSource(ctx.createOscillator());
+      const oscNeg2 = engine.trackSource(ctx.createOscillator());
       const gainNeg = ctx.createGain();
 
       oscNeg1.type = "sawtooth";
@@ -420,7 +394,7 @@ export function playMemeSound(
       const tScreech = now + 0.56;
       const noiseBuf = createNoiseBuffer(ctx, 0.7);
       if (noiseBuf && typeof ctx.createBufferSource === "function" && typeof ctx.createBiquadFilter === "function") {
-        const noiseSource = trackSource(ctx.createBufferSource());
+        const noiseSource = engine.trackSource(ctx.createBufferSource());
         const noiseGain = ctx.createGain();
         const noiseFilter = ctx.createBiquadFilter();
 
@@ -445,8 +419,8 @@ export function playMemeSound(
       }
 
       // Add AM sideband grit for baud rate scrambling texture
-      const baudCarrier = trackSource(ctx.createOscillator());
-      const baudModulator = trackSource(ctx.createOscillator());
+      const baudCarrier = engine.trackSource(ctx.createOscillator());
+      const baudModulator = engine.trackSource(ctx.createOscillator());
       const baudGain = ctx.createGain();
       const modGain = ctx.createGain();
 
@@ -479,7 +453,7 @@ export function playMemeSound(
 
     case "fda-siren": {
       // Harsh buzzer tone
-      const osc = trackSource(ctx.createOscillator());
+      const osc = engine.trackSource(ctx.createOscillator());
       const gain = ctx.createGain();
       osc.type = "sawtooth";
       osc.frequency.setValueAtTime(220, now);
@@ -497,7 +471,7 @@ export function playMemeSound(
       // Arpeggiated C-Major triumphant chord (C5, E5, G5, C6)
       const notes = [523.25, 659.25, 783.99, 1046.5];
       notes.forEach((freq, idx) => {
-        const osc = trackSource(ctx.createOscillator());
+        const osc = engine.trackSource(ctx.createOscillator());
         const gain = ctx.createGain();
         osc.type = "square";
         osc.frequency.setValueAtTime(freq, now + idx * 0.06);

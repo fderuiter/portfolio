@@ -51,11 +51,11 @@ describe("CRF Studio Mobile & Tablet Responsiveness", () => {
     expect(canvasBtn).toBeDefined();
     expect(inspectorBtn).toBeDefined();
 
-    // Switch to Forms view on mobile
+    // Switch to Forms/Spine view on mobile
     await act(async () => {
       formsBtn?.click();
     });
-    expect(container.textContent).toContain("Protocol Forms");
+    expect(container.textContent).toContain("Study Timeline");
 
     // Switch to Inspector view on mobile
     await act(async () => {

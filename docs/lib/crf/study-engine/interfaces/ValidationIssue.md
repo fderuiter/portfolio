@@ -6,7 +6,7 @@
 
 # Interface: ValidationIssue
 
-Defined in: [lib/crf/study-engine.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L32)
+Defined in: [lib/crf/study-engine.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L37)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/study-engine.ts:32](https://github.com/fderuiter/portfolio/
 
 > `optional` **field?**: `string`
 
-Defined in: [lib/crf/study-engine.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L34)
+Defined in: [lib/crf/study-engine.ts:39](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L39)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/study-engine.ts:34](https://github.com/fderuiter/portfolio/
 
 > **form**: `string`
 
-Defined in: [lib/crf/study-engine.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L33)
+Defined in: [lib/crf/study-engine.ts:38](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L38)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/study-engine.ts:33](https://github.com/fderuiter/portfolio/
 
 > **message**: `string`
 
-Defined in: [lib/crf/study-engine.ts:36](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L36)
+Defined in: [lib/crf/study-engine.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L41)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/study-engine.ts:36](https://github.com/fderuiter/portfolio/
 
 > **rule**: `string`
 
-Defined in: [lib/crf/study-engine.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L35)
+Defined in: [lib/crf/study-engine.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L40)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [lib/crf/study-engine.ts:35](https://github.com/fderuiter/portfolio/
 
 > **severity**: `"error"` \| `"warning"`
 
-Defined in: [lib/crf/study-engine.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L37)
+Defined in: [lib/crf/study-engine.ts:42](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L42)

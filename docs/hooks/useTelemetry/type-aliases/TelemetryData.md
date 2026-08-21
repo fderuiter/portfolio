@@ -8,4 +8,6 @@
 
 > **TelemetryData** = `Record`\<`string`, [`ProjectTelemetry`](../interfaces/ProjectTelemetry.md)\>
 
-Defined in: [hooks/useTelemetry.ts:11](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L11)
+Defined in: [hooks/useTelemetry.ts:22](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L22)
+
+Map of project slug identifiers to their corresponding telemetry metric counters.

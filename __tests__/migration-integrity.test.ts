@@ -7,6 +7,7 @@ const {
   getLockProvider,
   getSchemaProvider,
   validateDocMigrations,
+  validateDocCommands,
   validateMigrationFiles,
 } = require("../scripts/check-migration-integrity.js");
 
@@ -145,6 +146,31 @@ describe("Prisma migration integrity", () => {
 
     expect(() => checkDestructiveMigrations(tmpDir, false)).toThrow("Destructive migrations are blocked");
     expect(() => checkDestructiveMigrations(tmpDir, true)).not.toThrow();
+
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it("validates that DATABASE_MIGRATIONS.md contains all required operational commands and environment variables", () => {
+    expect(() => validateDocCommands("DATABASE_MIGRATIONS.md")).not.toThrow();
+  });
+
+  it("fails validateDocCommands when mandatory operational commands are omitted from documentation", () => {
+    const fs = require("fs");
+    const path = require("path");
+    const os = require("os");
+
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "doc-cmd-test-"));
+    const docFile = path.join(tmpDir, "DATABASE_MIGRATIONS.md");
+
+    // Documentation missing release:gate and check:migrations:drift
+    fs.writeFileSync(
+      docFile,
+      "# Migrations\nRun `npm run check:migrations` and set `ALLOW_DESTRUCTIVE_MIGRATIONS=true`.\n",
+    );
+
+    expect(() => validateDocCommands(docFile)).toThrow(/Documentation completeness check failed/);
+    expect(() => validateDocCommands(docFile)).toThrow(/schema drift verification/);
+    expect(() => validateDocCommands(docFile)).toThrow(/pipeline release gate execution/);
 
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });

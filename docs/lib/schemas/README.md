@@ -13,6 +13,9 @@
 - [ContactSubmission](type-aliases/ContactSubmission.md)
 - [NewsletterResponse](type-aliases/NewsletterResponse.md)
 - [NewsletterSubscription](type-aliases/NewsletterSubscription.md)
+- [ResendEventType](type-aliases/ResendEventType.md)
+- [ResendWebhookEvent](type-aliases/ResendWebhookEvent.md)
+- [ResendWebhookResponse](type-aliases/ResendWebhookResponse.md)
 
 ## Variables
 
@@ -29,5 +32,8 @@
 - [NewsletterSubscriptionSchema](variables/NewsletterSubscriptionSchema.md)
 - [RateLimitParamsSchema](variables/RateLimitParamsSchema.md)
 - [ReactionSubmissionSchema](variables/ReactionSubmissionSchema.md)
+- [RESEND\_EVENT\_TYPES](variables/RESEND_EVENT_TYPES.md)
+- [ResendWebhookEventSchema](variables/ResendWebhookEventSchema.md)
+- [ResendWebhookResponseSchema](variables/ResendWebhookResponseSchema.md)
 - [SyncParamsSchema](variables/SyncParamsSchema.md)
 - [TelemetryEventSchema](variables/TelemetryEventSchema.md)

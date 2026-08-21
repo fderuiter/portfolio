@@ -12,7 +12,7 @@ Defined in: [lib/crf/formula-presets.ts:3](https://github.com/fderuiter/portfoli
 
 ### category
 
-> **category**: `"general"` \| `"anthropometric"` \| `"renal"` \| `"cardiac"` \| `"oncology"`
+> **category**: `"anthropometric"` \| `"renal"` \| `"cardiac"` \| `"oncology"` \| `"general"`
 
 Defined in: [lib/crf/formula-presets.ts:6](https://github.com/fderuiter/portfolio/blob/main/lib/crf/formula-presets.ts#L6)
 

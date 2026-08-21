@@ -17,6 +17,7 @@
 - [GameScoreState](interfaces/GameScoreState.md)
 - [PowerUpState](interfaces/PowerUpState.md)
 - [ProtocolAmendment](interfaces/ProtocolAmendment.md)
+- [RecordedRuleViolation](interfaces/RecordedRuleViolation.md)
 - [SDTMRow](interfaces/SDTMRow.md)
 - [SignatureModalState](interfaces/SignatureModalState.md)
 - [StationConfig](interfaces/StationConfig.md)

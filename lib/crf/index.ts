@@ -29,4 +29,8 @@ export {
 } from "./export-sas";
 export * from "./fhir-questionnaire";
 export * from "./odm-xml-serializer";
+export * from "./usdm-adapter";
 export * from "./precision-date";
+export * from "./form-health";
+export * from "./study-auditor";
+export * from "./smart-blocks-engine";

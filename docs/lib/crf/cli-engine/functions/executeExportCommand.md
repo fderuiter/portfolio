@@ -20,7 +20,7 @@ Multi-Format Export Command
 
 ### format
 
-`"json"` \| `"r"` \| `"yaml"` \| `"odm"` \| `"fhir"` \| `"sas"`
+`"json"` \| `"yaml"` \| `"odm"` \| `"fhir"` \| `"sas"` \| `"r"` \| `"usdm"`
 
 ### \_options?
 
