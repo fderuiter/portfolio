@@ -112,13 +112,13 @@ Or follow manual setup steps:
 
 2. **Configure Environment**
    Copy `.env.example` to `.env.local` and set your `DATABASE_URL` (Neon Postgres connection string) and optionally `GITHUB_TOKEN` to avoid API rate limits.
-
-   Verify environment variable configuration:
+   
+   Verify your environment variable configuration:
    ```bash
    npm run env:check
    ```
-   This command validates required server and client key declarations against `lib/env.ts` schemas, warning of missing or invalid keys before starting the app.
-
+   This command validates all required server and client environment key declarations against `lib/env.ts`, warning of any missing or invalid keys to confirm setup is complete.
+   
    To configure Clerk authentication and author access allowlists interactively:
    ```bash
    npm run setup:clerk
