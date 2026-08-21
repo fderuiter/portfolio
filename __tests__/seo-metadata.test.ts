@@ -607,6 +607,129 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
       }
     });
   });
+
+  describe("Universal Schema Language and Access Declarations", () => {
+    it("all ROUTE_METADATA_CONFIGS declare explicit inLanguage: 'en-US', locale: 'en-US', and isAccessibleForFree: true", () => {
+      const keys = Object.keys(ROUTE_METADATA_CONFIGS);
+      expect(keys.length).toBeGreaterThanOrEqual(15);
+
+      for (const key of keys) {
+        const config = ROUTE_METADATA_CONFIGS[key];
+        expect(config.inLanguage, `Route "${key}" missing inLanguage`).toBe("en-US");
+        expect(config.locale, `Route "${key}" missing locale`).toBe("en-US");
+        expect(config.isAccessibleForFree, `Route "${key}" missing isAccessibleForFree`).toBe(true);
+      }
+    });
+
+    it("buildRouteMetadata produces synchronized locale and other metadata declarations", () => {
+      const config = ROUTE_METADATA_CONFIGS.crf;
+      const meta = buildRouteMetadata(config);
+
+      expect(meta.openGraph?.locale).toBe("en_US");
+      expect(meta.other?.inLanguage).toBe("en-US");
+      expect(meta.other?.isAccessibleForFree).toBe("true");
+    });
+
+    it("all base and specialized structured data generators include inLanguage and isAccessibleForFree attributes", async () => {
+      const {
+        getPersonNode,
+        getWebsiteNode,
+        getWebPageNode,
+        getBreadcrumbNode,
+        getVisualArtworkSchema,
+        getWebApplicationSchema,
+        getCollectionPageSchema,
+        getSoftwareSourceCodeSchema,
+        getBreadcrumbSchema,
+      } = await import("@/lib/seo");
+
+      const person = getPersonNode();
+      expect(person.inLanguage).toBe("en-US");
+      expect(person.isAccessibleForFree).toBe(true);
+
+      const website = getWebsiteNode();
+      expect(website.inLanguage).toBe("en-US");
+      expect(website.isAccessibleForFree).toBe(true);
+
+      const webpage = getWebPageNode({ name: "Test", description: "Desc", url: "/test" });
+      expect(webpage.inLanguage).toBe("en-US");
+      expect(webpage.isAccessibleForFree).toBe(true);
+
+      const breadcrumbNode = getBreadcrumbNode([{ name: "Home", url: "/" }], "/test");
+      expect(breadcrumbNode.inLanguage).toBe("en-US");
+      expect(breadcrumbNode.isAccessibleForFree).toBe(true);
+
+      const artwork = JSON.parse(
+        getVisualArtworkSchema({ name: "Art", description: "Desc", url: "/art" })
+      );
+      expect(artwork.inLanguage).toBe("en-US");
+      expect(artwork.isAccessibleForFree).toBe(true);
+
+      const webApp = JSON.parse(
+        getWebApplicationSchema({
+          name: "App",
+          description: "Desc",
+          url: "/app",
+          applicationCategory: "DeveloperApplication",
+        })
+      );
+      expect(webApp.inLanguage).toBe("en-US");
+      expect(webApp.isAccessibleForFree).toBe(true);
+
+      const collection = JSON.parse(
+        getCollectionPageSchema("Collection", "Desc", "/col", [])
+      );
+      expect(collection.inLanguage).toBe("en-US");
+      expect(collection.isAccessibleForFree).toBe(true);
+
+      const code = JSON.parse(
+        getSoftwareSourceCodeSchema(
+          {
+            id: "1",
+            slug: "test",
+            title: "Test",
+            primary_language: "TypeScript",
+            published: true,
+            simulated_telemetry: false,
+            tags: "",
+            editorial_content: "Content",
+            architectural_narrative: "",
+            created_at: new Date(),
+            updated_at: new Date(),
+          },
+          null
+        )
+      );
+      expect(code.inLanguage).toBe("en-US");
+      expect(code.isAccessibleForFree).toBe(true);
+
+      const breadcrumbSchema = JSON.parse(
+        getBreadcrumbSchema([{ name: "Home", url: "/" }])
+      );
+      expect(breadcrumbSchema.inLanguage).toBe("en-US");
+      expect(breadcrumbSchema.isAccessibleForFree).toBe(true);
+    });
+
+    it("getUnifiedGraphSchema automatically enriches all graph nodes with inLanguage and isAccessibleForFree", async () => {
+      const { getUnifiedGraphSchema, getPersonNode, getWebsiteNode } = await import("@/lib/seo");
+
+      // Custom node without explicit language/access fields
+      const customNode = {
+        "@type": "Thing",
+        "@id": `${SITE_BASE_URL}/#custom`,
+        name: "Custom Entity",
+      };
+
+      const rawGraph = getUnifiedGraphSchema([getPersonNode(), getWebsiteNode(), customNode]);
+      const parsed = JSON.parse(rawGraph);
+
+      expect(parsed["@graph"]).toHaveLength(3);
+      for (const node of parsed["@graph"]) {
+        expect(node.inLanguage).toBe("en-US");
+        expect(node.isAccessibleForFree).toBe(true);
+      }
+    });
+  });
 });
 
 

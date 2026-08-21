@@ -76,6 +76,7 @@
 - [lib/crf/presets/loader](lib/crf/presets/loader/README.md)
 - [lib/crf/presets/oncology-recist](lib/crf/presets/oncology-recist/README.md)
 - [lib/crf/presets/pk-dose-escalation](lib/crf/presets/pk-dose-escalation/README.md)
+- [lib/crf/smart-blocks-engine](lib/crf/smart-blocks-engine/README.md)
 - [lib/crf/study-auditor](lib/crf/study-auditor/README.md)
 - [lib/crf/study-engine](lib/crf/study-engine/README.md)
 - [lib/crf/types](lib/crf/types/README.md)

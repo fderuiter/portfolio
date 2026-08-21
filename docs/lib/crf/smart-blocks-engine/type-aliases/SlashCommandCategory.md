@@ -8,4 +8,4 @@
 
 > **SlashCommandCategory** = `"smart_block"` \| `"widget"` \| `"layout"`
 
-Defined in: lib/crf/smart-blocks-engine.ts:9
+Defined in: [lib/crf/smart-blocks-engine.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L9)

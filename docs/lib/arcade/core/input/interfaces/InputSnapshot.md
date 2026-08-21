@@ -6,7 +6,7 @@
 
 # Interface: InputSnapshot
 
-Defined in: lib/arcade/core/input.ts:11
+Defined in: [lib/arcade/core/input.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L11)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: lib/arcade/core/input.ts:11
 
 > **actionA**: `boolean`
 
-Defined in: lib/arcade/core/input.ts:16
+Defined in: [lib/arcade/core/input.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L16)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: lib/arcade/core/input.ts:16
 
 > **actionB**: `boolean`
 
-Defined in: lib/arcade/core/input.ts:17
+Defined in: [lib/arcade/core/input.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L17)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: lib/arcade/core/input.ts:17
 
 > **actionC**: `boolean`
 
-Defined in: lib/arcade/core/input.ts:18
+Defined in: [lib/arcade/core/input.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L18)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: lib/arcade/core/input.ts:18
 
 > **aimX**: `number`
 
-Defined in: lib/arcade/core/input.ts:14
+Defined in: [lib/arcade/core/input.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L14)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: lib/arcade/core/input.ts:14
 
 > **aimY**: `number`
 
-Defined in: lib/arcade/core/input.ts:15
+Defined in: [lib/arcade/core/input.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L15)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: lib/arcade/core/input.ts:15
 
 > **keysDown**: `ReadonlySet`\<`string`\>
 
-Defined in: lib/arcade/core/input.ts:20
+Defined in: [lib/arcade/core/input.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L20)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: lib/arcade/core/input.ts:20
 
 > **moveX**: `number`
 
-Defined in: lib/arcade/core/input.ts:12
+Defined in: [lib/arcade/core/input.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L12)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: lib/arcade/core/input.ts:12
 
 > **moveY**: `number`
 
-Defined in: lib/arcade/core/input.ts:13
+Defined in: [lib/arcade/core/input.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L13)
 
 ***
 
@@ -78,4 +78,4 @@ Defined in: lib/arcade/core/input.ts:13
 
 > **primaryPointer**: [`PrimaryPointerState`](PrimaryPointerState.md)
 
-Defined in: lib/arcade/core/input.ts:19
+Defined in: [lib/arcade/core/input.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/input.ts#L19)

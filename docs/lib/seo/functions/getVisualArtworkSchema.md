@@ -8,9 +8,7 @@
 
 > **getVisualArtworkSchema**(`options`): `string`
 
-Defined in: [lib/seo.ts:128](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L128)
-
-Returns a specialized VisualArtwork & MediaObject Schema.org representation for open graphic design assets (e.g. Laser Loon).
+Defined in: [lib/seo.ts:161](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L161)
 
 ## Parameters
 

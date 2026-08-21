@@ -6,7 +6,7 @@
 
 # Interface: GamePoint
 
-Defined in: lib/arcade/core/viewport.ts:29
+Defined in: [lib/arcade/core/viewport.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L29)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: lib/arcade/core/viewport.ts:29
 
 > **x**: `number`
 
-Defined in: lib/arcade/core/viewport.ts:30
+Defined in: [lib/arcade/core/viewport.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L30)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: lib/arcade/core/viewport.ts:30
 
 > **y**: `number`
 
-Defined in: lib/arcade/core/viewport.ts:31
+Defined in: [lib/arcade/core/viewport.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L31)

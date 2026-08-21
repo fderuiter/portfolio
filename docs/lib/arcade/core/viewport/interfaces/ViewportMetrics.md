@@ -6,7 +6,7 @@
 
 # Interface: ViewportMetrics
 
-Defined in: lib/arcade/core/viewport.ts:16
+Defined in: [lib/arcade/core/viewport.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L16)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: lib/arcade/core/viewport.ts:16
 
 > **bleedHeight**: `number`
 
-Defined in: lib/arcade/core/viewport.ts:26
+Defined in: [lib/arcade/core/viewport.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L26)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: lib/arcade/core/viewport.ts:26
 
 > **bleedWidth**: `number`
 
-Defined in: lib/arcade/core/viewport.ts:25
+Defined in: [lib/arcade/core/viewport.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L25)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: lib/arcade/core/viewport.ts:25
 
 > **canvasHeight**: `number`
 
-Defined in: lib/arcade/core/viewport.ts:24
+Defined in: [lib/arcade/core/viewport.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L24)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: lib/arcade/core/viewport.ts:24
 
 > **canvasWidth**: `number`
 
-Defined in: lib/arcade/core/viewport.ts:23
+Defined in: [lib/arcade/core/viewport.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L23)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: lib/arcade/core/viewport.ts:23
 
 > **dpr**: `number`
 
-Defined in: lib/arcade/core/viewport.ts:17
+Defined in: [lib/arcade/core/viewport.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L17)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: lib/arcade/core/viewport.ts:17
 
 > **internalHeight**: `number`
 
-Defined in: lib/arcade/core/viewport.ts:22
+Defined in: [lib/arcade/core/viewport.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L22)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: lib/arcade/core/viewport.ts:22
 
 > **internalWidth**: `number`
 
-Defined in: lib/arcade/core/viewport.ts:21
+Defined in: [lib/arcade/core/viewport.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L21)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: lib/arcade/core/viewport.ts:21
 
 > **offsetX**: `number`
 
-Defined in: lib/arcade/core/viewport.ts:19
+Defined in: [lib/arcade/core/viewport.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L19)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: lib/arcade/core/viewport.ts:19
 
 > **offsetY**: `number`
 
-Defined in: lib/arcade/core/viewport.ts:20
+Defined in: [lib/arcade/core/viewport.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L20)
 
 ***
 
@@ -86,4 +86,4 @@ Defined in: lib/arcade/core/viewport.ts:20
 
 > **scale**: `number`
 
-Defined in: lib/arcade/core/viewport.ts:18
+Defined in: [lib/arcade/core/viewport.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/arcade/core/viewport.ts#L18)
