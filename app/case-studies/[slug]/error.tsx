@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import * as Sentry from "@sentry/nextjs";
+import { reportClientError } from "@/lib/client-sentry";
 import { resolveBaseUrl } from "@/lib/domain";
 
 export default function CaseStudyError({
@@ -15,7 +15,7 @@ export default function CaseStudyError({
   const [canonicalUrl, setCanonicalUrl] = useState<string>(`${resolveBaseUrl()}/`);
 
   useEffect(() => {
-    Sentry.captureException(error);
+    reportClientError(error);
     console.error("Case study route error:", error);
     if (typeof window !== "undefined") {
       // eslint-disable-next-line react-hooks/set-state-in-effect

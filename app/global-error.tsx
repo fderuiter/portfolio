@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import * as Sentry from "@sentry/nextjs";
+import { reportClientError } from "@/lib/client-sentry";
 import { sanitizeError } from "@/lib/error-sanitization";
 import { resolveBaseUrl } from "@/lib/domain";
 
@@ -15,7 +15,7 @@ export default function GlobalError({
   const [canonicalUrl, setCanonicalUrl] = useState<string>(`${resolveBaseUrl()}/`);
 
   useEffect(() => {
-    Sentry.captureException(error);
+    reportClientError(error);
     console.error("Global uncaught crash boundary:", sanitizeError(error));
     if (typeof window !== "undefined") {
       // eslint-disable-next-line react-hooks/set-state-in-effect

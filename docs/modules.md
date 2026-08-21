@@ -38,6 +38,7 @@
 - [lib/audio/sound-engine](lib/audio/sound-engine/README.md)
 - [lib/auth/admin](lib/auth/admin/README.md)
 - [lib/case-studies-data](lib/case-studies-data/README.md)
+- [lib/client-sentry](lib/client-sentry/README.md)
 - [lib/clinical-trial-chaos](lib/clinical-trial-chaos/README.md)
 - [lib/clinical-trial-chaos/engine](lib/clinical-trial-chaos/engine/README.md)
 - [lib/clinical-trial-chaos/scenarios](lib/clinical-trial-chaos/scenarios/README.md)
