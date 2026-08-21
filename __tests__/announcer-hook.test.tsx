@@ -6,6 +6,7 @@ import {
   useAnnouncer,
   announcerReducer,
   initialAnnouncerState,
+  sanitizePII,
   AnnouncerState,
 } from "@/components/providers/A11yProvider";
 
@@ -309,6 +310,46 @@ describe("A11yProvider & useAnnouncer Dynamic Screen Reader Engine", () => {
       state = announcerReducer(state, { type: "TIMER_EXPIRED" });
       expect(state.activeAssertive).toBeNull();
       expect(state.activePolite).toBeNull();
+    });
+
+    it("processes atomic ENQUEUE, ASSERTIVE_PREEMPT, DEQUEUE_NEXT, and TIMER_COMPLETE actions", () => {
+      const p1 = { id: "p1", text: "Polite 1", priority: "polite" as const };
+      const p2 = { id: "p2", text: "Polite 2", priority: "polite" as const };
+      const a1 = { id: "a1", text: "Assertive 1", priority: "assertive" as const };
+
+      let state = initialAnnouncerState;
+
+      // ENQUEUE polite
+      state = announcerReducer(state, { type: "ENQUEUE", item: p1 });
+      expect(state.activePolite).toEqual(p1);
+
+      // ENQUEUE polite while busy
+      state = announcerReducer(state, { type: "ENQUEUE", item: p2 });
+      expect(state.politeQueue).toEqual([p2]);
+
+      // ASSERTIVE_PREEMPT interrupts active polite
+      state = announcerReducer(state, { type: "ASSERTIVE_PREEMPT", item: a1 });
+      expect(state.activePolite).toBeNull();
+      expect(state.activeAssertive).toEqual(a1);
+      expect(state.politeQueue).toEqual([p2]);
+
+      // TIMER_COMPLETE transitions to next item in queue
+      state = announcerReducer(state, { type: "TIMER_COMPLETE" });
+      expect(state.activeAssertive).toBeNull();
+      expect(state.activePolite).toEqual(p2);
+
+      // DEQUEUE_NEXT finishes last item
+      state = announcerReducer(state, { type: "DEQUEUE_NEXT" });
+      expect(state.activePolite).toBeNull();
+      expect(state.activeAssertive).toBeNull();
+    });
+
+    it("sanitizes Social Security Numbers using sanitizePII helper", () => {
+      expect(sanitizePII("User SSN is 123-45-6789")).toBe("User SSN is ***-**-****");
+      expect(sanitizePII("Multiple SSNs: 987-65-4321 and 111-22-3333")).toBe(
+        "Multiple SSNs: ***-**-**** and ***-**-****"
+      );
+      expect(sanitizePII("Clean message without PII")).toBe("Clean message without PII");
     });
   });
 });

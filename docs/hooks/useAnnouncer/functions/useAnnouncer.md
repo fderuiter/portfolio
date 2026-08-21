@@ -8,7 +8,7 @@
 
 > **useAnnouncer**(): [`AnnouncerContextType`](../interfaces/AnnouncerContextType.md)
 
-Defined in: [components/providers/A11yProvider.tsx:134](https://github.com/fderuiter/portfolio/blob/main/components/providers/A11yProvider.tsx#L134)
+Defined in: [components/providers/A11yProvider.tsx:186](https://github.com/fderuiter/portfolio/blob/main/components/providers/A11yProvider.tsx#L186)
 
 ## Returns
 

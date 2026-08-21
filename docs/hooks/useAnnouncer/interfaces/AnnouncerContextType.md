@@ -6,7 +6,7 @@
 
 # Interface: AnnouncerContextType
 
-Defined in: [components/providers/A11yProvider.tsx:25](https://github.com/fderuiter/portfolio/blob/main/components/providers/A11yProvider.tsx#L25)
+Defined in: [components/providers/A11yProvider.tsx:29](https://github.com/fderuiter/portfolio/blob/main/components/providers/A11yProvider.tsx#L29)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [components/providers/A11yProvider.tsx:25](https://github.com/fderui
 
 > **announce**: (`message`, `priority?`) => `void`
 
-Defined in: [components/providers/A11yProvider.tsx:26](https://github.com/fderuiter/portfolio/blob/main/components/providers/A11yProvider.tsx#L26)
+Defined in: [components/providers/A11yProvider.tsx:30](https://github.com/fderuiter/portfolio/blob/main/components/providers/A11yProvider.tsx#L30)
 
 #### Parameters
 
