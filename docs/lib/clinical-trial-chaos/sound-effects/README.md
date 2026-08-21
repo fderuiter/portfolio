@@ -20,3 +20,5 @@
 - [startProceduralBGM](functions/startProceduralBGM.md)
 - [stopProceduralBGM](functions/stopProceduralBGM.md)
 - [updateBGMTempo](functions/updateBGMTempo.md)
+- [useClinicalAudioCleanup](functions/useClinicalAudioCleanup.md)
+- [useProceduralBGM](functions/useProceduralBGM.md)

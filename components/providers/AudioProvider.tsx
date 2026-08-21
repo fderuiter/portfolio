@@ -4,6 +4,111 @@ import React, { createContext, useContext, useState, useEffect, useRef } from "r
 
 export type AudioProfile = "8-bit" | "90s-retro" | "ambient";
 
+// --- Central Governed Audio State & Singleton AudioContext ---
+let governedAudioCtx: AudioContext | null = null;
+const audioCleanupRegistry = new Set<() => void>();
+
+export function getGovernedAudioContext(): AudioContext | null {
+  if (typeof window === "undefined") return null;
+  if (!governedAudioCtx || governedAudioCtx.state === "closed") {
+    const AudioCtxClass =
+      window.AudioContext ||
+      (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (AudioCtxClass) {
+      governedAudioCtx = new AudioCtxClass();
+    }
+  }
+  if (governedAudioCtx && governedAudioCtx.state === "suspended") {
+    governedAudioCtx.resume().catch(() => {});
+  }
+  return governedAudioCtx;
+}
+
+export function closeGovernedAudioContext(): void {
+  cleanupGovernedAudio();
+  if (governedAudioCtx) {
+    governedAudioCtx.close().catch(() => {});
+    governedAudioCtx = null;
+  }
+}
+
+export function getGovernedVolume(): number {
+  if (typeof window === "undefined") return 0.3;
+  const savedVolume = localStorage.getItem("sound_volume");
+  if (savedVolume !== null) {
+    const val = parseFloat(savedVolume);
+    if (!isNaN(val)) return Math.max(0, Math.min(1, val));
+  }
+  return 0.3;
+}
+
+export function isGovernedMuted(): boolean {
+  if (typeof window === "undefined") return true;
+  const savedMuted = localStorage.getItem("sound_muted");
+  if (savedMuted !== null) {
+    return savedMuted === "true";
+  }
+  return true;
+}
+
+export function isGovernedBypassActive(): boolean {
+  if (typeof window === "undefined") return false;
+  const forcedColors = window.matchMedia?.("(forced-colors: active)").matches;
+  const msHighContrast = window.matchMedia?.("(-ms-high-contrast: active)").matches;
+  const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  const documentClasses = document.documentElement.className || "";
+  const documentHtmlContrast = document.documentElement.getAttribute("data-contrast") || "";
+
+  return !!(
+    forcedColors ||
+    msHighContrast ||
+    prefersReducedMotion ||
+    documentClasses.includes("high-contrast") ||
+    documentClasses.includes("contrast") ||
+    documentHtmlContrast === "high" ||
+    localStorage.getItem("sound_a11y_bypass") === "true"
+  );
+}
+
+export function isGovernedSoundAllowed(): boolean {
+  return !isGovernedMuted() && !isGovernedBypassActive();
+}
+
+export function registerAudioCleanup(fn: () => void): () => void {
+  audioCleanupRegistry.add(fn);
+  return () => {
+    audioCleanupRegistry.delete(fn);
+  };
+}
+
+export function cleanupGovernedAudio(): void {
+  audioCleanupRegistry.forEach((fn) => {
+    try {
+      fn();
+    } catch {
+      // Ignore audio cleanup errors
+    }
+  });
+  audioCleanupRegistry.clear();
+}
+
+export function useAudioCleanup(cleanupFn?: () => void) {
+  useEffect(() => {
+    let unregister: (() => void) | undefined;
+    if (cleanupFn) {
+      unregister = registerAudioCleanup(cleanupFn);
+    }
+    return () => {
+      if (cleanupFn) {
+        try {
+          cleanupFn();
+        } catch {}
+      }
+      if (unregister) unregister();
+    };
+  }, [cleanupFn]);
+}
+
 interface AudioContextType {
   volume: number;
   muted: boolean;
@@ -80,21 +185,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     if (typeof window === "undefined") return;
 
     const checkBypass = () => {
-      const forcedColors = window.matchMedia?.("(forced-colors: active)").matches;
-      const msHighContrast = window.matchMedia?.("(-ms-high-contrast: active)").matches;
-      const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-      const documentClasses = document.documentElement.className || "";
-      const documentHtmlContrast = document.documentElement.getAttribute("data-contrast") || "";
-
-      const shouldBypass = !!(
-        forcedColors ||
-        msHighContrast ||
-        prefersReducedMotion ||
-        documentClasses.includes("high-contrast") ||
-        documentClasses.includes("contrast") ||
-        documentHtmlContrast === "high" ||
-        localStorage.getItem("sound_a11y_bypass") === "true"
-      );
+      const shouldBypass = isGovernedBypassActive();
       setBypassActive(shouldBypass);
     };
 
@@ -114,26 +205,18 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     return () => {
-      if (audioCtxRef.current) {
-        audioCtxRef.current.close().catch(() => {});
-        audioCtxRef.current = null;
-      }
+      closeGovernedAudioContext();
     };
   }, []);
 
   const getAudioContext = (): AudioContext | null => {
-    if (typeof window === "undefined") return null;
-    if (!audioCtxRef.current) {
-      const AudioContextClass = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-      if (AudioContextClass) {
-        audioCtxRef.current = new AudioContextClass();
-      }
-    }
-    return audioCtxRef.current;
+    const ctx = getGovernedAudioContext();
+    audioCtxRef.current = ctx;
+    return ctx;
   };
 
   const playNote = (frequency: number, duration: number, pan?: number) => {
-    if (muted || bypassActive) return;
+    if (muted || bypassActive || !isGovernedSoundAllowed()) return;
 
     const ctx = getAudioContext();
     if (!ctx) return;
@@ -297,7 +380,9 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== "undefined") {
       localStorage.setItem("sound_muted", String(m));
     }
-    if (!m) {
+    if (m) {
+      cleanupGovernedAudio();
+    } else {
       const ctx = getAudioContext();
       if (ctx && ctx.state === "suspended") {
         ctx.resume().catch(() => {});

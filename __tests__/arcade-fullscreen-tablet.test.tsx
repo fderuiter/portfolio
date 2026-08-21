@@ -41,14 +41,18 @@ class LocalStorageMock {
   }
 }
 
-vi.mock("@/components/providers/AudioProvider", () => ({
-  useAudio: () => ({
-    playNote: vi.fn(),
-    playSuccess: vi.fn(),
-    playHover: vi.fn(),
-  }),
-  AudioProvider: ({ children }: { children: React.ReactNode }) => children,
-}));
+vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/providers/AudioProvider")>();
+  return {
+    ...actual,
+    useAudio: () => ({
+      playNote: vi.fn(),
+      playSuccess: vi.fn(),
+      playHover: vi.fn(),
+    }),
+    AudioProvider: ({ children }: { children: React.ReactNode }) => children,
+  };
+});
 
 vi.mock("@/hooks/useTelemetry", () => ({
   useTelemetry: () => ({

@@ -446,6 +446,12 @@ Re-exports [updateTSPMovingWalls](tsp/functions/updateTSPMovingWalls.md)
 
 ***
 
+### useRetroAudioCleanup
+
+Re-exports [useRetroAudioCleanup](audio/functions/useRetroAudioCleanup.md)
+
+***
+
 ### Vec3
 
 Re-exports [Vec3](types/interfaces/Vec3.md)

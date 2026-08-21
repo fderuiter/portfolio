@@ -370,6 +370,18 @@ Re-exports [updateBGMTempo](sound-effects/functions/updateBGMTempo.md)
 
 ***
 
+### useClinicalAudioCleanup
+
+Re-exports [useClinicalAudioCleanup](sound-effects/functions/useClinicalAudioCleanup.md)
+
+***
+
+### useProceduralBGM
+
+Re-exports [useProceduralBGM](sound-effects/functions/useProceduralBGM.md)
+
+***
+
 ### validateObservationChoice
 
 Re-exports [validateObservationChoice](engine/functions/validateObservationChoice.md)
