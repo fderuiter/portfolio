@@ -39,6 +39,10 @@ import {
 import { sanitizeError, sanitizeString } from "@/lib/error-sanitization";
 import { evaluateCanaryRollout } from "@/scripts/canary-analyzer";
 import { CaseStudyService } from "@/lib/services/case-study-service";
+import { exportToCDISCODMXML, generateSDTMDataset } from "@/lib/clinical-trial-chaos/engine";
+import { ClinicalSubject } from "@/lib/clinical-trial-chaos/types";
+import { exportStudyToCdiscOdmXml } from "@/lib/crf/odm-xml-serializer";
+import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
 import { resolveSnippetTerminology } from "@/components/ProjectTeaserGrid";
 
 describe("Defect Remediation & Regression Verification Suite (Invariant #11)", () => {
@@ -589,6 +593,118 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
 
       expect(loopBody).not.toContain("computeShortestTour(");
       expect(loopBody).toContain("tspTour");
+    });
+  });
+
+  describe("CDISC ODM XML Subject Matching & Attribute Escaping Protocol (Requirement 1-4)", () => {
+    it("guarantees complete subject record isolation without substring data leaks across subject IDs", () => {
+      const subj1: ClinicalSubject = {
+        id: "s-1",
+        subjectLabel: "1",
+        studySite: "Site 001 (Main)",
+        observations: [
+          { id: "o-1", field: "Weight", rawValue: "70", currentValue: "70 kg", destination: "VS", isResolved: true },
+        ],
+        status: "submitted",
+        timeRemaining: 30,
+        maxTime: 30,
+        createdAt: 1000,
+      };
+
+      const subj10: ClinicalSubject = {
+        id: "s-10",
+        subjectLabel: "10",
+        studySite: "Site 001 (Main)",
+        observations: [
+          { id: "o-10", field: "Weight", rawValue: "85", currentValue: "85 kg (subj 10 data)", destination: "VS", isResolved: true },
+        ],
+        status: "submitted",
+        timeRemaining: 30,
+        maxTime: 30,
+        createdAt: 1000,
+      };
+
+      const subj11: ClinicalSubject = {
+        id: "s-11",
+        subjectLabel: "11",
+        studySite: "Site 001 (Main)",
+        observations: [
+          { id: "o-11", field: "Weight", rawValue: "92", currentValue: "92 kg (subj 11 data)", destination: "VS", isResolved: true },
+        ],
+        status: "submitted",
+        timeRemaining: 30,
+        maxTime: 30,
+        createdAt: 1000,
+      };
+
+      const sdtmDataset = generateSDTMDataset([subj1, subj10, subj11]);
+      const xmlSubj1 = exportToCDISCODMXML([subj1], sdtmDataset);
+
+      expect(xmlSubj1).toContain('SubjectKey="1"');
+      expect(xmlSubj1).toContain("70 kg");
+      expect(xmlSubj1).not.toContain("85 kg (subj 10 data)");
+      expect(xmlSubj1).not.toContain("92 kg (subj 11 data)");
+    });
+
+    it("guarantees 100% valid XML entity escaping across exported attributes containing reserved XML characters", () => {
+      const specialStudy = {
+        ...ONCOLOGY_RECIST_PRESET,
+        protocolNumber: 'P&1<2>"3"',
+        version: 'v&1"2"',
+        visits: [
+          {
+            id: 'v_&1<2>',
+            oid: 'SE.VIS&1<2>',
+            name: 'Visit &1',
+            visitType: 'Scheduled' as const,
+            targetDay: 1,
+            windowBefore: 0,
+            windowAfter: 0,
+            assignedFormIds: ['f_&1<2>'],
+          },
+        ],
+        forms: [
+          {
+            id: 'f_&1<2>',
+            name: 'Form &1',
+            description: 'Special test form',
+            domain: 'DM&LB',
+            version: '1.0',
+            rules: [],
+            sections: [
+              {
+                id: 'sec_&1',
+                title: 'Section &1',
+                fields: [
+                  {
+                    id: 'field_&1',
+                    variableName: 'VAR_&1<2>"3"',
+                    label: 'Label &1 <2>',
+                    dataType: 'text' as const,
+                    columnSpan: 6,
+                    required: true,
+                    codelistId: 'CL_&1',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const xml = exportStudyToCdiscOdmXml(specialStudy);
+
+      expect(xml).toContain('FileOID="ODM.P&amp;1&lt;2&gt;&quot;3&quot;.');
+      expect(xml).toContain('Study OID="STUDY.P_1_2__3_"');
+      expect(xml).toContain('MetaDataVersion OID="MDV.v&amp;1&quot;2&quot;"');
+      expect(xml).toContain('StudyEventRef StudyEventOID="SE.VIS&amp;1&lt;2&gt;"');
+      expect(xml).toContain('FormRef FormOID="FORM.f_&amp;1&lt;2&gt;"');
+      expect(xml).toContain('FormDef OID="FORM.f_&amp;1&lt;2&gt;"');
+      expect(xml).toContain('ItemGroupRef ItemGroupOID="IG.DM&amp;LB.sec_&amp;1"');
+      expect(xml).toContain('ItemGroupDef OID="IG.DM&amp;LB.sec_&amp;1"');
+      expect(xml).toContain('ItemRef ItemOID="IT.VAR_&amp;1&lt;2&gt;&quot;3&quot;"');
+      expect(xml).toContain('ItemDef OID="IT.VAR_&amp;1&lt;2&gt;&quot;3&quot;"');
+      expect(xml).toContain('CodeListOID="CL_&amp;1"');
     });
   });
 

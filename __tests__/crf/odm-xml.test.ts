@@ -42,4 +42,62 @@ describe("CRF Studio - CDISC ODM-XML v1.3.2 Serializer", () => {
     const xml = exportStudyToCdiscOdmXml(specialStudy);
     expect(xml).toContain("Phase III Study &lt;A &amp; B&gt; with &quot;quotes&quot; &amp; &apos;apostrophes&apos;");
   });
+
+  it("escapes all reserved XML characters in object identifier attributes (OIDs)", () => {
+    const specialOidStudy = {
+      ...ONCOLOGY_RECIST_PRESET,
+      protocolNumber: 'PROTO&1<2>"3"',
+      version: '1.0&"beta"',
+      visits: [
+        {
+          id: 'v_&1<2>"3"',
+          oid: 'SE.VIS&1<2>"3"',
+          name: 'Visit &1 <2> "3"',
+          visitType: 'Scheduled' as const,
+          targetDay: 1,
+          windowBefore: 0,
+          windowAfter: 0,
+          assignedFormIds: ['f_&1<2>"3"'],
+        },
+      ],
+      forms: [
+        {
+          id: 'f_&1<2>"3"',
+          name: 'Form &1 <2>',
+          description: 'Special test form',
+          domain: 'DM&VS',
+          version: '1.0',
+          rules: [],
+          sections: [
+            {
+              id: 'sec_&1<2>"3"',
+              title: 'Section &1',
+              fields: [
+                {
+                  id: 'field_&1<2>"3"',
+                  variableName: 'VAR&1<2>"3"',
+                  label: 'Field Label &1 <2>',
+                  dataType: 'text' as const,
+                  columnSpan: 6,
+                  required: true,
+                  codelistId: 'CL_&1<2>"3"',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    const xml = exportStudyToCdiscOdmXml(specialOidStudy);
+
+    expect(xml).toContain('StudyEventRef StudyEventOID="SE.VIS&amp;1&lt;2&gt;&quot;3&quot;"');
+    expect(xml).toContain('FormRef FormOID="FORM.f_&amp;1&lt;2&gt;&quot;3&quot;"');
+    expect(xml).toContain('FormDef OID="FORM.f_&amp;1&lt;2&gt;&quot;3&quot;"');
+    expect(xml).toContain('ItemGroupRef ItemGroupOID="IG.DM&amp;VS.sec_&amp;1&lt;2&gt;&quot;3&quot;"');
+    expect(xml).toContain('ItemGroupDef OID="IG.DM&amp;VS.sec_&amp;1&lt;2&gt;&quot;3&quot;"');
+    expect(xml).toContain('ItemRef ItemOID="IT.VAR&amp;1&lt;2&gt;&quot;3&quot;"');
+    expect(xml).toContain('ItemDef OID="IT.VAR&amp;1&lt;2&gt;&quot;3&quot;"');
+    expect(xml).toContain('CodeListOID="CL_&amp;1&lt;2&gt;&quot;3&quot;"');
+  });
 });

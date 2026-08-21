@@ -28,7 +28,7 @@ import {
   AMENDMENT_PRESETS,
 } from "../lib/clinical-trial-chaos/scenarios";
 import * as soundEffects from "../lib/clinical-trial-chaos/sound-effects";
-import { ClinicalSubject, StationConfig } from "../lib/clinical-trial-chaos/types";
+import { ClinicalSubject, StationConfig, CDISCDomain } from "../lib/clinical-trial-chaos/types";
 
 describe("Clinical Trial Chaos Engine - Unit Tests", () => {
   it("initializes score state with zeroed values and multiplier 1", () => {
@@ -247,6 +247,111 @@ describe("Clinical Trial Chaos Engine - Unit Tests", () => {
     expect(xml).toContain('<ODM xmlns="http://www.cdisc.org/ns/odm/v1.3"');
     expect(xml).toContain("STUDY.CT-CHAOS-2026");
     expect(xml).toContain(subjects[0].subjectLabel);
+  });
+
+  it("filters domain observations using exact subject identifier equality (excluding subject 10 and 11 when exporting subject 1)", () => {
+    const subj1: ClinicalSubject = {
+      id: "subj-1",
+      subjectLabel: "1",
+      studySite: "Site 014 (Boston General)",
+      observations: [
+        {
+          id: "obs-1",
+          field: "Height",
+          rawValue: "180",
+          currentValue: "180 cm",
+          destination: "DM",
+          isResolved: true,
+        },
+      ],
+      status: "submitted",
+      timeRemaining: 30,
+      maxTime: 30,
+      createdAt: Date.now(),
+    };
+
+    const subj10: ClinicalSubject = {
+      id: "subj-10",
+      subjectLabel: "10",
+      studySite: "Site 014 (Boston General)",
+      observations: [
+        {
+          id: "obs-10",
+          field: "Height",
+          rawValue: "175",
+          currentValue: "175 cm (from subj 10)",
+          destination: "DM",
+          isResolved: true,
+        },
+      ],
+      status: "submitted",
+      timeRemaining: 30,
+      maxTime: 30,
+      createdAt: Date.now(),
+    };
+
+    const subj11: ClinicalSubject = {
+      id: "subj-11",
+      subjectLabel: "11",
+      studySite: "Site 014 (Boston General)",
+      observations: [
+        {
+          id: "obs-11",
+          field: "Height",
+          rawValue: "165",
+          currentValue: "165 cm (from subj 11)",
+          destination: "DM",
+          isResolved: true,
+        },
+      ],
+      status: "submitted",
+      timeRemaining: 30,
+      maxTime: 30,
+      createdAt: Date.now(),
+    };
+
+    const allRows = generateSDTMDataset([subj1, subj10, subj11]);
+
+    // Export ONLY subject 1
+    const xml1 = exportToCDISCODMXML([subj1], allRows);
+
+    expect(xml1).toContain('<SubjectData SubjectKey="1">');
+    expect(xml1).toContain("180 cm");
+    // Ensure data from subject 10 and 11 is NOT present in subject 1's export
+    expect(xml1).not.toContain("175 cm (from subj 10)");
+    expect(xml1).not.toContain("165 cm (from subj 11)");
+  });
+
+  it("escapes all reserved XML characters in exported attributes for clinical trial chaos XML", () => {
+    const specialSubj: ClinicalSubject = {
+      id: 'subj_&1<2>"3"',
+      subjectLabel: 'SUBJ_&1<2>"3"',
+      studySite: 'Site 014 (Boston & Cambridge)',
+      observations: [
+        {
+          id: 'obs_1',
+          field: 'Glucose & HbA1c',
+          rawValue: '100',
+          currentValue: '100 mg/dL <normal>',
+          destination: 'LB' as CDISCDomain,
+          ctCode: 'GLUC&HBA1C<1>"2"',
+          isResolved: true,
+        },
+      ],
+      status: 'submitted',
+      timeRemaining: 30,
+      maxTime: 30,
+      createdAt: Date.now(),
+    };
+
+    const rows = generateSDTMDataset([specialSubj]);
+    const xml = exportToCDISCODMXML([specialSubj], rows);
+
+    expect(xml).toContain('SubjectKey="SUBJ_&amp;1&lt;2&gt;&quot;3&quot;"');
+    expect(xml).toContain('FormOID="FRM.LB"');
+    expect(xml).toContain('ItemGroupOID="IG.LB"');
+    expect(xml).toContain('ItemOID="IT.LB.GLUC&amp;HBA1C&lt;1&gt;&quot;2&quot;"');
+    expect(xml).toContain('Value="100 mg/dL &lt;normal&gt;"');
   });
 
   it("exports valid SDTM CSV text", () => {
