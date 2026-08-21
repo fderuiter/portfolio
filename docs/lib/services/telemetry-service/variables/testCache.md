@@ -8,7 +8,7 @@
 
 > `const` **\_testCache**: `object`
 
-Defined in: [lib/services/telemetry-service.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L58)
+Defined in: [lib/services/telemetry-service.ts:60](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L60)
 
 ## Type Declaration
 
@@ -21,6 +21,16 @@ Defined in: [lib/services/telemetry-service.ts:58](https://github.com/fderuiter/
 ##### Returns
 
 `Map`\<`string`, [`LocalCacheEntry`](../interfaces/LocalCacheEntry.md)\>
+
+### circuitBreakerCooldownUntil
+
+#### Get Signature
+
+> **get** **circuitBreakerCooldownUntil**(): `number`
+
+##### Returns
+
+`number`
 
 ### inactive
 

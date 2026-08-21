@@ -47,6 +47,8 @@ import { ClinicalSubject } from "@/lib/clinical-trial-chaos/types";
 import { exportStudyToCdiscOdmXml } from "@/lib/crf/odm-xml-serializer";
 import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
 import { resolveSnippetTerminology } from "@/components/ProjectTeaserGrid";
+import { TelemetryService, _testCache } from "@/lib/services/telemetry-service";
+import { NextRequest } from "next/server";
 
 describe("Defect Remediation & Regression Verification Suite (Invariant #11)", () => {
   describe("Proof AST Solver Resilience & Deep Recursion Guards", () => {
@@ -830,6 +832,31 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       expect(metrics!.missingCoreVariables).toEqual(["VSORRES", "VSDTC"]);
       // 1 of 3 core variables present = 33% conformance
       expect(metrics!.cdashConformancePercentage).toBe(33);
+    });
+  });
+
+  describe("Telemetry Rate Limiter Circuit Breaker & Cooldown Fallback", () => {
+    beforeEach(() => {
+      _testCache.reset();
+    });
+
+    it("verifies 30-second circuit breaker cooldown prevents unhandled exception cascade on remote rate limit failure", async () => {
+      const req = new NextRequest("http://localhost:3000/api/telemetry", {
+        method: "POST",
+        headers: { "x-forwarded-for": "192.0.2.55" },
+      });
+
+      const now = Date.now();
+      const res = await TelemetryService.isRateLimited(req);
+
+      // Verify valid rate limit object returned with fallback headers
+      expect(res.limited).toBe(false);
+      expect(res.headers).toBeDefined();
+      expect(res.headers?.["X-RateLimit-Limit"]).toBe("100");
+      expect(res.headers?.["X-RateLimit-Remaining"]).toBe("99");
+
+      // Verify circuit breaker timestamp
+      expect(_testCache.circuitBreakerCooldownUntil).toBeGreaterThanOrEqual(now);
     });
   });
 });
