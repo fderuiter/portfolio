@@ -72,21 +72,25 @@ HTMLCanvasElement.prototype.releasePointerCapture = mockReleasePointerCapture;
 HTMLCanvasElement.prototype.hasPointerCapture = mockHasPointerCapture;
 
 // Mock AudioProvider
-vi.mock("@/components/providers/AudioProvider", () => ({
-  useAudio: () => ({
-    playNote: vi.fn(),
-    playSuccess: vi.fn(),
-    playHover: vi.fn(),
-    playClick: vi.fn(),
-    volume: 0.8,
-    muted: false,
-    profile: "8-bit",
-    setVolume: vi.fn(),
-    setMuted: vi.fn(),
-    setProfile: vi.fn(),
-  }),
-  AudioProvider: ({ children }: any) => <>{children}</>,
-}));
+vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/providers/AudioProvider")>();
+  return {
+    ...actual,
+    useAudio: () => ({
+      playNote: vi.fn(),
+      playSuccess: vi.fn(),
+      playHover: vi.fn(),
+      playClick: vi.fn(),
+      volume: 0.8,
+      muted: false,
+      profile: "8-bit",
+      setVolume: vi.fn(),
+      setMuted: vi.fn(),
+      setProfile: vi.fn(),
+    }),
+    AudioProvider: ({ children }: any) => <>{children}</>,
+  };
+});
 
 // Mock Telemetry
 vi.mock("@/hooks/useTelemetry", () => ({

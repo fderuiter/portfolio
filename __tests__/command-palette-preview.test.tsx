@@ -10,16 +10,20 @@ import { CommandPalette } from "@/components/CommandPalette";
 // Mock audio provider functions
 const mockPlayHover = vi.fn();
 const mockPlaySubmit = vi.fn();
-vi.mock("@/components/providers/AudioProvider", () => ({
-  useAudio: () => ({
-    playHover: mockPlayHover,
-    playSubmit: mockPlaySubmit,
-    playSuccess: vi.fn(),
-    playNote: vi.fn(),
-    volume: 0.3,
-    muted: false,
-  }),
-}));
+vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/providers/AudioProvider")>();
+  return {
+    ...actual,
+    useAudio: () => ({
+      playHover: mockPlayHover,
+      playSubmit: mockPlaySubmit,
+      playSuccess: vi.fn(),
+      playNote: vi.fn(),
+      volume: 0.3,
+      muted: false,
+    }),
+  };
+});
 
 // Mock Next.js router
 const mockPush = vi.fn();

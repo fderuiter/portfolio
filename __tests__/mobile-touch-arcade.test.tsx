@@ -10,14 +10,18 @@ import { VirtualDPad } from "@/components/ui/VirtualDPad";
 import { ClinicalTrialChaos } from "@/components/ClinicalTrialChaos";
 
 // Mock AudioProvider
-vi.mock("@/components/providers/AudioProvider", () => ({
-  useAudio: () => ({
-    playClick: vi.fn(),
-    playNote: vi.fn(),
-    playSuccess: vi.fn(),
-    playHover: vi.fn(),
-  }),
-}));
+vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/providers/AudioProvider")>();
+  return {
+    ...actual,
+    useAudio: () => ({
+      playClick: vi.fn(),
+      playNote: vi.fn(),
+      playSuccess: vi.fn(),
+      playHover: vi.fn(),
+    }),
+  };
+});
 
 // Mock Telemetry
 vi.mock("@/hooks/useTelemetry", () => ({
