@@ -9,7 +9,7 @@ import path from "path";
 import fs from "fs";
 import { execSync, execFileSync } from "child_process";
 import { runDiagnostics, printDoctorReport } from "../lib/dx/doctor";
-import { scaffold, type ScaffoldType } from "../lib/dx/scaffolder";
+import { scaffold, type ScaffoldType, validateScaffoldType, validateScaffoldName } from "../lib/dx/scaffolder";
 import { runAllBenchmarks, printBenchmarkReport } from "../lib/dx/bench";
 import { colors, formatHeader, badge, formatSection } from "../lib/dx/utils";
 import { ALLOWED_COMMIT_TYPES, validateCommitMessage, validateBranchName } from "../lib/dx/git-guard";
@@ -269,20 +269,121 @@ async function handleBranchCommand(): Promise<void> {
   }
 }
 
+export async function runInteractiveScaffoldWizard(): Promise<void> {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  const question = (q: string): Promise<string> =>
+    new Promise((resolve) => rl.question(q, (ans) => resolve(ans.trim())));
+
+  console.log(formatHeader("DX Feature Scaffolding Interactive Wizard", "Vertical Slice Template Generator"));
+  console.log(`${colors.bold}Supported Architecture Template Types:${colors.reset}`);
+  console.log(`  ${colors.cyan}1)${colors.reset} component   - Reusable UI component (components/ui/ & unit test)`);
+  console.log(`  ${colors.cyan}2)${colors.reset} hook        - Custom React hook (hooks/ & unit test)`);
+  console.log(`  ${colors.cyan}3)${colors.reset} api         - Zod-validated API route (app/api/ & unit test)`);
+  console.log(`  ${colors.cyan}4)${colors.reset} adr         - Architectural Decision Record (adr/00XX-*.md)`);
+  console.log(`  ${colors.cyan}5)${colors.reset} case-study  - Interactive Case Study page (app/case-studies/ & test)`);
+  console.log(`  ${colors.cyan}6)${colors.reset} arcade      - Arcade simulator & engine (lib/, components/, app/ & tests)`);
+  console.log(`  ${colors.cyan}7)${colors.reset} game        - Interactive game module (arcade alias)\n`);
+
+  const typeMenuMap: Record<string, ScaffoldType> = {
+    "1": "component",
+    "2": "hook",
+    "3": "api",
+    "4": "adr",
+    "5": "case-study",
+    "6": "arcade",
+    "7": "game",
+  };
+
+  let selectedType: ScaffoldType | null = null;
+  while (!selectedType) {
+    const rawType = await question(`${colors.bold}Select template type [1-7 or name] (default: 1 - component): ${colors.reset}`);
+    const choice = rawType === "" ? "1" : rawType.toLowerCase();
+
+    if (typeMenuMap[choice]) {
+      selectedType = typeMenuMap[choice];
+    } else {
+      const typeCheck = validateScaffoldType(choice);
+      if (typeCheck.valid) {
+        selectedType = choice as ScaffoldType;
+      } else {
+        console.log(`${colors.brightRed}✖ ${typeCheck.error}${colors.reset}`);
+      }
+    }
+  }
+
+  let selectedName = "";
+  while (!selectedName) {
+    const rawName = await question(`${colors.bold}Enter feature / asset name (e.g. matrix-defender, analytics-card): ${colors.reset}`);
+    const nameCheck = validateScaffoldName(rawName);
+    if (nameCheck.valid) {
+      selectedName = rawName.trim();
+    } else {
+      console.log(`${colors.brightRed}✖ ${nameCheck.error}${colors.reset}`);
+    }
+  }
+
+  const dryRunAns = await question(`${colors.bold}Run in preview / dry-run mode? (y/N): ${colors.reset}`);
+  const dryRun = dryRunAns.toLowerCase() === "y" || dryRunAns.toLowerCase() === "yes";
+
+  rl.close();
+
+  console.log(`\n${colors.cyan}Scaffolding ${selectedType.toUpperCase()}: ${selectedName}${colors.reset}`);
+  if (dryRun) {
+    console.log(`${colors.yellow}[PREVIEW MODE - No files will be modified on disk]${colors.reset}`);
+  }
+  console.log("");
+
+  try {
+    const generated = scaffold({
+      type: selectedType,
+      name: selectedName,
+      dryRun,
+      workspaceRoot,
+    });
+    for (const f of generated) {
+      const actionBadge = f.action === "updated" ? badge("UPDATED", "info") : badge("CREATED", "pass");
+      console.log(`${actionBadge} ${f.relativePath}`);
+    }
+    console.log(`\n${colors.brightGreen}✔ Successfully scaffolded ${generated.length} item(s) for ${selectedName}.${colors.reset}\n`);
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.error(`\n${colors.brightRed}✖ Scaffolding failed: ${errorMsg}${colors.reset}\n`);
+    process.exit(1);
+  }
+}
+
 async function handleScaffoldCommand(args: string[]): Promise<void> {
-  const type = args[0] as ScaffoldType;
-  const name = args[1];
   const dryRun = args.includes("--dry-run");
+  const posArgs = args.filter((a) => !a.startsWith("--"));
 
-  const validTypes: ScaffoldType[] = ["arcade", "game", "api", "adr", "case-study", "component", "hook"];
-
-  if (!type || !validTypes.includes(type) || !name) {
-    console.log(formatHeader("DX Scaffolder: Interactive Template Generator"));
-    console.log(`${colors.yellow}Please specify both a valid type and name.${colors.reset}`);
-    console.log(`Valid types: ${validTypes.join(", ")}`);
-    console.log(`Usage: npm run dx scaffold <type> <name> [--dry-run]\n`);
+  if (posArgs.length === 0) {
+    await runInteractiveScaffoldWizard();
     return;
   }
+
+  const rawType = posArgs[0];
+  const rawName = posArgs[1];
+
+  const typeCheck = validateScaffoldType(rawType);
+  if (!typeCheck.valid) {
+    console.error(`\n${colors.brightRed}✖ ${typeCheck.error}${colors.reset}`);
+    console.log(`Usage: npm run dx scaffold <type> <name> [--dry-run]\n`);
+    process.exit(1);
+  }
+
+  const nameCheck = validateScaffoldName(rawName);
+  if (!nameCheck.valid) {
+    console.error(`\n${colors.brightRed}✖ ${nameCheck.error}${colors.reset}`);
+    console.log(`Usage: npm run dx scaffold <type> <name> [--dry-run]\n`);
+    process.exit(1);
+  }
+
+  const type = rawType.toLowerCase() as ScaffoldType;
+  const name = rawName.trim();
 
   console.log(formatHeader(`Scaffolding ${type.toUpperCase()}: ${name}`));
   if (dryRun) {
@@ -390,14 +491,7 @@ async function runInteractiveMenu(): Promise<void> {
         handleAnalyzeCommand([]);
         break;
       case "8": {
-        const rl2 = readline.createInterface({ input: process.stdin, output: process.stdout });
-        rl2.question(`Enter type (arcade, api, adr, component, hook) and name: `, async (input) => {
-          rl2.close();
-          const [t, n] = input.trim().split(/\s+/);
-          if (t && n) {
-            await handleScaffoldCommand([t, n]);
-          }
-        });
+        await runInteractiveScaffoldWizard();
         break;
       }
       case "9":
