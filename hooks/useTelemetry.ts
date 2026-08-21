@@ -140,33 +140,6 @@ export function flushPendingDeferredQueue(): void {
   }
 }
 
-const RETRY_QUEUE_CACHE_KEY = "portfolio_telemetry_retry_queue";
-
-function loadPersistedRetryQueue(): QueuedEvent[] {
-  if (typeof window !== "undefined" && typeof window.localStorage?.getItem === "function") {
-    try {
-      const raw = localStorage.getItem(RETRY_QUEUE_CACHE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) return parsed;
-      }
-    } catch (e) {
-      console.warn("Failed to retrieve local storage telemetry retry queue:", sanitizeError(e));
-    }
-  }
-  return [];
-}
-
-function persistRetryQueue(): void {
-  if (typeof window !== "undefined" && typeof window.localStorage?.setItem === "function") {
-    try {
-      localStorage.setItem(RETRY_QUEUE_CACHE_KEY, JSON.stringify(retryQueue));
-    } catch (e) {
-      console.warn("Failed to write local storage telemetry retry queue:", sanitizeError(e));
-    }
-  }
-}
-
 /**
  * Configure the maximum capacity of the in-memory telemetry retry queue.
  * Trims existing queue entries from the front (oldest first) if current length exceeds new capacity.
@@ -179,7 +152,6 @@ export function setQueueCapacity(capacity: number): void {
   while (retryQueue.length > maxQueueCapacity) {
     retryQueue.shift();
   }
-  persistRetryQueue();
 }
 
 /**
@@ -191,18 +163,12 @@ export function getQueueCapacity(): number {
   return maxQueueCapacity;
 }
 
-let hasLoadedRetryQueue = false;
-
 /**
  * Get a shallow copy of the current in-memory retry queue.
  *
  * @returns Array of currently queued telemetry events.
  */
 export function getRetryQueue(): QueuedEvent[] {
-  if (!hasLoadedRetryQueue && typeof window !== "undefined") {
-    hasLoadedRetryQueue = true;
-    retryQueue = loadPersistedRetryQueue();
-  }
   return [...retryQueue];
 }
 
@@ -212,10 +178,6 @@ export function getRetryQueue(): QueuedEvent[] {
  * @returns Number of items currently in the retry queue.
  */
 export function getRetryQueueLength(): number {
-  if (!hasLoadedRetryQueue && typeof window !== "undefined") {
-    hasLoadedRetryQueue = true;
-    retryQueue = loadPersistedRetryQueue();
-  }
   return retryQueue.length;
 }
 
@@ -224,7 +186,6 @@ export function getRetryQueueLength(): number {
  */
 export function clearRetryQueue(): void {
   retryQueue = [];
-  persistRetryQueue();
   if (retryTimer) {
     clearTimeout(retryTimer);
     retryTimer = null;
@@ -241,7 +202,6 @@ export function enqueueRetryItem(item: QueuedEvent): void {
     retryQueue.shift();
   }
   retryQueue.push(item);
-  persistRetryQueue();
 }
 
 let inFlightFetch: Promise<void> | null = null;
@@ -429,18 +389,60 @@ async function fetchTelemetryAggregates(options?: { force?: boolean }): Promise<
 }
 
 /**
- * Process queued retry events with exponential backoff.
+ * Targeted rollback function to decrement affected optimistic counter
+ * without corrupting adjacent metrics or concurrent state changes.
+ */
+function rollbackEvent(projectSlug: string, eventType: TelemetryEventType) {
+  updateStore((prev) => {
+    const currentStats = prev.telemetry[projectSlug];
+    if (!currentStats) return { ...prev, syncFailed: true };
+
+    const isPageView = eventType === "page_view";
+    const updatedStats = {
+      views: isPageView ? Math.max(0, currentStats.views - 1) : currentStats.views,
+      clicks: !isPageView ? Math.max(0, currentStats.clicks - 1) : currentStats.clicks,
+    };
+
+    return {
+      ...prev,
+      telemetry: {
+        ...prev.telemetry,
+        [projectSlug]: updatedStats,
+      },
+      syncFailed: true,
+    };
+  });
+}
+
+const MAX_RETRIES = 3;
+const BASE_RETRY_DELAY_MS = 1000;
+const MAX_RETRY_DELAY_MS = 10000;
+
+function scheduleRetryWorker() {
+  if (retryQueue.length === 0 || retryTimer) return;
+
+  const minRetries = Math.min(...retryQueue.map((item) => item.retries));
+  const delay = Math.min(MAX_RETRY_DELAY_MS, BASE_RETRY_DELAY_MS * Math.pow(2, minRetries));
+
+  retryTimer = setTimeout(() => {
+    retryTimer = null;
+    processRetryQueue();
+  }, delay);
+}
+
+/**
+ * Process queued retry events with exponential backoff and targeted rollbacks.
  */
 async function processRetryQueue(options?: { keepalive?: boolean }) {
   if (retryQueue.length === 0) return;
-  const currentBatch = [...retryQueue];
-  retryQueue = [];
-  persistRetryQueue();
 
   if (retryTimer) {
     clearTimeout(retryTimer);
     retryTimer = null;
   }
+
+  const currentBatch = [...retryQueue];
+  retryQueue = [];
 
   for (const item of currentBatch) {
     try {
@@ -451,23 +453,32 @@ async function processRetryQueue(options?: { keepalive?: boolean }) {
         keepalive: options?.keepalive ?? false,
       });
 
-      if (!response.ok) {
-        if (response.status === 429 && item.retries < 3) {
-          enqueueRetryItem({ ...item, retries: item.retries + 1 });
-        }
+      if (response.ok) {
+        continue;
+      }
+
+      if (response.status === 429) {
+        console.warn("Telemetry record rate limited by API.");
+        rollbackEvent(item.projectSlug, item.eventType);
+        continue;
+      }
+
+      if (item.retries < 2) {
+        enqueueRetryItem({ ...item, retries: item.retries + 1 });
+      } else {
+        rollbackEvent(item.projectSlug, item.eventType);
       }
     } catch {
-      if (item.retries < 3) {
+      if (item.retries < 2) {
         enqueueRetryItem({ ...item, retries: item.retries + 1 });
+      } else {
+        rollbackEvent(item.projectSlug, item.eventType);
       }
     }
   }
 
-  if (retryQueue.length > 0 && !retryTimer) {
-    retryTimer = setTimeout(() => {
-      retryTimer = null;
-      processRetryQueue();
-    }, 5000);
+  if (retryQueue.length > 0) {
+    scheduleRetryWorker();
   }
 }
 
@@ -510,17 +521,11 @@ export function useTelemetry(options?: UseTelemetryOptions) {
       options?: RecordEventOptions
     ) => {
       const executeDispatch = async () => {
-        // 1. Snapshot pre-update full telemetry state
-        const snapshotTelemetry: TelemetryData = {};
-        for (const [key, val] of Object.entries(currentStoreState.telemetry)) {
-          snapshotTelemetry[key] = { ...val };
-        }
-
-        // 2. Optimistic Local State Update
+        // 1. Optimistic Local State Update
         const currentStats = currentStoreState.telemetry[projectSlug] || { views: 0, clicks: 0 };
         const updatedStats = {
           views: eventType === "page_view" ? currentStats.views + 1 : currentStats.views,
-          clicks: eventType === "project_click" ? currentStats.clicks + 1 : currentStats.clicks,
+          clicks: eventType !== "page_view" ? currentStats.clicks + 1 : currentStats.clicks,
         };
 
         updateStore((prev) => ({
@@ -531,7 +536,7 @@ export function useTelemetry(options?: UseTelemetryOptions) {
           },
         }));
 
-        // 3. Dispatch network POST event with HTTP status code inspection
+        // 2. Dispatch network POST event with HTTP status code inspection
         try {
           const response = await fetch("/api/telemetry", {
             method: "POST",
@@ -544,31 +549,24 @@ export function useTelemetry(options?: UseTelemetryOptions) {
           if (!response.ok) {
             if (response.status === 429) {
               console.warn("Telemetry record rate limited by API.");
-              enqueueRetryItem({ projectSlug, eventType, retries: 0 });
-              if (!retryTimer) {
-                retryTimer = setTimeout(() => {
-                  retryTimer = null;
-                  processRetryQueue();
-                }, 3000);
-              }
-              // Roll back optimistic state and local storage to pre-update snapshot on rate limiting
-              updateStore((prev) => ({
-                ...prev,
-                telemetry: snapshotTelemetry,
-                syncFailed: true,
-              }));
+              rollbackEvent(projectSlug, eventType);
             } else {
-              throw new Error(`Failed to persist telemetry event with status: ${response.status}`);
+              console.error(
+                "Optimistic telemetry sync persistence failed:",
+                sanitizeError(new Error(`Failed to persist telemetry event with status: ${response.status}`))
+              );
+              rollbackEvent(projectSlug, eventType);
             }
           }
         } catch (err) {
           console.error("Optimistic telemetry sync persistence failed:", sanitizeError(err));
-          // Roll back optimistic state and local storage to pre-update snapshot on HTTP error or network failure
           updateStore((prev) => ({
             ...prev,
-            telemetry: snapshotTelemetry,
             syncFailed: true,
           }));
+          // Buffer unsynced event in in-memory queue to retry during temporary connection loss
+          enqueueRetryItem({ projectSlug, eventType, retries: 0 });
+          scheduleRetryWorker();
         }
       };
 

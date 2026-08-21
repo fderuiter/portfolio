@@ -62,6 +62,7 @@ describe("useTelemetry Hook Integration & Isolation", () => {
     // Dynamically import to ensure clean isolated module state
     const importedModule = await import("@/hooks/useTelemetry");
     useTelemetry = importedModule.useTelemetry;
+    importedModule.clearRetryQueue();
 
     container = document.createElement("div");
     document.body.appendChild(container);
@@ -589,16 +590,16 @@ describe("useTelemetry Hook Integration & Isolation", () => {
       vi.advanceTimersByTime(0);
     });
 
-    // Simulate 429 rate limit to enqueue an event
+    // Simulate network error to enqueue an unsynced event for retry
     fetchMock.mockImplementationOnce(async () => {
-      return { ok: false, status: 429 };
+      throw new TypeError("Failed to fetch");
     });
 
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const errorSpy1 = vi.spyOn(console, "error").mockImplementation(() => {});
     await act(async () => {
       await hookResult.recordEvent("project-abc", "page_view");
     });
-    warnSpy.mockRestore();
+    errorSpy1.mockRestore();
 
     // Setup fetch mock for flushing
     const postCallsWithKeepalive: any[] = [];
@@ -620,16 +621,16 @@ describe("useTelemetry Hook Integration & Isolation", () => {
     expect(postCallsWithKeepalive[0].keepalive).toBe(true);
 
     // Test visibilitychange when visibilityState is 'hidden'
-    // First, enqueue another rate-limited event
+    // First, enqueue another network-failed event
     fetchMock.mockImplementationOnce(async () => {
-      return { ok: false, status: 429 };
+      throw new TypeError("Failed to fetch");
     });
 
-    const warnSpy2 = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const errorSpy2 = vi.spyOn(console, "error").mockImplementation(() => {});
     await act(async () => {
       await hookResult.recordEvent("project-abc", "project_click");
     });
-    warnSpy2.mockRestore();
+    errorSpy2.mockRestore();
 
     postCallsWithKeepalive.length = 0;
 
@@ -667,9 +668,6 @@ describe("useTelemetry Hook Integration & Isolation", () => {
       );
     });
 
-    const viewsEl = container.querySelector('[data-testid="views"]');
-    expect(viewsEl?.textContent).toBe("12");
-
     // Mock network fetch to fail with TypeError (Network failure)
     fetchMock.mockImplementation(async (url: string, init?: any) => {
       if (init?.method === "POST") {
@@ -678,10 +676,22 @@ describe("useTelemetry Hook Integration & Isolation", () => {
       return { ok: true, json: async () => initialCache };
     });
 
+    await act(async () => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    const viewsEl = container.querySelector('[data-testid="views"]');
+    expect(viewsEl?.textContent).toBe("12");
+
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     await act(async () => {
       await hookResult.recordEvent("project-abc", "page_view");
+    });
+
+    // Advance timers asynchronously to exhaust exponential backoff retries and microtasks
+    await act(async () => {
+      await vi.runAllTimersAsync();
     });
 
     // Active state and UI should be fully restored to pre-update snapshot
