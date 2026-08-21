@@ -82,13 +82,23 @@ function createIco(images: Array<{ width: number; height: number; buffer: Buffer
 }
 
 export async function generateBrandIcons(rootDir: string = process.cwd()) {
-  const svgBuffer = Buffer.from(SVG_BRAND_MARK.trim());
+  const publicFaviconSvgPath = path.resolve(rootDir, "public/favicon.svg");
+  const appIconSvgPath = path.resolve(rootDir, "app/icon.svg");
+
+  let svgContent = SVG_BRAND_MARK.trim();
+  if (fs.existsSync(publicFaviconSvgPath)) {
+    const existing = fs.readFileSync(publicFaviconSvgPath, "utf-8").trim();
+    if (existing) svgContent = existing;
+  } else if (fs.existsSync(appIconSvgPath)) {
+    const existing = fs.readFileSync(appIconSvgPath, "utf-8").trim();
+    if (existing) svgContent = existing;
+  }
+
+  const svgBuffer = Buffer.from(svgContent);
 
   // 1. Write SVG icons
-  const appIconSvgPath = path.resolve(rootDir, "app/icon.svg");
-  const publicFaviconSvgPath = path.resolve(rootDir, "public/favicon.svg");
-  fs.writeFileSync(appIconSvgPath, SVG_BRAND_MARK.trim() + "\n");
-  fs.writeFileSync(publicFaviconSvgPath, SVG_BRAND_MARK.trim() + "\n");
+  fs.writeFileSync(appIconSvgPath, svgContent + "\n");
+  fs.writeFileSync(publicFaviconSvgPath, svgContent + "\n");
   console.log("✓ Generated app/icon.svg & public/favicon.svg");
 
   // 2. Generate multi-resolution ICO
