@@ -8,9 +8,9 @@
 
 > **flushPendingDeferredQueue**(): `void`
 
-Defined in: [hooks/useTelemetry.ts:123](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L123)
+Defined in: [hooks/useTelemetry.ts:253](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L253)
 
-Flush all pending deferred tasks immediately using persistent network calls.
+Immediately flushes pending deferred tasks with keepalive transport.
 
 ## Returns
 

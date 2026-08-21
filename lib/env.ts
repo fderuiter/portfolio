@@ -35,7 +35,7 @@ export const serverEnvSchema = z.object({
   ADMIN_EMAILS: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
   RESEND_WEBHOOK_SECRET: z.string().optional(),
-  RESEND_FROM_EMAIL: z.string().default("Frederick de Ruiter <onboarding@resend.dev>"),
+  RESEND_FROM_EMAIL: z.string().default("Frederick de Ruiter <notifications@deruiter.dev>"),
   CONTACT_NOTIFICATION_EMAIL: z.string().default("fpderuiter@gmail.com"),
   PLAYWRIGHT_TEST: z.string().optional(),
   CI: z.string().optional(),

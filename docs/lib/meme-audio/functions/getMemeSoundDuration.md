@@ -8,7 +8,7 @@
 
 > **getMemeSoundDuration**(`type`): `number`
 
-Defined in: [lib/meme-audio.ts:62](https://github.com/fderuiter/portfolio/blob/main/lib/meme-audio.ts#L62)
+Defined in: [lib/meme-audio.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/meme-audio.ts#L35)
 
 ## Parameters
 

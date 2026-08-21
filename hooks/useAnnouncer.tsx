@@ -4,8 +4,9 @@ export {
   useAnnouncer,
   A11yProvider as LiveAnnouncerProvider,
   sanitizePII,
-  announcerReducer,
   initialAnnouncerState,
+  liveAnnouncer,
+  LiveAnnouncer,
 } from "@/components/providers/A11yProvider";
 export type {
   Priority,
@@ -13,6 +14,5 @@ export type {
   AnnouncerContextType,
   AnnounceItem,
   AnnouncerState,
-  AnnouncerAction,
+  A11yProviderProps,
 } from "@/components/providers/A11yProvider";
-

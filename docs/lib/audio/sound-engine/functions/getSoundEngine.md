@@ -8,7 +8,7 @@
 
 > **getSoundEngine**(): [`SoundEngine`](../classes/SoundEngine.md)
 
-Defined in: [lib/audio/sound-engine.ts:584](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L584)
+Defined in: [lib/audio/sound-engine.ts:587](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L587)
 
 Returns the singleton SoundEngine instance.
 

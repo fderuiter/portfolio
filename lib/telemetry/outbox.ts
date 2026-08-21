@@ -203,10 +203,22 @@ export class TelemetryOutbox {
       }
     };
 
+    const win = window as unknown as Record<string, EventListener | undefined>;
+    if (win.__telemetryOutboxUnloadListener) {
+      window.removeEventListener("pagehide", win.__telemetryOutboxUnloadListener);
+      window.removeEventListener("beforeunload", win.__telemetryOutboxUnloadListener);
+    }
+    win.__telemetryOutboxUnloadListener = this.unloadListener as EventListener;
+
     window.addEventListener("pagehide", this.unloadListener);
     window.addEventListener("beforeunload", this.unloadListener);
 
     if (typeof document !== "undefined") {
+      const doc = document as unknown as Record<string, EventListener | undefined>;
+      if (doc.__telemetryOutboxVisibilityListener) {
+        document.removeEventListener("visibilitychange", doc.__telemetryOutboxVisibilityListener);
+      }
+      doc.__telemetryOutboxVisibilityListener = this.visibilityListener as EventListener;
       document.addEventListener("visibilitychange", this.visibilityListener);
     }
   }
@@ -256,6 +268,13 @@ export class TelemetryOutbox {
         console.warn("Telemetry record rate limited by API.");
         if (this.onRollback) {
           this.onRollback(item, "rate_limited");
+        }
+        return false;
+      }
+
+      if (status === 500) {
+        if (this.onRollback) {
+          this.onRollback(item, "error", res);
         }
         return false;
       }

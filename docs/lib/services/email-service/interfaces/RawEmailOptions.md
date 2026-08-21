@@ -34,6 +34,14 @@ Defined in: [lib/services/email-service.ts:18](https://github.com/fderuiter/port
 
 ***
 
+### skipQueue?
+
+> `optional` **skipQueue?**: `boolean`
+
+Defined in: [lib/services/email-service.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L23)
+
+***
+
 ### subject
 
 > **subject**: `string`

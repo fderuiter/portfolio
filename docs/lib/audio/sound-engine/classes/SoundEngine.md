@@ -32,7 +32,7 @@ Defined in: [lib/audio/sound-engine.ts:92](https://github.com/fderuiter/portfoli
 
 > **close**(): `void`
 
-Defined in: [lib/audio/sound-engine.ts:568](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L568)
+Defined in: [lib/audio/sound-engine.ts:571](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L571)
 
 Closes and disposes of AudioContext resources.
 
@@ -117,7 +117,7 @@ Returns whether sound playback is currently permitted.
 
 > **playNoise**(`options`): `void`
 
-Defined in: [lib/audio/sound-engine.ts:462](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L462)
+Defined in: [lib/audio/sound-engine.ts:465](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L465)
 
 Synthesizes and plays procedural white noise with optional filter resonance.
 
@@ -137,7 +137,7 @@ Synthesizes and plays procedural white noise with optional filter resonance.
 
 > **playSequence**(`notes`, `options?`): [`SequenceHandle`](../interfaces/SequenceHandle.md)
 
-Defined in: [lib/audio/sound-engine.ts:411](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L411)
+Defined in: [lib/audio/sound-engine.ts:414](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L414)
 
 Plays an ordered sequence or arpeggio of notes.
 
@@ -163,7 +163,7 @@ Plays an ordered sequence or arpeggio of notes.
 
 > **playTone**(`options`): `void`
 
-Defined in: [lib/audio/sound-engine.ts:292](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L292)
+Defined in: [lib/audio/sound-engine.ts:295](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L295)
 
 Synthesizes and plays a customizable frequency pulse.
 
@@ -181,7 +181,7 @@ Synthesizes and plays a customizable frequency pulse.
 
 > **playTone**(`frequency`, `duration?`, `type?`, `volume?`, `pan?`): `void`
 
-Defined in: [lib/audio/sound-engine.ts:293](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L293)
+Defined in: [lib/audio/sound-engine.ts:296](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L296)
 
 Synthesizes and plays a customizable frequency pulse.
 
@@ -257,7 +257,7 @@ Sets master volume, clamps between 0 and 1, and persists to storage.
 
 > **stopAll**(): `void`
 
-Defined in: [lib/audio/sound-engine.ts:543](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L543)
+Defined in: [lib/audio/sound-engine.ts:546](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L546)
 
 Immediately halts all active playing oscillators, noise sources, and sequence timers.
 
@@ -278,3 +278,29 @@ Toggles mute status and returns the next value.
 #### Returns
 
 `boolean`
+
+***
+
+### trackSource()
+
+> **trackSource**\<`T`\>(`source`): `T`
+
+Defined in: [lib/audio/sound-engine.ts:280](https://github.com/fderuiter/portfolio/blob/main/lib/audio/sound-engine.ts#L280)
+
+Tracks an active audio source node for unified lifecycle governance and immediate stopAll() termination.
+
+#### Type Parameters
+
+##### T
+
+`T` *extends* `AudioScheduledSourceNode`
+
+#### Parameters
+
+##### source
+
+`T`
+
+#### Returns
+
+`T`

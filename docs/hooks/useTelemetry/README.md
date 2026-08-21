@@ -22,6 +22,7 @@
 ## Variables
 
 - [DEFAULT\_MAX\_QUEUE\_CAPACITY](variables/DEFAULT_MAX_QUEUE_CAPACITY.md)
+- [telemetryOutbox](variables/telemetryOutbox.md)
 
 ## Functions
 

@@ -274,7 +274,10 @@ export class SoundEngine {
     return !this.isMuted() && !this.isBypassActive();
   }
 
-  private trackSource<T extends AudioScheduledSourceNode>(source: T): T {
+  /**
+   * Tracks an active audio source node for unified lifecycle governance and immediate stopAll() termination.
+   */
+  public trackSource<T extends AudioScheduledSourceNode>(source: T): T {
     this.activeSources.add(source);
     try {
       if (typeof source.addEventListener === "function") {

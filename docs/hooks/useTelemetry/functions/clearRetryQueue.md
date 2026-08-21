@@ -8,9 +8,9 @@
 
 > **clearRetryQueue**(): `void`
 
-Defined in: [hooks/useTelemetry.ts:187](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L187)
+Defined in: [hooks/useTelemetry.ts:314](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L314)
 
-Clear all queued retry items and cancel any pending retry timers.
+Clears retry queue, pending tasks, timers, and resets store state.
 
 ## Returns
 

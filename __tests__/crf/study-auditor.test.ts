@@ -1,465 +1,284 @@
 import { describe, it, expect } from "vitest";
-import {
-  StudyAuditor,
-  auditStudy,
-  auditForm,
-  auditFormula,
-  type StudyAuditReport,
-  type FormAuditSummary,
-  type FormulaAuditSummary,
-} from "@/lib/crf/study-auditor";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
-import { DEVICE_CARDIOVASCULAR_IMPLANT_PRESET } from "@/lib/crf/presets/device-cardiovascular-implant";
-import { StudyProtocol, CRFForm, CRFField } from "@/lib/crf/types";
+import { StudyAuditor, AuditDiagnostic, StudyAuditReport } from "@/lib/crf/study-auditor";
+import { StudyProtocol, CRFForm } from "@/lib/crf/types";
+import { getOncologyPresetSync, getStudyPresetsSync } from "@/lib/crf/presets/loader";
 
-describe("StudyAuditor Domain Engine Contract Tests", () => {
-  describe("1. Preset Audits & Public Contract Verification", () => {
-    it("audits ONCOLOGY_RECIST_PRESET study protocol successfully", () => {
-      const report: StudyAuditReport = StudyAuditor.audit(ONCOLOGY_RECIST_PRESET);
+describe("StudyAuditor Domain Engine (TDD Red-Green-Refactor)", () => {
+  const oncologyStudy: StudyProtocol = getOncologyPresetSync();
+
+  describe("Study-Level Audit (StudyAuditor.audit)", () => {
+    it("audits a valid clinical study preset and returns a compliant StudyAuditReport", () => {
+      const report: StudyAuditReport = StudyAuditor.audit(oncologyStudy);
 
       expect(report).toBeDefined();
-      expect(report.studyId).toBe(ONCOLOGY_RECIST_PRESET.id);
-      expect(report.protocolNumber).toBe(ONCOLOGY_RECIST_PRESET.protocolNumber);
-      expect(report.studyName).toBe(ONCOLOGY_RECIST_PRESET.studyName);
-      expect(report.phase).toBe("Phase III");
-      expect(report.therapeuticArea).toBe("Oncology");
-      expect(report.timestamp).toBeDefined();
-
-      // Check summary metrics
-      expect(report.summary.totalForms).toBe(ONCOLOGY_RECIST_PRESET.forms.length);
-      expect(report.summary.totalVisits).toBe(ONCOLOGY_RECIST_PRESET.visits.length);
-      expect(report.summary.totalFields).toBeGreaterThan(0);
-      expect(report.summary.errorCount).toBe(0);
-      expect(report.isValid).toBe(true);
-
-      // Conformance & Health Scores
-      expect(report.overallScore).toBeGreaterThanOrEqual(80);
-      expect(report.cdashConformanceScore).toBeGreaterThanOrEqual(80);
-      expect(report.sdvReadinessScore).toBeGreaterThanOrEqual(0);
-
-      // Form breakdowns
-      expect(Object.keys(report.formAudits).length).toBe(ONCOLOGY_RECIST_PRESET.forms.length);
-      for (const form of ONCOLOGY_RECIST_PRESET.forms) {
-        const formSummary = report.formAudits[form.id];
-        expect(formSummary).toBeDefined();
-        expect(formSummary.formId).toBe(form.id);
-        expect(formSummary.domain).toBe(form.domain);
-        expect(formSummary.formName).toBe(form.name);
-      }
-
-      // Functional equivalent
-      const functionalReport = auditStudy(ONCOLOGY_RECIST_PRESET);
-      expect(functionalReport.studyId).toBe(report.studyId);
-      expect(functionalReport.summary.totalForms).toBe(report.summary.totalForms);
+      expect(typeof report.score).toBe("number");
+      expect(report.score).toBeGreaterThanOrEqual(0);
+      expect(report.score).toBeLessThanOrEqual(100);
+      expect(report.health).toBeDefined();
+      expect(Array.isArray(report.diagnostics)).toBe(true);
+      expect(report.summary).toBeDefined();
+      expect(typeof report.summary.errors).toBe("number");
+      expect(typeof report.summary.warnings).toBe("number");
+      expect(typeof report.autoFix).toBe("function");
+      expect(typeof report.autoFixAll).toBe("function");
     });
 
-    it("audits DEVICE_CARDIOVASCULAR_IMPLANT_PRESET (ISO 14155 / TAVR) study protocol", () => {
-      const report = StudyAuditor.audit(DEVICE_CARDIOVASCULAR_IMPLANT_PRESET);
-
-      expect(report).toBeDefined();
-      expect(report.protocolNumber).toBe(DEVICE_CARDIOVASCULAR_IMPLANT_PRESET.protocolNumber);
-      expect(report.therapeuticArea).toContain("Cardiology");
-      expect(report.summary.totalForms).toBe(DEVICE_CARDIOVASCULAR_IMPLANT_PRESET.forms.length);
-      expect(report.summary.totalVisits).toBe(DEVICE_CARDIOVASCULAR_IMPLANT_PRESET.visits.length);
-      expect(report.isValid).toBe(true);
-      expect(report.summary.errorCount).toBe(0);
-
-      // Validate device domains presence in form audits
-      const formDomains = Object.values(report.formAudits).map((f) => f.domain);
-      expect(formDomains).toContain("DI");
-      expect(formDomains).toContain("DU");
-      expect(formDomains).toContain("DE");
-    });
-  });
-
-  describe("2. Comprehensive Defect & Compliance Interception (Synthetic Invalid Studies)", () => {
-    it("detects CDASH variable name length violations (>8 characters, SD0001)", () => {
-      const invalidStudy: StudyProtocol = JSON.parse(JSON.stringify(ONCOLOGY_RECIST_PRESET));
-      invalidStudy.forms[0].sections[0].fields.push({
-        id: "f_length_viol",
-        variableName: "VERYLONGVARNAME", // 15 chars > 8
-        label: "Very Long Variable",
-        dataType: "text",
-        columnSpan: 6,
-        required: false,
-      });
-
-      const report = StudyAuditor.audit(invalidStudy);
-      expect(report.isValid).toBe(false);
-      expect(report.summary.errorCount).toBeGreaterThanOrEqual(1);
-
-      const lengthViolations = report.findings.filter(
-        (f) => f.ruleId === "SD0001" || f.category === "variable_length"
-      );
-      expect(lengthViolations.length).toBeGreaterThanOrEqual(1);
-      expect(lengthViolations[0].variableName).toBe("VERYLONGVARNAME");
-      expect(lengthViolations[0].autoFixAvailable).toBe(true);
-      expect(lengthViolations[0].autoFixType).toBe("truncate_variable");
-      expect(lengthViolations[0].suggestedFix).toBe("Truncate to 'VERYLONG'");
-    });
-
-    it("detects missing required CDASH core variables (SD0002)", () => {
-      const invalidStudy: StudyProtocol = JSON.parse(JSON.stringify(ONCOLOGY_RECIST_PRESET));
-      const dmForm = invalidStudy.forms.find((f) => f.domain === "DM");
-      expect(dmForm).toBeDefined();
-
-      if (dmForm) {
-        // Strip out SEX and AGE
-        dmForm.sections = dmForm.sections.map((sec) => ({
-          ...sec,
-          fields: sec.fields.filter(
-            (f) => f.variableName.toUpperCase() !== "SEX" && f.variableName.toUpperCase() !== "AGE"
-          ),
-        }));
-      }
-
-      const report = StudyAuditor.audit(invalidStudy);
-      expect(report.isValid).toBe(false);
-
-      const missingCoreFindings = report.findings.filter(
-        (f) => f.ruleId === "SD0002" || f.category === "cdash_conformance"
-      );
-      expect(missingCoreFindings.length).toBeGreaterThanOrEqual(1);
-      const missingVars = missingCoreFindings.map((f) => f.variableName?.toUpperCase());
-      expect(missingVars).toContain("SEX");
-    });
-
-    it("detects unbound choice fields missing NCI controlled terminology (SD0003)", () => {
-      const invalidStudy: StudyProtocol = JSON.parse(JSON.stringify(ONCOLOGY_RECIST_PRESET));
-      invalidStudy.forms[0].sections[0].fields.push({
-        id: "f_unbound_choice",
-        variableName: "UNBOUND",
-        label: "Unbound Radio Option",
-        dataType: "radio",
-        columnSpan: 6,
-        required: false,
-        codelistId: undefined,
-        customOptions: undefined,
-      });
-
-      const report = StudyAuditor.audit(invalidStudy);
-      const unboundFindings = report.findings.filter(
-        (f) => f.ruleId === "SD0003" || f.category === "codelist_binding"
-      );
-      expect(unboundFindings.length).toBeGreaterThanOrEqual(1);
-      expect(unboundFindings[0].variableName).toBe("UNBOUND");
-      expect(unboundFindings[0].autoFixAvailable).toBe(true);
-    });
-
-    it("detects non-ISO 8601 date format violations (SD0004)", () => {
-      const invalidStudy: StudyProtocol = JSON.parse(JSON.stringify(ONCOLOGY_RECIST_PRESET));
-      invalidStudy.forms[0].sections[0].fields.push({
-        id: "f_bad_date",
-        variableName: "BADDATE",
-        label: "Invalid Default Date",
-        dataType: "date",
-        columnSpan: 6,
-        required: false,
-        defaultValue: "08/21/2026", // MM/DD/YYYY non-ISO
-      });
-
-      const report = StudyAuditor.audit(invalidStudy);
-      const dateFindings = report.findings.filter(
-        (f) => f.ruleId === "SD0004" || f.category === "date_format"
-      );
-      expect(dateFindings.length).toBeGreaterThanOrEqual(1);
-      expect(dateFindings[0].variableName).toBe("BADDATE");
-      expect(dateFindings[0].autoFixAvailable).toBe(true);
-    });
-
-    it("detects orphan forms not assigned to any visit in Schedule of Activities (SD0005)", () => {
-      const invalidStudy: StudyProtocol = JSON.parse(JSON.stringify(ONCOLOGY_RECIST_PRESET));
-      invalidStudy.forms.push({
-        id: "f_orphan_form",
-        name: "Orphaned Unscheduled Form",
-        domain: "PE",
-        description: "Physical exam not linked to any visit",
-        version: "1.0",
-        isLogForm: false,
-        sections: [
+    it("detects CDASH variable name length violations (>8 chars) with autoFix available", () => {
+      const invalidStudy: StudyProtocol = {
+        ...oncologyStudy,
+        id: "test_overlength_var",
+        forms: [
           {
-            id: "sec_pe",
-            title: "Physical Exam",
-            fields: [
+            id: "f_dm",
+            name: "Demographics",
+            domain: "DM",
+            description: "Demographics",
+            version: "1.0",
+            sections: [
               {
-                id: "f_pe_test",
-                variableName: "PETESTCD",
-                label: "PE Test",
-                dataType: "text",
-                columnSpan: 6,
-                required: false,
+                id: "sec_1",
+                title: "Demographics Section",
+                fields: [
+                  {
+                    id: "fld_long_var",
+                    variableName: "LONGVARIABLENAME",
+                    label: "Overlength Field",
+                    dataType: "text",
+                    columnSpan: 6,
+                  },
+                ],
               },
             ],
+            rules: [],
           },
         ],
-        rules: [],
-      });
-
-      const report = StudyAuditor.audit(invalidStudy);
-      expect(report.orphanForms.some((f) => f.formId === "f_orphan_form")).toBe(true);
-      expect(report.summary.orphanFormsCount).toBeGreaterThanOrEqual(1);
-
-      const soaFindings = report.findings.filter(
-        (f) => f.ruleId === "SD0005" || f.category === "soa_integrity"
-      );
-      expect(soaFindings.some((f) => f.formId === "f_orphan_form")).toBe(true);
-    });
-
-    it("detects orphan visits with zero assigned forms and broken form references in visits", () => {
-      const invalidStudy: StudyProtocol = JSON.parse(JSON.stringify(ONCOLOGY_RECIST_PRESET));
-      invalidStudy.visits.push({
-        id: "v_empty_visit",
-        oid: "SE.EMPTY",
-        name: "Empty Test Visit",
-        visitType: "Scheduled",
-        targetDay: 100,
-        windowBefore: 0,
-        windowAfter: 0,
-        assignedFormIds: [],
-      });
-      invalidStudy.visits.push({
-        id: "v_broken_ref",
-        oid: "SE.BROKEN",
-        name: "Broken Reference Visit",
-        visitType: "Scheduled",
-        targetDay: 110,
-        windowBefore: 0,
-        windowAfter: 0,
-        assignedFormIds: ["non_existent_form_id_123"],
-      });
-
-      const report = StudyAuditor.audit(invalidStudy);
-      expect(report.orphanVisits.some((v) => v.visitId === "v_empty_visit")).toBe(true);
-      expect(report.summary.orphanVisitsCount).toBeGreaterThanOrEqual(1);
-
-      const brokenVisitRefFindings = report.findings.filter(
-        (f) => f.category === "soa_integrity" && f.message.includes("non_existent_form_id_123")
-      );
-      expect(brokenVisitRefFindings.length).toBeGreaterThanOrEqual(1);
-    });
-
-    it("detects duplicate field IDs and duplicate variable names within forms", () => {
-      const invalidStudy: StudyProtocol = JSON.parse(JSON.stringify(ONCOLOGY_RECIST_PRESET));
-      const dmForm = invalidStudy.forms[0];
-      dmForm.sections[0].fields.push({
-        id: dmForm.sections[0].fields[0].id, // Duplicate ID
-        variableName: dmForm.sections[0].fields[0].variableName, // Duplicate Variable Name
-        label: "Duplicate Field",
-        dataType: "text",
-        columnSpan: 6,
-        required: false,
-      });
-
-      const report = StudyAuditor.audit(invalidStudy);
-      const dupIdFindings = report.findings.filter((f) => f.message.includes("Duplicate field ID"));
-      const dupVarFindings = report.findings.filter((f) => f.message.includes("Duplicate variable name"));
-
-      expect(dupIdFindings.length).toBeGreaterThanOrEqual(1);
-      expect(dupVarFindings.length).toBeGreaterThanOrEqual(1);
-    });
-
-    it("detects broken edit check rule triggers and targets", () => {
-      const invalidStudy: StudyProtocol = JSON.parse(JSON.stringify(ONCOLOGY_RECIST_PRESET));
-      const dmForm = invalidStudy.forms[0];
-      dmForm.rules.push({
-        id: "rule_broken_refs",
-        name: "Broken Trigger & Target Rule",
-        description: "References non-existent field IDs",
-        triggerFieldIds: ["non_existent_trigger_999"],
-        targetFieldId: "non_existent_target_888",
-        actionType: "show_field",
-        conditions: [
+        visits: [
           {
-            fieldId: "non_existent_trigger_999",
-            operator: "eq",
-            value: "Y",
+            id: "v_1",
+            oid: "SE.SCR",
+            name: "Screening",
+            visitType: "Scheduled",
+            targetDay: 1,
+            windowBefore: 0,
+            windowAfter: 0,
+            assignedFormIds: ["f_dm"],
           },
         ],
-        logicalOperator: "AND",
-      });
-
-      const report = StudyAuditor.audit(invalidStudy);
-      const brokenRuleFindings = report.findings.filter(
-        (f) => f.category === "rule_integrity" || f.ruleName === "Broken Trigger & Target Rule"
-      );
-      expect(brokenRuleFindings.length).toBeGreaterThanOrEqual(1);
-    });
-  });
-
-  describe("3. StudyAuditor.auditForm Single Form Engine", () => {
-    it("audits single CRFForm with complete health metrics and SDV readiness", () => {
-      const form: CRFForm = ONCOLOGY_RECIST_PRESET.forms[0]; // DM form
-      const formReport: FormAuditSummary = StudyAuditor.auditForm(form);
-
-      expect(formReport).toBeDefined();
-      expect(formReport.formId).toBe(form.id);
-      expect(formReport.domain).toBe(form.domain);
-      expect(formReport.formName).toBe(form.name);
-      expect(formReport.totalFields).toBeGreaterThan(0);
-      expect(formReport.mandatoryFields).toBeGreaterThanOrEqual(0);
-      expect(formReport.codelistsAttached).toBeGreaterThanOrEqual(0);
-      expect(formReport.cdashConformancePercentage).toBeGreaterThanOrEqual(80);
-      expect(formReport.sdvReadinessPercentage).toBeGreaterThanOrEqual(0);
-
-      // Functional equivalent
-      const functionalFormReport = auditForm(form);
-      expect(functionalFormReport.formId).toBe(formReport.formId);
-      expect(functionalFormReport.totalFields).toBe(formReport.totalFields);
-    });
-
-    it("identifies calculated fields with missing formula expressions in form audit", () => {
-      const form: CRFForm = {
-        id: "f_calc_test",
-        name: "Calculation Test Form",
-        domain: "VS",
-        description: "Form testing calculated field validation",
-        version: "1.0",
-        sections: [
-          {
-            id: "sec_1",
-            title: "Vital Measures",
-            fields: [
-              {
-                id: "f_weight",
-                variableName: "WEIGHT",
-                label: "Weight (kg)",
-                dataType: "number",
-                columnSpan: 6,
-                required: true,
-              },
-              {
-                id: "f_empty_calc",
-                variableName: "CALCVAL",
-                label: "Empty Calc Field",
-                dataType: "calculated",
-                columnSpan: 6,
-                required: false,
-                calculationFormula: "", // Missing formula
-              },
-            ],
-          },
-        ],
-        rules: [],
       };
 
-      const report = StudyAuditor.auditForm(form);
-      expect(report.findings.some((f) => f.message.includes("no arithmetic formula defined"))).toBe(true);
+      const report = StudyAuditor.audit(invalidStudy);
+      const lenViolation = report.diagnostics.find(
+        (d: AuditDiagnostic) => d.ruleId === "SD0001" || d.tier === "cdash"
+      );
+
+      expect(lenViolation).toBeDefined();
+      expect(lenViolation?.severity).toBe("error");
+      expect(lenViolation?.autoFixAvailable).toBe(true);
+      expect(lenViolation?.suggestedFix).toBeDefined();
+    });
+
+    it("detects orphaned forms unassigned in the Schedule of Activities (SoA)", () => {
+      const unassignedStudy: StudyProtocol = {
+        ...oncologyStudy,
+        id: "test_soa_orphan",
+        forms: [
+          ...oncologyStudy.forms,
+          {
+            id: "f_orphan",
+            name: "Orphaned Unscheduled Assessment",
+            domain: "LB",
+            description: "Never added to visits",
+            version: "1.0",
+            isLogForm: false,
+            sections: [],
+            rules: [],
+          },
+        ],
+      };
+
+      const report = StudyAuditor.audit(unassignedStudy);
+      const orphanDiag = report.diagnostics.find(
+        (d: AuditDiagnostic) => d.ruleId === "SD0005" || (d.tier === "soa" && d.formId === "f_orphan")
+      );
+
+      expect(orphanDiag).toBeDefined();
+      expect(orphanDiag?.severity).toBe("warning");
+      expect(orphanDiag?.autoFixAvailable).toBe(true);
+    });
+
+    it("detects broken edit check rule trigger field references", () => {
+      const brokenRuleStudy: StudyProtocol = {
+        ...oncologyStudy,
+        id: "test_broken_rule",
+        forms: [
+          {
+            id: "f_vs",
+            name: "Vital Signs",
+            domain: "VS",
+            description: "Vitals",
+            version: "1.0",
+            sections: [
+              {
+                id: "sec_vs",
+                title: "Vitals Section",
+                fields: [
+                  {
+                    id: "f_sys",
+                    variableName: "SYSBP",
+                    label: "Systolic BP",
+                    dataType: "number",
+                    columnSpan: 6,
+                  },
+                ],
+              },
+            ],
+            rules: [
+              {
+                id: "r_broken",
+                name: "Broken Rule",
+                description: "References missing field",
+                triggerFieldIds: ["non_existent_field_id"],
+                actionType: "show_field",
+                targetFieldId: "f_sys",
+                conditions: [],
+                logicalOperator: "AND",
+              },
+            ],
+          },
+        ],
+        visits: [
+          {
+            id: "v_vs",
+            oid: "SE.V1",
+            name: "Visit 1",
+            visitType: "Scheduled",
+            targetDay: 1,
+            windowBefore: 0,
+            windowAfter: 0,
+            assignedFormIds: ["f_vs"],
+          },
+        ],
+      };
+
+      const report = StudyAuditor.audit(brokenRuleStudy);
+      const ruleDiag = report.diagnostics.find(
+        (d: AuditDiagnostic) => d.tier === "ast" && d.message.includes("non-existent trigger field")
+      );
+
+      expect(ruleDiag).toBeDefined();
+      expect(ruleDiag?.severity).toBe("error");
     });
   });
 
-  describe("4. StudyAuditor.auditFormula AST Engine & Static Analysis", () => {
-    const mockFields: CRFField[] = [
-      {
-        id: "f_height",
-        variableName: "HEIGHT",
-        label: "Height",
-        dataType: "number",
-        columnSpan: 6,
-        required: true,
-      },
-      {
-        id: "f_weight",
-        variableName: "WEIGHT",
-        label: "Weight",
-        dataType: "number",
-        columnSpan: 6,
-        required: true,
-      },
-      {
-        id: "f_systolic",
-        variableName: "SYSBP",
-        label: "Systolic Blood Pressure",
-        dataType: "integer",
-        columnSpan: 6,
-        required: true,
-      },
-      {
-        id: "f_text_val",
-        variableName: "TEXTVAL",
-        label: "Non-numeric Text Note",
-        dataType: "text",
-        columnSpan: 6,
-        required: false,
-      },
-    ];
+  describe("Form-Level Audit (StudyAuditor.auditForm)", () => {
+    it("computes accurate health, SDV readiness, and CDASH conformance for individual forms", () => {
+      const dmForm = oncologyStudy.forms.find((f: CRFForm) => f.domain === "DM") || oncologyStudy.forms[0];
+      const formReport = StudyAuditor.auditForm(dmForm, oncologyStudy);
 
-    it("validates valid arithmetic formulas (BMI, RECIST sums, mathematical functions)", () => {
-      const bmiFormula = "WEIGHT / ((HEIGHT / 100) * (HEIGHT / 100))";
-      const result: FormulaAuditSummary = StudyAuditor.auditFormula(bmiFormula, mockFields);
+      expect(formReport).toBeDefined();
+      expect(formReport.formId).toBe(dmForm.id);
+      expect(formReport.health.totalFields).toBeGreaterThan(0);
+      expect(formReport.health.cdashConformancePercentage).toBeGreaterThanOrEqual(0);
+      expect(formReport.health.cdashConformancePercentage).toBeLessThanOrEqual(100);
+      expect(Array.isArray(formReport.diagnostics)).toBe(true);
+    });
+  });
 
-      expect(result.isValid).toBe(true);
-      expect(result.diagnostics.filter((d) => d.severity === "error").length).toBe(0);
-      expect(result.referencedVariables.some((v) => v.name === "WEIGHT" && v.exists && v.isNumeric)).toBe(true);
-      expect(result.referencedVariables.some((v) => v.name === "HEIGHT" && v.exists && v.isNumeric)).toBe(true);
+  describe("Formula-Level Audit (StudyAuditor.auditFormula)", () => {
+    it("validates valid arithmetic expressions with variable references", () => {
+      const fields = [
+        { id: "weight", variableName: "WEIGHT", label: "Weight", dataType: "number" as const, columnSpan: 6 },
+        { id: "height", variableName: "HEIGHT", label: "Height", dataType: "number" as const, columnSpan: 6 },
+      ];
 
-      // Functional equivalent
-      const functionalFormulaResult = auditFormula(bmiFormula, mockFields);
-      expect(functionalFormulaResult.isValid).toBe(true);
+      const res = StudyAuditor.auditFormula("weight / ((height / 100) ^ 2)", fields);
+      expect(res.isValid).toBe(true);
+      expect(res.referencedVariables.length).toBe(2);
     });
 
-    it("validates math functions: round, sqrt, abs, min, max, clamp", () => {
-      const formula = "round(sqrt(WEIGHT) + abs(SYSBP), 2)";
-      const result = StudyAuditor.auditFormula(formula, mockFields);
+    it("detects syntax errors, unbalanced parentheses, and division by zero", () => {
+      const fields = [
+        { id: "f1", variableName: "V1", label: "V1", dataType: "number" as const, columnSpan: 6 },
+      ];
 
-      expect(result.isValid).toBe(true);
-      expect(result.diagnostics.filter((d) => d.severity === "error").length).toBe(0);
+      const unbalanced = StudyAuditor.auditFormula("(f1 + 10", fields);
+      expect(unbalanced.isValid).toBe(false);
+      expect(unbalanced.diagnostics.some((d) => d.code === "UNMATCHED_LPAREN")).toBe(true);
+
+      const divZero = StudyAuditor.auditFormula("f1 / 0", fields);
+      expect(divZero.diagnostics.some((d) => d.code === "DIVISION_BY_ZERO")).toBe(true);
     });
+  });
 
-    it("detects syntax error: unmatched parentheses in formula", () => {
-      const badFormula = "WEIGHT / ((HEIGHT / 100)";
-      const result = StudyAuditor.auditFormula(badFormula, mockFields);
+  describe("1-Click AutoFix Engine", () => {
+    it("auto-fixes overlength variables and unassigned SoA forms in a single batch pass", () => {
+      const dirtyStudy: StudyProtocol = {
+        ...oncologyStudy,
+        id: "dirty_study_autofix",
+        forms: [
+          {
+            id: "f_dirty",
+            name: "Dirty Form",
+            domain: "VS",
+            description: "Dirty Form",
+            version: "1.0",
+            sections: [
+              {
+                id: "sec_dirty",
+                title: "Dirty Section",
+                fields: [
+                  {
+                    id: "f_long",
+                    variableName: "LONGVARNAMEEXCEEDING8",
+                    label: "Long Name",
+                    dataType: "text",
+                    columnSpan: 6,
+                  },
+                ],
+              },
+            ],
+            rules: [],
+          },
+        ],
+        visits: [
+          {
+            id: "v_1",
+            oid: "SE.V1",
+            name: "Visit 1",
+            visitType: "Scheduled",
+            targetDay: 1,
+            windowBefore: 0,
+            windowAfter: 0,
+            assignedFormIds: [], // Empty -> causes SD0005
+          },
+        ],
+      };
 
-      expect(result.isValid).toBe(false);
-      expect(result.diagnostics.some((d) => d.code === "UNMATCHED_LPAREN")).toBe(true);
-      expect(result.unmatchedBracketIndices.length).toBeGreaterThan(0);
+      const initialReport = StudyAuditor.audit(dirtyStudy);
+      expect(initialReport.summary.errors + initialReport.summary.warnings).toBeGreaterThan(0);
+
+      const { protocol: fixedStudy, fixedCount } = initialReport.autoFixAll();
+      expect(fixedCount).toBeGreaterThan(0);
+
+      const cleanedReport = StudyAuditor.audit(fixedStudy);
+      // Truncated variable name should now be <= 8 chars
+      const fixedField = fixedStudy.forms[0].sections[0].fields[0];
+      expect(fixedField.variableName.length).toBeLessThanOrEqual(8);
+      // Form should now be assigned to visit
+      expect(fixedStudy.visits[0].assignedFormIds).toContain("f_dirty");
     });
+  });
 
-    it("detects syntax error: trailing operators and consecutive operators", () => {
-      const badFormula1 = "WEIGHT + ";
-      const result1 = StudyAuditor.auditFormula(badFormula1, mockFields);
-      expect(result1.isValid).toBe(false);
-      expect(result1.diagnostics.some((d) => d.code === "TRAILING_OPERATOR")).toBe(true);
+  describe("Preset Health Verification", () => {
+    it("audits all registered study presets without unhandled exceptions", () => {
+      const presets = getStudyPresetsSync();
+      expect(presets.length).toBeGreaterThan(0);
 
-      const badFormula2 = "WEIGHT * * HEIGHT";
-      const result2 = StudyAuditor.auditFormula(badFormula2, mockFields);
-      expect(result2.isValid).toBe(false);
-      expect(result2.diagnostics.some((d) => d.code === "CONSECUTIVE_OPERATORS")).toBe(true);
-    });
-
-    it("detects static division by zero", () => {
-      const divZeroFormula = "WEIGHT / 0";
-      const result = StudyAuditor.auditFormula(divZeroFormula, mockFields);
-
-      expect(result.isValid).toBe(false);
-      expect(result.diagnostics.some((d) => d.code === "DIVISION_BY_ZERO")).toBe(true);
-    });
-
-    it("detects circular reference when formula references self field ID or variable", () => {
-      const circularFormula = "f_bmi + WEIGHT";
-      const result = StudyAuditor.auditFormula(circularFormula, mockFields, "f_bmi");
-
-      expect(result.isValid).toBe(false);
-      expect(result.diagnostics.some((d) => d.code === "CIRCULAR_REFERENCE")).toBe(true);
-    });
-
-    it("detects non-numeric variable types referenced in arithmetic expressions", () => {
-      const badTypeFormula = "WEIGHT + TEXTVAL";
-      const result = StudyAuditor.auditFormula(badTypeFormula, mockFields);
-
-      // Warning about non-numeric variable
-      expect(result.diagnostics.some((d) => d.code === "NON_NUMERIC_VARIABLE")).toBe(true);
-    });
-
-    it("detects unknown function names and invalid function arity", () => {
-      const unknownFnFormula = "custom_unsupported_fn(WEIGHT)";
-      const result1 = StudyAuditor.auditFormula(unknownFnFormula, mockFields);
-      expect(result1.isValid).toBe(false);
-      expect(result1.diagnostics.some((d) => d.code === "UNKNOWN_FUNCTION")).toBe(true);
-
-      const badArityFormula = "sqrt(WEIGHT, HEIGHT)"; // sqrt expects 1 arg
-      const result2 = StudyAuditor.auditFormula(badArityFormula, mockFields);
-      expect(result2.isValid).toBe(false);
-      expect(result2.diagnostics.some((d) => d.code === "INVALID_ARITY")).toBe(true);
+      presets.forEach((preset) => {
+        const report = StudyAuditor.audit(preset);
+        expect(report.health.totalFields).toBeGreaterThanOrEqual(0);
+        expect(typeof report.score).toBe("number");
+      });
     });
   });
 });

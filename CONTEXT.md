@@ -85,6 +85,11 @@ Formal inference rules used to derive logical steps from valid premises:
 - **Virtual D-Pad**: An on-screen, high-contrast touch controller component with minimum 48x48px directional buttons supporting rapid touch/mouse down-up events, haptic/audio feedback, and pointer capture for responsive action in arcade games.
 - **Canvas Touch Action Isolation**: The explicit setting of `touch-action: none` or `touch-action: pan-y` on interactive HTML5 / WebGL canvas elements during active gameplay to prevent touch gestures from triggering browser pull-to-refresh or unwanted page scrolling.
 - **Safe Area Inset Adaptation**: Dynamic spacing integration using CSS `env(safe-area-inset-top)`, `env(safe-area-inset-bottom)`, `env(safe-area-inset-left)`, and `env(safe-area-inset-right)` to protect fixed navigation bars, floating buttons, and game controllers from iPhone notches, Dynamic Islands, and mobile home indicator bars.
+- **Arcade Safe Zone & Bleed Matrix**: Matrix transformation scaling a core logical game coordinate space with dynamic high-DPI Retina DPR awareness and aspect-ratio bleed rendering.
+- **Headless Arcade Engine Lifecycle**: Pure TypeScript framework-agnostic game engine architecture (`init`, `update(dt)`, `render(ctx)`, `destroy`) decoupled from React lifecycles.
+- **HTML/DOM HUD Overlay Pattern**: UI design standard placing static game UI, health bars, inventory, and action docks in absolute-positioned responsive HTML/CSS overlays while restricting Canvas rendering to in-world diegetic elements.
+- **Unified Arcade Input Manager**: Input abstraction layer normalizing pointer events, keyboard keys, and virtual touch docks into a uniform coordinate and action vector.
+- **Deterministic Object Pool**: Zero-allocation memory management mechanism pre-allocating reusable entity instances (projectiles, particles, damage text) to eliminate garbage collection stutters.
 
 ## Accessibility Architecture & WCAG 2.1 Compliance
 

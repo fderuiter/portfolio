@@ -32,39 +32,9 @@ Re-exports [AstConditionSchema](universal-schema/variables/AstConditionSchema.md
 
 ***
 
-### AuditCategory
+### AuditDiagnostic
 
-Re-exports [AuditCategory](study-auditor/type-aliases/AuditCategory.md)
-
-***
-
-### AuditFinding
-
-Re-exports [AuditFinding](study-auditor/interfaces/AuditFinding.md)
-
-***
-
-### auditForm
-
-Re-exports [auditForm](study-auditor/functions/auditForm.md)
-
-***
-
-### auditFormula
-
-Re-exports [auditFormula](study-auditor/functions/auditFormula.md)
-
-***
-
-### AuditSeverity
-
-Re-exports [AuditSeverity](study-auditor/type-aliases/AuditSeverity.md)
-
-***
-
-### auditStudy
-
-Re-exports [auditStudy](study-auditor/functions/auditStudy.md)
+Re-exports [AuditDiagnostic](study-auditor/interfaces/AuditDiagnostic.md)
 
 ***
 
@@ -311,6 +281,18 @@ Re-exports [DeviceViewport](types/type-aliases/DeviceViewport.md)
 ### DiagnosticItem
 
 Re-exports [DiagnosticItem](form-linter/interfaces/DiagnosticItem.md)
+
+***
+
+### DiagnosticSeverity
+
+Re-exports [DiagnosticSeverity](study-auditor/type-aliases/DiagnosticSeverity.md)
+
+***
+
+### DiagnosticTier
+
+Re-exports [DiagnosticTier](study-auditor/type-aliases/DiagnosticTier.md)
 
 ***
 
@@ -566,27 +548,15 @@ Re-exports [formatPrecisionDate](precision-date/functions/formatPrecisionDate.md
 
 ***
 
-### FormAuditContext
+### FormAuditReport
 
-Re-exports [FormAuditContext](study-auditor/interfaces/FormAuditContext.md)
-
-***
-
-### FormAuditSummary
-
-Re-exports [FormAuditSummary](study-auditor/interfaces/FormAuditSummary.md)
+Re-exports [FormAuditReport](study-auditor/interfaces/FormAuditReport.md)
 
 ***
 
 ### FormHealthMetrics
 
 Re-exports [FormHealthMetrics](form-health/interfaces/FormHealthMetrics.md)
-
-***
-
-### FormulaAuditSummary
-
-Re-exports [FormulaAuditSummary](study-auditor/interfaces/FormulaAuditSummary.md)
 
 ***
 
@@ -677,12 +647,6 @@ Re-exports [generateStudyDocx](export-docx/functions/generateStudyDocx.md)
 ### generateStudyPdf
 
 Re-exports [generateStudyPdf](export-pdf/functions/generateStudyPdf.md)
-
-***
-
-### getDomainCoreVariables
-
-Re-exports [getDomainCoreVariables](study-auditor/functions/getDomainCoreVariables.md)
 
 ***
 

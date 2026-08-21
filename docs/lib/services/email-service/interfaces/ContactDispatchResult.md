@@ -6,7 +6,7 @@
 
 # Interface: ContactDispatchResult
 
-Defined in: [lib/services/email-service.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L32)
+Defined in: [lib/services/email-service.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L35)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/services/email-service.ts:32](https://github.com/fderuiter/port
 
 > **adminResult**: [`EmailDispatchResult`](EmailDispatchResult.md)
 
-Defined in: [lib/services/email-service.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L34)
+Defined in: [lib/services/email-service.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L37)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/services/email-service.ts:34](https://github.com/fderuiter/port
 
 > `optional` **confirmationResult?**: [`EmailDispatchResult`](EmailDispatchResult.md)
 
-Defined in: [lib/services/email-service.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L35)
+Defined in: [lib/services/email-service.ts:38](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L38)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [lib/services/email-service.ts:35](https://github.com/fderuiter/port
 
 > **success**: `boolean`
 
-Defined in: [lib/services/email-service.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L33)
+Defined in: [lib/services/email-service.ts:36](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L36)

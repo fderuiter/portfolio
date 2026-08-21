@@ -12,20 +12,12 @@
 
 ## Interfaces
 
-- [AuditFinding](interfaces/AuditFinding.md)
-- [FormAuditContext](interfaces/FormAuditContext.md)
-- [FormAuditSummary](interfaces/FormAuditSummary.md)
-- [FormulaAuditSummary](interfaces/FormulaAuditSummary.md)
+- [AuditDiagnostic](interfaces/AuditDiagnostic.md)
+- [FormAuditReport](interfaces/FormAuditReport.md)
+- [FormHealthMetrics](interfaces/FormHealthMetrics.md)
 - [StudyAuditReport](interfaces/StudyAuditReport.md)
 
 ## Type Aliases
 
-- [AuditCategory](type-aliases/AuditCategory.md)
-- [AuditSeverity](type-aliases/AuditSeverity.md)
-
-## Functions
-
-- [auditForm](functions/auditForm.md)
-- [auditFormula](functions/auditFormula.md)
-- [auditStudy](functions/auditStudy.md)
-- [getDomainCoreVariables](functions/getDomainCoreVariables.md)
+- [DiagnosticSeverity](type-aliases/DiagnosticSeverity.md)
+- [DiagnosticTier](type-aliases/DiagnosticTier.md)

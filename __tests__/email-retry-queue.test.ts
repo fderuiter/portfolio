@@ -1,0 +1,308 @@
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { EmailService, RawEmailOptions } from "@/lib/services/email-service";
+
+// In-memory mock store for OutboundEmailQueue & SuppressionList
+interface MockQueueItem {
+  id: string;
+  to: string;
+  from: string;
+  replyTo: string | null;
+  subject: string;
+  html: string;
+  text: string | null;
+  tags: unknown;
+  attempts: number;
+  status: string;
+  nextRetryAt: Date;
+  lastError: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const mockQueueStore = new Map<string, MockQueueItem>();
+const mockSuppressionStore = new Map<string, { email: string; reason: string }>();
+
+vi.mock("@/lib/db", () => ({
+  prisma: {
+    suppressionList: {
+      findUnique: vi.fn().mockImplementation(async ({ where }: { where: { email: string } }) => {
+        const item = mockSuppressionStore.get(where.email.toLowerCase().trim());
+        return item ? { ...item, id: "sup_1", createdAt: new Date() } : null;
+      }),
+      upsert: vi.fn().mockImplementation(async ({ where, create }: { where: { email: string }; create: { email: string; reason: string } }) => {
+        mockSuppressionStore.set(where.email.toLowerCase().trim(), {
+          email: where.email.toLowerCase().trim(),
+          reason: create.reason,
+        });
+        return { id: "sup_1", email: where.email, reason: create.reason, createdAt: new Date() };
+      }),
+    },
+    outboundEmailQueue: {
+      create: vi.fn().mockImplementation(async ({ data }: { data: Record<string, unknown> }) => {
+        const id = `queue_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+        const record: MockQueueItem = {
+          id,
+          to: data.to as string,
+          from: data.from as string,
+          replyTo: (data.replyTo as string) || null,
+          subject: data.subject as string,
+          html: data.html as string,
+          text: (data.text as string) || null,
+          tags: data.tags || null,
+          attempts: (data.attempts as number) ?? 1,
+          status: (data.status as string) ?? "RETRYING",
+          nextRetryAt: (data.nextRetryAt as Date) ?? new Date(),
+          lastError: (data.lastError as string) ?? null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        mockQueueStore.set(id, record);
+        return record;
+      }),
+      findMany: vi.fn().mockImplementation(async ({ where, take }: { where?: { status?: { in?: string[] }; nextRetryAt?: { lte?: Date } }; take?: number }) => {
+        let results = Array.from(mockQueueStore.values());
+        if (where?.status?.in) {
+          results = results.filter((item) => where.status?.in?.includes(item.status));
+        }
+        if (where?.nextRetryAt?.lte) {
+          const lteTime = where.nextRetryAt.lte instanceof Date ? where.nextRetryAt.lte.getTime() : new Date(where.nextRetryAt.lte).getTime();
+          results = results.filter((item) => item.nextRetryAt.getTime() <= lteTime);
+        }
+        if (take) {
+          results = results.slice(0, take);
+        }
+        return results;
+      }),
+      update: vi.fn().mockImplementation(async ({ where, data }: { where: { id: string }; data: Partial<MockQueueItem> }) => {
+        const existing = mockQueueStore.get(where.id);
+        if (!existing) throw new Error(`Record ${where.id} not found in mock queue`);
+        const updated: MockQueueItem = {
+          ...existing,
+          ...data,
+          updatedAt: new Date(),
+        };
+        mockQueueStore.set(where.id, updated);
+        return updated;
+      }),
+    },
+  },
+}));
+
+// Mock Resend SDK
+const mockSendFn = vi.fn();
+vi.mock("resend", () => {
+  return {
+    Resend: class MockResend {
+      emails = {
+        send: mockSendFn,
+      };
+    },
+  };
+});
+
+describe("Outbound Email Queue & Resilient Backoff Retry Engine (#546)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockQueueStore.clear();
+    mockSuppressionStore.clear();
+    EmailService.resetClient();
+    process.env.RESEND_API_KEY = "re_test_mock_api_key";
+    process.env.VITEST = "";
+  });
+
+  afterEach(() => {
+    EmailService.resetClient();
+    process.env.VITEST = "1";
+  });
+
+  describe("Automatic Queueing on Rate Limit (429) & Network Timeouts", () => {
+    it("automatically persists email to OutboundEmailQueue when Resend returns 429 rate limit", async () => {
+      mockSendFn.mockResolvedValueOnce({
+        data: null,
+        error: { message: "Too many requests (429 rate limit exceeded)", name: "rate_limit_exceeded" },
+      });
+
+      const options: RawEmailOptions = {
+        to: "recipient@example.com",
+        subject: "Welcome to Portfolio",
+        html: "<p>Hello world</p>",
+      };
+
+      const result = await EmailService.sendRawEmail(options);
+
+      expect(result.success).toBe(true);
+      expect(result.queued).toBe(true);
+      expect(result.queueId).toBeDefined();
+
+      expect(mockQueueStore.size).toBe(1);
+      const queuedItem = mockQueueStore.get(result.queueId!);
+      expect(queuedItem?.to).toBe("recipient@example.com");
+      expect(queuedItem?.status).toBe("RETRYING");
+      expect(queuedItem?.attempts).toBe(1);
+      expect(queuedItem?.lastError).toContain("429");
+    });
+
+    it("automatically persists email to OutboundEmailQueue when network dispatch throws transient error", async () => {
+      mockSendFn.mockRejectedValueOnce(new Error("fetch failed (ECONNRESET timeout)"));
+
+      const options: RawEmailOptions = {
+        to: "transient@example.com",
+        subject: "Network Failure Test",
+        html: "<p>Retry content</p>",
+      };
+
+      const result = await EmailService.sendRawEmail(options);
+
+      expect(result.success).toBe(true);
+      expect(result.queued).toBe(true);
+      expect(result.queueId).toBeDefined();
+
+      const queuedItem = mockQueueStore.get(result.queueId!);
+      expect(queuedItem?.to).toBe("transient@example.com");
+      expect(queuedItem?.lastError).toContain("ECONNRESET");
+    });
+
+    it("does not queue if error is a non-retryable domain validation error", async () => {
+      mockSendFn.mockResolvedValueOnce({
+        data: null,
+        error: { message: "Domain not verified", name: "validation_error" },
+      });
+
+      const options: RawEmailOptions = {
+        to: "unverified@example.com",
+        subject: "Invalid Domain Test",
+        html: "<p>Content</p>",
+      };
+
+      const result = await EmailService.sendRawEmail(options);
+
+      expect(result.success).toBe(false);
+      expect(result.queued).toBeUndefined();
+      expect(result.error).toBe("Domain not verified");
+      expect(mockQueueStore.size).toBe(0);
+    });
+  });
+
+  describe("processRetryQueue() Execution & Exponential Backoff", () => {
+    it("successfully delivers queued items when upstream recovers and updates status to DELIVERED", async () => {
+      // Seed a pending queue item
+      const queueId = await EmailService.queueOutboundEmail(
+        {
+          to: "pending@example.com",
+          subject: "Pending Email",
+          html: "<p>Delayed body</p>",
+        },
+        undefined,
+        "Initial 429 rate limit"
+      );
+
+      // Upstream Resend is now healthy
+      mockSendFn.mockResolvedValueOnce({
+        data: { id: "msg_success_123" },
+        error: null,
+      });
+
+      const summary = await EmailService.processRetryQueue({ now: new Date(Date.now() + 5000) });
+
+      expect(summary.processed).toBe(1);
+      expect(summary.succeeded).toBe(1);
+      expect(summary.failed).toBe(0);
+
+      const item = mockQueueStore.get(queueId);
+      expect(item?.status).toBe("DELIVERED");
+    });
+
+    it("applies exponential backoff on consecutive failures and marks FAILED after max attempts", async () => {
+      // Seed an item that has failed 4 times already
+      const record: MockQueueItem = {
+        id: "queue_max_attempts",
+        to: "failing@example.com",
+        from: "Frederick de Ruiter <notifications@deruiter.dev>",
+        replyTo: null,
+        subject: "Max Retries Test",
+        html: "<p>Test</p>",
+        text: null,
+        tags: null,
+        attempts: 4,
+        status: "RETRYING",
+        nextRetryAt: new Date(Date.now() - 5000), // Due for retry
+        lastError: "Rate limit",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockQueueStore.set(record.id, record);
+
+      // Still failing upstream
+      mockSendFn.mockResolvedValueOnce({
+        data: null,
+        error: { message: "Rate limit 429", name: "rate_limit_exceeded" },
+      });
+
+      const summary = await EmailService.processRetryQueue();
+
+      expect(summary.processed).toBe(1);
+      expect(summary.failed).toBe(1);
+
+      const updated = mockQueueStore.get("queue_max_attempts");
+      expect(updated?.attempts).toBe(5);
+      expect(updated?.status).toBe("FAILED");
+    });
+
+    it("marks queued item FAILED immediately if recipient was added to suppression list in the interim", async () => {
+      // Suppress the email
+      mockSuppressionStore.set("suppressed@example.com", {
+        email: "suppressed@example.com",
+        reason: "BOUNCE",
+      });
+
+      const record: MockQueueItem = {
+        id: "queue_suppressed_target",
+        to: "suppressed@example.com",
+        from: "Frederick de Ruiter <notifications@deruiter.dev>",
+        replyTo: null,
+        subject: "Suppression Check Test",
+        html: "<p>Test</p>",
+        text: null,
+        tags: null,
+        attempts: 1,
+        status: "RETRYING",
+        nextRetryAt: new Date(Date.now() - 1000),
+        lastError: "Rate limit",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      mockQueueStore.set(record.id, record);
+
+      const summary = await EmailService.processRetryQueue();
+
+      expect(summary.processed).toBe(1);
+      expect(summary.failed).toBe(1);
+      expect(mockSendFn).not.toHaveBeenCalled();
+
+      const updated = mockQueueStore.get("queue_suppressed_target");
+      expect(updated?.status).toBe("FAILED");
+      expect(updated?.lastError).toContain("suppression list");
+    });
+  });
+
+  describe("Sender Identity Standardization", () => {
+    it("defaults sender address to canonical custom domain format", async () => {
+      mockSendFn.mockResolvedValueOnce({
+        data: { id: "msg_standard_from" },
+        error: null,
+      });
+
+      await EmailService.sendRawEmail({
+        to: "visitor@example.com",
+        subject: "Default Sender Verification",
+        html: "<p>Testing sender</p>",
+      });
+
+      expect(mockSendFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          from: "Frederick de Ruiter <notifications@deruiter.dev>",
+        })
+      );
+    });
+  });
+});

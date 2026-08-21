@@ -8,9 +8,9 @@
 
 > **getPendingDeferredQueueLength**(): `number`
 
-Defined in: [hooks/useTelemetry.ts:106](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L106)
+Defined in: [hooks/useTelemetry.ts:238](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L238)
 
-Get count of currently pending deferred telemetry tasks.
+Gets count of pending deferred telemetry tasks.
 
 ## Returns
 
