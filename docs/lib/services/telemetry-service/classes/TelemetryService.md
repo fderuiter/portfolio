@@ -6,7 +6,7 @@
 
 # Class: TelemetryService
 
-Defined in: [lib/services/telemetry-service.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L69)
+Defined in: [lib/services/telemetry-service.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L73)
 
 ## Constructors
 
@@ -24,7 +24,7 @@ Defined in: [lib/services/telemetry-service.ts:69](https://github.com/fderuiter/
 
 > `static` **getAggregateStats**(): `Promise`\<`Record`\<`string`, \{ `clicks`: `number`; `views`: `number`; \}\>\>
 
-Defined in: [lib/services/telemetry-service.ts:160](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L160)
+Defined in: [lib/services/telemetry-service.ts:204](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L204)
 
 Fetches aggregate portfolio view/click telemetry statistics.
 
@@ -38,7 +38,7 @@ Fetches aggregate portfolio view/click telemetry statistics.
 
 > `static` **isRateLimited**(`req`): `Promise`\<\{ `headers?`: `Record`\<`string`, `string`\>; `limited`: `boolean`; \}\>
 
-Defined in: [lib/services/telemetry-service.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L73)
+Defined in: [lib/services/telemetry-service.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L77)
 
 Evaluates rate limiting anonymously using Web Crypto SHA-256 IP hashing.
 
@@ -58,7 +58,7 @@ Evaluates rate limiting anonymously using Web Crypto SHA-256 IP hashing.
 
 > `static` **recordEvent**(`data`): `Promise`\<\{ `createdAt`: `Date`; `eventType`: `string`; `id`: `string`; `projectSlug`: `string`; \}\>
 
-Defined in: [lib/services/telemetry-service.ts:136](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L136)
+Defined in: [lib/services/telemetry-service.ts:180](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L180)
 
 Records a telemetry interaction event into the Redis buffer queue.
 
@@ -78,7 +78,7 @@ Records a telemetry interaction event into the Redis buffer queue.
 
 > `static` **syncBufferedEvents**(`batchSize`): `Promise`\<\{ `inserted`: `number`; `processed`: `number`; \}\>
 
-Defined in: [lib/services/telemetry-service.ts:199](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L199)
+Defined in: [lib/services/telemetry-service.ts:243](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L243)
 
 Synchronizes buffered telemetry events from Redis into PostgreSQL.
 Atomically transfers event batches from 'telemetry_buffer' to 'telemetry_processing'
