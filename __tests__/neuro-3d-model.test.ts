@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
 import * as THREE from "three";
 import {
-  createCorticalSurfaceMesh,
   getAnatomicalParcelAtCoordinate,
 } from "@/lib/neuro/mesh-generator";
+import { createCorticalSurfaceMesh } from "@/lib/neuro/engine-loader";
 import { loadExternalBrainMesh } from "@/lib/neuro/asset-loader";
 
 describe("NeuroRecon 3D High-Fidelity Brain Model & Desikan-Killiany Atlas Engine", () => {

@@ -6,15 +6,15 @@
 
 # Interface: MeshWorkerResponse
 
-Defined in: [lib/neuro/types.ts:475](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L475)
+Defined in: [lib/neuro/types.ts:493](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L493)
 
 ## Properties
 
 ### buffers
 
-> **buffers**: [`HemisphereBufferTransfer`](HemisphereBufferTransfer.md)[]
+> **buffers**: [`RawGeometryBuffer`](RawGeometryBuffer.md)[]
 
-Defined in: [lib/neuro/types.ts:480](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L480)
+Defined in: [lib/neuro/types.ts:498](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L498)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/neuro/types.ts:480](https://github.com/fderuiter/portfolio/blob
 
 > **hemiFilter**: [`HemisphereFilter`](../type-aliases/HemisphereFilter.md)
 
-Defined in: [lib/neuro/types.ts:478](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L478)
+Defined in: [lib/neuro/types.ts:496](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L496)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/neuro/types.ts:478](https://github.com/fderuiter/portfolio/blob
 
 > **id**: `string`
 
-Defined in: [lib/neuro/types.ts:476](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L476)
+Defined in: [lib/neuro/types.ts:494](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L494)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/neuro/types.ts:476](https://github.com/fderuiter/portfolio/blob
 
 > `optional` **isSubcortical?**: `boolean`
 
-Defined in: [lib/neuro/types.ts:481](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L481)
+Defined in: [lib/neuro/types.ts:499](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L499)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/neuro/types.ts:481](https://github.com/fderuiter/portfolio/blob
 
 > **mode**: [`SurfaceMode`](../type-aliases/SurfaceMode.md)
 
-Defined in: [lib/neuro/types.ts:477](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L477)
+Defined in: [lib/neuro/types.ts:495](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L495)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [lib/neuro/types.ts:477](https://github.com/fderuiter/portfolio/blob
 
 > **wireframe**: `boolean`
 
-Defined in: [lib/neuro/types.ts:479](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L479)
+Defined in: [lib/neuro/types.ts:497](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L497)

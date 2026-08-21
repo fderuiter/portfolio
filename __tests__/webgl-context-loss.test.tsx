@@ -194,6 +194,7 @@ describe("WebGL Context Loss & Restoration Recovery Suite", () => {
             />
           </A11yProvider>
         );
+        await Promise.resolve();
       });
 
       expect(container.textContent).toContain("Pial Surface");
@@ -237,6 +238,7 @@ describe("WebGL Context Loss & Restoration Recovery Suite", () => {
             />
           </A11yProvider>
         );
+        await Promise.resolve();
       });
 
       const buttons = Array.from(container.querySelectorAll("button"));

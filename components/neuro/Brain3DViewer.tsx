@@ -2,10 +2,11 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { clamp } from "@/lib/game-utils";
-import * as THREE from "three";
+import type * as THREE from "three";
 import { AnatomicalParcel, HemisphereFilter, SurfaceMode, VoxelCoord } from "@/lib/neuro/types";
-import { createCorticalSurfaceMeshAsync, getAnatomicalParcelAtCoordinate } from "@/lib/neuro/mesh-generator";
-import { loadExternalBrainMesh } from "@/lib/neuro/asset-loader";
+import { createCorticalSurfaceMeshBuffersAsync, getAnatomicalParcelAtCoordinate } from "@/lib/neuro/mesh-generator";
+import { loadExternalBrainBuffers } from "@/lib/neuro/asset-loader";
+import { createMeshGroupFromBuffers, loadGraphicsEngine } from "@/lib/neuro/engine-loader";
 import { useWebGLContextLoss } from "@/hooks/useWebGLContextLoss";
 import { ProgressHUD } from "./ProgressHUD";
 import { Icon3dCubeSphere, IconCheck, IconLayersSubtract, IconRefresh } from "@tabler/icons-react";
@@ -34,6 +35,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
   const meshGroupRef = useRef<THREE.Group | null>(null);
   const crosshairMarkerRef = useRef<THREE.Mesh | null>(null);
   const meshRequestIdRef = useRef(0);
+  const threeRef = useRef<typeof THREE | null>(null);
 
   const [contextKey, setContextKey] = useState(0);
   const isContextLostRef = useRef(false);
@@ -113,162 +115,190 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
     };
   }, []);
 
-  // Initialize Three.js Scene, Camera, and Renderer
+  // Initialize Three.js Scene, Camera, and Renderer Asynchronously on Demand
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    const width = container.clientWidth || 400;
-    const height = container.clientHeight || 400;
-
-    // Scene
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x09090b); // Zinc-950
-    sceneRef.current = scene;
-
-    // Camera
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-    camera.position.set(0, 0, 4.8);
-    cameraRef.current = camera;
-
-    // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
-    scene.add(ambientLight);
-
-    const dirLight1 = new THREE.DirectionalLight(0x38bdf8, 1.25); // Sky blue key light
-    dirLight1.position.set(5, 8, 6);
-    scene.add(dirLight1);
-
-    const dirLight2 = new THREE.DirectionalLight(0x818cf8, 0.85); // Indigo fill light
-    dirLight2.position.set(-5, -4, -4);
-    scene.add(dirLight2);
-
-    const rimLight = new THREE.DirectionalLight(0x06b6d4, 0.5); // Cyan rim light
-    rimLight.position.set(0, 6, -5);
-    scene.add(rimLight);
-
-    // 3D Crosshair Indicator
-    const crossGeo = new THREE.SphereGeometry(0.06, 16, 16);
-    const crossMat = new THREE.MeshBasicMaterial({ color: 0x00f5d4, wireframe: true });
-    const crosshairMarker = new THREE.Mesh(crossGeo, crossMat);
-    scene.add(crosshairMarker);
-    crosshairMarkerRef.current = crosshairMarker;
-
-    // WebGL Renderer
-    let renderer: THREE.WebGLRenderer | null = null;
-    try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setSize(width, height);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      container.innerHTML = "";
-      container.appendChild(renderer.domElement);
-      rendererRef.current = renderer;
-      bindCanvas(renderer.domElement);
-    } catch {
-      // Fallback for headless / test environments
-      return;
-    }
-
+    let isCancelled = false;
     let animId: number;
-    const animate = () => {
-      animId = requestAnimationFrame(animate);
+    let handleResize: (() => void) | null = null;
 
-      if (isContextLostRef.current || !isIntersectingRef.current) return;
+    loadGraphicsEngine().then((THREE) => {
+      if (isCancelled || !containerRef.current) return;
+      threeRef.current = THREE;
 
-      if (meshGroupRef.current) {
-        if (isRotatingRef.current && !isDraggingRef.current) {
-          rotationRef.current.y += 0.004;
+      const width = container.clientWidth || 400;
+      const height = container.clientHeight || 400;
+
+      // Scene
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x09090b); // Zinc-950
+      sceneRef.current = scene;
+
+      // Camera
+      const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+      camera.position.set(0, 0, 4.8);
+      cameraRef.current = camera;
+
+      // Lights
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
+      scene.add(ambientLight);
+
+      const dirLight1 = new THREE.DirectionalLight(0x38bdf8, 1.25); // Sky blue key light
+      dirLight1.position.set(5, 8, 6);
+      scene.add(dirLight1);
+
+      const dirLight2 = new THREE.DirectionalLight(0x818cf8, 0.85); // Indigo fill light
+      dirLight2.position.set(-5, -4, -4);
+      scene.add(dirLight2);
+
+      const rimLight = new THREE.DirectionalLight(0x06b6d4, 0.5); // Cyan rim light
+      rimLight.position.set(0, 6, -5);
+      scene.add(rimLight);
+
+      // 3D Crosshair Indicator
+      const crossGeo = new THREE.SphereGeometry(0.06, 16, 16);
+      const crossMat = new THREE.MeshBasicMaterial({ color: 0x00f5d4, wireframe: true });
+      const crosshairMarker = new THREE.Mesh(crossGeo, crossMat);
+      scene.add(crosshairMarker);
+      crosshairMarkerRef.current = crosshairMarker;
+
+      // WebGL Renderer
+      let renderer: THREE.WebGLRenderer | null = null;
+      try {
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(width, height);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        container.innerHTML = "";
+        container.appendChild(renderer.domElement);
+        rendererRef.current = renderer;
+        bindCanvas(renderer.domElement);
+      } catch {
+        // Fallback for headless / test environments
+        return;
+      }
+
+      const animate = () => {
+        animId = requestAnimationFrame(animate);
+
+        if (isContextLostRef.current || !isIntersectingRef.current) return;
+
+        if (meshGroupRef.current) {
+          if (isRotatingRef.current && !isDraggingRef.current) {
+            rotationRef.current.y += 0.004;
+          }
+          meshGroupRef.current.rotation.x = rotationRef.current.x;
+          meshGroupRef.current.rotation.y = rotationRef.current.y;
         }
-        meshGroupRef.current.rotation.x = rotationRef.current.x;
-        meshGroupRef.current.rotation.y = rotationRef.current.y;
-      }
 
-      if (renderer && scene && camera) {
-        renderer.render(scene, camera);
-      }
-    };
-    animate();
+        if (renderer && scene && camera) {
+          renderer.render(scene, camera);
+        }
+      };
+      animate();
 
-    const handleResize = () => {
-      if (!container || !renderer || !camera) return;
-      const w = container.clientWidth;
-      const h = container.clientHeight;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    };
+      handleResize = () => {
+        if (!container || !renderer || !camera) return;
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+      };
 
-    window.addEventListener("resize", handleResize);
+      window.addEventListener("resize", handleResize);
+    });
 
     return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener("resize", handleResize);
+      isCancelled = true;
+      if (animId) cancelAnimationFrame(animId);
+      if (handleResize) window.removeEventListener("resize", handleResize);
       bindCanvas(null);
-      if (renderer) {
-        renderer.dispose();
+      if (rendererRef.current) {
+        rendererRef.current.dispose();
       }
-      if (container && renderer && renderer.domElement.parentNode === container) {
-        container.removeChild(renderer.domElement);
+      if (container && rendererRef.current && rendererRef.current.domElement.parentNode === container) {
+        container.removeChild(rendererRef.current.domElement);
       }
     };
   }, [contextKey, bindCanvas]);
 
   // Update Cortical Mesh on surfaceMode, modelUrl, wireframeActive, hemiFilter, contextKey, or isNearViewport change
   useEffect(() => {
-    const scene = sceneRef.current;
-    if (!scene) return;
-
     let isMounted = true;
     const reqId = ++meshRequestIdRef.current;
 
-    const disposeGroup = (group: THREE.Group) => {
+    const disposeGroup = (group: THREE.Group, scene: THREE.Scene) => {
       scene.remove(group);
       group.traverse((obj) => {
-        if (obj instanceof THREE.Mesh) {
-          obj.geometry?.dispose();
-          if (Array.isArray(obj.material)) {
-            obj.material.forEach((m) => m.dispose());
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const meshObj = obj as any;
+        if (meshObj.geometry) {
+          meshObj.geometry.dispose();
+        }
+        if (meshObj.material) {
+          if (Array.isArray(meshObj.material)) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            meshObj.material.forEach((m: any) => m.dispose());
           } else {
-            obj.material?.dispose();
+            meshObj.material.dispose();
           }
         }
       });
     };
 
-    if (meshGroupRef.current) {
-      disposeGroup(meshGroupRef.current);
-      meshGroupRef.current = null;
-    }
+    loadGraphicsEngine().then((THREE) => {
+      if (!isMounted || reqId !== meshRequestIdRef.current || !sceneRef.current) return;
+      const scene = sceneRef.current;
 
-    if (isNearViewport && modelUrl && surfaceMode === "pial" && hemiFilter === "both") {
-      // Offload procedural surface generation to background Web Worker thread
-      createCorticalSurfaceMeshAsync(surfaceMode, wireframeActive, hemiFilter).then((fallbackGroup) => {
-        if (!isMounted || reqId !== meshRequestIdRef.current || !sceneRef.current) return;
-        if (meshGroupRef.current) {
-          disposeGroup(meshGroupRef.current);
-        }
-        sceneRef.current.add(fallbackGroup);
-        meshGroupRef.current = fallbackGroup;
-      });
+      if (meshGroupRef.current) {
+        disposeGroup(meshGroupRef.current, scene);
+        meshGroupRef.current = null;
+      }
 
-      loadExternalBrainMesh(modelUrl, surfaceMode, hemiFilter).then((externalGroup) => {
-        if (!isMounted || reqId !== meshRequestIdRef.current || !sceneRef.current) return;
-        if (meshGroupRef.current) {
-          disposeGroup(meshGroupRef.current);
-        }
-        sceneRef.current.add(externalGroup);
-        meshGroupRef.current = externalGroup;
-      });
-    } else {
-      createCorticalSurfaceMeshAsync(surfaceMode, wireframeActive, hemiFilter).then((newGroup) => {
-        if (!isMounted || reqId !== meshRequestIdRef.current || !sceneRef.current) return;
-        if (meshGroupRef.current) {
-          disposeGroup(meshGroupRef.current);
-        }
-        sceneRef.current.add(newGroup);
-        meshGroupRef.current = newGroup;
-      });
-    }
+      if (isNearViewport && modelUrl && surfaceMode === "pial" && hemiFilter === "both") {
+        // Offload procedural surface generation to background Web Worker thread
+        createCorticalSurfaceMeshBuffersAsync(surfaceMode, wireframeActive, hemiFilter).then((proceduralBuffers) => {
+          if (!isMounted || reqId !== meshRequestIdRef.current || !sceneRef.current) return;
+          if (meshGroupRef.current) {
+            disposeGroup(meshGroupRef.current, sceneRef.current);
+          }
+          const fallbackGroup = createMeshGroupFromBuffers(proceduralBuffers, THREE, {
+            wireframe: wireframeActive,
+            mode: surfaceMode,
+          });
+          sceneRef.current.add(fallbackGroup);
+          meshGroupRef.current = fallbackGroup;
+        });
+
+        loadExternalBrainBuffers(modelUrl, surfaceMode, hemiFilter).then((externalBuffers) => {
+          if (!isMounted || reqId !== meshRequestIdRef.current || !sceneRef.current) return;
+          if (meshGroupRef.current) {
+            disposeGroup(meshGroupRef.current, sceneRef.current);
+          }
+          const externalGroup = createMeshGroupFromBuffers(externalBuffers, THREE, {
+            wireframe: wireframeActive,
+            mode: surfaceMode,
+          });
+          sceneRef.current.add(externalGroup);
+          meshGroupRef.current = externalGroup;
+        });
+      } else {
+        createCorticalSurfaceMeshBuffersAsync(surfaceMode, wireframeActive, hemiFilter).then((rawBuffers) => {
+          if (!isMounted || reqId !== meshRequestIdRef.current || !sceneRef.current) return;
+          if (meshGroupRef.current) {
+            disposeGroup(meshGroupRef.current, sceneRef.current);
+          }
+          const newGroup = createMeshGroupFromBuffers(rawBuffers, THREE, {
+            wireframe: wireframeActive,
+            mode: surfaceMode,
+          });
+          sceneRef.current.add(newGroup);
+          meshGroupRef.current = newGroup;
+        });
+      }
+    });
 
     return () => {
       isMounted = false;
@@ -290,7 +320,8 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
     const container = containerRef.current;
     const camera = cameraRef.current;
     const meshGroup = meshGroupRef.current;
-    if (!container || !camera || !meshGroup) return null;
+    const THREE = threeRef.current || (typeof window !== "undefined" ? (window as unknown as { THREE?: typeof import("three") }).THREE : null);
+    if (!container || !camera || !meshGroup || !THREE) return null;
 
     const rect = container.getBoundingClientRect();
     const mouseX = ((clientX - rect.left) / rect.width) * 2 - 1;

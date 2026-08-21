@@ -2,10 +2,12 @@ import { describe, it, expect, vi } from "vitest";
 import * as THREE from "three";
 import {
   generateHemisphereBuffers,
+} from "@/lib/neuro/mesh-generator";
+import {
   createHemisphereGeometryFromBuffers,
   createCorticalSurfaceMeshFromBuffers,
   createCorticalSurfaceMeshAsync,
-} from "@/lib/neuro/mesh-generator";
+} from "@/lib/neuro/engine-loader";
 import { MeshWorkerRequest, MeshWorkerResponse } from "@/lib/neuro/types";
 
 describe("NeuroRecon Web Worker Mesh Generator & Zero-Copy ArrayBuffer Transfer Suite", () => {
