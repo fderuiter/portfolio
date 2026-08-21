@@ -198,4 +198,145 @@ describe("Graph-Extended Schema & USDM Bidirectional Adapter", () => {
     const v2 = updated.visits.find((v) => v.id === "v_c2d1");
     expect(v2?.armFormAssignments?.["arm_exp"]).toContain("form_recist_onc");
   });
+
+  it("extracts valueSets and codeList references from USDM graph specifications into study codelists", () => {
+    const customUsdmDoc = {
+      $schema: "https://www.cdisc.org/schemas/usdm/v3/usdm.schema.json",
+      schemaVersion: "3.0.0",
+      study: {
+        id: "usdm_valsets_01",
+        protocolNumber: "VS-CL-2026",
+        title: "ValueSet and Codelist Specification Test",
+        phase: "Phase II",
+        valueSets: [
+          {
+            id: "vs_dose_freq",
+            name: "Dose Frequency Value Set",
+            terms: [
+              { code: "QD", label: "Once Daily", nciCode: "C64496", order: 1 },
+              { code: "BID", label: "Twice Daily", nciCode: "C64497", order: 2 },
+            ],
+          },
+        ],
+        codeLists: [
+          {
+            id: "cl_grade",
+            name: "CTCAE Toxicity Grade",
+            nciCodelistCode: "C66769",
+            codeListItems: [
+              { code: "G1", label: "Grade 1", nciCode: "C48275", order: 1 },
+              { code: "G2", label: "Grade 2", nciCode: "C48276", order: 2 },
+            ],
+          },
+        ],
+        studyDesigns: [
+          {
+            id: "design_01",
+            name: "Main Design",
+            arms: [],
+            epochs: [],
+            cohorts: [],
+            encounters: [],
+            activities: [],
+            biomedicalConcepts: [
+              {
+                id: "bc_freq",
+                name: "Dosing Frequency",
+                properties: {
+                  codeList: {
+                    id: "cl_bc_freq",
+                    name: "BC Dosing Frequency",
+                    options: [{ code: "TID", label: "Three times daily", order: 1 }],
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    const imported = importStudyFromUsdm(customUsdmDoc);
+    expect(imported.codelists).toBeDefined();
+    expect(imported.codelists.length).toBeGreaterThanOrEqual(3);
+
+    const freqCodelist = imported.codelists.find((cl) => cl.id === "vs_dose_freq");
+    expect(freqCodelist).toBeDefined();
+    expect(freqCodelist?.name).toBe("Dose Frequency Value Set");
+    expect(freqCodelist?.options.length).toBe(2);
+    expect(freqCodelist?.options[0].code).toBe("QD");
+
+    const gradeCodelist = imported.codelists.find((cl) => cl.id === "cl_grade");
+    expect(gradeCodelist).toBeDefined();
+    expect(gradeCodelist?.nciCodelistCode).toBe("C66769");
+    expect(gradeCodelist?.options[1].code).toBe("G2");
+
+    const bcFreqCodelist = imported.codelists.find((cl) => cl.id === "cl_bc_freq");
+    expect(bcFreqCodelist).toBeDefined();
+    expect(bcFreqCodelist?.options[0].code).toBe("TID");
+  });
+
+  it("maps windowBefore and windowAfter visit tolerances to constrain study schedule rules", () => {
+    const customUsdmDoc = {
+      $schema: "https://www.cdisc.org/schemas/usdm/v3/usdm.schema.json",
+      schemaVersion: "3.0.0",
+      study: {
+        id: "usdm_tolerances_01",
+        protocolNumber: "TOL-2026",
+        title: "Visit Tolerance Schedule Rules Test",
+        phase: "Phase III",
+        studyDesigns: [
+          {
+            id: "design_01",
+            name: "Tolerance Design",
+            arms: [],
+            epochs: [],
+            cohorts: [],
+            encounters: [
+              {
+                id: "enc_v1",
+                name: "Week 2 Visit",
+                type: "Scheduled",
+                targetDay: 14,
+                windowBefore: 3,
+                windowAfter: 5,
+              },
+              {
+                id: "enc_v2",
+                name: "Month 1 Visit",
+                type: "Scheduled",
+                targetDay: 30,
+                windowBefore: 2,
+                windowAfter: 2,
+              },
+            ],
+            activities: [],
+            biomedicalConcepts: [],
+          },
+        ],
+      },
+    };
+
+    const imported = importStudyFromUsdm(customUsdmDoc);
+    expect(imported.visits.length).toBe(2);
+    expect(imported.rules).toBeDefined();
+
+    const ruleV1 = imported.rules?.find((r) => r.id === "rule_sched_enc_v1");
+    expect(ruleV1).toBeDefined();
+    expect(ruleV1?.name).toContain("Week 2 Visit");
+    expect(ruleV1?.actionType).toBe("raise_query");
+    // Target Day 14, windowBefore 3, windowAfter 5 => minDay = 11, maxDay = 19
+    const condGteV1 = ruleV1?.conditions.find((c) => c.operator === "gte");
+    const condLteV1 = ruleV1?.conditions.find((c) => c.operator === "lte");
+    expect(condGteV1?.value).toBe(11);
+    expect(condLteV1?.value).toBe(19);
+
+    const ruleV2 = imported.rules?.find((r) => r.id === "rule_sched_enc_v2");
+    expect(ruleV2).toBeDefined();
+    // Target Day 30, windowBefore 2, windowAfter 2 => minDay = 28, maxDay = 32
+    const condGteV2 = ruleV2?.conditions.find((c) => c.operator === "gte");
+    const condLteV2 = ruleV2?.conditions.find((c) => c.operator === "lte");
+    expect(condGteV2?.value).toBe(28);
+    expect(condLteV2?.value).toBe(32);
+  });
 });
