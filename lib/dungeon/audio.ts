@@ -3,28 +3,56 @@
  * Safe for SSR, Node, and headless test environments.
  */
 
+/**
+ * Procedural Web Audio API 8-Bit Chiptune Sound Synthesizer
+ * Safe for SSR, Node, and headless test environments.
+ */
+
+import { useEffect } from "react";
+import {
+  getGovernedAudioContext,
+  getGovernedVolume,
+  isGovernedSoundAllowed,
+  registerAudioCleanup,
+} from "@/components/providers/AudioProvider";
+
 export class RetroAudioEngine {
-  private ctx: AudioContext | null = null;
   private isMuted: boolean = false;
+  private activeSources = new Set<AudioScheduledSourceNode>();
 
   private getContext(): AudioContext | null {
-    if (typeof window === "undefined") return null;
-    if (!this.ctx) {
-      const AudioCtx =
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (AudioCtx) {
-        this.ctx = new AudioCtx();
-      }
-    }
-    if (this.ctx && this.ctx.state === "suspended") {
-      this.ctx.resume().catch(() => {});
-    }
-    return this.ctx;
+    return getGovernedAudioContext();
+  }
+
+  private isSoundAllowed(): boolean {
+    return !this.isMuted && isGovernedSoundAllowed();
+  }
+
+  private trackSource<T extends AudioScheduledSourceNode>(source: T): T {
+    this.activeSources.add(source);
+    try {
+      source.addEventListener("ended", () => {
+        this.activeSources.delete(source);
+      });
+    } catch {}
+    return source;
+  }
+
+  public stopAll(): void {
+    this.activeSources.forEach((src) => {
+      try {
+        src.stop();
+        src.disconnect();
+      } catch {}
+    });
+    this.activeSources.clear();
   }
 
   public setMuted(muted: boolean): void {
     this.isMuted = muted;
+    if (muted) {
+      this.stopAll();
+    }
   }
 
   public getMuted(): boolean {
@@ -40,19 +68,22 @@ export class RetroAudioEngine {
     type: OscillatorType = "square",
     volume: number = 0.08
   ): void {
-    if (this.isMuted) return;
+    if (!this.isSoundAllowed()) return;
     const ctx = this.getContext();
     if (!ctx) return;
 
     try {
-      const osc = ctx.createOscillator();
+      const masterVolume = getGovernedVolume();
+      const effectiveVolume = Math.max(0.0001, volume * masterVolume);
+
+      const osc = this.trackSource(ctx.createOscillator());
       const gain = ctx.createGain();
 
       osc.type = type;
       osc.frequency.setValueAtTime(freq, ctx.currentTime);
 
-      gain.gain.setValueAtTime(volume, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + durationMs / 1000);
+      gain.gain.setValueAtTime(effectiveVolume, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + durationMs / 1000);
 
       osc.connect(gain);
       gain.connect(ctx.destination);
@@ -75,19 +106,20 @@ export class RetroAudioEngine {
    * Port Scan frequency ramp.
    */
   public playPortScan(): void {
-    if (this.isMuted) return;
+    if (!this.isSoundAllowed()) return;
     const ctx = this.getContext();
     if (!ctx) return;
 
     try {
-      const osc = ctx.createOscillator();
+      const masterVolume = getGovernedVolume();
+      const osc = this.trackSource(ctx.createOscillator());
       const gain = ctx.createGain();
 
       osc.type = "sawtooth";
       osc.frequency.setValueAtTime(400, ctx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.15);
 
-      gain.gain.setValueAtTime(0.06, ctx.currentTime);
+      gain.gain.setValueAtTime(0.06 * masterVolume, ctx.currentTime);
       gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime + 0.15);
 
       osc.connect(gain);
@@ -102,19 +134,20 @@ export class RetroAudioEngine {
    * High-impact Exploit blast sound.
    */
   public playExploitBlast(): void {
-    if (this.isMuted) return;
+    if (!this.isSoundAllowed()) return;
     const ctx = this.getContext();
     if (!ctx) return;
 
     try {
-      const osc = ctx.createOscillator();
+      const masterVolume = getGovernedVolume();
+      const osc = this.trackSource(ctx.createOscillator());
       const gain = ctx.createGain();
 
       osc.type = "sawtooth";
       osc.frequency.setValueAtTime(280, ctx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(60, ctx.currentTime + 0.25);
 
-      gain.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain.gain.setValueAtTime(0.1 * masterVolume, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
 
       osc.connect(gain);
@@ -164,3 +197,15 @@ export class RetroAudioEngine {
 }
 
 export const retroAudio = new RetroAudioEngine();
+
+registerAudioCleanup(() => {
+  retroAudio.stopAll();
+});
+
+export function useRetroAudioCleanup(): void {
+  useEffect(() => {
+    return () => {
+      retroAudio.stopAll();
+    };
+  }, []);
+}

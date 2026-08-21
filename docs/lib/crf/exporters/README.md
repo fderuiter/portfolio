@@ -14,6 +14,12 @@ Re-exports [AcrfHtmlOptions](../export-acrf/interfaces/AcrfHtmlOptions.md)
 
 ***
 
+### diffUsdmProtocols
+
+Re-exports [diffUsdmProtocols](../usdm-adapter/functions/diffUsdmProtocols.md)
+
+***
+
 ### escapeRString
 
 Re-exports [escapeRString](../export-r/functions/escapeRString.md)
@@ -71,6 +77,18 @@ Re-exports [exportStudyToR](../export-r/functions/exportStudyToR.md)
 ### exportStudyToSas
 
 Re-exports [exportStudyToSas](../export-sas/functions/exportStudyToSas.md)
+
+***
+
+### exportStudyToUsdm
+
+Re-exports [exportStudyToUsdm](../usdm-adapter/functions/exportStudyToUsdm.md)
+
+***
+
+### exportStudyToUsdmObject
+
+Re-exports [exportStudyToUsdmObject](../usdm-adapter/functions/exportStudyToUsdmObject.md)
 
 ***
 
@@ -152,6 +170,12 @@ Re-exports [getSasFormatName](../export-sas/functions/getSasFormatName.md)
 
 ***
 
+### importStudyFromUsdm
+
+Re-exports [importStudyFromUsdm](../usdm-adapter/functions/importStudyFromUsdm.md)
+
+***
+
 ### parseMultiSelectValue
 
 Re-exports [parseMultiSelectValue](../export-r/functions/parseMultiSelectValue.md)
@@ -179,3 +203,69 @@ Re-exports [SdtmMappingRow](../export-acrf/interfaces/SdtmMappingRow.md)
 ### serializeStudyToOdmXml
 
 Re-exports [serializeStudyToOdmXml](../odm-xml-serializer/variables/serializeStudyToOdmXml.md)
+
+***
+
+### UsdmActivity
+
+Re-exports [UsdmActivity](../usdm-adapter/interfaces/UsdmActivity.md)
+
+***
+
+### UsdmArm
+
+Re-exports [UsdmArm](../usdm-adapter/interfaces/UsdmArm.md)
+
+***
+
+### UsdmBiomedicalConcept
+
+Re-exports [UsdmBiomedicalConcept](../usdm-adapter/interfaces/UsdmBiomedicalConcept.md)
+
+***
+
+### UsdmBiomedicalConceptProperty
+
+Re-exports [UsdmBiomedicalConceptProperty](../usdm-adapter/interfaces/UsdmBiomedicalConceptProperty.md)
+
+***
+
+### UsdmCohort
+
+Re-exports [UsdmCohort](../usdm-adapter/interfaces/UsdmCohort.md)
+
+***
+
+### UsdmDiffSummary
+
+Re-exports [UsdmDiffSummary](../usdm-adapter/interfaces/UsdmDiffSummary.md)
+
+***
+
+### UsdmDocument
+
+Re-exports [UsdmDocument](../usdm-adapter/interfaces/UsdmDocument.md)
+
+***
+
+### UsdmEncounter
+
+Re-exports [UsdmEncounter](../usdm-adapter/interfaces/UsdmEncounter.md)
+
+***
+
+### UsdmEpoch
+
+Re-exports [UsdmEpoch](../usdm-adapter/interfaces/UsdmEpoch.md)
+
+***
+
+### UsdmStudy
+
+Re-exports [UsdmStudy](../usdm-adapter/interfaces/UsdmStudy.md)
+
+***
+
+### UsdmStudyDesign
+
+Re-exports [UsdmStudyDesign](../usdm-adapter/interfaces/UsdmStudyDesign.md)

@@ -6,7 +6,7 @@
 
 # Interface: Token
 
-Defined in: [lib/crf/expression-evaluator.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L9)
+Defined in: [lib/crf/expression-evaluator.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L24)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/expression-evaluator.ts:9](https://github.com/fderuiter/por
 
 > `optional` **end?**: `number`
 
-Defined in: [lib/crf/expression-evaluator.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L13)
+Defined in: [lib/crf/expression-evaluator.ts:28](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L28)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/expression-evaluator.ts:13](https://github.com/fderuiter/po
 
 > `optional` **start?**: `number`
 
-Defined in: [lib/crf/expression-evaluator.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L12)
+Defined in: [lib/crf/expression-evaluator.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L27)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/expression-evaluator.ts:12](https://github.com/fderuiter/po
 
 > **type**: [`TokenType`](../type-aliases/TokenType.md)
 
-Defined in: [lib/crf/expression-evaluator.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L10)
+Defined in: [lib/crf/expression-evaluator.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L25)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/crf/expression-evaluator.ts:10](https://github.com/fderuiter/po
 
 > **value**: `string`
 
-Defined in: [lib/crf/expression-evaluator.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L11)
+Defined in: [lib/crf/expression-evaluator.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L26)

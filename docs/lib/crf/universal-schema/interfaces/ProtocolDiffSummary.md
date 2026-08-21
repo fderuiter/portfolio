@@ -6,15 +6,47 @@
 
 # Interface: ProtocolDiffSummary
 
-Defined in: [lib/crf/universal-schema.ts:419](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L419)
+Defined in: [lib/crf/universal-schema.ts:478](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L478)
 
 ## Properties
+
+### addedArms
+
+> **addedArms**: `string`[]
+
+Defined in: [lib/crf/universal-schema.ts:494](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L494)
+
+***
+
+### addedCohorts
+
+> **addedCohorts**: `string`[]
+
+Defined in: [lib/crf/universal-schema.ts:498](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L498)
+
+***
+
+### addedConcepts
+
+> **addedConcepts**: `string`[]
+
+Defined in: [lib/crf/universal-schema.ts:500](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L500)
+
+***
+
+### addedEpochs
+
+> **addedEpochs**: `string`[]
+
+Defined in: [lib/crf/universal-schema.ts:496](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L496)
+
+***
 
 ### addedForms
 
 > **addedForms**: `string`[]
 
-Defined in: [lib/crf/universal-schema.ts:422](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L422)
+Defined in: [lib/crf/universal-schema.ts:481](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L481)
 
 ***
 
@@ -22,7 +54,7 @@ Defined in: [lib/crf/universal-schema.ts:422](https://github.com/fderuiter/portf
 
 > **addedVisits**: `string`[]
 
-Defined in: [lib/crf/universal-schema.ts:433](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L433)
+Defined in: [lib/crf/universal-schema.ts:492](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L492)
 
 ***
 
@@ -30,7 +62,7 @@ Defined in: [lib/crf/universal-schema.ts:433](https://github.com/fderuiter/portf
 
 > **hasChanges**: `boolean`
 
-Defined in: [lib/crf/universal-schema.ts:421](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L421)
+Defined in: [lib/crf/universal-schema.ts:480](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L480)
 
 ***
 
@@ -38,7 +70,7 @@ Defined in: [lib/crf/universal-schema.ts:421](https://github.com/fderuiter/portf
 
 > **modifiedForms**: `object`[]
 
-Defined in: [lib/crf/universal-schema.ts:424](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L424)
+Defined in: [lib/crf/universal-schema.ts:483](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L483)
 
 #### addedFields
 
@@ -74,7 +106,39 @@ Defined in: [lib/crf/universal-schema.ts:424](https://github.com/fderuiter/portf
 
 > **protocolNumber**: `string`
 
-Defined in: [lib/crf/universal-schema.ts:420](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L420)
+Defined in: [lib/crf/universal-schema.ts:479](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L479)
+
+***
+
+### removedArms
+
+> **removedArms**: `string`[]
+
+Defined in: [lib/crf/universal-schema.ts:495](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L495)
+
+***
+
+### removedCohorts
+
+> **removedCohorts**: `string`[]
+
+Defined in: [lib/crf/universal-schema.ts:499](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L499)
+
+***
+
+### removedConcepts
+
+> **removedConcepts**: `string`[]
+
+Defined in: [lib/crf/universal-schema.ts:501](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L501)
+
+***
+
+### removedEpochs
+
+> **removedEpochs**: `string`[]
+
+Defined in: [lib/crf/universal-schema.ts:497](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L497)
 
 ***
 
@@ -82,7 +146,7 @@ Defined in: [lib/crf/universal-schema.ts:420](https://github.com/fderuiter/portf
 
 > **removedForms**: `string`[]
 
-Defined in: [lib/crf/universal-schema.ts:423](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L423)
+Defined in: [lib/crf/universal-schema.ts:482](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L482)
 
 ***
 
@@ -90,4 +154,4 @@ Defined in: [lib/crf/universal-schema.ts:423](https://github.com/fderuiter/portf
 
 > **removedVisits**: `string`[]
 
-Defined in: [lib/crf/universal-schema.ts:434](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L434)
+Defined in: [lib/crf/universal-schema.ts:493](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L493)

@@ -23,17 +23,46 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
 }) => {
   const [editingVisitId, setEditingVisitId] = useState<string | null>(null);
   const [viewFormat, setViewFormat] = useState<"table" | "cards">("table");
+  const [selectedArmId, setSelectedArmId] = useState<string>("all");
   const [selectedCardVisitId, setSelectedCardVisitId] = useState<string>(
     study.visits[0]?.id || ""
   );
 
+  const arms = study.arms || [];
+  const epochs = study.epochs || [];
+  const epochMap = new Map(epochs.map((e) => [e.id, e.name]));
+
+  const getFormAssignment = (visit: StudyVisit, formId: string) => {
+    if (selectedArmId !== "all" && visit.armFormAssignments?.[selectedArmId]) {
+      return visit.armFormAssignments[selectedArmId].includes(formId);
+    }
+    return visit.assignedFormIds.includes(formId);
+  };
+
   const handleToggleFormAtVisit = (visitId: string, formId: string) => {
     const updated = study.visits.map((v) => {
       if (v.id !== visitId) return v;
-      const assigned = v.assignedFormIds.includes(formId)
-        ? v.assignedFormIds.filter((id) => id !== formId)
-        : [...v.assignedFormIds, formId];
-      return { ...v, assignedFormIds: assigned };
+
+      if (selectedArmId !== "all") {
+        const currentArmForms = v.armFormAssignments?.[selectedArmId] || [...v.assignedFormIds];
+        const nextArmForms = currentArmForms.includes(formId)
+          ? currentArmForms.filter((id) => id !== formId)
+          : [...currentArmForms, formId];
+
+        const armAssignments = { ...(v.armFormAssignments || {}) };
+        armAssignments[selectedArmId] = nextArmForms;
+
+        return {
+          ...v,
+          armFormAssignments: armAssignments,
+          armIds: Array.from(new Set([...(v.armIds || []), selectedArmId])),
+        };
+      } else {
+        const assigned = v.assignedFormIds.includes(formId)
+          ? v.assignedFormIds.filter((id) => id !== formId)
+          : [...v.assignedFormIds, formId];
+        return { ...v, assignedFormIds: assigned };
+      }
     });
     onUpdateVisits(updated);
   };
@@ -83,7 +112,7 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
             </h1>
           </div>
           <p className="text-xs text-zinc-400 font-sans mt-1">
-            Map clinical forms to protocol visits and configure allowable window tolerances (± days).
+            Map clinical forms to protocol visits and configure allowable window tolerances (± days) across study arms and epochs.
           </p>
         </div>
 
@@ -126,6 +155,40 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
         </div>
       </div>
 
+      {/* Arm Selector Filter Bar */}
+      {arms.length > 0 && (
+        <div className="mb-4 p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+          <div className="flex items-center gap-2 text-zinc-300">
+            <span className="font-bold text-brand-cyan">Active Study Arm Scope:</span>
+          </div>
+          <div className="flex items-center gap-2 overflow-x-auto">
+            <button
+              onClick={() => setSelectedArmId("all")}
+              className={`px-3 py-1 rounded-lg transition-all border ${
+                selectedArmId === "all"
+                  ? "bg-brand-cyan text-black font-bold border-brand-cyan"
+                  : "bg-zinc-950 text-zinc-400 border-zinc-800 hover:text-white"
+              }`}
+            >
+              All Arms (Combined Schedule)
+            </button>
+            {arms.map((arm) => (
+              <button
+                key={arm.id}
+                onClick={() => setSelectedArmId(arm.id)}
+                className={`px-3 py-1 rounded-lg transition-all border whitespace-nowrap ${
+                  selectedArmId === arm.id
+                    ? "bg-brand-cyan text-black font-bold border-brand-cyan"
+                    : "bg-zinc-950 text-zinc-400 border-zinc-800 hover:text-white"
+                }`}
+              >
+                [{arm.type}] {arm.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Cards View (Optimized for Mobile Phones & Small Tablets) */}
       {viewFormat === "cards" ? (
         <div className="space-y-4 max-w-2xl mx-auto w-full">
@@ -158,6 +221,11 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
                   </h2>
                   <div className="text-xs text-brand-cyan font-mono mt-0.5">
                     Target Day {currentCardVisit.targetDay} (±{currentCardVisit.windowBefore}d window)
+                    {currentCardVisit.epochId && epochMap.has(currentCardVisit.epochId) && (
+                      <span className="ml-2 text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-500/30">
+                        {epochMap.get(currentCardVisit.epochId)}
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -193,7 +261,7 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
                 </div>
                 <div className="space-y-1.5">
                   {study.forms.map((form) => {
-                    const isAssigned = currentCardVisit.assignedFormIds.includes(form.id);
+                    const isAssigned = getFormAssignment(currentCardVisit, form.id);
                     return (
                       <div
                         key={form.id}
@@ -256,6 +324,11 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
                       <div className="text-[10px] font-mono text-brand-cyan">
                         Day {visit.targetDay} (±{visit.windowBefore}d)
                       </div>
+                      {visit.epochId && epochMap.has(visit.epochId) && (
+                        <div className="text-[9px] font-mono text-purple-400">
+                          {epochMap.get(visit.epochId)}
+                        </div>
+                      )}
                       <div className="flex items-center justify-center gap-1.5 pt-1">
                         <button
                           onClick={() =>
@@ -300,7 +373,7 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
                   </td>
 
                   {study.visits.map((visit) => {
-                    const isAssigned = visit.assignedFormIds.includes(form.id);
+                    const isAssigned = getFormAssignment(visit, form.id);
 
                     return (
                       <td

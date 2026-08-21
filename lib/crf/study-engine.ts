@@ -12,6 +12,10 @@ import {
   StudyVisit,
   EditCheckRule,
   ClinicalDataType,
+  StudyArm,
+  StudyEpoch,
+  StudyCohort,
+  BiomedicalConcept,
 } from "./types";
 import { lintForm } from "./ast-evaluator";
 import {
@@ -23,6 +27,7 @@ import { exportStudyToCdiscOdmXml } from "./odm-xml-serializer";
 import { exportStudyToFhirQuestionnaire } from "./fhir-questionnaire";
 import { exportStudyToSas } from "./export-sas";
 import { exportStudyToR } from "./export-r";
+import { exportStudyToUsdm } from "./usdm-adapter";
 import {
   exportUniversalCrfJson,
   exportUniversalCrfYaml,
@@ -576,6 +581,200 @@ export class StudyProtocolEngine {
   }
 
   /**
+   * Assign Forms to a Study Visit specifically for a designated Study Arm
+   */
+  static assignArmVisitForms(
+    study: StudyProtocol,
+    visitIdOrName: string,
+    armId: string,
+    formIdsOrDomains: string[]
+  ): { study: StudyProtocol; visit?: StudyVisit; error?: string } {
+    const target = visitIdOrName.trim().toLowerCase();
+    const visit = study.visits.find(
+      (v) => v.id === visitIdOrName || v.name.toLowerCase() === target
+    );
+
+    if (!visit) {
+      return { study, error: `Visit '${visitIdOrName}' not found in protocol.` };
+    }
+
+    const resolvedFormIds: string[] = [];
+    for (const token of formIdsOrDomains) {
+      const f = this.getForm(study, token);
+      if (f && !resolvedFormIds.includes(f.id)) {
+        resolvedFormIds.push(f.id);
+      }
+    }
+
+    const armAssignments = { ...(visit.armFormAssignments || {}) };
+    armAssignments[armId] = resolvedFormIds;
+
+    const armIds = Array.from(new Set([...(visit.armIds || []), armId]));
+    const updatedVisit: StudyVisit = {
+      ...visit,
+      armIds,
+      armFormAssignments: armAssignments,
+    };
+
+    const updatedStudy: StudyProtocol = {
+      ...study,
+      lastModified: new Date().toISOString(),
+      visits: study.visits.map((v) => (v.id === visit.id ? updatedVisit : v)),
+    };
+
+    return { study: updatedStudy, visit: updatedVisit };
+  }
+
+  /**
+   * Add Study Arm to Protocol Graph
+   */
+  static addArm(study: StudyProtocol, arm: StudyArm): { study: StudyProtocol; arm: StudyArm } {
+    const existingArms = study.arms || [];
+    const updatedStudy: StudyProtocol = {
+      ...study,
+      lastModified: new Date().toISOString(),
+      arms: [...existingArms.filter((a) => a.id !== arm.id), arm],
+    };
+    return { study: updatedStudy, arm };
+  }
+
+  /**
+   * Remove Study Arm from Protocol Graph
+   */
+  static removeArm(study: StudyProtocol, armId: string): { study: StudyProtocol; removedArm?: StudyArm } {
+    const existingArms = study.arms || [];
+    const removedArm = existingArms.find((a) => a.id === armId);
+    if (!removedArm) return { study };
+    const updatedStudy: StudyProtocol = {
+      ...study,
+      lastModified: new Date().toISOString(),
+      arms: existingArms.filter((a) => a.id !== armId),
+    };
+    return { study: updatedStudy, removedArm };
+  }
+
+  /**
+   * Add Study Epoch to Protocol Graph
+   */
+  static addEpoch(study: StudyProtocol, epoch: StudyEpoch): { study: StudyProtocol; epoch: StudyEpoch } {
+    const existingEpochs = study.epochs || [];
+    const updatedEpochs = [...existingEpochs.filter((e) => e.id !== epoch.id), epoch].sort(
+      (a, b) => a.sequenceNumber - b.sequenceNumber
+    );
+    const updatedStudy: StudyProtocol = {
+      ...study,
+      lastModified: new Date().toISOString(),
+      epochs: updatedEpochs,
+    };
+    return { study: updatedStudy, epoch };
+  }
+
+  /**
+   * Remove Study Epoch from Protocol Graph
+   */
+  static removeEpoch(study: StudyProtocol, epochId: string): { study: StudyProtocol; removedEpoch?: StudyEpoch } {
+    const existingEpochs = study.epochs || [];
+    const removedEpoch = existingEpochs.find((e) => e.id === epochId);
+    if (!removedEpoch) return { study };
+    const updatedStudy: StudyProtocol = {
+      ...study,
+      lastModified: new Date().toISOString(),
+      epochs: existingEpochs.filter((e) => e.id !== epochId),
+    };
+    return { study: updatedStudy, removedEpoch };
+  }
+
+  /**
+   * Add Study Cohort to Protocol Graph
+   */
+  static addCohort(study: StudyProtocol, cohort: StudyCohort): { study: StudyProtocol; cohort: StudyCohort } {
+    const existingCohorts = study.cohorts || [];
+    const updatedStudy: StudyProtocol = {
+      ...study,
+      lastModified: new Date().toISOString(),
+      cohorts: [...existingCohorts.filter((c) => c.id !== cohort.id), cohort],
+    };
+    return { study: updatedStudy, cohort };
+  }
+
+  /**
+   * Remove Study Cohort from Protocol Graph
+   */
+  static removeCohort(study: StudyProtocol, cohortId: string): { study: StudyProtocol; removedCohort?: StudyCohort } {
+    const existingCohorts = study.cohorts || [];
+    const removedCohort = existingCohorts.find((c) => c.id === cohortId);
+    if (!removedCohort) return { study };
+    const updatedStudy: StudyProtocol = {
+      ...study,
+      lastModified: new Date().toISOString(),
+      cohorts: existingCohorts.filter((c) => c.id !== cohortId),
+    };
+    return { study: updatedStudy, removedCohort };
+  }
+
+  /**
+   * Add Biomedical Concept to Protocol Graph
+   */
+  static addBiomedicalConcept(
+    study: StudyProtocol,
+    concept: BiomedicalConcept
+  ): { study: StudyProtocol; concept: BiomedicalConcept } {
+    const existingConcepts = study.biomedicalConcepts || [];
+    const updatedStudy: StudyProtocol = {
+      ...study,
+      lastModified: new Date().toISOString(),
+      biomedicalConcepts: [...existingConcepts.filter((c) => c.id !== concept.id), concept],
+    };
+    return { study: updatedStudy, concept };
+  }
+
+  /**
+   * Constructs an arm-aware visit matrix reflecting form assignments across study arms and epochs
+   */
+  static getArmAwareVisitMatrix(study: StudyProtocol) {
+    const arms = study.arms || [];
+    const epochs = study.epochs || [];
+    const epochMap = new Map(epochs.map((e) => [e.id, e.name]));
+
+    if (arms.length === 0) {
+      return [
+        {
+          armId: undefined,
+          armName: "Default Protocol Schedule",
+          visits: study.visits.map((v) => ({
+            visitId: v.id,
+            visitName: v.name,
+            targetDay: v.targetDay,
+            epochId: v.epochId,
+            epochName: v.epochId ? epochMap.get(v.epochId) : undefined,
+            assignedFormIds: v.assignedFormIds,
+          })),
+        },
+      ];
+    }
+
+    return arms.map((arm) => {
+      const armVisits = study.visits.map((v) => {
+        const armSpecificForms = v.armFormAssignments?.[arm.id] || v.assignedFormIds;
+        return {
+          visitId: v.id,
+          visitName: v.name,
+          targetDay: v.targetDay,
+          epochId: v.epochId,
+          epochName: v.epochId ? epochMap.get(v.epochId) : undefined,
+          assignedFormIds: armSpecificForms,
+        };
+      });
+
+      return {
+        armId: arm.id,
+        armName: arm.name,
+        visits: armVisits,
+      };
+    });
+  }
+
+  /**
    * Add Dynamic AST Edit Check / Calculation Rule to Form
    */
   static addRule(
@@ -759,7 +958,7 @@ export class StudyProtocolEngine {
    */
   static exportProtocol(
     study: StudyProtocol,
-    format: "json" | "yaml" | "odm" | "fhir" | "sas" | "r"
+    format: "json" | "yaml" | "odm" | "fhir" | "sas" | "r" | "usdm"
   ): { success: boolean; output: string; format: string; sizeBytes: number; error?: string } {
     try {
       let output = "";
@@ -781,6 +980,9 @@ export class StudyProtocolEngine {
           break;
         case "r":
           output = exportStudyToR(study);
+          break;
+        case "usdm":
+          output = exportStudyToUsdm(study);
           break;
         default:
           return {

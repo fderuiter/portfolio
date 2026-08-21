@@ -30,3 +30,4 @@
 - [evaluateCondition](functions/evaluateCondition.md)
 - [evaluateFormula](functions/evaluateFormula.md)
 - [evaluateRule](functions/evaluateRule.md)
+- [isMissingOrNullFlavor](functions/isMissingOrNullFlavor.md)

@@ -12,11 +12,15 @@ import {
   PowerUpInventory,
   PowerUpType,
   ProtocolAmendment,
+  RecordedRuleViolation,
   SDTMRow,
   SignatureReason,
   StationConfig,
 } from "./types";
 import { AMENDMENT_PRESETS } from "./scenarios";
+import { evaluateCondition, evaluateRule } from "../crf/ast-evaluator";
+import { EditCheckRule, StudyProtocol, CRFField } from "../crf/types";
+import { StudyProtocolEngine } from "../crf/study-engine";
 
 export function createInitialScoreState(): GameScoreState {
   return {
@@ -113,22 +117,123 @@ export function createAuditLogEntry(
 }
 
 /**
- * Validates a user's multi-choice answer on a clinical observation.
+ * Validates a user's multi-choice answer on a clinical observation using authored AST conditions.
  */
 export function validateObservationChoice(
   observation: ClinicalObservation,
-  selectedChoice: string
+  selectedChoice: string,
+  activeProtocol?: StudyProtocol | null
 ): {
   observation: ClinicalObservation;
   isValid: boolean;
   explanation: string;
   suspicionDelta: number;
   scoreDelta: number;
+  isAstEvaluated: boolean;
+  ruleName?: string;
 } {
-  const expected = observation.correctedValue ?? observation.rawValue;
-  const isCorrect = selectedChoice.trim() === expected.trim();
+  let ruleToEvaluate: EditCheckRule | undefined = observation.astRule;
+  let ruleName = ruleToEvaluate?.name || `AST Check (${observation.field})`;
 
-  if (isCorrect) {
+  if (activeProtocol) {
+    const protocolRules: EditCheckRule[] = [];
+    if (activeProtocol.forms) {
+      activeProtocol.forms.forEach((form) => {
+        if (form.rules && form.rules.length > 0) {
+          form.rules.forEach((r) => {
+            if (
+              r.targetFieldId === observation.field ||
+              r.targetFieldId === observation.fieldId ||
+              r.triggerFieldIds.includes(observation.field) ||
+              (observation.fieldId && r.triggerFieldIds.includes(observation.fieldId))
+            ) {
+              protocolRules.push(r);
+            }
+          });
+        }
+      });
+    }
+    if (activeProtocol.rules && activeProtocol.rules.length > 0) {
+      activeProtocol.rules.forEach((r) => {
+        if (
+          r.targetFieldId === observation.field ||
+          r.targetFieldId === observation.fieldId ||
+          r.triggerFieldIds.includes(observation.field) ||
+          (observation.fieldId && r.triggerFieldIds.includes(observation.fieldId))
+        ) {
+          protocolRules.push(r);
+        }
+      });
+    }
+    if (protocolRules.length > 0) {
+      ruleToEvaluate = protocolRules[0];
+      ruleName = ruleToEvaluate.name;
+    }
+  }
+
+  const fieldValues: Record<string, string | number | boolean | null | undefined> = {
+    [observation.field]: selectedChoice,
+    [observation.field.toLowerCase()]: selectedChoice,
+  };
+  if (observation.fieldId) {
+    fieldValues[observation.fieldId] = selectedChoice;
+    fieldValues[observation.fieldId.toLowerCase()] = selectedChoice;
+  }
+
+  const fieldsList: CRFField[] = [
+    {
+      id: observation.fieldId || observation.field,
+      variableName: observation.field,
+      label: observation.field,
+      dataType: "text",
+      columnSpan: 6,
+      required: true,
+    },
+  ];
+
+  let isValid = false;
+  let explanation = "";
+
+  if (ruleToEvaluate && ruleToEvaluate.conditions && ruleToEvaluate.conditions.length > 0) {
+    isValid = evaluateRule(ruleToEvaluate, fieldValues, fieldsList);
+    if (isValid) {
+      explanation =
+        ruleToEvaluate.description ||
+        `Authored AST Rule '${ruleName}' PASSED: '${selectedChoice}' satisfies condition.`;
+    } else {
+      const failedCond = ruleToEvaluate.conditions[0];
+      explanation =
+        ruleToEvaluate.queryMessage ||
+        `Authored AST Rule '${ruleName}' FAILED: '${selectedChoice}' violates condition (${failedCond.fieldId} ${failedCond.operator} ${failedCond.value}).`;
+    }
+  } else if (observation.astConditions && observation.astConditions.length > 0) {
+    isValid = observation.astConditions.every((cond) =>
+      evaluateCondition(cond, fieldValues, fieldsList)
+    );
+    if (isValid) {
+      explanation = `AST Condition PASSED: '${selectedChoice}' satisfies condition.`;
+    } else {
+      explanation = `AST Condition FAILED: '${selectedChoice}' violates condition.`;
+    }
+  } else {
+    // Fallback AST condition evaluation (evaluates via AST evaluateCondition)
+    const expected = observation.correctedValue ?? observation.rawValue;
+    const syntheticCond = {
+      fieldId: observation.field,
+      operator: "eq" as const,
+      value: expected.trim(),
+    };
+    isValid = evaluateCondition(syntheticCond, fieldValues, fieldsList);
+    if (isValid) {
+      explanation =
+        observation.explanation ||
+        `Correct CDISC standardization applied: '${selectedChoice}' complies with ${observation.destination} specification.`;
+    } else {
+      explanation = `Invalid regulatory code: '${selectedChoice}' does not resolve '${observation.field}' (${observation.hint || "Review standard terminology"}).`;
+    }
+  }
+
+  if (isValid) {
     return {
       observation: {
         ...observation,
@@ -136,11 +241,11 @@ export function validateObservationChoice(
         isResolved: true,
       },
       isValid: true,
-      explanation:
-        observation.explanation ||
-        `Correct CDISC standardization applied: '${selectedChoice}' complies with ${observation.destination} specification.`,
+      explanation,
       suspicionDelta: -3,
       scoreDelta: 75,
+      isAstEvaluated: true,
+      ruleName,
     };
   } else {
     return {
@@ -149,9 +254,11 @@ export function validateObservationChoice(
         isResolved: false,
       },
       isValid: false,
-      explanation: `Invalid regulatory code: '${selectedChoice}' does not resolve '${observation.field}' (${observation.hint || "Review standard terminology"}).`,
+      explanation,
       suspicionDelta: 8,
       scoreDelta: -25,
+      isAstEvaluated: true,
+      ruleName,
     };
   }
 }
@@ -576,7 +683,9 @@ export function exportToSDTMCSV(sdtmRows: SDTMRow[]): string {
 export function generateBIMOReport(
   scoreState: GameScoreState,
   auditorState: AuditorState,
-  _logs?: AuditLogEntry[]
+  _logs?: AuditLogEntry[],
+  ruleViolations?: RecordedRuleViolation[],
+  activeProtocol?: StudyProtocol | null
 ): BIMOInspectionReport {
   const totalSubmissions = scoreState.subjectsSubmitted;
   const violations = scoreState.auditViolations;
@@ -589,7 +698,44 @@ export function generateBIMOReport(
 
   const findings: BIMOFinding[] = [];
 
-  if (violations > 0) {
+  // Register specific AST edit check failures & CDISC conformance errors
+  if (ruleViolations && ruleViolations.length > 0) {
+    ruleViolations.forEach((v, idx) => {
+      if (v.type === "ast_edit_check") {
+        findings.push({
+          id: `FND-AST-${idx + 1}`,
+          category: "Protocol Compliance",
+          severity: "Major",
+          description: `AST Edit Check Violation on ${v.subjectLabel} (${v.field}): '${v.selectedChoice}' failed rule ${v.ruleName || "Check"}. ${v.message}`,
+          regulation: "21 CFR § 312.62 - Investigator record keeping & protocol adherence",
+        });
+      } else {
+        findings.push({
+          id: `FND-CDISC-${idx + 1}`,
+          category: "Data Integrity",
+          severity: "Major",
+          description: `CDISC Conformance Error on ${v.subjectLabel} (${v.field}): '${v.selectedChoice}' violates ${v.domain || "SDTM"} standard. ${v.message}`,
+          regulation: "ICH GCP E6(R2) § 5.5 - Electronic data handling & CDISC STRESN standardization",
+        });
+      }
+    });
+  }
+
+  // If active protocol is loaded, validate protocol conformance
+  if (activeProtocol) {
+    const protocolVal = StudyProtocolEngine.validateProtocol(activeProtocol);
+    protocolVal.errors.forEach((err, idx) => {
+      findings.push({
+        id: `FND-PROTO-${idx + 1}`,
+        category: "Protocol Compliance",
+        severity: "Major",
+        description: `Authored Protocol Error in Form [${err.form}]: ${err.message}`,
+        regulation: "CDISC CDASH 2.2 / SDTM v3.3 Protocol Specification Standard",
+      });
+    });
+  }
+
+  if (violations > 0 && findings.length === 0) {
     findings.push({
       id: "FND-001",
       category: "Data Integrity",
@@ -599,7 +745,7 @@ export function generateBIMOReport(
     });
   }
 
-  if (auditorState.suspicion >= 50) {
+  if (auditorState.suspicion >= 50 && !findings.some((f) => f.id === "FND-002")) {
     findings.push({
       id: "FND-002",
       category: "21 CFR Part 11",
@@ -609,7 +755,7 @@ export function generateBIMOReport(
     });
   }
 
-  if (cleanRate < 80 && totalSubmissions > 0) {
+  if (cleanRate < 80 && totalSubmissions > 0 && !findings.some((f) => f.id === "FND-003")) {
     findings.push({
       id: "FND-003",
       category: "Protocol Compliance",
@@ -622,12 +768,12 @@ export function generateBIMOReport(
   let verdict: BIMOInspectionReport["verdict"] = "NAI (No Action Indicated - Approved)";
   let summary = "The Bioresearch Monitoring inspection found no objectionable conditions. The sponsor and clinical site data systems operate in full compliance with 21 CFR Part 11 and CDISC standards.";
 
-  if (auditorState.suspicion >= 100 || violations >= 3) {
+  if (auditorState.suspicion >= 100 || violations >= 3 || findings.some((f) => f.severity === "Critical")) {
     verdict = "OAI (Official Action Indicated - Form 483 Issued)";
     summary = "FDA Form 483 issued. Significant objectionable conditions were observed during the inspection, including critical data integrity discrepancies. Trial operations suspended under 21 CFR § 312.44.";
   } else if (findings.length > 0 || auditorState.suspicion > 30) {
     verdict = "VAI (Voluntary Action Indicated)";
-    summary = "Objectionable conditions were noted, but they do not meet the threshold for regulatory action. The sponsor is advised to implement corrective and preventive action (CAPA) plans for Controlled Terminology validation.";
+    summary = "Objectionable conditions were noted, but they do not meet the threshold for regulatory action. The sponsor is advised to implement corrective and preventive action (CAPA) plans for Corrective Action plans for Controlled Terminology validation.";
   }
 
   return {

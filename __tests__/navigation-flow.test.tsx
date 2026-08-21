@@ -14,18 +14,22 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/arcade/laser-loon",
 }));
 
-vi.mock("@/components/providers/AudioProvider", () => ({
-  useAudio: () => ({
-    volume: 0.5,
-    muted: false,
-    profile: "8-bit",
-    playHover: vi.fn(),
-    playSubmit: vi.fn(),
-    playSuccess: vi.fn(),
-    playError: vi.fn(),
-    playAutocomplete: vi.fn(),
-  }),
-}));
+vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/providers/AudioProvider")>();
+  return {
+    ...actual,
+    useAudio: () => ({
+      volume: 0.5,
+      muted: false,
+      profile: "8-bit",
+      playHover: vi.fn(),
+      playSubmit: vi.fn(),
+      playSuccess: vi.fn(),
+      playError: vi.fn(),
+      playAutocomplete: vi.fn(),
+    }),
+  };
+});
 
 describe("Navigation Flow Components Suite", () => {
   let container: HTMLDivElement;

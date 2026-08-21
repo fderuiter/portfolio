@@ -8,7 +8,7 @@
 
 > **evaluateCondition**(`condition`, `fieldValues`, `fieldsList`, `visitContext?`): `boolean`
 
-Defined in: [lib/crf/expression-evaluator.ts:421](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L421)
+Defined in: [lib/crf/expression-evaluator.ts:437](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L437)
 
 Evaluate single AST condition
 

@@ -8,20 +8,24 @@ import { CommandPalette } from "@/components/CommandPalette";
 (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 // Mock AudioProvider
-vi.mock("@/components/providers/AudioProvider", () => ({
-  useAudio: () => ({
-    volume: 0.5,
-    muted: false,
-    profile: "8-bit",
-    setVolume: vi.fn(),
-    setMuted: vi.fn(),
-    setProfile: vi.fn(),
-    playHover: vi.fn(),
-    playSubmit: vi.fn(),
-    playSuccess: vi.fn(),
-    playNote: vi.fn(),
-  }),
-}));
+vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/providers/AudioProvider")>();
+  return {
+    ...actual,
+    useAudio: () => ({
+      volume: 0.5,
+      muted: false,
+      profile: "8-bit",
+      setVolume: vi.fn(),
+      setMuted: vi.fn(),
+      setProfile: vi.fn(),
+      playHover: vi.fn(),
+      playSubmit: vi.fn(),
+      playSuccess: vi.fn(),
+      playNote: vi.fn(),
+    }),
+  };
+});
 
 // Mock SearchProvider
 let mockSearchOpen = false;

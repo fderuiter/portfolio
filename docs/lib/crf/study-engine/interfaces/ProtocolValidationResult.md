@@ -6,7 +6,7 @@
 
 # Interface: ProtocolValidationResult
 
-Defined in: [lib/crf/study-engine.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L40)
+Defined in: [lib/crf/study-engine.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L45)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/study-engine.ts:40](https://github.com/fderuiter/portfolio/
 
 > **errors**: [`ValidationIssue`](ValidationIssue.md)[]
 
-Defined in: [lib/crf/study-engine.ts:43](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L43)
+Defined in: [lib/crf/study-engine.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L48)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/study-engine.ts:43](https://github.com/fderuiter/portfolio/
 
 > **isCompliant**: `boolean`
 
-Defined in: [lib/crf/study-engine.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L41)
+Defined in: [lib/crf/study-engine.ts:46](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L46)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/study-engine.ts:41](https://github.com/fderuiter/portfolio/
 
 > **issues**: [`ValidationIssue`](ValidationIssue.md)[]
 
-Defined in: [lib/crf/study-engine.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L45)
+Defined in: [lib/crf/study-engine.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L50)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/study-engine.ts:45](https://github.com/fderuiter/portfolio/
 
 > **totalIssues**: `number`
 
-Defined in: [lib/crf/study-engine.ts:42](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L42)
+Defined in: [lib/crf/study-engine.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L47)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [lib/crf/study-engine.ts:42](https://github.com/fderuiter/portfolio/
 
 > **warnings**: [`ValidationIssue`](ValidationIssue.md)[]
 
-Defined in: [lib/crf/study-engine.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L44)
+Defined in: [lib/crf/study-engine.ts:49](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-engine.ts#L49)

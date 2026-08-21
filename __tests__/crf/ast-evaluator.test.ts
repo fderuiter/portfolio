@@ -3,6 +3,7 @@ import {
   evaluateFormula,
   evaluateCondition,
   evaluateRule,
+  isMissingOrNullFlavor,
   lintForm,
   lintFormula,
   tokenizeWithSpans,
@@ -172,6 +173,174 @@ describe("CRF Studio - AST Formula & Rule Evaluator", () => {
       };
       expect(evaluateRule(ruleOr, { f_sysbp: 150, f_diabp: 80 }, sampleFields)).toBe(true);
       expect(evaluateRule(ruleOr, { f_sysbp: 120, f_diabp: 75 }, sampleFields)).toBe(false);
+    });
+  });
+
+  describe("CDISC Null Flavor & Missing Value Guard Engine", () => {
+    it("isMissingOrNullFlavor identifies null, undefined, empty string, and all CDISC null flavor codes", () => {
+      expect(isMissingOrNullFlavor(null)).toBe(true);
+      expect(isMissingOrNullFlavor(undefined)).toBe(true);
+      expect(isMissingOrNullFlavor("")).toBe(true);
+      expect(isMissingOrNullFlavor("   ")).toBe(true);
+
+      // Standard CDISC null flavor codes
+      ["ND", "NA", "UNK", "ASKU", "NASK", "MSK"].forEach((code) => {
+        expect(isMissingOrNullFlavor(code)).toBe(true);
+        expect(isMissingOrNullFlavor(code.toLowerCase())).toBe(true);
+        expect(isMissingOrNullFlavor(`  ${code}  `)).toBe(true);
+      });
+
+      // Collected non-missing values
+      expect(isMissingOrNullFlavor(0)).toBe(false);
+      expect(isMissingOrNullFlavor("0")).toBe(false);
+      expect(isMissingOrNullFlavor(120)).toBe(false);
+      expect(isMissingOrNullFlavor("120")).toBe(false);
+      expect(isMissingOrNullFlavor(false)).toBe(false);
+      expect(isMissingOrNullFlavor(true)).toBe(false);
+      expect(isMissingOrNullFlavor("COMPLETE")).toBe(false);
+    });
+
+    it("relational numeric operators (gt, gte, lt, lte) return false when comparing against missing or null flavor values", () => {
+      const nullFlavors = ["ND", "NA", "UNK", "ASKU", "NASK", "MSK", null, undefined, ""];
+
+      nullFlavors.forEach((nfVal) => {
+        const values = { f_sysbp: nfVal };
+
+        expect(
+          evaluateCondition({ fieldId: "f_sysbp", operator: "gt", value: 140 }, values, sampleFields)
+        ).toBe(false);
+        expect(
+          evaluateCondition({ fieldId: "f_sysbp", operator: "gte", value: 0 }, values, sampleFields)
+        ).toBe(false);
+        expect(
+          evaluateCondition({ fieldId: "f_sysbp", operator: "lt", value: 200 }, values, sampleFields)
+        ).toBe(false);
+        expect(
+          evaluateCondition({ fieldId: "f_sysbp", operator: "lte", value: 0 }, values, sampleFields)
+        ).toBe(false);
+      });
+    });
+
+    it("treats CDISC null flavor codes as missing during presence checks (is_empty, is_not_empty)", () => {
+      ["ND", "NA", "UNK", "ASKU", "NASK", "MSK"].forEach((nf) => {
+        expect(
+          evaluateCondition({ fieldId: "f_sysbp", operator: "is_empty", value: "" }, { f_sysbp: nf }, sampleFields)
+        ).toBe(true);
+        expect(
+          evaluateCondition({ fieldId: "f_sysbp", operator: "is_not_empty", value: "" }, { f_sysbp: nf }, sampleFields)
+        ).toBe(false);
+      });
+    });
+
+    it("normalizes CDISC null flavor strings to null in formula context before math expression execution", () => {
+      // Formula: WEIGHT / ((HEIGHT / 100) ^ 2)
+      expect(
+        evaluateFormula("f_weight + 10", { f_weight: "ND" }, sampleFields)
+      ).toBeNull();
+
+      expect(
+        evaluateFormula("f_weight / ((f_height / 100) ^ 2)", { f_height: 180, f_weight: "UNK" }, sampleFields)
+      ).toBeNull();
+
+      expect(
+        evaluateFormula("f_height - f_weight", { f_height: "NA", f_weight: 70 }, sampleFields)
+      ).toBeNull();
+
+      expect(
+        evaluateFormula("sqrt(f_weight)", { f_weight: "ASKU" }, sampleFields)
+      ).toBeNull();
+    });
+
+    it("evaluates valid zero numeric inputs accurately in relational checks and calculations", () => {
+      const valuesZero = { f_sysbp: 0, f_diabp: 0, f_weight: 0, f_height: 180 };
+
+      // Relational checks
+      expect(
+        evaluateCondition({ fieldId: "f_sysbp", operator: "eq", value: 0 }, valuesZero, sampleFields)
+      ).toBe(true);
+      expect(
+        evaluateCondition({ fieldId: "f_sysbp", operator: "gte", value: 0 }, valuesZero, sampleFields)
+      ).toBe(true);
+      expect(
+        evaluateCondition({ fieldId: "f_sysbp", operator: "gt", value: 0 }, valuesZero, sampleFields)
+      ).toBe(false);
+      expect(
+        evaluateCondition({ fieldId: "f_sysbp", operator: "lte", value: 0 }, valuesZero, sampleFields)
+      ).toBe(true);
+      expect(
+        evaluateCondition({ fieldId: "f_sysbp", operator: "is_empty", value: "" }, valuesZero, sampleFields)
+      ).toBe(false);
+
+      // Calculations
+      expect(evaluateFormula("f_sysbp + 10", valuesZero, sampleFields)).toBe(10);
+      expect(evaluateFormula("f_sysbp * 5", valuesZero, sampleFields)).toBe(0);
+      expect(evaluateFormula("f_weight / ((f_height / 100) ^ 2)", valuesZero, sampleFields)).toBe(0);
+    });
+
+    it("prevents false-positive edit check queries when dependent fields contain null flavors", () => {
+      const hypertensionRule: EditCheckRule = {
+        id: "rule_htn",
+        name: "Hypertension Query",
+        description: "Flag when both systolic > 140 and diastolic > 90",
+        triggerFieldIds: ["f_sysbp", "f_diabp"],
+        actionType: "raise_query",
+        targetFieldId: "f_sysbp",
+        logicalOperator: "AND",
+        conditions: [
+          { fieldId: "f_sysbp", operator: "gt", value: 140 },
+          { fieldId: "f_diabp", operator: "gt", value: 90 },
+        ],
+      };
+
+      // Diastolic BP not done (ND) -> rule should return false (no query)
+      expect(evaluateRule(hypertensionRule, { f_sysbp: 150, f_diabp: "ND" }, sampleFields)).toBe(false);
+      // Diastolic BP unknown (UNK) -> rule should return false
+      expect(evaluateRule(hypertensionRule, { f_sysbp: 150, f_diabp: "UNK" }, sampleFields)).toBe(false);
+      // Diastolic BP uncollected (null) -> rule should return false
+      expect(evaluateRule(hypertensionRule, { f_sysbp: 150, f_diabp: null }, sampleFields)).toBe(false);
+
+      // Actual high systolic and diastolic -> rule returns true
+      expect(evaluateRule(hypertensionRule, { f_sysbp: 150, f_diabp: 95 }, sampleFields)).toBe(true);
+    });
+
+    it("preserves field lookup resolution across cross-visit, visit-level, and nullFlavorValue fallback contexts", () => {
+      const fieldWithNullFlavor: CRFField = {
+        id: "f_weight",
+        variableName: "WEIGHT",
+        label: "Weight",
+        dataType: "number",
+        columnSpan: 6,
+        required: false,
+        nullFlavorValue: "ND",
+      };
+
+      // Visit-level lookup with scoped key
+      expect(
+        evaluateCondition(
+          { fieldId: "WEIGHT", operator: "is_empty", value: "" },
+          { V1_f_weight: "ND" },
+          [fieldWithNullFlavor],
+          "V1"
+        )
+      ).toBe(true);
+
+      // Cross-visit lookup
+      expect(
+        evaluateCondition(
+          { fieldId: "WEIGHT", operator: "is_empty", value: "", crossVisitId: "V2" },
+          { V2_WEIGHT: "NA" },
+          [fieldWithNullFlavor]
+        )
+      ).toBe(true);
+
+      // Fallback to field's active nullFlavorValue
+      expect(
+        evaluateCondition(
+          { fieldId: "f_weight", operator: "is_empty", value: "" },
+          {},
+          [fieldWithNullFlavor]
+        )
+      ).toBe(true);
     });
   });
 

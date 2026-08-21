@@ -15,3 +15,5 @@
 - [getMemeSoundDuration](functions/getMemeSoundDuration.md)
 - [isSoundAllowed](functions/isSoundAllowed.md)
 - [playMemeSound](functions/playMemeSound.md)
+- [stopAllMemeSounds](functions/stopAllMemeSounds.md)
+- [useMemeAudioCleanup](functions/useMemeAudioCleanup.md)

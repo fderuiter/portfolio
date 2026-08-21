@@ -148,8 +148,32 @@ Or follow manual setup steps:
    ```
    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Asset Generation & Design System Commands
+
+The repository provides standardized CLI commands for generating multi-resolution brand assets and compiling design system tokens:
+
+### Brand Icon Generation
+
+- **Command:** `npm run build:icons` (or `npm run generate:icons` / `npx tsx scripts/dx.ts build:icons`)
+- **Input Source Location:** Vector SVG artwork at `public/favicon.svg` (or `app/icon.svg`).
+- **Generated Output Asset Targets:**
+  - `app/icon.svg` & `public/favicon.svg`: Vector SVG favicons
+  - `app/favicon.ico` & `public/favicon.ico`: Multi-resolution Windows ICO container enclosing 16x16, 32x32, and 48x48 PNG buffers
+  - `public/apple-touch-icon.png`: 180x180 high-DPI iOS touch icon
+  - `public/icon-192.png` & `public/icon-512.png`: Standard PWA web app manifest icons
+
+### Design System Token Compilation
+
+- **Command:** `npm run build:theme` (or `npm run generate:theme` / `npx tsx scripts/dx.ts build:theme`)
+- **Input Source Location:** CSS custom properties declared in `app/globals.css` (within the `:root` selector block).
+- **Generated Output Asset Target:** `lib/design-manifest.ts` (strongly-typed runtime TypeScript constants exported as `designManifest`).
+
 ## Database changes
 
 Schema changes must include a checked-in Prisma migration. See
 [DATABASE_MIGRATIONS.md](_media/DATABASE_MIGRATIONS.md) for the development workflow,
 production rollout order, and the one-time production baseline procedure.
+
+## Contributing Guidelines
+
+For full details on developer onboarding, architectural invariants, conventional commits, and interactive CLI feature scaffolding (`npm run scaffold`), please refer to the [**`CONTRIBUTING.md`**](_media/CONTRIBUTING.md) guide.
