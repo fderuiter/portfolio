@@ -174,7 +174,7 @@ export const DpadActionDock: React.FC<DpadActionDockProps> = ({
                   audio.playHover();
                   onWeaponSelect(idx);
                 }}
-                className={`min-h-[48px] px-3 py-2 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
+                className={`min-h-[48px] px-3 py-2 rounded-lg text-xs font-mono font-bold transition-colors flex items-center gap-1 focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
                   selectedWeapon === idx
                     ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-[0_0_12px_rgba(6,182,212,0.3)]"
                     : "bg-zinc-800/60 text-zinc-400 border border-zinc-700/60 hover:text-white"
@@ -289,7 +289,7 @@ export const TwinStickAimDock: React.FC<TwinStickAimDockProps> = ({
                 audio.playHover();
                 onWeaponSelect(idx);
               }}
-              className={`min-h-[48px] px-3 py-2 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none ${
+              className={`min-h-[48px] px-3 py-2 rounded-lg text-xs font-mono font-bold transition-colors flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none ${
                 selectedWeapon === idx
                   ? "bg-red-500/20 text-red-300 border border-red-500/50 shadow-[0_0_12px_rgba(239,68,68,0.3)]"
                   : "bg-zinc-800/60 text-zinc-400 border border-zinc-700/60 hover:text-white"
@@ -322,7 +322,7 @@ export const TwinStickAimDock: React.FC<TwinStickAimDockProps> = ({
             onPointerDown={(e) => handleAction(e, onTremoloPress)}
             onPointerUp={(e) => handleAction(e, onTremoloRelease)}
             onPointerCancel={(e) => handleAction(e, onTremoloRelease)}
-            className={`min-w-[52px] min-h-[52px] w-14 h-14 rounded-2xl border flex flex-col items-center justify-center transition-all shadow-lg focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
+            className={`min-w-[52px] min-h-[52px] w-14 h-14 rounded-2xl border flex flex-col items-center justify-center transition-colors transition-shadow shadow-lg focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${
               isTremoloReady
                 ? "bg-cyan-500/30 border-cyan-400 text-cyan-200 animate-pulse shadow-[0_0_15px_rgba(6,182,212,0.5)] active:scale-95 cursor-pointer"
                 : "bg-zinc-900 border-zinc-800 text-zinc-600 opacity-60 cursor-not-allowed"
@@ -411,7 +411,7 @@ export const BezelClusterDock: React.FC<BezelClusterDockProps> = ({
           onPointerDown={(e) => handlePress(e, b.id)}
           onPointerUp={(e) => handleRelease(e, b.id)}
           onPointerCancel={(e) => handleRelease(e, b.id)}
-          className={`min-w-[48px] min-h-[48px] px-3.5 py-2.5 rounded-xl border bg-zinc-900/90 active:scale-95 transition-all flex items-center gap-1.5 font-mono text-xs font-bold focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none ${b.color} ${
+          className={`min-w-[48px] min-h-[48px] px-3.5 py-2.5 rounded-xl border bg-zinc-900/90 active:scale-95 transition-colors transition-transform flex items-center gap-1.5 font-mono text-xs font-bold focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none ${b.color} ${
             activeButton === b.id ? "ring-2 ring-amber-400 scale-95 bg-zinc-800" : ""
           }`}
         >
@@ -487,7 +487,7 @@ export const ActionStripDock: React.FC<ActionStripDockProps> = ({
             aria-label={act.label}
             disabled={act.disabled}
             onClick={() => handleAction(act.id, act.disabled)}
-            className={`min-w-[48px] min-h-[48px] px-3.5 py-2.5 rounded-xl border bg-zinc-900/90 active:scale-95 transition-all flex items-center gap-2 font-mono text-xs font-bold focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${colorClasses} ${
+            className={`min-w-[48px] min-h-[48px] px-3.5 py-2.5 rounded-xl border bg-zinc-900/90 active:scale-95 transition-colors transition-transform flex items-center gap-2 font-mono text-xs font-bold focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none ${colorClasses} ${
               isActive ? "bg-zinc-800 ring-2 ring-cyan-400" : ""
             } ${act.disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
           >

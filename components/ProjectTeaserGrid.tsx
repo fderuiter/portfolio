@@ -112,7 +112,7 @@ export const ProjectTeaserGrid: React.FC<ProjectTeaserGridProps> = ({ caseStudie
           return (
             <article
               key={study.id}
-              className="group relative flex flex-col justify-between p-6 rounded-2xl bg-[#13151a]/80 border border-white/10 hover:border-amber-500/40 hover:bg-[#181b22] transition-all duration-300 backdrop-blur-md overflow-hidden shadow-xl"
+              className="group relative flex flex-col justify-between p-6 rounded-2xl bg-[#13151a]/80 border border-white/10 hover:border-amber-500/40 hover:bg-[#181b22] transition-colors transition-shadow duration-300 backdrop-blur-md overflow-hidden shadow-xl"
             >
               <div className="relative z-10 flex flex-col h-full">
                 {/* Header: System Number, Language Badge & Slug */}
@@ -173,7 +173,7 @@ export const ProjectTeaserGrid: React.FC<ProjectTeaserGridProps> = ({ caseStudie
       <div className="w-full flex justify-center">
         <Link
           href="/case-studies"
-          className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 bg-[#14161d] hover:bg-amber-400 border border-white/10 hover:border-amber-400 text-zinc-200 hover:text-black font-mono text-xs font-bold rounded-xl transition-all duration-200 shadow-md active:scale-[0.98] group"
+          className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 bg-[#14161d] hover:bg-amber-400 border border-white/10 hover:border-amber-400 text-zinc-200 hover:text-black font-mono text-xs font-bold rounded-xl transition-colors transition-transform duration-200 shadow-md active:scale-[0.98] group"
         >
           <IconLayersIntersect className="w-4 h-4 text-amber-400 group-hover:text-black transition-colors" />
           <span>View All Architectural Case Studies ({caseStudies.length})</span>

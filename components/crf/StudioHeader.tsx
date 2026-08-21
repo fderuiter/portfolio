@@ -233,7 +233,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
           {/* Conformance Diagnostics Badge */}
           <button
             onClick={onOpenDiagnostics}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono transition-all border ${
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono transition-colors border ${
               totalIssues > 0
                 ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20"
                 : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white"
@@ -262,7 +262,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
                   window.location.href = "/arcade/clinical-chaos";
                 }
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white font-mono text-xs font-bold rounded-lg border border-emerald-500/40 transition-all shadow-xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white font-mono text-xs font-bold rounded-lg border border-emerald-500/40 transition-colors transition-shadow shadow-xs"
               title="Launch Live Conformance Engine Simulation with Active Protocol Pre-Loaded"
             >
               <IconPlayerPlay className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400" />
@@ -272,7 +272,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
             {/* Word / PDF Export Modal Trigger */}
             <button
               onClick={onOpenExportDocument}
-              className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white font-mono text-xs font-bold rounded-lg border border-blue-500/40 transition-all shadow-xs"
+              className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white font-mono text-xs font-bold rounded-lg border border-blue-500/40 transition-colors transition-shadow shadow-xs"
               title="Export Word (.docx) Protocol Books & PDF Blank/Annotated CRFs"
             >
               <IconFileSpreadsheet className="w-3.5 h-3.5" />
@@ -282,7 +282,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
             {/* 1-Click CDASH Quick Scaffolder */}
             <button
               onClick={onOpenCdashScaffolder}
-              className="inline-flex items-center gap-1 px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white font-mono text-xs font-bold rounded-lg border border-zinc-700 transition-all"
+              className="inline-flex items-center gap-1 px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white font-mono text-xs font-bold rounded-lg border border-zinc-700 transition-colors"
               title="1-Click CDASH Domain Scaffolder (⌘K)"
             >
               <IconSparkles className="w-3.5 h-3.5 text-amber-400" />
@@ -292,7 +292,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
             {/* Organization Branding */}
             <button
               onClick={onOpenBranding}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white font-mono text-xs rounded-lg transition-all"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white font-mono text-xs rounded-lg transition-colors"
               title="Configure Organization Branding & Logos"
             >
               <span
@@ -307,7 +307,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
             {onCopyShareLink && (
               <button
                 onClick={onCopyShareLink}
-                className="inline-flex items-center gap-1 px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white font-mono text-xs rounded-lg transition-all"
+                className="inline-flex items-center gap-1 px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white font-mono text-xs rounded-lg transition-colors"
                 title="Copy Shareable Studio Link"
               >
                 <IconLink className="w-3.5 h-3.5 text-brand-cyan" />
@@ -319,7 +319,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
             <div className="flex items-center bg-zinc-900 border border-brand-cyan/40 rounded-lg overflow-hidden shadow-xs">
               <button
                 onClick={onOpenWizard}
-                className="inline-flex items-center gap-1 px-2.5 py-1 bg-brand-cyan/15 hover:bg-brand-cyan text-brand-cyan hover:text-black font-mono text-xs font-bold transition-all"
+                className="inline-flex items-center gap-1 px-2.5 py-1 bg-brand-cyan/15 hover:bg-brand-cyan text-brand-cyan hover:text-black font-mono text-xs font-bold transition-colors"
                 title="Open Interactive Clinical Walkthrough Wizard"
               >
                 <IconHelp className="w-3.5 h-3.5" />
@@ -328,7 +328,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
               {onStartSpotlightTour && (
                 <button
                   onClick={onStartSpotlightTour}
-                  className="px-1.5 py-1 bg-brand-cyan/10 hover:bg-brand-cyan text-brand-cyan hover:text-black font-mono text-xs border-l border-brand-cyan/30 transition-all"
+                  className="px-1.5 py-1 bg-brand-cyan/10 hover:bg-brand-cyan text-brand-cyan hover:text-black font-mono text-xs border-l border-brand-cyan/30 transition-colors"
                   title="Launch Interactive UI Spotlight Tour"
                 >
                   <IconPlayerPlay className="w-3 h-3" />
@@ -472,7 +472,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => onChangeMode(item.mode)}
-                className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono font-semibold transition-all rounded-lg whitespace-nowrap outline-none shrink-0 ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono font-semibold transition-colors rounded-lg whitespace-nowrap outline-none shrink-0 ${
                   isActive
                     ? "bg-brand-cyan/15 text-brand-cyan font-bold border border-brand-cyan/30 shadow-xs"
                     : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 border border-transparent"

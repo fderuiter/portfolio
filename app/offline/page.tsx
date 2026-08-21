@@ -96,7 +96,7 @@ export default function OfflineFallbackPage() {
                 <Link
                   key={route.path}
                   href={route.path}
-                  className="flex items-center space-x-3 p-3 rounded-lg bg-zinc-950/60 border border-zinc-800/60 hover:border-brand-cyan/40 hover:bg-zinc-800/40 transition-all group"
+                  className="flex items-center space-x-3 p-3 rounded-lg bg-zinc-950/60 border border-zinc-800/60 hover:border-brand-cyan/40 hover:bg-zinc-800/40 transition-colors group"
                 >
                   <div className="p-2 rounded-md bg-zinc-900 border border-zinc-800 text-brand-cyan group-hover:border-brand-cyan/30">
                     {route.icon}

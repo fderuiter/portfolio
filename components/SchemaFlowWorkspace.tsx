@@ -708,7 +708,7 @@ export default function SchemaFlowWorkspace() {
                 <div className="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-zinc-900">
                   <button
                     onClick={() => toggleSolverLoop()}
-                    className={`px-2.5 py-1 text-[9px] font-mono font-bold rounded-lg border transition-all cursor-pointer ${
+                    className={`px-2.5 py-1 text-[9px] font-mono font-bold rounded-lg border transition-colors cursor-pointer ${
                       isSolverLoopActive
                         ? "bg-brand-cyan/10 border-brand-cyan/30 text-brand-cyan"
                         : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700"

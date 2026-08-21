@@ -121,14 +121,14 @@ export const ProofCanvas: React.FC<ProofCanvasProps> = ({
             </button>
             <button
               onClick={handleAutoStep}
-              className="px-2.5 py-1.5 rounded-lg bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan text-xs font-mono flex items-center gap-1 transition cursor-pointer active:scale-[0.98]"
+              className="px-2.5 py-1.5 rounded-lg bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan text-xs font-mono flex items-center gap-1 transition-colors transition-transform cursor-pointer active:scale-[0.98]"
             >
               <IconWand className="w-3.5 h-3.5" />
               Auto-Step
             </button>
             <button
               onClick={handleResetLayout}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer active:scale-[0.98]"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors transition-transform cursor-pointer active:scale-[0.98]"
               title="Reset node positions & connections"
             >
               <IconRefresh className="w-4 h-4" />
@@ -327,7 +327,7 @@ export const ProofCanvas: React.FC<ProofCanvasProps> = ({
                   onPointerMove={(e) => handleNodePointerMove(e, node.id)}
                   onPointerUp={(e) => handleNodePointerUp(e, node.id)}
                   onClick={() => handleNodeClick(node.id)}
-                  className={`group w-40 p-2.5 rounded-xl border cursor-pointer transition-all shadow-md select-none ${
+                  className={`group w-40 p-2.5 rounded-xl border cursor-pointer transition-colors transition-shadow shadow-md select-none ${
                     isDimmed ? "opacity-40" : "opacity-100"
                   } ${
                     isHoveredInDrag
@@ -383,7 +383,7 @@ export const ProofCanvas: React.FC<ProofCanvasProps> = ({
                   <button
                     type="button"
                     onPointerDown={(e) => handleHandlePointerDown(e, node.id)}
-                    className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-slate-950 border-2 border-brand-cyan/80 hover:border-brand-cyan hover:scale-125 hover:bg-brand-cyan transition-all shadow-md shadow-cyan-500/40 flex items-center justify-center cursor-crosshair z-20 group-hover:opacity-100 opacity-80"
+                    className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-slate-950 border-2 border-brand-cyan/80 hover:border-brand-cyan hover:scale-125 hover:bg-brand-cyan transition-colors transition-transform transition-opacity shadow-md shadow-cyan-500/40 flex items-center justify-center cursor-crosshair z-20 group-hover:opacity-100 opacity-80"
                     title={`Drag connection from Node ${node.id}`}
                     aria-label={`Drag connection handle from Node ${node.id}`}
                   >
@@ -403,7 +403,7 @@ export const ProofCanvas: React.FC<ProofCanvasProps> = ({
               <button
                 key={rule.id}
                 onClick={() => handleApplyRule(rule.id)}
-                className="min-h-8 px-2.5 py-1 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 text-xs font-mono text-slate-300 hover:text-white transition flex items-center gap-1 cursor-pointer active:scale-[0.98]"
+                className="min-h-8 px-2.5 py-1 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 text-xs font-mono text-slate-300 hover:text-white transition-colors transition-transform flex items-center gap-1 cursor-pointer active:scale-[0.98]"
                 title={`${rule.name}: ${rule.template}`}
               >
                 <span className="text-brand-cyan font-bold">{rule.symbol}</span>
@@ -415,7 +415,7 @@ export const ProofCanvas: React.FC<ProofCanvasProps> = ({
             <button
               onClick={() => handleStartSimulation("normal")}
               disabled={isSimulating}
-              className="min-h-8 px-3 py-1.5 rounded-lg bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-600/30 text-xs font-mono flex items-center gap-1 transition cursor-pointer active:scale-[0.98]"
+              className="min-h-8 px-3 py-1.5 rounded-lg bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-600/30 text-xs font-mono flex items-center gap-1 transition-colors transition-transform cursor-pointer active:scale-[0.98]"
             >
               <IconPlayerPlay className="w-3.5 h-3.5" />
               {isSimulating ? "Simulating..." : "Simulate"}

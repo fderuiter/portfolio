@@ -89,7 +89,7 @@ export const VirtualDPad: React.FC<VirtualDPadProps> = ({
           onTouchEnd={(e) => handleRelease(() => onDirectionRelease?.("up"), e, "up")}
           onMouseDown={(e) => handlePress(() => onDirectionPress?.("up"), e, "up")}
           onMouseUp={(e) => handleRelease(() => onDirectionRelease?.("up"), e, "up")}
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-12 rounded-t-xl bg-zinc-900/90 border-t border-x border-zinc-700/80 active:bg-brand-cyan/20 active:border-brand-cyan active:text-brand-cyan text-zinc-300 flex items-center justify-center transition-all cursor-pointer shadow-md active:scale-95"
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-12 rounded-t-xl bg-zinc-900/90 border-t border-x border-zinc-700/80 active:bg-brand-cyan/20 active:border-brand-cyan active:text-brand-cyan text-zinc-300 flex items-center justify-center transition-colors transition-transform cursor-pointer shadow-md active:scale-95"
         >
           <IconChevronUp className="w-6 h-6 pointer-events-none" />
         </button>
@@ -102,7 +102,7 @@ export const VirtualDPad: React.FC<VirtualDPadProps> = ({
           onTouchEnd={(e) => handleRelease(() => onDirectionRelease?.("down"), e, "down")}
           onMouseDown={(e) => handlePress(() => onDirectionPress?.("down"), e, "down")}
           onMouseUp={(e) => handleRelease(() => onDirectionRelease?.("down"), e, "down")}
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-12 rounded-b-xl bg-zinc-900/90 border-b border-x border-zinc-700/80 active:bg-brand-cyan/20 active:border-brand-cyan active:text-brand-cyan text-zinc-300 flex items-center justify-center transition-all cursor-pointer shadow-md active:scale-95"
+          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-12 rounded-b-xl bg-zinc-900/90 border-b border-x border-zinc-700/80 active:bg-brand-cyan/20 active:border-brand-cyan active:text-brand-cyan text-zinc-300 flex items-center justify-center transition-colors transition-transform cursor-pointer shadow-md active:scale-95"
         >
           <IconChevronDown className="w-6 h-6 pointer-events-none" />
         </button>
@@ -115,7 +115,7 @@ export const VirtualDPad: React.FC<VirtualDPadProps> = ({
           onTouchEnd={(e) => handleRelease(() => onDirectionRelease?.("left"), e, "left")}
           onMouseDown={(e) => handlePress(() => onDirectionPress?.("left"), e, "left")}
           onMouseUp={(e) => handleRelease(() => onDirectionRelease?.("left"), e, "left")}
-          className="absolute left-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-l-xl bg-zinc-900/90 border-l border-y border-zinc-700/80 active:bg-brand-cyan/20 active:border-brand-cyan active:text-brand-cyan text-zinc-300 flex items-center justify-center transition-all cursor-pointer shadow-md active:scale-95"
+          className="absolute left-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-l-xl bg-zinc-900/90 border-l border-y border-zinc-700/80 active:bg-brand-cyan/20 active:border-brand-cyan active:text-brand-cyan text-zinc-300 flex items-center justify-center transition-colors transition-transform cursor-pointer shadow-md active:scale-95"
         >
           <IconChevronLeft className="w-6 h-6 pointer-events-none" />
         </button>
@@ -128,7 +128,7 @@ export const VirtualDPad: React.FC<VirtualDPadProps> = ({
           onTouchEnd={(e) => handleRelease(() => onDirectionRelease?.("right"), e, "right")}
           onMouseDown={(e) => handlePress(() => onDirectionPress?.("right"), e, "right")}
           onMouseUp={(e) => handleRelease(() => onDirectionRelease?.("right"), e, "right")}
-          className="absolute right-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-r-xl bg-zinc-900/90 border-r border-y border-zinc-700/80 active:bg-brand-cyan/20 active:border-brand-cyan active:text-brand-cyan text-zinc-300 flex items-center justify-center transition-all cursor-pointer shadow-md active:scale-95"
+          className="absolute right-0 top-1/2 -translate-y-1/2 w-12 h-12 rounded-r-xl bg-zinc-900/90 border-r border-y border-zinc-700/80 active:bg-brand-cyan/20 active:border-brand-cyan active:text-brand-cyan text-zinc-300 flex items-center justify-center transition-colors transition-transform cursor-pointer shadow-md active:scale-95"
         >
           <IconChevronRight className="w-6 h-6 pointer-events-none" />
         </button>
@@ -144,7 +144,7 @@ export const VirtualDPad: React.FC<VirtualDPadProps> = ({
             onTouchEnd={(e) => handleRelease(onActionBRelease, e, "actionB")}
             onMouseDown={(e) => handlePress(onActionBPress, e, "actionB")}
             onMouseUp={(e) => handleRelease(onActionBRelease, e, "actionB")}
-            className="w-16 h-16 rounded-2xl bg-zinc-900/90 border border-zinc-700/80 active:bg-purple-500/20 active:border-purple-400 active:text-purple-300 text-zinc-300 flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer shadow-md active:scale-95"
+            className="w-16 h-16 rounded-2xl bg-zinc-900/90 border border-zinc-700/80 active:bg-purple-500/20 active:border-purple-400 active:text-purple-300 text-zinc-300 flex flex-col items-center justify-center gap-0.5 transition-colors transition-transform cursor-pointer shadow-md active:scale-95"
           >
             <span className="text-[11px] font-mono font-black tracking-wider pointer-events-none">
               {actionBLabel}
@@ -163,7 +163,7 @@ export const VirtualDPad: React.FC<VirtualDPadProps> = ({
             onTouchEnd={(e) => handleRelease(onActionARelease, e, "actionA")}
             onMouseDown={(e) => handlePress(onActionAPress, e, "actionA")}
             onMouseUp={(e) => handleRelease(onActionARelease, e, "actionA")}
-            className="w-18 h-18 rounded-2xl bg-brand-cyan/15 border-2 border-brand-cyan/60 active:bg-brand-cyan/30 active:border-brand-cyan active:scale-95 text-brand-cyan flex flex-col items-center justify-center gap-0.5 transition-all cursor-pointer shadow-[0_0_20px_rgba(6,182,212,0.15)]"
+            className="w-18 h-18 rounded-2xl bg-brand-cyan/15 border-2 border-brand-cyan/60 active:bg-brand-cyan/30 active:border-brand-cyan active:scale-95 text-brand-cyan flex flex-col items-center justify-center gap-0.5 transition-colors transition-transform cursor-pointer shadow-[0_0_20px_rgba(6,182,212,0.15)]"
           >
             <span className="text-xs font-mono font-black tracking-wider pointer-events-none">
               {actionALabel}

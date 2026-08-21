@@ -134,14 +134,14 @@ export const ${pascal}: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={handleToggle}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-cyan text-slate-950 font-semibold rounded hover:bg-cyan-400 transition"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-cyan text-slate-950 font-semibold rounded hover:bg-cyan-400 transition-colors"
           >
             {gameState.status === "running" ? <IconPlayerPause className="w-4 h-4" /> : <IconPlayerPlay className="w-4 h-4" />}
             {gameState.status === "running" ? "Pause" : "Start"}
           </button>
           <button
             onClick={handleReset}
-            className="p-1.5 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 transition"
+            className="p-1.5 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 transition-colors"
             title="Reset Simulator"
           >
             <IconRotate className="w-4 h-4" />
@@ -562,7 +562,7 @@ export const ${pascal}: React.FC<${pascal}Props> = ({
   return (
     <div
       className={cn(
-        "rounded-xl p-4 transition-all duration-200",
+        "rounded-xl p-4 transition-colors duration-200",
         variant === "default" && "bg-slate-900 border border-slate-800 text-slate-100",
         variant === "glass" && "bg-slate-900/40 backdrop-blur-md border border-slate-700/50 text-white",
         variant === "outline" && "border border-brand-cyan/40 bg-transparent text-brand-cyan",

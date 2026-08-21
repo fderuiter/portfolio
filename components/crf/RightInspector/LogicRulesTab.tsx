@@ -89,7 +89,7 @@ export const LogicRulesTab: React.FC<LogicRulesTabProps> = ({
         </div>
         <button
           onClick={handleAddRule}
-          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-brand-cyan/20 hover:bg-brand-cyan text-brand-cyan hover:text-black font-mono text-xs font-bold transition-all"
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-brand-cyan/20 hover:bg-brand-cyan text-brand-cyan hover:text-black font-mono text-xs font-bold transition-colors"
         >
           <IconPlus className="w-3.5 h-3.5" />
           <span>Add Rule</span>

@@ -204,7 +204,7 @@ export const CdashScaffolderModal: React.FC<CdashScaffolderModalProps> = ({
           {filteredDomains.map((domain) => (
             <div
               key={domain.code}
-              className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/80 hover:border-brand-cyan/50 hover:bg-zinc-900/60 transition-all flex items-start justify-between gap-4 group"
+              className="p-4 rounded-xl bg-zinc-950/60 border border-zinc-800/80 hover:border-brand-cyan/50 hover:bg-zinc-900/60 transition-colors flex items-start justify-between gap-4 group"
             >
               <div className="space-y-1 flex-1">
                 <div className="flex items-center gap-2.5">
@@ -223,7 +223,7 @@ export const CdashScaffolderModal: React.FC<CdashScaffolderModalProps> = ({
                   onInjectForm(newForm);
                   onClose();
                 }}
-                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-cyan/20 hover:bg-brand-cyan text-brand-cyan hover:text-black font-mono text-xs font-bold rounded-lg border border-brand-cyan/40 transition-all mt-1"
+                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-cyan/20 hover:bg-brand-cyan text-brand-cyan hover:text-black font-mono text-xs font-bold rounded-lg border border-brand-cyan/40 transition-colors mt-1"
               >
                 <IconPlus className="w-4 h-4" />
                 <span>Inject Form</span>

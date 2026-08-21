@@ -96,7 +96,7 @@ export const Footer: React.FC = () => {
             <Link
               href="/stack"
               onMouseEnter={handleHover}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900/80 hover:bg-zinc-900 border border-zinc-800 hover:border-brand-cyan/40 text-[11px] font-mono text-zinc-300 hover:text-white transition-all w-fit group"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900/80 hover:bg-zinc-900 border border-zinc-800 hover:border-brand-cyan/40 text-[11px] font-mono text-zinc-300 hover:text-white transition-colors w-fit group"
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500 group-hover:animate-pulse" />
               <span>All Systems Operational</span>
@@ -279,7 +279,7 @@ export const Footer: React.FC = () => {
                 <Link
                   href="/schedule"
                   onMouseEnter={handleHover}
-                  className="text-brand-cyan font-bold hover:underline transition-all flex items-center gap-1.5"
+                  className="text-brand-cyan font-bold hover:underline transition-colors flex items-center gap-1.5"
                 >
                   <IconCalendar className="w-3 h-3 text-brand-cyan" />
                   Schedule 1:1 Sync ↗

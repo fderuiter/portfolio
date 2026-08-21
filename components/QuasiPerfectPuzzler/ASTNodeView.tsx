@@ -115,7 +115,7 @@ export const ASTNodeView: React.FC<ASTNodeViewProps> = React.memo(
             if (isInteractive) onHoverTarget(null);
           }}
           aria-label={`${node.type} node with value ${node.value}. Expression: ${renderASTString(node)}`}
-          className={`relative group inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-1.5 text-sm font-mono transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-cyan/70 ${getNodeStyling()} ${
+          className={`relative group inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-1.5 text-sm font-mono transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-brand-cyan/70 ${getNodeStyling()} ${
             isSelected
               ? "ring-2 ring-brand-cyan scale-105 shadow-[0_0_20px_rgba(6,182,212,0.6)]"
               : isHovered

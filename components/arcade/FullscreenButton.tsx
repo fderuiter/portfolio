@@ -24,7 +24,7 @@ export const FullscreenButton: React.FC<FullscreenButtonProps> = ({
         onClick={onToggle}
         aria-label="Exit Fullscreen (Esc or F)"
         title="Exit Fullscreen (Esc or F)"
-        className={`absolute top-3 right-3 z-50 p-2.5 rounded-xl bg-black/85 hover:bg-black text-zinc-300 hover:text-white border border-zinc-700/80 shadow-2xl backdrop-blur-md transition-all active:scale-[0.96] cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-500/50 focus-visible:outline-none ${className}`}
+        className={`absolute top-3 right-3 z-50 p-2.5 rounded-xl bg-black/85 hover:bg-black text-zinc-300 hover:text-white border border-zinc-700/80 shadow-2xl backdrop-blur-md transition-colors transition-transform active:scale-[0.96] cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-500/50 focus-visible:outline-none ${className}`}
       >
         <IconMinimize className="w-5 h-5 text-amber-400" />
       </button>
@@ -37,7 +37,7 @@ export const FullscreenButton: React.FC<FullscreenButtonProps> = ({
       onClick={onToggle}
       aria-label={isFullscreen ? "Exit Fullscreen (F)" : "Enter Fullscreen (F)"}
       title={isFullscreen ? "Exit Fullscreen (F)" : "Enter Fullscreen (F)"}
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer select-none active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-amber-500/50 focus-visible:outline-none ${
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-colors transition-transform cursor-pointer select-none active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-amber-500/50 focus-visible:outline-none ${
         isFullscreen
           ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
           : "bg-neutral-900/90 hover:bg-neutral-800 text-zinc-300 hover:text-white border border-neutral-800 hover:border-zinc-700 shadow-sm"

@@ -135,7 +135,7 @@ export const DiagnosticsDrawer: React.FC<DiagnosticsDrawerProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={() => setFilterSeverity("all")}
-              className={`px-3 py-1 rounded-lg text-xs font-mono transition-all ${
+              className={`px-3 py-1 rounded-lg text-xs font-mono transition-colors ${
                 filterSeverity === "all"
                   ? "bg-zinc-800 text-white font-bold"
                   : "text-zinc-400 hover:text-white"
@@ -145,7 +145,7 @@ export const DiagnosticsDrawer: React.FC<DiagnosticsDrawerProps> = ({
             </button>
             <button
               onClick={() => setFilterSeverity("error")}
-              className={`px-3 py-1 rounded-lg text-xs font-mono transition-all flex items-center gap-1 ${
+              className={`px-3 py-1 rounded-lg text-xs font-mono transition-colors flex items-center gap-1 ${
                 filterSeverity === "error"
                   ? "bg-red-500/20 text-red-400 border border-red-500/30 font-bold"
                   : "text-zinc-400 hover:text-white"
@@ -156,7 +156,7 @@ export const DiagnosticsDrawer: React.FC<DiagnosticsDrawerProps> = ({
             </button>
             <button
               onClick={() => setFilterSeverity("warning")}
-              className={`px-3 py-1 rounded-lg text-xs font-mono transition-all flex items-center gap-1 ${
+              className={`px-3 py-1 rounded-lg text-xs font-mono transition-colors flex items-center gap-1 ${
                 filterSeverity === "warning"
                   ? "bg-amber-500/20 text-amber-400 border border-amber-500/30 font-bold"
                   : "text-zinc-400 hover:text-white"
@@ -170,7 +170,7 @@ export const DiagnosticsDrawer: React.FC<DiagnosticsDrawerProps> = ({
           {complianceViolations.some((v) => v.autoFixAvailable) && onUpdateStudy && (
             <button
               onClick={handleFixAll}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-cyan hover:bg-white text-black font-mono text-xs font-bold transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-cyan hover:bg-white text-black font-mono text-xs font-bold transition-colors transition-shadow shadow-sm"
             >
               <IconWand className="w-3.5 h-3.5" />
               <span>1-Click Auto-Fix All</span>
@@ -205,7 +205,7 @@ export const DiagnosticsDrawer: React.FC<DiagnosticsDrawerProps> = ({
               {filteredViolations.map((v) => (
                 <div
                   key={v.id}
-                  className={`p-4 rounded-xl border font-mono text-xs space-y-2 transition-all ${
+                  className={`p-4 rounded-xl border font-mono text-xs space-y-2 transition-colors ${
                     v.severity === "error"
                       ? "bg-red-500/5 border-red-500/30"
                       : "bg-amber-500/5 border-amber-500/30"

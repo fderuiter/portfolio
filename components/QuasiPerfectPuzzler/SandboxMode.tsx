@@ -236,7 +236,7 @@ export const SandboxMode: React.FC = () => {
               key={preset.name}
               type="button"
               onClick={() => loadPreset(idx)}
-              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors ${
                 idx === selectedPresetIdx
                   ? "bg-emerald-500 text-black shadow-[0_0_10px_rgba(16,185,129,0.4)]"
                   : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200"
@@ -248,7 +248,7 @@ export const SandboxMode: React.FC = () => {
           <button
             type="button"
             onClick={() => loadPreset(selectedPresetIdx)}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 transition-all"
+            className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 transition-colors"
           >
             <IconRotate className="w-3.5 h-3.5" />
             <span>Reset</span>

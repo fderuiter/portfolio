@@ -277,7 +277,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto lg:max-w-none bg-[#13151a]/90 border border-white/10 rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-xl flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:border-amber-500/30">
+    <div className="w-full max-w-xl mx-auto lg:max-w-none bg-[#13151a]/90 border border-white/10 rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-xl flex flex-col justify-between relative overflow-hidden transition-colors transition-shadow duration-300 hover:border-amber-500/30">
       {/* Precision grid decorative corner cues */}
       <div className="absolute top-2.5 right-3 flex items-center gap-1.5 font-mono text-[9px] text-zinc-500 uppercase tracking-wider select-none">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
@@ -291,7 +291,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
             role="tab"
             aria-selected={mode === "logic"}
             onClick={() => { setMode("logic"); playSkillHover(); }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-colors cursor-pointer flex items-center gap-1.5 shrink-0 ${
               mode === "logic"
                 ? "bg-amber-500/15 text-amber-300 border border-amber-500/30 shadow-sm"
                 : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5 border border-transparent"
@@ -305,7 +305,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
             role="tab"
             aria-selected={mode === "cdisc"}
             onClick={() => { setMode("cdisc"); playSkillHover(); }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-colors cursor-pointer flex items-center gap-1.5 shrink-0 ${
               mode === "cdisc"
                 ? "bg-amber-500/15 text-amber-300 border border-amber-500/30 shadow-sm"
                 : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5 border border-transparent"
@@ -319,7 +319,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
             role="tab"
             aria-selected={mode === "garmin"}
             onClick={() => { setMode("garmin"); playSkillHover(); }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-colors cursor-pointer flex items-center gap-1.5 shrink-0 ${
               mode === "garmin"
                 ? "bg-amber-500/15 text-amber-300 border border-amber-500/30 shadow-sm"
                 : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5 border border-transparent"
@@ -367,7 +367,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
                 <div className="flex items-center justify-between gap-3 pt-1">
                   <button
                     onClick={handleDischargeStep}
-                    className="inline-flex items-center gap-2 px-3.5 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98]"
+                    className="inline-flex items-center gap-2 px-3.5 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition-colors transition-transform cursor-pointer active:scale-[0.98]"
                   >
                     <IconRefresh className={`w-3.5 h-3.5 ${logicDischarged ? "rotate-180" : ""} transition-transform duration-300`} />
                     <span>{logicDischarged ? "Reset Logic Step" : "Prove Invariant Step"}</span>
@@ -413,7 +413,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
                 <div className="flex items-center justify-between gap-3 pt-1">
                   <button
                     onClick={() => { setFhirValidationActive(!fhirValidationActive); playSkillHover(); }}
-                    className="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98]"
+                    className="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-bold transition-colors transition-transform cursor-pointer active:scale-[0.98]"
                   >
                     <IconCheck className="w-3.5 h-3.5" />
                     <span>{fhirValidationActive ? "Data Integrity Rule: ACTIVE" : "Toggle Integrity Rule"}</span>
@@ -462,7 +462,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
                   <button
                     onClick={handleRunGc}
                     disabled={isGarminGcRunning}
-                    className="inline-flex items-center gap-2 px-3.5 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98] disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-3.5 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 rounded-xl text-xs font-bold transition-colors transition-transform transition-opacity cursor-pointer active:scale-[0.98] disabled:opacity-50"
                   >
                     <IconRefresh className={`w-3.5 h-3.5 ${isGarminGcRunning ? "animate-spin" : ""}`} />
                     <span>{isGarminGcRunning ? "Freeing RAM..." : "Clean Memory (GC)"}</span>
@@ -557,7 +557,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
             {/* Primary Action */}
             <a
               href="#case-studies"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 text-xs sm:text-sm font-mono font-bold text-black bg-amber-400 hover:bg-amber-300 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-amber-500/10 cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 text-xs sm:text-sm font-mono font-bold text-black bg-amber-400 hover:bg-amber-300 rounded-xl transition-colors transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-amber-500/10 cursor-pointer"
             >
               <span>Explore My Work</span>
               <IconArrowRight className="w-4 h-4" />
@@ -567,7 +567,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
             <div className="grid grid-cols-2 gap-2.5 w-full sm:w-auto sm:flex sm:flex-row sm:gap-3">
               <Link
                 href="/arcade"
-                className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-3 text-xs font-mono font-semibold text-zinc-200 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-200 active:scale-[0.98] cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-3 text-xs font-mono font-semibold text-zinc-200 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-colors transition-transform duration-200 active:scale-[0.98] cursor-pointer"
               >
                 <IconDeviceGamepad2 className="w-4 h-4 text-amber-400 shrink-0" />
                 <span className="truncate">Arcade &amp; Labs</span>
@@ -577,7 +577,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
                 href="https://github.com/fderuiter"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-3 text-xs font-mono font-semibold text-zinc-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-200 active:scale-[0.98] cursor-pointer"
+                className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-3 text-xs font-mono font-semibold text-zinc-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-colors transition-transform duration-200 active:scale-[0.98] cursor-pointer"
               >
                 <IconBrandGithub className="w-4 h-4 shrink-0" />
                 <span className="truncate">GitHub</span>

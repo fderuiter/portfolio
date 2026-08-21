@@ -470,7 +470,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
           <button
             key={mode}
             onClick={() => onSurfaceChange?.(mode)}
-            className={`px-2.5 py-1 rounded-lg transition-all capitalize whitespace-nowrap ${
+            className={`px-2.5 py-1 rounded-lg transition-colors capitalize whitespace-nowrap ${
               surfaceMode === mode
                 ? "bg-brand-cyan text-zinc-950 font-bold shadow-sm"
                 : "text-zinc-400 hover:text-white hover:bg-zinc-800"
@@ -524,7 +524,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
           onClick={() => triggerSimulation(800)}
           title="Simulate WebGL Context Loss & Recovery (GPU Resilience Test)"
           aria-label="Simulate WebGL Context Loss and Recovery"
-          className="flex items-center gap-1 px-2 py-0.5 rounded text-zinc-400 hover:text-amber-300 hover:bg-zinc-800 transition"
+          className="flex items-center gap-1 px-2 py-0.5 rounded text-zinc-400 hover:text-amber-300 hover:bg-zinc-800 transition-colors"
         >
           <IconRefresh className="w-2.5 h-2.5 text-amber-400" />
           <span>GPU Test</span>
@@ -536,7 +536,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
         <div
           role="status"
           aria-live="polite"
-          className={`absolute top-12 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono shadow-xl transition-all duration-300 pointer-events-none ${
+          className={`absolute top-12 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono shadow-xl transition-colors transition-transform duration-300 pointer-events-none ${
             contextStatus === "lost" || contextStatus === "restoring"
               ? "bg-amber-950/90 border border-amber-500/60 text-amber-300 animate-pulse"
               : "bg-emerald-950/90 border border-emerald-500/60 text-emerald-300"

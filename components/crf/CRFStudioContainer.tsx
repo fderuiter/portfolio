@@ -718,7 +718,7 @@ export const CRFStudioContainer: React.FC = () => {
           <>
             {/* Desktop / Tablet Left Sidebar: Forms Navigator & Widget Palette */}
             {isLeftSidebarOpen && (
-              <aside className="hidden md:flex w-64 lg:w-72 bg-zinc-950 border-r border-zinc-850 flex-col shrink-0 transition-all">
+              <aside className="hidden md:flex w-64 lg:w-72 bg-zinc-950 border-r border-zinc-850 flex-col shrink-0 transition-colors">
                 {/* Left Sub-Tabs */}
                 <div className="flex border-b border-zinc-850 bg-zinc-900/40">
                   <button
@@ -849,7 +849,7 @@ export const CRFStudioContainer: React.FC = () => {
 
             {/* Desktop / Tablet Right Inspector Panel */}
             {isRightInspectorOpen && (
-              <aside className="hidden md:flex w-72 lg:w-96 bg-zinc-950 shrink-0 flex-col transition-all">
+              <aside className="hidden md:flex w-72 lg:w-96 bg-zinc-950 shrink-0 flex-col transition-colors">
                 <InspectorPanel
                   form={activeForm}
                   selectedField={selectedField}
@@ -925,7 +925,7 @@ export const CRFStudioContainer: React.FC = () => {
         >
           <button
             onClick={() => setMobileActiveView("forms")}
-            className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-all ${
+            className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-colors ${
               mobileActiveView === "forms"
                 ? "text-brand-cyan font-bold bg-brand-cyan/10"
                 : "text-zinc-400 hover:text-zinc-200"
@@ -937,7 +937,7 @@ export const CRFStudioContainer: React.FC = () => {
 
           <button
             onClick={() => setMobileActiveView("canvas")}
-            className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-all ${
+            className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-colors ${
               mobileActiveView === "canvas"
                 ? "text-brand-cyan font-bold bg-brand-cyan/10"
                 : "text-zinc-400 hover:text-zinc-200"
@@ -949,7 +949,7 @@ export const CRFStudioContainer: React.FC = () => {
 
           <button
             onClick={() => setMobileActiveView("inspector")}
-            className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-all ${
+            className={`flex flex-col items-center gap-0.5 py-1 px-3 rounded-xl transition-colors ${
               mobileActiveView === "inspector"
                 ? "text-brand-cyan font-bold bg-brand-cyan/10"
                 : "text-zinc-400 hover:text-zinc-200"

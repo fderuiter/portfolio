@@ -87,7 +87,7 @@ export default function ContactPage() {
               </p>
               <Link
                 href="/schedule"
-                className="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-mono font-bold text-xs rounded-xl transition-all shadow-md active:scale-[0.98]"
+                className="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-mono font-bold text-xs rounded-xl transition-colors transition-transform shadow-md active:scale-[0.98]"
               >
                 <span>Schedule 1:1 Video Sync</span>
                 <IconExternalLink className="w-3.5 h-3.5" />

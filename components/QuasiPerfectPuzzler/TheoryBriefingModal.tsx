@@ -97,7 +97,7 @@ export const TheoryBriefingModal: React.FC<TheoryBriefingModalProps> = ({
             <button
               type="button"
               onClick={() => onToggleMode("story")}
-              className={`px-2.5 py-1 text-xs font-bold rounded transition-all ${
+              className={`px-2.5 py-1 text-xs font-bold rounded transition-colors ${
                 gameMode === "story"
                   ? "bg-brand-cyan text-black"
                   : "text-zinc-400 hover:text-zinc-200"
@@ -108,7 +108,7 @@ export const TheoryBriefingModal: React.FC<TheoryBriefingModalProps> = ({
             <button
               type="button"
               onClick={() => onToggleMode("hacker")}
-              className={`px-2.5 py-1 text-xs font-bold rounded transition-all ${
+              className={`px-2.5 py-1 text-xs font-bold rounded transition-colors ${
                 gameMode === "hacker"
                   ? "bg-amber-400 text-black font-extrabold"
                   : "text-zinc-400 hover:text-zinc-200"
@@ -184,7 +184,7 @@ export const TheoryBriefingModal: React.FC<TheoryBriefingModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="flex items-center gap-2 rounded-xl bg-brand-cyan px-5 py-2 text-xs font-bold text-black shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:bg-cyan-400 transition-all font-extrabold"
+            className="flex items-center gap-2 rounded-xl bg-brand-cyan px-5 py-2 text-xs font-bold text-black shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:bg-cyan-400 transition-colors transition-shadow font-extrabold"
           >
             <span>Start Proving</span>
             <span>→</span>

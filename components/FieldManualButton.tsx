@@ -91,7 +91,7 @@ export function FieldManualButton({
           onClick={handleOpen}
           onMouseEnter={() => playHover()}
           aria-label={`Open Field Manual for ${manual.title}`}
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-medium text-zinc-400 hover:text-cyan-300 bg-zinc-900/60 hover:bg-zinc-850 border border-zinc-800 transition-all cursor-pointer ${className}`}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-medium text-zinc-400 hover:text-cyan-300 bg-zinc-900/60 hover:bg-zinc-850 border border-zinc-800 transition-colors cursor-pointer ${className}`}
         >
           <IconHelp className="w-3.5 h-3.5 text-cyan-400" />
           <span>Manual</span>
@@ -110,7 +110,7 @@ export function FieldManualButton({
           onClick={handleOpen}
           onMouseEnter={() => playHover()}
           aria-label={`Open Field Manual for ${manual.title}`}
-          className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-mono font-semibold rounded-xl bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 hover:text-cyan-400 border border-zinc-800 hover:border-cyan-500/30 transition-all cursor-pointer ${className}`}
+          className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-mono font-semibold rounded-xl bg-zinc-900/80 hover:bg-zinc-800 text-zinc-300 hover:text-cyan-400 border border-zinc-800 hover:border-cyan-500/30 transition-colors cursor-pointer ${className}`}
         >
           <IconBook2 className="w-4 h-4 text-cyan-400" />
           <span>{label}</span>
@@ -133,7 +133,7 @@ export function FieldManualButton({
           onClick={handleOpen}
           onMouseEnter={() => playHover()}
           aria-label={`Open Field Manual for ${manual.title}`}
-          className={`group flex items-center gap-2 px-3.5 py-1.5 text-xs font-mono font-bold rounded-xl transition-all border cursor-pointer ${
+          className={`group flex items-center gap-2 px-3.5 py-1.5 text-xs font-mono font-bold rounded-xl transition-colors border cursor-pointer ${
             !hasSeenGuide
               ? "bg-cyan-950/40 text-cyan-300 border-cyan-500/40 shadow-sm shadow-cyan-500/10 animate-pulse"
               : "bg-zinc-900/60 hover:bg-zinc-850 text-zinc-300 hover:text-cyan-300 border-zinc-800 hover:border-cyan-500/40"

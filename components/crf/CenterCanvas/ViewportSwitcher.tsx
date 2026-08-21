@@ -18,7 +18,7 @@ export const ViewportSwitcher: React.FC<ViewportSwitcherProps> = ({
     <div className="flex items-center gap-1 bg-zinc-900/90 border border-zinc-800 p-1 rounded-xl shadow-inner">
       <button
         onClick={() => onChangeViewport("desktop")}
-        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono transition-all ${
+        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono transition-colors ${
           viewport === "desktop"
             ? "bg-zinc-800 text-white font-bold shadow-sm"
             : "text-zinc-400 hover:text-zinc-200"
@@ -31,7 +31,7 @@ export const ViewportSwitcher: React.FC<ViewportSwitcherProps> = ({
 
       <button
         onClick={() => onChangeViewport("tablet")}
-        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono transition-all ${
+        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono transition-colors ${
           viewport === "tablet"
             ? "bg-zinc-800 text-white font-bold shadow-sm"
             : "text-zinc-400 hover:text-zinc-200"
@@ -44,7 +44,7 @@ export const ViewportSwitcher: React.FC<ViewportSwitcherProps> = ({
 
       <button
         onClick={() => onChangeViewport("mobile")}
-        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono transition-all ${
+        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono transition-colors ${
           viewport === "mobile"
             ? "bg-zinc-800 text-white font-bold shadow-sm"
             : "text-zinc-400 hover:text-zinc-200"

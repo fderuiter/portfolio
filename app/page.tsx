@@ -192,7 +192,7 @@ export default async function PortfolioHomePage() {
             <Link
               href="/contact"
               aria-label="Send a direct inquiry to Frederick de Ruiter via the secure contact form"
-              className="group flex flex-col items-center justify-center p-5 sm:p-6 bg-[#13151a]/80 border border-white/10 rounded-2xl transition-all duration-200 hover:border-amber-500/40 hover:bg-[#181b22] active:scale-[0.98] text-center cursor-pointer min-h-[110px] shadow-lg"
+              className="group flex flex-col items-center justify-center p-5 sm:p-6 bg-[#13151a]/80 border border-white/10 rounded-2xl transition-colors transition-transform duration-200 hover:border-amber-500/40 hover:bg-[#181b22] active:scale-[0.98] text-center cursor-pointer min-h-[110px] shadow-lg"
             >
               <span className="w-10 h-10 rounded-xl bg-black/50 border border-white/10 flex items-center justify-center text-zinc-400 group-hover:text-amber-400 group-hover:border-amber-500/30 transition-colors mb-3 shrink-0">
                 <IconMessageCode className="w-4 h-4" />
@@ -205,7 +205,7 @@ export default async function PortfolioHomePage() {
             <Link
               href="/schedule"
               aria-label="Schedule a 1:1 meeting with Frederick de Ruiter on Google Calendar"
-              className="group flex flex-col items-center justify-center p-5 sm:p-6 bg-amber-500/5 border border-amber-500/30 rounded-2xl transition-all duration-200 hover:border-amber-400 hover:bg-amber-500/10 active:scale-[0.98] text-center cursor-pointer relative overflow-hidden min-h-[110px] shadow-lg"
+              className="group flex flex-col items-center justify-center p-5 sm:p-6 bg-amber-500/5 border border-amber-500/30 rounded-2xl transition-colors transition-transform duration-200 hover:border-amber-400 hover:bg-amber-500/10 active:scale-[0.98] text-center cursor-pointer relative overflow-hidden min-h-[110px] shadow-lg"
             >
               <div className="absolute top-2.5 right-2.5 px-1.5 py-0.5 bg-amber-500/20 border border-amber-500/40 rounded text-[9px] font-mono text-amber-300 uppercase tracking-wider">
                 30 Min
@@ -223,7 +223,7 @@ export default async function PortfolioHomePage() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="View Frederick de Ruiter's GitHub profile externally"
-              className="group flex flex-col items-center justify-center p-5 sm:p-6 bg-[#13151a]/80 border border-white/10 rounded-2xl transition-all duration-200 hover:border-amber-500/40 hover:bg-[#181b22] active:scale-[0.98] text-center cursor-pointer min-h-[110px] shadow-lg"
+              className="group flex flex-col items-center justify-center p-5 sm:p-6 bg-[#13151a]/80 border border-white/10 rounded-2xl transition-colors transition-transform duration-200 hover:border-amber-500/40 hover:bg-[#181b22] active:scale-[0.98] text-center cursor-pointer min-h-[110px] shadow-lg"
             >
               <span className="w-10 h-10 rounded-xl bg-black/50 border border-white/10 flex items-center justify-center text-zinc-400 group-hover:text-amber-400 group-hover:border-amber-500/30 transition-colors mb-3 shrink-0">
                 <IconBrandGithub className="w-4 h-4" />
@@ -238,7 +238,7 @@ export default async function PortfolioHomePage() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="View Frederick de Ruiter's LinkedIn profile externally"
-              className="group flex flex-col items-center justify-center p-5 sm:p-6 bg-[#13151a]/80 border border-white/10 rounded-2xl transition-all duration-200 hover:border-amber-500/40 hover:bg-[#181b22] active:scale-[0.98] text-center cursor-pointer min-h-[110px] shadow-lg"
+              className="group flex flex-col items-center justify-center p-5 sm:p-6 bg-[#13151a]/80 border border-white/10 rounded-2xl transition-colors transition-transform duration-200 hover:border-amber-500/40 hover:bg-[#181b22] active:scale-[0.98] text-center cursor-pointer min-h-[110px] shadow-lg"
             >
               <span className="w-10 h-10 rounded-xl bg-black/50 border border-white/10 flex items-center justify-center text-zinc-400 group-hover:text-amber-400 group-hover:border-amber-500/30 transition-colors mb-3 shrink-0">
                 <IconBrandLinkedin className="w-4 h-4" />

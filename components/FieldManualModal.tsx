@@ -100,7 +100,7 @@ export function FieldManualModal({ isOpen, onClose, manual }: FieldManualModalPr
             <div className="relative px-6 pt-2 border-b border-zinc-900/80 bg-zinc-950/60 flex gap-2 overflow-x-auto no-scrollbar">
               <button
                 onClick={() => handleTabChange("objective")}
-                className={`flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-t-xl transition-all border-b-2 cursor-pointer ${
+                className={`flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-t-xl transition-colors border-b-2 cursor-pointer ${
                   activeTab === "objective"
                     ? "text-cyan-400 border-cyan-400 bg-cyan-950/20"
                     : "text-zinc-400 hover:text-zinc-200 border-transparent hover:bg-zinc-900/40"
@@ -112,7 +112,7 @@ export function FieldManualModal({ isOpen, onClose, manual }: FieldManualModalPr
 
               <button
                 onClick={() => handleTabChange("controls")}
-                className={`flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-t-xl transition-all border-b-2 cursor-pointer ${
+                className={`flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-t-xl transition-colors border-b-2 cursor-pointer ${
                   activeTab === "controls"
                     ? "text-cyan-400 border-cyan-400 bg-cyan-950/20"
                     : "text-zinc-400 hover:text-zinc-200 border-transparent hover:bg-zinc-900/40"
@@ -124,7 +124,7 @@ export function FieldManualModal({ isOpen, onClose, manual }: FieldManualModalPr
 
               <button
                 onClick={() => handleTabChange("rules")}
-                className={`flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-t-xl transition-all border-b-2 cursor-pointer ${
+                className={`flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-t-xl transition-colors border-b-2 cursor-pointer ${
                   activeTab === "rules"
                     ? "text-cyan-400 border-cyan-400 bg-cyan-950/20"
                     : "text-zinc-400 hover:text-zinc-200 border-transparent hover:bg-zinc-900/40"
@@ -136,7 +136,7 @@ export function FieldManualModal({ isOpen, onClose, manual }: FieldManualModalPr
 
               <button
                 onClick={() => handleTabChange("lore")}
-                className={`flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-t-xl transition-all border-b-2 cursor-pointer ${
+                className={`flex items-center gap-2 px-3.5 py-2.5 text-xs font-semibold rounded-t-xl transition-colors border-b-2 cursor-pointer ${
                   activeTab === "lore"
                     ? "text-cyan-400 border-cyan-400 bg-cyan-950/20"
                     : "text-zinc-400 hover:text-zinc-200 border-transparent hover:bg-zinc-900/40"
@@ -188,7 +188,7 @@ export function FieldManualModal({ isOpen, onClose, manual }: FieldManualModalPr
                     <button
                       onClick={() => handleTabChange("controls")}
                       onMouseEnter={() => playHover()}
-                      className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold font-mono uppercase tracking-wider text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-xl transition-all cursor-pointer"
+                      className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold font-mono uppercase tracking-wider text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-xl transition-colors cursor-pointer"
                     >
                       <span>Review Controls</span>
                       <IconArrowRight className="w-4 h-4 text-cyan-400" />
@@ -237,7 +237,7 @@ export function FieldManualModal({ isOpen, onClose, manual }: FieldManualModalPr
                     <button
                       onClick={() => handleTabChange("rules")}
                       onMouseEnter={() => playHover()}
-                      className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold font-mono uppercase tracking-wider text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-xl transition-all cursor-pointer"
+                      className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold font-mono uppercase tracking-wider text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-xl transition-colors cursor-pointer"
                     >
                       <span>Review Rules & Scoring</span>
                       <IconArrowRight className="w-4 h-4 text-cyan-400" />
@@ -308,7 +308,7 @@ export function FieldManualModal({ isOpen, onClose, manual }: FieldManualModalPr
                     <button
                       onClick={() => handleTabChange("lore")}
                       onMouseEnter={() => playHover()}
-                      className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold font-mono uppercase tracking-wider text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-xl transition-all cursor-pointer"
+                      className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold font-mono uppercase tracking-wider text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-xl transition-colors cursor-pointer"
                     >
                       <span>Explore Engineering Lore</span>
                       <IconArrowRight className="w-4 h-4 text-cyan-400" />
@@ -362,7 +362,7 @@ export function FieldManualModal({ isOpen, onClose, manual }: FieldManualModalPr
                     </button>
                     <button
                       onClick={onClose}
-                      className="px-5 py-2 text-xs font-bold font-mono uppercase tracking-wider text-black bg-cyan-400 hover:bg-cyan-300 rounded-xl transition-all shadow-lg shadow-cyan-500/20 cursor-pointer"
+                      className="px-5 py-2 text-xs font-bold font-mono uppercase tracking-wider text-black bg-cyan-400 hover:bg-cyan-300 rounded-xl transition-colors transition-shadow shadow-lg shadow-cyan-500/20 cursor-pointer"
                     >
                       Ready to Play!
                     </button>

@@ -1502,14 +1502,14 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
       <div className="mb-2 w-full flex flex-wrap items-center justify-between gap-2 px-1 text-[10px]">
         <div className="flex items-center gap-2">
           <span
-            className={`inline-flex items-center gap-2 px-3 py-1 rounded-full font-bold uppercase tracking-wider border transition-all duration-300 ${
+            className={`inline-flex items-center gap-2 px-3 py-1 rounded-full font-bold uppercase tracking-wider border transition-colors duration-300 ${
               isFocused
                 ? "bg-brand-cyan/10 text-brand-cyan border-brand-cyan/30 shadow-[0_0_10px_rgba(34,211,238,0.15)] animate-pulse"
                 : "bg-neutral-950 text-neutral-500 border-neutral-900"
             }`}
           >
             <span
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              className={`w-2 h-2 rounded-full transition-colors duration-300 ${
                 isFocused
                   ? "bg-brand-cyan shadow-[0_0_8px_rgba(6,182,212,0.8)]"
                   : "bg-neutral-700"
@@ -1644,7 +1644,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
           isFullscreen
             ? "fixed inset-0 z-50 w-full h-[100dvh] max-h-[100dvh] max-w-none rounded-none border-none bg-black flex flex-col items-center justify-between p-1.5 sm:p-4 select-none touch-none overflow-hidden"
             : "h-auto"
-        } bg-neutral-950/90 border rounded-2xl flex flex-col items-center justify-between p-2.5 overflow-hidden outline-none transition-all duration-300 ${
+        } bg-neutral-950/90 border rounded-2xl flex flex-col items-center justify-between p-2.5 overflow-hidden outline-none transition-colors duration-300 ${
           isFocused
             ? "border-brand-cyan ring-2 ring-brand-cyan/10 shadow-[0_0_20px_rgba(34,211,238,0.1)] scale-[1.005]"
             : "border-neutral-900"
@@ -1670,7 +1670,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
               <span className="text-neutral-500">HP</span>
               <div className="w-14 h-2 bg-neutral-900 rounded-full overflow-hidden border border-neutral-800">
                 <div
-                  className={`h-full transition-all duration-200 ${
+                  className={`h-full transition-colors duration-200 ${
                     playerHp > 50
                       ? "bg-emerald-500"
                       : playerHp > 25
@@ -1688,7 +1688,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
               <span className="text-cyan-500">RAM</span>
               <div className="w-14 h-2 bg-neutral-900 rounded-full overflow-hidden border border-neutral-800">
                 <div
-                  className="h-full bg-cyan-500 transition-all duration-200"
+                  className="h-full bg-cyan-500 transition-colors duration-200"
                   style={{ width: `${Math.max(0, (currentRam / maxRam) * 100)}%` }}
                 />
               </div>
@@ -1727,7 +1727,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
               : isExpanded
               ? "w-full max-w-[360px] aspect-[240/144] h-auto"
               : "w-full max-w-[240px] aspect-[240/144] h-auto"
-          } flex items-center justify-center transition-all duration-300 my-auto`}
+          } flex items-center justify-center transition-colors duration-300 my-auto`}
           style={
             crtCalibration.curvature > 0.05
               ? {
@@ -1777,7 +1777,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                       handleNextRoom();
                       containerRef.current?.focus({ preventScroll: true });
                     }}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-brand-cyan hover:bg-cyan-400 text-black text-[9px] font-bold rounded-lg transition-all cursor-pointer shadow-md"
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-brand-cyan hover:bg-cyan-400 text-black text-[9px] font-bold rounded-lg transition-colors transition-shadow cursor-pointer shadow-md"
                   >
                     <span>Next Subnet Tier</span>
                     <IconArrowRight className="w-3 h-3" />
@@ -1789,7 +1789,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                       handleRestart();
                       containerRef.current?.focus({ preventScroll: true });
                     }}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-brand-cyan/40 text-neutral-200 hover:text-brand-cyan text-[9px] font-bold rounded-lg transition-all cursor-pointer"
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-brand-cyan/40 text-neutral-200 hover:text-brand-cyan text-[9px] font-bold rounded-lg transition-colors cursor-pointer"
                   >
                     <IconRefresh className="w-3 h-3" />
                     Play Again
@@ -1859,7 +1859,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                         key={`${rIdx}-${cIdx}`}
                         onClick={() => handleHexCellClick(rIdx, cIdx)}
                         disabled={cell.selected || hexPuzzle.solved || hexPuzzle.failed}
-                        className={`w-7 h-6 rounded flex items-center justify-center text-[9px] font-bold transition-all cursor-pointer ${
+                        className={`w-7 h-6 rounded flex items-center justify-center text-[9px] font-bold transition-colors cursor-pointer ${
                           cell.selected
                             ? "bg-neutral-900 text-neutral-600 border border-neutral-800"
                             : isSelectable
@@ -1968,7 +1968,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                       setWeapons(DEFAULT_WEAPONS);
                       setGameStatus("playing");
                     }}
-                    className={`p-1.5 rounded border text-left flex flex-col justify-between transition-all cursor-pointer ${
+                    className={`p-1.5 rounded border text-left flex flex-col justify-between transition-colors cursor-pointer ${
                       selectedClassId === cls.id
                         ? "bg-cyan-500/20 border-cyan-400 text-cyan-200"
                         : "bg-neutral-900 border-neutral-800 text-neutral-400 hover:border-neutral-700"
@@ -2019,7 +2019,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                   handleSubmitTimesheet();
                   containerRef.current?.focus({ preventScroll: true });
                 }}
-                className="inline-flex items-center gap-1 px-3 py-1 bg-amber-500 hover:bg-amber-400 text-black text-[9px] font-bold rounded-md transition-all cursor-pointer shadow-md"
+                className="inline-flex items-center gap-1 px-3 py-1 bg-amber-500 hover:bg-amber-400 text-black text-[9px] font-bold rounded-md transition-colors transition-shadow cursor-pointer shadow-md"
               >
                 <IconCheck className="w-3 h-3" />
                 Submit Timesheet & Open Vault [ENTER]
@@ -2066,7 +2066,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                       }
                     }}
                     disabled={isDisabled}
-                    className={`px-1.5 py-0.5 rounded border flex items-center gap-1 transition-all ${
+                    className={`px-1.5 py-0.5 rounded border flex items-center gap-1 transition-colors ${
                       isDisabled
                         ? "bg-neutral-900/50 text-neutral-600 border-neutral-800/50 cursor-not-allowed opacity-60"
                         : isActive

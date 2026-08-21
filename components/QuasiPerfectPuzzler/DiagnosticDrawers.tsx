@@ -34,7 +34,7 @@ export const DiagnosticDrawers: React.FC<DiagnosticDrawersProps> = ({
   return (
     <div className="w-full space-y-3 font-mono" data-testid="diagnostic-drawers">
       {/* 1. Accordion Drawer: Lean IDE Inspector */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-950 overflow-hidden shadow-md transition-all">
+      <div className="rounded-2xl border border-zinc-800 bg-zinc-950 overflow-hidden shadow-md transition-colors transition-shadow">
         <button
           type="button"
           onClick={onToggleLeanInspector}
@@ -77,7 +77,7 @@ export const DiagnosticDrawers: React.FC<DiagnosticDrawersProps> = ({
       </div>
 
       {/* 2. Accordion Drawer: Diagnostic Terminal Log */}
-      <div className="rounded-2xl border border-zinc-800 bg-zinc-950 overflow-hidden shadow-md transition-all">
+      <div className="rounded-2xl border border-zinc-800 bg-zinc-950 overflow-hidden shadow-md transition-colors transition-shadow">
         <button
           type="button"
           onClick={() => setIsTerminalOpen((prev) => !prev)}

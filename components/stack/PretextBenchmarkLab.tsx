@@ -136,7 +136,7 @@ export const PretextBenchmarkLab: React.FC = () => {
           disabled={isRunning}
           onClick={runBenchmark}
           onMouseEnter={() => playHover()}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-brand-cyan text-zinc-950 font-mono text-xs font-bold hover:bg-cyan-400 active:scale-95 transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-brand-cyan text-zinc-950 font-mono text-xs font-bold hover:bg-cyan-400 active:scale-95 transition-colors transition-transform transition-opacity shadow-[0_0_20px_rgba(6,182,212,0.3)] disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
         >
           {isRunning ? (
             <>
@@ -164,7 +164,7 @@ export const PretextBenchmarkLab: React.FC = () => {
                 key={dataset.id}
                 type="button"
                 onClick={() => handleDatasetChange(idx)}
-                className={`text-left p-2.5 rounded-xl border text-xs font-mono transition-all cursor-pointer ${
+                className={`text-left p-2.5 rounded-xl border text-xs font-mono transition-colors cursor-pointer ${
                   selectedDatasetIndex === idx
                     ? "bg-brand-cyan/15 border-brand-cyan/50 text-brand-cyan font-bold"
                     : "bg-zinc-950/60 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"

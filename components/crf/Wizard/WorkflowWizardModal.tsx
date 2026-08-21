@@ -293,7 +293,7 @@ export const WorkflowWizardModal: React.FC<WorkflowWizardModalProps> = ({
                 onClose();
                 onStartSpotlightTour();
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-medium transition-all"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-medium transition-colors"
               title="Launch interactive UI Spotlight Tour"
             >
               <IconPlayerPlay className="w-3.5 h-3.5" />
@@ -320,7 +320,7 @@ export const WorkflowWizardModal: React.FC<WorkflowWizardModalProps> = ({
               <button
                 key={s.number}
                 onClick={() => setCurrentStageIdx(idx)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl text-left transition-all border ${
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl text-left transition-colors border ${
                   isActive
                     ? "bg-brand-cyan/15 border-brand-cyan text-white shadow-sm"
                     : isCompleted
@@ -367,7 +367,7 @@ export const WorkflowWizardModal: React.FC<WorkflowWizardModalProps> = ({
                     <button
                       key={arch.id}
                       onClick={() => handleSelectPreset(arch.id)}
-                      className={`p-3.5 rounded-xl border text-left transition-all ${
+                      className={`p-3.5 rounded-xl border text-left transition-colors ${
                         draftStudy.protocolNumber.includes(arch.phase) || draftStudy.studyName.includes(arch.name.split(" ")[0])
                           ? "bg-brand-cyan/10 border-brand-cyan text-white shadow-sm"
                           : "bg-zinc-950 hover:bg-zinc-900/80 border-zinc-800 text-zinc-300"
@@ -470,7 +470,7 @@ export const WorkflowWizardModal: React.FC<WorkflowWizardModalProps> = ({
                     <div
                       key={dom.code}
                       onClick={() => handleToggleDomain(dom.code)}
-                      className={`p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col justify-between space-y-2 select-none ${
+                      className={`p-3.5 rounded-xl border cursor-pointer transition-colors flex flex-col justify-between space-y-2 select-none ${
                         isChecked
                           ? "bg-zinc-900 border-brand-cyan/80 shadow-md shadow-brand-cyan/5"
                           : "bg-zinc-950 hover:bg-zinc-900/50 border-zinc-800/80 opacity-70 hover:opacity-100"
@@ -559,7 +559,7 @@ export const WorkflowWizardModal: React.FC<WorkflowWizardModalProps> = ({
                           <button
                             key={form.id}
                             onClick={() => handleToggleVisitForm(visit.id, form.id)}
-                            className={`px-2 py-1 rounded-lg text-[10px] font-semibold border transition-all ${
+                            className={`px-2 py-1 rounded-lg text-[10px] font-semibold border transition-colors ${
                               isAssigned
                                 ? "bg-brand-cyan/20 border-brand-cyan text-brand-cyan shadow-xs"
                                 : "bg-zinc-950 border-zinc-800 text-zinc-500 hover:text-zinc-300"
@@ -739,7 +739,7 @@ export const WorkflowWizardModal: React.FC<WorkflowWizardModalProps> = ({
             {currentStageIdx < 4 ? (
               <button
                 onClick={() => setCurrentStageIdx((prev) => Math.min(4, prev + 1))}
-                className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-brand-cyan text-black hover:bg-white text-xs font-bold transition-all shadow-md"
+                className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-brand-cyan text-black hover:bg-white text-xs font-bold transition-colors transition-shadow shadow-md"
               >
                 <span>Next Stage</span>
                 <IconChevronRight className="w-4 h-4" />
@@ -747,7 +747,7 @@ export const WorkflowWizardModal: React.FC<WorkflowWizardModalProps> = ({
             ) : (
               <button
                 onClick={handleDeploy}
-                className="inline-flex items-center gap-1.5 px-6 py-2 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-black text-xs font-bold transition-all shadow-lg shadow-emerald-500/20"
+                className="inline-flex items-center gap-1.5 px-6 py-2 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-black text-xs font-bold transition-colors transition-shadow shadow-lg shadow-emerald-500/20"
               >
                 <IconCheck className="w-4 h-4" />
                 <span>Deploy Protocol to Studio Canvas</span>

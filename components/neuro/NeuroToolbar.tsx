@@ -81,7 +81,7 @@ export const NeuroToolbar: React.FC<NeuroToolbarProps> = ({
               key={tool.id}
               onClick={() => onToolModeChange(tool.id)}
               title={`${tool.label} [${tool.key}]`}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono transition-all select-none ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono transition-colors select-none ${
                 isActive
                   ? "bg-zinc-800 text-white font-bold border border-zinc-700 shadow-sm"
                   : "text-zinc-400 hover:text-white hover:bg-zinc-900"
@@ -104,7 +104,7 @@ export const NeuroToolbar: React.FC<NeuroToolbarProps> = ({
               <button
                 key={r}
                 onClick={() => onBrushRadiusChange(r)}
-                className={`w-6 h-6 rounded-md font-bold text-xs flex items-center justify-center transition-all ${
+                className={`w-6 h-6 rounded-md font-bold text-xs flex items-center justify-center transition-colors ${
                   brushRadius === r
                     ? "bg-brand-cyan text-zinc-950 shadow-sm"
                     : "text-zinc-400 hover:text-white hover:bg-zinc-800"
@@ -121,7 +121,7 @@ export const NeuroToolbar: React.FC<NeuroToolbarProps> = ({
       <div className="flex items-center gap-1.5 bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs font-mono">
         <button
           onClick={onTogglePialContour}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all ${
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors ${
             showPialContour
               ? "bg-red-500/15 border border-red-500/30 text-red-400 font-bold"
               : "text-zinc-400 hover:text-white hover:bg-zinc-900"
@@ -133,7 +133,7 @@ export const NeuroToolbar: React.FC<NeuroToolbarProps> = ({
 
         <button
           onClick={onToggleWmContour}
-          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all ${
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors ${
             showWmContour
               ? "bg-yellow-500/15 border border-yellow-500/30 text-yellow-400 font-bold"
               : "text-zinc-400 hover:text-white hover:bg-zinc-900"
@@ -150,7 +150,7 @@ export const NeuroToolbar: React.FC<NeuroToolbarProps> = ({
           onClick={onRunRecon}
           disabled={isProcessing}
           title="Run FreeSurfer recon-all pipeline [R]"
-          className="flex items-center gap-1.5 px-3.5 py-1.5 bg-brand-cyan hover:bg-brand-cyan/90 text-zinc-950 font-mono font-bold text-xs rounded-xl shadow-lg shadow-brand-cyan/15 transition-all disabled:opacity-50"
+          className="flex items-center gap-1.5 px-3.5 py-1.5 bg-brand-cyan hover:bg-brand-cyan/90 text-zinc-950 font-mono font-bold text-xs rounded-xl shadow-lg shadow-brand-cyan/15 transition-colors transition-opacity disabled:opacity-50"
         >
           <IconPlayerPlay className={`w-4 h-4 ${isProcessing ? "animate-spin" : ""}`} />
           <span>{isProcessing ? "RECON RUNNING..." : "RUN RECON-ALL"}</span>
@@ -161,7 +161,7 @@ export const NeuroToolbar: React.FC<NeuroToolbarProps> = ({
           onClick={onReset}
           title="Reset current edits & control points"
           aria-label="Reset workspace"
-          className="p-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all"
+          className="p-2 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors"
         >
           <IconRotateClockwise2 className="w-4 h-4" />
         </button>
@@ -170,7 +170,7 @@ export const NeuroToolbar: React.FC<NeuroToolbarProps> = ({
           onClick={onOpenFieldManual}
           title="Open FreeSurfer Field Manual & Defect Guide [M]"
           aria-label="Open Field Manual"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-800 text-brand-cyan hover:bg-zinc-900 text-xs font-mono font-bold transition-all"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-950 border border-zinc-800 text-brand-cyan hover:bg-zinc-900 text-xs font-mono font-bold transition-colors"
         >
           <IconBook className="w-4 h-4" />
           <span className="hidden sm:inline">FIELD MANUAL</span>

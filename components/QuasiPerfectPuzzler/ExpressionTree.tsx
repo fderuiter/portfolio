@@ -65,7 +65,7 @@ export const ExpressionTree: React.FC<ExpressionTreeProps> = ({
                   onClick={() => onSelectTarget(hyp.id)}
                   onMouseEnter={() => onHoverTarget(hyp.id)}
                   onMouseLeave={() => onHoverTarget(null)}
-                  className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-mono transition-all cursor-pointer ${
+                  className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-mono transition-colors cursor-pointer ${
                     isSelected
                       ? "border-purple-400 bg-purple-600/30 text-white shadow-[0_0_12px_rgba(168,85,247,0.5)] ring-2 ring-purple-400"
                       : isHovered

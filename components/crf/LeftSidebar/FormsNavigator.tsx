@@ -48,7 +48,7 @@ export const FormsNavigator: React.FC<FormsNavigatorProps> = ({
       {/* 1-Click CDASH Scaffolder CTA */}
       <button
         onClick={onOpenCdashScaffolder}
-        className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/30 text-brand-cyan text-xs font-mono font-bold transition-all shadow-sm group"
+        className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/30 text-brand-cyan text-xs font-mono font-bold transition-colors transition-shadow shadow-sm group"
       >
         <IconSparkles className="w-4 h-4 group-hover:scale-110 transition-transform" />
         <span>+ CDASH Standard Form</span>
@@ -64,7 +64,7 @@ export const FormsNavigator: React.FC<FormsNavigatorProps> = ({
             <div
               key={form.id}
               onClick={() => onSelectForm(form.id)}
-              className={`group relative p-2.5 rounded-xl border cursor-pointer transition-all ${
+              className={`group relative p-2.5 rounded-xl border cursor-pointer transition-colors ${
                 isActive
                   ? "bg-brand-cyan/10 border-brand-cyan/40 shadow-sm"
                   : "bg-zinc-950/60 border-zinc-850 hover:border-zinc-700 hover:bg-zinc-900/60"

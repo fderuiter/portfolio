@@ -143,7 +143,7 @@ export const BrandingConfigModal: React.FC<BrandingConfigModalProps> = ({
                   key={preset.id}
                   type="button"
                   onClick={() => handleApplyPreset(preset.id)}
-                  className="p-3 rounded-xl border border-zinc-800 bg-zinc-950/60 hover:bg-zinc-800/80 hover:border-zinc-700 text-left transition-all group flex flex-col justify-between space-y-2"
+                  className="p-3 rounded-xl border border-zinc-800 bg-zinc-950/60 hover:bg-zinc-800/80 hover:border-zinc-700 text-left transition-colors group flex flex-col justify-between space-y-2"
                 >
                   <div className="flex items-center gap-1.5">
                     <span
@@ -231,7 +231,7 @@ export const BrandingConfigModal: React.FC<BrandingConfigModalProps> = ({
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full p-4 border-2 border-dashed border-zinc-800 hover:border-brand-cyan/60 rounded-xl bg-zinc-950/40 text-center transition-all flex flex-col items-center justify-center gap-1.5 group"
+                    className="w-full p-4 border-2 border-dashed border-zinc-800 hover:border-brand-cyan/60 rounded-xl bg-zinc-950/40 text-center transition-colors flex flex-col items-center justify-center gap-1.5 group"
                   >
                     <IconUpload className="w-5 h-5 text-zinc-500 group-hover:text-brand-cyan transition-colors" />
                     <span className="text-xs font-mono text-zinc-400 group-hover:text-zinc-200">
@@ -439,7 +439,7 @@ export const BrandingConfigModal: React.FC<BrandingConfigModalProps> = ({
           <button
             type="button"
             onClick={handleSaveDefault}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-850 hover:bg-zinc-800 border border-zinc-750 text-zinc-300 hover:text-white text-xs font-mono transition-all"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-850 hover:bg-zinc-800 border border-zinc-750 text-zinc-300 hover:text-white text-xs font-mono transition-colors"
           >
             {savedSuccess ? (
               <IconCheck className="w-3.5 h-3.5 text-emerald-400" />
@@ -460,7 +460,7 @@ export const BrandingConfigModal: React.FC<BrandingConfigModalProps> = ({
             <button
               type="button"
               onClick={handleSaveAndClose}
-              className="px-5 py-2 bg-brand-cyan text-black hover:bg-white font-mono text-xs font-bold rounded-xl transition-all shadow-md"
+              className="px-5 py-2 bg-brand-cyan text-black hover:bg-white font-mono text-xs font-bold rounded-xl transition-colors transition-shadow shadow-md"
             >
               Apply Branding
             </button>

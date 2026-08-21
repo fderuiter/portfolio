@@ -46,7 +46,7 @@ export default function GlobalError({
 
           <button
             onClick={() => reset()}
-            className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-bold bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 hover:border-brand-cyan/40 text-brand-cyan rounded-2xl transition-all duration-300 shadow-lg cursor-pointer"
+            className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-bold bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 hover:border-brand-cyan/40 text-brand-cyan rounded-2xl transition-colors transition-shadow duration-300 shadow-lg cursor-pointer"
           >
             Reset Root Layout
           </button>

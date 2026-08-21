@@ -37,7 +37,7 @@ export const LeanIdeInspector: React.FC<LeanIdeInspectorProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab("code")}
-            className={`flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-lg transition-colors ${
               activeTab === "code"
                 ? "bg-purple-600 text-white shadow-[0_0_10px_rgba(168,85,247,0.4)]"
                 : "text-zinc-400 hover:text-zinc-200"
@@ -49,7 +49,7 @@ export const LeanIdeInspector: React.FC<LeanIdeInspectorProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab("encyclopedia")}
-            className={`flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-lg transition-colors ${
               activeTab === "encyclopedia"
                 ? "bg-brand-cyan text-black shadow-[0_0_10px_rgba(6,182,212,0.4)]"
                 : "text-zinc-400 hover:text-zinc-200"
@@ -67,7 +67,7 @@ export const LeanIdeInspector: React.FC<LeanIdeInspectorProps> = ({
             copiedLabel="Copied to Clipboard!"
             icon={<IconCopy className="w-3.5 h-3.5" />}
             copiedIcon={<IconCheck className="w-3.5 h-3.5 text-emerald-400" />}
-            className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-lg border border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
             aria-label="Copy Lean 4 Code"
             successMessage="Lean 4 proof script copied to clipboard"
           />
@@ -153,7 +153,7 @@ export const LeanIdeInspector: React.FC<LeanIdeInspectorProps> = ({
                 key={tac.id}
                 type="button"
                 onClick={() => setSelectedTactic(tac.id)}
-                className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-between ${
+                className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center justify-between ${
                   selectedTactic === tac.id
                     ? "bg-brand-cyan text-black"
                     : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"

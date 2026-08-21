@@ -121,7 +121,7 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
           <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-xl p-0.5">
             <button
               onClick={() => setViewFormat("table")}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono transition-all ${
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono transition-colors ${
                 viewFormat === "table"
                   ? "bg-brand-cyan text-black font-bold"
                   : "text-zinc-400 hover:text-zinc-200"
@@ -133,7 +133,7 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
             </button>
             <button
               onClick={() => setViewFormat("cards")}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono transition-all ${
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-mono transition-colors ${
                 viewFormat === "cards"
                   ? "bg-brand-cyan text-black font-bold"
                   : "text-zinc-400 hover:text-zinc-200"
@@ -147,7 +147,7 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
 
           <button
             onClick={handleAddVisit}
-            className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-brand-cyan text-black hover:bg-white font-mono text-xs font-bold transition-all shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-brand-cyan text-black hover:bg-white font-mono text-xs font-bold transition-colors transition-shadow shadow-sm"
           >
             <IconPlus className="w-4 h-4" />
             <span>Add Visit</span>
@@ -164,7 +164,7 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
           <div className="flex items-center gap-2 overflow-x-auto">
             <button
               onClick={() => setSelectedArmId("all")}
-              className={`px-3 py-1 rounded-lg transition-all border ${
+              className={`px-3 py-1 rounded-lg transition-colors border ${
                 selectedArmId === "all"
                   ? "bg-brand-cyan text-black font-bold border-brand-cyan"
                   : "bg-zinc-950 text-zinc-400 border-zinc-800 hover:text-white"
@@ -176,7 +176,7 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
               <button
                 key={arm.id}
                 onClick={() => setSelectedArmId(arm.id)}
-                className={`px-3 py-1 rounded-lg transition-all border whitespace-nowrap ${
+                className={`px-3 py-1 rounded-lg transition-colors border whitespace-nowrap ${
                   selectedArmId === arm.id
                     ? "bg-brand-cyan text-black font-bold border-brand-cyan"
                     : "bg-zinc-950 text-zinc-400 border-zinc-800 hover:text-white"
@@ -200,7 +200,7 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
                 <button
                   key={visit.id}
                   onClick={() => setSelectedCardVisitId(visit.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-all border ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-colors border ${
                     isSelected
                       ? "bg-brand-cyan/20 border-brand-cyan text-brand-cyan font-bold"
                       : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200"
@@ -266,7 +266,7 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
                       <div
                         key={form.id}
                         onClick={() => handleToggleFormAtVisit(currentCardVisit.id, form.id)}
-                        className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
+                        className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-colors ${
                           isAssigned
                             ? "bg-brand-cyan/10 border-brand-cyan/40 text-white"
                             : "bg-zinc-950 border-zinc-850 text-zinc-400 hover:bg-zinc-900"
@@ -383,7 +383,7 @@ export const VisitMatrixEditor: React.FC<VisitMatrixEditorProps> = ({
                       >
                         <div className="flex items-center justify-center">
                           <div
-                            className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-all ${
+                            className={`w-5 h-5 rounded-lg border flex items-center justify-center transition-colors ${
                               isAssigned
                                 ? "bg-brand-cyan border-brand-cyan text-black font-bold shadow-sm"
                                 : "bg-zinc-900 border-zinc-800 text-transparent hover:border-zinc-700"

@@ -135,7 +135,7 @@ export const CRTCalibrationModal: React.FC<CRTCalibrationModalProps> = ({
                 <button
                   key={presetId}
                   onClick={() => handlePresetSelect(presetId)}
-                  className={`p-2.5 rounded-xl text-left border transition-all text-xs flex flex-col justify-between cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none ${
+                  className={`p-2.5 rounded-xl text-left border transition-colors text-xs flex flex-col justify-between cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400 focus:outline-none ${
                     isSelected
                       ? "border-emerald-500 bg-emerald-500/10 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.15)]"
                       : "border-zinc-800 bg-zinc-900/60 hover:bg-zinc-900 text-zinc-300 hover:border-zinc-700"

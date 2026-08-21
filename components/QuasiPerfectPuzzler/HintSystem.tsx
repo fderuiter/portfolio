@@ -46,7 +46,7 @@ export const HintSystem: React.FC<HintSystemProps> = ({ hints, onTierChange }) =
           return (
             <div
               key={tierInfo.tier}
-              className={`rounded-xl border p-3 transition-all ${
+              className={`rounded-xl border p-3 transition-colors ${
                 isUnlocked
                   ? "border-zinc-800 bg-zinc-900/80"
                   : "border-zinc-850 bg-zinc-950/40 opacity-60"
@@ -65,7 +65,7 @@ export const HintSystem: React.FC<HintSystemProps> = ({ hints, onTierChange }) =
                   <button
                     type="button"
                     onClick={handleUnlockNext}
-                    className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition-all"
+                    className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition-colors"
                   >
                     <span>Reveal Next Hint</span>
                     <IconChevronRight className="w-3 h-3" />

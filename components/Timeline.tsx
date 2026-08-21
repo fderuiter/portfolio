@@ -61,7 +61,7 @@ export const Timeline: React.FC = () => {
         <div className="flex p-0.5 bg-black/60 border border-white/10 rounded-xl text-xs font-mono w-full sm:w-auto">
           <button
             onClick={() => handleGlobalToggle("reality")}
-            className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 min-h-10 px-3.5 py-2 rounded-lg font-bold transition-all duration-200 cursor-pointer ${
+            className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 min-h-10 px-3.5 py-2 rounded-lg font-bold transition-colors duration-200 cursor-pointer ${
               globalMode === "reality"
                 ? "bg-[#1f232d] text-amber-300 border border-amber-500/40 shadow-sm"
                 : "text-zinc-400 hover:text-zinc-200 border border-transparent"
@@ -72,7 +72,7 @@ export const Timeline: React.FC = () => {
           </button>
           <button
             onClick={() => handleGlobalToggle("recruiter")}
-            className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 min-h-10 px-3.5 py-2 rounded-lg font-bold transition-all duration-200 cursor-pointer ${
+            className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 min-h-10 px-3.5 py-2 rounded-lg font-bold transition-colors duration-200 cursor-pointer ${
               globalMode === "recruiter"
                 ? "bg-[#1f232d] text-cyan-300 border border-cyan-500/40 shadow-sm"
                 : "text-zinc-400 hover:text-zinc-200 border border-transparent"
@@ -129,7 +129,7 @@ export const Timeline: React.FC = () => {
                       }`,
                     } as React.CSSProperties
                   }
-                  className={`p-4 sm:p-6 bg-[#13151a]/85 border rounded-2xl backdrop-blur-md transition-all duration-300 group shadow-lg ${
+                  className={`p-4 sm:p-6 bg-[#13151a]/85 border rounded-2xl backdrop-blur-md transition-colors transition-shadow duration-300 group shadow-lg ${
                     isReality ? "border-amber-500/25 hover:border-amber-500/45" : "border-white/10 hover:border-white/20"
                   }`}
                 >

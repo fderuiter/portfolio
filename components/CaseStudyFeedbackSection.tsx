@@ -292,7 +292,7 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
   return (
     <section
       aria-label="Article feedback and reactions"
-      className="mt-16 w-full border-t border-zinc-900 pt-10 pb-6 min-h-[480px] flex flex-col justify-between transition-all duration-200"
+      className="mt-16 w-full border-t border-zinc-900 pt-10 pb-6 min-h-[480px] flex flex-col justify-between transition-colors duration-200"
     >
       <div className="space-y-8">
         {/* Section Header */}
@@ -330,7 +330,7 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
                   disabled={isLoading}
                   aria-pressed={isReacted}
                   aria-label={`React with ${label}, current count ${count}`}
-                  className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-mono font-medium border transition-all duration-150 active:scale-95 ${
+                  className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-mono font-medium border transition-colors transition-transform duration-150 active:scale-95 ${
                     isReacted
                       ? "bg-brand-cyan/15 border-brand-cyan/40 text-brand-cyan shadow-sm shadow-brand-cyan/10"
                       : "bg-zinc-900/70 border-zinc-800 text-zinc-300 hover:border-zinc-700 hover:text-neutral-100 hover:bg-zinc-900"
@@ -380,7 +380,7 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
                       type="button"
                       onClick={() => toggleTakeaway(takeaway)}
                       aria-pressed={isSelected}
-                      className={`px-3 py-1.5 rounded-md text-xs font-mono transition-all duration-150 border active:scale-95 ${
+                      className={`px-3 py-1.5 rounded-md text-xs font-mono transition-colors transition-transform duration-150 border active:scale-95 ${
                         isSelected
                           ? "bg-brand-cyan/20 border-brand-cyan/50 text-brand-cyan font-bold"
                           : "bg-zinc-900/60 border-zinc-800/80 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
@@ -412,7 +412,7 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
                     setComments(e.target.value.slice(0, 2000));
                   }}
                   placeholder="Describe key insights, questions, or actionable observations from reading this post-mortem..."
-                  className="w-full rounded-lg bg-zinc-900/80 border border-zinc-800 p-3 text-sm text-neutral-100 placeholder-zinc-600 focus:outline-none focus:border-brand-cyan/60 focus:ring-1 focus:ring-brand-cyan/30 transition-all font-sans leading-relaxed"
+                  className="w-full rounded-lg bg-zinc-900/80 border border-zinc-800 p-3 text-sm text-neutral-100 placeholder-zinc-600 focus:outline-none focus:border-brand-cyan/60 focus:ring-1 focus:ring-brand-cyan/30 transition-colors font-sans leading-relaxed"
                 />
               </div>
 
@@ -432,7 +432,7 @@ export function CaseStudyFeedbackSection({ slug }: CaseStudyFeedbackSectionProps
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-cyan text-zinc-950 font-mono text-xs font-bold hover:bg-cyan-400 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 shadow-md shadow-brand-cyan/20"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-brand-cyan text-zinc-950 font-mono text-xs font-bold hover:bg-cyan-400 transition-colors transition-transform transition-opacity duration-150 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 shadow-md shadow-brand-cyan/20"
                 >
                   {submitting ? (
                     <>

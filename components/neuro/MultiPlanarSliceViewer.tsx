@@ -486,7 +486,7 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
           <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-750 p-0.5 rounded-lg">
             <button
               onClick={() => setViewLayout("multi")}
-              className={`px-2 py-0.5 rounded-md transition-all ${
+              className={`px-2 py-0.5 rounded-md transition-colors ${
                 viewLayout === "multi"
                   ? "bg-brand-cyan text-zinc-950 font-bold"
                   : "text-zinc-400 hover:text-white"
@@ -496,7 +496,7 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
             </button>
             <button
               onClick={() => setViewLayout("focused")}
-              className={`px-2 py-0.5 rounded-md transition-all ${
+              className={`px-2 py-0.5 rounded-md transition-colors ${
                 viewLayout === "focused"
                   ? "bg-brand-cyan text-zinc-950 font-bold"
                   : "text-zinc-400 hover:text-white"
@@ -628,7 +628,7 @@ export const MultiPlanarSliceViewer: React.FC<MultiPlanarSliceViewerProps> = ({
                 <button
                   key={p}
                   onClick={() => setActivePlane(p)}
-                  className={`px-3 py-1 rounded-lg text-xs font-mono uppercase font-bold transition-all ${
+                  className={`px-3 py-1 rounded-lg text-xs font-mono uppercase font-bold transition-colors ${
                     activePlane === p
                       ? "bg-brand-cyan text-zinc-950"
                       : "bg-zinc-800 text-zinc-400 hover:text-white"

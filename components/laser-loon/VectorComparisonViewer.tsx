@@ -29,7 +29,7 @@ export const VectorComparisonViewer: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setViewMode("slider")}
-            className={`px-3 py-1.5 text-xs font-mono font-bold rounded-lg border transition-all ${
+            className={`px-3 py-1.5 text-xs font-mono font-bold rounded-lg border transition-colors ${
               viewMode === "slider"
                 ? "bg-red-500/20 text-red-300 border-red-500/50 shadow-sm"
                 : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white"
@@ -39,7 +39,7 @@ export const VectorComparisonViewer: React.FC = () => {
           </button>
           <button
             onClick={() => setViewMode("split")}
-            className={`px-3 py-1.5 text-xs font-mono font-bold rounded-lg border transition-all ${
+            className={`px-3 py-1.5 text-xs font-mono font-bold rounded-lg border transition-colors ${
               viewMode === "split"
                 ? "bg-red-500/20 text-red-300 border-red-500/50 shadow-sm"
                 : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white"
@@ -49,7 +49,7 @@ export const VectorComparisonViewer: React.FC = () => {
           </button>
           <button
             onClick={() => setViewMode("overlay")}
-            className={`px-3 py-1.5 text-xs font-mono font-bold rounded-lg border transition-all ${
+            className={`px-3 py-1.5 text-xs font-mono font-bold rounded-lg border transition-colors ${
               viewMode === "overlay"
                 ? "bg-red-500/20 text-red-300 border-red-500/50 shadow-sm"
                 : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white"
@@ -66,7 +66,7 @@ export const VectorComparisonViewer: React.FC = () => {
           <span className="text-xs font-mono text-zinc-400 px-2">Active Render Pass:</span>
           <button
             onClick={() => setActiveLayer("silhouette")}
-            className={`px-3 py-1 text-xs font-mono rounded-md border transition-all ${
+            className={`px-3 py-1 text-xs font-mono rounded-md border transition-colors ${
               activeLayer === "silhouette"
                 ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/50"
                 : "bg-black/40 text-zinc-400 border-zinc-800"
@@ -76,7 +76,7 @@ export const VectorComparisonViewer: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveLayer("laser")}
-            className={`px-3 py-1 text-xs font-mono rounded-md border transition-all ${
+            className={`px-3 py-1 text-xs font-mono rounded-md border transition-colors ${
               activeLayer === "laser"
                 ? "bg-red-500/20 text-red-300 border-red-500/50"
                 : "bg-black/40 text-zinc-400 border-zinc-800"
@@ -86,7 +86,7 @@ export const VectorComparisonViewer: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveLayer("all")}
-            className={`px-3 py-1 text-xs font-mono rounded-md border transition-all ${
+            className={`px-3 py-1 text-xs font-mono rounded-md border transition-colors ${
               activeLayer === "all"
                 ? "bg-amber-500/20 text-amber-300 border-amber-500/50"
                 : "bg-black/40 text-zinc-400 border-zinc-800"

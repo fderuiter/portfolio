@@ -507,7 +507,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
             <button
               key={role}
               onClick={() => setCurrentRole(role)}
-              className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-mono whitespace-nowrap transition-all ${
+              className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-mono whitespace-nowrap transition-colors ${
                 currentRole === role
                   ? "bg-brand-cyan text-black font-bold shadow-sm"
                   : "text-zinc-400 hover:text-white"
@@ -523,7 +523,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
       <div className="flex items-center gap-2 border-b border-zinc-800 pb-2 overflow-x-auto scrollbar-none">
         <button
           onClick={() => setSubView("form_entry")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-colors ${
             subView === "form_entry"
               ? "bg-brand-cyan text-black font-bold"
               : "bg-zinc-900 text-zinc-400 hover:text-white"
@@ -534,7 +534,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
         </button>
         <button
           onClick={() => setSubView("subject_matrix")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-colors ${
             subView === "subject_matrix"
               ? "bg-brand-cyan text-black font-bold"
               : "bg-zinc-900 text-zinc-400 hover:text-white"
@@ -545,7 +545,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
         </button>
         <button
           onClick={() => setSubView("queries")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-colors ${
             subView === "queries"
               ? "bg-brand-cyan text-black font-bold"
               : "bg-zinc-900 text-zinc-400 hover:text-white"
@@ -556,7 +556,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
         </button>
         <button
           onClick={() => setSubView("audit_trail")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono whitespace-nowrap transition-colors ${
             subView === "audit_trail"
               ? "bg-brand-cyan text-black font-bold"
               : "bg-zinc-900 text-zinc-400 hover:text-white"
@@ -681,7 +681,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleSaveForm}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-mono text-xs font-bold bg-brand-cyan text-black hover:bg-white transition-all shadow-sm"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-mono text-xs font-bold bg-brand-cyan text-black hover:bg-white transition-colors transition-shadow shadow-sm"
                   title="Save Form Data and run 3-Tier Missing Data Engine"
                 >
                   <IconDeviceFloppy className="w-4 h-4" />
@@ -691,7 +691,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                 {currentRole === "Principal Investigator" && (
                   <button
                     onClick={handleToggleLockForm}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-mono text-xs font-bold transition-all shadow-sm ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-mono text-xs font-bold transition-colors transition-shadow shadow-sm ${
                       isCurrentFormLocked
                         ? "bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700"
                         : "bg-sky-500 text-black hover:bg-white"
@@ -778,7 +778,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                     return (
                       <div
                         key={field.id}
-                        className={`p-3 rounded-xl border transition-all ${
+                        className={`p-3 rounded-xl border transition-colors ${
                           fieldError
                             ? "bg-red-500/10 border-red-500/60 ring-1 ring-red-500/30"
                             : fieldQueries.length > 0
@@ -869,7 +869,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                                         isCurrentFormLocked &&
                                         currentRole !== "Principal Investigator"
                                       }
-                                      className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-bold transition-all border ${
+                                      className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-bold transition-colors border ${
                                         isSelectedNf
                                           ? "bg-brand-cyan text-black border-brand-cyan font-black"
                                           : "bg-zinc-950 text-zinc-400 border-zinc-850 hover:text-zinc-200"
@@ -1287,7 +1287,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
               </div>
               <button
                 onClick={handleSaveForm}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-mono text-xs font-bold bg-brand-cyan text-black hover:bg-white transition-all shadow-sm"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-mono text-xs font-bold bg-brand-cyan text-black hover:bg-white transition-colors transition-shadow shadow-sm"
               >
                 <IconDeviceFloppy className="w-4 h-4" />
                 <span>Save &amp; Validate Form Data</span>
@@ -1362,7 +1362,7 @@ export const LiveEdcSimulator: React.FC<LiveEdcSimulatorProps> = ({ study }) => 
                                     setActiveFormId(form.id);
                                     setSubView("form_entry");
                                   }}
-                                  className={`px-2 py-1 rounded text-[10px] font-mono font-bold transition-all border ${
+                                  className={`px-2 py-1 rounded text-[10px] font-mono font-bold transition-colors border ${
                                     status.openQueriesCount > 0
                                       ? "bg-red-500/20 text-red-400 border-red-500/40 animate-pulse"
                                       : status.isLocked

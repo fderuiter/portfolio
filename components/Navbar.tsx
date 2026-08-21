@@ -288,7 +288,7 @@ export const Navbar: React.FC = () => {
       <header
         ref={headerObserverRef}
         className={cn(
-          "fixed top-0 inset-x-0 z-50 transition-all duration-300 w-full select-none",
+          "fixed top-0 inset-x-0 z-50 transition-colors duration-300 w-full select-none",
           isScrolled
             ? "bg-zinc-950/85 backdrop-blur-xl border-b border-zinc-800/60 py-3 shadow-[0_4px_30px_rgba(0,0,0,0.5)]"
             : "bg-transparent py-5"
@@ -328,7 +328,7 @@ export const Navbar: React.FC = () => {
                 }}
                 onMouseEnter={handleLinkHover}
                 className={cn(
-                  "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0",
+                  "py-1 text-xs font-mono tracking-wider font-semibold transition-colors duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0",
                   (pathname === "/" && activeSection === "case-studies") || pathname === "/case-studies" || pathname.startsWith("/case-studies/")
                     ? "text-brand-cyan font-bold"
                     : "text-muted"
@@ -345,7 +345,7 @@ export const Navbar: React.FC = () => {
                     onClick={() => setActiveDropdown(activeDropdown === "arcade" ? null : "arcade")}
                     onMouseEnter={handleLinkHover}
                     className={cn(
-                      "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-brand-cyan rounded whitespace-nowrap shrink-0",
+                      "py-1 text-xs font-mono tracking-wider font-semibold transition-colors duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-brand-cyan rounded whitespace-nowrap shrink-0",
                       isArcadeActive || activeDropdown === "arcade"
                         ? "text-brand-cyan font-bold"
                         : "text-muted"
@@ -387,7 +387,7 @@ export const Navbar: React.FC = () => {
                               onClick={() => setActiveDropdown(null)}
                               onMouseEnter={handleLinkHover}
                               className={cn(
-                                "flex items-start gap-3 p-2.5 rounded-xl transition-all duration-150 group min-w-0",
+                                "flex items-start gap-3 p-2.5 rounded-xl transition-colors duration-150 group min-w-0",
                                 isActive
                                   ? "bg-brand-cyan/10 border border-brand-cyan/30 text-white"
                                   : "hover:bg-zinc-900/80 text-zinc-300 hover:text-white"
@@ -421,7 +421,7 @@ export const Navbar: React.FC = () => {
                   onClick={() => setActiveDropdown(activeDropdown === "systems" ? null : "systems")}
                   onMouseEnter={handleLinkHover}
                   className={cn(
-                    "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-brand-cyan rounded whitespace-nowrap shrink-0",
+                    "py-1 text-xs font-mono tracking-wider font-semibold transition-colors duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-brand-cyan rounded whitespace-nowrap shrink-0",
                     isSystemsActive || activeDropdown === "systems"
                       ? "text-brand-cyan font-bold"
                       : "text-muted"
@@ -462,7 +462,7 @@ export const Navbar: React.FC = () => {
                             onClick={() => setActiveDropdown(null)}
                             onMouseEnter={handleLinkHover}
                             className={cn(
-                              "flex items-start gap-3 p-2.5 rounded-xl transition-all duration-150 group min-w-0",
+                              "flex items-start gap-3 p-2.5 rounded-xl transition-colors duration-150 group min-w-0",
                               isActive
                                 ? "bg-brand-cyan/10 border border-brand-cyan/30 text-white"
                                 : "hover:bg-zinc-900/80 text-zinc-300 hover:text-white"
@@ -494,7 +494,7 @@ export const Navbar: React.FC = () => {
                 onClick={(e) => handleNavClick(e, "/#about")}
                 onMouseEnter={handleLinkHover}
                 className={cn(
-                  "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0",
+                  "py-1 text-xs font-mono tracking-wider font-semibold transition-colors duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0",
                   pathname === "/" && activeSection === "about"
                     ? "text-brand-cyan font-bold"
                     : "text-muted"
@@ -515,7 +515,7 @@ export const Navbar: React.FC = () => {
                 }}
                 onMouseEnter={handleLinkHover}
                 className={cn(
-                  "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0",
+                  "py-1 text-xs font-mono tracking-wider font-semibold transition-colors duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0",
                   (pathname === "/" && activeSection === "contact") || pathname === "/contact"
                     ? "text-brand-cyan font-bold"
                     : "text-muted"
@@ -530,7 +530,7 @@ export const Navbar: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onMouseEnter={handleLinkHover}
-                className="py-1 text-xs font-mono tracking-wider font-semibold text-muted hover:text-foreground transition-all duration-200 cursor-pointer flex items-center gap-1 group whitespace-nowrap shrink-0"
+                className="py-1 text-xs font-mono tracking-wider font-semibold text-muted hover:text-foreground transition-colors duration-200 cursor-pointer flex items-center gap-1 group whitespace-nowrap shrink-0"
                 aria-label="View source repository on GitHub"
               >
                 <span>GitHub</span>
@@ -545,7 +545,7 @@ export const Navbar: React.FC = () => {
               type="button"
               onClick={openSearch}
               onMouseEnter={handleLinkHover}
-              className="flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1.5 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-brand-cyan/40 hover:bg-zinc-900 text-zinc-400 hover:text-white transition-all cursor-pointer shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-cyan/40 shrink-0 whitespace-nowrap"
+              className="flex items-center gap-1.5 md:gap-2 px-2.5 md:px-3 py-1.5 rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-brand-cyan/40 hover:bg-zinc-900 text-zinc-400 hover:text-white transition-colors transition-shadow cursor-pointer shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-cyan/40 shrink-0 whitespace-nowrap"
               aria-label="Search portfolio and commands (Press Command+K)"
             >
               <IconSearch className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
@@ -559,7 +559,7 @@ export const Navbar: React.FC = () => {
                 type="button"
                 onClick={() => setPersona("technical")}
                 className={cn(
-                  "flex items-center justify-center gap-1 px-2 md:px-2.5 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer min-h-8 shrink-0 whitespace-nowrap",
+                  "flex items-center justify-center gap-1 px-2 md:px-2.5 py-1.5 rounded-lg font-bold transition-colors duration-200 cursor-pointer min-h-8 shrink-0 whitespace-nowrap",
                   persona === "technical"
                     ? "bg-zinc-950 text-amber-400 border border-amber-400/20 shadow-[0_0_8px_rgba(251,191,36,0.15)]"
                     : "text-zinc-500 hover:text-zinc-300 border border-transparent"
@@ -573,7 +573,7 @@ export const Navbar: React.FC = () => {
                 type="button"
                 onClick={() => setPersona("recruiter")}
                 className={cn(
-                  "flex items-center justify-center gap-1 px-2 md:px-2.5 py-1.5 rounded-lg font-bold transition-all duration-200 cursor-pointer min-h-8 shrink-0 whitespace-nowrap",
+                  "flex items-center justify-center gap-1 px-2 md:px-2.5 py-1.5 rounded-lg font-bold transition-colors duration-200 cursor-pointer min-h-8 shrink-0 whitespace-nowrap",
                   persona === "recruiter"
                     ? "bg-zinc-950 text-brand-cyan border border-brand-cyan/20 shadow-[0_0_8px_rgba(6,182,212,0.15)]"
                     : "text-zinc-500 hover:text-zinc-300 border border-transparent"
@@ -591,7 +591,7 @@ export const Navbar: React.FC = () => {
                 type="button"
                 onClick={() => setShowAudioPanel(!showAudioPanel)}
                 className={cn(
-                  "flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-full border transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-cyan/40 shrink-0 whitespace-nowrap",
+                  "flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-full border transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-cyan/40 shrink-0 whitespace-nowrap",
                   !muted
                     ? "border-brand-cyan/40 bg-brand-cyan/5 text-brand-cyan shadow-[0_0_12px_rgba(6,182,212,0.15)]"
                     : "border-zinc-900 bg-zinc-900/40 hover:border-brand-cyan/40 text-zinc-400 hover:text-foreground"
@@ -634,7 +634,7 @@ export const Navbar: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setMuted(!muted)}
-                          className="px-2 py-0.5 rounded text-[10px] font-mono font-black border border-zinc-900 bg-zinc-900/50 hover:border-brand-cyan/40 text-brand-cyan transition-all cursor-pointer"
+                          className="px-2 py-0.5 rounded text-[10px] font-mono font-black border border-zinc-900 bg-zinc-900/50 hover:border-brand-cyan/40 text-brand-cyan transition-colors cursor-pointer"
                         >
                           {muted ? "UNMUTE" : "MUTE"}
                         </button>
@@ -667,7 +667,7 @@ export const Navbar: React.FC = () => {
                               onClick={() => setProfile(p)}
                               disabled={muted}
                               className={cn(
-                                "w-full text-left px-3 py-1.5 rounded-lg border text-[10px] font-mono tracking-wider transition-all duration-200 cursor-pointer active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed",
+                                "w-full text-left px-3 py-1.5 rounded-lg border text-[10px] font-mono tracking-wider transition-colors transition-transform transition-opacity duration-200 cursor-pointer active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed",
                                 profile === p
                                   ? "bg-brand-cyan/10 border-brand-cyan/40 text-brand-cyan font-bold shadow-[0_0_12px_rgba(6,182,212,0.12)]"
                                   : "bg-zinc-900/20 border-zinc-900 hover:border-zinc-800 text-zinc-400 hover:text-foreground"
@@ -717,7 +717,7 @@ export const Navbar: React.FC = () => {
                   height="2"
                   rx="1"
                   className={cn(
-                    "origin-center transition-all duration-300",
+                    "origin-center transition-colors duration-300",
                     isOpen ? "rotate-45 translate-y-[6px]" : ""
                   )}
                 />
@@ -727,7 +727,7 @@ export const Navbar: React.FC = () => {
                   height="2"
                   rx="1"
                   className={cn(
-                    "transition-all duration-300",
+                    "transition-colors duration-300",
                     isOpen ? "opacity-0" : ""
                   )}
                 />
@@ -737,7 +737,7 @@ export const Navbar: React.FC = () => {
                   height="2"
                   rx="1"
                   className={cn(
-                    "origin-center transition-all duration-300",
+                    "origin-center transition-colors duration-300",
                     isOpen ? "-rotate-45 -translate-y-[8px]" : ""
                   )}
                 />
@@ -781,7 +781,7 @@ export const Navbar: React.FC = () => {
                   <Link
                     href={pathname === "/" ? "/#case-studies" : "/case-studies"}
                     onClick={(e) => handleNavClick(e, pathname === "/" ? "/#case-studies" : "/case-studies")}
-                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between active:scale-[0.99] transition-all"
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between active:scale-[0.99] transition-colors transition-transform"
                   >
                     <span>Engineering Case Studies</span>
                     <span className="text-xs font-mono text-zinc-500">→</span>
@@ -789,7 +789,7 @@ export const Navbar: React.FC = () => {
                   <Link
                     href="/#about"
                     onClick={(e) => handleNavClick(e, "/#about")}
-                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between active:scale-[0.99] transition-all"
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between active:scale-[0.99] transition-colors transition-transform"
                   >
                     <span>About &amp; Experience</span>
                     <span className="text-xs font-mono text-zinc-500">→</span>
@@ -797,7 +797,7 @@ export const Navbar: React.FC = () => {
                   <Link
                     href={pathname === "/" ? "/#contact" : "/contact"}
                     onClick={(e) => handleNavClick(e, pathname === "/" ? "/#contact" : "/contact")}
-                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between active:scale-[0.99] transition-all"
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between active:scale-[0.99] transition-colors transition-transform"
                   >
                     <span>Contact &amp; Inquiries</span>
                     <span className="text-xs font-mono text-zinc-500">→</span>
@@ -805,7 +805,7 @@ export const Navbar: React.FC = () => {
                   <Link
                     href="/schedule"
                     onClick={(e) => handleNavClick(e, "/schedule")}
-                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-300 hover:text-white flex items-center justify-between active:scale-[0.99] transition-all"
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-300 hover:text-white flex items-center justify-between active:scale-[0.99] transition-colors transition-transform"
                   >
                     <span>Office Hours &amp; Schedule</span>
                     <span className="text-xs font-mono text-zinc-500">→</span>
@@ -820,7 +820,7 @@ export const Navbar: React.FC = () => {
                   <Link
                     href="/crf"
                     onClick={(e) => handleNavClick(e, "/crf")}
-                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between gap-2 active:scale-[0.99] transition-all min-w-0"
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between gap-2 active:scale-[0.99] transition-colors transition-transform min-w-0"
                   >
                     <span className="flex items-center gap-2 min-w-0">
                       <IconFileSpreadsheet className="w-4 h-4 text-brand-cyan shrink-0" />
@@ -831,7 +831,7 @@ export const Navbar: React.FC = () => {
                   <Link
                     href="/proof"
                     onClick={(e) => handleNavClick(e, "/proof")}
-                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between gap-2 active:scale-[0.99] transition-all min-w-0"
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between gap-2 active:scale-[0.99] transition-colors transition-transform min-w-0"
                   >
                     <span className="flex items-center gap-2 min-w-0">
                       <IconBrain className="w-4 h-4 text-brand-purple shrink-0" />
@@ -842,7 +842,7 @@ export const Navbar: React.FC = () => {
                   <Link
                     href="/neuro"
                     onClick={(e) => handleNavClick(e, "/neuro")}
-                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between gap-2 active:scale-[0.99] transition-all min-w-0"
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between gap-2 active:scale-[0.99] transition-colors transition-transform min-w-0"
                   >
                     <span className="flex items-center gap-2 min-w-0">
                       <IconBrain className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -853,7 +853,7 @@ export const Navbar: React.FC = () => {
                   <Link
                     href="/stack"
                     onClick={(e) => handleNavClick(e, "/stack")}
-                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between gap-2 active:scale-[0.99] transition-all min-w-0"
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between gap-2 active:scale-[0.99] transition-colors transition-transform min-w-0"
                   >
                     <span className="flex items-center gap-2 min-w-0">
                       <IconCpu className="w-4 h-4 text-brand-cyan shrink-0" />
@@ -865,7 +865,7 @@ export const Navbar: React.FC = () => {
                     <Link
                       href="/arcade"
                       onClick={(e) => handleNavClick(e, "/arcade")}
-                      className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-brand-cyan hover:bg-brand-cyan/10 flex items-center justify-between gap-2 active:scale-[0.99] transition-all min-w-0"
+                      className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-brand-cyan hover:bg-brand-cyan/10 flex items-center justify-between gap-2 active:scale-[0.99] transition-colors transition-transform min-w-0"
                     >
                       <span className="flex items-center gap-2 min-w-0">
                         <IconDeviceGamepad2 className="w-4 h-4 shrink-0" />
@@ -887,7 +887,7 @@ export const Navbar: React.FC = () => {
                     type="button"
                     onClick={() => setPersona("technical")}
                     className={cn(
-                      "flex-1 flex items-center justify-center gap-1.5 min-h-11 py-2.5 rounded-xl font-bold transition-all cursor-pointer",
+                      "flex-1 flex items-center justify-center gap-1.5 min-h-11 py-2.5 rounded-xl font-bold transition-colors cursor-pointer",
                       persona === "technical"
                         ? "bg-zinc-950 text-amber-400 border border-amber-400/20 shadow-[0_0_12px_rgba(251,191,36,0.15)]"
                         : "text-zinc-500 hover:text-zinc-300 border border-transparent"
@@ -900,7 +900,7 @@ export const Navbar: React.FC = () => {
                     type="button"
                     onClick={() => setPersona("recruiter")}
                     className={cn(
-                      "flex-1 flex items-center justify-center gap-1.5 min-h-11 py-2.5 rounded-xl font-bold transition-all cursor-pointer",
+                      "flex-1 flex items-center justify-center gap-1.5 min-h-11 py-2.5 rounded-xl font-bold transition-colors cursor-pointer",
                       persona === "recruiter"
                         ? "bg-zinc-950 text-brand-cyan border border-brand-cyan/20 shadow-[0_0_12px_rgba(6,182,212,0.15)]"
                         : "text-zinc-500 hover:text-zinc-300 border border-transparent"
@@ -928,7 +928,7 @@ export const Navbar: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setMuted(!muted)}
-                    className="min-h-11 px-4 py-2 rounded-xl text-xs font-mono font-black border border-zinc-800 bg-zinc-900/50 hover:border-brand-cyan/40 text-brand-cyan transition-all cursor-pointer flex items-center justify-center"
+                    className="min-h-11 px-4 py-2 rounded-xl text-xs font-mono font-black border border-zinc-800 bg-zinc-900/50 hover:border-brand-cyan/40 text-brand-cyan transition-colors cursor-pointer flex items-center justify-center"
                   >
                     {muted ? "UNMUTE" : "MUTE"}
                   </button>
@@ -961,7 +961,7 @@ export const Navbar: React.FC = () => {
                       onClick={() => setProfile(p)}
                       disabled={muted}
                       className={cn(
-                        "min-h-11 text-center px-2 py-2 rounded-xl border text-[11px] font-mono tracking-wider transition-all cursor-pointer disabled:opacity-40 flex items-center justify-center",
+                        "min-h-11 text-center px-2 py-2 rounded-xl border text-[11px] font-mono tracking-wider transition-colors transition-opacity cursor-pointer disabled:opacity-40 flex items-center justify-center",
                         profile === p
                           ? "bg-brand-cyan/10 border-brand-cyan/40 text-brand-cyan font-bold"
                           : "bg-zinc-900/20 border-zinc-900 hover:border-zinc-800 text-zinc-400"

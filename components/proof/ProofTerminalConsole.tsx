@@ -55,7 +55,7 @@ export const ProofTerminalConsole: React.FC<ProofTerminalConsoleProps> = ({
           <button
             ref={toggleBtnRef}
             onClick={toggleConsole}
-            className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] transition cursor-pointer active:scale-[0.98]"
+            className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] transition-colors transition-transform cursor-pointer active:scale-[0.98]"
           >
             {isConsoleOpen ? "Collapse" : "Expand"}
           </button>

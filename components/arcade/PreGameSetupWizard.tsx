@@ -292,7 +292,7 @@ export const PreGameSetupWizard: React.FC<PreGameSetupWizardProps> = ({
                   onClick={() => goToStep(step as 1 | 2 | 3)}
                   onMouseEnter={() => playHover()}
                   aria-label={`Go to wizard step ${step}`}
-                  className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full text-xs font-bold flex items-center justify-center transition-all ${
+                  className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full text-xs font-bold flex items-center justify-center transition-colors ${
                     currentStep === step
                       ? "bg-amber-500 text-black shadow-[0_0_10px_rgba(245,158,11,0.5)] scale-110"
                       : currentStep > step
@@ -326,7 +326,7 @@ export const PreGameSetupWizard: React.FC<PreGameSetupWizardProps> = ({
                       type="button"
                       onClick={() => handleDifficultyChange(opt.id)}
                       onMouseEnter={() => playHover()}
-                      className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                      className={`p-2.5 rounded-xl border text-left transition-colors cursor-pointer ${
                         config.difficulty === opt.id
                           ? "border-amber-400 bg-amber-500/20 text-white shadow-[0_0_15px_rgba(245,158,11,0.2)] ring-1 ring-amber-400"
                           : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
@@ -354,7 +354,7 @@ export const PreGameSetupWizard: React.FC<PreGameSetupWizardProps> = ({
                       type="button"
                       onClick={() => handleLoadoutChange(opt.id)}
                       onMouseEnter={() => playHover()}
-                      className={`w-full p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                      className={`w-full p-2.5 rounded-xl border text-left transition-colors cursor-pointer flex items-center justify-between gap-3 ${
                         config.loadout === opt.id
                           ? "border-amber-400 bg-amber-500/20 text-white shadow-[0_0_15px_rgba(245,158,11,0.2)] ring-1 ring-amber-400"
                           : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
@@ -399,7 +399,7 @@ export const PreGameSetupWizard: React.FC<PreGameSetupWizardProps> = ({
                       type="button"
                       onClick={() => handleScreenShakeChange(opt.id)}
                       onMouseEnter={() => playHover()}
-                      className={`p-2 rounded-xl border text-center transition-all cursor-pointer ${
+                      className={`p-2 rounded-xl border text-center transition-colors cursor-pointer ${
                         config.screenShake === opt.id
                           ? "border-amber-400 bg-amber-500/20 text-white shadow-[0_0_15px_rgba(245,158,11,0.2)] ring-1 ring-amber-400"
                           : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
@@ -423,7 +423,7 @@ export const PreGameSetupWizard: React.FC<PreGameSetupWizardProps> = ({
                       type="button"
                       onClick={() => handleCRTFilterChange(opt.id)}
                       onMouseEnter={() => playHover()}
-                      className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                      className={`p-2.5 rounded-xl border text-left transition-colors cursor-pointer ${
                         config.crtFilter === opt.id
                           ? "border-amber-400 bg-amber-500/20 text-white shadow-[0_0_15px_rgba(245,158,11,0.2)] ring-1 ring-amber-400"
                           : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
@@ -451,7 +451,7 @@ export const PreGameSetupWizard: React.FC<PreGameSetupWizardProps> = ({
                       type="button"
                       onClick={() => handleBezelStyleChange(opt.id)}
                       onMouseEnter={() => playHover()}
-                      className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                      className={`p-2.5 rounded-xl border text-left transition-colors cursor-pointer ${
                         config.bezelStyle === opt.id
                           ? "border-amber-400 bg-amber-500/20 text-white shadow-[0_0_15px_rgba(245,158,11,0.2)] ring-1 ring-amber-400"
                           : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
@@ -514,7 +514,7 @@ export const PreGameSetupWizard: React.FC<PreGameSetupWizardProps> = ({
               type="button"
               onClick={() => goToStep((currentStep - 1) as 1 | 2 | 3)}
               onMouseEnter={() => playHover()}
-              className="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
+              className="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer"
             >
               <IconChevronLeft className="w-4 h-4" />
               <span>Back</span>
@@ -524,7 +524,7 @@ export const PreGameSetupWizard: React.FC<PreGameSetupWizardProps> = ({
               type="button"
               onClick={onCancel}
               onMouseEnter={() => playHover()}
-              className="px-3.5 py-2 rounded-xl bg-zinc-900/60 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 font-bold text-xs transition-all cursor-pointer"
+              className="px-3.5 py-2 rounded-xl bg-zinc-900/60 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 font-bold text-xs transition-colors cursor-pointer"
             >
               Skip Setup
             </button>
@@ -537,7 +537,7 @@ export const PreGameSetupWizard: React.FC<PreGameSetupWizardProps> = ({
               type="button"
               onClick={() => goToStep((currentStep + 1) as 1 | 2 | 3)}
               onMouseEnter={() => playHover()}
-              className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs flex items-center gap-1 transition-all shadow-[0_0_15px_rgba(245,158,11,0.3)] cursor-pointer uppercase"
+              className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs flex items-center gap-1 transition-colors transition-shadow shadow-[0_0_15px_rgba(245,158,11,0.3)] cursor-pointer uppercase"
             >
               <span>Next Step</span>
               <IconChevronRight className="w-4 h-4" />
@@ -547,7 +547,7 @@ export const PreGameSetupWizard: React.FC<PreGameSetupWizardProps> = ({
               type="button"
               onClick={handleStartGame}
               onMouseEnter={() => playHover()}
-              className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs sm:text-sm flex items-center gap-2 transition-all shadow-[0_0_20px_rgba(16,185,129,0.4)] cursor-pointer uppercase tracking-wider animate-pulse"
+              className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs sm:text-sm flex items-center gap-2 transition-colors transition-shadow shadow-[0_0_20px_rgba(16,185,129,0.4)] cursor-pointer uppercase tracking-wider animate-pulse"
             >
               <IconRocket className="w-4 h-4 fill-black" />
               <span>Start Game</span>

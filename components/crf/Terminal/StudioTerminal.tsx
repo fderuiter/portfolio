@@ -275,7 +275,7 @@ export const StudioTerminal: React.FC<StudioTerminalProps> = ({
         <button
           onClick={() => handleExecute(inputVal)}
           disabled={!inputVal.trim()}
-          className="p-1 rounded bg-brand-cyan/20 hover:bg-brand-cyan text-brand-cyan hover:text-black disabled:opacity-30 disabled:pointer-events-none transition-all"
+          className="p-1 rounded bg-brand-cyan/20 hover:bg-brand-cyan text-brand-cyan hover:text-black disabled:opacity-30 disabled:pointer-events-none transition-colors transition-opacity"
           title="Execute Command (Enter)"
         >
           <IconPlayerPlay className="w-3.5 h-3.5" />

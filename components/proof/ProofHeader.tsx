@@ -57,7 +57,7 @@ export const ProofHeader: React.FC<ProofHeaderProps> = ({
         <div className="flex items-center gap-3">
           <button
             onClick={handleCopyShareLink}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-200 hover:bg-slate-700 text-xs font-semibold transition cursor-pointer active:scale-[0.98]"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-200 hover:bg-slate-700 text-xs font-semibold transition-colors transition-transform cursor-pointer active:scale-[0.98]"
             title="Copy Shareable Proof Link with Active Theorem & Tab"
           >
             <IconLink className="w-4 h-4 text-brand-cyan" />
@@ -65,14 +65,14 @@ export const ProofHeader: React.FC<ProofHeaderProps> = ({
           </button>
           <button
             onClick={() => setIsCustomStudioOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-brand-purple/40 bg-brand-purple/10 text-brand-purple hover:bg-brand-purple/20 text-xs font-semibold transition cursor-pointer active:scale-[0.98]"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-brand-purple/40 bg-brand-purple/10 text-brand-purple hover:bg-brand-purple/20 text-xs font-semibold transition-colors transition-transform cursor-pointer active:scale-[0.98]"
           >
             <IconPlus className="w-4 h-4" />
             Custom Studio
           </button>
           <button
             onClick={() => setIsExportModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-200 hover:bg-slate-700 text-xs font-semibold transition cursor-pointer active:scale-[0.98]"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-200 hover:bg-slate-700 text-xs font-semibold transition-colors transition-transform cursor-pointer active:scale-[0.98]"
           >
             <IconDownload className="w-4 h-4" />
             Export
@@ -101,7 +101,7 @@ export const ProofHeader: React.FC<ProofHeaderProps> = ({
               <button
                 key={thKey}
                 onClick={() => handleSwitchTheorem(thKey)}
-                className={`flex flex-col text-left p-2.5 rounded-xl border transition-all relative overflow-hidden cursor-pointer active:scale-[0.98] ${
+                className={`flex flex-col text-left p-2.5 rounded-xl border transition-colors transition-transform relative overflow-hidden cursor-pointer active:scale-[0.98] ${
                   isActive
                     ? "bg-slate-800 border-brand-cyan shadow-lg shadow-brand-cyan/10"
                     : "bg-slate-900/60 border-slate-800 hover:border-slate-700 hover:bg-slate-800/50"

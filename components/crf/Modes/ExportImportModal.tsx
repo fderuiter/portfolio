@@ -190,7 +190,7 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => recordEvent("crf", "project_click")}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold transition-all shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold transition-colors transition-shadow shadow-sm"
           >
             <IconCalendar className="w-4 h-4" />
             <span>Schedule Consultation</span>
@@ -199,7 +199,7 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
           {onOpenBranding && (
             <button
               onClick={onOpenBranding}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-mono transition-all"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-mono transition-colors"
             >
               <IconPalette className="w-4 h-4 text-brand-cyan" />
               <span>Branding</span>
@@ -209,7 +209,7 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
           {onOpenExportDocument && (
             <button
               onClick={onOpenExportDocument}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition-colors transition-shadow shadow-sm"
             >
               <IconFileText className="w-4 h-4" />
               <span>Export Word / PDF</span>
@@ -221,11 +221,11 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
             label="Copy Code"
             copiedLabel="Copied!"
             successMessage="Export code copied to clipboard"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-850 hover:bg-zinc-800 border border-zinc-750 text-zinc-200 text-xs font-mono transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-850 hover:bg-zinc-800 border border-zinc-750 text-zinc-200 text-xs font-mono transition-colors cursor-pointer"
           />
           <button
             onClick={handleDownload}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-brand-cyan text-black hover:bg-white font-mono text-xs font-bold transition-all shadow-sm"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-brand-cyan text-black hover:bg-white font-mono text-xs font-bold transition-colors transition-shadow shadow-sm"
           >
             <IconDownload className="w-4 h-4" />
             <span>Download File</span>
@@ -444,7 +444,7 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
           <button
             onClick={handlePerformImport}
             disabled={!importJsonText.trim()}
-            className="px-4 py-2 bg-zinc-800 hover:bg-brand-cyan text-white hover:text-black font-mono text-xs font-bold rounded-xl transition-all disabled:opacity-40 disabled:pointer-events-none"
+            className="px-4 py-2 bg-zinc-800 hover:bg-brand-cyan text-white hover:text-black font-mono text-xs font-bold rounded-xl transition-colors transition-opacity disabled:opacity-40 disabled:pointer-events-none"
           >
             Import Protocol into Studio
           </button>

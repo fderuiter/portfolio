@@ -139,7 +139,7 @@ export const AssetDistributionHub: React.FC = () => {
           <a
             href="/files/laser-loon-assets.zip"
             download="laser-loon-assets.zip"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-400 text-black font-mono text-xs font-extrabold rounded-xl transition-all shadow-[0_0_25px_rgba(239,68,68,0.4)] active:scale-[0.98] group cursor-pointer"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-400 text-black font-mono text-xs font-extrabold rounded-xl transition-colors transition-transform shadow-[0_0_25px_rgba(239,68,68,0.4)] active:scale-[0.98] group cursor-pointer"
           >
             <IconDownload className="w-4 h-4 transform group-hover:-translate-y-0.5 transition-transform" />
             <span>Download Master ZIP Archive (1-Click)</span>
@@ -230,7 +230,7 @@ export const AssetDistributionHub: React.FC = () => {
 
 function AssetCard({ item }: { item: AssetFormatItem }) {
   return (
-    <div className="group flex flex-col justify-between p-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/80 transition-all duration-200">
+    <div className="group flex flex-col justify-between p-4 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-zinc-700 hover:bg-zinc-900/80 transition-colors duration-200">
       <div>
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
@@ -251,7 +251,7 @@ function AssetCard({ item }: { item: AssetFormatItem }) {
       <a
         href={item.href}
         download={item.filename}
-        className="inline-flex items-center justify-between w-full px-3 py-2 bg-zinc-800/80 hover:bg-red-500/20 hover:border-red-500/40 border border-zinc-700/60 text-zinc-200 hover:text-red-300 font-mono text-xs font-bold rounded-xl transition-all group/btn"
+        className="inline-flex items-center justify-between w-full px-3 py-2 bg-zinc-800/80 hover:bg-red-500/20 hover:border-red-500/40 border border-zinc-700/60 text-zinc-200 hover:text-red-300 font-mono text-xs font-bold rounded-xl transition-colors group/btn"
       >
         <span>Download {item.ext}</span>
         <IconDownload className="w-3.5 h-3.5 transform group-hover/btn:translate-y-0.5 transition-transform" />

@@ -102,7 +102,7 @@ export const StackOverviewView: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onMouseEnter={() => playHover()}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900/80 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white hover:border-zinc-700 transition-all cursor-pointer group"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900/80 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white hover:border-zinc-700 transition-colors cursor-pointer group"
               >
                 <IconBrandGithub className="w-4 h-4 text-zinc-400 group-hover:text-white transition-colors" />
                 <span>View Source on GitHub</span>
@@ -119,35 +119,35 @@ export const StackOverviewView: React.FC = () => {
             <a
               href="#pretext-lab"
               onClick={(e) => handleAnchorClick(e, "pretext-lab")}
-              className="px-3 py-1 rounded-lg bg-zinc-900/60 border border-zinc-800/80 hover:border-brand-cyan/40 text-xs font-mono text-zinc-400 hover:text-brand-cyan transition-all"
+              className="px-3 py-1 rounded-lg bg-zinc-900/60 border border-zinc-800/80 hover:border-brand-cyan/40 text-xs font-mono text-zinc-400 hover:text-brand-cyan transition-colors"
             >
               Layout Physics Lab
             </a>
             <a
               href="#audio-lab"
               onClick={(e) => handleAnchorClick(e, "audio-lab")}
-              className="px-3 py-1 rounded-lg bg-zinc-900/60 border border-zinc-800/80 hover:border-purple-400/40 text-xs font-mono text-zinc-400 hover:text-purple-300 transition-all"
+              className="px-3 py-1 rounded-lg bg-zinc-900/60 border border-zinc-800/80 hover:border-purple-400/40 text-xs font-mono text-zinc-400 hover:text-purple-300 transition-colors"
             >
               Web Audio Synthesizer
             </a>
             <a
               href="#stack-layers"
               onClick={(e) => handleAnchorClick(e, "stack-layers")}
-              className="px-3 py-1 rounded-lg bg-zinc-900/60 border border-zinc-800/80 hover:border-emerald-400/40 text-xs font-mono text-zinc-400 hover:text-emerald-300 transition-all"
+              className="px-3 py-1 rounded-lg bg-zinc-900/60 border border-zinc-800/80 hover:border-emerald-400/40 text-xs font-mono text-zinc-400 hover:text-emerald-300 transition-colors"
             >
               Stack Layers
             </a>
             <a
               href="#invariants"
               onClick={(e) => handleAnchorClick(e, "invariants")}
-              className="px-3 py-1 rounded-lg bg-zinc-900/60 border border-zinc-800/80 hover:border-amber-400/40 text-xs font-mono text-zinc-400 hover:text-amber-300 transition-all"
+              className="px-3 py-1 rounded-lg bg-zinc-900/60 border border-zinc-800/80 hover:border-amber-400/40 text-xs font-mono text-zinc-400 hover:text-amber-300 transition-colors"
             >
               12 Invariants
             </a>
             <a
               href="#quickstart"
               onClick={(e) => handleAnchorClick(e, "quickstart")}
-              className="px-3 py-1 rounded-lg bg-zinc-900/60 border border-zinc-800/80 hover:border-cyan-400/40 text-xs font-mono text-zinc-400 hover:text-cyan-300 transition-all"
+              className="px-3 py-1 rounded-lg bg-zinc-900/60 border border-zinc-800/80 hover:border-cyan-400/40 text-xs font-mono text-zinc-400 hover:text-cyan-300 transition-colors"
             >
               CLI Quickstart
             </a>

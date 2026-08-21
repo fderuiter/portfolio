@@ -276,7 +276,7 @@ export const MemeVaultClient: React.FC = () => {
 
         <button
           onClick={triggerChaosMode}
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-semibold shadow-lg shadow-emerald-500/10 transition-all hover:scale-105 active:scale-95"
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-semibold shadow-lg shadow-emerald-500/10 transition-colors transition-transform hover:scale-105 active:scale-95"
         >
           <IconSparkles className="w-4 h-4 animate-spin" />
           <span>Launch Retro Chaos Mode</span>
@@ -355,7 +355,7 @@ export const MemeVaultClient: React.FC = () => {
                 onClick={() => handlePlaySound(btn)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.96 }}
-                className={`relative flex flex-col items-start p-4 sm:p-5 rounded-2xl border bg-gradient-to-b ${btn.accent} transition-all duration-200 text-left focus:outline-none focus:ring-2 focus:ring-emerald-400 shadow-md active:scale-[0.97] ${
+                className={`relative flex flex-col items-start p-4 sm:p-5 rounded-2xl border bg-gradient-to-b ${btn.accent} transition-colors transition-transform duration-200 text-left focus:outline-none focus:ring-2 focus:ring-emerald-400 shadow-md active:scale-[0.97] ${
                   isPlaying ? "ring-2 ring-white shadow-[0_0_25px_rgba(255,255,255,0.3)]" : ""
                 }`}
                 aria-label={`Play ${btn.label}`}
@@ -405,7 +405,7 @@ export const MemeVaultClient: React.FC = () => {
             return (
               <div
                 key={ach.id}
-                className={`p-5 rounded-2xl border transition-all ${
+                className={`p-5 rounded-2xl border transition-colors ${
                   isUnlocked
                     ? "bg-slate-900/90 border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.1)]"
                     : "bg-slate-950/60 border-slate-800/80 opacity-70"
@@ -482,7 +482,7 @@ export const MemeVaultClient: React.FC = () => {
             return (
               <div
                 key={q.id}
-                className="p-5 rounded-2xl border border-slate-800/90 bg-slate-900/70 hover:border-slate-700 transition-all flex flex-col justify-between"
+                className="p-5 rounded-2xl border border-slate-800/90 bg-slate-900/70 hover:border-slate-700 transition-colors flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between text-xs text-slate-400 mb-3">

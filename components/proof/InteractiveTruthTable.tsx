@@ -313,7 +313,7 @@ export function InteractiveTruthTable({ diagnosis }: InteractiveTruthTableProps)
                 aria-checked={isTrue}
                 aria-label={`Toggle variable ${varName}`}
                 onClick={() => toggleVariable(varName)}
-                className={`p-2 rounded-lg border flex items-center justify-between transition-all focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
+                className={`p-2 rounded-lg border flex items-center justify-between transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
                   isTrue
                     ? "bg-emerald-950/40 border-emerald-800/80 text-emerald-300 hover:bg-emerald-950/60"
                     : "bg-rose-950/30 border-rose-900/60 text-rose-300 hover:bg-rose-950/50"
@@ -337,7 +337,7 @@ export function InteractiveTruthTable({ diagnosis }: InteractiveTruthTableProps)
 
       {/* Contradiction / Consistency Banner */}
       <div
-        className={`p-2.5 rounded-lg border transition-all ${
+        className={`p-2.5 rounded-lg border transition-colors ${
           isCounterexampleActive
             ? "bg-red-950/60 border-red-700 text-red-200 shadow-md shadow-red-950/50"
             : allPremisesTrue
@@ -470,7 +470,7 @@ export function InteractiveTruthTable({ diagnosis }: InteractiveTruthTableProps)
                         applyRowValuation(row);
                       }
                     }}
-                    className={`border-t border-slate-800/60 cursor-pointer transition-all ${
+                    className={`border-t border-slate-800/60 cursor-pointer transition-colors ${
                       isActive
                         ? "bg-cyan-950/60 text-cyan-200 font-bold ring-1 ring-inset ring-cyan-500/80"
                         : row.isCounterexample

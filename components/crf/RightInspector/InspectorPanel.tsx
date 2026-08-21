@@ -78,7 +78,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
         <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={handleCopyCli}
-            className={`p-1.5 rounded text-xs font-mono transition-all flex items-center gap-1 border ${
+            className={`p-1.5 rounded text-xs font-mono transition-colors flex items-center gap-1 border ${
               hasCopiedCli
                 ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
                 : "bg-zinc-900 text-zinc-400 hover:text-white border-zinc-800 hover:bg-zinc-800"

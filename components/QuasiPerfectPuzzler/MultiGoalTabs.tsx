@@ -41,7 +41,7 @@ export const MultiGoalTabs: React.FC<MultiGoalTabsProps> = ({
               key={sg.id}
               type="button"
               onClick={() => onSelectGoal(idx)}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
                 isActive
                   ? "bg-purple-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.5)] border border-purple-400"
                   : isDone

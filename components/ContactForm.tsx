@@ -144,7 +144,7 @@ export function ContactForm({
         <button
           type="button"
           onClick={handleReset}
-          className="px-5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-xs font-mono font-bold text-zinc-200 hover:text-white hover:border-amber-400/50 hover:bg-zinc-800 transition-all cursor-pointer active:scale-95"
+          className="px-5 py-2.5 rounded-xl bg-zinc-900 border border-zinc-700 text-xs font-mono font-bold text-zinc-200 hover:text-white hover:border-amber-400/50 hover:bg-zinc-800 transition-colors transition-transform cursor-pointer active:scale-95"
         >
           Send Another Message &rarr;
         </button>
@@ -208,7 +208,7 @@ export function ContactForm({
             placeholder="e.g. Ada Lovelace"
             aria-invalid={!!fieldErrors.name}
             aria-describedby={fieldErrors.name ? "name_error" : undefined}
-            className={`w-full px-3.5 py-2.5 rounded-xl bg-[#0d0e11] border text-xs font-mono text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 transition-all ${
+            className={`w-full px-3.5 py-2.5 rounded-xl bg-[#0d0e11] border text-xs font-mono text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 transition-colors ${
               fieldErrors.name
                 ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/30"
                 : "border-white/10 focus:border-amber-400/60 focus:ring-amber-400/20"
@@ -240,7 +240,7 @@ export function ContactForm({
             placeholder="e.g. ada@example.com"
             aria-invalid={!!fieldErrors.email}
             aria-describedby={fieldErrors.email ? "email_error" : undefined}
-            className={`w-full px-3.5 py-2.5 rounded-xl bg-[#0d0e11] border text-xs font-mono text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 transition-all ${
+            className={`w-full px-3.5 py-2.5 rounded-xl bg-[#0d0e11] border text-xs font-mono text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 transition-colors ${
               fieldErrors.email
                 ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/30"
                 : "border-white/10 focus:border-amber-400/60 focus:ring-amber-400/20"
@@ -268,7 +268,7 @@ export function ContactForm({
                 key={item}
                 type="button"
                 onClick={() => setIntent(item)}
-                className={`px-3 py-2 rounded-xl text-[11px] font-mono font-bold uppercase tracking-wider transition-all border text-center cursor-pointer ${
+                className={`px-3 py-2 rounded-xl text-[11px] font-mono font-bold uppercase tracking-wider transition-colors border text-center cursor-pointer ${
                   isSelected
                     ? "bg-amber-500/15 border-amber-400/60 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.15)]"
                     : "bg-[#0d0e11] border-white/10 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
@@ -300,7 +300,7 @@ export function ContactForm({
           placeholder="e.g. Collaboration on formal verification or clinical systems"
           aria-invalid={!!fieldErrors.subject}
           aria-describedby={fieldErrors.subject ? "subject_error" : undefined}
-          className={`w-full px-3.5 py-2.5 rounded-xl bg-[#0d0e11] border text-xs font-mono text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 transition-all ${
+          className={`w-full px-3.5 py-2.5 rounded-xl bg-[#0d0e11] border text-xs font-mono text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 transition-colors ${
             fieldErrors.subject
               ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/30"
               : "border-white/10 focus:border-amber-400/60 focus:ring-amber-400/20"
@@ -337,7 +337,7 @@ export function ContactForm({
           placeholder="Write your note, idea, project outline, or question here..."
           aria-invalid={!!fieldErrors.message}
           aria-describedby={fieldErrors.message ? "message_error" : undefined}
-          className={`w-full px-3.5 py-2.5 rounded-xl bg-[#0d0e11] border text-xs font-mono text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 transition-all resize-y min-h-[100px] leading-relaxed ${
+          className={`w-full px-3.5 py-2.5 rounded-xl bg-[#0d0e11] border text-xs font-mono text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 transition-colors resize-y min-h-[100px] leading-relaxed ${
             fieldErrors.message
               ? "border-red-500/60 focus:border-red-500 focus:ring-red-500/30"
               : "border-white/10 focus:border-amber-400/60 focus:ring-amber-400/20"
@@ -360,7 +360,7 @@ export function ContactForm({
         <button
           type="submit"
           disabled={status === "submitting"}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-amber-400 text-zinc-950 font-mono font-bold text-xs hover:bg-amber-300 active:scale-95 disabled:opacity-50 disabled:pointer-events-none transition-all shadow-[0_0_20px_rgba(245,158,11,0.25)] cursor-pointer"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-amber-400 text-zinc-950 font-mono font-bold text-xs hover:bg-amber-300 active:scale-95 disabled:opacity-50 disabled:pointer-events-none transition-colors transition-transform transition-opacity shadow-[0_0_20px_rgba(245,158,11,0.25)] cursor-pointer"
         >
           {status === "submitting" ? (
             <>

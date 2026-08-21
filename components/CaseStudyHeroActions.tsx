@@ -44,7 +44,7 @@ export function CaseStudyHeroActions({
           target="_blank"
           rel="noopener noreferrer"
           aria-label={`View on GitHub: ${repoDisplay}`}
-          className="inline-flex items-center gap-2.5 px-4 py-2 rounded-lg bg-zinc-900/90 hover:bg-zinc-800/90 border border-zinc-800 hover:border-zinc-700 text-zinc-100 text-sm font-medium transition-all shadow-sm group focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 active:scale-[0.98]"
+          className="inline-flex items-center gap-2.5 px-4 py-2 rounded-lg bg-zinc-900/90 hover:bg-zinc-800/90 border border-zinc-800 hover:border-zinc-700 text-zinc-100 text-sm font-medium transition-colors transition-transform shadow-sm group focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 active:scale-[0.98]"
         >
           <IconBrandGithub className="w-4 h-4 text-brand-cyan transition-transform group-hover:scale-110" />
           <span className="font-mono text-xs md:text-sm font-semibold">{repoDisplay}</span>
@@ -70,7 +70,7 @@ export function CaseStudyHeroActions({
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Explore on Kaggle Notebook"
-          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-sky-950/40 hover:bg-sky-900/50 border border-sky-500/30 hover:border-sky-400/50 text-sky-200 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-sky-400/50 active:scale-[0.98]"
+          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-sky-950/40 hover:bg-sky-900/50 border border-sky-500/30 hover:border-sky-400/50 text-sky-200 text-sm font-medium transition-colors transition-transform focus:outline-none focus:ring-2 focus:ring-sky-400/50 active:scale-[0.98]"
         >
           <span className="font-bold text-sky-400 font-mono text-xs">K</span>
           <span className="text-xs md:text-sm font-semibold">Explore on Kaggle</span>
@@ -85,7 +85,7 @@ export function CaseStudyHeroActions({
           target="_blank"
           rel="noopener noreferrer"
           aria-label={`View external project: ${externalPlatformType || "Resource"}`}
-          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-zinc-400/50 active:scale-[0.98]"
+          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 text-sm font-medium transition-colors transition-transform focus:outline-none focus:ring-2 focus:ring-zinc-400/50 active:scale-[0.98]"
         >
           <IconExternalLink className="w-4 h-4 text-zinc-400" />
           <span className="text-xs md:text-sm font-semibold">
@@ -99,7 +99,7 @@ export function CaseStudyHeroActions({
         <Link
           href={interactiveUrl}
           aria-label={interactiveLabel || "Launch Interactive Studio"}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/40 hover:border-brand-cyan text-brand-cyan text-sm font-semibold transition-all shadow-[0_0_15px_rgba(6,182,212,0.15)] focus:outline-none focus:ring-2 focus:ring-brand-cyan/60 active:scale-[0.98]"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/40 hover:border-brand-cyan text-brand-cyan text-sm font-semibold transition-colors transition-transform shadow-[0_0_15px_rgba(6,182,212,0.15)] focus:outline-none focus:ring-2 focus:ring-brand-cyan/60 active:scale-[0.98]"
         >
           <IconPlayerPlay className="w-4 h-4 text-brand-cyan fill-brand-cyan/20" />
           <span className="text-xs md:text-sm">{interactiveLabel || "Launch Interactive Studio"}</span>

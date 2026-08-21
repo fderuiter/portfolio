@@ -1464,7 +1464,7 @@ export const LaserLoon: React.FC = () => {
               setMode("campaign");
               resetGame();
             }}
-            className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-colors cursor-pointer ${
               mode === "campaign"
                 ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]"
                 : "text-neutral-400 hover:text-white"
@@ -1477,7 +1477,7 @@ export const LaserLoon: React.FC = () => {
               setMode("arcade");
               resetGame();
             }}
-            className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-colors cursor-pointer ${
               mode === "arcade"
                 ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]"
                 : "text-neutral-400 hover:text-white"
@@ -1490,7 +1490,7 @@ export const LaserLoon: React.FC = () => {
               setMode("sandbox");
               setGameState("playing");
             }}
-            className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-colors cursor-pointer ${
               mode === "sandbox"
                 ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]"
                 : "text-neutral-400 hover:text-white"
@@ -1505,7 +1505,7 @@ export const LaserLoon: React.FC = () => {
           <button
             onClick={() => selectLaserType("ruby-laser")}
             aria-pressed={laserType === "ruby-laser"}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-colors cursor-pointer flex items-center gap-1 ${
               laserType === "ruby-laser"
                 ? "bg-red-500/20 text-red-400 border border-red-500/40 shadow-[0_0_10px_rgba(239,68,68,0.3)]"
                 : "text-neutral-400 hover:text-white border border-transparent"
@@ -1516,7 +1516,7 @@ export const LaserLoon: React.FC = () => {
           <button
             onClick={() => selectLaserType("cyan-pulse")}
             aria-pressed={laserType === "cyan-pulse"}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-colors cursor-pointer ${
               laserType === "cyan-pulse"
                 ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/40"
                 : "text-neutral-400 hover:text-white border border-transparent"
@@ -1527,7 +1527,7 @@ export const LaserLoon: React.FC = () => {
           <button
             onClick={() => selectLaserType("aurora-wave")}
             aria-pressed={laserType === "aurora-wave"}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-colors cursor-pointer ${
               laserType === "aurora-wave"
                 ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
                 : "text-neutral-400 hover:text-white border border-transparent"
@@ -1538,7 +1538,7 @@ export const LaserLoon: React.FC = () => {
           <button
             onClick={() => selectLaserType("ice-cannon")}
             aria-pressed={laserType === "ice-cannon"}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 ${
+            className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-colors cursor-pointer flex items-center gap-1 ${
               laserType === "ice-cannon"
                 ? "bg-sky-500/20 text-sky-400 border border-sky-500/40 shadow-[0_0_10px_rgba(56,189,248,0.3)]"
                 : "text-neutral-400 hover:text-white border border-transparent"
@@ -1553,7 +1553,7 @@ export const LaserLoon: React.FC = () => {
         <div className="flex items-center gap-2 text-xs font-mono">
           <button
             onClick={() => setShowMuseum(true)}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-amber-300 border border-amber-500/30 transition-all cursor-pointer"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-amber-300 border border-amber-500/30 transition-colors cursor-pointer"
           >
             <IconBook className="w-3.5 h-3.5" />
             <span>Flag Museum</span>
@@ -1584,7 +1584,7 @@ export const LaserLoon: React.FC = () => {
         onKeyDown={handleKeyDown}
         onKeyUp={handleKeyUp}
         data-keyboard-boundary="true"
-        className={`relative outline-none transition-all duration-300 shadow-2xl flex flex-col justify-between ${
+        className={`relative outline-none transition-colors transition-shadow duration-300 shadow-2xl flex flex-col justify-between ${
           isFullscreen
             ? "fixed inset-0 z-50 w-full h-[100dvh] max-h-[100dvh] max-w-none rounded-none border-none bg-black p-2 sm:p-4 overflow-hidden select-none touch-none"
             : `w-full max-w-3xl h-auto aspect-[768/420] bg-neutral-950 border rounded-3xl overflow-hidden ${
@@ -1693,7 +1693,7 @@ export const LaserLoon: React.FC = () => {
               aria-valuemin={0}
               aria-valuemax={100}
               aria-label="Ultimate Tremolo Meter"
-              className={`px-3 py-1.5 rounded-xl font-mono text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-lg ${
+              className={`px-3 py-1.5 rounded-xl font-mono text-xs font-bold flex items-center gap-1.5 transition-colors transition-shadow cursor-pointer shadow-lg ${
                 ultimateMeter >= 100 || mode === "sandbox"
                   ? "bg-gradient-to-r from-cyan-400 to-sky-500 text-black shadow-[0_0_20px_rgba(34,211,238,0.6)] animate-bounce"
                   : "bg-neutral-900/80 text-neutral-500 border border-neutral-800 cursor-not-allowed opacity-80"
@@ -1751,7 +1751,7 @@ export const LaserLoon: React.FC = () => {
                   startGame();
                   containerRef.current?.focus({ preventScroll: true });
                 }}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-red-500 hover:bg-red-400 text-white font-mono font-bold text-sm rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-red-500 hover:bg-red-400 text-white font-mono font-bold text-sm rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-colors transition-transform transform hover:scale-105 active:scale-95 cursor-pointer"
               >
                 <IconPlayerPlay className="w-4 h-4 fill-current" />
                 <span>START CAMPAIGN [SPACE]</span>
@@ -1759,7 +1759,7 @@ export const LaserLoon: React.FC = () => {
 
               <button
                 onClick={() => setShowMuseum(true)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-amber-300 border border-amber-500/30 font-mono font-bold text-sm rounded-xl transition-all cursor-pointer"
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-amber-300 border border-amber-500/30 font-mono font-bold text-sm rounded-xl transition-colors cursor-pointer"
               >
                 <IconBook className="w-4 h-4" />
                 <span>FLAG MUSEUM</span>
@@ -1801,7 +1801,7 @@ export const LaserLoon: React.FC = () => {
 
                 <button
                   onClick={() => startAct(currentActNum)}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-red-500 hover:bg-red-400 text-white font-mono font-bold text-xs shadow-lg cursor-pointer transition-all transform hover:scale-105 active:scale-95 ml-auto"
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-red-500 hover:bg-red-400 text-white font-mono font-bold text-xs shadow-lg cursor-pointer transition-colors transition-transform transform hover:scale-105 active:scale-95 ml-auto"
                 >
                   <span>ENGAGE STAGE [SPACE]</span>
                   <IconChevronRight className="w-4 h-4" />
@@ -1838,7 +1838,7 @@ export const LaserLoon: React.FC = () => {
                 setCurrentActNum((prev) => prev + 1);
                 setGameState("act-intro");
               }}
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-mono font-bold text-sm rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-mono font-bold text-sm rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-colors transition-transform transform hover:scale-105 active:scale-95 cursor-pointer"
             >
               <span>ADVANCE TO ACT {currentActNum + 1} [SPACE]</span>
               <IconChevronRight className="w-4 h-4" />
@@ -1917,7 +1917,7 @@ export const LaserLoon: React.FC = () => {
                 startGame();
                 containerRef.current?.focus({ preventScroll: true });
               }}
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-red-500 hover:bg-red-400 text-white font-mono font-bold text-sm rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-red-500 hover:bg-red-400 text-white font-mono font-bold text-sm rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-colors transition-transform transform hover:scale-105 active:scale-95 cursor-pointer"
             >
               <IconRefresh className="w-4 h-4" />
               PLAY AGAIN [SPACE]
@@ -1990,7 +1990,7 @@ export const LaserLoon: React.FC = () => {
             type="button"
             onClick={() => selectLaserType("ruby-laser")}
             aria-pressed={laserType === "ruby-laser"}
-            className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+            className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-colors cursor-pointer ${
               laserType === "ruby-laser"
                 ? "bg-red-500/20 text-red-300 border border-red-500/50 shadow-[0_0_10px_rgba(239,68,68,0.2)]"
                 : "bg-neutral-900 text-neutral-400 border border-neutral-800"
@@ -2002,7 +2002,7 @@ export const LaserLoon: React.FC = () => {
             type="button"
             onClick={() => selectLaserType("cyan-pulse")}
             aria-pressed={laserType === "cyan-pulse"}
-            className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+            className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-colors cursor-pointer ${
               laserType === "cyan-pulse"
                 ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.2)]"
                 : "bg-neutral-900 text-neutral-400 border border-neutral-800"
@@ -2014,7 +2014,7 @@ export const LaserLoon: React.FC = () => {
             type="button"
             onClick={() => selectLaserType("aurora-wave")}
             aria-pressed={laserType === "aurora-wave"}
-            className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+            className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-colors cursor-pointer ${
               laserType === "aurora-wave"
                 ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
                 : "bg-neutral-900 text-neutral-400 border border-neutral-800"
@@ -2026,7 +2026,7 @@ export const LaserLoon: React.FC = () => {
             type="button"
             onClick={() => selectLaserType("ice-cannon")}
             aria-pressed={laserType === "ice-cannon"}
-            className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+            className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-colors cursor-pointer ${
               laserType === "ice-cannon"
                 ? "bg-sky-500/20 text-sky-300 border border-sky-500/50 shadow-[0_0_10px_rgba(56,189,248,0.2)]"
                 : "bg-neutral-900 text-neutral-400 border border-neutral-800"
@@ -2176,7 +2176,7 @@ export const LaserLoon: React.FC = () => {
                   key={entry.id}
                   onClick={() => setSelectedFlagIndex(idx)}
                   aria-pressed={selectedFlagIndex === idx}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold whitespace-nowrap cursor-pointer transition-all ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold whitespace-nowrap cursor-pointer transition-colors ${
                     selectedFlagIndex === idx
                       ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]"
                       : "bg-neutral-900 text-neutral-400 hover:text-white border border-neutral-800"

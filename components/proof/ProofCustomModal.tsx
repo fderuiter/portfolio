@@ -95,7 +95,7 @@ export const ProofCustomModal: React.FC<ProofCustomModalProps> = ({
             <div className="flex justify-end gap-3 pt-2">
               <button
                 onClick={onLoadIntoWorkspace}
-                className="px-4 py-2 rounded-xl bg-brand-cyan hover:bg-cyan-400 text-slate-950 font-bold text-xs transition cursor-pointer active:scale-[0.98]"
+                className="px-4 py-2 rounded-xl bg-brand-cyan hover:bg-cyan-400 text-slate-950 font-bold text-xs transition-colors transition-transform cursor-pointer active:scale-[0.98]"
               >
                 Load into Workspace
               </button>

@@ -957,9 +957,25 @@ export function checkLayoutTextClippingInvariants(root: string): DiagnosticCheck
 
   for (const file of sourceFiles) {
     const content = fs.readFileSync(file, "utf-8");
+    const relPath = path.relative(root, file);
     if (content.includes("z-[9999]")) {
-      const relPath = path.relative(root, file);
       violations.push(`Rogue z-index escalation 'z-[9999]' found in ${relPath}`);
+    }
+    if (content.includes("transition-all")) {
+      violations.push(`Generic transition directive 'transition-all' found in ${relPath}`);
+    }
+  }
+
+  // Check app/globals.css for root body layer promotion and generic transition directives
+  const globalsCssPath = path.join(root, "app", "globals.css");
+  if (fs.existsSync(globalsCssPath)) {
+    const globalsContent = fs.readFileSync(globalsCssPath, "utf-8");
+    const bodyMatch = globalsContent.match(/body\s*\{[\s\S]*?\}/);
+    if (bodyMatch && bodyMatch[0].includes("will-change")) {
+      violations.push("Root document body in app/globals.css contains global GPU layer promotion hint 'will-change'.");
+    }
+    if (globalsContent.includes("transition: all") || globalsContent.includes("transition:all")) {
+      violations.push("app/globals.css contains generic 'transition: all' directive.");
     }
   }
 

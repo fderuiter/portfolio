@@ -206,7 +206,7 @@ export const VirtualGamepad: React.FC<VirtualGamepadProps> = ({
               key={label}
               type="button"
               onClick={() => onWeaponSelect(idx)}
-              className={`px-2.5 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-all ${
+              className={`px-2.5 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-colors ${
                 selectedWeapon === idx
                   ? "bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/40 shadow-[0_0_10px_rgba(34,211,238,0.2)]"
                   : "bg-zinc-800/60 text-zinc-400 border border-zinc-700/60"

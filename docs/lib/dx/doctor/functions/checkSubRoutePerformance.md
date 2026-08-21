@@ -8,7 +8,7 @@
 
 > **checkSubRoutePerformance**(`root`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:1245](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1245)
+Defined in: [lib/dx/doctor.ts:1261](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1261)
 
 Real-Browser Sub-Route Web Vitals & SLA Performance Gate (AGENTS.md Invariant #14)
 

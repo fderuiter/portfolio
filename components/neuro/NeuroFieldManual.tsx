@@ -74,7 +74,7 @@ export const NeuroFieldManual: React.FC<NeuroFieldManualProps> = ({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as typeof activeTab)}
-              className={`flex items-center gap-1.5 py-3 px-3 text-xs font-mono border-b-2 transition-all select-none ${
+              className={`flex items-center gap-1.5 py-3 px-3 text-xs font-mono border-b-2 transition-colors select-none ${
                 activeTab === tab.id
                   ? "border-brand-cyan text-brand-cyan font-bold"
                   : "border-transparent text-zinc-400 hover:text-zinc-200"
@@ -244,7 +244,7 @@ export const NeuroFieldManual: React.FC<NeuroFieldManualProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded-xl bg-brand-cyan text-zinc-950 font-bold hover:bg-brand-cyan/90 transition-all"
+            className="px-4 py-1.5 rounded-xl bg-brand-cyan text-zinc-950 font-bold hover:bg-brand-cyan/90 transition-colors"
           >
             DISMISS FIELD MANUAL
           </button>

@@ -339,10 +339,10 @@ export const FOUR_GLORY_COMMANDS_OBJ: CaseStudyCommands = {
       mostLikelyScoreline: "2 - 1 (Probability: 19.8%)",
     },
   },
-  "4glory evaluate-hypothesis --hypothesis \"High press in transition forces turnover against low block\"": {
+  "4glory evaluate-hypothesis --hypothesis \"High press in transition-colors forces turnover against low block\"": {
     description: "Empirically tests fan tactical hypothesis against seasonal spatial dataset.",
     payload: {
-      hypothesis: "High press in transition forces turnover against low block",
+      hypothesis: "High press in transition-colors forces turnover against low block",
       sampleSizeMatches: 380,
       empiricalTurnoverRate: "64.2%",
       counterAttackConversionRate: "14.8%",
@@ -366,7 +366,7 @@ export const FOUR_GLORY_PLAYBACK_OBJ: CaseStudyPlayback = [
     description: "Execute 10,000-iteration Monte Carlo match simulation",
   },
   {
-    command: "4glory evaluate-hypothesis --hypothesis \"High press in transition forces turnover against low block\"",
+    command: "4glory evaluate-hypothesis --hypothesis \"High press in transition-colors forces turnover against low block\"",
     description: "Evaluate tactical hypothesis against empirical tracking data",
   },
 ];

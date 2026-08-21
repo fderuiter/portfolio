@@ -391,7 +391,7 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
           <button
             type="button"
             onClick={() => onUpdateField({ requirementTier: "optional", required: false })}
-            className={`px-2 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-all border ${
+            className={`px-2 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-colors border ${
               field.requirementTier === "optional" || (!field.requirementTier && !field.required)
                 ? "bg-zinc-800 text-white border-zinc-600 shadow-sm"
                 : "bg-zinc-900/60 text-zinc-400 border-zinc-800 hover:text-zinc-200"
@@ -402,7 +402,7 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
           <button
             type="button"
             onClick={() => onUpdateField({ requirementTier: "hard_stop", required: true })}
-            className={`px-2 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-all border ${
+            className={`px-2 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-colors border ${
               field.requirementTier === "hard_stop" || (!field.requirementTier && field.required)
                 ? "bg-red-500/20 text-red-300 border-red-500/40 shadow-sm"
                 : "bg-zinc-900/60 text-zinc-400 border-zinc-800 hover:text-red-300"
@@ -413,7 +413,7 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
           <button
             type="button"
             onClick={() => onUpdateField({ requirementTier: "auto_query", required: true })}
-            className={`px-2 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-all border ${
+            className={`px-2 py-1.5 rounded-lg text-[10px] font-mono font-bold transition-colors border ${
               field.requirementTier === "auto_query"
                 ? "bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-sm"
                 : "bg-zinc-900/60 text-zinc-400 border-zinc-800 hover:text-amber-300"
@@ -613,7 +613,7 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
           <div className="flex rounded-lg p-0.5 bg-zinc-900 border border-zinc-800">
             <button
               onClick={() => handleSetOptionMode("standard")}
-              className={`flex-1 py-1.5 px-2 rounded-md text-[11px] font-mono font-medium transition-all ${
+              className={`flex-1 py-1.5 px-2 rounded-md text-[11px] font-mono font-medium transition-colors ${
                 optionMode === "standard"
                   ? "bg-zinc-800 text-brand-cyan shadow-sm font-bold"
                   : "text-zinc-400 hover:text-white"
@@ -623,7 +623,7 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
             </button>
             <button
               onClick={() => handleSetOptionMode("custom")}
-              className={`flex-1 py-1.5 px-2 rounded-md text-[11px] font-mono font-medium transition-all ${
+              className={`flex-1 py-1.5 px-2 rounded-md text-[11px] font-mono font-medium transition-colors ${
                 optionMode === "custom"
                   ? "bg-zinc-800 text-brand-cyan shadow-sm font-bold"
                   : "text-zinc-400 hover:text-white"
@@ -697,7 +697,7 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
                     <button
                       key={tpl.name}
                       onClick={() => handleApplyTemplate(tpl)}
-                      className="px-2 py-1 rounded-md bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 hover:border-brand-cyan/40 text-[10px] font-sans text-zinc-300 hover:text-white transition-all flex items-center gap-1"
+                      className="px-2 py-1 rounded-md bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 hover:border-brand-cyan/40 text-[10px] font-sans text-zinc-300 hover:text-white transition-colors flex items-center gap-1"
                       title={`Load ${tpl.options.length} options for ${tpl.name}`}
                     >
                       <span>{tpl.name}</span>
@@ -740,7 +740,7 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
                       <button
                         onClick={handleApplyBulkText}
                         disabled={!bulkInput.trim()}
-                        className="px-2.5 py-1 rounded bg-brand-cyan/20 hover:bg-brand-cyan text-brand-cyan hover:text-black font-mono text-[10px] font-bold border border-brand-cyan/40 transition-all disabled:opacity-40"
+                        className="px-2.5 py-1 rounded bg-brand-cyan/20 hover:bg-brand-cyan text-brand-cyan hover:text-black font-mono text-[10px] font-bold border border-brand-cyan/40 transition-colors transition-opacity disabled:opacity-40"
                       >
                         Apply Bulk Options
                       </button>
@@ -837,7 +837,7 @@ export const FieldPropertiesTab: React.FC<FieldPropertiesTabProps> = ({
                   {onSaveToStudyCodelist && (field.customOptions?.length || 0) > 0 && (
                     <button
                       onClick={handleSaveAsStudyCodelist}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-brand-cyan/15 hover:bg-brand-cyan/25 text-brand-cyan border border-brand-cyan/40 text-[10px] font-mono font-bold transition-all"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-brand-cyan/15 hover:bg-brand-cyan/25 text-brand-cyan border border-brand-cyan/40 text-[10px] font-mono font-bold transition-colors"
                       title="Promote these choices into a reusable study-level controlled codelist"
                     >
                       <IconDeviceFloppy className="w-3 h-3" />

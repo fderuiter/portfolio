@@ -81,7 +81,7 @@ export default function SchedulePage() {
           {CONSULTATION_TOPICS.map((topic, i) => (
             <div
               key={i}
-              className="p-5 rounded-2xl bg-zinc-900/30 border border-zinc-800/80 hover:border-brand-cyan/30 transition-all flex flex-col justify-start"
+              className="p-5 rounded-2xl bg-zinc-900/30 border border-zinc-800/80 hover:border-brand-cyan/30 transition-colors flex flex-col justify-start"
             >
               <div className="p-2.5 rounded-xl bg-zinc-950 border border-zinc-800/80 w-fit mb-3">
                 {topic.icon}
@@ -97,7 +97,7 @@ export default function SchedulePage() {
         </div>
 
         {/* Interactive Booking Action Card */}
-        <div className="w-full p-8 md:p-12 rounded-3xl bg-zinc-900/30 border border-zinc-800/80 hover:border-brand-cyan/40 transition-all shadow-2xl relative overflow-hidden flex flex-col items-center text-center">
+        <div className="w-full p-8 md:p-12 rounded-3xl bg-zinc-900/30 border border-zinc-800/80 hover:border-brand-cyan/40 transition-colors transition-shadow shadow-2xl relative overflow-hidden flex flex-col items-center text-center">
           <div className="absolute top-0 right-0 w-80 h-80 bg-brand-cyan/5 rounded-full blur-[100px] pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-80 h-80 bg-brand-blue/5 rounded-full blur-[100px] pointer-events-none" />
 
@@ -116,7 +116,7 @@ export default function SchedulePage() {
             href={GOOGLE_CALENDAR_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-brand-cyan text-zinc-950 font-mono font-bold text-sm hover:bg-white transition-all duration-300 shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:scale-105 cursor-pointer"
+            className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-brand-cyan text-zinc-950 font-mono font-bold text-sm hover:bg-white transition-colors transition-transform duration-300 shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:scale-105 cursor-pointer"
           >
             <span>Open Google Calendar Appointments</span>
             <IconExternalLink className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />

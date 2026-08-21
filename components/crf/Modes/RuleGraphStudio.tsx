@@ -172,7 +172,7 @@ export const RuleGraphStudio: React.FC<RuleGraphStudioProps> = ({ study }) => {
                 <div
                   key={rule.id}
                   onClick={() => setSelectedRuleId(rule.id)}
-                  className={`p-4 rounded-xl border transition-all cursor-pointer ${
+                  className={`p-4 rounded-xl border transition-colors cursor-pointer ${
                     isSelected
                       ? "bg-zinc-900 border-brand-cyan ring-1 ring-brand-cyan/40 shadow-lg"
                       : "bg-zinc-950/80 border-zinc-800 hover:border-zinc-700"

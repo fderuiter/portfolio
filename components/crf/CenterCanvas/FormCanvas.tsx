@@ -175,7 +175,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
   return (
     <div
       onClick={() => onSelectField(null)}
-      className="flex-1 flex flex-col h-full bg-zinc-950/80 crf-canvas-area overflow-y-auto p-3 sm:p-6 transition-all relative"
+      className="flex-1 flex flex-col h-full bg-zinc-950/80 crf-canvas-area overflow-y-auto p-3 sm:p-6 transition-colors relative"
     >
       {/* Top Canvas Controls Bar */}
       <div className="flex flex-wrap items-center justify-between gap-2.5 mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-zinc-800/80">
@@ -199,7 +199,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
               e.stopPropagation();
               onAddSection();
             }}
-            className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-zinc-850 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 text-xs font-mono transition-all shadow-sm"
+            className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-zinc-850 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 text-xs font-mono transition-colors transition-shadow shadow-sm"
           >
             <IconFolderPlus className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-brand-cyan" />
             <span className="hidden sm:inline">Add Section</span>
@@ -210,7 +210,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
 
       {/* Main Canvas Scroll Area with Centered Viewport */}
       <div className="flex-1 flex justify-center pb-28">
-        <div className={`${viewportWidthClass} transition-all duration-300 space-y-4 sm:space-y-6`}>
+        <div className={`${viewportWidthClass} transition-colors duration-300 space-y-4 sm:space-y-6`}>
           {/* Form Header Card */}
           <div className="p-4 sm:p-5 rounded-2xl bg-zinc-900/70 crf-paper-sheet border border-zinc-800/80 shadow-lg relative group">
             {isEditingTitle ? (
@@ -261,7 +261,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                   </button>
                   <button
                     onClick={handleSaveTitle}
-                    className="inline-flex items-center gap-1 px-3 py-1 text-xs font-mono font-bold rounded bg-brand-cyan text-black hover:bg-white transition-all"
+                    className="inline-flex items-center gap-1 px-3 py-1 text-xs font-mono font-bold rounded bg-brand-cyan text-black hover:bg-white transition-colors"
                   >
                     <IconCheck className="w-3.5 h-3.5" />
                     <span>Save Form Details</span>
@@ -297,7 +297,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                     setDomainInput(form.domain);
                     setIsEditingTitle(true);
                   }}
-                  className="p-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-white border border-zinc-700/60 transition-all opacity-80 sm:opacity-0 sm:group-hover:opacity-100 shrink-0"
+                  className="p-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-400 hover:text-white border border-zinc-700/60 transition-colors transition-opacity opacity-80 sm:opacity-0 sm:group-hover:opacity-100 shrink-0"
                   title="Edit Form Properties"
                   aria-label="Edit Form Properties"
                 >
@@ -415,7 +415,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                       e.stopPropagation();
                       onOpenPalette();
                     }}
-                    className="p-6 sm:p-8 border-2 border-dashed border-zinc-800 hover:border-brand-cyan/40 rounded-xl text-center cursor-pointer transition-all bg-zinc-950/30 group"
+                    className="p-6 sm:p-8 border-2 border-dashed border-zinc-800 hover:border-brand-cyan/40 rounded-xl text-center cursor-pointer transition-colors bg-zinc-950/30 group"
                   >
                     <IconPlus className="w-5 h-5 sm:w-6 sm:h-6 text-zinc-600 group-hover:text-brand-cyan mx-auto mb-2 transition-colors" />
                     <p className="text-xs text-zinc-400 font-mono">
@@ -471,7 +471,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
                 e.stopPropagation();
                 onAddSection();
               }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-300 hover:text-white text-xs font-mono transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-zinc-300 hover:text-white text-xs font-mono transition-colors"
             >
               <IconPlus className="w-4 h-4 text-brand-cyan" />
               <span>Add New Section to Form</span>
@@ -486,7 +486,7 @@ export const FormCanvas: React.FC<FormCanvasProps> = ({
           e.stopPropagation();
           onOpenPalette();
         }}
-        className="fixed sm:hidden bottom-20 right-4 z-30 flex items-center gap-1.5 px-3.5 py-2.5 rounded-full bg-brand-cyan text-black font-mono text-xs font-extrabold shadow-2xl hover:bg-white transition-all active:scale-95"
+        className="fixed sm:hidden bottom-20 right-4 z-30 flex items-center gap-1.5 px-3.5 py-2.5 rounded-full bg-brand-cyan text-black font-mono text-xs font-extrabold shadow-2xl hover:bg-white transition-colors transition-transform active:scale-95"
         title="Add Field / Open Widget Palette"
         aria-label="Add Field Widget"
       >

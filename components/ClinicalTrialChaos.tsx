@@ -1256,7 +1256,7 @@ export const ClinicalTrialChaos: React.FC = () => {
       data-keyboard-boundary="true"
       tabIndex={0}
       onKeyDown={handleKeyDown}
-      className={`relative w-full font-mono focus:outline-none transition-all ${
+      className={`relative w-full font-mono focus:outline-none transition-colors ${
         isFullscreen
           ? "fixed inset-0 z-50 w-full h-[100dvh] max-h-[100dvh] max-w-none rounded-none border-none bg-black p-3 sm:p-6 overflow-y-auto select-none"
           : "rounded-2xl border border-blue-500/30 bg-zinc-950 p-4 md:p-6 shadow-2xl focus:ring-1 focus:ring-brand-cyan"
@@ -1334,7 +1334,7 @@ export const ClinicalTrialChaos: React.FC = () => {
           {/* Master SFX Mute */}
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
-            className="rounded-lg border border-zinc-800 bg-zinc-900 p-2 text-zinc-400 hover:text-white transition"
+            className="rounded-lg border border-zinc-800 bg-zinc-900 p-2 text-zinc-400 hover:text-white transition-colors"
             title={soundEnabled ? "Mute Arcade SFX" : "Unmute Arcade SFX"}
           >
             {soundEnabled ? (
@@ -1480,7 +1480,7 @@ export const ClinicalTrialChaos: React.FC = () => {
           </div>
           <div className="w-full h-3 rounded-full bg-zinc-950 border border-zinc-800 overflow-hidden relative">
             <div
-              className={`h-full transition-all duration-300 ${
+              className={`h-full transition-colors duration-300 ${
                 auditor.suspicion > 75
                   ? "bg-gradient-to-r from-amber-500 to-rose-600"
                   : auditor.suspicion > 40
@@ -1610,7 +1610,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                     <div className="flex gap-2">
                       <button
                         onClick={() => startGame("campaign", 1)}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold text-xs uppercase tracking-wider hover:opacity-90 transition shadow-lg"
+                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-colors transition-opacity shadow-lg"
                       >
                         <IconRefresh className="h-4 w-4" /> Restart Phase I
                       </button>
@@ -1633,7 +1633,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                     </p>
                     <button
                       onClick={() => startGame("campaign", (phase < 3 ? phase + 1 : 1) as GamePhase)}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-500 text-black font-bold text-xs uppercase tracking-wider hover:bg-emerald-400 transition"
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-500 text-black font-bold text-xs uppercase tracking-wider hover:bg-emerald-400 transition-colors"
                     >
                       {phase < 3 ? `Advance to Phase ${phase + 1}` : "Play Victory Lap / Re-run"}
                     </button>
@@ -1649,13 +1649,13 @@ export const ClinicalTrialChaos: React.FC = () => {
                     <div className="flex flex-wrap items-center justify-center gap-3">
                       <button
                         onClick={() => startGame("campaign", 1)}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500 text-black font-bold text-xs uppercase tracking-wider hover:bg-cyan-400 transition shadow-[0_0_20px_-3px_rgba(6,182,212,0.5)]"
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500 text-black font-bold text-xs uppercase tracking-wider hover:bg-cyan-400 transition-colors transition-shadow shadow-[0_0_20px_-3px_rgba(6,182,212,0.5)]"
                       >
                         <IconPlayerPlay className="h-4 w-4" /> Start 3-Phase Campaign
                       </button>
                       <button
                         onClick={() => startGame("endless", 1)}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-200 font-bold text-xs uppercase tracking-wider hover:bg-zinc-800 transition"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-200 font-bold text-xs uppercase tracking-wider hover:bg-zinc-800 transition-colors"
                       >
                         Endless Sprint Mode
                       </button>
@@ -1790,7 +1790,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                   <div
                     key={station.id}
                     onClick={() => handleInitiateSubmission(station.id)}
-                    className="group cursor-pointer rounded-xl border border-zinc-800 bg-zinc-900/90 p-3 hover:border-brand-cyan/60 hover:bg-zinc-800/90 transition flex flex-col justify-between"
+                    className="group cursor-pointer rounded-xl border border-zinc-800 bg-zinc-900/90 p-3 hover:border-brand-cyan/60 hover:bg-zinc-800/90 transition-colors flex flex-col justify-between"
                     style={{ borderColor: station.accentColor }}
                   >
                     <div>
@@ -1800,7 +1800,7 @@ export const ClinicalTrialChaos: React.FC = () => {
                           {station.vendor}
                         </span>
                       </div>
-                      <h4 className="mt-1 text-sm font-bold text-white group-hover:text-brand-cyan transition">
+                      <h4 className="mt-1 text-sm font-bold text-white group-hover:text-brand-cyan transition-colors">
                         {station.label}
                       </h4>
                       <p className="text-[9px] text-zinc-400 mt-0.5 leading-tight">{station.name}</p>
@@ -2143,7 +2143,7 @@ export const ClinicalTrialChaos: React.FC = () => {
               </button>
               <button
                 onClick={handleConfirmSignature}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold text-xs uppercase tracking-wider hover:opacity-90 transition shadow-lg shadow-cyan-500/20"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold text-xs uppercase tracking-wider hover:opacity-90 transition-colors transition-opacity shadow-lg shadow-cyan-500/20"
               >
                 <IconShieldCheck className="h-4 w-4" /> Sign &amp; Lock CRF (Enter)
               </button>
@@ -2256,7 +2256,7 @@ export const ClinicalTrialChaos: React.FC = () => {
               </div>
               <button
                 onClick={() => setBimoReport(null)}
-                className="px-5 py-2 rounded-xl bg-emerald-500 text-black font-bold text-xs uppercase tracking-wider hover:bg-emerald-400 transition"
+                className="px-5 py-2 rounded-xl bg-emerald-500 text-black font-bold text-xs uppercase tracking-wider hover:bg-emerald-400 transition-colors"
               >
                 Close Report
               </button>
@@ -2279,7 +2279,7 @@ export const ClinicalTrialChaos: React.FC = () => {
 
         <Link
           href="/case-studies/imednet-python-sdk"
-          className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-brand-blue/40 bg-brand-blue/15 text-xs font-bold text-brand-cyan hover:bg-brand-blue/25 transition shadow-sm"
+          className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-brand-blue/40 bg-brand-blue/15 text-xs font-bold text-brand-cyan hover:bg-brand-blue/25 transition-colors transition-shadow shadow-sm"
         >
           <span>Read SDK Case Study</span>
           <IconExternalLink className="h-3.5 w-3.5" />

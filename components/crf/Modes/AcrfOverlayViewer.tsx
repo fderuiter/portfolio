@@ -103,7 +103,7 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
           {onOpenBranding && (
             <button
               onClick={onOpenBranding}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-mono transition-all"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-mono transition-colors"
             >
               <IconPalette className="w-4 h-4 text-brand-cyan" />
               <span>Branding</span>
@@ -113,7 +113,7 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
           {onOpenExportModal && (
             <button
               onClick={onOpenExportModal}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition-colors transition-shadow shadow-sm"
             >
               <IconFileSpreadsheet className="w-4 h-4" />
               <span>Export Docx / PDF</span>
@@ -125,11 +125,11 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
             label="Copy aCRF HTML"
             copiedLabel="Copied HTML!"
             successMessage="aCRF HTML content copied to clipboard"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-850 hover:bg-zinc-800 border border-zinc-750 text-zinc-200 text-xs font-mono transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-850 hover:bg-zinc-800 border border-zinc-750 text-zinc-200 text-xs font-mono transition-colors cursor-pointer"
           />
           <button
             onClick={handlePrint}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-brand-cyan text-black hover:bg-white font-mono text-xs font-bold transition-all shadow-sm"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-brand-cyan text-black hover:bg-white font-mono text-xs font-bold transition-colors transition-shadow shadow-sm"
           >
             <IconPrinter className="w-4 h-4" />
             <span>{viewMode === "study_book" ? "Print aCRF Book" : "Print Form aCRF"}</span>
@@ -141,7 +141,7 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
       <div className="flex items-center gap-2 border-b border-zinc-800 pb-2">
         <button
           onClick={() => setViewMode("single_form")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-colors ${
             viewMode === "single_form"
               ? "bg-brand-cyan text-black font-bold"
               : "bg-zinc-900 text-zinc-400 hover:text-white"
@@ -152,7 +152,7 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
         </button>
         <button
           onClick={() => setViewMode("study_book")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-colors ${
             viewMode === "study_book"
               ? "bg-brand-cyan text-black font-bold"
               : "bg-zinc-900 text-zinc-400 hover:text-white"
@@ -163,7 +163,7 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
         </button>
         <button
           onClick={() => setViewMode("sdtm_matrix")}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-colors ${
             viewMode === "sdtm_matrix"
               ? "bg-brand-cyan text-black font-bold"
               : "bg-zinc-900 text-zinc-400 hover:text-white"
@@ -183,7 +183,7 @@ export const AcrfOverlayViewer: React.FC<AcrfOverlayViewerProps> = ({
               <button
                 key={f.id}
                 onClick={() => setSelectedFormId(f.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-mono transition-all whitespace-nowrap flex items-center gap-2 border ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-mono transition-colors whitespace-nowrap flex items-center gap-2 border ${
                   f.id === selectedFormId
                     ? "bg-brand-cyan/15 border-brand-cyan/40 text-brand-cyan font-bold"
                     : "bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:text-white"

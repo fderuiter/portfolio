@@ -205,7 +205,7 @@ export function AdminLoginGateway() {
                   headerTitle: "text-zinc-100 font-mono text-base font-bold tracking-tight",
                   headerSubtitle: "text-zinc-400 font-sans text-xs",
                   socialButtonsBlockButton:
-                    "bg-[#13151a] hover:bg-zinc-800 text-zinc-200 border border-white/10 font-mono text-xs transition-all active:scale-[0.98]",
+                    "bg-[#13151a] hover:bg-zinc-800 text-zinc-200 border border-white/10 font-mono text-xs transition-colors transition-transform active:scale-[0.98]",
                   socialButtonsBlockButtonText: "font-mono font-medium text-xs text-zinc-300",
                   dividerLine: "bg-white/10",
                   dividerText: "text-zinc-500 font-mono text-[10px] uppercase tracking-widest bg-[#0d0e11] px-3",
@@ -213,7 +213,7 @@ export function AdminLoginGateway() {
                   formFieldInput:
                     "bg-[#13151a] border-white/10 text-zinc-100 placeholder:text-zinc-600 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono text-xs rounded-lg transition-colors",
                   formButtonPrimary:
-                    "bg-amber-500 hover:bg-amber-400 text-zinc-950 font-mono text-xs uppercase tracking-wider font-bold py-2.5 rounded-lg transition-all shadow-md active:scale-[0.98]",
+                    "bg-amber-500 hover:bg-amber-400 text-zinc-950 font-mono text-xs uppercase tracking-wider font-bold py-2.5 rounded-lg transition-colors transition-transform shadow-md active:scale-[0.98]",
                   footerActionText: "text-zinc-500 font-sans text-xs",
                   footerActionLink:
                     "text-amber-400 hover:text-amber-300 font-mono text-xs font-medium hover:underline",

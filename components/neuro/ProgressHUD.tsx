@@ -58,7 +58,7 @@ export const ProgressHUD: React.FC<ProgressHUDProps> = ({ className = "" }) => {
   return (
     <div
       data-testid="progress-hud-container"
-      className={`pointer-events-none absolute bottom-14 left-1/2 -translate-x-1/2 z-20 flex flex-col gap-2 bg-zinc-950/90 backdrop-blur-md border border-zinc-700/80 px-4 py-3 rounded-2xl shadow-2xl text-xs font-mono text-zinc-200 min-w-[280px] sm:min-w-[320px] transition-all duration-300 origin-bottom ${
+      className={`pointer-events-none absolute bottom-14 left-1/2 -translate-x-1/2 z-20 flex flex-col gap-2 bg-zinc-950/90 backdrop-blur-md border border-zinc-700/80 px-4 py-3 rounded-2xl shadow-2xl text-xs font-mono text-zinc-200 min-w-[280px] sm:min-w-[320px] transition-colors transition-transform duration-300 origin-bottom ${
         isFadingOut ? "opacity-0 scale-95" : "opacity-100 scale-100"
       } ${className}`}
     >

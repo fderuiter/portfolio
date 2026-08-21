@@ -705,7 +705,7 @@ export const NeuroReconClient: React.FC = () => {
           {/* Share Link Button */}
           <button
             onClick={handleCopyShareLink}
-            className="flex items-center gap-1.5 px-3 py-2 bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 rounded-xl text-xs font-mono text-zinc-300 hover:text-white transition-all shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-2 bg-zinc-950 hover:bg-zinc-800 border border-zinc-800 rounded-xl text-xs font-mono text-zinc-300 hover:text-white transition-colors transition-shadow shadow-sm"
             title="Copy Shareable Link for Current Scenario & View"
           >
             <IconLink className="w-3.5 h-3.5 text-brand-cyan" />
@@ -728,7 +728,7 @@ export const NeuroReconClient: React.FC = () => {
                     playNote(440, 0.08);
                   }}
                   title={dCfg ? dCfg.subtitle : dId}
-                  className={`px-2.5 py-1 rounded-lg transition-all ${
+                  className={`px-2.5 py-1 rounded-lg transition-colors ${
                     isSelected
                       ? "bg-zinc-800 text-white font-bold border border-zinc-700 shadow-sm"
                       : "text-zinc-400 hover:text-white"
@@ -749,7 +749,7 @@ export const NeuroReconClient: React.FC = () => {
                 <button
                   key={scId}
                   onClick={() => handleSelectScenario(scId)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-colors whitespace-nowrap ${
                     isActive
                       ? "bg-brand-cyan text-zinc-950 font-bold shadow-md"
                       : "text-zinc-400 hover:text-white hover:bg-zinc-900"
@@ -795,7 +795,7 @@ export const NeuroReconClient: React.FC = () => {
         <div className="flex items-center gap-1 bg-zinc-950 p-1 rounded-xl border border-zinc-800 text-xs font-mono self-end md:self-auto">
           <button
             onClick={() => setViewMode("split")}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors ${
               viewMode === "split"
                 ? "bg-zinc-800 text-white font-bold"
                 : "text-zinc-400 hover:text-white"
@@ -805,7 +805,7 @@ export const NeuroReconClient: React.FC = () => {
           </button>
           <button
             onClick={() => setViewMode("3d")}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors ${
               viewMode === "3d"
                 ? "bg-zinc-800 text-white font-bold"
                 : "text-zinc-400 hover:text-white"
@@ -816,7 +816,7 @@ export const NeuroReconClient: React.FC = () => {
           </button>
           <button
             onClick={() => setViewMode("2d")}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-colors ${
               viewMode === "2d"
                 ? "bg-zinc-800 text-white font-bold"
                 : "text-zinc-400 hover:text-white"
@@ -952,20 +952,20 @@ export const NeuroReconClient: React.FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => recordEvent("neuro", "project_click")}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-mono font-bold text-xs shadow-lg shadow-emerald-500/20 transition-all"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-mono font-bold text-xs shadow-lg shadow-emerald-500/20 transition-colors transition-shadow"
                 >
                   <IconCalendar className="w-4 h-4" />
                   <span>Schedule Consultation</span>
                 </a>
                 <button
                   onClick={() => setShowSuccessModal(false)}
-                  className="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-mono transition-all"
+                  className="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-mono transition-colors"
                 >
                   Stay in Current Case
                 </button>
                 <button
                   onClick={handleAdvanceNextScenario}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-cyan hover:bg-brand-cyan/90 text-zinc-950 font-mono font-bold text-xs shadow-lg shadow-brand-cyan/20 transition-all"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-cyan hover:bg-brand-cyan/90 text-zinc-950 font-mono font-bold text-xs shadow-lg shadow-brand-cyan/20 transition-colors transition-shadow"
                 >
                   <span>Advance Next Case</span>
                   <IconArrowRight className="w-4 h-4" />

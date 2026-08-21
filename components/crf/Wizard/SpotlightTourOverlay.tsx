@@ -63,7 +63,7 @@ const TOUR_STEPS: TourStep[] = [
     title: "4. Workspace Mode Navigation",
     targetDescription: "Top Header — Studio View Modes (1-5)",
     details:
-      "Seamlessly transition between the Form Canvas, Schedule of Activities (SoA Visit Matrix), AST Rule Graph Visualizer, Live 21 CFR Part 11 EDC Simulator, and Annotated CRF (aCRF) viewer.",
+      "Seamlessly transition-colors between the Form Canvas, Schedule of Activities (SoA Visit Matrix), AST Rule Graph Visualizer, Live 21 CFR Part 11 EDC Simulator, and Annotated CRF (aCRF) viewer.",
     actionHint: "Tip: Use hotkeys 1, 2, 3, 4, and 5 to rapidly switch between workspace views.",
     position: "top-center",
   },
@@ -182,7 +182,7 @@ export const SpotlightTourOverlay: React.FC<SpotlightTourOverlayProps> = ({
               <button
                 key={s.id}
                 onClick={() => setCurrentStepIdx(idx)}
-                className={`h-1.5 rounded-full transition-all ${
+                className={`h-1.5 rounded-full transition-colors ${
                   idx === currentStepIdx
                     ? "w-6 bg-brand-cyan"
                     : idx < currentStepIdx
@@ -217,7 +217,7 @@ export const SpotlightTourOverlay: React.FC<SpotlightTourOverlayProps> = ({
 
             <button
               onClick={handleNext}
-              className="inline-flex items-center gap-1 px-4 py-1.5 rounded-xl bg-brand-cyan text-black hover:bg-white text-xs font-mono font-bold transition-all shadow-md"
+              className="inline-flex items-center gap-1 px-4 py-1.5 rounded-xl bg-brand-cyan text-black hover:bg-white text-xs font-mono font-bold transition-colors transition-shadow shadow-md"
             >
               <span>{currentStepIdx === TOUR_STEPS.length - 1 ? "Complete Tour" : "Next Step"}</span>
               {currentStepIdx === TOUR_STEPS.length - 1 ? (

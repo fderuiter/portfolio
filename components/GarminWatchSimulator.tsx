@@ -519,7 +519,7 @@ export const GarminWatchSimulator: React.FC = () => {
       {/* Keyboard Capture Status Banner & Controls Bar */}
       <div className="mb-4 text-center flex flex-wrap items-center justify-center gap-3">
         <span
-          className={`inline-flex items-center gap-2 px-3 py-1 rounded-full font-mono text-[10px] font-bold uppercase tracking-wider border transition-all duration-300 ${
+          className={`inline-flex items-center gap-2 px-3 py-1 rounded-full font-mono text-[10px] font-bold uppercase tracking-wider border transition-colors duration-300 ${
             isFocused
               ? "bg-brand-cyan/10 text-brand-cyan border-brand-cyan/30 shadow-[0_0_10px_rgba(34,211,238,0.15)] animate-pulse"
               : "bg-zinc-950 text-zinc-500 border-zinc-800"
@@ -537,7 +537,7 @@ export const GarminWatchSimulator: React.FC = () => {
         <div className="flex items-center gap-1 p-0.5 bg-zinc-900 border border-zinc-800 rounded-full text-[9px] font-mono">
           <button
             onClick={() => handleSelectDevice("fenix")}
-            className={`px-2.5 py-0.5 rounded-full cursor-pointer transition-all ${
+            className={`px-2.5 py-0.5 rounded-full cursor-pointer transition-colors ${
               deviceTarget === "fenix" ? "bg-rose-600 text-white font-bold" : "text-zinc-400 hover:text-zinc-200"
             }`}
           >
@@ -545,7 +545,7 @@ export const GarminWatchSimulator: React.FC = () => {
           </button>
           <button
             onClick={() => handleSelectDevice("forerunner")}
-            className={`px-2.5 py-0.5 rounded-full cursor-pointer transition-all ${
+            className={`px-2.5 py-0.5 rounded-full cursor-pointer transition-colors ${
               deviceTarget === "forerunner" ? "bg-amber-600 text-black font-bold" : "text-zinc-400 hover:text-zinc-200"
             }`}
           >
@@ -553,7 +553,7 @@ export const GarminWatchSimulator: React.FC = () => {
           </button>
           <button
             onClick={() => handleSelectDevice("edge")}
-            className={`px-2.5 py-0.5 rounded-full cursor-pointer transition-all ${
+            className={`px-2.5 py-0.5 rounded-full cursor-pointer transition-colors ${
               deviceTarget === "edge" ? "bg-emerald-600 text-white font-bold" : "text-zinc-400 hover:text-zinc-200"
             }`}
           >
@@ -603,7 +603,7 @@ export const GarminWatchSimulator: React.FC = () => {
         onBlur={() => setIsFocused(false)}
         onKeyDown={handleKeyDown}
         data-keyboard-boundary="true"
-        className={`relative w-full max-w-[336px] aspect-square h-auto rounded-full bg-gradient-to-br p-6 flex items-center justify-center border-4 select-none outline-none transition-all duration-300 ${getThemeChassis()} ${
+        className={`relative w-full max-w-[336px] aspect-square h-auto rounded-full bg-gradient-to-br p-6 flex items-center justify-center border-4 select-none outline-none transition-colors duration-300 ${getThemeChassis()} ${
           isFocused
             ? "ring-4 ring-brand-cyan/20 shadow-[0_0_40px_rgba(34,211,238,0.25)] scale-[1.01]"
             : "shadow-2xl"
@@ -619,7 +619,7 @@ export const GarminWatchSimulator: React.FC = () => {
             containerRef.current?.focus({ preventScroll: true });
           }}
           title="Backlight (L): +0.3%/s Battery"
-          className="absolute -left-3.5 top-[24%] px-2 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-amber-500 hover:to-amber-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
+          className="absolute -left-3.5 top-[24%] px-2 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-amber-500 hover:to-amber-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-colors transition-transform shadow-md cursor-pointer flex flex-col items-center"
         >
           <span>LIGHT</span>
           <span className="text-[6px] text-amber-300/80">[L]</span>
@@ -634,7 +634,7 @@ export const GarminWatchSimulator: React.FC = () => {
             containerRef.current?.focus({ preventScroll: true });
           }}
           title="Jump (ArrowUp / UP)"
-          className="absolute -left-3.5 top-[46%] px-2.5 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
+          className="absolute -left-3.5 top-[46%] px-2.5 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-brand-cyan hover:to-brand-cyan/80 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-colors transition-transform shadow-md cursor-pointer flex flex-col items-center"
         >
           <span>UP</span>
           <span className="text-[6px] text-cyan-300/80">[▲]</span>
@@ -649,7 +649,7 @@ export const GarminWatchSimulator: React.FC = () => {
             containerRef.current?.focus({ preventScroll: true });
           }}
           title="Jettison Variable (ArrowDown / DOWN)"
-          className="absolute -left-3.5 top-[68%] px-2 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-rose-500 hover:to-rose-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
+          className="absolute -left-3.5 top-[68%] px-2 py-1.5 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-rose-500 hover:to-rose-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-l-md border-y border-l border-zinc-600 active:scale-95 transition-colors transition-transform shadow-md cursor-pointer flex flex-col items-center"
         >
           <span>DOWN</span>
           <span className="text-[6px] text-rose-300/80">[▼] POP</span>
@@ -664,7 +664,7 @@ export const GarminWatchSimulator: React.FC = () => {
             containerRef.current?.focus({ preventScroll: true });
           }}
           title="Start / Pause / Restart (Enter / Space)"
-          className="absolute -right-3.5 top-[30%] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-emerald-500 hover:to-emerald-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
+          className="absolute -right-3.5 top-[30%] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-emerald-500 hover:to-emerald-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-colors transition-transform shadow-md cursor-pointer flex flex-col items-center"
         >
           <span>START</span>
           <span className="text-[6px] text-emerald-300/80">[ENTER]</span>
@@ -679,7 +679,7 @@ export const GarminWatchSimulator: React.FC = () => {
             containerRef.current?.focus({ preventScroll: true });
           }}
           title="Force Garbage Collection (Backspace / Escape): 500ms Freeze"
-          className="absolute -right-3.5 top-[62%] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-purple-500 hover:to-purple-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-all shadow-md cursor-pointer flex flex-col items-center"
+          className="absolute -right-3.5 top-[62%] px-2.5 py-1.5 bg-gradient-to-l from-zinc-700 to-zinc-800 hover:from-purple-500 hover:to-purple-600 text-[8px] font-bold text-zinc-300 hover:text-black rounded-r-md border-y border-r border-zinc-600 active:scale-95 transition-colors transition-transform shadow-md cursor-pointer flex flex-col items-center"
         >
           <span>BACK</span>
           <span className="text-[6px] text-purple-300/80">[GC]</span>
@@ -739,7 +739,7 @@ export const GarminWatchSimulator: React.FC = () => {
               </p>
               <button
                 onClick={handleStartStop}
-                className="mt-3 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[9px] rounded-full flex items-center gap-1 shadow-lg cursor-pointer transition-all active:scale-95"
+                className="mt-3 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[9px] rounded-full flex items-center gap-1 shadow-lg cursor-pointer transition-colors transition-transform active:scale-95"
               >
                 <IconPlayerPlay className="w-3 h-3" />
                 START SIMULATION
@@ -772,14 +772,14 @@ export const GarminWatchSimulator: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => recordEvent("garmin_simulator", "project_click")}
-                className="mt-1 px-3 py-1 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-[9px] rounded-full flex items-center gap-1 shadow-lg cursor-pointer transition-all active:scale-95"
+                className="mt-1 px-3 py-1 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-[9px] rounded-full flex items-center gap-1 shadow-lg cursor-pointer transition-colors transition-transform active:scale-95"
               >
                 <IconCalendar className="w-3 h-3" />
                 <span>Book Consultation</span>
               </a>
               <button
                 onClick={handleStartStop}
-                className="px-2.5 py-0.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-[8px] rounded-full flex items-center gap-1 shadow cursor-pointer transition-all active:scale-95"
+                className="px-2.5 py-0.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-[8px] rounded-full flex items-center gap-1 shadow cursor-pointer transition-colors transition-transform active:scale-95"
               >
                 <IconPlayerPlay className="w-2.5 h-2.5" />
                 <span>Reboot &amp; Restart</span>
@@ -847,19 +847,19 @@ export const GarminWatchSimulator: React.FC = () => {
       <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-[10px] font-mono">
         <button
           onClick={handleSaveFlash}
-          className="px-2.5 py-1 bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/40 rounded shadow cursor-pointer transition-all active:scale-95"
+          className="px-2.5 py-1 bg-amber-600/20 hover:bg-amber-600/30 text-amber-300 border border-amber-500/40 rounded shadow cursor-pointer transition-colors transition-transform active:scale-95"
         >
           💾 Write NV Flash (+8KB)
         </button>
         <button
           onClick={handleClearFlash}
-          className="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 rounded shadow cursor-pointer transition-all active:scale-95"
+          className="px-2.5 py-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 rounded shadow cursor-pointer transition-colors transition-transform active:scale-95"
         >
           🗑️ Clear Flash Storage
         </button>
         <button
           onClick={handleDrainBattery}
-          className="px-2.5 py-1 bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 border border-rose-800/50 rounded shadow cursor-pointer transition-all active:scale-95"
+          className="px-2.5 py-1 bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 border border-rose-800/50 rounded shadow cursor-pointer transition-colors transition-transform active:scale-95"
         >
           ⚡ Drain Battery (-20%)
         </button>

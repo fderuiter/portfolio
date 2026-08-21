@@ -601,7 +601,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
       tabIndex={0}
       data-keyboard-boundary="true"
       onKeyDown={handleKeyDown}
-      className={`relative font-mono outline-none transition-all ${
+      className={`relative font-mono outline-none transition-colors ${
         isFullscreen
           ? "fixed inset-0 z-50 w-full h-[100dvh] max-h-[100dvh] max-w-none rounded-none border-none bg-black p-3 sm:p-6 overflow-y-auto select-none"
           : "rounded-2xl border border-brand-cyan/30 bg-zinc-950/90 p-5 shadow-[0_0_35px_-10px_rgba(6,182,212,0.35)] focus:border-brand-cyan"
@@ -639,7 +639,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
             <button
               type="button"
               onClick={() => handleToggleMode("story")}
-              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors ${
                 gameMode === "story"
                   ? "bg-brand-cyan text-black shadow-[0_0_10px_rgba(6,182,212,0.4)]"
                   : "text-zinc-400 hover:text-zinc-200"
@@ -650,7 +650,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
             <button
               type="button"
               onClick={() => handleToggleMode("hacker")}
-              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors ${
                 gameMode === "hacker"
                   ? "bg-amber-400 text-black shadow-[0_0_10px_rgba(251,191,36,0.4)] font-extrabold"
                   : "text-zinc-400 hover:text-zinc-200"
@@ -664,7 +664,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveTab("campaign")}
-              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+              className={`px-3 py-1 text-xs font-bold rounded-lg transition-colors ${
                 activeTab === "campaign"
                   ? "bg-purple-600 text-white shadow-[0_0_10px_rgba(168,85,247,0.4)]"
                   : "text-zinc-400 hover:text-zinc-200"
@@ -675,7 +675,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
             <button
               type="button"
               onClick={() => setActiveTab("sandbox")}
-              className={`flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+              className={`flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-lg transition-colors ${
                 activeTab === "sandbox"
                   ? "bg-emerald-500 text-black shadow-[0_0_10px_rgba(16,185,129,0.4)]"
                   : "text-zinc-400 hover:text-zinc-200"
@@ -717,7 +717,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
                     key={chap.id}
                     type="button"
                     onClick={() => setSelectedChapter(chap.id as number | "all")}
-                    className={`px-2.5 py-0.5 rounded text-[11px] font-bold transition-all ${
+                    className={`px-2.5 py-0.5 rounded text-[11px] font-bold transition-colors ${
                       selectedChapter === chap.id
                         ? "bg-zinc-800 text-brand-cyan border border-brand-cyan/40"
                         : "text-zinc-500 hover:text-zinc-300"
@@ -733,7 +733,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowBriefingModal(true)}
-                  className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg border border-brand-cyan/40 bg-brand-cyan/10 text-brand-cyan hover:bg-brand-cyan/20 transition-all"
+                  className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg border border-brand-cyan/40 bg-brand-cyan/10 text-brand-cyan hover:bg-brand-cyan/20 transition-colors"
                 >
                   <IconSparkles className="w-3.5 h-3.5" />
                   <span>Theory Briefing</span>
@@ -741,7 +741,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowHints((prev) => !prev)}
-                  className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${
+                  className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg border transition-colors ${
                     showHints
                       ? "bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-[0_0_10px_rgba(245,158,11,0.3)]"
                       : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-zinc-200"
@@ -753,7 +753,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowLeanInspector((prev) => !prev)}
-                  className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg border transition-all ${
+                  className={`flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg border transition-colors ${
                     showLeanInspector
                       ? "bg-purple-500/20 text-purple-300 border-purple-500/50 shadow-[0_0_10px_rgba(168,85,247,0.3)]"
                       : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-zinc-200"
@@ -777,7 +777,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
                     key={lvl.id}
                     type="button"
                     onClick={() => loadLevel(actualIdx)}
-                    className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all ${
+                    className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-colors ${
                       isCurrent
                         ? "bg-brand-cyan text-black shadow-[0_0_10px_rgba(6,182,212,0.5)] font-extrabold"
                         : lvlProgress?.completed

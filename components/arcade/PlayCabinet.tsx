@@ -215,7 +215,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
 
         {/* Game Area Container with Dynamic Viewport Height Budgeting */}
         <div
-          className={`w-full relative rounded-2xl border-2 transition-all duration-300 overflow-hidden max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--footer-height,48px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] min-h-[280px] flex items-center justify-center bg-black ${bezelClasses}`}
+          className={`w-full relative rounded-2xl border-2 transition-colors duration-300 overflow-hidden max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--footer-height,48px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] min-h-[280px] flex items-center justify-center bg-black ${bezelClasses}`}
         >
           {children}
 
@@ -250,7 +250,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowWizard(true)}
-              className="px-3 py-1 bg-zinc-950 text-amber-400 hover:text-amber-300 rounded-lg border border-amber-500/30 transition-all font-bold uppercase text-[10px] tracking-wider flex items-center gap-1 hover:bg-zinc-900 hover:border-amber-500/50 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
+              className="px-3 py-1 bg-zinc-950 text-amber-400 hover:text-amber-300 rounded-lg border border-amber-500/30 transition-colors font-bold uppercase text-[10px] tracking-wider flex items-center gap-1 hover:bg-zinc-900 hover:border-amber-500/50 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
             >
               <IconAdjustments className="w-3.5 h-3.5 text-amber-400" />
               <span>Setup Wizard</span>
@@ -258,7 +258,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
 
             <button
               onClick={handleExit}
-              className="px-3 py-1 bg-zinc-950 text-zinc-400 hover:text-white rounded-lg border border-zinc-800 transition-all font-bold uppercase text-[10px] tracking-wider flex items-center gap-1 hover:bg-zinc-900 hover:border-zinc-700 cursor-pointer focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
+              className="px-3 py-1 bg-zinc-950 text-zinc-400 hover:text-white rounded-lg border border-zinc-800 transition-colors font-bold uppercase text-[10px] tracking-wider flex items-center gap-1 hover:bg-zinc-900 hover:border-zinc-700 cursor-pointer focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
             >
               <IconPower className="w-3.5 h-3.5 text-red-500" />
               <span>Reset Cabinet</span>
@@ -270,7 +270,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
   }
 
   return (
-    <div className={`w-full ${colors.shadow} transition-all duration-300`}>
+    <div className={`w-full ${colors.shadow} transition-colors transition-shadow duration-300`}>
       {/* Static Retro Cabinet Preview Screen with scanlines */}
       <div 
         className="w-full aspect-[16/10] min-h-[380px] rounded-2xl border border-zinc-800 bg-zinc-950 flex flex-col justify-between p-6 sm:p-8 relative overflow-hidden select-none"
@@ -370,7 +370,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
                   onMouseEnter={handlePrefetch}
                   onFocus={handlePrefetch}
                   onClick={handleLaunch}
-                  className={`w-full md:w-auto px-8 py-3.5 ${colors.buttonBg} ${colors.buttonHover} text-black font-extrabold rounded-xl border-b-4 ${colors.buttonBorder} hover:border-b-2 active:border-b-0 active:translate-y-1 transition-all duration-70s flex items-center justify-center gap-2 font-mono text-xs sm:text-sm tracking-wider shadow-lg ${colors.buttonShadow} uppercase`}
+                  className={`w-full md:w-auto px-8 py-3.5 ${colors.buttonBg} ${colors.buttonHover} text-black font-extrabold rounded-xl border-b-4 ${colors.buttonBorder} hover:border-b-2 active:border-b-0 active:translate-y-1 transition-colors transition-transform duration-70s flex items-center justify-center gap-2 font-mono text-xs sm:text-sm tracking-wider shadow-lg ${colors.buttonShadow} uppercase`}
                 >
                   <IconPlayerPlay className="w-4 h-4 fill-black text-black" />
                   <span>Launch Cabinet</span>

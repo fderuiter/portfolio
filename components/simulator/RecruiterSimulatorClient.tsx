@@ -414,7 +414,7 @@ export default function RecruiterSimulatorClient() {
                     <button
                       key={idx}
                       onClick={() => handleSelectOption(opt)}
-                      className="group flex flex-col text-left p-5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 hover:border-brand-cyan/50 hover:bg-zinc-900/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.1)] transition-all duration-200 cursor-pointer"
+                      className="group flex flex-col text-left p-5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 hover:border-brand-cyan/50 hover:bg-zinc-900/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.1)] transition-colors transition-shadow duration-200 cursor-pointer"
                     >
                       <div className="flex items-center justify-between w-full mb-1">
                         <span className="text-sm sm:text-base font-bold text-neutral-200 group-hover:text-brand-cyan transition-colors">
@@ -525,7 +525,7 @@ export default function RecruiterSimulatorClient() {
                   <Link
                     href="/schedule"
                     onClick={() => recordEvent("simulator", "simulator_schedule_click")}
-                    className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-brand-cyan to-brand-blue text-zinc-950 hover:text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.2)] transition-all cursor-pointer hover:scale-[1.02]"
+                    className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-brand-cyan to-brand-blue text-zinc-950 hover:text-white font-mono font-bold text-xs uppercase tracking-wider rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.2)] transition-colors transition-transform cursor-pointer hover:scale-[1.02]"
                   >
                     <IconCalendar className="w-4 h-4" aria-hidden="true" /> Schedule on Google Calendar
                   </Link>
@@ -538,11 +538,11 @@ export default function RecruiterSimulatorClient() {
                     copiedLabel="Copied!"
                     successMessage="Engineering alignment assessment report successfully copied to clipboard!"
                     errorMessage="Unable to copy engineering assessment to clipboard"
-                    className="flex items-center justify-center gap-2 px-4 py-3 bg-zinc-950 border border-zinc-800 hover:border-zinc-700 text-zinc-300 font-mono font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                    className="flex items-center justify-center gap-2 px-4 py-3 bg-zinc-950 border border-zinc-800 hover:border-zinc-700 text-zinc-300 font-mono font-bold text-xs uppercase tracking-wider rounded-xl transition-colors cursor-pointer"
                   />
                   <button
                     onClick={handleReset}
-                    className="flex items-center justify-center gap-2 px-4 py-3 bg-zinc-950 border border-zinc-800 hover:border-zinc-700 text-zinc-400 font-mono font-bold text-xs uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                    className="flex items-center justify-center gap-2 px-4 py-3 bg-zinc-950 border border-zinc-800 hover:border-zinc-700 text-zinc-400 font-mono font-bold text-xs uppercase tracking-wider rounded-xl transition-colors cursor-pointer"
                   >
                     <IconRefresh className="w-4 h-4" aria-hidden="true" /> Run Again
                   </button>

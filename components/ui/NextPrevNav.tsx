@@ -41,7 +41,7 @@ export const NextPrevNav: React.FC<NextPrevNavProps> = ({
           <Link
             href={backToHub.href}
             onMouseEnter={handleHover}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900/60 border border-zinc-800 text-xs font-mono text-zinc-400 hover:text-brand-cyan hover:border-brand-cyan/40 transition-all duration-200 group"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-zinc-900/60 border border-zinc-800 text-xs font-mono text-zinc-400 hover:text-brand-cyan hover:border-brand-cyan/40 transition-colors duration-200 group"
           >
             <IconGridDots className="w-4 h-4 text-brand-cyan group-hover:rotate-90 transition-transform duration-300" />
             <span>{backToHub.title}</span>
@@ -54,7 +54,7 @@ export const NextPrevNav: React.FC<NextPrevNavProps> = ({
           <Link
             href={prev.href}
             onMouseEnter={handleHover}
-            className="group flex flex-col p-5 rounded-2xl bg-zinc-900/30 border border-zinc-800/80 hover:border-brand-cyan/40 hover:bg-zinc-900/50 transition-all duration-200"
+            className="group flex flex-col p-5 rounded-2xl bg-zinc-900/30 border border-zinc-800/80 hover:border-brand-cyan/40 hover:bg-zinc-900/50 transition-colors duration-200"
           >
             <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-500 group-hover:text-brand-cyan transition-colors mb-1.5">
               <IconArrowLeft className="w-3.5 h-3.5 transform group-hover:-translate-x-1 transition-transform duration-200" />
@@ -77,7 +77,7 @@ export const NextPrevNav: React.FC<NextPrevNavProps> = ({
           <Link
             href={next.href}
             onMouseEnter={handleHover}
-            className="group flex flex-col items-end text-right p-5 rounded-2xl bg-zinc-900/30 border border-zinc-800/80 hover:border-brand-cyan/40 hover:bg-zinc-900/50 transition-all duration-200 sm:col-start-2"
+            className="group flex flex-col items-end text-right p-5 rounded-2xl bg-zinc-900/30 border border-zinc-800/80 hover:border-brand-cyan/40 hover:bg-zinc-900/50 transition-colors duration-200 sm:col-start-2"
           >
             <span className="inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-500 group-hover:text-brand-cyan transition-colors mb-1.5">
               <span>{next.label || "Next Experience"}</span>

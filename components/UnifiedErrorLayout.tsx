@@ -162,7 +162,7 @@ export function UnifiedErrorLayout({
       <main className="min-h-screen py-32 px-6 flex flex-col items-center justify-center bg-brand-dark text-foreground relative overflow-hidden select-none">
       {/* Background Blurs */}
       <div 
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none transition-all duration-700 [transform:translate(-50%,-50%)_translate(var(--blur-shift-x,0px),var(--blur-shift-y,0px))]" 
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-brand-cyan/5 blur-[120px] pointer-events-none transition-colors transition-transform duration-700 [transform:translate(-50%,-50%)_translate(var(--blur-shift-x,0px),var(--blur-shift-y,0px))]" 
         style={showRetroLabyrinth ? ({
           "--blur-shift-x": `${(normalized.x - 0.5) * 40}px`,
           "--blur-shift-y": `${(normalized.y - 0.5) * 40}px`,
@@ -209,7 +209,7 @@ export function UnifiedErrorLayout({
         {/* Interactive target reticle/crosshair indicator */}
         {showRetroLabyrinth && (
           <div 
-            className="absolute pointer-events-none mix-blend-screen transition-all duration-75"
+            className="absolute pointer-events-none mix-blend-screen transition-colors duration-75"
             style={{
               left: `${mousePos.x}px`,
               top: `${mousePos.y}px`,
@@ -279,7 +279,7 @@ export function UnifiedErrorLayout({
                   handleActivateGame();
                 }
               }}
-              className="relative w-full aspect-[15/9] min-h-[240px] h-[240px] bg-neutral-950/90 border border-neutral-900 hover:border-brand-cyan/60 rounded-2xl flex flex-col items-center justify-center font-mono select-none overflow-hidden my-6 cursor-pointer group/coin transition-all duration-300 shadow-xl"
+              className="relative w-full aspect-[15/9] min-h-[240px] h-[240px] bg-neutral-950/90 border border-neutral-900 hover:border-brand-cyan/60 rounded-2xl flex flex-col items-center justify-center font-mono select-none overflow-hidden my-6 cursor-pointer group/coin transition-colors transition-shadow duration-300 shadow-xl"
             >
               {/* Cyberpunk grid background effect */}
               <div className="absolute inset-0 pointer-events-none opacity-10 group-hover/coin:opacity-20 transition-opacity duration-300">
@@ -298,7 +298,7 @@ export function UnifiedErrorLayout({
               {/* Center Insert Coin Prompts */}
               <div className="flex flex-col items-center justify-center gap-3 p-4 z-10 text-center">
                 {/* Arcade Coin Slot Icon / Badge */}
-                <div className="w-12 h-12 rounded-full border-2 border-brand-cyan/40 group-hover/coin:border-brand-cyan group-hover/coin:scale-105 flex items-center justify-center bg-brand-cyan/10 transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+                <div className="w-12 h-12 rounded-full border-2 border-brand-cyan/40 group-hover/coin:border-brand-cyan group-hover/coin:scale-105 flex items-center justify-center bg-brand-cyan/10 transition-colors transition-transform duration-300 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
                   <span className="text-brand-cyan font-extrabold text-sm tracking-tighter">1¢</span>
                 </div>
 
@@ -346,7 +346,7 @@ export function UnifiedErrorLayout({
                     key={study.id}
                     href={`/case-studies/${study.slug}`}
                     onClick={() => handleSuggestionClick(study.slug)}
-                    className="group block p-4 bg-neutral-950/60 hover:bg-neutral-900/60 border border-neutral-900 hover:border-brand-cyan/40 rounded-2xl transition-all duration-300 backdrop-blur-sm"
+                    className="group block p-4 bg-neutral-950/60 hover:bg-neutral-900/60 border border-neutral-900 hover:border-brand-cyan/40 rounded-2xl transition-colors duration-300 backdrop-blur-sm"
                   >
                     <div className="flex justify-between items-start gap-2 mb-1">
                       <h4 className="text-sm font-bold text-neutral-200 group-hover:text-brand-cyan transition-colors duration-250">
@@ -381,14 +381,14 @@ export function UnifiedErrorLayout({
               e.currentTarget.focus();
               openSearch();
             }}
-            className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-bold bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-brand-cyan/40 text-brand-cyan rounded-2xl transition-all duration-300 shadow-lg cursor-pointer"
+            className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-bold bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-brand-cyan/40 text-brand-cyan rounded-2xl transition-colors transition-shadow duration-300 shadow-lg cursor-pointer"
           >
             Search Site
           </button>
 
           <Link
             href={secondaryActionHref}
-            className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-semibold bg-transparent border border-neutral-900 hover:border-neutral-800 text-neutral-400 rounded-2xl transition-all duration-300 cursor-pointer"
+            className="inline-flex items-center justify-center w-full px-6 py-3 text-sm font-semibold bg-transparent border border-neutral-900 hover:border-neutral-800 text-neutral-400 rounded-2xl transition-colors duration-300 cursor-pointer"
           >
             {secondaryActionText}
           </Link>

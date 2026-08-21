@@ -198,7 +198,7 @@ export const InvariantsMatrix: React.FC = () => {
               playHover();
               setSelectedCategory(cat);
             }}
-            className={`px-3 py-1 rounded-lg text-xs font-mono transition-all cursor-pointer ${
+            className={`px-3 py-1 rounded-lg text-xs font-mono transition-colors cursor-pointer ${
               selectedCategory === cat
                 ? "bg-emerald-500/15 border border-emerald-500/50 text-emerald-400 font-bold"
                 : "bg-zinc-950/60 border border-zinc-800 text-zinc-400 hover:text-zinc-200"
@@ -214,7 +214,7 @@ export const InvariantsMatrix: React.FC = () => {
         {filteredInvariants.map((inv) => (
           <div
             key={inv.id}
-            className="p-4 rounded-xl bg-zinc-950/70 border border-zinc-800/90 hover:border-emerald-500/30 transition-all flex flex-col justify-between group"
+            className="p-4 rounded-xl bg-zinc-950/70 border border-zinc-800/90 hover:border-emerald-500/30 transition-colors flex flex-col justify-between group"
           >
             <div>
               <div className="flex items-center justify-between gap-2 mb-2">

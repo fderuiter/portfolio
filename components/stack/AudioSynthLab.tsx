@@ -112,7 +112,7 @@ export const AudioSynthLab: React.FC = () => {
                 key={p}
                 type="button"
                 onClick={() => handleProfileChange(p)}
-                className={`py-2 px-2.5 rounded-xl border text-xs font-mono capitalize transition-all cursor-pointer ${
+                className={`py-2 px-2.5 rounded-xl border text-xs font-mono capitalize transition-colors cursor-pointer ${
                   profile === p
                     ? "bg-purple-500/15 border-purple-500/50 text-purple-300 font-bold"
                     : "bg-zinc-950/60 border-zinc-800 text-zinc-400 hover:text-zinc-200"
@@ -157,7 +157,7 @@ export const AudioSynthLab: React.FC = () => {
         <button
           type="button"
           onClick={() => triggerSound("tactile", () => playHover(pan))}
-          className={`p-3 rounded-xl border flex flex-col items-center text-center gap-2 transition-all cursor-pointer ${
+          className={`p-3 rounded-xl border flex flex-col items-center text-center gap-2 transition-colors cursor-pointer ${
             activeSoundName === "tactile"
               ? "bg-purple-500/20 border-purple-400 scale-95"
               : "bg-zinc-950/70 border-zinc-800 hover:border-purple-500/40 hover:bg-zinc-900/80"
@@ -173,7 +173,7 @@ export const AudioSynthLab: React.FC = () => {
         <button
           type="button"
           onClick={() => triggerSound("laser", () => playNote(880, 0.08, pan))}
-          className={`p-3 rounded-xl border flex flex-col items-center text-center gap-2 transition-all cursor-pointer ${
+          className={`p-3 rounded-xl border flex flex-col items-center text-center gap-2 transition-colors cursor-pointer ${
             activeSoundName === "laser"
               ? "bg-purple-500/20 border-purple-400 scale-95"
               : "bg-zinc-950/70 border-zinc-800 hover:border-purple-500/40 hover:bg-zinc-900/80"
@@ -189,7 +189,7 @@ export const AudioSynthLab: React.FC = () => {
         <button
           type="button"
           onClick={() => triggerSound("success", () => playSuccess())}
-          className={`p-3 rounded-xl border flex flex-col items-center text-center gap-2 transition-all cursor-pointer ${
+          className={`p-3 rounded-xl border flex flex-col items-center text-center gap-2 transition-colors cursor-pointer ${
             activeSoundName === "success"
               ? "bg-purple-500/20 border-purple-400 scale-95"
               : "bg-zinc-950/70 border-zinc-800 hover:border-emerald-500/40 hover:bg-zinc-900/80"
@@ -205,7 +205,7 @@ export const AudioSynthLab: React.FC = () => {
         <button
           type="button"
           onClick={() => triggerSound("error", () => playError())}
-          className={`p-3 rounded-xl border flex flex-col items-center text-center gap-2 transition-all cursor-pointer ${
+          className={`p-3 rounded-xl border flex flex-col items-center text-center gap-2 transition-colors cursor-pointer ${
             activeSoundName === "error"
               ? "bg-purple-500/20 border-purple-400 scale-95"
               : "bg-zinc-950/70 border-zinc-800 hover:border-rose-500/40 hover:bg-zinc-900/80"
@@ -221,7 +221,7 @@ export const AudioSynthLab: React.FC = () => {
         <button
           type="button"
           onClick={() => triggerSound("key", () => playKeystroke(65 + Math.floor(Math.random() * 26)))}
-          className={`p-3 rounded-xl border col-span-2 sm:col-span-1 flex flex-col items-center text-center gap-2 transition-all cursor-pointer ${
+          className={`p-3 rounded-xl border col-span-2 sm:col-span-1 flex flex-col items-center text-center gap-2 transition-colors cursor-pointer ${
             activeSoundName === "key"
               ? "bg-purple-500/20 border-purple-400 scale-95"
               : "bg-zinc-950/70 border-zinc-800 hover:border-amber-500/40 hover:bg-zinc-900/80"

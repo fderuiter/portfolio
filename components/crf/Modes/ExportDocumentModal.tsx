@@ -218,7 +218,7 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
               <button
                 type="button"
                 onClick={() => setExportMode("blank")}
-                className={`p-3.5 rounded-xl border text-left transition-all ${
+                className={`p-3.5 rounded-xl border text-left transition-colors ${
                   exportMode === "blank"
                     ? "bg-brand-cyan/10 border-brand-cyan text-white shadow-sm"
                     : "bg-zinc-950/60 border-zinc-800 text-zinc-400 hover:text-zinc-200"
@@ -236,7 +236,7 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
               <button
                 type="button"
                 onClick={() => setExportMode("annotated")}
-                className={`p-3.5 rounded-xl border text-left transition-all ${
+                className={`p-3.5 rounded-xl border text-left transition-colors ${
                   exportMode === "annotated"
                     ? "bg-brand-cyan/10 border-brand-cyan text-white shadow-sm"
                     : "bg-zinc-950/60 border-zinc-800 text-zinc-400 hover:text-zinc-200"
@@ -262,7 +262,7 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
               <button
                 type="button"
                 onClick={() => setScope("all")}
-                className={`px-3 py-2 rounded-xl border text-xs font-mono transition-all ${
+                className={`px-3 py-2 rounded-xl border text-xs font-mono transition-colors ${
                   scope === "all"
                     ? "bg-zinc-800 border-brand-cyan text-brand-cyan font-bold"
                     : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white"
@@ -274,7 +274,7 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
               <button
                 type="button"
                 onClick={() => setScope("single")}
-                className={`px-3 py-2 rounded-xl border text-xs font-mono transition-all ${
+                className={`px-3 py-2 rounded-xl border text-xs font-mono transition-colors ${
                   scope === "single"
                     ? "bg-zinc-800 border-brand-cyan text-brand-cyan font-bold"
                     : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white"
@@ -286,7 +286,7 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
               <button
                 type="button"
                 onClick={() => setScope("selected")}
-                className={`px-3 py-2 rounded-xl border text-xs font-mono transition-all ${
+                className={`px-3 py-2 rounded-xl border text-xs font-mono transition-colors ${
                   scope === "selected"
                     ? "bg-zinc-800 border-brand-cyan text-brand-cyan font-bold"
                     : "bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white"
@@ -365,7 +365,7 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => recordEvent("crf", "project_click")}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold transition-colors transition-shadow shadow-sm"
             >
               <IconCalendar className="w-4 h-4" />
               <span>Schedule Consultation</span>
@@ -378,7 +378,7 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
               type="button"
               onClick={handleDownloadDocx}
               disabled={isExportingDocx || isExportingPdf}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition-all shadow-md disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition-colors transition-opacity shadow-md disabled:opacity-50"
             >
               {isExportingDocx ? (
                 <IconLoader2 className="w-4 h-4 animate-spin" />
@@ -395,7 +395,7 @@ export const ExportDocumentModal: React.FC<ExportDocumentModalProps> = ({
               type="button"
               onClick={handleDownloadPdf}
               disabled={isExportingDocx || isExportingPdf}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-cyan text-black hover:bg-white font-mono text-xs font-bold transition-all shadow-md disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-cyan text-black hover:bg-white font-mono text-xs font-bold transition-colors transition-opacity shadow-md disabled:opacity-50"
             >
               {isExportingPdf ? (
                 <IconLoader2 className="w-4 h-4 animate-spin" />
