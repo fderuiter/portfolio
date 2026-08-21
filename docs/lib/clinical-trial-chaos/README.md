@@ -172,6 +172,12 @@ Re-exports [generateClinicalSubject](scenarios/functions/generateClinicalSubject
 
 ***
 
+### generateClinicalSubjectFromProtocol
+
+Re-exports [generateClinicalSubjectFromProtocol](scenarios/functions/generateClinicalSubjectFromProtocol.md)
+
+***
+
 ### generateSDTMDataset
 
 Re-exports [generateSDTMDataset](engine/functions/generateSDTMDataset.md)
@@ -292,6 +298,12 @@ Re-exports [ProtocolAmendment](types/interfaces/ProtocolAmendment.md)
 
 ***
 
+### RecordedRuleViolation
+
+Re-exports [RecordedRuleViolation](types/interfaces/RecordedRuleViolation.md)
+
+***
+
 ### scrambleStations
 
 Re-exports [scrambleStations](engine/functions/scrambleStations.md)
@@ -367,6 +379,18 @@ Re-exports [triggerRandomAmendment](engine/functions/triggerRandomAmendment.md)
 ### updateBGMTempo
 
 Re-exports [updateBGMTempo](sound-effects/functions/updateBGMTempo.md)
+
+***
+
+### useClinicalAudioCleanup
+
+Re-exports [useClinicalAudioCleanup](sound-effects/functions/useClinicalAudioCleanup.md)
+
+***
+
+### useProceduralBGM
+
+Re-exports [useProceduralBGM](sound-effects/functions/useProceduralBGM.md)
 
 ***
 

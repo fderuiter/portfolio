@@ -8,4 +8,4 @@
 
 > `const` **UniversalCrfFieldSchema**: `z.ZodType`\<[`UniversalCrfField`](../type-aliases/UniversalCrfField.md)\>
 
-Defined in: [lib/crf/universal-schema.ts:126](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L126)
+Defined in: [lib/crf/universal-schema.ts:178](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L178)

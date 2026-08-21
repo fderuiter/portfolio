@@ -14,6 +14,8 @@
 ## Type Aliases
 
 - [UniversalAstCondition](type-aliases/UniversalAstCondition.md)
+- [UniversalBiomedicalConcept](type-aliases/UniversalBiomedicalConcept.md)
+- [UniversalBiomedicalConceptProperty](type-aliases/UniversalBiomedicalConceptProperty.md)
 - [UniversalCdashMetadata](type-aliases/UniversalCdashMetadata.md)
 - [UniversalClinicalDataType](type-aliases/UniversalClinicalDataType.md)
 - [UniversalCodelist](type-aliases/UniversalCodelist.md)
@@ -25,16 +27,24 @@
 - [UniversalCrfSection](type-aliases/UniversalCrfSection.md)
 - [UniversalCrfVisit](type-aliases/UniversalCrfVisit.md)
 - [UniversalEditCheckRule](type-aliases/UniversalEditCheckRule.md)
+- [UniversalStudyArm](type-aliases/UniversalStudyArm.md)
+- [UniversalStudyCohort](type-aliases/UniversalStudyCohort.md)
+- [UniversalStudyEpoch](type-aliases/UniversalStudyEpoch.md)
 - [UniversalStudyProtocol](type-aliases/UniversalStudyProtocol.md)
 
 ## Variables
 
 - [AstConditionSchema](variables/AstConditionSchema.md)
 - [BaseCRFFieldSchema](variables/BaseCRFFieldSchema.md)
+- [BiomedicalConceptPropertySchema](variables/BiomedicalConceptPropertySchema.md)
+- [BiomedicalConceptSchema](variables/BiomedicalConceptSchema.md)
 - [CdashVariableMetadataSchema](variables/CdashVariableMetadataSchema.md)
 - [CodelistDefinitionSchema](variables/CodelistDefinitionSchema.md)
 - [CodelistOptionSchema](variables/CodelistOptionSchema.md)
 - [EditCheckRuleSchema](variables/EditCheckRuleSchema.md)
+- [StudyArmSchema](variables/StudyArmSchema.md)
+- [StudyCohortSchema](variables/StudyCohortSchema.md)
+- [StudyEpochSchema](variables/StudyEpochSchema.md)
 - [UniversalClinicalDataTypeSchema](variables/UniversalClinicalDataTypeSchema.md)
 - [UniversalCrfBrandingSchema](variables/UniversalCrfBrandingSchema.md)
 - [UniversalCrfFieldSchema](variables/UniversalCrfFieldSchema.md)

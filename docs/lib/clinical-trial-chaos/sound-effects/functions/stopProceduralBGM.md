@@ -10,7 +10,7 @@
 
 Defined in: [lib/clinical-trial-chaos/sound-effects.ts:169](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L169)
 
-Stops procedural background music.
+Stops procedural background music and clears active timers.
 
 ## Returns
 

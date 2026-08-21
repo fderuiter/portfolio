@@ -252,6 +252,23 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
 
           {/* Desktop Direct Utility Buttons */}
           <div className="hidden lg:flex items-center gap-1.5">
+            {/* Launch Live Conformance Engine Simulation */}
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  try {
+                    localStorage.setItem("crf_active_protocol", JSON.stringify(study));
+                  } catch {}
+                  window.location.href = "/arcade/clinical-chaos";
+                }
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white font-mono text-xs font-bold rounded-lg border border-emerald-500/40 transition-all shadow-xs"
+              title="Launch Live Conformance Engine Simulation with Active Protocol Pre-Loaded"
+            >
+              <IconPlayerPlay className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400" />
+              <span>Simulate Protocol</span>
+            </button>
+
             {/* Word / PDF Export Modal Trigger */}
             <button
               onClick={onOpenExportDocument}

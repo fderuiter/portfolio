@@ -39,15 +39,19 @@ class LocalStorageMock {
 const mockPlaySuccess = vi.fn();
 const mockPlayNote = vi.fn();
 
-vi.mock("@/components/providers/AudioProvider", () => ({
-  useAudio: () => ({
-    playSuccess: mockPlaySuccess,
-    playNote: mockPlayNote,
-    playHover: vi.fn(),
-    muted: false,
-  }),
-  AudioProvider: ({ children }: { children: React.ReactNode }) => children,
-}));
+vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/providers/AudioProvider")>();
+  return {
+    ...actual,
+    useAudio: () => ({
+      playSuccess: mockPlaySuccess,
+      playNote: mockPlayNote,
+      playHover: vi.fn(),
+      muted: false,
+    }),
+    AudioProvider: ({ children }: { children: React.ReactNode }) => children,
+  };
+});
 
 const mockRecordEvent = vi.fn().mockResolvedValue(true);
 vi.mock("@/hooks/useTelemetry", () => ({

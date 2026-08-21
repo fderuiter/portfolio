@@ -8,7 +8,7 @@
 
 > **calculateDuboisBSA**(`heightCm`, `weightKg`): `number` \| `null`
 
-Defined in: [lib/crf/expression-evaluator.ts:372](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L372)
+Defined in: [lib/crf/expression-evaluator.ts:388](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L388)
 
 Calculates DuBois & DuBois Body Surface Area (BSA) in m^2.
 

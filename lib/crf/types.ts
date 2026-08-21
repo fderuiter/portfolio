@@ -69,8 +69,54 @@ export interface EditCheckRule {
   formulaExpression?: string; // For calculations: e.g. "weight / ((height/100) * (height/100))"
 }
 
+export interface StudyArm {
+  id: string;
+  name: string;
+  type: string; // e.g. "Experimental", "Active Comparator", "Placebo Comparator"
+  description?: string;
+  epochIds?: string[];
+}
+
+export interface StudyEpoch {
+  id: string;
+  name: string;
+  sequenceNumber: number;
+  type?: string; // "Screening", "Treatment", "Follow-up", "Washout", etc.
+  description?: string;
+}
+
+export interface StudyCohort {
+  id: string;
+  name: string;
+  description?: string;
+  armIds?: string[];
+  targetSize?: number;
+}
+
+export interface BiomedicalConceptProperty {
+  id: string;
+  name: string;
+  code?: string;
+  datatype?: string;
+}
+
+export interface BiomedicalConcept {
+  id: string;
+  name: string;
+  conceptId?: string; // e.g. "C25298"
+  code?: string;
+  domain?: string;
+  synonyms?: string[];
+  properties?: BiomedicalConceptProperty[] | Record<string, unknown>;
+  variableName?: string;
+  dataType?: string;
+  label?: string;
+  unit?: string;
+}
+
 export interface CRFField {
   id: string;
+  conceptId?: string;        // Reference to BiomedicalConcept
   variableName: string;      // e.g. BRTHYR, DIABP, AETERM
   label: string;             // Question text displayed to investigator
   description?: string;      // Instructions / hint
@@ -139,6 +185,9 @@ export interface StudyVisit {
   formIds?: string[];
   isRepeating?: boolean;
   repeatMax?: number;
+  epochId?: string;          // Link to StudyEpoch
+  armIds?: string[];         // Link to applicable StudyArms
+  armFormAssignments?: Record<string, string[]>; // armId -> formIds[]
 }
 
 export interface StudyBranding {
@@ -209,6 +258,10 @@ export interface StudyProtocol {
   codelists: CodelistDefinition[];
   rules?: EditCheckRule[];
   branding?: StudyBranding;
+  arms?: StudyArm[];
+  epochs?: StudyEpoch[];
+  cohorts?: StudyCohort[];
+  biomedicalConcepts?: BiomedicalConcept[];
 }
 
 export interface EDCQuery {

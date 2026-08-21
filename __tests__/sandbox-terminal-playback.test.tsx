@@ -10,14 +10,18 @@ import { createRoot, type Root } from "react-dom/client";
 import { SandboxTerminal } from "@/components/SandboxTerminal";
 
 // Mock audio and announcer providers
-vi.mock("@/components/providers/AudioProvider", () => ({
-  useAudio: () => ({
-    playKeystroke: vi.fn(),
-    playAutocomplete: vi.fn(),
-    playSuccess: vi.fn(),
-  }),
-  AudioProvider: ({ children }: { children: React.ReactNode }) => children,
-}));
+vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/providers/AudioProvider")>();
+  return {
+    ...actual,
+    useAudio: () => ({
+      playKeystroke: vi.fn(),
+      playAutocomplete: vi.fn(),
+      playSuccess: vi.fn(),
+    }),
+    AudioProvider: ({ children }: { children: React.ReactNode }) => children,
+  };
+});
 
 vi.mock("@/components/providers/A11yProvider", () => ({
   useAnnouncer: () => ({

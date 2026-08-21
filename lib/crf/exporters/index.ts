@@ -17,3 +17,4 @@ export * from "../export-docx";
 export * from "../export-pdf";
 export * from "../odm-xml-serializer";
 export * from "../fhir-questionnaire";
+export * from "../usdm-adapter";

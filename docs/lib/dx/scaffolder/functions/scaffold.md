@@ -8,7 +8,7 @@
 
 > **scaffold**(`options`): [`GeneratedFile`](../interfaces/GeneratedFile.md)[]
 
-Defined in: [lib/dx/scaffolder.ts:600](https://github.com/fderuiter/portfolio/blob/main/lib/dx/scaffolder.ts#L600)
+Defined in: [lib/dx/scaffolder.ts:736](https://github.com/fderuiter/portfolio/blob/main/lib/dx/scaffolder.ts#L736)
 
 Universal Scaffolding Dispatcher
 
