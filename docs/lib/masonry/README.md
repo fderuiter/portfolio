@@ -14,4 +14,5 @@
 
 ## Functions
 
+- [calculateCardHeightFromBlocks](functions/calculateCardHeightFromBlocks.md)
 - [calculateMasonryLayout](functions/calculateMasonryLayout.md)

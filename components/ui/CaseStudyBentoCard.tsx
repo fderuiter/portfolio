@@ -30,7 +30,7 @@ const REALITY_CONTENT: Record<string, string> = {
   "lambda-wave": "Combining Haskell's garbage-collected runtime with sub-10ms hard real-time medical device constraints required strict allocation control. We eliminated GC pauses in the raw data ingestion path by implementing C++ lock-free ring buffers over FFI, while automated struct alignment tests verified zero memory padding mismatches across language boundaries."
 };
 
-const getRealityContent = (slug: string, originalContent: string) => {
+export const getRealityContent = (slug: string, originalContent: string) => {
   return REALITY_CONTENT[slug] || `Reality Check: ${originalContent} (Dynamic verification and performance testing in live staging revealed minor scaling limits under concurrent loads).`;
 };
 
@@ -252,6 +252,7 @@ interface CaseStudyBentoCardProps {
   study: BaseCaseStudy & { githubStats: GitHubStats | null };
   className?: string;
   preCalculatedHeight?: number;
+  preCalculatedRealityHeight?: number;
   preCalculatedParagraphsLines?: RichInlineLine[][];
   preCalculatedParagraphsItems?: ExtendedRichInlineItem[][];
   headingTag?: HeadingTag | string;
@@ -275,6 +276,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
   study, 
   className,
   preCalculatedHeight,
+  preCalculatedRealityHeight,
   headingTag,
 }) => {
   const { githubStats } = study;
@@ -284,6 +286,8 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
   const { heightOverrides, registerHeightOverride, clearHeightOverride, setTransitioning } = useBentoLayout();
   const [mode, setMode] = React.useState<"pitch" | "reality">("pitch");
 
+  const effectiveRealityHeight = preCalculatedRealityHeight || (study as unknown as { preCalculatedRealityHeight?: number }).preCalculatedRealityHeight;
+
   const handleToggleMode = (newMode: "pitch" | "reality") => {
     if (newMode === mode) return;
 
@@ -292,6 +296,8 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
 
     if (newMode === "pitch") {
       clearHeightOverride(study.id);
+    } else if (effectiveRealityHeight) {
+      registerHeightOverride(study.id, effectiveRealityHeight);
     }
 
     setTimeout(() => {
@@ -300,31 +306,6 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
   };
 
   const innerRef = React.useRef<HTMLDivElement>(null);
-
-  // ResizeObserver restricted strictly to the active transition/interactive state (Reality mode)
-  React.useLayoutEffect(() => {
-    if (mode !== "reality" || !innerRef.current) return;
-
-    const element = innerRef.current;
-    
-    const observer = new ResizeObserver(() => {
-      const cardEl = element.closest('div.isolate') as HTMLElement;
-      if (cardEl) {
-        const originalHeight = cardEl.style.height;
-        cardEl.style.height = 'auto'; // Disable fixed height to measure natural footprint
-        const actualHeight = cardEl.getBoundingClientRect().height;
-        cardEl.style.height = originalHeight; // Restore immediately
-        
-        registerHeightOverride(study.id, actualHeight);
-      }
-    });
-
-    observer.observe(element);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [mode, study.id, registerHeightOverride]);
 
   const cardHeightValue = heightOverrides[study.id] !== undefined 
     ? heightOverrides[study.id] 

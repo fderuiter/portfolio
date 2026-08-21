@@ -159,11 +159,53 @@ Original CSS Variable: --warning
 
 Original CSS Variable: --layout-card-padding
 
+#### layout.dockHeight
+
+> `readonly` **dockHeight**: `0` = `0`
+
+Original CSS Variable: --layout-dock-height
+
+#### layout.footerHeight
+
+> `readonly` **footerHeight**: `4` = `4`
+
+Original CSS Variable: --layout-footer-height
+
 #### layout.gap
 
 > `readonly` **gap**: `16` = `16`
 
 Original CSS Variable: --layout-gap
+
+#### layout.headerHeight
+
+> `readonly` **headerHeight**: `7` = `7`
+
+Original CSS Variable: --layout-header-height
+
+#### layout.studioBudget
+
+> `readonly` **studioBudget**: `"calc(100dvh - var(--layout-header-height))"` = `"calc(100dvh - var(--layout-header-height))"`
+
+Original CSS Variable: --layout-studio-budget
+
+#### layout.studioHeaderHeight
+
+> `readonly` **studioHeaderHeight**: `3.5` = `3.5`
+
+Original CSS Variable: --layout-studio-header-height
+
+#### layout.viewportBudget
+
+> `readonly` **viewportBudget**: `"calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px))"` = `"calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px))"`
+
+Original CSS Variable: --layout-viewport-budget
+
+#### layout.workspaceBudget
+
+> `readonly` **workspaceBudget**: `"calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px) - var(--layout-studio-header-height, 0px))"` = `"calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px) - var(--layout-studio-header-height, 0px))"`
+
+Original CSS Variable: --layout-workspace-budget
 
 ### masonry
 

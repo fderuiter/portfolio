@@ -85,6 +85,7 @@ const CaseStudyShowcaseInner: React.FC<CaseStudyShowcaseProps> = ({ caseStudies 
                     <CaseStudyBentoCard 
                       study={study} 
                       preCalculatedHeight={study.height}
+                      preCalculatedRealityHeight={study.preCalculatedRealityHeight}
                       preCalculatedParagraphsLines={study.paragraphsLines}
                       preCalculatedParagraphsItems={study.paragraphsItems}
                     />
