@@ -89,6 +89,38 @@ function validateDocMigrations(docPath, migrationsPath) {
   return documentedMigrations;
 }
 
+const REQUIRED_DOC_COMMANDS = [
+  { name: "schema drift verification ('npm run check:migrations:drift' or 'prisma migrate diff')", pattern: /check:migrations:drift|prisma migrate diff/i },
+  { name: "pipeline release gate execution ('npm run release:gate' or 'release-gate.ts')", pattern: /release:gate|release-gate\.ts/i },
+  { name: "destructive migration environment variable ('ALLOW_DESTRUCTIVE_MIGRATIONS')", pattern: /ALLOW_DESTRUCTIVE_MIGRATIONS/i },
+  { name: "unified migration check ('npm run check:migrations')", pattern: /check:migrations\b/i },
+];
+
+function validateDocCommands(docPath) {
+  if (!fs.existsSync(docPath)) {
+    throw new Error(`Migration documentation file not found at ${docPath}.`);
+  }
+  const docContent = fs.readFileSync(docPath, "utf8");
+  const missing = [];
+
+  for (const cmd of REQUIRED_DOC_COMMANDS) {
+    if (!cmd.pattern.test(docContent)) {
+      missing.push(cmd.name);
+    }
+  }
+
+  if (missing.length > 0) {
+    throw new Error(
+      `Documentation completeness check failed in ${path.basename(docPath)}:\n` +
+      `  Missing required operational command/variable documentation:\n` +
+      missing.map((m) => `    - ${m}`).join("\n") +
+      `\nPlease update ${path.basename(docPath)} to explicitly document all required database release and drift verification procedures.`,
+    );
+  }
+
+  return true;
+}
+
 function checkMigrationIntegrity(options = {}) {
   const rootDir = options.rootDir || path.resolve(__dirname, "..");
   const schemaFile = options.schemaPath || path.join(rootDir, "prisma/schema.prisma");
@@ -108,6 +140,7 @@ function checkMigrationIntegrity(options = {}) {
 
   const migrations = validateMigrationFiles(migrationsDir);
   const docMigrations = validateDocMigrations(docFile, migrationsDir);
+  validateDocCommands(docFile);
 
   console.log(
     `Migration integrity check passed: provider=${schemaProvider}, migrations=${migrations.length}, docMigrations=${docMigrations.length}.`,
@@ -129,5 +162,7 @@ module.exports = {
   getLockProvider,
   getSchemaProvider,
   validateDocMigrations,
+  validateDocCommands,
   validateMigrationFiles,
+  REQUIRED_DOC_COMMANDS,
 };

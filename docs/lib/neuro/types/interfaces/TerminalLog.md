@@ -36,6 +36,6 @@ Defined in: [lib/neuro/types.ts:428](https://github.com/fderuiter/portfolio/blob
 
 ### type
 
-> **type**: `"error"` \| `"command"` \| `"output"` \| `"success"` \| `"info"`
+> **type**: `"error"` \| `"info"` \| `"output"` \| `"success"` \| `"command"`
 
 Defined in: [lib/neuro/types.ts:426](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/types.ts#L426)

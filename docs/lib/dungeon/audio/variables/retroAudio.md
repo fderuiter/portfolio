@@ -8,4 +8,4 @@
 
 > `const` **retroAudio**: [`RetroAudioEngine`](../classes/RetroAudioEngine.md)
 
-Defined in: [lib/dungeon/audio.ts:199](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L199)
+Defined in: [lib/dungeon/audio.ts:177](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L177)

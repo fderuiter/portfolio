@@ -8,9 +8,9 @@
 
 > **scheduleIdleTask**(`task`, `timeout?`): () => `void`
 
-Defined in: [hooks/useTelemetry.ts:74](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L74)
+Defined in: [hooks/useTelemetry.ts:211](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L211)
 
-Schedule a task during browser idle periods with a fallback timeout mechanism.
+Schedules a task during browser idle periods with a fallback timeout.
 
 ## Parameters
 
@@ -18,13 +18,13 @@ Schedule a task during browser idle periods with a fallback timeout mechanism.
 
 () => `void`
 
-The callback task to execute during idle time.
+Callback task to execute.
 
 ### timeout?
 
 `number` = `2000`
 
-Maximum timeout delay before forcing task execution.
+Maximum timeout delay before forced execution.
 
 ## Returns
 

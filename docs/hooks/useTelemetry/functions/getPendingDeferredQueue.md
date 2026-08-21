@@ -8,12 +8,12 @@
 
 > **getPendingDeferredQueue**(): [`PendingDeferredTask`](../interfaces/PendingDeferredTask.md)[]
 
-Defined in: [hooks/useTelemetry.ts:93](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L93)
+Defined in: [hooks/useTelemetry.ts:229](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L229)
 
-Get array of currently pending deferred telemetry tasks.
+Gets currently pending deferred telemetry tasks.
 
 ## Returns
 
 [`PendingDeferredTask`](../interfaces/PendingDeferredTask.md)[]
 
-Array of pending deferred telemetry tasks.
+Array of pending deferred tasks.

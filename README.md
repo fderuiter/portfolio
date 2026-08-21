@@ -77,6 +77,10 @@ The core objective of this project is to create an interactive showcase that dyn
 
 The portfolio utilizes a "Design Engineering" approach, combining lightweight libraries like Aceternity UI and Magic UI with Framer Motion. For complete architectural documentation—including the App Router route tree (`app/work/laser-loon/page.tsx`), Python backend core utilities (`app/core/crypto.py`, `app/core/resilient_file_ops.py`, `app/core/analyzer_strategies.py`), and UI component hierarchy (`components/ui/CaseStudyBentoCard.tsx`)—refer to [**`ARCHITECTURE.md`**](ARCHITECTURE.md).
 
+## Deployment & Synthetic Monitoring
+
+Operational workflows for production releases—including Automated Canary Analysis (ACA) commands, service-level agreement (SLA) threshold gates, automated rollback webhooks, and step-by-step synthetic probe failure triage runbooks—are detailed in [**`DEPLOYMENT.md`**](DEPLOYMENT.md).
+
 ## Project Roadmap
 
 The full 5-phase development roadmap, milestone progress, and issue tracker are maintained in **[GitHub Issue #18 — Portfolio Hub V1 Architecture Master 5-Phase Development Plan](https://github.com/fderuiter/portfolio/issues/18)**.
@@ -137,12 +141,75 @@ Or follow manual setup steps:
    npx prisma db seed
    ```
 
-5. **Start the Development Server**
+5. **Verify Local Health & Architectural Invariants**
+   Immediately after environment setup and database initialization, run the local health diagnostic command to confirm local environment readiness and invariant health before writing code:
+   ```bash
+   # Run local architectural invariant diagnostic checks
+   npm run doctor
+
+   # Or execute the complete invariant verification suite
+   npm run verify
+   ```
+
+6. **Start the Development Server**
    Launch Next.js 16 with Turbopack and concurrent TypeScript watcher:
    ```bash
    npm run dev
    ```
    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+### API Documentation & Drift Verification Workflow
+
+When introducing or modifying public interfaces (`lib/`, `hooks/`, `types/`) or HTTP API routes (`app/api/`), contributors must ensure documentation and specifications remain synchronized to prevent pre-commit blocks and CI build failures:
+
+1. **Compile API Documentation**
+   After changing public functions, hooks, or types, manually recompile the TypeDoc reference documentation:
+   ```bash
+   npm run compile-docs
+   ```
+
+2. **Verify Local Documentation Drift**
+   Execute the local documentation drift check before committing changes:
+   ```bash
+   npm run check-docs-drift
+   ```
+
+3. **Resolve Drift & Stage Documentation**
+   If documentation drift is detected, run `npm run compile-docs` (or `npm run doctor:fix` to auto-remediate) and stage updated markdown files in `docs/` alongside code changes before committing:
+   ```bash
+   git add docs/ openapi.json
+   ```
+## Local Verification & Continuous Integration (CI) Mapping
+
+To prevent pull request build failures and maintain zero-drift quality standards, local verification commands map directly to automated continuous integration quality gates executed in GitHub Actions workflows (`.github/workflows/ci.yml` and `.github/workflows/synthetic-probes.yml`).
+
+Before submitting a pull request, run the relevant local quality commands or execute the full pre-submission quality gate:
+
+```bash
+# Complete pre-submission CI quality gate
+npm run quality
+```
+
+### CI Quality Gate Mapping
+
+| Local Quality Command | Continuous Integration Job / Step | Verification Scope & Purpose |
+| --- | --- | --- |
+| `npm run doctor` | `rigor-pipeline` / Diagnostic Check | Diagnostic audit of 23 architectural and testing invariants (routes, layout, WCAG a11y, hydration) |
+| `npm run doctor:fix` | Local Auto-remediation | Auto-remediates fixable architectural invariants and updates OpenAPI & TypeDoc contracts |
+| `npm run env:check` | `rigor-pipeline` / Environment Guard | Validates `.env.local` schema definitions against `lib/env.ts` and `.env.example` |
+| `npm run check` | `rigor-pipeline` / `Type Check & Lint` | Static TypeScript type checking (`tsc --noEmit`) and ESLint code hygiene |
+| `npm run lint:docs` | `rigor-pipeline` / `Lint Documentation` | Markdown formatting and structure linting via `markdownlint-cli` |
+| `npm run check-docs-drift` | `rigor-pipeline` / `Check Documentation Drift` | Verifies lockstep synchronization for TypeDoc API docs, OpenAPI schemas, and onboarding guides |
+| `npm run release:gate` | `rigor-pipeline` / `Execute Pipeline Release Gate` | Pre-deployment release gate validating security audits and migration integrity |
+| `npm run check:migrations:drift` | `rigor-pipeline` / `Check Schema Drift` | Verifies Prisma database schema against active migrations and checks for drift |
+| `npm test` / `npm run test:ci` | `rigor-pipeline` / `Run Logic Tests (Vitest)` | Comprehensive unit, logic, and state engine test execution with coverage tracking |
+| `npm run test:mutation` | `rigor-pipeline` / `Run Shift-Left Property Fuzz Testing Gate` | Fast-check property-based fuzz testing and generative invariant verification |
+| `npx playwright test` | `rigor-pipeline` / `Run Visual & Drift Detection` | Sub-pixel visual regression testing and Playwright-Axe WCAG accessibility scans |
+| `npm run analyze:bundle -- --strict` | `rigor-pipeline` / `Verify Bundle Performance Budgets` | Enforces JavaScript chunk size limits and initial shared bundle gzip budgets |
+| `npm run bench:pages -- --assert` | `rigor-pipeline` / `Run Real-Browser Sub-Route Web Vitals` | Real-browser Core Web Vitals (LCP <= 2500ms, TTFB <= 800ms, CLS <= 0.1) SLA assertions |
+| `npm run audit:security` | `security-gate` / `Execute Security Audit Gate` | Dependency security vulnerability auditing and policy compliance |
+| `npm run probe:synthetic` | `synthetic-probes.yml` / `Headless Synthetic Probe Matrix` | Playwright synthetic user probes verifying critical user journeys and API telemetry |
+| `npm run quality` | CI Pipeline Composite Pre-Flight Gate | Runs `check`, `lint:docs`, `check-docs-drift`, `bench:pages -- --assert`, and `verify` in sequence |
 
 ## Asset Generation & Design System Commands
 

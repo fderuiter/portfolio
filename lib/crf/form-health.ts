@@ -10,7 +10,7 @@ export interface FormHealthMetrics {
   missingCoreVariables: string[];
 }
 
-const CDASH_CORE_DOMAIN_VARIABLES: Record<string, string[]> = {
+export const CDASH_CORE_DOMAIN_VARIABLES: Record<string, string[]> = {
   DM: ["SEX", "AGE", "RACE"],
   VS: ["VSTESTCD", "VSORRES", "VSDTC"],
   AE: ["AETERM", "AESTDTC", "AESEV", "AESER", "AEREL"],

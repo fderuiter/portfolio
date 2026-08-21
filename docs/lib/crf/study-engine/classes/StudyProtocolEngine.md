@@ -272,7 +272,7 @@ Add Dynamic AST Edit Check / Calculation Rule to Form
 
 ###### querySeverity?
 
-`"error"` \| `"info"` \| `"warning"`
+`"error"` \| `"warning"` \| `"info"`
 
 ###### targetFieldIdOrVar
 
@@ -480,7 +480,7 @@ Multi-Format Regulatory Export Compilation
 
 ##### format
 
-`"json"` \| `"r"` \| `"yaml"` \| `"odm"` \| `"fhir"` \| `"sas"` \| `"usdm"`
+`"json"` \| `"yaml"` \| `"odm"` \| `"fhir"` \| `"sas"` \| `"r"` \| `"usdm"`
 
 #### Returns
 

@@ -14,6 +14,12 @@ Re-exports [AcrfHtmlOptions](export-acrf/interfaces/AcrfHtmlOptions.md)
 
 ***
 
+### ALL\_SLASH\_COMMANDS
+
+Re-exports [ALL_SLASH_COMMANDS](smart-blocks-engine/variables/ALL_SLASH_COMMANDS.md)
+
+***
+
 ### ansi
 
 Re-exports [ansi](cli-engine/variables/ansi.md)
@@ -29,6 +35,18 @@ Re-exports [AstCondition](types/interfaces/AstCondition.md)
 ### AstConditionSchema
 
 Re-exports [AstConditionSchema](universal-schema/variables/AstConditionSchema.md)
+
+***
+
+### ATOMIC\_SLASH\_COMMANDS
+
+Re-exports [ATOMIC_SLASH_COMMANDS](smart-blocks-engine/variables/ATOMIC_SLASH_COMMANDS.md)
+
+***
+
+### AuditDiagnostic
+
+Re-exports [AuditDiagnostic](study-auditor/interfaces/AuditDiagnostic.md)
 
 ***
 
@@ -134,6 +152,12 @@ Re-exports [calculateRecistSldChange](expression-evaluator/functions/calculateRe
 
 ***
 
+### CDASH\_CORE\_DOMAIN\_VARIABLES
+
+Re-exports [CDASH_CORE_DOMAIN_VARIABLES](form-health/variables/CDASH_CORE_DOMAIN_VARIABLES.md)
+
+***
+
 ### CDASH\_STANDARD\_VARIABLES
 
 Re-exports [CDASH_STANDARD_VARIABLES](cdash-domain-templates/variables/CDASH_STANDARD_VARIABLES.md)
@@ -182,6 +206,12 @@ Re-exports [CLINICAL_FORMULA_PRESETS](formula-presets/variables/CLINICAL_FORMULA
 
 ***
 
+### CLINICAL\_SMART\_BLOCKS
+
+Re-exports [CLINICAL_SMART_BLOCKS](smart-blocks-engine/variables/CLINICAL_SMART_BLOCKS.md)
+
+***
+
 ### ClinicalDataType
 
 Re-exports [ClinicalDataType](types/type-aliases/ClinicalDataType.md)
@@ -191,6 +221,12 @@ Re-exports [ClinicalDataType](types/type-aliases/ClinicalDataType.md)
 ### ClinicalFormulaPreset
 
 Re-exports [ClinicalFormulaPreset](formula-presets/interfaces/ClinicalFormulaPreset.md)
+
+***
+
+### ClinicalSmartBlockDefinition
+
+Re-exports [ClinicalSmartBlockDefinition](smart-blocks-engine/interfaces/ClinicalSmartBlockDefinition.md)
 
 ***
 
@@ -227,6 +263,12 @@ Re-exports [ComplianceSeverity](types/type-aliases/ComplianceSeverity.md)
 ### ComplianceViolation
 
 Re-exports [ComplianceViolation](types/interfaces/ComplianceViolation.md)
+
+***
+
+### computeFormHealthMetrics
+
+Re-exports [computeFormHealthMetrics](form-health/functions/computeFormHealthMetrics.md)
 
 ***
 
@@ -269,6 +311,18 @@ Re-exports [DeviceViewport](types/type-aliases/DeviceViewport.md)
 ### DiagnosticItem
 
 Re-exports [DiagnosticItem](form-linter/interfaces/DiagnosticItem.md)
+
+***
+
+### DiagnosticSeverity
+
+Re-exports [DiagnosticSeverity](study-auditor/type-aliases/DiagnosticSeverity.md)
+
+***
+
+### DiagnosticTier
+
+Re-exports [DiagnosticTier](study-auditor/type-aliases/DiagnosticTier.md)
 
 ***
 
@@ -524,6 +578,18 @@ Re-exports [formatPrecisionDate](precision-date/functions/formatPrecisionDate.md
 
 ***
 
+### FormAuditReport
+
+Re-exports [FormAuditReport](study-auditor/interfaces/FormAuditReport.md)
+
+***
+
+### FormHealthMetrics
+
+Re-exports [FormHealthMetrics](form-health/interfaces/FormHealthMetrics.md)
+
+***
+
 ### FormulaDiagnostic
 
 Re-exports [FormulaDiagnostic](formula-linter/interfaces/FormulaDiagnostic.md)
@@ -650,6 +716,18 @@ Re-exports [importStudyFromUsdm](usdm-adapter/functions/importStudyFromUsdm.md)
 
 ***
 
+### instantiateAtomicField
+
+Re-exports [instantiateAtomicField](smart-blocks-engine/functions/instantiateAtomicField.md)
+
+***
+
+### instantiateSmartBlock
+
+Re-exports [instantiateSmartBlock](smart-blocks-engine/functions/instantiateSmartBlock.md)
+
+***
+
 ### isCdiscNullFlavor
 
 Re-exports [isCdiscNullFlavor](precision-date/functions/isCdiscNullFlavor.md)
@@ -764,9 +842,27 @@ Re-exports [SdtmMappingRow](export-acrf/interfaces/SdtmMappingRow.md)
 
 ***
 
+### searchSlashCommands
+
+Re-exports [searchSlashCommands](smart-blocks-engine/functions/searchSlashCommands.md)
+
+***
+
 ### serializeStudyToOdmXml
 
 Re-exports [serializeStudyToOdmXml](odm-xml-serializer/variables/serializeStudyToOdmXml.md)
+
+***
+
+### SlashCommandCategory
+
+Re-exports [SlashCommandCategory](smart-blocks-engine/type-aliases/SlashCommandCategory.md)
+
+***
+
+### SlashCommandItem
+
+Re-exports [SlashCommandItem](smart-blocks-engine/interfaces/SlashCommandItem.md)
 
 ***
 
@@ -803,6 +899,18 @@ Re-exports [StudyArm](types/interfaces/StudyArm.md)
 ### StudyArmSchema
 
 Re-exports [StudyArmSchema](universal-schema/variables/StudyArmSchema.md)
+
+***
+
+### StudyAuditor
+
+Re-exports [StudyAuditor](study-auditor/classes/StudyAuditor.md)
+
+***
+
+### StudyAuditReport
+
+Re-exports [StudyAuditReport](study-auditor/interfaces/StudyAuditReport.md)
 
 ***
 

@@ -8,9 +8,9 @@
 
 > **playSyntheticTone**(`frequency`, `durationSeconds`, `type?`, `gainLevel?`): `void`
 
-Defined in: [lib/clinical-trial-chaos/sound-effects.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L27)
+Defined in: [lib/clinical-trial-chaos/sound-effects.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L17)
 
-Play a short custom synthetic beep/tone routed through AudioProvider governance.
+Play a short custom synthetic beep/tone routed through SoundEngine governance.
 
 ## Parameters
 

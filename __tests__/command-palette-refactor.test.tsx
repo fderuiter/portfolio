@@ -10,6 +10,7 @@ import { CommandPalette } from "@/components/CommandPalette";
 const mockPlayHover = vi.fn();
 const mockPlaySubmit = vi.fn();
 vi.mock("@/components/providers/AudioProvider", () => ({
+  registerAudioCleanup: vi.fn(),
   useAudio: () => ({
     playHover: mockPlayHover,
     playSubmit: mockPlaySubmit,
@@ -18,6 +19,7 @@ vi.mock("@/components/providers/AudioProvider", () => ({
     volume: 0.3,
     muted: false,
   }),
+  registerAudioCleanup: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({

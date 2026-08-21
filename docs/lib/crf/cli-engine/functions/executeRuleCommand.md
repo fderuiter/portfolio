@@ -20,7 +20,7 @@ Rule Command (Add / List)
 
 ### action
 
-`"list"` \| `"add"`
+`"add"` \| `"list"`
 
 ### args
 

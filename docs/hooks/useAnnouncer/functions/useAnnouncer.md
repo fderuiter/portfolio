@@ -8,7 +8,9 @@
 
 > **useAnnouncer**(): [`AnnouncerContextType`](../interfaces/AnnouncerContextType.md)
 
-Defined in: [components/providers/A11yProvider.tsx:186](https://github.com/fderuiter/portfolio/blob/main/components/providers/A11yProvider.tsx#L186)
+Defined in: [components/providers/A11yProvider.tsx:32](https://github.com/fderuiter/portfolio/blob/main/components/providers/A11yProvider.tsx#L32)
+
+Hook providing access to the screen reader LiveAnnouncer dispatcher.
 
 ## Returns
 

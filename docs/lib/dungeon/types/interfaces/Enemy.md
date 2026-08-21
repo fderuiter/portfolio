@@ -124,7 +124,7 @@ Defined in: [lib/dungeon/types.ts:117](https://github.com/fderuiter/portfolio/bl
 
 ### patrolDir
 
-> **patrolDir**: `"left"` \| `"right"` \| `"up"` \| `"down"`
+> **patrolDir**: `"up"` \| `"down"` \| `"left"` \| `"right"`
 
 Defined in: [lib/dungeon/types.ts:109](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/types.ts#L109)
 

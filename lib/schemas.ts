@@ -322,3 +322,58 @@ export const NewsletterResponseSchema = z.object({
 });
 
 export type NewsletterResponse = z.infer<typeof NewsletterResponseSchema>;
+
+/**
+ * Allowed Resend webhook lifecycle event types
+ */
+export const RESEND_EVENT_TYPES = [
+  "email.sent",
+  "email.delivered",
+  "email.delivery_delayed",
+  "email.complained",
+  "email.bounced",
+  "email.opened",
+  "email.clicked",
+] as const;
+
+export type ResendEventType = (typeof RESEND_EVENT_TYPES)[number];
+
+/**
+ * Schema for Resend Webhook POST payload validation
+ */
+export const ResendWebhookEventSchema = z.object({
+  type: z.enum(RESEND_EVENT_TYPES, {
+    message: "Invalid or unsupported Resend event type",
+  }),
+  created_at: z.string().optional(),
+  data: z
+    .object({
+      id: z.string().optional(),
+      from: z.string().optional(),
+      to: z.array(z.string()).optional(),
+      subject: z.string().optional(),
+      created_at: z.string().optional(),
+      status: z.string().optional(),
+      bounce: z
+        .object({
+          message: z.string().optional(),
+          type: z.string().optional(),
+        })
+        .optional(),
+    })
+    .passthrough(),
+});
+
+export type ResendWebhookEvent = z.infer<typeof ResendWebhookEventSchema>;
+
+/**
+ * Schema for Resend Webhook response
+ */
+export const ResendWebhookResponseSchema = z.object({
+  received: z.boolean(),
+  processedEvent: z.string().optional(),
+  suppressed: z.boolean().optional(),
+});
+
+export type ResendWebhookResponse = z.infer<typeof ResendWebhookResponseSchema>;
+

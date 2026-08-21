@@ -6,7 +6,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { SchemaFlowWorkspaceSkeleton } from "@/components/SchemaFlowWorkspaceSkeleton";
-import SchemaFlowWorkspaceWrapper from "@/components/SchemaFlowWorkspaceWrapper";
 import { RetroLabyrinthSkeleton } from "@/components/RetroLabyrinthSkeleton";
 import { RetroLabyrinth } from "@/components/RetroLabyrinth";
 

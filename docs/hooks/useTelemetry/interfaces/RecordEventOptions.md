@@ -6,7 +6,9 @@
 
 # Interface: RecordEventOptions
 
-Defined in: [hooks/useTelemetry.ts:37](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L37)
+Defined in: [hooks/useTelemetry.ts:49](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L49)
+
+Options for recording a telemetry event.
 
 ## Properties
 
@@ -14,4 +16,4 @@ Defined in: [hooks/useTelemetry.ts:37](https://github.com/fderuiter/portfolio/bl
 
 > `optional` **defer?**: `boolean`
 
-Defined in: [hooks/useTelemetry.ts:38](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L38)
+Defined in: [hooks/useTelemetry.ts:50](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L50)

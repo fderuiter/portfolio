@@ -8,15 +8,15 @@
 
 > **LiveAnnouncerProvider**(`__namedParameters`): `Element`
 
-Defined in: [components/providers/A11yProvider.tsx:194](https://github.com/fderuiter/portfolio/blob/main/components/providers/A11yProvider.tsx#L194)
+Defined in: [components/providers/A11yProvider.tsx:45](https://github.com/fderuiter/portfolio/blob/main/components/providers/A11yProvider.tsx#L45)
+
+Lightweight screen reader live region DOM renderer and context provider.
 
 ## Parameters
 
 ### \_\_namedParameters
 
-#### children
-
-`ReactNode`
+[`A11yProviderProps`](../interfaces/A11yProviderProps.md)
 
 ## Returns
 

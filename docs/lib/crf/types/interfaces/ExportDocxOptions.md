@@ -52,7 +52,7 @@ Defined in: [lib/crf/types.ts:209](https://github.com/fderuiter/portfolio/blob/m
 
 ### scope
 
-> **scope**: `"all"` \| `"single"` \| `"selected"`
+> **scope**: `"single"` \| `"all"` \| `"selected"`
 
 Defined in: [lib/crf/types.ts:210](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L210)
 

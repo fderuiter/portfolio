@@ -8,7 +8,7 @@
 
 > **printDoctorReport**(`summary`, `ciMode?`): `void`
 
-Defined in: [lib/dx/doctor.ts:1355](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1355)
+Defined in: [lib/dx/doctor.ts:1398](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1398)
 
 ## Parameters
 

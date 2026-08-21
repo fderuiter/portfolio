@@ -6,7 +6,7 @@
 
 # Class: TelemetryService
 
-Defined in: [lib/services/telemetry-service.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L69)
+Defined in: [lib/services/telemetry-service.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L73)
 
 ## Constructors
 
@@ -24,7 +24,7 @@ Defined in: [lib/services/telemetry-service.ts:69](https://github.com/fderuiter/
 
 > `static` **getAggregateStats**(): `Promise`\<`Record`\<`string`, \{ `clicks`: `number`; `views`: `number`; \}\>\>
 
-Defined in: [lib/services/telemetry-service.ts:160](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L160)
+Defined in: [lib/services/telemetry-service.ts:204](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L204)
 
 Fetches aggregate portfolio view/click telemetry statistics.
 
@@ -38,7 +38,7 @@ Fetches aggregate portfolio view/click telemetry statistics.
 
 > `static` **getQueueDepths**(): `Promise`\<\{ `bufferLength`: `number`; `processingLength`: `number`; \}\>
 
-Defined in: [lib/services/telemetry-service.ts:198](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L198)
+Defined in: [lib/services/telemetry-service.ts:242](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L242)
 
 Pre-flight inspection check that inspects queue depths for both the primary telemetry
 buffer queue and the recovery staging queue without modifying, locking, or clearing queued items.
@@ -53,7 +53,7 @@ buffer queue and the recovery staging queue without modifying, locking, or clear
 
 > `static` **isRateLimited**(`req`): `Promise`\<\{ `headers?`: `Record`\<`string`, `string`\>; `limited`: `boolean`; \}\>
 
-Defined in: [lib/services/telemetry-service.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L73)
+Defined in: [lib/services/telemetry-service.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L77)
 
 Evaluates rate limiting anonymously using Web Crypto SHA-256 IP hashing.
 
@@ -73,7 +73,7 @@ Evaluates rate limiting anonymously using Web Crypto SHA-256 IP hashing.
 
 > `static` **recordEvent**(`data`): `Promise`\<\{ `createdAt`: `Date`; `eventType`: `string`; `id`: `string`; `projectSlug`: `string`; \}\>
 
-Defined in: [lib/services/telemetry-service.ts:136](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L136)
+Defined in: [lib/services/telemetry-service.ts:180](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L180)
 
 Records a telemetry interaction event into the Redis buffer queue.
 
@@ -93,7 +93,7 @@ Records a telemetry interaction event into the Redis buffer queue.
 
 > `static` **syncBufferedEvents**(`batchSize`): `Promise`\<\{ `inserted`: `number`; `processed`: `number`; \}\>
 
-Defined in: [lib/services/telemetry-service.ts:228](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L228)
+Defined in: [lib/services/telemetry-service.ts:272](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L272)
 
 Synchronizes buffered telemetry events from Redis into PostgreSQL.
 Runs a pre-flight queue depth check on both 'telemetry_buffer' and 'telemetry_processing'

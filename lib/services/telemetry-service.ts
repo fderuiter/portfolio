@@ -33,6 +33,8 @@ let inactiveGeneration = new Map<string, LocalCacheEntry>();
 let lastSwapTime = Date.now();
 
 const SWAP_INTERVAL_MS = 5000;
+const CIRCUIT_BREAKER_COOLDOWN_MS = 30000;
+let circuitBreakerCooldownUntil = 0;
 
 function swapGenerations() {
   const temp = inactiveGeneration;
@@ -58,11 +60,13 @@ function checkAndSwapPassive() {
 export const _testCache = {
   get active() { return activeGeneration; },
   get inactive() { return inactiveGeneration; },
+  get circuitBreakerCooldownUntil() { return circuitBreakerCooldownUntil; },
   swap() { swapGenerations(); },
   reset() {
     activeGeneration.clear();
     inactiveGeneration.clear();
     lastSwapTime = Date.now();
+    circuitBreakerCooldownUntil = 0;
   }
 };
 
@@ -77,9 +81,36 @@ export class TelemetryService {
     const ipHash = await generateClientConnectionHash(ip);
     const now = Date.now();
 
+    const isCircuitActive = now < circuitBreakerCooldownUntil;
+
+    const buildLocalHeaders = (entry: LocalCacheEntry) => ({
+      "X-RateLimit-Limit": String(MAX_REQUESTS_PER_WINDOW),
+      "X-RateLimit-Remaining": String(Math.max(0, MAX_REQUESTS_PER_WINDOW - entry.count)),
+      "X-RateLimit-Reset": String(Math.ceil(entry.expiresAt / 1000)),
+    });
+
     let cached = activeGeneration.get(ipHash);
     if (!cached) {
       cached = inactiveGeneration.get(ipHash);
+    }
+
+    if (isCircuitActive) {
+      if (cached && now < cached.expiresAt) {
+        cached.count += 1;
+        cached.expiresAt = Math.max(cached.expiresAt, circuitBreakerCooldownUntil);
+      } else {
+        cached = {
+          count: 1,
+          expiresAt: Math.max(circuitBreakerCooldownUntil, now + 5000),
+        };
+        activeGeneration.set(ipHash, cached);
+      }
+
+      const isLimited = cached.count > MAX_REQUESTS_PER_WINDOW;
+      return {
+        limited: isLimited,
+        headers: buildLocalHeaders(cached),
+      };
     }
 
     if (cached && now < cached.expiresAt) {
@@ -87,11 +118,7 @@ export class TelemetryService {
         cached.count += 1;
         return {
           limited: false,
-          headers: {
-            "X-RateLimit-Limit": String(MAX_REQUESTS_PER_WINDOW),
-            "X-RateLimit-Remaining": String(MAX_REQUESTS_PER_WINDOW - cached.count),
-            "X-RateLimit-Reset": String(Math.ceil(cached.expiresAt / 1000)),
-          },
+          headers: buildLocalHeaders(cached),
         };
       }
     }
@@ -116,8 +143,25 @@ export class TelemetryService {
         return { limited: true, headers };
       }
     } catch (err) {
-      console.error("Rate limiting check failed, failing open:", err);
-      return { limited: false };
+      console.error("Upstream rate limiting check failed, activating 30s circuit breaker fallback:", err);
+      circuitBreakerCooldownUntil = now + CIRCUIT_BREAKER_COOLDOWN_MS;
+
+      if (cached && now < cached.expiresAt) {
+        cached.count += 1;
+        cached.expiresAt = Math.max(cached.expiresAt, circuitBreakerCooldownUntil);
+      } else {
+        cached = {
+          count: 1,
+          expiresAt: circuitBreakerCooldownUntil,
+        };
+        activeGeneration.set(ipHash, cached);
+      }
+
+      const isLimited = cached.count > MAX_REQUESTS_PER_WINDOW;
+      return {
+        limited: isLimited,
+        headers: buildLocalHeaders(cached),
+      };
     } finally {
       // Memory sweeping check when capacity is reached
       if (activeGeneration.size > 5000) {
