@@ -8,4 +8,4 @@
 
 > **PowerUpInventory** = `Record`\<[`PowerUpType`](PowerUpType.md), [`PowerUpState`](../interfaces/PowerUpState.md)\>
 
-Defined in: [lib/clinical-trial-chaos/types.ts:142](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L142)
+Defined in: [lib/clinical-trial-chaos/types.ts:147](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L147)

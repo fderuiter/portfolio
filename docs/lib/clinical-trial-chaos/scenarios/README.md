@@ -21,4 +21,5 @@
 ## Functions
 
 - [generateClinicalSubject](functions/generateClinicalSubject.md)
+- [generateClinicalSubjectFromProtocol](functions/generateClinicalSubjectFromProtocol.md)
 - [getStationsForPhase](functions/getStationsForPhase.md)

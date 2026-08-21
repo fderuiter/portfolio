@@ -6,7 +6,7 @@
 
 # Interface: BIMOFinding
 
-Defined in: [lib/clinical-trial-chaos/types.ts:161](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L161)
+Defined in: [lib/clinical-trial-chaos/types.ts:166](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L166)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:161](https://github.com/fderuiter
 
 > **category**: `"21 CFR Part 11"` \| `"Data Integrity"` \| `"Protocol Compliance"` \| `"Adverse Event Reporting"`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:163](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L163)
+Defined in: [lib/clinical-trial-chaos/types.ts:168](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L168)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:163](https://github.com/fderuiter
 
 > **description**: `string`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:165](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L165)
+Defined in: [lib/clinical-trial-chaos/types.ts:170](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L170)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:165](https://github.com/fderuiter
 
 > **id**: `string`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:162](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L162)
+Defined in: [lib/clinical-trial-chaos/types.ts:167](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L167)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:162](https://github.com/fderuiter
 
 > **regulation**: `string`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:166](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L166)
+Defined in: [lib/clinical-trial-chaos/types.ts:171](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L171)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [lib/clinical-trial-chaos/types.ts:166](https://github.com/fderuiter
 
 > **severity**: `"Critical"` \| `"Major"` \| `"Minor"`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:164](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L164)
+Defined in: [lib/clinical-trial-chaos/types.ts:169](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L169)
