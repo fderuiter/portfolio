@@ -18,11 +18,35 @@ Defined in: [lib/seo-metadata.ts:6](https://github.com/fderuiter/portfolio/blob/
 
 ***
 
+### inLanguage?
+
+> `optional` **inLanguage?**: `string`
+
+Defined in: [lib/seo-metadata.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/seo-metadata.ts#L10)
+
+***
+
+### isAccessibleForFree?
+
+> `optional` **isAccessibleForFree?**: `boolean`
+
+Defined in: [lib/seo-metadata.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/seo-metadata.ts#L12)
+
+***
+
 ### keywords?
 
 > `optional` **keywords?**: `string`[]
 
 Defined in: [lib/seo-metadata.ts:8](https://github.com/fderuiter/portfolio/blob/main/lib/seo-metadata.ts#L8)
+
+***
+
+### locale?
+
+> `optional` **locale?**: `string`
+
+Defined in: [lib/seo-metadata.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/seo-metadata.ts#L11)
 
 ***
 

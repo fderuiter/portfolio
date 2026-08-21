@@ -10,6 +10,7 @@ import { CommandPalette } from "@/components/CommandPalette";
 const mockPlayHover = vi.fn();
 const mockPlaySubmit = vi.fn();
 vi.mock("@/components/providers/AudioProvider", () => ({
+  registerAudioCleanup: vi.fn(() => vi.fn()),
   useAudio: () => ({
     playHover: mockPlayHover,
     playSubmit: mockPlaySubmit,

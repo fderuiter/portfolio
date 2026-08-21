@@ -25,6 +25,7 @@ globalThis.ResizeObserver = MockResizeObserver as any;
 
 // Mock required providers
 vi.mock("@/components/providers/AudioProvider", () => ({
+  registerAudioCleanup: vi.fn(() => vi.fn()),
   useAudio: () => ({
     playHover: vi.fn(),
     playClick: vi.fn(),

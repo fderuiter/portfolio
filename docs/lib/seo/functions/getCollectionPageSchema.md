@@ -6,9 +6,9 @@
 
 # Function: getCollectionPageSchema()
 
-> **getCollectionPageSchema**(`name`, `description`, `url`, `items`): `string`
+> **getCollectionPageSchema**(`name`, `description`, `url`, `items`, `options?`): `string`
 
-Defined in: [lib/seo.ts:279](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L279)
+Defined in: [lib/seo.ts:366](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L366)
 
 Returns a Schema.org CollectionPage schema for hub and directory views.
 
@@ -29,6 +29,16 @@ Returns a Schema.org CollectionPage schema for hub and directory views.
 ### items
 
 [`CollectionItem`](../interfaces/CollectionItem.md)[]
+
+### options?
+
+#### inLanguage?
+
+`string`
+
+#### isAccessibleForFree?
+
+`boolean`
 
 ## Returns
 
