@@ -62,3 +62,13 @@ model CaseStudyReaction {
   @@index([caseStudySlug, reactionType])
   @@index([connectionHash])
 }
+
+model SuppressionList {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  reason    String   // "BOUNCE" | "COMPLAINT" | "UNSUBSCRIBE"
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+

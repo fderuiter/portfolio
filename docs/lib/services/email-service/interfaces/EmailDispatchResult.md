@@ -6,7 +6,7 @@
 
 # Interface: EmailDispatchResult
 
-Defined in: [lib/services/email-service.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L23)
+Defined in: [lib/services/email-service.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L25)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/services/email-service.ts:23](https://github.com/fderuiter/port
 
 > `optional` **data?**: `object`
 
-Defined in: [lib/services/email-service.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L25)
+Defined in: [lib/services/email-service.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L27)
 
 #### id
 
@@ -26,7 +26,7 @@ Defined in: [lib/services/email-service.ts:25](https://github.com/fderuiter/port
 
 > `optional` **error?**: `string`
 
-Defined in: [lib/services/email-service.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L26)
+Defined in: [lib/services/email-service.ts:28](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L28)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [lib/services/email-service.ts:26](https://github.com/fderuiter/port
 
 > `optional` **simulated?**: `boolean`
 
-Defined in: [lib/services/email-service.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L27)
+Defined in: [lib/services/email-service.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L29)
 
 ***
 
@@ -42,4 +42,4 @@ Defined in: [lib/services/email-service.ts:27](https://github.com/fderuiter/port
 
 > **success**: `boolean`
 
-Defined in: [lib/services/email-service.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L24)
+Defined in: [lib/services/email-service.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L26)

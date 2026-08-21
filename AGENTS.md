@@ -153,3 +153,17 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - **Functional Semantic Status Accents**: Status indicators, telemetry badges, and interactive feedback must use crisp semantic tokens (Precision Amber `#f59e0b`, Emerald `#10b981`, Steel `#94a3b8`) rather than decorative gradients.
 - **Swiss Editorial Typography & Layout**: High-impact headlines must utilize negative tracking (`-0.035em`) paired with zero-CLS Pretext calculations, and technical metadata must utilize tabular monospace (`var(--font-geist-mono)`).
 - **Interactive Telemetry Over Static Cards**: Major showcases must provide interactive micro-simulations (AST premise discharging, CDISC 21 CFR Part 11 auditing, embedded memory heap meters) with direct contextual handoffs to full studio workspaces (`/proof`, `/crf`, `/simulator`).
+
+## Agent skills
+
+### Issue tracker
+
+GitHub issues managed via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Five canonical triage roles matching standard label names (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context repository using `CONTEXT.md` and `adr/` at root. See `docs/agents/domain.md`.

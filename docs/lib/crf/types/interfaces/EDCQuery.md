@@ -100,7 +100,7 @@ Defined in: [lib/crf/types.ts:271](https://github.com/fderuiter/portfolio/blob/m
 
 ### severity
 
-> **severity**: `"error"` \| `"info"` \| `"warning"`
+> **severity**: `"error"` \| `"warning"` \| `"info"`
 
 Defined in: [lib/crf/types.ts:276](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L276)
 

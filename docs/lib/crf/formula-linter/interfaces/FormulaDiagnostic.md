@@ -36,7 +36,7 @@ Defined in: [lib/crf/formula-linter.ts:17](https://github.com/fderuiter/portfoli
 
 ### severity
 
-> **severity**: `"error"` \| `"info"` \| `"warning"`
+> **severity**: `"error"` \| `"warning"` \| `"info"`
 
 Defined in: [lib/crf/formula-linter.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/crf/formula-linter.ts#L16)
 

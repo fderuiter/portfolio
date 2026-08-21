@@ -1,7 +1,9 @@
 import { Resend } from "resend";
+import crypto from "crypto";
 import * as Sentry from "@sentry/nextjs";
-import { env } from "@/lib/env";
-import { ContactSubmission } from "@/lib/schemas";
+import { env, getEnv } from "@/lib/env";
+import { prisma } from "@/lib/db";
+import { ContactSubmission, ResendWebhookEvent } from "@/lib/schemas";
 import {
   renderContactAdminEmail,
   renderContactConfirmationEmail,
@@ -33,6 +35,14 @@ export interface ContactDispatchResult {
   confirmationResult?: EmailDispatchResult;
 }
 
+export interface SvixVerifyParams {
+  payload: string;
+  svixId?: string | null;
+  svixTimestamp?: string | null;
+  svixSignature?: string | null;
+  secret?: string;
+}
+
 /**
  * Singleton holder for the Resend client instance.
  */
@@ -47,9 +57,64 @@ function getResendClient(): Resend | null {
 }
 
 /**
- * Deep module encapsulating all outbound transactional email workflows.
- * Provides resilient hybrid fallback with simulation mode during development,
- * CI testing, or when Resend API credentials are not provisioned.
+ * Verifies Svix cryptographic signature for incoming Resend deliverability webhooks.
+ */
+export function verifySvixSignature({
+  payload,
+  svixId,
+  svixTimestamp,
+  svixSignature,
+  secret,
+}: SvixVerifyParams): boolean {
+  if (!svixId || !svixTimestamp || !svixSignature) {
+    return false;
+  }
+
+  const effectiveSecret = secret || getEnv().RESEND_WEBHOOK_SECRET;
+  if (!effectiveSecret || effectiveSecret.trim() === "") {
+    return false;
+  }
+
+  // Prevent timestamp replay attacks (> 5 minutes tolerance)
+  const timestampNum = parseInt(svixTimestamp, 10);
+  const nowSec = Math.floor(Date.now() / 1000);
+  if (isNaN(timestampNum) || Math.abs(nowSec - timestampNum) > 300) {
+    return false;
+  }
+
+  try {
+    const rawSecret = effectiveSecret.startsWith("whsec_")
+      ? effectiveSecret.substring(6)
+      : effectiveSecret;
+    const secretBuffer = Buffer.from(rawSecret, "base64");
+
+    const toSign = `${svixId}.${svixTimestamp}.${payload}`;
+    const expectedHmac = crypto.createHmac("sha256", secretBuffer).update(toSign).digest("base64");
+
+    const signatures = svixSignature.split(" ");
+    for (const versionedSig of signatures) {
+      const [version, sig] = versionedSig.split(",");
+      if (version === "v1" && sig) {
+        const sigBuffer = Buffer.from(sig, "base64");
+        const expectedBuffer = Buffer.from(expectedHmac, "base64");
+        if (
+          sigBuffer.length === expectedBuffer.length &&
+          crypto.timingSafeEqual(sigBuffer, expectedBuffer)
+        ) {
+          return true;
+        }
+      }
+    }
+    return false;
+  } catch (err) {
+    console.error("Failed to verify Svix signature:", err);
+    return false;
+  }
+}
+
+/**
+ * Deep module encapsulating all outbound transactional email workflows,
+ * bounce/complaint suppression list defenses, and webhook ingestion.
  */
 export class EmailService {
   /**
@@ -60,9 +125,88 @@ export class EmailService {
   }
 
   /**
+   * Checks if an email address is in the suppression list (bounced, complained, unsubscribed).
+   */
+  static async isSuppressed(
+    email: string
+  ): Promise<{ suppressed: boolean; reason?: string }> {
+    try {
+      const record = await prisma.suppressionList.findUnique({
+        where: { email: email.toLowerCase().trim() },
+      });
+      if (record) {
+        return { suppressed: true, reason: record.reason };
+      }
+      return { suppressed: false };
+    } catch {
+      // If database is offline or unseeded in tests, defensively fail open
+      return { suppressed: false };
+    }
+  }
+
+  /**
+   * Records an email address in the suppression list.
+   */
+  static async recordSuppression(
+    email: string,
+    reason: "BOUNCE" | "COMPLAINT" | "UNSUBSCRIBE"
+  ): Promise<void> {
+    try {
+      await prisma.suppressionList.upsert({
+        where: { email: email.toLowerCase().trim() },
+        create: { email: email.toLowerCase().trim(), reason },
+        update: { reason },
+      });
+    } catch (err) {
+      console.error(`Failed to record suppression for ${email}:`, err);
+    }
+  }
+
+  /**
+   * Processes incoming Resend deliverability webhook event.
+   */
+  static async handleWebhookEvent(
+    event: ResendWebhookEvent
+  ): Promise<{ handled: boolean; suppressed?: boolean; reason?: string }> {
+    try {
+      if (event.type === "email.bounced" || event.type === "email.complained") {
+        const reason = event.type === "email.bounced" ? "BOUNCE" : "COMPLAINT";
+        const recipients = event.data.to || [];
+
+        for (const recipient of recipients) {
+          if (recipient && typeof recipient === "string") {
+            await this.recordSuppression(recipient, reason);
+          }
+        }
+
+        return { handled: true, suppressed: true, reason };
+      }
+
+      return { handled: true, suppressed: false };
+    } catch (err) {
+      Sentry.captureException(err);
+      console.error("Error processing Resend webhook event:", err);
+      return { handled: false };
+    }
+  }
+
+  /**
    * Core dispatcher that transmits an email via Resend SDK or executes simulated delivery.
    */
   static async sendRawEmail(options: RawEmailOptions): Promise<EmailDispatchResult> {
+    const recipients = Array.isArray(options.to) ? options.to : [options.to];
+
+    // Pre-check suppression list before transmitting
+    for (const recipient of recipients) {
+      const check = await this.isSuppressed(recipient);
+      if (check.suppressed) {
+        return {
+          success: false,
+          error: `Recipient address ${recipient} is suppressed due to previous ${check.reason || "rejection"}.`,
+        };
+      }
+    }
+
     const client = getResendClient();
     const fromAddress = options.from || env.RESEND_FROM_EMAIL || "Frederick de Ruiter <onboarding@resend.dev>";
 
@@ -236,4 +380,3 @@ export class EmailService {
     return welcomeResult;
   }
 }
-

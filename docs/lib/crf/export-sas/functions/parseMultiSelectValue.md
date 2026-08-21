@@ -6,7 +6,7 @@
 
 # Function: parseMultiSelectValue()
 
-> **parseMultiSelectValue**(`edcValue`, `optionCode`): `"N"` \| `"Y"`
+> **parseMultiSelectValue**(`edcValue`, `optionCode`): `"Y"` \| `"N"`
 
 Defined in: [lib/crf/export-sas.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-sas.ts#L75)
 
@@ -26,4 +26,4 @@ Returns 'Y' if selected, 'N' if absent/unselected.
 
 ## Returns
 
-`"N"` \| `"Y"`
+`"Y"` \| `"N"`

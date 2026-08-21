@@ -16,7 +16,7 @@ import {
 } from "@/lib/crf/types";
 import { getPresetByIdSync, getOncologyPresetSync } from "@/lib/crf/presets/loader";
 import { StudioHeader } from "./StudioHeader";
-import { FormsNavigator } from "./LeftSidebar/FormsNavigator";
+import { StudySpine, LeftSidebarTab } from "./LeftSidebar/StudySpine";
 import { WidgetPalette } from "./LeftSidebar/WidgetPalette";
 import { CdashScaffolderModal } from "./LeftSidebar/CdashScaffolderModal";
 import { FormCanvas } from "./CenterCanvas/FormCanvas";
@@ -206,12 +206,27 @@ export const CRFStudioContainer: React.FC = () => {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isSpotlightTourOpen, setIsSpotlightTourOpen] = useState(false);
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
-  const [leftTab, setLeftTabState] = useState<"forms" | "palette">(() => {
+  const [activeVisitId, setActiveVisitIdState] = useState<string>(() => {
     if (typeof window !== "undefined") {
-      const rawTab = new URLSearchParams(window.location.hash.slice(1)).get("tab");
-      if (rawTab === "forms" || rawTab === "palette") return rawTab;
+      const rawVisit = new URLSearchParams(window.location.hash.slice(1)).get("visit");
+      if (rawVisit) return rawVisit;
     }
-    return "forms";
+    return "";
+  });
+
+  useEffect(() => {
+    if (study && !activeVisitId && study.visits[0]) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setActiveVisitIdState(study.visits[0].id);
+    }
+  }, [study, activeVisitId]);
+
+  const [leftTab, setLeftTabState] = useState<LeftSidebarTab>(() => {
+    if (typeof window !== "undefined") {
+      const rawTab = new URLSearchParams(window.location.hash.slice(1)).get("tab") as LeftSidebarTab | null;
+      if (rawTab && ["spine", "forms", "palette"].includes(rawTab)) return rawTab;
+    }
+    return "spine";
   });
 
   // Synchronize incoming hash state on mount or browser Back/Forward navigation
@@ -233,14 +248,22 @@ export const CRFStudioContainer: React.FC = () => {
       setActiveFormIdState(targetForm);
     }
 
+    const rawVisit = params.visit as string | undefined;
+    if (rawVisit && study?.visits.some((v) => v.id === rawVisit)) {
+      if (rawVisit !== activeVisitId) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setActiveVisitIdState(rawVisit);
+      }
+    }
+
     const targetField = params.field || null;
     if (targetField !== selectedFieldId) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedFieldIdState(targetField);
     }
 
-    const targetTab = params.tab === "palette" ? "palette" : "forms";
-    if (targetTab !== leftTab) {
+    const targetTab = (params.tab as LeftSidebarTab | undefined) || "spine";
+    if (["spine", "forms", "palette"].includes(targetTab) && targetTab !== leftTab) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLeftTabState(targetTab);
     }
@@ -255,7 +278,7 @@ export const CRFStudioContainer: React.FC = () => {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setTheme("dark");
     }
-  }, [params, study?.forms, activeMode, activeFormId, selectedFieldId, leftTab, theme]);
+  }, [params, study?.forms, study?.visits, activeMode, activeFormId, activeVisitId, selectedFieldId, leftTab, theme]);
 
   // Synchronized Setters with Hybrid Navigation
   const setActiveMode = useCallback(
@@ -266,10 +289,11 @@ export const CRFStudioContainer: React.FC = () => {
     [setParam]
   );
 
+  const defaultFormId = study?.forms?.[0]?.id;
   const setActiveFormId = useCallback(
     (formId: string) => {
       setActiveFormIdState(formId);
-      const isDefault = formId === study?.forms?.[0]?.id;
+      const isDefault = formId === defaultFormId;
       setParams(
         {
           form: isDefault ? null : formId,
@@ -278,7 +302,15 @@ export const CRFStudioContainer: React.FC = () => {
         { replace: true }
       );
     },
-    [setParams, study?.forms]
+    [setParams, defaultFormId]
+  );
+
+  const setActiveVisitId = useCallback(
+    (visitId: string) => {
+      setActiveVisitIdState(visitId);
+      setParam("visit", visitId, { replace: true });
+    },
+    [setParam]
   );
 
   const setSelectedFieldId = useCallback(
@@ -290,9 +322,9 @@ export const CRFStudioContainer: React.FC = () => {
   );
 
   const setLeftTab = useCallback(
-    (tab: "forms" | "palette") => {
+    (tab: LeftSidebarTab) => {
       setLeftTabState(tab);
-      setParam("tab", tab === "forms" ? null : tab, { replace: true });
+      setParam("tab", tab === "spine" ? null : tab, { replace: true });
     },
     [setParam]
   );
@@ -460,10 +492,6 @@ export const CRFStudioContainer: React.FC = () => {
   const allFields = activeForm ? activeForm.sections.flatMap((s) => s.fields) : [];
   const selectedField = allFields.find((f) => f.id === selectedFieldId) || null;
 
-  if (!study || !study.forms) {
-    return <CRFStudioSkeleton />;
-  }
-
   // Select Field on Mobile automatically slides in Inspector or updates tab
   const handleSelectField = (fieldId: string | null) => {
     setSelectedFieldId(fieldId);
@@ -538,15 +566,87 @@ export const CRFStudioContainer: React.FC = () => {
     setSelectedFieldId(null);
   };
 
-  const handleInjectCdashForm = (newForm: CRFForm) => {
-    updateStudyWithHistory({
-      ...study,
-      forms: [...study.forms, newForm],
-    });
-    setActiveFormId(newForm.id);
-    setSelectedFieldId(null);
-    setMobileActiveView("canvas");
-  };
+  const handleAssignFormToVisit = useCallback(
+    (visitId: string, formId: string) => {
+      const updatedVisits = study.visits.map((v) => {
+        if (v.id !== visitId) return v;
+        if (v.assignedFormIds.includes(formId)) return v;
+        return {
+          ...v,
+          assignedFormIds: [...v.assignedFormIds, formId],
+        };
+      });
+      updateStudyWithHistory({ ...study, visits: updatedVisits });
+    },
+    [study, updateStudyWithHistory]
+  );
+
+  const handleUnassignFormFromVisit = useCallback(
+    (visitId: string, formId: string) => {
+      const updatedVisits = study.visits.map((v) => {
+        if (v.id !== visitId) return v;
+        return {
+          ...v,
+          assignedFormIds: v.assignedFormIds.filter((id) => id !== formId),
+        };
+      });
+      updateStudyWithHistory({ ...study, visits: updatedVisits });
+    },
+    [study, updateStudyWithHistory]
+  );
+
+  const handleAddVisit = useCallback(() => {
+    const nextIdx = study.visits.length + 1;
+    const newVisit: StudyVisit = {
+      id: `v_visit_${Date.now()}`,
+      oid: `SE.VISIT_${nextIdx}`,
+      name: `Visit ${nextIdx} (Day ${(nextIdx - 1) * 28})`,
+      visitType: "Scheduled",
+      targetDay: (nextIdx - 1) * 28,
+      windowBefore: 3,
+      windowAfter: 3,
+      assignedFormIds: study.forms.filter((f) => !f.isLogForm).map((f) => f.id),
+    };
+    updateStudyWithHistory({ ...study, visits: [...study.visits, newVisit] });
+    setActiveVisitId(newVisit.id);
+  }, [study, updateStudyWithHistory, setActiveVisitId]);
+
+  const handleDeleteVisit = useCallback(
+    (visitId: string) => {
+      if (study.visits.length <= 1) return;
+      const filtered = study.visits.filter((v) => v.id !== visitId);
+      updateStudyWithHistory({ ...study, visits: filtered });
+      if (activeVisitId === visitId) {
+        setActiveVisitId(filtered[0]?.id || "");
+      }
+    },
+    [study, activeVisitId, updateStudyWithHistory, setActiveVisitId]
+  );
+
+  const handleInjectCdashForm = useCallback(
+    (newForm: CRFForm, targetVisitId?: string) => {
+      const nextVisits = targetVisitId
+        ? study.visits.map((v) =>
+            v.id === targetVisitId
+              ? {
+                  ...v,
+                  assignedFormIds: Array.from(new Set([...v.assignedFormIds, newForm.id])),
+                }
+              : v
+          )
+        : study.visits;
+
+      updateStudyWithHistory({
+        ...study,
+        forms: [...study.forms, newForm],
+        visits: nextVisits,
+      });
+      setActiveFormId(newForm.id);
+      setSelectedFieldId(null);
+      setMobileActiveView("canvas");
+    },
+    [study, updateStudyWithHistory, setActiveFormId, setSelectedFieldId]
+  );
 
   const handleUpdateFormMeta = (updates: Partial<CRFForm>) => {
     if (!activeForm) return;
@@ -657,6 +757,10 @@ export const CRFStudioContainer: React.FC = () => {
     });
   };
 
+  if (!study || !study.forms) {
+    return <CRFStudioSkeleton />;
+  }
+
   const activeBranding = getStudyBranding(study);
 
   return (
@@ -716,70 +820,63 @@ export const CRFStudioContainer: React.FC = () => {
       <div className="flex-1 flex overflow-hidden relative">
         {activeMode === "designer" && activeForm && (
           <>
-            {/* Desktop / Tablet Left Sidebar: Forms Navigator & Widget Palette */}
+            {/* Desktop / Tablet Left Sidebar: Study Spine, Forms & Global Library */}
             {isLeftSidebarOpen && (
               <aside className="hidden md:flex w-64 lg:w-72 bg-zinc-950 border-r border-zinc-850 flex-col shrink-0 transition-all">
-                {/* Left Sub-Tabs */}
-                <div className="flex border-b border-zinc-850 bg-zinc-900/40">
-                  <button
-                    onClick={() => setLeftTab("forms")}
-                    className={`flex-1 py-2 text-xs font-mono transition-colors border-b-2 ${
-                      leftTab === "forms"
-                        ? "border-brand-cyan text-brand-cyan font-bold bg-zinc-900/60"
-                        : "border-transparent text-zinc-400 hover:text-zinc-200"
-                    }`}
-                  >
-                    Forms ({study.forms.length})
-                  </button>
-                  <button
-                    onClick={() => setLeftTab("palette")}
-                    className={`flex-1 py-2 text-xs font-mono transition-colors border-b-2 ${
-                      leftTab === "palette"
-                        ? "border-brand-cyan text-brand-cyan font-bold bg-zinc-900/60"
-                        : "border-transparent text-zinc-400 hover:text-zinc-200"
-                    }`}
-                  >
-                    Palette
-                  </button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-3">
-                  {leftTab === "forms" ? (
-                    <FormsNavigator
-                      forms={study.forms}
-                      activeFormId={activeForm.id}
-                      onSelectForm={(id) => {
-                        setActiveFormId(id);
-                        setSelectedFieldId(null);
-                      }}
-                      onAddForm={handleAddForm}
-                      onDuplicateForm={handleDuplicateForm}
-                      onDeleteForm={handleDeleteForm}
-                      onOpenCdashScaffolder={() => setIsScaffolderOpen(true)}
-                    />
-                  ) : (
-                    <WidgetPalette onAddField={handleAddField} />
-                  )}
-                </div>
+                <StudySpine
+                  study={study}
+                  activeVisitId={activeVisitId}
+                  activeFormId={activeForm.id}
+                  activeTab={leftTab}
+                  onChangeTab={setLeftTab}
+                  onSelectVisit={(id) => setActiveVisitId(id)}
+                  onSelectForm={(id) => {
+                    setActiveFormId(id);
+                    setSelectedFieldId(null);
+                  }}
+                  onAddVisit={handleAddVisit}
+                  onDeleteVisit={handleDeleteVisit}
+                  onAddForm={handleAddForm}
+                  onDuplicateForm={handleDuplicateForm}
+                  onDeleteForm={handleDeleteForm}
+                  onOpenCdashScaffolder={() => setIsScaffolderOpen(true)}
+                  onAddField={handleAddField}
+                  onAssignFormToVisit={handleAssignFormToVisit}
+                  onUnassignFormFromVisit={handleUnassignFormFromVisit}
+                  onInjectCdashForm={handleInjectCdashForm}
+                />
               </aside>
             )}
 
             {/* Mobile Stack Views (Visible only on < md screens) */}
             <div className="md:hidden flex-1 flex flex-col overflow-hidden">
               {mobileActiveView === "forms" && (
-                <div className="flex-1 overflow-y-auto p-4 bg-zinc-950">
-                  <FormsNavigator
-                    forms={study.forms}
+                <div className="flex-1 overflow-y-auto bg-zinc-950">
+                  <StudySpine
+                    study={study}
+                    activeVisitId={activeVisitId}
                     activeFormId={activeForm.id}
+                    activeTab={leftTab}
+                    onChangeTab={setLeftTab}
+                    onSelectVisit={(id) => setActiveVisitId(id)}
                     onSelectForm={(id) => {
                       setActiveFormId(id);
                       setSelectedFieldId(null);
                       setMobileActiveView("canvas");
                     }}
+                    onAddVisit={handleAddVisit}
+                    onDeleteVisit={handleDeleteVisit}
                     onAddForm={handleAddForm}
                     onDuplicateForm={handleDuplicateForm}
                     onDeleteForm={handleDeleteForm}
                     onOpenCdashScaffolder={() => setIsScaffolderOpen(true)}
+                    onAddField={(field) => {
+                      handleAddField(field);
+                      setMobileActiveView("canvas");
+                    }}
+                    onAssignFormToVisit={handleAssignFormToVisit}
+                    onUnassignFormFromVisit={handleUnassignFormFromVisit}
+                    onInjectCdashForm={handleInjectCdashForm}
                   />
                 </div>
               )}

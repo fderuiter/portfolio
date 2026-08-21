@@ -463,13 +463,13 @@ async function processRetryQueue(options?: { keepalive?: boolean }) {
         continue;
       }
 
-      if (item.retries < 2) {
+      if (item.retries < MAX_RETRIES) {
         enqueueRetryItem({ ...item, retries: item.retries + 1 });
       } else {
         rollbackEvent(item.projectSlug, item.eventType);
       }
     } catch {
-      if (item.retries < 2) {
+      if (item.retries < MAX_RETRIES) {
         enqueueRetryItem({ ...item, retries: item.retries + 1 });
       } else {
         rollbackEvent(item.projectSlug, item.eventType);
