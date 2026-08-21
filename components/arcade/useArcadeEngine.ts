@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { ArcadeEngine } from "@/lib/arcade/core/engine";
-import { ArcadeGameLoop } from "@/lib/arcade/core/game-loop";
 import {
+  ArcadeEngine,
+  ArcadeGameLoop,
   ArcadeViewport,
-  ViewportMode,
-  ViewportMetrics,
-} from "@/lib/arcade/core/viewport";
-import { ArcadeInputManager } from "@/lib/arcade/core/input";
+  type ViewportMode,
+  type ViewportMetrics,
+  ArcadeInputManager,
+} from "@/lib/arcade";
 
-export interface UseArcadeEngineOptions {
+interface UseArcadeEngineOptions {
   viewportMode?: ViewportMode;
   baseWidth: number;
   baseHeight: number;
@@ -19,7 +19,7 @@ export interface UseArcadeEngineOptions {
   paused?: boolean;
 }
 
-export interface UseArcadeEngineReturn<
+interface UseArcadeEngineReturn<
   TEngine extends ArcadeEngine<unknown, TSnapshot>,
   TSnapshot,
 > {

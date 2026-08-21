@@ -8,7 +8,7 @@
 
 > **preparePretextBlocks**(`text`, `fontSize?`, `fontFamilyVariable?`): [`PreparedBlock`](../interfaces/PreparedBlock.md)[]
 
-Defined in: [lib/pretext-block-parser.ts:176](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L176)
+Defined in: [lib/pretext-block-parser.ts:250](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L250)
 
 Pre-prepares a list of structured blocks for offscreen measurement.
 

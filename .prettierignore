@@ -11,3 +11,5 @@ tmp
 .scratch
 app/generated/prisma
 package-lock.json
+docs
+openapi.json

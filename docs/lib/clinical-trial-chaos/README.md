@@ -6,14 +6,6 @@
 
 # lib/clinical-trial-chaos
 
-## Interfaces
-
-- [ClinicalScenario](interfaces/ClinicalScenario.md)
-
-## Variables
-
-- [clinicalChaosScenarios](variables/clinicalChaosScenarios.md)
-
 ## References
 
 ### ALL\_STATIONS

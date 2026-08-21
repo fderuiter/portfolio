@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useRef,
+} from "react";
 
 export type AudioProfile = "8-bit" | "90s-retro" | "ambient";
 
@@ -8,12 +14,13 @@ export type AudioProfile = "8-bit" | "90s-retro" | "ambient";
 let governedAudioCtx: AudioContext | null = null;
 const audioCleanupRegistry = new Set<() => void>();
 
-export function getGovernedAudioContext(): AudioContext | null {
+function getGovernedAudioContext(): AudioContext | null {
   if (typeof window === "undefined") return null;
   if (!governedAudioCtx || governedAudioCtx.state === "closed") {
     const AudioCtxClass =
       window.AudioContext ||
-      (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      (window as typeof window & { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext;
     if (AudioCtxClass) {
       governedAudioCtx = new AudioCtxClass();
     }
@@ -24,7 +31,7 @@ export function getGovernedAudioContext(): AudioContext | null {
   return governedAudioCtx;
 }
 
-export function closeGovernedAudioContext(): void {
+function closeGovernedAudioContext(): void {
   cleanupGovernedAudio();
   if (governedAudioCtx) {
     governedAudioCtx.close().catch(() => {});
@@ -32,17 +39,7 @@ export function closeGovernedAudioContext(): void {
   }
 }
 
-export function getGovernedVolume(): number {
-  if (typeof window === "undefined") return 0.3;
-  const savedVolume = localStorage.getItem("sound_volume");
-  if (savedVolume !== null) {
-    const val = parseFloat(savedVolume);
-    if (!isNaN(val)) return Math.max(0, Math.min(1, val));
-  }
-  return 0.3;
-}
-
-export function isGovernedMuted(): boolean {
+function isGovernedMuted(): boolean {
   if (typeof window === "undefined") return true;
   const savedMuted = localStorage.getItem("sound_muted");
   if (savedMuted !== null) {
@@ -51,13 +48,18 @@ export function isGovernedMuted(): boolean {
   return true;
 }
 
-export function isGovernedBypassActive(): boolean {
+function isGovernedBypassActive(): boolean {
   if (typeof window === "undefined") return false;
   const forcedColors = window.matchMedia?.("(forced-colors: active)").matches;
-  const msHighContrast = window.matchMedia?.("(-ms-high-contrast: active)").matches;
-  const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  const msHighContrast = window.matchMedia?.(
+    "(-ms-high-contrast: active)"
+  ).matches;
+  const prefersReducedMotion = window.matchMedia?.(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
   const documentClasses = document.documentElement.className || "";
-  const documentHtmlContrast = document.documentElement.getAttribute("data-contrast") || "";
+  const documentHtmlContrast =
+    document.documentElement.getAttribute("data-contrast") || "";
 
   return !!(
     forcedColors ||
@@ -70,7 +72,7 @@ export function isGovernedBypassActive(): boolean {
   );
 }
 
-export function isGovernedSoundAllowed(): boolean {
+function isGovernedSoundAllowed(): boolean {
   return !isGovernedMuted() && !isGovernedBypassActive();
 }
 
@@ -81,7 +83,7 @@ export function registerAudioCleanup(fn: () => void): () => void {
   };
 }
 
-export function cleanupGovernedAudio(): void {
+function cleanupGovernedAudio(): void {
   audioCleanupRegistry.forEach((fn) => {
     try {
       fn();
@@ -90,23 +92,6 @@ export function cleanupGovernedAudio(): void {
     }
   });
   audioCleanupRegistry.clear();
-}
-
-export function useAudioCleanup(cleanupFn?: () => void) {
-  useEffect(() => {
-    let unregister: (() => void) | undefined;
-    if (cleanupFn) {
-      unregister = registerAudioCleanup(cleanupFn);
-    }
-    return () => {
-      if (cleanupFn) {
-        try {
-          cleanupFn();
-        } catch {}
-      }
-      if (unregister) unregister();
-    };
-  }, [cleanupFn]);
 }
 
 interface AudioContextType {
@@ -266,7 +251,10 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
     env.gain.setValueAtTime(0, now);
     env.gain.linearRampToValueAtTime(targetGain, now + attack);
-    env.gain.linearRampToValueAtTime(targetGain * sustain, now + attack + decay);
+    env.gain.linearRampToValueAtTime(
+      targetGain * sustain,
+      now + attack + decay
+    );
 
     const sustainEndTime = now + attack + decay + duration;
     env.gain.setValueAtTime(targetGain * sustain, sustainEndTime);
@@ -280,7 +268,10 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
         panner.pan.setValueAtTime(Math.max(-1, Math.min(1, pan)), now);
         lastNode.connect(panner);
         lastNode = panner;
-      } catch { {} }
+      } catch {
+        {
+        }
+      }
     }
 
     lastNode.connect(ctx.destination);
@@ -290,20 +281,25 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     const totalDuration = attack + decay + duration + release;
     osc.stop(now + totalDuration + 0.1);
 
-    setTimeout(() => {
-      try {
-        osc.disconnect();
-        env.disconnect();
-      } catch { {} }
-    }, (totalDuration + 0.5) * 1000);
+    setTimeout(
+      () => {
+        try {
+          osc.disconnect();
+          env.disconnect();
+        } catch {
+          {
+          }
+        }
+      },
+      (totalDuration + 0.5) * 1000
+    );
   };
 
   const playKeystroke = (charCode: number) => {
     if (muted || bypassActive) return;
     const pentatonicScale = [
-      130.81, 146.83, 164.81, 196.00, 220.00,
-      261.63, 293.66, 329.63, 392.00, 440.00,
-      523.25, 587.33, 659.25, 783.99, 880.00
+      130.81, 146.83, 164.81, 196.0, 220.0, 261.63, 293.66, 329.63, 392.0,
+      440.0, 523.25, 587.33, 659.25, 783.99, 880.0,
     ];
     const idx = charCode % pentatonicScale.length;
     playNote(pentatonicScale[idx], 0.05);
@@ -311,7 +307,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
   const playAutocomplete = () => {
     if (muted || bypassActive) return;
-    const notes = [261.63, 329.63, 392.00, 523.25];
+    const notes = [261.63, 329.63, 392.0, 523.25];
     notes.forEach((freq, idx) => {
       setTimeout(() => {
         playNote(freq, 0.08);
@@ -322,12 +318,12 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const playSuccess = () => {
     if (muted || bypassActive) return;
     if (profile === "ambient") {
-      const notes = [261.63, 329.63, 392.00, 493.88];
+      const notes = [261.63, 329.63, 392.0, 493.88];
       notes.forEach((freq) => {
         playNote(freq, 0.4);
       });
     } else {
-      const notes = [329.63, 392.00, 523.25, 659.25];
+      const notes = [329.63, 392.0, 523.25, 659.25];
       notes.forEach((freq, idx) => {
         setTimeout(() => {
           playNote(freq, 0.12);
@@ -354,15 +350,23 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
   const playHover = (pan?: number) => {
     if (muted || bypassActive) return;
-    if (typeof window !== "undefined" && window.matchMedia?.("(hover: none)").matches) return;
-    const freq = profile === "ambient" ? 440.00 : 880.00;
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(hover: none)").matches
+    )
+      return;
+    const freq = profile === "ambient" ? 440.0 : 880.0;
     playNote(freq, 0.02, pan);
   };
 
   const playSkillHover = () => {
     if (muted || bypassActive) return;
-    if (typeof window !== "undefined" && window.matchMedia?.("(hover: none)").matches) return;
-    const notes = [261.63, 293.66, 329.63, 392.00, 440.00];
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(hover: none)").matches
+    )
+      return;
+    const notes = [261.63, 293.66, 329.63, 392.0, 440.0];
     const randomFreq = notes[Math.floor(Math.random() * notes.length)];
     playNote(randomFreq, 0.1);
   };
@@ -395,37 +399,40 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== "undefined") {
       localStorage.setItem("sound_profile", p);
     }
-    
+
     // Play sound confirmation for swapped profile
     setTimeout(() => {
       let confirmFreq = 523.25; // C5
       if (p === "ambient") {
         confirmFreq = 329.63; // E4
       } else if (p === "90s-retro") {
-        confirmFreq = 440.00; // A4
+        confirmFreq = 440.0; // A4
       }
       playNote(confirmFreq, 0.15);
     }, 10);
   };
 
-  const value = React.useMemo(() => ({
-    volume,
-    muted,
-    profile,
-    setVolume: handleSetVolume,
-    setMuted: handleSetMuted,
-    setProfile: handleSetProfile,
-    playNote,
-    playKeystroke,
-    playAutocomplete,
-    playSuccess,
-    playSubmit,
-    playError,
-    playHover,
-    playSkillHover,
-    bypassActive
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [volume, muted, profile, bypassActive]);
+  const value = React.useMemo(
+    () => ({
+      volume,
+      muted,
+      profile,
+      setVolume: handleSetVolume,
+      setMuted: handleSetMuted,
+      setProfile: handleSetProfile,
+      playNote,
+      playKeystroke,
+      playAutocomplete,
+      playSuccess,
+      playSubmit,
+      playError,
+      playHover,
+      playSkillHover,
+      bypassActive,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }),
+    [volume, muted, profile, bypassActive]
+  );
 
   return (
     <AudioProviderContext.Provider value={value}>

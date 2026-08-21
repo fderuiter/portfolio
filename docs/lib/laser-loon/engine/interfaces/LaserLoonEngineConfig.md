@@ -6,7 +6,7 @@
 
 # Interface: LaserLoonEngineConfig
 
-Defined in: [lib/laser-loon/engine.ts:677](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L677)
+Defined in: [lib/laser-loon/engine.ts:676](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L676)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/laser-loon/engine.ts:677](https://github.com/fderuiter/portfoli
 
 > `optional` **laserType?**: [`LaserType`](../../types/type-aliases/LaserType.md)
 
-Defined in: [lib/laser-loon/engine.ts:679](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L679)
+Defined in: [lib/laser-loon/engine.ts:678](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L678)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [lib/laser-loon/engine.ts:679](https://github.com/fderuiter/portfoli
 
 > `optional` **mode?**: [`LaserMode`](../../types/type-aliases/LaserMode.md)
 
-Defined in: [lib/laser-loon/engine.ts:678](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L678)
+Defined in: [lib/laser-loon/engine.ts:677](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L677)

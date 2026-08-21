@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest";
+import { fromPartial } from "@total-typescript/shoehorn";
 import { updateEnemyAI } from "@/lib/dungeon/ai";
+
 import {
   createFaceMesh,
   createOctahedronMesh,
@@ -322,7 +324,7 @@ describe("Dungeon Master AI & Wireframe Boss Engine", () => {
     });
 
     it("renders wireframe meshes to 2D canvas context without throwing", () => {
-      const mockCtx = {
+      const mockCtx = fromPartial<CanvasRenderingContext2D>({
         save: () => {},
         restore: () => {},
         beginPath: () => {},
@@ -336,13 +338,17 @@ describe("Dungeon Master AI & Wireframe Boss Engine", () => {
         lineWidth: 1,
         shadowColor: "",
         shadowBlur: 0,
-      } as unknown as CanvasRenderingContext2D;
+      });
 
       const faceMesh = createFaceMesh();
-      expect(() => renderWireframeMesh(mockCtx, faceMesh, 100, 100, true)).not.toThrow();
+      expect(() =>
+        renderWireframeMesh(mockCtx, faceMesh, 100, 100, true)
+      ).not.toThrow();
 
       const octaMesh = createOctahedronMesh();
-      expect(() => renderWireframeMesh(mockCtx, octaMesh, 100, 100, false)).not.toThrow();
+      expect(() =>
+        renderWireframeMesh(mockCtx, octaMesh, 100, 100, false)
+      ).not.toThrow();
     });
   });
 });

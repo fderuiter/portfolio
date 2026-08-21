@@ -8,7 +8,7 @@
 
 > `const` **DEFAULT\_BUDGETS**: `object`
 
-Defined in: [lib/dx/bundle-guard.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bundle-guard.ts#L24)
+Defined in: [lib/dx/bundle-guard.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bundle-guard.ts#L31)
 
 ## Type Declaration
 

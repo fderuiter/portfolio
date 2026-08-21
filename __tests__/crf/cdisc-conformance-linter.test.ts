@@ -5,8 +5,8 @@ import {
   autoFixAllViolations,
 } from "@/lib/crf/cdisc-conformance-linter";
 import { lintForm } from "@/lib/crf/form-linter";
-import { StudyProtocol, CRFForm } from "@/lib/crf/types";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
+import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
+import type { StudyProtocol, CRFForm } from "@/lib/crf";
 
 describe("CDISC Conformance & Regulatory Validation Linter & Auto-Fix Engine", () => {
   it("should detect clean schema on standard preset without major errors", () => {
@@ -123,7 +123,9 @@ describe("CDISC Conformance & Regulatory Validation Linter & Auto-Fix Engine", (
 
     // Auto-fix adding SEX field
     const fixed = autoFixViolation(testStudy, sexViolation!);
-    const allVars = fixed.forms[0].sections.flatMap((s) => s.fields).map((f) => f.variableName);
+    const allVars = fixed.forms[0].sections
+      .flatMap((s) => s.fields)
+      .map((f) => f.variableName);
     expect(allVars).toContain("SEX");
   });
 
@@ -144,7 +146,9 @@ describe("CDISC Conformance & Regulatory Validation Linter & Auto-Fix Engine", (
     };
 
     const violations = validateStudyCompliance(testStudy);
-    const sd0005 = violations.find((v) => v.ruleId === "SD0005" && v.formId === "form_orphan");
+    const sd0005 = violations.find(
+      (v) => v.ruleId === "SD0005" && v.formId === "form_orphan"
+    );
     expect(sd0005).toBeDefined();
 
     // Test Auto-Fix SD0005
@@ -255,7 +259,9 @@ describe("CDISC Conformance & Regulatory Validation Linter & Auto-Fix Engine", (
 
       // Assert form-level field ID uniqueness checks pass via lintForm
       const diagnostics = lintForm(form);
-      const duplicateIdErrors = diagnostics.filter((d) => d.id.startsWith("dup_id_"));
+      const duplicateIdErrors = diagnostics.filter((d) =>
+        d.id.startsWith("dup_id_")
+      );
       expect(duplicateIdErrors.length).toBe(0);
     });
 
@@ -267,13 +273,18 @@ describe("CDISC Conformance & Regulatory Validation Linter & Auto-Fix Engine", (
     expect(uniqueSectionIds.size).toBe(allSectionIds.length);
 
     // Assert auto-fixed IDs follow UUID format pattern and contain high entropy UUIDs
-    const autoFixedFieldIds = allFieldIds.filter((id) => id.startsWith("f_autofix_"));
-    const autoFixedSectionIds = allSectionIds.filter((id) => id.startsWith("sec_autofix_"));
+    const autoFixedFieldIds = allFieldIds.filter((id) =>
+      id.startsWith("f_autofix_")
+    );
+    const autoFixedSectionIds = allSectionIds.filter((id) =>
+      id.startsWith("sec_autofix_")
+    );
 
     expect(autoFixedFieldIds.length).toBeGreaterThan(0);
     expect(autoFixedSectionIds.length).toBeGreaterThan(0);
 
-    const uuidRegex = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
+    const uuidRegex =
+      /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
     autoFixedFieldIds.forEach((id) => {
       expect(id).toMatch(uuidRegex);
     });

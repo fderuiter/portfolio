@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { StudyProtocolEngine } from "@/lib/crf/study-engine";
-import { getOncologyPresetSync } from "@/lib/crf/presets/loader";
+import { getOncologyPresetSync } from "@/lib/crf/presets";
 
 describe("StudyProtocolEngine - Pure Business Logic Engine", () => {
   const sampleStudy = getOncologyPresetSync();
@@ -27,18 +27,32 @@ describe("StudyProtocolEngine - Pure Business Logic Engine", () => {
     expect(vsForm.domain).toBe("VS");
     expect(vsForm.sections.flatMap((s) => s.fields).length).toBeGreaterThan(3);
 
-    const { study: s2, form: customForm } = StudyProtocolEngine.addForm(s1, "CUSTOM_TEST", "Custom Lab Assessment");
+    const { study: s2, form: customForm } = StudyProtocolEngine.addForm(
+      s1,
+      "CUSTOM_TEST",
+      "Custom Lab Assessment"
+    );
     expect(s2.forms.length).toBe(2);
     expect(customForm.domain).toBe("CUSTOM_TEST");
     expect(customForm.name).toBe("Custom Lab Assessment");
   });
 
   it("removes form and automatically prunes visit form assignments", () => {
-    const { study: s1, form: vsForm } = StudyProtocolEngine.addForm(sampleStudy, "VS");
-    const { study: s2 } = StudyProtocolEngine.assignVisitForms(s1, s1.visits[0].id, [vsForm.id]);
+    const { study: s1, form: vsForm } = StudyProtocolEngine.addForm(
+      sampleStudy,
+      "VS"
+    );
+    const { study: s2 } = StudyProtocolEngine.assignVisitForms(
+      s1,
+      s1.visits[0].id,
+      [vsForm.id]
+    );
     expect(s2.visits[0].assignedFormIds).toContain(vsForm.id);
 
-    const { study: s3, removedForm } = StudyProtocolEngine.removeForm(s2, vsForm.id);
+    const { study: s3, removedForm } = StudyProtocolEngine.removeForm(
+      s2,
+      vsForm.id
+    );
     expect(removedForm?.id).toBe(vsForm.id);
     expect(s3.forms.some((f) => f.id === vsForm.id)).toBe(false);
     expect(s3.visits[0].assignedFormIds).not.toContain(vsForm.id);
@@ -46,7 +60,11 @@ describe("StudyProtocolEngine - Pure Business Logic Engine", () => {
 
   it("adds fields with CDASH metadata enrichment and duplicate detection", () => {
     const { study: s1 } = StudyProtocolEngine.addForm(sampleStudy, "VS");
-    const { study: s2, field, error } = StudyProtocolEngine.addField(s1, "VS", {
+    const {
+      study: s2,
+      field,
+      error,
+    } = StudyProtocolEngine.addField(s1, "VS", {
       variableName: "TEMPC",
       label: "Body Temperature (Celsius)",
       dataType: "number",
@@ -87,7 +105,11 @@ describe("StudyProtocolEngine - Pure Business Logic Engine", () => {
     const formWithRule = s3.forms.find((f) => f.domain === "VS");
     expect(formWithRule?.rules.some((r) => r.id === rule?.id)).toBe(true);
 
-    const { study: s4, removedField } = StudyProtocolEngine.removeField(s3, "VS", field!.id);
+    const { study: s4, removedField } = StudyProtocolEngine.removeField(
+      s3,
+      "VS",
+      field!.id
+    );
     expect(removedField?.id).toBe(field!.id);
     const formAfterRemoval = s4.forms.find((f) => f.domain === "VS");
     expect(formAfterRemoval?.rules.some((r) => r.id === rule?.id)).toBe(false);
@@ -105,7 +127,10 @@ describe("StudyProtocolEngine - Pure Business Logic Engine", () => {
     expect(s1.visits.some((v) => v.id === v1.id)).toBe(true);
     expect(s1.visits[s1.visits.length - 1].targetDay).toBe(56);
 
-    const { study: s2, removedVisit } = StudyProtocolEngine.removeVisit(s1, v1.id);
+    const { study: s2, removedVisit } = StudyProtocolEngine.removeVisit(
+      s1,
+      v1.id
+    );
     expect(removedVisit?.id).toBe(v1.id);
     expect(s2.visits.some((v) => v.id === v1.id)).toBe(false);
   });
@@ -113,9 +138,13 @@ describe("StudyProtocolEngine - Pure Business Logic Engine", () => {
   it("lists and loads study presets", () => {
     const presets = StudyProtocolEngine.listPresets();
     expect(presets.length).toBeGreaterThan(2);
-    expect(presets.some((p) => p.id === "device_cardiovascular_implant")).toBe(true);
+    expect(presets.some((p) => p.id === "device_cardiovascular_implant")).toBe(
+      true
+    );
 
-    const { study, presetInfo } = StudyProtocolEngine.loadPreset("device_cardiovascular_implant");
+    const { study, presetInfo } = StudyProtocolEngine.loadPreset(
+      "device_cardiovascular_implant"
+    );
     expect(presetInfo.id).toBe("device_cardiovascular_implant");
     expect(study.forms.some((f) => f.domain === "DI")).toBe(true);
   });
@@ -147,7 +176,9 @@ describe("StudyProtocolEngine - Pure Business Logic Engine", () => {
 
     const invalidRes = StudyProtocolEngine.validateProtocol(invalidStudy);
     expect(invalidRes.isCompliant).toBe(false);
-    expect(invalidRes.errors.some((e) => e.rule === "CDASH-VAR-LEN")).toBe(true);
+    expect(invalidRes.errors.some((e) => e.rule === "CDASH-VAR-LEN")).toBe(
+      true
+    );
   });
 
   it("exports to all 6 clinical metadata standards", () => {

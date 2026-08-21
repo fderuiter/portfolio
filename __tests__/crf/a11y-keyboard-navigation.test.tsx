@@ -2,14 +2,16 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { BrandingConfigModal } from "@/components/crf/Branding/BrandingConfigModal";
 import { ExportDocumentModal } from "@/components/crf/Modes/ExportDocumentModal";
-import { DEFAULT_STUDY_BRANDING } from "@/lib/crf/branding-defaults";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
+import { DEFAULT_STUDY_BRANDING } from "@/lib/crf";
+import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
 
 describe("CRF Studio - Modal Accessibility (A11y) & Keyboard Navigation", () => {
   let container: HTMLDivElement;
@@ -53,7 +55,9 @@ describe("CRF Studio - Modal Accessibility (A11y) & Keyboard Navigation", () => 
       const dialogEl = container.querySelector('[role="dialog"]');
       expect(dialogEl).not.toBeNull();
       expect(dialogEl?.getAttribute("aria-modal")).toBe("true");
-      expect(dialogEl?.getAttribute("aria-labelledby")).toBe("branding-modal-title");
+      expect(dialogEl?.getAttribute("aria-labelledby")).toBe(
+        "branding-modal-title"
+      );
 
       const titleEl = container.querySelector("#branding-modal-title");
       expect(titleEl).not.toBeNull();
@@ -77,7 +81,9 @@ describe("CRF Studio - Modal Accessibility (A11y) & Keyboard Navigation", () => 
 
       // Dispatch Escape keydown event
       await act(async () => {
-        window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+        window.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+        );
       });
 
       expect(handleClose).toHaveBeenCalledTimes(1);
@@ -104,11 +110,15 @@ describe("CRF Studio - Modal Accessibility (A11y) & Keyboard Navigation", () => 
       const dialogEl = container.querySelector('[role="dialog"]');
       expect(dialogEl).not.toBeNull();
       expect(dialogEl?.getAttribute("aria-modal")).toBe("true");
-      expect(dialogEl?.getAttribute("aria-labelledby")).toBe("export-modal-title");
+      expect(dialogEl?.getAttribute("aria-labelledby")).toBe(
+        "export-modal-title"
+      );
 
       const titleEl = container.querySelector("#export-modal-title");
       expect(titleEl).not.toBeNull();
-      expect(titleEl?.textContent).toContain("Clinical Word (.docx) & PDF Exporter");
+      expect(titleEl?.textContent).toContain(
+        "Clinical Word (.docx) & PDF Exporter"
+      );
     });
 
     it("should dismiss the Export modal when pressing the Escape key", async () => {
@@ -129,7 +139,9 @@ describe("CRF Studio - Modal Accessibility (A11y) & Keyboard Navigation", () => 
 
       // Dispatch Escape keydown event
       await act(async () => {
-        window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+        window.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Escape", bubbles: true })
+        );
       });
 
       expect(handleClose).toHaveBeenCalledTimes(1);

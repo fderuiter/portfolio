@@ -8,7 +8,7 @@
 
 > **usePretextRichLayout**(`__namedParameters`): `object`
 
-Defined in: [hooks/usePretextLayout.tsx:408](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L408)
+Defined in: [hooks/usePretextLayout.tsx:403](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L403)
 
 ## Parameters
 
@@ -30,7 +30,7 @@ Defined in: [hooks/usePretextLayout.tsx:408](https://github.com/fderuiter/portfo
 
 ### items
 
-> **items**: [`ExtendedRichInlineItem`](../interfaces/ExtendedRichInlineItem.md)[]
+> **items**: [`ExtendedRichInlineItem`](../../../lib/pretext-block-parser/interfaces/ExtendedRichInlineItem.md)[]
 
 ### lines
 

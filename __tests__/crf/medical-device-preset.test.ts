@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { DEVICE_CARDIOVASCULAR_IMPLANT_PRESET } from "@/lib/crf/presets/device-cardiovascular-implant";
-import { STUDY_PRESETS } from "@/lib/crf/presets";
+import {
+  DEVICE_CARDIOVASCULAR_IMPLANT_PRESET,
+  STUDY_PRESETS,
+} from "@/lib/crf/presets";
 import { validateStudyCompliance } from "@/lib/crf/cdisc-conformance-linter";
 import { exportStudyToCdiscOdmXml } from "@/lib/crf/odm-xml-serializer";
 import { generateStudyPdf } from "@/lib/crf/export-pdf";
@@ -8,7 +10,9 @@ import { generateStudyDocx } from "@/lib/crf/export-docx";
 
 describe("Medical Device IDE Clinical Study Preset (ISO 14155 / FDA 21 CFR 812)", () => {
   it("registers in STUDY_PRESETS catalog correctly", () => {
-    const catalogItem = STUDY_PRESETS.find((p) => p.id === "device_cardiovascular_implant");
+    const catalogItem = STUDY_PRESETS.find(
+      (p) => p.id === "device_cardiovascular_implant"
+    );
     expect(catalogItem).toBeDefined();
     expect(catalogItem?.therapeuticArea).toContain("Medical Device");
     expect(catalogItem?.study.protocolNumber).toBe("DEV-2026-VALVE");
@@ -28,7 +32,9 @@ describe("Medical Device IDE Clinical Study Preset (ISO 14155 / FDA 21 CFR 812)"
   });
 
   it("includes Device Identifier (DI) fields with UDI, lot, model, and expiration", () => {
-    const diForm = DEVICE_CARDIOVASCULAR_IMPLANT_PRESET.forms.find((f) => f.domain === "DI");
+    const diForm = DEVICE_CARDIOVASCULAR_IMPLANT_PRESET.forms.find(
+      (f) => f.domain === "DI"
+    );
     expect(diForm).toBeDefined();
     const fields = diForm!.sections.flatMap((s) => s.fields);
     const varNames = fields.map((f) => f.variableName);
@@ -43,7 +49,9 @@ describe("Medical Device IDE Clinical Study Preset (ISO 14155 / FDA 21 CFR 812)"
   });
 
   it("passes CDISC conformance linting without fatal variable errors", () => {
-    const violations = validateStudyCompliance(DEVICE_CARDIOVASCULAR_IMPLANT_PRESET);
+    const violations = validateStudyCompliance(
+      DEVICE_CARDIOVASCULAR_IMPLANT_PRESET
+    );
     const fatalErrors = violations.filter((v) => v.severity === "error");
     expect(fatalErrors).toHaveLength(0);
   });
@@ -59,18 +67,24 @@ describe("Medical Device IDE Clinical Study Preset (ISO 14155 / FDA 21 CFR 812)"
   });
 
   it("exports blank PDF and Word documents without exceptions", async () => {
-    const pdfBlob = await generateStudyPdf(DEVICE_CARDIOVASCULAR_IMPLANT_PRESET, {
-      mode: "blank",
-      scope: "all",
-    });
+    const pdfBlob = await generateStudyPdf(
+      DEVICE_CARDIOVASCULAR_IMPLANT_PRESET,
+      {
+        mode: "blank",
+        scope: "all",
+      }
+    );
     expect(pdfBlob).toBeInstanceOf(Blob);
     expect(pdfBlob.size).toBeGreaterThan(0);
 
-    const docxBlob = await generateStudyDocx(DEVICE_CARDIOVASCULAR_IMPLANT_PRESET, {
-      mode: "blank",
-      scope: "all",
-      includeTableOfContents: true,
-    });
+    const docxBlob = await generateStudyDocx(
+      DEVICE_CARDIOVASCULAR_IMPLANT_PRESET,
+      {
+        mode: "blank",
+        scope: "all",
+        includeTableOfContents: true,
+      }
+    );
     expect(docxBlob).toBeInstanceOf(Blob);
     expect(docxBlob.size).toBeGreaterThan(0);
   });

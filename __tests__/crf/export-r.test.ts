@@ -9,7 +9,7 @@ import {
   exportFormToR,
   exportStudyToR,
 } from "@/lib/crf/export-r";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
+import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
 import { StudyProtocol, CRFForm, CRFField } from "@/lib/crf/types";
 
 describe("CRF Studio - Automated R & Pharmaverse Scaffolding Exporter", () => {
@@ -22,18 +22,23 @@ describe("CRF Studio - Automated R & Pharmaverse Scaffolding Exporter", () => {
     });
 
     it("escapes quotes and backslashes in R literals", () => {
-      expect(escapeRString('Label with "quotes"')).toBe('Label with \\"quotes\\"');
+      expect(escapeRString('Label with "quotes"')).toBe(
+        'Label with \\"quotes\\"'
+      );
       expect(escapeRString("Path\\To\\File")).toBe("Path\\\\To\\\\File");
     });
   });
 
   describe("Codelist Factor Level Generation", () => {
     it("generates factor level and label vectors for study codelists", () => {
-      const code = generateRCodelists(ONCOLOGY_RECIST_PRESET, ONCOLOGY_RECIST_PRESET.forms);
+      const code = generateRCodelists(
+        ONCOLOGY_RECIST_PRESET,
+        ONCOLOGY_RECIST_PRESET.forms
+      );
 
       expect(code).toContain("cl_cl_sex_levels <- c(");
       expect(code).toContain('"M", "F"');
-      expect(code).toContain('cl_cl_sex_labels <- c(');
+      expect(code).toContain("cl_cl_sex_labels <- c(");
       expect(code).toContain('"Male", "Female"');
     });
 
@@ -49,7 +54,9 @@ describe("CRF Studio - Automated R & Pharmaverse Scaffolding Exporter", () => {
 
   describe("Tibble Data Steps & Full R Suite Generation", () => {
     it("generates a valid tibble creation block with typed vectors and labelled attributes", () => {
-      const dmForm = ONCOLOGY_RECIST_PRESET.forms.find((f) => f.domain === "DM")!;
+      const dmForm = ONCOLOGY_RECIST_PRESET.forms.find(
+        (f) => f.domain === "DM"
+      )!;
       const rCode = generateRDataStepForForm(dmForm, ONCOLOGY_RECIST_PRESET, {
         includeSampleData: true,
         includeGlimpse: true,
@@ -65,10 +72,14 @@ describe("CRF Studio - Automated R & Pharmaverse Scaffolding Exporter", () => {
     });
 
     it("exports a single form to an independent R script", () => {
-      const vsForm = ONCOLOGY_RECIST_PRESET.forms.find((f) => f.domain === "VS")!;
+      const vsForm = ONCOLOGY_RECIST_PRESET.forms.find(
+        (f) => f.domain === "VS"
+      )!;
       const rScript = exportFormToR(vsForm, ONCOLOGY_RECIST_PRESET);
 
-      expect(rScript).toContain("#==============================================================================");
+      expect(rScript).toContain(
+        "#=============================================================================="
+      );
       expect(rScript).toContain("PROGRAM:      create_raw_vs.R");
       expect(rScript).toContain("tbl_vs <- tibble::tibble(");
     });
@@ -84,7 +95,9 @@ describe("CRF Studio - Automated R & Pharmaverse Scaffolding Exporter", () => {
     });
 
     it("filters to selected form when selectedFormId is specified", () => {
-      const aeForm = ONCOLOGY_RECIST_PRESET.forms.find((f) => f.domain === "AE")!;
+      const aeForm = ONCOLOGY_RECIST_PRESET.forms.find(
+        (f) => f.domain === "AE"
+      )!;
       const filtered = exportStudyToR(ONCOLOGY_RECIST_PRESET, {
         selectedFormId: aeForm.id,
       });
@@ -127,7 +140,11 @@ describe("CRF Studio - Automated R & Pharmaverse Scaffolding Exporter", () => {
 
     it("expands multi-select choices into distinct dichotomous R sub-variable factors bound to CL_NY", () => {
       const usedNames = new Set<string>();
-      const expanded = getExpandedRFields(multiSelectField, ONCOLOGY_RECIST_PRESET, usedNames);
+      const expanded = getExpandedRFields(
+        multiSelectField,
+        ONCOLOGY_RECIST_PRESET,
+        usedNames
+      );
 
       expect(expanded).toHaveLength(3);
       expect(expanded[0].varName).toBe("MH_HYPERTEN");
@@ -152,7 +169,11 @@ describe("CRF Studio - Automated R & Pharmaverse Scaffolding Exporter", () => {
       };
 
       const usedNames = new Set<string>();
-      const expanded = getExpandedRFields(longField, ONCOLOGY_RECIST_PRESET, usedNames);
+      const expanded = getExpandedRFields(
+        longField,
+        ONCOLOGY_RECIST_PRESET,
+        usedNames
+      );
 
       expect(expanded).toHaveLength(2);
       expect(expanded[0].varName.length).toBeLessThanOrEqual(32);
@@ -164,7 +185,9 @@ describe("CRF Studio - Automated R & Pharmaverse Scaffolding Exporter", () => {
       expect(parseMultiSelectValue("HYPERTEN, ASTHMA", "HYPERTEN")).toBe("Y");
       expect(parseMultiSelectValue("HYPERTEN, ASTHMA", "DIABETES")).toBe("N");
       expect(parseMultiSelectValue("HYPERTEN, ASTHMA", "ASTHMA")).toBe("Y");
-      expect(parseMultiSelectValue('"HYPERTEN", "ASTHMA"', "HYPERTEN")).toBe("Y");
+      expect(parseMultiSelectValue('"HYPERTEN", "ASTHMA"', "HYPERTEN")).toBe(
+        "Y"
+      );
     });
 
     it("generates R script with factor vectors using cl_cl_ny_levels and cl_cl_ny_labels and labelled attributes", () => {
@@ -172,7 +195,7 @@ describe("CRF Studio - Automated R & Pharmaverse Scaffolding Exporter", () => {
 
       expect(rScript).toContain("cl_cl_ny_levels <- c(");
       expect(rScript).toContain('"N", "Y"');
-      expect(rScript).toContain('cl_cl_ny_labels <- c(');
+      expect(rScript).toContain("cl_cl_ny_labels <- c(");
       expect(rScript).toContain('"No", "Yes"');
 
       expect(rScript).toContain("MH_HYPERTEN");
@@ -180,9 +203,13 @@ describe("CRF Studio - Automated R & Pharmaverse Scaffolding Exporter", () => {
       expect(rScript).toContain("MH_ASTHMA");
 
       expect(rScript).toContain("factor(c(");
-      expect(rScript).toContain("levels = cl_cl_ny_levels, labels = cl_cl_ny_labels");
+      expect(rScript).toContain(
+        "levels = cl_cl_ny_levels, labels = cl_cl_ny_labels"
+      );
 
-      expect(rScript).toContain('MH_HYPERTEN = "Medical History Category - Hypertension"');
+      expect(rScript).toContain(
+        'MH_HYPERTEN = "Medical History Category - Hypertension"'
+      );
       expect(rScript).not.toContain("OPTION_A, OPTION_B");
     });
   });

@@ -20,8 +20,7 @@ import {
   SDTM_COL_WIDTH_5,
   SDTM_COL_WIDTH_6,
 } from "@/lib/crf/export-docx";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
-import { CNS_NEURO_PRESET } from "@/lib/crf/presets/cns-neuro";
+import { ONCOLOGY_RECIST_PRESET, CNS_NEURO_PRESET } from "@/lib/crf/presets";
 import { StudyBranding } from "@/lib/crf/types";
 
 // 1x1 transparent PNG Base64 for logo testing
@@ -35,11 +34,15 @@ describe("CRF Studio - Microsoft Word (.docx) Exporter", () => {
 
   it("should have proportional cell column widths summing to 9,360 DXA in standard and annotated modes", () => {
     expect(STANDARD_COL_WIDTH_1 + STANDARD_COL_WIDTH_2).toBe(TABLE_WIDTH_DXA);
-    expect(ANNOTATED_COL_WIDTH_1 + ANNOTATED_COL_WIDTH_2 + ANNOTATED_COL_WIDTH_3).toBe(
-      TABLE_WIDTH_DXA
-    );
     expect(
-      TOC_COL_WIDTH_1 + TOC_COL_WIDTH_2 + TOC_COL_WIDTH_3 + TOC_COL_WIDTH_4 + TOC_COL_WIDTH_5
+      ANNOTATED_COL_WIDTH_1 + ANNOTATED_COL_WIDTH_2 + ANNOTATED_COL_WIDTH_3
+    ).toBe(TABLE_WIDTH_DXA);
+    expect(
+      TOC_COL_WIDTH_1 +
+        TOC_COL_WIDTH_2 +
+        TOC_COL_WIDTH_3 +
+        TOC_COL_WIDTH_4 +
+        TOC_COL_WIDTH_5
     ).toBe(TABLE_WIDTH_DXA);
     expect(
       SDTM_COL_WIDTH_1 +
@@ -92,7 +95,8 @@ describe("CRF Studio - Microsoft Word (.docx) Exporter", () => {
       accentColor: "#059669",
       headerText: "CONFIDENTIAL • PROTOCOL BNT-2026",
       footerText: "Investigator Master Copy",
-      confidentialityNotice: "Proprietary clinical trial protocol documentation.",
+      confidentialityNotice:
+        "Proprietary clinical trial protocol documentation.",
       logoBase64: SAMPLE_BASE64_LOGO,
       showPageNumbers: true,
       showTableOfContents: true,
@@ -109,7 +113,10 @@ describe("CRF Studio - Microsoft Word (.docx) Exporter", () => {
   });
 
   it("should export a selective subset of forms when scope is selected", async () => {
-    const selectedIds = [ONCOLOGY_RECIST_PRESET.forms[0].id, ONCOLOGY_RECIST_PRESET.forms[1].id];
+    const selectedIds = [
+      ONCOLOGY_RECIST_PRESET.forms[0].id,
+      ONCOLOGY_RECIST_PRESET.forms[1].id,
+    ];
     const blob = await generateStudyDocx(ONCOLOGY_RECIST_PRESET, {
       mode: "blank",
       scope: "selected",

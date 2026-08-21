@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { computeFormHealthMetrics } from "@/lib/crf/form-health";
 import { CRFForm } from "@/lib/crf/types";
+import { fromAny } from "@total-typescript/shoehorn";
 
 describe("computeFormHealthMetrics", () => {
   it("computes accurate variable counts, mandatory fields, codelist attachments, and SDV readiness", () => {
@@ -108,7 +109,7 @@ describe("computeFormHealthMetrics", () => {
           fields: [
             {
               id: "f1",
-              variableName: undefined as unknown as string,
+              variableName: fromAny(undefined),
               label: "Unassigned Field 1",
               dataType: "text",
               required: true,
@@ -116,12 +117,13 @@ describe("computeFormHealthMetrics", () => {
             },
             {
               id: "f2",
-              variableName: null as unknown as string,
+              variableName: fromAny(null),
               label: "Unassigned Field 2",
               dataType: "number",
               required: false,
               columnSpan: 6,
             },
+
             {
               id: "f3",
               variableName: "",

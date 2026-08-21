@@ -6,9 +6,9 @@
 
 # Function: scanDeadCode()
 
-> **scanDeadCode**(`workspaceRoot`): [`DeadCodeReport`](../interfaces/DeadCodeReport.md)
+> **scanDeadCode**(`workspaceRoot`, `options?`): [`DeadCodeReport`](../interfaces/DeadCodeReport.md)
 
-Defined in: [lib/dx/dead-code.ts:168](https://github.com/fderuiter/portfolio/blob/main/lib/dx/dead-code.ts#L168)
+Defined in: [lib/dx/dead-code.ts:237](https://github.com/fderuiter/portfolio/blob/main/lib/dx/dead-code.ts#L237)
 
 Scans the workspace for dead code and unreferenced exports.
 
@@ -17,6 +17,10 @@ Scans the workspace for dead code and unreferenced exports.
 ### workspaceRoot
 
 `string`
+
+### options?
+
+[`DeadCodeScanOptions`](../interfaces/DeadCodeScanOptions.md) = `{}`
 
 ## Returns
 

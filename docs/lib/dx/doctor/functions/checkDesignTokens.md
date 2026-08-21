@@ -8,7 +8,7 @@
 
 > **checkDesignTokens**(`root`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:1043](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1043)
+Defined in: [lib/dx/doctor.ts:1323](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1323)
 
 Check Design System Token Migration Invariant across Core Layout Surfaces
 

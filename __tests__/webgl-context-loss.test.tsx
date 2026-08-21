@@ -1,7 +1,9 @@
 import React, { act, useRef } from "react";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { createRoot, Root } from "react-dom/client";
+import { fromPartial } from "@total-typescript/shoehorn";
 import { Brain3DViewer } from "@/components/neuro/Brain3DViewer";
+
 import { useWebGLContextLoss } from "@/hooks/useWebGLContextLoss";
 import { A11yProvider } from "@/components/providers/A11yProvider";
 
@@ -34,13 +36,14 @@ const HookTestHarness: React.FC<{
   onRestored?: () => void;
 }> = ({ onLost, onRestored }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { status, isLost, recoveryCount, triggerSimulation } = useWebGLContextLoss({
-    canvasRef,
-    label: "3D Viewport",
-    onContextLost: onLost,
-    onContextRestored: onRestored,
-    autoResetIdleDelayMs: 1000,
-  });
+  const { status, isLost, recoveryCount, triggerSimulation } =
+    useWebGLContextLoss({
+      canvasRef,
+      label: "3D Viewport",
+      onContextLost: onLost,
+      onContextRestored: onRestored,
+      autoResetIdleDelayMs: 1000,
+    });
 
   return (
     <div>
@@ -65,31 +68,34 @@ describe("WebGL Context Loss & Restoration Recovery Suite", () => {
     vi.useFakeTimers();
 
     // Canvas 2D mock context for any 2D canvas calls
-    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation((contextId) => {
-      if (contextId === "2d") {
-        return {
-          fillStyle: "",
-          strokeStyle: "",
-          lineWidth: 1,
-          fillRect: vi.fn(),
-          strokeRect: vi.fn(),
-          clearRect: vi.fn(),
-          beginPath: vi.fn(),
-          moveTo: vi.fn(),
-          lineTo: vi.fn(),
-          arc: vi.fn(),
-          roundRect: vi.fn(),
-          stroke: vi.fn(),
-          fill: vi.fn(),
-          setLineDash: vi.fn(),
-          measureText: vi.fn().mockReturnValue({ width: 50 }),
-          quadraticCurveTo: vi.fn(),
-          bezierCurveTo: vi.fn(),
-          arcTo: vi.fn(),
-        } as unknown as CanvasRenderingContext2D;
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(
+      (contextId) => {
+        if (contextId === "2d") {
+          return fromPartial<CanvasRenderingContext2D>({
+            fillStyle: "",
+            strokeStyle: "",
+            lineWidth: 1,
+            fillRect: vi.fn(),
+            strokeRect: vi.fn(),
+            clearRect: vi.fn(),
+            beginPath: vi.fn(),
+            moveTo: vi.fn(),
+            lineTo: vi.fn(),
+            arc: vi.fn(),
+            roundRect: vi.fn(),
+            stroke: vi.fn(),
+            fill: vi.fn(),
+            setLineDash: vi.fn(),
+            measureText: vi.fn().mockReturnValue({ width: 50 }),
+            quadraticCurveTo: vi.fn(),
+            bezierCurveTo: vi.fn(),
+            arcTo: vi.fn(),
+          });
+        }
+
+        return null;
       }
-      return null;
-    });
+    );
   });
 
   afterEach(() => {
@@ -117,9 +123,15 @@ describe("WebGL Context Loss & Restoration Recovery Suite", () => {
         );
       });
 
-      const canvas = container.querySelector('[data-testid="test-canvas"]') as HTMLCanvasElement;
-      expect(container.querySelector('[data-testid="status"]')?.textContent).toBe("idle");
-      expect(container.querySelector('[data-testid="is-lost"]')?.textContent).toBe("false");
+      const canvas = container.querySelector(
+        '[data-testid="test-canvas"]'
+      ) as HTMLCanvasElement;
+      expect(
+        container.querySelector('[data-testid="status"]')?.textContent
+      ).toBe("idle");
+      expect(
+        container.querySelector('[data-testid="is-lost"]')?.textContent
+      ).toBe("false");
 
       // 1. Dispatch webglcontextlost
       await act(async () => {
@@ -128,26 +140,40 @@ describe("WebGL Context Loss & Restoration Recovery Suite", () => {
       });
 
       expect(onLost).toHaveBeenCalledTimes(1);
-      expect(container.querySelector('[data-testid="status"]')?.textContent).toBe("lost");
-      expect(container.querySelector('[data-testid="is-lost"]')?.textContent).toBe("true");
+      expect(
+        container.querySelector('[data-testid="status"]')?.textContent
+      ).toBe("lost");
+      expect(
+        container.querySelector('[data-testid="is-lost"]')?.textContent
+      ).toBe("true");
 
       // 2. Dispatch webglcontextrestored
       await act(async () => {
-        const restoredEvt = new Event("webglcontextrestored", { cancelable: true });
+        const restoredEvt = new Event("webglcontextrestored", {
+          cancelable: true,
+        });
         canvas.dispatchEvent(restoredEvt);
       });
 
       expect(onRestored).toHaveBeenCalledTimes(1);
-      expect(container.querySelector('[data-testid="status"]')?.textContent).toBe("restored");
-      expect(container.querySelector('[data-testid="recovery-count"]')?.textContent).toBe("1");
+      expect(
+        container.querySelector('[data-testid="status"]')?.textContent
+      ).toBe("restored");
+      expect(
+        container.querySelector('[data-testid="recovery-count"]')?.textContent
+      ).toBe("1");
 
       // 3. Advances to idle
       await act(async () => {
         vi.advanceTimersByTime(1000);
       });
 
-      expect(container.querySelector('[data-testid="status"]')?.textContent).toBe("idle");
-      expect(container.querySelector('[data-testid="is-lost"]')?.textContent).toBe("false");
+      expect(
+        container.querySelector('[data-testid="status"]')?.textContent
+      ).toBe("idle");
+      expect(
+        container.querySelector('[data-testid="is-lost"]')?.textContent
+      ).toBe("false");
     });
 
     it("triggers simulated context loss through triggerSimulation", async () => {
@@ -163,21 +189,27 @@ describe("WebGL Context Loss & Restoration Recovery Suite", () => {
         );
       });
 
-      const simBtn = container.querySelector('[data-testid="sim-btn"]') as HTMLButtonElement;
+      const simBtn = container.querySelector(
+        '[data-testid="sim-btn"]'
+      ) as HTMLButtonElement;
 
       await act(async () => {
         simBtn.click();
       });
 
       expect(onLost).toHaveBeenCalledTimes(1);
-      expect(container.querySelector('[data-testid="status"]')?.textContent).toBe("lost");
+      expect(
+        container.querySelector('[data-testid="status"]')?.textContent
+      ).toBe("lost");
 
       await act(async () => {
         vi.advanceTimersByTime(500);
       });
 
       expect(onRestored).toHaveBeenCalledTimes(1);
-      expect(container.querySelector('[data-testid="status"]')?.textContent).toBe("restored");
+      expect(
+        container.querySelector('[data-testid="status"]')?.textContent
+      ).toBe("restored");
     });
   });
 
@@ -207,15 +239,21 @@ describe("WebGL Context Loss & Restoration Recovery Suite", () => {
 
       // Trigger webglcontextlost on the viewer's canvas
       await act(async () => {
-        canvas?.dispatchEvent(new Event("webglcontextlost", { cancelable: true }));
+        canvas?.dispatchEvent(
+          new Event("webglcontextlost", { cancelable: true })
+        );
       });
 
       // Verify HUD banner appears indicating recovery in progress
-      expect(container.textContent).toContain("GPU Context Interrupted — Re-instantiating buffers...");
+      expect(container.textContent).toContain(
+        "GPU Context Interrupted — Re-instantiating buffers..."
+      );
 
       // Trigger webglcontextrestored
       await act(async () => {
-        canvas?.dispatchEvent(new Event("webglcontextrestored", { cancelable: true }));
+        canvas?.dispatchEvent(
+          new Event("webglcontextrestored", { cancelable: true })
+        );
       });
 
       // Verify restored banner appears
@@ -242,14 +280,18 @@ describe("WebGL Context Loss & Restoration Recovery Suite", () => {
       });
 
       const buttons = Array.from(container.querySelectorAll("button"));
-      const gpuTestBtn = buttons.find((btn) => btn.textContent?.includes("GPU Test"));
+      const gpuTestBtn = buttons.find((btn) =>
+        btn.textContent?.includes("GPU Test")
+      );
       expect(gpuTestBtn).toBeDefined();
 
       await act(async () => {
         gpuTestBtn?.click();
       });
 
-      expect(container.textContent).toContain("GPU Context Interrupted — Re-instantiating buffers...");
+      expect(container.textContent).toContain(
+        "GPU Context Interrupted — Re-instantiating buffers..."
+      );
 
       await act(async () => {
         vi.advanceTimersByTime(800);

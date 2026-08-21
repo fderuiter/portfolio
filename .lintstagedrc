@@ -1,5 +1,4 @@
 {
   "*": "prettier --ignore-unknown --write",
-  "*.{js,jsx,ts,tsx}": ["eslint --fix --no-warn-ignored"],
-  "*.{ts,tsx}": ["vitest related --run --passWithNoTests"]
+  "*.{js,jsx,ts,tsx}": ["eslint --fix --no-warn-ignored"]
 }

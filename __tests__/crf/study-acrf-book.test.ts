@@ -4,9 +4,11 @@ import {
   generateStudyAcrfBookHtml,
   generateSdtmMappingMatrix,
 } from "@/lib/crf/export-acrf";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
-import { CLINICAL_INSTRUMENTS_PRESET } from "@/lib/crf/presets/clinical-instruments";
-import { STUDY_PRESETS } from "@/lib/crf/presets";
+import {
+  ONCOLOGY_RECIST_PRESET,
+  CLINICAL_INSTRUMENTS_PRESET,
+  STUDY_PRESETS,
+} from "@/lib/crf/presets";
 
 describe("Annotated CRF (aCRF) Submission Suite & Clinical Presets", () => {
   it("should generate a valid single-form aCRF HTML document", () => {
@@ -22,7 +24,9 @@ describe("Annotated CRF (aCRF) Submission Suite & Clinical Presets", () => {
   it("should generate a complete multi-page Study aCRF Book with Table of Contents", () => {
     const html = generateStudyAcrfBookHtml(ONCOLOGY_RECIST_PRESET);
 
-    expect(html).toContain("REGULATORY SUBMISSION ANNOTATED CASE REPORT FORM BOOK (aCRF)");
+    expect(html).toContain(
+      "REGULATORY SUBMISSION ANNOTATED CASE REPORT FORM BOOK (aCRF)"
+    );
     expect(html).toContain("Table of Contents &amp; SDTM Domain Index");
     expect(html).toContain(ONCOLOGY_RECIST_PRESET.protocolNumber);
 
@@ -48,16 +52,24 @@ describe("Annotated CRF (aCRF) Submission Suite & Clinical Presets", () => {
 
   it("should properly load CLINICAL_INSTRUMENTS_PRESET with PHQ-9, ECG QTc, and SAE forms", () => {
     expect(CLINICAL_INSTRUMENTS_PRESET.forms.length).toBe(3);
-    const phq9 = CLINICAL_INSTRUMENTS_PRESET.forms.find((f) => f.id === "form_phq9");
-    const ecg = CLINICAL_INSTRUMENTS_PRESET.forms.find((f) => f.id === "form_ecg_cardio");
-    const sae = CLINICAL_INSTRUMENTS_PRESET.forms.find((f) => f.id === "form_sae_expedited");
+    const phq9 = CLINICAL_INSTRUMENTS_PRESET.forms.find(
+      (f) => f.id === "form_phq9"
+    );
+    const ecg = CLINICAL_INSTRUMENTS_PRESET.forms.find(
+      (f) => f.id === "form_ecg_cardio"
+    );
+    const sae = CLINICAL_INSTRUMENTS_PRESET.forms.find(
+      (f) => f.id === "form_sae_expedited"
+    );
 
     expect(phq9).toBeDefined();
     expect(ecg).toBeDefined();
     expect(sae).toBeDefined();
 
     // Verify preset is registered in catalog
-    const registered = STUDY_PRESETS.find((p) => p.id === "clinical_instruments");
+    const registered = STUDY_PRESETS.find(
+      (p) => p.id === "clinical_instruments"
+    );
     expect(registered).toBeDefined();
   });
 });

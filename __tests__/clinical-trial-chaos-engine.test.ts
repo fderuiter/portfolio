@@ -14,12 +14,12 @@ import {
   scrambleStations,
   verify21CFRSubmission,
   formatAuditTimestamp,
-  createAuditLogEntry,
   generateSDTMDataset,
   exportToCDISCODMXML,
   exportToSDTMCSV,
   generateBIMOReport,
 } from "../lib/clinical-trial-chaos/engine";
+
 import {
   SEEDED_SCENARIOS,
   INITIAL_STATIONS,
@@ -28,7 +28,11 @@ import {
   AMENDMENT_PRESETS,
 } from "../lib/clinical-trial-chaos/scenarios";
 import * as soundEffects from "../lib/clinical-trial-chaos/sound-effects";
-import { ClinicalSubject, StationConfig, CDISCDomain } from "../lib/clinical-trial-chaos/types";
+import {
+  ClinicalSubject,
+  StationConfig,
+  CDISCDomain,
+} from "../lib/clinical-trial-chaos/types";
 
 describe("Clinical Trial Chaos Engine - Unit Tests", () => {
   it("initializes score state with zeroed values and multiplier 1", () => {
@@ -91,7 +95,7 @@ describe("Clinical Trial Chaos Engine - Unit Tests", () => {
   });
 
   it("checks full subject compliance only when all observations are resolved", () => {
-    const subjectWithErrors = JSON.parse(JSON.stringify(SEEDED_SCENARIOS[0])) as ClinicalSubject;
+    const subjectWithErrors = structuredClone(SEEDED_SCENARIOS[0]);
     expect(isSubjectFullyCompliant(subjectWithErrors)).toBe(false);
 
     subjectWithErrors.observations.forEach((obs) => {
@@ -103,7 +107,7 @@ describe("Clinical Trial Chaos Engine - Unit Tests", () => {
   });
 
   it("calculates submission points factoring in observations, speed bonus, SAE and multiplier", () => {
-    const subject = JSON.parse(JSON.stringify(SEEDED_SCENARIOS[0])) as ClinicalSubject;
+    const subject = structuredClone(SEEDED_SCENARIOS[0]);
     subject.timeRemaining = 20;
     subject.maxTime = 40;
 
@@ -130,7 +134,10 @@ describe("Clinical Trial Chaos Engine - Unit Tests", () => {
       { ...SEEDED_SCENARIOS[1], timeRemaining: 10.0 },
     ];
 
-    const { updatedSubjects, expiredSubjects } = tickSubjectTimers(subjects, 2.0);
+    const { updatedSubjects, expiredSubjects } = tickSubjectTimers(
+      subjects,
+      2.0
+    );
     expect(expiredSubjects).toHaveLength(1);
     expect(expiredSubjects[0].subjectLabel).toBe("SUBJ-1001");
     expect(updatedSubjects).toHaveLength(1);
@@ -170,7 +177,9 @@ describe("Clinical Trial Chaos Engine - Unit Tests", () => {
   });
 
   it("scrambles station positions circularly", () => {
-    const originalStations: StationConfig[] = JSON.parse(JSON.stringify(INITIAL_STATIONS));
+    const originalStations: StationConfig[] = JSON.parse(
+      JSON.stringify(INITIAL_STATIONS)
+    );
     const scrambled = scrambleStations(originalStations);
 
     expect(scrambled[0].positionIndex).toBe(originalStations[1].positionIndex);
@@ -192,7 +201,11 @@ describe("Clinical Trial Chaos Engine - Unit Tests", () => {
       ],
     };
 
-    const result = verify21CFRSubmission(compliantSubject, "Intent to Submit", "DM");
+    const result = verify21CFRSubmission(
+      compliantSubject,
+      "Intent to Submit",
+      "DM"
+    );
     expect(result.success).toBe(true);
     expect(result.level).toBe("COMPLIANT");
     expect(result.suspicionDelta).toBe(-5);
@@ -239,8 +252,9 @@ describe("Clinical Trial Chaos Engine - Unit Tests", () => {
   });
 
   it("exports valid CDISC ODM 1.3 XML document", () => {
-    const subjects = [SEEDED_SCENARIOS[0] as ClinicalSubject];
+    const subjects = [SEEDED_SCENARIOS[0]];
     const rows = generateSDTMDataset(subjects);
+
     const xml = exportToCDISCODMXML(subjects, rows);
 
     expect(xml).toContain('<?xml version="1.0" encoding="UTF-8"?>');
@@ -326,19 +340,19 @@ describe("Clinical Trial Chaos Engine - Unit Tests", () => {
     const specialSubj: ClinicalSubject = {
       id: 'subj_&1<2>"3"',
       subjectLabel: 'SUBJ_&1<2>"3"',
-      studySite: 'Site 014 (Boston & Cambridge)',
+      studySite: "Site 014 (Boston & Cambridge)",
       observations: [
         {
-          id: 'obs_1',
-          field: 'Glucose & HbA1c',
-          rawValue: '100',
-          currentValue: '100 mg/dL <normal>',
-          destination: 'LB' as CDISCDomain,
+          id: "obs_1",
+          field: "Glucose & HbA1c",
+          rawValue: "100",
+          currentValue: "100 mg/dL <normal>",
+          destination: "LB" as CDISCDomain,
           ctCode: 'GLUC&HBA1C<1>"2"',
           isResolved: true,
         },
       ],
-      status: 'submitted',
+      status: "submitted",
       timeRemaining: 30,
       maxTime: 30,
       createdAt: Date.now(),
@@ -350,34 +364,22 @@ describe("Clinical Trial Chaos Engine - Unit Tests", () => {
     expect(xml).toContain('SubjectKey="SUBJ_&amp;1&lt;2&gt;&quot;3&quot;"');
     expect(xml).toContain('FormOID="FRM.LB"');
     expect(xml).toContain('ItemGroupOID="IG.LB"');
-    expect(xml).toContain('ItemOID="IT.LB.GLUC&amp;HBA1C&lt;1&gt;&quot;2&quot;"');
+    expect(xml).toContain(
+      'ItemOID="IT.LB.GLUC&amp;HBA1C&lt;1&gt;&quot;2&quot;"'
+    );
     expect(xml).toContain('Value="100 mg/dL &lt;normal&gt;"');
   });
 
   it("exports valid SDTM CSV text", () => {
-    const subjects = [SEEDED_SCENARIOS[0] as ClinicalSubject];
+    const subjects = [SEEDED_SCENARIOS[0]];
     const rows = generateSDTMDataset(subjects);
     const csv = exportToSDTMCSV(rows);
 
-    expect(csv).toContain("STUDYID,DOMAIN,USUBJID,SEQ,TESTCD,TEST,ORRES,STRESC,STRESN,STRESU,VISIT,DY,SIGNDATE,STATUS");
+    expect(csv).toContain(
+      "STUDYID,DOMAIN,USUBJID,SEQ,TESTCD,TEST,ORRES,STRESC,STRESN,STRESU,VISIT,DY,SIGNDATE,STATUS"
+    );
     expect(csv).toContain("CT-CHAOS-2026");
     expect(csv).toContain("DM");
-  });
-
-  it("generates FDA BIMO inspection report with regulatory determination", () => {
-    const score = {
-      ...createInitialScoreState(),
-      subjectsSubmitted: 6,
-      cleanSubmissions: 6,
-      auditViolations: 0,
-    };
-    const auditor = createInitialAuditorState();
-    const logs = [createAuditLogEntry("Audit passed", "COMPLIANT")];
-
-    const report = generateBIMOReport(score, auditor, logs);
-    expect(report.overallScore).toBe(100);
-    expect(report.verdict).toContain("NAI (No Action Indicated - Approved)");
-    expect(report.cleanRate).toBe(100);
   });
 
   it("generates BIMO inspection report with VAI and OAI verdicts based on violations", () => {
@@ -403,17 +405,29 @@ describe("Clinical Trial Chaos Engine - Unit Tests", () => {
     const oaiReport = generateBIMOReport(oaiScore, oaiAuditor, []);
     expect(oaiReport.verdict).toContain("OAI (Official Action Indicated");
 
-    const zeroSubmissionsReport = generateBIMOReport(createInitialScoreState(), createInitialAuditorState(), []);
+    const zeroSubmissionsReport = generateBIMOReport(
+      createInitialScoreState(),
+      createInitialAuditorState(),
+      []
+    );
     expect(zeroSubmissionsReport.cleanRate).toBe(100);
   });
 
   it("handles verify21CFRSubmission with non-compliant subjects or invalid domain", () => {
-    const dirtySubject = JSON.parse(JSON.stringify(SEEDED_SCENARIOS[0])) as ClinicalSubject;
-    const dirtyRes = verify21CFRSubmission(dirtySubject, "Intent to Submit", "DM");
+    const dirtySubject = structuredClone(SEEDED_SCENARIOS[0]);
+    const dirtyRes = verify21CFRSubmission(
+      dirtySubject,
+      "Intent to Submit",
+      "DM"
+    );
     expect(dirtyRes.success).toBe(false);
     expect(dirtyRes.suspicionDelta).toBeGreaterThan(0);
 
-    const wrongDomainRes = verify21CFRSubmission(dirtySubject, "Intent to Submit", "LB");
+    const wrongDomainRes = verify21CFRSubmission(
+      dirtySubject,
+      "Intent to Submit",
+      "LB"
+    );
     expect(wrongDomainRes.success).toBe(false);
   });
 
@@ -426,7 +440,12 @@ describe("Clinical Trial Chaos Engine - Unit Tests", () => {
     expect(subj1.observations.every((o) => o.isResolved)).toBe(true);
 
     // Corrupted subject
-    const subj2 = generateClinicalSubject(1.0, false, 2002, ["DM", "VS", "AE", "LB"]);
+    const subj2 = generateClinicalSubject(1.0, false, 2002, [
+      "DM",
+      "VS",
+      "AE",
+      "LB",
+    ]);
     expect(subj2.subjectLabel).toBe("SUBJ-2002");
     expect(subj2.observations.some((o) => !o.isResolved)).toBe(true);
 

@@ -1,8 +1,11 @@
 // @vitest-environment jsdom
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { fromPartial } from "@total-typescript/shoehorn";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
@@ -87,7 +90,10 @@ describe("CRT Post-Processing Pipeline & Phosphor Mask Engine", () => {
     });
 
     it("should return default calibration when storage contains invalid JSON", () => {
-      mockStorage.setItem("retro_labyrinth_crt_calibration", "INVALID_JSON_CORRUPT{");
+      mockStorage.setItem(
+        "retro_labyrinth_crt_calibration",
+        "INVALID_JSON_CORRUPT{"
+      );
       const config = loadCRTCalibration();
       expect(config.scanlinesEnabled).toBe(true);
     });
@@ -149,24 +155,37 @@ describe("CRT Post-Processing Pipeline & Phosphor Mask Engine", () => {
     let mockCtx: CanvasRenderingContext2D;
 
     beforeEach(() => {
-      mockCtx = {
+      mockCtx = fromPartial<CanvasRenderingContext2D>({
         save: vi.fn(),
         restore: vi.fn(),
         fillRect: vi.fn(),
         createRadialGradient: vi.fn(() => ({
           addColorStop: vi.fn(),
-        })),
-        createPattern: vi.fn(() => ({})),
-      } as unknown as CanvasRenderingContext2D;
+        })) as any,
+        createPattern: vi.fn(() => ({})) as any,
+      });
     });
 
     it("should gracefully handle zero dimensions without drawing", () => {
-      renderCRTEffects(mockCtx, 0, 0, DEFAULT_CRT_CALIBRATION, CRT_THEMES.emerald);
+      renderCRTEffects(
+        mockCtx,
+        0,
+        0,
+        DEFAULT_CRT_CALIBRATION,
+        CRT_THEMES.emerald
+      );
       expect(mockCtx.fillRect).not.toHaveBeenCalled();
     });
 
     it("should render scanlines, bloom, vignette, and phosphor mask without exceptions", () => {
-      renderCRTEffects(mockCtx, 240, 144, CRT_PRESETS["authentic-arcade"].config, CRT_THEMES.emerald, 10);
+      renderCRTEffects(
+        mockCtx,
+        240,
+        144,
+        CRT_PRESETS["authentic-arcade"].config,
+        CRT_THEMES.emerald,
+        10
+      );
       expect(mockCtx.save).toHaveBeenCalled();
       expect(mockCtx.restore).toHaveBeenCalled();
       expect(mockCtx.fillRect).toHaveBeenCalled();
@@ -174,7 +193,14 @@ describe("CRT Post-Processing Pipeline & Phosphor Mask Engine", () => {
     });
 
     it("should skip scanlines when disabled in clean-digital preset", () => {
-      renderCRTEffects(mockCtx, 240, 144, CRT_PRESETS["clean-digital"].config, CRT_THEMES.emerald, 0);
+      renderCRTEffects(
+        mockCtx,
+        240,
+        144,
+        CRT_PRESETS["clean-digital"].config,
+        CRT_THEMES.emerald,
+        0
+      );
       expect(mockCtx.save).toHaveBeenCalled();
     });
 
@@ -222,8 +248,8 @@ describe("CRT Post-Processing Pipeline & Phosphor Mask Engine", () => {
       expect(container.textContent).toContain("Cyberpunk Neon Deck");
 
       // Click Reset Defaults
-      const resetBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-        b.textContent?.includes("Reset Defaults")
+      const resetBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("Reset Defaults")
       );
       expect(resetBtn).toBeTruthy();
       await act(async () => {

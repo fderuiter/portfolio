@@ -6,43 +6,17 @@
 
 # Function: printDoctorReport()
 
-> **printDoctorReport**(`summary`, `ciMode?`): `void`
+> **printDoctorReport**(`summary`, `_ciMode?`): `void`
 
-Defined in: [lib/dx/doctor.ts:1398](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1398)
+Defined in: [lib/dx/doctor.ts:1835](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1835)
 
 ## Parameters
 
 ### summary
 
-#### hasFailures
+[`DiagnosticSummary`](../interfaces/DiagnosticSummary.md)
 
-`boolean`
-
-#### hasWarnings
-
-`boolean`
-
-#### results
-
-[`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)[]
-
-#### totalFailed
-
-`number`
-
-#### totalFixed
-
-`number`
-
-#### totalPassed
-
-`number`
-
-#### totalWarned
-
-`number`
-
-### ciMode?
+### \_ciMode?
 
 `boolean` = `false`
 

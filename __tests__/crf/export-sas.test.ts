@@ -11,7 +11,7 @@ import {
   exportFormToSas,
   exportStudyToSas,
 } from "@/lib/crf/export-sas";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
+import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
 import { StudyProtocol, CRFForm, CRFField } from "@/lib/crf/types";
 
 describe("CRF Studio - Automated SAS Statistical Exporter", () => {
@@ -19,7 +19,9 @@ describe("CRF Studio - Automated SAS Statistical Exporter", () => {
     it("sanitizes SAS variable and dataset names properly", () => {
       expect(sanitizeSasName("123badname")).toBe("V_123BADNAME");
       expect(sanitizeSasName("patient_weight_kg")).toBe("PATIENT_WEIGHT_KG");
-      expect(sanitizeSasName("var-with-dashes.and.dots")).toBe("VAR_WITH_DASHES_AND_DOTS");
+      expect(sanitizeSasName("var-with-dashes.and.dots")).toBe(
+        "VAR_WITH_DASHES_AND_DOTS"
+      );
       expect(sanitizeSasName("a".repeat(40), 32)).toHaveLength(32);
       expect(sanitizeSasName("")).toBe("VAR");
     });
@@ -31,7 +33,9 @@ describe("CRF Studio - Automated SAS Statistical Exporter", () => {
     });
 
     it("escapes single quotes for SAS string literals", () => {
-      expect(escapeSasString("Patient's Baseline Assessment")).toBe("Patient''s Baseline Assessment");
+      expect(escapeSasString("Patient's Baseline Assessment")).toBe(
+        "Patient''s Baseline Assessment"
+      );
       expect(escapeSasString("No quotes here")).toBe("No quotes here");
       expect(escapeSasString("")).toBe("");
     });
@@ -117,12 +121,18 @@ describe("CRF Studio - Automated SAS Statistical Exporter", () => {
 
   describe("DATA Step & Full Study Suite Generation", () => {
     it("generates a complete SAS DATA step for a CRF Form with ATTRIB and test records", () => {
-      const dmForm = ONCOLOGY_RECIST_PRESET.forms.find((f) => f.domain === "DM")!;
-      const dataStep = generateSasDataStepForForm(dmForm, ONCOLOGY_RECIST_PRESET, {
-        includeSampleData: true,
-        includeProcContents: true,
-        includeProcFreq: true,
-      });
+      const dmForm = ONCOLOGY_RECIST_PRESET.forms.find(
+        (f) => f.domain === "DM"
+      )!;
+      const dataStep = generateSasDataStepForForm(
+        dmForm,
+        ONCOLOGY_RECIST_PRESET,
+        {
+          includeSampleData: true,
+          includeProcContents: true,
+          includeProcFreq: true,
+        }
+      );
 
       expect(dataStep).toContain("DATA raw_dm");
       expect(dataStep).toContain("ATTRIB");
@@ -135,10 +145,14 @@ describe("CRF Studio - Automated SAS Statistical Exporter", () => {
     });
 
     it("exports a single form to a self-contained SAS program", () => {
-      const vsForm = ONCOLOGY_RECIST_PRESET.forms.find((f) => f.domain === "VS")!;
+      const vsForm = ONCOLOGY_RECIST_PRESET.forms.find(
+        (f) => f.domain === "VS"
+      )!;
       const sasProgram = exportFormToSas(vsForm, ONCOLOGY_RECIST_PRESET);
 
-      expect(sasProgram).toContain("/*=============================================================================");
+      expect(sasProgram).toContain(
+        "/*============================================================================="
+      );
       expect(sasProgram).toContain("PROGRAM:      create_raw_vs.sas");
       expect(sasProgram).toContain(ONCOLOGY_RECIST_PRESET.protocolNumber);
       expect(sasProgram).toContain("DATA raw_vs");
@@ -156,7 +170,9 @@ describe("CRF Studio - Automated SAS Statistical Exporter", () => {
     });
 
     it("filters to a selected form when selectedFormId option is provided", () => {
-      const aeForm = ONCOLOGY_RECIST_PRESET.forms.find((f) => f.domain === "AE")!;
+      const aeForm = ONCOLOGY_RECIST_PRESET.forms.find(
+        (f) => f.domain === "AE"
+      )!;
       const filtered = exportStudyToSas(ONCOLOGY_RECIST_PRESET, {
         selectedFormId: aeForm.id,
       });
@@ -199,16 +215,24 @@ describe("CRF Studio - Automated SAS Statistical Exporter", () => {
 
     it("expands multi-select choices into distinct dichotomous sub-variables with $NYF. format", () => {
       const usedNames = new Set<string>();
-      const expanded = getExpandedSasAttributes(multiSelectField, ONCOLOGY_RECIST_PRESET, usedNames);
+      const expanded = getExpandedSasAttributes(
+        multiSelectField,
+        ONCOLOGY_RECIST_PRESET,
+        usedNames
+      );
 
       expect(expanded).toHaveLength(3);
       expect(expanded[0].attrs.sasVarName).toBe("MH_HYPERTEN");
       expect(expanded[0].attrs.format).toBe("$NYF.");
       expect(expanded[0].attrs.length).toBe("$1");
-      expect(expanded[0].attrs.label).toBe("Medical History Category - Hypertension");
+      expect(expanded[0].attrs.label).toBe(
+        "Medical History Category - Hypertension"
+      );
 
       expect(expanded[1].attrs.sasVarName).toBe("MH_DIABETES");
-      expect(expanded[1].attrs.label).toBe("Medical History Category - Diabetes Mellitus");
+      expect(expanded[1].attrs.label).toBe(
+        "Medical History Category - Diabetes Mellitus"
+      );
 
       expect(expanded[2].attrs.sasVarName).toBe("MH_ASTHMA");
     });
@@ -228,19 +252,27 @@ describe("CRF Studio - Automated SAS Statistical Exporter", () => {
       };
 
       const usedNames = new Set<string>();
-      const expanded = getExpandedSasAttributes(longField, ONCOLOGY_RECIST_PRESET, usedNames);
+      const expanded = getExpandedSasAttributes(
+        longField,
+        ONCOLOGY_RECIST_PRESET,
+        usedNames
+      );
 
       expect(expanded).toHaveLength(2);
       expect(expanded[0].attrs.sasVarName.length).toBeLessThanOrEqual(32);
       expect(expanded[1].attrs.sasVarName.length).toBeLessThanOrEqual(32);
-      expect(expanded[0].attrs.sasVarName).not.toBe(expanded[1].attrs.sasVarName);
+      expect(expanded[0].attrs.sasVarName).not.toBe(
+        expanded[1].attrs.sasVarName
+      );
     });
 
     it("parses comma-separated multi-select EDC values accurately", () => {
       expect(parseMultiSelectValue("HYPERTEN, ASTHMA", "HYPERTEN")).toBe("Y");
       expect(parseMultiSelectValue("HYPERTEN, ASTHMA", "DIABETES")).toBe("N");
       expect(parseMultiSelectValue("HYPERTEN, ASTHMA", "ASTHMA")).toBe("Y");
-      expect(parseMultiSelectValue('"HYPERTEN", "ASTHMA"', "HYPERTEN")).toBe("Y");
+      expect(parseMultiSelectValue('"HYPERTEN", "ASTHMA"', "HYPERTEN")).toBe(
+        "Y"
+      );
       expect(parseMultiSelectValue(null, "HYPERTEN")).toBe("N");
     });
 

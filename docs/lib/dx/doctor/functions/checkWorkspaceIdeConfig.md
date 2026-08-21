@@ -8,7 +8,7 @@
 
 > **checkWorkspaceIdeConfig**(`root`, `fix?`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:1102](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1102)
+Defined in: [lib/dx/doctor.ts:1389](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1389)
 
 Check Workspace & IDE Configuration Integrity (.editorconfig, .vscode)
 

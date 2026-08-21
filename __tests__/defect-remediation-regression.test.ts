@@ -4,8 +4,12 @@ import path from "path";
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { WorkflowWizardModal } from "@/components/crf/Wizard/WorkflowWizardModal";
+import { fromAny, fromPartial } from "@total-typescript/shoehorn";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
+
 import {
   evaluateAst,
   evaluateAstWithTrace,
@@ -42,10 +46,13 @@ import {
 import { sanitizeError, sanitizeString } from "@/lib/error-sanitization";
 import { evaluateCanaryRollout } from "@/scripts/canary-analyzer";
 import { CaseStudyService } from "@/lib/services/case-study-service";
-import { exportToCDISCODMXML, generateSDTMDataset } from "@/lib/clinical-trial-chaos/engine";
+import {
+  exportToCDISCODMXML,
+  generateSDTMDataset,
+} from "@/lib/clinical-trial-chaos/engine";
 import { ClinicalSubject } from "@/lib/clinical-trial-chaos/types";
-import { exportStudyToCdiscOdmXml } from "@/lib/crf/odm-xml-serializer";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
+import { exportStudyToCdiscOdmXml } from "@/lib/crf";
+import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
 import { resolveSnippetTerminology } from "@/components/ProjectTeaserGrid";
 import { TelemetryService, _testCache } from "@/lib/services/telemetry-service";
 import { NextRequest } from "next/server";
@@ -74,10 +81,10 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
     });
 
     it("handles nullish, empty, or malformed AST nodes gracefully", () => {
-      expect(evaluateAst(null as unknown as PropAst, {})).toBe(false);
-      expect(evaluateAst(undefined as unknown as PropAst, {})).toBe(false);
-      expect(formatFormula(null as unknown as PropAst)).toBe("");
-      expect(extractVariables(null as unknown as PropAst)).toEqual([]);
+      expect(evaluateAst(fromAny(null), {})).toBe(false);
+      expect(evaluateAst(fromAny(undefined), {})).toBe(false);
+      expect(formatFormula(fromAny(null))).toBe("");
+      expect(extractVariables(fromAny(null))).toEqual([]);
       expect(areAstsEqual(null, null)).toBe(false);
       expect(areAstsEqual(undefined, { type: "var", name: "A" })).toBe(false);
     });
@@ -85,11 +92,24 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
     it("produces valid hierarchical traces on complex logical formulas", () => {
       const ast: PropAst = {
         type: "implies",
-        left: { type: "and", left: { type: "var", name: "P" }, right: { type: "var", name: "Q" } },
-        right: { type: "or", left: { type: "var", name: "R" }, right: { type: "var", name: "S" } },
+        left: {
+          type: "and",
+          left: { type: "var", name: "P" },
+          right: { type: "var", name: "Q" },
+        },
+        right: {
+          type: "or",
+          left: { type: "var", name: "R" },
+          right: { type: "var", name: "S" },
+        },
       };
 
-      const trace = evaluateAstWithTrace(ast, { P: true, Q: true, R: false, S: true });
+      const trace = evaluateAstWithTrace(ast, {
+        P: true,
+        Q: true,
+        R: false,
+        S: true,
+      });
       expect(trace.value).toBe(true);
       expect(trace.operator).toBe("→");
       expect(trace.children).toBeDefined();
@@ -99,9 +119,30 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
 
   describe("CRF Clinical AST Evaluator & Arithmetic Guards", () => {
     const mockFields: CRFField[] = [
-      { id: "f1", variableName: "HEIGHT", label: "Height (cm)", dataType: "number", columnSpan: 6, required: true },
-      { id: "f2", variableName: "WEIGHT", label: "Weight (kg)", dataType: "number", columnSpan: 6, required: true },
-      { id: "f3", variableName: "ZERO_DIV", label: "Zero Field", dataType: "number", columnSpan: 6, required: false },
+      {
+        id: "f1",
+        variableName: "HEIGHT",
+        label: "Height (cm)",
+        dataType: "number",
+        columnSpan: 6,
+        required: true,
+      },
+      {
+        id: "f2",
+        variableName: "WEIGHT",
+        label: "Weight (kg)",
+        dataType: "number",
+        columnSpan: 6,
+        required: true,
+      },
+      {
+        id: "f3",
+        variableName: "ZERO_DIV",
+        label: "Zero Field",
+        dataType: "number",
+        columnSpan: 6,
+        required: false,
+      },
     ];
 
     it("safely resolves dynamic division by zero returning explicit null instead of NaN or Infinity", () => {
@@ -115,7 +156,11 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       expect(resultZeroHeight).toBeNull();
 
       // Direct division by zero in expression
-      const resultDivZero = evaluateFormula("100 / ZERO_DIV", { ZERO_DIV: 0 }, mockFields);
+      const resultDivZero = evaluateFormula(
+        "100 / ZERO_DIV",
+        { ZERO_DIV: 0 },
+        mockFields
+      );
       expect(resultDivZero).toBeNull();
     });
 
@@ -144,7 +189,9 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
     });
 
     it("handles token spans and diagnostics for malformed clinical formulas", () => {
-      const tokens = tokenizeWithSpans("round(sqrt(HEIGHT * WEIGHT) / 3600, 2)");
+      const tokens = tokenizeWithSpans(
+        "round(sqrt(HEIGHT * WEIGHT) / 3600, 2)"
+      );
       expect(tokens.length).toBeGreaterThan(5);
       expect(tokens[0].value).toBe("round");
     });
@@ -156,14 +203,50 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       expect(isMissingOrNullFlavor(0)).toBe(false);
 
       // 1. Relational comparisons with missing / null flavor values must evaluate to false
-      expect(evaluateCondition({ fieldId: "f1", operator: "gt", value: 100 }, { f1: "ND" }, mockFields)).toBe(false);
-      expect(evaluateCondition({ fieldId: "f1", operator: "gte", value: 0 }, { f1: null }, mockFields)).toBe(false);
-      expect(evaluateCondition({ fieldId: "f1", operator: "lt", value: 50 }, { f1: "UNK" }, mockFields)).toBe(false);
-      expect(evaluateCondition({ fieldId: "f1", operator: "lte", value: 10 }, { f1: "" }, mockFields)).toBe(false);
+      expect(
+        evaluateCondition(
+          { fieldId: "f1", operator: "gt", value: 100 },
+          { f1: "ND" },
+          mockFields
+        )
+      ).toBe(false);
+      expect(
+        evaluateCondition(
+          { fieldId: "f1", operator: "gte", value: 0 },
+          { f1: null },
+          mockFields
+        )
+      ).toBe(false);
+      expect(
+        evaluateCondition(
+          { fieldId: "f1", operator: "lt", value: 50 },
+          { f1: "UNK" },
+          mockFields
+        )
+      ).toBe(false);
+      expect(
+        evaluateCondition(
+          { fieldId: "f1", operator: "lte", value: 10 },
+          { f1: "" },
+          mockFields
+        )
+      ).toBe(false);
 
       // 2. Calculations with missing / null flavor inputs must safely return null
-      expect(evaluateFormula("HEIGHT + WEIGHT", { HEIGHT: 180, WEIGHT: "ND" }, mockFields)).toBeNull();
-      expect(evaluateFormula("HEIGHT - WEIGHT", { HEIGHT: "NA", WEIGHT: 70 }, mockFields)).toBeNull();
+      expect(
+        evaluateFormula(
+          "HEIGHT + WEIGHT",
+          { HEIGHT: 180, WEIGHT: "ND" },
+          mockFields
+        )
+      ).toBeNull();
+      expect(
+        evaluateFormula(
+          "HEIGHT - WEIGHT",
+          { HEIGHT: "NA", WEIGHT: 70 },
+          mockFields
+        )
+      ).toBeNull();
 
       // 3. Edit check rules pass without triggering false-positive queries when dependent fields contain null flavors
       const nullFlavorRule = {
@@ -176,11 +259,21 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
         logicalOperator: "AND" as const,
         conditions: [{ fieldId: "f1", operator: "gt" as const, value: 0 }],
       };
-      expect(evaluateRule(nullFlavorRule, { f1: "ND" }, mockFields)).toBe(false);
+      expect(evaluateRule(nullFlavorRule, { f1: "ND" }, mockFields)).toBe(
+        false
+      );
 
       // 4. Valid numeric zero must continue to evaluate correctly
-      expect(evaluateCondition({ fieldId: "f1", operator: "gte", value: 0 }, { f1: 0 }, mockFields)).toBe(true);
-      expect(evaluateFormula("HEIGHT + 10", { HEIGHT: 0 }, mockFields)).toBe(10);
+      expect(
+        evaluateCondition(
+          { fieldId: "f1", operator: "gte", value: 0 },
+          { f1: 0 },
+          mockFields
+        )
+      ).toBe(true);
+      expect(evaluateFormula("HEIGHT + 10", { HEIGHT: 0 }, mockFields)).toBe(
+        10
+      );
     });
   });
 
@@ -213,7 +306,11 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       expect(freedKb).toBeGreaterThanOrEqual(0);
       expect(afterGc.allocatedRamKb).toBeGreaterThanOrEqual(0.4);
 
-      const { state: allocState } = allocateVariable(playing, "string", "testVar");
+      const { state: allocState } = allocateVariable(
+        playing,
+        "string",
+        "testVar"
+      );
       expect(allocState.allocatedRamKb).toBeGreaterThan(playing.allocatedRamKb);
     });
   });
@@ -224,7 +321,7 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       expect(Number.isFinite(boundedNaN.x)).toBe(true);
       expect(Number.isFinite(boundedNaN.y)).toBe(true);
 
-      const boundedUndef = clampBounds(undefined as unknown as number, null as unknown as number);
+      const boundedUndef = clampBounds(fromAny(undefined), fromAny(null));
       expect(Number.isFinite(boundedUndef.x)).toBe(true);
       expect(Number.isFinite(boundedUndef.y)).toBe(true);
     });
@@ -260,15 +357,19 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
     it("scrubs nested system paths and cause chains", () => {
       const originalNodeEnv = process.env.NODE_ENV;
       try {
-        (process.env as Record<string, string | undefined>).NODE_ENV = "production";
+        (process.env as Record<string, string | undefined>).NODE_ENV =
+          "production";
 
-        const rawMessage = "Failed loading file /Users/fred/Code/portfolio/lib/db.ts: connect ECONNREFUSED";
+        const rawMessage =
+          "Failed loading file /Users/fred/Code/portfolio/lib/db.ts: connect ECONNREFUSED";
         const sanitizedStr = sanitizeString(rawMessage);
         expect(sanitizedStr).not.toContain("/Users/fred");
         expect(sanitizedStr).toContain("[scrubbed]");
 
         const rootError = new Error("Database error at /app/server/secret.key");
-        const wrappedError = new Error("Top level failure at /home/ubuntu/app/server.ts");
+        const wrappedError = new Error(
+          "Top level failure at /home/ubuntu/app/server.ts"
+        );
         wrappedError.cause = rootError;
 
         const sanitized = sanitizeError(wrappedError);
@@ -276,7 +377,8 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
         expect(sanitized.cause).toBeDefined();
         expect((sanitized.cause as Error).message).not.toContain("/app/server");
       } finally {
-        (process.env as Record<string, string | undefined>).NODE_ENV = originalNodeEnv;
+        (process.env as Record<string, string | undefined>).NODE_ENV =
+          originalNodeEnv;
       }
     });
   });
@@ -330,7 +432,10 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
 
       // Trigger Escape keydown on the dialog container
       await act(async () => {
-        const escEvent = new KeyboardEvent("keydown", { key: "Escape", bubbles: true });
+        const escEvent = new KeyboardEvent("keydown", {
+          key: "Escape",
+          bubbles: true,
+        });
         dialog.dispatchEvent(escEvent);
       });
 
@@ -354,14 +459,20 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
 
       // Dispatch ArrowRight keydown
       await act(async () => {
-        const arrowRight = new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true });
+        const arrowRight = new KeyboardEvent("keydown", {
+          key: "ArrowRight",
+          bubbles: true,
+        });
         dialog.dispatchEvent(arrowRight);
       });
       expect(container.textContent).toContain("Stage 2 of 5");
 
       // Dispatch ArrowLeft keydown
       await act(async () => {
-        const arrowLeft = new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true });
+        const arrowLeft = new KeyboardEvent("keydown", {
+          key: "ArrowLeft",
+          bubbles: true,
+        });
         dialog.dispatchEvent(arrowLeft);
       });
       expect(container.textContent).toContain("Stage 1 of 5");
@@ -374,7 +485,10 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
 
       // Dispatch ArrowRight keydown from inside the text input
       await act(async () => {
-        const arrowRight = new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true });
+        const arrowRight = new KeyboardEvent("keydown", {
+          key: "ArrowRight",
+          bubbles: true,
+        });
         input.dispatchEvent(arrowRight);
       });
       // The stage should NOT change because focus is on an input
@@ -441,7 +555,10 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       document.body.appendChild(containerBoundary);
 
       // Event target inside simulator boundary
-      const eventInside = new KeyboardEvent("keydown", { key: "?", bubbles: true });
+      const eventInside = new KeyboardEvent("keydown", {
+        key: "?",
+        bubbles: true,
+      });
       innerCanvasControl.dispatchEvent(eventInside);
       handleGlobalKeyDown(eventInside);
 
@@ -450,7 +567,10 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       // Event target outside boundary
       const outsideButton = document.createElement("button");
       document.body.appendChild(outsideButton);
-      const eventOutside = new KeyboardEvent("keydown", { key: "?", bubbles: true });
+      const eventOutside = new KeyboardEvent("keydown", {
+        key: "?",
+        bubbles: true,
+      });
       outsideButton.dispatchEvent(eventOutside);
       handleGlobalKeyDown(eventOutside);
 
@@ -605,7 +725,8 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       expect(uniqueSectionIds.size).toBe(generatedSectionIds.length);
 
       // Verify high-entropy UUID format
-      const uuidPattern = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
+      const uuidPattern =
+        /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
       generatedFieldIds.forEach((id) => {
         expect(id).toMatch(uuidPattern);
       });
@@ -617,7 +738,10 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
 
   describe("RetroLabyrinth Canvas Loop Pathfinding Memoization", () => {
     it("ensures Traveling Salesman pathfinding tour calculation is memoized at component level", () => {
-      const retroLabyrinthPath = path.resolve(__dirname, "../components/RetroLabyrinth.tsx");
+      const retroLabyrinthPath = path.resolve(
+        __dirname,
+        "../components/RetroLabyrinth.tsx"
+      );
       const code = fs.readFileSync(retroLabyrinthPath, "utf-8");
 
       expect(code).toContain("useMemo");
@@ -627,7 +751,10 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
 
       // Verify computeShortestTour is not invoked inside the real-time canvas drawing loop
       const loopStart = code.indexOf("const loop = ");
-      const loopEnd = code.indexOf("animFrameRef.current = requestAnimationFrame(loop);", loopStart);
+      const loopEnd = code.indexOf(
+        "animFrameRef.current = requestAnimationFrame(loop);",
+        loopStart
+      );
       const loopBody = code.slice(loopStart, loopEnd);
 
       expect(loopBody).not.toContain("computeShortestTour(");
@@ -642,7 +769,14 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
         subjectLabel: "1",
         studySite: "Site 001 (Main)",
         observations: [
-          { id: "o-1", field: "Weight", rawValue: "70", currentValue: "70 kg", destination: "VS", isResolved: true },
+          {
+            id: "o-1",
+            field: "Weight",
+            rawValue: "70",
+            currentValue: "70 kg",
+            destination: "VS",
+            isResolved: true,
+          },
         ],
         status: "submitted",
         timeRemaining: 30,
@@ -655,7 +789,14 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
         subjectLabel: "10",
         studySite: "Site 001 (Main)",
         observations: [
-          { id: "o-10", field: "Weight", rawValue: "85", currentValue: "85 kg (subj 10 data)", destination: "VS", isResolved: true },
+          {
+            id: "o-10",
+            field: "Weight",
+            rawValue: "85",
+            currentValue: "85 kg (subj 10 data)",
+            destination: "VS",
+            isResolved: true,
+          },
         ],
         status: "submitted",
         timeRemaining: 30,
@@ -668,7 +809,14 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
         subjectLabel: "11",
         studySite: "Site 001 (Main)",
         observations: [
-          { id: "o-11", field: "Weight", rawValue: "92", currentValue: "92 kg (subj 11 data)", destination: "VS", isResolved: true },
+          {
+            id: "o-11",
+            field: "Weight",
+            rawValue: "92",
+            currentValue: "92 kg (subj 11 data)",
+            destination: "VS",
+            isResolved: true,
+          },
         ],
         status: "submitted",
         timeRemaining: 30,
@@ -692,37 +840,37 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
         version: 'v&1"2"',
         visits: [
           {
-            id: 'v_&1<2>',
-            oid: 'SE.VIS&1<2>',
-            name: 'Visit &1',
-            visitType: 'Scheduled' as const,
+            id: "v_&1<2>",
+            oid: "SE.VIS&1<2>",
+            name: "Visit &1",
+            visitType: "Scheduled" as const,
             targetDay: 1,
             windowBefore: 0,
             windowAfter: 0,
-            assignedFormIds: ['f_&1<2>'],
+            assignedFormIds: ["f_&1<2>"],
           },
         ],
         forms: [
           {
-            id: 'f_&1<2>',
-            name: 'Form &1',
-            description: 'Special test form',
-            domain: 'DM&LB',
-            version: '1.0',
+            id: "f_&1<2>",
+            name: "Form &1",
+            description: "Special test form",
+            domain: "DM&LB",
+            version: "1.0",
             rules: [],
             sections: [
               {
-                id: 'sec_&1',
-                title: 'Section &1',
+                id: "sec_&1",
+                title: "Section &1",
                 fields: [
                   {
-                    id: 'field_&1',
+                    id: "field_&1",
                     variableName: 'VAR_&1<2>"3"',
-                    label: 'Label &1 <2>',
-                    dataType: 'text' as const,
+                    label: "Label &1 <2>",
+                    dataType: "text" as const,
                     columnSpan: 6,
                     required: true,
-                    codelistId: 'CL_&1',
+                    codelistId: "CL_&1",
                   },
                 ],
               },
@@ -736,13 +884,21 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       expect(xml).toContain('FileOID="ODM.P&amp;1&lt;2&gt;&quot;3&quot;.');
       expect(xml).toContain('Study OID="STUDY.P_1_2__3_"');
       expect(xml).toContain('MetaDataVersion OID="MDV.v&amp;1&quot;2&quot;"');
-      expect(xml).toContain('StudyEventRef StudyEventOID="SE.VIS&amp;1&lt;2&gt;"');
+      expect(xml).toContain(
+        'StudyEventRef StudyEventOID="SE.VIS&amp;1&lt;2&gt;"'
+      );
       expect(xml).toContain('FormRef FormOID="FORM.f_&amp;1&lt;2&gt;"');
       expect(xml).toContain('FormDef OID="FORM.f_&amp;1&lt;2&gt;"');
-      expect(xml).toContain('ItemGroupRef ItemGroupOID="IG.DM&amp;LB.sec_&amp;1"');
+      expect(xml).toContain(
+        'ItemGroupRef ItemGroupOID="IG.DM&amp;LB.sec_&amp;1"'
+      );
       expect(xml).toContain('ItemGroupDef OID="IG.DM&amp;LB.sec_&amp;1"');
-      expect(xml).toContain('ItemRef ItemOID="IT.VAR_&amp;1&lt;2&gt;&quot;3&quot;"');
-      expect(xml).toContain('ItemDef OID="IT.VAR_&amp;1&lt;2&gt;&quot;3&quot;"');
+      expect(xml).toContain(
+        'ItemRef ItemOID="IT.VAR_&amp;1&lt;2&gt;&quot;3&quot;"'
+      );
+      expect(xml).toContain(
+        'ItemDef OID="IT.VAR_&amp;1&lt;2&gt;&quot;3&quot;"'
+      );
       expect(xml).toContain('CodeListOID="CL_&amp;1"');
     });
   });
@@ -781,22 +937,23 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
             id: "sec_vs",
             title: "Measurements",
             fields: [
-              {
+              fromPartial<CRFField>({
                 id: "f1",
                 label: "Systolic BP",
                 dataType: "number",
                 required: true,
                 columnSpan: 6,
                 // variableName undefined
-              } as CRFField,
+              }),
               {
                 id: "f2",
-                variableName: null as unknown as string,
+                variableName: fromAny(null),
                 label: "Diastolic BP",
                 dataType: "number",
                 required: false,
                 columnSpan: 6,
               },
+
               {
                 id: "f3",
                 variableName: "",
@@ -856,7 +1013,9 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       expect(res.headers?.["X-RateLimit-Remaining"]).toBe("99");
 
       // Verify circuit breaker timestamp
-      expect(_testCache.circuitBreakerCooldownUntil).toBeGreaterThanOrEqual(now);
+      expect(_testCache.circuitBreakerCooldownUntil).toBeGreaterThanOrEqual(
+        now
+      );
     });
   });
 });

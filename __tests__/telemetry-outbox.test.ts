@@ -43,7 +43,10 @@ describe("TelemetryOutbox Contract Test Suite", () => {
 
   describe("1. FIFO Capacity Bounding & Queue Management", () => {
     it("initializes with default capacity of 50 items", () => {
-      const outbox = new TelemetryOutbox({ storage: null, autoFlushOnUnload: false });
+      const outbox = new TelemetryOutbox({
+        storage: null,
+        autoFlushOnUnload: false,
+      });
       expect(outbox.getCapacity()).toBe(DEFAULT_OUTBOX_CAPACITY);
       expect(DEFAULT_OUTBOX_CAPACITY).toBe(50);
       expect(outbox.size).toBe(0);
@@ -79,8 +82,16 @@ describe("TelemetryOutbox Contract Test Suite", () => {
       });
 
       outbox.enqueue({ projectSlug: "event-1", eventType: "page_view" });
-      outbox.enqueue({ projectSlug: "event-2", eventType: "project_click", retries: 1 });
-      outbox.enqueue({ projectSlug: "event-3", eventType: "route_error", retries: 2 });
+      outbox.enqueue({
+        projectSlug: "event-2",
+        eventType: "project_click",
+        retries: 1,
+      });
+      outbox.enqueue({
+        projectSlug: "event-3",
+        eventType: "route_error",
+        retries: 2,
+      });
 
       expect(outbox.size).toBe(3);
       expect(outbox.peek()?.projectSlug).toBe("event-1");
@@ -90,7 +101,9 @@ describe("TelemetryOutbox Contract Test Suite", () => {
 
       expect(outbox.size).toBe(3);
       const queue = outbox.getQueue();
-      expect(queue.map((item: TelemetryOutboxItem) => item.projectSlug)).toEqual(["event-2", "event-3", "event-4"]);
+      expect(
+        queue.map((item: TelemetryOutboxItem) => item.projectSlug)
+      ).toEqual(["event-2", "event-3", "event-4"]);
       expect(queue[0].retries).toBe(1);
       expect(queue[1].retries).toBe(2);
       expect(queue[2].retries).toBe(0);
@@ -115,7 +128,12 @@ describe("TelemetryOutbox Contract Test Suite", () => {
       expect(outbox.size).toBe(4);
 
       const queue = outbox.getQueue();
-      expect(queue.map((i: TelemetryOutboxItem) => i.projectSlug)).toEqual(["item-5", "item-6", "item-7", "item-8"]);
+      expect(queue.map((i: TelemetryOutboxItem) => i.projectSlug)).toEqual([
+        "item-5",
+        "item-6",
+        "item-7",
+        "item-8",
+      ]);
 
       // Ignore invalid capacity <= 0
       outbox.setCapacity(0);
@@ -127,7 +145,10 @@ describe("TelemetryOutbox Contract Test Suite", () => {
     });
 
     it("synchronously clears queue and resets metrics", () => {
-      const outbox = new TelemetryOutbox({ storage: null, autoFlushOnUnload: false });
+      const outbox = new TelemetryOutbox({
+        storage: null,
+        autoFlushOnUnload: false,
+      });
       outbox.enqueue({ projectSlug: "test", eventType: "page_view" });
       expect(outbox.size).toBe(1);
 
@@ -158,7 +179,10 @@ describe("TelemetryOutbox Contract Test Suite", () => {
         onRollback,
       });
 
-      const item: TelemetryOutboxItem = { projectSlug: "fast-path", eventType: "page_view" };
+      const item: TelemetryOutboxItem = {
+        projectSlug: "fast-path",
+        eventType: "page_view",
+      };
       const result = await outbox.send(item);
 
       expect(result).toBe(true);
@@ -172,7 +196,9 @@ describe("TelemetryOutbox Contract Test Suite", () => {
     });
 
     it("enqueues item and schedules retry worker on network error during direct send", async () => {
-      const mockTransport: TelemetryTransport = vi.fn().mockRejectedValue(new Error("Network Down"));
+      const mockTransport: TelemetryTransport = vi
+        .fn()
+        .mockRejectedValue(new Error("Network Down"));
       const onRollback = vi.fn();
 
       const outbox = new TelemetryOutbox({
@@ -183,16 +209,21 @@ describe("TelemetryOutbox Contract Test Suite", () => {
         onRollback,
       });
 
-      const item: TelemetryOutboxItem = { projectSlug: "offline-event", eventType: "page_view" };
+      const item: TelemetryOutboxItem = {
+        projectSlug: "offline-event",
+        eventType: "page_view",
+      };
       const result = await outbox.send(item);
 
       expect(result).toBe(false);
       expect(outbox.size).toBe(1);
-      expect(outbox.getQueue()[0]).toEqual(expect.objectContaining({
-        projectSlug: "offline-event",
-        eventType: "page_view",
-        retries: 0,
-      }));
+      expect(outbox.getQueue()[0]).toEqual(
+        expect.objectContaining({
+          projectSlug: "offline-event",
+          eventType: "page_view",
+          retries: 0,
+        })
+      );
       expect(onRollback).not.toHaveBeenCalled();
 
       outbox.destroy();
@@ -202,13 +233,19 @@ describe("TelemetryOutbox Contract Test Suite", () => {
   describe("3. Exponential Backoff Retries on 5xx & Network Errors", () => {
     it("retries failed items with exponential backoff delays and marks success upon recovery", async () => {
       let callCount = 0;
-      const mockTransport: TelemetryTransport = vi.fn().mockImplementation(async () => {
-        callCount++;
-        if (callCount < 3) {
-          return { ok: false, status: 503, statusText: "Service Unavailable" };
-        }
-        return { ok: true, status: 200 };
-      });
+      const mockTransport: TelemetryTransport = vi
+        .fn()
+        .mockImplementation(async () => {
+          callCount++;
+          if (callCount < 3) {
+            return {
+              ok: false,
+              status: 503,
+              statusText: "Service Unavailable",
+            };
+          }
+          return { ok: true, status: 200 };
+        });
 
       const onSuccess = vi.fn();
       const onRollback = vi.fn();
@@ -268,7 +305,10 @@ describe("TelemetryOutbox Contract Test Suite", () => {
         onSuccess,
       });
 
-      const initialItem: TelemetryOutboxItem = { projectSlug: "failing-event", eventType: "page_view" };
+      const initialItem: TelemetryOutboxItem = {
+        projectSlug: "failing-event",
+        eventType: "page_view",
+      };
       outbox.enqueue(initialItem);
 
       // Attempt 1: retries 0 -> 1 (fails)
@@ -289,7 +329,10 @@ describe("TelemetryOutbox Contract Test Suite", () => {
       expect(outbox.size).toBe(0);
       expect(onRollback).toHaveBeenCalledTimes(1);
       expect(onRollback).toHaveBeenCalledWith(
-        expect.objectContaining({ projectSlug: "failing-event", eventType: "page_view" }),
+        expect.objectContaining({
+          projectSlug: "failing-event",
+          eventType: "page_view",
+        }),
         "max_retries_exceeded",
         expect.anything()
       );
@@ -313,7 +356,11 @@ describe("TelemetryOutbox Contract Test Suite", () => {
         maxRetries: 5,
       });
 
-      outbox.enqueue({ projectSlug: "clamp-test", eventType: "page_view", retries: 3 });
+      outbox.enqueue({
+        projectSlug: "clamp-test",
+        eventType: "page_view",
+        retries: 3,
+      });
       // 1000 * 2^3 = 8000ms, but clamped to 2500ms
       await vi.advanceTimersByTimeAsync(2400);
       expect(mockTransport).not.toHaveBeenCalled();
@@ -334,7 +381,9 @@ describe("TelemetryOutbox Contract Test Suite", () => {
       });
 
       const onRollback = vi.fn();
-      const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const consoleWarnSpy = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
 
       const outbox = new TelemetryOutbox({
         transport: mockTransport,
@@ -343,7 +392,10 @@ describe("TelemetryOutbox Contract Test Suite", () => {
         onRollback,
       });
 
-      const item: TelemetryOutboxItem = { projectSlug: "rate-limited-slug", eventType: "project_click" };
+      const item: TelemetryOutboxItem = {
+        projectSlug: "rate-limited-slug",
+        eventType: "project_click",
+      };
       const directSendResult = await outbox.send(item);
 
       expect(directSendResult).toBe(false);
@@ -357,13 +409,17 @@ describe("TelemetryOutbox Contract Test Suite", () => {
     });
 
     it("drops 429 items during batch retry flush while allowing other items to process", async () => {
-      const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-      const mockTransport: TelemetryTransport = vi.fn().mockImplementation(async (item: TelemetryOutboxItem) => {
-        if (item.projectSlug === "rate-limited") {
-          return { ok: false, status: 429 };
-        }
-        return { ok: true, status: 200 };
-      });
+      const consoleWarnSpy = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
+      const mockTransport: TelemetryTransport = vi
+        .fn()
+        .mockImplementation(async (item: TelemetryOutboxItem) => {
+          if (item.projectSlug === "rate-limited") {
+            return { ok: false, status: 429 };
+          }
+          return { ok: true, status: 200 };
+        });
 
       const onRollback = vi.fn();
       const onSuccess = vi.fn();
@@ -406,7 +462,11 @@ describe("TelemetryOutbox Contract Test Suite", () => {
       });
 
       outbox1.enqueue({ projectSlug: "persisted-1", eventType: "page_view" });
-      outbox1.enqueue({ projectSlug: "persisted-2", eventType: "project_click", retries: 1 });
+      outbox1.enqueue({
+        projectSlug: "persisted-2",
+        eventType: "project_click",
+        retries: 1,
+      });
 
       const raw = mockStorage.getItem(storageKey);
       expect(raw).toBeTruthy();
@@ -427,8 +487,15 @@ describe("TelemetryOutbox Contract Test Suite", () => {
 
       expect(outbox2.size).toBe(2);
       expect(outbox2.getQueue()).toEqual([
-        expect.objectContaining({ projectSlug: "persisted-1", eventType: "page_view" }),
-        expect.objectContaining({ projectSlug: "persisted-2", eventType: "project_click", retries: 1 }),
+        expect.objectContaining({
+          projectSlug: "persisted-1",
+          eventType: "page_view",
+        }),
+        expect.objectContaining({
+          projectSlug: "persisted-2",
+          eventType: "project_click",
+          retries: 1,
+        }),
       ]);
 
       outbox2.clear();
@@ -441,7 +508,9 @@ describe("TelemetryOutbox Contract Test Suite", () => {
       const storageKey = "corrupt_telemetry_outbox";
       mockStorage.setItem(storageKey, "{invalid-json-data");
 
-      const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const consoleWarnSpy = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
 
       const outbox = new TelemetryOutbox({
         storage: mockStorage,
@@ -465,7 +534,9 @@ describe("TelemetryOutbox Contract Test Suite", () => {
         removeItem: () => {},
       };
 
-      const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const consoleWarnSpy = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
 
       const outbox = new TelemetryOutbox({
         storage: throwingStorage,
@@ -485,7 +556,9 @@ describe("TelemetryOutbox Contract Test Suite", () => {
 
   describe("6. Unload Beacons & Keepalive Dispatching", () => {
     it("flushes queue with keepalive: true on window pagehide and beforeunload events", async () => {
-      const mockTransport: TelemetryTransport = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+      const mockTransport: TelemetryTransport = vi
+        .fn()
+        .mockResolvedValue({ ok: true, status: 200 });
 
       const outbox = new TelemetryOutbox({
         transport: mockTransport,
@@ -508,7 +581,9 @@ describe("TelemetryOutbox Contract Test Suite", () => {
     });
 
     it("flushes queue with keepalive: true on document visibilitychange to hidden", async () => {
-      const mockTransport: TelemetryTransport = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+      const mockTransport: TelemetryTransport = vi
+        .fn()
+        .mockResolvedValue({ ok: true, status: 200 });
 
       const outbox = new TelemetryOutbox({
         transport: mockTransport,
@@ -516,7 +591,10 @@ describe("TelemetryOutbox Contract Test Suite", () => {
         autoFlushOnUnload: true,
       });
 
-      outbox.enqueue({ projectSlug: "visibility-beacon", eventType: "project_click" });
+      outbox.enqueue({
+        projectSlug: "visibility-beacon",
+        eventType: "project_click",
+      });
       expect(outbox.size).toBe(1);
 
       Object.defineProperty(document, "visibilityState", {
@@ -537,7 +615,9 @@ describe("TelemetryOutbox Contract Test Suite", () => {
 
   describe("7. Lifecycle & Clean Destruction", () => {
     it("unregisters event listeners and cancels timers on destroy()", async () => {
-      const mockTransport = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+      const mockTransport = vi
+        .fn()
+        .mockResolvedValue({ ok: true, status: 200 });
       const removeEventListenerSpy = vi.spyOn(window, "removeEventListener");
 
       const outbox = new TelemetryOutbox({
@@ -553,12 +633,19 @@ describe("TelemetryOutbox Contract Test Suite", () => {
       outbox.destroy();
 
       expect(outbox.isDestroyed).toBe(true);
-      expect(removeEventListenerSpy).toHaveBeenCalledWith("pagehide", expect.any(Function));
-      expect(removeEventListenerSpy).toHaveBeenCalledWith("beforeunload", expect.any(Function));
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        "pagehide",
+        expect.any(Function)
+      );
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        "beforeunload",
+        expect.any(Function)
+      );
 
       // Advance timers to confirm no background retry runs after destroy
-      (mockTransport as unknown as ReturnType<typeof vi.fn>).mockClear();
+      vi.mocked(mockTransport).mockClear();
       await vi.advanceTimersByTimeAsync(5000);
+
       expect(mockTransport).not.toHaveBeenCalled();
 
       // Subsequent actions on destroyed instance should be safe no-ops

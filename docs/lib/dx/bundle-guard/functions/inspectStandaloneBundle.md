@@ -8,7 +8,7 @@
 
 > **inspectStandaloneBundle**(`workspaceRoot`): `object`
 
-Defined in: [lib/dx/bundle-guard.ts:149](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bundle-guard.ts#L149)
+Defined in: [lib/dx/bundle-guard.ts:172](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bundle-guard.ts#L172)
 
 Inspects standalone JavaScript bundle assets in public/ and checks budget limits.
 

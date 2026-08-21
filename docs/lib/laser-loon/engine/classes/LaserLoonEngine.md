@@ -6,7 +6,7 @@
 
 # Class: LaserLoonEngine
 
-Defined in: [lib/laser-loon/engine.ts:682](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L682)
+Defined in: [lib/laser-loon/engine.ts:681](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L681)
 
 Base abstract class and typed EventBus for all headless arcade game engines.
 Zero framework dependencies. Testable in pure Node.js/Vitest.
@@ -21,7 +21,7 @@ Zero framework dependencies. Testable in pure Node.js/Vitest.
 
 > **new LaserLoonEngine**(`config?`): `LaserLoonEngine`
 
-Defined in: [lib/laser-loon/engine.ts:689](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L689)
+Defined in: [lib/laser-loon/engine.ts:688](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L688)
 
 #### Parameters
 
@@ -67,7 +67,7 @@ Defined in: [lib/arcade/core/engine.ts:7](https://github.com/fderuiter/portfolio
 
 > **createSnapshot**(): [`LaserLoonSnapshot`](../interfaces/LaserLoonSnapshot.md)
 
-Defined in: [lib/laser-loon/engine.ts:893](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L893)
+Defined in: [lib/laser-loon/engine.ts:892](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L892)
 
 Generates a fresh immutable state snapshot.
 
@@ -156,7 +156,7 @@ Reference is preserved until notifySubscribers() is explicitly called.
 
 > **init**(): `void`
 
-Defined in: [lib/laser-loon/engine.ts:725](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L725)
+Defined in: [lib/laser-loon/engine.ts:724](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L724)
 
 Initializes engine resources, object pools, and audio bindings.
 
@@ -192,7 +192,7 @@ Invalidates cached snapshot so the next getSnapshot() recomputes fresh state.
 
 > **launchIceBlock**(`x`, `y`): `void`
 
-Defined in: [lib/laser-loon/engine.ts:801](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L801)
+Defined in: [lib/laser-loon/engine.ts:800](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L800)
 
 #### Parameters
 
@@ -266,7 +266,7 @@ Subscribes to a typed one-shot action event (e.g. sfx, haptic, screen shake).
 
 > **render**(`ctx`, `_alpha`): `void`
 
-Defined in: [lib/laser-loon/engine.ts:861](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L861)
+Defined in: [lib/laser-loon/engine.ts:860](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L860)
 
 Renders in-world graphics to the 2D canvas with sub-frame alpha interpolation.
 
@@ -326,7 +326,7 @@ Handles canvas dimension and device pixel ratio resize events.
 
 > **setAim**(`x`, `y`): `void`
 
-Defined in: [lib/laser-loon/engine.ts:754](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L754)
+Defined in: [lib/laser-loon/engine.ts:753](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L753)
 
 #### Parameters
 
@@ -348,7 +348,7 @@ Defined in: [lib/laser-loon/engine.ts:754](https://github.com/fderuiter/portfoli
 
 > **setLaserType**(`type`): `void`
 
-Defined in: [lib/laser-loon/engine.ts:763](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L763)
+Defined in: [lib/laser-loon/engine.ts:762](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L762)
 
 #### Parameters
 
@@ -366,7 +366,7 @@ Defined in: [lib/laser-loon/engine.ts:763](https://github.com/fderuiter/portfoli
 
 > **setLoonTargetY**(`y`): `void`
 
-Defined in: [lib/laser-loon/engine.ts:759](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L759)
+Defined in: [lib/laser-loon/engine.ts:758](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L758)
 
 #### Parameters
 
@@ -384,7 +384,7 @@ Defined in: [lib/laser-loon/engine.ts:759](https://github.com/fderuiter/portfoli
 
 > **spawnExplosion**(`x`, `y`, `color`, `count?`, `isIce?`, `isStar?`): `void`
 
-Defined in: [lib/laser-loon/engine.ts:768](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L768)
+Defined in: [lib/laser-loon/engine.ts:767](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L767)
 
 #### Parameters
 
@@ -422,7 +422,7 @@ Defined in: [lib/laser-loon/engine.ts:768](https://github.com/fderuiter/portfoli
 
 > **startGame**(): `void`
 
-Defined in: [lib/laser-loon/engine.ts:729](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L729)
+Defined in: [lib/laser-loon/engine.ts:728](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L728)
 
 #### Returns
 
@@ -458,7 +458,7 @@ Subscribes a listener to snapshot state updates (React useSyncExternalStore).
 
 > **update**(`dt`): `void`
 
-Defined in: [lib/laser-loon/engine.ts:817](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L817)
+Defined in: [lib/laser-loon/engine.ts:816](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L816)
 
 Advances deterministic simulation physics by fixed delta time dt (in seconds).
 

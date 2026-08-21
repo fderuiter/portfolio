@@ -37,7 +37,4 @@ export {
   type ClinicalFormulaPreset,
 } from "./formula-presets";
 
-export {
-  lintForm,
-  type DiagnosticItem,
-} from "./form-linter";
+export { lintForm, type DiagnosticItem } from "./form-linter";

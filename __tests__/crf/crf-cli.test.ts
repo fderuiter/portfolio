@@ -15,7 +15,7 @@ import {
   executeCliString,
   stripAnsi,
 } from "@/lib/crf/cli-engine";
-import { getOncologyPresetSync } from "@/lib/crf/presets/loader";
+import { getOncologyPresetSync } from "@/lib/crf/presets";
 import { StudyProtocol } from "@/lib/crf/types";
 
 describe("CRF CLI & Headless Command Engine", () => {
@@ -60,13 +60,24 @@ describe("CRF CLI & Headless Command Engine", () => {
   });
 
   it("scaffolds CDASH domain forms and respects --dry-run", () => {
-    const res = executeAddFormCommand(sampleStudy, "PE", "Physical Examination", { dryRun: true });
+    const res = executeAddFormCommand(
+      sampleStudy,
+      "PE",
+      "Physical Examination",
+      { dryRun: true }
+    );
     expect(res.success).toBe(true);
     expect(res.data).toBeDefined();
     expect(res.updatedStudy?.forms.length).toBe(sampleStudy.forms.length); // Dry run: study unchanged
 
-    const realRes = executeAddFormCommand(sampleStudy, "PE", "Physical Examination");
-    expect(realRes.updatedStudy?.forms.length).toBe(sampleStudy.forms.length + 1);
+    const realRes = executeAddFormCommand(
+      sampleStudy,
+      "PE",
+      "Physical Examination"
+    );
+    expect(realRes.updatedStudy?.forms.length).toBe(
+      sampleStudy.forms.length + 1
+    );
   });
 
   it("removes form and updates study", () => {
@@ -90,7 +101,9 @@ describe("CRF CLI & Headless Command Engine", () => {
     expect(res.updatedStudy).toBeDefined();
 
     const vsForm = res.updatedStudy?.forms.find((f) => f.domain === "VS");
-    const tempField = vsForm?.sections.flatMap((s) => s.fields).find((f) => f.variableName === "TEMPC");
+    const tempField = vsForm?.sections
+      .flatMap((s) => s.fields)
+      .find((f) => f.variableName === "TEMPC");
     expect(tempField).toBeDefined();
     expect(tempField?.unit).toBe("C");
     expect(tempField?.required).toBe(true);
@@ -100,27 +113,57 @@ describe("CRF CLI & Headless Command Engine", () => {
     const res = executeRemoveFieldCommand(sampleStudy, "VS", "SYSBP");
     expect(res.success).toBe(true);
     const vsForm = res.updatedStudy?.forms.find((f) => f.domain === "VS");
-    expect(vsForm?.sections.flatMap((s) => s.fields).some((f) => f.variableName === "SYSBP")).toBe(false);
+    expect(
+      vsForm?.sections
+        .flatMap((s) => s.fields)
+        .some((f) => f.variableName === "SYSBP")
+    ).toBe(false);
   });
 
   it("manages visits through executeVisitCommand", () => {
-    const addRes = executeVisitCommand(sampleStudy, "add", ["Cycle 4 Day 1", "--day", "84", "--win", "3"]);
+    const addRes = executeVisitCommand(sampleStudy, "add", [
+      "Cycle 4 Day 1",
+      "--day",
+      "84",
+      "--win",
+      "3",
+    ]);
     expect(addRes.success).toBe(true);
-    expect(addRes.updatedStudy?.visits.some((v) => v.name === "Cycle 4 Day 1")).toBe(true);
+    expect(
+      addRes.updatedStudy?.visits.some((v) => v.name === "Cycle 4 Day 1")
+    ).toBe(true);
 
-    const assignRes = executeVisitCommand(addRes.updatedStudy!, "assign", ["Cycle 4 Day 1", "DM", "VS"]);
+    const assignRes = executeVisitCommand(addRes.updatedStudy!, "assign", [
+      "Cycle 4 Day 1",
+      "DM",
+      "VS",
+    ]);
     expect(assignRes.success).toBe(true);
 
-    const rmRes = executeVisitCommand(assignRes.updatedStudy!, "rm", ["Cycle 4 Day 1"]);
+    const rmRes = executeVisitCommand(assignRes.updatedStudy!, "rm", [
+      "Cycle 4 Day 1",
+    ]);
     expect(rmRes.success).toBe(true);
-    expect(rmRes.updatedStudy?.visits.some((v) => v.name === "Cycle 4 Day 1")).toBe(false);
+    expect(
+      rmRes.updatedStudy?.visits.some((v) => v.name === "Cycle 4 Day 1")
+    ).toBe(false);
   });
 
   it("manages rules through executeRuleCommand", () => {
-    const addRuleRes = executeRuleCommand(sampleStudy, "add", ["VS", "--expr", "round(WEIGHT/2, 1)", "--msg", "Weight check", "--target", "WEIGHT"]);
+    const addRuleRes = executeRuleCommand(sampleStudy, "add", [
+      "VS",
+      "--expr",
+      "round(WEIGHT/2, 1)",
+      "--msg",
+      "Weight check",
+      "--target",
+      "WEIGHT",
+    ]);
     expect(addRuleRes.success).toBe(true);
 
-    const listRes = executeRuleCommand(addRuleRes.updatedStudy!, "list", ["VS"]);
+    const listRes = executeRuleCommand(addRuleRes.updatedStudy!, "list", [
+      "VS",
+    ]);
     expect(listRes.success).toBe(true);
     expect(stripAnsi(listRes.document)).toContain("Weight check");
   });
@@ -132,18 +175,33 @@ describe("CRF CLI & Headless Command Engine", () => {
 
     const presetsRes = executeListCommand(sampleStudy, "presets");
     expect(presetsRes.success).toBe(true);
-    expect(stripAnsi(presetsRes.document)).toContain("CLINICAL TRIAL PROTOCOL PRESETS");
+    expect(stripAnsi(presetsRes.document)).toContain(
+      "CLINICAL TRIAL PROTOCOL PRESETS"
+    );
   });
 
   it("loads presets through executePresetCommand", () => {
-    const loadRes = executePresetCommand(sampleStudy, "load", "device_cardiovascular_implant");
+    const loadRes = executePresetCommand(
+      sampleStudy,
+      "load",
+      "device_cardiovascular_implant"
+    );
     expect(loadRes.success).toBe(true);
-    expect(loadRes.updatedStudy?.forms.some((f) => f.domain === "DI")).toBe(true);
+    expect(loadRes.updatedStudy?.forms.some((f) => f.domain === "DI")).toBe(
+      true
+    );
     expect(loadRes.uiAction?.type).toBe("load_preset");
   });
 
   it("exports to multiple regulatory formats (ODM-XML, FHIR, SAS, R, JSON, YAML)", () => {
-    const formats: Array<"json" | "yaml" | "odm" | "fhir" | "sas" | "r"> = ["json", "yaml", "odm", "fhir", "sas", "r"];
+    const formats: Array<"json" | "yaml" | "odm" | "fhir" | "sas" | "r"> = [
+      "json",
+      "yaml",
+      "odm",
+      "fhir",
+      "sas",
+      "r",
+    ];
     for (const fmt of formats) {
       const res = executeExportCommand(sampleStudy, fmt);
       expect(res.success).toBe(true);
@@ -152,7 +210,9 @@ describe("CRF CLI & Headless Command Engine", () => {
   });
 
   it("runs diff between two protocols", () => {
-    const modifiedStudy: StudyProtocol = JSON.parse(JSON.stringify(sampleStudy));
+    const modifiedStudy: StudyProtocol = JSON.parse(
+      JSON.stringify(sampleStudy)
+    );
     modifiedStudy.forms = modifiedStudy.forms.filter((f) => f.domain !== "VS");
 
     const res = executeDiffCommand(sampleStudy, modifiedStudy);
@@ -181,7 +241,10 @@ describe("CRF CLI & Headless Command Engine", () => {
     expect(listRes.success).toBe(true);
 
     // 5. Add Field
-    const addRes = executeCliString(sampleStudy, "crf add field VS --var TEMPC --type number --unit C");
+    const addRes = executeCliString(
+      sampleStudy,
+      "crf add field VS --var TEMPC --type number --unit C"
+    );
     expect(addRes.success).toBe(true);
     expect(stripAnsi(addRes.document)).toContain("ADD FIELD — TEMPC");
 

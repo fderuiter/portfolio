@@ -1,15 +1,20 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { fromAny } from "@total-typescript/shoehorn";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { useResponsiveCanvas } from "@/hooks/useResponsiveCanvas";
 
 function renderHookHelper<T>(useHook: () => T) {
-  const result = { current: null as unknown as T };
+  const result: { current: T } = { current: fromAny(null) };
+
   const container = document.createElement("div");
+
   document.body.appendChild(container);
   const root = createRoot(container);
 

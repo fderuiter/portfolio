@@ -1,14 +1,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { ArcadeEngine } from "@/lib/arcade/core/engine";
-import { ArcadeGameLoop } from "@/lib/arcade/core/game-loop";
+import { ArcadeEngine, ArcadeGameLoop } from "@/lib/arcade";
+import { fromPartial } from "@total-typescript/shoehorn";
 
 // Mock implementation of ArcadeEngine for testing
-class TestArcadeEngine extends ArcadeEngine<{ count: number }, { count: number }> {
+class TestArcadeEngine extends ArcadeEngine<
+  { count: number },
+  { count: number }
+> {
   public updateCalls: number[] = [];
   public renderCalls: { alpha: number }[] = [];
   public initCalled = false;
   public destroyCalled = false;
-  public resizeCalled: { width: number; height: number; dpr: number } | null = null;
+  public resizeCalled: { width: number; height: number; dpr: number } | null =
+    null;
 
   constructor() {
     super({ count: 0 });
@@ -87,7 +91,7 @@ describe("ArcadeGameLoop", () => {
 
   it("runs fixed timestep updates and interpolates render passes", () => {
     const engine = new TestArcadeEngine();
-    const mockCtx = {} as CanvasRenderingContext2D;
+    const mockCtx = fromPartial<CanvasRenderingContext2D>({});
     const loop = new ArcadeGameLoop(engine, () => mockCtx);
 
     loop.start();
@@ -108,8 +112,10 @@ describe("ArcadeGameLoop", () => {
 
   it("clamps accumulator to prevent spiral of death on huge time delta", () => {
     const engine = new TestArcadeEngine();
-    const mockCtx = {} as CanvasRenderingContext2D;
-    const loop = new ArcadeGameLoop(engine, () => mockCtx, { maxAccumulatorSec: 0.1 }); // Max 6 frames
+    const mockCtx = fromPartial<CanvasRenderingContext2D>({});
+    const loop = new ArcadeGameLoop(engine, () => mockCtx, {
+      maxAccumulatorSec: 0.1,
+    }); // Max 6 frames
 
     loop.start();
 
@@ -123,7 +129,7 @@ describe("ArcadeGameLoop", () => {
 
   it("supports pausing and resuming without accumulating phantom delta time", () => {
     const engine = new TestArcadeEngine();
-    const mockCtx = {} as CanvasRenderingContext2D;
+    const mockCtx = fromPartial<CanvasRenderingContext2D>({});
     const loop = new ArcadeGameLoop(engine, () => mockCtx);
 
     loop.start();
@@ -146,7 +152,7 @@ describe("ArcadeGameLoop", () => {
 
   it("supports single-step debug mode", () => {
     const engine = new TestArcadeEngine();
-    const mockCtx = {} as CanvasRenderingContext2D;
+    const mockCtx = fromPartial<CanvasRenderingContext2D>({});
     const loop = new ArcadeGameLoop(engine, () => mockCtx);
 
     loop.start();

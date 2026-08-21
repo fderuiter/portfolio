@@ -224,6 +224,12 @@ Re-exports [CLINICAL_FORMULA_PRESETS](formula-presets/variables/CLINICAL_FORMULA
 
 ***
 
+### CLINICAL\_INSTRUMENTS\_PRESET
+
+Re-exports [CLINICAL_INSTRUMENTS_PRESET](presets/clinical-instruments/variables/CLINICAL_INSTRUMENTS_PRESET.md)
+
+***
+
 ### CLINICAL\_SMART\_BLOCKS
 
 Re-exports [CLINICAL_SMART_BLOCKS](smart-blocks-engine/variables/CLINICAL_SMART_BLOCKS.md)
@@ -245,6 +251,12 @@ Re-exports [ClinicalFormulaPreset](formula-presets/interfaces/ClinicalFormulaPre
 ### ClinicalSmartBlockDefinition
 
 Re-exports [ClinicalSmartBlockDefinition](smart-blocks-engine/interfaces/ClinicalSmartBlockDefinition.md)
+
+***
+
+### CNS\_NEURO\_PRESET
+
+Re-exports [CNS_NEURO_PRESET](presets/cns-neuro/variables/CNS_NEURO_PRESET.md)
 
 ***
 
@@ -320,6 +332,12 @@ Re-exports [DEFAULT_STUDY_BRANDING](branding-defaults/variables/DEFAULT_STUDY_BR
 
 ***
 
+### DEVICE\_CARDIOVASCULAR\_IMPLANT\_PRESET
+
+Re-exports [DEVICE_CARDIOVASCULAR_IMPLANT_PRESET](presets/device-cardiovascular-implant/variables/DEVICE_CARDIOVASCULAR_IMPLANT_PRESET.md)
+
+***
+
 ### DeviceViewport
 
 Re-exports [DeviceViewport](types/type-aliases/DeviceViewport.md)
@@ -377,6 +395,12 @@ Re-exports [EditCheckRuleSchema](universal-schema/variables/EditCheckRuleSchema.
 ### ElectronicSignature
 
 Re-exports [ElectronicSignature](types/interfaces/ElectronicSignature.md)
+
+***
+
+### EMPTY\_STUDY\_PRESET
+
+Re-exports [EMPTY_STUDY_PRESET](presets/empty-study/variables/EMPTY_STUDY_PRESET.md)
 
 ***
 
@@ -716,6 +740,30 @@ Re-exports [getFieldOptions](export-r/functions/getFieldOptions.md)
 
 ***
 
+### getOncologyPreset
+
+Re-exports [getOncologyPreset](presets/loader/functions/getOncologyPreset.md)
+
+***
+
+### getOncologyPresetSync
+
+Re-exports [getOncologyPresetSync](presets/loader/functions/getOncologyPresetSync.md)
+
+***
+
+### getPresetById
+
+Re-exports [getPresetById](presets/loader/functions/getPresetById.md)
+
+***
+
+### getPresetByIdSync
+
+Re-exports [getPresetByIdSync](presets/loader/functions/getPresetByIdSync.md)
+
+***
+
 ### getSasFormatName
 
 Re-exports [getSasFormatName](export-sas/functions/getSasFormatName.md)
@@ -725,6 +773,18 @@ Re-exports [getSasFormatName](export-sas/functions/getSasFormatName.md)
 ### getStudyBranding
 
 Re-exports [getStudyBranding](branding-defaults/functions/getStudyBranding.md)
+
+***
+
+### getStudyPresets
+
+Re-exports [getStudyPresets](presets/loader/functions/getStudyPresets.md)
+
+***
+
+### getStudyPresetsSync
+
+Re-exports [getStudyPresetsSync](presets/loader/functions/getStudyPresetsSync.md)
 
 ***
 
@@ -800,6 +860,12 @@ Re-exports [NUMERIC_DATA_TYPES](formula-linter/variables/NUMERIC_DATA_TYPES.md)
 
 ***
 
+### ONCOLOGY\_RECIST\_PRESET
+
+Re-exports [ONCOLOGY_RECIST_PRESET](presets/oncology-recist/variables/ONCOLOGY_RECIST_PRESET.md)
+
+***
+
 ### ParsedPrecisionDate
 
 Re-exports [ParsedPrecisionDate](precision-date/interfaces/ParsedPrecisionDate.md)
@@ -824,6 +890,12 @@ Re-exports [parseUniversalCrf](universal-schema/functions/parseUniversalCrf.md)
 
 ***
 
+### PK\_ESCALATION\_PRESET
+
+Re-exports [PK_ESCALATION_PRESET](presets/pk-dose-escalation/variables/PK_ESCALATION_PRESET.md)
+
+***
+
 ### PrecisionDateValidationOptions
 
 Re-exports [PrecisionDateValidationOptions](precision-date/interfaces/PrecisionDateValidationOptions.md)
@@ -833,6 +905,12 @@ Re-exports [PrecisionDateValidationOptions](precision-date/interfaces/PrecisionD
 ### PrecisionDateValidationResult
 
 Re-exports [PrecisionDateValidationResult](precision-date/interfaces/PrecisionDateValidationResult.md)
+
+***
+
+### PresetCatalogItem
+
+Re-exports [PresetCatalogItem](presets/interfaces/PresetCatalogItem.md)
 
 ***
 
@@ -959,6 +1037,12 @@ Re-exports [StudioMode](types/type-aliases/StudioMode.md)
 ### StudioTheme
 
 Re-exports [StudioTheme](types/type-aliases/StudioTheme.md)
+
+***
+
+### STUDY\_PRESETS
+
+Re-exports [STUDY_PRESETS](presets/variables/STUDY_PRESETS.md)
 
 ***
 

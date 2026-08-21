@@ -1,7 +1,7 @@
 import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
-import { ArcadeEngine } from "@/lib/arcade/core/engine";
+import { ArcadeEngine } from "@/lib/arcade";
 import { useArcadeEngine } from "@/components/arcade/useArcadeEngine";
 
 interface TestState {

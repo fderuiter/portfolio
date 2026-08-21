@@ -6,9 +6,9 @@
 
 # Function: runDiagnostics()
 
-> **runDiagnostics**(`options?`): `Promise`\<\{ `hasFailures`: `boolean`; `hasWarnings`: `boolean`; `results`: [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)[]; `totalFailed`: `number`; `totalFixed`: `number`; `totalPassed`: `number`; `totalWarned`: `number`; \}\>
+> **runDiagnostics**(`options?`): `Promise`\<[`DiagnosticSummary`](../interfaces/DiagnosticSummary.md)\>
 
-Defined in: [lib/dx/doctor.ts:1341](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1341)
+Defined in: [lib/dx/doctor.ts:1736](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1736)
 
 Run All Diagnostics
 
@@ -20,4 +20,4 @@ Run All Diagnostics
 
 ## Returns
 
-`Promise`\<\{ `hasFailures`: `boolean`; `hasWarnings`: `boolean`; `results`: [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)[]; `totalFailed`: `number`; `totalFixed`: `number`; `totalPassed`: `number`; `totalWarned`: `number`; \}\>
+`Promise`\<[`DiagnosticSummary`](../interfaces/DiagnosticSummary.md)\>

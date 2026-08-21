@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { ObjectPool } from "@/lib/arcade/core/pool";
+import { ObjectPool } from "@/lib/arcade";
 
 interface Particle {
   id: number;

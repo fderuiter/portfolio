@@ -845,7 +845,7 @@ export function generateBIMOReport(
   };
 }
 
-import { ArcadeEngine } from "@/lib/arcade/core/engine";
+import { ArcadeEngine } from "@/lib/arcade";
 
 export interface ClinicalTrialChaosState {
   scoreState: GameScoreState;

@@ -10,7 +10,7 @@ import {
   diffUniversalCrfStudies,
 } from "../../lib/crf/universal-schema";
 import { StudyProtocolEngine } from "../../lib/crf/study-engine";
-import { ONCOLOGY_RECIST_PRESET } from "../../lib/crf/presets/oncology-recist";
+import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
 import { StudyProtocol } from "../../lib/crf/types";
 
 describe("Graph-Extended Schema & USDM Bidirectional Adapter", () => {
@@ -103,12 +103,24 @@ describe("Graph-Extended Schema & USDM Bidirectional Adapter", () => {
     const usdmJson = exportStudyToUsdm(ONCOLOGY_RECIST_PRESET);
     const reimportedStudy = importStudyFromUsdm(usdmJson);
 
-    expect(reimportedStudy.protocolNumber).toBe(ONCOLOGY_RECIST_PRESET.protocolNumber);
-    expect(reimportedStudy.arms?.length).toBe(ONCOLOGY_RECIST_PRESET.arms?.length);
-    expect(reimportedStudy.epochs?.length).toBe(ONCOLOGY_RECIST_PRESET.epochs?.length);
-    expect(reimportedStudy.cohorts?.length).toBe(ONCOLOGY_RECIST_PRESET.cohorts?.length);
-    expect(reimportedStudy.visits.length).toBe(ONCOLOGY_RECIST_PRESET.visits.length);
-    expect(reimportedStudy.forms.length).toBe(ONCOLOGY_RECIST_PRESET.forms.length);
+    expect(reimportedStudy.protocolNumber).toBe(
+      ONCOLOGY_RECIST_PRESET.protocolNumber
+    );
+    expect(reimportedStudy.arms?.length).toBe(
+      ONCOLOGY_RECIST_PRESET.arms?.length
+    );
+    expect(reimportedStudy.epochs?.length).toBe(
+      ONCOLOGY_RECIST_PRESET.epochs?.length
+    );
+    expect(reimportedStudy.cohorts?.length).toBe(
+      ONCOLOGY_RECIST_PRESET.cohorts?.length
+    );
+    expect(reimportedStudy.visits.length).toBe(
+      ONCOLOGY_RECIST_PRESET.visits.length
+    );
+    expect(reimportedStudy.forms.length).toBe(
+      ONCOLOGY_RECIST_PRESET.forms.length
+    );
 
     // Verify 2nd roundtrip stability (deterministic idempotency)
     const usdmJson2 = exportStudyToUsdm(reimportedStudy);
@@ -123,7 +135,9 @@ describe("Graph-Extended Schema & USDM Bidirectional Adapter", () => {
     const usdmObj = exportStudyToUsdmObject(ONCOLOGY_RECIST_PRESET);
     const design = usdmObj.study.studyDesigns![0];
 
-    const sysbpConcept = design.biomedicalConcepts.find((c) => c.variableName === "SYSBP" || c.name.includes("Systolic"));
+    const sysbpConcept = design.biomedicalConcepts.find(
+      (c) => c.variableName === "SYSBP" || c.name.includes("Systolic")
+    );
     expect(sysbpConcept).toBeDefined();
     expect(sysbpConcept?.domain).toBe("VS");
     expect(sysbpConcept?.dataType).toBe("integer");
@@ -147,7 +161,9 @@ describe("Graph-Extended Schema & USDM Bidirectional Adapter", () => {
   it("accurately reports semantic version diffing between USDM protocol revisions", () => {
     const usdmA = exportStudyToUsdm(ONCOLOGY_RECIST_PRESET);
 
-    const modifiedStudy: StudyProtocol = JSON.parse(JSON.stringify(ONCOLOGY_RECIST_PRESET));
+    const modifiedStudy: StudyProtocol = JSON.parse(
+      JSON.stringify(ONCOLOGY_RECIST_PRESET)
+    );
     // Add a new arm
     modifiedStudy.arms!.push({
       id: "arm_c",
@@ -170,7 +186,9 @@ describe("Graph-Extended Schema & USDM Bidirectional Adapter", () => {
   });
 
   it("maintains arm-aware visit matrices with form assignments specific to study arms", () => {
-    const matrix = StudyProtocolEngine.getArmAwareVisitMatrix(ONCOLOGY_RECIST_PRESET);
+    const matrix = StudyProtocolEngine.getArmAwareVisitMatrix(
+      ONCOLOGY_RECIST_PRESET
+    );
     expect(matrix.length).toBe(2); // Arm A and Arm B
 
     const armA = matrix.find((m) => m.armId === "arm_exp");
@@ -214,7 +232,12 @@ describe("Graph-Extended Schema & USDM Bidirectional Adapter", () => {
             name: "Dose Frequency Value Set",
             terms: [
               { code: "QD", label: "Once Daily", nciCode: "C64496", order: 1 },
-              { code: "BID", label: "Twice Daily", nciCode: "C64497", order: 2 },
+              {
+                code: "BID",
+                label: "Twice Daily",
+                nciCode: "C64497",
+                order: 2,
+              },
             ],
           },
         ],
@@ -246,7 +269,9 @@ describe("Graph-Extended Schema & USDM Bidirectional Adapter", () => {
                   codeList: {
                     id: "cl_bc_freq",
                     name: "BC Dosing Frequency",
-                    options: [{ code: "TID", label: "Three times daily", order: 1 }],
+                    options: [
+                      { code: "TID", label: "Three times daily", order: 1 },
+                    ],
                   },
                 },
               },
@@ -260,7 +285,9 @@ describe("Graph-Extended Schema & USDM Bidirectional Adapter", () => {
     expect(imported.codelists).toBeDefined();
     expect(imported.codelists.length).toBeGreaterThanOrEqual(3);
 
-    const freqCodelist = imported.codelists.find((cl) => cl.id === "vs_dose_freq");
+    const freqCodelist = imported.codelists.find(
+      (cl) => cl.id === "vs_dose_freq"
+    );
     expect(freqCodelist).toBeDefined();
     expect(freqCodelist?.name).toBe("Dose Frequency Value Set");
     expect(freqCodelist?.options.length).toBe(2);
@@ -271,7 +298,9 @@ describe("Graph-Extended Schema & USDM Bidirectional Adapter", () => {
     expect(gradeCodelist?.nciCodelistCode).toBe("C66769");
     expect(gradeCodelist?.options[1].code).toBe("G2");
 
-    const bcFreqCodelist = imported.codelists.find((cl) => cl.id === "cl_bc_freq");
+    const bcFreqCodelist = imported.codelists.find(
+      (cl) => cl.id === "cl_bc_freq"
+    );
     expect(bcFreqCodelist).toBeDefined();
     expect(bcFreqCodelist?.options[0].code).toBe("TID");
   });

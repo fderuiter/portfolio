@@ -5,10 +5,7 @@ import {
   StudyAuditReport,
 } from "@/lib/crf/study-auditor";
 import { StudyProtocol, CRFForm, CRFField } from "@/lib/crf/types";
-import {
-  getOncologyPresetSync,
-  getStudyPresetsSync,
-} from "@/lib/crf/presets/loader";
+import { getOncologyPresetSync, getStudyPresetsSync } from "@/lib/crf/presets";
 
 describe("StudyAuditor Domain Engine (TDD Red-Green-Refactor)", () => {
   const oncologyStudy: StudyProtocol = getOncologyPresetSync();

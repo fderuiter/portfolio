@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
 import { inspectStandaloneBundle } from "../lib/dx/bundle-guard";
+import { fromPartial } from "@total-typescript/shoehorn";
 
 describe("Standalone JavaScript Engine Build & 50KB Size Guard", () => {
   const root = process.cwd();
@@ -37,9 +38,11 @@ describe("Standalone JavaScript Engine Build & 50KB Size Guard", () => {
   });
 
   it("detects size budget violations when standalone asset exceeds 50KB", () => {
-    const spyStat = vi.spyOn(fs, "statSync").mockReturnValue({
-      size: 55 * 1024, // 55KB
-    } as unknown as fs.Stats);
+    const spyStat = vi.spyOn(fs, "statSync").mockReturnValue(
+      fromPartial<fs.Stats>({
+        size: 55 * 1024, // 55KB
+      })
+    );
 
     const report = inspectStandaloneBundle(root);
     expect(report.exists).toBe(true);

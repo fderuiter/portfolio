@@ -2,14 +2,16 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { useFullscreen } from "@/hooks/useFullscreen";
 
 function renderHookHelper<T>(useHook: () => T) {
-  const result = { current: null as unknown as T };
+  const result: { current: T } = { current: null as any };
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
@@ -63,7 +65,9 @@ describe("useFullscreen Hook - Unit & Edge Matrix Suite", () => {
   });
 
   it("1. initializes with isFullscreen false and isSupported true by default", () => {
-    const { result, unmount } = renderHookHelper(() => useFullscreen(elementRef));
+    const { result, unmount } = renderHookHelper(() =>
+      useFullscreen(elementRef)
+    );
     unmountCurrent = unmount;
 
     expect(result.current.isFullscreen).toBe(false);
@@ -72,7 +76,9 @@ describe("useFullscreen Hook - Unit & Edge Matrix Suite", () => {
   });
 
   it("2. calls native requestFullscreen when enterFullscreen is invoked", async () => {
-    const { result, unmount } = renderHookHelper(() => useFullscreen(elementRef));
+    const { result, unmount } = renderHookHelper(() =>
+      useFullscreen(elementRef)
+    );
     unmountCurrent = unmount;
 
     await act(async () => {
@@ -84,11 +90,13 @@ describe("useFullscreen Hook - Unit & Edge Matrix Suite", () => {
 
   it("3. handles WebKit vendor-prefixed webkitRequestFullscreen fallback", async () => {
     // Delete standard method and define WebKit method
-    delete (mockElement as unknown as Record<string, unknown>).requestFullscreen;
+    delete (mockElement as any).requestFullscreen;
     const webkitMock = vi.fn().mockResolvedValue(undefined);
-    (mockElement as unknown as Record<string, unknown>).webkitRequestFullscreen = webkitMock;
+    (mockElement as any).webkitRequestFullscreen = webkitMock;
 
-    const { result, unmount } = renderHookHelper(() => useFullscreen(elementRef));
+    const { result, unmount } = renderHookHelper(() =>
+      useFullscreen(elementRef)
+    );
     unmountCurrent = unmount;
 
     await act(async () => {
@@ -99,7 +107,9 @@ describe("useFullscreen Hook - Unit & Edge Matrix Suite", () => {
   });
 
   it("4. falls back to pseudo-fullscreen when native requestFullscreen throws error", async () => {
-    mockElement.requestFullscreen = vi.fn().mockRejectedValue(new Error("SecurityError: Permissions check failed"));
+    mockElement.requestFullscreen = vi
+      .fn()
+      .mockRejectedValue(new Error("SecurityError: Permissions check failed"));
     const onFullscreenChange = vi.fn();
 
     const { result, unmount } = renderHookHelper(() =>
@@ -117,7 +127,9 @@ describe("useFullscreen Hook - Unit & Edge Matrix Suite", () => {
   });
 
   it("5. exits pseudo-fullscreen cleanly when exitFullscreen is invoked", async () => {
-    mockElement.requestFullscreen = vi.fn().mockRejectedValue(new Error("Native fullscreen denied"));
+    mockElement.requestFullscreen = vi
+      .fn()
+      .mockRejectedValue(new Error("Native fullscreen denied"));
     const onFullscreenChange = vi.fn();
     const { result, unmount } = renderHookHelper(() =>
       useFullscreen(elementRef, { onFullscreenChange })
@@ -139,7 +151,9 @@ describe("useFullscreen Hook - Unit & Edge Matrix Suite", () => {
   });
 
   it("6. toggles fullscreen with toggleFullscreen method", async () => {
-    const { result, unmount } = renderHookHelper(() => useFullscreen(elementRef));
+    const { result, unmount } = renderHookHelper(() =>
+      useFullscreen(elementRef)
+    );
     unmountCurrent = unmount;
 
     await act(async () => {
@@ -189,8 +203,12 @@ describe("useFullscreen Hook - Unit & Edge Matrix Suite", () => {
   });
 
   it("9. exits pseudo-fullscreen when Escape key is pressed", async () => {
-    mockElement.requestFullscreen = vi.fn().mockRejectedValue(new Error("Native fullscreen denied"));
-    const { result, unmount } = renderHookHelper(() => useFullscreen(elementRef));
+    mockElement.requestFullscreen = vi
+      .fn()
+      .mockRejectedValue(new Error("Native fullscreen denied"));
+    const { result, unmount } = renderHookHelper(() =>
+      useFullscreen(elementRef)
+    );
     unmountCurrent = unmount;
 
     await act(async () => {

@@ -8,7 +8,7 @@
 
 > **checkDefectRemediationInvariants**(`root`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:880](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L880)
+Defined in: [lib/dx/doctor.ts:1093](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1093)
 
 Check Defect Remediation & Root-Cause Invariants (AGENTS.md Invariant #11).
 Asserts presence of regression test harness and computational boundary defenses.

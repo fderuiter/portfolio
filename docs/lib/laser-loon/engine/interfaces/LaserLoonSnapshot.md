@@ -6,7 +6,7 @@
 
 # Interface: LaserLoonSnapshot
 
-Defined in: [lib/laser-loon/engine.ts:656](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L656)
+Defined in: [lib/laser-loon/engine.ts:655](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L655)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/laser-loon/engine.ts:656](https://github.com/fderuiter/portfoli
 
 > **activeParticleCount**: `number`
 
-Defined in: [lib/laser-loon/engine.ts:673](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L673)
+Defined in: [lib/laser-loon/engine.ts:672](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L672)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/laser-loon/engine.ts:673](https://github.com/fderuiter/portfoli
 
 > **activeShockwaveCount**: `number`
 
-Defined in: [lib/laser-loon/engine.ts:674](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L674)
+Defined in: [lib/laser-loon/engine.ts:673](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L673)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/laser-loon/engine.ts:674](https://github.com/fderuiter/portfoli
 
 > **actKills**: `number`
 
-Defined in: [lib/laser-loon/engine.ts:661](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L661)
+Defined in: [lib/laser-loon/engine.ts:660](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L660)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/laser-loon/engine.ts:661](https://github.com/fderuiter/portfoli
 
 > **aimPos**: `object`
 
-Defined in: [lib/laser-loon/engine.ts:669](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L669)
+Defined in: [lib/laser-loon/engine.ts:668](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L668)
 
 #### x
 
@@ -54,7 +54,7 @@ Defined in: [lib/laser-loon/engine.ts:669](https://github.com/fderuiter/portfoli
 
 > **combo**: `number`
 
-Defined in: [lib/laser-loon/engine.ts:664](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L664)
+Defined in: [lib/laser-loon/engine.ts:663](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L663)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/laser-loon/engine.ts:664](https://github.com/fderuiter/portfoli
 
 > **currentAct**: `number`
 
-Defined in: [lib/laser-loon/engine.ts:660](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L660)
+Defined in: [lib/laser-loon/engine.ts:659](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L659)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/laser-loon/engine.ts:660](https://github.com/fderuiter/portfoli
 
 > **gameState**: `"idle"` \| `"playing"` \| `"story-modal"` \| `"gameover"` \| `"victory"`
 
-Defined in: [lib/laser-loon/engine.ts:659](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L659)
+Defined in: [lib/laser-loon/engine.ts:658](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L658)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/laser-loon/engine.ts:659](https://github.com/fderuiter/portfoli
 
 > **highScore**: `number`
 
-Defined in: [lib/laser-loon/engine.ts:663](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L663)
+Defined in: [lib/laser-loon/engine.ts:662](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L662)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [lib/laser-loon/engine.ts:663](https://github.com/fderuiter/portfoli
 
 > **iceBlocks**: [`IceBlock`](../../types/interfaces/IceBlock.md)[]
 
-Defined in: [lib/laser-loon/engine.ts:671](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L671)
+Defined in: [lib/laser-loon/engine.ts:670](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L670)
 
 ***
 
@@ -94,7 +94,7 @@ Defined in: [lib/laser-loon/engine.ts:671](https://github.com/fderuiter/portfoli
 
 > **laserType**: `string`
 
-Defined in: [lib/laser-loon/engine.ts:658](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L658)
+Defined in: [lib/laser-loon/engine.ts:657](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L657)
 
 ***
 
@@ -102,7 +102,7 @@ Defined in: [lib/laser-loon/engine.ts:658](https://github.com/fderuiter/portfoli
 
 > **loonPos**: `object`
 
-Defined in: [lib/laser-loon/engine.ts:668](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L668)
+Defined in: [lib/laser-loon/engine.ts:667](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L667)
 
 #### x
 
@@ -118,7 +118,7 @@ Defined in: [lib/laser-loon/engine.ts:668](https://github.com/fderuiter/portfoli
 
 > **mode**: [`LaserMode`](../../types/type-aliases/LaserMode.md)
 
-Defined in: [lib/laser-loon/engine.ts:657](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L657)
+Defined in: [lib/laser-loon/engine.ts:656](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L656)
 
 ***
 
@@ -126,7 +126,7 @@ Defined in: [lib/laser-loon/engine.ts:657](https://github.com/fderuiter/portfoli
 
 > **multiplier**: `number`
 
-Defined in: [lib/laser-loon/engine.ts:665](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L665)
+Defined in: [lib/laser-loon/engine.ts:664](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L664)
 
 ***
 
@@ -134,7 +134,7 @@ Defined in: [lib/laser-loon/engine.ts:665](https://github.com/fderuiter/portfoli
 
 > **powerUps**: [`PowerUp`](../../types/interfaces/PowerUp.md)[]
 
-Defined in: [lib/laser-loon/engine.ts:672](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L672)
+Defined in: [lib/laser-loon/engine.ts:671](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L671)
 
 ***
 
@@ -142,7 +142,7 @@ Defined in: [lib/laser-loon/engine.ts:672](https://github.com/fderuiter/portfoli
 
 > **score**: `number`
 
-Defined in: [lib/laser-loon/engine.ts:662](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L662)
+Defined in: [lib/laser-loon/engine.ts:661](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L661)
 
 ***
 
@@ -150,7 +150,7 @@ Defined in: [lib/laser-loon/engine.ts:662](https://github.com/fderuiter/portfoli
 
 > **targets**: [`Target`](../../types/interfaces/Target.md)[]
 
-Defined in: [lib/laser-loon/engine.ts:670](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L670)
+Defined in: [lib/laser-loon/engine.ts:669](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L669)
 
 ***
 
@@ -158,7 +158,7 @@ Defined in: [lib/laser-loon/engine.ts:670](https://github.com/fderuiter/portfoli
 
 > **timeLeft**: `number`
 
-Defined in: [lib/laser-loon/engine.ts:666](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L666)
+Defined in: [lib/laser-loon/engine.ts:665](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L665)
 
 ***
 
@@ -166,4 +166,4 @@ Defined in: [lib/laser-loon/engine.ts:666](https://github.com/fderuiter/portfoli
 
 > **ultimateMeter**: `number`
 
-Defined in: [lib/laser-loon/engine.ts:667](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L667)
+Defined in: [lib/laser-loon/engine.ts:666](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L666)

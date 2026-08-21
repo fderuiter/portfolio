@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { StudioTerminal } from "@/components/crf/Terminal/StudioTerminal";
-import { getOncologyPresetSync } from "@/lib/crf/presets/loader";
+import { getOncologyPresetSync } from "@/lib/crf/presets";
 
 describe("StudioTerminal In-Browser Console Component", () => {
   let container: HTMLDivElement;
@@ -86,7 +88,9 @@ describe("StudioTerminal In-Browser Console Component", () => {
         )?.set;
         nativeInputValueSetter?.call(input, "crf add form PE");
         input.dispatchEvent(new Event("input", { bubbles: true }));
-        input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+        input.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+        );
       }
     });
 
@@ -115,7 +119,9 @@ describe("StudioTerminal In-Browser Console Component", () => {
         )?.set;
         nativeInputValueSetter?.call(input, "clear");
         input.dispatchEvent(new Event("input", { bubbles: true }));
-        input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+        input.dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+        );
       }
     });
 

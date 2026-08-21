@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { ArcadeInputManager } from "@/lib/arcade/core/input";
-import { ArcadeViewport } from "@/lib/arcade/core/viewport";
+import { ArcadeInputManager, ArcadeViewport } from "@/lib/arcade";
+import { fromPartial } from "@total-typescript/shoehorn";
 
 describe("ArcadeInputManager", () => {
   let inputManager: ArcadeInputManager;
@@ -15,24 +15,25 @@ describe("ArcadeInputManager", () => {
       baseHeight: 500,
     });
 
-    mockCanvas = {
-      getBoundingClientRect: () => ({
-        left: 0,
-        top: 0,
-        width: 800,
-        height: 500,
-        right: 800,
-        bottom: 500,
-        x: 0,
-        y: 0,
-        toJSON: () => {},
-      }),
+    mockCanvas = fromPartial<HTMLCanvasElement>({
+      getBoundingClientRect: () =>
+        fromPartial<DOMRect>({
+          left: 0,
+          top: 0,
+          width: 800,
+          height: 500,
+          right: 800,
+          bottom: 500,
+          x: 0,
+          y: 0,
+          toJSON: () => {},
+        }),
       setPointerCapture: vi.fn(),
       releasePointerCapture: vi.fn(),
       hasPointerCapture: vi.fn().mockReturnValue(false),
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
-    } as unknown as HTMLCanvasElement;
+    });
   });
 
   afterEach(() => {
@@ -80,13 +81,15 @@ describe("ArcadeInputManager", () => {
     const metrics = viewport.calculateMetrics(800, 500, 1.0);
     inputManager.attach(mockCanvas, () => metrics);
 
-    inputManager.handlePointerDown({
-      clientX: 400,
-      clientY: 250,
-      pointerId: 1,
-      pointerType: "mouse",
-      button: 0,
-    } as PointerEvent);
+    inputManager.handlePointerDown(
+      fromPartial<PointerEvent>({
+        clientX: 400,
+        clientY: 250,
+        pointerId: 1,
+        pointerType: "mouse",
+        button: 0,
+      })
+    );
 
     const snapshot = inputManager.getSnapshot();
     expect(snapshot.primaryPointer.isDown).toBe(true);
@@ -94,13 +97,15 @@ describe("ArcadeInputManager", () => {
     expect(snapshot.aimY).toBeCloseTo(250, 1);
     expect(snapshot.actionA).toBe(true); // primary click triggers actionA
 
-    inputManager.handlePointerUp({
-      clientX: 400,
-      clientY: 250,
-      pointerId: 1,
-      pointerType: "mouse",
-      button: 0,
-    } as PointerEvent);
+    inputManager.handlePointerUp(
+      fromPartial<PointerEvent>({
+        clientX: 400,
+        clientY: 250,
+        pointerId: 1,
+        pointerType: "mouse",
+        button: 0,
+      })
+    );
 
     expect(inputManager.getSnapshot().primaryPointer.isDown).toBe(false);
   });

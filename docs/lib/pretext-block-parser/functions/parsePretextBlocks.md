@@ -8,7 +8,7 @@
 
 > **parsePretextBlocks**(`text`): [`StructuredBlock`](../interfaces/StructuredBlock.md)[]
 
-Defined in: [lib/pretext-block-parser.ts:42](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L42)
+Defined in: [lib/pretext-block-parser.ts:102](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L102)
 
 Identifies multi-line log blocks, structured code diffs, code blocks,
 and standard markdown paragraphs from input text.

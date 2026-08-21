@@ -3,7 +3,8 @@ import {
   ArcadeViewport,
   screenToGameCoords,
   type ViewportMetrics,
-} from "@/lib/arcade/core/viewport";
+} from "@/lib/arcade";
+import { fromPartial } from "@total-typescript/shoehorn";
 
 describe("ArcadeViewport - Safe Zone & Bleed Matrix", () => {
   it("calculates centered safe zone scale and offsets for 16:9 safe zone in 16:9 display", () => {
@@ -117,12 +118,12 @@ describe("screenToGameCoords (Coordinate Inverse Transform)", () => {
       bleedHeight: 500,
     };
 
-    const mockRect = {
+    const mockRect = fromPartial<DOMRect>({
       left: 100,
       top: 50,
       width: 400,
       height: 250,
-    } as DOMRect;
+    });
 
     // Click in center of screen
     // clientX = rect.left (100) + offsetX (50) + (safeWidth (800) * scale (0.5)) / 2 (200) = 350
@@ -147,12 +148,12 @@ describe("screenToGameCoords (Coordinate Inverse Transform)", () => {
       bleedHeight: 500,
     };
 
-    const mockRect = {
+    const mockRect = fromPartial<DOMRect>({
       left: 0,
       top: 0,
       width: 0,
       height: 0,
-    } as DOMRect;
+    });
 
     const coords = screenToGameCoords(100, 100, mockRect, metrics);
     expect(Number.isFinite(coords.x)).toBe(true);

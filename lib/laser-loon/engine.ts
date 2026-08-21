@@ -650,8 +650,7 @@ export function updateFloatingTexts(
     .filter((f) => f.alpha > 0);
 }
 
-import { ArcadeEngine } from "@/lib/arcade/core/engine";
-import { ObjectPool } from "@/lib/arcade/core/pool";
+import { ArcadeEngine, ObjectPool } from "@/lib/arcade";
 
 export interface LaserLoonSnapshot {
   mode: LaserMode;

@@ -1,11 +1,70 @@
-import { 
-  walkRichInlineLineRanges, 
+import {
+  walkRichInlineLineRanges,
   prepareRichInline,
   type PreparedRichInline,
-  type RichInlineLineRange
+  type RichInlineLineRange,
+  type RichInlineItem,
 } from "@chenglou/pretext/rich-inline";
-import { parseMarkdownToRichItems, type ExtendedRichInlineItem } from "@/hooks/usePretextLayout";
 import { resolveThemeFonts } from "@/lib/layout-config";
+import { resolveCodeChipExtraWidth } from "@/lib/graphics-engine";
+
+export interface ExtendedRichInlineItem extends RichInlineItem {
+  type: "text" | "bold" | "italic" | "code";
+}
+
+/**
+ * Tokenizes markdown-like inline text (**bold**, *italic*, `code`) into RichInlineItem arrays.
+ */
+export function parseMarkdownToRichItems(
+  text: string,
+  baseFont: string,
+  boldFont: string,
+  italicFont: string,
+  codeFont: string
+): ExtendedRichInlineItem[] {
+  const items: ExtendedRichInlineItem[] = [];
+  const regex = /(\*\*.*?\*\*|`.*?`|\*.*?\*|[^*`\n]+|\n)/g;
+
+  let match;
+  while ((match = regex.exec(text)) !== null) {
+    const raw = match[0];
+    if (raw === "\n") {
+      items.push({
+        text: " ",
+        font: baseFont,
+        type: "text",
+      });
+    } else if (raw.startsWith("**") && raw.endsWith("**") && raw.length > 4) {
+      items.push({
+        text: raw.slice(2, -2),
+        font: boldFont,
+        type: "bold",
+      });
+    } else if (raw.startsWith("`") && raw.endsWith("`") && raw.length > 2) {
+      items.push({
+        text: raw.slice(1, -1),
+        font: codeFont,
+        type: "code",
+        break: "never",
+        extraWidth: resolveCodeChipExtraWidth(), // padding + borders on our styled code chips
+      });
+    } else if (raw.startsWith("*") && raw.endsWith("*") && raw.length > 2) {
+      items.push({
+        text: raw.slice(1, -1),
+        font: italicFont,
+        type: "italic",
+      });
+    } else {
+      items.push({
+        text: raw,
+        font: baseFont,
+        type: "text",
+      });
+    }
+  }
+
+  return items;
+}
 
 export type StructuredBlockType = "paragraph" | "code" | "log" | "diff";
 
@@ -26,13 +85,14 @@ export interface PreparedBlock {
 }
 
 export const BLOCK_LAYOUT_CONFIG = {
-  LINE_HEIGHT: 18,        // 18px per line for code / log / diff monospace blocks
-  BLOCK_PADDING: 18,      // 8px top + 8px bottom + 2px border
-  PARAGRAPH_GAP: 12,      // 12px gap between blocks
+  LINE_HEIGHT: 18, // 18px per line for code / log / diff monospace blocks
+  BLOCK_PADDING: 18, // 8px top + 8px bottom + 2px border
+  PARAGRAPH_GAP: 12, // 12px gap between blocks
   PARAGRAPH_LINE_HEIGHT: 20, // standard paragraph text line height
 };
 
-const LOG_PATTERN = /^(\[\s*(ERROR|WARN|INFO|DEBUG|FATAL|TRACE)\s*\]|\d{4}-\d{2}-\d{2}|\d{2}:\d{2}:\d{2}|(ERROR|WARN|INFO|DEBUG|FATAL):)/i;
+const LOG_PATTERN =
+  /^(\[\s*(ERROR|WARN|INFO|DEBUG|FATAL|TRACE)\s*\]|\d{4}-\d{2}-\d{2}|\d{2}:\d{2}:\d{2}|(ERROR|WARN|INFO|DEBUG|FATAL):)/i;
 const DIFF_PATTERN = /^([+-]{1}[^+-]|@@|[*]{3}|---|\+\+\+)/;
 
 /**
@@ -60,7 +120,11 @@ export function parsePretextBlocks(text: string): StructuredBlock[] {
         let blockType: StructuredBlockType = "code";
         const langLower = (currentLanguage || "").toLowerCase();
 
-        if (langLower === "log" || langLower === "terminal" || langLower === "console") {
+        if (
+          langLower === "log" ||
+          langLower === "terminal" ||
+          langLower === "console"
+        ) {
           blockType = "log";
         } else if (langLower === "diff" || langLower === "patch") {
           blockType = "diff";
@@ -102,9 +166,16 @@ export function parsePretextBlocks(text: string): StructuredBlock[] {
     if (LOG_PATTERN.test(trimmed) || DIFF_PATTERN.test(trimmed)) {
       // Look ahead to see if next line also matches log/diff
       const nextLine = lines[i + 1]?.trim() || "";
-      const prevLineIsLogDiff = currentBuffer.length > 0 && (LOG_PATTERN.test(currentBuffer[currentBuffer.length - 1].trim()) || DIFF_PATTERN.test(currentBuffer[currentBuffer.length - 1].trim()));
-      
-      if (prevLineIsLogDiff || LOG_PATTERN.test(nextLine) || DIFF_PATTERN.test(nextLine)) {
+      const prevLineIsLogDiff =
+        currentBuffer.length > 0 &&
+        (LOG_PATTERN.test(currentBuffer[currentBuffer.length - 1].trim()) ||
+          DIFF_PATTERN.test(currentBuffer[currentBuffer.length - 1].trim()));
+
+      if (
+        prevLineIsLogDiff ||
+        LOG_PATTERN.test(nextLine) ||
+        DIFF_PATTERN.test(nextLine)
+      ) {
         if (currentBuffer.length > 0 && !prevLineIsLogDiff) {
           flushParagraphBuffer(currentBuffer, blocks);
           currentBuffer = [];
@@ -119,7 +190,10 @@ export function parsePretextBlocks(text: string): StructuredBlock[] {
 
         // Check if block ends on this line
         const peekNext = lines[i + 1]?.trim() || "";
-        if (!peekNext || (!LOG_PATTERN.test(peekNext) && !DIFF_PATTERN.test(peekNext))) {
+        if (
+          !peekNext ||
+          (!LOG_PATTERN.test(peekNext) && !DIFF_PATTERN.test(peekNext))
+        ) {
           const type: StructuredBlockType = isDiff ? "diff" : "log";
           blocks.push({
             type,
@@ -179,11 +253,20 @@ export function preparePretextBlocks(
   fontFamilyVariable: string = "--font-inter"
 ): PreparedBlock[] {
   const blocks = parsePretextBlocks(text);
-  const { baseFont, boldFont, italicFont, codeFont } = resolveThemeFonts(fontSize, fontFamilyVariable);
+  const { baseFont, boldFont, italicFont, codeFont } = resolveThemeFonts(
+    fontSize,
+    fontFamilyVariable
+  );
 
   return blocks.map((block) => {
     if (block.type === "paragraph") {
-      const items = parseMarkdownToRichItems(block.raw, baseFont, boldFont, italicFont, codeFont);
+      const items = parseMarkdownToRichItems(
+        block.raw,
+        baseFont,
+        boldFont,
+        italicFont,
+        codeFont
+      );
       const prepared = prepareRichInline(items);
       return {
         ...block,
@@ -209,22 +292,32 @@ export function calculateBlockHeight(
     const preparedBlock = block as PreparedBlock;
     if (preparedBlock.prepared) {
       const linesRanges: RichInlineLineRange[] = [];
-      walkRichInlineLineRanges(preparedBlock.prepared, containerWidth, (range) => {
-        linesRanges.push(range);
-      });
+      walkRichInlineLineRanges(
+        preparedBlock.prepared,
+        containerWidth,
+        (range) => {
+          linesRanges.push(range);
+        }
+      );
       const lineCount = Math.max(linesRanges.length, 1);
       return lineCount * lineHeight;
     }
     // Fallback estimation based on text length
-    const estLines = Math.max(Math.ceil((block.raw.length * 8) / containerWidth), 1);
+    const estLines = Math.max(
+      Math.ceil((block.raw.length * 8) / containerWidth),
+      1
+    );
     return estLines * lineHeight;
   }
 
   // Code, Log, and Diff blocks
   // Accounts for discrete line count, line wrapping for extra long lines, plus block padding and borders
   const discreteLineCount = Math.max(block.lines.length, 1);
-  const approxCharsPerLine = Math.max(Math.floor((containerWidth - 24) / 7), 20);
-  
+  const approxCharsPerLine = Math.max(
+    Math.floor((containerWidth - 24) / 7),
+    20
+  );
+
   let totalWrappedLines = 0;
   for (const line of block.lines) {
     const lineLen = line.length;
@@ -236,5 +329,8 @@ export function calculateBlockHeight(
   }
 
   const effectiveLines = Math.max(totalWrappedLines, discreteLineCount);
-  return effectiveLines * BLOCK_LAYOUT_CONFIG.LINE_HEIGHT + BLOCK_LAYOUT_CONFIG.BLOCK_PADDING;
+  return (
+    effectiveLines * BLOCK_LAYOUT_CONFIG.LINE_HEIGHT +
+    BLOCK_LAYOUT_CONFIG.BLOCK_PADDING
+  );
 }

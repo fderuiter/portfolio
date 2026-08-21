@@ -3,7 +3,11 @@ import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act, cleanup } from "@testing-library/react";
 import * as THREE from "three";
-import { progressBus, formatBytes, AssetProgressEvent } from "@/lib/neuro/progress-bus";
+import {
+  progressBus,
+  formatBytes,
+  AssetProgressEvent,
+} from "@/lib/neuro/progress-bus";
 import { loadExternalBrainMesh } from "@/lib/neuro/asset-loader";
 import { ProgressHUD } from "@/components/neuro/ProgressHUD";
 import { Brain3DViewer } from "@/components/neuro/Brain3DViewer";
@@ -80,11 +84,11 @@ describe("Event-Driven Progress Bus & Floating Visual Progress HUD", () => {
         onLoad({ scene: mockScene });
       });
 
-      (GLTFLoader as unknown as ReturnType<typeof vi.fn>).mockImplementation(function (
+      vi.mocked(GLTFLoader).mockImplementation(function (
         this: Record<string, unknown>
       ) {
         this.load = mockLoad;
-      });
+      } as any);
 
       await loadExternalBrainMesh("/models/test-stream.glb", "pial", "both");
 
@@ -107,17 +111,21 @@ describe("Event-Driven Progress Bus & Floating Visual Progress HUD", () => {
       const events: AssetProgressEvent[] = [];
       const unsubscribe = progressBus.subscribe((e) => events.push(e));
 
-      const mockLoad = vi.fn((url: string, onLoad: any, onProgress: any, onError: any) => {
-        onError(new Error("404 Not Found"));
-      });
+      const mockLoad = vi.fn(
+        (url: string, onLoad: any, onProgress: any, onError: any) => {
+          onError(new Error("404 Not Found"));
+        }
+      );
 
-      (OBJLoader as unknown as ReturnType<typeof vi.fn>).mockImplementation(function (
+      vi.mocked(OBJLoader).mockImplementation(function (
         this: Record<string, unknown>
       ) {
         this.load = mockLoad;
-      });
+      } as any);
 
-      const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const consoleWarnSpy = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
 
       await loadExternalBrainMesh("/models/missing.obj", "pial", "both");
 

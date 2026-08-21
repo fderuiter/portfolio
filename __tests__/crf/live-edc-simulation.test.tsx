@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { LiveEdcSimulator } from "@/components/crf/Modes/LiveEdcSimulator";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
+import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
 
 describe("Live 21 CFR Part 11 EDC Simulation Suite", () => {
   let container: HTMLDivElement;
@@ -33,7 +35,9 @@ describe("Live 21 CFR Part 11 EDC Simulation Suite", () => {
       root.render(<LiveEdcSimulator study={ONCOLOGY_RECIST_PRESET} />);
     });
 
-    expect(container.textContent).toContain("Live 21 CFR Part 11 EDC Simulation Mode");
+    expect(container.textContent).toContain(
+      "Live 21 CFR Part 11 EDC Simulation Mode"
+    );
     expect(container.textContent).toContain("Patient Form Entry");
     expect(container.textContent).toContain("Subject Status Matrix");
     expect(container.textContent).toContain("Discrepancy Queries");
@@ -46,8 +50,8 @@ describe("Live 21 CFR Part 11 EDC Simulation Suite", () => {
     });
 
     // 1. Switch to Subject Status Matrix
-    const matrixTab = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Subject Status Matrix")
+    const matrixTab = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Subject Status Matrix")
     );
     expect(matrixTab).toBeDefined();
 
@@ -55,28 +59,34 @@ describe("Live 21 CFR Part 11 EDC Simulation Suite", () => {
       matrixTab?.click();
     });
 
-    expect(container.textContent).toContain("Longitudinal Subject vs. Visit Progression Matrix");
+    expect(container.textContent).toContain(
+      "Longitudinal Subject vs. Visit Progression Matrix"
+    );
     expect(container.textContent).toContain("001-101");
 
     // 2. Switch to Discrepancy Queries
-    const queriesTab = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Discrepancy Queries")
+    const queriesTab = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Discrepancy Queries")
     );
     await act(async () => {
       queriesTab?.click();
     });
 
-    expect(container.textContent).toContain("Clinical Discrepancy & Query Management Ledger");
+    expect(container.textContent).toContain(
+      "Clinical Discrepancy & Query Management Ledger"
+    );
 
     // 3. Switch to Audit Trail
-    const auditTab = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Part 11 Audit Trail")
+    const auditTab = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Part 11 Audit Trail")
     );
     await act(async () => {
       auditTab?.click();
     });
 
-    expect(container.textContent).toContain("21 CFR Part 11 Immutable Audit Trail Log");
+    expect(container.textContent).toContain(
+      "21 CFR Part 11 Immutable Audit Trail Log"
+    );
   });
 
   it("allows CRA role to toggle Source Data Verification (SDV) on fields", async () => {
@@ -85,8 +95,8 @@ describe("Live 21 CFR Part 11 EDC Simulation Suite", () => {
     });
 
     // Click CRA Monitor role button
-    const craRoleBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.trim() === "CRA Monitor"
+    const craRoleBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.trim() === "CRA Monitor"
     );
     expect(craRoleBtn).toBeDefined();
 
@@ -95,8 +105,10 @@ describe("Live 21 CFR Part 11 EDC Simulation Suite", () => {
     });
 
     // Find CRA SDV button on field
-    const sdvBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("SDV Verify") || b.textContent?.includes("SDV Done")
+    const sdvBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) =>
+        b.textContent?.includes("SDV Verify") ||
+        b.textContent?.includes("SDV Done")
     );
     expect(sdvBtn).toBeDefined();
 
@@ -114,8 +126,8 @@ describe("Live 21 CFR Part 11 EDC Simulation Suite", () => {
     });
 
     // Click Principal Investigator role button
-    const piRoleBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.trim() === "Principal Investigator"
+    const piRoleBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.trim() === "Principal Investigator"
     );
     expect(piRoleBtn).toBeDefined();
 

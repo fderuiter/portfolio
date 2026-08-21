@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import fs from "fs";
 import path from "path";
 import { renderHook } from "@testing-library/react";
+import { fromPartial } from "@total-typescript/shoehorn";
+
 import {
   playMemeSound,
   getMemeSoundDuration,
@@ -211,19 +213,25 @@ describe("Meme Audio & SoundEngine Core Integration (__tests__/meme-audio.test.t
       createGain: vi.fn().mockImplementation(createMockGain),
       createBiquadFilter: vi.fn().mockImplementation(createMockFilter),
       createBufferSource: vi.fn().mockImplementation(createMockBufferSource),
-      createBuffer: vi.fn().mockImplementation((channels: number, length: number, sampleRate: number) => {
-        const channelData = new Float32Array(length);
-        return {
-          numberOfChannels: channels,
-          length,
-          sampleRate,
-          duration: length / sampleRate,
-          getChannelData: vi.fn().mockReturnValue(channelData),
-        } as unknown as AudioBuffer;
-      }),
+      createBuffer: vi
+        .fn()
+        .mockImplementation(
+          (channels: number, length: number, sampleRate: number) => {
+            const channelData = new Float32Array(length);
+            return fromPartial<AudioBuffer>({
+              numberOfChannels: channels,
+              length,
+              sampleRate,
+              duration: length / sampleRate,
+              getChannelData: vi.fn().mockReturnValue(channelData),
+            });
+          }
+        ),
     };
 
-    const MockAudioContextConstructor = vi.fn().mockImplementation(function (this: Record<string, unknown>) {
+    const MockAudioContextConstructor = vi.fn().mockImplementation(function (
+      this: Record<string, unknown>
+    ) {
       Object.assign(this, mockAudioContext);
       return mockAudioContext;
     });

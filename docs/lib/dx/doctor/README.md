@@ -9,6 +9,7 @@
 ## Interfaces
 
 - [DiagnosticCheckResult](interfaces/DiagnosticCheckResult.md)
+- [DiagnosticSummary](interfaces/DiagnosticSummary.md)
 - [DoctorOptions](interfaces/DoctorOptions.md)
 
 ## Functions
@@ -21,6 +22,7 @@
 - [checkHydrationSafety](functions/checkHydrationSafety.md)
 - [checkLayoutTextClippingInvariants](functions/checkLayoutTextClippingInvariants.md)
 - [checkMigrationGuard](functions/checkMigrationGuard.md)
+- [checkModuleBoundaries](functions/checkModuleBoundaries.md)
 - [checkNavbarHierarchy](functions/checkNavbarHierarchy.md)
 - [checkOnboardingDocsDrift](functions/checkOnboardingDocsDrift.md)
 - [checkOpenApiParity](functions/checkOpenApiParity.md)
@@ -30,6 +32,7 @@
 - [checkRouteIndexing](functions/checkRouteIndexing.md)
 - [checkSecretLeaks](functions/checkSecretLeaks.md)
 - [checkSubRoutePerformance](functions/checkSubRoutePerformance.md)
+- [checkTestFixtureHygiene](functions/checkTestFixtureHygiene.md)
 - [checkTestPathResolution](functions/checkTestPathResolution.md)
 - [checkWorkspaceIdeConfig](functions/checkWorkspaceIdeConfig.md)
 - [printDoctorReport](functions/printDoctorReport.md)

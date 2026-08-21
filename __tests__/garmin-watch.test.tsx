@@ -1,7 +1,9 @@
 import { describe, it, expect } from "vitest";
 import fs from "fs";
 import path from "path";
+import { fromPartial, fromAny } from "@total-typescript/shoehorn";
 import { GarminWatchSimulator } from "@/components/GarminWatchSimulator";
+
 import {
   DEVICE_PROFILES,
   VARIABLE_RAM_COSTS,
@@ -24,7 +26,10 @@ import {
 } from "@/lib/garmin-engine";
 
 describe("GarminWatchSimulator Architecture & Feature Completeness", () => {
-  const componentPath = path.resolve(__dirname, "../components/GarminWatchSimulator.tsx");
+  const componentPath = path.resolve(
+    __dirname,
+    "../components/GarminWatchSimulator.tsx"
+  );
   const content = fs.readFileSync(componentPath, "utf-8");
 
   it("exports a function or component named GarminWatchSimulator", () => {
@@ -278,7 +283,7 @@ describe("Garmin Connect IQ Simulation Engine (lib/garmin-engine.ts)", () => {
   });
 
   it("should render canvas frames for active, frozen, foggy, and crashed states", () => {
-    const mockCtx = {
+    const mockCtx = fromPartial<CanvasRenderingContext2D>({
       save: () => {},
       restore: () => {},
       beginPath: () => {},
@@ -299,16 +304,17 @@ describe("Garmin Connect IQ Simulation Engine (lib/garmin-engine.ts)", () => {
       roundRect: () => {},
       measureText: () => ({ width: 40 }),
       translate: () => {},
-      createRadialGradient: () => ({
-        addColorStop: () => {},
-      }),
-      fillStyle: "",
-      strokeStyle: "",
+      createRadialGradient: () =>
+        fromPartial<CanvasGradient>({
+          addColorStop: () => {},
+        }),
+      fillStyle: "#000000",
+      strokeStyle: "#ffffff",
       lineWidth: 1,
-      font: "",
-      textAlign: "",
-      globalCompositeOperation: "",
-    } as unknown as CanvasRenderingContext2D;
+      font: "10px sans-serif",
+      textAlign: "center",
+      globalCompositeOperation: "source-over",
+    });
 
     // 1. Normal playing state with light on and obstacles
     const playingState = {
@@ -317,10 +323,47 @@ describe("Garmin Connect IQ Simulation Engine (lib/garmin-engine.ts)", () => {
       fogLevel: 0.5,
       fogWipes: [{ x: 140, y: 140, radius: 25 }],
       obstacles: [
-        { id: 1, x: 100, y: 180, width: 16, height: 20, type: "null_pointer" as const, label: "NULL", speed: 2 },
-        { id: 2, x: 150, y: 180, width: 20, height: 28, type: "watchdog" as const, label: "DOG", speed: 2 },
-        { id: 3, x: 200, y: 150, width: 14, height: 14, type: "mem_token" as const, label: "FLT", speed: 2, variablePayload: "float" as const },
-        { id: 4, x: 250, y: 180, width: 18, height: 24, type: "stack_overflow" as const, label: "STK", speed: 2 },
+        {
+          id: 1,
+          x: 100,
+          y: 180,
+          width: 16,
+          height: 20,
+          type: "null_pointer" as const,
+          label: "NULL",
+          speed: 2,
+        },
+        {
+          id: 2,
+          x: 150,
+          y: 180,
+          width: 20,
+          height: 28,
+          type: "watchdog" as const,
+          label: "DOG",
+          speed: 2,
+        },
+        {
+          id: 3,
+          x: 200,
+          y: 150,
+          width: 14,
+          height: 14,
+          type: "mem_token" as const,
+          label: "FLT",
+          speed: 2,
+          variablePayload: "float" as const,
+        },
+        {
+          id: 4,
+          x: 250,
+          y: 180,
+          width: 18,
+          height: 24,
+          type: "stack_overflow" as const,
+          label: "STK",
+          speed: 2,
+        },
       ],
     };
     expect(() => renderCanvasFrame(mockCtx, playingState)).not.toThrow();
@@ -400,7 +443,7 @@ describe("Garmin Connect IQ Simulation Engine (lib/garmin-engine.ts)", () => {
     let state = startGame(createInitialState("fenix"));
     state.thermalStress = 1.0;
     state.fogLevel = 1.0;
-    
+
     // Resolve stress
     state.allocatedRamKb = 1.8;
     state.isLightOn = false;
@@ -427,21 +470,25 @@ describe("Garmin Connect IQ Simulation Engine (lib/garmin-engine.ts)", () => {
       const state = startGame(createInitialState("fenix"));
       state.battery = 12.0;
 
-      const mockCtx = new Proxy(
-        {
-          fillStyle: "",
-          strokeStyle: "",
-          font: "",
-          textAlign: "",
-          createRadialGradient: () => ({ addColorStop: () => {} }),
-        },
-        {
-          get(target, prop) {
-            if (prop in target) return (target as Record<string | symbol, unknown>)[prop];
-            return () => {};
+      const mockCtx = fromAny<CanvasRenderingContext2D, unknown>(
+        new Proxy(
+          {
+            fillStyle: "",
+            strokeStyle: "",
+            font: "",
+            textAlign: "",
+            createRadialGradient: () =>
+              fromPartial<CanvasGradient>({ addColorStop: () => {} }),
           },
-        }
-      ) as unknown as CanvasRenderingContext2D;
+          {
+            get(target, prop) {
+              if (prop in target)
+                return (target as Record<string | symbol, unknown>)[prop];
+              return () => {};
+            },
+          }
+        )
+      );
 
       expect(() => renderCanvasFrame(mockCtx, state)).not.toThrow();
     });
@@ -492,17 +539,27 @@ describe("Garmin Connect IQ Simulation Engine (lib/garmin-engine.ts)", () => {
       const state = startGame(createInitialState("fenix"));
       const initialFlash = state.allocatedFlashKb;
 
-      const { state: nextState, crashed } = allocateFlashVariable(state, 8.0, "user_settings.dat");
+      const { state: nextState, crashed } = allocateFlashVariable(
+        state,
+        8.0,
+        "user_settings.dat"
+      );
       expect(crashed).toBe(false);
       expect(nextState.allocatedFlashKb).toBeCloseTo(initialFlash + 8.0, 1);
-      expect(nextState.flashVariables.some((f) => f.name === "user_settings.dat")).toBe(true);
+      expect(
+        nextState.flashVariables.some((f) => f.name === "user_settings.dat")
+      ).toBe(true);
     });
 
     it("should throw Out Of Storage crash when flash allocations exceed device limit", () => {
       const state = startGame(createInitialState("fenix"));
       state.allocatedFlashKb = 60.0; // Fēnix limit is 64.0 KB
 
-      const { state: crashedState, crashed } = allocateFlashVariable(state, 10.0, "large_blob.bin");
+      const { state: crashedState, crashed } = allocateFlashVariable(
+        state,
+        10.0,
+        "large_blob.bin"
+      );
       expect(crashed).toBe(true);
       expect(crashedState.gameState).toBe("crashed");
       expect(crashedState.crashReport?.errorType).toBe("Out Of Storage");
@@ -511,7 +568,12 @@ describe("Garmin Connect IQ Simulation Engine (lib/garmin-engine.ts)", () => {
 
     it("should persist flash variables to browser local storage for cross-session reload", () => {
       const flashVars = [
-        { id: 10, name: "session_state.json", sizeKb: 12.0, allocatedAt: Date.now() },
+        {
+          id: 10,
+          name: "session_state.json",
+          sizeKb: 12.0,
+          allocatedAt: Date.now(),
+        },
       ];
       savePersistedFlashStorage(flashVars);
 

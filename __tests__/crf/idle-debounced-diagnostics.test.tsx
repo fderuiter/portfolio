@@ -1,13 +1,15 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { useDebouncedDiagnostics } from "@/hooks/useDebouncedDiagnostics";
 import { DiagnosticsDrawer } from "@/components/crf/DiagnosticsDrawer";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
+import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
 import { StudyProtocol, CRFForm } from "@/lib/crf/types";
 import * as astEvaluator from "@/lib/crf/ast-evaluator";
 import * as conformanceLinter from "@/lib/crf/cdisc-conformance-linter";
@@ -38,11 +40,16 @@ describe("Targeted Main-Thread Idle Scheduling & Debounced Diagnostic Badge Suit
     const lintFormSpy = vi.spyOn(astEvaluator, "lintForm");
 
     const TestComponent = ({ study }: { study: StudyProtocol }) => {
-      const { totalIssues, isPending } = useDebouncedDiagnostics(study, { debounceMs: 200, idleTimeoutMs: 100 });
+      const { totalIssues, isPending } = useDebouncedDiagnostics(study, {
+        debounceMs: 200,
+        idleTimeoutMs: 100,
+      });
       return (
         <div>
           <span data-testid="total-issues">{totalIssues}</span>
-          <span data-testid="is-pending">{isPending ? "pending" : "ready"}</span>
+          <span data-testid="is-pending">
+            {isPending ? "pending" : "ready"}
+          </span>
         </div>
       );
     };
@@ -92,7 +99,9 @@ describe("Targeted Main-Thread Idle Scheduling & Debounced Diagnostic Badge Suit
       root.render(<TestComponent study={studyState} />);
     });
 
-    expect(container.querySelector('[data-testid="is-pending"]')?.textContent).toBe("pending");
+    expect(
+      container.querySelector('[data-testid="is-pending"]')?.textContent
+    ).toBe("pending");
 
     // Keystroke 2 within 100ms
     vi.advanceTimersByTime(100);
@@ -111,26 +120,39 @@ describe("Targeted Main-Thread Idle Scheduling & Debounced Diagnostic Badge Suit
       root.render(<TestComponent study={studyState} />);
     });
 
-    expect(container.querySelector('[data-testid="is-pending"]')?.textContent).toBe("pending");
+    expect(
+      container.querySelector('[data-testid="is-pending"]')?.textContent
+    ).toBe("pending");
 
     // Advance time past the 200ms trailing debounce edge
     await act(async () => {
       vi.advanceTimersByTime(250);
     });
 
-    expect(container.querySelector('[data-testid="is-pending"]')?.textContent).toBe("ready");
-    expect(Number(container.querySelector('[data-testid="total-issues"]')?.textContent)).toBeGreaterThan(0);
+    expect(
+      container.querySelector('[data-testid="is-pending"]')?.textContent
+    ).toBe("ready");
+    expect(
+      Number(
+        container.querySelector('[data-testid="total-issues"]')?.textContent
+      )
+    ).toBeGreaterThan(0);
   });
 
   it("memoizes diagnostic drawer evaluation results against unchanged study protocol state", async () => {
     const lintFormSpy = vi.spyOn(astEvaluator, "lintForm");
-    const validateComplianceSpy = vi.spyOn(conformanceLinter, "validateStudyCompliance");
+    const validateComplianceSpy = vi.spyOn(
+      conformanceLinter,
+      "validateStudyCompliance"
+    );
 
     const Wrapper = () => {
       const [, setCount] = useState(0);
       return (
         <div>
-          <button onClick={() => setCount((c) => c + 1)}>Re-render Parent</button>
+          <button onClick={() => setCount((c) => c + 1)}>
+            Re-render Parent
+          </button>
           <DiagnosticsDrawer
             isOpen={true}
             study={ONCOLOGY_RECIST_PRESET}
@@ -159,7 +181,9 @@ describe("Targeted Main-Thread Idle Scheduling & Debounced Diagnostic Badge Suit
 
     // Verify lintForm and validateStudyCompliance were NOT called again
     expect(lintFormSpy.mock.calls.length).toBe(initialLintCalls);
-    expect(validateComplianceSpy.mock.calls.length).toBe(initialComplianceCalls);
+    expect(validateComplianceSpy.mock.calls.length).toBe(
+      initialComplianceCalls
+    );
   });
 
   it("immediately cancels pending background diagnostic computations when new inputs or undo actions occur", async () => {
@@ -178,12 +202,18 @@ describe("Targeted Main-Thread Idle Scheduling & Debounced Diagnostic Badge Suit
 
     const TestHarness = () => {
       const [currentStudy, setCurrentStudy] = useState(studyInitial);
-      const { totalIssues, isPending } = useDebouncedDiagnostics(currentStudy, { debounceMs: 300 });
+      const { totalIssues, isPending } = useDebouncedDiagnostics(currentStudy, {
+        debounceMs: 300,
+      });
 
       return (
         <div>
-          <button onClick={() => setCurrentStudy(studyEdited)}>Edit Input</button>
-          <button onClick={() => setCurrentStudy(studyInitial)}>Undo Action</button>
+          <button onClick={() => setCurrentStudy(studyEdited)}>
+            Edit Input
+          </button>
+          <button onClick={() => setCurrentStudy(studyInitial)}>
+            Undo Action
+          </button>
           <div data-testid="issues">{totalIssues}</div>
           <div data-testid="status">{isPending ? "computing" : "idle"}</div>
         </div>
@@ -199,15 +229,21 @@ describe("Targeted Main-Thread Idle Scheduling & Debounced Diagnostic Badge Suit
       vi.advanceTimersByTime(100);
     });
 
-    const editBtn = Array.from(container.querySelectorAll("button")).find((b) => b.textContent === "Edit Input");
-    const undoBtn = Array.from(container.querySelectorAll("button")).find((b) => b.textContent === "Undo Action");
+    const editBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent === "Edit Input"
+    );
+    const undoBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent === "Undo Action"
+    );
 
     // Trigger edit
     await act(async () => {
       editBtn?.click();
     });
 
-    expect(container.querySelector('[data-testid="status"]')?.textContent).toBe("computing");
+    expect(container.querySelector('[data-testid="status"]')?.textContent).toBe(
+      "computing"
+    );
 
     // Trigger undo before edit timer completes
     await act(async () => {
@@ -222,7 +258,9 @@ describe("Targeted Main-Thread Idle Scheduling & Debounced Diagnostic Badge Suit
       vi.advanceTimersByTime(350);
     });
 
-    expect(container.querySelector('[data-testid="status"]')?.textContent).toBe("idle");
+    expect(container.querySelector('[data-testid="status"]')?.textContent).toBe(
+      "idle"
+    );
   });
 
   it("preserves object reference identity for form fields and diagnostic items during evaluation without worker cloning", async () => {

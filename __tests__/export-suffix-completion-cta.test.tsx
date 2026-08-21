@@ -4,15 +4,20 @@ import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { exportStudyToSas, exportFormToSas } from "@/lib/crf/export-sas";
 import { exportStudyToR, exportFormToR } from "@/lib/crf/export-r";
-import { generateAcrfHtml, generateStudyAcrfBookHtml } from "@/lib/crf/export-acrf";
+import {
+  generateAcrfHtml,
+  generateStudyAcrfBookHtml,
+} from "@/lib/crf/export-acrf";
 import { exportStudyToCdiscOdmXml } from "@/lib/crf/odm-xml-serializer";
 import { exportFormToFhirQuestionnaire } from "@/lib/crf/fhir-questionnaire";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
+import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
 import { GarminWatchSimulator } from "@/components/GarminWatchSimulator";
 import { ExportDocumentModal } from "@/components/crf/Modes/ExportDocumentModal";
 import { ExportImportModal } from "@/components/crf/Modes/ExportImportModal";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 const mockRecordEvent = vi.fn().mockResolvedValue(true);
 vi.mock("@/hooks/useTelemetry", () => ({
@@ -34,24 +39,37 @@ describe("Export Suffix & Completion Screen CTA Retrofit Suite", () => {
   describe("CRF Studio Document Exporters Suffix Verification", () => {
     it("appends consultation scheduling link to SAS export header and footer comments", () => {
       const sasOutput = exportStudyToSas(ONCOLOGY_RECIST_PRESET);
-      expect(sasOutput).toContain("CONSULTATION: Schedule Consultation: /schedule");
+      expect(sasOutput).toContain(
+        "CONSULTATION: Schedule Consultation: /schedule"
+      );
       expect(sasOutput).toContain("/* Schedule Consultation: /schedule */");
 
-      const singleSas = exportFormToSas(ONCOLOGY_RECIST_PRESET.forms[0], ONCOLOGY_RECIST_PRESET);
+      const singleSas = exportFormToSas(
+        ONCOLOGY_RECIST_PRESET.forms[0],
+        ONCOLOGY_RECIST_PRESET
+      );
       expect(singleSas).toContain("/* Schedule Consultation: /schedule */");
     });
 
     it("appends consultation scheduling link to R export header and footer comments", () => {
       const rOutput = exportStudyToR(ONCOLOGY_RECIST_PRESET);
-      expect(rOutput).toContain("# CONSULTATION: Schedule Consultation: /schedule");
+      expect(rOutput).toContain(
+        "# CONSULTATION: Schedule Consultation: /schedule"
+      );
       expect(rOutput).toContain("# Schedule Consultation: /schedule");
 
-      const singleR = exportFormToR(ONCOLOGY_RECIST_PRESET.forms[0], ONCOLOGY_RECIST_PRESET);
+      const singleR = exportFormToR(
+        ONCOLOGY_RECIST_PRESET.forms[0],
+        ONCOLOGY_RECIST_PRESET
+      );
       expect(singleR).toContain("# Schedule Consultation: /schedule");
     });
 
     it("appends consultation scheduling link to aCRF HTML output footers", () => {
-      const htmlSingle = generateAcrfHtml(ONCOLOGY_RECIST_PRESET.forms[0], ONCOLOGY_RECIST_PRESET);
+      const htmlSingle = generateAcrfHtml(
+        ONCOLOGY_RECIST_PRESET.forms[0],
+        ONCOLOGY_RECIST_PRESET
+      );
       expect(htmlSingle).toContain("Schedule Consultation: /schedule");
 
       const htmlBook = generateStudyAcrfBookHtml(ONCOLOGY_RECIST_PRESET);
@@ -65,7 +83,10 @@ describe("Export Suffix & Completion Screen CTA Retrofit Suite", () => {
     });
 
     it("appends consultation scheduling link to HL7 FHIR Questionnaire description", () => {
-      const fhirObj = exportFormToFhirQuestionnaire(ONCOLOGY_RECIST_PRESET.forms[0], ONCOLOGY_RECIST_PRESET) as {
+      const fhirObj = exportFormToFhirQuestionnaire(
+        ONCOLOGY_RECIST_PRESET.forms[0],
+        ONCOLOGY_RECIST_PRESET
+      ) as {
         description: string;
       };
       expect(fhirObj.description).toContain("Schedule Consultation: /schedule");
@@ -112,7 +133,9 @@ describe("Export Suffix & Completion Screen CTA Retrofit Suite", () => {
         setLineDash: vi.fn(),
       };
 
-      HTMLCanvasElement.prototype.getContext = vi.fn(() => mockCtx as any) as any;
+      HTMLCanvasElement.prototype.getContext = vi.fn(
+        () => mockCtx as any
+      ) as any;
     });
 
     afterEach(() => {
@@ -176,8 +199,8 @@ describe("Export Suffix & Completion Screen CTA Retrofit Suite", () => {
       });
 
       // Simulation is initially idle. Let's verify start
-      const startBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-        b.textContent?.includes("START")
+      const startBtn = Array.from(container.querySelectorAll("button")).find(
+        (b) => b.textContent?.includes("START")
       );
       expect(startBtn).toBeDefined();
     });

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { fromPartial } from "@total-typescript/shoehorn";
 import {
   SoundEngine,
   getSoundEngine,
@@ -232,20 +233,27 @@ describe("SoundEngine (lib/audio/sound-engine)", () => {
       createGain: vi.fn().mockImplementation(createMockGain),
       createStereoPanner: vi.fn().mockImplementation(createMockPanner),
       createBiquadFilter: vi.fn().mockImplementation(createMockFilter),
-      createBuffer: vi.fn().mockImplementation((channels: number, length: number, sampleRate: number) => {
-        const channelData = new Float32Array(length);
-        return {
-          numberOfChannels: channels,
-          length,
-          sampleRate,
-          duration: length / sampleRate,
-          getChannelData: vi.fn().mockReturnValue(channelData),
-        } as unknown as AudioBuffer;
-      }),
+      createBuffer: vi
+        .fn()
+        .mockImplementation(
+          (channels: number, length: number, sampleRate: number) => {
+            const channelData = new Float32Array(length);
+            return fromPartial<AudioBuffer>({
+              numberOfChannels: channels,
+              length,
+              sampleRate,
+              duration: length / sampleRate,
+              getChannelData: vi.fn().mockReturnValue(channelData),
+            });
+          }
+        ),
+
       createBufferSource: vi.fn().mockImplementation(createMockBufferSource),
     };
 
-    const MockAudioContextConstructor = vi.fn().mockImplementation(function (this: Record<string, unknown>) {
+    const MockAudioContextConstructor = vi.fn().mockImplementation(function (
+      this: Record<string, unknown>
+    ) {
       Object.assign(this, mockAudioContext);
       return mockAudioContext;
     });
@@ -330,7 +338,10 @@ describe("SoundEngine (lib/audio/sound-engine)", () => {
 
   describe("2. Single Tone Synthesis (playTone)", () => {
     it("configures oscillator type, frequency, and envelope correctly with positional arguments", () => {
-      const engine = new SoundEngine({ initialMuted: false, initialVolume: 0.5 });
+      const engine = new SoundEngine({
+        initialMuted: false,
+        initialVolume: 0.5,
+      });
       engine.playTone(523.25, 0.12, "sawtooth", 0.8);
 
       expect(createdOscillators.length).toBe(1);
@@ -348,7 +359,10 @@ describe("SoundEngine (lib/audio/sound-engine)", () => {
     });
 
     it("supports ToneOptions object with ADSR envelope and stereo panning", () => {
-      const engine = new SoundEngine({ initialMuted: false, initialVolume: 1.0 });
+      const engine = new SoundEngine({
+        initialMuted: false,
+        initialVolume: 1.0,
+      });
       const options: ToneOptions = {
         frequency: 880,
         duration: 0.3,
@@ -373,7 +387,10 @@ describe("SoundEngine (lib/audio/sound-engine)", () => {
       expect(gain.gain.linearRampToValueAtTime).toHaveBeenCalledWith(0.3, 0.1); // Decay to sustain (0.6 * 0.5 = 0.3)
 
       expect(createdPanners.length).toBe(1);
-      expect(createdPanners[0].pan.setValueAtTime).toHaveBeenCalledWith(-0.5, 0);
+      expect(createdPanners[0].pan.setValueAtTime).toHaveBeenCalledWith(
+        -0.5,
+        0
+      );
     });
 
     it("auto-disconnects oscillator and gain nodes after playback ends", () => {
@@ -393,7 +410,10 @@ describe("SoundEngine (lib/audio/sound-engine)", () => {
 
   describe("3. Sequence & Arpeggio Playback (playSequence)", () => {
     it("schedules consecutive notes with appropriate delays and durations", () => {
-      const engine = new SoundEngine({ initialMuted: false, initialVolume: 0.5 });
+      const engine = new SoundEngine({
+        initialMuted: false,
+        initialVolume: 0.5,
+      });
       const notes: SequenceNote[] = [
         { frequency: 261.63, duration: 0.1 },
         { frequency: 329.63, duration: 0.1, delay: 0.08 },
@@ -405,17 +425,23 @@ describe("SoundEngine (lib/audio/sound-engine)", () => {
 
       // First note should start at t=0
       expect(createdOscillators.length).toBe(1);
-      expect(createdOscillators[0].frequency.setValueAtTime).toHaveBeenCalledWith(261.63, 0);
+      expect(
+        createdOscillators[0].frequency.setValueAtTime
+      ).toHaveBeenCalledWith(261.63, 0);
 
       // Advance time to t=80ms
       vi.advanceTimersByTime(80);
       expect(createdOscillators.length).toBe(2);
-      expect(createdOscillators[1].frequency.setValueAtTime).toHaveBeenCalledWith(329.63, expect.any(Number));
+      expect(
+        createdOscillators[1].frequency.setValueAtTime
+      ).toHaveBeenCalledWith(329.63, expect.any(Number));
 
       // Advance time to t=160ms
       vi.advanceTimersByTime(80);
       expect(createdOscillators.length).toBe(3);
-      expect(createdOscillators[2].frequency.setValueAtTime).toHaveBeenCalledWith(392.0, expect.any(Number));
+      expect(
+        createdOscillators[2].frequency.setValueAtTime
+      ).toHaveBeenCalledWith(392.0, expect.any(Number));
     });
 
     it("cancels future notes in a sequence when sequenceHandle.cancel() is called", () => {
@@ -437,7 +463,10 @@ describe("SoundEngine (lib/audio/sound-engine)", () => {
     });
 
     it("supports sequence options for default note type and volume multiplier", () => {
-      const engine = new SoundEngine({ initialMuted: false, initialVolume: 1.0 });
+      const engine = new SoundEngine({
+        initialMuted: false,
+        initialVolume: 1.0,
+      });
       const notes: SequenceNote[] = [
         { frequency: 440, duration: 0.1 },
         { frequency: 880, duration: 0.1, delay: 0.05, type: "sawtooth" },
@@ -459,7 +488,10 @@ describe("SoundEngine (lib/audio/sound-engine)", () => {
 
   describe("4. Synthetic Noise Generation (playNoise)", () => {
     it("allocates audio buffer and routes through buffer source, filter, and gain", () => {
-      const engine = new SoundEngine({ initialMuted: false, initialVolume: 0.5 });
+      const engine = new SoundEngine({
+        initialMuted: false,
+        initialVolume: 0.5,
+      });
       const noiseOpts: NoiseOptions = {
         duration: 0.2,
         volume: 0.4,
@@ -470,7 +502,11 @@ describe("SoundEngine (lib/audio/sound-engine)", () => {
 
       engine.playNoise(noiseOpts);
 
-      expect(mockAudioContext.createBuffer).toHaveBeenCalledWith(1, expect.any(Number), 44100);
+      expect(mockAudioContext.createBuffer).toHaveBeenCalledWith(
+        1,
+        expect.any(Number),
+        44100
+      );
       expect(createdBufferSources.length).toBe(1);
       const source = createdBufferSources[0];
 
@@ -489,12 +525,17 @@ describe("SoundEngine (lib/audio/sound-engine)", () => {
     });
 
     it("supports plain noise playback without filter", () => {
-      const engine = new SoundEngine({ initialMuted: false, initialVolume: 1.0 });
+      const engine = new SoundEngine({
+        initialMuted: false,
+        initialVolume: 1.0,
+      });
       engine.playNoise({ duration: 0.1, volume: 0.3 });
 
       expect(createdBufferSources.length).toBe(1);
       expect(createdFilters.length).toBe(0);
-      expect(createdBufferSources[0].connect).toHaveBeenCalledWith(createdGains[0]);
+      expect(createdBufferSources[0].connect).toHaveBeenCalledWith(
+        createdGains[0]
+      );
     });
   });
 

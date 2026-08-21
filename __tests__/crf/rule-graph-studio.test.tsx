@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { RuleGraphStudio } from "@/components/crf/Modes/RuleGraphStudio";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
+import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
 import { StudyProtocol } from "@/lib/crf/types";
 
 describe("RuleGraphStudio & Formula Sandbox Suite", () => {
@@ -34,9 +36,15 @@ describe("RuleGraphStudio & Formula Sandbox Suite", () => {
       root.render(<RuleGraphStudio study={ONCOLOGY_RECIST_PRESET} />);
     });
 
-    expect(container.textContent).toContain("Logic Dependency DAG & AST Rule Studio");
-    expect(container.textContent).toContain("Visual Execution Flow & Trigger Dependencies (DAG)");
-    expect(container.textContent).toContain("AST Formula Evaluator & Clinical Calculation Studio");
+    expect(container.textContent).toContain(
+      "Logic Dependency DAG & AST Rule Studio"
+    );
+    expect(container.textContent).toContain(
+      "Visual Execution Flow & Trigger Dependencies (DAG)"
+    );
+    expect(container.textContent).toContain(
+      "AST Formula Evaluator & Clinical Calculation Studio"
+    );
   });
 
   it("inserts mathematical tokens into the formula sandbox when clicking token pills", async () => {
@@ -44,8 +52,8 @@ describe("RuleGraphStudio & Formula Sandbox Suite", () => {
       root.render(<RuleGraphStudio study={ONCOLOGY_RECIST_PRESET} />);
     });
 
-    const sqrtBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.trim() === "sqrt("
+    const sqrtBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.trim() === "sqrt("
     );
     expect(sqrtBtn).toBeDefined();
 
@@ -53,7 +61,9 @@ describe("RuleGraphStudio & Formula Sandbox Suite", () => {
       sqrtBtn?.click();
     });
 
-    const formulaInput = container.querySelector('input[value*="sqrt"]') as HTMLInputElement;
+    const formulaInput = container.querySelector(
+      'input[value*="sqrt"]'
+    ) as HTMLInputElement;
     expect(formulaInput).not.toBeNull();
   });
 
@@ -72,8 +82,22 @@ describe("RuleGraphStudio & Formula Sandbox Suite", () => {
               id: "sec_1",
               title: "Test",
               fields: [
-                { id: "f_a", variableName: "VAR_A", label: "A", dataType: "number", columnSpan: 6, required: true },
-                { id: "f_b", variableName: "VAR_B", label: "B", dataType: "number", columnSpan: 6, required: true },
+                {
+                  id: "f_a",
+                  variableName: "VAR_A",
+                  label: "A",
+                  dataType: "number",
+                  columnSpan: 6,
+                  required: true,
+                },
+                {
+                  id: "f_b",
+                  variableName: "VAR_B",
+                  label: "B",
+                  dataType: "number",
+                  columnSpan: 6,
+                  required: true,
+                },
               ],
             },
           ],

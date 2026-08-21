@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Pre-Push Hook: Git Safety & Protected Branch Guard
+# Prevents accidental force pushes or direct pushes to main from local environment.
+# Bypass with: ALLOW_DANGEROUS_GIT=1 git push ...
+
+set -euo pipefail
+
+if [ "${ALLOW_DANGEROUS_GIT:-0}" = "1" ]; then
+  exit 0
+fi
+
+# Read pushed refs from stdin
+# Format: <local ref> <local sha1> <remote ref> <remote sha1>
+while read -r local_ref local_sha remote_ref remote_sha; do
+  # Check if pushing directly to main
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    echo "BLOCKED: Direct push to 'main' branch is prohibited." >&2
+    echo "Active development must occur on feature branches and merge through pull requests." >&2
+    echo "To bypass in an emergency, set ALLOW_DANGEROUS_GIT=1 before pushing." >&2
+    exit 1
+  fi
+done
+
+exit 0

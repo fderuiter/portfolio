@@ -2,12 +2,8 @@
 
 import React, { useState } from "react";
 import { useResizeObserver } from "@/hooks/useResizeObserver";
-import {
-  StudyProtocol,
-  StudioMode,
-  StudioTheme,
-} from "@/lib/crf/types";
-import { getStudyPresetsSync } from "@/lib/crf/presets/loader";
+import { StudyProtocol, StudioMode, StudioTheme } from "@/lib/crf/types";
+import { getStudyPresetsSync } from "@/lib/crf/presets";
 import { useDebouncedDiagnostics } from "@/hooks/useDebouncedDiagnostics";
 import {
   IconLayoutGrid,
@@ -90,13 +86,28 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
   onCopyShareLink,
 }) => {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-  const [presets] = useState<Array<{ id: string; name: string; therapeuticArea?: string; study: { protocolNumber: string } }>>(() => getStudyPresetsSync());
+  const [presets] = useState<
+    Array<{
+      id: string;
+      name: string;
+      therapeuticArea?: string;
+      study: { protocolNumber: string };
+    }>
+  >(() => getStudyPresetsSync());
   const branding = getStudyBranding(study);
   const { totalIssues } = useDebouncedDiagnostics(study);
 
-  const currentPreset = presets.find((p) => p.study.protocolNumber === study.protocolNumber);
+  const currentPreset = presets.find(
+    (p) => p.study.protocolNumber === study.protocolNumber
+  );
 
-  const MODES: { mode: StudioMode; label: string; shortLabel: string; shortcut: string; icon: React.ReactNode }[] = [
+  const MODES: {
+    mode: StudioMode;
+    label: string;
+    shortLabel: string;
+    shortcut: string;
+    icon: React.ReactNode;
+  }[] = [
     {
       mode: "designer",
       label: "Form Designer",
@@ -141,15 +152,21 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
     },
   ];
 
-  const headerObserverRef = useResizeObserver<HTMLElement>((entry) => {
-    const h = Math.round(entry.contentRect.height);
-    if (typeof document !== "undefined" && h > 0) {
-      document.documentElement.style.setProperty("--header-height", `${h}px`);
-    }
-  }, { trackVertical: true });
+  const headerObserverRef = useResizeObserver<HTMLElement>(
+    (entry) => {
+      const h = Math.round(entry.contentRect.height);
+      if (typeof document !== "undefined" && h > 0) {
+        document.documentElement.style.setProperty("--header-height", `${h}px`);
+      }
+    },
+    { trackVertical: true }
+  );
 
   return (
-    <header ref={headerObserverRef} className="border-b border-zinc-850 bg-zinc-950/95 sticky top-0 z-30 backdrop-blur-xl">
+    <header
+      ref={headerObserverRef}
+      className="border-b border-zinc-850 bg-zinc-950/95 sticky top-0 z-30 backdrop-blur-xl"
+    >
       {/* TIER 1: Brand, Protocol Selector & Global Actions Bar */}
       <div className="flex items-center justify-between px-3 sm:px-4 py-2 border-b border-zinc-900/80 gap-3">
         {/* Left Side: Brand, Protocol Selector & Study Badges */}
@@ -219,8 +236,16 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
             <button
               onClick={onToggleTheme}
               className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 transition-colors inline-flex items-center gap-1 text-[11px] font-mono"
-              title={theme === "light" ? "Switch to Dark Studio Mode" : "Switch to Clinical Light Mode"}
-              aria-label={theme === "light" ? "Switch to Dark Studio Mode" : "Switch to Clinical Light Mode"}
+              title={
+                theme === "light"
+                  ? "Switch to Dark Studio Mode"
+                  : "Switch to Clinical Light Mode"
+              }
+              aria-label={
+                theme === "light"
+                  ? "Switch to Dark Studio Mode"
+                  : "Switch to Clinical Light Mode"
+              }
             >
               {theme === "light" ? (
                 <IconMoon className="w-3.5 h-3.5 text-amber-500" />
@@ -257,7 +282,10 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
               onClick={() => {
                 if (typeof window !== "undefined") {
                   try {
-                    localStorage.setItem("crf_active_protocol", JSON.stringify(study));
+                    localStorage.setItem(
+                      "crf_active_protocol",
+                      JSON.stringify(study)
+                    );
                   } catch {}
                   window.location.href = "/arcade/clinical-chaos";
                 }
@@ -382,7 +410,9 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
                     <IconSparkles className="w-4 h-4 text-amber-400" />
                     <div className="flex-1">
                       <div className="font-bold">+ CDASH Form Scaffolder</div>
-                      <div className="text-[10px] text-zinc-500">Inject 10+ standard domains</div>
+                      <div className="text-[10px] text-zinc-500">
+                        Inject 10+ standard domains
+                      </div>
                     </div>
                   </button>
 
@@ -401,7 +431,9 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
                     <div className="flex-1">
                       <div className="font-bold">CDISC Diagnostics</div>
                       <div className="text-[10px] text-zinc-500">
-                        {totalIssues > 0 ? `${totalIssues} rule violations` : "Study fully verified"}
+                        {totalIssues > 0
+                          ? `${totalIssues} rule violations`
+                          : "Study fully verified"}
                       </div>
                     </div>
                   </button>
@@ -416,7 +448,9 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
                     <IconFileSpreadsheet className="w-4 h-4 text-blue-400" />
                     <div className="flex-1">
                       <div className="font-bold">Docx / PDF Books</div>
-                      <div className="text-[10px] text-blue-400/70">Export Word &amp; blank PDFs</div>
+                      <div className="text-[10px] text-blue-400/70">
+                        Export Word &amp; blank PDFs
+                      </div>
                     </div>
                   </button>
 
@@ -430,7 +464,9 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
                     <IconPalette className="w-4 h-4 text-brand-cyan" />
                     <div className="flex-1">
                       <div className="font-bold">Organization Branding</div>
-                      <div className="text-[10px] text-zinc-500">Logos, colors &amp; header profiles</div>
+                      <div className="text-[10px] text-zinc-500">
+                        Logos, colors &amp; header profiles
+                      </div>
                     </div>
                   </button>
 
@@ -445,7 +481,9 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
                       <IconTerminal2 className="w-4 h-4 text-brand-cyan" />
                       <div className="flex-1">
                         <div className="font-bold">CLI Terminal Drawer</div>
-                        <div className="text-[10px] text-zinc-500">Interactive command interface</div>
+                        <div className="text-[10px] text-zinc-500">
+                          Interactive command interface
+                        </div>
                       </div>
                     </button>
                   )}
@@ -483,7 +521,9 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
                 <span className="sm:hidden">{item.shortLabel}</span>
                 <span
                   className={`text-[9px] px-1 py-0.2 rounded font-mono hidden md:inline-block ${
-                    isActive ? "bg-brand-cyan/25 text-brand-cyan font-bold" : "bg-zinc-900 text-zinc-600"
+                    isActive
+                      ? "bg-brand-cyan/25 text-brand-cyan font-bold"
+                      : "bg-zinc-900 text-zinc-600"
                   }`}
                 >
                   {item.shortcut}

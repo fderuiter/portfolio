@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { WorkflowWizardModal } from "@/components/crf/Wizard/WorkflowWizardModal";
-import { getOncologyPresetSync } from "@/lib/crf/presets/loader";
+import { getOncologyPresetSync } from "@/lib/crf/presets";
 
 describe("WorkflowWizardModal Component", () => {
   let container: HTMLDivElement;
@@ -75,7 +77,9 @@ describe("WorkflowWizardModal Component", () => {
       nextButtons[0].click();
     });
     expect(container.textContent).toContain("Stage 2 of 5");
-    expect(container.textContent).toContain("Select CDASH & Medical Device Domains");
+    expect(container.textContent).toContain(
+      "Select CDASH & Medical Device Domains"
+    );
 
     // Step to Stage 3
     const nextBtn2 = Array.from(container.querySelectorAll("button")).find(
@@ -85,7 +89,9 @@ describe("WorkflowWizardModal Component", () => {
       nextBtn2?.click();
     });
     expect(container.textContent).toContain("Stage 3 of 5");
-    expect(container.textContent).toContain("Schedule of Activities (SoA) Matrix");
+    expect(container.textContent).toContain(
+      "Schedule of Activities (SoA) Matrix"
+    );
 
     // Step to Stage 4
     const nextBtn3 = Array.from(container.querySelectorAll("button")).find(
@@ -95,7 +101,9 @@ describe("WorkflowWizardModal Component", () => {
       nextBtn3?.click();
     });
     expect(container.textContent).toContain("Stage 4 of 5");
-    expect(container.textContent).toContain("Clinical Calculations & AST Edit Checks");
+    expect(container.textContent).toContain(
+      "Clinical Calculations & AST Edit Checks"
+    );
 
     // Step to Stage 5
     const nextBtn4 = Array.from(container.querySelectorAll("button")).find(
@@ -105,7 +113,9 @@ describe("WorkflowWizardModal Component", () => {
       nextBtn4?.click();
     });
     expect(container.textContent).toContain("Stage 5 of 5");
-    expect(container.textContent).toContain("Regulatory & Logic Conformance Audit");
+    expect(container.textContent).toContain(
+      "Regulatory & Logic Conformance Audit"
+    );
     expect(container.textContent).toContain("Deploy Protocol to Studio Canvas");
 
     // Click Deploy

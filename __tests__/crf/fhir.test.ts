@@ -1,15 +1,22 @@
 import { describe, it, expect } from "vitest";
 import { exportFormToFhirQuestionnaire } from "@/lib/crf/fhir-questionnaire";
 import { generateAcrfHtml } from "@/lib/crf/export-acrf";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
+import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
 
 describe("CRF Studio - FHIR Questionnaire & aCRF Generator", () => {
   it("converts a CRF form into a valid FHIR R4 Questionnaire Resource", () => {
     const dmForm = ONCOLOGY_RECIST_PRESET.forms.find((f) => f.domain === "DM")!;
-    const fhir = exportFormToFhirQuestionnaire(dmForm, ONCOLOGY_RECIST_PRESET) as {
+    const fhir = exportFormToFhirQuestionnaire(
+      dmForm,
+      ONCOLOGY_RECIST_PRESET
+    ) as {
       resourceType: string;
       status: string;
-      item: Array<{ linkId: string; type: string; item: Array<{ linkId: string; type: string }> }>;
+      item: Array<{
+        linkId: string;
+        type: string;
+        item: Array<{ linkId: string; type: string }>;
+      }>;
     };
 
     expect(fhir.resourceType).toBe("Questionnaire");

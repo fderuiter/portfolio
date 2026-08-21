@@ -6,7 +6,7 @@
 
 # Interface: BenchmarkResult
 
-Defined in: [lib/dx/bench.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L24)
+Defined in: [lib/dx/bench.ts:39](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L39)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/dx/bench.ts:24](https://github.com/fderuiter/portfolio/blob/mai
 
 > **durationMs**: `number`
 
-Defined in: [lib/dx/bench.ts:28](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L28)
+Defined in: [lib/dx/bench.ts:43](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L43)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/dx/bench.ts:28](https://github.com/fderuiter/portfolio/blob/mai
 
 > **iterations**: `number`
 
-Defined in: [lib/dx/bench.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L27)
+Defined in: [lib/dx/bench.ts:42](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L42)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/dx/bench.ts:27](https://github.com/fderuiter/portfolio/blob/mai
 
 > `optional` **metrics?**: `Record`\<`string`, `string` \| `number`\>
 
-Defined in: [lib/dx/bench.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L30)
+Defined in: [lib/dx/bench.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L45)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/dx/bench.ts:30](https://github.com/fderuiter/portfolio/blob/mai
 
 > **name**: `string`
 
-Defined in: [lib/dx/bench.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L26)
+Defined in: [lib/dx/bench.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L41)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/dx/bench.ts:26](https://github.com/fderuiter/portfolio/blob/mai
 
 > **opsPerSec**: `number`
 
-Defined in: [lib/dx/bench.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L29)
+Defined in: [lib/dx/bench.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L44)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [lib/dx/bench.ts:29](https://github.com/fderuiter/portfolio/blob/mai
 
 > **suite**: `string`
 
-Defined in: [lib/dx/bench.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L25)
+Defined in: [lib/dx/bench.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L40)

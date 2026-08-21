@@ -1,23 +1,38 @@
 import { performance } from "perf_hooks";
-import { 
-  distributeItemsGreedily, 
-  mapDataToCoordinates, 
-  generateHermiteSplinePath, 
-  generateCubicSplinePath 
+import {
+  distributeItemsGreedily,
+  mapDataToCoordinates,
+  generateHermiteSplinePath,
+  generateCubicSplinePath,
 } from "../graphics-math";
-import { 
-  prepareRichInline, 
-  walkRichInlineLineRanges, 
+import {
+  prepareRichInline,
+  walkRichInlineLineRanges,
   materializeRichInlineLineRange,
-  type RichInlineLineRange 
+  type RichInlineLineRange,
 } from "@chenglou/pretext/rich-inline";
 import { scanFile } from "../validation-scanner";
 import { evaluateFormula, lintFormula } from "../crf/ast-evaluator";
-import { parseFormula, extractVariables, generateTruthTable } from "../proof-utils";
-import { createInitialDuckGameState, stepDuckGame, enterDogPark, stepParkGame } from "../working-with-duck-engine";
-import { createInitialState, startGame, allocateVariable, updateGameSimulation, triggerGarbageCollection } from "../garmin-engine";
+import {
+  parseFormula,
+  extractVariables,
+  generateTruthTable,
+} from "../proof-utils";
+import {
+  createInitialDuckGameState,
+  stepDuckGame,
+  enterDogPark,
+  stepParkGame,
+} from "../working-with-duck-engine";
+import {
+  createInitialState,
+  startGame,
+  allocateVariable,
+  updateGameSimulation,
+  triggerGarbageCollection,
+} from "../garmin-engine";
 import type { CRFField } from "../crf/types";
-import { colors, formatSection, renderTable } from "./utils";
+import { colors, formatHeader } from "./utils";
 import path from "path";
 import fs from "fs";
 
@@ -33,7 +48,9 @@ export interface BenchmarkResult {
 /**
  * Benchmark Greedy Masonry Column Distribution
  */
-export function benchmarkMasonryScheduler(iterations = 1000): BenchmarkResult[] {
+export function benchmarkMasonryScheduler(
+  iterations = 1000
+): BenchmarkResult[] {
   const sizes = [100, 1000, 10000];
   const results: BenchmarkResult[] = [];
 
@@ -86,7 +103,9 @@ function ensureCanvasContext(): void {
     // If running in pure Node CLI environment
     const mockGlobal = globalThis as unknown as {
       document: {
-        createElement: (tag: string) => { getContext?: (type: string) => MockCanvas2DContext };
+        createElement: (tag: string) => {
+          getContext?: (type: string) => MockCanvas2DContext;
+        };
       };
     };
     mockGlobal.document = {
@@ -105,9 +124,14 @@ function ensureCanvasContext(): void {
   } else if (typeof HTMLCanvasElement !== "undefined") {
     // In JSDOM or browser
     const origGetContext = HTMLCanvasElement.prototype.getContext;
-    HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, type: string) {
+    HTMLCanvasElement.prototype.getContext = function (
+      this: HTMLCanvasElement,
+      type: string
+    ) {
       try {
-        const res = origGetContext ? origGetContext.call(this, type as "2d") : null;
+        const res = origGetContext
+          ? origGetContext.call(this, type as "2d")
+          : null;
         if (res) return res;
       } catch {
         // ignore
@@ -133,11 +157,22 @@ export function benchmarkPretextLayout(iterations = 2000): BenchmarkResult[] {
   const monoFont = "14px monospace";
 
   const sampleParagraph = [
-    { text: "Pioneering systems engineering architecture with ", font: defaultFont },
+    {
+      text: "Pioneering systems engineering architecture with ",
+      font: defaultFont,
+    },
     { text: "zero-whitespace", font: boldFont },
     { text: " masonry layout physics and ", font: defaultFont },
-    { text: "chenglou/pretext", font: monoFont, extraWidth: 12, break: "never" as const },
-    { text: " mathematical layout engines to prevent DOM reflow thrashing.", font: defaultFont },
+    {
+      text: "chenglou/pretext",
+      font: monoFont,
+      extraWidth: 12,
+      break: "never" as const,
+    },
+    {
+      text: " mathematical layout engines to prevent DOM reflow thrashing.",
+      font: defaultFont,
+    },
   ];
 
   const prepared = prepareRichInline(sampleParagraph);
@@ -163,7 +198,7 @@ export function benchmarkPretextLayout(iterations = 2000): BenchmarkResult[] {
       opsPerSec,
       metrics: {
         "Container Width": `${containerWidth}px`,
-        "Throughput": `${opsPerSec.toLocaleString()} lines/sec`,
+        Throughput: `${opsPerSec.toLocaleString()} lines/sec`,
         "Latency / Layout": `${(duration / iterations).toFixed(4)}ms`,
       },
     },
@@ -209,9 +244,14 @@ export function benchmarkScanner(iterations = 100): BenchmarkResult[] {
 /**
  * Benchmark Browser-Free SVG Spline & Coordinate Math
  */
-export function benchmarkSVGCoordinateMath(iterations = 5000): BenchmarkResult[] {
+export function benchmarkSVGCoordinateMath(
+  iterations = 5000
+): BenchmarkResult[] {
   const dataSize = 100;
-  const mockData = Array.from({ length: dataSize }, (_, i) => Math.sin(i / 10) * 50 + 50);
+  const mockData = Array.from(
+    { length: dataSize },
+    (_, i) => Math.sin(i / 10) * 50 + 50
+  );
 
   const start = performance.now();
   for (let it = 0; it < iterations; it++) {
@@ -244,8 +284,22 @@ export function benchmarkASTEvaluator(iterations = 3000): BenchmarkResult[] {
   const formula = "WEIGHT / ((HEIGHT / 100) ^ 2)";
   const context = { WEIGHT: 72, HEIGHT: 178 };
   const mockFields: CRFField[] = [
-    { id: "WEIGHT", variableName: "WEIGHT", label: "Weight (kg)", dataType: "number", required: true, columnSpan: 6 },
-    { id: "HEIGHT", variableName: "HEIGHT", label: "Height (cm)", dataType: "number", required: true, columnSpan: 6 },
+    {
+      id: "WEIGHT",
+      variableName: "WEIGHT",
+      label: "Weight (kg)",
+      dataType: "number",
+      required: true,
+      columnSpan: 6,
+    },
+    {
+      id: "HEIGHT",
+      variableName: "HEIGHT",
+      label: "Height (cm)",
+      dataType: "number",
+      required: true,
+      columnSpan: 6,
+    },
   ];
 
   const start = performance.now();
@@ -264,8 +318,8 @@ export function benchmarkASTEvaluator(iterations = 3000): BenchmarkResult[] {
       durationMs: Number(duration.toFixed(2)),
       opsPerSec,
       metrics: {
-        "Expression": formula,
-        "Throughput": `${opsPerSec.toLocaleString()} evals/sec`,
+        Expression: formula,
+        Throughput: `${opsPerSec.toLocaleString()} evals/sec`,
         "Latency / Eval": `${(duration / iterations).toFixed(4)}ms`,
       },
     },
@@ -275,7 +329,9 @@ export function benchmarkASTEvaluator(iterations = 3000): BenchmarkResult[] {
 /**
  * Benchmark Deductive Logic Proof Engine & Truth Table Solver
  */
-export function benchmarkProofDAGValidation(iterations = 1500): BenchmarkResult[] {
+export function benchmarkProofDAGValidation(
+  iterations = 1500
+): BenchmarkResult[] {
   const p1 = parseFormula("P -> Q");
   const p2 = parseFormula("Q -> R");
   const conc = parseFormula("P -> R");
@@ -304,8 +360,8 @@ export function benchmarkProofDAGValidation(iterations = 1500): BenchmarkResult[
       durationMs: Number(duration.toFixed(2)),
       opsPerSec,
       metrics: {
-        "Theorem": "Hypothetical Syllogism",
-        "Throughput": `${opsPerSec.toLocaleString()} solves/sec`,
+        Theorem: "Hypothetical Syllogism",
+        Throughput: `${opsPerSec.toLocaleString()} solves/sec`,
         "Latency / Solve": `${(duration / iterations).toFixed(4)}ms`,
       },
     },
@@ -336,7 +392,7 @@ export function benchmarkDuckPhysics(iterations = 2500): BenchmarkResult[] {
       opsPerSec,
       metrics: {
         "Ticks Simulated": (iterations * 2).toLocaleString(),
-        "Throughput": `${opsPerSec.toLocaleString()} ticks/sec`,
+        Throughput: `${opsPerSec.toLocaleString()} ticks/sec`,
         "Latency / Tick": `${(duration / (iterations * 2)).toFixed(4)}ms`,
       },
     },
@@ -348,7 +404,12 @@ export function benchmarkDuckPhysics(iterations = 2500): BenchmarkResult[] {
  */
 export function benchmarkGarminMemory(iterations = 4000): BenchmarkResult[] {
   let state = startGame(createInitialState("fenix"));
-  const varTypes: ("int" | "float" | "string" | "array")[] = ["int", "float", "string", "array"];
+  const varTypes: ("int" | "float" | "string" | "array")[] = [
+    "int",
+    "float",
+    "string",
+    "array",
+  ];
 
   const start = performance.now();
   for (let i = 0; i < iterations; i++) {
@@ -373,7 +434,7 @@ export function benchmarkGarminMemory(iterations = 4000): BenchmarkResult[] {
       opsPerSec,
       metrics: {
         "Memory Budget": "32 KB",
-        "Throughput": `${opsPerSec.toLocaleString()} ops/sec`,
+        Throughput: `${opsPerSec.toLocaleString()} ops/sec`,
         "Latency / Step": `${(duration / iterations).toFixed(4)}ms`,
       },
     },
@@ -399,36 +460,41 @@ export function runAllBenchmarks(): BenchmarkResult[] {
 }
 
 export function printBenchmarkReport(results: BenchmarkResult[]): void {
-  console.log(formatSection("Micro-Benchmark & Performance Profiles"));
-
-  const rows = results.map((r) => ({
-    suite: r.suite,
-    benchmark: r.name,
-    iterations: r.iterations.toLocaleString(),
-    duration: `${r.durationMs}ms`,
-    ops: `${r.opsPerSec.toLocaleString()} ops/s`,
-  }));
-
   console.log(
-    renderTable(
-      [
-        { header: "Suite", key: "suite", width: 22 },
-        { header: "Benchmark Test", key: "benchmark", width: 42 },
-        { header: "Iters", key: "iterations", width: 8, align: "right" },
-        { header: "Total Time", key: "duration", width: 12, align: "right" },
-        { header: "Throughput", key: "ops", width: 18, align: "right" },
-      ],
-      rows
+    formatHeader(
+      "DX BENCH — Computational & AST Engine Profiles",
+      "Pretext Layout • Greedy Masonry • Security • Garmin Heap • Logic Solver"
     )
   );
 
-  console.log(`${colors.dim}Detailed Metrics:${colors.reset}`);
+  console.log(`### Benchmark Profiles · ${results.length} suites executed\n`);
+
   for (const r of results) {
+    const suiteTag = `[${r.suite}]`.padEnd(25);
+    const testName = r.name.padEnd(45);
+    const opsStr = `${r.opsPerSec.toLocaleString()} ops/s`.padStart(18);
+    const timeStr = `${r.durationMs}ms`.padStart(10);
+
+    console.log(
+      `  ${colors.cyan}${suiteTag}${colors.reset} ${colors.bold}${testName}${colors.reset} ${colors.green}${opsStr}${colors.reset} · ${colors.dim}${timeStr}${colors.reset}`
+    );
+
     if (r.metrics) {
       const metricStr = Object.entries(r.metrics)
-        .map(([k, v]) => `${k}: ${colors.cyan}${v}${colors.reset}`)
-        .join(" | ");
-      console.log(`  ${colors.bold}${r.name}${colors.reset}: ${metricStr}`);
+        .map(([k, v]) => `${k}: ${v}`)
+        .join(" · ");
+      console.log(`  ${colors.gray}└─ *${metricStr}*${colors.reset}`);
     }
   }
+
+  console.log(`\n### What's Actionable\n`);
+  console.log(
+    `To profile real-browser Core Web Vitals (LCP, TTFB, CLS) across canonical routes:`
+  );
+  console.log(`\n  ${colors.brightGreen}npm run bench:pages${colors.reset}\n`);
+
+  console.log(`##### Metadata`);
+  console.log(
+    `*Total Suites: ${results.length} · Engine Status: 100% Deterministic & Optimized*`
+  );
 }

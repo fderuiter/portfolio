@@ -8,7 +8,7 @@ import {
   generateCliCommandForForm,
   diffUniversalCrfStudies,
 } from "@/lib/crf/universal-schema";
-import { getOncologyPresetSync } from "@/lib/crf/presets/loader";
+import { getOncologyPresetSync } from "@/lib/crf/presets";
 import { CRFField, CRFForm, StudyProtocol } from "@/lib/crf/types";
 
 describe("Universal CRF Specification & Schema Engine", () => {
@@ -51,8 +51,12 @@ describe("Universal CRF Specification & Schema Engine", () => {
 
   it("serializes protocol to clean YAML with header comments and without summary count fields", () => {
     const yamlString = exportUniversalCrfYaml(sampleStudy);
-    expect(yamlString).toContain("# Universal Clinical Research Form (CRF) Specification");
-    expect(yamlString).toContain(`protocolNumber: ${sampleStudy.protocolNumber}`);
+    expect(yamlString).toContain(
+      "# Universal Clinical Research Form (CRF) Specification"
+    );
+    expect(yamlString).toContain(
+      `protocolNumber: ${sampleStudy.protocolNumber}`
+    );
 
     // Verify summary count fields are omitted
     expect(yamlString).not.toContain("formsCount:");
@@ -90,8 +94,18 @@ describe("Universal CRF Specification & Schema Engine", () => {
           nciCodelistCode: "C66730",
           isStandard: true,
           options: [
-            { code: "CLASS_I", label: "Class I: No Limitation", nciCode: "C25251", order: 1 },
-            { code: "CLASS_II", label: "Class II: Slight Limitation", nciCode: "C25252", order: 2 },
+            {
+              code: "CLASS_I",
+              label: "Class I: No Limitation",
+              nciCode: "C25251",
+              order: 1,
+            },
+            {
+              code: "CLASS_II",
+              label: "Class II: Slight Limitation",
+              nciCode: "C25252",
+              order: 2,
+            },
           ],
         },
       ],
@@ -99,7 +113,8 @@ describe("Universal CRF Specification & Schema Engine", () => {
         {
           id: "RULE_GLOBAL_01",
           name: "Global Consent Rule",
-          description: "Informed consent date must be prior to study procedures",
+          description:
+            "Informed consent date must be prior to study procedures",
           triggerFieldIds: ["fld_icdat"],
           actionType: "raise_query",
           targetFieldId: "fld_icdat",
@@ -108,7 +123,8 @@ describe("Universal CRF Specification & Schema Engine", () => {
           ],
           logicalOperator: "AND",
           querySeverity: "error",
-          queryMessage: "Informed consent date is required before baseline assessment.",
+          queryMessage:
+            "Informed consent date is required before baseline assessment.",
         },
       ],
       visits: [
@@ -141,13 +157,22 @@ describe("Universal CRF Specification & Schema Engine", () => {
             {
               id: "RULE_VS_01",
               name: "BMI Calculator Rule",
-              description: "Automatically compute Body Mass Index from height and weight",
+              description:
+                "Automatically compute Body Mass Index from height and weight",
               triggerFieldIds: ["fld_height", "fld_weight"],
               actionType: "set_value",
               targetFieldId: "fld_bmi",
               conditions: [
-                { fieldId: "fld_height", operator: "is_not_empty", value: true },
-                { fieldId: "fld_weight", operator: "is_not_empty", value: true },
+                {
+                  fieldId: "fld_height",
+                  operator: "is_not_empty",
+                  value: true,
+                },
+                {
+                  fieldId: "fld_weight",
+                  operator: "is_not_empty",
+                  value: true,
+                },
               ],
               logicalOperator: "AND",
               formulaExpression: "WEIGHT / ((HEIGHT / 100) * (HEIGHT / 100))",
@@ -165,7 +190,8 @@ describe("Universal CRF Specification & Schema Engine", () => {
                   id: "fld_sysbp",
                   variableName: "SYSBP",
                   label: "Systolic Blood Pressure",
-                  description: "Seated systolic blood pressure after 5 min rest",
+                  description:
+                    "Seated systolic blood pressure after 5 min rest",
                   dataType: "number",
                   columnSpan: 6,
                   required: true,
@@ -195,7 +221,8 @@ describe("Universal CRF Specification & Schema Engine", () => {
                   dataType: "calculated",
                   columnSpan: 6,
                   required: false,
-                  calculationFormula: "WEIGHT / ((HEIGHT / 100) * (HEIGHT / 100))",
+                  calculationFormula:
+                    "WEIGHT / ((HEIGHT / 100) * (HEIGHT / 100))",
                   codelistId: "CL_NYHA",
                   scaleMinLabel: "Low",
                   scaleMaxLabel: "High",

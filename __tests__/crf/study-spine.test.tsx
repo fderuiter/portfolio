@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { StudySpine } from "@/components/crf/LeftSidebar/StudySpine";
-import { getOncologyPresetSync } from "@/lib/crf/presets/loader";
+import { getOncologyPresetSync } from "@/lib/crf/presets";
 import { StudyProtocol } from "@/lib/crf/types";
 
 describe("StudySpine Component (Left Sidebar & Global Library)", () => {
@@ -19,7 +21,10 @@ describe("StudySpine Component (Left Sidebar & Global Library)", () => {
     ...mockStudy,
     visits: mockStudy.visits.map((v, i) => ({
       ...v,
-      assignedFormIds: i === 0 ? mockStudy.forms.slice(0, 2).map((f) => f.id) : v.assignedFormIds,
+      assignedFormIds:
+        i === 0
+          ? mockStudy.forms.slice(0, 2).map((f) => f.id)
+          : v.assignedFormIds,
     })),
   };
 
@@ -66,7 +71,9 @@ describe("StudySpine Component (Left Sidebar & Global Library)", () => {
 
     const spineBtn = container.querySelector('button[title*="Study Spine"]');
     const formsBtn = container.querySelector('button[title*="Protocol Forms"]');
-    const paletteBtn = container.querySelector('button[title*="Widget Palette"]');
+    const paletteBtn = container.querySelector(
+      'button[title*="Widget Palette"]'
+    );
 
     expect(spineBtn).not.toBeNull();
     expect(formsBtn).not.toBeNull();
@@ -99,8 +106,8 @@ describe("StudySpine Component (Left Sidebar & Global Library)", () => {
       );
     });
 
-    const visitTitle = Array.from(container.querySelectorAll("span")).find((el) =>
-      el.textContent?.includes(normalizedStudy.visits[0].name)
+    const visitTitle = Array.from(container.querySelectorAll("span")).find(
+      (el) => el.textContent?.includes(normalizedStudy.visits[0].name)
     );
     expect(visitTitle).not.toBeUndefined();
 
@@ -119,10 +126,18 @@ describe("StudySpine Component (Left Sidebar & Global Library)", () => {
 
     await act(async () => {
       root = createRoot(container);
-      root.render(<StudySpine {...defaultProps} activeTab="spine" onAddVisit={onAddVisit} />);
+      root.render(
+        <StudySpine
+          {...defaultProps}
+          activeTab="spine"
+          onAddVisit={onAddVisit}
+        />
+      );
     });
 
-    const addVisitBtn = container.querySelector('button[title*="Add New Protocol Visit"]') as HTMLButtonElement;
+    const addVisitBtn = container.querySelector(
+      'button[title*="Add New Protocol Visit"]'
+    ) as HTMLButtonElement;
     expect(addVisitBtn).not.toBeNull();
 
     await act(async () => {
@@ -146,14 +161,19 @@ describe("StudySpine Component (Left Sidebar & Global Library)", () => {
       );
     });
 
-    const unassignBtn = container.querySelector('button[title*="Unassign form from this visit"]') as HTMLButtonElement;
+    const unassignBtn = container.querySelector(
+      'button[title*="Unassign form from this visit"]'
+    ) as HTMLButtonElement;
     expect(unassignBtn).not.toBeNull();
 
     await act(async () => {
       unassignBtn.click();
     });
 
-    expect(onUnassign).toHaveBeenCalledWith(normalizedStudy.visits[0].id, normalizedStudy.forms[0].id);
+    expect(onUnassign).toHaveBeenCalledWith(
+      normalizedStudy.visits[0].id,
+      normalizedStudy.forms[0].id
+    );
   });
 
   it("renders active forms and global CDASH library templates when in 'forms' tab", async () => {
@@ -164,7 +184,9 @@ describe("StudySpine Component (Left Sidebar & Global Library)", () => {
 
     expect(container.textContent).toContain("Study Forms");
     expect(container.textContent).toContain("Global CDASH Library");
-    const input = container.querySelector('input[placeholder*="Search templates"]');
+    const input = container.querySelector(
+      'input[placeholder*="Search templates"]'
+    );
     expect(input).not.toBeNull();
   });
 
@@ -174,7 +196,9 @@ describe("StudySpine Component (Left Sidebar & Global Library)", () => {
       root.render(<StudySpine {...defaultProps} activeTab="forms" />);
     });
 
-    const searchInput = container.querySelector('input[placeholder*="Search templates"]') as HTMLInputElement;
+    const searchInput = container.querySelector(
+      'input[placeholder*="Search templates"]'
+    ) as HTMLInputElement;
     expect(searchInput).not.toBeNull();
 
     await act(async () => {
@@ -190,10 +214,18 @@ describe("StudySpine Component (Left Sidebar & Global Library)", () => {
 
     await act(async () => {
       root = createRoot(container);
-      root.render(<StudySpine {...defaultProps} activeTab="forms" onInjectCdashForm={onInject} />);
+      root.render(
+        <StudySpine
+          {...defaultProps}
+          activeTab="forms"
+          onInjectCdashForm={onInject}
+        />
+      );
     });
 
-    const addTemplateBtn = container.querySelector('button[title*="Add this template to the study"]') as HTMLButtonElement;
+    const addTemplateBtn = container.querySelector(
+      'button[title*="Add this template to the study"]'
+    ) as HTMLButtonElement;
     expect(addTemplateBtn).not.toBeNull();
 
     await act(async () => {
@@ -208,11 +240,17 @@ describe("StudySpine Component (Left Sidebar & Global Library)", () => {
 
     await act(async () => {
       root = createRoot(container);
-      root.render(<StudySpine {...defaultProps} activeTab="palette" onAddField={onAddField} />);
+      root.render(
+        <StudySpine
+          {...defaultProps}
+          activeTab="palette"
+          onAddField={onAddField}
+        />
+      );
     });
 
-    const textWidgetBtn = Array.from(container.querySelectorAll("button")).find((el) =>
-      el.textContent?.includes("Single-Line Text")
+    const textWidgetBtn = Array.from(container.querySelectorAll("button")).find(
+      (el) => el.textContent?.includes("Single-Line Text")
     );
     expect(textWidgetBtn).not.toBeUndefined();
 

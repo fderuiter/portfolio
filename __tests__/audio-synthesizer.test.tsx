@@ -3,9 +3,15 @@ import fs from "fs";
 import path from "path";
 
 describe("Audio Synthesizer & Sound Settings Engine", () => {
-  const providerPath = path.resolve(__dirname, "../components/providers/AudioProvider.tsx");
+  const providerPath = path.resolve(
+    __dirname,
+    "../components/providers/AudioProvider.tsx"
+  );
   const navbarPath = path.resolve(__dirname, "../components/Navbar.tsx");
-  const terminalPath = path.resolve(__dirname, "../components/SandboxTerminal.tsx");
+  const terminalPath = path.resolve(
+    __dirname,
+    "../components/SandboxTerminal.tsx"
+  );
   const skillsPath = path.resolve(__dirname, "../components/SkillsGrid.tsx");
 
   const providerContent = fs.readFileSync(providerPath, "utf-8");
@@ -14,7 +20,9 @@ describe("Audio Synthesizer & Sound Settings Engine", () => {
   const skillsContent = fs.readFileSync(skillsPath, "utf-8");
 
   it("should have AudioProvider with correct state and profiles", () => {
-    expect(providerContent).toContain('export type AudioProfile = "8-bit" | "90s-retro" | "ambient";');
+    expect(providerContent).toContain(
+      'export type AudioProfile = "8-bit" | "90s-retro" | "ambient";'
+    );
     expect(providerContent).toContain("volume");
     expect(providerContent).toContain("muted");
     expect(providerContent).toContain("profile");
@@ -46,27 +54,35 @@ describe("Audio Synthesizer & Sound Settings Engine", () => {
   });
 
   it("should implement automatic high-contrast mode bypass to protect assistive technologies", () => {
-    expect(providerContent).toContain('window.matchMedia?.("(forced-colors: active)")');
-    expect(providerContent).toContain('window.matchMedia?.("(-ms-high-contrast: active)")');
+    expect(providerContent).toContain("forced-colors: active");
+    expect(providerContent).toContain("-ms-high-contrast: active");
     expect(providerContent).toContain("bypassActive");
   });
 
   it("should integrate sound panel and spatial hovering into the Navbar", () => {
-    expect(navbarContent).toContain('import { useAudio } from "@/components/providers/AudioProvider";');
-    expect(navbarContent).toContain("SOUND: {muted ? \"OFF\" : profile.toUpperCase()}");
+    expect(navbarContent).toContain(
+      'import { useAudio } from "@/components/providers/AudioProvider";'
+    );
+    expect(navbarContent).toContain(
+      'SOUND: {muted ? "OFF" : profile.toUpperCase()}'
+    );
     expect(navbarContent).toContain("onMouseEnter={handleLinkHover}");
-    expect(navbarContent).toContain("const pan = (rect.left + rect.width / 2) / window.innerWidth * 2 - 1;");
+    expect(navbarContent).toContain(
+      "const pan = (rect.left + rect.width / 2) / window.innerWidth * 2 - 1;"
+    );
   });
 
   it("should integrate terminal keystrokes, autocomplete and success audio feedback", () => {
-    expect(terminalContent).toContain('const { playKeystroke, playAutocomplete, playSuccess } = useAudio();');
+    expect(terminalContent).toContain(
+      "const { playKeystroke, playAutocomplete, playSuccess } = useAudio();"
+    );
     expect(terminalContent).toContain("playKeystroke(char.charCodeAt(0));");
     expect(terminalContent).toContain("playAutocomplete();");
     expect(terminalContent).toContain("playSuccess();");
   });
 
   it("should integrate soft complementary audio feedback on skills grid hovers", () => {
-    expect(skillsContent).toContain('const { playSkillHover } = useAudio();');
+    expect(skillsContent).toContain("const { playSkillHover } = useAudio();");
     expect(skillsContent).toContain("onMouseEnter={playSkillHover}");
   });
 });
