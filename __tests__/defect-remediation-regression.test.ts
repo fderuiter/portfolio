@@ -19,7 +19,8 @@ import {
   ExpressionEvaluator,
   tokenizeWithSpans,
 } from "@/lib/crf/ast-evaluator";
-import { CRFField, StudyProtocol } from "@/lib/crf/types";
+import { CRFField, CRFForm, StudyProtocol } from "@/lib/crf/types";
+import { computeFormHealthMetrics } from "@/lib/crf/form-health";
 import { autoFixAllViolations } from "@/lib/crf/cdisc-conformance-linter";
 import {
   createInitialState,
@@ -609,6 +610,73 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       expect(technicalText).not.toContain("standardized study domain tables");
       expect(technicalText).not.toContain("data-key=");
       expect(technicalText).not.toContain("<span");
+    });
+  });
+
+  describe("CRF Health Calculator Safe Property Guard (Targeted Safe Property Guard)", () => {
+    it("safely computes form health metrics for draft forms containing fields with undefined, null, or empty variable names", () => {
+      const draftForm: CRFForm = {
+        id: "form_draft",
+        name: "Draft Vital Signs",
+        domain: "VS",
+        description: "Draft form with unassigned variable names",
+        version: "1.0",
+        sections: [
+          {
+            id: "sec_vs",
+            title: "Measurements",
+            fields: [
+              {
+                id: "f1",
+                label: "Systolic BP",
+                dataType: "number",
+                required: true,
+                columnSpan: 6,
+                // variableName undefined
+              } as CRFField,
+              {
+                id: "f2",
+                variableName: null as unknown as string,
+                label: "Diastolic BP",
+                dataType: "number",
+                required: false,
+                columnSpan: 6,
+              },
+              {
+                id: "f3",
+                variableName: "",
+                label: "Heart Rate",
+                dataType: "number",
+                required: false,
+                columnSpan: 6,
+              },
+              {
+                id: "f4",
+                variableName: "VSTESTCD",
+                label: "Vital Signs Test Short Name",
+                dataType: "text",
+                required: true,
+                columnSpan: 6,
+              },
+            ],
+          },
+        ],
+        rules: [],
+      };
+
+      let metrics;
+      expect(() => {
+        metrics = computeFormHealthMetrics(draftForm);
+      }).not.toThrow();
+
+      expect(metrics).toBeDefined();
+      expect(metrics!.totalFields).toBe(4);
+      expect(metrics!.mandatoryFields).toBe(2);
+      // VS core variables: ["VSTESTCD", "VSORRES", "VSDTC"]
+      // Present: "VSTESTCD". Missing: "VSORRES", "VSDTC".
+      expect(metrics!.missingCoreVariables).toEqual(["VSORRES", "VSDTC"]);
+      // 1 of 3 core variables present = 33% conformance
+      expect(metrics!.cdashConformancePercentage).toBe(33);
     });
   });
 });

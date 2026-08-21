@@ -59,7 +59,8 @@ const parseCSSAndGenerateTS = () => {
       manifest.masonry[camelName] = parseNumber(value, key);
     } else if (key.startsWith('layout-')) {
       const camelName = key.replace('layout-', '').replace(/-([a-z])/g, g => g[1].toUpperCase());
-      manifest.layout[camelName] = parseNumber(value, key);
+      const num = parseFloat(value);
+      manifest.layout[camelName] = !isNaN(num) && /^[0-9.]+(px|rem|em)?$/.test(value.trim()) ? num : value;
     }
   }
 
@@ -129,7 +130,7 @@ const parseCSSAndGenerateTS = () => {
   for (const [k, v] of Object.entries(manifest.layout)) {
     const cssName = `layout-${k.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)}`;
     ts += `    /** Original CSS Variable: --${cssName} */\n`;
-    ts += `    ${k}: ${v},\n`;
+    ts += `    ${k}: ${typeof v === "number" ? v : JSON.stringify(v)},\n`;
   }
   ts += `  },\n`;
 
