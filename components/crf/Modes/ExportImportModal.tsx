@@ -21,7 +21,6 @@ import {
 
 import {
   exportUniversalCrfJson,
-  parseUniversalCrf,
 } from "@/lib/crf/universal-schema";
 
 interface ExportImportModalProps {
@@ -31,7 +30,7 @@ interface ExportImportModalProps {
   onOpenBranding?: () => void;
 }
 
-type ExportTab = "universal" | "odm" | "sas" | "r" | "json" | "fhir" | "sdtm_spec";
+type ExportTab = "universal" | "usdm" | "odm" | "sas" | "r" | "json" | "fhir" | "sdtm_spec";
 
 export const ExportImportModal: React.FC<ExportImportModalProps> = ({
   study,
@@ -58,6 +57,9 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
       let content = "";
       if (activeTab === "universal") {
         content = exportUniversalCrfJson(study);
+      } else if (activeTab === "usdm") {
+        const { exportStudyToUsdm } = await import("@/lib/crf/usdm-adapter");
+        content = exportStudyToUsdm(study);
       } else if (activeTab === "odm") {
         const { exportStudyToCdiscOdmXml } = await import("@/lib/crf/odm-xml-serializer");
         content = exportStudyToCdiscOdmXml(study);
@@ -115,6 +117,9 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
     if (activeTab === "universal") {
       filename = `${study.protocolNumber}.crf.json`;
       mimeType = "application/json";
+    } else if (activeTab === "usdm") {
+      filename = `${study.protocolNumber}.usdm.json`;
+      mimeType = "application/json";
     } else if (activeTab === "odm") {
       filename = `study-${study.protocolNumber}-odm.xml`;
       mimeType = "application/xml";
@@ -140,14 +145,15 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
     URL.revokeObjectURL(url);
   };
 
-  const handlePerformImport = () => {
+  const handlePerformImport = async () => {
     setImportError(null);
     try {
-      const parsed = parseUniversalCrf(importJsonText);
-      onImportStudy(parsed);
+      const { importStudyFromUsdm } = await import("@/lib/crf/usdm-adapter");
+      const imported = importStudyFromUsdm(importJsonText);
+      onImportStudy(imported);
       setImportJsonText("");
     } catch (err: unknown) {
-      setImportError((err as Error).message || "Invalid Universal CRF syntax");
+      setImportError((err as Error).message || "Invalid Protocol or USDM JSON syntax");
     }
   };
 
@@ -270,6 +276,18 @@ export const ExportImportModal: React.FC<ExportImportModalProps> = ({
         >
           <IconFileText className="w-4 h-4 text-brand-cyan" />
           <span>Universal CRF (.json)</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("usdm")}
+          className={`px-3 sm:px-4 py-2 text-xs font-mono transition-colors border-b-2 flex items-center gap-2 whitespace-nowrap ${
+            activeTab === "usdm"
+              ? "border-brand-cyan text-brand-cyan font-bold"
+              : "border-transparent text-zinc-400 hover:text-zinc-200"
+          }`}
+        >
+          <IconCode className="w-4 h-4 text-purple-400" />
+          <span>CDISC USDM Graph (.json)</span>
         </button>
 
         <button

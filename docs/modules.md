@@ -69,6 +69,7 @@
 - [lib/crf/study-engine](lib/crf/study-engine/README.md)
 - [lib/crf/types](lib/crf/types/README.md)
 - [lib/crf/universal-schema](lib/crf/universal-schema/README.md)
+- [lib/crf/usdm-adapter](lib/crf/usdm-adapter/README.md)
 - [lib/db](lib/db/README.md)
 - [lib/design-manifest](lib/design-manifest/README.md)
 - [lib/domain](lib/domain/README.md)
