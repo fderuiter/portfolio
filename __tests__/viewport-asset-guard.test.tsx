@@ -72,8 +72,7 @@ describe("Viewport-Driven Component Asset Guard", () => {
 
   describe("Brain3DViewer Viewport Asset Guard", () => {
     it("defers loadExternalBrainMesh when off-screen and triggers load when entering 200px rootMargin viewport threshold", async () => {
-      const mockGroup = new THREE.Group();
-      const loadExternalSpy = vi.spyOn(assetLoader, "loadExternalBrainMesh").mockResolvedValue(mockGroup);
+      const loadExternalSpy = vi.spyOn(assetLoader, "loadExternalBrainBuffers").mockResolvedValue([]);
 
       render(
         <Brain3DViewer
@@ -97,9 +96,10 @@ describe("Viewport-Driven Component Asset Guard", () => {
             {} as IntersectionObserver
           );
         });
+        await Promise.resolve();
       });
 
-      // Now loadExternalBrainMesh MUST be triggered with modelUrl
+      // Now loadExternalBrainBuffers MUST be triggered with modelUrl
       expect(loadExternalSpy).toHaveBeenCalledWith("/models/brain-surface.glb", "pial", "both");
     });
 
@@ -108,16 +108,18 @@ describe("Viewport-Driven Component Asset Guard", () => {
       // @ts-expect-error override IntersectionObserver
       delete window.IntersectionObserver;
 
-      const mockGroup = new THREE.Group();
-      const loadExternalSpy = vi.spyOn(assetLoader, "loadExternalBrainMesh").mockResolvedValue(mockGroup);
+      const loadExternalSpy = vi.spyOn(assetLoader, "loadExternalBrainBuffers").mockResolvedValue([]);
 
-      render(
-        <Brain3DViewer
-          surfaceMode="pial"
-          crosshair={{ x: 48, y: 48, z: 48 }}
-          modelUrl="/models/brain-surface.glb"
-        />
-      );
+      await act(async () => {
+        render(
+          <Brain3DViewer
+            surfaceMode="pial"
+            crosshair={{ x: 48, y: 48, z: 48 }}
+            modelUrl="/models/brain-surface.glb"
+          />
+        );
+        await Promise.resolve();
+      });
 
       // Since IntersectionObserver is undefined, it defaults to near viewport and fetches external model
       expect(loadExternalSpy).toHaveBeenCalledWith("/models/brain-surface.glb", "pial", "both");

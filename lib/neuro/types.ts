@@ -472,11 +472,29 @@ export interface HemisphereBufferTransfer {
   indices: Uint32Array;
 }
 
+export interface RawGeometryBuffer {
+  name?: string;
+  hemi?: "left" | "right";
+  positions: Float32Array;
+  normals?: Float32Array;
+  colors?: Float32Array;
+  indices: Uint32Array;
+  color?: number;
+}
+
+export interface GeometryBundle {
+  mode: SurfaceMode;
+  hemiFilter: HemisphereFilter;
+  wireframe?: boolean;
+  buffers: RawGeometryBuffer[];
+  isSubcortical?: boolean;
+}
+
 export interface MeshWorkerResponse {
   id: string;
   mode: SurfaceMode;
   hemiFilter: HemisphereFilter;
   wireframe: boolean;
-  buffers: HemisphereBufferTransfer[];
+  buffers: RawGeometryBuffer[];
   isSubcortical?: boolean;
 }

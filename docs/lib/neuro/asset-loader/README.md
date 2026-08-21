@@ -8,4 +8,5 @@
 
 ## Functions
 
+- [loadExternalBrainBuffers](functions/loadExternalBrainBuffers.md)
 - [loadExternalBrainMesh](functions/loadExternalBrainMesh.md)

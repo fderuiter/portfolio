@@ -8,7 +8,7 @@
 
 > **generateHemisphereBuffers**(`hemi`, `mode`): [`HemisphereBufferTransfer`](../../types/interfaces/HemisphereBufferTransfer.md)
 
-Defined in: [lib/neuro/mesh-generator.ts:136](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/mesh-generator.ts#L136)
+Defined in: [lib/neuro/mesh-generator.ts:131](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/mesh-generator.ts#L131)
 
 Generate raw typed array buffers for a single hemisphere (Left or Right)
 Executes 12,500+ vertex spatial point checks, trigonometric folding calculations,
