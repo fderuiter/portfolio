@@ -533,5 +533,15 @@ To guarantee that layouts remain resilient across all devices, viewports, and ed
    - **iOS Safari Dynamic Viewport:** Validates `min-h-dvh` bottom clearance beneath floating browser bars.
    - **Android System Font Scaling:** Verifies vertical container expansion under system-level "Largest" font size.
 
+## Standalone Deployment Operations & Synthetic Monitoring
+
+The deployment pipeline integrates Automated Canary Analysis (ACA) and continuous synthetic user probing to safeguard production rollouts and enable rapid failure triage:
+
+- **Automated Canary Release Gates (`scripts/canary-analyzer.ts`)**: Evaluates real-time telemetry against baseline error budgets, enforcing 0.5% 5xx error limits, 800ms p95 latency ceilings, 25% relative latency regression limits, and 2.0x Sentry exception spike ratios before traffic cutover.
+- **Automated Rollback Dispatch**: Automatically prepares and posts JSON payloads (`AUTOMATED_CANARY_ROLLBACK`) to infrastructure webhooks when canary analysis triggers `ROLLBACK_REQUIRED`.
+- **Scheduled Synthetic Journey Monitoring (`.github/workflows/synthetic-probes.yml`)**: Continuous 30-minute crons executing Playwright headless probes across 5 critical user journeys (Landing Pretext layout, Command Palette discovery, Proof Assistant DAG studio, Arcade canvas lifecycle, and Telemetry API schemas).
+
+Detailed operational evaluation commands, webhook payload structures, custom target URL overrides, and step-by-step failure triage runbooks are maintained in [**`DEPLOYMENT.md`**](DEPLOYMENT.md).
+
 
 
