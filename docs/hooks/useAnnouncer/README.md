@@ -14,11 +14,18 @@
 
 ## Type Aliases
 
+- [AnnouncerAction](type-aliases/AnnouncerAction.md)
 - [Priority](type-aliases/Priority.md)
+
+## Variables
+
+- [initialAnnouncerState](variables/initialAnnouncerState.md)
 
 ## Functions
 
+- [announcerReducer](functions/announcerReducer.md)
 - [LiveAnnouncerProvider](functions/LiveAnnouncerProvider.md)
+- [sanitizePII](functions/sanitizePII.md)
 - [useAnnouncer](functions/useAnnouncer.md)
 
 ## References

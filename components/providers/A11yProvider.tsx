@@ -18,7 +18,11 @@ export interface AnnouncerState {
   assertiveQueue: AnnounceItem[];
 }
 
-type AnnouncerAction =
+export type AnnouncerAction =
+  | { type: "ENQUEUE"; item: AnnounceItem }
+  | { type: "DEQUEUE_NEXT" }
+  | { type: "ASSERTIVE_PREEMPT"; item: AnnounceItem }
+  | { type: "TIMER_COMPLETE" }
   | { type: "ANNOUNCE"; item: AnnounceItem }
   | { type: "TIMER_EXPIRED" };
 
@@ -33,8 +37,20 @@ export const initialAnnouncerState: AnnouncerState = {
   assertiveQueue: [],
 };
 
+/**
+ * Sanitizes Social Security Numbers and sensitive personal identifiers prior to live region updates.
+ */
+export function sanitizePII(message: string): string {
+  if (typeof message !== "string") return "";
+  return message.replace(/\b\d{3}[-.\s]?\d{2}[-.\s]?\d{4}\b/g, "***-**-****");
+}
+
+/**
+ * Atomic reducer managing polite and assertive announcement queues and active playback states.
+ */
 export function announcerReducer(state: AnnouncerState, action: AnnouncerAction): AnnouncerState {
   switch (action.type) {
+    case "ENQUEUE":
     case "ANNOUNCE": {
       const { item } = action;
       if (item.priority === "assertive") {
@@ -63,6 +79,25 @@ export function announcerReducer(state: AnnouncerState, action: AnnouncerAction)
         };
       }
     }
+
+    case "ASSERTIVE_PREEMPT": {
+      const { item } = action;
+      if (state.activeAssertive === null) {
+        return {
+          ...state,
+          activePolite: null,
+          activeAssertive: item,
+        };
+      }
+      return {
+        ...state,
+        activePolite: null,
+        assertiveQueue: [...state.assertiveQueue, item],
+      };
+    }
+
+    case "DEQUEUE_NEXT":
+    case "TIMER_COMPLETE":
     case "TIMER_EXPIRED": {
       if (state.activeAssertive !== null) {
         if (state.assertiveQueue.length > 0) {
@@ -111,8 +146,25 @@ export function announcerReducer(state: AnnouncerState, action: AnnouncerAction)
         };
       }
 
+      if (state.assertiveQueue.length > 0) {
+        return {
+          ...state,
+          activeAssertive: state.assertiveQueue[0],
+          assertiveQueue: state.assertiveQueue.slice(1),
+        };
+      }
+
+      if (state.politeQueue.length > 0) {
+        return {
+          ...state,
+          activePolite: state.politeQueue[0],
+          politeQueue: state.politeQueue.slice(1),
+        };
+      }
+
       return state;
     }
+
     default:
       return state;
   }
@@ -145,13 +197,17 @@ export function A11yProvider({ children }: { children: React.ReactNode }) {
 
   const announce = useCallback((message: string, priority: Priority = "polite") => {
     if (typeof message !== "string") return;
-    const filteredMessage = message.replace(/\b\d{3}-\d{2}-\d{4}\b/g, "***-**-****");
+    const filteredMessage = sanitizePII(message);
     const item: AnnounceItem = {
       id: generateAnnounceId(),
       text: filteredMessage,
       priority,
     };
-    dispatch({ type: "ANNOUNCE", item });
+    if (priority === "assertive") {
+      dispatch({ type: "ASSERTIVE_PREEMPT", item });
+    } else {
+      dispatch({ type: "ENQUEUE", item });
+    }
   }, []);
 
   const activeAssertiveId = state.activeAssertive?.id;
@@ -182,7 +238,7 @@ export function A11yProvider({ children }: { children: React.ReactNode }) {
     timerRef.current = setTimeout(() => {
       activeTimerIdRef.current = null;
       timerRef.current = null;
-      dispatch({ type: "TIMER_EXPIRED" });
+      dispatch({ type: "TIMER_COMPLETE" });
     }, 3000);
 
     return () => {
