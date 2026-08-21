@@ -1,5 +1,25 @@
 import { describe, it, expect } from "vitest";
-import { generateStudyDocx, generateFormDocx } from "@/lib/crf/export-docx";
+import {
+  generateStudyDocx,
+  generateFormDocx,
+  TABLE_WIDTH_DXA,
+  STANDARD_COL_WIDTH_1,
+  STANDARD_COL_WIDTH_2,
+  ANNOTATED_COL_WIDTH_1,
+  ANNOTATED_COL_WIDTH_2,
+  ANNOTATED_COL_WIDTH_3,
+  TOC_COL_WIDTH_1,
+  TOC_COL_WIDTH_2,
+  TOC_COL_WIDTH_3,
+  TOC_COL_WIDTH_4,
+  TOC_COL_WIDTH_5,
+  SDTM_COL_WIDTH_1,
+  SDTM_COL_WIDTH_2,
+  SDTM_COL_WIDTH_3,
+  SDTM_COL_WIDTH_4,
+  SDTM_COL_WIDTH_5,
+  SDTM_COL_WIDTH_6,
+} from "@/lib/crf/export-docx";
 import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
 import { CNS_NEURO_PRESET } from "@/lib/crf/presets/cns-neuro";
 import { StudyBranding } from "@/lib/crf/types";
@@ -9,6 +29,28 @@ const SAMPLE_BASE64_LOGO =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
 
 describe("CRF Studio - Microsoft Word (.docx) Exporter", () => {
+  it("should use 9,360 DXA table width matching 1-inch margins on Letter paper", () => {
+    expect(TABLE_WIDTH_DXA).toBe(9360);
+  });
+
+  it("should have proportional cell column widths summing to 9,360 DXA in standard and annotated modes", () => {
+    expect(STANDARD_COL_WIDTH_1 + STANDARD_COL_WIDTH_2).toBe(TABLE_WIDTH_DXA);
+    expect(ANNOTATED_COL_WIDTH_1 + ANNOTATED_COL_WIDTH_2 + ANNOTATED_COL_WIDTH_3).toBe(
+      TABLE_WIDTH_DXA
+    );
+    expect(
+      TOC_COL_WIDTH_1 + TOC_COL_WIDTH_2 + TOC_COL_WIDTH_3 + TOC_COL_WIDTH_4 + TOC_COL_WIDTH_5
+    ).toBe(TABLE_WIDTH_DXA);
+    expect(
+      SDTM_COL_WIDTH_1 +
+        SDTM_COL_WIDTH_2 +
+        SDTM_COL_WIDTH_3 +
+        SDTM_COL_WIDTH_4 +
+        SDTM_COL_WIDTH_5 +
+        SDTM_COL_WIDTH_6
+    ).toBe(TABLE_WIDTH_DXA);
+  });
+
   it("should generate a valid Word document (.docx Blob) for an entire study in blank mode", async () => {
     const blob = await generateStudyDocx(ONCOLOGY_RECIST_PRESET, {
       mode: "blank",
