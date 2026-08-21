@@ -67,7 +67,7 @@ Defined in: [lib/arcade/core/engine.ts:7](https://github.com/fderuiter/portfolio
 
 > **createSnapshot**(): [`RetroLabyrinthSnapshot`](../interfaces/RetroLabyrinthSnapshot.md)
 
-Defined in: [lib/retro-labyrinth/engine.ts:243](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L243)
+Defined in: [lib/retro-labyrinth/engine.ts:245](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L245)
 
 Generates a fresh immutable state snapshot.
 
@@ -137,7 +137,7 @@ Emits a typed event to registered listeners.
 
 > **fireActiveWeapon**(): `void`
 
-Defined in: [lib/retro-labyrinth/engine.ts:293](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L293)
+Defined in: [lib/retro-labyrinth/engine.ts:295](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L295)
 
 #### Returns
 
@@ -186,7 +186,7 @@ Initializes engine resources, object pools, and audio bindings.
 
 > **move**(`dx`, `dy`): `boolean`
 
-Defined in: [lib/retro-labyrinth/engine.ts:264](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L264)
+Defined in: [lib/retro-labyrinth/engine.ts:266](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L266)
 
 #### Parameters
 
@@ -260,7 +260,7 @@ Subscribes to a typed one-shot action event (e.g. sfx, haptic, screen shake).
 
 > **render**(`ctx`, `_alpha`): `void`
 
-Defined in: [lib/retro-labyrinth/engine.ts:192](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L192)
+Defined in: [lib/retro-labyrinth/engine.ts:194](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L194)
 
 Renders in-world graphics to the 2D canvas with sub-frame alpha interpolation.
 
@@ -288,7 +288,7 @@ Renders in-world graphics to the 2D canvas with sub-frame alpha interpolation.
 
 > **resetGame**(): `void`
 
-Defined in: [lib/retro-labyrinth/engine.ts:320](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L320)
+Defined in: [lib/retro-labyrinth/engine.ts:322](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L322)
 
 #### Returns
 
@@ -332,7 +332,7 @@ Handles canvas dimension and device pixel ratio resize events.
 
 > **selectWeapon**(`index`): `void`
 
-Defined in: [lib/retro-labyrinth/engine.ts:307](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L307)
+Defined in: [lib/retro-labyrinth/engine.ts:309](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L309)
 
 #### Parameters
 
@@ -350,7 +350,7 @@ Defined in: [lib/retro-labyrinth/engine.ts:307](https://github.com/fderuiter/por
 
 > **setCrtTheme**(`themeId`): `void`
 
-Defined in: [lib/retro-labyrinth/engine.ts:315](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L315)
+Defined in: [lib/retro-labyrinth/engine.ts:317](https://github.com/fderuiter/portfolio/blob/main/lib/retro-labyrinth/engine.ts#L317)
 
 #### Parameters
 

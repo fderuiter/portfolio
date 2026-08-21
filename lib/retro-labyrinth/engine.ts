@@ -104,7 +104,7 @@ export class RetroLabyrinthEngine extends ArcadeEngine<RetroLabyrinthState, Retr
     const crtThemeId = config.crtThemeId ?? "emerald";
 
     const campaignRooms = gameMode === "roguelike" ? generateRoguelikeCampaign() : [];
-    const currentMaze = gameMode === "roguelike" ? campaignRooms[0]?.maze || STAGE_1_MAZE : STAGE_1_MAZE;
+    const currentMaze = gameMode === "roguelike" ? campaignRooms[0]?.grid || STAGE_1_MAZE : STAGE_1_MAZE;
 
     const initialWeapons = selectedClass.starterWeapons.map((id) => {
       const template = DEFAULT_WEAPONS[id] || DEFAULT_WEAPONS.npm_install;
@@ -161,12 +161,14 @@ export class RetroLabyrinthEngine extends ArcadeEngine<RetroLabyrinthState, Retr
     // Update enemy AI every 12 ticks
     if (this.tickCounter % 12 === 0) {
       if (this.state.enemies.length > 0) {
-        const updatedEnemies = updateEnemyAI(
+        const result = updateEnemyAI(
           this.state.enemies,
-          this.state.playerPosition,
-          this.state.currentMaze
+          this.state.currentMaze,
+          this.state.playerPosition.x,
+          this.state.playerPosition.y,
+          dt * 1000
         );
-        this.state.enemies = updatedEnemies;
+        this.state.enemies = result.updatedEnemies;
       }
     }
 
@@ -176,17 +178,17 @@ export class RetroLabyrinthEngine extends ArcadeEngine<RetroLabyrinthState, Retr
         ...p,
         x: p.x + p.vx * dt,
         y: p.y + p.vy * dt,
-        life: p.life - dt,
+        alpha: p.alpha - dt * p.decay,
       }))
-      .filter((p) => p.life > 0);
+      .filter((p) => p.alpha > 0);
 
     this.state.floatingTexts = this.state.floatingTexts
       .map((t) => ({
         ...t,
-        y: t.y - 10 * dt,
-        life: t.life - dt,
+        y: t.y + t.vy * dt,
+        alpha: t.alpha - dt,
       }))
-      .filter((t) => t.life > 0);
+      .filter((t) => t.alpha > 0);
   }
 
   public override render(ctx: CanvasRenderingContext2D, _alpha: number): void {
@@ -216,10 +218,10 @@ export class RetroLabyrinthEngine extends ArcadeEngine<RetroLabyrinthState, Retr
         const isVisible = this.state.visibleCells[r]?.[c] ?? true;
 
         if (char === "#") {
-          ctx.fillStyle = isVisible ? theme.primary : theme.dim;
+          ctx.fillStyle = isVisible ? theme.primaryColor : theme.bgDark;
           ctx.fillRect(px, py, cellW, cellH);
         } else if (char === "E") {
-          ctx.fillStyle = theme.accent;
+          ctx.fillStyle = theme.accentColor;
           ctx.fillRect(px + 2, py + 2, cellW - 4, cellH - 4);
         }
       }
@@ -320,7 +322,7 @@ export class RetroLabyrinthEngine extends ArcadeEngine<RetroLabyrinthState, Retr
   public resetGame(): void {
     const selectedClass = CYBERDECK_CLASSES[this.state.selectedClassId] || CYBERDECK_CLASSES.script_kiddie;
     const campaignRooms = this.state.gameMode === "roguelike" ? generateRoguelikeCampaign() : [];
-    const currentMaze = this.state.gameMode === "roguelike" ? campaignRooms[0]?.maze || STAGE_1_MAZE : STAGE_1_MAZE;
+    const currentMaze = this.state.gameMode === "roguelike" ? campaignRooms[0]?.grid || STAGE_1_MAZE : STAGE_1_MAZE;
 
     this.state.campaignRooms = campaignRooms;
     this.state.currentMaze = currentMaze;
