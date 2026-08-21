@@ -34,6 +34,8 @@ function printUsage(): void {
   console.log(`  ${colors.cyan}dead-code${colors.reset}              Scan for unused exports and orphaned modules`);
   console.log(`  ${colors.cyan}analyze [--strict]${colors.reset}     Inspect production bundle chunk sizes and performance budgets`);
   console.log(`  ${colors.cyan}scaffold <type> <name>${colors.reset} Scaffold code templates (types: arcade, api, adr, case-study, component, hook)`);
+  console.log(`  ${colors.cyan}build:icons${colors.reset}            Generate multi-resolution brand icons from source vector artwork`);
+  console.log(`  ${colors.cyan}build:theme${colors.reset}            Compile CSS custom properties into strongly-typed TS design manifest`);
   console.log(`  ${colors.cyan}bench${colors.reset}                  Run Pretext, Masonry Scheduler, and Security benchmarks`);
   console.log(`  ${colors.cyan}bench --pages${colors.reset}          Run real-browser Core Web Vitals & page speed benchmarks`);
   console.log(`  ${colors.cyan}clean${colors.reset}                  Clean build artifacts and reset developer cache`);
@@ -456,8 +458,19 @@ async function main(): Promise<void> {
       break;
     case "scaffold":
     case "g":
-    case "generate":
       await handleScaffoldCommand(args.slice(1));
+      break;
+    case "build:icons":
+    case "generate:icons":
+    case "icons":
+      console.log(formatHeader("DX Asset Engine: Multi-Resolution Brand Icons"));
+      execSync("npx tsx scripts/generate-brand-icons.ts", { cwd: workspaceRoot, stdio: "inherit" });
+      break;
+    case "build:theme":
+    case "generate:theme":
+    case "theme":
+      console.log(formatHeader("DX Theme Compiler: Design Token Manifest Generator"));
+      execSync("npx tsx scripts/generate-theme.ts", { cwd: workspaceRoot, stdio: "inherit" });
       break;
     case "bench":
     case "benchmark":
