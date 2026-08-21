@@ -33,6 +33,7 @@ The security audit CLI evaluates vulnerability severity levels and enforces the 
 
 Automated security checks are enforced across continuous integration and release workflows:
 
+- **Pre-Commit Hook Gate:** Local commits perform dependency security vulnerability checks via `npm run audit:security` in `.husky/pre-commit` before remote push.
 - **Pull Request & Branch CI Gate:** In `.github/workflows/ci.yml`, the `security-gate` job executes `npm run audit:security` on every pull request and push to primary branches (`main`/`master`). Pull requests with unhandled or expired vulnerabilities cannot pass CI.
 - **Release Gate Pipeline:** Pre-deployment release operations execute `npm run release:gate` (`scripts/release-gate.ts`), which runs the vulnerability security audit step (`runSecurityAudit`) prior to database migration deployments and production builds. Any unhandled high or critical vulnerabilities halt the release pipeline immediately.
 
