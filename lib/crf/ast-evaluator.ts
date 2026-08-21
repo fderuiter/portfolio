@@ -8,6 +8,7 @@ export {
   evaluateFormula,
   evaluateCondition,
   evaluateRule,
+  isMissingOrNullFlavor,
   calculateBMI,
   calculateMostellerBSA,
   calculateDuboisBSA,

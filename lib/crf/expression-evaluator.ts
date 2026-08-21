@@ -1,4 +1,19 @@
 import { AstCondition, EditCheckRule, CRFField } from "./types";
+import { isCdiscNullFlavor } from "./precision-date";
+
+/**
+ * Unified Missing Value & CDISC Null Flavor Guard
+ * Returns true if a value is null, undefined, empty string, or a valid CDISC null flavor code (e.g. ND, NA, UNK, ASKU, NASK, MSK).
+ */
+export function isMissingOrNullFlavor(val: unknown): boolean {
+  if (val === null || val === undefined) return true;
+  if (typeof val === "string") {
+    const trimmed = val.trim();
+    if (trimmed === "") return true;
+    if (isCdiscNullFlavor(trimmed)) return true;
+  }
+  return false;
+}
 
 /**
  * Tokenizer & Safe Recursive Descent Parser for Clinical Expressions
@@ -311,7 +326,7 @@ export function evaluateFormula(
   const context: Record<string, number | null> = {};
 
   Object.entries(fieldValues).forEach(([k, rawVal]) => {
-    if (rawVal === null || rawVal === undefined || rawVal === "") {
+    if (isMissingOrNullFlavor(rawVal)) {
       context[k.toLowerCase()] = null;
     } else {
       const num = typeof rawVal === "number" ? rawVal : parseFloat(String(rawVal));
@@ -324,19 +339,20 @@ export function evaluateFormula(
       fieldValues[f.id] ??
       fieldValues[f.id.toLowerCase()] ??
       fieldValues[f.variableName] ??
-      fieldValues[f.variableName.toLowerCase()];
+      fieldValues[f.variableName.toLowerCase()] ??
+      f.nullFlavorValue;
 
     const idKey = f.id.toLowerCase();
     const varKey = f.variableName.toLowerCase();
 
-    if (rawVal !== undefined && rawVal !== null && rawVal !== "") {
+    if (!isMissingOrNullFlavor(rawVal)) {
       const num = typeof rawVal === "number" ? rawVal : parseFloat(String(rawVal));
       const safeNum = Number.isFinite(num) ? num : null;
       context[idKey] = safeNum;
       context[varKey] = safeNum;
     } else {
-      if (!(idKey in context)) context[idKey] = null;
-      if (!(varKey in context)) context[varKey] = null;
+      context[idKey] = null;
+      context[varKey] = null;
     }
   });
 
@@ -428,54 +444,90 @@ export function evaluateCondition(
     (f) => f.id === condition.fieldId || f.variableName === condition.fieldId
   );
 
-  // Check cross-visit lookup key if present
+  // Check cross-visit / visit-level lookup key if present
   let actualVal: string | number | boolean | null | undefined;
   if (condition.crossVisitId) {
     const crossKey = `${condition.crossVisitId}_${condition.fieldId}`;
     const crossVarKey = targetField ? `${condition.crossVisitId}_${targetField.id}` : crossKey;
-    actualVal = fieldValues[crossKey] ?? fieldValues[crossVarKey] ?? fieldValues[condition.fieldId];
+    const crossNameKey = targetField ? `${condition.crossVisitId}_${targetField.variableName}` : crossKey;
+    actualVal =
+      fieldValues[crossKey] ??
+      fieldValues[crossVarKey] ??
+      fieldValues[crossNameKey] ??
+      fieldValues[condition.fieldId] ??
+      (targetField ? (fieldValues[targetField.id] ?? fieldValues[targetField.variableName]) : undefined);
   } else if (visitContext) {
     const scopedKey = `${visitContext}_${condition.fieldId}`;
     const scopedVarKey = targetField ? `${visitContext}_${targetField.id}` : scopedKey;
-    actualVal = fieldValues[scopedKey] ?? fieldValues[scopedVarKey] ?? fieldValues[condition.fieldId] ?? (targetField ? fieldValues[targetField.id] : undefined);
+    const scopedNameKey = targetField ? `${visitContext}_${targetField.variableName}` : scopedKey;
+    actualVal =
+      fieldValues[scopedKey] ??
+      fieldValues[scopedVarKey] ??
+      fieldValues[scopedNameKey] ??
+      fieldValues[condition.fieldId] ??
+      (targetField ? (fieldValues[targetField.id] ?? fieldValues[targetField.variableName]) : undefined);
   } else {
-    actualVal = fieldValues[condition.fieldId] ?? (targetField ? fieldValues[targetField.id] : undefined);
+    actualVal =
+      fieldValues[condition.fieldId] ??
+      (targetField ? (fieldValues[targetField.id] ?? fieldValues[targetField.variableName]) : undefined);
   }
+
+  // Fallback to field's active nullFlavorValue if actualVal is missing
+  if ((actualVal === undefined || actualVal === null || actualVal === "") && targetField?.nullFlavorValue) {
+    actualVal = targetField.nullFlavorValue;
+  }
+
+  const actMissing = isMissingOrNullFlavor(actualVal);
 
   switch (condition.operator) {
     case "is_empty":
-      return actualVal === undefined || actualVal === null || actualVal === "";
+      return actMissing;
     case "is_not_empty":
-      return actualVal !== undefined && actualVal !== null && actualVal !== "";
-    case "eq":
-      return String(actualVal ?? "").toLowerCase() === String(condition.value).toLowerCase();
-    case "neq":
-      return String(actualVal ?? "").toLowerCase() !== String(condition.value).toLowerCase();
+      return !actMissing;
+    case "eq": {
+      const condMissing = isMissingOrNullFlavor(condition.value);
+      if (actMissing && condMissing) return true;
+      if (actMissing || condMissing) return false;
+      return String(actualVal).toLowerCase() === String(condition.value).toLowerCase();
+    }
+    case "neq": {
+      const condMissing = isMissingOrNullFlavor(condition.value);
+      if (actMissing && condMissing) return false;
+      if (actMissing || condMissing) return true;
+      return String(actualVal).toLowerCase() !== String(condition.value).toLowerCase();
+    }
     case "gt": {
-      const numAct = parseFloat(String(actualVal ?? 0));
-      const numCond = parseFloat(String(condition.value ?? 0));
-      return !isNaN(numAct) && numAct > numCond;
+      if (actMissing || isMissingOrNullFlavor(condition.value)) return false;
+      const numAct = typeof actualVal === "number" ? actualVal : parseFloat(String(actualVal));
+      const numCond = typeof condition.value === "number" ? condition.value : parseFloat(String(condition.value));
+      return Number.isFinite(numAct) && Number.isFinite(numCond) && numAct > numCond;
     }
     case "gte": {
-      const numAct = parseFloat(String(actualVal ?? 0));
-      const numCond = parseFloat(String(condition.value ?? 0));
-      return !isNaN(numAct) && numAct >= numCond;
+      if (actMissing || isMissingOrNullFlavor(condition.value)) return false;
+      const numAct = typeof actualVal === "number" ? actualVal : parseFloat(String(actualVal));
+      const numCond = typeof condition.value === "number" ? condition.value : parseFloat(String(condition.value));
+      return Number.isFinite(numAct) && Number.isFinite(numCond) && numAct >= numCond;
     }
     case "lt": {
-      const numAct = parseFloat(String(actualVal ?? 0));
-      const numCond = parseFloat(String(condition.value ?? 0));
-      return !isNaN(numAct) && numAct < numCond;
+      if (actMissing || isMissingOrNullFlavor(condition.value)) return false;
+      const numAct = typeof actualVal === "number" ? actualVal : parseFloat(String(actualVal));
+      const numCond = typeof condition.value === "number" ? condition.value : parseFloat(String(condition.value));
+      return Number.isFinite(numAct) && Number.isFinite(numCond) && numAct < numCond;
     }
     case "lte": {
-      const numAct = parseFloat(String(actualVal ?? 0));
-      const numCond = parseFloat(String(condition.value ?? 0));
-      return !isNaN(numAct) && numAct <= numCond;
+      if (actMissing || isMissingOrNullFlavor(condition.value)) return false;
+      const numAct = typeof actualVal === "number" ? actualVal : parseFloat(String(actualVal));
+      const numCond = typeof condition.value === "number" ? condition.value : parseFloat(String(condition.value));
+      return Number.isFinite(numAct) && Number.isFinite(numCond) && numAct <= numCond;
     }
-    case "contains":
-      return String(actualVal ?? "").toLowerCase().includes(String(condition.value).toLowerCase());
+    case "contains": {
+      if (actMissing || isMissingOrNullFlavor(condition.value)) return false;
+      return String(actualVal).toLowerCase().includes(String(condition.value).toLowerCase());
+    }
     case "in": {
+      if (actMissing) return false;
       if (Array.isArray(condition.value)) {
-        return condition.value.some((v) => String(v).toLowerCase() === String(actualVal ?? "").toLowerCase());
+        return condition.value.some((v) => !isMissingOrNullFlavor(v) && String(v).toLowerCase() === String(actualVal).toLowerCase());
       }
       return false;
     }

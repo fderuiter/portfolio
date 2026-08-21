@@ -16,6 +16,9 @@ import {
 } from "@/lib/proof-utils";
 import {
   evaluateFormula,
+  evaluateCondition,
+  evaluateRule,
+  isMissingOrNullFlavor,
   ExpressionEvaluator,
   tokenizeWithSpans,
 } from "@/lib/crf/ast-evaluator";
@@ -138,6 +141,40 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       const tokens = tokenizeWithSpans("round(sqrt(HEIGHT * WEIGHT) / 3600, 2)");
       expect(tokens.length).toBeGreaterThan(5);
       expect(tokens[0].value).toBe("round");
+    });
+
+    it("prevents coercive conversion of uncollected and CDISC null flavor fields to zero during condition matching and calculation", () => {
+      // 0. Guard function detects CDISC null flavors and missing values
+      expect(isMissingOrNullFlavor("ND")).toBe(true);
+      expect(isMissingOrNullFlavor(null)).toBe(true);
+      expect(isMissingOrNullFlavor(0)).toBe(false);
+
+      // 1. Relational comparisons with missing / null flavor values must evaluate to false
+      expect(evaluateCondition({ fieldId: "f1", operator: "gt", value: 100 }, { f1: "ND" }, mockFields)).toBe(false);
+      expect(evaluateCondition({ fieldId: "f1", operator: "gte", value: 0 }, { f1: null }, mockFields)).toBe(false);
+      expect(evaluateCondition({ fieldId: "f1", operator: "lt", value: 50 }, { f1: "UNK" }, mockFields)).toBe(false);
+      expect(evaluateCondition({ fieldId: "f1", operator: "lte", value: 10 }, { f1: "" }, mockFields)).toBe(false);
+
+      // 2. Calculations with missing / null flavor inputs must safely return null
+      expect(evaluateFormula("HEIGHT + WEIGHT", { HEIGHT: 180, WEIGHT: "ND" }, mockFields)).toBeNull();
+      expect(evaluateFormula("HEIGHT - WEIGHT", { HEIGHT: "NA", WEIGHT: 70 }, mockFields)).toBeNull();
+
+      // 3. Edit check rules pass without triggering false-positive queries when dependent fields contain null flavors
+      const nullFlavorRule = {
+        id: "rule_null_flavor",
+        name: "Null Flavor Rule",
+        description: "Rule check",
+        triggerFieldIds: ["f1"],
+        actionType: "raise_query" as const,
+        targetFieldId: "f1",
+        logicalOperator: "AND" as const,
+        conditions: [{ fieldId: "f1", operator: "gt" as const, value: 0 }],
+      };
+      expect(evaluateRule(nullFlavorRule, { f1: "ND" }, mockFields)).toBe(false);
+
+      // 4. Valid numeric zero must continue to evaluate correctly
+      expect(evaluateCondition({ fieldId: "f1", operator: "gte", value: 0 }, { f1: 0 }, mockFields)).toBe(true);
+      expect(evaluateFormula("HEIGHT + 10", { HEIGHT: 0 }, mockFields)).toBe(10);
     });
   });
 
