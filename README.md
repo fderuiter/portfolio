@@ -138,6 +138,28 @@ Or follow manual setup steps:
    ```
    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+### API Documentation & Drift Verification Workflow
+
+When introducing or modifying public interfaces (`lib/`, `hooks/`, `types/`) or HTTP API routes (`app/api/`), contributors must ensure documentation and specifications remain synchronized to prevent pre-commit blocks and CI build failures:
+
+1. **Compile API Documentation**
+   After changing public functions, hooks, or types, manually recompile the TypeDoc reference documentation:
+   ```bash
+   npm run compile-docs
+   ```
+
+2. **Verify Local Documentation Drift**
+   Execute the local documentation drift check before committing changes:
+   ```bash
+   npm run check-docs-drift
+   ```
+
+3. **Resolve Drift & Stage Documentation**
+   If documentation drift is detected, run `npm run compile-docs` (or `npm run doctor:fix` to auto-remediate) and stage updated markdown files in `docs/` alongside code changes before committing:
+   ```bash
+   git add docs/ openapi.json
+   ```
+
 ## Database changes
 
 Schema changes must include a checked-in Prisma migration. See
