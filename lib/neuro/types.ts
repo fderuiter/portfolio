@@ -456,3 +456,27 @@ export const TISSUE_LABELS: TissueSegmentLabels = {
 
 export type { AssetProgressEvent, ProgressSubscriber } from "./progress-bus";
 export { progressBus, formatBytes } from "./progress-bus";
+
+export interface MeshWorkerRequest {
+  id: string;
+  mode: SurfaceMode;
+  hemiFilter: HemisphereFilter;
+  wireframe?: boolean;
+}
+
+export interface HemisphereBufferTransfer {
+  hemi: "left" | "right";
+  positions: Float32Array;
+  normals: Float32Array;
+  colors: Float32Array;
+  indices: Uint32Array;
+}
+
+export interface MeshWorkerResponse {
+  id: string;
+  mode: SurfaceMode;
+  hemiFilter: HemisphereFilter;
+  wireframe: boolean;
+  buffers: HemisphereBufferTransfer[];
+  isSubcortical?: boolean;
+}

@@ -13,4 +13,8 @@
 ## Functions
 
 - [createCorticalSurfaceMesh](functions/createCorticalSurfaceMesh.md)
+- [createCorticalSurfaceMeshAsync](functions/createCorticalSurfaceMeshAsync.md)
+- [createCorticalSurfaceMeshFromBuffers](functions/createCorticalSurfaceMeshFromBuffers.md)
+- [createHemisphereGeometryFromBuffers](functions/createHemisphereGeometryFromBuffers.md)
+- [generateHemisphereBuffers](functions/generateHemisphereBuffers.md)
 - [getAnatomicalParcelAtCoordinate](functions/getAnatomicalParcelAtCoordinate.md)

@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { clamp } from "@/lib/game-utils";
 import * as THREE from "three";
 import { AnatomicalParcel, HemisphereFilter, SurfaceMode, VoxelCoord } from "@/lib/neuro/types";
-import { createCorticalSurfaceMesh, getAnatomicalParcelAtCoordinate } from "@/lib/neuro/mesh-generator";
+import { createCorticalSurfaceMeshAsync, getAnatomicalParcelAtCoordinate } from "@/lib/neuro/mesh-generator";
 import { loadExternalBrainMesh } from "@/lib/neuro/asset-loader";
 import { useWebGLContextLoss } from "@/hooks/useWebGLContextLoss";
 import { ProgressHUD } from "./ProgressHUD";
@@ -33,6 +33,7 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const meshGroupRef = useRef<THREE.Group | null>(null);
   const crosshairMarkerRef = useRef<THREE.Mesh | null>(null);
+  const meshRequestIdRef = useRef(0);
 
   const [contextKey, setContextKey] = useState(0);
   const isContextLostRef = useRef(false);
@@ -218,10 +219,11 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
     if (!scene) return;
 
     let isMounted = true;
+    const reqId = ++meshRequestIdRef.current;
 
-    if (meshGroupRef.current) {
-      scene.remove(meshGroupRef.current);
-      meshGroupRef.current.traverse((obj) => {
+    const disposeGroup = (group: THREE.Group) => {
+      scene.remove(group);
+      group.traverse((obj) => {
         if (obj instanceof THREE.Mesh) {
           obj.geometry?.dispose();
           if (Array.isArray(obj.material)) {
@@ -231,34 +233,41 @@ export const Brain3DViewer: React.FC<Brain3DViewerProps> = ({
           }
         }
       });
+    };
+
+    if (meshGroupRef.current) {
+      disposeGroup(meshGroupRef.current);
+      meshGroupRef.current = null;
     }
 
     if (isNearViewport && modelUrl && surfaceMode === "pial" && hemiFilter === "both") {
-      // Immediately render procedural fallback geometry while awaiting network asset retrieval
-      const fallbackGroup = createCorticalSurfaceMesh(surfaceMode, wireframeActive, hemiFilter);
-      scene.add(fallbackGroup);
-      meshGroupRef.current = fallbackGroup;
+      // Offload procedural surface generation to background Web Worker thread
+      createCorticalSurfaceMeshAsync(surfaceMode, wireframeActive, hemiFilter).then((fallbackGroup) => {
+        if (!isMounted || reqId !== meshRequestIdRef.current || !sceneRef.current) return;
+        if (meshGroupRef.current) {
+          disposeGroup(meshGroupRef.current);
+        }
+        sceneRef.current.add(fallbackGroup);
+        meshGroupRef.current = fallbackGroup;
+      });
 
       loadExternalBrainMesh(modelUrl, surfaceMode, hemiFilter).then((externalGroup) => {
-        if (!isMounted || !sceneRef.current) return;
-        sceneRef.current.remove(fallbackGroup);
-        fallbackGroup.traverse((obj) => {
-          if (obj instanceof THREE.Mesh) {
-            obj.geometry?.dispose();
-            if (Array.isArray(obj.material)) {
-              obj.material.forEach((m) => m.dispose());
-            } else {
-              obj.material?.dispose();
-            }
-          }
-        });
+        if (!isMounted || reqId !== meshRequestIdRef.current || !sceneRef.current) return;
+        if (meshGroupRef.current) {
+          disposeGroup(meshGroupRef.current);
+        }
         sceneRef.current.add(externalGroup);
         meshGroupRef.current = externalGroup;
       });
     } else {
-      const newGroup = createCorticalSurfaceMesh(surfaceMode, wireframeActive, hemiFilter);
-      scene.add(newGroup);
-      meshGroupRef.current = newGroup;
+      createCorticalSurfaceMeshAsync(surfaceMode, wireframeActive, hemiFilter).then((newGroup) => {
+        if (!isMounted || reqId !== meshRequestIdRef.current || !sceneRef.current) return;
+        if (meshGroupRef.current) {
+          disposeGroup(meshGroupRef.current);
+        }
+        sceneRef.current.add(newGroup);
+        meshGroupRef.current = newGroup;
+      });
     }
 
     return () => {
