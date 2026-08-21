@@ -40,4 +40,4 @@ Selects a hex matrix cell and processes the next step in the bypass sequence.
 
 ### soundType
 
-> **soundType**: `"match"` \| `"click"` \| `"fail"`
+> **soundType**: `"click"` \| `"match"` \| `"fail"`

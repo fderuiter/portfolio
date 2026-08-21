@@ -6,7 +6,7 @@
 
 # Interface: ExportDocxOptions
 
-Defined in: [lib/crf/types.ts:159](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L159)
+Defined in: [lib/crf/types.ts:208](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L208)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/types.ts:159](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **branding?**: [`StudyBranding`](StudyBranding.md)
 
-Defined in: [lib/crf/types.ts:166](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L166)
+Defined in: [lib/crf/types.ts:215](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L215)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/types.ts:166](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **includeRulesSummary?**: `boolean`
 
-Defined in: [lib/crf/types.ts:165](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L165)
+Defined in: [lib/crf/types.ts:214](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L214)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/types.ts:165](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **includeSdtmAppendix?**: `boolean`
 
-Defined in: [lib/crf/types.ts:164](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L164)
+Defined in: [lib/crf/types.ts:213](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L213)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/types.ts:164](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **includeTableOfContents?**: `boolean`
 
-Defined in: [lib/crf/types.ts:163](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L163)
+Defined in: [lib/crf/types.ts:212](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L212)
 
 ***
 
@@ -46,15 +46,15 @@ Defined in: [lib/crf/types.ts:163](https://github.com/fderuiter/portfolio/blob/m
 
 > **mode**: `"blank"` \| `"annotated"`
 
-Defined in: [lib/crf/types.ts:160](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L160)
+Defined in: [lib/crf/types.ts:209](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L209)
 
 ***
 
 ### scope
 
-> **scope**: `"all"` \| `"single"` \| `"selected"`
+> **scope**: `"single"` \| `"all"` \| `"selected"`
 
-Defined in: [lib/crf/types.ts:161](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L161)
+Defined in: [lib/crf/types.ts:210](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L210)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [lib/crf/types.ts:161](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **selectedFormIds?**: `string`[]
 
-Defined in: [lib/crf/types.ts:162](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L162)
+Defined in: [lib/crf/types.ts:211](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L211)

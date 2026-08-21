@@ -1,6 +1,6 @@
 {
   "targetUrl": "http://localhost:3000",
-  "timestamp": "2026-08-20T17:12:21.174Z",
+  "timestamp": "2026-08-21T17:52:00.904Z",
   "thresholds": {
     "maxTtfbMs": 800,
     "maxFcpMs": 1800,
@@ -10,28 +10,142 @@
   "routes": [
     {
       "route": {
+        "path": "/",
+        "name": "Homepage (Pretext & Bio)",
+        "category": "top-level"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 8.2,
+        "min": 5.2,
+        "max": 1216.9,
+        "p95": 1216.9
+      },
+      "fcp": {
+        "median": 88,
+        "min": 80,
+        "max": 1320,
+        "p95": 1320
+      },
+      "lcp": {
+        "median": 88,
+        "min": 80,
+        "max": 1320,
+        "p95": 1320
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 18.5,
+        "min": 15.4,
+        "max": 1228.1,
+        "p95": 1228.1
+      },
+      "loadDuration": {
+        "median": 122.1,
+        "min": 116.3,
+        "max": 1345.5,
+        "p95": 1345.5
+      },
+      "transferSizeKb": {
+        "median": 27.8,
+        "min": 27.8,
+        "max": 27.8,
+        "p95": 27.8
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/case-studies",
+        "name": "Case Studies Index",
+        "category": "top-level"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 8.7,
+        "min": 7.9,
+        "max": 15.7,
+        "p95": 15.7
+      },
+      "fcp": {
+        "median": 152,
+        "min": 148,
+        "max": 168,
+        "p95": 168
+      },
+      "lcp": {
+        "median": 152,
+        "min": 148,
+        "max": 168,
+        "p95": 168
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 29.8,
+        "min": 27.9,
+        "max": 34.3,
+        "p95": 34.3
+      },
+      "loadDuration": {
+        "median": 258.4,
+        "min": 237.2,
+        "max": 258.9,
+        "p95": 258.9
+      },
+      "transferSizeKb": {
+        "median": 102.9,
+        "min": 102.9,
+        "max": 102.9,
+        "p95": 102.9
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
         "path": "/arcade",
         "name": "Arcade Hub",
         "category": "top-level"
       },
       "runs": 3,
       "ttfb": {
-        "median": 70.2,
-        "min": 69.8,
-        "max": 93.6,
-        "p95": 93.6
+        "median": 3.9,
+        "min": 3.8,
+        "max": 5.7,
+        "p95": 5.7
       },
       "fcp": {
-        "median": 116,
-        "min": 104,
-        "max": 140,
-        "p95": 140
+        "median": 100,
+        "min": 92,
+        "max": 104,
+        "p95": 104
       },
       "lcp": {
-        "median": 116,
-        "min": 104,
-        "max": 140,
-        "p95": 140
+        "median": 100,
+        "min": 92,
+        "max": 104,
+        "p95": 104
       },
       "cls": {
         "median": 0,
@@ -40,22 +154,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 95.1,
-        "min": 93.1,
-        "max": 122.2,
-        "p95": 122.2
+        "median": 13.5,
+        "min": 12.8,
+        "max": 14.1,
+        "p95": 14.1
       },
       "loadDuration": {
-        "median": 95.4,
-        "min": 93.8,
-        "max": 123,
-        "p95": 123
+        "median": 89.5,
+        "min": 64.8,
+        "max": 99.3,
+        "p95": 99.3
       },
       "transferSizeKb": {
-        "median": 0.3,
-        "min": 0.3,
-        "max": 0.3,
-        "p95": 0.3
+        "median": 17,
+        "min": 17,
+        "max": 17,
+        "p95": 17
       },
       "ratings": {
         "ttfb": "good",
@@ -67,28 +181,28 @@
     },
     {
       "route": {
-        "path": "/arcade/working-with-duck",
-        "name": "Game: Duck Canvas Engine",
-        "category": "arcade"
+        "path": "/proof",
+        "name": "Formal Proof Studio",
+        "category": "tool"
       },
       "runs": 3,
       "ttfb": {
-        "median": 85.3,
-        "min": 75.8,
-        "max": 1192.1,
-        "p95": 1192.1
+        "median": 5,
+        "min": 4.6,
+        "max": 5.3,
+        "p95": 5.3
       },
       "fcp": {
-        "median": 244,
-        "min": 120,
-        "max": 1356,
-        "p95": 1356
+        "median": 68,
+        "min": 68,
+        "max": 88,
+        "p95": 88
       },
       "lcp": {
-        "median": 244,
-        "min": 120,
-        "max": 1356,
-        "p95": 1356
+        "median": 68,
+        "min": 68,
+        "max": 88,
+        "p95": 88
       },
       "cls": {
         "median": 0,
@@ -97,22 +211,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 218,
-        "min": 104.9,
-        "max": 1236.6,
-        "p95": 1236.6
+        "median": 13.3,
+        "min": 12.8,
+        "max": 14.6,
+        "p95": 14.6
       },
       "loadDuration": {
-        "median": 218.1,
-        "min": 105.6,
-        "max": 1358.3,
-        "p95": 1358.3
+        "median": 62.9,
+        "min": 61.8,
+        "max": 80,
+        "p95": 80
       },
       "transferSizeKb": {
-        "median": 0.3,
-        "min": 0.3,
-        "max": 14.9,
-        "p95": 14.9
+        "median": 13.3,
+        "min": 13.3,
+        "max": 13.3,
+        "p95": 13.3
       },
       "ratings": {
         "ttfb": "good",
@@ -124,28 +238,28 @@
     },
     {
       "route": {
-        "path": "/arcade/laser-loon",
-        "name": "Game: Laser Loon",
-        "category": "arcade"
+        "path": "/neuro",
+        "name": "Neuro 3D Simulator",
+        "category": "tool"
       },
       "runs": 3,
       "ttfb": {
-        "median": 8.9,
-        "min": 8.8,
-        "max": 32.3,
-        "p95": 32.3
+        "median": 6.8,
+        "min": 5.3,
+        "max": 7,
+        "p95": 7
       },
       "fcp": {
-        "median": 148,
-        "min": 108,
-        "max": 228,
-        "p95": 228
+        "median": 332,
+        "min": 260,
+        "max": 852,
+        "p95": 852
       },
       "lcp": {
-        "median": 148,
-        "min": 108,
-        "max": 228,
-        "p95": 228
+        "median": 332,
+        "min": 260,
+        "max": 852,
+        "p95": 852
       },
       "cls": {
         "median": 0,
@@ -154,16 +268,187 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 33.1,
-        "min": 31.7,
-        "max": 123.5,
-        "p95": 123.5
+        "median": 286.9,
+        "min": 213.9,
+        "max": 806.8,
+        "p95": 806.8
       },
       "loadDuration": {
-        "median": 180.5,
-        "min": 118.5,
-        "max": 479,
-        "p95": 479
+        "median": 1497.7,
+        "min": 1463.3,
+        "max": 1827.8,
+        "p95": 1827.8
+      },
+      "transferSizeKb": {
+        "median": 12.8,
+        "min": 12.8,
+        "max": 12.8,
+        "p95": 12.8
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/crf",
+        "name": "CRF Builder & AST",
+        "category": "tool"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 3.9,
+        "min": 3.3,
+        "max": 4.6,
+        "p95": 4.6
+      },
+      "fcp": {
+        "median": 64,
+        "min": 64,
+        "max": 68,
+        "p95": 68
+      },
+      "lcp": {
+        "median": 64,
+        "min": 64,
+        "max": 68,
+        "p95": 68
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 12.1,
+        "min": 11.5,
+        "max": 13.3,
+        "p95": 13.3
+      },
+      "loadDuration": {
+        "median": 76,
+        "min": 67.3,
+        "max": 86.2,
+        "p95": 86.2
+      },
+      "transferSizeKb": {
+        "median": 12.8,
+        "min": 12.8,
+        "max": 12.8,
+        "p95": 12.8
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/simulator",
+        "name": "System Dynamics Simulator",
+        "category": "tool"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 11.8,
+        "min": 11.1,
+        "max": 82.9,
+        "p95": 82.9
+      },
+      "fcp": {
+        "median": 84,
+        "min": 72,
+        "max": 176,
+        "p95": 176
+      },
+      "lcp": {
+        "median": 84,
+        "min": 72,
+        "max": 176,
+        "p95": 176
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 32.3,
+        "min": 25.6,
+        "max": 111.9,
+        "p95": 111.9
+      },
+      "loadDuration": {
+        "median": 73.7,
+        "min": 62.5,
+        "max": 201.7,
+        "p95": 201.7
+      },
+      "transferSizeKb": {
+        "median": 11.8,
+        "min": 11.8,
+        "max": 11.8,
+        "p95": 11.8
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/schedule",
+        "name": "Schedule / Calendar",
+        "category": "top-level"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 3.2,
+        "min": 2.9,
+        "max": 4.1,
+        "p95": 4.1
+      },
+      "fcp": {
+        "median": 84,
+        "min": 80,
+        "max": 92,
+        "p95": 92
+      },
+      "lcp": {
+        "median": 84,
+        "min": 80,
+        "max": 92,
+        "p95": 92
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 11,
+        "min": 10.2,
+        "max": 12.4,
+        "p95": 12.4
+      },
+      "loadDuration": {
+        "median": 83.3,
+        "min": 80.3,
+        "max": 88.3,
+        "p95": 88.3
       },
       "transferSizeKb": {
         "median": 15,
@@ -181,28 +466,28 @@
     },
     {
       "route": {
-        "path": "/arcade/quasi-puzzler",
-        "name": "Game: Quasi Puzzler",
-        "category": "arcade"
+        "path": "/offline",
+        "name": "Offline Fallback View",
+        "category": "top-level"
       },
       "runs": 3,
       "ttfb": {
-        "median": 78.3,
-        "min": 72.5,
-        "max": 87.2,
-        "p95": 87.2
+        "median": 3.7,
+        "min": 3.2,
+        "max": 3.9,
+        "p95": 3.9
       },
       "fcp": {
-        "median": 120,
-        "min": 112,
-        "max": 144,
-        "p95": 144
+        "median": 80,
+        "min": 72,
+        "max": 80,
+        "p95": 80
       },
       "lcp": {
-        "median": 120,
-        "min": 112,
-        "max": 144,
-        "p95": 144
+        "median": 80,
+        "min": 72,
+        "max": 80,
+        "p95": 80
       },
       "cls": {
         "median": 0,
@@ -211,22 +496,1333 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 109,
-        "min": 105.6,
-        "max": 126.6,
-        "p95": 126.6
+        "median": 11.1,
+        "min": 10.9,
+        "max": 11.5,
+        "p95": 11.5
       },
       "loadDuration": {
-        "median": 109.8,
-        "min": 106.3,
-        "max": 126.8,
-        "p95": 126.8
+        "median": 57.6,
+        "min": 53.9,
+        "max": 70.1,
+        "p95": 70.1
       },
       "transferSizeKb": {
-        "median": 0.3,
-        "min": 0.3,
-        "max": 0.3,
-        "p95": 0.3
+        "median": 12.1,
+        "min": 12.1,
+        "max": 12.1,
+        "p95": 12.1
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/case-studies/clinical-data-mapper",
+        "name": "CS: Clinical Data Mapper",
+        "category": "case-study"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 3.6,
+        "min": 3.4,
+        "max": 3.8,
+        "p95": 3.8
+      },
+      "fcp": {
+        "median": 80,
+        "min": 72,
+        "max": 80,
+        "p95": 80
+      },
+      "lcp": {
+        "median": 80,
+        "min": 72,
+        "max": 80,
+        "p95": 80
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 12.8,
+        "min": 11.9,
+        "max": 14,
+        "p95": 14
+      },
+      "loadDuration": {
+        "median": 78.1,
+        "min": 74,
+        "max": 81.4,
+        "p95": 81.4
+      },
+      "transferSizeKb": {
+        "median": 22.9,
+        "min": 22.9,
+        "max": 22.9,
+        "p95": 22.9
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/case-studies/cadence-clinical",
+        "name": "CS: Cadence Clinical",
+        "category": "case-study"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 3.6,
+        "min": 3.5,
+        "max": 3.9,
+        "p95": 3.9
+      },
+      "fcp": {
+        "median": 76,
+        "min": 76,
+        "max": 84,
+        "p95": 84
+      },
+      "lcp": {
+        "median": 76,
+        "min": 76,
+        "max": 84,
+        "p95": 84
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 13.1,
+        "min": 12.8,
+        "max": 13.8,
+        "p95": 13.8
+      },
+      "loadDuration": {
+        "median": 76.3,
+        "min": 74.9,
+        "max": 87.9,
+        "p95": 87.9
+      },
+      "transferSizeKb": {
+        "median": 22.8,
+        "min": 22.8,
+        "max": 22.8,
+        "p95": 22.8
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/case-studies/schemaflow",
+        "name": "CS: SchemaFlow",
+        "category": "case-study"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 4.1,
+        "min": 3.9,
+        "max": 4.3,
+        "p95": 4.3
+      },
+      "fcp": {
+        "median": 84,
+        "min": 84,
+        "max": 84,
+        "p95": 84
+      },
+      "lcp": {
+        "median": 84,
+        "min": 84,
+        "max": 84,
+        "p95": 84
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 14.3,
+        "min": 14.1,
+        "max": 20.2,
+        "p95": 20.2
+      },
+      "loadDuration": {
+        "median": 86.7,
+        "min": 79.6,
+        "max": 90.7,
+        "p95": 90.7
+      },
+      "transferSizeKb": {
+        "median": 23.7,
+        "min": 23.7,
+        "max": 23.7,
+        "p95": 23.7
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/case-studies/imednet-python-sdk",
+        "name": "CS: iMedNet SDK",
+        "category": "case-study"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 3.8,
+        "min": 3.3,
+        "max": 5.1,
+        "p95": 5.1
+      },
+      "fcp": {
+        "median": 76,
+        "min": 72,
+        "max": 84,
+        "p95": 84
+      },
+      "lcp": {
+        "median": 76,
+        "min": 72,
+        "max": 84,
+        "p95": 84
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 13.4,
+        "min": 13,
+        "max": 15.5,
+        "p95": 15.5
+      },
+      "loadDuration": {
+        "median": 79.4,
+        "min": 71.9,
+        "max": 84.9,
+        "p95": 84.9
+      },
+      "transferSizeKb": {
+        "median": 24.8,
+        "min": 24.8,
+        "max": 24.8,
+        "p95": 24.8
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/case-studies/wedding-website",
+        "name": "CS: Wedding Platform",
+        "category": "case-study"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 4.2,
+        "min": 4,
+        "max": 9.3,
+        "p95": 9.3
+      },
+      "fcp": {
+        "median": 84,
+        "min": 80,
+        "max": 96,
+        "p95": 96
+      },
+      "lcp": {
+        "median": 84,
+        "min": 80,
+        "max": 96,
+        "p95": 96
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 15.9,
+        "min": 13.3,
+        "max": 19.4,
+        "p95": 19.4
+      },
+      "loadDuration": {
+        "median": 80.1,
+        "min": 76.7,
+        "max": 91.4,
+        "p95": 91.4
+      },
+      "transferSizeKb": {
+        "median": 23,
+        "min": 23,
+        "max": 23,
+        "p95": 23
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/case-studies/hono-kiln",
+        "name": "CS: Hono-Kiln Runtime",
+        "category": "case-study"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 4.1,
+        "min": 3.5,
+        "max": 4.6,
+        "p95": 4.6
+      },
+      "fcp": {
+        "median": 68,
+        "min": 64,
+        "max": 76,
+        "p95": 76
+      },
+      "lcp": {
+        "median": 68,
+        "min": 64,
+        "max": 76,
+        "p95": 76
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 12.6,
+        "min": 12.3,
+        "max": 13.8,
+        "p95": 13.8
+      },
+      "loadDuration": {
+        "median": 69.3,
+        "min": 64.5,
+        "max": 88.1,
+        "p95": 88.1
+      },
+      "transferSizeKb": {
+        "median": 21.3,
+        "min": 21.3,
+        "max": 21.3,
+        "p95": 21.3
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/case-studies/inbody-qr-decoder",
+        "name": "CS: InBody QR Decoder",
+        "category": "case-study"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 3.2,
+        "min": 2.7,
+        "max": 4.8,
+        "p95": 4.8
+      },
+      "fcp": {
+        "median": 68,
+        "min": 68,
+        "max": 72,
+        "p95": 72
+      },
+      "lcp": {
+        "median": 68,
+        "min": 68,
+        "max": 72,
+        "p95": 72
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 11.7,
+        "min": 11.5,
+        "max": 14,
+        "p95": 14
+      },
+      "loadDuration": {
+        "median": 72.1,
+        "min": 70.3,
+        "max": 83.6,
+        "p95": 83.6
+      },
+      "transferSizeKb": {
+        "median": 21.5,
+        "min": 21.5,
+        "max": 21.5,
+        "p95": 21.5
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/case-studies/oxidizemath",
+        "name": "CS: OxidizeMath",
+        "category": "case-study"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 3.8,
+        "min": 3.8,
+        "max": 7.6,
+        "p95": 7.6
+      },
+      "fcp": {
+        "median": 84,
+        "min": 76,
+        "max": 88,
+        "p95": 88
+      },
+      "lcp": {
+        "median": 84,
+        "min": 76,
+        "max": 88,
+        "p95": 88
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 14.3,
+        "min": 13.7,
+        "max": 17.5,
+        "p95": 17.5
+      },
+      "loadDuration": {
+        "median": 85.8,
+        "min": 79.7,
+        "max": 88.2,
+        "p95": 88.2
+      },
+      "transferSizeKb": {
+        "median": 21,
+        "min": 21,
+        "max": 21,
+        "p95": 21
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/case-studies/ualbf",
+        "name": "CS: UALBF Engine",
+        "category": "case-study"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 9.9,
+        "min": 3.5,
+        "max": 12.1,
+        "p95": 12.1
+      },
+      "fcp": {
+        "median": 84,
+        "min": 72,
+        "max": 96,
+        "p95": 96
+      },
+      "lcp": {
+        "median": 84,
+        "min": 72,
+        "max": 96,
+        "p95": 96
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 20.2,
+        "min": 12.8,
+        "max": 22.8,
+        "p95": 22.8
+      },
+      "loadDuration": {
+        "median": 98.2,
+        "min": 85.4,
+        "max": 102.2,
+        "p95": 102.2
+      },
+      "transferSizeKb": {
+        "median": 21.3,
+        "min": 21.3,
+        "max": 21.3,
+        "p95": 21.3
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/case-studies/laser-loon",
+        "name": "CS: Laser Loon",
+        "category": "case-study"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 3.3,
+        "min": 3.3,
+        "max": 3.8,
+        "p95": 3.8
+      },
+      "fcp": {
+        "median": 84,
+        "min": 76,
+        "max": 92,
+        "p95": 92
+      },
+      "lcp": {
+        "median": 84,
+        "min": 76,
+        "max": 92,
+        "p95": 92
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 14.3,
+        "min": 14,
+        "max": 14.5,
+        "p95": 14.5
+      },
+      "loadDuration": {
+        "median": 86.5,
+        "min": 76.2,
+        "max": 99.7,
+        "p95": 99.7
+      },
+      "transferSizeKb": {
+        "median": 25.1,
+        "min": 25.1,
+        "max": 25.1,
+        "p95": 25.1
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/work/laser-loon",
+        "name": "CS: Laser Loon Work Route",
+        "category": "case-study"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 3.6,
+        "min": 2.9,
+        "max": 3.8,
+        "p95": 3.8
+      },
+      "fcp": {
+        "median": 88,
+        "min": 80,
+        "max": 92,
+        "p95": 92
+      },
+      "lcp": {
+        "median": 88,
+        "min": 80,
+        "max": 92,
+        "p95": 92
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 14,
+        "min": 14,
+        "max": 14.2,
+        "p95": 14.2
+      },
+      "loadDuration": {
+        "median": 87.1,
+        "min": 81.3,
+        "max": 99.9,
+        "p95": 99.9
+      },
+      "transferSizeKb": {
+        "median": 24.8,
+        "min": 24.8,
+        "max": 24.8,
+        "p95": 24.8
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/case-studies/sonos-network-controller",
+        "name": "CS: Sonos Network Controller",
+        "category": "case-study"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 3.3,
+        "min": 3.1,
+        "max": 3.4,
+        "p95": 3.4
+      },
+      "fcp": {
+        "median": 80,
+        "min": 76,
+        "max": 84,
+        "p95": 84
+      },
+      "lcp": {
+        "median": 80,
+        "min": 76,
+        "max": 84,
+        "p95": 84
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 13.5,
+        "min": 13,
+        "max": 13.8,
+        "p95": 13.8
+      },
+      "loadDuration": {
+        "median": 84.5,
+        "min": 77.6,
+        "max": 90.9,
+        "p95": 90.9
+      },
+      "transferSizeKb": {
+        "median": 22.3,
+        "min": 22.3,
+        "max": 22.3,
+        "p95": 22.3
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/case-studies/clintrials",
+        "name": "CS: clintrials WASM Engine",
+        "category": "case-study"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 3.3,
+        "min": 3.3,
+        "max": 4,
+        "p95": 4
+      },
+      "fcp": {
+        "median": 84,
+        "min": 64,
+        "max": 84,
+        "p95": 84
+      },
+      "lcp": {
+        "median": 84,
+        "min": 64,
+        "max": 84,
+        "p95": 84
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 13.1,
+        "min": 12.8,
+        "max": 13.8,
+        "p95": 13.8
+      },
+      "loadDuration": {
+        "median": 74.8,
+        "min": 71.6,
+        "max": 82.6,
+        "p95": 82.6
+      },
+      "transferSizeKb": {
+        "median": 22.5,
+        "min": 22.5,
+        "max": 22.5,
+        "p95": 22.5
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/case-studies/equipose-randomization",
+        "name": "CS: Equipose Randomization",
+        "category": "case-study"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 4.3,
+        "min": 4.3,
+        "max": 4.8,
+        "p95": 4.8
+      },
+      "fcp": {
+        "median": 84,
+        "min": 76,
+        "max": 92,
+        "p95": 92
+      },
+      "lcp": {
+        "median": 84,
+        "min": 76,
+        "max": 92,
+        "p95": 92
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 14.1,
+        "min": 14,
+        "max": 14.3,
+        "p95": 14.3
+      },
+      "loadDuration": {
+        "median": 77.9,
+        "min": 72.7,
+        "max": 88.9,
+        "p95": 88.9
+      },
+      "transferSizeKb": {
+        "median": 24,
+        "min": 24,
+        "max": 24,
+        "p95": 24
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/case-studies/lambda-wave",
+        "name": "CS: Lambda-Wave Radar",
+        "category": "case-study"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 2.8,
+        "min": 2.6,
+        "max": 3,
+        "p95": 3
+      },
+      "fcp": {
+        "median": 64,
+        "min": 60,
+        "max": 72,
+        "p95": 72
+      },
+      "lcp": {
+        "median": 64,
+        "min": 60,
+        "max": 72,
+        "p95": 72
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 11.3,
+        "min": 10.7,
+        "max": 11.8,
+        "p95": 11.8
+      },
+      "loadDuration": {
+        "median": 70.1,
+        "min": 58.5,
+        "max": 73.3,
+        "p95": 73.3
+      },
+      "transferSizeKb": {
+        "median": 23.1,
+        "min": 23.1,
+        "max": 23.1,
+        "p95": 23.1
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/case-studies/duckdeploy",
+        "name": "CS: DuckDeploy Dynamic UI",
+        "category": "case-study"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 3,
+        "min": 2.8,
+        "max": 5.5,
+        "p95": 5.5
+      },
+      "fcp": {
+        "median": 60,
+        "min": 56,
+        "max": 64,
+        "p95": 64
+      },
+      "lcp": {
+        "median": 60,
+        "min": 56,
+        "max": 64,
+        "p95": 64
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 11.7,
+        "min": 10.7,
+        "max": 13.5,
+        "p95": 13.5
+      },
+      "loadDuration": {
+        "median": 63.6,
+        "min": 60.3,
+        "max": 78,
+        "p95": 78
+      },
+      "transferSizeKb": {
+        "median": 27.4,
+        "min": 27.4,
+        "max": 27.4,
+        "p95": 27.4
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/case-studies/cardiac-risk-modeling",
+        "name": "CS: Cardiac Risk Modeling",
+        "category": "case-study"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 7.8,
+        "min": 7.5,
+        "max": 14.1,
+        "p95": 14.1
+      },
+      "fcp": {
+        "median": 76,
+        "min": 64,
+        "max": 96,
+        "p95": 96
+      },
+      "lcp": {
+        "median": 76,
+        "min": 64,
+        "max": 96,
+        "p95": 96
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 16.5,
+        "min": 16.5,
+        "max": 23,
+        "p95": 23
+      },
+      "loadDuration": {
+        "median": 70.1,
+        "min": 67.8,
+        "max": 119.9,
+        "p95": 119.9
+      },
+      "transferSizeKb": {
+        "median": 27.4,
+        "min": 27.4,
+        "max": 27.4,
+        "p95": 27.4
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/case-studies/4glory",
+        "name": "CS: 4Glory Sports Analytics",
+        "category": "case-study"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 2.2,
+        "min": 2.1,
+        "max": 2.3,
+        "p95": 2.3
+      },
+      "fcp": {
+        "median": 60,
+        "min": 52,
+        "max": 68,
+        "p95": 68
+      },
+      "lcp": {
+        "median": 60,
+        "min": 52,
+        "max": 68,
+        "p95": 68
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 9.7,
+        "min": 9.5,
+        "max": 10.2,
+        "p95": 10.2
+      },
+      "loadDuration": {
+        "median": 59.7,
+        "min": 55.9,
+        "max": 64.1,
+        "p95": 64.1
+      },
+      "transferSizeKb": {
+        "median": 26.7,
+        "min": 26.7,
+        "max": 26.7,
+        "p95": 26.7
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/case-studies/crf-xl",
+        "name": "CS: CRF.xl CDISC Compiler",
+        "category": "case-study"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 3.3,
+        "min": 2.5,
+        "max": 4.2,
+        "p95": 4.2
+      },
+      "fcp": {
+        "median": 72,
+        "min": 72,
+        "max": 80,
+        "p95": 80
+      },
+      "lcp": {
+        "median": 72,
+        "min": 72,
+        "max": 80,
+        "p95": 80
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 11.3,
+        "min": 10.4,
+        "max": 12.5,
+        "p95": 12.5
+      },
+      "loadDuration": {
+        "median": 64.7,
+        "min": 60.5,
+        "max": 71.6,
+        "p95": 71.6
+      },
+      "transferSizeKb": {
+        "median": 28.9,
+        "min": 28.9,
+        "max": 28.9,
+        "p95": 28.9
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/case-studies/promptops",
+        "name": "CS: PromptOps LLM Framework",
+        "category": "case-study"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 4.6,
+        "min": 3,
+        "max": 5.9,
+        "p95": 5.9
+      },
+      "fcp": {
+        "median": 72,
+        "min": 68,
+        "max": 84,
+        "p95": 84
+      },
+      "lcp": {
+        "median": 72,
+        "min": 68,
+        "max": 84,
+        "p95": 84
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 12.6,
+        "min": 11.6,
+        "max": 13.3,
+        "p95": 13.3
+      },
+      "loadDuration": {
+        "median": 62.2,
+        "min": 61.4,
+        "max": 65.7,
+        "p95": 65.7
+      },
+      "transferSizeKb": {
+        "median": 25.9,
+        "min": 25.9,
+        "max": 25.9,
+        "p95": 25.9
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/arcade/working-with-duck",
+        "name": "Game: Duck Canvas Engine",
+        "category": "arcade"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 21.7,
+        "min": 3.2,
+        "max": 22.5,
+        "p95": 22.5
+      },
+      "fcp": {
+        "median": 68,
+        "min": 48,
+        "max": 76,
+        "p95": 76
+      },
+      "lcp": {
+        "median": 68,
+        "min": 48,
+        "max": 76,
+        "p95": 76
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 28.7,
+        "min": 10.7,
+        "max": 29.8,
+        "p95": 29.8
+      },
+      "loadDuration": {
+        "median": 70.1,
+        "min": 50.8,
+        "max": 86.7,
+        "p95": 86.7
+      },
+      "transferSizeKb": {
+        "median": 14.1,
+        "min": 14.1,
+        "max": 14.1,
+        "p95": 14.1
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/arcade/laser-loon",
+        "name": "Game: Laser Loon",
+        "category": "arcade"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 7.3,
+        "min": 6.6,
+        "max": 9.4,
+        "p95": 9.4
+      },
+      "fcp": {
+        "median": 68,
+        "min": 60,
+        "max": 72,
+        "p95": 72
+      },
+      "lcp": {
+        "median": 68,
+        "min": 60,
+        "max": 72,
+        "p95": 72
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 14,
+        "min": 13.3,
+        "max": 15.5,
+        "p95": 15.5
+      },
+      "loadDuration": {
+        "median": 53,
+        "min": 49.2,
+        "max": 68.9,
+        "p95": 68.9
+      },
+      "transferSizeKb": {
+        "median": 14.2,
+        "min": 14.2,
+        "max": 14.2,
+        "p95": 14.2
+      },
+      "ratings": {
+        "ttfb": "good",
+        "fcp": "good",
+        "lcp": "good",
+        "cls": "good"
+      },
+      "passedBudget": true
+    },
+    {
+      "route": {
+        "path": "/arcade/quasi-puzzler",
+        "name": "Game: Quasi Puzzler",
+        "category": "arcade"
+      },
+      "runs": 3,
+      "ttfb": {
+        "median": 3.2,
+        "min": 2.4,
+        "max": 3.2,
+        "p95": 3.2
+      },
+      "fcp": {
+        "median": 44,
+        "min": 44,
+        "max": 52,
+        "p95": 52
+      },
+      "lcp": {
+        "median": 44,
+        "min": 44,
+        "max": 52,
+        "p95": 52
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0,
+        "p95": 0
+      },
+      "domContentLoaded": {
+        "median": 9.4,
+        "min": 8.6,
+        "max": 9.6,
+        "p95": 9.6
+      },
+      "loadDuration": {
+        "median": 48.5,
+        "min": 45.3,
+        "max": 54,
+        "p95": 54
+      },
+      "transferSizeKb": {
+        "median": 13.9,
+        "min": 13.9,
+        "max": 13.9,
+        "p95": 13.9
       },
       "ratings": {
         "ttfb": "good",
@@ -244,22 +1840,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 8.3,
-        "min": 8.3,
-        "max": 15.5,
-        "p95": 15.5
+        "median": 10.7,
+        "min": 3.6,
+        "max": 10.9,
+        "p95": 10.9
       },
       "fcp": {
-        "median": 152,
-        "min": 108,
-        "max": 164,
-        "p95": 164
+        "median": 64,
+        "min": 56,
+        "max": 72,
+        "p95": 72
       },
       "lcp": {
-        "median": 152,
-        "min": 108,
-        "max": 164,
-        "p95": 164
+        "median": 64,
+        "min": 56,
+        "max": 72,
+        "p95": 72
       },
       "cls": {
         "median": 0,
@@ -268,22 +1864,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 35.3,
-        "min": 32,
-        "max": 60.2,
-        "p95": 60.2
+        "median": 17,
+        "min": 9.8,
+        "max": 18,
+        "p95": 18
       },
       "loadDuration": {
-        "median": 158.9,
-        "min": 122.5,
-        "max": 185.5,
-        "p95": 185.5
+        "median": 55.1,
+        "min": 53.4,
+        "max": 56.4,
+        "p95": 56.4
       },
       "transferSizeKb": {
-        "median": 14.8,
-        "min": 14.8,
-        "max": 14.8,
-        "p95": 14.8
+        "median": 14.1,
+        "min": 14.1,
+        "max": 14.1,
+        "p95": 14.1
       },
       "ratings": {
         "ttfb": "good",
@@ -301,22 +1897,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 75,
-        "min": 26.8,
-        "max": 92.9,
-        "p95": 92.9
+        "median": 12.5,
+        "min": 6.7,
+        "max": 14.5,
+        "p95": 14.5
       },
       "fcp": {
-        "median": 124,
-        "min": 116,
-        "max": 208,
-        "p95": 208
+        "median": 60,
+        "min": 44,
+        "max": 64,
+        "p95": 64
       },
       "lcp": {
-        "median": 124,
-        "min": 116,
-        "max": 208,
-        "p95": 208
+        "median": 60,
+        "min": 44,
+        "max": 64,
+        "p95": 64
       },
       "cls": {
         "median": 0,
@@ -325,22 +1921,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 96.9,
-        "min": 72.2,
-        "max": 112.3,
-        "p95": 112.3
+        "median": 18.6,
+        "min": 13,
+        "max": 21.3,
+        "p95": 21.3
       },
       "loadDuration": {
-        "median": 112.6,
-        "min": 97.4,
-        "max": 479.8,
-        "p95": 479.8
+        "median": 57.3,
+        "min": 47.1,
+        "max": 63.2,
+        "p95": 63.2
       },
       "transferSizeKb": {
-        "median": 0.3,
-        "min": 0.3,
-        "max": 14.8,
-        "p95": 14.8
+        "median": 14,
+        "min": 14,
+        "max": 14,
+        "p95": 14
       },
       "ratings": {
         "ttfb": "good",
@@ -358,22 +1954,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 93.8,
-        "min": 7.9,
-        "max": 106.1,
-        "p95": 106.1
+        "median": 9.6,
+        "min": 8.2,
+        "max": 14.1,
+        "p95": 14.1
       },
       "fcp": {
-        "median": 140,
-        "min": 124,
-        "max": 172,
-        "p95": 172
+        "median": 56,
+        "min": 48,
+        "max": 56,
+        "p95": 56
       },
       "lcp": {
-        "median": 140,
-        "min": 124,
-        "max": 172,
-        "p95": 172
+        "median": 56,
+        "min": 48,
+        "max": 56,
+        "p95": 56
       },
       "cls": {
         "median": 0,
@@ -382,22 +1978,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 114.2,
-        "min": 28.9,
-        "max": 156.6,
-        "p95": 156.6
+        "median": 16.1,
+        "min": 14.4,
+        "max": 20.9,
+        "p95": 20.9
       },
       "loadDuration": {
-        "median": 156.6,
-        "min": 114.7,
-        "max": 156.7,
-        "p95": 156.7
+        "median": 57,
+        "min": 48.6,
+        "max": 58.4,
+        "p95": 58.4
       },
       "transferSizeKb": {
-        "median": 0.3,
-        "min": 0.3,
-        "max": 14.8,
-        "p95": 14.8
+        "median": 14.1,
+        "min": 14.1,
+        "max": 14.1,
+        "p95": 14.1
       },
       "ratings": {
         "ttfb": "good",
@@ -415,22 +2011,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 8.9,
-        "min": 7.5,
-        "max": 24.9,
-        "p95": 24.9
+        "median": 9.7,
+        "min": 8.7,
+        "max": 10,
+        "p95": 10
       },
       "fcp": {
-        "median": 212,
-        "min": 184,
-        "max": 328,
-        "p95": 328
+        "median": 84,
+        "min": 80,
+        "max": 84,
+        "p95": 84
       },
       "lcp": {
-        "median": 212,
-        "min": 184,
-        "max": 328,
-        "p95": 328
+        "median": 84,
+        "min": 80,
+        "max": 84,
+        "p95": 84
       },
       "cls": {
         "median": 0,
@@ -439,22 +2035,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 31.6,
-        "min": 30.3,
-        "max": 71.1,
-        "p95": 71.1
+        "median": 15.7,
+        "min": 15.3,
+        "max": 16.4,
+        "p95": 16.4
       },
       "loadDuration": {
-        "median": 267.7,
-        "min": 240.8,
-        "max": 548.6,
-        "p95": 548.6
+        "median": 56.4,
+        "min": 55.9,
+        "max": 70.8,
+        "p95": 70.8
       },
       "transferSizeKb": {
-        "median": 17.5,
-        "min": 17.5,
-        "max": 17.5,
-        "p95": 17.5
+        "median": 16.8,
+        "min": 16.8,
+        "max": 16.8,
+        "p95": 16.8
       },
       "ratings": {
         "ttfb": "good",

@@ -4,10 +4,8 @@ import { render, screen, act, cleanup } from "@testing-library/react";
 import {
   A11yProvider,
   useAnnouncer,
-  announcerReducer,
-  initialAnnouncerState,
   sanitizePII,
-  AnnouncerState,
+  liveAnnouncer,
 } from "@/components/providers/A11yProvider";
 
 function TestAnnouncerComponent() {
@@ -36,9 +34,11 @@ function TestAnnouncerComponent() {
 describe("A11yProvider & useAnnouncer Dynamic Screen Reader Engine", () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    liveAnnouncer.clear();
   });
 
   afterEach(() => {
+    liveAnnouncer.clear();
     cleanup();
     vi.runOnlyPendingTimers();
     vi.useRealTimers();
@@ -246,111 +246,11 @@ describe("A11yProvider & useAnnouncer Dynamic Screen Reader Engine", () => {
     expect(announceRef.current).toBe(initialRef);
   });
 
-  describe("announcerReducer state machine unit logic", () => {
-    it("handles ANNOUNCE for polite messages when idle vs when busy", () => {
-      const state0 = initialAnnouncerState;
-
-      const item1 = { id: "1", text: "P1", priority: "polite" as const };
-      const state1 = announcerReducer(state0, { type: "ANNOUNCE", item: item1 });
-      expect(state1.activePolite).toEqual(item1);
-      expect(state1.politeQueue).toEqual([]);
-
-      const item2 = { id: "2", text: "P2", priority: "polite" as const };
-      const state2 = announcerReducer(state1, { type: "ANNOUNCE", item: item2 });
-      expect(state2.activePolite).toEqual(item1);
-      expect(state2.politeQueue).toEqual([item2]);
-    });
-
-    it("handles ANNOUNCE for assertive messages preempting active polite message", () => {
-      const item1 = { id: "1", text: "P1", priority: "polite" as const };
-      const state1 = announcerReducer(initialAnnouncerState, { type: "ANNOUNCE", item: item1 });
-
-      const itemAssertive = { id: "a1", text: "A1", priority: "assertive" as const };
-      const state2 = announcerReducer(state1, { type: "ANNOUNCE", item: itemAssertive });
-
-      expect(state2.activePolite).toBeNull();
-      expect(state2.activeAssertive).toEqual(itemAssertive);
-    });
-
-    it("dequeues correctly on TIMER_EXPIRED from assertive queue to polite queue", () => {
-      const p1 = { id: "p1", text: "P1", priority: "polite" as const };
-      const p2 = { id: "p2", text: "P2", priority: "polite" as const };
-      const a1 = { id: "a1", text: "A1", priority: "assertive" as const };
-      const a2 = { id: "a2", text: "A2", priority: "assertive" as const };
-
-      let state: AnnouncerState = initialAnnouncerState;
-      // p1 starts playing
-      state = announcerReducer(state, { type: "ANNOUNCE", item: p1 });
-      // p2 is added to politeQueue because p1 is active
-      state = announcerReducer(state, { type: "ANNOUNCE", item: p2 });
-      // a1 preempts p1 (p1 discarded), a1 becomes activeAssertive, p2 stays in politeQueue
-      state = announcerReducer(state, { type: "ANNOUNCE", item: a1 });
-      // a2 added to assertiveQueue
-      state = announcerReducer(state, { type: "ANNOUNCE", item: a2 });
-
-      expect(state.activeAssertive).toEqual(a1);
-      expect(state.assertiveQueue).toEqual([a2]);
-      expect(state.activePolite).toBeNull();
-      expect(state.politeQueue).toEqual([p2]);
-
-      // Timer expires for A1 -> A2 becomes active
-      state = announcerReducer(state, { type: "TIMER_EXPIRED" });
-      expect(state.activeAssertive).toEqual(a2);
-      expect(state.assertiveQueue).toEqual([]);
-      expect(state.activePolite).toBeNull();
-      expect(state.politeQueue).toEqual([p2]);
-
-      // Timer expires for A2 -> P2 becomes active
-      state = announcerReducer(state, { type: "TIMER_EXPIRED" });
-      expect(state.activeAssertive).toBeNull();
-      expect(state.activePolite).toEqual(p2);
-      expect(state.politeQueue).toEqual([]);
-
-      // Timer expires for P2 -> state becomes empty
-      state = announcerReducer(state, { type: "TIMER_EXPIRED" });
-      expect(state.activeAssertive).toBeNull();
-      expect(state.activePolite).toBeNull();
-    });
-
-    it("processes atomic ENQUEUE, ASSERTIVE_PREEMPT, DEQUEUE_NEXT, and TIMER_COMPLETE actions", () => {
-      const p1 = { id: "p1", text: "Polite 1", priority: "polite" as const };
-      const p2 = { id: "p2", text: "Polite 2", priority: "polite" as const };
-      const a1 = { id: "a1", text: "Assertive 1", priority: "assertive" as const };
-
-      let state = initialAnnouncerState;
-
-      // ENQUEUE polite
-      state = announcerReducer(state, { type: "ENQUEUE", item: p1 });
-      expect(state.activePolite).toEqual(p1);
-
-      // ENQUEUE polite while busy
-      state = announcerReducer(state, { type: "ENQUEUE", item: p2 });
-      expect(state.politeQueue).toEqual([p2]);
-
-      // ASSERTIVE_PREEMPT interrupts active polite
-      state = announcerReducer(state, { type: "ASSERTIVE_PREEMPT", item: a1 });
-      expect(state.activePolite).toBeNull();
-      expect(state.activeAssertive).toEqual(a1);
-      expect(state.politeQueue).toEqual([p2]);
-
-      // TIMER_COMPLETE transitions to next item in queue
-      state = announcerReducer(state, { type: "TIMER_COMPLETE" });
-      expect(state.activeAssertive).toBeNull();
-      expect(state.activePolite).toEqual(p2);
-
-      // DEQUEUE_NEXT finishes last item
-      state = announcerReducer(state, { type: "DEQUEUE_NEXT" });
-      expect(state.activePolite).toBeNull();
-      expect(state.activeAssertive).toBeNull();
-    });
-
-    it("sanitizes Social Security Numbers using sanitizePII helper", () => {
-      expect(sanitizePII("User SSN is 123-45-6789")).toBe("User SSN is ***-**-****");
-      expect(sanitizePII("Multiple SSNs: 987-65-4321 and 111-22-3333")).toBe(
-        "Multiple SSNs: ***-**-**** and ***-**-****"
-      );
-      expect(sanitizePII("Clean message without PII")).toBe("Clean message without PII");
-    });
+  it("sanitizes Social Security Numbers using sanitizePII helper", () => {
+    expect(sanitizePII("User SSN is 123-45-6789")).toBe("User SSN is ***-**-****");
+    expect(sanitizePII("Multiple SSNs: 987-65-4321 and 111-22-3333")).toBe(
+      "Multiple SSNs: ***-**-**** and ***-**-****"
+    );
+    expect(sanitizePII("Clean message without PII")).toBe("Clean message without PII");
   });
 });
-

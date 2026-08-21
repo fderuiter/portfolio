@@ -16,7 +16,7 @@ Calculates the accurate offscreen height of a structured block prior to layout s
 
 ### block
 
-[`StructuredBlock`](../interfaces/StructuredBlock.md) \| [`PreparedBlock`](../interfaces/PreparedBlock.md)
+[`PreparedBlock`](../interfaces/PreparedBlock.md) \| [`StructuredBlock`](../interfaces/StructuredBlock.md)
 
 ### containerWidth
 

@@ -33,6 +33,7 @@ vi.mock("@/components/providers/AudioProvider", () => ({
     muted: false,
     profile: "synth",
   }),
+  registerAudioCleanup: vi.fn(),
 }));
 
 vi.mock("@/components/providers/SearchProvider", () => ({

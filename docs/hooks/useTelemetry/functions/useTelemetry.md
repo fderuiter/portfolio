@@ -8,11 +8,11 @@
 
 > **useTelemetry**(`options?`): `object`
 
-Defined in: [hooks/useTelemetry.ts:496](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L496)
+Defined in: [hooks/useTelemetry.ts:404](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L404)
 
-Custom hook implementing a robust Stale-While-Revalidate (SWR) telemetry system with useSyncExternalStore.
-Hydrates state instantly from LocalStorage cache to prevent Cumulative Layout Shifts (CLS),
-schedules background syncs during idle frames, and supports optimistic updates with automated retry queuing and FIFO eviction.
+Custom hook implementing a lightweight SWR telemetry system with useSyncExternalStore.
+Hydrates state instantly from LocalStorage cache, schedules background syncs during idle frames,
+and delegates retry queueing, rate-limiting rollbacks, and keepalive beacons to TelemetryOutbox.
 
 ## Parameters
 
@@ -24,9 +24,11 @@ Optional configuration options including maximum retry queue capacity.
 
 ## Returns
 
+`object`
+
 ### pendingDeferredLength
 
-> **pendingDeferredLength**: `number`
+> **pendingDeferredLength**: `number` = `pendingDeferred.length`
 
 ### queueCapacity
 
@@ -34,11 +36,11 @@ Optional configuration options including maximum retry queue capacity.
 
 ### queueLength
 
-> **queueLength**: `number`
+> **queueLength**: `number` = `telemetryOutbox.size`
 
 ### recordEvent
 
-> **recordEvent**: (`projectSlug`, `eventType`, `options?`) => `Promise`\<`void`\>
+> **recordEvent**: (`projectSlug`, `eventType`, `opts?`) => `Promise`\<`void`\>
 
 #### Parameters
 
@@ -50,7 +52,7 @@ Optional configuration options including maximum retry queue capacity.
 
 [`TelemetryEventType`](../type-aliases/TelemetryEventType.md)
 
-##### options?
+##### opts?
 
 [`RecordEventOptions`](../interfaces/RecordEventOptions.md)
 
@@ -61,9 +63,6 @@ Optional configuration options including maximum retry queue capacity.
 ### refetch
 
 > **refetch**: (`options?`) => `Promise`\<`void`\> = `fetchTelemetryAggregates`
-
-Fetch latest telemetry aggregates from the server.
-Reuses active in-flight Promises for concurrent callers and enforces cooldown throttling.
 
 #### Parameters
 

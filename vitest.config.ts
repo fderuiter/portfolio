@@ -46,6 +46,7 @@ export default defineConfig({
         'lib/quasi-perfect/index.ts',
         'lib/garmin-types.ts',
         'lib/working-with-duck-types.ts',
+        'lib/telemetry/index.ts',
       ],
       thresholds: {
         lines: 80,

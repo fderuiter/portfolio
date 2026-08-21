@@ -611,6 +611,64 @@ export const openApiSpec = {
         },
       },
     },
+    "/api/webhooks/resend": {
+      post: {
+        summary: "Ingest Resend deliverability webhook events",
+        description: "Cryptographically verifies Svix webhook signatures and processes email lifecycle events (bounces, complaints, delivery status) to maintain suppression lists.",
+        responses: {
+          200: {
+            description: "Webhook event processed successfully",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ResendWebhookResponse",
+                },
+              },
+            },
+          },
+          400: {
+            description: "Missing required Svix headers or invalid JSON payload",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
+          },
+          401: {
+            description: "Invalid Svix signature",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
+          },
+          422: {
+            description: "Payload does not match Resend webhook schema",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
+          },
+          500: {
+            description: "Internal server error processing webhook",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   },
   components: {
     schemas: {
@@ -902,6 +960,15 @@ export const openApiSpec = {
           simulated: { type: "boolean", description: "Indicates simulated dispatch during testing or local development" },
         },
         required: ["success", "message"],
+      },
+      ResendWebhookResponse: {
+        type: "object",
+        properties: {
+          received: { type: "boolean" },
+          processedEvent: { type: "string", description: "The processed event type" },
+          suppressed: { type: "boolean", description: "Indicates whether the email address was recorded to the suppression list" },
+        },
+        required: ["received"],
       },
     },
   },

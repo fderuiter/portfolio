@@ -8,7 +8,7 @@
 
 > **tickSubjectTimers**(`subjects`, `deltaSeconds`): `object`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:206](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L206)
+Defined in: [lib/clinical-trial-chaos/engine.ts:313](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L313)
 
 Advances conveyor subjects timer by deltaSeconds.
 

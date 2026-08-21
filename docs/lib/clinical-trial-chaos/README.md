@@ -172,6 +172,12 @@ Re-exports [generateClinicalSubject](scenarios/functions/generateClinicalSubject
 
 ***
 
+### generateClinicalSubjectFromProtocol
+
+Re-exports [generateClinicalSubjectFromProtocol](scenarios/functions/generateClinicalSubjectFromProtocol.md)
+
+***
+
 ### generateSDTMDataset
 
 Re-exports [generateSDTMDataset](engine/functions/generateSDTMDataset.md)
@@ -289,6 +295,12 @@ Re-exports [PowerUpType](types/type-aliases/PowerUpType.md)
 ### ProtocolAmendment
 
 Re-exports [ProtocolAmendment](types/interfaces/ProtocolAmendment.md)
+
+***
+
+### RecordedRuleViolation
+
+Re-exports [RecordedRuleViolation](types/interfaces/RecordedRuleViolation.md)
 
 ***
 

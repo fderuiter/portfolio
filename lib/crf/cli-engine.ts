@@ -599,7 +599,7 @@ export function executePresetCommand(
  */
 export function executeExportCommand(
   study: StudyProtocol,
-  format: "json" | "yaml" | "odm" | "fhir" | "sas" | "r",
+  format: "json" | "yaml" | "odm" | "fhir" | "sas" | "r" | "usdm",
   _options: CliExecutionOptions = {}
 ): CliCommandResult {
   const res = StudyProtocolEngine.exportProtocol(study, format);

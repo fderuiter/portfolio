@@ -3,49 +3,27 @@
  * Safe for SSR, Node, and headless test environments.
  */
 
-/**
- * Procedural Web Audio API 8-Bit Chiptune Sound Synthesizer
- * Safe for SSR, Node, and headless test environments.
- */
-
 import { useEffect } from "react";
-import {
-  getGovernedAudioContext,
-  getGovernedVolume,
-  isGovernedSoundAllowed,
-  registerAudioCleanup,
-} from "@/components/providers/AudioProvider";
+import { getSoundEngine, SoundEngine } from "@/lib/audio/sound-engine";
 
 export class RetroAudioEngine {
   private isMuted: boolean = false;
-  private activeSources = new Set<AudioScheduledSourceNode>();
+  private engine: SoundEngine;
+
+  constructor(engine: SoundEngine = getSoundEngine()) {
+    this.engine = engine;
+  }
 
   private getContext(): AudioContext | null {
-    return getGovernedAudioContext();
+    return this.engine.getAudioContext();
   }
 
   private isSoundAllowed(): boolean {
-    return !this.isMuted && isGovernedSoundAllowed();
-  }
-
-  private trackSource<T extends AudioScheduledSourceNode>(source: T): T {
-    this.activeSources.add(source);
-    try {
-      source.addEventListener("ended", () => {
-        this.activeSources.delete(source);
-      });
-    } catch {}
-    return source;
+    return !this.isMuted && this.engine.isSoundAllowed();
   }
 
   public stopAll(): void {
-    this.activeSources.forEach((src) => {
-      try {
-        src.stop();
-        src.disconnect();
-      } catch {}
-    });
-    this.activeSources.clear();
+    this.engine.stopAll();
   }
 
   public setMuted(muted: boolean): void {
@@ -73,10 +51,10 @@ export class RetroAudioEngine {
     if (!ctx) return;
 
     try {
-      const masterVolume = getGovernedVolume();
+      const masterVolume = this.engine.getVolume();
       const effectiveVolume = Math.max(0.0001, volume * masterVolume);
 
-      const osc = this.trackSource(ctx.createOscillator());
+      const osc = this.engine.trackSource(ctx.createOscillator());
       const gain = ctx.createGain();
 
       osc.type = type;
@@ -111,8 +89,8 @@ export class RetroAudioEngine {
     if (!ctx) return;
 
     try {
-      const masterVolume = getGovernedVolume();
-      const osc = this.trackSource(ctx.createOscillator());
+      const masterVolume = this.engine.getVolume();
+      const osc = this.engine.trackSource(ctx.createOscillator());
       const gain = ctx.createGain();
 
       osc.type = "sawtooth";
@@ -139,8 +117,8 @@ export class RetroAudioEngine {
     if (!ctx) return;
 
     try {
-      const masterVolume = getGovernedVolume();
-      const osc = this.trackSource(ctx.createOscillator());
+      const masterVolume = this.engine.getVolume();
+      const osc = this.engine.trackSource(ctx.createOscillator());
       const gain = ctx.createGain();
 
       osc.type = "sawtooth";
@@ -197,10 +175,6 @@ export class RetroAudioEngine {
 }
 
 export const retroAudio = new RetroAudioEngine();
-
-registerAudioCleanup(() => {
-  retroAudio.stopAll();
-});
 
 export function useRetroAudioCleanup(): void {
   useEffect(() => {

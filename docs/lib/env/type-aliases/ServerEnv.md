@@ -8,4 +8,4 @@
 
 > **ServerEnv** = `z.infer`\<*typeof* [`serverEnvSchema`](../variables/serverEnvSchema.md)\>
 
-Defined in: [lib/env.ts:59](https://github.com/fderuiter/portfolio/blob/main/lib/env.ts#L59)
+Defined in: [lib/env.ts:60](https://github.com/fderuiter/portfolio/blob/main/lib/env.ts#L60)

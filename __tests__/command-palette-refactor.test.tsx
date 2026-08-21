@@ -19,6 +19,7 @@ vi.mock("@/components/providers/AudioProvider", () => ({
     volume: 0.3,
     muted: false,
   }),
+  registerAudioCleanup: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({

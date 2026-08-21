@@ -8,7 +8,7 @@
 
 > **isSoundAllowed**(): `boolean`
 
-Defined in: [lib/meme-audio.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/meme-audio.ts#L47)
+Defined in: [lib/meme-audio.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/meme-audio.ts#L20)
 
 ## Returns
 

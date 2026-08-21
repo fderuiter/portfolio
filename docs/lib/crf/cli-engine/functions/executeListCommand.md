@@ -20,7 +20,7 @@ List Catalogs Command (domains, presets, forms, visits)
 
 ### category
 
-`"domains"` \| `"forms"` \| `"visits"` \| `"presets"`
+`"domains"` \| `"presets"` \| `"forms"` \| `"visits"`
 
 ### options?
 

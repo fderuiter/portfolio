@@ -444,6 +444,7 @@ export function scaffoldCaseStudy(root: string, rawName: string, dryRun = false)
   const title = toTitleCase(rawName);
 
   const routeFile = path.join(root, "app", "case-studies", kebab, "page.tsx");
+  const testFile = path.join(root, "__tests__", `${kebab}-case-study.test.ts`);
   const paletteFile = path.join(root, "components", "CommandPalette.tsx");
 
   const routeContent = `import React from "react";
@@ -480,19 +481,36 @@ export default function ${pascal}CaseStudyPage() {
 }
 `;
 
-  const results: GeneratedFile[] = [];
-  const rel = path.relative(root, routeFile);
+  const testContent = `import { describe, it, expect } from "vitest";
+import ${pascal}CaseStudyPage, { metadata } from "@/app/case-studies/${kebab}/page";
 
-  if (!dryRun) {
-    fs.mkdirSync(path.dirname(routeFile), { recursive: true });
-    fs.writeFileSync(routeFile, routeContent, "utf-8");
-  }
-  results.push({
-    filePath: routeFile,
-    relativePath: rel,
-    content: routeContent,
-    action: "created",
+describe("${title} Case Study Page", () => {
+  it("exports metadata and page component correctly", () => {
+    expect(metadata.title).toContain("${title}");
+    expect(typeof ${pascal}CaseStudyPage).toBe("function");
   });
+});
+`;
+
+  const results: GeneratedFile[] = [];
+  const filesToWrite = [
+    { filePath: routeFile, content: routeContent },
+    { filePath: testFile, content: testContent },
+  ];
+
+  for (const item of filesToWrite) {
+    const rel = path.relative(root, item.filePath);
+    if (!dryRun) {
+      fs.mkdirSync(path.dirname(item.filePath), { recursive: true });
+      fs.writeFileSync(item.filePath, item.content, "utf-8");
+    }
+    results.push({
+      filePath: item.filePath,
+      relativePath: rel,
+      content: item.content,
+      action: "created",
+    });
+  }
 
   // Register in CommandPalette.tsx
   if (fs.existsSync(paletteFile)) {
@@ -519,7 +537,7 @@ export default function ${pascal}CaseStudyPage() {
 }
 
 /**
- * Scaffold UI Component & Hook
+ * Scaffold UI Component
  */
 export function scaffoldComponent(root: string, rawName: string, dryRun = false): GeneratedFile[] {
   const pascal = toPascalCase(rawName);
@@ -595,6 +613,124 @@ describe("${pascal} Component", () => {
 }
 
 /**
+ * Scaffold Custom React Hook
+ */
+export function scaffoldHook(root: string, rawName: string, dryRun = false): GeneratedFile[] {
+  const kebab = toKebabCase(rawName).replace(/^use-/, "");
+  const pascal = toPascalCase(kebab);
+  const hookName = `use${pascal}`;
+  const hookFile = path.join(root, "hooks", `${hookName}.ts`);
+  const testFile = path.join(root, "__tests__", `${kebab}-hook.test.ts`);
+
+  const hookContent = `import { useState, useCallback } from "react";
+
+export interface ${pascal}Options {
+  initialValue?: string;
+}
+
+/**
+ * ${hookName} - Custom React Hook
+ */
+export function ${hookName}(options: ${pascal}Options = {}) {
+  const { initialValue = "" } = options;
+  const [value, setValue] = useState<string>(initialValue);
+
+  const reset = useCallback(() => {
+    setValue(initialValue);
+  }, [initialValue]);
+
+  return {
+    value,
+    setValue,
+    reset,
+  };
+}
+`;
+
+  const testContent = `import { describe, it, expect } from "vitest";
+import { renderHook, act } from "@testing-library/react";
+import { ${hookName} } from "@/hooks/${hookName}";
+
+describe("${hookName}", () => {
+  it("initializes state and updates correctly", () => {
+    const { result } = renderHook(() => ${hookName}({ initialValue: "test" }));
+    expect(result.current.value).toBe("test");
+
+    act(() => {
+      result.current.setValue("updated");
+    });
+    expect(result.current.value).toBe("updated");
+
+    act(() => {
+      result.current.reset();
+    });
+    expect(result.current.value).toBe("test");
+  });
+});
+`;
+
+  const results: GeneratedFile[] = [];
+  const filesToWrite = [
+    { filePath: hookFile, content: hookContent },
+    { filePath: testFile, content: testContent },
+  ];
+
+  for (const item of filesToWrite) {
+    const rel = path.relative(root, item.filePath);
+    if (!dryRun) {
+      fs.mkdirSync(path.dirname(item.filePath), { recursive: true });
+      fs.writeFileSync(item.filePath, item.content, "utf-8");
+    }
+    results.push({
+      filePath: item.filePath,
+      relativePath: rel,
+      content: item.content,
+      action: "created",
+    });
+  }
+
+  return results;
+}
+
+export const VALID_SCAFFOLD_TYPES: ScaffoldType[] = [
+  "component",
+  "hook",
+  "api",
+  "adr",
+  "case-study",
+  "arcade",
+  "game",
+];
+
+export function validateScaffoldType(type: string): { valid: boolean; error?: string } {
+  if (!type || typeof type !== "string" || !type.trim()) {
+    return { valid: false, error: "Scaffold template type is required." };
+  }
+  const normalized = type.trim().toLowerCase() as ScaffoldType;
+  if (!VALID_SCAFFOLD_TYPES.includes(normalized)) {
+    return {
+      valid: false,
+      error: `Unsupported template type '${type}'. Allowed types: ${VALID_SCAFFOLD_TYPES.join(", ")}.`,
+    };
+  }
+  return { valid: true };
+}
+
+export function validateScaffoldName(name: string): { valid: boolean; error?: string } {
+  if (!name || typeof name !== "string" || !name.trim()) {
+    return { valid: false, error: "Feature/asset name cannot be empty." };
+  }
+  const trimmed = name.trim();
+  if (!/^[a-zA-Z0-9\s-_]+$/.test(trimmed)) {
+    return {
+      valid: false,
+      error: "Invalid name format. Use alphanumeric characters, hyphens, or underscores.",
+    };
+  }
+  return { valid: true };
+}
+
+/**
  * Universal Scaffolding Dispatcher
  */
 export function scaffold(options: ScaffoldOptions): GeneratedFile[] {
@@ -612,8 +748,9 @@ export function scaffold(options: ScaffoldOptions): GeneratedFile[] {
     case "case-study":
       return scaffoldCaseStudy(root, name, dryRun);
     case "component":
-    case "hook":
       return scaffoldComponent(root, name, dryRun);
+    case "hook":
+      return scaffoldHook(root, name, dryRun);
     default:
       throw new Error(`Unknown scaffold type: ${type}`);
   }
