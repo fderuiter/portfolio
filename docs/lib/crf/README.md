@@ -614,6 +614,12 @@ Re-exports [isFutureDate](precision-date/functions/isFutureDate.md)
 
 ***
 
+### isMissingOrNullFlavor
+
+Re-exports [isMissingOrNullFlavor](expression-evaluator/functions/isMissingOrNullFlavor.md)
+
+***
+
 ### KNOWN\_MATH\_FUNCTIONS
 
 Re-exports [KNOWN_MATH_FUNCTIONS](formula-linter/variables/KNOWN_MATH_FUNCTIONS.md)

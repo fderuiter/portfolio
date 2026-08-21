@@ -8,7 +8,7 @@
 
 > **calculateBMI**(`weightKg`, `heightCm`): `number` \| `null`
 
-Defined in: [lib/crf/expression-evaluator.ts:355](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L355)
+Defined in: [lib/crf/expression-evaluator.ts:371](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L371)
 
 Calculates Body Mass Index (BMI) in kg/m^2.
 

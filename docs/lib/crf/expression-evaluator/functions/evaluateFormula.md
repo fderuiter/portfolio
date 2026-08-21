@@ -8,7 +8,7 @@
 
 > **evaluateFormula**(`formula`, `fieldValues`, `fieldsList`): `number` \| `null`
 
-Defined in: [lib/crf/expression-evaluator.ts:303](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L303)
+Defined in: [lib/crf/expression-evaluator.ts:318](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L318)
 
 Safely evaluates a math formula with dynamic field variables
 
