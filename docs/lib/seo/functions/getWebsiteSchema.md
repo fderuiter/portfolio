@@ -6,11 +6,23 @@
 
 # Function: getWebsiteSchema()
 
-> **getWebsiteSchema**(): `string`
+> **getWebsiteSchema**(`options?`): `string`
 
-Defined in: [lib/seo.ts:179](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L179)
+Defined in: [lib/seo.ts:212](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L212)
 
 Returns the root WebSite schema.
+
+## Parameters
+
+### options?
+
+#### inLanguage?
+
+`string`
+
+#### isAccessibleForFree?
+
+`boolean`
 
 ## Returns
 

@@ -8,7 +8,7 @@
 
 > **getWebApplicationSchema**(`options`): `string`
 
-Defined in: [lib/seo.ts:201](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L201)
+Defined in: [lib/seo.ts:259](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L259)
 
 Returns a specialized WebApplication schema for interactive games, proof tools, and simulators.
 

@@ -6,9 +6,9 @@
 
 # Function: getBreadcrumbNode()
 
-> **getBreadcrumbNode**(`items`, `pageUrl`): `Record`\<`string`, `unknown`\>
+> **getBreadcrumbNode**(`items`, `pageUrl`, `options?`): `Record`\<`string`, `unknown`\>
 
-Defined in: [lib/seo.ts:95](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L95)
+Defined in: [lib/seo.ts:103](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L103)
 
 Returns a normalized BreadcrumbList entity node with explicit #breadcrumb @id.
 
@@ -21,6 +21,16 @@ Returns a normalized BreadcrumbList entity node with explicit #breadcrumb @id.
 ### pageUrl
 
 `string`
+
+### options?
+
+#### inLanguage?
+
+`string`
+
+#### isAccessibleForFree?
+
+`boolean`
 
 ## Returns
 

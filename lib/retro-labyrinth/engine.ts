@@ -334,6 +334,8 @@ export class RetroLabyrinthEngine extends ArcadeEngine<RetroLabyrinthState, Retr
 
   private updateFOV(): void {
     const maze = this.state.currentMaze;
+    if (!maze || maze.length === 0 || !maze[0]) return;
+
     const fov = calculateFOV(
       maze,
       this.state.playerPosition.x,

@@ -6,7 +6,7 @@
 
 # Interface: SlashCommandItem
 
-Defined in: lib/crf/smart-blocks-engine.ts:25
+Defined in: [lib/crf/smart-blocks-engine.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L25)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: lib/crf/smart-blocks-engine.ts:25
 
 > **action**: `"insert_smart_block"` \| `"insert_field"` \| `"insert_section"`
 
-Defined in: lib/crf/smart-blocks-engine.ts:33
+Defined in: [lib/crf/smart-blocks-engine.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L33)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: lib/crf/smart-blocks-engine.ts:33
 
 > `optional` **badge?**: `string`
 
-Defined in: lib/crf/smart-blocks-engine.ts:32
+Defined in: [lib/crf/smart-blocks-engine.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L32)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: lib/crf/smart-blocks-engine.ts:32
 
 > **category**: [`SlashCommandCategory`](../type-aliases/SlashCommandCategory.md)
 
-Defined in: lib/crf/smart-blocks-engine.ts:29
+Defined in: [lib/crf/smart-blocks-engine.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L29)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: lib/crf/smart-blocks-engine.ts:29
 
 > **command**: `string`
 
-Defined in: lib/crf/smart-blocks-engine.ts:30
+Defined in: [lib/crf/smart-blocks-engine.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L30)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: lib/crf/smart-blocks-engine.ts:30
 
 > **description**: `string`
 
-Defined in: lib/crf/smart-blocks-engine.ts:28
+Defined in: [lib/crf/smart-blocks-engine.ts:28](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L28)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: lib/crf/smart-blocks-engine.ts:28
 
 > `optional` **fieldTemplate?**: `Partial`\<[`CRFField`](../../types/interfaces/CRFField.md)\>
 
-Defined in: lib/crf/smart-blocks-engine.ts:35
+Defined in: [lib/crf/smart-blocks-engine.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L35)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: lib/crf/smart-blocks-engine.ts:35
 
 > **id**: `string`
 
-Defined in: lib/crf/smart-blocks-engine.ts:26
+Defined in: [lib/crf/smart-blocks-engine.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L26)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: lib/crf/smart-blocks-engine.ts:26
 
 > **keywords**: `string`[]
 
-Defined in: lib/crf/smart-blocks-engine.ts:31
+Defined in: [lib/crf/smart-blocks-engine.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L31)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: lib/crf/smart-blocks-engine.ts:31
 
 > `optional` **smartBlockId?**: `string`
 
-Defined in: lib/crf/smart-blocks-engine.ts:34
+Defined in: [lib/crf/smart-blocks-engine.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L34)
 
 ***
 
@@ -86,4 +86,4 @@ Defined in: lib/crf/smart-blocks-engine.ts:34
 
 > **title**: `string`
 
-Defined in: lib/crf/smart-blocks-engine.ts:27
+Defined in: [lib/crf/smart-blocks-engine.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/crf/smart-blocks-engine.ts#L27)
