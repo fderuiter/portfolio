@@ -13,8 +13,12 @@ import {
   StudyEpoch,
   StudyCohort,
   BiomedicalConcept,
+  CodelistDefinition,
+  CodelistOption,
+  EditCheckRule,
 } from "./types";
 import { validateUniversalCrf } from "./universal-schema";
+import { STANDARD_CODELISTS } from "./cdisc-controlled-terminology";
 
 export interface UsdmBiomedicalConceptProperty {
   id: string;
@@ -98,6 +102,10 @@ export interface UsdmStudyDesign {
   encounters: UsdmEncounter[];
   activities: UsdmActivity[];
   biomedicalConcepts: UsdmBiomedicalConcept[];
+  codeLists?: Record<string, unknown>[] | CodelistDefinition[];
+  valueSets?: Record<string, unknown>[];
+  rules?: EditCheckRule[];
+  scheduleRules?: Record<string, unknown>[];
 }
 
 export interface UsdmStudy {
@@ -118,12 +126,85 @@ export interface UsdmStudy {
   encounters?: UsdmEncounter[];
   activities?: UsdmActivity[];
   biomedicalConcepts?: UsdmBiomedicalConcept[];
+  codeLists?: Record<string, unknown>[] | CodelistDefinition[];
+  valueSets?: Record<string, unknown>[];
+  codelists?: CodelistDefinition[];
+  rules?: EditCheckRule[];
 }
 
 export interface UsdmDocument {
   $schema?: string;
   schemaVersion?: string;
   study: UsdmStudy;
+  valueSets?: Record<string, unknown>[];
+  codeLists?: Record<string, unknown>[] | CodelistDefinition[];
+  codelists?: CodelistDefinition[];
+  rules?: EditCheckRule[];
+}
+
+/**
+ * Normalizes USDM graph ValueSet or CodeList objects/references into a CRF Studio CodelistDefinition.
+ */
+export function extractCodelistFromUsdmObject(raw: unknown): CodelistDefinition | null {
+  if (!raw || typeof raw !== "object") return null;
+  const obj = raw as Record<string, unknown>;
+
+  const target = (obj.codeList || obj.valueSet || obj.codelist || obj) as Record<string, unknown>;
+
+  const id =
+    target.id ||
+    target.codeListId ||
+    target.valueSetId ||
+    target.nciCodelistCode ||
+    target.code ||
+    (target.name ? `cl_${String(target.name).toLowerCase().replace(/[^a-z0-9]/g, "_")}` : null);
+
+  if (!id) return null;
+
+  const name = target.name || target.label || target.title || id;
+  const nciCodelistCode = target.nciCodelistCode || target.nciCode || target.cCode;
+
+  const rawOpts =
+    target.options ||
+    target.terms ||
+    target.items ||
+    target.codeListItems ||
+    target.valueSetItems ||
+    target.concepts ||
+    target.values ||
+    target.codes ||
+    target.permittedValues;
+
+  const options: CodelistOption[] = Array.isArray(rawOpts)
+    ? rawOpts.map((opt: unknown, idx: number) => {
+        if (typeof opt === "string" || typeof opt === "number") {
+          return {
+            code: String(opt),
+            label: String(opt),
+            order: idx + 1,
+          };
+        }
+        const o = (opt || {}) as Record<string, unknown>;
+        const code = String(o.code ?? o.value ?? o.id ?? o.name ?? o.term ?? idx + 1);
+        const label = String(o.label ?? o.decode ?? o.name ?? o.text ?? o.description ?? code);
+        const nciCode = (o.nciCode || o.cCode || o.conceptId || (code.match(/^C\d+$/) ? code : undefined)) as string | undefined;
+        const order = typeof o.order === "number" ? o.order : typeof o.sequenceNumber === "number" ? o.sequenceNumber : idx + 1;
+        return {
+          code,
+          label,
+          nciCode,
+          order,
+        };
+      })
+    : [];
+
+  return {
+    id: String(id),
+    name: String(name),
+    nciCodelistCode: nciCodelistCode ? String(nciCodelistCode) : undefined,
+    isStandard: Boolean(target.isStandard),
+    options,
+  };
 }
 
 export interface UsdmDiffSummary {
@@ -253,6 +334,58 @@ export function exportStudyToUsdmObject(study: StudyProtocol): UsdmDocument {
     isLogForm: f.isLogForm,
   }));
 
+  const codeLists = (study.codelists || []).map((cl) => ({
+    id: cl.id,
+    name: cl.name,
+    nciCodelistCode: cl.nciCodelistCode,
+    isStandard: cl.isStandard,
+    options: cl.options,
+  }));
+
+  const valueSets = (study.codelists || []).map((cl) => ({
+    id: `vs_${cl.id}`,
+    name: `${cl.name} Value Set`,
+    codeListId: cl.id,
+    codeList: cl,
+  }));
+
+  const explicitRules = study.rules || [];
+  const scheduleRules: EditCheckRule[] = (study.visits || []).map((v) => {
+    const windowBefore = Math.abs(v.windowBefore || 0);
+    const windowAfter = Math.abs(v.windowAfter || 0);
+    const minDay = v.targetDay - windowBefore;
+    const maxDay = v.targetDay + windowAfter;
+
+    return {
+      id: `rule_sched_${v.id}`,
+      name: `Schedule Rule: ${v.name}`,
+      description: `Schedule window rule for ${v.name}: Target Day ${v.targetDay} (-${windowBefore}/+${windowAfter} days; allowed window Day ${minDay} to Day ${maxDay})`,
+      triggerFieldIds: [`${v.id}_day`],
+      actionType: "raise_query",
+      targetFieldId: v.id,
+      conditions: [
+        { fieldId: `${v.id}_day`, operator: "gte", value: minDay },
+        { fieldId: `${v.id}_day`, operator: "lte", value: maxDay },
+      ],
+      logicalOperator: "AND",
+      querySeverity: "warning",
+      queryMessage: `Visit ${v.name} is outside allowed schedule window [Day ${minDay}, Day ${maxDay}]`,
+      formulaExpression: `visit_day >= ${minDay} && visit_day <= ${maxDay}`,
+    };
+  });
+
+  const ruleMap = new Map<string, EditCheckRule>();
+  [...explicitRules, ...scheduleRules].forEach((rule) => {
+    if (rule && (rule.id || rule.name)) {
+      const key = rule.id || rule.name;
+      if (!ruleMap.has(key)) {
+        ruleMap.set(key, rule);
+      }
+    }
+  });
+
+  const exportRules = Array.from(ruleMap.values());
+
   const primaryDesign: UsdmStudyDesign = {
     id: "design_main",
     name: study.studyName || "Main Study Design",
@@ -280,6 +413,9 @@ export function exportStudyToUsdmObject(study: StudyProtocol): UsdmDocument {
     encounters,
     activities,
     biomedicalConcepts,
+    codeLists,
+    valueSets,
+    rules: exportRules,
   };
 
   return {
@@ -297,6 +433,9 @@ export function exportStudyToUsdmObject(study: StudyProtocol): UsdmDocument {
       version: study.version,
       lastModified: study.lastModified,
       studyDesigns: [primaryDesign],
+      codeLists,
+      valueSets,
+      rules: exportRules,
     },
   };
 }
@@ -311,7 +450,8 @@ export function exportStudyToUsdm(study: StudyProtocol, pretty = true): string {
 
 /**
  * Imports a CDISC USDM JSON document or object into an internal CRF Studio StudyProtocol.
- * Reassembles linear encounter schedules into visit sequences and resolves decoupled BiomedicalConcept definitions.
+ * Reassembles linear encounter schedules into visit sequences, extracts valueSets and codeList references into study codelists,
+ * maps windowBefore and windowAfter visit tolerances to constrain study schedule rules, and resolves decoupled BiomedicalConcept definitions.
  */
 export function importStudyFromUsdm(usdmInput: string | UsdmDocument | Record<string, unknown>): StudyProtocol {
   const doc = (typeof usdmInput === "string" ? JSON.parse(usdmInput) : usdmInput) as Record<string, unknown> & UsdmDocument;
@@ -395,6 +535,152 @@ export function importStudyFromUsdm(usdmInput: string | UsdmDocument | Record<st
     };
   });
 
+  // Extract valueSets and codeList references into study codelists
+  const codelistMap = new Map<string, CodelistDefinition>();
+
+  function registerCodelistCandidate(candidate: unknown) {
+    if (!candidate) return;
+    if (Array.isArray(candidate)) {
+      candidate.forEach(registerCodelistCandidate);
+      return;
+    }
+    if (typeof candidate !== "object") return;
+    const cl = extractCodelistFromUsdmObject(candidate);
+    if (cl && cl.id) {
+      const existing = codelistMap.get(cl.id);
+      if (!existing || (existing.options.length === 0 && cl.options.length > 0)) {
+        codelistMap.set(cl.id, cl);
+      }
+    }
+  }
+
+  [
+    doc.valueSets,
+    doc.codeLists,
+    doc.codelists,
+    doc.valueSet,
+    doc.codeList,
+    studyObj.valueSets,
+    studyObj.codeLists,
+    studyObj.codelists,
+    studyObj.valueSet,
+    studyObj.codeList,
+    primaryDesign.valueSets,
+    primaryDesign.codeLists,
+    primaryDesign.codelists,
+    primaryDesign.valueSet,
+    primaryDesign.codeList,
+  ].forEach(registerCodelistCandidate);
+
+  rawConcepts.forEach((bc) => {
+    const bcObj = bc as unknown as Record<string, unknown>;
+    registerCodelistCandidate(bcObj.codeList || bcObj.valueSet || bcObj.codelist);
+    if (bc.properties && typeof bc.properties === "object") {
+      const props = bc.properties as Record<string, unknown>;
+      registerCodelistCandidate(props.codeList || props.valueSet || props.codelist);
+      const clId = (props.codelistId || props.codeListId || props.valueSetId || bcObj.codelistId || bcObj.codeListId || bcObj.valueSetId) as string | undefined;
+      if (clId && (props.customOptions || props.options || props.terms)) {
+        registerCodelistCandidate({
+          id: clId,
+          name: (bc.label || bc.name || clId) as string,
+          options: props.customOptions || props.options || props.terms,
+        });
+      }
+    }
+  });
+
+  rawActivities.forEach((act) => {
+    (act.sections || []).forEach((sec) => {
+      (sec.fields || []).forEach((fld) => {
+        const fldObj = fld as unknown as Record<string, unknown>;
+        registerCodelistCandidate(fldObj.codeList || fldObj.valueSet || fldObj.codelist);
+        const clId = fld.codelistId || (fldObj.codeListId as string | undefined) || (fldObj.valueSetId as string | undefined);
+        if (clId && (fld.customOptions || fldObj.options)) {
+          registerCodelistCandidate({
+            id: clId,
+            name: fld.label || fld.variableName || clId,
+            options: fld.customOptions || fldObj.options,
+          });
+        }
+      });
+    });
+  });
+
+  const allReferencedCodelistIds = new Set<string>();
+
+  rawConcepts.forEach((bc) => {
+    const props = (bc.properties || {}) as Record<string, unknown>;
+    const bcObj = bc as unknown as Record<string, unknown>;
+    const id = props.codelistId || props.codeListId || props.valueSetId || bcObj.codelistId || bcObj.codeListId || bcObj.valueSetId;
+    if (id) allReferencedCodelistIds.add(String(id));
+  });
+
+  rawActivities.forEach((act) => {
+    (act.sections || []).forEach((sec) => {
+      (sec.fields || []).forEach((fld) => {
+        const fldObj = fld as unknown as Record<string, unknown>;
+        const id = fld.codelistId || fldObj.codeListId || fldObj.valueSetId;
+        if (id) allReferencedCodelistIds.add(String(id));
+      });
+    });
+  });
+
+  allReferencedCodelistIds.forEach((id) => {
+    if (!codelistMap.has(id)) {
+      const std = STANDARD_CODELISTS.find((sc) => sc.id === id || sc.nciCodelistCode === id);
+      if (std) {
+        codelistMap.set(id, std);
+      }
+    }
+  });
+
+  const extractedCodelists: CodelistDefinition[] = Array.from(codelistMap.values());
+
+  // Map windowBefore and windowAfter visit tolerances to constrain study schedule rules
+  const primaryDesignObj = primaryDesign as unknown as Record<string, unknown>;
+  const explicitRules: EditCheckRule[] = [
+    ...((doc.rules as EditCheckRule[]) || []),
+    ...((studyObj.rules as EditCheckRule[]) || []),
+    ...((primaryDesign.rules as EditCheckRule[]) || []),
+    ...((primaryDesignObj.scheduleRules as EditCheckRule[]) || []),
+  ];
+
+  const scheduleRules: EditCheckRule[] = visits.map((v) => {
+    const windowBefore = Math.abs(v.windowBefore || 0);
+    const windowAfter = Math.abs(v.windowAfter || 0);
+    const minDay = v.targetDay - windowBefore;
+    const maxDay = v.targetDay + windowAfter;
+
+    return {
+      id: `rule_sched_${v.id}`,
+      name: `Schedule Rule: ${v.name}`,
+      description: `Schedule window rule for ${v.name}: Target Day ${v.targetDay} (-${windowBefore}/+${windowAfter} days; allowed window Day ${minDay} to Day ${maxDay})`,
+      triggerFieldIds: [`${v.id}_day`],
+      actionType: "raise_query",
+      targetFieldId: v.id,
+      conditions: [
+        { fieldId: `${v.id}_day`, operator: "gte", value: minDay },
+        { fieldId: `${v.id}_day`, operator: "lte", value: maxDay },
+      ],
+      logicalOperator: "AND",
+      querySeverity: "warning",
+      queryMessage: `Visit ${v.name} is outside allowed schedule window [Day ${minDay}, Day ${maxDay}]`,
+      formulaExpression: `visit_day >= ${minDay} && visit_day <= ${maxDay}`,
+    };
+  });
+
+  const ruleMap = new Map<string, EditCheckRule>();
+  [...explicitRules, ...scheduleRules].forEach((rule) => {
+    if (rule && (rule.id || rule.name)) {
+      const key = rule.id || rule.name;
+      if (!ruleMap.has(key)) {
+        ruleMap.set(key, rule);
+      }
+    }
+  });
+
+  const rules: EditCheckRule[] = Array.from(ruleMap.values());
+
   const protocol: StudyProtocol = {
     $schema: "https://www.deruiter.dev/schemas/crf/v1/universal-crf.schema.json",
     schemaVersion: "1.0.0",
@@ -408,7 +694,8 @@ export function importStudyFromUsdm(usdmInput: string | UsdmDocument | Record<st
     lastModified: studyObj.lastModified || new Date().toISOString(),
     forms,
     visits,
-    codelists: (studyObj.codelists as StudyProtocol["codelists"]) || [],
+    codelists: extractedCodelists.length > 0 ? extractedCodelists : (studyObj.codelists as StudyProtocol["codelists"]) || [],
+    rules,
     branding: studyObj.branding as StudyProtocol["branding"],
     arms,
     epochs,
