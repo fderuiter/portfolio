@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // 1. Hoisted mocks definition
-const { mockRatelimitLimit, mockLpush, mockExpire, mockExec, mockRpop, mockLmove, mockLrange, mockDel, mockUseRef, mockUseEffect } = vi.hoisted(() => {
+const { mockRatelimitLimit, mockLpush, mockExpire, mockExec, mockRpop, mockLmove, mockLrange, mockDel, mockLlen, mockUseRef, mockUseEffect } = vi.hoisted(() => {
   return {
     mockRatelimitLimit: vi.fn(),
     mockLpush: vi.fn(),
@@ -11,6 +11,7 @@ const { mockRatelimitLimit, mockLpush, mockExpire, mockExec, mockRpop, mockLmove
     mockLmove: vi.fn(),
     mockLrange: vi.fn().mockResolvedValue([]),
     mockDel: vi.fn(),
+    mockLlen: vi.fn(),
     mockUseRef: vi.fn(),
     mockUseEffect: vi.fn(),
   };
@@ -45,13 +46,31 @@ vi.mock("@/lib/db", async (importOriginal) => {
 vi.mock("@upstash/redis", () => {
   class MockRedis {
     pipeline() {
-      return {
-        lpush: mockLpush,
-        expire: mockExpire,
-        exec: mockExec,
-        rpop: mockRpop,
-        lmove: mockLmove,
+      let isLlenPipeline = false;
+      let isLmovePipeline = false;
+
+      const p = {
+        lpush: (..._args: unknown[]) => { mockLpush(..._args); return p; },
+        expire: (..._args: unknown[]) => { mockExpire(..._args); return p; },
+        rpop: (..._args: unknown[]) => { mockRpop(..._args); return p; },
+        lmove: (..._args: unknown[]) => { isLmovePipeline = true; mockLmove(..._args); return p; },
+        llen: (..._args: unknown[]) => { isLlenPipeline = true; mockLlen(..._args); return p; },
+        exec: async () => {
+          if (isLlenPipeline && !isLmovePipeline) {
+            const results = mockLlen.mock.results;
+            if (results && results.length >= 2) {
+              const r1 = results[results.length - 2]?.value;
+              const r2 = results[results.length - 1]?.value;
+              if (typeof r1 === "number" || typeof r2 === "number") {
+                return [r1 ?? 0, r2 ?? 0];
+              }
+            }
+            return [1, 0];
+          }
+          return mockExec();
+        },
       };
+      return p;
     }
     lrange = mockLrange;
     del = mockDel;

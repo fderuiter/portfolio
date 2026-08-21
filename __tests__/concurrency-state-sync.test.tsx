@@ -22,13 +22,23 @@ const { mockLpush, mockExpire, mockExec, mockRpop, mockLmove, mockLrange, mockDe
 vi.mock("@upstash/redis", () => {
   class MockRedis {
     pipeline() {
-      return {
-        rpop: mockRpop,
-        lpush: mockLpush,
-        expire: mockExpire,
-        exec: mockExec,
-        lmove: mockLmove,
+      let isLlenPipeline = false;
+      let isLmovePipeline = false;
+
+      const p = {
+        lpush: (..._args: unknown[]) => { mockLpush(..._args); return p; },
+        expire: (..._args: unknown[]) => { mockExpire(..._args); return p; },
+        rpop: (..._args: unknown[]) => { mockRpop(..._args); return p; },
+        lmove: (..._args: unknown[]) => { isLmovePipeline = true; mockLmove(..._args); return p; },
+        llen: (..._args: unknown[]) => { isLlenPipeline = true; return p; },
+        exec: async () => {
+          if (isLlenPipeline && !isLmovePipeline) {
+            return [1, 0];
+          }
+          return mockExec();
+        },
       };
+      return p;
     }
     lrange = mockLrange;
     del = mockDel;

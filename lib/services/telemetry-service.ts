@@ -192,9 +192,38 @@ export class TelemetryService {
   }
 
   /**
+   * Pre-flight inspection check that inspects queue depths for both the primary telemetry
+   * buffer queue and the recovery staging queue without modifying, locking, or clearing queued items.
+   */
+  static async getQueueDepths(): Promise<{ bufferLength: number; processingLength: number }> {
+    const p = redis.pipeline();
+    p.llen("telemetry_buffer");
+    p.llen("telemetry_processing");
+    const [bufferRes, processingRes] = await p.exec();
+
+    const parseLen = (val: unknown): number => {
+      if (typeof val === "number") return val;
+      if (typeof val === "string") {
+        const parsed = parseInt(val, 10);
+        return isNaN(parsed) ? 0 : parsed;
+      }
+      if (Array.isArray(val)) return val.length;
+      if (val && typeof val === "object") return 1;
+      return 0;
+    };
+
+    return {
+      bufferLength: parseLen(bufferRes),
+      processingLength: parseLen(processingRes),
+    };
+  }
+
+  /**
    * Synchronizes buffered telemetry events from Redis into PostgreSQL.
-   * Atomically transfers event batches from 'telemetry_buffer' to 'telemetry_processing'
-   * using LMOVE to guarantee zero telemetry loss during synchronization failures.
+   * Runs a pre-flight queue depth check on both 'telemetry_buffer' and 'telemetry_processing'
+   * queues to immediately exit on idle cycles without executing state-mutating cache commands.
+   * Whenever either queue contains events, atomically transfers event batches from
+   * 'telemetry_buffer' to 'telemetry_processing' using LMOVE to guarantee zero telemetry loss.
    */
   static async syncBufferedEvents(batchSize: number) {
     interface BufferedEvent {
@@ -204,12 +233,18 @@ export class TelemetryService {
       createdAt: string | Date;
     }
 
+    // Pre-flight check: Inspect both primary buffer queue and active recovery staging queue
+    const depths = await TelemetryService.getQueueDepths();
+    if (depths.bufferLength === 0 && depths.processingLength === 0) {
+      return { processed: 0, inserted: 0 };
+    }
+
     // 1. Fetch any pending events previously transferred to processing queue but not yet synced to DB
     const existingProcessing = (await redis.lrange("telemetry_processing", 0, -1)) as BufferedEvent[];
     let events: BufferedEvent[] = Array.isArray(existingProcessing) ? existingProcessing : [];
 
     // 2. If existing processing queue has fewer items than batchSize, atomically move remaining batch from buffer
-    if (events.length < batchSize) {
+    if (events.length < batchSize && (depths.bufferLength > 0 || events.length === 0)) {
       const needed = batchSize - events.length;
       const p = redis.pipeline();
       for (let i = 0; i < needed; i++) {

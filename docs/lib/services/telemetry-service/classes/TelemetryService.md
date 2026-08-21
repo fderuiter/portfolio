@@ -34,6 +34,21 @@ Fetches aggregate portfolio view/click telemetry statistics.
 
 ***
 
+### getQueueDepths()
+
+> `static` **getQueueDepths**(): `Promise`\<\{ `bufferLength`: `number`; `processingLength`: `number`; \}\>
+
+Defined in: [lib/services/telemetry-service.ts:198](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L198)
+
+Pre-flight inspection check that inspects queue depths for both the primary telemetry
+buffer queue and the recovery staging queue without modifying, locking, or clearing queued items.
+
+#### Returns
+
+`Promise`\<\{ `bufferLength`: `number`; `processingLength`: `number`; \}\>
+
+***
+
 ### isRateLimited()
 
 > `static` **isRateLimited**(`req`): `Promise`\<\{ `headers?`: `Record`\<`string`, `string`\>; `limited`: `boolean`; \}\>
@@ -78,11 +93,13 @@ Records a telemetry interaction event into the Redis buffer queue.
 
 > `static` **syncBufferedEvents**(`batchSize`): `Promise`\<\{ `inserted`: `number`; `processed`: `number`; \}\>
 
-Defined in: [lib/services/telemetry-service.ts:199](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L199)
+Defined in: [lib/services/telemetry-service.ts:228](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L228)
 
 Synchronizes buffered telemetry events from Redis into PostgreSQL.
-Atomically transfers event batches from 'telemetry_buffer' to 'telemetry_processing'
-using LMOVE to guarantee zero telemetry loss during synchronization failures.
+Runs a pre-flight queue depth check on both 'telemetry_buffer' and 'telemetry_processing'
+queues to immediately exit on idle cycles without executing state-mutating cache commands.
+Whenever either queue contains events, atomically transfers event batches from
+'telemetry_buffer' to 'telemetry_processing' using LMOVE to guarantee zero telemetry loss.
 
 #### Parameters
 

@@ -22,13 +22,23 @@ vi.mock("@/lib/db", () => {
 vi.mock("@upstash/redis", () => {
   class MockRedis {
     pipeline() {
-      return {
-        lpush: vi.fn(),
-        expire: vi.fn(),
-        rpop: vi.fn(),
-        lmove: vi.fn(),
-        exec: vi.fn().mockResolvedValue([]),
+      let isLlenPipeline = false;
+      let isLmovePipeline = false;
+
+      const p = {
+        lpush: vi.fn().mockImplementation(() => p),
+        expire: vi.fn().mockImplementation(() => p),
+        rpop: vi.fn().mockImplementation(() => p),
+        lmove: vi.fn().mockImplementation(() => { isLmovePipeline = true; return p; }),
+        llen: vi.fn().mockImplementation(() => { isLlenPipeline = true; return p; }),
+        exec: vi.fn().mockImplementation(async () => {
+          if (isLlenPipeline && !isLmovePipeline) {
+            return [1, 0];
+          }
+          return [];
+        }),
       };
+      return p;
     }
     lrange = vi.fn().mockResolvedValue([]);
     del = vi.fn().mockResolvedValue(1);
