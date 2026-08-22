@@ -52,7 +52,15 @@ export const serverEnvSchema = z.object({
   NEXT_RUNTIME: z.string().optional(),
   GITHUB_ACTIONS: z.string().optional(),
   VITEST: z.string().optional(),
+  WS_NO_BUFFER_UTIL: z.string().optional(),
+  WS_NO_UTF_8_VALIDATE: z.string().optional(),
 });
+
+// Enforce fallback WebSocket masking flags for bundled serverless runtimes
+if (typeof process !== "undefined" && process.env) {
+  process.env.WS_NO_BUFFER_UTIL = "1";
+  process.env.WS_NO_UTF_8_VALIDATE = "1";
+}
 
 /**
  * Client-side environment variables schema (prefixed with NEXT_PUBLIC_).

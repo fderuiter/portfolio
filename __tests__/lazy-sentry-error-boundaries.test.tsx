@@ -2,10 +2,12 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React, { act } from "react";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, waitFor } from "@testing-library/react";
 
 // Configure React 19 act environment
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 const { mockInit, mockCaptureException } = vi.hoisted(() => ({
   mockInit: vi.fn(),
@@ -69,11 +71,15 @@ describe("Lazy Sentry Loading in Error Boundaries & Conditional Initialization",
       expect(isDummyOrMissingDsn(undefined)).toBe(true);
       expect(isDummyOrMissingDsn("")).toBe(true);
       expect(isDummyOrMissingDsn("   ")).toBe(true);
-      expect(isDummyOrMissingDsn("https://dummy@o0.ingest.sentry.io/0")).toBe(true);
+      expect(isDummyOrMissingDsn("https://dummy@o0.ingest.sentry.io/0")).toBe(
+        true
+      );
       expect(isDummyOrMissingDsn("https://example@sentry.io/123")).toBe(true);
       expect(isDummyOrMissingDsn("https://0000@sentry.io/0")).toBe(true);
 
-      expect(isDummyOrMissingDsn("https://acme123@o0.ingest.sentry.io/456789")).toBe(false);
+      expect(
+        isDummyOrMissingDsn("https://acme123@o0.ingest.sentry.io/456789")
+      ).toBe(false);
     });
 
     it("bypasses initClientSentry when DSN is missing or dummy", async () => {
@@ -82,7 +88,8 @@ describe("Lazy Sentry Loading in Error Boundaries & Conditional Initialization",
       expect(res1).toBeNull();
       expect(mockInit).not.toHaveBeenCalled();
 
-      process.env.NEXT_PUBLIC_SENTRY_DSN = "https://dummy@o0.ingest.sentry.io/0";
+      process.env.NEXT_PUBLIC_SENTRY_DSN =
+        "https://dummy@o0.ingest.sentry.io/0";
       const res2 = await initClientSentry();
       expect(res2).toBeNull();
       expect(mockInit).not.toHaveBeenCalled();
@@ -100,7 +107,8 @@ describe("Lazy Sentry Loading in Error Boundaries & Conditional Initialization",
 
   describe("Requirement 2 & 4: Error Boundaries Dynamic Fetching & Immediate Fallback UI", () => {
     it("renders app/error.tsx fallback UI immediately and triggers deferred telemetry when valid DSN is set", async () => {
-      process.env.NEXT_PUBLIC_SENTRY_DSN = "https://validkey@o0.ingest.sentry.io/999999";
+      process.env.NEXT_PUBLIC_SENTRY_DSN =
+        "https://validkey@o0.ingest.sentry.io/999999";
       const sampleError = new Error("Pipeline compilation failure");
       const resetFn = vi.fn();
 
@@ -110,17 +118,15 @@ describe("Lazy Sentry Loading in Error Boundaries & Conditional Initialization",
       expect(screen.getByText("Pipeline Stalled")).not.toBeNull();
       expect(screen.getByText("RUNTIME_ERROR")).not.toBeNull();
 
-      // Flush microtasks for dynamic Sentry import
-      await act(async () => {
-        await new Promise((r) => setTimeout(r, 10));
+      await waitFor(() => {
+        expect(mockInit).toHaveBeenCalled();
+        expect(mockCaptureException).toHaveBeenCalledWith(sampleError);
       });
-
-      expect(mockInit).toHaveBeenCalled();
-      expect(mockCaptureException).toHaveBeenCalledWith(sampleError);
     });
 
     it("renders app/global-error.tsx fallback UI immediately and triggers deferred telemetry", async () => {
-      process.env.NEXT_PUBLIC_SENTRY_DSN = "https://validkey@o0.ingest.sentry.io/999999";
+      process.env.NEXT_PUBLIC_SENTRY_DSN =
+        "https://validkey@o0.ingest.sentry.io/999999";
       const rootError = new Error("Root rendering tree unhandled crash");
       const resetFn = vi.fn();
 
@@ -129,16 +135,15 @@ describe("Lazy Sentry Loading in Error Boundaries & Conditional Initialization",
       expect(screen.getByText("Unrecoverable Crash")).not.toBeNull();
       expect(screen.getByText("CRITICAL_HALT")).not.toBeNull();
 
-      await act(async () => {
-        await new Promise((r) => setTimeout(r, 10));
+      await waitFor(() => {
+        expect(mockInit).toHaveBeenCalled();
+        expect(mockCaptureException).toHaveBeenCalledWith(rootError);
       });
-
-      expect(mockInit).toHaveBeenCalled();
-      expect(mockCaptureException).toHaveBeenCalledWith(rootError);
     });
 
     it("renders app/case-studies/[slug]/error.tsx fallback UI immediately and triggers deferred telemetry", async () => {
-      process.env.NEXT_PUBLIC_SENTRY_DSN = "https://validkey@o0.ingest.sentry.io/999999";
+      process.env.NEXT_PUBLIC_SENTRY_DSN =
+        "https://validkey@o0.ingest.sentry.io/999999";
       const caseError = new Error("Database Neon query failure");
       const resetFn = vi.fn();
 
@@ -147,20 +152,21 @@ describe("Lazy Sentry Loading in Error Boundaries & Conditional Initialization",
       expect(screen.getByText("Query Transaction Failed")).not.toBeNull();
       expect(screen.getByText("CASE_LOAD_FAIL")).not.toBeNull();
 
-      await act(async () => {
-        await new Promise((r) => setTimeout(r, 10));
+      await waitFor(() => {
+        expect(mockInit).toHaveBeenCalled();
+        expect(mockCaptureException).toHaveBeenCalledWith(caseError);
       });
-
-      expect(mockInit).toHaveBeenCalled();
-      expect(mockCaptureException).toHaveBeenCalledWith(caseError);
     });
 
     it("renders error boundaries fallback UI gracefully without crashing even when Sentry import fails or network error occurs", async () => {
-      process.env.NEXT_PUBLIC_SENTRY_DSN = "https://validkey@o0.ingest.sentry.io/999999";
+      process.env.NEXT_PUBLIC_SENTRY_DSN =
+        "https://validkey@o0.ingest.sentry.io/999999";
       const testError = new Error("Network offline crash");
       const resetFn = vi.fn();
 
-      const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const consoleWarnSpy = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
 
       // Simulate a network failure during dynamic Sentry import by making reportClientError catch gracefully
       await reportClientError(testError);

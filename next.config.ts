@@ -15,6 +15,21 @@ const nextConfig: NextConfig = {
       exclude: ["error", "warn"],
     },
   },
+  serverExternalPackages: [
+    "ws",
+    "bufferutil",
+    "utf-8-validate",
+    "@neondatabase/serverless",
+    "@prisma/adapter-neon",
+    "@prisma/client",
+  ],
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push("bufferutil", "utf-8-validate");
+    }
+    return config;
+  },
   experimental: {
     optimizePackageImports: ["@tabler/icons-react"],
   },
@@ -27,7 +42,8 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/:all*(svg|jpg|png|webp|avif|glb|obj|ico|txt|woff|woff2|ttf|eot|otf)",
+        source:
+          "/:all*(svg|jpg|png|webp|avif|glb|obj|ico|txt|woff|woff2|ttf|eot|otf)",
         headers: [
           {
             key: "Cache-Control",

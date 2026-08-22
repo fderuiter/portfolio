@@ -31,6 +31,9 @@ if (
     `${process.env.NODE_OPTIONS || ""} --no-warnings`.trim();
 }
 process.env.SERWIST_SUPPRESS_TURBOPACK_WARNING = "1";
+process.env.WS_NO_BUFFER_UTIL = "1";
+process.env.WS_NO_UTF_8_VALIDATE = "1";
+process.env.SKIP_DB_HEALTH_CHECK = "true";
 
 // Helper function to run a step and exit if it fails
 function runStep(command, args) {

@@ -1018,4 +1018,37 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       );
     });
   });
+
+  describe("WebSocket BufferUtil Masking & Neon Serverless Build Environment Guard", () => {
+    it("guarantees WS_NO_BUFFER_UTIL and WS_NO_UTF_8_VALIDATE are set so frame masking never calls missing native bufferutil.mask", async () => {
+      // Importing lib/db ensures environment initialization
+      await import("@/lib/db");
+
+      expect(process.env.WS_NO_BUFFER_UTIL).toBe("1");
+      expect(process.env.WS_NO_UTF_8_VALIDATE).toBe("1");
+
+      // Test pure JS frame masking implementation with buffer length >= 48 bytes
+      // (the exact threshold where ws would otherwise call bufferUtil.mask)
+      const bufferUtilPath = path.resolve(
+        process.cwd(),
+        "node_modules/ws/lib/buffer-util.js"
+      );
+      const bufferUtil =
+        (await import(bufferUtilPath)).default ||
+        (await import(bufferUtilPath));
+      expect(typeof bufferUtil.mask).toBe("function");
+
+      const source = Buffer.alloc(64, 0x41); // 64 bytes of 'A'
+      const mask = Buffer.from([0x12, 0x34, 0x56, 0x78]);
+      const output = Buffer.alloc(64);
+
+      expect(() => {
+        bufferUtil.mask(source, mask, output, 0, 64);
+      }).not.toThrow();
+
+      // Verify masking XOR logic
+      expect(output[0]).toBe(0x41 ^ 0x12);
+      expect(output[1]).toBe(0x41 ^ 0x34);
+    });
+  });
 });
