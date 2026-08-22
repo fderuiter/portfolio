@@ -18,6 +18,8 @@
 # next.js
 /.next/
 /out/
+/public/sw.js
+/public/sw.js.map
 
 # production
 /build

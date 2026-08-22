@@ -8,7 +8,7 @@
 
 > **runDiagnostics**(`options?`): `Promise`\<[`DiagnosticSummary`](../interfaces/DiagnosticSummary.md)\>
 
-Defined in: [lib/dx/doctor.ts:1736](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1736)
+Defined in: [lib/dx/doctor.ts:1737](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1737)
 
 Run All Diagnostics
 

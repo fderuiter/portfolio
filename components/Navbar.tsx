@@ -125,7 +125,8 @@ export const Navbar: React.FC = () => {
   const [activeSection, setActiveSection] = useState("hero");
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
-  const { volume, muted, profile, setVolume, setMuted, setProfile, playHover } = useAudio();
+  const { volume, muted, profile, setVolume, setMuted, setProfile, playHover } =
+    useAudio();
   const { openSearch } = useSearch();
   const { persona, setPersona } = usePersona();
   const [showAudioPanel, setShowAudioPanel] = useState(false);
@@ -152,7 +153,7 @@ export const Navbar: React.FC = () => {
   const handleLinkHover = (e: React.MouseEvent<HTMLElement>) => {
     if (typeof window === "undefined") return;
     const rect = e.currentTarget.getBoundingClientRect();
-    const pan = (rect.left + rect.width / 2) / window.innerWidth * 2 - 1;
+    const pan = ((rect.left + rect.width / 2) / window.innerWidth) * 2 - 1;
     playHover(pan);
   };
 
@@ -254,7 +255,10 @@ export const Navbar: React.FC = () => {
   }, [activeDropdown, showAudioPanel]);
 
   // Handle smooth scroll clicks on homepage and universal mobile drawer dismissal
-  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
     setActiveDropdown(null);
     setIsOpen(false);
     if (typeof document !== "undefined") {
@@ -272,15 +276,23 @@ export const Navbar: React.FC = () => {
   };
 
   const isArcadeActive = pathname.startsWith("/arcade");
-  const isSystemsActive = pathname === "/proof" || pathname === "/simulator" || pathname === "/crf" || pathname === "/neuro" || pathname === "/stack";
+  const isSystemsActive =
+    pathname === "/proof" ||
+    pathname === "/simulator" ||
+    pathname === "/crf" ||
+    pathname === "/neuro" ||
+    pathname === "/stack";
 
-  const headerObserverRef = useResizeObserver<HTMLElement>((entry) => {
-    const h = Math.round(entry.contentRect.height);
-    if (typeof document !== "undefined" && h > 0) {
-      document.documentElement.style.setProperty("--header-height", `${h}px`);
-      document.documentElement.style.setProperty("--navbar-height", `${h}px`);
-    }
-  }, { trackVertical: true });
+  const headerObserverRef = useResizeObserver<HTMLElement>(
+    (entry) => {
+      const h = Math.round(entry.contentRect.height);
+      if (typeof document !== "undefined" && h > 0) {
+        document.documentElement.style.setProperty("--header-height", `${h}px`);
+        document.documentElement.style.setProperty("--navbar-height", `${h}px`);
+      }
+    },
+    { trackVertical: true }
+  );
 
   return (
     <>
@@ -314,8 +326,11 @@ export const Navbar: React.FC = () => {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center gap-3 lg:gap-6 shrink-0">
-            <nav className="flex items-center gap-3 md:gap-4 lg:gap-6 shrink-0" aria-label="Main Navigation">
+          <div className="hidden xl:flex items-center gap-3 lg:gap-6 shrink-0">
+            <nav
+              className="flex items-center gap-3 md:gap-4 lg:gap-6 shrink-0"
+              aria-label="Main Navigation"
+            >
               {/* Work Pillar */}
               <Link
                 href={pathname === "/" ? "/#case-studies" : "/case-studies"}
@@ -329,7 +344,9 @@ export const Navbar: React.FC = () => {
                 onMouseEnter={handleLinkHover}
                 className={cn(
                   "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0",
-                  (pathname === "/" && activeSection === "case-studies") || pathname === "/case-studies" || pathname.startsWith("/case-studies/")
+                  (pathname === "/" && activeSection === "case-studies") ||
+                    pathname === "/case-studies" ||
+                    pathname.startsWith("/case-studies/")
                     ? "text-brand-cyan font-bold"
                     : "text-muted"
                 )}
@@ -342,7 +359,11 @@ export const Navbar: React.FC = () => {
                 <div className="relative shrink-0">
                   <button
                     type="button"
-                    onClick={() => setActiveDropdown(activeDropdown === "arcade" ? null : "arcade")}
+                    onClick={() =>
+                      setActiveDropdown(
+                        activeDropdown === "arcade" ? null : "arcade"
+                      )
+                    }
                     onMouseEnter={handleLinkHover}
                     className={cn(
                       "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-brand-cyan rounded whitespace-nowrap shrink-0",
@@ -357,7 +378,9 @@ export const Navbar: React.FC = () => {
                     <IconChevronDown
                       className={cn(
                         "w-3 h-3 transition-transform duration-200 shrink-0",
-                        activeDropdown === "arcade" ? "rotate-180 text-brand-cyan" : "text-zinc-500"
+                        activeDropdown === "arcade"
+                          ? "rotate-180 text-brand-cyan"
+                          : "text-zinc-500"
                       )}
                     />
                   </button>
@@ -376,7 +399,9 @@ export const Navbar: React.FC = () => {
                           <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-zinc-400 truncate">
                             Interactive Arcade &amp; Labs
                           </span>
-                          <span className="text-[9px] font-mono text-brand-cyan shrink-0 ml-2">60 FPS</span>
+                          <span className="text-[9px] font-mono text-brand-cyan shrink-0 ml-2">
+                            60 FPS
+                          </span>
                         </div>
                         {ARCADE_ITEMS.map((item) => {
                           const isActive = pathname === item.href;
@@ -418,7 +443,11 @@ export const Navbar: React.FC = () => {
               <div className="relative shrink-0">
                 <button
                   type="button"
-                  onClick={() => setActiveDropdown(activeDropdown === "systems" ? null : "systems")}
+                  onClick={() =>
+                    setActiveDropdown(
+                      activeDropdown === "systems" ? null : "systems"
+                    )
+                  }
                   onMouseEnter={handleLinkHover}
                   className={cn(
                     "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-brand-cyan rounded whitespace-nowrap shrink-0",
@@ -433,7 +462,9 @@ export const Navbar: React.FC = () => {
                   <IconChevronDown
                     className={cn(
                       "w-3 h-3 transition-transform duration-200 shrink-0",
-                      activeDropdown === "systems" ? "rotate-180 text-brand-cyan" : "text-zinc-500"
+                      activeDropdown === "systems"
+                        ? "rotate-180 text-brand-cyan"
+                        : "text-zinc-500"
                     )}
                   />
                 </button>
@@ -453,7 +484,13 @@ export const Navbar: React.FC = () => {
                           Workspaces &amp; Verification
                         </span>
                       </div>
-                      {SYSTEMS_ITEMS.filter((item) => !(persona === "technical" && item.href === "/simulator")).map((item) => {
+                      {SYSTEMS_ITEMS.filter(
+                        (item) =>
+                          !(
+                            persona === "technical" &&
+                            item.href === "/simulator"
+                          )
+                      ).map((item) => {
                         const isActive = pathname === item.href;
                         return (
                           <Link
@@ -516,7 +553,8 @@ export const Navbar: React.FC = () => {
                 onMouseEnter={handleLinkHover}
                 className={cn(
                   "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0",
-                  (pathname === "/" && activeSection === "contact") || pathname === "/contact"
+                  (pathname === "/" && activeSection === "contact") ||
+                    pathname === "/contact"
                     ? "text-brand-cyan font-bold"
                     : "text-muted"
                 )}
@@ -550,7 +588,9 @@ export const Navbar: React.FC = () => {
             >
               <IconSearch className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
               <span className="text-xs font-mono hidden lg:inline">Search</span>
-              <kbd className="kbd-badge text-[10px] text-zinc-400 font-mono">⌘K</kbd>
+              <kbd className="kbd-badge text-[10px] text-zinc-400 font-mono">
+                ⌘K
+              </kbd>
             </button>
 
             {/* Global Persona Toggle (Desktop) */}
@@ -651,31 +691,41 @@ export const Navbar: React.FC = () => {
                           min="0"
                           max="100"
                           value={Math.round(volume * 100)}
-                          onChange={(e) => setVolume(parseFloat(e.target.value) / 100)}
+                          onChange={(e) =>
+                            setVolume(parseFloat(e.target.value) / 100)
+                          }
                           disabled={muted}
                           className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-brand-cyan disabled:opacity-40 disabled:cursor-not-allowed"
                         />
                       </div>
 
                       <div className="flex flex-col gap-2">
-                        <span className="text-[10px] font-mono text-zinc-500">Sound Profile</span>
+                        <span className="text-[10px] font-mono text-zinc-500">
+                          Sound Profile
+                        </span>
                         <div className="flex flex-col gap-1.5">
-                          {(["8-bit", "90s-retro", "ambient"] as const).map((p) => (
-                            <button
-                              key={p}
-                              type="button"
-                              onClick={() => setProfile(p)}
-                              disabled={muted}
-                              className={cn(
-                                "w-full text-left px-3 py-1.5 rounded-lg border text-[10px] font-mono tracking-wider transition-all duration-200 cursor-pointer active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed",
-                                profile === p
-                                  ? "bg-brand-cyan/10 border-brand-cyan/40 text-brand-cyan font-bold shadow-[0_0_12px_rgba(6,182,212,0.12)]"
-                                  : "bg-zinc-900/20 border-zinc-900 hover:border-zinc-800 text-zinc-400 hover:text-foreground"
-                              )}
-                            >
-                              {p === "8-bit" ? "8-Bit Retro" : p === "90s-retro" ? "90s Retro" : "Ambient Pad"}
-                            </button>
-                          ))}
+                          {(["8-bit", "90s-retro", "ambient"] as const).map(
+                            (p) => (
+                              <button
+                                key={p}
+                                type="button"
+                                onClick={() => setProfile(p)}
+                                disabled={muted}
+                                className={cn(
+                                  "w-full text-left px-3 py-1.5 rounded-lg border text-[10px] font-mono tracking-wider transition-all duration-200 cursor-pointer active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed",
+                                  profile === p
+                                    ? "bg-brand-cyan/10 border-brand-cyan/40 text-brand-cyan font-bold shadow-[0_0_12px_rgba(6,182,212,0.12)]"
+                                    : "bg-zinc-900/20 border-zinc-900 hover:border-zinc-800 text-zinc-400 hover:text-foreground"
+                                )}
+                              >
+                                {p === "8-bit"
+                                  ? "8-Bit Retro"
+                                  : p === "90s-retro"
+                                    ? "90s Retro"
+                                    : "Ambient Pad"}
+                              </button>
+                            )
+                          )}
                         </div>
                       </div>
                     </motion.div>
@@ -686,7 +736,7 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Mobile Header Actions (Search Button + Hamburger) */}
-          <div className="md:hidden flex items-center gap-2 relative z-50">
+          <div className="xl:hidden flex items-center gap-2 relative z-50">
             <button
               type="button"
               onClick={openSearch}
@@ -702,7 +752,9 @@ export const Navbar: React.FC = () => {
               type="button"
               aria-expanded={isOpen}
               aria-controls="mobile-navigation"
-              aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-label={
+                isOpen ? "Close navigation menu" : "Open navigation menu"
+              }
               onClick={() => setIsOpen(!isOpen)}
               className="flex items-center justify-center w-9 h-9 rounded-xl border border-zinc-800 bg-zinc-900/60 text-muted hover:text-foreground transition-colors cursor-pointer"
             >
@@ -780,7 +832,12 @@ export const Navbar: React.FC = () => {
                   </span>
                   <Link
                     href={pathname === "/" ? "/#case-studies" : "/case-studies"}
-                    onClick={(e) => handleNavClick(e, pathname === "/" ? "/#case-studies" : "/case-studies")}
+                    onClick={(e) =>
+                      handleNavClick(
+                        e,
+                        pathname === "/" ? "/#case-studies" : "/case-studies"
+                      )
+                    }
                     className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between active:scale-[0.99] transition-all"
                   >
                     <span>Engineering Case Studies</span>
@@ -796,7 +853,12 @@ export const Navbar: React.FC = () => {
                   </Link>
                   <Link
                     href={pathname === "/" ? "/#contact" : "/contact"}
-                    onClick={(e) => handleNavClick(e, pathname === "/" ? "/#contact" : "/contact")}
+                    onClick={(e) =>
+                      handleNavClick(
+                        e,
+                        pathname === "/" ? "/#contact" : "/contact"
+                      )
+                    }
                     className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between active:scale-[0.99] transition-all"
                   >
                     <span>Contact &amp; Inquiries</span>
@@ -826,7 +888,9 @@ export const Navbar: React.FC = () => {
                       <IconFileSpreadsheet className="w-4 h-4 text-brand-cyan shrink-0" />
                       <span className="truncate">CRF Studio &amp; EDC</span>
                     </span>
-                    <span className="text-[10px] font-mono text-brand-cyan px-1.5 py-0.5 rounded bg-brand-cyan/10 shrink-0">CDISC</span>
+                    <span className="text-[10px] font-mono text-brand-cyan px-1.5 py-0.5 rounded bg-brand-cyan/10 shrink-0">
+                      CDISC
+                    </span>
                   </Link>
                   <Link
                     href="/proof"
@@ -837,7 +901,9 @@ export const Navbar: React.FC = () => {
                       <IconBrain className="w-4 h-4 text-brand-purple shrink-0" />
                       <span className="truncate">Proof Canvas</span>
                     </span>
-                    <span className="text-[10px] font-mono text-brand-purple px-1.5 py-0.5 rounded bg-brand-purple/10 shrink-0">AST</span>
+                    <span className="text-[10px] font-mono text-brand-purple px-1.5 py-0.5 rounded bg-brand-purple/10 shrink-0">
+                      AST
+                    </span>
                   </Link>
                   <Link
                     href="/neuro"
@@ -848,7 +914,9 @@ export const Navbar: React.FC = () => {
                       <IconBrain className="w-4 h-4 text-emerald-400 shrink-0" />
                       <span className="truncate">NeuroRecon Studio</span>
                     </span>
-                    <span className="text-[10px] font-mono text-emerald-400 px-1.5 py-0.5 rounded bg-emerald-500/10 shrink-0">3D MRI</span>
+                    <span className="text-[10px] font-mono text-emerald-400 px-1.5 py-0.5 rounded bg-emerald-500/10 shrink-0">
+                      3D MRI
+                    </span>
                   </Link>
                   <Link
                     href="/stack"
@@ -859,7 +927,9 @@ export const Navbar: React.FC = () => {
                       <IconCpu className="w-4 h-4 text-brand-cyan shrink-0" />
                       <span className="truncate">Under the Hood (Stack)</span>
                     </span>
-                    <span className="text-[10px] font-mono text-brand-cyan px-1.5 py-0.5 rounded bg-brand-cyan/10 shrink-0">Architecture</span>
+                    <span className="text-[10px] font-mono text-brand-cyan px-1.5 py-0.5 rounded bg-brand-cyan/10 shrink-0">
+                      Architecture
+                    </span>
                   </Link>
                   {persona !== "technical" && (
                     <Link
@@ -871,7 +941,9 @@ export const Navbar: React.FC = () => {
                         <IconDeviceGamepad2 className="w-4 h-4 shrink-0" />
                         <span className="truncate">Arcade Games Hub</span>
                       </span>
-                      <span className="text-xs font-mono text-brand-cyan shrink-0">6 Games</span>
+                      <span className="text-xs font-mono text-brand-cyan shrink-0">
+                        6 Games
+                      </span>
                     </Link>
                   )}
                 </div>
@@ -946,7 +1018,9 @@ export const Navbar: React.FC = () => {
                     min="0"
                     max="100"
                     value={Math.round(volume * 100)}
-                    onChange={(e) => setVolume(parseFloat(e.target.value) / 100)}
+                    onChange={(e) =>
+                      setVolume(parseFloat(e.target.value) / 100)
+                    }
                     disabled={muted}
                     className="w-full h-3 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-brand-cyan disabled:opacity-40"
                   />
@@ -967,7 +1041,11 @@ export const Navbar: React.FC = () => {
                           : "bg-zinc-900/20 border-zinc-900 hover:border-zinc-800 text-zinc-400"
                       )}
                     >
-                      {p === "8-bit" ? "8-Bit" : p === "90s-retro" ? "90s" : "Ambient"}
+                      {p === "8-bit"
+                        ? "8-Bit"
+                        : p === "90s-retro"
+                          ? "90s"
+                          : "Ambient"}
                     </button>
                   ))}
                 </div>
@@ -991,4 +1069,3 @@ export const Navbar: React.FC = () => {
     </>
   );
 };
-

@@ -1,21 +1,23 @@
 /* eslint-disable */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import child_process from 'child_process';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import child_process from "child_process";
 
-describe('build.js script execution', () => {
+describe("build.js script execution", () => {
   let originalEnv: NodeJS.ProcessEnv;
   let exitMock: any;
   let spawnSpy: any;
 
   beforeEach(() => {
     // Clear require cache for scripts/build.js so it executes on each require call
-    delete require.cache[require.resolve('../scripts/build.js')];
-    
+    delete require.cache[require.resolve("../scripts/build.js")];
+
     originalEnv = { ...process.env };
-    exitMock = vi.spyOn(process, 'exit').mockImplementation((code) => {
+    exitMock = vi.spyOn(process, "exit").mockImplementation((code) => {
       throw new Error(`Process exited with code ${code}`);
     });
-    spawnSpy = vi.spyOn(child_process, 'spawnSync').mockImplementation(() => ({ status: 0 } as any));
+    spawnSpy = vi
+      .spyOn(child_process, "spawnSync")
+      .mockImplementation(() => ({ status: 0 }) as any);
   });
 
   afterEach(() => {
@@ -24,51 +26,93 @@ describe('build.js script execution', () => {
     spawnSpy.mockRestore();
   });
 
-  it('runs generate, check:migrations, and next build offline without prisma migrate deploy', () => {
-    process.env.VERCEL_ENV = 'preview';
-    process.env.DATABASE_URL = 'postgresql://db:5432';
+  it("runs generate, check:migrations, and next build offline without prisma migrate deploy", () => {
+    process.env.VERCEL_ENV = "preview";
+    process.env.DATABASE_URL = "postgresql://db:5432";
 
     try {
-      require('../scripts/build.js');
+      require("../scripts/build.js");
     } catch (err: any) {
-      expect(err.message).toBe('Process exited with code 0');
+      expect(err.message).toBe("Process exited with code 0");
     }
 
     // It should have called prisma generate, check:migrations, and next build
-    expect(spawnSpy).toHaveBeenCalledWith('npx', ['prisma', 'generate'], expect.any(Object));
-    expect(spawnSpy).toHaveBeenCalledWith('npm', ['run', 'check:migrations'], expect.any(Object));
-    expect(spawnSpy).toHaveBeenCalledWith('npx', ['next', 'build'], expect.any(Object));
+    expect(spawnSpy).toHaveBeenCalledWith(
+      "npx",
+      ["prisma", "generate"],
+      expect.any(Object)
+    );
+    expect(spawnSpy).toHaveBeenCalledWith(
+      "npm",
+      ["run", "check:migrations"],
+      expect.any(Object)
+    );
+    expect(spawnSpy).toHaveBeenCalledWith(
+      "npx",
+      ["next", "build", "--webpack"],
+      expect.any(Object)
+    );
 
     // It MUST NOT execute live migration deploy
-    expect(spawnSpy).not.toHaveBeenCalledWith('npx', ['prisma', 'migrate', 'deploy'], expect.any(Object));
+    expect(spawnSpy).not.toHaveBeenCalledWith(
+      "npx",
+      ["prisma", "migrate", "deploy"],
+      expect.any(Object)
+    );
 
     // It should exit with 0
     expect(exitMock).toHaveBeenCalledWith(0);
   });
 
-  it('never executes prisma migrate deploy even if VERCEL_ENV is production', () => {
-    process.env.VERCEL_ENV = 'production';
-    process.env.DATABASE_URL = 'postgresql://db:5432';
+  it("never executes prisma migrate deploy even if VERCEL_ENV is production", () => {
+    process.env.VERCEL_ENV = "production";
+    process.env.DATABASE_URL = "postgresql://db:5432";
 
     try {
-      require('../scripts/build.js');
+      require("../scripts/build.js");
     } catch (err: any) {
-      expect(err.message).toBe('Process exited with code 0');
+      expect(err.message).toBe("Process exited with code 0");
     }
 
     // It should have called prisma generate, generate-openapi, check:migrations, and then next build
-    expect(spawnSpy).toHaveBeenCalledWith('npx', ['prisma', 'generate'], expect.any(Object));
-    expect(spawnSpy).toHaveBeenCalledWith('npx', ['tsx', 'scripts/generate-openapi.ts'], expect.any(Object));
-    expect(spawnSpy).toHaveBeenCalledWith('npm', ['run', 'check:migrations'], expect.any(Object));
-    expect(spawnSpy).toHaveBeenCalledWith('npx', ['next', 'build'], expect.any(Object));
+    expect(spawnSpy).toHaveBeenCalledWith(
+      "npx",
+      ["prisma", "generate"],
+      expect.any(Object)
+    );
+    expect(spawnSpy).toHaveBeenCalledWith(
+      "npx",
+      ["tsx", "scripts/generate-openapi.ts"],
+      expect.any(Object)
+    );
+    expect(spawnSpy).toHaveBeenCalledWith(
+      "npm",
+      ["run", "check:migrations"],
+      expect.any(Object)
+    );
+    expect(spawnSpy).toHaveBeenCalledWith(
+      "npx",
+      ["next", "build", "--webpack"],
+      expect.any(Object)
+    );
 
     // It MUST NOT execute live migration deploy in static compilation
-    expect(spawnSpy).not.toHaveBeenCalledWith('npx', ['prisma', 'migrate', 'deploy'], expect.any(Object));
+    expect(spawnSpy).not.toHaveBeenCalledWith(
+      "npx",
+      ["prisma", "migrate", "deploy"],
+      expect.any(Object)
+    );
 
     // Verify ordering: check:migrations happens BEFORE next build
-    const calls = spawnSpy.mock.calls.map((c: any[]) => `${c[0]} ${c[1].join(' ')}`);
-    const checkMigrationsIndex = calls.findIndex((c: string) => c.includes('check:migrations'));
-    const nextBuildIndex = calls.findIndex((c: string) => c.includes('next build'));
+    const calls = spawnSpy.mock.calls.map(
+      (c: any[]) => `${c[0]} ${c[1].join(" ")}`
+    );
+    const checkMigrationsIndex = calls.findIndex((c: string) =>
+      c.includes("check:migrations")
+    );
+    const nextBuildIndex = calls.findIndex((c: string) =>
+      c.includes("next build")
+    );
 
     expect(checkMigrationsIndex).toBeGreaterThan(-1);
     expect(nextBuildIndex).toBeGreaterThan(checkMigrationsIndex);
@@ -77,38 +121,50 @@ describe('build.js script execution', () => {
     expect(exitMock).toHaveBeenCalledWith(0);
   });
 
-  it('sets dummy DATABASE_URL and DIRECT_URL if none are provided', () => {
-    process.env.VERCEL_ENV = 'preview';
+  it("sets dummy DATABASE_URL and DIRECT_URL if none are provided", () => {
+    process.env.VERCEL_ENV = "preview";
     delete (process.env as any).DATABASE_URL;
     delete (process.env as any).DIRECT_URL;
 
     try {
-      require('../scripts/build.js');
+      require("../scripts/build.js");
     } catch (err: any) {
-      expect(err.message).toBe('Process exited with code 0');
+      expect(err.message).toBe("Process exited with code 0");
     }
 
-    expect(process.env.DATABASE_URL).toBe('postgresql://dummy:dummy@localhost:5432/dummy');
-    expect(process.env.DIRECT_URL).toBe('postgresql://dummy:dummy@localhost:5432/dummy');
+    expect(process.env.DATABASE_URL).toBe(
+      "postgresql://dummy:dummy@localhost:5432/dummy"
+    );
+    expect(process.env.DIRECT_URL).toBe(
+      "postgresql://dummy:dummy@localhost:5432/dummy"
+    );
   });
 
-  it('fails immediately if a build step fails', () => {
-    process.env.VERCEL_ENV = 'preview';
-    
+  it("fails immediately if a build step fails", () => {
+    process.env.VERCEL_ENV = "preview";
+
     // Mock spawnSync to fail on prisma generate (the first call)
-    spawnSpy.mockImplementationOnce(() => ({ status: 123 } as any));
+    spawnSpy.mockImplementationOnce(() => ({ status: 123 }) as any);
 
     try {
-      require('../scripts/build.js');
+      require("../scripts/build.js");
     } catch (err: any) {
-      expect(err.message).toBe('Process exited with code 123');
+      expect(err.message).toBe("Process exited with code 123");
     }
 
     // It should have tried prisma generate
-    expect(spawnSpy).toHaveBeenCalledWith('npx', ['prisma', 'generate'], expect.any(Object));
-    
+    expect(spawnSpy).toHaveBeenCalledWith(
+      "npx",
+      ["prisma", "generate"],
+      expect.any(Object)
+    );
+
     // It should NOT have tried next build
-    expect(spawnSpy).not.toHaveBeenCalledWith('npx', ['next', 'build'], expect.any(Object));
+    expect(spawnSpy).not.toHaveBeenCalledWith(
+      "npx",
+      ["next", "build"],
+      expect.any(Object)
+    );
 
     // It should exit with the failed code (123)
     expect(exitMock).toHaveBeenCalledWith(123);

@@ -6,7 +6,7 @@
 
 # Interface: TelemetryEventInput
 
-Defined in: [lib/services/telemetry-service.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L9)
+Defined in: [lib/services/telemetry-service.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L12)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/services/telemetry-service.ts:9](https://github.com/fderuiter/p
 
 > **eventType**: `string`
 
-Defined in: [lib/services/telemetry-service.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L11)
+Defined in: [lib/services/telemetry-service.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L14)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [lib/services/telemetry-service.ts:11](https://github.com/fderuiter/
 
 > **projectSlug**: `string`
 
-Defined in: [lib/services/telemetry-service.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L10)
+Defined in: [lib/services/telemetry-service.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L13)

@@ -4,7 +4,10 @@ import { redis } from "@/lib/redis";
 import { RateLimitParamsSchema } from "@/lib/schemas";
 import { Ratelimit } from "@upstash/ratelimit";
 import { env } from "@/lib/env";
-import { generateClientConnectionHash, extractClientIp } from "./privacy-service";
+import {
+  generateClientConnectionHash,
+  extractClientIp,
+} from "./privacy-service";
 
 export interface TelemetryEventInput {
   projectSlug: string;
@@ -24,7 +27,10 @@ const sdkEphemeralCache = new Map<string, number>();
 
 const ratelimit = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(MAX_REQUESTS_PER_WINDOW, `${RATE_LIMIT_WINDOW_S} s`),
+  limiter: Ratelimit.slidingWindow(
+    MAX_REQUESTS_PER_WINDOW,
+    `${RATE_LIMIT_WINDOW_S} s`
+  ),
   ephemeralCache: sdkEphemeralCache,
 });
 
@@ -58,23 +64,33 @@ function checkAndSwapPassive() {
 }
 
 export const _testCache = {
-  get active() { return activeGeneration; },
-  get inactive() { return inactiveGeneration; },
-  get circuitBreakerCooldownUntil() { return circuitBreakerCooldownUntil; },
-  swap() { swapGenerations(); },
+  get active() {
+    return activeGeneration;
+  },
+  get inactive() {
+    return inactiveGeneration;
+  },
+  get circuitBreakerCooldownUntil() {
+    return circuitBreakerCooldownUntil;
+  },
+  swap() {
+    swapGenerations();
+  },
   reset() {
     activeGeneration.clear();
     inactiveGeneration.clear();
     lastSwapTime = Date.now();
     circuitBreakerCooldownUntil = 0;
-  }
+  },
 };
 
 export class TelemetryService {
   /**
    * Evaluates rate limiting anonymously using Web Crypto SHA-256 IP hashing.
    */
-  static async isRateLimited(req: NextRequest): Promise<{ limited: boolean; headers?: Record<string, string> }> {
+  static async isRateLimited(
+    req: NextRequest
+  ): Promise<{ limited: boolean; headers?: Record<string, string> }> {
     checkAndSwapPassive();
 
     const ip = extractClientIp(req);
@@ -85,7 +101,9 @@ export class TelemetryService {
 
     const buildLocalHeaders = (entry: LocalCacheEntry) => ({
       "X-RateLimit-Limit": String(MAX_REQUESTS_PER_WINDOW),
-      "X-RateLimit-Remaining": String(Math.max(0, MAX_REQUESTS_PER_WINDOW - entry.count)),
+      "X-RateLimit-Remaining": String(
+        Math.max(0, MAX_REQUESTS_PER_WINDOW - entry.count)
+      ),
       "X-RateLimit-Reset": String(Math.ceil(entry.expiresAt / 1000)),
     });
 
@@ -97,7 +115,10 @@ export class TelemetryService {
     if (isCircuitActive) {
       if (cached && now < cached.expiresAt) {
         cached.count += 1;
-        cached.expiresAt = Math.max(cached.expiresAt, circuitBreakerCooldownUntil);
+        cached.expiresAt = Math.max(
+          cached.expiresAt,
+          circuitBreakerCooldownUntil
+        );
       } else {
         cached = {
           count: 1,
@@ -143,12 +164,18 @@ export class TelemetryService {
         return { limited: true, headers };
       }
     } catch (err) {
-      console.error("Upstream rate limiting check failed, activating 30s circuit breaker fallback:", err);
+      console.error(
+        "Upstream rate limiting check failed, activating 30s circuit breaker fallback:",
+        err
+      );
       circuitBreakerCooldownUntil = now + CIRCUIT_BREAKER_COOLDOWN_MS;
 
       if (cached && now < cached.expiresAt) {
         cached.count += 1;
-        cached.expiresAt = Math.max(cached.expiresAt, circuitBreakerCooldownUntil);
+        cached.expiresAt = Math.max(
+          cached.expiresAt,
+          circuitBreakerCooldownUntil
+        );
       } else {
         cached = {
           count: 1,
@@ -186,13 +213,23 @@ export class TelemetryService {
       createdAt: new Date(),
     };
 
-    const p = redis.pipeline();
-    p.lpush("telemetry_buffer", eventData);
-    p.expire("telemetry_buffer", 48 * 60 * 60); // 48 hours
-    const [listLength] = await p.exec();
+    if (env.PLAYWRIGHT_TEST === "true") {
+      return eventData;
+    }
 
-    if (Number(listLength) > 1000) {
-      console.error("ALERT: Secondary telemetry buffer occupancy exceeds threshold.");
+    try {
+      const p = redis.pipeline();
+      p.lpush("telemetry_buffer", eventData);
+      p.expire("telemetry_buffer", 48 * 60 * 60); // 48 hours
+      const [listLength] = await p.exec();
+
+      if (Number(listLength) > 1000) {
+        console.error(
+          "ALERT: Secondary telemetry buffer occupancy exceeds threshold."
+        );
+      }
+    } catch (err) {
+      console.warn("Failed to commit telemetry event to Redis buffer:", err);
     }
 
     return eventData;
@@ -205,8 +242,8 @@ export class TelemetryService {
     if (env.PLAYWRIGHT_TEST === "true") {
       return {
         "synthetic-probe-runner": { views: 5, clicks: 2 },
-        "simulator": { views: 10, clicks: 4 },
-        "neuro": { views: 8, clicks: 3 },
+        simulator: { views: 10, clicks: 4 },
+        neuro: { views: 8, clicks: 3 },
       };
     }
 
@@ -217,7 +254,8 @@ export class TelemetryService {
       },
     });
 
-    const formattedStats: Record<string, { views: number; clicks: number }> = {};
+    const formattedStats: Record<string, { views: number; clicks: number }> =
+      {};
 
     for (const item of stats) {
       const slug = item.projectSlug;
@@ -249,8 +287,14 @@ export class TelemetryService {
     }
 
     // 1. Fetch any pending events previously transferred to processing queue but not yet synced to DB
-    const existingProcessing = (await redis.lrange("telemetry_processing", 0, -1)) as BufferedEvent[];
-    let events: BufferedEvent[] = Array.isArray(existingProcessing) ? existingProcessing : [];
+    const existingProcessing = (await redis.lrange(
+      "telemetry_processing",
+      0,
+      -1
+    )) as BufferedEvent[];
+    let events: BufferedEvent[] = Array.isArray(existingProcessing)
+      ? existingProcessing
+      : [];
 
     // 2. If existing processing queue has fewer items than batchSize, atomically move remaining batch from buffer
     if (events.length < batchSize) {
@@ -286,7 +330,10 @@ export class TelemetryService {
         skipDuplicates: true,
       });
     } catch (dbErr) {
-      console.warn("Primary database write failed during sync. Telemetry event batch remains intact in processing queue.", dbErr);
+      console.warn(
+        "Primary database write failed during sync. Telemetry event batch remains intact in processing queue.",
+        dbErr
+      );
       throw dbErr;
     }
 

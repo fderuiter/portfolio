@@ -67,9 +67,10 @@ describe("Audio Synthesizer & Sound Settings Engine", () => {
       'SOUND: {muted ? "OFF" : profile.toUpperCase()}'
     );
     expect(navbarContent).toContain("onMouseEnter={handleLinkHover}");
-    expect(navbarContent).toContain(
-      "const pan = (rect.left + rect.width / 2) / window.innerWidth * 2 - 1;"
+    expect(navbarContent).toMatch(
+      /const pan = \(?\(rect\.left \+ rect\.width \/ 2\) \/ window\.innerWidth\)? \* 2 - 1;/
     );
+    expect(navbarContent).toContain("playHover(pan);");
   });
 
   it("should integrate terminal keystrokes, autocomplete and success audio feedback", () => {

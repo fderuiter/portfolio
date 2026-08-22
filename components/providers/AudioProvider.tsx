@@ -429,8 +429,8 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       playHover,
       playSkillHover,
       bypassActive,
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [volume, muted, profile, bypassActive]
   );
 

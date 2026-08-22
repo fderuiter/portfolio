@@ -1,7 +1,10 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { applySecurityHeaders } from "@/lib/security-headers";
-import { generateClientConnectionHash, extractClientIp } from "@/lib/services/privacy-service";
+import {
+  generateClientConnectionHash,
+  extractClientIp,
+} from "@/lib/services/privacy-service";
 
 const isProtectedRoute = createRouteMatcher(["/admin(.*)", "/api/admin(.*)"]);
 const isPublicAuthRoute = createRouteMatcher(["/admin/login(.*)"]);
@@ -12,7 +15,7 @@ const isPublicAuthRoute = createRouteMatcher(["/admin/login(.*)"]);
  * generates privacy-preserving client connection tokens for API telemetry/rate limiting,
  * and attaches standard HTTP security headers globally.
  */
-export const proxy = clerkMiddleware(async (auth, req: NextRequest) => {
+const authMiddleware = clerkMiddleware(async (auth, req: NextRequest) => {
   if (isProtectedRoute(req) && !isPublicAuthRoute(req)) {
     await auth.protect();
   }
@@ -23,7 +26,9 @@ export const proxy = clerkMiddleware(async (auth, req: NextRequest) => {
   if (isApi) {
     const ip = extractClientIp(req);
     const userAgent = req.headers.get("user-agent") || "";
-    const connectionHash = await generateClientConnectionHash(`${ip}:${userAgent}`);
+    const connectionHash = await generateClientConnectionHash(
+      `${ip}:${userAgent}`
+    );
     requestHeaders.set("x-connection-hash", connectionHash);
   }
 
@@ -36,6 +41,11 @@ export const proxy = clerkMiddleware(async (auth, req: NextRequest) => {
   return applySecurityHeaders(response);
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function proxy(req: NextRequest, event?: any) {
+  return authMiddleware(req, event);
+}
+
 export const config = {
   matcher: [
     // Skip Next.js internals and all static files, unless found in search params
@@ -44,7 +54,3 @@ export const config = {
     "/(api|trpc)(.*)",
   ],
 };
-
-// Backward compatibility alias for test harnesses and older consumers
-export { proxy as middleware };
-export default proxy;

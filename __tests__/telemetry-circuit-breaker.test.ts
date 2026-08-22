@@ -2,14 +2,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import crypto from "crypto";
 
-const { mockRatelimitLimit, mockLpush, mockExpire, mockExec } = vi.hoisted(() => {
-  return {
-    mockRatelimitLimit: vi.fn(),
-    mockLpush: vi.fn(),
-    mockExpire: vi.fn(),
-    mockExec: vi.fn().mockResolvedValue([1]),
-  };
-});
+const { mockRatelimitLimit, mockLpush, mockExpire, mockExec } = vi.hoisted(
+  () => {
+    return {
+      mockRatelimitLimit: vi.fn(),
+      mockLpush: vi.fn(),
+      mockExpire: vi.fn(),
+      mockExec: vi.fn().mockResolvedValue([1]),
+    };
+  }
+);
 
 vi.mock("@/lib/db", () => {
   return {
@@ -44,7 +46,8 @@ vi.mock("@upstash/ratelimit", () => {
   };
 });
 
-import { POST, _testCache } from "@/app/api/telemetry/route";
+import { POST } from "@/app/api/telemetry/route";
+import { _testCache } from "@/lib/services/telemetry-service";
 import { NextRequest } from "next/server";
 
 describe("Telemetry Rate Limiting Circuit Breaker Cooldown Suite", () => {
@@ -67,7 +70,9 @@ describe("Telemetry Rate Limiting Circuit Breaker Cooldown Suite", () => {
   });
 
   it("triggers a 30-second local circuit breaker state upon upstream rate limit exception", async () => {
-    mockRatelimitLimit.mockRejectedValueOnce(new Error("Upstream Upstash Redis Rate Limiter Failure"));
+    mockRatelimitLimit.mockRejectedValueOnce(
+      new Error("Upstream Upstash Redis Rate Limiter Failure")
+    );
 
     const payload = {
       projectSlug: "/dashboard",
@@ -94,7 +99,9 @@ describe("Telemetry Rate Limiting Circuit Breaker Cooldown Suite", () => {
 
   it("bypasses remote rate limit calls and uses local generational memory during 30-second cooldown window", async () => {
     // 1. First request triggers upstream exception and activates circuit breaker
-    mockRatelimitLimit.mockRejectedValueOnce(new Error("Upstream Rate Limiter Outage"));
+    mockRatelimitLimit.mockRejectedValueOnce(
+      new Error("Upstream Rate Limiter Outage")
+    );
 
     const payload = {
       projectSlug: "/dashboard",
@@ -238,7 +245,9 @@ describe("Telemetry Rate Limiting Circuit Breaker Cooldown Suite", () => {
   });
 
   it("enforces local rate limits and returns 429 when client exceeds request threshold during fallback mode", async () => {
-    mockRatelimitLimit.mockRejectedValue(new Error("Persistent Remote Service Outage"));
+    mockRatelimitLimit.mockRejectedValue(
+      new Error("Persistent Remote Service Outage")
+    );
 
     const payload = {
       projectSlug: "/flood-test",

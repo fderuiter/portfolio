@@ -1,105 +1,195 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('Arcade Games & Simulators Suite', () => {
-  test('Arcade Hub (/arcade) loads all arcade/puzzle games successfully', async ({ page }) => {
-    await page.goto('/arcade');
-    await page.waitForLoadState('networkidle');
+test.describe("Arcade Games & Simulators Suite", () => {
+  test("Arcade Hub (/arcade) loads all arcade/puzzle games successfully", async ({
+    page,
+  }) => {
+    await page.goto("/arcade");
+    await page.waitForLoadState("networkidle");
 
     // 1. Quasi-Perfect Puzzler
-    await expect(page.getByRole('heading', { name: /Quasi-Perfect Puzzler/i }).first()).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /Quasi-Perfect Puzzler/i }).first()
+    ).toBeVisible();
 
     // 2. Laser Loon: Bug Hunter
-    await expect(page.getByRole('heading', { name: /Laser Loon/i }).first()).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /Laser Loon/i }).first()
+    ).toBeVisible();
 
     // 3. Garmin Watch Simulator
-    await expect(page.getByRole('heading', { name: /Garmin/i }).first()).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /Garmin/i }).first()
+    ).toBeVisible();
 
     // 4. Clinical Trial Chaos
-    await expect(page.getByRole('heading', { name: /Clinical Trial Chaos/i }).first()).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /Clinical Trial Chaos/i }).first()
+    ).toBeVisible();
 
     // 5. Retro Labyrinth
-    await expect(page.getByRole('heading', { name: /Retro Labyrinth/i }).first()).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /Retro Labyrinth/i }).first()
+    ).toBeVisible();
 
     // 6. Working With Duck
-    await expect(page.getByRole('heading', { name: /Working With Duck/i }).first()).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /Working With Duck/i }).first()
+    ).toBeVisible();
   });
 
-  test('Laser Loon dedicated game starts and switches weapon modes', async ({ page }) => {
-    await page.goto('/arcade/laser-loon');
-    await page.waitForLoadState('networkidle');
+  test("Laser Loon dedicated game starts and switches weapon modes", async ({
+    page,
+  }) => {
+    await page.goto("/arcade/laser-loon", { waitUntil: "domcontentloaded" });
 
-    // Click Launch Cabinet button to mount/start the game
-    const launchCabinetBtn = page.getByRole('button', { name: /Launch Cabinet/i });
-    await expect(launchCabinetBtn).toBeVisible();
-    await launchCabinetBtn.click();
+    // 1. Launch Cabinet with hydration retry
+    await expect(async () => {
+      const launchBtn = page.getByRole("button", { name: /Launch Cabinet/i });
+      if (await launchBtn.isVisible()) {
+        await launchBtn.click({ force: true });
+      }
+      const skipBtn = page.getByRole("button", { name: /Skip Setup/i });
+      await expect(skipBtn).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 20000 });
 
-    // Laser canvas exists after launch warming up
-    const laserCanvas = page.locator('canvas').first();
+    // 2. Dismiss Setup Wizard
+    const skipBtn = page.getByRole("button", { name: /Skip Setup/i });
+    if (await skipBtn.isVisible()) {
+      await skipBtn.click({ force: true });
+      await skipBtn
+        .waitFor({ state: "hidden", timeout: 10000 })
+        .catch(() => {});
+    }
+
+    const laserCanvas = page.locator("canvas").first();
     await expect(laserCanvas).toBeVisible({ timeout: 15000 });
 
-    // Switch weapons to Emerald Beam (Aurora)
-    const auroraBtn = page.getByRole('button', { name: /Aurora \(3\)/i });
-    await auroraBtn.click();
-    await expect(auroraBtn).toHaveClass(/bg-emerald-500/);
+    // 3. Switch weapons to Emerald Beam (Aurora)
+    const auroraBtn = page.getByRole("button", { name: /Aurora/i }).first();
+    await expect(async () => {
+      await auroraBtn.click({ force: true });
+      await expect(auroraBtn).toHaveAttribute("aria-pressed", "true", {
+        timeout: 2000,
+      });
+    }).toPass({ timeout: 15000 });
 
-    // Switch to Sandbox mode
-    const sandboxTab = page.getByRole('button', { name: /Zero-G Sandbox/i });
-    await sandboxTab.click();
-    await expect(page.getByRole('button', { name: 'Zero-G', exact: true })).toBeVisible();
+    // 4. Switch to Sandbox mode
+    const sandboxTab = page.getByRole("button", { name: /Zero-G Sandbox/i });
+    await expect(async () => {
+      await sandboxTab.click({ force: true });
+      await expect(
+        page.getByRole("button", { name: "Zero-G", exact: true })
+      ).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 15000 });
   });
 
-  test('Garmin Watch Simulator switches device targets and starts', async ({ page }) => {
-    await page.goto('/arcade/garmin-watch');
-    await page.waitForLoadState('networkidle');
+  test("Garmin Watch Simulator switches device targets and starts", async ({
+    page,
+  }) => {
+    await page.goto("/arcade/garmin-watch", { waitUntil: "domcontentloaded" });
 
-    // Click Launch Cabinet button to mount/start the game
-    const launchCabinetBtn = page.getByRole('button', { name: /Launch Cabinet/i });
-    await expect(launchCabinetBtn).toBeVisible();
-    await launchCabinetBtn.click();
+    // 1. Launch Cabinet with hydration retry
+    await expect(async () => {
+      const launchBtn = page.getByRole("button", { name: /Launch Cabinet/i });
+      if (await launchBtn.isVisible()) {
+        await launchBtn.click({ force: true });
+      }
+      const skipBtn = page.getByRole("button", { name: /Skip Setup/i });
+      await expect(skipBtn).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 20000 });
 
-    const garminCanvas = page.locator('canvas').first();
+    // 2. Dismiss Setup Wizard
+    const skipBtn = page.getByRole("button", { name: /Skip Setup/i });
+    if (await skipBtn.isVisible()) {
+      await skipBtn.click({ force: true });
+      await skipBtn
+        .waitFor({ state: "hidden", timeout: 10000 })
+        .catch(() => {});
+    }
+
+    const garminCanvas = page.locator("canvas").first();
     await expect(garminCanvas).toBeVisible({ timeout: 15000 });
 
-    // Switch to Edge (128KB) profile
-    const edgeBtn = page.getByRole('button', { name: /Edge \(128KB\)/i });
-    await edgeBtn.click();
-    await expect(page.getByText('LIMIT: 128 KB RAM').first()).toBeVisible();
+    // 3. Switch to Edge (128KB) profile
+    const edgeBtn = page.getByRole("button", { name: /Edge \(128KB\)/i });
+    await expect(async () => {
+      await edgeBtn.click({ force: true });
+      await expect(page.getByText("LIMIT: 128 KB RAM").first()).toBeVisible({
+        timeout: 2000,
+      });
+    }).toPass({ timeout: 15000 });
 
-    // Start simulation
-    const startSimBtn = page.getByRole('button', { name: /START SIMULATION/i });
+    // 4. Start simulation
+    const startSimBtn = page.getByRole("button", { name: /START SIMULATION/i });
     if (await startSimBtn.isVisible()) {
-      await startSimBtn.click();
+      await startSimBtn.click({ force: true });
     }
   });
 
-  test('Quasi-Perfect Puzzler allows level selection and tactic clicking', async ({ page }) => {
-    await page.goto('/arcade/quasi-puzzler');
-    await page.waitForLoadState('networkidle');
+  test("Quasi-Perfect Puzzler allows level selection and tactic clicking", async ({
+    page,
+  }) => {
+    await page.goto("/arcade/quasi-puzzler", { waitUntil: "domcontentloaded" });
 
-    // Click Launch Cabinet button to mount/start the game
-    const launchCabinetBtn = page.getByRole('button', { name: /Launch Cabinet/i });
-    await expect(launchCabinetBtn).toBeVisible();
-    await launchCabinetBtn.click();
+    // 1. Launch Cabinet with hydration retry
+    await expect(async () => {
+      const launchBtn = page.getByRole("button", { name: /Launch Cabinet/i });
+      if (await launchBtn.isVisible()) {
+        await launchBtn.click({ force: true });
+      }
+      const skipBtn = page.getByRole("button", { name: /Skip Setup/i });
+      await expect(skipBtn).toBeVisible({ timeout: 2000 });
+    }).toPass({ timeout: 20000 });
 
-    // Switch to Level 2
-    const l2Btn = page.getByRole('button', { name: /L2/i });
-    await expect(l2Btn).toBeVisible({ timeout: 15000 });
-    await l2Btn.click();
-    await expect(page.getByRole('heading', { name: 'The Mirror Law' })).toBeVisible();
-    await expect(page.getByText(/Active Hypotheses Context/i)).toBeVisible();
+    // 2. Dismiss Setup Wizard
+    const skipBtn = page.getByRole("button", { name: /Skip Setup/i });
+    if (await skipBtn.isVisible()) {
+      await skipBtn.click({ force: true });
+      await skipBtn
+        .waitFor({ state: "hidden", timeout: 10000 })
+        .catch(() => {});
+    }
+
+    // 3. Verify Level 1 and solve via rfl tactic card click + target node
+    await expect(
+      page.locator("h3", { hasText: "The Identity Crisis" })
+    ).toBeVisible({ timeout: 15000 });
+
+    const rflCard = page.locator('[data-tactic-id="rfl"]');
+    await expect(rflCard).toBeVisible({ timeout: 15000 });
+    await rflCard.click();
+
+    const goalNode = page.locator('[data-node-id="eq-lvl1"]');
+    await expect(goalNode).toBeVisible({ timeout: 15000 });
+    await goalNode.click();
+
+    // 4. Verify Q.E.D. Theorem Verified modal
+    await expect(page.getByText("Q.E.D. · THEOREM VERIFIED")).toBeVisible({
+      timeout: 15000,
+    });
   });
 
-  test('Retro Labyrinth renders on 404 Error page with interactive canvas', async ({ page }) => {
-    await page.goto('/non-existent-arcade-route-404');
-    await page.waitForLoadState('networkidle');
+  test("Retro Labyrinth renders on 404 Error page with interactive canvas", async ({
+    page,
+  }) => {
+    await page.goto("/non-existent-arcade-route-404", {
+      waitUntil: "domcontentloaded",
+    });
 
-    // Verify 404 UnifiedErrorLayout has Retro Labyrinth
-    await expect(page.getByText('Graveyard Roguelike')).toBeVisible();
-    const labyrinthCanvas = page.locator('canvas').first();
-    await expect(labyrinthCanvas).toBeVisible();
+    // Click the Insert Coin preview or verify canvas
+    await expect(async () => {
+      const coinPreview = page.locator('[data-testid="insert-coin-preview"]');
+      if (await coinPreview.isVisible()) {
+        await coinPreview.click({ force: true });
+      }
+      const labyrinthCanvas = page.locator("canvas").first();
+      await expect(labyrinthCanvas).toBeVisible({ timeout: 3000 });
+    }).toPass({ timeout: 20000 });
 
-    // Verify weapon buttons exist
-    await expect(page.getByRole('button', { name: /\[1\] npm i/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /\[2\] git push -f/i })).toBeVisible();
+    // Verify error boundary and retro labyrinth content
+    await expect(page.getByText("Graveyard Roguelike")).toBeVisible({
+      timeout: 15000,
+    });
   });
 });

@@ -1,9 +1,18 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useSyncExternalStore } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useSyncExternalStore,
+} from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { STATUS_TICKER_ITEMS, unlockAchievement, isVaultUnlocked } from "@/lib/meme-data";
+import {
+  STATUS_TICKER_ITEMS,
+  unlockAchievement,
+  isVaultUnlocked,
+} from "@/lib/meme-data";
 import { playMemeSound } from "@/lib/meme-audio";
 import { generateId } from "@/lib/utils";
 import { IconDeviceGamepad2 } from "@tabler/icons-react";
@@ -70,12 +79,16 @@ export const FooterStatusTicker: React.FC = () => {
     setDuckBarks((b) => b + 1);
 
     // Pick random quote
-    const nextQuote = DUCK_QUOTES[Math.floor(Math.random() * DUCK_QUOTES.length)];
+    const nextQuote =
+      DUCK_QUOTES[Math.floor(Math.random() * DUCK_QUOTES.length)];
     setDuckBubble(nextQuote);
 
     // Spawn a bouncing treat particle
     const treatId = generateId("treat-");
-    setTreats((prev) => [...prev.slice(-4), { id: treatId, x: Math.random() * 40 - 20, y: -40 }]);
+    setTreats((prev) => [
+      ...prev.slice(-4),
+      { id: treatId, x: Math.random() * 40 - 20, y: -40 },
+    ]);
 
     // Dismiss quote bubble after 3.5 seconds
     setTimeout(() => {
@@ -83,16 +96,22 @@ export const FooterStatusTicker: React.FC = () => {
     }, 3500);
   }, []);
 
-  const tickerObserverRef = useResizeObserver<HTMLDivElement>((entry) => {
-    const h = Math.round(entry.contentRect.height);
-    if (typeof document !== "undefined" && h > 0) {
-      document.documentElement.style.setProperty("--footer-height", `${h}px`);
-      document.documentElement.style.setProperty("--ticker-height", `${h}px`);
-    }
-  }, { trackVertical: true });
+  const tickerObserverRef = useResizeObserver<HTMLDivElement>(
+    (entry) => {
+      const h = Math.round(entry.contentRect.height);
+      if (typeof document !== "undefined" && h > 0) {
+        document.documentElement.style.setProperty("--footer-height", `${h}px`);
+        document.documentElement.style.setProperty("--ticker-height", `${h}px`);
+      }
+    },
+    { trackVertical: true }
+  );
 
   return (
-    <div ref={tickerObserverRef} className="w-full border-t border-zinc-800/60 bg-zinc-950/60 backdrop-blur-md px-4 py-3 text-xs font-mono">
+    <div
+      ref={tickerObserverRef}
+      className="w-full border-t border-zinc-800/60 bg-zinc-950/60 backdrop-blur-md px-4 py-3 text-xs font-mono"
+    >
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
         {/* Live Status Ticker */}
         <div className="flex items-center gap-2.5 overflow-hidden w-full sm:w-auto">
@@ -100,7 +119,7 @@ export const FooterStatusTicker: React.FC = () => {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
           </span>
-          <span className="text-zinc-500 uppercase tracking-wider text-[10px] font-semibold shrink-0">
+          <span className="text-zinc-400 uppercase tracking-wider text-[10px] font-semibold shrink-0">
             Live Telemetry:
           </span>
           <div className="h-5 overflow-hidden relative flex-1 sm:w-80">
@@ -174,7 +193,9 @@ export const FooterStatusTicker: React.FC = () => {
               title="Click to pet Duck the Golden Retriever!"
               aria-label="Pet Duck the puppy"
             >
-              <span className="text-sm transition-transform group-hover:scale-125">🐕</span>
+              <span className="text-sm transition-transform group-hover:scale-125">
+                🐕
+              </span>
               <span className="hidden sm:inline">Duck</span>
               <span className="text-[10px] text-amber-400/80 bg-amber-400/10 px-1 rounded">
                 {duckBarks > 0 ? `+${duckBarks} barks` : "pet me"}

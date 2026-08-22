@@ -3,14 +3,16 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import crypto from "crypto";
 
 // Hoist mock functions
-const { mockRatelimitLimit, mockLpush, mockExpire, mockExec } = vi.hoisted(() => {
-  return {
-    mockRatelimitLimit: vi.fn(),
-    mockLpush: vi.fn(),
-    mockExpire: vi.fn(),
-    mockExec: vi.fn().mockResolvedValue([1]),
-  };
-});
+const { mockRatelimitLimit, mockLpush, mockExpire, mockExec } = vi.hoisted(
+  () => {
+    return {
+      mockRatelimitLimit: vi.fn(),
+      mockLpush: vi.fn(),
+      mockExpire: vi.fn(),
+      mockExec: vi.fn().mockResolvedValue([1]),
+    };
+  }
+);
 
 // Mock dependencies
 vi.mock("@/lib/db", () => {
@@ -47,7 +49,8 @@ vi.mock("@upstash/ratelimit", () => {
 });
 
 // Import endpoint and _testCache
-import { POST, _testCache } from "@/app/api/telemetry/route";
+import { POST } from "@/app/api/telemetry/route";
+import { _testCache } from "@/lib/services/telemetry-service";
 import { NextRequest } from "next/server";
 
 describe("Generational Double-Buffered Cache for Telemetry Rate Limiter", () => {
@@ -55,7 +58,7 @@ describe("Generational Double-Buffered Cache for Telemetry Rate Limiter", () => 
     vi.clearAllMocks();
     vi.useFakeTimers();
     _testCache.reset();
-    
+
     // Default mock rate check to success
     mockRatelimitLimit.mockReset().mockResolvedValue({
       success: true,
@@ -253,7 +256,10 @@ describe("Generational Double-Buffered Cache for Telemetry Rate Limiter", () => 
     // Setup: put the user in both active and inactive cache generations (simulating edge case)
     // We seed count = 100 (which is MAX_REQUESTS_PER_WINDOW) to force falling through to SDK rate limiting
     _testCache.active.set(ipHash, { count: 100, expiresAt: Date.now() + 5000 });
-    _testCache.inactive.set(ipHash, { count: 100, expiresAt: Date.now() + 5000 });
+    _testCache.inactive.set(ipHash, {
+      count: 100,
+      expiresAt: Date.now() + 5000,
+    });
 
     // Mock rate limiter returning block (success: false)
     mockRatelimitLimit.mockResolvedValue({

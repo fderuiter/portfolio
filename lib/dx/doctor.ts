@@ -1529,6 +1529,7 @@ export function checkDirectoryTopology(root: string): DiagnosticCheckResult {
     "tmp",
     "scratch",
     "test-results",
+    "playwright-report",
     ".agents",
     ".husky",
     ".vscode",
