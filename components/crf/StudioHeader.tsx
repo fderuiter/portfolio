@@ -170,7 +170,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
       {/* TIER 1: Brand, Protocol Selector & Global Actions Bar */}
       <div className="flex items-center justify-between px-3 sm:px-4 py-2 border-b border-zinc-900/80 gap-3">
         {/* Left Side: Brand, Protocol Selector & Study Badges */}
-        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-wrap sm:flex-nowrap">
+        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 shrink">
           <div className="flex items-center gap-1.5 shrink-0">
             <span className="w-2 h-2 rounded-full bg-brand-cyan animate-pulse shrink-0" />
             <span className="font-mono text-xs sm:text-sm font-extrabold text-white tracking-wider uppercase truncate">
@@ -181,12 +181,12 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
           <div className="h-3.5 w-px bg-zinc-800 hidden sm:block shrink-0" />
 
           {/* Protocol Preset Selector */}
-          <div className="flex items-center gap-1.5 min-w-0">
+          <div className="flex items-center min-w-0 max-w-[160px] xs:max-w-[200px] sm:max-w-[240px] md:max-w-[280px] shrink">
             <select
               onChange={(e) => onSelectPreset(e.target.value)}
               value={currentPreset?.id || "custom"}
               aria-label="Select Clinical Protocol Preset"
-              className="bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700 text-xs font-mono text-zinc-200 rounded-lg px-2 py-1 focus:border-brand-cyan focus:ring-1 focus:ring-brand-cyan focus:outline-none max-w-[140px] xs:max-w-[180px] sm:max-w-[220px] md:max-w-xs truncate transition-colors"
+              className="w-full bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700 text-xs font-mono text-zinc-200 rounded-lg px-2.5 py-1 focus:border-brand-cyan focus:ring-1 focus:ring-brand-cyan focus:outline-none truncate transition-colors cursor-pointer"
             >
               {presets.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -196,13 +196,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
             </select>
           </div>
 
-          {currentPreset?.therapeuticArea && (
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20 hidden lg:inline truncate max-w-[140px]">
-              {currentPreset.therapeuticArea}
-            </span>
-          )}
-
-          <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-brand-cyan/10 text-brand-cyan border border-brand-cyan/20 hidden md:inline shrink-0">
+          <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-brand-cyan/10 text-brand-cyan border border-brand-cyan/20 hidden sm:inline-flex shrink-0 whitespace-nowrap">
             {study.phase}
           </span>
         </div>
@@ -210,7 +204,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
         {/* Right Side: Undo/Redo, Diagnostics, Theme & Global Action Buttons */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Undo / Redo */}
-          <div className="flex items-center gap-0.5 bg-zinc-900 border border-zinc-800 rounded-lg p-0.5">
+          <div className="flex items-center gap-0.5 bg-zinc-900 border border-zinc-800 rounded-lg p-0.5 shrink-0">
             <button
               onClick={onUndo}
               disabled={!canUndo}
@@ -235,7 +229,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
           {onToggleTheme && (
             <button
               onClick={onToggleTheme}
-              className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 transition-colors inline-flex items-center gap-1 text-[11px] font-mono"
+              className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 transition-colors inline-flex items-center gap-1 text-[11px] font-mono shrink-0"
               title={
                 theme === "light"
                   ? "Switch to Dark Studio Mode"
@@ -258,7 +252,7 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
           {/* Conformance Diagnostics Badge */}
           <button
             onClick={onOpenDiagnostics}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono transition-all border ${
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono transition-all border shrink-0 ${
               totalIssues > 0
                 ? "bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20"
                 : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white"
@@ -270,106 +264,57 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
             ) : (
               <IconCheck className="w-3.5 h-3.5 text-emerald-400" />
             )}
-            <span className="hidden sm:inline">
-              {totalIssues > 0 ? `${totalIssues} Diagnostics` : "Verified"}
+            <span className="hidden md:inline">
+              {totalIssues > 0 ? `${totalIssues} Issues` : "Verified"}
             </span>
           </button>
 
-          {/* Desktop Direct Utility Buttons */}
-          <div className="hidden lg:flex items-center gap-1.5">
-            {/* Launch Live Conformance Engine Simulation */}
-            <button
-              onClick={() => {
-                if (typeof window !== "undefined") {
-                  try {
-                    localStorage.setItem(
-                      "crf_active_protocol",
-                      JSON.stringify(study)
-                    );
-                  } catch {}
-                  window.location.href = "/arcade/clinical-chaos";
-                }
-              }}
-              className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white font-mono text-xs font-bold rounded-lg border border-emerald-500/40 transition-all shadow-xs"
-              title="Launch Live Conformance Engine Simulation with Active Protocol Pre-Loaded"
-            >
-              <IconPlayerPlay className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400" />
-              <span>Simulate Protocol</span>
-            </button>
+          {/* Primary 1-Click CDASH Quick Scaffolder Button */}
+          <button
+            onClick={onOpenCdashScaffolder}
+            className="inline-flex items-center gap-1 px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white font-mono text-xs font-bold rounded-lg border border-zinc-700 transition-all shrink-0 whitespace-nowrap shadow-xs"
+            title="1-Click CDASH Domain Scaffolder (⌘K)"
+          >
+            <IconSparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span className="hidden sm:inline">+ CDASH Form</span>
+            <span className="sm:hidden">+ CDASH</span>
+          </button>
 
-            {/* Word / PDF Export Modal Trigger */}
-            <button
-              onClick={onOpenExportDocument}
-              className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white font-mono text-xs font-bold rounded-lg border border-blue-500/40 transition-all shadow-xs"
-              title="Export Word (.docx) Protocol Books & PDF Blank/Annotated CRFs"
-            >
-              <IconFileSpreadsheet className="w-3.5 h-3.5" />
-              <span>Docx / PDF</span>
-            </button>
+          {/* Simulation Button (Shown on 2xl or via More menu) */}
+          <button
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                try {
+                  localStorage.setItem(
+                    "crf_active_protocol",
+                    JSON.stringify(study)
+                  );
+                } catch {}
+                window.location.href = "/arcade/clinical-chaos";
+              }
+            }}
+            className="hidden 2xl:inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white font-mono text-xs font-bold rounded-lg border border-emerald-500/40 transition-all shadow-xs shrink-0 whitespace-nowrap"
+            title="Launch Live Conformance Engine Simulation with Active Protocol Pre-Loaded"
+          >
+            <IconPlayerPlay className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400 shrink-0" />
+            <span>Simulate Protocol</span>
+          </button>
 
-            {/* 1-Click CDASH Quick Scaffolder */}
-            <button
-              onClick={onOpenCdashScaffolder}
-              className="inline-flex items-center gap-1 px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white font-mono text-xs font-bold rounded-lg border border-zinc-700 transition-all"
-              title="1-Click CDASH Domain Scaffolder (⌘K)"
-            >
-              <IconSparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>+ CDASH Form</span>
-            </button>
+          {/* Word / PDF Export Modal Trigger (Shown on 2xl or via More menu) */}
+          <button
+            onClick={onOpenExportDocument}
+            className="hidden 2xl:inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white font-mono text-xs font-bold rounded-lg border border-blue-500/40 transition-all shadow-xs shrink-0 whitespace-nowrap"
+            title="Export Word (.docx) Protocol Books & PDF Blank/Annotated CRFs"
+          >
+            <IconFileSpreadsheet className="w-3.5 h-3.5 shrink-0" />
+            <span>Docx / PDF</span>
+          </button>
 
-            {/* Organization Branding */}
-            <button
-              onClick={onOpenBranding}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white font-mono text-xs rounded-lg transition-all"
-              title="Configure Organization Branding & Logos"
-            >
-              <span
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: branding.primaryColor }}
-              />
-              <IconPalette className="w-3.5 h-3.5 text-brand-cyan" />
-              <span className="hidden xl:inline">Branding</span>
-            </button>
-
-            {/* Copy Shareable Link */}
-            {onCopyShareLink && (
-              <button
-                onClick={onCopyShareLink}
-                className="inline-flex items-center gap-1 px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white font-mono text-xs rounded-lg transition-all"
-                title="Copy Shareable Studio Link"
-              >
-                <IconLink className="w-3.5 h-3.5 text-brand-cyan" />
-                <span className="hidden xl:inline">Share</span>
-              </button>
-            )}
-
-            {/* Interactive Clinical Tour / Guide */}
-            <div className="flex items-center bg-zinc-900 border border-brand-cyan/40 rounded-lg overflow-hidden shadow-xs">
-              <button
-                onClick={onOpenWizard}
-                className="inline-flex items-center gap-1 px-2.5 py-1 bg-brand-cyan/15 hover:bg-brand-cyan text-brand-cyan hover:text-black font-mono text-xs font-bold transition-all"
-                title="Open Interactive Clinical Walkthrough Wizard"
-              >
-                <IconHelp className="w-3.5 h-3.5" />
-                <span className="hidden xl:inline">How It Works</span>
-              </button>
-              {onStartSpotlightTour && (
-                <button
-                  onClick={onStartSpotlightTour}
-                  className="px-1.5 py-1 bg-brand-cyan/10 hover:bg-brand-cyan text-brand-cyan hover:text-black font-mono text-xs border-l border-brand-cyan/30 transition-all"
-                  title="Launch Interactive UI Spotlight Tour"
-                >
-                  <IconPlayerPlay className="w-3 h-3" />
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* More Actions Trigger Button (Mobile / Tablet) */}
+          {/* More Actions Trigger Button */}
           <div className="relative">
             <button
               onClick={() => setIsMoreMenuOpen((prev) => !prev)}
-              className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 transition-colors lg:hidden inline-flex items-center gap-1 shrink-0"
+              className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 transition-colors inline-flex items-center gap-1 shrink-0"
               title="More Actions & Tools"
               aria-label="More Studio Actions"
               aria-expanded={isMoreMenuOpen}
@@ -380,14 +325,14 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
               )}
             </button>
 
-            {/* Mobile / Tablet Popover */}
+            {/* Popover Menu */}
             {isMoreMenuOpen && (
               <>
                 <div
-                  className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden"
+                  className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs 2xl:hidden"
                   onClick={() => setIsMoreMenuOpen(false)}
                 />
-                <div className="absolute right-0 top-full mt-2 w-72 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-3 z-50 lg:hidden space-y-1 animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute right-0 top-full mt-2 w-72 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-2xl p-3 z-50 2xl:hidden space-y-1 animate-in fade-in zoom-in-95 duration-150">
                   <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-800 px-1">
                     <span className="text-xs font-bold font-mono text-zinc-300 uppercase">
                       Studio Actions
@@ -403,37 +348,23 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
                   <button
                     onClick={() => {
                       setIsMoreMenuOpen(false);
-                      onOpenCdashScaffolder();
+                      if (typeof window !== "undefined") {
+                        try {
+                          localStorage.setItem(
+                            "crf_active_protocol",
+                            JSON.stringify(study)
+                          );
+                        } catch {}
+                        window.location.href = "/arcade/clinical-chaos";
+                      }
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs font-mono rounded-xl bg-zinc-950 hover:bg-zinc-800 text-zinc-200 transition-colors"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs font-mono rounded-xl bg-emerald-950/40 hover:bg-emerald-900/40 text-emerald-200 border border-emerald-800/40 transition-colors"
                   >
-                    <IconSparkles className="w-4 h-4 text-amber-400" />
+                    <IconPlayerPlay className="w-4 h-4 text-emerald-400 fill-emerald-400" />
                     <div className="flex-1">
-                      <div className="font-bold">+ CDASH Form Scaffolder</div>
-                      <div className="text-[10px] text-zinc-500">
-                        Inject 10+ standard domains
-                      </div>
-                    </div>
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setIsMoreMenuOpen(false);
-                      onOpenDiagnostics();
-                    }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs font-mono rounded-xl bg-zinc-950 hover:bg-zinc-800 text-zinc-200 transition-colors"
-                  >
-                    {totalIssues > 0 ? (
-                      <IconBug className="w-4 h-4 text-amber-400" />
-                    ) : (
-                      <IconCheck className="w-4 h-4 text-emerald-400" />
-                    )}
-                    <div className="flex-1">
-                      <div className="font-bold">CDISC Diagnostics</div>
-                      <div className="text-[10px] text-zinc-500">
-                        {totalIssues > 0
-                          ? `${totalIssues} rule violations`
-                          : "Study fully verified"}
+                      <div className="font-bold">Simulate Protocol</div>
+                      <div className="text-[10px] text-emerald-400/70">
+                        Launch in Clinical Chaos Arcade
                       </div>
                     </div>
                   </button>
@@ -461,6 +392,10 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
                     }}
                     className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs font-mono rounded-xl bg-zinc-950 hover:bg-zinc-800 text-zinc-200 transition-colors"
                   >
+                    <span
+                      className="w-2 h-2 rounded-full shrink-0"
+                      style={{ backgroundColor: branding.primaryColor }}
+                    />
                     <IconPalette className="w-4 h-4 text-brand-cyan" />
                     <div className="flex-1">
                       <div className="font-bold">Organization Branding</div>
@@ -469,6 +404,58 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
                       </div>
                     </div>
                   </button>
+
+                  {onCopyShareLink && (
+                    <button
+                      onClick={() => {
+                        setIsMoreMenuOpen(false);
+                        onCopyShareLink();
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs font-mono rounded-xl bg-zinc-950 hover:bg-zinc-800 text-zinc-200 transition-colors"
+                    >
+                      <IconLink className="w-4 h-4 text-brand-cyan" />
+                      <div className="flex-1">
+                        <div className="font-bold">Share Studio Protocol</div>
+                        <div className="text-[10px] text-zinc-500">
+                          Copy direct link with state
+                        </div>
+                      </div>
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => {
+                      setIsMoreMenuOpen(false);
+                      onOpenWizard();
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs font-mono rounded-xl bg-zinc-950 hover:bg-zinc-800 text-zinc-200 transition-colors"
+                  >
+                    <IconHelp className="w-4 h-4 text-brand-cyan" />
+                    <div className="flex-1">
+                      <div className="font-bold">Interactive Guide</div>
+                      <div className="text-[10px] text-zinc-500">
+                        How CRF Studio works
+                      </div>
+                    </div>
+                  </button>
+
+                  {onStartSpotlightTour && (
+                    <button
+                      onClick={() => {
+                        setIsMoreMenuOpen(false);
+                        onStartSpotlightTour();
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs font-mono rounded-xl bg-brand-cyan/10 hover:bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/20 transition-colors"
+                    >
+                      <IconPlayerPlay className="w-4 h-4 text-brand-cyan" />
+                      <div className="flex-1">
+                        <div className="font-bold">Spotlight UI Tour</div>
+                        <div className="text-[10px] text-brand-cyan/70">
+                          Interactive walkthrough
+                        </div>
+                      </div>
+                    </button>
+                  )}
 
                   {onToggleTerminal && (
                     <button
@@ -517,10 +504,13 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
                 }`}
               >
                 {item.icon}
-                <span className="hidden sm:inline">{item.label}</span>
+                <span className="hidden 2xl:inline">{item.label}</span>
+                <span className="hidden sm:inline 2xl:hidden">
+                  {item.shortLabel}
+                </span>
                 <span className="sm:hidden">{item.shortLabel}</span>
                 <span
-                  className={`text-[9px] px-1 py-0.2 rounded font-mono hidden md:inline-block ${
+                  className={`text-[9px] px-1 py-0.2 rounded font-mono hidden 2xl:inline-block ${
                     isActive
                       ? "bg-brand-cyan/25 text-brand-cyan font-bold"
                       : "bg-zinc-900 text-zinc-600"

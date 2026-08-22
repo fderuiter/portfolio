@@ -24,7 +24,9 @@ export function NewsletterForm({
   const [email, setEmail] = useState("");
   const [gotcha, setGotcha] = useState("");
   const [mountedAt, setMountedAt] = useState<number>(0);
-  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "submitting" | "success" | "error"
+  >("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const mountedRef = useRef(false);
@@ -62,11 +64,19 @@ export function NewsletterForm({
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      let data: { error?: string; message?: string } | null = null;
+      try {
+        data = await response.json();
+      } catch {
+        // Non-JSON response fallback
+      }
 
       if (!response.ok) {
         setStatus("error");
-        setErrorMessage(data.error || "Subscription failed. Please try again.");
+        setErrorMessage(
+          data?.error ||
+            `Subscription failed (HTTP ${response.status}). Please try again.`
+        );
         return;
       }
 
@@ -75,7 +85,9 @@ export function NewsletterForm({
       if (onSuccess) onSuccess();
     } catch {
       setStatus("error");
-      setErrorMessage("Network error. Please verify your connection and try again.");
+      setErrorMessage(
+        "Network connection error. Please verify your connection and try again."
+      );
     }
   };
 
@@ -99,7 +111,8 @@ export function NewsletterForm({
             Engineering &amp; Architecture Notes
           </h4>
           <p className="text-xs font-mono text-zinc-400 leading-relaxed">
-            Occasional deep-dives into formal verification, AST compilers, CDISC clinical architectures, and bare-metal browser physics. Zero fluff.
+            Occasional deep-dives into formal verification, AST compilers, CDISC
+            clinical architectures, and bare-metal browser physics. Zero fluff.
           </p>
         </div>
       )}

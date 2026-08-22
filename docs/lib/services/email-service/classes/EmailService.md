@@ -6,7 +6,7 @@
 
 # Class: EmailService
 
-Defined in: [lib/services/email-service.ts:146](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L146)
+Defined in: [lib/services/email-service.ts:149](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L149)
 
 Deep module encapsulating all outbound transactional email workflows,
 bounce/complaint suppression list defenses, retry queueing, and webhook ingestion.
@@ -27,7 +27,7 @@ bounce/complaint suppression list defenses, retry queueing, and webhook ingestio
 
 > `static` **handleWebhookEvent**(`event`): `Promise`\<\{ `handled`: `boolean`; `reason?`: `string`; `suppressed?`: `boolean`; \}\>
 
-Defined in: [lib/services/email-service.ts:400](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L400)
+Defined in: [lib/services/email-service.ts:416](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L416)
 
 Processes incoming Resend deliverability webhook event.
 
@@ -93,7 +93,7 @@ Processes incoming Resend deliverability webhook event.
 
 > `static` **isSuppressed**(`email`): `Promise`\<\{ `reason?`: `string`; `suppressed`: `boolean`; \}\>
 
-Defined in: [lib/services/email-service.ts:157](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L157)
+Defined in: [lib/services/email-service.ts:160](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L160)
 
 Checks if an email address is in the suppression list (bounced, complained, unsubscribed).
 
@@ -113,7 +113,7 @@ Checks if an email address is in the suppression list (bounced, complained, unsu
 
 > `static` **processRetryQueue**(`options?`): `Promise`\<\{ `failed`: `number`; `processed`: `number`; `succeeded`: `number`; \}\>
 
-Defined in: [lib/services/email-service.ts:230](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L230)
+Defined in: [lib/services/email-service.ts:239](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L239)
 
 Processes due items from OutboundEmailQueue with exponential backoff.
 
@@ -139,7 +139,7 @@ Processes due items from OutboundEmailQueue with exponential backoff.
 
 > `static` **queueOutboundEmail**(`options`, `fromAddress?`, `errorReason?`): `Promise`\<`string`\>
 
-Defined in: [lib/services/email-service.ts:195](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L195)
+Defined in: [lib/services/email-service.ts:198](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L198)
 
 Enqueues an email to the persistent OutboundEmailQueue table.
 
@@ -167,7 +167,7 @@ Enqueues an email to the persistent OutboundEmailQueue table.
 
 > `static` **recordSuppression**(`email`, `reason`): `Promise`\<`void`\>
 
-Defined in: [lib/services/email-service.ts:177](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L177)
+Defined in: [lib/services/email-service.ts:180](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L180)
 
 Records an email address in the suppression list.
 
@@ -191,7 +191,7 @@ Records an email address in the suppression list.
 
 > `static` **resetClient**(): `void`
 
-Defined in: [lib/services/email-service.ts:150](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L150)
+Defined in: [lib/services/email-service.ts:153](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L153)
 
 Resets the cached Resend client instance (primarily used for test isolation).
 
@@ -205,7 +205,7 @@ Resets the cached Resend client instance (primarily used for test isolation).
 
 > `static` **sendContactInquiry**(`submission`, `connectionHash?`): `Promise`\<[`ContactDispatchResult`](../interfaces/ContactDispatchResult.md)\>
 
-Defined in: [lib/services/email-service.ts:527](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L527)
+Defined in: [lib/services/email-service.ts:559](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L559)
 
 Dispatches an inbound visitor inquiry:
 1. Delivers admin notification to CONTACT_NOTIFICATION_EMAIL
@@ -257,7 +257,7 @@ Dispatches an inbound visitor inquiry:
 
 > `static` **sendFeedbackNotification**(`payload`): `Promise`\<[`EmailDispatchResult`](../interfaces/EmailDispatchResult.md)\>
 
-Defined in: [lib/services/email-service.ts:583](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L583)
+Defined in: [lib/services/email-service.ts:618](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L618)
 
 Dispatches an alert email to the admin when visitor feedback is submitted on a case study.
 
@@ -277,7 +277,7 @@ Dispatches an alert email to the admin when visitor feedback is submitted on a c
 
 > `static` **sendRawEmail**(`options`): `Promise`\<[`EmailDispatchResult`](../interfaces/EmailDispatchResult.md)\>
 
-Defined in: [lib/services/email-service.ts:428](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L428)
+Defined in: [lib/services/email-service.ts:444](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L444)
 
 Core dispatcher that transmits an email via Resend SDK or executes simulated delivery.
 
@@ -297,7 +297,7 @@ Core dispatcher that transmits an email via Resend SDK or executes simulated del
 
 > `static` **subscribeNewsletter**(`email`, `connectionHash?`): `Promise`\<[`EmailDispatchResult`](../interfaces/EmailDispatchResult.md)\>
 
-Defined in: [lib/services/email-service.ts:606](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L606)
+Defined in: [lib/services/email-service.ts:644](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L644)
 
 Dispatches a newsletter subscription workflow:
 1. Delivers welcome confirmation email to the subscriber

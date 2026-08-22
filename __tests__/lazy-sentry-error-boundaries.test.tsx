@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import React, { act } from "react";
+import React from "react";
 import { render, screen, cleanup, waitFor } from "@testing-library/react";
 
 // Configure React 19 act environment

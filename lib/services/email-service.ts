@@ -92,7 +92,10 @@ export function verifySvixSignature({
     const secretBuffer = Buffer.from(rawSecret, "base64");
 
     const toSign = `${svixId}.${svixTimestamp}.${payload}`;
-    const expectedHmac = crypto.createHmac("sha256", secretBuffer).update(toSign).digest("base64");
+    const expectedHmac = crypto
+      .createHmac("sha256", secretBuffer)
+      .update(toSign)
+      .digest("base64");
 
     const signatures = svixSignature.split(" ");
     for (const versionedSig of signatures) {
@@ -197,8 +200,14 @@ export class EmailService {
     fromAddress?: string,
     errorReason?: string
   ): Promise<string> {
-    const toAddress = Array.isArray(options.to) ? options.to.join(", ") : options.to;
-    const from = fromAddress || options.from || env.RESEND_FROM_EMAIL || DEFAULT_FROM_EMAIL;
+    const toAddress = Array.isArray(options.to)
+      ? options.to.join(", ")
+      : options.to;
+    const from =
+      fromAddress ||
+      options.from ||
+      env.RESEND_FROM_EMAIL ||
+      DEFAULT_FROM_EMAIL;
     const nextRetryAt = new Date(Date.now() + BASE_RETRY_DELAY_MS);
 
     try {
@@ -269,7 +278,9 @@ export class EmailService {
     for (const item of items) {
       const client = getResendClient();
       const rawOptions: RawEmailOptions = {
-        to: item.to.includes(",") ? item.to.split(",").map((s) => s.trim()) : item.to,
+        to: item.to.includes(",")
+          ? item.to.split(",").map((s) => s.trim())
+          : item.to,
         from: item.from,
         replyTo: item.replyTo || undefined,
         subject: item.subject,
@@ -279,7 +290,9 @@ export class EmailService {
       };
 
       // Suppression check
-      const toRecipients = Array.isArray(rawOptions.to) ? rawOptions.to : [rawOptions.to];
+      const toRecipients = Array.isArray(rawOptions.to)
+        ? rawOptions.to
+        : [rawOptions.to];
       let isAnySuppressed = false;
       for (const rec of toRecipients) {
         const check = await this.isSuppressed(rec);
@@ -361,7 +374,10 @@ export class EmailService {
         }
       } catch (sendErr) {
         const nextAttempts = item.attempts + 1;
-        const msg = sendErr instanceof Error ? sendErr.message : "Network dispatch failure";
+        const msg =
+          sendErr instanceof Error
+            ? sendErr.message
+            : "Network dispatch failure";
         if (nextAttempts >= MAX_RETRY_ATTEMPTS) {
           await prisma.outboundEmailQueue.update({
             where: { id: item.id },
@@ -425,7 +441,9 @@ export class EmailService {
   /**
    * Core dispatcher that transmits an email via Resend SDK or executes simulated delivery.
    */
-  static async sendRawEmail(options: RawEmailOptions): Promise<EmailDispatchResult> {
+  static async sendRawEmail(
+    options: RawEmailOptions
+  ): Promise<EmailDispatchResult> {
     const recipients = Array.isArray(options.to) ? options.to : [options.to];
 
     // Pre-check suppression list before transmitting
@@ -440,7 +458,8 @@ export class EmailService {
     }
 
     const client = getResendClient();
-    const fromAddress = options.from || env.RESEND_FROM_EMAIL || DEFAULT_FROM_EMAIL;
+    const fromAddress =
+      options.from || env.RESEND_FROM_EMAIL || DEFAULT_FROM_EMAIL;
 
     const apiKey = getEnv().RESEND_API_KEY || env.RESEND_API_KEY;
     const isVitest = getEnv().VITEST === "1" || env.VITEST === "1";
@@ -474,11 +493,17 @@ export class EmailService {
       });
 
       if (error) {
-        Sentry.captureException(new Error(`Resend dispatch error: ${error.message}`));
+        Sentry.captureException(
+          new Error(`Resend dispatch error: ${error.message}`)
+        );
         console.error("Resend API error:", error);
 
         if (isRetryableError(error.message) && !options.skipQueue) {
-          const queueId = await this.queueOutboundEmail(options, fromAddress, error.message);
+          const queueId = await this.queueOutboundEmail(
+            options,
+            fromAddress,
+            error.message
+          );
           return {
             success: true,
             queued: true,
@@ -495,15 +520,22 @@ export class EmailService {
 
       return {
         success: true,
-        data: { id: data?.id || `msg_${Math.random().toString(36).substring(2, 10)}` },
+        data: {
+          id: data?.id || `msg_${Math.random().toString(36).substring(2, 10)}`,
+        },
       };
     } catch (err) {
       Sentry.captureException(err);
-      const errorMessage = err instanceof Error ? err.message : "Unknown error sending email";
+      const errorMessage =
+        err instanceof Error ? err.message : "Unknown error sending email";
       console.error("EmailService unhandled exception:", err);
 
       if (isRetryableError(errorMessage) && !options.skipQueue) {
-        const queueId = await this.queueOutboundEmail(options, fromAddress, errorMessage);
+        const queueId = await this.queueOutboundEmail(
+          options,
+          fromAddress,
+          errorMessage
+        );
         return {
           success: true,
           queued: true,
@@ -538,7 +570,10 @@ export class EmailService {
       submittedAt: new Date(),
     });
 
-    const adminEmail = env.CONTACT_NOTIFICATION_EMAIL || "fpderuiter@gmail.com";
+    const adminEmail =
+      getEnv().CONTACT_NOTIFICATION_EMAIL ||
+      env.CONTACT_NOTIFICATION_EMAIL ||
+      "fpderuiter@gmail.com";
 
     // 1. Send Admin Notification
     const adminResult = await this.sendRawEmail({
@@ -584,7 +619,10 @@ export class EmailService {
     payload: FeedbackNotificationPayload
   ): Promise<EmailDispatchResult> {
     const template = renderFeedbackNotificationEmail(payload);
-    const adminEmail = env.CONTACT_NOTIFICATION_EMAIL || "fpderuiter@gmail.com";
+    const adminEmail =
+      getEnv().CONTACT_NOTIFICATION_EMAIL ||
+      env.CONTACT_NOTIFICATION_EMAIL ||
+      "fpderuiter@gmail.com";
 
     return this.sendRawEmail({
       to: adminEmail,
@@ -608,7 +646,10 @@ export class EmailService {
     connectionHash?: string
   ): Promise<EmailDispatchResult> {
     const welcomeTemplate = renderNewsletterWelcomeEmail({ email });
-    const adminEmail = env.CONTACT_NOTIFICATION_EMAIL || "fpderuiter@gmail.com";
+    const adminEmail =
+      getEnv().CONTACT_NOTIFICATION_EMAIL ||
+      env.CONTACT_NOTIFICATION_EMAIL ||
+      "fpderuiter@gmail.com";
 
     // 1. Deliver Welcome Confirmation to Subscriber
     const welcomeResult = await this.sendRawEmail({
@@ -616,9 +657,7 @@ export class EmailService {
       subject: welcomeTemplate.subject,
       html: welcomeTemplate.html,
       text: welcomeTemplate.text,
-      tags: [
-        { name: "category", value: "newsletter-welcome" },
-      ],
+      tags: [{ name: "category", value: "newsletter-welcome" }],
     });
 
     // 2. Alert Admin of New Subscriber
@@ -628,9 +667,7 @@ export class EmailService {
         subject: `[Newsletter] New Subscriber: ${email}`,
         html: `<p>New subscriber registered: <strong>${email}</strong></p><p>Fingerprint: ${connectionHash || "anonymous"}</p>`,
         text: `New subscriber registered: ${email}\nFingerprint: ${connectionHash || "anonymous"}`,
-        tags: [
-          { name: "category", value: "newsletter-admin-alert" },
-        ],
+        tags: [{ name: "category", value: "newsletter-admin-alert" }],
       });
     }
 

@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import { CaseStudyService } from "@/lib/services/case-study-service";
 import { CaseStudyShowcase } from "@/components/CaseStudyShowcase";
 import { BaseCaseStudy } from "@/types/domain";
-import { getGitHubStats, parseGitHubUrl, GitHubStats, getSimulatedStats } from "@/lib/github";
+import {
+  getGitHubStats,
+  parseGitHubUrl,
+  GitHubStats,
+  getSimulatedStats,
+} from "@/lib/github";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { PageLayout } from "@/components/PageLayout";
 import { resolveBaseUrl } from "@/lib/domain";
@@ -12,13 +17,15 @@ export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Engineering Case Studies | Frederick de Ruiter",
-  description: "Deep-dive architectural breakdowns, clinical data systems, CDISC standards pipelines, and full-stack systems engineering.",
+  description:
+    "Deep-dive architectural breakdowns, clinical data systems, CDISC standards pipelines, and full-stack systems engineering.",
   alternates: {
     canonical: "/case-studies",
   },
   openGraph: {
     title: "Engineering Case Studies | Frederick de Ruiter",
-    description: "Deep-dive architectural breakdowns, clinical data systems, CDISC standards pipelines, and full-stack systems engineering.",
+    description:
+      "Deep-dive architectural breakdowns, clinical data systems, CDISC standards pipelines, and full-stack systems engineering.",
     type: "website",
     url: `${resolveBaseUrl()}/case-studies`,
     images: [
@@ -33,7 +40,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Engineering Case Studies | Frederick de Ruiter",
-    description: "Deep-dive architectural breakdowns, clinical data systems, and full-stack engineering.",
+    description:
+      "Deep-dive architectural breakdowns, clinical data systems, and full-stack engineering.",
     images: [`${resolveBaseUrl()}/case-studies/opengraph-image`],
   },
 };
@@ -49,11 +57,16 @@ export default async function CaseStudiesPage() {
     data.map(async (d) => {
       let stats: GitHubStats | null = null;
       if (d.simulated_telemetry) {
-        stats = getSimulatedStats(d.primary_language);
+        stats = getSimulatedStats(d.primary_language, d.slug);
       } else if (d.github_url) {
         const parsed = parseGitHubUrl(d.github_url);
         if (parsed) {
-          stats = await getGitHubStats(parsed.owner, parsed.repo, d.primary_language);
+          stats = await getGitHubStats(
+            parsed.owner,
+            parsed.repo,
+            d.primary_language,
+            d.slug
+          );
         }
       }
       return {
@@ -95,7 +108,8 @@ export default async function CaseStudiesPage() {
             Engineering Case Studies
           </h1>
           <p className="text-xs sm:text-sm font-mono text-zinc-400 tracking-wider uppercase">
-            Clinical data engines, CDISC validation pipelines, and full-stack systems
+            Clinical data engines, CDISC validation pipelines, and full-stack
+            systems
           </p>
         </div>
 
@@ -103,10 +117,12 @@ export default async function CaseStudiesPage() {
         {caseStudies.length === 0 ? (
           <div className="text-center p-8 sm:p-12 bg-zinc-900/10 border border-zinc-900/40 border-dashed rounded-2xl w-full">
             <p className="text-sm text-zinc-400 italic mb-2">
-              No published case studies currently available in the active environment.
+              No published case studies currently available in the active
+              environment.
             </p>
             <p className="text-xs text-zinc-500 font-mono">
-              Refer to canonical project specifications in the repository documentation.
+              Refer to canonical project specifications in the repository
+              documentation.
             </p>
           </div>
         ) : (

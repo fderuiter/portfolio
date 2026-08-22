@@ -308,7 +308,7 @@ export const Navbar: React.FC = () => {
       >
         <div
           ref={navContainerRef}
-          className="max-w-6xl mx-auto px-4 sm:px-6 md:px-12 flex justify-between items-center w-full"
+          className="max-w-6xl mx-auto px-4 sm:px-6 md:px-10 flex justify-between items-center w-full gap-4 sm:gap-6 lg:gap-8"
         >
           {/* Logo / Wordmark */}
           <Link
@@ -326,9 +326,9 @@ export const Navbar: React.FC = () => {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden xl:flex items-center gap-3 lg:gap-6 shrink-0">
+          <div className="hidden xl:flex items-center gap-2.5 lg:gap-4 2xl:gap-5 shrink-0">
             <nav
-              className="flex items-center gap-3 md:gap-4 lg:gap-6 shrink-0"
+              className="flex items-center gap-2.5 md:gap-3.5 lg:gap-4.5 shrink-0"
               aria-label="Main Navigation"
             >
               {/* Work Pillar */}
@@ -607,7 +607,8 @@ export const Navbar: React.FC = () => {
                 aria-label="Switch to Technical Persona"
               >
                 <IconFlame className="w-3.5 h-3.5 shrink-0" />
-                <span className="hidden xl:inline">TECHNICAL</span>
+                <span className="hidden 2xl:inline">TECHNICAL</span>
+                <span className="hidden xl:inline 2xl:hidden">TECH</span>
               </button>
               <button
                 type="button"
@@ -621,7 +622,8 @@ export const Navbar: React.FC = () => {
                 aria-label="Switch to Recruiter Persona"
               >
                 <IconBriefcase className="w-3.5 h-3.5 shrink-0" />
-                <span className="hidden xl:inline">RECRUITER</span>
+                <span className="hidden 2xl:inline">RECRUITER</span>
+                <span className="hidden xl:inline 2xl:hidden">REC</span>
               </button>
             </div>
 
@@ -649,7 +651,7 @@ export const Navbar: React.FC = () => {
                   </div>
                 )}
                 <span className="text-[10px] font-mono tracking-wider font-bold">
-                  SOUND: {muted ? "OFF" : profile.toUpperCase()}
+                  {muted ? "MUTED" : profile.toUpperCase()}
                 </span>
                 <IconChevronDown className="w-3 h-3 text-zinc-500" />
               </button>

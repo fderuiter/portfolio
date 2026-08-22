@@ -97,12 +97,18 @@ export function ContactForm({
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      let data: { error?: string; message?: string } | null = null;
+      try {
+        data = await response.json();
+      } catch {
+        // Non-JSON response fallback
+      }
 
       if (!response.ok) {
         setStatus("error");
         setErrorMessage(
-          data.error || "Unable to send message. Please try again later."
+          data?.error ||
+            `Unable to send message (HTTP ${response.status}). Please try again later or email directly.`
         );
         return;
       }
@@ -113,7 +119,7 @@ export function ContactForm({
       console.error("Contact submission error:", err);
       setStatus("error");
       setErrorMessage(
-        "Network connection error. Please check your connection or email directly."
+        "Network connection error. Please check your connection or email directly to fpderuiter@gmail.com."
       );
     }
   };
@@ -147,8 +153,8 @@ export function ContactForm({
         <p className="text-xs sm:text-sm text-zinc-300 font-sans max-w-md mb-6 leading-relaxed">
           Thanks for reaching out,{" "}
           <span className="font-bold text-white">{name || "friend"}</span>. Your
-          message has been sent directly to my inbox and I will follow up
-          shortly.
+          message has been sent directly to my inbox (fpderuiter@gmail.com) and
+          I will follow up shortly.
         </p>
         <button
           type="button"
@@ -290,7 +296,7 @@ export function ContactForm({
           <IconTarget className="w-3.5 h-3.5 text-amber-400" />
           <span>Inquiry Intent</span>
         </label>
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+        <div className="flex flex-wrap gap-2">
           {CONTACT_INTENTS.map((item) => {
             const isSelected = intent === item;
             return (
@@ -298,7 +304,7 @@ export function ContactForm({
                 key={item}
                 type="button"
                 onClick={() => setIntent(item)}
-                className={`px-3 py-2 rounded-xl text-[11px] font-mono font-bold uppercase tracking-wider transition-all border text-center cursor-pointer ${
+                className={`flex-1 min-w-[100px] px-3 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all border text-center cursor-pointer min-h-[40px] flex items-center justify-center ${
                   isSelected
                     ? "bg-amber-500/15 border-amber-400/60 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.15)]"
                     : "bg-[#0d0e11] border-white/10 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"

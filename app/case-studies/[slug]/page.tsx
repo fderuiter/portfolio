@@ -5,8 +5,16 @@ import { IconTerminal } from "@tabler/icons-react";
 import { TracingBeam } from "@/components/ui/TracingBeam";
 import { RichNarrative } from "@/components/RichNarrative";
 import { Tooltip } from "@/components/ui/Tooltip";
-import { getGitHubStats, parseGitHubUrl, getSimulatedStats } from "@/lib/github";
-import { getSoftwareSourceCodeSchema, getBreadcrumbSchema, getVisualArtworkSchema } from "@/lib/seo";
+import {
+  getGitHubStats,
+  parseGitHubUrl,
+  getSimulatedStats,
+} from "@/lib/github";
+import {
+  getSoftwareSourceCodeSchema,
+  getBreadcrumbSchema,
+  getVisualArtworkSchema,
+} from "@/lib/seo";
 import { TelemetryTracker } from "@/components/TelemetryTracker";
 import { TerminologyToggle } from "@/components/TerminologyToggle";
 import { CaseStudyHeroActions } from "@/components/CaseStudyHeroActions";
@@ -33,7 +41,9 @@ export async function generateStaticParams() {
   return slugs.map((slug) => ({ slug }));
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const study = await CaseStudyService.getCaseStudyBySlug(slug);
 
@@ -45,9 +55,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const cleanDescription = (study.editorial_content || "")
+    .replace(/<[^>]+>/g, "")
     .replace(/\*\*/g, "")
     .replace(/`/g, "")
     .replace(/\*/g, "")
+    .trim()
     .slice(0, 160);
 
   const ogImageUrl = `${resolveBaseUrl()}/case-studies/${slug}/opengraph-image`;
@@ -65,7 +77,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url: `${resolveBaseUrl()}/case-studies/${slug}`,
       publishedTime: study.created_at.toISOString(),
       modifiedTime: study.updated_at.toISOString(),
-      tags: (study.tags || "").split(",").map((t) => t.trim()).filter(Boolean),
+      tags: (study.tags || "")
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean),
       images: [
         {
           url: ogImageUrl,
@@ -98,20 +113,31 @@ export default async function CaseStudyPage({ params }: PageProps) {
   }
 
   const currentIndex = allStudies.findIndex((s) => s.slug === slug);
-  const prevStudy = currentIndex > 0 ? allStudies[currentIndex - 1] : allStudies[allStudies.length - 1];
-  const nextStudy = currentIndex < allStudies.length - 1 ? allStudies[currentIndex + 1] : allStudies[0];
+  const prevStudy =
+    currentIndex > 0
+      ? allStudies[currentIndex - 1]
+      : allStudies[allStudies.length - 1];
+  const nextStudy =
+    currentIndex < allStudies.length - 1
+      ? allStudies[currentIndex + 1]
+      : allStudies[0];
 
   let stats = null;
   if (study.simulated_telemetry) {
-    stats = getSimulatedStats(study.primary_language);
+    stats = getSimulatedStats(study.primary_language, study.slug);
   } else if (study.github_url) {
     const parsed = parseGitHubUrl(study.github_url);
     if (parsed) {
-      stats = await getGitHubStats(parsed.owner, parsed.repo, study.primary_language);
+      stats = await getGitHubStats(
+        parsed.owner,
+        parsed.repo,
+        study.primary_language,
+        study.slug
+      );
     }
   }
 
-  const tagsList = study.tags ? study.tags.split(",").map(t => t.trim()) : [];
+  const tagsList = study.tags ? study.tags.split(",").map((t) => t.trim()) : [];
 
   let commands = undefined;
   let playback = undefined;
@@ -144,10 +170,18 @@ export default async function CaseStudyPage({ params }: PageProps) {
             study.slug === "laser-loon"
               ? getVisualArtworkSchema({
                   name: study.title,
-                  description: study.editorial_content.replace(/\*\*/g, "").replace(/`/g, "").slice(0, 200),
+                  description: study.editorial_content
+                    .replace(/\*\*/g, "")
+                    .replace(/`/g, "")
+                    .slice(0, 200),
                   url: `/case-studies/${study.slug}`,
                   imageUrl: `${resolveBaseUrl()}/images/laser-loon-preview.png`,
-                  formats: ["image/svg+xml", "application/illustrator", "application/pdf", "image/png"],
+                  formats: [
+                    "image/svg+xml",
+                    "application/illustrator",
+                    "application/pdf",
+                    "image/png",
+                  ],
                   license: "https://creativecommons.org/licenses/by/4.0/",
                 })
               : getSoftwareSourceCodeSchema(study, stats),
@@ -188,7 +222,9 @@ export default async function CaseStudyPage({ params }: PageProps) {
           {slug === "crf-xl" && (
             <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 text-xs font-mono mb-6 shadow-sm">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="font-semibold">Microsoft Office / Fluent Design Accent Active (Easter Egg)</span>
+              <span className="font-semibold">
+                Microsoft Office / Fluent Design Accent Active (Easter Egg)
+              </span>
             </div>
           )}
 
@@ -224,7 +260,6 @@ export default async function CaseStudyPage({ params }: PageProps) {
               <RichNarrative html={study.editorial_content} />
             </div>
 
-
             {/* Tags list row */}
             <div className="flex flex-wrap gap-2 pt-4">
               {tagsList.map((tag, idx) => (
@@ -238,16 +273,23 @@ export default async function CaseStudyPage({ params }: PageProps) {
             </div>
 
             {/* Interactive Sandbox Terminal Shell */}
-            {(Boolean(commands || study.commands_json) || slug === "imednet-python-sdk") && (
+            {(Boolean(commands || study.commands_json) ||
+              slug === "imednet-python-sdk") && (
               <div className="mt-12 border-t border-zinc-900/50 pt-10">
                 <h2 className="text-xl font-bold font-sans text-neutral-100 mb-3 flex items-center gap-2">
                   <IconTerminal className="w-5 h-5 text-brand-cyan" />
                   Interactive CLI Developer Sandbox
                 </h2>
                 <p className="text-xs font-mono text-zinc-500 mb-6 leading-relaxed">
-                  Test interactive CLI commands and view structured telemetry outputs directly inside the browser. Use the interactive badges or type &apos;help&apos; inside the prompt.
+                  Test interactive CLI commands and view structured telemetry
+                  outputs directly inside the browser. Use the interactive
+                  badges or type &apos;help&apos; inside the prompt.
                 </p>
-                <SandboxTerminal commands={commands} playback={playback} slug={slug} />
+                <SandboxTerminal
+                  commands={commands}
+                  playback={playback}
+                  slug={slug}
+                />
               </div>
             )}
 
@@ -255,13 +297,25 @@ export default async function CaseStudyPage({ params }: PageProps) {
             {slug === "schemaflow" && (
               <div className="mt-12 border-t border-zinc-900/50 pt-10">
                 <h2 className="text-xl font-bold font-sans text-neutral-100 mb-3 flex items-center gap-2">
-                  <svg className="w-5 h-5 text-brand-cyan" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  <svg
+                    className="w-5 h-5 text-brand-cyan"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                    />
                   </svg>
                   Interactive Mathematical Proof Tree & Telemetry
                 </h2>
                 <p className="text-xs font-mono text-zinc-500 mb-6 leading-relaxed">
-                  Apply logical tactics to branch and navigate the mathematical proof tree. Click nodes to connect/disconnect, track real-time telemetry, and run/rollback proof states.
+                  Apply logical tactics to branch and navigate the mathematical
+                  proof tree. Click nodes to connect/disconnect, track real-time
+                  telemetry, and run/rollback proof states.
                 </p>
                 <SchemaFlowWorkspaceWrapper />
               </div>

@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   IconPlayerPlay,
   IconPower,
   IconTerminal,
   IconAdjustments,
 } from "@tabler/icons-react";
+import { FullscreenButton } from "@/components/arcade/FullscreenButton";
 import {
   PreGameSetupWizard,
   getSavedSetupConfig,
@@ -57,9 +58,56 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
   const [bootProgress, setBootProgress] = useState(0);
 
   const [showWizard, setShowWizard] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const cabinetRef = useRef<HTMLDivElement>(null);
   const [setupConfig, setSetupConfig] = useState<GameSetupConfig>(() =>
     getSavedSetupConfig(gameId)
   );
+
+  const toggleCabinetFullscreen = useCallback(() => {
+    setIsFullscreen((prev) => {
+      const next = !prev;
+      if (
+        next &&
+        typeof document !== "undefined" &&
+        cabinetRef.current?.requestFullscreen
+      ) {
+        cabinetRef.current.requestFullscreen().catch(() => {});
+      } else if (
+        !next &&
+        typeof document !== "undefined" &&
+        document.fullscreenElement
+      ) {
+        document.exitFullscreen().catch(() => {});
+      }
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (typeof document !== "undefined") {
+        setIsFullscreen(!!document.fullscreenElement);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "f" || e.key === "F") {
+        const target = e.target as HTMLElement | null;
+        if (
+          target &&
+          (target.tagName === "INPUT" || target.tagName === "TEXTAREA")
+        )
+          return;
+        toggleCabinetFullscreen();
+      }
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [toggleCabinetFullscreen]);
 
   const colors = {
     amber: {
@@ -127,19 +175,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
       buttonShadow: "shadow-rose-500/40",
       accent: "rose",
     },
-  }[accentColor || "amber"] || {
-    border: "border-amber-500/30",
-    borderHover: "hover:border-amber-400/50",
-    bgGlow: "bg-amber-500/5",
-    text: "text-amber-400",
-    textDark: "text-amber-600",
-    shadow: "shadow-amber-500/10",
-    buttonBg: "bg-amber-500",
-    buttonHover: "hover:bg-amber-400",
-    buttonBorder: "border-amber-700",
-    buttonShadow: "shadow-amber-500/40",
-    accent: "amber",
-  };
+  }[accentColor];
 
   const handlePrefetch = () => {
     if (!isPrefetched) {
@@ -171,7 +207,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
           const next = prev + Math.floor(Math.random() * 30) + 25;
           if (next >= 100) {
             setIsLaunched(true);
-            setShowWizard(true);
+            setShowWizard(false); // Quick-play instant start per ADR 0031
             setIsWarmingUp(false);
             return 100;
           }
@@ -192,6 +228,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
   const handleExit = () => {
     setIsLaunched(false);
     setIsWarmingUp(false);
+    setIsFullscreen(false);
     setBootProgress(0);
     onExit?.();
   };
@@ -207,7 +244,12 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
 
     return (
       <div
-        className="relative w-full flex flex-col items-center max-w-full min-w-0 @container"
+        ref={cabinetRef}
+        className={`relative w-full flex flex-col items-center max-w-full min-w-0 @container transition-all duration-300 ${
+          isFullscreen
+            ? "fixed inset-0 z-50 w-full h-[100dvh] max-h-[100dvh] max-w-none rounded-none border-none bg-black p-2 sm:p-4 overflow-hidden select-none touch-none justify-between"
+            : ""
+        }`}
         style={
           {
             "--layout-dock-height": controlDock ? "120px" : "0px",
@@ -225,10 +267,88 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
           {statusAnnouncement || `${title} cabinet active.`}
         </div>
 
+        {/* Fullscreen Mode: Floating Glassmorphic Pill Header */}
+        {isFullscreen ? (
+          <div className="absolute top-3 right-3 z-50 flex items-center gap-1.5 p-1 bg-black/85 backdrop-blur-md rounded-2xl border border-zinc-700/80 shadow-2xl select-none">
+            <FullscreenButton
+              isFullscreen={isFullscreen}
+              onToggle={toggleCabinetFullscreen}
+              variant="header"
+            />
+            <button
+              type="button"
+              onClick={() => setShowWizard(true)}
+              className="px-2.5 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-amber-400 rounded-xl border border-amber-500/30 transition-all font-mono font-bold text-xs flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
+              title="Pre-Game Setup Wizard"
+            >
+              <IconAdjustments className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Setup</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleExit}
+              className="px-2.5 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-zinc-400 hover:text-red-400 rounded-xl border border-neutral-800 transition-all font-mono font-bold text-xs flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
+              title="Reset / Power Off Cabinet"
+            >
+              <IconPower className="w-3.5 h-3.5 text-red-500" />
+              <span className="hidden sm:inline">Power</span>
+            </button>
+          </div>
+        ) : (
+          /* Windowed Mode: Cabinet Marquee / Top Frame Bezel Header Bar */
+          <div className="w-full flex items-center justify-between px-3.5 py-2 bg-zinc-950/95 border border-zinc-800 rounded-t-2xl font-mono text-xs text-zinc-400 select-none backdrop-blur-md gap-2 shrink-0 z-20">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399] shrink-0" />
+              <span className="font-bold tracking-wider text-zinc-200 text-xs uppercase truncate">
+                {title}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+              <FullscreenButton
+                isFullscreen={isFullscreen}
+                onToggle={toggleCabinetFullscreen}
+                variant="header"
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowWizard(true)}
+                className="px-2.5 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-amber-400 rounded-xl border border-amber-500/30 transition-all font-mono font-bold text-xs flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
+                title="Pre-Game Setup Wizard"
+              >
+                <IconAdjustments className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Setup</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleExit}
+                className="px-2.5 py-1.5 bg-neutral-900/90 hover:bg-neutral-800 text-zinc-400 hover:text-red-400 rounded-xl border border-neutral-800 transition-all font-mono font-bold text-xs flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
+                title="Reset / Power Off Cabinet"
+              >
+                <IconPower className="w-3.5 h-3.5 text-red-500" />
+                <span className="hidden sm:inline">Power</span>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Game Area Container with Dynamic Viewport Height Budgeting */}
         <div
-          className={`w-full relative rounded-2xl border-2 transition-all duration-300 overflow-y-auto overflow-x-hidden max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--layout-dock-height,64px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] min-h-[380px] flex flex-col items-center justify-center bg-black ${bezelClasses}`}
+          className={`w-full relative ${
+            isFullscreen
+              ? "flex-1 max-h-none h-full rounded-2xl border-2"
+              : "border-2 border-t-0 rounded-b-2xl max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--layout-dock-height,64px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] min-h-[380px]"
+          } transition-all duration-300 overflow-y-auto overflow-x-hidden flex flex-col items-center justify-center bg-black ${bezelClasses}`}
         >
+          {/* Floating Exit Button for full window viewports */}
+          <FullscreenButton
+            isFullscreen={isFullscreen}
+            onToggle={toggleCabinetFullscreen}
+            variant="floating"
+          />
+
           {children}
 
           {/* 3-Step Setup Wizard Overlay prior to active gameplay / when reconfiguring */}
@@ -247,34 +367,46 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
 
         {/* Optional Control Dock Slot (e.g. Virtual Gamepad, Bezel cluster) */}
         {controlDock && (
-          <div className="w-full mt-3 flex justify-center">{controlDock}</div>
+          <div className="w-full mt-3 flex justify-center shrink-0">
+            {controlDock}
+          </div>
         )}
 
-        {/* Discrete Retro Controller Menu */}
-        <div className="mt-4 flex items-center justify-between w-full border border-zinc-800 bg-zinc-900/60 rounded-2xl px-4 py-2 font-mono text-xs text-zinc-500 flex-wrap gap-2">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="uppercase tracking-wider">Cabinet Engaged</span>
-          </div>
+        {/* Discrete Retro Controller Menu (visible when not in full-screen) */}
+        {!isFullscreen && (
+          <div className="mt-3 flex items-center justify-between w-full border border-zinc-800 bg-zinc-900/60 rounded-2xl px-4 py-2 font-mono text-xs text-zinc-500 flex-wrap gap-2 shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="uppercase tracking-wider">Cabinet Engaged</span>
+            </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowWizard(true)}
-              className="px-3 py-1 bg-zinc-950 text-amber-400 hover:text-amber-300 rounded-lg border border-amber-500/30 transition-all font-bold uppercase text-[10px] tracking-wider flex items-center gap-1 hover:bg-zinc-900 hover:border-amber-500/50 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
-            >
-              <IconAdjustments className="w-3.5 h-3.5 text-amber-400" />
-              <span>Setup Wizard</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <FullscreenButton
+                isFullscreen={isFullscreen}
+                onToggle={toggleCabinetFullscreen}
+                variant="header"
+              />
 
-            <button
-              onClick={handleExit}
-              className="px-3 py-1 bg-zinc-950 text-zinc-400 hover:text-white rounded-lg border border-zinc-800 transition-all font-bold uppercase text-[10px] tracking-wider flex items-center gap-1 hover:bg-zinc-900 hover:border-zinc-700 cursor-pointer focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
-            >
-              <IconPower className="w-3.5 h-3.5 text-red-500" />
-              <span>Reset Cabinet</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => setShowWizard(true)}
+                className="px-3 py-1 bg-zinc-950 text-amber-400 hover:text-amber-300 rounded-lg border border-amber-500/30 transition-all font-bold uppercase text-[10px] tracking-wider flex items-center gap-1 hover:bg-zinc-900 hover:border-amber-500/50 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none"
+              >
+                <IconAdjustments className="w-3.5 h-3.5 text-amber-400" />
+                <span>Setup Wizard</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleExit}
+                className="px-3 py-1 bg-zinc-950 text-zinc-400 hover:text-white rounded-lg border border-zinc-800 transition-all font-bold uppercase text-[10px] tracking-wider flex items-center gap-1 hover:bg-zinc-900 hover:border-zinc-700 cursor-pointer focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
+              >
+                <IconPower className="w-3.5 h-3.5 text-red-500" />
+                <span>Reset Cabinet</span>
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     );
   }

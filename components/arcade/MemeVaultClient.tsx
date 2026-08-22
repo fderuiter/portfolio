@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useSyncExternalStore, useCallback, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useSyncExternalStore,
+  useCallback,
+  useRef,
+} from "react";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
@@ -50,10 +56,10 @@ function getAchievementsServerSnapshot(): string {
 }
 
 // 24-Bar Architectural Web Audio Spectrum Visualizer
-const AudioWaveformVisualizer: React.FC<{ isPlaying: boolean; soundLabel?: string }> = ({
-  isPlaying,
-  soundLabel,
-}) => {
+const AudioWaveformVisualizer: React.FC<{
+  isPlaying: boolean;
+  soundLabel?: string;
+}> = ({ isPlaying, soundLabel }) => {
   const barRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   useEffect(() => {
@@ -83,7 +89,7 @@ const AudioWaveformVisualizer: React.FC<{ isPlaying: boolean; soundLabel?: strin
           scaleVal = clamp(base + spike, 0.15, 1.0);
         } else {
           // Idle ambient breath
-          scaleVal = 0.10 + Math.sin(currentTime * 0.002 + i * 0.3) * 0.06;
+          scaleVal = 0.1 + Math.sin(currentTime * 0.002 + i * 0.3) * 0.06;
         }
         el.style.setProperty("--bar-scale", scaleVal.toFixed(4));
       }
@@ -98,18 +104,27 @@ const AudioWaveformVisualizer: React.FC<{ isPlaying: boolean; soundLabel?: strin
     <div className="relative rounded-2xl border border-emerald-500/20 bg-slate-950/80 p-4 sm:p-5 backdrop-blur-md overflow-hidden mb-8">
       <div className="flex items-center justify-between gap-3 mb-3 text-xs">
         <div className="flex items-center gap-2 text-emerald-400 font-bold">
-          <IconActivity className={`w-4 h-4 ${isPlaying ? "animate-pulse" : ""}`} />
+          <IconActivity
+            className={`w-4 h-4 ${isPlaying ? "animate-pulse" : ""}`}
+          />
           <span className="uppercase tracking-wider text-[11px]">
-            {isPlaying ? `Synthesizing Waveform: ${soundLabel}` : "Web Audio Synthesis Engine (Idle)"}
+            {isPlaying
+              ? `Synthesizing Waveform: ${soundLabel}`
+              : "Web Audio Synthesis Engine (Idle)"}
           </span>
         </div>
-        <span className="font-mono text-[10px] text-zinc-500">24-Channel DSP · 44.1kHz</span>
+        <span className="font-mono text-[10px] text-zinc-500">
+          24-Channel DSP · 44.1kHz
+        </span>
       </div>
 
       {/* Spectrum Waveform Bars */}
       <div className="flex items-end justify-between gap-1 sm:gap-1.5 h-14 sm:h-16 w-full px-1">
         {Array.from({ length: 24 }).map((_, idx) => (
-          <div key={idx} className="flex-1 flex flex-col items-center justify-end h-full">
+          <div
+            key={idx}
+            className="flex-1 flex flex-col items-center justify-end h-full"
+          >
             <div
               className={`w-full h-full rounded-t-sm overflow-hidden ${
                 isPlaying ? "shadow-[0_0_8px_rgba(16,185,129,0.5)]" : ""
@@ -159,9 +174,13 @@ export const MemeVaultClient: React.FC = () => {
   const [activeSound, setActiveSound] = useState<string | null>(null);
   const [activeSoundLabel, setActiveSoundLabel] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [asciiTab, setAsciiTab] = useState<"cowsay" | "duck" | "loon" | "train">("cowsay");
+  const [asciiTab, setAsciiTab] = useState<
+    "cowsay" | "duck" | "loon" | "train"
+  >("cowsay");
   const [reactions, setReactions] = useState<Record<string, number>>({});
-  const [celebrationAchievement, setCelebrationAchievement] = useState<string | null>(null);
+  const [celebrationAchievement, setCelebrationAchievement] = useState<
+    string | null
+  >(null);
   const soundTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -249,7 +268,9 @@ export const MemeVaultClient: React.FC = () => {
                   <h4 className="text-xs uppercase tracking-wider text-amber-400 font-bold">
                     Secret Achievement Unlocked!
                   </h4>
-                  <p className="text-sm text-white font-semibold">{celebrationAchievement}</p>
+                  <p className="text-sm text-white font-semibold">
+                    {celebrationAchievement}
+                  </p>
                 </div>
               </div>
               <button
@@ -299,7 +320,9 @@ export const MemeVaultClient: React.FC = () => {
           </h1>
 
           <p className="text-sm sm:text-base text-slate-300 font-sans leading-relaxed mb-6">
-            Synthesized Web Audio sound effects, collectible Easter egg achievement trophies, and curated engineering &amp; CDISC compliance humor from Lake Minnetonka.
+            Synthesized Web Audio sound effects, collectible Easter egg
+            achievement trophies, and curated engineering &amp; CDISC compliance
+            humor from Lake Minnetonka.
           </p>
 
           {/* Achievement Progress Bar */}
@@ -317,7 +340,11 @@ export const MemeVaultClient: React.FC = () => {
               <motion.div
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: progressPercent / 100 }}
-                transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.8, ease: "easeOut" }}
+                transition={
+                  prefersReducedMotion
+                    ? { duration: 0 }
+                    : { duration: 0.8, ease: "easeOut" }
+                }
                 className="h-full w-full bg-gradient-to-r from-emerald-500 via-cyan-400 to-amber-400 rounded-full origin-left transform-gpu"
                 style={{ transformOrigin: "left", willChange: "transform" }}
               />
@@ -333,9 +360,12 @@ export const MemeVaultClient: React.FC = () => {
             <IconVolume className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white">8-Channel Retro Soundboard</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-white">
+              8-Channel Retro Soundboard
+            </h2>
             <p className="text-xs text-slate-400 font-sans">
-              Pure client-side Web Audio synthesis with zero external audio assets.
+              Pure client-side Web Audio synthesis with zero external audio
+              assets.
             </p>
           </div>
         </div>
@@ -350,13 +380,14 @@ export const MemeVaultClient: React.FC = () => {
           {SOUNDBOARD_BUTTONS.map((btn) => {
             const isPlaying = activeSound === btn.id;
             return (
-              <motion.button
+              <button
                 key={btn.id}
+                type="button"
                 onClick={() => handlePlaySound(btn)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.96 }}
-                className={`relative flex flex-col items-start p-4 sm:p-5 rounded-2xl border bg-gradient-to-b ${btn.accent} transition-all duration-200 text-left focus:outline-none focus:ring-2 focus:ring-emerald-400 shadow-md active:scale-[0.97] ${
-                  isPlaying ? "ring-2 ring-white shadow-[0_0_25px_rgba(255,255,255,0.3)]" : ""
+                className={`relative flex flex-col items-start p-4 sm:p-5 rounded-2xl border bg-gradient-to-b ${btn.accent} transition-all duration-200 text-left focus:outline-none focus:ring-2 focus:ring-emerald-400 shadow-md hover:scale-[1.02] active:scale-[0.96] cursor-pointer ${
+                  isPlaying
+                    ? "ring-2 ring-white shadow-[0_0_25px_rgba(255,255,255,0.3)]"
+                    : ""
                 }`}
                 aria-label={`Play ${btn.label}`}
               >
@@ -366,8 +397,12 @@ export const MemeVaultClient: React.FC = () => {
                     {btn.category}
                   </span>
                 </div>
-                <h3 className="font-bold text-sm sm:text-base text-white mb-1">{btn.label}</h3>
-                <p className="text-xs text-slate-300/80 font-sans leading-snug">{btn.description}</p>
+                <h3 className="font-bold text-sm sm:text-base text-white mb-1">
+                  {btn.label}
+                </h3>
+                <p className="text-xs text-slate-300/80 font-sans leading-snug">
+                  {btn.description}
+                </p>
 
                 {isPlaying && (
                   <motion.div
@@ -379,7 +414,7 @@ export const MemeVaultClient: React.FC = () => {
                     <span className="w-1 h-3.5 bg-emerald-400 rounded-full animate-bounce delay-150" />
                   </motion.div>
                 )}
-              </motion.button>
+              </button>
             );
           })}
         </div>
@@ -392,9 +427,12 @@ export const MemeVaultClient: React.FC = () => {
             <IconTrophy className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white">Easter Egg Trophy Case</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-white">
+              Easter Egg Trophy Case
+            </h2>
             <p className="text-xs text-slate-400 font-sans">
-              Discover secret interactions across the terminal, footer, command palette, and games.
+              Discover secret interactions across the terminal, footer, command
+              palette, and games.
             </p>
           </div>
         </div>
@@ -417,7 +455,9 @@ export const MemeVaultClient: React.FC = () => {
                       {ach.icon}
                     </span>
                     <div>
-                      <h3 className="font-bold text-sm text-white">{ach.title}</h3>
+                      <h3 className="font-bold text-sm text-white">
+                        {ach.title}
+                      </h3>
                       <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
                         {isUnlocked ? "Unlocked 🏆" : "Locked 🔒"}
                       </span>
@@ -451,9 +491,12 @@ export const MemeVaultClient: React.FC = () => {
               <IconSparkles className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white">Engineering Meme Deck</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-white">
+                Engineering Meme Deck
+              </h2>
               <p className="text-xs text-slate-400 font-sans">
-                Curated one-liners from distributed systems, CDISC EDC, and startup life.
+                Curated one-liners from distributed systems, CDISC EDC, and
+                startup life.
               </p>
             </div>
           </div>
@@ -492,7 +535,9 @@ export const MemeVaultClient: React.FC = () => {
                     <CopyButton
                       text={`"${q.quote}" — ${q.author}`}
                       icon={<IconCopy className="w-4 h-4" />}
-                      copiedIcon={<IconCheck className="w-4 h-4 text-emerald-400" />}
+                      copiedIcon={
+                        <IconCheck className="w-4 h-4 text-emerald-400" />
+                      }
                       className="p-1.5 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors cursor-pointer"
                       title="Copy Quote"
                       aria-label="Copy Quote"
@@ -528,7 +573,9 @@ export const MemeVaultClient: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
             <IconTerminal className="w-5 h-5 text-emerald-400" />
-            <h2 className="text-lg font-bold text-white">ASCII Terminal Studio</h2>
+            <h2 className="text-lg font-bold text-white">
+              ASCII Terminal Studio
+            </h2>
           </div>
 
           <div className="flex gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs">

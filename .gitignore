@@ -51,3 +51,6 @@ next-env.d.ts
 *.log
 app/theme.css
 /.scratch
+
+# clerk configuration (can include secrets)
+/.clerk/

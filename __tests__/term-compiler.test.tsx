@@ -13,8 +13,20 @@ import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 // Mock framer-motion to prevent transition freezes in jsdom tests
 vi.mock("framer-motion", async (importOriginal) => {
   const actual = await importOriginal<typeof import("framer-motion")>();
-  const Component = ({ children, className, style, onClick, ...props }: any) => {
-    const { initial: _initial, animate: _animate, exit: _exit, transition: _transition, ...rest } = props;
+  const Component = ({
+    children,
+    className,
+    style,
+    onClick,
+    ...props
+  }: any) => {
+    const {
+      initial: _initial,
+      animate: _animate,
+      exit: _exit,
+      transition: _transition,
+      ...rest
+    } = props;
     return (
       <div className={className} style={style} onClick={onClick} {...rest}>
         {children}
@@ -110,7 +122,8 @@ describe("Centralized Term Template Compiler", () => {
     });
 
     it("should not transform text inside HTML tag attributes", () => {
-      const rawHtml = '<a href="/docs/gxp-compliance" class="ecrf-link">Read GxP Guidelines</a>';
+      const rawHtml =
+        '<a href="/docs/gxp-compliance" class="ecrf-link">Read GxP Guidelines</a>';
       const compiled = compileTerms(rawHtml);
 
       expect(compiled).toContain('href="/docs/gxp-compliance"');
@@ -126,6 +139,18 @@ describe("Centralized Term Template Compiler", () => {
       // Count occurrences of data-key="gxp-term"
       const matches = compiled.match(/data-key="gxp-term"/g);
       expect(matches?.length).toBe(1);
+    });
+
+    it("should not transform text inside markdown inline code backticks `...` or fenced blocks", () => {
+      const rawMarkdown =
+        "We compile `JSON Schema` and `AST` structures into AST graphs.";
+      const compiled = compileTerms(rawMarkdown);
+
+      expect(compiled).toContain("`JSON Schema`");
+      expect(compiled).toContain("`AST`");
+      expect(compiled).not.toContain("`<span");
+      // Plain text AST outside backticks should be compiled
+      expect(compiled).toContain('data-key="ast-term"');
     });
   });
 
@@ -148,17 +173,24 @@ describe("Centralized Term Template Compiler", () => {
     });
 
     it("should abort with clear errors when malformed or invalid term tags are present", () => {
-      const malformedKey = '<span data-key="unknown-key" data-term="x" data-definition="y">Text</span>';
+      const malformedKey =
+        '<span data-key="unknown-key" data-term="x" data-definition="y">Text</span>';
       const resKey = validateTermTags(malformedKey);
       expect(resKey.valid).toBe(false);
-      expect(resKey.errors[0]).toContain('invalid/unrecognized data-key="unknown-key"');
+      expect(resKey.errors[0]).toContain(
+        'invalid/unrecognized data-key="unknown-key"'
+      );
 
-      const missingAttr = '<span data-key="gxp-term" data-term="industry-standard">GxP</span>';
+      const missingAttr =
+        '<span data-key="gxp-term" data-term="industry-standard">GxP</span>';
       const resAttr = validateTermTags(missingAttr);
       expect(resAttr.valid).toBe(false);
-      expect(resAttr.errors[0]).toContain("has missing/empty attributes: [data-definition]");
+      expect(resAttr.errors[0]).toContain(
+        "has missing/empty attributes: [data-definition]"
+      );
 
-      const invalidTag = '<div data-key="gxp-term" data-term="industry-standard" data-definition="def">GxP</div>';
+      const invalidTag =
+        '<div data-key="gxp-term" data-term="industry-standard" data-definition="def">GxP</div>';
       const resTag = validateTermTags(invalidTag);
       expect(resTag.valid).toBe(false);
       expect(resTag.errors[0]).toContain("must be <span> or <abbr>");
@@ -167,7 +199,8 @@ describe("Centralized Term Template Compiler", () => {
 
   describe("4. Integration with RichNarrative & Terminology Toggle State", () => {
     it("should render compiled terms with Tooltip interactive markup", () => {
-      const rawText = "Lead technical architect for GxP-compliant eClinical databases.";
+      const rawText =
+        "Lead technical architect for GxP-compliant eClinical databases.";
       const compiledHtml = compileTerms(rawText);
 
       const { container } = render(
@@ -182,7 +215,9 @@ describe("Centralized Term Template Compiler", () => {
     });
 
     it("should update tooltips across timeline and case study views when toggling simplified mode", async () => {
-      const compiledHtml = compileTerms("Translating protocols into eCRF systems.");
+      const compiledHtml = compileTerms(
+        "Translating protocols into eCRF systems."
+      );
 
       const { container } = render(
         <TerminologyProvider>
@@ -194,11 +229,15 @@ describe("Centralized Term Template Compiler", () => {
       expect(container.textContent).toContain("eCRF");
 
       // Verify fallback timeline data carries 100% valid compiled terms
-      const timelineRes = validateTermTags(dictionary.detailed.timeline[0].recruiterDescription);
+      const timelineRes = validateTermTags(
+        dictionary.detailed.timeline[0].recruiterDescription
+      );
       expect(timelineRes.valid).toBe(true);
 
       // Verify fallback case study data carries 100% valid compiled terms
-      const studyRes = validateTermTags(FALLBACK_CASE_STUDIES[0].editorial_content);
+      const studyRes = validateTermTags(
+        FALLBACK_CASE_STUDIES[0].editorial_content
+      );
       expect(studyRes.valid).toBe(true);
     });
   });

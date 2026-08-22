@@ -6,9 +6,9 @@
 
 # Function: getGitHubStats()
 
-> **getGitHubStats**(`owner`, `repo`, `fallbackLanguage?`): `Promise`\<[`GitHubStats`](../interfaces/GitHubStats.md) \| `null`\>
+> **getGitHubStats**(`owner`, `repo`, `fallbackLanguage?`, `identifier?`): `Promise`\<[`GitHubStats`](../interfaces/GitHubStats.md) \| `null`\>
 
-Defined in: [lib/github.ts:209](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L209)
+Defined in: [lib/github.ts:239](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L239)
 
 Public facing API client wrapper.
 Integrates Next.js unstable_cache and seamlessly falls back to direct API fetching
@@ -26,6 +26,10 @@ when rate limits/404s are encountered.
 `string`
 
 ### fallbackLanguage?
+
+`string`
+
+### identifier?
 
 `string`
 

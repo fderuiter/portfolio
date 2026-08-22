@@ -89,8 +89,19 @@ describe("StudioHeader & Keyboard Shortcuts Suite", () => {
       );
     });
 
+    const moreBtn = container.querySelector(
+      "button[aria-label='More Studio Actions']"
+    );
+    if (moreBtn) {
+      await act(async () => {
+        (moreBtn as HTMLButtonElement).click();
+      });
+    }
+
     const howItWorksBtn = Array.from(container.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("How It Works")
+      (b) =>
+        b.textContent?.includes("Interactive Guide") ||
+        b.textContent?.includes("How")
     );
     expect(howItWorksBtn).toBeDefined();
 
