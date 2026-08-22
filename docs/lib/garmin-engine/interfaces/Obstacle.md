@@ -6,7 +6,7 @@
 
 # Interface: Obstacle
 
-Defined in: [lib/garmin-engine.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L79)
+Defined in: [lib/garmin-engine.ts:122](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L122)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/garmin-engine.ts:79](https://github.com/fderuiter/portfolio/blo
 
 > **height**: `number`
 
-Defined in: [lib/garmin-engine.ts:84](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L84)
+Defined in: [lib/garmin-engine.ts:127](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L127)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/garmin-engine.ts:84](https://github.com/fderuiter/portfolio/blo
 
 > **id**: `number`
 
-Defined in: [lib/garmin-engine.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L80)
+Defined in: [lib/garmin-engine.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L123)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/garmin-engine.ts:80](https://github.com/fderuiter/portfolio/blo
 
 > **label**: `string`
 
-Defined in: [lib/garmin-engine.ts:86](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L86)
+Defined in: [lib/garmin-engine.ts:129](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L129)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/garmin-engine.ts:86](https://github.com/fderuiter/portfolio/blo
 
 > **speed**: `number`
 
-Defined in: [lib/garmin-engine.ts:87](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L87)
+Defined in: [lib/garmin-engine.ts:130](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L130)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/garmin-engine.ts:87](https://github.com/fderuiter/portfolio/blo
 
 > **type**: [`ObstacleType`](../type-aliases/ObstacleType.md)
 
-Defined in: [lib/garmin-engine.ts:85](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L85)
+Defined in: [lib/garmin-engine.ts:128](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L128)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/garmin-engine.ts:85](https://github.com/fderuiter/portfolio/blo
 
 > `optional` **variablePayload?**: [`VariableType`](../type-aliases/VariableType.md)
 
-Defined in: [lib/garmin-engine.ts:88](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L88)
+Defined in: [lib/garmin-engine.ts:131](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L131)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/garmin-engine.ts:88](https://github.com/fderuiter/portfolio/blo
 
 > **width**: `number`
 
-Defined in: [lib/garmin-engine.ts:83](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L83)
+Defined in: [lib/garmin-engine.ts:126](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L126)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/garmin-engine.ts:83](https://github.com/fderuiter/portfolio/blo
 
 > **x**: `number`
 
-Defined in: [lib/garmin-engine.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L81)
+Defined in: [lib/garmin-engine.ts:124](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L124)
 
 ***
 
@@ -78,4 +78,4 @@ Defined in: [lib/garmin-engine.ts:81](https://github.com/fderuiter/portfolio/blo
 
 > **y**: `number`
 
-Defined in: [lib/garmin-engine.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L82)
+Defined in: [lib/garmin-engine.ts:125](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L125)

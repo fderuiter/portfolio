@@ -9,6 +9,7 @@
 ## Interfaces
 
 - [DiagnosticCheckResult](interfaces/DiagnosticCheckResult.md)
+- [DiagnosticSummary](interfaces/DiagnosticSummary.md)
 - [DoctorOptions](interfaces/DoctorOptions.md)
 
 ## Functions
@@ -16,10 +17,12 @@
 - [checkAccessibilityStandards](functions/checkAccessibilityStandards.md)
 - [checkDefectRemediationInvariants](functions/checkDefectRemediationInvariants.md)
 - [checkDesignTokens](functions/checkDesignTokens.md)
+- [checkDirectoryTopology](functions/checkDirectoryTopology.md)
 - [checkDocumentationParity](functions/checkDocumentationParity.md)
 - [checkHydrationSafety](functions/checkHydrationSafety.md)
 - [checkLayoutTextClippingInvariants](functions/checkLayoutTextClippingInvariants.md)
 - [checkMigrationGuard](functions/checkMigrationGuard.md)
+- [checkModuleBoundaries](functions/checkModuleBoundaries.md)
 - [checkNavbarHierarchy](functions/checkNavbarHierarchy.md)
 - [checkOnboardingDocsDrift](functions/checkOnboardingDocsDrift.md)
 - [checkOpenApiParity](functions/checkOpenApiParity.md)
@@ -28,6 +31,8 @@
 - [checkProactiveDefectInterception](functions/checkProactiveDefectInterception.md)
 - [checkRouteIndexing](functions/checkRouteIndexing.md)
 - [checkSecretLeaks](functions/checkSecretLeaks.md)
+- [checkSubRoutePerformance](functions/checkSubRoutePerformance.md)
+- [checkTestFixtureHygiene](functions/checkTestFixtureHygiene.md)
 - [checkTestPathResolution](functions/checkTestPathResolution.md)
 - [checkWorkspaceIdeConfig](functions/checkWorkspaceIdeConfig.md)
 - [printDoctorReport](functions/printDoctorReport.md)

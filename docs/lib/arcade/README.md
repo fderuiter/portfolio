@@ -8,6 +8,36 @@
 
 ## References
 
+### ArcadeEngine
+
+Re-exports [ArcadeEngine](core/engine/classes/ArcadeEngine.md)
+
+***
+
+### ArcadeGameLoop
+
+Re-exports [ArcadeGameLoop](core/game-loop/classes/ArcadeGameLoop.md)
+
+***
+
+### ArcadeGameLoopOptions
+
+Re-exports [ArcadeGameLoopOptions](core/game-loop/interfaces/ArcadeGameLoopOptions.md)
+
+***
+
+### ArcadeInputManager
+
+Re-exports [ArcadeInputManager](core/input/classes/ArcadeInputManager.md)
+
+***
+
+### ArcadeViewport
+
+Re-exports [ArcadeViewport](core/viewport/classes/ArcadeViewport.md)
+
+***
+
 ### CRT\_CALIBRATION\_STORAGE\_KEY
 
 Re-exports [CRT_CALIBRATION_STORAGE_KEY](crt-pipeline/variables/CRT_CALIBRATION_STORAGE_KEY.md)
@@ -44,9 +74,21 @@ Re-exports [DEFAULT_CRT_CALIBRATION](crt-pipeline/variables/DEFAULT_CRT_CALIBRAT
 
 ***
 
+### GamePoint
+
+Re-exports [GamePoint](core/viewport/interfaces/GamePoint.md)
+
+***
+
 ### getOrCreatePhosphorPattern
 
 Re-exports [getOrCreatePhosphorPattern](crt-pipeline/functions/getOrCreatePhosphorPattern.md)
+
+***
+
+### InputSnapshot
+
+Re-exports [InputSnapshot](core/input/interfaces/InputSnapshot.md)
 
 ***
 
@@ -62,9 +104,33 @@ Re-exports [loadCRTCalibration](crt-pipeline/functions/loadCRTCalibration.md)
 
 ***
 
+### ObjectPool
+
+Re-exports [ObjectPool](core/pool/classes/ObjectPool.md)
+
+***
+
+### ObjectPoolConfig
+
+Re-exports [ObjectPoolConfig](core/pool/interfaces/ObjectPoolConfig.md)
+
+***
+
 ### PhosphorMaskType
 
 Re-exports [PhosphorMaskType](crt-pipeline/type-aliases/PhosphorMaskType.md)
+
+***
+
+### PoolOverflowPolicy
+
+Re-exports [PoolOverflowPolicy](core/pool/type-aliases/PoolOverflowPolicy.md)
+
+***
+
+### PrimaryPointerState
+
+Re-exports [PrimaryPointerState](core/input/interfaces/PrimaryPointerState.md)
 
 ***
 
@@ -77,3 +143,39 @@ Re-exports [renderCRTEffects](crt-pipeline/functions/renderCRTEffects.md)
 ### saveCRTCalibration
 
 Re-exports [saveCRTCalibration](crt-pipeline/functions/saveCRTCalibration.md)
+
+***
+
+### screenToGameCoords
+
+Re-exports [screenToGameCoords](core/viewport/functions/screenToGameCoords.md)
+
+***
+
+### ViewportConfig
+
+Re-exports [ViewportConfig](core/viewport/interfaces/ViewportConfig.md)
+
+***
+
+### ViewportMetrics
+
+Re-exports [ViewportMetrics](core/viewport/interfaces/ViewportMetrics.md)
+
+***
+
+### ViewportMode
+
+Re-exports [ViewportMode](core/viewport/type-aliases/ViewportMode.md)
+
+***
+
+### VirtualAction
+
+Re-exports [VirtualAction](core/input/type-aliases/VirtualAction.md)
+
+***
+
+### VirtualDirection
+
+Re-exports [VirtualDirection](core/input/type-aliases/VirtualDirection.md)

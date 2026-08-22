@@ -8,4 +8,4 @@
 
 > **CorporateHazard** = [`PortfolioHazard`](../interfaces/PortfolioHazard.md)
 
-Defined in: [lib/working-with-duck-engine.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L67)
+Defined in: [lib/working-with-duck-engine.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L75)

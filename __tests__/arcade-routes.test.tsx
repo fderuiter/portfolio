@@ -96,20 +96,24 @@ vi.mock("framer-motion", async (importOriginal) => {
 });
 
 // Mock AudioProvider
-vi.mock("@/components/providers/AudioProvider", () => ({
-  useAudio: () => ({
-    playNote: vi.fn(),
-    playSuccess: vi.fn(),
-    playHover: vi.fn(),
-    volume: 0.8,
-    muted: false,
-    profile: "8-bit",
-    setVolume: vi.fn(),
-    setMuted: vi.fn(),
-    setProfile: vi.fn(),
-  }),
-  AudioProvider: ({ children }: any) => <>{children}</>,
-}));
+vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/providers/AudioProvider")>();
+  return {
+    ...actual,
+    useAudio: () => ({
+      playNote: vi.fn(),
+      playSuccess: vi.fn(),
+      playHover: vi.fn(),
+      volume: 0.8,
+      muted: false,
+      profile: "8-bit",
+      setVolume: vi.fn(),
+      setMuted: vi.fn(),
+      setProfile: vi.fn(),
+    }),
+    AudioProvider: ({ children }: any) => <>{children}</>,
+  };
+});
 
 // Mock useTelemetry
 vi.mock("@/hooks/useTelemetry", () => ({
@@ -177,7 +181,7 @@ describe("Arcade Dedicated Routes Suite", () => {
     expect(container.textContent).toContain("Working With Duck");
     expect(container.textContent).toContain("Laser Loon: Quest for the State Flag");
     expect(container.textContent).toContain("Quasi-Perfect Puzzler");
-    expect(container.textContent).toContain("Garmin Connect IQ 32KB Memory Runner");
+    expect(container.textContent).toContain("Monkey C Mayhem: Garmin Schvitz App");
     expect(container.textContent).toContain("Clinical Trial Chaos: CDISC Compliance");
     expect(container.textContent).toContain("Retro Labyrinth: Graveyard Roguelike");
 
@@ -252,8 +256,8 @@ describe("Arcade Dedicated Routes Suite", () => {
       root.render(<GarminWatchPage />);
     });
     expect(container.textContent).toContain("Arcade Hub");
-    expect(container.textContent).toContain("Garmin Connect IQ");
-    expect(container.textContent).toContain("32KB Memory Runner");
+    expect(container.textContent).toContain("Monkey C Mayhem");
+    expect(container.textContent).toContain("Garmin Schvitz App");
 
     const script = container.querySelector("script[type='application/ld+json']");
     expect(script).not.toBeNull();

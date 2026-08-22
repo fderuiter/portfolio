@@ -12,11 +12,15 @@ import {
   PowerUpInventory,
   PowerUpType,
   ProtocolAmendment,
+  RecordedRuleViolation,
   SDTMRow,
   SignatureReason,
   StationConfig,
 } from "./types";
 import { AMENDMENT_PRESETS } from "./scenarios";
+import { evaluateCondition, evaluateRule } from "../crf/ast-evaluator";
+import { EditCheckRule, StudyProtocol, CRFField } from "../crf/types";
+import { StudyProtocolEngine } from "../crf/study-engine";
 
 export function createInitialScoreState(): GameScoreState {
   return {
@@ -51,7 +55,8 @@ export function createInitialPowerUpInventory(): PowerUpInventory {
     "fda-coffee-break": {
       id: "fda-coffee-break",
       name: "FDA Coffee Break",
-      description: "Sends auditor to cafeteria. Freezes suspicion and auditor movement for 8 seconds.",
+      description:
+        "Sends auditor to cafeteria. Freezes suspicion and auditor movement for 8 seconds.",
       hotkey: "Q",
       charge: 0,
       maxCharge: 3,
@@ -61,7 +66,8 @@ export function createInitialPowerUpInventory(): PowerUpInventory {
     "auto-clean": {
       id: "auto-clean",
       name: "CDISC Auto-Clean",
-      description: "Instantly validates and standardizes all observations on the active dossier.",
+      description:
+        "Instantly validates and standardizes all observations on the active dossier.",
       hotkey: "W",
       charge: 0,
       maxCharge: 4,
@@ -71,7 +77,8 @@ export function createInitialPowerUpInventory(): PowerUpInventory {
     "query-extension": {
       id: "query-extension",
       name: "Site Query Extension",
-      description: "Grants +12 seconds to all active conveyor subjects to avoid overdue timeouts.",
+      description:
+        "Grants +12 seconds to all active conveyor subjects to avoid overdue timeouts.",
       hotkey: "E",
       charge: 0,
       maxCharge: 2,
@@ -81,7 +88,8 @@ export function createInitialPowerUpInventory(): PowerUpInventory {
     "fast-sign": {
       id: "fast-sign",
       name: "Fast-Track 21 CFR Pass",
-      description: "Instant compliant sign & lock of active subject without opening the signature modal.",
+      description:
+        "Instant compliant sign & lock of active subject without opening the signature modal.",
       hotkey: "R",
       charge: 0,
       maxCharge: 5,
@@ -113,22 +121,135 @@ export function createAuditLogEntry(
 }
 
 /**
- * Validates a user's multi-choice answer on a clinical observation.
+ * Validates a user's multi-choice answer on a clinical observation using authored AST conditions.
  */
 export function validateObservationChoice(
   observation: ClinicalObservation,
-  selectedChoice: string
+  selectedChoice: string,
+  activeProtocol?: StudyProtocol | null
 ): {
   observation: ClinicalObservation;
   isValid: boolean;
   explanation: string;
   suspicionDelta: number;
   scoreDelta: number;
+  isAstEvaluated: boolean;
+  ruleName?: string;
 } {
-  const expected = observation.correctedValue ?? observation.rawValue;
-  const isCorrect = selectedChoice.trim() === expected.trim();
+  let ruleToEvaluate: EditCheckRule | undefined = observation.astRule;
+  let ruleName = ruleToEvaluate?.name || `AST Check (${observation.field})`;
 
-  if (isCorrect) {
+  if (activeProtocol) {
+    const protocolRules: EditCheckRule[] = [];
+    if (activeProtocol.forms) {
+      activeProtocol.forms.forEach((form) => {
+        if (form.rules && form.rules.length > 0) {
+          form.rules.forEach((r) => {
+            if (
+              r.targetFieldId === observation.field ||
+              r.targetFieldId === observation.fieldId ||
+              r.triggerFieldIds.includes(observation.field) ||
+              (observation.fieldId &&
+                r.triggerFieldIds.includes(observation.fieldId))
+            ) {
+              protocolRules.push(r);
+            }
+          });
+        }
+      });
+    }
+    if (activeProtocol.rules && activeProtocol.rules.length > 0) {
+      activeProtocol.rules.forEach((r) => {
+        if (
+          r.targetFieldId === observation.field ||
+          r.targetFieldId === observation.fieldId ||
+          r.triggerFieldIds.includes(observation.field) ||
+          (observation.fieldId &&
+            r.triggerFieldIds.includes(observation.fieldId))
+        ) {
+          protocolRules.push(r);
+        }
+      });
+    }
+    if (protocolRules.length > 0) {
+      ruleToEvaluate = protocolRules[0];
+      ruleName = ruleToEvaluate.name;
+    }
+  }
+
+  const fieldValues: Record<
+    string,
+    string | number | boolean | null | undefined
+  > = {
+    [observation.field]: selectedChoice,
+    [observation.field.toLowerCase()]: selectedChoice,
+  };
+  if (observation.fieldId) {
+    fieldValues[observation.fieldId] = selectedChoice;
+    fieldValues[observation.fieldId.toLowerCase()] = selectedChoice;
+  }
+
+  const fieldsList: CRFField[] = [
+    {
+      id: observation.fieldId || observation.field,
+      variableName: observation.field,
+      label: observation.field,
+      dataType: "text",
+      columnSpan: 6,
+      required: true,
+    },
+  ];
+
+  let isValid = false;
+  let explanation = "";
+
+  if (
+    ruleToEvaluate &&
+    ruleToEvaluate.conditions &&
+    ruleToEvaluate.conditions.length > 0
+  ) {
+    isValid = evaluateRule(ruleToEvaluate, fieldValues, fieldsList);
+    if (isValid) {
+      explanation =
+        ruleToEvaluate.description ||
+        `Authored AST Rule '${ruleName}' PASSED: '${selectedChoice}' satisfies condition.`;
+    } else {
+      const failedCond = ruleToEvaluate.conditions[0];
+      explanation =
+        ruleToEvaluate.queryMessage ||
+        `Authored AST Rule '${ruleName}' FAILED: '${selectedChoice}' violates condition (${failedCond.fieldId} ${failedCond.operator} ${failedCond.value}).`;
+    }
+  } else if (
+    observation.astConditions &&
+    observation.astConditions.length > 0
+  ) {
+    isValid = observation.astConditions.every((cond) =>
+      evaluateCondition(cond, fieldValues, fieldsList)
+    );
+    if (isValid) {
+      explanation = `AST Condition PASSED: '${selectedChoice}' satisfies condition.`;
+    } else {
+      explanation = `AST Condition FAILED: '${selectedChoice}' violates condition.`;
+    }
+  } else {
+    // Fallback AST condition evaluation (evaluates via AST evaluateCondition)
+    const expected = observation.correctedValue ?? observation.rawValue;
+    const syntheticCond = {
+      fieldId: observation.field,
+      operator: "eq" as const,
+      value: expected.trim(),
+    };
+    isValid = evaluateCondition(syntheticCond, fieldValues, fieldsList);
+    if (isValid) {
+      explanation =
+        observation.explanation ||
+        `Correct CDISC standardization applied: '${selectedChoice}' complies with ${observation.destination} specification.`;
+    } else {
+      explanation = `Invalid regulatory code: '${selectedChoice}' does not resolve '${observation.field}' (${observation.hint || "Review standard terminology"}).`;
+    }
+  }
+
+  if (isValid) {
     return {
       observation: {
         ...observation,
@@ -136,11 +257,11 @@ export function validateObservationChoice(
         isResolved: true,
       },
       isValid: true,
-      explanation:
-        observation.explanation ||
-        `Correct CDISC standardization applied: '${selectedChoice}' complies with ${observation.destination} specification.`,
+      explanation,
       suspicionDelta: -3,
       scoreDelta: 75,
+      isAstEvaluated: true,
+      ruleName,
     };
   } else {
     return {
@@ -149,9 +270,11 @@ export function validateObservationChoice(
         isResolved: false,
       },
       isValid: false,
-      explanation: `Invalid regulatory code: '${selectedChoice}' does not resolve '${observation.field}' (${observation.hint || "Review standard terminology"}).`,
+      explanation,
       suspicionDelta: 8,
       scoreDelta: -25,
+      isAstEvaluated: true,
+      ruleName,
     };
   }
 }
@@ -163,8 +286,10 @@ export function fixObservation(
   observation: ClinicalObservation,
   suggestedCorrection?: string
 ): { observation: ClinicalObservation; isValid: boolean } {
-  const target = suggestedCorrection ?? observation.correctedValue ?? observation.rawValue;
-  const isValid = target === observation.correctedValue || target.trim().length > 0;
+  const target =
+    suggestedCorrection ?? observation.correctedValue ?? observation.rawValue;
+  const isValid =
+    target === observation.correctedValue || target.trim().length > 0;
 
   return {
     observation: {
@@ -193,11 +318,16 @@ export function calculateSubmissionPoints(
 ): number {
   const basePoints = 200;
   const observationBonus = subject.observations.length * 60;
-  const speedBonus = Math.floor((subject.timeRemaining / subject.maxTime) * 120);
+  const speedBonus = Math.floor(
+    (subject.timeRemaining / subject.maxTime) * 120
+  );
   const saeBonus = subject.isSAE ? 300 : 0;
   const cleanBonus = allClean ? 150 : 0;
 
-  return Math.round((basePoints + observationBonus + speedBonus + saeBonus + cleanBonus) * multiplier);
+  return Math.round(
+    (basePoints + observationBonus + speedBonus + saeBonus + cleanBonus) *
+      multiplier
+  );
 }
 
 /**
@@ -391,7 +521,9 @@ export function verify21CFRSubmission(
   }
 
   // Check if subject has observations matching the target station domain
-  const hasMatchingDomain = subject.observations.some((obs) => obs.destination === targetStation);
+  const hasMatchingDomain = subject.observations.some(
+    (obs) => obs.destination === targetStation
+  );
   if (!hasMatchingDomain) {
     return {
       success: false,
@@ -413,7 +545,8 @@ export function verify21CFRSubmission(
  * Spawns a random mid-game protocol amendment.
  */
 export function triggerRandomAmendment(): ProtocolAmendment {
-  const picked = AMENDMENT_PRESETS[Math.floor(Math.random() * AMENDMENT_PRESETS.length)];
+  const picked =
+    AMENDMENT_PRESETS[Math.floor(Math.random() * AMENDMENT_PRESETS.length)];
   return {
     ...picked,
     timeRemaining: picked.durationSeconds,
@@ -433,14 +566,17 @@ export function generateSDTMDataset(subjects: ClinicalSubject[]): SDTMRow[] {
       // Parse numeric result if present
       const numMatch = obs.currentValue.match(/^[-+]?[0-9]*\.?[0-9]+/);
       const stresn = numMatch ? parseFloat(numMatch[0]) : undefined;
-      const unitMatch = obs.currentValue.replace(/^[-+]?[0-9]*\.?[0-9]+/, "").trim();
+      const unitMatch = obs.currentValue
+        .replace(/^[-+]?[0-9]*\.?[0-9]+/, "")
+        .trim();
 
       rows.push({
         STUDYID: "CT-CHAOS-2026",
         DOMAIN: obs.destination,
         USUBJID: `CTC-${subj.studySite.slice(5, 8)}-${subj.subjectLabel}`,
         SEQ: seq++,
-        TESTCD: obs.ctCode || obs.field.toUpperCase().replace(/\s+/g, "").slice(0, 8),
+        TESTCD:
+          obs.ctCode || obs.field.toUpperCase().replace(/\s+/g, "").slice(0, 8),
         TEST: obs.field,
         ORRES: obs.rawValue,
         STRESC: obs.currentValue,
@@ -467,11 +603,20 @@ export function exportToCDISCODMXML(
   const timestamp = new Date().toISOString();
   const subjectNodes = subjects
     .map((s) => {
+      const fullSubjectId = s.studySite?.slice(5, 8)
+        ? `CTC-${s.studySite.slice(5, 8)}-${s.subjectLabel}`
+        : s.subjectLabel;
+
       const itemDataNodes = sdtmRows
-        .filter((r) => r.USUBJID.includes(s.subjectLabel))
+        .filter(
+          (r) =>
+            r.USUBJID === s.subjectLabel ||
+            r.USUBJID === fullSubjectId ||
+            r.USUBJID === s.id
+        )
         .map(
           (r) =>
-            `          <ItemData ItemOID="IT.${r.DOMAIN}.${r.TESTCD}" Value="${escapeXml(r.STRESC)}">
+            `          <ItemData ItemOID="${escapeXml(`IT.${r.DOMAIN}.${r.TESTCD}`)}" Value="${escapeXml(r.STRESC)}">
             <AuditRecord>
               <UserOID>USR.DATAMANAGER</UserOID>
               <DateTimeStamp>${timestamp}</DateTimeStamp>
@@ -483,8 +628,8 @@ export function exportToCDISCODMXML(
 
       return `      <SubjectData SubjectKey="${escapeXml(s.subjectLabel)}">
         <StudyEventData StudyEventOID="SE.VISIT1">
-          <FormData FormOID="FRM.${s.observations[0]?.destination || "DM"}">
-            <ItemGroupData ItemGroupOID="IG.${s.observations[0]?.destination || "DM"}" ItemGroupRepeatKey="1">
+          <FormData FormOID="${escapeXml(`FRM.${s.observations[0]?.destination || "DM"}`)}">
+            <ItemGroupData ItemGroupOID="${escapeXml(`IG.${s.observations[0]?.destination || "DM"}`)}" ItemGroupRepeatKey="1">
 ${itemDataNodes}
             </ItemGroupData>
           </FormData>
@@ -567,20 +712,66 @@ export function exportToSDTMCSV(sdtmRows: SDTMRow[]): string {
 export function generateBIMOReport(
   scoreState: GameScoreState,
   auditorState: AuditorState,
-  _logs?: AuditLogEntry[]
+  _logs?: AuditLogEntry[],
+  ruleViolations?: RecordedRuleViolation[],
+  activeProtocol?: StudyProtocol | null
 ): BIMOInspectionReport {
   const totalSubmissions = scoreState.subjectsSubmitted;
   const violations = scoreState.auditViolations;
   const cleanSubmissions = scoreState.cleanSubmissions;
 
-  const cleanRate = totalSubmissions > 0 ? (cleanSubmissions / totalSubmissions) * 100 : 100;
+  const cleanRate =
+    totalSubmissions > 0 ? (cleanSubmissions / totalSubmissions) * 100 : 100;
   const violationPenalty = Math.min(60, violations * 15);
   const suspicionPenalty = Math.min(30, auditorState.suspicion * 0.3);
-  const rawScore = Math.max(0, Math.round(100 - violationPenalty - suspicionPenalty));
+  const rawScore = Math.max(
+    0,
+    Math.round(100 - violationPenalty - suspicionPenalty)
+  );
 
   const findings: BIMOFinding[] = [];
 
-  if (violations > 0) {
+  // Register specific AST edit check failures & CDISC conformance errors
+  if (ruleViolations && ruleViolations.length > 0) {
+    ruleViolations.forEach((v, idx) => {
+      if (v.type === "ast_edit_check") {
+        findings.push({
+          id: `FND-AST-${idx + 1}`,
+          category: "Protocol Compliance",
+          severity: "Major",
+          description: `AST Edit Check Violation on ${v.subjectLabel} (${v.field}): '${v.selectedChoice}' failed rule ${v.ruleName || "Check"}. ${v.message}`,
+          regulation:
+            "21 CFR § 312.62 - Investigator record keeping & protocol adherence",
+        });
+      } else {
+        findings.push({
+          id: `FND-CDISC-${idx + 1}`,
+          category: "Data Integrity",
+          severity: "Major",
+          description: `CDISC Conformance Error on ${v.subjectLabel} (${v.field}): '${v.selectedChoice}' violates ${v.domain || "SDTM"} standard. ${v.message}`,
+          regulation:
+            "ICH GCP E6(R2) § 5.5 - Electronic data handling & CDISC STRESN standardization",
+        });
+      }
+    });
+  }
+
+  // If active protocol is loaded, validate protocol conformance
+  if (activeProtocol) {
+    const protocolVal = StudyProtocolEngine.validateProtocol(activeProtocol);
+    protocolVal.errors.forEach((err, idx) => {
+      findings.push({
+        id: `FND-PROTO-${idx + 1}`,
+        category: "Protocol Compliance",
+        severity: "Major",
+        description: `Authored Protocol Error in Form [${err.form}]: ${err.message}`,
+        regulation:
+          "CDISC CDASH 2.2 / SDTM v3.3 Protocol Specification Standard",
+      });
+    });
+  }
+
+  if (violations > 0 && findings.length === 0) {
     findings.push({
       id: "FND-001",
       category: "Data Integrity",
@@ -590,17 +781,25 @@ export function generateBIMOReport(
     });
   }
 
-  if (auditorState.suspicion >= 50) {
+  if (
+    auditorState.suspicion >= 50 &&
+    !findings.some((f) => f.id === "FND-002")
+  ) {
     findings.push({
       id: "FND-002",
       category: "21 CFR Part 11",
       severity: auditorState.suspicion >= 100 ? "Critical" : "Major",
       description: `Elevated auditor scrutiny index (${Math.round(auditorState.suspicion)}%). Backlog pressure and delayed source data verification.`,
-      regulation: "21 CFR § 11.50 - Signature manifestations and audit trail timeliness",
+      regulation:
+        "21 CFR § 11.50 - Signature manifestations and audit trail timeliness",
     });
   }
 
-  if (cleanRate < 80 && totalSubmissions > 0) {
+  if (
+    cleanRate < 80 &&
+    totalSubmissions > 0 &&
+    !findings.some((f) => f.id === "FND-003")
+  ) {
     findings.push({
       id: "FND-003",
       category: "Protocol Compliance",
@@ -610,20 +809,32 @@ export function generateBIMOReport(
     });
   }
 
-  let verdict: BIMOInspectionReport["verdict"] = "NAI (No Action Indicated - Approved)";
-  let summary = "The Bioresearch Monitoring inspection found no objectionable conditions. The sponsor and clinical site data systems operate in full compliance with 21 CFR Part 11 and CDISC standards.";
+  let verdict: BIMOInspectionReport["verdict"] =
+    "NAI (No Action Indicated - Approved)";
+  let summary =
+    "The Bioresearch Monitoring inspection found no objectionable conditions. The sponsor and clinical site data systems operate in full compliance with 21 CFR Part 11 and CDISC standards.";
 
-  if (auditorState.suspicion >= 100 || violations >= 3) {
+  if (
+    auditorState.suspicion >= 100 ||
+    violations >= 3 ||
+    findings.some((f) => f.severity === "Critical")
+  ) {
     verdict = "OAI (Official Action Indicated - Form 483 Issued)";
-    summary = "FDA Form 483 issued. Significant objectionable conditions were observed during the inspection, including critical data integrity discrepancies. Trial operations suspended under 21 CFR § 312.44.";
+    summary =
+      "FDA Form 483 issued. Significant objectionable conditions were observed during the inspection, including critical data integrity discrepancies. Trial operations suspended under 21 CFR § 312.44.";
   } else if (findings.length > 0 || auditorState.suspicion > 30) {
     verdict = "VAI (Voluntary Action Indicated)";
-    summary = "Objectionable conditions were noted, but they do not meet the threshold for regulatory action. The sponsor is advised to implement corrective and preventive action (CAPA) plans for Controlled Terminology validation.";
+    summary =
+      "Objectionable conditions were noted, but they do not meet the threshold for regulatory action. The sponsor is advised to implement corrective and preventive action (CAPA) plans for Corrective Action plans for Controlled Terminology validation.";
   }
 
   return {
     runId: `BIMO-${Date.now().toString(36).toUpperCase()}`,
-    auditDate: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
+    auditDate: new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }),
     overallScore: rawScore,
     verdict,
     complianceRate: Math.round(cleanRate),
@@ -632,4 +843,120 @@ export function generateBIMOReport(
     cleanRate: Math.round(cleanRate),
     summary,
   };
+}
+
+import { ArcadeEngine } from "@/lib/arcade";
+
+export interface ClinicalTrialChaosState {
+  scoreState: GameScoreState;
+  auditorState: AuditorState;
+  powerUps: PowerUpInventory;
+  isPaused: boolean;
+  activeAmendment: ProtocolAmendment | null;
+  ruleViolations: RecordedRuleViolation[];
+  subjects: ClinicalSubject[];
+  activeProtocol: StudyProtocol | null;
+}
+
+export interface ClinicalTrialChaosSnapshot {
+  scoreState: GameScoreState;
+  auditorState: AuditorState;
+  powerUps: PowerUpInventory;
+  isPaused: boolean;
+  activeAmendment: ProtocolAmendment | null;
+  ruleViolationsCount: number;
+  subjectCount: number;
+}
+
+export class ClinicalTrialChaosEngine extends ArcadeEngine<
+  ClinicalTrialChaosState,
+  ClinicalTrialChaosSnapshot
+> {
+  constructor() {
+    super({
+      scoreState: createInitialScoreState(),
+      auditorState: createInitialAuditorState(),
+      powerUps: createInitialPowerUpInventory(),
+      isPaused: false,
+      activeAmendment: null,
+      ruleViolations: [],
+      subjects: [],
+      activeProtocol: null,
+    });
+  }
+
+  public override init(): void {
+    // init
+  }
+
+  public activatePowerUp(id: PowerUpType): void {
+    const p = this.state.powerUps[id];
+    if (p) {
+      p.activeSecondsRemaining = p.duration;
+      if (id === "fda-coffee-break") {
+        this.state.auditorState.isPaused = true;
+      }
+      this.notifySubscribers();
+    }
+  }
+
+  public override update(dt: number): void {
+    if (this.state.isPaused) return;
+
+    // Update powerups timer
+    for (const key of Object.keys(this.state.powerUps) as PowerUpType[]) {
+      const p = this.state.powerUps[key];
+      if (p.activeSecondsRemaining > 0) {
+        p.activeSecondsRemaining = Math.max(0, p.activeSecondsRemaining - dt);
+        if (p.activeSecondsRemaining === 0 && key === "fda-coffee-break") {
+          this.state.auditorState.isPaused = false;
+        }
+      }
+    }
+
+    // Auditor patrol progression
+    if (!this.state.auditorState.isPaused) {
+      this.state.auditorState.x += this.state.auditorState.direction * 0.1 * dt;
+      if (this.state.auditorState.x >= 0.9) {
+        this.state.auditorState.x = 0.9;
+        this.state.auditorState.direction = -1;
+      } else if (this.state.auditorState.x <= 0.1) {
+        this.state.auditorState.x = 0.1;
+        this.state.auditorState.direction = 1;
+      }
+    }
+
+    this.invalidateSnapshot();
+  }
+
+  public override render(ctx: CanvasRenderingContext2D, _alpha: number): void {
+    if (!ctx) return;
+
+    // Conveyor Floor Background
+    ctx.fillStyle = "#0a0a0f";
+    ctx.fillRect(0, 0, 760, 200);
+
+    // Conveyor Belt
+    ctx.fillStyle = "#1e1e24";
+    ctx.fillRect(0, 80, 760, 40);
+
+    // Auditor Indicator
+    const audX = this.state.auditorState.x * 760;
+    ctx.fillStyle = "#f59e0b";
+    ctx.fillRect(audX - 10, 30, 20, 30);
+  }
+
+  public override createSnapshot(): ClinicalTrialChaosSnapshot {
+    return {
+      scoreState: { ...this.state.scoreState },
+      auditorState: { ...this.state.auditorState },
+      powerUps: { ...this.state.powerUps },
+      isPaused: this.state.isPaused,
+      activeAmendment: this.state.activeAmendment
+        ? { ...this.state.activeAmendment }
+        : null,
+      ruleViolationsCount: this.state.ruleViolations.length,
+      subjectCount: this.state.subjects.length,
+    };
+  }
 }

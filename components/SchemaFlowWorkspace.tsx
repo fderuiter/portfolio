@@ -105,8 +105,10 @@ export default function SchemaFlowWorkspace() {
   const terminalLogsContainerRef = useRef<HTMLDivElement>(null);
   const consoleInputRef = useRef<HTMLInputElement>(null);
 
-  // Telemetry Gauge State
-  const [ramPercent, setRamPercent] = useState(42.5);
+  // Telemetry Gauge State & Direct DOM Refs
+  const ramValRef = useRef(42.5);
+  const gaugeContainerRef = useRef<HTMLDivElement>(null);
+  const ramTextRef = useRef<HTMLSpanElement>(null);
   const [isSolverLoopActive, setIsSolverLoopActive] = useState(false);
   const telemetryIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -122,8 +124,8 @@ export default function SchemaFlowWorkspace() {
     ]);
   };
 
-  // Proof status evaluator
-  const evaluateProof = () => {
+  // Proof status evaluator memoized to re-calculate only when graph edges or nodes change
+  const { isC_Proven, isE_Proven } = React.useMemo(() => {
     // C is proven if both A and B point to C
     const hasAtoC = edges.some((e) => e.source === "A" && e.target === "C");
     const hasBtoC = edges.some((e) => e.source === "B" && e.target === "C");
@@ -135,9 +137,7 @@ export default function SchemaFlowWorkspace() {
     const isE_Proven = isC_Proven && hasCtoE && hasDtoE;
 
     return { isC_Proven, isE_Proven };
-  };
-
-  const { isC_Proven, isE_Proven } = evaluateProof();
+  }, [edges]);
 
   const toggleSolverLoop = (newState?: boolean) => {
     setIsSolverLoopActive((prev) => {
@@ -151,7 +151,7 @@ export default function SchemaFlowWorkspace() {
     });
   };
 
-  // Handle high-frequency telemetry solver loop animation
+  // Handle high-frequency telemetry solver loop animation with direct DOM mutations
   useEffect(() => {
     if (isSolverLoopActive) {
       const baseVal = 42.5;
@@ -161,17 +161,27 @@ export default function SchemaFlowWorkspace() {
         // Fluctuating RAM simulating real solver calculation cycles
         const noise = Math.sin(tick * 0.4) * 8 + Math.cos(tick * 0.15) * 4;
         const newPercent = clamp(baseVal + noise + (tick % 7 === 0 ? 10 : 0) - (tick % 11 === 0 ? 8 : 0), 30.2, 98.4);
-        setRamPercent(newPercent);
-      }, 80); // ~12 updates per second
+        ramValRef.current = newPercent;
+
+        // Direct DOM mutations to transient telemetry UI metrics - zero Virtual DOM re-renders
+        if (gaugeContainerRef.current) {
+          gaugeContainerRef.current.style.setProperty("--gauge-progress", newPercent.toString());
+        }
+        if (ramTextRef.current) {
+          ramTextRef.current.textContent = `${newPercent.toFixed(0)}%`;
+        }
+      }, 80); // ~12.5 updates per second
     } else {
       if (telemetryIntervalRef.current) {
         clearInterval(telemetryIntervalRef.current);
+        telemetryIntervalRef.current = null;
       }
     }
 
     return () => {
       if (telemetryIntervalRef.current) {
         clearInterval(telemetryIntervalRef.current);
+        telemetryIntervalRef.current = null;
       }
     };
   }, [isSolverLoopActive]);
@@ -649,9 +659,10 @@ export default function SchemaFlowWorkspace() {
               
               {/* Radial gauge element */}
               <div 
+                ref={gaugeContainerRef}
                 className="relative w-16 h-16 flex items-center justify-center shrink-0"
                 style={{
-                  "--gauge-progress": ramPercent,
+                  "--gauge-progress": 42.5,
                 } as React.CSSProperties}
               >
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
@@ -676,8 +687,8 @@ export default function SchemaFlowWorkspace() {
                 </svg>
                 {/* Embedded dynamic percent */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center leading-none">
-                  <span className="text-[10px] font-mono font-bold text-white">
-                    {ramPercent.toFixed(0)}%
+                  <span ref={ramTextRef} className="text-[10px] font-mono font-bold text-white">
+                    42%
                   </span>
                 </div>
               </div>

@@ -1,0 +1,15 @@
+node_modules
+.next
+coverage
+test-results
+playwright-report
+build
+out
+.agents
+scratch
+tmp
+.scratch
+app/generated/prisma
+package-lock.json
+docs
+openapi.json

@@ -2,24 +2,6 @@
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  IconTerminal,
-  IconSparkles,
-  IconRefresh,
-  IconBulb,
-  IconShieldCheck,
-  IconX,
-  IconBook,
-  IconTable,
-  IconAlertTriangle,
-  IconDownload,
-  IconPlayerPlay,
-  IconCpu,
-  IconWand,
-  IconPlus,
-  IconLink,
-} from "@tabler/icons-react";
-import { CopyButton } from "@/components/CopyButton";
 import { useClipboard } from "@/hooks/useClipboard";
 import {
   getSuggestion,
@@ -40,37 +22,20 @@ import {
   computeMagneticSnap,
   AlignmentGuide,
   THEOREMS,
-  INFERENCE_RULES,
   TheoremId,
   Edge,
   FallacyDiagnosis,
   ProofNode,
 } from "@/lib/proof-utils";
-import { FieldManualButton } from "@/components/FieldManualButton";
-import dynamic from "next/dynamic";
 import { useAudio } from "@/components/providers/AudioProvider";
-
-const InteractiveTruthTable = dynamic(
-  () => import("@/components/proof/InteractiveTruthTable").then((mod) => mod.InteractiveTruthTable),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex flex-col items-center justify-center p-8 text-slate-500 gap-2">
-        <div className="w-6 h-6 border-2 border-slate-800 border-t-brand-cyan rounded-full animate-spin" />
-        <span>Loading Truth Table...</span>
-      </div>
-    ),
-  }
-);
 import { useStudioHashParams } from "@/hooks/useStudioHashParams";
-import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { NextPrevNav } from "@/components/ui/NextPrevNav";
-
-interface TerminalLog {
-  id: string;
-  type: "command" | "output" | "error" | "info" | "success";
-  text: string;
-}
+import { ProofHeader } from "@/components/proof/ProofHeader";
+import { ProofCanvas } from "@/components/proof/ProofCanvas";
+import { ProofLedger } from "@/components/proof/ProofLedger";
+import { ProofTerminalConsole, TerminalLog } from "@/components/proof/ProofTerminalConsole";
+import { ProofExportModal } from "@/components/proof/ProofExportModal";
+import { ProofCustomModal } from "@/components/proof/ProofCustomModal";
 
 export function ProofWorkspaceClient() {
   const { params, setParam, setParams } = useStudioHashParams();
@@ -135,7 +100,6 @@ export function ProofWorkspaceClient() {
 
   // Export Modal state
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
-  const [exportFormat, setExportFormat] = useState<"lean" | "latex" | "markdown" | "mermaid">("lean");
 
   // CLI Console State
   const [isConsoleOpen, setIsConsoleOpen] = useState(true);
@@ -292,14 +256,6 @@ export function ProofWorkspaceClient() {
   const deductionLedger = useMemo(
     () => getDeductionLedger(edges, activeTheoremId),
     [edges, activeTheoremId]
-  );
-
-  const activeSourceId =
-    dragConnection?.sourceId || (selectedNodeIds.length === 1 ? selectedNodeIds[0] : null);
-
-  const compatibleTargets = useMemo(
-    () => (activeSourceId ? getCompatibleTargets(activeSourceId, activeTheoremId, edges) : []),
-    [activeSourceId, activeTheoremId, edges]
   );
 
   const toggleSnapping = React.useCallback(() => {
@@ -1424,722 +1380,77 @@ export function ProofWorkspaceClient() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full flex-1 flex flex-col gap-6">
-        {/* Header and Breadcrumbs */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-          <div className="space-y-1">
-            <Breadcrumbs items={[{ label: "Logical Proof Workspace", href: "/proof" }]} />
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2">
-              <IconCpu className="w-8 h-8 text-brand-cyan animate-pulse" />
-              Logical Proof Canvas
-            </h1>
-            <p className="text-sm text-slate-400">
-              AST Natural Deduction & Distributed Systems Formal Invariant Workbench
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleCopyShareLink}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-200 hover:bg-slate-700 text-xs font-semibold transition"
-              title="Copy Shareable Proof Link with Active Theorem & Tab"
-            >
-              <IconLink className="w-4 h-4 text-brand-cyan" />
-              Share
-            </button>
-            <button
-              onClick={() => setIsCustomStudioOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-brand-purple/40 bg-brand-purple/10 text-brand-purple hover:bg-brand-purple/20 text-xs font-semibold transition"
-            >
-              <IconPlus className="w-4 h-4" />
-              Custom Studio
-            </button>
-            <button
-              onClick={() => setIsExportModalOpen(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-200 hover:bg-slate-700 text-xs font-semibold transition"
-            >
-              <IconDownload className="w-4 h-4" />
-              Export
-            </button>
-            <FieldManualButton manualId="proof" />
-          </div>
-        </div>
+        <ProofHeader
+          activeTheoremId={activeTheoremId}
+          handleSwitchTheorem={handleSwitchTheorem}
+          isE_Proven={isE_Proven}
+          edges={edges}
+          handleCopyShareLink={handleCopyShareLink}
+          setIsCustomStudioOpen={setIsCustomStudioOpen}
+          setIsExportModalOpen={setIsExportModalOpen}
+          mobileActiveView={mobileActiveView}
+          setMobileActiveView={setMobileActiveView}
+          setActiveTab={setActiveTab}
+        />
 
-        {/* Curriculum Domain Carousel */}
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-mono uppercase tracking-wider text-slate-400">Curriculum Invariant Catalog</span>
-            <span className="text-xs font-mono text-brand-cyan">
-              Status: {isE_Proven ? "✔ Q.E.D. DISCHARGED" : "⏳ IN PROGRESS"}
-            </span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-            {(Object.keys(THEOREMS) as TheoremId[]).map((thKey) => {
-              const th = THEOREMS[thKey];
-              const isActive = thKey === activeTheoremId;
-              const { isE_Proven: isThProven } = evaluateProofStatus(
-                isActive ? edges : th.initialEdges,
-                thKey
-              );
-              return (
-                <button
-                  key={thKey}
-                  onClick={() => handleSwitchTheorem(thKey)}
-                  className={`flex flex-col text-left p-2.5 rounded-xl border transition-all relative overflow-hidden ${
-                    isActive
-                      ? "bg-slate-800 border-brand-cyan shadow-lg shadow-brand-cyan/10"
-                      : "bg-slate-900/60 border-slate-800 hover:border-slate-700 hover:bg-slate-800/50"
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-1 mb-1">
-                    <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-slate-950 text-slate-400">
-                      {th.category}
-                    </span>
-                    {isThProven ? (
-                      <IconShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                    ) : (
-                      <span className="w-2 h-2 rounded-full bg-amber-500/80" />
-                    )}
-                  </div>
-                  <span className="text-xs font-bold text-slate-200 line-clamp-1">{th.title}</span>
-                  <span className="text-[11px] text-slate-400 line-clamp-1">{th.subtitle}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Mobile View Switcher Tabs (Visible on < lg screens) */}
-        <div className="lg:hidden flex items-center bg-slate-900 border border-slate-800 rounded-2xl p-1 gap-1 text-xs font-mono select-none">
-          <button
-            onClick={() => setMobileActiveView("canvas")}
-            className={`flex-1 py-2.5 px-2 rounded-xl text-center font-bold flex items-center justify-center gap-1.5 transition ${
-              mobileActiveView === "canvas"
-                ? "bg-brand-cyan text-slate-950 shadow-md"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            <IconCpu className="w-4 h-4" />
-            <span>Canvas</span>
-          </button>
-          <button
-            onClick={() => {
-              setMobileActiveView("ledger");
-              setActiveTab("ledger");
-            }}
-            className={`flex-1 py-2.5 px-2 rounded-xl text-center font-bold flex items-center justify-center gap-1.5 transition ${
-              mobileActiveView === "ledger"
-                ? "bg-brand-cyan text-slate-950 shadow-md"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            <IconTable className="w-4 h-4" />
-            <span>Ledger</span>
-          </button>
-          <button
-            onClick={() => {
-              setMobileActiveView("fallacy");
-              setActiveTab("fallacy");
-            }}
-            className={`flex-1 py-2.5 px-2 rounded-xl text-center font-bold flex items-center justify-center gap-1.5 transition ${
-              mobileActiveView === "fallacy"
-                ? "bg-brand-cyan text-slate-950 shadow-md"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            <IconAlertTriangle className="w-4 h-4" />
-            <span>Fallacy</span>
-          </button>
-          <button
-            onClick={() => setMobileActiveView("terminal")}
-            className={`flex-1 py-2.5 px-2 rounded-xl text-center font-bold flex items-center justify-center gap-1.5 transition ${
-              mobileActiveView === "terminal"
-                ? "bg-brand-cyan text-slate-950 shadow-md"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            <IconTerminal className="w-4 h-4" />
-            <span>Terminal</span>
-          </button>
-        </div>
-
-        {/* Workspace Layout: Canvas on Left/Center, Inspector on Right */}
+        {/* Workspace Layout: Canvas on Left/Center, Ledger/Inspector on Right */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Canvas Section */}
-          <div className={`lg:col-span-8 flex flex-col gap-4 ${mobileActiveView === "canvas" ? "flex" : "hidden lg:flex"}`}>
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/80 backdrop-blur overflow-hidden flex flex-col shadow-2xl relative">
-              {/* Canvas Header */}
-              <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between bg-slate-950/40">
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-emerald-500/80 animate-ping" />
-                  <span className="text-xs font-semibold text-white">{activeTheorem.ruleName}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={toggleSnapping}
-                    className={`px-2.5 py-1.5 rounded-lg border text-xs font-mono flex items-center gap-1.5 transition ${
-                      isSnappingEnabled
-                        ? "bg-brand-cyan/15 border-brand-cyan/50 text-brand-cyan shadow-sm shadow-cyan-500/20"
-                        : "bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200"
-                    }`}
-                    title="Toggle magnetic snapping & alignment guides [Shortcut: G]"
-                    aria-pressed={isSnappingEnabled}
-                    aria-label={`Magnetic Snapping: ${isSnappingEnabled ? "Enabled" : "Disabled"}. Press G to toggle.`}
-                  >
-                    <span className="text-[11px] font-bold">SNAP</span>
-                    <span
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        isSnappingEnabled ? "bg-emerald-400 animate-pulse" : "bg-slate-600"
-                      }`}
-                    />
-                    <kbd className="hidden md:inline text-[9px] px-1 py-0.2 rounded bg-slate-950/70 border border-slate-800 text-slate-400 font-mono">
-                      G
-                    </kbd>
-                  </button>
-                  <button
-                    onClick={handleAutoStep}
-                    className="px-2.5 py-1.5 rounded-lg bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/40 text-brand-cyan text-xs font-mono flex items-center gap-1 transition"
-                  >
-                    <IconWand className="w-3.5 h-3.5" />
-                    Auto-Step
-                  </button>
-                  <button
-                    onClick={handleResetLayout}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
-                    title="Reset node positions & connections"
-                  >
-                    <IconRefresh className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+          <ProofCanvas
+            activeTheorem={activeTheorem}
+            edges={edges}
+            nodeOffsets={nodeOffsets}
+            selectedNodeIds={selectedNodeIds}
+            inspectedNodeId={inspectedNodeId}
+            isSnappingEnabled={isSnappingEnabled}
+            activeGuides={activeGuides}
+            dragConnection={dragConnection}
+            isSimulating={isSimulating}
+            simulationProgress={simulationProgress}
+            toggleSnapping={toggleSnapping}
+            handleAutoStep={handleAutoStep}
+            handleResetLayout={handleResetLayout}
+            activeTacticHint={activeTacticHint}
+            handleNodePointerDown={handleNodePointerDown}
+            handleNodePointerMove={handleNodePointerMove}
+            handleNodePointerUp={handleNodePointerUp}
+            handleNodeClick={handleNodeClick}
+            handleHandlePointerDown={handleHandlePointerDown}
+            handleCanvasPointerMove={handleCanvasPointerMove}
+            handleCanvasPointerUp={handleCanvasPointerUp}
+            handleApplyRule={handleApplyRule}
+            handleStartSimulation={handleStartSimulation}
+            canvasWrapperRef={canvasWrapperRef}
+            svgCanvasRef={svgCanvasRef}
+            mobileActiveView={mobileActiveView}
+          />
 
-              {/* Tactic Goal Ribbon */}
-              <div className="bg-slate-950/60 px-4 py-2 border-b border-slate-800/80 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2 text-slate-300">
-                  <IconBulb className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span className="font-medium text-amber-300/90">{activeTacticHint.title}:</span>
-                  <span className="text-slate-400">{activeTacticHint.hint}</span>
-                </div>
-                <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 shrink-0">
-                  Goal: Node {activeTheorem.targetNodeId}
-                </span>
-              </div>
-
-              {/* SVG Canvas Area (Responsive scroll wrapper) */}
-              <div
-                ref={canvasWrapperRef}
-                tabIndex={0}
-                role="region"
-                aria-label="Proof workspace canvas"
-                onPointerMove={handleCanvasPointerMove}
-                onPointerUp={handleCanvasPointerUp}
-                className="relative w-full h-[420px] bg-gradient-to-b from-slate-950/60 via-slate-900 to-slate-950 select-none overflow-x-auto overflow-y-hidden"
-              >
-                <div className="relative min-w-[760px] h-full">
-                  <svg ref={svgCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none">
-                    <defs>
-                      <pattern id="canvas-grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                        <circle cx="2" cy="2" r="1" fill="#334155" opacity={isSnappingEnabled ? 0.45 : 0.15} />
-                      </pattern>
-                      <marker
-                        id="arrow"
-                        viewBox="0 0 10 10"
-                        refX="8"
-                        refY="5"
-                        markerWidth="6"
-                        markerHeight="6"
-                        orient="auto-start-reverse"
-                      >
-                        <path d="M 0 1 L 10 5 L 0 9 z" fill="#06b6d4" />
-                      </marker>
-                      <marker
-                        id="arrow-emerald"
-                        viewBox="0 0 10 10"
-                        refX="8"
-                        refY="5"
-                        markerWidth="6"
-                        markerHeight="6"
-                        orient="auto-start-reverse"
-                      >
-                        <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981" />
-                      </marker>
-                      <linearGradient id="edgeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#06b6d4" />
-                        <stop offset="100%" stopColor="#10b981" />
-                      </linearGradient>
-                    </defs>
-
-                    {/* Canvas Background Grid */}
-                    <rect width="100%" height="100%" fill="url(#canvas-grid)" />
-
-                    {/* Snapping Alignment Guides */}
-                    {activeGuides.map((guide, idx) => {
-                      if (guide.type === "vertical") {
-                        return (
-                          <line
-                            key={`guide-v-${idx}`}
-                            x1={guide.pos}
-                            y1={Math.max(0, guide.start)}
-                            x2={guide.pos}
-                            y2={Math.min(420, guide.end)}
-                            stroke="#06b6d4"
-                            strokeWidth="1.5"
-                            strokeDasharray="4 3"
-                            className="animate-pulse"
-                          />
-                        );
-                      }
-                      return (
-                        <line
-                          key={`guide-h-${idx}`}
-                          x1={Math.max(0, guide.start)}
-                          y1={guide.pos}
-                          x2={Math.min(760, guide.end)}
-                          y2={guide.pos}
-                          stroke="#10b981"
-                          strokeWidth="1.5"
-                          strokeDasharray="4 3"
-                          className="animate-pulse"
-                        />
-                      );
-                    })}
-
-                    {/* Render Bezier Curves for Graph Edges */}
-                    {edges.map((edge, idx) => {
-                      const sNode = activeTheorem.nodes.find((n) => n.id === edge.source);
-                      const tNode = activeTheorem.nodes.find((n) => n.id === edge.target);
-                      if (!sNode || !tNode) return null;
-
-                      const sOffset = nodeOffsets[sNode.id] || { x: 0, y: 0 };
-                      const tOffset = nodeOffsets[tNode.id] || { x: 0, y: 0 };
-
-                      const x1 = sNode.x + sOffset.x + 80;
-                      const y1 = sNode.y + sOffset.y + 35;
-                      const x2 = tNode.x + tOffset.x;
-                      const y2 = tNode.y + tOffset.y + 35;
-
-                      const dx = Math.abs(x2 - x1) * 0.5;
-                      const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
-
-                      return (
-                        <g key={`edge-${idx}`}>
-                          <path
-                            d={d}
-                            fill="none"
-                            stroke="url(#edgeGradient)"
-                            strokeWidth="2.5"
-                            strokeDasharray="4 2"
-                            className="animate-pulse"
-                            markerEnd="url(#arrow)"
-                          />
-                        </g>
-                      );
-                    })}
-
-                    {/* Interactive Drag-to-Connect Cord */}
-                    {dragConnection && (() => {
-                      const x1 = dragConnection.sourceX;
-                      const y1 = dragConnection.sourceY;
-                      const x2 = dragConnection.currentX;
-                      const y2 = dragConnection.currentY;
-                      const dx = Math.abs(x2 - x1) * 0.5;
-                      const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
-                      const strokeColor = dragConnection.hoveredTargetId
-                        ? dragConnection.isValid
-                          ? "#10b981"
-                          : "#f43f5e"
-                        : "#06b6d4";
-
-                      return (
-                        <g key="drag-connection-cord">
-                          <path
-                            d={d}
-                            fill="none"
-                            stroke={strokeColor}
-                            strokeWidth="6"
-                            opacity="0.25"
-                          />
-                          <path
-                            d={d}
-                            fill="none"
-                            stroke={strokeColor}
-                            strokeWidth="3"
-                            strokeDasharray="6 3"
-                            className="animate-pulse"
-                            markerEnd={
-                              dragConnection.hoveredTargetId && dragConnection.isValid
-                                ? "url(#arrow-emerald)"
-                                : "url(#arrow)"
-                            }
-                          />
-                          <circle cx={x2} cy={y2} r="5" fill={strokeColor} className="animate-ping" opacity="0.75" />
-                          <circle cx={x2} cy={y2} r="4" fill={strokeColor} />
-                        </g>
-                      );
-                    })()}
-                  </svg>
-
-                  {/* Node Cards on Canvas */}
-                  {activeTheorem.nodes.map((node) => {
-                    const offset = nodeOffsets[node.id] || { x: 0, y: 0 };
-                    const isSelected = selectedNodeIds.includes(node.id);
-                    const isInspected = inspectedNodeId === node.id;
-                    const isTarget = node.id === activeTheorem.targetNodeId;
-                    const isIntermediate = node.id === activeTheorem.intermediateNodeId;
-
-                    let isNodeProven = true;
-                    if (isIntermediate) isNodeProven = isC_Proven;
-                    if (isTarget) isNodeProven = isE_Proven;
-
-                    const compTarget = compatibleTargets.find((c) => c.targetId === node.id);
-                    const isCompatible = !!compTarget;
-                    const isHoveredInDrag = dragConnection?.hoveredTargetId === node.id;
-                    const isDragSource = dragConnection?.sourceId === node.id;
-                    const isDimmed = !!dragConnection && !isDragSource && !isCompatible && !isHoveredInDrag;
-
-                    return (
-                      <motion.div
-                        key={node.id}
-                        style={{
-                          position: "absolute",
-                          left: node.x + offset.x,
-                          top: node.y + offset.y,
-                        }}
-                        onPointerDown={(e) => handleNodePointerDown(e, node.id)}
-                        onPointerMove={(e) => handleNodePointerMove(e, node.id)}
-                        onPointerUp={(e) => handleNodePointerUp(e, node.id)}
-                        onClick={() => handleNodeClick(node.id)}
-                        className={`group w-40 p-2.5 rounded-xl border cursor-pointer transition-all shadow-md select-none ${
-                          isDimmed ? "opacity-40" : "opacity-100"
-                        } ${
-                          isHoveredInDrag
-                            ? dragConnection?.isValid
-                              ? "bg-emerald-950/60 border-emerald-400 ring-2 ring-emerald-400/80 shadow-emerald-500/30 scale-105"
-                              : "bg-rose-950/60 border-rose-500 ring-2 ring-rose-500/80 shadow-rose-500/30 scale-105"
-                            : isCompatible
-                            ? "bg-emerald-950/30 border-emerald-500/70 ring-2 ring-emerald-500/50 shadow-emerald-500/20"
-                            : isSelected
-                            ? "bg-brand-cyan/20 border-brand-cyan ring-2 ring-brand-cyan/50 shadow-cyan-500/20"
-                            : isInspected
-                            ? "bg-slate-800 border-slate-600 ring-1 ring-slate-400"
-                            : "bg-slate-900 border-slate-800 hover:border-slate-700"
-                        }`}
-                      >
-                        {/* Compatible Rule Floating Badge */}
-                        {isCompatible && compTarget && (
-                          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-mono text-[9px] font-bold shadow-md shadow-emerald-950/50 flex items-center gap-1 z-30 whitespace-nowrap animate-bounce">
-                            <IconSparkles className="w-2.5 h-2.5 shrink-0" />
-                            <span>{compTarget.badgeLabel}</span>
-                          </div>
-                        )}
-
-                        {/* Invalid Hover Floating Badge */}
-                        {isHoveredInDrag && !dragConnection?.isValid && (
-                          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-rose-500 text-white font-mono text-[9px] font-bold shadow-md flex items-center gap-1 z-30 whitespace-nowrap">
-                            <IconAlertTriangle className="w-2.5 h-2.5 shrink-0" />
-                            <span>Invalid Inference</span>
-                          </div>
-                        )}
-
-                        {/* Node Header & Status */}
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-950 text-slate-300">
-                            Node {node.id}
-                          </span>
-                          <span
-                            className={`text-[9px] font-mono px-1 py-0.5 rounded ${
-                              isNodeProven
-                                ? "bg-emerald-950 text-emerald-400 border border-emerald-800/40"
-                                : "bg-amber-950 text-amber-400 border border-amber-800/40"
-                            }`}
-                          >
-                            {isNodeProven ? "PROVEN" : "PENDING"}
-                          </span>
-                        </div>
-                        <div className="font-mono text-sm font-bold text-white mb-0.5">{node.label}</div>
-                        <div className="text-[10px] text-slate-400 line-clamp-2 leading-tight">
-                          {node.meaning}
-                        </div>
-
-                        {/* Connection Anchor Handle Port (Right Edge) */}
-                        <button
-                          type="button"
-                          onPointerDown={(e) => handleHandlePointerDown(e, node.id)}
-                          className="absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-slate-950 border-2 border-brand-cyan/80 hover:border-brand-cyan hover:scale-125 hover:bg-brand-cyan transition-all shadow-md shadow-cyan-500/40 flex items-center justify-center cursor-crosshair z-20 group-hover:opacity-100 opacity-80"
-                          title={`Drag connection from Node ${node.id}`}
-                          aria-label={`Drag connection handle from Node ${node.id}`}
-                        >
-                          <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan group-hover:bg-slate-950" />
-                        </button>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Floating Rule Palette Dock */}
-              <div className="p-3 bg-slate-950/90 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[10px] font-mono uppercase text-slate-500 mr-1">Rule Palette:</span>
-                  {INFERENCE_RULES.slice(0, 6).map((rule) => (
-                    <button
-                      key={rule.id}
-                      onClick={() => handleApplyRule(rule.id)}
-                      className="min-h-8 px-2.5 py-1 rounded-lg border border-slate-800 bg-slate-900 hover:bg-slate-800 text-xs font-mono text-slate-300 hover:text-white transition flex items-center gap-1"
-                      title={`${rule.name}: ${rule.template}`}
-                    >
-                      <span className="text-brand-cyan font-bold">{rule.symbol}</span>
-                      <span className="text-[11px] text-slate-400 hidden sm:inline">{rule.name}</span>
-                    </button>
-                  ))}
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleStartSimulation("normal")}
-                    disabled={isSimulating}
-                    className="min-h-8 px-3 py-1.5 rounded-lg bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 hover:bg-emerald-600/30 text-xs font-mono flex items-center gap-1 transition"
-                  >
-                    <IconPlayerPlay className="w-3.5 h-3.5" />
-                    {isSimulating ? "Simulating..." : "Simulate"}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Simulation Progress Ribbon */}
-            {isSimulating && simulationProgress && (
-              <div className="p-3 rounded-xl border border-emerald-800/40 bg-emerald-950/20 text-emerald-300 text-xs flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <IconSparkles className="w-4 h-4 text-emerald-400 animate-spin" />
-                  <span>Background Tactic Simulation Running...</span>
-                  <span className="text-slate-400 font-mono">
-                    [{simulationProgress.step}/{simulationProgress.total}] {simulationProgress.log}
-                  </span>
-                </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">
-                  THREAD: WEB WORKER (60FPS UI SAFE)
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Right Inspector Section */}
-          <div className={`lg:col-span-4 flex flex-col gap-4 ${mobileActiveView === "ledger" || mobileActiveView === "systems" || mobileActiveView === "fallacy" ? "flex" : "hidden lg:flex"}`}>
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/80 backdrop-blur overflow-hidden flex flex-col shadow-xl">
-              {/* Tab Selector */}
-              <div className="grid grid-cols-3 border-b border-slate-800 bg-slate-950/40 text-xs font-medium">
-                <button
-                  onClick={() => {
-                    setActiveTab("ledger");
-                    setMobileActiveView("ledger");
-                  }}
-                  className={`py-2.5 flex items-center justify-center gap-1.5 border-b-2 transition ${
-                    activeTab === "ledger"
-                      ? "border-brand-cyan text-brand-cyan bg-slate-900"
-                      : "border-transparent text-slate-400 hover:text-slate-200"
-                  }`}
-                >
-                  <IconTable className="w-4 h-4" />
-                  Ledger
-                </button>
-                <button
-                  onClick={() => {
-                    setActiveTab("systems");
-                    setMobileActiveView("systems");
-                  }}
-                  className={`py-2.5 flex items-center justify-center gap-1.5 border-b-2 transition ${
-                    activeTab === "systems"
-                      ? "border-brand-cyan text-brand-cyan bg-slate-900"
-                      : "border-transparent text-slate-400 hover:text-slate-200"
-                  }`}
-                >
-                  <IconBook className="w-4 h-4" />
-                  Systems
-                </button>
-                <button
-                  onClick={() => {
-                    setActiveTab("fallacy");
-                    setMobileActiveView("fallacy");
-                  }}
-                  className={`py-2.5 flex items-center justify-center gap-1.5 border-b-2 transition ${
-                    activeTab === "fallacy"
-                      ? "border-brand-cyan text-brand-cyan bg-slate-900"
-                      : "border-transparent text-slate-400 hover:text-slate-200"
-                  }`}
-                >
-                  <IconAlertTriangle className="w-4 h-4" />
-                  Fallacy
-                </button>
-              </div>
-
-              {/* Tab Content */}
-              <div className="p-4 flex flex-col gap-4 min-h-[380px] max-h-[460px] overflow-y-auto">
-                {activeTab === "ledger" && (
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono font-bold text-slate-300">Formal Fitch Deduction Ledger</span>
-                      <span className="text-[10px] font-mono text-slate-500">Lines: {deductionLedger.length}</span>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      {deductionLedger.map((step) => (
-                        <div
-                          key={step.stepNumber}
-                          className={`p-2.5 rounded-lg border text-xs flex flex-col gap-1 transition ${
-                            step.isProven
-                              ? "bg-slate-900 border-slate-800"
-                              : "bg-slate-950/60 border-slate-900 text-slate-500"
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono font-bold text-slate-400">Step {step.stepNumber}</span>
-                              {step.nodeId && (
-                                <span className="text-[10px] font-mono px-1.5 py-0.5 text-slate-400 bg-slate-800/60 rounded">
-                                  Node {step.nodeId}
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <span
-                                className={`text-[9px] font-mono px-1.5 py-0.5 rounded ${
-                                  step.isProven ? "bg-emerald-950 text-emerald-400" : "bg-slate-800 text-slate-500"
-                                }`}
-                              >
-                                {step.isProven ? "✔ PROVEN" : "⏳ PENDING"}
-                              </span>
-                              {step.isDeletable && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleDeleteStep(step.stepNumber)}
-                                  aria-label={`Delete Step ${step.stepNumber} and prune downstream dependencies`}
-                                  title={`Delete Step ${step.stepNumber} (prune dependencies)`}
-                                  className="p-1 rounded text-slate-400 hover:text-red-400 hover:bg-red-950/50 transition-colors focus:outline-none focus:ring-1 focus:ring-red-500/50"
-                                >
-                                  <IconX className="w-3.5 h-3.5" />
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                          <div className="font-mono font-bold text-white text-sm">{step.formula}</div>
-                          <div className="text-slate-400 text-[11px]">
-                            <span className="text-brand-cyan font-mono">{step.rule}</span> ({step.premises})
-                          </div>
-                          <div className="text-slate-400 text-[11px] leading-tight">{step.plainEnglish}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === "systems" && (
-                  <div className="flex flex-col gap-3 text-xs">
-                    <div className="space-y-1">
-                      <span className="text-xs font-bold text-white">{activeTheorem.title}</span>
-                      <p className="text-slate-400 leading-relaxed">{activeTheorem.scenario}</p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-2">
-                      <span className="font-mono text-brand-cyan font-semibold block">Lean 4 Invariant Model</span>
-                      <pre className="font-mono text-[11px] text-slate-300 whitespace-pre-wrap">
-                        {activeTheorem.leanCode}
-                      </pre>
-                    </div>
-                    <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 space-y-1">
-                      <span className="font-mono text-slate-400 font-semibold block">Distributed Systems Invariant</span>
-                      <p className="text-slate-300 leading-relaxed">{activeTheorem.goalDescription}</p>
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === "fallacy" && (
-                  <div className="flex flex-col gap-3 text-xs">
-                    {currentFallacy ? (
-                      <InteractiveTruthTable
-                        diagnosis={currentFallacy}
-                        onClear={() => setCurrentFallacy(null)}
-                      />
-                    ) : (
-                      <div className="flex flex-col items-center justify-center text-center p-8 text-slate-500 gap-2">
-                        <IconShieldCheck className="w-10 h-10 text-emerald-400/80" />
-                        <span className="font-semibold text-slate-300">Zero Active Fallacies</span>
-                        <p className="text-[11px] max-w-xs">
-                          All current graph connections and premise selections follow valid deductive inference rules.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <ProofLedger
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            mobileActiveView={mobileActiveView}
+            setMobileActiveView={setMobileActiveView}
+            deductionLedger={deductionLedger}
+            handleDeleteStep={handleDeleteStep}
+            activeTheorem={activeTheorem}
+            currentFallacy={currentFallacy}
+            setCurrentFallacy={setCurrentFallacy}
+          />
         </div>
 
-        {/* Command Console Split-View */}
-        <div
-          data-keyboard-boundary="true"
-          className={`rounded-2xl border border-slate-800 bg-slate-950 overflow-hidden flex flex-col shadow-2xl ${
-            mobileActiveView === "terminal" ? "flex" : "hidden lg:flex"
-          }`}
-        >
-          <div className="px-4 py-2 border-b border-slate-800 bg-slate-900/60 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <IconTerminal className="w-4 h-4 text-brand-cyan" />
-              <span className="text-xs font-mono font-semibold text-slate-300">proof-cli @ formal-verification</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs font-mono text-slate-500">
-              <span>Toggle: Ctrl + `</span>
-              <button
-                ref={toggleBtnRef}
-                onClick={toggleConsole}
-                className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] transition"
-              >
-                {isConsoleOpen ? "Collapse" : "Expand"}
-              </button>
-            </div>
-          </div>
-
-          {isConsoleOpen && (
-            <div className="flex flex-col">
-              <div
-                ref={terminalLogsContainerRef}
-                className="p-4 font-mono text-xs text-slate-300 h-44 overflow-y-auto space-y-1.5 bg-slate-950/80"
-              >
-                {consoleLogs.map((log) => (
-                  <div
-                    key={log.id}
-                    className={`whitespace-pre-wrap ${
-                      log.type === "command"
-                        ? "text-brand-cyan font-bold"
-                        : log.type === "error"
-                        ? "text-red-400 font-semibold"
-                        : log.type === "success"
-                        ? "text-emerald-400"
-                        : "text-slate-300"
-                    }`}
-                  >
-                    {log.type === "command" ? `$ ${log.text}` : log.text}
-                  </div>
-                ))}
-              </div>
-
-              <form onSubmit={handleConsoleSubmit} className="relative border-t border-slate-800 flex items-center">
-                <span className="pl-4 text-brand-cyan font-mono text-xs font-bold">$</span>
-                <input
-                  ref={consoleInputRef}
-                  type="text"
-                  value={consoleInput}
-                  onChange={(e) => setConsoleInput(e.target.value)}
-                  onKeyDown={handleConsoleKeyDown}
-                  placeholder="Enter logic command (e.g. 'connect A C', 'apply mp A B', 'help')..."
-                  className="w-full bg-transparent px-3 py-2.5 font-mono text-xs text-white placeholder-slate-600 focus:outline-none"
-                />
-                {suggestion && (
-                  <span className="absolute left-6 pointer-events-none font-mono text-xs text-slate-600 pl-[1ch]">
-                    <span className="invisible">{consoleInput}</span>
-                    {suggestion.substring(consoleInput.length)}
-                  </span>
-                )}
-              </form>
-            </div>
-          )}
-        </div>
+        <ProofTerminalConsole
+          isConsoleOpen={isConsoleOpen}
+          toggleConsole={toggleConsole}
+          mobileActiveView={mobileActiveView}
+          consoleLogs={consoleLogs}
+          consoleInput={consoleInput}
+          setConsoleInput={setConsoleInput}
+          handleConsoleSubmit={handleConsoleSubmit}
+          handleConsoleKeyDown={handleConsoleKeyDown}
+          suggestion={suggestion}
+          consoleInputRef={consoleInputRef}
+          toggleBtnRef={toggleBtnRef}
+          terminalLogsContainerRef={terminalLogsContainerRef}
+        />
 
         {/* Feedback Toast */}
         <AnimatePresence>
@@ -2161,148 +1472,29 @@ export function ProofWorkspaceClient() {
           )}
         </AnimatePresence>
 
-        {/* Export Proof Modal */}
-        <AnimatePresence>
-          {isExportModalOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 p-6 flex flex-col gap-4 shadow-2xl"
-              >
-                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                    <IconDownload className="w-5 h-5 text-brand-cyan" />
-                    Export Proof Certificate
-                  </h3>
-                  <button
-                    onClick={() => setIsExportModalOpen(false)}
-                    className="p-1 rounded text-slate-400 hover:text-white"
-                  >
-                    <IconX className="w-5 h-5" />
-                  </button>
-                </div>
-                <div className="flex gap-2">
-                  {(["lean", "latex", "markdown", "mermaid"] as const).map((fmt) => (
-                    <button
-                      key={fmt}
-                      onClick={() => setExportFormat(fmt)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-mono uppercase font-bold border transition ${
-                        exportFormat === fmt
-                          ? "border-brand-cyan bg-brand-cyan/20 text-brand-cyan"
-                          : "border-slate-800 bg-slate-950 text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      {fmt}
-                    </button>
-                  ))}
-                </div>
-                <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 max-h-72 overflow-y-auto">
-                  <pre className="font-mono text-xs text-slate-300 whitespace-pre-wrap">
-                    {exportFormat === "lean" && exportProofToLean4(activeTheoremId)}
-                    {exportFormat === "latex" && exportProofToLatex(activeTheoremId)}
-                    {exportFormat === "markdown" && exportProofToMarkdown(edges, activeTheoremId)}
-                    {exportFormat === "mermaid" && exportProofToMermaid(edges, activeTheoremId)}
-                  </pre>
-                </div>
-                <div className="flex justify-end gap-3 pt-2">
-                  <CopyButton
-                    text={() =>
-                      exportFormat === "lean"
-                        ? exportProofToLean4(activeTheoremId)
-                        : exportFormat === "latex"
-                        ? exportProofToLatex(activeTheoremId)
-                        : exportFormat === "markdown"
-                        ? exportProofToMarkdown(edges, activeTheoremId)
-                        : exportProofToMermaid(edges, activeTheoremId)
-                    }
-                    label="Copy to Clipboard"
-                    copiedLabel="Copied!"
-                    successMessage="Exported proof code copied to clipboard"
-                    className="px-4 py-2 rounded-xl bg-brand-cyan hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer"
-                  />
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
+        <ProofExportModal
+          isOpen={isExportModalOpen}
+          onClose={() => setIsExportModalOpen(false)}
+          activeTheoremId={activeTheoremId}
+          edges={edges}
+        />
 
-        {/* Custom Invariant Studio Modal */}
-        <AnimatePresence>
-          {isCustomStudioOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="w-full max-w-xl rounded-2xl border border-slate-800 bg-slate-900 p-6 flex flex-col gap-4 shadow-2xl"
-              >
-                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                  <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                    <IconPlus className="w-5 h-5 text-brand-purple" />
-                    Custom Invariant Studio
-                  </h3>
-                  <button
-                    onClick={() => setIsCustomStudioOpen(false)}
-                    className="p-1 rounded text-slate-400 hover:text-white"
-                  >
-                    <IconX className="w-5 h-5" />
-                  </button>
-                </div>
-                <div className="space-y-3 text-xs">
-                  <div>
-                    <label className="block text-slate-400 font-mono mb-1">Premise 1 Formula:</label>
-                    <input
-                      type="text"
-                      value={customPremise1}
-                      onChange={(e) => setCustomPremise1(e.target.value)}
-                      className="w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 font-mono text-white focus:outline-none focus:border-brand-cyan"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-slate-400 font-mono mb-1">Premise 2 Formula:</label>
-                    <input
-                      type="text"
-                      value={customPremise2}
-                      onChange={(e) => setCustomPremise2(e.target.value)}
-                      className="w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 font-mono text-white focus:outline-none focus:border-brand-cyan"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-slate-400 font-mono mb-1">Premise 3 Formula:</label>
-                    <input
-                      type="text"
-                      value={customPremise3}
-                      onChange={(e) => setCustomPremise3(e.target.value)}
-                      className="w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 font-mono text-white focus:outline-none focus:border-brand-cyan"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-slate-400 font-mono mb-1">Target Invariant Goal:</label>
-                    <input
-                      type="text"
-                      value={customGoal}
-                      onChange={(e) => setCustomGoal(e.target.value)}
-                      className="w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 font-mono text-white focus:outline-none focus:border-brand-cyan"
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-end gap-3 pt-2">
-                  <button
-                    onClick={() => {
-                      handleSwitchTheorem("custom");
-                      setIsCustomStudioOpen(false);
-                    }}
-                    className="px-4 py-2 rounded-xl bg-brand-cyan hover:bg-cyan-400 text-slate-950 font-bold text-xs transition"
-                  >
-                    Load into Workspace
-                  </button>
-                </div>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
+        <ProofCustomModal
+          isOpen={isCustomStudioOpen}
+          onClose={() => setIsCustomStudioOpen(false)}
+          customPremise1={customPremise1}
+          customPremise2={customPremise2}
+          customPremise3={customPremise3}
+          customGoal={customGoal}
+          setCustomPremise1={setCustomPremise1}
+          setCustomPremise2={setCustomPremise2}
+          setCustomPremise3={setCustomPremise3}
+          setCustomGoal={setCustomGoal}
+          onLoadIntoWorkspace={() => {
+            handleSwitchTheorem("custom");
+            setIsCustomStudioOpen(false);
+          }}
+        />
 
         <NextPrevNav
           prev={{ title: "NeuroRecon CAD Simulator", href: "/neuro" }}

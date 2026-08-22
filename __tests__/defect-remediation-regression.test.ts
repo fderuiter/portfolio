@@ -1,9 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import fs from "fs";
+import path from "path";
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { WorkflowWizardModal } from "@/components/crf/Wizard/WorkflowWizardModal";
+import { fromAny, fromPartial } from "@total-typescript/shoehorn";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
+
 import {
   evaluateAst,
   evaluateAstWithTrace,
@@ -14,10 +20,15 @@ import {
 } from "@/lib/proof-utils";
 import {
   evaluateFormula,
+  evaluateCondition,
+  evaluateRule,
+  isMissingOrNullFlavor,
   ExpressionEvaluator,
   tokenizeWithSpans,
 } from "@/lib/crf/ast-evaluator";
-import { CRFField } from "@/lib/crf/types";
+import { CRFField, CRFForm, StudyProtocol } from "@/lib/crf/types";
+import { computeFormHealthMetrics } from "@/lib/crf/form-health";
+import { autoFixAllViolations } from "@/lib/crf/cdisc-conformance-linter";
 import {
   createInitialState,
   updateGameSimulation,
@@ -35,6 +46,16 @@ import {
 import { sanitizeError, sanitizeString } from "@/lib/error-sanitization";
 import { evaluateCanaryRollout } from "@/scripts/canary-analyzer";
 import { CaseStudyService } from "@/lib/services/case-study-service";
+import {
+  exportToCDISCODMXML,
+  generateSDTMDataset,
+} from "@/lib/clinical-trial-chaos/engine";
+import { ClinicalSubject } from "@/lib/clinical-trial-chaos/types";
+import { exportStudyToCdiscOdmXml } from "@/lib/crf";
+import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
+import { resolveSnippetTerminology } from "@/components/ProjectTeaserGrid";
+import { TelemetryService, _testCache } from "@/lib/services/telemetry-service";
+import { NextRequest } from "next/server";
 
 describe("Defect Remediation & Regression Verification Suite (Invariant #11)", () => {
   describe("Proof AST Solver Resilience & Deep Recursion Guards", () => {
@@ -60,10 +81,10 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
     });
 
     it("handles nullish, empty, or malformed AST nodes gracefully", () => {
-      expect(evaluateAst(null as unknown as PropAst, {})).toBe(false);
-      expect(evaluateAst(undefined as unknown as PropAst, {})).toBe(false);
-      expect(formatFormula(null as unknown as PropAst)).toBe("");
-      expect(extractVariables(null as unknown as PropAst)).toEqual([]);
+      expect(evaluateAst(fromAny(null), {})).toBe(false);
+      expect(evaluateAst(fromAny(undefined), {})).toBe(false);
+      expect(formatFormula(fromAny(null))).toBe("");
+      expect(extractVariables(fromAny(null))).toEqual([]);
       expect(areAstsEqual(null, null)).toBe(false);
       expect(areAstsEqual(undefined, { type: "var", name: "A" })).toBe(false);
     });
@@ -71,11 +92,24 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
     it("produces valid hierarchical traces on complex logical formulas", () => {
       const ast: PropAst = {
         type: "implies",
-        left: { type: "and", left: { type: "var", name: "P" }, right: { type: "var", name: "Q" } },
-        right: { type: "or", left: { type: "var", name: "R" }, right: { type: "var", name: "S" } },
+        left: {
+          type: "and",
+          left: { type: "var", name: "P" },
+          right: { type: "var", name: "Q" },
+        },
+        right: {
+          type: "or",
+          left: { type: "var", name: "R" },
+          right: { type: "var", name: "S" },
+        },
       };
 
-      const trace = evaluateAstWithTrace(ast, { P: true, Q: true, R: false, S: true });
+      const trace = evaluateAstWithTrace(ast, {
+        P: true,
+        Q: true,
+        R: false,
+        S: true,
+      });
       expect(trace.value).toBe(true);
       expect(trace.operator).toBe("→");
       expect(trace.children).toBeDefined();
@@ -85,9 +119,30 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
 
   describe("CRF Clinical AST Evaluator & Arithmetic Guards", () => {
     const mockFields: CRFField[] = [
-      { id: "f1", variableName: "HEIGHT", label: "Height (cm)", dataType: "number", columnSpan: 6, required: true },
-      { id: "f2", variableName: "WEIGHT", label: "Weight (kg)", dataType: "number", columnSpan: 6, required: true },
-      { id: "f3", variableName: "ZERO_DIV", label: "Zero Field", dataType: "number", columnSpan: 6, required: false },
+      {
+        id: "f1",
+        variableName: "HEIGHT",
+        label: "Height (cm)",
+        dataType: "number",
+        columnSpan: 6,
+        required: true,
+      },
+      {
+        id: "f2",
+        variableName: "WEIGHT",
+        label: "Weight (kg)",
+        dataType: "number",
+        columnSpan: 6,
+        required: true,
+      },
+      {
+        id: "f3",
+        variableName: "ZERO_DIV",
+        label: "Zero Field",
+        dataType: "number",
+        columnSpan: 6,
+        required: false,
+      },
     ];
 
     it("safely resolves dynamic division by zero returning explicit null instead of NaN or Infinity", () => {
@@ -101,7 +156,11 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       expect(resultZeroHeight).toBeNull();
 
       // Direct division by zero in expression
-      const resultDivZero = evaluateFormula("100 / ZERO_DIV", { ZERO_DIV: 0 }, mockFields);
+      const resultDivZero = evaluateFormula(
+        "100 / ZERO_DIV",
+        { ZERO_DIV: 0 },
+        mockFields
+      );
       expect(resultDivZero).toBeNull();
     });
 
@@ -130,9 +189,91 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
     });
 
     it("handles token spans and diagnostics for malformed clinical formulas", () => {
-      const tokens = tokenizeWithSpans("round(sqrt(HEIGHT * WEIGHT) / 3600, 2)");
+      const tokens = tokenizeWithSpans(
+        "round(sqrt(HEIGHT * WEIGHT) / 3600, 2)"
+      );
       expect(tokens.length).toBeGreaterThan(5);
       expect(tokens[0].value).toBe("round");
+    });
+
+    it("prevents coercive conversion of uncollected and CDISC null flavor fields to zero during condition matching and calculation", () => {
+      // 0. Guard function detects CDISC null flavors and missing values
+      expect(isMissingOrNullFlavor("ND")).toBe(true);
+      expect(isMissingOrNullFlavor(null)).toBe(true);
+      expect(isMissingOrNullFlavor(0)).toBe(false);
+
+      // 1. Relational comparisons with missing / null flavor values must evaluate to false
+      expect(
+        evaluateCondition(
+          { fieldId: "f1", operator: "gt", value: 100 },
+          { f1: "ND" },
+          mockFields
+        )
+      ).toBe(false);
+      expect(
+        evaluateCondition(
+          { fieldId: "f1", operator: "gte", value: 0 },
+          { f1: null },
+          mockFields
+        )
+      ).toBe(false);
+      expect(
+        evaluateCondition(
+          { fieldId: "f1", operator: "lt", value: 50 },
+          { f1: "UNK" },
+          mockFields
+        )
+      ).toBe(false);
+      expect(
+        evaluateCondition(
+          { fieldId: "f1", operator: "lte", value: 10 },
+          { f1: "" },
+          mockFields
+        )
+      ).toBe(false);
+
+      // 2. Calculations with missing / null flavor inputs must safely return null
+      expect(
+        evaluateFormula(
+          "HEIGHT + WEIGHT",
+          { HEIGHT: 180, WEIGHT: "ND" },
+          mockFields
+        )
+      ).toBeNull();
+      expect(
+        evaluateFormula(
+          "HEIGHT - WEIGHT",
+          { HEIGHT: "NA", WEIGHT: 70 },
+          mockFields
+        )
+      ).toBeNull();
+
+      // 3. Edit check rules pass without triggering false-positive queries when dependent fields contain null flavors
+      const nullFlavorRule = {
+        id: "rule_null_flavor",
+        name: "Null Flavor Rule",
+        description: "Rule check",
+        triggerFieldIds: ["f1"],
+        actionType: "raise_query" as const,
+        targetFieldId: "f1",
+        logicalOperator: "AND" as const,
+        conditions: [{ fieldId: "f1", operator: "gt" as const, value: 0 }],
+      };
+      expect(evaluateRule(nullFlavorRule, { f1: "ND" }, mockFields)).toBe(
+        false
+      );
+
+      // 4. Valid numeric zero must continue to evaluate correctly
+      expect(
+        evaluateCondition(
+          { fieldId: "f1", operator: "gte", value: 0 },
+          { f1: 0 },
+          mockFields
+        )
+      ).toBe(true);
+      expect(evaluateFormula("HEIGHT + 10", { HEIGHT: 0 }, mockFields)).toBe(
+        10
+      );
     });
   });
 
@@ -165,7 +306,11 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       expect(freedKb).toBeGreaterThanOrEqual(0);
       expect(afterGc.allocatedRamKb).toBeGreaterThanOrEqual(0.4);
 
-      const { state: allocState } = allocateVariable(playing, "string", "testVar");
+      const { state: allocState } = allocateVariable(
+        playing,
+        "string",
+        "testVar"
+      );
       expect(allocState.allocatedRamKb).toBeGreaterThan(playing.allocatedRamKb);
     });
   });
@@ -176,7 +321,7 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       expect(Number.isFinite(boundedNaN.x)).toBe(true);
       expect(Number.isFinite(boundedNaN.y)).toBe(true);
 
-      const boundedUndef = clampBounds(undefined as unknown as number, null as unknown as number);
+      const boundedUndef = clampBounds(fromAny(undefined), fromAny(null));
       expect(Number.isFinite(boundedUndef.x)).toBe(true);
       expect(Number.isFinite(boundedUndef.y)).toBe(true);
     });
@@ -212,15 +357,19 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
     it("scrubs nested system paths and cause chains", () => {
       const originalNodeEnv = process.env.NODE_ENV;
       try {
-        (process.env as Record<string, string | undefined>).NODE_ENV = "production";
+        (process.env as Record<string, string | undefined>).NODE_ENV =
+          "production";
 
-        const rawMessage = "Failed loading file /Users/fred/Code/portfolio/lib/db.ts: connect ECONNREFUSED";
+        const rawMessage =
+          "Failed loading file /Users/fred/Code/portfolio/lib/db.ts: connect ECONNREFUSED";
         const sanitizedStr = sanitizeString(rawMessage);
         expect(sanitizedStr).not.toContain("/Users/fred");
         expect(sanitizedStr).toContain("[scrubbed]");
 
         const rootError = new Error("Database error at /app/server/secret.key");
-        const wrappedError = new Error("Top level failure at /home/ubuntu/app/server.ts");
+        const wrappedError = new Error(
+          "Top level failure at /home/ubuntu/app/server.ts"
+        );
         wrappedError.cause = rootError;
 
         const sanitized = sanitizeError(wrappedError);
@@ -228,7 +377,8 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
         expect(sanitized.cause).toBeDefined();
         expect((sanitized.cause as Error).message).not.toContain("/app/server");
       } finally {
-        (process.env as Record<string, string | undefined>).NODE_ENV = originalNodeEnv;
+        (process.env as Record<string, string | undefined>).NODE_ENV =
+          originalNodeEnv;
       }
     });
   });
@@ -282,7 +432,10 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
 
       // Trigger Escape keydown on the dialog container
       await act(async () => {
-        const escEvent = new KeyboardEvent("keydown", { key: "Escape", bubbles: true });
+        const escEvent = new KeyboardEvent("keydown", {
+          key: "Escape",
+          bubbles: true,
+        });
         dialog.dispatchEvent(escEvent);
       });
 
@@ -306,14 +459,20 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
 
       // Dispatch ArrowRight keydown
       await act(async () => {
-        const arrowRight = new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true });
+        const arrowRight = new KeyboardEvent("keydown", {
+          key: "ArrowRight",
+          bubbles: true,
+        });
         dialog.dispatchEvent(arrowRight);
       });
       expect(container.textContent).toContain("Stage 2 of 5");
 
       // Dispatch ArrowLeft keydown
       await act(async () => {
-        const arrowLeft = new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true });
+        const arrowLeft = new KeyboardEvent("keydown", {
+          key: "ArrowLeft",
+          bubbles: true,
+        });
         dialog.dispatchEvent(arrowLeft);
       });
       expect(container.textContent).toContain("Stage 1 of 5");
@@ -326,7 +485,10 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
 
       // Dispatch ArrowRight keydown from inside the text input
       await act(async () => {
-        const arrowRight = new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true });
+        const arrowRight = new KeyboardEvent("keydown", {
+          key: "ArrowRight",
+          bubbles: true,
+        });
         input.dispatchEvent(arrowRight);
       });
       // The stage should NOT change because focus is on an input
@@ -393,7 +555,10 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       document.body.appendChild(containerBoundary);
 
       // Event target inside simulator boundary
-      const eventInside = new KeyboardEvent("keydown", { key: "?", bubbles: true });
+      const eventInside = new KeyboardEvent("keydown", {
+        key: "?",
+        bubbles: true,
+      });
       innerCanvasControl.dispatchEvent(eventInside);
       handleGlobalKeyDown(eventInside);
 
@@ -402,7 +567,10 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       // Event target outside boundary
       const outsideButton = document.createElement("button");
       document.body.appendChild(outsideButton);
-      const eventOutside = new KeyboardEvent("keydown", { key: "?", bubbles: true });
+      const eventOutside = new KeyboardEvent("keydown", {
+        key: "?",
+        bubbles: true,
+      });
       outsideButton.dispatchEvent(eventOutside);
       handleGlobalKeyDown(eventOutside);
 
@@ -482,6 +650,405 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
 
       const allSlugs = await CaseStudyService.getAllPublishedSlugs();
       expect(allSlugs).toContain("laser-loon");
+    });
+  });
+
+  describe("CDISC Auto-Fix Cryptographic UUID Identifier Generation (Targeted UUID Autofix Repair)", () => {
+    it("ensures batch auto-fix generates unique cryptographic UUID identifiers across synchronous execution loops", () => {
+      const mockProtocol: StudyProtocol = {
+        id: "study_test_autofix",
+        studyName: "Test Protocol",
+        sponsor: "Test Pharma",
+        therapeuticArea: "Oncology",
+        phase: "Phase I",
+        protocolNumber: "PROTOCOL-001",
+        version: "1.0",
+        lastModified: "2026-08-20",
+        codelists: [],
+        branding: {
+          primaryColor: "#000000",
+          accentColor: "#000000",
+          organizationName: "Test Pharma",
+          footerText: "Confidential",
+        },
+        forms: [
+          {
+            id: "form_demographics_empty",
+            name: "Demographics",
+            domain: "DM",
+            description: "Demographics domain missing all core variables",
+            version: "1.0",
+            rules: [],
+            sections: [],
+          },
+          {
+            id: "form_vitals_empty",
+            name: "Vital Signs",
+            domain: "VS",
+            description: "Vital signs domain missing all core variables",
+            version: "1.0",
+            rules: [],
+            sections: [],
+          },
+        ],
+        visits: [
+          {
+            id: "v1",
+            oid: "SE.V1",
+            name: "Screening",
+            visitType: "Scheduled",
+            targetDay: 0,
+            windowBefore: 0,
+            windowAfter: 0,
+            assignedFormIds: ["form_demographics_empty", "form_vitals_empty"],
+          },
+        ],
+      };
+
+      const { updatedStudy, fixedCount } = autoFixAllViolations(mockProtocol);
+      expect(fixedCount).toBeGreaterThan(0);
+
+      const generatedFieldIds = updatedStudy.forms
+        .flatMap((f) => f.sections)
+        .flatMap((s) => s.fields)
+        .map((f) => f.id);
+
+      const generatedSectionIds = updatedStudy.forms
+        .flatMap((f) => f.sections)
+        .map((s) => s.id);
+
+      // Verify no duplicate field or section IDs exist
+      const uniqueFieldIds = new Set(generatedFieldIds);
+      const uniqueSectionIds = new Set(generatedSectionIds);
+
+      expect(uniqueFieldIds.size).toBe(generatedFieldIds.length);
+      expect(uniqueSectionIds.size).toBe(generatedSectionIds.length);
+
+      // Verify high-entropy UUID format
+      const uuidPattern =
+        /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
+      generatedFieldIds.forEach((id) => {
+        expect(id).toMatch(uuidPattern);
+      });
+      generatedSectionIds.forEach((id) => {
+        expect(id).toMatch(uuidPattern);
+      });
+    });
+  });
+
+  describe("RetroLabyrinth Canvas Loop Pathfinding Memoization", () => {
+    it("ensures Traveling Salesman pathfinding tour calculation is memoized at component level", () => {
+      const retroLabyrinthPath = path.resolve(
+        __dirname,
+        "../components/RetroLabyrinth.tsx"
+      );
+      const code = fs.readFileSync(retroLabyrinthPath, "utf-8");
+
+      expect(code).toContain("useMemo");
+      expect(code).toContain("const tspTour = useMemo(");
+      expect(code).toContain("computeShortestTour(");
+      expect(code).toContain("tspTour,");
+
+      // Verify computeShortestTour is not invoked inside the real-time canvas drawing loop
+      const loopStart = code.indexOf("const loop = ");
+      const loopEnd = code.indexOf(
+        "animFrameRef.current = requestAnimationFrame(loop);",
+        loopStart
+      );
+      const loopBody = code.slice(loopStart, loopEnd);
+
+      expect(loopBody).not.toContain("computeShortestTour(");
+      expect(loopBody).toContain("tspTour");
+    });
+  });
+
+  describe("CDISC ODM XML Subject Matching & Attribute Escaping Protocol (Requirement 1-4)", () => {
+    it("guarantees complete subject record isolation without substring data leaks across subject IDs", () => {
+      const subj1: ClinicalSubject = {
+        id: "s-1",
+        subjectLabel: "1",
+        studySite: "Site 001 (Main)",
+        observations: [
+          {
+            id: "o-1",
+            field: "Weight",
+            rawValue: "70",
+            currentValue: "70 kg",
+            destination: "VS",
+            isResolved: true,
+          },
+        ],
+        status: "submitted",
+        timeRemaining: 30,
+        maxTime: 30,
+        createdAt: 1000,
+      };
+
+      const subj10: ClinicalSubject = {
+        id: "s-10",
+        subjectLabel: "10",
+        studySite: "Site 001 (Main)",
+        observations: [
+          {
+            id: "o-10",
+            field: "Weight",
+            rawValue: "85",
+            currentValue: "85 kg (subj 10 data)",
+            destination: "VS",
+            isResolved: true,
+          },
+        ],
+        status: "submitted",
+        timeRemaining: 30,
+        maxTime: 30,
+        createdAt: 1000,
+      };
+
+      const subj11: ClinicalSubject = {
+        id: "s-11",
+        subjectLabel: "11",
+        studySite: "Site 001 (Main)",
+        observations: [
+          {
+            id: "o-11",
+            field: "Weight",
+            rawValue: "92",
+            currentValue: "92 kg (subj 11 data)",
+            destination: "VS",
+            isResolved: true,
+          },
+        ],
+        status: "submitted",
+        timeRemaining: 30,
+        maxTime: 30,
+        createdAt: 1000,
+      };
+
+      const sdtmDataset = generateSDTMDataset([subj1, subj10, subj11]);
+      const xmlSubj1 = exportToCDISCODMXML([subj1], sdtmDataset);
+
+      expect(xmlSubj1).toContain('SubjectKey="1"');
+      expect(xmlSubj1).toContain("70 kg");
+      expect(xmlSubj1).not.toContain("85 kg (subj 10 data)");
+      expect(xmlSubj1).not.toContain("92 kg (subj 11 data)");
+    });
+
+    it("guarantees 100% valid XML entity escaping across exported attributes containing reserved XML characters", () => {
+      const specialStudy = {
+        ...ONCOLOGY_RECIST_PRESET,
+        protocolNumber: 'P&1<2>"3"',
+        version: 'v&1"2"',
+        visits: [
+          {
+            id: "v_&1<2>",
+            oid: "SE.VIS&1<2>",
+            name: "Visit &1",
+            visitType: "Scheduled" as const,
+            targetDay: 1,
+            windowBefore: 0,
+            windowAfter: 0,
+            assignedFormIds: ["f_&1<2>"],
+          },
+        ],
+        forms: [
+          {
+            id: "f_&1<2>",
+            name: "Form &1",
+            description: "Special test form",
+            domain: "DM&LB",
+            version: "1.0",
+            rules: [],
+            sections: [
+              {
+                id: "sec_&1",
+                title: "Section &1",
+                fields: [
+                  {
+                    id: "field_&1",
+                    variableName: 'VAR_&1<2>"3"',
+                    label: "Label &1 <2>",
+                    dataType: "text" as const,
+                    columnSpan: 6,
+                    required: true,
+                    codelistId: "CL_&1",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const xml = exportStudyToCdiscOdmXml(specialStudy);
+
+      expect(xml).toContain('FileOID="ODM.P&amp;1&lt;2&gt;&quot;3&quot;.');
+      expect(xml).toContain('Study OID="STUDY.P_1_2__3_"');
+      expect(xml).toContain('MetaDataVersion OID="MDV.v&amp;1&quot;2&quot;"');
+      expect(xml).toContain(
+        'StudyEventRef StudyEventOID="SE.VIS&amp;1&lt;2&gt;"'
+      );
+      expect(xml).toContain('FormRef FormOID="FORM.f_&amp;1&lt;2&gt;"');
+      expect(xml).toContain('FormDef OID="FORM.f_&amp;1&lt;2&gt;"');
+      expect(xml).toContain(
+        'ItemGroupRef ItemGroupOID="IG.DM&amp;LB.sec_&amp;1"'
+      );
+      expect(xml).toContain('ItemGroupDef OID="IG.DM&amp;LB.sec_&amp;1"');
+      expect(xml).toContain(
+        'ItemRef ItemOID="IT.VAR_&amp;1&lt;2&gt;&quot;3&quot;"'
+      );
+      expect(xml).toContain(
+        'ItemDef OID="IT.VAR_&amp;1&lt;2&gt;&quot;3&quot;"'
+      );
+      expect(xml).toContain('CodeListOID="CL_&amp;1"');
+    });
+  });
+
+  describe("Homepage Teaser Snippet Terminology Swap & Post-Substitution Truncation", () => {
+    it("synchronously resolves compiled terminology tags prior to character truncation and strips raw markup", () => {
+      const sampleContent =
+        'An enterprise-grade **TypeScript** mapping pipeline that transforms raw `<span data-key="edc" data-term="digital trial forms" data-definition="def">Electronic Data Capture (EDC)</span>` datasets into compliant **<span data-key="cdisc-sdtm" data-term="standardized study domain tables" data-definition="Format for study datasets.">CDISC SDTM</span>** domains.';
+
+      const simplifiedText = resolveSnippetTerminology(sampleContent, true);
+      expect(simplifiedText).toContain("standardized study domain tables");
+      expect(simplifiedText).toContain("digital trial forms");
+      expect(simplifiedText).not.toContain("CDISC SDTM");
+      expect(simplifiedText).not.toContain("data-key=");
+      expect(simplifiedText).not.toContain("<span");
+
+      const technicalText = resolveSnippetTerminology(sampleContent, false);
+      expect(technicalText).toContain("CDISC SDTM");
+      expect(technicalText).toContain("Electronic Data Capture (EDC)");
+      expect(technicalText).not.toContain("standardized study domain tables");
+      expect(technicalText).not.toContain("data-key=");
+      expect(technicalText).not.toContain("<span");
+    });
+  });
+
+  describe("CRF Health Calculator Safe Property Guard (Targeted Safe Property Guard)", () => {
+    it("safely computes form health metrics for draft forms containing fields with undefined, null, or empty variable names", () => {
+      const draftForm: CRFForm = {
+        id: "form_draft",
+        name: "Draft Vital Signs",
+        domain: "VS",
+        description: "Draft form with unassigned variable names",
+        version: "1.0",
+        sections: [
+          {
+            id: "sec_vs",
+            title: "Measurements",
+            fields: [
+              fromPartial<CRFField>({
+                id: "f1",
+                label: "Systolic BP",
+                dataType: "number",
+                required: true,
+                columnSpan: 6,
+                // variableName undefined
+              }),
+              {
+                id: "f2",
+                variableName: fromAny(null),
+                label: "Diastolic BP",
+                dataType: "number",
+                required: false,
+                columnSpan: 6,
+              },
+
+              {
+                id: "f3",
+                variableName: "",
+                label: "Heart Rate",
+                dataType: "number",
+                required: false,
+                columnSpan: 6,
+              },
+              {
+                id: "f4",
+                variableName: "VSTESTCD",
+                label: "Vital Signs Test Short Name",
+                dataType: "text",
+                required: true,
+                columnSpan: 6,
+              },
+            ],
+          },
+        ],
+        rules: [],
+      };
+
+      let metrics;
+      expect(() => {
+        metrics = computeFormHealthMetrics(draftForm);
+      }).not.toThrow();
+
+      expect(metrics).toBeDefined();
+      expect(metrics!.totalFields).toBe(4);
+      expect(metrics!.mandatoryFields).toBe(2);
+      // VS core variables: ["VSTESTCD", "VSORRES", "VSDTC"]
+      // Present: "VSTESTCD". Missing: "VSORRES", "VSDTC".
+      expect(metrics!.missingCoreVariables).toEqual(["VSORRES", "VSDTC"]);
+      // 1 of 3 core variables present = 33% conformance
+      expect(metrics!.cdashConformancePercentage).toBe(33);
+    });
+  });
+
+  describe("Telemetry Rate Limiter Circuit Breaker & Cooldown Fallback", () => {
+    beforeEach(() => {
+      _testCache.reset();
+    });
+
+    it("verifies 30-second circuit breaker cooldown prevents unhandled exception cascade on remote rate limit failure", async () => {
+      const req = new NextRequest("http://localhost:3000/api/telemetry", {
+        method: "POST",
+        headers: { "x-forwarded-for": "192.0.2.55" },
+      });
+
+      const now = Date.now();
+      const res = await TelemetryService.isRateLimited(req);
+
+      // Verify valid rate limit object returned with fallback headers
+      expect(res.limited).toBe(false);
+      expect(res.headers).toBeDefined();
+      expect(res.headers?.["X-RateLimit-Limit"]).toBe("100");
+      expect(res.headers?.["X-RateLimit-Remaining"]).toBe("99");
+
+      // Verify circuit breaker timestamp
+      expect(_testCache.circuitBreakerCooldownUntil).toBeGreaterThanOrEqual(
+        now
+      );
+    });
+  });
+
+  describe("WebSocket BufferUtil Masking & Neon Serverless Build Environment Guard", () => {
+    it("guarantees WS_NO_BUFFER_UTIL and WS_NO_UTF_8_VALIDATE are set so frame masking never calls missing native bufferutil.mask", async () => {
+      // Importing lib/db ensures environment initialization
+      await import("@/lib/db");
+
+      expect(process.env.WS_NO_BUFFER_UTIL).toBe("1");
+      expect(process.env.WS_NO_UTF_8_VALIDATE).toBe("1");
+
+      // Test pure JS frame masking implementation with buffer length >= 48 bytes
+      // (the exact threshold where ws would otherwise call bufferUtil.mask)
+      const bufferUtilPath = path.resolve(
+        process.cwd(),
+        "node_modules/ws/lib/buffer-util.js"
+      );
+      const bufferUtil =
+        (await import(bufferUtilPath)).default ||
+        (await import(bufferUtilPath));
+      expect(typeof bufferUtil.mask).toBe("function");
+
+      const source = Buffer.alloc(64, 0x41); // 64 bytes of 'A'
+      const mask = Buffer.from([0x12, 0x34, 0x56, 0x78]);
+      const output = Buffer.alloc(64);
+
+      expect(() => {
+        bufferUtil.mask(source, mask, output, 0, 64);
+      }).not.toThrow();
+
+      // Verify masking XOR logic
+      expect(output[0]).toBe(0x41 ^ 0x12);
+      expect(output[1]).toBe(0x41 ^ 0x34);
     });
   });
 });

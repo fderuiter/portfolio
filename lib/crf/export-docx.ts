@@ -28,6 +28,44 @@ function cleanHex(color?: string, fallback = "0284C7"): string {
 }
 
 /**
+ * Table width in DXA (Twips) matching standard 1-inch margins on Letter paper (8.5" - 2" = 6.5" = 9,360 DXA).
+ */
+export const TABLE_WIDTH_DXA = 9360;
+
+/**
+ * Standard mode section table column widths in DXA (sum = 9,360).
+ */
+export const STANDARD_COL_WIDTH_1 = 3931; // ~42%
+export const STANDARD_COL_WIDTH_2 = 5429; // ~58%
+
+/**
+ * Annotated mode section table column widths in DXA (sum = 9,360).
+ */
+export const ANNOTATED_COL_WIDTH_1 = 2995; // ~32%
+export const ANNOTATED_COL_WIDTH_2 = 3744; // 40%
+export const ANNOTATED_COL_WIDTH_3 = 2621; // ~28%
+
+/**
+ * Table of contents column widths in DXA (sum = 9,360).
+ */
+export const TOC_COL_WIDTH_1 = 749;  // ~8%
+export const TOC_COL_WIDTH_2 = 1404; // 15%
+export const TOC_COL_WIDTH_3 = 4399; // ~47%
+export const TOC_COL_WIDTH_4 = 1404; // 15%
+export const TOC_COL_WIDTH_5 = 1404; // 15%
+
+/**
+ * SDTM specification appendix column widths in DXA (sum = 9,360).
+ */
+export const SDTM_COL_WIDTH_1 = 1123; // ~12%
+export const SDTM_COL_WIDTH_2 = 1685; // ~18%
+export const SDTM_COL_WIDTH_3 = 2808; // 30%
+export const SDTM_COL_WIDTH_4 = 1872; // 20%
+export const SDTM_COL_WIDTH_5 = 936;  // 10%
+export const SDTM_COL_WIDTH_6 = 936;  // 10%
+
+
+/**
  * Decodes base64 image data to Uint8Array for docx ImageRun.
  */
 function base64ToUint8Array(base64String: string): Uint8Array | null {
@@ -124,6 +162,23 @@ function renderFieldResponseMock(
     ];
   }
 
+  if (field.dataType === "precision_date") {
+    const nullFlavorText = field.allowNullFlavor ? "   [ND] [NA] [UNK]" : "";
+    return [
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `[ YYYY - MM - DD ]${field.allowPartial ? " (Partial Allowed)" : ""}${nullFlavorText}`,
+            color: "64748B",
+            size: 20,
+            font: "Courier New",
+          }),
+        ],
+        spacing: { before: 80, after: 80 },
+      }),
+    ];
+  }
+
   if (field.dataType === "repeating_table") {
     return [
       new Paragraph({
@@ -183,7 +238,7 @@ function createSectionTable(
         tableHeader: true,
         children: [
           new TableCell({
-            width: { size: 3200, type: WidthType.DXA },
+            width: { size: ANNOTATED_COL_WIDTH_1, type: WidthType.DXA },
             shading: { type: ShadingType.CLEAR, fill: "F1F5F9" },
             children: [
               new Paragraph({
@@ -199,7 +254,7 @@ function createSectionTable(
             ],
           }),
           new TableCell({
-            width: { size: 4000, type: WidthType.DXA },
+            width: { size: ANNOTATED_COL_WIDTH_2, type: WidthType.DXA },
             shading: { type: ShadingType.CLEAR, fill: "F1F5F9" },
             children: [
               new Paragraph({
@@ -215,7 +270,7 @@ function createSectionTable(
             ],
           }),
           new TableCell({
-            width: { size: 2800, type: WidthType.DXA },
+            width: { size: ANNOTATED_COL_WIDTH_3, type: WidthType.DXA },
             shading: { type: ShadingType.CLEAR, fill: "F1F5F9" },
             children: [
               new Paragraph({
@@ -239,7 +294,7 @@ function createSectionTable(
         tableHeader: true,
         children: [
           new TableCell({
-            width: { size: 4200, type: WidthType.DXA },
+            width: { size: STANDARD_COL_WIDTH_1, type: WidthType.DXA },
             shading: { type: ShadingType.CLEAR, fill: "F1F5F9" },
             children: [
               new Paragraph({
@@ -255,7 +310,7 @@ function createSectionTable(
             ],
           }),
           new TableCell({
-            width: { size: 5800, type: WidthType.DXA },
+            width: { size: STANDARD_COL_WIDTH_2, type: WidthType.DXA },
             shading: { type: ShadingType.CLEAR, fill: "F1F5F9" },
             children: [
               new Paragraph({
@@ -359,12 +414,12 @@ function createSectionTable(
             new TableCell({
               borders: cellBorder,
               children: labelParagraphs,
-              width: { size: 3200, type: WidthType.DXA },
+              width: { size: ANNOTATED_COL_WIDTH_1, type: WidthType.DXA },
             }),
             new TableCell({
               borders: cellBorder,
               children: responseParagraphs,
-              width: { size: 4000, type: WidthType.DXA },
+              width: { size: ANNOTATED_COL_WIDTH_2, type: WidthType.DXA },
             }),
             new TableCell({
               borders: cellBorder,
@@ -373,7 +428,7 @@ function createSectionTable(
                 type: ShadingType.CLEAR,
                 fill: isDerived ? "FAF5FF" : "F0F9FF",
               },
-              width: { size: 2800, type: WidthType.DXA },
+              width: { size: ANNOTATED_COL_WIDTH_3, type: WidthType.DXA },
             }),
           ],
         })
@@ -385,12 +440,12 @@ function createSectionTable(
             new TableCell({
               borders: cellBorder,
               children: labelParagraphs,
-              width: { size: 4200, type: WidthType.DXA },
+              width: { size: STANDARD_COL_WIDTH_1, type: WidthType.DXA },
             }),
             new TableCell({
               borders: cellBorder,
               children: responseParagraphs,
-              width: { size: 5800, type: WidthType.DXA },
+              width: { size: STANDARD_COL_WIDTH_2, type: WidthType.DXA },
             }),
           ],
         })
@@ -399,7 +454,7 @@ function createSectionTable(
   });
 
   return new Table({
-    width: { size: 10000, type: WidthType.DXA },
+    width: { size: TABLE_WIDTH_DXA, type: WidthType.DXA },
     rows,
   });
 }
@@ -420,7 +475,7 @@ function createTableOfContentsTable(forms: CRFForm[]): Table {
       tableHeader: true,
       children: [
         new TableCell({
-          width: { size: 800, type: WidthType.DXA },
+          width: { size: TOC_COL_WIDTH_1, type: WidthType.DXA },
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
           children: [
             new Paragraph({
@@ -429,7 +484,7 @@ function createTableOfContentsTable(forms: CRFForm[]): Table {
           ],
         }),
         new TableCell({
-          width: { size: 1500, type: WidthType.DXA },
+          width: { size: TOC_COL_WIDTH_2, type: WidthType.DXA },
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
           children: [
             new Paragraph({
@@ -438,7 +493,7 @@ function createTableOfContentsTable(forms: CRFForm[]): Table {
           ],
         }),
         new TableCell({
-          width: { size: 4700, type: WidthType.DXA },
+          width: { size: TOC_COL_WIDTH_3, type: WidthType.DXA },
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
           children: [
             new Paragraph({
@@ -447,7 +502,7 @@ function createTableOfContentsTable(forms: CRFForm[]): Table {
           ],
         }),
         new TableCell({
-          width: { size: 1500, type: WidthType.DXA },
+          width: { size: TOC_COL_WIDTH_4, type: WidthType.DXA },
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
           children: [
             new Paragraph({
@@ -456,7 +511,7 @@ function createTableOfContentsTable(forms: CRFForm[]): Table {
           ],
         }),
         new TableCell({
-          width: { size: 1500, type: WidthType.DXA },
+          width: { size: TOC_COL_WIDTH_5, type: WidthType.DXA },
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
           children: [
             new Paragraph({
@@ -509,7 +564,7 @@ function createTableOfContentsTable(forms: CRFForm[]): Table {
   });
 
   return new Table({
-    width: { size: 10000, type: WidthType.DXA },
+    width: { size: TABLE_WIDTH_DXA, type: WidthType.DXA },
     rows,
   });
 }
@@ -530,32 +585,32 @@ function createSdtmSpecificationTable(study: StudyProtocol): Table {
       tableHeader: true,
       children: [
         new TableCell({
-          width: { size: 1200, type: WidthType.DXA },
+          width: { size: SDTM_COL_WIDTH_1, type: WidthType.DXA },
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
           children: [new Paragraph({ children: [new TextRun({ text: "Domain", bold: true, color: "FFFFFF", size: 18 })] })],
         }),
         new TableCell({
-          width: { size: 1800, type: WidthType.DXA },
+          width: { size: SDTM_COL_WIDTH_2, type: WidthType.DXA },
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
           children: [new Paragraph({ children: [new TextRun({ text: "Variable", bold: true, color: "FFFFFF", size: 18 })] })],
         }),
         new TableCell({
-          width: { size: 3000, type: WidthType.DXA },
+          width: { size: SDTM_COL_WIDTH_3, type: WidthType.DXA },
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
           children: [new Paragraph({ children: [new TextRun({ text: "CDASH Question Label", bold: true, color: "FFFFFF", size: 18 })] })],
         }),
         new TableCell({
-          width: { size: 2000, type: WidthType.DXA },
+          width: { size: SDTM_COL_WIDTH_4, type: WidthType.DXA },
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
           children: [new Paragraph({ children: [new TextRun({ text: "SDTM Target", bold: true, color: "FFFFFF", size: 18 })] })],
         }),
         new TableCell({
-          width: { size: 1000, type: WidthType.DXA },
+          width: { size: SDTM_COL_WIDTH_5, type: WidthType.DXA },
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
           children: [new Paragraph({ children: [new TextRun({ text: "Origin", bold: true, color: "FFFFFF", size: 18 })] })],
         }),
         new TableCell({
-          width: { size: 1000, type: WidthType.DXA },
+          width: { size: SDTM_COL_WIDTH_6, type: WidthType.DXA },
           shading: { type: ShadingType.CLEAR, fill: "0F172A" },
           children: [new Paragraph({ children: [new TextRun({ text: "Core", bold: true, color: "FFFFFF", size: 18 })] })],
         }),
@@ -607,7 +662,7 @@ function createSdtmSpecificationTable(study: StudyProtocol): Table {
   });
 
   return new Table({
-    width: { size: 10000, type: WidthType.DXA },
+    width: { size: TABLE_WIDTH_DXA, type: WidthType.DXA },
     rows,
   });
 }
@@ -715,7 +770,7 @@ export async function generateStudyDocx(
 
   documentChildren.push(
     new Table({
-      width: { size: 10000, type: WidthType.DXA },
+      width: { size: TABLE_WIDTH_DXA, type: WidthType.DXA },
       rows: [
         new TableRow({
           children: [
@@ -776,7 +831,7 @@ export async function generateStudyDocx(
   if (branding.confidentialityNotice) {
     documentChildren.push(
       new Table({
-        width: { size: 10000, type: WidthType.DXA },
+        width: { size: TABLE_WIDTH_DXA, type: WidthType.DXA },
         rows: [
           new TableRow({
             children: [

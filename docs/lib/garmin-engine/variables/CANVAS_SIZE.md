@@ -8,4 +8,4 @@
 
 > `const` **CANVAS\_SIZE**: `280` = `280`
 
-Defined in: [lib/garmin-engine.ts:133](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L133)
+Defined in: [lib/garmin-engine.ts:187](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L187)

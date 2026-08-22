@@ -14,22 +14,57 @@ import {
   EditCheckRule,
   StudyVisit,
 } from "@/lib/crf/types";
-import { getPresetByIdSync, getOncologyPresetSync } from "@/lib/crf/presets/loader";
+import { getPresetByIdSync, getOncologyPresetSync } from "@/lib/crf/presets";
 import { StudioHeader } from "./StudioHeader";
-import { FormsNavigator } from "./LeftSidebar/FormsNavigator";
+import { StudySpine, LeftSidebarTab } from "./LeftSidebar/StudySpine";
 import { WidgetPalette } from "./LeftSidebar/WidgetPalette";
 import { CdashScaffolderModal } from "./LeftSidebar/CdashScaffolderModal";
 import { FormCanvas } from "./CenterCanvas/FormCanvas";
 import { InspectorPanel } from "./RightInspector/InspectorPanel";
 import dynamic from "next/dynamic";
-import { AcrfOverlayViewer } from "./Modes/AcrfOverlayViewer";
-import { ExportImportModal } from "./Modes/ExportImportModal";
-const ExportDocumentModal = dynamic(
-  () => import("./Modes/ExportDocumentModal").then((mod) => ({ default: mod.ExportDocumentModal })),
+
+const AcrfOverlayViewer = dynamic(
+  () =>
+    import("./Modes/AcrfOverlayViewer").then((mod) => mod.AcrfOverlayViewer),
   { ssr: false }
 );
-import { BrandingConfigModal } from "./Branding/BrandingConfigModal";
-import { DiagnosticsDrawer } from "./DiagnosticsDrawer";
+
+const ExportImportModal = dynamic(
+  () =>
+    import("./Modes/ExportImportModal").then((mod) => mod.ExportImportModal),
+  { ssr: false }
+);
+
+const ExportDocumentModal = dynamic(
+  () =>
+    import("./Modes/ExportDocumentModal").then((mod) => ({
+      default: mod.ExportDocumentModal,
+    })),
+  { ssr: false }
+);
+
+const BrandingConfigModal = dynamic(
+  () =>
+    import("./Branding/BrandingConfigModal").then(
+      (mod) => mod.BrandingConfigModal
+    ),
+  { ssr: false }
+);
+
+const DiagnosticsDrawer = dynamic(
+  () => import("./DiagnosticsDrawer").then((mod) => mod.DiagnosticsDrawer),
+  { ssr: false }
+);
+
+const SpotlightTourOverlay = dynamic(
+  () =>
+    import("./Wizard/SpotlightTourOverlay").then(
+      (mod) => mod.SpotlightTourOverlay
+    ),
+  { ssr: false }
+);
+
+import { StudioTerminal } from "./Terminal/StudioTerminal";
 import {
   VisitMatrixEditorSkeleton,
   RuleGraphStudioSkeleton,
@@ -39,7 +74,8 @@ import {
 } from "./Skeletons";
 
 const VisitMatrixEditor = dynamic(
-  () => import("./Modes/VisitMatrixEditor").then((mod) => mod.VisitMatrixEditor),
+  () =>
+    import("./Modes/VisitMatrixEditor").then((mod) => mod.VisitMatrixEditor),
   {
     ssr: false,
     loading: () => <VisitMatrixEditorSkeleton />,
@@ -63,13 +99,15 @@ const LiveEdcSimulator = dynamic(
 );
 
 const WorkflowWizardModal = dynamic(
-  () => import("./Wizard/WorkflowWizardModal").then((mod) => mod.WorkflowWizardModal),
+  () =>
+    import("./Wizard/WorkflowWizardModal").then(
+      (mod) => mod.WorkflowWizardModal
+    ),
   {
     ssr: false,
     loading: () => <WorkflowWizardModalSkeleton />,
   }
 );
-import { SpotlightTourOverlay } from "./Wizard/SpotlightTourOverlay";
 import { getStudyBranding } from "@/lib/crf/branding-defaults";
 import { useStudioHashParams } from "@/hooks/useStudioHashParams";
 import { useAudio } from "@/components/providers/AudioProvider";
@@ -113,8 +151,15 @@ export const CRFStudioContainer: React.FC = () => {
   // Studio Navigation & Selection State
   const [activeMode, setActiveModeState] = useState<StudioMode>(() => {
     if (typeof window !== "undefined") {
-      const rawMode = new URLSearchParams(window.location.hash.slice(1)).get("mode") as StudioMode;
-      if (rawMode && ["designer", "matrix", "rules", "edc", "acrf", "export"].includes(rawMode)) {
+      const rawMode = new URLSearchParams(window.location.hash.slice(1)).get(
+        "mode"
+      ) as StudioMode;
+      if (
+        rawMode &&
+        ["designer", "matrix", "rules", "edc", "acrf", "export"].includes(
+          rawMode
+        )
+      ) {
         return rawMode;
       }
     }
@@ -126,7 +171,9 @@ export const CRFStudioContainer: React.FC = () => {
   useEffect(() => {
     if (study && !activeFormId) {
       if (typeof window !== "undefined") {
-        const rawForm = new URLSearchParams(window.location.hash.slice(1)).get("form");
+        const rawForm = new URLSearchParams(window.location.hash.slice(1)).get(
+          "form"
+        );
         if (rawForm && study.forms.some((f) => f.id === rawForm)) {
           // eslint-disable-next-line react-hooks/set-state-in-effect
           setActiveFormIdState(rawForm);
@@ -138,22 +185,31 @@ export const CRFStudioContainer: React.FC = () => {
     }
   }, [study, activeFormId]);
 
-  const [selectedFieldId, setSelectedFieldIdState] = useState<string | null>(() => {
-    if (typeof window !== "undefined") {
-      return new URLSearchParams(window.location.hash.slice(1)).get("field") || null;
+  const [selectedFieldId, setSelectedFieldIdState] = useState<string | null>(
+    () => {
+      if (typeof window !== "undefined") {
+        return (
+          new URLSearchParams(window.location.hash.slice(1)).get("field") ||
+          null
+        );
+      }
+      return null;
     }
-    return null;
-  });
+  );
 
   const [theme, setTheme] = useState<StudioTheme>(() => {
     if (typeof window !== "undefined") {
-      const rawTheme = new URLSearchParams(window.location.hash.slice(1)).get("theme") as StudioTheme;
+      const rawTheme = new URLSearchParams(window.location.hash.slice(1)).get(
+        "theme"
+      ) as StudioTheme;
       if (rawTheme === "light" || rawTheme === "dark") {
         return rawTheme;
       }
       try {
         if (typeof window.localStorage?.getItem === "function") {
-          const cached = localStorage.getItem("crf_studio_theme") as StudioTheme;
+          const cached = localStorage.getItem(
+            "crf_studio_theme"
+          ) as StudioTheme;
           if (cached === "light" || cached === "dark") {
             return cached;
           }
@@ -172,8 +228,11 @@ export const CRFStudioContainer: React.FC = () => {
   const [isRightInspectorOpen, setIsRightInspectorOpen] = useState(true);
 
   // Mobile Stack Navigation View: "forms" | "canvas" | "inspector"
-  const [mobileActiveView, setMobileActiveView] = useState<"forms" | "canvas" | "inspector">("canvas");
-  const [isMobileWidgetDrawerOpen, setIsMobileWidgetDrawerOpen] = useState(false);
+  const [mobileActiveView, setMobileActiveView] = useState<
+    "forms" | "canvas" | "inspector"
+  >("canvas");
+  const [isMobileWidgetDrawerOpen, setIsMobileWidgetDrawerOpen] =
+    useState(false);
 
   // Modals & Panels State
   const [isScaffolderOpen, setIsScaffolderOpen] = useState(false);
@@ -182,18 +241,43 @@ export const CRFStudioContainer: React.FC = () => {
   const [isExportDocModalOpen, setIsExportDocModalOpen] = useState(false);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isSpotlightTourOpen, setIsSpotlightTourOpen] = useState(false);
-  const [leftTab, setLeftTabState] = useState<"forms" | "palette">(() => {
+  const [isTerminalOpen, setIsTerminalOpen] = useState(false);
+  const [activeVisitId, setActiveVisitIdState] = useState<string>(() => {
     if (typeof window !== "undefined") {
-      const rawTab = new URLSearchParams(window.location.hash.slice(1)).get("tab");
-      if (rawTab === "forms" || rawTab === "palette") return rawTab;
+      const rawVisit = new URLSearchParams(window.location.hash.slice(1)).get(
+        "visit"
+      );
+      if (rawVisit) return rawVisit;
     }
-    return "forms";
+    return "";
+  });
+
+  useEffect(() => {
+    if (study && !activeVisitId && study.visits[0]) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setActiveVisitIdState(study.visits[0].id);
+    }
+  }, [study, activeVisitId]);
+
+  const [leftTab, setLeftTabState] = useState<LeftSidebarTab>(() => {
+    if (typeof window !== "undefined") {
+      const rawTab = new URLSearchParams(window.location.hash.slice(1)).get(
+        "tab"
+      ) as LeftSidebarTab | null;
+      if (rawTab && ["spine", "forms", "palette"].includes(rawTab))
+        return rawTab;
+    }
+    return "spine";
   });
 
   // Synchronize incoming hash state on mount or browser Back/Forward navigation
   useEffect(() => {
     const targetMode = (params.mode as StudioMode | undefined) || "designer";
-    if (["designer", "matrix", "rules", "edc", "acrf", "export"].includes(targetMode)) {
+    if (
+      ["designer", "matrix", "rules", "edc", "acrf", "export"].includes(
+        targetMode
+      )
+    ) {
       if (targetMode !== activeMode) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setActiveModeState(targetMode);
@@ -201,12 +285,21 @@ export const CRFStudioContainer: React.FC = () => {
     }
 
     const defaultFormId = study?.forms[0]?.id || "";
-    const targetForm = params.form && study?.forms.some((f) => f.id === params.form)
-      ? params.form
-      : defaultFormId;
+    const targetForm =
+      params.form && study?.forms.some((f) => f.id === params.form)
+        ? params.form
+        : defaultFormId;
     if (targetForm && targetForm !== activeFormId) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveFormIdState(targetForm);
+    }
+
+    const rawVisit = params.visit as string | undefined;
+    if (rawVisit && study?.visits.some((v) => v.id === rawVisit)) {
+      if (rawVisit !== activeVisitId) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setActiveVisitIdState(rawVisit);
+      }
     }
 
     const targetField = params.field || null;
@@ -215,8 +308,11 @@ export const CRFStudioContainer: React.FC = () => {
       setSelectedFieldIdState(targetField);
     }
 
-    const targetTab = params.tab === "palette" ? "palette" : "forms";
-    if (targetTab !== leftTab) {
+    const targetTab = (params.tab as LeftSidebarTab | undefined) || "spine";
+    if (
+      ["spine", "forms", "palette"].includes(targetTab) &&
+      targetTab !== leftTab
+    ) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLeftTabState(targetTab);
     }
@@ -231,7 +327,17 @@ export const CRFStudioContainer: React.FC = () => {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setTheme("dark");
     }
-  }, [params, study?.forms, activeMode, activeFormId, selectedFieldId, leftTab, theme]);
+  }, [
+    params,
+    study?.forms,
+    study?.visits,
+    activeMode,
+    activeFormId,
+    activeVisitId,
+    selectedFieldId,
+    leftTab,
+    theme,
+  ]);
 
   // Synchronized Setters with Hybrid Navigation
   const setActiveMode = useCallback(
@@ -242,10 +348,11 @@ export const CRFStudioContainer: React.FC = () => {
     [setParam]
   );
 
+  const defaultFormId = study?.forms?.[0]?.id;
   const setActiveFormId = useCallback(
     (formId: string) => {
       setActiveFormIdState(formId);
-      const isDefault = formId === study?.forms?.[0]?.id;
+      const isDefault = formId === defaultFormId;
       setParams(
         {
           form: isDefault ? null : formId,
@@ -254,7 +361,15 @@ export const CRFStudioContainer: React.FC = () => {
         { replace: true }
       );
     },
-    [setParams, study?.forms]
+    [setParams, defaultFormId]
+  );
+
+  const setActiveVisitId = useCallback(
+    (visitId: string) => {
+      setActiveVisitIdState(visitId);
+      setParam("visit", visitId, { replace: true });
+    },
+    [setParam]
   );
 
   const setSelectedFieldId = useCallback(
@@ -266,9 +381,9 @@ export const CRFStudioContainer: React.FC = () => {
   );
 
   const setLeftTab = useCallback(
-    (tab: "forms" | "palette") => {
+    (tab: LeftSidebarTab) => {
       setLeftTabState(tab);
-      setParam("tab", tab === "forms" ? null : tab, { replace: true });
+      setParam("tab", tab === "spine" ? null : tab, { replace: true });
     },
     [setParam]
   );
@@ -285,7 +400,9 @@ export const CRFStudioContainer: React.FC = () => {
         // Ignore localstorage errors in restricted contexts
       }
     }
-    setParam("theme", nextTheme === "dark" ? null : nextTheme, { replace: true });
+    setParam("theme", nextTheme === "dark" ? null : nextTheme, {
+      replace: true,
+    });
   }, [theme, setParam]);
 
   const { copy: copyShareLink } = useClipboard({
@@ -387,7 +504,18 @@ export const CRFStudioContainer: React.FC = () => {
         }
       }
 
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "j") {
+        e.preventDefault();
+        setIsTerminalOpen((prev) => !prev);
+        return;
+      }
+
       if (!isInput) {
+        if (e.key === "`") {
+          e.preventDefault();
+          setIsTerminalOpen((prev) => !prev);
+          return;
+        }
         if (e.key === "?" || e.key === "F1") {
           e.preventDefault();
           setIsWizardOpen((prev) => !prev);
@@ -408,26 +536,34 @@ export const CRFStudioContainer: React.FC = () => {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleUndo, handleRedo, selectedFieldId, setActiveMode, setSelectedFieldId]);
+  }, [
+    handleUndo,
+    handleRedo,
+    selectedFieldId,
+    setActiveMode,
+    setSelectedFieldId,
+  ]);
 
   const handleSaveCodelist = useCallback(
     (newCodelist: import("@/lib/crf/types").CodelistDefinition) => {
       if (!study) return;
       updateStudyWithHistory({
         ...study,
-        codelists: [...study.codelists.filter((cl) => cl.id !== newCodelist.id), newCodelist],
+        codelists: [
+          ...study.codelists.filter((cl) => cl.id !== newCodelist.id),
+          newCodelist,
+        ],
       });
     },
     [study, updateStudyWithHistory]
   );
 
-  const activeForm = study?.forms?.find((f) => f.id === activeFormId) || study?.forms?.[0];
-  const allFields = activeForm ? activeForm.sections.flatMap((s) => s.fields) : [];
+  const activeForm =
+    study?.forms?.find((f) => f.id === activeFormId) || study?.forms?.[0];
+  const allFields = activeForm
+    ? activeForm.sections.flatMap((s) => s.fields)
+    : [];
   const selectedField = allFields.find((f) => f.id === selectedFieldId) || null;
-
-  if (!study || !study.forms) {
-    return <CRFStudioSkeleton />;
-  }
 
   // Select Field on Mobile automatically slides in Inspector or updates tab
   const handleSelectField = (fieldId: string | null) => {
@@ -503,19 +639,95 @@ export const CRFStudioContainer: React.FC = () => {
     setSelectedFieldId(null);
   };
 
-  const handleInjectCdashForm = (newForm: CRFForm) => {
-    updateStudyWithHistory({
-      ...study,
-      forms: [...study.forms, newForm],
-    });
-    setActiveFormId(newForm.id);
-    setSelectedFieldId(null);
-    setMobileActiveView("canvas");
-  };
+  const handleAssignFormToVisit = useCallback(
+    (visitId: string, formId: string) => {
+      const updatedVisits = study.visits.map((v) => {
+        if (v.id !== visitId) return v;
+        if (v.assignedFormIds.includes(formId)) return v;
+        return {
+          ...v,
+          assignedFormIds: [...v.assignedFormIds, formId],
+        };
+      });
+      updateStudyWithHistory({ ...study, visits: updatedVisits });
+    },
+    [study, updateStudyWithHistory]
+  );
+
+  const handleUnassignFormFromVisit = useCallback(
+    (visitId: string, formId: string) => {
+      const updatedVisits = study.visits.map((v) => {
+        if (v.id !== visitId) return v;
+        return {
+          ...v,
+          assignedFormIds: v.assignedFormIds.filter((id) => id !== formId),
+        };
+      });
+      updateStudyWithHistory({ ...study, visits: updatedVisits });
+    },
+    [study, updateStudyWithHistory]
+  );
+
+  const handleAddVisit = useCallback(() => {
+    const nextIdx = study.visits.length + 1;
+    const newVisit: StudyVisit = {
+      id: `v_visit_${Date.now()}`,
+      oid: `SE.VISIT_${nextIdx}`,
+      name: `Visit ${nextIdx} (Day ${(nextIdx - 1) * 28})`,
+      visitType: "Scheduled",
+      targetDay: (nextIdx - 1) * 28,
+      windowBefore: 3,
+      windowAfter: 3,
+      assignedFormIds: study.forms.filter((f) => !f.isLogForm).map((f) => f.id),
+    };
+    updateStudyWithHistory({ ...study, visits: [...study.visits, newVisit] });
+    setActiveVisitId(newVisit.id);
+  }, [study, updateStudyWithHistory, setActiveVisitId]);
+
+  const handleDeleteVisit = useCallback(
+    (visitId: string) => {
+      if (study.visits.length <= 1) return;
+      const filtered = study.visits.filter((v) => v.id !== visitId);
+      updateStudyWithHistory({ ...study, visits: filtered });
+      if (activeVisitId === visitId) {
+        setActiveVisitId(filtered[0]?.id || "");
+      }
+    },
+    [study, activeVisitId, updateStudyWithHistory, setActiveVisitId]
+  );
+
+  const handleInjectCdashForm = useCallback(
+    (newForm: CRFForm, targetVisitId?: string) => {
+      const nextVisits = targetVisitId
+        ? study.visits.map((v) =>
+            v.id === targetVisitId
+              ? {
+                  ...v,
+                  assignedFormIds: Array.from(
+                    new Set([...v.assignedFormIds, newForm.id])
+                  ),
+                }
+              : v
+          )
+        : study.visits;
+
+      updateStudyWithHistory({
+        ...study,
+        forms: [...study.forms, newForm],
+        visits: nextVisits,
+      });
+      setActiveFormId(newForm.id);
+      setSelectedFieldId(null);
+      setMobileActiveView("canvas");
+    },
+    [study, updateStudyWithHistory, setActiveFormId, setSelectedFieldId]
+  );
 
   const handleUpdateFormMeta = (updates: Partial<CRFForm>) => {
     if (!activeForm) return;
-    const updatedForms = study.forms.map((f) => (f.id === activeForm.id ? { ...f, ...updates } : f));
+    const updatedForms = study.forms.map((f) =>
+      f.id === activeForm.id ? { ...f, ...updates } : f
+    );
     updateStudyWithHistory({ ...study, forms: updatedForms });
   };
 
@@ -536,7 +748,9 @@ export const CRFStudioContainer: React.FC = () => {
 
   const handleDeleteSection = (sectionId: string) => {
     if (!activeForm || activeForm.sections.length <= 1) return;
-    const updatedSections = activeForm.sections.filter((s) => s.id !== sectionId);
+    const updatedSections = activeForm.sections.filter(
+      (s) => s.id !== sectionId
+    );
     handleUpdateFormMeta({ sections: updatedSections });
   };
 
@@ -567,7 +781,9 @@ export const CRFStudioContainer: React.FC = () => {
     if (!activeForm) return;
     const updatedSections = activeForm.sections.map((s) => ({
       ...s,
-      fields: s.fields.map((f) => (f.id === fieldId ? { ...f, ...updates } : f)),
+      fields: s.fields.map((f) =>
+        f.id === fieldId ? { ...f, ...updates } : f
+      ),
     }));
     handleUpdateFormMeta({ sections: updatedSections });
   };
@@ -615,12 +831,18 @@ export const CRFStudioContainer: React.FC = () => {
     updateStudyWithHistory({ ...study, visits });
   };
 
-  const handleUpdateBranding = (newBranding: import("@/lib/crf/types").StudyBranding) => {
+  const handleUpdateBranding = (
+    newBranding: import("@/lib/crf/types").StudyBranding
+  ) => {
     updateStudyWithHistory({
       ...study,
       branding: newBranding,
     });
   };
+
+  if (!study || !study.forms) {
+    return <CRFStudioSkeleton />;
+  }
 
   const activeBranding = getStudyBranding(study);
 
@@ -634,8 +856,10 @@ export const CRFStudioContainer: React.FC = () => {
           "--brand-accent": activeBranding.accentColor || "#0ea5e9",
         } as React.CSSProperties
       }
-      className={`flex flex-col h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] ${
-        theme === "light" ? "bg-slate-50 text-slate-900" : "bg-zinc-950 text-foreground"
+      className={`flex flex-col h-[var(--layout-studio-budget,calc(100dvh-var(--header-height,80px)))] h-[calc(100dvh-var(--header-height,80px))] max-h-[var(--layout-studio-budget,calc(100dvh-var(--header-height,80px)))] ${
+        theme === "light"
+          ? "bg-slate-50 text-slate-900"
+          : "bg-zinc-950 text-foreground"
       } overflow-hidden relative`}
     >
       {/* Studio Header Bar */}
@@ -648,8 +872,10 @@ export const CRFStudioContainer: React.FC = () => {
         onToggleTheme={handleToggleTheme}
         isLeftSidebarOpen={isLeftSidebarOpen}
         isRightInspectorOpen={isRightInspectorOpen}
+        isTerminalOpen={isTerminalOpen}
         onToggleLeftSidebar={() => setIsLeftSidebarOpen((prev) => !prev)}
         onToggleRightInspector={() => setIsRightInspectorOpen((prev) => !prev)}
+        onToggleTerminal={() => setIsTerminalOpen((prev) => !prev)}
         onUndo={handleUndo}
         onRedo={handleRedo}
         onChangeMode={setActiveMode}
@@ -679,70 +905,63 @@ export const CRFStudioContainer: React.FC = () => {
       <div className="flex-1 flex overflow-hidden relative">
         {activeMode === "designer" && activeForm && (
           <>
-            {/* Desktop / Tablet Left Sidebar: Forms Navigator & Widget Palette */}
+            {/* Desktop / Tablet Left Sidebar: Study Spine, Forms & Global Library */}
             {isLeftSidebarOpen && (
               <aside className="hidden md:flex w-64 lg:w-72 bg-zinc-950 border-r border-zinc-850 flex-col shrink-0 transition-all">
-                {/* Left Sub-Tabs */}
-                <div className="flex border-b border-zinc-850 bg-zinc-900/40">
-                  <button
-                    onClick={() => setLeftTab("forms")}
-                    className={`flex-1 py-2 text-xs font-mono transition-colors border-b-2 ${
-                      leftTab === "forms"
-                        ? "border-brand-cyan text-brand-cyan font-bold bg-zinc-900/60"
-                        : "border-transparent text-zinc-400 hover:text-zinc-200"
-                    }`}
-                  >
-                    Forms ({study.forms.length})
-                  </button>
-                  <button
-                    onClick={() => setLeftTab("palette")}
-                    className={`flex-1 py-2 text-xs font-mono transition-colors border-b-2 ${
-                      leftTab === "palette"
-                        ? "border-brand-cyan text-brand-cyan font-bold bg-zinc-900/60"
-                        : "border-transparent text-zinc-400 hover:text-zinc-200"
-                    }`}
-                  >
-                    Palette
-                  </button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-3">
-                  {leftTab === "forms" ? (
-                    <FormsNavigator
-                      forms={study.forms}
-                      activeFormId={activeForm.id}
-                      onSelectForm={(id) => {
-                        setActiveFormId(id);
-                        setSelectedFieldId(null);
-                      }}
-                      onAddForm={handleAddForm}
-                      onDuplicateForm={handleDuplicateForm}
-                      onDeleteForm={handleDeleteForm}
-                      onOpenCdashScaffolder={() => setIsScaffolderOpen(true)}
-                    />
-                  ) : (
-                    <WidgetPalette onAddField={handleAddField} />
-                  )}
-                </div>
+                <StudySpine
+                  study={study}
+                  activeVisitId={activeVisitId}
+                  activeFormId={activeForm.id}
+                  activeTab={leftTab}
+                  onChangeTab={setLeftTab}
+                  onSelectVisit={(id) => setActiveVisitId(id)}
+                  onSelectForm={(id) => {
+                    setActiveFormId(id);
+                    setSelectedFieldId(null);
+                  }}
+                  onAddVisit={handleAddVisit}
+                  onDeleteVisit={handleDeleteVisit}
+                  onAddForm={handleAddForm}
+                  onDuplicateForm={handleDuplicateForm}
+                  onDeleteForm={handleDeleteForm}
+                  onOpenCdashScaffolder={() => setIsScaffolderOpen(true)}
+                  onAddField={handleAddField}
+                  onAssignFormToVisit={handleAssignFormToVisit}
+                  onUnassignFormFromVisit={handleUnassignFormFromVisit}
+                  onInjectCdashForm={handleInjectCdashForm}
+                />
               </aside>
             )}
 
             {/* Mobile Stack Views (Visible only on < md screens) */}
             <div className="md:hidden flex-1 flex flex-col overflow-hidden">
               {mobileActiveView === "forms" && (
-                <div className="flex-1 overflow-y-auto p-4 bg-zinc-950">
-                  <FormsNavigator
-                    forms={study.forms}
+                <div className="flex-1 overflow-y-auto bg-zinc-950">
+                  <StudySpine
+                    study={study}
+                    activeVisitId={activeVisitId}
                     activeFormId={activeForm.id}
+                    activeTab={leftTab}
+                    onChangeTab={setLeftTab}
+                    onSelectVisit={(id) => setActiveVisitId(id)}
                     onSelectForm={(id) => {
                       setActiveFormId(id);
                       setSelectedFieldId(null);
                       setMobileActiveView("canvas");
                     }}
+                    onAddVisit={handleAddVisit}
+                    onDeleteVisit={handleDeleteVisit}
                     onAddForm={handleAddForm}
                     onDuplicateForm={handleDuplicateForm}
                     onDeleteForm={handleDeleteForm}
                     onOpenCdashScaffolder={() => setIsScaffolderOpen(true)}
+                    onAddField={(field) => {
+                      handleAddField(field);
+                      setMobileActiveView("canvas");
+                    }}
+                    onAssignFormToVisit={handleAssignFormToVisit}
+                    onUnassignFormFromVisit={handleUnassignFormFromVisit}
+                    onInjectCdashForm={handleInjectCdashForm}
                   />
                 </div>
               )}
@@ -829,7 +1048,10 @@ export const CRFStudioContainer: React.FC = () => {
         )}
 
         {activeMode === "matrix" && (
-          <VisitMatrixEditor study={study} onUpdateVisits={handleUpdateVisits} />
+          <VisitMatrixEditor
+            study={study}
+            onUpdateVisits={handleUpdateVisits}
+          />
         )}
 
         {activeMode === "rules" && <RuleGraphStudio study={study} />}
@@ -859,6 +1081,30 @@ export const CRFStudioContainer: React.FC = () => {
         )}
       </div>
 
+      {/* In-Studio Interactive Terminal Drawer */}
+      <StudioTerminal
+        isOpen={isTerminalOpen}
+        study={study}
+        onClose={() => setIsTerminalOpen(false)}
+        onOpenWizard={() => setIsWizardOpen(true)}
+        onSwitchMode={setActiveMode}
+        onOpenModal={(modal) => {
+          if (modal === "wizard") setIsWizardOpen(true);
+          else if (modal === "branding") setIsBrandingOpen(true);
+          else if (modal === "diagnostics") setIsDiagnosticsOpen(true);
+          else if (modal === "export") setIsExportDocModalOpen(true);
+        }}
+        onUpdateStudy={(updated) => {
+          updateStudyWithHistory(updated);
+          if (
+            updated.forms[0] &&
+            !updated.forms.some((f) => f.id === activeFormId)
+          ) {
+            setActiveFormId(updated.forms[0].id);
+          }
+        }}
+      />
+
       {/* Mobile Stack Bottom Navigation Bar (Visible only in Designer mode on mobile < md) */}
       {activeMode === "designer" && (
         <nav
@@ -874,7 +1120,9 @@ export const CRFStudioContainer: React.FC = () => {
             }`}
           >
             <IconFileSpreadsheet className="w-4 h-4" />
-            <span className="text-[10px] font-mono">Forms ({study.forms.length})</span>
+            <span className="text-[10px] font-mono">
+              Forms ({study.forms.length})
+            </span>
           </button>
 
           <button
@@ -972,12 +1220,20 @@ export const CRFStudioContainer: React.FC = () => {
         />
       )}
 
-      {/* 5-Stage Interactive Clinical Walkthrough Wizard */}
+      {/* 5-Stage Interactive Clinical Authoring Wizard */}
       <WorkflowWizardModal
         isOpen={isWizardOpen}
+        study={study}
         onClose={() => setIsWizardOpen(false)}
         onSwitchMode={setActiveMode}
         onLoadPreset={handleSelectPreset}
+        onApplyStudy={(updated) => {
+          updateStudyWithHistory(updated);
+          if (updated.forms[0]) {
+            setActiveFormId(updated.forms[0].id);
+          }
+          playSuccess();
+        }}
         onStartSpotlightTour={() => setIsSpotlightTourOpen(true)}
       />
 

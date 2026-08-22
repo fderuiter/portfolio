@@ -206,6 +206,8 @@ export function generateHermiteSplinePath(
     }
   }
 
+  const maxFrameHeight = heightForArea !== undefined ? heightForArea : Math.max(...points.map((p) => p.y), 0);
+
   let pathD = `M ${points[0].x} ${points[0].y}`;
   for (let i = 0; i < points.length - 1; i++) {
     const p0 = points[i];
@@ -213,11 +215,11 @@ export function generateHermiteSplinePath(
     const t0 = tangents[i];
     const t1 = tangents[i + 1];
 
-    // Convert Hermite formulation to Cubic Bezier control points
+    // Convert Hermite formulation to Cubic Bezier control points and clamp Y to SVG frame height [0, maxFrameHeight]
     const cp1x = p0.x + t0.x / 3;
-    const cp1y = p0.y + t0.y / 3;
+    const cp1y = Math.max(0, Math.min(maxFrameHeight, p0.y + t0.y / 3));
     const cp2x = p1.x - t1.x / 3;
-    const cp2y = p1.y - t1.y / 3;
+    const cp2y = Math.max(0, Math.min(maxFrameHeight, p1.y - t1.y / 3));
 
     pathD += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p1.x} ${p1.y}`;
   }

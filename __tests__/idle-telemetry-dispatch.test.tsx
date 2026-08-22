@@ -202,7 +202,7 @@ describe("Idle-Scheduled Non-Blocking Telemetry Dispatch Suite", () => {
       consoleErrorSpy.mockRestore();
     });
 
-    it("enqueues for retry on HTTP 429 Rate Limit without rolling back optimistic state immediately", async () => {
+    it("enqueues for retry on HTTP 429 Rate Limit and rolls back optimistic state to pre-update snapshot", async () => {
       fetchSpy.mockImplementation(async (_url: string | URL | Request, init?: RequestInit) => {
         if (init?.method === "POST") {
           return {
@@ -226,12 +226,16 @@ describe("Idle-Scheduled Non-Blocking Telemetry Dispatch Suite", () => {
         vi.advanceTimersByTime(2000);
       });
 
+      const clicksEl = container!.querySelector('[data-testid="clicks"]');
+      const initialClicks = clicksEl?.textContent;
+
       const clickBtn = container!.querySelector('[data-testid="record-click"]') as HTMLButtonElement;
       await act(async () => {
         clickBtn.click();
       });
 
       expect(consoleWarnSpy).toHaveBeenCalledWith("Telemetry record rate limited by API.");
+      expect(clicksEl?.textContent).toBe(initialClicks);
       consoleWarnSpy.mockRestore();
     });
   });

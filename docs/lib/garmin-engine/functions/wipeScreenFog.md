@@ -8,7 +8,7 @@
 
 > **wipeScreenFog**(`state`, `x`, `y`, `radius?`): [`GameEngineState`](../interfaces/GameEngineState.md)
 
-Defined in: [lib/garmin-engine.ts:309](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L309)
+Defined in: [lib/garmin-engine.ts:467](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L467)
 
 Adds a wipe trail to defog the screen
 

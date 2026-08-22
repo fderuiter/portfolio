@@ -1,9 +1,18 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import React, { createContext, useContext, useSyncExternalStore, useMemo } from "react";
 import { useConsoleArt } from "@/hooks/useConsoleArt";
+import {
+  liveAnnouncer,
+  initialAnnouncerState,
+  type Priority,
+  type AnnounceItem,
+  type AnnouncerState,
+  LiveAnnouncer,
+} from "@/lib/a11y/announcer";
 
-export type Priority = "polite" | "assertive";
+export type { Priority, AnnounceItem, AnnouncerState };
+export { sanitizePII, initialAnnouncerState, liveAnnouncer, LiveAnnouncer } from "@/lib/a11y/announcer";
 
 export interface AnnouncerContextType {
   announce: (message: string, priority?: Priority) => void;
@@ -11,69 +20,53 @@ export interface AnnouncerContextType {
 
 const AnnouncerContext = createContext<AnnouncerContextType | null>(null);
 
-export function useAnnouncer() {
+const fallbackAnnouncer: AnnouncerContextType = {
+  announce: (message: string, priority?: Priority) => {
+    liveAnnouncer.announce(message, priority);
+  },
+};
+
+/**
+ * Hook providing access to the screen reader LiveAnnouncer dispatcher.
+ */
+export function useAnnouncer(): AnnouncerContextType {
   const ctx = useContext(AnnouncerContext);
-  if (!ctx) {
-    return {
-      announce: (_message: string, _priority?: Priority) => {
-        // Fallback fallback announcer to prevent crashing in direct component mounts/tests
-      },
-    };
-  }
-  return ctx;
+  return ctx ?? fallbackAnnouncer;
 }
 
-export function A11yProvider({ children }: { children: React.ReactNode }) {
+export interface A11yProviderProps {
+  children: React.ReactNode;
+  announcer?: LiveAnnouncer;
+}
+
+/**
+ * Lightweight screen reader live region DOM renderer and context provider.
+ */
+export function A11yProvider({ children, announcer = liveAnnouncer }: A11yProviderProps) {
   useConsoleArt();
-  const [politeQueue, setPoliteQueue] = useState<string[]>([]);
-  const [assertiveQueue, setAssertiveQueue] = useState<string[]>([]);
-  
-  const [politeMessage, setPoliteMessage] = useState("");
-  const [assertiveMessage, setAssertiveMessage] = useState("");
+  const state = useSyncExternalStore(
+    (cb) => announcer.subscribe(cb),
+    () => announcer.getSnapshot(),
+    () => initialAnnouncerState
+  );
 
-  const announce = useCallback((message: string, priority: Priority = "polite") => {
-    // Announcements must be strictly filtered to prevent SPI (Sensitive Personal Information)
-    const filteredMessage = message.replace(/\b\d{3}-\d{2}-\d{4}\b/g, "***-**-****");
-    
-    if (priority === "assertive") {
-      setAssertiveQueue(q => [...q, filteredMessage]);
-    } else {
-      setPoliteQueue(q => [...q, filteredMessage]);
-    }
-  }, []);
-
-  useEffect(() => {
-    // Process assertive queue first (higher priority)
-    if (assertiveQueue.length > 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setAssertiveMessage(assertiveQueue[0]);
-      const timer = setTimeout(() => {
-        setAssertiveMessage("");
-        setAssertiveQueue(q => q.slice(1));
-      }, 3000);
-      return () => clearTimeout(timer);
-    } else if (politeQueue.length > 0) {
-      // Process polite queue if assertive is empty
-       
-      setPoliteMessage(politeQueue[0]);
-      const timer = setTimeout(() => {
-        setPoliteMessage("");
-        setPoliteQueue(q => q.slice(1));
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [politeQueue, assertiveQueue]);
-
-  const contextValue = React.useMemo(() => ({ announce }), [announce]);
+  const value = useMemo<AnnouncerContextType>(
+    () => ({
+      announce: (message: string, priority?: Priority) => {
+        announcer.announce(message, priority);
+      },
+    }),
+    [announcer]
+  );
 
   return (
-    <AnnouncerContext.Provider value={contextValue}>
+    <AnnouncerContext.Provider value={value}>
       {children}
       <div className="sr-only" aria-live="polite" aria-atomic="true">
-        {politeMessage}
+        {state.activePolite?.text || ""}
       </div>
       <div className="sr-only" aria-live="assertive" aria-atomic="true">
-        {assertiveMessage}
+        {state.activeAssertive?.text || ""}
       </div>
     </AnnouncerContext.Provider>
   );

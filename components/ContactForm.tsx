@@ -30,9 +30,11 @@ export function ContactForm({
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [gotcha, setGotcha] = useState(""); // Honeypot field
-  
+
   const [mountedAt, setMountedAt] = useState<number>(0);
-  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "submitting" | "success" | "error"
+  >("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -95,11 +97,19 @@ export function ContactForm({
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      let data: { error?: string; message?: string } | null = null;
+      try {
+        data = await response.json();
+      } catch {
+        // Non-JSON response fallback
+      }
 
       if (!response.ok) {
         setStatus("error");
-        setErrorMessage(data.error || "Unable to send message. Please try again later.");
+        setErrorMessage(
+          data?.error ||
+            `Unable to send message (HTTP ${response.status}). Please try again later or email directly.`
+        );
         return;
       }
 
@@ -108,7 +118,9 @@ export function ContactForm({
     } catch (err) {
       console.error("Contact submission error:", err);
       setStatus("error");
-      setErrorMessage("Network connection error. Please check your connection or email directly.");
+      setErrorMessage(
+        "Network connection error. Please check your connection or email directly to fpderuiter@gmail.com."
+      );
     }
   };
 
@@ -139,7 +151,10 @@ export function ContactForm({
           Message Delivered!
         </h3>
         <p className="text-xs sm:text-sm text-zinc-300 font-sans max-w-md mb-6 leading-relaxed">
-          Thanks for reaching out, <span className="font-bold text-white">{name || "friend"}</span>. Your message has been sent directly to my inbox and I will follow up shortly.
+          Thanks for reaching out,{" "}
+          <span className="font-bold text-white">{name || "friend"}</span>. Your
+          message has been sent directly to my inbox (fpderuiter@gmail.com) and
+          I will follow up shortly.
         </p>
         <button
           type="button"
@@ -160,7 +175,10 @@ export function ContactForm({
       aria-label="Direct contact inquiry form"
     >
       {/* Invisible Honeypot Trap for Bots */}
-      <div className="sr-only opacity-0 absolute -left-[9999px] select-none" aria-hidden="true">
+      <div
+        className="sr-only opacity-0 absolute -left-[9999px] select-none"
+        aria-hidden="true"
+      >
         <label htmlFor="company_honeypot">Leave this blank</label>
         <input
           id="company_honeypot"
@@ -191,18 +209,25 @@ export function ContactForm({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Name */}
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="contact_name" className="text-xs font-mono font-bold text-zinc-300 flex items-center gap-1.5">
+          <label
+            htmlFor="contact_name"
+            className="text-xs font-mono font-bold text-zinc-300 flex items-center gap-1.5"
+          >
             <IconUser className="w-3.5 h-3.5 text-amber-400" />
-            <span>Your Name <span className="text-amber-400">*</span></span>
+            <span>
+              Your Name <span className="text-amber-400">*</span>
+            </span>
           </label>
           <input
             id="contact_name"
+            name="name"
             type="text"
             required
             value={name}
             onChange={(e) => {
               setName(e.target.value);
-              if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: "" }));
+              if (fieldErrors.name)
+                setFieldErrors((prev) => ({ ...prev, name: "" }));
             }}
             placeholder="e.g. Ada Lovelace"
             aria-invalid={!!fieldErrors.name}
@@ -214,7 +239,10 @@ export function ContactForm({
             }`}
           />
           {fieldErrors.name && (
-            <span id="name_error" className="text-[11px] font-mono text-red-400">
+            <span
+              id="name_error"
+              className="text-[11px] font-mono text-red-400"
+            >
               {fieldErrors.name}
             </span>
           )}
@@ -222,18 +250,25 @@ export function ContactForm({
 
         {/* Email */}
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="contact_email" className="text-xs font-mono font-bold text-zinc-300 flex items-center gap-1.5">
+          <label
+            htmlFor="contact_email"
+            className="text-xs font-mono font-bold text-zinc-300 flex items-center gap-1.5"
+          >
             <IconMail className="w-3.5 h-3.5 text-amber-400" />
-            <span>Email Address <span className="text-amber-400">*</span></span>
+            <span>
+              Email Address <span className="text-amber-400">*</span>
+            </span>
           </label>
           <input
             id="contact_email"
+            name="email"
             type="email"
             required
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);
-              if (fieldErrors.email) setFieldErrors((prev) => ({ ...prev, email: "" }));
+              if (fieldErrors.email)
+                setFieldErrors((prev) => ({ ...prev, email: "" }));
             }}
             placeholder="e.g. ada@example.com"
             aria-invalid={!!fieldErrors.email}
@@ -245,7 +280,10 @@ export function ContactForm({
             }`}
           />
           {fieldErrors.email && (
-            <span id="email_error" className="text-[11px] font-mono text-red-400">
+            <span
+              id="email_error"
+              className="text-[11px] font-mono text-red-400"
+            >
               {fieldErrors.email}
             </span>
           )}
@@ -258,7 +296,7 @@ export function ContactForm({
           <IconTarget className="w-3.5 h-3.5 text-amber-400" />
           <span>Inquiry Intent</span>
         </label>
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+        <div className="flex flex-wrap gap-2">
           {CONTACT_INTENTS.map((item) => {
             const isSelected = intent === item;
             return (
@@ -266,7 +304,7 @@ export function ContactForm({
                 key={item}
                 type="button"
                 onClick={() => setIntent(item)}
-                className={`px-3 py-2 rounded-xl text-[11px] font-mono font-bold uppercase tracking-wider transition-all border text-center cursor-pointer ${
+                className={`flex-1 min-w-[100px] px-3 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all border text-center cursor-pointer min-h-[40px] flex items-center justify-center ${
                   isSelected
                     ? "bg-amber-500/15 border-amber-400/60 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.15)]"
                     : "bg-[#0d0e11] border-white/10 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700"
@@ -281,18 +319,25 @@ export function ContactForm({
 
       {/* Subject */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="contact_subject" className="text-xs font-mono font-bold text-zinc-300 flex items-center gap-1.5">
+        <label
+          htmlFor="contact_subject"
+          className="text-xs font-mono font-bold text-zinc-300 flex items-center gap-1.5"
+        >
           <IconMessageCode className="w-3.5 h-3.5 text-amber-400" />
-          <span>Subject <span className="text-amber-400">*</span></span>
+          <span>
+            Subject <span className="text-amber-400">*</span>
+          </span>
         </label>
         <input
           id="contact_subject"
+          name="subject"
           type="text"
           required
           value={subject}
           onChange={(e) => {
             setSubject(e.target.value);
-            if (fieldErrors.subject) setFieldErrors((prev) => ({ ...prev, subject: "" }));
+            if (fieldErrors.subject)
+              setFieldErrors((prev) => ({ ...prev, subject: "" }));
           }}
           placeholder="e.g. Collaboration on formal verification or clinical systems"
           aria-invalid={!!fieldErrors.subject}
@@ -304,7 +349,10 @@ export function ContactForm({
           }`}
         />
         {fieldErrors.subject && (
-          <span id="subject_error" className="text-[11px] font-mono text-red-400">
+          <span
+            id="subject_error"
+            className="text-[11px] font-mono text-red-400"
+          >
             {fieldErrors.subject}
           </span>
         )}
@@ -312,23 +360,30 @@ export function ContactForm({
 
       {/* Message */}
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="contact_message" className="text-xs font-mono font-bold text-zinc-300 flex items-center justify-between">
+        <label
+          htmlFor="contact_message"
+          className="text-xs font-mono font-bold text-zinc-300 flex items-center justify-between"
+        >
           <span className="flex items-center gap-1.5">
             <IconMessageCode className="w-3.5 h-3.5 text-amber-400" />
-            <span>Message <span className="text-amber-400">*</span></span>
+            <span>
+              Message <span className="text-amber-400">*</span>
+            </span>
           </span>
-          <span className="text-[10px] font-normal text-zinc-500">
+          <span className="text-[10px] font-normal text-zinc-400">
             {message.length} / 5000 chars
           </span>
         </label>
         <textarea
           id="contact_message"
+          name="message"
           required
           rows={4}
           value={message}
           onChange={(e) => {
             setMessage(e.target.value);
-            if (fieldErrors.message) setFieldErrors((prev) => ({ ...prev, message: "" }));
+            if (fieldErrors.message)
+              setFieldErrors((prev) => ({ ...prev, message: "" }));
           }}
           placeholder="Write your note, idea, project outline, or question here..."
           aria-invalid={!!fieldErrors.message}
@@ -340,7 +395,10 @@ export function ContactForm({
           }`}
         />
         {fieldErrors.message && (
-          <span id="message_error" className="text-[11px] font-mono text-red-400">
+          <span
+            id="message_error"
+            className="text-[11px] font-mono text-red-400"
+          >
             {fieldErrors.message}
           </span>
         )}
@@ -348,7 +406,7 @@ export function ContactForm({
 
       {/* Submit Button */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-white/5">
-        <span className="text-[11px] font-mono text-zinc-500 flex items-center gap-1.5">
+        <span className="text-[11px] font-mono text-zinc-400 flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           <span>Resend TLS Encryption &bull; Anti-Spam Protected</span>
         </span>

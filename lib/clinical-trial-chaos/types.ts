@@ -1,3 +1,5 @@
+import { AstCondition, EditCheckRule } from "../crf/types";
+
 export type CDISCDomain = "DM" | "VS" | "AE" | "LB" | "CM" | "EX" | "DS" | "MH";
 
 export type ValidationErrorType =
@@ -14,6 +16,7 @@ export type ValidationErrorType =
 export interface ClinicalObservation {
   id: string;
   field: string;
+  fieldId?: string;
   rawValue: string;
   correctedValue?: string;
   currentValue: string;
@@ -24,6 +27,8 @@ export interface ClinicalObservation {
   ctCode?: string; // e.g. CDISC CT Code C25473 or MedDRA PT
   options?: string[]; // Multi-choice validation puzzle options
   isResolved: boolean;
+  astRule?: EditCheckRule;
+  astConditions?: AstCondition[];
 }
 
 export interface ClinicalSubject {
@@ -164,6 +169,18 @@ export interface BIMOFinding {
   severity: "Critical" | "Major" | "Minor";
   description: string;
   regulation: string;
+}
+
+export interface RecordedRuleViolation {
+  id: string;
+  type: "ast_edit_check" | "cdisc_conformance";
+  subjectLabel: string;
+  field: string;
+  selectedChoice: string;
+  ruleName?: string;
+  message: string;
+  domain?: CDISCDomain;
+  timestamp: string;
 }
 
 export interface BIMOInspectionReport {

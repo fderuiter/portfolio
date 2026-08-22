@@ -1,13 +1,15 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('Mobile & Tablet Touch Interactions Suite', () => {
+test.describe("Mobile & Tablet Touch Interactions Suite", () => {
   test.beforeEach(async ({ page }) => {
     // Emulate reduced motion for test stability
-    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.emulateMedia({ reducedMotion: "reduce" });
 
     // Enable test flags
     await page.addInitScript(() => {
-      (window as unknown as { __PLAYWRIGHT_TEST__?: boolean }).__PLAYWRIGHT_TEST__ = true;
+      (
+        window as unknown as { __PLAYWRIGHT_TEST__?: boolean }
+      ).__PLAYWRIGHT_TEST__ = true;
     });
 
     // Disable CSS animations for deterministic testing
@@ -22,24 +24,26 @@ test.describe('Mobile & Tablet Touch Interactions Suite', () => {
   });
 
   const TEST_ROUTES = [
-    '/',
-    '/schedule',
-    '/crf',
-    '/proof',
-    '/neuro',
-    '/simulator',
-    '/arcade',
-    '/arcade/laser-loon',
-    '/arcade/retro-labyrinth',
-    '/arcade/clinical-chaos',
-    '/arcade/garmin-watch',
-    '/arcade/working-with-duck',
-    '/arcade/quasi-puzzler',
-    '/arcade/meme-vault',
+    "/",
+    "/schedule",
+    "/crf",
+    "/proof",
+    "/neuro",
+    "/simulator",
+    "/arcade",
+    "/arcade/laser-loon",
+    "/arcade/retro-labyrinth",
+    "/arcade/clinical-chaos",
+    "/arcade/garmin-watch",
+    "/arcade/working-with-duck",
+    "/arcade/quasi-puzzler",
+    "/arcade/meme-vault",
   ];
 
   for (const route of TEST_ROUTES) {
-    test(`Zero Horizontal Overflow Invariant on route: ${route}`, async ({ page }) => {
+    test(`Zero Horizontal Overflow Invariant on route: ${route}`, async ({
+      page,
+    }) => {
       await page.goto(route);
       await page.waitForTimeout(300);
 
@@ -52,77 +56,97 @@ test.describe('Mobile & Tablet Touch Interactions Suite', () => {
     });
   }
 
-  test('Mobile Navigation Drawer opens, traps focus, and links to all primary routes', async ({ page, isMobile }) => {
-    test.skip(!isMobile, 'Mobile drawer test is only applicable on mobile viewports');
+  test("Mobile Navigation Drawer opens, traps focus, and links to all primary routes", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(
+      !isMobile,
+      "Mobile drawer test is only applicable on mobile viewports"
+    );
 
-    await page.goto('/');
+    await page.goto("/");
     await page.waitForTimeout(400);
 
     // Click Hamburger Menu Trigger
-    const menuButton = page.getByRole('button', { name: /open navigation menu/i });
+    const menuButton = page.getByRole("button", {
+      name: /open navigation menu/i,
+    });
     await expect(menuButton).toBeVisible();
     await menuButton.click();
 
     // Verify modal overlay opens
-    const overlay = page.getByRole('dialog', { name: /mobile navigation overlay/i });
+    const overlay = page.getByRole("dialog", {
+      name: /mobile navigation overlay/i,
+    });
     await expect(overlay).toBeVisible();
 
     // Verify nav links inside drawer
-    const workLink = overlay.getByRole('link', { name: /work showcase/i });
+    const workLink = overlay.getByRole("link", { name: /work showcase/i });
     await expect(workLink).toBeVisible();
 
-    const arcadeLink = overlay.getByRole('link', { name: /arcade games hub/i });
+    const arcadeLink = overlay.getByRole("link", { name: /arcade games hub/i });
     await expect(arcadeLink).toBeVisible();
 
-    const crfLink = overlay.getByRole('link', { name: /crf studio/i });
+    const crfLink = overlay.getByRole("link", { name: /crf studio/i });
     await expect(crfLink).toBeVisible();
 
-    const proofLink = overlay.getByRole('link', { name: /proof canvas/i });
+    const proofLink = overlay.getByRole("link", { name: /proof canvas/i });
     await expect(proofLink).toBeVisible();
 
-    const neuroLink = overlay.getByRole('link', { name: /neurorecon studio/i });
+    const neuroLink = overlay.getByRole("link", { name: /neurorecon studio/i });
     await expect(neuroLink).toBeVisible();
 
     // Close menu with escape key
-    await page.keyboard.press('Escape');
+    await page.keyboard.press("Escape");
     await expect(overlay).toBeHidden();
   });
 
-  test('Proof Workspace mobile view switcher tabs and auto-step execution', async ({ page, isMobile }) => {
-    await page.goto('/proof');
+  test("Proof Workspace mobile view switcher tabs and auto-step execution", async ({
+    page,
+    isMobile,
+  }) => {
+    await page.goto("/proof");
     await page.waitForTimeout(400);
 
     if (isMobile) {
       // Verify mobile segmented tab switcher
-      const ledgerTab = page.getByRole('button', { name: /ledger/i }).first();
-      const fallacyTab = page.getByRole('button', { name: /fallacy/i }).first();
-      const canvasTab = page.getByRole('button', { name: /canvas/i }).first();
+      const ledgerTab = page.getByRole("button", { name: /ledger/i }).first();
+      const fallacyTab = page.getByRole("button", { name: /fallacy/i }).first();
+      const canvasTab = page.getByRole("button", { name: /canvas/i }).first();
 
       await expect(canvasTab).toBeVisible();
       await ledgerTab.click();
-      await expect(page.getByText(/Formal Fitch Deduction Ledger/i)).toBeVisible();
+      await expect(
+        page.getByText(/Formal Fitch Deduction Ledger/i)
+      ).toBeVisible();
 
       await fallacyTab.click();
-      await expect(page.getByText(/Zero Active Fallacies|Truth Table/i)).toBeVisible();
+      await expect(
+        page.getByText(/Zero Active Fallacies|Truth Table/i)
+      ).toBeVisible();
 
       await canvasTab.click();
     }
 
     // Verify auto-step execution
-    const autoStepBtn = page.getByRole('button', { name: /auto-step/i });
+    const autoStepBtn = page.getByRole("button", { name: /auto-step/i });
     await expect(autoStepBtn).toBeVisible();
     await autoStepBtn.click();
   });
 
-  test('CRF Studio mobile bottom navigation and canvas interaction', async ({ page, isMobile }) => {
-    await page.goto('/crf');
+  test("CRF Studio mobile bottom navigation and canvas interaction", async ({
+    page,
+    isMobile,
+  }) => {
+    await page.goto("/crf");
     await page.waitForTimeout(400);
 
     if (isMobile) {
       const mobileNav = page.getByLabel(/mobile view navigation/i);
       if (await mobileNav.isVisible()) {
-        const formsTab = mobileNav.getByRole('button', { name: /forms/i });
-        const canvasTab = mobileNav.getByRole('button', { name: /canvas/i });
+        const formsTab = mobileNav.getByRole("button", { name: /forms/i });
+        const canvasTab = mobileNav.getByRole("button", { name: /canvas/i });
 
         await expect(formsTab).toBeVisible();
         await expect(canvasTab).toBeVisible();
@@ -133,33 +157,48 @@ test.describe('Mobile & Tablet Touch Interactions Suite', () => {
     }
   });
 
-  test('Neuro Simulator view mode toggles and slice canvas rendering', async ({ page }) => {
-    await page.goto('/neuro');
+  test("Neuro Simulator view mode toggles and slice canvas rendering", async ({
+    page,
+  }) => {
+    await page.goto("/neuro");
     await page.waitForTimeout(400);
 
     // Verify 2D / 3D split toggles
-    const splitBtn = page.getByRole('button', { name: /split 3d\/2d/i });
+    const splitBtn = page.getByRole("button", { name: /split 3d\/2d/i });
     await expect(splitBtn).toBeVisible();
 
-    const canvasElements = page.locator('canvas');
+    const canvasElements = page.locator("canvas");
     await expect(canvasElements.first()).toBeVisible();
   });
 
-  test('Retro Labyrinth touch D-Pad and action buttons operate properly', async ({ page }) => {
-    await page.goto('/arcade/retro-labyrinth');
-    await page.waitForTimeout(400);
+  test("Retro Labyrinth touch D-Pad and action buttons operate properly", async ({
+    page,
+  }) => {
+    await page.goto("/arcade/retro-labyrinth");
+    await page.waitForLoadState("networkidle");
+
+    const launchCabinetBtn = page.getByRole("button", {
+      name: /Launch Cabinet/i,
+    });
+    if (await launchCabinetBtn.isVisible()) {
+      await launchCabinetBtn.click();
+    }
 
     // Locate the labyrinth game container
-    const gameContainer = page.locator('[data-keyboard-boundary="true"]').first();
-    await expect(gameContainer).toBeVisible();
+    const gameContainer = page
+      .locator('[data-keyboard-boundary="true"]')
+      .first();
+    await expect(gameContainer).toBeVisible({ timeout: 15000 });
 
     // If on mobile/tablet, verify Virtual D-Pad is rendered
-    const virtualPad = page.getByRole('group', { name: /virtual game controller/i });
+    const virtualPad = page.getByRole("group", {
+      name: /virtual game controller/i,
+    });
     if (await virtualPad.isVisible()) {
-      const upBtn = virtualPad.getByRole('button', { name: /move up/i });
-      const downBtn = virtualPad.getByRole('button', { name: /move down/i });
-      const leftBtn = virtualPad.getByRole('button', { name: /move left/i });
-      const rightBtn = virtualPad.getByRole('button', { name: /move right/i });
+      const upBtn = virtualPad.getByRole("button", { name: /move up/i });
+      const downBtn = virtualPad.getByRole("button", { name: /move down/i });
+      const leftBtn = virtualPad.getByRole("button", { name: /move left/i });
+      const rightBtn = virtualPad.getByRole("button", { name: /move right/i });
 
       await expect(upBtn).toBeVisible();
       await expect(downBtn).toBeVisible();
@@ -174,17 +213,26 @@ test.describe('Mobile & Tablet Touch Interactions Suite', () => {
     }
   });
 
-  test('Laser Loon touch controls bar and weapon switching', async ({ page }) => {
-    await page.goto('/arcade/laser-loon');
-    await page.waitForTimeout(400);
+  test("Laser Loon touch controls bar and weapon switching", async ({
+    page,
+  }) => {
+    await page.goto("/arcade/laser-loon");
+    await page.waitForLoadState("networkidle");
+
+    const launchCabinetBtn = page.getByRole("button", {
+      name: /Launch Cabinet/i,
+    });
+    if (await launchCabinetBtn.isVisible()) {
+      await launchCabinetBtn.click();
+    }
 
     // Verify game canvas is rendered
-    const canvas = page.locator('canvas').first();
-    await expect(canvas).toBeVisible();
+    const canvas = page.locator("canvas").first();
+    await expect(canvas).toBeVisible({ timeout: 15000 });
 
     // Check touch controls bar if on mobile/tablet
-    const fireBtn = page.getByRole('button', { name: /fire/i });
-    const iceBtn = page.getByRole('button', { name: /ice cannon/i });
+    const fireBtn = page.getByRole("button", { name: /fire/i });
+    const iceBtn = page.getByRole("button", { name: /ice cannon/i });
 
     if (await iceBtn.isVisible()) {
       await iceBtn.click();
@@ -195,15 +243,26 @@ test.describe('Mobile & Tablet Touch Interactions Suite', () => {
     }
   });
 
-  test('Clinical Trial Chaos conveyor canvas touch isolation and station routing', async ({ page }) => {
-    await page.goto('/arcade/clinical-chaos');
-    await page.waitForTimeout(400);
+  test("Clinical Trial Chaos conveyor canvas touch isolation and station routing", async ({
+    page,
+  }) => {
+    await page.goto("/arcade/clinical-chaos");
+    await page.waitForLoadState("networkidle");
 
-    const canvas = page.locator('canvas').first();
-    await expect(canvas).toBeVisible();
+    const launchCabinetBtn = page.getByRole("button", {
+      name: /Launch Cabinet/i,
+    });
+    if (await launchCabinetBtn.isVisible()) {
+      await launchCabinetBtn.click();
+    }
+
+    const canvas = page.locator("canvas").first();
+    await expect(canvas).toBeVisible({ timeout: 15000 });
 
     // Verify touchAction style is none
-    const touchAction = await canvas.evaluate((el) => window.getComputedStyle(el).touchAction);
-    expect(touchAction).toBe('none');
+    const touchAction = await canvas.evaluate(
+      (el) => window.getComputedStyle(el).touchAction
+    );
+    expect(touchAction).toBe("none");
   });
 });

@@ -8,4 +8,4 @@
 
 > **StudioTheme** = `"dark"` \| `"light"`
 
-Defined in: [lib/crf/types.ts:280](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L280)
+Defined in: [lib/crf/types.ts:348](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L348)

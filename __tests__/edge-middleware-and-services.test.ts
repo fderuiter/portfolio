@@ -1,9 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, type NextFetchEvent } from "next/server";
+import { fromPartial } from "@total-typescript/shoehorn";
 
 // Mock database and upstash redis dependencies
 vi.mock("@/lib/db", async (importOriginal) => {
-  const isLiveDb = !!(process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("dummy"));
+  const isLiveDb = !!(
+    process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("dummy")
+  );
   if (isLiveDb) {
     return await importOriginal<typeof import("@/lib/db")>();
   }
@@ -32,7 +35,15 @@ vi.mock("@/lib/db", async (importOriginal) => {
   };
 });
 
-const { mockLpush, mockExpire, mockExec, mockRpop, mockLmove, mockLrange, mockDel } = vi.hoisted(() => ({
+const {
+  mockLpush,
+  mockExpire,
+  mockExec,
+  mockRpop,
+  mockLmove,
+  mockLrange,
+  mockDel,
+} = vi.hoisted(() => ({
   mockLpush: vi.fn(),
   mockExpire: vi.fn(),
   mockExec: vi.fn(),
@@ -76,7 +87,10 @@ vi.mock("@upstash/ratelimit", () => {
 import { proxy } from "@/proxy";
 import { CaseStudyService } from "@/lib/services/case-study-service";
 import { TelemetryService } from "@/lib/services/telemetry-service";
-import { generateClientConnectionHash, extractClientIp } from "@/lib/services/privacy-service";
+import {
+  generateClientConnectionHash,
+  extractClientIp,
+} from "@/lib/services/privacy-service";
 import { createApiHandler } from "@/lib/route-wrapper";
 import { SECURITY_HEADERS } from "@/lib/security-headers";
 import { prisma } from "@/lib/db";
@@ -93,12 +107,12 @@ describe("Next.js 16 Edge Proxy & Modular Domain Services Suite", () => {
         headers: { "x-forwarded-for": "203.0.113.195" },
       });
 
-      const mockEvent = {
+      const mockEvent = fromPartial<NextFetchEvent>({
         waitUntil: vi.fn(),
         passThroughOnException: vi.fn(),
-      };
+      });
 
-      const res = await proxy(req, mockEvent as unknown as import("next/server").NextFetchEvent);
+      const res = await proxy(req, mockEvent);
 
       expect(res).toBeDefined();
       Object.entries(SECURITY_HEADERS).forEach(([header, value]) => {
@@ -130,15 +144,19 @@ describe("Next.js 16 Edge Proxy & Modular Domain Services Suite", () => {
         slug: "xss-defense-case",
         primary_language: "TypeScript",
         editorial_content: "Editorial body <script>alert(1)</script>",
-        architectural_narrative: "<h3>Heading</h3><iframe src='evil.com'></iframe><p>Safe content</p>",
+        architectural_narrative:
+          "<h3>Heading</h3><iframe src='evil.com'></iframe><p>Safe content</p>",
         tags: "security, xss",
       };
 
       const mockCreate = vi.mocked(prisma.caseStudy.create);
-      mockCreate.mockImplementation((args) => Promise.resolve({
-        id: "cuid-1",
-        ...(args as { data: Record<string, unknown> }).data,
-      }) as ReturnType<typeof prisma.caseStudy.create>);
+      mockCreate.mockImplementation(
+        (args) =>
+          Promise.resolve({
+            id: "cuid-1",
+            ...(args as { data: Record<string, unknown> }).data,
+          }) as ReturnType<typeof prisma.caseStudy.create>
+      );
 
       await CaseStudyService.submitCaseStudy(input);
 
@@ -161,17 +179,30 @@ describe("Next.js 16 Edge Proxy & Modular Domain Services Suite", () => {
       });
 
       expect(event.projectSlug).toBe("/dashboard");
-      expect(mockLpush).toHaveBeenCalledWith("telemetry_buffer", expect.objectContaining({
-        projectSlug: "/dashboard",
-        eventType: "page_view",
-      }));
+      expect(mockLpush).toHaveBeenCalledWith(
+        "telemetry_buffer",
+        expect.objectContaining({
+          projectSlug: "/dashboard",
+          eventType: "page_view",
+        })
+      );
       expect(mockExpire).toHaveBeenCalledWith("telemetry_buffer", 172800);
     });
 
     it("synchronizes buffered telemetry events in batches and skips duplicates", async () => {
       const mockEvents = [
-        { id: "e-1", projectSlug: "/p1", eventType: "page_view", createdAt: new Date() },
-        { id: "e-2", projectSlug: "/p2", eventType: "project_click", createdAt: new Date() },
+        {
+          id: "e-1",
+          projectSlug: "/p1",
+          eventType: "page_view",
+          createdAt: new Date(),
+        },
+        {
+          id: "e-2",
+          projectSlug: "/p2",
+          eventType: "project_click",
+          createdAt: new Date(),
+        },
       ];
       mockExec.mockResolvedValueOnce(mockEvents);
 

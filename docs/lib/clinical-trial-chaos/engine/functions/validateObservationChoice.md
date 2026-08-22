@@ -6,11 +6,11 @@
 
 # Function: validateObservationChoice()
 
-> **validateObservationChoice**(`observation`, `selectedChoice`): `object`
+> **validateObservationChoice**(`observation`, `selectedChoice`, `activeProtocol?`): `object`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:118](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L118)
+Defined in: [lib/clinical-trial-chaos/engine.ts:126](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L126)
 
-Validates a user's multi-choice answer on a clinical observation.
+Validates a user's multi-choice answer on a clinical observation using authored AST conditions.
 
 ## Parameters
 
@@ -22,6 +22,10 @@ Validates a user's multi-choice answer on a clinical observation.
 
 `string`
 
+### activeProtocol?
+
+[`StudyProtocol`](../../../crf/types/interfaces/StudyProtocol.md) \| `null`
+
 ## Returns
 
 `object`
@@ -30,6 +34,10 @@ Validates a user's multi-choice answer on a clinical observation.
 
 > **explanation**: `string`
 
+### isAstEvaluated
+
+> **isAstEvaluated**: `boolean`
+
 ### isValid
 
 > **isValid**: `boolean`
@@ -37,6 +45,10 @@ Validates a user's multi-choice answer on a clinical observation.
 ### observation
 
 > **observation**: [`ClinicalObservation`](../../types/interfaces/ClinicalObservation.md)
+
+### ruleName?
+
+> `optional` **ruleName?**: `string`
 
 ### scoreDelta
 

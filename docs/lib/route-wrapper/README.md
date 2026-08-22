@@ -13,6 +13,7 @@
 ## Type Aliases
 
 - [ApiHandler](type-aliases/ApiHandler.md)
+- [ApiRouteHandler](type-aliases/ApiRouteHandler.md)
 
 ## Variables
 

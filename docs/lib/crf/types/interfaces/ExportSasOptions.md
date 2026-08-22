@@ -6,7 +6,7 @@
 
 # Interface: ExportSasOptions
 
-Defined in: [lib/crf/types.ts:168](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L168)
+Defined in: [lib/crf/types.ts:227](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L227)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/types.ts:168](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **datasetPrefix?**: `string`
 
-Defined in: [lib/crf/types.ts:173](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L173)
+Defined in: [lib/crf/types.ts:232](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L232)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/types.ts:173](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **includeProcContents?**: `boolean`
 
-Defined in: [lib/crf/types.ts:171](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L171)
+Defined in: [lib/crf/types.ts:230](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L230)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/types.ts:171](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **includeProcFreq?**: `boolean`
 
-Defined in: [lib/crf/types.ts:172](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L172)
+Defined in: [lib/crf/types.ts:231](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L231)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/types.ts:172](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **includeSampleData?**: `boolean`
 
-Defined in: [lib/crf/types.ts:170](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L170)
+Defined in: [lib/crf/types.ts:229](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L229)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [lib/crf/types.ts:170](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **selectedFormId?**: `string`
 
-Defined in: [lib/crf/types.ts:169](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L169)
+Defined in: [lib/crf/types.ts:228](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L228)

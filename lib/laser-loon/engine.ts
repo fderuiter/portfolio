@@ -3,6 +3,7 @@
  * Pure physics engine, raycast geometry, collision detection, and campaign lifecycle.
  */
 
+import { clamp } from "@/lib/game-utils";
 import {
   LaserLoonState,
   LaserMode,
@@ -29,7 +30,9 @@ import {
   ULTIMATE_CHARGE_PER_KILL,
 } from "./constants";
 
-export function createInitialState(mode: LaserMode = "campaign"): LaserLoonState {
+export function createInitialState(
+  mode: LaserMode = "campaign"
+): LaserLoonState {
   return {
     mode,
     laserType: "ruby-laser",
@@ -72,9 +75,21 @@ export function getActAvailableEnemies(actNumber: number): CivicEnemyType[] {
     case 3:
       return ["red-tape", "veto-stamp", "tricolor-rival", "clipboard"];
     case 4:
-      return ["legislative-amendment", "seal-guardian", "polar-vortex", "red-tape"];
+      return [
+        "legislative-amendment",
+        "seal-guardian",
+        "polar-vortex",
+        "red-tape",
+      ];
     default:
-      return ["mosquito", "hailstorm", "butter-bomb", "red-tape", "veto-stamp", "tricolor-rival"];
+      return [
+        "mosquito",
+        "hailstorm",
+        "butter-bomb",
+        "red-tape",
+        "veto-stamp",
+        "tricolor-rival",
+      ];
   }
 }
 
@@ -92,7 +107,8 @@ export function spawnTarget(
     targetType = pool[Math.floor(Math.random() * pool.length)];
   }
 
-  const template = ENEMY_TYPES.find((b) => b.type === targetType) || ENEMY_TYPES[0];
+  const template =
+    ENEMY_TYPES.find((b) => b.type === targetType) || ENEMY_TYPES[0];
 
   const edge = Math.floor(Math.random() * 3);
   let x = canvasWidth + 30;
@@ -151,8 +167,11 @@ export function spawnBossForAct(
   canvasWidth = DEFAULT_CANVAS_WIDTH,
   canvasHeight = DEFAULT_CANVAS_HEIGHT
 ): { boss: Target; nextId: number } {
-  const act = CAMPAIGN_ACTS.find((a) => a.actNumber === actNumber) || CAMPAIGN_ACTS[0];
-  const template = ENEMY_TYPES.find((e) => e.type === act.bossType) || ENEMY_TYPES[ENEMY_TYPES.length - 1];
+  const act =
+    CAMPAIGN_ACTS.find((a) => a.actNumber === actNumber) || CAMPAIGN_ACTS[0];
+  const template =
+    ENEMY_TYPES.find((e) => e.type === act.bossType) ||
+    ENEMY_TYPES[ENEMY_TYPES.length - 1];
 
   const boss: Target = {
     id: nextId,
@@ -371,7 +390,8 @@ export function updateTargetsPosition(
 
       if (nextT.isBoss) {
         // Boss flight pattern
-        nextT.shieldAngle = ((nextT.shieldAngle || 0) + 0.04 * dt) % (Math.PI * 2);
+        nextT.shieldAngle =
+          ((nextT.shieldAngle || 0) + 0.04 * dt) % (Math.PI * 2);
         nextT.y += nextT.vy * dt;
         if (nextT.y < 80) {
           nextT.y = 80;
@@ -554,7 +574,10 @@ export function calculateNextComboAndMultiplier(
 ): { nextCombo: number; nextMultiplier: number } {
   const timeSinceLast = currentTime - lastComboTime;
   const nextCombo = timeSinceLast < COMBO_TIMEOUT_MS ? currentCombo + 1 : 1;
-  const nextMultiplier = Math.min(MAX_MULTIPLIER, Math.floor(nextCombo / 3) + 1);
+  const nextMultiplier = Math.min(
+    MAX_MULTIPLIER,
+    Math.floor(nextCombo / 3) + 1
+  );
   return { nextCombo, nextMultiplier };
 }
 
@@ -575,7 +598,11 @@ export function createExplosionParticles(
       y,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
-      radius: isIce ? Math.random() * 5 + 2 : isStar ? Math.random() * 4 + 2 : Math.random() * 3.5 + 1.5,
+      radius: isIce
+        ? Math.random() * 5 + 2
+        : isStar
+          ? Math.random() * 4 + 2
+          : Math.random() * 3.5 + 1.5,
       color: isIce ? (Math.random() > 0.4 ? "#38bdf8" : "#ffffff") : color,
       alpha: 1,
       decay: Math.random() * 0.03 + (isIce ? 0.015 : 0.02),
@@ -597,7 +624,10 @@ export function updateParticles(particles: Particle[], dt: number): Particle[] {
     .filter((p) => p.alpha > 0);
 }
 
-export function updateShockwaves(shockwaves: Shockwave[], dt: number): Shockwave[] {
+export function updateShockwaves(
+  shockwaves: Shockwave[],
+  dt: number
+): Shockwave[] {
   return shockwaves
     .map((s) => ({
       ...s,
@@ -607,7 +637,10 @@ export function updateShockwaves(shockwaves: Shockwave[], dt: number): Shockwave
     .filter((s) => s.alpha > 0.02 && s.radius < s.maxRadius);
 }
 
-export function updateFloatingTexts(texts: FloatingText[], dt: number): FloatingText[] {
+export function updateFloatingTexts(
+  texts: FloatingText[],
+  dt: number
+): FloatingText[] {
   return texts
     .map((f) => ({
       ...f,
@@ -615,4 +648,267 @@ export function updateFloatingTexts(texts: FloatingText[], dt: number): Floating
       alpha: f.alpha - 0.02 * dt,
     }))
     .filter((f) => f.alpha > 0);
+}
+
+import { ArcadeEngine, ObjectPool } from "@/lib/arcade";
+
+export interface LaserLoonSnapshot {
+  mode: LaserMode;
+  laserType: LaserType | string;
+  gameState: LaserLoonState["gameState"];
+  currentAct: number;
+  actKills: number;
+  score: number;
+  highScore: number;
+  combo: number;
+  multiplier: number;
+  timeLeft: number;
+  ultimateMeter: number;
+  loonPos: { x: number; y: number };
+  aimPos: { x: number; y: number };
+  targets: Target[];
+  iceBlocks: IceBlock[];
+  powerUps: PowerUp[];
+  activeParticleCount: number;
+  activeShockwaveCount: number;
+}
+
+export interface LaserLoonEngineConfig {
+  mode?: LaserMode;
+  laserType?: LaserType;
+}
+
+export class LaserLoonEngine extends ArcadeEngine<
+  LaserLoonState,
+  LaserLoonSnapshot
+> {
+  private readonly particlePool: ObjectPool<Particle>;
+  private activeParticles: Particle[] = [];
+
+  constructor(config: LaserLoonEngineConfig = {}) {
+    const mode = config.mode ?? "campaign";
+    const initialState = createInitialState(mode);
+    if (config.laserType) {
+      initialState.laserType = config.laserType;
+    }
+    super(initialState);
+
+    this.particlePool = new ObjectPool<Particle>({
+      initialCapacity: 100,
+      maxCapacity: 300,
+      overflowPolicy: "fifo",
+      factory: () => ({
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        radius: 3,
+        color: "#ffffff",
+        alpha: 1,
+        decay: 0.02,
+        shape: "circle",
+        rotation: 0,
+      }),
+      reset: (p) => {
+        p.x = 0;
+        p.y = 0;
+        p.vx = 0;
+        p.vy = 0;
+        p.alpha = 1;
+        p.decay = 0.02;
+        p.rotation = 0;
+      },
+    });
+  }
+
+  public override init(): void {
+    // init
+  }
+
+  public startGame(): void {
+    this.state.gameState = "playing";
+    this.state.score = 0;
+    this.state.combo = 0;
+    this.state.multiplier = 1;
+    this.state.targets = [];
+    this.state.iceBlocks = [];
+    this.state.powerUps = [];
+    this.activeParticles = [];
+
+    // Initial target spawn
+    const { newTarget, nextId } = spawnTarget(
+      [],
+      1,
+      DEFAULT_CANVAS_WIDTH,
+      DEFAULT_CANVAS_HEIGHT,
+      undefined,
+      this.state.currentAct
+    );
+    this.state.targets.push(newTarget);
+    this.state.nextTargetId = nextId;
+
+    this.notifySubscribers();
+  }
+
+  public setAim(x: number, y: number): void {
+    this.state.aimPos.x = x;
+    this.state.aimPos.y = y;
+  }
+
+  public setLoonTargetY(y: number): void {
+    this.state.loonPos.targetY = clamp(y, 40, DEFAULT_CANVAS_HEIGHT - 40);
+  }
+
+  public setLaserType(type: LaserType): void {
+    this.state.laserType = type;
+    this.notifySubscribers();
+  }
+
+  public spawnExplosion(
+    x: number,
+    y: number,
+    color: string,
+    count = 20,
+    isIce = false,
+    isStar = false
+  ): void {
+    for (let i = 0; i < count; i++) {
+      const p = this.particlePool.acquire();
+      if (p) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * (isIce ? 5.5 : 4.5) + 1.5;
+        p.x = x;
+        p.y = y;
+        p.vx = Math.cos(angle) * speed;
+        p.vy = Math.sin(angle) * speed;
+        p.radius = isIce
+          ? Math.random() * 5 + 2
+          : isStar
+            ? Math.random() * 4 + 2
+            : Math.random() * 3.5 + 1.5;
+        p.color = isIce ? (Math.random() > 0.4 ? "#38bdf8" : "#ffffff") : color;
+        p.alpha = 1;
+        p.decay = Math.random() * 0.03 + (isIce ? 0.015 : 0.02);
+        p.shape = isIce ? "crystal" : isStar ? "star" : "circle";
+        p.rotation = Math.random() * Math.PI * 2;
+        this.activeParticles.push(p);
+      }
+    }
+    this.notifySubscribers();
+  }
+
+  public launchIceBlock(x: number, y: number): void {
+    const newIce: IceBlock = {
+      id: this.state.nextIceId++,
+      x,
+      y,
+      vx: 6.5,
+      vy: (Math.random() - 0.5) * 2,
+      size: 26,
+      rotation: 0,
+      vRot: (Math.random() - 0.5) * 0.1,
+      hp: 1,
+    };
+    this.state.iceBlocks.push(newIce);
+    this.notifySubscribers();
+  }
+
+  public override update(dt: number): void {
+    if (this.state.gameState !== "playing") return;
+
+    // Smooth Loon Y interpolation
+    this.state.loonPos.y +=
+      (this.state.loonPos.targetY - this.state.loonPos.y) *
+      Math.min(1, 0.2 * dt * 60);
+
+    // Update targets
+    this.state.targets = this.state.targets
+      .map((t) => ({
+        ...t,
+        x: t.x + t.vx * dt * 60,
+        y: t.y + t.vy * dt * 60,
+        pulsePhase: t.pulsePhase + 0.08 * dt * 60,
+      }))
+      .filter((t) => t.x > -100 && t.hp > 0);
+
+    // Update ice blocks
+    this.state.iceBlocks = this.state.iceBlocks
+      .map((b) => ({
+        ...b,
+        x: b.x + b.vx * dt * 60,
+        y: b.y + b.vy * dt * 60,
+        rotation: b.rotation + b.vRot * dt * 60,
+      }))
+      .filter((b) => b.x < DEFAULT_CANVAS_WIDTH + 100);
+
+    // Update particles via pool
+    const survivingParticles: Particle[] = [];
+    for (const p of this.activeParticles) {
+      p.x += p.vx * dt * 60;
+      p.y += p.vy * dt * 60;
+      p.alpha -= p.decay * dt * 60;
+      if (p.alpha > 0) {
+        survivingParticles.push(p);
+      } else {
+        this.particlePool.release(p);
+      }
+    }
+    this.activeParticles = survivingParticles;
+    this.invalidateSnapshot();
+  }
+
+  public override render(ctx: CanvasRenderingContext2D, _alpha: number): void {
+    if (!ctx) return;
+
+    // Background
+    ctx.fillStyle = "#090d16";
+    ctx.fillRect(0, 0, DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
+
+    // Render Targets
+    for (const t of this.state.targets) {
+      ctx.fillStyle = t.color || "#ef4444";
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, t.radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Render Ice blocks
+    for (const b of this.state.iceBlocks) {
+      ctx.fillStyle = "#38bdf8";
+      ctx.fillRect(b.x - b.size / 2, b.y - b.size / 2, b.size, b.size);
+    }
+
+    // Render Particles
+    for (const p of this.activeParticles) {
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = Math.max(0, p.alpha);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1.0;
+  }
+
+  public override createSnapshot(): LaserLoonSnapshot {
+    return {
+      mode: this.state.mode,
+      laserType: this.state.laserType,
+      gameState: this.state.gameState,
+      currentAct: this.state.currentAct,
+      actKills: this.state.actKills,
+      score: this.state.score,
+      highScore: this.state.highScore,
+      combo: this.state.combo,
+      multiplier: this.state.multiplier,
+      timeLeft: this.state.timeLeft,
+      ultimateMeter: this.state.ultimateMeter,
+      loonPos: { x: this.state.loonPos.x, y: this.state.loonPos.y },
+      aimPos: { x: this.state.aimPos.x, y: this.state.aimPos.y },
+      targets: [...this.state.targets],
+      iceBlocks: [...this.state.iceBlocks],
+      powerUps: [...this.state.powerUps],
+      activeParticleCount: this.activeParticles.length,
+      activeShockwaveCount: this.state.shockwaves.length,
+    };
+  }
 }

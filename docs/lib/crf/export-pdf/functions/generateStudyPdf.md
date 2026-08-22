@@ -8,7 +8,7 @@
 
 > **generateStudyPdf**(`study`, `options`): `Promise`\<`Blob`\>
 
-Defined in: [lib/crf/export-pdf.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-pdf.ts#L58)
+Defined in: [lib/crf/export-pdf.ts:63](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-pdf.ts#L63)
 
 Generates a high-fidelity PDF Document for a Study Protocol or single form.
 

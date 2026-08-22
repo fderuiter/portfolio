@@ -62,6 +62,7 @@ describe("useTelemetry Hook Integration & Isolation", () => {
     // Dynamically import to ensure clean isolated module state
     const importedModule = await import("@/hooks/useTelemetry");
     useTelemetry = importedModule.useTelemetry;
+    importedModule.clearRetryQueue();
 
     container = document.createElement("div");
     document.body.appendChild(container);
@@ -589,16 +590,16 @@ describe("useTelemetry Hook Integration & Isolation", () => {
       vi.advanceTimersByTime(0);
     });
 
-    // Simulate 429 rate limit to enqueue an event
+    // Simulate network error to enqueue an unsynced event for retry
     fetchMock.mockImplementationOnce(async () => {
-      return { ok: false, status: 429 };
+      throw new TypeError("Failed to fetch");
     });
 
-    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const errorSpy1 = vi.spyOn(console, "error").mockImplementation(() => {});
     await act(async () => {
       await hookResult.recordEvent("project-abc", "page_view");
     });
-    warnSpy.mockRestore();
+    errorSpy1.mockRestore();
 
     // Setup fetch mock for flushing
     const postCallsWithKeepalive: any[] = [];
@@ -620,16 +621,16 @@ describe("useTelemetry Hook Integration & Isolation", () => {
     expect(postCallsWithKeepalive[0].keepalive).toBe(true);
 
     // Test visibilitychange when visibilityState is 'hidden'
-    // First, enqueue another rate-limited event
+    // First, enqueue another network-failed event
     fetchMock.mockImplementationOnce(async () => {
-      return { ok: false, status: 429 };
+      throw new TypeError("Failed to fetch");
     });
 
-    const warnSpy2 = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const errorSpy2 = vi.spyOn(console, "error").mockImplementation(() => {});
     await act(async () => {
       await hookResult.recordEvent("project-abc", "project_click");
     });
-    warnSpy2.mockRestore();
+    errorSpy2.mockRestore();
 
     postCallsWithKeepalive.length = 0;
 
@@ -645,5 +646,107 @@ describe("useTelemetry Hook Integration & Isolation", () => {
 
     expect(postCallsWithKeepalive.length).toBe(1);
     expect(postCallsWithKeepalive[0].keepalive).toBe(true);
+  });
+
+  it("should capture pre-update state snapshot and revert store and local storage cache on network failure", async () => {
+    // Populate local cache with initial multi-project state
+    const initialCache = {
+      "project-abc": { views: 12, clicks: 3 },
+      "project-xyz": { views: 40, clicks: 15 },
+    };
+    mockStorage.setItem("portfolio_telemetry_cache", JSON.stringify(initialCache));
+
+    let hookResult: any;
+    await act(async () => {
+      root = createRoot(container);
+      root.render(
+        <TelemetryTestComponent
+          onHookValue={(val) => {
+            hookResult = val;
+          }}
+        />
+      );
+    });
+
+    // Mock network fetch to fail with TypeError (Network failure)
+    fetchMock.mockImplementation(async (url: string, init?: any) => {
+      if (init?.method === "POST") {
+        throw new TypeError("Failed to fetch");
+      }
+      return { ok: true, json: async () => initialCache };
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    const viewsEl = container.querySelector('[data-testid="views"]');
+    expect(viewsEl?.textContent).toBe("12");
+
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    await act(async () => {
+      await hookResult.recordEvent("project-abc", "page_view");
+    });
+
+    // Advance timers asynchronously to exhaust exponential backoff retries and microtasks
+    await act(async () => {
+      await vi.runAllTimersAsync();
+    });
+
+    // Active state and UI should be fully restored to pre-update snapshot
+    expect(viewsEl?.textContent).toBe("12");
+    expect(hookResult.telemetry["project-abc"]).toEqual({ views: 12, clicks: 3 });
+    expect(hookResult.telemetry["project-xyz"]).toEqual({ views: 40, clicks: 15 });
+
+    // Local Storage cache must also match the restored pre-update snapshot
+    const persistedCache = JSON.parse(mockStorage.getItem("portfolio_telemetry_cache") || "{}");
+    expect(persistedCache).toEqual(initialCache);
+    expect(hookResult.syncFailed).toBe(true);
+
+    errorSpy.mockRestore();
+  });
+
+  it("should capture pre-update state snapshot and revert store and local storage cache on 429 rate limit status", async () => {
+    const initialCache = {
+      "project-abc": { views: 100, clicks: 50 },
+    };
+    mockStorage.setItem("portfolio_telemetry_cache", JSON.stringify(initialCache));
+
+    let hookResult: any;
+    await act(async () => {
+      root = createRoot(container);
+      root.render(
+        <TelemetryTestComponent
+          onHookValue={(val) => {
+            hookResult = val;
+          }}
+        />
+      );
+    });
+
+    // Mock POST to return 429
+    fetchMock.mockImplementation(async (url: string, init?: any) => {
+      if (init?.method === "POST") {
+        return { ok: false, status: 429, statusText: "Too Many Requests" };
+      }
+      return { ok: true, json: async () => initialCache };
+    });
+
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    await act(async () => {
+      await hookResult.recordEvent("project-abc", "project_click");
+    });
+
+    // React state & UI must be restored to pre-update values
+    expect(hookResult.telemetry["project-abc"]).toEqual({ views: 100, clicks: 50 });
+
+    // Local storage cache must match reverted values with zero residual bloat
+    const persistedCache = JSON.parse(mockStorage.getItem("portfolio_telemetry_cache") || "{}");
+    expect(persistedCache).toEqual(initialCache);
+
+    expect(warnSpy).toHaveBeenCalledWith("Telemetry record rate limited by API.");
+    warnSpy.mockRestore();
   });
 });

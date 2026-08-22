@@ -1,12 +1,14 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { DiagnosticsDrawer } from "@/components/crf/DiagnosticsDrawer";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
+import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
 import { StudyProtocol } from "@/lib/crf/types";
 
 describe("DiagnosticsDrawer & CDISC Conformance Studio Suite", () => {
@@ -56,7 +58,9 @@ describe("DiagnosticsDrawer & CDISC Conformance Studio Suite", () => {
       );
     });
 
-    expect(container.textContent).toContain("CDISC Conformance & Regulatory Validation Studio");
+    expect(container.textContent).toContain(
+      "CDISC Conformance & Regulatory Validation Studio"
+    );
     expect(container.textContent).toContain("100% CDISC & SDTM Compliant");
   });
 
@@ -121,8 +125,8 @@ describe("DiagnosticsDrawer & CDISC Conformance Studio Suite", () => {
     expect(container.textContent).toContain("VERY_LONG_NAME_TEST");
 
     // Click "Fix Rule" button
-    const fixRuleBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Fix Rule")
+    const fixRuleBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Fix Rule")
     );
     expect(fixRuleBtn).toBeDefined();
 
@@ -190,8 +194,8 @@ describe("DiagnosticsDrawer & CDISC Conformance Studio Suite", () => {
       );
     });
 
-    const fixAllBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("1-Click Auto-Fix All")
+    const fixAllBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("1-Click Auto-Fix All")
     );
     expect(fixAllBtn).toBeDefined();
 

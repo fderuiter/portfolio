@@ -36,6 +36,6 @@ Defined in: [lib/crf/form-linter.ts:6](https://github.com/fderuiter/portfolio/bl
 
 ### severity
 
-> **severity**: `"error"` \| `"info"` \| `"warning"`
+> **severity**: `"error"` \| `"warning"` \| `"info"`
 
 Defined in: [lib/crf/form-linter.ts:5](https://github.com/fderuiter/portfolio/blob/main/lib/crf/form-linter.ts#L5)

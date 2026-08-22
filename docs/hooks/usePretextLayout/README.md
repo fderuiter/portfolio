@@ -8,7 +8,6 @@
 
 ## Interfaces
 
-- [ExtendedRichInlineItem](interfaces/ExtendedRichInlineItem.md)
 - [PretextLayoutState](interfaces/PretextLayoutState.md)
 - [PretextRichTextProps](interfaces/PretextRichTextProps.md)
 - [PretextTextProps](interfaces/PretextTextProps.md)
@@ -23,7 +22,6 @@
 ## Functions
 
 - [clearCache](functions/clearCache.md)
-- [parseMarkdownToRichItems](functions/parseMarkdownToRichItems.md)
 - [prepareRichInline](functions/prepareRichInline.md)
 - [usePretextLayout](functions/usePretextLayout.md)
 - [usePretextRichLayout](functions/usePretextRichLayout.md)
@@ -39,6 +37,18 @@ Re-exports [BLOCK_LAYOUT_CONFIG](../../lib/pretext-block-parser/variables/BLOCK_
 ### calculateBlockHeight
 
 Re-exports [calculateBlockHeight](../../lib/pretext-block-parser/functions/calculateBlockHeight.md)
+
+***
+
+### ExtendedRichInlineItem
+
+Re-exports [ExtendedRichInlineItem](../../lib/pretext-block-parser/interfaces/ExtendedRichInlineItem.md)
+
+***
+
+### parseMarkdownToRichItems
+
+Re-exports [parseMarkdownToRichItems](../../lib/pretext-block-parser/functions/parseMarkdownToRichItems.md)
 
 ***
 

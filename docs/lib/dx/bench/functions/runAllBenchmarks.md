@@ -8,7 +8,7 @@
 
 > **runAllBenchmarks**(): [`BenchmarkResult`](../interfaces/BenchmarkResult.md)[]
 
-Defined in: [lib/dx/bench.ts:386](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L386)
+Defined in: [lib/dx/bench.ts:447](https://github.com/fderuiter/portfolio/blob/main/lib/dx/bench.ts#L447)
 
 Run All Benchmarks
 

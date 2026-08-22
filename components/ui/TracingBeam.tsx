@@ -28,12 +28,11 @@ export const TracingBeam: React.FC<TracingBeamProps> = ({ children, className })
     restDelta: 0.001,
   });
 
-  // 3. Map progress to height (0% to 100%)
-  const heightTransform = useTransform(
-    shouldReduceMotion ? scrollYProgress : scrollYProgressSpring,
-    [0, 1],
-    ["0%", "100%"]
-  );
+  // Active motion progress value adhering to reduced motion settings
+  const activeProgress = shouldReduceMotion ? scrollYProgress : scrollYProgressSpring;
+
+  // Map progress to percentage translation for the marker indicator (0% to 100%)
+  const yTransform = useTransform(activeProgress, [0, 1], ["0%", "100%"]);
 
   return (
     <div
@@ -42,28 +41,31 @@ export const TracingBeam: React.FC<TracingBeamProps> = ({ children, className })
     >
       {/* 4. Scroll-Linked Tracing Beam Left-Margin Rail */}
       <div className="absolute -left-6 md:-left-12 lg:-left-16 top-4 bottom-4 w-[2px] bg-zinc-900/60 rounded-full hidden md:block select-none pointer-events-none">
-        {/* Active glowing beam segment */}
+        {/* Active glowing beam segment scaled via composited GPU transform */}
         <motion.div
           style={{
-            height: heightTransform,
+            scaleY: activeProgress,
+            originY: 0,
             "--beam-glow": `0 0 8px ${hexToRgba(designManifest.colors["brand-cyan"], 0.3)}`
           } as /* eslint-disable-line @typescript-eslint/no-explicit-any */ any}
-          className="absolute top-0 w-full bg-gradient-to-b from-brand-cyan via-brand-blue to-purple-500 rounded-full shadow-[var(--beam-glow)] origin-top"
+          className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-brand-cyan via-brand-blue to-purple-500 rounded-full shadow-[var(--beam-glow)] origin-top transform-gpu will-change-transform"
         />
         
-        {/* Breathing Head floating focus bubble */}
+        {/* Breathing Head floating focus bubble translated via composited GPU transform */}
         <motion.div
           style={{
-            top: heightTransform,
+            y: yTransform,
             "--dot-glow": `0 0 15px ${hexToRgba(designManifest.colors["brand-cyan"], 0.8)}`
           } as /* eslint-disable-line @typescript-eslint/no-explicit-any */ any}
-          className="absolute -left-[5px] -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-brand-cyan border-2 border-zinc-950 shadow-[var(--dot-glow)] flex items-center justify-center"
+          className="absolute top-0 left-0 w-full h-full transform-gpu will-change-transform pointer-events-none"
         >
-          {/* Neon pulsating ring */}
-          {!shouldReduceMotion && (
-            <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping absolute opacity-75" />
-          )}
-          <span className="w-1.5 h-1.5 rounded-full bg-white" />
+          <div className="absolute top-0 -left-[5px] -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-brand-cyan border-2 border-zinc-950 shadow-[var(--dot-glow)] flex items-center justify-center">
+            {/* Neon pulsating ring */}
+            {!shouldReduceMotion && (
+              <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping absolute opacity-75" />
+            )}
+            <span className="w-1.5 h-1.5 rounded-full bg-white" />
+          </div>
         </motion.div>
       </div>
 

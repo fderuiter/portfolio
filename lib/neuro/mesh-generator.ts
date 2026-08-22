@@ -2,21 +2,25 @@
  * Procedural High-Fidelity Cortical Surface Mesh Generator for NeuroRecon
  * Generates Pial, White Matter, Inflated, Subcortical (ASEG), and Desikan-Killiany Atlas (APARC)
  * dual-hemisphere 3D meshes with anatomical curvature and FreeSurfer ColorLUT parcellation.
+ * Outputs surface and anatomical geometry strictly as raw binary array buffers (Float32Array / Uint32Array)
+ * without importing graphics engine runtime packages.
  */
 
-import * as THREE from "three";
 import { clamp } from "../game-utils";
-import { AnatomicalParcel, DESIKAN_KILLIANY_PARCELS, HemisphereFilter, SurfaceMode } from "./types";
-
-export interface MeshBundle {
-  geometry: THREE.BufferGeometry;
-  material: THREE.Material;
-  mesh: THREE.Mesh;
-}
+import {
+  AnatomicalParcel,
+  DESIKAN_KILLIANY_PARCELS,
+  HemisphereBufferTransfer,
+  HemisphereFilter,
+  MeshWorkerRequest,
+  MeshWorkerResponse,
+  RawGeometryBuffer,
+  SurfaceMode,
+} from "./types";
 
 /**
  * Determine the Desikan-Killiany anatomical parcel for a 3D coordinate on a cerebral hemisphere.
- * Coordinates are in normalized Three.js model space.
+ * Coordinates are in normalized model space.
  */
 export function getAnatomicalParcelAtCoordinate(
   pos: { x: number; y: number; z: number },
@@ -28,15 +32,23 @@ export function getAnatomicalParcelAtCoordinate(
 
   // Medial Wall & Cingulate Cortex
   if (x < 0.28) {
-    if (y > 0.45 && z > -0.1) return DESIKAN_KILLIANY_PARCELS.rostralanteriorcingulate;
-    if (y > 0.0 && y <= 0.45 && z > 0.1) return DESIKAN_KILLIANY_PARCELS.caudalanteriorcingulate;
-    if (y < 0.0 && y >= -0.65 && z > 0.0) return DESIKAN_KILLIANY_PARCELS.posteriorcingulate;
-    if (y < -0.65 && z > -0.2 && z < 0.3) return DESIKAN_KILLIANY_PARCELS.isthmuscingulate;
+    if (y > 0.45 && z > -0.1)
+      return DESIKAN_KILLIANY_PARCELS.rostralanteriorcingulate;
+    if (y > 0.0 && y <= 0.45 && z > 0.1)
+      return DESIKAN_KILLIANY_PARCELS.caudalanteriorcingulate;
+    if (y < 0.0 && y >= -0.65 && z > 0.0)
+      return DESIKAN_KILLIANY_PARCELS.posteriorcingulate;
+    if (y < -0.65 && z > -0.2 && z < 0.3)
+      return DESIKAN_KILLIANY_PARCELS.isthmuscingulate;
     if (y > 0.0 && z > 0.4) return DESIKAN_KILLIANY_PARCELS.paracentral;
     if (y < -0.5 && z > 0.2) return DESIKAN_KILLIANY_PARCELS.precuneus;
     if (y < -0.7 && z > 0.0) return DESIKAN_KILLIANY_PARCELS.cuneus;
     if (y < -0.6 && z <= 0.0) return DESIKAN_KILLIANY_PARCELS.pericalcarine;
-    if (y < 0.0 && z <= -0.2) return DESIKAN_KILLIANY_PARCELS.parahippocampal || DESIKAN_KILLIANY_PARCELS.entorhinal;
+    if (y < 0.0 && z <= -0.2)
+      return (
+        DESIKAN_KILLIANY_PARCELS.parahippocampal ||
+        DESIKAN_KILLIANY_PARCELS.entorhinal
+      );
     return DESIKAN_KILLIANY_PARCELS.superiorfrontal;
   }
 
@@ -116,69 +128,34 @@ export function getAnatomicalParcelAtCoordinate(
   }
 
   // Default fallback
-  return isLeft ? DESIKAN_KILLIANY_PARCELS.superiorfrontal : DESIKAN_KILLIANY_PARCELS.superiorfrontal;
+  return isLeft
+    ? DESIKAN_KILLIANY_PARCELS.superiorfrontal
+    : DESIKAN_KILLIANY_PARCELS.superiorfrontal;
 }
 
 /**
- * Procedurally generates a FreeSurfer-style cortical surface mesh.
+ * Generate raw typed array buffers for a single hemisphere (Left or Right)
+ * Executes 12,500+ vertex spatial point checks, trigonometric folding calculations,
+ * and Desikan-Killiany atlas parcellations into Float32Array and Uint32Array structures.
  */
-export function createCorticalSurfaceMesh(
-  mode: SurfaceMode = "pial",
-  wireframe = false,
-  hemiFilter: HemisphereFilter = "both"
-): THREE.Group {
-  const group = new THREE.Group();
-
-  if (mode === "aseg") {
-    // Generate subcortical structures
-    group.add(createSubcorticalMesh(hemiFilter));
-    return group;
-  }
-
-  // Material setup
-  const material = new THREE.MeshStandardMaterial({
-    vertexColors: true,
-    roughness: mode === "aparc" ? 0.45 : mode === "white" ? 0.3 : 0.35,
-    metalness: mode === "aparc" ? 0.05 : 0.12,
-    wireframe,
-    side: THREE.DoubleSide,
-  });
-
-  if (hemiFilter === "both" || hemiFilter === "lh") {
-    const leftHemi = createHemisphereGeometry("left", mode);
-    const leftMesh = new THREE.Mesh(leftHemi, material);
-    leftMesh.name = "lh_surface";
-    group.add(leftMesh);
-  }
-
-  if (hemiFilter === "both" || hemiFilter === "rh") {
-    const rightHemi = createHemisphereGeometry("right", mode);
-    const rightMesh = new THREE.Mesh(rightHemi, material);
-    rightMesh.name = "rh_surface";
-    group.add(rightMesh);
-  }
-
-  return group;
-}
-
-/**
- * Generate a single hemisphere surface mesh (Left or Right) with high-density tessellation
- */
-function createHemisphereGeometry(
+export function generateHemisphereBuffers(
   hemi: "left" | "right",
   mode: SurfaceMode
-): THREE.BufferGeometry {
+): HemisphereBufferTransfer {
   const uSegments = 128; // Azimuth resolution
   const vSegments = 96; // Elevation resolution
   const isLeft = hemi === "left";
   const hemiSign = isLeft ? -1 : 1;
 
-  const positions: number[] = [];
-  const normals: number[] = [];
-  const colors: number[] = [];
-  const indices: number[] = [];
+  const numVertices = (uSegments + 1) * (vSegments + 1); // 12,513 vertices
+  const positions = new Float32Array(numVertices * 3);
+  const rawNormals = new Float32Array(numVertices * 3);
+  const colors = new Float32Array(numVertices * 3);
+  const indices = new Uint32Array(uSegments * vSegments * 6); // 73,728 indices
 
   const baseScale = mode === "white" ? 0.92 : mode === "inflated" ? 1.06 : 1.0;
+
+  let vIdx = 0;
 
   for (let j = 0; j <= vSegments; j++) {
     const theta = (j / vSegments) * Math.PI; // 0 to PI (Superior to Inferior)
@@ -197,7 +174,7 @@ function createHemisphereGeometry(
       const rz = 1.45 * baseScale;
 
       let x = rx * sinTheta * cosPhi * hemiSign + (isLeft ? -0.06 : 0.06);
-      let y = ry * sinTheta * sinPhi - (ry * 0.5);
+      let y = ry * sinTheta * sinPhi - ry * 0.5;
       let z = rz * cosTheta;
 
       // Temporal lobe anterior hook & Sylvian fissure indentation
@@ -209,13 +186,15 @@ function createHemisphereGeometry(
       let centralSulcusDepth = 0;
       if (y > -0.15 && y < 0.15 && z > -0.2) {
         const distToCentral = Math.abs(y - (0.05 + (z - 0.2) * 0.18));
-        centralSulcusDepth = Math.exp(-Math.pow(distToCentral / 0.12, 2)) * 0.14;
+        centralSulcusDepth =
+          Math.exp(-Math.pow(distToCentral / 0.12, 2)) * 0.14;
       }
 
       let sylvianFissureDepth = 0;
       if (z > -0.4 && z < 0.15 && y > -0.4 && y < 0.5) {
         const distToSylvian = Math.abs(z - (-0.12 - (y - 0.1) * 0.25));
-        sylvianFissureDepth = Math.exp(-Math.pow(distToSylvian / 0.14, 2)) * 0.18;
+        sylvianFissureDepth =
+          Math.exp(-Math.pow(distToSylvian / 0.14, 2)) * 0.18;
       }
 
       // Sulcal and gyral folding patterns
@@ -242,22 +221,25 @@ function createHemisphereGeometry(
         curvature = (fold1 + fold2) / 1.65;
       }
 
-      positions.push(x, y, z);
+      const pOffset = vIdx * 3;
+      positions[pOffset] = x;
+      positions[pOffset + 1] = y;
+      positions[pOffset + 2] = z;
 
       // Normal vector approximation
-      const n = new THREE.Vector3(x, y, z).normalize();
-      normals.push(n.x, n.y, n.z);
+      const len = Math.hypot(x, y, z) || 1;
+      rawNormals[pOffset] = x / len;
+      rawNormals[pOffset + 1] = y / len;
+      rawNormals[pOffset + 2] = z / len;
 
       // Vertex color assignment
       if (mode === "aparc") {
         const parcel = getAnatomicalParcelAtCoordinate({ x, y, z }, isLeft);
         // Slightly shade according to sulcal curvature for realistic 3D parcel depth
         const depthShade = 0.85 + clamp(curvature * 0.2, -0.25, 0.25);
-        colors.push(
-          parcel.normRgb[0] * depthShade,
-          parcel.normRgb[1] * depthShade,
-          parcel.normRgb[2] * depthShade
-        );
+        colors[pOffset] = parcel.normRgb[0] * depthShade;
+        colors[pOffset + 1] = parcel.normRgb[1] * depthShade;
+        colors[pOffset + 2] = parcel.normRgb[2] * depthShade;
       } else {
         // Sulcal fundi (dark slate/gray) vs Gyral crests (bright cyan/blue)
         const normCurv = clamp((curvature + 1.2) / 2.4, 0, 1);
@@ -271,12 +253,17 @@ function createHemisphereGeometry(
           b = 0.68 + normCurv * 0.12;
         }
 
-        colors.push(r, g, b);
+        colors[pOffset] = r;
+        colors[pOffset + 1] = g;
+        colors[pOffset + 2] = b;
       }
+
+      vIdx++;
     }
   }
 
   // Generate triangle indices
+  let iIdx = 0;
   for (let j = 0; j < vSegments; j++) {
     for (let i = 0; i < uSegments; i++) {
       const a = j * (uSegments + 1) + i;
@@ -285,73 +272,338 @@ function createHemisphereGeometry(
       const d = c + 1;
 
       if (isLeft) {
-        indices.push(a, b, d);
-        indices.push(a, d, c);
+        indices[iIdx++] = a;
+        indices[iIdx++] = b;
+        indices[iIdx++] = d;
+        indices[iIdx++] = a;
+        indices[iIdx++] = d;
+        indices[iIdx++] = c;
       } else {
-        indices.push(a, d, b);
-        indices.push(a, c, d);
+        indices[iIdx++] = a;
+        indices[iIdx++] = d;
+        indices[iIdx++] = b;
+        indices[iIdx++] = a;
+        indices[iIdx++] = c;
+        indices[iIdx++] = d;
       }
     }
   }
 
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-  geometry.setAttribute("normal", new THREE.Float32BufferAttribute(normals, 3));
-  geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
-  geometry.setIndex(indices);
-  geometry.computeVertexNormals();
-
-  return geometry;
+  return {
+    hemi,
+    positions,
+    normals: rawNormals,
+    colors,
+    indices,
+  };
 }
 
 /**
- * Generate subcortical structures (Ventricles, Thalamus, Caudate, Putamen, Hippocampus, Amygdala, Brainstem)
+ * Generate UV sphere geometry buffer for subcortical structures.
  */
-function createSubcorticalMesh(hemiFilter: HemisphereFilter = "both"): THREE.Group {
-  const subGroup = new THREE.Group();
+function generateSphereBuffer(
+  center: [number, number, number],
+  scale: [number, number, number],
+  colorHex: number,
+  name: string
+): RawGeometryBuffer {
+  const widthSegments = 24;
+  const heightSegments = 16;
+  const numVertices = (widthSegments + 1) * (heightSegments + 1);
+  const positions = new Float32Array(numVertices * 3);
+  const normals = new Float32Array(numVertices * 3);
+  const indices = new Uint32Array(widthSegments * heightSegments * 6);
 
-  // Color lookup table matching FreeSurfer ColorLUT
-  const structures = [
-    // Lateral Ventricles (Bright blue)
-    { name: "Left-Lateral-Ventricle", hemi: "lh", pos: [-0.38, 0.1, 0.15], scale: [0.22, 0.75, 0.28], color: 0x7890cd },
-    { name: "Right-Lateral-Ventricle", hemi: "rh", pos: [0.38, 0.1, 0.15], scale: [0.22, 0.75, 0.28], color: 0x7890cd },
-    // Thalamus (Green)
-    { name: "Left-Thalamus", hemi: "lh", pos: [-0.35, -0.15, -0.05], scale: [0.32, 0.45, 0.35], color: 0x00760e },
-    { name: "Right-Thalamus", hemi: "rh", pos: [0.35, -0.15, -0.05], scale: [0.32, 0.45, 0.35], color: 0x00760e },
-    // Caudate Nucleus (Cyan)
-    { name: "Left-Caudate", hemi: "lh", pos: [-0.55, 0.25, 0.2], scale: [0.22, 0.48, 0.25], color: 0x7aff88 },
-    { name: "Right-Caudate", hemi: "rh", pos: [0.55, 0.25, 0.2], scale: [0.22, 0.48, 0.25], color: 0x7aff88 },
-    // Putamen (Pink/Magenta)
-    { name: "Left-Putamen", hemi: "lh", pos: [-0.75, 0.05, -0.02], scale: [0.28, 0.55, 0.32], color: 0xeb4095 },
-    { name: "Right-Putamen", hemi: "rh", pos: [0.75, 0.05, -0.02], scale: [0.28, 0.55, 0.32], color: 0xeb4095 },
-    // Hippocampus (Yellow)
-    { name: "Left-Hippocampus", hemi: "lh", pos: [-0.62, -0.32, -0.38], scale: [0.2, 0.55, 0.2], color: 0xd0e83b },
-    { name: "Right-Hippocampus", hemi: "rh", pos: [0.62, -0.32, -0.38], scale: [0.2, 0.55, 0.2], color: 0xd0e83b },
-    // Amygdala (Cyan Blue)
-    { name: "Left-Amygdala", hemi: "lh", pos: [-0.58, 0.02, -0.36], scale: [0.18, 0.22, 0.18], color: 0x67a8ff },
-    { name: "Right-Amygdala", hemi: "rh", pos: [0.58, 0.02, -0.36], scale: [0.18, 0.22, 0.18], color: 0x67a8ff },
-    // Brainstem (Gray/Tan)
-    { name: "Brain-Stem", hemi: "both", pos: [0, -0.25, -0.75], scale: [0.45, 0.48, 0.75], color: 0x776655 },
-  ];
+  let vIdx = 0;
+  for (let j = 0; j <= heightSegments; j++) {
+    const v = j / heightSegments;
+    const theta = v * Math.PI;
+    const sinTheta = Math.sin(theta);
+    const cosTheta = Math.cos(theta);
 
-  const baseGeo = new THREE.SphereGeometry(1, 32, 24);
+    for (let i = 0; i <= widthSegments; i++) {
+      const u = i / widthSegments;
+      const phi = u * Math.PI * 2;
+      const sinPhi = Math.sin(phi);
+      const cosPhi = Math.cos(phi);
 
-  structures.forEach((s) => {
-    if (hemiFilter !== "both" && s.hemi !== "both" && s.hemi !== hemiFilter) {
-      return;
+      const nx = sinTheta * cosPhi;
+      const ny = cosTheta;
+      const nz = sinTheta * sinPhi;
+
+      const pOffset = vIdx * 3;
+      normals[pOffset] = nx;
+      normals[pOffset + 1] = ny;
+      normals[pOffset + 2] = nz;
+
+      positions[pOffset] = center[0] + nx * scale[0];
+      positions[pOffset + 1] = center[1] + ny * scale[1];
+      positions[pOffset + 2] = center[2] + nz * scale[2];
+
+      vIdx++;
     }
+  }
 
-    const mat = new THREE.MeshStandardMaterial({
-      color: s.color,
-      roughness: 0.3,
-      metalness: 0.1,
+  let iIdx = 0;
+  for (let j = 0; j < heightSegments; j++) {
+    for (let i = 0; i < widthSegments; i++) {
+      const a = j * (widthSegments + 1) + i;
+      const b = a + 1;
+      const c = (j + 1) * (widthSegments + 1) + i;
+      const d = c + 1;
+
+      indices[iIdx++] = a;
+      indices[iIdx++] = b;
+      indices[iIdx++] = d;
+      indices[iIdx++] = a;
+      indices[iIdx++] = d;
+      indices[iIdx++] = c;
+    }
+  }
+
+  return {
+    name,
+    positions,
+    normals,
+    indices,
+    color: colorHex,
+  };
+}
+
+/**
+ * Generate subcortical structure geometry buffers (Ventricles, Thalamus, Caudate, Putamen, Hippocampus, Amygdala, Brainstem)
+ */
+export function generateSubcorticalBuffers(
+  hemiFilter: HemisphereFilter = "both"
+): RawGeometryBuffer[] {
+  const structures = [
+    {
+      name: "Left-Lateral-Ventricle",
+      hemi: "lh",
+      pos: [-0.38, 0.1, 0.15],
+      scale: [0.22, 0.75, 0.28],
+      color: 0x7890cd,
+    },
+    {
+      name: "Right-Lateral-Ventricle",
+      hemi: "rh",
+      pos: [0.38, 0.1, 0.15],
+      scale: [0.22, 0.75, 0.28],
+      color: 0x7890cd,
+    },
+    {
+      name: "Left-Thalamus",
+      hemi: "lh",
+      pos: [-0.35, -0.15, -0.05],
+      scale: [0.32, 0.45, 0.35],
+      color: 0x00760e,
+    },
+    {
+      name: "Right-Thalamus",
+      hemi: "rh",
+      pos: [0.35, -0.15, -0.05],
+      scale: [0.32, 0.45, 0.35],
+      color: 0x00760e,
+    },
+    {
+      name: "Left-Caudate",
+      hemi: "lh",
+      pos: [-0.55, 0.25, 0.2],
+      scale: [0.22, 0.48, 0.25],
+      color: 0x7aff88,
+    },
+    {
+      name: "Right-Caudate",
+      hemi: "rh",
+      pos: [0.55, 0.25, 0.2],
+      scale: [0.22, 0.48, 0.25],
+      color: 0x7aff88,
+    },
+    {
+      name: "Left-Putamen",
+      hemi: "lh",
+      pos: [-0.75, 0.05, -0.02],
+      scale: [0.28, 0.55, 0.32],
+      color: 0xeb4095,
+    },
+    {
+      name: "Right-Putamen",
+      hemi: "rh",
+      pos: [0.75, 0.05, -0.02],
+      scale: [0.28, 0.55, 0.32],
+      color: 0xeb4095,
+    },
+    {
+      name: "Left-Hippocampus",
+      hemi: "lh",
+      pos: [-0.62, -0.32, -0.38],
+      scale: [0.2, 0.55, 0.2],
+      color: 0xd0e83b,
+    },
+    {
+      name: "Right-Hippocampus",
+      hemi: "rh",
+      pos: [0.62, -0.32, -0.38],
+      scale: [0.2, 0.55, 0.2],
+      color: 0xd0e83b,
+    },
+    {
+      name: "Left-Amygdala",
+      hemi: "lh",
+      pos: [-0.58, 0.02, -0.36],
+      scale: [0.18, 0.22, 0.18],
+      color: 0x67a8ff,
+    },
+    {
+      name: "Right-Amygdala",
+      hemi: "rh",
+      pos: [0.58, 0.02, -0.36],
+      scale: [0.18, 0.22, 0.18],
+      color: 0x67a8ff,
+    },
+    {
+      name: "Brain-Stem",
+      hemi: "both",
+      pos: [0, -0.25, -0.75],
+      scale: [0.45, 0.48, 0.75],
+      color: 0x776655,
+    },
+  ] as const;
+
+  const buffers: RawGeometryBuffer[] = [];
+
+  for (const s of structures) {
+    if (hemiFilter !== "both" && s.hemi !== "both" && s.hemi !== hemiFilter) {
+      continue;
+    }
+    buffers.push(
+      generateSphereBuffer(
+        s.pos as [number, number, number],
+        s.scale as [number, number, number],
+        s.color,
+        s.name
+      )
+    );
+  }
+
+  return buffers;
+}
+
+/**
+ * Procedurally generates raw cortical surface geometry array buffers synchronously.
+ */
+export function createCorticalSurfaceMeshBuffers(
+  mode: SurfaceMode = "pial",
+  _wireframe = false,
+  hemiFilter: HemisphereFilter = "both"
+): RawGeometryBuffer[] {
+  if (mode === "aseg") {
+    return generateSubcorticalBuffers(hemiFilter);
+  }
+
+  const buffers: RawGeometryBuffer[] = [];
+
+  if (hemiFilter === "both" || hemiFilter === "lh") {
+    const lhBuf = generateHemisphereBuffers("left", mode);
+    buffers.push({
+      name: "lh_surface",
+      hemi: "left",
+      positions: lhBuf.positions,
+      normals: lhBuf.normals,
+      colors: lhBuf.colors,
+      indices: lhBuf.indices,
     });
-    const mesh = new THREE.Mesh(baseGeo, mat);
-    mesh.name = s.name;
-    mesh.position.set(s.pos[0], s.pos[1], s.pos[2]);
-    mesh.scale.set(s.scale[0], s.scale[1], s.scale[2]);
-    subGroup.add(mesh);
-  });
+  }
 
-  return subGroup;
+  if (hemiFilter === "both" || hemiFilter === "rh") {
+    const rhBuf = generateHemisphereBuffers("right", mode);
+    buffers.push({
+      name: "rh_surface",
+      hemi: "right",
+      positions: rhBuf.positions,
+      normals: rhBuf.normals,
+      colors: rhBuf.colors,
+      indices: rhBuf.indices,
+    });
+  }
+
+  return buffers;
+}
+
+// Background Web Worker Management & Async Interface
+let workerInstance: Worker | null = null;
+let requestCounter = 0;
+const pendingRequests = new Map<
+  string,
+  (response: MeshWorkerResponse) => void
+>();
+
+function getMeshWorker(): Worker | null {
+  if (typeof window === "undefined" || typeof Worker === "undefined") {
+    return null;
+  }
+
+  if (!workerInstance) {
+    try {
+      workerInstance = new Worker(new URL("./mesh-worker.ts", import.meta.url));
+      workerInstance.onmessage = (event: MessageEvent<MeshWorkerResponse>) => {
+        const { id } = event.data;
+        if (!id) return;
+        const callback = pendingRequests.get(id);
+        if (callback) {
+          pendingRequests.delete(id);
+          callback(event.data);
+        }
+      };
+      workerInstance.onerror = (err) => {
+        console.warn("Mesh generator Web Worker error:", err);
+        pendingRequests.clear();
+      };
+    } catch {
+      workerInstance = null;
+    }
+  }
+
+  return workerInstance;
+}
+
+/**
+ * Offloads vertex spatial point checks and Desikan-Killiany atlas parcellations
+ * to a background Web Worker thread, returning raw binary ArrayBuffers via zero-copy transfers.
+ */
+export async function createCorticalSurfaceMeshBuffersAsync(
+  mode: SurfaceMode = "pial",
+  wireframe = false,
+  hemiFilter: HemisphereFilter = "both"
+): Promise<RawGeometryBuffer[]> {
+  const worker = getMeshWorker();
+
+  if (!worker) {
+    return createCorticalSurfaceMeshBuffers(mode, wireframe, hemiFilter);
+  }
+
+  return new Promise((resolve) => {
+    const requestId = `mesh_req_${++requestCounter}`;
+
+    const timeout = setTimeout(() => {
+      if (pendingRequests.has(requestId)) {
+        pendingRequests.delete(requestId);
+        resolve(createCorticalSurfaceMeshBuffers(mode, wireframe, hemiFilter));
+      }
+    }, 1000);
+
+    pendingRequests.set(requestId, (response: MeshWorkerResponse) => {
+      clearTimeout(timeout);
+      resolve(response.buffers);
+    });
+
+    const request: MeshWorkerRequest = {
+      id: requestId,
+      mode,
+      hemiFilter,
+      wireframe,
+    };
+
+    worker.postMessage(request);
+  });
 }

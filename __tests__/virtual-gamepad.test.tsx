@@ -2,11 +2,16 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { VirtualGamepad, VirtualDPad } from "@/components/arcade/VirtualGamepad";
+import {
+  VirtualGamepad,
+  VirtualDPad,
+} from "@/components/arcade/VirtualGamepad";
 
 describe("VirtualGamepad & VirtualDPad Component Suite", () => {
   let container: HTMLDivElement;
@@ -14,7 +19,8 @@ describe("VirtualGamepad & VirtualDPad Component Suite", () => {
 
   beforeEach(() => {
     // Ensure clean non-touch environment by default
-    delete (window as unknown as Record<string, unknown>).ontouchstart;
+    delete (window as any).ontouchstart;
+
     Object.defineProperty(navigator, "maxTouchPoints", {
       value: 0,
       writable: true,
@@ -78,12 +84,16 @@ describe("VirtualGamepad & VirtualDPad Component Suite", () => {
 
     // Trigger pointer down and pointer up
     await act(async () => {
-      upBtn?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true }));
+      upBtn?.dispatchEvent(
+        new PointerEvent("pointerdown", { bubbles: true, cancelable: true })
+      );
     });
     expect(onDirectionPress).toHaveBeenCalledWith("up");
 
     await act(async () => {
-      upBtn?.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, cancelable: true }));
+      upBtn?.dispatchEvent(
+        new PointerEvent("pointerup", { bubbles: true, cancelable: true })
+      );
     });
     expect(onDirectionRelease).toHaveBeenCalledWith("up");
 
@@ -92,12 +102,16 @@ describe("VirtualGamepad & VirtualDPad Component Suite", () => {
     expect(actionABtn).not.toBeNull();
 
     await act(async () => {
-      actionABtn?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true }));
+      actionABtn?.dispatchEvent(
+        new PointerEvent("pointerdown", { bubbles: true, cancelable: true })
+      );
     });
     expect(onActionAPress).toHaveBeenCalled();
 
     await act(async () => {
-      actionABtn?.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, cancelable: true }));
+      actionABtn?.dispatchEvent(
+        new PointerEvent("pointerup", { bubbles: true, cancelable: true })
+      );
     });
     expect(onActionARelease).toHaveBeenCalled();
   });
@@ -119,13 +133,17 @@ describe("VirtualGamepad & VirtualDPad Component Suite", () => {
     expect(downBtn).not.toBeNull();
 
     await act(async () => {
-      downBtn?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, cancelable: true }));
+      downBtn?.dispatchEvent(
+        new PointerEvent("pointerdown", { bubbles: true, cancelable: true })
+      );
     });
     expect(onDirectionPress).toHaveBeenCalledWith("down");
 
     // Simulate pointer cancellation (e.g. system gesture interrupt or finger moving off screen)
     await act(async () => {
-      downBtn?.dispatchEvent(new PointerEvent("pointercancel", { bubbles: true, cancelable: true }));
+      downBtn?.dispatchEvent(
+        new PointerEvent("pointercancel", { bubbles: true, cancelable: true })
+      );
     });
     expect(onDirectionRelease).toHaveBeenCalledWith("down");
   });
@@ -145,8 +163,8 @@ describe("VirtualGamepad & VirtualDPad Component Suite", () => {
       );
     });
 
-    const plasmaBtn = Array.from(container.querySelectorAll("button")).find((btn) =>
-      btn.textContent?.includes("2: Plasma")
+    const plasmaBtn = Array.from(container.querySelectorAll("button")).find(
+      (btn) => btn.textContent?.includes("2: Plasma")
     );
     expect(plasmaBtn).toBeDefined();
 

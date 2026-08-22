@@ -7,15 +7,38 @@ import { applySecurityHeaders } from "@/lib/security-headers";
 export interface ApiWrapperOptions<TSchema extends ZodSchema = ZodSchema> {
   schema?: TSchema;
   type?: "body" | "query";
-  customValidationError?: (error: unknown, req: NextRequest) => { error: string; details?: Array<{ path: string; message: string }> };
+  customValidationError?: (
+    error: unknown,
+    req: NextRequest
+  ) => { error: string; details?: Array<{ path: string; message: string }> };
   customJsonError?: string;
   defaultStatus?: number;
 }
 
 export type ApiHandler<TData = unknown> = (
   req: NextRequest,
-  context: { data: TData; params: Record<string, string> }
+  context: {
+    data: TData;
+    params: Record<string, string | string[] | undefined>;
+  }
 ) => Promise<NextResponse>;
+
+export type ApiRouteHandler = {
+  (
+    req?: NextRequest,
+    routeParams?: {
+      params?:
+        | Promise<Record<string, string | string[] | undefined>>
+        | Record<string, string | string[] | undefined>;
+    }
+  ): Promise<NextResponse>;
+  (
+    req: NextRequest,
+    routeContext: {
+      params: Promise<Record<string, string | string[] | undefined>>;
+    }
+  ): Promise<NextResponse>;
+};
 
 /**
  * Higher-order API route handler wrapper.
@@ -25,18 +48,12 @@ export type ApiHandler<TData = unknown> = (
 export function createApiHandler<TSchema extends ZodSchema>(
   handler: ApiHandler<z.infer<TSchema>>,
   options: ApiWrapperOptions<TSchema> & { schema: TSchema }
-): (
-  rawReq?: NextRequest,
-  routeParams?: { params?: Promise<Record<string, string>> | Record<string, string> }
-) => Promise<NextResponse>;
+): ApiRouteHandler;
 
 export function createApiHandler(
   handler: ApiHandler<undefined>,
   options?: ApiWrapperOptions
-): (
-  rawReq?: NextRequest,
-  routeParams?: { params?: Promise<Record<string, string>> | Record<string, string> }
-) => Promise<NextResponse>;
+): ApiRouteHandler;
 
 export function createApiHandler<TSchema extends ZodSchema>(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -45,7 +62,11 @@ export function createApiHandler<TSchema extends ZodSchema>(
 ) {
   return async (
     rawReq?: NextRequest,
-    routeParams?: { params?: Promise<Record<string, string>> | Record<string, string> }
+    routeParams?: {
+      params?:
+        | Promise<Record<string, string | string[] | undefined>>
+        | Record<string, string | string[] | undefined>;
+    }
   ): Promise<NextResponse> => {
     const req = rawReq || new NextRequest("http://localhost:3000");
     try {
@@ -82,11 +103,14 @@ export function createApiHandler<TSchema extends ZodSchema>(
           try {
             body = await req.json();
           } catch {
-            const customJsonMsg = options.customJsonError || "Invalid JSON payload";
+            const customJsonMsg =
+              options.customJsonError || "Invalid JSON payload";
             const response = NextResponse.json(
               {
                 error: customJsonMsg,
-                details: [{ path: "body", message: "Request body must be valid JSON" }],
+                details: [
+                  { path: "body", message: "Request body must be valid JSON" },
+                ],
               },
               { status: 400 }
             );
@@ -120,17 +144,23 @@ export function createApiHandler<TSchema extends ZodSchema>(
     } catch (err: unknown) {
       Sentry.captureException(err);
       const sanitized = sanitizeError(err);
-      
+
       // Check for unique constraint failure (e.g. Prisma P2002)
       const errorObj = err as { code?: string; message?: string };
       if (
         errorObj?.code === "P2002" ||
-        (typeof errorObj?.message === "string" && errorObj.message.includes("Unique constraint failed"))
+        (typeof errorObj?.message === "string" &&
+          errorObj.message.includes("Unique constraint failed"))
       ) {
         const response = NextResponse.json(
           {
             error: "A case study with this slug already exists",
-            details: [{ path: "slug", message: "A case study with this slug already exists" }],
+            details: [
+              {
+                path: "slug",
+                message: "A case study with this slug already exists",
+              },
+            ],
           },
           { status: 400 }
         );

@@ -10,16 +10,20 @@ import { CommandPalette } from "@/components/CommandPalette";
 // Mock audio provider functions
 const mockPlayHover = vi.fn();
 const mockPlaySubmit = vi.fn();
-vi.mock("@/components/providers/AudioProvider", () => ({
-  useAudio: () => ({
-    playHover: mockPlayHover,
-    playSubmit: mockPlaySubmit,
-    playSuccess: vi.fn(),
-    playNote: vi.fn(),
-    volume: 0.3,
-    muted: false,
-  }),
-}));
+vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/providers/AudioProvider")>();
+  return {
+    ...actual,
+    useAudio: () => ({
+      playHover: mockPlayHover,
+      playSubmit: mockPlaySubmit,
+      playSuccess: vi.fn(),
+      playNote: vi.fn(),
+      volume: 0.3,
+      muted: false,
+    }),
+  };
+});
 
 // Mock Next.js router
 const mockPush = vi.fn();
@@ -148,8 +152,8 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
     });
 
     expect(mockPlayHover).toHaveBeenCalledTimes(2);
-    expect(previewPane?.textContent).toContain("Say Hi & Connect");
-    expect(previewPane?.textContent).toContain("Open for Sync");
+    expect(previewPane?.textContent).toContain("Contact & Direct Inquiries");
+    expect(previewPane?.textContent).toContain("Relay Active");
 
     // Press ArrowUp to move back
     await act(async () => {

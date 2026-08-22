@@ -1,11 +1,13 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import {
   IconCalendar,
   IconClock,
   IconVideo,
   IconMail,
+  IconMessageCode,
   IconExternalLink,
   IconShieldCheck,
   IconCpu,
@@ -143,13 +145,13 @@ export default function SchedulePage() {
             Prefer direct email or messaging?
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
-            <a
-              href="mailto:fpderuiter@gmail.com"
+            <Link
+              href="/contact"
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-brand-cyan hover:border-brand-cyan/40 transition-colors"
             >
-              <IconMail className="w-4 h-4 text-brand-cyan" />
-              <span>fpderuiter@gmail.com</span>
-            </a>
+              <IconMessageCode className="w-4 h-4 text-brand-cyan" />
+              <span>Direct Contact Form</span>
+            </Link>
             <a
               href="https://www.linkedin.com/in/frederick-de-ruiter-88012467/"
               target="_blank"

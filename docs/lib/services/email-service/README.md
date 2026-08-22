@@ -15,3 +15,8 @@
 - [ContactDispatchResult](interfaces/ContactDispatchResult.md)
 - [EmailDispatchResult](interfaces/EmailDispatchResult.md)
 - [RawEmailOptions](interfaces/RawEmailOptions.md)
+- [SvixVerifyParams](interfaces/SvixVerifyParams.md)
+
+## Functions
+
+- [verifySvixSignature](functions/verifySvixSignature.md)

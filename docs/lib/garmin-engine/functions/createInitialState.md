@@ -6,9 +6,9 @@
 
 # Function: createInitialState()
 
-> **createInitialState**(`device?`, `highScore?`): [`GameEngineState`](../interfaces/GameEngineState.md)
+> **createInitialState**(`device?`, `highScore?`, `initialFlash?`): [`GameEngineState`](../interfaces/GameEngineState.md)
 
-Defined in: [lib/garmin-engine.ts:144](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L144)
+Defined in: [lib/garmin-engine.ts:198](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L198)
 
 Initializes a new fresh game state
 
@@ -21,6 +21,10 @@ Initializes a new fresh game state
 ### highScore?
 
 `number` = `0`
+
+### initialFlash?
+
+[`FlashVariable`](../interfaces/FlashVariable.md)[]
 
 ## Returns
 

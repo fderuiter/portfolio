@@ -8,7 +8,7 @@
 
 > **exportBenchmarkResults**(`summaries`, `outDir?`, `baseUrl?`): `object`
 
-Defined in: [lib/dx/page-bench.ts:482](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L482)
+Defined in: [lib/dx/page-bench.ts:706](https://github.com/fderuiter/portfolio/blob/main/lib/dx/page-bench.ts#L706)
 
 Save benchmark results to disk in Markdown and JSON formats
 

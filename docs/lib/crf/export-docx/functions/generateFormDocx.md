@@ -8,7 +8,7 @@
 
 > **generateFormDocx**(`form`, `study`, `options?`): `Promise`\<`Blob`\>
 
-Defined in: [lib/crf/export-docx.ts:1006](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-docx.ts#L1006)
+Defined in: [lib/crf/export-docx.ts:1061](https://github.com/fderuiter/portfolio/blob/main/lib/crf/export-docx.ts#L1061)
 
 Convenience helper to export a single form to docx.
 

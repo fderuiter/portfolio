@@ -8,7 +8,7 @@
 
 > **playPneumaticChuteSound**(): `void`
 
-Defined in: [lib/clinical-trial-chaos/sound-effects.ts:113](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L113)
+Defined in: [lib/clinical-trial-chaos/sound-effects.ts:100](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/sound-effects.ts#L100)
 
 Sound: Pneumatic chute delivery whoosh
 

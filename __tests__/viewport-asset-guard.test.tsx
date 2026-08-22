@@ -5,7 +5,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Brain3DViewer } from "@/components/neuro/Brain3DViewer";
 import { WorkingWithDuck } from "@/components/WorkingWithDuck";
 import * as assetLoader from "@/lib/neuro/asset-loader";
-import * as THREE from "three";
 
 // Mock Three.js WebGLRenderer to work in jsdom
 vi.mock("three", async () => {
@@ -41,7 +40,10 @@ describe("Viewport-Driven Component Asset Guard", () => {
       readonly rootMargin: string = "0px";
       readonly thresholds: ReadonlyArray<number> = [];
 
-      constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {
+      constructor(
+        callback: IntersectionObserverCallback,
+        options?: IntersectionObserverInit
+      ) {
         mockObserverCallbacks.push(callback);
         if (options?.rootMargin) {
           (this as { rootMargin: string }).rootMargin = options.rootMargin;
@@ -63,7 +65,8 @@ describe("Viewport-Driven Component Asset Guard", () => {
       }
     }
 
-    window.IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver;
+    window.IntersectionObserver =
+      MockIntersectionObserver as unknown as typeof IntersectionObserver;
   });
 
   afterEach(() => {
@@ -72,8 +75,9 @@ describe("Viewport-Driven Component Asset Guard", () => {
 
   describe("Brain3DViewer Viewport Asset Guard", () => {
     it("defers loadExternalBrainMesh when off-screen and triggers load when entering 200px rootMargin viewport threshold", async () => {
-      const mockGroup = new THREE.Group();
-      const loadExternalSpy = vi.spyOn(assetLoader, "loadExternalBrainMesh").mockResolvedValue(mockGroup);
+      const loadExternalSpy = vi
+        .spyOn(assetLoader, "loadExternalBrainBuffers")
+        .mockResolvedValue([]);
 
       render(
         <Brain3DViewer
@@ -97,10 +101,15 @@ describe("Viewport-Driven Component Asset Guard", () => {
             {} as IntersectionObserver
           );
         });
+        await Promise.resolve();
       });
 
-      // Now loadExternalBrainMesh MUST be triggered with modelUrl
-      expect(loadExternalSpy).toHaveBeenCalledWith("/models/brain-surface.glb", "pial", "both");
+      // Now loadExternalBrainBuffers MUST be triggered with modelUrl
+      expect(loadExternalSpy).toHaveBeenCalledWith(
+        "/models/brain-surface.glb",
+        "pial",
+        "both"
+      );
     });
 
     it("defaults to loading asset if IntersectionObserver is unsupported in the runtime environment", async () => {
@@ -108,19 +117,27 @@ describe("Viewport-Driven Component Asset Guard", () => {
       // @ts-expect-error override IntersectionObserver
       delete window.IntersectionObserver;
 
-      const mockGroup = new THREE.Group();
-      const loadExternalSpy = vi.spyOn(assetLoader, "loadExternalBrainMesh").mockResolvedValue(mockGroup);
+      const loadExternalSpy = vi
+        .spyOn(assetLoader, "loadExternalBrainBuffers")
+        .mockResolvedValue([]);
 
-      render(
-        <Brain3DViewer
-          surfaceMode="pial"
-          crosshair={{ x: 48, y: 48, z: 48 }}
-          modelUrl="/models/brain-surface.glb"
-        />
-      );
+      await act(async () => {
+        render(
+          <Brain3DViewer
+            surfaceMode="pial"
+            crosshair={{ x: 48, y: 48, z: 48 }}
+            modelUrl="/models/brain-surface.glb"
+          />
+        );
+        await Promise.resolve();
+      });
 
       // Since IntersectionObserver is undefined, it defaults to near viewport and fetches external model
-      expect(loadExternalSpy).toHaveBeenCalledWith("/models/brain-surface.glb", "pial", "both");
+      expect(loadExternalSpy).toHaveBeenCalledWith(
+        "/models/brain-surface.glb",
+        "pial",
+        "both"
+      );
     });
   });
 

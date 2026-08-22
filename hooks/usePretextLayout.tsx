@@ -2,33 +2,44 @@
 
 import React, { useState, useLayoutEffect, useRef, useCallback } from "react";
 import { useResizeObserver } from "./useResizeObserver";
-import { prepare, layout, clearCache, type PreparedText } from "@chenglou/pretext";
-import { 
-  prepareRichInline, 
-  walkRichInlineLineRanges, 
+import {
+  prepare,
+  layout,
+  clearCache,
+  type PreparedText,
+} from "@chenglou/pretext";
+import {
+  prepareRichInline,
+  walkRichInlineLineRanges,
   materializeRichInlineLineRange,
   type PreparedRichInline,
   type RichInlineLine,
-  type RichInlineItem,
-  type RichInlineLineRange
+  type RichInlineLineRange,
 } from "@chenglou/pretext/rich-inline";
 import { designManifest } from "@/lib/design-manifest";
-import { resolveThemeFonts, resolveSingleThemeFont, type ThemeFonts } from "@/lib/layout-config";
+import {
+  resolveThemeFonts,
+  resolveSingleThemeFont,
+  type ThemeFonts,
+} from "@/lib/layout-config";
 import { useTerminology } from "@/components/providers/TerminologyProvider";
-import { 
-  parsePretextBlocks, 
-  calculateBlockHeight, 
+import {
+  parsePretextBlocks,
+  calculateBlockHeight,
   BLOCK_LAYOUT_CONFIG,
   preparePretextBlocks,
+  parseMarkdownToRichItems,
+  type ExtendedRichInlineItem,
   type StructuredBlock,
   type PreparedBlock,
-  type StructuredBlockType
+  type StructuredBlockType,
 } from "@/lib/pretext-block-parser";
 
-import { 
-  isBrowser, 
+export { parseMarkdownToRichItems, type ExtendedRichInlineItem };
+
+import {
+  isBrowser,
   validateLayoutHeight,
-  resolveCodeChipExtraWidth,
   textPrepareCache,
   textLayoutCache,
   richItemsCache,
@@ -36,7 +47,7 @@ import {
   richLayoutCache,
   cssPropertyCache,
   fontConfigCache,
-  isStylesheetLoaded
+  isStylesheetLoaded,
 } from "@/lib/graphics-engine";
 
 export interface UsePretextLayoutOptions {
@@ -46,7 +57,10 @@ export interface UsePretextLayoutOptions {
   fontFamilyVariable?: string;
   translationMode?: string;
   activeTheme?: string;
-  getResponsiveMetrics?: (width: number) => { fontSize: number; lineHeight: number };
+  getResponsiveMetrics?: (width: number) => {
+    fontSize: number;
+    lineHeight: number;
+  };
 }
 
 export interface PretextLayoutState {
@@ -74,108 +88,125 @@ export function usePretextLayout({
 
   const preparedTextRef = useRef<PreparedText | null>(null);
   const fontStringRef = useRef<string>("");
-  const resolvedFontRef = useRef<{ fontSize: number; fontFamilyVariable: string; fontString: string } | null>(null);
+  const resolvedFontRef = useRef<{
+    fontSize: number;
+    fontFamilyVariable: string;
+    fontString: string;
+  } | null>(null);
   const lastWidthRef = useRef<number>(-1);
 
-  const measureText = useCallback((maxWidth: number) => {
-    if (!isBrowser() || maxWidth <= 0) return;
+  const measureText = useCallback(
+    (maxWidth: number) => {
+      if (!isBrowser() || maxWidth <= 0) return;
 
-    let activeFontSize = fontSize;
-    let activeLineHeight = lineHeight;
+      let activeFontSize = fontSize;
+      let activeLineHeight = lineHeight;
 
-    if (getResponsiveMetrics) {
-      const metrics = getResponsiveMetrics(maxWidth);
-      activeFontSize = metrics.fontSize;
-      activeLineHeight = metrics.lineHeight;
-    }
+      if (getResponsiveMetrics) {
+        const metrics = getResponsiveMetrics(maxWidth);
+        activeFontSize = metrics.fontSize;
+        activeLineHeight = metrics.lineHeight;
+      }
 
-    // Skip DOM query on resizing if previously resolved
-    let fontString = "";
-    if (
-      resolvedFontRef.current &&
-      resolvedFontRef.current.fontSize === activeFontSize &&
-      resolvedFontRef.current.fontFamilyVariable === fontFamilyVariable
-    ) {
-      fontString = resolvedFontRef.current.fontString;
-    } else {
-      fontString = resolveSingleThemeFont(activeFontSize, fontFamilyVariable);
-      resolvedFontRef.current = {
-        fontSize: activeFontSize,
-        fontFamilyVariable,
-        fontString,
-      };
-    }
-    fontStringRef.current = fontString;
+      // Skip DOM query on resizing if previously resolved
+      let fontString = "";
+      if (
+        resolvedFontRef.current &&
+        resolvedFontRef.current.fontSize === activeFontSize &&
+        resolvedFontRef.current.fontFamilyVariable === fontFamilyVariable
+      ) {
+        fontString = resolvedFontRef.current.fontString;
+      } else {
+        fontString = resolveSingleThemeFont(activeFontSize, fontFamilyVariable);
+        resolvedFontRef.current = {
+          fontSize: activeFontSize,
+          fontFamilyVariable,
+          fontString,
+        };
+      }
+      fontStringRef.current = fontString;
 
-    const flooredWidth = Math.floor(maxWidth);
-    const blocks = parsePretextBlocks(text);
-    const hasSpecialBlocks = blocks.some((b) => b.type !== "paragraph");
+      const flooredWidth = Math.floor(maxWidth);
+      const blocks = parsePretextBlocks(text);
+      const hasSpecialBlocks = blocks.some((b) => b.type !== "paragraph");
 
-    if (hasSpecialBlocks) {
-      let totalHeight = 0;
-      let totalLines = 0;
-      for (const b of blocks) {
-        if (b.type === "paragraph") {
-          const prepKey = `${b.raw}|${fontString}`;
-          let prep = textPrepareCache.get(prepKey);
-          if (!prep) {
-            prep = prepare(b.raw, fontString);
-            textPrepareCache.set(prepKey, prep);
+      if (hasSpecialBlocks) {
+        let totalHeight = 0;
+        let totalLines = 0;
+        for (const b of blocks) {
+          if (b.type === "paragraph") {
+            const prepKey = `${b.raw}|${fontString}`;
+            let prep = textPrepareCache.get(prepKey);
+            if (!prep) {
+              prep = prepare(b.raw, fontString);
+              textPrepareCache.set(prepKey, prep);
+            }
+            const res = layout(prep, flooredWidth, activeLineHeight);
+            totalHeight += res.height;
+            totalLines += res.lineCount;
+          } else {
+            const blockH = calculateBlockHeight(
+              b,
+              flooredWidth,
+              activeLineHeight
+            );
+            totalHeight += blockH;
+            totalLines += b.lines.length;
           }
-          const res = layout(prep, flooredWidth, activeLineHeight);
-          totalHeight += res.height;
-          totalLines += res.lineCount;
-        } else {
-          const blockH = calculateBlockHeight(b, flooredWidth, activeLineHeight);
-          totalHeight += blockH;
-          totalLines += b.lines.length;
+        }
+        if (blocks.length > 1) {
+          totalHeight +=
+            (blocks.length - 1) * BLOCK_LAYOUT_CONFIG.PARAGRAPH_GAP;
+        }
+
+        setState((prev) => {
+          if (prev.height === totalHeight && prev.lineCount === totalLines) {
+            return prev;
+          }
+          return { isReady: true, height: totalHeight, lineCount: totalLines };
+        });
+        return;
+      }
+
+      const prepareKey = `${text}|${fontString}`;
+      const stylesheetLoaded = isStylesheetLoaded();
+      let prepared = stylesheetLoaded
+        ? textPrepareCache.get(prepareKey)
+        : undefined;
+      if (!prepared) {
+        prepared = prepare(text, fontString);
+        if (stylesheetLoaded) {
+          textPrepareCache.set(prepareKey, prepared);
         }
       }
-      if (blocks.length > 1) {
-        totalHeight += (blocks.length - 1) * BLOCK_LAYOUT_CONFIG.PARAGRAPH_GAP;
+      preparedTextRef.current = prepared;
+
+      const cacheKey = `${text}|${fontString}|${flooredWidth}|${activeLineHeight}`;
+      let result = stylesheetLoaded ? textLayoutCache.get(cacheKey) : undefined;
+
+      if (!result) {
+        result = layout(prepared, flooredWidth, activeLineHeight);
+        if (stylesheetLoaded) {
+          textLayoutCache.set(cacheKey, result);
+        }
       }
 
       setState((prev) => {
-        if (prev.height === totalHeight && prev.lineCount === totalLines) {
+        if (
+          prev.height === result.height &&
+          prev.lineCount === result.lineCount
+        ) {
           return prev;
         }
-        return { isReady: true, height: totalHeight, lineCount: totalLines };
+        return {
+          isReady: true,
+          height: result.height,
+          lineCount: result.lineCount,
+        };
       });
-      return;
-    }
-
-    const prepareKey = `${text}|${fontString}`;
-    const stylesheetLoaded = isStylesheetLoaded();
-    let prepared = stylesheetLoaded ? textPrepareCache.get(prepareKey) : undefined;
-    if (!prepared) {
-      prepared = prepare(text, fontString);
-      if (stylesheetLoaded) {
-        textPrepareCache.set(prepareKey, prepared);
-      }
-    }
-    preparedTextRef.current = prepared;
-
-    const cacheKey = `${text}|${fontString}|${flooredWidth}|${activeLineHeight}`;
-    let result = stylesheetLoaded ? textLayoutCache.get(cacheKey) : undefined;
-
-    if (!result) {
-      result = layout(prepared, flooredWidth, activeLineHeight);
-      if (stylesheetLoaded) {
-        textLayoutCache.set(cacheKey, result);
-      }
-    }
-
-    setState((prev) => {
-      if (prev.height === result.height && prev.lineCount === result.lineCount) {
-        return prev;
-      }
-      return {
-        isReady: true,
-        height: result.height,
-        lineCount: result.lineCount,
-      };
-    });
-  }, [text, fontSize, lineHeight, fontFamilyVariable, getResponsiveMetrics]);
+    },
+    [text, fontSize, lineHeight, fontFamilyVariable, getResponsiveMetrics]
+  );
 
   const containerRef = useResizeObserver<HTMLDivElement>((entry) => {
     const maxWidth = Math.floor(entry.contentRect.width);
@@ -222,7 +253,9 @@ export function usePretextLayout({
       fontStringRef.current = fontString;
       const prepareKey = `${text}|${fontString}`;
       const stylesheetLoaded = isStylesheetLoaded();
-      let prepared = stylesheetLoaded ? textPrepareCache.get(prepareKey) : undefined;
+      let prepared = stylesheetLoaded
+        ? textPrepareCache.get(prepareKey)
+        : undefined;
       if (!prepared) {
         prepared = prepare(text, fontString);
         if (stylesheetLoaded) {
@@ -232,7 +265,16 @@ export function usePretextLayout({
       preparedTextRef.current = prepared;
       setState((prev) => ({ ...prev, isReady: true }));
     }
-  }, [text, fontSize, fontFamilyVariable, measureText, containerRef, translationMode, activeTheme, simplified]);
+  }, [
+    text,
+    fontSize,
+    fontFamilyVariable,
+    measureText,
+    containerRef,
+    translationMode,
+    activeTheme,
+    simplified,
+  ]);
 
   // Removed custom ResizeObserver in favor of unified useResizeObserver hook
 
@@ -264,7 +306,18 @@ export interface PretextTextProps {
   fontFamilyVariable?: string;
   translationMode?: string;
   activeTheme?: string;
-  semanticTag?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p" | "span" | "div" | "article" | "section";
+  semanticTag?:
+    | "h1"
+    | "h2"
+    | "h3"
+    | "h4"
+    | "h5"
+    | "h6"
+    | "p"
+    | "span"
+    | "div"
+    | "article"
+    | "section";
   className?: string;
   children?: React.ReactNode;
 }
@@ -331,64 +384,6 @@ export const PretextText: React.FC<PretextTextProps> = ({
 // PRETEXT RICH INLINE TEXT ENGINE (ISSUE #45)
 // ==========================================
 
-export interface ExtendedRichInlineItem extends RichInlineItem {
-  type: "text" | "bold" | "italic" | "code";
-}
-
-/**
- * Tokenizes markdown-like inline text (**bold**, *italic*, `code`) into RichInlineItem arrays.
- */
-export function parseMarkdownToRichItems(
-  text: string,
-  baseFont: string,
-  boldFont: string,
-  italicFont: string,
-  codeFont: string
-): ExtendedRichInlineItem[] {
-  const items: ExtendedRichInlineItem[] = [];
-  const regex = /(\*\*.*?\*\*|`.*?`|\*.*?\*|[^*`\n]+|\n)/g;
-  
-  let match;
-  while ((match = regex.exec(text)) !== null) {
-    const raw = match[0];
-    if (raw === "\n") {
-      items.push({
-        text: " ",
-        font: baseFont,
-        type: "text",
-      });
-    } else if (raw.startsWith("**") && raw.endsWith("**") && raw.length > 4) {
-      items.push({
-        text: raw.slice(2, -2),
-        font: boldFont,
-        type: "bold",
-      });
-    } else if (raw.startsWith("`") && raw.endsWith("`") && raw.length > 2) {
-      items.push({
-        text: raw.slice(1, -1),
-        font: codeFont,
-        type: "code",
-        break: "never",
-        extraWidth: resolveCodeChipExtraWidth(), // padding + borders on our styled code chips
-      });
-    } else if (raw.startsWith("*") && raw.endsWith("*") && raw.length > 2) {
-      items.push({
-        text: raw.slice(1, -1),
-        font: italicFont,
-        type: "italic",
-      });
-    } else {
-      items.push({
-        text: raw,
-        font: baseFont,
-        type: "text",
-      });
-    }
-  }
-  
-  return items;
-}
-
 interface ParagraphData {
   items: ExtendedRichInlineItem[];
   prepared: PreparedRichInline | null;
@@ -430,71 +425,91 @@ export function usePretextRichLayout({
   const paragraphsRef = useRef<ParagraphData[]>([]);
   const itemsRef = useRef<ExtendedRichInlineItem[]>([]);
   const itemsKeyRef = useRef<string>("");
-  const resolvedFontsRef = useRef<{ fontSize: number; fontFamilyVariable: string; fonts: ThemeFonts } | null>(null);
+  const resolvedFontsRef = useRef<{
+    fontSize: number;
+    fontFamilyVariable: string;
+    fonts: ThemeFonts;
+  } | null>(null);
   const lastWidthRef = useRef<number>(-1);
 
-  const measureRichText = useCallback((maxWidth: number) => {
-    if (paragraphsRef.current.length === 0 || !itemsKeyRef.current) return;
+  const measureRichText = useCallback(
+    (maxWidth: number) => {
+      if (paragraphsRef.current.length === 0 || !itemsKeyRef.current) return;
 
-    const flooredWidth = Math.floor(maxWidth);
-    const layoutKey = `${itemsKeyRef.current}|${flooredWidth}|${lineHeight}`;
-    const stylesheetLoaded = isStylesheetLoaded();
-    let cachedResult = stylesheetLoaded ? richLayoutCache.get(layoutKey) : undefined;
+      const flooredWidth = Math.floor(maxWidth);
+      const layoutKey = `${itemsKeyRef.current}|${flooredWidth}|${lineHeight}`;
+      const stylesheetLoaded = isStylesheetLoaded();
+      let cachedResult = stylesheetLoaded
+        ? richLayoutCache.get(layoutKey)
+        : undefined;
 
-    if (!cachedResult) {
-      const materializedLines: RichInlineLine[] = [];
-      paragraphsRef.current.forEach((paragraph) => {
-        if (paragraph.isEmpty) {
-          materializedLines.push({
-            fragments: [],
-            width: 0,
-            end: 0 as unknown as RichInlineLine['end'],
-          });
-        } else if (paragraph.prepared) {
-          const linesRanges: RichInlineLineRange[] = [];
-          walkRichInlineLineRanges(paragraph.prepared, flooredWidth, (range) => {
-            linesRanges.push(range);
-          });
+      if (!cachedResult) {
+        const materializedLines: RichInlineLine[] = [];
+        paragraphsRef.current.forEach((paragraph) => {
+          if (paragraph.isEmpty) {
+            materializedLines.push({
+              fragments: [],
+              width: 0,
+              end: 0 as unknown as RichInlineLine["end"],
+            });
+          } else if (paragraph.prepared) {
+            const linesRanges: RichInlineLineRange[] = [];
+            walkRichInlineLineRanges(
+              paragraph.prepared,
+              flooredWidth,
+              (range) => {
+                linesRanges.push(range);
+              }
+            );
 
-          const paragraphLines = linesRanges.map((range) => {
-            const line = materializeRichInlineLineRange(paragraph.prepared!, range);
-            const adjustedFragments = line.fragments.map((frag) => ({
-              ...frag,
-              itemIndex: frag.itemIndex + paragraph.itemOffset,
-            }));
-            return {
-              ...line,
-              fragments: adjustedFragments,
-            };
-          });
+            const paragraphLines = linesRanges.map((range) => {
+              const line = materializeRichInlineLineRange(
+                paragraph.prepared!,
+                range
+              );
+              const adjustedFragments = line.fragments.map((frag) => ({
+                ...frag,
+                itemIndex: frag.itemIndex + paragraph.itemOffset,
+              }));
+              return {
+                ...line,
+                fragments: adjustedFragments,
+              };
+            });
 
-          materializedLines.push(...paragraphLines);
+            materializedLines.push(...paragraphLines);
+          }
+        });
+
+        cachedResult = {
+          height: materializedLines.length * lineHeight,
+          lines: materializedLines,
+        };
+        if (stylesheetLoaded) {
+          richLayoutCache.set(layoutKey, cachedResult);
         }
+      }
+
+      const { height: calculatedHeight, lines: materializedLines } =
+        cachedResult;
+
+      setState((prev) => {
+        if (
+          prev.height === calculatedHeight &&
+          prev.lines.length === materializedLines.length
+        ) {
+          return prev;
+        }
+        return {
+          isReady: true,
+          height: calculatedHeight,
+          lines: materializedLines,
+          items: itemsRef.current,
+        };
       });
-
-      cachedResult = {
-        height: materializedLines.length * lineHeight,
-        lines: materializedLines,
-      };
-      if (stylesheetLoaded) {
-        richLayoutCache.set(layoutKey, cachedResult);
-      }
-    }
-
-    const { height: calculatedHeight, lines: materializedLines } = cachedResult;
-
-    setState((prev) => {
-      if (prev.height === calculatedHeight && prev.lines.length === materializedLines.length) {
-        return prev;
-      }
-      return {
-        isReady: true,
-        height: calculatedHeight,
-        lines: materializedLines,
-        items: itemsRef.current,
-      };
-    });
-  }, [lineHeight]);
+    },
+    [lineHeight]
+  );
 
   const containerRef = useResizeObserver<HTMLDivElement>((entry) => {
     const maxWidth = Math.floor(entry.contentRect.width);
@@ -541,7 +556,9 @@ export function usePretextRichLayout({
     itemsKeyRef.current = itemsKey;
 
     const stylesheetLoaded = isStylesheetLoaded();
-    let parsedParagraphs = stylesheetLoaded ? (richItemsCache.get(itemsKey) as ParagraphData[] | undefined) : undefined;
+    let parsedParagraphs = stylesheetLoaded
+      ? (richItemsCache.get(itemsKey) as ParagraphData[] | undefined)
+      : undefined;
     if (!parsedParagraphs) {
       let accumulatedItemOffset = 0;
       const paragraphs = text.split("\n");
@@ -554,7 +571,13 @@ export function usePretextRichLayout({
             itemOffset: accumulatedItemOffset,
           };
         }
-        const items = parseMarkdownToRichItems(paragraphStr, baseFont, boldFont, italicFont, codeFont);
+        const items = parseMarkdownToRichItems(
+          paragraphStr,
+          baseFont,
+          boldFont,
+          italicFont,
+          codeFont
+        );
         const prepared = prepareRichInline(items);
         const res = {
           items,
@@ -583,7 +606,16 @@ export function usePretextRichLayout({
     } else {
       setState((prev) => ({ ...prev, isReady: true }));
     }
-  }, [text, fontSize, fontFamilyVariable, measureRichText, containerRef, translationMode, activeTheme, simplified]);
+  }, [
+    text,
+    fontSize,
+    fontFamilyVariable,
+    measureRichText,
+    containerRef,
+    translationMode,
+    activeTheme,
+    simplified,
+  ]);
 
   // Removed custom ResizeObserver in favor of unified useResizeObserver hook
 
@@ -623,70 +655,75 @@ export const PretextRichText: React.FC<PretextRichTextProps> = ({
   fallbackText = "",
 }) => {
   if (!isReady || lines.length === 0) {
-    return (
-      <p className={className}>
-        {fallbackText}
-      </p>
-    );
+    return <p className={className}>{fallbackText}</p>;
   }
 
   return (
     <div className="relative">
       {/* 1. Custom Visual Presentation (hidden from screen readers, not selectable) */}
-      <div 
-        aria-hidden="true" 
-        role="presentation" 
+      <div
+        aria-hidden="true"
+        role="presentation"
         data-pretext-layer="visual"
         className={`${className || ""} select-none pointer-events-none`}
         style={{ display: "flex", flexDirection: "column" }}
       >
         {lines.map((line, lineIdx) => (
-          <div 
-            key={lineIdx} 
+          <div
+            key={lineIdx}
             className="flex flex-nowrap items-center whitespace-nowrap overflow-visible"
             style={{ height: `${lineHeight}px`, lineHeight: `${lineHeight}px` }}
           >
-            {line.fragments.length === 0 ? "\u00A0" : line.fragments.map((frag, fragIdx) => {
-              const item = items[frag.itemIndex];
-              
-              if (item?.type === "code") {
-                return (
-                  <span
-                    key={fragIdx}
-                    className="px-1.5 py-0 mx-0.5 text-[11px] font-mono font-bold bg-brand-cyan/10 border border-brand-cyan/20 text-brand-cyan rounded-md inline-block shadow-[0_0_10px_rgba(6,182,212,0.05)] align-middle leading-[1.3]"
-                    style={{ 
-                      marginLeft: frag.gapBefore > 0 ? `${frag.gapBefore}px` : undefined,
-                    }}
-                  >
-                    {frag.text}
-                  </span>
-                );
-              }
+            {line.fragments.length === 0
+              ? "\u00A0"
+              : line.fragments.map((frag, fragIdx) => {
+                  const item = items[frag.itemIndex];
 
-              const style = item?.type === "bold"
-                ? "font-bold text-neutral-100"
-                : item?.type === "italic"
-                ? "italic text-zinc-300"
-                : "text-zinc-400";
+                  if (item?.type === "code") {
+                    return (
+                      <span
+                        key={fragIdx}
+                        className="px-1.5 py-0 mx-0.5 text-[11px] font-mono font-bold bg-brand-cyan/10 border border-brand-cyan/20 text-brand-cyan rounded-md inline-block shadow-[0_0_10px_rgba(6,182,212,0.05)] align-middle leading-[1.3]"
+                        style={{
+                          marginLeft:
+                            frag.gapBefore > 0
+                              ? `${frag.gapBefore}px`
+                              : undefined,
+                        }}
+                      >
+                        {frag.text}
+                      </span>
+                    );
+                  }
 
-              return (
-                <span
-                  key={fragIdx}
-                  className={style}
-                  style={{ 
-                    marginLeft: frag.gapBefore > 0 ? `${frag.gapBefore}px` : undefined,
-                  }}
-                >
-                  {frag.text}
-                </span>
-              );
-            })}
+                  const style =
+                    item?.type === "bold"
+                      ? "font-bold text-neutral-100"
+                      : item?.type === "italic"
+                        ? "italic text-zinc-300"
+                        : "text-zinc-400";
+
+                  return (
+                    <span
+                      key={fragIdx}
+                      className={style}
+                      style={{
+                        marginLeft:
+                          frag.gapBefore > 0
+                            ? `${frag.gapBefore}px`
+                            : undefined,
+                      }}
+                    >
+                      {frag.text}
+                    </span>
+                  );
+                })}
           </div>
         ))}
       </div>
 
       {/* 2. Transparent Standard Semantic Overlay (selectable, readable by screen readers) */}
-      <p 
+      <p
         data-pretext-layer="semantic"
         className={`${className || ""} absolute inset-0 select-text bg-transparent`}
         style={{
@@ -700,8 +737,8 @@ export const PretextRichText: React.FC<PretextRichTextProps> = ({
         }}
       >
         {lines.map((line, lineIdx) => (
-          <span 
-            key={lineIdx} 
+          <span
+            key={lineIdx}
             className="flex flex-nowrap items-center whitespace-nowrap overflow-visible"
             style={{ height: `${lineHeight}px`, lineHeight: `${lineHeight}px` }}
           >
@@ -710,14 +747,17 @@ export const PretextRichText: React.FC<PretextRichTextProps> = ({
             ) : (
               line.fragments.map((frag, fragIdx) => {
                 const item = items[frag.itemIndex];
-                
+
                 if (item?.type === "code") {
                   return (
                     <code
                       key={fragIdx}
                       className="px-1.5 py-0 mx-0.5 text-[11px] font-mono font-bold border inline-block align-middle leading-[1.3]"
-                      style={{ 
-                        marginLeft: frag.gapBefore > 0 ? `${frag.gapBefore}px` : undefined,
+                      style={{
+                        marginLeft:
+                          frag.gapBefore > 0
+                            ? `${frag.gapBefore}px`
+                            : undefined,
                       }}
                     >
                       {frag.text}
@@ -730,8 +770,11 @@ export const PretextRichText: React.FC<PretextRichTextProps> = ({
                     <strong
                       key={fragIdx}
                       className="font-bold"
-                      style={{ 
-                        marginLeft: frag.gapBefore > 0 ? `${frag.gapBefore}px` : undefined,
+                      style={{
+                        marginLeft:
+                          frag.gapBefore > 0
+                            ? `${frag.gapBefore}px`
+                            : undefined,
                       }}
                     >
                       {frag.text}
@@ -744,8 +787,11 @@ export const PretextRichText: React.FC<PretextRichTextProps> = ({
                     <em
                       key={fragIdx}
                       className="italic"
-                      style={{ 
-                        marginLeft: frag.gapBefore > 0 ? `${frag.gapBefore}px` : undefined,
+                      style={{
+                        marginLeft:
+                          frag.gapBefore > 0
+                            ? `${frag.gapBefore}px`
+                            : undefined,
                       }}
                     >
                       {frag.text}
@@ -756,8 +802,9 @@ export const PretextRichText: React.FC<PretextRichTextProps> = ({
                 return (
                   <span
                     key={fragIdx}
-                    style={{ 
-                      marginLeft: frag.gapBefore > 0 ? `${frag.gapBefore}px` : undefined,
+                    style={{
+                      marginLeft:
+                        frag.gapBefore > 0 ? `${frag.gapBefore}px` : undefined,
                     }}
                   >
                     {frag.text}
@@ -779,6 +826,5 @@ export {
   BLOCK_LAYOUT_CONFIG,
   type StructuredBlock,
   type PreparedBlock,
-  type StructuredBlockType
+  type StructuredBlockType,
 };
-

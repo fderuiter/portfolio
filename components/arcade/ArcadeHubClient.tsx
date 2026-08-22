@@ -107,11 +107,11 @@ const ARCADE_GAMES: ArcadeGameCard[] = [
   {
     id: "garmin-watch",
     slug: "garmin-watch",
-    title: "Garmin Connect IQ 32KB Memory Runner",
-    subtitle: "Embedded Systems Memory & Display Simulator",
+    title: "Monkey C Mayhem: Garmin Schvitz App",
+    subtitle: "Embedded Systems & Garmin Schvitz App Simulator",
     genre: "Embedded Systems",
     description:
-      "Circular 280×280 smartwatch simulator operating under strict 32KB RAM constraints with real-time garbage collection lifecycle tracking and simulated thermal condensation.",
+      "Circular 280×280 Monkey C Mayhem smartwatch simulator running the Garmin Schvitz App artifact under strict 32KB RAM constraints with real-time garbage collection lifecycle tracking.",
     mechanics: ["Circular LCD 280×280", "32KB Monkey C RAM Limit", "500ms GC Freeze", "Overheat Fog Wiping"],
     techStack: ["HTML5 Canvas", "Piezo Audio Synthesis", "Embedded State Engine"],
     icon: <IconCpu className="w-6 h-6 text-amber-400" />,

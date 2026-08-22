@@ -6,15 +6,15 @@
 
 # Interface: PreparedBlock
 
-Defined in: [lib/pretext-block-parser.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L19)
+Defined in: [lib/pretext-block-parser.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L78)
 
 ## Properties
 
 ### items?
 
-> `optional` **items?**: [`ExtendedRichInlineItem`](../../../hooks/usePretextLayout/interfaces/ExtendedRichInlineItem.md)[]
+> `optional` **items?**: [`ExtendedRichInlineItem`](ExtendedRichInlineItem.md)[]
 
-Defined in: [lib/pretext-block-parser.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L25)
+Defined in: [lib/pretext-block-parser.ts:84](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L84)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/pretext-block-parser.ts:25](https://github.com/fderuiter/portfo
 
 > `optional` **language?**: `string`
 
-Defined in: [lib/pretext-block-parser.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L21)
+Defined in: [lib/pretext-block-parser.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L80)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/pretext-block-parser.ts:21](https://github.com/fderuiter/portfo
 
 > **lines**: `string`[]
 
-Defined in: [lib/pretext-block-parser.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L22)
+Defined in: [lib/pretext-block-parser.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L81)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/pretext-block-parser.ts:22](https://github.com/fderuiter/portfo
 
 > `optional` **prepared?**: `PreparedRichInline` \| `null`
 
-Defined in: [lib/pretext-block-parser.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L24)
+Defined in: [lib/pretext-block-parser.ts:83](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L83)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/pretext-block-parser.ts:24](https://github.com/fderuiter/portfo
 
 > **raw**: `string`
 
-Defined in: [lib/pretext-block-parser.ts:23](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L23)
+Defined in: [lib/pretext-block-parser.ts:82](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L82)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [lib/pretext-block-parser.ts:23](https://github.com/fderuiter/portfo
 
 > **type**: [`StructuredBlockType`](../type-aliases/StructuredBlockType.md)
 
-Defined in: [lib/pretext-block-parser.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L20)
+Defined in: [lib/pretext-block-parser.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L79)

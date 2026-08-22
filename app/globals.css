@@ -1,6 +1,13 @@
 @import "tailwindcss";
 
 :root {
+  /* Layout Space Contract Variables */
+  --header-height: 80px;
+  --navbar-height: 80px;
+  --footer-height: 48px;
+  --ticker-height: 48px;
+  --viewport-height: 100dvh;
+
   /* Colors - Warm Architectural Graphite & Precision Accents */
   --background: #0d0e11;
   --foreground: #f4f4f6;
@@ -28,6 +35,15 @@
   --layout-masonry-padding-without-stats: 254px;
   --layout-gap: 16px;
   --layout-card-padding: 20px;
+
+  /* Vertical Layout Budget Tokens */
+  --layout-header-height: 7rem;
+  --layout-footer-height: 4rem;
+  --layout-dock-height: 0px;
+  --layout-studio-header-height: 3.5rem;
+  --layout-studio-budget: calc(100dvh - var(--layout-header-height));
+  --layout-viewport-budget: calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px));
+  --layout-workspace-budget: calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px) - var(--layout-studio-header-height, 0px));
 
   /* Motion Springs (stiffness, damping) */
   --motion-spring-snappy-stiffness: 380;
@@ -77,9 +93,14 @@
 html {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  scrollbar-gutter: stable;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.scrollbar-gutter-stable {
+  scrollbar-gutter: stable;
 }
 
 @supports not (scrollbar-color: auto) {
@@ -109,7 +130,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
   will-change: background-color, color;
 }

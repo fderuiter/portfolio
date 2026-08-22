@@ -166,6 +166,7 @@ export function getFieldSasAttributes(field: CRFField, study: StudyProtocol): Sa
 
     case "date":
     case "partial_date":
+    case "precision_date":
       return {
         sasVarName,
         isNumeric: false,
@@ -462,7 +463,7 @@ function generateSyntheticMockData(
     const visitNum = ((i - 1) % visitNames.length) + 1;
 
     const rowValues: string[] = [
-      study.protocolNumber,
+      study.protocolNumber || "STUDY01",
       (form.domain || "CRF").toUpperCase(),
       subjid,
       visit,
@@ -490,7 +491,7 @@ function generateSyntheticMockData(
         } else {
           rowValues.push(String(10 * i));
         }
-      } else if (field.dataType === "date" || field.dataType === "partial_date") {
+      } else if (field.dataType === "date" || field.dataType === "partial_date" || field.dataType === "precision_date") {
         rowValues.push(`2026-03-0${i}`);
       } else if (field.dataType === "time") {
         rowValues.push(`08:3${i}:00`);
@@ -514,10 +515,11 @@ function generateSyntheticMockData(
   rows.forEach((row) => {
     const formattedRow = row
       .map((val) => {
-        if (val.includes(",") || val.includes(" ") || val.includes("'")) {
-          return `"${val.replace(/"/g, '""')}"`;
+        const strVal = String(val ?? "");
+        if (strVal.includes(",") || strVal.includes(" ") || strVal.includes("'")) {
+          return `"${strVal.replace(/"/g, '""')}"`;
         }
-        return val;
+        return strVal;
       })
       .join(",");
     datalinesStr += `${formattedRow}\n`;

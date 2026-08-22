@@ -10,6 +10,7 @@ export type ClinicalDataType =
   | "integer"
   | "date"
   | "partial_date"
+  | "precision_date"
   | "time"
   | "datetime"
   | "single_select"
@@ -68,8 +69,54 @@ export interface EditCheckRule {
   formulaExpression?: string; // For calculations: e.g. "weight / ((height/100) * (height/100))"
 }
 
+export interface StudyArm {
+  id: string;
+  name: string;
+  type: string; // e.g. "Experimental", "Active Comparator", "Placebo Comparator"
+  description?: string;
+  epochIds?: string[];
+}
+
+export interface StudyEpoch {
+  id: string;
+  name: string;
+  sequenceNumber: number;
+  type?: string; // "Screening", "Treatment", "Follow-up", "Washout", etc.
+  description?: string;
+}
+
+export interface StudyCohort {
+  id: string;
+  name: string;
+  description?: string;
+  armIds?: string[];
+  targetSize?: number;
+}
+
+export interface BiomedicalConceptProperty {
+  id: string;
+  name: string;
+  code?: string;
+  datatype?: string;
+}
+
+export interface BiomedicalConcept {
+  id: string;
+  name: string;
+  conceptId?: string; // e.g. "C25298"
+  code?: string;
+  domain?: string;
+  synonyms?: string[];
+  properties?: BiomedicalConceptProperty[] | Record<string, unknown>;
+  variableName?: string;
+  dataType?: string;
+  label?: string;
+  unit?: string;
+}
+
 export interface CRFField {
   id: string;
+  conceptId?: string;        // Reference to BiomedicalConcept
   variableName: string;      // e.g. BRTHYR, DIABP, AETERM
   label: string;             // Question text displayed to investigator
   description?: string;      // Instructions / hint
@@ -90,6 +137,13 @@ export interface CRFField {
   repeatingColumns?: CRFField[]; // When dataType is 'repeating_table'
   scaleMinLabel?: string;    // For VAS/NRS e.g. "No Pain"
   scaleMaxLabel?: string;    // For VAS/NRS e.g. "Worst Possible Pain"
+  allowPartial?: boolean;    // Allow omission of unknown day/month in date capture
+  preventFutureDate?: boolean; // Enforce date <= current UTC timestamp
+  allowNullFlavor?: boolean; // Enable compact CDISC null-flavor pills (ND, NA, UNK)
+  requirementTier?: "optional" | "hard_stop" | "auto_query"; // 3-tier missing data engine
+  requiresSdv?: boolean;     // Mandatory CRA Source Document Verification governance flag
+  isBlinded?: boolean;       // Protocol masking from unblinded sponsor roles until DB lock
+  nullFlavorValue?: string;  // Active/selected CDISC null-flavor code (e.g. "ND" | "NA" | "UNK")
   sdvVerified?: boolean;     // CRA Source Data Verification flag
   sdvTimestamp?: string;
   sdvAuditedBy?: string;
@@ -124,11 +178,16 @@ export interface StudyVisit {
   name: string;              // e.g. "Screening", "Cycle 1 Day 1"
   visitType: "Scheduled" | "Unscheduled" | "Common";
   targetDay: number;         // e.g. Day 0, Day 28
+  timepointDays?: number;
   windowBefore: number;      // -3 days
   windowAfter: number;       // +3 days
   assignedFormIds: string[]; // Forms collected at this visit
+  formIds?: string[];
   isRepeating?: boolean;
   repeatMax?: number;
+  epochId?: string;          // Link to StudyEpoch
+  armIds?: string[];         // Link to applicable StudyArms
+  armFormAssignments?: Record<string, string[]>; // armId -> formIds[]
 }
 
 export interface StudyBranding {
@@ -182,9 +241,13 @@ export interface ExportROptions {
 }
 
 export interface StudyProtocol {
+  $schema?: string;
+  schemaVersion?: string;
   id: string;
   protocolNumber: string;    // e.g. "ONC-2026-003"
+  protocolId?: string;
   studyName: string;         // e.g. "Phase III Multicenter Study of Immuno-Oncology..."
+  title?: string;
   phase: "Phase I" | "Phase I/II" | "Phase II" | "Phase III" | "Phase IV" | "Registry";
   sponsor: string;
   therapeuticArea: string;   // Oncology, Neurology, Cardiology, Infectious Disease, etc.
@@ -193,7 +256,12 @@ export interface StudyProtocol {
   forms: CRFForm[];
   visits: StudyVisit[];
   codelists: CodelistDefinition[];
+  rules?: EditCheckRule[];
   branding?: StudyBranding;
+  arms?: StudyArm[];
+  epochs?: StudyEpoch[];
+  cohorts?: StudyCohort[];
+  biomedicalConcepts?: BiomedicalConcept[];
 }
 
 export interface EDCQuery {

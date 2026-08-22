@@ -6,7 +6,7 @@
 
 # Interface: WebPageNodeOptions
 
-Defined in: [lib/seo.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L65)
+Defined in: [lib/seo.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L68)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/seo.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib
 
 > `optional` **breadcrumbs?**: [`BreadcrumbItem`](BreadcrumbItem.md)[]
 
-Defined in: [lib/seo.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L69)
+Defined in: [lib/seo.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L72)
 
 ***
 
@@ -22,7 +22,23 @@ Defined in: [lib/seo.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib
 
 > **description**: `string`
 
-Defined in: [lib/seo.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L67)
+Defined in: [lib/seo.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L70)
+
+***
+
+### inLanguage?
+
+> `optional` **inLanguage?**: `string`
+
+Defined in: [lib/seo.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L73)
+
+***
+
+### isAccessibleForFree?
+
+> `optional` **isAccessibleForFree?**: `boolean`
+
+Defined in: [lib/seo.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L74)
 
 ***
 
@@ -30,7 +46,7 @@ Defined in: [lib/seo.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib
 
 > **name**: `string`
 
-Defined in: [lib/seo.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L66)
+Defined in: [lib/seo.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L69)
 
 ***
 
@@ -38,4 +54,4 @@ Defined in: [lib/seo.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib
 
 > **url**: `string`
 
-Defined in: [lib/seo.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L68)
+Defined in: [lib/seo.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L71)

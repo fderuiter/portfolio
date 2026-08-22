@@ -6,11 +6,10 @@
 
 # lib/neuro/mesh-generator
 
-## Interfaces
-
-- [MeshBundle](interfaces/MeshBundle.md)
-
 ## Functions
 
-- [createCorticalSurfaceMesh](functions/createCorticalSurfaceMesh.md)
+- [createCorticalSurfaceMeshBuffers](functions/createCorticalSurfaceMeshBuffers.md)
+- [createCorticalSurfaceMeshBuffersAsync](functions/createCorticalSurfaceMeshBuffersAsync.md)
+- [generateHemisphereBuffers](functions/generateHemisphereBuffers.md)
+- [generateSubcorticalBuffers](functions/generateSubcorticalBuffers.md)
 - [getAnatomicalParcelAtCoordinate](functions/getAnatomicalParcelAtCoordinate.md)

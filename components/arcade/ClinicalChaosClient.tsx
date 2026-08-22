@@ -128,7 +128,7 @@ export const ClinicalChaosClient: React.FC = () => {
         {/* Sequential Next / Previous Navigation */}
         <NextPrevNav
           prev={{
-            title: "Garmin 32KB Memory Runner",
+            title: "Monkey C Mayhem: Garmin Schvitz App",
             href: "/arcade/garmin-watch",
             label: "Previous Game",
             tag: "Embedded Simulator",

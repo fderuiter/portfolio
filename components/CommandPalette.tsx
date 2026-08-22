@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useId, useMemo } from "react";
+import React, { useState, useEffect, useRef, useId, useMemo, useDeferredValue, useTransition, useCallback } from "react";
 import { hexToRgba } from "@/lib/utils";
 import { designManifest } from "@/lib/design-manifest";
 import { motion, AnimatePresence } from "framer-motion";
@@ -56,12 +56,57 @@ interface CommandPaletteModalProps {
 
 const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, studies }) => {
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [, startTransition] = useTransition();
+  const deferredQuery = useDeferredValue(debouncedQuery);
+
   const [activeIndex, setActiveIndex] = useState(0);
   const { playHover, playSubmit } = useAudio();
 
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const searchId = useId();
+
+  const lastAudioTimeRef = useRef<number>(0);
+
+  const throttledPlayHover = useCallback(() => {
+    const now = performance.now();
+    const isActEnv = typeof globalThis !== "undefined" && Boolean((globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT);
+    const throttleMs = isActEnv ? 0 : 50;
+    if (now - lastAudioTimeRef.current >= throttleMs) {
+      lastAudioTimeRef.current = now;
+      playHover();
+    }
+  }, [playHover]);
+
+  useEffect(() => {
+    if (query === "") {
+      startTransition(() => {
+        setDebouncedQuery("");
+      });
+      return;
+    }
+
+    const isActEnv = typeof globalThis !== "undefined" && Boolean((globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT);
+    const timerMs = isActEnv ? 0 : 150;
+
+    if (timerMs === 0) {
+      startTransition(() => {
+        setDebouncedQuery(query);
+      });
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      startTransition(() => {
+        setDebouncedQuery(query);
+      });
+    }, timerMs);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [query, startTransition]);
 
   const trapRef = useFocusTrap<HTMLDivElement>(true, {
     initialFocusRef: inputRef,
@@ -124,19 +169,19 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
       },
       {
         id: "nav-contact",
-        title: "Say Hi & Connect",
-        subtitle: "Drop a line, book a chat, or check out GitHub and LinkedIn",
+        title: "Contact & Direct Inquiries",
+        subtitle: "Send a direct message, consulting inquiry, or systems collaboration",
         category: "navigation",
-        url: "/#contact",
+        url: "/contact",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
-        badge: "Direct Connect",
-        status: "Open for Sync",
-        description: "Direct channels for collaboration, technical discussions, code reviews, and project advisory.",
-        techStack: ["Web API", "Calendly Sync", "PGP Key", "Open Source"],
+        badge: "Direct Inquiries",
+        status: "Relay Active",
+        description: "Secure, rate-limited direct messaging channel for systems architecture inquiries, consulting, and collaboration.",
+        techStack: ["Next.js 16", "Resend API", "Zod", "Rate Limiting", "Honeypot"],
         highlights: [
-          "30-minute friendly technical sync",
-          "Direct verified social links",
-          "PGP security verification"
+          "Encrypted transactional relay dispatch",
+          "Automated instant confirmation receipt",
+          "Zero-friction bot and spam protection"
         ]
       },
       {
@@ -171,6 +216,23 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
           "Interactive bento-box case study grid",
           "Live telemetry and commit logs",
           "Deep architectural retrospectives"
+        ]
+      },
+      {
+        id: "nav-newsletter",
+        title: "Systems Dispatch Newsletter",
+        subtitle: "Subscribe to engineering retrospectives, AST logic, and browser physics",
+        category: "navigation",
+        url: "/contact",
+        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
+        badge: "Newsletter",
+        status: "Bi-Weekly",
+        description: "High-density technical dispatches covering formal verification, CDISC clinical data systems, and bare-metal browser physics.",
+        techStack: ["Resend API", "Next.js 16", "TypeScript", "Transactional Email"],
+        highlights: [
+          "Formal verification & logic AST case studies",
+          "Clinical EDC & CDISC architectural breakdowns",
+          "Zero tracking beacons and zero spam"
         ]
       },
       {
@@ -413,14 +475,14 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
       },
       {
         id: "nav-garmin-watch",
-        title: "Garmin Connect IQ 32KB Memory Runner",
-        subtitle: "Retro smartwatch engineering game — survive strict 32KB RAM, GC freezes, and thermal overheating",
+        title: "Monkey C Mayhem: Garmin Schvitz App",
+        subtitle: "Retro smartwatch engineering game — survive strict 32KB RAM, GC freezes, and thermal overheating in Monkey C Mayhem (Garmin Schvitz App)",
         category: "navigation",
         url: "/arcade/garmin-watch",
         icon: <IconTerminal className="w-4 h-4 text-brand-cyan" />,
-        badge: "Embedded Systems",
-        status: "32KB Memory Limit",
-        description: "Constrained embedded systems runner simulating Connect IQ Monkey C memory allocators, mark-sweep garbage collection, and thermal throttling.",
+        badge: "Monkey C Mayhem",
+        status: "Garmin Schvitz App",
+        description: "Constrained embedded systems runner simulating Connect IQ Monkey C memory allocators in Monkey C Mayhem (Garmin Schvitz App), mark-sweep garbage collection, and thermal throttling.",
         techStack: ["Connect IQ Specs", "Memory Profiler", "GC Simulator", "Canvas 2D"],
         highlights: [
           "32KB hard heap budget simulation",
@@ -637,8 +699,8 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
 
   // 3. In-Memory Fuzzy filtering matching queries against titles, tags, and secret easter egg triggers
   const filteredItems = useMemo(() => {
-    const baseMatches = filterFuzzySearch(query, allItems);
-    const q = query.trim().toLowerCase();
+    const baseMatches = filterFuzzySearch(deferredQuery, allItems);
+    const q = deferredQuery.trim().toLowerCase();
     if (!q) return baseMatches;
 
     const secretItems: PaletteItem[] = [];
@@ -740,7 +802,17 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
     }
 
     return [...secretItems, ...baseMatches];
-  }, [allItems, query]);
+  }, [allItems, deferredQuery]);
+
+  const handleItemHover = useCallback(
+    (index: number) => {
+      if (index !== activeIndex) {
+        setActiveIndex(index);
+        throttledPlayHover();
+      }
+    },
+    [activeIndex, throttledPlayHover]
+  );
 
   // 4. Keyboard Control Handlers (↑↓, Enter, Escape)
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -755,11 +827,11 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setActiveIndex((prev) => (prev + 1) % filteredItems.length);
-      playHover();
+      throttledPlayHover();
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setActiveIndex((prev) => (prev - 1 + filteredItems.length) % filteredItems.length);
-      playHover();
+      throttledPlayHover();
     } else if (e.key === "Escape") {
       e.preventDefault();
       onClose();
@@ -914,24 +986,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({ onClose, stud
                       aria-describedby={isActive ? "palette-preview-pane" : undefined}
                       onClick={() => handleSelectItem(item)}
                       style={{ "--cmd-item-glow": hexToRgba(designManifest.colors["brand-cyan"], 0.04) } as React.CSSProperties}
-                      onMouseEnter={() => {
-                        if (index !== activeIndex) {
-                          setActiveIndex(index);
-                          playHover();
-                        }
-                      }}
-                      onMouseOver={() => {
-                        if (index !== activeIndex) {
-                          setActiveIndex(index);
-                          playHover();
-                        }
-                      }}
-                      onPointerEnter={() => {
-                        if (index !== activeIndex) {
-                          setActiveIndex(index);
-                          playHover();
-                        }
-                      }}
+                      onMouseEnter={() => handleItemHover(index)}
                       className={`flex items-center gap-3.5 px-3.5 py-3 rounded-xl cursor-pointer select-none transition-all duration-200 border ${
                         isActive
                           ? "bg-zinc-950 border-brand-cyan/25 shadow-[0_0_15px_var(--cmd-item-glow)]"

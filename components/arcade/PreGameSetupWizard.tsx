@@ -15,10 +15,10 @@ import {
   IconRocket,
 } from "@tabler/icons-react";
 
-export type DifficultyMode = "casual" | "normal" | "hard";
-export type ScreenShakeIntensity = "none" | "subtle" | "high";
-export type CRTFilterPreset = "off" | "soft" | "arcade" | "scanlines";
-export type BezelStyle = "classic" | "neon" | "woodgrain" | "minimal";
+type DifficultyMode = "casual" | "normal" | "hard";
+type ScreenShakeIntensity = "none" | "subtle" | "high";
+type CRTFilterPreset = "off" | "soft" | "arcade" | "scanlines";
+type BezelStyle = "classic" | "neon" | "woodgrain" | "minimal";
 
 export interface GameSetupConfig {
   difficulty: DifficultyMode;
@@ -28,14 +28,14 @@ export interface GameSetupConfig {
   bezelStyle: BezelStyle;
 }
 
-export interface GameLoadoutOption {
+interface GameLoadoutOption {
   id: string;
   name: string;
   description: string;
   badge?: string;
 }
 
-export const GAME_LOADOUTS: Record<string, GameLoadoutOption[]> = {
+const GAME_LOADOUTS: Record<string, GameLoadoutOption[]> = {
   "working-with-duck": [
     { id: "balanced", name: "Treats & Tennis Ball", description: "Standard puppy management loadout with balanced treats and recall", badge: "Balanced" },
     { id: "agility", name: "Agility Whistle & Chew Toy", description: "Faster recall speed & high puppy happiness boost", badge: "Agility" },
@@ -73,26 +73,26 @@ export const GAME_LOADOUTS: Record<string, GameLoadoutOption[]> = {
   ]
 };
 
-export const DIFFICULTY_OPTIONS: { id: DifficultyMode; label: string; desc: string; badge: string; color: string }[] = [
+const DIFFICULTY_OPTIONS: { id: DifficultyMode; label: string; desc: string; badge: string; color: string }[] = [
   { id: "casual", label: "Casual", desc: "Relaxed difficulty with extra safety margins and higher resources", badge: "Relaxed", color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10" },
   { id: "normal", label: "Normal", desc: "Standard balanced arcade experience as originally intended", badge: "Standard", color: "text-amber-400 border-amber-500/30 bg-amber-500/10" },
   { id: "hard", label: "Hard", desc: "Extreme arcade challenge for veteran players seeking leaderboard dominance", badge: "Expert", color: "text-red-400 border-red-500/30 bg-red-500/10" },
 ];
 
-export const SCREEN_SHAKE_OPTIONS: { id: ScreenShakeIntensity; label: string; desc: string }[] = [
+const SCREEN_SHAKE_OPTIONS: { id: ScreenShakeIntensity; label: string; desc: string }[] = [
   { id: "none", label: "None (Off)", desc: "Completely disable screen shake vibrations" },
   { id: "subtle", label: "Subtle (Low)", desc: "Gentle physical feedback on major impacts" },
   { id: "high", label: "High (Full)", desc: "Maximum retro arcade screen shake intensity" },
 ];
 
-export const CRT_FILTER_OPTIONS: { id: CRTFilterPreset; label: string; desc: string }[] = [
+const CRT_FILTER_OPTIONS: { id: CRTFilterPreset; label: string; desc: string }[] = [
   { id: "off", label: "Disabled", desc: "Clean modern rendering without CRT overlays" },
   { id: "soft", label: "Soft CRT", desc: "Gentle phosphor glow and subtle scanline raster" },
   { id: "arcade", label: "Arcade CRT", desc: "Authentic arcade cabinet tube curvature & phosphor mask" },
   { id: "scanlines", label: "Heavy Scanlines", desc: "Prominent scanline grid for 90s retro aesthetic" },
 ];
 
-export const BEZEL_STYLE_OPTIONS: { id: BezelStyle; label: string; desc: string; previewClass: string }[] = [
+const BEZEL_STYLE_OPTIONS: { id: BezelStyle; label: string; desc: string; previewClass: string }[] = [
   { id: "classic", label: "Classic Woodgrain", desc: "Vintage 1980s arcade wood cabinet trim", previewClass: "border-amber-800 bg-amber-950/40 text-amber-300" },
   { id: "neon", label: "Cyber Neon", desc: "Glowing cyan & magenta neon synthwave bezel", previewClass: "border-cyan-500 bg-cyan-950/40 text-cyan-300" },
   { id: "woodgrain", label: "Pixel Gold", desc: "Polished pixel gold metallic border", previewClass: "border-yellow-500 bg-yellow-950/40 text-yellow-300" },
@@ -138,7 +138,7 @@ export function saveSetupConfig(gameId: string, config: GameSetupConfig): void {
   }
 }
 
-export interface PreGameSetupWizardProps {
+interface PreGameSetupWizardProps {
   gameId: string;
   gameTitle?: string;
   isOpen: boolean;

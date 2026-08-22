@@ -47,10 +47,12 @@ function getBoundaryRegex(phrase: string): RegExp {
  * Splits input HTML/text into protected tokens (HTML tags, code blocks, existing terminology tags)
  * and plain text tokens available for term substitution.
  */
-function tokenizeHtml(input: string): Array<{ isText: boolean; content: string }> {
-  // Regex matches HTML comments, <code>, <pre>, existing terminology tags, or general HTML tags
+function tokenizeHtml(
+  input: string
+): Array<{ isText: boolean; content: string }> {
+  // Regex matches HTML comments, fenced code blocks, inline backtick code, <code>, <pre>, existing terminology tags, or general HTML tags
   const tagRegex =
-    /(<!--[\s\S]*?-->|<code\b[\s\S]*?<\/code>|<pre\b[\s\S]*?<\/pre>|<span\b[^>]*data-key=[\s\S]*?<\/span>|<abbr\b[^>]*data-key=[\s\S]*?<\/abbr>|<[^>]+>)/gi;
+    /(<!--[\s\S]*?-->|```[\s\S]*?```|`[^`\n]+`|<code\b[\s\S]*?<\/code>|<pre\b[\s\S]*?<\/pre>|<span\b[^>]*data-key=[\s\S]*?<\/span>|<abbr\b[^>]*data-key=[\s\S]*?<\/abbr>|<[^>]+>)/gi;
 
   const tokens: Array<{ isText: boolean; content: string }> = [];
   let lastIndex = 0;
@@ -171,7 +173,8 @@ export function validateTermTags(
   const glossaryMap = getGlossaryKeyMap(glossary);
 
   // Match terminology tags e.g. <span data-key="...">...</span> or <abbr ...>...</abbr> or tags carrying data-key/data-term/data-definition
-  const termTagRegex = /<(span|abbr)\b([^>]*)>([\s\S]*?)<\/\1>|<([a-z0-9]+)\b([^>]*(?:data-key|data-term|data-definition)[^>]*)>([\s\S]*?)<\/\4>/gi;
+  const termTagRegex =
+    /<(span|abbr)\b([^>]*)>([\s\S]*?)<\/\1>|<([a-z0-9]+)\b([^>]*(?:data-key|data-term|data-definition)[^>]*)>([\s\S]*?)<\/\4>/gi;
 
   let match: RegExpExecArray | null;
   while ((match = termTagRegex.exec(html)) !== null) {
@@ -188,7 +191,8 @@ export function validateTermTags(
     }
 
     // Single scanning pass per tag to extract all metadata attributes
-    const attrPassRegex = /data-(key|term|definition)\s*=\s*(?:"([^"]*)"|'([^']*)')/gi;
+    const attrPassRegex =
+      /data-(key|term|definition)\s*=\s*(?:"([^"]*)"|'([^']*)')/gi;
     let attrMatch: RegExpExecArray | null;
     let keyVal = "";
     let termVal = "";

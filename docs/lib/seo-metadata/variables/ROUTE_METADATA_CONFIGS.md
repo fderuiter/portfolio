@@ -8,4 +8,4 @@
 
 > `const` **ROUTE\_METADATA\_CONFIGS**: `Record`\<`string`, [`RouteMetaConfig`](../interfaces/RouteMetaConfig.md)\>
 
-Defined in: [lib/seo-metadata.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/seo-metadata.ts#L12)
+Defined in: [lib/seo-metadata.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/seo-metadata.ts#L15)

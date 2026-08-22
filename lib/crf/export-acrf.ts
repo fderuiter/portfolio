@@ -120,6 +120,14 @@ export function generateAcrfHtml(
         inputMock = `<div style="margin-top: 4px; border: 1px dashed #94a3b8; padding: 4px 8px; font-size: 11px; color: #475569; background: #f8fafc;">
           [Calculated via formula: <code>${field.calculationFormula || "f(x)"}</code>]
         </div>`;
+      } else if (field.dataType === "precision_date") {
+        const nullFlavorsHtml = field.allowNullFlavor
+          ? `<span style="font-size: 9px; font-family: monospace; color: #64748b; margin-left: 8px;">[ND] [NA] [UNK]</span>`
+          : "";
+        inputMock = `<div style="margin-top: 4px; font-family: monospace; font-size: 11px; color: #64748b; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 8px; background: #f8fafc; display: flex; align-items: center; justify-content: space-between;">
+          <span>[ YYYY - MM - DD ] ${field.allowPartial ? "(Partial)" : ""}</span>
+          ${nullFlavorsHtml}
+        </div>`;
       } else {
         inputMock = `<div style="margin-top: 4px; border-bottom: 1px solid #cbd5e1; height: 22px; width: 100%; display: flex; align-items: flex-end; font-size: 11px; color: #94a3b8;">
           ${field.placeholder || "_________________________"} ${field.unit ? ` (${field.unit})` : ""}

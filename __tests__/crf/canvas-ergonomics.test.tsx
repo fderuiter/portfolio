@@ -38,7 +38,7 @@ describe("Canvas Field Ergonomics & Micro-Interactions", () => {
     vi.restoreAllMocks();
   });
 
-  it("allows 1-click column span adjustment via presets (3c, 4c, 6c, 12c)", async () => {
+  it("allows column span adjustment via expand and shrink buttons", async () => {
     const handleUpdate = vi.fn();
 
     await act(async () => {
@@ -55,16 +55,14 @@ describe("Canvas Field Ergonomics & Micro-Interactions", () => {
       );
     });
 
-    const span12Btn = Array.from(container.querySelectorAll("button")).find(
-      (b) => b.textContent === "12c"
-    );
-    expect(span12Btn).toBeDefined();
+    const plusBtn = container.querySelector('button[title="Expand column span"]');
+    expect(plusBtn).not.toBeNull();
 
     await act(async () => {
-      span12Btn?.click();
+      plusBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
-    expect(handleUpdate).toHaveBeenCalledWith({ columnSpan: 12 });
+    expect(handleUpdate).toHaveBeenCalledWith({ columnSpan: 7 });
   });
 
   it("toggles required question status via 1-click asterisk badge", async () => {
@@ -93,7 +91,9 @@ describe("Canvas Field Ergonomics & Micro-Interactions", () => {
       reqBtn?.click();
     });
 
-    expect(handleUpdate).toHaveBeenCalledWith({ required: true });
+    expect(handleUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ required: true })
+    );
   });
 
   it("supports quick inline label editing", async () => {

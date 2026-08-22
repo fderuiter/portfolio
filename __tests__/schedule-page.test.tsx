@@ -55,14 +55,17 @@ describe("SchedulePage Component", () => {
     expect(container?.textContent).toContain("Google Meet Video Bridge");
   });
 
-  it("renders correct contact links including email and linkedin", async () => {
+  it("renders correct contact links including contact form and linkedin", async () => {
     await act(async () => {
       root?.render(<SchedulePage />);
     });
 
+    const contactLink = container?.querySelector('a[href="/contact"]');
+    expect(contactLink).not.toBeNull();
+    expect(contactLink?.textContent).toContain("Direct Contact Form");
+
     const emailLink = container?.querySelector('a[href="mailto:fpderuiter@gmail.com"]');
-    expect(emailLink).not.toBeNull();
-    expect(emailLink?.textContent).toContain("fpderuiter@gmail.com");
+    expect(emailLink).toBeNull();
 
     const linkedinLink = container?.querySelector('a[href="https://www.linkedin.com/in/frederick-de-ruiter-88012467/"]');
     expect(linkedinLink).not.toBeNull();

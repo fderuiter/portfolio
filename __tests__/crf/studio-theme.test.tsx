@@ -2,7 +2,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -40,12 +42,22 @@ import { VisitMatrixEditor } from "@/components/crf/Modes/VisitMatrixEditor";
 import { RuleGraphStudio } from "@/components/crf/Modes/RuleGraphStudio";
 import { LiveEdcSimulator } from "@/components/crf/Modes/LiveEdcSimulator";
 import { WorkflowWizardModal } from "@/components/crf/Wizard/WorkflowWizardModal";
+import { AcrfOverlayViewer } from "@/components/crf/Modes/AcrfOverlayViewer";
+import { ExportImportModal } from "@/components/crf/Modes/ExportImportModal";
+import { BrandingConfigModal } from "@/components/crf/Branding/BrandingConfigModal";
+import { DiagnosticsDrawer } from "@/components/crf/DiagnosticsDrawer";
+import { SpotlightTourOverlay } from "@/components/crf/Wizard/SpotlightTourOverlay";
 
 (globalThis as any).mockComponents = {
   VisitMatrixEditor,
   RuleGraphStudio,
   LiveEdcSimulator,
   WorkflowWizardModal,
+  AcrfOverlayViewer,
+  ExportImportModal,
+  BrandingConfigModal,
+  DiagnosticsDrawer,
+  SpotlightTourOverlay,
 };
 
 vi.mock("next/dynamic", () => {
@@ -65,6 +77,16 @@ vi.mock("next/dynamic", () => {
           Component = registry.LiveEdcSimulator;
         } else if (loaderStr.includes("WorkflowWizardModal")) {
           Component = registry.WorkflowWizardModal;
+        } else if (loaderStr.includes("AcrfOverlayViewer")) {
+          Component = registry.AcrfOverlayViewer;
+        } else if (loaderStr.includes("ExportImportModal")) {
+          Component = registry.ExportImportModal;
+        } else if (loaderStr.includes("BrandingConfigModal")) {
+          Component = registry.BrandingConfigModal;
+        } else if (loaderStr.includes("DiagnosticsDrawer")) {
+          Component = registry.DiagnosticsDrawer;
+        } else if (loaderStr.includes("SpotlightTourOverlay")) {
+          Component = registry.SpotlightTourOverlay;
         }
 
         if (Component) {
@@ -81,7 +103,7 @@ vi.mock("next/dynamic", () => {
 
 import { CRFStudioContainer } from "@/components/crf/CRFStudioContainer";
 import { StudioHeader } from "@/components/crf/StudioHeader";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
+import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
 
 describe("CRF Studio - Light Mode & Theming", () => {
   let container: HTMLDivElement;

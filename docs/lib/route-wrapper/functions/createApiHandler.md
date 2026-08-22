@@ -8,9 +8,9 @@
 
 ## Call Signature
 
-> **createApiHandler**\<`TSchema`\>(`handler`, `options`): (`rawReq?`, `routeParams?`) => `Promise`\<`NextResponse`\<`unknown`\>\>
+> **createApiHandler**\<`TSchema`\>(`handler`, `options`): [`ApiRouteHandler`](../type-aliases/ApiRouteHandler.md)
 
-Defined in: [lib/route-wrapper.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/route-wrapper.ts#L25)
+Defined in: [lib/route-wrapper.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/route-wrapper.ts#L48)
 
 Higher-order API route handler wrapper.
 Provides automated Zod request schema validation, uniform error transformation,
@@ -34,13 +34,13 @@ Sentry exception logging, error sanitization, and security header enforcement.
 
 ### Returns
 
-(`rawReq?`, `routeParams?`) => `Promise`\<`NextResponse`\<`unknown`\>\>
+[`ApiRouteHandler`](../type-aliases/ApiRouteHandler.md)
 
 ## Call Signature
 
-> **createApiHandler**(`handler`, `options?`): (`rawReq?`, `routeParams?`) => `Promise`\<`NextResponse`\<`unknown`\>\>
+> **createApiHandler**(`handler`, `options?`): [`ApiRouteHandler`](../type-aliases/ApiRouteHandler.md)
 
-Defined in: [lib/route-wrapper.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/route-wrapper.ts#L33)
+Defined in: [lib/route-wrapper.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/route-wrapper.ts#L53)
 
 Higher-order API route handler wrapper.
 Provides automated Zod request schema validation, uniform error transformation,
@@ -58,4 +58,4 @@ Sentry exception logging, error sanitization, and security header enforcement.
 
 ### Returns
 
-(`rawReq?`, `routeParams?`) => `Promise`\<`NextResponse`\<`unknown`\>\>
+[`ApiRouteHandler`](../type-aliases/ApiRouteHandler.md)

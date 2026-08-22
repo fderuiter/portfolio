@@ -8,7 +8,7 @@
 
 > **dragDuckTo**(`state`, `x`, `y`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:2165](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2165)
+Defined in: [lib/working-with-duck-engine.ts:2283](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2283)
 
 Player Action: Drag Duck position
 

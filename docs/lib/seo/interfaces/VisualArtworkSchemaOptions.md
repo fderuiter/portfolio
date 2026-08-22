@@ -6,7 +6,7 @@
 
 # Interface: VisualArtworkSchemaOptions
 
-Defined in: [lib/seo.ts:116](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L116)
+Defined in: [lib/seo.ts:125](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L125)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/seo.ts:116](https://github.com/fderuiter/portfolio/blob/main/li
 
 > `optional` **creator?**: `string`
 
-Defined in: [lib/seo.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L123)
+Defined in: [lib/seo.ts:132](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L132)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/seo.ts:123](https://github.com/fderuiter/portfolio/blob/main/li
 
 > **description**: `string`
 
-Defined in: [lib/seo.ts:118](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L118)
+Defined in: [lib/seo.ts:127](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L127)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/seo.ts:118](https://github.com/fderuiter/portfolio/blob/main/li
 
 > `optional` **formats?**: `string`[]
 
-Defined in: [lib/seo.ts:121](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L121)
+Defined in: [lib/seo.ts:130](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L130)
 
 ***
 
@@ -38,7 +38,23 @@ Defined in: [lib/seo.ts:121](https://github.com/fderuiter/portfolio/blob/main/li
 
 > `optional` **imageUrl?**: `string`
 
-Defined in: [lib/seo.ts:120](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L120)
+Defined in: [lib/seo.ts:129](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L129)
+
+***
+
+### inLanguage?
+
+> `optional` **inLanguage?**: `string`
+
+Defined in: [lib/seo.ts:133](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L133)
+
+***
+
+### isAccessibleForFree?
+
+> `optional` **isAccessibleForFree?**: `boolean`
+
+Defined in: [lib/seo.ts:134](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L134)
 
 ***
 
@@ -46,7 +62,7 @@ Defined in: [lib/seo.ts:120](https://github.com/fderuiter/portfolio/blob/main/li
 
 > `optional` **license?**: `string`
 
-Defined in: [lib/seo.ts:122](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L122)
+Defined in: [lib/seo.ts:131](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L131)
 
 ***
 
@@ -54,7 +70,7 @@ Defined in: [lib/seo.ts:122](https://github.com/fderuiter/portfolio/blob/main/li
 
 > **name**: `string`
 
-Defined in: [lib/seo.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L117)
+Defined in: [lib/seo.ts:126](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L126)
 
 ***
 
@@ -62,4 +78,4 @@ Defined in: [lib/seo.ts:117](https://github.com/fderuiter/portfolio/blob/main/li
 
 > **url**: `string`
 
-Defined in: [lib/seo.ts:119](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L119)
+Defined in: [lib/seo.ts:128](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L128)

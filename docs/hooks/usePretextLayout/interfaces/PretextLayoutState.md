@@ -6,7 +6,7 @@
 
 # Interface: PretextLayoutState
 
-Defined in: [hooks/usePretextLayout.tsx:52](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L52)
+Defined in: [hooks/usePretextLayout.tsx:66](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L66)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [hooks/usePretextLayout.tsx:52](https://github.com/fderuiter/portfol
 
 > **height**: `number`
 
-Defined in: [hooks/usePretextLayout.tsx:54](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L54)
+Defined in: [hooks/usePretextLayout.tsx:68](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L68)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [hooks/usePretextLayout.tsx:54](https://github.com/fderuiter/portfol
 
 > **isReady**: `boolean`
 
-Defined in: [hooks/usePretextLayout.tsx:53](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L53)
+Defined in: [hooks/usePretextLayout.tsx:67](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L67)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [hooks/usePretextLayout.tsx:53](https://github.com/fderuiter/portfol
 
 > **lineCount**: `number`
 
-Defined in: [hooks/usePretextLayout.tsx:55](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L55)
+Defined in: [hooks/usePretextLayout.tsx:69](https://github.com/fderuiter/portfolio/blob/main/hooks/usePretextLayout.tsx#L69)

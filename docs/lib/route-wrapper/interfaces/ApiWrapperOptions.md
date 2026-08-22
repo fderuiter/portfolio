@@ -20,7 +20,7 @@ Defined in: [lib/route-wrapper.ts:7](https://github.com/fderuiter/portfolio/blob
 
 > `optional` **customJsonError?**: `string`
 
-Defined in: [lib/route-wrapper.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/route-wrapper.ts#L11)
+Defined in: [lib/route-wrapper.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/route-wrapper.ts#L14)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: [lib/route-wrapper.ts:10](https://github.com/fderuiter/portfolio/blo
 
 > `optional` **defaultStatus?**: `number`
 
-Defined in: [lib/route-wrapper.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/route-wrapper.ts#L12)
+Defined in: [lib/route-wrapper.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/route-wrapper.ts#L15)
 
 ***
 
@@ -72,6 +72,6 @@ Defined in: [lib/route-wrapper.ts:8](https://github.com/fderuiter/portfolio/blob
 
 ### type?
 
-> `optional` **type?**: `"query"` \| `"body"`
+> `optional` **type?**: `"body"` \| `"query"`
 
 Defined in: [lib/route-wrapper.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/route-wrapper.ts#L9)

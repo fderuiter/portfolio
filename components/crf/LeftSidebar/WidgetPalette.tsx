@@ -90,6 +90,22 @@ const WIDGETS: WidgetItem[] = [
     },
   },
   {
+    type: "precision_date",
+    label: "Precision Date (Segmented / ISO)",
+    category: "timing",
+    icon: <IconCalendar className="w-4 h-4 text-brand-cyan" />,
+    defaultField: {
+      label: "Clinical Event Date (Precision ISO)",
+      variableName: "EVNT_DAT",
+      columnSpan: 6,
+      required: true,
+      allowPartial: true,
+      preventFutureDate: true,
+      allowNullFlavor: true,
+      requirementTier: "hard_stop",
+    },
+  },
+  {
     type: "partial_date",
     label: "Partial Date (UN-UNK-YYYY)",
     category: "timing",

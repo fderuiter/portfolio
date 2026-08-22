@@ -15,6 +15,7 @@ import {
   IconBrightnessUp,
 } from "@tabler/icons-react";
 import { useAudio } from "@/components/providers/AudioProvider";
+import { triggerHaptic } from "@/lib/haptics";
 
 function useIsTouchDevice(): boolean {
   const [isTouch, setIsTouch] = useState<boolean>(false);
@@ -81,6 +82,7 @@ export const DpadActionDock: React.FC<DpadActionDockProps> = ({
 
   const handleDirPress = (e: React.SyntheticEvent, dir: "up" | "down" | "left" | "right") => {
     if (e.cancelable) e.preventDefault();
+    triggerHaptic(15);
     audio.playHover();
     onDirectionPress?.(dir);
   };
@@ -92,6 +94,7 @@ export const DpadActionDock: React.FC<DpadActionDockProps> = ({
 
   const handleAction = (e: React.SyntheticEvent, callback?: () => void) => {
     if (e.cancelable) e.preventDefault();
+    triggerHaptic(20);
     audio.playSubmit();
     callback?.();
   };
@@ -259,6 +262,7 @@ export const TwinStickAimDock: React.FC<TwinStickAimDockProps> = ({
 
   const handleAction = (e: React.SyntheticEvent, callback?: () => void) => {
     if (e.cancelable) e.preventDefault();
+    triggerHaptic(20);
     audio.playSubmit();
     callback?.();
   };
@@ -373,6 +377,7 @@ export const BezelClusterDock: React.FC<BezelClusterDockProps> = ({
 
   const handlePress = (e: React.SyntheticEvent, btn: BezelButtonId) => {
     if (e.cancelable) e.preventDefault();
+    triggerHaptic(20);
     audio.playNote(btn === "start" ? 440 : 330, 0.05);
     onButtonPress?.(btn);
   };
@@ -452,6 +457,7 @@ export const ActionStripDock: React.FC<ActionStripDockProps> = ({
 
   const handleAction = (id: string, disabled?: boolean) => {
     if (disabled) return;
+    triggerHaptic(20);
     audio.playSubmit();
     onAction(id);
   };

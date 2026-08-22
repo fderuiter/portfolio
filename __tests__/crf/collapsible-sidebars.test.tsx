@@ -2,7 +2,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -78,7 +80,9 @@ describe("CRF Studio Collapsible Sidebars & Header Controls", () => {
       root.render(<CRFStudioContainer />);
     });
 
-    const moreBtn = container.querySelector("button[aria-label='More Studio Actions']");
+    const moreBtn = container.querySelector(
+      "button[aria-label='More Studio Actions']"
+    );
     expect(moreBtn).not.toBeNull();
 
     // Open More Actions popover sheet
@@ -87,8 +91,8 @@ describe("CRF Studio Collapsible Sidebars & Header Controls", () => {
     });
 
     expect(container.textContent).toContain("Studio Actions");
-    expect(container.textContent).toContain("CDASH Form Scaffolder");
-    expect(container.textContent).toContain("CDISC Diagnostics");
+    expect(container.textContent).toContain("Simulate Protocol");
+    expect(container.textContent).toContain("Docx / PDF Books");
     expect(container.textContent).toContain("Organization Branding");
 
     // Click backdrop or close button

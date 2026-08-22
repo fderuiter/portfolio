@@ -2,13 +2,15 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { CRFStudioContainer } from "@/components/crf/CRFStudioContainer";
 import { VisitMatrixEditor } from "@/components/crf/Modes/VisitMatrixEditor";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
+import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
 
 describe("CRF Studio Mobile & Tablet Responsiveness", () => {
   let container: HTMLDivElement;
@@ -36,7 +38,9 @@ describe("CRF Studio Mobile & Tablet Responsiveness", () => {
     });
 
     // Verify mobile navigation bar is present
-    const mobileNav = container.querySelector("nav[aria-label='Mobile View Navigation']");
+    const mobileNav = container.querySelector(
+      "nav[aria-label='Mobile View Navigation']"
+    );
     expect(mobileNav).not.toBeNull();
 
     // Check buttons inside mobile navigation
@@ -45,17 +49,19 @@ describe("CRF Studio Mobile & Tablet Responsiveness", () => {
 
     const formsBtn = navButtons.find((b) => b.textContent?.includes("Forms"));
     const canvasBtn = navButtons.find((b) => b.textContent?.includes("Canvas"));
-    const inspectorBtn = navButtons.find((b) => b.textContent?.includes("Inspector"));
+    const inspectorBtn = navButtons.find((b) =>
+      b.textContent?.includes("Inspector")
+    );
 
     expect(formsBtn).toBeDefined();
     expect(canvasBtn).toBeDefined();
     expect(inspectorBtn).toBeDefined();
 
-    // Switch to Forms view on mobile
+    // Switch to Forms/Spine view on mobile
     await act(async () => {
       formsBtn?.click();
     });
-    expect(container.textContent).toContain("Protocol Forms");
+    expect(container.textContent).toContain("Study Timeline");
 
     // Switch to Inspector view on mobile
     await act(async () => {
@@ -76,7 +82,9 @@ describe("CRF Studio Mobile & Tablet Responsiveness", () => {
       root.render(<CRFStudioContainer />);
     });
 
-    const fabBtn = container.querySelector("button[title='Add Field / Open Widget Palette']");
+    const fabBtn = container.querySelector(
+      "button[title='Add Field / Open Widget Palette']"
+    );
     expect(fabBtn).not.toBeNull();
 
     await act(async () => {
@@ -89,7 +97,9 @@ describe("CRF Studio Mobile & Tablet Responsiveness", () => {
     expect(container.textContent).toContain("Visual Analog Scale");
 
     // Close bottom sheet
-    const closeBtn = container.querySelector("button[aria-label='Close Widget Palette']");
+    const closeBtn = container.querySelector(
+      "button[aria-label='Close Widget Palette']"
+    );
     expect(closeBtn).not.toBeNull();
 
     await act(async () => {
@@ -116,8 +126,8 @@ describe("CRF Studio Mobile & Tablet Responsiveness", () => {
     expect(container.querySelector("table")).not.toBeNull();
 
     // Switch to Cards view
-    const cardsToggle = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Cards")
+    const cardsToggle = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Cards")
     );
     expect(cardsToggle).toBeDefined();
 
@@ -130,8 +140,8 @@ describe("CRF Studio Mobile & Tablet Responsiveness", () => {
     expect(container.textContent).toContain("Target Day");
 
     // Switch back to Table view
-    const tableToggle = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Table")
+    const tableToggle = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Table")
     );
     await act(async () => {
       tableToggle?.click();

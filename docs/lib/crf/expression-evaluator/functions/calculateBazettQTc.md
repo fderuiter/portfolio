@@ -8,7 +8,7 @@
 
 > **calculateBazettQTc**(`qtMs`, `rrSec`): `number` \| `null`
 
-Defined in: [lib/crf/expression-evaluator.ts:396](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L396)
+Defined in: [lib/crf/expression-evaluator.ts:412](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L412)
 
 Calculates Bazett Corrected QT interval (QTcB) in milliseconds.
 

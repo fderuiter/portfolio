@@ -8,7 +8,7 @@
 
 > **steerParkDuck**(`state`, `targetY`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:2332](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2332)
+Defined in: [lib/working-with-duck-engine.ts:2473](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2473)
 
 ## Parameters
 

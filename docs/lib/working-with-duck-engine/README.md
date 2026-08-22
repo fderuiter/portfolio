@@ -6,6 +6,10 @@
 
 # lib/working-with-duck-engine
 
+## Classes
+
+- [WorkingWithDuckEngine](classes/WorkingWithDuckEngine.md)
+
 ## Interfaces
 
 - [BathtubState](interfaces/BathtubState.md)
@@ -21,6 +25,7 @@
 - [Particle](interfaces/Particle.md)
 - [PortfolioHazard](interfaces/PortfolioHazard.md)
 - [Squirrel](interfaces/Squirrel.md)
+- [WorkingWithDuckSnapshot](interfaces/WorkingWithDuckSnapshot.md)
 - [WorkingWithDuckState](interfaces/WorkingWithDuckState.md)
 
 ## Type Aliases

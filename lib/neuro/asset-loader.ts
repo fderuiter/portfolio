@@ -1,38 +1,86 @@
 /**
  * NeuroRecon External Asset Loader & Cache
- * Loads real 3D brain models (GLB, GLTF, OBJ) and 2D MRI datasets with caching & fallback.
+ * Loads real 3D brain models (GLB, GLTF, OBJ) and delivers raw geometry array buffers.
+ * Caches raw binary array buffers instead of live GPU scene objects to allow garbage collection.
+ * Completely isolates engine parsing utilities with zero top-level graphics library imports.
  */
 
-import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
-import { createCorticalSurfaceMesh } from "./mesh-generator";
-import { HemisphereFilter, SurfaceMode } from "./types";
+import { createCorticalSurfaceMeshBuffers } from "./mesh-generator";
+import { HemisphereFilter, RawGeometryBuffer, SurfaceMode } from "./types";
+import { progressBus } from "./progress-bus";
+import { createMeshGroupFromBuffers, loadGraphicsEngine } from "./engine-loader";
 
-const meshCache = new Map<string, THREE.Group>();
+const rawBufferCache = new Map<string, RawGeometryBuffer[]>();
 
 /**
- * Load external 3D brain mesh model (.glb, .gltf, or .obj) with automatic centering and scale normalization.
+ * Deep clone raw geometry buffers to ensure caller isolation.
  */
-export async function loadExternalBrainMesh(
+function cloneRawBuffers(buffers: RawGeometryBuffer[]): RawGeometryBuffer[] {
+  return buffers.map((buf) => ({
+    name: buf.name,
+    hemi: buf.hemi,
+    positions: new Float32Array(buf.positions),
+    normals: buf.normals ? new Float32Array(buf.normals) : undefined,
+    colors: buf.colors ? new Float32Array(buf.colors) : undefined,
+    indices: new Uint32Array(buf.indices),
+    color: buf.color,
+  }));
+}
+
+/**
+ * Load external 3D brain model (.glb, .gltf, or .obj) and extract raw vertex and index data buffers.
+ * Stores raw geometry buffers in persistent module memory rather than live engine scene objects.
+ */
+export async function loadExternalBrainBuffers(
   modelUrl: string,
   mode: SurfaceMode = "pial",
   hemiFilter: HemisphereFilter = "both"
-): Promise<THREE.Group> {
+): Promise<RawGeometryBuffer[]> {
   const cacheKey = `${modelUrl}_${mode}_${hemiFilter}`;
-  if (meshCache.has(cacheKey)) {
-    const cached = meshCache.get(cacheKey)!;
-    return cached.clone();
+  if (rawBufferCache.has(cacheKey)) {
+    const cached = rawBufferCache.get(cacheKey)!;
+    return cloneRawBuffers(cached);
   }
+
+  let lastLoaded = 0;
+  let lastTotal = 0;
+
+  const handleProgress = (event: ProgressEvent) => {
+    const loaded = event?.loaded || 0;
+    const total = event?.total || 0;
+    lastLoaded = loaded;
+    lastTotal = total;
+    const percentage = total > 0 ? Math.min(100, Math.round((loaded / total) * 100)) : 0;
+    progressBus.publish({
+      url: modelUrl,
+      loaded,
+      total,
+      percentage,
+      status: "loading",
+    });
+  };
+
+  // Publish initial loading state event
+  progressBus.publish({
+    url: modelUrl,
+    loaded: 0,
+    total: 0,
+    percentage: 0,
+    status: "loading",
+  });
 
   try {
     const isObj = modelUrl.endsWith(".obj");
-    const group = new THREE.Group();
+    const THREE = await loadGraphicsEngine();
+
+    const rawBuffers: RawGeometryBuffer[] = [];
 
     if (isObj) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { OBJLoader } = (await import("three/examples/jsm/loaders/OBJLoader.js")) as any;
       const loader = new OBJLoader();
-      const obj = await new Promise<THREE.Group>((resolve, reject) => {
-        loader.load(modelUrl, resolve, undefined, reject);
+      const obj = await new Promise<import("three").Group>((resolve, reject) => {
+        loader.load(modelUrl, resolve, handleProgress, reject);
       });
 
       // Apply standard clinical brain material
@@ -61,13 +109,47 @@ export async function loadExternalBrainMesh(
       const center = new THREE.Vector3();
       box.getCenter(center);
       obj.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+      obj.updateMatrixWorld(true);
 
-      group.add(obj);
+      obj.traverse((child) => {
+        if (child instanceof THREE.Mesh && child.geometry) {
+          const geom = child.geometry.clone();
+          geom.applyMatrix4(child.matrixWorld);
+          const posAttr = geom.getAttribute("position");
+          const normAttr = geom.getAttribute("normal");
+          const colAttr = geom.getAttribute("color");
+          const indexAttr = geom.getIndex();
+
+          if (posAttr) {
+            const positions = new Float32Array(posAttr.array);
+            const normals = normAttr ? new Float32Array(normAttr.array) : undefined;
+            const colors = colAttr ? new Float32Array(colAttr.array) : undefined;
+            let indices: Uint32Array;
+            if (indexAttr) {
+              indices = new Uint32Array(indexAttr.array);
+            } else {
+              indices = new Uint32Array(posAttr.count);
+              for (let i = 0; i < posAttr.count; i++) indices[i] = i;
+            }
+
+            rawBuffers.push({
+              name: child.name || "obj_mesh",
+              positions,
+              normals,
+              colors,
+              indices,
+              color: 0x93c5fd,
+            });
+          }
+        }
+      });
     } else {
       // GLTF / GLB loader
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { GLTFLoader } = (await import("three/examples/jsm/loaders/GLTFLoader.js")) as any;
       const loader = new GLTFLoader();
-      const gltf = await new Promise<{ scene: THREE.Group }>((resolve, reject) => {
-        loader.load(modelUrl, resolve, undefined, reject);
+      const gltf = await new Promise<{ scene: import("three").Group }>((resolve, reject) => {
+        loader.load(modelUrl, resolve, handleProgress, reject);
       });
 
       const model = gltf.scene;
@@ -83,17 +165,84 @@ export async function loadExternalBrainMesh(
       const center = new THREE.Vector3();
       box.getCenter(center);
       model.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+      model.updateMatrixWorld(true);
 
-      group.add(model);
+      model.traverse((child) => {
+        if (child instanceof THREE.Mesh && child.geometry) {
+          const geom = child.geometry.clone();
+          geom.applyMatrix4(child.matrixWorld);
+          const posAttr = geom.getAttribute("position");
+          const normAttr = geom.getAttribute("normal");
+          const colAttr = geom.getAttribute("color");
+          const indexAttr = geom.getIndex();
+
+          if (posAttr) {
+            const positions = new Float32Array(posAttr.array);
+            const normals = normAttr ? new Float32Array(normAttr.array) : undefined;
+            const colors = colAttr ? new Float32Array(colAttr.array) : undefined;
+            let indices: Uint32Array;
+            if (indexAttr) {
+              indices = new Uint32Array(indexAttr.array);
+            } else {
+              indices = new Uint32Array(posAttr.count);
+              for (let i = 0; i < posAttr.count; i++) indices[i] = i;
+            }
+
+            rawBuffers.push({
+              name: child.name || "gltf_mesh",
+              positions,
+              normals,
+              colors,
+              indices,
+            });
+          }
+        }
+      });
     }
 
-    meshCache.set(cacheKey, group);
-    return group.clone();
+    if (rawBuffers.length === 0) {
+      throw new Error("Parsed external 3D asset contains zero valid mesh geometries.");
+    }
+
+    const finalLoaded = lastTotal || lastLoaded;
+    const finalTotal = lastTotal || lastLoaded;
+    progressBus.publish({
+      url: modelUrl,
+      loaded: finalLoaded,
+      total: finalTotal,
+      percentage: 100,
+      status: "complete",
+    });
+
+    rawBufferCache.set(cacheKey, rawBuffers);
+    return cloneRawBuffers(rawBuffers);
   } catch (err) {
-    // Graceful fallback to procedural cortical surface mesh
+    progressBus.publish({
+      url: modelUrl,
+      loaded: lastLoaded,
+      total: lastTotal,
+      percentage: 0,
+      status: "error",
+      error: err instanceof Error ? err.message : String(err),
+    });
+
+    // Graceful fallback to procedural cortical surface mesh array buffers
     console.warn(`Failed to load external model from ${modelUrl}, falling back to procedural mesh:`, err);
-    const fallback = createCorticalSurfaceMesh(mode, false, hemiFilter);
-    meshCache.set(cacheKey, fallback);
-    return fallback.clone();
+    const fallbackBuffers = createCorticalSurfaceMeshBuffers(mode, false, hemiFilter);
+    rawBufferCache.set(cacheKey, fallbackBuffers);
+    return cloneRawBuffers(fallbackBuffers);
   }
+}
+
+/**
+ * Convenience wrapper returning THREE.Group scene object constructed on-demand from raw geometry buffers.
+ */
+export async function loadExternalBrainMesh(
+  modelUrl: string,
+  mode: SurfaceMode = "pial",
+  hemiFilter: HemisphereFilter = "both"
+): Promise<import("three").Group> {
+  const buffers = await loadExternalBrainBuffers(modelUrl, mode, hemiFilter);
+  const THREE = await loadGraphicsEngine();
+  return createMeshGroupFromBuffers(buffers, THREE, { mode });
 }

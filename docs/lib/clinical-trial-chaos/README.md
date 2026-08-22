@@ -6,14 +6,6 @@
 
 # lib/clinical-trial-chaos
 
-## Interfaces
-
-- [ClinicalScenario](interfaces/ClinicalScenario.md)
-
-## Variables
-
-- [clinicalChaosScenarios](variables/clinicalChaosScenarios.md)
-
 ## References
 
 ### ALL\_STATIONS
@@ -94,6 +86,24 @@ Re-exports [ClinicalSubject](types/interfaces/ClinicalSubject.md)
 
 ***
 
+### ClinicalTrialChaosEngine
+
+Re-exports [ClinicalTrialChaosEngine](engine/classes/ClinicalTrialChaosEngine.md)
+
+***
+
+### ClinicalTrialChaosSnapshot
+
+Re-exports [ClinicalTrialChaosSnapshot](engine/interfaces/ClinicalTrialChaosSnapshot.md)
+
+***
+
+### ClinicalTrialChaosState
+
+Re-exports [ClinicalTrialChaosState](engine/interfaces/ClinicalTrialChaosState.md)
+
+***
+
 ### createAuditLogEntry
 
 Re-exports [createAuditLogEntry](engine/functions/createAuditLogEntry.md)
@@ -169,6 +179,12 @@ Re-exports [generateBIMOReport](engine/functions/generateBIMOReport.md)
 ### generateClinicalSubject
 
 Re-exports [generateClinicalSubject](scenarios/functions/generateClinicalSubject.md)
+
+***
+
+### generateClinicalSubjectFromProtocol
+
+Re-exports [generateClinicalSubjectFromProtocol](scenarios/functions/generateClinicalSubjectFromProtocol.md)
 
 ***
 
@@ -292,6 +308,12 @@ Re-exports [ProtocolAmendment](types/interfaces/ProtocolAmendment.md)
 
 ***
 
+### RecordedRuleViolation
+
+Re-exports [RecordedRuleViolation](types/interfaces/RecordedRuleViolation.md)
+
+***
+
 ### scrambleStations
 
 Re-exports [scrambleStations](engine/functions/scrambleStations.md)
@@ -367,6 +389,18 @@ Re-exports [triggerRandomAmendment](engine/functions/triggerRandomAmendment.md)
 ### updateBGMTempo
 
 Re-exports [updateBGMTempo](sound-effects/functions/updateBGMTempo.md)
+
+***
+
+### useClinicalAudioCleanup
+
+Re-exports [useClinicalAudioCleanup](sound-effects/functions/useClinicalAudioCleanup.md)
+
+***
+
+### useProceduralBGM
+
+Re-exports [useProceduralBGM](sound-effects/functions/useProceduralBGM.md)
 
 ***
 

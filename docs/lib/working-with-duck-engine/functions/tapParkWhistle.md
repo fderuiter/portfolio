@@ -8,7 +8,7 @@
 
 > **tapParkWhistle**(`state`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:2345](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2345)
+Defined in: [lib/working-with-duck-engine.ts:2489](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2489)
 
 ## Parameters
 

@@ -8,4 +8,4 @@
 
 > **SoundCue** = `"tippy-tap"` \| `"squeak"` \| `"bark"` \| `"belly-rub"` \| `"whistle"` \| `"snore"` \| `"ding"` \| `"fail"` \| `"door-knock"` \| `"squirrel-chirp"` \| `"hiccup"` \| `"combo-fanfare"` \| `"trick-chime"` \| `"paw-clap"` \| `"spin-whoosh"` \| `"bath-soap"` \| `"bath-rinse"` \| `"water-lap"` \| `"crunch-kibble"` \| `"code-type"` \| `"frisbee-throw"`
 
-Defined in: [lib/working-with-duck-engine.ts:336](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L336)
+Defined in: [lib/working-with-duck-engine.ts:360](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L360)

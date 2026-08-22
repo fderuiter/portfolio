@@ -32,7 +32,7 @@ export const CommitSparkline: React.FC<CommitSparklineProps> = ({
   const { pathD, areaD } = useMemo(() => {
     const width = 300;
     const height = 60;
-    const padding = 6;
+    const padding = 8;
 
     const points = mapDataToCoordinates(dataPoints, width, height, padding, minVal, maxVal);
     return generateHermiteSplinePath(points, height);

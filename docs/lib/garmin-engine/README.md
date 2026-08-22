@@ -6,12 +6,18 @@
 
 # lib/garmin-engine
 
+## Classes
+
+- [GarminWatchEngine](classes/GarminWatchEngine.md)
+
 ## Interfaces
 
 - [CrashReport](interfaces/CrashReport.md)
 - [DeviceProfile](interfaces/DeviceProfile.md)
+- [FlashVariable](interfaces/FlashVariable.md)
 - [FogPoint](interfaces/FogPoint.md)
 - [GameEngineState](interfaces/GameEngineState.md)
+- [GarminWatchSnapshot](interfaces/GarminWatchSnapshot.md)
 - [MemoryVariable](interfaces/MemoryVariable.md)
 - [Obstacle](interfaces/Obstacle.md)
 
@@ -26,6 +32,7 @@
 - [CANVAS\_SIZE](variables/CANVAS_SIZE.md)
 - [CIQ\_PALETTE](variables/CIQ_PALETTE.md)
 - [DEVICE\_PROFILES](variables/DEVICE_PROFILES.md)
+- [FLASH\_STORAGE\_KEY](variables/FLASH_STORAGE_KEY.md)
 - [GRAVITY](variables/GRAVITY.md)
 - [GROUND\_Y](variables/GROUND_Y.md)
 - [JUMP\_FORCE](variables/JUMP_FORCE.md)
@@ -36,10 +43,14 @@
 
 ## Functions
 
+- [allocateFlashVariable](functions/allocateFlashVariable.md)
 - [allocateVariable](functions/allocateVariable.md)
+- [clearFlashStorage](functions/clearFlashStorage.md)
 - [createInitialState](functions/createInitialState.md)
 - [jettisonOldestVariable](functions/jettisonOldestVariable.md)
+- [loadPersistedFlashStorage](functions/loadPersistedFlashStorage.md)
 - [renderCanvasFrame](functions/renderCanvasFrame.md)
+- [savePersistedFlashStorage](functions/savePersistedFlashStorage.md)
 - [startGame](functions/startGame.md)
 - [triggerGarbageCollection](functions/triggerGarbageCollection.md)
 - [updateGameSimulation](functions/updateGameSimulation.md)

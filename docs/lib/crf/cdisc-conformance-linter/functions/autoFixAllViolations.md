@@ -8,7 +8,7 @@
 
 > **autoFixAllViolations**(`study`): `object`
 
-Defined in: [lib/crf/cdisc-conformance-linter.ts:294](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cdisc-conformance-linter.ts#L294)
+Defined in: [lib/crf/cdisc-conformance-linter.ts:342](https://github.com/fderuiter/portfolio/blob/main/lib/crf/cdisc-conformance-linter.ts#L342)
 
 Automatically applies all available 1-Click Auto-Fix remediations across the entire study protocol.
 

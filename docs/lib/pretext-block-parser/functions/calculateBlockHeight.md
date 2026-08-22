@@ -8,7 +8,7 @@
 
 > **calculateBlockHeight**(`block`, `containerWidth`, `lineHeight?`): `number`
 
-Defined in: [lib/pretext-block-parser.ts:203](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L203)
+Defined in: [lib/pretext-block-parser.ts:286](https://github.com/fderuiter/portfolio/blob/main/lib/pretext-block-parser.ts#L286)
 
 Calculates the accurate offscreen height of a structured block prior to layout scheduling.
 
@@ -16,7 +16,7 @@ Calculates the accurate offscreen height of a structured block prior to layout s
 
 ### block
 
-[`StructuredBlock`](../interfaces/StructuredBlock.md) \| [`PreparedBlock`](../interfaces/PreparedBlock.md)
+[`PreparedBlock`](../interfaces/PreparedBlock.md) \| [`StructuredBlock`](../interfaces/StructuredBlock.md)
 
 ### containerWidth
 

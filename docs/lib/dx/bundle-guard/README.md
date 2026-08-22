@@ -8,6 +8,7 @@
 
 ## Interfaces
 
+- [BundleBudgetOptions](interfaces/BundleBudgetOptions.md)
 - [BundleBudgetReport](interfaces/BundleBudgetReport.md)
 - [ChunkInfo](interfaces/ChunkInfo.md)
 
@@ -19,3 +20,5 @@
 
 - [checkBundleBudgets](functions/checkBundleBudgets.md)
 - [inspectBundleChunks](functions/inspectBundleChunks.md)
+- [inspectStandaloneBundle](functions/inspectStandaloneBundle.md)
+- [printBundleReport](functions/printBundleReport.md)

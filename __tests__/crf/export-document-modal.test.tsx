@@ -2,19 +2,27 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { ExportDocumentModal } from "@/components/crf/Modes/ExportDocumentModal";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
+import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
 
 vi.mock("@/lib/crf/export-docx", () => ({
-  generateStudyDocx: vi.fn().mockResolvedValue(new Blob(["mock-docx"], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" })),
+  generateStudyDocx: vi.fn().mockResolvedValue(
+    new Blob(["mock-docx"], {
+      type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    })
+  ),
 }));
 
 vi.mock("@/lib/crf/export-pdf", () => ({
-  generateStudyPdf: vi.fn().mockResolvedValue(new Blob(["mock-pdf"], { type: "application/pdf" })),
+  generateStudyPdf: vi
+    .fn()
+    .mockResolvedValue(new Blob(["mock-pdf"], { type: "application/pdf" })),
 }));
 
 describe("ExportDocumentModal Component", () => {
@@ -58,7 +66,9 @@ describe("ExportDocumentModal Component", () => {
       );
     });
 
-    expect(container.textContent).toContain("Clinical Word (.docx) & PDF Exporter");
+    expect(container.textContent).toContain(
+      "Clinical Word (.docx) & PDF Exporter"
+    );
     expect(container.textContent).toContain("Blank Data Collection Forms");
     expect(container.textContent).toContain("Annotated Submission aCRF");
     expect(container.textContent).toContain("Entire Study Book");
@@ -84,7 +94,9 @@ describe("ExportDocumentModal Component", () => {
 
     // Select Annotated aCRF mode
     const buttons = Array.from(container.querySelectorAll("button"));
-    const acrfModeBtn = buttons.find((b) => b.textContent?.includes("Annotated Submission aCRF"));
+    const acrfModeBtn = buttons.find((b) =>
+      b.textContent?.includes("Annotated Submission aCRF")
+    );
     expect(acrfModeBtn).toBeDefined();
 
     await act(async () => {
@@ -92,8 +104,8 @@ describe("ExportDocumentModal Component", () => {
     });
 
     // Click Export Word
-    const exportWordBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Export Word (.docx)")
+    const exportWordBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Export Word (.docx)")
     );
     expect(exportWordBtn).toBeDefined();
 
@@ -121,8 +133,8 @@ describe("ExportDocumentModal Component", () => {
       );
     });
 
-    const brandingBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Customize Branding")
+    const brandingBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Customize Branding")
     );
     expect(brandingBtn).toBeDefined();
 
@@ -149,8 +161,8 @@ describe("ExportDocumentModal Component", () => {
       );
     });
 
-    const exportPdfBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Export PDF (.pdf)")
+    const exportPdfBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Export PDF (.pdf)")
     );
     expect(exportPdfBtn).toBeDefined();
 

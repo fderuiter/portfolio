@@ -2,12 +2,14 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { ExportImportModal } from "@/components/crf/Modes/ExportImportModal";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
+import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
 
 describe("ExportImportModal Statistical Tabs & Domain Filtering", () => {
   let container: HTMLDivElement;
@@ -54,7 +56,9 @@ describe("ExportImportModal Statistical Tabs & Domain Filtering", () => {
       );
     });
 
-    expect(container.textContent).toContain("CDISC Standards & Interoperability Exporter");
+    expect(container.textContent).toContain(
+      "CDISC Standards & Interoperability Exporter"
+    );
     expect(container.textContent).toContain("CDISC ODM-XML");
     expect(container.textContent).toContain("SAS Script (.sas)");
     expect(container.textContent).toContain("R Scaffolding (.R)");
@@ -77,7 +81,9 @@ describe("ExportImportModal Statistical Tabs & Domain Filtering", () => {
     });
 
     const buttons = Array.from(container.querySelectorAll("button"));
-    const sasTabBtn = buttons.find((b) => b.textContent?.includes("SAS Script (.sas)"));
+    const sasTabBtn = buttons.find((b) =>
+      b.textContent?.includes("SAS Script (.sas)")
+    );
     expect(sasTabBtn).toBeDefined();
 
     await act(async () => {
@@ -109,7 +115,9 @@ describe("ExportImportModal Statistical Tabs & Domain Filtering", () => {
     });
 
     const buttons = Array.from(container.querySelectorAll("button"));
-    const rTabBtn = buttons.find((b) => b.textContent?.includes("R Scaffolding (.R)"));
+    const rTabBtn = buttons.find((b) =>
+      b.textContent?.includes("R Scaffolding (.R)")
+    );
     expect(rTabBtn).toBeDefined();
 
     await act(async () => {
@@ -140,8 +148,8 @@ describe("ExportImportModal Statistical Tabs & Domain Filtering", () => {
     });
 
     // Switch to SAS tab
-    const sasTabBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("SAS Script (.sas)")
+    const sasTabBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("SAS Script (.sas)")
     );
     await act(async () => {
       sasTabBtn?.click();
@@ -178,16 +186,16 @@ describe("ExportImportModal Statistical Tabs & Domain Filtering", () => {
     });
 
     // Switch to SAS tab
-    const sasTabBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("SAS Script (.sas)")
+    const sasTabBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("SAS Script (.sas)")
     );
     await act(async () => {
       sasTabBtn?.click();
     });
 
     // Click Download
-    const downloadBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Download File")
+    const downloadBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Download File")
     );
     await act(async () => {
       downloadBtn?.click();

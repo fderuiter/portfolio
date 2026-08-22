@@ -2,22 +2,32 @@ import fs from "fs";
 import path from "path";
 import { execSync } from "child_process";
 import { scanFile } from "../validation-scanner";
-import { colors, badge, formatSection } from "./utils";
+import { colors, badge, formatHeader } from "./utils";
 import { checkEnvironmentVariables } from "./env-guard";
 import { checkGitHygieneConfig } from "./git-guard";
 import { checkDeadCode } from "./dead-code";
 import { checkBundleBudgets } from "./bundle-guard";
+import { type RemediationAction } from "./cli-parser";
 import { getEnv } from "../env";
 
 export interface DiagnosticCheckResult {
   id: string;
   name: string;
-  category: "architecture" | "routes" | "security" | "database" | "docs" | "hydration" | "accessibility" | "quality";
+  category:
+    | "architecture"
+    | "routes"
+    | "security"
+    | "database"
+    | "docs"
+    | "hydration"
+    | "accessibility"
+    | "quality";
   status: "pass" | "fail" | "warn" | "fixed";
   message: string;
   details?: string[];
   fixable?: boolean;
   fixedMessage?: string;
+  remediation?: RemediationAction;
 }
 
 export interface DoctorOptions {
@@ -30,7 +40,11 @@ export interface DoctorOptions {
 /**
  * Helper to recursively find files
  */
-function findFiles(dir: string, pattern: RegExp, ignoreDirs: string[] = ["node_modules", ".git", ".next", "dist"]): string[] {
+function findFiles(
+  dir: string,
+  pattern: RegExp,
+  ignoreDirs: string[] = ["node_modules", ".git", ".next", "dist"]
+): string[] {
   if (!fs.existsSync(dir)) return [];
   const results: string[] = [];
   const list = fs.readdirSync(dir, { withFileTypes: true });
@@ -50,7 +64,10 @@ function findFiles(dir: string, pattern: RegExp, ignoreDirs: string[] = ["node_m
 /**
  * Check Route Registration in CommandPalette.tsx (AGENTS.md Invariant #3)
  */
-export function checkRouteIndexing(root: string, fix = false): DiagnosticCheckResult {
+export function checkRouteIndexing(
+  root: string,
+  fix = false
+): DiagnosticCheckResult {
   const appDir = path.join(root, "app");
   const paletteFile = path.join(root, "components", "CommandPalette.tsx");
 
@@ -96,14 +113,16 @@ export function checkRouteIndexing(root: string, fix = false): DiagnosticCheckRe
       name: "First-Class Route Command Palette Registration",
       category: "routes",
       status: "pass",
-      message: "All first-class app routes are registered in CommandPalette staticNavs.",
+      message:
+        "All first-class app routes are registered in CommandPalette staticNavs.",
     };
   }
 
   if (fix) {
     // Attempt auto-fix by injecting missing routes into staticNavs array
     let updatedContent = paletteContent;
-    const staticNavsRegex = /(const staticNavs:\s*PaletteItem\[\]\s*=\s*\[)([\s\S]*?)(\n\s*\];)/;
+    const staticNavsRegex =
+      /(const staticNavs:\s*PaletteItem\[\]\s*=\s*\[)([\s\S]*?)(\n\s*\];)/;
     const match = paletteContent.match(staticNavsRegex);
 
     if (match) {
@@ -117,7 +136,10 @@ export function checkRouteIndexing(root: string, fix = false): DiagnosticCheckRe
       });
 
       const insertion = "\n" + generatedItems.join("\n");
-      updatedContent = paletteContent.replace(staticNavsRegex, `$1$2${insertion}$3`);
+      updatedContent = paletteContent.replace(
+        staticNavsRegex,
+        `$1$2${insertion}$3`
+      );
       fs.writeFileSync(paletteFile, updatedContent, "utf-8");
 
       return {
@@ -137,7 +159,9 @@ export function checkRouteIndexing(root: string, fix = false): DiagnosticCheckRe
     category: "routes",
     status: "fail",
     message: `${missingRoutes.length} route(s) not registered in CommandPalette.tsx staticNavs (AGENTS.md #3)`,
-    details: missingRoutes.map((m) => `Missing registration for ${m.url} (from app/${m.routePath})`),
+    details: missingRoutes.map(
+      (m) => `Missing registration for ${m.url} (from app/${m.routePath})`
+    ),
     fixable: true,
   };
 }
@@ -158,7 +182,9 @@ export function checkNavbarHierarchy(root: string): DiagnosticCheckResult {
     }
     const content = fs.readFileSync(file, "utf-8");
     // Check if Navbar is imported or rendered as a JSX tag
-    const rendersNavbar = /<Navbar\b/.test(content) || /import\s+.*Navbar.*from\s+["']@\/components\/Navbar["']/.test(content);
+    const rendersNavbar =
+      /<Navbar\b/.test(content) ||
+      /import\s+.*Navbar.*from\s+["']@\/components\/Navbar["']/.test(content);
     if (rendersNavbar) {
       violations.push(relative);
     }
@@ -170,7 +196,8 @@ export function checkNavbarHierarchy(root: string): DiagnosticCheckResult {
       name: "Global Navbar Single-Mount Invariant",
       category: "architecture",
       status: "pass",
-      message: "Navbar is only mounted in app/layout.tsx. No duplicate Navbars detected.",
+      message:
+        "Navbar is only mounted in app/layout.tsx. No duplicate Navbars detected.",
     };
   }
 
@@ -197,7 +224,8 @@ export function checkPageTopPadding(root: string): DiagnosticCheckResult {
   for (const file of pageFiles) {
     const relative = path.relative(root, file);
     // Skip API or non-route files
-    if (relative.startsWith("app/api") || relative.startsWith("app/generated")) continue;
+    if (relative.startsWith("app/api") || relative.startsWith("app/generated"))
+      continue;
 
     const content = fs.readFileSync(file, "utf-8");
     const hasTopPadding =
@@ -216,7 +244,8 @@ export function checkPageTopPadding(root: string): DiagnosticCheckResult {
       name: "Page Header Clearance Top-Padding Invariant",
       category: "architecture",
       status: "pass",
-      message: "All route root containers include header clearance padding (pt-24 to pt-32).",
+      message:
+        "All route root containers include header clearance padding (pt-24 to pt-32).",
     };
   }
 
@@ -258,10 +287,16 @@ export function checkTestPathResolution(root: string): DiagnosticCheckResult {
       // Look for hardcoded root paths like "/app/..." or absolute macOS/Linux roots
       if (
         /(path\.resolve|readFileSync|join)\(\s*['"`]\/app\//.test(line) ||
-        /(root|dir|cwd|workspaceRoot)\s*=\s*['"`]\/app\/[^'"`]+['"`]/.test(line) ||
+        /(root|dir|cwd|workspaceRoot)\s*=\s*['"`]\/app\/[^'"`]+['"`]/.test(
+          line
+        ) ||
         /['"`]\/(Users|home)\/[a-zA-Z0-9_-]+\//.test(line)
       ) {
-        violations.push({ file: relative, line: index + 1, match: line.trim() });
+        violations.push({
+          file: relative,
+          line: index + 1,
+          match: line.trim(),
+        });
       }
     });
   }
@@ -272,7 +307,8 @@ export function checkTestPathResolution(root: string): DiagnosticCheckResult {
       name: "Dynamic Path Resolution in Test Suites",
       category: "architecture",
       status: "pass",
-      message: "All tests dynamically resolve workspace root via process.cwd() or path.resolve().",
+      message:
+        "All tests dynamically resolve workspace root via process.cwd() or path.resolve().",
     };
   }
 
@@ -288,18 +324,74 @@ export function checkTestPathResolution(root: string): DiagnosticCheckResult {
 }
 
 /**
+ * Check Test Fixture Hygiene & Unsafe Type Assertions (ADR 0028).
+ * Test suites must use @total-typescript/shoehorn instead of unsafe double casts (`as unknown as [A-Z]`).
+ */
+export function checkTestFixtureHygiene(root: string): DiagnosticCheckResult {
+  const testsDir = path.join(root, "__tests__");
+  const testFiles = findFiles(testsDir, /\.(test|spec)\.(ts|tsx)$/);
+  const violations: { file: string; line: number; match: string }[] = [];
+
+  for (const file of testFiles) {
+    const relative = path.relative(root, file);
+    if (relative.includes("dx-doctor.test.ts")) {
+      continue;
+    }
+
+    const content = fs.readFileSync(file, "utf-8");
+    const lines = content.split("\n");
+
+    lines.forEach((line, index) => {
+      if (
+        line.includes("IS_REACT_ACT_ENVIRONMENT") ||
+        line.includes("AudioContext: unknown") ||
+        line.includes("globalThis as unknown as")
+      ) {
+        return;
+      }
+      if (/as\s+unknown\s+as\s+[A-Z]/.test(line)) {
+        violations.push({
+          file: relative,
+          line: index + 1,
+          match: line.trim(),
+        });
+      }
+    });
+  }
+
+  if (violations.length === 0) {
+    return {
+      id: "tests-fixture-hygiene",
+      name: "Test Fixture Hygiene & Shoehorn Guard (ADR 0028)",
+      category: "quality",
+      status: "pass",
+      message:
+        "Test fixtures use @total-typescript/shoehorn without unsafe double type assertions.",
+    };
+  }
+
+  return {
+    id: "tests-fixture-hygiene",
+    name: "Test Fixture Hygiene & Shoehorn Guard (ADR 0028)",
+    category: "quality",
+    status: "fail",
+    message: `Unsafe type assertions (as unknown as Type) detected in ${violations.length} test location(s). Migrate to @total-typescript/shoehorn (fromPartial / fromAny).`,
+    details: violations
+      .slice(0, 10)
+      .map((v) => `${v.file}:${v.line} -> ${v.match}`),
+    fixable: false,
+  };
+}
+
+/**
  * Secret & Credential Leak Scanner
  */
 export function checkSecretLeaks(root: string): DiagnosticCheckResult {
-  const candidateFiles = findFiles(root, /\.(ts|tsx|js|mjs|json|yml|yaml|md)$/, [
-    "node_modules",
-    ".git",
-    ".next",
-    "dist",
-    "coverage",
-    "__tests__",
-    ".husky",
-  ]);
+  const candidateFiles = findFiles(
+    root,
+    /\.(ts|tsx|js|mjs|json|yml|yaml|md)$/,
+    ["node_modules", ".git", ".next", "dist", "coverage", "__tests__", ".husky"]
+  );
 
   const ignoredFiles = [
     "package-lock.json",
@@ -335,7 +427,8 @@ export function checkSecretLeaks(root: string): DiagnosticCheckResult {
       name: "Zero Hardcoded Credentials & Secrets Scanner",
       category: "security",
       status: "pass",
-      message: "No private keys, tokens, or live database passwords detected in repository files.",
+      message:
+        "No private keys, tokens, or live database passwords detected in repository files.",
     };
   }
 
@@ -375,12 +468,18 @@ export function checkMigrationGuard(root: string): DiagnosticCheckResult {
     try {
       const schemaContent = fs.readFileSync(schemaPath, "utf-8");
       const lockContent = fs.readFileSync(lockPath, "utf-8");
-      const schemaProviderMatch = schemaContent.match(/datasource\s+\w+\s*\{[\s\S]*?provider\s*=\s*["']([^"']+)["']/);
-      const lockProviderMatch = lockContent.match(/^provider\s*=\s*["']([^"']+)["']/m);
+      const schemaProviderMatch = schemaContent.match(
+        /datasource\s+\w+\s*\{[\s\S]*?provider\s*=\s*["']([^"']+)["']/
+      );
+      const lockProviderMatch = lockContent.match(
+        /^provider\s*=\s*["']([^"']+)["']/m
+      );
 
       if (schemaProviderMatch && lockProviderMatch) {
         if (schemaProviderMatch[1] !== lockProviderMatch[1]) {
-          failures.push(`Provider mismatch: schema.prisma uses '${schemaProviderMatch[1]}', migration_lock.toml uses '${lockProviderMatch[1]}'.`);
+          failures.push(
+            `Provider mismatch: schema.prisma uses '${schemaProviderMatch[1]}', migration_lock.toml uses '${lockProviderMatch[1]}'.`
+          );
         }
       }
     } catch (e: unknown) {
@@ -397,7 +496,9 @@ export function checkMigrationGuard(root: string): DiagnosticCheckResult {
     for (const sqlFile of sqlFiles) {
       const content = fs.readFileSync(sqlFile, "utf-8");
       if (content.trim() === "") {
-        failures.push(`Empty migration SQL file found at ${path.relative(root, sqlFile)}.`);
+        failures.push(
+          `Empty migration SQL file found at ${path.relative(root, sqlFile)}.`
+        );
       }
     }
   }
@@ -418,13 +519,81 @@ export function checkMigrationGuard(root: string): DiagnosticCheckResult {
     failures.push(`Destructive DDL detected in ${v.file}: ${v.ddl}`);
   }
 
+  // 4. Check Migration Documentation Parity & Operational Command Completeness
+  const docPath = path.join(root, "DATABASE_MIGRATIONS.md");
+  if (!fs.existsSync(docPath)) {
+    failures.push(
+      "DATABASE_MIGRATIONS.md file is missing from repository root."
+    );
+  } else {
+    try {
+      const docContent = fs.readFileSync(docPath, "utf-8");
+      // Check migration identifier parity
+      const documentedMigrations = Array.from(
+        new Set(
+          (docContent.match(/\b\d{14}_[a-z0-9_]+\b/gi) || []).map((m) =>
+            m.toLowerCase()
+          )
+        )
+      ).sort();
+      const actualMigrations = fs
+        .readdirSync(migrationsDir, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => entry.name)
+        .sort();
+
+      const missingInDoc = actualMigrations.filter(
+        (m) => !documentedMigrations.includes(m.toLowerCase())
+      );
+      if (missingInDoc.length > 0) {
+        failures.push(
+          `DATABASE_MIGRATIONS.md is missing active migration(s): ${missingInDoc.join(", ")}`
+        );
+      }
+
+      // Check required operational commands & environment variables
+      const requiredDocCommands = [
+        {
+          name: "schema drift verification ('npm run check:migrations:drift' or 'prisma migrate diff')",
+          pattern: /check:migrations:drift|prisma migrate diff/i,
+        },
+        {
+          name: "pipeline release gate execution ('npm run release:gate' or 'release-gate.ts')",
+          pattern: /release:gate|release-gate\.ts/i,
+        },
+        {
+          name: "destructive migration environment variable ('ALLOW_DESTRUCTIVE_MIGRATIONS')",
+          pattern: /ALLOW_DESTRUCTIVE_MIGRATIONS/i,
+        },
+        {
+          name: "unified migration check ('npm run check:migrations')",
+          pattern: /check:migrations\b/i,
+        },
+      ];
+
+      for (const cmd of requiredDocCommands) {
+        if (!cmd.pattern.test(docContent)) {
+          failures.push(
+            `DATABASE_MIGRATIONS.md is missing documentation for ${cmd.name}`
+          );
+        }
+      }
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      failures.push(
+        `Failed to verify DATABASE_MIGRATIONS.md completeness: ${msg}`
+      );
+    }
+  }
+
   if (failures.length === 0) {
     return {
       id: "database-migrations",
       name: "Prisma Migration Integrity & Destructive Guard",
       category: "database",
       status: "pass",
-      message: "All migration SQL files pass integrity checks with zero unapproved destructive DDL.",
+      message:
+        "All migration SQL files pass integrity checks with zero unapproved destructive DDL.",
     };
   }
 
@@ -442,7 +611,10 @@ export function checkMigrationGuard(root: string): DiagnosticCheckResult {
 /**
  * Documentation & TypeDoc Parity Check
  */
-export function checkDocumentationParity(root: string, fix = false): DiagnosticCheckResult {
+export function checkDocumentationParity(
+  root: string,
+  fix = false
+): DiagnosticCheckResult {
   const docsDir = path.join(root, "docs");
   if (!fs.existsSync(docsDir)) {
     return {
@@ -450,7 +622,8 @@ export function checkDocumentationParity(root: string, fix = false): DiagnosticC
       name: "TypeDoc & Markdown Documentation Parity",
       category: "docs",
       status: "fail",
-      message: "docs/ directory does not exist. Run 'npm run compile-docs' to generate.",
+      message:
+        "docs/ directory does not exist. Run 'npm run compile-docs' to generate.",
       fixable: true,
     };
   }
@@ -479,11 +652,18 @@ export function checkDocumentationParity(root: string, fix = false): DiagnosticC
   const driftDetails: string[] = [];
 
   try {
-    const diff = execSync("git diff --name-only docs", { cwd: root, encoding: "utf-8" }).trim();
+    const diff = execSync("git diff --name-only docs", {
+      cwd: root,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "ignore"],
+    }).trim();
     if (diff.length > 0) {
       driftDetails.push(...diff.split("\n").map((f) => `Modified: ${f}`));
     }
-    const untracked = execSync("git ls-files --others --exclude-standard docs", { cwd: root, encoding: "utf-8" }).trim();
+    const untracked = execSync(
+      "git ls-files --others --exclude-standard docs",
+      { cwd: root, encoding: "utf-8", stdio: ["pipe", "pipe", "ignore"] }
+    ).trim();
     if (untracked.length > 0) {
       driftDetails.push(...untracked.split("\n").map((f) => `Untracked: ${f}`));
     }
@@ -515,7 +695,10 @@ export function checkDocumentationParity(root: string, fix = false): DiagnosticC
 /**
  * Onboarding Documentation & Engine Constraint Drift Check
  */
-export function checkOnboardingDocsDrift(root: string, fix = false): DiagnosticCheckResult {
+export function checkOnboardingDocsDrift(
+  root: string,
+  fix = false
+): DiagnosticCheckResult {
   const readmePath = path.join(root, "README.md");
   const docsReadmePath = path.join(root, "docs", "README.md");
   const targetFiles = [readmePath];
@@ -535,7 +718,9 @@ export function checkOnboardingDocsDrift(root: string, fix = false): DiagnosticC
 
   for (const filePath of targetFiles) {
     if (!fs.existsSync(filePath)) {
-      failures.push(`Target onboarding doc missing: ${path.relative(root, filePath)}`);
+      failures.push(
+        `Target onboarding doc missing: ${path.relative(root, filePath)}`
+      );
       continue;
     }
 
@@ -545,31 +730,46 @@ export function checkOnboardingDocsDrift(root: string, fix = false): DiagnosticC
     // 1. Obsolete Badges Check
     for (const badgeRegex of obsoleteBadges) {
       if (badgeRegex.test(content)) {
-        failures.push(`${relative}: Obsolete Python technology badge detected in top header.`);
+        failures.push(
+          `${relative}: Obsolete Python technology badge detected in top header.`
+        );
         break;
       }
     }
 
     // 2. Node & npm Engine Requirements Check
     if (!/Node\.js.*22/i.test(content)) {
-      failures.push(`${relative}: Missing explicit requirement for Node.js 22.x in prerequisites.`);
+      failures.push(
+        `${relative}: Missing explicit requirement for Node.js 22.x in prerequisites.`
+      );
     }
 
     if (/\b(v20\+|v18\+|v16\+)\b/i.test(content)) {
-      failures.push(`${relative}: Incorrect Node version (v20+/v18+/v16+) listed in prerequisites.`);
+      failures.push(
+        `${relative}: Incorrect Node version (v20+/v18+/v16+) listed in prerequisites.`
+      );
     }
 
-    if (/\b(bun|yarn|pnpm)\b.*as the package manager/i.test(content) || /npm\s+or\s+bun/i.test(content)) {
-      failures.push(`${relative}: Lists unsupported package manager (bun/yarn/pnpm) in prerequisites.`);
+    if (
+      /\b(bun|yarn|pnpm)\b.*as the package manager/i.test(content) ||
+      /npm\s+or\s+bun/i.test(content)
+    ) {
+      failures.push(
+        `${relative}: Lists unsupported package manager (bun/yarn/pnpm) in prerequisites.`
+      );
     }
 
     // 3. Environment Template Reference Check
     if (content.includes(".env.local.example")) {
-      failures.push(`${relative}: References invalid environment template '.env.local.example' instead of '.env.example'.`);
+      failures.push(
+        `${relative}: References invalid environment template '.env.local.example' instead of '.env.example'.`
+      );
     }
 
     if (!content.includes(".env.example")) {
-      failures.push(`${relative}: Missing reference to valid environment template '.env.example'.`);
+      failures.push(
+        `${relative}: Missing reference to valid environment template '.env.example'.`
+      );
     }
 
     // 4. Database Setup Sequence Check (prisma db push before prisma db seed)
@@ -577,9 +777,13 @@ export function checkOnboardingDocsDrift(root: string, fix = false): DiagnosticC
     const seedIndex = content.indexOf("prisma db seed");
 
     if (pushIndex === -1) {
-      failures.push(`${relative}: Missing database schema push command ('npx prisma db push') in setup instructions.`);
+      failures.push(
+        `${relative}: Missing database schema push command ('npx prisma db push') in setup instructions.`
+      );
     } else if (seedIndex !== -1 && pushIndex > seedIndex) {
-      failures.push(`${relative}: Schema push command ('prisma db push') must precede database seeding ('prisma db seed').`);
+      failures.push(
+        `${relative}: Schema push command ('prisma db push') must precede database seeding ('prisma db seed').`
+      );
     }
   }
 
@@ -608,14 +812,18 @@ export function checkOnboardingDocsDrift(root: string, fix = false): DiagnosticC
     name: "Onboarding Documentation & Engine Sync Guard",
     category: "docs",
     status: "pass",
-    message: "Onboarding documentation matches Node.js 22.x/npm engine constraints, environment templates, and database setup sequence.",
+    message:
+      "Onboarding documentation matches Node.js 22.x/npm engine constraints, environment templates, and database setup sequence.",
   };
 }
 
 /**
  * OpenAPI Parity & Route Completeness Check
  */
-export function checkOpenApiParity(root: string, fix = false): DiagnosticCheckResult {
+export function checkOpenApiParity(
+  root: string,
+  fix = false
+): DiagnosticCheckResult {
   const openApiFile = path.join(root, "openapi.json");
   const generatorScript = path.join(root, "scripts", "generate-openapi.ts");
   const apiDir = path.join(root, "app", "api");
@@ -633,13 +841,17 @@ export function checkOpenApiParity(root: string, fix = false): DiagnosticCheckRe
 
   if (fix) {
     try {
-      execSync("npx tsx scripts/generate-openapi.ts", { cwd: root, stdio: "ignore" });
+      execSync("npx tsx scripts/generate-openapi.ts", {
+        cwd: root,
+        stdio: "ignore",
+      });
       return {
         id: "api-openapi-sync",
         name: "OpenAPI Specification Contract Sync",
         category: "architecture",
         status: "fixed",
-        message: "Successfully regenerated openapi.json specification with complete route coverage.",
+        message:
+          "Successfully regenerated openapi.json specification with complete route coverage.",
       };
     } catch {
       return {
@@ -675,7 +887,9 @@ export function checkOpenApiParity(root: string, fix = false): DiagnosticCheckRe
   }
 
   const documentedRoutes = Object.keys(parsedSpec.paths || {});
-  const missingRoutes = expectedRoutes.filter((r) => !documentedRoutes.includes(r));
+  const missingRoutes = expectedRoutes.filter(
+    (r) => !documentedRoutes.includes(r)
+  );
 
   if (missingRoutes.length > 0) {
     return {
@@ -694,7 +908,8 @@ export function checkOpenApiParity(root: string, fix = false): DiagnosticCheckRe
     name: "OpenAPI Specification Contract Sync",
     category: "architecture",
     status: "pass",
-    message: "All app/api routes are documented in openapi.json with zero specification drift.",
+    message:
+      "All app/api routes are documented in openapi.json with zero specification drift.",
   };
 }
 
@@ -704,7 +919,10 @@ export function checkOpenApiParity(root: string, fix = false): DiagnosticCheckRe
 export function checkHydrationSafety(root: string): DiagnosticCheckResult {
   const componentsDir = path.join(root, "components");
   const appDir = path.join(root, "app");
-  const files = [...findFiles(componentsDir, /\.tsx$/), ...findFiles(appDir, /\.tsx$/)];
+  const files = [
+    ...findFiles(componentsDir, /\.tsx$/),
+    ...findFiles(appDir, /\.tsx$/),
+  ];
 
   const warnings: { file: string; pattern: string }[] = [];
 
@@ -713,12 +931,26 @@ export function checkHydrationSafety(root: string): DiagnosticCheckResult {
     const content = fs.readFileSync(file, "utf-8");
 
     // Scan for unsuppressed Math.random() in rendering JSX
-    if (/<div>.*Math\.random\(.*\).*<\/div>/.test(content) && !/suppressHydrationWarning/.test(content)) {
-      warnings.push({ file: relative, pattern: "Math.random() in JSX without suppressHydrationWarning" });
+    if (
+      /<div>.*Math\.random\(.*\).*<\/div>/.test(content) &&
+      !/suppressHydrationWarning/.test(content)
+    ) {
+      warnings.push({
+        file: relative,
+        pattern: "Math.random() in JSX without suppressHydrationWarning",
+      });
     }
     // Scan for direct window / localStorage reads in initial useState initializers without useSyncExternalStore
-    if (/useState\(\s*\(\)\s*=>\s*(typeof window !== ["']undefined["'] \? localStorage|localStorage\.getItem)/.test(content)) {
-      warnings.push({ file: relative, pattern: "Direct localStorage in useState initializer (prefer useSyncExternalStore)" });
+    if (
+      /useState\(\s*\(\)\s*=>\s*(typeof window !== ["']undefined["'] \? localStorage|localStorage\.getItem)/.test(
+        content
+      )
+    ) {
+      warnings.push({
+        file: relative,
+        pattern:
+          "Direct localStorage in useState initializer (prefer useSyncExternalStore)",
+      });
     }
   }
 
@@ -728,7 +960,8 @@ export function checkHydrationSafety(root: string): DiagnosticCheckResult {
       name: "React 19 & Next.js 16 Hydration Determinism",
       category: "hydration",
       status: "pass",
-      message: "Zero hydration antipatterns detected. Client state uses useSyncExternalStore or mounted bounds.",
+      message:
+        "Zero hydration antipatterns detected. Client state uses useSyncExternalStore or mounted bounds.",
     };
   }
 
@@ -746,7 +979,10 @@ export function checkHydrationSafety(root: string): DiagnosticCheckResult {
  * Accessibility Standards & WCAG 2.1 Conformance Guard (Invariant #10)
  * Ensures bypass skip links, semantic main landmark, live announcer provider, and alt/label tags are present.
  */
-export function checkAccessibilityStandards(root: string, fix = false): DiagnosticCheckResult {
+export function checkAccessibilityStandards(
+  root: string,
+  fix = false
+): DiagnosticCheckResult {
   const layoutFile = path.join(root, "app", "layout.tsx");
   const violations: string[] = [];
 
@@ -764,29 +1000,47 @@ export function checkAccessibilityStandards(root: string, fix = false): Diagnost
   let layoutContent = fs.readFileSync(layoutFile, "utf-8");
 
   // Check 1: SkipToContent or accessible skip link
-  const hasSkipLink = /<SkipToContent\b|href=["']#main-content["']/.test(layoutContent);
+  const hasSkipLink = /<SkipToContent\b|href=["']#main-content["']/.test(
+    layoutContent
+  );
   if (!hasSkipLink) {
-    violations.push("Missing SkipToContent or #main-content skip link in app/layout.tsx");
+    violations.push(
+      "Missing SkipToContent or #main-content skip link in app/layout.tsx"
+    );
   }
 
   // Check 2: Semantic main element with id="main-content"
-  const hasMainLandmark = /<main[^>]*id=["']main-content["']|<main[^>]*\bid=["']main-content["']/.test(layoutContent);
+  const hasMainLandmark =
+    /<main[^>]*id=["']main-content["']|<main[^>]*\bid=["']main-content["']/.test(
+      layoutContent
+    );
   if (!hasMainLandmark) {
-    violations.push("Missing semantic main landmark with id='main-content' in app/layout.tsx");
+    violations.push(
+      "Missing semantic main landmark with id='main-content' in app/layout.tsx"
+    );
   }
 
   // Check 3: Live Announcer Provider
-  const hasAnnouncer = /<A11yProvider\b|<LiveAnnouncerProvider\b/.test(layoutContent);
+  const hasAnnouncer = /<A11yProvider\b|<LiveAnnouncerProvider\b/.test(
+    layoutContent
+  );
   if (!hasAnnouncer) {
-    violations.push("Missing A11yProvider / LiveAnnouncerProvider screen-reader live region in app/layout.tsx");
+    violations.push(
+      "Missing A11yProvider / LiveAnnouncerProvider screen-reader live region in app/layout.tsx"
+    );
   }
 
   // Auto-fix if fix is true and layout violations exist
   if (fix && violations.length > 0) {
     let modified = false;
     if (!hasSkipLink && !layoutContent.includes("SkipToContent")) {
-      layoutContent = `import { SkipToContent } from "@/components/SkipToContent";\n` + layoutContent;
-      layoutContent = layoutContent.replace(/<body[^>]*>/, (match) => `${match}\n        <SkipToContent />`);
+      layoutContent =
+        `import { SkipToContent } from "@/components/SkipToContent";\n` +
+        layoutContent;
+      layoutContent = layoutContent.replace(
+        /<body[^>]*>/,
+        (match) => `${match}\n        <SkipToContent />`
+      );
       modified = true;
     }
     if (!hasMainLandmark && layoutContent.includes("{children}")) {
@@ -803,7 +1057,8 @@ export function checkAccessibilityStandards(root: string, fix = false): Diagnost
         name: "WCAG 2.1 Accessibility & Landmark Standards",
         category: "accessibility",
         status: "fixed",
-        message: "Auto-remediated layout landmarks and skip links in app/layout.tsx",
+        message:
+          "Auto-remediated layout landmarks and skip links in app/layout.tsx",
         details: violations,
       };
     }
@@ -815,7 +1070,8 @@ export function checkAccessibilityStandards(root: string, fix = false): Diagnost
       name: "WCAG 2.1 Accessibility & Landmark Standards",
       category: "accessibility",
       status: "pass",
-      message: "Root layout satisfies WCAG 2.1 skip link, semantic main landmark, and dynamic live announcer standards.",
+      message:
+        "Root layout satisfies WCAG 2.1 skip link, semantic main landmark, and dynamic live announcer standards.",
     };
   }
 
@@ -834,25 +1090,55 @@ export function checkAccessibilityStandards(root: string, fix = false): Diagnost
  * Check Defect Remediation & Root-Cause Invariants (AGENTS.md Invariant #11).
  * Asserts presence of regression test harness and computational boundary defenses.
  */
-export function checkDefectRemediationInvariants(root: string): DiagnosticCheckResult {
-  const regressionTestFile = path.join(root, "__tests__", "defect-remediation-regression.test.ts");
-  const adrFile = path.join(root, "adr", "0007-comprehensive-defect-remediation-strategy.md");
+export function checkDefectRemediationInvariants(
+  root: string
+): DiagnosticCheckResult {
+  const regressionTestFile = path.join(
+    root,
+    "__tests__",
+    "defect-remediation-regression.test.ts"
+  );
+  const adrFile = path.join(
+    root,
+    "adr",
+    "0007-comprehensive-defect-remediation-strategy.md"
+  );
   const violations: string[] = [];
 
   if (!fs.existsSync(regressionTestFile)) {
-    violations.push("Missing primary defect remediation regression suite: __tests__/defect-remediation-regression.test.ts");
+    violations.push(
+      "Missing primary defect remediation regression suite: __tests__/defect-remediation-regression.test.ts"
+    );
   }
 
   if (!fs.existsSync(adrFile)) {
-    violations.push("Missing Architectural Decision Record: adr/0007-comprehensive-defect-remediation-strategy.md");
+    violations.push(
+      "Missing Architectural Decision Record: adr/0007-comprehensive-defect-remediation-strategy.md"
+    );
   }
 
   // Scan computational engine files for boundary guards
   const engineChecks = [
-    { file: "lib/proof-utils.ts", pattern: /depth\s*>\s*500/, label: "Proof AST recursion limit guard" },
-    { file: "lib/garmin-engine.ts", pattern: /safeDelta\s*=\s*Number\.isFinite/, label: "Garmin telemetry finite delta guard" },
-    { file: "lib/working-with-duck-engine.ts", pattern: /safeX\s*=\s*Number\.isFinite/, label: "Duck engine coordinate boundary guard" },
-    { file: "lib/crf/ast-evaluator.ts", pattern: /ExpressionEvaluator/, label: "CRF AST Expression Evaluator" },
+    {
+      file: "lib/proof-utils.ts",
+      pattern: /depth\s*>\s*500/,
+      label: "Proof AST recursion limit guard",
+    },
+    {
+      file: "lib/garmin-engine.ts",
+      pattern: /safeDelta\s*=\s*Number\.isFinite/,
+      label: "Garmin telemetry finite delta guard",
+    },
+    {
+      file: "lib/working-with-duck-engine.ts",
+      pattern: /safeX\s*=\s*Number\.isFinite/,
+      label: "Duck engine coordinate boundary guard",
+    },
+    {
+      file: "lib/crf/ast-evaluator.ts",
+      pattern: /ExpressionEvaluator/,
+      label: "CRF AST Expression Evaluator",
+    },
   ];
 
   for (const ec of engineChecks) {
@@ -863,7 +1149,9 @@ export function checkDefectRemediationInvariants(root: string): DiagnosticCheckR
     }
     const content = fs.readFileSync(fullPath, "utf-8");
     if (!ec.pattern.test(content)) {
-      violations.push(`Engine ${ec.file} lacks verified invariant defense: ${ec.label}`);
+      violations.push(
+        `Engine ${ec.file} lacks verified invariant defense: ${ec.label}`
+      );
     }
   }
 
@@ -873,7 +1161,8 @@ export function checkDefectRemediationInvariants(root: string): DiagnosticCheckR
       name: "Defect Remediation & Root-Cause Regression Invariant",
       category: "quality",
       status: "pass",
-      message: "All legacy computational engines enforce boundary defenses, and verified regression test harness is active.",
+      message:
+        "All legacy computational engines enforce boundary defenses, and verified regression test harness is active.",
     };
   }
 
@@ -891,16 +1180,36 @@ export function checkDefectRemediationInvariants(root: string): DiagnosticCheckR
 /**
  * Check Proactive Defect Interception, Shift-Left Gateways & Synthetic Probes (AGENTS.md Invariant #12).
  */
-export function checkProactiveDefectInterception(root: string): DiagnosticCheckResult {
+export function checkProactiveDefectInterception(
+  root: string
+): DiagnosticCheckResult {
   const violations: string[] = [];
 
   const requiredFiles = [
-    { file: "stryker.config.mjs", desc: "Stryker mutation testing configuration" },
-    { file: "__tests__/property-fuzz.test.ts", desc: "Fast-check property & generative fuzz test suite" },
-    { file: "__tests__/e2e/synthetic-probes.spec.ts", desc: "Headless synthetic journey probe suite" },
-    { file: ".github/workflows/synthetic-probes.yml", desc: "Scheduled synthetic probe monitoring workflow" },
-    { file: "scripts/canary-analyzer.ts", desc: "Automated Canary Analysis (ACA) engine" },
-    { file: "adr/0008-proactive-defect-interception-strategy.md", desc: "ADR-0008 Proactive Defect Interception Strategy" },
+    {
+      file: "stryker.config.mjs",
+      desc: "Stryker mutation testing configuration",
+    },
+    {
+      file: "__tests__/property-fuzz.test.ts",
+      desc: "Fast-check property & generative fuzz test suite",
+    },
+    {
+      file: "__tests__/e2e/synthetic-probes.spec.ts",
+      desc: "Headless synthetic journey probe suite",
+    },
+    {
+      file: ".github/workflows/synthetic-probes.yml",
+      desc: "Scheduled synthetic probe monitoring workflow",
+    },
+    {
+      file: "scripts/canary-analyzer.ts",
+      desc: "Automated Canary Analysis (ACA) engine",
+    },
+    {
+      file: "adr/0008-proactive-defect-interception-strategy.md",
+      desc: "ADR-0008 Proactive Defect Interception Strategy",
+    },
   ];
 
   for (const rf of requiredFiles) {
@@ -916,7 +1225,8 @@ export function checkProactiveDefectInterception(root: string): DiagnosticCheckR
       name: "Proactive Defect Interception & Synthetic Reliability Invariant",
       category: "quality",
       status: "pass",
-      message: "Shift-left property fuzzing, synthetic journey probes, and canary analyzer are active.",
+      message:
+        "Shift-left property fuzzing, synthetic journey probes, and canary analyzer are active.",
     };
   }
 
@@ -934,12 +1244,20 @@ export function checkProactiveDefectInterception(root: string): DiagnosticCheckR
 /**
  * Check Layout Integrity, Defensive CSS & Stacking Context Isolation (AGENTS.md Invariant #13)
  */
-export function checkLayoutTextClippingInvariants(root: string): DiagnosticCheckResult {
+export function checkLayoutTextClippingInvariants(
+  root: string
+): DiagnosticCheckResult {
   const violations: string[] = [];
 
   const requiredFiles = [
-    { file: "components/PageLayout.tsx", desc: "PageLayout container component" },
-    { file: "adr/0009-responsive-layout-and-text-clipping-standard.md", desc: "ADR-0009 Responsive Layout Integrity Standard" },
+    {
+      file: "components/PageLayout.tsx",
+      desc: "PageLayout container component",
+    },
+    {
+      file: "adr/0009-responsive-layout-and-text-clipping-standard.md",
+      desc: "ADR-0009 Responsive Layout Integrity Standard",
+    },
   ];
 
   for (const rf of requiredFiles) {
@@ -959,7 +1277,9 @@ export function checkLayoutTextClippingInvariants(root: string): DiagnosticCheck
     const content = fs.readFileSync(file, "utf-8");
     if (content.includes("z-[9999]")) {
       const relPath = path.relative(root, file);
-      violations.push(`Rogue z-index escalation 'z-[9999]' found in ${relPath}`);
+      violations.push(
+        `Rogue z-index escalation 'z-[9999]' found in ${relPath}`
+      );
     }
   }
 
@@ -969,7 +1289,9 @@ export function checkLayoutTextClippingInvariants(root: string): DiagnosticCheck
     const content = fs.readFileSync(pageFile, "utf-8");
     const relPath = path.relative(root, pageFile);
     if (content.includes('<main id="main-content"')) {
-      violations.push(`Duplicate <main id="main-content"> landmark found in ${relPath}`);
+      violations.push(
+        `Duplicate <main id="main-content"> landmark found in ${relPath}`
+      );
     }
   }
 
@@ -979,7 +1301,8 @@ export function checkLayoutTextClippingInvariants(root: string): DiagnosticCheck
       name: "Layout Integrity, Defensive CSS & Stacking Isolation Invariant",
       category: "architecture",
       status: "pass",
-      message: "PageLayout containers, bounded z-index scale, and defensive CSS invariants are active.",
+      message:
+        "PageLayout containers, bounded z-index scale, and defensive CSS invariants are active.",
     };
   }
 
@@ -1025,8 +1348,14 @@ export function checkDesignTokens(root: string): DiagnosticCheckResult {
         !/style=\{\s*\{\s*["']--/.test(line) &&
         !/as\s+React\.CSSProperties/.test(line)
       ) {
-        if (/style=\{\s*\{\s*(height|padding|margin|fontSize|color|width|backgroundColor)\s*:\s*/.test(line)) {
-          violations.push(`${compPath}:${i + 1} - Raw unconstrained inline style property detected in style prop`);
+        if (
+          /style=\{\s*\{\s*(height|padding|margin|fontSize|color|width|backgroundColor)\s*:\s*/.test(
+            line
+          )
+        ) {
+          violations.push(
+            `${compPath}:${i + 1} - Raw unconstrained inline style property detected in style prop`
+          );
         }
       }
     }
@@ -1049,20 +1378,36 @@ export function checkDesignTokens(root: string): DiagnosticCheckResult {
     name: "Design Token Migration & Dual Governance Invariant",
     category: "architecture",
     status: "pass",
-    message: "Zero raw inline style overrides or hardcoded pixel dimensions detected across core layout surfaces.",
+    message:
+      "Zero raw inline style overrides or hardcoded pixel dimensions detected across core layout surfaces.",
   };
 }
 
 /**
  * Check Workspace & IDE Configuration Integrity (.editorconfig, .vscode)
  */
-export function checkWorkspaceIdeConfig(root: string, fix = false): DiagnosticCheckResult {
+export function checkWorkspaceIdeConfig(
+  root: string,
+  fix = false
+): DiagnosticCheckResult {
   const requiredFiles = [
     { file: ".editorconfig", desc: "Universal EditorConfig rules" },
-    { file: path.join(".vscode", "settings.json"), desc: "VS Code workspace settings" },
-    { file: path.join(".vscode", "extensions.json"), desc: "VS Code extension recommendations" },
-    { file: path.join(".vscode", "launch.json"), desc: "VS Code launch debug profiles" },
-    { file: path.join(".vscode", "tasks.json"), desc: "VS Code build task runners" },
+    {
+      file: path.join(".vscode", "settings.json"),
+      desc: "VS Code workspace settings",
+    },
+    {
+      file: path.join(".vscode", "extensions.json"),
+      desc: "VS Code extension recommendations",
+    },
+    {
+      file: path.join(".vscode", "launch.json"),
+      desc: "VS Code launch debug profiles",
+    },
+    {
+      file: path.join(".vscode", "tasks.json"),
+      desc: "VS Code build task runners",
+    },
   ];
 
   const missing: string[] = [];
@@ -1077,7 +1422,8 @@ export function checkWorkspaceIdeConfig(root: string, fix = false): DiagnosticCh
   if (missing.length > 0) {
     if (fix) {
       const vscodeDir = path.join(root, ".vscode");
-      if (!fs.existsSync(vscodeDir)) fs.mkdirSync(vscodeDir, { recursive: true });
+      if (!fs.existsSync(vscodeDir))
+        fs.mkdirSync(vscodeDir, { recursive: true });
 
       const editorConfigPath = path.join(root, ".editorconfig");
       if (!fs.existsSync(editorConfigPath)) {
@@ -1093,7 +1439,8 @@ export function checkWorkspaceIdeConfig(root: string, fix = false): DiagnosticCh
         name: "IDE & Workspace Configuration Standards",
         category: "architecture",
         status: "fixed",
-        message: "Scaffolded missing workspace IDE configurations (.vscode, .editorconfig).",
+        message:
+          "Scaffolded missing workspace IDE configurations (.vscode, .editorconfig).",
         fixedMessage: "Created missing IDE configs.",
       };
     }
@@ -1114,13 +1461,21 @@ export function checkWorkspaceIdeConfig(root: string, fix = false): DiagnosticCh
     name: "IDE & Workspace Configuration Standards",
     category: "architecture",
     status: "pass",
-    message: "All VS Code workspace profiles (.vscode/) and .editorconfig are properly configured.",
+    message:
+      "All VS Code workspace profiles (.vscode/) and .editorconfig are properly configured.",
   };
 }
 
 export function checkPackageLockfile(root: string): DiagnosticCheckResult {
-  const alternativeLocks = ["bun.lock", "bun.lockb", "yarn.lock", "pnpm-lock.yaml"];
-  const foundLocks = alternativeLocks.filter((lock) => fs.existsSync(path.join(root, lock)));
+  const alternativeLocks = [
+    "bun.lock",
+    "bun.lockb",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+  ];
+  const foundLocks = alternativeLocks.filter((lock) =>
+    fs.existsSync(path.join(root, lock))
+  );
 
   if (foundLocks.length > 0) {
     return {
@@ -1139,14 +1494,233 @@ export function checkPackageLockfile(root: string): DiagnosticCheckResult {
     name: "Single Package Manager Lockfile Invariant",
     category: "architecture",
     status: "pass",
-    message: "Zero duplicate/alternative lockfiles detected. Workspace is correctly standardized on npm and uses package-lock.json.",
+    message:
+      "Zero duplicate/alternative lockfiles detected. Workspace is correctly standardized on npm and uses package-lock.json.",
   };
 }
 
 /**
- * Run All Diagnostics
+ * Check System Architecture & Directory Topology Sync (AGENTS.md & ARCHITECTURE.md).
+ * Asserts that all non-hidden top-level repository directories are explicitly represented in ARCHITECTURE.md.
  */
-export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
+export function checkDirectoryTopology(root: string): DiagnosticCheckResult {
+  const archFile = path.join(root, "ARCHITECTURE.md");
+
+  if (!fs.existsSync(archFile)) {
+    return {
+      id: "docs-topology-drift",
+      name: "System Architecture Directory Topology Parity",
+      category: "architecture",
+      status: "fail",
+      message: "ARCHITECTURE.md file not found in workspace root.",
+      details: ["Missing ARCHITECTURE.md file in workspace root."],
+      fixable: false,
+    };
+  }
+
+  const ignoredDirs = new Set([
+    "node_modules",
+    ".git",
+    ".next",
+    "dist",
+    "coverage",
+    "out",
+    "build",
+    "tmp",
+    "scratch",
+    "test-results",
+    "playwright-report",
+    ".agents",
+    ".husky",
+    ".vscode",
+    ".github",
+  ]);
+
+  let topDirs: string[] = [];
+  try {
+    const entries = fs.readdirSync(root, { withFileTypes: true });
+    topDirs = entries
+      .filter(
+        (e) =>
+          e.isDirectory() && !e.name.startsWith(".") && !ignoredDirs.has(e.name)
+      )
+      .map((e) => e.name);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return {
+      id: "docs-topology-drift",
+      name: "System Architecture Directory Topology Parity",
+      category: "architecture",
+      status: "fail",
+      message: `Failed to read top-level workspace directories: ${msg}`,
+      fixable: false,
+    };
+  }
+
+  const archContent = fs.readFileSync(archFile, "utf-8");
+
+  // Extract topology section if present, or search full document
+  let topologyContent = archContent;
+  const topologyHeaderMatch = archContent.match(
+    /##\s+System Architecture & Directory Topology[\s\S]*?(?=\n##\s+|\b$)/
+  );
+  if (topologyHeaderMatch) {
+    topologyContent = topologyHeaderMatch[0];
+  }
+
+  const missingDirs: string[] = [];
+
+  for (const dir of topDirs) {
+    // Search for directory name in topology content
+    const regex = new RegExp(`\\b${dir}(\\/|\\b)`, "i");
+    if (!regex.test(topologyContent)) {
+      missingDirs.push(dir);
+    }
+  }
+
+  if (missingDirs.length > 0) {
+    return {
+      id: "docs-topology-drift",
+      name: "System Architecture Directory Topology Parity",
+      category: "architecture",
+      status: "fail",
+      message: `${missingDirs.length} top-level directory/directories missing from ARCHITECTURE.md topology overview.`,
+      details: missingDirs.map(
+        (d) =>
+          `Missing directory in ARCHITECTURE.md: '${d}/'. Please update ## System Architecture & Directory Topology in ARCHITECTURE.md.`
+      ),
+      fixable: false,
+    };
+  }
+
+  return {
+    id: "docs-topology-drift",
+    name: "System Architecture Directory Topology Parity",
+    category: "architecture",
+    status: "pass",
+    message:
+      "All top-level repository directories are explicitly documented in ARCHITECTURE.md.",
+  };
+}
+
+/**
+ * Real-Browser Sub-Route Web Vitals & SLA Performance Gate (AGENTS.md Invariant #14)
+ */
+export function checkSubRoutePerformance(root: string): DiagnosticCheckResult {
+  const jsonPath = path.join(root, "benchmark-results.json");
+  if (!fs.existsSync(jsonPath)) {
+    return {
+      id: "quality-subroute-performance",
+      name: "Sub-Route Real-Browser Core Web Vitals Performance SLA",
+      category: "quality",
+      status: "pass",
+      message:
+        "No recorded benchmark-results.json found. Budget assertions are active during 'npm run bench:pages -- --assert' and CI.",
+    };
+  }
+
+  try {
+    const data = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
+    const routes = data.routes || [];
+    const failed = routes.filter(
+      (r: { passedBudget?: boolean }) => r.passedBudget === false
+    );
+
+    if (failed.length > 0) {
+      const details = failed.map(
+        (f: {
+          route?: { path: string; name: string };
+          lcp?: { median: number };
+          cls?: { median: number };
+          ttfb?: { median: number };
+        }) =>
+          `Route '${f.route?.path}' (${f.route?.name}): TTFB=${f.ttfb?.median}ms, LCP=${f.lcp?.median}ms, CLS=${f.cls?.median}`
+      );
+      return {
+        id: "quality-subroute-performance",
+        name: "Sub-Route Real-Browser Core Web Vitals Performance SLA",
+        category: "quality",
+        status: "fail",
+        message: `${failed.length} sub-route(s) breached Core Web Vitals SLA performance budgets in benchmark-results.json`,
+        details,
+      };
+    }
+
+    return {
+      id: "quality-subroute-performance",
+      name: "Sub-Route Real-Browser Core Web Vitals Performance SLA",
+      category: "quality",
+      status: "pass",
+      message: `All ${routes.length} benchmarked sub-routes comply with Core Web Vitals SLA budgets (LCP <= 2500ms, TTFB <= 800ms, CLS <= 0.1).`,
+    };
+  } catch {
+    return {
+      id: "quality-subroute-performance",
+      name: "Sub-Route Real-Browser Core Web Vitals Performance SLA",
+      category: "quality",
+      status: "fail",
+      message: "benchmark-results.json is not valid JSON.",
+    };
+  }
+}
+
+/**
+ * Check TS Deep Modules & Architectural Seams (AGENTS.md Invariant #20)
+ */
+export function checkModuleBoundaries(root: string): DiagnosticCheckResult {
+  const configPath = path.join(root, ".dependency-cruiser.cjs");
+  if (!fs.existsSync(configPath)) {
+    return {
+      id: "architecture-deep-module-boundaries",
+      name: "TS Deep Modules & Architectural Seam Enforcement",
+      category: "architecture",
+      status: "fail",
+      message:
+        ".dependency-cruiser.cjs configuration not found at workspace root.",
+      fixable: false,
+    };
+  }
+
+  try {
+    execSync("npx depcruise lib app components __tests__ hooks scripts", {
+      cwd: root,
+      stdio: "pipe",
+      encoding: "utf-8",
+    });
+    return {
+      id: "architecture-deep-module-boundaries",
+      name: "TS Deep Modules & Architectural Seam Enforcement",
+      category: "architecture",
+      status: "pass",
+      message:
+        "All module seams, public entry points, and test surfaces satisfy architectural boundary invariants with 0 cycles.",
+    };
+  } catch (error: unknown) {
+    const err = error as {
+      stdout?: Buffer | string;
+      stderr?: Buffer | string;
+      message?: string;
+    };
+    const rawOutput =
+      err.stdout?.toString() || err.stderr?.toString() || err.message || "";
+    const details = rawOutput
+      .split("\n")
+      .map((l: string) => l.trim())
+      .filter((l: string) => l.length > 0 && !l.includes("modules cruised"));
+    return {
+      id: "architecture-deep-module-boundaries",
+      name: "TS Deep Modules & Architectural Seam Enforcement",
+      category: "architecture",
+      status: "fail",
+      message:
+        "Architectural boundary violation detected. Private internals or circular dependencies found.",
+      details: details.slice(0, 10),
+      fixable: false,
+    };
+  }
+}
+
+export interface DiagnosticSummary {
   results: DiagnosticCheckResult[];
   hasFailures: boolean;
   hasWarnings: boolean;
@@ -1154,19 +1728,30 @@ export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
   totalFailed: number;
   totalWarned: number;
   totalFixed: number;
-}> {
+  remediations: RemediationAction[];
+}
+
+/**
+ * Run All Diagnostics
+ */
+export async function runDiagnostics(
+  options: DoctorOptions = {}
+): Promise<DiagnosticSummary> {
   const root = options.workspaceRoot || process.cwd();
   const fix = !!options.fix;
 
-  const checks: DiagnosticCheckResult[] = [
+  const rawChecks: DiagnosticCheckResult[] = [
     checkRouteIndexing(root, fix),
     checkNavbarHierarchy(root),
     checkPageTopPadding(root),
     checkTestPathResolution(root),
+    checkTestFixtureHygiene(root),
     checkSecretLeaks(root),
+
     checkMigrationGuard(root),
     checkDocumentationParity(root, fix),
     checkOnboardingDocsDrift(root, fix),
+    checkDirectoryTopology(root),
     checkOpenApiParity(root, fix),
     checkHydrationSafety(root),
     checkAccessibilityStandards(root, fix),
@@ -1180,7 +1765,30 @@ export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
     checkDesignTokens(root),
     checkDeadCode(root),
     checkBundleBudgets(root),
+    checkSubRoutePerformance(root),
+    checkModuleBoundaries(root),
   ];
+
+  const checks = rawChecks.map((check) => {
+    if (
+      (check.status === "fail" || check.status === "warn") &&
+      !check.remediation
+    ) {
+      if (check.fixable) {
+        return {
+          ...check,
+          remediation: {
+            id: `fix-${check.id}`,
+            title: `Auto-fix ${check.name}`,
+            command: "npm run doctor:fix",
+            autoFixable: true,
+            scope: check.category,
+          },
+        };
+      }
+    }
+    return check;
+  });
 
   const totalPassed = checks.filter((c) => c.status === "pass").length;
   const totalFailed = checks.filter((c) => c.status === "fail").length;
@@ -1190,6 +1798,29 @@ export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
   const hasFailures = totalFailed > 0;
   const hasWarnings = totalWarned > 0;
 
+  const remediations: RemediationAction[] = [];
+  const addedCmds = new Set<string>();
+
+  for (const check of checks) {
+    if (check.status === "fail" || check.status === "warn") {
+      if (check.remediation && !addedCmds.has(check.remediation.command)) {
+        remediations.push(check.remediation);
+        addedCmds.add(check.remediation.command);
+      }
+    }
+  }
+
+  const hasAnyFixable = checks.some((c) => c.status === "fail" && c.fixable);
+  if (hasAnyFixable && !addedCmds.has("npm run doctor:fix")) {
+    remediations.unshift({
+      id: "doctor-fix",
+      title: "Auto-remediate all fixable architectural invariants",
+      command: "npm run doctor:fix",
+      autoFixable: true,
+      scope: "global",
+    });
+  }
+
   return {
     results: checks,
     hasFailures,
@@ -1198,17 +1829,29 @@ export async function runDiagnostics(options: DoctorOptions = {}): Promise<{
     totalFailed,
     totalWarned,
     totalFixed,
+    remediations,
   };
 }
 
 export function printDoctorReport(
-  summary: Awaited<ReturnType<typeof runDiagnostics>>,
-  ciMode = false
+  summary: DiagnosticSummary,
+  _ciMode = false
 ): void {
-  console.log(formatSection("Repository Invariant & Architectural Health"));
+  console.log(
+    formatHeader(
+      "DX DOCTOR — Architectural Invariant Health",
+      "Next.js 16 • React 19 • 24 Invariants Audited"
+    )
+  );
+
+  console.log(
+    `### Invariant Health · ${summary.totalPassed}/${summary.results.length} checks passing\n`
+  );
 
   for (const check of summary.results) {
-    console.log(badge(`[${check.category.toUpperCase()}] ${check.name}`, check.status));
+    console.log(
+      badge(`[${check.category.toUpperCase()}] ${check.name}`, check.status)
+    );
     console.log(`  ${colors.dim}${check.message}${colors.reset}`);
     if (check.details && check.details.length > 0) {
       for (const d of check.details) {
@@ -1217,17 +1860,46 @@ export function printDoctorReport(
     }
   }
 
-  console.log("\n" + colors.cyan + "─".repeat(60) + colors.reset);
-  console.log(
-    `Summary: ${colors.green}${summary.totalPassed} Passed${colors.reset} | ` +
-      (summary.totalFixed > 0 ? `${colors.magenta}${summary.totalFixed} Auto-Fixed${colors.reset} | ` : "") +
-      (summary.totalWarned > 0 ? `${colors.yellow}${summary.totalWarned} Warnings${colors.reset} | ` : "") +
-      (summary.totalFailed > 0 ? `${colors.red}${summary.totalFailed} Failures${colors.reset}` : `${colors.brightGreen}0 Failures${colors.reset}`)
-  );
-
-  if (summary.hasFailures && !ciMode) {
+  if (summary.hasFailures) {
     console.log(
-      `\n${colors.brightYellow}💡 Tip: Run 'npm run doctor:fix' to automatically remediate fixable invariants.${colors.reset}\n`
+      `\n### What's Actionable · ${summary.totalFailed} failure(s) detected\n`
     );
+    const fixableChecks = summary.results.filter(
+      (c) => c.status === "fail" && c.fixable
+    );
+    if (fixableChecks.length > 0) {
+      console.log(
+        `Run auto-remediation to resolve ${fixableChecks.length} fixable invariant(s):`
+      );
+      console.log(
+        `\n  ${colors.brightGreen}npm run doctor:fix${colors.reset}\n`
+      );
+    }
+    const nonFixable = summary.results.filter(
+      (c) => c.status === "fail" && !c.fixable
+    );
+    if (nonFixable.length > 0) {
+      console.log(
+        `Manual remediation required for ${nonFixable.length} check(s):`
+      );
+      for (const nf of nonFixable) {
+        console.log(
+          `  ${colors.yellow}• ${nf.name}: ${nf.message}${colors.reset}`
+        );
+      }
+      console.log("");
+    }
+  } else if (!summary.hasWarnings) {
+    console.log(`\n### All Invariants Satisfied\n`);
+    console.log(
+      `Every rule in AGENTS.md is verified and passing cleanly with zero drift.`
+    );
+    console.log(`Next step: run full verification suite:`);
+    console.log(`\n  ${colors.brightGreen}npm run quality${colors.reset}\n`);
   }
+
+  console.log(`##### Invariant Audit Metadata`);
+  console.log(
+    `*Passed: ${summary.totalPassed} · Fixed: ${summary.totalFixed} · Warned: ${summary.totalWarned} · Failed: ${summary.totalFailed}*`
+  );
 }

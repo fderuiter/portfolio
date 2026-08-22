@@ -8,7 +8,7 @@
 
 > **equipAccessory**(`state`, `accessory`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:1790](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1790)
+Defined in: [lib/working-with-duck-engine.ts:1897](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1897)
 
 Player Action: Equip Wearable Accessory
 

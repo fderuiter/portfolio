@@ -14,7 +14,7 @@ import { resolveBaseUrl } from "@/lib/domain";
 import { ROUTE_METADATA_CONFIGS, buildRouteMetadata } from "@/lib/seo-metadata";
 import { ARCADE_GAMES_METADATA } from "@/lib/arcade-data";
 import robots from "@/app/robots";
-import sitemap, { revalidate, STATIC_ROUTE_LAST_MODIFIED } from "@/app/sitemap";
+import sitemap, { revalidate } from "@/app/sitemap";
 import manifest from "@/app/manifest";
 import { FALLBACK_CASE_STUDIES } from "@/lib/case-studies-data";
 
@@ -178,7 +178,7 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     expect(parsed.interactionStatistic).toHaveLength(2);
   });
 
-  it("buildRouteMetadata generates complete Next.js metadata objects for all registered routes", () => {
+  it("buildRouteMetadata generates complete Next.js metadata objects for all registered routes with explicit social images", () => {
     const routeKeys = Object.keys(ROUTE_METADATA_CONFIGS);
     expect(routeKeys.length).toBeGreaterThanOrEqual(10);
 
@@ -192,7 +192,41 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
       expect(meta.openGraph?.title).toContain(config.title);
       expect(meta.openGraph?.description).toBe(config.description);
       expect(meta.twitter?.title).toContain(config.title);
+
+      // Verify explicit OpenGraph image array
+      expect(meta.openGraph?.images).toBeDefined();
+      expect(Array.isArray(meta.openGraph?.images)).toBe(true);
+      const ogImages = meta.openGraph?.images as Array<{ url: string; width?: number; height?: number; alt?: string }>;
+      expect(ogImages.length).toBeGreaterThan(0);
+      expect(ogImages[0].url).toContain(`${config.path}/opengraph-image`);
+      expect(ogImages[0].width).toBe(1200);
+      expect(ogImages[0].height).toBe(630);
+
+      // Verify explicit Twitter card image
+      expect(meta.twitter?.images).toBeDefined();
+      expect(Array.isArray(meta.twitter?.images)).toBe(true);
+      const twImages = meta.twitter?.images as Array<string>;
+      expect(twImages.length).toBeGreaterThan(0);
+      expect(twImages[0]).toContain(`${config.path}/opengraph-image`);
     }
+  });
+
+  it("contact route layout exports dedicated page metadata with title, description, and social images", async () => {
+    const { metadata } = await import("@/app/contact/layout");
+    expect(metadata.title).toBe("Contact & Direct Inquiries | Frederick de Ruiter");
+    expect(metadata.description).toContain("direct communication channels");
+    expect(metadata.openGraph?.title).toContain("Contact & Direct Inquiries");
+    expect(metadata.openGraph?.description).toBe(metadata.description);
+
+    const ogImages = metadata.openGraph?.images as Array<{ url: string; width?: number; height?: number; alt?: string }>;
+    expect(ogImages).toBeDefined();
+    expect(ogImages[0].url).toContain("/contact/opengraph-image");
+    expect(ogImages[0].width).toBe(1200);
+    expect(ogImages[0].height).toBe(630);
+
+    const twImages = metadata.twitter?.images as Array<string>;
+    expect(twImages).toBeDefined();
+    expect(twImages[0]).toContain("/contact/opengraph-image");
   });
 
   it("enforces front-loaded SERP length bounds, active CTR verbs, and long-tail keywords across all route configs", () => {
@@ -300,21 +334,29 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     expect(revalidate).toBe(86400);
   });
 
-  it("static route entries serve identical static modification dates across repeated requests", async () => {
+  it("static route entries serve route-specific source file modification dates dynamically", async () => {
     const map1 = await sitemap();
     await new Promise((resolve) => setTimeout(resolve, 15));
     const map2 = await sitemap();
 
     expect(map1.length).toBe(map2.length);
 
-    // Verify static routes maintain identical timestamps matching STATIC_ROUTE_LAST_MODIFIED
+    // Verify static routes maintain consistent timestamps matching source file modification times
     const staticEntries = map1.filter((entry) => !entry.url.includes("/case-studies/"));
     for (const entry of staticEntries) {
       const match = map2.find((e) => e.url === entry.url);
       expect(match).toBeDefined();
-      expect(entry.lastModified).toEqual(STATIC_ROUTE_LAST_MODIFIED);
-      expect(match?.lastModified).toEqual(STATIC_ROUTE_LAST_MODIFIED);
+      expect(entry.lastModified).toEqual(match?.lastModified);
     }
+
+    // Verify root static route matches source file mtime
+    const rootEntry = map1.find((e) => e.url === resolveBaseUrl());
+    expect(rootEntry).toBeDefined();
+    const rootStat = fs.statSync(path.resolve(process.cwd(), "app/page.tsx"));
+    const rootEntryDate = rootEntry?.lastModified instanceof Date
+      ? rootEntry.lastModified
+      : new Date(rootEntry?.lastModified ?? 0);
+    expect(rootEntryDate.getTime()).toBe(rootStat.mtime.getTime());
   });
 
   it("fallback and mock content items retain explicit pre-defined update dates rather than generating execution timestamps", async () => {
@@ -562,6 +604,129 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
         expect(game.route).toMatch(/^\/arcade/);
         expect(game.title).toBeTruthy();
         expect(game.description).toBeTruthy();
+      }
+    });
+  });
+
+  describe("Universal Schema Language and Access Declarations", () => {
+    it("all ROUTE_METADATA_CONFIGS declare explicit inLanguage: 'en-US', locale: 'en-US', and isAccessibleForFree: true", () => {
+      const keys = Object.keys(ROUTE_METADATA_CONFIGS);
+      expect(keys.length).toBeGreaterThanOrEqual(15);
+
+      for (const key of keys) {
+        const config = ROUTE_METADATA_CONFIGS[key];
+        expect(config.inLanguage, `Route "${key}" missing inLanguage`).toBe("en-US");
+        expect(config.locale, `Route "${key}" missing locale`).toBe("en-US");
+        expect(config.isAccessibleForFree, `Route "${key}" missing isAccessibleForFree`).toBe(true);
+      }
+    });
+
+    it("buildRouteMetadata produces synchronized locale and other metadata declarations", () => {
+      const config = ROUTE_METADATA_CONFIGS.crf;
+      const meta = buildRouteMetadata(config);
+
+      expect(meta.openGraph?.locale).toBe("en_US");
+      expect(meta.other?.inLanguage).toBe("en-US");
+      expect(meta.other?.isAccessibleForFree).toBe("true");
+    });
+
+    it("all base and specialized structured data generators include inLanguage and isAccessibleForFree attributes", async () => {
+      const {
+        getPersonNode,
+        getWebsiteNode,
+        getWebPageNode,
+        getBreadcrumbNode,
+        getVisualArtworkSchema,
+        getWebApplicationSchema,
+        getCollectionPageSchema,
+        getSoftwareSourceCodeSchema,
+        getBreadcrumbSchema,
+      } = await import("@/lib/seo");
+
+      const person = getPersonNode();
+      expect(person.inLanguage).toBe("en-US");
+      expect(person.isAccessibleForFree).toBe(true);
+
+      const website = getWebsiteNode();
+      expect(website.inLanguage).toBe("en-US");
+      expect(website.isAccessibleForFree).toBe(true);
+
+      const webpage = getWebPageNode({ name: "Test", description: "Desc", url: "/test" });
+      expect(webpage.inLanguage).toBe("en-US");
+      expect(webpage.isAccessibleForFree).toBe(true);
+
+      const breadcrumbNode = getBreadcrumbNode([{ name: "Home", url: "/" }], "/test");
+      expect(breadcrumbNode.inLanguage).toBe("en-US");
+      expect(breadcrumbNode.isAccessibleForFree).toBe(true);
+
+      const artwork = JSON.parse(
+        getVisualArtworkSchema({ name: "Art", description: "Desc", url: "/art" })
+      );
+      expect(artwork.inLanguage).toBe("en-US");
+      expect(artwork.isAccessibleForFree).toBe(true);
+
+      const webApp = JSON.parse(
+        getWebApplicationSchema({
+          name: "App",
+          description: "Desc",
+          url: "/app",
+          applicationCategory: "DeveloperApplication",
+        })
+      );
+      expect(webApp.inLanguage).toBe("en-US");
+      expect(webApp.isAccessibleForFree).toBe(true);
+
+      const collection = JSON.parse(
+        getCollectionPageSchema("Collection", "Desc", "/col", [])
+      );
+      expect(collection.inLanguage).toBe("en-US");
+      expect(collection.isAccessibleForFree).toBe(true);
+
+      const code = JSON.parse(
+        getSoftwareSourceCodeSchema(
+          {
+            id: "1",
+            slug: "test",
+            title: "Test",
+            primary_language: "TypeScript",
+            published: true,
+            simulated_telemetry: false,
+            tags: "",
+            editorial_content: "Content",
+            architectural_narrative: "",
+            created_at: new Date(),
+            updated_at: new Date(),
+          },
+          null
+        )
+      );
+      expect(code.inLanguage).toBe("en-US");
+      expect(code.isAccessibleForFree).toBe(true);
+
+      const breadcrumbSchema = JSON.parse(
+        getBreadcrumbSchema([{ name: "Home", url: "/" }])
+      );
+      expect(breadcrumbSchema.inLanguage).toBe("en-US");
+      expect(breadcrumbSchema.isAccessibleForFree).toBe(true);
+    });
+
+    it("getUnifiedGraphSchema automatically enriches all graph nodes with inLanguage and isAccessibleForFree", async () => {
+      const { getUnifiedGraphSchema, getPersonNode, getWebsiteNode } = await import("@/lib/seo");
+
+      // Custom node without explicit language/access fields
+      const customNode = {
+        "@type": "Thing",
+        "@id": `${SITE_BASE_URL}/#custom`,
+        name: "Custom Entity",
+      };
+
+      const rawGraph = getUnifiedGraphSchema([getPersonNode(), getWebsiteNode(), customNode]);
+      const parsed = JSON.parse(rawGraph);
+
+      expect(parsed["@graph"]).toHaveLength(3);
+      for (const node of parsed["@graph"]) {
+        expect(node.inLanguage).toBe("en-US");
+        expect(node.isAccessibleForFree).toBe(true);
       }
     });
   });

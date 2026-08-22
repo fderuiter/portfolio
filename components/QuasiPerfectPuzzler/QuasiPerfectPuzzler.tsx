@@ -603,7 +603,7 @@ export const QuasiPerfectPuzzler: React.FC = () => {
       onKeyDown={handleKeyDown}
       className={`relative font-mono outline-none transition-all ${
         isFullscreen
-          ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none bg-black p-4 sm:p-6 overflow-y-auto"
+          ? "fixed inset-0 z-50 w-full h-[100dvh] max-h-[100dvh] max-w-none rounded-none border-none bg-black p-3 sm:p-6 overflow-y-auto select-none"
           : "rounded-2xl border border-brand-cyan/30 bg-zinc-950/90 p-5 shadow-[0_0_35px_-10px_rgba(6,182,212,0.35)] focus:border-brand-cyan"
       }`}
     >

@@ -1242,11 +1242,70 @@ export const LaserLoon: React.FC = () => {
     }
   };
 
+  const lastPointerTimeRef = useRef(0);
+
+  const handleCanvasPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    lastPointerTimeRef.current = Date.now();
+    if (!canvasRef.current) return;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // Ignored for test environments without setPointerCapture mock
+    }
+    containerRef.current?.focus({ preventScroll: true });
+
+    updatePointerAim(e.clientX, e.clientY);
+
+    const rect = canvasRef.current.getBoundingClientRect();
+    const scaleX = (canvasRef.current.width || DEFAULT_CANVAS_WIDTH) / (rect.width || 1);
+    const scaleY = (canvasRef.current.height || DEFAULT_CANVAS_HEIGHT) / (rect.height || 1);
+    const mouseX = (e.clientX - rect.left) * scaleX;
+    const mouseY = (e.clientY - rect.top) * scaleY;
+
+    const distToLoon = Math.hypot(mouseX - loonPosRef.current.x, mouseY - loonPosRef.current.y);
+    if (mode === "sandbox" && distToLoon < 45) {
+      isDraggingLoonRef.current = true;
+    } else {
+      isFiringRef.current = true;
+      fireWeapon();
+    }
+  };
+
+  const handleCanvasPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    updatePointerAim(e.clientX, e.clientY);
+  };
+
+  const handleCanvasPointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        // Ignored
+      }
+    }
+    isFiringRef.current = false;
+    isDraggingLoonRef.current = false;
+  };
+
+  const handleCanvasPointerCancel = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        // Ignored
+      }
+    }
+    isFiringRef.current = false;
+    isDraggingLoonRef.current = false;
+  };
+
   const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (Date.now() - lastPointerTimeRef.current < 100) return;
     updatePointerAim(e.clientX, e.clientY);
   };
 
   const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (Date.now() - lastPointerTimeRef.current < 100) return;
     if (!canvasRef.current) return;
     containerRef.current?.focus({ preventScroll: true });
 
@@ -1266,17 +1325,20 @@ export const LaserLoon: React.FC = () => {
   };
 
   const handleCanvasMouseUp = () => {
+    if (Date.now() - lastPointerTimeRef.current < 100) return;
     isFiringRef.current = false;
     isDraggingLoonRef.current = false;
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (Date.now() - lastPointerTimeRef.current < 100) return;
     if (e.touches.length > 0) {
       updatePointerAim(e.touches[0].clientX, e.touches[0].clientY);
     }
   };
 
   const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (Date.now() - lastPointerTimeRef.current < 100) return;
     if (e.touches.length > 0) {
       updatePointerAim(e.touches[0].clientX, e.touches[0].clientY);
       isFiringRef.current = true;
@@ -1285,6 +1347,7 @@ export const LaserLoon: React.FC = () => {
   };
 
   const handleTouchEnd = () => {
+    if (Date.now() - lastPointerTimeRef.current < 100) return;
     isFiringRef.current = false;
     isDraggingLoonRef.current = false;
   };
@@ -1523,7 +1586,7 @@ export const LaserLoon: React.FC = () => {
         data-keyboard-boundary="true"
         className={`relative outline-none transition-all duration-300 shadow-2xl flex flex-col justify-between ${
           isFullscreen
-            ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none bg-black p-2 sm:p-4 overflow-hidden"
+            ? "fixed inset-0 z-50 w-full h-[100dvh] max-h-[100dvh] max-w-none rounded-none border-none bg-black p-2 sm:p-4 overflow-hidden select-none touch-none"
             : `w-full max-w-3xl h-auto aspect-[768/420] bg-neutral-950 border rounded-3xl overflow-hidden ${
                 isFocused
                   ? "border-red-500 ring-4 ring-red-500/20 shadow-[0_0_40px_rgba(239,68,68,0.25)]"
@@ -1647,18 +1710,24 @@ export const LaserLoon: React.FC = () => {
           ref={canvasRef}
           width={768}
           height={420}
+          onPointerDown={handleCanvasPointerDown}
+          onPointerMove={handleCanvasPointerMove}
+          onPointerUp={handleCanvasPointerUp}
+          onPointerCancel={handleCanvasPointerCancel}
           onMouseMove={handleCanvasMouseMove}
           onMouseDown={handleCanvasMouseDown}
           onMouseUp={handleCanvasMouseUp}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd}
+          style={{ touchAction: "none" }}
           role="application"
           aria-label="Laser Loon Arcade Game. Use arrow keys to reposition the loon, spacebar or enter to fire weapons, and number keys 1 to 4 to select weapons."
           tabIndex={0}
           className={
             isFullscreen
-              ? "max-h-[calc(100vh-140px)] max-w-full aspect-[768/420] object-contain block cursor-crosshair touch-none my-auto"
+              ? "max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--footer-height,48px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] max-w-full aspect-[768/420] object-contain block cursor-crosshair touch-none my-auto"
               : "w-full h-auto aspect-[768/420] block cursor-crosshair touch-none"
           }
         />

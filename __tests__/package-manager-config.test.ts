@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-import { describe, it, expect, vi, beforeEach, afterEach, type MockInstance } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import fs from "fs";
 import path from "path";
 
@@ -28,15 +28,17 @@ describe("Package Manager & Vercel Configuration Invariants", () => {
 
   describe("scripts/enforce-npm.js execution", () => {
     let originalEnv: NodeJS.ProcessEnv;
-    let exitMock: MockInstance<typeof process.exit>;
-    let consoleErrorMock: MockInstance<typeof console.error>;
+    let exitMock: ReturnType<typeof vi.spyOn>;
+    let consoleErrorMock: ReturnType<typeof vi.spyOn>;
 
     beforeEach(() => {
       originalEnv = { ...process.env };
       exitMock = vi.spyOn(process, "exit").mockImplementation((code) => {
         throw new Error(`Process exited with code ${code}`);
-      }) as unknown as MockInstance<typeof process.exit>;
-      consoleErrorMock = vi.spyOn(console, "error").mockImplementation(() => {}) as unknown as MockInstance<typeof console.error>;
+      });
+      consoleErrorMock = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
     });
 
     afterEach(() => {
@@ -46,7 +48,8 @@ describe("Package Manager & Vercel Configuration Invariants", () => {
     });
 
     it("allows execution when npm_config_user_agent starts with npm/", () => {
-      process.env.npm_config_user_agent = "npm/10.9.2 node/v20.18.0 darwin arm64";
+      process.env.npm_config_user_agent =
+        "npm/10.9.2 node/v20.18.0 darwin arm64";
       delete require.cache[require.resolve("../scripts/enforce-npm.js")];
 
       expect(() => {

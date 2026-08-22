@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { generateStudyPdf, generateFormPdf } from "@/lib/crf/export-pdf";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
+import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
 import { StudyBranding } from "@/lib/crf/types";
 
 // 1x1 transparent PNG Base64 for logo testing
@@ -49,7 +49,8 @@ describe("CRF Studio - Direct PDF Exporter", () => {
       accentColor: "#e11d48",
       headerText: "CONFIDENTIAL • CLINICAL INVESTIGATION PLAN",
       footerText: "Institutional Review Board (IRB) Copy",
-      confidentialityNotice: "Contains proprietary clinical investigation data.",
+      confidentialityNotice:
+        "Contains proprietary clinical investigation data.",
       logoBase64: SAMPLE_BASE64_LOGO,
       showPageNumbers: true,
       showTableOfContents: true,

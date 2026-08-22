@@ -8,9 +8,9 @@
 
 > **enqueueRetryItem**(`item`): `void`
 
-Defined in: [hooks/useTelemetry.ts:239](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L239)
+Defined in: [hooks/useTelemetry.ts:328](https://github.com/fderuiter/portfolio/blob/main/hooks/useTelemetry.ts#L328)
 
-Enqueue a telemetry retry item using synchronous FIFO eviction when capacity is reached.
+Enqueues a telemetry item for retry.
 
 ## Parameters
 
@@ -18,7 +18,7 @@ Enqueue a telemetry retry item using synchronous FIFO eviction when capacity is 
 
 [`QueuedEvent`](../interfaces/QueuedEvent.md)
 
-The telemetry event item to enqueue.
+Telemetry event to enqueue.
 
 ## Returns
 

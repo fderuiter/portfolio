@@ -8,4 +8,4 @@
 
 > `const` **DEVICE\_PROFILES**: `Record`\<[`DeviceTarget`](../type-aliases/DeviceTarget.md), [`DeviceProfile`](../interfaces/DeviceProfile.md)\>
 
-Defined in: [lib/garmin-engine.ts:20](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L20)
+Defined in: [lib/garmin-engine.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/garmin-engine.ts#L22)

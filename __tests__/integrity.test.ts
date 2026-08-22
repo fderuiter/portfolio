@@ -49,7 +49,7 @@ function findMdFiles(dir: string): string[] {
     const fullPath = path.join(dir, file);
     const stat = fs.statSync(fullPath);
     if (stat && stat.isDirectory()) {
-      if (file === 'node_modules' || file === 'generated' || file === 'coverage' || file.startsWith('.')) continue;
+      if (file === 'node_modules' || file === 'generated' || file === 'coverage' || file === '_media' || file.startsWith('.')) continue;
       results = results.concat(findMdFiles(fullPath));
     } else if (file.endsWith('.md')) {
       results.push(fullPath);

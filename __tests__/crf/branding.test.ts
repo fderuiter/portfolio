@@ -4,7 +4,7 @@ import {
   BRANDING_PRESETS,
   getStudyBranding,
 } from "@/lib/crf/branding-defaults";
-import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets/oncology-recist";
+import { ONCOLOGY_RECIST_PRESET } from "@/lib/crf/presets";
 import { StudyProtocol, StudyBranding } from "@/lib/crf/types";
 
 describe("CRF Studio - Branding Defaults & Resolution", () => {
@@ -12,7 +12,9 @@ describe("CRF Studio - Branding Defaults & Resolution", () => {
     expect(DEFAULT_STUDY_BRANDING.primaryColor).toMatch(/^#[0-9a-fA-F]{6}$/);
     expect(DEFAULT_STUDY_BRANDING.accentColor).toMatch(/^#[0-9a-fA-F]{6}$/);
     expect(DEFAULT_STUDY_BRANDING.organizationName.length).toBeGreaterThan(0);
-    expect(DEFAULT_STUDY_BRANDING.confidentialityNotice?.length).toBeGreaterThan(10);
+    expect(
+      DEFAULT_STUDY_BRANDING.confidentialityNotice?.length
+    ).toBeGreaterThan(10);
   });
 
   it("should provide multiple distinct branding presets in BRANDING_PRESETS", () => {
@@ -48,7 +50,9 @@ describe("CRF Studio - Branding Defaults & Resolution", () => {
     };
     const fallbackResolved = getStudyBranding(studyWithoutBrand);
     expect(fallbackResolved.organizationName).toBe("Aura Therapeutics");
-    expect(fallbackResolved.primaryColor).toBe(DEFAULT_STUDY_BRANDING.primaryColor);
+    expect(fallbackResolved.primaryColor).toBe(
+      DEFAULT_STUDY_BRANDING.primaryColor
+    );
   });
 
   it("should preserve branding losslessly across JSON serialization and deserialization", () => {
@@ -60,7 +64,8 @@ describe("CRF Studio - Branding Defaults & Resolution", () => {
         accentColor: "#0284c7",
         headerText: "CUSTOM HEADER",
         footerText: "CUSTOM FOOTER",
-        confidentialityNotice: "Strictly confidential notice for roundtrip test.",
+        confidentialityNotice:
+          "Strictly confidential notice for roundtrip test.",
         showPageNumbers: true,
         showTableOfContents: true,
       },
@@ -70,9 +75,13 @@ describe("CRF Studio - Branding Defaults & Resolution", () => {
     const deserialized: StudyProtocol = JSON.parse(serialized);
 
     expect(deserialized.branding).toBeDefined();
-    expect(deserialized.branding?.organizationName).toBe("Roundtrip Health Tech");
+    expect(deserialized.branding?.organizationName).toBe(
+      "Roundtrip Health Tech"
+    );
     expect(deserialized.branding?.primaryColor).toBe("#06b6d4");
     expect(deserialized.branding?.headerText).toBe("CUSTOM HEADER");
-    expect(deserialized.branding?.confidentialityNotice).toContain("Strictly confidential");
+    expect(deserialized.branding?.confidentialityNotice).toContain(
+      "Strictly confidential"
+    );
   });
 });

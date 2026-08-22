@@ -6,7 +6,7 @@
 
 # Interface: LocalCacheEntry
 
-Defined in: [lib/services/telemetry-service.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L14)
+Defined in: [lib/services/telemetry-service.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L17)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/services/telemetry-service.ts:14](https://github.com/fderuiter/
 
 > **count**: `number`
 
-Defined in: [lib/services/telemetry-service.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L15)
+Defined in: [lib/services/telemetry-service.ts:18](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L18)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [lib/services/telemetry-service.ts:15](https://github.com/fderuiter/
 
 > **expiresAt**: `number`
 
-Defined in: [lib/services/telemetry-service.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L16)
+Defined in: [lib/services/telemetry-service.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/services/telemetry-service.ts#L19)

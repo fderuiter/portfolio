@@ -135,7 +135,7 @@ export const QuasiPuzzlerClient: React.FC = () => {
             tag: "Civic Arcade Campaign",
           }}
           next={{
-            title: "Garmin 32KB Memory Runner",
+            title: "Monkey C Mayhem: Garmin Schvitz App",
             href: "/arcade/garmin-watch",
             label: "Next Game",
             tag: "Embedded Simulator",

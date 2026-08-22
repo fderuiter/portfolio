@@ -4,7 +4,7 @@ import React, { ElementType, HTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { ModalContainer, ModalContainerProps } from "./ModalContainer";
 
-export interface DefensiveFlexProps extends HTMLAttributes<HTMLElement> {
+interface DefensiveFlexProps extends HTMLAttributes<HTMLElement> {
   /**
    * Underlying HTML element tag or custom component. Defaults to "div".
    */
@@ -104,7 +104,7 @@ export function DefensiveFlex({
   );
 }
 
-export interface TruncatedTextProps extends HTMLAttributes<HTMLElement> {
+interface TruncatedTextProps extends HTMLAttributes<HTMLElement> {
   /**
    * Underlying HTML element tag or custom component. Defaults to "span".
    */

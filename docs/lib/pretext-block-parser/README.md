@@ -8,6 +8,7 @@
 
 ## Interfaces
 
+- [ExtendedRichInlineItem](interfaces/ExtendedRichInlineItem.md)
 - [PreparedBlock](interfaces/PreparedBlock.md)
 - [StructuredBlock](interfaces/StructuredBlock.md)
 
@@ -22,5 +23,6 @@
 ## Functions
 
 - [calculateBlockHeight](functions/calculateBlockHeight.md)
+- [parseMarkdownToRichItems](functions/parseMarkdownToRichItems.md)
 - [parsePretextBlocks](functions/parsePretextBlocks.md)
 - [preparePretextBlocks](functions/preparePretextBlocks.md)

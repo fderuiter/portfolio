@@ -6,7 +6,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { SchemaFlowWorkspaceSkeleton } from "@/components/SchemaFlowWorkspaceSkeleton";
-import SchemaFlowWorkspaceWrapper from "@/components/SchemaFlowWorkspaceWrapper";
 import { RetroLabyrinthSkeleton } from "@/components/RetroLabyrinthSkeleton";
 import { RetroLabyrinth } from "@/components/RetroLabyrinth";
 
@@ -73,9 +72,11 @@ describe("Workspace Skeletons & Reserved Aspect Ratios Suite", () => {
     });
 
     it("renders SchemaFlowWorkspaceWrapper with initial dynamic loading fallback", async () => {
+      vi.resetModules();
+      const { default: DynamicSchemaFlowWorkspaceWrapper } = await import("@/components/SchemaFlowWorkspaceWrapper");
       await act(async () => {
         root = createRoot(container);
-        root.render(<SchemaFlowWorkspaceWrapper />);
+        root.render(<DynamicSchemaFlowWorkspaceWrapper />);
       });
 
       // Wrapper renders skeleton during dynamic import fetch

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback, useSyncExternalStore } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo, useSyncExternalStore } from "react";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { clamp } from "@/lib/game-utils";
 import { useAudio } from "@/components/providers/AudioProvider";
@@ -923,6 +923,17 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
     }
   };
 
+  // Memoized Traveling Salesman Pathfinding Tour
+  const tspTour = useMemo(() => {
+    return computeShortestTour(
+      playerPosition.x,
+      playerPosition.y,
+      tspNodes,
+      EXIT_X,
+      EXIT_Y
+    ).tour;
+  }, [playerPosition.x, playerPosition.y, tspNodes]);
+
   // Loop State Mirroring Ref for Stable Animation Lifecycle
   const loopStateRef = useRef({
     isMounted,
@@ -936,6 +947,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
     items,
     boss,
     tspNodes,
+    tspTour,
     gameMode,
     roomIndex,
     gameStatus,
@@ -958,6 +970,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
       items,
       boss,
       tspNodes,
+      tspTour,
       gameMode,
       roomIndex,
       gameStatus,
@@ -1007,6 +1020,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
         items,
         boss,
         tspNodes,
+        tspTour,
         gameMode,
         roomIndex,
         gameStatus,
@@ -1212,13 +1226,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
 
           // TSP Route Line in Room 1/3
           if (gameMode === "roguelike" && tspNodes.length > 0) {
-            const { tour } = computeShortestTour(
-              playerPosition.x,
-              playerPosition.y,
-              tspNodes,
-              EXIT_X,
-              EXIT_Y
-            );
+            const tour = tspTour;
 
             ctx.save();
             ctx.strokeStyle = "rgba(56, 189, 248, 0.4)";
@@ -1634,7 +1642,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
         data-keyboard-boundary="true"
         className={`relative w-full ${
           isFullscreen
-            ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none bg-black flex flex-col items-center justify-between p-2 sm:p-4 overflow-y-auto"
+            ? "fixed inset-0 z-50 w-full h-[100dvh] max-h-[100dvh] max-w-none rounded-none border-none bg-black flex flex-col items-center justify-between p-1.5 sm:p-4 select-none touch-none overflow-hidden"
             : "h-auto"
         } bg-neutral-950/90 border rounded-2xl flex flex-col items-center justify-between p-2.5 overflow-hidden outline-none transition-all duration-300 ${
           isFocused
@@ -1680,26 +1688,25 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
               <span className="text-cyan-500">RAM</span>
               <div className="w-14 h-2 bg-neutral-900 rounded-full overflow-hidden border border-neutral-800">
                 <div
-                  className="h-full bg-cyan-400 transition-all duration-200"
+                  className="h-full bg-cyan-500 transition-all duration-200"
                   style={{ width: `${Math.max(0, (currentRam / maxRam) * 100)}%` }}
                 />
               </div>
-              <span className="text-cyan-300 font-bold">{currentRam}GB</span>
+              <span className="text-neutral-300 font-bold">{currentRam}</span>
             </div>
 
-            {/* Crypto Bounty */}
-            <div className="text-[9px] text-amber-300 flex items-center gap-1 font-bold">
-              <span>🪙 {cryptoBounty}</span>
-              <span className="text-emerald-400 text-[8px] bg-emerald-950/60 px-1 py-0.2 rounded border border-emerald-800/40">
-                🔌 {bypassChips} Chips
-              </span>
+            {/* Crypto Balance */}
+            <div className="flex items-center gap-1 text-[9px] font-mono text-amber-400 font-bold" title="Crypto Chips">
+              <span>🪙</span>
+              <span>{cryptoBounty} Chips</span>
             </div>
 
-            {/* Score */}
-            <div className="text-[9px] text-neutral-400 flex items-center gap-1.5">
-              <span>SCORE: <strong className="text-brand-cyan font-bold">{score}</strong></span>
-              <span className="text-neutral-600">|</span>
-              <span>HI: <strong className="text-amber-400 font-bold">{effectiveHighScore}</strong></span>
+            {/* Total Score & High Score */}
+            <div className="flex items-center gap-1 text-[9px] font-mono text-brand-cyan font-bold" title="Score">
+              <span>SCORE: {score}</span>
+              {effectiveHighScore > 0 && (
+                <span className="text-neutral-500 font-normal">({effectiveHighScore})</span>
+              )}
             </div>
           </div>
         </div>
@@ -1716,11 +1723,11 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
         <div
           className={`relative ${
             isFullscreen
-              ? "w-full max-h-[calc(100vh-220px)] aspect-[240/144]"
+              ? "w-full flex-1 max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--footer-height,48px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] aspect-[240/144] min-h-0"
               : isExpanded
               ? "w-full max-w-[360px] aspect-[240/144] h-auto"
               : "w-full max-w-[240px] aspect-[240/144] h-auto"
-          } flex items-center justify-center transition-all duration-300`}
+          } flex items-center justify-center transition-all duration-300 my-auto`}
           style={
             crtCalibration.curvature > 0.05
               ? {
@@ -1740,7 +1747,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
             }}
             className={`block ${
               isFullscreen
-                ? "w-full h-full max-h-[calc(100vh-220px)] object-contain"
+                ? "max-w-full max-h-full aspect-[240/144] object-contain"
                 : isExpanded
                 ? "w-full max-w-[360px] aspect-[240/144] h-auto"
                 : "w-full max-w-[240px] aspect-[240/144] h-auto"

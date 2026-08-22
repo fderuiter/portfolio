@@ -6,7 +6,7 @@
 
 # Interface: WebApplicationSchemaOptions
 
-Defined in: [lib/seo.ts:189](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L189)
+Defined in: [lib/seo.ts:221](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L221)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/seo.ts:189](https://github.com/fderuiter/portfolio/blob/main/li
 
 > **applicationCategory**: `"GameApplication"` \| `"DeveloperApplication"` \| `"EducationalApplication"` \| `"MultimediaApplication"`
 
-Defined in: [lib/seo.ts:193](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L193)
+Defined in: [lib/seo.ts:225](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L225)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/seo.ts:193](https://github.com/fderuiter/portfolio/blob/main/li
 
 > `optional` **browserRequirements?**: `string`
 
-Defined in: [lib/seo.ts:196](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L196)
+Defined in: [lib/seo.ts:228](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L228)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/seo.ts:196](https://github.com/fderuiter/portfolio/blob/main/li
 
 > **description**: `string`
 
-Defined in: [lib/seo.ts:191](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L191)
+Defined in: [lib/seo.ts:223](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L223)
 
 ***
 
@@ -38,7 +38,23 @@ Defined in: [lib/seo.ts:191](https://github.com/fderuiter/portfolio/blob/main/li
 
 > `optional` **genre?**: `string`
 
-Defined in: [lib/seo.ts:195](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L195)
+Defined in: [lib/seo.ts:227](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L227)
+
+***
+
+### inLanguage?
+
+> `optional` **inLanguage?**: `string`
+
+Defined in: [lib/seo.ts:229](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L229)
+
+***
+
+### isAccessibleForFree?
+
+> `optional` **isAccessibleForFree?**: `boolean`
+
+Defined in: [lib/seo.ts:230](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L230)
 
 ***
 
@@ -46,7 +62,7 @@ Defined in: [lib/seo.ts:195](https://github.com/fderuiter/portfolio/blob/main/li
 
 > **name**: `string`
 
-Defined in: [lib/seo.ts:190](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L190)
+Defined in: [lib/seo.ts:222](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L222)
 
 ***
 
@@ -54,7 +70,7 @@ Defined in: [lib/seo.ts:190](https://github.com/fderuiter/portfolio/blob/main/li
 
 > `optional` **operatingSystem?**: `string`
 
-Defined in: [lib/seo.ts:194](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L194)
+Defined in: [lib/seo.ts:226](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L226)
 
 ***
 
@@ -62,4 +78,4 @@ Defined in: [lib/seo.ts:194](https://github.com/fderuiter/portfolio/blob/main/li
 
 > **url**: `string`
 
-Defined in: [lib/seo.ts:192](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L192)
+Defined in: [lib/seo.ts:224](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L224)

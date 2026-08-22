@@ -14,18 +14,22 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/arcade/laser-loon",
 }));
 
-vi.mock("@/components/providers/AudioProvider", () => ({
-  useAudio: () => ({
-    volume: 0.5,
-    muted: false,
-    profile: "8-bit",
-    playHover: vi.fn(),
-    playSubmit: vi.fn(),
-    playSuccess: vi.fn(),
-    playError: vi.fn(),
-    playAutocomplete: vi.fn(),
-  }),
-}));
+vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/components/providers/AudioProvider")>();
+  return {
+    ...actual,
+    useAudio: () => ({
+      volume: 0.5,
+      muted: false,
+      profile: "8-bit",
+      playHover: vi.fn(),
+      playSubmit: vi.fn(),
+      playSuccess: vi.fn(),
+      playError: vi.fn(),
+      playAutocomplete: vi.fn(),
+    }),
+  };
+});
 
 describe("Navigation Flow Components Suite", () => {
   let container: HTMLDivElement;
@@ -120,15 +124,17 @@ describe("Navigation Flow Components Suite", () => {
       expect(container.textContent).toContain("Arcade Hub Index ↗");
       expect(container.textContent).toContain("Laser Loon");
       expect(container.textContent).toContain("Quasi-Puzzler");
-      expect(container.textContent).toContain("Garmin 32KB Runner");
+      expect(container.textContent).toContain("Monkey C Mayhem");
 
       // Systems links
       expect(container.textContent).toContain("Proof Workspace");
       expect(container.textContent).toContain("Incident Simulator");
 
-      // Connect links
+      // Connect links & Newsletter
       expect(container.textContent).toContain("Schedule 1:1 Sync ↗");
-      expect(container.textContent).toContain("fpderuiter@gmail.com");
+      expect(container.textContent).toContain("Direct Contact Form ↗");
+      expect(container.textContent).toContain("Systems Dispatch");
+      expect(container.textContent).not.toContain("fpderuiter@gmail.com");
 
       // Back to top button
       const backToTopBtn = container.querySelector('button[aria-label="Scroll back to top of page"]');

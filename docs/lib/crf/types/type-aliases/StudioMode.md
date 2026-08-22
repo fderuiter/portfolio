@@ -8,4 +8,4 @@
 
 > **StudioMode** = `"designer"` \| `"matrix"` \| `"rules"` \| `"edc"` \| `"acrf"` \| `"export"`
 
-Defined in: [lib/crf/types.ts:270](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L270)
+Defined in: [lib/crf/types.ts:338](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L338)

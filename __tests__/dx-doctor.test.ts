@@ -12,6 +12,7 @@ import {
   checkHydrationSafety,
   checkAccessibilityStandards,
   checkDocumentationParity,
+  checkDirectoryTopology,
   checkOpenApiParity,
   checkDefectRemediationInvariants,
   checkDesignTokens,
@@ -149,6 +150,23 @@ describe("DX Invariant Doctor Engine", () => {
       expect(result.status).toBe("fail");
       expect(result.details?.[0]).toContain("DROP COLUMN");
     });
+
+    it("flags DATABASE_MIGRATIONS.md when missing mandatory release or drift commands", () => {
+      const migDir = path.join(tempDir, "prisma", "migrations", "20260814000000_init");
+      fs.mkdirSync(migDir, { recursive: true });
+      fs.writeFileSync(path.join(migDir, "migration.sql"), "CREATE TABLE users (id INT);");
+
+      // Incomplete DATABASE_MIGRATIONS.md without release:gate or check:migrations:drift
+      fs.writeFileSync(
+        path.join(tempDir, "DATABASE_MIGRATIONS.md"),
+        "# Migrations\n- `20260814000000_init`\n\nRun `npm run check:migrations`."
+      );
+
+      const result = checkMigrationGuard(tempDir);
+      expect(result.status).toBe("fail");
+      expect(result.details?.some((d) => d.includes("schema drift verification"))).toBe(true);
+      expect(result.details?.some((d) => d.includes("pipeline release gate"))).toBe(true);
+    });
   });
 
   describe("checkPageTopPadding", () => {
@@ -186,6 +204,43 @@ describe("DX Invariant Doctor Engine", () => {
 
       const result = checkDocumentationParity(tempDir, false);
       expect(result.status).toBe("pass");
+    });
+  });
+
+  describe("checkDirectoryTopology", () => {
+    it("fails when ARCHITECTURE.md is missing", () => {
+      const result = checkDirectoryTopology(tempDir);
+      expect(result.status).toBe("fail");
+      expect(result.message).toContain("ARCHITECTURE.md file not found");
+    });
+
+    it("fails when a top-level directory is missing from ARCHITECTURE.md topology section", () => {
+      fs.writeFileSync(
+        path.join(tempDir, "ARCHITECTURE.md"),
+        `# Architecture\n\n## System Architecture & Directory Topology\n\n\`\`\`text\napp/\ncomponents/\n\`\`\`\n`
+      );
+      fs.mkdirSync(path.join(tempDir, "app"), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, "components"), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, "scripts"), { recursive: true });
+
+      const result = checkDirectoryTopology(tempDir);
+      expect(result.status).toBe("fail");
+      expect(result.message).toContain("1 top-level directory/directories missing");
+      expect(result.details?.some((d) => d.includes("scripts/"))).toBe(true);
+    });
+
+    it("passes when all top-level repository directories are documented in ARCHITECTURE.md", () => {
+      fs.writeFileSync(
+        path.join(tempDir, "ARCHITECTURE.md"),
+        `# Architecture\n\n## System Architecture & Directory Topology\n\n\`\`\`text\napp/\ncomponents/\nscripts/\n\`\`\`\n`
+      );
+      fs.mkdirSync(path.join(tempDir, "app"), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, "components"), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, "scripts"), { recursive: true });
+
+      const result = checkDirectoryTopology(tempDir);
+      expect(result.status).toBe("pass");
+      expect(result.message).toContain("All top-level repository directories are explicitly documented");
     });
   });
 

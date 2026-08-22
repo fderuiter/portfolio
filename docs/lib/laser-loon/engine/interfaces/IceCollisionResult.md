@@ -6,7 +6,7 @@
 
 # Interface: IceCollisionResult
 
-Defined in: [lib/laser-loon/engine.ts:269](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L269)
+Defined in: [lib/laser-loon/engine.ts:288](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L288)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/laser-loon/engine.ts:269](https://github.com/fderuiter/portfoli
 
 > **frozenTargets**: [`Target`](../../types/interfaces/Target.md)[]
 
-Defined in: [lib/laser-loon/engine.ts:274](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L274)
+Defined in: [lib/laser-loon/engine.ts:293](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L293)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/laser-loon/engine.ts:274](https://github.com/fderuiter/portfoli
 
 > **killedTargets**: [`Target`](../../types/interfaces/Target.md)[]
 
-Defined in: [lib/laser-loon/engine.ts:273](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L273)
+Defined in: [lib/laser-loon/engine.ts:292](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L292)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/laser-loon/engine.ts:273](https://github.com/fderuiter/portfoli
 
 > **pointsEarned**: `number`
 
-Defined in: [lib/laser-loon/engine.ts:275](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L275)
+Defined in: [lib/laser-loon/engine.ts:294](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L294)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/laser-loon/engine.ts:275](https://github.com/fderuiter/portfoli
 
 > **shatteredBlocks**: `object`[]
 
-Defined in: [lib/laser-loon/engine.ts:272](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L272)
+Defined in: [lib/laser-loon/engine.ts:291](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L291)
 
 #### x
 
@@ -54,7 +54,7 @@ Defined in: [lib/laser-loon/engine.ts:272](https://github.com/fderuiter/portfoli
 
 > **updatedIceBlocks**: [`IceBlock`](../../types/interfaces/IceBlock.md)[]
 
-Defined in: [lib/laser-loon/engine.ts:270](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L270)
+Defined in: [lib/laser-loon/engine.ts:289](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L289)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [lib/laser-loon/engine.ts:270](https://github.com/fderuiter/portfoli
 
 > **updatedTargets**: [`Target`](../../types/interfaces/Target.md)[]
 
-Defined in: [lib/laser-loon/engine.ts:271](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L271)
+Defined in: [lib/laser-loon/engine.ts:290](https://github.com/fderuiter/portfolio/blob/main/lib/laser-loon/engine.ts#L290)

@@ -1,16 +1,19 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { WorkflowWizardModal } from "@/components/crf/Wizard/WorkflowWizardModal";
-import { SpotlightTourOverlay } from "@/components/crf/Wizard/SpotlightTourOverlay";
+import { getOncologyPresetSync } from "@/lib/crf/presets";
 
-describe("WorkflowWizardModal & SpotlightTourOverlay Test Suite", () => {
+describe("WorkflowWizardModal Component", () => {
   let container: HTMLDivElement;
   let root: Root;
+  const sampleStudy = getOncologyPresetSync();
 
   beforeEach(() => {
     container = document.createElement("div");
@@ -20,19 +23,17 @@ describe("WorkflowWizardModal & SpotlightTourOverlay Test Suite", () => {
 
   afterEach(() => {
     act(() => {
-      root?.unmount();
+      root.unmount();
     });
-    if (container.parentNode) {
-      document.body.removeChild(container);
-    }
-    vi.restoreAllMocks();
+    container.remove();
   });
 
-  it("does not render when isOpen is false", async () => {
-    await act(async () => {
+  it("does not render when isOpen is false", () => {
+    act(() => {
       root.render(
         <WorkflowWizardModal
           isOpen={false}
+          study={sampleStudy}
           onClose={vi.fn()}
           onSwitchMode={vi.fn()}
           onStartSpotlightTour={vi.fn()}
@@ -40,115 +41,95 @@ describe("WorkflowWizardModal & SpotlightTourOverlay Test Suite", () => {
       );
     });
 
-    expect(container.children.length).toBe(0);
+    expect(container.innerHTML).toBe("");
   });
 
-  it("renders Stage 1 (CDASH 2.2 Form & Canvas Design) when opened", async () => {
-    await act(async () => {
-      root.render(
-        <WorkflowWizardModal
-          isOpen={true}
-          onClose={vi.fn()}
-          onSwitchMode={vi.fn()}
-          onStartSpotlightTour={vi.fn()}
-        />
-      );
-    });
-
-    expect(container.textContent).toContain("CDASH 2.2 Form & Canvas Design");
-    expect(container.textContent).toContain("Stage 1 of 5");
-    expect(container.textContent).toContain("12-Column Responsive Grid");
-  });
-
-  it("navigates across stages when clicking Next and Previous buttons", async () => {
-    await act(async () => {
-      root.render(
-        <WorkflowWizardModal
-          isOpen={true}
-          onClose={vi.fn()}
-          onSwitchMode={vi.fn()}
-          onStartSpotlightTour={vi.fn()}
-        />
-      );
-    });
-
-    // Find Next Stage button
-    const nextBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Next Stage")
-    );
-    expect(nextBtn).toBeDefined();
-
-    await act(async () => {
-      nextBtn?.click();
-    });
-
-    // Should now be on Stage 2: Schedule of Activities
-    expect(container.textContent).toContain("Schedule of Activities (SoA Matrix)");
-    expect(container.textContent).toContain("Stage 2 of 5");
-
-    // Click Previous Stage
-    const prevBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Previous Stage")
-    );
-    expect(prevBtn).toBeDefined();
-
-    await act(async () => {
-      prevBtn?.click();
-    });
-
-    expect(container.textContent).toContain("CDASH 2.2 Form & Canvas Design");
-    expect(container.textContent).toContain("Stage 1 of 5");
-  });
-
-  it("triggers onSwitchMode and closes modal when live action is clicked", async () => {
-    const handleSwitchMode = vi.fn();
+  it("renders 5 stages and allows step navigation and deployment", async () => {
     const handleClose = vi.fn();
+    const handleSwitchMode = vi.fn();
+    const handleApplyStudy = vi.fn();
 
     await act(async () => {
       root.render(
         <WorkflowWizardModal
           isOpen={true}
+          study={sampleStudy}
           onClose={handleClose}
           onSwitchMode={handleSwitchMode}
+          onApplyStudy={handleApplyStudy}
           onStartSpotlightTour={vi.fn()}
         />
       );
     });
 
-    const actionBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Open Form Canvas")
+    expect(container.textContent).toContain("CRF Protocol Authoring Wizard");
+    expect(container.textContent).toContain("Stage 1 of 5");
+    expect(container.textContent).toContain("Choose Starting Archetype");
+
+    // Click "Next Stage" button
+    const nextButtons = Array.from(container.querySelectorAll("button")).filter(
+      (b) => b.textContent?.includes("Next Stage")
     );
-    expect(actionBtn).toBeDefined();
+    expect(nextButtons.length).toBeGreaterThan(0);
+
+    // Step to Stage 2
+    await act(async () => {
+      nextButtons[0].click();
+    });
+    expect(container.textContent).toContain("Stage 2 of 5");
+    expect(container.textContent).toContain(
+      "Select CDASH & Medical Device Domains"
+    );
+
+    // Step to Stage 3
+    const nextBtn2 = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Next Stage")
+    );
+    await act(async () => {
+      nextBtn2?.click();
+    });
+    expect(container.textContent).toContain("Stage 3 of 5");
+    expect(container.textContent).toContain(
+      "Schedule of Activities (SoA) Matrix"
+    );
+
+    // Step to Stage 4
+    const nextBtn3 = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Next Stage")
+    );
+    await act(async () => {
+      nextBtn3?.click();
+    });
+    expect(container.textContent).toContain("Stage 4 of 5");
+    expect(container.textContent).toContain(
+      "Clinical Calculations & AST Edit Checks"
+    );
+
+    // Step to Stage 5
+    const nextBtn4 = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Next Stage")
+    );
+    await act(async () => {
+      nextBtn4?.click();
+    });
+    expect(container.textContent).toContain("Stage 5 of 5");
+    expect(container.textContent).toContain(
+      "Regulatory & Logic Conformance Audit"
+    );
+    expect(container.textContent).toContain("Deploy Protocol to Studio Canvas");
+
+    // Click Deploy
+    const deployBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Deploy Protocol")
+    );
+    expect(deployBtn).toBeDefined();
 
     await act(async () => {
-      actionBtn?.click();
+      deployBtn?.click();
     });
 
+    expect(handleApplyStudy).toHaveBeenCalled();
     expect(handleSwitchMode).toHaveBeenCalledWith("designer");
     expect(handleClose).toHaveBeenCalled();
-  });
-
-  it("renders and steps through SpotlightTourOverlay", async () => {
-    const handleClose = vi.fn();
-
-    await act(async () => {
-      root.render(<SpotlightTourOverlay isOpen={true} onClose={handleClose} />);
-    });
-
-    expect(container.textContent).toContain("Interactive UI Tour");
-    expect(container.textContent).toContain("Step 1 of 5");
-    expect(container.textContent).toContain("Left Palette & 1-Click CDASH Scaffolder");
-
-    const nextStepBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Next Step")
-    );
-    expect(nextStepBtn).toBeDefined();
-
-    await act(async () => {
-      nextStepBtn?.click();
-    });
-
-    expect(container.textContent).toContain("Step 2 of 5");
-    expect(container.textContent).toContain("Center 12-Column Responsive Canvas");
   });
 });

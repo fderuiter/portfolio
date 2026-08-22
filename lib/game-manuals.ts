@@ -319,10 +319,10 @@ export const GAME_MANUALS: Record<string, FieldManualData> = {
 
   "garmin-watch": {
     id: "garmin-watch",
-    title: "Garmin Connect IQ 32KB Memory Runner",
-    subtitle: "Embedded Systems Engineering Simulator",
+    title: "Monkey C Mayhem: Garmin Schvitz App",
+    subtitle: "Embedded Systems & Garmin Schvitz App Simulator",
     genre: "Embedded Systems",
-    badge: "Monkey C 32KB",
+    badge: "Monkey C Mayhem",
     route: "/arcade/garmin-watch",
     storageKey: "garmin_simulator_high_score",
     accentColor: "from-amber-500/20 via-amber-500/5 to-transparent",

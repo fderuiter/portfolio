@@ -15,7 +15,15 @@ let isHealthy = false;
 let healthCheckPromise: Promise<void> | null = null;
 
 const verifyDatabaseHealthAsync = (baseClient: PrismaClient) => {
-  if (isHealthy || healthCheckPromise) return;
+  const currentEnv = getEnv();
+  if (
+    isHealthy ||
+    healthCheckPromise ||
+    currentEnv.NEXT_PHASE === "phase-production-build" ||
+    currentEnv.SKIP_DB_HEALTH_CHECK === "true"
+  ) {
+    return;
+  }
 
   healthCheckPromise = baseClient
     .$queryRawUnsafe(`SELECT 1 FROM "TelemetryEvent" LIMIT 1`)
@@ -23,7 +31,14 @@ const verifyDatabaseHealthAsync = (baseClient: PrismaClient) => {
       isHealthy = true;
     })
     .catch((error) => {
-      console.error("Database health check failed: Schema version is behind. Missing TelemetryEvent.", error);
+      if (currentEnv.VERCEL_ENV === "production") {
+        console.warn("Database health check non-blocking notice:", error);
+      } else {
+        console.error(
+          "Database health check failed: Schema version is behind. Missing TelemetryEvent.",
+          error
+        );
+      }
     })
     .finally(() => {
       healthCheckPromise = null;
@@ -35,7 +50,10 @@ const createPrismaClient = () => {
   const currentEnv = getEnv();
   const baseClient = new PrismaClient({
     adapter,
-    log: currentEnv.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+    log:
+      currentEnv.NODE_ENV === "development"
+        ? ["query", "error", "warn"]
+        : ["error"],
   });
 
   return baseClient.$extends({
@@ -45,7 +63,11 @@ const createPrismaClient = () => {
         if (activeEnv.PLAYWRIGHT_TEST === "true") {
           const operation = (rest as Record<string, unknown>).operation;
           const model = (rest as Record<string, unknown>).model;
-          if (operation === "findMany" || operation === "findFirst" || operation === "findUnique") {
+          if (
+            operation === "findMany" ||
+            operation === "findFirst" ||
+            operation === "findUnique"
+          ) {
             if (model === "CaseStudy") {
               return [
                 {
@@ -59,9 +81,10 @@ const createPrismaClient = () => {
                   updated_at: new Date(),
                   description: "Clinical Data Mapper Description",
                   editorial_content: "Clinical Data Mapper Editorial Content",
-                  github_url: "https://github.com/fderuiter/clinical-data-mapper",
+                  github_url:
+                    "https://github.com/fderuiter/clinical-data-mapper",
                   simulated_telemetry: false,
-                }
+                },
               ];
             }
             return [];
@@ -82,8 +105,8 @@ const createPrismaClient = () => {
           verifyDatabaseHealthAsync(baseClient as unknown as PrismaClient);
         }
         return query(args);
-      }
-    }
+      },
+    },
   });
 };
 

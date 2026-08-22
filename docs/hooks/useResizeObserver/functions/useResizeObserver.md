@@ -6,7 +6,7 @@
 
 # Function: useResizeObserver()
 
-> **useResizeObserver**\<`T`\>(`callback`): `RefObject`\<`T` \| `null`\>
+> **useResizeObserver**\<`T`\>(`callback`, `options?`): `RefObject`\<`T` \| `null`\>
 
 Defined in: [hooks/useResizeObserver.ts:6](https://github.com/fderuiter/portfolio/blob/main/hooks/useResizeObserver.ts#L6)
 
@@ -21,6 +21,10 @@ Defined in: [hooks/useResizeObserver.ts:6](https://github.com/fderuiter/portfoli
 ### callback
 
 (`entry`) => `void`
+
+### options?
+
+`boolean` \| \{ `trackVertical?`: `boolean`; \}
 
 ## Returns
 

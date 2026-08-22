@@ -1,15 +1,19 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
+import { fromAny } from "@total-typescript/shoehorn";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { useTimelineState } from "@/hooks/useTimelineState";
 
 function renderHookHelper<T>(useHook: () => T) {
-  const result = { current: null as unknown as T };
+  const result: { current: T } = { current: fromAny(null) };
   const container = document.createElement("div");
+
   document.body.appendChild(container);
   const root = createRoot(container);
 
@@ -38,7 +42,7 @@ function renderHookHelper<T>(useHook: () => T) {
 describe("useTimelineState Hook - Complete Unit & Coverage Suite", () => {
   it("1. should initialize with default state", () => {
     const { result, unmount } = renderHookHelper(() => useTimelineState());
-    
+
     expect(result.current.globalMode).toBe("reality");
     expect(result.current.cardOverrides).toEqual({});
     expect(result.current.getCardMode(0)).toBe("reality");

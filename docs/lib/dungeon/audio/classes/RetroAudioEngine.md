@@ -6,16 +6,21 @@
 
 # Class: RetroAudioEngine
 
-Defined in: [lib/dungeon/audio.ts:6](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L6)
-
-Procedural Web Audio API 8-Bit Chiptune Sound Synthesizer
-Safe for SSR, Node, and headless test environments.
+Defined in: [lib/dungeon/audio.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L9)
 
 ## Constructors
 
 ### Constructor
 
-> **new RetroAudioEngine**(): `RetroAudioEngine`
+> **new RetroAudioEngine**(`engine?`): `RetroAudioEngine`
+
+Defined in: [lib/dungeon/audio.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L13)
+
+#### Parameters
+
+##### engine?
+
+[`SoundEngine`](../../../audio/sound-engine/classes/SoundEngine.md) = `...`
 
 #### Returns
 
@@ -27,7 +32,7 @@ Safe for SSR, Node, and headless test environments.
 
 > **getMuted**(): `boolean`
 
-Defined in: [lib/dungeon/audio.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L30)
+Defined in: [lib/dungeon/audio.ts:36](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L36)
 
 #### Returns
 
@@ -39,7 +44,7 @@ Defined in: [lib/dungeon/audio.ts:30](https://github.com/fderuiter/portfolio/blo
 
 > **playAlertPulse**(): `void`
 
-Defined in: [lib/dungeon/audio.ts:152](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L152)
+Defined in: [lib/dungeon/audio.ts:163](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L163)
 
 Security Alert / IDS alarm pulse.
 
@@ -53,7 +58,7 @@ Security Alert / IDS alarm pulse.
 
 > **playCriticalHit**(): `void`
 
-Defined in: [lib/dungeon/audio.ts:131](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L131)
+Defined in: [lib/dungeon/audio.ts:142](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L142)
 
 Critical CVE hit arpeggio.
 
@@ -67,7 +72,7 @@ Critical CVE hit arpeggio.
 
 > **playExploitBlast**(): `void`
 
-Defined in: [lib/dungeon/audio.ts:104](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L104)
+Defined in: [lib/dungeon/audio.ts:114](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L114)
 
 High-impact Exploit blast sound.
 
@@ -81,7 +86,7 @@ High-impact Exploit blast sound.
 
 > **playHackSuccess**(): `void`
 
-Defined in: [lib/dungeon/audio.ts:140](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L140)
+Defined in: [lib/dungeon/audio.ts:151](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L151)
 
 Hex terminal bypass success fanfare.
 
@@ -95,7 +100,7 @@ Hex terminal bypass success fanfare.
 
 > **playPickup**(): `void`
 
-Defined in: [lib/dungeon/audio.ts:160](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L160)
+Defined in: [lib/dungeon/audio.ts:171](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L171)
 
 Item / Crypto pickup chime.
 
@@ -109,7 +114,7 @@ Item / Crypto pickup chime.
 
 > **playPortScan**(): `void`
 
-Defined in: [lib/dungeon/audio.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L77)
+Defined in: [lib/dungeon/audio.ts:86](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L86)
 
 Port Scan frequency ramp.
 
@@ -123,7 +128,7 @@ Port Scan frequency ramp.
 
 > **playStep**(): `void`
 
-Defined in: [lib/dungeon/audio.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L70)
+Defined in: [lib/dungeon/audio.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L79)
 
 Subnet step movement blip.
 
@@ -137,7 +142,7 @@ Subnet step movement blip.
 
 > **playTone**(`freq`, `durationMs?`, `type?`, `volume?`): `void`
 
-Defined in: [lib/dungeon/audio.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L37)
+Defined in: [lib/dungeon/audio.ts:43](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L43)
 
 Plays a customizable synthesized frequency pulse.
 
@@ -169,13 +174,25 @@ Plays a customizable synthesized frequency pulse.
 
 > **setMuted**(`muted`): `void`
 
-Defined in: [lib/dungeon/audio.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L26)
+Defined in: [lib/dungeon/audio.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L29)
 
 #### Parameters
 
 ##### muted
 
 `boolean`
+
+#### Returns
+
+`void`
+
+***
+
+### stopAll()
+
+> **stopAll**(): `void`
+
+Defined in: [lib/dungeon/audio.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/dungeon/audio.ts#L25)
 
 #### Returns
 

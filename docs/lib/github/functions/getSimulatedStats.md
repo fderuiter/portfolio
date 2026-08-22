@@ -6,13 +6,17 @@
 
 # Function: getSimulatedStats()
 
-> **getSimulatedStats**(`language`): [`GitHubStats`](../interfaces/GitHubStats.md)
+> **getSimulatedStats**(`language`, `identifier?`): [`GitHubStats`](../interfaces/GitHubStats.md)
 
-Defined in: [lib/github.ts:283](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L283)
+Defined in: [lib/github.ts:617](https://github.com/fderuiter/portfolio/blob/main/lib/github.ts#L617)
 
 ## Parameters
 
 ### language
+
+`string`
+
+### identifier?
 
 `string`
 

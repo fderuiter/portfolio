@@ -3,6 +3,8 @@
  */
 
 export * from "./types";
+export * from "./universal-schema";
+export * from "./cli-engine";
 export * from "./expression-evaluator";
 export * from "./formula-linter";
 export * from "./formula-presets";
@@ -27,3 +29,12 @@ export {
 } from "./export-sas";
 export * from "./fhir-questionnaire";
 export * from "./odm-xml-serializer";
+export * from "./usdm-adapter";
+export * from "./precision-date";
+export {
+  computeFormHealthMetrics,
+  CDASH_CORE_DOMAIN_VARIABLES,
+} from "./form-health";
+export * from "./study-auditor";
+export * from "./smart-blocks-engine";
+export * from "./presets";

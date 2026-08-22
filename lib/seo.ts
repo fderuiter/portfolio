@@ -10,7 +10,7 @@ export const WEBSITE_NODE_ID = `${SITE_BASE_URL}/#website`;
 /**
  * Returns the canonical Person Schema.org entity node with #person @id.
  */
-export function getPersonNode(): Record<string, unknown> {
+export function getPersonNode(options?: { inLanguage?: string; isAccessibleForFree?: boolean }): Record<string, unknown> {
   return {
     "@type": "Person",
     "@id": PERSON_NODE_ID,
@@ -18,7 +18,8 @@ export function getPersonNode(): Record<string, unknown> {
     "url": SITE_BASE_URL,
     "image": `${SITE_BASE_URL}/favicon.ico`,
     "jobTitle": "Principal Systems Engineer & Designer",
-    "email": "fpderuiter@gmail.com",
+    "inLanguage": options?.inLanguage || "en-US",
+    "isAccessibleForFree": options?.isAccessibleForFree ?? true,
     "sameAs": [
       "https://github.com/fderuiter",
       "https://www.linkedin.com/in/frederick-de-ruiter-88012467/"
@@ -37,13 +38,15 @@ export function getPersonNode(): Record<string, unknown> {
 /**
  * Returns the canonical WebSite Schema.org entity node with `#website` `@id` and Sitelinks SearchAction.
  */
-export function getWebsiteNode(): Record<string, unknown> {
+export function getWebsiteNode(options?: { inLanguage?: string; isAccessibleForFree?: boolean }): Record<string, unknown> {
   return {
     "@type": "WebSite",
     "@id": WEBSITE_NODE_ID,
     "name": "Frederick de Ruiter Portfolio",
     "url": SITE_BASE_URL,
     "description": "High-performance systems engineering showcase, canvas physics engines, and CDISC data engines by Frederick de Ruiter.",
+    "inLanguage": options?.inLanguage || "en-US",
+    "isAccessibleForFree": options?.isAccessibleForFree ?? true,
     "publisher": {
       "@type": "Person",
       "@id": PERSON_NODE_ID,
@@ -67,6 +70,8 @@ export interface WebPageNodeOptions {
   description: string;
   url: string;
   breadcrumbs?: BreadcrumbItem[];
+  inLanguage?: string;
+  isAccessibleForFree?: boolean;
 }
 
 /**
@@ -80,6 +85,8 @@ export function getWebPageNode(options: WebPageNodeOptions): Record<string, unkn
     "url": fullUrl,
     "name": options.name,
     "description": options.description,
+    "inLanguage": options.inLanguage || "en-US",
+    "isAccessibleForFree": options.isAccessibleForFree ?? true,
     "isPartOf": {
       "@id": WEBSITE_NODE_ID
     },
@@ -93,12 +100,14 @@ export function getWebPageNode(options: WebPageNodeOptions): Record<string, unkn
 /**
  * Returns a normalized BreadcrumbList entity node with explicit #breadcrumb @id.
  */
-export function getBreadcrumbNode(items: BreadcrumbItem[], pageUrl: string): Record<string, unknown> {
+export function getBreadcrumbNode(items: BreadcrumbItem[], pageUrl: string, options?: { inLanguage?: string; isAccessibleForFree?: boolean }): Record<string, unknown> {
   const normalized = normalizeBreadcrumbs(items);
   const fullPageUrl = pageUrl.startsWith("http") ? pageUrl : `${SITE_BASE_URL}${pageUrl.startsWith("/") ? pageUrl : "/" + pageUrl}`;
   return {
     "@type": "BreadcrumbList",
     "@id": `${fullPageUrl}/#breadcrumb`,
+    "inLanguage": options?.inLanguage || "en-US",
+    "isAccessibleForFree": options?.isAccessibleForFree ?? true,
     "itemListElement": normalized.map((item, index) => {
       const formattedUrl = item.url.startsWith("http")
         ? item.url
@@ -121,20 +130,23 @@ export interface VisualArtworkSchemaOptions {
   formats?: string[];
   license?: string;
   creator?: string;
+  inLanguage?: string;
+  isAccessibleForFree?: boolean;
 }
 
 /**
  * Returns a specialized VisualArtwork & MediaObject Schema.org representation for open graphic design assets (e.g. Laser Loon).
  */
-export function getVisualArtworkSchema(options: VisualArtworkSchemaOptions): string {
+export function getVisualArtworkNode(options: VisualArtworkSchemaOptions): Record<string, unknown> {
   const fullUrl = options.url.startsWith("http") ? options.url : `${SITE_BASE_URL}${options.url.startsWith("/") ? options.url : "/" + options.url}`;
-  const schema = {
-    "@context": "https://schema.org",
+  return {
     "@type": "VisualArtwork",
     "@id": `${fullUrl}/#artwork`,
     "name": options.name,
     "description": options.description,
     "url": fullUrl,
+    "inLanguage": options.inLanguage || "en-US",
+    "isAccessibleForFree": options.isAccessibleForFree ?? true,
     "image": options.imageUrl || `${SITE_BASE_URL}/images/laser-loon-preview.png`,
     "encodingFormat": options.formats || ["image/svg+xml", "application/illustrator", "application/pdf", "image/png"],
     "license": options.license || "https://creativecommons.org/licenses/by/4.0/",
@@ -144,6 +156,13 @@ export function getVisualArtworkSchema(options: VisualArtworkSchemaOptions): str
       "name": options.creator || "Frederick de Ruiter"
     }
   };
+}
+
+export function getVisualArtworkSchema(options: VisualArtworkSchemaOptions): string {
+  const schema = {
+    "@context": "https://schema.org",
+    ...getVisualArtworkNode(options),
+  };
 
   return JSON.stringify(schema).replace(/</g, "\\u003c");
 }
@@ -151,8 +170,21 @@ export function getVisualArtworkSchema(options: VisualArtworkSchemaOptions): str
 /**
  * Returns an interconnected Schema.org `@graph` linking all provided entity nodes into a single structured payload.
  */
-export function getUnifiedGraphSchema(nodes: (Record<string, unknown> | null | undefined)[]): string {
-  const filteredNodes = nodes.filter((n): n is Record<string, unknown> => Boolean(n));
+export function getUnifiedGraphSchema(
+  nodes: (Record<string, unknown> | null | undefined)[],
+  options?: { inLanguage?: string; isAccessibleForFree?: boolean }
+): string {
+  const defaultInLanguage = options?.inLanguage || "en-US";
+  const defaultIsAccessibleForFree = options?.isAccessibleForFree ?? true;
+
+  const filteredNodes = nodes
+    .filter((n): n is Record<string, unknown> => Boolean(n))
+    .map((node) => ({
+      inLanguage: (node.inLanguage as string) || defaultInLanguage,
+      isAccessibleForFree: (node.isAccessibleForFree as boolean) ?? defaultIsAccessibleForFree,
+      ...node,
+    }));
+
   const schema = {
     "@context": "https://schema.org",
     "@graph": filteredNodes,
@@ -165,10 +197,10 @@ export function getUnifiedGraphSchema(nodes: (Record<string, unknown> | null | u
  * Returns the canonical Person schema representing Frederick de Ruiter.
  * Securely escapes angle brackets to neutralize potential XSS script injections.
  */
-export function getPersonSchema(): string {
+export function getPersonSchema(options?: { inLanguage?: string; isAccessibleForFree?: boolean }): string {
   const schema = {
     "@context": "https://schema.org",
-    ...getPersonNode(),
+    ...getPersonNode(options),
   };
 
   return JSON.stringify(schema).replace(/</g, "\\u003c");
@@ -177,10 +209,10 @@ export function getPersonSchema(): string {
 /**
  * Returns the root WebSite schema.
  */
-export function getWebsiteSchema(): string {
+export function getWebsiteSchema(options?: { inLanguage?: string; isAccessibleForFree?: boolean }): string {
   const schema = {
     "@context": "https://schema.org",
-    ...getWebsiteNode(),
+    ...getWebsiteNode(options),
   };
 
   return JSON.stringify(schema).replace(/</g, "\\u003c");
@@ -194,18 +226,22 @@ export interface WebApplicationSchemaOptions {
   operatingSystem?: string;
   genre?: string;
   browserRequirements?: string;
+  inLanguage?: string;
+  isAccessibleForFree?: boolean;
 }
 
 /**
- * Returns a specialized WebApplication schema for interactive games, proof tools, and simulators.
+ * Returns a specialized WebApplication entity node for interactive games, proof tools, and simulators.
  */
-export function getWebApplicationSchema(options: WebApplicationSchemaOptions): string {
-  const schema = {
-    "@context": "https://schema.org",
+export function getWebApplicationNode(options: WebApplicationSchemaOptions): Record<string, unknown> {
+  const fullUrl = options.url.startsWith("http") ? options.url : `${SITE_BASE_URL}${options.url.startsWith("/") ? options.url : "/" + options.url}`;
+  return {
     "@type": "WebApplication",
     "name": options.name,
     "description": options.description,
-    "url": options.url.startsWith("http") ? options.url : `${SITE_BASE_URL}${options.url}`,
+    "url": fullUrl,
+    "inLanguage": options.inLanguage || "en-US",
+    "isAccessibleForFree": options.isAccessibleForFree ?? true,
     "applicationCategory": options.applicationCategory,
     "operatingSystem": options.operatingSystem || "Any modern web browser (HTML5, Canvas 2D, Web Audio API)",
     "browserRequirements": options.browserRequirements || "Requires JavaScript. Requires HTML5 Canvas support.",
@@ -214,6 +250,16 @@ export function getWebApplicationSchema(options: WebApplicationSchemaOptions): s
       "@type": "Person",
       "name": "Frederick de Ruiter"
     }
+  };
+}
+
+/**
+ * Returns a specialized WebApplication schema for interactive games, proof tools, and simulators.
+ */
+export function getWebApplicationSchema(options: WebApplicationSchemaOptions): string {
+  const schema = {
+    "@context": "https://schema.org",
+    ...getWebApplicationNode(options),
   };
 
   return JSON.stringify(schema).replace(/</g, "\\u003c");
@@ -247,11 +293,16 @@ export function normalizeBreadcrumbs(items: BreadcrumbItem[]): BreadcrumbItem[] 
  * Returns a Schema.org BreadcrumbList for hierarchical page navigation.
  * Enforces a single root location entry and securely sanitizes angle brackets against script injection.
  */
-export function getBreadcrumbSchema(items: BreadcrumbItem[]): string {
+export function getBreadcrumbSchema(
+  items: BreadcrumbItem[],
+  options?: { inLanguage?: string; isAccessibleForFree?: boolean }
+): string {
   const normalized = normalizeBreadcrumbs(items);
   const schema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
+    "inLanguage": options?.inLanguage || "en-US",
+    "isAccessibleForFree": options?.isAccessibleForFree ?? true,
     "itemListElement": normalized.map((item, index) => {
       const formattedUrl = item.url.startsWith("http")
         ? item.url
@@ -275,27 +326,30 @@ export interface CollectionItem {
 }
 
 /**
- * Returns a Schema.org CollectionPage schema for hub and directory views.
+ * Returns a CollectionPage entity node.
  */
-export function getCollectionPageSchema(
+export function getCollectionPageNode(
   name: string,
   description: string,
   url: string,
-  items: CollectionItem[]
-): string {
-  const schema = {
-    "@context": "https://schema.org",
+  items: CollectionItem[],
+  options?: { inLanguage?: string; isAccessibleForFree?: boolean }
+): Record<string, unknown> {
+  const fullUrl = url.startsWith("http") ? url : `${SITE_BASE_URL}${url.startsWith("/") ? url : "/" + url}`;
+  return {
     "@type": "CollectionPage",
     "name": name,
     "description": description,
-    "url": url.startsWith("http") ? url : `${SITE_BASE_URL}${url}`,
+    "url": fullUrl,
+    "inLanguage": options?.inLanguage || "en-US",
+    "isAccessibleForFree": options?.isAccessibleForFree ?? true,
     "mainEntity": {
       "@type": "ItemList",
       "itemListElement": items.map((item, index) => ({
         "@type": "ListItem",
         "position": index + 1,
         "name": item.name,
-        "url": item.url.startsWith("http") ? item.url : `${SITE_BASE_URL}${item.url}`,
+        "url": item.url.startsWith("http") ? item.url : `${SITE_BASE_URL}${item.url.startsWith("/") ? item.url : "/" + item.url}`,
         ...(item.description ? { "description": item.description } : {})
       }))
     },
@@ -304,36 +358,51 @@ export function getCollectionPageSchema(
       "name": "Frederick de Ruiter"
     }
   };
+}
+
+/**
+ * Returns a Schema.org CollectionPage schema for hub and directory views.
+ */
+export function getCollectionPageSchema(
+  name: string,
+  description: string,
+  url: string,
+  items: CollectionItem[],
+  options?: { inLanguage?: string; isAccessibleForFree?: boolean }
+): string {
+  const schema = {
+    "@context": "https://schema.org",
+    ...getCollectionPageNode(name, description, url, items, options),
+  };
 
   return JSON.stringify(schema).replace(/</g, "\\u003c");
 }
 
 /**
- * Returns a specialized SoftwareSourceCode schema for dynamic Case Studies.
- * Integrates database case study records with cached live GitHub telemetry statistics.
+ * Returns a specialized SoftwareSourceCode entity node for dynamic Case Studies.
  */
-export function getSoftwareSourceCodeSchema(
+export function getSoftwareSourceCodeNode(
   study: BaseCaseStudy,
-  stats: Partial<GitHubStats> | null
-): string {
-  // Strip formatting markdown markers for description fields
+  stats: Partial<GitHubStats> | null,
+  options?: { inLanguage?: string; isAccessibleForFree?: boolean }
+): Record<string, unknown> {
   const cleanDescription = study.editorial_content
     .replace(/\*\*/g, "")
     .replace(/`/g, "")
     .replace(/\*/g, "");
 
-  const schema = {
-    "@context": "https://schema.org",
+  return {
     "@type": "SoftwareSourceCode",
     "name": study.title,
     "description": cleanDescription,
+    "inLanguage": options?.inLanguage || "en-US",
+    "isAccessibleForFree": options?.isAccessibleForFree ?? true,
     "codeRepository": study.github_url || undefined,
     "programmingLanguage": study.primary_language,
     "author": {
       "@type": "Person",
       "name": "Frederick de Ruiter"
     },
-    // Incorporate telemetry API stats directly into the structured metadata
     "interactionStatistic": (stats && typeof stats.stars === "number" && typeof stats.forks === "number") ? [
       {
         "@type": "InteractionCounter",
@@ -346,6 +415,21 @@ export function getSoftwareSourceCodeSchema(
         "userInteractionCount": stats.forks
       }
     ] : undefined
+  };
+}
+
+/**
+ * Returns a specialized SoftwareSourceCode schema for dynamic Case Studies.
+ * Integrates database case study records with cached live GitHub telemetry statistics.
+ */
+export function getSoftwareSourceCodeSchema(
+  study: BaseCaseStudy,
+  stats: Partial<GitHubStats> | null,
+  options?: { inLanguage?: string; isAccessibleForFree?: boolean }
+): string {
+  const schema = {
+    "@context": "https://schema.org",
+    ...getSoftwareSourceCodeNode(study, stats, options),
   };
 
   return JSON.stringify(schema).replace(/</g, "\\u003c");

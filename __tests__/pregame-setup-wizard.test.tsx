@@ -1,10 +1,18 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React from "react";
-import { render, screen, fireEvent, act, cleanup } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  act,
+  cleanup,
+} from "@testing-library/react";
 import {
   PreGameSetupWizard,
   getSavedSetupConfig,
@@ -79,14 +87,18 @@ describe("Standardized Pre-Game Setup Wizard", () => {
       // Click Next Step -> Step 2
       fireEvent.click(screen.getByText(/Next Step/i));
       expect(screen.getByTestId("wizard-step-2")).toBeTruthy();
-      expect(screen.getByText(/Step 2: Visual & Cabinet Configuration/i)).toBeTruthy();
+      expect(
+        screen.getByText(/Step 2: Visual & Cabinet Configuration/i)
+      ).toBeTruthy();
       expect(screen.getByText(/Screen Shake Intensity/i)).toBeTruthy();
       expect(screen.getByText(/CRT Filter Effect/i)).toBeTruthy();
 
       // Click Next Step -> Step 3
       fireEvent.click(screen.getByText(/Next Step/i));
       expect(screen.getByTestId("wizard-step-3")).toBeTruthy();
-      expect(screen.getByText(/Step 3: Setup Summary & Confirmation/i)).toBeTruthy();
+      expect(
+        screen.getByText(/Step 3: Setup Summary & Confirmation/i)
+      ).toBeTruthy();
       expect(screen.getByRole("button", { name: /Start Game/i })).toBeTruthy();
     });
 
@@ -102,7 +114,9 @@ describe("Standardized Pre-Game Setup Wizard", () => {
       );
 
       // Select Hard difficulty button in step 1
-      const hardBtn = screen.getAllByRole("button").find((b) => b.textContent?.includes("Hard"));
+      const hardBtn = screen
+        .getAllByRole("button")
+        .find((b) => b.textContent?.includes("Hard"));
       expect(hardBtn).toBeDefined();
       if (hardBtn) fireEvent.click(hardBtn);
 
@@ -204,7 +218,7 @@ describe("Standardized Pre-Game Setup Wizard", () => {
       { id: "working-with-duck", title: "Working With Duck" },
       { id: "laser-loon", title: "Laser Loon: Quest for the State Flag" },
       { id: "quasi-puzzler", title: "Quasi-Perfect Puzzler" },
-      { id: "garmin-watch", title: "Garmin Connect IQ 32KB Memory Runner" },
+      { id: "garmin-watch", title: "Monkey C Mayhem: Garmin Schvitz App" },
       { id: "clinical-chaos", title: "Clinical Trial Chaos: CDISC Compliance" },
       { id: "retro-labyrinth", title: "Retro Labyrinth: Graveyard Roguelike" },
     ];
@@ -238,7 +252,11 @@ describe("Standardized Pre-Game Setup Wizard", () => {
           vi.advanceTimersByTime(2000);
         });
 
-        // Setup wizard MUST be visible after launch
+        // Open setup wizard via cabinet frame setup button
+        const setupBtn = screen.getByTitle(/Pre-Game Setup Wizard/i);
+        fireEvent.click(setupBtn);
+
+        // Setup wizard is visible
         expect(screen.getByTestId("pregame-setup-wizard-overlay")).toBeTruthy();
         expect(screen.getByText(/Step 1: Gameplay Parameters/i)).toBeTruthy();
 
@@ -260,4 +278,3 @@ describe("Standardized Pre-Game Setup Wizard", () => {
     });
   });
 });
-

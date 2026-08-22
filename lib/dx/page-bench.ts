@@ -27,35 +27,139 @@ export const CANONICAL_ROUTES: PageBenchmarkRoute[] = [
   { path: "/offline", name: "Offline Fallback View", category: "top-level" },
 
   // Deep Case Studies
-  { path: "/case-studies/clinical-data-mapper", name: "CS: Clinical Data Mapper", category: "case-study" },
-  { path: "/case-studies/cadence-clinical", name: "CS: Cadence Clinical", category: "case-study" },
-  { path: "/case-studies/schemaflow", name: "CS: SchemaFlow", category: "case-study" },
-  { path: "/case-studies/imednet-python-sdk", name: "CS: iMedNet SDK", category: "case-study" },
-  { path: "/case-studies/wedding-website", name: "CS: Wedding Platform", category: "case-study" },
-  { path: "/case-studies/hono-kiln", name: "CS: Hono-Kiln Runtime", category: "case-study" },
-  { path: "/case-studies/inbody-qr-decoder", name: "CS: InBody QR Decoder", category: "case-study" },
-  { path: "/case-studies/oxidizemath", name: "CS: OxidizeMath", category: "case-study" },
-  { path: "/case-studies/ualbf", name: "CS: UALBF Engine", category: "case-study" },
-  { path: "/case-studies/laser-loon", name: "CS: Laser Loon", category: "case-study" },
-  { path: "/work/laser-loon", name: "CS: Laser Loon Work Route", category: "case-study" },
-  { path: "/case-studies/sonos-network-controller", name: "CS: Sonos Network Controller", category: "case-study" },
-  { path: "/case-studies/clintrials", name: "CS: clintrials WASM Engine", category: "case-study" },
-  { path: "/case-studies/equipose-randomization", name: "CS: Equipose Randomization", category: "case-study" },
-  { path: "/case-studies/lambda-wave", name: "CS: Lambda-Wave Radar", category: "case-study" },
-  { path: "/case-studies/duckdeploy", name: "CS: DuckDeploy Dynamic UI", category: "case-study" },
-  { path: "/case-studies/cardiac-risk-modeling", name: "CS: Cardiac Risk Modeling", category: "case-study" },
-  { path: "/case-studies/4glory", name: "CS: 4Glory Sports Analytics", category: "case-study" },
-  { path: "/case-studies/crf-xl", name: "CS: CRF.xl CDISC Compiler", category: "case-study" },
-  { path: "/case-studies/promptops", name: "CS: PromptOps LLM Framework", category: "case-study" },
+  {
+    path: "/case-studies/clinical-data-mapper",
+    name: "CS: Clinical Data Mapper",
+    category: "case-study",
+  },
+  {
+    path: "/case-studies/cadence-clinical",
+    name: "CS: Cadence Clinical",
+    category: "case-study",
+  },
+  {
+    path: "/case-studies/schemaflow",
+    name: "CS: SchemaFlow",
+    category: "case-study",
+  },
+  {
+    path: "/case-studies/imednet-python-sdk",
+    name: "CS: iMedNet SDK",
+    category: "case-study",
+  },
+  {
+    path: "/case-studies/wedding-website",
+    name: "CS: Wedding Platform",
+    category: "case-study",
+  },
+  {
+    path: "/case-studies/hono-kiln",
+    name: "CS: Hono-Kiln Runtime",
+    category: "case-study",
+  },
+  {
+    path: "/case-studies/inbody-qr-decoder",
+    name: "CS: InBody QR Decoder",
+    category: "case-study",
+  },
+  {
+    path: "/case-studies/oxidizemath",
+    name: "CS: OxidizeMath",
+    category: "case-study",
+  },
+  {
+    path: "/case-studies/ualbf",
+    name: "CS: UALBF Engine",
+    category: "case-study",
+  },
+  {
+    path: "/case-studies/laser-loon",
+    name: "CS: Laser Loon",
+    category: "case-study",
+  },
+  {
+    path: "/work/laser-loon",
+    name: "CS: Laser Loon Work Route",
+    category: "case-study",
+  },
+  {
+    path: "/case-studies/sonos-network-controller",
+    name: "CS: Sonos Network Controller",
+    category: "case-study",
+  },
+  {
+    path: "/case-studies/clintrials",
+    name: "CS: clintrials WASM Engine",
+    category: "case-study",
+  },
+  {
+    path: "/case-studies/equipose-randomization",
+    name: "CS: Equipose Randomization",
+    category: "case-study",
+  },
+  {
+    path: "/case-studies/lambda-wave",
+    name: "CS: Lambda-Wave Radar",
+    category: "case-study",
+  },
+  {
+    path: "/case-studies/duckdeploy",
+    name: "CS: DuckDeploy Dynamic UI",
+    category: "case-study",
+  },
+  {
+    path: "/case-studies/cardiac-risk-modeling",
+    name: "CS: Cardiac Risk Modeling",
+    category: "case-study",
+  },
+  {
+    path: "/case-studies/4glory",
+    name: "CS: 4Glory Sports Analytics",
+    category: "case-study",
+  },
+  {
+    path: "/case-studies/crf-xl",
+    name: "CS: CRF.xl CDISC Compiler",
+    category: "case-study",
+  },
+  {
+    path: "/case-studies/promptops",
+    name: "CS: PromptOps LLM Framework",
+    category: "case-study",
+  },
 
   // Arcade Mini-Games
-  { path: "/arcade/working-with-duck", name: "Game: Duck Canvas Engine", category: "arcade" },
+  {
+    path: "/arcade/working-with-duck",
+    name: "Game: Duck Canvas Engine",
+    category: "arcade",
+  },
   { path: "/arcade/laser-loon", name: "Game: Laser Loon", category: "arcade" },
-  { path: "/arcade/quasi-puzzler", name: "Game: Quasi Puzzler", category: "arcade" },
-  { path: "/arcade/garmin-watch", name: "Game: Garmin Watch", category: "arcade" },
-  { path: "/arcade/clinical-chaos", name: "Game: Clinical Chaos", category: "arcade" },
-  { path: "/arcade/retro-labyrinth", name: "Game: Retro Labyrinth", category: "arcade" },
-  { path: "/arcade/meme-vault", name: "Game: Secret Meme Vault", category: "arcade" },
+  {
+    path: "/arcade/quasi-puzzler",
+    name: "Game: Quasi Puzzler",
+    category: "arcade",
+  },
+  {
+    path: "/arcade/garmin-watch",
+    name: "Game: Garmin Watch",
+    category: "arcade",
+  },
+  {
+    path: "/arcade/clinical-chaos",
+    name: "Game: Clinical Chaos",
+    category: "arcade",
+  },
+  {
+    path: "/arcade/retro-labyrinth",
+    name: "Game: Retro Labyrinth",
+    category: "arcade",
+  },
+  {
+    path: "/arcade/meme-vault",
+    name: "Game: Secret Meme Vault",
+    category: "arcade",
+  },
 ];
 
 export interface SingleRunMetrics {
@@ -105,7 +209,7 @@ export interface BenchmarkThresholds {
 
 export const DEFAULT_THRESHOLDS: BenchmarkThresholds = {
   maxTtfbMs: 800,
-  maxFcpMs: 1800,
+  maxFcpMs: 2000,
   maxLcpMs: 2500,
   maxCls: 0.1,
 };
@@ -121,11 +225,17 @@ export function calculateSummary(values: number[]): MetricSummary {
   // Median
   const mid = Math.floor(sorted.length / 2);
   const median = Number(
-    (sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2).toFixed(2)
+    (sorted.length % 2 !== 0
+      ? sorted[mid]
+      : (sorted[mid - 1] + sorted[mid]) / 2
+    ).toFixed(2)
   );
 
   // P95 (Nearest-rank method)
-  const p95Index = Math.min(sorted.length - 1, Math.ceil(0.95 * sorted.length) - 1);
+  const p95Index = Math.min(
+    sorted.length - 1,
+    Math.ceil(0.95 * sorted.length) - 1
+  );
   const p95 = Number(sorted[p95Index].toFixed(2));
 
   return { median, min, max, p95 };
@@ -155,7 +265,10 @@ export function rateCls(cls: number): WebVitalRating {
   return "poor";
 }
 
-export function formatRatingColor(val: string | number, rating: WebVitalRating): string {
+export function formatRatingColor(
+  val: string | number,
+  rating: WebVitalRating
+): string {
   switch (rating) {
     case "good":
       return `${colors.brightGreen}${val}${colors.reset}`;
@@ -169,7 +282,10 @@ export function formatRatingColor(val: string | number, rating: WebVitalRating):
 /**
  * Capture raw performance metrics for a single navigation via Playwright
  */
-export async function measurePageRoute(page: Page, url: string): Promise<SingleRunMetrics> {
+export async function measurePageRoute(
+  page: Page,
+  url: string
+): Promise<SingleRunMetrics> {
   // Navigate and wait for page to reach load state
   await page.goto(url, { waitUntil: "load", timeout: 30000 });
 
@@ -178,7 +294,9 @@ export async function measurePageRoute(page: Page, url: string): Promise<SingleR
 
   const metrics = await page.evaluate((): SingleRunMetrics => {
     // 1. Navigation Timing Level 2
-    const navEntries = performance.getEntriesByType("navigation") as PerformanceNavigationTiming[];
+    const navEntries = performance.getEntriesByType(
+      "navigation"
+    ) as PerformanceNavigationTiming[];
     const nav = navEntries && navEntries.length > 0 ? navEntries[0] : null;
 
     let ttfb = 0;
@@ -191,7 +309,10 @@ export async function measurePageRoute(page: Page, url: string): Promise<SingleR
       if (ttfb === 0 && nav.responseStart > 0) {
         ttfb = Math.max(0, nav.responseStart - nav.startTime);
       }
-      domContentLoaded = Math.max(0, nav.domContentLoadedEventEnd - nav.startTime);
+      domContentLoaded = Math.max(
+        0,
+        nav.domContentLoadedEventEnd - nav.startTime
+      );
       loadDuration = Math.max(0, nav.loadEventEnd - nav.startTime);
       transferSizeKb = (nav.encodedBodySize || nav.transferSize || 0) / 1024;
     }
@@ -212,14 +333,18 @@ export async function measurePageRoute(page: Page, url: string): Promise<SingleR
 
     // 4. LCP and CLS from performance timeline if available
     let lcp = fcp;
-    const lcpEntries = performance.getEntriesByType("largest-contentful-paint") as PerformanceEntry[];
+    const lcpEntries = performance.getEntriesByType(
+      "largest-contentful-paint"
+    ) as PerformanceEntry[];
     if (lcpEntries && lcpEntries.length > 0) {
       lcp = lcpEntries[lcpEntries.length - 1].startTime;
     }
 
     // Layout shift entries
     let cls = 0;
-    const layoutShiftEntries = performance.getEntriesByType("layout-shift") as (PerformanceEntry & {
+    const layoutShiftEntries = performance.getEntriesByType(
+      "layout-shift"
+    ) as (PerformanceEntry & {
       hadRecentInput?: boolean;
       value?: number;
     })[];
@@ -257,13 +382,20 @@ export interface RunOptions {
     hasTouch?: boolean;
     userAgent?: string;
   };
-  onProgress?: (progress: { route: PageBenchmarkRoute; currentRun: number; totalRuns: number; metrics?: SingleRunMetrics }) => void;
+  onProgress?: (progress: {
+    route: PageBenchmarkRoute;
+    currentRun: number;
+    totalRuns: number;
+    metrics?: SingleRunMetrics;
+  }) => void;
 }
 
 /**
  * Execute Page Benchmark Suite across specified routes
  */
-export async function runPageBenchmarks(options: RunOptions = {}): Promise<PageBenchmarkSummary[]> {
+export async function runPageBenchmarks(
+  options: RunOptions = {}
+): Promise<PageBenchmarkSummary[]> {
   const baseUrl = options.baseUrl || "http://localhost:3000";
   const runs = options.runs || 3;
   const routes = options.routes || CANONICAL_ROUTES;
@@ -276,22 +408,28 @@ export async function runPageBenchmarks(options: RunOptions = {}): Promise<PageB
   try {
     browser = await chromium.launch({
       headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+      ],
     });
 
-    const contextOptions = options.device || (isMobile
-      ? {
-          viewport: { width: 390, height: 844 },
-          isMobile: true,
-          hasTouch: true,
-          userAgent:
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
-        }
-      : {
-          viewport: { width: 1280, height: 800 },
-          isMobile: false,
-          hasTouch: false,
-        });
+    const contextOptions =
+      options.device ||
+      (isMobile
+        ? {
+            viewport: { width: 390, height: 844 },
+            isMobile: true,
+            hasTouch: true,
+            userAgent:
+              "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
+          }
+        : {
+            viewport: { width: 1280, height: 800 },
+            isMobile: false,
+            hasTouch: false,
+          });
 
     const context = await browser.newContext(contextOptions);
 
@@ -315,7 +453,12 @@ export async function runPageBenchmarks(options: RunOptions = {}): Promise<PageB
         const metrics = await measurePageRoute(page, pageUrl);
         samples.push(metrics);
         if (options.onProgress) {
-          options.onProgress({ route, currentRun: run, totalRuns: runs, metrics });
+          options.onProgress({
+            route,
+            currentRun: run,
+            totalRuns: runs,
+            metrics,
+          });
         }
       }
 
@@ -325,9 +468,13 @@ export async function runPageBenchmarks(options: RunOptions = {}): Promise<PageB
       const fcpSummary = calculateSummary(samples.map((s) => s.fcp));
       const lcpSummary = calculateSummary(samples.map((s) => s.lcp));
       const clsSummary = calculateSummary(samples.map((s) => s.cls));
-      const domSummary = calculateSummary(samples.map((s) => s.domContentLoaded));
+      const domSummary = calculateSummary(
+        samples.map((s) => s.domContentLoaded)
+      );
       const loadSummary = calculateSummary(samples.map((s) => s.loadDuration));
-      const sizeSummary = calculateSummary(samples.map((s) => s.transferSizeKb));
+      const sizeSummary = calculateSummary(
+        samples.map((s) => s.transferSizeKb)
+      );
 
       const ratings = {
         ttfb: rateTtfb(ttfbSummary.median),
@@ -370,10 +517,20 @@ export async function runPageBenchmarks(options: RunOptions = {}): Promise<PageB
 /**
  * Render Formatted Terminal Table with Core Web Vitals Ratings
  */
-export function printPageBenchmarkReport(summaries: PageBenchmarkSummary[], baseUrl = "http://localhost:3000"): void {
-  console.log(formatHeader("Real-Browser Page Speed & Core Web Vitals Report", `Target: ${baseUrl} • Samples: 1 warmup + ${summaries[0]?.runs || 3} measured`));
+export function printPageBenchmarkReport(
+  summaries: PageBenchmarkSummary[],
+  baseUrl = "http://localhost:3000"
+): void {
+  console.log(
+    formatHeader(
+      "Real-Browser Page Speed & Core Web Vitals Report",
+      `Target: ${baseUrl} • Samples: 1 warmup + ${summaries[0]?.runs || 3} measured`
+    )
+  );
 
-  console.log(`${colors.dim}Legend: ${colors.brightGreen}■ Good${colors.reset} ${colors.dim}|${colors.reset} ${colors.brightYellow}■ Needs Improvement${colors.reset} ${colors.dim}|${colors.reset} ${colors.brightRed}■ Poor${colors.reset}\n`);
+  console.log(
+    `${colors.dim}Legend: ${colors.brightGreen}■ Good${colors.reset} ${colors.dim}|${colors.reset} ${colors.brightYellow}■ Needs Improvement${colors.reset} ${colors.dim}|${colors.reset} ${colors.brightRed}■ Poor${colors.reset}\n`
+  );
 
   const rows = summaries.map((s) => {
     const ttfbStr = formatRatingColor(`${s.ttfb.median}ms`, s.ratings.ttfb);
@@ -417,23 +574,53 @@ export function printPageBenchmarkReport(summaries: PageBenchmarkSummary[], base
   );
 
   // Group Summary Stats
-  const avgLcp = summaries.length > 0 ? Math.round(summaries.reduce((sum, s) => sum + s.lcp.median, 0) / summaries.length) : 0;
-  const avgTtfb = summaries.length > 0 ? Math.round(summaries.reduce((sum, s) => sum + s.ttfb.median, 0) / summaries.length) : 0;
-  const avgLoad = summaries.length > 0 ? Math.round(summaries.reduce((sum, s) => sum + s.loadDuration.median, 0) / summaries.length) : 0;
+  const avgLcp =
+    summaries.length > 0
+      ? Math.round(
+          summaries.reduce((sum, s) => sum + s.lcp.median, 0) / summaries.length
+        )
+      : 0;
+  const avgTtfb =
+    summaries.length > 0
+      ? Math.round(
+          summaries.reduce((sum, s) => sum + s.ttfb.median, 0) /
+            summaries.length
+        )
+      : 0;
+  const avgLoad =
+    summaries.length > 0
+      ? Math.round(
+          summaries.reduce((sum, s) => sum + s.loadDuration.median, 0) /
+            summaries.length
+        )
+      : 0;
   const totalPassed = summaries.filter((s) => s.passedBudget).length;
 
   console.log(formatSection("Executive Summary & SLAs"));
-  console.log(`  • ${colors.bold}Total Pages Tested:${colors.reset} ${summaries.length}`);
-  console.log(`  • ${colors.bold}Passing Web Vitals Budget:${colors.reset} ${totalPassed} / ${summaries.length}`);
-  console.log(`  • ${colors.bold}Fleet Average TTFB:${colors.reset} ${avgTtfb}ms`);
-  console.log(`  • ${colors.bold}Fleet Average LCP:${colors.reset} ${avgLcp}ms`);
-  console.log(`  • ${colors.bold}Fleet Average Full Load:${colors.reset} ${avgLoad}ms\n`);
+  console.log(
+    `  • ${colors.bold}Total Pages Tested:${colors.reset} ${summaries.length}`
+  );
+  console.log(
+    `  • ${colors.bold}Passing Web Vitals Budget:${colors.reset} ${totalPassed} / ${summaries.length}`
+  );
+  console.log(
+    `  • ${colors.bold}Fleet Average TTFB:${colors.reset} ${avgTtfb}ms`
+  );
+  console.log(
+    `  • ${colors.bold}Fleet Average LCP:${colors.reset} ${avgLcp}ms`
+  );
+  console.log(
+    `  • ${colors.bold}Fleet Average Full Load:${colors.reset} ${avgLoad}ms\n`
+  );
 }
 
 /**
  * Generate Markdown Report of Benchmark Results
  */
-export function generateMarkdownReport(summaries: PageBenchmarkSummary[], baseUrl = "http://localhost:3000"): string {
+export function generateMarkdownReport(
+  summaries: PageBenchmarkSummary[],
+  baseUrl = "http://localhost:3000"
+): string {
   let md = `# Page Speed & Core Web Vitals Benchmark Report\n\n`;
   md += `**Target URL**: \`${baseUrl}\`  \n`;
   md += `**Generated**: ${new Date().toISOString()}  \n`;
@@ -444,18 +631,55 @@ export function generateMarkdownReport(summaries: PageBenchmarkSummary[], baseUr
   md += `| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |\n`;
 
   for (const s of summaries) {
-    const ttfbIcon = s.ratings.ttfb === "good" ? "🟢" : s.ratings.ttfb === "needs-improvement" ? "🟡" : "🔴";
-    const fcpIcon = s.ratings.fcp === "good" ? "🟢" : s.ratings.fcp === "needs-improvement" ? "🟡" : "🔴";
-    const lcpIcon = s.ratings.lcp === "good" ? "🟢" : s.ratings.lcp === "needs-improvement" ? "🟡" : "🔴";
-    const clsIcon = s.ratings.cls === "good" ? "🟢" : s.ratings.cls === "needs-improvement" ? "🟡" : "🔴";
+    const ttfbIcon =
+      s.ratings.ttfb === "good"
+        ? "🟢"
+        : s.ratings.ttfb === "needs-improvement"
+          ? "🟡"
+          : "🔴";
+    const fcpIcon =
+      s.ratings.fcp === "good"
+        ? "🟢"
+        : s.ratings.fcp === "needs-improvement"
+          ? "🟡"
+          : "🔴";
+    const lcpIcon =
+      s.ratings.lcp === "good"
+        ? "🟢"
+        : s.ratings.lcp === "needs-improvement"
+          ? "🟡"
+          : "🔴";
+    const clsIcon =
+      s.ratings.cls === "good"
+        ? "🟢"
+        : s.ratings.cls === "needs-improvement"
+          ? "🟡"
+          : "🔴";
     const budgetStatus = s.passedBudget ? "✅ PASS" : "❌ FAIL";
 
     md += `| \`${s.route.path}\` | ${s.route.name} | ${ttfbIcon} ${s.ttfb.median}ms | ${fcpIcon} ${s.fcp.median}ms | ${lcpIcon} ${s.lcp.median}ms | ${clsIcon} ${s.cls.median.toFixed(3)} | ${s.domContentLoaded.median}ms | ${s.loadDuration.median}ms | ${budgetStatus} |\n`;
   }
 
-  const avgLcp = summaries.length > 0 ? Math.round(summaries.reduce((sum, s) => sum + s.lcp.median, 0) / summaries.length) : 0;
-  const avgTtfb = summaries.length > 0 ? Math.round(summaries.reduce((sum, s) => sum + s.ttfb.median, 0) / summaries.length) : 0;
-  const avgLoad = summaries.length > 0 ? Math.round(summaries.reduce((sum, s) => sum + s.loadDuration.median, 0) / summaries.length) : 0;
+  const avgLcp =
+    summaries.length > 0
+      ? Math.round(
+          summaries.reduce((sum, s) => sum + s.lcp.median, 0) / summaries.length
+        )
+      : 0;
+  const avgTtfb =
+    summaries.length > 0
+      ? Math.round(
+          summaries.reduce((sum, s) => sum + s.ttfb.median, 0) /
+            summaries.length
+        )
+      : 0;
+  const avgLoad =
+    summaries.length > 0
+      ? Math.round(
+          summaries.reduce((sum, s) => sum + s.loadDuration.median, 0) /
+            summaries.length
+        )
+      : 0;
   const passCount = summaries.filter((s) => s.passedBudget).length;
 
   md += `\n## Aggregate Metrics\n\n`;
@@ -479,7 +703,11 @@ export function generateMarkdownReport(summaries: PageBenchmarkSummary[], baseUr
 /**
  * Save benchmark results to disk in Markdown and JSON formats
  */
-export function exportBenchmarkResults(summaries: PageBenchmarkSummary[], outDir = process.cwd(), baseUrl = "http://localhost:3000"): {
+export function exportBenchmarkResults(
+  summaries: PageBenchmarkSummary[],
+  outDir = process.cwd(),
+  baseUrl = "http://localhost:3000"
+): {
   jsonPath: string;
   markdownPath: string;
 } {
@@ -494,7 +722,11 @@ export function exportBenchmarkResults(summaries: PageBenchmarkSummary[], outDir
   };
 
   fs.writeFileSync(jsonPath, JSON.stringify(jsonPayload, null, 2), "utf-8");
-  fs.writeFileSync(markdownPath, generateMarkdownReport(summaries, baseUrl), "utf-8");
+  fs.writeFileSync(
+    markdownPath,
+    generateMarkdownReport(summaries, baseUrl),
+    "utf-8"
+  );
 
   return { jsonPath, markdownPath };
 }

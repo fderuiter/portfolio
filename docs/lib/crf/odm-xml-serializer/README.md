@@ -6,6 +6,10 @@
 
 # lib/crf/odm-xml-serializer
 
+## Variables
+
+- [serializeStudyToOdmXml](variables/serializeStudyToOdmXml.md)
+
 ## Functions
 
 - [exportStudyToCdiscOdmXml](functions/exportStudyToCdiscOdmXml.md)

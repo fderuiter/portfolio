@@ -8,7 +8,7 @@
 
 > **mopIndoorPuddle**(`state`, `x`, `y`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:2075](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2075)
+Defined in: [lib/working-with-duck-engine.ts:2191](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2191)
 
 Player Action: Mop up an indoor bladder puddle by clicking / scrubbing over it
 

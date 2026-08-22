@@ -6,13 +6,13 @@
 
 # Variable: withApiWrapper
 
-> `const` **withApiWrapper**: \{\<`TSchema`\>(`handler`, `options`): (`rawReq?`, `routeParams?`) => `Promise`\<`NextResponse`\<`unknown`\>\>; (`handler`, `options?`): (`rawReq?`, `routeParams?`) => `Promise`\<`NextResponse`\<`unknown`\>\>; \} = `createApiHandler`
+> `const` **withApiWrapper**: \{\<`TSchema`\>(`handler`, `options`): [`ApiRouteHandler`](../type-aliases/ApiRouteHandler.md); (`handler`, `options?`): [`ApiRouteHandler`](../type-aliases/ApiRouteHandler.md); \} = `createApiHandler`
 
-Defined in: [lib/route-wrapper.ts:150](https://github.com/fderuiter/portfolio/blob/main/lib/route-wrapper.ts#L150)
+Defined in: [lib/route-wrapper.ts:180](https://github.com/fderuiter/portfolio/blob/main/lib/route-wrapper.ts#L180)
 
 ## Call Signature
 
-> \<`TSchema`\>(`handler`, `options`): (`rawReq?`, `routeParams?`) => `Promise`\<`NextResponse`\<`unknown`\>\>
+> \<`TSchema`\>(`handler`, `options`): [`ApiRouteHandler`](../type-aliases/ApiRouteHandler.md)
 
 Higher-order API route handler wrapper.
 Provides automated Zod request schema validation, uniform error transformation,
@@ -36,11 +36,11 @@ Sentry exception logging, error sanitization, and security header enforcement.
 
 ### Returns
 
-(`rawReq?`, `routeParams?`) => `Promise`\<`NextResponse`\<`unknown`\>\>
+[`ApiRouteHandler`](../type-aliases/ApiRouteHandler.md)
 
 ## Call Signature
 
-> (`handler`, `options?`): (`rawReq?`, `routeParams?`) => `Promise`\<`NextResponse`\<`unknown`\>\>
+> (`handler`, `options?`): [`ApiRouteHandler`](../type-aliases/ApiRouteHandler.md)
 
 Higher-order API route handler wrapper.
 Provides automated Zod request schema validation, uniform error transformation,
@@ -58,4 +58,4 @@ Sentry exception logging, error sanitization, and security header enforcement.
 
 ### Returns
 
-(`rawReq?`, `routeParams?`) => `Promise`\<`NextResponse`\<`unknown`\>\>
+[`ApiRouteHandler`](../type-aliases/ApiRouteHandler.md)

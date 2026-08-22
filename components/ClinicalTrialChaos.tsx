@@ -56,9 +56,11 @@ import {
   StationConfig,
   PowerUpInventory,
   PowerUpType,
+  RecordedRuleViolation,
   SDTMRow,
   BIMOInspectionReport,
 } from "@/lib/clinical-trial-chaos/types";
+import { StudyProtocol } from "@/lib/crf/types";
 
 import {
   createInitialScoreState,
@@ -86,6 +88,7 @@ import {
   getStationsForPhase,
   SEEDED_SCENARIOS,
   generateClinicalSubject,
+  generateClinicalSubjectFromProtocol,
 } from "@/lib/clinical-trial-chaos/scenarios";
 
 import {
@@ -179,9 +182,26 @@ export const ClinicalTrialChaos: React.FC = () => {
   const [targetRoutingStation, setTargetRoutingStation] = useState<CDISCDomain>("DM");
   const [bimoReport, setBimoReport] = useState<BIMOInspectionReport | null>(null);
 
+  // Active Authored Protocol Engine State & Rule Violations Log
+  const [activeProtocol, setActiveProtocol] = useState<StudyProtocol | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("crf_active_protocol");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && parsed.id) return parsed;
+        }
+      } catch {}
+    }
+    return null;
+  });
+  const [ruleViolations, setRuleViolations] = useState<RecordedRuleViolation[]>([]);
+
   // 4. DOM & Canvas references
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const lastPointerTimeRef = useRef(0);
+  const isPointerDownRef = useRef(false);
   const { isFullscreen, toggleFullscreen } = useFullscreen(containerRef);
   const animFrameIdRef = useRef<number | null>(null);
   const lastTickTimeRef = useRef<number>(0);
@@ -189,6 +209,8 @@ export const ClinicalTrialChaos: React.FC = () => {
   const amendmentTimerRef = useRef<number>(0);
   const terminalContainerRef = useRef<HTMLDivElement>(null);
   const particlesRef = useRef<Particle[]>([]);
+  const activeProtocolRef = useRef<StudyProtocol | null>(activeProtocol);
+  const ruleViolationsRef = useRef<RecordedRuleViolation[]>(ruleViolations);
 
   // 5. Audit Logger
   const addAuditLog = useCallback(
@@ -255,6 +277,8 @@ export const ClinicalTrialChaos: React.FC = () => {
       setSelectedSubjectId(null);
       setValidatingObs(null);
       setBimoReport(null);
+      setRuleViolations([]);
+      ruleViolationsRef.current = [];
       setPowerUps(createInitialPowerUpInventory());
       setSignatureModal({
         isOpen: false,
@@ -264,16 +288,21 @@ export const ClinicalTrialChaos: React.FC = () => {
         requiresReason: true,
       });
 
-      // Initial subjects: Seeded for Phase 1 campaign, generated for others
+      // Initial subjects: Seeded for Phase 1 campaign or populated from active protocol
       const activeDomains = phaseStations.map((s) => s.id);
-      const initialSubs =
-        targetPhase === 1 && mode === "campaign"
-          ? JSON.parse(JSON.stringify(SEEDED_SCENARIOS))
-          : [
-              generateClinicalSubject(0.4, false, 100, activeDomains),
-              generateClinicalSubject(0.6, false, 101, activeDomains),
-              generateClinicalSubject(0.7, targetPhase >= 2, 102, activeDomains),
-            ];
+      const initialSubs = activeProtocol
+        ? [
+            generateClinicalSubjectFromProtocol(activeProtocol, 0.4, false, 100),
+            generateClinicalSubjectFromProtocol(activeProtocol, 0.6, false, 101),
+            generateClinicalSubjectFromProtocol(activeProtocol, 0.7, targetPhase >= 2, 102),
+          ]
+        : targetPhase === 1 && mode === "campaign"
+        ? JSON.parse(JSON.stringify(SEEDED_SCENARIOS))
+        : [
+            generateClinicalSubject(0.4, false, 100, activeDomains),
+            generateClinicalSubject(0.6, false, 101, activeDomains),
+            generateClinicalSubject(0.7, targetPhase >= 2, 102, activeDomains),
+          ];
 
       setConveyorSubjects(initialSubs);
       setSelectedSubjectId(initialSubs[0]?.id ?? null);
@@ -295,7 +324,7 @@ export const ClinicalTrialChaos: React.FC = () => {
 
       recordEvent("clinical_trial_chaos", "project_click").catch(() => {});
     },
-    [addAuditLog, recordEvent, effectiveHighScore]
+    [addAuditLog, recordEvent, effectiveHighScore, activeProtocol]
   );
 
   // 9. Active Subject in Dossier
@@ -337,7 +366,7 @@ export const ClinicalTrialChaos: React.FC = () => {
       if (!validatingObs) return;
       const { subjectId, obs } = validatingObs;
 
-      const result = validateObservationChoice(obs, choice);
+      const result = validateObservationChoice(obs, choice, activeProtocol);
 
       if (result.isValid) {
         triggerSound("validate");
@@ -378,6 +407,7 @@ export const ClinicalTrialChaos: React.FC = () => {
         triggerSound("incorrect");
         setValidatingObs((prev) => (prev ? { ...prev, selectedChoice: choice, feedback: { isValid: false, text: result.explanation } } : null));
 
+        // Immediately increase Auditor AI suspicion metrics
         setAuditor((aud) => {
           const nextSusp = Math.min(100, aud.suspicion + result.suspicionDelta);
           return {
@@ -387,14 +417,29 @@ export const ClinicalTrialChaos: React.FC = () => {
           };
         });
 
+        // Record rule violation for final regulatory inspection report
+        const violation: RecordedRuleViolation = {
+          id: `viol_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          type: obs.astRule ? "ast_edit_check" : "cdisc_conformance",
+          subjectLabel: activeSubject?.subjectLabel || "SUBJ-UNK",
+          field: obs.field,
+          selectedChoice: choice,
+          ruleName: result.ruleName,
+          message: result.explanation,
+          domain: obs.destination,
+          timestamp: new Date().toISOString(),
+        };
+        setRuleViolations((prev) => [...prev, violation]);
+        ruleViolationsRef.current.push(violation);
+
         addAuditLog(
-          `[DATA MISMATCH] Invalid code selected: ${choice} for ${obs.field}. Suspicion +${result.suspicionDelta}%`,
+          `[AST RULE FAILURE] ${result.ruleName || "Edit check"} failed for ${obs.field}: '${choice}'. Auditor Suspicion +${result.suspicionDelta}%`,
           "WARN",
           result.suspicionDelta
         );
       }
     },
-    [validatingObs, triggerSound, addAuditLog]
+    [validatingObs, activeProtocol, activeSubject, triggerSound, addAuditLog]
   );
 
   // 13. Power-Up Trigger Execution
@@ -559,7 +604,9 @@ export const ClinicalTrialChaos: React.FC = () => {
           const report = generateBIMOReport(
             { ...scoreState, subjectsSubmitted: scoreState.subjectsSubmitted + 1 },
             auditor,
-            auditLogs
+            auditLogs,
+            ruleViolations,
+            activeProtocol
           );
           setBimoReport(report);
         }
@@ -592,6 +639,8 @@ export const ClinicalTrialChaos: React.FC = () => {
     scoreState,
     auditor,
     auditLogs,
+    ruleViolations,
+    activeProtocol,
     gameMode,
     phase,
     triggerSound,
@@ -823,6 +872,8 @@ export const ClinicalTrialChaos: React.FC = () => {
     renderConveyorCanvasRef.current = renderConveyorCanvas;
     validatingObsRef.current = validatingObs;
     signatureModalRef.current = signatureModal;
+    activeProtocolRef.current = activeProtocol;
+    ruleViolationsRef.current = ruleViolations;
   });
 
   // 17. Main Game Loop Tick (requestAnimationFrame)
@@ -909,7 +960,13 @@ export const ClinicalTrialChaos: React.FC = () => {
           `[FDA NOTICE OF STUDY TERMINATION] 21 CFR Part 11 Audit Suspicion reached 100%. Form 483 Issued.`,
           "CRITICAL"
         );
-        const report = generateBIMOReport(scoreStateRef.current, updatedAuditor, auditLogsRef.current);
+        const report = generateBIMOReport(
+          scoreStateRef.current,
+          updatedAuditor,
+          auditLogsRef.current,
+          ruleViolationsRef.current,
+          activeProtocolRef.current
+        );
         setBimoReport(report);
         setAuditor({ ...updatedAuditor });
       }
@@ -973,12 +1030,14 @@ export const ClinicalTrialChaos: React.FC = () => {
         spawnTimerRef.current = 0;
         const errorChance = phaseRef.current === 1 ? 0.45 : phaseRef.current === 2 ? 0.65 : 0.8;
         const isSAE = Math.random() < (phaseRef.current === 1 ? 0.1 : 0.3);
-        const newSub = generateClinicalSubject(
-          errorChance,
-          isSAE,
-          undefined,
-          stationsRef.current.map((s) => s.id)
-        );
+        const newSub = activeProtocolRef.current
+          ? generateClinicalSubjectFromProtocol(activeProtocolRef.current, errorChance, isSAE)
+          : generateClinicalSubject(
+              errorChance,
+              isSAE,
+              undefined,
+              stationsRef.current.map((s) => s.id)
+            );
         conveyorSubjectsRef.current = [...conveyorSubjectsRef.current, newSub];
         setConveyorSubjects([...conveyorSubjectsRef.current]);
         if (!selectedSubjectIdRef.current) {
@@ -1150,6 +1209,45 @@ export const ClinicalTrialChaos: React.FC = () => {
     }
   };
 
+  const handleCanvasPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    lastPointerTimeRef.current = Date.now();
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // Ignored for environments without setPointerCapture mock
+    }
+    isPointerDownRef.current = true;
+    handleCanvasClickOrTouch(e.clientX, e.clientY);
+  };
+
+  const handleCanvasPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (isPointerDownRef.current) {
+      handleCanvasClickOrTouch(e.clientX, e.clientY);
+    }
+  };
+
+  const handleCanvasPointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        // Ignored
+      }
+    }
+    isPointerDownRef.current = false;
+  };
+
+  const handleCanvasPointerCancel = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+      try {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      } catch {
+        // Ignored
+      }
+    }
+    isPointerDownRef.current = false;
+  };
+
   const sortedStations = [...stations].sort((a, b) => a.positionIndex - b.positionIndex);
 
   return (
@@ -1160,7 +1258,7 @@ export const ClinicalTrialChaos: React.FC = () => {
       onKeyDown={handleKeyDown}
       className={`relative w-full font-mono focus:outline-none transition-all ${
         isFullscreen
-          ? "fixed inset-0 z-50 w-screen h-screen max-w-none max-h-none rounded-none border-none bg-black p-4 sm:p-6 overflow-y-auto overflow-x-hidden"
+          ? "fixed inset-0 z-50 w-full h-[100dvh] max-h-[100dvh] max-w-none rounded-none border-none bg-black p-3 sm:p-6 overflow-y-auto select-none"
           : "rounded-2xl border border-blue-500/30 bg-zinc-950 p-4 md:p-6 shadow-2xl focus:ring-1 focus:ring-brand-cyan"
       }`}
     >
@@ -1245,6 +1343,54 @@ export const ClinicalTrialChaos: React.FC = () => {
               <IconVolumeOff className="h-4 w-4 text-zinc-600" />
             )}
           </button>
+        </div>
+      </div>
+
+      {/* Authored Protocol Engine Status Banner */}
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl border border-emerald-500/30 bg-emerald-950/40 text-xs font-mono">
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-emerald-300 font-bold">
+            {activeProtocol
+              ? `AUTHORED PROTOCOL ENGINE: ${activeProtocol.protocolNumber} - ${activeProtocol.studyName} (${activeProtocol.forms?.length || 0} Forms, ${activeProtocol.rules?.length || 0} AST Rules)`
+              : "BUILT-IN PRESET SCENARIOS ACTIVE (Fallback Mode)"}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          {activeProtocol ? (
+            <button
+              onClick={() => {
+                setActiveProtocol(null);
+                try {
+                  localStorage.removeItem("crf_active_protocol");
+                } catch {}
+                addAuditLog("Switched simulation engine to Built-in Preset Scenarios.", "INFO");
+              }}
+              className="px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 text-zinc-300 text-[11px]"
+            >
+              Use Built-in Presets
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  try {
+                    const stored = localStorage.getItem("crf_active_protocol");
+                    if (stored) {
+                      const parsed = JSON.parse(stored);
+                      setActiveProtocol(parsed);
+                      addAuditLog(`Loaded active protocol ${parsed.protocolNumber} into simulation.`, "COMPLIANT");
+                      return;
+                    }
+                  } catch {}
+                  alert("No custom protocol found in storage. Author a protocol in CRF Studio and click 'Simulate Protocol'!");
+                }
+              }}
+              className="px-2.5 py-1 rounded-lg bg-emerald-600/30 border border-emerald-500/50 hover:bg-emerald-600/50 text-emerald-200 text-[11px] font-bold"
+            >
+              Load Authored Protocol
+            </button>
+          )}
         </div>
       </div>
 
@@ -1415,13 +1561,24 @@ export const ClinicalTrialChaos: React.FC = () => {
               ref={canvasRef}
               width={760}
               height={200}
-              onClick={(e) => handleCanvasClickOrTouch(e.clientX, e.clientY)}
+              onPointerDown={handleCanvasPointerDown}
+              onPointerMove={handleCanvasPointerMove}
+              onPointerUp={handleCanvasPointerUp}
+              onPointerCancel={handleCanvasPointerCancel}
+              onClick={(e) => {
+                if (Date.now() - lastPointerTimeRef.current < 100) return;
+                handleCanvasClickOrTouch(e.clientX, e.clientY);
+              }}
               onTouchStart={(e) => {
+                if (Date.now() - lastPointerTimeRef.current < 100) return;
                 const touch = e.touches[0];
                 if (touch) handleCanvasClickOrTouch(touch.clientX, touch.clientY);
               }}
+              onTouchCancel={() => {
+                isPointerDownRef.current = false;
+              }}
               style={{ touchAction: "none" }}
-              className={`w-full ${isFullscreen ? "h-auto max-h-[300px] aspect-[760/200] object-contain" : "h-auto aspect-[760/200]"} block cursor-pointer`}
+              className={`w-full ${isFullscreen ? "h-auto max-h-[300px] aspect-[760/200] object-contain" : "h-auto aspect-[760/200]"} block cursor-pointer touch-none`}
             />
 
             {/* Overlays for Idle / Paused / Game Over / Cleared */}

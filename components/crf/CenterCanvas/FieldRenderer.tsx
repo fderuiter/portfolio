@@ -141,35 +141,75 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             {field.dataType}
           </span>
 
-          {/* Quick Required Toggle */}
+          {/* Quick Requirement Tier Badge / Toggle */}
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onUpdateField?.({ required: !field.required });
+              const nextTier =
+                field.requirementTier === "hard_stop" || (!field.requirementTier && field.required)
+                  ? "auto_query"
+                  : field.requirementTier === "auto_query"
+                  ? "optional"
+                  : "hard_stop";
+              onUpdateField?.({
+                requirementTier: nextTier,
+                required: nextTier !== "optional",
+              });
             }}
             className={`px-1.5 py-0.5 rounded text-[9px] font-mono transition-colors border ${
-              field.required
+              field.requirementTier === "auto_query"
+                ? "bg-amber-500/15 text-amber-400 border-amber-500/30 font-bold"
+                : field.requirementTier === "hard_stop" || (!field.requirementTier && field.required)
                 ? "bg-red-500/15 text-red-400 border-red-500/30 font-bold"
                 : "bg-zinc-900 text-zinc-600 border-zinc-800 hover:text-zinc-400"
             }`}
-            title={field.required ? "Required question (click to make optional)" : "Optional question (click to make required)"}
+            title={`Requirement Tier: ${
+              field.requirementTier === "auto_query"
+                ? "Auto-Query on empty"
+                : field.requirementTier === "hard_stop" || (!field.requirementTier && field.required)
+                ? "Hard Stop (Blocks form)"
+                : "Optional"
+            } (click to cycle)`}
           >
-            {field.required ? "* Req" : "Opt"}
+            {field.requirementTier === "auto_query"
+              ? "? Auto-Query"
+              : field.requirementTier === "hard_stop" || (!field.requirementTier && field.required)
+              ? "* Hard Stop"
+              : "Opt"}
           </button>
+
+          {field.requiresSdv && (
+            <span
+              className="inline-flex items-center gap-0.5 font-mono text-[9px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20"
+              title="Requires CRA Source Document Verification"
+            >
+              <IconShieldCheck className="w-3 h-3" />
+              <span>SDV Req</span>
+            </span>
+          )}
+
+          {field.isBlinded && (
+            <span
+              className="inline-flex items-center gap-0.5 font-mono text-[9px] text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20"
+              title="Masked / Blinded variable"
+            >
+              <span>Blinded</span>
+            </span>
+          )}
 
           {field.sdvVerified && (
             <span className="inline-flex items-center gap-0.5 font-mono text-[9px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
               <IconShieldCheck className="w-3 h-3" />
-              <span>SDV</span>
+              <span>Verified</span>
             </span>
           )}
         </div>
 
         {/* Right Actions & Progressive Micro-Toolbar */}
-        <div className="flex items-center gap-1">
-          {/* Progressive Column Span Controls (Visible on Hover / Focus / Selection) */}
+        <div className="flex items-center gap-1 shrink-0">
+          {/* Compact Column Span Stepper (Visible on Hover / Focus / Selection) */}
           <div
-            className={`hidden sm:flex items-center bg-zinc-900/90 border border-zinc-800 rounded-lg px-1 py-0.5 text-[9px] font-mono text-zinc-400 gap-1 transition-opacity ${
+            className={`hidden sm:flex items-center bg-zinc-900/90 border border-zinc-800 rounded-lg px-1.5 py-0.5 text-[9px] font-mono text-zinc-400 gap-1 transition-opacity ${
               isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-within:opacity-100"
             }`}
           >
@@ -179,43 +219,23 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
                 handleAdjustSpan(-1);
               }}
               disabled={field.columnSpan <= 1}
-              className="hover:text-white disabled:opacity-30 px-0.5"
+              className="hover:text-white disabled:opacity-30 px-0.5 font-bold"
               title="Shrink column span"
             >
               -
             </button>
-            <span className="text-zinc-300 font-bold">{field.columnSpan}/12</span>
+            <span className="text-brand-cyan font-bold">{field.columnSpan}/12</span>
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 handleAdjustSpan(1);
               }}
               disabled={field.columnSpan >= 12}
-              className="hover:text-white disabled:opacity-30 px-0.5"
+              className="hover:text-white disabled:opacity-30 px-0.5 font-bold"
               title="Expand column span"
             >
               +
             </button>
-
-            <div className="h-2.5 w-px bg-zinc-800 mx-0.5" />
-
-            {[3, 4, 6, 12].map((s) => (
-              <button
-                key={s}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onUpdateField?.({ columnSpan: s });
-                }}
-                className={`px-1 py-0.2 rounded text-[8px] font-bold ${
-                  field.columnSpan === s
-                    ? "bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/40"
-                    : "text-zinc-500 hover:text-zinc-200"
-                }`}
-                title={`Set width to ${s} columns (${Math.round((s / 12) * 100)}%)`}
-              >
-                {s}c
-              </button>
-            ))}
           </div>
 
           {/* Touch Move Up/Down Controls for touch devices & smaller screens */}
@@ -447,6 +467,29 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
           </div>
         )}
 
+        {field.dataType === "precision_date" && (
+          <div className="space-y-1.5">
+            <div className="grid grid-cols-3 gap-1.5 font-mono text-[11px]">
+              <div className="p-1.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 text-center">
+                <span className="text-[9px] text-zinc-500 block">Day</span>
+                <span>{field.allowPartial ? "DD / UNK" : "DD (01-31)"}</span>
+              </div>
+              <div className="p-1.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 text-center">
+                <span className="text-[9px] text-zinc-500 block">Month</span>
+                <span>{field.allowPartial ? "MM / UNK" : "MMM (01-12)"}</span>
+              </div>
+              <div className="p-1.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 text-center">
+                <span className="text-[9px] text-zinc-500 block">Year</span>
+                <span>YYYY</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
+              <span>{field.allowPartial ? "ISO: YYYY-MM-DD / UNK" : "ISO: YYYY-MM-DD"}</span>
+              {field.preventFutureDate && <span className="text-amber-400/80">≤ Today UTC</span>}
+            </div>
+          </div>
+        )}
+
         {(field.dataType === "date" || field.dataType === "partial_date" || field.dataType === "datetime" || field.dataType === "time") && (
           <input
             type="text"
@@ -516,6 +559,21 @@ export const FieldRenderer: React.FC<FieldRendererProps> = ({
             <span className="text-[10px] font-mono bg-zinc-800 px-2 py-0.5 rounded text-zinc-300">
               Pending
             </span>
+          </div>
+        )}
+        {field.allowNullFlavor && (
+          <div className="flex items-center justify-between pt-1 text-[10px] font-mono text-zinc-500 border-t border-zinc-850/60 mt-1">
+            <span>Null Flavors:</span>
+            <div className="flex gap-1">
+              {(["ND", "NA", "UNK"] as const).map((nf) => (
+                <span
+                  key={nf}
+                  className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-zinc-900 text-zinc-400 border border-zinc-800"
+                >
+                  {nf}
+                </span>
+              ))}
+            </div>
           </div>
         )}
       </div>

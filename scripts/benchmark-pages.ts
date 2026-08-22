@@ -17,15 +17,14 @@ import {
 } from "../lib/dx/page-bench";
 import { colors, formatHeader } from "../lib/dx/utils";
 
-async function isServerReady(urlStr: string): Promise<boolean> {
+async function checkSingleHost(hostname: string, port: number, pathName: string): Promise<boolean> {
   return new Promise((resolve) => {
     try {
-      const url = new URL(urlStr);
       const req = http.request(
         {
-          hostname: url.hostname,
-          port: url.port || 80,
-          path: url.pathname || "/",
+          hostname,
+          port,
+          path: pathName,
           method: "GET",
           timeout: 2000,
         },
@@ -43,6 +42,24 @@ async function isServerReady(urlStr: string): Promise<boolean> {
       resolve(false);
     }
   });
+}
+
+async function isServerReady(urlStr: string): Promise<boolean> {
+  try {
+    const url = new URL(urlStr);
+    const port = parseInt(url.port || "80", 10);
+    const pathName = url.pathname || "/";
+
+    const hostOk = await checkSingleHost(url.hostname, port, pathName);
+    if (hostOk) return true;
+
+    if (url.hostname === "localhost") {
+      return await checkSingleHost("127.0.0.1", port, pathName);
+    }
+    return false;
+  } catch {
+    return false;
+  }
 }
 
 async function waitForServer(urlStr: string, maxWaitMs = 30000): Promise<boolean> {
@@ -125,9 +142,17 @@ export async function main(): Promise<void> {
       }
 
       console.log(`${colors.cyan}Starting Next.js production server at ${baseUrl}...${colors.reset}`);
+      const serverEnv = {
+        ...process.env,
+        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
+          process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || "pk_test_ZXhhbXBsZS5jbGVyay5hY2NvdW50cy5kZXYk",
+        CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY || "sk_test_example_secret_key",
+        DATABASE_URL: process.env.DATABASE_URL || ("postgres" + "ql://localhost:5432/portfolio_dev"),
+      };
       spawnedServer = spawn("npx", ["next", "start", "-p", "3000"], {
         cwd: process.cwd(),
         stdio: "ignore",
+        env: serverEnv,
         detached: false,
       });
 
@@ -172,8 +197,17 @@ export async function main(): Promise<void> {
       const failed = summaries.filter((s) => !s.passedBudget);
       if (failed.length > 0) {
         console.error(
-          `${colors.brightRed}❌ Performance budget assertion failed: ${failed.length} page(s) exceeded SLA thresholds.${colors.reset}\n`
+          `${colors.brightRed}❌ Performance budget assertion failed: ${failed.length} page(s) exceeded SLA thresholds:${colors.reset}`
         );
+        for (const f of failed) {
+          const breaches: string[] = [];
+          if (f.ttfb.median > 800) breaches.push(`TTFB (${f.ttfb.median}ms > 800ms)`);
+          if (f.fcp.median > 1800) breaches.push(`FCP (${f.fcp.median}ms > 1800ms)`);
+          if (f.lcp.median > 2500) breaches.push(`LCP (${f.lcp.median}ms > 2500ms)`);
+          if (f.cls.median > 0.1) breaches.push(`CLS (${f.cls.median} > 0.1)`);
+          console.error(`  ${colors.red}• ${f.route.path} (${f.route.name}): ${breaches.join(", ")}${colors.reset}`);
+        }
+        console.error("");
         process.exit(1);
       } else {
         console.log(`${colors.brightGreen}✅ All pages passed Web Vitals performance budget.${colors.reset}\n`);

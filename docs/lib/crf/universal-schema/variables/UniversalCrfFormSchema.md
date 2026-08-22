@@ -1,0 +1,11 @@
+[**fderuiter-portfolio**](../../../../README.md)
+
+***
+
+[fderuiter-portfolio](../../../../modules.md) / [lib/crf/universal-schema](../README.md) / UniversalCrfFormSchema
+
+# Variable: UniversalCrfFormSchema
+
+> `const` **UniversalCrfFormSchema**: `ZodObject`\<\{ `description`: `ZodDefault`\<`ZodString`\>; `domain`: `ZodString`; `id`: `ZodString`; `isLocked`: `ZodOptional`\<`ZodBoolean`\>; `isLogForm`: `ZodOptional`\<`ZodBoolean`\>; `lockedAt`: `ZodOptional`\<`ZodString`\>; `lockedBy`: `ZodOptional`\<`ZodString`\>; `name`: `ZodString`; `rules`: `ZodDefault`\<`ZodArray`\<`ZodObject`\<\{ `actionType`: `ZodEnum`\<\{ `hide_field`: `"hide_field"`; `raise_query`: `"raise_query"`; `require_field`: `"require_field"`; `set_value`: `"set_value"`; `show_field`: `"show_field"`; \}\>; `conditions`: `ZodArray`\<`ZodObject`\<\{ `crossVisitId`: `ZodOptional`\<`ZodString`\>; `fieldId`: `ZodString`; `operator`: `ZodEnum`\<\{ `contains`: ...; `eq`: ...; `gt`: ...; `gte`: ...; `in`: ...; `is_empty`: ...; `is_not_empty`: ...; `lt`: ...; `lte`: ...; `neq`: ...; \}\>; `value`: `ZodUnion`\<readonly \[..., ..., ..., ...\]\>; \}, `$strip`\>\>; `description`: `ZodDefault`\<`ZodString`\>; `formulaExpression`: `ZodOptional`\<`ZodString`\>; `id`: `ZodString`; `logicalOperator`: `ZodDefault`\<`ZodEnum`\<\{ `AND`: `"AND"`; `OR`: `"OR"`; \}\>\>; `name`: `ZodString`; `queryMessage`: `ZodOptional`\<`ZodString`\>; `querySeverity`: `ZodOptional`\<`ZodEnum`\<\{ `error`: `"error"`; `info`: `"info"`; `warning`: `"warning"`; \}\>\>; `targetFieldId`: `ZodString`; `triggerFieldIds`: `ZodArray`\<`ZodString`\>; \}, `$strip`\>\>\>; `sections`: `ZodDefault`\<`ZodArray`\<`ZodObject`\<\{ `collapsible`: `ZodOptional`\<`ZodBoolean`\>; `description`: `ZodOptional`\<`ZodString`\>; `fields`: `ZodDefault`\<`ZodArray`\<`ZodType`\<[`UniversalCrfField`](../type-aliases/UniversalCrfField.md), `unknown`, `$ZodTypeInternals`\<[`UniversalCrfField`](../type-aliases/UniversalCrfField.md), `unknown`\>\>\>\>; `id`: `ZodString`; `isRepeating`: `ZodOptional`\<`ZodBoolean`\>; `title`: `ZodString`; \}, `$strip`\>\>\>; `version`: `ZodDefault`\<`ZodString`\>; \}, `$strip`\>
+
+Defined in: [lib/crf/universal-schema.ts:193](https://github.com/fderuiter/portfolio/blob/main/lib/crf/universal-schema.ts#L193)

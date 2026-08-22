@@ -1,25 +1,115 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import { BaseCaseStudy } from "@/types/domain";
-import { IconChevronRight, IconArrowRight, IconLayersIntersect } from "@tabler/icons-react";
+import {
+  IconChevronRight,
+  IconArrowRight,
+  IconLayersIntersect,
+} from "@tabler/icons-react";
+import { useTerminology } from "@/components/providers/TerminologyProvider";
 
 interface ProjectTeaserGridProps {
   caseStudies: BaseCaseStudy[];
 }
 
-const LANGUAGE_STYLES: Record<string, { bg: string; text: string; border: string }> = {
-  TypeScript: { bg: "bg-amber-500/10", text: "text-amber-300", border: "border-amber-500/20" },
-  JavaScript: { bg: "bg-yellow-500/10", text: "text-yellow-300", border: "border-yellow-500/20" },
-  Python: { bg: "bg-emerald-500/10", text: "text-emerald-300", border: "border-emerald-500/20" },
-  Haskell: { bg: "bg-indigo-500/10", text: "text-indigo-300", border: "border-indigo-500/20" },
-  React: { bg: "bg-cyan-500/10", text: "text-cyan-300", border: "border-cyan-500/20" },
+const LANGUAGE_STYLES: Record<
+  string,
+  { bg: string; text: string; border: string }
+> = {
+  TypeScript: {
+    bg: "bg-amber-500/10",
+    text: "text-amber-300",
+    border: "border-amber-500/20",
+  },
+  JavaScript: {
+    bg: "bg-yellow-500/10",
+    text: "text-yellow-300",
+    border: "border-yellow-500/20",
+  },
+  Python: {
+    bg: "bg-emerald-500/10",
+    text: "text-emerald-300",
+    border: "border-emerald-500/20",
+  },
+  Haskell: {
+    bg: "bg-indigo-500/10",
+    text: "text-indigo-300",
+    border: "border-indigo-500/20",
+  },
+  React: {
+    bg: "bg-cyan-500/10",
+    text: "text-cyan-300",
+    border: "border-cyan-500/20",
+  },
 };
 
-const DEFAULT_STYLE = { bg: "bg-zinc-800/40", text: "text-zinc-300", border: "border-white/10" };
+const DEFAULT_STYLE = {
+  bg: "bg-zinc-800/40",
+  text: "text-zinc-300",
+  border: "border-white/10",
+};
+
+/**
+ * Synchronously swaps compiled terminology tags for either simplified plain-text definitions
+ * or original technical terms, then strips remaining raw HTML tags.
+ */
+export function resolveSnippetTerminology(
+  html: string,
+  simplified: boolean
+): string {
+  if (!html) return "";
+
+  const unescapeAttr = (str: string): string => {
+    return str
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&apos;/g, "'")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&amp;/g, "&");
+  };
+
+  const termTagRegex = /<(span|abbr)\b([^>]*)>([\s\S]*?)<\/\1>/gi;
+
+  let resolved = html.replace(
+    termTagRegex,
+    (fullTag, _tagName, attrs, innerContent) => {
+      const isTermTag =
+        /data-term=/i.test(attrs) ||
+        /data-definition=/i.test(attrs) ||
+        /data-key=/i.test(attrs);
+
+      if (!isTermTag) {
+        return fullTag;
+      }
+
+      if (simplified) {
+        const termMatch = /data-term=["']([^"']*)["']/i.exec(attrs);
+        if (termMatch && termMatch[1]) {
+          return unescapeAttr(termMatch[1]);
+        }
+      }
+
+      return unescapeAttr(innerContent);
+    }
+  );
+
+  // Strip any remaining or unclosed HTML tags to prevent broken markup in card text
+  resolved = resolved.replace(/<[^>]*>/g, "");
+
+  return resolved;
+}
 
 // Clean inline text formatter that converts markdown bold/code markers without heavy parsing
 function CleanMarkdownSnippet({ text }: { text: string }) {
-  const trimmed = text.length > 220 ? `${text.slice(0, 217).trim()}...` : text;
+  const { simplified } = useTerminology();
+  const resolvedText = resolveSnippetTerminology(text, simplified);
+  const trimmed =
+    resolvedText.length > 220
+      ? `${resolvedText.slice(0, 217).trim()}...`
+      : resolvedText;
   const parts = trimmed.split(/(\*\*.*?\*\*|`.*?`)/g);
 
   return (
@@ -48,7 +138,9 @@ function CleanMarkdownSnippet({ text }: { text: string }) {
   );
 }
 
-export const ProjectTeaserGrid: React.FC<ProjectTeaserGridProps> = ({ caseStudies }) => {
+export const ProjectTeaserGrid: React.FC<ProjectTeaserGridProps> = ({
+  caseStudies,
+}) => {
   const topProjects = caseStudies.slice(0, 3);
 
   return (
@@ -56,7 +148,8 @@ export const ProjectTeaserGrid: React.FC<ProjectTeaserGridProps> = ({ caseStudie
       {/* 3-Column Systems Dossier Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 w-full mb-8 sm:mb-10">
         {topProjects.map((study, idx) => {
-          const style = LANGUAGE_STYLES[study.primary_language] || DEFAULT_STYLE;
+          const style =
+            LANGUAGE_STYLES[study.primary_language] || DEFAULT_STYLE;
           const sysId = `SYS-0${idx + 1}`;
 
           return (
@@ -77,7 +170,7 @@ export const ProjectTeaserGrid: React.FC<ProjectTeaserGridProps> = ({ caseStudie
                       {study.primary_language}
                     </span>
                   </div>
-                  <span className="text-[10px] font-mono text-zinc-500 truncate max-w-[120px]">
+                  <span className="text-[10px] font-mono text-zinc-400 truncate max-w-[120px]">
                     {study.slug}
                   </span>
                 </div>
@@ -108,7 +201,9 @@ export const ProjectTeaserGrid: React.FC<ProjectTeaserGridProps> = ({ caseStudie
                     <IconChevronRight className="ml-1 w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-200" />
                   </Link>
 
-                  <span className="text-[10px] font-mono text-zinc-600 uppercase">INSPECT // DOSSIER</span>
+                  <span className="text-[10px] font-mono text-zinc-400 uppercase">
+                    INSPECT // DOSSIER
+                  </span>
                 </div>
               </div>
 
@@ -126,7 +221,9 @@ export const ProjectTeaserGrid: React.FC<ProjectTeaserGridProps> = ({ caseStudie
           className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 bg-[#14161d] hover:bg-amber-400 border border-white/10 hover:border-amber-400 text-zinc-200 hover:text-black font-mono text-xs font-bold rounded-xl transition-all duration-200 shadow-md active:scale-[0.98] group"
         >
           <IconLayersIntersect className="w-4 h-4 text-amber-400 group-hover:text-black transition-colors" />
-          <span>View All Architectural Case Studies ({caseStudies.length})</span>
+          <span>
+            View All Architectural Case Studies ({caseStudies.length})
+          </span>
           <IconArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-200" />
         </Link>
       </div>

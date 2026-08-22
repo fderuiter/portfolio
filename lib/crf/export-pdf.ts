@@ -41,6 +41,11 @@ function formatResponseMock(field: CRFField, study: StudyProtocol): string {
     return `[Derived Formula: ${field.calculationFormula || "f(x)"}]`;
   }
 
+  if (field.dataType === "precision_date") {
+    const nullFlavorText = field.allowNullFlavor ? "  [ND] [NA] [UNK]" : "";
+    return `[ YYYY - MM - DD ]${field.allowPartial ? " (Partial Allowed)" : ""}${nullFlavorText}`;
+  }
+
   if (field.dataType === "repeating_table") {
     return "[Repeating Log Matrix - Multiple rows collected]";
   }

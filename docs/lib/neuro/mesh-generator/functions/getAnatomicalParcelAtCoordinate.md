@@ -8,10 +8,10 @@
 
 > **getAnatomicalParcelAtCoordinate**(`pos`, `isLeft`): [`AnatomicalParcel`](../../types/interfaces/AnatomicalParcel.md)
 
-Defined in: [lib/neuro/mesh-generator.ts:21](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/mesh-generator.ts#L21)
+Defined in: [lib/neuro/mesh-generator.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/mesh-generator.ts#L25)
 
 Determine the Desikan-Killiany anatomical parcel for a 3D coordinate on a cerebral hemisphere.
-Coordinates are in normalized Three.js model space.
+Coordinates are in normalized model space.
 
 ## Parameters
 

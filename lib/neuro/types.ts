@@ -453,3 +453,48 @@ export const TISSUE_LABELS: TissueSegmentLabels = {
   DURA: 5,
   SKULL: 6,
 };
+
+export type { AssetProgressEvent, ProgressSubscriber } from "./progress-bus";
+export { progressBus, formatBytes } from "./progress-bus";
+
+export interface MeshWorkerRequest {
+  id: string;
+  mode: SurfaceMode;
+  hemiFilter: HemisphereFilter;
+  wireframe?: boolean;
+}
+
+export interface HemisphereBufferTransfer {
+  hemi: "left" | "right";
+  positions: Float32Array;
+  normals: Float32Array;
+  colors: Float32Array;
+  indices: Uint32Array;
+}
+
+export interface RawGeometryBuffer {
+  name?: string;
+  hemi?: "left" | "right";
+  positions: Float32Array;
+  normals?: Float32Array;
+  colors?: Float32Array;
+  indices: Uint32Array;
+  color?: number;
+}
+
+export interface GeometryBundle {
+  mode: SurfaceMode;
+  hemiFilter: HemisphereFilter;
+  wireframe?: boolean;
+  buffers: RawGeometryBuffer[];
+  isSubcortical?: boolean;
+}
+
+export interface MeshWorkerResponse {
+  id: string;
+  mode: SurfaceMode;
+  hemiFilter: HemisphereFilter;
+  wireframe: boolean;
+  buffers: RawGeometryBuffer[];
+  isSubcortical?: boolean;
+}

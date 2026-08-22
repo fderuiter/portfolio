@@ -2,7 +2,7 @@
 
 ***
 
-[fderuiter-portfolio](../../../modules.md) / [lib/clinical-trial-chaos](../README.md) / ClinicalScenario
+[fderuiter-portfolio](../../../modules.md) / [lib/clinical-trial-chaos](../README-1.md) / ClinicalScenario
 
 # Interface: ClinicalScenario
 

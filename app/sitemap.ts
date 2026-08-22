@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { CaseStudyService } from "@/lib/services/case-study-service";
 import { resolveBaseUrl } from "@/lib/domain";
 import { ROUTE_METADATA_CONFIGS } from "@/lib/seo-metadata";
+import { getRouteLastModified } from "@/lib/fs-stat-mapping";
 
 export const revalidate = 86400;
 
@@ -9,26 +10,31 @@ export const STATIC_ROUTE_LAST_MODIFIED = new Date("2026-08-14T00:00:00Z");
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = resolveBaseUrl();
+  const serverGenerationDate = new Date();
   const sitemapMap = new Map<string, MetadataRoute.Sitemap[number]>();
+
+  const resolveStaticDate = (routePath: string) => {
+    return getRouteLastModified(routePath, serverGenerationDate);
+  };
 
   // 1. Root and Hub entries
   sitemapMap.set(baseUrl, {
     url: baseUrl,
-    lastModified: STATIC_ROUTE_LAST_MODIFIED,
+    lastModified: resolveStaticDate("/"),
     changeFrequency: "daily",
     priority: 1.0,
   });
 
   sitemapMap.set(`${baseUrl}/case-studies`, {
     url: `${baseUrl}/case-studies`,
-    lastModified: STATIC_ROUTE_LAST_MODIFIED,
+    lastModified: resolveStaticDate("/case-studies"),
     changeFrequency: "weekly",
     priority: 0.9,
   });
 
   sitemapMap.set(`${baseUrl}/arcade`, {
     url: `${baseUrl}/arcade`,
-    lastModified: STATIC_ROUTE_LAST_MODIFIED,
+    lastModified: resolveStaticDate("/arcade"),
     changeFrequency: "weekly",
     priority: 0.9,
   });
@@ -43,14 +49,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     if (config.path === "/crf" || config.path === "/stack" || config.path === "/work/laser-loon") {
       priority = 0.9;
-    } else if (config.path === "/schedule") {
-      priority = 0.7;
+    } else if (config.path === "/schedule" || config.path === "/contact") {
+      priority = 0.8;
       changeFrequency = "monthly";
     }
 
     sitemapMap.set(url, {
       url,
-      lastModified: STATIC_ROUTE_LAST_MODIFIED,
+      lastModified: resolveStaticDate(config.path),
       changeFrequency,
       priority,
     });

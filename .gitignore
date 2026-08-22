@@ -18,6 +18,8 @@
 # next.js
 /.next/
 /out/
+/public/sw.js
+/public/sw.js.map
 
 # production
 /build
@@ -49,3 +51,6 @@ next-env.d.ts
 *.log
 app/theme.css
 /.scratch
+
+# clerk configuration (can include secrets)
+/.clerk/

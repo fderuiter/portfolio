@@ -323,3 +323,101 @@ ${payload.comments}`;
 
   return { html, text, subject: emailSubject };
 }
+
+export interface NewsletterWelcomePayload {
+  email: string;
+}
+
+/**
+ * Renders a confirmation / welcome receipt for a new newsletter subscriber.
+ */
+export function renderNewsletterWelcomeEmail(payload: NewsletterWelcomePayload): RenderedEmail {
+  const safeEmail = escapeHtml(payload.email);
+  const emailSubject = `Welcome to Frederick de Ruiter's Engineering & Systems Dispatch`;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${emailSubject}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #0d0e11; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f4f4f6;">
+  <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0d0e11; padding: 32px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #13151a; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; overflow: hidden;">
+          <!-- Header -->
+          <tr>
+            <td style="padding: 24px 28px; background-color: #181b22; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td>
+                    <span style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; font-weight: bold; color: #06b6d4; text-transform: uppercase; letter-spacing: 0.1em; background: rgba(6, 182, 212, 0.12); border: 1px solid rgba(6, 182, 212, 0.25); padding: 3px 8px; border-radius: 6px;">
+                      SYSTEMS DISPATCH // SUBSCRIBED
+                    </span>
+                  </td>
+                </tr>
+              </table>
+              <h1 style="margin: 16px 0 0 0; font-size: 20px; font-weight: 800; color: #ffffff; line-height: 1.3;">
+                Welcome to the Engineering Dispatch
+              </h1>
+            </td>
+          </tr>
+
+          <!-- Message Body -->
+          <tr>
+            <td style="padding: 24px 28px 16px 28px; font-size: 14px; line-height: 1.6; color: #d4d4d8;">
+              <p style="margin: 0 0 16px 0;">
+                Thanks for subscribing with <strong style="color: #ffffff; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;">${safeEmail}</strong>.
+              </p>
+              <p style="margin: 0 0 16px 0;">
+                You&#39;ll receive infrequent, high-density technical retrospectives covering:
+              </p>
+              <ul style="margin: 0 0 20px 0; padding-left: 20px; color: #a1a1aa;">
+                <li style="margin-bottom: 6px;"><strong style="color: #f4f4f6;">Formal Verification &amp; Logic ASTs</strong> — Deductive proof assistants, type theory, and constraint solvers.</li>
+                <li style="margin-bottom: 6px;"><strong style="color: #f4f4f6;">Clinical Data Systems</strong> — CDISC CDASH, ODM-XML interoperability, and 21 CFR Part 11 architectures.</li>
+                <li style="margin-bottom: 6px;"><strong style="color: #f4f4f6;">Embedded Simulators &amp; Browser Physics</strong> — Custom canvas physics, Monkey C runtimes, and WebAssembly.</li>
+              </ul>
+              <p style="margin: 0;">
+                No spam, no fluff, zero automated tracking beacons.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 20px 28px; background-color: #0d0e11; border-top: 1px solid rgba(255, 255, 255, 0.06); text-align: center;">
+              <p style="margin: 0 0 8px 0; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; color: #71717a;">
+                Frederick de Ruiter &bull; Systems Architecture &amp; Engineering
+              </p>
+              <p style="margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 10px; color: #52525b;">
+                You received this email because you subscribed on deruiter.dev.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+  const text = `Welcome to the Engineering Dispatch
+
+Thanks for subscribing with ${payload.email}.
+
+You'll receive infrequent, high-density technical retrospectives covering:
+- Formal Verification & Logic ASTs
+- Clinical Data Systems & CDISC Interoperability
+- Embedded Simulators & Browser Physics
+
+No spam, zero tracking.
+
+Frederick de Ruiter
+Systems Architecture & Engineering
+https://www.deruiter.dev`;
+
+  return { html, text, subject: emailSubject };
+}
+

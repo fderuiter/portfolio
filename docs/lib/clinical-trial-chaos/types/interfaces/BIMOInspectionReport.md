@@ -6,7 +6,7 @@
 
 # Interface: BIMOInspectionReport
 
-Defined in: [lib/clinical-trial-chaos/types.ts:169](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L169)
+Defined in: [lib/clinical-trial-chaos/types.ts:186](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L186)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:169](https://github.com/fderuiter
 
 > **auditDate**: `string`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:171](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L171)
+Defined in: [lib/clinical-trial-chaos/types.ts:188](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L188)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:171](https://github.com/fderuiter
 
 > **cleanRate**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:177](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L177)
+Defined in: [lib/clinical-trial-chaos/types.ts:194](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L194)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:177](https://github.com/fderuiter
 
 > **complianceRate**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:174](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L174)
+Defined in: [lib/clinical-trial-chaos/types.ts:191](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L191)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:174](https://github.com/fderuiter
 
 > **findings**: [`BIMOFinding`](BIMOFinding.md)[]
 
-Defined in: [lib/clinical-trial-chaos/types.ts:175](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L175)
+Defined in: [lib/clinical-trial-chaos/types.ts:192](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L192)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:175](https://github.com/fderuiter
 
 > **overallScore**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:172](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L172)
+Defined in: [lib/clinical-trial-chaos/types.ts:189](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L189)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:172](https://github.com/fderuiter
 
 > **runId**: `string`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:170](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L170)
+Defined in: [lib/clinical-trial-chaos/types.ts:187](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L187)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:170](https://github.com/fderuiter
 
 > **submittedCRFs**: `number`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:176](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L176)
+Defined in: [lib/clinical-trial-chaos/types.ts:193](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L193)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/clinical-trial-chaos/types.ts:176](https://github.com/fderuiter
 
 > **summary**: `string`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:178](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L178)
+Defined in: [lib/clinical-trial-chaos/types.ts:195](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L195)
 
 ***
 
@@ -78,4 +78,4 @@ Defined in: [lib/clinical-trial-chaos/types.ts:178](https://github.com/fderuiter
 
 > **verdict**: `"NAI (No Action Indicated - Approved)"` \| `"VAI (Voluntary Action Indicated)"` \| `"OAI (Official Action Indicated - Form 483 Issued)"`
 
-Defined in: [lib/clinical-trial-chaos/types.ts:173](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L173)
+Defined in: [lib/clinical-trial-chaos/types.ts:190](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/types.ts#L190)
