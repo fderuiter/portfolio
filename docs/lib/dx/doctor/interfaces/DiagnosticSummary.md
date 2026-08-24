@@ -6,7 +6,7 @@
 
 # Interface: DiagnosticSummary
 
-Defined in: [lib/dx/doctor.ts:1723](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1723)
+Defined in: [lib/dx/doctor.ts:2021](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L2021)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/dx/doctor.ts:1723](https://github.com/fderuiter/portfolio/blob/
 
 > **hasFailures**: `boolean`
 
-Defined in: [lib/dx/doctor.ts:1725](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1725)
+Defined in: [lib/dx/doctor.ts:2023](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L2023)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/dx/doctor.ts:1725](https://github.com/fderuiter/portfolio/blob/
 
 > **hasWarnings**: `boolean`
 
-Defined in: [lib/dx/doctor.ts:1726](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1726)
+Defined in: [lib/dx/doctor.ts:2024](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L2024)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/dx/doctor.ts:1726](https://github.com/fderuiter/portfolio/blob/
 
 > **remediations**: [`RemediationAction`](../../cli-parser/interfaces/RemediationAction.md)[]
 
-Defined in: [lib/dx/doctor.ts:1731](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1731)
+Defined in: [lib/dx/doctor.ts:2029](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L2029)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/dx/doctor.ts:1731](https://github.com/fderuiter/portfolio/blob/
 
 > **results**: [`DiagnosticCheckResult`](DiagnosticCheckResult.md)[]
 
-Defined in: [lib/dx/doctor.ts:1724](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1724)
+Defined in: [lib/dx/doctor.ts:2022](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L2022)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/dx/doctor.ts:1724](https://github.com/fderuiter/portfolio/blob/
 
 > **totalFailed**: `number`
 
-Defined in: [lib/dx/doctor.ts:1728](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1728)
+Defined in: [lib/dx/doctor.ts:2026](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L2026)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/dx/doctor.ts:1728](https://github.com/fderuiter/portfolio/blob/
 
 > **totalFixed**: `number`
 
-Defined in: [lib/dx/doctor.ts:1730](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1730)
+Defined in: [lib/dx/doctor.ts:2028](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L2028)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/dx/doctor.ts:1730](https://github.com/fderuiter/portfolio/blob/
 
 > **totalPassed**: `number`
 
-Defined in: [lib/dx/doctor.ts:1727](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1727)
+Defined in: [lib/dx/doctor.ts:2025](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L2025)
 
 ***
 
@@ -70,4 +70,4 @@ Defined in: [lib/dx/doctor.ts:1727](https://github.com/fderuiter/portfolio/blob/
 
 > **totalWarned**: `number`
 
-Defined in: [lib/dx/doctor.ts:1729](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1729)
+Defined in: [lib/dx/doctor.ts:2027](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L2027)

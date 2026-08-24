@@ -6,6 +6,10 @@
 
 # lib/services/privacy-service
 
+## Interfaces
+
+- [PrivacyHashResult](interfaces/PrivacyHashResult.md)
+
 ## Type Aliases
 
 - [RequestOrHeaders](type-aliases/RequestOrHeaders.md)

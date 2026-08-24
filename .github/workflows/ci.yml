@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ "main", "master" ]
+    branches: ["main", "master"]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: ["main", "master"]
 
 jobs:
   rigor-pipeline:
@@ -34,7 +34,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install Dependencies
         run: npm ci
@@ -84,6 +84,9 @@ jobs:
         run: |
           tsc --noEmit
           npm run lint
+
+      - name: Verify ADR Invariants & Doctor Health Diagnostics
+        run: npm run verify
 
       - name: Next.js Cache
         uses: actions/cache@v4
@@ -178,7 +181,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install Dependencies
         run: npm ci
