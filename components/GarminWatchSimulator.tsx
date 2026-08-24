@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback, useSyncExternalStore } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useSyncExternalStore,
+} from "react";
 import {
   IconCircle,
   IconBolt,
@@ -79,7 +85,7 @@ export const GarminWatchSimulator: React.FC = () => {
   const [gameState, setGameState] = useState<GameEngineState>(initialState);
   const effectiveHighScore = Math.max(gameState.highScore, loadedHighScore);
   const [isFocused, setIsFocused] = useState(false);
-  const [isDraggingFog, setIsDraggingFog] = useState(false);
+  const isDraggingFogRef = useRef(false);
 
   // References for Canvas and Animation Loop
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -306,20 +312,37 @@ export const GarminWatchSimulator: React.FC = () => {
     }
   };
 
-  // Canvas Mouse & Touch Drag Wiping for Overheat Fog & Swipe Detection
-  const handleCanvasPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    setIsDraggingFog(true);
+  // Canvas Mouse & Touch Drag Wiping for Overheat Fog & Isolated Swipe Detection
+  const handleCanvasPointerDown = (
+    e: React.PointerEvent<HTMLCanvasElement>
+  ) => {
+    isDraggingFogRef.current = true;
     pointerStartRef.current = { x: e.clientX, y: e.clientY };
     swipeHandledRef.current = false;
+
+    if (typeof e.currentTarget.setPointerCapture === "function") {
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } catch {}
+    }
+
     const { x, y } = toGameCoordinates(e.clientX, e.clientY);
     handleWipeFog(x, y);
     containerRef.current?.focus({ preventScroll: true });
   };
 
-  const handleCanvasPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!isDraggingFog && e.buttons === 0) return;
+  const handleCanvasPointerMove = (
+    e: React.PointerEvent<HTMLCanvasElement>
+  ) => {
+    if (!isDraggingFogRef.current && e.buttons === 0) return;
+
     const { x, y } = toGameCoordinates(e.clientX, e.clientY);
     handleWipeFog(x, y);
+
+    // Suppress directional swipe action processing while active screen fog is present
+    if (stateRef.current.fogLevel > 0) {
+      return;
+    }
 
     if (pointerStartRef.current && !swipeHandledRef.current) {
       const dx = e.clientX - pointerStartRef.current.x;
@@ -334,7 +357,20 @@ export const GarminWatchSimulator: React.FC = () => {
   };
 
   const handleCanvasPointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (pointerStartRef.current && !swipeHandledRef.current) {
+    if (typeof e.currentTarget.releasePointerCapture === "function") {
+      try {
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+          e.currentTarget.releasePointerCapture(e.pointerId);
+        }
+      } catch {}
+    }
+
+    // Evaluate directional swipe gesture only when screen fog is zero
+    if (
+      stateRef.current.fogLevel <= 0 &&
+      pointerStartRef.current &&
+      !swipeHandledRef.current
+    ) {
       const dx = e.clientX - pointerStartRef.current.x;
       const dy = e.clientY - pointerStartRef.current.y;
       const dist = Math.hypot(dx, dy);
@@ -344,13 +380,24 @@ export const GarminWatchSimulator: React.FC = () => {
         processSwipeGesture(dx, dy);
       }
     }
-    setIsDraggingFog(false);
+
+    isDraggingFogRef.current = false;
     pointerStartRef.current = null;
     swipeHandledRef.current = false;
   };
 
-  const handleCanvasPointerCancel = () => {
-    setIsDraggingFog(false);
+  const handleCanvasPointerCancel = (
+    e: React.PointerEvent<HTMLCanvasElement>
+  ) => {
+    if (typeof e.currentTarget.releasePointerCapture === "function") {
+      try {
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+          e.currentTarget.releasePointerCapture(e.pointerId);
+        }
+      } catch {}
+    }
+
+    isDraggingFogRef.current = false;
     pointerStartRef.current = null;
     swipeHandledRef.current = false;
   };
@@ -362,20 +409,25 @@ export const GarminWatchSimulator: React.FC = () => {
     const isHighMemory = ramUsage / ramLimit > 0.85;
 
     // 1. High Memory Pressure (>85%)
-    if (isHighMemory && !hasAlertedMemoryRef.current && gameState.gameState === "playing") {
+    if (
+      isHighMemory &&
+      !hasAlertedMemoryRef.current &&
+      gameState.gameState === "playing"
+    ) {
       hasAlertedMemoryRef.current = true;
       const msg = `Warning: High memory pressure. RAM usage at ${Math.round((ramUsage / ramLimit) * 100)}% (${ramUsage.toFixed(1)} KB of ${ramLimit} KB).`;
       setAlertMessage(msg);
       announce(msg, "assertive");
       triggerHaptic([30, 20, 30]);
-    } else if (!isHighMemory && ramUsage / ramLimit <= 0.80) {
+    } else if (!isHighMemory && ramUsage / ramLimit <= 0.8) {
       hasAlertedMemoryRef.current = false;
     }
 
     // 2. Garbage Collection Freeze
     if (gameState.isGcActive && !hasAlertedGcRef.current) {
       hasAlertedGcRef.current = true;
-      const msg = "Garbage collection active. 500 millisecond execution freeze.";
+      const msg =
+        "Garbage collection active. 500 millisecond execution freeze.";
       setAlertMessage(msg);
       announce(msg, "assertive");
     } else if (!gameState.isGcActive) {
@@ -440,7 +492,10 @@ export const GarminWatchSimulator: React.FC = () => {
         if (nextState.score > nextState.highScore) {
           if (typeof window !== "undefined") {
             try {
-              localStorage.setItem("garmin_simulator_high_score", nextState.score.toString());
+              localStorage.setItem(
+                "garmin_simulator_high_score",
+                nextState.score.toString()
+              );
             } catch {}
           }
         }
@@ -527,10 +582,14 @@ export const GarminWatchSimulator: React.FC = () => {
         >
           <IconCircle
             className={`w-2.5 h-2.5 ${
-              isFocused ? "fill-brand-cyan stroke-none" : "fill-zinc-600 stroke-none"
+              isFocused
+                ? "fill-brand-cyan stroke-none"
+                : "fill-zinc-600 stroke-none"
             }`}
           />
-          {isFocused ? "Watch Keyboard Captures: ACTIVE" : "Click Watch to Focus Controls"}
+          {isFocused
+            ? "Watch Keyboard Captures: ACTIVE"
+            : "Click Watch to Focus Controls"}
         </span>
 
         {/* Device Profile Target (Memory Limit) Selector */}
@@ -538,7 +597,9 @@ export const GarminWatchSimulator: React.FC = () => {
           <button
             onClick={() => handleSelectDevice("fenix")}
             className={`px-2.5 py-0.5 rounded-full cursor-pointer transition-all ${
-              deviceTarget === "fenix" ? "bg-rose-600 text-white font-bold" : "text-zinc-400 hover:text-zinc-200"
+              deviceTarget === "fenix"
+                ? "bg-rose-600 text-white font-bold"
+                : "text-zinc-400 hover:text-zinc-200"
             }`}
           >
             Fēnix (32KB)
@@ -546,7 +607,9 @@ export const GarminWatchSimulator: React.FC = () => {
           <button
             onClick={() => handleSelectDevice("forerunner")}
             className={`px-2.5 py-0.5 rounded-full cursor-pointer transition-all ${
-              deviceTarget === "forerunner" ? "bg-amber-600 text-black font-bold" : "text-zinc-400 hover:text-zinc-200"
+              deviceTarget === "forerunner"
+                ? "bg-amber-600 text-black font-bold"
+                : "text-zinc-400 hover:text-zinc-200"
             }`}
           >
             Forerunner (64KB)
@@ -554,7 +617,9 @@ export const GarminWatchSimulator: React.FC = () => {
           <button
             onClick={() => handleSelectDevice("edge")}
             className={`px-2.5 py-0.5 rounded-full cursor-pointer transition-all ${
-              deviceTarget === "edge" ? "bg-emerald-600 text-white font-bold" : "text-zinc-400 hover:text-zinc-200"
+              deviceTarget === "edge"
+                ? "bg-emerald-600 text-white font-bold"
+                : "text-zinc-400 hover:text-zinc-200"
             }`}
           >
             Edge (128KB)
@@ -567,7 +632,9 @@ export const GarminWatchSimulator: React.FC = () => {
             <button
               onClick={() => setBezelTheme("slate")}
               className={`px-2 py-0.5 rounded-full cursor-pointer ${
-                bezelTheme === "slate" ? "bg-zinc-700 text-white font-bold" : "text-zinc-400"
+                bezelTheme === "slate"
+                  ? "bg-zinc-700 text-white font-bold"
+                  : "text-zinc-400"
               }`}
             >
               Tactix
@@ -575,7 +642,9 @@ export const GarminWatchSimulator: React.FC = () => {
             <button
               onClick={() => setBezelTheme("solar")}
               className={`px-2 py-0.5 rounded-full cursor-pointer ${
-                bezelTheme === "solar" ? "bg-amber-600 text-black font-bold" : "text-zinc-400"
+                bezelTheme === "solar"
+                  ? "bg-amber-600 text-black font-bold"
+                  : "text-zinc-400"
               }`}
             >
               Solar
@@ -583,7 +652,9 @@ export const GarminWatchSimulator: React.FC = () => {
             <button
               onClick={() => setBezelTheme("cyan")}
               className={`px-2 py-0.5 rounded-full cursor-pointer ${
-                bezelTheme === "cyan" ? "bg-cyan-500 text-black font-bold" : "text-zinc-400"
+                bezelTheme === "cyan"
+                  ? "bg-cyan-500 text-black font-bold"
+                  : "text-zinc-400"
               }`}
             >
               Cyan
@@ -591,7 +662,11 @@ export const GarminWatchSimulator: React.FC = () => {
           </div>
 
           <FieldManualButton manualId="garmin-watch" label="Manual" />
-          <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} variant="header" />
+          <FullscreenButton
+            isFullscreen={isFullscreen}
+            onToggle={toggleFullscreen}
+            variant="header"
+          />
         </div>
       </div>
 
@@ -735,7 +810,8 @@ export const GarminWatchSimulator: React.FC = () => {
                 LIMIT: {currentProfile.ramLimitKb} KB RAM
               </span>
               <p className="text-[8px] text-zinc-400 mt-2 max-w-[190px] leading-tight">
-                Survive memory allocations, jump over bugs, pop variables &amp; trigger GC!
+                Survive memory allocations, jump over bugs, pop variables &amp;
+                trigger GC!
               </p>
               <button
                 onClick={handleStartStop}
@@ -748,19 +824,22 @@ export const GarminWatchSimulator: React.FC = () => {
           )}
 
           {/* Game Over / Power Loss Shutdown / Completion Overlay */}
-          {(gameState.gameState === "crashed" || gameState.gameState === "shutdown" || gameState.gameState === "summary") && (
+          {(gameState.gameState === "crashed" ||
+            gameState.gameState === "shutdown" ||
+            gameState.gameState === "summary") && (
             <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-3 text-center z-30 font-mono space-y-1.5">
               <span className="text-[11px] font-extrabold text-rose-400 tracking-wider uppercase">
                 {gameState.gameState === "shutdown"
                   ? "⚡ BROWNOUT SHUTDOWN"
                   : gameState.gameState === "crashed"
-                  ? gameState.crashReport?.errorType === "Out Of Storage"
-                    ? "OUT OF FLASH STORAGE"
-                    : "CRASH / OOM"
-                  : "RUN COMPLETE"}
+                    ? gameState.crashReport?.errorType === "Out Of Storage"
+                      ? "OUT OF FLASH STORAGE"
+                      : "CRASH / OOM"
+                    : "RUN COMPLETE"}
               </span>
               <div className="text-[10px] text-zinc-300">
-                SCORE: <strong className="text-amber-400">{gameState.score}</strong>
+                SCORE:{" "}
+                <strong className="text-amber-400">{gameState.score}</strong>
               </div>
               {gameState.gameState === "shutdown" && (
                 <div className="text-[8px] text-rose-300 max-w-[180px] leading-tight">
@@ -816,26 +895,61 @@ export const GarminWatchSimulator: React.FC = () => {
       <div className="mt-4 flex flex-wrap items-center justify-center gap-3 text-xs font-mono text-zinc-400 max-w-xl text-center">
         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg">
           <IconCpu className="w-3.5 h-3.5 text-brand-cyan" />
-          <span>RAM: <strong className="text-white">{gameState.allocatedRamKb.toFixed(1)} / {currentProfile.ramLimitKb} KB</strong></span>
+          <span>
+            RAM:{" "}
+            <strong className="text-white">
+              {gameState.allocatedRamKb.toFixed(1)} /{" "}
+              {currentProfile.ramLimitKb} KB
+            </strong>
+          </span>
         </div>
         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg">
           <IconCpu className="w-3.5 h-3.5 text-amber-500" />
-          <span>FLASH: <strong className="text-white">{gameState.allocatedFlashKb.toFixed(1)} / {currentProfile.flashLimitKb} KB</strong></span>
+          <span>
+            FLASH:{" "}
+            <strong className="text-white">
+              {gameState.allocatedFlashKb.toFixed(1)} /{" "}
+              {currentProfile.flashLimitKb} KB
+            </strong>
+          </span>
         </div>
         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg">
-          <IconBolt className={`w-3.5 h-3.5 ${gameState.battery < 15 ? "text-rose-500 animate-pulse" : "text-amber-400"}`} />
-          <span>BATTERY: <strong className="text-white">{Math.round(gameState.battery)}%</strong></span>
+          <IconBolt
+            className={`w-3.5 h-3.5 ${gameState.battery < 15 ? "text-rose-500 animate-pulse" : "text-amber-400"}`}
+          />
+          <span>
+            BATTERY:{" "}
+            <strong className="text-white">
+              {Math.round(gameState.battery)}%
+            </strong>
+          </span>
           {gameState.battery < 15 && gameState.battery > 0 && (
-            <span className="ml-1 text-[9px] text-rose-400 font-bold bg-rose-950/80 px-1.5 py-0.5 rounded border border-rose-800 animate-pulse">LOW POWER</span>
+            <span className="ml-1 text-[9px] text-rose-400 font-bold bg-rose-950/80 px-1.5 py-0.5 rounded border border-rose-800 animate-pulse">
+              LOW POWER
+            </span>
           )}
         </div>
         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg">
-          <IconFlame className={`w-3.5 h-3.5 ${gameState.thermalStress > 0.4 ? "text-orange-500 animate-pulse" : "text-zinc-500"}`} />
-          <span>THERMAL: <strong className="text-white">{Math.round((gameState.thermalStress ?? 0) * 100)}%</strong></span>
+          <IconFlame
+            className={`w-3.5 h-3.5 ${gameState.thermalStress > 0.4 ? "text-orange-500 animate-pulse" : "text-zinc-500"}`}
+          />
+          <span>
+            THERMAL:{" "}
+            <strong className="text-white">
+              {Math.round((gameState.thermalStress ?? 0) * 100)}%
+            </strong>
+          </span>
         </div>
         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg">
-          <IconFlame className={`w-3.5 h-3.5 ${gameState.fogLevel > 0.4 ? "text-rose-500 animate-pulse" : "text-zinc-500"}`} />
-          <span>CONDENSATION: <strong className="text-white">{Math.round(gameState.fogLevel * 100)}%</strong></span>
+          <IconFlame
+            className={`w-3.5 h-3.5 ${gameState.fogLevel > 0.4 ? "text-rose-500 animate-pulse" : "text-zinc-500"}`}
+          />
+          <span>
+            CONDENSATION:{" "}
+            <strong className="text-white">
+              {Math.round(gameState.fogLevel * 100)}%
+            </strong>
+          </span>
         </div>
         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900/80 border border-zinc-800 rounded-lg">
           <span className="text-amber-400 font-bold">🏆 HI-SCORE:</span>
@@ -867,11 +981,24 @@ export const GarminWatchSimulator: React.FC = () => {
 
       {/* Control Quick Reference Guide */}
       <div className="mt-3 flex flex-wrap justify-center gap-2 text-[10px] font-mono text-zinc-500">
-        <span className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded"><strong className="text-zinc-300">UP / ▲:</strong> Jump</span>
-        <span className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded"><strong className="text-zinc-300">DOWN / ▼:</strong> Pop Heap Variable</span>
-        <span className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded"><strong className="text-zinc-300">BACK / [GC]:</strong> Trigger Garbage Collector</span>
-        <span className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded"><strong className="text-zinc-300">LIGHT / [L]:</strong> Backlight (Burns Bat)</span>
-        <span className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded"><strong className="text-zinc-300">SWIPE / [W]:</strong> Wipe Screen Fog</span>
+        <span className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded">
+          <strong className="text-zinc-300">UP / ▲:</strong> Jump
+        </span>
+        <span className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded">
+          <strong className="text-zinc-300">DOWN / ▼:</strong> Pop Heap Variable
+        </span>
+        <span className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded">
+          <strong className="text-zinc-300">BACK / [GC]:</strong> Trigger
+          Garbage Collector
+        </span>
+        <span className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded">
+          <strong className="text-zinc-300">LIGHT / [L]:</strong> Backlight
+          (Burns Bat)
+        </span>
+        <span className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded">
+          <strong className="text-zinc-300">SWIPE / [W]:</strong> Wipe Screen
+          Fog
+        </span>
       </div>
 
       {/* Off-screen Live Regions for Screen Reader Telemetry & Assertive Alerts */}
@@ -887,7 +1014,12 @@ export const GarminWatchSimulator: React.FC = () => {
         )}%. Score: ${gameState.score}. High Score: ${effectiveHighScore}.`}
       </div>
 
-      <div className="sr-only" role="alert" aria-live="assertive" aria-atomic="true">
+      <div
+        className="sr-only"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
         {alertMessage}
       </div>
     </div>
