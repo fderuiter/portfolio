@@ -6,7 +6,7 @@
 
 # Interface: CaseStudyPlaybackStep
 
-Defined in: [lib/case-studies-data.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L32)
+Defined in: [lib/case-studies-data.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L33)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/case-studies-data.ts:32](https://github.com/fderuiter/portfolio
 
 > **command**: `string`
 
-Defined in: [lib/case-studies-data.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L33)
+Defined in: [lib/case-studies-data.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L34)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [lib/case-studies-data.ts:33](https://github.com/fderuiter/portfolio
 
 > **description**: `string`
 
-Defined in: [lib/case-studies-data.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L34)
+Defined in: [lib/case-studies-data.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L35)

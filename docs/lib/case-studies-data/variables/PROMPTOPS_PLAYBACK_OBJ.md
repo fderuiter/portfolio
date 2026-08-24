@@ -8,4 +8,4 @@
 
 > `const` **PROMPTOPS\_PLAYBACK\_OBJ**: [`CaseStudyPlayback`](../type-aliases/CaseStudyPlayback.md)
 
-Defined in: [lib/case-studies-data.ts:485](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L485)
+Defined in: [lib/case-studies-data.ts:569](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L569)

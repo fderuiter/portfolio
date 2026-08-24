@@ -8,4 +8,4 @@
 
 > `const` **CRF\_XL\_COMMANDS\_OBJ**: [`CaseStudyCommands`](../type-aliases/CaseStudyCommands.md)
 
-Defined in: [lib/case-studies-data.ts:374](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L374)
+Defined in: [lib/case-studies-data.ts:426](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L426)

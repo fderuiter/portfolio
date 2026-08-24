@@ -8,4 +8,4 @@
 
 > `const` **CRF\_XL\_PLAYBACK\_OBJ**: [`CaseStudyPlayback`](../type-aliases/CaseStudyPlayback.md)
 
-Defined in: [lib/case-studies-data.ts:414](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L414)
+Defined in: [lib/case-studies-data.ts:471](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L471)
