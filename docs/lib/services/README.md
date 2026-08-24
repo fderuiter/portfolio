@@ -404,6 +404,12 @@ Re-exports [LocalCacheEntry](telemetry-service/interfaces/LocalCacheEntry.md)
 
 ***
 
+### PrivacyHashResult
+
+Re-exports [PrivacyHashResult](privacy-service/interfaces/PrivacyHashResult.md)
+
+***
+
 ### RawEmailOptions
 
 Re-exports [RawEmailOptions](email-service/interfaces/RawEmailOptions.md)

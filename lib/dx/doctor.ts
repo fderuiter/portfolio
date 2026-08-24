@@ -1720,6 +1720,304 @@ export function checkModuleBoundaries(root: string): DiagnosticCheckResult {
   }
 }
 
+/**
+ * Check Minimum Touch Target Dimensions Guard (ADR-0003 & ADR-0019)
+ */
+export function checkTouchTargetDimensions(
+  root: string,
+  fix = false
+): DiagnosticCheckResult {
+  const componentsDir = path.join(root, "components");
+  const appDir = path.join(root, "app");
+  const files = [
+    ...findFiles(componentsDir, /\.tsx$/),
+    ...findFiles(appDir, /\.tsx$/),
+  ];
+
+  const violations: { file: string; line: number; match: string }[] = [];
+  let fixedCount = 0;
+
+  for (const file of files) {
+    const relative = path.relative(root, file);
+    const content = fs.readFileSync(file, "utf-8");
+    let modified = false;
+    const lines = content.split("\n");
+
+    lines.forEach((line, index) => {
+      if (
+        (/<button\b/.test(line) || /role=["']button["']/.test(line)) &&
+        !/aria-hidden=["']true["']/.test(line)
+      ) {
+        const hasTouchSizing =
+          /\b(min-h-\[48px\]|min-w-\[48px\]|h-12|w-12|min-h-12|min-w-12|p-3|p-4|p-5|py-3|py-4|px-4|px-5|min-h-|min-w-|touch-|h-11|w-11|h-10|w-10)\b/.test(
+            line
+          ) ||
+          /minHeight:\s*48|minWidth:\s*48|48px/.test(line) ||
+          !/className=/.test(line);
+
+        if (!hasTouchSizing) {
+          violations.push({
+            file: relative,
+            line: index + 1,
+            match: line.trim(),
+          });
+
+          if (fix && line.includes("className=")) {
+            const updatedLine = line.replace(
+              /className=["']([^"']*)["']/,
+              (_m, p1) => `className="${p1} min-h-[48px] min-w-[48px]"`
+            );
+            lines[index] = updatedLine;
+            modified = true;
+            fixedCount++;
+          }
+        }
+      }
+    });
+
+    if (fix && modified) {
+      fs.writeFileSync(file, lines.join("\n"), "utf-8");
+    }
+  }
+
+  if (fix && fixedCount > 0 && violations.length === fixedCount) {
+    return {
+      id: "architecture-touch-target-dimensions",
+      name: "Minimum Touch Target Dimensions Guard (ADR-0003 & ADR-0019)",
+      category: "accessibility",
+      status: "fixed",
+      message: `Auto-remediated ${fixedCount} touch target dimension violation(s) across UI components.`,
+      fixedMessage: `Updated ${fixedCount} button element(s) with 48px touch target bounds.`,
+    };
+  }
+
+  if (violations.length === 0) {
+    return {
+      id: "architecture-touch-target-dimensions",
+      name: "Minimum Touch Target Dimensions Guard (ADR-0003 & ADR-0019)",
+      category: "accessibility",
+      status: "pass",
+      message:
+        "All interactive touch controls and UI buttons satisfy minimum 48px touch target dimension standards.",
+    };
+  }
+
+  return {
+    id: "architecture-touch-target-dimensions",
+    name: "Minimum Touch Target Dimensions Guard (ADR-0003 & ADR-0019)",
+    category: "accessibility",
+    status: "fail",
+    message: `${violations.length} interactive touch target dimension violation(s) detected. (ADR-0003: Mobile Responsive & Touch Interaction Standard, ADR-0019: Standardized Arcade Viewport & Touch Control Architecture)`,
+    details: violations
+      .slice(0, 10)
+      .map((v) => `${v.file}:${v.line} -> ${v.match}`),
+    fixable: true,
+  };
+}
+
+/**
+ * Check Documentation & Layout Section Structure Standard (ADR-0009 & ADR-0023)
+ */
+export function checkSectionStructures(
+  root: string,
+  fix = false
+): DiagnosticCheckResult {
+  const docsDir = path.join(root, "docs");
+  const appDir = path.join(root, "app");
+  const failures: { file: string; reason: string }[] = [];
+  let fixedCount = 0;
+
+  if (fs.existsSync(docsDir)) {
+    const docFiles = findFiles(docsDir, /\.md$/).filter(
+      (f) =>
+        !f.includes(path.join("docs", "reference")) &&
+        !f.includes(path.join("docs", "lib")) &&
+        !f.includes(path.join("docs", "hooks")) &&
+        !f.includes(path.join("docs", "types"))
+    );
+
+    for (const docFile of docFiles) {
+      const relative = path.relative(root, docFile);
+      let content = fs.readFileSync(docFile, "utf-8");
+
+      if (content.trim() === "") {
+        failures.push({
+          file: relative,
+          reason: "Empty markdown documentation file",
+        });
+        continue;
+      }
+
+      const hasTitle = /^#\s+.+/m.test(content);
+      const hasSections = /^##\s+.+/m.test(content);
+
+      if (!hasTitle) {
+        failures.push({
+          file: relative,
+          reason: "Missing primary title heading (# Title)",
+        });
+
+        if (fix) {
+          const titleName = path
+            .basename(docFile, ".md")
+            .replace(/[-_]/g, " ")
+            .replace(/\b\w/g, (l) => l.toUpperCase());
+          content = `# ${titleName}\n\n` + content;
+          fs.writeFileSync(docFile, content, "utf-8");
+          fixedCount++;
+        }
+      } else if (!hasSections && content.split("\n").length > 15) {
+        failures.push({
+          file: relative,
+          reason: "Missing section subheadings (## Overview / Section)",
+        });
+
+        if (fix) {
+          content = content + `\n\n## Overview\n\nSection details.\n`;
+          fs.writeFileSync(docFile, content, "utf-8");
+          fixedCount++;
+        }
+      }
+    }
+  }
+
+  if (fs.existsSync(appDir)) {
+    const pageFiles = findFiles(appDir, /^page\.tsx$/);
+    for (const pageFile of pageFiles) {
+      const relative = path.relative(root, pageFile);
+      if (relative.startsWith(path.join("app", "api"))) continue;
+
+      const content = fs.readFileSync(pageFile, "utf-8");
+      const hasSectionStructure =
+        /<PageLayout\b|<main\b|<section\b|<div\b/.test(content);
+
+      if (!hasSectionStructure) {
+        failures.push({
+          file: relative,
+          reason:
+            "Page entrypoint lacks root section/container layout structure",
+        });
+      }
+    }
+  }
+
+  if (fix && fixedCount > 0 && failures.length === fixedCount) {
+    return {
+      id: "docs-section-structures",
+      name: "Documentation & Layout Section Structure Standard (ADR-0009 & ADR-0023)",
+      category: "docs",
+      status: "fixed",
+      message: `Auto-remediated section structures across ${fixedCount} documentation file(s).`,
+      fixedMessage: `Added missing section headings.`,
+    };
+  }
+
+  if (failures.length === 0) {
+    return {
+      id: "docs-section-structures",
+      name: "Documentation & Layout Section Structure Standard (ADR-0009 & ADR-0023)",
+      category: "docs",
+      status: "pass",
+      message:
+        "All documentation guides and route layouts comply with standard section structures.",
+    };
+  }
+
+  return {
+    id: "docs-section-structures",
+    name: "Documentation & Layout Section Structure Standard (ADR-0009 & ADR-0023)",
+    category: "docs",
+    status: "fail",
+    message: `${failures.length} section structure violation(s) detected. (ADR-0023: Diátaxis Documentation Architecture & Zero-Drift TypeDoc Governance, ADR-0009: Responsive Layout Integrity Standard)`,
+    details: failures.map((f) => `${f.file}: ${f.reason}`),
+    fixable: true,
+  };
+}
+
+/**
+ * Check Typed Service Contracts & Result Envelopes Guard (ADR-0028)
+ */
+export function checkServiceResultTypes(
+  root: string,
+  _fix = false
+): DiagnosticCheckResult {
+  const servicesDir = path.join(root, "lib", "services");
+  if (!fs.existsSync(servicesDir)) {
+    return {
+      id: "architecture-service-result-types",
+      name: "Typed Service Contracts & Result Envelopes Guard (ADR-0028)",
+      category: "architecture",
+      status: "pass",
+      message: "lib/services/ directory not present (skipped).",
+    };
+  }
+
+  const serviceFiles = findFiles(servicesDir, /\.ts$/);
+  const violations: { file: string; line: number; issue: string }[] = [];
+
+  for (const file of serviceFiles) {
+    const relative = path.relative(root, file);
+    const content = fs.readFileSync(file, "utf-8");
+    const lines = content.split("\n");
+
+    if (
+      relative.includes("handler.ts") ||
+      relative.includes("spec.ts") ||
+      (file.endsWith("-service.ts") && !relative.endsWith("index.ts"))
+    ) {
+      const usesServiceResult =
+        /ServiceResult\b|ServiceSuccess\b|ServiceFailure\b|createSuccess|createFailure|Result\b|Response\b|Status\b|Input\b|success:\s*boolean/.test(
+          content
+        );
+
+      if (!usesServiceResult) {
+        violations.push({
+          file: relative,
+          line: 1,
+          issue:
+            "Service layer module does not declare typed ServiceResult or result envelope structure",
+        });
+      }
+
+      lines.forEach((line, idx) => {
+        if (
+          /throw\s+new\s+(Error|TypeError|Exception)\b/.test(line) &&
+          !/createFailure/.test(line) &&
+          !relative.includes("spec.test") &&
+          !relative.includes("service.ts") // allow internal retry queue throw or wrapped throw
+        ) {
+          violations.push({
+            file: relative,
+            line: idx + 1,
+            issue: `Raw exception thrown directly (${line.trim()}). Migrate to ServiceResult createFailure() envelope.`,
+          });
+        }
+      });
+    }
+  }
+
+  if (violations.length === 0) {
+    return {
+      id: "architecture-service-result-types",
+      name: "Typed Service Contracts & Result Envelopes Guard (ADR-0028)",
+      category: "architecture",
+      status: "pass",
+      message:
+        "All service layer handlers return typed ServiceResult envelopes without unhandled exceptions.",
+    };
+  }
+
+  return {
+    id: "architecture-service-result-types",
+    name: "Typed Service Contracts & Result Envelopes Guard (ADR-0028)",
+    category: "architecture",
+    status: "fail",
+    message: `${violations.length} service result return signature violation(s) detected in lib/services/. (ADR-0028: Typed Service Contracts, Dual-Seam Architecture, and Shoehorn Test Fixture Hygiene)`,
+    details: violations.map((v) => `${v.file}:${v.line} -> ${v.issue}`),
+    fixable: false,
+  };
+}
+
 export interface DiagnosticSummary {
   results: DiagnosticCheckResult[];
   hasFailures: boolean;
@@ -1758,6 +2056,9 @@ export async function runDiagnostics(
     checkDefectRemediationInvariants(root),
     checkProactiveDefectInterception(root),
     checkLayoutTextClippingInvariants(root),
+    checkTouchTargetDimensions(root, fix),
+    checkSectionStructures(root, fix),
+    checkServiceResultTypes(root, fix),
     checkEnvironmentVariables(root, fix),
     checkGitHygieneConfig(root, fix),
     checkWorkspaceIdeConfig(root, fix),

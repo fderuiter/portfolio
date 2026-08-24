@@ -16,6 +16,9 @@ import {
   checkOpenApiParity,
   checkDefectRemediationInvariants,
   checkDesignTokens,
+  checkTouchTargetDimensions,
+  checkSectionStructures,
+  checkServiceResultTypes,
   runDiagnostics,
   printDoctorReport,
 } from "@/lib/dx/doctor";
@@ -36,7 +39,10 @@ describe("DX Invariant Doctor Engine", () => {
       // Setup fake workspace with app/arcade/cyber-dash/page.tsx and un-indexed CommandPalette
       const appArcadeDir = path.join(tempDir, "app", "arcade", "cyber-dash");
       fs.mkdirSync(appArcadeDir, { recursive: true });
-      fs.writeFileSync(path.join(appArcadeDir, "page.tsx"), "export default function Page() { return null; }");
+      fs.writeFileSync(
+        path.join(appArcadeDir, "page.tsx"),
+        "export default function Page() { return null; }"
+      );
 
       const compDir = path.join(tempDir, "components");
       fs.mkdirSync(compDir, { recursive: true });
@@ -54,7 +60,10 @@ describe("DX Invariant Doctor Engine", () => {
     it("auto-fixes missing route registrations when fix=true", () => {
       const appArcadeDir = path.join(tempDir, "app", "arcade", "cyber-dash");
       fs.mkdirSync(appArcadeDir, { recursive: true });
-      fs.writeFileSync(path.join(appArcadeDir, "page.tsx"), "export default function Page() { return null; }");
+      fs.writeFileSync(
+        path.join(appArcadeDir, "page.tsx"),
+        "export default function Page() { return null; }"
+      );
 
       const compDir = path.join(tempDir, "components");
       fs.mkdirSync(compDir, { recursive: true });
@@ -67,7 +76,10 @@ describe("DX Invariant Doctor Engine", () => {
       expect(fixResult.status).toBe("fixed");
 
       // Verify file was written
-      const updatedPalette = fs.readFileSync(path.join(compDir, "CommandPalette.tsx"), "utf-8");
+      const updatedPalette = fs.readFileSync(
+        path.join(compDir, "CommandPalette.tsx"),
+        "utf-8"
+      );
       expect(updatedPalette).toContain('url: "/arcade/cyber-dash"');
     });
   });
@@ -95,7 +107,7 @@ describe("DX Invariant Doctor Engine", () => {
       );
       fs.writeFileSync(
         path.join(appDir, "page.tsx"),
-        'export default function Page() { return <main>Content</main>; }'
+        "export default function Page() { return <main>Content</main>; }"
       );
 
       const result = checkNavbarHierarchy(tempDir);
@@ -109,7 +121,7 @@ describe("DX Invariant Doctor Engine", () => {
       fs.mkdirSync(testsDir, { recursive: true });
       fs.writeFileSync(
         path.join(testsDir, "bad.test.ts"),
-        'const root = ' + '"/app/config.json";'
+        "const root = " + '"/app/config.json";'
       );
 
       const result = checkTestPathResolution(tempDir);
@@ -133,7 +145,10 @@ describe("DX Invariant Doctor Engine", () => {
   describe("checkSecretLeaks", () => {
     it("detects secret patterns", () => {
       const secretFile = path.join(tempDir, "leaked.ts");
-      fs.writeFileSync(secretFile, 'const key = "' + 'ghp_' + '123456789012345678901234567890123456";');
+      fs.writeFileSync(
+        secretFile,
+        'const key = "' + "ghp_" + '123456789012345678901234567890123456";'
+      );
 
       const result = checkSecretLeaks(tempDir);
       expect(result.status).toBe("fail");
@@ -142,9 +157,17 @@ describe("DX Invariant Doctor Engine", () => {
 
   describe("checkMigrationGuard", () => {
     it("flags destructive DROP COLUMN statement without override", () => {
-      const migDir = path.join(tempDir, "prisma", "migrations", "20260814_test");
+      const migDir = path.join(
+        tempDir,
+        "prisma",
+        "migrations",
+        "20260814_test"
+      );
       fs.mkdirSync(migDir, { recursive: true });
-      fs.writeFileSync(path.join(migDir, "migration.sql"), "ALTER TABLE users DROP COLUMN password;");
+      fs.writeFileSync(
+        path.join(migDir, "migration.sql"),
+        "ALTER TABLE users DROP COLUMN password;"
+      );
 
       const result = checkMigrationGuard(tempDir);
       expect(result.status).toBe("fail");
@@ -152,9 +175,17 @@ describe("DX Invariant Doctor Engine", () => {
     });
 
     it("flags DATABASE_MIGRATIONS.md when missing mandatory release or drift commands", () => {
-      const migDir = path.join(tempDir, "prisma", "migrations", "20260814000000_init");
+      const migDir = path.join(
+        tempDir,
+        "prisma",
+        "migrations",
+        "20260814000000_init"
+      );
       fs.mkdirSync(migDir, { recursive: true });
-      fs.writeFileSync(path.join(migDir, "migration.sql"), "CREATE TABLE users (id INT);");
+      fs.writeFileSync(
+        path.join(migDir, "migration.sql"),
+        "CREATE TABLE users (id INT);"
+      );
 
       // Incomplete DATABASE_MIGRATIONS.md without release:gate or check:migrations:drift
       fs.writeFileSync(
@@ -164,8 +195,12 @@ describe("DX Invariant Doctor Engine", () => {
 
       const result = checkMigrationGuard(tempDir);
       expect(result.status).toBe("fail");
-      expect(result.details?.some((d) => d.includes("schema drift verification"))).toBe(true);
-      expect(result.details?.some((d) => d.includes("pipeline release gate"))).toBe(true);
+      expect(
+        result.details?.some((d) => d.includes("schema drift verification"))
+      ).toBe(true);
+      expect(
+        result.details?.some((d) => d.includes("pipeline release gate"))
+      ).toBe(true);
     });
   });
 
@@ -173,7 +208,10 @@ describe("DX Invariant Doctor Engine", () => {
     it("flags pages missing header clearance top padding", () => {
       const appDir = path.join(tempDir, "app", "demo");
       fs.mkdirSync(appDir, { recursive: true });
-      fs.writeFileSync(path.join(appDir, "page.tsx"), "export default function Page() { return <div>No padding</div>; }");
+      fs.writeFileSync(
+        path.join(appDir, "page.tsx"),
+        "export default function Page() { return <div>No padding</div>; }"
+      );
 
       const result = checkPageTopPadding(tempDir);
       expect(result.status).toBe("warn");
@@ -183,7 +221,10 @@ describe("DX Invariant Doctor Engine", () => {
     it("passes when pages include header clearance top padding", () => {
       const appDir = path.join(tempDir, "app", "demo");
       fs.mkdirSync(appDir, { recursive: true });
-      fs.writeFileSync(path.join(appDir, "page.tsx"), "export default function Page() { return <main className='pt-28'>Content</main>; }");
+      fs.writeFileSync(
+        path.join(appDir, "page.tsx"),
+        "export default function Page() { return <main className='pt-28'>Content</main>; }"
+      );
 
       const result = checkPageTopPadding(tempDir);
       expect(result.status).toBe("pass");
@@ -225,7 +266,9 @@ describe("DX Invariant Doctor Engine", () => {
 
       const result = checkDirectoryTopology(tempDir);
       expect(result.status).toBe("fail");
-      expect(result.message).toContain("1 top-level directory/directories missing");
+      expect(result.message).toContain(
+        "1 top-level directory/directories missing"
+      );
       expect(result.details?.some((d) => d.includes("scripts/"))).toBe(true);
     });
 
@@ -240,7 +283,9 @@ describe("DX Invariant Doctor Engine", () => {
 
       const result = checkDirectoryTopology(tempDir);
       expect(result.status).toBe("pass");
-      expect(result.message).toContain("All top-level repository directories are explicitly documented");
+      expect(result.message).toContain(
+        "All top-level repository directories are explicitly documented"
+      );
     });
   });
 
@@ -254,11 +299,17 @@ describe("DX Invariant Doctor Engine", () => {
     it("fails when an app/api route is missing from openapi.json", () => {
       const apiDir = path.join(tempDir, "app", "api", "metrics");
       fs.mkdirSync(apiDir, { recursive: true });
-      fs.writeFileSync(path.join(apiDir, "route.ts"), "export async function GET() { return null; }");
+      fs.writeFileSync(
+        path.join(apiDir, "route.ts"),
+        "export async function GET() { return null; }"
+      );
 
       const scriptsDir = path.join(tempDir, "scripts");
       fs.mkdirSync(scriptsDir, { recursive: true });
-      fs.writeFileSync(path.join(scriptsDir, "generate-openapi.ts"), "// generator");
+      fs.writeFileSync(
+        path.join(scriptsDir, "generate-openapi.ts"),
+        "// generator"
+      );
 
       fs.writeFileSync(
         path.join(tempDir, "openapi.json"),
@@ -274,11 +325,17 @@ describe("DX Invariant Doctor Engine", () => {
     it("passes when all app/api routes are documented in openapi.json", () => {
       const apiDir = path.join(tempDir, "app", "api", "telemetry");
       fs.mkdirSync(apiDir, { recursive: true });
-      fs.writeFileSync(path.join(apiDir, "route.ts"), "export async function GET() { return null; }");
+      fs.writeFileSync(
+        path.join(apiDir, "route.ts"),
+        "export async function GET() { return null; }"
+      );
 
       const scriptsDir = path.join(tempDir, "scripts");
       fs.mkdirSync(scriptsDir, { recursive: true });
-      fs.writeFileSync(path.join(scriptsDir, "generate-openapi.ts"), "// generator");
+      fs.writeFileSync(
+        path.join(scriptsDir, "generate-openapi.ts"),
+        "// generator"
+      );
 
       fs.writeFileSync(
         path.join(tempDir, "openapi.json"),
@@ -385,7 +442,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     it("fails when regression test suite or ADR 0007 are missing", () => {
       const result = checkDefectRemediationInvariants(tempDir);
       expect(result.status).toBe("fail");
-      expect(result.message).toContain("defect remediation invariant violation");
+      expect(result.message).toContain(
+        "defect remediation invariant violation"
+      );
     });
 
     it("passes when all computational engines and regression suites are verified", () => {
@@ -414,14 +473,111 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       const result = checkDesignTokens(tempDir);
       expect(result.status).toBe("fail");
-      expect(result.details?.[0]).toContain("Raw unconstrained inline style property detected");
+      expect(result.details?.[0]).toContain(
+        "Raw unconstrained inline style property detected"
+      );
+    });
+  });
+
+  describe("checkTouchTargetDimensions (ADR-0003 & ADR-0019)", () => {
+    it("fails when an interactive button lacks 48px touch target styling", () => {
+      const compDir = path.join(tempDir, "components");
+      fs.mkdirSync(compDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(compDir, "SmallButton.tsx"),
+        'export function SmallButton() { return <button className="text-xs">Click</button>; }'
+      );
+
+      const result = checkTouchTargetDimensions(tempDir, false);
+      expect(result.status).toBe("fail");
+      expect(result.message).toContain("ADR-0003");
+      expect(result.message).toContain("ADR-0019");
+    });
+
+    it("auto-fixes missing touch target dimensions when fix=true", () => {
+      const compDir = path.join(tempDir, "components");
+      fs.mkdirSync(compDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(compDir, "SmallButton.tsx"),
+        'export function SmallButton() { return <button className="text-xs">Click</button>; }'
+      );
+
+      const result = checkTouchTargetDimensions(tempDir, true);
+      expect(result.status).toBe("fixed");
+
+      const updated = fs.readFileSync(
+        path.join(compDir, "SmallButton.tsx"),
+        "utf-8"
+      );
+      expect(updated).toContain("min-h-[48px]");
+    });
+  });
+
+  describe("checkSectionStructures (ADR-0009 & ADR-0023)", () => {
+    it("fails when a documentation guide lacks title heading", () => {
+      const docsDir = path.join(tempDir, "docs");
+      fs.mkdirSync(docsDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(docsDir, "guide.md"),
+        "This guide contains raw text without a title heading."
+      );
+
+      const result = checkSectionStructures(tempDir, false);
+      expect(result.status).toBe("fail");
+      expect(result.message).toContain("ADR-0023");
+    });
+
+    it("auto-fixes missing title heading when fix=true", () => {
+      const docsDir = path.join(tempDir, "docs");
+      fs.mkdirSync(docsDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(docsDir, "guide.md"),
+        "This guide contains raw text without a title heading."
+      );
+
+      const result = checkSectionStructures(tempDir, true);
+      expect(result.status).toBe("fixed");
+
+      const updated = fs.readFileSync(path.join(docsDir, "guide.md"), "utf-8");
+      expect(updated).toContain("# Guide");
+    });
+  });
+
+  describe("checkServiceResultTypes (ADR-0028)", () => {
+    it("fails when a service handler lacks ServiceResult envelope structure", () => {
+      const serviceDir = path.join(tempDir, "lib", "services", "custom");
+      fs.mkdirSync(serviceDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(serviceDir, "handler.ts"),
+        "export class CustomHandler { execute() { return { value: 1 }; } }"
+      );
+
+      const result = checkServiceResultTypes(tempDir, false);
+      expect(result.status).toBe("fail");
+      expect(result.message).toContain("ADR-0028");
+    });
+
+    it("passes when a service handler uses ServiceResult envelope pattern", () => {
+      const serviceDir = path.join(tempDir, "lib", "services", "custom");
+      fs.mkdirSync(serviceDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(serviceDir, "handler.ts"),
+        'import { ServiceResult, createSuccess } from "@/lib/services/service-result";\nexport class CustomHandler { execute(): ServiceResult<number> { return createSuccess(1); } }'
+      );
+
+      const result = checkServiceResultTypes(tempDir, false);
+      expect(result.status).toBe("pass");
     });
   });
 
   describe("Full Workspace Health Diagnostic", () => {
     it("runs diagnostic across active workspace cleanly and prints reports", async () => {
       const workspaceRoot = path.resolve(__dirname, "..");
-      const summary = await runDiagnostics({ workspaceRoot, fix: false, ci: true });
+      const summary = await runDiagnostics({
+        workspaceRoot,
+        fix: false,
+        ci: true,
+      });
       expect(summary.results.length).toBeGreaterThan(0);
       expect(summary.totalPassed).toBeGreaterThan(0);
 

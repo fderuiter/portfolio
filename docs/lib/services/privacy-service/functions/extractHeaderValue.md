@@ -8,7 +8,7 @@
 
 > **extractHeaderValue**(`reqOrHeaders`, `name`): `string` \| `null` \| `undefined`
 
-Defined in: [lib/services/privacy-service.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/services/privacy-service.ts#L12)
+Defined in: [lib/services/privacy-service.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/services/privacy-service.ts#L16)
 
 Safely extracts header value from request objects, Headers, or plain header maps.
 
