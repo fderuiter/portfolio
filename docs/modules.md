@@ -27,6 +27,7 @@
 - [lib/accessibility-utils](lib/accessibility-utils/README.md)
 - [lib/arcade](lib/arcade/README.md)
 - [lib/arcade-data](lib/arcade-data/README.md)
+- [lib/arcade-registry](lib/arcade-registry/README.md)
 - [lib/arcade/core](lib/arcade/core/README.md)
 - [lib/arcade/core/engine](lib/arcade/core/engine/README.md)
 - [lib/arcade/core/game-loop](lib/arcade/core/game-loop/README.md)
