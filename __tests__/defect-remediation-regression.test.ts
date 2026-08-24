@@ -35,6 +35,7 @@ import {
   jettisonOldestVariable,
   triggerGarbageCollection,
   allocateVariable,
+  wipeScreenFog,
 } from "@/lib/garmin-engine";
 import {
   clampBounds,
@@ -1049,6 +1050,24 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
       // Verify masking XOR logic
       expect(output[0]).toBe(0x41 ^ 0x12);
       expect(output[1]).toBe(0x41 ^ 0x34);
+    });
+  });
+
+  describe("Fog-State Prioritized Gesture Isolation & Defogging Regression", () => {
+    it("ensures wipeScreenFog reduces fog level monotonically towards 0", () => {
+      const state = createInitialState("fenix");
+      state.fogLevel = 0.8;
+
+      const wiped1 = wipeScreenFog(state, 140, 140, 35);
+      expect(wiped1.fogLevel).toBeLessThan(0.8);
+      expect(wiped1.fogLevel).toBeCloseTo(0.58, 2);
+
+      const wiped2 = wipeScreenFog(wiped1, 140, 140, 35);
+      expect(wiped2.fogLevel).toBeLessThan(wiped1.fogLevel);
+
+      const wiped3 = wipeScreenFog(wiped2, 140, 140, 35);
+      const wiped4 = wipeScreenFog(wiped3, 140, 140, 35);
+      expect(wiped4.fogLevel).toBe(0);
     });
   });
 });
