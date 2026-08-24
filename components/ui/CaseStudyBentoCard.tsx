@@ -16,6 +16,7 @@ import {
   IconAlertCircle,
   IconTerminal,
   IconChevronRight,
+  IconPlayerPlay,
 } from "@tabler/icons-react";
 import { type RichInlineLine } from "@chenglou/pretext/rich-inline";
 import Link from "next/link";
@@ -24,6 +25,7 @@ import { useBentoLayout } from "@/components/providers/BentoLayoutContext";
 import { useTerminology } from "@/components/providers/TerminologyProvider";
 import { compileTerms } from "@/lib/term-compiler";
 import { parsePretextBlocks } from "@/lib/pretext-block-parser";
+import { getSimulatorForCaseStudy } from "@/lib/arcade-registry";
 
 const REALITY_CONTENT: Record<string, string> = {
   schemaflow:
@@ -382,6 +384,15 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
       ? heightOverrides[study.id]
       : preCalculatedHeight;
 
+  const registryEntry = getSimulatorForCaseStudy(study.slug);
+  const simulatorRoute =
+    (study as { interactive_url?: string | null }).interactive_url ||
+    registryEntry?.simulatorRoute;
+  const simulatorLabel =
+    (study as { interactive_label?: string | null }).interactive_label ||
+    registryEntry?.ctaLabel ||
+    "Launch Simulator";
+
   return (
     <Card
       className={cn(
@@ -607,15 +618,26 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
           )}
         </div>
 
-        {/* Footer analyze link with 44px+ tap target */}
-        <div className="flex justify-between items-center border-t border-zinc-900/40 pt-1.5 mt-1">
+        {/* Dual CTA Action Bar when simulator exists, or single CTA link when no simulator */}
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-zinc-900/60 pt-2.5 mt-2">
           <Link
             href={`/case-studies/${study.slug}`}
-            className="group inline-flex items-center min-h-[44px] py-2 text-xs font-bold text-brand-cyan/80 hover:text-brand-cyan transition-colors duration-300 cursor-pointer relative z-10"
+            className="group inline-flex items-center justify-center min-h-[44px] px-3.5 py-2 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white text-xs font-bold font-mono transition-all cursor-pointer relative z-10 active:scale-[0.98]"
           >
-            <span>Analyze Architecture</span>
-            <IconChevronRight className="ml-1 w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform duration-200" />
+            <span>Read Case Study</span>
+            <IconChevronRight className="ml-1 w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform duration-200 text-zinc-400" />
           </Link>
+
+          {simulatorRoute && (
+            <Link
+              href={simulatorRoute}
+              aria-label={`Launch ${study.title} simulator`}
+              className="group inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3.5 py-2 rounded-lg bg-brand-cyan/10 hover:bg-brand-cyan/20 border border-brand-cyan/40 hover:border-brand-cyan text-brand-cyan text-xs font-bold font-mono transition-all shadow-[0_0_12px_rgba(6,182,212,0.15)] hover:shadow-[0_0_18px_rgba(6,182,212,0.3)] cursor-pointer relative z-10 active:scale-[0.98]"
+            >
+              <IconPlayerPlay className="w-3.5 h-3.5 text-brand-cyan fill-brand-cyan/20 group-hover:scale-110 transition-transform" />
+              <span>{simulatorLabel}</span>
+            </Link>
+          )}
         </div>
       </div>
     </Card>
