@@ -68,6 +68,18 @@ export const NUMERIC_DATA_TYPES: Set<ClinicalDataType> = new Set([
   "nrs_scale",
 ]);
 
+export const LOGICAL_KEYWORDS = new Set(["and", "or", "not"]);
+export const RELATIONAL_KEYWORDS = new Set([
+  "eq",
+  "neq",
+  "gt",
+  "gte",
+  "lt",
+  "lte",
+  "in",
+  "contains",
+]);
+
 /**
  * Enhanced Tokenizer with character start/end coordinates and bracket matching
  */
@@ -103,14 +115,103 @@ export function tokenizeWithSpans(input: string): HighlightToken[] {
       continue;
     }
 
-    if (ch === "+" || ch === "-" || ch === "*" || ch === "/" || ch === "%" || ch === "^") {
+    if (
+      ch === "+" ||
+      ch === "-" ||
+      ch === "*" ||
+      ch === "/" ||
+      ch === "%" ||
+      ch === "^"
+    ) {
       rawTokens.push({ type: "OP", value: ch, start, end: start + 1 });
       i++;
       continue;
     }
 
+    // 1. Double character relational / logical operators
+    if (i + 1 < input.length) {
+      const two = input.substring(i, i + 2);
+      if (
+        two === "==" ||
+        two === "!=" ||
+        two === "<=" ||
+        two === ">=" ||
+        two === "<>"
+      ) {
+        rawTokens.push({
+          type: "RELATIONAL_OP",
+          value: two,
+          start,
+          end: start + 2,
+        });
+        i += 2;
+        continue;
+      }
+      if (two === "&&" || two === "||") {
+        rawTokens.push({
+          type: "LOGICAL_OP",
+          value: two,
+          start,
+          end: start + 2,
+        });
+        i += 2;
+        continue;
+      }
+    }
+
+    // 2. Single character relational / logical operators
+    if (ch === "=" || ch === "<" || ch === ">") {
+      rawTokens.push({
+        type: "RELATIONAL_OP",
+        value: ch,
+        start,
+        end: start + 1,
+      });
+      i++;
+      continue;
+    }
+
+    if (ch === "!") {
+      rawTokens.push({ type: "LOGICAL_OP", value: ch, start, end: start + 1 });
+      i++;
+      continue;
+    }
+
+    // 3. String literals (single or double quotes)
+    if (ch === '"' || ch === "'") {
+      const quote = ch;
+      let strVal = quote;
+      i++;
+      while (i < input.length && input[i] !== quote) {
+        if (input[i] === "\\") {
+          strVal += input[i];
+          i++;
+        }
+        if (i < input.length) {
+          strVal += input[i];
+          i++;
+        }
+      }
+      if (i < input.length && input[i] === quote) {
+        strVal += quote;
+        i++;
+      }
+      rawTokens.push({ type: "STRING", value: strVal, start, end: i });
+      continue;
+    }
+
+    // 4. Square Brackets
+    if (ch === "[" || ch === "]") {
+      rawTokens.push({ type: "BRACKET", value: ch, start, end: start + 1 });
+      i++;
+      continue;
+    }
+
     // Numbers (integers or decimals)
-    if (/[0-9]/.test(ch) || (ch === "." && i + 1 < input.length && /[0-9]/.test(input[i + 1]))) {
+    if (
+      /[0-9]/.test(ch) ||
+      (ch === "." && i + 1 < input.length && /[0-9]/.test(input[i + 1]))
+    ) {
       let numStr = "";
       while (i < input.length && (/[0-9]/.test(input[i]) || input[i] === ".")) {
         numStr += input[i];
@@ -120,12 +221,24 @@ export function tokenizeWithSpans(input: string): HighlightToken[] {
       continue;
     }
 
-    // Identifiers or function names
+    // Identifiers, function names, domain-qualified variables, or keyword operators
     if (/[a-zA-Z_]/.test(ch)) {
       let idStr = "";
-      while (i < input.length && /[a-zA-Z0-9_]/.test(input[i])) {
-        idStr += input[i];
-        i++;
+      while (i < input.length) {
+        const char = input[i];
+        if (/[a-zA-Z0-9_]/.test(char)) {
+          idStr += char;
+          i++;
+        } else if (
+          char === "." &&
+          i + 1 < input.length &&
+          /[a-zA-Z0-9_]/.test(input[i + 1])
+        ) {
+          idStr += char;
+          i++;
+        } else {
+          break;
+        }
       }
 
       let lookAhead = i;
@@ -133,17 +246,25 @@ export function tokenizeWithSpans(input: string): HighlightToken[] {
         lookAhead++;
       }
 
-      const isFunc =
-        lookAhead < input.length &&
-        input[lookAhead] === "(" &&
-        KNOWN_MATH_FUNCTIONS.has(idStr.toLowerCase());
+      const idLower = idStr.toLowerCase();
 
-      rawTokens.push({
-        type: isFunc ? "FUNCTION" : "IDENTIFIER",
-        value: idStr,
-        start,
-        end: i,
-      });
+      if (LOGICAL_KEYWORDS.has(idLower)) {
+        rawTokens.push({ type: "LOGICAL_OP", value: idStr, start, end: i });
+      } else if (RELATIONAL_KEYWORDS.has(idLower)) {
+        rawTokens.push({ type: "RELATIONAL_OP", value: idStr, start, end: i });
+      } else {
+        const isFunc =
+          lookAhead < input.length &&
+          input[lookAhead] === "(" &&
+          KNOWN_MATH_FUNCTIONS.has(idLower);
+
+        rawTokens.push({
+          type: isFunc ? "FUNCTION" : "IDENTIFIER",
+          value: idStr,
+          start,
+          end: i,
+        });
+      }
       continue;
     }
 
@@ -201,7 +322,8 @@ export function lintFormula(
       diagnostics: [
         {
           severity: "info",
-          message: "Formula is empty. Enter an arithmetic expression or choose a clinical preset.",
+          message:
+            "Formula is empty. Enter an arithmetic expression or choose a clinical preset.",
           start: 0,
           end: 0,
           code: "EMPTY_FORMULA",
@@ -220,9 +342,22 @@ export function lintFormula(
 
   const fieldLookup = new Map<string, CRFField>();
   fields.forEach((f) => {
-    fieldLookup.set(f.id.toLowerCase(), f);
-    fieldLookup.set(f.variableName.toLowerCase(), f);
+    if (f.id) fieldLookup.set(f.id.toLowerCase(), f);
+    if (f.variableName) fieldLookup.set(f.variableName.toLowerCase(), f);
+    if (f.cdashMetadata?.domain && f.variableName) {
+      fieldLookup.set(
+        `${f.cdashMetadata.domain}.${f.variableName}`.toLowerCase(),
+        f
+      );
+    }
   });
+
+  const hasRelationalOrLogical = tokens.some(
+    (t) =>
+      t.type === "RELATIONAL_OP" ||
+      t.type === "LOGICAL_OP" ||
+      t.type === "STRING"
+  );
 
   for (let idx = 0; idx < tokens.length; idx++) {
     const token = tokens[idx];
@@ -266,7 +401,8 @@ export function lintFormula(
         unmatchedBracketIndices.push(token.start);
         diagnostics.push({
           severity: "error",
-          message: "Unexpected closing parenthesis ')' with no matching opening '('",
+          message:
+            "Unexpected closing parenthesis ')' with no matching opening '('",
           start: token.start,
           end: token.end,
           code: "UNMATCHED_RPAREN",
@@ -274,11 +410,19 @@ export function lintFormula(
       }
     }
 
-    if (token.type === "OP") {
+    if (
+      token.type === "OP" ||
+      token.type === "RELATIONAL_OP" ||
+      token.type === "LOGICAL_OP"
+    ) {
       if (
         nextToken &&
-        nextToken.type === "OP" &&
-        nextToken.value !== "-"
+        (nextToken.type === "OP" ||
+          nextToken.type === "RELATIONAL_OP" ||
+          nextToken.type === "LOGICAL_OP") &&
+        nextToken.value !== "-" &&
+        nextToken.value.toLowerCase() !== "not" &&
+        nextToken.value !== "!"
       ) {
         diagnostics.push({
           severity: "error",
@@ -289,7 +433,12 @@ export function lintFormula(
         });
       }
 
-      if (token.value === "/" && nextToken && nextToken.type === "NUMBER" && parseFloat(nextToken.value) === 0) {
+      if (
+        token.value === "/" &&
+        nextToken &&
+        nextToken.type === "NUMBER" &&
+        parseFloat(nextToken.value) === 0
+      ) {
         diagnostics.push({
           severity: "error",
           message: "Static division by zero (/ 0)",
@@ -302,12 +451,19 @@ export function lintFormula(
 
     if (token.type === "IDENTIFIER") {
       const varKey = token.value.toLowerCase();
-      const matchedField = fieldLookup.get(varKey);
+      let matchedField = fieldLookup.get(varKey);
+
+      if (!matchedField && varKey.includes(".")) {
+        const parts = varKey.split(".");
+        const varPart = parts[parts.length - 1];
+        matchedField = fieldLookup.get(varPart);
+      }
 
       if (
         currentFieldId &&
         (varKey === currentFieldId.toLowerCase() ||
-          (matchedField && matchedField.id.toLowerCase() === currentFieldId.toLowerCase()))
+          (matchedField &&
+            matchedField.id.toLowerCase() === currentFieldId.toLowerCase()))
       ) {
         diagnostics.push({
           severity: "error",
@@ -351,7 +507,7 @@ export function lintFormula(
           isNumeric,
         });
 
-        if (!isNumeric) {
+        if (!isNumeric && !hasRelationalOrLogical) {
           diagnostics.push({
             severity: "warning",
             message: `Field "${matchedField.label}" (${matchedField.variableName}) has non-numeric type "${matchedField.dataType}". Expected number, integer, or calculated.`,
@@ -415,7 +571,14 @@ export function lintFormula(
               end: tokens[endIdx]?.end ?? token.end,
               code: "INVALID_ARITY",
             });
-          } else if ((fnName === "abs" || fnName === "floor" || fnName === "ceil" || fnName === "exp" || fnName === "log") && argCount !== 1) {
+          } else if (
+            (fnName === "abs" ||
+              fnName === "floor" ||
+              fnName === "ceil" ||
+              fnName === "exp" ||
+              fnName === "log") &&
+            argCount !== 1
+          ) {
             diagnostics.push({
               severity: "error",
               message: `Function "${fnName}(x)" expects exactly 1 argument, but received ${argCount}`,

@@ -315,6 +315,323 @@ describe("StudyAuditor Domain Engine (TDD Red-Green-Refactor)", () => {
     });
   });
 
+  describe("Multi-Form Field Reference Resolution & Domain-Qualified Variables", () => {
+    it("resolves cross-form field references and domain-qualified variables without missing-field errors", () => {
+      const multiFormStudy: StudyProtocol = {
+        id: "multi_form_study",
+        protocolNumber: "MF-001",
+        studyName: "Multi-Form Test Study",
+        phase: "Phase III",
+        sponsor: "Test Sponsor",
+        therapeuticArea: "Oncology",
+        version: "1.0",
+        lastModified: new Date().toISOString(),
+        forms: [
+          {
+            id: "f_dm",
+            name: "Demographics",
+            domain: "DM",
+            description: "Demographics",
+            version: "1.0",
+            sections: [
+              {
+                id: "s_dm",
+                title: "DM Section",
+                fields: [
+                  {
+                    id: "fld_age",
+                    variableName: "AGE",
+                    label: "Age",
+                    dataType: "number",
+                    required: true,
+                    columnSpan: 6,
+                  },
+                ],
+              },
+            ],
+            rules: [],
+          },
+          {
+            id: "f_vs",
+            name: "Vital Signs",
+            domain: "VS",
+            description: "Vitals",
+            version: "1.0",
+            sections: [
+              {
+                id: "s_vs",
+                title: "VS Section",
+                fields: [
+                  {
+                    id: "fld_sysbp",
+                    variableName: "SYSBP",
+                    label: "Systolic BP",
+                    dataType: "number",
+                    required: true,
+                    columnSpan: 6,
+                  },
+                ],
+              },
+            ],
+            rules: [
+              {
+                id: "r_cross_form",
+                name: "Cross Form Rule",
+                description: "Checks DM.AGE from VS form",
+                triggerFieldIds: ["fld_sysbp"],
+                actionType: "raise_query",
+                targetFieldId: "fld_sysbp",
+                conditions: [
+                  {
+                    fieldId: "fld_age", // Cross-form reference to DM.AGE
+                    operator: "gt",
+                    value: 18,
+                  },
+                  {
+                    fieldId: "DM.AGE", // Domain-qualified reference
+                    operator: "lt",
+                    value: 100,
+                  },
+                ],
+                logicalOperator: "AND",
+              },
+            ],
+          },
+        ],
+        visits: [
+          {
+            id: "v1",
+            oid: "SE.V1",
+            name: "Visit 1",
+            visitType: "Scheduled",
+            targetDay: 1,
+            windowBefore: 0,
+            windowAfter: 0,
+            assignedFormIds: ["f_dm", "f_vs"],
+          },
+        ],
+        codelists: [],
+      };
+
+      const report = StudyAuditor.audit(multiFormStudy);
+      const crossFormErrors = report.diagnostics.filter(
+        (d) =>
+          d.tier === "ast" &&
+          (d.message.includes("fld_age") || d.message.includes("DM.AGE"))
+      );
+
+      expect(crossFormErrors.length).toBe(0);
+    });
+  });
+
+  describe("Study-Level Rules Auditing & Health Penalty Scoring", () => {
+    it("audits study-level rules alongside form-level rules and includes violations in health penalty score", () => {
+      const studyWithRules: StudyProtocol = {
+        ...oncologyStudy,
+        id: "study_rules_test",
+        rules: [
+          {
+            id: "r_study_valid",
+            name: "Valid Study Rule",
+            description: "Valid reference",
+            triggerFieldIds: ["fld_dm_age"],
+            actionType: "raise_query",
+            targetFieldId: "fld_dm_age",
+            conditions: [],
+            logicalOperator: "AND",
+          },
+          {
+            id: "r_study_invalid",
+            name: "Invalid Study Rule",
+            description: "Invalid trigger reference",
+            triggerFieldIds: ["non_existent_study_field"],
+            actionType: "show_field",
+            targetFieldId: "non_existent_target_field",
+            conditions: [
+              {
+                fieldId: "non_existent_cond_field",
+                operator: "eq",
+                value: 1,
+              },
+            ],
+            logicalOperator: "AND",
+          },
+        ],
+      };
+
+      const report = StudyAuditor.audit(studyWithRules);
+      const studyRuleDiagnostics = report.diagnostics.filter(
+        (d) => d.formId === "study" || d.ruleId === "r_study_invalid"
+      );
+
+      expect(studyRuleDiagnostics.length).toBeGreaterThan(0);
+      expect(
+        studyRuleDiagnostics.some((d) => d.autoFixAvailable === true)
+      ).toBe(true);
+      expect(report.isCompliant).toBe(false);
+      expect(report.score).toBeLessThan(100);
+    });
+
+    it("auto-fixes invalid field references in study-level rules by pruning them", () => {
+      const studyWithInvalidRules: StudyProtocol = {
+        ...oncologyStudy,
+        id: "study_autofix_test",
+        rules: [
+          {
+            id: "r_study_orphan",
+            name: "Orphaned Study Rule",
+            description: "Contains bad refs",
+            triggerFieldIds: ["bad_trigger_1"],
+            actionType: "raise_query",
+            targetFieldId: "bad_target_1",
+            conditions: [
+              {
+                fieldId: "bad_cond_1",
+                operator: "eq",
+                value: "X",
+              },
+            ],
+            logicalOperator: "AND",
+          },
+        ],
+      };
+
+      const reportBefore = StudyAuditor.audit(studyWithInvalidRules);
+      expect(reportBefore.diagnostics.length).toBeGreaterThan(0);
+
+      const { protocol: fixedStudy, fixedCount } = reportBefore.autoFixAll();
+      expect(fixedCount).toBeGreaterThan(0);
+
+      const reportAfter = StudyAuditor.audit(fixedStudy);
+      const remainingStudyRuleErrors = reportAfter.diagnostics.filter(
+        (d) => d.ruleId === "r_study_orphan"
+      );
+      expect(remainingStudyRuleErrors.length).toBe(0);
+    });
+  });
+
+  describe("Formula Linter Relational & Logical Operators", () => {
+    it("tokenizes and parses relational operators cleanly", () => {
+      const fields: CRFField[] = [
+        {
+          id: "fld_age",
+          variableName: "AGE",
+          label: "Age",
+          dataType: "number",
+          required: true,
+          columnSpan: 6,
+        },
+        {
+          id: "fld_sex",
+          variableName: "SEX",
+          label: "Sex",
+          dataType: "single_select",
+          required: true,
+          columnSpan: 6,
+        },
+        {
+          id: "fld_aeterm",
+          variableName: "AETERM",
+          label: "AE Term",
+          dataType: "text",
+          required: true,
+          columnSpan: 6,
+        },
+      ];
+
+      const resEq = StudyAuditor.auditFormula("AGE == 18", fields);
+      expect(resEq.isValid).toBe(true);
+
+      const resGtLt = StudyAuditor.auditFormula(
+        "AGE >= 18 AND AGE <= 65",
+        fields
+      );
+      expect(resGtLt.isValid).toBe(true);
+
+      const resIn = StudyAuditor.auditFormula("SEX in ('M', 'F')", fields);
+      expect(resIn.isValid).toBe(true);
+
+      const resContains = StudyAuditor.auditFormula(
+        'AETERM contains "HEADACHE"',
+        fields
+      );
+      expect(resContains.isValid).toBe(true);
+    });
+
+    it("tokenizes and parses logical operators and validates variable existence in conditional logic", () => {
+      const fields: CRFField[] = [
+        {
+          id: "fld_sys",
+          variableName: "SYSBP",
+          label: "Systolic BP",
+          dataType: "number",
+          required: true,
+          columnSpan: 6,
+        },
+        {
+          id: "fld_dia",
+          variableName: "DIABP",
+          label: "Diastolic BP",
+          dataType: "number",
+          required: true,
+          columnSpan: 6,
+        },
+      ];
+
+      const validLogical = StudyAuditor.auditFormula(
+        "SYSBP > 140 OR DIABP > 90",
+        fields
+      );
+      expect(validLogical.isValid).toBe(true);
+
+      const invalidLogical = StudyAuditor.auditFormula(
+        "SYSBP > 140 AND UNKNOWN_VAR > 50",
+        fields
+      );
+      expect(
+        invalidLogical.diagnostics.some((d) => d.code === "UNKNOWN_VARIABLE")
+      ).toBe(true);
+      expect(
+        invalidLogical.referencedVariables.find((v) => v.name === "UNKNOWN_VAR")
+          ?.exists
+      ).toBe(false);
+    });
+  });
+
+  describe("Isolated Single-Form Audit Capability", () => {
+    it("maintains isolated single-form auditing when studyContext is omitted", () => {
+      const singleForm: CRFForm = {
+        id: "f_single",
+        name: "Isolated Single Form",
+        domain: "CUSTOM",
+        description: "Isolated Form",
+        version: "1.0",
+        sections: [
+          {
+            id: "sec_single",
+            title: "Section",
+            fields: [
+              {
+                id: "f_age",
+                variableName: "AGE",
+                label: "Age",
+                dataType: "number",
+                required: true,
+                columnSpan: 6,
+              },
+            ],
+          },
+        ],
+        rules: [],
+      };
+
+      const formReport = StudyAuditor.auditForm(singleForm);
+      expect(formReport).toBeDefined();
+      expect(formReport.formId).toBe(singleForm.id);
+      expect(formReport.health.totalFields).toBe(1);
+    });
+  });
+
   describe("Preset Health Verification", () => {
     it("audits all registered study presets without unhandled exceptions", () => {
       const presets = getStudyPresetsSync();
