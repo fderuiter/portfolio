@@ -31,6 +31,7 @@ export const serverEnvSchema = z.object({
   UPSTASH_REDIS_REST_URL: z.string().url().optional().or(z.literal("")),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
   CRON_SECRET: z.string().optional(),
+  GREENLIGHT_SECRET: z.string().optional(),
   GITHUB_TOKEN: z.string().optional(),
   SENTRY_DSN: z.string().url().optional().or(z.literal("")),
   SENTRY_ORG: z.string().optional(),
