@@ -9,35 +9,27 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
-// Lightweight mock component stubs for dynamic studio modes
-const MockVisitMatrixEditor = () => <div>Protocol Visit Schedule Matrix</div>;
-const MockRuleGraphStudio = () => (
-  <div>Logic Dependency DAG & AST Rule Studio</div>
-);
-const MockLiveEdcSimulator = () => (
-  <div>Live 21 CFR Part 11 EDC Simulation Mode</div>
-);
-const MockWorkflowWizardModal = () => <div>Workflow Wizard Modal</div>;
-const MockAcrfOverlayViewer = () => (
-  <div>Visual Annotated CRF (aCRF) Submission Studio</div>
-);
-const MockExportImportModal = () => (
-  <div>CDISC Standards & Interoperability Exporter</div>
-);
-const MockBrandingConfigModal = () => <div>Branding Config Modal</div>;
-const MockDiagnosticsDrawer = () => <div>Diagnostics Drawer</div>;
-const MockSpotlightTourOverlay = () => <div>Spotlight Tour Overlay</div>;
+// Statically import components to put in global mock registry
+import { VisitMatrixEditor } from "@/components/crf/Modes/VisitMatrixEditor";
+import { RuleGraphStudio } from "@/components/crf/Modes/RuleGraphStudio";
+import { LiveEdcSimulator } from "@/components/crf/Modes/LiveEdcSimulator";
+import { WorkflowWizardModal } from "@/components/crf/Wizard/WorkflowWizardModal";
+import { AcrfOverlayViewer } from "@/components/crf/Modes/AcrfOverlayViewer";
+import { ExportImportModal } from "@/components/crf/Modes/ExportImportModal";
+import { BrandingConfigModal } from "@/components/crf/Branding/BrandingConfigModal";
+import { DiagnosticsDrawer } from "@/components/crf/DiagnosticsDrawer";
+import { SpotlightTourOverlay } from "@/components/crf/Wizard/SpotlightTourOverlay";
 
 (globalThis as any).mockComponents = {
-  VisitMatrixEditor: MockVisitMatrixEditor,
-  RuleGraphStudio: MockRuleGraphStudio,
-  LiveEdcSimulator: MockLiveEdcSimulator,
-  WorkflowWizardModal: MockWorkflowWizardModal,
-  AcrfOverlayViewer: MockAcrfOverlayViewer,
-  ExportImportModal: MockExportImportModal,
-  BrandingConfigModal: MockBrandingConfigModal,
-  DiagnosticsDrawer: MockDiagnosticsDrawer,
-  SpotlightTourOverlay: MockSpotlightTourOverlay,
+  VisitMatrixEditor,
+  RuleGraphStudio,
+  LiveEdcSimulator,
+  WorkflowWizardModal,
+  AcrfOverlayViewer,
+  ExportImportModal,
+  BrandingConfigModal,
+  DiagnosticsDrawer,
+  SpotlightTourOverlay,
 };
 
 // Synchronous dynamic import mock for tests using global registry
