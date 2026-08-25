@@ -40,7 +40,8 @@ export interface AuditDiagnostic {
     | "add_core_variable"
     | "assign_nci_codelist"
     | "fix_date_format"
-    | "assign_visit_form";
+    | "assign_visit_form"
+    | "prune_invalid_field_reference";
   suggestedFix?: string;
 }
 
@@ -124,6 +125,149 @@ export class StudyAuditor {
       string,
       Array<{ formId: string; fieldId: string }>
     >();
+
+    // Protocol-wide field collection and reference index
+    const allStudyFields: CRFField[] = [];
+    const studyFieldRefNames = new Set<string>();
+
+    forms.forEach((form) => {
+      const formDomain = form.domain?.trim().toUpperCase();
+      (form.sections || []).forEach((section) => {
+        (section.fields || []).forEach((field) => {
+          allStudyFields.push(field);
+          if (field.id) studyFieldRefNames.add(field.id.toLowerCase());
+          if (field.variableName)
+            studyFieldRefNames.add(field.variableName.toLowerCase());
+          if (formDomain && field.variableName) {
+            studyFieldRefNames.add(
+              `${formDomain}.${field.variableName}`.toLowerCase()
+            );
+          }
+          if (formDomain && field.id) {
+            studyFieldRefNames.add(`${formDomain}.${field.id}`.toLowerCase());
+          }
+          if (field.cdashMetadata?.domain && field.variableName) {
+            studyFieldRefNames.add(
+              `${field.cdashMetadata.domain.toUpperCase()}.${field.variableName}`.toLowerCase()
+            );
+          }
+        });
+      });
+    });
+
+    const isRefValid = (ref: string): boolean => {
+      if (!ref || ref.trim() === "") return true;
+      const lower = ref.trim().toLowerCase();
+      if (studyFieldRefNames.has(lower)) return true;
+      if (lower.includes(".")) {
+        const sub = lower.split(".").pop();
+        if (sub && studyFieldRefNames.has(sub)) return true;
+      }
+      return false;
+    };
+
+    // Helper to audit any rule list (form-level or study-level)
+    const auditRuleList = (
+      ruleList: typeof study.rules,
+      ownerFormId: string,
+      ownerFormName: string,
+      isolatedFormFieldIds?: Set<string>
+    ) => {
+      (ruleList || []).forEach((rule) => {
+        // Validate trigger fields
+        (rule.triggerFieldIds || []).forEach((triggerId) => {
+          const isValid = isolatedFormFieldIds
+            ? isolatedFormFieldIds.has(triggerId) || isRefValid(triggerId)
+            : isRefValid(triggerId);
+
+          if (!isValid) {
+            diagnostics.push({
+              id: `ast_rule_trigger_${ownerFormId}_${rule.id}_${triggerId}`,
+              tier: "ast",
+              severity: "error",
+              formId: ownerFormId,
+              formName: ownerFormName,
+              ruleId: rule.id,
+              ruleDescription: rule.description,
+              message: `Rule "${rule.name}" references non-existent trigger field ID or variable "${triggerId}".`,
+              autoFixAvailable: true,
+              autoFixType: "prune_invalid_field_reference",
+              suggestedFix: `Remove invalid trigger reference "${triggerId}".`,
+            });
+          }
+        });
+
+        // Validate target field
+        if (rule.targetFieldId) {
+          const isValid = isolatedFormFieldIds
+            ? isolatedFormFieldIds.has(rule.targetFieldId) ||
+              isRefValid(rule.targetFieldId)
+            : isRefValid(rule.targetFieldId);
+
+          if (!isValid) {
+            diagnostics.push({
+              id: `ast_rule_target_${ownerFormId}_${rule.id}_${rule.targetFieldId}`,
+              tier: "ast",
+              severity: "error",
+              formId: ownerFormId,
+              formName: ownerFormName,
+              ruleId: rule.id,
+              ruleDescription: rule.description,
+              message: `Rule "${rule.name}" references non-existent target field ID or variable "${rule.targetFieldId}".`,
+              autoFixAvailable: true,
+              autoFixType: "prune_invalid_field_reference",
+              suggestedFix: `Remove or correct invalid target field reference "${rule.targetFieldId}".`,
+            });
+          }
+        }
+
+        // Validate condition field references
+        (rule.conditions || []).forEach((cond) => {
+          if (cond.fieldId) {
+            const isValid = isolatedFormFieldIds
+              ? isolatedFormFieldIds.has(cond.fieldId) ||
+                isRefValid(cond.fieldId)
+              : isRefValid(cond.fieldId);
+
+            if (!isValid) {
+              diagnostics.push({
+                id: `ast_rule_cond_${ownerFormId}_${rule.id}_${cond.fieldId}`,
+                tier: "ast",
+                severity: "error",
+                formId: ownerFormId,
+                formName: ownerFormName,
+                ruleId: rule.id,
+                ruleDescription: rule.description,
+                message: `Rule "${rule.name}" condition references non-existent field or variable "${cond.fieldId}".`,
+                autoFixAvailable: true,
+                autoFixType: "prune_invalid_field_reference",
+                suggestedFix: `Remove invalid condition field reference "${cond.fieldId}".`,
+              });
+            }
+          }
+        });
+
+        // Lint formula expression if present
+        if (rule.formulaExpression) {
+          const lintRes = lintFormula(rule.formulaExpression, allStudyFields);
+          lintRes.diagnostics.forEach((diag) => {
+            if (diag.severity === "error" || diag.severity === "warning") {
+              diagnostics.push({
+                id: `ast_rule_formula_${ownerFormId}_${rule.id}_${diag.code}_${diag.start}`,
+                tier: "ast",
+                severity: diag.severity,
+                formId: ownerFormId,
+                formName: ownerFormName,
+                ruleId: rule.id,
+                ruleDescription: rule.description,
+                message: `Rule "${rule.name}" formula: ${diag.message}`,
+                autoFixAvailable: false,
+              });
+            }
+          });
+        }
+      });
+    };
 
     // 1. Audit Forms, Sections, and Fields
     forms.forEach((form) => {
@@ -296,36 +440,18 @@ export class StudyAuditor {
         });
       }
 
-      // AST Rule trigger/target references
-      const formFieldIds = new Set(formFields.map((f) => f.id));
-      (form.rules || []).forEach((rule) => {
-        (rule.triggerFieldIds || []).forEach((triggerId) => {
-          if (!formFieldIds.has(triggerId)) {
-            diagnostics.push({
-              id: `ast_rule_trigger_${form.id}_${rule.id}_${triggerId}`,
-              tier: "ast",
-              severity: "error",
-              formId: form.id,
-              formName: form.name,
-              message: `Rule "${rule.name}" references non-existent trigger field ID "${triggerId}".`,
-              autoFixAvailable: false,
-            });
-          }
-        });
-
-        if (rule.targetFieldId && !formFieldIds.has(rule.targetFieldId)) {
-          diagnostics.push({
-            id: `ast_rule_target_${form.id}_${rule.id}_${rule.targetFieldId}`,
-            tier: "ast",
-            severity: "error",
-            formId: form.id,
-            formName: form.name,
-            message: `Rule "${rule.name}" references non-existent target field ID "${rule.targetFieldId}".`,
-            autoFixAvailable: false,
-          });
-        }
-      });
+      // AST Form Rule trigger/target references
+      auditRuleList(form.rules || [], form.id, form.name);
     });
+
+    // 2. Audit Study-Level Rules
+    const studyRules = study.rules || [];
+    conditionalRules += studyRules.length;
+    auditRuleList(
+      studyRules,
+      study.id || "study_level",
+      study.studyName || "Protocol Level Rules"
+    );
 
     // Check duplicate variable names within the same form
     variableOccurrenceMap.forEach((occurrences, varName) => {
@@ -555,6 +681,90 @@ export class StudyAuditor {
         };
         targetSection.fields.push(newField);
       }
+    }
+
+    if (target.autoFixType === "prune_invalid_field_reference") {
+      const validNames = new Set<string>();
+      cloned.forms.forEach((f) => {
+        const domain = f.domain?.trim().toUpperCase();
+        (f.sections || []).forEach((sec) => {
+          (sec.fields || []).forEach((fld) => {
+            if (fld.id) validNames.add(fld.id.toLowerCase());
+            if (fld.variableName)
+              validNames.add(fld.variableName.toLowerCase());
+            if (domain && fld.variableName)
+              validNames.add(`${domain}.${fld.variableName}`.toLowerCase());
+            if (domain && fld.id)
+              validNames.add(`${domain}.${fld.id}`.toLowerCase());
+            if (fld.cdashMetadata?.domain && fld.variableName) {
+              validNames.add(
+                `${fld.cdashMetadata.domain.toUpperCase()}.${fld.variableName}`.toLowerCase()
+              );
+            }
+          });
+        });
+      });
+
+      const checkValid = (ref: string) => {
+        if (!ref) return true;
+        const low = ref.toLowerCase();
+        if (validNames.has(low)) return true;
+        if (low.includes(".")) {
+          const sub = low.split(".").pop();
+          if (sub && validNames.has(sub)) return true;
+        }
+        return false;
+      };
+
+      const pruneRule = (
+        rule: (typeof cloned.forms)[0]["rules"][0]
+      ): boolean => {
+        if (rule.triggerFieldIds) {
+          rule.triggerFieldIds = rule.triggerFieldIds.filter(checkValid);
+        }
+        if (rule.conditions) {
+          rule.conditions = rule.conditions.filter((c) =>
+            checkValid(c.fieldId)
+          );
+        }
+        if (rule.targetFieldId && !checkValid(rule.targetFieldId)) {
+          rule.targetFieldId = rule.triggerFieldIds[0] || "";
+        }
+        const isEmpty =
+          (!rule.triggerFieldIds || rule.triggerFieldIds.length === 0) &&
+          (!rule.conditions || rule.conditions.length === 0);
+        return isEmpty;
+      };
+
+      if (cloned.rules) {
+        cloned.rules = cloned.rules.filter((rule) => {
+          if (
+            rule.id === target.ruleId ||
+            (target.ruleId && rule.id === target.ruleId) ||
+            target.id.includes(rule.id)
+          ) {
+            const shouldRemove = pruneRule(rule);
+            return !shouldRemove;
+          }
+          return true;
+        });
+      }
+
+      cloned.forms.forEach((form) => {
+        if (form.rules) {
+          form.rules = form.rules.filter((rule) => {
+            if (
+              rule.id === target.ruleId ||
+              (target.ruleId && rule.id === target.ruleId) ||
+              target.id.includes(rule.id)
+            ) {
+              const shouldRemove = pruneRule(rule);
+              return !shouldRemove;
+            }
+            return true;
+          });
+        }
+      });
     }
 
     return cloned;

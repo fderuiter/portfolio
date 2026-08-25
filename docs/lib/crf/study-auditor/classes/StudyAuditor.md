@@ -6,7 +6,7 @@
 
 # Class: StudyAuditor
 
-Defined in: [lib/crf/study-auditor.ts:96](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L96)
+Defined in: [lib/crf/study-auditor.ts:97](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L97)
 
 Deep domain engine for unified clinical study, form, and formula quality auditing.
 Consolidates AST syntax checking, CDISC CDASH 2.2 regulatory compliance,
@@ -28,7 +28,7 @@ Schedule of Activities (SoA) consistency, form health telemetry, and 1-click aut
 
 > `static` **applyAutoFix**(`study`, `diagnosticId`): [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
 
-Defined in: [lib/crf/study-auditor.ts:458](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L458)
+Defined in: [lib/crf/study-auditor.ts:577](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L577)
 
 Applies an individual 1-click auto-fix remediation to a StudyProtocol instance.
 
@@ -52,7 +52,7 @@ Applies an individual 1-click auto-fix remediation to a StudyProtocol instance.
 
 > `static` **applyAutoFixAll**(`study`, `diagnostics?`): `object`
 
-Defined in: [lib/crf/study-auditor.ts:566](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L566)
+Defined in: [lib/crf/study-auditor.ts:752](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L752)
 
 Applies all available auto-fix remediations in a single pass.
 
@@ -84,7 +84,7 @@ Applies all available auto-fix remediations in a single pass.
 
 > `static` **audit**(`study`): [`StudyAuditReport`](../interfaces/StudyAuditReport.md)
 
-Defined in: [lib/crf/study-auditor.ts:103](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L103)
+Defined in: [lib/crf/study-auditor.ts:104](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L104)
 
 Performs a comprehensive multi-tier audit across an entire clinical study protocol.
 
@@ -108,7 +108,7 @@ A consolidated StudyAuditReport containing diagnostics, health scores, and auto-
 
 > `static` **auditForm**(`form`, `studyContext?`): [`FormAuditReport`](../interfaces/FormAuditReport.md)
 
-Defined in: [lib/crf/study-auditor.ts:413](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L413)
+Defined in: [lib/crf/study-auditor.ts:532](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L532)
 
 Audits an individual CRF Form.
 
@@ -132,7 +132,7 @@ Audits an individual CRF Form.
 
 > `static` **auditFormula**(`formula`, `fields`): [`FormulaLintResult`](../../formula-linter/interfaces/FormulaLintResult.md)
 
-Defined in: [lib/crf/study-auditor.ts:448](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L448)
+Defined in: [lib/crf/study-auditor.ts:567](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L567)
 
 Evaluates and tokenizes an arithmetic formula expression against a list of fields.
 

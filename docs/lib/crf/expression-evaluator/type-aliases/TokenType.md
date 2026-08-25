@@ -6,7 +6,7 @@
 
 # Type Alias: TokenType
 
-> **TokenType** = `"NUMBER"` \| `"IDENTIFIER"` \| `"OP"` \| `"LPAREN"` \| `"RPAREN"` \| `"COMMA"`
+> **TokenType** = `"NUMBER"` \| `"IDENTIFIER"` \| `"OP"` \| `"LPAREN"` \| `"RPAREN"` \| `"COMMA"` \| `"REL_OP"` \| `"LOG_OP"` \| `"STRING"`
 
 Defined in: [lib/crf/expression-evaluator.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/crf/expression-evaluator.ts#L22)
 

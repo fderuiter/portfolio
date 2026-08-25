@@ -6,7 +6,7 @@
 
 # Interface: FormAuditReport
 
-Defined in: [lib/crf/study-auditor.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L65)
+Defined in: [lib/crf/study-auditor.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L66)
 
 Single form audit report.
 
@@ -16,7 +16,7 @@ Single form audit report.
 
 > **diagnostics**: [`AuditDiagnostic`](AuditDiagnostic.md)[]
 
-Defined in: [lib/crf/study-auditor.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L70)
+Defined in: [lib/crf/study-auditor.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L71)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [lib/crf/study-auditor.ts:70](https://github.com/fderuiter/portfolio
 
 > **formId**: `string`
 
-Defined in: [lib/crf/study-auditor.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L66)
+Defined in: [lib/crf/study-auditor.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L67)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [lib/crf/study-auditor.ts:66](https://github.com/fderuiter/portfolio
 
 > **formName**: `string`
 
-Defined in: [lib/crf/study-auditor.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L67)
+Defined in: [lib/crf/study-auditor.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L68)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [lib/crf/study-auditor.ts:67](https://github.com/fderuiter/portfolio
 
 > **health**: [`FormHealthMetrics`](FormHealthMetrics.md)
 
-Defined in: [lib/crf/study-auditor.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L69)
+Defined in: [lib/crf/study-auditor.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L70)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: [lib/crf/study-auditor.ts:69](https://github.com/fderuiter/portfolio
 
 > **isCompliant**: `boolean`
 
-Defined in: [lib/crf/study-auditor.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L68)
+Defined in: [lib/crf/study-auditor.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L69)

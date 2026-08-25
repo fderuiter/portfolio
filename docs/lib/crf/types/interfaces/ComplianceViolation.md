@@ -20,7 +20,7 @@ Defined in: [lib/crf/types.ts:322](https://github.com/fderuiter/portfolio/blob/m
 
 ### autoFixType?
 
-> `optional` **autoFixType?**: `"truncate_variable"` \| `"add_core_variable"` \| `"assign_nci_codelist"` \| `"fix_date_format"` \| `"assign_visit_form"`
+> `optional` **autoFixType?**: `"truncate_variable"` \| `"add_core_variable"` \| `"assign_nci_codelist"` \| `"fix_date_format"` \| `"assign_visit_form"` \| `"prune_invalid_field_reference"`
 
 Defined in: [lib/crf/types.ts:323](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L323)
 

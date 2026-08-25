@@ -103,14 +103,73 @@ export function tokenizeWithSpans(input: string): HighlightToken[] {
       continue;
     }
 
-    if (ch === "+" || ch === "-" || ch === "*" || ch === "/" || ch === "%" || ch === "^") {
+    // String literals: "..." or '...'
+    if (ch === '"' || ch === "'") {
+      const quote = ch;
+      i++;
+      let strVal = "";
+      while (i < input.length && input[i] !== quote) {
+        if (input[i] === "\\" && i + 1 < input.length) {
+          i++;
+        }
+        strVal += input[i];
+        i++;
+      }
+      if (i < input.length && input[i] === quote) {
+        i++;
+      }
+      rawTokens.push({ type: "STRING", value: strVal, start, end: i });
+      continue;
+    }
+
+    // Two-character relational or logical operators
+    if (i + 1 < input.length) {
+      const two = input.substring(i, i + 2);
+      if (["==", "!=", "<=", ">=", "<>", "&&", "||"].includes(two)) {
+        const isLog = ["&&", "||"].includes(two);
+        rawTokens.push({
+          type: isLog ? "LOG_OP" : "REL_OP",
+          value: two,
+          start,
+          end: i + 2,
+        });
+        i += 2;
+        continue;
+      }
+    }
+
+    // Single-character relational or logical operators
+    if (["=", ">", "<", "!"].includes(ch)) {
+      const isLog = ch === "!";
+      rawTokens.push({
+        type: isLog ? "LOG_OP" : "REL_OP",
+        value: ch,
+        start,
+        end: i + 1,
+      });
+      i++;
+      continue;
+    }
+
+    // Arithmetic operators
+    if (
+      ch === "+" ||
+      ch === "-" ||
+      ch === "*" ||
+      ch === "/" ||
+      ch === "%" ||
+      ch === "^"
+    ) {
       rawTokens.push({ type: "OP", value: ch, start, end: start + 1 });
       i++;
       continue;
     }
 
     // Numbers (integers or decimals)
-    if (/[0-9]/.test(ch) || (ch === "." && i + 1 < input.length && /[0-9]/.test(input[i + 1]))) {
+    if (
+      /[0-9]/.test(ch) ||
+      (ch === "." && i + 1 < input.length && /[0-9]/.test(input[i + 1]))
+    ) {
       let numStr = "";
       while (i < input.length && (/[0-9]/.test(input[i]) || input[i] === ".")) {
         numStr += input[i];
@@ -120,12 +179,41 @@ export function tokenizeWithSpans(input: string): HighlightToken[] {
       continue;
     }
 
-    // Identifiers or function names
+    // Identifiers, domain-qualified variables (e.g. DM.AGE), keywords, or functions
     if (/[a-zA-Z_]/.test(ch)) {
       let idStr = "";
-      while (i < input.length && /[a-zA-Z0-9_]/.test(input[i])) {
+      while (i < input.length && /[a-zA-Z0-9_.]/.test(input[i])) {
         idStr += input[i];
         i++;
+      }
+
+      if (idStr.endsWith(".") && !idStr.includes("..")) {
+        idStr = idStr.slice(0, -1);
+        i--;
+      }
+
+      const upper = idStr.toUpperCase();
+
+      // Logical operator keywords
+      if (upper === "AND" || upper === "OR" || upper === "NOT") {
+        rawTokens.push({
+          type: "LOG_OP",
+          value: idStr,
+          start,
+          end: start + idStr.length,
+        });
+        continue;
+      }
+
+      // Relational operator keywords
+      if (upper === "IN" || upper === "CONTAINS") {
+        rawTokens.push({
+          type: "REL_OP",
+          value: idStr,
+          start,
+          end: start + idStr.length,
+        });
+        continue;
       }
 
       let lookAhead = i;
@@ -136,13 +224,15 @@ export function tokenizeWithSpans(input: string): HighlightToken[] {
       const isFunc =
         lookAhead < input.length &&
         input[lookAhead] === "(" &&
-        KNOWN_MATH_FUNCTIONS.has(idStr.toLowerCase());
+        (KNOWN_MATH_FUNCTIONS.has(idStr.toLowerCase()) ||
+          upper === "IS_EMPTY" ||
+          upper === "IS_NOT_EMPTY");
 
       rawTokens.push({
         type: isFunc ? "FUNCTION" : "IDENTIFIER",
         value: idStr,
         start,
-        end: i,
+        end: start + idStr.length,
       });
       continue;
     }
@@ -201,7 +291,8 @@ export function lintFormula(
       diagnostics: [
         {
           severity: "info",
-          message: "Formula is empty. Enter an arithmetic expression or choose a clinical preset.",
+          message:
+            "Formula is empty. Enter an arithmetic expression or choose a clinical preset.",
           start: 0,
           end: 0,
           code: "EMPTY_FORMULA",
@@ -222,7 +313,18 @@ export function lintFormula(
   fields.forEach((f) => {
     fieldLookup.set(f.id.toLowerCase(), f);
     fieldLookup.set(f.variableName.toLowerCase(), f);
+    if (f.cdashMetadata?.domain) {
+      fieldLookup.set(
+        `${f.cdashMetadata.domain}.${f.variableName}`.toLowerCase(),
+        f
+      );
+      fieldLookup.set(`${f.cdashMetadata.domain}.${f.id}`.toLowerCase(), f);
+    }
   });
+
+  const hasRelOrLog = tokens.some(
+    (t) => t.type === "REL_OP" || t.type === "LOG_OP" || t.type === "STRING"
+  );
 
   for (let idx = 0; idx < tokens.length; idx++) {
     const token = tokens[idx];
@@ -266,7 +368,8 @@ export function lintFormula(
         unmatchedBracketIndices.push(token.start);
         diagnostics.push({
           severity: "error",
-          message: "Unexpected closing parenthesis ')' with no matching opening '('",
+          message:
+            "Unexpected closing parenthesis ')' with no matching opening '('",
           start: token.start,
           end: token.end,
           code: "UNMATCHED_RPAREN",
@@ -274,11 +377,19 @@ export function lintFormula(
       }
     }
 
-    if (token.type === "OP") {
+    if (
+      token.type === "OP" ||
+      token.type === "REL_OP" ||
+      token.type === "LOG_OP"
+    ) {
       if (
         nextToken &&
-        nextToken.type === "OP" &&
-        nextToken.value !== "-"
+        (nextToken.type === "OP" ||
+          nextToken.type === "REL_OP" ||
+          nextToken.type === "LOG_OP") &&
+        nextToken.value !== "-" &&
+        nextToken.value.toUpperCase() !== "NOT" &&
+        nextToken.value !== "!"
       ) {
         diagnostics.push({
           severity: "error",
@@ -289,7 +400,12 @@ export function lintFormula(
         });
       }
 
-      if (token.value === "/" && nextToken && nextToken.type === "NUMBER" && parseFloat(nextToken.value) === 0) {
+      if (
+        token.value === "/" &&
+        nextToken &&
+        nextToken.type === "NUMBER" &&
+        parseFloat(nextToken.value) === 0
+      ) {
         diagnostics.push({
           severity: "error",
           message: "Static division by zero (/ 0)",
@@ -302,12 +418,19 @@ export function lintFormula(
 
     if (token.type === "IDENTIFIER") {
       const varKey = token.value.toLowerCase();
-      const matchedField = fieldLookup.get(varKey);
+      let matchedField = fieldLookup.get(varKey);
+
+      if (!matchedField && token.value.includes(".")) {
+        const parts = token.value.split(".");
+        const subKey = parts[parts.length - 1].toLowerCase();
+        matchedField = fieldLookup.get(subKey);
+      }
 
       if (
         currentFieldId &&
         (varKey === currentFieldId.toLowerCase() ||
-          (matchedField && matchedField.id.toLowerCase() === currentFieldId.toLowerCase()))
+          (matchedField &&
+            matchedField.id.toLowerCase() === currentFieldId.toLowerCase()))
       ) {
         diagnostics.push({
           severity: "error",
@@ -351,7 +474,7 @@ export function lintFormula(
           isNumeric,
         });
 
-        if (!isNumeric) {
+        if (!isNumeric && !hasRelOrLog) {
           diagnostics.push({
             severity: "warning",
             message: `Field "${matchedField.label}" (${matchedField.variableName}) has non-numeric type "${matchedField.dataType}". Expected number, integer, or calculated.`,
@@ -415,7 +538,14 @@ export function lintFormula(
               end: tokens[endIdx]?.end ?? token.end,
               code: "INVALID_ARITY",
             });
-          } else if ((fnName === "abs" || fnName === "floor" || fnName === "ceil" || fnName === "exp" || fnName === "log") && argCount !== 1) {
+          } else if (
+            (fnName === "abs" ||
+              fnName === "floor" ||
+              fnName === "ceil" ||
+              fnName === "exp" ||
+              fnName === "log") &&
+            argCount !== 1
+          ) {
             diagnostics.push({
               severity: "error",
               message: `Function "${fnName}(x)" expects exactly 1 argument, but received ${argCount}`,
@@ -430,7 +560,13 @@ export function lintFormula(
   }
 
   const lastToken = tokens[tokens.length - 1];
-  if (lastToken && (lastToken.type === "OP" || lastToken.type === "COMMA")) {
+  if (
+    lastToken &&
+    (lastToken.type === "OP" ||
+      lastToken.type === "REL_OP" ||
+      lastToken.type === "LOG_OP" ||
+      lastToken.type === "COMMA")
+  ) {
     diagnostics.push({
       severity: "error",
       message: `Expression ends unexpectedly with trailing "${lastToken.value}"`,

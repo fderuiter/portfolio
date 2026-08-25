@@ -19,7 +19,16 @@ export function isMissingOrNullFlavor(val: unknown): boolean {
  * Tokenizer & Safe Recursive Descent Parser for Clinical Expressions
  * Avoids any use of `eval()` or `Function()` constructor.
  */
-export type TokenType = "NUMBER" | "IDENTIFIER" | "OP" | "LPAREN" | "RPAREN" | "COMMA";
+export type TokenType =
+  | "NUMBER"
+  | "IDENTIFIER"
+  | "OP"
+  | "LPAREN"
+  | "RPAREN"
+  | "COMMA"
+  | "REL_OP"
+  | "LOG_OP"
+  | "STRING";
 
 export interface Token {
   type: TokenType;
@@ -59,14 +68,24 @@ function tokenize(input: string): Token[] {
       continue;
     }
 
-    if (ch === "+" || ch === "-" || ch === "*" || ch === "/" || ch === "%" || ch === "^") {
+    if (
+      ch === "+" ||
+      ch === "-" ||
+      ch === "*" ||
+      ch === "/" ||
+      ch === "%" ||
+      ch === "^"
+    ) {
       tokens.push({ type: "OP", value: ch });
       i++;
       continue;
     }
 
     // Numbers (integers or decimals)
-    if (/[0-9]/.test(ch) || (ch === "." && i + 1 < s.length && /[0-9]/.test(s[i + 1]))) {
+    if (
+      /[0-9]/.test(ch) ||
+      (ch === "." && i + 1 < s.length && /[0-9]/.test(s[i + 1]))
+    ) {
       let numStr = "";
       while (i < s.length && (/[0-9]/.test(s[i]) || s[i] === ".")) {
         numStr += s[i];
@@ -115,7 +134,9 @@ export class ExpressionEvaluator {
       throw new Error("Unexpected end of expression");
     }
     if (expectedType && token.type !== expectedType) {
-      throw new Error(`Expected token ${expectedType} but got ${token.type} (${token.value})`);
+      throw new Error(
+        `Expected token ${expectedType} but got ${token.type} (${token.value})`
+      );
     }
     return token;
   }
@@ -143,7 +164,11 @@ export class ExpressionEvaluator {
 
     while (this.pos < this.tokens.length) {
       const next = this.peek();
-      if (next && next.type === "OP" && (next.value === "+" || next.value === "-")) {
+      if (
+        next &&
+        next.type === "OP" &&
+        (next.value === "+" || next.value === "-")
+      ) {
         const op = this.consume().value;
         const right = this.parseMul();
         if (left === null || right === null) {
@@ -165,7 +190,11 @@ export class ExpressionEvaluator {
 
     while (this.pos < this.tokens.length) {
       const next = this.peek();
-      if (next && next.type === "OP" && (next.value === "*" || next.value === "/" || next.value === "%")) {
+      if (
+        next &&
+        next.type === "OP" &&
+        (next.value === "*" || next.value === "/" || next.value === "%")
+      ) {
         const op = this.consume().value;
         const right = this.parsePow();
         if (left === null || right === null) {
@@ -329,7 +358,8 @@ export function evaluateFormula(
     if (isMissingOrNullFlavor(rawVal)) {
       context[k.toLowerCase()] = null;
     } else {
-      const num = typeof rawVal === "number" ? rawVal : parseFloat(String(rawVal));
+      const num =
+        typeof rawVal === "number" ? rawVal : parseFloat(String(rawVal));
       context[k.toLowerCase()] = Number.isFinite(num) ? num : null;
     }
   });
@@ -346,7 +376,8 @@ export function evaluateFormula(
     const varKey = f.variableName.toLowerCase();
 
     if (!isMissingOrNullFlavor(rawVal)) {
-      const num = typeof rawVal === "number" ? rawVal : parseFloat(String(rawVal));
+      const num =
+        typeof rawVal === "number" ? rawVal : parseFloat(String(rawVal));
       const safeNum = Number.isFinite(num) ? num : null;
       context[idKey] = safeNum;
       context[varKey] = safeNum;
@@ -368,7 +399,10 @@ export function evaluateFormula(
 /**
  * Calculates Body Mass Index (BMI) in kg/m^2.
  */
-export function calculateBMI(weightKg: number, heightCm: number): number | null {
+export function calculateBMI(
+  weightKg: number,
+  heightCm: number
+): number | null {
   if (heightCm <= 0) return null;
   const heightM = heightCm / 100;
   return Math.round((weightKg / (heightM * heightM)) * 10) / 10;
@@ -377,7 +411,10 @@ export function calculateBMI(weightKg: number, heightCm: number): number | null 
 /**
  * Calculates Mosteller Body Surface Area (BSA) in m^2.
  */
-export function calculateMostellerBSA(heightCm: number, weightKg: number): number | null {
+export function calculateMostellerBSA(
+  heightCm: number,
+  weightKg: number
+): number | null {
   if (heightCm <= 0 || weightKg < 0) return null;
   return Math.round(Math.sqrt((heightCm * weightKg) / 3600) * 100) / 100;
 }
@@ -385,7 +422,10 @@ export function calculateMostellerBSA(heightCm: number, weightKg: number): numbe
 /**
  * Calculates DuBois & DuBois Body Surface Area (BSA) in m^2.
  */
-export function calculateDuboisBSA(heightCm: number, weightKg: number): number | null {
+export function calculateDuboisBSA(
+  heightCm: number,
+  weightKg: number
+): number | null {
   if (heightCm <= 0 || weightKg < 0) return null;
   const bsa = 0.007184 * Math.pow(heightCm, 0.725) * Math.pow(weightKg, 0.425);
   return Math.round(bsa * 100) / 100;
@@ -417,7 +457,10 @@ export function calculateBazettQTc(qtMs: number, rrSec: number): number | null {
 /**
  * Calculates Fridericia Corrected QT interval (QTcF) in milliseconds.
  */
-export function calculateFridericiaQTc(qtMs: number, rrSec: number): number | null {
+export function calculateFridericiaQTc(
+  qtMs: number,
+  rrSec: number
+): number | null {
   if (rrSec <= 0) return null;
   return Math.round(qtMs / Math.cbrt(rrSec));
 }
@@ -425,7 +468,10 @@ export function calculateFridericiaQTc(qtMs: number, rrSec: number): number | nu
 /**
  * Calculates RECIST 1.1 Sum of Longest Diameters percentage change from baseline.
  */
-export function calculateRecistSldChange(baselineSldMm: number, currentSldMm: number): number | null {
+export function calculateRecistSldChange(
+  baselineSldMm: number,
+  currentSldMm: number
+): number | null {
   if (baselineSldMm <= 0) return null;
   const diff = currentSldMm - baselineSldMm;
   return Math.round((diff / baselineSldMm) * 1000) / 10;
@@ -448,32 +494,49 @@ export function evaluateCondition(
   let actualVal: string | number | boolean | null | undefined;
   if (condition.crossVisitId) {
     const crossKey = `${condition.crossVisitId}_${condition.fieldId}`;
-    const crossVarKey = targetField ? `${condition.crossVisitId}_${targetField.id}` : crossKey;
-    const crossNameKey = targetField ? `${condition.crossVisitId}_${targetField.variableName}` : crossKey;
+    const crossVarKey = targetField
+      ? `${condition.crossVisitId}_${targetField.id}`
+      : crossKey;
+    const crossNameKey = targetField
+      ? `${condition.crossVisitId}_${targetField.variableName}`
+      : crossKey;
     actualVal =
       fieldValues[crossKey] ??
       fieldValues[crossVarKey] ??
       fieldValues[crossNameKey] ??
       fieldValues[condition.fieldId] ??
-      (targetField ? (fieldValues[targetField.id] ?? fieldValues[targetField.variableName]) : undefined);
+      (targetField
+        ? (fieldValues[targetField.id] ?? fieldValues[targetField.variableName])
+        : undefined);
   } else if (visitContext) {
     const scopedKey = `${visitContext}_${condition.fieldId}`;
-    const scopedVarKey = targetField ? `${visitContext}_${targetField.id}` : scopedKey;
-    const scopedNameKey = targetField ? `${visitContext}_${targetField.variableName}` : scopedKey;
+    const scopedVarKey = targetField
+      ? `${visitContext}_${targetField.id}`
+      : scopedKey;
+    const scopedNameKey = targetField
+      ? `${visitContext}_${targetField.variableName}`
+      : scopedKey;
     actualVal =
       fieldValues[scopedKey] ??
       fieldValues[scopedVarKey] ??
       fieldValues[scopedNameKey] ??
       fieldValues[condition.fieldId] ??
-      (targetField ? (fieldValues[targetField.id] ?? fieldValues[targetField.variableName]) : undefined);
+      (targetField
+        ? (fieldValues[targetField.id] ?? fieldValues[targetField.variableName])
+        : undefined);
   } else {
     actualVal =
       fieldValues[condition.fieldId] ??
-      (targetField ? (fieldValues[targetField.id] ?? fieldValues[targetField.variableName]) : undefined);
+      (targetField
+        ? (fieldValues[targetField.id] ?? fieldValues[targetField.variableName])
+        : undefined);
   }
 
   // Fallback to field's active nullFlavorValue if actualVal is missing
-  if ((actualVal === undefined || actualVal === null || actualVal === "") && targetField?.nullFlavorValue) {
+  if (
+    (actualVal === undefined || actualVal === null || actualVal === "") &&
+    targetField?.nullFlavorValue
+  ) {
     actualVal = targetField.nullFlavorValue;
   }
 
@@ -488,46 +551,90 @@ export function evaluateCondition(
       const condMissing = isMissingOrNullFlavor(condition.value);
       if (actMissing && condMissing) return true;
       if (actMissing || condMissing) return false;
-      return String(actualVal).toLowerCase() === String(condition.value).toLowerCase();
+      return (
+        String(actualVal).toLowerCase() ===
+        String(condition.value).toLowerCase()
+      );
     }
     case "neq": {
       const condMissing = isMissingOrNullFlavor(condition.value);
       if (actMissing && condMissing) return false;
       if (actMissing || condMissing) return true;
-      return String(actualVal).toLowerCase() !== String(condition.value).toLowerCase();
+      return (
+        String(actualVal).toLowerCase() !==
+        String(condition.value).toLowerCase()
+      );
     }
     case "gt": {
       if (actMissing || isMissingOrNullFlavor(condition.value)) return false;
-      const numAct = typeof actualVal === "number" ? actualVal : parseFloat(String(actualVal));
-      const numCond = typeof condition.value === "number" ? condition.value : parseFloat(String(condition.value));
-      return Number.isFinite(numAct) && Number.isFinite(numCond) && numAct > numCond;
+      const numAct =
+        typeof actualVal === "number"
+          ? actualVal
+          : parseFloat(String(actualVal));
+      const numCond =
+        typeof condition.value === "number"
+          ? condition.value
+          : parseFloat(String(condition.value));
+      return (
+        Number.isFinite(numAct) && Number.isFinite(numCond) && numAct > numCond
+      );
     }
     case "gte": {
       if (actMissing || isMissingOrNullFlavor(condition.value)) return false;
-      const numAct = typeof actualVal === "number" ? actualVal : parseFloat(String(actualVal));
-      const numCond = typeof condition.value === "number" ? condition.value : parseFloat(String(condition.value));
-      return Number.isFinite(numAct) && Number.isFinite(numCond) && numAct >= numCond;
+      const numAct =
+        typeof actualVal === "number"
+          ? actualVal
+          : parseFloat(String(actualVal));
+      const numCond =
+        typeof condition.value === "number"
+          ? condition.value
+          : parseFloat(String(condition.value));
+      return (
+        Number.isFinite(numAct) && Number.isFinite(numCond) && numAct >= numCond
+      );
     }
     case "lt": {
       if (actMissing || isMissingOrNullFlavor(condition.value)) return false;
-      const numAct = typeof actualVal === "number" ? actualVal : parseFloat(String(actualVal));
-      const numCond = typeof condition.value === "number" ? condition.value : parseFloat(String(condition.value));
-      return Number.isFinite(numAct) && Number.isFinite(numCond) && numAct < numCond;
+      const numAct =
+        typeof actualVal === "number"
+          ? actualVal
+          : parseFloat(String(actualVal));
+      const numCond =
+        typeof condition.value === "number"
+          ? condition.value
+          : parseFloat(String(condition.value));
+      return (
+        Number.isFinite(numAct) && Number.isFinite(numCond) && numAct < numCond
+      );
     }
     case "lte": {
       if (actMissing || isMissingOrNullFlavor(condition.value)) return false;
-      const numAct = typeof actualVal === "number" ? actualVal : parseFloat(String(actualVal));
-      const numCond = typeof condition.value === "number" ? condition.value : parseFloat(String(condition.value));
-      return Number.isFinite(numAct) && Number.isFinite(numCond) && numAct <= numCond;
+      const numAct =
+        typeof actualVal === "number"
+          ? actualVal
+          : parseFloat(String(actualVal));
+      const numCond =
+        typeof condition.value === "number"
+          ? condition.value
+          : parseFloat(String(condition.value));
+      return (
+        Number.isFinite(numAct) && Number.isFinite(numCond) && numAct <= numCond
+      );
     }
     case "contains": {
       if (actMissing || isMissingOrNullFlavor(condition.value)) return false;
-      return String(actualVal).toLowerCase().includes(String(condition.value).toLowerCase());
+      return String(actualVal)
+        .toLowerCase()
+        .includes(String(condition.value).toLowerCase());
     }
     case "in": {
       if (actMissing) return false;
       if (Array.isArray(condition.value)) {
-        return condition.value.some((v) => !isMissingOrNullFlavor(v) && String(v).toLowerCase() === String(actualVal).toLowerCase());
+        return condition.value.some(
+          (v) =>
+            !isMissingOrNullFlavor(v) &&
+            String(v).toLowerCase() === String(actualVal).toLowerCase()
+        );
       }
       return false;
     }
@@ -548,8 +655,12 @@ export function evaluateRule(
   if (!rule.conditions || rule.conditions.length === 0) return true;
 
   if (rule.logicalOperator === "OR") {
-    return rule.conditions.some((cond) => evaluateCondition(cond, fieldValues, fieldsList, visitContext));
+    return rule.conditions.some((cond) =>
+      evaluateCondition(cond, fieldValues, fieldsList, visitContext)
+    );
   } else {
-    return rule.conditions.every((cond) => evaluateCondition(cond, fieldValues, fieldsList, visitContext));
+    return rule.conditions.every((cond) =>
+      evaluateCondition(cond, fieldValues, fieldsList, visitContext)
+    );
   }
 }

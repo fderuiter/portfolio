@@ -22,7 +22,7 @@ Defined in: [lib/crf/study-auditor.ts:37](https://github.com/fderuiter/portfolio
 
 ### autoFixType?
 
-> `optional` **autoFixType?**: `"truncate_variable"` \| `"add_core_variable"` \| `"assign_nci_codelist"` \| `"fix_date_format"` \| `"assign_visit_form"`
+> `optional` **autoFixType?**: `"truncate_variable"` \| `"add_core_variable"` \| `"assign_nci_codelist"` \| `"fix_date_format"` \| `"assign_visit_form"` \| `"prune_invalid_field_reference"`
 
 Defined in: [lib/crf/study-auditor.ts:38](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L38)
 
@@ -96,7 +96,7 @@ Defined in: [lib/crf/study-auditor.ts:29](https://github.com/fderuiter/portfolio
 
 > `optional` **suggestedFix?**: `string`
 
-Defined in: [lib/crf/study-auditor.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L44)
+Defined in: [lib/crf/study-auditor.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L45)
 
 ***
 
