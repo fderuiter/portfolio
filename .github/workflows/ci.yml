@@ -66,6 +66,7 @@ jobs:
         run: npm run release:gate
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/portfolio_ci?schema=replay
+          RESEND_API_KEY: re_ci_dummy_key_for_pipeline_verification
 
       - name: Check Schema Drift
         run: |

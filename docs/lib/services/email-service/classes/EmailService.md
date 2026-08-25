@@ -27,7 +27,7 @@ bounce/complaint suppression list defenses, retry queueing, and webhook ingestio
 
 > `static` **handleWebhookEvent**(`event`): `Promise`\<\{ `handled`: `boolean`; `reason?`: `string`; `suppressed?`: `boolean`; \}\>
 
-Defined in: [lib/services/email-service.ts:416](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L416)
+Defined in: [lib/services/email-service.ts:419](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L419)
 
 Processes incoming Resend deliverability webhook event.
 
@@ -205,7 +205,7 @@ Resets the cached Resend client instance (primarily used for test isolation).
 
 > `static` **sendContactInquiry**(`submission`, `connectionHash?`): `Promise`\<[`ContactDispatchResult`](../interfaces/ContactDispatchResult.md)\>
 
-Defined in: [lib/services/email-service.ts:559](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L559)
+Defined in: [lib/services/email-service.ts:562](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L562)
 
 Dispatches an inbound visitor inquiry:
 1. Delivers admin notification to CONTACT_NOTIFICATION_EMAIL
@@ -257,7 +257,7 @@ Dispatches an inbound visitor inquiry:
 
 > `static` **sendFeedbackNotification**(`payload`): `Promise`\<[`EmailDispatchResult`](../interfaces/EmailDispatchResult.md)\>
 
-Defined in: [lib/services/email-service.ts:618](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L618)
+Defined in: [lib/services/email-service.ts:621](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L621)
 
 Dispatches an alert email to the admin when visitor feedback is submitted on a case study.
 
@@ -277,7 +277,7 @@ Dispatches an alert email to the admin when visitor feedback is submitted on a c
 
 > `static` **sendRawEmail**(`options`): `Promise`\<[`EmailDispatchResult`](../interfaces/EmailDispatchResult.md)\>
 
-Defined in: [lib/services/email-service.ts:444](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L444)
+Defined in: [lib/services/email-service.ts:447](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L447)
 
 Core dispatcher that transmits an email via Resend SDK or executes simulated delivery.
 
@@ -297,7 +297,7 @@ Core dispatcher that transmits an email via Resend SDK or executes simulated del
 
 > `static` **subscribeNewsletter**(`email`, `connectionHash?`): `Promise`\<[`EmailDispatchResult`](../interfaces/EmailDispatchResult.md)\>
 
-Defined in: [lib/services/email-service.ts:644](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L644)
+Defined in: [lib/services/email-service.ts:647](https://github.com/fderuiter/portfolio/blob/main/lib/services/email-service.ts#L647)
 
 Dispatches a newsletter subscription workflow:
 1. Delivers welcome confirmation email to the subscriber

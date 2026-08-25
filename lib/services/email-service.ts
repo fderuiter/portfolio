@@ -315,15 +315,18 @@ export class EmailService {
       }
 
       const apiKey = getEnv().RESEND_API_KEY || env.RESEND_API_KEY;
-      const isVitest = getEnv().VITEST === "1" || env.VITEST === "1";
 
-      // If simulated / test environment without live Resend client
-      if (!client || (isVitest && !apiKey)) {
+      // If missing email service credentials or no active Resend client, mark queue item as FAILED
+      if (!client || !apiKey || apiKey.trim() === "") {
         await prisma.outboundEmailQueue.update({
           where: { id: item.id },
-          data: { status: "DELIVERED", updatedAt: new Date() },
+          data: {
+            status: "FAILED",
+            lastError: "Missing email service credentials (RESEND_API_KEY)",
+            updatedAt: new Date(),
+          },
         });
-        succeeded++;
+        failed++;
         continue;
       }
 

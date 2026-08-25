@@ -20,70 +20,127 @@ interface MockQueueItem {
 }
 
 const mockQueueStore = new Map<string, MockQueueItem>();
-const mockSuppressionStore = new Map<string, { email: string; reason: string }>();
+const mockSuppressionStore = new Map<
+  string,
+  { email: string; reason: string }
+>();
 
 vi.mock("@/lib/db", () => ({
   prisma: {
     suppressionList: {
-      findUnique: vi.fn().mockImplementation(async ({ where }: { where: { email: string } }) => {
-        const item = mockSuppressionStore.get(where.email.toLowerCase().trim());
-        return item ? { ...item, id: "sup_1", createdAt: new Date() } : null;
-      }),
-      upsert: vi.fn().mockImplementation(async ({ where, create }: { where: { email: string }; create: { email: string; reason: string } }) => {
-        mockSuppressionStore.set(where.email.toLowerCase().trim(), {
-          email: where.email.toLowerCase().trim(),
-          reason: create.reason,
-        });
-        return { id: "sup_1", email: where.email, reason: create.reason, createdAt: new Date() };
-      }),
+      findUnique: vi
+        .fn()
+        .mockImplementation(async ({ where }: { where: { email: string } }) => {
+          const item = mockSuppressionStore.get(
+            where.email.toLowerCase().trim()
+          );
+          return item ? { ...item, id: "sup_1", createdAt: new Date() } : null;
+        }),
+      upsert: vi
+        .fn()
+        .mockImplementation(
+          async ({
+            where,
+            create,
+          }: {
+            where: { email: string };
+            create: { email: string; reason: string };
+          }) => {
+            mockSuppressionStore.set(where.email.toLowerCase().trim(), {
+              email: where.email.toLowerCase().trim(),
+              reason: create.reason,
+            });
+            return {
+              id: "sup_1",
+              email: where.email,
+              reason: create.reason,
+              createdAt: new Date(),
+            };
+          }
+        ),
     },
     outboundEmailQueue: {
-      create: vi.fn().mockImplementation(async ({ data }: { data: Record<string, unknown> }) => {
-        const id = `queue_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-        const record: MockQueueItem = {
-          id,
-          to: data.to as string,
-          from: data.from as string,
-          replyTo: (data.replyTo as string) || null,
-          subject: data.subject as string,
-          html: data.html as string,
-          text: (data.text as string) || null,
-          tags: data.tags || null,
-          attempts: (data.attempts as number) ?? 1,
-          status: (data.status as string) ?? "RETRYING",
-          nextRetryAt: (data.nextRetryAt as Date) ?? new Date(),
-          lastError: (data.lastError as string) ?? null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-        mockQueueStore.set(id, record);
-        return record;
-      }),
-      findMany: vi.fn().mockImplementation(async ({ where, take }: { where?: { status?: { in?: string[] }; nextRetryAt?: { lte?: Date } }; take?: number }) => {
-        let results = Array.from(mockQueueStore.values());
-        if (where?.status?.in) {
-          results = results.filter((item) => where.status?.in?.includes(item.status));
-        }
-        if (where?.nextRetryAt?.lte) {
-          const lteTime = where.nextRetryAt.lte instanceof Date ? where.nextRetryAt.lte.getTime() : new Date(where.nextRetryAt.lte).getTime();
-          results = results.filter((item) => item.nextRetryAt.getTime() <= lteTime);
-        }
-        if (take) {
-          results = results.slice(0, take);
-        }
-        return results;
-      }),
-      update: vi.fn().mockImplementation(async ({ where, data }: { where: { id: string }; data: Partial<MockQueueItem> }) => {
-        const existing = mockQueueStore.get(where.id);
-        if (!existing) throw new Error(`Record ${where.id} not found in mock queue`);
-        const updated: MockQueueItem = {
-          ...existing,
-          ...data,
-          updatedAt: new Date(),
-        };
-        mockQueueStore.set(where.id, updated);
-        return updated;
-      }),
+      create: vi
+        .fn()
+        .mockImplementation(
+          async ({ data }: { data: Record<string, unknown> }) => {
+            const id = `queue_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+            const record: MockQueueItem = {
+              id,
+              to: data.to as string,
+              from: data.from as string,
+              replyTo: (data.replyTo as string) || null,
+              subject: data.subject as string,
+              html: data.html as string,
+              text: (data.text as string) || null,
+              tags: data.tags || null,
+              attempts: (data.attempts as number) ?? 1,
+              status: (data.status as string) ?? "RETRYING",
+              nextRetryAt: (data.nextRetryAt as Date) ?? new Date(),
+              lastError: (data.lastError as string) ?? null,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            };
+            mockQueueStore.set(id, record);
+            return record;
+          }
+        ),
+      findMany: vi
+        .fn()
+        .mockImplementation(
+          async ({
+            where,
+            take,
+          }: {
+            where?: {
+              status?: { in?: string[] };
+              nextRetryAt?: { lte?: Date };
+            };
+            take?: number;
+          }) => {
+            let results = Array.from(mockQueueStore.values());
+            if (where?.status?.in) {
+              results = results.filter((item) =>
+                where.status?.in?.includes(item.status)
+              );
+            }
+            if (where?.nextRetryAt?.lte) {
+              const lteTime =
+                where.nextRetryAt.lte instanceof Date
+                  ? where.nextRetryAt.lte.getTime()
+                  : new Date(where.nextRetryAt.lte).getTime();
+              results = results.filter(
+                (item) => item.nextRetryAt.getTime() <= lteTime
+              );
+            }
+            if (take) {
+              results = results.slice(0, take);
+            }
+            return results;
+          }
+        ),
+      update: vi
+        .fn()
+        .mockImplementation(
+          async ({
+            where,
+            data,
+          }: {
+            where: { id: string };
+            data: Partial<MockQueueItem>;
+          }) => {
+            const existing = mockQueueStore.get(where.id);
+            if (!existing)
+              throw new Error(`Record ${where.id} not found in mock queue`);
+            const updated: MockQueueItem = {
+              ...existing,
+              ...data,
+              updatedAt: new Date(),
+            };
+            mockQueueStore.set(where.id, updated);
+            return updated;
+          }
+        ),
     },
   },
 }));
@@ -119,7 +176,10 @@ describe("Outbound Email Queue & Resilient Backoff Retry Engine (#546)", () => {
     it("automatically persists email to OutboundEmailQueue when Resend returns 429 rate limit", async () => {
       mockSendFn.mockResolvedValueOnce({
         data: null,
-        error: { message: "Too many requests (429 rate limit exceeded)", name: "rate_limit_exceeded" },
+        error: {
+          message: "Too many requests (429 rate limit exceeded)",
+          name: "rate_limit_exceeded",
+        },
       });
 
       const options: RawEmailOptions = {
@@ -143,7 +203,9 @@ describe("Outbound Email Queue & Resilient Backoff Retry Engine (#546)", () => {
     });
 
     it("automatically persists email to OutboundEmailQueue when network dispatch throws transient error", async () => {
-      mockSendFn.mockRejectedValueOnce(new Error("fetch failed (ECONNRESET timeout)"));
+      mockSendFn.mockRejectedValueOnce(
+        new Error("fetch failed (ECONNRESET timeout)")
+      );
 
       const options: RawEmailOptions = {
         to: "transient@example.com",
@@ -202,7 +264,9 @@ describe("Outbound Email Queue & Resilient Backoff Retry Engine (#546)", () => {
         error: null,
       });
 
-      const summary = await EmailService.processRetryQueue({ now: new Date(Date.now() + 5000) });
+      const summary = await EmailService.processRetryQueue({
+        now: new Date(Date.now() + 5000),
+      });
 
       expect(summary.processed).toBe(1);
       expect(summary.succeeded).toBe(1);
@@ -282,6 +346,32 @@ describe("Outbound Email Queue & Resilient Backoff Retry Engine (#546)", () => {
       const updated = mockQueueStore.get("queue_suppressed_target");
       expect(updated?.status).toBe("FAILED");
       expect(updated?.lastError).toContain("suppression list");
+    });
+
+    it("marks queued item FAILED instead of DELIVERED when email service credentials are missing", async () => {
+      delete process.env.RESEND_API_KEY;
+
+      const queueId = await EmailService.queueOutboundEmail(
+        {
+          to: "uncredited@example.com",
+          subject: "Missing Credential Queue Test",
+          html: "<p>Body</p>",
+        },
+        undefined,
+        "Initial failure"
+      );
+
+      const summary = await EmailService.processRetryQueue({
+        now: new Date(Date.now() + 5000),
+      });
+
+      expect(summary.processed).toBe(1);
+      expect(summary.succeeded).toBe(0);
+      expect(summary.failed).toBe(1);
+
+      const updated = mockQueueStore.get(queueId);
+      expect(updated?.status).toBe("FAILED");
+      expect(updated?.lastError).toContain("Missing email service credentials");
     });
   });
 
