@@ -8,4 +8,4 @@
 
 > `const` **DUCKDEPLOY\_PLAYBACK\_OBJ**: [`CaseStudyPlayback`](../type-aliases/CaseStudyPlayback.md)
 
-Defined in: [lib/case-studies-data.ts:234](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L234)
+Defined in: [lib/case-studies-data.ts:221](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L221)

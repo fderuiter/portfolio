@@ -8,4 +8,4 @@
 
 > `const` **ARCADE\_GAMES\_METADATA**: [`ArcadeGameMetadata`](../interfaces/ArcadeGameMetadata.md)[]
 
-Defined in: [lib/arcade-data.ts:19](https://github.com/fderuiter/portfolio/blob/main/lib/arcade-data.ts#L19)
+Defined in: [lib/arcade-data.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/arcade-data.ts#L17)

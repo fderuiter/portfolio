@@ -8,4 +8,4 @@
 
 > **CaseStudyCommands** = `Record`\<`string`, [`CaseStudyCommandDefinition`](../interfaces/CaseStudyCommandDefinition.md)\>
 
-Defined in: [lib/case-studies-data.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L31)
+Defined in: [lib/case-studies-data.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L30)
