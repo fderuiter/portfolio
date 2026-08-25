@@ -6,17 +6,21 @@ import { validateConstructiveContent } from "@/lib/moderation";
  */
 export const TelemetryEventSchema = z.object({
   projectSlug: z.string().min(1, "projectSlug must be a non-empty string"),
-  eventType: z.enum([
-    "page_view",
-    "project_click",
-    "route_error",
-    "simulator_option_select",
-    "simulator_milestone_reached",
-    "simulator_schedule_click",
-    "simulator_report_copy",
-  ], {
-    message: "Allowed: 'page_view', 'project_click', 'route_error', 'simulator_option_select', 'simulator_milestone_reached', 'simulator_schedule_click', 'simulator_report_copy'",
-  }),
+  eventType: z.enum(
+    [
+      "page_view",
+      "project_click",
+      "route_error",
+      "simulator_option_select",
+      "simulator_milestone_reached",
+      "simulator_schedule_click",
+      "simulator_report_copy",
+    ],
+    {
+      message:
+        "Allowed: 'page_view', 'project_click', 'route_error', 'simulator_option_select', 'simulator_milestone_reached', 'simulator_schedule_click', 'simulator_report_copy'",
+    }
+  ),
 });
 
 /**
@@ -40,7 +44,12 @@ export const FallbackMemorySchema = z.object({
  * Schema for background sync cron query parameters
  */
 export const SyncParamsSchema = z.object({
-  batch: z.coerce.number().int().positive("Batch must be a positive integer").max(500, "Batch cannot exceed 500").default(50),
+  batch: z.coerce
+    .number()
+    .int()
+    .positive("Batch must be a positive integer")
+    .max(500, "Batch cannot exceed 500")
+    .default(50),
 });
 
 /**
@@ -64,12 +73,18 @@ export const CaseStudyListResponseSchema = z.array(CaseStudySummarySchema);
  */
 export const CaseStudySubmissionSchema = z
   .object({
-    title: z.string({ message: "Title is required" }).trim().min(1, "Title is required"),
+    title: z
+      .string({ message: "Title is required" })
+      .trim()
+      .min(1, "Title is required"),
     slug: z
       .string({ message: "Slug is required" })
       .trim()
       .min(1, "Slug is required")
-      .regex(/^[a-zA-Z0-9-_]+$/, "Slug must contain only alphanumeric characters, hyphens, and underscores"),
+      .regex(
+        /^[a-zA-Z0-9-_]+$/,
+        "Slug must contain only alphanumeric characters, hyphens, and underscores"
+      ),
     primary_language: z.string().trim().optional(),
     language: z.string().trim().optional(),
     editorial_content: z.string().trim().optional(),
@@ -78,10 +93,15 @@ export const CaseStudySubmissionSchema = z
     architectural_narrative: z.string().trim().optional(),
     narrative: z.string().trim().optional(),
     architectural_narrative_html: z.string().trim().optional(),
-    tags: z.union([
-      z.string().trim().min(1, "Tags are required"),
-      z.array(z.string().trim().min(1, "Tag cannot be empty")).min(1, "At least one tag is required"),
-    ], { message: "Tags are required" }),
+    tags: z.union(
+      [
+        z.string().trim().min(1, "Tags are required"),
+        z
+          .array(z.string().trim().min(1, "Tag cannot be empty"))
+          .min(1, "At least one tag is required"),
+      ],
+      { message: "Tags are required" }
+    ),
     github_url: z.string().trim().optional(),
   })
   .superRefine((data, ctx) => {
@@ -103,7 +123,10 @@ export const CaseStudySubmissionSchema = z
       });
     }
 
-    const arch = data.architectural_narrative || data.narrative || data.architectural_narrative_html;
+    const arch =
+      data.architectural_narrative ||
+      data.narrative ||
+      data.architectural_narrative_html;
     if (!arch) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -140,7 +163,9 @@ export const CaseStudySubmissionSchema = z
       if (!check.isValid) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: check.reason || "Architectural narrative violates community tone standards",
+          message:
+            check.reason ||
+            "Architectural narrative violates community tone standards",
           path: ["architectural_narrative"],
         });
       }
@@ -160,8 +185,13 @@ export const CaseStudySubmissionSchema = z
   })
   .transform((data) => {
     const lang = data.primary_language || data.language || "";
-    const ed = data.editorial_content || data.summary || data.summary_markdown || "";
-    const arch = data.architectural_narrative || data.narrative || data.architectural_narrative_html || "";
+    const ed =
+      data.editorial_content || data.summary || data.summary_markdown || "";
+    const arch =
+      data.architectural_narrative ||
+      data.narrative ||
+      data.architectural_narrative_html ||
+      "";
     const tagsStr = Array.isArray(data.tags) ? data.tags.join(", ") : data.tags;
 
     return {
@@ -178,45 +208,58 @@ export const CaseStudySubmissionSchema = z
 /**
  * Allowed reaction types
  */
-export const ALLOWED_REACTIONS = ["insightful", "mind_blowing", "actionable", "thorough"] as const;
+export const ALLOWED_REACTIONS = [
+  "insightful",
+  "mind_blowing",
+  "actionable",
+  "thorough",
+] as const;
 
 /**
  * Schema for Feedback POST payload validation
  */
-export const FeedbackSubmissionSchema = z.object({
-  caseStudySlug: z.string().min(1, "caseStudySlug must be a non-empty string"),
-  takeaways: z
-    .array(z.string().min(1, "Takeaway cannot be empty"))
-    .min(1, "At least one learning takeaway must be selected"),
-  comments: z
-    .string()
-    .min(3, "Comments must be at least 3 characters long")
-    .max(2000, "Comments cannot exceed 2000 characters"),
-}).superRefine((data, ctx) => {
-  if (data.comments) {
-    const commentsCheck = validateConstructiveContent(data.comments);
-    if (!commentsCheck.isValid) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: commentsCheck.reason || "Submission text violates community tone standards",
-        path: ["comments"],
-      });
-    }
-  }
-
-  if (Array.isArray(data.takeaways)) {
-    data.takeaways.forEach((takeaway, idx) => {
-      const takeawayCheck = validateConstructiveContent(takeaway);
-      if (!takeawayCheck.isValid) {
+export const FeedbackSubmissionSchema = z
+  .object({
+    caseStudySlug: z
+      .string()
+      .min(1, "caseStudySlug must be a non-empty string"),
+    takeaways: z
+      .array(z.string().min(1, "Takeaway cannot be empty"))
+      .min(1, "At least one learning takeaway must be selected"),
+    comments: z
+      .string()
+      .min(3, "Comments must be at least 3 characters long")
+      .max(2000, "Comments cannot exceed 2000 characters"),
+  })
+  .superRefine((data, ctx) => {
+    if (data.comments) {
+      const commentsCheck = validateConstructiveContent(data.comments);
+      if (!commentsCheck.isValid) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: takeawayCheck.reason || "Submission text violates community tone standards",
-          path: ["takeaways", idx],
+          message:
+            commentsCheck.reason ||
+            "Submission text violates community tone standards",
+          path: ["comments"],
         });
       }
-    });
-  }
-});
+    }
+
+    if (Array.isArray(data.takeaways)) {
+      data.takeaways.forEach((takeaway, idx) => {
+        const takeawayCheck = validateConstructiveContent(takeaway);
+        if (!takeawayCheck.isValid) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message:
+              takeawayCheck.reason ||
+              "Submission text violates community tone standards",
+            path: ["takeaways", idx],
+          });
+        }
+      });
+    }
+  });
 
 /**
  * Schema for Reaction POST payload validation
@@ -224,14 +267,21 @@ export const FeedbackSubmissionSchema = z.object({
 export const ReactionSubmissionSchema = z.object({
   caseStudySlug: z.string().min(1, "caseStudySlug must be a non-empty string"),
   reactionType: z.enum(ALLOWED_REACTIONS, {
-    message: "Allowed reactionType values: 'insightful', 'mind_blowing', 'actionable', 'thorough'",
+    message:
+      "Allowed reactionType values: 'insightful', 'mind_blowing', 'actionable', 'thorough'",
   }),
 });
 
 /**
  * Allowed intent categories for visitor contact submissions
  */
-export const CONTACT_INTENTS = ["general", "collaboration", "consulting", "recruiting", "other"] as const;
+export const CONTACT_INTENTS = [
+  "general",
+  "collaboration",
+  "consulting",
+  "recruiting",
+  "other",
+] as const;
 export type ContactIntent = (typeof CONTACT_INTENTS)[number];
 
 /**
@@ -239,15 +289,28 @@ export type ContactIntent = (typeof CONTACT_INTENTS)[number];
  */
 export const ContactSubmissionSchema = z
   .object({
-    name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name cannot exceed 100 characters"),
+    name: z
+      .string()
+      .trim()
+      .min(2, "Name must be at least 2 characters")
+      .max(100, "Name cannot exceed 100 characters"),
     email: z.string().trim().email("Please provide a valid email address"),
     intent: z
       .enum(CONTACT_INTENTS, {
-        message: "Intent must be one of: 'general', 'collaboration', 'consulting', 'recruiting', 'other'",
+        message:
+          "Intent must be one of: 'general', 'collaboration', 'consulting', 'recruiting', 'other'",
       })
       .default("general"),
-    subject: z.string().trim().min(3, "Subject must be at least 3 characters").max(150, "Subject cannot exceed 150 characters"),
-    message: z.string().trim().min(10, "Message must be at least 10 characters").max(5000, "Message cannot exceed 5000 characters"),
+    subject: z
+      .string()
+      .trim()
+      .min(3, "Subject must be at least 3 characters")
+      .max(150, "Subject cannot exceed 150 characters"),
+    message: z
+      .string()
+      .trim()
+      .min(10, "Message must be at least 10 characters")
+      .max(5000, "Message cannot exceed 5000 characters"),
     _gotcha: z.string().optional(),
     _clientTimestamp: z.number().int().positive().optional(),
   })
@@ -309,7 +372,9 @@ export const NewsletterSubscriptionSchema = z.object({
   _clientTimestamp: z.number().int().positive().optional(),
 });
 
-export type NewsletterSubscription = z.infer<typeof NewsletterSubscriptionSchema>;
+export type NewsletterSubscription = z.infer<
+  typeof NewsletterSubscriptionSchema
+>;
 
 /**
  * Schema for Newsletter subscription API response
@@ -377,3 +442,28 @@ export const ResendWebhookResponseSchema = z.object({
 
 export type ResendWebhookResponse = z.infer<typeof ResendWebhookResponseSchema>;
 
+/**
+ * Schema for Site Governance Greenlight Evaluation request payload validation
+ */
+export const SiteGreenlightRequestSchema = z.object({
+  siteId: z.string().min(1, "siteId is required"),
+  studyId: z.string().min(1, "studyId is required"),
+  countryCode: z.enum(["US", "EU", "JP", "GB", "Global"]).default("Global"),
+  irbApprovalDate: z.string().optional(),
+  irbExpirationDate: z.string().optional(),
+  ctaExecuted: z.boolean().optional(),
+  ctaExecutionDate: z.string().optional(),
+  eIsfComplete: z.boolean().optional(),
+  eIsfMissingDocuments: z.array(z.string()).optional(),
+  doaSignedByPi: z.boolean().optional(),
+  doaPiSignatureDate: z.string().optional(),
+  trainingCompletionPercent: z.number().min(0).max(100).optional(),
+  ipReleaseAuthorized: z.boolean().optional(),
+  ipReleaseDate: z.string().optional(),
+  form1572Signed: z.boolean().optional(),
+  euCtisRegistered: z.boolean().optional(),
+  pmdaNotificationFiled: z.boolean().optional(),
+  mhraApprovalReceived: z.boolean().optional(),
+});
+
+export type SiteGreenlightRequest = z.infer<typeof SiteGreenlightRequestSchema>;

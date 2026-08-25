@@ -706,6 +706,87 @@
           }
         }
       }
+    },
+    "/api/site-governance": {
+      "post": {
+        "summary": "Evaluate site greenlight status and issue HMAC token",
+        "description": "Evaluates country rules matrix and 6 operational readiness facets (IRB, CTA, eISF, DOA, Training, IP release) and returns signed HMAC-SHA256 greenlight token.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "siteId": {
+                    "type": "string"
+                  },
+                  "studyId": {
+                    "type": "string"
+                  },
+                  "countryCode": {
+                    "type": "string",
+                    "enum": [
+                      "US",
+                      "EU",
+                      "JP",
+                      "GB",
+                      "Global"
+                    ]
+                  }
+                },
+                "required": [
+                  "siteId",
+                  "studyId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Site greenlight evaluation completed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "evaluation": {
+                      "type": "object"
+                    },
+                    "token": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error during site evaluation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
