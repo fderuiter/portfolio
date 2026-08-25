@@ -16,6 +16,7 @@
 - [ResendEventType](type-aliases/ResendEventType.md)
 - [ResendWebhookEvent](type-aliases/ResendWebhookEvent.md)
 - [ResendWebhookResponse](type-aliases/ResendWebhookResponse.md)
+- [SiteGreenlightRequest](type-aliases/SiteGreenlightRequest.md)
 
 ## Variables
 
@@ -35,5 +36,6 @@
 - [RESEND\_EVENT\_TYPES](variables/RESEND_EVENT_TYPES.md)
 - [ResendWebhookEventSchema](variables/ResendWebhookEventSchema.md)
 - [ResendWebhookResponseSchema](variables/ResendWebhookResponseSchema.md)
+- [SiteGreenlightRequestSchema](variables/SiteGreenlightRequestSchema.md)
 - [SyncParamsSchema](variables/SyncParamsSchema.md)
 - [TelemetryEventSchema](variables/TelemetryEventSchema.md)
