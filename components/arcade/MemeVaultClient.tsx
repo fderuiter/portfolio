@@ -570,7 +570,7 @@ export const MemeVaultClient: React.FC = () => {
 
       {/* Section 4: ASCII Art Console */}
       <section className="mb-12">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
           <div className="flex items-center gap-2.5">
             <IconTerminal className="w-5 h-5 text-emerald-400" />
             <h2 className="text-lg font-bold text-white">
@@ -578,7 +578,7 @@ export const MemeVaultClient: React.FC = () => {
             </h2>
           </div>
 
-          <div className="flex gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs">
+          <div className="flex flex-wrap gap-1.5 p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs">
             {(["cowsay", "duck", "loon", "train"] as const).map((tab) => (
               <button
                 key={tab}

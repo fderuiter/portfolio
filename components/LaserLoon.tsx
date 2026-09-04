@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useSyncExternalStore, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useSyncExternalStore,
+  useCallback,
+} from "react";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { clamp } from "@/lib/game-utils";
@@ -77,7 +83,11 @@ const getHighScoreSnapshot = () => {
 const getHighScoreServerSnapshot = () => "0";
 
 export const LaserLoon: React.FC = () => {
-  const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
+  const isMounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
   const rawHighScore = useSyncExternalStore(
     subscribeHighScore,
     getHighScoreSnapshot,
@@ -90,7 +100,14 @@ export const LaserLoon: React.FC = () => {
   // Game configuration & React state
   const [mode, setMode] = useState<LaserMode>("campaign");
   const [laserType, setLaserType] = useState<LaserType>("ruby-laser");
-  const [gameState, setGameState] = useState<"idle" | "playing" | "act-intro" | "act-victory" | "gameover" | "campaign-victory">("idle");
+  const [gameState, setGameState] = useState<
+    | "idle"
+    | "playing"
+    | "act-intro"
+    | "act-victory"
+    | "gameover"
+    | "campaign-victory"
+  >("idle");
   const [currentActNum, setCurrentActNum] = useState(1);
   const [actKills, setActKills] = useState(0);
   const [bossActive, setBossActive] = useState(false);
@@ -104,7 +121,8 @@ export const LaserLoon: React.FC = () => {
   const [multiplier, setMultiplier] = useState(1);
   const [timeLeft, setTimeLeft] = useState(45);
   const [ultimateMeter, setUltimateMeter] = useState(0);
-  const [activePowerUpType, setActivePowerUpType] = useState<PowerUpType | null>(null);
+  const [activePowerUpType, setActivePowerUpType] =
+    useState<PowerUpType | null>(null);
   const [activePowerUpTimeMs, setActivePowerUpTimeMs] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
   const [screenShakeEnabled, setScreenShakeEnabled] = useState(true);
@@ -158,17 +176,25 @@ export const LaserLoon: React.FC = () => {
   const shakeIntensityRef = useRef(0);
   const actKillsRef = useRef(0);
   const bossSpawnedRef = useRef(false);
-  const activePowerUpRef = useRef<{ type: PowerUpType; expiresAt: number } | null>(null);
+  const activePowerUpRef = useRef<{
+    type: PowerUpType;
+    expiresAt: number;
+  } | null>(null);
   const ultimateMeterRef = useRef(0);
 
-  const currentAct = CAMPAIGN_ACTS.find((a) => a.actNumber === currentActNum) || CAMPAIGN_ACTS[0];
+  const currentAct =
+    CAMPAIGN_ACTS.find((a) => a.actNumber === currentActNum) ||
+    CAMPAIGN_ACTS[0];
 
   // Synthesized Loon Tremolo / Cry using Web Audio API FM Oscillators
   const playSynthesizedLoonTremolo = useCallback(() => {
     if (!soundEnabled) return;
     try {
       if (typeof window === "undefined") return;
-      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext })
+          .webkitAudioContext;
       if (!AudioCtx) return;
       if (!audioCtxRef.current) {
         audioCtxRef.current = new AudioCtx();
@@ -213,25 +239,28 @@ export const LaserLoon: React.FC = () => {
   }, [soundEnabled]);
 
   // Audio synthesis helpers
-  const playLaserSound = useCallback((type: LaserType) => {
-    if (!soundEnabled) return;
-    try {
-      if (type === "ruby-laser") {
-        playNote(740, 0.05);
-        setTimeout(() => playNote(440, 0.04), 25);
-      } else if (type === "cyan-pulse") {
-        playNote(880, 0.03);
-        setTimeout(() => playNote(587.33, 0.03), 15);
-      } else if (type === "aurora-wave") {
-        playNote(523.25, 0.05);
-        playNote(659.25, 0.05);
-        playNote(783.99, 0.05);
-      } else if (type === "ice-cannon") {
-        playNote(330, 0.08);
-        setTimeout(() => playNote(660, 0.06), 30);
-      }
-    } catch {}
-  }, [soundEnabled, playNote]);
+  const playLaserSound = useCallback(
+    (type: LaserType) => {
+      if (!soundEnabled) return;
+      try {
+        if (type === "ruby-laser") {
+          playNote(740, 0.05);
+          setTimeout(() => playNote(440, 0.04), 25);
+        } else if (type === "cyan-pulse") {
+          playNote(880, 0.03);
+          setTimeout(() => playNote(587.33, 0.03), 15);
+        } else if (type === "aurora-wave") {
+          playNote(523.25, 0.05);
+          playNote(659.25, 0.05);
+          playNote(783.99, 0.05);
+        } else if (type === "ice-cannon") {
+          playNote(330, 0.08);
+          setTimeout(() => playNote(660, 0.06), 30);
+        }
+      } catch {}
+    },
+    [soundEnabled, playNote]
+  );
 
   const playIceShatterSound = useCallback(() => {
     if (!soundEnabled) return;
@@ -243,19 +272,22 @@ export const LaserLoon: React.FC = () => {
     } catch {}
   }, [soundEnabled, playNote]);
 
-  const playExplodeSound = useCallback((isBoss = false) => {
-    if (!soundEnabled) return;
-    try {
-      if (isBoss) {
-        playNote(110, 0.2);
-        setTimeout(() => playNote(82.4, 0.25), 50);
-        setTimeout(() => playNote(55, 0.3), 120);
-      } else {
-        playNote(220, 0.08);
-        setTimeout(() => playNote(110, 0.1), 35);
-      }
-    } catch {}
-  }, [soundEnabled, playNote]);
+  const playExplodeSound = useCallback(
+    (isBoss = false) => {
+      if (!soundEnabled) return;
+      try {
+        if (isBoss) {
+          playNote(110, 0.2);
+          setTimeout(() => playNote(82.4, 0.25), 50);
+          setTimeout(() => playNote(55, 0.3), 120);
+        } else {
+          playNote(220, 0.08);
+          setTimeout(() => playNote(110, 0.1), 35);
+        }
+      } catch {}
+    },
+    [soundEnabled, playNote]
+  );
 
   const playPowerUpSound = useCallback(() => {
     if (!soundEnabled) return;
@@ -266,41 +298,73 @@ export const LaserLoon: React.FC = () => {
     } catch {}
   }, [soundEnabled, playNote]);
 
-  const playComboSound = useCallback((comboCount: number) => {
-    if (!soundEnabled) return;
-    try {
-      const baseFreq = Math.min(1200, 440 + comboCount * 50);
-      playNote(baseFreq, 0.08);
-      setTimeout(() => playNote(baseFreq * 1.25, 0.1), 50);
-    } catch {}
-  }, [soundEnabled, playNote]);
+  const playComboSound = useCallback(
+    (comboCount: number) => {
+      if (!soundEnabled) return;
+      try {
+        const baseFreq = Math.min(1200, 440 + comboCount * 50);
+        playNote(baseFreq, 0.08);
+        setTimeout(() => playNote(baseFreq * 1.25, 0.1), 50);
+      } catch {}
+    },
+    [soundEnabled, playNote]
+  );
 
   // Floating text helper
-  const addFloatingText = useCallback((x: number, y: number, text: string, color: string) => {
-    floatingTextsRef.current.push({
-      id: nextTextIdRef.current++,
-      x,
-      y,
-      text,
-      color,
-      alpha: 1,
-      vy: -1.4,
-    });
-  }, []);
+  const addFloatingText = useCallback(
+    (x: number, y: number, text: string, color: string) => {
+      floatingTextsRef.current.push({
+        id: nextTextIdRef.current++,
+        x,
+        y,
+        text,
+        color,
+        alpha: 1,
+        vy: -1.4,
+      });
+    },
+    []
+  );
 
   // Particle helper
-  const spawnExplosion = useCallback((x: number, y: number, color: string, count = 20, isIce = false, isStar = false) => {
-    const newParticles = createExplosionParticles(x, y, color, count, isIce, isStar);
-    particlesRef.current.push(...newParticles);
-  }, []);
+  const spawnExplosion = useCallback(
+    (
+      x: number,
+      y: number,
+      color: string,
+      count = 20,
+      isIce = false,
+      isStar = false
+    ) => {
+      const newParticles = createExplosionParticles(
+        x,
+        y,
+        color,
+        count,
+        isIce,
+        isStar
+      );
+      particlesRef.current.push(...newParticles);
+    },
+    []
+  );
 
   // Launch Ice Block
-  const launchIceBlock = useCallback((fromX: number, fromY: number, targetX: number, targetY: number) => {
-    const { iceBlock, nextId } = engineCreateIceBlock(fromX, fromY, targetX, targetY, nextIceIdRef.current);
-    nextIceIdRef.current = nextId;
-    iceBlocksRef.current.push(iceBlock);
-    spawnExplosion(fromX, fromY, "#38bdf8", 6, true);
-  }, [spawnExplosion]);
+  const launchIceBlock = useCallback(
+    (fromX: number, fromY: number, targetX: number, targetY: number) => {
+      const { iceBlock, nextId } = engineCreateIceBlock(
+        fromX,
+        fromY,
+        targetX,
+        targetY,
+        nextIceIdRef.current
+      );
+      nextIceIdRef.current = nextId;
+      iceBlocksRef.current.push(iceBlock);
+      spawnExplosion(fromX, fromY, "#38bdf8", 6, true);
+    },
+    [spawnExplosion]
+  );
 
   // High score updater
   const addScore = useCallback((pts: number) => {
@@ -328,32 +392,48 @@ export const LaserLoon: React.FC = () => {
   }, []);
 
   // Spawner callback
-  const spawnTarget = useCallback((width: number, height: number) => {
-    const { updatedTargets, nextId } = engineSpawnTarget(
-      targetsRef.current,
-      nextTargetIdRef.current,
-      width,
-      height,
-      undefined,
-      currentActNum
-    );
-    targetsRef.current = updatedTargets;
-    nextTargetIdRef.current = nextId;
-  }, [currentActNum]);
+  const spawnTarget = useCallback(
+    (width: number, height: number) => {
+      const { updatedTargets, nextId } = engineSpawnTarget(
+        targetsRef.current,
+        nextTargetIdRef.current,
+        width,
+        height,
+        undefined,
+        currentActNum
+      );
+      targetsRef.current = updatedTargets;
+      nextTargetIdRef.current = nextId;
+    },
+    [currentActNum]
+  );
 
   // Spawn Boss
-  const triggerBossEncounter = useCallback((width: number, height: number) => {
-    bossSpawnedRef.current = true;
-    const { boss, nextId } = spawnBossForAct(currentActNum, nextTargetIdRef.current, width, height);
-    nextTargetIdRef.current = nextId;
-    targetsRef.current = [...targetsRef.current, boss];
-    setBossActive(true);
-    setBossHp(boss.hp);
-    setBossMaxHp(boss.maxHp);
-    setBossName(boss.label);
-    addFloatingText(width * 0.5, 80, `⚠️ BOSS: ${boss.label.toUpperCase()} ⚠️`, "#ef4444");
-    if (screenShakeEnabled) shakeIntensityRef.current = 8;
-  }, [currentActNum, screenShakeEnabled, addFloatingText]);
+  const triggerBossEncounter = useCallback(
+    (width: number, height: number) => {
+      bossSpawnedRef.current = true;
+      const { boss, nextId } = spawnBossForAct(
+        currentActNum,
+        nextTargetIdRef.current,
+        width,
+        height
+      );
+      nextTargetIdRef.current = nextId;
+      targetsRef.current = [...targetsRef.current, boss];
+      setBossActive(true);
+      setBossHp(boss.hp);
+      setBossMaxHp(boss.maxHp);
+      setBossName(boss.label);
+      addFloatingText(
+        width * 0.5,
+        80,
+        `⚠️ BOSS: ${boss.label.toUpperCase()} ⚠️`,
+        "#ef4444"
+      );
+      if (screenShakeEnabled) shakeIntensityRef.current = 8;
+    },
+    [currentActNum, screenShakeEnabled, addFloatingText]
+  );
 
   // Spawn Power-Up
   const spawnRandomPowerUp = useCallback((width: number, height: number) => {
@@ -400,7 +480,12 @@ export const LaserLoon: React.FC = () => {
 
     result.killedTargets.forEach((t) => {
       spawnExplosion(t.x, t.y, "#38bdf8", 32, true);
-      addFloatingText(t.x, t.y, `TREMOLO VAPORIZED! +${t.points * 3}`, "#38bdf8");
+      addFloatingText(
+        t.x,
+        t.y,
+        `TREMOLO VAPORIZED! +${t.points * 3}`,
+        "#38bdf8"
+      );
     });
 
     addFloatingText(w * 0.5, 120, "THE HAUNTING LOON TREMOLO!", "#22d3ee");
@@ -484,13 +569,19 @@ export const LaserLoon: React.FC = () => {
   useEffect(() => {
     if (gameState !== lastGameStateRef.current) {
       if (gameState === "playing") {
-        announce(`Game started. Active weapon is ${WEAPONS[laserType]?.name || laserType}.`, "assertive");
+        announce(
+          `Game started. Active weapon is ${WEAPONS[laserType]?.name || laserType}.`,
+          "assertive"
+        );
       } else if (gameState === "gameover") {
         announce(`Game over. Final score is ${score}.`, "assertive");
       } else if (gameState === "act-victory") {
         announce(`Act ${currentActNum} completed successfully!`, "assertive");
       } else if (gameState === "campaign-victory") {
-        announce("Campaign victory! You successfully completed all acts.", "assertive");
+        announce(
+          "Campaign victory! You successfully completed all acts.",
+          "assertive"
+        );
       }
       lastGameStateRef.current = gameState;
     }
@@ -568,7 +659,15 @@ export const LaserLoon: React.FC = () => {
     }
 
     // Raycast hit check
-    const hitResult = checkLaserRayHit(eyeX, eyeY, aim.x, aim.y, laserType, targetsRef.current, hasHotdish);
+    const hitResult = checkLaserRayHit(
+      eyeX,
+      eyeY,
+      aim.x,
+      aim.y,
+      laserType,
+      targetsRef.current,
+      hasHotdish
+    );
     targetsRef.current = hitResult.updatedTargets;
 
     if (hitResult.ultimateGained > 0) {
@@ -588,7 +687,8 @@ export const LaserLoon: React.FC = () => {
     if (hitResult.killedTargets.length > 0) {
       const hasKilledBoss = hitResult.killedTargets.some((t) => t.isBoss);
       playExplodeSound(hasKilledBoss);
-      if (screenShakeEnabled) shakeIntensityRef.current = hasKilledBoss ? 12 : 6;
+      if (screenShakeEnabled)
+        shakeIntensityRef.current = hasKilledBoss ? 12 : 6;
 
       hitResult.killedTargets.forEach((t) => {
         spawnExplosion(t.x, t.y, t.color, t.isBoss ? 50 : 24, false, t.isBoss);
@@ -602,14 +702,20 @@ export const LaserLoon: React.FC = () => {
         setCombo(nextCombo);
         setMultiplier(nextMultiplier);
 
-        const extraMul = activePowerUpRef.current?.type === "north-star" ? 3 : 0;
+        const extraMul =
+          activePowerUpRef.current?.type === "north-star" ? 3 : 0;
         const pts = t.points * (nextMultiplier + extraMul);
         addScore(pts);
         addFloatingText(t.x, t.y, `+${pts}`, t.color);
 
         if (nextCombo > 1 && nextCombo % 3 === 0) {
           playComboSound(nextCombo);
-          addFloatingText(t.x, t.y - 20, `${nextMultiplier}x COMBO!`, "#38bdf8");
+          addFloatingText(
+            t.x,
+            t.y - 20,
+            `${nextMultiplier}x COMBO!`,
+            "#38bdf8"
+          );
         }
 
         // Campaign progression
@@ -623,7 +729,9 @@ export const LaserLoon: React.FC = () => {
             if (currentActNum >= 4) {
               setGameState("campaign-victory");
               playSuccess();
-              recordEvent("laser_loon_victory", "project_click").catch(() => {});
+              recordEvent("laser_loon_victory", "project_click").catch(
+                () => {}
+              );
             } else {
               setGameState("act-victory");
               playSuccess();
@@ -631,7 +739,11 @@ export const LaserLoon: React.FC = () => {
           }
         }
       });
-    } else if (hitResult.hitAny && screenShakeEnabled && shakeIntensityRef.current === 0) {
+    } else if (
+      hitResult.hitAny &&
+      screenShakeEnabled &&
+      shakeIntensityRef.current === 0
+    ) {
       shakeIntensityRef.current = 2;
     }
   }, [
@@ -694,7 +806,10 @@ export const LaserLoon: React.FC = () => {
       if (shakeIntensityRef.current > 0) {
         shakeOffsetX = (Math.random() - 0.5) * shakeIntensityRef.current;
         shakeOffsetY = (Math.random() - 0.5) * shakeIntensityRef.current;
-        shakeIntensityRef.current = Math.max(0, shakeIntensityRef.current - 0.35 * dt);
+        shakeIntensityRef.current = Math.max(
+          0,
+          shakeIntensityRef.current - 0.35 * dt
+        );
       }
 
       ctx.save();
@@ -761,7 +876,10 @@ export const LaserLoon: React.FC = () => {
       }
 
       // Continuous firing when mouse is held
-      if (isFiringRef.current && (gameState === "playing" || mode === "sandbox")) {
+      if (
+        isFiringRef.current &&
+        (gameState === "playing" || mode === "sandbox")
+      ) {
         fireWeapon();
       }
 
@@ -773,13 +891,20 @@ export const LaserLoon: React.FC = () => {
 
           if (actKillsRef.current >= reqKills && !bossSpawnedRef.current) {
             triggerBossEncounter(width, height);
-          } else if (!bossSpawnedRef.current && targetsRef.current.length < 5 && Math.random() < 0.032 * dt) {
+          } else if (
+            !bossSpawnedRef.current &&
+            targetsRef.current.length < 5 &&
+            Math.random() < 0.032 * dt
+          ) {
             spawnTarget(width, height);
           }
         } else {
           // Arcade & sandbox spawning
           const maxTargets = mode === "arcade" ? 6 : 8;
-          if (targetsRef.current.length < maxTargets && Math.random() < 0.035 * dt) {
+          if (
+            targetsRef.current.length < maxTargets &&
+            Math.random() < 0.035 * dt
+          ) {
             spawnTarget(width, height);
           }
         }
@@ -791,7 +916,13 @@ export const LaserLoon: React.FC = () => {
       }
 
       // 4. Update Power-Ups & Player Pickup Collisions
-      const powerResult = engineUpdatePowerUps(powerUpsRef.current, dt, loon.x, loon.y, 32);
+      const powerResult = engineUpdatePowerUps(
+        powerUpsRef.current,
+        dt,
+        loon.x,
+        loon.y,
+        32
+      );
       powerUpsRef.current = powerResult.remainingPowerUps;
 
       if (powerResult.collectedPowerUp) {
@@ -919,12 +1050,26 @@ export const LaserLoon: React.FC = () => {
       });
 
       // 6. Update & Render Targets / Enemies / Bosses
-      targetsRef.current = updateTargetsPosition(targetsRef.current, dt, mode, gravity, height, width);
+      targetsRef.current = updateTargetsPosition(
+        targetsRef.current,
+        dt,
+        mode,
+        gravity,
+        height,
+        width
+      );
 
       targetsRef.current.forEach((t) => {
         ctx.save();
         const pulse = Math.sin(t.pulsePhase) * 3;
-        const glow = ctx.createRadialGradient(t.x, t.y, 2, t.x, t.y, t.radius + 10 + pulse);
+        const glow = ctx.createRadialGradient(
+          t.x,
+          t.y,
+          2,
+          t.x,
+          t.y,
+          t.radius + 10 + pulse
+        );
         glow.addColorStop(0, (t.frozenTimer > 0 ? "#38bdf8" : t.color) + "66");
         glow.addColorStop(1, t.color + "00");
         ctx.fillStyle = glow;
@@ -932,7 +1077,8 @@ export const LaserLoon: React.FC = () => {
         ctx.arc(t.x, t.y, t.radius + 10 + pulse, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.fillStyle = t.frozenTimer > 0 ? "rgba(186, 230, 253, 0.9)" : "#18181b";
+        ctx.fillStyle =
+          t.frozenTimer > 0 ? "rgba(186, 230, 253, 0.9)" : "#18181b";
         ctx.beginPath();
         ctx.arc(t.x, t.y, t.radius, 0, Math.PI * 2);
         ctx.fill();
@@ -960,7 +1106,12 @@ export const LaserLoon: React.FC = () => {
         if (t.frozenTimer > 0) {
           ctx.strokeStyle = "#ffffff";
           ctx.lineWidth = 1.5;
-          ctx.strokeRect(t.x - t.radius - 2, t.y - t.radius - 2, (t.radius + 2) * 2, (t.radius + 2) * 2);
+          ctx.strokeRect(
+            t.x - t.radius - 2,
+            t.y - t.radius - 2,
+            (t.radius + 2) * 2,
+            (t.radius + 2) * 2
+          );
         }
 
         // Mini HP ring for multi-hit targets
@@ -969,7 +1120,13 @@ export const LaserLoon: React.FC = () => {
           ctx.lineWidth = t.isBoss ? 4 : 3;
           ctx.beginPath();
           const hpPct = Math.max(0, t.hp / t.maxHp);
-          ctx.arc(t.x, t.y, t.radius + (t.isBoss ? 6 : 3), -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * hpPct);
+          ctx.arc(
+            t.x,
+            t.y,
+            t.radius + (t.isBoss ? 6 : 3),
+            -Math.PI / 2,
+            -Math.PI / 2 + Math.PI * 2 * hpPct
+          );
           ctx.stroke();
         }
 
@@ -977,7 +1134,8 @@ export const LaserLoon: React.FC = () => {
         ctx.font = t.isBoss ? "bold 10px monospace" : "bold 8.5px monospace";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        const shortName = t.label.length > 14 ? t.label.slice(0, 12) + ".." : t.label;
+        const shortName =
+          t.label.length > 14 ? t.label.slice(0, 12) + ".." : t.label;
         ctx.fillText(shortName, t.x, t.y);
 
         ctx.restore();
@@ -1004,7 +1162,10 @@ export const LaserLoon: React.FC = () => {
       const aim = aimPosRef.current;
       const hasHotdish = activePowerUpRef.current?.type === "hotdish";
 
-      ctx.strokeStyle = laserType === "ice-cannon" ? "rgba(56, 189, 248, 0.4)" : "rgba(239, 68, 68, 0.4)";
+      ctx.strokeStyle =
+        laserType === "ice-cannon"
+          ? "rgba(56, 189, 248, 0.4)"
+          : "rgba(239, 68, 68, 0.4)";
       ctx.lineWidth = 1;
       ctx.setLineDash([4, 4]);
       ctx.beginPath();
@@ -1013,7 +1174,11 @@ export const LaserLoon: React.FC = () => {
       ctx.stroke();
       ctx.setLineDash([]);
 
-      ctx.strokeStyle = hasHotdish ? "#f59e0b" : laserType === "ice-cannon" ? "#38bdf8" : "#ef4444";
+      ctx.strokeStyle = hasHotdish
+        ? "#f59e0b"
+        : laserType === "ice-cannon"
+          ? "#38bdf8"
+          : "#ef4444";
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.arc(aim.x, aim.y, 8, 0, Math.PI * 2);
@@ -1137,7 +1302,12 @@ export const LaserLoon: React.FC = () => {
       ctx.fill();
 
       // Glowing Crimson Cybernetic Eye (F277 Iconic Spec)
-      const eyeGlowColor = laserType === "ruby-laser" ? "#ef4444" : laserType === "ice-cannon" ? "#38bdf8" : "#22d3ee";
+      const eyeGlowColor =
+        laserType === "ruby-laser"
+          ? "#ef4444"
+          : laserType === "ice-cannon"
+            ? "#38bdf8"
+            : "#22d3ee";
       ctx.fillStyle = eyeGlowColor;
       ctx.shadowColor = eyeGlowColor;
       ctx.shadowBlur = 14;
@@ -1179,7 +1349,10 @@ export const LaserLoon: React.FC = () => {
       });
 
       // 11. Update & Draw Floating Texts
-      floatingTextsRef.current = updateFloatingTexts(floatingTextsRef.current, dt);
+      floatingTextsRef.current = updateFloatingTexts(
+        floatingTextsRef.current,
+        dt
+      );
       floatingTextsRef.current.forEach((f) => {
         ctx.save();
         ctx.globalAlpha = Math.max(0, f.alpha);
@@ -1238,13 +1411,19 @@ export const LaserLoon: React.FC = () => {
       loonPosRef.current.targetX = mouseX;
       loonPosRef.current.targetY = mouseY;
     } else {
-      loonPosRef.current.targetY = clamp(mouseY, 40, (canvasRef.current?.height || DEFAULT_CANVAS_HEIGHT) - 40);
+      loonPosRef.current.targetY = clamp(
+        mouseY,
+        40,
+        (canvasRef.current?.height || DEFAULT_CANVAS_HEIGHT) - 40
+      );
     }
   };
 
   const lastPointerTimeRef = useRef(0);
 
-  const handleCanvasPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+  const handleCanvasPointerDown = (
+    e: React.PointerEvent<HTMLCanvasElement>
+  ) => {
     lastPointerTimeRef.current = Date.now();
     if (!canvasRef.current) return;
     try {
@@ -1257,12 +1436,17 @@ export const LaserLoon: React.FC = () => {
     updatePointerAim(e.clientX, e.clientY);
 
     const rect = canvasRef.current.getBoundingClientRect();
-    const scaleX = (canvasRef.current.width || DEFAULT_CANVAS_WIDTH) / (rect.width || 1);
-    const scaleY = (canvasRef.current.height || DEFAULT_CANVAS_HEIGHT) / (rect.height || 1);
+    const scaleX =
+      (canvasRef.current.width || DEFAULT_CANVAS_WIDTH) / (rect.width || 1);
+    const scaleY =
+      (canvasRef.current.height || DEFAULT_CANVAS_HEIGHT) / (rect.height || 1);
     const mouseX = (e.clientX - rect.left) * scaleX;
     const mouseY = (e.clientY - rect.top) * scaleY;
 
-    const distToLoon = Math.hypot(mouseX - loonPosRef.current.x, mouseY - loonPosRef.current.y);
+    const distToLoon = Math.hypot(
+      mouseX - loonPosRef.current.x,
+      mouseY - loonPosRef.current.y
+    );
     if (mode === "sandbox" && distToLoon < 45) {
       isDraggingLoonRef.current = true;
     } else {
@@ -1271,7 +1455,9 @@ export const LaserLoon: React.FC = () => {
     }
   };
 
-  const handleCanvasPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+  const handleCanvasPointerMove = (
+    e: React.PointerEvent<HTMLCanvasElement>
+  ) => {
     updatePointerAim(e.clientX, e.clientY);
   };
 
@@ -1287,7 +1473,9 @@ export const LaserLoon: React.FC = () => {
     isDraggingLoonRef.current = false;
   };
 
-  const handleCanvasPointerCancel = (e: React.PointerEvent<HTMLCanvasElement>) => {
+  const handleCanvasPointerCancel = (
+    e: React.PointerEvent<HTMLCanvasElement>
+  ) => {
     if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
       try {
         e.currentTarget.releasePointerCapture(e.pointerId);
@@ -1310,12 +1498,17 @@ export const LaserLoon: React.FC = () => {
     containerRef.current?.focus({ preventScroll: true });
 
     const rect = canvasRef.current.getBoundingClientRect();
-    const scaleX = (canvasRef.current.width || DEFAULT_CANVAS_WIDTH) / (rect.width || 1);
-    const scaleY = (canvasRef.current.height || DEFAULT_CANVAS_HEIGHT) / (rect.height || 1);
+    const scaleX =
+      (canvasRef.current.width || DEFAULT_CANVAS_WIDTH) / (rect.width || 1);
+    const scaleY =
+      (canvasRef.current.height || DEFAULT_CANVAS_HEIGHT) / (rect.height || 1);
     const mouseX = (e.clientX - rect.left) * scaleX;
     const mouseY = (e.clientY - rect.top) * scaleY;
 
-    const distToLoon = Math.hypot(mouseX - loonPosRef.current.x, mouseY - loonPosRef.current.y);
+    const distToLoon = Math.hypot(
+      mouseX - loonPosRef.current.x,
+      mouseY - loonPosRef.current.y
+    );
     if (mode === "sandbox" && distToLoon < 45) {
       isDraggingLoonRef.current = true;
     } else {
@@ -1387,7 +1580,11 @@ export const LaserLoon: React.FC = () => {
     }
 
     if (e.key === " " || e.key === "Enter") {
-      if (gameState === "idle" || gameState === "gameover" || gameState === "campaign-victory") {
+      if (
+        gameState === "idle" ||
+        gameState === "gameover" ||
+        gameState === "campaign-victory"
+      ) {
         startGame();
       } else if (gameState === "act-intro") {
         startAct(currentActNum);
@@ -1405,19 +1602,31 @@ export const LaserLoon: React.FC = () => {
     } else if (e.key === "ArrowUp" || e.key.toLowerCase() === "w") {
       const nextY = Math.max(40, loonPosRef.current.targetY - 25);
       loonPosRef.current.targetY = nextY;
-      announce(`Loon moved up. Horizontal position: ${Math.round(loonPosRef.current.targetX)}, vertical position: ${Math.round(nextY)}`, "polite");
+      announce(
+        `Loon moved up. Horizontal position: ${Math.round(loonPosRef.current.targetX)}, vertical position: ${Math.round(nextY)}`,
+        "polite"
+      );
     } else if (e.key === "ArrowDown" || e.key.toLowerCase() === "s") {
       const nextY = Math.min(340, loonPosRef.current.targetY + 25);
       loonPosRef.current.targetY = nextY;
-      announce(`Loon moved down. Horizontal position: ${Math.round(loonPosRef.current.targetX)}, vertical position: ${Math.round(nextY)}`, "polite");
+      announce(
+        `Loon moved down. Horizontal position: ${Math.round(loonPosRef.current.targetX)}, vertical position: ${Math.round(nextY)}`,
+        "polite"
+      );
     } else if (e.key === "ArrowLeft" || e.key.toLowerCase() === "a") {
       const nextX = Math.max(40, loonPosRef.current.targetX - 25);
       loonPosRef.current.targetX = nextX;
-      announce(`Loon moved left. Horizontal position: ${Math.round(nextX)}, vertical position: ${Math.round(loonPosRef.current.targetY)}`, "polite");
+      announce(
+        `Loon moved left. Horizontal position: ${Math.round(nextX)}, vertical position: ${Math.round(loonPosRef.current.targetY)}`,
+        "polite"
+      );
     } else if (e.key === "ArrowRight" || e.key.toLowerCase() === "d") {
       const nextX = Math.min(728, loonPosRef.current.targetX + 25);
       loonPosRef.current.targetX = nextX;
-      announce(`Loon moved right. Horizontal position: ${Math.round(nextX)}, vertical position: ${Math.round(loonPosRef.current.targetY)}`, "polite");
+      announce(
+        `Loon moved right. Horizontal position: ${Math.round(nextX)}, vertical position: ${Math.round(loonPosRef.current.targetY)}`,
+        "polite"
+      );
     } else if (e.key === "1") {
       selectLaserType("ruby-laser");
     } else if (e.key === "2") {
@@ -1444,7 +1653,8 @@ export const LaserLoon: React.FC = () => {
           [INITIALIZING LASER LOON CRYO ENGINE...]
         </div>
         <p className="text-xs text-neutral-500 max-w-sm">
-          Loading submission F277 specs, retro audio synthesizer, and Minnesota State Flag campaign lore.
+          Loading submission F277 specs, retro audio synthesizer, and Minnesota
+          State Flag campaign lore.
         </p>
       </div>
     );
@@ -1458,7 +1668,7 @@ export const LaserLoon: React.FC = () => {
       {/* HUD Header Bar & Mode Selector */}
       <div className="w-full max-w-3xl flex flex-wrap items-center justify-between gap-3 mb-3 px-2">
         {/* Mode Tabs */}
-        <div className="flex items-center gap-1.5 p-1 bg-neutral-900/80 border border-neutral-800 rounded-xl backdrop-blur-md">
+        <div className="flex flex-wrap items-center gap-1.5 p-1 bg-neutral-900/80 border border-neutral-800 rounded-xl backdrop-blur-md">
           <button
             onClick={() => {
               setMode("campaign");
@@ -1501,7 +1711,7 @@ export const LaserLoon: React.FC = () => {
         </div>
 
         {/* Laser Weapon Selector */}
-        <div className="flex items-center gap-1.5 p-1 bg-neutral-900/80 border border-neutral-800 rounded-xl backdrop-blur-md">
+        <div className="flex flex-wrap items-center gap-1.5 p-1 bg-neutral-900/80 border border-neutral-800 rounded-xl backdrop-blur-md">
           <button
             onClick={() => selectLaserType("ruby-laser")}
             aria-pressed={laserType === "ruby-laser"}
@@ -1550,7 +1760,7 @@ export const LaserLoon: React.FC = () => {
         </div>
 
         {/* Score & Museum Buttons */}
-        <div className="flex items-center gap-2 text-xs font-mono">
+        <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
           <button
             onClick={() => setShowMuseum(true)}
             className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-amber-300 border border-amber-500/30 transition-all cursor-pointer"
@@ -1560,12 +1770,18 @@ export const LaserLoon: React.FC = () => {
           </button>
 
           <FieldManualButton manualId="laser-loon" label="Manual" />
-          <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} variant="header" />
+          <FullscreenButton
+            isFullscreen={isFullscreen}
+            onToggle={toggleFullscreen}
+            variant="header"
+          />
 
           <div className="flex items-center gap-1.5 px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-300">
             <IconTrophy className="w-3.5 h-3.5 text-amber-400" />
             <span className="text-[10px] text-neutral-500">HI:</span>
-            <span className="font-bold text-amber-400">{effectiveHighScore}</span>
+            <span className="font-bold text-amber-400">
+              {effectiveHighScore}
+            </span>
           </div>
 
           <div className="flex items-center gap-1.5 px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-300">
@@ -1614,7 +1830,9 @@ export const LaserLoon: React.FC = () => {
                   isFocused ? "bg-red-400 animate-ping" : "bg-neutral-600"
                 }`}
               />
-              {isFocused ? "Loon Controls: ACTIVE" : "Click to Aim & Shoot Lasers"}
+              {isFocused
+                ? "Loon Controls: ACTIVE"
+                : "Click to Aim & Shoot Lasers"}
             </span>
 
             {combo > 1 && (
@@ -1627,7 +1845,8 @@ export const LaserLoon: React.FC = () => {
             {activePowerUpType && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-mono text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse">
                 <IconSparkles className="w-3 h-3 text-emerald-400" />
-                {POWER_UP_CONFIGS[activePowerUpType]?.label} ({Math.ceil(activePowerUpTimeMs / 1000)}s)
+                {POWER_UP_CONFIGS[activePowerUpType]?.label} (
+                {Math.ceil(activePowerUpTimeMs / 1000)}s)
               </span>
             )}
           </div>
@@ -1636,10 +1855,14 @@ export const LaserLoon: React.FC = () => {
           <div className="flex items-center gap-2 pointer-events-auto">
             {mode === "campaign" && gameState === "playing" && (
               <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-neutral-900/90 border border-neutral-800 font-mono text-xs text-neutral-200">
-                <span className="text-red-400 font-bold">ACT {currentActNum}/4</span>
+                <span className="text-red-400 font-bold">
+                  ACT {currentActNum}/4
+                </span>
                 <span className="text-neutral-500">|</span>
                 <span className="text-neutral-400">
-                  {bossActive ? "BOSS BATTLE" : `Kills: ${actKills}/${currentAct.requiredMinionKills}`}
+                  {bossActive
+                    ? "BOSS BATTLE"
+                    : `Kills: ${actKills}/${currentAct.requiredMinionKills}`}
                 </span>
               </div>
             )}
@@ -1647,7 +1870,13 @@ export const LaserLoon: React.FC = () => {
             {mode === "arcade" && gameState === "playing" && (
               <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-900/90 border border-neutral-800 font-mono text-xs font-bold text-neutral-200">
                 <span>TIME:</span>
-                <span className={timeLeft <= 10 ? "text-rose-400 animate-ping font-extrabold" : "text-red-400"}>
+                <span
+                  className={
+                    timeLeft <= 10
+                      ? "text-rose-400 animate-ping font-extrabold"
+                      : "text-red-400"
+                  }
+                >
                   {timeLeft}s
                 </span>
               </div>
@@ -1660,11 +1889,16 @@ export const LaserLoon: React.FC = () => {
           <div className="absolute top-14 left-1/2 -translate-x-1/2 z-20 w-80 max-w-[90%] bg-neutral-900/90 border border-red-500/40 rounded-2xl p-2.5 backdrop-blur-md shadow-[0_0_20px_rgba(239,68,68,0.2)]">
             <div className="flex justify-between items-center text-[10px] font-mono font-bold text-neutral-300 mb-1">
               <span className="text-red-400">{bossName.toUpperCase()}</span>
-              <span>{Math.max(0, bossHp)} / {bossMaxHp} HP</span>
+              <span>
+                {Math.max(0, bossHp)} / {bossMaxHp} HP
+              </span>
             </div>
             <div
               role="progressbar"
-              aria-valuenow={Math.max(0, Math.round((bossHp / bossMaxHp) * 100))}
+              aria-valuenow={Math.max(
+                0,
+                Math.round((bossHp / bossMaxHp) * 100)
+              )}
               aria-valuemin={0}
               aria-valuemax={100}
               aria-label={`${bossName} Health`}
@@ -1742,7 +1976,10 @@ export const LaserLoon: React.FC = () => {
               LASER LOON: QUEST FOR THE STATE FLAG
             </h3>
             <p className="text-xs text-neutral-400 max-w-md mb-6 leading-relaxed">
-              Pilot submission <span className="text-red-400 font-bold">F277 Laser Loon</span> across Lake Minnetonka, the State Fair, and Legislative Hearings to claim glory on the State Capitol dome!
+              Pilot submission{" "}
+              <span className="text-red-400 font-bold">F277 Laser Loon</span>{" "}
+              across Lake Minnetonka, the State Fair, and Legislative Hearings
+              to claim glory on the State Capitol dome!
             </p>
             <div className="flex items-center gap-3 flex-wrap justify-center">
               <button
@@ -1796,7 +2033,9 @@ export const LaserLoon: React.FC = () => {
               <div className="flex items-center justify-between gap-4 border-t border-stone-700/80 pt-4 flex-wrap">
                 <div className="text-[10px] font-mono text-stone-400">
                   <span>Location: </span>
-                  <span className="text-amber-300 font-bold">{currentAct.location}</span>
+                  <span className="text-amber-300 font-bold">
+                    {currentAct.location}
+                  </span>
                 </div>
 
                 <button
@@ -1825,12 +2064,20 @@ export const LaserLoon: React.FC = () => {
             </p>
             <div className="grid grid-cols-2 gap-4 bg-neutral-900/80 border border-neutral-800 rounded-2xl p-4 mb-6 min-w-[240px]">
               <div>
-                <span className="text-[10px] font-mono text-neutral-500 uppercase block">Current Score</span>
-                <span className="text-xl font-mono font-bold text-red-400">{score}</span>
+                <span className="text-[10px] font-mono text-neutral-500 uppercase block">
+                  Current Score
+                </span>
+                <span className="text-xl font-mono font-bold text-red-400">
+                  {score}
+                </span>
               </div>
               <div>
-                <span className="text-[10px] font-mono text-neutral-500 uppercase block">Act Boss</span>
-                <span className="text-xs font-mono font-bold text-emerald-400 mt-1 block">DEFEATED</span>
+                <span className="text-[10px] font-mono text-neutral-500 uppercase block">
+                  Act Boss
+                </span>
+                <span className="text-xs font-mono font-bold text-emerald-400 mt-1 block">
+                  DEFEATED
+                </span>
               </div>
             </div>
             <button
@@ -1856,16 +2103,27 @@ export const LaserLoon: React.FC = () => {
               HISTORY MADE! F277 PREVAILS!
             </h3>
             <p className="text-xs text-neutral-300 max-w-lg mb-5 leading-relaxed font-sans">
-              Laser Loon is hoisted high atop the Minnesota State Capitol Dome! Over <span className="text-amber-300 font-bold">$13,500</span> raised for the Saint Paul Public Library Foundation as the public domain legend lives on.
+              Laser Loon is hoisted high atop the Minnesota State Capitol Dome!
+              Over <span className="text-amber-300 font-bold">$13,500</span>{" "}
+              raised for the Saint Paul Public Library Foundation as the public
+              domain legend lives on.
             </p>
             <div className="grid grid-cols-2 gap-4 bg-neutral-900/80 border border-neutral-800 rounded-2xl p-4 mb-6 min-w-[280px]">
               <div>
-                <span className="text-[10px] font-mono text-neutral-500 uppercase block">Total Score</span>
-                <span className="text-2xl font-mono font-bold text-amber-400">{score}</span>
+                <span className="text-[10px] font-mono text-neutral-500 uppercase block">
+                  Total Score
+                </span>
+                <span className="text-2xl font-mono font-bold text-amber-400">
+                  {score}
+                </span>
               </div>
               <div>
-                <span className="text-[10px] font-mono text-neutral-500 uppercase block">Rank</span>
-                <span className="text-2xl font-mono font-bold text-red-400">STATE FLAG</span>
+                <span className="text-[10px] font-mono text-neutral-500 uppercase block">
+                  Rank
+                </span>
+                <span className="text-2xl font-mono font-bold text-red-400">
+                  STATE FLAG
+                </span>
               </div>
             </div>
             <div className="flex gap-3">
@@ -1903,12 +2161,20 @@ export const LaserLoon: React.FC = () => {
             </p>
             <div className="grid grid-cols-2 gap-4 bg-neutral-900/80 border border-neutral-800 rounded-2xl p-4 mb-6 min-w-[240px]">
               <div>
-                <span className="text-[10px] font-mono text-neutral-500 uppercase block">Final Score</span>
-                <span className="text-xl font-mono font-bold text-red-400">{score}</span>
+                <span className="text-[10px] font-mono text-neutral-500 uppercase block">
+                  Final Score
+                </span>
+                <span className="text-xl font-mono font-bold text-red-400">
+                  {score}
+                </span>
               </div>
               <div>
-                <span className="text-[10px] font-mono text-neutral-500 uppercase block">Max Combo</span>
-                <span className="text-xl font-mono font-bold text-amber-400">{combo}x</span>
+                <span className="text-[10px] font-mono text-neutral-500 uppercase block">
+                  Max Combo
+                </span>
+                <span className="text-xl font-mono font-bold text-amber-400">
+                  {combo}x
+                </span>
               </div>
             </div>
             <button
@@ -1929,11 +2195,15 @@ export const LaserLoon: React.FC = () => {
         {mode === "sandbox" && (
           <div className="absolute bottom-3 left-4 right-4 z-20 flex flex-wrap items-center justify-between gap-2 p-2 bg-neutral-900/80 border border-neutral-800 rounded-2xl backdrop-blur-md pointer-events-auto">
             <div className="flex items-center gap-3">
-              <span className="text-[10px] font-mono text-neutral-400">GRAVITY:</span>
+              <span className="text-[10px] font-mono text-neutral-400">
+                GRAVITY:
+              </span>
               <button
                 onClick={() => setGravity(0)}
                 className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold cursor-pointer ${
-                  gravity === 0 ? "bg-red-400 text-black" : "bg-neutral-800 text-neutral-400"
+                  gravity === 0
+                    ? "bg-red-400 text-black"
+                    : "bg-neutral-800 text-neutral-400"
                 }`}
               >
                 Zero-G
@@ -1941,7 +2211,9 @@ export const LaserLoon: React.FC = () => {
               <button
                 onClick={() => setGravity(0.15)}
                 className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold cursor-pointer ${
-                  gravity === 0.15 ? "bg-red-400 text-black" : "bg-neutral-800 text-neutral-400"
+                  gravity === 0.15
+                    ? "bg-red-400 text-black"
+                    : "bg-neutral-800 text-neutral-400"
                 }`}
               >
                 Lake
@@ -1952,7 +2224,12 @@ export const LaserLoon: React.FC = () => {
               <button
                 onClick={() => {
                   const loon = loonPosRef.current;
-                  launchIceBlock(loon.x + 48, loon.y - 8, aimPosRef.current.x, aimPosRef.current.y);
+                  launchIceBlock(
+                    loon.x + 48,
+                    loon.y - 8,
+                    aimPosRef.current.x,
+                    aimPosRef.current.y
+                  );
                 }}
                 className="px-3 py-1 bg-sky-950 hover:bg-sky-900 text-sky-300 text-[10px] font-mono font-bold rounded-lg border border-sky-800/60 cursor-pointer"
               >
@@ -1961,7 +2238,10 @@ export const LaserLoon: React.FC = () => {
               <button
                 onClick={() => {
                   if (canvasRef.current) {
-                    spawnTarget(canvasRef.current.width, canvasRef.current.height);
+                    spawnTarget(
+                      canvasRef.current.width,
+                      canvasRef.current.height
+                    );
                   }
                 }}
                 className="px-3 py-1 bg-neutral-800 hover:bg-neutral-700 text-red-400 text-[10px] font-mono font-bold rounded-lg border border-neutral-700 cursor-pointer"
@@ -1971,7 +2251,10 @@ export const LaserLoon: React.FC = () => {
               <button
                 onClick={() => {
                   if (canvasRef.current) {
-                    triggerBossEncounter(canvasRef.current.width, canvasRef.current.height);
+                    triggerBossEncounter(
+                      canvasRef.current.width,
+                      canvasRef.current.height
+                    );
                   }
                 }}
                 className="px-3 py-1 bg-red-950 hover:bg-red-900 text-red-300 text-[10px] font-mono font-bold rounded-lg border border-red-800/60 cursor-pointer"
@@ -2099,17 +2382,22 @@ export const LaserLoon: React.FC = () => {
           }}
           onTremoloPress={fireUltimateTremolo}
           onWeaponSelect={(idx) => {
-            const types: LaserType[] = ["ruby-laser", "cyan-pulse", "aurora-wave", "ice-cannon"];
+            const types: LaserType[] = [
+              "ruby-laser",
+              "cyan-pulse",
+              "aurora-wave",
+              "ice-cannon",
+            ];
             if (types[idx]) selectLaserType(types[idx]);
           }}
           selectedWeapon={
             laserType === "ruby-laser"
               ? 0
               : laserType === "cyan-pulse"
-              ? 1
-              : laserType === "aurora-wave"
-              ? 2
-              : 3
+                ? 1
+                : laserType === "aurora-wave"
+                  ? 2
+                  : 3
           }
           weapons={[
             { id: "ruby-laser", label: "Ruby", color: "red" },
@@ -2123,13 +2411,20 @@ export const LaserLoon: React.FC = () => {
 
       {/* Footer Controls & Toggles */}
       <div className="w-full max-w-3xl flex justify-between items-center px-4 mt-2 text-[10px] font-mono text-neutral-500">
-        <span>Controls: Aim &amp; Click / Space to fire · Keys 1-4 for Optics · Space / U for Tremolo</span>
+        <span>
+          Controls: Aim &amp; Click / Space to fire · Keys 1-4 for Optics ·
+          Space / U for Tremolo
+        </span>
         <div className="flex items-center gap-4">
           <button
             onClick={() => setSoundEnabled((prev) => !prev)}
             className="hover:text-neutral-300 transition-colors cursor-pointer flex items-center gap-1"
           >
-            {soundEnabled ? <IconVolume className="w-3 h-3 text-red-400" /> : <IconVolumeOff className="w-3 h-3" />}
+            {soundEnabled ? (
+              <IconVolume className="w-3 h-3 text-red-400" />
+            ) : (
+              <IconVolumeOff className="w-3 h-3" />
+            )}
             Audio: {soundEnabled ? "ON" : "MUTED"}
           </button>
           <button
@@ -2164,7 +2459,8 @@ export const LaserLoon: React.FC = () => {
                   Minnesota Flag Redesign Museum
                 </h3>
                 <p className="text-xs text-neutral-400 font-mono">
-                  Historical artifacts, viral submissions, and the F277 Laser Loon legend.
+                  Historical artifacts, viral submissions, and the F277 Laser
+                  Loon legend.
                 </p>
               </div>
             </div>
@@ -2194,8 +2490,13 @@ export const LaserLoon: React.FC = () => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
                     <div>
-                      <h4 className="text-lg font-bold text-white font-mono">{flag.name}</h4>
-                      <p className="text-xs text-neutral-400">Created by: <span className="text-neutral-200">{flag.creator}</span></p>
+                      <h4 className="text-lg font-bold text-white font-mono">
+                        {flag.name}
+                      </h4>
+                      <p className="text-xs text-neutral-400">
+                        Created by:{" "}
+                        <span className="text-neutral-200">{flag.creator}</span>
+                      </p>
                     </div>
                     <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30">
                       {flag.category}
@@ -2204,7 +2505,9 @@ export const LaserLoon: React.FC = () => {
 
                   {/* Flag Color Palette Swatches */}
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-neutral-400">Color Palette:</span>
+                    <span className="text-xs font-mono text-neutral-400">
+                      Color Palette:
+                    </span>
                     <div className="flex gap-1.5">
                       {flag.flagColors.map((col, i) => (
                         <div
@@ -2219,16 +2522,28 @@ export const LaserLoon: React.FC = () => {
 
                   <div className="bg-neutral-900/60 border border-neutral-800/80 rounded-2xl p-4 space-y-3 font-mono text-xs">
                     <div>
-                      <span className="text-red-400 font-bold block mb-1">Design Overview:</span>
-                      <p className="text-neutral-300 leading-relaxed">{flag.description}</p>
+                      <span className="text-red-400 font-bold block mb-1">
+                        Design Overview:
+                      </span>
+                      <p className="text-neutral-300 leading-relaxed">
+                        {flag.description}
+                      </p>
                     </div>
                     <div>
-                      <span className="text-amber-400 font-bold block mb-1">Historical Significance:</span>
-                      <p className="text-neutral-300 leading-relaxed">{flag.historicalSignificance}</p>
+                      <span className="text-amber-400 font-bold block mb-1">
+                        Historical Significance:
+                      </span>
+                      <p className="text-neutral-300 leading-relaxed">
+                        {flag.historicalSignificance}
+                      </p>
                     </div>
                     <div>
-                      <span className="text-emerald-400 font-bold block mb-1">Civic Impact:</span>
-                      <p className="text-neutral-300 leading-relaxed">{flag.civicImpact}</p>
+                      <span className="text-emerald-400 font-bold block mb-1">
+                        Civic Impact:
+                      </span>
+                      <p className="text-neutral-300 leading-relaxed">
+                        {flag.civicImpact}
+                      </p>
                     </div>
                   </div>
                 </div>

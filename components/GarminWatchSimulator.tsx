@@ -627,7 +627,7 @@ export const GarminWatchSimulator: React.FC = () => {
         </div>
 
         {/* Bezel Theme Switcher & Field Manual */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-center gap-2">
           <div className="flex items-center gap-1 p-0.5 bg-zinc-900 border border-zinc-800 rounded-full text-[9px] font-mono">
             <button
               onClick={() => setBezelTheme("slate")}
