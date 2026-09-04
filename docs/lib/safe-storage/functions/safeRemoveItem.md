@@ -8,7 +8,7 @@
 
 > **safeRemoveItem**(`key`): `void`
 
-Defined in: [lib/safe-storage.ts:480](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L480)
+Defined in: [lib/safe-storage.ts:512](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L512)
 
 ## Parameters
 

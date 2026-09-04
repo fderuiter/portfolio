@@ -1,5 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextRequest, NextResponse } from "next/server";
+import { NextFetchEvent, NextRequest, NextResponse } from "next/server";
 import { applySecurityHeaders } from "@/lib/security-headers";
 import {
   generateClientConnectionHash,
@@ -41,8 +41,7 @@ const authMiddleware = clerkMiddleware(async (auth, req: NextRequest) => {
   return applySecurityHeaders(response);
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function proxy(req: NextRequest, event?: any) {
+export function proxy(req: NextRequest, event: NextFetchEvent) {
   return authMiddleware(req, event);
 }
 

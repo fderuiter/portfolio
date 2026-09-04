@@ -6,16 +6,16 @@
 
 # Function: sanitizeError()
 
-> **sanitizeError**(`error`): `any`
+> **sanitizeError**(`error`): `unknown`
 
-Defined in: [lib/error-sanitization.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/error-sanitization.ts#L27)
+Defined in: [lib/error-sanitization.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/error-sanitization.ts#L32)
 
 ## Parameters
 
 ### error
 
-`any`
+`unknown`
 
 ## Returns
 
-`any`
+`unknown`

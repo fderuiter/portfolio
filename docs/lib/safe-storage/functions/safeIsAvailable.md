@@ -8,7 +8,7 @@
 
 > **safeIsAvailable**(): `boolean`
 
-Defined in: [lib/safe-storage.ts:489](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L489)
+Defined in: [lib/safe-storage.ts:523](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L523)
 
 ## Returns
 
