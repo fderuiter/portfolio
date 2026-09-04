@@ -8,7 +8,10 @@
 import { createCorticalSurfaceMeshBuffers } from "./mesh-generator";
 import { HemisphereFilter, RawGeometryBuffer, SurfaceMode } from "./types";
 import { progressBus } from "./progress-bus";
-import { createMeshGroupFromBuffers, loadGraphicsEngine } from "./engine-loader";
+import {
+  createMeshGroupFromBuffers,
+  loadGraphicsEngine,
+} from "./engine-loader";
 
 const rawBufferCache = new Map<string, RawGeometryBuffer[]>();
 
@@ -50,7 +53,8 @@ export async function loadExternalBrainBuffers(
     const total = event?.total || 0;
     lastLoaded = loaded;
     lastTotal = total;
-    const percentage = total > 0 ? Math.min(100, Math.round((loaded / total) * 100)) : 0;
+    const percentage =
+      total > 0 ? Math.min(100, Math.round((loaded / total) * 100)) : 0;
     progressBus.publish({
       url: modelUrl,
       loaded,
@@ -76,12 +80,14 @@ export async function loadExternalBrainBuffers(
     const rawBuffers: RawGeometryBuffer[] = [];
 
     if (isObj) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { OBJLoader } = (await import("three/examples/jsm/loaders/OBJLoader.js")) as any;
+      const { OBJLoader } =
+        await import("three/examples/jsm/loaders/OBJLoader.js");
       const loader = new OBJLoader();
-      const obj = await new Promise<import("three").Group>((resolve, reject) => {
-        loader.load(modelUrl, resolve, handleProgress, reject);
-      });
+      const obj = await new Promise<import("three").Group>(
+        (resolve, reject) => {
+          loader.load(modelUrl, resolve, handleProgress, reject);
+        }
+      );
 
       // Apply standard clinical brain material
       const material = new THREE.MeshStandardMaterial({
@@ -122,8 +128,12 @@ export async function loadExternalBrainBuffers(
 
           if (posAttr) {
             const positions = new Float32Array(posAttr.array);
-            const normals = normAttr ? new Float32Array(normAttr.array) : undefined;
-            const colors = colAttr ? new Float32Array(colAttr.array) : undefined;
+            const normals = normAttr
+              ? new Float32Array(normAttr.array)
+              : undefined;
+            const colors = colAttr
+              ? new Float32Array(colAttr.array)
+              : undefined;
             let indices: Uint32Array;
             if (indexAttr) {
               indices = new Uint32Array(indexAttr.array);
@@ -145,12 +155,14 @@ export async function loadExternalBrainBuffers(
       });
     } else {
       // GLTF / GLB loader
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { GLTFLoader } = (await import("three/examples/jsm/loaders/GLTFLoader.js")) as any;
+      const { GLTFLoader } =
+        await import("three/examples/jsm/loaders/GLTFLoader.js");
       const loader = new GLTFLoader();
-      const gltf = await new Promise<{ scene: import("three").Group }>((resolve, reject) => {
-        loader.load(modelUrl, resolve, handleProgress, reject);
-      });
+      const gltf = await new Promise<{ scene: import("three").Group }>(
+        (resolve, reject) => {
+          loader.load(modelUrl, resolve, handleProgress, reject);
+        }
+      );
 
       const model = gltf.scene;
 
@@ -164,7 +176,11 @@ export async function loadExternalBrainBuffers(
 
       const center = new THREE.Vector3();
       box.getCenter(center);
-      model.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+      model.position.set(
+        -center.x * scale,
+        -center.y * scale,
+        -center.z * scale
+      );
       model.updateMatrixWorld(true);
 
       model.traverse((child) => {
@@ -178,8 +194,12 @@ export async function loadExternalBrainBuffers(
 
           if (posAttr) {
             const positions = new Float32Array(posAttr.array);
-            const normals = normAttr ? new Float32Array(normAttr.array) : undefined;
-            const colors = colAttr ? new Float32Array(colAttr.array) : undefined;
+            const normals = normAttr
+              ? new Float32Array(normAttr.array)
+              : undefined;
+            const colors = colAttr
+              ? new Float32Array(colAttr.array)
+              : undefined;
             let indices: Uint32Array;
             if (indexAttr) {
               indices = new Uint32Array(indexAttr.array);
@@ -201,7 +221,9 @@ export async function loadExternalBrainBuffers(
     }
 
     if (rawBuffers.length === 0) {
-      throw new Error("Parsed external 3D asset contains zero valid mesh geometries.");
+      throw new Error(
+        "Parsed external 3D asset contains zero valid mesh geometries."
+      );
     }
 
     const finalLoaded = lastTotal || lastLoaded;
@@ -227,8 +249,15 @@ export async function loadExternalBrainBuffers(
     });
 
     // Graceful fallback to procedural cortical surface mesh array buffers
-    console.warn(`Failed to load external model from ${modelUrl}, falling back to procedural mesh:`, err);
-    const fallbackBuffers = createCorticalSurfaceMeshBuffers(mode, false, hemiFilter);
+    console.warn(
+      `Failed to load external model from ${modelUrl}, falling back to procedural mesh:`,
+      err
+    );
+    const fallbackBuffers = createCorticalSurfaceMeshBuffers(
+      mode,
+      false,
+      hemiFilter
+    );
     rawBufferCache.set(cacheKey, fallbackBuffers);
     return cloneRawBuffers(fallbackBuffers);
   }

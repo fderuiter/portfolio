@@ -8,7 +8,7 @@
 
 > **safeGetEnvelope**\<`T`\>(`key`): [`StorageEnvelope`](../interfaces/StorageEnvelope.md)\<`T`\> \| `null`
 
-Defined in: [lib/safe-storage.ts:484](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L484)
+Defined in: [lib/safe-storage.ts:517](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L517)
 
 ## Type Parameters
 

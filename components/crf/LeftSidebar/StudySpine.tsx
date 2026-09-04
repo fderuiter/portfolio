@@ -61,18 +61,38 @@ export const StudySpine: React.FC<StudySpineProps> = ({
   onUnassignFormFromVisit,
   onInjectCdashForm,
 }) => {
-  const [collapsedEpochs, setCollapsedEpochs] = useState<Record<string, boolean>>({});
-  const [collapsedVisits, setCollapsedVisits] = useState<Record<string, boolean>>({});
+  const [collapsedEpochs, setCollapsedEpochs] = useState<
+    Record<string, boolean>
+  >({});
+  const [collapsedVisits, setCollapsedVisits] = useState<
+    Record<string, boolean>
+  >({});
   const [dragOverVisitId, setDragOverVisitId] = useState<string | null>(null);
   const [libraryFilter, setLibraryFilter] = useState<string>("");
 
-  const epochs = study.epochs && study.epochs.length > 0
-    ? study.epochs
-    : [
-        { id: "epoch_screening", name: "Screening & Baseline", sequenceNumber: 1, type: "Screening" },
-        { id: "epoch_treatment", name: "Active Treatment", sequenceNumber: 2, type: "Treatment" },
-        { id: "epoch_followup", name: "Follow-Up & Safety", sequenceNumber: 3, type: "Follow-up" },
-      ];
+  const epochs =
+    study.epochs && study.epochs.length > 0
+      ? study.epochs
+      : [
+          {
+            id: "epoch_screening",
+            name: "Screening & Baseline",
+            sequenceNumber: 1,
+            type: "Screening",
+          },
+          {
+            id: "epoch_treatment",
+            name: "Active Treatment",
+            sequenceNumber: 2,
+            type: "Treatment",
+          },
+          {
+            id: "epoch_followup",
+            name: "Follow-Up & Safety",
+            sequenceNumber: 3,
+            type: "Follow-up",
+          },
+        ];
 
   const toggleEpochCollapse = (epochId: string) => {
     setCollapsedEpochs((prev) => ({ ...prev, [epochId]: !prev[epochId] }));
@@ -87,10 +107,18 @@ export const StudySpine: React.FC<StudySpineProps> = ({
     return study.visits.filter((v) => {
       if (v.epochId) return v.epochId === epochId;
       // Fallback inference if visits lack epochId
-      if (epochId.includes("screen") || v.id.includes("screen") || v.targetDay === 0) {
+      if (
+        epochId.includes("screen") ||
+        v.id.includes("screen") ||
+        v.targetDay === 0
+      ) {
         return epochId.includes("screen");
       }
-      if (epochId.includes("follow") || v.id.includes("follow") || v.targetDay > 100) {
+      if (
+        epochId.includes("follow") ||
+        v.id.includes("follow") ||
+        v.targetDay > 100
+      ) {
         return epochId.includes("follow");
       }
       return epochId.includes("treatment");
@@ -99,11 +127,17 @@ export const StudySpine: React.FC<StudySpineProps> = ({
 
   // Handle Drag & Drop form assignment onto visit
   const handleDragStartForm = (e: React.DragEvent, formId: string) => {
-    e.dataTransfer.setData("application/json", JSON.stringify({ type: "form", formId }));
+    e.dataTransfer.setData(
+      "application/json",
+      JSON.stringify({ type: "form", formId })
+    );
   };
 
   const handleDragStartTemplate = (e: React.DragEvent, domainCode: string) => {
-    e.dataTransfer.setData("application/json", JSON.stringify({ type: "template", domainCode }));
+    e.dataTransfer.setData(
+      "application/json",
+      JSON.stringify({ type: "template", domainCode })
+    );
   };
 
   const handleDragOverVisit = (e: React.DragEvent, visitId: string) => {
@@ -131,8 +165,9 @@ export const StudySpine: React.FC<StudySpineProps> = ({
         onSelectVisit(visitId);
         onSelectForm(data.formId);
       } else if (data.type === "template" && data.domainCode) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const scaffolded = scaffoldCdashDomain(data.domainCode as any);
+        const scaffolded = scaffoldCdashDomain(
+          data.domainCode as Parameters<typeof scaffoldCdashDomain>[0]
+        );
         onInjectCdashForm(scaffolded, visitId);
         onAssignFormToVisit(visitId, scaffolded.id);
         onSelectVisit(visitId);
@@ -144,7 +179,10 @@ export const StudySpine: React.FC<StudySpineProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-zinc-950/95 select-none" data-testid="study-spine-root">
+    <div
+      className="flex flex-col h-full bg-zinc-950/95 select-none"
+      data-testid="study-spine-root"
+    >
       {/* 3-Way Sub-Navigation Header */}
       <div className="flex border-b border-zinc-800/80 bg-zinc-900/60 p-1 gap-1 shrink-0">
         <button
@@ -191,7 +229,11 @@ export const StudySpine: React.FC<StudySpineProps> = ({
       <div className="flex-1 overflow-y-auto p-2.5 space-y-3">
         {/* TAB 1: STUDY SPINE (Timeline & Epochs) */}
         {activeTab === "spine" && (
-          <div className="space-y-3" role="tree" aria-label="Study Spine Longitudinal Timeline">
+          <div
+            className="space-y-3"
+            role="tree"
+            aria-label="Study Spine Longitudinal Timeline"
+          >
             <div className="flex items-center justify-between px-1">
               <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 font-semibold flex items-center gap-1.5">
                 <IconTimeline className="w-3.5 h-3.5 text-brand-cyan" />
@@ -237,7 +279,8 @@ export const StudySpine: React.FC<StudySpineProps> = ({
                         </span>
                       </div>
                       <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-750">
-                        {epochVisits.length} {epochVisits.length === 1 ? "visit" : "visits"}
+                        {epochVisits.length}{" "}
+                        {epochVisits.length === 1 ? "visit" : "visits"}
                       </span>
                     </div>
 
@@ -251,7 +294,8 @@ export const StudySpine: React.FC<StudySpineProps> = ({
                         ) : (
                           epochVisits.map((visit) => {
                             const isVisitActive = activeVisitId === visit.id;
-                            const isVisitCollapsed = !!collapsedVisits[visit.id];
+                            const isVisitCollapsed =
+                              !!collapsedVisits[visit.id];
                             const isDropTarget = dragOverVisitId === visit.id;
                             const assignedForms = study.forms.filter((f) =>
                               visit.assignedFormIds.includes(f.id)
@@ -260,15 +304,17 @@ export const StudySpine: React.FC<StudySpineProps> = ({
                             return (
                               <div
                                 key={visit.id}
-                                onDragOver={(e) => handleDragOverVisit(e, visit.id)}
+                                onDragOver={(e) =>
+                                  handleDragOverVisit(e, visit.id)
+                                }
                                 onDragLeave={handleDragLeaveVisit}
                                 onDrop={(e) => handleDropOnVisit(e, visit.id)}
                                 className={`rounded-lg border transition-all ${
                                   isDropTarget
                                     ? "border-brand-cyan bg-brand-cyan/20 ring-2 ring-brand-cyan/40 scale-[1.01]"
                                     : isVisitActive
-                                    ? "border-brand-cyan/40 bg-zinc-900/90 shadow-sm"
-                                    : "border-zinc-800/80 bg-zinc-950/60 hover:border-zinc-700 hover:bg-zinc-900/40"
+                                      ? "border-brand-cyan/40 bg-zinc-900/90 shadow-sm"
+                                      : "border-zinc-800/80 bg-zinc-950/60 hover:border-zinc-700 hover:bg-zinc-900/40"
                                 }`}
                               >
                                 {/* Visit Row */}
@@ -301,7 +347,9 @@ export const StudySpine: React.FC<StudySpineProps> = ({
                                       <div className="flex items-center gap-1.5">
                                         <span
                                           className={`text-xs font-bold truncate ${
-                                            isVisitActive ? "text-brand-cyan" : "text-zinc-200"
+                                            isVisitActive
+                                              ? "text-brand-cyan"
+                                              : "text-zinc-200"
                                           }`}
                                         >
                                           {visit.name}
@@ -309,10 +357,14 @@ export const StudySpine: React.FC<StudySpineProps> = ({
                                       </div>
                                       <div className="flex items-center gap-2 mt-0.5">
                                         <span className="text-[10px] text-zinc-400 font-mono">
-                                          Day {visit.targetDay} (±{visit.windowBefore || 3}d)
+                                          Day {visit.targetDay} (±
+                                          {visit.windowBefore || 3}d)
                                         </span>
                                         <span className="text-[9px] font-mono px-1 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">
-                                          {assignedForms.length} {assignedForms.length === 1 ? "form" : "forms"}
+                                          {assignedForms.length}{" "}
+                                          {assignedForms.length === 1
+                                            ? "form"
+                                            : "forms"}
                                         </span>
                                       </div>
                                     </div>
@@ -342,12 +394,15 @@ export const StudySpine: React.FC<StudySpineProps> = ({
                                       </p>
                                     ) : (
                                       assignedForms.map((form) => {
-                                        const isFormActive = form.id === activeFormId;
+                                        const isFormActive =
+                                          form.id === activeFormId;
                                         return (
                                           <div
                                             key={form.id}
                                             draggable
-                                            onDragStart={(e) => handleDragStartForm(e, form.id)}
+                                            onDragStart={(e) =>
+                                              handleDragStartForm(e, form.id)
+                                            }
                                             onClick={(e) => {
                                               e.stopPropagation();
                                               onSelectVisit(visit.id);
@@ -362,7 +417,9 @@ export const StudySpine: React.FC<StudySpineProps> = ({
                                             <div className="flex items-center gap-1.5 min-w-0">
                                               <IconGripVertical className="w-3 h-3 text-zinc-600 cursor-grab shrink-0" />
                                               <IconFileSpreadsheet className="w-3.5 h-3.5 text-brand-cyan shrink-0" />
-                                              <span className="text-xs truncate">{form.name}</span>
+                                              <span className="text-xs truncate">
+                                                {form.name}
+                                              </span>
                                             </div>
                                             <div className="flex items-center gap-1">
                                               <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-zinc-800 text-zinc-400 border border-zinc-700">
@@ -372,7 +429,10 @@ export const StudySpine: React.FC<StudySpineProps> = ({
                                                 type="button"
                                                 onClick={(e) => {
                                                   e.stopPropagation();
-                                                  onUnassignFormFromVisit(visit.id, form.id);
+                                                  onUnassignFormFromVisit(
+                                                    visit.id,
+                                                    form.id
+                                                  );
                                                 }}
                                                 className="p-0.5 rounded text-zinc-500 hover:text-red-400 hover:bg-zinc-800 transition-colors"
                                                 title="Unassign form from this visit"
@@ -421,7 +481,10 @@ export const StudySpine: React.FC<StudySpineProps> = ({
               <div className="space-y-1.5 max-h-60 overflow-y-auto pr-0.5">
                 {study.forms.map((form) => {
                   const isActive = form.id === activeFormId;
-                  const fieldCount = form.sections.reduce((acc, s) => acc + s.fields.length, 0);
+                  const fieldCount = form.sections.reduce(
+                    (acc, s) => acc + s.fields.length,
+                    0
+                  );
 
                   return (
                     <div
@@ -526,8 +589,12 @@ export const StudySpine: React.FC<StudySpineProps> = ({
               <div className="space-y-1.5 max-h-72 overflow-y-auto pr-0.5">
                 {CDASH_DOMAIN_CATALOG.filter((cat) =>
                   libraryFilter
-                    ? cat.label.toLowerCase().includes(libraryFilter.toLowerCase()) ||
-                      cat.code.toLowerCase().includes(libraryFilter.toLowerCase())
+                    ? cat.label
+                        .toLowerCase()
+                        .includes(libraryFilter.toLowerCase()) ||
+                      cat.code
+                        .toLowerCase()
+                        .includes(libraryFilter.toLowerCase())
                     : true
                 ).map((cat) => {
                   return (
@@ -555,8 +622,11 @@ export const StudySpine: React.FC<StudySpineProps> = ({
 
                         <button
                           onClick={() => {
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            const scaffolded = scaffoldCdashDomain(cat.code as any);
+                            const scaffolded = scaffoldCdashDomain(
+                              cat.code as Parameters<
+                                typeof scaffoldCdashDomain
+                              >[0]
+                            );
                             onInjectCdashForm(scaffolded, activeVisitId);
                           }}
                           className="px-2 py-1 rounded bg-brand-cyan/10 hover:bg-brand-cyan/20 text-brand-cyan border border-brand-cyan/30 text-[10px] font-mono font-bold transition-colors shrink-0"

@@ -8,7 +8,7 @@
 
 > **loadExternalBrainMesh**(`modelUrl`, `mode?`, `hemiFilter?`): `Promise`\<`Group`\<`Object3DEventMap`\>\>
 
-Defined in: [lib/neuro/asset-loader.ts:240](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/asset-loader.ts#L240)
+Defined in: [lib/neuro/asset-loader.ts:269](https://github.com/fderuiter/portfolio/blob/main/lib/neuro/asset-loader.ts#L269)
 
 Convenience wrapper returning THREE.Group scene object constructed on-demand from raw geometry buffers.
 

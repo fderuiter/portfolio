@@ -56,8 +56,8 @@ export class SafeStorageAdapter {
       const storage = window.localStorage;
       return Boolean(
         storage &&
-          typeof storage.getItem === "function" &&
-          typeof storage.setItem === "function"
+        typeof storage.getItem === "function" &&
+        typeof storage.setItem === "function"
       );
     } catch {
       return false;
@@ -149,7 +149,11 @@ export class SafeStorageAdapter {
 
         envelope.lastAccessedAt = Date.now();
         const updatedRaw = JSON.stringify(envelope);
-        this.memoryCache.set(key, { raw: updatedRaw, envelope, parsedValue: envelope.value });
+        this.memoryCache.set(key, {
+          raw: updatedRaw,
+          envelope,
+          parsedValue: envelope.value,
+        });
 
         try {
           window.localStorage.setItem(key, updatedRaw);
@@ -178,7 +182,11 @@ export class SafeStorageAdapter {
    * Writes an item wrapped in a metadata envelope to storage.
    * Handles QuotaExceededError by triggering LRU metadata eviction.
    */
-  public setItem<T = any>(key: string, value: T, options?: StorageOptions): boolean {
+  public setItem<T = any>(
+    key: string,
+    value: T,
+    options?: StorageOptions
+  ): boolean {
     const now = Date.now();
     let expiresAt: number | null = options?.expiresAt ?? null;
     if (options?.ttlMs !== undefined && typeof options.ttlMs === "number") {
@@ -200,7 +208,11 @@ export class SafeStorageAdapter {
     const jsonString = JSON.stringify(envelope);
 
     // Always update in-memory fallback cache first
-    this.memoryCache.set(key, { raw: jsonString, envelope, parsedValue: value });
+    this.memoryCache.set(key, {
+      raw: jsonString,
+      envelope,
+      parsedValue: value,
+    });
 
     if (!this.isAvailable()) {
       this.notifyChange(key);
@@ -213,7 +225,12 @@ export class SafeStorageAdapter {
       return true;
     } catch (error) {
       // Attempt LRU & expired item eviction to free up quota
-      const writeSuccess = this.handleWriteQuotaFailure(key, jsonString, envelope, error);
+      const writeSuccess = this.handleWriteQuotaFailure(
+        key,
+        jsonString,
+        envelope,
+        error
+      );
       this.notifyChange(key);
       return writeSuccess;
     }
@@ -230,7 +247,10 @@ export class SafeStorageAdapter {
         window.localStorage.removeItem(key);
       } catch (error) {
         const sanitized = sanitizeError(error);
-        console.warn(`SafeStorage: removeItem failed for key "${key}":`, sanitized);
+        console.warn(
+          `SafeStorage: removeItem failed for key "${key}":`,
+          sanitized
+        );
       }
     }
 
@@ -337,7 +357,11 @@ export class SafeStorageAdapter {
 
           try {
             const parsed = JSON.parse(raw);
-            if (this.isEnvelope(parsed) && parsed.expiresAt && parsed.expiresAt <= now) {
+            if (
+              this.isEnvelope(parsed) &&
+              parsed.expiresAt &&
+              parsed.expiresAt <= now
+            ) {
               keysToRemove.push(k);
             }
           } catch {
@@ -358,7 +382,11 @@ export class SafeStorageAdapter {
 
     // Also prune memory cache
     for (const [k, cached] of Array.from(this.memoryCache.entries())) {
-      if (cached.envelope && cached.envelope.expiresAt && cached.envelope.expiresAt <= now) {
+      if (
+        cached.envelope &&
+        cached.envelope.expiresAt &&
+        cached.envelope.expiresAt <= now
+      ) {
         this.memoryCache.delete(k);
         if (!this.isAvailable()) count++;
       }
@@ -372,7 +400,7 @@ export class SafeStorageAdapter {
       typeof obj === "object" &&
       obj !== null &&
       "value" in obj &&
-      typeof (obj as any).lastAccessedAt === "number"
+      typeof (obj as Record<string, unknown>).lastAccessedAt === "number"
     );
   }
 
@@ -409,7 +437,8 @@ export class SafeStorageAdapter {
     }
 
     // 2. Identify and sort candidate expirable keys by lastAccessedAt ascending (LRU)
-    const expirableCandidates: Array<{ key: string; lastAccessedAt: number }> = [];
+    const expirableCandidates: Array<{ key: string; lastAccessedAt: number }> =
+      [];
 
     if (this.isAvailable()) {
       try {
@@ -424,7 +453,10 @@ export class SafeStorageAdapter {
           try {
             const parsed = JSON.parse(raw);
             if (this.isEnvelope(parsed)) {
-              if (parsed.isExpirable === true || (parsed.expiresAt && parsed.expiresAt > 0)) {
+              if (
+                parsed.isExpirable === true ||
+                (parsed.expiresAt && parsed.expiresAt > 0)
+              ) {
                 expirableCandidates.push({
                   key: k,
                   lastAccessedAt: parsed.lastAccessedAt || 0,
@@ -477,12 +509,14 @@ export const safeSetItem = <T = any>(
   options?: StorageOptions
 ): boolean => safeStorage.setItem(key, value, options);
 
-export const safeRemoveItem = (key: string): void => safeStorage.removeItem(key);
+export const safeRemoveItem = (key: string): void =>
+  safeStorage.removeItem(key);
 
 export const safeClear = (): void => safeStorage.clear();
 
-export const safeGetEnvelope = <T = any>(key: string): StorageEnvelope<T> | null =>
-  safeStorage.getEnvelope(key);
+export const safeGetEnvelope = <T = any>(
+  key: string
+): StorageEnvelope<T> | null => safeStorage.getEnvelope(key);
 
 export const safePruneExpired = (): number => safeStorage.pruneExpired();
 
