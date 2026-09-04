@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useSyncExternalStore, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useSyncExternalStore,
+  useCallback,
+} from "react";
 import Link from "next/link";
 import { clamp } from "@/lib/game-utils";
 import Image from "next/image";
@@ -92,7 +98,8 @@ const subscribeStorage = (callback: () => void) => {
 const getHighScoreSnapshot = () => {
   if (typeof window === "undefined") return "0";
   try {
-    return window.localStorage && typeof window.localStorage.getItem === "function"
+    return window.localStorage &&
+      typeof window.localStorage.getItem === "function"
       ? window.localStorage.getItem("working_with_duck_high_score") || "0"
       : "0";
   } catch {
@@ -570,7 +577,10 @@ function drawDuckPuppy(
   }
 }
 
-function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckState) {
+function drawOfficeScene(
+  ctx: CanvasRenderingContext2D,
+  state: WorkingWithDuckState
+) {
   // 1. Hardwood Floor
   ctx.fillStyle = "#1e1b18";
   ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -638,14 +648,24 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
   ctx.strokeStyle = "#71717a";
   ctx.lineWidth = 3;
   ctx.beginPath();
-  ctx.roundRect(RUG_BOUNDS.x, RUG_BOUNDS.y, RUG_BOUNDS.width, RUG_BOUNDS.height, 24);
+  ctx.roundRect(
+    RUG_BOUNDS.x,
+    RUG_BOUNDS.y,
+    RUG_BOUNDS.width,
+    RUG_BOUNDS.height,
+    24
+  );
   ctx.fill();
   ctx.stroke();
 
   // Rug Pattern
   ctx.strokeStyle = "#52525b";
   ctx.lineWidth = 1.5;
-  for (let rx = RUG_BOUNDS.x + 20; rx < RUG_BOUNDS.x + RUG_BOUNDS.width - 10; rx += 30) {
+  for (
+    let rx = RUG_BOUNDS.x + 20;
+    rx < RUG_BOUNDS.x + RUG_BOUNDS.width - 10;
+    rx += 30
+  ) {
     ctx.beginPath();
     ctx.moveTo(rx, RUG_BOUNDS.y + 10);
     ctx.lineTo(rx, RUG_BOUNDS.y + RUG_BOUNDS.height - 10);
@@ -657,7 +677,13 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
   ctx.strokeStyle = "#3f3f46";
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.roundRect(DESK_BOUNDS.x, DESK_BOUNDS.y, DESK_BOUNDS.width, DESK_BOUNDS.height, 16);
+  ctx.roundRect(
+    DESK_BOUNDS.x,
+    DESK_BOUNDS.y,
+    DESK_BOUNDS.width,
+    DESK_BOUNDS.height,
+    16
+  );
   ctx.fill();
   ctx.stroke();
 
@@ -709,7 +735,11 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
   ctx.strokeRect(DESK_BOUNDS.x + 20, DESK_BOUNDS.y + 125, 130, 22);
   ctx.fillStyle = "#38bdf8";
   ctx.font = "bold 9px monospace";
-  ctx.fillText("💻 FOCUS SPRINT (SPACE)", DESK_BOUNDS.x + 85, DESK_BOUNDS.y + 140);
+  ctx.fillText(
+    "💻 FOCUS SPRINT (SPACE)",
+    DESK_BOUNDS.x + 85,
+    DESK_BOUNDS.y + 140
+  );
 
   // 4. Dog Bed
   ctx.fillStyle = "#581c87";
@@ -744,7 +774,11 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
   ctx.fillStyle = "#e9d5ff";
   ctx.font = "10px monospace";
   ctx.textAlign = "center";
-  ctx.fillText("DUCK'S BED", DOG_BED_BOUNDS.x + DOG_BED_BOUNDS.width / 2, DOG_BED_BOUNDS.y + DOG_BED_BOUNDS.height / 2 + 3);
+  ctx.fillText(
+    "DUCK'S BED",
+    DOG_BED_BOUNDS.x + DOG_BED_BOUNDS.width / 2,
+    DOG_BED_BOUNDS.y + DOG_BED_BOUNDS.height / 2 + 3
+  );
 
   // 5. Office Stations (Water & Food Bowls)
   // Water Bowl
@@ -752,7 +786,15 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
   ctx.strokeStyle = "#38bdf8";
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.ellipse(WATER_BOWL_BOUNDS.x + 25, WATER_BOWL_BOUNDS.y + 20, 22, 16, 0, 0, Math.PI * 2);
+  ctx.ellipse(
+    WATER_BOWL_BOUNDS.x + 25,
+    WATER_BOWL_BOUNDS.y + 20,
+    22,
+    16,
+    0,
+    0,
+    Math.PI * 2
+  );
   ctx.fill();
   ctx.stroke();
 
@@ -771,14 +813,26 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
 
   ctx.fillStyle = "#ffffff";
   ctx.font = "bold 8px monospace";
-  ctx.fillText(`💧 ${Math.round(state.officeStations.waterLevel)}%`, WATER_BOWL_BOUNDS.x + 25, WATER_BOWL_BOUNDS.y + 42);
+  ctx.fillText(
+    `💧 ${Math.round(state.officeStations.waterLevel)}%`,
+    WATER_BOWL_BOUNDS.x + 25,
+    WATER_BOWL_BOUNDS.y + 42
+  );
 
   // Food Bowl
   ctx.fillStyle = "#d97706";
   ctx.strokeStyle = "#fbbf24";
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.ellipse(FOOD_BOWL_BOUNDS.x + 25, FOOD_BOWL_BOUNDS.y + 20, 22, 16, 0, 0, Math.PI * 2);
+  ctx.ellipse(
+    FOOD_BOWL_BOUNDS.x + 25,
+    FOOD_BOWL_BOUNDS.y + 20,
+    22,
+    16,
+    0,
+    0,
+    Math.PI * 2
+  );
   ctx.fill();
   ctx.stroke();
 
@@ -797,7 +851,11 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
 
   ctx.fillStyle = "#ffffff";
   ctx.font = "bold 8px monospace";
-  ctx.fillText(`🍖 ${Math.round(state.officeStations.foodLevel)}%`, FOOD_BOWL_BOUNDS.x + 25, FOOD_BOWL_BOUNDS.y + 42);
+  ctx.fillText(
+    `🍖 ${Math.round(state.officeStations.foodLevel)}%`,
+    FOOD_BOWL_BOUNDS.x + 25,
+    FOOD_BOWL_BOUNDS.y + 42
+  );
 
   // 6. Bathtub Washroom Door / Station
   const isMuddy = state.isMuddy;
@@ -805,23 +863,46 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
   ctx.strokeStyle = isMuddy ? "#38bdf8" : "#334155";
   ctx.lineWidth = isMuddy ? 3 : 1.5;
   ctx.beginPath();
-  ctx.roundRect(BATHTUB_BOUNDS.x, BATHTUB_BOUNDS.y, BATHTUB_BOUNDS.width, BATHTUB_BOUNDS.height, 12);
+  ctx.roundRect(
+    BATHTUB_BOUNDS.x,
+    BATHTUB_BOUNDS.y,
+    BATHTUB_BOUNDS.width,
+    BATHTUB_BOUNDS.height,
+    12
+  );
   ctx.fill();
   ctx.stroke();
 
   ctx.fillStyle = isMuddy ? "#38bdf8" : "#94a3b8";
   ctx.font = "bold 9px monospace";
-  ctx.fillText("🛁 BATHTUB", BATHTUB_BOUNDS.x + BATHTUB_BOUNDS.width / 2, BATHTUB_BOUNDS.y + 35);
-  ctx.fillText(isMuddy ? "🧼 NEEDS WASH!" : "(CLEAN)", BATHTUB_BOUNDS.x + BATHTUB_BOUNDS.width / 2, BATHTUB_BOUNDS.y + 50);
+  ctx.fillText(
+    "🛁 BATHTUB",
+    BATHTUB_BOUNDS.x + BATHTUB_BOUNDS.width / 2,
+    BATHTUB_BOUNDS.y + 35
+  );
+  ctx.fillText(
+    isMuddy ? "🧼 NEEDS WASH!" : "(CLEAN)",
+    BATHTUB_BOUNDS.x + BATHTUB_BOUNDS.width / 2,
+    BATHTUB_BOUNDS.y + 50
+  );
 
   // 7. Back Door to Yard
-  const isPottyUrgent = state.bladder > 75 || state.duck.state === "SNIFFING_POTTY" || state.duck.state === "DRAGGED";
+  const isPottyUrgent =
+    state.bladder > 75 ||
+    state.duck.state === "SNIFFING_POTTY" ||
+    state.duck.state === "DRAGGED";
 
   ctx.fillStyle = isPottyUrgent ? "#065f46" : "#064e3b";
   ctx.strokeStyle = isPottyUrgent ? "#34d399" : "#10b981";
   ctx.lineWidth = isPottyUrgent ? 3 : 2;
   ctx.beginPath();
-  ctx.roundRect(BACK_DOOR_BOUNDS.x, BACK_DOOR_BOUNDS.y, BACK_DOOR_BOUNDS.width, BACK_DOOR_BOUNDS.height, 12);
+  ctx.roundRect(
+    BACK_DOOR_BOUNDS.x,
+    BACK_DOOR_BOUNDS.y,
+    BACK_DOOR_BOUNDS.width,
+    BACK_DOOR_BOUNDS.height,
+    12
+  );
   ctx.fill();
   ctx.stroke();
 
@@ -844,20 +925,36 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
     ctx.setLineDash([4, 4]);
     ctx.beginPath();
     ctx.moveTo(state.duck.x, state.duck.y);
-    ctx.lineTo(BACK_DOOR_BOUNDS.x + BACK_DOOR_BOUNDS.width / 2, BACK_DOOR_BOUNDS.y + BACK_DOOR_BOUNDS.height / 2);
+    ctx.lineTo(
+      BACK_DOOR_BOUNDS.x + BACK_DOOR_BOUNDS.width / 2,
+      BACK_DOOR_BOUNDS.y + BACK_DOOR_BOUNDS.height / 2
+    );
     ctx.stroke();
     ctx.setLineDash([]);
     ctx.restore();
   }
 
   ctx.fillStyle = "#047857";
-  ctx.fillRect(BACK_DOOR_BOUNDS.x + 10, BACK_DOOR_BOUNDS.y + 10, BACK_DOOR_BOUNDS.width - 20, BACK_DOOR_BOUNDS.height - 20);
+  ctx.fillRect(
+    BACK_DOOR_BOUNDS.x + 10,
+    BACK_DOOR_BOUNDS.y + 10,
+    BACK_DOOR_BOUNDS.width - 20,
+    BACK_DOOR_BOUNDS.height - 20
+  );
 
   ctx.fillStyle = "#a7f3d0";
   ctx.font = "bold 9px monospace";
   ctx.textAlign = "center";
-  ctx.fillText("BACK DOOR", BACK_DOOR_BOUNDS.x + BACK_DOOR_BOUNDS.width / 2, BACK_DOOR_BOUNDS.y + BACK_DOOR_BOUNDS.height / 2 - 4);
-  ctx.fillText(isPottyUrgent ? "👉 DROP HERE" : "(POTTY YARD)", BACK_DOOR_BOUNDS.x + BACK_DOOR_BOUNDS.width / 2, BACK_DOOR_BOUNDS.y + BACK_DOOR_BOUNDS.height / 2 + 8);
+  ctx.fillText(
+    "BACK DOOR",
+    BACK_DOOR_BOUNDS.x + BACK_DOOR_BOUNDS.width / 2,
+    BACK_DOOR_BOUNDS.y + BACK_DOOR_BOUNDS.height / 2 - 4
+  );
+  ctx.fillText(
+    isPottyUrgent ? "👉 DROP HERE" : "(POTTY YARD)",
+    BACK_DOOR_BOUNDS.x + BACK_DOOR_BOUNDS.width / 2,
+    BACK_DOOR_BOUNDS.y + BACK_DOOR_BOUNDS.height / 2 + 8
+  );
 
   // Amazon Delivery Parcel Knock
   if (state.activeSurpriseEvent?.type === "amazon-delivery") {
@@ -877,7 +974,11 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
     ctx.strokeRect(BACK_DOOR_BOUNDS.x - 70, BACK_DOOR_BOUNDS.y + 10, 80, 20);
     ctx.fillStyle = "#000000";
     ctx.font = "bold 8px monospace";
-    ctx.fillText("📦 SIGN PACKAGE", BACK_DOOR_BOUNDS.x - 30, BACK_DOOR_BOUNDS.y + 23);
+    ctx.fillText(
+      "📦 SIGN PACKAGE",
+      BACK_DOOR_BOUNDS.x - 30,
+      BACK_DOOR_BOUNDS.y + 23
+    );
   }
 
   // 8. Portfolio Hazards
@@ -889,7 +990,13 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
       ctx.strokeStyle = "#ef4444";
       ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.arc(hazard.x, hazard.y, hazard.radius + 8 + Math.sin(state.ticks * 0.2) * 4, 0, Math.PI * 2);
+      ctx.arc(
+        hazard.x,
+        hazard.y,
+        hazard.radius + 8 + Math.sin(state.ticks * 0.2) * 4,
+        0,
+        Math.PI * 2
+      );
       ctx.stroke();
 
       const maxTimer = state.duck.maxStateTimer || 240;
@@ -897,13 +1004,23 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
       ctx.strokeStyle = "#f97316";
       ctx.lineWidth = 4;
       ctx.beginPath();
-      ctx.arc(hazard.x, hazard.y, hazard.radius + 14, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress);
+      ctx.arc(
+        hazard.x,
+        hazard.y,
+        hazard.radius + 14,
+        -Math.PI / 2,
+        -Math.PI / 2 + Math.PI * 2 * progress
+      );
       ctx.stroke();
 
       ctx.fillStyle = "#f97316";
       ctx.font = "bold 9px monospace";
       ctx.textAlign = "center";
-      ctx.fillText("🦴 DROP KONG / CALL DROP IT!", hazard.x, hazard.y - hazard.radius - 10);
+      ctx.fillText(
+        "🦴 DROP KONG / CALL DROP IT!",
+        hazard.x,
+        hazard.y - hazard.radius - 10
+      );
     }
 
     ctx.fillStyle = hazard.isChewed ? "#7f1d1d" : "#27272a";
@@ -918,7 +1035,8 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
     ctx.font = "14px sans-serif";
     ctx.textAlign = "center";
     let icon = "📊";
-    if (hazard.id === "power-cable" || hazard.id === "server-cable") icon = "⚡";
+    if (hazard.id === "power-cable" || hazard.id === "server-cable")
+      icon = "⚡";
     if (hazard.id === "audit-file" || hazard.id === "clinical-db") icon = "📑";
     if (hazard.id === "laptop" || hazard.id === "garmin-watch") icon = "💻";
     if (hazard.id === "pitch-deck" || hazard.id === "resume") icon = "📊";
@@ -926,7 +1044,11 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
 
     ctx.fillStyle = isTargeted ? "#f87171" : "#a1a1aa";
     ctx.font = "9px monospace";
-    ctx.fillText(hazard.name.split(" ")[0], hazard.x, hazard.y + hazard.radius + 12);
+    ctx.fillText(
+      hazard.name.split(" ")[0],
+      hazard.x,
+      hazard.y + hazard.radius + 12
+    );
 
     ctx.restore();
   });
@@ -940,14 +1062,30 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
       ctx.strokeStyle = "#38bdf8";
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.ellipse(puddle.x, puddle.y, puddle.radius * 1.25, puddle.radius * 0.85, 0, 0, Math.PI * 2);
+      ctx.ellipse(
+        puddle.x,
+        puddle.y,
+        puddle.radius * 1.25,
+        puddle.radius * 0.85,
+        0,
+        0,
+        Math.PI * 2
+      );
       ctx.fill();
       ctx.stroke();
 
       // Inner puddle ripple
       ctx.fillStyle = "rgba(14, 165, 233, 0.55)";
       ctx.beginPath();
-      ctx.ellipse(puddle.x, puddle.y, puddle.radius * 0.7, puddle.radius * 0.45, 0, 0, Math.PI * 2);
+      ctx.ellipse(
+        puddle.x,
+        puddle.y,
+        puddle.radius * 0.7,
+        puddle.radius * 0.45,
+        0,
+        0,
+        Math.PI * 2
+      );
       ctx.fill();
 
       // Mop Progress Bar if scrubbing
@@ -955,7 +1093,12 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
         ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
         ctx.fillRect(puddle.x - 25, puddle.y - 28, 50, 6);
         ctx.fillStyle = "#22c55e";
-        ctx.fillRect(puddle.x - 25, puddle.y - 28, (50 * Math.min(100, puddle.mopProgress)) / 100, 6);
+        ctx.fillRect(
+          puddle.x - 25,
+          puddle.y - 28,
+          (50 * Math.min(100, puddle.mopProgress)) / 100,
+          6
+        );
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 1;
         ctx.strokeRect(puddle.x - 25, puddle.y - 28, 50, 6);
@@ -983,7 +1126,14 @@ function drawOfficeScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckSt
   }
 
   // 10. Procedural Duck Puppy Rendering
-  drawDuckPuppy(ctx, state.duck, state.ticks, state.bellyRubProgress, state.activeAccessory, state.isMuddy);
+  drawDuckPuppy(
+    ctx,
+    state.duck,
+    state.ticks,
+    state.bellyRubProgress,
+    state.activeAccessory,
+    state.isMuddy
+  );
 
   // 11. Floating Particles
   state.particles.forEach((p) => {
@@ -1052,13 +1202,29 @@ function drawDogParkScene(
     ctx.strokeStyle = "#451a03";
     ctx.lineWidth = 3;
     ctx.beginPath();
-    ctx.ellipse(puddle.x, puddle.y, puddle.radius * 1.3, puddle.radius, 0, 0, Math.PI * 2);
+    ctx.ellipse(
+      puddle.x,
+      puddle.y,
+      puddle.radius * 1.3,
+      puddle.radius,
+      0,
+      0,
+      Math.PI * 2
+    );
     ctx.fill();
     ctx.stroke();
 
     ctx.fillStyle = "#92400e";
     ctx.beginPath();
-    ctx.ellipse(puddle.x - 5, puddle.y - 4, puddle.radius * 0.7, puddle.radius * 0.5, 0, 0, Math.PI * 2);
+    ctx.ellipse(
+      puddle.x - 5,
+      puddle.y - 4,
+      puddle.radius * 0.7,
+      puddle.radius * 0.5,
+      0,
+      0,
+      Math.PI * 2
+    );
     ctx.fill();
 
     ctx.fillStyle = "#fde68a";
@@ -1072,13 +1238,27 @@ function drawDogParkScene(
     ctx.fillStyle = hurdle.cleared ? "#15803d" : "#ea580c";
     ctx.strokeStyle = "#ffffff";
     ctx.lineWidth = 2;
-    ctx.fillRect(hurdle.x - hurdle.width / 2, hurdle.y - hurdle.height / 2, hurdle.width, hurdle.height);
-    ctx.strokeRect(hurdle.x - hurdle.width / 2, hurdle.y - hurdle.height / 2, hurdle.width, hurdle.height);
+    ctx.fillRect(
+      hurdle.x - hurdle.width / 2,
+      hurdle.y - hurdle.height / 2,
+      hurdle.width,
+      hurdle.height
+    );
+    ctx.strokeRect(
+      hurdle.x - hurdle.width / 2,
+      hurdle.y - hurdle.height / 2,
+      hurdle.width,
+      hurdle.height
+    );
 
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 9px monospace";
     ctx.textAlign = "center";
-    ctx.fillText(hurdle.cleared ? "CLEARED" : "JUMP (SPACE)", hurdle.x, hurdle.y - hurdle.height / 2 - 6);
+    ctx.fillText(
+      hurdle.cleared ? "CLEARED" : "JUMP (SPACE)",
+      hurdle.x,
+      hurdle.y - hurdle.height / 2 - 6
+    );
   });
 
   // 4. Friendly Dog NPCs
@@ -1108,7 +1288,13 @@ function drawDogParkScene(
       ctx.strokeStyle = "#ca8a04";
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.arc(bone.x, bone.y, 14 + Math.sin(state.ticks * 0.1) * 2, 0, Math.PI * 2);
+      ctx.arc(
+        bone.x,
+        bone.y,
+        14 + Math.sin(state.ticks * 0.1) * 2,
+        0,
+        Math.PI * 2
+      );
       ctx.stroke();
 
       ctx.font = "16px sans-serif";
@@ -1193,8 +1379,16 @@ function drawDogParkScene(
   ctx.font = "bold 11px monospace";
   ctx.textAlign = "center";
   if (park.status === "aim") {
-    ctx.fillText("🎾 Phase 1: Click & Drag on field to Launch!", CANVAS_WIDTH / 2, 34);
-    ctx.fillText("Duck will sprint across to fetch & jump obstacles", CANVAS_WIDTH / 2, 50);
+    ctx.fillText(
+      "🎾 Phase 1: Click & Drag on field to Launch!",
+      CANVAS_WIDTH / 2,
+      34
+    );
+    ctx.fillText(
+      "Duck will sprint across to fetch & jump obstacles",
+      CANVAS_WIDTH / 2,
+      50
+    );
   } else if (park.status === "thrown" || park.status === "retrieving") {
     ctx.fillStyle = "#facc15";
     ctx.fillText(
@@ -1202,19 +1396,42 @@ function drawDogParkScene(
       CANVAS_WIDTH / 2,
       34
     );
-    ctx.fillText("Dodge mud puddles, jump hurdles & greet park friends!", CANVAS_WIDTH / 2, 50);
+    ctx.fillText(
+      "Dodge mud puddles, jump hurdles & greet park friends!",
+      CANVAS_WIDTH / 2,
+      50
+    );
   } else if (park.status === "success") {
     ctx.fillStyle = "#4ade80";
-    ctx.fillText(`🌟 Perfect Fetch! Duck retrieved ball & ${park.bonesCollected} bones!`, CANVAS_WIDTH / 2, 34);
-    ctx.fillText("Click 'Return to Office' for 30s Tired Puppy Buff", CANVAS_WIDTH / 2, 50);
+    ctx.fillText(
+      `🌟 Perfect Fetch! Duck retrieved ball & ${park.bonesCollected} bones!`,
+      CANVAS_WIDTH / 2,
+      34
+    );
+    ctx.fillText(
+      "Click 'Return to Office' for 30s Tired Puppy Buff",
+      CANVAS_WIDTH / 2,
+      50
+    );
   } else if (park.status === "muddy") {
     ctx.fillStyle = "#f87171";
-    ctx.fillText("💦 Duck splashed in mud! Needs a quick bath in the Washroom!", CANVAS_WIDTH / 2, 34);
-    ctx.fillText("Click 'Return to Office' to wash in Bathtub", CANVAS_WIDTH / 2, 50);
+    ctx.fillText(
+      "💦 Duck splashed in mud! Needs a quick bath in the Washroom!",
+      CANVAS_WIDTH / 2,
+      34
+    );
+    ctx.fillText(
+      "Click 'Return to Office' to wash in Bathtub",
+      CANVAS_WIDTH / 2,
+      50
+    );
   }
 }
 
-function drawBathtubScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckState) {
+function drawBathtubScene(
+  ctx: CanvasRenderingContext2D,
+  state: WorkingWithDuckState
+) {
   const bath = state.bathtubState;
 
   // 1. Cozy Pastel Blue Bathroom Tiles
@@ -1257,7 +1474,8 @@ function drawBathtubScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckS
   ctx.translate(400, 240);
 
   // Wet fluffy duck body
-  ctx.fillStyle = bath.soapLather > 30 ? "#f0fdf4" : state.isMuddy ? "#a16207" : "#faf5ee";
+  ctx.fillStyle =
+    bath.soapLather > 30 ? "#f0fdf4" : state.isMuddy ? "#a16207" : "#faf5ee";
   ctx.strokeStyle = "#fde68a";
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -1266,7 +1484,8 @@ function drawBathtubScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckS
   ctx.stroke();
 
   // Cute head resting on bathtub rim
-  ctx.fillStyle = bath.soapLather > 30 ? "#ffffff" : state.isMuddy ? "#854d0e" : "#ffffff";
+  ctx.fillStyle =
+    bath.soapLather > 30 ? "#ffffff" : state.isMuddy ? "#854d0e" : "#ffffff";
   ctx.beginPath();
   ctx.ellipse(0, -25, 25, 20, 0, 0, Math.PI * 2);
   ctx.fill();
@@ -1333,12 +1552,24 @@ function drawBathtubScene(ctx: CanvasRenderingContext2D, state: WorkingWithDuckS
   ctx.fillStyle = "#e0f2fe";
   ctx.font = "bold 10px monospace";
   if (bath.soapLather < 100) {
-    ctx.fillText(`🧼 Scrub Cursor to Lather Soap (${Math.round(bath.soapLather)}%)`, CANVAS_WIDTH / 2, 80);
+    ctx.fillText(
+      `🧼 Scrub Cursor to Lather Soap (${Math.round(bath.soapLather)}%)`,
+      CANVAS_WIDTH / 2,
+      80
+    );
   } else if (bath.rinseLevel < 100) {
-    ctx.fillText(`🚿 Click 'Rinse Spray' Button Below (${Math.round(bath.rinseLevel)}%)`, CANVAS_WIDTH / 2, 80);
+    ctx.fillText(
+      `🚿 Click 'Rinse Spray' Button Below (${Math.round(bath.rinseLevel)}%)`,
+      CANVAS_WIDTH / 2,
+      80
+    );
   } else {
     ctx.fillStyle = "#4ade80";
-    ctx.fillText("✨ 100% Clean! Click 'Finish Bath & Return'", CANVAS_WIDTH / 2, 80);
+    ctx.fillText(
+      "✨ 100% Clean! Click 'Finish Bath & Return'",
+      CANVAS_WIDTH / 2,
+      80
+    );
   }
 }
 
@@ -1365,21 +1596,33 @@ function drawCanvas(
 // --- Main React Component ---
 
 export const WorkingWithDuck: React.FC = () => {
-  const rawHighScore = useSyncExternalStore(subscribeStorage, getHighScoreSnapshot, getServerSnapshot);
+  const rawHighScore = useSyncExternalStore(
+    subscribeStorage,
+    getHighScoreSnapshot,
+    getServerSnapshot
+  );
   const loadedHighScore = parseInt(rawHighScore, 10) || 0;
 
   const { playNote, muted, setMuted } = useAudio();
   const { recordEvent } = useTelemetry();
 
   // Core Game State Ref for 60 FPS deterministic engine
-  const gameStateRef = useRef<WorkingWithDuckState>(createInitialDuckGameState(1, "campaign"));
+  const gameStateRef = useRef<WorkingWithDuckState>(
+    createInitialDuckGameState(1, "campaign")
+  );
   // UI React State for rendering HUD, modals, and overlays
-  const [uiState, setUiState] = useState<WorkingWithDuckState>(() => createInitialDuckGameState(1, "campaign"));
+  const [uiState, setUiState] = useState<WorkingWithDuckState>(() =>
+    createInitialDuckGameState(1, "campaign")
+  );
   const [isScrapbookOpen, setIsScrapbookOpen] = useState(false);
   const [isWardrobeOpen, setIsWardrobeOpen] = useState(false);
   const [activeScrapbookIndex, setActiveScrapbookIndex] = useState(0);
-  const [scrapbookViewMode, setScrapbookViewMode] = useState<"photo" | "vector">("photo");
-  const [mobileTab, setMobileTab] = useState<"toys" | "tricks" | "actions">("toys");
+  const [scrapbookViewMode, setScrapbookViewMode] = useState<
+    "photo" | "vector"
+  >("photo");
+  const [mobileTab, setMobileTab] = useState<"toys" | "tricks" | "actions">(
+    "toys"
+  );
   const isDraggingDuckStateRef = useRef(false);
   const isThrowingParkBallRef = useRef(false);
   const aimParkStartRef = useRef<{ x: number; y: number } | null>(null);
@@ -1394,13 +1637,19 @@ export const WorkingWithDuck: React.FC = () => {
     },
   });
 
-  const failTrapRef = useFocusTrap<HTMLDivElement>(uiState.status === "failed", {
-    onEscape: () => {
-      gameStateRef.current = createInitialDuckGameState(uiState.currentLevel, uiState.mode);
-      gameStateRef.current.status = "running";
-      setUiState({ ...gameStateRef.current });
-    },
-  });
+  const failTrapRef = useFocusTrap<HTMLDivElement>(
+    uiState.status === "failed",
+    {
+      onEscape: () => {
+        gameStateRef.current = createInitialDuckGameState(
+          uiState.currentLevel,
+          uiState.mode
+        );
+        gameStateRef.current.status = "running";
+        setUiState({ ...gameStateRef.current });
+      },
+    }
+  );
 
   const wardrobeTrapRef = useFocusTrap<HTMLDivElement>(isWardrobeOpen, {
     onEscape: () => setIsWardrobeOpen(false),
@@ -1420,7 +1669,10 @@ export const WorkingWithDuck: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [_isNearViewport, setIsNearViewport] = useState<boolean>(() => {
-    if (typeof window === "undefined" || typeof IntersectionObserver === "undefined") {
+    if (
+      typeof window === "undefined" ||
+      typeof IntersectionObserver === "undefined"
+    ) {
       return true;
     }
     return false;
@@ -1559,12 +1811,21 @@ export const WorkingWithDuck: React.FC = () => {
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      if (window.localStorage && typeof window.localStorage.setItem === "function") {
+      if (
+        window.localStorage &&
+        typeof window.localStorage.setItem === "function"
+      ) {
         if (uiState.highScore > loadedHighScore) {
-          window.localStorage.setItem("working_with_duck_high_score", String(uiState.highScore));
+          window.localStorage.setItem(
+            "working_with_duck_high_score",
+            String(uiState.highScore)
+          );
         }
         if (uiState.unlockedFacts.length > 0) {
-          window.localStorage.setItem("working_with_duck_unlocked_facts", JSON.stringify(uiState.unlockedFacts));
+          window.localStorage.setItem(
+            "working_with_duck_unlocked_facts",
+            JSON.stringify(uiState.unlockedFacts)
+          );
         }
       }
     } catch {}
@@ -1606,7 +1867,9 @@ export const WorkingWithDuck: React.FC = () => {
 
         // Process sound cue queue
         if (nextState.soundCueQueue.length > 0) {
-          nextState.soundCueQueue.forEach((cue) => playSoundCueRef.current(cue));
+          nextState.soundCueQueue.forEach((cue) =>
+            playSoundCueRef.current(cue)
+          );
           gameStateRef.current.soundCueQueue = [];
         }
 
@@ -1645,12 +1908,19 @@ export const WorkingWithDuck: React.FC = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
-      if (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable) {
+      if (
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable
+      ) {
         return;
       }
 
       // Restrict key listener to only fire when focus is within our container
-      if (!containerRef.current || !containerRef.current.contains(document.activeElement)) {
+      if (
+        !containerRef.current ||
+        !containerRef.current.contains(document.activeElement)
+      ) {
         return;
       }
 
@@ -1677,7 +1947,10 @@ export const WorkingWithDuck: React.FC = () => {
           gameStateRef.current = performTrick(state, "HIGH_FIVE");
           setUiState({ ...gameStateRef.current });
         } else if (state.inDogPark) {
-          gameStateRef.current = steerParkDuck(state, state.parkState.duckY - 25);
+          gameStateRef.current = steerParkDuck(
+            state,
+            state.parkState.duckY - 25
+          );
           setUiState({ ...gameStateRef.current });
         }
       } else if (e.key === "e" || e.key === "E") {
@@ -1702,7 +1975,10 @@ export const WorkingWithDuck: React.FC = () => {
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
         if (state.inDogPark) {
-          gameStateRef.current = steerParkDuck(state, state.parkState.duckY - 25);
+          gameStateRef.current = steerParkDuck(
+            state,
+            state.parkState.duckY - 25
+          );
           setUiState({ ...gameStateRef.current });
         } else {
           let s = state;
@@ -1713,12 +1989,18 @@ export const WorkingWithDuck: React.FC = () => {
           s = dragDuckTo(s, s.duck.x, nextY);
           gameStateRef.current = s;
           setUiState({ ...s });
-          announce(`Dragging Duck up. Horizontal position ${Math.round(s.duck.x)}, vertical position ${Math.round(nextY)}. Press Enter to drop.`, "polite");
+          announce(
+            `Dragging Duck up. Horizontal position ${Math.round(s.duck.x)}, vertical position ${Math.round(nextY)}. Press Enter to drop.`,
+            "polite"
+          );
         }
       } else if (e.key === "ArrowDown") {
         e.preventDefault();
         if (state.inDogPark) {
-          gameStateRef.current = steerParkDuck(state, state.parkState.duckY + 25);
+          gameStateRef.current = steerParkDuck(
+            state,
+            state.parkState.duckY + 25
+          );
           setUiState({ ...gameStateRef.current });
         } else {
           let s = state;
@@ -1729,7 +2011,10 @@ export const WorkingWithDuck: React.FC = () => {
           s = dragDuckTo(s, s.duck.x, nextY);
           gameStateRef.current = s;
           setUiState({ ...s });
-          announce(`Dragging Duck down. Horizontal position ${Math.round(s.duck.x)}, vertical position ${Math.round(nextY)}. Press Enter to drop.`, "polite");
+          announce(
+            `Dragging Duck down. Horizontal position ${Math.round(s.duck.x)}, vertical position ${Math.round(nextY)}. Press Enter to drop.`,
+            "polite"
+          );
         }
       } else if (e.key === "ArrowLeft") {
         e.preventDefault();
@@ -1742,7 +2027,10 @@ export const WorkingWithDuck: React.FC = () => {
           s = dragDuckTo(s, nextX, s.duck.y);
           gameStateRef.current = s;
           setUiState({ ...s });
-          announce(`Dragging Duck left. Horizontal position ${Math.round(nextX)}, vertical position ${Math.round(s.duck.y)}. Press Enter to drop.`, "polite");
+          announce(
+            `Dragging Duck left. Horizontal position ${Math.round(nextX)}, vertical position ${Math.round(s.duck.y)}. Press Enter to drop.`,
+            "polite"
+          );
         }
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
@@ -1755,7 +2043,10 @@ export const WorkingWithDuck: React.FC = () => {
           s = dragDuckTo(s, nextX, s.duck.y);
           gameStateRef.current = s;
           setUiState({ ...s });
-          announce(`Dragging Duck right. Horizontal position ${Math.round(nextX)}, vertical position ${Math.round(s.duck.y)}. Press Enter to drop.`, "polite");
+          announce(
+            `Dragging Duck right. Horizontal position ${Math.round(nextX)}, vertical position ${Math.round(s.duck.y)}. Press Enter to drop.`,
+            "polite"
+          );
         }
       } else if (e.key === "Enter") {
         if (state.duck.state === "DRAGGED") {
@@ -1765,7 +2056,12 @@ export const WorkingWithDuck: React.FC = () => {
           setUiState({ ...s });
           let dropLocation = "on the floor";
           if (s.inBathtub) dropLocation = "in the bathtub";
-          else if (s.duck.x >= BACK_DOOR_BOUNDS.x && s.duck.x <= BACK_DOOR_BOUNDS.x + BACK_DOOR_BOUNDS.width && s.duck.y >= BACK_DOOR_BOUNDS.y && s.duck.y <= BACK_DOOR_BOUNDS.y + BACK_DOOR_BOUNDS.height) {
+          else if (
+            s.duck.x >= BACK_DOOR_BOUNDS.x &&
+            s.duck.x <= BACK_DOOR_BOUNDS.x + BACK_DOOR_BOUNDS.width &&
+            s.duck.y >= BACK_DOOR_BOUNDS.y &&
+            s.duck.y <= BACK_DOOR_BOUNDS.y + BACK_DOOR_BOUNDS.height
+          ) {
             dropLocation = "outside to potty";
           }
           announce(`Dropped Duck ${dropLocation}.`, "polite");
@@ -1781,7 +2077,11 @@ export const WorkingWithDuck: React.FC = () => {
   useEffect(() => {
     const handleGlobalPointerUp = () => {
       const state = gameStateRef.current;
-      if (state.inDogPark && isThrowingParkBallRef.current && aimParkStartRef.current) {
+      if (
+        state.inDogPark &&
+        isThrowingParkBallRef.current &&
+        aimParkStartRef.current
+      ) {
         isThrowingParkBallRef.current = false;
         const powerX = (aimParkStartRef.current.x - 90) * 0.08;
         const powerY = (aimParkStartRef.current.y - 250) * 0.06;
@@ -1840,10 +2140,16 @@ export const WorkingWithDuck: React.FC = () => {
     // Announce status changes
     if (uiState.status !== lastAnnouncedStatusRef.current) {
       if (uiState.status === "won") {
-        announce("Sprint completed! Duck is asleep and work is done.", "assertive");
+        announce(
+          "Sprint completed! Duck is asleep and work is done.",
+          "assertive"
+        );
       } else if (uiState.status === "failed") {
         announce("Sprint failed. Duck got a time-out.", "assertive");
-      } else if (uiState.status === "running" && lastAnnouncedStatusRef.current === "idle") {
+      } else if (
+        uiState.status === "running" &&
+        lastAnnouncedStatusRef.current === "idle"
+      ) {
         announce("Sprint started.", "polite");
       }
       lastAnnouncedStatusRef.current = uiState.status;
@@ -1852,7 +2158,10 @@ export const WorkingWithDuck: React.FC = () => {
     // Announce high bladder
     const isBladderHigh = uiState.bladder > 80;
     if (isBladderHigh && !lastAnnouncedBladderRef.current) {
-      announce("Warning: Duck bladder is full. Drag the duck to the back door immediately!", "assertive");
+      announce(
+        "Warning: Duck bladder is full. Drag the duck to the back door immediately!",
+        "assertive"
+      );
       lastAnnouncedBladderRef.current = true;
     } else if (!isBladderHigh) {
       lastAnnouncedBladderRef.current = false;
@@ -1861,14 +2170,20 @@ export const WorkingWithDuck: React.FC = () => {
     // Announce high excitement
     const isExcitementHigh = uiState.excitement > 80;
     if (isExcitementHigh && !lastAnnouncedExcitementRef.current) {
-      announce("Warning: Duck excitement is high. Call Sit (Q) or take a dog park trip!", "polite");
+      announce(
+        "Warning: Duck excitement is high. Call Sit (Q) or take a dog park trip!",
+        "polite"
+      );
       lastAnnouncedExcitementRef.current = true;
     } else if (!isExcitementHigh) {
       lastAnnouncedExcitementRef.current = false;
     }
 
     // Announce major work progress milestones (every 25%)
-    const pct = Math.min(100, Math.round((uiState.workProgress / uiState.targetWorkProgress) * 100));
+    const pct = Math.min(
+      100,
+      Math.round((uiState.workProgress / uiState.targetWorkProgress) * 100)
+    );
     const milestone = Math.floor(pct / 25) * 25;
     if (milestone > lastAnnouncedWorkProgressRef.current && milestone > 0) {
       announce(`Work progress is at ${milestone} percent.`, "polite");
@@ -1902,7 +2217,12 @@ export const WorkingWithDuck: React.FC = () => {
 
     // Check click on surprise event target
     if (state.activeSurpriseEvent) {
-      if (state.activeSurpriseEvent.type === "squirrel-window" && x >= 340 && x <= 465 && y <= 85) {
+      if (
+        state.activeSurpriseEvent.type === "squirrel-window" &&
+        x >= 340 &&
+        x <= 465 &&
+        y <= 85
+      ) {
         gameStateRef.current = {
           ...state,
           activeSurpriseEvent: null,
@@ -2082,7 +2402,10 @@ export const WorkingWithDuck: React.FC = () => {
 
     // Belly Rubbing during The Flop
     if (state.duck.state === "THE_FLOP") {
-      const movedDist = Math.hypot(x - lastBellyScrubPosRef.current.x, y - lastBellyScrubPosRef.current.y);
+      const movedDist = Math.hypot(
+        x - lastBellyScrubPosRef.current.x,
+        y - lastBellyScrubPosRef.current.y
+      );
       if (movedDist > 12) {
         lastBellyScrubPosRef.current = { x, y };
         gameStateRef.current = scrubBelly(state, x, y);
@@ -2094,7 +2417,11 @@ export const WorkingWithDuck: React.FC = () => {
   const handleCanvasMouseUp = () => {
     const state = gameStateRef.current;
 
-    if (state.inDogPark && isThrowingParkBallRef.current && aimParkStartRef.current) {
+    if (
+      state.inDogPark &&
+      isThrowingParkBallRef.current &&
+      aimParkStartRef.current
+    ) {
       isThrowingParkBallRef.current = false;
       const powerX = (aimParkStartRef.current.x - 90) * 0.08;
       const powerY = (aimParkStartRef.current.y - 250) * 0.06;
@@ -2113,7 +2440,9 @@ export const WorkingWithDuck: React.FC = () => {
 
   const lastPointerTimeRef = useRef(0);
 
-  const handleCanvasPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+  const handleCanvasPointerDown = (
+    e: React.PointerEvent<HTMLCanvasElement>
+  ) => {
     lastPointerTimeRef.current = Date.now();
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
@@ -2127,7 +2456,9 @@ export const WorkingWithDuck: React.FC = () => {
     handleCanvasMouseDown(fakeMouseEvent);
   };
 
-  const handleCanvasPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+  const handleCanvasPointerMove = (
+    e: React.PointerEvent<HTMLCanvasElement>
+  ) => {
     const fakeMouseEvent = {
       clientX: e.clientX,
       clientY: e.clientY,
@@ -2146,7 +2477,9 @@ export const WorkingWithDuck: React.FC = () => {
     handleCanvasMouseUp();
   };
 
-  const handleCanvasPointerCancel = (e: React.PointerEvent<HTMLCanvasElement>) => {
+  const handleCanvasPointerCancel = (
+    e: React.PointerEvent<HTMLCanvasElement>
+  ) => {
     if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
       try {
         e.currentTarget.releasePointerCapture(e.pointerId);
@@ -2220,23 +2553,33 @@ export const WorkingWithDuck: React.FC = () => {
     }
   };
 
-  const currentSprint = SPRINTS.find((s) => s.level === uiState.currentLevel) || SPRINTS[0];
+  const currentSprint =
+    SPRINTS.find((s) => s.level === uiState.currentLevel) || SPRINTS[0];
 
   // Guided Onboarding Hint Text
   let tutorialHint: string | null = null;
   if (uiState.currentLevel === 1 && uiState.status === "running") {
     if (uiState.duck.state === "THE_FLOP") {
-      tutorialHint = "💖 Duck flopped on his back! Move your cursor back & forth over his belly!";
-    } else if (uiState.duck.state === "SNIFFING_POTTY" || uiState.bladder > 80) {
-      tutorialHint = "🚽 Duck needs to go! Click and drag Duck over to the Back Door!";
+      tutorialHint =
+        "💖 Duck flopped on his back! Move your cursor back & forth over his belly!";
+    } else if (
+      uiState.duck.state === "SNIFFING_POTTY" ||
+      uiState.bladder > 80
+    ) {
+      tutorialHint =
+        "🚽 Duck needs to go! Click and drag Duck over to the Back Door!";
     } else if (uiState.duck.state === "SNEAKY_CHEW") {
-      tutorialHint = "⚠️ Duck is eyeing your work! Drop a Kong (2) or Call Drop It (E) to save it!";
+      tutorialHint =
+        "⚠️ Duck is eyeing your work! Drop a Kong (2) or Call Drop It (E) to save it!";
     } else if (uiState.duck.state === "NO_TAKE_THROW") {
-      tutorialHint = "🎾 Duck caught the ball! Press (4) to trade a treat or (E) for Drop It!";
+      tutorialHint =
+        "🎾 Duck caught the ball! Press (4) to trade a treat or (E) for Drop It!";
     } else if (uiState.excitement > 80) {
-      tutorialHint = "⚡ Excitement is high! Call Sit (Q) or take a Dog Park trip!";
+      tutorialHint =
+        "⚡ Excitement is high! Call Sit (Q) or take a Dog Park trip!";
     } else {
-      tutorialHint = "💡 Tip: Work advances automatically. Press Space for active coding bursts & try training tricks (Q-W-E-R)!";
+      tutorialHint =
+        "💡 Tip: Work advances automatically. Press Space for active coding bursts & try training tricks (Q-W-E-R)!";
     }
   }
 
@@ -2264,12 +2607,23 @@ export const WorkingWithDuck: React.FC = () => {
               <span>Work Progress</span>
             </span>
             <span className="text-brand-cyan font-bold shrink-0 ml-1">
-              {Math.min(100, Math.round((uiState.workProgress / uiState.targetWorkProgress) * 100))}%
+              {Math.min(
+                100,
+                Math.round(
+                  (uiState.workProgress / uiState.targetWorkProgress) * 100
+                )
+              )}
+              %
             </span>
           </div>
           <div
             role="progressbar"
-            aria-valuenow={Math.min(100, Math.round((uiState.workProgress / uiState.targetWorkProgress) * 100))}
+            aria-valuenow={Math.min(
+              100,
+              Math.round(
+                (uiState.workProgress / uiState.targetWorkProgress) * 100
+              )
+            )}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-label="Work Progress"
@@ -2285,8 +2639,14 @@ export const WorkingWithDuck: React.FC = () => {
             />
           </div>
           <div className="flex justify-between items-center mt-1 text-[9px] sm:text-[10px] font-mono text-zinc-500">
-            <span className="truncate">{uiState.mode === "endless" ? "Endless Mode" : currentSprint.title.split(":")[0]}</span>
-            <span className="text-teal-400 font-bold shrink-0 ml-1">{uiState.multiplier.toFixed(1)}× Speed</span>
+            <span className="truncate">
+              {uiState.mode === "endless"
+                ? "Endless Mode"
+                : currentSprint.title.split(":")[0]}
+            </span>
+            <span className="text-teal-400 font-bold shrink-0 ml-1">
+              {uiState.multiplier.toFixed(1)}× Speed
+            </span>
           </div>
         </div>
 
@@ -2299,7 +2659,9 @@ export const WorkingWithDuck: React.FC = () => {
             </span>
             <span
               className={`font-bold shrink-0 ml-1 ${
-                uiState.excitement > 80 ? "text-amber-400 animate-pulse" : "text-zinc-300"
+                uiState.excitement > 80
+                  ? "text-amber-400 animate-pulse"
+                  : "text-zinc-300"
               }`}
             >
               {Math.round(uiState.excitement)}%
@@ -2327,8 +2689,14 @@ export const WorkingWithDuck: React.FC = () => {
             />
           </div>
           <div className="flex justify-between items-center mt-1 text-[9px] sm:text-[10px] font-mono text-zinc-500">
-            <span className="truncate">{uiState.excitement > 85 ? "⚠️ ZOOMIES" : "Fetch / Sit"}</span>
-            {uiState.calmBuffTimer > 0 && <span className="text-emerald-400 shrink-0 ml-1">Calm Active</span>}
+            <span className="truncate">
+              {uiState.excitement > 85 ? "⚠️ ZOOMIES" : "Fetch / Sit"}
+            </span>
+            {uiState.calmBuffTimer > 0 && (
+              <span className="text-emerald-400 shrink-0 ml-1">
+                Calm Active
+              </span>
+            )}
           </div>
         </div>
 
@@ -2341,7 +2709,9 @@ export const WorkingWithDuck: React.FC = () => {
               />
               <span>Bladder Clock</span>
             </span>
-            <span className={`font-bold shrink-0 ml-1 ${uiState.bladder > 80 ? "text-rose-400" : "text-zinc-300"}`}>
+            <span
+              className={`font-bold shrink-0 ml-1 ${uiState.bladder > 80 ? "text-rose-400" : "text-zinc-300"}`}
+            >
               {Math.round(uiState.bladder)}%
             </span>
           </div>
@@ -2367,7 +2737,11 @@ export const WorkingWithDuck: React.FC = () => {
             />
           </div>
           <div className="flex justify-between items-center mt-1 text-[9px] sm:text-[10px] font-mono text-zinc-500">
-            <span className="truncate">{uiState.duck.state === "SNIFFING_POTTY" ? "🚨 TO DOOR!" : "Drag to Door"}</span>
+            <span className="truncate">
+              {uiState.duck.state === "SNIFFING_POTTY"
+                ? "🚨 TO DOOR!"
+                : "Drag to Door"}
+            </span>
           </div>
         </div>
 
@@ -2378,7 +2752,9 @@ export const WorkingWithDuck: React.FC = () => {
               <IconHeart className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-400 shrink-0" />
               <span>Good Boy Scale</span>
             </span>
-            <span className="text-amber-300 font-bold shrink-0 ml-1">{Math.round(uiState.naughtyVsGood)}</span>
+            <span className="text-amber-300 font-bold shrink-0 ml-1">
+              {Math.round(uiState.naughtyVsGood)}
+            </span>
           </div>
           <div
             role="progressbar"
@@ -2401,14 +2777,16 @@ export const WorkingWithDuck: React.FC = () => {
           </div>
           <div className="flex justify-between items-center mt-1 text-[9px] sm:text-[10px] font-mono">
             <span className="text-rose-400 font-semibold">Naughty</span>
-            <span className="text-emerald-400 font-semibold">Good Boy (2.5×)</span>
+            <span className="text-emerald-400 font-semibold">
+              Good Boy (2.5×)
+            </span>
           </div>
         </div>
       </div>
 
       {/* Guided Tutorial Hint Banner */}
       {tutorialHint && (
-        <div className="mb-3 px-4 py-2 rounded-xl border border-brand-cyan/30 bg-brand-cyan/10 backdrop-blur-md flex items-center gap-2 text-xs font-mono text-brand-cyan animate-fadeIn">
+        <div className="mb-3 px-4 py-2 rounded-xl border border-brand-cyan/30 bg-brand-cyan/10 backdrop-blur-md flex items-center gap-2 text-xs font-mono text-brand-cyan animate-fadeIn [@media(max-height:500px)]:hidden">
           <IconInfoCircle className="w-4 h-4 shrink-0" />
           <span>{tutorialHint}</span>
         </div>
@@ -2442,8 +2820,8 @@ export const WorkingWithDuck: React.FC = () => {
           tabIndex={0}
           className={
             isFullscreen
-              ? "max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--footer-height,48px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] max-w-full aspect-[800/500] object-contain block cursor-crosshair touch-none my-auto mx-auto"
-              : "w-full h-auto aspect-[800/500] cursor-crosshair block touch-none"
+              ? "max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--layout-dock-height,64px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] max-w-full aspect-[800/500] object-contain block cursor-crosshair touch-none my-auto mx-auto"
+              : "w-full h-auto aspect-[800/500] cursor-crosshair block touch-none [@media(max-height:500px)]:w-auto [@media(max-height:500px)]:max-w-full [@media(max-height:500px)]:max-h-[68dvh] [@media(max-height:500px)]:mx-auto"
           }
         />
 
@@ -2457,7 +2835,9 @@ export const WorkingWithDuck: React.FC = () => {
               Working With <span className="text-brand-cyan">Duck</span>
             </h2>
             <p className="text-[11px] sm:text-xs font-mono text-amber-300 font-bold mb-1 sm:mb-2">
-              {uiState.mode === "endless" ? "Endless Mode · High Score Challenge" : currentSprint.title}
+              {uiState.mode === "endless"
+                ? "Endless Mode · High Score Challenge"
+                : currentSprint.title}
             </p>
             <p className="max-w-md text-[11px] sm:text-sm text-zinc-300 font-mono mb-4 sm:mb-6 leading-relaxed line-clamp-3 sm:line-clamp-none">
               {uiState.mode === "endless"
@@ -2467,14 +2847,23 @@ export const WorkingWithDuck: React.FC = () => {
             <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
               <button
                 onClick={() => {
-                  gameStateRef.current = { ...gameStateRef.current, status: "running" };
+                  gameStateRef.current = {
+                    ...gameStateRef.current,
+                    status: "running",
+                  };
                   setUiState((s) => ({ ...s, status: "running" }));
-                  recordEvent("working-with-duck", "project_click").catch(() => {});
+                  recordEvent("working-with-duck", "project_click").catch(
+                    () => {}
+                  );
                 }}
                 className="px-5 py-2.5 sm:px-6 sm:py-3 rounded-xl bg-brand-cyan text-black font-mono font-bold text-xs sm:text-sm hover:bg-white hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center gap-2 cursor-pointer min-h-[44px]"
               >
                 <IconPlayerPlay className="w-4 h-4 fill-current" />
-                <span>{uiState.mode === "endless" ? "Start Endless Mode" : `Start Sprint ${uiState.currentLevel}`}</span>
+                <span>
+                  {uiState.mode === "endless"
+                    ? "Start Endless Mode"
+                    : `Start Sprint ${uiState.currentLevel}`}
+                </span>
               </button>
 
               <button
@@ -2511,15 +2900,17 @@ export const WorkingWithDuck: React.FC = () => {
             <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono text-[10px] font-bold uppercase">
               {uiState.activeSkillToast.badge}
             </span>
-            <span className="text-xs font-mono text-zinc-300">{uiState.activeSkillToast.text}</span>
+            <span className="text-xs font-mono text-zinc-300">
+              {uiState.activeSkillToast.text}
+            </span>
           </div>
         )}
       </div>
 
       {/* Unified Tactile Action Dock */}
       <div className="mt-3 sm:mt-4 flex flex-col gap-2.5 font-mono">
-        {/* --- MOBILE VIEWPORT CONTROL DECK (<md) --- */}
-        <div className="flex md:hidden flex-col gap-2">
+        {/* --- MOBILE VIEWPORT CONTROL DECK (<md, or any short/landscape viewport) --- */}
+        <div className="flex [@media(min-width:768px)_and_(min-height:560px)]:hidden flex-col gap-2">
           {/* Segmented Switcher Tabs */}
           <div className="grid grid-cols-3 p-1 rounded-2xl bg-zinc-900/90 border border-zinc-800 gap-1 text-xs font-bold">
             <button
@@ -2570,7 +2961,10 @@ export const WorkingWithDuck: React.FC = () => {
             <div className="grid grid-cols-2 gap-2 animate-fadeIn">
               <button
                 onClick={() => {
-                  gameStateRef.current = { ...gameStateRef.current, selectedItem: "tennis-ball" };
+                  gameStateRef.current = {
+                    ...gameStateRef.current,
+                    selectedItem: "tennis-ball",
+                  };
                   setUiState((s) => ({ ...s, selectedItem: "tennis-ball" }));
                 }}
                 className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer ${
@@ -2585,7 +2979,10 @@ export const WorkingWithDuck: React.FC = () => {
 
               <button
                 onClick={() => {
-                  gameStateRef.current = { ...gameStateRef.current, selectedItem: "kong" };
+                  gameStateRef.current = {
+                    ...gameStateRef.current,
+                    selectedItem: "kong",
+                  };
                   setUiState((s) => ({ ...s, selectedItem: "kong" }));
                 }}
                 className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer ${
@@ -2599,7 +2996,10 @@ export const WorkingWithDuck: React.FC = () => {
 
               <button
                 onClick={() => {
-                  gameStateRef.current = { ...gameStateRef.current, selectedItem: "squeaky-toy" };
+                  gameStateRef.current = {
+                    ...gameStateRef.current,
+                    selectedItem: "squeaky-toy",
+                  };
                   setUiState((s) => ({ ...s, selectedItem: "squeaky-toy" }));
                 }}
                 className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer ${
@@ -2629,7 +3029,10 @@ export const WorkingWithDuck: React.FC = () => {
             <div className="grid grid-cols-2 gap-2 animate-fadeIn">
               <button
                 onClick={() => {
-                  gameStateRef.current = performTrick(gameStateRef.current, "SIT");
+                  gameStateRef.current = performTrick(
+                    gameStateRef.current,
+                    "SIT"
+                  );
                   setUiState({ ...gameStateRef.current });
                 }}
                 className="p-3 rounded-2xl border border-sky-500/40 bg-sky-500/10 text-sky-300 active:bg-sky-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
@@ -2639,7 +3042,10 @@ export const WorkingWithDuck: React.FC = () => {
 
               <button
                 onClick={() => {
-                  gameStateRef.current = performTrick(gameStateRef.current, "HIGH_FIVE");
+                  gameStateRef.current = performTrick(
+                    gameStateRef.current,
+                    "HIGH_FIVE"
+                  );
                   setUiState({ ...gameStateRef.current });
                 }}
                 className="p-3 rounded-2xl border border-pink-500/40 bg-pink-500/10 text-pink-300 active:bg-pink-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
@@ -2649,7 +3055,10 @@ export const WorkingWithDuck: React.FC = () => {
 
               <button
                 onClick={() => {
-                  gameStateRef.current = performTrick(gameStateRef.current, "DROP_IT");
+                  gameStateRef.current = performTrick(
+                    gameStateRef.current,
+                    "DROP_IT"
+                  );
                   setUiState({ ...gameStateRef.current });
                 }}
                 className="p-3 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 active:bg-emerald-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
@@ -2659,7 +3068,10 @@ export const WorkingWithDuck: React.FC = () => {
 
               <button
                 onClick={() => {
-                  gameStateRef.current = performTrick(gameStateRef.current, "SPIN");
+                  gameStateRef.current = performTrick(
+                    gameStateRef.current,
+                    "SPIN"
+                  );
                   setUiState({ ...gameStateRef.current });
                 }}
                 className="p-3 rounded-2xl border border-purple-500/40 bg-purple-500/10 text-purple-300 active:bg-purple-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
@@ -2676,7 +3088,9 @@ export const WorkingWithDuck: React.FC = () => {
                 <>
                   <button
                     onClick={() => {
-                      gameStateRef.current = activeCodeBurst(gameStateRef.current);
+                      gameStateRef.current = activeCodeBurst(
+                        gameStateRef.current
+                      );
                       setUiState({ ...gameStateRef.current });
                     }}
                     className="w-full py-3 px-4 rounded-2xl bg-cyan-500 text-black font-bold text-xs hover:bg-cyan-400 active:scale-98 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
@@ -2688,7 +3102,9 @@ export const WorkingWithDuck: React.FC = () => {
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => {
-                        gameStateRef.current = enterDogPark(gameStateRef.current);
+                        gameStateRef.current = enterDogPark(
+                          gameStateRef.current
+                        );
                         setUiState({ ...gameStateRef.current });
                       }}
                       className="p-3 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 active:bg-emerald-500/20 text-xs font-bold transition-all flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer"
@@ -2699,7 +3115,9 @@ export const WorkingWithDuck: React.FC = () => {
 
                     <button
                       onClick={() => {
-                        gameStateRef.current = enterBathtub(gameStateRef.current);
+                        gameStateRef.current = enterBathtub(
+                          gameStateRef.current
+                        );
                         setUiState({ ...gameStateRef.current });
                       }}
                       className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer ${
@@ -2741,7 +3159,9 @@ export const WorkingWithDuck: React.FC = () => {
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => {
-                        gameStateRef.current = jumpParkHurdle(gameStateRef.current);
+                        gameStateRef.current = jumpParkHurdle(
+                          gameStateRef.current
+                        );
                         setUiState({ ...gameStateRef.current });
                       }}
                       className="p-3 rounded-2xl bg-amber-400 text-black font-bold text-xs active:bg-amber-300 transition-all flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer shadow-[0_0_12px_rgba(250,204,21,0.3)]"
@@ -2751,7 +3171,9 @@ export const WorkingWithDuck: React.FC = () => {
 
                     <button
                       onClick={() => {
-                        gameStateRef.current = tapParkWhistle(gameStateRef.current);
+                        gameStateRef.current = tapParkWhistle(
+                          gameStateRef.current
+                        );
                         setUiState({ ...gameStateRef.current });
                       }}
                       className="p-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs font-bold transition-all flex items-center justify-center min-h-[48px] cursor-pointer"
@@ -2763,7 +3185,10 @@ export const WorkingWithDuck: React.FC = () => {
                   <button
                     onClick={() => {
                       const isSuccess = uiState.parkState.status === "success";
-                      gameStateRef.current = exitDogPark(gameStateRef.current, isSuccess);
+                      gameStateRef.current = exitDogPark(
+                        gameStateRef.current,
+                        isSuccess
+                      );
                       setUiState({ ...gameStateRef.current });
                     }}
                     className="w-full py-2.5 rounded-2xl border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs active:bg-zinc-800 transition-colors flex items-center justify-center min-h-[44px] cursor-pointer"
@@ -2776,7 +3201,7 @@ export const WorkingWithDuck: React.FC = () => {
           )}
 
           {/* Mobile Meta Controls Strip */}
-          <div className="flex items-center justify-between gap-1 pt-2 border-t border-zinc-800/80">
+          <div className="flex flex-wrap items-center justify-center gap-1.5 pt-2 border-t border-zinc-800/80">
             <button
               onClick={() => setIsWardrobeOpen(true)}
               className="p-2.5 rounded-xl border border-zinc-800 bg-zinc-900/80 text-amber-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
@@ -2798,7 +3223,11 @@ export const WorkingWithDuck: React.FC = () => {
               className="p-2.5 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
               title={isMusicMuted ? "Unmute Music" : "Mute Music"}
             >
-              {isMusicMuted ? <IconMusicOff className="w-4 h-4 text-zinc-500" /> : <IconMusic className="w-4 h-4 text-emerald-400" />}
+              {isMusicMuted ? (
+                <IconMusicOff className="w-4 h-4 text-zinc-500" />
+              ) : (
+                <IconMusic className="w-4 h-4 text-emerald-400" />
+              )}
             </button>
 
             <button
@@ -2806,23 +3235,34 @@ export const WorkingWithDuck: React.FC = () => {
               className="p-2.5 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
               title={muted ? "Unmute Audio" : "Mute Audio"}
             >
-              {muted ? <IconVolumeOff className="w-4 h-4" /> : <IconVolume className="w-4 h-4 text-brand-cyan" />}
+              {muted ? (
+                <IconVolumeOff className="w-4 h-4" />
+              ) : (
+                <IconVolume className="w-4 h-4 text-brand-cyan" />
+              )}
             </button>
 
             <FieldManualButton manualId="working-with-duck" label="Manual" />
-            <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} variant="header" />
+            <FullscreenButton
+              isFullscreen={isFullscreen}
+              onToggle={toggleFullscreen}
+              variant="header"
+            />
           </div>
         </div>
 
-        {/* --- DESKTOP VIEWPORT HOTBAR (>=md) --- */}
-        <div className="hidden md:flex flex-col gap-3">
+        {/* --- DESKTOP VIEWPORT HOTBAR (>=md and tall enough to fit 3 rows) --- */}
+        <div className="hidden [@media(min-width:768px)_and_(min-height:560px)]:flex flex-col gap-3">
           {/* Desktop Row 1: Toys [1-4] + Tricks [Q-W-E-R] */}
           <div className="flex flex-wrap items-center justify-between gap-2.5">
             {/* Toys & Treats */}
             <div className="flex items-center gap-1.5 flex-wrap">
               <button
                 onClick={() => {
-                  gameStateRef.current = { ...gameStateRef.current, selectedItem: "tennis-ball" };
+                  gameStateRef.current = {
+                    ...gameStateRef.current,
+                    selectedItem: "tennis-ball",
+                  };
                   setUiState((s) => ({ ...s, selectedItem: "tennis-ball" }));
                 }}
                 aria-pressed={uiState.selectedItem === "tennis-ball"}
@@ -2833,14 +3273,19 @@ export const WorkingWithDuck: React.FC = () => {
                 }`}
                 title="Throw ball to play fetch & drain Excitement"
               >
-                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-zinc-500">1</span>
+                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-zinc-500">
+                  1
+                </span>
                 <IconBallTennis className="w-3.5 h-3.5 text-lime-400" />
                 <span>Tennis Ball</span>
               </button>
 
               <button
                 onClick={() => {
-                  gameStateRef.current = { ...gameStateRef.current, selectedItem: "kong" };
+                  gameStateRef.current = {
+                    ...gameStateRef.current,
+                    selectedItem: "kong",
+                  };
                   setUiState((s) => ({ ...s, selectedItem: "kong" }));
                 }}
                 aria-pressed={uiState.selectedItem === "kong"}
@@ -2851,13 +3296,18 @@ export const WorkingWithDuck: React.FC = () => {
                 }`}
                 title="Drop chew toy to distract Duck away from desk hazards"
               >
-                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-zinc-500">2</span>
+                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-zinc-500">
+                  2
+                </span>
                 <span>Kong Chew</span>
               </button>
 
               <button
                 onClick={() => {
-                  gameStateRef.current = { ...gameStateRef.current, selectedItem: "squeaky-toy" };
+                  gameStateRef.current = {
+                    ...gameStateRef.current,
+                    selectedItem: "squeaky-toy",
+                  };
                   setUiState((s) => ({ ...s, selectedItem: "squeaky-toy" }));
                 }}
                 aria-pressed={uiState.selectedItem === "squeaky-toy"}
@@ -2868,7 +3318,9 @@ export const WorkingWithDuck: React.FC = () => {
                 }`}
                 title="Squeak to instantly get Duck's attention and recall"
               >
-                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-zinc-500">3</span>
+                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-zinc-500">
+                  3
+                </span>
                 <IconBone className="w-3.5 h-3.5" />
                 <span>Squeaky</span>
               </button>
@@ -2882,7 +3334,9 @@ export const WorkingWithDuck: React.FC = () => {
                 className="px-3 py-1.5 rounded-xl border border-zinc-800 bg-zinc-900/70 text-amber-300 hover:border-amber-500/40 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 title="Give treat (trades ball during No Take Only Throw)"
               >
-                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-zinc-500">4</span>
+                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-zinc-500">
+                  4
+                </span>
                 <span>Treat 🍖</span>
               </button>
             </div>
@@ -2891,49 +3345,69 @@ export const WorkingWithDuck: React.FC = () => {
             <div className="flex items-center gap-1.5 flex-wrap">
               <button
                 onClick={() => {
-                  gameStateRef.current = performTrick(gameStateRef.current, "SIT");
+                  gameStateRef.current = performTrick(
+                    gameStateRef.current,
+                    "SIT"
+                  );
                   setUiState({ ...gameStateRef.current });
                 }}
                 className="px-3 py-1.5 rounded-xl border border-sky-500/40 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 title="Command Sit: Calms Excitement (-20) & boosts Good Boy scale"
               >
-                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-sky-400">Q</span>
+                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-sky-400">
+                  Q
+                </span>
                 <span>Sit 🪑</span>
               </button>
 
               <button
                 onClick={() => {
-                  gameStateRef.current = performTrick(gameStateRef.current, "HIGH_FIVE");
+                  gameStateRef.current = performTrick(
+                    gameStateRef.current,
+                    "HIGH_FIVE"
+                  );
                   setUiState({ ...gameStateRef.current });
                 }}
                 className="px-3 py-1.5 rounded-xl border border-pink-500/40 bg-pink-500/10 text-pink-300 hover:bg-pink-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 title="Command High Five: Morale boost (+45 pts) & tail wag"
               >
-                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-pink-400">W</span>
+                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-pink-400">
+                  W
+                </span>
                 <span>Paw 🐾</span>
               </button>
 
               <button
                 onClick={() => {
-                  gameStateRef.current = performTrick(gameStateRef.current, "DROP_IT");
+                  gameStateRef.current = performTrick(
+                    gameStateRef.current,
+                    "DROP_IT"
+                  );
                   setUiState({ ...gameStateRef.current });
                 }}
                 className="px-3 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 title="Command Drop It: Immediately drops stolen hazards or ball (+60-75 pts)"
               >
-                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-emerald-400">E</span>
+                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-emerald-400">
+                  E
+                </span>
                 <span>Drop It ✋</span>
               </button>
 
               <button
                 onClick={() => {
-                  gameStateRef.current = performTrick(gameStateRef.current, "SPIN");
+                  gameStateRef.current = performTrick(
+                    gameStateRef.current,
+                    "SPIN"
+                  );
                   setUiState({ ...gameStateRef.current });
                 }}
                 className="px-3 py-1.5 rounded-xl border border-purple-500/40 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 title="Command Spin: Playful trick (+50 pts) with 360 rotation"
               >
-                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-purple-400">R</span>
+                <span className="px-1 py-0.5 rounded bg-zinc-950 text-[9px] text-purple-400">
+                  R
+                </span>
                 <span>Spin 🌀</span>
               </button>
             </div>
@@ -2946,7 +3420,9 @@ export const WorkingWithDuck: React.FC = () => {
               {!uiState.inDogPark && !uiState.inBathtub ? (
                 <button
                   onClick={() => {
-                    gameStateRef.current = activeCodeBurst(gameStateRef.current);
+                    gameStateRef.current = activeCodeBurst(
+                      gameStateRef.current
+                    );
                     setUiState({ ...gameStateRef.current });
                   }}
                   className="px-4 py-2 rounded-xl bg-cyan-500 text-black font-bold text-xs hover:bg-cyan-400 active:scale-95 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center gap-2 cursor-pointer"
@@ -2982,7 +3458,9 @@ export const WorkingWithDuck: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => {
-                      gameStateRef.current = jumpParkHurdle(gameStateRef.current);
+                      gameStateRef.current = jumpParkHurdle(
+                        gameStateRef.current
+                      );
                       setUiState({ ...gameStateRef.current });
                     }}
                     className="px-4 py-2 rounded-xl bg-amber-400 text-black font-bold text-xs hover:bg-amber-300 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_0_12px_rgba(250,204,21,0.3)]"
@@ -2992,7 +3470,9 @@ export const WorkingWithDuck: React.FC = () => {
 
                   <button
                     onClick={() => {
-                      gameStateRef.current = tapParkWhistle(gameStateRef.current);
+                      gameStateRef.current = tapParkWhistle(
+                        gameStateRef.current
+                      );
                       setUiState({ ...gameStateRef.current });
                     }}
                     className="px-3.5 py-2 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs font-bold transition-all cursor-pointer"
@@ -3003,7 +3483,10 @@ export const WorkingWithDuck: React.FC = () => {
                   <button
                     onClick={() => {
                       const isSuccess = uiState.parkState.status === "success";
-                      gameStateRef.current = exitDogPark(gameStateRef.current, isSuccess);
+                      gameStateRef.current = exitDogPark(
+                        gameStateRef.current,
+                        isSuccess
+                      );
                       setUiState({ ...gameStateRef.current });
                     }}
                     className="px-3.5 py-2 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs hover:bg-zinc-800 transition-colors cursor-pointer"
@@ -3067,7 +3550,11 @@ export const WorkingWithDuck: React.FC = () => {
                 className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer"
                 title={isMusicMuted ? "Unmute Lo-Fi Music" : "Mute Lo-Fi Music"}
               >
-                {isMusicMuted ? <IconMusicOff className="w-4 h-4 text-zinc-500" /> : <IconMusic className="w-4 h-4 text-emerald-400" />}
+                {isMusicMuted ? (
+                  <IconMusicOff className="w-4 h-4 text-zinc-500" />
+                ) : (
+                  <IconMusic className="w-4 h-4 text-emerald-400" />
+                )}
               </button>
 
               <button
@@ -3075,11 +3562,19 @@ export const WorkingWithDuck: React.FC = () => {
                 className="p-2 rounded-xl border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white transition-colors cursor-pointer"
                 title={muted ? "Unmute Audio" : "Mute Audio"}
               >
-                {muted ? <IconVolumeOff className="w-4 h-4" /> : <IconVolume className="w-4 h-4 text-brand-cyan" />}
+                {muted ? (
+                  <IconVolumeOff className="w-4 h-4" />
+                ) : (
+                  <IconVolume className="w-4 h-4 text-brand-cyan" />
+                )}
               </button>
 
               <FieldManualButton manualId="working-with-duck" label="Manual" />
-              <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} variant="header" />
+              <FullscreenButton
+                isFullscreen={isFullscreen}
+                onToggle={toggleFullscreen}
+                variant="header"
+              />
             </div>
           </div>
         </div>
@@ -3097,7 +3592,10 @@ export const WorkingWithDuck: React.FC = () => {
             </div>
 
             <span className="px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[11px] sm:text-xs font-bold uppercase tracking-wider">
-              {uiState.mode === "endless" ? "Endless Milestone" : currentSprint.title} Completed!
+              {uiState.mode === "endless"
+                ? "Endless Milestone"
+                : currentSprint.title}{" "}
+              Completed!
             </span>
 
             <h3 className="text-xl sm:text-2xl font-bold text-white mt-2 sm:mt-3 mb-1 sm:mb-2">
@@ -3105,8 +3603,14 @@ export const WorkingWithDuck: React.FC = () => {
             </h3>
 
             <p className="text-xs text-zinc-400 leading-relaxed mb-4">
-              Total Score: <strong className="text-amber-300 font-bold">{uiState.totalScore}</strong> · High Score:{" "}
-              <strong className="text-brand-cyan">{Math.max(uiState.highScore, loadedHighScore)}</strong>
+              Total Score:{" "}
+              <strong className="text-amber-300 font-bold">
+                {uiState.totalScore}
+              </strong>{" "}
+              · High Score:{" "}
+              <strong className="text-brand-cyan">
+                {Math.max(uiState.highScore, loadedHighScore)}
+              </strong>
             </p>
 
             {/* Unlocked Polaroid Card */}
@@ -3121,7 +3625,9 @@ export const WorkingWithDuck: React.FC = () => {
                     sizes="(max-width: 640px) 220px, 320px"
                   />
                 </div>
-                <h4 className="font-bold text-xs text-zinc-900">{uiState.latestUnlockedFact.title}</h4>
+                <h4 className="font-bold text-xs text-zinc-900">
+                  {uiState.latestUnlockedFact.title}
+                </h4>
                 <p className="text-[10px] sm:text-[11px] text-zinc-600 font-sans mt-1 leading-snug line-clamp-3 sm:line-clamp-none">
                   {uiState.latestUnlockedFact.fact}
                 </p>
@@ -3132,20 +3638,27 @@ export const WorkingWithDuck: React.FC = () => {
             <div className="mb-4">
               <button
                 onClick={() => {
-                  gameStateRef.current = advanceToNextLevel(gameStateRef.current);
+                  gameStateRef.current = advanceToNextLevel(
+                    gameStateRef.current
+                  );
                   setUiState({ ...gameStateRef.current, status: "running" });
                 }}
                 className="w-full py-3 px-4 rounded-xl bg-brand-cyan text-black font-bold text-xs sm:text-sm hover:bg-white active:scale-95 transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
               >
-                <span>{uiState.currentLevel < 5 ? `Proceed to Sprint ${uiState.currentLevel + 1} →` : "Play Endless Mode →"}</span>
+                <span>
+                  {uiState.currentLevel < 5
+                    ? `Proceed to Sprint ${uiState.currentLevel + 1} →`
+                    : "Play Endless Mode →"}
+                </span>
               </button>
             </div>
 
             {/* Recruiter CTA Suite */}
             <div className="pt-4 border-t border-zinc-800/80">
               <p className="text-[11px] sm:text-xs text-zinc-300 mb-3 font-sans leading-relaxed">
-                Raising Duck takes multitasking, empathy, and quick problem solving — the exact skills Fred brings to
-                engineering teams. Now that Duck is napping, let&apos;s talk!
+                Raising Duck takes multitasking, empathy, and quick problem
+                solving — the exact skills Fred brings to engineering teams. Now
+                that Duck is napping, let&apos;s talk!
               </p>
 
               <div className="flex flex-wrap items-center justify-center gap-2">
@@ -3191,15 +3704,20 @@ export const WorkingWithDuck: React.FC = () => {
               <IconAlertTriangle className="w-7 h-7 sm:w-8 sm:h-8" />
             </div>
 
-            <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Duck Got a Time-Out! 🐾</h3>
+            <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
+              Duck Got a Time-Out! 🐾
+            </h3>
             <p className="text-xs text-zinc-400 leading-relaxed mb-6 font-sans">
-              Too many sneaky chews and missed potty breaks tilted the scale fully red.
-              Take a breath and try again!
+              Too many sneaky chews and missed potty breaks tilted the scale
+              fully red. Take a breath and try again!
             </p>
 
             <button
               onClick={() => {
-                gameStateRef.current = createInitialDuckGameState(uiState.currentLevel, uiState.mode);
+                gameStateRef.current = createInitialDuckGameState(
+                  uiState.currentLevel,
+                  uiState.mode
+                );
                 gameStateRef.current.status = "running";
                 setUiState({ ...gameStateRef.current });
               }}
@@ -3231,20 +3749,51 @@ export const WorkingWithDuck: React.FC = () => {
                 <IconShirt className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-white">Duck&apos;s Wardrobe</h3>
-                <p className="text-[11px] sm:text-xs text-zinc-400">Equip unlocked accessories</p>
+                <h3 className="text-base sm:text-lg font-bold text-white">
+                  Duck&apos;s Wardrobe
+                </h3>
+                <p className="text-[11px] sm:text-xs text-zinc-400">
+                  Equip unlocked accessories
+                </p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 gap-2 sm:gap-2.5">
               {[
-                { id: "none", name: "Natural Fluffy Coat", desc: "Pure English Cream marshmallow vibes", icon: "🐾" },
-                { id: "bucket-hat", name: "Adidas Bucket Hat", desc: "Fact #5 · +10 Charisma & street style", icon: "🧢" },
-                { id: "bowtie", name: "Tech CEO Bowtie", desc: "+0.2× Multiplier boost for executive standups", icon: "👔" },
-                { id: "bandana", name: "Adventure Bandana", desc: "Crimson polka-dot outdoor explorer gear", icon: "🧣" },
-                { id: "rain-boots", name: "Yellow Mud Boots", desc: "100% Mud puddle immunity at the Dog Park!", icon: "🥾" },
+                {
+                  id: "none",
+                  name: "Natural Fluffy Coat",
+                  desc: "Pure English Cream marshmallow vibes",
+                  icon: "🐾",
+                },
+                {
+                  id: "bucket-hat",
+                  name: "Adidas Bucket Hat",
+                  desc: "Fact #5 · +10 Charisma & street style",
+                  icon: "🧢",
+                },
+                {
+                  id: "bowtie",
+                  name: "Tech CEO Bowtie",
+                  desc: "+0.2× Multiplier boost for executive standups",
+                  icon: "👔",
+                },
+                {
+                  id: "bandana",
+                  name: "Adventure Bandana",
+                  desc: "Crimson polka-dot outdoor explorer gear",
+                  icon: "🧣",
+                },
+                {
+                  id: "rain-boots",
+                  name: "Yellow Mud Boots",
+                  desc: "100% Mud puddle immunity at the Dog Park!",
+                  icon: "🥾",
+                },
               ].map((acc) => {
-                const isUnlocked = uiState.unlockedAccessories.includes(acc.id as DuckAccessory);
+                const isUnlocked = uiState.unlockedAccessories.includes(
+                  acc.id as DuckAccessory
+                );
                 const isSelected = uiState.activeAccessory === acc.id;
 
                 return (
@@ -3252,7 +3801,10 @@ export const WorkingWithDuck: React.FC = () => {
                     key={acc.id}
                     disabled={!isUnlocked}
                     onClick={() => {
-                      gameStateRef.current = equipAccessory(gameStateRef.current, acc.id as DuckAccessory);
+                      gameStateRef.current = equipAccessory(
+                        gameStateRef.current,
+                        acc.id as DuckAccessory
+                      );
                       setUiState({ ...gameStateRef.current });
                     }}
                     aria-checked={isSelected}
@@ -3261,23 +3813,31 @@ export const WorkingWithDuck: React.FC = () => {
                       isSelected
                         ? "border-brand-cyan bg-brand-cyan/15 text-white shadow-md"
                         : isUnlocked
-                        ? "border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-600"
-                        : "border-zinc-800/50 bg-zinc-900/30 text-zinc-600 cursor-not-allowed opacity-50"
+                          ? "border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-600"
+                          : "border-zinc-800/50 bg-zinc-900/30 text-zinc-600 cursor-not-allowed opacity-50"
                     }`}
                   >
                     <div className="flex items-center gap-2.5 sm:gap-3">
-                      <span className="text-xl sm:text-2xl shrink-0">{acc.icon}</span>
+                      <span className="text-xl sm:text-2xl shrink-0">
+                        {acc.icon}
+                      </span>
                       <div>
                         <div className="text-xs font-bold flex items-center gap-2">
                           <span>{acc.name}</span>
                           {!isUnlocked && (
-                            <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-[9px] text-zinc-400">Locked</span>
+                            <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-[9px] text-zinc-400">
+                              Locked
+                            </span>
                           )}
                         </div>
-                        <div className="text-[10px] text-zinc-400">{acc.desc}</div>
+                        <div className="text-[10px] text-zinc-400">
+                          {acc.desc}
+                        </div>
                       </div>
                     </div>
-                    {isSelected && <IconCheck className="w-4 h-4 text-brand-cyan shrink-0" />}
+                    {isSelected && (
+                      <IconCheck className="w-4 h-4 text-brand-cyan shrink-0" />
+                    )}
                   </button>
                 );
               })}
@@ -3306,8 +3866,12 @@ export const WorkingWithDuck: React.FC = () => {
                   <IconBook className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base sm:text-lg font-bold text-white">Duck&apos;s Polaroid Scrapbook</h3>
-                  <p className="text-[11px] sm:text-xs text-zinc-400">Real puppy milestones &amp; vector art</p>
+                  <h3 className="text-base sm:text-lg font-bold text-white">
+                    Duck&apos;s Polaroid Scrapbook
+                  </h3>
+                  <p className="text-[11px] sm:text-xs text-zinc-400">
+                    Real puppy milestones &amp; vector art
+                  </p>
                 </div>
               </div>
 
@@ -3342,8 +3906,13 @@ export const WorkingWithDuck: React.FC = () => {
             {/* Scrapbook Carousel Card */}
             {(() => {
               const currentFact = DUCK_FACTS[activeScrapbookIndex];
-              const isUnlocked = uiState.unlockedFacts.includes(currentFact.level);
-              const activeImageSource = scrapbookViewMode === "photo" ? currentFact.photoUrl : currentFact.svgUrl;
+              const isUnlocked = uiState.unlockedFacts.includes(
+                currentFact.level
+              );
+              const activeImageSource =
+                scrapbookViewMode === "photo"
+                  ? currentFact.photoUrl
+                  : currentFact.svgUrl;
 
               return (
                 <div className="rounded-2xl bg-white p-3 sm:p-4 text-black shadow-2xl">
@@ -3359,9 +3928,12 @@ export const WorkingWithDuck: React.FC = () => {
                     ) : (
                       <div className="absolute inset-0 bg-zinc-900 flex flex-col items-center justify-center text-zinc-500 p-4 text-center">
                         <IconBone className="w-8 h-8 mb-2 opacity-40" />
-                        <span className="text-xs font-mono font-bold">Locked Milestone</span>
+                        <span className="text-xs font-mono font-bold">
+                          Locked Milestone
+                        </span>
                         <span className="text-[10px] font-sans mt-1">
-                          Complete Sprint {currentFact.level} to unlock this milestone!
+                          Complete Sprint {currentFact.level} to unlock this
+                          milestone!
                         </span>
                       </div>
                     )}
@@ -3369,7 +3941,9 @@ export const WorkingWithDuck: React.FC = () => {
 
                   <div className="flex items-center justify-between mb-1">
                     <h4 className="font-bold text-xs sm:text-sm text-zinc-900">
-                      {isUnlocked ? currentFact.title : `Sprint ${currentFact.level} Secret`}
+                      {isUnlocked
+                        ? currentFact.title
+                        : `Sprint ${currentFact.level} Secret`}
                     </h4>
                     <span className="text-[10px] font-mono font-bold text-zinc-500">
                       Card {activeScrapbookIndex + 1} of {DUCK_FACTS.length}
@@ -3377,7 +3951,9 @@ export const WorkingWithDuck: React.FC = () => {
                   </div>
 
                   <p className="text-[11px] sm:text-xs text-zinc-700 font-sans leading-relaxed">
-                    {isUnlocked ? currentFact.fact : "Play through the campaign levels to reveal real photos, artwork, and stories about Duck."}
+                    {isUnlocked
+                      ? currentFact.fact
+                      : "Play through the campaign levels to reveal real photos, artwork, and stories about Duck."}
                   </p>
 
                   {isUnlocked && (
@@ -3393,7 +3969,9 @@ export const WorkingWithDuck: React.FC = () => {
             <div className="mt-3 sm:mt-4 flex items-center justify-between gap-2">
               <button
                 disabled={activeScrapbookIndex === 0}
-                onClick={() => setActiveScrapbookIndex((i) => Math.max(0, i - 1))}
+                onClick={() =>
+                  setActiveScrapbookIndex((i) => Math.max(0, i - 1))
+                }
                 className="px-3 py-1.5 rounded-lg border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer min-h-[38px]"
               >
                 ← Prev
@@ -3415,7 +3993,11 @@ export const WorkingWithDuck: React.FC = () => {
 
               <button
                 disabled={activeScrapbookIndex === DUCK_FACTS.length - 1}
-                onClick={() => setActiveScrapbookIndex((i) => Math.min(DUCK_FACTS.length - 1, i + 1))}
+                onClick={() =>
+                  setActiveScrapbookIndex((i) =>
+                    Math.min(DUCK_FACTS.length - 1, i + 1)
+                  )
+                }
                 className="px-3 py-1.5 rounded-lg border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer min-h-[38px]"
               >
                 Next →

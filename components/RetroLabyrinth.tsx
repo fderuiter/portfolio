@@ -1,6 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback, useMemo, useSyncExternalStore } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { clamp } from "@/lib/game-utils";
 import { useAudio } from "@/components/providers/AudioProvider";
@@ -113,8 +120,14 @@ const getHighScoreSnapshot = () => {
 const getHighScoreServerSnapshot = () => "0";
 const emptySubscribe = () => () => {};
 
-export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propIsMounted }) => {
-  const clientMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
+export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({
+  isMounted: propIsMounted,
+}) => {
+  const clientMounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
   const isMounted = propIsMounted ?? clientMounted;
   const rawHighScore = useSyncExternalStore(
     subscribeHighScore,
@@ -124,20 +137,26 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
   const loadedHighScore = parseInt(rawHighScore, 10) || 0;
 
   // Persistent Cyberdeck Profile & Meta-Progression
-  const [profile, setProfile] = useState<CyberdeckProfile>(() => loadCyberdeckProfile());
-  const [selectedClassId, setSelectedClassId] = useState<CyberdeckClassId>("script_kiddie");
-  const selectedClass = CYBERDECK_CLASSES[selectedClassId] || CYBERDECK_CLASSES.script_kiddie;
+  const [profile, setProfile] = useState<CyberdeckProfile>(() =>
+    loadCyberdeckProfile()
+  );
+  const [selectedClassId, setSelectedClassId] =
+    useState<CyberdeckClassId>("script_kiddie");
+  const selectedClass =
+    CYBERDECK_CLASSES[selectedClassId] || CYBERDECK_CLASSES.script_kiddie;
 
   // CRT Phosphor Theme & Calibration
   const [crtThemeId, setCrtThemeId] = useState<CRTThemeId>("emerald");
-  const [crtCalibration, setCrtCalibration] = useState<CRTCalibrationConfig>(() =>
-    loadCRTCalibration()
+  const [crtCalibration, setCrtCalibration] = useState<CRTCalibrationConfig>(
+    () => loadCRTCalibration()
   );
   const [isCRTModalOpen, setIsCRTModalOpen] = useState(false);
   const currentTheme = CRT_THEMES[crtThemeId] || CRT_THEMES.emerald;
 
   // Game mode & stage
-  const [gameMode, setGameMode] = useState<"roguelike" | "classic">("roguelike");
+  const [gameMode, setGameMode] = useState<"roguelike" | "classic">(
+    "roguelike"
+  );
   const [stage, setStage] = useState<number>(1);
   const [roomIndex, setRoomIndex] = useState<number>(0);
   const [campaignRooms, setCampaignRooms] = useState<DungeonRoom[]>(() =>
@@ -146,7 +165,10 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
 
   // Active room & grid
   const [currentMaze, setCurrentMaze] = useState<string[][]>(STAGE_1_MAZE);
-  const [playerPosition, setPlayerPosition] = useState({ x: START_X, y: START_Y });
+  const [playerPosition, setPlayerPosition] = useState({
+    x: START_X,
+    y: START_Y,
+  });
   const [playerHp, setPlayerHp] = useState(selectedClass.baseHp);
   const [maxPlayerHp, setMaxPlayerHp] = useState(selectedClass.baseHp);
 
@@ -154,7 +176,9 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
   const [currentRam, setCurrentRam] = useState(selectedClass.baseRam);
   const [maxRam, setMaxRam] = useState(selectedClass.baseRam);
   const [cryptoBounty, setCryptoBounty] = useState(0);
-  const [bypassChips, setBypassChips] = useState(selectedClass.startBypassChips);
+  const [bypassChips, setBypassChips] = useState(
+    selectedClass.startBypassChips
+  );
 
   // Scoring & Stats
   const [score, setScore] = useState(0);
@@ -164,7 +188,13 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
 
   // Game lifecycle status & Modals
   const [gameStatus, setGameStatus] = useState<
-    "playing" | "victory" | "caught" | "timesheet" | "hacking" | "darknet_shop" | "class_select"
+    | "playing"
+    | "victory"
+    | "caught"
+    | "timesheet"
+    | "hacking"
+    | "darknet_shop"
+    | "class_select"
   >("playing");
   const [isFocused, setIsFocused] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -174,22 +204,28 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
   const [hackingFeedback, setHackingFeedback] = useState<string>("");
 
   // Combat & Weapons
-  const [weapons, setWeapons] = useState<Record<WeaponId, Weapon>>(DEFAULT_WEAPONS);
+  const [weapons, setWeapons] =
+    useState<Record<WeaponId, Weapon>>(DEFAULT_WEAPONS);
   const [rawActiveWeaponId, setActiveWeaponId] = useState<WeaponId>(() => {
     return selectedClass.starterWeapons?.[0] || "npm_install";
   });
-  const activeWeaponId = selectedClass.starterWeapons.includes(rawActiveWeaponId)
+  const activeWeaponId = selectedClass.starterWeapons.includes(
+    rawActiveWeaponId
+  )
     ? rawActiveWeaponId
     : selectedClass.starterWeapons[0] || "npm_install";
   const [dronesStunned, setDronesStunned] = useState(false);
-  const [activeSideEffect, setActiveSideEffect] = useState<ActiveSideEffect | null>(null);
+  const [activeSideEffect, setActiveSideEffect] =
+    useState<ActiveSideEffect | null>(null);
 
   // Room Entities
   const [enemies, setEnemies] = useState<Enemy[]>([]);
   const [items, setItems] = useState<ItemPickup[]>([]);
   const [boss, setBoss] = useState<BossState | undefined>(undefined);
   const [tspNodes, setTspNodes] = useState(generateTSPRoom().tspNodes || []);
-  const [tspWalls, setTspWalls] = useState(generateTSPRoom().tspMovingWalls || []);
+  const [tspWalls, setTspWalls] = useState(
+    generateTSPRoom().tspMovingWalls || []
+  );
 
   // Backward compatibility state for Stage 2 Drone
   const [drones, setDrones] = useState<Drone[]>([]);
@@ -237,7 +273,9 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
       if (mode === "classic") {
         setStage(targetStageOrIndex);
         const classicRoom =
-          targetStageOrIndex === 2 ? generateClassicStage2() : generateClassicStage1();
+          targetStageOrIndex === 2
+            ? generateClassicStage2()
+            : generateClassicStage1();
         setCurrentMaze(classicRoom.grid);
         setPlayerPosition({ x: classicRoom.startX, y: classicRoom.startY });
         setEnemies(classicRoom.enemies);
@@ -276,7 +314,12 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
             }))
         );
 
-        const fov = calculateFOV(currentRoom.grid, currentRoom.startX, currentRoom.startY, 7);
+        const fov = calculateFOV(
+          currentRoom.grid,
+          currentRoom.startX,
+          currentRoom.startY,
+          7
+        );
         setVisibleMap(fov.visible);
         setExploredMap(fov.explored);
       }
@@ -312,7 +355,8 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
 
   // Start Roguelike Campaign with chosen Cyberdeck Class
   const startRoguelikeCampaign = useCallback(() => {
-    const chosenClass = CYBERDECK_CLASSES[selectedClassId] || CYBERDECK_CLASSES.script_kiddie;
+    const chosenClass =
+      CYBERDECK_CLASSES[selectedClassId] || CYBERDECK_CLASSES.script_kiddie;
     setPlayerHp(chosenClass.baseHp);
     setMaxPlayerHp(chosenClass.baseHp);
     setCurrentRam(chosenClass.baseRam);
@@ -493,7 +537,10 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                   ...w,
                   npm_install: {
                     ...w.npm_install,
-                    ammo: Math.min(w.npm_install.maxAmmo, w.npm_install.ammo + 4),
+                    ammo: Math.min(
+                      w.npm_install.maxAmmo,
+                      w.npm_install.ammo + 4
+                    ),
                   },
                 }));
                 setScore((s) => s + 100);
@@ -505,7 +552,10 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                   ...w,
                   git_force_push: {
                     ...w.git_force_push,
-                    ammo: Math.min(w.git_force_push.maxAmmo, w.git_force_push.ammo + 1),
+                    ammo: Math.min(
+                      w.git_force_push.maxAmmo,
+                      w.git_force_push.ammo + 1
+                    ),
                   },
                   zero_day: {
                     ...w.zero_day,
@@ -544,10 +594,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
         );
 
         // Terminal / Chest Intercept
-        if (
-          gameMode === "roguelike" &&
-          currentMaze[nextY][nextX] === "T"
-        ) {
+        if (gameMode === "roguelike" && currentMaze[nextY][nextX] === "T") {
           if (roomIndex === 3) {
             setGameStatus("timesheet");
           } else {
@@ -560,7 +607,11 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
         // Enemy collision check
         if (!dronesStunned) {
           const hitEnemy = enemies.find(
-            (e) => e.x === nextX && e.y === nextY && e.state !== "stunned" && e.state !== "frozen"
+            (e) =>
+              e.x === nextX &&
+              e.y === nextY &&
+              e.state !== "stunned" &&
+              e.state !== "frozen"
           );
           if (hitEnemy) {
             setPlayerHp((hp) => {
@@ -588,12 +639,16 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
           setGameStatus("victory");
           playSuccess();
           retroAudio.playHackSuccess();
-          const finalScore = score + Math.max(100, 1000 - nextMoves * 20) + cryptoBounty;
+          const finalScore =
+            score + Math.max(100, 1000 - nextMoves * 20) + cryptoBounty;
           setScore(finalScore);
           if (finalScore > effectiveHighScore) {
             setHighScore(finalScore);
             if (typeof window !== "undefined") {
-              localStorage.setItem("retro_labyrinth_highscore", finalScore.toString());
+              localStorage.setItem(
+                "retro_labyrinth_highscore",
+                finalScore.toString()
+              );
             }
           }
 
@@ -607,7 +662,10 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
           saveCyberdeckProfile(updatedProf);
 
           recordEvent("labyrinth_solved", "project_click").catch((err) => {
-            console.error("Failed to record telemetry for labyrinth solution:", err);
+            console.error(
+              "Failed to record telemetry for labyrinth solution:",
+              err
+            );
           });
         }
       }
@@ -809,7 +867,13 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
         activeSideEffect?.type === "scrambled_keys" &&
         activeSideEffect.expiresAt > Date.now();
 
-      if (key === "1" || key === "2" || key === "3" || key === "4" || key === "5") {
+      if (
+        key === "1" ||
+        key === "2" ||
+        key === "3" ||
+        key === "4" ||
+        key === "5"
+      ) {
         const slotIdx = parseInt(key, 10) - 1;
         const weaponId = selectedClass.starterWeapons[slotIdx];
         if (weaponId && weapons[weaponId] && weapons[weaponId].ammo > 0) {
@@ -874,7 +938,11 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
     for (let i = 1; i <= starterWeapons.length; i++) {
       const candidateIdx = (currentIdx + i) % starterWeapons.length;
       const candidateWeaponId = starterWeapons[candidateIdx];
-      if (candidateWeaponId && weapons[candidateWeaponId] && weapons[candidateWeaponId].ammo > 0) {
+      if (
+        candidateWeaponId &&
+        weapons[candidateWeaponId] &&
+        weapons[candidateWeaponId].ammo > 0
+      ) {
         setActiveWeaponId(candidateWeaponId);
         handleFireWeapon(candidateWeaponId);
         break;
@@ -884,7 +952,8 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
 
   // BlinkBrowse cursor movement handler
   const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (gameMode !== "roguelike" || roomIndex !== 2 || gameStatus !== "playing") return;
+    if (gameMode !== "roguelike" || roomIndex !== 2 || gameStatus !== "playing")
+      return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -915,8 +984,10 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
     cursorGridPosRef.current = { x: gridX, y: gridY };
 
     if (Math.random() < 0.2) {
-      const dx = gridX > playerPosition.x ? 1 : gridX < playerPosition.x ? -1 : 0;
-      const dy = gridY > playerPosition.y ? 1 : gridY < playerPosition.y ? -1 : 0;
+      const dx =
+        gridX > playerPosition.x ? 1 : gridX < playerPosition.x ? -1 : 0;
+      const dy =
+        gridY > playerPosition.y ? 1 : gridY < playerPosition.y ? -1 : 0;
       if (dx !== 0 || dy !== 0) {
         tryMove(dx, dy);
       }
@@ -1042,13 +1113,14 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
       // 2. Update Enemy AI
       if (gameStatus === "playing" && enemies.length > 0 && deltaMs > 0) {
         if (Math.random() < 0.05) {
-          const { updatedEnemies, damageToPlayer, caughtPlayer } = updateEnemyAI(
-            enemies,
-            currentMaze,
-            playerPosition.x,
-            playerPosition.y,
-            deltaMs
-          );
+          const { updatedEnemies, damageToPlayer, caughtPlayer } =
+            updateEnemyAI(
+              enemies,
+              currentMaze,
+              playerPosition.x,
+              playerPosition.y,
+              deltaMs
+            );
           setEnemies(updatedEnemies);
 
           if (damageToPlayer > 0) {
@@ -1066,7 +1138,12 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
       }
 
       // 3. Update Boss
-      if (gameStatus === "playing" && boss && !boss.defeated && gameMode === "roguelike") {
+      if (
+        gameStatus === "playing" &&
+        boss &&
+        !boss.defeated &&
+        gameMode === "roguelike"
+      ) {
         const { updatedBoss, spawnedDamage } = updateFaceForgeBoss(
           boss,
           playerPosition.x,
@@ -1245,7 +1322,9 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
             tspNodes.forEach((node) => {
               const nx = node.x * cellW + cellW / 2;
               const ny = node.y * cellH + cellH / 2;
-              ctx.fillStyle = node.visited ? "#10b981" : currentTheme.accentColor;
+              ctx.fillStyle = node.visited
+                ? "#10b981"
+                : currentTheme.accentColor;
               ctx.beginPath();
               ctx.arc(nx, ny, 3.5, 0, Math.PI * 2);
               ctx.fill();
@@ -1272,12 +1351,12 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
               enemy.state === "frozen"
                 ? "rgba(56, 189, 248, 0.5)"
                 : enemy.state === "confused"
-                ? "rgba(236, 72, 153, 0.4)"
-                : enemy.state === "stunned"
-                ? "rgba(56, 189, 248, 0.3)"
-                : enemy.state === "chase"
-                ? "rgba(239, 68, 68, 0.4)"
-                : "rgba(245, 158, 11, 0.3)";
+                  ? "rgba(236, 72, 153, 0.4)"
+                  : enemy.state === "stunned"
+                    ? "rgba(56, 189, 248, 0.3)"
+                    : enemy.state === "chase"
+                      ? "rgba(239, 68, 68, 0.4)"
+                      : "rgba(245, 158, 11, 0.3)";
             ctx.beginPath();
             ctx.arc(ex, ey, 8, 0, Math.PI * 2);
             ctx.fill();
@@ -1286,8 +1365,8 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
               enemy.state === "frozen"
                 ? "#38bdf8"
                 : enemy.state === "confused"
-                ? "#ec4899"
-                : enemy.color;
+                  ? "#ec4899"
+                  : enemy.color;
             ctx.beginPath();
             ctx.arc(ex, ey, 3.5, 0, Math.PI * 2);
             ctx.fill();
@@ -1490,8 +1569,8 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
     gameMode === "roguelike"
       ? campaignRooms[roomIndex] || campaignRooms[0]
       : stage === 2
-      ? generateClassicStage2()
-      : generateClassicStage1();
+        ? generateClassicStage2()
+        : generateClassicStage1();
 
   return (
     <div className="w-full flex flex-col items-center select-none my-6 font-mono">
@@ -1515,7 +1594,9 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                   : "bg-neutral-700"
               }`}
             />
-            {isFocused ? "Netrunner Breach: ACTIVE" : "Click Subnet to Focus & Hack"}
+            {isFocused
+              ? "Netrunner Breach: ACTIVE"
+              : "Click Subnet to Focus & Hack"}
           </span>
 
           {/* Class Badge */}
@@ -1525,14 +1606,20 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
             title="Change Cyberdeck Class"
           >
             <span>{selectedClass.icon}</span>
-            <span className="font-bold text-brand-cyan">{selectedClass.name}</span>
+            <span className="font-bold text-brand-cyan">
+              {selectedClass.name}
+            </span>
           </button>
         </div>
 
         {/* Mode Selector, CRT Palette & Expand */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center justify-end gap-1.5">
           <FieldManualButton manualId="retro-labyrinth" label="Manual" />
-          <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} variant="header" />
+          <FullscreenButton
+            isFullscreen={isFullscreen}
+            onToggle={toggleFullscreen}
+            variant="header"
+          />
 
           {/* CRT Theme Switcher */}
           <div className="flex items-center gap-0.5 bg-neutral-900 p-0.5 rounded-lg text-[9px]">
@@ -1540,7 +1627,9 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
               onClick={() => setCrtThemeId("emerald")}
               title="Emerald Green (VT220)"
               className={`px-1.5 py-0.5 rounded cursor-pointer ${
-                crtThemeId === "emerald" ? "bg-emerald-500 text-black font-bold" : "text-neutral-400"
+                crtThemeId === "emerald"
+                  ? "bg-emerald-500 text-black font-bold"
+                  : "text-neutral-400"
               }`}
             >
               🟢
@@ -1549,7 +1638,9 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
               onClick={() => setCrtThemeId("amber")}
               title="Amber Hacker (IBM 3270)"
               className={`px-1.5 py-0.5 rounded cursor-pointer ${
-                crtThemeId === "amber" ? "bg-amber-500 text-black font-bold" : "text-neutral-400"
+                crtThemeId === "amber"
+                  ? "bg-amber-500 text-black font-bold"
+                  : "text-neutral-400"
               }`}
             >
               🟠
@@ -1558,7 +1649,9 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
               onClick={() => setCrtThemeId("synthwave")}
               title="Synthwave Neon"
               className={`px-1.5 py-0.5 rounded cursor-pointer ${
-                crtThemeId === "synthwave" ? "bg-pink-500 text-black font-bold" : "text-neutral-400"
+                crtThemeId === "synthwave"
+                  ? "bg-pink-500 text-black font-bold"
+                  : "text-neutral-400"
               }`}
             >
               🟣
@@ -1567,7 +1660,9 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
               onClick={() => setCrtThemeId("matrix")}
               title="Matrix Terminal"
               className={`px-1.5 py-0.5 rounded cursor-pointer ${
-                crtThemeId === "matrix" ? "bg-green-600 text-black font-bold" : "text-neutral-400"
+                crtThemeId === "matrix"
+                  ? "bg-green-600 text-black font-bold"
+                  : "text-neutral-400"
               }`}
             >
               🟩
@@ -1656,15 +1751,17 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
           variant="floating"
         />
         {/* Header HUD: Subnet Badge, HP, RAM, Crypto, Score */}
-        <div className="w-full flex justify-between items-center text-[10px] font-bold px-2 py-0.5 border-b border-neutral-900/60">
+        <div className="w-full flex flex-wrap justify-between items-center gap-x-3 gap-y-1 text-[10px] font-bold px-2 py-0.5 border-b border-neutral-900/60">
           <div className="flex items-center gap-2">
-            <span className="text-neutral-400">SYSTEM_LABYRINTH.EXE · {currentRoom.badge}</span>
+            <span className="text-neutral-400">
+              SYSTEM_LABYRINTH.EXE · {currentRoom.badge}
+            </span>
             <span className="text-brand-cyan/80 text-[9px] hidden sm:inline truncate max-w-[150px]">
               [{currentRoom.title}]
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             {/* Player HP */}
             <div className="flex items-center gap-1 text-[9px]">
               <span className="text-neutral-500">HP</span>
@@ -1674,10 +1771,12 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                     playerHp > 50
                       ? "bg-emerald-500"
                       : playerHp > 25
-                      ? "bg-amber-500"
-                      : "bg-rose-500 animate-pulse"
+                        ? "bg-amber-500"
+                        : "bg-rose-500 animate-pulse"
                   }`}
-                  style={{ width: `${Math.max(0, (playerHp / maxPlayerHp) * 100)}%` }}
+                  style={{
+                    width: `${Math.max(0, (playerHp / maxPlayerHp) * 100)}%`,
+                  }}
                 />
               </div>
               <span className="text-neutral-300 font-bold">{playerHp}</span>
@@ -1689,23 +1788,33 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
               <div className="w-14 h-2 bg-neutral-900 rounded-full overflow-hidden border border-neutral-800">
                 <div
                   className="h-full bg-cyan-500 transition-all duration-200"
-                  style={{ width: `${Math.max(0, (currentRam / maxRam) * 100)}%` }}
+                  style={{
+                    width: `${Math.max(0, (currentRam / maxRam) * 100)}%`,
+                  }}
                 />
               </div>
               <span className="text-neutral-300 font-bold">{currentRam}</span>
             </div>
 
             {/* Crypto Balance */}
-            <div className="flex items-center gap-1 text-[9px] font-mono text-amber-400 font-bold" title="Crypto Chips">
+            <div
+              className="flex items-center gap-1 text-[9px] font-mono text-amber-400 font-bold"
+              title="Crypto Chips"
+            >
               <span>🪙</span>
               <span>{cryptoBounty} Chips</span>
             </div>
 
             {/* Total Score & High Score */}
-            <div className="flex items-center gap-1 text-[9px] font-mono text-brand-cyan font-bold" title="Score">
+            <div
+              className="flex items-center gap-1 text-[9px] font-mono text-brand-cyan font-bold"
+              title="Score"
+            >
               <span>SCORE: {score}</span>
               {effectiveHighScore > 0 && (
-                <span className="text-neutral-500 font-normal">({effectiveHighScore})</span>
+                <span className="text-neutral-500 font-normal">
+                  ({effectiveHighScore})
+                </span>
               )}
             </div>
           </div>
@@ -1714,7 +1823,9 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
         {/* Active Side-Effect Warning Banner */}
         {activeSideEffect && (
           <div className="w-full bg-rose-950/60 border border-rose-800/60 rounded px-2 py-0.5 my-0.5 flex items-center justify-between text-[9px] text-rose-300 animate-pulse">
-            <span>⚠️ {activeSideEffect.title}: {activeSideEffect.description}</span>
+            <span>
+              ⚠️ {activeSideEffect.title}: {activeSideEffect.description}
+            </span>
             <span className="font-bold">ACTIVE</span>
           </div>
         )}
@@ -1725,8 +1836,8 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
             isFullscreen
               ? "w-full flex-1 max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--footer-height,48px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] aspect-[240/144] min-h-0"
               : isExpanded
-              ? "w-full max-w-[360px] aspect-[240/144] h-auto"
-              : "w-full max-w-[240px] aspect-[240/144] h-auto"
+                ? "w-full max-w-[360px] aspect-[240/144] h-auto"
+                : "w-full max-w-[240px] aspect-[240/144] h-auto"
           } flex items-center justify-center transition-all duration-300 my-auto`}
           style={
             crtCalibration.curvature > 0.05
@@ -1749,8 +1860,8 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
               isFullscreen
                 ? "max-w-full max-h-full aspect-[240/144] object-contain"
                 : isExpanded
-                ? "w-full max-w-[360px] aspect-[240/144] h-auto"
-                : "w-full max-w-[240px] aspect-[240/144] h-auto"
+                  ? "w-full max-w-[360px] aspect-[240/144] h-auto"
+                  : "w-full max-w-[240px] aspect-[240/144] h-auto"
             } rounded-lg border border-neutral-900/60 bg-neutral-950 cursor-crosshair`}
           />
 
@@ -1764,13 +1875,20 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                 MAINFRAME TIER BREACHED
               </h3>
               <p className="text-[9px] text-neutral-400 mt-0.5 leading-relaxed">
-                Infiltrated in <span className="font-bold text-brand-cyan">{movesCount}</span> moves. Crypto Harvested: <span className="font-bold text-amber-400">+{cryptoBounty}</span>
+                Infiltrated in{" "}
+                <span className="font-bold text-brand-cyan">{movesCount}</span>{" "}
+                moves. Crypto Harvested:{" "}
+                <span className="font-bold text-amber-400">
+                  +{cryptoBounty}
+                </span>
               </p>
               <p className="text-[9px] text-neutral-400">
-                Final Score: <span className="font-bold text-brand-cyan">{score}</span>
+                Final Score:{" "}
+                <span className="font-bold text-brand-cyan">{score}</span>
               </p>
               <div className="flex gap-2 mt-2">
-                {gameMode === "roguelike" && roomIndex < campaignRooms.length - 1 ? (
+                {gameMode === "roguelike" &&
+                roomIndex < campaignRooms.length - 1 ? (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -1831,18 +1949,28 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                 </div>
                 <div className="flex items-center gap-2">
                   <span>TARGET: [{hexPuzzle.targetSequence.join(" ")}]</span>
-                  <span className="text-amber-400">+{hexPuzzle.rewardCrypto} CRYPTO</span>
+                  <span className="text-amber-400">
+                    +{hexPuzzle.rewardCrypto} CRYPTO
+                  </span>
                 </div>
               </div>
 
               {/* Buffer Bar */}
               <div className="w-full flex items-center justify-between px-2 py-0.5 text-[8px] bg-neutral-900/80 rounded border border-neutral-800">
-                <span className="text-neutral-400">BUFFER [{hexPuzzle.currentInput.length}/{hexPuzzle.maxBufferSize}]:</span>
+                <span className="text-neutral-400">
+                  BUFFER [{hexPuzzle.currentInput.length}/
+                  {hexPuzzle.maxBufferSize}]:
+                </span>
                 <span className="text-cyan-300 font-bold">
-                  {hexPuzzle.currentInput.length > 0 ? hexPuzzle.currentInput.join(" ") : "(EMPTY)"}
+                  {hexPuzzle.currentInput.length > 0
+                    ? hexPuzzle.currentInput.join(" ")
+                    : "(EMPTY)"}
                 </span>
                 <span className="text-pink-400 font-bold">
-                  AXIS: {hexPuzzle.activeAxis === "row" ? `ROW ${hexPuzzle.activeIndex + 1}` : `COL ${hexPuzzle.activeIndex + 1}`}
+                  AXIS:{" "}
+                  {hexPuzzle.activeAxis === "row"
+                    ? `ROW ${hexPuzzle.activeIndex + 1}`
+                    : `COL ${hexPuzzle.activeIndex + 1}`}
                 </span>
               </div>
 
@@ -1851,20 +1979,24 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                 {hexPuzzle.grid.map((row, rIdx) =>
                   row.map((cell, cIdx) => {
                     const isSelectable =
-                      (hexPuzzle.activeAxis === "row" && rIdx === hexPuzzle.activeIndex) ||
-                      (hexPuzzle.activeAxis === "col" && cIdx === hexPuzzle.activeIndex);
+                      (hexPuzzle.activeAxis === "row" &&
+                        rIdx === hexPuzzle.activeIndex) ||
+                      (hexPuzzle.activeAxis === "col" &&
+                        cIdx === hexPuzzle.activeIndex);
 
                     return (
                       <button
                         key={`${rIdx}-${cIdx}`}
                         onClick={() => handleHexCellClick(rIdx, cIdx)}
-                        disabled={cell.selected || hexPuzzle.solved || hexPuzzle.failed}
+                        disabled={
+                          cell.selected || hexPuzzle.solved || hexPuzzle.failed
+                        }
                         className={`w-7 h-6 rounded flex items-center justify-center text-[9px] font-bold transition-all cursor-pointer ${
                           cell.selected
                             ? "bg-neutral-900 text-neutral-600 border border-neutral-800"
                             : isSelectable
-                            ? "bg-cyan-500/20 text-cyan-200 border border-cyan-400 hover:bg-cyan-500/40 animate-pulse"
-                            : "bg-neutral-900/60 text-neutral-500 border border-neutral-900"
+                              ? "bg-cyan-500/20 text-cyan-200 border border-cyan-400 hover:bg-cyan-500/40 animate-pulse"
+                              : "bg-neutral-900/60 text-neutral-500 border border-neutral-900"
                         }`}
                       >
                         {cell.byte}
@@ -1907,7 +2039,9 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                   <IconShoppingCart className="w-3.5 h-3.5" />
                   <span>DARKNET EXPLOIT BLACK-MARKET</span>
                 </div>
-                <span className="text-amber-300">🪙 {cryptoBounty} Crypto Available</span>
+                <span className="text-amber-300">
+                  🪙 {cryptoBounty} Crypto Available
+                </span>
               </div>
 
               <div className="w-full flex flex-col gap-1 my-1 overflow-y-auto max-h-[140px] pr-1">
@@ -1919,8 +2053,12 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                     <div className="flex items-center gap-1">
                       <span>{item.icon}</span>
                       <div>
-                        <div className="text-neutral-200 font-bold">{item.name}</div>
-                        <div className="text-neutral-400 text-[7px]">{item.description}</div>
+                        <div className="text-neutral-200 font-bold">
+                          {item.name}
+                        </div>
+                        <div className="text-neutral-400 text-[7px]">
+                          {item.description}
+                        </div>
                       </div>
                     </div>
 
@@ -1978,7 +2116,9 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                       <span className="font-bold text-[9px] text-white">
                         {cls.icon} {cls.name}
                       </span>
-                      <span className="text-[7px] text-cyan-400">{cls.baseRam}GB RAM</span>
+                      <span className="text-[7px] text-cyan-400">
+                        {cls.baseRam}GB RAM
+                      </span>
                     </div>
                     <div className="text-[7px] text-neutral-400 mt-0.5 leading-tight">
                       {cls.passiveBonus}
@@ -2006,12 +2146,26 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                 BILLABLE HOURS INTERRUPT
               </h3>
               <p className="text-[9px] text-neutral-400 mt-0.5 leading-tight">
-                Opening this abandoned repo chest requires logging 0.25h of admin work.
+                Opening this abandoned repo chest requires logging 0.25h of
+                admin work.
               </p>
               <div className="w-full max-w-[210px] bg-neutral-900/90 border border-neutral-800 rounded p-1.5 my-1.5 text-left text-[8px] space-y-0.5 text-neutral-300">
-                <div>CLIENT: <span className="text-brand-cyan">Abandoned Repos LLC</span></div>
-                <div>TASK: <span className="text-amber-300">JIRA-404: Refactor Legacy Rust</span></div>
-                <div>HOURS: <span className="text-emerald-400 font-bold">0.25 hrs (Admin)</span></div>
+                <div>
+                  CLIENT:{" "}
+                  <span className="text-brand-cyan">Abandoned Repos LLC</span>
+                </div>
+                <div>
+                  TASK:{" "}
+                  <span className="text-amber-300">
+                    JIRA-404: Refactor Legacy Rust
+                  </span>
+                </div>
+                <div>
+                  HOURS:{" "}
+                  <span className="text-emerald-400 font-bold">
+                    0.25 hrs (Admin)
+                  </span>
+                </div>
               </div>
               <button
                 onClick={(e) => {
@@ -2051,7 +2205,9 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                       disabled
                       className="px-1.5 py-0.5 rounded border flex items-center gap-1 bg-neutral-950 text-neutral-600 border-neutral-900 opacity-50 cursor-not-allowed"
                     >
-                      <span className="font-bold">[{keyNum}] {shortLabel}</span>
+                      <span className="font-bold">
+                        [{keyNum}] {shortLabel}
+                      </span>
                     </button>
                   );
                 }
@@ -2070,12 +2226,16 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({ isMounted: propI
                       isDisabled
                         ? "bg-neutral-900/50 text-neutral-600 border-neutral-800/50 cursor-not-allowed opacity-60"
                         : isActive
-                        ? "bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-[0_0_8px_rgba(245,158,11,0.2)] cursor-pointer"
-                        : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-neutral-200 cursor-pointer"
+                          ? "bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-[0_0_8px_rgba(245,158,11,0.2)] cursor-pointer"
+                          : "bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-neutral-200 cursor-pointer"
                     }`}
                   >
-                    <span className="font-bold">[{keyNum}] {shortLabel}</span>
-                    <span className={hasAmmo ? "text-amber-400" : "text-rose-500"}>
+                    <span className="font-bold">
+                      [{keyNum}] {shortLabel}
+                    </span>
+                    <span
+                      className={hasAmmo ? "text-amber-400" : "text-rose-500"}
+                    >
                       ({weapon.ammo})
                     </span>
                   </button>

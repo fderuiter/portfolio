@@ -339,7 +339,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
           className={`w-full relative ${
             isFullscreen
               ? "flex-1 max-h-none h-full rounded-2xl border-2"
-              : "border-2 border-t-0 rounded-b-2xl max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--layout-dock-height,64px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] min-h-[380px]"
+              : "border-2 border-t-0 rounded-b-2xl max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--layout-dock-height,64px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] min-h-[min(380px,60dvh)]"
           } transition-all duration-300 overflow-y-auto overflow-x-hidden flex flex-col items-center justify-center bg-black ${bezelClasses}`}
         >
           {/* Floating Exit Button for full window viewports */}
@@ -415,7 +415,7 @@ export const PlayCabinet: React.FC<PlayCabinetProps> = ({
     <div className={`w-full ${colors.shadow} transition-all duration-300`}>
       {/* Static Retro Cabinet Preview Screen with scanlines */}
       <div
-        className="w-full aspect-[16/10] min-h-[380px] rounded-2xl border border-zinc-800 bg-zinc-950 flex flex-col justify-between p-6 sm:p-8 relative overflow-hidden select-none"
+        className="w-full aspect-[16/10] min-h-[min(380px,65dvh)] rounded-2xl border border-zinc-800 bg-zinc-950 flex flex-col justify-between p-6 sm:p-8 relative overflow-hidden select-none"
         style={{
           backgroundImage:
             "radial-gradient(circle at center, #09090b 40%, #020202 100%)",

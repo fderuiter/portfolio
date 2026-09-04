@@ -1650,8 +1650,8 @@ export const ClinicalTrialChaos: React.FC = () => {
       </div>
 
       {/* Navigation View Switcher (Conveyor Ops vs Live SDTM Studio vs Audit Log) */}
-      <div className="mt-3 flex items-center justify-between border-b border-zinc-800/80 pb-2">
-        <div className="flex items-center gap-2">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-zinc-800/80 pb-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setActiveTab("conveyor")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition ${

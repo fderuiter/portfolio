@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, useCallback, useSyncExternalStore, useMemo, useRef } from "react";
+import React, {
+  useState,
+  useCallback,
+  useSyncExternalStore,
+  useMemo,
+  useRef,
+} from "react";
 import { PanInfo } from "framer-motion";
 import { useAudio } from "@/components/providers/AudioProvider";
 import { puzzleLevels } from "@/lib/quasi-perfect/levels";
@@ -78,7 +84,9 @@ interface StepHistory {
 export const QuasiPerfectPuzzler: React.FC = () => {
   const { playNote, playSuccess } = useAudio();
 
-  const [activeTab, setActiveTab] = useState<"campaign" | "sandbox">("campaign");
+  const [activeTab, setActiveTab] = useState<"campaign" | "sandbox">(
+    "campaign"
+  );
   const [selectedChapter, setSelectedChapter] = useState<number | "all">("all");
   const [showHints, setShowHints] = useState<boolean>(false);
   const [showLeanInspector, setShowLeanInspector] = useState<boolean>(() => {
@@ -100,7 +108,8 @@ export const QuasiPerfectPuzzler: React.FC = () => {
   });
 
   const [currentLevelIndex, setCurrentLevelIndex] = useState<number>(0);
-  const currentLevel: PuzzlerLevelDef = puzzleLevels[currentLevelIndex] || puzzleLevels[0];
+  const currentLevel: PuzzlerLevelDef =
+    puzzleLevels[currentLevelIndex] || puzzleLevels[0];
 
   // Multi-Goal State
   const [subgoals, setSubgoals] = useState<SubGoal[]>(() => [
@@ -125,7 +134,9 @@ export const QuasiPerfectPuzzler: React.FC = () => {
   const [history, setHistory] = useState<StepHistory[]>([]);
   const [redoHistory, setRedoHistory] = useState<StepHistory[]>([]);
 
-  const [selectedTacticIndex, setSelectedTacticIndex] = useState<number | null>(null);
+  const [selectedTacticIndex, setSelectedTacticIndex] = useState<number | null>(
+    null
+  );
   const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
   const [hoveredTargetId, setHoveredTargetId] = useState<string | null>(null);
 
@@ -255,14 +266,20 @@ export const QuasiPerfectPuzzler: React.FC = () => {
       const tacticItem = currentLevel.availableTactics[tacticIdx];
       if (!tacticItem) return;
 
-      const tacticId = typeof tacticItem === "string" ? tacticItem : tacticItem.id;
-      const hypothesisArg = typeof tacticItem === "object" ? tacticItem.hypothesis : undefined;
+      const tacticId =
+        typeof tacticItem === "string" ? tacticItem : tacticItem.id;
+      const hypothesisArg =
+        typeof tacticItem === "object" ? tacticItem.hypothesis : undefined;
       const tactic = tacticDefs[tacticId];
 
       if (!tactic) return;
 
       // Check RAM availability (enforced strictly in Hacker mode)
-      if (gameMode === "hacker" && currentRam < tactic.baseRamCost && tactic.id !== "sorry") {
+      if (
+        gameMode === "hacker" &&
+        currentRam < tactic.baseRamCost &&
+        tactic.id !== "sorry"
+      ) {
         addLog(
           `FATAL ERROR: Insufficient RAM for tactic '${tactic.name}'. Required: ${tactic.baseRamCost} GB, Available: ${currentRam.toFixed(1)} GB.`,
           "error"
@@ -298,7 +315,9 @@ export const QuasiPerfectPuzzler: React.FC = () => {
 
       if (result.success) {
         const nextRam =
-          gameMode === "story" ? 99 : Math.max(0, currentRam - result.ramConsumed);
+          gameMode === "story"
+            ? 99
+            : Math.max(0, currentRam - result.ramConsumed);
 
         // Record history snapshot
         setHistory((prev) => [
@@ -324,7 +343,9 @@ export const QuasiPerfectPuzzler: React.FC = () => {
           leanLine: result.leanProofStep || tactic.name,
           explanation: tactic.description,
           goalBefore: activeSubgoal.label,
-          goalAfter: result.newAST?.value ? String(result.newAST.value) : "Reduced",
+          goalAfter: result.newAST?.value
+            ? String(result.newAST.value)
+            : "Reduced",
           subgoalLabel: activeSubgoal.label,
         };
         const updatedSteps = [...proofSteps, newStep];
@@ -409,12 +430,17 @@ export const QuasiPerfectPuzzler: React.FC = () => {
               "success"
             );
           } else {
-            addLog("▲ Theorem admitted via 'sorry'. Morality Penalty: -100.", "warning");
+            addLog(
+              "▲ Theorem admitted via 'sorry'. Morality Penalty: -100.",
+              "warning"
+            );
           }
         } else {
           // If current active subgoal was completed, automatically advance to next open subgoal
           if (updatedSubgoals[activeGoalIndex]?.isCompleted) {
-            const nextOpenIdx = updatedSubgoals.findIndex((sg) => !sg.isCompleted);
+            const nextOpenIdx = updatedSubgoals.findIndex(
+              (sg) => !sg.isCompleted
+            );
             if (nextOpenIdx !== -1) {
               setActiveGoalIndex(nextOpenIdx);
               addLog(
@@ -427,7 +453,9 @@ export const QuasiPerfectPuzzler: React.FC = () => {
       } else {
         // Failed step: deduct failure penalty in hacker mode
         const nextRam =
-          gameMode === "story" ? 99 : Math.max(0, currentRam - result.ramConsumed);
+          gameMode === "story"
+            ? 99
+            : Math.max(0, currentRam - result.ramConsumed);
         setCurrentRam(nextRam);
         addLog(result.message, "error");
         playNote(130.81, 0.2); // Low error buzz
@@ -461,7 +489,11 @@ export const QuasiPerfectPuzzler: React.FC = () => {
 
   // Drag-and-drop collision detection
   const handleCardDragEnd = useCallback(
-    (tacticIdx: number, event: MouseEvent | TouchEvent | PointerEvent, _info: PanInfo) => {
+    (
+      tacticIdx: number,
+      event: MouseEvent | TouchEvent | PointerEvent,
+      _info: PanInfo
+    ) => {
       const clientX =
         "clientX" in event
           ? event.clientX
@@ -519,7 +551,15 @@ export const QuasiPerfectPuzzler: React.FC = () => {
     setCurrentScore(null);
     addLog("Reverted last tactic step via undo.", "info");
     playNote(392, 0.05);
-  }, [history, subgoals, activeGoalIndex, currentRam, proofSteps, addLog, playNote]);
+  }, [
+    history,
+    subgoals,
+    activeGoalIndex,
+    currentRam,
+    proofSteps,
+    addLog,
+    playNote,
+  ]);
 
   // Redo step
   const handleRedo = useCallback(() => {
@@ -546,7 +586,15 @@ export const QuasiPerfectPuzzler: React.FC = () => {
     setRedoHistory((prev) => prev.slice(0, -1));
     addLog("Restored tactic step via redo.", "info");
     playNote(493.88, 0.05);
-  }, [redoHistory, subgoals, activeGoalIndex, currentRam, proofSteps, addLog, playNote]);
+  }, [
+    redoHistory,
+    subgoals,
+    activeGoalIndex,
+    currentRam,
+    proofSteps,
+    addLog,
+    playNote,
+  ]);
 
   const handleResetLevel = useCallback(() => {
     loadLevel(currentLevelIndex);
@@ -627,13 +675,16 @@ export const QuasiPerfectPuzzler: React.FC = () => {
               18-Level 3-Chapter Curriculum
             </span>
           </div>
-          <h2 id="quasi-puzzler-heading" className="mt-1 text-2xl font-bold text-zinc-100">
+          <h2
+            id="quasi-puzzler-heading"
+            className="mt-1 text-2xl font-bold text-zinc-100"
+          >
             Quasi-Perfect Puzzler
           </h2>
         </div>
 
         {/* Campaign vs Sandbox Mode Switch & Field Manual */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Game Mode (Story / Casual vs Hacker / Speedrun) */}
           <div className="bg-zinc-900/90 p-1 rounded-xl border border-zinc-800 flex items-center gap-1">
             <button
@@ -687,7 +738,11 @@ export const QuasiPerfectPuzzler: React.FC = () => {
           </div>
 
           <FieldManualButton manualId="quasi-puzzler" label="Manual" />
-          <FullscreenButton isFullscreen={isFullscreen} onToggle={toggleFullscreen} variant="header" />
+          <FullscreenButton
+            isFullscreen={isFullscreen}
+            onToggle={toggleFullscreen}
+            variant="header"
+          />
         </div>
       </div>
 
@@ -716,7 +771,9 @@ export const QuasiPerfectPuzzler: React.FC = () => {
                   <button
                     key={chap.id}
                     type="button"
-                    onClick={() => setSelectedChapter(chap.id as number | "all")}
+                    onClick={() =>
+                      setSelectedChapter(chap.id as number | "all")
+                    }
                     className={`px-2.5 py-0.5 rounded text-[11px] font-bold transition-all ${
                       selectedChapter === chap.id
                         ? "bg-zinc-800 text-brand-cyan border border-brand-cyan/40"
@@ -768,7 +825,9 @@ export const QuasiPerfectPuzzler: React.FC = () => {
             {/* Level Selector Buttons */}
             <div className="flex flex-wrap items-center gap-1.5 p-2 bg-zinc-900/50 rounded-xl border border-zinc-850">
               {filteredLevels.map((lvl) => {
-                const actualIdx = puzzleLevels.findIndex((l) => l.id === lvl.id);
+                const actualIdx = puzzleLevels.findIndex(
+                  (l) => l.id === lvl.id
+                );
                 const isCurrent = actualIdx === currentLevelIndex;
                 const lvlProgress = parsedProgress.completedLevels?.[lvl.id];
 
@@ -781,8 +840,8 @@ export const QuasiPerfectPuzzler: React.FC = () => {
                       isCurrent
                         ? "bg-brand-cyan text-black shadow-[0_0_10px_rgba(6,182,212,0.5)] font-extrabold"
                         : lvlProgress?.completed
-                        ? "bg-zinc-800 text-emerald-300 hover:bg-zinc-700"
-                        : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                          ? "bg-zinc-800 text-emerald-300 hover:bg-zinc-700"
+                          : "bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
                     }`}
                   >
                     L{lvl.id}
@@ -856,14 +915,20 @@ export const QuasiPerfectPuzzler: React.FC = () => {
           {/* Progressive Hints Drawer (if toggled) */}
           {showHints && (
             <div className="mt-4">
-              <HintSystem hints={currentLevel.hints} onClose={() => setShowHints(false)} />
+              <HintSystem
+                hints={currentLevel.hints}
+                onClose={() => setShowHints(false)}
+              />
             </div>
           )}
 
           {/* Lean Server RAM Gauge (Hacker Mode Only) */}
           {gameMode === "hacker" && (
             <div className="mt-4">
-              <RAMGauge currentRam={currentRam} initialRam={currentLevel.initialRam} />
+              <RAMGauge
+                currentRam={currentRam}
+                initialRam={currentLevel.initialRam}
+              />
             </div>
           )}
 
@@ -874,7 +939,8 @@ export const QuasiPerfectPuzzler: React.FC = () => {
                 💥 FATAL ERROR: Lean Language Server Crashed (OOM)
               </p>
               <p className="mt-1 text-xs text-zinc-400">
-                Available RAM was completely exhausted before discharging the goal.
+                Available RAM was completely exhausted before discharging the
+                goal.
               </p>
               <button
                 type="button"
@@ -909,7 +975,9 @@ export const QuasiPerfectPuzzler: React.FC = () => {
                 if (selectedTacticIndex !== null) {
                   executeTacticOnNode(selectedTacticIndex, nodeId);
                 } else {
-                  setSelectedTargetId((prev) => (prev === nodeId ? null : nodeId));
+                  setSelectedTargetId((prev) =>
+                    prev === nodeId ? null : nodeId
+                  );
                 }
               }}
               onHoverTarget={setHoveredTargetId}
@@ -950,7 +1018,9 @@ export const QuasiPerfectPuzzler: React.FC = () => {
               isComplete={levelSolved}
               logs={logs}
               isLeanInspectorOpen={showLeanInspector}
-              onToggleLeanInspector={() => setShowLeanInspector((prev) => !prev)}
+              onToggleLeanInspector={() =>
+                setShowLeanInspector((prev) => !prev)
+              }
               currentLevelIndex={currentLevelIndex}
             />
           </div>
