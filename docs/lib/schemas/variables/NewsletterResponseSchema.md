@@ -8,6 +8,6 @@
 
 > `const` **NewsletterResponseSchema**: `ZodObject`\<\{ `message`: `ZodString`; `simulated`: `ZodOptional`\<`ZodBoolean`\>; `subscriberId`: `ZodOptional`\<`ZodString`\>; `success`: `ZodBoolean`; \}, `$strip`\>
 
-Defined in: [lib/schemas.ts:317](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L317)
+Defined in: [lib/schemas.ts:382](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L382)
 
 Schema for Newsletter subscription API response

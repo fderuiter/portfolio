@@ -6,7 +6,7 @@
 
 # Interface: DiaEtmfZone
 
-Defined in: [lib/site-governance/types.ts:157](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L157)
+Defined in: [lib/site-governance/types.ts:164](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L164)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/site-governance/types.ts:157](https://github.com/fderuiter/port
 
 > **description**: `string`
 
-Defined in: [lib/site-governance/types.ts:160](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L160)
+Defined in: [lib/site-governance/types.ts:167](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L167)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/site-governance/types.ts:160](https://github.com/fderuiter/port
 
 > **zoneName**: `string`
 
-Defined in: [lib/site-governance/types.ts:159](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L159)
+Defined in: [lib/site-governance/types.ts:166](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L166)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [lib/site-governance/types.ts:159](https://github.com/fderuiter/port
 
 > **zoneNumber**: `number`
 
-Defined in: [lib/site-governance/types.ts:158](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L158)
+Defined in: [lib/site-governance/types.ts:165](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L165)

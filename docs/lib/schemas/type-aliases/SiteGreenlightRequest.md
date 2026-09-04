@@ -8,4 +8,4 @@
 
 > **SiteGreenlightRequest** = `z.infer`\<*typeof* [`SiteGreenlightRequestSchema`](../variables/SiteGreenlightRequestSchema.md)\>
 
-Defined in: [lib/schemas.ts:404](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L404)
+Defined in: [lib/schemas.ts:469](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L469)

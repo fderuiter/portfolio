@@ -8,4 +8,4 @@
 
 > **NewsletterResponse** = `z.infer`\<*typeof* [`NewsletterResponseSchema`](../variables/NewsletterResponseSchema.md)\>
 
-Defined in: [lib/schemas.ts:324](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L324)
+Defined in: [lib/schemas.ts:389](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L389)

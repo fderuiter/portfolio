@@ -6,7 +6,7 @@
 
 # Interface: StoragePort
 
-Defined in: [lib/site-governance/binders.ts:48](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L48)
+Defined in: [lib/site-governance/binders.ts:133](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L133)
 
 In-memory / Abstract Storage Port Interface for dual-read port adapter pattern.
 
@@ -16,7 +16,7 @@ In-memory / Abstract Storage Port Interface for dual-read port adapter pattern.
 
 > **name**: `string`
 
-Defined in: [lib/site-governance/binders.ts:49](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L49)
+Defined in: [lib/site-governance/binders.ts:134](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L134)
 
 ## Methods
 
@@ -24,7 +24,7 @@ Defined in: [lib/site-governance/binders.ts:49](https://github.com/fderuiter/por
 
 > **get**(`id`): `Promise`\<[`BinderDocument`](../../types/interfaces/BinderDocument.md) \| `null`\>
 
-Defined in: [lib/site-governance/binders.ts:50](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L50)
+Defined in: [lib/site-governance/binders.ts:135](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L135)
 
 #### Parameters
 
@@ -42,7 +42,7 @@ Defined in: [lib/site-governance/binders.ts:50](https://github.com/fderuiter/por
 
 > **list**(`siteId?`): `Promise`\<[`BinderDocument`](../../types/interfaces/BinderDocument.md)[]\>
 
-Defined in: [lib/site-governance/binders.ts:52](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L52)
+Defined in: [lib/site-governance/binders.ts:137](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L137)
 
 #### Parameters
 
@@ -60,7 +60,7 @@ Defined in: [lib/site-governance/binders.ts:52](https://github.com/fderuiter/por
 
 > **set**(`doc`): `Promise`\<`void`\>
 
-Defined in: [lib/site-governance/binders.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L51)
+Defined in: [lib/site-governance/binders.ts:136](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L136)
 
 #### Parameters
 

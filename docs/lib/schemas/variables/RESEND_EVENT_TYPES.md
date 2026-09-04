@@ -8,6 +8,6 @@
 
 > `const` **RESEND\_EVENT\_TYPES**: readonly \[`"email.sent"`, `"email.delivered"`, `"email.delivery_delayed"`, `"email.complained"`, `"email.bounced"`, `"email.opened"`, `"email.clicked"`\]
 
-Defined in: [lib/schemas.ts:329](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L329)
+Defined in: [lib/schemas.ts:394](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L394)
 
 Allowed Resend webhook lifecycle event types

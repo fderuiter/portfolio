@@ -8,7 +8,7 @@
 
 > **verifyDOAAuditTrailIntegrity**(`log`): `object`
 
-Defined in: [lib/site-governance/doa-engine.ts:226](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/doa-engine.ts#L226)
+Defined in: [lib/site-governance/doa-engine.ts:252](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/doa-engine.ts#L252)
 
 Verifies chronological audit trail hash chain integrity for 21 CFR Part 11.
 

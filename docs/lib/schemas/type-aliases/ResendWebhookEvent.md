@@ -8,4 +8,4 @@
 
 > **ResendWebhookEvent** = `z.infer`\<*typeof* [`ResendWebhookEventSchema`](../variables/ResendWebhookEventSchema.md)\>
 
-Defined in: [lib/schemas.ts:367](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L367)
+Defined in: [lib/schemas.ts:432](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L432)

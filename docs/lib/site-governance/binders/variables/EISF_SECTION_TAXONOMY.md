@@ -8,6 +8,6 @@
 
 > `const` **EISF\_SECTION\_TAXONOMY**: [`EisfSection`](../../types/interfaces/EisfSection.md)[]
 
-Defined in: [lib/site-governance/binders.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L22)
+Defined in: [lib/site-governance/binders.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L72)
 
 eISF Binder Section 1–7 Taxonomy Definition.

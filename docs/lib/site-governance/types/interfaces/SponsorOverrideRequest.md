@@ -6,7 +6,7 @@
 
 # Interface: SponsorOverrideRequest
 
-Defined in: [lib/site-governance/types.ts:94](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L94)
+Defined in: [lib/site-governance/types.ts:96](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L96)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/site-governance/types.ts:94](https://github.com/fderuiter/portf
 
 > **justification**: `string`
 
-Defined in: [lib/site-governance/types.ts:97](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L97)
+Defined in: [lib/site-governance/types.ts:99](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L99)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/site-governance/types.ts:97](https://github.com/fderuiter/portf
 
 > **signer1**: `object`
 
-Defined in: [lib/site-governance/types.ts:99](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L99)
+Defined in: [lib/site-governance/types.ts:101](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L101)
 
 #### id
 
@@ -46,7 +46,7 @@ Defined in: [lib/site-governance/types.ts:99](https://github.com/fderuiter/portf
 
 > **signer2**: `object`
 
-Defined in: [lib/site-governance/types.ts:105](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L105)
+Defined in: [lib/site-governance/types.ts:107](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L107)
 
 #### id
 
@@ -70,7 +70,7 @@ Defined in: [lib/site-governance/types.ts:105](https://github.com/fderuiter/port
 
 > **siteId**: `string`
 
-Defined in: [lib/site-governance/types.ts:95](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L95)
+Defined in: [lib/site-governance/types.ts:97](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L97)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/site-governance/types.ts:95](https://github.com/fderuiter/portf
 
 > **studyId**: `string`
 
-Defined in: [lib/site-governance/types.ts:96](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L96)
+Defined in: [lib/site-governance/types.ts:98](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L98)
 
 ***
 
@@ -86,4 +86,4 @@ Defined in: [lib/site-governance/types.ts:96](https://github.com/fderuiter/portf
 
 > **waivedFacets**: [`GreenlightFacet`](../type-aliases/GreenlightFacet.md)[]
 
-Defined in: [lib/site-governance/types.ts:98](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L98)
+Defined in: [lib/site-governance/types.ts:100](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L100)

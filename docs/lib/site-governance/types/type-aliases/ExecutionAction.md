@@ -8,4 +8,4 @@
 
 > **ExecutionAction** = `"SUBJECT_RANDOMIZATION"` \| `"ECRF_WRITE_ACCESS"` \| `"ECRF_SAVE"` \| `"ECRF_SUBMIT"` \| `"IP_DISPENSING"` \| `"SUBJECT_ENROLLMENT"`
 
-Defined in: [lib/site-governance/types.ts:139](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L139)
+Defined in: [lib/site-governance/types.ts:146](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L146)

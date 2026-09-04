@@ -6,7 +6,7 @@
 
 # Interface: SponsorOverrideResult
 
-Defined in: [lib/site-governance/types.ts:113](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L113)
+Defined in: [lib/site-governance/types.ts:115](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L115)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/site-governance/types.ts:113](https://github.com/fderuiter/port
 
 > **auditEntry**: [`Part11AuditEntry`](Part11AuditEntry.md)
 
-Defined in: [lib/site-governance/types.ts:118](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L118)
+Defined in: [lib/site-governance/types.ts:120](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L120)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/site-governance/types.ts:118](https://github.com/fderuiter/port
 
 > `optional` **errorMessage?**: `string`
 
-Defined in: [lib/site-governance/types.ts:120](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L120)
+Defined in: [lib/site-governance/types.ts:122](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L122)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/site-governance/types.ts:120](https://github.com/fderuiter/port
 
 > **siteId**: `string`
 
-Defined in: [lib/site-governance/types.ts:115](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L115)
+Defined in: [lib/site-governance/types.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L117)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/site-governance/types.ts:115](https://github.com/fderuiter/port
 
 > **status**: [`GreenlightStatus`](../type-aliases/GreenlightStatus.md)
 
-Defined in: [lib/site-governance/types.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L117)
+Defined in: [lib/site-governance/types.ts:119](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L119)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/site-governance/types.ts:117](https://github.com/fderuiter/port
 
 > **studyId**: `string`
 
-Defined in: [lib/site-governance/types.ts:116](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L116)
+Defined in: [lib/site-governance/types.ts:118](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L118)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/site-governance/types.ts:116](https://github.com/fderuiter/port
 
 > **success**: `boolean`
 
-Defined in: [lib/site-governance/types.ts:114](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L114)
+Defined in: [lib/site-governance/types.ts:116](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L116)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [lib/site-governance/types.ts:114](https://github.com/fderuiter/port
 
 > `optional` **tokenPayload?**: [`GreenlightTokenPayload`](GreenlightTokenPayload.md)
 
-Defined in: [lib/site-governance/types.ts:119](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L119)
+Defined in: [lib/site-governance/types.ts:121](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L121)

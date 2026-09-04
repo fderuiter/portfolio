@@ -6,7 +6,7 @@
 
 # Class: InMemoryStoragePort
 
-Defined in: [lib/site-governance/binders.ts:55](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L55)
+Defined in: [lib/site-governance/binders.ts:140](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L140)
 
 In-memory / Abstract Storage Port Interface for dual-read port adapter pattern.
 
@@ -20,7 +20,7 @@ In-memory / Abstract Storage Port Interface for dual-read port adapter pattern.
 
 > **new InMemoryStoragePort**(`name`, `initialDocs?`): `InMemoryStoragePort`
 
-Defined in: [lib/site-governance/binders.ts:59](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L59)
+Defined in: [lib/site-governance/binders.ts:144](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L144)
 
 #### Parameters
 
@@ -42,7 +42,7 @@ Defined in: [lib/site-governance/binders.ts:59](https://github.com/fderuiter/por
 
 > `readonly` **name**: `string`
 
-Defined in: [lib/site-governance/binders.ts:56](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L56)
+Defined in: [lib/site-governance/binders.ts:141](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L141)
 
 #### Implementation of
 
@@ -54,7 +54,7 @@ Defined in: [lib/site-governance/binders.ts:56](https://github.com/fderuiter/por
 
 > **get**(`id`): `Promise`\<[`BinderDocument`](../../types/interfaces/BinderDocument.md) \| `null`\>
 
-Defined in: [lib/site-governance/binders.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L66)
+Defined in: [lib/site-governance/binders.ts:151](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L151)
 
 #### Parameters
 
@@ -76,7 +76,7 @@ Defined in: [lib/site-governance/binders.ts:66](https://github.com/fderuiter/por
 
 > **list**(`siteId?`): `Promise`\<[`BinderDocument`](../../types/interfaces/BinderDocument.md)[]\>
 
-Defined in: [lib/site-governance/binders.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L75)
+Defined in: [lib/site-governance/binders.ts:160](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L160)
 
 #### Parameters
 
@@ -98,7 +98,7 @@ Defined in: [lib/site-governance/binders.ts:75](https://github.com/fderuiter/por
 
 > **set**(`doc`): `Promise`\<`void`\>
 
-Defined in: [lib/site-governance/binders.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L71)
+Defined in: [lib/site-governance/binders.ts:156](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L156)
 
 #### Parameters
 

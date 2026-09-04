@@ -6,7 +6,7 @@
 
 # Class: BinderSyncEngine
 
-Defined in: [lib/site-governance/binders.ts:168](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L168)
+Defined in: [lib/site-governance/binders.ts:260](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L260)
 
 CRA QC Staging Workflow & Bidirectional eISF / eTMF Synchronizer Engine.
 
@@ -16,7 +16,7 @@ CRA QC Staging Workflow & Bidirectional eISF / eTMF Synchronizer Engine.
 
 > **new BinderSyncEngine**(`adapter`): `BinderSyncEngine`
 
-Defined in: [lib/site-governance/binders.ts:169](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L169)
+Defined in: [lib/site-governance/binders.ts:261](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L261)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [lib/site-governance/binders.ts:169](https://github.com/fderuiter/po
 
 > **approveQC**(`docId`, `craId`, `qcComments?`): `Promise`\<[`BinderDocument`](../../types/interfaces/BinderDocument.md)\>
 
-Defined in: [lib/site-governance/binders.ts:192](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L192)
+Defined in: [lib/site-governance/binders.ts:284](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L284)
 
 CRA QC Approval action.
 
@@ -62,7 +62,7 @@ CRA QC Approval action.
 
 > **performBatchSync**(`siteId`): `Promise`\<\{ `errors`: `string`[]; `processed`: `number`; `syncedToEtmf`: `number`; \}\>
 
-Defined in: [lib/site-governance/binders.ts:266](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L266)
+Defined in: [lib/site-governance/binders.ts:360](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L360)
 
 Executes batch bidirectional synchronization across site binder documents.
 
@@ -82,7 +82,7 @@ Executes batch bidirectional synchronization across site binder documents.
 
 > **rejectQC**(`docId`, `craId`, `rejectionReason`): `Promise`\<[`BinderDocument`](../../types/interfaces/BinderDocument.md)\>
 
-Defined in: [lib/site-governance/binders.ts:210](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L210)
+Defined in: [lib/site-governance/binders.ts:302](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L302)
 
 CRA QC Rejection action.
 
@@ -110,7 +110,7 @@ CRA QC Rejection action.
 
 > **stageDocumentForQC**(`doc`): `Promise`\<[`BinderDocument`](../../types/interfaces/BinderDocument.md)\>
 
-Defined in: [lib/site-governance/binders.ts:174](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L174)
+Defined in: [lib/site-governance/binders.ts:266](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L266)
 
 Stages a document in eISF for CRA QC review.
 
@@ -130,7 +130,7 @@ Stages a document in eISF for CRA QC review.
 
 > **syncBackFromETMF**(`docId`, `updates`): `Promise`\<[`BinderDocument`](../../types/interfaces/BinderDocument.md)\>
 
-Defined in: [lib/site-governance/binders.ts:246](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L246)
+Defined in: [lib/site-governance/binders.ts:340](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L340)
 
 Propagates eTMF metadata changes back to eISF.
 
@@ -154,7 +154,7 @@ Propagates eTMF metadata changes back to eISF.
 
 > **syncToETMF**(`docId`): `Promise`\<[`BinderDocument`](../../types/interfaces/BinderDocument.md)\>
 
-Defined in: [lib/site-governance/binders.ts:228](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L228)
+Defined in: [lib/site-governance/binders.ts:320](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L320)
 
 Synchronizes QC_APPROVED document from eISF to eTMF Zone.
 

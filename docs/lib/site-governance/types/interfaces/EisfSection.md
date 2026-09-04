@@ -6,7 +6,7 @@
 
 # Interface: EisfSection
 
-Defined in: [lib/site-governance/types.ts:163](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L163)
+Defined in: [lib/site-governance/types.ts:170](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L170)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/site-governance/types.ts:163](https://github.com/fderuiter/port
 
 > **description**: `string`
 
-Defined in: [lib/site-governance/types.ts:166](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L166)
+Defined in: [lib/site-governance/types.ts:173](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L173)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/site-governance/types.ts:166](https://github.com/fderuiter/port
 
 > **sectionName**: `string`
 
-Defined in: [lib/site-governance/types.ts:165](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L165)
+Defined in: [lib/site-governance/types.ts:172](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L172)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [lib/site-governance/types.ts:165](https://github.com/fderuiter/port
 
 > **sectionNumber**: `number`
 
-Defined in: [lib/site-governance/types.ts:164](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L164)
+Defined in: [lib/site-governance/types.ts:171](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L171)

@@ -8,4 +8,4 @@
 
 > **ResendWebhookResponse** = `z.infer`\<*typeof* [`ResendWebhookResponseSchema`](../variables/ResendWebhookResponseSchema.md)\>
 
-Defined in: [lib/schemas.ts:378](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L378)
+Defined in: [lib/schemas.ts:443](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L443)

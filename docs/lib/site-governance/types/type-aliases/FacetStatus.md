@@ -8,4 +8,4 @@
 
 > **FacetStatus** = `"PASSED"` \| `"FAILED"` \| `"WAIVED"`
 
-Defined in: [lib/site-governance/types.ts:51](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L51)
+Defined in: [lib/site-governance/types.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L53)

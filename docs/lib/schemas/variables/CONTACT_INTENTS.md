@@ -8,6 +8,6 @@
 
 > `const` **CONTACT\_INTENTS**: readonly \[`"general"`, `"collaboration"`, `"consulting"`, `"recruiting"`, `"other"`\]
 
-Defined in: [lib/schemas.ts:234](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L234)
+Defined in: [lib/schemas.ts:278](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L278)
 
 Allowed intent categories for visitor contact submissions

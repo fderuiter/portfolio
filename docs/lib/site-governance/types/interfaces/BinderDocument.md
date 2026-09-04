@@ -6,7 +6,7 @@
 
 # Interface: BinderDocument
 
-Defined in: [lib/site-governance/types.ts:171](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L171)
+Defined in: [lib/site-governance/types.ts:179](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L179)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/site-governance/types.ts:171](https://github.com/fderuiter/port
 
 > **content**: `string`
 
-Defined in: [lib/site-governance/types.ts:179](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L179)
+Defined in: [lib/site-governance/types.ts:187](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L187)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/site-governance/types.ts:179](https://github.com/fderuiter/port
 
 > **eisfSection**: `number`
 
-Defined in: [lib/site-governance/types.ts:174](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L174)
+Defined in: [lib/site-governance/types.ts:182](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L182)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/site-governance/types.ts:174](https://github.com/fderuiter/port
 
 > **etmfZone**: `number`
 
-Defined in: [lib/site-governance/types.ts:175](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L175)
+Defined in: [lib/site-governance/types.ts:183](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L183)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/site-governance/types.ts:175](https://github.com/fderuiter/port
 
 > **id**: `string`
 
-Defined in: [lib/site-governance/types.ts:172](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L172)
+Defined in: [lib/site-governance/types.ts:180](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L180)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/site-governance/types.ts:172](https://github.com/fderuiter/port
 
 > `optional` **lastSyncedAt?**: `string`
 
-Defined in: [lib/site-governance/types.ts:184](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L184)
+Defined in: [lib/site-governance/types.ts:192](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L192)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/site-governance/types.ts:184](https://github.com/fderuiter/port
 
 > `optional` **qcComments?**: `string`
 
-Defined in: [lib/site-governance/types.ts:183](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L183)
+Defined in: [lib/site-governance/types.ts:191](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L191)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/site-governance/types.ts:183](https://github.com/fderuiter/port
 
 > **qcStatus**: [`QcStatus`](../type-aliases/QcStatus.md)
 
-Defined in: [lib/site-governance/types.ts:178](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L178)
+Defined in: [lib/site-governance/types.ts:186](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L186)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/site-governance/types.ts:178](https://github.com/fderuiter/port
 
 > **siteId**: `string`
 
-Defined in: [lib/site-governance/types.ts:176](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L176)
+Defined in: [lib/site-governance/types.ts:184](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L184)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/site-governance/types.ts:176](https://github.com/fderuiter/port
 
 > **studyId**: `string`
 
-Defined in: [lib/site-governance/types.ts:177](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L177)
+Defined in: [lib/site-governance/types.ts:185](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L185)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [lib/site-governance/types.ts:177](https://github.com/fderuiter/port
 
 > **title**: `string`
 
-Defined in: [lib/site-governance/types.ts:173](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L173)
+Defined in: [lib/site-governance/types.ts:181](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L181)
 
 ***
 
@@ -94,7 +94,7 @@ Defined in: [lib/site-governance/types.ts:173](https://github.com/fderuiter/port
 
 > **uploadedAt**: `string`
 
-Defined in: [lib/site-governance/types.ts:182](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L182)
+Defined in: [lib/site-governance/types.ts:190](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L190)
 
 ***
 
@@ -102,7 +102,7 @@ Defined in: [lib/site-governance/types.ts:182](https://github.com/fderuiter/port
 
 > **uploadedBy**: `string`
 
-Defined in: [lib/site-governance/types.ts:181](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L181)
+Defined in: [lib/site-governance/types.ts:189](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L189)
 
 ***
 
@@ -110,4 +110,4 @@ Defined in: [lib/site-governance/types.ts:181](https://github.com/fderuiter/port
 
 > **version**: `string`
 
-Defined in: [lib/site-governance/types.ts:180](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L180)
+Defined in: [lib/site-governance/types.ts:188](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L188)

@@ -8,7 +8,7 @@
 
 > **issueGreenlightToken**(`siteId`, `studyId`, `status`, `facetHash`, `secretKey?`, `expiresInSeconds?`): [`GreenlightTokenPayload`](../../types/interfaces/GreenlightTokenPayload.md)
 
-Defined in: [lib/site-governance/greenlight-engine.ts:164](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/greenlight-engine.ts#L164)
+Defined in: [lib/site-governance/greenlight-engine.ts:212](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/greenlight-engine.ts#L212)
 
 Issues cryptographic HMAC-SHA256 token for site execution greenlight.
 

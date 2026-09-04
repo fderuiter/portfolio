@@ -6,7 +6,7 @@
 
 # Class: SovereignGatekeeperException
 
-Defined in: [lib/site-governance/execution-gatekeeper.ts:4](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/execution-gatekeeper.ts#L4)
+Defined in: [lib/site-governance/execution-gatekeeper.ts:8](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/execution-gatekeeper.ts#L8)
 
 ## Extends
 
@@ -18,7 +18,7 @@ Defined in: [lib/site-governance/execution-gatekeeper.ts:4](https://github.com/f
 
 > **new SovereignGatekeeperException**(`siteId`, `action`, `violationCode`, `message`): `SovereignGatekeeperException`
 
-Defined in: [lib/site-governance/execution-gatekeeper.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/execution-gatekeeper.ts#L9)
+Defined in: [lib/site-governance/execution-gatekeeper.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/execution-gatekeeper.ts#L13)
 
 #### Parameters
 
@@ -52,7 +52,7 @@ Defined in: [lib/site-governance/execution-gatekeeper.ts:9](https://github.com/f
 
 > `readonly` **action**: [`ExecutionAction`](../../types/type-aliases/ExecutionAction.md)
 
-Defined in: [lib/site-governance/execution-gatekeeper.ts:6](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/execution-gatekeeper.ts#L6)
+Defined in: [lib/site-governance/execution-gatekeeper.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/execution-gatekeeper.ts#L10)
 
 ***
 
@@ -96,7 +96,7 @@ Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1076
 
 > `readonly` **siteId**: `string`
 
-Defined in: [lib/site-governance/execution-gatekeeper.ts:5](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/execution-gatekeeper.ts#L5)
+Defined in: [lib/site-governance/execution-gatekeeper.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/execution-gatekeeper.ts#L9)
 
 ***
 
@@ -116,7 +116,7 @@ Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1078
 
 > `readonly` **violationCode**: `string`
 
-Defined in: [lib/site-governance/execution-gatekeeper.ts:7](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/execution-gatekeeper.ts#L7)
+Defined in: [lib/site-governance/execution-gatekeeper.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/execution-gatekeeper.ts#L11)
 
 ***
 

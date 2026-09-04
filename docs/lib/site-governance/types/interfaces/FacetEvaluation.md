@@ -6,7 +6,7 @@
 
 # Interface: FacetEvaluation
 
-Defined in: [lib/site-governance/types.ts:53](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L53)
+Defined in: [lib/site-governance/types.ts:55](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L55)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/site-governance/types.ts:53](https://github.com/fderuiter/portf
 
 > **details**: `string`
 
-Defined in: [lib/site-governance/types.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L57)
+Defined in: [lib/site-governance/types.ts:59](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L59)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/site-governance/types.ts:57](https://github.com/fderuiter/portf
 
 > **facet**: [`GreenlightFacet`](../type-aliases/GreenlightFacet.md)
 
-Defined in: [lib/site-governance/types.ts:54](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L54)
+Defined in: [lib/site-governance/types.ts:56](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L56)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/site-governance/types.ts:54](https://github.com/fderuiter/portf
 
 > **lastEvaluatedAt**: `string`
 
-Defined in: [lib/site-governance/types.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L58)
+Defined in: [lib/site-governance/types.ts:60](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L60)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/site-governance/types.ts:58](https://github.com/fderuiter/portf
 
 > **score**: `number`
 
-Defined in: [lib/site-governance/types.ts:56](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L56)
+Defined in: [lib/site-governance/types.ts:58](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L58)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [lib/site-governance/types.ts:56](https://github.com/fderuiter/portf
 
 > **status**: [`FacetStatus`](../type-aliases/FacetStatus.md)
 
-Defined in: [lib/site-governance/types.ts:55](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L55)
+Defined in: [lib/site-governance/types.ts:57](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L57)

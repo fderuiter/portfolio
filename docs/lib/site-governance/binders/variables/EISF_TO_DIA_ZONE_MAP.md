@@ -8,6 +8,6 @@
 
 > `const` **EISF\_TO\_DIA\_ZONE\_MAP**: `Record`\<`number`, `number`\>
 
-Defined in: [lib/site-governance/binders.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L35)
+Defined in: [lib/site-governance/binders.ts:120](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L120)
 
 Default Section 1-7 eISF to DIA Zone eTMF mapping dictionary.

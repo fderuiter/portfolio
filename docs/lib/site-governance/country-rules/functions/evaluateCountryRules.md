@@ -8,7 +8,7 @@
 
 > **evaluateCountryRules**(`jurisdiction`, `siteData`): [`CountryRulesResult`](../../types/interfaces/CountryRulesResult.md)
 
-Defined in: [lib/site-governance/country-rules.ts:262](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/country-rules.ts#L262)
+Defined in: [lib/site-governance/country-rules.ts:287](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/country-rules.ts#L287)
 
 Evaluates site startup data against statutory country rules matrix.
 

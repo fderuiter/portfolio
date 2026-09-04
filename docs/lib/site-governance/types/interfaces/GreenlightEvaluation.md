@@ -6,7 +6,7 @@
 
 # Interface: GreenlightEvaluation
 
-Defined in: [lib/site-governance/types.ts:63](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L63)
+Defined in: [lib/site-governance/types.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L65)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/site-governance/types.ts:63](https://github.com/fderuiter/portf
 
 > **countryRulesResult**: [`CountryRulesResult`](CountryRulesResult.md)
 
-Defined in: [lib/site-governance/types.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L68)
+Defined in: [lib/site-governance/types.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L70)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/site-governance/types.ts:68](https://github.com/fderuiter/portf
 
 > **evaluatedAt**: `string`
 
-Defined in: [lib/site-governance/types.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L70)
+Defined in: [lib/site-governance/types.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L72)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/site-governance/types.ts:70](https://github.com/fderuiter/portf
 
 > **facets**: `Record`\<[`GreenlightFacet`](../type-aliases/GreenlightFacet.md), [`FacetEvaluation`](FacetEvaluation.md)\>
 
-Defined in: [lib/site-governance/types.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L67)
+Defined in: [lib/site-governance/types.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L69)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/site-governance/types.ts:67](https://github.com/fderuiter/portf
 
 > **isExecutionPermitted**: `boolean`
 
-Defined in: [lib/site-governance/types.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L69)
+Defined in: [lib/site-governance/types.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L71)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/site-governance/types.ts:69](https://github.com/fderuiter/portf
 
 > **siteId**: `string`
 
-Defined in: [lib/site-governance/types.ts:64](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L64)
+Defined in: [lib/site-governance/types.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L66)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/site-governance/types.ts:64](https://github.com/fderuiter/portf
 
 > **status**: [`GreenlightStatus`](../type-aliases/GreenlightStatus.md)
 
-Defined in: [lib/site-governance/types.ts:66](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L66)
+Defined in: [lib/site-governance/types.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L68)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [lib/site-governance/types.ts:66](https://github.com/fderuiter/portf
 
 > **studyId**: `string`
 
-Defined in: [lib/site-governance/types.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L65)
+Defined in: [lib/site-governance/types.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L67)

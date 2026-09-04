@@ -8,7 +8,7 @@
 
 > **assertExecutionAllowed**(`siteId`, `action`, `tokenPayload?`, `secretKey?`): `void`
 
-Defined in: [lib/site-governance/execution-gatekeeper.ts:93](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/execution-gatekeeper.ts#L93)
+Defined in: [lib/site-governance/execution-gatekeeper.ts:102](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/execution-gatekeeper.ts#L102)
 
 Asserts that site execution is permitted, throwing SovereignGatekeeperException if blocked.
 
