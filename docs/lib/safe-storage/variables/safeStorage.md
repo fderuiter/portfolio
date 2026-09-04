@@ -8,4 +8,4 @@
 
 > `const` **safeStorage**: [`SafeStorageAdapter`](../classes/SafeStorageAdapter.md)
 
-Defined in: [lib/safe-storage.ts:469](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L469)
+Defined in: [lib/safe-storage.ts:501](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L501)

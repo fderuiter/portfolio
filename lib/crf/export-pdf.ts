@@ -4,12 +4,29 @@ import { CRFForm, StudyProtocol, CRFField, ExportPdfOptions } from "./types";
 import { getStudyBranding } from "./branding-defaults";
 
 /**
+ * jspdf-autotable's plugin attaches `lastAutoTable` to the jsPDF instance at
+ * runtime, but the library ships no type augmentation for it.
+ */
+interface JsPDFWithAutoTable extends jsPDF {
+  lastAutoTable: { finalY: number };
+}
+
+/**
  * Converts Hex string to RGB tuple for jsPDF.
  */
-function hexToRgb(hex?: string, fallback: [number, number, number] = [2, 132, 199]): [number, number, number] {
+function hexToRgb(
+  hex?: string,
+  fallback: [number, number, number] = [2, 132, 199]
+): [number, number, number] {
   if (!hex) return fallback;
   const clean = hex.replace(/^#/, "");
-  const normalized = clean.length === 3 ? clean.split("").map((c) => c + c).join("") : clean;
+  const normalized =
+    clean.length === 3
+      ? clean
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : clean;
   const num = parseInt(normalized, 16);
   if (isNaN(num)) return fallback;
   return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
@@ -22,10 +39,11 @@ function formatResponseMock(field: CRFField, study: StudyProtocol): string {
   const codelist = study.codelists.find((cl) => cl.id === field.codelistId);
 
   if (field.dataType === "radio" || field.dataType === "single_select") {
-    const opts = field.customOptions || codelist?.options || [
-      { code: "1", label: "Option 1", order: 1 },
-      { code: "2", label: "Option 2", order: 2 },
-    ];
+    const opts = field.customOptions ||
+      codelist?.options || [
+        { code: "1", label: "Option 1", order: 1 },
+        { code: "2", label: "Option 2", order: 2 },
+      ];
     return opts.map((o) => `( ) ${o.label} [${o.code}]`).join("   ");
   }
 
@@ -72,9 +90,13 @@ export async function generateStudyPdf(
   // Determine forms to include
   let formsToInclude: CRFForm[] = study.forms;
   if (options.scope === "single" && options.selectedFormIds?.length) {
-    formsToInclude = study.forms.filter((f) => f.id === options.selectedFormIds![0]);
+    formsToInclude = study.forms.filter(
+      (f) => f.id === options.selectedFormIds![0]
+    );
   } else if (options.scope === "selected" && options.selectedFormIds?.length) {
-    formsToInclude = study.forms.filter((f) => options.selectedFormIds!.includes(f.id));
+    formsToInclude = study.forms.filter((f) =>
+      options.selectedFormIds!.includes(f.id)
+    );
   }
 
   const doc = new jsPDF({
@@ -92,7 +114,14 @@ export async function generateStudyPdf(
   // Brand Logo if provided
   if (branding.logoBase64) {
     try {
-      doc.addImage(branding.logoBase64, "PNG", pageWidth / 2 - 25, currentY, 50, 15);
+      doc.addImage(
+        branding.logoBase64,
+        "PNG",
+        pageWidth / 2 - 25,
+        currentY,
+        50,
+        15
+      );
       currentY += 22;
     } catch {
       // If image format fails, continue gracefully
@@ -122,7 +151,10 @@ export async function generateStudyPdf(
   doc.setFont("helvetica", "normal");
   doc.setFontSize(11);
   doc.setTextColor(51, 65, 85);
-  const splitStudyName = doc.splitTextToSize(study.studyName, pageWidth - margin * 2 - 10);
+  const splitStudyName = doc.splitTextToSize(
+    study.studyName,
+    pageWidth - margin * 2 - 10
+  );
   doc.text(splitStudyName, pageWidth / 2, currentY, { align: "center" });
   currentY += splitStudyName.length * 6 + 6;
 
@@ -134,7 +166,10 @@ export async function generateStudyPdf(
     styles: { fontSize: 9, cellPadding: 2, textColor: [30, 41, 59] },
     body: [
       [
-        { content: `Protocol Number: ${study.protocolNumber}`, styles: { fontStyle: "bold" } },
+        {
+          content: `Protocol Number: ${study.protocolNumber}`,
+          styles: { fontStyle: "bold" },
+        },
         { content: `Sponsor: ${study.sponsor}`, styles: { fontStyle: "bold" } },
       ],
       [
@@ -143,13 +178,14 @@ export async function generateStudyPdf(
       ],
       [
         { content: `Therapeutic Area: ${study.therapeuticArea}` },
-        { content: `Date: ${study.lastModified || new Date().toISOString().slice(0, 10)}` },
+        {
+          content: `Date: ${study.lastModified || new Date().toISOString().slice(0, 10)}`,
+        },
       ],
     ],
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  currentY = (doc as any).lastAutoTable.finalY + 8;
+  currentY = (doc as JsPDFWithAutoTable).lastAutoTable.finalY + 8;
 
   // Confidentiality Notice Box
   if (branding.confidentialityNotice) {
@@ -170,7 +206,11 @@ export async function generateStudyPdf(
         [
           {
             content: "CONFIDENTIALITY NOTICE",
-            styles: { fontStyle: "bold", textColor: [100, 116, 139], fillColor: [241, 245, 249] },
+            styles: {
+              fontStyle: "bold",
+              textColor: [100, 116, 139],
+              fillColor: [241, 245, 249],
+            },
           },
         ],
       ],
@@ -262,7 +302,8 @@ export async function generateStudyPdf(
             field.cdashMetadata?.acrfAnnotation ||
             `${form.domain}.${field.variableName}`;
           const isDerived = field.dataType === "calculated";
-          const core = field.cdashMetadata?.core || (field.required ? "HR" : "O");
+          const core =
+            field.cdashMetadata?.core || (field.required ? "HR" : "O");
           const annotCol = `${sdtmTarget}\n[${isDerived ? "Derived" : "CRF"}] [${core}]`;
           return [promptCol, valCol, annotCol];
         }
@@ -271,7 +312,13 @@ export async function generateStudyPdf(
       });
 
       const head = isAnnotated
-        ? [["Question / Variable Prompt", "Clinical Value Blank", "SDTM / aCRF Tag"]]
+        ? [
+            [
+              "Question / Variable Prompt",
+              "Clinical Value Blank",
+              "SDTM / aCRF Tag",
+            ],
+          ]
         : [["Question / Variable Prompt", "Clinical Value / Observations"]];
 
       autoTable(doc, {
@@ -312,8 +359,7 @@ export async function generateStudyPdf(
             },
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      startY = (doc as any).lastAutoTable.finalY + 8;
+      startY = (doc as JsPDFWithAutoTable).lastAutoTable.finalY + 8;
     });
   });
 
@@ -333,7 +379,8 @@ export async function generateStudyPdf(
             f.domain,
             field.variableName,
             field.label,
-            field.cdashMetadata?.sdtmVariable || `${f.domain}.${field.variableName}`,
+            field.cdashMetadata?.sdtmVariable ||
+              `${f.domain}.${field.variableName}`,
             field.dataType === "calculated" ? "Derived" : "CRF",
             field.cdashMetadata?.core || (field.required ? "HR" : "O"),
           ]);
@@ -344,7 +391,9 @@ export async function generateStudyPdf(
     autoTable(doc, {
       startY: 25,
       margin: { left: margin, right: margin },
-      head: [["Domain", "Variable", "CDASH Label", "SDTM Target", "Origin", "Core"]],
+      head: [
+        ["Domain", "Variable", "CDASH Label", "SDTM Target", "Origin", "Core"],
+      ],
       body: sdtmRows,
       theme: "striped",
       headStyles: {
@@ -386,9 +435,14 @@ export async function generateStudyPdf(
       pageHeight - 7
     );
     if (branding.showPageNumbers !== false) {
-      doc.text(`Page ${i} of ${totalPages}`, pageWidth - margin, pageHeight - 7, {
-        align: "right",
-      });
+      doc.text(
+        `Page ${i} of ${totalPages}`,
+        pageWidth - margin,
+        pageHeight - 7,
+        {
+          align: "right",
+        }
+      );
     }
   }
 

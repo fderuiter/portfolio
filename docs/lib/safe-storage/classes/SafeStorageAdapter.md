@@ -28,7 +28,7 @@ Defined in: [lib/safe-storage.ts:31](https://github.com/fderuiter/portfolio/blob
 
 > **get** **length**(): `number`
 
-Defined in: [lib/safe-storage.ts:275](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L275)
+Defined in: [lib/safe-storage.ts:295](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L295)
 
 Gets total number of stored keys.
 
@@ -42,7 +42,7 @@ Gets total number of stored keys.
 
 > **clear**(): `void`
 
-Defined in: [lib/safe-storage.ts:243](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L243)
+Defined in: [lib/safe-storage.ts:263](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L263)
 
 Clears all items from storage and memory cache.
 
@@ -70,7 +70,7 @@ Clear all internal memory cache entries.
 
 > **getEnvelope**\<`T`\>(`key`): [`StorageEnvelope`](../interfaces/StorageEnvelope.md)\<`T`\> \| `null`
 
-Defined in: [lib/safe-storage.ts:289](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L289)
+Defined in: [lib/safe-storage.ts:309](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L309)
 
 Gets the metadata envelope for a key if present or constructs default metadata.
 
@@ -161,7 +161,7 @@ Safely checks whether localStorage API is accessible in the current environment.
 
 > **key**(`index`): `string` \| `null`
 
-Defined in: [lib/safe-storage.ts:261](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L261)
+Defined in: [lib/safe-storage.ts:281](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L281)
 
 Returns key at specified index.
 
@@ -181,7 +181,7 @@ Returns key at specified index.
 
 > **pruneExpired**(): `number`
 
-Defined in: [lib/safe-storage.ts:323](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L323)
+Defined in: [lib/safe-storage.ts:343](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L343)
 
 Prunes all expired keys across storage and memory cache.
 Returns count of pruned entries.
@@ -196,7 +196,7 @@ Returns count of pruned entries.
 
 > **removeItem**(`key`): `void`
 
-Defined in: [lib/safe-storage.ts:225](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L225)
+Defined in: [lib/safe-storage.ts:242](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L242)
 
 Removes an item from storage and memory cache.
 
@@ -216,7 +216,7 @@ Removes an item from storage and memory cache.
 
 > **setItem**\<`T`\>(`key`, `value`, `options?`): `boolean`
 
-Defined in: [lib/safe-storage.ts:181](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L181)
+Defined in: [lib/safe-storage.ts:185](https://github.com/fderuiter/portfolio/blob/main/lib/safe-storage.ts#L185)
 
 Writes an item wrapped in a metadata envelope to storage.
 Handles QuotaExceededError by triggering LRU metadata eviction.

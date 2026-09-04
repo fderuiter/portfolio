@@ -8,7 +8,7 @@
 
 > **sanitizeString**(`str`): `string`
 
-Defined in: [lib/error-sanitization.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/error-sanitization.ts#L9)
+Defined in: [lib/error-sanitization.ts:8](https://github.com/fderuiter/portfolio/blob/main/lib/error-sanitization.ts#L8)
 
 Utility to sanitize errors for production environment console output.
 Blocks the leak of absolute system paths and deep stack traces.

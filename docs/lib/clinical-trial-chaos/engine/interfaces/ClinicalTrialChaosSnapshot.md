@@ -6,7 +6,7 @@
 
 # Interface: ClinicalTrialChaosSnapshot
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:861](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L861)
+Defined in: [lib/clinical-trial-chaos/engine.ts:864](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L864)
 
 ## Properties
 
@@ -14,7 +14,15 @@ Defined in: [lib/clinical-trial-chaos/engine.ts:861](https://github.com/fderuite
 
 > **activeAmendment**: [`ProtocolAmendment`](../../types/interfaces/ProtocolAmendment.md) \| `null`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:866](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L866)
+Defined in: [lib/clinical-trial-chaos/engine.ts:870](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L870)
+
+***
+
+### auditLogCount
+
+> **auditLogCount**: `number`
+
+Defined in: [lib/clinical-trial-chaos/engine.ts:874](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L874)
 
 ***
 
@@ -22,7 +30,15 @@ Defined in: [lib/clinical-trial-chaos/engine.ts:866](https://github.com/fderuite
 
 > **auditorState**: [`AuditorState`](../../types/interfaces/AuditorState.md)
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:863](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L863)
+Defined in: [lib/clinical-trial-chaos/engine.ts:866](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L866)
+
+***
+
+### isModalPaused
+
+> **isModalPaused**: `boolean`
+
+Defined in: [lib/clinical-trial-chaos/engine.ts:869](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L869)
 
 ***
 
@@ -30,7 +46,7 @@ Defined in: [lib/clinical-trial-chaos/engine.ts:863](https://github.com/fderuite
 
 > **isPaused**: `boolean`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:865](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L865)
+Defined in: [lib/clinical-trial-chaos/engine.ts:868](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L868)
 
 ***
 
@@ -38,7 +54,7 @@ Defined in: [lib/clinical-trial-chaos/engine.ts:865](https://github.com/fderuite
 
 > **powerUps**: [`PowerUpInventory`](../../types/type-aliases/PowerUpInventory.md)
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:864](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L864)
+Defined in: [lib/clinical-trial-chaos/engine.ts:867](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L867)
 
 ***
 
@@ -46,7 +62,7 @@ Defined in: [lib/clinical-trial-chaos/engine.ts:864](https://github.com/fderuite
 
 > **ruleViolationsCount**: `number`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:867](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L867)
+Defined in: [lib/clinical-trial-chaos/engine.ts:871](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L871)
 
 ***
 
@@ -54,7 +70,7 @@ Defined in: [lib/clinical-trial-chaos/engine.ts:867](https://github.com/fderuite
 
 > **scoreState**: [`GameScoreState`](../../types/interfaces/GameScoreState.md)
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:862](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L862)
+Defined in: [lib/clinical-trial-chaos/engine.ts:865](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L865)
 
 ***
 
@@ -62,4 +78,12 @@ Defined in: [lib/clinical-trial-chaos/engine.ts:862](https://github.com/fderuite
 
 > **subjectCount**: `number`
 
-Defined in: [lib/clinical-trial-chaos/engine.ts:868](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L868)
+Defined in: [lib/clinical-trial-chaos/engine.ts:872](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L872)
+
+***
+
+### submittedCount
+
+> **submittedCount**: `number`
+
+Defined in: [lib/clinical-trial-chaos/engine.ts:873](https://github.com/fderuiter/portfolio/blob/main/lib/clinical-trial-chaos/engine.ts#L873)

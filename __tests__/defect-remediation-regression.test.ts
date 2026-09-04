@@ -373,7 +373,9 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
         );
         wrappedError.cause = rootError;
 
-        const sanitized = sanitizeError(wrappedError);
+        const sanitized = sanitizeError(wrappedError) as Error & {
+          cause?: unknown;
+        };
         expect(sanitized.message).not.toContain("/home/ubuntu");
         expect(sanitized.cause).toBeDefined();
         expect((sanitized.cause as Error).message).not.toContain("/app/server");

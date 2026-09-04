@@ -1,20 +1,20 @@
-import { 
-  walkRichInlineLineRanges, 
+import {
+  walkRichInlineLineRanges,
   materializeRichInlineLineRange,
   type PreparedRichInline,
   type RichInlineLine,
-  type RichInlineLineRange
+  type RichInlineLineRange,
 } from "@chenglou/pretext/rich-inline";
 import { type ExtendedRichInlineItem } from "@/hooks/usePretextLayout";
-import { 
-  calculateColumnCount, 
-  calculateColumnWidth, 
-  distributeItemsGreedily 
+import {
+  calculateColumnCount,
+  calculateColumnWidth,
+  distributeItemsGreedily,
 } from "@/lib/graphics-math";
-import { 
-  calculateBlockHeight, 
-  BLOCK_LAYOUT_CONFIG, 
-  type PreparedBlock 
+import {
+  calculateBlockHeight,
+  BLOCK_LAYOUT_CONFIG,
+  type PreparedBlock,
 } from "@/lib/pretext-block-parser";
 
 export interface MasonryConfig {
@@ -37,6 +37,12 @@ export interface PreparedData {
   blocks?: PreparedBlock[];
   realityBlocks?: PreparedBlock[];
   paddingHeight: number;
+  /**
+   * Legacy flat shape (single paragraph, not wrapped in `paragraphs`).
+   * Still produced by some callers/tests; normalized below.
+   */
+  prepared?: PreparedRichInline;
+  items?: ExtendedRichInlineItem[];
 }
 
 export function calculateCardHeightFromBlocks(
@@ -55,13 +61,18 @@ export function calculateCardHeightFromBlocks(
       });
       totalTextHeight += lineCount * config.LINE_HEIGHT;
     } else {
-      totalTextHeight += calculateBlockHeight(block, textWidth, config.LINE_HEIGHT);
+      totalTextHeight += calculateBlockHeight(
+        block,
+        textWidth,
+        config.LINE_HEIGHT
+      );
     }
   }
   if (blocks.length > 1) {
     totalTextHeight += (blocks.length - 1) * BLOCK_LAYOUT_CONFIG.PARAGRAPH_GAP;
   }
-  const responsivePaddingAdjustment = colCount === 1 ? (config.MOBILE_PADDING_ADJUSTMENT ?? 0) : 0;
+  const responsivePaddingAdjustment =
+    colCount === 1 ? (config.MOBILE_PADDING_ADJUSTMENT ?? 0) : 0;
   return totalTextHeight + paddingHeight - responsivePaddingAdjustment;
 }
 
@@ -72,22 +83,37 @@ export function calculateMasonryLayout<T extends { id: string }>(
   config: MasonryConfig,
   heightOverrides?: Record<string, number>
 ) {
-  const colCount = calculateColumnCount(containerWidth, config.BREAKPOINTS, config.COLS);
-  const columnWidth = calculateColumnWidth(containerWidth, colCount, config.GAP);
+  const colCount = calculateColumnCount(
+    containerWidth,
+    config.BREAKPOINTS,
+    config.COLS
+  );
+  const columnWidth = calculateColumnWidth(
+    containerWidth,
+    colCount,
+    config.GAP
+  );
 
   const itemsWithHeight = filteredItems.map((study) => {
     const cached = preparedData[study.id];
     if (!cached) {
       const override = heightOverrides?.[study.id];
-      const height = override !== undefined ? override : config.FALLBACK_ITEM_HEIGHT;
-      return { ...study, height, preCalculatedRealityHeight: height, paragraphsLines: [], paragraphsItems: [] };
+      const height =
+        override !== undefined ? override : config.FALLBACK_ITEM_HEIGHT;
+      return {
+        ...study,
+        height,
+        preCalculatedRealityHeight: height,
+        paragraphsLines: [],
+        paragraphsItems: [],
+      };
     }
 
     let totalTextHeight = 0;
     const paragraphsLines: RichInlineLine[][] = [];
     const paragraphsItems: ExtendedRichInlineItem[][] = [];
 
-    const textWidth = columnWidth - (config.CARD_PADDING * 2);
+    const textWidth = columnWidth - config.CARD_PADDING * 2;
 
     if (cached.blocks && cached.blocks.length > 0) {
       for (const block of cached.blocks) {
@@ -108,7 +134,11 @@ export function calculateMasonryLayout<T extends { id: string }>(
           totalTextHeight += paragraphHeight;
         } else {
           // Code / Log / Diff structured block
-          const blockHeight = calculateBlockHeight(block, textWidth, config.LINE_HEIGHT);
+          const blockHeight = calculateBlockHeight(
+            block,
+            textWidth,
+            config.LINE_HEIGHT
+          );
           totalTextHeight += blockHeight;
         }
       }
@@ -119,14 +149,14 @@ export function calculateMasonryLayout<T extends { id: string }>(
       }
     } else {
       let paragraphs = cached.paragraphs;
-      /* eslint-disable @typescript-eslint/no-explicit-any */
-      if (!paragraphs && (cached as any).prepared) {
-        paragraphs = [{
-          prepared: (cached as any).prepared,
-          items: (cached as any).items || [],
-        }];
+      if (!paragraphs && cached.prepared) {
+        paragraphs = [
+          {
+            prepared: cached.prepared,
+            items: cached.items || [],
+          },
+        ];
       }
-      /* eslint-enable @typescript-eslint/no-explicit-any */
 
       for (const paragraph of paragraphs || []) {
         const linesRanges: RichInlineLineRange[] = [];
@@ -154,16 +184,23 @@ export function calculateMasonryLayout<T extends { id: string }>(
     const override = heightOverrides?.[study.id];
     // The single-column card shell is 22px shorter because responsive typography
     // and control wrapping remove one desktop spacing row.
-    const responsivePaddingAdjustment = colCount === 1
-      ? (config.MOBILE_PADDING_ADJUSTMENT ?? 0)
-      : 0;
-    const totalHeight = override !== undefined
-      ? override
-      : totalTextHeight + cached.paddingHeight - responsivePaddingAdjustment;
+    const responsivePaddingAdjustment =
+      colCount === 1 ? (config.MOBILE_PADDING_ADJUSTMENT ?? 0) : 0;
+    const totalHeight =
+      override !== undefined
+        ? override
+        : totalTextHeight + cached.paddingHeight - responsivePaddingAdjustment;
 
-    const preCalculatedRealityHeight = cached.realityBlocks && cached.realityBlocks.length > 0
-      ? calculateCardHeightFromBlocks(cached.realityBlocks, textWidth, cached.paddingHeight, config, colCount)
-      : totalHeight;
+    const preCalculatedRealityHeight =
+      cached.realityBlocks && cached.realityBlocks.length > 0
+        ? calculateCardHeightFromBlocks(
+            cached.realityBlocks,
+            textWidth,
+            cached.paddingHeight,
+            config,
+            colCount
+          )
+        : totalHeight;
 
     return {
       ...study,
@@ -174,8 +211,11 @@ export function calculateMasonryLayout<T extends { id: string }>(
     };
   });
 
-  const { columns } = distributeItemsGreedily(itemsWithHeight, colCount, config.GAP);
+  const { columns } = distributeItemsGreedily(
+    itemsWithHeight,
+    colCount,
+    config.GAP
+  );
 
   return { colCount, columns };
 }
-
