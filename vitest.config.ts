@@ -11,6 +11,12 @@ export default defineConfig({
     include: ["__tests__/**/*.{test,spec}.{ts,tsx}"],
     execArgv: ["--max-old-space-size=4096", "--no-warnings"],
     exclude: ["**/node_modules/**", "**/e2e/**"],
+    // Running with >=2 concurrent forks reliably starves __tests__/crf/crf-studio.test.tsx's
+    // multi-transition tests past their timeout under this project's full 2300+ test suite,
+    // even though they pass instantly in isolation (confirmed: maxWorkers=2 still hangs,
+    // only fully sequential execution is reliable). Disable file parallelism until the
+    // underlying contention is root-caused.
+    fileParallelism: false,
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html", "lcov"],
