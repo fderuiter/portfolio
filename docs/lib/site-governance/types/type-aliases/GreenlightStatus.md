@@ -8,4 +8,4 @@
 
 > **GreenlightStatus** = `"GREENLIGHT"` \| `"BLOCKED"` \| `"OVERRIDDEN"`
 
-Defined in: [lib/site-governance/types.ts:61](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L61)
+Defined in: [lib/site-governance/types.ts:63](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L63)

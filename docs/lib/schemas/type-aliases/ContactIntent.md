@@ -8,4 +8,4 @@
 
 > **ContactIntent** = *typeof* [`CONTACT_INTENTS`](../variables/CONTACT_INTENTS.md)\[`number`\]
 
-Defined in: [lib/schemas.ts:235](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L235)
+Defined in: [lib/schemas.ts:285](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L285)

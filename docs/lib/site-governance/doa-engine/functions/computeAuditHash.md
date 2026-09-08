@@ -8,7 +8,7 @@
 
 > **computeAuditHash**(`entry`): `string`
 
-Defined in: [lib/site-governance/doa-engine.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/doa-engine.ts#L30)
+Defined in: [lib/site-governance/doa-engine.ts:36](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/doa-engine.ts#L36)
 
 Computes SHA-256 hash chain for DOA Audit Entry.
 

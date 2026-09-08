@@ -8,7 +8,7 @@
 
 > **evaluateGreenlight**(`siteData`, `studyId`, `overrides?`): [`GreenlightEvaluation`](../../types/interfaces/GreenlightEvaluation.md)
 
-Defined in: [lib/site-governance/greenlight-engine.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/greenlight-engine.ts#L29)
+Defined in: [lib/site-governance/greenlight-engine.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/greenlight-engine.ts#L30)
 
 Evaluates the 6 operational readiness facets for clinical trial site qualification:
 1. IRB: Ethics & IRB Approval

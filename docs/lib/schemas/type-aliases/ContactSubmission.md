@@ -8,4 +8,4 @@
 
 > **ContactSubmission** = `z.infer`\<*typeof* [`ContactSubmissionSchema`](../variables/ContactSubmissionSchema.md)\>
 
-Defined in: [lib/schemas.ts:289](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L289)
+Defined in: [lib/schemas.ts:352](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L352)

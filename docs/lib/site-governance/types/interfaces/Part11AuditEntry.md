@@ -6,7 +6,7 @@
 
 # Interface: Part11AuditEntry
 
-Defined in: [lib/site-governance/types.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L123)
+Defined in: [lib/site-governance/types.ts:125](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L125)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/site-governance/types.ts:123](https://github.com/fderuiter/port
 
 > **actorId**: `string`
 
-Defined in: [lib/site-governance/types.ts:128](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L128)
+Defined in: [lib/site-governance/types.ts:135](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L135)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/site-governance/types.ts:128](https://github.com/fderuiter/port
 
 > **actorName**: `string`
 
-Defined in: [lib/site-governance/types.ts:129](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L129)
+Defined in: [lib/site-governance/types.ts:136](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L136)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/site-governance/types.ts:129](https://github.com/fderuiter/port
 
 > **actorRole**: `string`
 
-Defined in: [lib/site-governance/types.ts:130](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L130)
+Defined in: [lib/site-governance/types.ts:137](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L137)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/site-governance/types.ts:130](https://github.com/fderuiter/port
 
 > **eventType**: `"SPONSOR_OVERRIDE"` \| `"DOA_SIGN_OFF"` \| `"DOA_REVOCATION"` \| `"GREENLIGHT_CHANGE"` \| `"GATEKEEPER_DENIAL"`
 
-Defined in: [lib/site-governance/types.ts:127](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L127)
+Defined in: [lib/site-governance/types.ts:129](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L129)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/site-governance/types.ts:127](https://github.com/fderuiter/port
 
 > **hash**: `string`
 
-Defined in: [lib/site-governance/types.ts:136](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L136)
+Defined in: [lib/site-governance/types.ts:143](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L143)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/site-governance/types.ts:136](https://github.com/fderuiter/port
 
 > **id**: `string`
 
-Defined in: [lib/site-governance/types.ts:124](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L124)
+Defined in: [lib/site-governance/types.ts:126](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L126)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/site-governance/types.ts:124](https://github.com/fderuiter/port
 
 > **justification**: `string`
 
-Defined in: [lib/site-governance/types.ts:131](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L131)
+Defined in: [lib/site-governance/types.ts:138](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L138)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/site-governance/types.ts:131](https://github.com/fderuiter/port
 
 > `optional` **newState?**: `string`
 
-Defined in: [lib/site-governance/types.ts:134](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L134)
+Defined in: [lib/site-governance/types.ts:141](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L141)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/site-governance/types.ts:134](https://github.com/fderuiter/port
 
 > **previousHash**: `string`
 
-Defined in: [lib/site-governance/types.ts:135](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L135)
+Defined in: [lib/site-governance/types.ts:142](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L142)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [lib/site-governance/types.ts:135](https://github.com/fderuiter/port
 
 > `optional` **previousState?**: `string`
 
-Defined in: [lib/site-governance/types.ts:133](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L133)
+Defined in: [lib/site-governance/types.ts:140](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L140)
 
 ***
 
@@ -94,7 +94,7 @@ Defined in: [lib/site-governance/types.ts:133](https://github.com/fderuiter/port
 
 > **signatures**: [`Part11Signature`](Part11Signature.md)[]
 
-Defined in: [lib/site-governance/types.ts:132](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L132)
+Defined in: [lib/site-governance/types.ts:139](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L139)
 
 ***
 
@@ -102,7 +102,7 @@ Defined in: [lib/site-governance/types.ts:132](https://github.com/fderuiter/port
 
 > **siteId**: `string`
 
-Defined in: [lib/site-governance/types.ts:126](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L126)
+Defined in: [lib/site-governance/types.ts:128](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L128)
 
 ***
 
@@ -110,4 +110,4 @@ Defined in: [lib/site-governance/types.ts:126](https://github.com/fderuiter/port
 
 > **timestamp**: `string`
 
-Defined in: [lib/site-governance/types.ts:125](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L125)
+Defined in: [lib/site-governance/types.ts:127](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L127)

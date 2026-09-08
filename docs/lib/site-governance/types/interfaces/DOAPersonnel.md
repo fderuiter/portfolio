@@ -6,7 +6,7 @@
 
 # Interface: DOAPersonnel
 
-Defined in: [lib/site-governance/types.ts:196](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L196)
+Defined in: [lib/site-governance/types.ts:204](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L204)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/site-governance/types.ts:196](https://github.com/fderuiter/port
 
 > **delegatedTaskCodes**: [`DOATaskCode`](../type-aliases/DOATaskCode.md)[]
 
-Defined in: [lib/site-governance/types.ts:201](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L201)
+Defined in: [lib/site-governance/types.ts:209](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L209)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/site-governance/types.ts:201](https://github.com/fderuiter/port
 
 > **email**: `string`
 
-Defined in: [lib/site-governance/types.ts:200](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L200)
+Defined in: [lib/site-governance/types.ts:208](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L208)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/site-governance/types.ts:200](https://github.com/fderuiter/port
 
 > `optional` **endDate?**: `string`
 
-Defined in: [lib/site-governance/types.ts:203](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L203)
+Defined in: [lib/site-governance/types.ts:211](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L211)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/site-governance/types.ts:203](https://github.com/fderuiter/port
 
 > **id**: `string`
 
-Defined in: [lib/site-governance/types.ts:197](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L197)
+Defined in: [lib/site-governance/types.ts:205](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L205)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/site-governance/types.ts:197](https://github.com/fderuiter/port
 
 > **name**: `string`
 
-Defined in: [lib/site-governance/types.ts:198](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L198)
+Defined in: [lib/site-governance/types.ts:206](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L206)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/site-governance/types.ts:198](https://github.com/fderuiter/port
 
 > `optional` **piRevokeDate?**: `string`
 
-Defined in: [lib/site-governance/types.ts:208](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L208)
+Defined in: [lib/site-governance/types.ts:216](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L216)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/site-governance/types.ts:208](https://github.com/fderuiter/port
 
 > `optional` **piSignDate?**: `string`
 
-Defined in: [lib/site-governance/types.ts:206](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L206)
+Defined in: [lib/site-governance/types.ts:214](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L214)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/site-governance/types.ts:206](https://github.com/fderuiter/port
 
 > `optional` **revocationReason?**: `string`
 
-Defined in: [lib/site-governance/types.ts:209](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L209)
+Defined in: [lib/site-governance/types.ts:217](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L217)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/site-governance/types.ts:209](https://github.com/fderuiter/port
 
 > `optional` **revokedByPi?**: `boolean`
 
-Defined in: [lib/site-governance/types.ts:207](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L207)
+Defined in: [lib/site-governance/types.ts:215](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L215)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [lib/site-governance/types.ts:207](https://github.com/fderuiter/port
 
 > **role**: `string`
 
-Defined in: [lib/site-governance/types.ts:199](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L199)
+Defined in: [lib/site-governance/types.ts:207](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L207)
 
 ***
 
@@ -94,7 +94,7 @@ Defined in: [lib/site-governance/types.ts:199](https://github.com/fderuiter/port
 
 > **signedByPi**: `boolean`
 
-Defined in: [lib/site-governance/types.ts:205](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L205)
+Defined in: [lib/site-governance/types.ts:213](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L213)
 
 ***
 
@@ -102,7 +102,7 @@ Defined in: [lib/site-governance/types.ts:205](https://github.com/fderuiter/port
 
 > **startDate**: `string`
 
-Defined in: [lib/site-governance/types.ts:202](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L202)
+Defined in: [lib/site-governance/types.ts:210](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L210)
 
 ***
 
@@ -110,4 +110,4 @@ Defined in: [lib/site-governance/types.ts:202](https://github.com/fderuiter/port
 
 > **status**: `"PENDING"` \| `"ACTIVE"` \| `"REVOKED"`
 
-Defined in: [lib/site-governance/types.ts:204](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L204)
+Defined in: [lib/site-governance/types.ts:212](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L212)

@@ -8,4 +8,4 @@
 
 > **NewsletterSubscription** = `z.infer`\<*typeof* [`NewsletterSubscriptionSchema`](../variables/NewsletterSubscriptionSchema.md)\>
 
-Defined in: [lib/schemas.ts:312](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L312)
+Defined in: [lib/schemas.ts:375](https://github.com/fderuiter/portfolio/blob/main/lib/schemas.ts#L375)

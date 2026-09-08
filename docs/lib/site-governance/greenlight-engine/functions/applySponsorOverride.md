@@ -8,7 +8,7 @@
 
 > **applySponsorOverride**(`request`, `previousHash?`, `secretKey?`): [`SponsorOverrideResult`](../../types/interfaces/SponsorOverrideResult.md)
 
-Defined in: [lib/site-governance/greenlight-engine.ts:221](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/greenlight-engine.ts#L221)
+Defined in: [lib/site-governance/greenlight-engine.ts:280](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/greenlight-engine.ts#L280)
 
 Applies dual-signature sponsor override with 21 CFR Part 11 justification audit logging.
 

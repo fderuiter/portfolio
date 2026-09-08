@@ -8,4 +8,4 @@
 
 > **QcStatus** = `"DRAFT"` \| `"QC_PENDING"` \| `"QC_APPROVED"` \| `"QC_REJECTED"` \| `"SYNCED_TO_ETMF"`
 
-Defined in: [lib/site-governance/types.ts:169](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L169)
+Defined in: [lib/site-governance/types.ts:176](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L176)

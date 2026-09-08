@@ -8,6 +8,6 @@
 
 > `const` **COUNTRY\_RULES\_DEFINITION**: `Record`\<[`CountryCode`](../../types/type-aliases/CountryCode.md), `Omit`\<[`StatutoryRuleCheck`](../../types/interfaces/StatutoryRuleCheck.md), `"status"`\>[]\>
 
-Defined in: [lib/site-governance/country-rules.ts:6](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/country-rules.ts#L6)
+Defined in: [lib/site-governance/country-rules.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/country-rules.ts#L11)
 
 Statutory site startup requirements matrix by jurisdiction.

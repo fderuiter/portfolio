@@ -6,7 +6,7 @@
 
 # Interface: GatekeeperResult
 
-Defined in: [lib/site-governance/types.ts:147](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L147)
+Defined in: [lib/site-governance/types.ts:154](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L154)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/site-governance/types.ts:147](https://github.com/fderuiter/port
 
 > **action**: [`ExecutionAction`](../type-aliases/ExecutionAction.md)
 
-Defined in: [lib/site-governance/types.ts:150](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L150)
+Defined in: [lib/site-governance/types.ts:157](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L157)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/site-governance/types.ts:150](https://github.com/fderuiter/port
 
 > **allowed**: `boolean`
 
-Defined in: [lib/site-governance/types.ts:148](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L148)
+Defined in: [lib/site-governance/types.ts:155](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L155)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/site-governance/types.ts:148](https://github.com/fderuiter/port
 
 > **reason**: `string`
 
-Defined in: [lib/site-governance/types.ts:152](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L152)
+Defined in: [lib/site-governance/types.ts:159](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L159)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/site-governance/types.ts:152](https://github.com/fderuiter/port
 
 > **siteId**: `string`
 
-Defined in: [lib/site-governance/types.ts:149](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L149)
+Defined in: [lib/site-governance/types.ts:156](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L156)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/site-governance/types.ts:149](https://github.com/fderuiter/port
 
 > **status**: [`GreenlightStatus`](../type-aliases/GreenlightStatus.md)
 
-Defined in: [lib/site-governance/types.ts:151](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L151)
+Defined in: [lib/site-governance/types.ts:158](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L158)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/site-governance/types.ts:151](https://github.com/fderuiter/port
 
 > **timestamp**: `string`
 
-Defined in: [lib/site-governance/types.ts:154](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L154)
+Defined in: [lib/site-governance/types.ts:161](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L161)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [lib/site-governance/types.ts:154](https://github.com/fderuiter/port
 
 > `optional` **violationCode?**: `string`
 
-Defined in: [lib/site-governance/types.ts:153](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L153)
+Defined in: [lib/site-governance/types.ts:160](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L160)

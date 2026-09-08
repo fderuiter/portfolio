@@ -6,7 +6,7 @@
 
 # Interface: CountryRulesResult
 
-Defined in: [lib/site-governance/types.ts:40](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L40)
+Defined in: [lib/site-governance/types.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L41)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/site-governance/types.ts:40](https://github.com/fderuiter/portf
 
 > **complianceScore**: `number`
 
-Defined in: [lib/site-governance/types.ts:43](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L43)
+Defined in: [lib/site-governance/types.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L44)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/site-governance/types.ts:43](https://github.com/fderuiter/portf
 
 > **evaluatedRules**: [`StatutoryRuleCheck`](StatutoryRuleCheck.md)[]
 
-Defined in: [lib/site-governance/types.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L44)
+Defined in: [lib/site-governance/types.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L45)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/site-governance/types.ts:44](https://github.com/fderuiter/portf
 
 > **isCompliant**: `boolean`
 
-Defined in: [lib/site-governance/types.ts:42](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L42)
+Defined in: [lib/site-governance/types.ts:43](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L43)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/site-governance/types.ts:42](https://github.com/fderuiter/portf
 
 > **jurisdiction**: [`CountryCode`](../type-aliases/CountryCode.md)
 
-Defined in: [lib/site-governance/types.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L41)
+Defined in: [lib/site-governance/types.ts:42](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L42)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/site-governance/types.ts:41](https://github.com/fderuiter/portf
 
 > **missingRequirements**: `string`[]
 
-Defined in: [lib/site-governance/types.ts:46](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L46)
+Defined in: [lib/site-governance/types.ts:47](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L47)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [lib/site-governance/types.ts:46](https://github.com/fderuiter/portf
 
 > **passedRules**: `string`[]
 
-Defined in: [lib/site-governance/types.ts:45](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L45)
+Defined in: [lib/site-governance/types.ts:46](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L46)

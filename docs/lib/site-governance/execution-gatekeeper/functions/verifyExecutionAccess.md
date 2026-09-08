@@ -8,7 +8,7 @@
 
 > **verifyExecutionAccess**(`params`): [`GatekeeperResult`](../../types/interfaces/GatekeeperResult.md)
 
-Defined in: [lib/site-governance/execution-gatekeeper.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/execution-gatekeeper.ts#L22)
+Defined in: [lib/site-governance/execution-gatekeeper.ts:31](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/execution-gatekeeper.ts#L31)
 
 Sovereign Site Execution Gatekeeper middleware preventing subject randomization
 and eCRF write access on non-greenlight sites.

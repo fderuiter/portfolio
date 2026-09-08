@@ -8,7 +8,7 @@
 
 > **verifyGreenlightToken**(`token`, `secretKey?`): `object`
 
-Defined in: [lib/site-governance/greenlight-engine.ts:195](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/greenlight-engine.ts#L195)
+Defined in: [lib/site-governance/greenlight-engine.ts:246](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/greenlight-engine.ts#L246)
 
 Verifies cryptographic HMAC-SHA256 greenlight token validity and payload integrity.
 

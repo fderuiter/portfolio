@@ -6,7 +6,7 @@
 
 # Class: DualReadStorageAdapter
 
-Defined in: [lib/site-governance/binders.ts:89](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L89)
+Defined in: [lib/site-governance/binders.ts:174](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L174)
 
 Zero-downtime Dual-Read Storage Port Adapter.
 Provides seamless read fallback from primary to secondary storage,
@@ -18,7 +18,7 @@ automatic backfill / self-healing, and atomic dual-write synchronization.
 
 > **new DualReadStorageAdapter**(`primary`, `secondary`): `DualReadStorageAdapter`
 
-Defined in: [lib/site-governance/binders.ts:90](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L90)
+Defined in: [lib/site-governance/binders.ts:175](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L175)
 
 #### Parameters
 
@@ -40,7 +40,7 @@ Defined in: [lib/site-governance/binders.ts:90](https://github.com/fderuiter/por
 
 > `readonly` **primary**: [`StoragePort`](../interfaces/StoragePort.md)
 
-Defined in: [lib/site-governance/binders.ts:91](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L91)
+Defined in: [lib/site-governance/binders.ts:176](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L176)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [lib/site-governance/binders.ts:91](https://github.com/fderuiter/por
 
 > `readonly` **secondary**: [`StoragePort`](../interfaces/StoragePort.md)
 
-Defined in: [lib/site-governance/binders.ts:92](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L92)
+Defined in: [lib/site-governance/binders.ts:177](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L177)
 
 ## Methods
 
@@ -56,7 +56,7 @@ Defined in: [lib/site-governance/binders.ts:92](https://github.com/fderuiter/por
 
 > **readDocument**(`id`): `Promise`\<[`BinderDocument`](../../types/interfaces/BinderDocument.md) \| `null`\>
 
-Defined in: [lib/site-governance/binders.ts:101](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L101)
+Defined in: [lib/site-governance/binders.ts:186](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L186)
 
 Reads document with zero downtime:
 1. Attempts read from primary storage.
@@ -79,7 +79,7 @@ Reads document with zero downtime:
 
 > **reconcile**(): `Promise`\<\{ `primaryCount`: `number`; `secondaryCount`: `number`; `syncedCount`: `number`; \}\>
 
-Defined in: [lib/site-governance/binders.ts:135](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L135)
+Defined in: [lib/site-governance/binders.ts:220](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L220)
 
 Reconciles all documents between primary and secondary ports for 100% parity.
 
@@ -93,7 +93,7 @@ Reconciles all documents between primary and secondary ports for 100% parity.
 
 > **writeDocument**(`doc`): `Promise`\<`void`\>
 
-Defined in: [lib/site-governance/binders.ts:128](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L128)
+Defined in: [lib/site-governance/binders.ts:213](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/binders.ts#L213)
 
 Dual-writes document to both primary and secondary storage ports.
 

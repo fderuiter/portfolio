@@ -8,7 +8,7 @@
 
 > **computeFacetHash**(`facets`): `string`
 
-Defined in: [lib/site-governance/greenlight-engine.ts:153](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/greenlight-engine.ts#L153)
+Defined in: [lib/site-governance/greenlight-engine.ts:196](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/greenlight-engine.ts#L196)
 
 Computes a hash string for 6-facet evaluation state.
 

@@ -6,7 +6,7 @@
 
 # Interface: StatutoryRuleCheck
 
-Defined in: [lib/site-governance/types.ts:9](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L9)
+Defined in: [lib/site-governance/types.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L10)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/site-governance/types.ts:9](https://github.com/fderuiter/portfo
 
 > **description**: `string`
 
-Defined in: [lib/site-governance/types.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L14)
+Defined in: [lib/site-governance/types.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L15)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/site-governance/types.ts:14](https://github.com/fderuiter/portf
 
 > **id**: `string`
 
-Defined in: [lib/site-governance/types.ts:10](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L10)
+Defined in: [lib/site-governance/types.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L11)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/site-governance/types.ts:10](https://github.com/fderuiter/portf
 
 > **jurisdiction**: [`CountryCode`](../type-aliases/CountryCode.md)
 
-Defined in: [lib/site-governance/types.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L12)
+Defined in: [lib/site-governance/types.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L13)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/site-governance/types.ts:12](https://github.com/fderuiter/portf
 
 > **mandatory**: `boolean`
 
-Defined in: [lib/site-governance/types.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L16)
+Defined in: [lib/site-governance/types.ts:17](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L17)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/site-governance/types.ts:16](https://github.com/fderuiter/portf
 
 > **name**: `string`
 
-Defined in: [lib/site-governance/types.ts:11](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L11)
+Defined in: [lib/site-governance/types.ts:12](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L12)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/site-governance/types.ts:11](https://github.com/fderuiter/portf
 
 > **status**: [`StatutoryRuleStatus`](../type-aliases/StatutoryRuleStatus.md)
 
-Defined in: [lib/site-governance/types.ts:13](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L13)
+Defined in: [lib/site-governance/types.ts:14](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L14)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [lib/site-governance/types.ts:13](https://github.com/fderuiter/portf
 
 > **statutoryReference**: `string`
 
-Defined in: [lib/site-governance/types.ts:15](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L15)
+Defined in: [lib/site-governance/types.ts:16](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/types.ts#L16)

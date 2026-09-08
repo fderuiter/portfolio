@@ -8,7 +8,7 @@
 
 > **signDOALogByPI**(`log`, `piCredentials`, `justification?`): [`DOALog`](../../types/interfaces/DOALog.md)
 
-Defined in: [lib/site-governance/doa-engine.ts:86](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/doa-engine.ts#L86)
+Defined in: [lib/site-governance/doa-engine.ts:100](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/doa-engine.ts#L100)
 
 Executes Principal Investigator 21 CFR Part 11 Electronic Signature Sign-off on DOA log.
 

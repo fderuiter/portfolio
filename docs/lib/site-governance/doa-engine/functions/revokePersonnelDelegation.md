@@ -8,7 +8,7 @@
 
 > **revokePersonnelDelegation**(`log`, `personnelId`, `piCredentials`, `revocationReason`): [`DOALog`](../../types/interfaces/DOALog.md)
 
-Defined in: [lib/site-governance/doa-engine.ts:155](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/doa-engine.ts#L155)
+Defined in: [lib/site-governance/doa-engine.ts:176](https://github.com/fderuiter/portfolio/blob/main/lib/site-governance/doa-engine.ts#L176)
 
 Revokes a staff task delegation with 21 CFR Part 11 PI signature logging.
 
