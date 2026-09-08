@@ -7,7 +7,10 @@ interface DeferredHydrationProps {
   fallback: React.ReactNode;
 }
 
-export const DeferredHydration: React.FC<DeferredHydrationProps> = ({ children, fallback }) => {
+export const DeferredHydration: React.FC<DeferredHydrationProps> = ({
+  children,
+  fallback,
+}) => {
   const [isMounted, setIsMounted] = useState(false);
   const [shouldRenderInteractive, setShouldRenderInteractive] = useState(false);
 
@@ -31,13 +34,19 @@ export const DeferredHydration: React.FC<DeferredHydrationProps> = ({ children, 
     };
 
     if (typeof window !== "undefined" && window.requestIdleCallback) {
-      idleId = window.requestIdleCallback(() => scheduleMount(), { timeout: 1000 });
+      idleId = window.requestIdleCallback(() => scheduleMount(), {
+        timeout: 1000,
+      });
     } else {
       timeoutId = setTimeout(() => scheduleMount(), 50);
     }
 
     return () => {
-      if (idleId !== null && typeof window !== "undefined" && window.cancelIdleCallback) {
+      if (
+        idleId !== null &&
+        typeof window !== "undefined" &&
+        window.cancelIdleCallback
+      ) {
         window.cancelIdleCallback(idleId);
       }
       if (animId !== null && typeof window !== "undefined") {
@@ -49,45 +58,29 @@ export const DeferredHydration: React.FC<DeferredHydrationProps> = ({ children, 
     };
   }, []);
 
-  const isServer = typeof window === "undefined";
-
-  // Server-side rendering always renders the children directly (hidden via CSS if desired, 
-  // or fully rendered so search engines can index it).
-  // On the client, before hydration is ready (before requestIdleCallback triggers), we render the high-fidelity skeleton.
-  if (isServer) {
-    return (
-      <div className="w-full relative">
-        <div className="w-full opacity-0 pointer-events-none">
-          {children}
-        </div>
-        <div className="absolute inset-0 z-10 w-full h-full pointer-events-none">
-          {fallback}
-        </div>
-      </div>
-    );
-  }
+  // Children are always present in the markup (SSR-visible for crawlers and to
+  // avoid CLS) and the fallback is layered on top until the idle-scheduled
+  // mount completes. Both server and client render the exact same structure
+  // on the first pass -- only the opacity classes change once state updates
+  // post-mount -- so hydration never has to reconcile a structural mismatch.
+  const revealed = shouldRenderInteractive && isMounted;
 
   return (
-    <div className="w-full relative" suppressHydrationWarning>
-      {shouldRenderInteractive ? (
-        <div
-          className={`w-full transition-opacity duration-500 ease-in-out ${
-            isMounted ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
-        >
-          {children}
-        </div>
-      ) : null}
-
-      {!isMounted && (
-        <div
-          className={`w-full transition-opacity duration-500 ease-in-out ${
-            shouldRenderInteractive ? "opacity-0 pointer-events-none absolute inset-0 z-10" : "opacity-100"
-          }`}
-        >
-          {fallback}
-        </div>
-      )}
+    <div className="w-full relative">
+      <div
+        className={`w-full transition-opacity duration-500 ease-in-out ${
+          revealed ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        {children}
+      </div>
+      <div
+        className={`absolute inset-0 z-10 w-full h-full transition-opacity duration-500 ease-in-out ${
+          revealed ? "opacity-0 pointer-events-none" : "opacity-100"
+        }`}
+      >
+        {fallback}
+      </div>
     </div>
   );
 };
@@ -126,7 +119,10 @@ export const SkillsGridSkeleton: React.FC = () => {
                   <div className="h-3 w-8 bg-zinc-800/50 rounded" />
                 </div>
                 <div className="h-1.5 w-full bg-zinc-950 rounded-full">
-                  <div className="h-full bg-zinc-800/60 rounded-full" style={{ width: `${80 - i * 15}%` }} />
+                  <div
+                    className="h-full bg-zinc-800/60 rounded-full"
+                    style={{ width: `${80 - i * 15}%` }}
+                  />
                 </div>
               </div>
             ))}
@@ -189,24 +185,37 @@ export const TimelineSkeleton: React.FC = () => {
               </div>
 
               {/* Card */}
-              <div className={`w-full md:w-[46%] pl-7 sm:pl-10 md:pl-0 ${isLeft ? "md:pr-10 md:text-right" : "md:pl-10"}`}>
+              <div
+                className={`w-full md:w-[46%] pl-7 sm:pl-10 md:pl-0 ${isLeft ? "md:pr-10 md:text-right" : "md:pl-10"}`}
+              >
                 <div className="p-4 sm:p-6 bg-zinc-900/25 border border-zinc-900/60 rounded-2xl">
-                  <div className={`flex items-center justify-between gap-2 mb-3 ${isLeft ? "md:flex-row-reverse" : ""}`}>
+                  <div
+                    className={`flex items-center justify-between gap-2 mb-3 ${isLeft ? "md:flex-row-reverse" : ""}`}
+                  >
                     <div className="h-5 w-24 bg-zinc-800/60 rounded-md" />
                     <div className="h-8 w-20 bg-zinc-900/80 border border-zinc-800 rounded-lg" />
                   </div>
-                  <div className={`h-5 w-48 bg-zinc-800/60 rounded ${isLeft ? "md:ml-auto" : ""}`} />
-                  <div className={`h-3.5 w-32 bg-zinc-800/40 rounded mt-1.5 ${isLeft ? "md:ml-auto" : ""}`} />
-                  
+                  <div
+                    className={`h-5 w-48 bg-zinc-800/60 rounded ${isLeft ? "md:ml-auto" : ""}`}
+                  />
+                  <div
+                    className={`h-3.5 w-32 bg-zinc-800/40 rounded mt-1.5 ${isLeft ? "md:ml-auto" : ""}`}
+                  />
+
                   <div className="mt-4 space-y-2">
                     <div className="h-3 w-full bg-zinc-800/30 rounded" />
                     <div className="h-3 w-[90%] bg-zinc-800/30 rounded" />
                     <div className="h-3 w-[95%] bg-zinc-800/30 rounded" />
                   </div>
 
-                  <div className={`flex flex-wrap gap-1.5 mt-4 ${isLeft ? "md:justify-end" : ""}`}>
+                  <div
+                    className={`flex flex-wrap gap-1.5 mt-4 ${isLeft ? "md:justify-end" : ""}`}
+                  >
                     {[1, 2, 3].map((t) => (
-                      <div key={t} className="h-5 w-14 bg-zinc-900/60 border border-zinc-800/80 rounded" />
+                      <div
+                        key={t}
+                        className="h-5 w-14 bg-zinc-900/60 border border-zinc-800/80 rounded"
+                      />
                     ))}
                   </div>
                 </div>
