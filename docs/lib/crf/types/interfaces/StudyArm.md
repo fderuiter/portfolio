@@ -6,7 +6,7 @@
 
 # Interface: StudyArm
 
-Defined in: [lib/crf/types.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L72)
+Defined in: [lib/crf/types.ts:83](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L83)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/types.ts:72](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **description?**: `string`
 
-Defined in: [lib/crf/types.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L76)
+Defined in: [lib/crf/types.ts:87](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L87)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/types.ts:76](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **epochIds?**: `string`[]
 
-Defined in: [lib/crf/types.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L77)
+Defined in: [lib/crf/types.ts:88](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L88)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/types.ts:77](https://github.com/fderuiter/portfolio/blob/ma
 
 > **id**: `string`
 
-Defined in: [lib/crf/types.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L73)
+Defined in: [lib/crf/types.ts:84](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L84)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/types.ts:73](https://github.com/fderuiter/portfolio/blob/ma
 
 > **name**: `string`
 
-Defined in: [lib/crf/types.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L74)
+Defined in: [lib/crf/types.ts:85](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L85)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [lib/crf/types.ts:74](https://github.com/fderuiter/portfolio/blob/ma
 
 > **type**: `string`
 
-Defined in: [lib/crf/types.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L75)
+Defined in: [lib/crf/types.ts:86](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L86)

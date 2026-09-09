@@ -6,7 +6,7 @@
 
 # Interface: BiomedicalConceptProperty
 
-Defined in: [lib/crf/types.ts:96](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L96)
+Defined in: [lib/crf/types.ts:107](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L107)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/types.ts:96](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **code?**: `string`
 
-Defined in: [lib/crf/types.ts:99](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L99)
+Defined in: [lib/crf/types.ts:110](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L110)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/types.ts:99](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **datatype?**: `string`
 
-Defined in: [lib/crf/types.ts:100](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L100)
+Defined in: [lib/crf/types.ts:111](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L111)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/types.ts:100](https://github.com/fderuiter/portfolio/blob/m
 
 > **id**: `string`
 
-Defined in: [lib/crf/types.ts:97](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L97)
+Defined in: [lib/crf/types.ts:108](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L108)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [lib/crf/types.ts:97](https://github.com/fderuiter/portfolio/blob/ma
 
 > **name**: `string`
 
-Defined in: [lib/crf/types.ts:98](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L98)
+Defined in: [lib/crf/types.ts:109](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L109)

@@ -6,7 +6,7 @@
 
 # Interface: ExportROptions
 
-Defined in: [lib/crf/types.ts:235](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L235)
+Defined in: [lib/crf/types.ts:246](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L246)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/types.ts:235](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **includeGlimpse?**: `boolean`
 
-Defined in: [lib/crf/types.ts:238](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L238)
+Defined in: [lib/crf/types.ts:249](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L249)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/types.ts:238](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **includeSampleData?**: `boolean`
 
-Defined in: [lib/crf/types.ts:237](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L237)
+Defined in: [lib/crf/types.ts:248](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L248)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/types.ts:237](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **selectedFormId?**: `string`
 
-Defined in: [lib/crf/types.ts:236](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L236)
+Defined in: [lib/crf/types.ts:247](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L247)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/types.ts:236](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **tibblePrefix?**: `string`
 
-Defined in: [lib/crf/types.ts:240](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L240)
+Defined in: [lib/crf/types.ts:251](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L251)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [lib/crf/types.ts:240](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **useLabelledPackage?**: `boolean`
 
-Defined in: [lib/crf/types.ts:239](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L239)
+Defined in: [lib/crf/types.ts:250](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L250)

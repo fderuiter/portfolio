@@ -6,7 +6,7 @@
 
 # Interface: StudyCohort
 
-Defined in: [lib/crf/types.ts:88](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L88)
+Defined in: [lib/crf/types.ts:99](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L99)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/types.ts:88](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **armIds?**: `string`[]
 
-Defined in: [lib/crf/types.ts:92](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L92)
+Defined in: [lib/crf/types.ts:103](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L103)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/types.ts:92](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **description?**: `string`
 
-Defined in: [lib/crf/types.ts:91](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L91)
+Defined in: [lib/crf/types.ts:102](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L102)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/types.ts:91](https://github.com/fderuiter/portfolio/blob/ma
 
 > **id**: `string`
 
-Defined in: [lib/crf/types.ts:89](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L89)
+Defined in: [lib/crf/types.ts:100](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L100)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/types.ts:89](https://github.com/fderuiter/portfolio/blob/ma
 
 > **name**: `string`
 
-Defined in: [lib/crf/types.ts:90](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L90)
+Defined in: [lib/crf/types.ts:101](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L101)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [lib/crf/types.ts:90](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **targetSize?**: `number`
 
-Defined in: [lib/crf/types.ts:93](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L93)
+Defined in: [lib/crf/types.ts:104](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L104)

@@ -28,7 +28,7 @@ Schedule of Activities (SoA) consistency, form health telemetry, and 1-click aut
 
 > `static` **applyAutoFix**(`study`, `diagnosticId`): [`StudyProtocol`](../../types/interfaces/StudyProtocol.md)
 
-Defined in: [lib/crf/study-auditor.ts:577](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L577)
+Defined in: [lib/crf/study-auditor.ts:584](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L584)
 
 Applies an individual 1-click auto-fix remediation to a StudyProtocol instance.
 
@@ -52,7 +52,7 @@ Applies an individual 1-click auto-fix remediation to a StudyProtocol instance.
 
 > `static` **applyAutoFixAll**(`study`, `diagnostics?`): `object`
 
-Defined in: [lib/crf/study-auditor.ts:752](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L752)
+Defined in: [lib/crf/study-auditor.ts:776](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L776)
 
 Applies all available auto-fix remediations in a single pass.
 
@@ -108,7 +108,7 @@ A consolidated StudyAuditReport containing diagnostics, health scores, and auto-
 
 > `static` **auditForm**(`form`, `studyContext?`): [`FormAuditReport`](../interfaces/FormAuditReport.md)
 
-Defined in: [lib/crf/study-auditor.ts:532](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L532)
+Defined in: [lib/crf/study-auditor.ts:539](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L539)
 
 Audits an individual CRF Form.
 
@@ -132,7 +132,7 @@ Audits an individual CRF Form.
 
 > `static` **auditFormula**(`formula`, `fields`): [`FormulaLintResult`](../../formula-linter/interfaces/FormulaLintResult.md)
 
-Defined in: [lib/crf/study-auditor.ts:567](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L567)
+Defined in: [lib/crf/study-auditor.ts:574](https://github.com/fderuiter/portfolio/blob/main/lib/crf/study-auditor.ts#L574)
 
 Evaluates and tokenizes an arithmetic formula expression against a list of fields.
 

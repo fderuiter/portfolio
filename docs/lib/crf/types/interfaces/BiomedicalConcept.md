@@ -6,7 +6,7 @@
 
 # Interface: BiomedicalConcept
 
-Defined in: [lib/crf/types.ts:103](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L103)
+Defined in: [lib/crf/types.ts:114](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L114)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/types.ts:103](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **code?**: `string`
 
-Defined in: [lib/crf/types.ts:107](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L107)
+Defined in: [lib/crf/types.ts:118](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L118)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/types.ts:107](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **conceptId?**: `string`
 
-Defined in: [lib/crf/types.ts:106](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L106)
+Defined in: [lib/crf/types.ts:117](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L117)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/types.ts:106](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **dataType?**: `string`
 
-Defined in: [lib/crf/types.ts:112](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L112)
+Defined in: [lib/crf/types.ts:123](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L123)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/types.ts:112](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **domain?**: `string`
 
-Defined in: [lib/crf/types.ts:108](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L108)
+Defined in: [lib/crf/types.ts:119](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L119)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/crf/types.ts:108](https://github.com/fderuiter/portfolio/blob/m
 
 > **id**: `string`
 
-Defined in: [lib/crf/types.ts:104](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L104)
+Defined in: [lib/crf/types.ts:115](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L115)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/crf/types.ts:104](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **label?**: `string`
 
-Defined in: [lib/crf/types.ts:113](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L113)
+Defined in: [lib/crf/types.ts:124](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L124)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/crf/types.ts:113](https://github.com/fderuiter/portfolio/blob/m
 
 > **name**: `string`
 
-Defined in: [lib/crf/types.ts:105](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L105)
+Defined in: [lib/crf/types.ts:116](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L116)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/crf/types.ts:105](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **properties?**: `Record`\<`string`, `unknown`\> \| [`BiomedicalConceptProperty`](BiomedicalConceptProperty.md)[]
 
-Defined in: [lib/crf/types.ts:110](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L110)
+Defined in: [lib/crf/types.ts:121](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L121)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/crf/types.ts:110](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **synonyms?**: `string`[]
 
-Defined in: [lib/crf/types.ts:109](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L109)
+Defined in: [lib/crf/types.ts:120](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L120)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [lib/crf/types.ts:109](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **unit?**: `string`
 
-Defined in: [lib/crf/types.ts:114](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L114)
+Defined in: [lib/crf/types.ts:125](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L125)
 
 ***
 
@@ -94,4 +94,4 @@ Defined in: [lib/crf/types.ts:114](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **variableName?**: `string`
 
-Defined in: [lib/crf/types.ts:111](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L111)
+Defined in: [lib/crf/types.ts:122](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L122)

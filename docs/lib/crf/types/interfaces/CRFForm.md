@@ -6,7 +6,7 @@
 
 # Interface: CRFForm
 
-Defined in: [lib/crf/types.ts:161](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L161)
+Defined in: [lib/crf/types.ts:172](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L172)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/crf/types.ts:161](https://github.com/fderuiter/portfolio/blob/m
 
 > **description**: `string`
 
-Defined in: [lib/crf/types.ts:165](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L165)
+Defined in: [lib/crf/types.ts:176](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L176)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/crf/types.ts:165](https://github.com/fderuiter/portfolio/blob/m
 
 > **domain**: `string`
 
-Defined in: [lib/crf/types.ts:164](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L164)
+Defined in: [lib/crf/types.ts:175](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L175)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/crf/types.ts:164](https://github.com/fderuiter/portfolio/blob/m
 
 > **id**: `string`
 
-Defined in: [lib/crf/types.ts:162](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L162)
+Defined in: [lib/crf/types.ts:173](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L173)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/crf/types.ts:162](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **isLocked?**: `boolean`
 
-Defined in: [lib/crf/types.ts:170](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L170)
+Defined in: [lib/crf/types.ts:181](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L181)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/crf/types.ts:170](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **isLogForm?**: `boolean`
 
-Defined in: [lib/crf/types.ts:169](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L169)
+Defined in: [lib/crf/types.ts:180](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L180)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/crf/types.ts:169](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **lockedAt?**: `string`
 
-Defined in: [lib/crf/types.ts:172](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L172)
+Defined in: [lib/crf/types.ts:183](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L183)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/crf/types.ts:172](https://github.com/fderuiter/portfolio/blob/m
 
 > `optional` **lockedBy?**: `string`
 
-Defined in: [lib/crf/types.ts:171](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L171)
+Defined in: [lib/crf/types.ts:182](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L182)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/crf/types.ts:171](https://github.com/fderuiter/portfolio/blob/m
 
 > **name**: `string`
 
-Defined in: [lib/crf/types.ts:163](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L163)
+Defined in: [lib/crf/types.ts:174](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L174)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/crf/types.ts:163](https://github.com/fderuiter/portfolio/blob/m
 
 > **rules**: [`EditCheckRule`](EditCheckRule.md)[]
 
-Defined in: [lib/crf/types.ts:168](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L168)
+Defined in: [lib/crf/types.ts:179](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L179)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [lib/crf/types.ts:168](https://github.com/fderuiter/portfolio/blob/m
 
 > **sections**: [`CRFSection`](CRFSection.md)[]
 
-Defined in: [lib/crf/types.ts:167](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L167)
+Defined in: [lib/crf/types.ts:178](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L178)
 
 ***
 
@@ -94,4 +94,4 @@ Defined in: [lib/crf/types.ts:167](https://github.com/fderuiter/portfolio/blob/m
 
 > **version**: `string`
 
-Defined in: [lib/crf/types.ts:166](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L166)
+Defined in: [lib/crf/types.ts:177](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L177)

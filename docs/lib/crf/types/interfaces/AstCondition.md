@@ -38,4 +38,4 @@ Defined in: [lib/crf/types.ts:54](https://github.com/fderuiter/portfolio/blob/ma
 
 > **value**: `string` \| `number` \| `boolean` \| `string`[]
 
-Defined in: [lib/crf/types.ts:55](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L55)
+Defined in: [lib/crf/types.ts:65](https://github.com/fderuiter/portfolio/blob/main/lib/crf/types.ts#L65)
