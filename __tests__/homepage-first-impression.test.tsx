@@ -7,6 +7,7 @@ import {
   fireEvent,
   waitFor,
   cleanup,
+  act,
 } from "@testing-library/react";
 import { Hero } from "@/components/Hero";
 import { TextReveal } from "@/components/TextReveal";
@@ -170,8 +171,99 @@ describe("[UI/UX 01] Homepage First Impression & Architectural Hierarchy Suite",
       const proveBtn = screen.getByRole("button", {
         name: /Prove Invariant Step/i,
       });
+      expect(proveBtn.className).toContain("min-h-11");
       expect(proveBtn.className).toContain("focus-visible:ring-2");
       expect(proveBtn.className).toContain("focus-visible:ring-amber-400");
+    });
+
+    it("links each roving tab to its labelled panel and automatically selects the focused tab", () => {
+      render(<Hero />);
+
+      const logicTab = screen.getByRole("tab", { name: /Logic/i });
+      const clinicalTab = screen.getByRole("tab", { name: /Clinical/i });
+      const memoryTab = screen.getByRole("tab", { name: /Memory/i });
+
+      expect(logicTab.getAttribute("id")).toBe("hero-demo-tab-logic");
+      expect(logicTab.getAttribute("aria-controls")).toBe(
+        "hero-demo-panel-logic"
+      );
+      expect(logicTab.getAttribute("tabindex")).toBe("0");
+      expect(clinicalTab.getAttribute("tabindex")).toBe("-1");
+      expect(memoryTab.getAttribute("tabindex")).toBe("-1");
+      for (const tab of [logicTab, clinicalTab, memoryTab]) {
+        expect(
+          document.getElementById(tab.getAttribute("aria-controls") ?? "")
+        ).not.toBe(null);
+      }
+      expect(
+        screen
+          .getByRole("tabpanel", { name: /Logic/i })
+          .getAttribute("aria-labelledby")
+      ).toBe("hero-demo-tab-logic");
+
+      logicTab.focus();
+      fireEvent.keyDown(logicTab, { key: "ArrowRight" });
+      expect(document.activeElement).toBe(clinicalTab);
+      expect(clinicalTab.getAttribute("aria-selected")).toBe("true");
+
+      fireEvent.keyDown(clinicalTab, { key: "End" });
+      expect(document.activeElement).toBe(memoryTab);
+      expect(memoryTab.getAttribute("aria-selected")).toBe("true");
+
+      fireEvent.keyDown(memoryTab, { key: "Home" });
+      expect(document.activeElement).toBe(logicTab);
+      expect(logicTab.getAttribute("aria-selected")).toBe("true");
+    });
+
+    it("resets each illustrative demo locally and announces the reset", () => {
+      vi.useFakeTimers();
+      render(<Hero />);
+
+      fireEvent.click(
+        screen.getByRole("button", { name: /Prove Invariant Step/i })
+      );
+      expect(screen.getByText(/Illustrative result: Q follows/i)).toBeDefined();
+      fireEvent.click(
+        screen.getByRole("button", { name: /Reset Logic Demo/i })
+      );
+      expect(screen.getByText(/Awaiting inference/i)).toBeDefined();
+      expect(
+        screen.getByText(/Logic demo reset/i).getAttribute("aria-live")
+      ).toBe("polite");
+
+      fireEvent.click(screen.getByRole("tab", { name: /Clinical/i }));
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: /Illustrative Integrity Rule: Active/i,
+        })
+      );
+      fireEvent.click(
+        screen.getByRole("button", { name: /Reset Clinical Demo/i })
+      );
+      expect(
+        screen.getByRole("button", {
+          name: /Illustrative Integrity Rule: Active/i,
+        })
+      ).toBeDefined();
+      expect(
+        screen.getByText(/Clinical demo reset/i).getAttribute("aria-live")
+      ).toBe("polite");
+
+      fireEvent.click(screen.getByRole("tab", { name: /Memory/i }));
+      fireEvent.click(
+        screen.getByRole("button", { name: /Clean Memory \(GC\)/i })
+      );
+      act(() => {
+        vi.advanceTimersByTime(400);
+      });
+      fireEvent.click(
+        screen.getByRole("button", { name: /Reset Memory Demo/i })
+      );
+      expect(screen.getByText(/18\.4 KB \/ 32\.0 KB/i)).toBeDefined();
+      expect(
+        screen.getByText(/Memory demo reset/i).getAttribute("aria-live")
+      ).toBe("polite");
+      vi.useRealTimers();
     });
   });
 
