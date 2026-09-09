@@ -115,7 +115,7 @@ describe("Lazy Sentry Loading in Error Boundaries & Conditional Initialization",
       render(<ErrorBoundaryApp error={sampleError} reset={resetFn} />);
 
       // Fallback UI must render immediately
-      expect(screen.getByText("Pipeline Stalled")).not.toBeNull();
+      expect(screen.getByText("This page hit a snag.")).not.toBeNull();
       expect(screen.getByText("RUNTIME_ERROR")).not.toBeNull();
 
       await waitFor(() => {
@@ -173,7 +173,7 @@ describe("Lazy Sentry Loading in Error Boundaries & Conditional Initialization",
 
       render(<ErrorBoundaryApp error={testError} reset={resetFn} />);
 
-      expect(screen.getByText("Pipeline Stalled")).not.toBeNull();
+      expect(screen.getByText("This page hit a snag.")).not.toBeNull();
       consoleWarnSpy.mockRestore();
     });
   });

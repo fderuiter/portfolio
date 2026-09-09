@@ -6,7 +6,7 @@
 
 # Interface: EasterEggAchievement
 
-Defined in: [lib/meme-data.ts:24](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L24)
+Defined in: [lib/meme-data.ts:32](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L32)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/meme-data.ts:24](https://github.com/fderuiter/portfolio/blob/ma
 
 > **description**: `string`
 
-Defined in: [lib/meme-data.ts:27](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L27)
+Defined in: [lib/meme-data.ts:35](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L35)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/meme-data.ts:27](https://github.com/fderuiter/portfolio/blob/ma
 
 > **hint**: `string`
 
-Defined in: [lib/meme-data.ts:30](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L30)
+Defined in: [lib/meme-data.ts:38](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L38)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/meme-data.ts:30](https://github.com/fderuiter/portfolio/blob/ma
 
 > **icon**: `string`
 
-Defined in: [lib/meme-data.ts:28](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L28)
+Defined in: [lib/meme-data.ts:36](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L36)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/meme-data.ts:28](https://github.com/fderuiter/portfolio/blob/ma
 
 > **id**: `string`
 
-Defined in: [lib/meme-data.ts:25](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L25)
+Defined in: [lib/meme-data.ts:33](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L33)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/meme-data.ts:25](https://github.com/fderuiter/portfolio/blob/ma
 
 > **title**: `string`
 
-Defined in: [lib/meme-data.ts:26](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L26)
+Defined in: [lib/meme-data.ts:34](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L34)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [lib/meme-data.ts:26](https://github.com/fderuiter/portfolio/blob/ma
 
 > `optional` **unlockedByDefault?**: `boolean`
 
-Defined in: [lib/meme-data.ts:29](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L29)
+Defined in: [lib/meme-data.ts:37](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L37)

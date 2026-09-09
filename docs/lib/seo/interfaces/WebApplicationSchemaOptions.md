@@ -6,7 +6,7 @@
 
 # Interface: WebApplicationSchemaOptions
 
-Defined in: [lib/seo.ts:221](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L221)
+Defined in: [lib/seo.ts:258](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L258)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/seo.ts:221](https://github.com/fderuiter/portfolio/blob/main/li
 
 > **applicationCategory**: `"GameApplication"` \| `"DeveloperApplication"` \| `"EducationalApplication"` \| `"MultimediaApplication"`
 
-Defined in: [lib/seo.ts:225](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L225)
+Defined in: [lib/seo.ts:262](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L262)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/seo.ts:225](https://github.com/fderuiter/portfolio/blob/main/li
 
 > `optional` **browserRequirements?**: `string`
 
-Defined in: [lib/seo.ts:228](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L228)
+Defined in: [lib/seo.ts:269](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L269)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/seo.ts:228](https://github.com/fderuiter/portfolio/blob/main/li
 
 > **description**: `string`
 
-Defined in: [lib/seo.ts:223](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L223)
+Defined in: [lib/seo.ts:260](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L260)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/seo.ts:223](https://github.com/fderuiter/portfolio/blob/main/li
 
 > `optional` **genre?**: `string`
 
-Defined in: [lib/seo.ts:227](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L227)
+Defined in: [lib/seo.ts:268](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L268)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/seo.ts:227](https://github.com/fderuiter/portfolio/blob/main/li
 
 > `optional` **inLanguage?**: `string`
 
-Defined in: [lib/seo.ts:229](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L229)
+Defined in: [lib/seo.ts:270](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L270)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [lib/seo.ts:229](https://github.com/fderuiter/portfolio/blob/main/li
 
 > `optional` **isAccessibleForFree?**: `boolean`
 
-Defined in: [lib/seo.ts:230](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L230)
+Defined in: [lib/seo.ts:271](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L271)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/seo.ts:230](https://github.com/fderuiter/portfolio/blob/main/li
 
 > **name**: `string`
 
-Defined in: [lib/seo.ts:222](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L222)
+Defined in: [lib/seo.ts:259](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L259)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/seo.ts:222](https://github.com/fderuiter/portfolio/blob/main/li
 
 > `optional` **operatingSystem?**: `string`
 
-Defined in: [lib/seo.ts:226](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L226)
+Defined in: [lib/seo.ts:267](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L267)
 
 ***
 
@@ -78,4 +78,4 @@ Defined in: [lib/seo.ts:226](https://github.com/fderuiter/portfolio/blob/main/li
 
 > **url**: `string`
 
-Defined in: [lib/seo.ts:224](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L224)
+Defined in: [lib/seo.ts:261](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L261)

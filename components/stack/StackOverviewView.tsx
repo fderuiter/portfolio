@@ -21,12 +21,12 @@ import { InvariantsMatrix } from "./InvariantsMatrix";
 
 const CLI_SNIPPETS = [
   {
-    title: "Full Invariant & Quality Suite",
+    title: "Full Quality Check",
     cmd: "npm run quality",
-    desc: "Executes TypeScript strict checks, docs drift assertion, ESLint, and all 12 architectural health rules.",
+    desc: "Checks types, lint rules, documentation, page performance, and architecture.",
   },
   {
-    title: "Zero-Drift Auto-Remediation",
+    title: "Regenerate the Docs",
     cmd: "npm run doctor:fix",
     desc: "Regenerates OpenAPI schemas, updates TypeDoc markdown, and synchronizes AST logic contracts.",
   },
@@ -45,7 +45,10 @@ const CLI_SNIPPETS = [
 export const StackOverviewView: React.FC = () => {
   const { playHover, playSuccess } = useAudio();
 
-  const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+  const handleAnchorClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    id: string
+  ) => {
     e.preventDefault();
     playHover();
     const el = document.getElementById(id);
@@ -82,7 +85,7 @@ export const StackOverviewView: React.FC = () => {
             <div className="max-w-3xl space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[11px] font-mono text-zinc-300">
                 <IconCpu className="w-3.5 h-3.5 text-brand-cyan" />
-                <span>Architecture Colophon &amp; Telemetry Matrix</span>
+                <span>HOW THIS SITE WORKS</span>
               </div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-mono font-extrabold tracking-tight text-white leading-tight">
                 Under the Hood: <br className="hidden sm:block" />
@@ -91,7 +94,9 @@ export const StackOverviewView: React.FC = () => {
                 </span>
               </h1>
               <p className="text-sm sm:text-base text-zinc-400 font-sans leading-relaxed max-w-2xl">
-                A live inspection of the architectural patterns, layout physics, procedural Web Audio synthesizers, database pipelines, and 12 engineering invariants that power this application.
+                The tools and tradeoffs behind this site. Try the text layout
+                and audio demos, look through the stack, or run the checks
+                yourself.
               </p>
             </div>
 
@@ -142,7 +147,7 @@ export const StackOverviewView: React.FC = () => {
               onClick={(e) => handleAnchorClick(e, "invariants")}
               className="px-3 py-1 rounded-lg bg-zinc-900/60 border border-zinc-800/80 hover:border-amber-400/40 text-xs font-mono text-zinc-400 hover:text-amber-300 transition-all"
             >
-              12 Invariants
+              Quality Rules
             </a>
             <a
               href="#quickstart"
@@ -159,11 +164,11 @@ export const StackOverviewView: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-mono font-bold text-white flex items-center gap-2">
-                <span>Interactive Micro-Laboratories</span>
+                <span>Try the Moving Parts</span>
                 <IconBolt className="w-4 h-4 text-brand-cyan" />
               </h2>
               <p className="text-xs text-zinc-400 font-sans mt-0.5">
-                Live playgrounds demonstrating low-level web platform capabilities without external heavyweight libraries.
+                Small demos of how the browser lays out text and makes sound.
               </p>
             </div>
           </div>
@@ -196,10 +201,11 @@ export const StackOverviewView: React.FC = () => {
               </div>
               <div>
                 <h2 className="text-base font-mono font-bold text-white">
-                  Developer Invariant &amp; Verification CLI
+                  Run the Checks
                 </h2>
                 <p className="text-xs text-zinc-400 font-sans mt-0.5">
-                  Run the exact test suites and verification tooling locally to inspect quality gates and specifications.
+                  Run the exact test suites and verification tooling locally to
+                  inspect quality gates and specifications.
                 </p>
               </div>
             </div>
@@ -226,7 +232,9 @@ export const StackOverviewView: React.FC = () => {
                     <CopyButton
                       text={snippet.cmd}
                       icon={<IconCopy className="w-3.5 h-3.5" />}
-                      copiedIcon={<IconCheck className="w-3.5 h-3.5 text-emerald-400" />}
+                      copiedIcon={
+                        <IconCheck className="w-3.5 h-3.5 text-emerald-400" />
+                      }
                       className="text-zinc-500 hover:text-white transition-colors p-1 cursor-pointer flex-shrink-0"
                       aria-label={`Copy command ${snippet.cmd}`}
                       successMessage={`Command copied to clipboard: ${snippet.cmd}`}

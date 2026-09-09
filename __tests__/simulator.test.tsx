@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React from "react";
-import { render, screen, fireEvent, act, cleanup } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  act,
+  cleanup,
+} from "@testing-library/react";
 import RecruiterSimulator from "@/components/simulator/RecruiterSimulatorClient";
 
 const mockRecordEvent = vi.fn();
@@ -31,18 +37,49 @@ vi.mock("@/hooks/useAnnouncer", () => ({
 // Mock framer-motion with full proxy and hooks support to prevent transition freezes in jsdom tests
 vi.mock("framer-motion", async (importOriginal) => {
   const actual = await importOriginal<typeof import("framer-motion")>();
-  const Component = ({ children, className, style, onClick, ...props }: any) => {
-    const { initial: _initial, animate: _animate, exit: _exit, transition: _transition, ...rest } = props;
+  const Component = ({
+    children,
+    className,
+    style,
+    onClick,
+    ...props
+  }: any) => {
+    const {
+      initial: _initial,
+      animate: _animate,
+      exit: _exit,
+      transition: _transition,
+      ...rest
+    } = props;
     return (
       <div className={className} style={style} onClick={onClick} {...rest}>
         {children}
       </div>
     );
   };
-  const Button = ({ children, className, style, onClick, type, ...props }: any) => {
-    const { initial: _initial, animate: _animate, exit: _exit, transition: _transition, ...rest } = props;
+  const Button = ({
+    children,
+    className,
+    style,
+    onClick,
+    type,
+    ...props
+  }: any) => {
+    const {
+      initial: _initial,
+      animate: _animate,
+      exit: _exit,
+      transition: _transition,
+      ...rest
+    } = props;
     return (
-      <button type={type || "button"} className={className} style={style} onClick={onClick} {...rest}>
+      <button
+        type={type || "button"}
+        className={className}
+        style={style}
+        onClick={onClick}
+        {...rest}
+      >
         {children}
       </button>
     );
@@ -85,26 +122,26 @@ describe("RecruiterSimulator - Ecosystem-Aligned Accessibility Integration", () 
 
   it("delays and assigns focus to the active question card container on mount and step transitions", () => {
     const { container } = render(<RecruiterSimulator />);
-    
+
     // On mount, cardRef should focus after 400ms
     act(() => {
       vi.advanceTimersByTime(400);
     });
-    
+
     // Find the focused element
     const activeCard = container.querySelector('[tabindex="-1"]');
     expect(activeCard).not.toBeNull();
     expect(document.activeElement).toBe(activeCard);
-    
+
     // Click an option to transition
-    const optionBtn = screen.getAllByText("Raw Systems & Performance Maverick")[0];
+    const optionBtn = screen.getAllByText("Systems & Performance")[0];
     fireEvent.click(optionBtn);
-    
+
     // Advancing timers should trigger the next delayed focus redirection
     act(() => {
       vi.advanceTimersByTime(400);
     });
-    
+
     // After transition completes, activeCard should be focused again
     const newActiveCard = container.querySelector('[tabindex="-1"]');
     expect(document.activeElement).toBe(newActiveCard);
@@ -112,60 +149,70 @@ describe("RecruiterSimulator - Ecosystem-Aligned Accessibility Integration", () 
 
   it("announces progress changes politely on step transitions", () => {
     render(<RecruiterSimulator />);
-    
+
     // Click an option to trigger transition
-    const optionBtn = screen.getAllByText("Raw Systems & Performance Maverick")[0];
+    const optionBtn = screen.getAllByText("Systems & Performance")[0];
     fireEvent.click(optionBtn);
-    
+
     // Verify polite announcement
     expect(mockAnnounce).toHaveBeenCalledWith("Step completed", "polite");
   });
 
   it("triggers assertive audio announcement with score and title, and provides accessible circular gauge description on completion", () => {
     render(<RecruiterSimulator />);
-    
+
     // Step 1
-    fireEvent.click(screen.getAllByText("Raw Systems & Performance Maverick")[0]);
+    fireEvent.click(screen.getAllByText("Systems & Performance")[0]);
     act(() => {
       vi.advanceTimersByTime(400);
     });
-    
+
     // Step 2
-    fireEvent.click(screen.getAllByText("Engage Distributed Circuit Breaker & Fallback Queue")[0]);
+    fireEvent.click(
+      screen.getAllByText(
+        "Engage Distributed Circuit Breaker & Fallback Queue"
+      )[0]
+    );
     act(() => {
       vi.advanceTimersByTime(400);
     });
-    
+
     // Step 3
-    fireEvent.click(screen.getAllByText("Enforce Exhaustive Idempotency Keys & Deduplication Window")[0]);
+    fireEvent.click(
+      screen.getAllByText(
+        "Enforce Exhaustive Idempotency Keys & Deduplication Window"
+      )[0]
+    );
     act(() => {
       vi.advanceTimersByTime(400);
     });
-    
+
     // Assertive announcement
     expect(mockAnnounce).toHaveBeenCalledWith(
-      expect.stringContaining("Alignment complete. Result: Principal Systems Engineer & Distributed Architect"),
+      expect.stringContaining("Alignment complete. Result: A Focus on Systems"),
       "assertive"
     );
     expect(mockAnnounce).toHaveBeenCalledWith(
       expect.stringContaining("Match"),
       "assertive"
     );
-    
+
     // Visual gauge replacement label
-    const gaugeContainer = screen.getByRole("img", { name: /Candidate alignment score/i });
+    const gaugeContainer = screen.getByRole("img", { name: /Scenario match/i });
     expect(gaugeContainer).toBeDefined();
-    expect(gaugeContainer.getAttribute("aria-label")).toContain("Candidate alignment score:");
+    expect(gaugeContainer.getAttribute("aria-label")).toContain(
+      "Scenario match (just for exploration):"
+    );
   });
 
   it("hides decorative vector graphics and raw symbol arrows using aria-hidden", () => {
     const { container } = render(<RecruiterSimulator />);
-    
+
     // Check option arrows are wrapped and hidden
     const arrowSpans = container.querySelectorAll('span[aria-hidden="true"]');
     expect(arrowSpans.length).toBeGreaterThan(0);
     let foundArrow = false;
-    arrowSpans.forEach(span => {
+    arrowSpans.forEach((span) => {
       if (span.textContent?.trim() === "→") {
         foundArrow = true;
       }
@@ -177,28 +224,44 @@ describe("RecruiterSimulator - Ecosystem-Aligned Accessibility Integration", () 
     render(<RecruiterSimulator />);
 
     // Step 1: Option Select
-    const option1 = screen.getAllByText("Raw Systems & Performance Maverick")[0];
+    const option1 = screen.getAllByText("Systems & Performance")[0];
     fireEvent.click(option1);
-    expect(mockRecordEvent).toHaveBeenCalledWith("simulator", "simulator_option_select");
+    expect(mockRecordEvent).toHaveBeenCalledWith(
+      "simulator",
+      "simulator_option_select"
+    );
 
     act(() => {
       vi.advanceTimersByTime(400);
     });
 
     // Step 2: Option Select
-    const option2 = screen.getAllByText("Engage Distributed Circuit Breaker & Fallback Queue")[0];
+    const option2 = screen.getAllByText(
+      "Engage Distributed Circuit Breaker & Fallback Queue"
+    )[0];
     fireEvent.click(option2);
-    expect(mockRecordEvent).toHaveBeenCalledWith("simulator", "simulator_option_select");
+    expect(mockRecordEvent).toHaveBeenCalledWith(
+      "simulator",
+      "simulator_option_select"
+    );
 
     act(() => {
       vi.advanceTimersByTime(400);
     });
 
     // Step 3: Milestone Reached (Final step)
-    const option3 = screen.getAllByText("Enforce Exhaustive Idempotency Keys & Deduplication Window")[0];
+    const option3 = screen.getAllByText(
+      "Enforce Exhaustive Idempotency Keys & Deduplication Window"
+    )[0];
     fireEvent.click(option3);
-    expect(mockRecordEvent).toHaveBeenCalledWith("simulator", "simulator_option_select");
-    expect(mockRecordEvent).toHaveBeenCalledWith("simulator", "simulator_milestone_reached");
+    expect(mockRecordEvent).toHaveBeenCalledWith(
+      "simulator",
+      "simulator_option_select"
+    );
+    expect(mockRecordEvent).toHaveBeenCalledWith(
+      "simulator",
+      "simulator_milestone_reached"
+    );
 
     act(() => {
       vi.advanceTimersByTime(400);
@@ -207,7 +270,10 @@ describe("RecruiterSimulator - Ecosystem-Aligned Accessibility Integration", () 
     // Click Schedule on Google Calendar CTA
     const scheduleLink = screen.getByText(/Schedule on Google Calendar/i);
     fireEvent.click(scheduleLink);
-    expect(mockRecordEvent).toHaveBeenCalledWith("simulator", "simulator_schedule_click");
+    expect(mockRecordEvent).toHaveBeenCalledWith(
+      "simulator",
+      "simulator_schedule_click"
+    );
   });
 
   it("synchronizes option selections to URL hash parameters and supports direct deep link state restoration", () => {
@@ -220,8 +286,8 @@ describe("RecruiterSimulator - Ecosystem-Aligned Accessibility Integration", () 
     });
 
     // Verify completed evaluation is restored directly from hash parameters
-    expect(screen.getByText("Principal Systems Engineer & Distributed Architect")).toBeDefined();
-    const gaugeContainer = screen.getByRole("img", { name: /Candidate alignment score/i });
+    expect(screen.getByText("A Focus on Systems")).toBeDefined();
+    const gaugeContainer = screen.getByRole("img", { name: /Scenario match/i });
     expect(gaugeContainer).toBeDefined();
   });
 
@@ -233,7 +299,7 @@ describe("RecruiterSimulator - Ecosystem-Aligned Accessibility Integration", () 
     });
 
     // Click step 1 option
-    const optionBtn = screen.getAllByText("Raw Systems & Performance Maverick")[0];
+    const optionBtn = screen.getAllByText("Systems & Performance")[0];
     fireEvent.click(optionBtn);
 
     expect(window.location.hash).toBe("#step=incident_triage&ans=0");

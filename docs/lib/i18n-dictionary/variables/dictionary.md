@@ -8,7 +8,7 @@
 
 > `const` **dictionary**: `object`
 
-Defined in: [lib/i18n-dictionary.ts:152](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L152)
+Defined in: [lib/i18n-dictionary.ts:218](https://github.com/fderuiter/portfolio/blob/main/lib/i18n-dictionary.ts#L218)
 
 ## Type Declaration
 
@@ -22,15 +22,15 @@ Defined in: [lib/i18n-dictionary.ts:152](https://github.com/fderuiter/portfolio/
 
 #### detailed.bio.description
 
-> **description**: `string` = `"I build software that doesn't break, and make complex systems actually fun to use. My background spans translating 150-page FDA clinical trial protocols into bulletproof databases at Mayo Clinic, serving as the university operations liaison for the Minnesota Vikings Training Camp, advocating for campus health improvements at Mankato, and 3D printing participant MRI brain models. On side projects, I build fast browser engines, canvas games, and civic tools—including the Laser Loon design that became a Minnesota cultural icon and raised $13.5k for public libraries. When I'm off-screen, I do emergency medical triage on alpine ski patrol."`
+> **description**: `string` = `"I work with clinical data and build tools for the parts that are harder than they ought to be. My route here includes Mayo Clinic research, Vikings training camp logistics, and 3D-printed brain models. Outside work, there’s ski patrol, browser games, and Laser Loon, a flag design that helped raise $13.5k for public libraries. It’s been an interesting set of tabs to have open."`
 
 #### detailed.bio.subtitle
 
-> **subtitle**: `string` = `"Clinical Data • Interactive Graphics • High-Stakes Troubleshooting"`
+> **subtitle**: `string` = `"Clinical research • Software • Side projects"`
 
 #### detailed.bio.title
 
-> **title**: `string` = `"Pragmatic Problem Solver & Systems Engineer"`
+> **title**: `string` = `"Hi, I’m Fred."`
 
 #### detailed.domains
 
@@ -58,15 +58,15 @@ Defined in: [lib/i18n-dictionary.ts:152](https://github.com/fderuiter/portfolio/
 
 #### simplified.bio.description
 
-> **description**: `string` = `"I'm a builder and problem solver who likes making things work smoothly. From managing clinical research databases and 3D printing brain models at Mayo Clinic to coordinating logistics for NFL training camps and creating viral community projects, I specialize in taking complicated, messy challenges and turning them into simple, reliable software."`
+> **description**: `string` = `"I work with clinical data, build software, and follow interesting questions into side projects. That has led to research databases, 3D-printed brains, browser games, and a laser-eyed loon that helped raise money for public libraries."`
 
 #### simplified.bio.subtitle
 
-> **subtitle**: `string` = `"Web Apps • Clinical Systems • Interactive Tools"`
+> **subtitle**: `string` = `"Clinical research • Useful tools • Occasional lasers"`
 
 #### simplified.bio.title
 
-> **title**: `string` = `"Problem Solver & Systems Engineer"`
+> **title**: `string` = `"Hi, I’m Fred."`
 
 #### simplified.domains
 

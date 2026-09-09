@@ -8,7 +8,7 @@
 
 > **unlockAchievement**(`achievementId`): `boolean`
 
-Defined in: [lib/meme-data.ts:337](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L337)
+Defined in: [lib/meme-data.ts:371](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L371)
 
 ## Parameters
 

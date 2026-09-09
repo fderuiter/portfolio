@@ -24,19 +24,50 @@ global.IntersectionObserver = class {
 // Mock framer-motion with full proxy and hooks support to prevent transition freezes in jsdom tests
 vi.mock("framer-motion", async (importOriginal) => {
   const actual = await importOriginal<typeof import("framer-motion")>();
-  const Component = ({ children, className, style, onClick, ...props }: any) => {
+  const Component = ({
+    children,
+    className,
+    style,
+    onClick,
+    ...props
+  }: any) => {
     // filter out motion-specific properties that react 19 warns about
-    const { initial: _initial, animate: _animate, exit: _exit, transition: _transition, ...rest } = props;
+    const {
+      initial: _initial,
+      animate: _animate,
+      exit: _exit,
+      transition: _transition,
+      ...rest
+    } = props;
     return (
       <div className={className} style={style} onClick={onClick} {...rest}>
         {children}
       </div>
     );
   };
-  const Button = ({ children, className, style, onClick, type, ...props }: any) => {
-    const { initial: _initial, animate: _animate, exit: _exit, transition: _transition, ...rest } = props;
+  const Button = ({
+    children,
+    className,
+    style,
+    onClick,
+    type,
+    ...props
+  }: any) => {
+    const {
+      initial: _initial,
+      animate: _animate,
+      exit: _exit,
+      transition: _transition,
+      ...rest
+    } = props;
     return (
-      <button type={type || "button"} className={className} style={style} onClick={onClick} {...rest}>
+      <button
+        type={type || "button"}
+        className={className}
+        style={style}
+        onClick={onClick}
+        {...rest}
+      >
         {children}
       </button>
     );
@@ -112,7 +143,9 @@ describe("Timeline Inline-Marked RichNarrative Integration", () => {
     });
 
     const buttons = Array.from(container.querySelectorAll("button"));
-    const realityBtn = buttons.find((btn) => btn.textContent?.includes("HANDS-ON REALITY"));
+    const realityBtn = buttons.find((btn) =>
+      btn.textContent?.includes("HANDS-ON REALITY")
+    );
     expect(realityBtn).toBeDefined();
 
     await act(async () => {
@@ -120,8 +153,10 @@ describe("Timeline Inline-Marked RichNarrative Integration", () => {
     });
 
     // Should contain some reality descriptions
-    expect(container.textContent).toContain("Translating dense 150-page clinical trial protocols");
-    expect(container.textContent).not.toContain("Lead technical architect for GxP");
+    expect(container.textContent).toContain(
+      "A study protocol can run to 150 pages."
+    );
+    expect(container.textContent).not.toContain("I design eCRFs");
   });
 
   it("should toggle to formal recruiter view and render GxP and eCRF marked terms", async () => {
@@ -131,7 +166,9 @@ describe("Timeline Inline-Marked RichNarrative Integration", () => {
 
     // Find and click 'FORMAL SUMMARY' button
     const buttons = Array.from(container.querySelectorAll("button"));
-    const recruiterBtn = buttons.find((btn) => btn.textContent?.includes("FORMAL SUMMARY"));
+    const recruiterBtn = buttons.find((btn) =>
+      btn.textContent?.includes("FORMAL SUMMARY")
+    );
     expect(recruiterBtn).toBeDefined();
 
     await act(async () => {
@@ -140,12 +177,14 @@ describe("Timeline Inline-Marked RichNarrative Integration", () => {
 
     // GxP and eCRF should now be rendered inside interactive tooltip trigger spans
     // and Source Document Verification (SDV) too
-    const triggers = Array.from(container.querySelectorAll("span[aria-describedby]"));
+    const triggers = Array.from(
+      container.querySelectorAll("span[aria-describedby]")
+    );
     expect(triggers.length).toBeGreaterThanOrEqual(3);
 
     const triggerTexts = triggers.map((t) => t.textContent);
     expect(triggerTexts).toContain("GxP");
-    expect(triggerTexts).toContain("eCRF");
+    expect(triggerTexts).toContain("eCRFs");
     expect(triggerTexts).toContain("Source Document Verification (SDV)");
   });
 
@@ -159,22 +198,24 @@ describe("Timeline Inline-Marked RichNarrative Integration", () => {
 
     // Switch to Formal Summary
     const buttons = Array.from(container.querySelectorAll("button"));
-    const recruiterBtn = buttons.find((btn) => btn.textContent?.includes("FORMAL SUMMARY"));
+    const recruiterBtn = buttons.find((btn) =>
+      btn.textContent?.includes("FORMAL SUMMARY")
+    );
     await act(async () => {
       recruiterBtn?.click();
     });
 
     // Timeline entries should display content from the simplified timeline dictionary slice
     expect(container.textContent).toContain(
-      "Created automated participant search tools using hospital electronic health records"
+      "I improved recruitment using hospital records"
     );
     expect(container.textContent).toContain(
-      "Managed operations for federally funded clinical trials from launch to completion"
+      "I managed the day-to-day work of clinical studies"
     );
 
     // Should not contain detailed terminology strings
     expect(container.textContent).not.toContain(
-      "Pioneered an EHR-based recruitment pipeline using SlicerDicer and MyChart"
+      "I used Epic SlicerDicer and MyChart"
     );
   });
 
@@ -184,17 +225,17 @@ describe("Timeline Inline-Marked RichNarrative Integration", () => {
     });
 
     // Switch to recruiter mode
-    const recruiterBtn = Array.from(container.querySelectorAll("button")).find((btn) =>
-      btn.textContent?.includes("FORMAL SUMMARY")
+    const recruiterBtn = Array.from(container.querySelectorAll("button")).find(
+      (btn) => btn.textContent?.includes("FORMAL SUMMARY")
     );
     await act(async () => {
       recruiterBtn?.click();
     });
 
     // Find the GxP trigger
-    const gxpTrigger = Array.from(container.querySelectorAll("span[aria-describedby]")).find(
-      (t) => t.textContent === "GxP"
-    );
+    const gxpTrigger = Array.from(
+      container.querySelectorAll("span[aria-describedby]")
+    ).find((t) => t.textContent === "GxP");
     expect(gxpTrigger).toBeDefined();
 
     // Hover to trigger tooltip rendering using React testing library fireEvent

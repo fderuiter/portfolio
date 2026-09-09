@@ -21,7 +21,7 @@ const DynamicLaserLoon = dynamic(LaserLoonLoader, {
   loading: () => (
     <div className="flex flex-col items-center justify-center p-8 min-h-[380px] font-mono text-xs text-zinc-500 animate-pulse">
       <div className="w-8 h-8 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin mb-4" />
-      <span>ALIGNING OPTIC ARSENAL CHUNKS...</span>
+      <span>Warming up the lasers...</span>
     </div>
   ),
 });
@@ -63,10 +63,13 @@ export const LaserLoonClient: React.FC = () => {
             </div>
             <div>
               <h1 className="text-3xl sm:text-4xl font-extrabold font-mono text-white tracking-tight">
-                Laser Loon: <span className="text-red-400">Quest for the State Flag</span>
+                Laser Loon:{" "}
+                <span className="text-red-400">Quest for the State Flag</span>
               </h1>
               <p className="text-xs sm:text-sm text-zinc-400 font-mono mt-1">
-                Pilot submission F277 Laser Loon on the Road to the Capitol. Battle rival flag redesigns, bureaucracy, and Minnesota folklore in this retro arcade campaign.
+                Pilot submission F277 Laser Loon on the Road to the Capitol.
+                Battle rival flag redesigns, bureaucracy, and Minnesota folklore
+                in this retro arcade campaign.
               </p>
             </div>
           </div>
@@ -77,10 +80,10 @@ export const LaserLoonClient: React.FC = () => {
           <PlayCabinet
             gameId="laser-loon"
             title="Laser Loon: Quest for the State Flag"
-            subtitle="Physics Raycasting & Waveform Campaign"
+            subtitle="A Loon With a Legislative Agenda"
             accentColor="red"
             icon={<IconCrosshair className="w-8 h-8 text-red-400" />}
-            instructions="Pilot submission F277 Laser Loon on the Road to the Capitol. Battle rival flag redesigns using raycast laser collision algorithms, cryo-shatter particle physics, and dual-synth Web Audio audio processing."
+            instructions="Fly Laser Loon toward the State Capitol, take on rival flags, and blast through red tape. There are ice weapons and boss battles. The flag committee did not request these features."
             controls={[
               { key: "1-4", action: "Optic Arsenal" },
               { key: "Space", action: "Loon Tremolo" },
@@ -100,7 +103,8 @@ export const LaserLoonClient: React.FC = () => {
               <span>Optic Arsenal (1 - 4)</span>
             </div>
             <p className="text-zinc-400 text-[11px] leading-relaxed">
-              Aim crosshairs with cursor or touch. Switch between Ruby Eye Laser, Cyan Pulse, Aurora Borealis Wave, and Glacial Cryo-Mortar.
+              Aim crosshairs with cursor or touch. Switch between Ruby Eye
+              Laser, Cyan Pulse, Aurora Borealis Wave, and Glacial Cryo-Mortar.
             </p>
           </div>
 
@@ -110,7 +114,8 @@ export const LaserLoonClient: React.FC = () => {
               <span>Haunting Loon Tremolo</span>
             </div>
             <p className="text-zinc-400 text-[11px] leading-relaxed">
-              Charge energy meter to 100% by scoring hits. Press Space to unleash a screen-wide synthesized cryogenic loon cry shockwave!
+              Charge energy meter to 100% by scoring hits. Press Space to
+              unleash a screen-wide synthesized cryogenic loon cry shockwave!
             </p>
           </div>
 
@@ -120,7 +125,9 @@ export const LaserLoonClient: React.FC = () => {
               <span>MN Civic Power-Ups</span>
             </div>
             <p className="text-zinc-400 text-[11px] leading-relaxed">
-              Collect floating Tater Tot Hotdish (laser overcharge), Pronto Pups (invulnerability shield), and North Star crystals (multiplier surge).
+              Collect floating Tater Tot Hotdish (laser overcharge), Pronto Pups
+              (invulnerability shield), and North Star crystals (multiplier
+              surge).
             </p>
           </div>
         </div>

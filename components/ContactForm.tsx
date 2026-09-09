@@ -148,13 +148,12 @@ export function ContactForm({
           <IconCheck className="w-7 h-7" />
         </div>
         <h3 className="text-lg sm:text-xl font-mono font-bold text-white mb-2">
-          Message Delivered!
+          Message sent!
         </h3>
         <p className="text-xs sm:text-sm text-zinc-300 font-sans max-w-md mb-6 leading-relaxed">
           Thanks for reaching out,{" "}
           <span className="font-bold text-white">{name || "friend"}</span>. Your
-          message has been sent directly to my inbox (fpderuiter@gmail.com) and
-          I will follow up shortly.
+          message is in my inbox. I’ll get back to you by email.
         </p>
         <button
           type="button"
@@ -199,7 +198,9 @@ export function ContactForm({
         >
           <IconAlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
           <div className="flex-1">
-            <span className="font-bold block mb-0.5">Transmission Failed:</span>
+            <span className="font-bold block mb-0.5">
+              Couldn’t send your message:
+            </span>
             <span>{errorMessage}</span>
           </div>
         </div>
@@ -294,7 +295,7 @@ export function ContactForm({
       <div className="flex flex-col gap-1.5">
         <label className="text-xs font-mono font-bold text-zinc-300 flex items-center gap-1.5">
           <IconTarget className="w-3.5 h-3.5 text-amber-400" />
-          <span>Inquiry Intent</span>
+          <span>What’s this about?</span>
         </label>
         <div className="flex flex-wrap gap-2">
           {CONTACT_INTENTS.map((item) => {
@@ -339,7 +340,7 @@ export function ContactForm({
             if (fieldErrors.subject)
               setFieldErrors((prev) => ({ ...prev, subject: "" }));
           }}
-          placeholder="e.g. Collaboration on formal verification or clinical systems"
+          placeholder="e.g. A project I’d like your help with"
           aria-invalid={!!fieldErrors.subject}
           aria-describedby={fieldErrors.subject ? "subject_error" : undefined}
           className={`w-full px-3.5 py-2.5 rounded-xl bg-[#0d0e11] border text-xs font-mono text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:ring-1 transition-all ${
@@ -408,7 +409,7 @@ export function ContactForm({
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-white/5">
         <span className="text-[11px] font-mono text-zinc-400 flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span>Resend TLS Encryption &bull; Anti-Spam Protected</span>
+          <span>Please don’t include passwords or patient information.</span>
         </span>
 
         <button
@@ -419,7 +420,7 @@ export function ContactForm({
           {status === "submitting" ? (
             <>
               <IconLoader2 className="w-4 h-4 animate-spin" />
-              <span>Transmitting...</span>
+              <span>Sending...</span>
             </>
           ) : (
             <>

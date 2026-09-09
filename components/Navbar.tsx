@@ -38,13 +38,13 @@ interface SubNavItem {
 const ARCADE_ITEMS: SubNavItem[] = [
   {
     title: "Arcade Hub",
-    subtitle: "Playable browser games & canvas physics",
+    subtitle: "Games, puzzles, and side projects",
     href: "/arcade",
     icon: <IconDeviceGamepad2 className="w-4 h-4 text-brand-cyan" />,
   },
   {
     title: "Laser Loon",
-    subtitle: "Physics raycaster & viral flag game",
+    subtitle: "A loon, lasers, and a trip to the Capitol",
     href: "/arcade/laser-loon",
     icon: <IconCrosshair className="w-4 h-4 text-brand-cyan" />,
   },
@@ -74,7 +74,7 @@ const ARCADE_ITEMS: SubNavItem[] = [
   },
   {
     title: "Working With Duck",
-    subtitle: "Autonomous desk pet & state machine",
+    subtitle: "You have work. Duck has other plans.",
     href: "/arcade/working-with-duck",
     icon: <IconBone className="w-4 h-4 text-brand-cyan" />,
   },
@@ -89,7 +89,7 @@ const ARCADE_ITEMS: SubNavItem[] = [
 const SYSTEMS_ITEMS: SubNavItem[] = [
   {
     title: "Under the Hood (Stack)",
-    subtitle: "Tech stack & live system telemetry",
+    subtitle: "The tools and decisions behind this site",
     href: "/stack",
     icon: <IconCpu className="w-4 h-4 text-brand-cyan" />,
   },
@@ -101,7 +101,7 @@ const SYSTEMS_ITEMS: SubNavItem[] = [
   },
   {
     title: "Proof Workspace",
-    subtitle: "Interactive deductive logic theorem prover",
+    subtitle: "Build a proof, one step at a time",
     href: "/proof",
     icon: <IconBrain className="w-4 h-4 text-brand-cyan" />,
   },

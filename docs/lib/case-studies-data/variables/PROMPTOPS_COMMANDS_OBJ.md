@@ -8,4 +8,4 @@
 
 > `const` **PROMPTOPS\_COMMANDS\_OBJ**: [`CaseStudyCommands`](../type-aliases/CaseStudyCommands.md)
 
-Defined in: [lib/case-studies-data.ts:429](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L429)
+Defined in: [lib/case-studies-data.ts:489](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L489)

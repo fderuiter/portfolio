@@ -2,7 +2,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -59,7 +61,7 @@ describe("Email Scrub Regression Invariant", () => {
     const mailto = container?.querySelector('a[href*="mailto:"]');
     expect(mailto).toBeNull();
     expect(container?.textContent).not.toContain("fpderuiter@gmail.com");
-    expect(container?.textContent).toContain("Direct Contact Form");
+    expect(container?.textContent).toContain("Send a Message");
   });
 
   it("should not render mailto:fpderuiter@gmail.com in ContactPage", async () => {

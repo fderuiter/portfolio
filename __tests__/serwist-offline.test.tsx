@@ -35,16 +35,18 @@ describe("Serwist PWA Engine & Offline App Shell Integration", () => {
     it("renders the dedicated offline fallback page with status and retry controls", () => {
       render(<OfflineFallbackPage />);
 
-      expect(screen.getByText(/Offline Application Shell/i)).toBeDefined();
+      expect(
+        screen.getByText(/This page isn’t available offline/i)
+      ).toBeDefined();
       expect(
         screen.getByText(
-          /You are currently offline|Your network connection has been re-established/i
+          /This page hasn’t been saved for offline use|You’re back online/i
         )
       ).toBeDefined();
       expect(
         screen.getAllByRole("button", { name: /Retry Connection/i })[0]
       ).toBeDefined();
-      expect(screen.getByText(/Precached App Shell Workspaces/i)).toBeDefined();
+      expect(screen.getByText(/Pages to Try Offline/i)).toBeDefined();
     });
 
     it("triggers window location reload when Retry Connection is clicked", () => {

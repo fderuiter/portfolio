@@ -11,7 +11,10 @@ import { CommandPalette } from "@/components/CommandPalette";
 const mockPlayHover = vi.fn();
 const mockPlaySubmit = vi.fn();
 vi.mock("@/components/providers/AudioProvider", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/components/providers/AudioProvider")>();
+  const actual =
+    await importOriginal<
+      typeof import("@/components/providers/AudioProvider")
+    >();
   return {
     ...actual,
     useAudio: () => ({
@@ -102,7 +105,9 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
     const combobox = document.querySelector('input[role="combobox"]');
     expect(combobox).not.toBeNull();
 
-    const listbox = document.querySelector('#palette-results-list[role="listbox"]');
+    const listbox = document.querySelector(
+      '#palette-results-list[role="listbox"]'
+    );
     expect(listbox).not.toBeNull();
 
     // Check master-detail preview pane
@@ -120,7 +125,7 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
     expect(previewPane?.textContent).toContain("Work Showcase Feed");
     expect(previewPane?.textContent).toContain("Next.js 16");
     expect(previewPane?.textContent).toContain("React 19");
-    expect(previewPane?.textContent).toContain("Production Feed");
+    expect(previewPane?.textContent).toContain("Project Collection");
   });
 
   it("updates preview pane and triggers audio hover when navigating with arrow keys", async () => {
@@ -130,7 +135,9 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
       root.render(<CommandPalette />);
     });
 
-    const combobox = document.querySelector('input[role="combobox"]') as HTMLInputElement;
+    const combobox = document.querySelector(
+      'input[role="combobox"]'
+    ) as HTMLInputElement;
     expect(combobox).not.toBeNull();
 
     const previewPane = document.querySelector("#palette-preview-pane");
@@ -138,30 +145,40 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
 
     // Press ArrowDown to navigate to second item (About System Architect)
     await act(async () => {
-      combobox.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+      combobox.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })
+      );
     });
 
     expect(mockPlayHover).toHaveBeenCalledTimes(1);
-    expect(previewPane?.textContent).toContain("About Frederick (Bio & Timeline)");
+    expect(previewPane?.textContent).toContain(
+      "About Frederick (Bio & Timeline)"
+    );
     expect(previewPane?.textContent).toContain("Origin Story");
     expect(previewPane?.textContent).toContain("Mayo Clinic Operations");
 
     // Press ArrowDown again to navigate to third item (Say Hi & Connect)
     await act(async () => {
-      combobox.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+      combobox.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })
+      );
     });
 
     expect(mockPlayHover).toHaveBeenCalledTimes(2);
     expect(previewPane?.textContent).toContain("Contact & Direct Inquiries");
-    expect(previewPane?.textContent).toContain("Relay Active");
+    expect(previewPane?.textContent).toContain("Contact Form");
 
     // Press ArrowUp to move back
     await act(async () => {
-      combobox.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true }));
+      combobox.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowUp", bubbles: true })
+      );
     });
 
     expect(mockPlayHover).toHaveBeenCalledTimes(3);
-    expect(previewPane?.textContent).toContain("About Frederick (Bio & Timeline)");
+    expect(previewPane?.textContent).toContain(
+      "About Frederick (Bio & Timeline)"
+    );
   });
 
   it("updates active preview when navigating or hovering over a list item", async () => {
@@ -176,7 +193,12 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
 
     // Hover or focus 4th option (Arcade Games Hub)
     await act(async () => {
-      options[3].dispatchEvent(new MouseEvent("mouseover", { bubbles: true, relatedTarget: document.body }));
+      options[3].dispatchEvent(
+        new MouseEvent("mouseover", {
+          bubbles: true,
+          relatedTarget: document.body,
+        })
+      );
     });
 
     const previewPane = document.querySelector("#palette-preview-pane");
@@ -192,18 +214,28 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
       root.render(<CommandPalette />);
     });
 
-    const combobox = document.querySelector('input[role="combobox"]') as HTMLInputElement;
+    const combobox = document.querySelector(
+      'input[role="combobox"]'
+    ) as HTMLInputElement;
 
     // Navigate to Arcade Hub
     await act(async () => {
-      combobox.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })); // index 1
-      combobox.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })); // index 2
-      combobox.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })); // index 3
+      combobox.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })
+      ); // index 1
+      combobox.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })
+      ); // index 2
+      combobox.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })
+      ); // index 3
     });
 
     // Press Enter
     await act(async () => {
-      combobox.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+      combobox.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+      );
     });
 
     expect(mockPlaySubmit).toHaveBeenCalled();
@@ -220,12 +252,20 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
     const combobox = document.querySelector('input[role="combobox"]');
     expect(combobox?.getAttribute("aria-expanded")).toBe("true");
     expect(combobox?.getAttribute("aria-autocomplete")).toBe("list");
-    expect(combobox?.getAttribute("aria-controls")).toBe("palette-results-list");
-    expect(combobox?.getAttribute("aria-activedescendant")).toBe("palette-option-nav-work");
+    expect(combobox?.getAttribute("aria-controls")).toBe(
+      "palette-results-list"
+    );
+    expect(combobox?.getAttribute("aria-activedescendant")).toBe(
+      "palette-option-nav-work"
+    );
 
-    const activeOption = document.querySelector('#palette-option-nav-work[role="option"]');
+    const activeOption = document.querySelector(
+      '#palette-option-nav-work[role="option"]'
+    );
     expect(activeOption?.getAttribute("aria-selected")).toBe("true");
-    expect(activeOption?.getAttribute("aria-describedby")).toBe("palette-preview-pane");
+    expect(activeOption?.getAttribute("aria-describedby")).toBe(
+      "palette-preview-pane"
+    );
   });
 
   it("filters search results dynamically and renders empty state message when no items match", async () => {
@@ -235,7 +275,9 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
       root.render(<CommandPalette />);
     });
 
-    const combobox = document.querySelector('input[role="combobox"]') as HTMLInputElement;
+    const combobox = document.querySelector(
+      'input[role="combobox"]'
+    ) as HTMLInputElement;
 
     // Type query with no matches
     await act(async () => {

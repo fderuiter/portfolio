@@ -34,7 +34,7 @@ const FEATURED_PROJECTS: FeaturedProject[] = [
     contribution:
       "Built a streaming TypeScript mapper that assembles runtime schemas from ODM metadata.",
     outcome:
-      "Creates a bounded-memory path from clinical inputs to standardized SDTM domains.",
+      "Maps clinical records to SDTM domains while processing XML in chunks.",
   },
   {
     slug: "cadence-clinical",
@@ -44,7 +44,7 @@ const FEATURED_PROJECTS: FeaturedProject[] = [
     contribution:
       "Designed a graph-and-relational system with append-only audit trails and digital signatures.",
     outcome:
-      "Connects trial workflows to traceable controls for regulated clinical operations.",
+      "Keeps study records, protocol changes, and audit history connected.",
   },
   {
     slug: "imednet-python-sdk",
@@ -243,11 +243,10 @@ function getProjectDetails(
   return {
     artifact: ["CASE STUDY", study.primary_language, "DOSSIER"],
     problem:
-      "The full case study preserves this project’s original context and technical constraints.",
+      "See what prompted this project and the constraints it needed to work within.",
     contribution:
-      summary || "The project summary is available in the full case study.",
-    outcome:
-      "Read the complete case study for the documented implementation and outcome.",
+      summary || "The writeup walks through the implementation choices.",
+    outcome: "Read the writeup for the results and lessons.",
   };
 }
 
@@ -418,7 +417,7 @@ export const ProjectTeaserGrid: React.FC<ProjectTeaserGridProps> = ({
                   </Link>
 
                   <span className="shrink-0 text-[10px] font-mono text-zinc-400 uppercase">
-                    INSPECT // DOSSIER
+                    PROJECT WRITEUPS
                   </span>
                 </div>
               </div>
@@ -437,9 +436,7 @@ export const ProjectTeaserGrid: React.FC<ProjectTeaserGridProps> = ({
           className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 bg-[#14161d] hover:bg-amber-400 border border-white/10 hover:border-amber-400 text-zinc-200 hover:text-black font-mono text-xs font-bold rounded-xl transition-all duration-200 shadow-md active:scale-[0.98] group"
         >
           <IconLayersIntersect className="w-4 h-4 text-amber-400 group-hover:text-black transition-colors" />
-          <span>
-            View All Architectural Case Studies ({caseStudies.length})
-          </span>
+          <span>View All Case Studies ({caseStudies.length})</span>
           <IconArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-200" />
         </Link>
       </div>

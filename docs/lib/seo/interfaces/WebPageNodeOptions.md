@@ -6,7 +6,7 @@
 
 # Interface: WebPageNodeOptions
 
-Defined in: [lib/seo.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L68)
+Defined in: [lib/seo.ts:75](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L75)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/seo.ts:68](https://github.com/fderuiter/portfolio/blob/main/lib
 
 > `optional` **breadcrumbs?**: [`BreadcrumbItem`](BreadcrumbItem.md)[]
 
-Defined in: [lib/seo.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L72)
+Defined in: [lib/seo.ts:79](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L79)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/seo.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib
 
 > **description**: `string`
 
-Defined in: [lib/seo.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L70)
+Defined in: [lib/seo.ts:77](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L77)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/seo.ts:70](https://github.com/fderuiter/portfolio/blob/main/lib
 
 > `optional` **inLanguage?**: `string`
 
-Defined in: [lib/seo.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L73)
+Defined in: [lib/seo.ts:80](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L80)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [lib/seo.ts:73](https://github.com/fderuiter/portfolio/blob/main/lib
 
 > `optional` **isAccessibleForFree?**: `boolean`
 
-Defined in: [lib/seo.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L74)
+Defined in: [lib/seo.ts:81](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L81)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [lib/seo.ts:74](https://github.com/fderuiter/portfolio/blob/main/lib
 
 > **name**: `string`
 
-Defined in: [lib/seo.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L69)
+Defined in: [lib/seo.ts:76](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L76)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [lib/seo.ts:69](https://github.com/fderuiter/portfolio/blob/main/lib
 
 > **url**: `string`
 
-Defined in: [lib/seo.ts:71](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L71)
+Defined in: [lib/seo.ts:78](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L78)

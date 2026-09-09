@@ -35,51 +35,90 @@ const rawTimelineDetailed: TimelineItem[] = [
     company: "BRIGHT Research Partners, Inc.",
     period: "March 2023 — Present",
     recruiterDescription:
-      "Lead technical architect for GxP-compliant eClinical databases, translating 100+ page scientific protocols into validated eCRF systems. Engineer automated cross-form edit checks and dynamic logic rules to enforce protocol compliance and point-of-entry data integrity. Manage clinical data lifecycles (DMP authoring, SAE reconciliation, database locks) and administer 21 CFR 812 investigational device accountability.",
+      "I design eCRFs and clinical databases for GxP research from study protocols, including cross-form edit checks and validation rules. I also manage data management plans, SAE reconciliation, database locks, and investigational device accountability under 21 CFR 812.",
     realityDescription:
-      "Translating dense 150-page clinical trial protocols into relational schemas and dynamic eCRFs. Building cross-form validation rules to catch edge-case clinician typos before they hit the database, and ensuring 100% device traceability under 21 CFR 812.",
-    tags: ["GxP Systems", "21 CFR 812", "eCRF Architecture", "Edit Checks", "DMP Authoring", "SAE Reconciliation", "iMednet"]
+      "A study protocol can run to 150 pages. My job is to turn it into forms people can actually use, then write the checks that catch contradictions across them. The footnotes tend to earn their keep.",
+    tags: [
+      "GxP Systems",
+      "21 CFR 812",
+      "eCRF Architecture",
+      "Edit Checks",
+      "DMP Authoring",
+      "SAE Reconciliation",
+      "iMednet",
+    ],
   },
   {
     role: "Research Program Coordinator",
     company: "Mayo Clinic",
     period: "July 2021 — March 2023",
     recruiterDescription:
-      "Pioneered an EHR-based recruitment pipeline using SlicerDicer and MyChart, resulting in a 5x increase in qualified participant enrollment (10 to 50+/month) and a 25% reduction in screen failures. Architected production REDCap databases, executed Linux-based FreeSurfer C pipelines processing 3T MRI scans for volumetric brain segmentation, innovated 3D-printable STL workflows for participant brain models, and prepared NIH DSMB data safety dossiers.",
+      "I used Epic SlicerDicer and MyChart to improve recruitment, helping monthly enrollment grow from 10 to 50+ participants while screen failures fell 25%. I also built REDCap databases, processed MRI scans with FreeSurfer, created 3D-printable brain models, and prepared NIH DSMB safety reports.",
     realityDescription:
-      "Automated cohort identification using Epic SlicerDicer and MyChart queries, scaling monthly enrollment 5x. Executed FreeSurfer C processing pipelines across Linux clusters for 3T MRI scans, 3D printed custom brain models for study participants, and compiled multi-million dollar NIH DSMB data safety dossiers.",
-    tags: ["Mayo Clinic", "Epic SlicerDicer", "MyChart Recruitment", "REDCap", "FreeSurfer Linux", "3T MRI Neuroinformatics", "3D Printing (STL)", "NIH DSMB"]
+      "I worked on recruitment queries, REDCap databases, MRI processing, and safety reports. We also 3D printed brain models for participants. That was a particularly good answer to “what did you do at work today?”",
+    tags: [
+      "Mayo Clinic",
+      "Epic SlicerDicer",
+      "MyChart Recruitment",
+      "REDCap",
+      "FreeSurfer Linux",
+      "3T MRI Neuroinformatics",
+      "3D Printing (STL)",
+      "NIH DSMB",
+    ],
   },
   {
     role: "Clinical Research Coordinator",
     company: "Mayo Clinic",
     period: "October 2019 — July 2021",
     recruiterDescription:
-      "Orchestrated the operational lifecycle for multiple high-compliance, federally funded NIH studies from startup to closeout. Authored and managed complex IRB protocols, informed consent documents, and regulatory amendments. Served as departmental Epic Super User providing at-the-elbow clinical troubleshooting and leading staff training on Epic for Research modules, ensuring 100% data integrity through Source Document Verification (SDV).",
+      "I coordinated NIH-funded studies from startup to closeout, prepared IRB submissions and consent documents, and checked study data through Source Document Verification (SDV). As an Epic Super User, I trained staff and helped clinical teams troubleshoot research workflows.",
     realityDescription:
-      "Ran day-to-day operations for federally funded NIH clinical trials from startup to closeout. Wrote IRB protocols, navigated multi-phase regulatory amendments, and served as departmental Epic Super User helping doctors and clinical staff troubleshoot complex electronic health record workflows.",
-    tags: ["Mayo Clinic", "NIH Studies", "IRB Protocols", "Epic Super User", "Source Document Verification", "GxP Compliance", "Clinical Operations"]
+      "I kept studies moving: approvals, paperwork, data checks, and helping people get Epic to do what they needed. A lot of research depends on someone patiently untangling the practical bits.",
+    tags: [
+      "Mayo Clinic",
+      "NIH Studies",
+      "IRB Protocols",
+      "Epic Super User",
+      "Source Document Verification",
+      "GxP Compliance",
+      "Clinical Operations",
+    ],
   },
   {
     role: "Desk Operations Specialist & Epic Super User",
     company: "Mayo Clinic",
     period: "February 2018 — October 2019",
     recruiterDescription:
-      "Spearheaded departmental EHR data migration for the high-volume Division of Oncology, personally transcribing record-high volumes of complex patient orders to ensure continuity of clinical care. Provided frontline technical troubleshooting and partnered with IT analysts to test and validate system updates in UAT environments.",
+      "I helped the Division of Oncology move patient orders into a new EHR, supported staff during the transition, and worked with IT analysts to test system updates.",
     realityDescription:
-      "Executed high-volume EHR data migrations for the Division of Oncology, keeping cancer treatment orders moving accurately during system transitions and resolving frontline software glitches for clinical teams.",
-    tags: ["Mayo Clinic", "Division of Oncology", "EHR Data Migration", "Epic Super User", "UAT Testing", "Technical Troubleshooting"]
+      "Cancer treatment orders still need to be right during a software migration. I helped transfer and check them, then worked through the software problems with the clinical teams using it.",
+    tags: [
+      "Mayo Clinic",
+      "Division of Oncology",
+      "EHR Data Migration",
+      "Epic Super User",
+      "UAT Testing",
+      "Technical Troubleshooting",
+    ],
   },
   {
     role: "Summer Operations Coordinator & Vikings Training Camp Liaison",
     company: "Minnesota State University, Mankato",
     period: "July 2017 — February 2018",
     recruiterDescription:
-      "Served as the primary university liaison for the Minnesota Vikings Summer Training Camp, orchestrating logistical, broadcast, and security operations between the university and the NFL franchise. Directed conference finances, inventory systems, and client billing reconciliations while spearheading campus health initiatives including free menstrual product access in university facilities.",
+      "I was the university liaison for Minnesota Vikings Training Camp, coordinating facilities, broadcast, and security logistics. I also managed conference billing and helped secure free menstrual products in campus facilities.",
     realityDescription:
-      "Acted as the university's main liaison for the Minnesota Vikings Training Camp—handling facilities, broadcast logistics, and NFL team operations—while managing campus billing reconciliations and successfully organizing student initiatives to provide free menstrual products across campus bathrooms.",
-    tags: ["Minnesota Vikings NFL Camp", "University Liaison", "Campus Advocacy", "Operations Logistics", "Financial Reconciliation", "Facilities Management"]
-  }
+      "I helped get an NFL training camp onto a university campus and kept summer operations moving. I also worked on free menstrual products in campus bathrooms. Different scales of logistics; both worth getting right.",
+    tags: [
+      "Minnesota Vikings NFL Camp",
+      "University Liaison",
+      "Campus Advocacy",
+      "Operations Logistics",
+      "Financial Reconciliation",
+      "Facilities Management",
+    ],
+  },
 ];
 
 const compiledTimelineDetailed = rawTimelineDetailed.map((item) => ({
@@ -95,51 +134,78 @@ const rawTimelineSimplified: TimelineItem[] = [
     company: "BRIGHT Research Partners, Inc.",
     period: "March 2023 — Present",
     recruiterDescription:
-      "Lead database designer for clinical research, creating digital medical forms and automated validation rules to ensure error-free data collection. Oversee trial data quality across study milestones and maintain full regulatory compliance for medical device studies.",
+      "I turn study protocols into electronic forms and databases, with checks that catch missing or inconsistent entries. I help manage trial data from collection through database lock and track investigational medical devices.",
     realityDescription:
-      "Designing online medical trial forms and database schemas from complex protocol guidelines. Building automated rules to catch clinical data entry errors in real time, and maintaining complete accountability logs for medical device trials.",
-    tags: ["GxP Systems", "21 CFR Part 11", "Database Design", "Data Validation", "Clinical Operations"]
+      "I read long study plans, turn them into usable forms, and add checks for missing or conflicting answers. There is usually an exception tucked into a footnote.",
+    tags: [
+      "GxP Systems",
+      "21 CFR Part 11",
+      "Database Design",
+      "Data Validation",
+      "Clinical Operations",
+    ],
   },
   {
     role: "Research Program Coordinator",
     company: "Mayo Clinic",
     period: "July 2021 — March 2023",
     recruiterDescription:
-      "Created automated participant search tools using hospital electronic health records, boosting monthly study enrollment fivefold while reducing screening disqualifications.",
+      "I improved recruitment using hospital records, helping monthly enrollment grow fivefold while fewer people were ruled out during screening. I also built research databases and prepared study safety reports.",
     realityDescription:
-      "Automated patient recruitment queries in hospital systems, built secure research databases, 3D printed custom brain models from MRI scans for study participants, and compiled federal study safety reports.",
-    tags: ["Mayo Clinic", "Trial Enrollment", "3D Printing", "Database Management", "Data Safety dossiers"]
+      "I helped find study participants, organized research data, and made 3D-printed models of people’s brains from their MRI scans. The printer had an unusually interesting workload.",
+    tags: [
+      "Mayo Clinic",
+      "Trial Enrollment",
+      "3D Printing",
+      "Database Management",
+      "Data Safety dossiers",
+    ],
   },
   {
     role: "Clinical Research Coordinator",
     company: "Mayo Clinic",
     period: "October 2019 — July 2021",
     recruiterDescription:
-      "Managed operations for federally funded clinical trials from launch to completion, overseeing ethics board submissions and staff software training.",
+      "I managed the day-to-day work of clinical studies, including ethics approvals, consent documents, data checks, and staff training.",
     realityDescription:
-      "Coordinated daily study operations, managed ethics board approvals and patient paperwork, and provided on-site electronic health record support for doctors and research staff.",
-    tags: ["Mayo Clinic", "Trial Operations", "Compliance Checks", "Staff Training"]
+      "I handled the approvals, forms, data checks, and software questions that keep a research study moving.",
+    tags: [
+      "Mayo Clinic",
+      "Trial Operations",
+      "Compliance Checks",
+      "Staff Training",
+    ],
   },
   {
     role: "Desk Operations Specialist & Epic Super User",
     company: "Mayo Clinic",
     period: "February 2018 — October 2019",
     recruiterDescription:
-      "Directed large-scale medical record transfers for cancer care departments, maintaining technical support and verifying software updates with IT teams.",
+      "I helped move oncology records during a hospital software transition and supported the people using the new system.",
     realityDescription:
-      "Transferred and verified high-volume patient medical records during hospital software upgrades while troubleshooting software issues for clinical staff.",
-    tags: ["Mayo Clinic", "Data Migration", "IT Support", "Workflow Optimization"]
+      "I helped clinical teams through a software change while keeping patient orders accurate. It was a good education in what software feels like from the other side of the desk.",
+    tags: [
+      "Mayo Clinic",
+      "Data Migration",
+      "IT Support",
+      "Workflow Optimization",
+    ],
   },
   {
     role: "Summer Operations Coordinator & Vikings Training Camp Liaison",
     company: "Minnesota State University, Mankato",
     period: "July 2017 — February 2018",
     recruiterDescription:
-      "Served as primary campus liaison for the Minnesota Vikings Training Camp and summer conference operations, while spearheading successful student initiatives for free campus healthcare supplies.",
+      "I coordinated Vikings training camp and summer conference logistics, managed billing, and helped make menstrual products freely available on campus.",
     realityDescription:
-      "Coordinated event logistics and broadcast setups for the Minnesota Vikings NFL team on campus, managed summer facility operations, and successfully organized student initiatives for free menstrual products in campus facilities.",
-    tags: ["Minnesota Vikings NFL Camp", "Campus Advocacy", "Operations Logistics", "Facilities Management"]
-  }
+      "I coordinated training camp logistics, summer events, and campus billing. I also helped get free menstrual products into campus bathrooms. Useful work comes in a lot of forms.",
+    tags: [
+      "Minnesota Vikings NFL Camp",
+      "Campus Advocacy",
+      "Operations Logistics",
+      "Facilities Management",
+    ],
+  },
 ];
 
 const compiledTimelineSimplified = rawTimelineSimplified.map((item) => ({
@@ -152,9 +218,10 @@ const compiledTimelineSimplified = rawTimelineSimplified.map((item) => ({
 export const dictionary = {
   detailed: {
     bio: {
-      title: "Pragmatic Problem Solver & Systems Engineer",
-      subtitle: "Clinical Data • Interactive Graphics • High-Stakes Troubleshooting",
-      description: "I build software that doesn't break, and make complex systems actually fun to use. My background spans translating 150-page FDA clinical trial protocols into bulletproof databases at Mayo Clinic, serving as the university operations liaison for the Minnesota Vikings Training Camp, advocating for campus health improvements at Mankato, and 3D printing participant MRI brain models. On side projects, I build fast browser engines, canvas games, and civic tools—including the Laser Loon design that became a Minnesota cultural icon and raised $13.5k for public libraries. When I'm off-screen, I do emergency medical triage on alpine ski patrol."
+      title: "Hi, I’m Fred.",
+      subtitle: "Clinical research • Software • Side projects",
+      description:
+        "I work with clinical data and build tools for the parts that are harder than they ought to be. My route here includes Mayo Clinic research, Vikings training camp logistics, and 3D-printed brain models. Outside work, there’s ski patrol, browser games, and Laser Loon, a flag design that helped raise $13.5k for public libraries. It’s been an interesting set of tabs to have open.",
     },
     domains: {
       title: "Core Toolkit & Domains",
@@ -162,36 +229,44 @@ export const dictionary = {
         {
           id: "01",
           title: "Clinical Data Systems",
-          tooltip: "Translating complex 150-page protocols into validated eCRFs, automated edit checks, and FDA-compliant datasets.",
-          description: "Translating dense 150-page clinical trial protocols into relational schemas and dynamic eCRFs so clinicians don't enter bad data."
+          tooltip:
+            "Clinical forms, edit checks, and data structures based on study protocols.",
+          description:
+            "I turn study protocols into eCRFs, database schemas, and validation rules that help catch inconsistent data.",
         },
         {
           id: "02",
           title: "Interactive Canvas Physics",
-          tooltip: "Crafting 60FPS canvas simulations, raycasting engines, and interactive deductive logic assistants from scratch.",
-          description: "Crafting 60FPS browser simulations, retro roguelikes, and interactive logic puzzles from scratch with zero framework bloat."
+          tooltip:
+            "Canvas games, raycasting, and interactive logic tools built for the browser.",
+          description:
+            "I build browser games and visual tools to explore rendering, physics, and logic. Making them playable is half the fun.",
         },
         {
           id: "03",
           title: "Civic Tech & Laser Loon",
-          tooltip: "Laser Loon CC0 viral campaign ($13.5k library fundraiser, NYT/WaPo coverage) and grassroots tech advocacy.",
-          description: "Designing open-source tools and viral creative projects—like the Laser Loon flag design that raised $13.5k+ for public libraries."
+          tooltip: "Open artwork and community projects, including Laser Loon.",
+          description:
+            "I made Laser Loon for the Minnesota flag redesign and shared the artwork. The project helped raise $13.5k for public libraries.",
         },
         {
           id: "04",
           title: "Ski Patrol & Emergency Triage",
-          tooltip: "Credentialed Alpine Ski Patroller (OEC/OET certified) performing rapid triage in high-stakes environments.",
-          description: "Applying rapid medical triage and calm decision-making from Alpine Ski Patrolling to build fault-tolerant, resilient software."
-        }
-      ]
+          tooltip:
+            "OEC/OET-certified Alpine Ski Patroller providing emergency care on the slopes.",
+          description:
+            "I volunteer on Alpine Ski Patrol. It’s a very practical reminder to stay calm, ask good questions, and help the person in front of you.",
+        },
+      ],
     },
-    timeline: compiledTimelineDetailed
+    timeline: compiledTimelineDetailed,
   },
   simplified: {
     bio: {
-      title: "Problem Solver & Systems Engineer",
-      subtitle: "Web Apps • Clinical Systems • Interactive Tools",
-      description: "I'm a builder and problem solver who likes making things work smoothly. From managing clinical research databases and 3D printing brain models at Mayo Clinic to coordinating logistics for NFL training camps and creating viral community projects, I specialize in taking complicated, messy challenges and turning them into simple, reliable software."
+      title: "Hi, I’m Fred.",
+      subtitle: "Clinical research • Useful tools • Occasional lasers",
+      description:
+        "I work with clinical data, build software, and follow interesting questions into side projects. That has led to research databases, 3D-printed brains, browser games, and a laser-eyed loon that helped raise money for public libraries.",
     },
     domains: {
       title: "What I Build (Simplified)",
@@ -199,30 +274,36 @@ export const dictionary = {
         {
           id: "01",
           title: "Clinical Databases",
-          tooltip: "Designing electronic forms and automated checks to ensure regulatory-compliant, accurate data entry.",
-          description: "Building clear digital medical forms with automatic checks that catch entry mistakes in real time."
+          tooltip:
+            "Electronic research forms and checks for missing or inconsistent data.",
+          description:
+            "I design clinical forms and checks that help people catch missing or inconsistent answers.",
         },
         {
           id: "02",
           title: "Interactive Web Graphics",
-          tooltip: "Developing lightweight web animations and responsive 2D guides from scratch.",
-          description: "Developing fast, smooth, and interactive web animations and visual guides from scratch."
+          tooltip:
+            "Games, animations, and interactive tools that run in your browser.",
+          description:
+            "I make browser games, animations, and visual tools you can try for yourself.",
         },
         {
           id: "03",
           title: "Civic Open Source",
-          tooltip: "Creating open-source software and tools that benefit public libraries and local organizations.",
-          description: "Building open-source public software and creative awareness campaigns that raised over $13,500 for local public libraries."
+          tooltip: "Code and artwork shared for other people to use.",
+          description:
+            "I share code and artwork people can use, including Laser Loon, which helped raise $13,500 for public libraries.",
         },
         {
           id: "04",
           title: "Emergency Triage & Safety",
-          tooltip: "Applying situational clarity and rapid medical decision-making to build secure, fault-tolerant systems.",
-          description: "Using real-world emergency response and triage experience from ski patrol to build reliable, high-availability software."
-        }
-      ]
+          tooltip:
+            "Emergency care and practical decision-making on ski patrol.",
+          description:
+            "I volunteer on ski patrol, providing emergency care and helping people get safely off the hill.",
+        },
+      ],
     },
-    timeline: compiledTimelineSimplified
-  }
+    timeline: compiledTimelineSimplified,
+  },
 };
-

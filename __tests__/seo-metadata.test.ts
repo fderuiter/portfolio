@@ -45,8 +45,14 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
   });
 
   it("getUnifiedGraphSchema generates interconnected @graph with valid node IDs", async () => {
-    const { getUnifiedGraphSchema, getPersonNode, getWebsiteNode, getWebPageNode, getBreadcrumbNode } = await import("@/lib/seo");
-    
+    const {
+      getUnifiedGraphSchema,
+      getPersonNode,
+      getWebsiteNode,
+      getWebPageNode,
+      getBreadcrumbNode,
+    } = await import("@/lib/seo");
+
     const pageUrl = `${SITE_BASE_URL}/crf`;
     const graphStr = getUnifiedGraphSchema([
       getPersonNode(),
@@ -55,9 +61,18 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
         name: "CRF Studio: Clinical Form Designer",
         description: "Design clinical trial CRFs.",
         url: "/crf",
-        breadcrumbs: [{ name: "Home", url: "/" }, { name: "CRF Studio", url: "/crf" }],
+        breadcrumbs: [
+          { name: "Home", url: "/" },
+          { name: "CRF Studio", url: "/crf" },
+        ],
       }),
-      getBreadcrumbNode([{ name: "Home", url: "/" }, { name: "CRF Studio", url: "/crf" }], pageUrl),
+      getBreadcrumbNode(
+        [
+          { name: "Home", url: "/" },
+          { name: "CRF Studio", url: "/crf" },
+        ],
+        pageUrl
+      ),
     ]);
 
     expect(graphStr).not.toContain("<script");
@@ -66,10 +81,18 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     expect(Array.isArray(parsed["@graph"])).toBe(true);
     expect(parsed["@graph"]).toHaveLength(4);
 
-    const person = parsed["@graph"].find((n: Record<string, unknown>) => n["@type"] === "Person");
-    const website = parsed["@graph"].find((n: Record<string, unknown>) => n["@type"] === "WebSite");
-    const webpage = parsed["@graph"].find((n: Record<string, unknown>) => n["@type"] === "WebPage");
-    const breadcrumb = parsed["@graph"].find((n: Record<string, unknown>) => n["@type"] === "BreadcrumbList");
+    const person = parsed["@graph"].find(
+      (n: Record<string, unknown>) => n["@type"] === "Person"
+    );
+    const website = parsed["@graph"].find(
+      (n: Record<string, unknown>) => n["@type"] === "WebSite"
+    );
+    const webpage = parsed["@graph"].find(
+      (n: Record<string, unknown>) => n["@type"] === "WebPage"
+    );
+    const breadcrumb = parsed["@graph"].find(
+      (n: Record<string, unknown>) => n["@type"] === "BreadcrumbList"
+    );
 
     expect(person["@id"]).toBe(`${SITE_BASE_URL}/#person`);
     expect(website["@id"]).toBe(`${SITE_BASE_URL}/#website`);
@@ -82,13 +105,19 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
 
   it("getVisualArtworkSchema generates rich VisualArtwork and MediaObject schema for Laser Loon", async () => {
     const { getVisualArtworkSchema } = await import("@/lib/seo");
-    
+
     const raw = getVisualArtworkSchema({
       name: "The Laser Loon (Minnesota State Flag Submission F277)",
-      description: "Open vector asset hub and graphic design case study for the Laser Loon.",
+      description:
+        "Open vector asset hub and graphic design case study for the Laser Loon.",
       url: "/work/laser-loon",
       imageUrl: `${SITE_BASE_URL}/images/laser-loon-preview.png`,
-      formats: ["image/svg+xml", "application/illustrator", "application/pdf", "image/png"],
+      formats: [
+        "image/svg+xml",
+        "application/illustrator",
+        "application/pdf",
+        "image/png",
+      ],
       license: "https://creativecommons.org/licenses/by/4.0/",
     });
 
@@ -102,7 +131,6 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     expect(parsed.encodingFormat).toContain("image/svg+xml");
     expect(parsed.encodingFormat).toContain("application/illustrator");
   });
-
 
   it("getWebApplicationSchema generates valid WebApplication schema for games", () => {
     const raw = getWebApplicationSchema({
@@ -133,7 +161,9 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     expect(parsed.itemListElement).toHaveLength(3);
     expect(parsed.itemListElement[0].position).toBe(1);
     expect(parsed.itemListElement[0].name).toBe("Home");
-    expect(parsed.itemListElement[2].item).toBe(`${SITE_BASE_URL}/arcade/laser-loon`);
+    expect(parsed.itemListElement[2].item).toBe(
+      `${SITE_BASE_URL}/arcade/laser-loon`
+    );
   });
 
   it("getCollectionPageSchema generates structured CollectionPage with item list", () => {
@@ -142,7 +172,11 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
       "Interactive games",
       "/arcade",
       [
-        { name: "Laser Loon", url: "/arcade/laser-loon", description: "Bug shooter" },
+        {
+          name: "Laser Loon",
+          url: "/arcade/laser-loon",
+          description: "Bug shooter",
+        },
         { name: "Quasi-Puzzler", url: "/arcade/quasi-puzzler" },
       ]
     );
@@ -196,7 +230,12 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
       // Verify explicit OpenGraph image array
       expect(meta.openGraph?.images).toBeDefined();
       expect(Array.isArray(meta.openGraph?.images)).toBe(true);
-      const ogImages = meta.openGraph?.images as Array<{ url: string; width?: number; height?: number; alt?: string }>;
+      const ogImages = meta.openGraph?.images as Array<{
+        url: string;
+        width?: number;
+        height?: number;
+        alt?: string;
+      }>;
       expect(ogImages.length).toBeGreaterThan(0);
       expect(ogImages[0].url).toContain(`${config.path}/opengraph-image`);
       expect(ogImages[0].width).toBe(1200);
@@ -213,12 +252,17 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
 
   it("contact route layout exports dedicated page metadata with title, description, and social images", async () => {
     const { metadata } = await import("@/app/contact/layout");
-    expect(metadata.title).toBe("Contact & Direct Inquiries | Frederick de Ruiter");
-    expect(metadata.description).toContain("direct communication channels");
-    expect(metadata.openGraph?.title).toContain("Contact & Direct Inquiries");
+    expect(metadata.title).toBe("Contact Fred | Frederick de Ruiter");
+    expect(metadata.description).toContain("Send Fred de Ruiter a note");
+    expect(metadata.openGraph?.title).toContain("Contact Fred");
     expect(metadata.openGraph?.description).toBe(metadata.description);
 
-    const ogImages = metadata.openGraph?.images as Array<{ url: string; width?: number; height?: number; alt?: string }>;
+    const ogImages = metadata.openGraph?.images as Array<{
+      url: string;
+      width?: number;
+      height?: number;
+      alt?: string;
+    }>;
     expect(ogImages).toBeDefined();
     expect(ogImages[0].url).toContain("/contact/opengraph-image");
     expect(ogImages[0].width).toBe(1200);
@@ -229,15 +273,13 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     expect(twImages[0]).toContain("/contact/opengraph-image");
   });
 
-  it("enforces front-loaded SERP length bounds, active CTR verbs, and long-tail keywords across all route configs", () => {
+  it("enforces SERP length bounds and descriptive keywords across all route configs", () => {
     const routeKeys = Object.keys(ROUTE_METADATA_CONFIGS);
     expect(routeKeys.length).toBeGreaterThanOrEqual(15);
 
-    const activeVerbRegex = /^(Design|Explore|Pilot|Solve|Survive|Master|Balance|Construct|Navigate|Schedule|Inspect|Unlock|Access|Download)/;
-
     for (const key of routeKeys) {
       const config = ROUTE_METADATA_CONFIGS[key];
-      
+
       // Title must be front-loaded, concise, and bounded between 25 and 60 characters
       expect(
         config.title.length,
@@ -255,17 +297,10 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
         `Route config "${key}" description is ${config.description.length} chars (must be <= 160): "${config.description}"`
       ).toBeLessThanOrEqual(160);
 
-      // Description must start with an active CTR verb
-      expect(
-        config.description,
-        `Route config "${key}" description must start with an active action verb: "${config.description}"`
-      ).toMatch(activeVerbRegex);
-
       // Keywords must contain >= 3 long-tail phrases
       expect(config.keywords?.length || 0).toBeGreaterThanOrEqual(3);
     }
   });
-
 
   it("robots configuration allows indexing and references sitemap in production", () => {
     const originalVercelEnv = process.env.VERCEL_ENV;
@@ -273,10 +308,12 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
       process.env.VERCEL_ENV = "production";
       const result = robots();
       expect(result.rules).toBeDefined();
-      expect(Array.isArray(result.rules) ? result.rules[0] : result.rules).toEqual({
+      expect(
+        Array.isArray(result.rules) ? result.rules[0] : result.rules
+      ).toEqual({
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/_next/", "/admin", "/admin/"]
+        disallow: ["/api/", "/_next/", "/admin", "/admin/"],
       });
       expect(result.sitemap).toBe(`${resolveBaseUrl()}/sitemap.xml`);
     } finally {
@@ -290,9 +327,11 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
       process.env.VERCEL_ENV = "preview";
       const result = robots();
       expect(result.rules).toBeDefined();
-      expect(Array.isArray(result.rules) ? result.rules[0] : result.rules).toEqual({
+      expect(
+        Array.isArray(result.rules) ? result.rules[0] : result.rules
+      ).toEqual({
         userAgent: "*",
-        disallow: "/"
+        disallow: "/",
       });
       expect(result.sitemap).toBeUndefined();
     } finally {
@@ -326,7 +365,9 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     for (const config of Object.values(ROUTE_METADATA_CONFIGS)) {
       if (config.path === "/offline") continue;
       const expectedUrl = `${expectedBase}${config.path.startsWith("/") ? config.path : "/" + config.path}`;
-      expect(urls, `Sitemap missing route: ${expectedUrl}`).toContain(expectedUrl);
+      expect(urls, `Sitemap missing route: ${expectedUrl}`).toContain(
+        expectedUrl
+      );
     }
   });
 
@@ -342,7 +383,9 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     expect(map1.length).toBe(map2.length);
 
     // Verify static routes maintain consistent timestamps matching source file modification times
-    const staticEntries = map1.filter((entry) => !entry.url.includes("/case-studies/"));
+    const staticEntries = map1.filter(
+      (entry) => !entry.url.includes("/case-studies/")
+    );
     for (const entry of staticEntries) {
       const match = map2.find((e) => e.url === entry.url);
       expect(match).toBeDefined();
@@ -353,24 +396,34 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     const rootEntry = map1.find((e) => e.url === resolveBaseUrl());
     expect(rootEntry).toBeDefined();
     const rootStat = fs.statSync(path.resolve(process.cwd(), "app/page.tsx"));
-    const rootEntryDate = rootEntry?.lastModified instanceof Date
-      ? rootEntry.lastModified
-      : new Date(rootEntry?.lastModified ?? 0);
+    const rootEntryDate =
+      rootEntry?.lastModified instanceof Date
+        ? rootEntry.lastModified
+        : new Date(rootEntry?.lastModified ?? 0);
     expect(rootEntryDate.getTime()).toBe(rootStat.mtime.getTime());
   });
 
   it("fallback and mock content items retain explicit pre-defined update dates rather than generating execution timestamps", async () => {
     const map = await sitemap();
-    const caseStudyEntries = map.filter((entry) => entry.url.includes("/case-studies/"));
+    const caseStudyEntries = map.filter((entry) =>
+      entry.url.includes("/case-studies/")
+    );
 
     expect(caseStudyEntries.length).toBeGreaterThan(0);
 
     for (const entry of caseStudyEntries) {
       const slug = entry.url.split("/case-studies/")[1];
-      const fallbackMatch = FALLBACK_CASE_STUDIES.find((cs) => cs.slug === slug);
+      const fallbackMatch = FALLBACK_CASE_STUDIES.find(
+        (cs) => cs.slug === slug
+      );
       if (fallbackMatch && entry.lastModified) {
-        const entryDate = entry.lastModified instanceof Date ? entry.lastModified : new Date(entry.lastModified);
-        expect(entryDate.toISOString()).toBe(fallbackMatch.updated_at.toISOString());
+        const entryDate =
+          entry.lastModified instanceof Date
+            ? entry.lastModified
+            : new Date(entry.lastModified);
+        expect(entryDate.toISOString()).toBe(
+          fallbackMatch.updated_at.toISOString()
+        );
       }
     }
   });
@@ -444,7 +497,7 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
 
     for (const content of [appIconContent, publicFaviconContent]) {
       expect(content).toContain("<svg");
-      expect(content).toContain("id=\"fd-grad\"");
+      expect(content).toContain('id="fd-grad"');
       expect(content).toContain("glyph-stem");
       expect(content).toContain("telemetry-dot");
       expect(content).toContain("</svg>");
@@ -454,11 +507,20 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
   it("custom branded favicon.ico, apple-touch-icon, and PWA icons exist as binary assets", () => {
     const appFaviconPath = path.resolve(process.cwd(), "app/favicon.ico");
     const publicFaviconPath = path.resolve(process.cwd(), "public/favicon.ico");
-    const appleTouchPath = path.resolve(process.cwd(), "public/apple-touch-icon.png");
+    const appleTouchPath = path.resolve(
+      process.cwd(),
+      "public/apple-touch-icon.png"
+    );
     const icon192Path = path.resolve(process.cwd(), "public/icon-192.png");
     const icon512Path = path.resolve(process.cwd(), "public/icon-512.png");
 
-    for (const filePath of [appFaviconPath, publicFaviconPath, appleTouchPath, icon192Path, icon512Path]) {
+    for (const filePath of [
+      appFaviconPath,
+      publicFaviconPath,
+      appleTouchPath,
+      icon192Path,
+      icon512Path,
+    ]) {
       expect(fs.existsSync(filePath)).toBe(true);
       const stat = fs.statSync(filePath);
       expect(stat.size).toBeGreaterThan(500);
@@ -470,7 +532,8 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
   });
 
   it("createSocialImageResponse generates valid ImageResponse with 1200x630 dimensions and Edge CDN cache headers", async () => {
-    const { createSocialImageResponse, OG_IMAGE_SIZE, OG_IMAGE_CONTENT_TYPE } = await import("@/lib/og-image");
+    const { createSocialImageResponse, OG_IMAGE_SIZE, OG_IMAGE_CONTENT_TYPE } =
+      await import("@/lib/og-image");
     expect(OG_IMAGE_SIZE).toEqual({ width: 1200, height: 630 });
     expect(OG_IMAGE_CONTENT_TYPE).toBe("image/png");
 
@@ -491,8 +554,10 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
   });
 
   it("root opengraph-image and twitter-image generators return valid responses", async () => {
-    const { default: rootOgImage, size: ogSize } = await import("@/app/opengraph-image");
-    const { default: rootTwitterImage, size: twitterSize } = await import("@/app/twitter-image");
+    const { default: rootOgImage, size: ogSize } =
+      await import("@/app/opengraph-image");
+    const { default: rootTwitterImage, size: twitterSize } =
+      await import("@/app/twitter-image");
 
     expect(ogSize).toEqual({ width: 1200, height: 630 });
     expect(twitterSize).toEqual({ width: 1200, height: 630 });
@@ -509,12 +574,22 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
   it("interactive hub opengraph-image generators return valid responses", async () => {
     const { default: arcadeOg } = await import("@/app/arcade/opengraph-image");
     const { default: proofOg } = await import("@/app/proof/opengraph-image");
-    const { default: simulatorOg } = await import("@/app/simulator/opengraph-image");
+    const { default: simulatorOg } =
+      await import("@/app/simulator/opengraph-image");
     const { default: stackOg } = await import("@/app/stack/opengraph-image");
-    const { default: scheduleOg } = await import("@/app/schedule/opengraph-image");
-    const { default: caseStudiesOg } = await import("@/app/case-studies/opengraph-image");
+    const { default: scheduleOg } =
+      await import("@/app/schedule/opengraph-image");
+    const { default: caseStudiesOg } =
+      await import("@/app/case-studies/opengraph-image");
 
-    for (const generator of [arcadeOg, proofOg, simulatorOg, stackOg, scheduleOg, caseStudiesOg]) {
+    for (const generator of [
+      arcadeOg,
+      proofOg,
+      simulatorOg,
+      stackOg,
+      scheduleOg,
+      caseStudiesOg,
+    ]) {
       const res = generator();
       expect(res).toBeDefined();
       expect(res.headers.get("content-type")).toContain("image/png");
@@ -525,24 +600,59 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
   it("all 9 targeted showcase, asset hub, and arcade route social preview cards exist and return edge-cached image responses", async () => {
     const { default: crfOg } = await import("@/app/crf/opengraph-image");
     const { default: neuroOg } = await import("@/app/neuro/opengraph-image");
-    const { default: clinicalChaosOg } = await import("@/app/arcade/clinical-chaos/opengraph-image");
-    const { default: garminWatchOg } = await import("@/app/arcade/garmin-watch/opengraph-image");
-    const { default: laserLoonOg } = await import("@/app/arcade/laser-loon/opengraph-image");
-    const { default: laserLoonWorkOg } = await import("@/app/work/laser-loon/opengraph-image");
-    const { default: quasiPuzzlerOg } = await import("@/app/arcade/quasi-puzzler/opengraph-image");
-    const { default: retroLabyrinthOg } = await import("@/app/arcade/retro-labyrinth/opengraph-image");
-    const { default: workingWithDuckOg } = await import("@/app/arcade/working-with-duck/opengraph-image");
+    const { default: clinicalChaosOg } =
+      await import("@/app/arcade/clinical-chaos/opengraph-image");
+    const { default: garminWatchOg } =
+      await import("@/app/arcade/garmin-watch/opengraph-image");
+    const { default: laserLoonOg } =
+      await import("@/app/arcade/laser-loon/opengraph-image");
+    const { default: laserLoonWorkOg } =
+      await import("@/app/work/laser-loon/opengraph-image");
+    const { default: quasiPuzzlerOg } =
+      await import("@/app/arcade/quasi-puzzler/opengraph-image");
+    const { default: retroLabyrinthOg } =
+      await import("@/app/arcade/retro-labyrinth/opengraph-image");
+    const { default: workingWithDuckOg } =
+      await import("@/app/arcade/working-with-duck/opengraph-image");
 
     const targetedGenerators = [
       { name: "/crf", generator: crfOg, routeKey: "crf" },
       { name: "/neuro", generator: neuroOg, routeKey: "neuro" },
-      { name: "/arcade/clinical-chaos", generator: clinicalChaosOg, routeKey: "clinicalChaos" },
-      { name: "/arcade/garmin-watch", generator: garminWatchOg, routeKey: "garminWatch" },
-      { name: "/arcade/laser-loon", generator: laserLoonOg, routeKey: "laserLoon" },
-      { name: "/work/laser-loon", generator: laserLoonWorkOg, routeKey: "laserLoonCaseStudy" },
-      { name: "/arcade/quasi-puzzler", generator: quasiPuzzlerOg, routeKey: "quasiPuzzler" },
-      { name: "/arcade/retro-labyrinth", generator: retroLabyrinthOg, routeKey: "retroLabyrinth" },
-      { name: "/arcade/working-with-duck", generator: workingWithDuckOg, routeKey: "workingWithDuck" },
+      {
+        name: "/arcade/clinical-chaos",
+        generator: clinicalChaosOg,
+        routeKey: "clinicalChaos",
+      },
+      {
+        name: "/arcade/garmin-watch",
+        generator: garminWatchOg,
+        routeKey: "garminWatch",
+      },
+      {
+        name: "/arcade/laser-loon",
+        generator: laserLoonOg,
+        routeKey: "laserLoon",
+      },
+      {
+        name: "/work/laser-loon",
+        generator: laserLoonWorkOg,
+        routeKey: "laserLoonCaseStudy",
+      },
+      {
+        name: "/arcade/quasi-puzzler",
+        generator: quasiPuzzlerOg,
+        routeKey: "quasiPuzzler",
+      },
+      {
+        name: "/arcade/retro-labyrinth",
+        generator: retroLabyrinthOg,
+        routeKey: "retroLabyrinth",
+      },
+      {
+        name: "/arcade/working-with-duck",
+        generator: workingWithDuckOg,
+        routeKey: "workingWithDuck",
+      },
     ];
 
     expect(targetedGenerators).toHaveLength(9);
@@ -576,7 +686,15 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     });
 
     it("all arcade game catalog entries match corresponding ROUTE_METADATA_CONFIGS paths and titles", () => {
-      const arcadeRouteKeys = ["quasiPuzzler", "laserLoon", "garminWatch", "retroLabyrinth", "workingWithDuck", "clinicalChaos", "memeVault"];
+      const arcadeRouteKeys = [
+        "quasiPuzzler",
+        "laserLoon",
+        "garminWatch",
+        "retroLabyrinth",
+        "workingWithDuck",
+        "clinicalChaos",
+        "memeVault",
+      ];
 
       for (const key of arcadeRouteKeys) {
         const routeConfig = ROUTE_METADATA_CONFIGS[key];
@@ -615,9 +733,14 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
 
       for (const key of keys) {
         const config = ROUTE_METADATA_CONFIGS[key];
-        expect(config.inLanguage, `Route "${key}" missing inLanguage`).toBe("en-US");
+        expect(config.inLanguage, `Route "${key}" missing inLanguage`).toBe(
+          "en-US"
+        );
         expect(config.locale, `Route "${key}" missing locale`).toBe("en-US");
-        expect(config.isAccessibleForFree, `Route "${key}" missing isAccessibleForFree`).toBe(true);
+        expect(
+          config.isAccessibleForFree,
+          `Route "${key}" missing isAccessibleForFree`
+        ).toBe(true);
       }
     });
 
@@ -651,16 +774,27 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
       expect(website.inLanguage).toBe("en-US");
       expect(website.isAccessibleForFree).toBe(true);
 
-      const webpage = getWebPageNode({ name: "Test", description: "Desc", url: "/test" });
+      const webpage = getWebPageNode({
+        name: "Test",
+        description: "Desc",
+        url: "/test",
+      });
       expect(webpage.inLanguage).toBe("en-US");
       expect(webpage.isAccessibleForFree).toBe(true);
 
-      const breadcrumbNode = getBreadcrumbNode([{ name: "Home", url: "/" }], "/test");
+      const breadcrumbNode = getBreadcrumbNode(
+        [{ name: "Home", url: "/" }],
+        "/test"
+      );
       expect(breadcrumbNode.inLanguage).toBe("en-US");
       expect(breadcrumbNode.isAccessibleForFree).toBe(true);
 
       const artwork = JSON.parse(
-        getVisualArtworkSchema({ name: "Art", description: "Desc", url: "/art" })
+        getVisualArtworkSchema({
+          name: "Art",
+          description: "Desc",
+          url: "/art",
+        })
       );
       expect(artwork.inLanguage).toBe("en-US");
       expect(artwork.isAccessibleForFree).toBe(true);
@@ -711,7 +845,8 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     });
 
     it("getUnifiedGraphSchema automatically enriches all graph nodes with inLanguage and isAccessibleForFree", async () => {
-      const { getUnifiedGraphSchema, getPersonNode, getWebsiteNode } = await import("@/lib/seo");
+      const { getUnifiedGraphSchema, getPersonNode, getWebsiteNode } =
+        await import("@/lib/seo");
 
       // Custom node without explicit language/access fields
       const customNode = {
@@ -720,7 +855,11 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
         name: "Custom Entity",
       };
 
-      const rawGraph = getUnifiedGraphSchema([getPersonNode(), getWebsiteNode(), customNode]);
+      const rawGraph = getUnifiedGraphSchema([
+        getPersonNode(),
+        getWebsiteNode(),
+        customNode,
+      ]);
       const parsed = JSON.parse(rawGraph);
 
       expect(parsed["@graph"]).toHaveLength(3);
@@ -731,7 +870,3 @@ describe("SEO Architecture & JSON-LD Schemas", () => {
     });
   });
 });
-
-
-
-

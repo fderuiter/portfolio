@@ -53,9 +53,7 @@ describe("ProjectTeaserGrid Component Suite", () => {
     );
     expect(articles.length).toBe(3);
 
-    expect(articles[0]?.textContent).toContain(
-      "Clinical Data Standards Engine"
-    );
+    expect(articles[0]?.textContent).toContain("Clinical Data Mapper");
     expect(articles[1]?.textContent).toContain("Cadence Clinical");
     expect(articles[2]?.textContent).toContain("iMednet Python SDK");
 
@@ -66,9 +64,7 @@ describe("ProjectTeaserGrid Component Suite", () => {
     // Should contain link to all case studies
     const allLink = container.querySelector('a[href="/case-studies"]');
     expect(allLink).not.toBeNull();
-    expect(allLink?.textContent).toContain(
-      "View All Architectural Case Studies"
-    );
+    expect(allLink?.textContent).toContain("View All Case Studies");
   });
 
   it("renders individual case study navigation links", async () => {

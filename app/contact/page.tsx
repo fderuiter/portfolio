@@ -18,7 +18,10 @@ import { NewsletterForm } from "@/components/NewsletterForm";
 
 export default function ContactPage() {
   return (
-    <PageLayout variant="standard" className="bg-zinc-950 text-foreground relative overflow-hidden pt-28 pb-20">
+    <PageLayout
+      variant="standard"
+      className="bg-zinc-950 text-foreground relative overflow-hidden pt-28 pb-20"
+    >
       {/* Ambient Atmospheric Glows */}
       <div className="absolute top-24 left-1/2 -translate-x-1/2 w-[650px] h-[320px] bg-brand-cyan/5 blur-[140px] pointer-events-none -z-10 rounded-full" />
       <div className="absolute top-96 right-1/4 w-[450px] h-[280px] bg-amber-500/5 blur-[120px] pointer-events-none -z-10 rounded-full" />
@@ -27,14 +30,11 @@ export default function ContactPage() {
         {/* Navigation Breadcrumb */}
         <div className="w-full flex items-center justify-between mb-8 gap-4 flex-wrap">
           <Breadcrumbs
-            items={[
-              { label: "Home", href: "/" },
-              { label: "Contact & Inquiries" },
-            ]}
+            items={[{ label: "Home", href: "/" }, { label: "Contact" }]}
           />
           <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Direct Relay Active</span>
+            <span>Say hello</span>
           </div>
         </div>
 
@@ -42,13 +42,14 @@ export default function ContactPage() {
         <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-amber-500/10 border border-amber-500/20 text-xs font-mono text-amber-300 uppercase tracking-widest">
             <IconMessageCode className="w-3.5 h-3.5" />
-            <span>Direct Channel // Encrypted Relay</span>
+            <span>A NOTE TO FRED</span>
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white mb-4 heading-editorial">
-            Let&#39;s Start a Conversation
+            Let’s talk.
           </h1>
           <p className="text-sm sm:text-base font-mono text-zinc-400 leading-relaxed">
-            Have a systems challenge, a consulting opportunity, or want to discuss clinical software and formal methods? Send a direct message below.
+            Have something you want to build, a role I might fit, or a question
+            about a project? I’d like to hear it.
           </p>
         </div>
 
@@ -58,10 +59,10 @@ export default function ContactPage() {
           <div className="lg:col-span-7 bg-[#13151a]/80 border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
             <div className="mb-6 border-b border-white/5 pb-4">
               <h2 className="text-lg font-mono font-bold text-white mb-1">
-                Send a Direct Inquiry
+                Send me a message
               </h2>
               <p className="text-xs font-mono text-zinc-400">
-                Delivered straight to my inbox via authenticated transactional dispatch.
+                This goes to my inbox. The ordinary email kind.
               </p>
             </div>
             <ContactForm />
@@ -80,16 +81,17 @@ export default function ContactPage() {
                 </span>
               </div>
               <h3 className="text-sm font-mono font-bold text-white mb-1">
-                Prefer a Live Technical Sync?
+                More of a talking person?
               </h3>
               <p className="text-xs font-mono text-zinc-400 mb-4 leading-relaxed">
-                Book a 30-minute architecture review, candidate sync, or casual conversation directly on Google Calendar.
+                Pick a time for a project chat, an introduction, or a second
+                opinion on something tricky.
               </p>
               <Link
                 href="/schedule"
                 className="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-mono font-bold text-xs rounded-xl transition-all shadow-md active:scale-[0.98]"
               >
-                <span>Schedule 1:1 Video Sync</span>
+                <span>Book a Chat</span>
                 <IconExternalLink className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -100,7 +102,7 @@ export default function ContactPage() {
             {/* Verified Network Shortcuts */}
             <div className="p-4 bg-zinc-900/40 border border-zinc-800 rounded-xl space-y-2">
               <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 block mb-2">
-                External Verification Channels
+                You can also find me here
               </span>
               <div className="flex flex-col sm:flex-row gap-2">
                 <a
@@ -127,7 +129,10 @@ export default function ContactPage() {
             {/* Privacy & Anti-Spam Notice */}
             <div className="flex items-center gap-2 px-3 py-2 text-[11px] font-mono text-zinc-400">
               <IconShieldLock className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Zero tracking cookies &bull; Rate-limited &bull; Encrypted</span>
+              <span>
+                Please keep patient details and other sensitive information out
+                of your message.
+              </span>
             </div>
           </div>
         </div>
@@ -135,16 +140,16 @@ export default function ContactPage() {
         {/* Sequential Next / Prev Navigation */}
         <NextPrevNav
           prev={{
-            title: "Schedule 1:1 Sync",
+            title: "Book a Chat",
             href: "/schedule",
-            label: "Direct Calendar",
+            label: "Find a Time",
             tag: "30 Min Meeting",
           }}
           next={{
-            title: "Case Studies Dossier",
+            title: "Project Writeups",
             href: "/case-studies",
             label: "Systems & Architecture",
-            tag: "Technical Retrospectives",
+            tag: "How They Work",
           }}
           backToHub={{
             title: "Return to Portfolio",

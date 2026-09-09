@@ -2,7 +2,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Configure React 19 act environment
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -21,7 +23,12 @@ import {
   isVaultUnlocked,
   setVaultUnlocked,
 } from "@/lib/meme-data";
-import { playMemeSound, isSoundAllowed, getMemeSoundDuration, type MemeSoundType } from "@/lib/meme-audio";
+import {
+  playMemeSound,
+  isSoundAllowed,
+  getMemeSoundDuration,
+  type MemeSoundType,
+} from "@/lib/meme-audio";
 import { MemeVaultClient } from "@/components/arcade/MemeVaultClient";
 import { FooterStatusTicker } from "@/components/FooterStatusTicker";
 import { RetroChaosOverlay } from "@/components/RetroChaosOverlay";
@@ -68,7 +75,7 @@ describe("Meme Data & ASCII Generator Invariants", () => {
     expect(cowsay).toContain("(oo)\\_______");
 
     const duck = ASCII_DUCK();
-    expect(duck).toContain(" __/_  `.  .-\"\"\"-.");
+    expect(duck).toContain(' __/_  `.  .-"""-.');
     expect(duck).toContain("___Y");
     expect(duck).toContain("(_,___/...-` (_/_/");
 
@@ -168,7 +175,9 @@ describe("Meme Web Audio Synthesizer", () => {
       getChannelData: vi.fn(() => new Float32Array(4410)),
     };
 
-    const mockAudioContext = vi.fn().mockImplementation(function (this: Record<string, unknown>) {
+    const mockAudioContext = vi.fn().mockImplementation(function (
+      this: Record<string, unknown>
+    ) {
       this.state = "running";
       this.currentTime = 0;
       this.sampleRate = 44100;
@@ -272,8 +281,10 @@ describe("Meme UI Components Rendering", () => {
       );
     });
 
-    expect(container.textContent).toContain("Live Telemetry:");
-    const petButton = container.querySelector("button[aria-label='Pet Duck the puppy']");
+    expect(container.textContent).toContain("Footnotes:");
+    const petButton = container.querySelector(
+      "button[aria-label='Pet Duck the puppy']"
+    );
     expect(petButton).toBeTruthy();
 
     if (petButton) {
@@ -296,12 +307,16 @@ describe("Meme UI Components Rendering", () => {
       );
     });
 
-    expect(container.textContent).toContain("Developer Soundboard & Meme Vault");
+    expect(container.textContent).toContain(
+      "Developer Soundboard & Meme Vault"
+    );
     expect(container.textContent).toContain("8-Channel Retro Soundboard");
     expect(container.textContent).toContain("Easter Egg Trophy Case");
     expect(container.textContent).toContain("Web Audio Synthesis Engine");
 
-    const soundButtons = container.querySelectorAll("button[aria-label^='Play ']");
+    const soundButtons = container.querySelectorAll(
+      "button[aria-label^='Play ']"
+    );
     expect(soundButtons.length).toBe(8);
 
     act(() => {
@@ -311,8 +326,8 @@ describe("Meme UI Components Rendering", () => {
     expect(getUnlockedAchievements()).toContain("soundboard-maestro");
 
     // Launch chaos button
-    const chaosBtn = Array.from(container.querySelectorAll("button")).find((b) =>
-      b.textContent?.includes("Launch Retro Chaos Mode")
+    const chaosBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Launch Retro Chaos Mode")
     );
     expect(chaosBtn).toBeTruthy();
     if (chaosBtn) {

@@ -240,7 +240,7 @@ export const MemeVaultClient: React.FC = () => {
   const getAsciiContent = () => {
     switch (asciiTab) {
       case "cowsay":
-        return ASCII_COWSAY("100% Type-Safe & MedTech Ready!");
+        return ASCII_COWSAY("You found the secret handshake.");
       case "duck":
         return ASCII_DUCK();
       case "loon":
@@ -320,9 +320,8 @@ export const MemeVaultClient: React.FC = () => {
           </h1>
 
           <p className="text-sm sm:text-base text-slate-300 font-sans leading-relaxed mb-6">
-            Synthesized Web Audio sound effects, collectible Easter egg
-            achievement trophies, and curated engineering &amp; CDISC compliance
-            humor from Lake Minnetonka.
+            A soundboard, hidden trophies, and jokes for people who have spent
+            too long looking at error messages.
           </p>
 
           {/* Achievement Progress Bar */}
@@ -364,8 +363,7 @@ export const MemeVaultClient: React.FC = () => {
               8-Channel Retro Soundboard
             </h2>
             <p className="text-xs text-slate-400 font-sans">
-              Pure client-side Web Audio synthesis with zero external audio
-              assets.
+              Every sound is generated in your browser.
             </p>
           </div>
         </div>
@@ -495,8 +493,8 @@ export const MemeVaultClient: React.FC = () => {
                 Engineering Meme Deck
               </h2>
               <p className="text-xs text-slate-400 font-sans">
-                Curated one-liners from distributed systems, CDISC EDC, and
-                startup life.
+                A few jokes about code, clinical data, and getting through the
+                workday.
               </p>
             </div>
           </div>
