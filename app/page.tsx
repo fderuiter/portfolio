@@ -129,7 +129,8 @@ export default async function PortfolioHomePage() {
             Selected work. Working systems.
           </h2>
           <p className="text-sm sm:text-base text-zinc-300 mb-8 sm:mb-12 text-center max-w-xl leading-relaxed">
-            Clinical software, formal logic, and browser experiments. Each
+            Featured for connected clinical-data impact: from standards mapping,
+            through trial operations, to developer-facing integration. Each
             project makes a complex idea tangible.
           </p>
 
