@@ -126,7 +126,7 @@ describe("Navigation Flow Components Suite", () => {
       expect(container.textContent).toContain("Explore the projects");
 
       // Arcade links
-      expect(container.textContent).toContain("Arcade Hub Index ↗");
+      expect(container.textContent).toContain("Arcade ↗");
       expect(container.textContent).toContain("Laser Loon");
       expect(container.textContent).toContain("Quasi-Puzzler");
       expect(container.textContent).toContain("Monkey C Mayhem");
@@ -137,7 +137,7 @@ describe("Navigation Flow Components Suite", () => {
 
       // Connect links & Newsletter
       expect(container.textContent).toContain("Book a Chat ↗");
-      expect(container.textContent).toContain("Direct Contact Form ↗");
+      expect(container.textContent).toContain("Contact ↗");
       expect(container.textContent).toContain("Project Notes");
       expect(container.textContent).not.toContain("fpderuiter@gmail.com");
 

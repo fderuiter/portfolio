@@ -157,11 +157,11 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
     const staticNavs: PaletteItem[] = [
       {
         id: "nav-work",
-        title: "Work Showcase Feed",
+        title: "Work",
         subtitle:
           "The problems, implementation choices, and lessons behind my clinical data tools, web apps, and side projects.",
         category: "navigation",
-        url: "/#case-studies",
+        url: "/case-studies",
         icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
         badge: "Showcase",
         status: "Project Collection",
@@ -200,7 +200,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
       },
       {
         id: "nav-contact",
-        title: "Contact & Direct Inquiries",
+        title: "Contact",
         subtitle:
           "Have a project, a role, or a question in mind? Send me a note or find a time to talk.",
         category: "navigation",
@@ -225,7 +225,7 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
       },
       {
         id: "nav-arcade",
-        title: "Arcade Games Hub",
+        title: "Arcade",
         subtitle:
           "A laser loon, a demanding puppy, logic puzzles, and a watch with very little memory. Try my browser games.",
         category: "navigation",
@@ -245,25 +245,6 @@ const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
           "Zero-dependency custom physics engines",
           "Synthesized 8-bit & retro audio chips",
           "Virtual D-Pad touch controls on mobile",
-        ],
-      },
-      {
-        id: "nav-case-studies",
-        title: "Engineering Case Studies Hub",
-        subtitle:
-          "Full Bento showcase of clinical data & architectural systems",
-        category: "navigation",
-        url: "/case-studies",
-        icon: <IconDirections className="w-4 h-4 text-brand-cyan" />,
-        badge: "Case Studies",
-        status: "Interactive Showcase",
-        description:
-          "Comprehensive portfolio showcase featuring interactive clinical systems, formal logic tools, live telemetry feeds, and full-stack architectural case studies.",
-        techStack: ["Next.js 16", "React 19", "Tailwind CSS", "TypeScript"],
-        highlights: [
-          "Project summaries and technical writeups",
-          "Live telemetry and commit logs",
-          "Deep architectural retrospectives",
         ],
       },
       {

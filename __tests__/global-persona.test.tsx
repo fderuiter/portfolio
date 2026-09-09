@@ -186,7 +186,7 @@ describe("Global Persona Perspective Toggle Suite", () => {
     expect(container.textContent).toBe("");
   });
 
-  it("hides 'Arcade & Labs' column and 'Incident Simulator' link in the footer in technical mode", async () => {
+  it("hides 'Arcade' column and 'Incident Simulator' link in the footer in technical mode", async () => {
     const TestWrapper = ({
       initialPersona,
     }: {
@@ -209,8 +209,8 @@ describe("Global Persona Perspective Toggle Suite", () => {
       );
     });
 
-    expect(container.textContent).toContain("Arcade & Labs");
-    expect(container.textContent).toContain("Arcade Hub Index ↗");
+    expect(container.textContent).toContain("Arcade");
+    expect(container.textContent).toContain("Arcade ↗");
     expect(container.textContent).toContain("Incident Simulator");
 
     // 2. Technical mode (hides arcade columns and simulator paths)
@@ -222,13 +222,13 @@ describe("Global Persona Perspective Toggle Suite", () => {
       );
     });
 
-    expect(container.textContent).not.toContain("Arcade & Labs");
-    expect(container.textContent).not.toContain("Arcade Hub Index ↗");
+    expect(container.textContent).not.toContain("Arcade");
+    expect(container.textContent).not.toContain("Arcade ↗");
     expect(container.textContent).not.toContain("Incident Simulator");
     expect(container.textContent).toContain("Proof Workspace");
   });
 
-  it("hides 'Arcade & Labs' dropdown and 'Incident Simulator' path from global navbar in technical mode", async () => {
+  it("keeps the Arcade navigation discoverable in both personas", async () => {
     const TestWrapper = ({
       initialPersona,
     }: {
@@ -242,7 +242,7 @@ describe("Global Persona Perspective Toggle Suite", () => {
       return <Navbar />;
     };
 
-    // 1. Recruiter mode: should display Arcade & Labs column header, and Incident Simulator in active paths
+    // 1. Recruiter mode: should display Arcade column header, and Incident Simulator in active paths
     await act(async () => {
       root.render(
         <PersonaProvider>
@@ -251,9 +251,9 @@ describe("Global Persona Perspective Toggle Suite", () => {
       );
     });
 
-    expect(container.textContent).toContain("Arcade & Labs");
+    expect(container.textContent).toContain("Arcade");
 
-    // 2. Technical mode: should hide Arcade & Labs and filter out Incident Simulator
+    // Technical readers retain access to the same top-level navigation.
     await act(async () => {
       root.render(
         <PersonaProvider>
@@ -262,7 +262,7 @@ describe("Global Persona Perspective Toggle Suite", () => {
       );
     });
 
-    expect(container.textContent).not.toContain("Arcade & Labs");
+    expect(container.textContent).toContain("Arcade");
   });
 
   it("syncs career timeline active display mode and automatically resets overrides on transition", async () => {

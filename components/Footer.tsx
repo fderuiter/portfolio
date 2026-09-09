@@ -126,7 +126,7 @@ export const Footer: React.FC = () => {
             <div className="space-y-4">
               <span className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
                 <IconSparkles className="w-3.5 h-3.5 text-brand-cyan" />
-                Arcade &amp; Labs
+                Arcade
               </span>
               <ul className="space-y-2 text-xs font-mono">
                 <li>
@@ -135,7 +135,7 @@ export const Footer: React.FC = () => {
                     onMouseEnter={handleHover}
                     className="text-zinc-400 hover:text-brand-cyan transition-colors"
                   >
-                    Arcade Hub Index ↗
+                    Arcade ↗
                   </Link>
                 </li>
                 <li>
@@ -221,12 +221,11 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2 text-xs font-mono">
               <li>
                 <Link
-                  href="/#case-studies"
-                  onClick={(e) => handleHashClick(e, "case-studies")}
+                  href="/case-studies"
                   onMouseEnter={handleHover}
                   className="text-zinc-400 hover:text-brand-cyan transition-colors"
                 >
-                  Featured Projects
+                  Work
                 </Link>
               </li>
               <li>
@@ -246,7 +245,7 @@ export const Footer: React.FC = () => {
                   className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                 >
                   <IconFileSpreadsheet className="w-3 h-3 text-brand-cyan" />
-                  CRF Studio &amp; EDC
+                  CRF Studio
                 </Link>
               </li>
               <li>
@@ -278,7 +277,7 @@ export const Footer: React.FC = () => {
                   onMouseEnter={handleHover}
                   className="text-zinc-400 hover:text-brand-cyan transition-colors"
                 >
-                  About &amp; Experience
+                  About
                 </Link>
               </li>
             </ul>
@@ -308,7 +307,7 @@ export const Footer: React.FC = () => {
                   className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                 >
                   <IconMessageCode className="w-3 h-3 text-brand-cyan" />
-                  Direct Contact Form ↗
+                  Contact ↗
                 </Link>
               </li>
               <li>

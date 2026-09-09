@@ -122,7 +122,7 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
     expect(options[0].getAttribute("aria-selected")).toBe("true");
 
     // Preview pane shows active item's details
-    expect(previewPane?.textContent).toContain("Work Showcase Feed");
+    expect(previewPane?.textContent).toContain("Work");
     expect(previewPane?.textContent).toContain("Next.js 16");
     expect(previewPane?.textContent).toContain("React 19");
     expect(previewPane?.textContent).toContain("Project Collection");
@@ -141,7 +141,7 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
     expect(combobox).not.toBeNull();
 
     const previewPane = document.querySelector("#palette-preview-pane");
-    expect(previewPane?.textContent).toContain("Work Showcase Feed");
+    expect(previewPane?.textContent).toContain("Work");
 
     // Press ArrowDown to navigate to second item (About System Architect)
     await act(async () => {
@@ -165,7 +165,7 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
     });
 
     expect(mockPlayHover).toHaveBeenCalledTimes(2);
-    expect(previewPane?.textContent).toContain("Contact & Direct Inquiries");
+    expect(previewPane?.textContent).toContain("Contact");
     expect(previewPane?.textContent).toContain("Contact Form");
 
     // Press ArrowUp to move back
@@ -202,7 +202,7 @@ describe("Command Palette Preview Tooltips & Master-Detail Navigation Suite", ()
     });
 
     const previewPane = document.querySelector("#palette-preview-pane");
-    expect(previewPane?.textContent).toContain("Arcade Games Hub");
+    expect(previewPane?.textContent).toContain("Arcade");
     expect(previewPane?.textContent).toContain("Interactive 60 FPS");
     expect(previewPane?.textContent).toContain("Canvas 2D");
   });
