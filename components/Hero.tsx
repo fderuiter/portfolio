@@ -255,19 +255,72 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
 
 type ConsoleMode = "logic" | "cdisc" | "garmin";
 
+const CONSOLE_MODES: readonly ConsoleMode[] = ["logic", "cdisc", "garmin"];
+
+const CONSOLE_MODE_LABELS: Record<ConsoleMode, string> = {
+  logic: "Logic demo",
+  cdisc: "Clinical demo",
+  garmin: "Memory demo",
+};
+
 /**
  * Interactive Live Engineering Console / Telemetry Spec Card
  */
 const InteractiveEngineeringConsole: React.FC = () => {
   const [mode, setMode] = useState<ConsoleMode>("logic");
+  const shouldReduceMotion = useReducedMotion();
   const { playSkillHover, playSuccess } = useAudio();
   const [logicDischarged, setLogicDischarged] = useState(false);
   const [fhirValidationActive, setFhirValidationActive] = useState(true);
   const [garminHeapAlloc, setGarminHeapAlloc] = useState(18.4);
   const [isGarminGcRunning, setIsGarminGcRunning] = useState(false);
+  const [announcement, setAnnouncement] = useState("");
+  const tabRefs = React.useRef<Record<ConsoleMode, HTMLButtonElement | null>>({
+    logic: null,
+    cdisc: null,
+    garmin: null,
+  });
+  const gcTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const selectMode = (nextMode: ConsoleMode) => {
+    setMode(nextMode);
+    setAnnouncement(`${CONSOLE_MODE_LABELS[nextMode]} selected.`);
+    playSkillHover();
+  };
+
+  const handleTabKeyDown = (
+    event: React.KeyboardEvent<HTMLButtonElement>,
+    currentMode: ConsoleMode
+  ) => {
+    const currentIndex = CONSOLE_MODES.indexOf(currentMode);
+    let nextIndex: number | null = null;
+
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      nextIndex = (currentIndex + 1) % CONSOLE_MODES.length;
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      nextIndex =
+        (currentIndex - 1 + CONSOLE_MODES.length) % CONSOLE_MODES.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = CONSOLE_MODES.length - 1;
+    }
+
+    if (nextIndex === null) return;
+
+    event.preventDefault();
+    const nextMode = CONSOLE_MODES[nextIndex];
+    selectMode(nextMode);
+    tabRefs.current[nextMode]?.focus();
+  };
 
   const handleDischargeStep = () => {
     setLogicDischarged((prev) => !prev);
+    setAnnouncement(
+      logicDischarged
+        ? "Illustrative logic step returned to its starting state."
+        : "Illustrative logic step applied. Q follows from the sample premises."
+    );
     if (!logicDischarged) {
       playSuccess();
     } else {
@@ -276,21 +329,60 @@ const InteractiveEngineeringConsole: React.FC = () => {
   };
 
   const handleRunGc = () => {
+    if (gcTimerRef.current) clearTimeout(gcTimerRef.current);
     setIsGarminGcRunning(true);
+    setAnnouncement("Illustrative memory cleanup is running.");
     playSkillHover();
-    setTimeout(() => {
+    gcTimerRef.current = setTimeout(() => {
       setGarminHeapAlloc((prev) => (prev > 14 ? 12.2 : 19.6));
       setIsGarminGcRunning(false);
+      setAnnouncement("Illustrative memory cleanup complete.");
+      gcTimerRef.current = null;
     }, 400);
   };
 
+  const resetLogicDemo = () => {
+    setLogicDischarged(false);
+    setAnnouncement("Logic demo reset.");
+    playSkillHover();
+  };
+
+  const resetClinicalDemo = () => {
+    setFhirValidationActive(true);
+    setAnnouncement("Clinical demo reset.");
+    playSkillHover();
+  };
+
+  const resetMemoryDemo = () => {
+    if (gcTimerRef.current) clearTimeout(gcTimerRef.current);
+    gcTimerRef.current = null;
+    setGarminHeapAlloc(18.4);
+    setIsGarminGcRunning(false);
+    setAnnouncement("Memory demo reset.");
+    playSkillHover();
+  };
+
+  React.useEffect(() => {
+    return () => {
+      if (gcTimerRef.current) clearTimeout(gcTimerRef.current);
+    };
+  }, []);
+
   return (
-    <div className="@container min-w-0 w-full max-w-xl mx-auto lg:max-w-none bg-[#13151a] border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:border-amber-500/30">
+    <div className="@container min-w-0 w-full max-w-xl mx-auto lg:max-w-none break-words bg-[#13151a] border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col justify-between relative overflow-hidden transition-all duration-300 motion-reduce:transition-none hover:border-amber-500/30">
       {/* Precision grid decorative corner cues */}
       <div className="mb-4 flex flex-wrap items-center gap-1.5 font-mono text-[9px] text-zinc-500 uppercase tracking-wider select-none">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        <span
+          className={`w-1.5 h-1.5 rounded-full bg-emerald-400 ${
+            shouldReduceMotion ? "" : "animate-pulse"
+          }`}
+        />
         <span>INTERACTIVE ENGINEERING / 01—03</span>
       </div>
+      <p className="mb-4 text-[11px] leading-relaxed text-zinc-400">
+        Three illustrative, local demos. Values are labelled by source and do
+        not represent live telemetry.
+      </p>
 
       <div>
         {/* Header Tabs */}
@@ -300,12 +392,18 @@ const InteractiveEngineeringConsole: React.FC = () => {
           aria-label="Interactive Systems Demos"
         >
           <button
+            ref={(node) => {
+              tabRefs.current.logic = node;
+            }}
+            id="hero-demo-tab-logic"
             role="tab"
             aria-selected={mode === "logic"}
+            aria-controls="hero-demo-panel-logic"
+            tabIndex={mode === "logic" ? 0 : -1}
             onClick={() => {
-              setMode("logic");
-              playSkillHover();
+              selectMode("logic");
             }}
+            onKeyDown={(event) => handleTabKeyDown(event, "logic")}
             className={`min-w-0 min-h-11 justify-center px-1.5 py-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-1 focus-visible:ring-offset-[#13151a] ${
               mode === "logic"
                 ? "bg-amber-500/15 text-amber-300 border border-amber-500/30 shadow-sm"
@@ -313,16 +411,22 @@ const InteractiveEngineeringConsole: React.FC = () => {
             }`}
           >
             <IconAtom className="w-3.5 h-3.5" />
-            <span>Logic</span>
+            <span className="min-w-0 break-words">Logic</span>
           </button>
 
           <button
+            ref={(node) => {
+              tabRefs.current.cdisc = node;
+            }}
+            id="hero-demo-tab-cdisc"
             role="tab"
             aria-selected={mode === "cdisc"}
+            aria-controls="hero-demo-panel-cdisc"
+            tabIndex={mode === "cdisc" ? 0 : -1}
             onClick={() => {
-              setMode("cdisc");
-              playSkillHover();
+              selectMode("cdisc");
             }}
+            onKeyDown={(event) => handleTabKeyDown(event, "cdisc")}
             className={`min-w-0 min-h-11 justify-center px-1.5 py-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-1 focus-visible:ring-offset-[#13151a] ${
               mode === "cdisc"
                 ? "bg-amber-500/15 text-amber-300 border border-amber-500/30 shadow-sm"
@@ -330,16 +434,22 @@ const InteractiveEngineeringConsole: React.FC = () => {
             }`}
           >
             <IconShieldCheck className="w-3.5 h-3.5" />
-            <span>Clinical</span>
+            <span className="min-w-0 break-words">Clinical</span>
           </button>
 
           <button
+            ref={(node) => {
+              tabRefs.current.garmin = node;
+            }}
+            id="hero-demo-tab-garmin"
             role="tab"
             aria-selected={mode === "garmin"}
+            aria-controls="hero-demo-panel-garmin"
+            tabIndex={mode === "garmin" ? 0 : -1}
             onClick={() => {
-              setMode("garmin");
-              playSkillHover();
+              selectMode("garmin");
             }}
+            onKeyDown={(event) => handleTabKeyDown(event, "garmin")}
             className={`min-w-0 min-h-11 justify-center px-1.5 py-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-1 focus-visible:ring-offset-[#13151a] ${
               mode === "garmin"
                 ? "bg-amber-500/15 text-amber-300 border border-amber-500/30 shadow-sm"
@@ -347,26 +457,31 @@ const InteractiveEngineeringConsole: React.FC = () => {
             }`}
           >
             <IconCpu className="w-3.5 h-3.5" />
-            <span>Memory</span>
+            <span className="min-w-0 break-words">Memory</span>
           </button>
         </div>
 
         {/* Tab Content Panels */}
-        <div className="min-h-[190px] flex flex-col justify-between font-mono">
+        <div
+          id={`hero-demo-panel-${mode}`}
+          role="tabpanel"
+          aria-labelledby={`hero-demo-tab-${mode}`}
+          className="min-h-[270px] sm:min-h-[246px] flex flex-col justify-between font-mono focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#13151a]"
+        >
           <AnimatePresence mode="wait">
             {mode === "logic" && (
               <motion.div
                 key="logic"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.15 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
+                animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+                exit={shouldReduceMotion ? undefined : { opacity: 0, y: -6 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
                 className="space-y-3"
               >
                 <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[11px] text-zinc-400">
                   <span>DEDUCTIVE LOGIC SOLVER</span>
                   <span className="text-amber-400 font-semibold">
-                    RULE: MODUS PONENS
+                    ILLUSTRATIVE RULE: MODUS PONENS
                   </span>
                 </div>
 
@@ -391,7 +506,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
                       }
                     >
                       {logicDischarged
-                        ? "Therefore Q is true"
+                        ? "Illustrative result: Q follows"
                         : "Awaiting inference"}
                     </span>
                   </div>
@@ -400,16 +515,24 @@ const InteractiveEngineeringConsole: React.FC = () => {
                 <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 gap-3 pt-1">
                   <button
                     onClick={handleDischargeStep}
-                    className="inline-flex items-center gap-2 px-3.5 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-1 focus-visible:ring-offset-[#13151a]"
+                    className="inline-flex min-h-11 items-center gap-2 px-3.5 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-1 focus-visible:ring-offset-[#13151a]"
                   >
                     <IconRefresh
                       className={`w-3.5 h-3.5 ${logicDischarged ? "rotate-180" : ""} transition-transform duration-300`}
                     />
                     <span>
                       {logicDischarged
-                        ? "Reset Logic Step"
+                        ? "Undo Illustrative Step"
                         : "Prove Invariant Step"}
                     </span>
+                  </button>
+
+                  <button
+                    onClick={resetLogicDemo}
+                    className="inline-flex min-h-11 items-center gap-2 px-3.5 py-2 text-xs font-bold text-zinc-200 border border-white/15 rounded-xl transition-colors hover:bg-white/5 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-1 focus-visible:ring-offset-[#13151a]"
+                  >
+                    <IconRefresh className="w-3.5 h-3.5" />
+                    <span>Reset Logic Demo</span>
                   </button>
 
                   <div className="flex items-center gap-1.5 text-[10px]">
@@ -418,8 +541,8 @@ const InteractiveEngineeringConsole: React.FC = () => {
                     />
                     <span className="text-zinc-400">
                       {logicDischarged
-                        ? "STATUS: PROVEN SOUND"
-                        : "STATUS: READY"}
+                        ? "ILLUSTRATIVE STATE: RESULT DERIVED"
+                        : "ILLUSTRATIVE STATE: READY"}
                     </span>
                   </div>
                 </div>
@@ -429,16 +552,16 @@ const InteractiveEngineeringConsole: React.FC = () => {
             {mode === "cdisc" && (
               <motion.div
                 key="cdisc"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.15 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
+                animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+                exit={shouldReduceMotion ? undefined : { opacity: 0, y: -6 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
                 className="space-y-3"
               >
                 <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[11px] text-zinc-400">
                   <span>CLINICAL TRIAL FORM ENGINE</span>
                   <span className="text-emerald-400 font-semibold">
-                    AUTOMATED VALIDATION
+                    ILLUSTRATIVE VALIDATION
                   </span>
                 </div>
 
@@ -467,19 +590,34 @@ const InteractiveEngineeringConsole: React.FC = () => {
                   <button
                     onClick={() => {
                       setFhirValidationActive(!fhirValidationActive);
+                      setAnnouncement(
+                        fhirValidationActive
+                          ? "Illustrative validation rule paused."
+                          : "Illustrative validation rule activated."
+                      );
                       playSkillHover();
                     }}
-                    className="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-1 focus-visible:ring-offset-[#13151a]"
+                    className="inline-flex min-h-11 items-center gap-2 px-3.5 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-1 focus-visible:ring-offset-[#13151a]"
                   >
                     <IconCheck className="w-3.5 h-3.5" />
                     <span>
                       {fhirValidationActive
-                        ? "Data Integrity Rule: ACTIVE"
-                        : "Toggle Integrity Rule"}
+                        ? "Illustrative Integrity Rule: Active"
+                        : "Illustrative Integrity Rule: Paused"}
                     </span>
                   </button>
 
-                  <span className="text-[10px] text-zinc-400">DEMO RULE</span>
+                  <button
+                    onClick={resetClinicalDemo}
+                    className="inline-flex min-h-11 items-center gap-2 px-3.5 py-2 text-xs font-bold text-zinc-200 border border-white/15 rounded-xl transition-colors hover:bg-white/5 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-1 focus-visible:ring-offset-[#13151a]"
+                  >
+                    <IconRefresh className="w-3.5 h-3.5" />
+                    <span>Reset Clinical Demo</span>
+                  </button>
+
+                  <span className="text-[10px] text-zinc-400">
+                    ILLUSTRATIVE DEMO RULE
+                  </span>
                 </div>
               </motion.div>
             )}
@@ -487,22 +625,22 @@ const InteractiveEngineeringConsole: React.FC = () => {
             {mode === "garmin" && (
               <motion.div
                 key="garmin"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.15 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 6 }}
+                animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+                exit={shouldReduceMotion ? undefined : { opacity: 0, y: -6 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
                 className="space-y-3"
               >
                 <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[11px] text-zinc-400">
                   <span>SMARTWATCH RUNTIME</span>
                   <span className="text-cyan-400 font-semibold">
-                    32KB MEMORY BUDGET
+                    ILLUSTRATIVE 32KB MEMORY BUDGET
                   </span>
                 </div>
 
                 <div className="p-3 bg-black/40 border border-white/5 rounded-xl space-y-2 text-xs text-zinc-300">
                   <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[11px]">
-                    <span className="text-zinc-400">RAM Used:</span>
+                    <span className="text-zinc-400">Simulated RAM Used:</span>
                     <span className="text-amber-300 font-bold">
                       {garminHeapAlloc.toFixed(1)} KB / 32.0 KB (
                       {Math.round((garminHeapAlloc / 32) * 100)}%)
@@ -520,9 +658,9 @@ const InteractiveEngineeringConsole: React.FC = () => {
                     />
                   </div>
                   <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[10px] text-zinc-500 pt-0.5">
-                    <span>Frame Budget: 16.6ms</span>
+                    <span>Illustrative frame reference: 16.6ms</span>
                     <span className="text-emerald-400">
-                      Simulated allocation
+                      Simulated allocation (heap)
                     </span>
                   </div>
                 </div>
@@ -531,7 +669,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
                   <button
                     onClick={handleRunGc}
                     disabled={isGarminGcRunning}
-                    className="inline-flex items-center gap-2 px-3.5 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-1 focus-visible:ring-offset-[#13151a]"
+                    className="inline-flex min-h-11 items-center gap-2 px-3.5 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-1 focus-visible:ring-offset-[#13151a]"
                   >
                     <IconRefresh
                       className={`w-3.5 h-3.5 ${isGarminGcRunning ? "animate-spin" : ""}`}
@@ -543,14 +681,33 @@ const InteractiveEngineeringConsole: React.FC = () => {
                     </span>
                   </button>
 
+                  <button
+                    onClick={resetMemoryDemo}
+                    className="inline-flex min-h-11 items-center gap-2 px-3.5 py-2 text-xs font-bold text-zinc-200 border border-white/15 rounded-xl transition-colors hover:bg-white/5 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-1 focus-visible:ring-offset-[#13151a]"
+                  >
+                    <IconRefresh className="w-3.5 h-3.5" />
+                    <span>Reset Memory Demo</span>
+                  </button>
+
                   <span className="text-[10px] text-zinc-400">
-                    HEAP OPTIMIZED
+                    ILLUSTRATIVE STATE
                   </span>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
+        {CONSOLE_MODES.filter((consoleMode) => consoleMode !== mode).map(
+          (consoleMode) => (
+            <div
+              key={consoleMode}
+              id={`hero-demo-panel-${consoleMode}`}
+              role="tabpanel"
+              aria-labelledby={`hero-demo-tab-${consoleMode}`}
+              hidden
+            />
+          )
+        )}
       </div>
 
       {/* Footer Spec strip */}
@@ -559,8 +716,11 @@ const InteractiveEngineeringConsole: React.FC = () => {
           <IconTerminal className="w-3 h-3 text-zinc-400" />
           <span>ILLUSTRATIVE DEMO</span>
         </span>
-        <span className="text-zinc-400">TRY THE CONTROLS</span>
+        <span className="text-zinc-400">TRY THE CONTROLS · NO LIVE DATA</span>
       </div>
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {announcement}
+      </p>
     </div>
   );
 };
