@@ -377,11 +377,11 @@ const InteractiveEngineeringConsole: React.FC = () => {
             shouldReduceMotion ? "" : "animate-pulse"
           }`}
         />
-        <span>INTERACTIVE ENGINEERING / 01—03</span>
+        <span>A FEW THINGS TO TRY</span>
       </div>
       <p className="mb-4 text-[11px] leading-relaxed text-zinc-400">
-        Three illustrative, local demos. Values are labelled by source and do
-        not represent live telemetry.
+        Try a logic rule, a form check, or a memory cleanup. These use sample
+        data, not live systems.
       </p>
 
       <div>
@@ -479,7 +479,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
                 className="space-y-3"
               >
                 <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[11px] text-zinc-400">
-                  <span>DEDUCTIVE LOGIC SOLVER</span>
+                  <span>ONE SMALL LOGIC PROOF</span>
                   <span className="text-amber-400 font-semibold">
                     ILLUSTRATIVE RULE: MODUS PONENS
                   </span>
@@ -521,9 +521,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
                       className={`w-3.5 h-3.5 ${logicDischarged ? "rotate-180" : ""} transition-transform duration-300`}
                     />
                     <span>
-                      {logicDischarged
-                        ? "Undo Illustrative Step"
-                        : "Prove Invariant Step"}
+                      {logicDischarged ? "Undo the Step" : "Apply the Rule"}
                     </span>
                   </button>
 
@@ -559,7 +557,7 @@ const InteractiveEngineeringConsole: React.FC = () => {
                 className="space-y-3"
               >
                 <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[11px] text-zinc-400">
-                  <span>CLINICAL TRIAL FORM ENGINE</span>
+                  <span>A CLINICAL FORM CHECK</span>
                   <span className="text-emerald-400 font-semibold">
                     ILLUSTRATIVE VALIDATION
                   </span>
@@ -731,9 +729,9 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ className }) => {
   const shouldReduceMotion = useReducedMotion();
-  const headline = "Complex systems. Thoughtfully built.";
+  const headline = "Hi, I’m Fred. I make complicated things usable.";
   const introText =
-    "From clinical workflows at Mayo Clinic to interactive web tools, I turn demanding problems into clear, dependable software. Explore the systems, and try the ideas behind them.";
+    "My background is in clinical research. I build software for the fiddly parts: messy data, complicated forms, and rules that need to hold up. I also made a loon shoot lasers. There’s room for both.";
 
   return (
     <section
@@ -757,7 +755,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
       {/* 2. Architectural Blueprint Corner Cues (desktop) */}
       <div className="hidden lg:flex absolute top-28 left-12 items-center gap-2 text-[10px] font-mono text-zinc-600 select-none">
         <span className="text-amber-500/60">[+]</span>
-        <span>BUILDER // PROBLEM SOLVER</span>
+        <span>CLINICAL DATA / SOFTWARE / SIDE QUESTS</span>
       </div>
       <div className="hidden lg:flex absolute top-28 right-12 items-center gap-2 text-[10px] font-mono text-zinc-600 select-none">
         <span>LOC: ROCHESTER &amp; NYC</span>
@@ -834,7 +832,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
           <div className="mt-8 pt-6 border-t border-white/5 w-full flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 text-[10px] font-mono text-zinc-400 select-none">
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span>3 INTERACTIVE ENGINES</span>
+              <span>TRY THE DEMOS</span>
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
@@ -842,7 +840,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-              <span>BUILT TO EXPLORE</span>
+              <span>SOURCE ON GITHUB</span>
             </span>
           </div>
         </div>

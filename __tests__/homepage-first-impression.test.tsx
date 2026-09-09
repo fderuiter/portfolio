@@ -54,7 +54,7 @@ describe("[UI/UX 01] Homepage First Impression & Architectural Hierarchy Suite",
       expect(
         screen.getByRole("heading", {
           level: 1,
-          name: /Complex systems\. Thoughtfully built\./i,
+          name: /Hi, I’m Fred\. I make complicated things usable\./i,
         })
       ).toBeDefined();
 
@@ -66,14 +66,14 @@ describe("[UI/UX 01] Homepage First Impression & Architectural Hierarchy Suite",
 
       // Intro text: dual layers (visual and semantic) both present
       const introLayers = screen.getAllByText(
-        /From clinical workflows at Mayo Clinic to interactive web tools/i
+        /My background is in clinical research/i
       );
       expect(introLayers).toHaveLength(2);
 
       // Invariant telemetry badges state honest scope rather than absolute claims
-      expect(screen.getByText(/3 INTERACTIVE ENGINES/i)).toBeDefined();
+      expect(screen.getByText(/TRY THE DEMOS/i)).toBeDefined();
       expect(screen.getByText(/CLINICAL OPERATIONS EXPERIENCE/i)).toBeDefined();
-      expect(screen.getByText(/BUILT TO EXPLORE/i)).toBeDefined();
+      expect(screen.getByText(/SOURCE ON GITHUB/i)).toBeDefined();
 
       // Absolutes must not be present
       const heroContainer = document.getElementById("hero");
@@ -132,7 +132,7 @@ describe("[UI/UX 01] Homepage First Impression & Architectural Hierarchy Suite",
       render(<Hero />);
 
       // Default tab: Logic
-      expect(screen.getByText(/DEDUCTIVE LOGIC SOLVER/i)).toBeDefined();
+      expect(screen.getByText(/ONE SMALL LOGIC PROOF/i)).toBeDefined();
       expect(screen.getByText(/RULE: MODUS PONENS/i)).toBeDefined();
 
       // Switch to Clinical tab
@@ -140,7 +140,7 @@ describe("[UI/UX 01] Homepage First Impression & Architectural Hierarchy Suite",
       fireEvent.click(clinicalTab);
 
       await waitFor(() => {
-        expect(screen.getByText(/CLINICAL TRIAL FORM ENGINE/i)).toBeDefined();
+        expect(screen.getByText(/A CLINICAL FORM CHECK/i)).toBeDefined();
       });
       expect(screen.getByText(/DEMO RULE/i)).toBeDefined();
 
@@ -169,7 +169,7 @@ describe("[UI/UX 01] Homepage First Impression & Architectural Hierarchy Suite",
       }
 
       const proveBtn = screen.getByRole("button", {
-        name: /Prove Invariant Step/i,
+        name: /Apply the Rule/i,
       });
       expect(proveBtn.className).toContain("min-h-11");
       expect(proveBtn.className).toContain("focus-visible:ring-2");
@@ -219,9 +219,7 @@ describe("[UI/UX 01] Homepage First Impression & Architectural Hierarchy Suite",
       vi.useFakeTimers();
       render(<Hero />);
 
-      fireEvent.click(
-        screen.getByRole("button", { name: /Prove Invariant Step/i })
-      );
+      fireEvent.click(screen.getByRole("button", { name: /Apply the Rule/i }));
       expect(screen.getByText(/Illustrative result: Q follows/i)).toBeDefined();
       fireEvent.click(
         screen.getByRole("button", { name: /Reset Logic Demo/i })

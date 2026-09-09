@@ -126,11 +126,12 @@ export default async function PortfolioHomePage() {
 
           {/* Title Block */}
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white text-center mb-2 heading-editorial">
-            Selected work. Working systems.
+            Things I’ve built. Reasons I built them.
           </h2>
           <p className="text-sm sm:text-base text-zinc-300 mb-8 sm:mb-12 text-center max-w-xl leading-relaxed">
-            Clinical software, formal logic, and browser experiments. Each
-            project makes a complex idea tangible.
+            Clinical data tools, experiments, and projects that got a little out
+            of hand. Here’s what each one does, how it works, and the decisions
+            behind it.
           </p>
 
           {/* Interactive Systems Highlights Section */}
@@ -140,12 +141,11 @@ export default async function PortfolioHomePage() {
           {caseStudies.length === 0 ? (
             <div className="text-center p-8 sm:p-12 bg-white/[0.02] border border-white/10 border-dashed rounded-2xl w-full">
               <p className="text-sm text-zinc-400 italic mb-2">
-                No published case studies currently available in the active
-                environment.
+                The project writeups aren’t loading right now.
               </p>
               <p className="text-xs text-zinc-400 font-mono">
-                Refer to canonical project specifications in the repository
-                documentation.
+                You can still explore the tools above or browse my code on
+                GitHub.
               </p>
             </div>
           ) : (
@@ -157,8 +157,8 @@ export default async function PortfolioHomePage() {
       {/* 2. Philosophy TextReveal Highlight */}
       <div className="bg-[#0d0e11] border-t border-white/10">
         <TextReveal>
-          Good software makes complexity understandable. I build for the people
-          who depend on it, and the details that earn their trust.
+          The person using your software has a job to do. Figuring out your
+          software should be the small part.
         </TextReveal>
       </div>
 
@@ -169,15 +169,15 @@ export default async function PortfolioHomePage() {
       >
         <div className="relative z-10 w-full max-w-6xl flex flex-col items-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-white/[0.04] border border-white/10 text-[10px] sm:text-xs font-mono font-bold text-amber-300 uppercase tracking-widest">
-            <span>SECTION 02 // TOOLKIT &amp; DOMAINS</span>
+            <span>SECTION 02 // WHAT I BRING</span>
           </div>
 
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white text-center mb-2 heading-editorial">
-            Experience informs the engineering.
+            A somewhat unconventional toolkit.
           </h2>
           <p className="text-sm sm:text-base text-zinc-300 mb-8 sm:mb-12 text-center max-w-md leading-relaxed">
-            Mayo Clinic clinical operations, low-level canvas graphics, civic
-            open-source projects, and emergency triage.
+            Clinical research taught me to care about the details. Side projects
+            give me a place to see how far I can take them.
           </p>
 
           {/* Dynamic Bento Skills Grid Card Layout */}
@@ -192,11 +192,11 @@ export default async function PortfolioHomePage() {
           </div>
 
           <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white text-center mb-2 heading-editorial">
-            A practice built through experience.
+            The route here had a few turns.
           </h3>
           <p className="text-sm sm:text-base text-zinc-300 mb-8 sm:mb-12 text-center max-w-md leading-relaxed">
-            From Minnesota Vikings NFL camp logistics and Mankato campus
-            advocacy to Mayo Clinic operations and modern web systems.
+            Vikings training camp, campus advocacy, Mayo Clinic, clinical data.
+            The job titles changed; figuring things out with people stayed.
           </p>
 
           {/* Interactive Staggered Timeline Component */}
@@ -219,15 +219,15 @@ export default async function PortfolioHomePage() {
           </div>
 
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white text-center mb-2 heading-editorial">
-            Have a difficult problem in mind?
+            What are you working on?
           </h2>
           <p className="text-sm sm:text-base text-zinc-300 mb-8 sm:mb-12 text-center max-w-md leading-relaxed">
-            Tell me what you are working on. I welcome conversations about
-            thoughtful software, useful tools, and ambitious ideas.
+            A project, a job, a question, or a bug with a suspiciously good
+            sense of timing. Tell me about it.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full max-w-6xl justify-center items-stretch">
-            {/* Direct Inquiries & Contact Form */}
+            {/* Say Hello & Contact Form */}
             <Link
               href="/contact"
               aria-label="Send a direct inquiry to Frederick de Ruiter via the secure contact form"
@@ -237,10 +237,10 @@ export default async function PortfolioHomePage() {
                 <IconMessageCode className="w-4 h-4" />
               </span>
               <span className="text-xs font-mono font-bold text-zinc-200 mb-1">
-                Direct Inquiries
+                Say Hello
               </span>
               <span className="text-xs font-mono text-amber-300">
-                Open Contact Form ↗
+                Send a Message ↗
               </span>
             </Link>
 
@@ -276,7 +276,7 @@ export default async function PortfolioHomePage() {
                 <IconBrandGithub className="w-4 h-4" />
               </span>
               <span className="text-xs font-mono font-bold text-zinc-200 mb-1">
-                Open Source Code
+                Browse My Code
               </span>
               <span className="text-xs font-mono text-zinc-400">
                 github.com/fderuiter
@@ -295,7 +295,7 @@ export default async function PortfolioHomePage() {
                 <IconBrandLinkedin className="w-4 h-4" />
               </span>
               <span className="text-xs font-mono font-bold text-zinc-200 mb-1">
-                LinkedIn Network
+                Find Me on LinkedIn
               </span>
               <span className="text-xs font-mono text-zinc-400">
                 Connect on LinkedIn ↗
@@ -307,17 +307,17 @@ export default async function PortfolioHomePage() {
           <div className="w-full max-w-3xl mt-12">
             <div className="text-center mb-6">
               <h3 className="text-lg sm:text-xl font-mono font-bold text-white mb-1.5">
-                Send a Direct Message
+                Drop me a note
               </h3>
               <p className="text-xs sm:text-sm text-zinc-300">
-                Share a little context about your project and how I can help.
+                A few sentences are plenty. No pitch deck required.
               </p>
             </div>
             <ContactForm />
           </div>
 
           <div className="mt-12 sm:mt-16 text-xs font-mono text-zinc-400 tracking-[0.2em] text-center select-none">
-            CRAFTED &amp; DEVELOPED BY FREDERICK DE RUITER
+            MADE BY FREDERICK DE RUITER
           </div>
         </div>
       </section>

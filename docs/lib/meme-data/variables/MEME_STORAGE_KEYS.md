@@ -8,7 +8,7 @@
 
 > `const` **MEME\_STORAGE\_KEYS**: `object`
 
-Defined in: [lib/meme-data.ts:319](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L319)
+Defined in: [lib/meme-data.ts:350](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L350)
 
 Storage helpers for achievements and meme vault unlock state
 

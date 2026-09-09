@@ -73,19 +73,21 @@ test.describe("Mobile & Tablet Touch Interactions Suite", () => {
       name: /open navigation menu/i,
     });
     await expect(menuButton).toBeVisible();
-    await menuButton.click();
 
     // Verify modal overlay opens
     const overlay = page.getByRole("dialog", {
       name: /mobile navigation overlay/i,
     });
-    await expect(overlay).toBeVisible();
+    await expect(async () => {
+      if (!(await overlay.isVisible())) await menuButton.click();
+      await expect(overlay).toBeVisible();
+    }).toPass({ timeout: 15000 });
 
     // Verify nav links inside drawer
-    const workLink = overlay.getByRole("link", { name: /work showcase/i });
+    const workLink = overlay.getByRole("link", { name: /^work\b/i });
     await expect(workLink).toBeVisible();
 
-    const arcadeLink = overlay.getByRole("link", { name: /arcade games hub/i });
+    const arcadeLink = overlay.getByRole("link", { name: /^arcade\b/i });
     await expect(arcadeLink).toBeVisible();
 
     const crfLink = overlay.getByRole("link", { name: /crf studio/i });

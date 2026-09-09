@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -177,8 +179,8 @@ describe("Homepage Teaser Snippet Terminology Swap Suite", () => {
       expect(container.textContent).not.toContain("data-term");
       expect(container.innerHTML).not.toContain("&lt;span");
 
-      // Should end with ellipsis '...' when truncated
-      expect(container.textContent).toContain("...");
+      // Uses a visible ellipsis only after truncating at a word boundary.
+      expect(container.textContent).toContain("…");
     });
 
     it("preserves markdown bold and code elements in card snippets", async () => {

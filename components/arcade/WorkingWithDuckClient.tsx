@@ -21,7 +21,7 @@ const DynamicWorkingWithDuck = dynamic(WorkingWithDuckLoader, {
   loading: () => (
     <div className="flex flex-col items-center justify-center p-8 min-h-[380px] font-mono text-xs text-zinc-500 animate-pulse">
       <div className="w-8 h-8 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin mb-4" />
-      <span>RETRIEVING DUCK STATE MACHINE...</span>
+      <span>Finding Duck...</span>
     </div>
   ),
 });
@@ -66,7 +66,8 @@ export const WorkingWithDuckClient: React.FC = () => {
                 Working With <span className="text-amber-400">Duck</span>
               </h1>
               <p className="text-xs sm:text-sm text-zinc-400 font-mono mt-1">
-                Balance shipping code deadlines against managing Duck — an autonomous, fluffy white golden retriever puppy.
+                You have a deadline. Duck has a ball. Try to keep both the
+                project and the puppy happy.
               </p>
             </div>
           </div>
@@ -77,10 +78,10 @@ export const WorkingWithDuckClient: React.FC = () => {
           <PlayCabinet
             gameId="working-with-duck"
             title="Working With Duck"
-            subtitle="Autonomous State Machine & Multitasking Simulation"
+            subtitle="Code, Toys, and Questionable Priorities"
             accentColor="amber"
             icon={<IconBone className="w-8 h-8 text-amber-400" />}
-            instructions="Balance code development against managing an autonomous Golden Retriever puppy, Duck. Features toy toss trajectories, real-time belly rub scrubbing, recall mechanics, and persistent scrapbook state."
+            instructions="Try to finish your code while Duck requests toys, treats, and belly rubs. Take him to the park, save a few scrapbook moments, and see how much work gets done."
             controls={[
               { key: "1-3", action: "Toss Toys" },
               { key: "4", action: "Trade Treats" },
@@ -100,7 +101,9 @@ export const WorkingWithDuckClient: React.FC = () => {
               <span>Toys &amp; Ball Trades</span>
             </div>
             <p className="text-zinc-400 text-[11px] leading-relaxed">
-              Press <strong>1-3</strong> to toss toys and redirect Duck away from portfolio hazards. Press <strong>4</strong> to trade treats when Duck does &ldquo;No Take, Only Throw!&rdquo;
+              Press <strong>1-3</strong> to toss toys and redirect Duck away
+              from portfolio hazards. Press <strong>4</strong> to trade treats
+              when Duck does &ldquo;No Take, Only Throw!&rdquo;
             </p>
           </div>
 
@@ -110,7 +113,9 @@ export const WorkingWithDuckClient: React.FC = () => {
               <span>Potty Countdown &amp; Rubs</span>
             </div>
             <p className="text-zinc-400 text-[11px] leading-relaxed">
-              When the Bladder flashes, click &amp; drag Duck to the <strong>Back Door</strong> within 3.5s. When Duck flops on his back, scrub your cursor for belly rubs!
+              When the Bladder flashes, click &amp; drag Duck to the{" "}
+              <strong>Back Door</strong> within 3.5s. When Duck flops on his
+              back, scrub your cursor for belly rubs!
             </p>
           </div>
 
@@ -120,7 +125,9 @@ export const WorkingWithDuckClient: React.FC = () => {
               <span>Dog Park &amp; Multipliers</span>
             </div>
             <p className="text-zinc-400 text-[11px] leading-relaxed">
-              Click <strong>Go to Dog Park</strong> to flick-throw the ball. Tap <strong>Spacebar</strong> to steer Duck around mud puddles and earn the 20-second Tired Puppy calm buff.
+              Click <strong>Go to Dog Park</strong> to flick-throw the ball. Tap{" "}
+              <strong>Spacebar</strong> to steer Duck around mud puddles and
+              earn the 20-second Tired Puppy calm buff.
             </p>
           </div>
         </div>

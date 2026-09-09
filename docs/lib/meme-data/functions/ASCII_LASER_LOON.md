@@ -8,7 +8,7 @@
 
 > **ASCII\_LASER\_LOON**(): `string`
 
-Defined in: [lib/meme-data.ts:259](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L259)
+Defined in: [lib/meme-data.ts:290](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L290)
 
 ## Returns
 

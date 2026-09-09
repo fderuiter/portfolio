@@ -18,14 +18,14 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "Engineering Case Studies | Frederick de Ruiter",
   description:
-    "Deep-dive architectural breakdowns, clinical data systems, CDISC standards pipelines, and full-stack systems engineering.",
+    "Projects by Fred de Ruiter: the problems, the implementation choices, and what happened along the way.",
   alternates: {
     canonical: "/case-studies",
   },
   openGraph: {
     title: "Engineering Case Studies | Frederick de Ruiter",
     description:
-      "Deep-dive architectural breakdowns, clinical data systems, CDISC standards pipelines, and full-stack systems engineering.",
+      "Projects by Fred de Ruiter: the problems, the implementation choices, and what happened along the way.",
     type: "website",
     url: `${resolveBaseUrl()}/case-studies`,
     images: [
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Engineering Case Studies | Frederick de Ruiter",
     description:
-      "Deep-dive architectural breakdowns, clinical data systems, and full-stack engineering.",
+      "The problems and decisions behind my clinical data tools, web apps, and side projects.",
     images: [`${resolveBaseUrl()}/case-studies/opengraph-image`],
   },
 };
@@ -108,8 +108,7 @@ export default async function CaseStudiesPage() {
             Engineering Case Studies
           </h1>
           <p className="text-xs sm:text-sm font-mono text-zinc-400 tracking-wider uppercase">
-            Clinical data engines, CDISC validation pipelines, and full-stack
-            systems
+            What I built, why I built it, and how the pieces fit together.
           </p>
         </div>
 
@@ -117,12 +116,10 @@ export default async function CaseStudiesPage() {
         {caseStudies.length === 0 ? (
           <div className="text-center p-8 sm:p-12 bg-zinc-900/10 border border-zinc-900/40 border-dashed rounded-2xl w-full">
             <p className="text-sm text-zinc-400 italic mb-2">
-              No published case studies currently available in the active
-              environment.
+              The project writeups aren’t loading right now.
             </p>
             <p className="text-xs text-zinc-500 font-mono">
-              Refer to canonical project specifications in the repository
-              documentation.
+              You can find project details and source code on my GitHub profile.
             </p>
           </div>
         ) : (

@@ -54,7 +54,7 @@ test.describe("Hero engineering console", () => {
       await expect(page.getByText("Memory demo reset.")).toBeAttached();
 
       await tabs.nth(0).click();
-      await page.getByRole("button", { name: "Prove Invariant Step" }).click();
+      await page.getByRole("button", { name: "Apply the Rule" }).click();
       await page.getByRole("button", { name: "Reset Logic Demo" }).click();
       await expect(page.getByText("Logic demo reset.")).toBeAttached();
 

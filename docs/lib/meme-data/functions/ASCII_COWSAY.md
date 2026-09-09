@@ -8,7 +8,7 @@
 
 > **ASCII\_COWSAY**(`text?`): `string`
 
-Defined in: [lib/meme-data.ts:237](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L237)
+Defined in: [lib/meme-data.ts:266](https://github.com/fderuiter/portfolio/blob/main/lib/meme-data.ts#L266)
 
 ## Parameters
 

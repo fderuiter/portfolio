@@ -8,7 +8,7 @@
 
 > **getWebsiteNode**(`options?`): `Record`\<`string`, `unknown`\>
 
-Defined in: [lib/seo.ts:41](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L41)
+Defined in: [lib/seo.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L44)
 
 Returns the canonical WebSite Schema.org entity node with `#website` `@id` and Sitelinks SearchAction.
 

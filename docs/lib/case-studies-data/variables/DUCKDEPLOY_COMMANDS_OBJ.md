@@ -8,4 +8,4 @@
 
 > `const` **DUCKDEPLOY\_COMMANDS\_OBJ**: [`CaseStudyCommands`](../type-aliases/CaseStudyCommands.md)
 
-Defined in: [lib/case-studies-data.ts:138](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L138)
+Defined in: [lib/case-studies-data.ts:142](https://github.com/fderuiter/portfolio/blob/main/lib/case-studies-data.ts#L142)

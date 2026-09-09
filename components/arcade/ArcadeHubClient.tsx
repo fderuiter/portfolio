@@ -57,12 +57,21 @@ const ARCADE_GAMES: ArcadeGameCard[] = [
     id: "working-with-duck",
     slug: "working-with-duck",
     title: "Working With Duck",
-    subtitle: "Autonomous State Machine & Multitasking Simulation",
+    subtitle: "Code, Toys, and Questionable Priorities",
     genre: "Pet Simulation & AI",
     description:
-      "Balance code development against managing an autonomous Golden Retriever puppy, Duck. Features toy toss trajectories, real-time belly rub scrubbing, recall mechanics, and persistent scrapbook state.",
-    mechanics: ["Autonomous Dog AI", "Tug-of-War Multipliers", "Dog Park Whistle Recall", "Polaroid Scrapbook"],
-    techStack: ["HTML5 Canvas 2D", "Web Audio Synthesizer", "Deterministic State Machine"],
+      "Try to finish your code while Duck requests toys, treats, and belly rubs. Take him to the park, save a few scrapbook moments, and see how much work gets done.",
+    mechanics: [
+      "Autonomous Dog AI",
+      "Tug-of-War Multipliers",
+      "Dog Park Whistle Recall",
+      "Polaroid Scrapbook",
+    ],
+    techStack: [
+      "HTML5 Canvas 2D",
+      "Web Audio Synthesizer",
+      "Deterministic State Machine",
+    ],
     icon: <IconBone className="w-6 h-6 text-amber-400" />,
     accentColor: "from-amber-500/20 via-amber-500/5 to-transparent",
     borderHover: "hover:border-amber-400/50",
@@ -74,12 +83,21 @@ const ARCADE_GAMES: ArcadeGameCard[] = [
     id: "laser-loon",
     slug: "laser-loon",
     title: "Laser Loon: Quest for the State Flag",
-    subtitle: "Physics Raycasting & Waveform Campaign",
+    subtitle: "A Loon With a Legislative Agenda",
     genre: "Raycast Arcade Shooter",
     description:
-      "Pilot submission F277 Laser Loon on the Road to the Capitol. Battle rival flag redesigns using raycast laser collision algorithms, cryo-shatter particle physics, and dual-synth Web Audio audio processing.",
-    mechanics: ["Raycast Collision", "Cryo Freezing", "Loon Tremolo Ultimate", "Campaign Boss Battles"],
-    techStack: ["HTML5 Canvas", "Web Audio Dual-Synth", "Multi-Phase AI Engine"],
+      "Fly Laser Loon toward the State Capitol, take on rival flags, and blast through red tape. There are ice weapons and boss battles. The flag committee did not request these features.",
+    mechanics: [
+      "Raycast Collision",
+      "Cryo Freezing",
+      "Loon Tremolo Ultimate",
+      "Campaign Boss Battles",
+    ],
+    techStack: [
+      "HTML5 Canvas",
+      "Web Audio Dual-Synth",
+      "Multi-Phase AI Engine",
+    ],
     icon: <IconCrosshair className="w-6 h-6 text-red-400" />,
     accentColor: "from-red-500/20 via-red-500/5 to-transparent",
     borderHover: "hover:border-red-400/50",
@@ -91,12 +109,21 @@ const ARCADE_GAMES: ArcadeGameCard[] = [
     id: "quasi-puzzler",
     slug: "quasi-puzzler",
     title: "Quasi-Perfect Puzzler",
-    subtitle: "Formal Verification & Proof Tactics Engine",
+    subtitle: "Small Proofs, Limited Memory",
     genre: "Formal Verification",
     description:
-      "Lean-inspired interactive proof tactics workspace. Construct inductive AST proof trees, discharge hypotheses via Modus Ponens, and manage proof-engine RAM limits.",
-    mechanics: ["AST Expression Tree", "Proof Tactics (intro, rw, simp)", "RAM Exhaustion OOM", "Morality Scoring"],
-    techStack: ["TypeScript AST", "Interactive Drag & Drop", "Lean 4 Engine Sim"],
+      "Solve Lean-inspired logic puzzles by applying tactics to a proof tree. Each move costs simulated memory, so a correct answer needs a sensible route.",
+    mechanics: [
+      "AST Expression Tree",
+      "Proof Tactics (intro, rw, simp)",
+      "RAM Exhaustion OOM",
+      "Morality Scoring",
+    ],
+    techStack: [
+      "TypeScript AST",
+      "Interactive Drag & Drop",
+      "Lean 4 Engine Sim",
+    ],
     icon: <IconBrain className="w-6 h-6 text-purple-400" />,
     accentColor: "from-purple-500/20 via-purple-500/5 to-transparent",
     borderHover: "hover:border-purple-400/50",
@@ -108,12 +135,21 @@ const ARCADE_GAMES: ArcadeGameCard[] = [
     id: "garmin-watch",
     slug: "garmin-watch",
     title: "Monkey C Mayhem: Garmin Schvitz App",
-    subtitle: "Embedded Systems & Garmin Schvitz App Simulator",
+    subtitle: "A Small Watch With a Lot Going On",
     genre: "Embedded Systems",
     description:
-      "Circular 280×280 Monkey C Mayhem smartwatch simulator running the Garmin Schvitz App artifact under strict 32KB RAM constraints with real-time garbage collection lifecycle tracking.",
-    mechanics: ["Circular LCD 280×280", "32KB Monkey C RAM Limit", "500ms GC Freeze", "Overheat Fog Wiping"],
-    techStack: ["HTML5 Canvas", "Piezo Audio Synthesis", "Embedded State Engine"],
+      "Keep a simulated Garmin Schvitz App running with a 32KB memory budget. Clear memory, dodge obstacles, and wipe the fog off the screen before the watch has a very bad day.",
+    mechanics: [
+      "Circular LCD 280×280",
+      "32KB Monkey C RAM Limit",
+      "500ms GC Freeze",
+      "Overheat Fog Wiping",
+    ],
+    techStack: [
+      "HTML5 Canvas",
+      "Piezo Audio Synthesis",
+      "Embedded State Engine",
+    ],
     icon: <IconCpu className="w-6 h-6 text-amber-400" />,
     accentColor: "from-amber-500/20 via-amber-500/5 to-transparent",
     borderHover: "hover:border-amber-400/50",
@@ -125,12 +161,21 @@ const ARCADE_GAMES: ArcadeGameCard[] = [
     id: "clinical-chaos",
     slug: "clinical-chaos",
     title: "Clinical Trial Chaos: CDISC Compliance",
-    subtitle: "21 CFR Part 11 Compliance & Domain Mapper",
+    subtitle: "Clinical Data, Against the Clock",
     genre: "Regulatory Simulation",
     description:
-      "Ingest CDISC SDTM/ADaM clinical observations, execute 21 CFR Part 11 electronic signatures with intent verification, and resolve site audit queries under inspection time pressure.",
-    mechanics: ["CDISC SDTM Domains (DM, VS, AE, LB)", "21 CFR § 11 Signatures", "FDA Auditor Patrol AI", "Protocol Amendments"],
-    techStack: ["FDA Compliance Sim", "Conveyor Belt Physics", "Web Audio Alarms"],
+      "Sort clinical observations, fix data problems, and sign submissions before time runs out. A game inspired by clinical data work, with a considerably less patient auditor.",
+    mechanics: [
+      "CDISC SDTM Domains (DM, VS, AE, LB)",
+      "21 CFR § 11 Signatures",
+      "FDA Auditor Patrol AI",
+      "Protocol Amendments",
+    ],
+    techStack: [
+      "FDA Compliance Sim",
+      "Conveyor Belt Physics",
+      "Web Audio Alarms",
+    ],
     icon: <IconShieldCheck className="w-6 h-6 text-emerald-400" />,
     accentColor: "from-emerald-500/20 via-emerald-500/5 to-transparent",
     borderHover: "hover:border-emerald-400/50",
@@ -142,12 +187,21 @@ const ARCADE_GAMES: ArcadeGameCard[] = [
     id: "retro-labyrinth",
     slug: "retro-labyrinth",
     title: "Retro Labyrinth: Graveyard Roguelike",
-    subtitle: "Procedural Dungeon Generation & CRT Filter Engine",
+    subtitle: "There Are Bugs in the Dungeon",
     genre: "Procedural Roguelike",
     description:
-      "Explore procedural code graph dungeons rendered with custom CRT scanline shaders, Traveling Salesperson dynamic shifting geometry, and FOV raycast fog-of-war.",
-    mechanics: ["TSP Dynamic Mazes", "FOV Fog-of-War", "Developer Weapons Inventory", "3D Wireframe Boss"],
-    techStack: ["CRT Canvas Filter", "Procedural Dungeon Gen", "Matrix 3D Math"],
+      "Explore a shifting dungeon made from abandoned codebases. Fight bugs, find your way through the fog, and face a wireframe boss with an unreasonable number of angles.",
+    mechanics: [
+      "TSP Dynamic Mazes",
+      "FOV Fog-of-War",
+      "Developer Weapons Inventory",
+      "3D Wireframe Boss",
+    ],
+    techStack: [
+      "CRT Canvas Filter",
+      "Procedural Dungeon Gen",
+      "Matrix 3D Math",
+    ],
     icon: <IconDeviceGamepad2 className="w-6 h-6 text-rose-400" />,
     accentColor: "from-rose-500/20 via-rose-500/5 to-transparent",
     borderHover: "hover:border-rose-400/50",
@@ -163,7 +217,7 @@ function GameCard({ game, index }: { game: ArcadeGameCard; index: number }) {
     getScore(game.storageKey),
     getServerScore
   );
-  
+
   let formattedScore = rawScore;
   if (game.id === "quasi-puzzler" && rawScore !== "0") {
     try {
@@ -195,7 +249,9 @@ function GameCard({ game, index }: { game: ArcadeGameCard; index: number }) {
               {game.icon}
             </div>
             <div>
-              <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border ${game.badgeBg}`}>
+              <span
+                className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border ${game.badgeBg}`}
+              >
                 {game.genre}
               </span>
             </div>
@@ -213,7 +269,9 @@ function GameCard({ game, index }: { game: ArcadeGameCard; index: number }) {
         <h2 className="text-xl md:text-2xl font-bold font-mono tracking-tight text-white group-hover:text-brand-cyan transition-colors">
           {game.title}
         </h2>
-        <p className="mt-1 text-xs font-mono text-zinc-400 font-medium">{game.subtitle}</p>
+        <p className="mt-1 text-xs font-mono text-zinc-400 font-medium">
+          {game.subtitle}
+        </p>
 
         <p className="mt-4 text-xs md:text-sm text-zinc-300 leading-relaxed font-sans">
           {game.description}
@@ -222,7 +280,7 @@ function GameCard({ game, index }: { game: ArcadeGameCard; index: number }) {
         {/* Mechanics Chips */}
         <div className="mt-5">
           <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 font-bold block mb-2">
-            Core Mechanics
+            How to Play
           </span>
           <div className="flex flex-wrap gap-1.5">
             {game.mechanics.map((m) => (
@@ -239,7 +297,7 @@ function GameCard({ game, index }: { game: ArcadeGameCard; index: number }) {
         {/* Tech Stack Chips */}
         <div className="mt-3">
           <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 font-bold block mb-2">
-            Architecture
+            Built With
           </span>
           <div className="flex flex-wrap gap-1.5">
             {game.techStack.map((t) => (
@@ -263,7 +321,7 @@ function GameCard({ game, index }: { game: ArcadeGameCard; index: number }) {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-cyan text-black font-mono text-xs font-bold transition-all duration-200 hover:bg-white hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(6,182,212,0.3)] cursor-pointer"
         >
           <IconPlayerPlay className="w-3.5 h-3.5 fill-current" />
-          <span>Launch Module</span>
+          <span>Play Game</span>
           <IconArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>
@@ -287,29 +345,31 @@ export const ArcadeHubClient: React.FC = () => {
         {/* Header Hero Section */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono font-bold mb-4">
-            <span>Interactive Systems &amp; Graphics Labs</span>
+            <span>SIDE PROJECTS YOU CAN PLAY</span>
           </div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold font-mono tracking-tight text-white">
-            Engineering <span className="text-brand-cyan">Arcade &amp; Labs</span>
+            Engineering{" "}
+            <span className="text-brand-cyan">Arcade &amp; Labs</span>
           </h1>
           <p className="mt-4 text-sm md:text-base text-zinc-400 font-sans leading-relaxed">
-            A suite of high-performance canvas physics engines, formal logic verification workspaces,
-            and embedded memory simulators built with zero external game frameworks.
+            Browser games about the things I apparently think about after work:
+            logic, clinical data, tiny computers, and a puppy who would like my
+            attention.
           </p>
 
           {/* Quick Metrics Bar */}
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs font-mono">
             <span className="px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300">
-              <strong>6 Interactive Modules</strong>
+              <strong>6 Playable Games</strong>
             </span>
             <span className="px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300">
               <strong>Web Audio Synthesis</strong>
             </span>
             <span className="px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300">
-              <strong>Deterministic 60FPS Loops</strong>
+              <strong>Keyboard &amp; Touch Controls</strong>
             </span>
             <span className="px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300">
-              <strong>Zero Framework Overhead</strong>
+              <strong>Custom Canvas Engines</strong>
             </span>
           </div>
         </div>
@@ -337,13 +397,16 @@ export const ArcadeHubClient: React.FC = () => {
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase border bg-emerald-500/10 text-emerald-300 border-emerald-500/30">
                   Secret Vault
                 </span>
-                <span className="text-xs font-mono text-zinc-400">Audio DSP &amp; Memes</span>
+                <span className="text-xs font-mono text-zinc-400">
+                  SOUNDS &amp; EASTER EGGS
+                </span>
               </div>
               <h2 className="text-lg sm:text-xl font-bold font-mono text-white">
                 Developer Soundboard &amp; Meme Vault
               </h2>
               <p className="text-xs sm:text-sm text-zinc-300 font-sans mt-1">
-                Synthesized 8-channel Web Audio soundboard, collectible Easter egg trophies, and ASCII art generators.
+                Make some noise, find a few hidden trophies, and borrow some
+                ASCII art.
               </p>
             </div>
           </div>

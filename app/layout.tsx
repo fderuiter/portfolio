@@ -39,10 +39,10 @@ export const metadata: Metadata = {
   metadataBase: new URL(resolveBaseUrl()),
   title: {
     template: "%s | Frederick de Ruiter",
-    default: "Frederick de Ruiter | Principal Systems Engineer & Designer",
+    default: "Frederick de Ruiter | Clinical Data, Software & Side Projects",
   },
   description:
-    "A high-performance design engineering showcase combining DOM-free canvas layout physics, serverless Neon Postgres data streams, and robust clinical CDISC data engines.",
+    "I’m Fred. I work with clinical data and build useful software, browser games, and the occasional laser loon. Explore my projects and the decisions behind them.",
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },
@@ -62,24 +62,24 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: resolveBaseUrl(),
     siteName: "Frederick de Ruiter Portfolio",
-    title: "Frederick de Ruiter | Principal Systems Engineer & Designer",
+    title: "Frederick de Ruiter | Clinical Data, Software & Side Projects",
     description:
-      "A high-performance design engineering showcase combining DOM-free canvas layout physics, serverless Neon Postgres data streams, and robust clinical CDISC data engines.",
+      "I’m Fred. I work with clinical data and build useful software, browser games, and the occasional laser loon. Explore my projects and the decisions behind them.",
     images: [
       {
         url: `${resolveBaseUrl()}/opengraph-image`,
         width: 1200,
         height: 630,
-        alt: "Frederick de Ruiter | Principal Systems Engineer & Designer",
+        alt: "Frederick de Ruiter | Clinical Data, Software & Side Projects",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     creator: "@laser_loon",
-    title: "Frederick de Ruiter | Principal Systems Engineer & Designer",
+    title: "Frederick de Ruiter | Clinical Data, Software & Side Projects",
     description:
-      "A high-performance design engineering showcase combining DOM-free canvas layout physics, serverless Neon Postgres data streams, and robust clinical CDISC data engines.",
+      "I’m Fred. I work with clinical data and build useful software, browser games, and the occasional laser loon. Explore my projects and the decisions behind them.",
     images: [`${resolveBaseUrl()}/twitter-image`],
   },
   robots: {

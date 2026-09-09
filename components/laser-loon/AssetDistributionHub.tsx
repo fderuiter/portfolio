@@ -124,13 +124,14 @@ export const AssetDistributionHub: React.FC = () => {
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 mb-2">
             <IconArchive className="w-3.5 h-3.5" />
-            <span>Open Source Graphic Asset Repository</span>
+            <span>TAKE A LOON HOME</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold font-mono text-white tracking-tight">
-            Laser Loon Production Asset Distribution Hub
+            Get the Laser Loon Artwork
           </h2>
           <p className="text-xs sm:text-sm text-zinc-400 font-mono mt-1 max-w-2xl">
-            Download production-ready master files in every industry vector and raster classification. Free for civic, commercial, and personal use under CC BY 4.0.
+            Print it, put it on a website, or make something of your own. Pick
+            the format you need below; the artwork is shared under CC BY 4.0.
           </p>
         </div>
 
@@ -142,7 +143,7 @@ export const AssetDistributionHub: React.FC = () => {
             className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-red-500 hover:bg-red-400 text-black font-mono text-xs font-extrabold rounded-xl transition-all shadow-[0_0_25px_rgba(239,68,68,0.4)] active:scale-[0.98] group cursor-pointer"
           >
             <IconDownload className="w-4 h-4 transform group-hover:-translate-y-0.5 transition-transform" />
-            <span>Download Master ZIP Archive (1-Click)</span>
+            <span>Download All Files (ZIP)</span>
           </a>
 
           <button
@@ -150,7 +151,11 @@ export const AssetDistributionHub: React.FC = () => {
             className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono text-xs font-bold rounded-xl transition-colors cursor-pointer"
             aria-label="Share case study link"
           >
-            {copied ? <IconCheck className="w-4 h-4 text-emerald-400" /> : <IconShare className="w-4 h-4" />}
+            {copied ? (
+              <IconCheck className="w-4 h-4 text-emerald-400" />
+            ) : (
+              <IconShare className="w-4 h-4" />
+            )}
             <span>{copied ? "Link Copied!" : "Share Assets"}</span>
           </button>
         </div>
@@ -165,9 +170,11 @@ export const AssetDistributionHub: React.FC = () => {
             <span>Vector Print &amp; Source Formats (.AI, .EPS, .PDF)</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {ASSET_ITEMS.filter((item) => item.category === "vector").map((item) => (
-              <AssetCard key={item.filename} item={item} />
-            ))}
+            {ASSET_ITEMS.filter((item) => item.category === "vector").map(
+              (item) => (
+                <AssetCard key={item.filename} item={item} />
+              )
+            )}
           </div>
         </div>
 
@@ -178,9 +185,11 @@ export const AssetDistributionHub: React.FC = () => {
             <span>Web &amp; UI Assets (.SVG, .PNG)</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {ASSET_ITEMS.filter((item) => item.category === "web").map((item) => (
-              <AssetCard key={item.filename} item={item} />
-            ))}
+            {ASSET_ITEMS.filter((item) => item.category === "web").map(
+              (item) => (
+                <AssetCard key={item.filename} item={item} />
+              )
+            )}
           </div>
         </div>
 
@@ -191,9 +200,11 @@ export const AssetDistributionHub: React.FC = () => {
             <span>Raster Compositing &amp; Previews (.PSD, .JPG)</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {ASSET_ITEMS.filter((item) => item.category === "raster").map((item) => (
-              <AssetCard key={item.filename} item={item} />
-            ))}
+            {ASSET_ITEMS.filter((item) => item.category === "raster").map(
+              (item) => (
+                <AssetCard key={item.filename} item={item} />
+              )
+            )}
           </div>
         </div>
       </div>
@@ -210,7 +221,10 @@ export const AssetDistributionHub: React.FC = () => {
               <IconShieldCheck className="w-4 h-4 text-emerald-400" />
             </h4>
             <p className="text-xs text-zinc-400 font-mono mt-1 leading-relaxed">
-              Free for commercial print, screen printing, vinyl plotting, merchandise, digital publications, and software development. Requires attribution to <strong>Frederick de Ruiter / Laser Loon Project</strong>.
+              Free for commercial print, screen printing, vinyl plotting,
+              merchandise, digital publications, and software development.
+              Requires attribution to{" "}
+              <strong>Frederick de Ruiter / Laser Loon Project</strong>.
             </p>
           </div>
         </div>
@@ -234,7 +248,9 @@ function AssetCard({ item }: { item: AssetFormatItem }) {
       <div>
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-black/50 border border-zinc-800">{item.icon}</div>
+            <div className="p-2 rounded-lg bg-black/50 border border-zinc-800">
+              {item.icon}
+            </div>
             <span className="font-mono text-sm font-bold text-white group-hover:text-amber-300 transition-colors">
               {item.filename}
             </span>
@@ -244,8 +260,12 @@ function AssetCard({ item }: { item: AssetFormatItem }) {
           </span>
         </div>
 
-        <div className="text-xs font-mono text-zinc-300 font-semibold mb-1">{item.classification}</div>
-        <p className="text-[11px] font-mono text-zinc-400 mb-3 leading-relaxed">{item.attributes}</p>
+        <div className="text-xs font-mono text-zinc-300 font-semibold mb-1">
+          {item.classification}
+        </div>
+        <p className="text-[11px] font-mono text-zinc-400 mb-3 leading-relaxed">
+          {item.attributes}
+        </p>
       </div>
 
       <a

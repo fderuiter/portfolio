@@ -45,7 +45,10 @@ export const Footer: React.FC = () => {
     }
   };
 
-  const handleHashClick = (e: React.MouseEvent<HTMLAnchorElement>, hash: string) => {
+  const handleHashClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    hash: string
+  ) => {
     if (pathname === "/") {
       e.preventDefault();
       const el = document.getElementById(hash);
@@ -55,15 +58,21 @@ export const Footer: React.FC = () => {
     }
   };
 
-  const footerObserverRef = useResizeObserver<HTMLElement>((entry) => {
-    const h = Math.round(entry.contentRect.height);
-    if (typeof document !== "undefined" && h > 0) {
-      document.documentElement.style.setProperty("--footer-height", `${h}px`);
-    }
-  }, { trackVertical: true });
+  const footerObserverRef = useResizeObserver<HTMLElement>(
+    (entry) => {
+      const h = Math.round(entry.contentRect.height);
+      if (typeof document !== "undefined" && h > 0) {
+        document.documentElement.style.setProperty("--footer-height", `${h}px`);
+      }
+    },
+    { trackVertical: true }
+  );
 
   return (
-    <footer ref={footerObserverRef} className="w-full bg-zinc-950 border-t border-zinc-900 relative z-20 select-none">
+    <footer
+      ref={footerObserverRef}
+      className="w-full bg-zinc-950 border-t border-zinc-900 relative z-20 select-none"
+    >
       {/* Top Ambient Highlight */}
       <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-cyan/20 to-transparent" />
 
@@ -72,7 +81,9 @@ export const Footer: React.FC = () => {
 
       <div className="max-w-6xl mx-auto px-6 md:px-12 pt-12 pb-[max(4rem,env(safe-area-inset-bottom)+2rem)]">
         {/* Main Grid */}
-        <div className={`grid grid-cols-1 sm:grid-cols-2 ${persona === "technical" ? "lg:grid-cols-4" : "lg:grid-cols-5"} gap-10 lg:gap-8 mb-16`}>
+        <div
+          className={`grid grid-cols-1 sm:grid-cols-2 ${persona === "technical" ? "lg:grid-cols-4" : "lg:grid-cols-5"} gap-10 lg:gap-8 mb-16`}
+        >
           {/* Col 1: Brand & Bio */}
           <div className="lg:col-span-2 flex flex-col justify-between space-y-6">
             <div className="space-y-3">
@@ -85,10 +96,13 @@ export const Footer: React.FC = () => {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-cyan/70 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-cyan" />
                 </span>
-                <span className="group-hover:text-brand-cyan transition-colors">FDERUITER</span>
+                <span className="group-hover:text-brand-cyan transition-colors">
+                  FDERUITER
+                </span>
               </Link>
               <p className="text-xs font-mono text-zinc-400 max-w-sm leading-relaxed">
-                Problem solver by trade, builder by obsession. Turning complex challenges into simple, bulletproof software.
+                Clinical data, useful software, and the occasional laser loon.
+                Made by Fred, with plenty of curiosity.
               </p>
             </div>
 
@@ -99,9 +113,11 @@ export const Footer: React.FC = () => {
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900/80 hover:bg-zinc-900 border border-zinc-800 hover:border-brand-cyan/40 text-[11px] font-mono text-zinc-300 hover:text-white transition-all w-fit group"
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500 group-hover:animate-pulse" />
-              <span>All Systems Operational</span>
+              <span>Explore the projects</span>
               <span className="text-zinc-600">|</span>
-              <span className="text-zinc-400 group-hover:text-brand-cyan transition-colors">Inspect Stack ↗</span>
+              <span className="text-zinc-400 group-hover:text-brand-cyan transition-colors">
+                Inspect Stack ↗
+              </span>
             </Link>
           </div>
 
@@ -110,7 +126,7 @@ export const Footer: React.FC = () => {
             <div className="space-y-4">
               <span className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
                 <IconSparkles className="w-3.5 h-3.5 text-brand-cyan" />
-                Arcade &amp; Labs
+                Arcade
               </span>
               <ul className="space-y-2 text-xs font-mono">
                 <li>
@@ -119,7 +135,7 @@ export const Footer: React.FC = () => {
                     onMouseEnter={handleHover}
                     className="text-zinc-400 hover:text-brand-cyan transition-colors"
                   >
-                    Arcade Hub Index ↗
+                    Arcade ↗
                   </Link>
                 </li>
                 <li>
@@ -205,12 +221,11 @@ export const Footer: React.FC = () => {
             <ul className="space-y-2 text-xs font-mono">
               <li>
                 <Link
-                  href="/#case-studies"
-                  onClick={(e) => handleHashClick(e, "case-studies")}
+                  href="/case-studies"
                   onMouseEnter={handleHover}
                   className="text-zinc-400 hover:text-brand-cyan transition-colors"
                 >
-                  Featured Projects
+                  Work
                 </Link>
               </li>
               <li>
@@ -230,7 +245,7 @@ export const Footer: React.FC = () => {
                   className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                 >
                   <IconFileSpreadsheet className="w-3 h-3 text-brand-cyan" />
-                  CRF Studio &amp; EDC
+                  CRF Studio
                 </Link>
               </li>
               <li>
@@ -262,7 +277,7 @@ export const Footer: React.FC = () => {
                   onMouseEnter={handleHover}
                   className="text-zinc-400 hover:text-brand-cyan transition-colors"
                 >
-                  About &amp; Experience
+                  About
                 </Link>
               </li>
             </ul>
@@ -282,7 +297,7 @@ export const Footer: React.FC = () => {
                   className="text-brand-cyan font-bold hover:underline transition-all flex items-center gap-1.5"
                 >
                   <IconCalendar className="w-3 h-3 text-brand-cyan" />
-                  Schedule 1:1 Sync ↗
+                  Book a Chat ↗
                 </Link>
               </li>
               <li>
@@ -292,7 +307,7 @@ export const Footer: React.FC = () => {
                   className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                 >
                   <IconMessageCode className="w-3 h-3 text-brand-cyan" />
-                  Direct Contact Form ↗
+                  Contact ↗
                 </Link>
               </li>
               <li>
@@ -316,7 +331,7 @@ export const Footer: React.FC = () => {
                   className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
                 >
                   <IconBrandLinkedin className="w-3 h-3 text-zinc-400" />
-                  LinkedIn Network ↗
+                  LinkedIn ↗
                 </a>
               </li>
             </ul>
@@ -329,14 +344,15 @@ export const Footer: React.FC = () => {
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-brand-cyan animate-pulse" />
               <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-brand-cyan">
-                Systems Dispatch
+                Project Notes
               </span>
             </div>
             <h4 className="text-sm font-mono font-bold text-white">
-              Engineering &amp; Architecture Notes
+              Notes from my projects
             </h4>
             <p className="text-xs font-mono text-zinc-400">
-              Occasional deep-dives into formal verification, AST compilers, CDISC clinical architectures, and bare-metal browser physics. Zero fluff.
+              Occasional notes on what I’m building, what I’m learning, and the
+              bugs that put up a good fight.
             </p>
           </div>
           <div className="w-full md:w-auto md:min-w-[340px]">
@@ -347,7 +363,10 @@ export const Footer: React.FC = () => {
         {/* Bottom Strip */}
         <div className="pt-8 border-t border-zinc-900/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-zinc-400">
           <div className="flex items-center gap-3">
-            <span>&copy; {new Date().getFullYear()} Frederick de Ruiter. All rights reserved.</span>
+            <span>
+              &copy; {new Date().getFullYear()} Frederick de Ruiter. All rights
+              reserved.
+            </span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -356,7 +375,7 @@ export const Footer: React.FC = () => {
               onMouseEnter={handleHover}
               className="hover:text-brand-cyan transition-colors"
             >
-              Systems Proof &amp; Verification
+              Logic &amp; Proofs
             </Link>
             <span className="text-zinc-700">&bull;</span>
             <button

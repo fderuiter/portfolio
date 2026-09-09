@@ -38,13 +38,13 @@ interface SubNavItem {
 const ARCADE_ITEMS: SubNavItem[] = [
   {
     title: "Arcade Hub",
-    subtitle: "Playable browser games & canvas physics",
+    subtitle: "Games, puzzles, and side projects",
     href: "/arcade",
     icon: <IconDeviceGamepad2 className="w-4 h-4 text-brand-cyan" />,
   },
   {
     title: "Laser Loon",
-    subtitle: "Physics raycaster & viral flag game",
+    subtitle: "A loon, lasers, and a trip to the Capitol",
     href: "/arcade/laser-loon",
     icon: <IconCrosshair className="w-4 h-4 text-brand-cyan" />,
   },
@@ -74,7 +74,7 @@ const ARCADE_ITEMS: SubNavItem[] = [
   },
   {
     title: "Working With Duck",
-    subtitle: "Autonomous desk pet & state machine",
+    subtitle: "You have work. Duck has other plans.",
     href: "/arcade/working-with-duck",
     icon: <IconBone className="w-4 h-4 text-brand-cyan" />,
   },
@@ -89,7 +89,7 @@ const ARCADE_ITEMS: SubNavItem[] = [
 const SYSTEMS_ITEMS: SubNavItem[] = [
   {
     title: "Under the Hood (Stack)",
-    subtitle: "Tech stack & live system telemetry",
+    subtitle: "The tools and decisions behind this site",
     href: "/stack",
     icon: <IconCpu className="w-4 h-4 text-brand-cyan" />,
   },
@@ -101,7 +101,7 @@ const SYSTEMS_ITEMS: SubNavItem[] = [
   },
   {
     title: "Proof Workspace",
-    subtitle: "Interactive deductive logic theorem prover",
+    subtitle: "Build a proof, one step at a time",
     href: "/proof",
     icon: <IconBrain className="w-4 h-4 text-brand-cyan" />,
   },
@@ -130,6 +130,7 @@ export const Navbar: React.FC = () => {
   const { openSearch } = useSearch();
   const { persona, setPersona } = usePersona();
   const [showAudioPanel, setShowAudioPanel] = useState(false);
+  const [showPreferences, setShowPreferences] = useState(false);
 
   const pathname = usePathname();
   const [prevPathname, setPrevPathname] = useState(pathname);
@@ -139,6 +140,7 @@ export const Navbar: React.FC = () => {
     setIsOpen(false);
     setActiveDropdown(null);
     setShowAudioPanel(false);
+    setShowPreferences(false);
   }
 
   useEffect(() => {
@@ -148,6 +150,9 @@ export const Navbar: React.FC = () => {
   }, [pathname]);
 
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const arcadeTriggerRef = useRef<HTMLButtonElement>(null);
+  const systemsTriggerRef = useRef<HTMLButtonElement>(null);
+  const preferencesTriggerRef = useRef<HTMLButtonElement>(null);
   const navContainerRef = useRef<HTMLDivElement>(null);
 
   const handleLinkHover = (e: React.MouseEvent<HTMLElement>) => {
@@ -234,16 +239,24 @@ export const Navbar: React.FC = () => {
     };
   }, [isOpen]);
 
-  // Accessibility: Esc key listener for dropdowns and audio panel
+  // Accessibility: Esc key listener for desktop disclosures and audio panel
   useEffect(() => {
-    if (!activeDropdown && !showAudioPanel) return;
+    if (!activeDropdown && !showAudioPanel && !showPreferences) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        if (showAudioPanel) {
+        if (showPreferences) {
+          setShowPreferences(false);
+          preferencesTriggerRef.current?.focus();
+        } else if (showAudioPanel) {
           setShowAudioPanel(false);
         } else if (activeDropdown) {
+          const trigger =
+            activeDropdown === "arcade"
+              ? arcadeTriggerRef.current
+              : systemsTriggerRef.current;
           setActiveDropdown(null);
+          trigger?.focus();
         }
       }
     };
@@ -252,7 +265,7 @@ export const Navbar: React.FC = () => {
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [activeDropdown, showAudioPanel]);
+  }, [activeDropdown, showAudioPanel, showPreferences]);
 
   // Handle smooth scroll clicks on homepage and universal mobile drawer dismissal
   const handleNavClick = (
@@ -261,6 +274,7 @@ export const Navbar: React.FC = () => {
   ) => {
     setActiveDropdown(null);
     setIsOpen(false);
+    setShowPreferences(false);
     if (typeof document !== "undefined") {
       document.body.style.overflow = "";
     }
@@ -326,26 +340,19 @@ export const Navbar: React.FC = () => {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <div className="hidden xl:flex items-center gap-2.5 lg:gap-4 2xl:gap-5 shrink-0">
+          <div className="hidden xl:flex items-center gap-2.5 lg:gap-3.5 2xl:gap-5 shrink-0">
             <nav
               className="flex items-center gap-2.5 md:gap-3.5 lg:gap-4.5 shrink-0"
               aria-label="Main Navigation"
             >
               {/* Work Pillar */}
               <Link
-                href={pathname === "/" ? "/#case-studies" : "/case-studies"}
-                onClick={(e) => {
-                  if (pathname === "/") {
-                    handleNavClick(e, "/#case-studies");
-                  } else {
-                    setActiveDropdown(null);
-                  }
-                }}
+                href="/case-studies"
+                onClick={() => setActiveDropdown(null)}
                 onMouseEnter={handleLinkHover}
                 className={cn(
                   "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 whitespace-nowrap shrink-0",
-                  (pathname === "/" && activeSection === "case-studies") ||
-                    pathname === "/case-studies" ||
+                  pathname === "/case-studies" ||
                     pathname.startsWith("/case-studies/")
                     ? "text-brand-cyan font-bold"
                     : "text-muted"
@@ -354,100 +361,101 @@ export const Navbar: React.FC = () => {
                 Work
               </Link>
 
-              {/* Arcade & Labs Dropdown */}
-              {persona !== "technical" && (
-                <div className="relative shrink-0">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setActiveDropdown(
-                        activeDropdown === "arcade" ? null : "arcade"
-                      )
-                    }
-                    onMouseEnter={handleLinkHover}
+              {/* Arcade Dropdown */}
+              <div className="relative shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPreferences(false);
+                    setActiveDropdown(
+                      activeDropdown === "arcade" ? null : "arcade"
+                    );
+                  }}
+                  onMouseEnter={handleLinkHover}
+                  className={cn(
+                    "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-brand-cyan rounded whitespace-nowrap shrink-0",
+                    isArcadeActive || activeDropdown === "arcade"
+                      ? "text-brand-cyan font-bold"
+                      : "text-muted"
+                  )}
+                  aria-expanded={activeDropdown === "arcade"}
+                  ref={arcadeTriggerRef}
+                  aria-controls="arcade-navigation"
+                >
+                  <span className="whitespace-nowrap">Arcade</span>
+                  <IconChevronDown
                     className={cn(
-                      "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-brand-cyan rounded whitespace-nowrap shrink-0",
-                      isArcadeActive || activeDropdown === "arcade"
-                        ? "text-brand-cyan font-bold"
-                        : "text-muted"
+                      "w-3 h-3 transition-transform duration-200 shrink-0",
+                      activeDropdown === "arcade"
+                        ? "rotate-180 text-brand-cyan"
+                        : "text-zinc-500"
                     )}
-                    aria-expanded={activeDropdown === "arcade"}
-                    aria-haspopup="true"
-                  >
-                    <span className="whitespace-nowrap">Arcade &amp; Labs</span>
-                    <IconChevronDown
-                      className={cn(
-                        "w-3 h-3 transition-transform duration-200 shrink-0",
-                        activeDropdown === "arcade"
-                          ? "rotate-180 text-brand-cyan"
-                          : "text-zinc-500"
-                      )}
-                    />
-                  </button>
+                  />
+                </button>
 
-                  <AnimatePresence>
-                    {activeDropdown === "arcade" && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 8, scale: 0.98 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                        transition={{ duration: 0.15 }}
-                        className="absolute left-0 mt-3 w-[calc(100vw-2rem)] sm:w-80 max-w-[calc(100vw-2rem)] p-2.5 rounded-2xl border border-zinc-800 bg-zinc-950/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_20px_rgba(6,182,212,0.08)] z-50 flex flex-col gap-1"
-                        role="menu"
-                      >
-                        <div className="px-3 py-1.5 border-b border-zinc-800/80 mb-1 flex items-center justify-between min-w-0">
-                          <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-zinc-400 truncate">
-                            Interactive Arcade &amp; Labs
-                          </span>
-                          <span className="text-[9px] font-mono text-brand-cyan shrink-0 ml-2">
-                            60 FPS
-                          </span>
-                        </div>
-                        {ARCADE_ITEMS.map((item) => {
-                          const isActive = pathname === item.href;
-                          return (
-                            <Link
-                              key={item.href}
-                              href={item.href}
-                              onClick={() => setActiveDropdown(null)}
-                              onMouseEnter={handleLinkHover}
-                              className={cn(
-                                "flex items-start gap-3 p-2.5 rounded-xl transition-all duration-150 group min-w-0",
-                                isActive
-                                  ? "bg-brand-cyan/10 border border-brand-cyan/30 text-white"
-                                  : "hover:bg-zinc-900/80 text-zinc-300 hover:text-white"
-                              )}
-                              role="menuitem"
-                            >
-                              <div className="mt-0.5 p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 group-hover:border-brand-cyan/30 transition-colors shrink-0">
-                                {item.icon}
-                              </div>
-                              <div className="flex flex-col min-w-0">
-                                <span className="text-xs font-mono font-bold tracking-tight text-neutral-200 group-hover:text-brand-cyan transition-colors truncate">
-                                  {item.title}
-                                </span>
-                                <span className="text-[11px] font-sans text-zinc-400 truncate">
-                                  {item.subtitle}
-                                </span>
-                              </div>
-                            </Link>
-                          );
-                        })}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )}
+                <AnimatePresence>
+                  {activeDropdown === "arcade" && (
+                    <motion.div
+                      key="arcade-navigation"
+                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute left-0 mt-3 w-[calc(100vw-2rem)] sm:w-80 max-w-[calc(100vw-2rem)] p-2.5 rounded-2xl border border-zinc-800 bg-zinc-950/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_20px_rgba(6,182,212,0.08)] z-50 flex flex-col gap-1"
+                      id="arcade-navigation"
+                    >
+                      <div className="px-3 py-1.5 border-b border-zinc-800/80 mb-1 flex items-center justify-between min-w-0">
+                        <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-zinc-400 truncate">
+                          Arcade
+                        </span>
+                        <span className="text-[9px] font-mono text-brand-cyan shrink-0 ml-2">
+                          60 FPS
+                        </span>
+                      </div>
+                      {ARCADE_ITEMS.map((item) => {
+                        const isActive = pathname === item.href;
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setActiveDropdown(null)}
+                            onMouseEnter={handleLinkHover}
+                            className={cn(
+                              "flex items-start gap-3 p-2.5 rounded-xl transition-all duration-150 group min-w-0",
+                              isActive
+                                ? "bg-brand-cyan/10 border border-brand-cyan/30 text-white"
+                                : "hover:bg-zinc-900/80 text-zinc-300 hover:text-white"
+                            )}
+                          >
+                            <div className="mt-0.5 p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 group-hover:border-brand-cyan/30 transition-colors shrink-0">
+                              {item.icon}
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-xs font-mono font-bold tracking-tight text-neutral-200 group-hover:text-brand-cyan transition-colors truncate">
+                                {item.title}
+                              </span>
+                              <span className="text-[11px] font-sans text-zinc-400 truncate">
+                                {item.subtitle}
+                              </span>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
               {/* Systems & Proof Dropdown */}
               <div className="relative shrink-0">
                 <button
                   type="button"
-                  onClick={() =>
+                  onClick={() => {
+                    setShowPreferences(false);
                     setActiveDropdown(
                       activeDropdown === "systems" ? null : "systems"
-                    )
-                  }
+                    );
+                  }}
                   onMouseEnter={handleLinkHover}
                   className={cn(
                     "py-1 text-xs font-mono tracking-wider font-semibold transition-all duration-200 hover:text-foreground cursor-pointer flex items-center gap-1 focus-visible:ring-1 focus-visible:ring-brand-cyan rounded whitespace-nowrap shrink-0",
@@ -456,7 +464,8 @@ export const Navbar: React.FC = () => {
                       : "text-muted"
                   )}
                   aria-expanded={activeDropdown === "systems"}
-                  aria-haspopup="true"
+                  ref={systemsTriggerRef}
+                  aria-controls="systems-navigation"
                 >
                   <span className="whitespace-nowrap">Systems</span>
                   <IconChevronDown
@@ -472,12 +481,13 @@ export const Navbar: React.FC = () => {
                 <AnimatePresence>
                   {activeDropdown === "systems" && (
                     <motion.div
+                      key="systems-navigation"
                       initial={{ opacity: 0, y: 8, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 6, scale: 0.98 }}
                       transition={{ duration: 0.15 }}
                       className="absolute left-0 mt-3 w-[calc(100vw-2rem)] sm:w-72 max-w-[calc(100vw-2rem)] p-2.5 rounded-2xl border border-zinc-800 bg-zinc-950/95 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.9),0_0_20px_rgba(6,182,212,0.08)] z-50 flex flex-col gap-1"
-                      role="menu"
+                      id="systems-navigation"
                     >
                       <div className="px-3 py-1.5 border-b border-zinc-800/80 mb-1 min-w-0">
                         <span className="text-[10px] font-mono uppercase font-bold tracking-widest text-zinc-400 truncate block">
@@ -504,7 +514,6 @@ export const Navbar: React.FC = () => {
                                 ? "bg-brand-cyan/10 border border-brand-cyan/30 text-white"
                                 : "hover:bg-zinc-900/80 text-zinc-300 hover:text-white"
                             )}
-                            role="menuitem"
                           >
                             <div className="mt-0.5 p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 group-hover:border-brand-cyan/30 transition-colors shrink-0">
                               {item.icon}
@@ -568,7 +577,7 @@ export const Navbar: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 onMouseEnter={handleLinkHover}
-                className="py-1 text-xs font-mono tracking-wider font-semibold text-muted hover:text-foreground transition-all duration-200 cursor-pointer flex items-center gap-1 group whitespace-nowrap shrink-0"
+                className="hidden 2xl:flex py-1 text-xs font-mono tracking-wider font-semibold text-muted hover:text-foreground transition-all duration-200 cursor-pointer items-center gap-1 group whitespace-nowrap shrink-0"
                 aria-label="View source repository on GitHub"
               >
                 <span>GitHub</span>
@@ -594,7 +603,7 @@ export const Navbar: React.FC = () => {
             </button>
 
             {/* Global Persona Toggle (Desktop) */}
-            <div className="flex p-0.5 bg-zinc-900/85 border border-zinc-800/80 rounded-xl text-[10px] font-mono shrink-0 select-none">
+            <div className="hidden 2xl:flex p-0.5 bg-zinc-900/85 border border-zinc-800/80 rounded-xl text-[10px] font-mono shrink-0 select-none">
               <button
                 type="button"
                 onClick={() => setPersona("technical")}
@@ -628,7 +637,7 @@ export const Navbar: React.FC = () => {
             </div>
 
             {/* Audio Controller Desktop */}
-            <div className="relative shrink-0">
+            <div className="relative hidden 2xl:block shrink-0">
               <button
                 type="button"
                 onClick={() => setShowAudioPanel(!showAudioPanel)}
@@ -735,6 +744,142 @@ export const Navbar: React.FC = () => {
                 )}
               </AnimatePresence>
             </div>
+
+            <div className="relative hidden xl:block 2xl:hidden shrink-0">
+              <button
+                ref={preferencesTriggerRef}
+                type="button"
+                aria-label="Open navigation preferences"
+                aria-controls="navigation-preferences"
+                aria-expanded={showPreferences}
+                onClick={() => {
+                  setActiveDropdown(null);
+                  setShowPreferences((isVisible) => !isVisible);
+                }}
+                className="flex min-h-9 items-center gap-1.5 rounded-xl border border-zinc-800 bg-zinc-900/60 px-3 py-1.5 text-xs font-mono text-zinc-300 transition-colors hover:border-brand-cyan/40 hover:text-white focus-visible:ring-2 focus-visible:ring-brand-cyan/40"
+              >
+                {muted ? (
+                  <IconVolumeOff className="h-3.5 w-3.5" />
+                ) : (
+                  <IconVolume className="h-3.5 w-3.5 text-brand-cyan" />
+                )}
+                <span>Preferences</span>
+                <IconChevronDown
+                  className={cn(
+                    "h-3 w-3 text-zinc-500 transition-transform",
+                    showPreferences && "rotate-180"
+                  )}
+                />
+              </button>
+
+              {showPreferences && (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Close navigation preferences"
+                    className="fixed inset-0 z-40 cursor-default"
+                    onClick={() => setShowPreferences(false)}
+                  />
+                  <div
+                    id="navigation-preferences"
+                    className="absolute right-0 z-50 mt-2 flex w-72 flex-col gap-4 rounded-2xl border border-zinc-800/80 bg-zinc-950/95 p-4 shadow-[0_20px_50px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
+                  >
+                    <div>
+                      <p className="text-[11px] font-mono font-bold tracking-wider text-zinc-300">
+                        PREFERENCES
+                      </p>
+                      <p className="mt-1 text-[10px] font-mono text-zinc-500">
+                        A little less detail? A little more sound? Your call.
+                      </p>
+                    </div>
+                    <div className="flex rounded-xl border border-zinc-800 bg-zinc-900/85 p-0.5 text-[10px] font-mono">
+                      <button
+                        type="button"
+                        onClick={() => setPersona("technical")}
+                        className={cn(
+                          "min-h-9 flex-1 rounded-lg px-2 font-bold",
+                          persona === "technical"
+                            ? "bg-zinc-950 text-amber-400"
+                            : "text-zinc-500 hover:text-zinc-300"
+                        )}
+                        aria-label="Switch to Technical Persona"
+                      >
+                        TECH
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPersona("recruiter")}
+                        className={cn(
+                          "min-h-9 flex-1 rounded-lg px-2 font-bold",
+                          persona === "recruiter"
+                            ? "bg-zinc-950 text-brand-cyan"
+                            : "text-zinc-500 hover:text-zinc-300"
+                        )}
+                        aria-label="Switch to Recruiter Persona"
+                      >
+                        RECRUITER
+                      </button>
+                    </div>
+                    <div className="flex flex-col gap-2 border-t border-zinc-800 pt-3">
+                      <div className="flex items-center justify-between text-[10px] font-mono text-zinc-400">
+                        <span>Sound · {muted ? "off" : profile}</span>
+                        <button
+                          type="button"
+                          onClick={() => setMuted(!muted)}
+                          className="min-h-8 rounded-lg border border-zinc-800 px-2 text-brand-cyan hover:border-brand-cyan/40"
+                        >
+                          {muted ? "Unmute" : "Mute"}
+                        </button>
+                      </div>
+                      <input
+                        aria-label="Volume"
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={Math.round(volume * 100)}
+                        onChange={(e) =>
+                          setVolume(parseFloat(e.target.value) / 100)
+                        }
+                        disabled={muted}
+                        className="w-full accent-brand-cyan disabled:opacity-40"
+                      />
+                      <div className="grid grid-cols-3 gap-1.5">
+                        {(["8-bit", "90s-retro", "ambient"] as const).map(
+                          (soundProfile) => (
+                            <button
+                              key={soundProfile}
+                              type="button"
+                              disabled={muted}
+                              onClick={() => setProfile(soundProfile)}
+                              className={cn(
+                                "min-h-8 rounded-lg border px-1 text-[10px] font-mono disabled:opacity-40",
+                                profile === soundProfile
+                                  ? "border-brand-cyan/40 bg-brand-cyan/10 text-brand-cyan"
+                                  : "border-zinc-800 text-zinc-400 hover:border-zinc-700"
+                              )}
+                            >
+                              {soundProfile === "8-bit"
+                                ? "8-Bit"
+                                : soundProfile === "90s-retro"
+                                  ? "90s"
+                                  : "Ambient"}
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </div>
+                    <a
+                      href="https://github.com/fderuiter/portfolio"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="min-h-9 rounded-lg border border-zinc-800 px-3 py-2 text-center text-[10px] font-mono text-zinc-400 hover:border-brand-cyan/40 hover:text-brand-cyan"
+                    >
+                      View source on GitHub ↗
+                    </a>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Mobile Header Actions (Search Button + Hamburger) */}
@@ -830,19 +975,14 @@ export const Navbar: React.FC = () => {
                 {/* Core Section */}
                 <div className="flex flex-col gap-2">
                   <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 font-bold px-1">
-                    Core Navigation
+                    Primary Navigation
                   </span>
                   <Link
-                    href={pathname === "/" ? "/#case-studies" : "/case-studies"}
-                    onClick={(e) =>
-                      handleNavClick(
-                        e,
-                        pathname === "/" ? "/#case-studies" : "/case-studies"
-                      )
-                    }
+                    href="/case-studies"
+                    onClick={() => setIsOpen(false)}
                     className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between active:scale-[0.99] transition-all"
                   >
-                    <span>Engineering Case Studies</span>
+                    <span>Work</span>
                     <span className="text-xs font-mono text-zinc-500">→</span>
                   </Link>
                   <Link
@@ -854,16 +994,11 @@ export const Navbar: React.FC = () => {
                     <span className="text-xs font-mono text-zinc-500">→</span>
                   </Link>
                   <Link
-                    href={pathname === "/" ? "/#contact" : "/contact"}
-                    onClick={(e) =>
-                      handleNavClick(
-                        e,
-                        pathname === "/" ? "/#contact" : "/contact"
-                      )
-                    }
+                    href="/contact"
+                    onClick={(e) => handleNavClick(e, "/contact")}
                     className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-neutral-200 hover:text-brand-cyan hover:border-brand-cyan/30 flex items-center justify-between active:scale-[0.99] transition-all"
                   >
-                    <span>Contact &amp; Inquiries</span>
+                    <span>Contact</span>
                     <span className="text-xs font-mono text-zinc-500">→</span>
                   </Link>
                   <Link
@@ -879,7 +1014,7 @@ export const Navbar: React.FC = () => {
                 {/* Interactive Tools & Arcade */}
                 <div className="flex flex-col gap-2">
                   <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 font-bold px-1">
-                    Systems Studios &amp; Arcade
+                    Systems
                   </span>
                   <Link
                     href="/crf"
@@ -933,21 +1068,19 @@ export const Navbar: React.FC = () => {
                       Architecture
                     </span>
                   </Link>
-                  {persona !== "technical" && (
-                    <Link
-                      href="/arcade"
-                      onClick={(e) => handleNavClick(e, "/arcade")}
-                      className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-brand-cyan hover:bg-brand-cyan/10 flex items-center justify-between gap-2 active:scale-[0.99] transition-all min-w-0"
-                    >
-                      <span className="flex items-center gap-2 min-w-0">
-                        <IconDeviceGamepad2 className="w-4 h-4 shrink-0" />
-                        <span className="truncate">Arcade Games Hub</span>
-                      </span>
-                      <span className="text-xs font-mono text-brand-cyan shrink-0">
-                        6 Games
-                      </span>
-                    </Link>
-                  )}
+                  <Link
+                    href="/arcade"
+                    onClick={(e) => handleNavClick(e, "/arcade")}
+                    className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-base font-bold text-brand-cyan hover:bg-brand-cyan/10 flex items-center justify-between gap-2 active:scale-[0.99] transition-all min-w-0"
+                  >
+                    <span className="flex items-center gap-2 min-w-0">
+                      <IconDeviceGamepad2 className="w-4 h-4 shrink-0" />
+                      <span className="truncate">Arcade</span>
+                    </span>
+                    <span className="text-xs font-mono text-brand-cyan shrink-0">
+                      6 Games
+                    </span>
+                  </Link>
                 </div>
               </div>
 

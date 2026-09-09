@@ -75,11 +75,10 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
 
         <div>
           <h3 className="text-xs font-mono font-bold tracking-widest text-zinc-300 uppercase mb-3 sm:mb-4">
-            Codebase Distribution
+            Languages in the Mix
           </h3>
           <p className="text-[10px] font-mono text-zinc-400 mb-4 sm:mb-6 leading-relaxed">
-            Primary languages and technologies aggregated across active
-            repositories.
+            A snapshot of the languages used across these projects.
           </p>
 
           <div className="space-y-3.5 sm:space-y-4">

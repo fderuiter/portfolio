@@ -8,7 +8,7 @@
 
 > **getUnifiedGraphSchema**(`nodes`, `options?`): `string`
 
-Defined in: [lib/seo.ts:173](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L173)
+Defined in: [lib/seo.ts:203](https://github.com/fderuiter/portfolio/blob/main/lib/seo.ts#L203)
 
 Returns an interconnected Schema.org `@graph` linking all provided entity nodes into a single structured payload.
 

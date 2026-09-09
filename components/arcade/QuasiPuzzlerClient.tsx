@@ -15,14 +15,16 @@ import {
 } from "@tabler/icons-react";
 
 const QuasiPerfectPuzzlerLoader = () =>
-  import("@/components/QuasiPerfectPuzzler").then((mod) => mod.QuasiPerfectPuzzler);
+  import("@/components/QuasiPerfectPuzzler").then(
+    (mod) => mod.QuasiPerfectPuzzler
+  );
 
 const DynamicQuasiPerfectPuzzler = dynamic(QuasiPerfectPuzzlerLoader, {
   ssr: false,
   loading: () => (
     <div className="flex flex-col items-center justify-center p-8 min-h-[380px] font-mono text-xs text-zinc-500 animate-pulse">
       <div className="w-8 h-8 border-2 border-purple-500/30 border-t-purple-500 rounded-full animate-spin mb-4" />
-      <span>DISCHARGING MATHEMATICAL AST HYPOTHESES...</span>
+      <span>Loading the puzzles...</span>
     </div>
   ),
 });
@@ -67,7 +69,9 @@ export const QuasiPuzzlerClient: React.FC = () => {
                 Quasi-Perfect <span className="text-purple-400">Puzzler</span>
               </h1>
               <p className="text-xs sm:text-sm text-zinc-400 font-mono mt-1">
-                Lean-style formal verification arcade. Drag and apply tactics to simplify mathematical AST goals and preserve theorem morality.
+                Apply tactics to a proof tree and work your way to a complete
+                proof. You can skip a goal with “sorry,” but the score will
+                notice.
               </p>
             </div>
           </div>
@@ -78,10 +82,10 @@ export const QuasiPuzzlerClient: React.FC = () => {
           <PlayCabinet
             gameId="quasi-puzzler"
             title="Quasi-Perfect Puzzler"
-            subtitle="Formal Verification & Proof Tactics Engine"
+            subtitle="Small Proofs, Limited Memory"
             accentColor="purple"
             icon={<IconBrain className="w-8 h-8 text-purple-400" />}
-            instructions="Lean-style formal verification arcade. Drag and apply tactics to simplify mathematical AST goals and preserve theorem morality."
+            instructions="Apply tactics to a proof tree and work your way to a complete proof. You can skip a goal with “sorry,” but the score will notice."
             controls={[
               { key: "Drag", action: "Apply Tactic" },
               { key: "Click", action: "Select Node" },
@@ -101,7 +105,8 @@ export const QuasiPuzzlerClient: React.FC = () => {
               <span>Tactics &amp; AST Nodes</span>
             </div>
             <p className="text-zinc-400 text-[11px] leading-relaxed">
-              Drag tactic cards from your hand onto AST nodes, or tap a tactic card and then tap a target node to execute the proof step.
+              Drag tactic cards from your hand onto AST nodes, or tap a tactic
+              card and then tap a target node to execute the proof step.
             </p>
           </div>
 
@@ -111,7 +116,9 @@ export const QuasiPuzzlerClient: React.FC = () => {
               <span>Lean Server RAM Limits</span>
             </div>
             <p className="text-zinc-400 text-[11px] leading-relaxed">
-              Each tactic consumes language server memory. If RAM hits 0 GB, the Lean runtime crashes (OOM). Close the theorem before running out of memory.
+              Each tactic consumes language server memory. If RAM hits 0 GB, the
+              Lean runtime crashes (OOM). Close the theorem before running out
+              of memory.
             </p>
           </div>
 
@@ -121,7 +128,9 @@ export const QuasiPuzzlerClient: React.FC = () => {
               <span>Theorem Morality &amp; Sorry</span>
             </div>
             <p className="text-zinc-400 text-[11px] leading-relaxed">
-              Admitting goals via <code>sorry</code> instantly passes the level but incurs a heavy -100 Morality Penalty and 0 stars. Solve genuinely for gold ratings!
+              Admitting goals via <code>sorry</code> instantly passes the level
+              but incurs a heavy -100 Morality Penalty and 0 stars. Solve
+              genuinely for gold ratings!
             </p>
           </div>
         </div>
