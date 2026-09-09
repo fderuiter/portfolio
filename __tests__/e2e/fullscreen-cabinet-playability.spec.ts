@@ -1,10 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 
-const BASE_URL = "http://localhost:3001";
-
 test.describe("Arcade Cabinet Fullscreen & In-Game Playability Suite", () => {
-  test.use({ baseURL: BASE_URL });
-
   const CABINET_GAMES: Array<{
     name: string;
     route: string;

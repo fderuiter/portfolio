@@ -1,10 +1,18 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-(globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 import React from "react";
-import { render, screen, fireEvent, act, cleanup } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  act,
+  cleanup,
+} from "@testing-library/react";
 import { PlayCabinet } from "../components/arcade/PlayCabinet";
 
 // Mock hooks
@@ -58,7 +66,9 @@ describe("PlayCabinet - Viewport Budgeting & Responsive Container Suite", () => 
     );
 
     expect(screen.getByText("Test Arcade Game")).toBeDefined();
-    expect(screen.getByRole("button", { name: /Launch Cabinet/i })).toBeDefined();
+    expect(
+      screen.getByRole("button", { name: /Launch Cabinet/i })
+    ).toBeDefined();
   });
 
   it("launches game with single-screen viewport budgeting container and aria-live state region", async () => {
@@ -72,7 +82,9 @@ describe("PlayCabinet - Viewport Budgeting & Responsive Container Suite", () => 
         controls={[{ key: "Space", action: "Jump" }]}
         importComponent={() => Promise.resolve({})}
         statusAnnouncement="Boss Encounter Approaching"
-        controlDock={<div data-testid="test-control-dock">Virtual Controls</div>}
+        controlDock={
+          <div data-testid="test-control-dock">Virtual Controls</div>
+        }
       >
         <div data-testid="game-content">Active Game Running</div>
       </PlayCabinet>
@@ -103,7 +115,9 @@ describe("PlayCabinet - Viewport Budgeting & Responsive Container Suite", () => 
     expect(screen.getByTestId("test-control-dock")).toBeDefined();
 
     // Verify aria-live polite announcer mirror exists and has status text
-    const liveRegion = screen.getByRole("region", { name: /Game Telemetry & Status Announcements/i });
+    const liveRegion = screen.getByRole("region", {
+      name: /Game Telemetry & Status Announcements/i,
+    });
     expect(liveRegion).toBeDefined();
     expect(liveRegion.textContent).toContain("Boss Encounter Approaching");
   });
@@ -141,6 +155,45 @@ describe("PlayCabinet - Viewport Budgeting & Responsive Container Suite", () => 
     const resetBtn = screen.getByRole("button", { name: /Reset Cabinet/i });
     fireEvent.click(resetBtn);
 
-    expect(screen.getByRole("button", { name: /Launch Cabinet/i })).toBeDefined();
+    expect(
+      screen.getByRole("button", { name: /Launch Cabinet/i })
+    ).toBeDefined();
+  });
+  it("exits fallback fullscreen before a game can swallow Escape", async () => {
+    render(
+      <PlayCabinet
+        title="Keyboard game"
+        accentColor="emerald"
+        icon={<span />}
+        instructions="Play"
+        controls={[]}
+        importComponent={() => Promise.resolve({})}
+      >
+        <button onKeyDown={(event) => event.stopPropagation()}>
+          Game control
+        </button>
+      </PlayCabinet>
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Launch Cabinet/i }));
+    });
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+    await act(async () => {
+      fireEvent.click(
+        screen.getByRole("button", { name: /Enter Fullscreen/i })
+      );
+    });
+    expect(document.body.style.overflow).toBe("hidden");
+    await act(async () => {
+      fireEvent.keyDown(screen.getByRole("button", { name: "Game control" }), {
+        key: "Escape",
+      });
+    });
+    expect(
+      screen.getByRole("button", { name: /Enter Fullscreen/i })
+    ).toBeDefined();
+    expect(document.body.style.overflow).not.toBe("hidden");
   });
 });

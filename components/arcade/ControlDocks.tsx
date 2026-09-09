@@ -80,14 +80,20 @@ export const DpadActionDock: React.FC<DpadActionDockProps> = ({
   const isTouch = useIsTouchDevice();
   const audio = useAudio();
 
-  const handleDirPress = (e: React.SyntheticEvent, dir: "up" | "down" | "left" | "right") => {
+  const handleDirPress = (
+    e: React.SyntheticEvent,
+    dir: "up" | "down" | "left" | "right"
+  ) => {
     if (e.cancelable) e.preventDefault();
     triggerHaptic(15);
     audio.playHover();
     onDirectionPress?.(dir);
   };
 
-  const handleDirRelease = (e: React.SyntheticEvent, dir: "up" | "down" | "left" | "right") => {
+  const handleDirRelease = (
+    e: React.SyntheticEvent,
+    dir: "up" | "down" | "left" | "right"
+  ) => {
     if (e.cancelable) e.preventDefault();
     onDirectionRelease?.(dir);
   };
@@ -105,10 +111,10 @@ export const DpadActionDock: React.FC<DpadActionDockProps> = ({
     <div
       role="group"
       aria-label="Virtual Gamepad Directional & Action Controls"
-      className={`select-none touch-none w-full max-w-2xl flex items-end justify-between gap-3 p-3 bg-zinc-950/80 border border-zinc-800/80 rounded-2xl backdrop-blur-md shadow-2xl ${className}`}
+      className={`select-none touch-none w-full max-w-2xl flex flex-wrap items-end justify-between gap-2 p-2 bg-zinc-950/80 border border-zinc-800/80 rounded-2xl backdrop-blur-md shadow-2xl ${className}`}
     >
       {/* 4-Way D-Pad */}
-      <div className="relative w-36 h-36 grid grid-cols-3 grid-rows-3 gap-1.5 p-1 rounded-2xl bg-zinc-900/90 border border-zinc-800 shadow-inner">
+      <div className="relative shrink-0 grid grid-cols-[repeat(3,48px)] grid-rows-[repeat(3,48px)] gap-1 p-1 rounded-2xl bg-zinc-900/90 border border-zinc-800 shadow-inner">
         <div />
         <button
           type="button"
@@ -162,9 +168,11 @@ export const DpadActionDock: React.FC<DpadActionDockProps> = ({
 
       {/* Center Weapon Arsenal Selector */}
       {weaponLabels && weaponLabels.length > 0 && onWeaponSelect && (
-        <div className="hidden sm:flex flex-col gap-1.5 p-1.5 rounded-xl bg-zinc-900/90 border border-zinc-800">
-          <span className="text-[9px] font-mono uppercase text-zinc-500 font-bold px-1 text-center">Arsenal</span>
-          <div className="flex items-center gap-1">
+        <div className="flex flex-col gap-1.5 p-1.5 rounded-xl bg-zinc-900/90 border border-zinc-800">
+          <span className="text-[9px] font-mono uppercase text-zinc-500 font-bold px-1 text-center">
+            Arsenal
+          </span>
+          <div className="flex flex-wrap items-center gap-1">
             {weaponLabels.map((label, idx) => (
               <button
                 key={label}
@@ -200,7 +208,9 @@ export const DpadActionDock: React.FC<DpadActionDockProps> = ({
             className="min-w-[52px] min-h-[52px] w-14 h-14 rounded-2xl bg-rose-500/20 active:bg-rose-500/40 border border-rose-500/40 text-rose-300 active:scale-95 transition-transform shadow-lg flex flex-col items-center justify-center focus-visible:ring-2 focus-visible:ring-rose-400 focus-visible:outline-none"
           >
             <IconFlask className="w-5 h-5 mb-0.5" />
-            <span className="text-[9px] font-mono font-bold uppercase">{actionBLabel}</span>
+            <span className="text-[9px] font-mono font-bold uppercase">
+              {actionBLabel}
+            </span>
           </button>
         )}
 
@@ -214,7 +224,9 @@ export const DpadActionDock: React.FC<DpadActionDockProps> = ({
             className="min-w-[56px] min-h-[56px] w-16 h-16 rounded-2xl bg-cyan-500/20 active:bg-cyan-500/40 border border-cyan-500/40 text-cyan-300 active:scale-95 transition-transform shadow-lg flex flex-col items-center justify-center focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:outline-none"
           >
             <IconSword className="w-6 h-6 mb-0.5" />
-            <span className="text-[10px] font-mono font-bold uppercase">{actionALabel}</span>
+            <span className="text-[10px] font-mono font-bold uppercase">
+              {actionALabel}
+            </span>
           </button>
         )}
       </div>
@@ -275,7 +287,7 @@ export const TwinStickAimDock: React.FC<TwinStickAimDockProps> = ({
     <div
       role="group"
       aria-label="Laser Loon Touch Controls"
-      className={`select-none touch-none w-full max-w-2xl flex items-center justify-between gap-3 p-3 bg-zinc-950/80 border border-zinc-800/80 rounded-2xl backdrop-blur-md shadow-2xl ${className}`}
+      className={`select-none touch-none w-full max-w-2xl flex flex-wrap items-center justify-between gap-2 p-2 bg-zinc-950/80 border border-zinc-800/80 rounded-2xl backdrop-blur-md shadow-2xl ${className}`}
     >
       {/* Arsenal Selection Pills */}
       {weapons.length > 0 && onWeaponSelect && (
@@ -300,10 +312,10 @@ export const TwinStickAimDock: React.FC<TwinStickAimDockProps> = ({
                   w.color === "cyan"
                     ? "bg-cyan-400"
                     : w.color === "purple"
-                    ? "bg-purple-400"
-                    : w.color === "amber"
-                    ? "bg-amber-400"
-                    : "bg-red-400"
+                      ? "bg-purple-400"
+                      : w.color === "amber"
+                        ? "bg-amber-400"
+                        : "bg-red-400"
                 }`}
               />
               <span className="truncate max-w-[80px]">{w.label}</span>
@@ -329,7 +341,9 @@ export const TwinStickAimDock: React.FC<TwinStickAimDockProps> = ({
             }`}
           >
             <IconSparkles className="w-5 h-5 mb-0.5" />
-            <span className="text-[9px] font-mono font-bold uppercase">Tremolo</span>
+            <span className="text-[9px] font-mono font-bold uppercase">
+              Tremolo
+            </span>
           </button>
         )}
 
@@ -343,7 +357,9 @@ export const TwinStickAimDock: React.FC<TwinStickAimDockProps> = ({
             className="min-w-[56px] min-h-[56px] w-16 h-16 rounded-2xl bg-red-500/20 active:bg-red-500/40 border border-red-500/50 text-red-300 active:scale-95 transition-transform shadow-lg flex flex-col items-center justify-center focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
           >
             <IconCrosshair className="w-6 h-6 mb-0.5" />
-            <span className="text-[10px] font-mono font-bold uppercase">Fire</span>
+            <span className="text-[10px] font-mono font-bold uppercase">
+              Fire
+            </span>
           </button>
         )}
       </div>
@@ -389,12 +405,42 @@ export const BezelClusterDock: React.FC<BezelClusterDockProps> = ({
 
   if (!isTouch && !forceVisible) return null;
 
-  const buttons: { id: BezelButtonId; label: string; icon: React.ReactNode; color: string }[] = [
-    { id: "light", label: "Light / Power", icon: <IconBrightnessUp className="w-5 h-5" />, color: "text-amber-400 border-amber-500/30" },
-    { id: "up", label: "Up / Menu", icon: <IconArrowUp className="w-5 h-5" />, color: "text-zinc-300 border-zinc-700" },
-    { id: "down", label: "Down", icon: <IconArrowDown className="w-5 h-5" />, color: "text-zinc-300 border-zinc-700" },
-    { id: "start", label: "Start / Stop", icon: <IconPlayerPlay className="w-5 h-5 text-emerald-400" />, color: "text-emerald-400 border-emerald-500/40 bg-emerald-500/10" },
-    { id: "back", label: "Back / Lap", icon: <IconArrowBackUp className="w-5 h-5 text-rose-400" />, color: "text-rose-400 border-rose-500/40 bg-rose-500/10" },
+  const buttons: {
+    id: BezelButtonId;
+    label: string;
+    icon: React.ReactNode;
+    color: string;
+  }[] = [
+    {
+      id: "light",
+      label: "Light / Power",
+      icon: <IconBrightnessUp className="w-5 h-5" />,
+      color: "text-amber-400 border-amber-500/30",
+    },
+    {
+      id: "up",
+      label: "Up / Menu",
+      icon: <IconArrowUp className="w-5 h-5" />,
+      color: "text-zinc-300 border-zinc-700",
+    },
+    {
+      id: "down",
+      label: "Down",
+      icon: <IconArrowDown className="w-5 h-5" />,
+      color: "text-zinc-300 border-zinc-700",
+    },
+    {
+      id: "start",
+      label: "Start / Stop",
+      icon: <IconPlayerPlay className="w-5 h-5 text-emerald-400" />,
+      color: "text-emerald-400 border-emerald-500/40 bg-emerald-500/10",
+    },
+    {
+      id: "back",
+      label: "Back / Lap",
+      icon: <IconArrowBackUp className="w-5 h-5 text-rose-400" />,
+      color: "text-rose-400 border-rose-500/40 bg-rose-500/10",
+    },
   ];
 
   return (
@@ -412,7 +458,9 @@ export const BezelClusterDock: React.FC<BezelClusterDockProps> = ({
           onPointerUp={(e) => handleRelease(e, b.id)}
           onPointerCancel={(e) => handleRelease(e, b.id)}
           className={`min-w-[48px] min-h-[48px] px-3.5 py-2.5 rounded-xl border bg-zinc-900/90 active:scale-95 transition-all flex items-center gap-1.5 font-mono text-xs font-bold focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none ${b.color} ${
-            activeButton === b.id ? "ring-2 ring-amber-400 scale-95 bg-zinc-800" : ""
+            activeButton === b.id
+              ? "ring-2 ring-amber-400 scale-95 bg-zinc-800"
+              : ""
           }`}
         >
           {b.icon}
@@ -474,10 +522,13 @@ export const ActionStripDock: React.FC<ActionStripDockProps> = ({
         const isActive = activeActionId === act.id;
         const colorClasses = {
           cyan: "hover:border-cyan-500/50 active:bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
-          emerald: "hover:border-emerald-500/50 active:bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-          amber: "hover:border-amber-500/50 active:bg-amber-500/20 text-amber-300 border-amber-500/30",
+          emerald:
+            "hover:border-emerald-500/50 active:bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
+          amber:
+            "hover:border-amber-500/50 active:bg-amber-500/20 text-amber-300 border-amber-500/30",
           rose: "hover:border-rose-500/50 active:bg-rose-500/20 text-rose-300 border-rose-500/30",
-          purple: "hover:border-purple-500/50 active:bg-purple-500/20 text-purple-300 border-purple-500/30",
+          purple:
+            "hover:border-purple-500/50 active:bg-purple-500/20 text-purple-300 border-purple-500/30",
         }[act.color || "cyan"];
 
         return (
