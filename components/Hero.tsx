@@ -8,16 +8,16 @@ import { usePretextLayout } from "@/hooks/usePretextLayout";
 import { AnimatedGridPattern } from "@/components/AnimatedGridPattern";
 import { designManifest } from "@/lib/design-manifest";
 import { useAudio } from "@/components/providers/AudioProvider";
-import { 
-  IconDeviceGamepad2, 
-  IconShieldCheck, 
-  IconTerminal, 
-  IconCpu, 
-  IconCheck, 
-  IconRefresh, 
-  IconArrowRight, 
+import {
+  IconDeviceGamepad2,
+  IconShieldCheck,
+  IconTerminal,
+  IconCpu,
+  IconCheck,
+  IconRefresh,
+  IconArrowRight,
   IconBrandGithub,
-  IconAtom
+  IconAtom,
 } from "@tabler/icons-react";
 
 function subscribeMobile(callback: () => void) {
@@ -42,7 +42,11 @@ interface HeroHeadlineProps {
 
 export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
   const shouldReduceMotion = useReducedMotion();
-  const isMobile = React.useSyncExternalStore(subscribeMobile, getMobileSnapshot, getMobileServerSnapshot);
+  const isMobile = React.useSyncExternalStore(
+    subscribeMobile,
+    getMobileSnapshot,
+    getMobileServerSnapshot
+  );
   const { ref, height, isReady } = usePretextLayout({
     text,
     fontSize: 54,
@@ -69,25 +73,25 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
     },
   };
 
-  const wordVariants = shouldReduceMotion ? {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.3 } },
-  } : {
-    hidden: { opacity: 0, y: 14, scale: 0.97 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: { ...designManifest.motion.springs.hero, mass: 0.35 },
-    },
-  };
+  const wordVariants = shouldReduceMotion
+    ? {
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { duration: 0.3 } },
+      }
+    : {
+        hidden: { opacity: 0, y: 14, scale: 0.97 },
+        visible: {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          transition: { ...designManifest.motion.springs.hero, mass: 0.35 },
+        },
+      };
 
   return (
     <div
-      style={{
-        "--hero-headline-height": isReady ? `${height}px` : "auto",
-      } as React.CSSProperties}
-      className="relative w-full max-w-4xl mx-auto lg:mx-0 min-h-[90px] sm:min-h-[110px] mb-4 sm:mb-6 min-h-[var(--hero-headline-height)] transition-[min-height] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      style={{ minHeight: isReady && height ? `${height}px` : undefined }}
+      className="relative w-full max-w-4xl mx-auto lg:mx-0 min-h-[72px] sm:min-h-[90px] lg:min-h-[110px] mb-4 sm:mb-6 transition-[min-height] duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]"
     >
       {/* 1. Custom Visual Presentation (hidden from screen readers, not selectable) */}
       <div
@@ -98,7 +102,7 @@ export const HeroHeadline: React.FC<HeroHeadlineProps> = ({ text }) => {
         className="w-full select-none pointer-events-none"
       >
         {!isReady ? (
-          <p className="fluid-heading-hero font-extrabold tracking-tight text-left opacity-0 leading-tight">
+          <p className="fluid-heading-hero font-extrabold tracking-tight text-center lg:text-left text-white leading-tight heading-editorial">
             {text}
           </p>
         ) : isMobile ? (
@@ -147,7 +151,11 @@ interface HeroTextProps {
 
 export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
   const shouldReduceMotion = useReducedMotion();
-  const isMobile = React.useSyncExternalStore(subscribeMobile, getMobileSnapshot, getMobileServerSnapshot);
+  const isMobile = React.useSyncExternalStore(
+    subscribeMobile,
+    getMobileSnapshot,
+    getMobileServerSnapshot
+  );
   const { ref, height, isReady } = usePretextLayout({
     text,
     fontSize: 16,
@@ -173,25 +181,25 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
     },
   };
 
-  const wordVariants = shouldReduceMotion ? {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.3 } },
-  } : {
-    hidden: { opacity: 0, y: 8, scale: 0.98 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: { ...designManifest.motion.springs.heroBeam, mass: 0.25 },
-    },
-  };
+  const wordVariants = shouldReduceMotion
+    ? {
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { duration: 0.3 } },
+      }
+    : {
+        hidden: { opacity: 0, y: 8, scale: 0.98 },
+        visible: {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          transition: { ...designManifest.motion.springs.heroBeam, mass: 0.25 },
+        },
+      };
 
   return (
     <div
-      style={{
-        "--hero-text-height": isReady ? `${height}px` : "auto",
-      } as React.CSSProperties}
-      className="relative w-full max-w-2xl mx-auto lg:mx-0 min-h-[50px] mb-6 sm:mb-8 min-h-[var(--hero-text-height)] transition-[min-height] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      style={{ minHeight: isReady && height ? `${height}px` : undefined }}
+      className="relative w-full max-w-2xl mx-auto lg:mx-0 min-h-[48px] sm:min-h-[54px] mb-6 sm:mb-8 transition-[min-height] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
     >
       {/* 1. Custom Visual Presentation (hidden from screen readers, not selectable) */}
       <div
@@ -202,7 +210,7 @@ export const HeroText: React.FC<HeroTextProps> = ({ text }) => {
         className="w-full select-none pointer-events-none"
       >
         {!isReady ? (
-          <p className="text-zinc-300 fluid-body leading-relaxed text-center lg:text-left opacity-0">
+          <p className="text-zinc-300 fluid-body leading-relaxed text-center lg:text-left">
             {text}
           </p>
         ) : isMobile ? (
@@ -277,56 +285,69 @@ const InteractiveEngineeringConsole: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto lg:max-w-none bg-[#13151a]/90 border border-white/10 rounded-2xl p-4 sm:p-6 shadow-2xl backdrop-blur-xl flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:border-amber-500/30">
+    <div className="@container min-w-0 w-full max-w-xl mx-auto lg:max-w-none bg-[#13151a] border border-white/10 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col justify-between relative overflow-hidden transition-all duration-300 hover:border-amber-500/30">
       {/* Precision grid decorative corner cues */}
-      <div className="absolute top-2.5 right-3 flex items-center gap-1.5 font-mono text-[9px] text-zinc-500 uppercase tracking-wider select-none">
+      <div className="mb-4 flex flex-wrap items-center gap-1.5 font-mono text-[9px] text-zinc-500 uppercase tracking-wider select-none">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-        <span>SYS.RUNTIME // LIVE PLAYGROUND</span>
+        <span>INTERACTIVE ENGINEERING / 01—03</span>
       </div>
 
       <div>
         {/* Header Tabs */}
-        <div className="flex items-center gap-1.5 sm:gap-2 mb-4 pb-3 border-b border-white/10 overflow-x-auto scrollbar-none" role="tablist" aria-label="Interactive Systems Demos">
+        <div
+          className="grid grid-cols-3 gap-1 mb-5 pb-4 border-b border-white/10"
+          role="tablist"
+          aria-label="Interactive Systems Demos"
+        >
           <button
             role="tab"
             aria-selected={mode === "logic"}
-            onClick={() => { setMode("logic"); playSkillHover(); }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+            onClick={() => {
+              setMode("logic");
+              playSkillHover();
+            }}
+            className={`min-w-0 min-h-11 justify-center px-1.5 py-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-1 focus-visible:ring-offset-[#13151a] ${
               mode === "logic"
                 ? "bg-amber-500/15 text-amber-300 border border-amber-500/30 shadow-sm"
                 : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5 border border-transparent"
             }`}
           >
             <IconAtom className="w-3.5 h-3.5" />
-            <span>01. Logic Puzzle</span>
+            <span>Logic</span>
           </button>
 
           <button
             role="tab"
             aria-selected={mode === "cdisc"}
-            onClick={() => { setMode("cdisc"); playSkillHover(); }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+            onClick={() => {
+              setMode("cdisc");
+              playSkillHover();
+            }}
+            className={`min-w-0 min-h-11 justify-center px-1.5 py-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-1 focus-visible:ring-offset-[#13151a] ${
               mode === "cdisc"
                 ? "bg-amber-500/15 text-amber-300 border border-amber-500/30 shadow-sm"
                 : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5 border border-transparent"
             }`}
           >
             <IconShieldCheck className="w-3.5 h-3.5" />
-            <span>02. Clinical Form Engine</span>
+            <span>Clinical</span>
           </button>
 
           <button
             role="tab"
             aria-selected={mode === "garmin"}
-            onClick={() => { setMode("garmin"); playSkillHover(); }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+            onClick={() => {
+              setMode("garmin");
+              playSkillHover();
+            }}
+            className={`min-w-0 min-h-11 justify-center px-1.5 py-2 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-1 focus-visible:ring-offset-[#13151a] ${
               mode === "garmin"
                 ? "bg-amber-500/15 text-amber-300 border border-amber-500/30 shadow-sm"
                 : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5 border border-transparent"
             }`}
           >
             <IconCpu className="w-3.5 h-3.5" />
-            <span>03. Smartwatch Simulator</span>
+            <span>Memory</span>
           </button>
         </div>
 
@@ -342,40 +363,64 @@ const InteractiveEngineeringConsole: React.FC = () => {
                 transition={{ duration: 0.15 }}
                 className="space-y-3"
               >
-                <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[11px] text-zinc-400">
                   <span>DEDUCTIVE LOGIC SOLVER</span>
-                  <span className="text-amber-400 font-semibold">RULE: MODUS PONENS</span>
+                  <span className="text-amber-400 font-semibold">
+                    RULE: MODUS PONENS
+                  </span>
                 </div>
 
                 <div className="p-3 bg-black/40 border border-white/5 rounded-xl space-y-1.5 text-xs text-zinc-300">
-                  <div className="flex items-center justify-between">
-                    <span className="text-zinc-500">1. Rule:</span>
-                    <span className="text-amber-300 font-semibold">P → Q (Valid Input → Reliable App)</span>
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                    <span className="text-zinc-500">1. Rule</span>
+                    <span className="text-amber-300 font-semibold">P → Q</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-zinc-500">2. Fact:</span>
-                    <span className="text-amber-300 font-semibold">P (Input Checked & Validated)</span>
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                    <span className="text-zinc-500">2. Fact</span>
+                    <span className="text-amber-300 font-semibold">
+                      P is true
+                    </span>
                   </div>
-                  <div className="pt-1.5 mt-1 border-t border-white/10 flex items-center justify-between">
-                    <span className="text-zinc-400">3. Conclusion:</span>
-                    <span className={logicDischarged ? "text-emerald-400 font-bold" : "text-zinc-500 italic"}>
-                      {logicDischarged ? "Q ⊢ System 100% Bug-Free (Q.E.D.)" : "[Click button to prove theorem...]"}
+                  <div className="pt-1.5 mt-1 border-t border-white/10 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                    <span className="text-zinc-400">3. Result</span>
+                    <span
+                      className={
+                        logicDischarged
+                          ? "text-emerald-400 font-bold"
+                          : "text-zinc-500 italic"
+                      }
+                    >
+                      {logicDischarged
+                        ? "Therefore Q is true"
+                        : "Awaiting inference"}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between gap-3 pt-1">
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 gap-3 pt-1">
                   <button
                     onClick={handleDischargeStep}
-                    className="inline-flex items-center gap-2 px-3.5 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98]"
+                    className="inline-flex items-center gap-2 px-3.5 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-1 focus-visible:ring-offset-[#13151a]"
                   >
-                    <IconRefresh className={`w-3.5 h-3.5 ${logicDischarged ? "rotate-180" : ""} transition-transform duration-300`} />
-                    <span>{logicDischarged ? "Reset Logic Step" : "Prove Invariant Step"}</span>
+                    <IconRefresh
+                      className={`w-3.5 h-3.5 ${logicDischarged ? "rotate-180" : ""} transition-transform duration-300`}
+                    />
+                    <span>
+                      {logicDischarged
+                        ? "Reset Logic Step"
+                        : "Prove Invariant Step"}
+                    </span>
                   </button>
 
                   <div className="flex items-center gap-1.5 text-[10px]">
-                    <span className={`w-2 h-2 rounded-full ${logicDischarged ? "bg-emerald-400" : "bg-amber-400"} transition-colors`} />
-                    <span className="text-zinc-400">{logicDischarged ? "STATUS: PROVEN SOUND" : "STATUS: READY"}</span>
+                    <span
+                      className={`w-2 h-2 rounded-full ${logicDischarged ? "bg-emerald-400" : "bg-amber-400"} transition-colors`}
+                    />
+                    <span className="text-zinc-400">
+                      {logicDischarged
+                        ? "STATUS: PROVEN SOUND"
+                        : "STATUS: READY"}
+                    </span>
                   </div>
                 </div>
               </motion.div>
@@ -390,36 +435,51 @@ const InteractiveEngineeringConsole: React.FC = () => {
                 transition={{ duration: 0.15 }}
                 className="space-y-3"
               >
-                <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[11px] text-zinc-400">
                   <span>CLINICAL TRIAL FORM ENGINE</span>
-                  <span className="text-emerald-400 font-semibold">AUTOMATED VALIDATION</span>
+                  <span className="text-emerald-400 font-semibold">
+                    AUTOMATED VALIDATION
+                  </span>
                 </div>
 
                 <div className="p-3 bg-black/40 border border-white/5 rounded-xl space-y-1.5 text-xs text-zinc-300">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
                     <span className="text-zinc-500">Field:</span>
-                    <span className="text-white font-mono">Patient Age (Demographics)</span>
+                    <span className="text-white font-mono">
+                      Patient Age (Demographics)
+                    </span>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
                     <span className="text-zinc-500">Validation:</span>
-                    <span className="text-amber-300">Range &amp; Type Safety Check</span>
+                    <span className="text-amber-300">
+                      Range &amp; Type Safety Check
+                    </span>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
                     <span className="text-zinc-500">Audit Security:</span>
-                    <span className="text-zinc-400 truncate max-w-[200px]">SHA256: Verified &amp; Signed</span>
+                    <span className="text-zinc-400 truncate max-w-[200px]">
+                      Example audit record
+                    </span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between gap-3 pt-1">
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 gap-3 pt-1">
                   <button
-                    onClick={() => { setFhirValidationActive(!fhirValidationActive); playSkillHover(); }}
-                    className="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98]"
+                    onClick={() => {
+                      setFhirValidationActive(!fhirValidationActive);
+                      playSkillHover();
+                    }}
+                    className="inline-flex items-center gap-2 px-3.5 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-1 focus-visible:ring-offset-[#13151a]"
                   >
                     <IconCheck className="w-3.5 h-3.5" />
-                    <span>{fhirValidationActive ? "Data Integrity Rule: ACTIVE" : "Toggle Integrity Rule"}</span>
+                    <span>
+                      {fhirValidationActive
+                        ? "Data Integrity Rule: ACTIVE"
+                        : "Toggle Integrity Rule"}
+                    </span>
                   </button>
 
-                  <span className="text-[10px] text-zinc-400">ZERO DATA LOSS</span>
+                  <span className="text-[10px] text-zinc-400">DEMO RULE</span>
                 </div>
               </motion.div>
             )}
@@ -433,42 +493,59 @@ const InteractiveEngineeringConsole: React.FC = () => {
                 transition={{ duration: 0.15 }}
                 className="space-y-3"
               >
-                <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[11px] text-zinc-400">
                   <span>SMARTWATCH RUNTIME</span>
-                  <span className="text-cyan-400 font-semibold">32KB MEMORY BUDGET</span>
+                  <span className="text-cyan-400 font-semibold">
+                    32KB MEMORY BUDGET
+                  </span>
                 </div>
 
                 <div className="p-3 bg-black/40 border border-white/5 rounded-xl space-y-2 text-xs text-zinc-300">
-                  <div className="flex items-center justify-between text-[11px]">
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[11px]">
                     <span className="text-zinc-400">RAM Used:</span>
-                    <span className="text-amber-300 font-bold">{garminHeapAlloc.toFixed(1)} KB / 32.0 KB ({Math.round((garminHeapAlloc / 32) * 100)}%)</span>
+                    <span className="text-amber-300 font-bold">
+                      {garminHeapAlloc.toFixed(1)} KB / 32.0 KB (
+                      {Math.round((garminHeapAlloc / 32) * 100)}%)
+                    </span>
                   </div>
                   {/* Visual memory bar */}
                   <div className="w-full h-2 bg-zinc-900 rounded-full overflow-hidden border border-white/5">
                     <div
-                      style={{
-                        "--heap-scale-x": garminHeapAlloc / 32,
-                      } as React.CSSProperties}
-                      className="h-full w-full bg-gradient-to-r from-emerald-400 via-amber-400 to-cyan-400 origin-left transform-gpu scale-x-[var(--heap-scale-x)]"
+                      style={
+                        {
+                          "--heap-scale-x": garminHeapAlloc / 32,
+                        } as React.CSSProperties
+                      }
+                      className="h-full w-full bg-amber-400 origin-left transform-gpu scale-x-[var(--heap-scale-x)]"
                     />
                   </div>
-                  <div className="flex items-center justify-between text-[10px] text-zinc-500 pt-0.5">
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[10px] text-zinc-500 pt-0.5">
                     <span>Frame Budget: 16.6ms</span>
-                    <span className="text-emerald-400">Silky 60 FPS Locked</span>
+                    <span className="text-emerald-400">
+                      Simulated allocation
+                    </span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between gap-3 pt-1">
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 gap-3 pt-1">
                   <button
                     onClick={handleRunGc}
                     disabled={isGarminGcRunning}
-                    className="inline-flex items-center gap-2 px-3.5 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98] disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-3.5 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-[0.98] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-1 focus-visible:ring-offset-[#13151a]"
                   >
-                    <IconRefresh className={`w-3.5 h-3.5 ${isGarminGcRunning ? "animate-spin" : ""}`} />
-                    <span>{isGarminGcRunning ? "Freeing RAM..." : "Clean Memory (GC)"}</span>
+                    <IconRefresh
+                      className={`w-3.5 h-3.5 ${isGarminGcRunning ? "animate-spin" : ""}`}
+                    />
+                    <span>
+                      {isGarminGcRunning
+                        ? "Freeing RAM..."
+                        : "Clean Memory (GC)"}
+                    </span>
                   </button>
 
-                  <span className="text-[10px] text-zinc-400">HEAP OPTIMIZED</span>
+                  <span className="text-[10px] text-zinc-400">
+                    HEAP OPTIMIZED
+                  </span>
                 </div>
               </motion.div>
             )}
@@ -477,12 +554,12 @@ const InteractiveEngineeringConsole: React.FC = () => {
       </div>
 
       {/* Footer Spec strip */}
-      <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-[10px] font-mono text-zinc-500">
+      <div className="mt-4 pt-3 border-t border-white/5 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[10px] font-mono text-zinc-500">
         <span className="flex items-center gap-1.5">
           <IconTerminal className="w-3 h-3 text-zinc-400" />
-          <span>ZERO LATENCY // ZERO BLOAT</span>
+          <span>ILLUSTRATIVE DEMO</span>
         </span>
-        <span className="text-zinc-400">LATENCY: &lt; 0.2ms</span>
+        <span className="text-zinc-400">TRY THE CONTROLS</span>
       </div>
     </div>
   );
@@ -494,14 +571,15 @@ interface HeroProps {
 
 export const Hero: React.FC<HeroProps> = ({ className }) => {
   const shouldReduceMotion = useReducedMotion();
-  const headline = "I build software that doesn't break, and make complex systems fun to use.";
-  const introText = "I spent years at Mayo Clinic turning messy medical protocols into smooth digital workflows. Today, I build ultra-fast web apps, interactive tools, and little canvas games with obsessive attention to detail.";
+  const headline = "Complex systems. Thoughtfully built.";
+  const introText =
+    "From clinical workflows at Mayo Clinic to interactive web tools, I turn demanding problems into clear, dependable software. Explore the systems, and try the ideas behind them.";
 
   return (
     <section
       id="hero"
       className={cn(
-        "relative min-h-[90dvh] lg:min-h-[100dvh] w-full flex flex-col justify-center items-center overflow-hidden bg-[#0d0e11] px-4 sm:px-6 md:px-8 lg:px-12 pt-28 pb-16 lg:py-24",
+        "section-isolate relative min-h-[90dvh] lg:min-h-[90dvh] w-full flex flex-col justify-center items-center overflow-hidden bg-[#0d0e11] px-4 sm:px-6 md:px-8 lg:px-12 pt-32 pb-16 sm:pt-36 lg:pt-44 lg:pb-24",
         className
       )}
     >
@@ -517,11 +595,11 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
       </div>
 
       {/* 2. Architectural Blueprint Corner Cues (desktop) */}
-      <div className="hidden lg:flex absolute top-24 left-12 items-center gap-2 text-[10px] font-mono text-zinc-600 select-none">
+      <div className="hidden lg:flex absolute top-28 left-12 items-center gap-2 text-[10px] font-mono text-zinc-600 select-none">
         <span className="text-amber-500/60">[+]</span>
         <span>BUILDER // PROBLEM SOLVER</span>
       </div>
-      <div className="hidden lg:flex absolute top-24 right-12 items-center gap-2 text-[10px] font-mono text-zinc-600 select-none">
+      <div className="hidden lg:flex absolute top-28 right-12 items-center gap-2 text-[10px] font-mono text-zinc-600 select-none">
         <span>LOC: ROCHESTER &amp; NYC</span>
         <span className="text-amber-500/60">[+]</span>
       </div>
@@ -529,7 +607,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
       {/* 3. Hero Split Grid Container */}
       <div className="relative z-10 w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10 lg:gap-12 items-center">
         {/* Left Column: Editorial Statement & Actions */}
-        <div className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left">
+        <div className="lg:col-span-7 min-w-0 flex flex-col items-center lg:items-start text-center lg:text-left">
           {/* Micro Brand Identifier */}
           <motion.div
             initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -8 }}
@@ -538,7 +616,7 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
             className="inline-flex items-center gap-2 px-3 py-1 mb-5 sm:mb-6 text-[10px] sm:text-xs font-mono font-semibold tracking-[0.15em] uppercase text-amber-300 bg-amber-500/10 border border-amber-500/25 rounded-full"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-            <span>FREDERICK DE RUITER · PROBLEM SOLVER &amp; BUILDER</span>
+            <span>FREDERICK DE RUITER / SOFTWARE &amp; SYSTEMS</span>
           </motion.div>
 
           {/* Dynamic Staggered Pretext-powered Title */}
@@ -551,13 +629,21 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
           <motion.div
             initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={shouldReduceMotion ? { delay: 0.1, duration: 0.4 } : { delay: 0.5, duration: 0.6, ...designManifest.motion.springs.smooth }}
+            transition={
+              shouldReduceMotion
+                ? { delay: 0.1, duration: 0.4 }
+                : {
+                    delay: 0.5,
+                    duration: 0.6,
+                    ...designManifest.motion.springs.smooth,
+                  }
+            }
             className="w-full flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 mt-2"
           >
             {/* Primary Action */}
             <a
               href="#case-studies"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 text-xs sm:text-sm font-mono font-bold text-black bg-amber-400 hover:bg-amber-300 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-amber-500/10 cursor-pointer"
+              className="w-full sm:w-auto min-h-[48px] inline-flex items-center justify-center gap-2 px-7 py-3.5 text-xs sm:text-sm font-mono font-bold text-black bg-amber-400 hover:bg-amber-300 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-amber-500/10 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0e11]"
             >
               <span>Explore My Work</span>
               <IconArrowRight className="w-4 h-4" />
@@ -567,17 +653,16 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
             <div className="grid grid-cols-2 gap-2.5 w-full sm:w-auto sm:flex sm:flex-row sm:gap-3">
               <Link
                 href="/arcade"
-                className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-3 text-xs font-mono font-semibold text-zinc-200 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-200 active:scale-[0.98] cursor-pointer"
+                className="min-h-[44px] inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-3 text-xs font-mono font-semibold text-zinc-200 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-200 active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0e11]"
               >
                 <IconDeviceGamepad2 className="w-4 h-4 text-amber-400 shrink-0" />
                 <span className="truncate">Arcade &amp; Labs</span>
               </Link>
-
               <a
                 href="https://github.com/fderuiter"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-3 text-xs font-mono font-semibold text-zinc-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-200 active:scale-[0.98] cursor-pointer"
+                className="min-h-[44px] inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-3 text-xs font-mono font-semibold text-zinc-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-200 active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0e11]"
               >
                 <IconBrandGithub className="w-4 h-4 shrink-0" />
                 <span className="truncate">GitHub</span>
@@ -593,11 +678,11 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              <span>CLINICAL TRIAL TESTED</span>
+              <span>CLINICAL OPERATIONS EXPERIENCE</span>
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-              <span>ZERO JARGON GUARANTEE</span>
+              <span>BUILT TO EXPLORE</span>
             </span>
           </div>
         </div>
@@ -606,8 +691,16 @@ export const Hero: React.FC<HeroProps> = ({ className }) => {
         <motion.div
           initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={shouldReduceMotion ? { delay: 0.1, duration: 0.4 } : { delay: 0.4, duration: 0.7, ...designManifest.motion.springs.smooth }}
-          className="lg:col-span-5 w-full flex justify-center"
+          transition={
+            shouldReduceMotion
+              ? { delay: 0.1, duration: 0.4 }
+              : {
+                  delay: 0.4,
+                  duration: 0.7,
+                  ...designManifest.motion.springs.smooth,
+                }
+          }
+          className="lg:col-span-5 min-w-0 w-full flex justify-center"
         >
           <InteractiveEngineeringConsole />
         </motion.div>

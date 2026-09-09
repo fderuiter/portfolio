@@ -4,7 +4,11 @@ import "./globals.css";
 import { SkipToContent } from "@/components/SkipToContent";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { getUnifiedGraphSchema, getPersonNode, getWebsiteNode } from "@/lib/seo";
+import {
+  getUnifiedGraphSchema,
+  getPersonNode,
+  getWebsiteNode,
+} from "@/lib/seo";
 import { A11yProvider } from "@/components/providers/A11yProvider";
 import { AudioProvider } from "@/components/providers/AudioProvider";
 import { SearchProvider } from "@/components/providers/SearchProvider";
@@ -16,8 +20,6 @@ import { SearchWrapper } from "@/components/SearchWrapper";
 import { resolveBaseUrl } from "@/lib/domain";
 
 import { SerwistRegister } from "@/components/providers/SerwistRegister";
-import { ClerkProvider } from "@clerk/nextjs";
-import { dark } from "@clerk/themes";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -39,7 +41,8 @@ export const metadata: Metadata = {
     template: "%s | Frederick de Ruiter",
     default: "Frederick de Ruiter | Principal Systems Engineer & Designer",
   },
-  description: "A high-performance design engineering showcase combining DOM-free canvas layout physics, serverless Neon Postgres data streams, and robust clinical CDISC data engines.",
+  description:
+    "A high-performance design engineering showcase combining DOM-free canvas layout physics, serverless Neon Postgres data streams, and robust clinical CDISC data engines.",
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },
@@ -60,7 +63,8 @@ export const metadata: Metadata = {
     url: resolveBaseUrl(),
     siteName: "Frederick de Ruiter Portfolio",
     title: "Frederick de Ruiter | Principal Systems Engineer & Designer",
-    description: "A high-performance design engineering showcase combining DOM-free canvas layout physics, serverless Neon Postgres data streams, and robust clinical CDISC data engines.",
+    description:
+      "A high-performance design engineering showcase combining DOM-free canvas layout physics, serverless Neon Postgres data streams, and robust clinical CDISC data engines.",
     images: [
       {
         url: `${resolveBaseUrl()}/opengraph-image`,
@@ -74,7 +78,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     creator: "@laser_loon",
     title: "Frederick de Ruiter | Principal Systems Engineer & Designer",
-    description: "A high-performance design engineering showcase combining DOM-free canvas layout physics, serverless Neon Postgres data streams, and robust clinical CDISC data engines.",
+    description:
+      "A high-performance design engineering showcase combining DOM-free canvas layout physics, serverless Neon Postgres data streams, and robust clinical CDISC data engines.",
     images: [`${resolveBaseUrl()}/twitter-image`],
   },
   robots: {
@@ -89,67 +94,56 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider
-      appearance={{
-        theme: dark,
-        elements: {
-          card: "border border-white/10 shadow-2xl bg-[#0d0e11]",
-          headerTitle: "text-zinc-100 font-mono tracking-tight",
-          headerSubtitle: "text-zinc-400 font-sans text-xs",
-          formButtonPrimary: "bg-amber-500 hover:bg-amber-400 text-zinc-950 font-mono text-xs uppercase tracking-wider font-semibold transition-all",
-          formFieldInput: "bg-[#13151a] border-white/10 text-zinc-100 focus:border-amber-500 focus:ring-amber-500 font-mono text-sm",
-          footerActionText: "text-zinc-400 font-sans text-xs",
-          footerActionLink: "text-amber-400 hover:text-amber-300 font-mono text-xs",
-        },
-      }}
+    <html
+      lang="en"
+      data-theme="dark"
+      className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <html
-        lang="en"
-        data-theme="dark"
-        className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
-      >
-        <head>
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: getUnifiedGraphSchema([getPersonNode(), getWebsiteNode()]),
-            }}
-          />
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: getUnifiedGraphSchema([getPersonNode(), getWebsiteNode()]),
+          }}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
                 (function() {
                   try {
                     document.documentElement.setAttribute('data-theme', 'dark');
                   } catch(e) {}
                 })();
-              `
-            }}
-          />
-        </head>
-        <body className="min-h-full flex flex-col bg-zinc-950 text-foreground antialiased">
-          <SkipToContent />
-          <PersonaProvider>
-            <TerminologyProvider>
-              <SearchProvider>
-                <A11yProvider>
-                  <AudioProvider>
-                    <Navbar />
-                    <main id="main-content" tabIndex={-1} className="flex-grow flex flex-col focus:outline-none">
-                      {children}
-                    </main>
-                    <Footer />
-                    <RetroChaosOverlay />
-                    <Analytics />
-                    <SearchWrapper />
-                    <SerwistRegister />
-                  </AudioProvider>
-                </A11yProvider>
-              </SearchProvider>
-            </TerminologyProvider>
-          </PersonaProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+              `,
+          }}
+        />
+      </head>
+      <body className="min-h-full flex flex-col bg-zinc-950 text-foreground antialiased">
+        <SkipToContent />
+        <PersonaProvider>
+          <TerminologyProvider>
+            <SearchProvider>
+              <A11yProvider>
+                <AudioProvider>
+                  <Navbar />
+                  <main
+                    id="main-content"
+                    tabIndex={-1}
+                    className="flex-grow flex flex-col focus:outline-none"
+                  >
+                    {children}
+                  </main>
+                  <Footer />
+                  <RetroChaosOverlay />
+                  <Analytics />
+                  <SearchWrapper />
+                  <SerwistRegister />
+                </AudioProvider>
+              </A11yProvider>
+            </SearchProvider>
+          </TerminologyProvider>
+        </PersonaProvider>
+      </body>
+    </html>
   );
 }

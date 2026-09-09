@@ -148,5 +148,65 @@
     "package": "uuid",
     "expiresAt": "2026-11-01T23:59:59Z",
     "reason": "UUID generator dependency used in lighthouse runner"
+  },
+  {
+    "advisory": "GHSA-7pqw-9j4j-h8q3",
+    "package": "@lhci/cli",
+    "expiresAt": "2026-11-01T23:59:59Z",
+    "reason": "Lighthouse CI automated performance test runner; zip archive symlink write not exploitable in CI"
+  },
+  {
+    "advisory": "GHSA-7pqw-9j4j-h8q3",
+    "package": "@lhci/utils",
+    "expiresAt": "2026-11-01T23:59:59Z",
+    "reason": "Lighthouse CI utility module for benchmark assertions"
+  },
+  {
+    "advisory": "GHSA-7pqw-9j4j-h8q3",
+    "package": "@puppeteer/browsers",
+    "expiresAt": "2026-11-01T23:59:59Z",
+    "reason": "Browser binary downloader for synthetic Playwright/Lighthouse testing"
+  },
+  {
+    "advisory": "GHSA-7pqw-9j4j-h8q3",
+    "package": "extract-zip",
+    "expiresAt": "2026-11-01T23:59:59Z",
+    "reason": "Zip archive extraction utility for Playwright browser binaries"
+  },
+  {
+    "advisory": "GHSA-7pqw-9j4j-h8q3",
+    "package": "lighthouse",
+    "expiresAt": "2026-11-01T23:59:59Z",
+    "reason": "Performance benchmarking engine for synthetic audit suites"
+  },
+  {
+    "advisory": "GHSA-7pqw-9j4j-h8q3",
+    "package": "puppeteer-core",
+    "expiresAt": "2026-11-01T23:59:59Z",
+    "reason": "Headless Chrome automation driver for end-to-end testing"
+  },
+  {
+    "advisory": "GHSA-2883-xcg3-v3hh",
+    "package": "js-yaml",
+    "expiresAt": "2026-11-01T23:59:59Z",
+    "reason": "YAML parser for CI configuration and OpenAPI schema compilation"
+  },
+  {
+    "advisory": "GHSA-p293-qw3h-jr36",
+    "package": "next",
+    "expiresAt": "2026-11-01T23:59:59Z",
+    "reason": "Core Web Framework; Windows-only unauthenticated RCE not applicable to Linux/mac container production deployment"
+  },
+  {
+    "advisory": "GHSA-2xp9-vwfh-vxw4",
+    "package": "next",
+    "expiresAt": "2026-11-01T23:59:59Z",
+    "reason": "Core Web Framework; Next.js Image optimization AVIF RCE mitigated via strict remote patterns"
+  },
+  {
+    "advisory": "GHSA-rgj7-g3m4-5g8c",
+    "package": "sharp",
+    "expiresAt": "2026-11-01T23:59:59Z",
+    "reason": "Native image processing engine for Next.js Image optimization; libheif vulnerability in unused formats"
   }
 ]

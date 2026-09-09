@@ -6,19 +6,19 @@
 export const designManifest = {
   colors: {
     /** Original CSS Variable: --background */
-    "background": "#0d0e11",
+    background: "#0d0e11",
     /** Original CSS Variable: --foreground */
-    "foreground": "#f4f4f6",
+    foreground: "#f4f4f6",
     /** Original CSS Variable: --surface-1 */
     "surface-1": "rgba(20, 22, 28, 0.75)",
     /** Original CSS Variable: --surface-2 */
     "surface-2": "rgba(28, 31, 39, 0.55)",
     /** Original CSS Variable: --border */
-    "border": "rgba(255, 255, 255, 0.08)",
+    border: "rgba(255, 255, 255, 0.08)",
     /** Original CSS Variable: --border-active */
     "border-active": "rgba(245, 158, 11, 0.4)",
     /** Original CSS Variable: --muted */
-    "muted": "#94a3b8",
+    muted: "#94a3b8",
     /** Original CSS Variable: --muted-strong */
     "muted-strong": "#cbd5e1",
     /** Original CSS Variable: --brand-cyan */
@@ -28,15 +28,15 @@ export const designManifest = {
     /** Original CSS Variable: --brand-blue */
     "brand-blue": "#3b82f6",
     /** Original CSS Variable: --brand-blue-glow */
-    "brand-blue-glow": "rgba(59, 130, 246, 0.10)",
+    "brand-blue-glow": "rgba(59, 130, 246, 0.1)",
     /** Original CSS Variable: --brand-dark */
     "brand-dark": "#0d0e11",
     /** Original CSS Variable: --success */
-    "success": "#10b981",
+    success: "#10b981",
     /** Original CSS Variable: --error */
-    "error": "#f87171",
+    error: "#f87171",
     /** Original CSS Variable: --warning */
-    "warning": "#f59e0b",
+    warning: "#f59e0b",
   },
   typography: {
     fonts: {
@@ -51,8 +51,8 @@ export const designManifest = {
         fontSize: 13,
         /** Original CSS Variable: --line-height-sm */
         lineHeight: 18,
-      }
-    }
+      },
+    },
   },
   masonry: {
     /** Original CSS Variable: --layout-masonry-padding-with-stats */
@@ -76,19 +76,21 @@ export const designManifest = {
     /** Original CSS Variable: --layout-studio-budget */
     studioBudget: "calc(100dvh - var(--layout-header-height))",
     /** Original CSS Variable: --layout-viewport-budget */
-    viewportBudget: "calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px))",
+    viewportBudget:
+      "calc(\n    100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px)\n  )",
     /** Original CSS Variable: --layout-workspace-budget */
-    workspaceBudget: "calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px) - var(--layout-studio-header-height, 0px))",
+    workspaceBudget:
+      "calc(\n    100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px) -\n      var(--layout-studio-header-height, 0px)\n  )",
   },
   breakpoints: {
     /** Original CSS Variable: --breakpoint-sm */
-    "sm": 640,
+    sm: 640,
     /** Original CSS Variable: --breakpoint-md */
-    "md": 768,
+    md: 768,
     /** Original CSS Variable: --breakpoint-lg */
-    "lg": 1024,
+    lg: 1024,
     /** Original CSS Variable: --breakpoint-xl */
-    "xl": 1280,
+    xl: 1280,
     /** Original CSS Variable: --breakpoint-2xl */
     "2xl": 1536,
   },
@@ -100,6 +102,6 @@ export const designManifest = {
       hero: { type: "spring", stiffness: 100, damping: 18 },
       heroBeam: { type: "spring", stiffness: 110, damping: 30 },
       timeline: { type: "spring", stiffness: 60, damping: 20 },
-    }
-  }
+    },
+  },
 } as const;

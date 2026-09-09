@@ -1,6 +1,6 @@
 {
   "targetUrl": "http://localhost:3000",
-  "timestamp": "2026-08-22T03:45:12.983Z",
+  "timestamp": "2026-09-08T21:49:53.202Z",
   "thresholds": {
     "maxTtfbMs": 800,
     "maxFcpMs": 2000,
@@ -16,22 +16,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 103,
-        "min": 24.5,
-        "max": 111.2,
-        "p95": 111.2
+        "median": 92.5,
+        "min": 15.7,
+        "max": 99.6,
+        "p95": 99.6
       },
       "fcp": {
-        "median": 176,
-        "min": 156,
-        "max": 188,
-        "p95": 188
+        "median": 124,
+        "min": 116,
+        "max": 140,
+        "p95": 140
       },
       "lcp": {
-        "median": 176,
-        "min": 156,
-        "max": 188,
-        "p95": 188
+        "median": 124,
+        "min": 116,
+        "max": 140,
+        "p95": 140
       },
       "cls": {
         "median": 0,
@@ -40,22 +40,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 146.6,
-        "min": 124.4,
-        "max": 176.8,
-        "p95": 176.8
+        "median": 111.7,
+        "min": 105.1,
+        "max": 131.9,
+        "p95": 131.9
       },
       "loadDuration": {
-        "median": 146.9,
-        "min": 124.7,
-        "max": 321,
-        "p95": 321
+        "median": 111.9,
+        "min": 105.4,
+        "max": 283.8,
+        "p95": 283.8
       },
       "transferSizeKb": {
         "median": 0.3,
         "min": 0.3,
-        "max": 81.9,
-        "p95": 81.9
+        "max": 84.7,
+        "p95": 84.7
       },
       "ratings": {
         "ttfb": "good",
@@ -73,22 +73,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 13.7,
-        "min": 9.3,
-        "max": 112.4,
-        "p95": 112.4
+        "median": 106.7,
+        "min": 4.9,
+        "max": 108.3,
+        "p95": 108.3
       },
       "fcp": {
-        "median": 132,
-        "min": 120,
-        "max": 156,
-        "p95": 156
+        "median": 124,
+        "min": 104,
+        "max": 152,
+        "p95": 152
       },
       "lcp": {
-        "median": 132,
-        "min": 120,
-        "max": 156,
-        "p95": 156
+        "median": 124,
+        "min": 104,
+        "max": 152,
+        "p95": 152
       },
       "cls": {
         "median": 0,
@@ -97,22 +97,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 54.8,
-        "min": 30,
-        "max": 151.7,
-        "p95": 151.7
+        "median": 116.8,
+        "min": 19.3,
+        "max": 146.4,
+        "p95": 146.4
       },
       "loadDuration": {
-        "median": 218,
-        "min": 151.7,
-        "max": 223.2,
-        "p95": 223.2
+        "median": 146.5,
+        "min": 117,
+        "max": 187.2,
+        "p95": 187.2
       },
       "transferSizeKb": {
-        "median": 85.6,
+        "median": 0.3,
         "min": 0.3,
-        "max": 85.6,
-        "p95": 85.6
+        "max": 101.3,
+        "p95": 101.3
       },
       "ratings": {
         "ttfb": "good",
@@ -130,22 +130,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 14.3,
-        "min": 5.2,
-        "max": 68.7,
-        "p95": 68.7
+        "median": 5.4,
+        "min": 4.5,
+        "max": 10.8,
+        "p95": 10.8
       },
       "fcp": {
-        "median": 88,
-        "min": 64,
-        "max": 172,
-        "p95": 172
+        "median": 64,
+        "min": 60,
+        "max": 112,
+        "p95": 112
       },
       "lcp": {
-        "median": 88,
-        "min": 64,
-        "max": 172,
-        "p95": 172
+        "median": 64,
+        "min": 60,
+        "max": 112,
+        "p95": 112
       },
       "cls": {
         "median": 0,
@@ -154,20 +154,20 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 52.8,
-        "min": 10.6,
-        "max": 84.4,
-        "p95": 84.4
+        "median": 10.6,
+        "min": 9.7,
+        "max": 83,
+        "p95": 83
       },
       "loadDuration": {
-        "median": 84.8,
-        "min": 35,
-        "max": 148.7,
-        "p95": 148.7
+        "median": 33.6,
+        "min": 21.4,
+        "max": 117.6,
+        "p95": 117.6
       },
       "transferSizeKb": {
         "median": 103.7,
-        "min": 0.3,
+        "min": 103.7,
         "max": 103.7,
         "p95": 103.7
       },
@@ -187,22 +187,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 3.8,
-        "min": 3.7,
-        "max": 5.6,
-        "p95": 5.6
+        "median": 3.7,
+        "min": 3.4,
+        "max": 3.8,
+        "p95": 3.8
       },
       "fcp": {
-        "median": 76,
-        "min": 60,
-        "max": 76,
-        "p95": 76
+        "median": 44,
+        "min": 44,
+        "max": 48,
+        "p95": 48
       },
       "lcp": {
-        "median": 76,
-        "min": 60,
-        "max": 76,
-        "p95": 76
+        "median": 44,
+        "min": 44,
+        "max": 48,
+        "p95": 48
       },
       "cls": {
         "median": 0,
@@ -211,16 +211,16 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 10.2,
-        "min": 9.6,
-        "max": 11.2,
-        "p95": 11.2
+        "median": 8.8,
+        "min": 8.6,
+        "max": 9.1,
+        "p95": 9.1
       },
       "loadDuration": {
-        "median": 35.1,
-        "min": 21.4,
-        "max": 40.5,
-        "p95": 40.5
+        "median": 31.2,
+        "min": 30.3,
+        "max": 31.6,
+        "p95": 31.6
       },
       "transferSizeKb": {
         "median": 73.8,
@@ -244,22 +244,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 67.9,
-        "min": 66.3,
-        "max": 74.3,
-        "p95": 74.3
+        "median": 112.6,
+        "min": 8.5,
+        "max": 125.7,
+        "p95": 125.7
       },
       "fcp": {
-        "median": 112,
-        "min": 112,
-        "max": 132,
-        "p95": 132
+        "median": 132,
+        "min": 80,
+        "max": 144,
+        "p95": 144
       },
       "lcp": {
-        "median": 112,
-        "min": 112,
-        "max": 132,
-        "p95": 132
+        "median": 132,
+        "min": 80,
+        "max": 144,
+        "p95": 144
       },
       "cls": {
         "median": 0,
@@ -268,22 +268,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 83.7,
-        "min": 77.9,
-        "max": 99.5,
-        "p95": 99.5
+        "median": 119.4,
+        "min": 35.9,
+        "max": 137.4,
+        "p95": 137.4
       },
       "loadDuration": {
-        "median": 84,
-        "min": 78.1,
-        "max": 99.5,
-        "p95": 99.5
+        "median": 119.5,
+        "min": 99.3,
+        "max": 137.7,
+        "p95": 137.7
       },
       "transferSizeKb": {
         "median": 0.3,
         "min": 0.3,
-        "max": 0.3,
-        "p95": 0.3
+        "max": 70.9,
+        "p95": 70.9
       },
       "ratings": {
         "ttfb": "good",
@@ -301,22 +301,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 4.8,
-        "min": 4.2,
-        "max": 4.9,
-        "p95": 4.9
+        "median": 4.2,
+        "min": 3.2,
+        "max": 4.3,
+        "p95": 4.3
       },
       "fcp": {
-        "median": 40,
-        "min": 40,
-        "max": 64,
-        "p95": 64
+        "median": 32,
+        "min": 32,
+        "max": 36,
+        "p95": 36
       },
       "lcp": {
-        "median": 40,
-        "min": 40,
-        "max": 64,
-        "p95": 64
+        "median": 32,
+        "min": 32,
+        "max": 36,
+        "p95": 36
       },
       "cls": {
         "median": 0,
@@ -325,16 +325,16 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 10.6,
-        "min": 9.5,
-        "max": 11.1,
-        "p95": 11.1
+        "median": 8.7,
+        "min": 7.9,
+        "max": 9,
+        "p95": 9
       },
       "loadDuration": {
-        "median": 22.6,
-        "min": 21.2,
-        "max": 33.5,
-        "p95": 33.5
+        "median": 27.6,
+        "min": 18.9,
+        "max": 30.9,
+        "p95": 30.9
       },
       "transferSizeKb": {
         "median": 70.8,
@@ -358,20 +358,20 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 4.6,
-        "min": 3.2,
-        "max": 100.3,
-        "p95": 100.3
+        "median": 98.5,
+        "min": 88.1,
+        "max": 108.2,
+        "p95": 108.2
       },
       "fcp": {
-        "median": 48,
-        "min": 32,
+        "median": 124,
+        "min": 104,
         "max": 140,
         "p95": 140
       },
       "lcp": {
-        "median": 48,
-        "min": 32,
+        "median": 124,
+        "min": 104,
         "max": 140,
         "p95": 140
       },
@@ -382,22 +382,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 9.3,
-        "min": 7.6,
-        "max": 135.2,
-        "p95": 135.2
+        "median": 115.7,
+        "min": 97,
+        "max": 133,
+        "p95": 133
       },
       "loadDuration": {
-        "median": 27.9,
-        "min": 19.8,
-        "max": 135.2,
-        "p95": 135.2
+        "median": 115.8,
+        "min": 97.2,
+        "max": 133,
+        "p95": 133
       },
       "transferSizeKb": {
-        "median": 63.8,
+        "median": 0.3,
         "min": 0.3,
-        "max": 63.8,
-        "p95": 63.8
+        "max": 0.3,
+        "p95": 0.3
       },
       "ratings": {
         "ttfb": "good",
@@ -415,22 +415,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 14.1,
-        "min": 3.5,
-        "max": 101.5,
-        "p95": 101.5
+        "median": 3.3,
+        "min": 3.1,
+        "max": 3.5,
+        "p95": 3.5
       },
       "fcp": {
-        "median": 144,
-        "min": 64,
-        "max": 156,
-        "p95": 156
+        "median": 52,
+        "min": 52,
+        "max": 56,
+        "p95": 56
       },
       "lcp": {
-        "median": 144,
-        "min": 64,
-        "max": 156,
-        "p95": 156
+        "median": 52,
+        "min": 52,
+        "max": 56,
+        "p95": 56
       },
       "cls": {
         "median": 0,
@@ -439,20 +439,20 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 51.3,
-        "min": 8.8,
-        "max": 113.3,
-        "p95": 113.3
+        "median": 8.3,
+        "min": 8,
+        "max": 8.5,
+        "p95": 8.5
       },
       "loadDuration": {
-        "median": 113.5,
-        "min": 22.1,
-        "max": 133.9,
-        "p95": 133.9
+        "median": 31.1,
+        "min": 19.8,
+        "max": 32.3,
+        "p95": 32.3
       },
       "transferSizeKb": {
         "median": 86.8,
-        "min": 0.3,
+        "min": 86.8,
         "max": 86.8,
         "p95": 86.8
       },
@@ -472,22 +472,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 3.3,
-        "min": 2.9,
-        "max": 4.1,
-        "p95": 4.1
+        "median": 3.4,
+        "min": 3.2,
+        "max": 98.5,
+        "p95": 98.5
       },
       "fcp": {
-        "median": 36,
+        "median": 44,
         "min": 36,
-        "max": 48,
-        "p95": 48
+        "max": 136,
+        "p95": 136
       },
       "lcp": {
-        "median": 36,
+        "median": 44,
         "min": 36,
-        "max": 48,
-        "p95": 48
+        "max": 136,
+        "p95": 136
       },
       "cls": {
         "median": 0,
@@ -496,20 +496,20 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 8.2,
-        "min": 8,
-        "max": 9.1,
-        "p95": 9.1
+        "median": 8,
+        "min": 7.8,
+        "max": 130.8,
+        "p95": 130.8
       },
       "loadDuration": {
-        "median": 29.1,
-        "min": 20.5,
-        "max": 30.1,
-        "p95": 30.1
+        "median": 29,
+        "min": 18.2,
+        "max": 130.8,
+        "p95": 130.8
       },
       "transferSizeKb": {
         "median": 69.5,
-        "min": 69.5,
+        "min": 0.3,
         "max": 69.5,
         "p95": 69.5
       },
@@ -529,22 +529,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 101.9,
-        "min": 88.8,
-        "max": 108.6,
-        "p95": 108.6
+        "median": 11.3,
+        "min": 3.7,
+        "max": 94.1,
+        "p95": 94.1
       },
       "fcp": {
-        "median": 148,
-        "min": 124,
-        "max": 152,
-        "p95": 152
+        "median": 80,
+        "min": 44,
+        "max": 116,
+        "p95": 116
       },
       "lcp": {
-        "median": 148,
-        "min": 124,
-        "max": 152,
-        "p95": 152
+        "median": 80,
+        "min": 44,
+        "max": 116,
+        "p95": 116
       },
       "cls": {
         "median": 0,
@@ -553,22 +553,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 117,
-        "min": 94.6,
-        "max": 146.7,
-        "p95": 146.7
+        "median": 31.1,
+        "min": 9.6,
+        "max": 102.5,
+        "p95": 102.5
       },
       "loadDuration": {
-        "median": 117.2,
-        "min": 94.7,
-        "max": 146.8,
-        "p95": 146.8
+        "median": 102.7,
+        "min": 54.8,
+        "max": 116.7,
+        "p95": 116.7
       },
       "transferSizeKb": {
-        "median": 0.3,
+        "median": 125.3,
         "min": 0.3,
-        "max": 0.3,
-        "p95": 0.3
+        "max": 125.3,
+        "p95": 125.3
       },
       "ratings": {
         "ttfb": "good",
@@ -586,22 +586,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 5,
-        "min": 4.2,
-        "max": 7.5,
-        "p95": 7.5
+        "median": 4.3,
+        "min": 3.9,
+        "max": 4.5,
+        "p95": 4.5
       },
       "fcp": {
-        "median": 64,
+        "median": 48,
         "min": 44,
-        "max": 72,
-        "p95": 72
+        "max": 60,
+        "p95": 60
       },
       "lcp": {
-        "median": 64,
+        "median": 48,
         "min": 44,
-        "max": 72,
-        "p95": 72
+        "max": 60,
+        "p95": 60
       },
       "cls": {
         "median": 0,
@@ -610,16 +610,16 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 13.9,
-        "min": 10.3,
-        "max": 17.9,
-        "p95": 17.9
+        "median": 10.2,
+        "min": 9.6,
+        "max": 10.8,
+        "p95": 10.8
       },
       "loadDuration": {
-        "median": 49.6,
-        "min": 38.2,
-        "max": 51.1,
-        "p95": 51.1
+        "median": 55,
+        "min": 47,
+        "max": 67.9,
+        "p95": 67.9
       },
       "transferSizeKb": {
         "median": 119,
@@ -643,22 +643,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 62.3,
-        "min": 16,
-        "max": 67.8,
-        "p95": 67.8
+        "median": 95.6,
+        "min": 7.8,
+        "max": 101.6,
+        "p95": 101.6
       },
       "fcp": {
-        "median": 104,
-        "min": 68,
-        "max": 7536,
-        "p95": 7536
+        "median": 116,
+        "min": 80,
+        "max": 128,
+        "p95": 128
       },
       "lcp": {
-        "median": 104,
-        "min": 68,
-        "max": 7536,
-        "p95": 7536
+        "median": 116,
+        "min": 80,
+        "max": 128,
+        "p95": 128
       },
       "cls": {
         "median": 0,
@@ -667,16 +667,16 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 75.4,
-        "min": 25.1,
-        "max": 7528.6,
-        "p95": 7528.6
+        "median": 105.9,
+        "min": 30.6,
+        "max": 113.4,
+        "p95": 113.4
       },
       "loadDuration": {
-        "median": 75.5,
-        "min": 72.2,
-        "max": 7528.7,
-        "p95": 7528.7
+        "median": 113.7,
+        "min": 106.1,
+        "max": 121.2,
+        "p95": 121.2
       },
       "transferSizeKb": {
         "median": 0.3,
@@ -700,22 +700,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 38.9,
-        "min": 7.5,
-        "max": 39.9,
-        "p95": 39.9
+        "median": 112.5,
+        "min": 99.9,
+        "max": 2144.1,
+        "p95": 2144.1
       },
       "fcp": {
-        "median": 88,
-        "min": 80,
-        "max": 160,
-        "p95": 160
+        "median": 144,
+        "min": 128,
+        "max": 2192,
+        "p95": 2192
       },
       "lcp": {
-        "median": 88,
-        "min": 80,
-        "max": 160,
-        "p95": 160
+        "median": 144,
+        "min": 128,
+        "max": 2192,
+        "p95": 2192
       },
       "cls": {
         "median": 0,
@@ -724,20 +724,20 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 78.5,
-        "min": 20.6,
-        "max": 80.9,
-        "p95": 80.9
+        "median": 137.4,
+        "min": 118.3,
+        "max": 2174.8,
+        "p95": 2174.8
       },
       "loadDuration": {
-        "median": 139,
-        "min": 108.1,
-        "max": 155.5,
-        "p95": 155.5
+        "median": 137.4,
+        "min": 118.5,
+        "max": 2211.5,
+        "p95": 2211.5
       },
       "transferSizeKb": {
-        "median": 130.2,
-        "min": 129.3,
+        "median": 0.3,
+        "min": 0.3,
         "max": 130.2,
         "p95": 130.2
       },
@@ -757,22 +757,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 21.2,
-        "min": 10.1,
-        "max": 74,
-        "p95": 74
+        "median": 3.9,
+        "min": 3.2,
+        "max": 15.7,
+        "p95": 15.7
       },
       "fcp": {
-        "median": 80,
-        "min": 56,
-        "max": 136,
-        "p95": 136
+        "median": 40,
+        "min": 40,
+        "max": 100,
+        "p95": 100
       },
       "lcp": {
-        "median": 80,
-        "min": 56,
-        "max": 136,
-        "p95": 136
+        "median": 40,
+        "min": 40,
+        "max": 100,
+        "p95": 100
       },
       "cls": {
         "median": 0,
@@ -781,22 +781,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 31.2,
-        "min": 17.8,
-        "max": 131.4,
-        "p95": 131.4
+        "median": 9.7,
+        "min": 9.1,
+        "max": 41.5,
+        "p95": 41.5
       },
       "loadDuration": {
-        "median": 94.8,
-        "min": 91.5,
-        "max": 131.4,
-        "p95": 131.4
+        "median": 53.7,
+        "min": 53,
+        "max": 139,
+        "p95": 139
       },
       "transferSizeKb": {
-        "median": 117.8,
-        "min": 0.3,
-        "max": 117.8,
-        "p95": 117.8
+        "median": 117.7,
+        "min": 117.7,
+        "max": 117.7,
+        "p95": 117.7
       },
       "ratings": {
         "ttfb": "good",
@@ -814,22 +814,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 75.6,
-        "min": 45.5,
-        "max": 1741,
-        "p95": 1741
+        "median": 101.2,
+        "min": 3.1,
+        "max": 950,
+        "p95": 950
       },
       "fcp": {
-        "median": 152,
-        "min": 116,
-        "max": 1796,
-        "p95": 1796
+        "median": 796,
+        "min": 44,
+        "max": 988,
+        "p95": 988
       },
       "lcp": {
-        "median": 152,
-        "min": 116,
-        "max": 1796,
-        "p95": 1796
+        "median": 796,
+        "min": 44,
+        "max": 988,
+        "p95": 988
       },
       "cls": {
         "median": 0,
@@ -838,19 +838,19 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 86.6,
-        "min": 77.3,
-        "max": 1752.7,
-        "p95": 1752.7
+        "median": 791.3,
+        "min": 8.8,
+        "max": 955.4,
+        "p95": 955.4
       },
       "loadDuration": {
-        "median": 176.9,
-        "min": 86.8,
-        "max": 1873.5,
-        "p95": 1873.5
+        "median": 791.3,
+        "min": 45.7,
+        "max": 992.7,
+        "p95": 992.7
       },
       "transferSizeKb": {
-        "median": 111,
+        "median": 111.9,
         "min": 0.3,
         "max": 111.9,
         "p95": 111.9
@@ -871,22 +871,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 100.6,
-        "min": 23.2,
-        "max": 172.8,
-        "p95": 172.8
+        "median": 15.7,
+        "min": 3.4,
+        "max": 110.5,
+        "p95": 110.5
       },
       "fcp": {
-        "median": 144,
-        "min": 104,
-        "max": 212,
-        "p95": 212
+        "median": 84,
+        "min": 40,
+        "max": 132,
+        "p95": 132
       },
       "lcp": {
-        "median": 144,
-        "min": 104,
-        "max": 212,
-        "p95": 212
+        "median": 84,
+        "min": 40,
+        "max": 132,
+        "p95": 132
       },
       "cls": {
         "median": 0,
@@ -895,22 +895,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 114.2,
-        "min": 93.7,
-        "max": 179.7,
-        "p95": 179.7
+        "median": 76,
+        "min": 9.1,
+        "max": 121,
+        "p95": 121
       },
       "loadDuration": {
-        "median": 133.2,
-        "min": 114.3,
-        "max": 179.9,
-        "p95": 179.9
+        "median": 118.6,
+        "min": 52.7,
+        "max": 121.3,
+        "p95": 121.3
       },
       "transferSizeKb": {
-        "median": 0.3,
+        "median": 111.4,
         "min": 0.3,
-        "max": 110.6,
-        "p95": 110.6
+        "max": 111.4,
+        "p95": 111.4
       },
       "ratings": {
         "ttfb": "good",
@@ -928,22 +928,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 6.7,
-        "min": 5.6,
-        "max": 7,
-        "p95": 7
+        "median": 3.6,
+        "min": 3.1,
+        "max": 10.8,
+        "p95": 10.8
       },
       "fcp": {
-        "median": 48,
-        "min": 48,
-        "max": 72,
-        "p95": 72
+        "median": 44,
+        "min": 44,
+        "max": 44,
+        "p95": 44
       },
       "lcp": {
-        "median": 48,
-        "min": 48,
-        "max": 72,
-        "p95": 72
+        "median": 44,
+        "min": 44,
+        "max": 44,
+        "p95": 44
       },
       "cls": {
         "median": 0,
@@ -952,16 +952,16 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 13.7,
-        "min": 11.2,
-        "max": 21.3,
-        "p95": 21.3
+        "median": 9.3,
+        "min": 8.7,
+        "max": 33.2,
+        "p95": 33.2
       },
       "loadDuration": {
-        "median": 59.3,
-        "min": 35.9,
-        "max": 66.5,
-        "p95": 66.5
+        "median": 49.3,
+        "min": 46.4,
+        "max": 51,
+        "p95": 51
       },
       "transferSizeKb": {
         "median": 110.9,
@@ -985,22 +985,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 122.5,
-        "min": 111.5,
-        "max": 186.6,
-        "p95": 186.6
+        "median": 102.8,
+        "min": 13.5,
+        "max": 103.1,
+        "p95": 103.1
       },
       "fcp": {
-        "median": 176,
-        "min": 152,
-        "max": 1712,
-        "p95": 1712
+        "median": 124,
+        "min": 116,
+        "max": 124,
+        "p95": 124
       },
       "lcp": {
-        "median": 176,
-        "min": 152,
-        "max": 1712,
-        "p95": 1712
+        "median": 124,
+        "min": 116,
+        "max": 124,
+        "p95": 124
       },
       "cls": {
         "median": 0,
@@ -1009,22 +1009,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 148.4,
-        "min": 122.1,
-        "max": 1706.9,
-        "p95": 1706.9
+        "median": 109.8,
+        "min": 37.7,
+        "max": 113.5,
+        "p95": 113.5
       },
       "loadDuration": {
-        "median": 148.6,
-        "min": 122.2,
-        "max": 1707,
-        "p95": 1707
+        "median": 113.8,
+        "min": 109.9,
+        "max": 135.1,
+        "p95": 135.1
       },
       "transferSizeKb": {
         "median": 0.3,
         "min": 0.3,
-        "max": 0.3,
-        "p95": 0.3
+        "max": 111.2,
+        "p95": 111.2
       },
       "ratings": {
         "ttfb": "good",
@@ -1042,22 +1042,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 18.3,
-        "min": 7.5,
-        "max": 41.4,
-        "p95": 41.4
+        "median": 91.5,
+        "min": 3.8,
+        "max": 1173.5,
+        "p95": 1173.5
       },
       "fcp": {
-        "median": 92,
-        "min": 80,
-        "max": 100,
-        "p95": 100
+        "median": 152,
+        "min": 44,
+        "max": 1212,
+        "p95": 1212
       },
       "lcp": {
-        "median": 92,
-        "min": 80,
-        "max": 100,
-        "p95": 100
+        "median": 152,
+        "min": 44,
+        "max": 1212,
+        "p95": 1212
       },
       "cls": {
         "median": 0,
@@ -1066,20 +1066,20 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 43.1,
-        "min": 23.9,
-        "max": 60.2,
-        "p95": 60.2
+        "median": 146.8,
+        "min": 40.9,
+        "max": 1205.1,
+        "p95": 1205.1
       },
       "loadDuration": {
-        "median": 116.9,
-        "min": 93.8,
-        "max": 286,
-        "p95": 286
+        "median": 146.8,
+        "min": 60.6,
+        "max": 1231.3,
+        "p95": 1231.3
       },
       "transferSizeKb": {
         "median": 141.3,
-        "min": 141.3,
+        "min": 0.3,
         "max": 141.3,
         "p95": 141.3
       },
@@ -1099,22 +1099,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 103.5,
-        "min": 45.5,
-        "max": 124.4,
-        "p95": 124.4
+        "median": 85.5,
+        "min": 11.9,
+        "max": 102.4,
+        "p95": 102.4
       },
       "fcp": {
-        "median": 152,
-        "min": 148,
-        "max": 168,
-        "p95": 168
+        "median": 104,
+        "min": 104,
+        "max": 124,
+        "p95": 124
       },
       "lcp": {
-        "median": 152,
-        "min": 148,
-        "max": 168,
-        "p95": 168
+        "median": 104,
+        "min": 104,
+        "max": 124,
+        "p95": 124
       },
       "cls": {
         "median": 0,
@@ -1123,22 +1123,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 136.5,
-        "min": 115.6,
-        "max": 173.9,
-        "p95": 173.9
+        "median": 91.4,
+        "min": 54.1,
+        "max": 113.1,
+        "p95": 113.1
       },
       "loadDuration": {
-        "median": 136.8,
-        "min": 115.8,
-        "max": 174.1,
-        "p95": 174.1
+        "median": 113.4,
+        "min": 91.5,
+        "max": 147.4,
+        "p95": 147.4
       },
       "transferSizeKb": {
         "median": 0.3,
         "min": 0.3,
-        "max": 136.3,
-        "p95": 136.3
+        "max": 137.2,
+        "p95": 137.2
       },
       "ratings": {
         "ttfb": "good",
@@ -1156,22 +1156,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 104.9,
-        "min": 68,
-        "max": 106,
-        "p95": 106
+        "median": 7.9,
+        "min": 3.3,
+        "max": 99,
+        "p95": 99
       },
       "fcp": {
-        "median": 156,
-        "min": 148,
-        "max": 160,
-        "p95": 160
+        "median": 80,
+        "min": 36,
+        "max": 116,
+        "p95": 116
       },
       "lcp": {
-        "median": 156,
-        "min": 148,
-        "max": 160,
-        "p95": 160
+        "median": 80,
+        "min": 36,
+        "max": 116,
+        "p95": 116
       },
       "cls": {
         "median": 0,
@@ -1180,22 +1180,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 118.6,
-        "min": 95.4,
-        "max": 126.9,
-        "p95": 126.9
+        "median": 30,
+        "min": 24.8,
+        "max": 104.3,
+        "p95": 104.3
       },
       "loadDuration": {
-        "median": 127.2,
-        "min": 118.8,
-        "max": 183.5,
-        "p95": 183.5
+        "median": 104.4,
+        "min": 36.8,
+        "max": 115.8,
+        "p95": 115.8
       },
       "transferSizeKb": {
-        "median": 0.3,
+        "median": 114.5,
         "min": 0.3,
-        "max": 113.7,
-        "p95": 113.7
+        "max": 114.5,
+        "p95": 114.5
       },
       "ratings": {
         "ttfb": "good",
@@ -1213,22 +1213,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 10,
-        "min": 7.9,
-        "max": 33.9,
-        "p95": 33.9
+        "median": 3.9,
+        "min": 3,
+        "max": 5.9,
+        "p95": 5.9
       },
       "fcp": {
-        "median": 76,
-        "min": 64,
-        "max": 92,
-        "p95": 92
+        "median": 40,
+        "min": 36,
+        "max": 40,
+        "p95": 40
       },
       "lcp": {
-        "median": 76,
-        "min": 64,
-        "max": 92,
-        "p95": 92
+        "median": 40,
+        "min": 36,
+        "max": 40,
+        "p95": 40
       },
       "cls": {
         "median": 0,
@@ -1237,16 +1237,16 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 18.7,
-        "min": 15.5,
-        "max": 42.5,
-        "p95": 42.5
+        "median": 9.7,
+        "min": 8.7,
+        "max": 11.9,
+        "p95": 11.9
       },
       "loadDuration": {
-        "median": 90.4,
-        "min": 74.9,
-        "max": 119.9,
-        "p95": 119.9
+        "median": 44.4,
+        "min": 44.1,
+        "max": 53,
+        "p95": 53
       },
       "transferSizeKb": {
         "median": 115.7,
@@ -1270,22 +1270,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 104.2,
-        "min": 29.8,
-        "max": 111.9,
-        "p95": 111.9
+        "median": 100.9,
+        "min": 8.2,
+        "max": 123.3,
+        "p95": 123.3
       },
       "fcp": {
-        "median": 144,
-        "min": 100,
-        "max": 152,
-        "p95": 152
+        "median": 116,
+        "min": 80,
+        "max": 144,
+        "p95": 144
       },
       "lcp": {
-        "median": 144,
-        "min": 100,
-        "max": 152,
-        "p95": 152
+        "median": 116,
+        "min": 80,
+        "max": 144,
+        "p95": 144
       },
       "cls": {
         "median": 0,
@@ -1294,22 +1294,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 121.4,
-        "min": 116.7,
-        "max": 122.5,
-        "p95": 122.5
+        "median": 109.1,
+        "min": 34,
+        "max": 134.1,
+        "p95": 134.1
       },
       "loadDuration": {
-        "median": 121.6,
-        "min": 117,
-        "max": 122.7,
-        "p95": 122.7
+        "median": 118.6,
+        "min": 109.2,
+        "max": 134.4,
+        "p95": 134.4
       },
       "transferSizeKb": {
         "median": 0.3,
         "min": 0.3,
-        "max": 121,
-        "p95": 121
+        "max": 121.8,
+        "p95": 121.8
       },
       "ratings": {
         "ttfb": "good",
@@ -1327,22 +1327,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 8.2,
-        "min": 5.9,
-        "max": 1534,
-        "p95": 1534
+        "median": 101.5,
+        "min": 93.6,
+        "max": 1231.2,
+        "p95": 1231.2
       },
       "fcp": {
-        "median": 52,
-        "min": 48,
-        "max": 1584,
-        "p95": 1584
+        "median": 516,
+        "min": 120,
+        "max": 1276,
+        "p95": 1276
       },
       "lcp": {
-        "median": 52,
-        "min": 48,
-        "max": 1584,
-        "p95": 1584
+        "median": 516,
+        "min": 120,
+        "max": 1276,
+        "p95": 1276
       },
       "cls": {
         "median": 0,
@@ -1351,22 +1351,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 22.6,
-        "min": 21.5,
-        "max": 1543.1,
-        "p95": 1543.1
+        "median": 510.2,
+        "min": 106.4,
+        "max": 1241,
+        "p95": 1241
       },
       "loadDuration": {
-        "median": 67.4,
-        "min": 56.2,
-        "max": 1873.1,
-        "p95": 1873.1
+        "median": 510.2,
+        "min": 106.6,
+        "max": 1283.4,
+        "p95": 1283.4
       },
       "transferSizeKb": {
-        "median": 117.4,
-        "min": 117.4,
-        "max": 117.4,
-        "p95": 117.4
+        "median": 0.3,
+        "min": 0.3,
+        "max": 117.3,
+        "p95": 117.3
       },
       "ratings": {
         "ttfb": "good",
@@ -1384,22 +1384,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 98.1,
-        "min": 17.4,
-        "max": 109.2,
-        "p95": 109.2
+        "median": 6.3,
+        "min": 4.2,
+        "max": 11.7,
+        "p95": 11.7
       },
       "fcp": {
-        "median": 136,
-        "min": 88,
-        "max": 152,
-        "p95": 152
+        "median": 56,
+        "min": 44,
+        "max": 112,
+        "p95": 112
       },
       "lcp": {
-        "median": 136,
-        "min": 88,
-        "max": 152,
-        "p95": 152
+        "median": 56,
+        "min": 44,
+        "max": 112,
+        "p95": 112
       },
       "cls": {
         "median": 0,
@@ -1408,22 +1408,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 106.1,
-        "min": 38.9,
-        "max": 119.4,
-        "p95": 119.4
+        "median": 38.3,
+        "min": 23.3,
+        "max": 54.8,
+        "p95": 54.8
       },
       "loadDuration": {
-        "median": 117.1,
-        "min": 106.3,
-        "max": 119.6,
-        "p95": 119.6
+        "median": 63.8,
+        "min": 54.7,
+        "max": 127.8,
+        "p95": 127.8
       },
       "transferSizeKb": {
-        "median": 0.3,
-        "min": 0.3,
-        "max": 139.4,
-        "p95": 139.4
+        "median": 140.3,
+        "min": 140.3,
+        "max": 140.3,
+        "p95": 140.3
       },
       "ratings": {
         "ttfb": "good",
@@ -1441,22 +1441,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 5.2,
-        "min": 4.4,
-        "max": 5.6,
-        "p95": 5.6
+        "median": 4.1,
+        "min": 3,
+        "max": 123.9,
+        "p95": 123.9
       },
       "fcp": {
-        "median": 44,
-        "min": 40,
-        "max": 44,
-        "p95": 44
+        "median": 36,
+        "min": 36,
+        "max": 1396,
+        "p95": 1396
       },
       "lcp": {
-        "median": 44,
-        "min": 40,
-        "max": 44,
-        "p95": 44
+        "median": 36,
+        "min": 36,
+        "max": 1396,
+        "p95": 1396
       },
       "cls": {
         "median": 0,
@@ -1465,20 +1465,20 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 17.3,
-        "min": 16.9,
-        "max": 18.9,
-        "p95": 18.9
+        "median": 15.3,
+        "min": 15.1,
+        "max": 1390.6,
+        "p95": 1390.6
       },
       "loadDuration": {
-        "median": 50.4,
-        "min": 49.3,
-        "max": 61.9,
-        "p95": 61.9
+        "median": 52.6,
+        "min": 45.9,
+        "max": 1390.6,
+        "p95": 1390.6
       },
       "transferSizeKb": {
         "median": 140.4,
-        "min": 140.4,
+        "min": 0.3,
         "max": 140.4,
         "p95": 140.4
       },
@@ -1498,22 +1498,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 104.8,
-        "min": 95.6,
-        "max": 107.3,
-        "p95": 107.3
+        "median": 15.3,
+        "min": 3.5,
+        "max": 97.4,
+        "p95": 97.4
       },
       "fcp": {
-        "median": 140,
-        "min": 128,
-        "max": 312,
-        "p95": 312
+        "median": 120,
+        "min": 40,
+        "max": 120,
+        "p95": 120
       },
       "lcp": {
-        "median": 140,
-        "min": 128,
-        "max": 312,
-        "p95": 312
+        "median": 120,
+        "min": 40,
+        "max": 120,
+        "p95": 120
       },
       "cls": {
         "median": 0,
@@ -1522,22 +1522,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 111.2,
-        "min": 101.6,
-        "max": 305.2,
-        "p95": 305.2
+        "median": 62.5,
+        "min": 15.5,
+        "max": 109.5,
+        "p95": 109.5
       },
       "loadDuration": {
-        "median": 111.3,
-        "min": 101.8,
-        "max": 305.2,
-        "p95": 305.2
+        "median": 109.8,
+        "min": 54.7,
+        "max": 141,
+        "p95": 141
       },
       "transferSizeKb": {
-        "median": 0.3,
+        "median": 135.5,
         "min": 0.3,
-        "max": 0.3,
-        "p95": 0.3
+        "max": 135.5,
+        "p95": 135.5
       },
       "ratings": {
         "ttfb": "good",
@@ -1555,22 +1555,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 11.1,
-        "min": 6.2,
-        "max": 419.1,
-        "p95": 419.1
+        "median": 7.2,
+        "min": 4.1,
+        "max": 8.8,
+        "p95": 8.8
       },
       "fcp": {
-        "median": 64,
-        "min": 52,
-        "max": 460,
-        "p95": 460
+        "median": 48,
+        "min": 40,
+        "max": 52,
+        "p95": 52
       },
       "lcp": {
-        "median": 64,
-        "min": 52,
-        "max": 460,
-        "p95": 460
+        "median": 48,
+        "min": 40,
+        "max": 52,
+        "p95": 52
       },
       "cls": {
         "median": 0,
@@ -1579,16 +1579,16 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 22.8,
-        "min": 18.2,
-        "max": 430.6,
-        "p95": 430.6
+        "median": 19,
+        "min": 15.7,
+        "max": 26.2,
+        "p95": 26.2
       },
       "loadDuration": {
-        "median": 64.8,
-        "min": 54.7,
-        "max": 463.7,
-        "p95": 463.7
+        "median": 83,
+        "min": 47.4,
+        "max": 563.2,
+        "p95": 563.2
       },
       "transferSizeKb": {
         "median": 152,
@@ -1612,22 +1612,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 98.4,
-        "min": 98.3,
-        "max": 101.5,
-        "p95": 101.5
+        "median": 101.5,
+        "min": 13.2,
+        "max": 143.6,
+        "p95": 143.6
       },
       "fcp": {
-        "median": 136,
-        "min": 136,
-        "max": 136,
-        "p95": 136
+        "median": 124,
+        "min": 116,
+        "max": 172,
+        "p95": 172
       },
       "lcp": {
-        "median": 136,
-        "min": 136,
-        "max": 136,
-        "p95": 136
+        "median": 124,
+        "min": 116,
+        "max": 172,
+        "p95": 172
       },
       "cls": {
         "median": 0,
@@ -1636,22 +1636,22 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 107.7,
-        "min": 107.1,
-        "max": 130.7,
-        "p95": 130.7
+        "median": 113.1,
+        "min": 56.6,
+        "max": 155.9,
+        "p95": 155.9
       },
       "loadDuration": {
-        "median": 107.8,
-        "min": 107.3,
-        "max": 130.7,
-        "p95": 130.7
+        "median": 132.7,
+        "min": 113.3,
+        "max": 156.2,
+        "p95": 156.2
       },
       "transferSizeKb": {
         "median": 0.3,
         "min": 0.3,
-        "max": 0.3,
-        "p95": 0.3
+        "max": 135.4,
+        "p95": 135.4
       },
       "ratings": {
         "ttfb": "good",
@@ -1669,22 +1669,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 94.6,
-        "min": 5.7,
-        "max": 97.3,
-        "p95": 97.3
+        "median": 98.3,
+        "min": 3.9,
+        "max": 116,
+        "p95": 116
       },
       "fcp": {
-        "median": 132,
-        "min": 92,
-        "max": 132,
-        "p95": 132
+        "median": 116,
+        "min": 104,
+        "max": 136,
+        "p95": 136
       },
       "lcp": {
-        "median": 132,
-        "min": 92,
-        "max": 132,
-        "p95": 132
+        "median": 116,
+        "min": 104,
+        "max": 136,
+        "p95": 136
       },
       "cls": {
         "median": 0,
@@ -1693,16 +1693,16 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 100.2,
-        "min": 48.3,
-        "max": 103.9,
-        "p95": 103.9
+        "median": 108.1,
+        "min": 30.8,
+        "max": 126.8,
+        "p95": 126.8
       },
       "loadDuration": {
-        "median": 104,
-        "min": 100.3,
-        "max": 114.2,
-        "p95": 114.2
+        "median": 108.4,
+        "min": 101.1,
+        "max": 127,
+        "p95": 127
       },
       "transferSizeKb": {
         "median": 0.3,
@@ -1726,22 +1726,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 4.2,
-        "min": 3.8,
-        "max": 4.3,
-        "p95": 4.3
+        "median": 2.9,
+        "min": 2.8,
+        "max": 2.9,
+        "p95": 2.9
       },
       "fcp": {
-        "median": 48,
+        "median": 36,
         "min": 36,
-        "max": 52,
-        "p95": 52
+        "max": 40,
+        "p95": 40
       },
       "lcp": {
-        "median": 48,
+        "median": 36,
         "min": 36,
-        "max": 52,
-        "p95": 52
+        "max": 40,
+        "p95": 40
       },
       "cls": {
         "median": 0,
@@ -1750,16 +1750,16 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 9.5,
-        "min": 9.3,
-        "max": 10.5,
-        "p95": 10.5
+        "median": 7.6,
+        "min": 7.5,
+        "max": 7.9,
+        "p95": 7.9
       },
       "loadDuration": {
-        "median": 30.8,
-        "min": 22.5,
-        "max": 31.4,
-        "p95": 31.4
+        "median": 29.2,
+        "min": 17.9,
+        "max": 30.4,
+        "p95": 30.4
       },
       "transferSizeKb": {
         "median": 77.9,
@@ -1783,22 +1783,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 92.9,
-        "min": 3.4,
-        "max": 114.4,
-        "p95": 114.4
+        "median": 96,
+        "min": 3.8,
+        "max": 120,
+        "p95": 120
       },
       "fcp": {
-        "median": 128,
-        "min": 44,
-        "max": 152,
-        "p95": 152
+        "median": 116,
+        "min": 40,
+        "max": 160,
+        "p95": 160
       },
       "lcp": {
-        "median": 128,
-        "min": 44,
-        "max": 152,
-        "p95": 152
+        "median": 116,
+        "min": 40,
+        "max": 160,
+        "p95": 160
       },
       "cls": {
         "median": 0,
@@ -1807,16 +1807,16 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 99.1,
-        "min": 8.4,
-        "max": 146.4,
-        "p95": 146.4
+        "median": 105.9,
+        "min": 8.6,
+        "max": 154,
+        "p95": 154
       },
       "loadDuration": {
-        "median": 99.3,
-        "min": 20.2,
-        "max": 146.4,
-        "p95": 146.4
+        "median": 106.1,
+        "min": 31.5,
+        "max": 154,
+        "p95": 154
       },
       "transferSizeKb": {
         "median": 0.3,
@@ -1840,22 +1840,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 4.5,
-        "min": 4.3,
-        "max": 5.8,
-        "p95": 5.8
+        "median": 3.3,
+        "min": 3.1,
+        "max": 5.7,
+        "p95": 5.7
       },
       "fcp": {
-        "median": 52,
-        "min": 44,
-        "max": 116,
-        "p95": 116
+        "median": 40,
+        "min": 40,
+        "max": 100,
+        "p95": 100
       },
       "lcp": {
-        "median": 52,
-        "min": 44,
-        "max": 116,
-        "p95": 116
+        "median": 40,
+        "min": 40,
+        "max": 100,
+        "p95": 100
       },
       "cls": {
         "median": 0,
@@ -1864,16 +1864,16 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 10.5,
-        "min": 9.9,
-        "max": 50.5,
-        "p95": 50.5
+        "median": 8.6,
+        "min": 8.2,
+        "max": 48.1,
+        "p95": 48.1
       },
       "loadDuration": {
-        "median": 25,
-        "min": 23,
-        "max": 104.6,
-        "p95": 104.6
+        "median": 29.4,
+        "min": 20.2,
+        "max": 100.2,
+        "p95": 100.2
       },
       "transferSizeKb": {
         "median": 77.6,
@@ -1897,22 +1897,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 4.4,
-        "min": 3.9,
-        "max": 5.9,
-        "p95": 5.9
+        "median": 3.2,
+        "min": 2.8,
+        "max": 3.4,
+        "p95": 3.4
       },
       "fcp": {
-        "median": 36,
-        "min": 36,
-        "max": 48,
-        "p95": 48
+        "median": 40,
+        "min": 40,
+        "max": 40,
+        "p95": 40
       },
       "lcp": {
-        "median": 36,
-        "min": 36,
-        "max": 48,
-        "p95": 48
+        "median": 40,
+        "min": 40,
+        "max": 40,
+        "p95": 40
       },
       "cls": {
         "median": 0,
@@ -1921,16 +1921,16 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 11.4,
-        "min": 9.6,
-        "max": 11.5,
-        "p95": 11.5
+        "median": 7.8,
+        "min": 7.6,
+        "max": 8.2,
+        "p95": 8.2
       },
       "loadDuration": {
-        "median": 34,
-        "min": 23.4,
-        "max": 34.7,
-        "p95": 34.7
+        "median": 18.2,
+        "min": 17.8,
+        "max": 29.9,
+        "p95": 29.9
       },
       "transferSizeKb": {
         "median": 77.5,
@@ -1954,22 +1954,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 109,
-        "min": 8.9,
-        "max": 187.4,
-        "p95": 187.4
+        "median": 105.4,
+        "min": 10,
+        "max": 109.6,
+        "p95": 109.6
       },
       "fcp": {
-        "median": 144,
-        "min": 84,
-        "max": 224,
-        "p95": 224
+        "median": 124,
+        "min": 76,
+        "max": 132,
+        "p95": 132
       },
       "lcp": {
-        "median": 144,
-        "min": 84,
-        "max": 224,
-        "p95": 224
+        "median": 124,
+        "min": 76,
+        "max": 132,
+        "p95": 132
       },
       "cls": {
         "median": 0,
@@ -1978,16 +1978,16 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 117.2,
-        "min": 74.8,
-        "max": 195.3,
-        "p95": 195.3
+        "median": 116.4,
+        "min": 70,
+        "max": 118.8,
+        "p95": 118.8
       },
       "loadDuration": {
-        "median": 117.3,
-        "min": 106.9,
-        "max": 195.6,
-        "p95": 195.6
+        "median": 116.6,
+        "min": 100.7,
+        "max": 119,
+        "p95": 119
       },
       "transferSizeKb": {
         "median": 0.3,
@@ -2011,22 +2011,22 @@
       },
       "runs": 3,
       "ttfb": {
-        "median": 4.8,
-        "min": 4.5,
-        "max": 4.9,
-        "p95": 4.9
+        "median": 3.5,
+        "min": 2.9,
+        "max": 4.7,
+        "p95": 4.7
       },
       "fcp": {
-        "median": 60,
-        "min": 52,
-        "max": 60,
-        "p95": 60
+        "median": 48,
+        "min": 48,
+        "max": 52,
+        "p95": 52
       },
       "lcp": {
-        "median": 60,
-        "min": 52,
-        "max": 60,
-        "p95": 60
+        "median": 48,
+        "min": 48,
+        "max": 52,
+        "p95": 52
       },
       "cls": {
         "median": 0,
@@ -2035,16 +2035,16 @@
         "p95": 0
       },
       "domContentLoaded": {
-        "median": 10.5,
-        "min": 9.7,
-        "max": 11.5,
-        "p95": 11.5
+        "median": 8.7,
+        "min": 8.2,
+        "max": 10,
+        "p95": 10
       },
       "loadDuration": {
-        "median": 23.2,
-        "min": 23.1,
-        "max": 38.6,
-        "p95": 38.6
+        "median": 35.4,
+        "min": 20,
+        "max": 37.5,
+        "p95": 37.5
       },
       "transferSizeKb": {
         "median": 109.2,

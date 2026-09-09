@@ -20,7 +20,7 @@
   --brand-cyan: #06b6d4;
   --brand-cyan-glow: rgba(6, 182, 212, 0.15);
   --brand-blue: #3b82f6;
-  --brand-blue-glow: rgba(59, 130, 246, 0.10);
+  --brand-blue-glow: rgba(59, 130, 246, 0.1);
   --brand-dark: #0d0e11;
   --success: #10b981;
   --error: #f87171;
@@ -42,8 +42,13 @@
   --layout-dock-height: 0px;
   --layout-studio-header-height: 3.5rem;
   --layout-studio-budget: calc(100dvh - var(--layout-header-height));
-  --layout-viewport-budget: calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px));
-  --layout-workspace-budget: calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px) - var(--layout-studio-header-height, 0px));
+  --layout-viewport-budget: calc(
+    100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px)
+  );
+  --layout-workspace-budget: calc(
+    100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px) -
+      var(--layout-studio-header-height, 0px)
+  );
 
   /* Motion Springs (stiffness, damping) */
   --motion-spring-snappy-stiffness: 380;
@@ -198,11 +203,13 @@ body {
 
 /* Standardized SVG Visual Filters */
 .svg-glow-cyan {
-  filter: drop-shadow(0 0 1.5px rgba(6, 182, 212, 0.8)) drop-shadow(0 0 4px rgba(6, 182, 212, 0.45));
+  filter: drop-shadow(0 0 1.5px rgba(6, 182, 212, 0.8))
+    drop-shadow(0 0 4px rgba(6, 182, 212, 0.45));
 }
 
 .svg-glow-blue {
-  filter: drop-shadow(0 0 1.5px rgba(59, 130, 246, 0.8)) drop-shadow(0 0 4px rgba(59, 130, 246, 0.45));
+  filter: drop-shadow(0 0 1.5px rgba(59, 130, 246, 0.8))
+    drop-shadow(0 0 4px rgba(59, 130, 246, 0.45));
 }
 
 .svg-shadow {
@@ -227,7 +234,9 @@ body {
 
 .glow-cyan-border {
   border-color: rgba(6, 182, 212, 0.4);
-  box-shadow: 0 0 20px -3px rgba(6, 182, 212, 0.15), inset 0 0 15px -3px rgba(6, 182, 212, 0.05);
+  box-shadow:
+    0 0 20px -3px rgba(6, 182, 212, 0.15),
+    inset 0 0 15px -3px rgba(6, 182, 212, 0.05);
 }
 
 /* Tool Shell & Precision Editorial Utilities */
@@ -256,7 +265,11 @@ body {
 }
 
 .editorial-surface {
-  background: linear-gradient(180deg, rgba(20, 22, 28, 0.6) 0%, rgba(13, 14, 17, 0.9) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(20, 22, 28, 0.6) 0%,
+    rgba(13, 14, 17, 0.9) 100%
+  );
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -287,7 +300,9 @@ body {
 
 /* Reduced motion compliance */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -297,7 +312,8 @@ body {
 
 /* Hardware-Accelerated Mobile Grid Animation */
 @keyframes grid-square-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0;
   }
   50% {
@@ -306,12 +322,11 @@ body {
 }
 
 .animate-grid-square {
-  animation: grid-square-pulse var(--grid-square-duration, 4s) ease-in-out infinite;
+  animation: grid-square-pulse var(--grid-square-duration, 4s) ease-in-out
+    infinite;
   animation-delay: var(--grid-square-delay, 0s);
   will-change: opacity;
 }
-
-
 
 [data-pretext-layer="semantic"] {
   color: transparent;
@@ -335,3 +350,36 @@ body {
   }
 }
 
+/* Portfolio editorial rhythm: readable prose, quiet labels, stable anchors. */
+.portfolio-home :is(#case-studies, #about, #contact) {
+  scroll-margin-top: calc(var(--navbar-height) + 2rem);
+}
+
+.portfolio-home :is(h2, h3) {
+  text-wrap: balance;
+}
+
+.portfolio-home :is(#case-studies, #about, #contact) > div > p {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.75;
+  text-wrap: pretty;
+}
+
+.portfolio-home #hero [data-pretext-layer="visual"] {
+  overflow-wrap: anywhere;
+}
+
+.portfolio-home #hero .fluid-heading-hero {
+  letter-spacing: -0.035em;
+}
+
+.portfolio-home #hero [data-pretext-layer="semantic"].fluid-body {
+  line-height: 1.625;
+}
+
+@media (min-width: 1024px) {
+  .portfolio-home #hero [data-pretext-layer="semantic"] {
+    text-align: left;
+  }
+}

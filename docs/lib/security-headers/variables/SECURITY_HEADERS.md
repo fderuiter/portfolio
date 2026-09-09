@@ -8,4 +8,4 @@
 
 > `const` **SECURITY\_HEADERS**: `Record`\<`string`, `string`\>
 
-Defined in: [lib/security-headers.ts:3](https://github.com/fderuiter/portfolio/blob/main/lib/security-headers.ts#L3)
+Defined in: [lib/security-headers.ts:22](https://github.com/fderuiter/portfolio/blob/main/lib/security-headers.ts#L22)

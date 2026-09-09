@@ -79,7 +79,7 @@ Original CSS Variable: --brand-blue
 
 #### colors.brand-blue-glow
 
-> `readonly` **brand-blue-glow**: `"rgba(59, 130, 246, 0.10)"` = `"rgba(59, 130, 246, 0.10)"`
+> `readonly` **brand-blue-glow**: `"rgba(59, 130, 246, 0.1)"` = `"rgba(59, 130, 246, 0.1)"`
 
 Original CSS Variable: --brand-blue-glow
 
@@ -197,13 +197,13 @@ Original CSS Variable: --layout-studio-header-height
 
 #### layout.viewportBudget
 
-> `readonly` **viewportBudget**: `"calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px))"` = `"calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px))"`
+> `readonly` **viewportBudget**: "calc(\n    100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px)\n  )" = "calc(\n    100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px)\n  )"
 
 Original CSS Variable: --layout-viewport-budget
 
 #### layout.workspaceBudget
 
-> `readonly` **workspaceBudget**: `"calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px) - var(--layout-studio-header-height, 0px))"` = `"calc(100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px) - var(--layout-studio-header-height, 0px))"`
+> `readonly` **workspaceBudget**: "calc(\n    100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px) -\n      var(--layout-studio-header-height, 0px)\n  )" = "calc(\n    100dvh - var(--layout-header-height) - var(--layout-dock-height, 0px) -\n      var(--layout-studio-header-height, 0px)\n  )"
 
 Original CSS Variable: --layout-workspace-budget
 
