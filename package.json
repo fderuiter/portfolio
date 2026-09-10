@@ -88,7 +88,7 @@
     "isomorphic-dompurify": "^3.22.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
-    "next": "16.3.1",
+    "next": "16.3.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "resend": "^6.20.0",
@@ -129,7 +129,7 @@
     "typedoc": "^0.28.20",
     "typedoc-plugin-markdown": "^4.12.0",
     "typescript": "^5",
-    "vitest": "^4.1.7"
+    "vitest": "^5.0.0"
   },
   "ignoreScripts": [
     "sharp",
