@@ -8,7 +8,7 @@
 
 > **checkSectionStructures**(`root`, `fix?`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:1821](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1821)
+Defined in: [lib/dx/doctor.ts:1828](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1828)
 
 Check Documentation & Layout Section Structure Standard (ADR-0009 & ADR-0023)
 

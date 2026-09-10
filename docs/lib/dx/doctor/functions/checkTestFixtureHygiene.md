@@ -8,7 +8,7 @@
 
 > **checkTestFixtureHygiene**(`root`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:330](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L330)
+Defined in: [lib/dx/doctor.ts:335](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L335)
 
 Check Test Fixture Hygiene & Unsafe Type Assertions (ADR 0028).
 Test suites must use @total-typescript/shoehorn instead of unsafe double casts (`as unknown as [A-Z]`).

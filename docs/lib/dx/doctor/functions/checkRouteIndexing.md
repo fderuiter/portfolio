@@ -8,7 +8,7 @@
 
 > **checkRouteIndexing**(`root`, `fix?`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:67](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L67)
+Defined in: [lib/dx/doctor.ts:72](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L72)
 
 Check Route Registration in CommandPalette.tsx (AGENTS.md Invariant #3)
 

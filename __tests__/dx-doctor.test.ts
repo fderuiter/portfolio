@@ -19,6 +19,7 @@ import {
   checkTouchTargetDimensions,
   checkSectionStructures,
   checkServiceResultTypes,
+  checkSubRoutePerformance,
   runDiagnostics,
   printDoctorReport,
 } from "@/lib/dx/doctor";
@@ -567,6 +568,29 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       const result = checkServiceResultTypes(tempDir, false);
       expect(result.status).toBe("pass");
+    });
+  });
+
+  describe("checkSubRoutePerformance", () => {
+    it("rejects missing production evidence at the diagnostic assertion gate", () => {
+      const result = checkSubRoutePerformance(tempDir);
+
+      expect(result.status).toBe("fail");
+      expect(result.message).toContain("assertion gate cannot pass");
+    });
+
+    it("rejects malformed versioned evidence instead of treating it as a pass", () => {
+      const evidenceDirectory = path.join(tempDir, ".benchmark-results");
+      fs.mkdirSync(evidenceDirectory, { recursive: true });
+      fs.writeFileSync(
+        path.join(evidenceDirectory, "benchmark-results.v1.json"),
+        '{"routes":[]}'
+      );
+
+      const result = checkSubRoutePerformance(tempDir);
+
+      expect(result.status).toBe("fail");
+      expect(result.message).toContain("not valid");
     });
   });
 

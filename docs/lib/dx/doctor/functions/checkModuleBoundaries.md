@@ -8,7 +8,7 @@
 
 > **checkModuleBoundaries**(`root`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:1670](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1670)
+Defined in: [lib/dx/doctor.ts:1677](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L1677)
 
 Check TS Deep Modules & Architectural Seams (AGENTS.md Invariant #20)
 
