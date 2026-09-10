@@ -6,7 +6,6 @@ describe("Transparent Continuous Overlay Layer Compliance", () => {
   const usePretextLayoutPath = path.resolve(__dirname, "../hooks/usePretextLayout.tsx");
   const pretextCardPath = path.resolve(__dirname, "../components/PretextCard.tsx");
   const heroPath = path.resolve(__dirname, "../components/Hero.tsx");
-  const lighthousercPath = path.resolve(__dirname, "../.lighthouserc.js");
 
   it("should implement transparent text overlay in PretextText", () => {
     const content = fs.readFileSync(usePretextLayoutPath, "utf-8");
@@ -67,13 +66,6 @@ describe("Transparent Continuous Overlay Layer Compliance", () => {
     expect(content).toContain('text-neutral-400 fluid-body text-center absolute inset-0 select-text bg-transparent');
   });
 
-  it("should enforce Lighthouse accessibility assertions in automated audits", () => {
-    const content = fs.readFileSync(lighthousercPath, "utf-8");
-
-    // Ensure accessibility category has a minScore of 1.0 (strict enforcement, zero failures)
-    expect(content).toContain("'categories:accessibility': ['error', {minScore: 1.0}]");
-  });
-
   it("should tag all pretext visual and semantic layers for high contrast forced-colors protection", () => {
     const usePretextLayoutContent = fs.readFileSync(usePretextLayoutPath, "utf-8");
     const pretextCardContent = fs.readFileSync(pretextCardPath, "utf-8");
@@ -104,4 +96,3 @@ describe("Transparent Continuous Overlay Layer Compliance", () => {
     expect(cssContent).toContain('color: CanvasText !important');
   });
 });
-

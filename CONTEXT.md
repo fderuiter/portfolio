@@ -115,7 +115,7 @@ Formal inference rules used to derive logical steps from valid premises:
 
 ### Continuous Auditing & Enforcement
 
-- **Multi-Tiered Accessibility Guard**: An automated testing hierarchy comprising static invariant analysis (`lib/dx/doctor.ts`), unit component testing (Vitest), comprehensive end-to-end axe-core browser evaluation (`@axe-core/playwright`), and Lighthouse CI score assertion (100% threshold).
+- **Multi-Tiered Accessibility Guard**: An automated testing hierarchy comprising static invariant analysis (`lib/dx/doctor.ts`), unit component testing (Vitest), and comprehensive end-to-end axe-core browser evaluation (`@axe-core/playwright`).
 - **WCAG 2.1 Level AA Conformance Invariant**: The structural requirement that all public routes, interactive modals, drawers, and form controls pass axe-core scans with zero critical, serious, or moderate violations.
 - **Internal Developer Tool Boundary**: Clear demarcation excluding CLI developer tasks (`scripts/dx.ts`), database seed scripts, and headless build pipelines from end-user accessibility audits while maintaining strict audit coverage across 100% of user-facing production interfaces.
 

@@ -44,18 +44,6 @@ export const DEFAULT_IGNORE_LIST: IgnoreRule[] = [
       "Dev-only process runner CLI tool with no production runtime exposure",
   },
   {
-    advisory: "GHSA-725w-8224-vh33",
-    package: "@lhci/cli",
-    expiresAt: "2026-11-01T23:59:59Z",
-    reason: "Lighthouse CI automated performance test runner",
-  },
-  {
-    advisory: "GHSA-725w-8224-vh33",
-    package: "@lhci/utils",
-    expiresAt: "2026-11-01T23:59:59Z",
-    reason: "Lighthouse CI utility module for benchmark assertions",
-  },
-  {
     advisory: "GHSA-qq97-3p32-359f",
     package: "@prisma/config",
     expiresAt: "2026-11-01T23:59:59Z",
@@ -79,12 +67,6 @@ export const DEFAULT_IGNORE_LIST: IgnoreRule[] = [
     package: "deepmerge-ts",
     expiresAt: "2026-11-01T23:59:59Z",
     reason: "TypeScript utility library for object merging in build config",
-  },
-  {
-    advisory: "GHSA-jmr9-qjv8-65gv",
-    package: "extract-zip",
-    expiresAt: "2026-11-01T23:59:59Z",
-    reason: "Zip archive extraction utility for Playwright browser binaries",
   },
   {
     advisory: "GHSA-3rjg-36vw-hh7p",
@@ -190,29 +172,10 @@ export const DEFAULT_IGNORE_LIST: IgnoreRule[] = [
   },
   {
     advisory: "GHSA-7pqw-9j4j-h8q3",
-    package: "@lhci/cli",
-    expiresAt: "2026-11-01T23:59:59Z",
-    reason:
-      "Lighthouse CI automated performance test runner; zip archive symlink write not exploitable in CI",
-  },
-  {
-    advisory: "GHSA-7pqw-9j4j-h8q3",
-    package: "@lhci/utils",
-    expiresAt: "2026-11-01T23:59:59Z",
-    reason: "Lighthouse CI utility module for benchmark assertions",
-  },
-  {
-    advisory: "GHSA-7pqw-9j4j-h8q3",
     package: "@puppeteer/browsers",
     expiresAt: "2026-11-01T23:59:59Z",
     reason:
       "Browser binary downloader for synthetic Playwright/Lighthouse testing",
-  },
-  {
-    advisory: "GHSA-7pqw-9j4j-h8q3",
-    package: "extract-zip",
-    expiresAt: "2026-11-01T23:59:59Z",
-    reason: "Zip archive extraction utility for Playwright browser binaries",
   },
   {
     advisory: "GHSA-7pqw-9j4j-h8q3",
