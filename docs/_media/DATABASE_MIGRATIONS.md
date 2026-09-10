@@ -6,13 +6,14 @@ changes the schema without adding an entry to Prisma's migration history.
 
 ## Active migrations
 
-The repository contains five active Prisma migrations:
+The repository contains six active Prisma migrations:
 
 1. `20260417215437_init`: Initial database baseline and core models.
 2. `20260528000000_add_telemetry_event`: Telemetry event ingestion table.
 3. `20260814000000_add_simulated_telemetry`: Simulated telemetry flags on case studies.
 4. `20260818000000_add_feedback_and_reactions`: Feedback submission and reaction tracking models.
 5. `20261014000000_add_commands_and_playback`: Command logging and session playback models.
+6. `20261015000000_add_email_resilience`: Suppression list and outbound email retry queue tables.
 
 ## Normal workflow
 
@@ -102,6 +103,7 @@ FROM "CaseStudy";
 
 Expected results are all five finished and non-rolled-back migrations recorded in
 `_prisma_migrations`:
+
 - `20260417215437_init`
 - `20260528000000_add_telemetry_event`
 - `20260814000000_add_simulated_telemetry`
@@ -114,6 +116,7 @@ the home page, case studies, and telemetry endpoints.
 ## Release ordering, schema drift & release gate execution
 
 ### Schema drift verification
+
 To verify that the database schema is synchronized with `prisma/schema.prisma` without executing live database connections or making mutations, run the schema drift check:
 
 ```bash
@@ -129,6 +132,7 @@ npm run check:migrations
 ```
 
 ### Pipeline release gate execution
+
 Live database migrations execute strictly inside the dedicated Pipeline Release Gate stage (`npm run release:gate` / `scripts/release-gate.ts`), isolated from static application build compilation (`scripts/build.js`). Direct database write credentials exist exclusively within the release gate stage, eliminating sensitive credential exposure and database lock conflicts during application compilation.
 
 To execute the release gate locally or in continuous integration pipelines:
@@ -138,11 +142,13 @@ npm run release:gate
 ```
 
 The Pipeline Release Gate performs:
+
 1. Vulnerability security audit gate (`scripts/security-audit.ts`).
 2. Unified migration safety & integrity validation (`scripts/check-migrations.js`).
 3. Database migration deployment (`npx prisma migrate deploy`).
 
 ### Destructive migration environment variables
+
 Automated migration safety checks (`scripts/check-migrations.js`) block any migration SQL containing destructive operations (`DROP TABLE` or `DROP COLUMN`) by default to prevent accidental data loss.
 
 To explicitly authorize destructive migrations during release gate execution or verification:
@@ -171,6 +177,78 @@ Every release must follow expand-and-contract:
    block `DROP TABLE` or `DROP COLUMN` unless `ALLOW_DESTRUCTIVE_MIGRATIONS=true` is explicitly provided.
 5. Remove old fields only in a later release after all readers have migrated.
 
+## Email resilience rollout and rollback
+
+`20261015000000_add_email_resilience` is additive and uses `IF NOT EXISTS`
+for both tables and all indexes. It is safe to apply to a database where the
+email tables were provisioned manually, provided their existing structures
+are compatible with `prisma/schema.prisma`.
+
+### Rollout
+
+1. Create a restorable Neon branch or snapshot and confirm the target without
+   printing credentials:
+
+   ```sql
+   SELECT current_database(), current_schema(), current_user;
+   ```
+
+2. Inspect any existing email tables and indexes before deployment:
+
+   ```sql
+   SELECT table_name
+   FROM information_schema.tables
+   WHERE table_schema = 'public'
+     AND table_name IN ('SuppressionList', 'OutboundEmailQueue');
+
+   SELECT indexname, tablename
+   FROM pg_indexes
+   WHERE schemaname = 'public'
+     AND tablename IN ('SuppressionList', 'OutboundEmailQueue')
+   ORDER BY tablename, indexname;
+   ```
+
+3. With `DIRECT_URL` pointed at the rehearsed target, run the offline checks
+   and apply the committed migrations through the release gate:
+
+   ```bash
+   npm run check:migrations
+   npm run release:gate
+   ```
+
+4. Verify the migration ledger and required objects before deploying the
+   application:
+
+   ```sql
+   SELECT migration_name, finished_at, rolled_back_at
+   FROM "_prisma_migrations"
+   WHERE migration_name = '20261015000000_add_email_resilience';
+
+   SELECT table_name
+   FROM information_schema.tables
+   WHERE table_schema = 'public'
+     AND table_name IN ('SuppressionList', 'OutboundEmailQueue');
+   ```
+
+5. Run `npm run check:migrations:drift` and require exit code 0 against the
+   freshly migrated database. Then smoke-test a suppressed recipient and a
+   retryable outbound failure. Run `npx prisma migrate deploy` once more and
+   confirm it is a no-op.
+
+### Rollback
+
+This migration has no destructive down migration. If the application release
+needs to be reverted, redeploy the previous application version while leaving
+these additive tables and indexes in place; older code does not depend on
+them. Do not drop either table or manually delete its migration ledger row.
+
+If deployment fails before the migration finishes, stop the release, inspect
+`_prisma_migrations`, and restore the rehearsed snapshot only when the target
+cannot be safely repaired. After correcting the underlying issue, use
+`npx prisma migrate resolve --rolled-back 20261015000000_add_email_resilience`
+only for a migration recorded as failed, then rerun `npm run release:gate`.
+Never mark a successfully applied migration rolled back.
+
 Prisma serializes concurrent migration attempts with its PostgreSQL advisory
 lock. Never automate `migrate resolve`; it is a one-time recovery operation that
 requires a verified schema comparison and a restorable snapshot.
@@ -178,10 +256,12 @@ requires a verified schema comparison and a restorable snapshot.
 ## Connection URLs (`DATABASE_URL` vs `DIRECT_URL`)
 
 Neon databases provide two connection endpoints:
+
 - **Pooled Connection (`DATABASE_URL`)**: Uses Neon's transaction pooler (e.g. `ep-xxx-pooler.us-east-2.aws.neon.tech`). Used by `lib/db.ts` for runtime queries.
 - **Direct Connection (`DIRECT_URL`)**: Connects directly to Postgres compute without PgBouncer (e.g. `ep-xxx.us-east-2.aws.neon.tech`). Used by `prisma.config.ts` for Prisma migrations and CLI tooling.
 
 In Vercel and local development:
+
 - Set `DATABASE_URL` to the pooled connection string.
 - Set `DIRECT_URL` to the unpooled direct connection string.
 
