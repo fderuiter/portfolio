@@ -25,7 +25,7 @@
     "generate:icons": "npx tsx scripts/generate-brand-icons.ts",
     "generate:theme": "npx tsx scripts/generate-theme.ts",
     "precompile-docs": "npx prisma generate",
-    "compile-docs": "npx typedoc --entryPoints hooks --entryPoints types --entryPoints lib --exclude \"**/env.d.ts\" --entryPointStrategy expand --out docs --plugin typedoc-plugin-markdown --hideGenerator --cleanOutputDir false --gitRevision main --sourceLinkTemplate \"https://github.com/fderuiter/portfolio/blob/{gitRevision}/{path}#L{line}\" --intentionallyNotExported TypeMap --intentionallyNotExported GlobalOmitConfig --intentionallyNotExported TypeMapCb --skipErrorChecking",
+    "compile-docs": "npx tsx scripts/compile-docs.ts",
     "check-docs-drift": "npx tsx scripts/check-drift.ts",
     "check:migrations": "node scripts/check-migrations.js",
     "check:migrations:drift": "prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code",
