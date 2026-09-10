@@ -8,8 +8,6 @@ import { fromPartial } from "@total-typescript/shoehorn";
 
 describe("Standalone JavaScript Engine Build & 50KB Size Guard", () => {
   const root = process.cwd();
-  const garminJsPath = path.join(root, "public", "garmin-engine.js");
-  const monkeyJsPath = path.join(root, "public", "monkey-c-mayhem.js");
 
   it("compiles the engine into standalone Vanilla JS assets under 50KB via build-standalone-engine script", () => {
     const outputDir = fs.mkdtempSync(
