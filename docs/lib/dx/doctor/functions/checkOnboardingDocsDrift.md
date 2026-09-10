@@ -8,7 +8,7 @@
 
 > **checkOnboardingDocsDrift**(`root`, `fix?`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:698](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L698)
+Defined in: [lib/dx/doctor.ts:703](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L703)
 
 Onboarding Documentation & Engine Constraint Drift Check
 

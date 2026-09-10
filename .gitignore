@@ -23,6 +23,7 @@
 
 # production
 /build
+/.benchmark-results/
 
 # misc
 .DS_Store

@@ -7,6 +7,11 @@ import { checkEnvironmentVariables } from "./env-guard";
 import { checkGitHygieneConfig } from "./git-guard";
 import { checkDeadCode } from "./dead-code";
 import { checkBundleBudgets } from "./bundle-guard";
+import {
+  DEFAULT_BENCHMARK_EVIDENCE_DIRECTORY,
+  readBenchmarkEvidence,
+  validateBenchmarkEvidence,
+} from "./benchmark-evidence";
 import { type RemediationAction } from "./cli-parser";
 import { getEnv } from "../env";
 
@@ -1607,42 +1612,43 @@ export function checkDirectoryTopology(root: string): DiagnosticCheckResult {
  * Real-Browser Sub-Route Web Vitals & SLA Performance Gate (AGENTS.md Invariant #14)
  */
 export function checkSubRoutePerformance(root: string): DiagnosticCheckResult {
-  const jsonPath = path.join(root, "benchmark-results.json");
+  const jsonPath = path.join(
+    root,
+    DEFAULT_BENCHMARK_EVIDENCE_DIRECTORY,
+    "benchmark-results.v1.json"
+  );
   if (!fs.existsSync(jsonPath)) {
     return {
       id: "quality-subroute-performance",
       name: "Sub-Route Real-Browser Core Web Vitals Performance SLA",
       category: "quality",
-      status: "pass",
+      status: "fail",
       message:
-        "No recorded benchmark-results.json found. Budget assertions are active during 'npm run bench:pages -- --assert' and CI.",
+        "No production benchmark evidence found; the performance assertion gate cannot pass.",
     };
   }
 
   try {
-    const data = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
-    const routes = data.routes || [];
-    const failed = routes.filter(
-      (r: { passedBudget?: boolean }) => r.passedBudget === false
-    );
-
-    if (failed.length > 0) {
-      const details = failed.map(
-        (f: {
-          route?: { path: string; name: string };
-          lcp?: { median: number };
-          cls?: { median: number };
-          ttfb?: { median: number };
-        }) =>
-          `Route '${f.route?.path}' (${f.route?.name}): TTFB=${f.ttfb?.median}ms, LCP=${f.lcp?.median}ms, CLS=${f.cls?.median}`
-      );
+    const evidence = readBenchmarkEvidence(jsonPath);
+    const revision = execSync("git rev-parse HEAD", {
+      cwd: root,
+      encoding: "utf-8",
+    }).trim();
+    const dirty =
+      execSync("git status --porcelain", {
+        cwd: root,
+        encoding: "utf-8",
+      }).trim().length > 0;
+    const validation = validateBenchmarkEvidence(evidence, { revision, dirty });
+    if (!validation.valid) {
       return {
         id: "quality-subroute-performance",
         name: "Sub-Route Real-Browser Core Web Vitals Performance SLA",
         category: "quality",
         status: "fail",
-        message: `${failed.length} sub-route(s) breached Core Web Vitals SLA performance budgets in benchmark-results.json`,
-        details,
+        message:
+          "Production benchmark evidence is incomplete, stale, or cannot support a budget assertion.",
+        details: validation.errors,
       };
     }
 
@@ -1651,7 +1657,7 @@ export function checkSubRoutePerformance(root: string): DiagnosticCheckResult {
       name: "Sub-Route Real-Browser Core Web Vitals Performance SLA",
       category: "quality",
       status: "pass",
-      message: `All ${routes.length} benchmarked sub-routes comply with Core Web Vitals SLA budgets (LCP <= 2500ms, TTFB <= 800ms, CLS <= 0.1).`,
+      message: `All ${evidence.routes.length} benchmarked sub-routes comply with the recorded production budget assertion.`,
     };
   } catch {
     return {
@@ -1659,7 +1665,8 @@ export function checkSubRoutePerformance(root: string): DiagnosticCheckResult {
       name: "Sub-Route Real-Browser Core Web Vitals Performance SLA",
       category: "quality",
       status: "fail",
-      message: "benchmark-results.json is not valid JSON.",
+      message:
+        "Production benchmark evidence is not valid benchmark-results.v1 JSON.",
     };
   }
 }

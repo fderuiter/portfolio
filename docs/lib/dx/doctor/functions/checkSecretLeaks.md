@@ -8,7 +8,7 @@
 
 > **checkSecretLeaks**(`root`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:389](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L389)
+Defined in: [lib/dx/doctor.ts:394](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L394)
 
 Secret & Credential Leak Scanner
 

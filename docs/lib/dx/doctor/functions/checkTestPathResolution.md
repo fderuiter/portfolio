@@ -8,7 +8,7 @@
 
 > **checkTestPathResolution**(`root`): [`DiagnosticCheckResult`](../interfaces/DiagnosticCheckResult.md)
 
-Defined in: [lib/dx/doctor.ts:266](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L266)
+Defined in: [lib/dx/doctor.ts:271](https://github.com/fderuiter/portfolio/blob/main/lib/dx/doctor.ts#L271)
 
 Check Test Environment Path Resolution (AGENTS.md Invariant #1).
 Tests must not hardcode '/app' or absolute local root paths.

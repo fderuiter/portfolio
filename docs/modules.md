@@ -99,6 +99,8 @@
 - [lib/dungeon/types](lib/dungeon/types/README.md)
 - [lib/dungeon/weapons](lib/dungeon/weapons/README.md)
 - [lib/dx/bench](lib/dx/bench/README.md)
+- [lib/dx/benchmark-evidence](lib/dx/benchmark-evidence/README.md)
+- [lib/dx/benchmark-runner](lib/dx/benchmark-runner/README.md)
 - [lib/dx/bundle-guard](lib/dx/bundle-guard/README.md)
 - [lib/dx/cli-parser](lib/dx/cli-parser/README.md)
 - [lib/dx/dead-code](lib/dx/dead-code/README.md)
