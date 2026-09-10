@@ -1,159 +1,175 @@
-import fs from 'fs';
-import path from 'path';
+import fs from "node:fs";
+import path from "node:path";
 
-const parseCSSAndGenerateTS = () => {
-  const cssPath = path.resolve(process.cwd(), 'app/globals.css');
-  const css = fs.readFileSync(cssPath, 'utf-8');
+export interface ThemeGenerationOptions {
+  sourceRoot?: string;
+  outputPath?: string;
+}
 
-  // Match anything inside :root { ... }
+function parseNumber(value: string, name: string): number {
+  const numberValue = Number.parseFloat(value);
+  if (Number.isNaN(numberValue)) {
+    throw new Error(
+      `Malformed token value for ${name}: ${value} is not a number.`
+    );
+  }
+  return numberValue;
+}
+
+function toCamelCase(value: string): string {
+  return value.replace(/-([a-z])/g, (_, letter: string) =>
+    letter.toUpperCase()
+  );
+}
+
+/** Compiles :root design tokens into the runtime TypeScript manifest. */
+export function generateTheme({
+  sourceRoot = process.cwd(),
+  outputPath = path.resolve(sourceRoot, "lib/design-manifest.ts"),
+}: ThemeGenerationOptions = {}): string {
+  const cssPath = path.resolve(sourceRoot, "app/globals.css");
+  const css = fs.readFileSync(cssPath, "utf8");
   const rootMatch = css.match(/:root\s*{([^}]+)}/);
+
   if (!rootMatch) {
-    console.error("Could not find :root block in globals.css");
-    process.exit(1);
+    throw new Error(`Could not find a :root block in ${cssPath}.`);
   }
 
-  const rootContent = rootMatch[1];
   const tokens: Record<string, string> = {};
-  
-  const varRegex = /--([a-zA-Z0-9-]+)\s*:\s*([^;]+);/g;
-  let match;
-  while ((match = varRegex.exec(rootContent)) !== null) {
+  const variablePattern = /--([a-zA-Z0-9-]+)\s*:\s*([^;]+);/g;
+  let match: RegExpExecArray | null;
+  while ((match = variablePattern.exec(rootMatch[1])) !== null) {
     tokens[match[1]] = match[2].trim();
   }
 
-  const manifest: /* eslint-disable-line @typescript-eslint/no-explicit-any */ any = {
-    colors: {},
-    typography: { fonts: {}, sizes: {} },
-    masonry: {},
-    layout: {},
-    motion: { springs: {} },
-    breakpoints: {}
-  };
-
-  const parseNumber = (val: string, name: string) => {
-    const num = parseFloat(val);
-    if (isNaN(num)) {
-      console.error(`Malformed token value for ${name}: ${val} is not a number.`);
-      process.exit(1);
-    }
-    return num;
-  };
-
-  // Process colors directly
   const colorKeys = [
-    'background', 'foreground', 'surface-1', 'surface-2', 
-    'border', 'border-active', 'muted', 'muted-strong', 
-    'brand-cyan', 'brand-cyan-glow', 'brand-blue', 'brand-blue-glow', 
-    'brand-dark', 'success', 'error', 'warning'
+    "background",
+    "foreground",
+    "surface-1",
+    "surface-2",
+    "border",
+    "border-active",
+    "muted",
+    "muted-strong",
+    "brand-cyan",
+    "brand-cyan-glow",
+    "brand-blue",
+    "brand-blue-glow",
+    "brand-dark",
+    "success",
+    "error",
+    "warning",
   ];
-  for (const key of colorKeys) {
-    if (tokens[key]) {
-      manifest.colors[key] = tokens[key];
-    }
-  }
+  const colors = Object.fromEntries(
+    colorKeys.flatMap((key) => (tokens[key] ? [[key, tokens[key]]] : []))
+  );
+  const masonry: Record<string, number> = {};
+  const layout: Record<string, number | string> = {};
+  const breakpoints: Record<string, number> = {};
+  const springs: Record<
+    string,
+    { type: "spring"; stiffness?: number; damping?: number }
+  > = {};
 
-  // Layout & Masonry
   for (const [key, value] of Object.entries(tokens)) {
-    if (key.startsWith('layout-masonry-')) {
-      const camelName = key.replace('layout-masonry-', '').replace(/-([a-z])/g, g => g[1].toUpperCase());
-      manifest.masonry[camelName] = parseNumber(value, key);
-    } else if (key.startsWith('layout-')) {
-      const camelName = key.replace('layout-', '').replace(/-([a-z])/g, g => g[1].toUpperCase());
-      const num = parseFloat(value);
-      manifest.layout[camelName] = !isNaN(num) && /^[0-9.]+(px|rem|em)?$/.test(value.trim()) ? num : value;
-    }
-  }
-
-  // Breakpoints
-  for (const [key, value] of Object.entries(tokens)) {
-    if (key.startsWith('breakpoint-')) {
-      const bName = key.replace('breakpoint-', '');
-      manifest.breakpoints[bName] = parseNumber(value, key);
-    }
-  }
-
-  // Typography
-  manifest.typography.fonts.sans = "var(--font-inter), system-ui, -apple-system, sans-serif";
-  manifest.typography.fonts.mono = "var(--font-geist-mono), ui-monospace, monospace";
-  manifest.typography.sizes.sm = {
-    fontSize: parseNumber(tokens['font-size-sm'] || "13", 'font-size-sm'),
-    lineHeight: parseNumber(tokens['line-height-sm'] || "18", 'line-height-sm')
-  };
-
-  // Motion springs
-  const springsData: Record<string, /* eslint-disable-line @typescript-eslint/no-explicit-any */ any> = {};
-  for (const [key, value] of Object.entries(tokens)) {
-    if (key.startsWith('motion-spring-')) {
-      const match = key.match(/motion-spring-(.+)-(stiffness|damping)/);
-      if (match) {
-        const [, name, prop] = match;
-        const camelName = name.replace(/-([a-z])/g, g => g[1].toUpperCase());
-        if (!springsData[camelName]) springsData[camelName] = { type: "spring" };
-        springsData[camelName][prop] = parseNumber(value, key);
+    if (key.startsWith("layout-masonry-")) {
+      masonry[toCamelCase(key.replace("layout-masonry-", ""))] = parseNumber(
+        value,
+        key
+      );
+    } else if (key.startsWith("layout-")) {
+      const numberValue = Number.parseFloat(value);
+      layout[toCamelCase(key.replace("layout-", ""))] =
+        !Number.isNaN(numberValue) && /^[0-9.]+(px|rem|em)?$/.test(value)
+          ? numberValue
+          : value;
+    } else if (key.startsWith("breakpoint-")) {
+      breakpoints[key.replace("breakpoint-", "")] = parseNumber(value, key);
+    } else if (key.startsWith("motion-spring-")) {
+      const springMatch = key.match(/^motion-spring-(.+)-(stiffness|damping)$/);
+      if (springMatch) {
+        const [, name, property] = springMatch;
+        const spring = springs[toCamelCase(name)] ?? {
+          type: "spring" as const,
+        };
+        if (property === "stiffness") {
+          spring.stiffness = parseNumber(value, key);
+        } else {
+          spring.damping = parseNumber(value, key);
+        }
+        springs[toCamelCase(name)] = spring;
       }
     }
   }
-  manifest.motion.springs = springsData;
 
-  // Generate TS
-  let ts = `/**\n * AUTO-GENERATED DESIGN TOKENS\n * Do not edit this file directly. Edit app/globals.css instead.\n */\n\n`;
-  ts += `export const designManifest = {\n`;
-  
-  // Colors
-  ts += `  colors: {\n`;
-  for (const [k, v] of Object.entries(manifest.colors)) {
-    ts += `    /** Original CSS Variable: --${k} */\n`;
-    ts += `    "${k}": "${v}",\n`;
+  const manifest = [
+    "/**",
+    " * AUTO-GENERATED DESIGN TOKENS",
+    " * Do not edit this file directly. Edit app/globals.css instead.",
+    " */",
+    "",
+    "export const designManifest = ",
+    `${JSON.stringify(
+      {
+        colors,
+        typography: {
+          fonts: {
+            sans: "var(--font-inter), system-ui, -apple-system, sans-serif",
+            mono: "var(--font-geist-mono), ui-monospace, monospace",
+          },
+          sizes: {
+            sm: {
+              fontSize: parseNumber(
+                tokens["font-size-sm"] ?? "13",
+                "font-size-sm"
+              ),
+              lineHeight: parseNumber(
+                tokens["line-height-sm"] ?? "18",
+                "line-height-sm"
+              ),
+            },
+          },
+        },
+        masonry,
+        layout,
+        breakpoints,
+        motion: { springs },
+      },
+      null,
+      2
+    )} as const;`,
+    "",
+  ].join("\n");
+
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+  if (
+    !fs.existsSync(outputPath) ||
+    fs.readFileSync(outputPath, "utf8") !== manifest
+  ) {
+    fs.writeFileSync(outputPath, manifest, "utf8");
   }
-  ts += `  },\n`;
 
-  // Typography
-  ts += `  typography: {\n    fonts: {\n`;
-  ts += `      /** Font stack for sans-serif */\n      sans: "${manifest.typography.fonts.sans}",\n`;
-  ts += `      /** Font stack for monospace */\n      mono: "${manifest.typography.fonts.mono}",\n`;
-  ts += `    },\n    sizes: {\n      sm: {\n`;
-  ts += `        /** Original CSS Variable: --font-size-sm */\n        fontSize: ${manifest.typography.sizes.sm.fontSize},\n`;
-  ts += `        /** Original CSS Variable: --line-height-sm */\n        lineHeight: ${manifest.typography.sizes.sm.lineHeight},\n`;
-  ts += `      }\n    }\n  },\n`;
+  return manifest;
+}
 
-  // Masonry
-  ts += `  masonry: {\n`;
-  for (const [k, v] of Object.entries(manifest.masonry)) {
-    const cssName = `layout-masonry-${k.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)}`;
-    ts += `    /** Original CSS Variable: --${cssName} */\n`;
-    ts += `    ${k}: ${v},\n`;
+function readFlag(name: string): string | undefined {
+  const index = process.argv.indexOf(name);
+  return index === -1 ? undefined : process.argv[index + 1];
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  try {
+    const sourceRoot = readFlag("--source-root") ?? process.cwd();
+    const outputPath = readFlag("--output");
+    generateTheme({
+      sourceRoot,
+      ...(outputPath ? { outputPath: path.resolve(outputPath) } : {}),
+    });
+    console.log(
+      `Generated TS constants at ${outputPath ?? path.resolve(sourceRoot, "lib/design-manifest.ts")}`
+    );
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : error);
+    process.exit(1);
   }
-  ts += `  },\n`;
-
-  // Layout
-  ts += `  layout: {\n`;
-  for (const [k, v] of Object.entries(manifest.layout)) {
-    const cssName = `layout-${k.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)}`;
-    ts += `    /** Original CSS Variable: --${cssName} */\n`;
-    ts += `    ${k}: ${typeof v === "number" ? v : JSON.stringify(v)},\n`;
-  }
-  ts += `  },\n`;
-
-  // Breakpoints
-  ts += `  breakpoints: {\n`;
-  for (const [k, v] of Object.entries(manifest.breakpoints)) {
-    ts += `    /** Original CSS Variable: --breakpoint-${k} */\n`;
-    ts += `    "${k}": ${v},\n`;
-  }
-  ts += `  },\n`;
-
-  // Motion
-  ts += `  motion: {\n    springs: {\n`;
-  for (const [k, obj] of Object.entries(manifest.motion.springs)) {
-    ts += `      ${k}: { type: "${(obj as   any).type}", stiffness: ${(obj as   any).stiffness}, damping: ${(obj as /* eslint-disable-line @typescript-eslint/no-explicit-any */ any).damping} },\n`;
-  }
-  ts += `    }\n  }\n`;
-
-  ts += `} as const;\n`;
-
-  const outputPath = path.resolve(process.cwd(), 'lib/design-manifest.ts');
-  fs.writeFileSync(outputPath, ts);
-  console.log(`Generated TS constants at ${outputPath}`);
-};
-
-parseCSSAndGenerateTS();
+}

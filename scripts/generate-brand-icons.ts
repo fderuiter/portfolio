@@ -55,7 +55,9 @@ const SVG_BRAND_MARK = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 
 /**
  * Creates a standard binary Windows ICO container enclosing PNG buffers.
  */
-function createIco(images: Array<{ width: number; height: number; buffer: Buffer }>): Buffer {
+function createIco(
+  images: Array<{ width: number; height: number; buffer: Buffer }>
+): Buffer {
   const header = Buffer.alloc(6);
   header.writeUInt16LE(0, 0); // Reserved
   header.writeUInt16LE(1, 2); // ICO Type (1)
@@ -78,58 +80,121 @@ function createIco(images: Array<{ width: number; height: number; buffer: Buffer
     offset += img.buffer.length;
   }
 
-  return Buffer.concat([header, ...entries, ...images.map((img) => img.buffer)]);
+  return Buffer.concat([
+    header,
+    ...entries,
+    ...images.map((img) => img.buffer),
+  ]);
 }
 
-export async function generateBrandIcons(rootDir: string = process.cwd()) {
-  const publicFaviconSvgPath = path.resolve(rootDir, "public/favicon.svg");
-  const appIconSvgPath = path.resolve(rootDir, "app/icon.svg");
+export interface BrandIconGenerationOptions {
+  sourceRoot?: string;
+  outputRoot?: string;
+}
+
+function writeIfChanged(outputPath: string, contents: string | Buffer): void {
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+  if (
+    fs.existsSync(outputPath) &&
+    fs.readFileSync(outputPath).equals(Buffer.from(contents))
+  ) {
+    return;
+  }
+  fs.writeFileSync(outputPath, contents);
+}
+
+/**
+ * Generates every brand icon from one SVG input. `outputRoot` lets validation
+ * use a disposable directory instead of rewriting tracked public assets.
+ */
+export async function generateBrandIcons(
+  options: BrandIconGenerationOptions | string = {}
+) {
+  const { sourceRoot = process.cwd(), outputRoot = sourceRoot } =
+    typeof options === "string"
+      ? { sourceRoot: options, outputRoot: options }
+      : options;
+  const sourcePublicFaviconSvgPath = path.resolve(
+    sourceRoot,
+    "public/favicon.svg"
+  );
+  const sourceAppIconSvgPath = path.resolve(sourceRoot, "app/icon.svg");
+  const publicFaviconSvgPath = path.resolve(outputRoot, "public/favicon.svg");
+  const appIconSvgPath = path.resolve(outputRoot, "app/icon.svg");
 
   let svgContent = SVG_BRAND_MARK.trim();
-  if (fs.existsSync(publicFaviconSvgPath)) {
-    const existing = fs.readFileSync(publicFaviconSvgPath, "utf-8").trim();
+  if (fs.existsSync(sourcePublicFaviconSvgPath)) {
+    const existing = fs
+      .readFileSync(sourcePublicFaviconSvgPath, "utf-8")
+      .trim();
     if (existing) svgContent = existing;
-  } else if (fs.existsSync(appIconSvgPath)) {
-    const existing = fs.readFileSync(appIconSvgPath, "utf-8").trim();
+  } else if (fs.existsSync(sourceAppIconSvgPath)) {
+    const existing = fs.readFileSync(sourceAppIconSvgPath, "utf-8").trim();
     if (existing) svgContent = existing;
   }
 
   const svgBuffer = Buffer.from(svgContent);
 
   // 1. Write SVG icons
-  fs.writeFileSync(appIconSvgPath, svgContent + "\n");
-  fs.writeFileSync(publicFaviconSvgPath, svgContent + "\n");
+  writeIfChanged(appIconSvgPath, svgContent + "\n");
+  writeIfChanged(publicFaviconSvgPath, svgContent + "\n");
   console.log("✓ Generated app/icon.svg & public/favicon.svg");
 
   // 2. Generate multi-resolution ICO
   const icoSizes = [16, 32, 48];
-  const icoImages: Array<{ width: number; height: number; buffer: Buffer }> = [];
+  const icoImages: Array<{ width: number; height: number; buffer: Buffer }> =
+    [];
   for (const size of icoSizes) {
     const buf = await sharp(svgBuffer).resize(size, size).png().toBuffer();
     icoImages.push({ width: size, height: size, buffer: buf });
   }
   const icoBuffer = createIco(icoImages);
-  fs.writeFileSync(path.resolve(rootDir, "app/favicon.ico"), icoBuffer);
-  fs.writeFileSync(path.resolve(rootDir, "public/favicon.ico"), icoBuffer);
-  console.log("✓ Generated app/favicon.ico & public/favicon.ico (16x16, 32x32, 48x48)");
+  writeIfChanged(path.resolve(outputRoot, "app/favicon.ico"), icoBuffer);
+  writeIfChanged(path.resolve(outputRoot, "public/favicon.ico"), icoBuffer);
+  console.log(
+    "✓ Generated app/favicon.ico & public/favicon.ico (16x16, 32x32, 48x48)"
+  );
 
   // 3. Generate Apple Touch Icon (180x180)
-  const appleTouchBuffer = await sharp(svgBuffer).resize(180, 180).png().toBuffer();
-  fs.writeFileSync(path.resolve(rootDir, "public/apple-touch-icon.png"), appleTouchBuffer);
+  const appleTouchBuffer = await sharp(svgBuffer)
+    .resize(180, 180)
+    .png()
+    .toBuffer();
+  writeIfChanged(
+    path.resolve(outputRoot, "public/apple-touch-icon.png"),
+    appleTouchBuffer
+  );
   console.log("✓ Generated public/apple-touch-icon.png (180x180)");
 
   // 4. Generate Web App Manifest Icons (192x192, 512x512)
-  const icon192Buffer = await sharp(svgBuffer).resize(192, 192).png().toBuffer();
-  fs.writeFileSync(path.resolve(rootDir, "public/icon-192.png"), icon192Buffer);
+  const icon192Buffer = await sharp(svgBuffer)
+    .resize(192, 192)
+    .png()
+    .toBuffer();
+  writeIfChanged(
+    path.resolve(outputRoot, "public/icon-192.png"),
+    icon192Buffer
+  );
   console.log("✓ Generated public/icon-192.png (192x192)");
 
-  const icon512Buffer = await sharp(svgBuffer).resize(512, 512).png().toBuffer();
-  fs.writeFileSync(path.resolve(rootDir, "public/icon-512.png"), icon512Buffer);
+  const icon512Buffer = await sharp(svgBuffer)
+    .resize(512, 512)
+    .png()
+    .toBuffer();
+  writeIfChanged(
+    path.resolve(outputRoot, "public/icon-512.png"),
+    icon512Buffer
+  );
   console.log("✓ Generated public/icon-512.png (512x512)");
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  generateBrandIcons().catch((err) => {
+  const outputFlag = process.argv.indexOf("--output-root");
+  const outputRoot =
+    outputFlag === -1 ? undefined : process.argv[outputFlag + 1];
+  generateBrandIcons(
+    outputRoot ? { outputRoot: path.resolve(outputRoot) } : {}
+  ).catch((err) => {
     console.error("Failed to generate brand icons:", err);
     process.exit(1);
   });

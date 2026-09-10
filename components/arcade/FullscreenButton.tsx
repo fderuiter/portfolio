@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useContext } from "react";
+import { CabinetFullscreenContext } from "./CabinetFullscreen";
 import { IconMaximize, IconMinimize } from "@tabler/icons-react";
 
 interface FullscreenButtonProps {
@@ -16,6 +17,9 @@ export const FullscreenButton: React.FC<FullscreenButtonProps> = ({
   variant = "header",
   className = "",
 }) => {
+  const cabinetFullscreen = useContext(CabinetFullscreenContext);
+  if (cabinetFullscreen) return null;
+
   if (variant === "floating") {
     if (!isFullscreen) return null;
     return (
@@ -37,7 +41,7 @@ export const FullscreenButton: React.FC<FullscreenButtonProps> = ({
       onClick={onToggle}
       aria-label={isFullscreen ? "Exit Fullscreen (F)" : "Enter Fullscreen (F)"}
       title={isFullscreen ? "Exit Fullscreen (F)" : "Enter Fullscreen (F)"}
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer select-none active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-amber-500/50 focus-visible:outline-none ${
+      className={`min-h-12 min-w-12 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer select-none active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-amber-500/50 focus-visible:outline-none ${
         isFullscreen
           ? "bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 shadow-[0_0_12px_rgba(245,158,11,0.2)]"
           : "bg-neutral-900/90 hover:bg-neutral-800 text-zinc-300 hover:text-white border border-neutral-800 hover:border-zinc-700 shadow-sm"

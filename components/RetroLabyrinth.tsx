@@ -35,7 +35,7 @@ import {
   saveCRTCalibration,
   renderCRTEffects,
 } from "@/lib/arcade/crt-pipeline";
-import { useFullscreen } from "@/hooks/useFullscreen";
+import { useGameFullscreen as useFullscreen } from "@/components/arcade/CabinetFullscreen";
 import {
   ActiveSideEffect,
   BossState,
@@ -1573,160 +1573,164 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({
         : generateClassicStage1();
 
   return (
-    <div className="w-full flex flex-col items-center select-none my-6 font-mono">
+    <div className="arcade-labyrinth w-full flex flex-col items-center select-none my-6 font-mono">
       {/* Tablet Orientation Recommendation */}
       <TabletOrientationHint className="w-full" />
 
-      {/* Top HUD Banner: Mode, Class, CRT Theme & Expand Toggle */}
-      <div className="mb-2 w-full flex flex-wrap items-center justify-between gap-2 px-1 text-[10px]">
-        <div className="flex items-center gap-2">
-          <span
-            className={`inline-flex items-center gap-2 px-3 py-1 rounded-full font-bold uppercase tracking-wider border transition-all duration-300 ${
-              isFocused
-                ? "bg-brand-cyan/10 text-brand-cyan border-brand-cyan/30 shadow-[0_0_10px_rgba(34,211,238,0.15)] animate-pulse"
-                : "bg-neutral-950 text-neutral-500 border-neutral-900"
-            }`}
-          >
+      <details className="arcade-labyrinth-options w-full">
+        <summary className="min-h-12 p-3 cursor-pointer text-xs text-zinc-300">
+          Game mode, class & display
+        </summary>
+        {/* Top HUD Banner: Mode, Class, CRT Theme & Expand Toggle */}
+        <div className="mb-2 w-full flex flex-wrap items-center justify-between gap-2 px-1 text-[10px]">
+          <div className="flex items-center gap-2">
             <span
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              className={`inline-flex items-center gap-2 px-3 py-1 rounded-full font-bold uppercase tracking-wider border transition-all duration-300 ${
                 isFocused
-                  ? "bg-brand-cyan shadow-[0_0_8px_rgba(6,182,212,0.8)]"
-                  : "bg-neutral-700"
+                  ? "bg-brand-cyan/10 text-brand-cyan border-brand-cyan/30 shadow-[0_0_10px_rgba(34,211,238,0.15)] animate-pulse"
+                  : "bg-neutral-950 text-neutral-500 border-neutral-900"
               }`}
-            />
-            {isFocused
-              ? "Netrunner Breach: ACTIVE"
-              : "Click Subnet to Focus & Hack"}
-          </span>
-
-          {/* Class Badge */}
-          <button
-            onClick={() => setGameStatus("class_select")}
-            className="px-2.5 py-1 bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 rounded-full flex items-center gap-1 cursor-pointer transition-colors"
-            title="Change Cyberdeck Class"
-          >
-            <span>{selectedClass.icon}</span>
-            <span className="font-bold text-brand-cyan">
-              {selectedClass.name}
+            >
+              <span
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  isFocused
+                    ? "bg-brand-cyan shadow-[0_0_8px_rgba(6,182,212,0.8)]"
+                    : "bg-neutral-700"
+                }`}
+              />
+              {isFocused
+                ? "Netrunner Breach: ACTIVE"
+                : "Click Subnet to Focus & Hack"}
             </span>
-          </button>
-        </div>
 
-        {/* Mode Selector, CRT Palette & Expand */}
-        <div className="flex flex-wrap items-center justify-end gap-1.5">
-          <FieldManualButton manualId="retro-labyrinth" label="Manual" />
-          <FullscreenButton
-            isFullscreen={isFullscreen}
-            onToggle={toggleFullscreen}
-            variant="header"
-          />
-
-          {/* CRT Theme Switcher */}
-          <div className="flex items-center gap-0.5 bg-neutral-900 p-0.5 rounded-lg text-[9px]">
+            {/* Class Badge */}
             <button
-              onClick={() => setCrtThemeId("emerald")}
-              title="Emerald Green (VT220)"
-              className={`px-1.5 py-0.5 rounded cursor-pointer ${
-                crtThemeId === "emerald"
-                  ? "bg-emerald-500 text-black font-bold"
-                  : "text-neutral-400"
-              }`}
+              onClick={() => setGameStatus("class_select")}
+              className="px-2.5 py-1 bg-neutral-900/90 hover:bg-neutral-800 border border-neutral-800 text-neutral-300 rounded-full flex items-center gap-1 cursor-pointer transition-colors"
+              title="Change Cyberdeck Class"
             >
-              🟢
-            </button>
-            <button
-              onClick={() => setCrtThemeId("amber")}
-              title="Amber Hacker (IBM 3270)"
-              className={`px-1.5 py-0.5 rounded cursor-pointer ${
-                crtThemeId === "amber"
-                  ? "bg-amber-500 text-black font-bold"
-                  : "text-neutral-400"
-              }`}
-            >
-              🟠
-            </button>
-            <button
-              onClick={() => setCrtThemeId("synthwave")}
-              title="Synthwave Neon"
-              className={`px-1.5 py-0.5 rounded cursor-pointer ${
-                crtThemeId === "synthwave"
-                  ? "bg-pink-500 text-black font-bold"
-                  : "text-neutral-400"
-              }`}
-            >
-              🟣
-            </button>
-            <button
-              onClick={() => setCrtThemeId("matrix")}
-              title="Matrix Terminal"
-              className={`px-1.5 py-0.5 rounded cursor-pointer ${
-                crtThemeId === "matrix"
-                  ? "bg-green-600 text-black font-bold"
-                  : "text-neutral-400"
-              }`}
-            >
-              🟩
-            </button>
-
-            {/* CRT Calibration Trigger */}
-            <span className="w-px h-3 bg-neutral-800 mx-0.5" />
-            <button
-              onClick={() => setIsCRTModalOpen(true)}
-              title="Calibrate CRT Display & Phosphor Shaders"
-              aria-label="Calibrate CRT Display & Phosphor Shaders"
-              className="px-1.5 py-0.5 rounded hover:bg-neutral-800 text-neutral-400 hover:text-emerald-400 cursor-pointer flex items-center gap-1 transition-colors"
-            >
-              <IconDeviceTv className="w-3 h-3" />
-              <span className="hidden sm:inline">CRT</span>
+              <span>{selectedClass.icon}</span>
+              <span className="font-bold text-brand-cyan">
+                {selectedClass.name}
+              </span>
             </button>
           </div>
 
-          <div className="flex items-center gap-1 bg-neutral-900 p-0.5 rounded-lg text-[9px]">
-            <button
-              onClick={startRoguelikeCampaign}
-              className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
-                gameMode === "roguelike"
-                  ? "bg-brand-cyan text-black font-bold"
-                  : "text-neutral-400 hover:text-white"
-              }`}
-            >
-              Graveyard Roguelike
-            </button>
-            <button
-              onClick={() => switchStage(1)}
-              className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
-                gameMode === "classic" && stage === 1
-                  ? "bg-brand-cyan text-black font-bold"
-                  : "text-neutral-400 hover:text-white"
-              }`}
-            >
-              Subnet 01
-            </button>
-            <button
-              onClick={() => switchStage(2)}
-              className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
-                gameMode === "classic" && stage === 2
-                  ? "bg-brand-cyan text-black font-bold"
-                  : "text-neutral-400 hover:text-white"
-              }`}
-            >
-              Subnet 02 (Firewall)
-            </button>
-            <button
-              onClick={() => setIsExpanded((prev) => !prev)}
-              title="Toggle Expanded View"
-              className="px-1.5 py-0.5 rounded text-neutral-400 hover:text-white hover:bg-neutral-800 cursor-pointer"
-            >
-              {isExpanded ? (
-                <IconMinimize className="w-3 h-3" />
-              ) : (
-                <IconMaximize className="w-3 h-3" />
-              )}
-            </button>
+          {/* Mode Selector, CRT Palette & Expand */}
+          <div className="flex flex-wrap items-center justify-end gap-1.5">
+            <FieldManualButton manualId="retro-labyrinth" label="Manual" />
+            <FullscreenButton
+              isFullscreen={isFullscreen}
+              onToggle={toggleFullscreen}
+              variant="header"
+            />
+
+            {/* CRT Theme Switcher */}
+            <div className="flex items-center gap-0.5 bg-neutral-900 p-0.5 rounded-lg text-[9px]">
+              <button
+                onClick={() => setCrtThemeId("emerald")}
+                title="Emerald Green (VT220)"
+                className={`px-1.5 py-0.5 rounded cursor-pointer ${
+                  crtThemeId === "emerald"
+                    ? "bg-emerald-500 text-black font-bold"
+                    : "text-neutral-400"
+                }`}
+              >
+                🟢
+              </button>
+              <button
+                onClick={() => setCrtThemeId("amber")}
+                title="Amber Hacker (IBM 3270)"
+                className={`px-1.5 py-0.5 rounded cursor-pointer ${
+                  crtThemeId === "amber"
+                    ? "bg-amber-500 text-black font-bold"
+                    : "text-neutral-400"
+                }`}
+              >
+                🟠
+              </button>
+              <button
+                onClick={() => setCrtThemeId("synthwave")}
+                title="Synthwave Neon"
+                className={`px-1.5 py-0.5 rounded cursor-pointer ${
+                  crtThemeId === "synthwave"
+                    ? "bg-pink-500 text-black font-bold"
+                    : "text-neutral-400"
+                }`}
+              >
+                🟣
+              </button>
+              <button
+                onClick={() => setCrtThemeId("matrix")}
+                title="Matrix Terminal"
+                className={`px-1.5 py-0.5 rounded cursor-pointer ${
+                  crtThemeId === "matrix"
+                    ? "bg-green-600 text-black font-bold"
+                    : "text-neutral-400"
+                }`}
+              >
+                🟩
+              </button>
+
+              {/* CRT Calibration Trigger */}
+              <span className="w-px h-3 bg-neutral-800 mx-0.5" />
+              <button
+                onClick={() => setIsCRTModalOpen(true)}
+                title="Calibrate CRT Display & Phosphor Shaders"
+                aria-label="Calibrate CRT Display & Phosphor Shaders"
+                className="px-1.5 py-0.5 rounded hover:bg-neutral-800 text-neutral-400 hover:text-emerald-400 cursor-pointer flex items-center gap-1 transition-colors"
+              >
+                <IconDeviceTv className="w-3 h-3" />
+                <span className="hidden sm:inline">CRT</span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-1 bg-neutral-900 p-0.5 rounded-lg text-[9px]">
+              <button
+                onClick={startRoguelikeCampaign}
+                className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
+                  gameMode === "roguelike"
+                    ? "bg-brand-cyan text-black font-bold"
+                    : "text-neutral-400 hover:text-white"
+                }`}
+              >
+                Graveyard Roguelike
+              </button>
+              <button
+                onClick={() => switchStage(1)}
+                className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
+                  gameMode === "classic" && stage === 1
+                    ? "bg-brand-cyan text-black font-bold"
+                    : "text-neutral-400 hover:text-white"
+                }`}
+              >
+                Subnet 01
+              </button>
+              <button
+                onClick={() => switchStage(2)}
+                className={`px-2 py-0.5 rounded cursor-pointer transition-colors ${
+                  gameMode === "classic" && stage === 2
+                    ? "bg-brand-cyan text-black font-bold"
+                    : "text-neutral-400 hover:text-white"
+                }`}
+              >
+                Subnet 02 (Firewall)
+              </button>
+              <button
+                onClick={() => setIsExpanded((prev) => !prev)}
+                title="Toggle Expanded View"
+                className="px-1.5 py-0.5 rounded text-neutral-400 hover:text-white hover:bg-neutral-800 cursor-pointer"
+              >
+                {isExpanded ? (
+                  <IconMinimize className="w-3 h-3" />
+                ) : (
+                  <IconMaximize className="w-3 h-3" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-
+      </details>
       {/* Main Focusable Game Container */}
       <div
         ref={containerRef}
@@ -1735,7 +1739,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         data-keyboard-boundary="true"
-        className={`relative w-full ${
+        className={`arcade-labyrinth-playfield relative w-full ${
           isFullscreen
             ? "fixed inset-0 z-50 w-full h-[100dvh] max-h-[100dvh] max-w-none rounded-none border-none bg-black flex flex-col items-center justify-between p-1.5 sm:p-4 select-none touch-none overflow-hidden"
             : "h-auto"
@@ -1832,7 +1836,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({
 
         {/* Game Canvas Container */}
         <div
-          className={`relative ${
+          className={`arcade-labyrinth-canvas relative ${
             isFullscreen
               ? "w-full flex-1 max-h-[var(--layout-viewport-budget,calc(100dvh-var(--header-height,80px)-var(--footer-height,48px)))] max-h-[calc(100dvh-var(--header-height,80px)-var(--footer-height,48px))] aspect-[240/144] min-h-0"
               : isExpanded
@@ -2183,7 +2187,7 @@ export const RetroLabyrinth: React.FC<RetroLabyrinthProps> = ({
         </div>
 
         {/* Weapons Hotbar & Controls Footer */}
-        <div className="w-full flex flex-col gap-1 px-2 pt-1 border-t border-neutral-900/60">
+        <div className="arcade-labyrinth-controls w-full flex flex-col gap-1 px-2 pt-1 border-t border-neutral-900/60">
           <div className="flex flex-wrap items-center justify-between gap-1 text-[8px]">
             {/* Weapon Hotkeys */}
             <div className="flex items-center gap-1 flex-wrap">

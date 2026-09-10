@@ -15,7 +15,7 @@ import { useTelemetry } from "@/hooks/useTelemetry";
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { FullscreenButton } from "@/components/arcade/FullscreenButton";
 import { DynamicTabletOrientationHint as TabletOrientationHint } from "@/components/arcade/DynamicTabletOrientationHint";
-import { useFullscreen } from "@/hooks/useFullscreen";
+import { useGameFullscreen as useFullscreen } from "@/components/arcade/CabinetFullscreen";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
 import { useResponsiveCanvas } from "@/hooks/useResponsiveCanvas";

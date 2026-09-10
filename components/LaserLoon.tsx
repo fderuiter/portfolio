@@ -28,7 +28,7 @@ import {
 import { FieldManualButton } from "@/components/FieldManualButton";
 import { FullscreenButton } from "@/components/arcade/FullscreenButton";
 import { DynamicTabletOrientationHint as TabletOrientationHint } from "@/components/arcade/DynamicTabletOrientationHint";
-import { useFullscreen } from "@/hooks/useFullscreen";
+import { useGameFullscreen as useFullscreen } from "@/components/arcade/CabinetFullscreen";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useAnnouncer } from "@/hooks/useAnnouncer";
 import { useResponsiveCanvas } from "@/hooks/useResponsiveCanvas";
@@ -1661,136 +1661,140 @@ export const LaserLoon: React.FC = () => {
   }
 
   return (
-    <div className="w-full flex flex-col items-center select-none my-6">
+    <div className="arcade-shooter w-full min-w-0 flex flex-col items-center select-none my-6">
       {/* Tablet Orientation Recommendation */}
       <TabletOrientationHint className="w-full max-w-3xl" />
 
-      {/* HUD Header Bar & Mode Selector */}
-      <div className="w-full max-w-3xl flex flex-wrap items-center justify-between gap-3 mb-3 px-2">
-        {/* Mode Tabs */}
-        <div className="flex flex-wrap items-center gap-1.5 p-1 bg-neutral-900/80 border border-neutral-800 rounded-xl backdrop-blur-md">
-          <button
-            onClick={() => {
-              setMode("campaign");
-              resetGame();
-            }}
-            className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-              mode === "campaign"
-                ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]"
-                : "text-neutral-400 hover:text-white"
-            }`}
-          >
-            🏆 Campaign
-          </button>
-          <button
-            onClick={() => {
-              setMode("arcade");
-              resetGame();
-            }}
-            className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-              mode === "arcade"
-                ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]"
-                : "text-neutral-400 hover:text-white"
-            }`}
-          >
-            ⚡ Arcade Survival
-          </button>
-          <button
-            onClick={() => {
-              setMode("sandbox");
-              setGameState("playing");
-            }}
-            className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
-              mode === "sandbox"
-                ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]"
-                : "text-neutral-400 hover:text-white"
-            }`}
-          >
-            🧪 Zero-G Sandbox
-          </button>
-        </div>
-
-        {/* Laser Weapon Selector */}
-        <div className="flex flex-wrap items-center gap-1.5 p-1 bg-neutral-900/80 border border-neutral-800 rounded-xl backdrop-blur-md">
-          <button
-            onClick={() => selectLaserType("ruby-laser")}
-            aria-pressed={laserType === "ruby-laser"}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 ${
-              laserType === "ruby-laser"
-                ? "bg-red-500/20 text-red-400 border border-red-500/40 shadow-[0_0_10px_rgba(239,68,68,0.3)]"
-                : "text-neutral-400 hover:text-white border border-transparent"
-            }`}
-          >
-            Ruby (1)
-          </button>
-          <button
-            onClick={() => selectLaserType("cyan-pulse")}
-            aria-pressed={laserType === "cyan-pulse"}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer ${
-              laserType === "cyan-pulse"
-                ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/40"
-                : "text-neutral-400 hover:text-white border border-transparent"
-            }`}
-          >
-            Pulse (2)
-          </button>
-          <button
-            onClick={() => selectLaserType("aurora-wave")}
-            aria-pressed={laserType === "aurora-wave"}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer ${
-              laserType === "aurora-wave"
-                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
-                : "text-neutral-400 hover:text-white border border-transparent"
-            }`}
-          >
-            Aurora (3)
-          </button>
-          <button
-            onClick={() => selectLaserType("ice-cannon")}
-            aria-pressed={laserType === "ice-cannon"}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 ${
-              laserType === "ice-cannon"
-                ? "bg-sky-500/20 text-sky-400 border border-sky-500/40 shadow-[0_0_10px_rgba(56,189,248,0.3)]"
-                : "text-neutral-400 hover:text-white border border-transparent"
-            }`}
-          >
-            <IconSnowflake className="w-3.5 h-3.5" />
-            Mortar (4)
-          </button>
-        </div>
-
-        {/* Score & Museum Buttons */}
-        <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
-          <button
-            onClick={() => setShowMuseum(true)}
-            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-amber-300 border border-amber-500/30 transition-all cursor-pointer"
-          >
-            <IconBook className="w-3.5 h-3.5" />
-            <span>Flag Museum</span>
-          </button>
-
-          <FieldManualButton manualId="laser-loon" label="Manual" />
-          <FullscreenButton
-            isFullscreen={isFullscreen}
-            onToggle={toggleFullscreen}
-            variant="header"
-          />
-
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-300">
-            <IconTrophy className="w-3.5 h-3.5 text-amber-400" />
-            <span className="text-[10px] text-neutral-500">HI:</span>
-            <span className="font-bold text-amber-400">
-              {effectiveHighScore}
-            </span>
+      <details className="arcade-shooter-options w-full max-w-3xl">
+        <summary className="min-h-12 p-3 cursor-pointer font-mono text-xs text-zinc-300">
+          Game modes, weapons & audio
+        </summary>
+        {/* HUD Header Bar & Mode Selector */}
+        <div className="w-full max-w-3xl flex flex-wrap items-center justify-between gap-3 mb-3 px-2">
+          {/* Mode Tabs */}
+          <div className="flex flex-wrap items-center gap-1.5 p-1 bg-neutral-900/80 border border-neutral-800 rounded-xl backdrop-blur-md">
+            <button
+              onClick={() => {
+                setMode("campaign");
+                resetGame();
+              }}
+              className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                mode === "campaign"
+                  ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]"
+                  : "text-neutral-400 hover:text-white"
+              }`}
+            >
+              🏆 Campaign
+            </button>
+            <button
+              onClick={() => {
+                setMode("arcade");
+                resetGame();
+              }}
+              className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                mode === "arcade"
+                  ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]"
+                  : "text-neutral-400 hover:text-white"
+              }`}
+            >
+              ⚡ Arcade Survival
+            </button>
+            <button
+              onClick={() => {
+                setMode("sandbox");
+                setGameState("playing");
+              }}
+              className={`px-3 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                mode === "sandbox"
+                  ? "bg-red-500 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)]"
+                  : "text-neutral-400 hover:text-white"
+              }`}
+            >
+              🧪 Zero-G Sandbox
+            </button>
           </div>
 
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-300">
-            <span className="text-[10px] text-neutral-500">SCORE:</span>
-            <span className="font-bold text-red-400">{score}</span>
+          {/* Laser Weapon Selector */}
+          <div className="flex flex-wrap items-center gap-1.5 p-1 bg-neutral-900/80 border border-neutral-800 rounded-xl backdrop-blur-md">
+            <button
+              onClick={() => selectLaserType("ruby-laser")}
+              aria-pressed={laserType === "ruby-laser"}
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                laserType === "ruby-laser"
+                  ? "bg-red-500/20 text-red-400 border border-red-500/40 shadow-[0_0_10px_rgba(239,68,68,0.3)]"
+                  : "text-neutral-400 hover:text-white border border-transparent"
+              }`}
+            >
+              Ruby (1)
+            </button>
+            <button
+              onClick={() => selectLaserType("cyan-pulse")}
+              aria-pressed={laserType === "cyan-pulse"}
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer ${
+                laserType === "cyan-pulse"
+                  ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/40"
+                  : "text-neutral-400 hover:text-white border border-transparent"
+              }`}
+            >
+              Pulse (2)
+            </button>
+            <button
+              onClick={() => selectLaserType("aurora-wave")}
+              aria-pressed={laserType === "aurora-wave"}
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer ${
+                laserType === "aurora-wave"
+                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                  : "text-neutral-400 hover:text-white border border-transparent"
+              }`}
+            >
+              Aurora (3)
+            </button>
+            <button
+              onClick={() => selectLaserType("ice-cannon")}
+              aria-pressed={laserType === "ice-cannon"}
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                laserType === "ice-cannon"
+                  ? "bg-sky-500/20 text-sky-400 border border-sky-500/40 shadow-[0_0_10px_rgba(56,189,248,0.3)]"
+                  : "text-neutral-400 hover:text-white border border-transparent"
+              }`}
+            >
+              <IconSnowflake className="w-3.5 h-3.5" />
+              Mortar (4)
+            </button>
+          </div>
+
+          {/* Score & Museum Buttons */}
+          <div className="flex flex-wrap items-center gap-2 text-xs font-mono">
+            <button
+              onClick={() => setShowMuseum(true)}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-amber-300 border border-amber-500/30 transition-all cursor-pointer"
+            >
+              <IconBook className="w-3.5 h-3.5" />
+              <span>Flag Museum</span>
+            </button>
+
+            <FieldManualButton manualId="laser-loon" label="Manual" />
+            <FullscreenButton
+              isFullscreen={isFullscreen}
+              onToggle={toggleFullscreen}
+              variant="header"
+            />
+
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-300">
+              <IconTrophy className="w-3.5 h-3.5 text-amber-400" />
+              <span className="text-[10px] text-neutral-500">HI:</span>
+              <span className="font-bold text-amber-400">
+                {effectiveHighScore}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-xl text-neutral-300">
+              <span className="text-[10px] text-neutral-500">SCORE:</span>
+              <span className="font-bold text-red-400">{score}</span>
+            </div>
           </div>
         </div>
-      </div>
-
+      </details>
       {/* Main Interactive Game Container */}
       <div
         ref={containerRef}
@@ -1800,7 +1804,7 @@ export const LaserLoon: React.FC = () => {
         onKeyDown={handleKeyDown}
         onKeyUp={handleKeyUp}
         data-keyboard-boundary="true"
-        className={`relative outline-none transition-all duration-300 shadow-2xl flex flex-col justify-between ${
+        className={`arcade-shooter-playfield relative outline-none shadow-2xl flex flex-col justify-between ${
           isFullscreen
             ? "fixed inset-0 z-50 w-full h-[100dvh] max-h-[100dvh] max-w-none rounded-none border-none bg-black p-2 sm:p-4 overflow-hidden select-none touch-none"
             : `w-full max-w-3xl h-auto aspect-[768/420] bg-neutral-950 border rounded-3xl overflow-hidden ${
@@ -1968,7 +1972,7 @@ export const LaserLoon: React.FC = () => {
 
         {/* Start Overlay Screen */}
         {gameState === "idle" && (
-          <div className="absolute inset-0 bg-neutral-950/85 backdrop-blur-sm z-30 flex flex-col items-center justify-center text-center p-6 select-none">
+          <div className="arcade-shooter-start absolute inset-0 bg-neutral-950/85 z-30 flex flex-col items-center text-center p-3 select-none overflow-y-auto">
             <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center mb-3 text-red-400 shadow-[0_0_30px_rgba(239,68,68,0.3)] animate-pulse">
               <IconTarget className="w-8 h-8" />
             </div>
@@ -2013,7 +2017,7 @@ export const LaserLoon: React.FC = () => {
 
         {/* Newspaper Story Card (Act Intro) */}
         {gameState === "act-intro" && (
-          <div className="absolute inset-0 bg-neutral-950/90 backdrop-blur-md z-30 flex flex-col items-center justify-center p-6 text-center select-none animate-in fade-in zoom-in duration-200">
+          <div className="arcade-shooter-story absolute inset-0 bg-neutral-950/90 z-30 flex flex-col items-center p-3 text-center select-none overflow-y-auto">
             <div className="max-w-lg w-full bg-stone-900/90 border-2 border-stone-600/80 rounded-2xl p-6 shadow-2xl text-left font-serif text-stone-200 relative">
               <div className="text-center border-b-2 border-stone-600/80 pb-3 mb-3">
                 <span className="text-[10px] tracking-widest uppercase font-mono text-amber-400 block mb-1">
@@ -2266,112 +2270,8 @@ export const LaserLoon: React.FC = () => {
         )}
       </div>
 
-      {/* Mobile / Tablet Touch Controls Bar */}
-      <div className="w-full max-w-3xl flex flex-wrap items-center justify-between gap-2 p-3 mt-3 rounded-2xl bg-neutral-950/80 border border-neutral-800 lg:hidden">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <button
-            type="button"
-            onClick={() => selectLaserType("ruby-laser")}
-            aria-pressed={laserType === "ruby-laser"}
-            className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
-              laserType === "ruby-laser"
-                ? "bg-red-500/20 text-red-300 border border-red-500/50 shadow-[0_0_10px_rgba(239,68,68,0.2)]"
-                : "bg-neutral-900 text-neutral-400 border border-neutral-800"
-            }`}
-          >
-            🔴 Ruby
-          </button>
-          <button
-            type="button"
-            onClick={() => selectLaserType("cyan-pulse")}
-            aria-pressed={laserType === "cyan-pulse"}
-            className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
-              laserType === "cyan-pulse"
-                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-[0_0_10px_rgba(6,182,212,0.2)]"
-                : "bg-neutral-900 text-neutral-400 border border-neutral-800"
-            }`}
-          >
-            ⚡ Pulse
-          </button>
-          <button
-            type="button"
-            onClick={() => selectLaserType("aurora-wave")}
-            aria-pressed={laserType === "aurora-wave"}
-            className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
-              laserType === "aurora-wave"
-                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
-                : "bg-neutral-900 text-neutral-400 border border-neutral-800"
-            }`}
-          >
-            🌈 Aurora
-          </button>
-          <button
-            type="button"
-            onClick={() => selectLaserType("ice-cannon")}
-            aria-pressed={laserType === "ice-cannon"}
-            className={`px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
-              laserType === "ice-cannon"
-                ? "bg-sky-500/20 text-sky-300 border border-sky-500/50 shadow-[0_0_10px_rgba(56,189,248,0.2)]"
-                : "bg-neutral-900 text-neutral-400 border border-neutral-800"
-            }`}
-          >
-            🧊 Mortar
-          </button>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={fireUltimateTremolo}
-            disabled={ultimateMeter < 100 && mode !== "sandbox"}
-            className={`px-3 py-2 rounded-xl font-mono text-xs font-bold ${
-              ultimateMeter >= 100 || mode === "sandbox"
-                ? "bg-cyan-400 text-black shadow-[0_0_15px_rgba(34,211,238,0.5)]"
-                : "bg-neutral-900 text-neutral-600 cursor-not-allowed"
-            }`}
-          >
-            💥 Tremolo
-          </button>
-
-          {gameState !== "playing" ? (
-            <button
-              type="button"
-              onClick={() => {
-                startGame();
-                containerRef.current?.focus({ preventScroll: true });
-              }}
-              className="px-4 py-2 rounded-xl bg-red-500 text-white font-mono font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-md active:scale-95"
-            >
-              <IconPlayerPlay className="w-3.5 h-3.5 fill-current" />
-              START GAME
-            </button>
-          ) : (
-            <button
-              type="button"
-              onTouchStart={() => {
-                isFiringRef.current = true;
-                fireWeapon();
-              }}
-              onTouchEnd={() => {
-                isFiringRef.current = false;
-              }}
-              onMouseDown={() => {
-                isFiringRef.current = true;
-                fireWeapon();
-              }}
-              onMouseUp={() => {
-                isFiringRef.current = false;
-              }}
-              className="px-6 py-2.5 rounded-xl bg-red-500 text-white font-mono font-extrabold text-sm active:bg-red-400 active:scale-95 cursor-pointer shadow-[0_0_15px_rgba(239,68,68,0.4)]"
-            >
-              🔥 FIRE
-            </button>
-          )}
-        </div>
-      </div>
-
       {/* Mobile/Tablet Touch Aim & Fire Dock */}
-      <div className="w-full max-w-3xl mt-3 flex justify-center">
+      <div className="arcade-shooter-controls w-full max-w-3xl mt-3 flex justify-center">
         <TwinStickAimDock
           onFirePress={() => {
             isFiringRef.current = true;
@@ -2410,7 +2310,7 @@ export const LaserLoon: React.FC = () => {
       </div>
 
       {/* Footer Controls & Toggles */}
-      <div className="w-full max-w-3xl flex justify-between items-center px-4 mt-2 text-[10px] font-mono text-neutral-500">
+      <div className="arcade-shooter-footer w-full max-w-3xl flex flex-wrap gap-2 justify-between items-center px-4 mt-2 text-[10px] font-mono text-neutral-500">
         <span>
           Controls: Aim &amp; Click / Space to fire · Keys 1-4 for Optics ·
           Space / U for Tremolo

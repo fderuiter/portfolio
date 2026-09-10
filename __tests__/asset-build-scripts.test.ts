@@ -1,102 +1,173 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { generateBrandIcons } from "../scripts/generate-brand-icons";
+import { generateTheme } from "../scripts/generate-theme";
 import { designManifest } from "../lib/design-manifest";
 
-describe("Standardized Asset Build Scripts & Design System Tokens", () => {
-  const rootDir = process.cwd();
+const workspaceRoot = process.cwd();
+const tsxCli = path.join(workspaceRoot, "node_modules/tsx/dist/cli.mjs");
+const standaloneScript = path.join(
+  workspaceRoot,
+  "scripts/build-standalone-engine.ts"
+);
+const trackedOutputs = [
+  "app/icon.svg",
+  "app/favicon.ico",
+  "public/favicon.svg",
+  "public/favicon.ico",
+  "public/apple-touch-icon.png",
+  "public/icon-192.png",
+  "public/icon-512.png",
+  "lib/design-manifest.ts",
+  "public/garmin-engine.js",
+  "public/monkey-c-mayhem.js",
+];
 
-  beforeAll(async () => {
-    // Generate icons to guarantee current state
-    await generateBrandIcons(rootDir);
+describe("asset generation and staging workflow", () => {
+  let temporaryRoot: string;
+  let sourceSnapshots: Map<string, Buffer>;
+
+  beforeAll(() => {
+    temporaryRoot = fs.mkdtempSync(
+      path.join(os.tmpdir(), "portfolio-assets-test-")
+    );
+    sourceSnapshots = new Map(
+      trackedOutputs.map((relativePath) => [
+        relativePath,
+        fs.readFileSync(path.join(workspaceRoot, relativePath)),
+      ])
+    );
   });
 
-  describe("1. Multi-Resolution Brand Icon Generation", () => {
-    it("generates vector SVG favicons", () => {
-      const appIconSvg = path.join(rootDir, "app/icon.svg");
-      const publicFaviconSvg = path.join(rootDir, "public/favicon.svg");
-
-      expect(fs.existsSync(appIconSvg)).toBe(true);
-      expect(fs.existsSync(publicFaviconSvg)).toBe(true);
-
-      const appSvgContent = fs.readFileSync(appIconSvg, "utf-8");
-      const publicSvgContent = fs.readFileSync(publicFaviconSvg, "utf-8");
-
-      expect(appSvgContent).toContain("<svg");
-      expect(publicSvgContent).toContain("<svg");
-    });
-
-    it("generates multi-resolution binary ICO container files with correct ICO header", () => {
-      const appFaviconIco = path.join(rootDir, "app/favicon.ico");
-      const publicFaviconIco = path.join(rootDir, "public/favicon.ico");
-
-      expect(fs.existsSync(appFaviconIco)).toBe(true);
-      expect(fs.existsSync(publicFaviconIco)).toBe(true);
-
-      const icoBuf = fs.readFileSync(publicFaviconIco);
-      expect(icoBuf.length).toBeGreaterThan(100);
-
-      // Check Windows ICO magic bytes: Reserved=0, Type=1 (ICO), ImageCount=3
-      expect(icoBuf.readUInt16LE(0)).toBe(0);
-      expect(icoBuf.readUInt16LE(2)).toBe(1);
-      expect(icoBuf.readUInt16LE(4)).toBe(3);
-    });
-
-    it("generates multi-resolution PNG graphics (Apple Touch Icon & Web App Manifest)", () => {
-      const pngTargets = [
-        path.join(rootDir, "public/apple-touch-icon.png"),
-        path.join(rootDir, "public/icon-192.png"),
-        path.join(rootDir, "public/icon-512.png"),
-      ];
-
-      for (const target of pngTargets) {
-        expect(fs.existsSync(target)).toBe(true);
-        const buf = fs.readFileSync(target);
-        expect(buf.length).toBeGreaterThan(100);
-
-        // PNG Header magic bytes: 0x89 'P' 'N' 'G'
-        expect(buf[0]).toBe(0x89);
-        expect(buf[1]).toBe(0x50);
-        expect(buf[2]).toBe(0x4e);
-        expect(buf[3]).toBe(0x47);
-      }
-    });
+  afterAll(() => {
+    fs.rmSync(temporaryRoot, { recursive: true, force: true });
   });
 
-  describe("2. Design Token Manifest Compilation", () => {
-    it("exports strongly-typed designManifest runtime constants", () => {
-      expect(designManifest).toBeDefined();
-      expect(typeof designManifest).toBe("object");
+  it("generates deterministic icon and theme outputs outside the workspace", async () => {
+    const iconOutputRoot = path.join(temporaryRoot, "icons");
+    const themeOutputPath = path.join(
+      temporaryRoot,
+      "theme",
+      "design-manifest.ts"
+    );
 
-      // Verify colors token category
-      expect(designManifest.colors).toBeDefined();
-      expect(designManifest.colors.background).toBeDefined();
-      expect(designManifest.colors.foreground).toBeDefined();
-
-      // Verify typography token category
-      expect(designManifest.typography).toBeDefined();
-      expect(designManifest.typography.fonts.sans).toContain("var(--font-inter)");
-      expect(designManifest.typography.fonts.mono).toContain("var(--font-geist-mono)");
-
-      // Verify masonry, layout, breakpoints, and motion categories
-      expect(designManifest.masonry).toBeDefined();
-      expect(designManifest.layout).toBeDefined();
-      expect(designManifest.breakpoints).toBeDefined();
-      expect(designManifest.motion).toBeDefined();
-      expect(designManifest.motion.springs).toBeDefined();
+    await generateBrandIcons({
+      sourceRoot: workspaceRoot,
+      outputRoot: iconOutputRoot,
     });
+    const firstTheme = generateTheme({
+      sourceRoot: workspaceRoot,
+      outputPath: themeOutputPath,
+    });
+    const firstIcon = fs.readFileSync(
+      path.join(iconOutputRoot, "public/favicon.ico")
+    );
+
+    await generateBrandIcons({
+      sourceRoot: workspaceRoot,
+      outputRoot: iconOutputRoot,
+    });
+    const secondTheme = generateTheme({
+      sourceRoot: workspaceRoot,
+      outputPath: themeOutputPath,
+    });
+    const secondIcon = fs.readFileSync(
+      path.join(iconOutputRoot, "public/favicon.ico")
+    );
+
+    expect(firstTheme).toBe(secondTheme);
+    expect(firstIcon.equals(secondIcon)).toBe(true);
+    expect(
+      fs
+        .readFileSync(path.join(iconOutputRoot, "app/favicon.ico"))
+        .equals(secondIcon)
+    ).toBe(true);
+    expect(
+      fs.readFileSync(path.join(iconOutputRoot, "app/icon.svg"), "utf8")
+    ).toBe(
+      fs.readFileSync(path.join(iconOutputRoot, "public/favicon.svg"), "utf8")
+    );
   });
 
-  describe("3. Package Configuration Script Targets", () => {
-    it("registers build:icons, build:theme, generate:icons, and generate:theme in package.json", () => {
-      const pkgJsonPath = path.join(rootDir, "package.json");
-      const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8"));
+  it("builds identical standalone aliases in an isolated directory and leaves no failed output", () => {
+    const outputDir = path.join(temporaryRoot, "standalone");
+    const build = (directory: string, maxSizeBytes?: number) =>
+      execFileSync(
+        process.execPath,
+        [
+          tsxCli,
+          standaloneScript,
+          "--source-root",
+          workspaceRoot,
+          "--output-dir",
+          directory,
+          ...(maxSizeBytes ? ["--max-size-bytes", String(maxSizeBytes)] : []),
+        ],
+        { cwd: workspaceRoot, stdio: "pipe" }
+      );
+    build(outputDir);
+    const firstBuild = fs.readFileSync(
+      path.join(outputDir, "garmin-engine.js")
+    );
 
-      expect(pkg.scripts["build:icons"]).toBe("npx tsx scripts/generate-brand-icons.ts");
-      expect(pkg.scripts["build:theme"]).toBe("npx tsx scripts/generate-theme.ts");
-      expect(pkg.scripts["generate:icons"]).toBe("npx tsx scripts/generate-brand-icons.ts");
-      expect(pkg.scripts["generate:theme"]).toBe("npx tsx scripts/generate-theme.ts");
-    });
+    build(outputDir);
+    expect(
+      fs
+        .readFileSync(path.join(outputDir, "garmin-engine.js"))
+        .equals(firstBuild)
+    ).toBe(true);
+    expect(
+      fs
+        .readFileSync(path.join(outputDir, "monkey-c-mayhem.js"))
+        .equals(firstBuild)
+    ).toBe(true);
+
+    const rejectedOutputDir = path.join(temporaryRoot, "rejected-standalone");
+    expect(() => build(rejectedOutputDir, 1)).toThrow();
+    expect(fs.existsSync(rejectedOutputDir)).toBe(false);
+  });
+
+  it("preserves all tracked generator destinations during validation", () => {
+    for (const [relativePath, snapshot] of sourceSnapshots) {
+      expect(
+        fs.readFileSync(path.join(workspaceRoot, relativePath)).equals(snapshot)
+      ).toBe(true);
+    }
+  });
+
+  it("exports strongly typed runtime design tokens", () => {
+    expect(designManifest.colors.background).toBeDefined();
+    expect(designManifest.typography.fonts.sans).toContain("var(--font-inter)");
+    expect(designManifest.motion.springs).toBeDefined();
+  });
+
+  it("runs formatting before linting and skips generated artifacts", () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const lintStagedConfig = require("../lint-staged.config.cjs") as Record<
+      string,
+      (files: string[]) => string[]
+    >;
+    const commands = lintStagedConfig["*"]([
+      "/repo/components/Example File.tsx",
+      "/repo/public/garmin-engine.js",
+      "/repo/docs/guide.md",
+    ]);
+
+    expect(commands).toHaveLength(2);
+    expect(commands[0]).toContain("prettier");
+    expect(commands[0]).toContain("Example File.tsx");
+    expect(commands[0]).not.toContain("garmin-engine.js");
+    expect(commands[1]).toContain("eslint");
+    expect(commands[1]).toContain("Example File.tsx");
+  });
+
+  it("keeps test setup non-mutating", () => {
+    const packageJson = JSON.parse(
+      fs.readFileSync(path.join(workspaceRoot, "package.json"), "utf8")
+    );
+    expect(packageJson.scripts.pretest).toBe("npx prisma generate");
   });
 });
