@@ -1,5 +1,15 @@
 # Portfolio Domain Context & Glossary
 
+## Delivery Coordination & Issue Governance
+
+- **Governing Map**: A non-executable epic or specification that defines a workstream's boundaries, outcomes, and child tickets. A governing map is not part of the agent work frontier and remains open until its child outcomes are complete.
+- **Executable Leaf**: A context-window-sized ticket that delivers one independently verifiable outcome and may be claimed by an agent when all of its hard blockers are closed.
+- **Hard Blocker**: An unfinished ticket whose outcome is genuinely required before useful work can begin on another ticket. Hard blockers are represented with native issue dependencies; preferred order alone is not a blocker.
+- **Coordination Relationship**: A non-blocking overlap between tickets that share an integration surface, validation environment, or product journey. Coordination relationships describe merge order and handoff expectations without removing tickets from the parallel frontier.
+- **Agent Frontier**: The set of unassigned executable leaves with no open hard blockers and no requirement for human-only authority.
+- **Human Gate**: A ticket requiring human authorization, protected credentials, destructive cloud action, production promotion, or subjective real-device validation. Human gates are prepared with reproducible evidence before being handed to a person.
+- **Completion Evidence**: The commit, pull request, automated results, deployment observation, or human sign-off demonstrating that every acceptance criterion of a ticket is satisfied.
+
 ## Logical Proof Workspace
 
 ### Deductive Inference Rules
