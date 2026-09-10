@@ -34,9 +34,11 @@ describe("Sentry Telemetry Filtering for Game Engine Exceptions", () => {
   });
 
   it("should filter out GameEngineException in Client config", async () => {
-    process.env.NEXT_PUBLIC_SENTRY_DSN = "https://validkey@o0.ingest.sentry.io/123456";
+    process.env.NEXT_PUBLIC_SENTRY_DSN =
+      "https://validkey@o0.ingest.sentry.io/123456";
     // Dynamically require to ensure we trigger Sentry.init on clean mock
-    const { initClientSentry, clientSentryPromise } = await import("../sentry.client.config");
+    const { initClientSentry, clientSentryPromise } =
+      await import("../instrumentation-client");
     await clientSentryPromise;
     await initClientSentry();
     expect(mockInit).toHaveBeenCalled();
@@ -48,20 +50,25 @@ describe("Sentry Telemetry Filtering for Game Engine Exceptions", () => {
     const stdError = new Error("A standard runtime exception");
 
     const event = { event_id: "1" };
-    
+
     // Should discard GameEngineException
-    const resultForGame = config.beforeSend(event, { originalException: gameError });
+    const resultForGame = config.beforeSend(event, {
+      originalException: gameError,
+    });
     expect(resultForGame).toBeNull();
 
     // Should preserve standard errors
-    const resultForStd = config.beforeSend(event, { originalException: stdError });
+    const resultForStd = config.beforeSend(event, {
+      originalException: stdError,
+    });
     expect(resultForStd).toEqual(event);
   });
 
   it("should bypass Client telemetry initialization when DSN is missing or dummy", async () => {
     delete process.env.NEXT_PUBLIC_SENTRY_DSN;
-    const { initClientSentry, reportClientError } = await import("../lib/client-sentry");
-    
+    const { initClientSentry, reportClientError } =
+      await import("../lib/client-sentry");
+
     // Reset mock
     mockInit.mockClear();
 
@@ -86,11 +93,15 @@ describe("Sentry Telemetry Filtering for Game Engine Exceptions", () => {
     const stdError = new Error("A standard runtime exception");
 
     const event = { event_id: "2" };
-    
-    const resultForGame = config.beforeSend(event, { originalException: gameError });
+
+    const resultForGame = config.beforeSend(event, {
+      originalException: gameError,
+    });
     expect(resultForGame).toBeNull();
 
-    const resultForStd = config.beforeSend(event, { originalException: stdError });
+    const resultForStd = config.beforeSend(event, {
+      originalException: stdError,
+    });
     expect(resultForStd).toEqual(event);
   });
 
@@ -104,11 +115,15 @@ describe("Sentry Telemetry Filtering for Game Engine Exceptions", () => {
     const stdError = new Error("A standard runtime exception");
 
     const event = { event_id: "3" };
-    
-    const resultForGame = config.beforeSend(event, { originalException: gameError });
+
+    const resultForGame = config.beforeSend(event, {
+      originalException: gameError,
+    });
     expect(resultForGame).toBeNull();
 
-    const resultForStd = config.beforeSend(event, { originalException: stdError });
+    const resultForStd = config.beforeSend(event, {
+      originalException: stdError,
+    });
     expect(resultForStd).toEqual(event);
   });
 

@@ -36,6 +36,7 @@ export default defineConfig({
         "app/globals.css",
         "lib/dx/utils.ts",
         "sentry.*.config.ts",
+        "instrumentation-client.ts",
         "prisma.config.ts",
         "scripts/**",
         "lib/layout-config.ts",

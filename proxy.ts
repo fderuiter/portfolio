@@ -10,7 +10,7 @@ const isProtectedRoute = createRouteMatcher(["/admin(.*)", "/api/admin(.*)"]);
 const isPublicAuthRoute = createRouteMatcher(["/admin/login(.*)"]);
 
 /**
- * Next.js 16 Edge Proxy
+ * Next.js 16 Node.js Proxy
  * Chains Clerk authentication for protected administrative routes,
  * generates privacy-preserving client connection tokens for API telemetry/rate limiting,
  * and attaches standard HTTP security headers globally.

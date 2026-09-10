@@ -232,27 +232,6 @@ export const DEFAULT_IGNORE_LIST: IgnoreRule[] = [
     expiresAt: "2026-11-01T23:59:59Z",
     reason: "YAML parser for CI configuration and OpenAPI schema compilation",
   },
-  {
-    advisory: "GHSA-p293-qw3h-jr36",
-    package: "next",
-    expiresAt: "2026-11-01T23:59:59Z",
-    reason:
-      "Core Web Framework; Windows-only unauthenticated RCE not applicable to Linux/mac container production deployment",
-  },
-  {
-    advisory: "GHSA-2xp9-vwfh-vxw4",
-    package: "next",
-    expiresAt: "2026-11-01T23:59:59Z",
-    reason:
-      "Core Web Framework; Next.js Image optimization AVIF RCE mitigated via strict remote patterns",
-  },
-  {
-    advisory: "GHSA-rgj7-g3m4-5g8c",
-    package: "sharp",
-    expiresAt: "2026-11-01T23:59:59Z",
-    reason:
-      "Native image processing engine for Next.js Image optimization; libheif vulnerability in unused formats",
-  },
 ];
 
 export interface Advisory {
