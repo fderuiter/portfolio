@@ -5,77 +5,105 @@ import {
   checkDocumentationDrift,
   compileDocumentation,
   getDocumentationGitStatus,
+  type DocumentationDriftResult,
 } from "./documentation-drift";
 import {
   checkOnboardingDocsDrift,
   checkDirectoryTopology,
 } from "../lib/dx/doctor";
 
-function checkDrift() {
-  console.log("Checking for documentation and specification drift...");
-  const workspaceRoot = path.resolve(__dirname, "..");
+interface DetailCheckResult {
+  status: "pass" | "fail" | "warn" | "fixed";
+  details?: string[];
+}
 
-  // 1. Check TypeDoc documentation compilation & drift without mutating docs/
+interface OpenApiCheckResult {
+  missingRoutes: string[];
+  hasDrift: boolean;
+}
+
+export interface DriftCheckDependencies {
+  checkDocumentation: () => DocumentationDriftResult;
+  checkOpenApi: () => OpenApiCheckResult;
+  checkOnboarding: () => DetailCheckResult;
+  checkTopology: () => DetailCheckResult;
+}
+
+function defaultDependencies(workspaceRoot: string): DriftCheckDependencies {
+  return {
+    checkDocumentation: () =>
+      checkDocumentationDrift({
+        workspaceRoot,
+        compile: (outputDirectory) =>
+          compileDocumentation(workspaceRoot, outputDirectory),
+        getGitStatus: () => getDocumentationGitStatus(workspaceRoot),
+      }),
+    checkOpenApi: () => generateOpenApi(workspaceRoot),
+    checkOnboarding: () => checkOnboardingDocsDrift(workspaceRoot),
+    checkTopology: () => checkDirectoryTopology(workspaceRoot),
+  };
+}
+
+/** Runs the non-mutating documentation and specification drift checks. */
+export function checkDrift(
+  workspaceRoot = path.resolve(__dirname, ".."),
+  dependencies = defaultDependencies(workspaceRoot)
+): number {
+  console.log("Checking for documentation and specification drift...");
   let docsDrift = false;
   let driftSummary = "";
+
   console.log(
     "Comparing documentation against an isolated TypeDoc compilation..."
   );
-  const documentationResult = checkDocumentationDrift({
-    workspaceRoot,
-    compile: (outputDirectory) =>
-      compileDocumentation(workspaceRoot, outputDirectory),
-    getGitStatus: () => getDocumentationGitStatus(workspaceRoot),
-  });
+  const documentationResult = dependencies.checkDocumentation();
   if (documentationResult.status === "error") {
     console.error(`❌ ${documentationResult.details.join("\n")}`);
-    process.exit(1);
+    return 1;
   }
   if (documentationResult.status === "fail") {
     docsDrift = true;
     driftSummary += `${documentationResult.details.map((detail) => `• ${detail}`).join("\n")}\n`;
   }
 
-  // 2. Check OpenAPI Specification parity and route coverage
   console.log(
     "Checking OpenAPI contract synchronization and route coverage..."
   );
-  const { missingRoutes, hasDrift: openApiDrift } =
-    generateOpenApi(workspaceRoot);
-
+  const { missingRoutes, hasDrift: openApiDrift } = dependencies.checkOpenApi();
   if (missingRoutes.length > 0) {
     docsDrift = true;
     driftSummary +=
       `• Undocumented API routes detected (${missingRoutes.length}):\n` +
-      missingRoutes.map((r) => `  - ${r}`).join("\n") +
+      missingRoutes.map((route) => `  - ${route}`).join("\n") +
       "\n";
   }
-
   if (openApiDrift) {
     docsDrift = true;
     driftSummary +=
       "• openapi.json is out of sync with scripts/generate-openapi.ts\n";
   }
 
-  // 3. Check Onboarding Documentation alignment with engine constraints
   console.log("Checking onboarding documentation synchronization...");
-  const onboardingResult = checkOnboardingDocsDrift(workspaceRoot);
+  const onboardingResult = dependencies.checkOnboarding();
   if (onboardingResult.status === "fail") {
     docsDrift = true;
     driftSummary +=
       "• Onboarding documentation drift detected:\n" +
-      (onboardingResult.details || []).map((d) => `  - ${d}`).join("\n") +
+      (onboardingResult.details || [])
+        .map((detail) => `  - ${detail}`)
+        .join("\n") +
       "\n";
   }
 
-  // 4. Check System Architecture Directory Topology alignment
   console.log("Checking architectural directory topology synchronization...");
-  const topologyResult = checkDirectoryTopology(workspaceRoot);
+  const topologyResult = dependencies.checkTopology();
   if (topologyResult.status === "fail") {
     docsDrift = true;
     driftSummary +=
       "• Architectural directory topology drift detected:\n" +
-      (topologyResult.details || []).map((d) => `  - ${d}`).join("\n") +
+      (topologyResult.details || [])
+        .map((detail) => `  - ${detail}`)
+        .join("\n") +
       "\n";
   }
 
@@ -87,13 +115,15 @@ function checkDrift() {
     console.error(
       "👉 Remedy the reported category: stage authored documentation, regenerate only stale references, and add missing API contracts before retrying.\n"
     );
-    process.exit(1);
-  } else {
-    console.log(
-      "✅ No documentation or specification drift detected. All API contracts and docs are synchronized."
-    );
-    process.exit(0);
+    return 1;
   }
+
+  console.log(
+    "✅ No documentation or specification drift detected. All API contracts and docs are synchronized."
+  );
+  return 0;
 }
 
-checkDrift();
+if (require.main === module) {
+  process.exitCode = checkDrift();
+}
