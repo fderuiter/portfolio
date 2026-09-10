@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { compileDocumentation } from "./compile-docs";
 
 export interface DocumentationGitStatus {
   modified: string[];
@@ -18,36 +19,6 @@ export interface DocumentationDriftResult {
   status: "pass" | "fail" | "error";
   details: string[];
 }
-
-const typedocArguments = [
-  "typedoc",
-  "--entryPoints",
-  "hooks",
-  "--entryPoints",
-  "types",
-  "--entryPoints",
-  "lib",
-  "--exclude",
-  "**/env.d.ts",
-  "--entryPointStrategy",
-  "expand",
-  "--plugin",
-  "typedoc-plugin-markdown",
-  "--hideGenerator",
-  "--cleanOutputDir",
-  "false",
-  "--gitRevision",
-  "main",
-  "--sourceLinkTemplate",
-  "https://github.com/fderuiter/portfolio/blob/{gitRevision}/{path}#L{line}",
-  "--intentionallyNotExported",
-  "TypeMap",
-  "--intentionallyNotExported",
-  "GlobalOmitConfig",
-  "--intentionallyNotExported",
-  "TypeMapCb",
-  "--skipErrorChecking",
-];
 
 function listFiles(directory: string, relativeDirectory = ""): string[] {
   if (!fs.existsSync(directory)) return [];
@@ -168,13 +139,4 @@ export function getDocumentationGitStatus(
   };
 }
 
-/** Compiles TypeDoc into an explicit destination rather than the workspace docs directory. */
-export function compileDocumentation(
-  workspaceRoot: string,
-  outputDirectory: string
-): void {
-  execFileSync("npx", [...typedocArguments, "--out", outputDirectory], {
-    cwd: workspaceRoot,
-    stdio: "inherit",
-  });
-}
+export { compileDocumentation };
