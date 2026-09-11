@@ -6,7 +6,7 @@
 
 # Class: WorkingWithDuckEngine
 
-Defined in: [lib/working-with-duck-engine.ts:2770](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2770)
+Defined in: [lib/working-with-duck-engine.ts:2783](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2783)
 
 Base abstract class and typed EventBus for all headless arcade game engines.
 Zero framework dependencies. Testable in pure Node.js/Vitest.
@@ -21,7 +21,7 @@ Zero framework dependencies. Testable in pure Node.js/Vitest.
 
 > **new WorkingWithDuckEngine**(`level?`, `mode?`): `WorkingWithDuckEngine`
 
-Defined in: [lib/working-with-duck-engine.ts:2774](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2774)
+Defined in: [lib/working-with-duck-engine.ts:2787](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2787)
 
 #### Parameters
 
@@ -71,7 +71,7 @@ Defined in: [lib/arcade/core/engine.ts:7](https://github.com/fderuiter/portfolio
 
 > **createSnapshot**(): [`WorkingWithDuckSnapshot`](../interfaces/WorkingWithDuckSnapshot.md)
 
-Defined in: [lib/working-with-duck-engine.ts:2818](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2818)
+Defined in: [lib/working-with-duck-engine.ts:2831](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2831)
 
 Generates a fresh immutable state snapshot.
 
@@ -160,7 +160,7 @@ Reference is preserved until notifySubscribers() is explicitly called.
 
 > **init**(): `void`
 
-Defined in: [lib/working-with-duck-engine.ts:2778](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2778)
+Defined in: [lib/working-with-duck-engine.ts:2791](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2791)
 
 Initializes engine resources, object pools, and audio bindings.
 
@@ -248,7 +248,7 @@ Subscribes to a typed one-shot action event (e.g. sfx, haptic, screen shake).
 
 > **performTrick**(`trick`): `void`
 
-Defined in: [lib/working-with-duck-engine.ts:2782](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2782)
+Defined in: [lib/working-with-duck-engine.ts:2795](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2795)
 
 #### Parameters
 
@@ -266,7 +266,7 @@ Defined in: [lib/working-with-duck-engine.ts:2782](https://github.com/fderuiter/
 
 > **render**(`ctx`, `_alpha`): `void`
 
-Defined in: [lib/working-with-duck-engine.ts:2806](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2806)
+Defined in: [lib/working-with-duck-engine.ts:2819](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2819)
 
 Renders in-world graphics to the 2D canvas with sub-frame alpha interpolation.
 
@@ -350,7 +350,7 @@ Subscribes a listener to snapshot state updates (React useSyncExternalStore).
 
 > **update**(`dt`): `void`
 
-Defined in: [lib/working-with-duck-engine.ts:2791](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2791)
+Defined in: [lib/working-with-duck-engine.ts:2804](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2804)
 
 Advances deterministic simulation physics by fixed delta time dt (in seconds).
 

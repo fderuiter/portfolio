@@ -8,7 +8,7 @@
 
 > **jumpParkHurdle**(`state`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:2473](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2473)
+Defined in: [lib/working-with-duck-engine.ts:2480](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2480)
 
 ## Parameters
 

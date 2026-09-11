@@ -8,7 +8,7 @@
 
 > **performTrick**(`state`, `trick`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:1498](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1498)
+Defined in: [lib/working-with-duck-engine.ts:1505](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1505)
 
 Player Action: Perform Puppy Training Trick (Sit, High Five, Drop It, Spin)
 

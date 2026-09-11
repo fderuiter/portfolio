@@ -528,7 +528,8 @@ export function clampBounds(x: number, y: number): { x: number; y: number } {
 export function createInitialDuckGameState(
   level = 1,
   mode: "campaign" | "endless" = "campaign",
-  preservedAccessories: DuckAccessory[] = ["none", "bucket-hat"]
+  preservedAccessories: DuckAccessory[] = ["none", "bucket-hat"],
+  preservedFacts: number[] = [1]
 ): WorkingWithDuckState {
   const sprint = SPRINTS.find((s) => s.level === level) || SPRINTS[0];
 
@@ -674,7 +675,13 @@ export function createInitialDuckGameState(
       timer: 0,
     },
 
-    unlockedFacts: [1],
+    unlockedFacts: Array.from(
+      new Set<number>(
+        [1, ...preservedFacts].filter((id) =>
+          DUCK_FACTS.some((fact) => fact.id === id)
+        )
+      )
+    ),
     latestUnlockedFact: null,
     highScore: 0,
     activeSkillToast: null,
@@ -2735,11 +2742,17 @@ export function advanceToNextLevel(
   const nextLevel = state.currentLevel + 1;
   const isComplete = nextLevel > SPRINTS.length;
   const nextState = isComplete
-    ? createInitialDuckGameState(5, "endless", state.unlockedAccessories)
+    ? createInitialDuckGameState(
+        5,
+        "endless",
+        state.unlockedAccessories,
+        state.unlockedFacts
+      )
     : createInitialDuckGameState(
         nextLevel,
         "campaign",
-        state.unlockedAccessories
+        state.unlockedAccessories,
+        state.unlockedFacts
       );
 
   // Progression must resume simulation immediately: callers advance from a

@@ -110,6 +110,33 @@ const getHighScoreSnapshot = () => {
 
 const getServerSnapshot = () => "0";
 
+// Validates and loads previously earned scrapbook unlocks before any
+// initial persistence write, so a corrupted/missing/inaccessible entry
+// can never silently replace valid saved progress with the [1] default
+// (#599). Unknown or malformed ids are dropped rather than crashing play;
+// createInitialDuckGameState re-validates against DUCK_FACTS and always
+// includes the baseline id 1.
+const getStoredUnlockedFacts = (): number[] => {
+  if (typeof window === "undefined") return [1];
+  try {
+    if (
+      !window.localStorage ||
+      typeof window.localStorage.getItem !== "function"
+    ) {
+      return [1];
+    }
+    const raw = window.localStorage.getItem("working_with_duck_unlocked_facts");
+    if (!raw) return [1];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [1];
+    return parsed.filter(
+      (id): id is number => typeof id === "number" && Number.isInteger(id)
+    );
+  } catch {
+    return [1];
+  }
+};
+
 // --- Pure Drawing Helpers Outside Component ---
 
 function drawAccessories(
@@ -1609,11 +1636,21 @@ export const WorkingWithDuck: React.FC = () => {
 
   // Core Game State Ref for 60 FPS deterministic engine
   const gameStateRef = useRef<WorkingWithDuckState>(
-    createInitialDuckGameState(1, "campaign")
+    createInitialDuckGameState(
+      1,
+      "campaign",
+      undefined,
+      getStoredUnlockedFacts()
+    )
   );
   // UI React State for rendering HUD, modals, and overlays
   const [uiState, setUiState] = useState<WorkingWithDuckState>(() =>
-    createInitialDuckGameState(1, "campaign")
+    createInitialDuckGameState(
+      1,
+      "campaign",
+      undefined,
+      getStoredUnlockedFacts()
+    )
   );
   const [isScrapbookOpen, setIsScrapbookOpen] = useState(false);
   const [isWardrobeOpen, setIsWardrobeOpen] = useState(false);
@@ -1644,7 +1681,9 @@ export const WorkingWithDuck: React.FC = () => {
       onEscape: () => {
         gameStateRef.current = createInitialDuckGameState(
           uiState.currentLevel,
-          uiState.mode
+          uiState.mode,
+          undefined,
+          uiState.unlockedFacts
         );
         gameStateRef.current.status = "running";
         setUiState({ ...gameStateRef.current });
@@ -3769,7 +3808,9 @@ export const WorkingWithDuck: React.FC = () => {
               onClick={() => {
                 gameStateRef.current = createInitialDuckGameState(
                   uiState.currentLevel,
-                  uiState.mode
+                  uiState.mode,
+                  undefined,
+                  uiState.unlockedFacts
                 );
                 gameStateRef.current.status = "running";
                 setUiState({ ...gameStateRef.current });
