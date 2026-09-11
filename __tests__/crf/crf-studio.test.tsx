@@ -9,16 +9,41 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
-// Statically import components to put in global mock registry
-import { VisitMatrixEditor } from "@/components/crf/Modes/VisitMatrixEditor";
-import { RuleGraphStudio } from "@/components/crf/Modes/RuleGraphStudio";
-import { LiveEdcSimulator } from "@/components/crf/Modes/LiveEdcSimulator";
-import { WorkflowWizardModal } from "@/components/crf/Wizard/WorkflowWizardModal";
-import { AcrfOverlayViewer } from "@/components/crf/Modes/AcrfOverlayViewer";
-import { ExportImportModal } from "@/components/crf/Modes/ExportImportModal";
-import { BrandingConfigModal } from "@/components/crf/Branding/BrandingConfigModal";
-import { DiagnosticsDrawer } from "@/components/crf/DiagnosticsDrawer";
-import { SpotlightTourOverlay } from "@/components/crf/Wizard/SpotlightTourOverlay";
+/**
+ * This file tests CRFStudioContainer's own tab-routing and preset-switching
+ * orchestration, not each lazily-loaded panel's internals — those already
+ * have dedicated real-component coverage elsewhere (rule-graph-studio.test.tsx,
+ * live-edc-simulation.test.tsx, branding-modal.test.tsx, workflow-wizard.test.tsx,
+ * diagnostics-drawer.test.tsx, export-statistical-modal.test.tsx). Mounting
+ * all nine real panels here paid their full AST/DAG/canvas setup cost on
+ * every test and intermittently exceeded the timeout under full-suite CPU
+ * contention (#651) despite finishing in well under a second in isolation.
+ * These stubs render only the heading text this file asserts on, so the
+ * container's own routing logic stays fully exercised without the redundant
+ * real-panel cost.
+ */
+const VisitMatrixEditor = () => (
+  <div>Protocol Visit Schedule Matrix (Schedule of Assessments)</div>
+);
+const RuleGraphStudio = () => (
+  <div>Logic Dependency DAG &amp; AST Rule Studio</div>
+);
+const LiveEdcSimulator = () => (
+  <div>Live 21 CFR Part 11 EDC Simulation Mode</div>
+);
+const AcrfOverlayViewer = () => (
+  <div>Visual Annotated CRF (aCRF) Submission Studio</div>
+);
+const ExportImportModal = () => (
+  <div>CDISC Standards &amp; Interoperability Exporter</div>
+);
+// Unasserted-on in this file; the real components early-return null when
+// closed (the state these tests always leave them in), so a null stub is
+// behaviorally equivalent here and skips their import/transform cost too.
+const WorkflowWizardModal = () => null;
+const BrandingConfigModal = () => null;
+const DiagnosticsDrawer = () => null;
+const SpotlightTourOverlay = () => null;
 
 (globalThis as any).mockComponents = {
   VisitMatrixEditor,
