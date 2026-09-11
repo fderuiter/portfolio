@@ -83,6 +83,7 @@
 - [rinseBathtub](functions/rinseBathtub.md)
 - [scrubBathtub](functions/scrubBathtub.md)
 - [scrubBelly](functions/scrubBelly.md)
+- [shouldSyncDuckHudState](functions/shouldSyncDuckHudState.md)
 - [startDraggingDuck](functions/startDraggingDuck.md)
 - [steerParkDuck](functions/steerParkDuck.md)
 - [stepBathtubGame](functions/stepBathtubGame.md)

@@ -696,6 +696,22 @@ export function calculateGoodBoyMultiplier(naughtyVsGood: number): number {
 }
 
 /**
+ * Decide whether a stepped state should be flushed to React UI state.
+ *
+ * The canvas game loop steps the engine at 60 FPS but only syncs the
+ * throttled React `uiState` on every 4th tick for DOM performance. Terminal
+ * transitions (win/fail) must always flush immediately regardless of tick
+ * remainder, otherwise `stepDuckGame` stops advancing (status is no longer
+ * "running") while `uiState` is left showing the last throttled frame,
+ * silently hiding the victory/failure panel.
+ */
+export function shouldSyncDuckHudState(
+  nextState: WorkingWithDuckState
+): boolean {
+  return nextState.ticks % 4 === 0 || nextState.status !== "running";
+}
+
+/**
  * Deterministic Game Step Loop (60 FPS)
  */
 export function stepDuckGame(
@@ -2718,14 +2734,18 @@ export function advanceToNextLevel(
 ): WorkingWithDuckState {
   const nextLevel = state.currentLevel + 1;
   const isComplete = nextLevel > SPRINTS.length;
-  if (isComplete) {
-    return createInitialDuckGameState(5, "endless", state.unlockedAccessories);
-  }
-  return createInitialDuckGameState(
-    nextLevel,
-    "campaign",
-    state.unlockedAccessories
-  );
+  const nextState = isComplete
+    ? createInitialDuckGameState(5, "endless", state.unlockedAccessories)
+    : createInitialDuckGameState(
+        nextLevel,
+        "campaign",
+        state.unlockedAccessories
+      );
+
+  // Progression must resume simulation immediately: callers advance from a
+  // terminal "won" state and rely on this returning a "running" state so the
+  // next tick actually progresses instead of sitting idle.
+  return { ...nextState, status: "running" };
 }
 
 import { ArcadeEngine } from "@/lib/arcade/core/engine";

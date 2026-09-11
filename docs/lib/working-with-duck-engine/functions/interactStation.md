@@ -8,7 +8,7 @@
 
 > **interactStation**(`state`, `stationId`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:1662](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1662)
+Defined in: [lib/working-with-duck-engine.ts:1678](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1678)
 
 Player Action: Interact with Office Station (Water Bowl, Food Bowl, Dog Bed)
 

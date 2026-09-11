@@ -8,7 +8,7 @@
 
 > **exitDogPark**(`state`, `isSuccess`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:2664](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2664)
+Defined in: [lib/working-with-duck-engine.ts:2680](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2680)
 
 ## Parameters
 
