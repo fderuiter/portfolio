@@ -43,6 +43,8 @@ import {
   dragDuckTo,
   stepDuckGame,
   performTrick,
+  advanceToNextLevel,
+  shouldSyncDuckHudState,
 } from "@/lib/working-with-duck-engine";
 import { sanitizeError, sanitizeString } from "@/lib/error-sanitization";
 import { evaluateCanaryRollout } from "@/scripts/canary-analyzer";
@@ -351,6 +353,57 @@ describe("Defect Remediation & Regression Verification Suite (Invariant #11)", (
 
       const trickState = performTrick(state, "SIT");
       expect(trickState.duck.state).toBe("PERFORMING_TRICK");
+    });
+
+    it("advanceToNextLevel resumes a running simulation instead of leaving the next sprint idle (#598 D02)", () => {
+      // Pre-fix, advanceToNextLevel delegated to createInitialDuckGameState,
+      // whose default "idle" status made stepDuckGame's `status !== "running"`
+      // guard silently discard every subsequent tick after Proceed/Retry.
+      let state = createInitialDuckGameState(1, "campaign");
+      state = { ...state, status: "won" };
+
+      const advanced = advanceToNextLevel(state);
+      expect(advanced.status).toBe("running");
+
+      const stepped = stepDuckGame(advanced);
+      expect(stepped.ticks).toBe(1);
+      expect(stepped.workProgress).toBeGreaterThan(0);
+
+      // The final-sprint-to-endless handoff shares the same code path.
+      const endless = advanceToNextLevel({
+        ...advanced,
+        currentLevel: 5,
+        status: "won",
+      });
+      expect(endless.mode).toBe("endless");
+      expect(endless.status).toBe("running");
+      expect(stepDuckGame(endless).ticks).toBe(1);
+    });
+
+    it("shouldSyncDuckHudState always flushes terminal win/fail frames regardless of tick remainder (#598 D01)", () => {
+      // Pre-fix, the component's canvas loop only synced React UI state every
+      // 4th tick, so a win/fail landing on remainder 1-3 never rendered its
+      // victory/failure panel even though the engine had already terminated.
+      for (let remainder = 0; remainder < 4; remainder++) {
+        const running = {
+          ...createInitialDuckGameState(1, "campaign"),
+          status: "running" as const,
+          ticks: remainder,
+        };
+        expect(shouldSyncDuckHudState({ ...running, status: "won" })).toBe(
+          true
+        );
+        expect(shouldSyncDuckHudState({ ...running, status: "failed" })).toBe(
+          true
+        );
+      }
+      expect(
+        shouldSyncDuckHudState({
+          ...createInitialDuckGameState(1, "campaign"),
+          status: "running",
+          ticks: 1,
+        })
+      ).toBe(false);
     });
   });
 
