@@ -45,15 +45,30 @@ export function ProofWorkspaceSkeleton() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-200 text-xs font-semibold min-h-[48px]">
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-200 text-xs font-semibold min-h-[48px] opacity-60 cursor-not-allowed"
+            >
               <IconLink className="w-4 h-4 text-brand-cyan" />
               Share
             </button>
-            <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-brand-purple/40 bg-brand-purple/10 text-brand-purple text-xs font-semibold min-h-[48px]">
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-brand-purple/40 bg-brand-purple/10 text-brand-purple text-xs font-semibold min-h-[48px] opacity-60 cursor-not-allowed"
+            >
               <IconPlus className="w-4 h-4" />
               Custom Studio
             </button>
-            <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-200 text-xs font-semibold min-h-[48px]">
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/80 text-slate-200 text-xs font-semibold min-h-[48px] opacity-60 cursor-not-allowed"
+            >
               <IconDownload className="w-4 h-4" />
               Export
             </button>
