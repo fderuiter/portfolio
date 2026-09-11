@@ -6,7 +6,7 @@
 
 # Interface: UseFullscreenReturn
 
-Defined in: [hooks/useFullscreen.ts:17](https://github.com/fderuiter/portfolio/blob/main/hooks/useFullscreen.ts#L17)
+Defined in: [hooks/useFullscreen.ts:18](https://github.com/fderuiter/portfolio/blob/main/hooks/useFullscreen.ts#L18)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [hooks/useFullscreen.ts:17](https://github.com/fderuiter/portfolio/b
 
 > **enterFullscreen**: () => `Promise`\<`void`\>
 
-Defined in: [hooks/useFullscreen.ts:21](https://github.com/fderuiter/portfolio/blob/main/hooks/useFullscreen.ts#L21)
+Defined in: [hooks/useFullscreen.ts:22](https://github.com/fderuiter/portfolio/blob/main/hooks/useFullscreen.ts#L22)
 
 #### Returns
 
@@ -26,7 +26,7 @@ Defined in: [hooks/useFullscreen.ts:21](https://github.com/fderuiter/portfolio/b
 
 > **exitFullscreen**: () => `Promise`\<`void`\>
 
-Defined in: [hooks/useFullscreen.ts:22](https://github.com/fderuiter/portfolio/blob/main/hooks/useFullscreen.ts#L22)
+Defined in: [hooks/useFullscreen.ts:23](https://github.com/fderuiter/portfolio/blob/main/hooks/useFullscreen.ts#L23)
 
 #### Returns
 
@@ -38,7 +38,7 @@ Defined in: [hooks/useFullscreen.ts:22](https://github.com/fderuiter/portfolio/b
 
 > **isFullscreen**: `boolean`
 
-Defined in: [hooks/useFullscreen.ts:18](https://github.com/fderuiter/portfolio/blob/main/hooks/useFullscreen.ts#L18)
+Defined in: [hooks/useFullscreen.ts:19](https://github.com/fderuiter/portfolio/blob/main/hooks/useFullscreen.ts#L19)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [hooks/useFullscreen.ts:18](https://github.com/fderuiter/portfolio/b
 
 > **isPseudoFullscreen**: `boolean`
 
-Defined in: [hooks/useFullscreen.ts:19](https://github.com/fderuiter/portfolio/blob/main/hooks/useFullscreen.ts#L19)
+Defined in: [hooks/useFullscreen.ts:20](https://github.com/fderuiter/portfolio/blob/main/hooks/useFullscreen.ts#L20)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [hooks/useFullscreen.ts:19](https://github.com/fderuiter/portfolio/b
 
 > **isSupported**: `boolean`
 
-Defined in: [hooks/useFullscreen.ts:20](https://github.com/fderuiter/portfolio/blob/main/hooks/useFullscreen.ts#L20)
+Defined in: [hooks/useFullscreen.ts:21](https://github.com/fderuiter/portfolio/blob/main/hooks/useFullscreen.ts#L21)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [hooks/useFullscreen.ts:20](https://github.com/fderuiter/portfolio/b
 
 > **toggleFullscreen**: () => `Promise`\<`void`\>
 
-Defined in: [hooks/useFullscreen.ts:23](https://github.com/fderuiter/portfolio/blob/main/hooks/useFullscreen.ts#L23)
+Defined in: [hooks/useFullscreen.ts:24](https://github.com/fderuiter/portfolio/blob/main/hooks/useFullscreen.ts#L24)
 
 #### Returns
 

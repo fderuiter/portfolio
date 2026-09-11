@@ -6,7 +6,7 @@
 
 # Interface: UseFullscreenOptions
 
-Defined in: [hooks/useFullscreen.ts:5](https://github.com/fderuiter/portfolio/blob/main/hooks/useFullscreen.ts#L5)
+Defined in: [hooks/useFullscreen.ts:6](https://github.com/fderuiter/portfolio/blob/main/hooks/useFullscreen.ts#L6)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [hooks/useFullscreen.ts:5](https://github.com/fderuiter/portfolio/bl
 
 > `optional` **enableKeyShortcut?**: `boolean`
 
-Defined in: [hooks/useFullscreen.ts:10](https://github.com/fderuiter/portfolio/blob/main/hooks/useFullscreen.ts#L10)
+Defined in: [hooks/useFullscreen.ts:11](https://github.com/fderuiter/portfolio/blob/main/hooks/useFullscreen.ts#L11)
 
 Whether to enable the 'F' key shortcut to toggle fullscreen when focused or within element.
 Default is true.
@@ -25,7 +25,7 @@ Default is true.
 
 > `optional` **onFullscreenChange?**: (`isFullscreen`) => `void`
 
-Defined in: [hooks/useFullscreen.ts:14](https://github.com/fderuiter/portfolio/blob/main/hooks/useFullscreen.ts#L14)
+Defined in: [hooks/useFullscreen.ts:15](https://github.com/fderuiter/portfolio/blob/main/hooks/useFullscreen.ts#L15)
 
 Callback invoked when fullscreen status changes.
 
