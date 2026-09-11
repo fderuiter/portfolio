@@ -39,6 +39,10 @@ export function ContactForm({
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const mountedRef = useRef(false);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const subjectInputRef = useRef<HTMLInputElement>(null);
+  const messageInputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (!mountedRef.current) {
@@ -47,7 +51,7 @@ export function ContactForm({
     }
   }, []);
 
-  const validateForm = (): boolean => {
+  const validateForm = (): Record<string, string> => {
     const errors: Record<string, string> = {};
 
     if (!name.trim() || name.trim().length < 2) {
@@ -67,14 +71,29 @@ export function ContactForm({
     }
 
     setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
+    return errors;
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (!validateForm()) {
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      // Move focus to the first invalid field (in visual/DOM order) so
+      // keyboard and screen-reader users are told a submission failed and
+      // where to fix it, instead of focus silently staying on the submit
+      // button with no announcement.
+      const firstInvalidRef = errors.name
+        ? nameInputRef
+        : errors.email
+          ? emailInputRef
+          : errors.subject
+            ? subjectInputRef
+            : errors.message
+              ? messageInputRef
+              : null;
+      firstInvalidRef?.current?.focus();
       return;
     }
 
@@ -224,6 +243,7 @@ export function ContactForm({
             name="name"
             type="text"
             required
+            ref={nameInputRef}
             value={name}
             onChange={(e) => {
               setName(e.target.value);
@@ -265,6 +285,7 @@ export function ContactForm({
             name="email"
             type="email"
             required
+            ref={emailInputRef}
             value={email}
             onChange={(e) => {
               setEmail(e.target.value);
@@ -334,6 +355,7 @@ export function ContactForm({
           name="subject"
           type="text"
           required
+          ref={subjectInputRef}
           value={subject}
           onChange={(e) => {
             setSubject(e.target.value);
@@ -380,6 +402,7 @@ export function ContactForm({
           name="message"
           required
           rows={4}
+          ref={messageInputRef}
           value={message}
           onChange={(e) => {
             setMessage(e.target.value);
