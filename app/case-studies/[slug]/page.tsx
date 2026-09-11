@@ -370,7 +370,7 @@ export default async function CaseStudyPage({ params }: PageProps) {
               }
               backToHub={{
                 title: "View All Case Studies",
-                href: "/#case-studies",
+                href: "/case-studies",
               }}
             />
           )}
