@@ -3677,6 +3677,9 @@ export const WorkingWithDuck: React.FC = () => {
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 z-50 animate-fadeIn">
           <div
             ref={winTrapRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="duck-win-dialog-heading"
             className="max-w-lg w-full max-h-[90dvh] overflow-y-auto rounded-3xl border border-brand-cyan/40 bg-zinc-950 p-4 sm:p-8 shadow-[0_0_50px_rgba(6,182,212,0.2)] text-center font-mono"
           >
             <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 mx-auto flex items-center justify-center mb-3">
@@ -3690,7 +3693,10 @@ export const WorkingWithDuck: React.FC = () => {
               Completed!
             </span>
 
-            <h3 className="text-xl sm:text-2xl font-bold text-white mt-2 sm:mt-3 mb-1 sm:mb-2">
+            <h3
+              id="duck-win-dialog-heading"
+              className="text-xl sm:text-2xl font-bold text-white mt-2 sm:mt-3 mb-1 sm:mb-2"
+            >
               Duck is Asleep &amp; Work is Done! 💤
             </h3>
 
@@ -3790,13 +3796,19 @@ export const WorkingWithDuck: React.FC = () => {
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 z-50 animate-fadeIn">
           <div
             ref={failTrapRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="duck-fail-dialog-heading"
             className="max-w-md w-full max-h-[90dvh] overflow-y-auto rounded-3xl border border-rose-500/40 bg-zinc-950 p-6 sm:p-8 shadow-[0_0_50px_rgba(244,63,94,0.2)] text-center font-mono"
           >
             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 mx-auto flex items-center justify-center mb-4">
               <IconAlertTriangle className="w-7 h-7 sm:w-8 sm:h-8" />
             </div>
 
-            <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
+            <h3
+              id="duck-fail-dialog-heading"
+              className="text-xl sm:text-2xl font-bold text-white mb-2"
+            >
               Duck Got a Time-Out! 🐾
             </h3>
             <p className="text-xs text-zinc-400 leading-relaxed mb-6 font-sans">
@@ -3829,6 +3841,9 @@ export const WorkingWithDuck: React.FC = () => {
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 z-50 animate-fadeIn">
           <div
             ref={wardrobeTrapRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="duck-wardrobe-dialog-heading"
             className="max-w-md w-full max-h-[90dvh] overflow-y-auto rounded-3xl border border-zinc-800 bg-zinc-950 p-4 sm:p-6 font-mono relative"
           >
             <button
@@ -3843,7 +3858,10 @@ export const WorkingWithDuck: React.FC = () => {
                 <IconShirt className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-white">
+                <h3
+                  id="duck-wardrobe-dialog-heading"
+                  className="text-base sm:text-lg font-bold text-white"
+                >
                   Duck&apos;s Wardrobe
                 </h3>
                 <p className="text-[11px] sm:text-xs text-zinc-400">
@@ -3945,6 +3963,9 @@ export const WorkingWithDuck: React.FC = () => {
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 z-50 animate-fadeIn">
           <div
             ref={scrapbookTrapRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="duck-scrapbook-dialog-heading"
             className="max-w-xl w-full max-h-[90dvh] overflow-y-auto rounded-3xl border border-zinc-800 bg-zinc-950 p-4 sm:p-8 font-mono relative"
           >
             <button
@@ -3960,7 +3981,10 @@ export const WorkingWithDuck: React.FC = () => {
                   <IconBook className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base sm:text-lg font-bold text-white">
+                  <h3
+                    id="duck-scrapbook-dialog-heading"
+                    className="text-base sm:text-lg font-bold text-white"
+                  >
                     Duck&apos;s Polaroid Scrapbook
                   </h3>
                   <p className="text-[11px] sm:text-xs text-zinc-400">

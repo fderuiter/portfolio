@@ -24,17 +24,33 @@ export interface UseFocusTrapOptions {
   onKeyDown?: (event: KeyboardEvent) => void;
 }
 
+// Module-level count of currently-active focus traps across the whole page
+// (a dialog, drawer, or overlay is "active" while its trap is mounted and
+// trapping focus). Consulted by other window-level keydown listeners (e.g.
+// useFullscreen's Escape-to-exit-pseudo-fullscreen shortcut) that would
+// otherwise fire alongside a dialog's own Escape handler on the same
+// keypress: native addEventListener does not let stopPropagation cancel
+// sibling listeners already registered on the same target, so a shared
+// "is any dialog currently open" signal is the only reliable way to give
+// the topmost dialog exclusive ownership of Escape.
+let activeFocusTrapCount = 0;
+
+/** True while at least one useFocusTrap instance is currently active. */
+export function isAnyFocusTrapActive(): boolean {
+  return activeFocusTrapCount > 0;
+}
+
 const FOCUSABLE_SELECTOR = [
-  'a[href]',
-  'button:not([disabled])',
-  'input:not([disabled])',
-  'select:not([disabled])',
-  'textarea:not([disabled])',
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
   '[tabindex]:not([tabindex="-1"])',
-  'audio[controls]',
-  'video[controls]',
-  '[contenteditable]:not([contenteditable="false"])'
-].join(', ');
+  "audio[controls]",
+  "video[controls]",
+  '[contenteditable]:not([contenteditable="false"])',
+].join(", ");
 
 /**
  * Custom hook to trap keyboard focus within a container element for modal dialogs and drawers.
@@ -67,6 +83,13 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(
 
       if (event.key === "Escape" && onEscapeRef.current) {
         event.preventDefault();
+        // stopPropagation alone only stops the event reaching other DOM
+        // nodes; sibling listeners already registered on this same target
+        // (window) still fire. stopImmediatePropagation additionally
+        // suppresses those, giving this dialog exclusive ownership of the
+        // keypress instead of also triggering e.g. a fullscreen-exit
+        // shortcut listening on the same target.
+        event.stopImmediatePropagation();
         event.stopPropagation();
         onEscapeRef.current();
         return;
@@ -89,7 +112,9 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(
         (el) =>
           !el.hasAttribute("disabled") &&
           el.getAttribute("aria-hidden") !== "true" &&
-          (el.offsetParent !== null || typeof env.VITEST !== "undefined" || el.style.display !== "none")
+          (el.offsetParent !== null ||
+            typeof env.VITEST !== "undefined" ||
+            el.style.display !== "none")
       );
 
       if (focusableElements.length === 0) {
@@ -103,13 +128,19 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(
 
       if (event.shiftKey) {
         // Shift + Tab: if on first element or outside, move to last
-        if (currentActive === firstElement || !container.contains(currentActive)) {
+        if (
+          currentActive === firstElement ||
+          !container.contains(currentActive)
+        ) {
           event.preventDefault();
           lastElement.focus();
         }
       } else {
         // Tab: if on last element or outside, move to first
-        if (currentActive === lastElement || !container.contains(currentActive)) {
+        if (
+          currentActive === lastElement ||
+          !container.contains(currentActive)
+        ) {
           event.preventDefault();
           firstElement.focus();
         }
@@ -121,15 +152,19 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(
   useEffect(() => {
     if (!active) return;
 
+    activeFocusTrapCount++;
+
     if (typeof document !== "undefined") {
-      previousActiveElementRef.current = document.activeElement as HTMLElement | null;
+      previousActiveElementRef.current =
+        document.activeElement as HTMLElement | null;
     }
 
     const timer = setTimeout(() => {
       if (initialFocusRef?.current) {
         initialFocusRef.current.focus();
       } else if (containerRef.current) {
-        const firstFocusable = containerRef.current.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+        const firstFocusable =
+          containerRef.current.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
         if (firstFocusable) {
           firstFocusable.focus();
         } else {
@@ -143,6 +178,7 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(
     }
 
     return () => {
+      activeFocusTrapCount = Math.max(0, activeFocusTrapCount - 1);
       clearTimeout(timer);
       if (typeof window !== "undefined") {
         window.removeEventListener("keydown", handleKeyDown);

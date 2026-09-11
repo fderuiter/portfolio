@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, RefObject } from "react";
+import { isAnyFocusTrapActive } from "./useFocusTrap";
 
 export interface UseFullscreenOptions {
   /**
@@ -60,8 +61,12 @@ export function useFullscreen(
     if (typeof document === "undefined") return;
     const doc = document as WebKitDocument;
     const fsElement = doc.fullscreenElement || doc.webkitFullscreenElement;
-    const active = !!fsElement && (!targetRef.current || fsElement === targetRef.current || targetRef.current.contains(fsElement));
-    
+    const active =
+      !!fsElement &&
+      (!targetRef.current ||
+        fsElement === targetRef.current ||
+        targetRef.current.contains(fsElement));
+
     setIsFullscreen(active);
     if (active) {
       setIsPseudoFullscreen(false);
@@ -77,7 +82,10 @@ export function useFullscreen(
 
     return () => {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
-      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+      document.removeEventListener(
+        "webkitfullscreenchange",
+        handleFullscreenChange
+      );
     };
   }, [handleFullscreenChange]);
 
@@ -118,9 +126,15 @@ export function useFullscreen(
     }
 
     try {
-      if (doc.exitFullscreen && (doc.fullscreenElement || doc.webkitFullscreenElement)) {
+      if (
+        doc.exitFullscreen &&
+        (doc.fullscreenElement || doc.webkitFullscreenElement)
+      ) {
         await doc.exitFullscreen();
-      } else if (doc.webkitExitFullscreen && (doc.fullscreenElement || doc.webkitFullscreenElement)) {
+      } else if (
+        doc.webkitExitFullscreen &&
+        (doc.fullscreenElement || doc.webkitFullscreenElement)
+      ) {
         await doc.webkitExitFullscreen();
       } else {
         setIsPseudoFullscreen(false);
@@ -150,7 +164,12 @@ export function useFullscreen(
       // Don't intercept if typing in an input, textarea, contentEditable, or inside an external keyboard boundary
       const target = e.target as HTMLElement;
       const el = targetRef.current;
-      const isWithin = !!(el && target && target instanceof Node && el.contains(target));
+      const isWithin = !!(
+        el &&
+        target &&
+        target instanceof Node &&
+        el.contains(target)
+      );
       if (
         target &&
         (target.tagName === "INPUT" ||
@@ -164,13 +183,36 @@ export function useFullscreen(
       if (e.key === "f" || e.key === "F") {
         // Check if event occurred within target or target is active/focused
         const el = targetRef.current;
-        const isWithin = !!(el && target && target instanceof Node && el.contains(target));
-        const isWindowOrDoc = (target as EventTarget | null) === window || (target as EventTarget | null) === document || target === document.body;
-        if (el && (isWithin || document.activeElement === el || isFullscreen || isWindowOrDoc || !target)) {
+        const isWithin = !!(
+          el &&
+          target &&
+          target instanceof Node &&
+          el.contains(target)
+        );
+        const isWindowOrDoc =
+          (target as EventTarget | null) === window ||
+          (target as EventTarget | null) === document ||
+          target === document.body;
+        if (
+          el &&
+          (isWithin ||
+            document.activeElement === el ||
+            isFullscreen ||
+            isWindowOrDoc ||
+            !target)
+        ) {
           e.preventDefault();
           void toggleFullscreen();
         }
       } else if (e.key === "Escape" && isPseudoFullscreen) {
+        // The topmost open dialog (win/fail panel, wardrobe, scrapbook,
+        // etc.) owns Escape while it's open: dismiss it first and leave
+        // the cabinet in fullscreen, so a second, subsequent Escape is
+        // needed to exit fullscreen. useFocusTrap's own handler normally
+        // suppresses this listener outright via stopImmediatePropagation
+        // when it runs first; this guard covers the case where a trap's
+        // listener is still attached but this one fires first.
+        if (isAnyFocusTrapActive()) return;
         e.preventDefault();
         void exitFullscreen();
       }
@@ -178,7 +220,14 @@ export function useFullscreen(
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [enableKeyShortcut, targetRef, isFullscreen, isPseudoFullscreen, toggleFullscreen, exitFullscreen]);
+  }, [
+    enableKeyShortcut,
+    targetRef,
+    isFullscreen,
+    isPseudoFullscreen,
+    toggleFullscreen,
+    exitFullscreen,
+  ]);
 
   return {
     isFullscreen: isFullscreen || isPseudoFullscreen,

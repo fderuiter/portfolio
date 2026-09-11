@@ -12,4 +12,5 @@
 
 ## Functions
 
+- [isAnyFocusTrapActive](functions/isAnyFocusTrapActive.md)
 - [useFocusTrap](functions/useFocusTrap.md)
