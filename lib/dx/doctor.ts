@@ -1727,8 +1727,25 @@ export function checkModuleBoundaries(root: string): DiagnosticCheckResult {
   }
 }
 
+// A class that provably renders below 48px (e.g. h-10 = 40px, h-11 = 44px)
+// must never be treated as compliant below, even though it also matches the
+// loose "has some sizing utility" pattern.
+const SUB_48PX_SIZE_PATTERN = /\b(h-10|w-10|h-11|w-11|size-10|size-11)\b/;
+
 /**
  * Check Minimum Touch Target Dimensions Guard (ADR-0003 & ADR-0019)
+ *
+ * IMPORTANT: this is a static source-text heuristic only. It scans JSX for
+ * className tokens that are *known* to render at a particular pixel size;
+ * it never renders anything and cannot see the real, computed box a
+ * control occupies (content-driven padding, inherited styles, responsive
+ * overrides, etc. are all invisible to it). A "pass" here means "no
+ * obviously undersized class name was found in source" — it is NOT proof
+ * that every interactive control satisfies the 48px standard on real
+ * rendered output. Rendered-dimension proof comes from the real-browser
+ * assertions in `__tests__/e2e/touch-controls.spec.ts`
+ * ("Real rendered touch-target dimensions" suite), which measure actual
+ * `getBoundingClientRect()` output across viewports.
  */
 export function checkTouchTargetDimensions(
   root: string,
@@ -1755,12 +1772,18 @@ export function checkTouchTargetDimensions(
         (/<button\b/.test(line) || /role=["']button["']/.test(line)) &&
         !/aria-hidden=["']true["']/.test(line)
       ) {
+        // A class that provably renders below 48px (e.g. h-10 = 40px,
+        // h-11 = 44px) must never be treated as compliant, even though it
+        // also matches the loose "has some sizing utility" patterns below.
+        const hasSub48pxOverride = SUB_48PX_SIZE_PATTERN.test(line);
+
         const hasTouchSizing =
-          /\b(min-h-\[48px\]|min-w-\[48px\]|h-12|w-12|min-h-12|min-w-12|p-3|p-4|p-5|py-3|py-4|px-4|px-5|min-h-|min-w-|touch-|h-11|w-11|h-10|w-10)\b/.test(
+          !hasSub48pxOverride &&
+          (/\b(min-h-\[48px\]|min-w-\[48px\]|h-12|w-12|min-h-12|min-w-12|p-3|p-4|p-5|py-3|py-4|px-4|px-5|min-h-|min-w-|touch-)\b/.test(
             line
           ) ||
-          /minHeight:\s*48|minWidth:\s*48|48px/.test(line) ||
-          !/className=/.test(line);
+            /minHeight:\s*48|minWidth:\s*48|48px/.test(line) ||
+            (!hasSub48pxOverride && !/className=/.test(line)));
 
         if (!hasTouchSizing) {
           violations.push({
@@ -1805,7 +1828,7 @@ export function checkTouchTargetDimensions(
       category: "accessibility",
       status: "pass",
       message:
-        "All interactive touch controls and UI buttons satisfy minimum 48px touch target dimension standards.",
+        "No obviously undersized touch-target class names found in source (static heuristic; does not measure rendered output). Rendered-dimension compliance is verified separately by the real-browser assertions in __tests__/e2e/touch-controls.spec.ts.",
     };
   }
 

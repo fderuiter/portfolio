@@ -512,6 +512,62 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       );
       expect(updated).toContain("min-h-[48px]");
     });
+
+    it("does not claim universal rendered compliance in its pass message (static heuristic disclaimer)", () => {
+      const compDir = path.join(tempDir, "components");
+      fs.mkdirSync(compDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(compDir, "ValidButton.tsx"),
+        'export function ValidButton() { return <button className="min-h-[48px] min-w-[48px]">Click</button>; }'
+      );
+
+      const result = checkTouchTargetDimensions(tempDir, false);
+      expect(result.status).toBe("pass");
+      // Must not claim every control "satisfies" the standard on rendered
+      // output -- this is a source-text heuristic, not a browser measurement.
+      expect(result.message.toLowerCase()).not.toContain("all interactive");
+      expect(result.message.toLowerCase()).toContain("static heuristic");
+      expect(result.message).toContain("touch-controls.spec.ts");
+    });
+
+    it("counterexample: fails a 40px button (h-10) even though it also carries other loosely-matched utilities", () => {
+      const compDir = path.join(tempDir, "components");
+      fs.mkdirSync(compDir, { recursive: true });
+      // h-10 = 2.5rem = 40px, below the 48px standard. Regression coverage
+      // for a real bug where h-10/h-11/w-10/w-11 (40px/44px) were previously
+      // accepted as if they satisfied the 48px minimum.
+      fs.writeFileSync(
+        path.join(compDir, "FortyPxButton.tsx"),
+        'export function FortyPxButton() { return <button className="h-10 w-10 flex items-center justify-center">X</button>; }'
+      );
+
+      const result = checkTouchTargetDimensions(tempDir, false);
+      expect(result.status).toBe("fail");
+    });
+
+    it("counterexample: fails a 44px button (h-11)", () => {
+      const compDir = path.join(tempDir, "components");
+      fs.mkdirSync(compDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(compDir, "FortyFourPxButton.tsx"),
+        'export function FortyFourPxButton() { return <button className="h-11 w-11">X</button>; }'
+      );
+
+      const result = checkTouchTargetDimensions(tempDir, false);
+      expect(result.status).toBe("fail");
+    });
+
+    it("passes a control that genuinely declares 48px dimensions", () => {
+      const compDir = path.join(tempDir, "components");
+      fs.mkdirSync(compDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(compDir, "FortyEightPxButton.tsx"),
+        'export function FortyEightPxButton() { return <button className="h-12 w-12">X</button>; }'
+      );
+
+      const result = checkTouchTargetDimensions(tempDir, false);
+      expect(result.status).toBe("pass");
+    });
   });
 
   describe("checkSectionStructures (ADR-0009 & ADR-0023)", () => {

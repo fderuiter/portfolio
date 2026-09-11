@@ -888,7 +888,7 @@ export const Navbar: React.FC = () => {
             <button
               type="button"
               onClick={openSearch}
-              className="flex items-center justify-center min-w-11 min-h-11 rounded-xl border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-brand-cyan transition-colors cursor-pointer"
+              className="flex items-center justify-center min-w-12 min-h-12 rounded-xl border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-brand-cyan transition-colors cursor-pointer"
               aria-label="Open Command Search"
             >
               <IconSearch className="w-4 h-4" />
@@ -904,7 +904,7 @@ export const Navbar: React.FC = () => {
                 isOpen ? "Close navigation menu" : "Open navigation menu"
               }
               onClick={() => setIsOpen(!isOpen)}
-              className="flex items-center justify-center min-w-11 min-h-11 rounded-xl border border-zinc-800 bg-zinc-900/60 text-muted hover:text-foreground transition-colors cursor-pointer"
+              className="flex items-center justify-center min-w-12 min-h-12 rounded-xl border border-zinc-800 bg-zinc-900/60 text-muted hover:text-foreground transition-colors cursor-pointer"
             >
               <svg
                 className="w-5 h-5 fill-current"

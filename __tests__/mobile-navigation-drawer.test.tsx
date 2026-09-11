@@ -289,7 +289,7 @@ describe("Mobile Navigation Drawer & Touch Interaction Suite", () => {
     expect(drawer?.querySelector('a[href="/simulator"]')).toBeNull();
   });
 
-  it("sizes the mobile search and hamburger triggers to at least a 44x44 CSS px touch target", async () => {
+  it("sizes the mobile search and hamburger triggers to at least the repository's 48x48 CSS px touch target standard (ADR-0003/ADR-0019)", async () => {
     await act(async () => {
       root.render(<Navbar />);
     });
@@ -301,10 +301,17 @@ describe("Mobile Navigation Drawer & Touch Interaction Suite", () => {
       'button[aria-controls="mobile-navigation"]'
     ) as HTMLButtonElement;
 
-    expect(searchBtn.className).toMatch(/min-w-11/);
-    expect(searchBtn.className).toMatch(/min-h-11/);
-    expect(hamburgerBtn.className).toMatch(/min-w-11/);
-    expect(hamburgerBtn.className).toMatch(/min-h-11/);
+    // min-w-11/min-h-11 (44px) previously passed here, but the repository's
+    // documented touch-target standard is 48px (ADR-0003, ADR-0019); a real
+    // rendered-dimension audit measured these two controls at 44x44.
+    expect(searchBtn.className).not.toMatch(/\bmin-w-11\b/);
+    expect(searchBtn.className).not.toMatch(/\bmin-h-11\b/);
+    expect(searchBtn.className).toMatch(/min-w-12/);
+    expect(searchBtn.className).toMatch(/min-h-12/);
+    expect(hamburgerBtn.className).not.toMatch(/\bmin-w-11\b/);
+    expect(hamburgerBtn.className).not.toMatch(/\bmin-h-11\b/);
+    expect(hamburgerBtn.className).toMatch(/min-w-12/);
+    expect(hamburgerBtn.className).toMatch(/min-h-12/);
   });
 
   it("dismisses drawer when tapping the backdrop container directly", async () => {
