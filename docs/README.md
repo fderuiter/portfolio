@@ -140,12 +140,13 @@ Or follow manual setup steps:
    ```
 
 3. **Initialize Database & Prisma Client**
-   Generate the Prisma client and push the schema to your database:
+   `npm install` already generates the Prisma client automatically via a `postinstall` hook, so `npx tsc --noEmit` and other direct type-checks work right after install with no extra step. Push the schema to your database:
 
    ```bash
-   npx prisma generate
    npx prisma db push
    ```
+
+   (Re-running `npx prisma generate` here is harmless if the schema changed since install.)
 
 4. **Seed Database**
    Populate the database with clinical trials and schema engine case studies (with inline Markdown formatting):
