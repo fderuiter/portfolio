@@ -253,6 +253,60 @@ describe("Mobile Navigation Drawer & Touch Interaction Suite", () => {
     expect(document.activeElement).toBe(hamburgerBtn);
   });
 
+  it("includes the Incident Simulator route in the mobile drawer, matching desktop and footer coverage", async () => {
+    mockPersona = "recruiter";
+    await act(async () => {
+      root.render(<Navbar />);
+    });
+
+    const hamburgerBtn = container.querySelector(
+      'button[aria-controls="mobile-navigation"]'
+    ) as HTMLButtonElement;
+    await act(async () => {
+      hamburgerBtn.click();
+    });
+
+    const drawer = document.getElementById("mobile-navigation");
+    const simulatorLink = drawer?.querySelector('a[href="/simulator"]');
+    expect(simulatorLink).toBeTruthy();
+    expect(simulatorLink?.textContent).toContain("Incident Simulator");
+  });
+
+  it("hides the Incident Simulator route in the mobile drawer for the technical persona, matching desktop", async () => {
+    mockPersona = "technical";
+    await act(async () => {
+      root.render(<Navbar />);
+    });
+
+    const hamburgerBtn = container.querySelector(
+      'button[aria-controls="mobile-navigation"]'
+    ) as HTMLButtonElement;
+    await act(async () => {
+      hamburgerBtn.click();
+    });
+
+    const drawer = document.getElementById("mobile-navigation");
+    expect(drawer?.querySelector('a[href="/simulator"]')).toBeNull();
+  });
+
+  it("sizes the mobile search and hamburger triggers to at least a 44x44 CSS px touch target", async () => {
+    await act(async () => {
+      root.render(<Navbar />);
+    });
+
+    const searchBtn = container.querySelector(
+      'button[aria-label="Open Command Search"]'
+    ) as HTMLButtonElement;
+    const hamburgerBtn = container.querySelector(
+      'button[aria-controls="mobile-navigation"]'
+    ) as HTMLButtonElement;
+
+    expect(searchBtn.className).toMatch(/min-w-11/);
+    expect(searchBtn.className).toMatch(/min-h-11/);
+    expect(hamburgerBtn.className).toMatch(/min-w-11/);
+    expect(hamburgerBtn.className).toMatch(/min-h-11/);
+  });
+
   it("dismisses drawer when tapping the backdrop container directly", async () => {
     await act(async () => {
       root.render(<Navbar />);

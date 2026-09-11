@@ -25,6 +25,7 @@ import {
   IconFileSpreadsheet,
   IconBriefcase,
   IconFlame,
+  IconActivity,
 } from "@tabler/icons-react";
 
 interface SubNavItem {
@@ -887,7 +888,7 @@ export const Navbar: React.FC = () => {
             <button
               type="button"
               onClick={openSearch}
-              className="flex items-center justify-center w-9 h-9 rounded-xl border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-brand-cyan transition-colors cursor-pointer"
+              className="flex items-center justify-center min-w-11 min-h-11 rounded-xl border border-zinc-800 bg-zinc-900/60 text-zinc-300 hover:text-brand-cyan transition-colors cursor-pointer"
               aria-label="Open Command Search"
             >
               <IconSearch className="w-4 h-4" />
@@ -903,7 +904,7 @@ export const Navbar: React.FC = () => {
                 isOpen ? "Close navigation menu" : "Open navigation menu"
               }
               onClick={() => setIsOpen(!isOpen)}
-              className="flex items-center justify-center w-9 h-9 rounded-xl border border-zinc-800 bg-zinc-900/60 text-muted hover:text-foreground transition-colors cursor-pointer"
+              className="flex items-center justify-center min-w-11 min-h-11 rounded-xl border border-zinc-800 bg-zinc-900/60 text-muted hover:text-foreground transition-colors cursor-pointer"
             >
               <svg
                 className="w-5 h-5 fill-current"
@@ -1068,6 +1069,21 @@ export const Navbar: React.FC = () => {
                       Architecture
                     </span>
                   </Link>
+                  {persona !== "technical" && (
+                    <Link
+                      href="/simulator"
+                      onClick={(e) => handleNavClick(e, "/simulator")}
+                      className="min-h-[48px] px-3.5 py-3 rounded-xl bg-zinc-900/40 border border-zinc-800/80 text-sm font-semibold text-neutral-200 hover:text-brand-cyan flex items-center justify-between gap-2 active:scale-[0.99] transition-all min-w-0"
+                    >
+                      <span className="flex items-center gap-2 min-w-0">
+                        <IconActivity className="w-4 h-4 text-brand-cyan shrink-0" />
+                        <span className="truncate">Incident Simulator</span>
+                      </span>
+                      <span className="text-[10px] font-mono text-brand-cyan px-1.5 py-0.5 rounded bg-brand-cyan/10 shrink-0">
+                        Outage Drill
+                      </span>
+                    </Link>
+                  )}
                   <Link
                     href="/arcade"
                     onClick={(e) => handleNavClick(e, "/arcade")}

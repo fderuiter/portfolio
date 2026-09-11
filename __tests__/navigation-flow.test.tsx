@@ -133,6 +133,7 @@ describe("Navigation Flow Components Suite", () => {
 
       // Systems links
       expect(container.textContent).toContain("Proof Workspace");
+      expect(container.textContent).toContain("NeuroRecon Studio");
       expect(container.textContent).toContain("Incident Simulator");
 
       // Connect links & Newsletter
