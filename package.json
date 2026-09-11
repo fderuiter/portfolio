@@ -12,6 +12,7 @@
     "verify": "npx tsx scripts/dx.ts verify",
     "commit": "npx tsx scripts/dx.ts commit",
     "env:check": "npx tsx scripts/dx.ts env",
+    "preflight": "npx tsx scripts/dx.ts preflight",
     "dead-code": "npx tsx scripts/dx.ts dead-code",
     "analyze:bundle": "npx tsx scripts/dx.ts analyze",
     "bench": "npx tsx scripts/dx.ts bench",

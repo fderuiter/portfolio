@@ -23,6 +23,7 @@ import {
   validateBranchName,
 } from "../lib/dx/git-guard";
 import { checkEnvironmentVariables } from "../lib/dx/env-guard";
+import { runPreflight } from "../lib/dx/preflight";
 import { runSetupWorkflow } from "../lib/dx/setup";
 import { scanDeadCode, printDeadCodeDocument } from "../lib/dx/dead-code";
 import { inspectBundleChunks, printBundleReport } from "../lib/dx/bundle-guard";
@@ -280,6 +281,49 @@ export async function handleEnvCommand(parsed: ParsedCliArgs): Promise<void> {
   }
 
   if (result.status === "fail" && !fix) {
+    process.exit(1);
+  }
+}
+
+/**
+ * Bounded runtime preflight: checks Node/npm versions, the generated
+ * Prisma client, and real `node --import tsx` execution up front, before
+ * an agent or developer starts expensive work (tests, `npm run verify`,
+ * browser probes). Meant to turn a broken environment into one clear,
+ * actionable report instead of a confusing wall of downstream failures.
+ */
+export function handlePreflightCommand(parsed: ParsedCliArgs): void {
+  const isJson = Boolean(parsed.flags.json || parsed.flags.j);
+  const startTime = Date.now();
+
+  const report = runPreflight(workspaceRoot);
+  const durationMs = Date.now() - startTime;
+
+  if (isJson) {
+    printJsonEnvelope(
+      createDxEnvelope({
+        command: "preflight",
+        success: report.ready,
+        durationMs,
+        data: report,
+      })
+    );
+  } else {
+    console.log(
+      formatHeader("DX Runtime Preflight", "Node • npm • Prisma • tsx")
+    );
+    for (const check of report.checks) {
+      console.log(`${badge(check.label, check.status)}`);
+      console.log(`  ${check.message}`);
+    }
+    console.log(
+      report.ready
+        ? `\n${colors.green}✔ Environment ready.${colors.reset}\n`
+        : `\n${colors.red}✘ Environment NOT ready -- see the failing check(s) above before starting real work.${colors.reset}\n`
+    );
+  }
+
+  if (!report.ready) {
     process.exit(1);
   }
 }
@@ -1215,6 +1259,9 @@ export async function main(): Promise<void> {
       break;
     case "env":
       await handleEnvCommand(parsed);
+      break;
+    case "preflight":
+      handlePreflightCommand(parsed);
       break;
     case "dead-code":
     case "unused":
