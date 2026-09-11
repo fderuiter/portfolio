@@ -149,8 +149,10 @@ describe("Lazy Sentry Loading in Error Boundaries & Conditional Initialization",
 
       render(<CaseStudyErrorApp error={caseError} reset={resetFn} />);
 
-      expect(screen.getByText("Query Transaction Failed")).not.toBeNull();
-      expect(screen.getByText("CASE_LOAD_FAIL")).not.toBeNull();
+      expect(
+        screen.getByText("This case study couldn't be loaded.")
+      ).not.toBeNull();
+      expect(screen.getByText("LOAD_FAILED")).not.toBeNull();
 
       await waitFor(() => {
         expect(mockInit).toHaveBeenCalled();
@@ -175,6 +177,55 @@ describe("Lazy Sentry Loading in Error Boundaries & Conditional Initialization",
 
       expect(screen.getByText("This page hit a snag.")).not.toBeNull();
       consoleWarnSpy.mockRestore();
+    });
+  });
+
+  describe("Requirement 5: Single main landmark & visitor-safe recovery copy", () => {
+    it("does not render its own <main> landmark (it mounts inside the root layout's <main>)", () => {
+      process.env.NEXT_PUBLIC_SENTRY_DSN =
+        "https://validkey@o0.ingest.sentry.io/999999";
+      const { container } = render(
+        <ErrorBoundaryApp error={new Error("boom")} reset={vi.fn()} />
+      );
+
+      expect(container.querySelector("main")).toBeNull();
+    });
+
+    it("case-study error boundary does not render its own <main> landmark", () => {
+      process.env.NEXT_PUBLIC_SENTRY_DSN =
+        "https://validkey@o0.ingest.sentry.io/999999";
+      const { container } = render(
+        <CaseStudyErrorApp error={new Error("boom")} reset={vi.fn()} />
+      );
+
+      expect(container.querySelector("main")).toBeNull();
+    });
+
+    it("case-study error boundary never leaks backend implementation detail (database/vendor names) to visitors", () => {
+      process.env.NEXT_PUBLIC_SENTRY_DSN =
+        "https://validkey@o0.ingest.sentry.io/999999";
+      render(
+        <CaseStudyErrorApp
+          error={new Error("Neon database connection pool exhausted")}
+          reset={vi.fn()}
+        />
+      );
+
+      const bodyText = document.body.textContent ?? "";
+      expect(bodyText).not.toMatch(/neon/i);
+      expect(bodyText).not.toMatch(/database/i);
+      expect(bodyText).not.toMatch(/postgres/i);
+    });
+
+    it("case-study error boundary offers a contextual way back to the case study list", () => {
+      process.env.NEXT_PUBLIC_SENTRY_DSN =
+        "https://validkey@o0.ingest.sentry.io/999999";
+      render(<CaseStudyErrorApp error={new Error("boom")} reset={vi.fn()} />);
+
+      const backLink = screen.getByRole("link", {
+        name: /back to case studies/i,
+      });
+      expect(backLink.getAttribute("href")).toBe("/case-studies");
     });
   });
 });
