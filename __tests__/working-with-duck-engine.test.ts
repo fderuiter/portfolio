@@ -28,6 +28,7 @@ import {
   stepParkGame,
   exitDogPark,
   advanceToNextLevel,
+  shouldSyncDuckHudState,
   calculateGoodBoyMultiplier,
   clampBounds,
   MIN_DUCK_X,
@@ -491,7 +492,12 @@ describe("Working With Duck - Deterministic Game Engine", () => {
   });
 
   it("should properly save all four corporate hazards with correct skill toasts", () => {
-    const hazardIds = ["pitch-deck", "power-cable", "audit-file", "laptop"] as const;
+    const hazardIds = [
+      "pitch-deck",
+      "power-cable",
+      "audit-file",
+      "laptop",
+    ] as const;
     hazardIds.forEach((id) => {
       let state = createInitialDuckGameState(1, "campaign");
       state.status = "running";
@@ -514,7 +520,9 @@ describe("Working With Duck - Deterministic Game Engine", () => {
 
     state = stepDuckGame(state);
     expect(state.activeSurpriseEvent).not.toBeNull();
-    expect(["amazon-delivery", "squirrel-window"]).toContain(state.activeSurpriseEvent?.type);
+    expect(["amazon-delivery", "squirrel-window"]).toContain(
+      state.activeSurpriseEvent?.type
+    );
     expect(state.floatingAlerts.length).toBeGreaterThan(0);
   });
 
@@ -564,7 +572,9 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     state.parkState.jumpHeight = 25;
     state.parkState.duckX = 200;
     state.parkState.duckY = 200;
-    state.parkState.hurdles = [{ id: 1, x: 205, y: 205, width: 30, height: 20, cleared: false }];
+    state.parkState.hurdles = [
+      { id: 1, x: 205, y: 205, width: 30, height: 20, cleared: false },
+    ];
     state = stepParkGame(state);
     expect(state.parkState.hurdles[0].cleared).toBe(true);
     expect(state.parkState.hurdlesCleared).toBe(1);
@@ -578,7 +588,16 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     state.parkState.duckX = 150;
     state.parkState.duckY = 150;
     state.parkState.bones = [{ id: 1, x: 155, y: 155, collected: false }];
-    state.parkState.friends = [{ id: 1, name: "Barnaby", breed: "golden", x: 160, y: 160, greeted: false }];
+    state.parkState.friends = [
+      {
+        id: 1,
+        name: "Barnaby",
+        breed: "golden",
+        x: 160,
+        y: 160,
+        greeted: false,
+      },
+    ];
     state = stepParkGame(state);
     expect(state.parkState.bones[0].collected).toBe(true);
     expect(state.parkState.friends[0].greeted).toBe(true);
@@ -634,16 +653,23 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     const stateWithPuddle = createInitialDuckGameState(1, "campaign");
     stateWithPuddle.status = "running";
     stateWithPuddle.duck.state = "IDLE_ROAM";
-    stateWithPuddle.indoorPuddles = [{ id: 1, x: 300, y: 200, radius: 24, mopProgress: 0 }];
+    stateWithPuddle.indoorPuddles = [
+      { id: 1, x: 300, y: 200, radius: 24, mopProgress: 0 },
+    ];
     const nextWith = stepDuckGame(stateWithPuddle);
 
-    expect(nextWith.workProgress).toBeCloseTo(nextWithout.workProgress * 0.7, 3);
+    expect(nextWith.workProgress).toBeCloseTo(
+      nextWithout.workProgress * 0.7,
+      3
+    );
   });
 
   it("should mop indoor puddle progressively until clean", () => {
     let state = createInitialDuckGameState(1, "campaign");
     state.status = "running";
-    state.indoorPuddles = [{ id: 1, x: 300, y: 200, radius: 24, mopProgress: 0 }];
+    state.indoorPuddles = [
+      { id: 1, x: 300, y: 200, radius: 24, mopProgress: 0 },
+    ];
 
     // Scrub puddle (35% per scrub)
     state = mopIndoorPuddle(state, 300, 200);
@@ -694,11 +720,106 @@ describe("Working With Duck - Deterministic Game Engine", () => {
     expect(state.activeCodeBursts).toBe(1);
 
     // Accessories
-    const accessories = ["bucket-hat", "bowtie", "rain-boots", "bandana", "none"] as const;
+    const accessories = [
+      "bucket-hat",
+      "bowtie",
+      "rain-boots",
+      "bandana",
+      "none",
+    ] as const;
     state.unlockedAccessories = [...accessories];
     accessories.forEach((acc) => {
       state = equipAccessory(state, acc);
       expect(state.activeAccessory).toBe(acc);
+    });
+  });
+
+  describe("Sprint Completion, Retry & Progression Reliability (#598)", () => {
+    it("advanceToNextLevel returns a running state so the next sprint resumes simulation immediately", () => {
+      const state = createInitialDuckGameState(1, "campaign");
+      state.status = "won";
+
+      const advanced = advanceToNextLevel(state);
+      expect(advanced.status).toBe("running");
+      expect(advanced.currentLevel).toBe(2);
+      expect(advanced.mode).toBe("campaign");
+
+      // Regression: previously advanceToNextLevel returned an "idle" state,
+      // so stepDuckGame's `status !== "running"` guard bailed out and the
+      // simulation never progressed after "Proceed to Sprint" was clicked.
+      const stepped = stepDuckGame(advanced);
+      expect(stepped.ticks).toBe(advanced.ticks + 1);
+      expect(stepped.workProgress).toBeGreaterThan(advanced.workProgress);
+    });
+
+    it("advancing past the final campaign sprint hands off to a running endless mode", () => {
+      const state = createInitialDuckGameState(5, "campaign");
+      state.status = "won";
+
+      const endless = advanceToNextLevel(state);
+      expect(endless.mode).toBe("endless");
+      expect(endless.status).toBe("running");
+
+      // Regression: the campaign-to-endless handoff shared the same idle-state
+      // bug, so endless mode looked "started" but never actually ticked.
+      const stepped = stepDuckGame(endless);
+      expect(stepped.ticks).toBe(1);
+      expect(stepped.workProgress).toBeGreaterThan(0);
+    });
+
+    it("retrying a failed sprint resumes simulation on the same level", () => {
+      let state = createInitialDuckGameState(2, "campaign");
+      state.naughtyVsGood = -95;
+      state.status = "running";
+      state = stepDuckGame(state);
+      expect(state.status).toBe("failed");
+
+      // Mirrors the component's Retry handler: rebuild the level and force running.
+      let retried = createInitialDuckGameState(state.currentLevel, state.mode);
+      retried = { ...retried, status: "running" };
+      expect(retried.status).toBe("running");
+
+      const stepped = stepDuckGame(retried);
+      expect(stepped.ticks).toBe(1);
+      expect(stepped.workProgress).toBeGreaterThan(0);
+    });
+
+    it("shouldSyncDuckHudState always flushes on a terminal transition regardless of tick remainder", () => {
+      for (let remainder = 0; remainder < 4; remainder++) {
+        const state = createInitialDuckGameState(1, "campaign");
+        state.status = "running";
+        state.ticks = remainder === 0 ? 4 : remainder;
+        state.workProgress = state.targetWorkProgress - 0.01;
+
+        const won = stepDuckGame(state);
+        expect(won.status).toBe("won");
+        expect(won.ticks % 4).toBe(remainder === 0 ? 0 : remainder);
+        expect(shouldSyncDuckHudState(won)).toBe(true);
+      }
+
+      for (let remainder = 0; remainder < 4; remainder++) {
+        const state = createInitialDuckGameState(1, "campaign");
+        state.status = "running";
+        state.ticks = remainder === 0 ? 4 : remainder;
+        state.naughtyVsGood = -95;
+
+        const failed = stepDuckGame(state);
+        expect(failed.status).toBe("failed");
+        expect(failed.ticks % 4).toBe(remainder === 0 ? 0 : remainder);
+        expect(shouldSyncDuckHudState(failed)).toBe(true);
+      }
+    });
+
+    it("shouldSyncDuckHudState only flushes running frames on the throttled 4-tick cadence", () => {
+      const base = createInitialDuckGameState(1, "campaign");
+      base.status = "running";
+
+      [0, 4, 8].forEach((ticks) => {
+        expect(shouldSyncDuckHudState({ ...base, ticks })).toBe(true);
+      });
+      [1, 2, 3, 5, 6, 7].forEach((ticks) => {
+        expect(shouldSyncDuckHudState({ ...base, ticks })).toBe(false);
+      });
     });
   });
 });

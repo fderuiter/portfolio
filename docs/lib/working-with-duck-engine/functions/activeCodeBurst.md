@@ -8,7 +8,7 @@
 
 > **activeCodeBurst**(`state`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:1617](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1617)
+Defined in: [lib/working-with-duck-engine.ts:1633](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1633)
 
 Player Action: Active Coding / Commit Burst at Desk (Spacebar or Desk Click)
 

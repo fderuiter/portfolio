@@ -8,7 +8,7 @@
 
 > **scrubBathtub**(`state`, `x`, `y`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:1756](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1756)
+Defined in: [lib/working-with-duck-engine.ts:1772](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L1772)
 
 ## Parameters
 

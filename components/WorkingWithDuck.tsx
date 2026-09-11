@@ -75,6 +75,7 @@ import {
   tapParkWhistle,
   exitDogPark,
   advanceToNextLevel,
+  shouldSyncDuckHudState,
   CANVAS_WIDTH,
   CANVAS_HEIGHT,
   DESK_BOUNDS,
@@ -1633,7 +1634,7 @@ export const WorkingWithDuck: React.FC = () => {
   const winTrapRef = useFocusTrap<HTMLDivElement>(uiState.status === "won", {
     onEscape: () => {
       gameStateRef.current = advanceToNextLevel(gameStateRef.current);
-      setUiState({ ...gameStateRef.current, status: "running" });
+      setUiState({ ...gameStateRef.current });
     },
   });
 
@@ -1873,8 +1874,10 @@ export const WorkingWithDuck: React.FC = () => {
           gameStateRef.current.soundCueQueue = [];
         }
 
-        // Throttle UI update every 4 frames (15 FPS UI state for DOM performance)
-        if (nextState.ticks % 4 === 0) {
+        // Throttle UI update every 4 frames (15 FPS UI state for DOM performance),
+        // but always flush immediately on a terminal win/fail transition so the
+        // victory/failure panel is never hidden behind a stale throttled frame.
+        if (shouldSyncDuckHudState(nextState)) {
           setUiState({ ...nextState });
         }
       }
@@ -3641,7 +3644,7 @@ export const WorkingWithDuck: React.FC = () => {
                   gameStateRef.current = advanceToNextLevel(
                     gameStateRef.current
                   );
-                  setUiState({ ...gameStateRef.current, status: "running" });
+                  setUiState({ ...gameStateRef.current });
                 }}
                 className="w-full py-3 px-4 rounded-xl bg-brand-cyan text-black font-bold text-xs sm:text-sm hover:bg-white active:scale-95 transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
               >

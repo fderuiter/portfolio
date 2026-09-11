@@ -8,7 +8,7 @@
 
 > **enterDogPark**(`state`, `mode?`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:2370](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2370)
+Defined in: [lib/working-with-duck-engine.ts:2386](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2386)
 
 Dog Park Mini-Game Transitions & Logic
 
