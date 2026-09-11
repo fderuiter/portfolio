@@ -49,6 +49,33 @@ describe("ContactForm Component", () => {
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
+  it("moves focus to the first invalid field when submission fails validation (#583)", async () => {
+    render(<ContactForm />);
+
+    const submitBtn = screen.getByRole("button", { name: /Send Message/i });
+    fireEvent.click(submitBtn);
+
+    // Regression: previously focus silently stayed on the submit button
+    // (or wherever it was) after a failed validation, so a keyboard/screen
+    // reader user got no indication where to fix the error.
+    const nameInput = await screen.findByLabelText(/Your Name/i);
+    expect(document.activeElement).toBe(nameInput);
+  });
+
+  it("moves focus to the first invalid field in DOM order, not just the first field", async () => {
+    render(<ContactForm />);
+
+    fireEvent.change(screen.getByLabelText(/Your Name/i), {
+      target: { value: "Ada Lovelace" },
+    });
+
+    const submitBtn = screen.getByRole("button", { name: /Send Message/i });
+    fireEvent.click(submitBtn);
+
+    const emailInput = await screen.findByLabelText(/Email Address/i);
+    expect(document.activeElement).toBe(emailInput);
+  });
+
   it("should submit payload and display success confirmation upon 200 response", async () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
