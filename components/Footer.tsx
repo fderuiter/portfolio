@@ -258,6 +258,16 @@ export const Footer: React.FC = () => {
                   Proof Workspace
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/neuro"
+                  onMouseEnter={handleHover}
+                  className="text-zinc-400 hover:text-brand-cyan transition-colors flex items-center gap-1.5"
+                >
+                  <IconBrain className="w-3 h-3 text-emerald-400" />
+                  NeuroRecon Studio
+                </Link>
+              </li>
               {persona !== "technical" && (
                 <li>
                   <Link
