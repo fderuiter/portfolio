@@ -8,7 +8,7 @@
 
 > **shouldSyncDuckHudState**(`nextState`): `boolean`
 
-Defined in: [lib/working-with-duck-engine.ts:708](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L708)
+Defined in: [lib/working-with-duck-engine.ts:715](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L715)
 
 Decide whether a stepped state should be flushed to React UI state.
 

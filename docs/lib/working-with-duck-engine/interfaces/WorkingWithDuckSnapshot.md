@@ -6,7 +6,7 @@
 
 # Interface: WorkingWithDuckSnapshot
 
-Defined in: [lib/working-with-duck-engine.ts:2753](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2753)
+Defined in: [lib/working-with-duck-engine.ts:2766](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2766)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [lib/working-with-duck-engine.ts:2753](https://github.com/fderuiter/
 
 > **bladder**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:2765](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2765)
+Defined in: [lib/working-with-duck-engine.ts:2778](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2778)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [lib/working-with-duck-engine.ts:2765](https://github.com/fderuiter/
 
 > **currentLevel**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:2757](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2757)
+Defined in: [lib/working-with-duck-engine.ts:2770](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2770)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [lib/working-with-duck-engine.ts:2757](https://github.com/fderuiter/
 
 > **duck**: `object`
 
-Defined in: [lib/working-with-duck-engine.ts:2758](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2758)
+Defined in: [lib/working-with-duck-engine.ts:2771](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2771)
 
 #### behaviorState
 
@@ -54,7 +54,7 @@ Defined in: [lib/working-with-duck-engine.ts:2758](https://github.com/fderuiter/
 
 > **excitement**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:2764](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2764)
+Defined in: [lib/working-with-duck-engine.ts:2777](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2777)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [lib/working-with-duck-engine.ts:2764](https://github.com/fderuiter/
 
 > **isMuddy**: `boolean`
 
-Defined in: [lib/working-with-duck-engine.ts:2767](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2767)
+Defined in: [lib/working-with-duck-engine.ts:2780](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2780)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [lib/working-with-duck-engine.ts:2767](https://github.com/fderuiter/
 
 > **multiplier**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:2756](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2756)
+Defined in: [lib/working-with-duck-engine.ts:2769](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2769)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [lib/working-with-duck-engine.ts:2756](https://github.com/fderuiter/
 
 > **naughtyVsGood**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:2766](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2766)
+Defined in: [lib/working-with-duck-engine.ts:2779](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2779)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [lib/working-with-duck-engine.ts:2766](https://github.com/fderuiter/
 
 > **score**: `number`
 
-Defined in: [lib/working-with-duck-engine.ts:2755](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2755)
+Defined in: [lib/working-with-duck-engine.ts:2768](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2768)
 
 ***
 
@@ -94,4 +94,4 @@ Defined in: [lib/working-with-duck-engine.ts:2755](https://github.com/fderuiter/
 
 > **status**: `"idle"` \| `"paused"` \| `"running"` \| `"failed"` \| `"won"`
 
-Defined in: [lib/working-with-duck-engine.ts:2754](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2754)
+Defined in: [lib/working-with-duck-engine.ts:2767](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2767)

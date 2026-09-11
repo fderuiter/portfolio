@@ -6,7 +6,7 @@
 
 # Function: createInitialDuckGameState()
 
-> **createInitialDuckGameState**(`level?`, `mode?`, `preservedAccessories?`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
+> **createInitialDuckGameState**(`level?`, `mode?`, `preservedAccessories?`, `preservedFacts?`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
 Defined in: [lib/working-with-duck-engine.ts:528](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L528)
 
@@ -23,6 +23,10 @@ Defined in: [lib/working-with-duck-engine.ts:528](https://github.com/fderuiter/p
 ### preservedAccessories?
 
 [`DuckAccessory`](../type-aliases/DuckAccessory.md)[] = `...`
+
+### preservedFacts?
+
+`number`[] = `...`
 
 ## Returns
 

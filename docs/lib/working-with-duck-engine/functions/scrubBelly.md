@@ -8,7 +8,7 @@
 
 > **scrubBelly**(`state`, `x`, `y`): [`WorkingWithDuckState`](../interfaces/WorkingWithDuckState.md)
 
-Defined in: [lib/working-with-duck-engine.ts:2124](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2124)
+Defined in: [lib/working-with-duck-engine.ts:2131](https://github.com/fderuiter/portfolio/blob/main/lib/working-with-duck-engine.ts#L2131)
 
 Player Action: Scrub Cursor over Duck during The Flop (Belly Rubs)
 
