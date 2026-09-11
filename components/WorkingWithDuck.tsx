@@ -1703,6 +1703,14 @@ export const WorkingWithDuck: React.FC = () => {
   }, []);
   const animFrameIdRef = useRef<number | null>(null);
   const lastBellyScrubPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  // Fixed-timestep simulation clock: the engine's tick balance (work
+  // increments, timers, combo decay) was tuned assuming 60 ticks/sec, so
+  // the loop below advances the simulation by real elapsed time in whole
+  // FIXED_STEP_MS chunks instead of once per rendered frame. That keeps
+  // gameplay speed identical at 30/60/120Hz instead of scaling with the
+  // display's refresh rate (#600).
+  const lastFrameTimeRef = useRef<number | null>(null);
+  const stepAccumulatorRef = useRef(0);
 
   const { isFullscreen, toggleFullscreen } = useFullscreen(containerRef);
 
@@ -1848,6 +1856,10 @@ export const WorkingWithDuck: React.FC = () => {
 
     const handleContextRestored = () => {
       isContextLost = false;
+      // Discard elapsed wall-clock time across the context-loss gap so
+      // resuming doesn't replay it as a burst of catch-up steps.
+      lastFrameTimeRef.current = null;
+      stepAccumulatorRef.current = 0;
       animFrameIdRef.current = requestAnimationFrame(render);
     };
 
@@ -1856,29 +1868,67 @@ export const WorkingWithDuck: React.FC = () => {
       canvas.addEventListener("contextrestored", handleContextRestored);
     }
 
-    const render = () => {
+    // Simulation runs on a fixed 60Hz timestep (the engine's tick balance —
+    // work increments, timers, combo decay — was tuned assuming 60 ticks/sec)
+    // driven by real elapsed time, not once per rendered frame, so gameplay
+    // speed stays identical whether the display is 30, 60, or 120Hz (#600).
+    const FIXED_STEP_MS = 1000 / 60;
+    const MAX_CATCHUP_STEPS = 8;
+
+    const render = (timestamp: number) => {
       if (!isRunning || isContextLost) return;
 
+      const previousTimestamp = lastFrameTimeRef.current;
+      lastFrameTimeRef.current = timestamp;
       const state = gameStateRef.current;
 
-      // Advance deterministic engine
-      if (state.status === "running") {
-        const nextState = stepDuckGame(state);
-        gameStateRef.current = nextState;
+      if (state.status !== "running") {
+        // Not simulating (idle/won/lost/paused): don't let time spent here
+        // accumulate into a catch-up burst whenever play resumes.
+        stepAccumulatorRef.current = 0;
+      } else {
+        // There's no previous frame to diff against right after a sprint
+        // starts (or resumes from a context-loss reset): treat it as
+        // exactly one fixed step rather than zero, so play advances on the
+        // very next frame instead of silently priming the clock first.
+        // Every later frame uses real measured elapsed time, clamped so a
+        // dropped frame, a backgrounded tab, or that same gap can't be
+        // replayed as a runaway catch-up burst.
+        const elapsedMs =
+          previousTimestamp === null
+            ? FIXED_STEP_MS
+            : Math.min(
+                timestamp - previousTimestamp,
+                FIXED_STEP_MS * MAX_CATCHUP_STEPS
+              );
+        stepAccumulatorRef.current += elapsedMs;
 
-        // Process sound cue queue
-        if (nextState.soundCueQueue.length > 0) {
-          nextState.soundCueQueue.forEach((cue) =>
-            playSoundCueRef.current(cue)
-          );
-          gameStateRef.current.soundCueQueue = [];
-        }
+        let stepsThisFrame = 0;
+        while (
+          stepAccumulatorRef.current >= FIXED_STEP_MS &&
+          stepsThisFrame < MAX_CATCHUP_STEPS &&
+          gameStateRef.current.status === "running"
+        ) {
+          const nextState = stepDuckGame(gameStateRef.current);
+          gameStateRef.current = nextState;
+          stepAccumulatorRef.current -= FIXED_STEP_MS;
+          stepsThisFrame++;
 
-        // Throttle UI update every 4 frames (15 FPS UI state for DOM performance),
-        // but always flush immediately on a terminal win/fail transition so the
-        // victory/failure panel is never hidden behind a stale throttled frame.
-        if (shouldSyncDuckHudState(nextState)) {
-          setUiState({ ...nextState });
+          // Process sound cue queue
+          if (nextState.soundCueQueue.length > 0) {
+            nextState.soundCueQueue.forEach((cue) =>
+              playSoundCueRef.current(cue)
+            );
+            gameStateRef.current.soundCueQueue = [];
+          }
+
+          // Throttle UI update every 4 ticks (~15 updates/sec of simulated
+          // time for DOM performance), but always flush immediately on a
+          // terminal win/fail transition so the victory/failure panel is
+          // never hidden behind a stale throttled frame.
+          if (shouldSyncDuckHudState(nextState)) {
+            setUiState({ ...nextState });
+          }
         }
       }
 
