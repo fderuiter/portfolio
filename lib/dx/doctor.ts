@@ -705,10 +705,17 @@ export function checkOnboardingDocsDrift(
   fix = false
 ): DiagnosticCheckResult {
   const readmePath = path.join(root, "README.md");
-  const docsReadmePath = path.join(root, "docs", "README.md");
+  // The Diátaxis reorg (ADR 0023) moved step-by-step onboarding content out
+  // of docs/README.md (now a lean hub/index page) and into this tutorial.
+  const onboardingTutorialPath = path.join(
+    root,
+    "docs",
+    "tutorials",
+    "01-local-development-and-onboarding.md"
+  );
   const targetFiles = [readmePath];
-  if (fs.existsSync(docsReadmePath)) {
-    targetFiles.push(docsReadmePath);
+  if (fs.existsSync(onboardingTutorialPath)) {
+    targetFiles.push(onboardingTutorialPath);
   }
 
   const failures: string[] = [];

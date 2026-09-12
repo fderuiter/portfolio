@@ -7,6 +7,11 @@ import {
   getDocumentationGitStatus,
   type DocumentationDriftResult,
 } from "./documentation-drift";
+import { API_REFERENCE_RELATIVE_PATH } from "./compile-docs";
+import {
+  checkMarkdownLinkIntegrity,
+  type MarkdownLinkCheckResult,
+} from "./markdown-link-check";
 import {
   checkOnboardingDocsDrift,
   checkDirectoryTopology,
@@ -27,6 +32,7 @@ export interface DriftCheckDependencies {
   checkOpenApi: () => OpenApiCheckResult;
   checkOnboarding: () => DetailCheckResult;
   checkTopology: () => DetailCheckResult;
+  checkMarkdownLinks: () => MarkdownLinkCheckResult;
 }
 
 function defaultDependencies(workspaceRoot: string): DriftCheckDependencies {
@@ -37,10 +43,12 @@ function defaultDependencies(workspaceRoot: string): DriftCheckDependencies {
         compile: (outputDirectory) =>
           compileDocumentation(workspaceRoot, outputDirectory),
         getGitStatus: () => getDocumentationGitStatus(workspaceRoot),
+        generatedDocsRelativePath: API_REFERENCE_RELATIVE_PATH,
       }),
     checkOpenApi: () => generateOpenApi(workspaceRoot),
     checkOnboarding: () => checkOnboardingDocsDrift(workspaceRoot),
     checkTopology: () => checkDirectoryTopology(workspaceRoot),
+    checkMarkdownLinks: () => checkMarkdownLinkIntegrity(workspaceRoot),
   };
 }
 
@@ -104,6 +112,16 @@ export function checkDrift(
       (topologyResult.details || [])
         .map((detail) => `  - ${detail}`)
         .join("\n") +
+      "\n";
+  }
+
+  console.log("Validating cross-quadrant documentation markdown links...");
+  const markdownLinkResult = dependencies.checkMarkdownLinks();
+  if (markdownLinkResult.status === "fail") {
+    docsDrift = true;
+    driftSummary +=
+      "• Broken documentation markdown links detected:\n" +
+      markdownLinkResult.details.map((detail) => `  - ${detail}`).join("\n") +
       "\n";
   }
 

@@ -25,6 +25,7 @@ function passingDependencies(): DriftCheckDependencies {
     checkOpenApi: () => ({ missingRoutes: [], hasDrift: false }),
     checkOnboarding: () => ({ status: "pass" }),
     checkTopology: () => ({ status: "pass" }),
+    checkMarkdownLinks: () => ({ status: "pass", details: [] }),
   };
 }
 
@@ -160,6 +161,58 @@ describe("documentation drift checking", () => {
     expect(result.details).toContain(
       "Authored documentation modified: docs/planning/next.md. Stage or revert the authored edit."
     );
+  });
+
+  it("compares generated output against a custom generatedDocsRelativePath instead of the docs root (ADR 0023)", () => {
+    const { root } = createFixture();
+    const apiReferenceDir = path.join(root, "docs", "reference", "api");
+    fs.mkdirSync(apiReferenceDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(apiReferenceDir, "modules.md"),
+      "# Modules\n",
+      "utf8"
+    );
+
+    const result = checkDocumentationDrift({
+      workspaceRoot: root,
+      compile: (outputDirectory) => {
+        fs.writeFileSync(
+          path.join(outputDirectory, "modules.md"),
+          "# Modules\n",
+          "utf8"
+        );
+      },
+      getGitStatus: () => ({ modified: [], untracked: [] }),
+      generatedDocsRelativePath: path.join("docs", "reference", "api"),
+    });
+
+    expect(result).toEqual({ status: "pass", details: [] });
+  });
+
+  it("reports a stale generated reference at the custom generatedDocsRelativePath location, not the docs root", () => {
+    const { root, docs } = createFixture();
+    // Nothing exists yet at docs/reference/api/modules.md.
+
+    const result = checkDocumentationDrift({
+      workspaceRoot: root,
+      compile: (outputDirectory) => {
+        fs.writeFileSync(
+          path.join(outputDirectory, "modules.md"),
+          "# Modules\n",
+          "utf8"
+        );
+      },
+      getGitStatus: () => ({ modified: [], untracked: [] }),
+      generatedDocsRelativePath: path.join("docs", "reference", "api"),
+    });
+
+    expect(result).toMatchObject({ status: "fail" });
+    expect(result.details).toContain(
+      "Stale generated reference: missing docs/reference/api/modules.md"
+    );
+    // The pre-existing docs/reference.md fixture at the plain docs root is
+    // untouched and irrelevant to this custom-path comparison.
+    expect(fs.existsSync(path.join(docs, "reference.md"))).toBe(true);
   });
 
   it("returns an actionable generator failure", () => {

@@ -13,6 +13,13 @@ export interface DocumentationDriftOptions {
   workspaceRoot: string;
   compile: (outputDirectory: string) => void;
   getGitStatus: () => DocumentationGitStatus;
+  /**
+   * Path (relative to workspaceRoot, forward-slash normalized) where
+   * compiled TypeDoc reference output is checked in, e.g.
+   * "docs/reference/api" (ADR 0023). Defaults to "docs" so callers that
+   * don't relocate generated output keep comparing against the docs root.
+   */
+  generatedDocsRelativePath?: string;
 }
 
 export interface DocumentationDriftResult {
@@ -38,40 +45,47 @@ function normalizePath(filePath: string): string {
 
 function getGeneratedDifferences(
   generatedDirectory: string,
-  docsDirectory: string
+  docsDirectory: string,
+  displayPrefix: string
 ): string[] {
   return listFiles(generatedDirectory).flatMap((relativePath) => {
     const generatedPath = path.join(generatedDirectory, relativePath);
     const documentationPath = path.join(docsDirectory, relativePath);
+    const displayPath = `${displayPrefix}/${normalizePath(relativePath)}`;
     if (!fs.existsSync(documentationPath)) {
-      return [
-        `Stale generated reference: missing docs/${normalizePath(relativePath)}`,
-      ];
+      return [`Stale generated reference: missing ${displayPath}`];
     }
     return fs
       .readFileSync(generatedPath)
       .equals(fs.readFileSync(documentationPath))
       ? []
       : [
-          `Stale generated reference: docs/${normalizePath(relativePath)} differs from generated output`,
+          `Stale generated reference: ${displayPath} differs from generated output`,
         ];
   });
 }
 
 function classifyWorkingTreeChanges(
   gitStatus: DocumentationGitStatus,
-  generatedFiles: Set<string>
+  generatedFiles: Set<string>,
+  generatedDocsRelativePath: string
 ): string[] {
+  const generatedPrefix = `${normalizePath(generatedDocsRelativePath)}/`;
+
   const classify = (filePath: string, state: "modified" | "untracked") => {
-    const normalized = normalizePath(filePath).replace(/^docs\//u, "");
-    if (generatedFiles.has(normalized)) {
-      return `Stale generated reference: docs/${normalized} is ${state}`;
+    const normalizedFull = normalizePath(filePath);
+    const displayPath = normalizedFull.replace(/^docs\//u, "");
+    const isGenerated =
+      normalizedFull.startsWith(generatedPrefix) &&
+      generatedFiles.has(normalizedFull.slice(generatedPrefix.length));
+    if (isGenerated) {
+      return `Stale generated reference: docs/${displayPath} is ${state}`;
     }
     const action =
       state === "modified"
         ? "Stage or revert the authored edit"
         : "Stage or remove the authored report";
-    return `Authored documentation ${state}: docs/${normalized}. ${action}.`;
+    return `Authored documentation ${state}: docs/${displayPath}. ${action}.`;
   };
 
   return [
@@ -88,11 +102,12 @@ export function checkDocumentationDrift({
   workspaceRoot,
   compile,
   getGitStatus,
+  generatedDocsRelativePath = "docs",
 }: DocumentationDriftOptions): DocumentationDriftResult {
   const outputDirectory = fs.mkdtempSync(
     path.join(os.tmpdir(), "portfolio-docs-check-")
   );
-  const docsDirectory = path.join(workspaceRoot, "docs");
+  const docsDirectory = path.join(workspaceRoot, generatedDocsRelativePath);
 
   try {
     try {
@@ -109,8 +124,16 @@ export function checkDocumentationDrift({
       listFiles(outputDirectory).map(normalizePath)
     );
     const details = [
-      ...getGeneratedDifferences(outputDirectory, docsDirectory),
-      ...classifyWorkingTreeChanges(getGitStatus(), generatedFiles),
+      ...getGeneratedDifferences(
+        outputDirectory,
+        docsDirectory,
+        normalizePath(generatedDocsRelativePath)
+      ),
+      ...classifyWorkingTreeChanges(
+        getGitStatus(),
+        generatedFiles,
+        generatedDocsRelativePath
+      ),
     ];
     return details.length === 0
       ? { status: "pass", details }
