@@ -31,6 +31,7 @@
     "check:migrations": "node scripts/check-migrations.js",
     "check:migrations:drift": "prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code",
     "migration:replay": "npx tsx scripts/migration-replay.ts",
+    "verify:upstash": "npx tsx scripts/verify-upstash.ts",
     "release:gate": "npx tsx scripts/release-gate.ts",
     "lint:docs": "npx markdownlint \"**/*.md\" --ignore node_modules --ignore .next --ignore coverage --ignore .agents --ignore scratch --ignore tmp --ignore test-results",
     "prebuild": "npx tsx scripts/generate-theme.ts",

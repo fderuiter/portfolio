@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import * as Sentry from "@sentry/nextjs";
 import { prisma } from "@/lib/db";
-import { redis } from "@/lib/redis";
+import { redis, getScopedRedisKey } from "@/lib/redis";
 import { RateLimitParamsSchema } from "@/lib/schemas";
 import { Ratelimit } from "@upstash/ratelimit";
 import { env } from "@/lib/env";
@@ -31,17 +31,32 @@ export interface LocalCacheEntry {
 const rateLimitConfig = RateLimitParamsSchema.parse({});
 const RATE_LIMIT_WINDOW_S = rateLimitConfig.windowMs / 1000;
 const MAX_REQUESTS_PER_WINDOW = rateLimitConfig.maxRequests;
+const RATE_LIMIT_TIMEOUT_MS = 1500;
 
 const sdkEphemeralCache = new Map<string, number>();
 
-const ratelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(
-    MAX_REQUESTS_PER_WINDOW,
-    `${RATE_LIMIT_WINDOW_S} s`
-  ),
-  ephemeralCache: sdkEphemeralCache,
-});
+const createRateLimiter = (prefix: string) =>
+  new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(
+      MAX_REQUESTS_PER_WINDOW,
+      `${RATE_LIMIT_WINDOW_S} s`
+    ),
+    ephemeralCache: sdkEphemeralCache,
+    prefix,
+  });
+
+let activePrefix = getScopedRedisKey("@upstash/ratelimit");
+let ratelimitInstance = createRateLimiter(activePrefix);
+
+function getRateLimiter() {
+  const currentPrefix = getScopedRedisKey("@upstash/ratelimit");
+  if (currentPrefix !== activePrefix) {
+    activePrefix = currentPrefix;
+    ratelimitInstance = createRateLimiter(currentPrefix);
+  }
+  return ratelimitInstance;
+}
 
 let activeGeneration = new Map<string, LocalCacheEntry>();
 let inactiveGeneration = new Map<string, LocalCacheEntry>();
@@ -154,7 +169,28 @@ export class TelemetryService {
     }
 
     try {
-      const result = await ratelimit.limit(ipHash);
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timer = setTimeout(() => {
+          reject(
+            new Error(
+              `Upstream rate limiting request timed out after ${RATE_LIMIT_TIMEOUT_MS}ms`
+            )
+          );
+        }, RATE_LIMIT_TIMEOUT_MS);
+        timer.unref?.();
+      });
+
+      let result;
+      try {
+        result = await Promise.race([
+          getRateLimiter().limit(ipHash),
+          timeoutPromise,
+        ]);
+      } finally {
+        if (timer) clearTimeout(timer);
+      }
+
       const headers = {
         "X-RateLimit-Limit": String(result.limit),
         "X-RateLimit-Remaining": String(result.remaining),
@@ -233,10 +269,26 @@ export class TelemetryService {
     }
 
     try {
+      const bufferKey = getScopedRedisKey("telemetry_buffer");
       const p = redis.pipeline();
-      p.lpush("telemetry_buffer", eventData);
-      p.expire("telemetry_buffer", 48 * 60 * 60); // 48 hours
-      const [listLength] = await p.exec();
+      p.lpush(bufferKey, eventData);
+      p.expire(bufferKey, 48 * 60 * 60); // 48 hours
+
+      let execTimer: ReturnType<typeof setTimeout> | undefined;
+      const execTimeoutPromise = new Promise<never>((_, reject) => {
+        execTimer = setTimeout(() => {
+          reject(new Error("Redis buffer enqueue timed out after 2000ms"));
+        }, 2000);
+        execTimer.unref?.();
+      });
+
+      let listLength: unknown;
+      try {
+        const [len] = await Promise.race([p.exec(), execTimeoutPromise]);
+        listLength = len;
+      } finally {
+        if (execTimer) clearTimeout(execTimer);
+      }
 
       if (Number(listLength) > 1000) {
         console.error(
@@ -303,10 +355,12 @@ export class TelemetryService {
    */
   static async syncBufferedEvents(batchSize: number) {
     type BufferedEvent = BufferedTelemetryEvent;
+    const bufferKey = getScopedRedisKey("telemetry_buffer");
+    const processingKey = getScopedRedisKey("telemetry_processing");
 
     // 1. Fetch any pending events previously transferred to processing queue but not yet synced to DB
     const existingProcessing = (await redis.lrange(
-      "telemetry_processing",
+      processingKey,
       0,
       -1
     )) as BufferedEvent[];
@@ -319,9 +373,9 @@ export class TelemetryService {
       const needed = batchSize - events.length;
       const p = redis.pipeline();
       for (let i = 0; i < needed; i++) {
-        p.lmove("telemetry_buffer", "telemetry_processing", "right", "left");
+        p.lmove(bufferKey, processingKey, "right", "left");
       }
-      p.expire("telemetry_processing", 48 * 60 * 60);
+      p.expire(processingKey, 48 * 60 * 60);
       const moveResults = await p.exec();
 
       const newlyMoved = moveResults.filter(
@@ -362,7 +416,7 @@ export class TelemetryService {
     // occurrence per owned event, so a concurrently moved event survives.
     const ack = redis.pipeline();
     for (const event of events) {
-      ack.lrem("telemetry_processing", 1, event);
+      ack.lrem(processingKey, 1, event);
     }
     await ack.exec();
 

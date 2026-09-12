@@ -30,6 +30,7 @@ export const serverEnvSchema = z.object({
   POSTGRES_PRISMA_URL: z.string().optional(),
   UPSTASH_REDIS_REST_URL: z.string().url().optional().or(z.literal("")),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+  UPSTASH_REDIS_KEY_PREFIX: z.string().optional(),
   CRON_SECRET: z.string().optional(),
   GITHUB_TOKEN: z.string().optional(),
   SENTRY_DSN: z.string().url().optional().or(z.literal("")),

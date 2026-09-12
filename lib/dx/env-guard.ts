@@ -6,7 +6,11 @@ import type { DiagnosticCheckResult } from "./doctor";
 /**
  * Extract all declared keys from Zod object schemas.
  */
-export function getDeclaredEnvKeys(): { serverKeys: string[]; clientKeys: string[]; allKeys: string[] } {
+export function getDeclaredEnvKeys(): {
+  serverKeys: string[];
+  clientKeys: string[];
+  allKeys: string[];
+} {
   const serverKeys = Object.keys(serverEnvSchema.shape);
   const clientKeys = Object.keys(clientEnvSchema.shape);
   const allKeys = Array.from(new Set([...serverKeys, ...clientKeys]));
@@ -28,7 +32,10 @@ export function parseEnvFile(filePath: string): Record<string, string> {
     if (match) {
       const key = match[1];
       let val = match[2].trim();
-      if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+      if (
+        (val.startsWith('"') && val.endsWith('"')) ||
+        (val.startsWith("'") && val.endsWith("'"))
+      ) {
         val = val.slice(1, -1);
       }
       result[key] = val;
@@ -40,12 +47,25 @@ export function parseEnvFile(filePath: string): Record<string, string> {
 /**
  * Generate a clean .env.example template based on schema keys.
  */
-export function generateEnvExampleContent(existingExamplePath?: string): string {
+export function generateEnvExampleContent(
+  existingExamplePath?: string
+): string {
   const { allKeys } = getDeclaredEnvKeys();
-  const existing = existingExamplePath && fs.existsSync(existingExamplePath) ? parseEnvFile(existingExamplePath) : {};
+  const existing =
+    existingExamplePath && fs.existsSync(existingExamplePath)
+      ? parseEnvFile(existingExamplePath)
+      : {};
 
   // Safe dummy URL builder that avoids static scanner false positives
-  const mockDbUrl = ["postgresql", "://", "local_user", ":", "local_secret", "@", "localhost:5432/portfolio_dev?sslmode=disable"].join("");
+  const mockDbUrl = [
+    "postgresql",
+    "://",
+    "local_user",
+    ":",
+    "local_secret",
+    "@",
+    "localhost:5432/portfolio_dev?sslmode=disable",
+  ].join("");
 
   const lines: string[] = [
     "# Environment Configuration Template",
@@ -74,6 +94,7 @@ export function generateEnvExampleContent(existingExamplePath?: string): string 
     "# Upstash Redis Cache & Rate Limiting",
     `UPSTASH_REDIS_REST_URL="${existing.UPSTASH_REDIS_REST_URL || "http://localhost:8079"}"`,
     `UPSTASH_REDIS_REST_TOKEN="${existing.UPSTASH_REDIS_REST_TOKEN || "example_dev_token"}"`,
+    `UPSTASH_REDIS_KEY_PREFIX="${existing.UPSTASH_REDIS_KEY_PREFIX || ""}"`,
     "",
     "# Operational, Testing & Security Flags",
     `CI="${existing.CI || ""}"`,
@@ -99,12 +120,42 @@ export function generateEnvExampleContent(existingExamplePath?: string): string 
 
   // Append any extra keys declared in schema that aren't in the default template
   const standardKeys = new Set([
-    "DATABASE_URL", "DATABASE_URL_UNPOOLED", "DIRECT_URL", "PGHOST", "PGHOST_UNPOOLED", "PGUSER", "PGDATABASE", "PGPASSWORD",
-    "POSTGRES_URL", "POSTGRES_URL_NON_POOLING", "POSTGRES_USER", "POSTGRES_HOST", "POSTGRES_PASSWORD", "POSTGRES_DATABASE",
-    "POSTGRES_URL_NO_SSL", "POSTGRES_PRISMA_URL", "UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN",
-    "CI", "PLAYWRIGHT_TEST", "SKIP_DB_HEALTH_CHECK", "ALLOW_DESTRUCTIVE_MIGRATIONS",
-    "CRON_SECRET", "GITHUB_TOKEN", "SENTRY_DSN", "SENTRY_ORG", "SENTRY_PROJECT", "NEXT_PUBLIC_SENTRY_DSN", "NEXT_PUBLIC_APP_URL",
-    "NODE_ENV", "VERCEL_ENV", "NEXT_PHASE", "NEXT_RUNTIME", "GITHUB_ACTIONS", "VITEST"
+    "DATABASE_URL",
+    "DATABASE_URL_UNPOOLED",
+    "DIRECT_URL",
+    "PGHOST",
+    "PGHOST_UNPOOLED",
+    "PGUSER",
+    "PGDATABASE",
+    "PGPASSWORD",
+    "POSTGRES_URL",
+    "POSTGRES_URL_NON_POOLING",
+    "POSTGRES_USER",
+    "POSTGRES_HOST",
+    "POSTGRES_PASSWORD",
+    "POSTGRES_DATABASE",
+    "POSTGRES_URL_NO_SSL",
+    "POSTGRES_PRISMA_URL",
+    "UPSTASH_REDIS_REST_URL",
+    "UPSTASH_REDIS_REST_TOKEN",
+    "UPSTASH_REDIS_KEY_PREFIX",
+    "CI",
+    "PLAYWRIGHT_TEST",
+    "SKIP_DB_HEALTH_CHECK",
+    "ALLOW_DESTRUCTIVE_MIGRATIONS",
+    "CRON_SECRET",
+    "GITHUB_TOKEN",
+    "SENTRY_DSN",
+    "SENTRY_ORG",
+    "SENTRY_PROJECT",
+    "NEXT_PUBLIC_SENTRY_DSN",
+    "NEXT_PUBLIC_APP_URL",
+    "NODE_ENV",
+    "VERCEL_ENV",
+    "NEXT_PHASE",
+    "NEXT_RUNTIME",
+    "GITHUB_ACTIONS",
+    "VITEST",
   ]);
 
   const extraKeys = allKeys.filter((k) => !standardKeys.has(k));
@@ -123,8 +174,12 @@ export function generateEnvExampleContent(existingExamplePath?: string): string 
  * Static analysis check to detect direct raw process.env reads in application code.
  * Standalone build scripts, setup tools, config files, test suites, and lib/env.ts are exempted.
  */
-export function checkRawEnvironmentAccess(root: string): { violations: string[] } {
-  const appDirs = ["app", "lib", "components", "hooks"].map((d) => path.join(root, d));
+export function checkRawEnvironmentAccess(root: string): {
+  violations: string[];
+} {
+  const appDirs = ["app", "lib", "components", "hooks"].map((d) =>
+    path.join(root, d)
+  );
   const violations: string[] = [];
 
   function scanDir(dir: string) {
@@ -135,10 +190,20 @@ export function checkRawEnvironmentAccess(root: string): { violations: string[] 
       const relPath = path.relative(root, fullPath).replace(/\\/g, "/");
 
       if (entry.isDirectory()) {
-        if (entry.name === "node_modules" || entry.name === ".next" || entry.name === "generated") continue;
+        if (
+          entry.name === "node_modules" ||
+          entry.name === ".next" ||
+          entry.name === "generated"
+        )
+          continue;
         scanDir(fullPath);
       } else if (entry.isFile() && /\.(ts|tsx|js|jsx)$/.test(entry.name)) {
-        if (relPath === "lib/env.ts" || relPath.startsWith("lib/dx/") || relPath.startsWith("app/generated/")) continue;
+        if (
+          relPath === "lib/env.ts" ||
+          relPath.startsWith("lib/dx/") ||
+          relPath.startsWith("app/generated/")
+        )
+          continue;
 
         const content = fs.readFileSync(fullPath, "utf-8");
         const lines = content.split("\n");
@@ -146,7 +211,12 @@ export function checkRawEnvironmentAccess(root: string): { violations: string[] 
           const line = lines[i];
           if (/\bprocess\.env\b/.test(line)) {
             const trimmed = line.trim();
-            if (trimmed.startsWith("//") || trimmed.startsWith("/*") || trimmed.startsWith("*")) continue;
+            if (
+              trimmed.startsWith("//") ||
+              trimmed.startsWith("/*") ||
+              trimmed.startsWith("*")
+            )
+              continue;
             violations.push(`${relPath}:${i + 1}: ${trimmed}`);
           }
         }
@@ -164,7 +234,10 @@ export function checkRawEnvironmentAccess(root: string): { violations: string[] 
 /**
  * Diagnostic check verifying environment schema validity and .env.example parity.
  */
-export function checkEnvironmentVariables(root: string, fix = false): DiagnosticCheckResult {
+export function checkEnvironmentVariables(
+  root: string,
+  fix = false
+): DiagnosticCheckResult {
   const examplePath = path.join(root, ".env.example");
   const { allKeys } = getDeclaredEnvKeys();
 
@@ -205,7 +278,9 @@ export function checkEnvironmentVariables(root: string, fix = false): Diagnostic
   }
 
   const exampleKeys = Object.keys(parseEnvFile(examplePath));
-  const missingKeys = allKeys.filter((k) => k !== "NODE_ENV" && k !== "VERCEL_ENV" && !exampleKeys.includes(k));
+  const missingKeys = allKeys.filter(
+    (k) => k !== "NODE_ENV" && k !== "VERCEL_ENV" && !exampleKeys.includes(k)
+  );
 
   if (missingKeys.length > 0) {
     if (fix) {
@@ -245,7 +320,8 @@ export function checkEnvironmentVariables(root: string, fix = false): Diagnostic
     name: "Environment Schema & .env.example Synchronization",
     category: "security",
     status: "pass",
-    message: ".env.example is fully synchronized with lib/env.ts and schema rules pass.",
+    message:
+      ".env.example is fully synchronized with lib/env.ts and schema rules pass.",
     details: details.length > 0 ? details : undefined,
   };
 }

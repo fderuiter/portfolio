@@ -9,3 +9,8 @@
 ## Variables
 
 - [redis](variables/redis.md)
+
+## Functions
+
+- [getRedisKeyPrefix](functions/getRedisKeyPrefix.md)
+- [getScopedRedisKey](functions/getScopedRedisKey.md)
