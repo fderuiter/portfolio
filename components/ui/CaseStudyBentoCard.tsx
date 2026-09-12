@@ -468,6 +468,7 @@ export const CaseStudyBentoCard: React.FC<CaseStudyBentoCardProps> = ({
               {/* Glowing SVG Commit Timeline Sparkline */}
               <CommitSparkline
                 activity={githubStats.commitActivity}
+                provenance={githubStats.provenance}
                 className="mb-1"
               />
 

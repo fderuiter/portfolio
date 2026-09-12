@@ -44,6 +44,14 @@
 
 ***
 
+### provenance
+
+> **provenance**: [`GitHubStatsProvenance`](../type-aliases/GitHubStatsProvenance.md)
+
+How much of this payload is a real measurement. Never assume `live`.
+
+***
+
 ### recentCommits
 
 > **recentCommits**: [`GitHubCommit`](GitHubCommit.md)[]
@@ -59,3 +67,5 @@
 ### updatedAt?
 
 > `optional` **updatedAt?**: `string`
+
+Upstream last-push timestamp, when the repository endpoint supplied one.

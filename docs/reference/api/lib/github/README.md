@@ -13,6 +13,14 @@
 - [GitHubStats](interfaces/GitHubStats.md)
 - [SimulatedTerminalLog](interfaces/SimulatedTerminalLog.md)
 
+## Type Aliases
+
+- [GitHubStatsProvenance](type-aliases/GitHubStatsProvenance.md)
+
+## Variables
+
+- [GITHUB\_REQUEST\_BUDGET\_MS](variables/GITHUB_REQUEST_BUDGET_MS.md)
+
 ## Functions
 
 - [generateMockCommitActivity](functions/generateMockCommitActivity.md)
