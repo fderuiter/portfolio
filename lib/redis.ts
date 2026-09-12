@@ -1,6 +1,26 @@
 import { Redis } from "@upstash/redis";
 import { getEnv } from "./env";
 
+/**
+ * Checks whether Upstash Redis is actively configured with valid credentials.
+ * Returns false in local, test, or offline environments where dummy fallback
+ * URLs or tokens are detected.
+ *
+ * @returns True if valid Upstash Redis credentials are present in environment variables.
+ */
+export function isRedisConfigured(): boolean {
+  const currentEnv = getEnv();
+  const rawUrl = currentEnv.UPSTASH_REDIS_REST_URL;
+  const rawToken = currentEnv.UPSTASH_REDIS_REST_TOKEN;
+  return Boolean(
+    rawUrl &&
+    rawToken &&
+    !rawUrl.includes("localhost:8079") &&
+    rawToken !== "example_token" &&
+    rawToken !== "example_dev_token"
+  );
+}
+
 const createRedisClient = () => {
   const currentEnv = getEnv();
   return new Redis({

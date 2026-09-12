@@ -131,13 +131,22 @@ When contributing code, ensure adherence to system invariants detailed in [`AGEN
 ## 6. Git Conventions & Verification Workflow
 
 ### Branch Naming
-All branches cut from `dev` or `main` must follow conventional prefixes:
+After the one-time `dev` reconciliation described in
+[ADR 0037](./adr/0037-controlled-integration-and-release-deployments.md), all
+work branches from `main` and returns to `main` through a pull request. Topic
+branches must follow conventional prefixes:
 - `feat/*` - New features or components
 - `fix/*` - Bug fixes and defect remediations
 - `docs/*` - Documentation additions
 - `dx/*` - Developer experience and tooling improvements
 - `refactor/*` - Code refactoring without behavior changes
 - `perf/*` - Performance optimizations
+- `chore/*` - Dependencies and repository maintenance
+
+Open pull requests against `main` and squash-merge them using a Conventional
+Commit PR title. Vercel deploys the merged `main` commit to production;
+feature branches do not deploy automatically. See
+[Release and deployment workflow](./docs/how-to/release-and-deploy.md).
 
 Generate conforming branch names interactively:
 ```bash
