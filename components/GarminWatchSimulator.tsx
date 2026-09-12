@@ -58,7 +58,20 @@ const getHighScoreSnapshot = () => {
 };
 const getHighScoreServerSnapshot = () => "0";
 
-export const GarminWatchSimulator: React.FC = () => {
+interface GarminWatchSimulatorProps {
+  /**
+   * Test/debug seam only: seeds both stateRef and gameState with this exact
+   * state at mount instead of a fresh createInitialState() call. Lets a
+   * real-component + real-engine test drive straight to a specific (e.g.
+   * mid-run) state without simulating a full playthrough or mocking the
+   * engine module (#685). Not used by any production caller.
+   */
+  initialState?: GameEngineState;
+}
+
+export const GarminWatchSimulator: React.FC<GarminWatchSimulatorProps> = ({
+  initialState,
+}) => {
   const rawHighScore = useSyncExternalStore(
     subscribeHighScore,
     getHighScoreSnapshot,
@@ -80,9 +93,10 @@ export const GarminWatchSimulator: React.FC = () => {
   // Hardware & Simulation State
   const [bezelTheme, setBezelTheme] = useState<WatchBezelTheme>("slate");
   const [deviceTarget, setDeviceTarget] = useState<DeviceTarget>("fenix");
-  const initialState = createInitialState("fenix", loadedHighScore);
-  const stateRef = useRef<GameEngineState>(initialState);
-  const [gameState, setGameState] = useState<GameEngineState>(initialState);
+  const defaultState =
+    initialState ?? createInitialState("fenix", loadedHighScore);
+  const stateRef = useRef<GameEngineState>(defaultState);
+  const [gameState, setGameState] = useState<GameEngineState>(defaultState);
   const effectiveHighScore = Math.max(gameState.highScore, loadedHighScore);
   const [isFocused, setIsFocused] = useState(false);
   const isDraggingFogRef = useRef(false);
@@ -101,6 +115,29 @@ export const GarminWatchSimulator: React.FC = () => {
   const gameLoopRef = useRef<number | null>(null);
   const lastFrameTimeRef = useRef<number>(0);
   const frameCountRef = useRef<number>(0);
+
+  // Single gateway for every stateRef mutation: stateRef.current and
+  // gameState are always written together from the same computed value, so
+  // the 60fps-loop ref and the rendered React state can never diverge by a
+  // call site forgetting to update one of them (#685, mirroring #655's
+  // applyTransition in WorkingWithDuck.tsx). `shouldSync` lets the hot
+  // per-frame tick path opt out of a React re-render per tick while still
+  // going through this one path; every discrete user action defaults to
+  // always syncing.
+  const applyTransition = useCallback(
+    (
+      updater: (state: GameEngineState) => GameEngineState,
+      shouldSync: (next: GameEngineState) => boolean = () => true
+    ): GameEngineState => {
+      const next = updater(stateRef.current);
+      stateRef.current = next;
+      if (shouldSync(next)) {
+        setGameState(next);
+      }
+      return next;
+    },
+    []
+  );
 
   // Audio Beep Helpers (Authentic Garmin 1200-1600Hz Piezo)
   const playBeep = useCallback(
@@ -122,14 +159,12 @@ export const GarminWatchSimulator: React.FC = () => {
     if (current.gameState !== "playing" || !current.isGrounded) return;
     triggerHaptic(20);
     playBeep(900, 0.03);
-    const nextState = {
-      ...current,
+    applyTransition((state) => ({
+      ...state,
       playerVy: JUMP_FORCE,
       isGrounded: false,
-    };
-    stateRef.current = nextState;
-    setGameState(nextState);
-  }, [playBeep]);
+    }));
+  }, [playBeep, applyTransition]);
 
   // Jettison Oldest Variable (DOWN)
   const handleJettison = useCallback(() => {
@@ -137,10 +172,8 @@ export const GarminWatchSimulator: React.FC = () => {
     if (current.gameState !== "playing") return;
     triggerHaptic(20);
     playBeep(650, 0.035);
-    const { state: nextState } = jettisonOldestVariable(current);
-    stateRef.current = nextState;
-    setGameState(nextState);
-  }, [playBeep]);
+    applyTransition((state) => jettisonOldestVariable(state).state);
+  }, [playBeep, applyTransition]);
 
   // Trigger Backlight / Flashlight (LIGHT)
   const handleToggleLight = useCallback(() => {
@@ -151,13 +184,11 @@ export const GarminWatchSimulator: React.FC = () => {
     if (nextLight && current.battery > 0) {
       playBeep(1600, 0.04);
     }
-    const nextState = {
-      ...current,
-      isLightOn: current.battery > 0 ? nextLight : false,
-    };
-    stateRef.current = nextState;
-    setGameState(nextState);
-  }, [playButtonTone, playBeep]);
+    applyTransition((state) => ({
+      ...state,
+      isLightOn: state.battery > 0 ? nextLight : false,
+    }));
+  }, [playButtonTone, playBeep, applyTransition]);
 
   // Force Garbage Collection (BACK)
   const handleForceGc = useCallback(() => {
@@ -165,41 +196,29 @@ export const GarminWatchSimulator: React.FC = () => {
     if (current.gameState !== "playing" || current.isGcActive) return;
     triggerHaptic(20);
     playBeep(450, 0.08);
-    const { state: nextState } = triggerGarbageCollection(current);
-    stateRef.current = nextState;
-    setGameState(nextState);
-  }, [playBeep]);
+    applyTransition((state) => triggerGarbageCollection(state).state);
+  }, [playBeep, applyTransition]);
 
   // Save Persistent Variable to Flash NVRAM
   const handleSaveFlash = useCallback(() => {
     playBeep(800, 0.03);
-    const current = stateRef.current;
-    const { state: nextState } = allocateFlashVariable(current, 8.0);
-    stateRef.current = nextState;
-    setGameState(nextState);
-  }, [playBeep]);
+    applyTransition((state) => allocateFlashVariable(state, 8.0).state);
+  }, [playBeep, applyTransition]);
 
   // Clear NVRAM Flash Storage
   const handleClearFlash = useCallback(() => {
     playBeep(500, 0.04);
-    const current = stateRef.current;
-    const nextState = clearFlashStorage(current);
-    stateRef.current = nextState;
-    setGameState(nextState);
-  }, [playBeep]);
+    applyTransition((state) => clearFlashStorage(state));
+  }, [playBeep, applyTransition]);
 
   // Drain Battery for Power Loss Testing
   const handleDrainBattery = useCallback(() => {
     playBeep(400, 0.05);
-    const current = stateRef.current;
-    const nextBattery = Math.max(0, current.battery - 20);
-    const nextState = {
-      ...current,
-      battery: nextBattery,
-    };
-    stateRef.current = nextState;
-    setGameState(nextState);
-  }, [playBeep]);
+    applyTransition((state) => ({
+      ...state,
+      battery: Math.max(0, state.battery - 20),
+    }));
+  }, [playBeep, applyTransition]);
 
   // Start / Pause / Restart (START)
   const handleStartStop = useCallback(() => {
@@ -212,31 +231,23 @@ export const GarminWatchSimulator: React.FC = () => {
       current.gameState === "shutdown" ||
       current.gameState === "summary"
     ) {
-      const next = startGame(current, deviceTarget);
-      stateRef.current = next;
-      setGameState(next);
+      applyTransition((state) => startGame(state, deviceTarget));
       recordEvent("garmin_simulator_start", "project_click").catch(() => {});
       playSuccess();
     } else if (current.gameState === "playing") {
-      const next = { ...current, gameState: "paused" as const };
-      stateRef.current = next;
-      setGameState(next);
+      applyTransition((state) => ({ ...state, gameState: "paused" as const }));
     } else if (current.gameState === "paused") {
-      const next = { ...current, gameState: "playing" as const };
-      stateRef.current = next;
-      setGameState(next);
+      applyTransition((state) => ({ ...state, gameState: "playing" as const }));
     }
-  }, [deviceTarget, playButtonTone, playSuccess, recordEvent]);
+  }, [deviceTarget, playButtonTone, playSuccess, recordEvent, applyTransition]);
 
   // Quick Fog Wipe (W / Touch / Mouse)
   const handleWipeFog = useCallback(
     (canvasX = CANVAS_SIZE / 2, canvasY = CANVAS_SIZE / 2) => {
       playBeep(1100, 0.015);
-      const next = wipeScreenFog(stateRef.current, canvasX, canvasY, 35);
-      stateRef.current = next;
-      setGameState(next);
+      applyTransition((state) => wipeScreenFog(state, canvasX, canvasY, 35));
     },
-    [playBeep]
+    [playBeep, applyTransition]
   );
 
   // Switch Device Profile
@@ -244,9 +255,7 @@ export const GarminWatchSimulator: React.FC = () => {
     triggerHaptic(15);
     playButtonTone();
     setDeviceTarget(target);
-    const next = createInitialState(target, stateRef.current.highScore);
-    stateRef.current = next;
-    setGameState(next);
+    applyTransition((state) => createInitialState(target, state.highScore));
   };
 
   // Process Directional Touch Swipe Gestures
@@ -485,8 +494,17 @@ export const GarminWatchSimulator: React.FC = () => {
       // Update simulation in mutable ref if active
       if (stateRef.current.gameState === "playing") {
         const prevStatus = stateRef.current.gameState;
-        const nextState = updateGameSimulation(stateRef.current, deltaMs);
-        stateRef.current = nextState;
+        // On milestone status transition, sync the throttled React UI
+        // immediately. Otherwise, sync low-frequency React UI throttled to
+        // 10 FPS (every 6 frames).
+        const nextState = applyTransition(
+          (state) => updateGameSimulation(state, deltaMs),
+          (next) => {
+            if (next.gameState !== prevStatus) return true;
+            frameCountRef.current++;
+            return frameCountRef.current % 6 === 0;
+          }
+        );
 
         // Save high scores safely
         if (nextState.score > nextState.highScore) {
@@ -497,17 +515,6 @@ export const GarminWatchSimulator: React.FC = () => {
                 nextState.score.toString()
               );
             } catch {}
-          }
-        }
-
-        // On milestone status transition, update React UI immediately.
-        // Otherwise, update low-frequency React UI throttled to 10 FPS (every 6 frames).
-        if (nextState.gameState !== prevStatus) {
-          setGameState({ ...nextState });
-        } else {
-          frameCountRef.current++;
-          if (frameCountRef.current % 6 === 0) {
-            setGameState({ ...nextState });
           }
         }
       }
@@ -535,7 +542,7 @@ export const GarminWatchSimulator: React.FC = () => {
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, []);
+  }, [applyTransition]);
 
   // Theme styling helpers
   const getThemeChassis = () => {
