@@ -133,9 +133,13 @@ Processes due items from OutboundEmailQueue with exponential backoff.
 
 ### queueOutboundEmail()
 
-> `static` **queueOutboundEmail**(`options`, `fromAddress?`, `errorReason?`): `Promise`\<`string`\>
+> `static` **queueOutboundEmail**(`options`, `fromAddress?`, `errorReason?`): `Promise`\<`string` \| `null`\>
 
 Enqueues an email to the persistent OutboundEmailQueue table.
+
+Returns the durable queue id, or `null` when the row could not be
+persisted. A null result means the message is not queued and will not be
+retried; callers must not present it as accepted for delivery.
 
 #### Parameters
 
@@ -153,7 +157,7 @@ Enqueues an email to the persistent OutboundEmailQueue table.
 
 #### Returns
 
-`Promise`\<`string`\>
+`Promise`\<`string` \| `null`\>
 
 ***
 
