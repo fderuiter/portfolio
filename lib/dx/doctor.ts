@@ -563,6 +563,10 @@ export function checkMigrationGuard(root: string): DiagnosticCheckResult {
           pattern: /check:migrations:drift|prisma migrate diff/i,
         },
         {
+          name: "disposable migration replay ('npm run migration:replay')",
+          pattern: /migration:replay/i,
+        },
+        {
           name: "pipeline release gate execution ('npm run release:gate' or 'release-gate.ts')",
           pattern: /release:gate|release-gate\.ts/i,
         },

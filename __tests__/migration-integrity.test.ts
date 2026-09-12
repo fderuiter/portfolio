@@ -221,6 +221,9 @@ describe("Prisma migration integrity", () => {
     expect(() => validateDocCommands(docFile)).toThrow(
       /pipeline release gate execution/
     );
+    expect(() => validateDocCommands(docFile)).toThrow(
+      /disposable migration replay/
+    );
 
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
