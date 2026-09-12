@@ -14,6 +14,26 @@ export interface GitHubLanguage {
 
 import { getEnv } from "./env";
 
+/**
+ * Where a {@link GitHubStats} payload came from.
+ *
+ * - `live` - every figure was read from the GitHub API.
+ * - `live-partial` - the repository figures are live, but at least one
+ *   secondary series (currently the commit timeline) was synthesized because
+ *   its endpoint failed, was throttled, or returned nothing.
+ * - `simulated` - no upstream data was usable; every figure is generated
+ *   locally and is not a real measurement.
+ */
+export type GitHubStatsProvenance = "live" | "live-partial" | "simulated";
+
+/**
+ * Total wall-clock budget, in milliseconds, for all upstream GitHub calls made
+ * while assembling one repository's statistics. The calls share a single
+ * deadline, so an outage or a throttled endpoint cannot stack four slow
+ * requests into an unbounded page render.
+ */
+export const GITHUB_REQUEST_BUDGET_MS = 8000;
+
 export interface GitHubStats {
   stars: number;
   forks: number;
@@ -23,7 +43,10 @@ export interface GitHubStats {
   commitActivity: number[];
   commitsCount?: number;
   primaryLanguage?: string;
+  /** Upstream last-push timestamp, when the repository endpoint supplied one. */
   updatedAt?: string;
+  /** How much of this payload is a real measurement. Never assume `live`. */
+  provenance: GitHubStatsProvenance;
 }
 
 /**
@@ -81,6 +104,12 @@ export function parseGitHubUrl(
 /**
  * Primary fetch routine with rate-limit authentication guards.
  * Hits api.github.com/repos/{owner}/{repo}, /languages, and /commits.
+ *
+ * All four calls share one {@link GITHUB_REQUEST_BUDGET_MS} deadline, so a
+ * GitHub outage or a throttled endpoint cannot hold a page render open. The
+ * signal only opts these requests out of per-render fetch memoization; the
+ * `next.revalidate` data cache and the surrounding `unstable_cache` wrapper
+ * are unaffected.
  */
 async function fetchRawGitHubStats(
   owner: string,
@@ -96,14 +125,14 @@ async function fetchRawGitHubStats(
     headers.Authorization = `token ${currentEnv.GITHUB_TOKEN}`;
   }
 
+  const signal = AbortSignal.timeout(GITHUB_REQUEST_BUDGET_MS);
+  const requestInit = { headers, signal, next: { revalidate: 3600 } };
+
   try {
     // 1. Fetch main repository statistics
     const repoRes = await fetch(
       `https://api.github.com/repos/${owner}/${repo}`,
-      {
-        headers,
-        next: { revalidate: 3600 },
-      }
+      requestInit
     );
     if (!repoRes.ok) {
       // 404 (private/unreleased repo) or 403 (unauthenticated rate-limit) are expected offline/build conditions
@@ -116,10 +145,7 @@ async function fetchRawGitHubStats(
     try {
       const langRes = await fetch(
         `https://api.github.com/repos/${owner}/${repo}/languages`,
-        {
-          headers,
-          next: { revalidate: 3600 },
-        }
+        requestInit
       );
       if (langRes.ok) {
         langData = await langRes.json();
@@ -146,10 +172,7 @@ async function fetchRawGitHubStats(
     try {
       const commitsRes = await fetch(
         `https://api.github.com/repos/${owner}/${repo}/commits?per_page=5`,
-        {
-          headers,
-          next: { revalidate: 3600 },
-        }
+        requestInit
       );
       if (commitsRes.ok) {
         commitsData = await commitsRes.json();
@@ -184,10 +207,7 @@ async function fetchRawGitHubStats(
     try {
       const activityRes = await fetch(
         `https://api.github.com/repos/${owner}/${repo}/stats/commit_activity`,
-        {
-          headers,
-          next: { revalidate: 3600 },
-        }
+        requestInit
       );
       if (activityRes.ok) {
         const activityData = await activityRes.json();
@@ -201,8 +221,11 @@ async function fetchRawGitHubStats(
       // Non-critical commit activity fetch failure
     }
 
-    // Resilient sine-wave-based mockup generator if empty or rate-limited
-    if (commitActivity.length === 0) {
+    // Resilient sine-wave-based mockup generator if empty or rate-limited.
+    // Substituting invented numbers downgrades the payload's provenance: the
+    // sparkline must never present a fabricated timeline as measured history.
+    const commitActivitySynthesized = commitActivity.length === 0;
+    if (commitActivitySynthesized) {
       commitActivity = generateMockCommitActivity();
     }
 
@@ -213,8 +236,17 @@ async function fetchRawGitHubStats(
       languages,
       recentCommits,
       commitActivity,
+      updatedAt:
+        typeof repoData.pushed_at === "string"
+          ? repoData.pushed_at
+          : typeof repoData.updated_at === "string"
+            ? repoData.updated_at
+            : undefined,
+      provenance: commitActivitySynthesized ? "live-partial" : "live",
     };
   } catch {
+    // Includes an exhausted request budget (TimeoutError) and a malformed
+    // upstream body. Callers fall back to simulated figures.
     return null;
   }
 }
@@ -834,5 +866,6 @@ export function getSimulatedStats(
     languages,
     recentCommits,
     commitActivity,
+    provenance: "simulated",
   };
 }

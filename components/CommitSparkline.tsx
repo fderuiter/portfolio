@@ -1,17 +1,29 @@
 "use client";
 
 import React, { useMemo, useId } from "react";
-import { mapDataToCoordinates, generateHermiteSplinePath } from "@/lib/graphics-math";
+import {
+  mapDataToCoordinates,
+  generateHermiteSplinePath,
+} from "@/lib/graphics-math";
+import type { GitHubStatsProvenance } from "@/lib/github";
 
 interface CommitSparklineProps {
   activity: number[];
   className?: string;
+  /**
+   * Where the plotted series came from. Anything other than `live` is drawn
+   * from generated numbers and is labelled as such, so an illustrative curve
+   * is never mistaken for measured commit history.
+   */
+  provenance?: GitHubStatsProvenance;
 }
 
-export const CommitSparkline: React.FC<CommitSparklineProps> = ({ 
+export const CommitSparkline: React.FC<CommitSparklineProps> = ({
   activity,
-  className 
+  className,
+  provenance = "live",
 }) => {
+  const isMeasured = provenance === "live";
   // Ensure we have exactly 52 data points (if less, default to baseline)
   const dataPoints = useMemo(() => {
     if (!activity || activity.length === 0) {
@@ -34,7 +46,14 @@ export const CommitSparkline: React.FC<CommitSparklineProps> = ({
     const height = 60;
     const padding = 8;
 
-    const points = mapDataToCoordinates(dataPoints, width, height, padding, minVal, maxVal);
+    const points = mapDataToCoordinates(
+      dataPoints,
+      width,
+      height,
+      padding,
+      minVal,
+      maxVal
+    );
     return generateHermiteSplinePath(points, height);
   }, [dataPoints, minVal, maxVal]);
 
@@ -45,8 +64,21 @@ export const CommitSparkline: React.FC<CommitSparklineProps> = ({
     <div className={`w-full relative select-none ${className || ""}`}>
       {/* Sparkline Title Metadata */}
       <div className="flex justify-between items-center text-[10px] font-mono text-zinc-400 mb-2">
-        <span className="tracking-widest uppercase">Commit Activity (12 Months)</span>
-        <span className="text-brand-cyan font-bold">{totalCommits} Commits</span>
+        <span className="tracking-widest uppercase">
+          Commit Activity (12 Months)
+        </span>
+        {isMeasured ? (
+          <span className="text-brand-cyan font-bold">
+            {totalCommits} Commits
+          </span>
+        ) : (
+          <span
+            className="text-slate-400 font-bold tracking-widest uppercase"
+            title="GitHub commit statistics were unavailable; this timeline is illustrative."
+          >
+            Sample Data
+          </span>
+        )}
       </div>
 
       {/* SVG Canvas Sparkline Graph */}
@@ -58,7 +90,11 @@ export const CommitSparkline: React.FC<CommitSparklineProps> = ({
           viewBox="0 0 300 60"
           className="w-full h-[60px] overflow-visible relative z-10"
           role="img"
-          aria-label={`GitHub commit activity timeline over the last 12 months. Total commits: ${totalCommits}`}
+          aria-label={
+            isMeasured
+              ? `GitHub commit activity timeline over the last 12 months. Total commits: ${totalCommits}`
+              : "Illustrative commit activity timeline. Live GitHub statistics were unavailable, so this curve is sample data and does not show real commit history."
+          }
         >
           <defs>
             {/* Area gradient under the path */}
@@ -66,9 +102,15 @@ export const CommitSparkline: React.FC<CommitSparklineProps> = ({
               <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.25" />
               <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0" />
             </linearGradient>
-            
+
             {/* Timeline color stroke gradient */}
-            <linearGradient id={`${uniqueId}-stroke`} x1="0" y1="0" x2="1" y2="0">
+            <linearGradient
+              id={`${uniqueId}-stroke`}
+              x1="0"
+              y1="0"
+              x2="1"
+              y2="0"
+            >
               <stop offset="0%" stopColor="#06b6d4" />
               <stop offset="50%" stopColor="#3b82f6" />
               <stop offset="100%" stopColor="#06b6d4" />
