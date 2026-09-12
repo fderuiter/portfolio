@@ -415,9 +415,9 @@ export const StudioHeader: React.FC<StudioHeaderProps> = ({
                     >
                       <IconLink className="w-4 h-4 text-brand-cyan" />
                       <div className="flex-1">
-                        <div className="font-bold">Share Studio Protocol</div>
+                        <div className="font-bold">Copy View Link</div>
                         <div className="text-[10px] text-zinc-500">
-                          Copy direct link with state
+                          Navigation URL only — does not include study content
                         </div>
                       </div>
                     </button>
