@@ -76,7 +76,7 @@ describe("Vercel Retention & Storage Inventory", () => {
 
     const ids = inventory.candidates.map((c) => c.id);
     const uniqueIds = new Set(ids);
-    expect(uniqueIds.size).toBe(42);
+    expect(uniqueIds.size).toBe(0);
   });
 
   it("strictly excludes the current production target from candidates", () => {

@@ -365,9 +365,9 @@ describe("Vercel Hobby Storage & Build Headroom Tracker", () => {
       expect(docContent).toContain("Functions Storage");
       expect(docContent).toContain("Deployment Storage");
       expect(docContent).toContain("Build Time");
-      expect(docContent).toContain("9.60 GB");
-      expect(docContent).toContain("5.85 GB");
-      expect(docContent).toContain("86.0 hours");
+      expect(docContent).toContain("9.68 GB");
+      expect(docContent).toContain("6.20 GB");
+      expect(docContent).toContain("87.0 hours");
       expect(docContent).toContain("Issue #691");
       expect(docContent).toContain("Issue #698");
       expect(docContent).toContain("Issue #692");

@@ -133,8 +133,9 @@ When contributing code, ensure adherence to system invariants detailed in [`AGEN
 ### Branch Naming
 After the one-time `dev` reconciliation described in
 [ADR 0037](./adr/0037-controlled-integration-and-release-deployments.md), all
-work branches from `main` and returns to `main` through a pull request. Topic
+work branches from `main` and returns through a pull request to `main`. Topic
 branches must follow conventional prefixes:
+
 - `feat/*` - New features or components
 - `fix/*` - Bug fixes and defect remediations
 - `docs/*` - Documentation additions

@@ -95,11 +95,12 @@ When `evaluateCanaryRollout` yields a `decision` of `ROLLBACK_REQUIRED`, the dep
 
 To catch silent production regressions, the repository runs automated, continuous end-to-end Playwright synthetic probes.
 
-### 30-Minute Cron Schedule
+### Daily Cron Schedule
 
 - **Workflow File**: `.github/workflows/synthetic-probes.yml`
-- **Cron Schedule**: `*/30 * * * *` (runs every 30 minutes)
-- **Runtime Environment**: Headless Chromium on `ubuntu-latest`, Node.js 22.x, using cached Playwright binaries.
+- **Cron Schedule**: `17 7 * * *` (runs daily at 07:17 UTC)
+- **Runtime Environment**: Headless Chromium on `ubuntu-latest`, Node.js 24.x,
+  using cached Playwright binaries.
 
 ### Manual Probe Execution & Custom Target URLs
 
