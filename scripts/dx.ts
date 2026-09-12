@@ -93,6 +93,9 @@ function printUsage(): void {
     `  ${colors.cyan}check:migrations:drift${colors.reset}        Run schema drift verification against prisma/schema.prisma`
   );
   console.log(
+    `  ${colors.cyan}migration:replay${colors.reset}              Replay full migration history on disposable target`
+  );
+  console.log(
     `  ${colors.cyan}release:gate${colors.reset}                  Run pre-release security audit and deploy gate`
   );
   console.log(
@@ -1361,6 +1364,12 @@ export async function main(): Promise<void> {
           `\n${colors.brightYellow}⚠️  Schema drift check completed (live database connection unavailable or drift detected).${colors.reset}\n`
         );
       }
+      break;
+    }
+    case "migration:replay": {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { runMigrationReplay } = require("./migration-replay");
+      await runMigrationReplay();
       break;
     }
     case "release:gate": {

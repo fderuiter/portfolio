@@ -131,6 +131,29 @@ To run offline migration safety and integrity checks (provider parity, SQL file 
 npm run check:migrations
 ```
 
+### Disposable migration replay (`npm run migration:replay`)
+
+To prove that the full committed migration history reaches the current `prisma/schema.prisma` from an empty database without reading ambient production credentials or risking data corruption, run the dedicated migration replay command:
+
+```bash
+npm run migration:replay
+```
+
+#### Replay execution model & target precedence
+
+1. **Target Precedence**: Replay looks for an explicit disposable target via `--url <url>`, `MIGRATION_REPLAY_URL`, or `DISPOSABLE_DATABASE_URL`. If none is specified, it checks for an available local Docker daemon to spin up an ephemeral container (`postgres:17-alpine`).
+2. **Ambient Credential Isolation**: The replay command deliberately ignores `.env`, `.env.local`, and ambient `DIRECT_URL` / `DATABASE_URL` values to prevent accidental replay or drift checks against live environments.
+3. **Target Disposability Guard**: External or production hosts (e.g. `*.neon.tech`, `*.supabase.co`, hosts containing `prod`) are strictly refused by default. To explicitly authorize an external or staging rehearsal target, set `ALLOW_NON_DISPOSABLE_TARGET=true` or pass `--allow-non-disposable`. All diagnostics redact user credentials and display safe target information.
+4. **Zero-Drift Invariant**: The workflow applies all committed migrations in sequence (`prisma migrate deploy`) and executes a zero-drift schema diff (`prisma migrate diff`) against `prisma/schema.prisma`. Any residual drift or replay error exits with code 1 and actionable diagnostics.
+
+#### Continuous integration replay mode
+
+In CI pipelines or local Docker-less environments, provide an explicit disposable target URL via `MIGRATION_REPLAY_URL` (targeting an ephemeral database such as `portfolio_ci` on `localhost:5432` with a dedicated `replay` schema):
+
+```bash
+MIGRATION_REPLAY_URL="${DISPOSABLE_POSTGRES_URL}" npm run migration:replay
+```
+
 ### Pipeline release gate execution
 
 Live database migrations execute strictly inside the dedicated Pipeline Release Gate stage (`npm run release:gate` / `scripts/release-gate.ts`), isolated from static application build compilation (`scripts/build.js`). Direct database write credentials exist exclusively within the release gate stage, eliminating sensitive credential exposure and database lock conflicts during application compilation.
