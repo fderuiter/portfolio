@@ -6,7 +6,11 @@ deliverability webhook working locally or in a new deployment environment.
 See [ADR 0018](../../adr/0018-resilient-transactional-email-and-bot-defense.md)
 and [ADR 0024](../../adr/0024-resilient-resend-webhook-deliverability-and-outbound-retry-queue.md)
 for the design rationale behind the retry queue and bounce/complaint
-handling this configuration enables.
+handling this configuration enables. See the
+[integration catalog](../reference/integrations-catalog.md) for how Resend
+fits alongside this project's other external integrations, and
+[how-to: configure Clerk, Sentry, Upstash, Vercel Cron/Analytics, and GitHub data fetching](configure-integrations.md)
+for the rest of them.
 
 ## 1. Set the required environment variables
 
