@@ -264,4 +264,70 @@ describe("StudySpine Component (Left Sidebar & Global Library)", () => {
       })
     );
   });
+
+  it("makes form selection reachable and activatable by keyboard (#659)", async () => {
+    const onSelectForm = vi.fn();
+
+    await act(async () => {
+      root = createRoot(container);
+      root.render(
+        <StudySpine
+          {...defaultProps}
+          activeTab="forms"
+          onSelectForm={onSelectForm}
+        />
+      );
+    });
+
+    const formRow = container.querySelector(
+      '[role="button"][aria-label^="Select form"]'
+    ) as HTMLElement;
+    expect(formRow).toBeTruthy();
+    expect(formRow.tabIndex).toBe(0);
+
+    formRow.focus();
+    expect(document.activeElement).toBe(formRow);
+
+    await act(async () => {
+      formRow.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+      );
+    });
+
+    expect(onSelectForm).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not re-trigger form selection when Enter is pressed on the nested duplicate/delete buttons (#659)", async () => {
+    const onSelectForm = vi.fn();
+    const onDuplicateForm = vi.fn();
+
+    await act(async () => {
+      root = createRoot(container);
+      root.render(
+        <StudySpine
+          {...defaultProps}
+          activeTab="forms"
+          onSelectForm={onSelectForm}
+          onDuplicateForm={onDuplicateForm}
+        />
+      );
+    });
+
+    const formRow = container.querySelector(
+      '[role="button"][aria-label^="Select form"]'
+    ) as HTMLElement;
+    const duplicateBtn = formRow.querySelector(
+      'button[title="Duplicate Form"]'
+    ) as HTMLButtonElement;
+    expect(duplicateBtn).toBeTruthy();
+
+    duplicateBtn.focus();
+    await act(async () => {
+      duplicateBtn.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+      );
+    });
+
+    expect(onSelectForm).not.toHaveBeenCalled();
+  });
 });
