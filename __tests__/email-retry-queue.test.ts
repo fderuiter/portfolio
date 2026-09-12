@@ -85,40 +85,38 @@ vi.mock("@/lib/db", () => ({
             return record;
           }
         ),
-      findMany: vi
-        .fn()
-        .mockImplementation(
-          async ({
-            where,
-            take,
-          }: {
-            where?: {
-              status?: { in?: string[] };
-              nextRetryAt?: { lte?: Date };
-            };
-            take?: number;
-          }) => {
-            let results = Array.from(mockQueueStore.values());
-            if (where?.status?.in) {
-              results = results.filter((item) =>
-                where.status?.in?.includes(item.status)
-              );
-            }
-            if (where?.nextRetryAt?.lte) {
-              const lteTime =
-                where.nextRetryAt.lte instanceof Date
-                  ? where.nextRetryAt.lte.getTime()
-                  : new Date(where.nextRetryAt.lte).getTime();
-              results = results.filter(
-                (item) => item.nextRetryAt.getTime() <= lteTime
-              );
-            }
-            if (take) {
-              results = results.slice(0, take);
-            }
-            return results;
+      findMany: vi.fn().mockImplementation(
+        async ({
+          where,
+          take,
+        }: {
+          where?: {
+            status?: { in?: string[] };
+            nextRetryAt?: { lte?: Date };
+          };
+          take?: number;
+        }) => {
+          let results = Array.from(mockQueueStore.values());
+          if (where?.status?.in) {
+            results = results.filter((item) =>
+              where.status?.in?.includes(item.status)
+            );
           }
-        ),
+          if (where?.nextRetryAt?.lte) {
+            const lteTime =
+              where.nextRetryAt.lte instanceof Date
+                ? where.nextRetryAt.lte.getTime()
+                : new Date(where.nextRetryAt.lte).getTime();
+            results = results.filter(
+              (item) => item.nextRetryAt.getTime() <= lteTime
+            );
+          }
+          if (take) {
+            results = results.slice(0, take);
+          }
+          return results;
+        }
+      ),
       update: vi
         .fn()
         .mockImplementation(
@@ -272,7 +270,9 @@ describe("Outbound Email Queue & Resilient Backoff Retry Engine (#546)", () => {
       expect(summary.succeeded).toBe(1);
       expect(summary.failed).toBe(0);
 
-      const item = mockQueueStore.get(queueId);
+      // A null id would mean the seed row was never persisted.
+      expect(queueId).not.toBeNull();
+      const item = mockQueueStore.get(queueId as string);
       expect(item?.status).toBe("DELIVERED");
     });
 
