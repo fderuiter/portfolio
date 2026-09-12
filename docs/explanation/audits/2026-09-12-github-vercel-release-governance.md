@@ -76,9 +76,8 @@ commits absent from `dev`, while `dev` has 74 commits absent from `main`.
 The eight `main`-only commits are four changes followed by four reverts. The
 branches share merge base `2b5a7724`, after which they developed independently.
 
-The workflow named `Auto-Sync & Rebase Dev on Main Push` attempts to rebase
-`dev` onto `main` and then force-push with `--force-with-lease`.
-[Checked-in workflow](../../.github/workflows/sync-dev-on-main-push.yml)
+The removed workflow named `Auto-Sync & Rebase Dev on Main Push` attempted to
+rebase `dev` onto `main` and then force-push with `--force-with-lease`.
 The five most recent recorded runs, spanning 2026-08-19 through 2026-08-25,
 all failed. The result is consistent with the observed divergence: the
 automation neither preserves an auditable merge relationship nor reliably
@@ -95,7 +94,7 @@ therefore a poor fit for the desired governance model.
 
 The main CI workflow runs only for pushes to `main`/`master` and pull requests
 targeting `main`/`master`.
-[Checked-in CI workflow](../../.github/workflows/ci.yml)
+[Checked-in CI workflow](../../../.github/workflows/ci.yml)
 Because GitHub's default integration branch is `dev`, routine changes merged
 into `dev` do not receive this CI workflow. Conversely, a `dev` to `main` pull
 request can run CI, but there is no branch protection to require it.
@@ -108,16 +107,16 @@ a red CI history because `main` is unprotected.
 
 The release gate currently performs a security audit, migration validation,
 and `prisma migrate deploy` against the `DATABASE_URL` supplied to that job.
-[Release gate](../../scripts/release-gate.ts)
+[Release gate](../../../scripts/release-gate.ts)
 In CI, that URL points to the disposable PostgreSQL service. This validates the
 migration chain but does not deploy migrations to the production database.
 The Vercel build script validates migrations but deliberately does not run
 `migrate deploy`.
-[Build script](../../scripts/build.js)
+[Build script](../../../scripts/build.js)
 No checked-in workflow provides a production migration stage. ADR 0001 says
 that live migrations belong in a secured pipeline release stage, so the
 implementation and the recorded decision are not yet connected end to end.
-[ADR 0001](../../adr/0001-pre-build-database-migrations.md)
+[ADR 0001](../../../adr/0001-pre-build-database-migrations.md)
 
 ### Vercel Git and deployment configuration
 
@@ -126,7 +125,7 @@ The linked Vercel project is `laser-loons-projects/portfolio`, project ID
 root `.`, and `npm run build`. The repository declares `npm ci` as the install
 command, while the installed Vercel CLI's project inspection displayed
 `npm install`; this should be treated as configuration drift to verify in the
-dashboard, with [`vercel.json`](../../vercel.json) made the reviewed source of
+dashboard, with [`vercel.json`](../../../vercel.json) made the reviewed source of
 truth.
 
 The emergency setting now builds only the Production environment. This stops
