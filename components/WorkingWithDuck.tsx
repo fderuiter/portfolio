@@ -2000,10 +2000,21 @@ export const WorkingWithDuck: React.FC = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
+      const interactiveTag =
+        target?.tagName === "BUTTON" ||
+        target?.tagName === "SELECT" ||
+        target?.tagName === "A";
+      const interactiveRole =
+        target?.getAttribute?.("role") === "button" ||
+        target?.getAttribute?.("role") === "link" ||
+        target?.getAttribute?.("role") === "menuitem" ||
+        target?.getAttribute?.("role") === "tab";
       if (
         target?.tagName === "INPUT" ||
         target?.tagName === "TEXTAREA" ||
-        target?.isContentEditable
+        target?.isContentEditable ||
+        interactiveTag ||
+        interactiveRole
       ) {
         return;
       }
