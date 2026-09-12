@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import { CaseStudyBentoCard } from "@/components/ui/CaseStudyBentoCard";
 import { BaseCaseStudy } from "@/types/domain";
 import { hexToRgba } from "@/lib/utils";
@@ -8,6 +8,7 @@ import { GitHubStats } from "@/lib/github";
 import { motion, AnimatePresence } from "framer-motion";
 import { designManifest } from "@/lib/design-manifest";
 import { useMasonryLayout } from "@/hooks/useMasonryLayout";
+import { useStudioHashParams } from "@/hooks/useStudioHashParams";
 import { BentoLayoutProvider } from "@/components/providers/BentoLayoutContext";
 
 interface HydratedCaseStudy extends BaseCaseStudy {
@@ -18,38 +19,75 @@ interface CaseStudyShowcaseProps {
   caseStudies: HydratedCaseStudy[];
 }
 
-const FILTER_TABS = ["All", "TypeScript", "Python"];
+const FILTER_PARAM = "lang";
 
-const CaseStudyShowcaseInner: React.FC<CaseStudyShowcaseProps> = ({ caseStudies }) => {
-  const [selectedFilter, setSelectedFilter] = useState("All");
+const CaseStudyShowcaseInner: React.FC<CaseStudyShowcaseProps> = ({
+  caseStudies,
+}) => {
+  // Filter tabs are bounded to whatever primary_language values actually appear in
+  // the collection today, so a real Rust, Graphic Design, or Angular/TypeScript
+  // case study is always reachable instead of being silently unfilterable.
+  const filterTabs = useMemo(() => {
+    const seen = new Set<string>();
+    for (const study of caseStudies) {
+      if (study.primary_language) seen.add(study.primary_language);
+    }
+    return ["All", ...Array.from(seen).sort((a, b) => a.localeCompare(b))];
+  }, [caseStudies]);
+
+  // Reflected in the URL hash (via useStudioHashParams' useSyncExternalStore-backed
+  // store, replacing rather than pushing history) so the current filter survives a
+  // browser Back from a case-study detail page and can be shared as a deep link —
+  // without pulling in next/navigation's useSearchParams, which would force this
+  // static page's card content out of the prerendered HTML behind a Suspense boundary.
+  const { getParam, setParam } = useStudioHashParams();
+  const requestedFilter = getParam(FILTER_PARAM, "All");
+  const selectedFilter = filterTabs.includes(requestedFilter)
+    ? requestedFilter
+    : "All";
+
+  const setSelectedFilter = (tab: string) => {
+    setParam(FILTER_PARAM, tab === "All" ? null : tab, { replace: true });
+  };
 
   // Client-side interactive filter
   const filteredStudies = useMemo(() => {
     return selectedFilter === "All"
       ? caseStudies
-      : caseStudies.filter((study) => study.primary_language === selectedFilter);
+      : caseStudies.filter(
+          (study) => study.primary_language === selectedFilter
+        );
   }, [caseStudies, selectedFilter]);
 
-  const { containerRef, layoutState } = useMasonryLayout(caseStudies, filteredStudies);
+  const { containerRef, layoutState } = useMasonryLayout(
+    caseStudies,
+    filteredStudies
+  );
 
   return (
     <div className="w-full flex flex-col items-center">
       {/* Premium Staggered Filtering Tabs */}
       <div className="flex max-w-full overflow-x-auto gap-1.5 mb-8 sm:mb-12 bg-zinc-900/40 p-1.5 rounded-2xl border border-zinc-900/60 backdrop-blur-md relative z-20 scrollbar-none">
-        {FILTER_TABS.map((tab) => {
+        {filterTabs.map((tab) => {
           const isActive = selectedFilter === tab;
           return (
             <button
               key={tab}
               onClick={() => setSelectedFilter(tab)}
               className={`relative px-3.5 sm:px-4 py-2.5 sm:py-2 min-h-[40px] sm:min-h-0 flex items-center justify-center text-xs font-mono font-bold transition-colors duration-300 rounded-xl cursor-pointer select-none shrink-0 ${
-                isActive ? "text-brand-cyan" : "text-zinc-400 hover:text-zinc-200"
+                isActive
+                  ? "text-brand-cyan"
+                  : "text-zinc-400 hover:text-zinc-200"
               }`}
             >
               {isActive && (
                 <motion.div
                   layoutId="activeTab"
-                  style={{ "--tab-glow": `0 0 15px ${hexToRgba(designManifest.colors["brand-cyan"], 0.12)}` } as React.CSSProperties}
+                  style={
+                    {
+                      "--tab-glow": `0 0 15px ${hexToRgba(designManifest.colors["brand-cyan"], 0.12)}`,
+                    } as React.CSSProperties
+                  }
                   className="absolute inset-0 bg-zinc-950 border border-zinc-800/80 rounded-xl -z-10 shadow-[var(--tab-glow)]"
                   transition={designManifest.motion.springs.snappy}
                 />
@@ -61,16 +99,13 @@ const CaseStudyShowcaseInner: React.FC<CaseStudyShowcaseProps> = ({ caseStudies 
       </div>
 
       {/* Dynamic Masonry Bento Grid */}
-      <div 
-        ref={containerRef} 
+      <div
+        ref={containerRef}
         className="w-full flex gap-4 items-start relative z-10"
       >
         {layoutState.isReady ? (
           layoutState.columns.map((colCards, colIdx) => (
-            <div 
-              key={colIdx} 
-              className="flex flex-col gap-4 flex-1 min-w-0"
-            >
+            <div key={colIdx} className="flex flex-col gap-4 flex-1 min-w-0">
               <AnimatePresence mode="popLayout">
                 {colCards.map((study) => (
                   <motion.div
@@ -82,10 +117,12 @@ const CaseStudyShowcaseInner: React.FC<CaseStudyShowcaseProps> = ({ caseStudies 
                     transition={{ duration: 0.22, ease: "easeInOut" }}
                     className="w-full"
                   >
-                    <CaseStudyBentoCard 
-                      study={study} 
+                    <CaseStudyBentoCard
+                      study={study}
                       preCalculatedHeight={study.height}
-                      preCalculatedRealityHeight={study.preCalculatedRealityHeight}
+                      preCalculatedRealityHeight={
+                        study.preCalculatedRealityHeight
+                      }
                       preCalculatedParagraphsLines={study.paragraphsLines}
                       preCalculatedParagraphsItems={study.paragraphsItems}
                     />
@@ -112,7 +149,8 @@ const CaseStudyShowcaseInner: React.FC<CaseStudyShowcaseProps> = ({ caseStudies 
           className="text-center py-16 px-6 bg-zinc-900/10 border border-zinc-900/40 border-dashed rounded-2xl w-full max-w-lg mt-4"
         >
           <p className="text-sm text-zinc-500 italic">
-            No projects found matching language filter &quot;{selectedFilter}&quot;.
+            No projects found matching language filter &quot;{selectedFilter}
+            &quot;.
           </p>
         </motion.div>
       )}
@@ -127,4 +165,3 @@ export const CaseStudyShowcase: React.FC<CaseStudyShowcaseProps> = (props) => {
     </BentoLayoutProvider>
   );
 };
-
