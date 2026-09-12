@@ -75,10 +75,13 @@ export const SkillsGrid: React.FC<SkillsGridProps> = ({ languages }) => {
 
         <div>
           <h3 className="text-xs font-mono font-bold tracking-widest text-zinc-300 uppercase mb-3 sm:mb-4">
-            Languages in the Mix
+            Codebase Composition
           </h3>
           <p className="text-[10px] font-mono text-zinc-400 mb-4 sm:mb-6 leading-relaxed">
-            A snapshot of the languages used across these projects.
+            Share of source bytes GitHub attributes to each language across
+            these repositories — includes markup, styles, and config files
+            alongside programming languages, not a claim of hand-written
+            proficiency split.
           </p>
 
           <div className="space-y-3.5 sm:space-y-4">
