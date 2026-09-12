@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { fromAny } from "@total-typescript/shoehorn";
 import {
   evaluateConditionResult,
   combineConditionResults,
@@ -193,11 +194,11 @@ describe("CRF Studio - Explainable Discrepancy Checks (#540)", () => {
       // Simulates data arriving from an external/import source whose
       // runtime shape doesn't actually match the AstOperator union the
       // TypeScript type claims, e.g. an older or foreign expression form.
-      const cond = {
+      const cond = fromAny<AstCondition, unknown>({
         fieldId: "f_sysbp",
         operator: "before",
         value: 100,
-      } as unknown as AstCondition;
+      });
       expect(evaluateConditionResult(cond, { f_sysbp: 90 }, fields)).toBe(
         "incompatible"
       );
