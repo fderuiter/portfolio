@@ -99,6 +99,9 @@ function printUsage(): void {
     `  ${colors.cyan}verify:upstash${colors.reset}                Verify Upstash Redis connectivity, namespaces, and outage behavior`
   );
   console.log(
+    `  ${colors.cyan}inventory:vercel${colors.reset}              Inspect Vercel storage meters, retention inventory, and candidates`
+  );
+  console.log(
     `  ${colors.cyan}release:gate${colors.reset}                  Run pre-release security audit and deploy gate`
   );
   console.log(
@@ -1389,6 +1392,18 @@ export async function main(): Promise<void> {
         console.log(`Prefix: ${data.environment.isolatedPrefix}`);
         console.log(`Buffer: ${data.keyspaces.telemetryBuffer}`);
       }
+      if (!success) process.exit(1);
+      break;
+    }
+    case "inventory:vercel": {
+      const { runRetentionInventoryVerification } =
+        await import("./vercel-retention-inventory");
+      const json = Boolean(parsed.flags.json || parsed.flags.j);
+      const candidates = Boolean(parsed.flags.candidates || parsed.flags.c);
+      const { success } = runRetentionInventoryVerification({
+        json,
+        candidates,
+      });
       if (!success) process.exit(1);
       break;
     }
