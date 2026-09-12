@@ -41,6 +41,7 @@ const {
   mockExec,
   mockRpop,
   mockLmove,
+  mockLrem,
   mockLrange,
   mockDel,
 } = vi.hoisted(() => ({
@@ -49,6 +50,7 @@ const {
   mockExec: vi.fn(),
   mockRpop: vi.fn(),
   mockLmove: vi.fn(),
+  mockLrem: vi.fn(),
   mockLrange: vi.fn().mockResolvedValue([]),
   mockDel: vi.fn(),
 }));
@@ -62,6 +64,7 @@ vi.mock("@upstash/redis", () => {
         exec: mockExec,
         rpop: mockRpop,
         lmove: mockLmove,
+        lrem: mockLrem,
       };
     }
     lrange = mockLrange;
@@ -173,11 +176,12 @@ describe("Next.js 16 Proxy & Modular Domain Services Suite", () => {
     it("buffers telemetry events to Redis list with 48h expiration", async () => {
       mockExec.mockResolvedValueOnce([1]);
 
-      const event = await TelemetryService.recordEvent({
+      const { event, buffered } = await TelemetryService.recordEvent({
         projectSlug: "/dashboard",
         eventType: "page_view",
       });
 
+      expect(buffered).toBe(true);
       expect(event.projectSlug).toBe("/dashboard");
       expect(mockLpush).toHaveBeenCalledWith(
         "telemetry_buffer",

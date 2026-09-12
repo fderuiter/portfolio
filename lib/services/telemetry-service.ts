@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { prisma } from "@/lib/db";
 import { redis } from "@/lib/redis";
 import { RateLimitParamsSchema } from "@/lib/schemas";
@@ -12,6 +13,14 @@ import {
 export interface TelemetryEventInput {
   projectSlug: string;
   eventType: string;
+}
+
+/** A telemetry event as it is held in, and read back from, the Redis buffer. */
+export interface BufferedTelemetryEvent {
+  id: string;
+  projectSlug: string;
+  eventType: string;
+  createdAt: string | Date;
 }
 
 export interface LocalCacheEntry {
@@ -203,8 +212,14 @@ export class TelemetryService {
 
   /**
    * Records a telemetry interaction event into the Redis buffer queue.
+   *
+   * The Redis buffer is the only store in front of the sync job, so a failed
+   * enqueue drops the event outright. `buffered` reports whether the event was
+   * actually accepted so callers never present a dropped event as durable.
    */
-  static async recordEvent(data: TelemetryEventInput) {
+  static async recordEvent(
+    data: TelemetryEventInput
+  ): Promise<{ event: BufferedTelemetryEvent; buffered: boolean }> {
     const eventId = crypto.randomUUID();
     const eventData = {
       id: eventId,
@@ -214,7 +229,7 @@ export class TelemetryService {
     };
 
     if (env.PLAYWRIGHT_TEST === "true") {
-      return eventData;
+      return { event: eventData, buffered: true };
     }
 
     try {
@@ -229,10 +244,13 @@ export class TelemetryService {
         );
       }
     } catch (err) {
-      console.warn("Failed to commit telemetry event to Redis buffer:", err);
+      // Losing the event here is silent by nature: nothing else holds it.
+      Sentry.captureException(err);
+      console.error("Failed to commit telemetry event to Redis buffer:", err);
+      return { event: eventData, buffered: false };
     }
 
-    return eventData;
+    return { event: eventData, buffered: true };
   }
 
   /**
@@ -279,12 +297,7 @@ export class TelemetryService {
    * using LMOVE to guarantee zero telemetry loss during synchronization failures.
    */
   static async syncBufferedEvents(batchSize: number) {
-    interface BufferedEvent {
-      id: string;
-      projectSlug: string;
-      eventType: string;
-      createdAt: string | Date;
-    }
+    type BufferedEvent = BufferedTelemetryEvent;
 
     // 1. Fetch any pending events previously transferred to processing queue but not yet synced to DB
     const existingProcessing = (await redis.lrange(
@@ -337,8 +350,16 @@ export class TelemetryService {
       throw dbErr;
     }
 
-    // On successful DB write, clear the processed events from the processing queue
-    await redis.del("telemetry_processing");
+    // On successful DB write, acknowledge exactly the events this invocation
+    // persisted. Deleting the whole key would also discard events that an
+    // overlapping sync moved into the processing queue after step 1 read it,
+    // losing them before they ever reached the database. LREM removes a single
+    // occurrence per owned event, so a concurrently moved event survives.
+    const ack = redis.pipeline();
+    for (const event of events) {
+      ack.lrem("telemetry_processing", 1, event);
+    }
+    await ack.exec();
 
     return { processed: events.length, inserted: createResult.count };
   }

@@ -12,6 +12,7 @@
 
 ## Interfaces
 
+- [BufferedTelemetryEvent](interfaces/BufferedTelemetryEvent.md)
 - [LocalCacheEntry](interfaces/LocalCacheEntry.md)
 - [TelemetryEventInput](interfaces/TelemetryEventInput.md)
 

@@ -50,9 +50,13 @@ Evaluates rate limiting anonymously using Web Crypto SHA-256 IP hashing.
 
 ### recordEvent()
 
-> `static` **recordEvent**(`data`): `Promise`\<\{ `createdAt`: `Date`; `eventType`: `string`; `id`: `string`; `projectSlug`: `string`; \}\>
+> `static` **recordEvent**(`data`): `Promise`\<\{ `buffered`: `boolean`; `event`: [`BufferedTelemetryEvent`](../interfaces/BufferedTelemetryEvent.md); \}\>
 
 Records a telemetry interaction event into the Redis buffer queue.
+
+The Redis buffer is the only store in front of the sync job, so a failed
+enqueue drops the event outright. `buffered` reports whether the event was
+actually accepted so callers never present a dropped event as durable.
 
 #### Parameters
 
@@ -62,7 +66,7 @@ Records a telemetry interaction event into the Redis buffer queue.
 
 #### Returns
 
-`Promise`\<\{ `createdAt`: `Date`; `eventType`: `string`; `id`: `string`; `projectSlug`: `string`; \}\>
+`Promise`\<\{ `buffered`: `boolean`; `event`: [`BufferedTelemetryEvent`](../interfaces/BufferedTelemetryEvent.md); \}\>
 
 ***
 
