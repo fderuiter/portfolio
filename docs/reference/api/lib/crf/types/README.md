@@ -16,6 +16,7 @@
 - [CodelistDefinition](interfaces/CodelistDefinition.md)
 - [CodelistOption](interfaces/CodelistOption.md)
 - [ComplianceViolation](interfaces/ComplianceViolation.md)
+- [ConditionGroup](interfaces/ConditionGroup.md)
 - [CRFField](interfaces/CRFField.md)
 - [CRFForm](interfaces/CRFForm.md)
 - [CRFSection](interfaces/CRFSection.md)
@@ -36,8 +37,10 @@
 
 ## Type Aliases
 
+- [AstOperator](type-aliases/AstOperator.md)
 - [ClinicalDataType](type-aliases/ClinicalDataType.md)
 - [ComplianceSeverity](type-aliases/ComplianceSeverity.md)
+- [ConditionResult](type-aliases/ConditionResult.md)
 - [DeviceViewport](type-aliases/DeviceViewport.md)
 - [StudioMode](type-aliases/StudioMode.md)
 - [StudioTheme](type-aliases/StudioTheme.md)

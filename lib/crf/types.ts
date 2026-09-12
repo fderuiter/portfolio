@@ -48,22 +48,50 @@ export interface CdashVariableMetadata {
   dataCategory?: string; // Identifier, Timing, Topic, Qualifier
 }
 
+export type AstOperator =
+  | "eq"
+  | "neq"
+  | "gt"
+  | "gte"
+  | "lt"
+  | "lte"
+  | "in"
+  | "contains"
+  | "is_empty"
+  | "is_not_empty";
+
 export interface AstCondition {
   fieldId: string;
   crossVisitId?: string; // Optional cross-visit comparator (e.g. "v_screen" or "prev_visit")
-  operator:
-    | "eq"
-    | "neq"
-    | "gt"
-    | "gte"
-    | "lt"
-    | "lte"
-    | "in"
-    | "contains"
-    | "is_empty"
-    | "is_not_empty";
+  operator: AstOperator;
   value: string | number | boolean | string[];
+  /**
+   * Field/field discrepancy check (#540): compares fieldId's value against
+   * this OTHER field's value instead of the literal `value`. Takes
+   * precedence over `value` when set.
+   */
+  compareFieldId?: string;
 }
+
+/**
+ * One AND/OR-homogeneous group of leaf conditions (#540). EditCheckRule can
+ * combine several of these with its own groupLogicalOperator, giving
+ * explicit two-level AND/OR grouping (e.g. "(A AND B) OR (C AND D)")
+ * without unbounded recursive nesting.
+ */
+export interface ConditionGroup {
+  id: string;
+  logicalOperator: "AND" | "OR";
+  conditions: AstCondition[];
+}
+
+/**
+ * Four-valued discrepancy check result (#540): "incompatible" is distinct
+ * from "missing" so a genuine authoring/import error (comparing a date
+ * field to a number literal, an unrecognized operator from an import) is
+ * never silently reported the same as a field that simply has no value yet.
+ */
+export type ConditionResult = "true" | "false" | "missing" | "incompatible";
 
 export interface EditCheckRule {
   id: string;
@@ -75,9 +103,25 @@ export interface EditCheckRule {
   targetFieldId: string;
   conditions: AstCondition[];
   logicalOperator: "AND" | "OR";
+  /**
+   * Explicit AND/OR groups (#540). When present (non-empty), evaluation
+   * uses these groups instead of the flat `conditions`/`logicalOperator`
+   * pair, which is retained for backward compatibility with rules
+   * authored, imported, or persisted before grouping existed.
+   */
+  conditionGroups?: ConditionGroup[];
+  groupLogicalOperator?: "AND" | "OR";
   querySeverity?: "info" | "warning" | "error";
   queryMessage?: string;
   formulaExpression?: string; // For calculations: e.g. "weight / ((height/100) * (height/100))"
+  /**
+   * Preserves an imported expression this evaluator couldn't map onto
+   * `conditions`/`conditionGroups` (unrecognized shape, not merely an
+   * unrecognized operator) verbatim, rather than silently dropping or
+   * simplifying it during import (#540). A rule carrying this never fires
+   * automatically; it is surfaced to the author for review instead.
+   */
+  unsupportedExpression?: { raw: unknown; reason: string };
 }
 
 export interface StudyArm {

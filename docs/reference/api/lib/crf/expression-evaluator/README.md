@@ -12,6 +12,9 @@
 
 ## Interfaces
 
+- [ConditionExplanation](interfaces/ConditionExplanation.md)
+- [GroupExplanation](interfaces/GroupExplanation.md)
+- [RuleExplanation](interfaces/RuleExplanation.md)
 - [Token](interfaces/Token.md)
 
 ## Type Aliases
@@ -27,7 +30,13 @@
 - [calculateFridericiaQTc](functions/calculateFridericiaQTc.md)
 - [calculateMostellerBSA](functions/calculateMostellerBSA.md)
 - [calculateRecistSldChange](functions/calculateRecistSldChange.md)
+- [combineConditionResults](functions/combineConditionResults.md)
+- [describeCondition](functions/describeCondition.md)
 - [evaluateCondition](functions/evaluateCondition.md)
+- [evaluateConditionResult](functions/evaluateConditionResult.md)
 - [evaluateFormula](functions/evaluateFormula.md)
 - [evaluateRule](functions/evaluateRule.md)
+- [evaluateRuleResult](functions/evaluateRuleResult.md)
+- [explainRule](functions/explainRule.md)
+- [getRuleGroups](functions/getRuleGroups.md)
 - [isMissingOrNullFlavor](functions/isMissingOrNullFlavor.md)
