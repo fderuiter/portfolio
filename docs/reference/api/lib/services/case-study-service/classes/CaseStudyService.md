@@ -18,6 +18,44 @@
 
 ## Methods
 
+### evictCaseStudyCache()
+
+> `static` **evictCaseStudyCache**(`slug`): `Promise`\<`boolean`\>
+
+Explicitly evicts a case study from the Upstash Redis read-through cache
+and dispatches on-demand Next.js ISR tag revalidations.
+
+#### Parameters
+
+##### slug
+
+`string`
+
+#### Returns
+
+`Promise`\<`boolean`\>
+
+***
+
+### flushBufferedReactionsToDatabase()
+
+> `static` **flushBufferedReactionsToDatabase**(`batchSize?`): `Promise`\<\{ `inserted`: `number`; `processed`: `number`; \}\>
+
+Flushes buffered reactions from Upstash Redis to Neon Postgres in batches.
+Designed for execution during scheduled maintenance (ADR 0036).
+
+#### Parameters
+
+##### batchSize?
+
+`number` = `500`
+
+#### Returns
+
+`Promise`\<\{ `inserted`: `number`; `processed`: `number`; \}\>
+
+***
+
 ### getAllPublishedCaseStudies()
 
 > `static` **getAllPublishedCaseStudies**(): `Promise`\<[`CaseStudyData`](../../../case-studies-data/interfaces/CaseStudyData.md)[]\>
@@ -47,8 +85,11 @@ Retrieves all published case study slugs for static route generation and sitemap
 
 > `static` **getCaseStudyBySlug**(`slug`): `Promise`\<[`CaseStudyData`](../../../case-studies-data/interfaces/CaseStudyData.md) \| `null`\>
 
-Retrieves a single published case study by slug, falling back to static data if absent from database.
-Returns null if not found in database or static fallbacks.
+Retrieves a single published case study by slug.
+Employs the Two-Tier Compute Shield (ADR 0036):
+- Check Upstash Redis read-through cache first (`cs:slug:[slug]`, 3600s TTL).
+- On cache miss or Redis error, query Prisma and populate cache.
+- Fall back to static dataset (FALLBACK_CASE_STUDIES) if absent from DB.
 
 #### Parameters
 
@@ -98,9 +139,12 @@ Retrieves all published case studies for public search/discovery.
 
 ### getReactions()
 
-> `static` **getReactions**(`slug`, `connectionHash`): `Promise`\<\{ `caseStudySlug`: `string`; `counts`: `Record`\<`string`, `number`\>; `success`: `boolean`; `userReactions`: `string`[]; \}\>
+> `static` **getReactions**(`slug`, `connectionHash`): `Promise`\<\{ `caseStudySlug`: `string`; `counts`: \{\[`key`: `string`\]: `number`; \}; `success`: `boolean`; `userReactions`: `string`[]; \}\>
 
 Gets aggregated reactions for a case study.
+Employs the Two-Tier Compute Shield (ADR 0036):
+Reads cached base counts (3600s TTL) and merges uncommitted Redis write-buffer increments,
+completely avoiding database queries during active browsing.
 
 #### Parameters
 
@@ -114,7 +158,7 @@ Gets aggregated reactions for a case study.
 
 #### Returns
 
-`Promise`\<\{ `caseStudySlug`: `string`; `counts`: `Record`\<`string`, `number`\>; `success`: `boolean`; `userReactions`: `string`[]; \}\>
+`Promise`\<\{ `caseStudySlug`: `string`; `counts`: \{\[`key`: `string`\]: `number`; \}; `success`: `boolean`; `userReactions`: `string`[]; \}\>
 
 ***
 
@@ -160,9 +204,11 @@ Submits feedback for a case study with duplicate rate-limiting.
 
 ### submitReaction()
 
-> `static` **submitReaction**(`input`, `connectionHash`): `Promise`\<\{ `counts`: `Record`\<`string`, `number`\>; `reactionType`: `string`; `success`: `boolean`; `userReactions`: `string`[]; \}\>
+> `static` **submitReaction**(`input`, `connectionHash`): `Promise`\<\{ `counts`: \{\[`key`: `string`\]: `number`; \}; `reactionType`: `string`; `success`: `boolean`; `userReactions`: `string`[]; \}\>
 
 Submits a reaction for a case study.
+Employs Write-Buffering in Upstash Redis (ADR 0036):
+Buffers reaction increments via HINCRBY and enqueues events without waking Neon Postgres.
 
 #### Parameters
 
@@ -176,4 +222,4 @@ Submits a reaction for a case study.
 
 #### Returns
 
-`Promise`\<\{ `counts`: `Record`\<`string`, `number`\>; `reactionType`: `string`; `success`: `boolean`; `userReactions`: `string`[]; \}\>
+`Promise`\<\{ `counts`: \{\[`key`: `string`\]: `number`; \}; `reactionType`: `string`; `success`: `boolean`; `userReactions`: `string`[]; \}\>

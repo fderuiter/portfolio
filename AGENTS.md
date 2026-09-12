@@ -187,6 +187,18 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Unit tests (`__tests__/`) and external components (`app/`, `components/`) must import exclusively through public root entry points.
 - Zero circular dependencies are permitted across the repository, enforced deterministically via `npm run lint:boundaries` and `npm run verify`.
 
+### 22. Free-Tier Provider Quota Governance & Edge Offloading
+
+- **Zero-Cost Free-Tier Ceiling**: All application architecture, scheduled jobs, and telemetry pipelines must operate strictly within the zero-cost free-tier entitlements of external providers (Vercel Hobby, Neon Postgres 0.5 GiB, Upstash Redis 10k commands/day, Resend 100 emails/day, Sentry 5k errors / 10k spans/mo, Clerk 10k MAU). Governed by [ADR 0036](adr/0036-free-tier-offloading-and-provider-quota-governance.md).
+- **Database Compute Sleep Invariant**: Neon serverless Postgres compute auto-suspends after 5 minutes of inactivity. Public browsing routes must never query Neon directly per request: full-page editorial content must use Next.js Incremental Static Regeneration (ISR with `revalidate = 3600`) at the edge, dynamic reads must pass through Upstash Redis read-through caching (`CaseStudyService`), and visitor interaction counters (reactions, pageviews) must be buffered in Redis (`HINCRBY`) rather than waking Postgres per click.
+- **Upstash Daily Command Protection**: To prevent exhausting Upstash's 10,000 commands/day allowance, `@upstash/ratelimit` instances must configure local in-memory caching (`ephemeralCache`), multi-key operations must use `redis.pipeline()`, and rate-limiting must be restricted strictly to mutative routes (`/api/contact`, `/api/newsletter`, `/api/telemetry`), completely bypassing static GET assets.
+- **Unified Maintenance Pipeline (Vercel Hobby 1-Cron Limit)**: Because Vercel Hobby permits strictly one cron job per day (`0 0 * * *`), all background tasks (telemetry buffer syncing, outbound email retries, and retention rollups) must be consolidated into a single time-budgeted maintenance route (`/api/cron/maintenance`) executing within $\le 8$ seconds. Sub-daily email retries may optionally use external event-driven webhooks via Upstash QStash.
+- **Sentry Quota & Noise Bounds**: `tracesSampleRate` must resolve dynamically to 0% in preview, development, and testing, and be clamped to $\le 5\%$ (0.05) in production. `beforeSend` filters must drop benign client noise (`AbortError`, `ResizeObserver loop limit exceeded`, browser extension errors) and strip all PII and authorization headers.
+- **External Agent Review Brief Standard**: All integration, devops, and feature tickets authored for review or execution by external AI agents (Claude Code, OpenAI) must include an explicit `## Agent Review Brief` specifying:
+  1. Exact file paths and symbols to inspect.
+  2. Invariant boundaries (non-destructive execution, quota caps, environment namespacing).
+  3. Actionable terminal verification commands (`npm test`, `npm run verify:*`, `npm run check-docs-drift`, `npm run quality`).
+
 ## Agent skills
 
 ### Issue tracker

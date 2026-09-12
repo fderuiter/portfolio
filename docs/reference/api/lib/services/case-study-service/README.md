@@ -12,6 +12,7 @@
 
 ## Interfaces
 
+- [BufferedReactionEvent](interfaces/BufferedReactionEvent.md)
 - [CaseStudySubmissionInput](interfaces/CaseStudySubmissionInput.md)
 - [FeedbackSubmissionInput](interfaces/FeedbackSubmissionInput.md)
 - [ReactionSubmissionInput](interfaces/ReactionSubmissionInput.md)
