@@ -56,6 +56,12 @@ Re-exports [AllocateGarminMemorySpec](garmin/allocate-memory/spec/interfaces/All
 
 ***
 
+### BufferedTelemetryEvent
+
+Re-exports [BufferedTelemetryEvent](telemetry-service/interfaces/BufferedTelemetryEvent.md)
+
+***
+
 ### CaseStudyData
 
 Re-exports [CaseStudyData](../case-studies-data/interfaces/CaseStudyData.md)

@@ -40,11 +40,15 @@ export const POST = createApiHandler(
         );
       }
 
-      const newEvent = await TelemetryService.recordEvent(data);
+      const { event, buffered } = await TelemetryService.recordEvent(data);
 
+      // A failed buffer write drops the event outright, so report it as
+      // accepted-but-not-durable (202) rather than created (201). The client
+      // must not retry a dropped analytics event, but it must not be told the
+      // event was stored either.
       const response = NextResponse.json(
-        { success: true, event: newEvent },
-        { status: 201 }
+        { success: true, durable: buffered, event },
+        { status: buffered ? 201 : 202 }
       );
       if (rateLimitRes.headers) {
         Object.entries(rateLimitRes.headers).forEach(([key, val]) => {

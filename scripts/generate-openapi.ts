@@ -31,14 +31,16 @@ export const openApiSpec = {
   openapi: "3.0.0",
   info: {
     title: "Portfolio Service API",
-    description: "Declarative Zod Validated & Programmatically Generated API Spec",
+    description:
+      "Declarative Zod Validated & Programmatically Generated API Spec",
     version: "1.0.0",
   },
   paths: {
     "/api/case-studies": {
       get: {
         summary: "Retrieve published case studies",
-        description: "Fetches a list of published case studies including title, slug, primary language, and tags.",
+        description:
+          "Fetches a list of published case studies including title, slug, primary language, and tags.",
         responses: {
           200: {
             description: "Successful retrieval of case studies",
@@ -67,7 +69,8 @@ export const openApiSpec = {
       },
       post: {
         summary: "Submit draft technical post-mortem case study",
-        description: "Submits a new technical case study or prototype post-mortem as an unpublished draft record.",
+        description:
+          "Submits a new technical case study or prototype post-mortem as an unpublished draft record.",
         requestBody: {
           required: true,
           content: {
@@ -80,7 +83,8 @@ export const openApiSpec = {
         },
         responses: {
           201: {
-            description: "Case study submitted successfully in unpublished draft state",
+            description:
+              "Case study submitted successfully in unpublished draft state",
             content: {
               "application/json": {
                 schema: {
@@ -118,7 +122,8 @@ export const openApiSpec = {
             },
           },
           400: {
-            description: "Missing or malformed payload fields or duplicate slug",
+            description:
+              "Missing or malformed payload fields or duplicate slug",
             content: {
               "application/json": {
                 schema: {
@@ -149,14 +154,16 @@ export const openApiSpec = {
             name: "slug",
             in: "query",
             required: false,
-            description: "Case study slug identifier (interchangeable with caseStudySlug)",
+            description:
+              "Case study slug identifier (interchangeable with caseStudySlug)",
             schema: { type: "string" },
           },
           {
             name: "caseStudySlug",
             in: "query",
             required: false,
-            description: "Case study slug identifier (interchangeable with slug)",
+            description:
+              "Case study slug identifier (interchangeable with slug)",
             schema: { type: "string" },
           },
         ],
@@ -195,7 +202,8 @@ export const openApiSpec = {
       },
       post: {
         summary: "Submit structured learning feedback",
-        description: "Validates and persists structured learning takeaways and free-form constructive text.",
+        description:
+          "Validates and persists structured learning takeaways and free-form constructive text.",
         requestBody: {
           required: true,
           content: {
@@ -253,20 +261,23 @@ export const openApiSpec = {
     "/api/case-studies/reactions": {
       get: {
         summary: "Retrieve case study reaction counts",
-        description: "Fetches aggregate quick reaction counts for a case study slug.",
+        description:
+          "Fetches aggregate quick reaction counts for a case study slug.",
         parameters: [
           {
             name: "slug",
             in: "query",
             required: false,
-            description: "Case study slug identifier (interchangeable with caseStudySlug)",
+            description:
+              "Case study slug identifier (interchangeable with caseStudySlug)",
             schema: { type: "string" },
           },
           {
             name: "caseStudySlug",
             in: "query",
             required: false,
-            description: "Case study slug identifier (interchangeable with slug)",
+            description:
+              "Case study slug identifier (interchangeable with slug)",
             schema: { type: "string" },
           },
         ],
@@ -305,7 +316,8 @@ export const openApiSpec = {
       },
       post: {
         summary: "Submit quick reaction badge",
-        description: "Increments quick reaction badge count for a case study slug.",
+        description:
+          "Increments quick reaction badge count for a case study slug.",
         requestBody: {
           required: true,
           content: {
@@ -353,7 +365,8 @@ export const openApiSpec = {
     "/api/telemetry": {
       get: {
         summary: "Retrieve compiled telemetry metrics",
-        description: "Perform dynamic grouping aggregates on TelemetryEvents to sum view & click metrics.",
+        description:
+          "Perform dynamic grouping aggregates on TelemetryEvents to sum view & click metrics.",
         responses: {
           200: {
             description: "Successful retrieval of aggregated statistics",
@@ -380,7 +393,8 @@ export const openApiSpec = {
       },
       post: {
         summary: "Ingest telemetry event",
-        description: "Saves telemetry transaction events and implements high-availability failover buffering.",
+        description:
+          "Buffers telemetry transaction events for asynchronous synchronization to the primary datastore. The Redis buffer is the only store in front of the sync job, so a failed enqueue drops the event: such a request is answered with 202 and durable=false rather than being reported as stored.",
         requestBody: {
           required: true,
           content: {
@@ -393,13 +407,18 @@ export const openApiSpec = {
         },
         responses: {
           201: {
-            description: "Event ingested successfully",
+            description: "Event buffered durably",
             content: {
               "application/json": {
                 schema: {
                   type: "object",
                   properties: {
                     success: { type: "boolean" },
+                    durable: {
+                      type: "boolean",
+                      description:
+                        "Whether the event was accepted into the durable buffer. False means the event was dropped.",
+                    },
                     event: {
                       type: "object",
                       properties: {
@@ -411,7 +430,37 @@ export const openApiSpec = {
                       required: ["id", "projectSlug", "eventType", "createdAt"],
                     },
                   },
-                  required: ["success", "event"],
+                  required: ["success", "durable", "event"],
+                },
+              },
+            },
+          },
+          202: {
+            description:
+              "Event accepted but not durably buffered; the buffer write failed and the event was dropped. Clients must not retry.",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean" },
+                    durable: {
+                      type: "boolean",
+                      description:
+                        "Whether the event was accepted into the durable buffer. False means the event was dropped.",
+                    },
+                    event: {
+                      type: "object",
+                      properties: {
+                        id: { type: "string" },
+                        projectSlug: { type: "string" },
+                        eventType: { type: "string" },
+                        createdAt: { type: "string", format: "date-time" },
+                      },
+                      required: ["id", "projectSlug", "eventType", "createdAt"],
+                    },
+                  },
+                  required: ["success", "durable", "event"],
                 },
               },
             },
@@ -438,7 +487,8 @@ export const openApiSpec = {
     "/api/telemetry/sync": {
       get: {
         summary: "Cron synchronization of buffered events",
-        description: "Pulls buffered telemetry events from secondary Redis cache and flushes them to primary datastore in batches.",
+        description:
+          "Pulls buffered telemetry events from secondary Redis cache and flushes them to primary datastore in batches.",
         parameters: [
           {
             name: "Authorization",
@@ -498,7 +548,8 @@ export const openApiSpec = {
     "/api/contact": {
       post: {
         summary: "Submit visitor contact and collaboration inquiry",
-        description: "Validates and processes inbound contact form submissions, evaluates spam protection gates, and dispatches notification emails.",
+        description:
+          "Validates and processes inbound contact form submissions, evaluates spam protection gates, and dispatches notification emails.",
         requestBody: {
           required: true,
           content: {
@@ -521,7 +572,8 @@ export const openApiSpec = {
             },
           },
           400: {
-            description: "Validation or tone policy violation on submission payload",
+            description:
+              "Validation or tone policy violation on submission payload",
             content: {
               "application/json": {
                 schema: {
@@ -555,8 +607,10 @@ export const openApiSpec = {
     },
     "/api/newsletter": {
       post: {
-        summary: "Subscribe email address to the systems engineering dispatch newsletter",
-        description: "Validates email address, verifies spam and duration gates, registers subscriber, and delivers a welcome confirmation receipt.",
+        summary:
+          "Subscribe email address to the systems engineering dispatch newsletter",
+        description:
+          "Validates email address, verifies spam and duration gates, registers subscriber, and delivers a welcome confirmation receipt.",
         requestBody: {
           required: true,
           content: {
@@ -614,7 +668,8 @@ export const openApiSpec = {
     "/api/webhooks/resend": {
       post: {
         summary: "Ingest Resend deliverability webhook events",
-        description: "Cryptographically verifies Svix webhook signatures and processes email lifecycle events (bounces, complaints, delivery status) to maintain suppression lists.",
+        description:
+          "Cryptographically verifies Svix webhook signatures and processes email lifecycle events (bounces, complaints, delivery status) to maintain suppression lists.",
         responses: {
           200: {
             description: "Webhook event processed successfully",
@@ -627,7 +682,8 @@ export const openApiSpec = {
             },
           },
           400: {
-            description: "Missing required Svix headers or invalid JSON payload",
+            description:
+              "Missing required Svix headers or invalid JSON payload",
             content: {
               "application/json": {
                 schema: {
@@ -689,19 +745,35 @@ export const openApiSpec = {
       CaseStudySubmission: {
         type: "object",
         properties: {
-          title: { type: "string", description: "Title of the post-mortem or case study" },
+          title: {
+            type: "string",
+            description: "Title of the post-mortem or case study",
+          },
           slug: { type: "string", description: "Unique URL slug" },
-          primary_language: { type: "string", description: "Primary programming language or tech stack" },
-          editorial_content: { type: "string", description: "Summary description markdown" },
-          architectural_narrative: { type: "string", description: "Detailed architectural narrative HTML markup" },
+          primary_language: {
+            type: "string",
+            description: "Primary programming language or tech stack",
+          },
+          editorial_content: {
+            type: "string",
+            description: "Summary description markdown",
+          },
+          architectural_narrative: {
+            type: "string",
+            description: "Detailed architectural narrative HTML markup",
+          },
           tags: {
             oneOf: [
               { type: "string" },
               { type: "array", items: { type: "string" } },
             ],
-            description: "Tags as comma-separated string or array of tag strings",
+            description:
+              "Tags as comma-separated string or array of tag strings",
           },
-          github_url: { type: "string", description: "Optional GitHub repository URL" },
+          github_url: {
+            type: "string",
+            description: "Optional GitHub repository URL",
+          },
         },
         required: ["title", "slug", "tags"],
       },
@@ -819,8 +891,15 @@ export const openApiSpec = {
             items: { type: "string" },
             description: "Selected key learning takeaways",
           },
-          comments: { type: "string", description: "Constructive user comments" },
-          createdAt: { type: "string", format: "date-time", description: "Submission timestamp" },
+          comments: {
+            type: "string",
+            description: "Constructive user comments",
+          },
+          createdAt: {
+            type: "string",
+            format: "date-time",
+            description: "Submission timestamp",
+          },
         },
         required: ["id", "takeaways", "comments", "createdAt"],
       },
@@ -831,7 +910,8 @@ export const openApiSpec = {
           caseStudySlug: { type: "string" },
           hasSubmitted: {
             type: "boolean",
-            description: "Indicates whether user with same connection hash has submitted feedback",
+            description:
+              "Indicates whether user with same connection hash has submitted feedback",
           },
           totalFeedback: { type: "integer" },
           feedback: {
@@ -839,7 +919,13 @@ export const openApiSpec = {
             items: { $ref: "#/components/schemas/FeedbackItem" },
           },
         },
-        required: ["success", "caseStudySlug", "hasSubmitted", "totalFeedback", "feedback"],
+        required: [
+          "success",
+          "caseStudySlug",
+          "hasSubmitted",
+          "totalFeedback",
+          "feedback",
+        ],
       },
       FeedbackPostResponse: {
         type: "object",
@@ -858,7 +944,13 @@ export const openApiSpec = {
               comments: { type: "string" },
               createdAt: { type: "string", format: "date-time" },
             },
-            required: ["id", "caseStudySlug", "takeaways", "comments", "createdAt"],
+            required: [
+              "id",
+              "caseStudySlug",
+              "takeaways",
+              "comments",
+              "createdAt",
+            ],
           },
         },
         required: ["success", "message", "feedback"],
@@ -893,7 +985,8 @@ export const openApiSpec = {
           userReactions: {
             type: "array",
             items: { type: "string" },
-            description: "Reaction types submitted by current user connection hash",
+            description:
+              "Reaction types submitted by current user connection hash",
           },
         },
         required: ["success", "caseStudySlug", "counts", "userReactions"],
@@ -917,18 +1010,49 @@ export const openApiSpec = {
       ContactSubmission: {
         type: "object",
         properties: {
-          name: { type: "string", minLength: 2, maxLength: 100, description: "Sender full name" },
-          email: { type: "string", format: "email", description: "Sender email address" },
+          name: {
+            type: "string",
+            minLength: 2,
+            maxLength: 100,
+            description: "Sender full name",
+          },
+          email: {
+            type: "string",
+            format: "email",
+            description: "Sender email address",
+          },
           intent: {
             type: "string",
-            enum: ["general", "collaboration", "consulting", "recruiting", "other"],
+            enum: [
+              "general",
+              "collaboration",
+              "consulting",
+              "recruiting",
+              "other",
+            ],
             default: "general",
             description: "Inquiry intent category",
           },
-          subject: { type: "string", minLength: 3, maxLength: 150, description: "Inquiry subject line" },
-          message: { type: "string", minLength: 10, maxLength: 5000, description: "Detailed inquiry message text" },
-          _gotcha: { type: "string", description: "Honeypot spam filter field" },
-          _clientTimestamp: { type: "integer", description: "Form client mount timestamp for duration check" },
+          subject: {
+            type: "string",
+            minLength: 3,
+            maxLength: 150,
+            description: "Inquiry subject line",
+          },
+          message: {
+            type: "string",
+            minLength: 10,
+            maxLength: 5000,
+            description: "Detailed inquiry message text",
+          },
+          _gotcha: {
+            type: "string",
+            description: "Honeypot spam filter field",
+          },
+          _clientTimestamp: {
+            type: "integer",
+            description: "Form client mount timestamp for duration check",
+          },
         },
         required: ["name", "email", "intent", "subject", "message"],
       },
@@ -937,17 +1061,31 @@ export const openApiSpec = {
         properties: {
           success: { type: "boolean" },
           message: { type: "string" },
-          messageId: { type: "string", description: "Dispatched email message identifier" },
-          simulated: { type: "boolean", description: "Indicates simulated dispatch during testing or local development" },
+          messageId: {
+            type: "string",
+            description: "Dispatched email message identifier",
+          },
+          simulated: {
+            type: "boolean",
+            description:
+              "Indicates simulated dispatch during testing or local development",
+          },
         },
         required: ["success", "message"],
       },
       NewsletterSubmission: {
         type: "object",
         properties: {
-          email: { type: "string", format: "email", description: "Subscriber email address" },
+          email: {
+            type: "string",
+            format: "email",
+            description: "Subscriber email address",
+          },
           _gotcha: { type: "string", description: "Honeypot spam trap field" },
-          _clientTimestamp: { type: "integer", description: "Form client mount timestamp for duration check" },
+          _clientTimestamp: {
+            type: "integer",
+            description: "Form client mount timestamp for duration check",
+          },
         },
         required: ["email"],
       },
@@ -956,8 +1094,15 @@ export const openApiSpec = {
         properties: {
           success: { type: "boolean" },
           message: { type: "string" },
-          subscriberId: { type: "string", description: "Registered subscriber identifier" },
-          simulated: { type: "boolean", description: "Indicates simulated dispatch during testing or local development" },
+          subscriberId: {
+            type: "string",
+            description: "Registered subscriber identifier",
+          },
+          simulated: {
+            type: "boolean",
+            description:
+              "Indicates simulated dispatch during testing or local development",
+          },
         },
         required: ["success", "message"],
       },
@@ -965,8 +1110,15 @@ export const openApiSpec = {
         type: "object",
         properties: {
           received: { type: "boolean" },
-          processedEvent: { type: "string", description: "The processed event type" },
-          suppressed: { type: "boolean", description: "Indicates whether the email address was recorded to the suppression list" },
+          processedEvent: {
+            type: "string",
+            description: "The processed event type",
+          },
+          suppressed: {
+            type: "boolean",
+            description:
+              "Indicates whether the email address was recorded to the suppression list",
+          },
         },
         required: ["received"],
       },
@@ -974,7 +1126,9 @@ export const openApiSpec = {
   },
 };
 
-export function generateOpenApi(workspaceRoot: string = path.resolve(__dirname, "..")): {
+export function generateOpenApi(
+  workspaceRoot: string = path.resolve(__dirname, "..")
+): {
   generatedJson: string;
   missingRoutes: string[];
   hasDrift: boolean;
@@ -983,7 +1137,9 @@ export function generateOpenApi(workspaceRoot: string = path.resolve(__dirname, 
   const expectedRoutes = getExpectedApiRoutes(workspaceRoot);
   const documentedRoutes = Object.keys(openApiSpec.paths);
 
-  const missingRoutes = expectedRoutes.filter((r) => !documentedRoutes.includes(r));
+  const missingRoutes = expectedRoutes.filter(
+    (r) => !documentedRoutes.includes(r)
+  );
   const generatedJson = JSON.stringify(openApiSpec, null, 2);
 
   let existingJson = "";
@@ -1006,26 +1162,35 @@ function main() {
   const specFilePath = path.join(root, "openapi.json");
 
   if (missingRoutes.length > 0) {
-    console.error(`❌ [OPENAPI ERROR] The following app/api routes are not documented in OpenAPI spec:`);
+    console.error(
+      `❌ [OPENAPI ERROR] The following app/api routes are not documented in OpenAPI spec:`
+    );
     for (const r of missingRoutes) {
       console.error(`  • ${r}`);
     }
     process.exit(1);
   }
 
-  const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
+  const isCI =
+    process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
 
   if (hasDrift) {
     if (isCI) {
-      console.error("❌ ERROR: The API schemas have been modified, but openapi.json is not updated!");
-      console.error("Please run the generation script locally ('npx tsx scripts/generate-openapi.ts') and commit the updated 'openapi.json' file.");
+      console.error(
+        "❌ ERROR: The API schemas have been modified, but openapi.json is not updated!"
+      );
+      console.error(
+        "Please run the generation script locally ('npx tsx scripts/generate-openapi.ts') and commit the updated 'openapi.json' file."
+      );
       process.exit(1);
     } else {
       fs.writeFileSync(specFilePath, generatedJson, "utf8");
       console.log("✅ Successfully updated openapi.json in the repository.");
     }
   } else {
-    console.log("✅ openapi.json is fully up-to-date with current schemas and all API routes are covered.");
+    console.log(
+      "✅ openapi.json is fully up-to-date with current schemas and all API routes are covered."
+    );
   }
 }
 

@@ -1,7 +1,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // 1. Hoisted mocks definition
-const { mockRatelimitLimit, mockLpush, mockExpire, mockExec, mockRpop, mockLmove, mockLrange, mockDel, mockUseRef, mockUseEffect } = vi.hoisted(() => {
+const {
+  mockRatelimitLimit,
+  mockLpush,
+  mockExpire,
+  mockExec,
+  mockRpop,
+  mockLmove,
+  mockLrem,
+  mockLrange,
+  mockDel,
+  mockUseRef,
+  mockUseEffect,
+} = vi.hoisted(() => {
   return {
     mockRatelimitLimit: vi.fn(),
     mockLpush: vi.fn(),
@@ -9,6 +21,7 @@ const { mockRatelimitLimit, mockLpush, mockExpire, mockExec, mockRpop, mockLmove
     mockExec: vi.fn(),
     mockRpop: vi.fn(),
     mockLmove: vi.fn(),
+    mockLrem: vi.fn(),
     mockLrange: vi.fn().mockResolvedValue([]),
     mockDel: vi.fn(),
     mockUseRef: vi.fn(),
@@ -27,7 +40,9 @@ vi.mock("react", async (importOriginal) => {
 });
 
 vi.mock("@/lib/db", async (importOriginal) => {
-  const isLiveDb = !!(process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("dummy"));
+  const isLiveDb = !!(
+    process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("dummy")
+  );
   if (isLiveDb) {
     return await importOriginal<typeof import("@/lib/db")>();
   }
@@ -51,6 +66,7 @@ vi.mock("@upstash/redis", () => {
         exec: mockExec,
         rpop: mockRpop,
         lmove: mockLmove,
+        lrem: mockLrem,
       };
     }
     lrange = mockLrange;
@@ -80,7 +96,9 @@ import { prisma } from "@/lib/db";
 import { TelemetryTracker } from "@/components/TelemetryTracker";
 import { useTelemetry } from "@/hooks/useTelemetry";
 
-const isLiveDb = !!(process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("dummy"));
+const isLiveDb = !!(
+  process.env.DATABASE_URL && !process.env.DATABASE_URL.includes("dummy")
+);
 
 describe("Telemetry Robustness & Pipeline Test Suite", () => {
   beforeEach(async () => {
@@ -114,7 +132,9 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
     }
 
     // Setup React hook mocks to have basic default behaviors
-    mockUseRef.mockImplementation((initialValue) => ({ current: initialValue }));
+    mockUseRef.mockImplementation((initialValue) => ({
+      current: initialValue,
+    }));
     mockUseEffect.mockImplementation((cb) => cb());
   });
 
@@ -209,7 +229,11 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
       // Simulate First Mount effect callback execution
       effectCallback!();
       expect(mockRecordEvent).toHaveBeenCalledTimes(1);
-      expect(mockRecordEvent).toHaveBeenCalledWith("/home-dashboard", "page_view", { defer: true });
+      expect(mockRecordEvent).toHaveBeenCalledWith(
+        "/home-dashboard",
+        "page_view",
+        { defer: true }
+      );
 
       // Simulate Second Mount effect callback execution (Strict Mode double-render)
       effectCallback!();
@@ -222,8 +246,18 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
     it("pulls buffered items from Redis in groups of 50 via atomic LMOVE and ignores duplicate payloads", async () => {
       // Mock Redis exec response returning 2 mock items and 48 null values
       const mockEvents = [
-        { id: "uuid-1", projectSlug: "/project-a", eventType: "page_view", createdAt: new Date() },
-        { id: "uuid-2", projectSlug: "/project-b", eventType: "project_click", createdAt: new Date() },
+        {
+          id: "uuid-1",
+          projectSlug: "/project-a",
+          eventType: "page_view",
+          createdAt: new Date(),
+        },
+        {
+          id: "uuid-2",
+          projectSlug: "/project-b",
+          eventType: "project_click",
+          createdAt: new Date(),
+        },
         ...Array(48).fill(null),
       ];
       mockLrange.mockResolvedValueOnce([]);
@@ -244,8 +278,16 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
 
       // Check that it transferred items atomically via lmove exactly 50 times
       expect(mockLmove).toHaveBeenCalledTimes(50);
-      expect(mockLmove).toHaveBeenCalledWith("telemetry_buffer", "telemetry_processing", "right", "left");
-      expect(mockDel).toHaveBeenCalledWith("telemetry_processing");
+      expect(mockLmove).toHaveBeenCalledWith(
+        "telemetry_buffer",
+        "telemetry_processing",
+        "right",
+        "left"
+      );
+      // Only the two persisted events are acknowledged; the shared queue key is
+      // never cleared wholesale, so a concurrent sync cannot lose its batch.
+      expect(mockDel).not.toHaveBeenCalledWith("telemetry_processing");
+      expect(mockLrem).toHaveBeenCalledTimes(2);
 
       // Verify skipping of duplicate payloads logged in database
       if (isLiveDb) {
@@ -292,7 +334,12 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
 
     it("handles primary database write failure during sync and preserves event batch intact in processing queue", async () => {
       const mockEvents = [
-        { id: "uuid-1", projectSlug: "/project-a", eventType: "page_view", createdAt: new Date() },
+        {
+          id: "uuid-1",
+          projectSlug: "/project-a",
+          eventType: "page_view",
+          createdAt: new Date(),
+        },
       ];
       mockLrange.mockResolvedValueOnce([]);
       mockExec.mockResolvedValueOnce(mockEvents);
@@ -300,9 +347,13 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
       // Simulate prisma createMany failure
       const dbError = new Error("Database Write Error");
       if (isLiveDb) {
-        vi.spyOn(prisma.telemetryEvent, "createMany").mockRejectedValueOnce(dbError);
+        vi.spyOn(prisma.telemetryEvent, "createMany").mockRejectedValueOnce(
+          dbError
+        );
       } else {
-        vi.mocked(prisma.telemetryEvent.createMany).mockRejectedValueOnce(dbError);
+        vi.mocked(prisma.telemetryEvent.createMany).mockRejectedValueOnce(
+          dbError
+        );
       }
 
       const req = new NextRequest("http://localhost:3000/api/telemetry/sync", {
@@ -315,13 +366,23 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
       expect(response.status).toBe(500);
 
       // Verify that events were moved via lmove and NOT deleted from processing queue on failure
-      expect(mockLmove).toHaveBeenCalledWith("telemetry_buffer", "telemetry_processing", "right", "left");
+      expect(mockLmove).toHaveBeenCalledWith(
+        "telemetry_buffer",
+        "telemetry_processing",
+        "right",
+        "left"
+      );
       expect(mockDel).not.toHaveBeenCalledWith("telemetry_processing");
     });
 
     it("re-syncs previously failed processing queue batch before pulling new events", async () => {
       const pendingEvents = [
-        { id: "uuid-pending-1", projectSlug: "/project-pending", eventType: "page_view", createdAt: new Date() },
+        {
+          id: "uuid-pending-1",
+          projectSlug: "/project-pending",
+          eventType: "page_view",
+          createdAt: new Date(),
+        },
       ];
       mockLrange.mockResolvedValueOnce(pendingEvents);
       mockExec.mockResolvedValueOnce([]);
@@ -338,7 +399,13 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
       const data = await response.json();
       expect(data.success).toBe(true);
       expect(data.processed).toBe(1);
-      expect(mockDel).toHaveBeenCalledWith("telemetry_processing");
+      expect(mockDel).not.toHaveBeenCalledWith("telemetry_processing");
+      expect(mockLrem).toHaveBeenCalledTimes(1);
+      expect(mockLrem).toHaveBeenCalledWith(
+        "telemetry_processing",
+        1,
+        pendingEvents[0]
+      );
     });
   });
 
@@ -357,7 +424,10 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
       const req1 = new NextRequest("http://localhost:3000/api/telemetry", {
         method: "POST",
         headers: { "x-forwarded-for": "1.2.3.4" },
-        body: JSON.stringify({ projectSlug: "/dashboard", eventType: "page_view" }),
+        body: JSON.stringify({
+          projectSlug: "/dashboard",
+          eventType: "page_view",
+        }),
       });
       const res1 = await POST(req1);
       expect(res1.status).toBe(201);
@@ -374,7 +444,10 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
       const req2 = new NextRequest("http://localhost:3000/api/telemetry", {
         method: "POST",
         headers: { "x-forwarded-for": "5.6.7.8" },
-        body: JSON.stringify({ projectSlug: "/dashboard", eventType: "page_view" }),
+        body: JSON.stringify({
+          projectSlug: "/dashboard",
+          eventType: "page_view",
+        }),
       });
       const res2 = await POST(req2);
       expect(res2.status).toBe(429);
@@ -399,7 +472,10 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
         const req = new NextRequest("http://localhost:3000/api/telemetry", {
           method: "POST",
           headers: { "x-forwarded-for": `192.168.100.${i}` },
-          body: JSON.stringify({ projectSlug: "/dashboard", eventType: "page_view" }),
+          body: JSON.stringify({
+            projectSlug: "/dashboard",
+            eventType: "page_view",
+          }),
         });
         await POST(req);
       }
@@ -411,7 +487,10 @@ describe("Telemetry Robustness & Pipeline Test Suite", () => {
       const req = new NextRequest("http://localhost:3000/api/telemetry", {
         method: "POST",
         headers: { "x-forwarded-for": "192.168.100.5006" },
-        body: JSON.stringify({ projectSlug: "/dashboard", eventType: "page_view" }),
+        body: JSON.stringify({
+          projectSlug: "/dashboard",
+          eventType: "page_view",
+        }),
       });
       const response = await POST(req);
       expect(response.status).toBe(201);
