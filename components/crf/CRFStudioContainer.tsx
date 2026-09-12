@@ -437,12 +437,15 @@ export const CRFStudioContainer: React.FC = () => {
   }, [theme, setParam]);
 
   const { copy: copyShareLink } = useClipboard({
-    successMessage: "Link copied to clipboard with current studio view!",
+    successMessage:
+      "View link copied. It opens this navigation state, not the authored study — recipients need their own copy of the study data.",
     onSuccess: () => {
       try {
         playSuccess();
       } catch {}
-      setCopyToast("Link copied to clipboard with current studio view!");
+      setCopyToast(
+        "View link copied. It opens this navigation state, not the authored study — recipients need their own copy of the study data."
+      );
       setTimeout(() => setCopyToast(null), 3500);
     },
   });

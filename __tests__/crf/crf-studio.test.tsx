@@ -369,4 +369,49 @@ describe("CRFStudioContainer Component", () => {
       }
     }
   );
+
+  it("labels the header's copy-link action as a view link, not study sharing (#662)", async () => {
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: vi.fn().mockResolvedValue(undefined),
+      },
+    });
+
+    await act(async () => {
+      root = createRoot(container);
+      root.render(<CRFStudioContainer />);
+    });
+
+    const moreActionsBtn = container.querySelector(
+      'button[aria-label="More Studio Actions"]'
+    ) as HTMLButtonElement;
+    expect(moreActionsBtn).toBeTruthy();
+
+    await act(async () => {
+      moreActionsBtn.click();
+    });
+
+    // Previously labeled "Share Studio Protocol" with "Copy direct link with
+    // state" — implying it shares the authored study — when it only ever
+    // copies the current navigation URL (mode/form/tab hash params). The
+    // study document itself lives in localStorage and never leaves this
+    // browser, so opening that link elsewhere shows a different study.
+    expect(container.textContent).not.toContain("Share Studio Protocol");
+    const copyLinkBtn = Array.from(container.querySelectorAll("button")).find(
+      (b) => b.textContent?.includes("Copy View Link")
+    );
+    expect(copyLinkBtn).toBeDefined();
+    expect(copyLinkBtn?.textContent).toContain(
+      "does not include study content"
+    );
+
+    await act(async () => {
+      copyLinkBtn?.click();
+    });
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalled();
+    expect(container.textContent).toContain(
+      "not the authored study — recipients need their own copy of the study data"
+    );
+  });
 });
