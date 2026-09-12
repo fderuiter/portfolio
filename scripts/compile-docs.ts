@@ -1,4 +1,12 @@
 import { execFileSync } from "node:child_process";
+import path from "node:path";
+
+/** Relative to the workspace root: where compiled TypeDoc reference markdown is checked in (ADR 0023). */
+export const API_REFERENCE_RELATIVE_PATH = path.join(
+  "docs",
+  "reference",
+  "api"
+);
 
 const typedocArguments = [
   "typedoc",
@@ -39,5 +47,5 @@ export function compileDocumentation(
 }
 
 if (require.main === module) {
-  compileDocumentation(process.cwd(), "docs");
+  compileDocumentation(process.cwd(), API_REFERENCE_RELATIVE_PATH);
 }
