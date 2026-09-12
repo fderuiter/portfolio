@@ -20,3 +20,15 @@
 ## Functions
 
 - [verifySvixSignature](functions/verifySvixSignature.md)
+
+## References
+
+### OutboundEmailStatus
+
+Re-exports [OutboundEmailStatus](../../db/variables/OutboundEmailStatus.md)
+
+***
+
+### SuppressionReason
+
+Re-exports [SuppressionReason](../../db/variables/SuppressionReason.md)
