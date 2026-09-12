@@ -293,8 +293,13 @@ export class TelemetryService {
 
   /**
    * Synchronizes buffered telemetry events from Redis into PostgreSQL.
-   * Atomically transfers event batches from 'telemetry_buffer' to 'telemetry_processing'
-   * using LMOVE to guarantee zero telemetry loss during synchronization failures.
+   *
+   * Events move from `telemetry_buffer` to `telemetry_processing` one at a time
+   * with LMOVE, so a crash mid-transfer cannot drop them, and a batch that
+   * fails to reach the database stays in `telemetry_processing` for the next
+   * run. Acknowledgement is per event rather than per queue: only the events
+   * this invocation persisted are removed, so an overlapping invocation's
+   * batch survives. Re-processing is idempotent through the explicit event id.
    */
   static async syncBufferedEvents(batchSize: number) {
     type BufferedEvent = BufferedTelemetryEvent;
