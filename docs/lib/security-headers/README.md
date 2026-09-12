@@ -8,6 +8,7 @@
 
 ## Variables
 
+- [ADMIN\_SECURITY\_HEADERS](variables/ADMIN_SECURITY_HEADERS.md)
 - [SECURITY\_HEADERS](variables/SECURITY_HEADERS.md)
 
 ## Functions

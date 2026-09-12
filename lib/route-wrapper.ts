@@ -95,7 +95,7 @@ export function createApiHandler<TSchema extends ZodSchema>(
                   })),
                 };
             const response = NextResponse.json(formatted, { status: 400 });
-            return applySecurityHeaders(response);
+            return applySecurityHeaders(response, req);
           }
           validatedData = result.data;
         } else {
@@ -114,7 +114,7 @@ export function createApiHandler<TSchema extends ZodSchema>(
               },
               { status: 400 }
             );
-            return applySecurityHeaders(response);
+            return applySecurityHeaders(response, req);
           }
 
           const result = options.schema.safeParse(body);
@@ -129,7 +129,7 @@ export function createApiHandler<TSchema extends ZodSchema>(
                   })),
                 };
             const response = NextResponse.json(formatted, { status: 400 });
-            return applySecurityHeaders(response);
+            return applySecurityHeaders(response, req);
           }
           validatedData = result.data;
         }
@@ -140,7 +140,7 @@ export function createApiHandler<TSchema extends ZodSchema>(
         params: resolvedParams,
       });
 
-      return applySecurityHeaders(response);
+      return applySecurityHeaders(response, req);
     } catch (err: unknown) {
       Sentry.captureException(err);
       const sanitized = sanitizeError(err);
@@ -164,7 +164,7 @@ export function createApiHandler<TSchema extends ZodSchema>(
           },
           { status: 400 }
         );
-        return applySecurityHeaders(response);
+        return applySecurityHeaders(response, req);
       }
 
       console.error("Unhandled API route exception:", sanitized);
@@ -172,7 +172,7 @@ export function createApiHandler<TSchema extends ZodSchema>(
         { error: "Internal server error" },
         { status: 500 }
       );
-      return applySecurityHeaders(response);
+      return applySecurityHeaders(response, req);
     }
   };
 }

@@ -6,17 +6,24 @@
 
 # Function: applySecurityHeaders()
 
-> **applySecurityHeaders**(`res`): `NextResponse`
+> **applySecurityHeaders**(`res`, `req?`): `NextResponse`
 
-Defined in: [lib/security-headers.ts:44](https://github.com/fderuiter/portfolio/blob/main/lib/security-headers.ts#L44)
+Defined in: [lib/security-headers.ts:99](https://github.com/fderuiter/portfolio/blob/main/lib/security-headers.ts#L99)
 
-Applies global security headers to a NextResponse object.
+Applies standard HTTP security headers to a NextResponse. When `req` resolves to the admin
+surface (`/admin`, `/api/admin`), the Content-Security-Policy additionally allows the
+configured Clerk origin and its supporting resources; every other route — and any call
+without a request context — receives the narrower public-surface policy.
 
 ## Parameters
 
 ### res
 
 `NextResponse`
+
+### req?
+
+`NextRequest`
 
 ## Returns
 
