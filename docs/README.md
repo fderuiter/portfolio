@@ -10,7 +10,7 @@ for why.
 | --- | --- | --- |
 | [**Tutorials**](tutorials/) | "How do I get set up?" (learning-oriented) | [Local development & onboarding](tutorials/01-local-development-and-onboarding.md) |
 | [**How-To Guides**](how-to/) | "How do I do X?" (goal-oriented) | [Add an API route & Zod contract](how-to/add-api-route-and-zod-contract.md) · [Configure Resend & webhooks](how-to/configure-resend-and-webhooks.md) · [Configure Clerk, Sentry, Upstash, Vercel Cron/Analytics & GitHub fetching](how-to/configure-integrations.md) |
-| [**Reference**](reference/api/) | "What's the exact contract?" (information-oriented, machine-compiled) | [TypeDoc API reference](reference/api/README.md) · [Integration catalog](reference/integrations-catalog.md) · [`openapi.json`](../openapi.json) at the repository root |
+| [**Reference**](reference/api/) | "What's the exact contract?" (information-oriented, machine-compiled) | [TypeDoc API reference](reference/api/README.md) · [Integration catalog](reference/integrations-catalog.md) · [Vercel retention inventory](reference/vercel-retention-inventory.md) · [`openapi.json`](../openapi.json) at the repository root |
 | [**Explanation**](explanation/) | "Why is it built this way?" (understanding-oriented) | [Explanation index](explanation/README.md) · [ADRs](../adr/) at the repository root |
 
 ## Keeping reference docs in sync
