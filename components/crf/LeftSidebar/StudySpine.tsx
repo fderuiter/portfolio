@@ -489,10 +489,24 @@ export const StudySpine: React.FC<StudySpineProps> = ({
                   return (
                     <div
                       key={form.id}
+                      role="button"
+                      tabIndex={0}
+                      aria-pressed={isActive}
+                      aria-label={`Select form ${form.name}`}
                       draggable
                       onDragStart={(e) => handleDragStartForm(e, form.id)}
                       onClick={() => onSelectForm(form.id)}
-                      className={`group relative p-2 rounded-xl border cursor-pointer transition-all ${
+                      onKeyDown={(e) => {
+                        // Only Enter/Space on the row itself selects the form; the
+                        // duplicate/delete buttons nested inside handle their own
+                        // activation and must not also bubble into this handler.
+                        if (e.target !== e.currentTarget) return;
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          onSelectForm(form.id);
+                        }
+                      }}
+                      className={`group relative p-2 rounded-xl border cursor-pointer transition-all outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan ${
                         isActive
                           ? "bg-brand-cyan/10 border-brand-cyan/50 shadow-sm"
                           : "bg-zinc-950/60 border-zinc-850 hover:border-zinc-700 hover:bg-zinc-900/60"
