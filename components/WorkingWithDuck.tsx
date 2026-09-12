@@ -1623,7 +1623,21 @@ function drawCanvas(
 
 // --- Main React Component ---
 
-export const WorkingWithDuck: React.FC = () => {
+interface WorkingWithDuckProps {
+  /**
+   * Test/debug seam only: seeds both gameStateRef and uiState with this
+   * exact state at mount instead of a fresh createInitialDuckGameState()
+   * call. Lets a real-component + real-engine test drive straight to a
+   * specific (e.g. near-terminal) state without simulating thousands of
+   * ticks or mocking the engine module (#655). Not used by any production
+   * caller.
+   */
+  initialState?: WorkingWithDuckState;
+}
+
+export const WorkingWithDuck: React.FC<WorkingWithDuckProps> = ({
+  initialState,
+}) => {
   const rawHighScore = useSyncExternalStore(
     subscribeStorage,
     getHighScoreSnapshot,
@@ -1634,23 +1648,21 @@ export const WorkingWithDuck: React.FC = () => {
   const { playNote, muted, setMuted } = useAudio();
   const { recordEvent } = useTelemetry();
 
+  const createDefaultState = () =>
+    createInitialDuckGameState(
+      1,
+      "campaign",
+      undefined,
+      getStoredUnlockedFacts()
+    );
+
   // Core Game State Ref for 60 FPS deterministic engine
   const gameStateRef = useRef<WorkingWithDuckState>(
-    createInitialDuckGameState(
-      1,
-      "campaign",
-      undefined,
-      getStoredUnlockedFacts()
-    )
+    initialState ?? createDefaultState()
   );
   // UI React State for rendering HUD, modals, and overlays
-  const [uiState, setUiState] = useState<WorkingWithDuckState>(() =>
-    createInitialDuckGameState(
-      1,
-      "campaign",
-      undefined,
-      getStoredUnlockedFacts()
-    )
+  const [uiState, setUiState] = useState<WorkingWithDuckState>(
+    () => initialState ?? createDefaultState()
   );
   const [isScrapbookOpen, setIsScrapbookOpen] = useState(false);
   const [isWardrobeOpen, setIsWardrobeOpen] = useState(false);
@@ -1668,10 +1680,31 @@ export const WorkingWithDuck: React.FC = () => {
 
   const { announce } = useAnnouncer();
 
+  // Single gateway for every gameStateRef mutation: gameStateRef.current and
+  // uiState are always written together from the same computed value, so the
+  // 60fps-loop ref and the throttled HUD state can never diverge by a call
+  // site forgetting to update one of them (#598, #655). `shouldSync` lets the
+  // hot per-frame tick path opt out of a React re-render per tick while still
+  // going through this one path; every discrete user action defaults to
+  // always syncing.
+  const applyTransition = useCallback(
+    (
+      updater: (state: WorkingWithDuckState) => WorkingWithDuckState,
+      shouldSync: (next: WorkingWithDuckState) => boolean = () => true
+    ): WorkingWithDuckState => {
+      const next = updater(gameStateRef.current);
+      gameStateRef.current = next;
+      if (shouldSync(next)) {
+        setUiState(next);
+      }
+      return next;
+    },
+    []
+  );
+
   const winTrapRef = useFocusTrap<HTMLDivElement>(uiState.status === "won", {
     onEscape: () => {
-      gameStateRef.current = advanceToNextLevel(gameStateRef.current);
-      setUiState({ ...gameStateRef.current });
+      applyTransition((state) => advanceToNextLevel(state));
     },
   });
 
@@ -1679,14 +1712,16 @@ export const WorkingWithDuck: React.FC = () => {
     uiState.status === "failed",
     {
       onEscape: () => {
-        gameStateRef.current = createInitialDuckGameState(
-          uiState.currentLevel,
-          uiState.mode,
-          undefined,
-          uiState.unlockedFacts
-        );
-        gameStateRef.current.status = "running";
-        setUiState({ ...gameStateRef.current });
+        applyTransition(() => {
+          const next = createInitialDuckGameState(
+            uiState.currentLevel,
+            uiState.mode,
+            undefined,
+            uiState.unlockedFacts
+          );
+          next.status = "running";
+          return next;
+        });
       },
     }
   );
@@ -1948,26 +1983,24 @@ export const WorkingWithDuck: React.FC = () => {
           stepsThisFrame < MAX_CATCHUP_STEPS &&
           gameStateRef.current.status === "running"
         ) {
-          const nextState = stepDuckGame(gameStateRef.current);
-          gameStateRef.current = nextState;
-          stepAccumulatorRef.current -= FIXED_STEP_MS;
-          stepsThisFrame++;
-
-          // Process sound cue queue
-          if (nextState.soundCueQueue.length > 0) {
-            nextState.soundCueQueue.forEach((cue) =>
-              playSoundCueRef.current(cue)
-            );
-            gameStateRef.current.soundCueQueue = [];
-          }
-
+          let cuesToPlay: SoundCue[] = [];
           // Throttle UI update every 4 ticks (~15 updates/sec of simulated
           // time for DOM performance), but always flush immediately on a
           // terminal win/fail transition so the victory/failure panel is
           // never hidden behind a stale throttled frame.
-          if (shouldSyncDuckHudState(nextState)) {
-            setUiState({ ...nextState });
-          }
+          applyTransition((state) => {
+            const stepped = stepDuckGame(state);
+            if (stepped.soundCueQueue.length > 0) {
+              cuesToPlay = stepped.soundCueQueue;
+              return { ...stepped, soundCueQueue: [] };
+            }
+            return stepped;
+          }, shouldSyncDuckHudState);
+          stepAccumulatorRef.current -= FIXED_STEP_MS;
+          stepsThisFrame++;
+
+          // Process sound cue queue
+          cuesToPlay.forEach((cue) => playSoundCueRef.current(cue));
         }
       }
 
@@ -1994,7 +2027,7 @@ export const WorkingWithDuck: React.FC = () => {
         cancelAnimationFrame(animFrameIdRef.current);
       }
     };
-  }, []);
+  }, [applyTransition]);
 
   // Keyboard Shortcuts (1-4 for hotbar items, Q-W-E-R for tricks, Space for coding/jumping)
   useEffect(() => {
@@ -2029,134 +2062,116 @@ export const WorkingWithDuck: React.FC = () => {
 
       const state = gameStateRef.current;
       if (e.key === "1") {
-        gameStateRef.current = { ...state, selectedItem: "tennis-ball" };
-        setUiState((s) => ({ ...s, selectedItem: "tennis-ball" }));
+        applyTransition((state) => ({ ...state, selectedItem: "tennis-ball" }));
       } else if (e.key === "2") {
-        gameStateRef.current = { ...state, selectedItem: "kong" };
-        setUiState((s) => ({ ...s, selectedItem: "kong" }));
+        applyTransition((state) => ({ ...state, selectedItem: "kong" }));
       } else if (e.key === "3") {
-        gameStateRef.current = { ...state, selectedItem: "squeaky-toy" };
-        setUiState((s) => ({ ...s, selectedItem: "squeaky-toy" }));
+        applyTransition((state) => ({ ...state, selectedItem: "squeaky-toy" }));
       } else if (e.key === "4") {
-        gameStateRef.current = giveTreat(state);
-        setUiState({ ...gameStateRef.current });
+        applyTransition((state) => giveTreat(state));
       } else if (e.key === "q" || e.key === "Q") {
         if (!state.inDogPark && !state.inBathtub) {
-          gameStateRef.current = performTrick(state, "SIT");
-          setUiState({ ...gameStateRef.current });
+          applyTransition((state) => performTrick(state, "SIT"));
         }
       } else if (e.key === "w" || e.key === "W") {
         if (!state.inDogPark && !state.inBathtub) {
-          gameStateRef.current = performTrick(state, "HIGH_FIVE");
-          setUiState({ ...gameStateRef.current });
+          applyTransition((state) => performTrick(state, "HIGH_FIVE"));
         } else if (state.inDogPark) {
-          gameStateRef.current = steerParkDuck(
-            state,
-            state.parkState.duckY - 25
+          applyTransition((state) =>
+            steerParkDuck(state, state.parkState.duckY - 25)
           );
-          setUiState({ ...gameStateRef.current });
         }
       } else if (e.key === "e" || e.key === "E") {
         if (!state.inDogPark && !state.inBathtub) {
-          gameStateRef.current = performTrick(state, "DROP_IT");
-          setUiState({ ...gameStateRef.current });
+          applyTransition((state) => performTrick(state, "DROP_IT"));
         }
       } else if (e.key === "r" || e.key === "R") {
         if (!state.inDogPark && !state.inBathtub) {
-          gameStateRef.current = performTrick(state, "SPIN");
-          setUiState({ ...gameStateRef.current });
+          applyTransition((state) => performTrick(state, "SPIN"));
         }
       } else if (e.code === "Space") {
         e.preventDefault();
         if (state.inDogPark) {
-          gameStateRef.current = jumpParkHurdle(state);
-          setUiState({ ...gameStateRef.current });
+          applyTransition((state) => jumpParkHurdle(state));
         } else if (!state.inBathtub) {
-          gameStateRef.current = activeCodeBurst(state);
-          setUiState({ ...gameStateRef.current });
+          applyTransition((state) => activeCodeBurst(state));
         }
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
         if (state.inDogPark) {
-          gameStateRef.current = steerParkDuck(
-            state,
-            state.parkState.duckY - 25
+          applyTransition((state) =>
+            steerParkDuck(state, state.parkState.duckY - 25)
           );
-          setUiState({ ...gameStateRef.current });
         } else {
-          let s = state;
-          if (s.duck.state !== "DRAGGED") {
-            s = startDraggingDuck(s);
-          }
-          const nextY = Math.max(50, s.duck.y - 25);
-          s = dragDuckTo(s, s.duck.x, nextY);
-          gameStateRef.current = s;
-          setUiState({ ...s });
+          const s = applyTransition((state) => {
+            let next = state;
+            if (next.duck.state !== "DRAGGED") {
+              next = startDraggingDuck(next);
+            }
+            const nextY = Math.max(50, next.duck.y - 25);
+            return dragDuckTo(next, next.duck.x, nextY);
+          });
           announce(
-            `Dragging Duck up. Horizontal position ${Math.round(s.duck.x)}, vertical position ${Math.round(nextY)}. Press Enter to drop.`,
+            `Dragging Duck up. Horizontal position ${Math.round(s.duck.x)}, vertical position ${Math.round(s.duck.y)}. Press Enter to drop.`,
             "polite"
           );
         }
       } else if (e.key === "ArrowDown") {
         e.preventDefault();
         if (state.inDogPark) {
-          gameStateRef.current = steerParkDuck(
-            state,
-            state.parkState.duckY + 25
+          applyTransition((state) =>
+            steerParkDuck(state, state.parkState.duckY + 25)
           );
-          setUiState({ ...gameStateRef.current });
         } else {
-          let s = state;
-          if (s.duck.state !== "DRAGGED") {
-            s = startDraggingDuck(s);
-          }
-          const nextY = Math.min(CANVAS_HEIGHT - 50, s.duck.y + 25);
-          s = dragDuckTo(s, s.duck.x, nextY);
-          gameStateRef.current = s;
-          setUiState({ ...s });
+          const s = applyTransition((state) => {
+            let next = state;
+            if (next.duck.state !== "DRAGGED") {
+              next = startDraggingDuck(next);
+            }
+            const nextY = Math.min(CANVAS_HEIGHT - 50, next.duck.y + 25);
+            return dragDuckTo(next, next.duck.x, nextY);
+          });
           announce(
-            `Dragging Duck down. Horizontal position ${Math.round(s.duck.x)}, vertical position ${Math.round(nextY)}. Press Enter to drop.`,
+            `Dragging Duck down. Horizontal position ${Math.round(s.duck.x)}, vertical position ${Math.round(s.duck.y)}. Press Enter to drop.`,
             "polite"
           );
         }
       } else if (e.key === "ArrowLeft") {
         e.preventDefault();
         if (!state.inDogPark) {
-          let s = state;
-          if (s.duck.state !== "DRAGGED") {
-            s = startDraggingDuck(s);
-          }
-          const nextX = Math.max(50, s.duck.x - 25);
-          s = dragDuckTo(s, nextX, s.duck.y);
-          gameStateRef.current = s;
-          setUiState({ ...s });
+          const s = applyTransition((state) => {
+            let next = state;
+            if (next.duck.state !== "DRAGGED") {
+              next = startDraggingDuck(next);
+            }
+            const nextX = Math.max(50, next.duck.x - 25);
+            return dragDuckTo(next, nextX, next.duck.y);
+          });
           announce(
-            `Dragging Duck left. Horizontal position ${Math.round(nextX)}, vertical position ${Math.round(s.duck.y)}. Press Enter to drop.`,
+            `Dragging Duck left. Horizontal position ${Math.round(s.duck.x)}, vertical position ${Math.round(s.duck.y)}. Press Enter to drop.`,
             "polite"
           );
         }
       } else if (e.key === "ArrowRight") {
         e.preventDefault();
         if (!state.inDogPark) {
-          let s = state;
-          if (s.duck.state !== "DRAGGED") {
-            s = startDraggingDuck(s);
-          }
-          const nextX = Math.min(CANVAS_WIDTH - 25, s.duck.x + 25);
-          s = dragDuckTo(s, nextX, s.duck.y);
-          gameStateRef.current = s;
-          setUiState({ ...s });
+          const s = applyTransition((state) => {
+            let next = state;
+            if (next.duck.state !== "DRAGGED") {
+              next = startDraggingDuck(next);
+            }
+            const nextX = Math.min(CANVAS_WIDTH - 25, next.duck.x + 25);
+            return dragDuckTo(next, nextX, next.duck.y);
+          });
           announce(
-            `Dragging Duck right. Horizontal position ${Math.round(nextX)}, vertical position ${Math.round(s.duck.y)}. Press Enter to drop.`,
+            `Dragging Duck right. Horizontal position ${Math.round(s.duck.x)}, vertical position ${Math.round(s.duck.y)}. Press Enter to drop.`,
             "polite"
           );
         }
       } else if (e.key === "Enter") {
         if (state.duck.state === "DRAGGED") {
           e.preventDefault();
-          const s = releaseDuck(state);
-          gameStateRef.current = s;
-          setUiState({ ...s });
+          const s = applyTransition((state) => releaseDuck(state));
           let dropLocation = "on the floor";
           if (s.inBathtub) dropLocation = "in the bathtub";
           else if (
@@ -2174,7 +2189,7 @@ export const WorkingWithDuck: React.FC = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [announce]);
+  }, [announce, applyTransition]);
 
   // Global Window Pointer Up & Cancel Handler (Prevents Drag Locking Off-Canvas)
   useEffect(() => {
@@ -2188,35 +2203,36 @@ export const WorkingWithDuck: React.FC = () => {
         isThrowingParkBallRef.current = false;
         const powerX = (aimParkStartRef.current.x - 90) * 0.08;
         const powerY = (aimParkStartRef.current.y - 250) * 0.06;
-        gameStateRef.current = throwParkBall(state, powerX, powerY);
+        applyTransition((state) => throwParkBall(state, powerX, powerY));
         aimParkStartRef.current = null;
-        setUiState({ ...gameStateRef.current });
         return;
       }
 
       if (isDraggingDuckStateRef.current) {
         isDraggingDuckStateRef.current = false;
-        gameStateRef.current = releaseDuck(state);
-        setUiState({ ...gameStateRef.current });
+        applyTransition((state) => releaseDuck(state));
       }
     };
 
     const handleGlobalPointerCancel = () => {
-      const state = gameStateRef.current;
       let needsUpdate = false;
-      if (isThrowingParkBallRef.current) {
-        isThrowingParkBallRef.current = false;
-        aimParkStartRef.current = null;
-        needsUpdate = true;
-      }
-      if (isDraggingDuckStateRef.current) {
-        isDraggingDuckStateRef.current = false;
-        gameStateRef.current = releaseDuck(state);
-        needsUpdate = true;
-      }
-      if (needsUpdate) {
-        setUiState({ ...gameStateRef.current });
-      }
+      applyTransition(
+        (state) => {
+          let next = state;
+          if (isThrowingParkBallRef.current) {
+            isThrowingParkBallRef.current = false;
+            aimParkStartRef.current = null;
+            needsUpdate = true;
+          }
+          if (isDraggingDuckStateRef.current) {
+            isDraggingDuckStateRef.current = false;
+            next = releaseDuck(next);
+            needsUpdate = true;
+          }
+          return next;
+        },
+        () => needsUpdate
+      );
     };
 
     window.addEventListener("pointerup", handleGlobalPointerUp);
@@ -2229,7 +2245,7 @@ export const WorkingWithDuck: React.FC = () => {
       window.removeEventListener("mouseup", handleGlobalPointerUp);
       window.removeEventListener("touchend", handleGlobalPointerUp);
     };
-  }, []);
+  }, [applyTransition]);
 
   // Reactive metrics and status changes screen reader announcer
   const lastAnnouncedBladderRef = useRef(false);
@@ -2304,8 +2320,7 @@ export const WorkingWithDuck: React.FC = () => {
 
     // Bathtub Mode Mouse Scrubbing
     if (state.inBathtub) {
-      gameStateRef.current = scrubBathtub(state, x, y);
-      setUiState({ ...gameStateRef.current });
+      applyTransition((state) => scrubBathtub(state, x, y));
       return;
     }
 
@@ -2326,7 +2341,7 @@ export const WorkingWithDuck: React.FC = () => {
         x <= 465 &&
         y <= 85
       ) {
-        gameStateRef.current = {
+        applyTransition((state) => ({
           ...state,
           activeSurpriseEvent: null,
           totalScore: state.totalScore + 200,
@@ -2344,8 +2359,7 @@ export const WorkingWithDuck: React.FC = () => {
               vy: -1.2,
             },
           ],
-        };
-        setUiState({ ...gameStateRef.current });
+        }));
         return;
       }
 
@@ -2356,7 +2370,7 @@ export const WorkingWithDuck: React.FC = () => {
         y >= BACK_DOOR_BOUNDS.y + 10 &&
         y <= BACK_DOOR_BOUNDS.y + 70
       ) {
-        gameStateRef.current = {
+        applyTransition((state) => ({
           ...state,
           activeSurpriseEvent: null,
           totalScore: state.totalScore + 150,
@@ -2374,8 +2388,7 @@ export const WorkingWithDuck: React.FC = () => {
               vy: -1.2,
             },
           ],
-        };
-        setUiState({ ...gameStateRef.current });
+        }));
         return;
       }
     }
@@ -2387,8 +2400,7 @@ export const WorkingWithDuck: React.FC = () => {
       y >= DESK_BOUNDS.y &&
       y <= DESK_BOUNDS.y + DESK_BOUNDS.height
     ) {
-      gameStateRef.current = activeCodeBurst(state);
-      setUiState({ ...gameStateRef.current });
+      applyTransition((state) => activeCodeBurst(state));
       return;
     }
 
@@ -2399,8 +2411,7 @@ export const WorkingWithDuck: React.FC = () => {
       y >= WATER_BOWL_BOUNDS.y &&
       y <= WATER_BOWL_BOUNDS.y + WATER_BOWL_BOUNDS.height
     ) {
-      gameStateRef.current = interactStation(state, "water");
-      setUiState({ ...gameStateRef.current });
+      applyTransition((state) => interactStation(state, "water"));
       return;
     }
 
@@ -2410,8 +2421,7 @@ export const WorkingWithDuck: React.FC = () => {
       y >= FOOD_BOWL_BOUNDS.y &&
       y <= FOOD_BOWL_BOUNDS.y + FOOD_BOWL_BOUNDS.height
     ) {
-      gameStateRef.current = interactStation(state, "food");
-      setUiState({ ...gameStateRef.current });
+      applyTransition((state) => interactStation(state, "food"));
       return;
     }
 
@@ -2421,8 +2431,7 @@ export const WorkingWithDuck: React.FC = () => {
       y >= BATHTUB_BOUNDS.y &&
       y <= BATHTUB_BOUNDS.y + BATHTUB_BOUNDS.height
     ) {
-      gameStateRef.current = enterBathtub(state);
-      setUiState({ ...gameStateRef.current });
+      applyTransition((state) => enterBathtub(state));
       return;
     }
 
@@ -2432,8 +2441,7 @@ export const WorkingWithDuck: React.FC = () => {
         (p) => Math.hypot(x - p.x, y - p.y) <= p.radius + 15
       );
       if (clickedPuddle) {
-        gameStateRef.current = mopIndoorPuddle(state, x, y);
-        setUiState({ ...gameStateRef.current });
+        applyTransition((state) => mopIndoorPuddle(state, x, y));
         return;
       }
     }
@@ -2442,26 +2450,30 @@ export const WorkingWithDuck: React.FC = () => {
     const duckDist = Math.hypot(x - state.duck.x, y - state.duck.y);
     if (duckDist < 38) {
       if (state.duck.state === "NO_TAKE_THROW") {
-        gameStateRef.current = giveTreat(state);
-        setUiState({ ...gameStateRef.current });
+        applyTransition((state) => giveTreat(state));
         return;
       }
-      gameStateRef.current = startDraggingDuck(state);
+      applyTransition(
+        (state) => startDraggingDuck(state),
+        () => false
+      );
       isDraggingDuckStateRef.current = true;
       return;
     }
 
     // Use Selected Hotbar Item on Canvas click
-    if (state.selectedItem === "squeaky-toy") {
-      gameStateRef.current = applySqueakyToy(state, x, y);
-    } else if (state.selectedItem === "kong") {
-      gameStateRef.current = applyKongToy(state, x, y);
-    } else if (state.selectedItem === "tennis-ball") {
-      gameStateRef.current = throwBall(state, x, y);
-    } else if (state.selectedItem === "treat") {
-      gameStateRef.current = giveTreat(state);
-    }
-    setUiState({ ...gameStateRef.current });
+    applyTransition((state) => {
+      if (state.selectedItem === "squeaky-toy") {
+        return applySqueakyToy(state, x, y);
+      } else if (state.selectedItem === "kong") {
+        return applyKongToy(state, x, y);
+      } else if (state.selectedItem === "tennis-ball") {
+        return throwBall(state, x, y);
+      } else if (state.selectedItem === "treat") {
+        return giveTreat(state);
+      }
+      return state;
+    });
   };
 
   const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -2471,8 +2483,7 @@ export const WorkingWithDuck: React.FC = () => {
 
     // Bathtub Mode Scrubbing
     if (state.inBathtub) {
-      gameStateRef.current = scrubBathtub(state, x, y);
-      setUiState({ ...gameStateRef.current });
+      applyTransition((state) => scrubBathtub(state, x, y));
       return;
     }
 
@@ -2481,14 +2492,20 @@ export const WorkingWithDuck: React.FC = () => {
       if (isThrowingParkBallRef.current) {
         aimParkStartRef.current = { x, y };
       } else if (state.parkState.status === "retrieving") {
-        gameStateRef.current = steerParkDuck(state, y);
+        applyTransition(
+          (state) => steerParkDuck(state, y),
+          () => false
+        );
       }
       return;
     }
 
     // Dragging Duck
     if (isDraggingDuckStateRef.current) {
-      gameStateRef.current = dragDuckTo(state, x, y);
+      applyTransition(
+        (state) => dragDuckTo(state, x, y),
+        () => false
+      );
       return;
     }
 
@@ -2498,8 +2515,7 @@ export const WorkingWithDuck: React.FC = () => {
         (p) => Math.hypot(x - p.x, y - p.y) <= p.radius + 15
       );
       if (hoveringPuddle) {
-        gameStateRef.current = mopIndoorPuddle(state, x, y);
-        setUiState({ ...gameStateRef.current });
+        applyTransition((state) => mopIndoorPuddle(state, x, y));
       }
     }
 
@@ -2511,8 +2527,7 @@ export const WorkingWithDuck: React.FC = () => {
       );
       if (movedDist > 12) {
         lastBellyScrubPosRef.current = { x, y };
-        gameStateRef.current = scrubBelly(state, x, y);
-        setUiState({ ...gameStateRef.current });
+        applyTransition((state) => scrubBelly(state, x, y));
       }
     }
   };
@@ -2528,16 +2543,14 @@ export const WorkingWithDuck: React.FC = () => {
       isThrowingParkBallRef.current = false;
       const powerX = (aimParkStartRef.current.x - 90) * 0.08;
       const powerY = (aimParkStartRef.current.y - 250) * 0.06;
-      gameStateRef.current = throwParkBall(state, powerX, powerY);
+      applyTransition((state) => throwParkBall(state, powerX, powerY));
       aimParkStartRef.current = null;
-      setUiState({ ...gameStateRef.current });
       return;
     }
 
     if (isDraggingDuckStateRef.current) {
       isDraggingDuckStateRef.current = false;
-      gameStateRef.current = releaseDuck(state);
-      setUiState({ ...gameStateRef.current });
+      applyTransition((state) => releaseDuck(state));
     }
   };
 
@@ -2590,24 +2603,24 @@ export const WorkingWithDuck: React.FC = () => {
         // Ignored
       }
     }
-    const state = gameStateRef.current;
     let needsUpdate = false;
-
-    if (isDraggingDuckStateRef.current) {
-      isDraggingDuckStateRef.current = false;
-      gameStateRef.current = releaseDuck(state);
-      needsUpdate = true;
-    }
-
-    if (isThrowingParkBallRef.current) {
-      isThrowingParkBallRef.current = false;
-      aimParkStartRef.current = null;
-      needsUpdate = true;
-    }
-
-    if (needsUpdate) {
-      setUiState({ ...gameStateRef.current });
-    }
+    applyTransition(
+      (state) => {
+        let next = state;
+        if (isDraggingDuckStateRef.current) {
+          isDraggingDuckStateRef.current = false;
+          next = releaseDuck(next);
+          needsUpdate = true;
+        }
+        if (isThrowingParkBallRef.current) {
+          isThrowingParkBallRef.current = false;
+          aimParkStartRef.current = null;
+          needsUpdate = true;
+        }
+        return next;
+      },
+      () => needsUpdate
+    );
   };
 
   const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
@@ -2639,21 +2652,24 @@ export const WorkingWithDuck: React.FC = () => {
 
   const handleTouchCancel = () => {
     if (Date.now() - lastPointerTimeRef.current < 100) return;
-    const state = gameStateRef.current;
     let needsUpdate = false;
-    if (isDraggingDuckStateRef.current) {
-      isDraggingDuckStateRef.current = false;
-      gameStateRef.current = releaseDuck(state);
-      needsUpdate = true;
-    }
-    if (isThrowingParkBallRef.current) {
-      isThrowingParkBallRef.current = false;
-      aimParkStartRef.current = null;
-      needsUpdate = true;
-    }
-    if (needsUpdate) {
-      setUiState({ ...gameStateRef.current });
-    }
+    applyTransition(
+      (state) => {
+        let next = state;
+        if (isDraggingDuckStateRef.current) {
+          isDraggingDuckStateRef.current = false;
+          next = releaseDuck(next);
+          needsUpdate = true;
+        }
+        if (isThrowingParkBallRef.current) {
+          isThrowingParkBallRef.current = false;
+          aimParkStartRef.current = null;
+          needsUpdate = true;
+        }
+        return next;
+      },
+      () => needsUpdate
+    );
   };
 
   const currentSprint =
@@ -2953,11 +2969,7 @@ export const WorkingWithDuck: React.FC = () => {
             <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
               <button
                 onClick={() => {
-                  gameStateRef.current = {
-                    ...gameStateRef.current,
-                    status: "running",
-                  };
-                  setUiState((s) => ({ ...s, status: "running" }));
+                  applyTransition((state) => ({ ...state, status: "running" }));
                   recordEvent("working-with-duck", "project_click").catch(
                     () => {}
                   );
@@ -3070,11 +3082,10 @@ export const WorkingWithDuck: React.FC = () => {
             <div className="grid grid-cols-2 gap-2 animate-fadeIn">
               <button
                 onClick={() => {
-                  gameStateRef.current = {
-                    ...gameStateRef.current,
+                  applyTransition((state) => ({
+                    ...state,
                     selectedItem: "tennis-ball",
-                  };
-                  setUiState((s) => ({ ...s, selectedItem: "tennis-ball" }));
+                  }));
                 }}
                 className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer ${
                   uiState.selectedItem === "tennis-ball"
@@ -3088,11 +3099,10 @@ export const WorkingWithDuck: React.FC = () => {
 
               <button
                 onClick={() => {
-                  gameStateRef.current = {
-                    ...gameStateRef.current,
+                  applyTransition((state) => ({
+                    ...state,
                     selectedItem: "kong",
-                  };
-                  setUiState((s) => ({ ...s, selectedItem: "kong" }));
+                  }));
                 }}
                 className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer ${
                   uiState.selectedItem === "kong"
@@ -3105,11 +3115,10 @@ export const WorkingWithDuck: React.FC = () => {
 
               <button
                 onClick={() => {
-                  gameStateRef.current = {
-                    ...gameStateRef.current,
+                  applyTransition((state) => ({
+                    ...state,
                     selectedItem: "squeaky-toy",
-                  };
-                  setUiState((s) => ({ ...s, selectedItem: "squeaky-toy" }));
+                  }));
                 }}
                 className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer ${
                   uiState.selectedItem === "squeaky-toy"
@@ -3123,8 +3132,7 @@ export const WorkingWithDuck: React.FC = () => {
 
               <button
                 onClick={() => {
-                  gameStateRef.current = giveTreat(gameStateRef.current);
-                  setUiState({ ...gameStateRef.current });
+                  applyTransition((state) => giveTreat(state));
                 }}
                 className="p-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-amber-300 active:bg-amber-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
               >
@@ -3138,11 +3146,7 @@ export const WorkingWithDuck: React.FC = () => {
             <div className="grid grid-cols-2 gap-2 animate-fadeIn">
               <button
                 onClick={() => {
-                  gameStateRef.current = performTrick(
-                    gameStateRef.current,
-                    "SIT"
-                  );
-                  setUiState({ ...gameStateRef.current });
+                  applyTransition((state) => performTrick(state, "SIT"));
                 }}
                 className="p-3 rounded-2xl border border-sky-500/40 bg-sky-500/10 text-sky-300 active:bg-sky-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
               >
@@ -3151,11 +3155,7 @@ export const WorkingWithDuck: React.FC = () => {
 
               <button
                 onClick={() => {
-                  gameStateRef.current = performTrick(
-                    gameStateRef.current,
-                    "HIGH_FIVE"
-                  );
-                  setUiState({ ...gameStateRef.current });
+                  applyTransition((state) => performTrick(state, "HIGH_FIVE"));
                 }}
                 className="p-3 rounded-2xl border border-pink-500/40 bg-pink-500/10 text-pink-300 active:bg-pink-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
               >
@@ -3164,11 +3164,7 @@ export const WorkingWithDuck: React.FC = () => {
 
               <button
                 onClick={() => {
-                  gameStateRef.current = performTrick(
-                    gameStateRef.current,
-                    "DROP_IT"
-                  );
-                  setUiState({ ...gameStateRef.current });
+                  applyTransition((state) => performTrick(state, "DROP_IT"));
                 }}
                 className="p-3 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 active:bg-emerald-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
               >
@@ -3177,11 +3173,7 @@ export const WorkingWithDuck: React.FC = () => {
 
               <button
                 onClick={() => {
-                  gameStateRef.current = performTrick(
-                    gameStateRef.current,
-                    "SPIN"
-                  );
-                  setUiState({ ...gameStateRef.current });
+                  applyTransition((state) => performTrick(state, "SPIN"));
                 }}
                 className="p-3 rounded-2xl border border-purple-500/40 bg-purple-500/10 text-purple-300 active:bg-purple-500/20 text-xs font-bold transition-all flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
               >
@@ -3197,10 +3189,7 @@ export const WorkingWithDuck: React.FC = () => {
                 <>
                   <button
                     onClick={() => {
-                      gameStateRef.current = activeCodeBurst(
-                        gameStateRef.current
-                      );
-                      setUiState({ ...gameStateRef.current });
+                      applyTransition((state) => activeCodeBurst(state));
                     }}
                     className="w-full py-3 px-4 rounded-2xl bg-cyan-500 text-black font-bold text-xs hover:bg-cyan-400 active:scale-98 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center justify-center gap-2 min-h-[48px] cursor-pointer"
                   >
@@ -3211,10 +3200,7 @@ export const WorkingWithDuck: React.FC = () => {
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => {
-                        gameStateRef.current = enterDogPark(
-                          gameStateRef.current
-                        );
-                        setUiState({ ...gameStateRef.current });
+                        applyTransition((state) => enterDogPark(state));
                       }}
                       className="p-3 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 active:bg-emerald-500/20 text-xs font-bold transition-all flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer"
                     >
@@ -3224,10 +3210,7 @@ export const WorkingWithDuck: React.FC = () => {
 
                     <button
                       onClick={() => {
-                        gameStateRef.current = enterBathtub(
-                          gameStateRef.current
-                        );
-                        setUiState({ ...gameStateRef.current });
+                        applyTransition((state) => enterBathtub(state));
                       }}
                       className={`p-3 rounded-2xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer ${
                         uiState.isMuddy
@@ -3244,8 +3227,7 @@ export const WorkingWithDuck: React.FC = () => {
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => {
-                      gameStateRef.current = rinseBathtub(gameStateRef.current);
-                      setUiState({ ...gameStateRef.current });
+                      applyTransition((state) => rinseBathtub(state));
                     }}
                     className="p-3 rounded-2xl bg-sky-500 text-black font-bold text-xs active:bg-sky-400 transition-all flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer shadow-[0_0_15px_rgba(56,189,248,0.3)]"
                   >
@@ -3255,8 +3237,7 @@ export const WorkingWithDuck: React.FC = () => {
 
                   <button
                     onClick={() => {
-                      gameStateRef.current = exitBathtub(gameStateRef.current);
-                      setUiState({ ...gameStateRef.current });
+                      applyTransition((state) => exitBathtub(state));
                     }}
                     className="p-3 rounded-2xl border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs active:bg-zinc-800 transition-colors flex items-center justify-center min-h-[48px] cursor-pointer"
                   >
@@ -3268,10 +3249,7 @@ export const WorkingWithDuck: React.FC = () => {
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => {
-                        gameStateRef.current = jumpParkHurdle(
-                          gameStateRef.current
-                        );
-                        setUiState({ ...gameStateRef.current });
+                        applyTransition((state) => jumpParkHurdle(state));
                       }}
                       className="p-3 rounded-2xl bg-amber-400 text-black font-bold text-xs active:bg-amber-300 transition-all flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer shadow-[0_0_12px_rgba(250,204,21,0.3)]"
                     >
@@ -3280,10 +3258,7 @@ export const WorkingWithDuck: React.FC = () => {
 
                     <button
                       onClick={() => {
-                        gameStateRef.current = tapParkWhistle(
-                          gameStateRef.current
-                        );
-                        setUiState({ ...gameStateRef.current });
+                        applyTransition((state) => tapParkWhistle(state));
                       }}
                       className="p-3 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs font-bold transition-all flex items-center justify-center min-h-[48px] cursor-pointer"
                     >
@@ -3294,11 +3269,7 @@ export const WorkingWithDuck: React.FC = () => {
                   <button
                     onClick={() => {
                       const isSuccess = uiState.parkState.status === "success";
-                      gameStateRef.current = exitDogPark(
-                        gameStateRef.current,
-                        isSuccess
-                      );
-                      setUiState({ ...gameStateRef.current });
+                      applyTransition((state) => exitDogPark(state, isSuccess));
                     }}
                     className="w-full py-2.5 rounded-2xl border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs active:bg-zinc-800 transition-colors flex items-center justify-center min-h-[44px] cursor-pointer"
                   >
@@ -3368,11 +3339,10 @@ export const WorkingWithDuck: React.FC = () => {
             <div className="flex items-center gap-1.5 flex-wrap">
               <button
                 onClick={() => {
-                  gameStateRef.current = {
-                    ...gameStateRef.current,
+                  applyTransition((state) => ({
+                    ...state,
                     selectedItem: "tennis-ball",
-                  };
-                  setUiState((s) => ({ ...s, selectedItem: "tennis-ball" }));
+                  }));
                 }}
                 aria-pressed={uiState.selectedItem === "tennis-ball"}
                 className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
@@ -3391,11 +3361,10 @@ export const WorkingWithDuck: React.FC = () => {
 
               <button
                 onClick={() => {
-                  gameStateRef.current = {
-                    ...gameStateRef.current,
+                  applyTransition((state) => ({
+                    ...state,
                     selectedItem: "kong",
-                  };
-                  setUiState((s) => ({ ...s, selectedItem: "kong" }));
+                  }));
                 }}
                 aria-pressed={uiState.selectedItem === "kong"}
                 className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
@@ -3413,11 +3382,10 @@ export const WorkingWithDuck: React.FC = () => {
 
               <button
                 onClick={() => {
-                  gameStateRef.current = {
-                    ...gameStateRef.current,
+                  applyTransition((state) => ({
+                    ...state,
                     selectedItem: "squeaky-toy",
-                  };
-                  setUiState((s) => ({ ...s, selectedItem: "squeaky-toy" }));
+                  }));
                 }}
                 aria-pressed={uiState.selectedItem === "squeaky-toy"}
                 className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
@@ -3436,8 +3404,7 @@ export const WorkingWithDuck: React.FC = () => {
 
               <button
                 onClick={() => {
-                  gameStateRef.current = giveTreat(gameStateRef.current);
-                  setUiState({ ...gameStateRef.current });
+                  applyTransition((state) => giveTreat(state));
                 }}
                 aria-pressed={uiState.selectedItem === "treat"}
                 className="px-3 py-1.5 rounded-xl border border-zinc-800 bg-zinc-900/70 text-amber-300 hover:border-amber-500/40 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
@@ -3454,11 +3421,7 @@ export const WorkingWithDuck: React.FC = () => {
             <div className="flex items-center gap-1.5 flex-wrap">
               <button
                 onClick={() => {
-                  gameStateRef.current = performTrick(
-                    gameStateRef.current,
-                    "SIT"
-                  );
-                  setUiState({ ...gameStateRef.current });
+                  applyTransition((state) => performTrick(state, "SIT"));
                 }}
                 className="px-3 py-1.5 rounded-xl border border-sky-500/40 bg-sky-500/10 text-sky-300 hover:bg-sky-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 title="Command Sit: Calms Excitement (-20) & boosts Good Boy scale"
@@ -3471,11 +3434,7 @@ export const WorkingWithDuck: React.FC = () => {
 
               <button
                 onClick={() => {
-                  gameStateRef.current = performTrick(
-                    gameStateRef.current,
-                    "HIGH_FIVE"
-                  );
-                  setUiState({ ...gameStateRef.current });
+                  applyTransition((state) => performTrick(state, "HIGH_FIVE"));
                 }}
                 className="px-3 py-1.5 rounded-xl border border-pink-500/40 bg-pink-500/10 text-pink-300 hover:bg-pink-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 title="Command High Five: Morale boost (+45 pts) & tail wag"
@@ -3488,11 +3447,7 @@ export const WorkingWithDuck: React.FC = () => {
 
               <button
                 onClick={() => {
-                  gameStateRef.current = performTrick(
-                    gameStateRef.current,
-                    "DROP_IT"
-                  );
-                  setUiState({ ...gameStateRef.current });
+                  applyTransition((state) => performTrick(state, "DROP_IT"));
                 }}
                 className="px-3 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 title="Command Drop It: Immediately drops stolen hazards or ball (+60-75 pts)"
@@ -3505,11 +3460,7 @@ export const WorkingWithDuck: React.FC = () => {
 
               <button
                 onClick={() => {
-                  gameStateRef.current = performTrick(
-                    gameStateRef.current,
-                    "SPIN"
-                  );
-                  setUiState({ ...gameStateRef.current });
+                  applyTransition((state) => performTrick(state, "SPIN"));
                 }}
                 className="px-3 py-1.5 rounded-xl border border-purple-500/40 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                 title="Command Spin: Playful trick (+50 pts) with 360 rotation"
@@ -3529,10 +3480,7 @@ export const WorkingWithDuck: React.FC = () => {
               {!uiState.inDogPark && !uiState.inBathtub ? (
                 <button
                   onClick={() => {
-                    gameStateRef.current = activeCodeBurst(
-                      gameStateRef.current
-                    );
-                    setUiState({ ...gameStateRef.current });
+                    applyTransition((state) => activeCodeBurst(state));
                   }}
                   className="px-4 py-2 rounded-xl bg-cyan-500 text-black font-bold text-xs hover:bg-cyan-400 active:scale-95 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] flex items-center gap-2 cursor-pointer"
                   title="Focus work sprint at desk (Spacebar)"
@@ -3544,8 +3492,7 @@ export const WorkingWithDuck: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => {
-                      gameStateRef.current = rinseBathtub(gameStateRef.current);
-                      setUiState({ ...gameStateRef.current });
+                      applyTransition((state) => rinseBathtub(state));
                     }}
                     className="px-4 py-2 rounded-xl bg-sky-500 text-black font-bold text-xs hover:bg-sky-400 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_0_15px_rgba(56,189,248,0.3)]"
                   >
@@ -3555,8 +3502,7 @@ export const WorkingWithDuck: React.FC = () => {
 
                   <button
                     onClick={() => {
-                      gameStateRef.current = exitBathtub(gameStateRef.current);
-                      setUiState({ ...gameStateRef.current });
+                      applyTransition((state) => exitBathtub(state));
                     }}
                     className="px-4 py-2 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs hover:bg-zinc-800 transition-colors cursor-pointer"
                   >
@@ -3567,10 +3513,7 @@ export const WorkingWithDuck: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => {
-                      gameStateRef.current = jumpParkHurdle(
-                        gameStateRef.current
-                      );
-                      setUiState({ ...gameStateRef.current });
+                      applyTransition((state) => jumpParkHurdle(state));
                     }}
                     className="px-4 py-2 rounded-xl bg-amber-400 text-black font-bold text-xs hover:bg-amber-300 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_0_12px_rgba(250,204,21,0.3)]"
                   >
@@ -3579,10 +3522,7 @@ export const WorkingWithDuck: React.FC = () => {
 
                   <button
                     onClick={() => {
-                      gameStateRef.current = tapParkWhistle(
-                        gameStateRef.current
-                      );
-                      setUiState({ ...gameStateRef.current });
+                      applyTransition((state) => tapParkWhistle(state));
                     }}
                     className="px-3.5 py-2 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs font-bold transition-all cursor-pointer"
                   >
@@ -3592,11 +3532,7 @@ export const WorkingWithDuck: React.FC = () => {
                   <button
                     onClick={() => {
                       const isSuccess = uiState.parkState.status === "success";
-                      gameStateRef.current = exitDogPark(
-                        gameStateRef.current,
-                        isSuccess
-                      );
-                      setUiState({ ...gameStateRef.current });
+                      applyTransition((state) => exitDogPark(state, isSuccess));
                     }}
                     className="px-3.5 py-2 rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs hover:bg-zinc-800 transition-colors cursor-pointer"
                   >
@@ -3609,8 +3545,7 @@ export const WorkingWithDuck: React.FC = () => {
                 <>
                   <button
                     onClick={() => {
-                      gameStateRef.current = enterDogPark(gameStateRef.current);
-                      setUiState({ ...gameStateRef.current });
+                      applyTransition((state) => enterDogPark(state));
                     }}
                     className="px-3.5 py-2 rounded-xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
                   >
@@ -3620,8 +3555,7 @@ export const WorkingWithDuck: React.FC = () => {
 
                   <button
                     onClick={() => {
-                      gameStateRef.current = enterBathtub(gameStateRef.current);
-                      setUiState({ ...gameStateRef.current });
+                      applyTransition((state) => enterBathtub(state));
                     }}
                     className={`px-3.5 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                       uiState.isMuddy
@@ -3753,10 +3687,7 @@ export const WorkingWithDuck: React.FC = () => {
             <div className="mb-4">
               <button
                 onClick={() => {
-                  gameStateRef.current = advanceToNextLevel(
-                    gameStateRef.current
-                  );
-                  setUiState({ ...gameStateRef.current });
+                  applyTransition((state) => advanceToNextLevel(state));
                 }}
                 className="w-full py-3 px-4 rounded-xl bg-brand-cyan text-black font-bold text-xs sm:text-sm hover:bg-white active:scale-95 transition-all shadow-[0_0_20px_rgba(6,182,212,0.4)] flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
               >
@@ -3835,14 +3766,16 @@ export const WorkingWithDuck: React.FC = () => {
 
             <button
               onClick={() => {
-                gameStateRef.current = createInitialDuckGameState(
-                  uiState.currentLevel,
-                  uiState.mode,
-                  undefined,
-                  uiState.unlockedFacts
-                );
-                gameStateRef.current.status = "running";
-                setUiState({ ...gameStateRef.current });
+                applyTransition(() => {
+                  const next = createInitialDuckGameState(
+                    uiState.currentLevel,
+                    uiState.mode,
+                    undefined,
+                    uiState.unlockedFacts
+                  );
+                  next.status = "running";
+                  return next;
+                });
               }}
               className="w-full py-3 rounded-xl bg-rose-500 text-white font-mono font-bold text-xs sm:text-sm hover:bg-rose-400 active:scale-95 transition-all cursor-pointer flex items-center justify-center gap-2 min-h-[44px]"
             >
@@ -3930,11 +3863,9 @@ export const WorkingWithDuck: React.FC = () => {
                     key={acc.id}
                     disabled={!isUnlocked}
                     onClick={() => {
-                      gameStateRef.current = equipAccessory(
-                        gameStateRef.current,
-                        acc.id as DuckAccessory
+                      applyTransition((state) =>
+                        equipAccessory(state, acc.id as DuckAccessory)
                       );
-                      setUiState({ ...gameStateRef.current });
                     }}
                     aria-checked={isSelected}
                     role="radio"
