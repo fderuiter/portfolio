@@ -463,6 +463,23 @@ export const CRFStudioContainer: React.FC = () => {
         target?.isContentEditable ||
         !!target?.closest?.("[data-keyboard-boundary]");
 
+      // Escape key to close mobile drawers or clear selection. Runs regardless of
+      // focus so it can still dismiss a drawer while a field inside it is focused.
+      if (e.key === "Escape") {
+        setIsMobileWidgetDrawerOpen(false);
+        if (selectedFieldId) {
+          setSelectedFieldId(null);
+        }
+      }
+
+      // Studio-level shortcuts below must never fire while a text editor (or a
+      // dialog/select) owns focus: Ctrl/Cmd+Z is native undo, Ctrl/Cmd+B and
+      // Ctrl/Cmd+I are native bold/italic in rich-text fields, and none of the
+      // others should hijack keystrokes meant for whatever the author is typing.
+      if (isInput) {
+        return;
+      }
+
       // Undo / Redo
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") {
         if (e.shiftKey) {
@@ -496,42 +513,32 @@ export const CRFStudioContainer: React.FC = () => {
         return;
       }
 
-      // Escape key to close mobile drawers or clear selection
-      if (e.key === "Escape") {
-        setIsMobileWidgetDrawerOpen(false);
-        if (selectedFieldId) {
-          setSelectedFieldId(null);
-        }
-      }
-
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "j") {
         e.preventDefault();
         setIsTerminalOpen((prev) => !prev);
         return;
       }
 
-      if (!isInput) {
-        if (e.key === "`") {
-          e.preventDefault();
-          setIsTerminalOpen((prev) => !prev);
-          return;
-        }
-        if (e.key === "?" || e.key === "F1") {
-          e.preventDefault();
-          setIsWizardOpen((prev) => !prev);
-        } else if (e.key === "1") {
-          setActiveMode("designer");
-        } else if (e.key === "2") {
-          setActiveMode("matrix");
-        } else if (e.key === "3") {
-          setActiveMode("rules");
-        } else if (e.key === "4") {
-          setActiveMode("edc");
-        } else if (e.key === "5") {
-          setActiveMode("acrf");
-        } else if (e.key === "6") {
-          setActiveMode("export");
-        }
+      if (e.key === "`") {
+        e.preventDefault();
+        setIsTerminalOpen((prev) => !prev);
+        return;
+      }
+      if (e.key === "?" || e.key === "F1") {
+        e.preventDefault();
+        setIsWizardOpen((prev) => !prev);
+      } else if (e.key === "1") {
+        setActiveMode("designer");
+      } else if (e.key === "2") {
+        setActiveMode("matrix");
+      } else if (e.key === "3") {
+        setActiveMode("rules");
+      } else if (e.key === "4") {
+        setActiveMode("edc");
+      } else if (e.key === "5") {
+        setActiveMode("acrf");
+      } else if (e.key === "6") {
+        setActiveMode("export");
       }
     };
     window.addEventListener("keydown", handleKeyDown);
